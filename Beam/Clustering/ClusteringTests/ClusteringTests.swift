@@ -9,14 +9,14 @@ class ClusteringTests: XCTestCase {
     func testNavigationMatrix() throws {
         // This is a test of the navigation matrix struct
         let cluster = Cluster()
-        XCTAssert(cluster.navigationMatrix.matrix == Matrix([[0]]))
+        expect(cluster.navigationMatrix.matrix) == Matrix([[0]])
         expect { try cluster.navigationMatrix.addPage(similarities: [1.0]) }.toNot(throwError())
-        XCTAssert(cluster.navigationMatrix.matrix == Matrix([[0, 1.0], [1.0, 0]]))
+        expect(cluster.navigationMatrix.matrix) == Matrix([[0, 1.0], [1.0, 0]])
         expect { try cluster.navigationMatrix.addPage(similarities: [0, 1]) }.toNot(throwError())
-        XCTAssert(cluster.navigationMatrix.matrix == Matrix([[0, 1, 0], [1, 0, 1], [0, 1, 0]]))
+        expect(cluster.navigationMatrix.matrix) == Matrix([[0, 1, 0], [1, 0, 1], [0, 1, 0]])
         expect { try cluster.navigationMatrix.addPage(similarities: [1, 0]) }.to(throwError()) // Dimension mismatch
         expect { try cluster.navigationMatrix.removePage(index: 1) }.toNot(throwError())
-        XCTAssert(cluster.navigationMatrix.matrix == Matrix([[0, 1], [1, 0]]))
+        expect(cluster.navigationMatrix.matrix) == Matrix([[0, 1], [1, 0]])
     }
 
     func testCosineSimilarity() throws {
@@ -25,7 +25,7 @@ class ClusteringTests: XCTestCase {
         let vec2 = [2.0, 4.0, 6.0, 8.0, 10.0]
         let cossim = cluster.cosineSimilarity(vector1: vec1, vector2: vec2)
 
-        XCTAssert(cossim == 0.9847319278346619)
+        expect(cossim).to(beCloseTo(0.9847319278346619, within: 0.0001))
     }
 
     // Test the score computation across all the known pages
@@ -43,8 +43,7 @@ class ClusteringTests: XCTestCase {
                 cluster.pages.append(page2)
 
             let scores = cluster.scoreTextualEmbedding(textualEmbedding: page2.textEmbedding ?? [0.0])
-
-                XCTAssert(scores == [0.8294351697354535])
+            expect(scores).to(beCloseTo([0.8294351697354525], within: 0.0001))
         }
     }
 
@@ -58,18 +57,17 @@ class ClusteringTests: XCTestCase {
         if let content1 = page1.content,
            let content2 = page2.content,
            let content3 = page3.content {
-                page1.textEmbedding = cluster.textualEmbeddingComputationWithNLEmbedding(text: content1)
-                cluster.pages.append(page1)
+            page1.textEmbedding = cluster.textualEmbeddingComputationWithNLEmbedding(text: content1)
+            cluster.pages.append(page1)
 
-                page2.textEmbedding = cluster.textualEmbeddingComputationWithNLEmbedding(text: content2)
-                cluster.pages.append(page2)
+            page2.textEmbedding = cluster.textualEmbeddingComputationWithNLEmbedding(text: content2)
+            cluster.pages.append(page2)
 
-                page3.textEmbedding = cluster.textualEmbeddingComputationWithNLEmbedding(text: content3)
-                cluster.pages.append(page3)
+            page3.textEmbedding = cluster.textualEmbeddingComputationWithNLEmbedding(text: content3)
+            cluster.pages.append(page3)
 
-                let scores = cluster.scoreTextualEmbedding(textualEmbedding: page3.textEmbedding ?? [0.0])
-
-                XCTAssert(scores == [0.26489349244685784, 0.0])
+            let scores = cluster.scoreTextualEmbedding(textualEmbedding: page3.textEmbedding ?? [0.0])
+            expect(scores).to(beCloseTo([0.26489349244685784, 0.0], within: 0.0001))
         }
     }
 
@@ -93,10 +91,11 @@ class ClusteringTests: XCTestCase {
             cluster.pages.append(page3)
             try cluster.textualSimilarityMatrixProcess(pageIndex: 2)
 
-            let gsSimilarityMatrix = Matrix([[0.0, 0.8294351697354535, 0.26489349244685784],
-                                             [0.8294351697354535, 0.0, 0.1927173621278106],
-                                             [0.26489349244685784, 0.1927173621278106, 0.0]])
-            XCTAssert(cluster.textualSimilarityMatrix.matrix == gsSimilarityMatrix)
+            let expectedSimilarityMatrixFlat = [0.0, 0.8294351697354535, 0.26489349244685784,
+                                             0.8294351697354535, 0.0, 0.1927173621278106,
+                                             0.26489349244685784, 0.1927173621278106, 0.0]
+            print(cluster.textualSimilarityMatrix.matrix.flat)
+            expect(cluster.textualSimilarityMatrix.matrix.flat).to(beCloseTo(expectedSimilarityMatrixFlat, within: 0.0001))
         }
     }
 
@@ -120,10 +119,10 @@ class ClusteringTests: XCTestCase {
             cluster.pages.append(page3)
             try cluster.textualSimilarityMatrixProcess(pageIndex: 2)
 
-            let gsSimilarityMatrix = Matrix([[0.0, 0.8294351697354535, 0.0],
-                                             [0.8294351697354535, 0.0, 0.0],
-                                             [0.0, 0.0, 0.0]])
-            XCTAssert(cluster.textualSimilarityMatrix.matrix == gsSimilarityMatrix)
+            let expectedSimilarityMatrixFlat = [0.0, 0.8294351697354535, 0.0,
+                                             0.8294351697354535, 0.0, 0.0,
+                                             0.0, 0.0, 0.0]
+            expect(cluster.textualSimilarityMatrix.matrix.flat).to(beCloseTo(expectedSimilarityMatrixFlat, within: 0.0001))
         }
     }
 
@@ -200,7 +199,7 @@ class ClusteringTests: XCTestCase {
         })
 
         wait(for: [expectation], timeout: 1)
-        XCTAssert(final_result == [[0, 2, 5], [1, 3, 4]])
+        expect(final_result) == [[0, 2, 5], [1, 3, 4]]
     }
 
     // Integration test for testing the whole textual similarity pipeline
@@ -280,7 +279,7 @@ class ClusteringTests: XCTestCase {
             case .failure(let error):
                 XCTFail(error.localizedDescription)
             case .success(let result):
-                XCTAssert(result.0 == [[0, 2, 5], [1, 3, 4], [6]])
+                expect(result.0) == [[0, 2, 5], [1, 3, 4], [6]]
             }
             expectation.fulfill()
         })
@@ -309,7 +308,8 @@ class ClusteringTests: XCTestCase {
             clustersResult = cluster.stabilize(predictedClusters)
             i += 1
         } while clustersResult != [0, 0, 1, 1, 2, 3, 3, 4, 0, 0] && i < 10
-        XCTAssert(clustersResult == [0, 0, 1, 1, 2, 3, 3, 4, 0, 0]) //This should pass ALMOST every time. There is some randomness in the algorithm...
+        expect(clustersResult) == [0, 0, 1, 1, 2, 3, 3, 4, 0, 0]
+        //This should pass ALMOST every time. There is some randomness in the algorithm...
     }
 
     func testProcessWithOnlyNavigation() throws {
@@ -332,7 +332,7 @@ class ClusteringTests: XCTestCase {
                 case .failure(let error):
                     XCTFail(error.localizedDescription)
                 case .success(let result):
-                    XCTAssert(result.0 == correct_results[i])
+                    expect(result.0) == correct_results[i]
                 }
                 if i == 5 {
                     expectation.fulfill()
@@ -500,7 +500,7 @@ class ClusteringTests: XCTestCase {
                 case .failure(let error):
                     XCTFail(error.localizedDescription)
                 case .success(let result):
-                    XCTAssert(result.0 == correct_results[i])
+                    expect(result.0) == correct_results[i]
                 }
                 if i == 5 {
                     expectation.fulfill()
@@ -512,7 +512,7 @@ class ClusteringTests: XCTestCase {
                     case .failure(let error):
                         XCTFail(error.localizedDescription)
                     case .success(let result):
-                        XCTAssert(result.0 == correct_results[i])
+                        expect(result.0) == correct_results[4]
                     }
                 })
             }
@@ -524,9 +524,9 @@ class ClusteringTests: XCTestCase {
         let cluster = Cluster()
         let myText = "Roger Federer is the best tennis player to ever play the game, but Rafael Nadal is best on clay"
         let myEntities = cluster.findEntitiesInText(text: myText)
-        XCTAssert(myEntities.entities["PlaceName"] == [])
-        XCTAssert(myEntities.entities["OrganizationName"] == [])
-        XCTAssert(myEntities.entities["PersonalName"] == ["Roger Federer", "Rafael Nadal"])
+        expect(myEntities.entities["PlaceName"]) == []
+        expect(myEntities.entities["OrganizationName"]) == []
+        expect(myEntities.entities["PersonalName"]) == ["Roger Federer", "Rafael Nadal"]
     }
 
     func testJaccardSimilarityMeasure() throws {
@@ -536,7 +536,7 @@ class ClusteringTests: XCTestCase {
         let firstTextEntities = cluster.findEntitiesInText(text: firstText)
         let secondTextEntities = cluster.findEntitiesInText(text: secondText)
         let similarity = cluster.jaccardEntities(entitiesText1: firstTextEntities, entitiesText2: secondTextEntities)
-        XCTAssert(similarity == 0.3333333333333333)
+        expect(similarity).to(beCloseTo(0.3333333333333333, within: 0.0001))
     }
 
     func testAllSimilarityMatrices() throws {
@@ -576,21 +576,26 @@ class ClusteringTests: XCTestCase {
         })
 
         wait(for: [expectation], timeout: 1)
-        XCTAssert(cluster.entitiesMatrix.matrix == Matrix([[0.0, 0.0, 0.3333333333333333],
-                                                           [0.0, 0.0, 0.0],
-                                                           [0.3333333333333333, 0.0, 0.0]]))
-        XCTAssert(cluster.navigationMatrix.matrix == Matrix([[0.0, 1.0, 1.0],
-                                                            [1.0, 0.0, 0.0],
-                                                            [1.0, 0.0, 0.0]]))
-        XCTAssert(cluster.textualSimilarityMatrix.matrix == Matrix([[0.0, 0.46988745662121795, 0.3628206314147012],
-                                                                   [0.46988745662121795, 0.0, 0.19001699954776027],
-                                                                   [0.3628206314147012, 0.19001699954776027, 0.0]]))
+
+        let expectedEntitesMatrix = [0.0, 0.0, 0.3333333333333333,
+                                    0.0, 0.0, 0.0,
+                                    0.3333333333333333, 0.0, 0.0]
+        let expectedNavigationMatrix = [0.0, 1.0, 1.0,
+                                        1.0, 0.0, 0.0,
+                                        1.0, 0.0, 0.0]
+        let expectedTextualMatrix = [0.0, 0.46988745662121795, 0.3628206314147012,
+                                    0.46988745662121795, 0.0, 0.19001699954776027,
+                                    0.3628206314147012, 0.19001699954776027, 0.0]
+
+        expect(cluster.entitiesMatrix.matrix.flat).to(beCloseTo(expectedEntitesMatrix, within: 0.0001))
+        expect(cluster.navigationMatrix.matrix.flat).to(beCloseTo(expectedNavigationMatrix, within: 0.0001))
+        expect(cluster.textualSimilarityMatrix.matrix.flat).to(beCloseTo(expectedTextualMatrix, within: 0.0001))
+
     }
 
     func testRaiseRemoveFlag() throws {
         let cluster = Cluster()
         let expectation = self.expectation(description: "Raise remove flag")
-        var flag = false
         cluster.candidate = 2
         try cluster.performCandidateChange()
         cluster.timeToRemove = 0.0
@@ -619,12 +624,11 @@ class ClusteringTests: XCTestCase {
             case .failure(let error):
                 XCTFail(error.localizedDescription)
             case .success(let result):
-                flag = result.1
+                expect(result.1) == true
             }
             expectation.fulfill()
         })
         wait(for: [expectation], timeout: 1)
-        XCTAssert(flag == true)
     }
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
@@ -702,11 +706,11 @@ class ClusteringTests: XCTestCase {
             case .failure(let error):
                 XCTFail(error.localizedDescription)
             case .success(let result):
-                XCTAssert(!result.0[0].contains(1))
-                XCTAssert(!result.0[0].contains(4))
-                XCTAssert(!result.0[0].contains(2))
-                XCTAssert(cluster.adjacencyMatrix.rows == 4)
-                XCTAssert(cluster.pages.count == 4)
+                expect(result.0[0]).toNot(contain(1))
+                expect(result.0[0]).toNot(contain(4))
+                expect(result.0[0]).toNot(contain(2))
+                expect(cluster.adjacencyMatrix.rows) == 4
+                expect(cluster.pages.count) == 4
             }
             expectation.fulfill()
         })
