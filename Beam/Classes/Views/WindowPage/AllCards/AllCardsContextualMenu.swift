@@ -9,15 +9,25 @@ import Foundation
 import BeamCore
 import Promises
 
+protocol AllCardsContextualMenuDelegate: AnyObject {
+    func contextualMenuWillDeleteDocuments(ids: [UUID], all: Bool)
+}
+
 class AllCardsContextualMenu {
 
     private let documentManager: DocumentManager
     private let selectedNotes: [BeamNote]
+    private let onLoadBlock: ((_ isLoading: Bool) -> Void)?
     private let onFinishBlock: ((_ needReload: Bool) -> Void)?
+    private let cmdManager = CommandManagerAsync<DocumentManager>()
 
-    init(documentManager: DocumentManager, selectedNotes: [BeamNote], onFinish: ((_ needReload: Bool) -> Void)?) {
+    var undoManager: UndoManager?
+    weak var delegate: AllCardsContextualMenuDelegate?
+
+    init(documentManager: DocumentManager, selectedNotes: [BeamNote], onLoad: ((_ isLoading: Bool) -> Void)? = nil, onFinish: ((_ needReload: Bool) -> Void)? = nil) {
         self.documentManager = documentManager
         self.selectedNotes = selectedNotes
+        self.onLoadBlock = onLoad
         self.onFinishBlock = onFinish
     }
 
@@ -180,8 +190,10 @@ class AllCardsContextualMenu {
         let alert = NSAlert()
         let messageNotesInfo = selectedNotes.count == 1 ?
             "this card" :
+            selectedNotes.count == 0 ?
+            "all cards" :
             "these \(selectedNotes.count) cards"
-        alert.messageText = "Are you sure you want to delete \(messageNotesInfo)? This cannot be undone."
+        alert.messageText = "Are you sure you want to delete \(messageNotesInfo)?"
         alert.addButton(withTitle: "Delete...")
         alert.addButton(withTitle: "Cancel")
         alert.alertStyle = .warning
@@ -197,14 +209,33 @@ class AllCardsContextualMenu {
 
     private func confirmedDeleteSelectedNotes() {
         guard selectedNotes.count > 0 else {
-            self.documentManager.deleteAll().then { _ in
+            onLoadBlock?(true)
+            self.delegate?.contextualMenuWillDeleteDocuments(ids: [], all: true)
+            cmdManager.deleteAllDocuments(in: documentManager) { _ in
+                self.registerUndo(actionName: "Delete All Cards")
                 self.onFinishBlock?(true)
             }
             return
         }
-        self.documentManager.delete(ids: selectedNotes.map { $0.id }).then { _ in
+        onLoadBlock?(true)
+        let ids = selectedNotes.map { $0.id }
+        self.delegate?.contextualMenuWillDeleteDocuments(ids: ids, all: false)
+        cmdManager.deleteDocuments(ids: ids, in: documentManager) { _ in
+            let count = ids.count
+            self.registerUndo(actionName: "Delete \(count) Card\(count > 1 ? "s" : "")")
             self.onFinishBlock?(true)
         }
     }
 
+    private func registerUndo(redo: Bool = false, actionName: String) {
+        undoManager?.registerUndo(withTarget: self, handler: { _ in
+            self.registerUndo(redo: !redo, actionName: actionName)
+            if redo {
+                self.cmdManager.redoAsync(context: self.documentManager) { _ in }
+            } else {
+                self.cmdManager.undoAsync(context: self.documentManager) { _ in }
+            }
+        })
+        undoManager?.setActionName(actionName)
+    }
 }

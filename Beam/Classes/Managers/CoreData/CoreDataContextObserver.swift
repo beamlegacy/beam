@@ -47,20 +47,23 @@ class CoreDataContextObserver {
                 guard !Thread.isMainThread else { return }
                 guard let self = self else { return }
                 var hasAnyDocumentChange = false
+                var finalDocuments = DocumentIds()
                 if let deletedObjects = notification.userInfo?[NSDeletedObjectsKey] as? Set<NSManagedObject>,
                    let deletedDocuments = self.documentsInObjectSet(deletedObjects),
                    !deletedDocuments.isEmpty {
                     hasAnyDocumentChange = true
-                    self.deletedDocumentsSubject.send(Set(deletedDocuments.map { $0.id }))
+                    finalDocuments = Set(deletedDocuments.map { $0.id })
+                    self.deletedDocumentsSubject.send(finalDocuments)
                 }
                 if let insertedObjects = notification.userInfo?[NSInsertedObjectsKey] as? Set<Document>,
                    let insertedDocuments = self.documentsInObjectSet(insertedObjects),
                    !insertedDocuments.isEmpty {
                     hasAnyDocumentChange = true
-                    self.insertedDocumentsSubject.send(Set(insertedDocuments.map { $0.id }))
+                    finalDocuments = Set(insertedDocuments.map { $0.id })
+                    self.insertedDocumentsSubject.send(finalDocuments)
                 }
                 if hasAnyDocumentChange {
-                    self.anyDocumentChangeSubject.send(nil)
+                    self.anyDocumentChangeSubject.send(finalDocuments)
                 }
             }
             .store(in: &cancellables)
