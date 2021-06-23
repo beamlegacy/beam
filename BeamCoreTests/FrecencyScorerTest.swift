@@ -41,11 +41,6 @@ class FrecencyScorerTest: XCTestCase {
             XCTAssertEqual(score.timeStamp, date)
         }
 
-        func testNoScore(_ storage: FrecencyStorage, _ urlId: UInt64, _ paramsKey: FrecencyParamKey) {
-            let score = storage.getOne(urlId: urlId, paramKey: paramsKey)
-            XCTAssertNil(score)
-        }
-
         let halfLife = Float(10.0)
         let testfrecencyParameters: [FrecencyParamKey: FrecencyParam] = [
             .readingTime30d0: FrecencyParam(key: .readingTime30d0, visitWeights: [.searchBar: 2.0], halfLife: halfLife),
