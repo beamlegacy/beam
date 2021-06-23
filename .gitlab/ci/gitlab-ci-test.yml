@@ -87,6 +87,25 @@ xctests UI:
     - macos-mono
   interruptible: true
 
+js_test:
+  stage: test
+  image: node:15.12.0
+  cache:
+    key: .yarn-cache
+  before_script:
+    - yarn install
+  only:
+    - master
+    - develop
+    - merge_requests
+  script:
+    - make js_test
+  coverage: '/All files\s+\|\s+([\d.]+)/'
+  artifacts:
+    reports:
+      junit: ./Beam/Classes/Components/PointAndShoot/Web/junit.xml
+  interruptible: true
+
 coverage_check:
   dependencies: []
   stage: build
