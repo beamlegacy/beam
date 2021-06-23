@@ -87,7 +87,7 @@ class ClusteringManager: ObservableObject {
         }
     }
 
-    func change(candidate: Int, weightNavigation: Double?, weightText: Double?, weightEntities: Double?) {
+    func change(candidate: Int, weightNavigation: Double, weightText: Double, weightEntities: Double) {
         isClustering = true
         cluster.changeCandidate(to: candidate, with: weightNavigation, with: weightText, with: weightEntities) { result in
             switch result {
