@@ -87,6 +87,7 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
                     return pointAndShoot.createTarget(area: area, quoteId: quoteId, mouseLocation: location, html: html, href: href)
                 }
                 pointAndShoot.shoot(targets: targets, href: href)
+                pointAndShoot.draw()
 
             case PointAndShootMessages.pointAndShoot_shootConfirmation:
                 guard webPage.pointAndShootAllowed == true else { return }
@@ -148,6 +149,7 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
                 }
                 positions.scale = scale
                 positions.setFrameInfoScroll(href: href, scrollX: x, scrollY: y)
+                pointAndShoot.draw()
 
             case PointAndShootMessages.pointAndShoot_frameBounds:
                 onFramesInfoMessage(msgPayload: msgPayload, webPage: webPage, positions: positions)
@@ -189,8 +191,6 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
                 _ = webPage.executeJS("syncStatus('\(status)')", objectName: "PointAndShoot", omit: href)
                 pointAndShoot.status = PointAndShootStatus(rawValue: status)!
             }
-
-            pointAndShoot.draw()    // After receiving any web events, draw PNS
 
         } catch {
             Logger.shared.logError("Message error: \(error)", category: .pointAndShoot)
