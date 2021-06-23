@@ -21,7 +21,9 @@ extension TextRoot {
                     cursorPosition = 0
                 }
             } else {
-                caretIndex = node.position(before: caretIndex, avoidUneditableRange: true)
+                // we allow to step "on" an uneditable range once
+                let isInsideUneditableRange = (node as? TextNode)?.isCursorInsideUneditableRange(caretIndex: caretIndex)
+                caretIndex = node.position(before: caretIndex, avoidUneditableRange: isInsideUneditableRange ?? true)
             }
         }
         cancelSelection()
@@ -39,7 +41,9 @@ extension TextRoot {
                     next.focus()
                 }
             } else {
-                caretIndex = node.position(after: caretIndex, avoidUneditableRange: true)
+                // we allow to step "on" an uneditable range once
+                let isInsideUneditableRange = (node as? TextNode)?.isCursorInsideUneditableRange(caretIndex: caretIndex)
+                caretIndex = node.position(after: caretIndex, avoidUneditableRange: isInsideUneditableRange ?? true)
             }
         }
         cancelSelection()
@@ -182,7 +186,12 @@ extension TextRoot {
                 }
             }
         } else {
-            cursorPosition = node.positionAbove(cursorPosition)
+            var pos = node.positionAbove(cursorPosition)
+            if let node = focusedWidget as? TextNode, let caretIndex = node.caretIndexForSourcePosition(pos),
+               let updatedCaretIndex = node.caretIndexAvoidingUneditableRange(caretIndex, after: false) {
+                pos = node.caretAtIndex(updatedCaretIndex).positionOnScreen
+            }
+            cursorPosition = pos
         }
         cancelSelection()
         node.invalidateText()
@@ -202,8 +211,13 @@ extension TextRoot {
                 cursorPosition = node.text.count
             }
         } else {
-            guard let node = focusedWidget as? TextNode else { return }
-            cursorPosition = node.positionBelow(cursorPosition)
+            var pos = node.positionBelow(cursorPosition)
+            if let node = focusedWidget as? TextNode,
+               let caretIndex = node.caretIndexForSourcePosition(pos),
+               let updatedCaretIndex = node.caretIndexAvoidingUneditableRange(caretIndex, after: true) {
+                pos = node.caretAtIndex(updatedCaretIndex).positionOnScreen
+            }
+            cursorPosition = pos
         }
         cancelSelection()
         node.invalidateText()

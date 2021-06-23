@@ -24,6 +24,8 @@ public class TextNode: ElementNode {
     override var indent: CGFloat { selfVisible ? 18 : 0 }
     var fontSize: CGFloat = 15
 
+    private var isCursorInsideUneditableRange = false
+
     static let cmdEnterLayer = "CmdEnterLayer"
 
     override var parent: Widget? {
@@ -311,8 +313,18 @@ public class TextNode: ElementNode {
         }
     }
 
+    public func isCursorInsideUneditableRange(caretIndex: Int) -> Bool {
+        let caret = self.caretAtIndex(caretIndex)
+        let sourceIndex = caret.indexInSource
+        guard let uneditableRange = uneditableRangeAt(index: sourceIndex) else { return false }
+        return sourceIndex > uneditableRange.lowerBound && (sourceIndex < uneditableRange.upperBound || !caret.inSource)
+    }
+
     public override func updateCursor() {
-        let on = !readOnly && editor.hasFocus && isFocused && editor.blinkPhase && (root?.state.nodeSelection?.nodes.isEmpty ?? true)
+        let on = !readOnly && editor.hasFocus && isFocused && editor.blinkPhase
+            && (root?.state.nodeSelection?.nodes.isEmpty ?? true)
+            && !isCursorInsideUneditableRange(caretIndex: caretIndex)
+
         let cursorRect = rectAt(caretIndex: caretIndex)
         let layer = self.cursorLayer
 

@@ -21,7 +21,7 @@ class TextLinesDecorationLayer: CALayer {
             CATransaction.disableAnimations {
                 self.frame = rect
             }
-            self.setNeedsDisplay()
+            self.updateSubLayers()
         }
     }
 
@@ -40,18 +40,20 @@ class TextLinesDecorationLayer: CALayer {
         fatalError("init(coder:) has not been implemented")
     }
 
-    override func draw(in context: CGContext) {
+    private func removeAllSublayers() {
+        sublayers?.forEach { $0.removeFromSuperlayer() }
+    }
+
+    private func updateSubLayers() {
+        removeAllSublayers()
         guard let textLines = textLines, !textLines.isEmpty else { return }
-        context.saveGState()
 
-        context.translateBy(x: decorationInset, y: decorationInset)
-        let firstLineBaseline = CGFloat(textLines.first?.typographicBounds.ascent ?? 0)
-        context.translateBy(x: 0, y: firstLineBaseline)
-        context.scaleBy(x: 1, y: -1)
+        let textOrigin = CGPoint(x: decorationInset, y: decorationInset)
+
+        var layers = [CALayer]()
         for textLine in textLines {
-
-            let originY = -textLine.frame.minY
-            var offset = textLine.frame.minX//CGFloat(0)
+            let originY = textOrigin.y + textLine.frame.minY
+            var offset = textOrigin.x + textLine.frame.minX
             var boxBackgroundRect: CGRect?
             var boxColor: NSColor?
 
@@ -59,31 +61,37 @@ class TextLinesDecorationLayer: CALayer {
                 var ascent = CGFloat(0)
                 var descent = CGFloat(0)
                 let width = CGFloat(CTRunGetTypographicBounds(run, CFRangeMake(0, 0), &ascent, &descent, nil))
+                let height = ascent + descent
                 if let attributes = CTRunGetAttributes(run) as? [NSAttributedString.Key: Any] {
                     if let color = attributes[.boxBackgroundColor] as? NSColor {
-                        let inset: CGFloat = -CGFloat(roundf(Float(ascent / 5.0)))
-                        let rect = CGRect(x: offset, y: originY + inset, width: width, height: ascent).insetBy(dx: inset, dy: inset)
+                        let inset: CGFloat = -4
+                        let rect = CGRect(x: offset, y: originY, width: width, height: height).insetBy(dx: inset, dy: inset)
                         boxBackgroundRect = boxBackgroundRect?.union(rect) ?? rect
                         boxColor = color
                     } else {
-                        drawFinishedBoxBackgroundRect(boxBackgroundRect, color: boxColor, in: context)
+                        if let boxLayer = buildBoxBackgroundLayer(boxBackgroundRect, color: boxColor) {
+                            layers.append(boxLayer)
+                        }
                         boxBackgroundRect = nil
                         boxColor = nil
                     }
                 }
                 offset += CGFloat(width)
             }
-            drawFinishedBoxBackgroundRect(boxBackgroundRect, color: boxColor, in: context)
-//            context.translateBy(x: 0, y: -textLine.frame.maxY)
+            if let boxLayer = buildBoxBackgroundLayer(boxBackgroundRect, color: boxColor) {
+                layers.append(boxLayer)
+            }
         }
-        context.restoreGState()
+        layers.forEach { addSublayer($0) }
     }
 
-    func drawFinishedBoxBackgroundRect(_ rect: CGRect?, color: NSColor?, in context: CGContext) {
-        guard let rect = rect, let boxColor = color else { return }
+    func buildBoxBackgroundLayer(_ rect: CGRect?, color: NSColor?) -> CAShapeLayer? {
+        guard let rect = rect, let boxColor = color else { return nil }
         let path = NSBezierPath(roundedRect: rect, xRadius: 4, yRadius: 4).cgPath
-        context.addPath(path)
-        context.setFillColor(boxColor.cgColor)
-        context.fillPath()
+        let layer = CAShapeLayer()
+        layer.path = path
+        layer.fillColor = BeamColor.Generic.background.nsColor.add(boxColor).cgColor
+        return layer
     }
+
 }
