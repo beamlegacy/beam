@@ -35,7 +35,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var cookies: HTTPCookieStorage
     var documentManager: DocumentManager
     var downloadManager: DownloadManager = BeamDownloadManager()
-    var clusteringManager: ClusteringManager?
+    var clusteringManager: ClusteringManager = ClusteringManager()
     var scope = Set<AnyCancellable>()
     var sessionLinkRanker = SessionLinkRanker()
 
@@ -94,8 +94,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
             guard let self = self,
                   let tabToIndex = tabToIndex else { return }
 
-            guard let clusteringManager = self.clusteringManager,
-                  var id = tabToIndex.currentTabTree?.current.link else { return }
+            guard var id = tabToIndex.currentTabTree?.current.link else { return }
             var parentId = tabToIndex.currentTabTree?.current.parent?.link
             if let parent = tabToIndex.currentTabTree?.current.parent,
                parent.events.contains(where: { $0.type == .searchBarNavigation }) {
@@ -112,7 +111,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
                 parentId = previousTabTree.current.link
             }
 
-            clusteringManager.addPage(id: id, parentId: parentId, value: tabToIndex)
+            self.clusteringManager.addPage(id: id, parentId: parentId, value: tabToIndex)
         }.store(in: &scope)
 
         $tabToIndex.sink { [weak self] tabToIndex in

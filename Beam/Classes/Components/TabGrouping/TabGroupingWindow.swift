@@ -27,6 +27,5 @@ class TabGroupingWindow: NSWindow, NSWindowDelegate {
 
     deinit {
         AppDelegate.main.tabGroupingWindow = nil
-        AppDelegate.main.data.clusteringManager = nil
     }
 }
