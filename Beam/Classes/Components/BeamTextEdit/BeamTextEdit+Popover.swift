@@ -37,7 +37,7 @@ extension BeamTextEdit {
             case .blockReference:
                 let blockElement = BeamElement("")
                 if let item = selectedItem as? PopoverBlockItem {
-                    blockElement.kind = .blockReference(item.name, item.id.uuidString)
+                    blockElement.kind = .blockReference(item.noteId, item.elementId)
                     guard let node = focusedWidget as? TextNode,
                           let parent = node.parent as? ElementNode
                     else { return }
@@ -130,7 +130,8 @@ extension BeamTextEdit {
         let range = startPosition - popoverPrefix ..< cursorPosition + popoverSuffix
         switch popover.mode {
         case .internalLink:
-            node.text.setAttributes([.internalLink(linkText)], to: range)
+            // Assign a Fake UUID
+            node.text.setAttributes([.internalLink(UUID.null)], to: range)
             let items = linkText.isEmpty ?
                 documentManager.loadAllWithLimit(BeamTextEdit.queryLimit, [NSSortDescriptor(key: "created_at", ascending: false)]) :
                 documentManager.documentsWithLimitTitleMatch(title: linkText, limit: BeamTextEdit.queryLimit)
@@ -142,11 +143,10 @@ extension BeamTextEdit {
                 GRDBDatabase.shared.search(matchingAnyTokensIn: linkText, maxResults: 5, includeText: true)
 
             popover.items = items.compactMap {
-                guard let uid = UUID(uuidString: $0.uid),
-                      let text = $0.text,
+                guard let text = $0.text,
                       !text.isEmpty
                 else { return nil }
-                return PopoverBlockItem(text: text, name: $0.title, id: uid)
+                return PopoverBlockItem(text: text, noteId: $0.noteId, elementId: $0.uid)
             }
         }
         popover.query = linkText
@@ -164,7 +164,7 @@ extension BeamTextEdit {
         if start <= end {
             let range = start..<end
             if leaveTextAsIs {
-                node.text.removeAttributes([.internalLink("")], from: range)
+                node.text.removeAttributes([.internalLink(UUID.null)], from: range)
             } else {
                 node.text.removeSubrange(range)
                 rootNode.cursorPosition = range.lowerBound
@@ -182,16 +182,15 @@ extension BeamTextEdit {
         guard let node = focusedWidget as? TextNode,
               popover != nil else { return }
 
-        guard let text = text,
-              let range = range else {
+        guard let range = range else {
             // By default remove internal link from begin to the end
             let text = node.text.text
-            node.text.removeAttributes([.internalLink(text)], from: cursorStartPosition..<rootNode.cursorPosition + text.count)
+            node.text.removeAttributes([.internalLink(UUID.null)], from: cursorStartPosition..<rootNode.cursorPosition + text.count)
             return
         }
 
         // Remove internal link at the specific range
-        node.text.removeAttributes([.internalLink(text)], from: range)
+        node.text.removeAttributes([.internalLink(UUID.null)], from: range)
     }
 
     private func updatePopoverPosition(with node: TextNode) {

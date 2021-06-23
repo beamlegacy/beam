@@ -124,22 +124,22 @@ class GRDBDatabaseBeamElementTests: XCTestCase {
         // One match
         matches = db.search(matchingAllTokensIn: "tata").map { $0.uid }
         expect(matches.count) == 1
-        expect(matches) == [note.children[3].id.uuidString]
+        expect(matches) == [note.children[3].id]
 
         // All tokens matches
         matches = db.search(matchingAllTokensIn: "abcd foo baz").map { $0.uid }
         expect(matches.count) == 1
-        expect(matches) == [note.children[2].id.uuidString]
+        expect(matches) == [note.children[2].id]
 
         // Multiple matches
         matches = db.search(matchingAllTokensIn: "foo abcd").map { $0.uid }
         expect(matches.count) == 2
-        expect(matches) == note.children[1...2].map { $0.id.uuidString }
+        expect(matches) == note.children[1...2].map { $0.id }
 
         // Match on the note title - return all note children
         matches = db.search(matchingAllTokensIn: "bar note").map { $0.uid }
         expect(matches.count) == 5
-        expect(matches) == [note.id.uuidString] + note.children.map { $0.id.uuidString }
+        expect(matches) == [note.id] + note.children.map { $0.id }
     }
 
     func testMatchingAnyTokensIn() throws {
@@ -150,31 +150,31 @@ class GRDBDatabaseBeamElementTests: XCTestCase {
         // One match
         matches = db.search(matchingAnyTokensIn: "tata").map { $0.uid }
         expect(matches.count) == 1
-        expect(matches) == [note.children[3].id.uuidString]
+        expect(matches) == [note.children[3].id]
 
         // All tokens matches in multiple records
         matches = db.search(matchingAnyTokensIn: "abcd foo baz").map { $0.uid }
         expect(matches.count) == 3
-        expect(matches) == note.children[0...2].map { $0.id.uuidString }
+        expect(matches) == note.children[0...2].map { $0.id }
 
         // Match on the note title - return all note children
         matches = db.search(matchingAnyTokensIn: "bar note").map { $0.uid }
         expect(matches.count) == 5
-        expect(matches) == [note.id.uuidString] + note.children.map { $0.id.uuidString }
+        expect(matches) == [note.id] + note.children.map { $0.id }
     }
 
     func testMatchingPhrase() throws {
         let matches = db.search(matchingPhrase: "abcd foo").map { $0.uid }
 
         expect(matches.count) == 2
-        expect(matches) == note.children[1...2].map { $0.id.uuidString }
+        expect(matches) == note.children[1...2].map { $0.id }
     }
 
     func testSearchMaxResults() throws {
         // Match on the note title - return all note children
         let matches = db.search(matchingAllTokensIn: "bar note", maxResults: 1).map { $0.uid }
         expect(matches.count) == 1
-        expect(matches) == [note.id.uuidString]
+        expect(matches) == [note.id]
     }
 
     func testClear() throws {

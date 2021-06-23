@@ -240,7 +240,7 @@ public extension CALayer {
     public var activateOnLostFocus = true
     public var useFocusRing = false
     public var openURL: (URL, BeamElement) -> Void = { _, _ in }
-    public var openCard: (String, UUID?) -> Void = { _, _ in }
+    public var openCard: (UUID, UUID?) -> Void = { _, _ in }
     public var onStartEditing: () -> Void = { }
     public var onEndEditing: () -> Void = { }
     public var onStartQuery: (TextNode) -> Void = { _ in }
@@ -1042,7 +1042,7 @@ public extension CALayer {
             let titleCoord = cardTitleLayer.convert(event.locationInWindow, from: nil)
             if cardTitleLayer.contains(titleCoord) {
                 guard let cardNote = note as? BeamNote else { return }
-                self.openCard(cardNote.title, nil)
+                self.openCard(cardNote.id, nil)
                 return
             }
         }

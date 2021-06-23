@@ -25,7 +25,7 @@ class LinksSection: Widget {
     let separatorLayer = CALayer()
     let offsetY: CGFloat = 40
 
-    var titles: [String: RefNoteTitle] = [:]
+    var titles: [UUID: RefNoteTitle] = [:]
 
     override var open: Bool {
         didSet {
@@ -75,13 +75,12 @@ class LinksSection: Widget {
         AppDelegate.main.data.$lastChangedElement
             .filter({ element in
                 guard let element = element,
-                      let refNoteTitle = element.note?.title
+                      let refNoteID = element.note?.id
                 else { return false }
-                let title = self.note.title
-                let ref = BeamNoteReference(noteTitle: refNoteTitle, elementID: element.id)
+                let ref = BeamNoteReference(noteID: refNoteID, elementID: element.id)
                 return self.currentReferences.contains(ref)
-                    || element.text.hasLinkToNote(named: title)
-                    || element.text.hasReferenceToNote(titled: title)
+                    || element.text.hasLinkToNote(id: self.note.id)
+                    || element.text.hasReferenceToNote(titled: self.note.title)
             })
             .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
             .sink { _ in
@@ -99,22 +98,22 @@ class LinksSection: Widget {
         currentReferences = links
 
         var validRefs = 0
-        var newrefs = [String: RefNoteTitle]()
+        var newrefs = [UUID: RefNoteTitle]()
         var toRemove = Set<RefNoteTitle>(titles.values)
 
         for noteReference in links {
-            let noteTitle = noteReference.noteTitle
+            let noteID = noteReference.noteID
             guard let breadCrumb = root?.getBreadCrumb(for: noteReference) else { continue }
 
             // Prepare title children:
-            guard let refTitleWidget = try? titles[noteTitle] ?? RefNoteTitle(parent: self, noteTitle: noteTitle, actionTitle: "Link", action: {
-                self.linkAllReferencesFromNote(named: noteTitle)
+            guard let refTitleWidget = try? titles[noteID] ?? RefNoteTitle(parent: self, noteId: noteID, actionTitle: "Link", action: {
+                self.linkAllReferencesFromNote(withId: noteID)
             }) else { continue }
-            newrefs[noteTitle] = refTitleWidget
+            newrefs[noteID] = refTitleWidget
             toRemove.remove(refTitleWidget)
 
             // now attach bread crumbs to the titles we just refreshed
-            if shouldHandleReference(rootNote: note.title, text: breadCrumb.proxy.text) {
+            if shouldHandleReference(rootNote: note.title, rootNoteId: note.id, text: breadCrumb.proxy.text) {
                 refTitleWidget.addChild(breadCrumb)
                 validRefs += 1
             } else {
@@ -146,7 +145,7 @@ class LinksSection: Widget {
         }
     }
 
-    func linkAllReferencesFromNote(named noteTitle: String) {
+    func linkAllReferencesFromNote(withId noteId: UUID) {
         // TODO
     }
 
@@ -163,8 +162,8 @@ class LinksSection: Widget {
         separatorLayer.isHidden = !selfVisible
     }
 
-    func shouldHandleReference(rootNote: String, text: BeamText) -> Bool {
-        let linksToNote = text.hasLinkToNote(named: rootNote)
+    func shouldHandleReference(rootNote: String, rootNoteId: UUID, text: BeamText) -> Bool {
+        let linksToNote = text.hasLinkToNote(id: rootNoteId)
         let referencesToNote = text.hasReferenceToNote(titled: rootNote)
 
         switch mode {

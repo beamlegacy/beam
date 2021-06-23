@@ -13,20 +13,12 @@ public extension BeamText {
         CharacterSet.newlines.inverted
     }
 
-    var internalLinks: [Range] {
-        var links = [Range]()
-        for range in ranges {
-            for attribute in range.attributes {
-                switch attribute {
-                case .internalLink:
-                    links.append(range)
-                default:
-                    break
-                }
-            }
-        }
+    var internalLinkRanges: [Range] {
+        ranges.compactMap { $0.internalLink == nil ? nil : $0 }
+    }
 
-        return links
+    var internalLinks: [UUID] {
+        ranges.compactMap { $0.internalLink }
     }
 
     var linkRanges: [Range] {
@@ -63,16 +55,9 @@ public extension BeamText {
         return attributes.compactMap({ $0.isInternalLink ? nil : $0 })
     }
 
-    mutating func replaceInternalLink(_ internalLink: BeamText.Range, withText: String) {
-        let rangeStart = internalLink.position
-        self.removeSubrangeSilent(rangeStart..<internalLink.end)
-        self.insert(withText, at: rangeStart, withAttributes: [.internalLink(withText)])
-    }
-
-    func hasLinkToNote(named noteTitle: String) -> Bool {
-        let titleLowercased = noteTitle.lowercased()
-        return internalLinks.contains(where: { range -> Bool in
-            range.string.lowercased() == titleLowercased
+    func hasLinkToNote(id noteId: UUID) -> Bool {
+        internalLinkRanges.contains(where: { range in
+            range.internalLink == noteId
         })
     }
 

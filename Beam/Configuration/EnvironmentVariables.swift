@@ -5,9 +5,9 @@
 /*
  *
  * * * * * * * * *
-  IMPORTANT: Save this file and commit when you change it before building or you will lose your changes.
+ IMPORTANT: Save this file and commit when you change it before building or you will lose your changes.
 
-  Building will overwrite this file to inject the ENV variables.
+ Building will overwrite this file to inject the ENV variables.
  * * * * * * * * *
  */
 
@@ -18,7 +18,7 @@ struct EnvironmentVariables {
             static private(set) var consumerKey = "$(GOOGLE_CONSUMER_KEY)"
             static private(set) var consumerSecret = "$(GOOGLE_CONSUMER_SECRET)"
             static private(set) var callbackURL = "$(GOOGLE_REDIRECT_URL)"
-         }
+        }
 
         struct Github {
             static private(set) var consumerKey = "$(GITHUB_CONSUMER_KEY)"

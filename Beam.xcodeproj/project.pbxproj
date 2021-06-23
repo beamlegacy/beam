@@ -418,6 +418,7 @@
 		96C9AAB92593BB67007D3D98 /* Widget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C9AAB82593BB67007D3D98 /* Widget.swift */; };
 		96C9CC3E2535CE2C00D70AA6 /* LexerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C9CC3D2535CE2C00D70AA6 /* LexerTests.swift */; };
 		96D5AE85264C01AD003AD516 /* TLDExtract in Frameworks */ = {isa = PBXBuildFile; productRef = 96D5AE84264C01AD003AD516 /* TLDExtract */; };
+		96DDF54B26823A4200FF8CCE /* BidirectionalLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96DDF54A26823A4200FF8CCE /* BidirectionalLink.swift */; };
 		96E1356F2546F03900133A24 /* TextNodeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E1356E2546F03900133A24 /* TextNodeTests.swift */; };
 		96E4505825995CA200BFF36F /* BreadCrumb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E4505725995CA200BFF36F /* BreadCrumb.swift */; };
 		96E4CEF9258D7E8200D6DE22 /* BeamTextTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E4CEF8258D7E8200D6DE22 /* BeamTextTests.swift */; };
@@ -1178,6 +1179,7 @@
 		96C9AA5625901AA9007D3D98 /* LinksSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinksSection.swift; sourceTree = "<group>"; };
 		96C9AAB82593BB67007D3D98 /* Widget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Widget.swift; sourceTree = "<group>"; };
 		96C9CC3D2535CE2C00D70AA6 /* LexerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LexerTests.swift; sourceTree = "<group>"; };
+		96DDF54A26823A4200FF8CCE /* BidirectionalLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BidirectionalLink.swift; sourceTree = "<group>"; };
 		96E1356E2546F03900133A24 /* TextNodeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextNodeTests.swift; sourceTree = "<group>"; };
 		96E4505725995CA200BFF36F /* BreadCrumb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BreadCrumb.swift; sourceTree = "<group>"; };
 		96E4CEF8258D7E8200D6DE22 /* BeamTextTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamTextTests.swift; sourceTree = "<group>"; };
@@ -1579,6 +1581,7 @@
 				0D3DD8F22681CBA4009F2DF0 /* IndexDocument.swift */,
 				0D15BE3E2681CEA40035F322 /* GRDBDatabase+Persistence.swift */,
 				0D15BE422681DAC30035F322 /* BeamElementRecord.swift */,
+				96DDF54A26823A4200FF8CCE /* BidirectionalLink.swift */,
 			);
 			path = GRDB;
 			sourceTree = "<group>";
@@ -4013,6 +4016,7 @@
 				4181713525810CDC00317ED8 /* Beam.xcdatamodeld in Sources */,
 				9611995E25A27A17005BEC82 /* BeamObjCBridge.m in Sources */,
 				DAA60C2C2666899A00C927E5 /* BeamState.swift in Sources */,
+				96DDF54B26823A4200FF8CCE /* BidirectionalLink.swift in Sources */,
 				0325629126051D3B006513E4 /* RBDigest.m in Sources */,
 				416C09F3259C919200AF2903 /* CATransaction+Beam.swift in Sources */,
 				418172382581107C00317ED8 /* TextNode.swift in Sources */,

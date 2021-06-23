@@ -89,11 +89,6 @@ extension BeamNote: BeamNoteDocument {
                 guard let self = self else { return }
                 try? GRDBDatabase.shared.append(note: self)
                 Self.appendToFetchedNotes(self)
-                switch result {
-                case .success:
-                    self.updatedNotesWithLinkedReferences(afterChangingTitleFrom: previousTitle, documentManager: documentManager)
-                case .failure: break
-                }
             }
 
             completion?(result)
@@ -201,6 +196,29 @@ extension BeamNote: BeamNoteDocument {
         return nil
     }
 
+    public static func fetch(_ documentManager: DocumentManager, id: UUID,
+                             keepInMemory: Bool = true) -> BeamNote? {
+        // Is the note in the cache?
+        if let note = getFetchedNote(id) {
+            return note
+        }
+
+        // Is the note in the document store?
+        guard let doc = documentManager.loadDocumentById(id: id) else {
+            return nil
+        }
+
+//        Logger.shared.logDebug("Note loaded:\n\(String(data: doc.data, encoding: .utf8)!)\n", category: .document)
+
+        do {
+            return try instanciateNote(documentManager, doc, keepInMemory: keepInMemory)
+        } catch {
+            Logger.shared.logError("Unable to decode note \(doc.title) (\(doc.id))", category: .document)
+        }
+
+        return nil
+    }
+
     public static func fetchNotesWithType(_ documentManager: DocumentManager, type: DocumentType, _ limit: Int, _ fetchOffset: Int) -> [BeamNote] {
         return documentManager.loadDocumentsWithType(type: type, limit, fetchOffset).compactMap { doc -> BeamNote? in
             if let note = getFetchedNote(doc.title) {
@@ -262,10 +280,14 @@ extension BeamNote: BeamNoteDocument {
 
     public static func indexAllNotes() {
         let documentManager = DocumentManager()
-        try? GRDBDatabase.shared.clear()
+        try? GRDBDatabase.shared.clearElements()
+        try? GRDBDatabase.shared.clearBidirectionalLinks()
         for title in documentManager.allDocumentsTitles() {
             if let note = BeamNote.fetch(documentManager, title: title) {
                 try? GRDBDatabase.shared.append(note: note)
+                for link in note.internalLinks {
+                    GRDBDatabase.shared.appendLink(link)
+                }
             }
         }
     }

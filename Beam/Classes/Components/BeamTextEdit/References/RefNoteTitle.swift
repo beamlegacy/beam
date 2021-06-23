@@ -9,6 +9,7 @@
 import Foundation
 import AppKit
 import Combine
+import BeamCore
 
 enum RefNoteTitleError: Error {
     case emptyReference
@@ -26,11 +27,14 @@ class RefNoteTitle: Widget {
     private let titleLayerXPosition: CGFloat = 22
     private let titleLayerYPosition: CGFloat = 2
 
+    private var noteId: UUID
     private var noteTitle: String
 
-    init(parent: Widget, noteTitle: String, actionTitle: String, action: @escaping () -> Void) throws {
+    init(parent: Widget, noteId: UUID, actionTitle: String, action: @escaping () -> Void) throws {
         self.action = action
-        self.noteTitle = noteTitle
+        self.noteId = noteId
+        let title = BeamNote.titleForNoteId(noteId) ?? "<note not found>"
+        self.noteTitle = title
         super.init(parent: parent)
 
         titleLayer.string = noteTitle.capitalized
@@ -46,7 +50,7 @@ class RefNoteTitle: Widget {
         cardTitleLayer = ButtonLayer("cardTitleLayer", titleLayer, activated: {[weak self] in
             guard let self = self, let title = self.titleLayer.string as? String else { return }
 
-            self.editor.openCard(title, nil)
+            self.editor.openCard(noteId, nil)
         })
         cardTitleLayer?.cursor = .pointingHand
         cardTitleLayer?.hovered = { [weak self] hover in

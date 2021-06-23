@@ -147,6 +147,14 @@ import BeamCore
         return navigateToNote(note, elementId: elementId)
     }
 
+    @discardableResult func navigateToNote(id: UUID, elementId: UUID? = nil) -> Bool {
+        //Logger.shared.logDebug("load note named \(named)")
+        guard let note = BeamNote.fetch(data.documentManager, id: id) else {
+            return false
+        }
+        return navigateToNote(note, elementId: elementId)
+    }
+
     @discardableResult func navigateToNote(_ note: BeamNote, elementId: UUID? = nil) -> Bool {
         mode = .note
 
@@ -230,7 +238,7 @@ import BeamCore
         let n = BeamNote.create(data.documentManager, title: query)
 
         let e = BeamElement()
-        e.text = BeamText(text: query, attributes: [.internalLink(query)])
+        e.text = BeamText(text: query, attributes: [.internalLink(n.id)])
         data.todaysNote.insert(e, after: data.todaysNote.children.last)
         try? GRDBDatabase.shared.append(note: data.todaysNote)
 

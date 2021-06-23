@@ -25,6 +25,13 @@ class BeamTextTests: XCTestCase {
         // To prevent saving on the API side
         AccountManager.logout()
         Configuration.networkEnabled = false
+        BeamNote.idForNoteNamed = { _ in
+            return UUID.null
+        }
+        BeamNote.titleForNoteId = { _ in
+            return "link"
+        }
+
     }
 
     override class func tearDown() {
@@ -118,10 +125,10 @@ class BeamTextTests: XCTestCase {
     func testLoadFromJSon1() {
         guard let validText =
         """
-        {"ranges":[{"string":"some "},{"string":"link","attributes":[{"type":4,"payload":"link"}]},{"string":" test"}]}
+        {"ranges":[{"string":"some "},{"string":"link","attributes":[{"type":4,"payload":"\(UUID.nullString)"}]},{"string":" test"}]}
         """.toBeamText else { fatalError() }
 
-        let links2 = validText.internalLinks
+        let links2 = validText.internalLinkRanges
         XCTAssertEqual(links2.count, 1)
         XCTAssertEqual(links2[0].string, "link")
         XCTAssertEqual(links2[0].position, 5)
@@ -132,7 +139,7 @@ class BeamTextTests: XCTestCase {
         var text = BeamText(text: "some link test")
         XCTAssert(text.makeInternalLink(5..<9))
 
-        let links1 = text.internalLinks
+        let links1 = text.internalLinkRanges
         XCTAssertEqual(links1.count, 1)
         XCTAssertEqual(links1[0].string, "link")
         XCTAssertEqual(links1[0].position, 5)
@@ -140,7 +147,7 @@ class BeamTextTests: XCTestCase {
 
         guard let validText =
         """
-        {"ranges":[{"string":"some "},{"string":"link","attributes":[{"type":4,"payload":"link"}]},{"string":" test"}]}
+        {"ranges":[{"string":"some "},{"string":"link","attributes":[{"type":4,"payload":"\(UUID.nullString)"}]},{"string":" test"}]}
         """.toBeamText else { fatalError() }
 
         XCTAssertEqual(text, validText)
@@ -150,7 +157,7 @@ class BeamTextTests: XCTestCase {
         var text = BeamText(text: "some link test")
         XCTAssert(text.makeInternalLink(4..<9))
 
-        let links1 = text.internalLinks
+        let links1 = text.internalLinkRanges
         XCTAssertEqual(links1.count, 1)
         XCTAssertEqual(links1[0].string, "link")
         XCTAssertEqual(links1[0].position, 5)
@@ -158,7 +165,7 @@ class BeamTextTests: XCTestCase {
 
         guard let validText =
         """
-        {"ranges":[{"string":"some "},{"string":"link","attributes":[{"type":4,"payload":"link"}]},{"string":" test"}]}
+        {"ranges":[{"string":"some "},{"string":"link","attributes":[{"type":4,"payload":"\(UUID.nullString)"}]},{"string":" test"}]}
         """.toBeamText else { fatalError() }
 
         XCTAssertEqual(text, validText)
@@ -168,7 +175,7 @@ class BeamTextTests: XCTestCase {
         var text = BeamText(text: "some link test")
         XCTAssert(text.makeInternalLink(5..<10))
 
-        let links1 = text.internalLinks
+        let links1 = text.internalLinkRanges
         XCTAssertEqual(links1.count, 1)
         XCTAssertEqual(links1[0].string, "link")
         XCTAssertEqual(links1[0].position, 5)
@@ -176,7 +183,7 @@ class BeamTextTests: XCTestCase {
 
         guard let validText =
         """
-        {"ranges":[{"string":"some "},{"string":"link","attributes":[{"type":4,"payload":"link"}]},{"string":" test"}]}
+        {"ranges":[{"string":"some "},{"string":"link","attributes":[{"type":4,"payload":"\(UUID.nullString)"}]},{"string":" test"}]}
         """.toBeamText else { fatalError() }
 
         XCTAssertEqual(text, validText)
@@ -186,10 +193,10 @@ class BeamTextTests: XCTestCase {
         var text = BeamText(text: "testText")
         XCTAssert(text.makeInternalLink(2..<4))
         XCTAssert(text.hasPrefix("test"))
-        XCTAssertEqual(text.internalLinks[0].string, "st")
+        XCTAssertEqual(text.internalLinkRanges[0].string, "st")
         let prefix = text.prefix(3)
         XCTAssertEqual(prefix.text, "tes")
-        let links = prefix.internalLinks
+        let links = prefix.internalLinkRanges
         XCTAssertEqual(links.count, 1)
         XCTAssertEqual(links[0].string, "s")
     }
@@ -198,10 +205,10 @@ class BeamTextTests: XCTestCase {
         var text = BeamText(text: "testText")
         XCTAssert(text.makeInternalLink(4..<6))
         XCTAssert(text.hasSuffix("Text"))
-        XCTAssertEqual(text.internalLinks[0].string, "Te")
+        XCTAssertEqual(text.internalLinkRanges[0].string, "Te")
         let suffix = text.suffix(3)
         XCTAssertEqual(suffix.text, "ext")
-        let links = suffix.internalLinks
+        let links = suffix.internalLinkRanges
         XCTAssertEqual(links.count, 1)
         XCTAssertEqual(links[0].string, "e")
     }
@@ -212,7 +219,7 @@ class BeamTextTests: XCTestCase {
         let ast = parser.parseAST()
         let visitor = BeamTextVisitor()
         let text = visitor.visit(ast)
-        let links = text.internalLinks
+        let links = text.internalLinkRanges
         XCTAssertEqual(links.count, 2)
         XCTAssertEqual(links[0].string, "markdown text")
         XCTAssertEqual(links[1].string, "links")

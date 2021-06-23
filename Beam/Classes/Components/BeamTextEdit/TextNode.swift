@@ -925,12 +925,12 @@ public class TextNode: ElementNode {
         }
     }
 
-    public func internalLinkAt(point: NSPoint) -> String? {
+    public func internalLinkAt(point: NSPoint) -> UUID? {
         guard let pos = indexAt(point: point) else { return nil }
         return internalLinkAt(index: pos)
     }
 
-    public func internalLinkAt(index: Int) -> String? {
+    public func internalLinkAt(index: Int) -> UUID? {
         guard let range = internalLinkRangeAt(index: index) else { return nil }
         for attr in range.attributes {
             switch attr {

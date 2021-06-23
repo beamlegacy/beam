@@ -20,7 +20,7 @@ public enum ElementKind: Codable, Equatable {
     case code
     case image(String)
     case embed(String)
-    case blockReference(String, String)
+    case blockReference(UUID, UUID)
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -70,7 +70,9 @@ public enum ElementKind: Codable, Equatable {
         case "embed":
             self = .embed(try container.decode(String.self, forKey: .source))
         case "blockReference":
-            self = .blockReference(try container.decode(String.self, forKey: .title), try container.decode(String.self, forKey: .source))
+            let noteID = try (try? container.decode(UUID.self, forKey: .title)) ?? BeamNote.idForNoteNamed(try container.decode(String.self, forKey: .title)) ?? UUID.null
+            let elementID = try (try? container.decode(UUID.self, forKey: .source)) ?? UUID(uuidString: try container.decode(String.self, forKey: .source)) ?? UUID.null
+            self = .blockReference(noteID, elementID)
         default:
             throw ElementKindError.typeNameUnknown(typeName)
         }
@@ -470,8 +472,8 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
         return depth + 1
     }
 
-    open func hasLinkToNote(named noteTitle: String) -> Bool {
-        text.hasLinkToNote(named: noteTitle)
+    open func hasLinkToNote(id noteId: UUID) -> Bool {
+        text.hasLinkToNote(id: noteId)
     }
 
     open func hasReferenceToNote(named noteTitle: String) -> Bool {

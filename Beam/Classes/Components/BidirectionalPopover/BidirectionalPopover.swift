@@ -22,8 +22,8 @@ struct PopoverLinkItem: PopoverItem {
 
 struct PopoverBlockItem: PopoverItem {
     var text: String
-    var name: String
-    var id: UUID
+    var noteId: UUID
+    var elementId: UUID
 }
 
 class BidirectionalPopover: NSView {

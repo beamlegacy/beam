@@ -15,7 +15,7 @@ public struct BTextEdit: NSViewRepresentable {
     var note: BeamNote
     var data: BeamData
     var openURL: (URL, BeamElement) -> Void
-    var openCard: (String, UUID?) -> Void
+    var openCard: (UUID, UUID?) -> Void
     var onStartEditing: () -> Void = { }
     var onEndEditing: () -> Void = { }
     var onStartQuery: (TextNode) -> Void = { _ in }
@@ -105,7 +105,7 @@ public struct BTextEditScrollable: NSViewRepresentable {
     var note: BeamNote
     var data: BeamData
     var openURL: (URL, BeamElement) -> Void
-    var openCard: (String, UUID?) -> Void
+    var openCard: (UUID, UUID?) -> Void
     var onStartEditing: () -> Void = { }
     var onEndEditing: () -> Void = { }
     var onStartQuery: (TextNode) -> Void = { _ in }

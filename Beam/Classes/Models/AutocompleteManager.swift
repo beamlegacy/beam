@@ -61,14 +61,14 @@ class AutocompleteManager: ObservableObject {
         var resultsToExclude = excludingNotes
         let searchResults = GRDBDatabase.shared.search(matchingAllTokensIn: query, maxResults: 10)
         return searchResults.compactMap { result -> AutocompleteResult? in
-            guard !resultsToExclude.contains(where: { $0.text == result.title || $0.uuid.uuidString == result.uid }) else {
+            guard !resultsToExclude.contains(where: { $0.text == result.title || $0.uuid == result.uid }) else {
                 return nil
             }
             guard beamData.documentManager.loadDocumentByTitle(title: result.title) != nil else { return nil }
             let autocompleteResult = AutocompleteResult(text: result.title,
                                                         source: .note,
                                                         completingText: query,
-                                                        uuid: UUID(uuidString: result.uid) ?? UUID())
+                                                        uuid: result.uid)
             resultsToExclude.append(autocompleteResult)
             return autocompleteResult
         }

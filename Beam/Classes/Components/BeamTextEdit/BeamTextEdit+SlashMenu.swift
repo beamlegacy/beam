@@ -148,7 +148,7 @@ extension BeamTextEdit {
     }
 
     private func insertInternalLink(in node: TextNode, for range: Range<Int>) {
-        node.cmdManager.insertText(BeamText(text: "@", attributes: [.internalLink("")]), in: node, at: range.lowerBound)
+        node.cmdManager.insertText(BeamText(text: "@", attributes: [.internalLink(UUID.null)]), in: node, at: range.lowerBound)
         node.cmdManager.focusElement(node, cursorPosition: range.lowerBound + 1)
         showBidirectionalPopover(mode: .internalLink, prefix: 1, suffix: 0)
     }

@@ -44,7 +44,8 @@ extension BeamText {
             return false
         }
 
-        let linkText = BeamText(text: link, attributes: [.internalLink(link)])
+        guard let linkID = BeamNote.idForNoteNamed(link) else { return false }
+        let linkText = BeamText(text: link, attributes: [.internalLink(linkID)])
         let actualRange = range.lowerBound + start ..< range.lowerBound + end
         Logger.shared.logInfo("makeInternalLink for range: \(range) | actual: \(actualRange)", category: .document)
         replaceSubrange(actualRange, with: linkText)
