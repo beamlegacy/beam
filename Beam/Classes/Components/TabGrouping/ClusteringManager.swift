@@ -18,6 +18,7 @@ class ClusteringManager: ObservableObject {
         }
     }
     var sendRanking = false
+    var ranker: SessionLinkRanker
     @Published var clusteredTabs: [[TabInformation?]] = [[]]
     @Published var isClustering: Bool = false
     @Published var selectedTabGroupingCandidate = 1
@@ -28,8 +29,9 @@ class ClusteringManager: ObservableObject {
     private var cluster: Cluster
     private var scope = Set<AnyCancellable>()
 
-    init() {
+    init(ranker: SessionLinkRanker) {
         self.cluster = Cluster()
+        self.ranker = ranker
         setupObservers()
     }
 
@@ -68,9 +70,9 @@ class ClusteringManager: ObservableObject {
         tabsInfo.append(value)
         isClustering = true
         var ranking: [UInt64]?
-        // if self.sendRanking {
-        //     ranking = self.clusteredPagesId.reduce([], +)
-        // }
+        if self.sendRanking {
+            ranking = self.ranker.clusteringRemovalSorted(links: self.clusteredPagesId.reduce([], +))
+        }
         cluster.add(page, ranking: ranking) { result in
             switch result {
             case .failure(let error):
@@ -97,12 +99,20 @@ class ClusteringManager: ObservableObject {
             case .success(let result):
                 DispatchQueue.main.async {
                     self.isClustering = false
-                    self.clusteredPagesId = result.0
+                    self.clusteredPagesId = self.reorganizeGroups(clusters: result.0)
                     self.sendRanking = result.1
                     self.logForClustering(result: result.0, changeCandidate: true)
                 }
             }
         }
+    }
+
+    private func reorganizeGroups(clusters: [[UInt64]]) -> [[UInt64]] {
+        var clusters = clusters
+        for cluster in clusters.enumerated() {
+            clusters[cluster.offset] = self.ranker.clusteringSorted(links: cluster.element)
+        }
+        return clusters
     }
 
     private func transformToClusteredPages() {
