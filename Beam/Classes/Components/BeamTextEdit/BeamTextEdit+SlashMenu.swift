@@ -59,12 +59,12 @@ extension BeamTextEdit {
     }
 
     private func handleAction(_ action: SlashMenuAction) {
-        showOrHideInlineFormatter(isPresent: false)
         guard let node = formatterTargetNode,
               let initialRange = formatterTargetRange,
               initialRange.lowerBound <= node.cursorPosition
               else { return }
 
+        showOrHideInlineFormatter(isPresent: false)
         node.cmdManager.beginGroup(with: "Slash Menu Formatting")
         let range = initialRange.lowerBound..<node.cursorPosition
         node.cmdManager.deleteText(in: node, for: range)
