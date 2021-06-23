@@ -167,14 +167,8 @@ class PointAndShoot: WebPageHolder {
     func translateTarget(target: Target, href: String) -> Target {
         let frameOffsetX = webPositions.viewportPosition(href, prop: WebPositions.FramePosition.x).reduce(0, +)
         let frameOffsetY = webPositions.viewportPosition(href, prop: WebPositions.FramePosition.y).reduce(0, +)
-        var frameScrollX = webPositions.viewportPosition(href, prop: WebPositions.FramePosition.scrollX)
-        var frameScrollY = webPositions.viewportPosition(href, prop: WebPositions.FramePosition.scrollY)
-        if frameScrollX.count > 1 {
-            frameScrollX.removeFirst()
-        }
-        if frameScrollY.count > 1 {
-            frameScrollY.removeFirst()
-        }
+        let frameScrollX = webPositions.viewportPosition(href, prop: WebPositions.FramePosition.scrollX)
+        let frameScrollY = webPositions.viewportPosition(href, prop: WebPositions.FramePosition.scrollY)
         let xDelta = frameOffsetX - frameScrollX.reduce(0, +)
         let yDelta = frameOffsetY - frameScrollY.reduce(0, +)
         guard let view = page.webView else {
@@ -195,7 +189,10 @@ class PointAndShoot: WebPageHolder {
     ///   - html: The HTML content of the targeted element
     /// - Returns: Translated target
     func createTarget(area: NSRect, quoteId: UUID? = nil, mouseLocation: NSPoint, html: String, offset: NSPoint? = nil, href: String) -> Target {
-        return Target(area: area, quoteId: quoteId, mouseLocation: mouseLocation, html: html, offset: offset)
+        let target = Target(area: area, quoteId: quoteId, mouseLocation: mouseLocation, html: html, offset: offset)
+        let xDelta = webPositions.viewportPosition(href, prop: WebPositions.FramePosition.scrollX).reduce(0, +)
+        let yDelta = webPositions.viewportPosition(href, prop: WebPositions.FramePosition.scrollY).reduce(0, +)
+        return target.translateTarget(xDelta: xDelta, yDelta: yDelta, scale: 1)
     }
 
     let ui: PointAndShootUI
@@ -228,13 +225,11 @@ class PointAndShoot: WebPageHolder {
     func point(target: Target, href: String) {
         pointTarget = translateTarget(target: target, href: href)
         ui.drawPoint(target: pointTarget!)
-        draw()
     }
 
     func cursor(target: Target, href: String) {
         pointTarget = translateTarget(target: target, href: href)
         ui.drawCursor(target: pointTarget!)
-        draw()
     }
 
     /// Removes PointFrame UI and resets the PNS status to .none, only runs when status is .pointing

@@ -152,7 +152,7 @@ class PointAndShootTargetTest: PointAndShootTest {
         let expectedTarget: PointAndShoot.Target = PointAndShoot.Target(
             area: NSRect(
                 x: 101 + iFrame.x,
-                y: 102 + iFrame.y,
+                y: 102 + iFrame.y - scrollDeltaFrame,
                 width: 301,
                 height: 302
             ),
@@ -196,7 +196,7 @@ class PointAndShootTargetTest: PointAndShootTest {
         let expectedTarget: PointAndShoot.Target = PointAndShoot.Target(
             area: NSRect(
                 x: 101 + iFrame.x,
-                y: 102 + iFrame.y - scrollDeltaWindow,
+                y: 102 + iFrame.y - scrollDeltaWindow - scrollDeltaFrame,
                 width: 301,
                 height: 302
             ),
