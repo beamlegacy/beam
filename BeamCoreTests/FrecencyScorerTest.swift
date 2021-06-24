@@ -35,13 +35,17 @@ class FrecencyScorerTest: XCTestCase {
     func testScorer() throws {
         //test frecency score computation and insertion
 
+        let halfLife = Float(10.0)
         func testScoreValue(_ storage: FrecencyStorage, _ urlId: UInt64, _ paramsKey: FrecencyParamKey, _ value: Float, _ date: Date) {
-            let score = storage.getOne(urlId: urlId, paramKey: paramsKey)!
-            XCTAssertEqual(score.value, value)
-            XCTAssertEqual(score.timeStamp, date)
+            guard let score = storage.getOne(urlId: urlId, paramKey: paramsKey) else {
+                XCTFail("score object not found")
+                return
+            }
+            XCTAssertEqual(score.lastScore, value, "wrong last score value")
+            XCTAssertEqual(score.lastTimestamp, date, "wrong last timestamp value")
+            XCTAssertEqual(score.sortValue, log(value) + Float(date.timeIntervalSinceReferenceDate) * log(2) / halfLife, "wrong sort value")
         }
 
-        let halfLife = Float(10.0)
         let testfrecencyParameters: [FrecencyParamKey: FrecencyParam] = [
             .readingTime30d0: FrecencyParam(key: .readingTime30d0, visitWeights: [.searchBar: 2.0], halfLife: halfLife),
             .visit30d0: FrecencyParam(key: .visit30d0, visitWeights: [.searchBar: 2.0], halfLife: halfLife)
@@ -50,7 +54,6 @@ class FrecencyScorerTest: XCTestCase {
         let scorer = ExponentialFrecencyScorer(storage: FakeFrecencyStorage(), params: testfrecencyParameters)
         let now = Date()
         let later = Date(timeInterval: Double(halfLife), since: now)
-
         //non pre exisiting score insertion
         scorer.update(urlId: 0, value: 1, visitType: .searchBar, date: now, paramKey: .readingTime30d0)
         testScoreValue(scorer.storage, 0, .readingTime30d0, 2, now)
@@ -65,5 +68,10 @@ class FrecencyScorerTest: XCTestCase {
         //score inserted into precise score name does not pollute other score name
         XCTAssertNil(scorer.storage.getOne(urlId: 1, paramKey: .readingTime30d0), "no score value")
         XCTAssertNil(scorer.storage.getOne(urlId: 0, paramKey: .visit30d0), "no score value")
+
+        //checking that sorting key works for a 0 score
+        scorer.update(urlId: 2, value: 0, visitType: .linkActivation, date: now, paramKey: .visit30d0)
+        testScoreValue(scorer.storage, 2, .visit30d0, 0, now)
+
     }
 }
