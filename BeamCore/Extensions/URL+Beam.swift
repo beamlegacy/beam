@@ -66,5 +66,4 @@ public extension URL {
     var tld: String? {
         return host?.tld
     }
-
 }

@@ -21,8 +21,10 @@ class ContentBlockingManager {
     private let listStore: WKContentRuleListStore
     private var ruleLists = [String: WKContentRuleList]()
 
+    let radBlockPreferences: RadBlockPreferencesManager
     init() {
         self.listStore = WKContentRuleListStore.default()
+        self.radBlockPreferences = RadBlockPreferencesManager()
     }
 
     func setup() {
@@ -32,6 +34,10 @@ class ContentBlockingManager {
         }
 
         // Setup RadBlock
+        synchronize()
+    }
+
+    func synchronize() {
         FilterManager.default.synchronize(with: .rescheduleOnError) { [weak self] (error) in
             if let error = error {
                 Logger.shared.logError("Sync error: \(error.localizedDescription)", category: .contentBlocking)
@@ -43,7 +49,12 @@ class ContentBlockingManager {
             let allowList = RadBlockDatabase.shared
             let blockers = groups.map { RBContentBlocker(filterGroup: $0, allowList: allowList) }
             self?.compileLists(blockers: blockers)
+            Logger.shared.logInfo("Radblock filters are synchronized", category: .contentBlocking)
         }
+    }
+
+    func removeAllRulesLists() {
+        self.ruleLists.removeAll()
     }
 
     func configure(webView: WKWebView) {
@@ -63,7 +74,6 @@ class ContentBlockingManager {
                 if let error = error {
                     Logger.shared.logError("Rule compilation error for \(identifier): \(error.localizedDescription)", category: .contentBlocking)
                 }
-
                 self?.register(ruleList: ruleList, identifier: identifier)
             }
         } else {
@@ -80,10 +90,41 @@ class ContentBlockingManager {
     }
 
     private func register(ruleList: WKContentRuleList?, identifier: String) {
-        if let ruleList = ruleList {
-            ruleLists[identifier] = ruleList
-        } else {
-            ruleLists.removeValue(forKey: identifier)
+        if let ruleList = ruleList, (identifier == "hush" || identifier == "regional") {
+            add(ruleList: ruleList, identifier: identifier)
+        }
+        if radBlockPreferences.isAdsFilterEnabled && identifier == "ads" {
+            add(ruleList: ruleList, identifier: identifier)
+        } else if !radBlockPreferences.isAdsFilterEnabled && identifier == "ads" {
+            remove(ruleList: ruleList, identifier: identifier)
+        }
+        if radBlockPreferences.isAnnoyancesFilterEnabled && identifier == "annoyance" {
+            add(ruleList: ruleList, identifier: identifier)
+        } else if !radBlockPreferences.isAnnoyancesFilterEnabled && identifier == "annoyance" {
+            remove(ruleList: ruleList, identifier: identifier)
+        }
+        if radBlockPreferences.isPrivacyFilterEnabled && identifier == "privacy" {
+            add(ruleList: ruleList, identifier: identifier)
+        } else if !radBlockPreferences.isPrivacyFilterEnabled && identifier == "privacy" {
+            remove(ruleList: ruleList, identifier: identifier)
+        }
+    }
+
+    private func add(ruleList: WKContentRuleList?, identifier: String) {
+        Logger.shared.logInfo("Radblock register rulist for \(identifier)", category: .contentBlocking)
+        ruleLists[identifier] = ruleList
+    }
+
+    private func remove(ruleList: WKContentRuleList?, identifier: String) {
+        Logger.shared.logInfo("Radblock removed rulist for \(identifier)", category: .contentBlocking)
+        ruleLists.removeValue(forKey: identifier)
+    }
+}
+
+extension ContentBlockingManager {
+    public func hasDomainInAllowList(domain: String, completion: @escaping (Bool) -> Void) {
+        RadBlockDatabase.shared.allowlistEntry(forDomain: domain) { entry, _ in
+            completion(entry != nil)
         }
     }
 }

@@ -6,18 +6,18 @@ class BeamUITestsMenuGenerator {
     // swiftlint:disable:next cyclomatic_complexity
     func executeCommand(_ command: MenuAvailableCommands) {
         switch command {
-            case .populateDBWithJournal: populateWithJournalNote(count: 10)
-            case .destroyDB: destroyDatabase()
-            case .logout: logout()
-            case .deleteLogs: deleteLogs()
-            case .resizeWindowLandscape: resizeWindowLandscape()
-            case .resizeWindowPortrait: resizeWindowPortrait()
-            case .loadUITestPage1: loadUITestsPage(page: 1)
-            case .loadUITestPage2: loadUITestsPage(page: 2)
-            case .loadUITestPage3: loadUITestsPage(page: 3)
-            case .loadUITestPage4: loadUITestsPage(page: 4)
-            case .insertTextInCurrentNote: insertTextInCurrentNote()
-            default: break
+        case .populateDBWithJournal: populateWithJournalNote(count: 10)
+        case .destroyDB: destroyDatabase()
+        case .logout: logout()
+        case .deleteLogs: deleteLogs()
+        case .resizeWindowLandscape: resizeWindowLandscape()
+        case .resizeWindowPortrait: resizeWindowPortrait()
+        case .loadUITestPage1: loadUITestsPage(page: 1)
+        case .loadUITestPage2: loadUITestsPage(page: 2)
+        case .loadUITestPage3: loadUITestsPage(page: 3)
+        case .loadUITestPage4: loadUITestsPage(page: 4)
+        case .insertTextInCurrentNote: insertTextInCurrentNote()
+        default: break
         }
     }
 

@@ -34,6 +34,7 @@ public enum LogCategory: String {
     case fileDB
     case oauth
     case passwordsDB
+    case passwordManager
     case clustering
     case commandManager
 }

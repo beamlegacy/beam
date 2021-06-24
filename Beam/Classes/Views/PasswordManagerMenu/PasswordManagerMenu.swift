@@ -66,7 +66,6 @@ struct PasswordManagerMenu: View {
                             OtherPasswordModal(passwordEntries: viewModel.display.allEntries, onFill: { entry in
                                 viewModel.fillCredentials(entry)
                             }, onRemove: { entry in
-                                // TODO: Implement when password will be saved
                                 viewModel.deleteCredentials(entry)
                             }, onDismiss: {
                                 showingOtherPasswordsSheet.toggle()

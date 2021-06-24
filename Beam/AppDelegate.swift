@@ -265,6 +265,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: Preferences
     lazy var preferences: [PreferencePane] = [
         AccountsPreferenceViewController(),
+        PrivacyPreferenceViewController(),
         AdvancedPreferencesViewController()
     ]
 
