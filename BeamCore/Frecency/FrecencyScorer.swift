@@ -16,6 +16,10 @@ private let visitWeights: [VisitType: Float] = [
 private func timeDecay(duration: Float, halfLife: Float) -> Float {
     return exp(-(duration * log(2) / halfLife))
 }
+private func scoreSortValue(score: Float, timeStamp: Date, halfLife: Float) -> Float {
+    guard score != 0.0 else { return -1 * Float.infinity }
+    return log(score) + Float(timeStamp.timeIntervalSinceReferenceDate) * log(2) / halfLife
+}
 
 public enum FrecencyParamKey: String {
     case visit30d0
@@ -35,23 +39,17 @@ let frecencyParameters: [FrecencyParamKey: FrecencyParam] = [
 
 public struct FrecencyScore {
     let urlId: UInt64
-    var timeStamp: Date
-    var value: Float
-
-    func value(at date: Date, halfLife: Float) -> Float {
-        let duration = Float(date.timeIntervalSince(timeStamp))
-        return value * timeDecay(duration: duration, halfLife: halfLife)
-    }
+    var lastTimestamp: Date
+    var lastScore: Float
+    var sortValue: Float
 }
 
 public protocol FrecencyScorer {
     func update(urlId: UInt64, value: Float, visitType: VisitType, date: Date, paramKey: FrecencyParamKey)
-    func rank(urlIds: [UInt64], paramKey: FrecencyParamKey, date: Date) -> [UInt64]
 }
 
 public protocol FrecencyStorage {
     func getOne(urlId: UInt64, paramKey: FrecencyParamKey) -> FrecencyScore?
-    func getAll(urlIds: [UInt64], paramKey: FrecencyParamKey) -> [FrecencyScore]
     func save(score: FrecencyScore, paramKey: FrecencyParamKey)
 }
 
@@ -70,11 +68,13 @@ class ExponentialFrecencyScorer: FrecencyScorer {
 
     private func updatedScore(urlId: UInt64, value: Float, date: Date, param: FrecencyParam) -> FrecencyScore {
         guard let score = storage.getOne(urlId: urlId, paramKey: param.key) else {
-            return  FrecencyScore(urlId: urlId, timeStamp: date, value: value)
+            let sortValue: Float = scoreSortValue(score: value, timeStamp: date, halfLife: param.halfLife)
+            return  FrecencyScore(urlId: urlId, lastTimestamp: date, lastScore: value, sortValue: sortValue)
         }
-        let duration = Float(date.timeIntervalSince(score.timeStamp))
-        let updatedValue = value + score.value * timeDecay(duration: duration, halfLife: param.halfLife)
-        return FrecencyScore(urlId: urlId, timeStamp: date, value: updatedValue)
+        let duration = Float(date.timeIntervalSince(score.lastTimestamp))
+        let updatedValue = value + score.lastScore * timeDecay(duration: duration, halfLife: param.halfLife)
+        let sortValue = scoreSortValue(score: updatedValue, timeStamp: date, halfLife: param.halfLife)
+        return FrecencyScore(urlId: urlId, lastTimestamp: date, lastScore: updatedValue, sortValue: sortValue)
     }
 
     func update(urlId: UInt64, value: Float, visitType: VisitType, date: Date, paramKey: FrecencyParamKey) {
@@ -82,14 +82,5 @@ class ExponentialFrecencyScorer: FrecencyScorer {
         let weightedValue = value * visitWeight(visitType: visitType, param: param)
         let score = updatedScore(urlId: urlId, value: weightedValue, date: date, param: param)
         storage.save(score: score, paramKey: param.key)
-    }
-
-    func rank(urlIds: [UInt64], paramKey: FrecencyParamKey, date: Date) -> [UInt64] {
-        return [UInt64]()
-//to be implemented depending on wether storage can compute exponetial function or not
-//        let scores = storage.getAll(urlIds: urlIds, paramsName: params.name)
-//        return scores
-//            .sorted { $0.value(at: date, halfLife: params.halfLife) < $1.value(at: date, halfLife: params.halfLife) }
-//            .map { $0.urlId }
     }
 }
