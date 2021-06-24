@@ -171,7 +171,7 @@ class AutocompleteManager: ObservableObject {
                 newResults.insert(contentsOf: toInsert, at: atIndex)
                 self.autocompleteResults = newResults
                 onUpdateResultsBlock?(newResults)
-            } else {
+            } else if atIndex < self.autocompleteResults.count {
                 self.autocompleteResults.insert(contentsOf: toInsert, at: atIndex)
             }
         }
