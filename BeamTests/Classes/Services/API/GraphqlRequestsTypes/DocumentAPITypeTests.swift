@@ -27,16 +27,25 @@ class DocumentAPITypeTests: QuickSpec {
             }
 
             describe(".encrypt()") {
-                it("encrypts the clear text") {
+                beforeEach {
                     expect { try sut.encrypt() }.toNot(throwError())
-
+                }
+                
+                it("encrypts the clear text") {
                     expect(sut.data) == text
                     expect(sut.encryptedData).toNot(beNil())
                 }
 
                 it("adds checksum") {
-                    expect { try sut.encrypt() }.toNot(throwError())
                     expect(sut.dataChecksum).toNot(beNil())
+                }
+
+                it("adds private key sha256") {
+                    let privateKey = EncryptionManager.shared.privateKey().asString()
+                    let sha1 = try? privateKey.SHA256()
+                    expect(sut.encryptedData).to(match("privateKeySha256"))
+                    expect(sut.encryptedData).to(match(sha1))
+                    expect(sut.encryptedData).toNot(match(privateKey))
                 }
             }
 

@@ -88,6 +88,7 @@ class DocumentAPIType: Codable {
 
     struct DataEncryption: Codable {
         let encryptionName: String?
+        let privateKeySha256: String?
         let data: String?
     }
 
@@ -103,9 +104,12 @@ class DocumentAPIType: Codable {
             guard let encryptionName = decodedStruct.encryptionName,
                   let algorithm = EncryptionManager.Algorithm(rawValue: encryptionName) else { return }
 
-            data = try EncryptionManager.shared.decryptString(encodedString, using: algorithm)
-            encryptedData = encodedData
-
+            do {
+                data = try EncryptionManager.shared.decryptString(encodedString, using: algorithm)
+                encryptedData = encodedData
+            } catch EncryptionManagerError.authenticationFailure {
+                Logger.shared.logError("Could not decrypt data with key \(decodedStruct.privateKeySha256 ?? "-")", category: .encryption)
+            }
         } catch DecodingError.dataCorrupted {
             Logger.shared.logError("DecodingError.dataCorrupted", category: .encryption)
             Logger.shared.logDebug("Encoded data: \(encodedData)", category: .encryption)
@@ -138,6 +142,7 @@ class DocumentAPIType: Codable {
 
         let encryptedClearData = try EncryptionManager.shared.encryptString(clearData)
         let encryptStruct = DataEncryption(encryptionName: EncryptionManager.Algorithm.AES_GCM.rawValue,
+                                           privateKeySha256: try? EncryptionManager.shared.privateKey().asString().SHA256(),
                                            data: encryptedClearData)
 
         let encoder = JSONEncoder()
