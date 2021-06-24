@@ -435,6 +435,8 @@
 		96FACC8626050B1E0088DD67 /* SetSelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96FACC8526050B1E0088DD67 /* SetSelection.swift */; };
 		96FACC8A26079C7E0088DD67 /* InputText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96FACC8926079C7E0088DD67 /* InputText.swift */; };
 		96FD761B25B1C43500B04ED3 /* BrowsingNodeWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96FD761A25B1C43500B04ED3 /* BrowsingNodeWidget.swift */; };
+		A005909F26677E8400698E75 /* PrivacyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A005909E26677E8400698E75 /* PrivacyView.swift */; };
+		A00590B72667911200698E75 /* Checkbox.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00590B62667911200698E75 /* Checkbox.swift */; };
 		A00AE82B265EAE9A00156220 /* BeamSearchField.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00AE82A265EAE9A00156220 /* BeamSearchField.swift */; };
 		A00F5A262656965900D338E1 /* PasswordsDBTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00F5A252656965900D338E1 /* PasswordsDBTests.swift */; };
 		A01030AA25F149EA00D740C5 /* TextEditorCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = A01030A925F149EA00D740C5 /* TextEditorCommand.swift */; };
@@ -442,6 +444,7 @@
 		A02FD6FE266519C300EBE17E /* Clustering.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A02FD6E72665180C00EBE17E /* Clustering.framework */; };
 		A02FD6FF266519C300EBE17E /* Clustering.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A02FD6E72665180C00EBE17E /* Clustering.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		A032BD33261F4677009A3576 /* ShortcutLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A032BD32261F4677009A3576 /* ShortcutLayer.swift */; };
+		A0379C43266E6C5B00D75D6B /* AllowListTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0379C42266E6C5B00D75D6B /* AllowListTableView.swift */; };
 		A03CE0EC25F954CB00D767B0 /* BeamNoteDataHolder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A03CE0EB25F954CB00D767B0 /* BeamNoteDataHolder.swift */; };
 		A0404F0C25E7ECDD00E347F3 /* CommandNodeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0404F0B25E7ECDD00E347F3 /* CommandNodeTests.swift */; };
 		A043B7E7265937DA00E267E5 /* AppDelegate+TabGrouping.swift in Sources */ = {isa = PBXBuildFile; fileRef = A043B7E6265937DA00E267E5 /* AppDelegate+TabGrouping.swift */; };
@@ -458,6 +461,7 @@
 		A0689E7125DE6B8700B19CBB /* CommandsTextTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0689E7025DE6B8700B19CBB /* CommandsTextTests.swift */; };
 		A08D739426413DEC00A9A604 /* UserProfileMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = A08D739326413DEC00A9A604 /* UserProfileMenu.swift */; };
 		A08DE20D26160DC800F8ABB4 /* BeamTextEdit+CopyPaste.swift in Sources */ = {isa = PBXBuildFile; fileRef = A08DE20C26160DC800F8ABB4 /* BeamTextEdit+CopyPaste.swift */; };
+		A0A3BED5266FD1B200566D6C /* BeamStepperButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0A3BED4266FD1B200566D6C /* BeamStepperButton.swift */; };
 		A0A4301626655993003A3C08 /* ClusteringManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0A4301526655993003A3C08 /* ClusteringManager.swift */; };
 		A0A84FB62636FA99008F0326 /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = 527FB71925B9A97A00959146 /* Sentry */; };
 		A0A84FB72636FA99008F0326 /* JWTDecode in Frameworks */ = {isa = PBXBuildFile; productRef = 527FB71E25B9A9B600959146 /* JWTDecode */; };
@@ -480,14 +484,18 @@
 		A0C58C382640026600FB95D8 /* ToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0C58C372640026600FB95D8 /* ToastView.swift */; };
 		A0C5D85B263C638A00FA6F6E /* CredentialsConfirmationToast.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0C5D85A263C638A00FA6F6E /* CredentialsConfirmationToast.swift */; };
 		A0C63A6825FA249700FB4CCE /* BeamTextHolder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0C63A6725FA249700FB4CCE /* BeamTextHolder.swift */; };
+		A0C77A2226694D2300DCC85C /* AllowListModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0C77A2126694D2300DCC85C /* AllowListModalView.swift */; };
 		A0D06CDB260A2D2700264926 /* JournalScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0D06CDA260A2D2700264926 /* JournalScrollView.swift */; };
 		A0D1731425E4FC2D00FDE73C /* ReplaceText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0D1731325E4FC2D00FDE73C /* ReplaceText.swift */; };
+		A0DB19F026829BF900956579 /* AllowListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0DB19EF26829BF900956579 /* AllowListViewModel.swift */; };
 		A0E15FFD25D1570D00F9D72F /* JournalUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0E15FFC25D1570D00F9D72F /* JournalUITests.swift */; };
 		A0E3150525ED1ECB001A5E55 /* FormatText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0E3150425ED1ECB001A5E55 /* FormatText.swift */; };
 		A0E7D98726139FCA00D70676 /* JournalStackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0E7D98626139FCA00D70676 /* JournalStackView.swift */; };
 		A0E9B0E326668C1300FC99A5 /* FaviconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0E9B0E226668C1300FC99A5 /* FaviconView.swift */; };
 		A0E9B0FB2666A80600FC99A5 /* TabGroupingTitleBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0E9B0FA2666A80600FC99A5 /* TabGroupingTitleBarView.swift */; };
 		A0EDF5DB266EE08C0079803E /* BeamPlaceholder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0EDF5DA266EE08C0079803E /* BeamPlaceholder.swift */; };
+		A0F462352668D79E0003EAD6 /* RadBlockPreferencesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0F462342668D79E0003EAD6 /* RadBlockPreferencesManager.swift */; };
+		A0F8DC87268488C900654046 /* hush.json in Resources */ = {isa = PBXBuildFile; fileRef = A0F8DC86268488C900654046 /* hush.json */; };
 		A50B372425FA180E00E5D34F /* NSApperance+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50B372325FA180E00E5D34F /* NSApperance+Beam.swift */; };
 		A5144001263803600021DD56 /* TrackableScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5144000263803600021DD56 /* TrackableScrollView.swift */; };
 		A514401B2638038C0021DD56 /* BrowserNewTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A514401A2638038C0021DD56 /* BrowserNewTabView.swift */; };
@@ -548,6 +556,7 @@
 		A5C7F10A267CC9FD002EE550 /* BeamTextEdit+InputDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C7F109267CC9FD002EE550 /* BeamTextEdit+InputDetector.swift */; };
 		A5BF04D32681A4F800CC80EB /* ElementNode+Layers.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BF04D22681A4F800CC80EB /* ElementNode+Layers.swift */; };
 		A5A6A428267F123C007F1B2F /* CommandManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5109F902670227800304B3A /* CommandManagerTests.swift */; };
+		A5C7F10A267CC9FD002EE550 /* BeamTextEdit+InputDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C7F109267CC9FD002EE550 /* BeamTextEdit+InputDetector.swift */; };
 		A5C9F005261353420096380F /* WindowPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C9F004261353420096380F /* WindowPage.swift */; };
 		A5C9F00A261364F50096380F /* WindowPageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C9F009261364F50096380F /* WindowPageView.swift */; };
 		A5C9F01126136B5F0096380F /* AllCardsPageContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C9F01026136B5F0096380F /* AllCardsPageContentView.swift */; };
@@ -1201,6 +1210,8 @@
 		96FACC8526050B1E0088DD67 /* SetSelection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetSelection.swift; sourceTree = "<group>"; };
 		96FACC8926079C7E0088DD67 /* InputText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputText.swift; sourceTree = "<group>"; };
 		96FD761A25B1C43500B04ED3 /* BrowsingNodeWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowsingNodeWidget.swift; sourceTree = "<group>"; };
+		A005909E26677E8400698E75 /* PrivacyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyView.swift; sourceTree = "<group>"; };
+		A00590B62667911200698E75 /* Checkbox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Checkbox.swift; sourceTree = "<group>"; };
 		A00AE82A265EAE9A00156220 /* BeamSearchField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamSearchField.swift; sourceTree = "<group>"; };
 		A00F5A252656965900D338E1 /* PasswordsDBTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordsDBTests.swift; sourceTree = "<group>"; };
 		A01030A925F149EA00D740C5 /* TextEditorCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditorCommand.swift; sourceTree = "<group>"; };
@@ -1208,6 +1219,7 @@
 		A0208F8125D6BB1C00CA054C /* AppDelegate+BeamTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+BeamTests.swift"; sourceTree = "<group>"; };
 		A02FD6E12665180C00EBE17E /* Clustering.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Clustering.xcodeproj; path = Beam/Clustering/Clustering.xcodeproj; sourceTree = "<group>"; };
 		A032BD32261F4677009A3576 /* ShortcutLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutLayer.swift; sourceTree = "<group>"; };
+		A0379C42266E6C5B00D75D6B /* AllowListTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllowListTableView.swift; sourceTree = "<group>"; };
 		A03CE0EB25F954CB00D767B0 /* BeamNoteDataHolder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamNoteDataHolder.swift; sourceTree = "<group>"; };
 		A0404F0B25E7ECDD00E347F3 /* CommandNodeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandNodeTests.swift; sourceTree = "<group>"; };
 		A043B7E6265937DA00E267E5 /* AppDelegate+TabGrouping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+TabGrouping.swift"; sourceTree = "<group>"; };
@@ -1224,6 +1236,7 @@
 		A0689E7025DE6B8700B19CBB /* CommandsTextTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandsTextTests.swift; sourceTree = "<group>"; };
 		A08D739326413DEC00A9A604 /* UserProfileMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfileMenu.swift; sourceTree = "<group>"; };
 		A08DE20C26160DC800F8ABB4 /* BeamTextEdit+CopyPaste.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamTextEdit+CopyPaste.swift"; sourceTree = "<group>"; };
+		A0A3BED4266FD1B200566D6C /* BeamStepperButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamStepperButton.swift; sourceTree = "<group>"; };
 		A0A4301526655993003A3C08 /* ClusteringManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClusteringManager.swift; sourceTree = "<group>"; };
 		A0A84FE026371A4B008F0326 /* OtherPasswordsCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OtherPasswordsCell.swift; sourceTree = "<group>"; };
 		A0A84FEA26381B64008F0326 /* OtherPasswordsModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OtherPasswordsModal.swift; sourceTree = "<group>"; };
@@ -1233,14 +1246,18 @@
 		A0C58C372640026600FB95D8 /* ToastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastView.swift; sourceTree = "<group>"; };
 		A0C5D85A263C638A00FA6F6E /* CredentialsConfirmationToast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialsConfirmationToast.swift; sourceTree = "<group>"; };
 		A0C63A6725FA249700FB4CCE /* BeamTextHolder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamTextHolder.swift; sourceTree = "<group>"; };
+		A0C77A2126694D2300DCC85C /* AllowListModalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllowListModalView.swift; sourceTree = "<group>"; };
 		A0D06CDA260A2D2700264926 /* JournalScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalScrollView.swift; sourceTree = "<group>"; };
 		A0D1731325E4FC2D00FDE73C /* ReplaceText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplaceText.swift; sourceTree = "<group>"; };
+		A0DB19EF26829BF900956579 /* AllowListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllowListViewModel.swift; sourceTree = "<group>"; };
 		A0E15FFC25D1570D00F9D72F /* JournalUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalUITests.swift; sourceTree = "<group>"; };
 		A0E3150425ED1ECB001A5E55 /* FormatText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatText.swift; sourceTree = "<group>"; };
 		A0E7D98626139FCA00D70676 /* JournalStackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalStackView.swift; sourceTree = "<group>"; };
 		A0E9B0E226668C1300FC99A5 /* FaviconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaviconView.swift; sourceTree = "<group>"; };
 		A0E9B0FA2666A80600FC99A5 /* TabGroupingTitleBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupingTitleBarView.swift; sourceTree = "<group>"; };
 		A0EDF5DA266EE08C0079803E /* BeamPlaceholder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamPlaceholder.swift; sourceTree = "<group>"; };
+		A0F462342668D79E0003EAD6 /* RadBlockPreferencesManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadBlockPreferencesManager.swift; sourceTree = "<group>"; };
+		A0F8DC86268488C900654046 /* hush.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = hush.json; sourceTree = "<group>"; };
 		A50B372325FA180E00E5D34F /* NSApperance+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSApperance+Beam.swift"; sourceTree = "<group>"; };
 		A5109F902670227800304B3A /* CommandManagerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandManagerTests.swift; sourceTree = "<group>"; };
 		A5144000263803600021DD56 /* TrackableScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackableScrollView.swift; sourceTree = "<group>"; };
@@ -1549,6 +1566,7 @@
 		0353852926051A6600691BB4 /* Ad blocker */ = {
 			isa = PBXGroup;
 			children = (
+				A0F8DC86268488C900654046 /* hush.json */,
 				0325627026051D3A006513E4 /* blockerList.json */,
 				0325627626051D3A006513E4 /* Info.plist */,
 				0325627C26051D3B006513E4 /* Models */,
@@ -2057,6 +2075,7 @@
 				524CF6C925F2735D007312F0 /* EncryptionManager.swift */,
 				03CA9A9625CC61BF00E7CFA2 /* ContentBlockingManager.swift */,
 				A5153EE2260DD58A00C84902 /* RecentsManager.swift */,
+				A0F462342668D79E0003EAD6 /* RadBlockPreferencesManager.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -2253,6 +2272,10 @@
 				52B9A399264566D60063AEEF /* OauthButton.swift */,
 				529826A52641A46E00E9448C /* GoogleButton.swift */,
 				52B9A36F264546570063AEEF /* OauthWindow.swift */,
+				A005909E26677E8400698E75 /* PrivacyView.swift */,
+				A0C77A2126694D2300DCC85C /* AllowListModalView.swift */,
+				A0379C42266E6C5B00D75D6B /* AllowListTableView.swift */,
+				A0DB19EF26829BF900956579 /* AllowListViewModel.swift */,
 			);
 			path = Preferences;
 			sourceTree = "<group>";
@@ -2954,6 +2977,8 @@
 				A0E9B0E226668C1300FC99A5 /* FaviconView.swift */,
 				A52BFE62260901980028D3F3 /* Separator.swift */,
 				A5153EDC260CC4DC00C84902 /* ButtonLabel.swift */,
+				A00590B62667911200698E75 /* Checkbox.swift */,
+				A0A3BED4266FD1B200566D6C /* BeamStepperButton.swift */,
 				3330D7CC265E95E0008C9E20 /* LinearProgressView.swift */,
 				33DEF48726617E0B00834839 /* CircledButton.swift */,
 			);
@@ -3489,6 +3514,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				02C07A9B2670D98600894C5D /* Navigation.js in Resources */,
+				A0F8DC87268488C900654046 /* hush.json in Resources */,
 				02A2B285263190F100D581A5 /* Scorer.js in Resources */,
 				027CB665263163AC001311A0 /* PasswordManager.js in Resources */,
 				8AF53BAE266A241C00C3CB2E /* UITests-2.html in Resources */,
@@ -3908,6 +3934,7 @@
 				52B9A39A264566D60063AEEF /* OauthButton.swift in Sources */,
 				96FACC8A26079C7E0088DD67 /* InputText.swift in Sources */,
 				418172002581107C00317ED8 /* NotificationName+Beam.swift in Sources */,
+				A0DB19F026829BF900956579 /* AllowListViewModel.swift in Sources */,
 				0325629226051D3B006513E4 /* RBUtils.m in Sources */,
 				A0E9B0E326668C1300FC99A5 /* FaviconView.swift in Sources */,
 				8726448F26199B8F0070E83D /* OptionSelector.swift in Sources */,
@@ -3941,6 +3968,7 @@
 				418171EC2581107C00317ED8 /* Me.swift in Sources */,
 				A52BFDF72608D6710028D3F3 /* BeamFont.swift in Sources */,
 				96319D6D26163AAD00D1CF31 /* BeamNote+CommandManager.swift in Sources */,
+				A005909F26677E8400698E75 /* PrivacyView.swift in Sources */,
 				960A57E8264C88920061E8D2 /* ProxyEmbedNode.swift in Sources */,
 				4181724E2581107C00317ED8 /* TabStats.swift in Sources */,
 				4181724F2581107C00317ED8 /* WebView.swift in Sources */,
@@ -3979,6 +4007,7 @@
 				96120D0E260C917600592546 /* TextLine.swift in Sources */,
 				A5946806265CE5ED0044A892 /* DocumentCommand.swift in Sources */,
 				A5233DE525FB682700BE6F05 /* FaviconProvider.swift in Sources */,
+				A00590B72667911200698E75 /* Checkbox.swift in Sources */,
 				33DEF48826617E0B00834839 /* CircledButton.swift in Sources */,
 				4181723D2581107C00317ED8 /* BeamTextEdit.swift in Sources */,
 				9691E40225AE5D2C00A13080 /* NodeSelection.swift in Sources */,
@@ -4054,6 +4083,7 @@
 				52B9A370264546570063AEEF /* OauthWindow.swift in Sources */,
 				418172072581107C00317ED8 /* Document.swift in Sources */,
 				4100D96B25AEFEEA00EF04CB /* BeamTextEdit+Shortcut.swift in Sources */,
+				A0379C43266E6C5B00D75D6B /* AllowListTableView.swift in Sources */,
 				A0C0C2A725E5109F00BE34F0 /* InsertElement.swift in Sources */,
 				41FAD34F25E5742800D78B36 /* CALayer+Animation.swift in Sources */,
 				524299EE25A488E000F4DBF5 /* AdvancedPreferencesView.swift in Sources */,
@@ -4097,6 +4127,7 @@
 				4181724C2581107C00317ED8 /* BrowserTabView.swift in Sources */,
 				A51559892677AC99006F6D6F /* MediaPlayerController.swift in Sources */,
 				521EEDE125937F5B00BA2485 /* DocumentsContentView.swift in Sources */,
+				A0C77A2226694D2300DCC85C /* AllowListModalView.swift in Sources */,
 				032562AA26051D3B006513E4 /* RBClient.m in Sources */,
 				A545D2FB25F7B1D800E68F94 /* DestinationNoteAutocompleteList.swift in Sources */,
 				5285672A26275A8D00DDBE45 /* BeamToBeam2Migration.xcmappingmodel in Sources */,
@@ -4124,6 +4155,7 @@
 				A032BD33261F4677009A3576 /* ShortcutLayer.swift in Sources */,
 				A5BF04D32681A4F800CC80EB /* ElementNode+Layers.swift in Sources */,
 				A5208D8F261D25F1006193AF /* BeamSpacing.swift in Sources */,
+				A0A3BED5266FD1B200566D6C /* BeamStepperButton.swift in Sources */,
 				BAA67CE03D8FFB795346CD06 /* WebPositions.swift in Sources */,
 				BAA67D3C5D44656448093D73 /* LoggingMessageHandler.swift in Sources */,
 				A52FCB632666514000BCD38A /* TextLinesDecorationLayer.swift in Sources */,
@@ -4145,6 +4177,7 @@
 				BAA671B407D2F6AD8F8704A3 /* ShootFrameSelectionView.swift in Sources */,
 				BAA67AEDAE0EACFDFC1F4E28 /* ShootCardConfirmationView.swift in Sources */,
 				BAA67A090213331E925B0682 /* ShootFrame.swift in Sources */,
+				A0F462352668D79E0003EAD6 /* RadBlockPreferencesManager.swift in Sources */,
 				BAA670C2CFE33BC83DF12343 /* ShootAbsolutePositioning.swift in Sources */,
 				BAA67AFAB13DE4A1378E312B /* PointFrame.swift in Sources */,
 				BAA67AB77852A4EE310BF552 /* ShootFrameFusionRect.swift in Sources */,
