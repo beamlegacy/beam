@@ -1,4 +1,5 @@
 import Foundation
+import BeamCore
 
 struct Configuration {
     // Build configuration

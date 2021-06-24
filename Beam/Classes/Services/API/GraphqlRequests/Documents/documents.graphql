@@ -7,6 +7,7 @@ query ($updatedAtAfter: ISO8601DateTime) {
       data
       createdAt
       updatedAt
+      deletedAt
       isPublic
       database { title id }
       documentType

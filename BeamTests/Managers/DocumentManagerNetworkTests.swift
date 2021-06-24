@@ -320,6 +320,102 @@ class DocumentManagerNetworkTests: QuickSpec {
                 }
             }
 
+            context("with existing local document, another document existing on the API, both using same titles") {
+                var remoteDocStruct: DocumentStruct!
+
+                beforeEach {
+                    docStruct = helper.createDocumentStruct(title: "foobar",
+                                                            id: "995d94e1-e0df-4eca-93e6-8778984bcd18")
+
+                    remoteDocStruct = helper.createDocumentStruct(title: docStruct.title,
+                                                                  id: "00000000-e0df-4eca-93e6-8778984bcd18")
+                    helper.saveRemotelyOnly(remoteDocStruct)
+                }
+
+                afterEach {
+                    // Not to leave any on the server
+                    helper.deleteDocumentStruct(remoteDocStruct)
+                }
+
+                it("deletes the local document, fetch the remote document and saves it") {
+                    let networkCalls = APIRequest.callsCount
+
+                    var updateDocumentStruct: DocumentStruct?
+                    var cancellable: AnyCancellable!
+                    var callsOrder: [String] = []
+
+                    waitUntil(timeout: .seconds(10)) { done in
+                        cancellable = sut.onDocumentChange(docStruct) { updateDocumentStructCallback in
+                            updateDocumentStruct = updateDocumentStructCallback
+                            expect(updateDocumentStructCallback.id) == remoteDocStruct.id
+                            callsOrder.append("onDocumentChange")
+                            cancellable.cancel()
+                        }
+
+                        sut.refreshAllFromAPI { result in
+                            expect { try result.get() }.toNot(throwError())
+                            expect { try result.get() } == true
+
+                            callsOrder.append("refreshAllFromAPI")
+                            done()
+                        }
+                    }
+
+                    expect(callsOrder) == ["onDocumentChange", "refreshAllFromAPI"]
+                    expect(updateDocumentStruct?.id) == remoteDocStruct.id
+                    expect(APIRequest.callsCount - networkCalls) == 1
+
+                    let count = Document.rawCountWithPredicate(CoreDataManager.shared.mainContext,
+                                                               NSPredicate(format: "title = %@", docStruct.title as CVarArg))
+                    expect(count) == 1
+
+                    let documents = try? Document.rawFetchAllWithLimit(CoreDataManager.shared.mainContext,
+                                                                       NSPredicate(format: "title = %@", docStruct.title as CVarArg))
+
+                    expect { documents?.compactMap { $0.id } } == [remoteDocStruct.id]
+                }
+
+                it("soft deletes the local document, fetch the remote document and saves it") {
+                    let networkCalls = APIRequest.callsCount
+
+                    var updateDocumentStruct: DocumentStruct?
+                    var cancellable: AnyCancellable!
+                    var callsOrder: [String] = []
+
+                    // Force a previous save
+                    docStruct = helper.saveLocally(docStruct)
+                    docStruct = helper.saveLocally(docStruct)
+
+                    waitUntil(timeout: .seconds(10)) { done in
+                        cancellable = sut.onDocumentChange(docStruct) { updateDocumentStructCallback in
+                            updateDocumentStruct = updateDocumentStructCallback
+                            expect(updateDocumentStructCallback.id) == remoteDocStruct.id
+                            callsOrder.append("onDocumentChange")
+                            cancellable.cancel()
+                        }
+
+                        sut.refreshAllFromAPI { result in
+                            expect { try result.get() }.toNot(throwError())
+                            expect { try result.get() } == true
+
+                            callsOrder.append("refreshAllFromAPI")
+                            done()
+                        }
+                    }
+
+                    expect(callsOrder) == ["onDocumentChange", "refreshAllFromAPI"]
+                    expect(updateDocumentStruct?.id) == remoteDocStruct.id
+                    expect(APIRequest.callsCount - networkCalls) == 2
+
+                    let count = Document.rawCountWithPredicate(CoreDataManager.shared.mainContext,
+                                                               NSPredicate(format: "title = %@", docStruct.title as CVarArg))
+                    expect(count) == 2
+
+                    let localDocument = try? Document.fetchWithId(CoreDataManager.shared.mainContext, docStruct.id)
+                    expect(localDocument?.deleted_at).to(beCloseTo(BeamDate.now, within: 1.0))
+                }
+            }
+
             context("when remote document doesn't exist") {
                 beforeEach {
                     docStruct = self.createStruct("995d94e1-e0df-4eca-93e6-8778984bcd18", helper)
@@ -936,89 +1032,122 @@ class DocumentManagerNetworkTests: QuickSpec {
                     }
 
                     context("with Foundation") {
-                        beforeEach {
-                            docStruct = helper.saveLocally(docStruct)
-                        }
+                        context("with existing local document, another document existing on the API, both using same titles") {
+                            var remoteDocStruct: DocumentStruct!
 
-                        it("saves the document on the API") {
-                            waitUntil(timeout: .seconds(10)) { done in
-                                sut.saveDocumentStructOnAPI(docStruct) { result in
-                                    expect { try result.get() }.toNot(throwError())
-                                    expect { try result.get() } == true
-                                    done()
-                                }
+                            beforeEach {
+                                docStruct = helper.createDocumentStruct(title: "foobar",
+                                                                        id: "995d94e1-e0df-4eca-93e6-8778984bcd18")
+
+                                remoteDocStruct = helper.createDocumentStruct(title: docStruct.title,
+                                                                              id: "00000000-e0df-4eca-93e6-8778984bcd18")
+                                helper.saveRemotelyOnly(remoteDocStruct)
                             }
 
-                            let remoteStruct = helper.fetchOnAPI(docStruct)
-                            expect(remoteStruct?.id) == docStruct.uuidString
-                            expect(remoteStruct?.isPublic) == false
-                        }
-
-                        it("updates the database on the API") {
-                            helper.saveRemotely(docStruct)
-                            expect(docStruct.databaseId) == DatabaseManager.defaultDatabase.id
-                            print(docStruct.databaseId)
-                            var remoteStruct = helper.fetchOnAPI(docStruct)
-                            expect(remoteStruct?.database?.id) == DatabaseManager.defaultDatabase.uuidString
-
-                            let newDatabase = helper.createDatabaseStruct("11111111-e0df-4eca-93e6-8778984bcd18")
-                            helper.saveDatabaseLocally(newDatabase)
-                            docStruct.databaseId = newDatabase.id
-
-                            waitUntil(timeout: .seconds(10)) { done in
-                                sut.saveDocumentStructOnAPI(docStruct) { result in
-                                    expect { try result.get() }.toNot(throwError())
-                                    expect { try result.get() } == true
-                                    done()
-                                }
+                            afterEach {
+                                // Not to leave any on the server
+                                helper.deleteDocumentStruct(remoteDocStruct)
                             }
 
-                            remoteStruct = helper.fetchOnAPI(docStruct)
-                            expect(remoteStruct?.database?.id) == newDatabase.uuidString
-                        }
+                            it("deletes the local document, fetch the remote document and saves it") {
+                                let previousNetworkCall = APIRequest.callsCount
 
-                        it("cancels previous unfinished saves") {
-                            beamHelper.disableNetworkRecording()
-                            helper.deleteAllDatabases()
-                            docStruct = helper.createDocumentStruct()
-                            docStruct = helper.saveLocally(docStruct)
+                                var updateDocumentStruct: DocumentStruct?
 
-                            let previousNetworkCall = APIRequest.callsCount
-                            let times = 10
-                            let title = docStruct.title
-                            var newTitle = title
+                                var cancellable: AnyCancellable!
+                                var callsOrder: [String] = []
 
-                            for index in 0..<times {
-                                newTitle = "\(title) - \(index)"
-                                docStruct.title = newTitle
-                                sut.saveDocumentStructOnAPI(docStruct) { result in
-                                    expect { try result.get() }.to(throwError { (error: NSError) in
-                                        expect(error.code) == NSURLErrorCancelled
-                                    })
+                                waitUntil(timeout: .seconds(10)) { done in
+                                    cancellable = sut.onDocumentChange(docStruct) { updateDocumentStructCallback in
+                                        updateDocumentStruct = updateDocumentStructCallback
+                                        expect(updateDocumentStructCallback.id) == remoteDocStruct.id
+                                        callsOrder.append("onDocumentChange")
+                                        cancellable.cancel()
+                                    }
+
+                                    docStruct.version += 1
+                                    sut.save(docStruct, true, { result in
+                                        expect { try result.get() }.toNot(throwError())
+                                        callsOrder.append("save")
+                                        done()
+                                    }, completion: nil)
                                 }
+
+                                expect(callsOrder) == ["onDocumentChange", "save"]
+                                expect(updateDocumentStruct?.id) == remoteDocStruct.id
+                                expect(APIRequest.callsCount - previousNetworkCall) == 4
+
+                                let count = Document.rawCountWithPredicate(CoreDataManager.shared.mainContext,
+                                                                           NSPredicate(format: "title = %@", docStruct.title as CVarArg))
+                                expect(count) == 1
                             }
 
-                            newTitle = "\(title) - last"
-                            waitUntil(timeout: .seconds(10)) { done in
-                                docStruct.title = newTitle
-                                sut.saveDocumentStructOnAPI(docStruct) { result in
-                                    expect { try result.get() }.toNot(throwError())
-                                    expect { try result.get() } == true
-                                    done()
+                            it("soft deletes the local document, fetch the remote document and saves it") {
+                                let previousNetworkCall = APIRequest.callsCount
+                                var updateDocumentStruct: DocumentStruct?
+                                var cancellable: AnyCancellable!
+                                var callsOrder: [String] = []
+
+                                // Force a previous save
+                                docStruct = helper.saveLocally(docStruct)
+
+                                waitUntil(timeout: .seconds(10)) { done in
+                                    cancellable = sut.onDocumentChange(docStruct) { updateDocumentStructCallback in
+                                        updateDocumentStruct = updateDocumentStructCallback
+                                        expect(updateDocumentStructCallback.id) == remoteDocStruct.id
+                                        callsOrder.append("onDocumentChange")
+                                        cancellable.cancel()
+                                    }
+
+                                    docStruct.version += 1
+                                    sut.save(docStruct, true, { result in
+                                        expect { try result.get() }.toNot(throwError())
+                                        callsOrder.append("save")
+                                        done()
+                                    }, completion: nil)
                                 }
+
+                                expect(callsOrder) == ["onDocumentChange", "save"]
+                                expect(updateDocumentStruct?.id) == remoteDocStruct.id
+                                expect(APIRequest.callsCount - previousNetworkCall) == 4
+
+                                let count = Document.rawCountWithPredicate(CoreDataManager.shared.mainContext,
+                                                                           NSPredicate(format: "title = %@", docStruct.title as CVarArg))
+                                expect(count) == 2
+
+                                let localDocument = try? Document.fetchWithId(CoreDataManager.shared.mainContext, docStruct.id)
+                                expect(localDocument?.deleted_at).to(beCloseTo(BeamDate.now, within: 1.0))
                             }
-
-                            expect(APIRequest.callsCount - previousNetworkCall) == 1
-
-                            let remoteStruct = helper.fetchOnAPI(docStruct)
-                            expect(remoteStruct?.title) == newTitle
                         }
 
-                        context("with deleted notes") {
-                            beforeEach { docStruct.deletedAt = BeamDate.now }
+                        context("with an existing local document, but non existing on the API") {
+                            beforeEach {
+                                docStruct = helper.saveLocally(docStruct)
+                            }
 
                             it("saves the document on the API") {
-                                let previousNetworkCall = APIRequest.callsCount
+                                waitUntil(timeout: .seconds(10)) { done in
+                                    sut.saveDocumentStructOnAPI(docStruct) { result in
+                                        expect { try result.get() }.toNot(throwError())
+                                        expect { try result.get() } == true
+                                        done()
+                                    }
+                                }
+
+                                let remoteStruct = helper.fetchOnAPI(docStruct)
+                                expect(remoteStruct?.id) == docStruct.uuidString
+                                expect(remoteStruct?.isPublic) == false
+                            }
+
+                            it("updates the database on the API") {
+                                helper.saveRemotely(docStruct)
+                                expect(docStruct.databaseId) == DatabaseManager.defaultDatabase.id
+                                var remoteStruct = helper.fetchOnAPI(docStruct)
+                                expect(remoteStruct?.database?.id) == DatabaseManager.defaultDatabase.uuidString
+
+                                let newDatabase = helper.createDatabaseStruct("11111111-e0df-4eca-93e6-8778984bcd18")
+                                helper.saveDatabaseLocally(newDatabase)
+                                docStruct.databaseId = newDatabase.id
 
                                 waitUntil(timeout: .seconds(10)) { done in
                                     sut.saveDocumentStructOnAPI(docStruct) { result in
@@ -1028,7 +1157,63 @@ class DocumentManagerNetworkTests: QuickSpec {
                                     }
                                 }
 
+                                remoteStruct = helper.fetchOnAPI(docStruct)
+                                expect(remoteStruct?.database?.id) == newDatabase.uuidString
+                            }
+
+                            it("cancels previous unfinished saves") {
+                                beamHelper.disableNetworkRecording()
+                                helper.deleteAllDatabases()
+                                docStruct = helper.createDocumentStruct()
+                                docStruct = helper.saveLocally(docStruct)
+
+                                let previousNetworkCall = APIRequest.callsCount
+                                let times = 10
+                                let title = docStruct.title
+                                var newTitle = title
+
+                                for index in 0..<times {
+                                    newTitle = "\(title) - \(index)"
+                                    docStruct.title = newTitle
+                                    sut.saveDocumentStructOnAPI(docStruct) { result in
+                                        expect { try result.get() }.to(throwError { (error: NSError) in
+                                            expect(error.code) == NSURLErrorCancelled
+                                        })
+                                    }
+                                }
+
+                                newTitle = "\(title) - last"
+                                waitUntil(timeout: .seconds(10)) { done in
+                                    docStruct.title = newTitle
+                                    sut.saveDocumentStructOnAPI(docStruct) { result in
+                                        expect { try result.get() }.toNot(throwError())
+                                        expect { try result.get() } == true
+                                        done()
+                                    }
+                                }
+
                                 expect(APIRequest.callsCount - previousNetworkCall) == 1
+
+                                let remoteStruct = helper.fetchOnAPI(docStruct)
+                                expect(remoteStruct?.title) == newTitle
+                            }
+
+                            context("with a local deleted document") {
+                                beforeEach { docStruct.deletedAt = BeamDate.now }
+
+                                it("saves the document on the API") {
+                                    let previousNetworkCall = APIRequest.callsCount
+
+                                    waitUntil(timeout: .seconds(10)) { done in
+                                        sut.saveDocumentStructOnAPI(docStruct) { result in
+                                            expect { try result.get() }.toNot(throwError())
+                                            expect { try result.get() } == true
+                                            done()
+                                        }
+                                    }
+
+                                    expect(APIRequest.callsCount - previousNetworkCall) == 1
+                                }
                             }
                         }
 

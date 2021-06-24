@@ -194,6 +194,10 @@ class APIRequest {
         guard let errors = result.errors, !errors.isEmpty else { return nil }
         if errors.count == 1, errors[0].message == "Differs from current checksum" {
             error = APIRequestError.documentConflict
+        } else if errors.count == 1,
+                  errors[0].path == ["attributes", "title"],
+                  errors[0].message == "Title has already been taken" {
+            error = APIRequestError.duplicateTitle
         } else {
             error = APIRequestError.apiErrors(errors)
         }

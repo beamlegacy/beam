@@ -73,7 +73,7 @@ class Document: NSManagedObject, BeamCoreDataObject {
         try context.performAndWait {
             for document in try Document.rawFetchAllWithLimit(context) {
                 Logger.shared.logDebug("title: \(document.title) database_id: \(document.database_id)",
-                                       category: .document)
+                                       category: .documentDebug)
             }
 
             Logger.shared.logDebug("About to delete \(rawCountWithPredicate(context, predicate)) documents",

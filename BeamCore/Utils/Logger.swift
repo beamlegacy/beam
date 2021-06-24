@@ -9,7 +9,14 @@ public enum LogCategory: String {
     case network
     case coredata
     case coredataDebug
+    case database
+    case databaseDebug
+    case databaseNetwork
     case document
+    case documentNotification
+    case documentNetwork
+    case documentMerge
+    case documentDebug
     case memory
     case bluetooth
     case ui
@@ -19,10 +26,6 @@ public enum LogCategory: String {
     case web
     case search
     case javascript
-    case documentMerge
-    case documentDebug
-    case database
-    case databaseDebug
     case noteEditor
     case keychain
     case encryption
@@ -43,7 +46,12 @@ public final class Logger {
     }
 
     private var subsystem = "beam"
-    private let hideCategories: [LogCategory] = [.web, .coredataDebug, .documentDebug, .commandManager]
+
+    // If you want to change this for you and uncluter your console logs, add into `.envrc.private`:
+    // export HIDE_CATEGORIES="web documentDebug javascript pointAndShoot coredataDebug"
+    // it will overwrite this `hideCategories`
+    private var hideCategories: [LogCategory] = [.web, .coredataDebug, .documentDebug, .commandManager]
+
     private let hideLumberCategories: [LogCategory] = [.documentDebug]
 
     private var ddFileLogger = DDFileLogger()
@@ -75,6 +83,10 @@ public final class Logger {
         ddFileLogger.logFileManager.maximumNumberOfLogFiles = 2
         ddFileLogger.maximumFileSize = 1024 * 1024 // 1MB
         ddFileLogger.rollingFrequency = 3600 * 24 * 7 // 1 week
+
+        if !EnvironmentVariables.hideCategories.isEmpty {
+            hideCategories = EnvironmentVariables.hideCategories
+        }
     }
 
     public var logFileData: Data {

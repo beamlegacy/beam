@@ -206,6 +206,7 @@
 		521EEDFB2593927100BA2485 /* Int+ByteSize.swift in Sources */ = {isa = PBXBuildFile; fileRef = 521EEDFA2593927100BA2485 /* Int+ByteSize.swift */; };
 		522AFB2825CBFAB100F60647 /* DocumentManagerTestsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 522AFB2725CBFAB100F60647 /* DocumentManagerTestsHelper.swift */; };
 		523416A22629D465001F306F /* BeamCoreDataObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 523416A12629D465001F306F /* BeamCoreDataObject.swift */; };
+		523A32CF267764A200606768 /* EnvironmentVariables.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52B9A38B264562E60063AEEF /* EnvironmentVariables.swift */; };
 		523FF66125C31D8800B4BD6E /* Data+String.swift in Sources */ = {isa = PBXBuildFile; fileRef = 523FF66025C31D8800B4BD6E /* Data+String.swift */; };
 		524299C725A47D2600F4DBF5 /* AppDelegate+Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524299C625A47D2600F4DBF5 /* AppDelegate+Preferences.swift */; };
 		524299E725A480A300F4DBF5 /* AccountsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524299E225A480A300F4DBF5 /* AccountsView.swift */; };
@@ -269,12 +270,12 @@
 		52B17AC7262449DA00CB4728 /* DatabaseDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52B17AC6262449DA00CB4728 /* DatabaseDetail.swift */; };
 		52B5EF78252F520100914D52 /* CoreDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52B5EF77252F520100914D52 /* CoreDataTests.swift */; };
 		52B9A370264546570063AEEF /* OauthWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52B9A36F264546570063AEEF /* OauthWindow.swift */; };
-		52B9A38C264562E60063AEEF /* EnvironmentVariables.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52B9A38B264562E60063AEEF /* EnvironmentVariables.swift */; };
 		52B9A39A264566D60063AEEF /* OauthButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52B9A399264566D60063AEEF /* OauthButton.swift */; };
 		52BB69A925CD5A49007A1173 /* OmniBarUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52BB69A825CD5A49007A1173 /* OmniBarUITests.swift */; };
 		52C3077B25C311950027C4B1 /* BeamDate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C3077A25C311950027C4B1 /* BeamDate.swift */; };
 		52C3078225C311B00027C4B1 /* BeamDateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C3078125C311B00027C4B1 /* BeamDateTests.swift */; };
 		52C3294225AC7A8E00EF11E7 /* DocumentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C3294125AC7A8E00EF11E7 /* DocumentTests.swift */; };
+		52CA917E26737CCB00DDF388 /* documents_title.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 52CA917D26737CCB00DDF388 /* documents_title.graphql */; };
 		52DD53F125F1122F004F7EC8 /* BeamExport.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 52DD53DC25F1122F004F7EC8 /* BeamExport.sqlite */; };
 		52DEF1CA252B259700561493 /* CoreDataManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52DEF1C9252B259700561493 /* CoreDataManagerTests.swift */; };
 		52DF49A625E42110009A651E /* BeamUITestsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52DF49A525E42110009A651E /* BeamUITestsHelper.swift */; };
@@ -1049,6 +1050,7 @@
 		52C3077A25C311950027C4B1 /* BeamDate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamDate.swift; sourceTree = "<group>"; };
 		52C3078125C311B00027C4B1 /* BeamDateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamDateTests.swift; sourceTree = "<group>"; };
 		52C3294125AC7A8E00EF11E7 /* DocumentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentTests.swift; sourceTree = "<group>"; };
+		52CA917D26737CCB00DDF388 /* documents_title.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = documents_title.graphql; sourceTree = "<group>"; };
 		52DD53DC25F1122F004F7EC8 /* BeamExport.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = BeamExport.sqlite; sourceTree = "<group>"; };
 		52DEF1C9252B259700561493 /* CoreDataManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataManagerTests.swift; sourceTree = "<group>"; };
 		52DF49A525E42110009A651E /* BeamUITestsHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamUITestsHelper.swift; sourceTree = "<group>"; };
@@ -1687,7 +1689,6 @@
 			children = (
 				4181713125810CDC00317ED8 /* Info.plist */,
 				41A969FE2581394300E6594B /* Configuration.swift */,
-				52B9A38B264562E60063AEEF /* EnvironmentVariables.swift */,
 				4181712B25810CDC00317ED8 /* Constants.swift */,
 				4181712D25810CDC00317ED8 /* Debug.xcconfig */,
 				4181713025810CDC00317ED8 /* Release.xcconfig */,
@@ -2208,6 +2209,7 @@
 				5260172025ADCBE800634695 /* documents.graphql */,
 				5204290A25A4B3D300DD677C /* document_updated_at.graphql */,
 				5206281725922D8A00D7CD9E /* delete_all_documents.graphql */,
+				52CA917D26737CCB00DDF388 /* documents_title.graphql */,
 			);
 			path = Documents;
 			sourceTree = "<group>";
@@ -2232,6 +2234,14 @@
 				5285672926275A8D00DDBE45 /* BeamToBeam2Migration.xcmappingmodel */,
 			);
 			path = Migrations;
+			sourceTree = "<group>";
+		};
+		523A32C72677648700606768 /* Configuration */ = {
+			isa = PBXGroup;
+			children = (
+				52B9A38B264562E60063AEEF /* EnvironmentVariables.swift */,
+			);
+			path = Configuration;
 			sourceTree = "<group>";
 		};
 		524299CC25A47EA900F4DBF5 /* Preferences */ = {
@@ -2700,6 +2710,7 @@
 		96319C9C261614CB00D1CF31 /* BeamCore */ = {
 			isa = PBXGroup;
 			children = (
+				523A32C72677648700606768 /* Configuration */,
 				DA63D511267CF0A000D7C756 /* Frecency */,
 				96319C91261614C000D1CF31 /* BeamCore.h */,
 				96319D122616232600D1CF31 /* Info.plist */,
@@ -3190,9 +3201,11 @@
 			buildConfigurationList = 96319D262616232700D1CF31 /* Build configuration list for PBXNativeTarget "BeamCore" */;
 			buildPhases = (
 				96319D0A2616232600D1CF31 /* Headers */,
+				523A32DC26776D0400606768 /* Variable env injector */,
 				96319D0B2616232600D1CF31 /* Sources */,
 				96319D0C2616232600D1CF31 /* Frameworks */,
 				96319D0D2616232600D1CF31 /* Resources */,
+				523A32DD26776D3000606768 /* Clean Variable env injector */,
 			);
 			buildRules = (
 			);
@@ -3238,9 +3251,7 @@
 			buildPhases = (
 				5205F34425BB1BFE00D3CDB4 /* Build libgit2 */,
 				521ED51025B9E43F00FBFA99 /* SwiftLint */,
-				520582C0257E351800E0533A /* Env variable Injector */,
 				965A78212514F147009980D4 /* Sources */,
-				520DDA94257E4CEE00FF8152 /* Clean Configuration.swift from variable Injector */,
 				965A78222514F147009980D4 /* Frameworks */,
 				0274A217261212DC00DA35CE /* Build Web */,
 				965A78232514F147009980D4 /* Resources */,
@@ -3535,6 +3546,7 @@
 				BAA6792F5CF42C0D8FEC2A9B /* WebEvents.ts in Resources */,
 				52FB84E42638124A0085A444 /* update_documents.graphql in Resources */,
 				BAA6704409BDC8AB92E95F8D /* WebEventsUI_native.ts in Resources */,
+				52CA917E26737CCB00DDF388 /* documents_title.graphql in Resources */,
 				BAA67B13B4EBCFF2D7A94F93 /* WebEventsUI_web.ts in Resources */,
 				BAA67EC2B781F8A78CD5A6B0 /* Beam.scss in Resources */,
 				BAA67A1DD75801D8B25037E9 /* BeamTypes.ts in Resources */,
@@ -3621,25 +3633,6 @@
 			shellPath = /bin/sh;
 			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nscripts/codesign-xpc-autoupdate.sh\n";
 		};
-		520582C0257E351800E0533A /* Env variable Injector */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 12;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = "Env variable Injector";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "if [ $ENABLE_PREVIEWS == \"NO\" ]\nthen\n    # your code to execute here\n    PATH=${PATH}:/opt/homebrew/bin\n    direnv allow ..\n    eval \"$(direnv export bash)\"\n\n    git checkout ${SRCROOT}/Beam/Configuration/EnvironmentVariables.swift\n\n    if which variable-injector >/dev/null; then\n      variable-injector --file ${SRCROOT}/Beam/Configuration/EnvironmentVariables.swift # --verbose # Pass your paramenters\n    else\n      echo \"Warning: Swift Variable Injector not installed, download from https://github.com/penso/variable-injector\"\n      exit 1\n    fi\n\nelse\n  echo \"Skipping the script because of SwiftUI preview mode\"\nfi\n";
-			showEnvVarsInLog = 0;
-		};
 		5205F34425BB1BFE00D3CDB4 /* Build libgit2 */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 12;
@@ -3657,25 +3650,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "./scripts/build_libgit2.sh\n";
-		};
-		520DDA94257E4CEE00FF8152 /* Clean Configuration.swift from variable Injector */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 12;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = "Clean Configuration.swift from variable Injector";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "git checkout ${SRCROOT}/Beam/Configuration/EnvironmentVariables.swift\n";
-			showEnvVarsInLog = 0;
 		};
 		521ED51025B9E43F00FBFA99 /* SwiftLint */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -3713,6 +3687,42 @@
 			shellPath = /bin/sh;
 			shellScript = "if [ \"$(ls -A ${SRCROOT}/BeamTests/Vinyl/ | grep -v .gitignore)\" ]; then\n    echo \"$(ls -A ${SRCROOT}/BeamTests/Vinyl/ | grep -v .gitignore)\"\n    echo \"Copying ${SRCROOT}/BeamTests/Vinyl/* to ${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam\"\n    mkdir -p ${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Logs/Beam/Vinyl/${CI_JOB_ID}/\n    cp -r ${SRCROOT}/BeamTests/Vinyl/* ${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Logs/Beam/Vinyl/${CI_JOB_ID}/\nfi\n";
 		};
+		523A32DC26776D0400606768 /* Variable env injector */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Variable env injector";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ $ENABLE_PREVIEWS == \"NO\" ]\nthen\n    # your code to execute here\n    PATH=${PATH}:/opt/homebrew/bin\n    direnv allow ..\n    eval \"$(direnv export bash)\"\n\n    git checkout ${SRCROOT}/BeamCore/Configuration/EnvironmentVariables.swift\n\n    if which variable-injector >/dev/null; then\n      variable-injector --file ${SRCROOT}/BeamCore/Configuration/EnvironmentVariables.swift # --verbose # Pass your paramenters\n    else\n      echo \"Warning: Swift Variable Injector not installed, download from https://github.com/penso/variable-injector\"\n      exit 1\n    fi\n\nelse\n  echo \"Skipping the script because of SwiftUI preview mode\"\nfi\n";
+		};
+		523A32DD26776D3000606768 /* Clean Variable env injector */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Clean Variable env injector";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "git checkout ${SRCROOT}/BeamCore/Configuration/EnvironmentVariables.swift\n";
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -3728,6 +3738,7 @@
 				96319D442616233E00D1CF31 /* RWLock.swift in Sources */,
 				DAA60C232666893300C927E5 /* SessionLinkRanker.swift in Sources */,
 				96319D472616233E00D1CF31 /* String+Data.swift in Sources */,
+				523A32CF267764A200606768 /* EnvironmentVariables.swift in Sources */,
 				9609AF502617159B00322141 /* URL+Beam.swift in Sources */,
 				96319D3D2616233E00D1CF31 /* BeamText+String.swift in Sources */,
 				96319D372616233E00D1CF31 /* String+LoremIpsum.swift in Sources */,
@@ -4094,7 +4105,6 @@
 				961EC58625B7A75A009FA322 /* LinkManager.swift in Sources */,
 				9661A587266980AF00CB56B3 /* BidirectionalPopoverBlockItem.swift in Sources */,
 				032562A626051D3B006513E4 /* RBFilterManager.m in Sources */,
-				52B9A38C264562E60063AEEF /* EnvironmentVariables.swift in Sources */,
 				418172372581107C00317ED8 /* TextEditOperations.swift in Sources */,
 				52E2528826175F1C00E54C45 /* DatabaseAPIType.swift in Sources */,
 				A0A84FEB26381B64008F0326 /* OtherPasswordsModal.swift in Sources */,
