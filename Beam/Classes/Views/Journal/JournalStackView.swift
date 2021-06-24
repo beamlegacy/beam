@@ -56,11 +56,14 @@ class JournalStackView: NSView {
         let textEditViews = self.subviews.compactMap { $0 as? BeamTextEdit }
         var lastViewHeight: CGFloat = .zero
         for (idx, textEdit) in textEditViews.enumerated() {
-            textEdit.invalidate()
+            var newFrame = textEdit.frame
             if idx != 0 {
-                textEdit.frame.origin = CGPoint(x: 0, y: lastViewHeight)
+                newFrame.origin = CGPoint(x: 0, y: lastViewHeight)
             }
-            textEdit.frame.size = NSSize(width: self.frame.width, height: textEdit.intrinsicContentSize.height)
+            newFrame.size = NSSize(width: self.frame.width, height: textEdit.intrinsicContentSize.height)
+            textEdit.frame = newFrame
+            textEdit.relayoutRoot()
+
             if idx == 0 {
                 lastViewHeight = topOffset + textEdit.intrinsicContentSize.height + horizontalSpace + bottomInset
             } else {

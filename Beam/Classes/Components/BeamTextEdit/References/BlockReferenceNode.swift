@@ -24,9 +24,8 @@ class BlockReferenceNode: TextNode {
     }
 
     static let lockButtonName = "lock"
+
     func setup() {
-        textPaddingHorizontal = 6
-        textPaddingVertical = 0
         readOnly = true
         var refNoteId: UUID
         var refElementId: UUID
@@ -84,6 +83,10 @@ class BlockReferenceNode: TextNode {
         }
 
         return l
+    }
+
+    override func textPadding(elementKind: ElementKind) -> NSEdgeInsets {
+        NSEdgeInsets(top: 0, left: 6, bottom: 0, right: 6)
     }
 
     override func onFocus() {

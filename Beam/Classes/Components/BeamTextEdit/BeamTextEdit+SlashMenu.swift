@@ -16,6 +16,7 @@ extension BeamTextEdit {
         case h1
         case h2
         case text
+        case task
         case divider
 
         // Text Formatters
@@ -63,6 +64,7 @@ extension BeamTextEdit {
               let initialRange = formatterTargetRange,
               initialRange.lowerBound <= node.cursorPosition
               else { return }
+        showOrHideInlineFormatter(isPresent: false)
 
         showOrHideInlineFormatter(isPresent: false)
         node.cmdManager.beginGroup(with: "Slash Menu Formatting")
@@ -91,6 +93,7 @@ extension BeamTextEdit {
         }
         return [
             ContextMenuItem(title: "Card Reference", subtitle: "@ or [[", icon: "field-card", action: { action(.internalLink) }),
+            ContextMenuItem(title: "Task", subtitle: "-[]", icon: "editor-task", action: { action(.task) }),
             ContextMenuItem(title: "Quote", subtitle: "\"", icon: "editor-format_quote", action: { action(.quote) }),
             ContextMenuItem.separator(),
             ContextMenuItem(title: "Bold", subtitle: "*", action: { action(.bold) }),
@@ -125,6 +128,8 @@ extension BeamTextEdit {
             elementKind = .heading(2)
         case .quote:
             elementKind = .quote(1, node.text.text, node.text.text)
+        case .task:
+            elementKind = .check(false)
         case .text:
             elementKind = .bullet
             attribute = .none

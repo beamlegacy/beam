@@ -122,7 +122,7 @@ class CommandNodeTests: QuickSpec {
                 it("inserts a node on a not intented tree") {
                     rootNode.focusedWidget = rootNode.children[1]
                     rootNode.cursorPosition = 0
-                    editor.pressEnter(false, false, false)
+                    editor.pressEnter(false, false, false, false)
                     rootNode.focusedWidget = rootNode.children[1]
 
                     rootNode.insertText(string: "Coucou", replacementRange: rootNode.selectedTextRange)
@@ -141,7 +141,7 @@ class CommandNodeTests: QuickSpec {
                     expect(rootNode.printTree()).to(equal(tree))
 
                     rootNode.cursorPosition = 6
-                    editor.pressEnter(false, false, false)
+                    editor.pressEnter(false, false, false, false)
 
                     insertedTree = """
                     TestCommands
@@ -155,7 +155,7 @@ class CommandNodeTests: QuickSpec {
                     expect(rootNode.printTree()).to(equal(tree))
 
                     rootNode.cursorPosition = 13
-                    editor.pressEnter(false, false, false)
+                    editor.pressEnter(false, false, false, false)
                     rootNode.focusedWidget = rootNode.children[2]
 
                     rootNode.insertText(string: "Coucou", replacementRange: rootNode.selectedTextRange)

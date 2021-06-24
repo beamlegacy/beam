@@ -85,4 +85,20 @@ class ParserTests: XCTestCase {
 //        let AST = parser.parseAST()
 //        Logger.shared.logDebug("AST: \(AST.treeString)")
 //    }
+
+    func testParserTask() {
+        let string = "- [x]Test of checked task\n- [ ]Test of unchecked task"
+        let parser = Parser(inputString: string)
+        let AST = parser.parseAST()
+        let expectedResult = """
+        Node[text("")]
+            Node[check(true)]
+                Node[text("Test of checked task")]
+            Node[text("\\n")]
+            Node[check(false)]
+                Node[text("Test of unchecked task")]
+
+        """
+        expect(AST.treeString).to(equal(expectedResult))
+    }
 }

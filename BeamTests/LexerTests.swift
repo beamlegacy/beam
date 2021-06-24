@@ -159,4 +159,26 @@ class LexerTests: XCTestCase {
             XCTAssertEqual(e.1, token.type)
         }
     }
+
+    func testLexer7() {
+        let string1 = "- [x] Test"
+        let lexer = Lexer(inputString: string1)
+
+        let results: [(String, Lexer.TokenType)] = [
+            ("- [", .CheckStart),
+            ("x", .Text),
+            ("]", .CloseSBracket),
+            (" ", .Blank),
+            ("Test", .Text),
+            ("", .EndOfFile)
+        ]
+
+        for e in results {
+            let token = lexer.nextToken()
+            //            Logger.shared.logDebug("new token: \(token)")
+            XCTAssertEqual(e.0, token.string)
+            XCTAssertEqual(e.1, token.type)
+        }
+        
+    }
 }

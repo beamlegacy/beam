@@ -21,7 +21,6 @@ public class TextNode: ElementNode {
     var lastHoverMouseInfo: MouseInfo?
     var interlineFactor = CGFloat(1.3)
     var interNodeSpacing = CGFloat(0)
-    override var indent: CGFloat { selfVisible ? 18 : 0 }
     var fontSize: CGFloat = 15
 
     private var isCursorInsideUneditableRange = false
@@ -169,6 +168,13 @@ public class TextNode: ElementNode {
 
         setAccessibilityLabel("TextNode")
         setAccessibilityRole(.textArea)
+
+        switch elementKind {
+        case .check:
+            textPadding = NSEdgeInsets(top: 0, left: 20, bottom: 0, right: 0)
+        default:
+            textPadding = NSEdgeInsetsZero
+        }
     }
 
     // MARK: - Setup UI
@@ -176,7 +182,7 @@ public class TextNode: ElementNode {
     override public func draw(in context: CGContext) {
         updateRendering()
 
-//        drawDebug(in: context)
+        drawDebug(in: context)
         updateSelection()
         updateCursor()
         updateDecorations()
@@ -233,20 +239,31 @@ public class TextNode: ElementNode {
             _attributedString = nil
             return
         }
-        if updateAttributedString() || elementText.isEmpty {
+        let newPadding = textPadding(elementKind: elementKind)
+        if updateAttributedString() || elementText.isEmpty || !NSEdgeInsetsEqual(textPadding, newPadding) {
+            textPadding = newPadding
             updateTextFrame()
             invalidateRendering()
         }
     }
 
-    var textPaddingHorizontal = CGFloat(0)
-    var textPaddingVertical = CGFloat(0)
+    private(set) var textPadding = NSEdgeInsetsZero
+
+    func textPadding(elementKind: ElementKind) -> NSEdgeInsets {
+        switch elementKind {
+        case .check:
+            return NSEdgeInsets(top: 0, left: 10, bottom: 0, right: 0)
+        default:
+            return NSEdgeInsetsZero
+        }
+    }
 
     func updateTextFrame() {
         if selfVisible {
             emptyTextFrame = nil
             let attrStr = attributedString
-            let textFrame = TextFrame.create(string: attrStr, atPosition: NSPoint(x: indent + textPaddingHorizontal, y: textPaddingVertical), textWidth: availableWidth - indent - textPaddingHorizontal * 3)
+            let width = availableWidth - indent - textPadding.left - textPadding.right
+            let textFrame = TextFrame.create(string: attrStr, atPosition: NSPoint(x: indent + textPadding.left, y: textPadding.top), textWidth: width)
             self.textFrame = textFrame
             let layerTree = textFrame.layerTree
             let textLayer = Layer(name: "text", layer: layerTree)
@@ -254,7 +271,7 @@ public class TextNode: ElementNode {
 
             if attrStr.string.isEmpty {
                 let dummyText = buildAttributedString(for: BeamText(text: "Dummy!"))
-                let fakelayout = TextFrame.create(string: dummyText, atPosition: NSPoint(x: indent, y: 0), textWidth: availableWidth - indent)
+                let fakelayout = TextFrame.create(string: dummyText, atPosition: NSPoint(x: indent + textPadding.left, y: textPadding.top), textWidth: width)
 
                 self.emptyTextFrame = fakelayout
             }
@@ -358,25 +375,27 @@ public class TextNode: ElementNode {
         guard availableWidth > 0 else { return }
 
         if invalidatedRendering {
-            contentsFrame = NSRect()
+            var r = CGRect.zero
 
             if selfVisible {
-                contentsFrame = textRect.insetBy(dx: -textPaddingHorizontal, dy: -textPaddingVertical)
+                r = textRect
+                r.origin.y += textPadding.top
+                r.origin.x -= textPadding.left
 
                 if self as? TextRoot == nil {
                     switch elementKind {
-                        case .heading(1):
-                            contentsFrame.size.height += 8
-                        case .heading(2):
-                            contentsFrame.size.height += 4
-                        default:
-                            contentsFrame.size.height -= 5
+                    case .heading(1):
+                        r.size.height += 8
+                    case .heading(2):
+                        r.size.height += 4
+                    default:
+                        r.size.height -= 5
                     }
                 }
             }
 
-            contentsFrame.size.width = availableWidth
-            contentsFrame = contentsFrame.rounded()
+            r.size.width = availableWidth - textPadding.left - textPadding.right
+            contentsFrame = r.rounded()
 
             invalidatedRendering = false
         }
@@ -665,7 +684,7 @@ public class TextNode: ElementNode {
 
     public func lineAt(point: NSPoint) -> Int {
         guard let textFrame = textFrame, !textFrame.lines.isEmpty else { return 0 }
-        let point = CGPoint(x: point.x - textPaddingHorizontal, y: point.y - textPaddingVertical)
+        let point = CGPoint(x: point.x - textPadding.left, y: point.y - textPadding.top)
         let y = point.y
         if y >= contentsFrame.height {
             let v = textFrame.lines.count - 1
@@ -756,7 +775,7 @@ public class TextNode: ElementNode {
     public func indexAt(point: NSPoint, limitToTextString: Bool = true) -> Int? {
         guard let textFrame = textFrame else { return nil }
         guard !textFrame.lines.isEmpty else { return nil }
-        let point = CGPoint(x: point.x - textPaddingHorizontal, y: point.y - textPaddingVertical)
+        let point = CGPoint(x: point.x - textPadding.left, y: point.y - textPadding.top)
         let line = lineAt(point: point)
         guard line >= 0 else { return nil }
         let l = textFrame.lines[line]
@@ -770,21 +789,21 @@ public class TextNode: ElementNode {
     }
 
     public func offsetAt(caretIndex: Int) -> CGFloat {
-        guard let textFrame = emptyTextFrame ?? self.textFrame else { return textPaddingHorizontal }
+        guard let textFrame = emptyTextFrame ?? self.textFrame else { return textPadding.left }
         guard !textFrame.lines.isEmpty else { return 0 }
         let caret = textFrame.carets[caretIndex]
-        return caret.offset.x + textPaddingHorizontal
+        return caret.offset.x + textPadding.left
     }
 
     override public func offsetAt(index: Int) -> CGFloat {
-        guard let textFrame = emptyTextFrame ?? self.textFrame else { return textPaddingHorizontal }
-        guard !textFrame.lines.isEmpty else { return textPaddingHorizontal }
+        guard let textFrame = emptyTextFrame ?? self.textFrame else { return textPadding.left }
+        guard !textFrame.lines.isEmpty else { return textPadding.left }
         let displayIndex = displayIndexFor(sourceIndex: index)
-        guard let line = lineAt(index: displayIndex) else { return textPaddingHorizontal }
+        guard let line = lineAt(index: displayIndex) else { return textPadding.left }
         let textLine = textFrame.lines[line]
         let positionInLine = displayIndex
         let result = textLine.offsetFor(index: positionInLine)
-        return CGFloat(result) + textPaddingHorizontal
+        return CGFloat(result) + textPadding.left
     }
 
     public func offsetAndFrameAt(index: Int) -> (CGFloat, NSRect) {
@@ -876,7 +895,7 @@ public class TextNode: ElementNode {
         }()
 
         let x1 = caret.offset.x
-        let cursorRect = NSRect(x: x1 + textPaddingHorizontal, y: textLine.frame.minY + textPaddingVertical, width: position == text.count ? bigCursorWidth : smallCursorWidth, height: textLine.bounds.height)
+        let cursorRect = NSRect(x: x1 + textPadding.left, y: textLine.frame.minY + textPadding.top, width: position == text.count ? bigCursorWidth : smallCursorWidth, height: textLine.bounds.height)
 
         return cursorRect
     }
@@ -918,10 +937,10 @@ public class TextNode: ElementNode {
         }) else { return nil }
 
         switch range.attributes[linkAttribIndex] {
-            case .link(let link):
-                return URL(string: link)
-            default:
-                return nil
+        case .link(let link):
+            return URL(string: link)
+        default:
+            return nil
         }
     }
 
@@ -934,10 +953,10 @@ public class TextNode: ElementNode {
         guard let range = internalLinkRangeAt(index: index) else { return nil }
         for attr in range.attributes {
             switch attr {
-                case .internalLink(let value):
-                    return value
-                default:
-                    continue
+            case .internalLink(let value):
+                return value
+            default:
+                continue
             }
         }
         return nil
@@ -1278,7 +1297,7 @@ public class TextNode: ElementNode {
     }
 
     var initialCaret: Caret {
-        Caret(offset: NSPoint(x: indent, y: 0), indexInSource: 0, indexOnScreen: 0, edge: .leading, inSource: true, line: 0)
+        Caret(offset: NSPoint(x: indent + textPadding.left, y: textPadding.top), indexInSource: 0, indexOnScreen: 0, edge: .leading, inSource: true, line: 0)
     }
 
     override public var textCount: Int {

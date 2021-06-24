@@ -59,9 +59,22 @@ extension BeamTextEdit {
                         self.showBidirectionalPopover(mode: .internalLink, prefix: 2, suffix: 2)
                         return true
                     }
+                } else if pos == 0 && left == " " {
+                    insertPair("[", "]")
+                    return false
                 }
-                insertPair("[", "]")
-                return false
+                return true
+            },
+            "]": { [unowned self] in
+                guard node.text.count >= 2, popover == nil else { return true }
+                let startRange = 0..<2
+                let substr = node.text.extract(range: startRange)
+                if substr.text == "-[" {
+                    rootNode.cmdManager.deleteText(in: node, for: startRange)
+                    rootNode.cmdManager.formatText(in: node, for: .check(false), with: nil, for: nil, isActive: false)
+                    return false
+                }
+                return true
             },
             "(": { [unowned self] in
                 guard popover == nil else { return false }

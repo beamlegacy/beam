@@ -17,6 +17,7 @@ public enum ElementKind: Codable, Equatable {
     case bullet
     case heading(Int)
     case quote(Int, String, String)
+    case check(Bool)
     case code
     case image(String)
     case embed(String)
@@ -27,6 +28,7 @@ public enum ElementKind: Codable, Equatable {
         case level
         case source
         case title
+        case value
     }
 
     public var rawValue: String {
@@ -37,6 +39,8 @@ public enum ElementKind: Codable, Equatable {
             return "heading \(level)"
         case .quote:
             return "quote"
+        case .check(let checked):
+            return "check \(checked)"
         case .code:
             return "code"
         case .image(let source):
@@ -61,6 +65,8 @@ public enum ElementKind: Codable, Equatable {
             self = .quote(try container.decode(Int.self, forKey: .level),
                             try container.decode(String.self, forKey: .source),
                             try container.decode(String.self, forKey: .title))
+        case "check":
+            self = .check(try container.decode(Bool.self, forKey: .value))
         case "code":
             self = .code
 
@@ -92,6 +98,9 @@ public enum ElementKind: Codable, Equatable {
             try container.encode(level, forKey: .level)
             try container.encode(source, forKey: .source)
             try container.encode(title, forKey: .title)
+        case let .check(checked):
+            try container.encode("check", forKey: .type)
+            try container.encode(checked, forKey: .value)
         case .code:
             try container.encode("code", forKey: .type)
         case let .image(source):
