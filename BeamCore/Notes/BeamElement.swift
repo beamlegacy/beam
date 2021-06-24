@@ -281,11 +281,11 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
         }
 
         if let selectedElements = selectedElements {
-            removeUnselectedElementsFromTree(selectedElements: selectedElements)
+            newElement.removeUnselectedElementsFromTree(selectedElements: selectedElements)
         }
 
         if withNewId {
-            deepChangeId()
+            newElement.deepChangeId()
         }
 
         return newElement
