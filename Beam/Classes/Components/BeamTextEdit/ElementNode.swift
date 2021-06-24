@@ -158,7 +158,7 @@ public class ElementNode: Widget {
     private var icon = NSImage(named: "editor-cmdreturn")
 
     private let debounceClickInterval = 0.23
-    private var bulletLayerPositionX = CGFloat(14)
+
     private var actionLayerPadding = CGFloat(3.5)
 
     public static func == (lhs: ElementNode, rhs: ElementNode) -> Bool {
@@ -182,16 +182,13 @@ public class ElementNode: Widget {
 
         super.init(parent: parent, nodeProvider: nodeProvider)
 
-        addDisclosureLayer(at: NSPoint(x: bulletLayerPositionX, y: isHeader ? firstLineBaseline - 8 : firstLineBaseline - 14))
-        addBulletPointLayer(at: NSPoint(x: bulletLayerPositionX, y: isHeader ? firstLineBaseline - 8 : firstLineBaseline - 14))
+        createElementLayers()
 
         displayedElement.$children
             .sink { [unowned self] elements in
                 guard self.parent != nil else { return }
                 updateTextChildren(elements: elements)
             }.store(in: &scope)
-
-        createIndentLayer()
 
         subscribeToElement(element)
 
@@ -204,15 +201,12 @@ public class ElementNode: Widget {
 
         super.init(editor: editor, nodeProvider: nodeProvider)
 
-        addDisclosureLayer(at: NSPoint(x: bulletLayerPositionX, y: isHeader ? firstLineBaseline - 8 : firstLineBaseline - 13))
-        addBulletPointLayer(at: NSPoint(x: bulletLayerPositionX, y: isHeader ? firstLineBaseline - 8 : firstLineBaseline - 13))
+        createElementLayers()
 
         displayedElement.$children
             .sink { [unowned self] elements in
                 updateTextChildren(elements: elements)
             }.store(in: &scope)
-
-        createIndentLayer()
 
         subscribeToElement(element)
 
@@ -234,59 +228,11 @@ public class ElementNode: Widget {
         }
     }
 
-    func createIndentLayer() {
-        let indentLayer = CALayer()
-        indentLayer.backgroundColor = BeamColor.Editor.indentBackground.cgColor
-        indentLayer.enableAnimations = false
-        addLayer(Layer(name: "indentLayer", layer: indentLayer))
-        updateIndentLayer()
-    }
-
-    func updateElementLayers() {
-        updateBulletAndDisclosureLayers()
-        updateIndentLayer()
-    }
-
-    func updateBulletAndDisclosureLayers() {
-        guard let bulletLayer = self.layers["bullet"] else { return }
-        guard let disclosureLayer = self.layers["disclosure"] as? ChevronButton else { return }
-
-        if showDisclosureButton {
-            bulletLayer.layer.isHidden = true
-            disclosureLayer.layer.isHidden = false
-        } else {
-            bulletLayer.layer.isHidden = false
-            disclosureLayer.layer.isHidden = true
-        }
-    }
-
-    func updateIndentLayer() {
-        guard let indentLayer = layers["indentLayer"] else { return }
-        let y = firstLineHeight + 8
-        indentLayer.frame = NSRect(x: childInset + 4.5, y: y - 5, width: 1, height: frame.height - y - 5)
-        indentLayer.layer.isHidden = children.isEmpty || !open
-    }
-
     func deepInvalidateText() {
         for c in children {
             guard let c = c as? ElementNode else { continue }
             c.deepInvalidateText()
         }
-    }
-
-    func addDisclosureLayer(at point: NSPoint) {
-        let disclosureLayer = ChevronButton("disclosure", open: open, changed: { [unowned self] value in
-            self.open = value
-            layers["indentLayer"]?.layer.isHidden = !value
-        })
-        disclosureLayer.layer.isHidden = true
-        addLayer(disclosureLayer, origin: point)
-    }
-
-    func addBulletPointLayer(at point: NSPoint) {
-        let bulletLayer = Layer(name: "bullet", layer: Layer.icon(named: "editor-bullet", color: BeamColor.Editor.bullet.nsColor))
-        bulletLayer.layer.isHidden = true
-        addLayer(bulletLayer, origin: point)
     }
 
     // MARK: - Methods ElementNode

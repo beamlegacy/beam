@@ -532,12 +532,14 @@ public extension CALayer {
     }
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
-    func pressEnter(_ option: Bool, _ command: Bool, _ shift: Bool) {
+    func pressEnter(_ option: Bool, _ command: Bool, _ shift: Bool, _ ctrl: Bool) {
         guard let node = focusedWidget as? ElementNode else { return }
 
         if option || shift {
             rootNode.insertNewline()
             hideInlineFormatter()
+        } else if ctrl, let textNode = node as? TextNode, case let .check(checked) = node.elementKind {
+            cmdManager.formatText(in: textNode, for: .check(!checked), with: nil, for: nil, isActive: false)
         } else if let popover = popover {
             popover.selectItem()
             return
@@ -1343,13 +1345,6 @@ public extension CALayer {
         }
     }
 
-    override public func insertNewline(_ sender: Any?) {
-        let shift = NSEvent.modifierFlags.contains(.shift)
-        let option = NSEvent.modifierFlags.contains(.option)
-        let command = NSEvent.modifierFlags.contains(.command)
-        pressEnter(option, command, shift)
-    }
-
 //    override public func scrollPageUp(_ sender: Any?) {
 //    }
 //
@@ -1402,6 +1397,19 @@ public extension CALayer {
         rootNode.decreaseIndentation()
     }
 
+    override public func insertNewline(_ sender: Any?) {
+        let shift = NSEvent.modifierFlags.contains(.shift)
+        let option = NSEvent.modifierFlags.contains(.option)
+        let command = NSEvent.modifierFlags.contains(.command)
+        let control = NSEvent.modifierFlags.contains(.control)
+        pressEnter(option, command, shift, control)
+    }
+
+    override public func insertLineBreak(_ sender: Any?) {
+        let control = true
+        pressEnter(false, false, false, control)
+    }
+
 //    override public func insertParagraphSeparator(_ sender: Any?) {
 //    }
 //
@@ -1422,6 +1430,7 @@ public extension CALayer {
 //
 //    override public func insertDoubleQuoteIgnoringSubstitution(_ sender: Any?) {
 //    }
+
 
         /* Case changes */
 

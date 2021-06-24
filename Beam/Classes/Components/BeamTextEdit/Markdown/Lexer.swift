@@ -19,6 +19,8 @@ class Lexer {
         case OpenSBracket
         case CloseSBracket
         case Hash
+        case CheckStart
+        case CheckFilled
 
         case Blank
 
@@ -291,6 +293,8 @@ class Lexer {
         addTokenPattern("}", .CloseBracket)
 
         addTokenPattern("\n", .NewLine)
+
+        addTokenPattern("- [", .CheckStart)
 
         setValidInBlank(" \t")
     }

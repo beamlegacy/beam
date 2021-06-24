@@ -10,6 +10,7 @@ disabled_rules:
   - todo
   - comment_spacing
   - superfluous_disable_command
+  - legacy_nsgeometry_functions
 
 # configurable rules can be customized from this configuration file
 # binary rules can set their severity level

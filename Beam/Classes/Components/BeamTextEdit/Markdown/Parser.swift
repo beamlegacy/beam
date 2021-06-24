@@ -22,6 +22,7 @@ class Parser {
         case embed
         case quote(Int)
         case newLine
+        case check(Bool)
 
         var asInt: Int {
             switch self {
@@ -34,6 +35,7 @@ class Parser {
             case .embed: return 6
             case .quote: return 7
             case .newLine: return 8
+            case .check: return 9
             }
         }
     }
@@ -91,6 +93,7 @@ class Parser {
             case text
             case link
             case level
+            case value
             case children
             case prefix
             case suffix
@@ -124,6 +127,8 @@ class Parser {
                 type = .quote(try container.decode(Int.self, forKey: .level))
             case NodeType.newLine.asInt:
                 type = .newLine
+            case NodeType.check(false).asInt:
+                type = .check(try container.decode(Bool.self, forKey: .value))
 
             default:
                 fatalError("Unexpected Parser.NodeType \(typeIndex)")
@@ -156,6 +161,8 @@ class Parser {
                 try container.encode(level, forKey: .level)
             case let .quote(level):
                 try container.encode(level, forKey: .level)
+            case let .check(value):
+                try container.encode(value, forKey: .value)
 
             default:
                 break
@@ -237,6 +244,8 @@ class Parser {
                 return p.enclosingSyntaxNode
             case .newLine:
                 return self
+            case .check:
+                return p.enclosingSyntaxNode
             }
         }
     }
@@ -522,6 +531,31 @@ class Parser {
         }
     }
 
+    private func parseCheck(_ context: ASTContext) {
+        let startToken = context.token
+
+        context.nextToken()
+        let checked = context.token.string == "x"
+
+        context.nextToken()
+        guard context.token.type == .CloseSBracket else {
+            appendTextNode(context, startToken.string, startToken.start)
+            return
+        }
+        let check = Node(type: .check(checked), startToken.start)
+        check.decorations[.prefix] = startToken
+
+        context.append(node: check)
+        context.push(node: check); defer { context.pop() }
+
+        context.nextToken()
+
+        // accumulate nodes until the end of the line:
+        while context.token.type != .NewLine && !context.isDone {
+            parseToken(context)
+        }
+    }
+
     private func parseQuote(_ context: ASTContext) {
         parseLineStarter(context, tokenType: .Quote, limit: nil) { level in
             return .quote(level)
@@ -593,6 +627,13 @@ class Parser {
 
         case .NewLine:
             parseTokenAsText(context)
+
+        case .CheckStart:
+            if context.atStartOfLine {
+                parseCheck(context)
+            } else {
+                parseTokenAsText(context)
+            }
 
         default:
             parseTokenAsText(context)
