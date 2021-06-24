@@ -286,7 +286,7 @@ import Promises
     var backListSize = 0
 
     private func setupObservers() {
-        Logger.shared.logDebug("setupObservers")
+        Logger.shared.logDebug("setupObservers", category: .javascript)
         webView.publisher(for: \.title).sink { [unowned self] value in
             self.receivedWebviewTitle(value)
         }.store(in: &scope)

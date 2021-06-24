@@ -117,22 +117,23 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             switch result {
             case .failure(let error):
                 Logger.shared.logError("Couldn't sync databases: \(error.localizedDescription)",
-                                       category: .document)
+                                       category: .database)
             case .success(let success):
-                if !success {
-                    Logger.shared.logError("Couldn't sync databases",
-                                           category: .document)
-                } else {
-                    self.documentManager.syncAll { result in
-                        switch result {
-                        case .failure(let error):
-                            Logger.shared.logError("Couldn't sync documents: \(error.localizedDescription)",
+                guard success == true else {
+                    Logger.shared.logError("Couldn't sync databases but no error",
+                                           category: .database)
+                    return
+                }
+
+                self.documentManager.syncAll { result in
+                    switch result {
+                    case .failure(let error):
+                        Logger.shared.logError("Couldn't sync documents: \(error.localizedDescription)",
+                                               category: .document)
+                    case .success(let success):
+                        if !success {
+                            Logger.shared.logError("Couldn't sync documents but no error",
                                                    category: .document)
-                        case .success(let success):
-                            if !success {
-                                Logger.shared.logError("Couldn't sync documents",
-                                                       category: .document)
-                            }
                         }
                     }
                 }

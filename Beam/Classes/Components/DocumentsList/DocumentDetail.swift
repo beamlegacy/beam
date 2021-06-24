@@ -68,6 +68,11 @@ struct DocumentDetail: View {
                                 Text(document.is_public ? "Yes" : "No")
                                 Spacer()
                             }
+                            HStack {
+                                Text("Version:").bold()
+                                Text("\(document.version)")
+                                Spacer()
+                            }
                         }
 
                         Divider()
@@ -76,7 +81,7 @@ struct DocumentDetail: View {
 
                         HStack(alignment: .top) {
                             VStack(alignment: HorizontalAlignment.leading) {
-                                Text(document.data?.MD5 ?? "No MD5")
+                                Text(document.data?.MD5.uppercased() ?? "No MD5")
                                     .font(.caption)
                                     .fontWeight(.light)
                                     .background(Color.white)
@@ -88,7 +93,7 @@ struct DocumentDetail: View {
                             Spacer()
 
                             VStack(alignment: HorizontalAlignment.leading) {
-                                Text(document.beam_api_checksum ?? "No MD5")
+                                Text(document.beam_api_checksum?.uppercased() ?? "No MD5")
                                     .font(.caption)
                                     .fontWeight(.light)
                                     .background(Color.white)
@@ -117,7 +122,7 @@ struct DocumentDetail: View {
     }
 
     private func refresh() {
-        let timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { _ in
+        let timer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { _ in
             refreshing = true
         }
 

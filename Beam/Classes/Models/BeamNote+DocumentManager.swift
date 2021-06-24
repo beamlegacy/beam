@@ -33,7 +33,10 @@ extension BeamNote: BeamNoteDocument {
     }
 
     public func observeDocumentChange(documentManager: DocumentManager) {
-        guard activeDocumentCancellable == nil else { return }
+        guard activeDocumentCancellable == nil else {
+            Logger.shared.logError("BeamNote already has change observer", category: .document)
+            return
+        }
         guard let docStruct = documentStruct else { return }
 
         Logger.shared.logInfo("Observe changes for note \(title)", category: .document)
@@ -41,8 +44,11 @@ extension BeamNote: BeamNoteDocument {
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
 
-                guard self.version < docStruct.version else {
-                    Logger.shared.logDebug("BeamNote \(self.title) observer skipped version \(docStruct.version) (must be greater than current \(self.version))")
+                /*
+                 When receiving updates for a new document, we don't check the version
+                 */
+                if self.version >= docStruct.version, self.id == docStruct.id {
+                    Logger.shared.logDebug("BeamNote \(self.title) {\(self.id)} observer skipped {\(docStruct.id)} version \(docStruct.version) (must be greater than current \(self.version))")
                     return
                 }
 
@@ -64,6 +70,11 @@ extension BeamNote: BeamNoteDocument {
             return
         }
 
+        if self.id != newSelf.id {
+            // TODO: reprocess bidirectional links, the document we had has been replaced with a new one
+            // following a title conflict
+            self.id = newSelf.id
+        }
         self.title = newSelf.title
         self.type = newSelf.type
         self.searchQueries = newSelf.searchQueries
@@ -95,6 +106,7 @@ extension BeamNote: BeamNoteDocument {
         }
     }
 
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
     public func save(documentManager: DocumentManager, completion: ((Result<Bool, Error>) -> Void)? = nil) {
         guard version == savedVersion else {
             Logger.shared.logError("Waiting for last save [\(title) {\(id)} - saved version \(savedVersion) / current \(version)]",
@@ -102,6 +114,11 @@ extension BeamNote: BeamNoteDocument {
             completion?(.failure(BeamNoteError.saveAlreadyRunning))
             return
         }
+
+        /*
+         When saving the note, we must increment its version first. `documentManager.save()` will check for
+         version increase between saves.
+         */
 
         version += 1
 
@@ -112,7 +129,7 @@ extension BeamNote: BeamNoteDocument {
             return
         }
 
-        Logger.shared.logInfo("BeamNote wants to save: \(title) version \(version)", category: .document)
+        Logger.shared.logInfo("BeamNote wants to save: \(title) {\(id)} version \(version)", category: .document)
         documentManager.save(documentStruct, completion: { [weak self] result in
             guard let self = self else { completion?(result); return }
 
@@ -126,24 +143,65 @@ extension BeamNote: BeamNoteDocument {
                 self.pendingSave += 1
 
             case .failure(let error):
-                if (error as NSError).domain == "DOCUMENT_ERROR_DOMAIN", (error as NSError).code == 1002 {
-                    Logger.shared.logError("Version error with \(self.version), reloading from the DB", category: .document)
+                if (error as NSError).domain == "DOCUMENT_ERROR_DOMAIN" {
+                    switch (error as NSError).code {
+                    case 1002:
+                        Logger.shared.logError("Version error with \(self.version), reloading from the DB", category: .document)
 
-                    // TODO: should merge the change we tried to save(), with the DB version instead of just reloading it
-                    if let dbDocumentStruct = documentManager.loadById(id: documentStruct.id) {
-                        DispatchQueue.main.async {
-                            self.updateWithDocumentStruct(dbDocumentStruct)
+                        /*
+                         The saved CoreData model has a higher version, and this instance of BeamNote didn't receive it
+                         through `onDocumentChange`. This should never happen.
+
+                         TODO: should merge the current version with the existing version instead of just reloading, to
+                         avoid losing content.
+                         */
+
+                        if let dbDocumentStruct = documentManager.loadById(id: documentStruct.id) {
+                            DispatchQueue.main.async {
+                                self.updateWithDocumentStruct(dbDocumentStruct)
+                            }
                         }
-                    }
 
-                    Logger.shared.logError("Version changed to \(self.savedVersion)/\(self.version)", category: .document)
-                } else {
-                    self.version = self.savedVersion
-                    Logger.shared.logError("Saving note \(self.title) failed: \(error)", category: .document)
+                        Logger.shared.logError("Version changed to \(self.savedVersion)/\(self.version)",
+                                               category: .document)
+                    case 1001:
+                        Logger.shared.logError("Title already exists for \(self.title). id: \(self.id)",
+                                               category: .document)
+
+                        /*
+                         Another non-deleted note with the same title, in the same database exists. We receive the
+                         existing duplicate in the error. We overwrite the current note with the existing duplicate to
+                         avoid UI glitch.
+
+                         TODO: should merge the current version with the existing version instead of just reloading, to
+                         avoid losing content.
+                         */
+
+                        if let documents = (error as NSError).userInfo["documents"] as? [DocumentStruct],
+                           let existingDocument = documents.first {
+                            Logger.shared.logError("\(documents.count) other documents, fetching existing one",
+                                                   category: .document)
+                            DispatchQueue.main.sync {
+                                self.updateWithDocumentStruct(existingDocument)
+                                self.savedVersion = existingDocument.version
+                            }
+
+                            completion?(result)
+
+                            // Avoid calling save() again
+                            return
+                        }
+                    default:
+                        break
+                    }
                 }
 
+                self.version = self.savedVersion
+                Logger.shared.logError("Saving note \(self.title) failed: \(error)", category: .document)
+
                 if self.pendingSave > 0 {
-                    Logger.shared.logDebug("Trying again: Saving note \(self.title) as there were \(self.pendingSave) pending save operations", category: .document)
+                    Logger.shared.logDebug("Trying again: Saving note \(self.title) as there were \(self.pendingSave) pending save operations",
+                                           category: .document)
                     self.save(documentManager: documentManager, completion: completion)
                 }
             }
@@ -173,7 +231,8 @@ extension BeamNote: BeamNoteDocument {
         return note
     }
 
-    public static func fetch(_ documentManager: DocumentManager, title: String,
+    public static func fetch(_ documentManager: DocumentManager,
+                             title: String,
                              keepInMemory: Bool = true) -> BeamNote? {
         // Is the note in the cache?
         if let note = getFetchedNote(title) {
@@ -237,6 +296,8 @@ extension BeamNote: BeamNoteDocument {
     public static func create(_ documentManager: DocumentManager, title: String) -> BeamNote {
         assert(getFetchedNote(title) == nil)
         let note = BeamNote(title: title)
+
+        // TODO: should force a first quick save to trigger any title conflicts with the API asap
         appendToFetchedNotes(note)
         updateNoteCount()
         return note

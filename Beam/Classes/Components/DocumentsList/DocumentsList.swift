@@ -5,7 +5,8 @@ import BeamCore
 struct DocumentsList: View {
     @Environment(\.managedObjectContext) var moc
     @FetchRequest(entity: Document.entity(),
-                  sortDescriptors: [NSSortDescriptor(keyPath: \Document.title, ascending: true)])
+                  sortDescriptors: [NSSortDescriptor(keyPath: \Document.title,
+                                                     ascending: true)])
     var documents: FetchedResults<Document>
 
     @State private var searchText: String = ""

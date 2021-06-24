@@ -487,7 +487,7 @@ extension DatabaseManager {
         // to prevent downloading all of them
         let lastUpdatedAt = Persistence.Sync.Databases.updated_at
         if let lastUpdatedAt = lastUpdatedAt {
-            Logger.shared.logDebug("Using updatedAt for databases API call: \(lastUpdatedAt)", category: .database)
+            Logger.shared.logDebug("Using updatedAt for databases API call: \(lastUpdatedAt)", category: .databaseNetwork)
         }
 
         do {
@@ -498,7 +498,7 @@ extension DatabaseManager {
                     self.coreDataManager.backgroundContext.performAndWait {
                         // exit early, no need to process further without any objects back
                         guard databases.count > 0 else {
-                            Logger.shared.logDebug("0 database fetched.", category: .document)
+                            Logger.shared.logDebug("0 database fetched.", category: .databaseNetwork)
                             completion?(.success(true))
                             return
                         }
@@ -507,7 +507,7 @@ extension DatabaseManager {
 
                         if let mostRecentUpdatedAt = mostRecentUpdatedAt {
                             Logger.shared.logDebug("new updatedAt: \(mostRecentUpdatedAt). \(databases.count) databases fetched.",
-                                                   category: .document)
+                                                   category: .databaseNetwork)
                         }
 
                         for database in databases {

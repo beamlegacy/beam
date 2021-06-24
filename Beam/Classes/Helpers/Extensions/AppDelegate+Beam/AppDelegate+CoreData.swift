@@ -172,6 +172,9 @@ extension AppDelegate {
 
     // MARK: - Fetch from API
     @IBAction func refreshNotesFromAPI(_ sender: Any) {
+        // Force refreshing all notes
+        Persistence.Sync.Documents.updated_at = nil
+
         documentManager.refreshAllFromAPI { result in
             DispatchQueue.main.async {
                 let alert = NSAlert()
@@ -191,6 +194,9 @@ extension AppDelegate {
 
     // MARK: - Fetch from API
     @IBAction func refreshDatabasesFromAPI(_ sender: Any) {
+        // Force refreshing all databases
+        Persistence.Sync.Databases.updated_at = nil
+
         databaseManager.fetchAllOnApi { result in
             DispatchQueue.main.async {
                 let alert = NSAlert()

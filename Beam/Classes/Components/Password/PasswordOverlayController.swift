@@ -55,7 +55,7 @@ class PasswordOverlayController: WebPageHolder {
                 }
             }
             elements = deduplicated
-            Logger.shared.logDebug("🔑 decoded: \(elements)")
+            Logger.shared.logDebug("🔑 decoded: \(elements)", category: .javascript)
         } catch {
             Logger.shared.logError(String(describing: error), category: .javascript)
             return

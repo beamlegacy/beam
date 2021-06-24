@@ -359,7 +359,18 @@ extension DocumentRequest {
                   _ completion: @escaping (Swift.Result<[DocumentAPIType], Error>) -> Void) throws -> URLSessionDataTask {
         let parameters = DocumentsParameters(updatedAtAfter: updatedAtAfter)
 
-        let bodyParamsRequest = GraphqlParameters(fileName: "documents", variables: parameters)
+        return try fetchAllWithFile("documents", parameters, completion)
+    }
+
+    @discardableResult
+    func fetchDocumentsTitle(_ completion: @escaping (Swift.Result<[DocumentAPIType], Error>) -> Void) throws -> URLSessionDataTask {
+        return try fetchAllWithFile("documents_title", EmptyVariable(), completion)
+    }
+
+    private func fetchAllWithFile<T: Encodable>(_ filename: String,
+                                                _ parameters: T,
+                                                _ completion: @escaping (Swift.Result<[DocumentAPIType], Error>) -> Void) throws -> URLSessionDataTask {
+        let bodyParamsRequest = GraphqlParameters(fileName: filename, variables: parameters)
 
         return try performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<Me, Error>) in
             switch result {
@@ -372,7 +383,7 @@ extension DocumentRequest {
                             try documents.forEach { try $0.decrypt() }
                         }
                     } catch {
-                        // Will catch uncrypting errors
+                        // Will catch unencryption errors
                         completion(.failure(error))
                         return
                     }

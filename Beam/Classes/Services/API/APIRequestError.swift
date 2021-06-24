@@ -14,6 +14,7 @@ enum APIRequestError: Error, Equatable {
     case apiError([String])
     case apiErrors([UserErrorData])
     case operationCancelled
+    case duplicateTitle
 }
 
 extension APIRequestError: LocalizedError {
@@ -35,9 +36,15 @@ extension APIRequestError: LocalizedError {
             return loc("error.api.notAuthenticated")
         case .apiError(let explanations):
             return explanations.joined(separator: ", ")
+        case .duplicateTitle:
+            return loc("error.api.duplicateTitle")
         case .apiErrors(let errors):
             return errors.compactMap {
-                "\(String(describing: $0.path?.joined(separator: ", "))): \(String(describing: $0.message))"
+                if let path = $0.path?.joined(separator: ", "), let message = $0.message {
+                    return "\(path): \(message)"
+                } else {
+                    return "\(String(describing: $0.path?.joined(separator: ", "))): \(String(describing: $0.message))"
+                }
             }.joined(separator: ", ")
         case .notFound:
             return loc("error.api.notFound")
