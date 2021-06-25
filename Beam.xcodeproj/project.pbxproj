@@ -204,6 +204,15 @@
 		521EEDED2593803F00BA2485 /* DocumentDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 521EEDEC2593803F00BA2485 /* DocumentDetail.swift */; };
 		521EEDF72593824100BA2485 /* AppDelegate+Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = 521EEDF62593824100BA2485 /* AppDelegate+Document.swift */; };
 		521EEDFB2593927100BA2485 /* Int+ByteSize.swift in Sources */ = {isa = PBXBuildFile; fileRef = 521EEDFA2593927100BA2485 /* Int+ByteSize.swift */; };
+		5224CD462685FF7E00D4179E /* update_beam_objects.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 5224CD452685FF7E00D4179E /* update_beam_objects.graphql */; };
+		5224CD4C2685FF8C00D4179E /* delete_beam_object.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 5224CD4B2685FF8C00D4179E /* delete_beam_object.graphql */; };
+		5224CD522685FF9B00D4179E /* update_beam_object.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 5224CD512685FF9B00D4179E /* update_beam_object.graphql */; };
+		5224CD602685FFB500D4179E /* delete_all_beam_objects.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 5224CD5F2685FFB500D4179E /* delete_all_beam_objects.graphql */; };
+		5224CD6A2685FFD100D4179E /* beam_object.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 5224CD692685FFD100D4179E /* beam_object.graphql */; };
+		5224CD702685FFDD00D4179E /* beam_objects.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 5224CD6F2685FFDD00D4179E /* beam_objects.graphql */; };
+		5224CD762685FFFC00D4179E /* beam_object_updated_at.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 5224CD752685FFFC00D4179E /* beam_object_updated_at.graphql */; };
+		5224CD7C2686034200D4179E /* BeamObjectAPIType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5224CD7B2686034200D4179E /* BeamObjectAPIType.swift */; };
+		5224CD822686043600D4179E /* BeamObjectRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5224CD812686043600D4179E /* BeamObjectRequest.swift */; };
 		522AFB2825CBFAB100F60647 /* DocumentManagerTestsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 522AFB2725CBFAB100F60647 /* DocumentManagerTestsHelper.swift */; };
 		522B17C82684E11E00741F94 /* String+SHA256.swift in Sources */ = {isa = PBXBuildFile; fileRef = 522B17C72684E11E00741F94 /* String+SHA256.swift */; };
 		523416A22629D465001F306F /* BeamCoreDataObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 523416A12629D465001F306F /* BeamCoreDataObject.swift */; };
@@ -985,6 +994,15 @@
 		521EEDF62593824100BA2485 /* AppDelegate+Document.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+Document.swift"; sourceTree = "<group>"; };
 		521EEDFA2593927100BA2485 /* Int+ByteSize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Int+ByteSize.swift"; sourceTree = "<group>"; };
 		521FEC652604B830009000F9 /* String+c99.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+c99.swift"; sourceTree = "<group>"; };
+		5224CD452685FF7E00D4179E /* update_beam_objects.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = update_beam_objects.graphql; sourceTree = "<group>"; };
+		5224CD4B2685FF8C00D4179E /* delete_beam_object.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = delete_beam_object.graphql; sourceTree = "<group>"; };
+		5224CD512685FF9B00D4179E /* update_beam_object.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = update_beam_object.graphql; sourceTree = "<group>"; };
+		5224CD5F2685FFB500D4179E /* delete_all_beam_objects.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = delete_all_beam_objects.graphql; sourceTree = "<group>"; };
+		5224CD692685FFD100D4179E /* beam_object.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = beam_object.graphql; sourceTree = "<group>"; };
+		5224CD6F2685FFDD00D4179E /* beam_objects.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = beam_objects.graphql; sourceTree = "<group>"; };
+		5224CD752685FFFC00D4179E /* beam_object_updated_at.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = beam_object_updated_at.graphql; sourceTree = "<group>"; };
+		5224CD7B2686034200D4179E /* BeamObjectAPIType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamObjectAPIType.swift; sourceTree = "<group>"; };
+		5224CD812686043600D4179E /* BeamObjectRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamObjectRequest.swift; sourceTree = "<group>"; };
 		522AFB2725CBFAB100F60647 /* DocumentManagerTestsHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentManagerTestsHelper.swift; sourceTree = "<group>"; };
 		522B17C72684E11E00741F94 /* String+SHA256.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+SHA256.swift"; sourceTree = "<group>"; };
 		523416A12629D465001F306F /* BeamCoreDataObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamCoreDataObject.swift; sourceTree = "<group>"; };
@@ -1237,7 +1255,6 @@
 		A0689E6C25DE623D00B19CBB /* DeleteText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteText.swift; sourceTree = "<group>"; };
 		A0689E7025DE6B8700B19CBB /* CommandsTextTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandsTextTests.swift; sourceTree = "<group>"; };
 		A06D5FA22683454C009D7C38 /* DeepCopyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepCopyTests.swift; sourceTree = "<group>"; };
-		A06DF52525B7608000E2CB62 /* CommandManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CommandManagerTests.swift; path = Classes/CommandManagerTests.swift; sourceTree = "<group>"; };
 		A08D739326413DEC00A9A604 /* UserProfileMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfileMenu.swift; sourceTree = "<group>"; };
 		A08DE20C26160DC800F8ABB4 /* BeamTextEdit+CopyPaste.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamTextEdit+CopyPaste.swift"; sourceTree = "<group>"; };
 		A0A3BED4266FD1B200566D6C /* BeamStepperButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamStepperButton.swift; sourceTree = "<group>"; };
@@ -1749,6 +1766,7 @@
 				418171642581107C00317ED8 /* APIRequest.swift */,
 				529E1AD325D45CFA00DD25B8 /* APIRequestError.swift */,
 				5206282525923B6800D7CD9E /* DocumentRequest.swift */,
+				5224CD812686043600D4179E /* BeamObjectRequest.swift */,
 				520088C32613297100AED835 /* DatabaseRequest.swift */,
 				524CF6B125F27318007312F0 /* DocumentRequest+Encryption.swift */,
 			);
@@ -1764,6 +1782,7 @@
 				418171602581107C00317ED8 /* GraphqlParametersProtocol.swift */,
 				418171612581107C00317ED8 /* User.swift */,
 				5206283D25923EB500D7CD9E /* DocumentAPIType.swift */,
+				5224CD7B2686034200D4179E /* BeamObjectAPIType.swift */,
 				52E2528726175F1C00E54C45 /* DatabaseAPIType.swift */,
 			);
 			path = GraphqlRequestsTypes;
@@ -1772,6 +1791,7 @@
 		418171662581107C00317ED8 /* GraphqlRequests */ = {
 			isa = PBXGroup;
 			children = (
+				5224CD3D2685FF6D00D4179E /* BeamObject */,
 				52F4E48226417ED90067B017 /* Identities */,
 				52E2526626173F7A00E54C45 /* Databases */,
 				520627F625922D4900D7CD9E /* Documents */,
@@ -2248,6 +2268,20 @@
 				521EEDEC2593803F00BA2485 /* DocumentDetail.swift */,
 			);
 			path = DocumentsList;
+			sourceTree = "<group>";
+		};
+		5224CD3D2685FF6D00D4179E /* BeamObject */ = {
+			isa = PBXGroup;
+			children = (
+				5224CD4B2685FF8C00D4179E /* delete_beam_object.graphql */,
+				5224CD5F2685FFB500D4179E /* delete_all_beam_objects.graphql */,
+				5224CD452685FF7E00D4179E /* update_beam_objects.graphql */,
+				5224CD512685FF9B00D4179E /* update_beam_object.graphql */,
+				5224CD692685FFD100D4179E /* beam_object.graphql */,
+				5224CD6F2685FFDD00D4179E /* beam_objects.graphql */,
+				5224CD752685FFFC00D4179E /* beam_object_updated_at.graphql */,
+			);
+			path = BeamObject;
 			sourceTree = "<group>";
 		};
 		52301D62261C880200ED2238 /* Migrations */ = {
@@ -3519,6 +3553,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5224CD462685FF7E00D4179E /* update_beam_objects.graphql in Resources */,
 				02C07A9B2670D98600894C5D /* Navigation.js in Resources */,
 				A0F8DC87268488C900654046 /* hush.json in Resources */,
 				02A2B285263190F100D581A5 /* Scorer.js in Resources */,
@@ -3531,6 +3566,7 @@
 				5204290B25A4B3D300DD677C /* document_updated_at.graphql in Resources */,
 				52E2528426173FA800E54C45 /* databases.graphql in Resources */,
 				9661A586266980AF00CB56B3 /* BidirectionalPopoverBlockItem.xib in Resources */,
+				5224CD4C2685FF8C00D4179E /* delete_beam_object.graphql in Resources */,
 				52F4E4BA264185FC0067B017 /* identities.graphql in Resources */,
 				5206280C25922D6300D7CD9E /* delete_document.graphql in Resources */,
 				5206281825922D8A00D7CD9E /* delete_all_documents.graphql in Resources */,
@@ -3561,6 +3597,7 @@
 				8AC2EFD8266F86F500049005 /* webpack.config.js in Resources */,
 				52A06978264E909A00B4B80A /* document_public_url.graphql in Resources */,
 				8AF53BAC266A241700C3CB2E /* UITests-1.html in Resources */,
+				5224CD762685FFFC00D4179E /* beam_object_updated_at.graphql in Resources */,
 				A515597A267786E1006F6D6F /* MediaPlayer.js in Resources */,
 				52E2527C26173F8D00E54C45 /* delete_database.graphql in Resources */,
 				418172412581107C00317ED8 /* ScrollableTextView.xib in Resources */,
@@ -3568,6 +3605,7 @@
 				8AC2EFD6266F86F500049005 /* yarn.lock in Resources */,
 				5260172125ADCBE800634695 /* documents.graphql in Resources */,
 				52E2528026173F9C00E54C45 /* update_database.graphql in Resources */,
+				5224CD702685FFDD00D4179E /* beam_objects.graphql in Resources */,
 				8AEADBD126776BC500E36BAC /* UITests-4.html in Resources */,
 				418171F52581107C00317ED8 /* forgot_password.graphql in Resources */,
 				BAA67DC79E1BCAF3869F3DBB /* build_js.sh in Resources */,
@@ -3579,12 +3617,15 @@
 				52FB84E42638124A0085A444 /* update_documents.graphql in Resources */,
 				BAA6704409BDC8AB92E95F8D /* WebEventsUI_native.ts in Resources */,
 				52CA917E26737CCB00DDF388 /* documents_title.graphql in Resources */,
+				5224CD602685FFB500D4179E /* delete_all_beam_objects.graphql in Resources */,
+				5224CD6A2685FFD100D4179E /* beam_object.graphql in Resources */,
 				BAA67B13B4EBCFF2D7A94F93 /* WebEventsUI_web.ts in Resources */,
 				BAA67EC2B781F8A78CD5A6B0 /* Beam.scss in Resources */,
 				BAA67A1DD75801D8B25037E9 /* BeamTypes.ts in Resources */,
 				BAA67B51C8D9DBD6FE5327B6 /* mixins.scss in Resources */,
 				BAA675AE9C103046AC022CBA /* .sassrc in Resources */,
 				BAA6750B78E3812C7DA5DF7C /* tsconfig.json in Resources */,
+				5224CD522685FF9B00D4179E /* update_beam_object.graphql in Resources */,
 				BAA67B681D12191FE57E7807 /* PopupUI_web.scss in Resources */,
 				BAA675D3496DCF90EB35C8AD /* BeamEventTargetMock.ts in Resources */,
 				BAA6704CFB6AE4C1D090F4E4 /* BeamWebFactoryMock.ts in Resources */,
@@ -3915,6 +3956,7 @@
 				418171F92581107C00317ED8 /* SearchEngine.swift in Sources */,
 				8775C5F32613212C00A26CAC /* StoredPasswordCell.swift in Sources */,
 				52FC002325E4244200ABECB0 /* MenuAvailableCommands.swift in Sources */,
+				5224CD822686043600D4179E /* BeamObjectRequest.swift in Sources */,
 				961EC51725B5038E009FA322 /* ChevronButton.swift in Sources */,
 				52B17ABA262442BC00CB4728 /* DatabasesList.swift in Sources */,
 				418171FE2581107C00317ED8 /* Html2Md.swift in Sources */,
@@ -3959,6 +4001,7 @@
 				3330D7CB265E466D008C9E20 /* OmniBarDownloadButton.swift in Sources */,
 				41221A362592771F00255197 /* BeamTextEdit+Popover.swift in Sources */,
 				87F11BD9266533C1003BE98E /* PasswordGenerator.swift in Sources */,
+				5224CD7C2686034200D4179E /* BeamObjectAPIType.swift in Sources */,
 				A5153EDD260CC4DC00C84902 /* ButtonLabel.swift in Sources */,
 				A55760822665501000DEE86C /* TableViewColumn.swift in Sources */,
 				96E4CF30258DFB0800D6DE22 /* BeamText+NSAttributedString.swift in Sources */,

@@ -1,0 +1,5 @@
+query BeamObject($id: ID!) {
+  beamObject(id: $id) {
+    updatedAt
+  }
+}

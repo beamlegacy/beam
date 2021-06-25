@@ -1,0 +1,11 @@
+mutation UpdateBeamObjects($beamObjects: [BeamObjectInput!]!) {
+  updateBeamObjects(input: {beamObjects: $beamObjects}) {
+    beamObjects {
+      id
+    }
+    errors {
+      path
+      message
+    }
+  }
+}

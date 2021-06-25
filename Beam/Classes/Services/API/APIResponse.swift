@@ -61,6 +61,8 @@ extension APIRequest {
 
             if T.self == FetchDocument.self {
                 finalName = FetchDocument.codingKey
+            } else if T.self == BeamObjectRequest.FetchBeamObject.self {
+                finalName = BeamObjectRequest.FetchBeamObject.codingKey
             } else {
                 finalName = name.prefix(1).lowercased() + name.dropFirst()
             }

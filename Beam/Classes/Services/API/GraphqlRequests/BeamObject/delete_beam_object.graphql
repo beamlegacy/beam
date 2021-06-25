@@ -1,0 +1,11 @@
+mutation DeleteBeamObject($id: ID!) {
+  deleteBeamObject(input: {beamObject: {id: $id}}) {
+    beamObject {
+      id
+    }
+    errors {
+      path
+      message
+    }
+  }
+}

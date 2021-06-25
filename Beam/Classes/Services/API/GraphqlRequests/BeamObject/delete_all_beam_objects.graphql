@@ -1,0 +1,9 @@
+mutation DeleteAllBeamObjects {
+  deleteAllBeamObjects(input: {}) {
+    success
+    errors {
+      path
+      message
+    }
+  }
+}

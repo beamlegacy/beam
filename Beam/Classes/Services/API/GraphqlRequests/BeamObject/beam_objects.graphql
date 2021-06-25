@@ -1,0 +1,15 @@
+query ($updatedAtAfter: ISO8601DateTime) {
+  me {
+    id
+    email
+    beamObjects(updatedAtAfter: $updatedAtAfter) {
+      id
+      createdAt
+      updatedAt
+      deletedAt
+      data
+      type
+      checksum
+    }
+  }
+}
