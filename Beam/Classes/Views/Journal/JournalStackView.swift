@@ -13,6 +13,7 @@ class JournalStackView: NSView {
     public var topOffset: CGFloat
     public var todaysMaxPosition: CGFloat = 0
     public var bottomInset: CGFloat = 0
+    public var bottomInsetForToday: CGFloat = 0
 
     private var views: [Int: BeamTextEdit] = [:]
     private var viewCount: Int = 0
@@ -90,6 +91,7 @@ class JournalStackView: NSView {
         if self.subviews.isEmpty {
             view.frame.origin = CGPoint(x: 0, y: topOffset)
             bottomInset = getBottomInsetForTodays(view)
+            bottomInsetForToday = bottomInset
             view.frame.size = NSSize(width: self.frame.width, height: view.intrinsicContentSize.height)
             todaysMaxPosition = topOffset + bottomInset
         } else {
