@@ -133,6 +133,13 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
             }
         }.store(in: &scope)
 
+        $newDay.sink { [weak self] newDay in
+            guard let self = self else { return }
+            if newDay {
+                self.reloadJournal()
+            }
+        }.store(in: &scope)
+
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(calendarDayDidChange(notification:)),
                                                name: NSNotification.Name.NSCalendarDayChanged,
