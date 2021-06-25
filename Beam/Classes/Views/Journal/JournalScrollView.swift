@@ -164,7 +164,8 @@ class ScrollViewContentWatcher: NSObject {
               let documentView = scrollView.documentView as? JournalStackView else { return }
         let scrollingDown = clipView.bounds.origin.y > bounds.origin.y
         let diff = clipView.bounds.origin.y - bounds.origin.y
-        let maxContentOffSetY = documentView.bounds.height - clipView.bounds.height
+        var maxContentOffSetY = documentView.bounds.height - clipView.bounds.height - documentView.topOffset
+        maxContentOffSetY = documentView.bottomInsetForToday > 0 ? maxContentOffSetY - documentView.bottomInsetForToday : maxContentOffSetY
         bounds = clipView.bounds
         // Update position of todays item
         if let todaysNote = documentView.getTodaysView() {
@@ -175,7 +176,7 @@ class ScrollViewContentWatcher: NSObject {
         documentView.updateSideLayer(scrollValue: diff, scrollingDown: scrollingDown, y: bounds.origin.y)
 
         // Update DataSource when scrollview is close to the end
-        if maxContentOffSetY - bounds.origin.y <= 5 {
+        if maxContentOffSetY - bounds.origin.y <= 10 {
             loadMore()
         }
         onScroll?(clipView.bounds.origin)
