@@ -48,13 +48,6 @@ export class Native {
     const messageHandler = this.messageHandlers[messageKey]
     if (messageHandler) {
       const href = this.href
-      for (const p in payload) {
-        const value = payload[p]
-        if (!value) {
-          console.warn(`value of ${p} is ${value}. Removing it.`)
-          delete payload[p]
-        }
-      }
       messageHandler.postMessage({ href, ...payload }, href)
     } else {
       throw Error(`No message handler for message "${name}"`)
