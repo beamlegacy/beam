@@ -103,8 +103,8 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
                   let tabToIndex = tabToIndex else { return }
 
             guard var id = tabToIndex.currentTabTree?.current.link else { return }
-            var parentId = tabToIndex.currentTabTree?.current.parent?.link
-            if let parent = tabToIndex.currentTabTree?.current.parent,
+            var parentId = tabToIndex.parentBrowsingNode?.link
+            if let parent = tabToIndex.parentBrowsingNode,
                parent.events.contains(where: { $0.type == .searchBarNavigation }) {
                 parentId = nil
             }
@@ -118,12 +118,11 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
                previousTabTree.current.events.contains(where: { $0.type == .openLinkInNewTab }) {
                 parentId = previousTabTree.current.link
             }
-
             self.clusteringManager.addPage(id: id, parentId: parentId, value: tabToIndex)
         }.store(in: &scope)
 
         $tabToIndex.sink { [weak self] tabToIndex in
-            guard let self = self,
+            guard let _ = self,
                   let tabToIndex = tabToIndex else { return }
 
             do {

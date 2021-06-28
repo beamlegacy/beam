@@ -233,6 +233,9 @@ public class BrowsingNode: ObservableObject, Codable {
         }
         if container.contains(.children) {
             children = try container.decode([BrowsingNode].self, forKey: .children)
+            for child in children {
+                child.parent = self
+            }
         }
     }
 
@@ -249,6 +252,22 @@ public class BrowsingNode: ObservableObject, Codable {
         }
     }
 
+    public func deepCopy() -> BrowsingNode? {
+        let encoder = JSONEncoder()
+        guard let data = try? encoder.encode(self) else {
+            Logger.shared.logError("DeepCopy Error while encoding \(self)", category: .document)
+            return nil
+        }
+
+        let decoder = JSONDecoder()
+        guard let newBrowsingNode = try? decoder.decode(Self.self, from: data) else {
+            Logger.shared.logError("DeepCopy Error while decoding \(self)", category: .document)
+            return nil
+        }
+
+        return newBrowsingNode
+    }
+
     public func visit(_ block: @escaping (BrowsingNode) -> Void) {
         block(self)
         for c in children {
@@ -263,6 +282,30 @@ public class BrowsingNode: ObservableObject, Codable {
         for child in children {
             child.dump(level: level + 1)
         }
+    }
+
+    var indexPath: IndexPath {
+        var path = [Int]()
+        var previous: BrowsingNode? = self
+        var current = parent
+        while current != nil {
+            guard let index = current?.children.firstIndex(where: { node in
+                node === previous
+            }) else { return IndexPath() }
+            path.insert(index, at: 0)
+            previous = current
+            current = previous?.parent
+        }
+        return IndexPath(indexes: path)
+    }
+
+    func childWithPath(_ path: IndexPath) -> BrowsingNode? {
+        guard let index = path.first else { return nil }
+        let child = children[index]
+        if path.count == 1 {
+            return child
+        }
+        return child.childWithPath(path.suffix(path.count - 1))
     }
 }
 
@@ -287,6 +330,7 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
         case root
         case scores
         case origin
+        case currentPath
     }
 
     public required init(from decoder: Decoder) throws {
@@ -294,7 +338,11 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
 
         origin = (try? container.decode(BrowsingTreeOrigin.self, forKey: .origin)) ?? defaultOrigin
         root = try container.decode(BrowsingNode.self, forKey: .root)
-        current = root
+        if let indexPath = try? container.decode(IndexPath.self, forKey: .currentPath), !indexPath.isEmpty {
+            current = root.childWithPath(indexPath)
+        } else {
+            current = root
+        }
 
         if container.contains(.scores) {
             scores = try container.decode([UInt64: Score].self, forKey: .scores)
@@ -314,16 +362,22 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
         try container.encode(root, forKey: .root)
         try container.encode(scores, forKey: .scores)
         try container.encode(origin, forKey: .origin)
+        try container.encode(current.indexPath, forKey: .currentPath)
     }
 
-    /// Careful this isn't a proper deepCopy
-    /// BrowsingSessions contains BrowsingNode that are not properly cloned.
-    /// This is used and needed for copy & paste atm
-    public func deepCopy() -> BrowsingTree {
-        let browsingTree = BrowsingTree(nil)
-        browsingTree.root = root
-        browsingTree.current = root
-        return browsingTree
+    public func deepCopy() -> BrowsingTree? {
+        let encoder = JSONEncoder()
+        guard let data = try? encoder.encode(self) else {
+            Logger.shared.logError("DeepCopy Error while encoding \(self)", category: .document)
+            return nil
+        }
+
+        let decoder = JSONDecoder()
+        guard let newBrowsingTree = try? decoder.decode(Self.self, from: data) else {
+            Logger.shared.logError("DeepCopy Error while decoding \(self)", category: .document)
+            return nil
+        }
+        return newBrowsingTree
     }
 
     public func startReading() {
