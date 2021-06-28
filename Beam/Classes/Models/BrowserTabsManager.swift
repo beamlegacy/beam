@@ -14,6 +14,7 @@ struct TabInformation {
     var url: URL
     weak var tabTree: BrowsingTree?
     weak var currentTabTree: BrowsingTree?
+    weak var parentBrowsingNode: BrowsingNode?
     weak var previousTabTree: BrowsingTree?
     var document: IndexDocument
     var textContent: String
@@ -97,6 +98,9 @@ class BrowserTabsManager: ObservableObject {
             tab.appendToIndexer = { [unowned self, weak tab] url, read in
                 var text = ""
                 var textForClustering = ""
+                let tabTree = tab?.browsingTree.deepCopy()
+                let currentTabTree = currentTab?.browsingTree.deepCopy()
+
                 self.indexingQueue.async { [unowned self] in
                     guard let doc = try? SwiftSoup.parse(read.content, url.absoluteString) else { return }
                     text = html2Text(url: url, doc: doc)
@@ -105,8 +109,15 @@ class BrowserTabsManager: ObservableObject {
                     DispatchQueue.main.async { [weak self] in
                         guard let self = self else { return }
                         let indexDocument = IndexDocument(source: url.absoluteString, title: read.title, contents: text)
-
-                        let tabInformation: TabInformation? = TabInformation(url: url, tabTree: tab?.browsingTree, currentTabTree: currentTab?.browsingTree, previousTabTree: self.latestCurrentTab, document: indexDocument, textContent: text, cleanedTextContentForClustering: textForClustering)
+                        
+                        let tabInformation: TabInformation? = TabInformation(url: url,
+                                                                             tabTree: tabTree,
+                                                                             currentTabTree: currentTabTree,
+                                                                             parentBrowsingNode: tabTree?.current.parent,
+                                                                             previousTabTree: self.latestCurrentTab,
+                                                                             document: indexDocument,
+                                                                             textContent: text,
+                                                                             cleanedTextContentForClustering: textForClustering)
                         self.data.tabToIndex = tabInformation
                         self.latestCurrentTab = nil
                     }

@@ -483,7 +483,6 @@ public class Cluster {
 
                 let newPageIndex = self.pages.count
                 self.pages.append(page)
-
                 // Handle Text similarity matrix
                 do {
                     try self.textualSimilarityMatrixProcess(pageIndex: newPageIndex)
