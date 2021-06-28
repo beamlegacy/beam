@@ -5,7 +5,12 @@ import BeamCore
 
 // swiftlint:disable file_length
 
-public struct DatabaseStruct {
+public struct DatabaseStruct: BeamObjectProtocol {
+    var uuid: String {
+        id.uuidString.lowercased()
+    }
+    var previousChecksum: String?
+
     var id: UUID
     var title: String
     let createdAt: Date
@@ -14,6 +19,15 @@ public struct DatabaseStruct {
 
     var uuidString: String {
         id.uuidString.lowercased()
+    }
+
+    // Used for encoding this into BeamObject
+    enum CodingKeys: String, CodingKey {
+        case id
+        case title
+        case createdAt
+        case updatedAt
+        case deletedAt
     }
 }
 
@@ -604,8 +618,57 @@ extension DatabaseManager {
     }
 
     @discardableResult
+    internal func saveOnBeamObjectAPI(_ databaseStruct: DatabaseStruct,
+                                      _ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) throws -> URLSessionTask? {
+        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            completion?(.success(false))
+            return nil
+        }
+
+        let beamObject = try BeamObjectAPIType(databaseStruct, .database)
+//        beamObject.previousChecksum = documentStruct.beamObjectPreviousChecksum
+
+        let request = BeamObjectRequest()
+
+        return try request.save(beamObject) { result in
+            switch result {
+            case .failure(let error):
+                Logger.shared.logError("Could not save \(beamObject): \(error.localizedDescription)", category: .beamObject)
+
+                completion?(.failure(error))
+            case .success(let updateBeamObject):
+                Logger.shared.logDebug("Saved \(updateBeamObject)", category: .beamObject)
+
+                completion?(.success(true))
+//                // `beamObjectPreviousChecksum` stores the checksum we sent to the API
+//                var sentDocumentStruct = documentStruct.copy()
+//                sentDocumentStruct.beamObjectPreviousChecksum = updateBeamObject.beamObject?.previousChecksum
+//
+//                CoreDataManager.shared.persistentContainer.performBackgroundTask { context in
+//                    guard let documentCoreData = try? Document.fetchWithId(context, documentStruct.id) else {
+//                        completion?(.failure(DocumentManagerError.localDocumentNotFound))
+//                        return
+//                    }
+//
+//                    // TODO: store previous data sent for improved 3-ways merge?
+//                    documentCoreData.beam_object_previous_checksum = sentDocumentStruct.beamObjectPreviousChecksum
+//
+//                    do {
+//                        let success = try Self.saveContext(context: context)
+//                        completion?(.success(success))
+//                    } catch {
+//                        completion?(.failure(error))
+//                    }
+//                }
+            }
+        }
+    }
+
+    @discardableResult
     internal func saveDatabaseStructOnAPI(_ databaseStruct: DatabaseStruct,
                                           _ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) -> URLSessionTask? {
+        _ = try? saveOnBeamObjectAPI(databaseStruct) { _ in }
+
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             completion?(.success(false))
             return nil

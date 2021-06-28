@@ -5,7 +5,7 @@ import CoreData
  When changing this, you *must* let backend know. We have to add new values to
  `app/models/document.rb` in our API codebase.
  */
-public enum DocumentType: Int16 {
+public enum DocumentType: Int16, Codable {
     case journal
     case note
 }
@@ -20,6 +20,7 @@ extension Document {
     @NSManaged public var data: Data?
     @NSManaged public var beam_api_data: Data?
     @NSManaged public var beam_api_checksum: String?
+    @NSManaged public var beam_object_previous_checksum: String?
     @NSManaged public var beam_api_sent_at: Date?
     @NSManaged public var deleted_at: Date?
     @NSManaged public var created_at: Date

@@ -16,6 +16,7 @@
         <attribute name="beam_api_checksum" optional="YES" attributeType="String"/>
         <attribute name="beam_api_data" optional="YES" attributeType="Binary"/>
         <attribute name="beam_api_sent_at" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="beam_object_previous_checksum" optional="YES" attributeType="String"/>
         <attribute name="created_at" attributeType="Date" defaultDateTimeInterval="628161600" usesScalarValueType="NO"/>
         <attribute name="data" optional="YES" attributeType="Binary"/>
         <attribute name="database_id" attributeType="UUID" usesScalarValueType="NO"/>
@@ -45,7 +46,7 @@
     </entity>
     <elements>
         <element name="Database" positionX="-279" positionY="-162" width="128" height="104"/>
-        <element name="Document" positionX="-176.8372802734375" positionY="-258.5739135742188" width="128" height="224"/>
+        <element name="Document" positionX="-176.8372802734375" positionY="-258.5739135742188" width="128" height="239"/>
         <element name="StoredLink" positionX="-410.7252197265625" positionY="-248.30859375" width="128" height="74"/>
     </elements>
 </model>

@@ -2,6 +2,20 @@ import Foundation
 import CryptoKit
 import BeamCore
 
+protocol BeamObjectProtocol: Codable {
+    var uuid: String { get }
+    var createdAt: Date { get }
+    var updatedAt: Date { get }
+    var deletedAt: Date? { get }
+    var previousChecksum: String? { get }
+}
+
+enum BeamObjectType: String {
+    case password
+    case database
+    case document
+}
+
 class BeamObjectAPIType: Codable {
     var id: String?
     var beamObjectType: String?
@@ -13,11 +27,56 @@ class BeamObjectAPIType: Codable {
     var dataChecksum: String?
     var previousChecksum: String?
 
+    enum CodingKeys: String, CodingKey {
+        case id
+        case beamObjectType = "type"
+        case createdAt
+        case updatedAt
+        case deletedAt
+        case data
+        case dataChecksum = "checksum"
+        case previousChecksum
+    }
+
+    init<T: BeamObjectProtocol>(_ object: T, _ type: BeamObjectType) throws {
+        id = object.uuid
+        beamObjectType = type.rawValue
+
+        createdAt = object.createdAt
+        updatedAt = object.updatedAt
+        deletedAt = object.deletedAt
+
+        previousChecksum = object.previousChecksum
+
+        let jsonData = try Self.encoder.encode(object)
+        data = jsonData.asString
+        dataChecksum = jsonData.SHA256
+    }
+
+    static var encoder: JSONEncoder {
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        encoder.outputFormatting = .sortedKeys
+        return encoder
+    }
+
+    static var decoder: JSONDecoder {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return decoder
+    }
+
     // MARK: - Encryption
     struct DataEncryption: Codable {
         let encryptionName: String?
         let privateKeySha256: String?
         let data: String?
+        //swiftlint:disable:next nesting
+        enum CodingKeys: String, CodingKey {
+            case encryptionName
+            case privateKeySha256
+            case data
+        }
     }
 
     func decrypt() throws {
@@ -60,7 +119,10 @@ class BeamObjectAPIType: Codable {
     func encrypt() throws {
         guard let clearData = data else { return }
 
+        dataChecksum = try clearData.SHA256()
+
         let encryptedClearData = try EncryptionManager.shared.encryptString(clearData)
+
         let encryptStruct = DataEncryption(encryptionName: EncryptionManager.Algorithm.AES_GCM.rawValue,
                                            privateKeySha256: try? EncryptionManager.shared.privateKey().asString().SHA256(),
                                            data: encryptedClearData)
@@ -68,7 +130,6 @@ class BeamObjectAPIType: Codable {
         let encoder = JSONEncoder()
         let encodedStruct = try encoder.encode(encryptStruct)
 
-        encryptedData = encodedStruct.asString
-        dataChecksum = try encodedStruct.asString?.SHA256()
+        data = encodedStruct.asString
     }
 }

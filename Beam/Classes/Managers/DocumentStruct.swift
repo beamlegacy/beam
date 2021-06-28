@@ -1,6 +1,11 @@
 import Foundation
 
-public struct DocumentStruct {
+public struct DocumentStruct: BeamObjectProtocol {
+    var uuid: String {
+        id.uuidString.lowercased()
+    }
+    var beamObjectPreviousChecksum: String?
+
     var id: UUID
     var databaseId: UUID
     var title: String
@@ -11,11 +16,24 @@ public struct DocumentStruct {
     let documentType: DocumentType
     var previousData: Data?
     var previousChecksum: String?
-    var version: Int64
+    var version: Int64 = 0
     var isPublic: Bool = false
 
     var uuidString: String {
         id.uuidString.lowercased()
+    }
+
+    // Used for encoding this into BeamObject
+    enum CodingKeys: String, CodingKey {
+        case id
+        case databaseId
+        case title
+        case createdAt
+        case updatedAt
+        case deletedAt
+        case data
+        case documentType
+        case isPublic
     }
 
     mutating func clearPreviousData() {
@@ -55,6 +73,7 @@ extension DocumentStruct {
         self.version = document.version
         self.isPublic = document.is_public
         self.databaseId = document.database_id
+        self.beamObjectPreviousChecksum = document.beam_object_previous_checksum
     }
 
     func asApiType() -> DocumentAPIType {

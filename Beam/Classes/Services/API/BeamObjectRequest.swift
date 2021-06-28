@@ -65,6 +65,24 @@ class BeamObjectRequest: APIRequest {
 // MARK: Foundation
 extension BeamObjectRequest {
     @discardableResult
+    // return multiple errors, as the API might return more than one.
+    func save(_ beamObject: BeamObjectAPIType,
+              _ completion: @escaping (Swift.Result<UpdateBeamObject, Error>) -> Void) throws -> URLSessionDataTask {
+        let parameters = try saveBeamObjectParameters(beamObject)
+        let bodyParamsRequest = GraphqlParameters(fileName: "update_beam_object", variables: parameters)
+
+        return try performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<UpdateBeamObject, Error>) in
+
+            switch result {
+            case .failure: completion(result)
+            case .success(let updateBeamObject):
+                updateBeamObject.beamObject?.previousChecksum = beamObject.dataChecksum
+                completion(.success(updateBeamObject))
+            }
+        }
+    }
+
+    @discardableResult
     func saveAll(_ beamObjects: [BeamObjectAPIType],
                  _ completionHandler: @escaping (Swift.Result<UpdateBeamObjects, Error>) -> Void) throws -> URLSessionDataTask? {
         var parameters: UpdateBeamObjects
@@ -82,13 +100,6 @@ extension BeamObjectRequest {
     }
 
     @discardableResult
-    func deleteAll(_ completion: @escaping (Swift.Result<DeleteAllBeamObjects, Error>) -> Void) throws -> URLSessionDataTask {
-        let bodyParamsRequest = GraphqlParameters(fileName: "delete_all_beam_objects", variables: EmptyVariable())
-
-        return try performRequest(bodyParamsRequest: bodyParamsRequest, completionHandler: completion)
-    }
-
-    @discardableResult
     func delete(_ id: String,
                 _ completion: @escaping (Swift.Result<DeleteBeamObject, Error>) -> Void) throws  -> URLSessionDataTask {
         let parameters = BeamObjectIdParameters(id: id)
@@ -98,18 +109,10 @@ extension BeamObjectRequest {
     }
 
     @discardableResult
-    // return multiple errors, as the API might return more than one.
-    func save(_ beamObject: BeamObjectAPIType,
-              _ completion: @escaping (Swift.Result<UpdateBeamObject, Error>) -> Void) throws -> URLSessionDataTask {
-        let parameters = try saveBeamObjectParameters(beamObject)
-        let bodyParamsRequest = GraphqlParameters(fileName: "update_beam_object", variables: parameters)
+    func deleteAll(_ completion: @escaping (Swift.Result<DeleteAllBeamObjects, Error>) -> Void) throws -> URLSessionDataTask {
+        let bodyParamsRequest = GraphqlParameters(fileName: "delete_all_beam_objects", variables: EmptyVariable())
 
-        return try performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<UpdateBeamObject, Error>) in
-            if case .success(let updateBeamObject) = result {
-                updateBeamObject.beamObject?.previousChecksum = beamObject.dataChecksum
-            }
-            completion(result)
-        }
+        return try performRequest(bodyParamsRequest: bodyParamsRequest, completionHandler: completion)
     }
 
     @discardableResult
@@ -151,21 +154,21 @@ extension BeamObjectRequest {
     }
 
     @discardableResult
-    func fetchBeamObject(_ beamObjectID: String,
-                         _ completionHandler: @escaping (Swift.Result<BeamObjectAPIType, Error>) -> Void) throws -> URLSessionDataTask {
-        try fetchBeamObjectWithFile("beam_object", beamObjectID, completionHandler)
+    func fetch(_ beamObjectID: String,
+               _ completionHandler: @escaping (Swift.Result<BeamObjectAPIType, Error>) -> Void) throws -> URLSessionDataTask {
+        try fetchWithFile("beam_object", beamObjectID, completionHandler)
     }
 
     @discardableResult
-    func fetchBeamObjectUpdatedAt(_ beamObjectID: String,
-                                  _ completionHandler: @escaping (Swift.Result<BeamObjectAPIType, Error>) -> Void) throws -> URLSessionDataTask {
-        try fetchBeamObjectWithFile("beam_object_updated_at", beamObjectID, completionHandler)
+    func fetchUpdatedAt(_ beamObjectID: String,
+                        _ completionHandler: @escaping (Swift.Result<BeamObjectAPIType, Error>) -> Void) throws -> URLSessionDataTask {
+        try fetchWithFile("beam_object_updated_at", beamObjectID, completionHandler)
     }
 
     // swiftlint:disable:next cyclomatic_complexity
-    private func fetchBeamObjectWithFile(_ filename: String,
-                                         _ beamObjectID: String,
-                                         _ completionHandler: @escaping (Swift.Result<BeamObjectAPIType, Error>) -> Void) throws -> URLSessionDataTask {
+    private func fetchWithFile(_ filename: String,
+                               _ beamObjectID: String,
+                               _ completionHandler: @escaping (Swift.Result<BeamObjectAPIType, Error>) -> Void) throws -> URLSessionDataTask {
         let parameters = BeamObjectIdParameters(id: beamObjectID)
         let bodyParamsRequest = GraphqlParameters(fileName: filename, variables: parameters)
 

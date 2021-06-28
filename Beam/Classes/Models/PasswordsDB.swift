@@ -9,17 +9,21 @@ import Foundation
 import BeamCore
 import GRDB
 
-struct PasswordsRecord {
+struct PasswordsRecord: BeamObjectProtocol {
     var id: Int64?
     var uuid: String
     var host: String
     var name: String
     var password: String
+    var createdAt: Date
+    var updatedAt: Date
+    var deletedAt: Date?
+    var previousChecksum: String?
 }
 
 extension PasswordsRecord: TableRecord {
     enum Columns: String, ColumnExpression {
-        case id, uuid, host, name, password
+        case id, uuid, host, name, password, createdAt, updatedAt, deletedAt
     }
 }
 
@@ -31,6 +35,9 @@ extension PasswordsRecord: FetchableRecord {
         host = row[Columns.host]
         name = row[Columns.name]
         password = row[Columns.password]
+        createdAt = row[Columns.createdAt]
+        updatedAt = row[Columns.updatedAt]
+        deletedAt = row[Columns.deletedAt]
     }
 }
 
@@ -71,6 +78,9 @@ class PasswordsDB: PasswordStore {
                 table.column("host", .text).notNull().indexed()
                 table.column("name", .text).notNull()
                 table.column("password", .text).notNull()
+                table.column("createdAt", .datetime).notNull()
+                table.column("updatedAt", .datetime).notNull()
+                table.column("deletedAt", .datetime)
             }
         })
     }
@@ -121,6 +131,7 @@ class PasswordsDB: PasswordStore {
         }
     }
 
+    // TODO: Use Result to return the error
     func password(host: String, username: String, completion: @escaping (String?) -> Void) {
         do {
             try dbQueue.read { db in
@@ -140,6 +151,7 @@ class PasswordsDB: PasswordStore {
         }
     }
 
+    // TODO: add a completion in case of errors.
     func save(host: String, username: String, password: String) {
         do {
             try dbQueue.write { db in
@@ -151,7 +163,9 @@ class PasswordsDB: PasswordStore {
                                                      uuid: id(for: host, and: username),
                                                      host: host,
                                                      name: username,
-                                                     password: encryptedPassword)
+                                                     password: encryptedPassword,
+                                                     createdAt: Date(),
+                                                     updatedAt: Date())
                 try passwordRecord.insert(db)
             }
         } catch let error {

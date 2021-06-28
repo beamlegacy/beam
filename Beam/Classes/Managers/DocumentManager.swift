@@ -1138,8 +1138,56 @@ extension DocumentManager {
     }
 
     @discardableResult
+    internal func saveOnBeamObjectAPI(_ documentStruct: DocumentStruct,
+                                      _ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) throws -> URLSessionTask? {
+        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            completion?(.success(false))
+            return nil
+        }
+
+        let beamObject = try BeamObjectAPIType(documentStruct, .document)
+        beamObject.previousChecksum = documentStruct.beamObjectPreviousChecksum
+
+        let request = BeamObjectRequest()
+
+        return try request.save(beamObject) { result in
+            switch result {
+            case .failure(let error):
+                Logger.shared.logError("Could not save \(beamObject): \(error.localizedDescription)", category: .beamObject)
+
+                completion?(.failure(error))
+            case .success(let updateBeamObject):
+                Logger.shared.logDebug("Saved \(updateBeamObject)", category: .beamObject)
+
+                // `beamObjectPreviousChecksum` stores the checksum we sent to the API
+                var sentDocumentStruct = documentStruct.copy()
+                sentDocumentStruct.beamObjectPreviousChecksum = updateBeamObject.beamObject?.previousChecksum
+
+                CoreDataManager.shared.persistentContainer.performBackgroundTask { context in
+                    guard let documentCoreData = try? Document.fetchWithId(context, documentStruct.id) else {
+                        completion?(.failure(DocumentManagerError.localDocumentNotFound))
+                        return
+                    }
+
+                    // TODO: store previous data sent for improved 3-ways merge?
+                    documentCoreData.beam_object_previous_checksum = sentDocumentStruct.beamObjectPreviousChecksum
+
+                    do {
+                        let success = try Self.saveContext(context: context)
+                        completion?(.success(success))
+                    } catch {
+                        completion?(.failure(error))
+                    }
+                }
+            }
+        }
+    }
+
+    @discardableResult
     internal func saveDocumentStructOnAPI(_ documentStruct: DocumentStruct,
                                           _ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) -> URLSessionTask? {
+        _ = try? saveOnBeamObjectAPI(documentStruct) { _ in }
+
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             completion?(.success(false))
             return nil
