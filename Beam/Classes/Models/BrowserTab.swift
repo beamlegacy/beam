@@ -320,81 +320,18 @@ import Promises
         webView.uiDelegate = nil
     }
 
-    func executeJS(_ jsCode: String, objectName: String?, omit: String? = nil) -> Promise<Any?> {
+    func executeJS(_ jsCode: String, objectName: String?) -> Promise<Any?> {
         Promise<Any?> { [unowned self] fulfill, reject in
             let parameterized = objectName != nil ? "beam.__ID__\(objectName!)." + jsCode : jsCode
             let obfuscatedCommand = Self.webViewConfiguration.obfuscate(str: parameterized)
 
-            if #available(macOS 11.4, *) {
-                // WKContentWorld is only available in macOS 11.0+
-                // Causes crash on macOX 11.0.1, issue is tracked at:
-                // https://linear.app/beamapp/issue/BE-1192/usage-of-wkframeinfo-and-wkcontentworld-crashes-beam-when-going-to-the
-                var frames = self.pointAndShoot.webPositions.framesInfo
-                if let href = omit {
-                    frames[href] = nil
-                }
-                frames.values.forEach({ frame in
-                    guard let message = frame.message else { return }
-                    webView.evaluateJavaScript(obfuscatedCommand, in: message.frameInfo, in: message.world) { response in
-                        switch response {
-                        case .success(let result):
-                            Logger.shared.logInfo("(\(obfuscatedCommand) succeeded: \(String(describing: result))", category: .javascript)
-                            fulfill(result)
-                        case .failure(let error):
-                            Logger.shared.logError("(\(obfuscatedCommand) failed: \(error.localizedDescription)", category: .javascript)
-                            reject(error)
-                        }
-                    }
-                })
-            } else {
-                // Fallback on earlier versions
-                // to main window frame
-                webView.evaluateJavaScript(obfuscatedCommand) { (result, error: Error?) in
-                    if error == nil {
-                        Logger.shared.logInfo("(\(obfuscatedCommand) succeeded: \(String(describing: result))",
-                                              category: .javascript)
-                        fulfill(result)
-                    } else {
-                        Logger.shared.logError("(\(obfuscatedCommand) failed: \(String(describing: error))",
-                                               category: .javascript)
-                        reject(error!)
-                    }
-                }
-            }
-
-        }
-    }
-
-    func executeJS(_ jsCode: String, objectName: String?, only: String) -> Promise<Any?> {
-        Promise<Any?> { [unowned self] fulfill, reject in
-            let parameterized = objectName != nil ? "beam.__ID__\(objectName!)." + jsCode : jsCode
-            let obfuscatedCommand = Self.webViewConfiguration.obfuscate(str: parameterized)
-
-            if #available(macOS 11.4, *) {
-                // WKContentWorld is only available in macOS 11.0+
-                // Causes crash on macOX 11.0.1, issue is tracked at:
-                // https://linear.app/beamapp/issue/BE-1192/usage-of-wkframeinfo-and-wkcontentworld-crashes-beam-when-going-to-the
-                if let frame = self.pointAndShoot.webPositions.framesInfo[only] {
-                    guard let message = frame.message else { return }
-                    webView.evaluateJavaScript(obfuscatedCommand, in: message.frameInfo, in: message.world) { (result) in
-                        Logger.shared.logInfo("(\(obfuscatedCommand) succeeded: \(String(describing: result))",
-                                              category: .javascript)
-                        fulfill(result)
-                    }
-                }
-            } else {
-                // Fallback on earlier versions
-                // to main window frame
-                webView.evaluateJavaScript(obfuscatedCommand) { (result, error: Error?) in
-                    if error == nil {
-                        Logger.shared.logInfo("(\(obfuscatedCommand) succeeded: \(String(describing: result))",
-                                              category: .javascript)
-                        fulfill(result)
-                    } else {
-                        Logger.shared.logError("(\(obfuscatedCommand) failed: \(String(describing: error))",
-                                               category: .javascript)
-                        reject(error!)
-                    }
+            webView.evaluateJavaScript(obfuscatedCommand) { (result, error: Error?) in
+                if error == nil {
+                    Logger.shared.logInfo("(\(obfuscatedCommand) succeeded: \(String(describing: result))", category: .javascript)
+                    fulfill(result)
+                } else {
+                    Logger.shared.logError("(\(obfuscatedCommand) failed: \(String(describing: error))", category: .javascript)
+                    reject(error!)
                 }
             }
 
