@@ -68,7 +68,7 @@ struct DownloaderView_Previews: PreviewProvider {
     static var previews: some View {
 
         let downloader = BeamDownloadManager()
-        downloader.downloadFile(at: URL(string: "https://devimages-cdn.apple.com/design/resources/download/SF-Symbols-2.1.dmg")!, headers: [:])
+        downloader.downloadFile(at: URL(string: "https://devimages-cdn.apple.com/design/resources/download/SF-Symbols-2.1.dmg")!, headers: [:], suggestedFileName: nil)
 
         return Group {
             DownloaderView(downloader: downloader)

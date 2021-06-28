@@ -55,6 +55,21 @@ class BeamWebNavigationController: WebPageHolder, WebNavigationController {
         }
         isNavigatingFromSearchBar = false
     }
+
+    private func shouldDownloadFile(for navigationResponse: WKNavigationResponse) -> Bool {
+
+        guard let response = navigationResponse.response as? HTTPURLResponse else { return false }
+
+        let contentDisposition = BeamDownloadManager.contentDisposition(from: response.allHeaderFields)
+
+        if let disposition = contentDisposition {
+            return disposition == .attachment
+        } else if !navigationResponse.canShowMIMEType {
+            return true
+        } else {
+            return false
+        }
+    }
 }
 
 extension BeamWebNavigationController: WKNavigationDelegate {
@@ -67,6 +82,7 @@ extension BeamWebNavigationController: WKNavigationDelegate {
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction,
                  preferences: WKWebpagePreferences,
                  decisionHandler: @escaping (WKNavigationActionPolicy, WKWebpagePreferences) -> Void) {
+
         handleBackForwardWebView(navigationAction: navigationAction)
         if let targetURL = navigationAction.request.url {
             if navigationAction.modifierFlags.contains(.command) {
@@ -80,15 +96,16 @@ extension BeamWebNavigationController: WKNavigationDelegate {
 
     func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse,
                  decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
+
         if let response = navigationResponse.response as? HTTPURLResponse,
-           !navigationResponse.canShowMIMEType,
-           let url = response.url {
+           let url = response.url,
+           shouldDownloadFile(for: navigationResponse) {
             decisionHandler(.cancel)
             var headers: [String: String] = [:]
             if let sourceURL = webView.url {
                 headers["Referer"] = sourceURL.absoluteString
             }
-            page.downloadManager.downloadFile(at: url, headers: headers, destinationFoldedURL: nil)
+            page.downloadManager.downloadFile(at: url, headers: headers, suggestedFileName: response.suggestedFilename, destinationFoldedURL: nil)
         } else {
             decisionHandler(.allow)
         }
@@ -123,4 +140,5 @@ extension BeamWebNavigationController: WKNavigationDelegate {
 
     func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
     }
+
 }
