@@ -325,9 +325,10 @@ import Promises
             let parameterized = objectName != nil ? "beam.__ID__\(objectName!)." + jsCode : jsCode
             let obfuscatedCommand = Self.webViewConfiguration.obfuscate(str: parameterized)
 
-            if #available(macOS 11.0, *) {
+            if #available(macOS 11.4, *) {
                 // WKContentWorld is only available in macOS 11.0+
-                // in evaluateJavaScript specific (i)frame
+                // Causes crash on macOX 11.0.1, issue is tracked at:
+                // https://linear.app/beamapp/issue/BE-1192/usage-of-wkframeinfo-and-wkcontentworld-crashes-beam-when-going-to-the
                 var frames = self.pointAndShoot.webPositions.framesInfo
                 if let href = omit {
                     frames[href] = nil
@@ -369,9 +370,10 @@ import Promises
             let parameterized = objectName != nil ? "beam.__ID__\(objectName!)." + jsCode : jsCode
             let obfuscatedCommand = Self.webViewConfiguration.obfuscate(str: parameterized)
 
-            if #available(macOS 11.0, *) {
+            if #available(macOS 11.4, *) {
                 // WKContentWorld is only available in macOS 11.0+
-                // in evaluateJavaScript specific (i)frame
+                // Causes crash on macOX 11.0.1, issue is tracked at:
+                // https://linear.app/beamapp/issue/BE-1192/usage-of-wkframeinfo-and-wkcontentworld-crashes-beam-when-going-to-the
                 if let frame = self.pointAndShoot.webPositions.framesInfo[only] {
                     guard let message = frame.message else { return }
                     webView.evaluateJavaScript(obfuscatedCommand, in: message.frameInfo, in: message.world) { (result) in
