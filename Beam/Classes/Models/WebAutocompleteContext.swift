@@ -40,49 +40,49 @@ extension DOMInputElement {
         guard let autocomplete = autocomplete else {
             return nil
         }
-        if let autocompleteCase = DOMInputAutocomplete(rawValue: autocomplete), autocompleteCase != .off {
+        if let autocompleteCase = DOMInputAutocomplete(rawValue: autocomplete) {
             return autocompleteCase
         }
-        return DOMInputAutocomplete.on
+        return DOMInputAutocomplete.off
     }
 
     var isLoginField: Bool {
         switch decodedAutocomplete {
-            case .email:
-                return true
-            case .username:
-                return true
-            case .currentPassword:
-                return true
-            default:
-                return false
+        case .email:
+            return true
+        case .username:
+            return true
+        case .currentPassword:
+            return true
+        default:
+            return false
         }
     }
 
     var isAutocompleteOnField: Bool {
         switch decodedAutocomplete {
-            case .on:
-                return true
-            default:
-                return false
+        case .on:
+            return true
+        default:
+            return false
         }
     }
 
     var isCurrentPasswordField: Bool {
         switch decodedAutocomplete {
-            case .currentPassword:
-                return true
-            default:
-                return false
+        case .currentPassword:
+            return true
+        default:
+            return false
         }
     }
 
     var isNewPasswordField: Bool {
         switch decodedAutocomplete {
-            case .newPassword:
-                return true
-            default:
-                return false
+        case .newPassword:
+            return true
+        default:
+            return false
         }
     }
 
@@ -97,8 +97,8 @@ extension DOMInputElement {
 
     var isPaymentInfoField: Bool {
         switch decodedAutocomplete {
-//        case .creditCardNumber:
-//            return true
+        //        case .creditCardNumber:
+        //            return true
         default:
             return false
         }
