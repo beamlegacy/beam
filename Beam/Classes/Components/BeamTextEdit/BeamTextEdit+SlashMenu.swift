@@ -93,7 +93,7 @@ extension BeamTextEdit {
         }
         return [
             ContextMenuItem(title: "Card Reference", subtitle: "@ or [[", icon: "field-card", action: { action(.internalLink) }),
-            ContextMenuItem(title: "Task", subtitle: "-[]", icon: "editor-task", action: { action(.task) }),
+            ContextMenuItem(title: "Todo", subtitle: "-[]", icon: "editor-task", action: { action(.task) }),
             ContextMenuItem(title: "Quote", subtitle: "\"", icon: "editor-format_quote", action: { action(.quote) }),
             ContextMenuItem.separator(),
             ContextMenuItem(title: "Bold", subtitle: "*", action: { action(.bold) }),
