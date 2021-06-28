@@ -88,12 +88,8 @@ class PointAndShoot: WebPageHolder {
         executeJS("setStatus('none')")
     }
 
-    private func executeJS(_ method: String, omit: String? = nil) {
-        page.executeJS(method, objectName: "PointAndShoot", omit: omit)
-    }
-
-    private func executeJS(_ method: String, only: String) {
-        page.executeJS(method, objectName: "PointAndShoot", only: only)
+    private func executeJS(_ method: String) {
+        page.executeJS(method, objectName: "PointAndShoot")
     }
 
     /**
@@ -386,7 +382,7 @@ class PointAndShoot: WebPageHolder {
         group.quoteId = quoteId
         group.noteInfo = noteInfo
         shootGroups.append(group)
-        executeJS("assignNote('\(quoteId)')", only: group.href)
+        executeJS("assignNote('\(quoteId)')")
         showShootInfo(group: group)
         activeShootGroup = nil
     }

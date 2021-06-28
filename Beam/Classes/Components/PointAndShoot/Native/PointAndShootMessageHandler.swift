@@ -188,7 +188,7 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
                     return
                 }
 
-                _ = webPage.executeJS("syncStatus('\(status)')", objectName: "PointAndShoot", omit: href)
+                _ = webPage.executeJS("syncStatus('\(status)')", objectName: "PointAndShoot")
                 pointAndShoot.status = PointAndShootStatus(rawValue: status)!
             }
 
