@@ -29,5 +29,5 @@ protocol DownloadManager {
     ///   - url: The URL of the file to download
     ///   - headers: Headers that will be added to the URLRequest
     ///   - destinationFoldedURL: Desired destination folder. If not provided, the download will end up in the download folder
-    func downloadFile(at url: URL, headers: [String: String], destinationFoldedURL: URL?)
+    func downloadFile(at url: URL, headers: [String: String], suggestedFileName: String?, destinationFoldedURL: URL?)
 }

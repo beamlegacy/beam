@@ -108,7 +108,7 @@ public class BeamDownloadManager: NSObject, DownloadManager, ObservableObject {
         }
     }
 
-    func downloadFile(at url: URL, headers: [String: String], destinationFoldedURL: URL? = nil) {
+    func downloadFile(at url: URL, headers: [String: String], suggestedFileName: String?, destinationFoldedURL: URL? = nil) {
 
         let destinationFolder: URL
         if let desiredFolder = destinationFoldedURL {
@@ -118,7 +118,7 @@ public class BeamDownloadManager: NSObject, DownloadManager, ObservableObject {
             destinationFolder = downloadFolder
         }
 
-        let downloadedFileName = url.lastPathComponent
+        let downloadedFileName = suggestedFileName ?? url.lastPathComponent
         let fileInDownloadURL = destinationFolder.appendingPathComponent(downloadedFileName)
 
         var request = URLRequest(url: url)
@@ -238,5 +238,26 @@ extension BeamDownloadManager: URLSessionDelegate, URLSessionDownloadDelegate {
         guard let downloadDirectory = try? downloadDirectoryURL() else { return }
 
         moveFile(sourceDownload: download, from: location, to: downloadDirectory)
+    }
+}
+
+extension BeamDownloadManager {
+
+    enum ContentDisposition {
+        case inline
+        case attachment
+    }
+
+    static func contentDisposition(from headers: [AnyHashable: Any]) -> ContentDisposition? {
+
+        guard let disposition = headers["Content-Disposition"] as? String else { return nil }
+        if disposition.hasPrefix("inline") {
+            return .inline
+        } else if disposition.hasPrefix("attachment") {
+            return .attachment
+        } else {
+            return nil
+        }
+
     }
 }
