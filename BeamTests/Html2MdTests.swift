@@ -5,6 +5,7 @@
 //  Created by Sebastien Metrot on 05/11/2020.
 //
 
+import  Nimble
 import XCTest
 import Foundation
 import SwiftSoup
@@ -45,7 +46,9 @@ class Html2MdTests: XCTestCase {
         """
         guard let doc = try? SwiftSoup.parse(html) else { return }
         let txt = html2TextForClustering(doc: doc)
-        
-        XCTAssertEqual(txt, "This is a paragraph.This is another paragraph.")
+
+        expect(txt) == "This is another paragraph."
+
+        // XCTAssertEqual(txt, "This is a paragraph.This is another paragraph.")
     }
 }
