@@ -229,7 +229,9 @@ class BeamTextTests: XCTestCase {
         let string = "tée🤦🏻‍♂️st"
 
         let text = BeamText(text: string)
-        let attributedString = text.buildAttributedString(fontSize: 12, cursorPosition: 0, elementKind: .bullet, mouseInteraction: nil, markedRange: nil, selectedRange: nil)
+        let asBuilder = BeamTextAttributedStringBuilder()
+        let config = BeamTextAttributedStringBuilder.Config(elementKind: .bullet, ranges: text.ranges, fontSize: 12)
+        let attributedString = asBuilder.build(config: config)
         let textFrame = TextFrame.create(string: attributedString, atPosition: NSPoint(), textWidth: 500)
         guard let line = textFrame.lines.first else { fatalError() }
         let carets = line.carets

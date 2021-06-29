@@ -122,6 +122,7 @@ public struct BTextEditScrollable: NSViewRepresentable {
     var showTitle = true
 
     var scrollToElementId: UUID?
+    private let focusOnAppear = true
 
     public func makeCoordinator() -> BTextEditScrollableCoordinator {
         BTextEditScrollableCoordinator(self)
@@ -148,6 +149,10 @@ public struct BTextEditScrollable: NSViewRepresentable {
         edit.centerText = centerText
         edit.showTitle = showTitle
         edit.scrollToElementId = scrollToElementId
+
+        if focusOnAppear {
+            _ = edit.becomeFirstResponder()
+        }
 
         let scrollView = NSScrollView()
         scrollView.automaticallyAdjustsContentInsets = false
@@ -176,6 +181,9 @@ public struct BTextEditScrollable: NSViewRepresentable {
 
         if edit.note !== note {
             edit.note = note
+            if focusOnAppear {
+                _ = edit.becomeFirstResponder()
+            }
         }
 
         edit.openURL = openURL
