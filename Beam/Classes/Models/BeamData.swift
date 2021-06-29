@@ -119,14 +119,13 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
                 parentId = previousTabTree.current.link
             }
             self.clusteringManager.addPage(id: id, parentId: parentId, value: tabToIndex)
-        }.store(in: &scope)
 
-        $tabToIndex.sink { [weak self] tabToIndex in
-            guard let _ = self,
-                  let tabToIndex = tabToIndex else { return }
-
+            // Update history record
             do {
-                try GRDBDatabase.shared.insertHistoryUrl(url: tabToIndex.url.string, title: tabToIndex.document.title, content: tabToIndex.textContent)
+                try GRDBDatabase.shared.insertHistoryUrl(urlId: id,
+                                                         url: tabToIndex.url.string,
+                                                         title: tabToIndex.document.title,
+                                                         content: tabToIndex.textContent)
             } catch {
                 Logger.shared.logError("unable to save history url \(tabToIndex.url.string)", category: .search)
             }

@@ -75,7 +75,7 @@ class AutocompleteManager: ObservableObject {
     }
 
     private func autocompleteHistoryResults(for query: String) -> [AutocompleteResult] {
-        GRDBDatabase.shared.searchHistory(query: query).map {
+        GRDBDatabase.shared.searchHistory(query: query, enabledFrecencyParam: .readingTime30d0).map {
             var urlString = $0.url
             let url = URL(string: urlString)
             if let url = url {
