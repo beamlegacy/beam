@@ -259,6 +259,7 @@
 		528286B625E806CD00C0CCEE /* NoteEditorUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 528286B525E806CD00C0CCEE /* NoteEditorUITests.swift */; };
 		5285672A26275A8D00DDBE45 /* BeamToBeam2Migration.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 5285672926275A8D00DDBE45 /* BeamToBeam2Migration.xcmappingmodel */; };
 		528910ED25FBBDE800492969 /* DocumentAPITypeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 528910EC25FBBDE800492969 /* DocumentAPITypeTests.swift */; };
+		5291CEE8268B5969001645A2 /* PasswordManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5291CEE7268B5969001645A2 /* PasswordManager.swift */; };
 		5298268C2641A37500E9448C /* GithubButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5298268B2641A37500E9448C /* GithubButton.swift */; };
 		529826A62641A46E00E9448C /* GoogleButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 529826A52641A46E00E9448C /* GoogleButton.swift */; };
 		5298649125D151D300D27A80 /* AutocompleteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5298649025D151D300D27A80 /* AutocompleteTests.swift */; };
@@ -565,8 +566,8 @@
 		A5946846265E30350044A892 /* Fakery in Frameworks */ = {isa = PBXBuildFile; productRef = A5946845265E30350044A892 /* Fakery */; };
 		A59C4413268233960066AA0E /* CheckboxLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A59C4412268233960066AA0E /* CheckboxLayer.swift */; };
 		A59D33882655101A002E7E96 /* WiggleEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = A59D33872655101A002E7E96 /* WiggleEffect.swift */; };
-		A5B268A426845549001797ED /* BeamTextAttributedStringBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5B268A326845549001797ED /* BeamTextAttributedStringBuilder.swift */; };
 		A5A6A428267F123C007F1B2F /* CommandManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5109F902670227800304B3A /* CommandManagerTests.swift */; };
+		A5B268A426845549001797ED /* BeamTextAttributedStringBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5B268A326845549001797ED /* BeamTextAttributedStringBuilder.swift */; };
 		A5BF04D32681A4F800CC80EB /* ElementNode+Layers.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BF04D22681A4F800CC80EB /* ElementNode+Layers.swift */; };
 		A5C7F10A267CC9FD002EE550 /* BeamTextEdit+InputDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C7F109267CC9FD002EE550 /* BeamTextEdit+InputDetector.swift */; };
 		A5C9F005261353420096380F /* WindowPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C9F004261353420096380F /* WindowPage.swift */; };
@@ -632,7 +633,7 @@
 		BAA67C4B9FEFA984D58B802F /* PointAndShootMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67B138DFC6DBC31D184E0 /* PointAndShootMessageHandler.swift */; };
 		BAA67C5AEE52409E39DB25C8 /* BeamWebViewConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67765B4D27F2D4F2B8562 /* BeamWebViewConfiguration.swift */; };
 		BAA67C9D1849C8B7A045A51F /* PointAndShootTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA670D8E6A58A6836DA2794 /* PointAndShootTest.swift */; };
-		BAA67CB7B8DE8FC709C996B3 /* PasswordManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA678E2B362F5D8A1A801D4 /* PasswordManager.swift */; };
+		BAA67CB7B8DE8FC709C996B3 /* PasswordManagerElements.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA678E2B362F5D8A1A801D4 /* PasswordManagerElements.swift */; };
 		BAA67CE03D8FFB795346CD06 /* WebPositions.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67DD5764226E47DFA6F9E /* WebPositions.swift */; };
 		BAA67D3C5D44656448093D73 /* LoggingMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67CDE485E5E7774A978D2 /* LoggingMessageHandler.swift */; };
 		BAA67DC79E1BCAF3869F3DBB /* build_js.sh in Resources */ = {isa = PBXBuildFile; fileRef = BAA6740CED2A340CD3002907 /* build_js.sh */; };
@@ -1052,6 +1053,7 @@
 		5285672926275A8D00DDBE45 /* BeamToBeam2Migration.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = BeamToBeam2Migration.xcmappingmodel; sourceTree = "<group>"; };
 		5287EC2E25C42B0100CE1DD9 /* String+UUID.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+UUID.swift"; sourceTree = "<group>"; };
 		528910EC25FBBDE800492969 /* DocumentAPITypeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentAPITypeTests.swift; sourceTree = "<group>"; };
+		5291CEE7268B5969001645A2 /* PasswordManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordManager.swift; sourceTree = "<group>"; };
 		5298268B2641A37500E9448C /* GithubButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GithubButton.swift; sourceTree = "<group>"; };
 		529826A52641A46E00E9448C /* GoogleButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleButton.swift; sourceTree = "<group>"; };
 		5298649025D151D300D27A80 /* AutocompleteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutocompleteTests.swift; sourceTree = "<group>"; };
@@ -1407,7 +1409,7 @@
 		BAA677C8DE42140C0F0BD535 /* PointAndShootUI_native.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = PointAndShootUI_native.ts; sourceTree = "<group>"; };
 		BAA67837448460D14C798F73 /* WebNavigationController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebNavigationController.swift; sourceTree = "<group>"; };
 		BAA678DCBD094131A9BC96F2 /* BrowsingSession.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BrowsingSession.swift; sourceTree = "<group>"; };
-		BAA678E2B362F5D8A1A801D4 /* PasswordManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PasswordManager.swift; sourceTree = "<group>"; };
+		BAA678E2B362F5D8A1A801D4 /* PasswordManagerElements.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PasswordManagerElements.swift; sourceTree = "<group>"; };
 		BAA678E5952B4D5130248886 /* BeamDownloadManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeamDownloadManager.swift; sourceTree = "<group>"; };
 		BAA678F0976FD26A8BF9B2CA /* PopupUI_web.scss */ = {isa = PBXFileReference; lastKnownFileType = text; path = PopupUI_web.scss; sourceTree = "<group>"; };
 		BAA678F7FE18AF760346FB0B /* Frames.test.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = Frames.test.ts; sourceTree = "<group>"; };
@@ -2104,6 +2106,7 @@
 				418171EA2581107C00317ED8 /* LibrairiesManager.swift */,
 				961EC58525B7A75A009FA322 /* LinkManager.swift */,
 				A0AA693225C41C9B0038F9A3 /* MouseHandler.swift */,
+				5291CEE7268B5969001645A2 /* PasswordManager.swift */,
 				A0F462342668D79E0003EAD6 /* RadBlockPreferencesManager.swift */,
 				A5153EE2260DD58A00C84902 /* RecentsManager.swift */,
 			);
@@ -3158,7 +3161,7 @@
 			children = (
 				BAA670958C9BAC6322CDA80A /* PasswordOverlayController.swift */,
 				BAA675B80B855A4B2886805B /* PasswordMessageHandler.swift */,
-				BAA678E2B362F5D8A1A801D4 /* PasswordManager.swift */,
+				BAA678E2B362F5D8A1A801D4 /* PasswordManagerElements.swift */,
 				BAA67AD6C73B8B9546778E72 /* PasswordManager.js */,
 				8726448E26199B8F0070E83D /* OptionSelector.swift */,
 			);
@@ -4029,6 +4032,7 @@
 				A52BFDF72608D6710028D3F3 /* BeamFont.swift in Sources */,
 				96319D6D26163AAD00D1CF31 /* BeamNote+CommandManager.swift in Sources */,
 				A005909F26677E8400698E75 /* PrivacyView.swift in Sources */,
+				5291CEE8268B5969001645A2 /* PasswordManager.swift in Sources */,
 				960A57E8264C88920061E8D2 /* ProxyEmbedNode.swift in Sources */,
 				4181724E2581107C00317ED8 /* TabStats.swift in Sources */,
 				4181724F2581107C00317ED8 /* WebView.swift in Sources */,
@@ -4227,7 +4231,7 @@
 				BAA67DDD4452566DFF99171E /* PasswordOverlayController.swift in Sources */,
 				960A57E4264C84BD0061E8D2 /* ProxyElement.swift in Sources */,
 				BAA6703B2414F077ED3A09D8 /* PasswordMessageHandler.swift in Sources */,
-				BAA67CB7B8DE8FC709C996B3 /* PasswordManager.swift in Sources */,
+				BAA67CB7B8DE8FC709C996B3 /* PasswordManagerElements.swift in Sources */,
 				BAA67A72C76AE25BF2FC60BD /* BrowsingScorer.swift in Sources */,
 				BAA67259A3927FBE4C92280B /* BrowsingTreeScorer.swift in Sources */,
 				8746CCA6266DFDCD00F44D41 /* PasswordImporter.swift in Sources */,

@@ -1,5 +1,5 @@
 mutation UpdateBeamObjects($beamObjects: [BeamObjectInput!]!) {
-  updateBeamObjects(input: {beamObjects: $beamObjects}) {
+  updateBeamObjects(input: {beamObjectsInput: $beamObjects}) {
     beamObjects {
       id
     }

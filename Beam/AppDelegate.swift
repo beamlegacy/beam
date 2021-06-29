@@ -40,6 +40,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     let documentManager = DocumentManager()
     let databaseManager = DatabaseManager()
+    let passwordManager = PasswordManager()
 
     #if DEBUG
     var beamUIMenuGenerator: BeamUITestsMenuGenerator!
@@ -112,6 +113,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         // My feeling is we should sync + trigger notification and only start network calls when
         // this sync has finished.
+
+        try? passwordManager.saveAllOnBeamObjectApi { result in
+            switch result {
+            case .failure(let error):
+                Logger.shared.logError("Couldn't sync passwords: \(error.localizedDescription)",
+                                       category: .passwordManager)
+            case .success(let success):
+                Logger.shared.logDebug("Synced passwords: \(success)",
+                                       category: .passwordManager)
+            }
+        }
 
         databaseManager.syncAll { result in
             switch result {

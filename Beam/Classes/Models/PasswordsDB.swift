@@ -81,6 +81,7 @@ class PasswordsDB: PasswordStore {
                 table.column("createdAt", .datetime).notNull()
                 table.column("updatedAt", .datetime).notNull()
                 table.column("deletedAt", .datetime)
+                table.column("previousChecksum", .text).notNull()
             }
         })
     }
