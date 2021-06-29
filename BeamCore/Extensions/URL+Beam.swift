@@ -46,13 +46,23 @@ public extension URL {
         return ["http", "https", "file"]
     }
 
+    func extractYouTubeId() -> String? {
+        let url = self.absoluteString
+        let typePattern = "(?:(?:\\.be\\/|embed\\/|v\\/|\\?v=|\\&v=|\\/videos\\/)|(?:[\\w+]+#\\w\\/\\w(?:\\/[\\w]+)?\\/\\w\\/))([\\w-_]+)"
+        let regex = try? NSRegularExpression(pattern: typePattern, options: .caseInsensitive)
+        return regex
+            .flatMap { $0.firstMatch(in: url, range: NSRange(location: 0, length: url.count)) }
+            .flatMap { Range($0.range(at: 1), in: url) }
+            .map { String(url[$0]) }
+    }
+
     var embed: URL? {
         guard let scheme = self.scheme,
               let host = self.host else {
             return nil
         }
 
-        if let youtubeID = self.query?.capturedGroups(withRegex: "v=([\\w|\\d]+)&?.*").first {
+        if let youtubeID = self.extractYouTubeId() {
             return URL(string: "\(scheme)://\(host)/embed/\(youtubeID)")
         }
 
