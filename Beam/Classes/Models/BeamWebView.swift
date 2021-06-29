@@ -36,4 +36,18 @@ class BeamWebView: WKWebView {
         }
         super.keyDown(with: event)
     }
+
+    public func setupForEmbed() {
+        preventScrolling = true
+    }
+
+    var preventScrolling: Bool = false
+    public override func scrollWheel(with theEvent: NSEvent) {
+        guard preventScrolling else {
+            super.scrollWheel(with: theEvent)
+            return
+        }
+        nextResponder?.scrollWheel(with: theEvent)
+    }
+
 }

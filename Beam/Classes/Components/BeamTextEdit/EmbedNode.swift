@@ -53,6 +53,7 @@ public class EmbedNode: ElementNode {
         webView.navigationDelegate = self
         webView.wantsLayer = true
         webView.allowsMagnification = true
+        webView.setupForEmbed()
         editor.addSubview(webView)
 
         guard let url = URL(string: source)?.embed
