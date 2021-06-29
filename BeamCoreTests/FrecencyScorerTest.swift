@@ -17,13 +17,10 @@ class FrecencyScorerTest: XCTestCase {
     class FakeFrecencyStorage: FrecencyStorage {
         var data: ScoreData = ScoreData()
 
-        func getOne(urlId: UInt64, paramKey: FrecencyParamKey) -> FrecencyScore? {
+        func fetchOne(urlId: UInt64, paramKey: FrecencyParamKey) throws -> FrecencyScore? {
             return data[paramKey]?[urlId]
         }
-        func getAll(urlIds: [UInt64], paramKey: FrecencyParamKey) -> [FrecencyScore] {
-            return urlIds.compactMap { getOne(urlId: $0, paramKey: paramKey) }
-        }
-        func save(score: FrecencyScore, paramKey: FrecencyParamKey) {
+        func save(score: FrecencyScore, paramKey: FrecencyParamKey) throws {
             if data[paramKey] != nil {
                 data[paramKey]?[score.urlId] = score
             } else {
@@ -36,14 +33,11 @@ class FrecencyScorerTest: XCTestCase {
         //test frecency score computation and insertion
 
         let halfLife = Float(10.0)
-        func testScoreValue(_ storage: FrecencyStorage, _ urlId: UInt64, _ paramsKey: FrecencyParamKey, _ value: Float, _ date: Date) {
-            guard let score = storage.getOne(urlId: urlId, paramKey: paramsKey) else {
-                XCTFail("score object not found")
-                return
-            }
-            XCTAssertEqual(score.lastScore, value, "wrong last score value")
-            XCTAssertEqual(score.lastTimestamp, date, "wrong last timestamp value")
-            XCTAssertEqual(score.sortValue, log(value) + Float(date.timeIntervalSinceReferenceDate) * log(2) / halfLife, "wrong sort value")
+        func testScoreValue(_ storage: FrecencyStorage, _ urlId: UInt64, _ paramsKey: FrecencyParamKey, _ value: Float, _ date: Date) throws {
+            let score = try storage.fetchOne(urlId: urlId, paramKey: paramsKey)
+            XCTAssertEqual(score?.lastScore, value, "wrong last score value")
+            XCTAssertEqual(score?.lastTimestamp, date, "wrong last timestamp value")
+            XCTAssertEqual(score?.sortValue, log(value) + Float(date.timeIntervalSinceReferenceDate) * log(2) / halfLife, "wrong sort value")
         }
 
         let testfrecencyParameters: [FrecencyParamKey: FrecencyParam] = [
@@ -56,22 +50,22 @@ class FrecencyScorerTest: XCTestCase {
         let later = Date(timeInterval: Double(halfLife), since: now)
         //non pre exisiting score insertion
         scorer.update(urlId: 0, value: 1, visitType: .searchBar, date: now, paramKey: .readingTime30d0)
-        testScoreValue(scorer.storage, 0, .readingTime30d0, 2, now)
+        try testScoreValue(scorer.storage, 0, .readingTime30d0, 2, now)
         //pre existing score update
         scorer.update(urlId: 0, value: 1, visitType: .searchBar, date: later, paramKey: .readingTime30d0)
-        testScoreValue(scorer.storage, 0, .readingTime30d0, 2 + 0.5 * 2, later)
+        try testScoreValue(scorer.storage, 0, .readingTime30d0, 2 + 0.5 * 2, later)
 
         //no pre exisiting score insertion
         scorer.update(urlId: 1, value: 1, visitType: .linkActivation, date: now, paramKey: .visit30d0)
-        testScoreValue(scorer.storage, 1, .visit30d0, 1, now)
+        try testScoreValue(scorer.storage, 1, .visit30d0, 1, now)
 
         //score inserted into precise score name does not pollute other score name
-        XCTAssertNil(scorer.storage.getOne(urlId: 1, paramKey: .readingTime30d0), "no score value")
-        XCTAssertNil(scorer.storage.getOne(urlId: 0, paramKey: .visit30d0), "no score value")
+        XCTAssertNil(try scorer.storage.fetchOne(urlId: 1, paramKey: .readingTime30d0), "no score value")
+        XCTAssertNil(try scorer.storage.fetchOne(urlId: 0, paramKey: .visit30d0), "no score value")
 
         //checking that sorting key works for a 0 score
         scorer.update(urlId: 2, value: 0, visitType: .linkActivation, date: now, paramKey: .visit30d0)
-        testScoreValue(scorer.storage, 2, .visit30d0, 0, now)
+        try testScoreValue(scorer.storage, 2, .visit30d0, 0, now)
 
     }
 }

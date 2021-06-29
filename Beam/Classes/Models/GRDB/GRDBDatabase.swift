@@ -54,6 +54,46 @@ struct GRDBDatabase {
             }
         }
 
+        migrator.registerMigration("createFrecencyUrlRecord") { db in
+            // Delete the history
+            try db.dropFTS4SynchronizationTriggers(forTable: "HistoryUrlRecord")
+            try db.execute(sql: "DROP TABLE HistoryUrlContent")
+            try db.execute(sql: "DROP TABLE HistoryUrlRecord")
+
+            try db.create(table: "historyUrlRecord", ifNotExists: true) { t in
+                // LinkStore URL id
+                t.column("urlId").unique()
+                // FIXME: Use only the LinkStore URL id as a primary key
+                t.column("url", .text).primaryKey()
+                t.column("last_visited_at", .date)
+                t.column("title", .text)
+                t.column("content", .text)
+            }
+
+            // Index title and text in FTS from HistoryUrlRecord.
+            try db.create(virtualTable: "historyUrlContent", using: FTS4()) { t in
+                t.synchronize(withTable: "historyUrlRecord")
+                t.tokenizer = .unicode61()
+                t.column("title")
+                t.column("content")
+            }
+
+            try db.create(table: "frecencyUrlRecord", ifNotExists: true) { t in
+                t.column("urlId", .integer) // FIXME: with .references("linkStore", column: "urlId")
+                t.column("lastAccessAt", .date)
+                t.column("frecencyScore", .double)
+                t.column("frecencySortScore", .double)
+                t.column("frecencyKey")
+                t.primaryKey(["urlId", "frecencyKey"])
+            }
+
+        }
+
+        #if DEBUG
+        // Speed up development by nuking the database when migrations change
+        migrator.eraseDatabaseOnSchemaChange = true
+        #endif
+
         try migrator.migrate(dbWriter)
 
         if needsCardReindexing {
@@ -148,13 +188,18 @@ extension GRDBDatabase {
     // MARK: - HistoryUrlRecord
 
     /// Register the URL in the history table associated with a `last_visited_at` timestamp.
+    /// - Parameter urlId: URL identifier from the LinkStore
     /// - Parameter url: URL to the page
     /// - Parameter title: Title of the page indexed in FTS
     /// - Parameter text: Content of the page indexed in FTS
-    func insertHistoryUrl(url: String, title: String, content: String?) throws {
+    func insertHistoryUrl(urlId: UInt64, url: String, title: String, content: String?) throws {
         try dbWriter.write { db in
-            try db.execute(sql: "INSERT OR REPLACE INTO HistoryUrlRecord (url, title, content, last_visited_at) VALUES (?, ?, ?, datetime('now'))",
-                           arguments: [url, title, content ?? ""])
+            try db.execute(
+                sql: """
+                INSERT OR REPLACE INTO historyUrlRecord (urlId, url, title, content, last_visited_at)
+                VALUES (?, ?, ?, ?, datetime('now'))
+                """,
+                arguments: [urlId, url, title, content ?? ""])
         }
     }
 }
@@ -215,11 +260,25 @@ extension GRDBDatabase {
     // MARK: - HistorySearchResult
 
     struct HistorySearchResult {
-        var title: String
-        var url: String
+        let title: String
+        let url: String
+        let frecency: FrecencyUrlRecord?
     }
 
-    func searchHistory(query: String, prefixLast: Bool = true) -> [HistorySearchResult] {
+    private struct HistoryUrlRecordWithFrecency: FetchableRecord {
+        var history: HistoryUrlRecord
+        var frecency: FrecencyUrlRecord?
+
+        init(row: Row) {
+            history = HistoryUrlRecord(row: row)
+            frecency = row[HistoryUrlRecord.frecencyForeign]
+        }
+    }
+
+    /// Perform a history search query.
+    /// - Parameter prefixLast: when enabled the last token is prefix matched.
+    /// - Parameter enabledFrecencyParam: select the frecency parameter to use to sort results.
+    func searchHistory(query: String, prefixLast: Bool = true, enabledFrecencyParam: FrecencyParamKey? = nil) -> [HistorySearchResult] {
         guard var pattern = FTS3Pattern(matchingAnyTokenIn: query) else { return [] }
         if prefixLast {
             guard let prefixLastPattern = try? FTS3Pattern(rawPattern: pattern.rawPattern + "*") else { return [] }
@@ -228,9 +287,22 @@ extension GRDBDatabase {
 
         do {
             let results = try dbReader.read { db -> [HistorySearchResult] in
-                let request = HistoryUrlRecord.joining(required: HistoryUrlRecord.content.matching(pattern))
-                return try request.fetchAll(db).map { record -> HistorySearchResult in
-                    HistorySearchResult(title: record.title, url: record.url)
+                var request = HistoryUrlRecord
+                    .joining(required: HistoryUrlRecord.content.matching(pattern))
+                    .including(optional: HistoryUrlRecord.frecency)
+                if let frecencyParam = enabledFrecencyParam {
+                    request = request
+                        .filter(literal: "frecencyUrlRecord.frecencyKey = \(frecencyParam)")
+                        .order(literal: "frecencyUrlRecord.frecencySortScore DESC")
+                }
+
+                return try request
+                    .asRequest(of: HistoryUrlRecordWithFrecency.self)
+                    .fetchAll(db)
+                    .map { record -> HistorySearchResult in
+                    HistorySearchResult(title: record.history.title,
+                                        url: record.history.url,
+                                        frecency: record.frecency)
                 }
             }
             return results
@@ -273,5 +345,26 @@ extension GRDBDatabase {
         return try dbWriter.read({ db in
             return try BidirectionalLink.fetchAll(db, keys: [noteId])
         })
+    }
+
+    // MARK: - FrecencyUrlRecord
+
+    func saveFrecencyUrl(_ frecencyUrl: inout FrecencyUrlRecord) throws {
+        try dbWriter.write { db in
+            try frecencyUrl.save(db)
+        }
+    }
+
+    func fetchOneFrecency(fromUrl: UInt64) throws -> [FrecencyParamKey: FrecencyUrlRecord] {
+        var result = [FrecencyParamKey: FrecencyUrlRecord]()
+        for type in FrecencyParamKey.allCases {
+            try dbReader.read { db in
+                if let record = try FrecencyUrlRecord.fetchOne(db, sql: "SELECT * FROM FrecencyUrlRecord WHERE urlId = ? AND frecencyKey = ?", arguments: [fromUrl, type]) {
+                    result[type] = record
+                }
+            }
+        }
+
+        return result
     }
 }

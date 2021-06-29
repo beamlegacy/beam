@@ -11,8 +11,13 @@ struct HistoryUrlRecord {
 extension HistoryUrlRecord: TableRecord {
     /// The table columns
     enum Columns: String, ColumnExpression {
-        case id, url, title, content
+        case id, urlId, url, title, content
     }
+
+    static let frecencyForeign = "frecency"
+    static let frecency = hasOne(FrecencyUrlRecord.self,
+                                 key: frecencyForeign,
+                                 using: ForeignKey([Columns.urlId], to: [FrecencyUrlRecord.Columns.urlId]))
 }
 
 // Fetching methods
@@ -29,7 +34,7 @@ extension HistoryUrlRecord: FetchableRecord {
 // FTS search
 extension HistoryUrlRecord {
     struct FTS: TableRecord {
-        static let databaseTableName = "HistoryUrlContent"
+        static let databaseTableName = "historyUrlContent"
     }
 
     // Association to perform a key join on both `rowid` columns.
