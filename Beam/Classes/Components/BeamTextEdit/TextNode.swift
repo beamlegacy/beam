@@ -334,7 +334,9 @@ public class TextNode: ElementNode {
         let caret = self.caretAtIndex(caretIndex)
         let sourceIndex = caret.indexInSource
         guard let uneditableRange = uneditableRangeAt(index: sourceIndex) else { return false }
-        return sourceIndex > uneditableRange.lowerBound && (sourceIndex < uneditableRange.upperBound || !caret.inSource)
+        return sourceIndex > uneditableRange.lowerBound &&
+            caret.edge != .trailing &&
+            (sourceIndex < uneditableRange.upperBound || !caret.inSource)
     }
 
     public override func updateCursor() {
@@ -1071,9 +1073,12 @@ public class TextNode: ElementNode {
                 mouseInteraction = MouseInteraction(type: MouseInteractionType.hovered, range: nsrange)
             }
         }
-        let focusedPosition: Int? = isFocused ? cursorPosition : nil
+        let caret = isFocused ? caretAtIndex(caretIndex) : nil
         let selectedRange = selected ? text.wholeRange : selectedTextRange
-        let str = beamText.buildAttributedString(fontSize: fontSize, cursorPosition: focusedPosition, elementKind: elementKind, mouseInteraction: mouseInteraction, markedRange: markedTextRange, selectedRange: selectedRange)
+        let str = beamText.buildAttributedString(node: self,
+                                                 caret: caret,
+                                                 selectedRange: selectedRange,
+                                                 mouseInteraction: mouseInteraction)
         let paragraphStyle = NSMutableParagraphStyle()
         //        paragraphStyle.alignment = .justified
         paragraphStyle.lineBreakMode = .byWordWrapping
