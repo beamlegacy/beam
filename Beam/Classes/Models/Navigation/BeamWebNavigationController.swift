@@ -39,6 +39,7 @@ class BeamWebNavigationController: WebPageHolder, WebNavigationController {
     }
 
     func navigatedTo(url: URL, webView: WKWebView) {
+        page.leave()
         let isLinkActivation = !isNavigatingFromSearchBar
         Readability.read(webView) { [weak self] result in
             guard let self = self else { return }
