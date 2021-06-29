@@ -21,7 +21,7 @@ private func scoreSortValue(score: Float, timeStamp: Date, halfLife: Float) -> F
     return log(score) + Float(timeStamp.timeIntervalSinceReferenceDate) * log(2) / halfLife
 }
 
-public enum FrecencyParamKey: String {
+public enum FrecencyParamKey: Int, CaseIterable {
     case visit30d0
     case readingTime30d0
 }
@@ -32,16 +32,23 @@ public struct FrecencyParam: Equatable {
     let halfLife: Float
 }
 
-let frecencyParameters: [FrecencyParamKey: FrecencyParam] = [
+public let frecencyParameters: [FrecencyParamKey: FrecencyParam] = [
     .readingTime30d0: FrecencyParam(key: .readingTime30d0, visitWeights: visitWeights, halfLife: halfLife),
-    .visit30d0: FrecencyParam(key: .readingTime30d0, visitWeights: visitWeights, halfLife: halfLife)
+    .visit30d0: FrecencyParam(key: .visit30d0, visitWeights: visitWeights, halfLife: halfLife)
 ]
 
 public struct FrecencyScore {
-    let urlId: UInt64
-    var lastTimestamp: Date
-    var lastScore: Float
-    var sortValue: Float
+    public let urlId: UInt64
+    public var lastTimestamp: Date
+    public var lastScore: Float
+    public var sortValue: Float
+
+    public init(urlId: UInt64, lastTimestamp: Date, lastScore: Float, sortValue: Float) {
+        self.urlId = urlId
+        self.lastTimestamp = lastTimestamp
+        self.lastScore = lastScore
+        self.sortValue = sortValue
+    }
 }
 
 public protocol FrecencyScorer {
@@ -49,15 +56,15 @@ public protocol FrecencyScorer {
 }
 
 public protocol FrecencyStorage {
-    func getOne(urlId: UInt64, paramKey: FrecencyParamKey) -> FrecencyScore?
-    func save(score: FrecencyScore, paramKey: FrecencyParamKey)
+    func fetchOne(urlId: UInt64, paramKey: FrecencyParamKey) throws -> FrecencyScore?
+    func save(score: FrecencyScore, paramKey: FrecencyParamKey) throws
 }
 
-class ExponentialFrecencyScorer: FrecencyScorer {
+public class ExponentialFrecencyScorer: FrecencyScorer {
     var storage: FrecencyStorage
     var params: [FrecencyParamKey: FrecencyParam]
 
-    init(storage: FrecencyStorage, params: [FrecencyParamKey: FrecencyParam]) {
+    public init(storage: FrecencyStorage, params: [FrecencyParamKey: FrecencyParam] = frecencyParameters) {
         self.storage = storage
         self.params = params
     }
@@ -67,7 +74,7 @@ class ExponentialFrecencyScorer: FrecencyScorer {
     }
 
     private func updatedScore(urlId: UInt64, value: Float, date: Date, param: FrecencyParam) -> FrecencyScore {
-        guard let score = storage.getOne(urlId: urlId, paramKey: param.key) else {
+        guard let score = try? storage.fetchOne(urlId: urlId, paramKey: param.key) else {
             let sortValue: Float = scoreSortValue(score: value, timeStamp: date, halfLife: param.halfLife)
             return  FrecencyScore(urlId: urlId, lastTimestamp: date, lastScore: value, sortValue: sortValue)
         }
@@ -77,10 +84,14 @@ class ExponentialFrecencyScorer: FrecencyScorer {
         return FrecencyScore(urlId: urlId, lastTimestamp: date, lastScore: updatedValue, sortValue: sortValue)
     }
 
-    func update(urlId: UInt64, value: Float, visitType: VisitType, date: Date, paramKey: FrecencyParamKey) {
+    public func update(urlId: UInt64, value: Float, visitType: VisitType, date: Date, paramKey: FrecencyParamKey) {
         guard let param = params[paramKey] else {return}
         let weightedValue = value * visitWeight(visitType: visitType, param: param)
         let score = updatedScore(urlId: urlId, value: weightedValue, date: date, param: param)
-        storage.save(score: score, paramKey: param.key)
+        do {
+            try storage.save(score: score, paramKey: param.key)
+        } catch {
+            Logger.shared.logError("unable to save frecency for urlId: \(score.urlId): \(error)", category: .database)
+        }
     }
 }

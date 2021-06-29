@@ -167,8 +167,7 @@ import Promises
             self.webView = web
         }
 
-        let tree: BrowsingTree = BrowsingTree(browsingTreeOrigin)
-        browsingTree = tree
+        browsingTree = BrowsingTree(browsingTreeOrigin, frecencyScorer: ExponentialFrecencyScorer(storage: GRDBFrecencyStorage()))
         noteController = WebNoteController(note: note, rootElement: rootElement)
 
         super.init()

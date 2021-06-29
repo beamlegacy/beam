@@ -14,16 +14,19 @@ class GRDBDatabaseHistoryTests: XCTestCase {
     }
 
     func testSearchHistory() throws {
-        let db = try GRDBDatabase.empty()
+        let db = GRDBDatabase.empty()
 
         for history in [
-            (url: "https://macg.co", title: "Avec macOS Monterey, le Mac devient un récepteur AirPlay", content: """
+            (urlId: 0, url: "https://macg.co", title: "Avec macOS Monterey, le Mac devient un récepteur AirPlay", content: """
 La recopie vidéo est également au menu depuis le centre de contrôle de l'appareil iOS. Le Mac prend en charge l'affichage portrait et paysage, et depuis l'app Photos, les clichés peuvent occuper le maximum d'espace possible sur l'écran de l'ordinateur (en zoomant sur l'iPhone, la photo s'agrandira sur le Mac).
 """ ),
-            (url: "https://doesnotexists.co", title: "", content: nil),
-            (url: "https://unicode-separator.com", title: "foo·bar", content: nil)
+            (urlId: 1, url: "https://doesnotexists.co", title: "", content: nil),
+            (urlId: 2, url: "https://unicode-separator.com", title: "foo·bar", content: nil)
         ] {
-            try db.insertHistoryUrl(url: history.url, title: history.title, content: history.content)
+            try db.insertHistoryUrl(urlId: UInt64(history.urlId),
+                                    url: history.url,
+                                    title: history.title,
+                                    content: history.content)
         }
 
         // Match `Monterey` on title.
@@ -64,6 +67,69 @@ La recopie vidéo est également au menu depuis le centre de contrôle de l'appa
         matches = db.searchHistory(query: "bar")
         expect(matches.count) == 1
         expect(matches[0].url) == "https://unicode-separator.com"
+
+        // Check frecency record is retrieved
+        do {
+            var frecency = FrecencyUrlRecord(urlId: 0,
+                                             lastAccessAt: Date(timeIntervalSince1970: 0),
+                                             frecencyScore: 0.42,
+                                             frecencySortScore: 0,
+                                             frecencyKey: .visit30d0)
+            try db.saveFrecencyUrl(&frecency)
+            // Match urlId = 0, and check frecency record
+            matches = db.searchHistory(query: "Monterey")
+            expect(matches.count) == 1
+            let f = try XCTUnwrap(matches[0].frecency)
+            expect(f.frecencyScore) == 0.42
+            expect(f.frecencySortScore) == 0.0
+        }
+    }
+
+    func testSearchHistoryFrecencySort() throws {
+        let db = GRDBDatabase.empty()
+
+        for history in [
+            (urlId: 0, url: "https://foobar.co", title: "foo bar", content: ""),
+            (urlId: 1, url: "https://foobar1.co", title: "foo baz", content: nil),
+            (urlId: 2, url: "https://foobar2.co", title: "foo·bar baz", content: nil)
+        ] {
+            try db.insertHistoryUrl(urlId: UInt64(history.urlId),
+                                    url: history.url,
+                                    title: history.title,
+                                    content: history.content)
+        }
+
+        for f in [
+            (urlId: 0, lastAccessAt: Date(), frecencyScore: 0.0, frecencySortScore: 0.42,            frecencyKey: FrecencyParamKey.visit30d0),
+            (urlId: 1, lastAccessAt: Date(), frecencyScore: 0.0, frecencySortScore: -0.05,           frecencyKey: FrecencyParamKey.visit30d0),
+            (urlId: 2, lastAccessAt: Date(), frecencyScore: 0.0, frecencySortScore: 1.42,            frecencyKey: FrecencyParamKey.visit30d0),
+            (urlId: 2, lastAccessAt: Date(), frecencyScore: 0.0, frecencySortScore: -Float.infinity, frecencyKey: FrecencyParamKey.readingTime30d0),
+        ] {
+            var frecency = FrecencyUrlRecord(urlId: UInt64(f.urlId),
+                                             lastAccessAt: f.lastAccessAt,
+                                             frecencyScore: Float(f.frecencyScore),
+                                             frecencySortScore: Float(f.frecencySortScore),
+                                             frecencyKey: f.frecencyKey)
+            try db.saveFrecencyUrl(&frecency)
+        }
+
+        // Retrieve search results with frecency sort on .visit30d0
+        var matches = db.searchHistory(query: "foo", enabledFrecencyParam: .visit30d0)
+        expect(matches.count) == 3
+
+        for (expectedUrlId, match) in zip([ 2, 0, 1 ], matches) {
+            let frecency = try XCTUnwrap(match.frecency)
+            expect(frecency.urlId) == UInt64(expectedUrlId)
+        }
+
+        // Retrieve search results with frecency sort on .readingTime30d0
+        matches = db.searchHistory(query: "foo", enabledFrecencyParam: .readingTime30d0)
+        expect(matches.count) == 1
+
+        for (expectedUrlId, match) in zip([ 2 ], matches) {
+            let frecency = try XCTUnwrap(match.frecency)
+            expect(frecency.urlId) == UInt64(expectedUrlId)
+        }
     }
 
     /// When a URL is visited multiple times. Searching the DB must the result once.
@@ -71,12 +137,16 @@ La recopie vidéo est également au menu depuis le centre de contrôle de l'appa
         let db = GRDBDatabase.empty()
 
         for history in [
-            (url: "https://www.lemonde.fr/", title: "Le Monde.fr", content: ""),
-            (url: "https://www.lemonde.fr/", title: "Le Monde.fr", content: nil),
-            (url: "https://macg.co/article1", title: "", content: "macOS Monterey, le Mac devient un récepteur AirPlay"),
-            (url: "https://macg.co/article2", title: "", content: "Le Mac prend en charge l'affichage portrait et paysage"),
+            (urlId: 0, url: "https://www.lemonde.fr/", title: "Le Monde.fr", content: ""),
+            (urlId: 0, url: "https://www.lemonde.fr/", title: "Le Monde.fr", content: nil),
+            (urlId: 1, url: "https://macg.co/article1", title: "", content: "macOS Monterey, le Mac devient un récepteur AirPlay"),
+            (urlId: 2, url: "https://macg.co/article2", title: "", content: "Le Mac prend en charge l'affichage portrait et paysage"),
+            // TODO: unique with ≠ URL but = urlId
         ] {
-            try db.insertHistoryUrl(url: history.url, title: history.title, content: history.content)
+            try db.insertHistoryUrl(urlId: UInt64(history.urlId),
+                                    url: history.url,
+                                    title: history.title,
+                                    content: history.content)
         }
 
         // Match `Monterey` on title.
