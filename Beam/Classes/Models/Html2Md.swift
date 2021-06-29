@@ -310,6 +310,7 @@ func html2Text(url: URL, doc: SwiftSoup.Document) -> BeamText {
 
 func html2TextForClustering(doc: SwiftSoup.Document) -> String {
     var cleanedText = ""
+    var alternateCleanedText = [String]()
 
     do {
         let paragraphs = try doc.select("p")
@@ -328,13 +329,16 @@ func html2TextForClustering(doc: SwiftSoup.Document) -> String {
                         cleanedText.append(textNode.text())
                     }
                 }
+                let myText = try paragraph.text()
+                if !alternateCleanedText.contains(myText) {
+                    alternateCleanedText += [myText]
+                }
             }
         }
     } catch {
         Logger.shared.logError("html2TextForClustering: error", category: .document)
     }
-
-    return cleanedText
+    return alternateCleanedText.max(by: {$1.count > $0.count}) ?? cleanedText
 }
 
 extension SwiftSoup.Document {

@@ -525,7 +525,7 @@ class ClusteringTests: XCTestCase {
         let myEntities = cluster.findEntitiesInText(text: myText)
         expect(myEntities.entities["PlaceName"]) == []
         expect(myEntities.entities["OrganizationName"]) == []
-        expect(myEntities.entities["PersonalName"]) == ["Roger Federer", "Rafael Nadal"]
+        expect(myEntities.entities["PersonalName"]) == ["roger federer", "rafael nadal"]
     }
 
     func testJaccardSimilarityMeasure() throws {
@@ -535,16 +535,16 @@ class ClusteringTests: XCTestCase {
         let firstTextEntities = cluster.findEntitiesInText(text: firstText)
         let secondTextEntities = cluster.findEntitiesInText(text: secondText)
         let similarity = cluster.jaccardEntities(entitiesText1: firstTextEntities, entitiesText2: secondTextEntities)
-        expect(similarity).to(beCloseTo(0.3333333333333333, within: 0.0001))
+        expect(similarity).to(beCloseTo(0.5, within: 0.0001))
     }
 
     func testAllSimilarityMatrices() throws {
         let cluster = Cluster()
         var _ = [[UInt64]]()
         let expectation = self.expectation(description: "Add page expectation")
-        let page1 = Page(id: 0, parentId: nil, title: "Page 1", content: "Roger Federer is the best tennis player to ever play the game, but Rafael Nadal is best on clay")
-        let page2 = Page(id: 1, parentId: 0, title: "Page 2", content: "Tennis is a very fun game")
-        let page3 = Page(id: 2, parentId: 0, title: "Page 3", content: "Pete Sampras and Roger Federer played 4 exhibition matches in 2008")
+        let page1 = Page(id: 0, parentId: nil, title: nil, content: "Roger Federer is the best tennis player to ever play the game, but Rafael Nadal is best on clay")
+        let page2 = Page(id: 1, parentId: 0, title: nil, content: "Tennis is a very fun game")
+        let page3 = Page(id: 2, parentId: 0, title: nil, content: "Pete Sampras and Roger Federer played 4 exhibition matches in 2008")
 
         cluster.add(page1, ranking: nil, completion: { result in
             switch result {
@@ -576,9 +576,9 @@ class ClusteringTests: XCTestCase {
 
         wait(for: [expectation], timeout: 1)
 
-        let expectedEntitesMatrix = [0.0, 0.0, 0.3333333333333333,
+        let expectedEntitiesMatrix = [0.0, 0.0, 0.5,
                                     0.0, 0.0, 0.0,
-                                    0.3333333333333333, 0.0, 0.0]
+                                    0.5, 0.0, 0.0]
         let expectedNavigationMatrix = [0.0, 1.0, 1.0,
                                         1.0, 0.0, 0.0,
                                         1.0, 0.0, 0.0]
@@ -586,10 +586,53 @@ class ClusteringTests: XCTestCase {
                                     0.46988745662121795, 0.0, 0.19001699954776027,
                                     0.3628206314147012, 0.19001699954776027, 0.0]
 
-        expect(cluster.entitiesMatrix.matrix.flat).to(beCloseTo(expectedEntitesMatrix, within: 0.0001))
+        expect(cluster.entitiesMatrix.matrix.flat).to(beCloseTo(expectedEntitiesMatrix, within: 0.0001))
         expect(cluster.navigationMatrix.matrix.flat).to(beCloseTo(expectedNavigationMatrix, within: 0.0001))
         expect(cluster.textualSimilarityMatrix.matrix.flat).to(beCloseTo(expectedTextualMatrix, within: 0.0001))
+    }
 
+    func testEntitySimilarityOverTitles() throws {
+        let cluster = Cluster()
+        var _ = [[UInt64]]()
+        let expectation = self.expectation(description: "Add page expectation")
+        let page1 = Page(id: 0, parentId: nil, title: "roger federer - Google Search", content: nil)
+        let page2 = Page(id: 1, parentId: 0, title: "Roger Federer", content: nil)
+        let page3 = Page(id: 2, parentId: 0, title: "Pete Sampras", content: nil)
+
+        cluster.add(page1, ranking: nil, completion: { result in
+            switch result {
+            case .failure(let error):
+                XCTFail(error.localizedDescription)
+            case .success(let result):
+                _ = result
+            }
+        })
+
+        cluster.add(page2, ranking: nil, completion: { result in
+            switch result {
+            case .failure(let error):
+                XCTFail(error.localizedDescription)
+            case .success(let result):
+                _ = result
+            }
+        })
+
+        cluster.add(page3, ranking: nil, completion: { result in
+            switch result {
+            case .failure(let error):
+                XCTFail(error.localizedDescription)
+            case .success(let result):
+                _ = result
+            }
+            expectation.fulfill()
+        })
+
+        wait(for: [expectation], timeout: 1)
+
+        let expectedEntitiesMatrix = [0.0, 1.0, 0.0,
+                                      1.0, 0.0, 0.0,
+                                      0.0, 0.0, 0.0]
+        expect(cluster.entitiesMatrix.matrix.flat).to(beCloseTo(expectedEntitiesMatrix, within: 0.0001))
     }
 
     func testRaiseRemoveFlag() throws {
