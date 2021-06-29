@@ -13,9 +13,9 @@ import Promises
 class Quote {
     let parseHtml: ParseHtml = ParseHtml()
 
-    func getQuoteKind(html: String, page: WebPage, group: PointAndShoot.ShootGroup) -> Promise<ElementKind> {
+    func getQuoteKind(html: String, page: WebPage) -> Promise<ElementKind> {
         return Promise { fulfill, _ in
-            guard let url = URL(string: group.href) else {
+            guard let url = page.url else {
                 fatalError("Expected to have Page URL")
             }
             if self.parseHtml.isVideo(url: url.absoluteString, html: html) {

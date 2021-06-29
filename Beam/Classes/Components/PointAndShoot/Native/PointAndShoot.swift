@@ -347,7 +347,7 @@ class PointAndShoot: WebPageHolder {
         var collectedQuotes: [BeamElement] = []
         let promises = htmls
             .enumerated().map({ (index, html) in
-            quote.getQuoteKind(html: html, page: page, group: shootGroup).then { quoteKind -> Void in
+            quote.getQuoteKind(html: html, page: page).then { quoteKind -> Void in
                 guard let source = self.page.addToNote(allowSearchResult: true) else {
                     Logger.shared.logError("Could not add note to page", category: .pointAndShoot)
                     return
