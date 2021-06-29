@@ -73,7 +73,7 @@ import Promises
 
     func navigatedTo(url: URL, read: Readability, title: String, isNavigation: Bool) {
         appendToIndexer?(url, read)
-        noteController.add(url: url, text: title, isNavigation: isNavigation)
+        _ = noteController.add(url: url, text: title, isNavigation: isNavigation)
         updateScore()
     }
 

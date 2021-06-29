@@ -81,3 +81,4 @@ function beam_media_sendPlayStateChanged(playing, element) {
 
 console.log("MediaPlayer installed");
 window.addEventListener("load", beam_media_observe);
+window.addEventListener("beam_historyLoad", beam_media_onPlaying);

@@ -61,6 +61,7 @@ export class WebEvents<UI extends WebEventsUI> {
     this.onScroll() // Init/refresh scroll info
 
     win.addEventListener("load", this.onLoad.bind(this))
+    win.addEventListener("beam_historyLoad", this.onLoad.bind(this))
     win.addEventListener("resize", this.onResize.bind(this))
     win.addEventListener("scroll", this.onScroll.bind(this))
 

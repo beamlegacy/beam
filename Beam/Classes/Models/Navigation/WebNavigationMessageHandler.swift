@@ -21,6 +21,7 @@ class WebNavigationMessageHandler: BeamMessageHandler<NavigationMessages> {
         }
         let msgPayload = messageBody as? [String: AnyObject]
         switch messageKey {
+        /// Is only called when the JS history API registers a change
         case NavigationMessages.nav_locationChanged:
             guard let dict = msgPayload,
                   let urlString = dict["url"] as? String
@@ -34,6 +35,7 @@ class WebNavigationMessageHandler: BeamMessageHandler<NavigationMessages> {
                 return
             }
             webPage.navigationController.navigatedTo(url: url, webView: webPage.webView)
+            _ = webPage.executeJS("dispatchEvent(new Event('beam_historyLoad'))", objectName: nil)
         }
     }
 }
