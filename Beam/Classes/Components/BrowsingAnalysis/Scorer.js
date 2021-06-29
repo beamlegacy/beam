@@ -23,5 +23,6 @@ function scorer_scroll(_ev) {
   window.webkit.messageHandlers.score_scroll.postMessage(scrollInfo)
 }
 window.addEventListener("load", scorer_scroll)
+window.addEventListener("beam_historyLoad", scorer_scroll)
 window.addEventListener("scroll", scorer_scroll)
 console.log('Scorer installed')
