@@ -13,7 +13,6 @@ typealias Table = [UInt64: FrecencyScore]
 typealias ScoreData = [FrecencyParamKey: Table]
 
 class FrecencyScorerTest: XCTestCase {
-
     class FakeFrecencyStorage: FrecencyStorage {
         var data: ScoreData = ScoreData()
 
@@ -29,43 +28,58 @@ class FrecencyScorerTest: XCTestCase {
         }
     }
 
+    var fakeStorage = FakeFrecencyStorage()
+
+    override func setUp() {
+        fakeStorage = FakeFrecencyStorage()
+    }
+
+    typealias StorageKey = (urlId: UInt64, frecencyParam: FrecencyParamKey)
+    private func expectFrecencyScoreInStorage(_ key: StorageKey,
+                                              value: Float,
+                                              lastTimestamp: Date,
+                                              halfLife: Float,
+                                              file: StaticString = #file,
+                                              line: UInt = #line) throws {
+        let score = try self.fakeStorage.fetchOne(urlId: key.urlId, paramKey: key.frecencyParam)
+        XCTAssertEqual(score?.lastScore, value,
+                       file: file, line: line)
+        XCTAssertEqual(score?.lastTimestamp, lastTimestamp,
+                       file: file, line: line)
+        XCTAssertEqual(score?.sortValue,
+                       log(value) + Float(lastTimestamp.timeIntervalSinceReferenceDate) * log(2) / halfLife,
+                       file: file, line: line)
+    }
+
+    /// Test frecency score computation and insertion.
     func testScorer() throws {
-        //test frecency score computation and insertion
-
         let halfLife = Float(10.0)
-        func testScoreValue(_ storage: FrecencyStorage, _ urlId: UInt64, _ paramsKey: FrecencyParamKey, _ value: Float, _ date: Date) throws {
-            let score = try storage.fetchOne(urlId: urlId, paramKey: paramsKey)
-            XCTAssertEqual(score?.lastScore, value, "wrong last score value")
-            XCTAssertEqual(score?.lastTimestamp, date, "wrong last timestamp value")
-            XCTAssertEqual(score?.sortValue, log(value) + Float(date.timeIntervalSinceReferenceDate) * log(2) / halfLife, "wrong sort value")
-        }
 
-        let testfrecencyParameters: [FrecencyParamKey: FrecencyParam] = [
+        let frecencyParameters: [FrecencyParamKey: FrecencyParam] = [
             .readingTime30d0: FrecencyParam(key: .readingTime30d0, visitWeights: [.searchBar: 2.0], halfLife: halfLife),
             .visit30d0: FrecencyParam(key: .visit30d0, visitWeights: [.searchBar: 2.0], halfLife: halfLife)
         ]
 
-        let scorer = ExponentialFrecencyScorer(storage: FakeFrecencyStorage(), params: testfrecencyParameters)
+        let scorer = ExponentialFrecencyScorer(storage: fakeStorage, params: frecencyParameters)
         let now = Date()
         let later = Date(timeInterval: Double(halfLife), since: now)
-        //non pre exisiting score insertion
+        // non pre exisiting score insertion
         scorer.update(urlId: 0, value: 1, visitType: .searchBar, date: now, paramKey: .readingTime30d0)
-        try testScoreValue(scorer.storage, 0, .readingTime30d0, 2, now)
-        //pre existing score update
+        try expectFrecencyScoreInStorage((0, .readingTime30d0), value: 2, lastTimestamp: now, halfLife: halfLife)
+        // pre existing score update
         scorer.update(urlId: 0, value: 1, visitType: .searchBar, date: later, paramKey: .readingTime30d0)
-        try testScoreValue(scorer.storage, 0, .readingTime30d0, 2 + 0.5 * 2, later)
+        try expectFrecencyScoreInStorage((0, .readingTime30d0), value: 2 + 0.5 * 2, lastTimestamp: later, halfLife: halfLife)
 
-        //no pre exisiting score insertion
+        // no pre exisiting score insertion
         scorer.update(urlId: 1, value: 1, visitType: .linkActivation, date: now, paramKey: .visit30d0)
-        try testScoreValue(scorer.storage, 1, .visit30d0, 1, now)
+        try expectFrecencyScoreInStorage((1, .visit30d0), value: 1, lastTimestamp: now, halfLife: halfLife)
 
-        //score inserted into precise score name does not pollute other score name
+        // score inserted into precise score name does not pollute other score name
         XCTAssertNil(try scorer.storage.fetchOne(urlId: 1, paramKey: .readingTime30d0), "no score value")
         XCTAssertNil(try scorer.storage.fetchOne(urlId: 0, paramKey: .visit30d0), "no score value")
 
-        //checking that sorting key works for a 0 score
+        // checking that sorting key works for a 0 score
         scorer.update(urlId: 2, value: 0, visitType: .linkActivation, date: now, paramKey: .visit30d0)
-        try testScoreValue(scorer.storage, 2, .visit30d0, 0, now)
-
+        try expectFrecencyScoreInStorage((2, .visit30d0), value: 0, lastTimestamp: now, halfLife: halfLife)
     }
 }
