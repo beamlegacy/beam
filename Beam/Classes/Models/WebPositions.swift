@@ -32,8 +32,6 @@ class WebPositions {
         var scrollY: CGFloat = 0
         var width: CGFloat = -1
         var height: CGFloat = -1
-        /// Used by executeJS to sync PointAndShoot state to other frames in the same Browsertab
-        var message: WKScriptMessage?
     }
 
     /// Utility to check if provided frame is a child frame
@@ -104,16 +102,6 @@ class WebPositions {
         }
 
         return framesInfo
-    }
-
-    /// Sets the message key on an already registered frame
-    /// - Parameters:
-    ///   - href: url of frame to update
-    ///   - message: full ScriptMessage object
-    func setFrameInfoMessage(href: HREF, message: WKScriptMessage) {
-        guard var frame = framesInfo[href] else { return }
-        frame.message = message
-        framesInfo[href] = frame
     }
 
     /// Sets scrollX and scrollY keys on an already registered frame

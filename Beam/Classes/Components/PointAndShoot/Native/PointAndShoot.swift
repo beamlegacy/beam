@@ -88,12 +88,8 @@ class PointAndShoot: WebPageHolder {
         executeJS("setStatus('none')")
     }
 
-    private func executeJS(_ method: String, omit: String? = nil) {
-        page.executeJS(method, objectName: "PointAndShoot", omit: omit)
-    }
-
-    private func executeJS(_ method: String, only: String) {
-        page.executeJS(method, objectName: "PointAndShoot", only: only)
+    private func executeJS(_ method: String) {
+        page.executeJS(method, objectName: "PointAndShoot")
     }
 
     /**
@@ -351,7 +347,7 @@ class PointAndShoot: WebPageHolder {
         var collectedQuotes: [BeamElement] = []
         let promises = htmls
             .enumerated().map({ (index, html) in
-            quote.getQuoteKind(html: html, page: page, group: shootGroup).then { quoteKind -> Void in
+            quote.getQuoteKind(html: html, page: page).then { quoteKind -> Void in
                 guard let source = self.page.addToNote(allowSearchResult: true) else {
                     Logger.shared.logError("Could not add note to page", category: .pointAndShoot)
                     return
@@ -386,7 +382,7 @@ class PointAndShoot: WebPageHolder {
         group.quoteId = quoteId
         group.noteInfo = noteInfo
         shootGroups.append(group)
-        executeJS("assignNote('\(quoteId)')", only: group.href)
+        executeJS("assignNote('\(quoteId)')")
         showShootInfo(group: group)
         activeShootGroup = nil
     }

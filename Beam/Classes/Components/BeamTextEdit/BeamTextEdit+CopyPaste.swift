@@ -27,7 +27,8 @@ extension BeamTextEdit {
             if nodes.count > 1 {
                 guard !node.text.text.isEmpty else { continue }
                 strNodes.append(NSAttributedString(string: String.tabs(max(0, node.element.depth - 1))))
-                strNodes.append(node.text.buildAttributedString(fontSize: node.fontSize, cursorPosition: node.cursorPosition, elementKind: node.elementKind, mouseInteraction: nil, markedRange: nil, selectedRange: nil))
+                let str = node.text.buildAttributedString(node: node, caret: nil, selectedRange: nil)
+                strNodes.append(str)
                 strNodes.append(NSAttributedString(string: "\n"))
             } else {
                 strNodes.append(node.attributedString)

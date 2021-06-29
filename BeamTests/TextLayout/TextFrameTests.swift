@@ -58,8 +58,11 @@ class TextFrameTests: XCTestCase {
         actualString = text.text
         expect(text.links.count) == 1
 
-
-        attributedString = text.buildAttributedString(fontSize: fontSize, cursorPosition: cursorPosition, elementKind: elementKind, mouseInteraction: mouseInteraction, markedRange: nil, selectedRange: nil)
+        let config = BeamTextAttributedStringBuilder.Config(elementKind: elementKind,
+                                                            ranges: text.ranges,
+                                                            fontSize: fontSize)
+        let asBuilder = BeamTextAttributedStringBuilder()
+        attributedString = asBuilder.build(config: config)
         let position = NSPoint(x: 0, y: 0)
 
         let textFrame = TextFrame.create(string: attributedString, atPosition: position, textWidth: textWidth)
@@ -134,9 +137,7 @@ class TextFrameTests: XCTestCase {
     // swiftlint:disable:next function_body_length
     func testLinkLayoutForOneMultipleLines() {
         let fontSize = CGFloat(12)
-        let cursorPosition = 10
         let elementKind = ElementKind.bullet
-        let mouseInteraction = MouseInteraction(type: .unknown, range: NSRange())
         let textWidth = CGFloat(20)
 
         var text = BeamText(text: "1 ")
@@ -149,8 +150,12 @@ class TextFrameTests: XCTestCase {
         actualString = text.text
         expect(text.links.count) == 1
 
+        let config = BeamTextAttributedStringBuilder.Config(elementKind: elementKind,
+                                                            ranges: text.ranges,
+                                                            fontSize: fontSize)
+        let asBuilder = BeamTextAttributedStringBuilder()
+        attributedString = asBuilder.build(config: config)
 
-        attributedString = text.buildAttributedString(fontSize: fontSize, cursorPosition: cursorPosition, elementKind: elementKind, mouseInteraction: mouseInteraction, markedRange: nil, selectedRange: nil)
         let position = NSPoint(x: 0, y: 0)
 
         let textFrame = TextFrame.create(string: attributedString, atPosition: position, textWidth: textWidth)

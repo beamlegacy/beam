@@ -65,27 +65,7 @@ class TestWebPage: WebPage {
 
     func navigatedTo(url: URL, read: Readability, title: String, isNavigation: Bool) {}
 
-    func executeJS(_ jsCode: String, objectName: String?, omit: String? = nil) -> Promise<Any?> {
-        if objectName == "PointAndShoot" {
-            switch jsCode {
-            case "setStatus('pointing')":
-                pointAndShoot.status = PointAndShootStatus.pointing
-            case "setStatus('shooting')":
-                pointAndShoot.status = PointAndShootStatus.shooting
-            case "setStatus('none')":
-                pointAndShoot.status = PointAndShootStatus.none
-            case let assignString where jsCode.contains("assignNote"):
-                Logger.shared.logDebug("\(assignString) called", category: .pointAndShoot)
-                pointAndShoot.status = PointAndShootStatus.none
-            default:
-                Logger.shared.logDebug("no matching jsCode case, no js call mocked", category: .pointAndShoot)
-            }
-        }
-        events.append("executeJS \(objectName ?? "").\(jsCode)")
-        return Promise(true)
-    }
-
-    func executeJS(_ jsCode: String, objectName: String?, only: String) -> Promise<Any?> {
+    func executeJS(_ jsCode: String, objectName: String?) -> Promise<Any?> {
         if objectName == "PointAndShoot" {
             switch jsCode {
             case "setStatus('pointing')":
@@ -228,7 +208,7 @@ class DownloadManagerMock: DownloadManager {
         completion(DownloadManagerResult.binary(data: Data([0x01, 0x02, 0x03]), mimeType: "image/png", actualURL: URL(string: "https://webpage.com/image.png")!))
     }
 
-    func downloadFile(at url: URL, headers: [String: String], destinationFoldedURL: URL?) {}
+    func downloadFile(at url: URL, headers: [String: String], suggestedFileName: String?, destinationFoldedURL: URL?) {}
 
     func waitForDownloadURL(_ url: URL, headers: [String: String]) -> DownloadManagerResult? { fatalError("waitForDownloadURL(_:headers:) has not been implemented") }
 }

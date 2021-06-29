@@ -420,28 +420,32 @@ extension DatabaseManager {
     // If title is already used, we update it to another unique title
     private func saveAllOnApiErrors(_ errors: [UserErrorData]) throws -> Bool {
         var fixedAnyError = false
-        let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
 
-        try context.performAndWait {
-            for error in errors {
-                if error.message == "Title has already been taken",
-                   error.path == ["attributes", "title"],
-                   let objectId = error.objectid,
-                   let uuid = UUID(uuidString: objectId) {
+        for error in errors {
+            if error.message == "Title has already been taken",
+               error.path == ["attributes", "title"],
+               let objectId = error.objectid,
+               let uuid = UUID(uuidString: objectId) {
 
-                    Logger.shared.logDebug("Changing database title", category: .database)
-                    if let database = try Database.fetchWithId(context, uuid) {
-                        database.title = "\(database.title) \(uuid)"
-                        try Self.saveContext(context: context)
-
-                        fixedAnyError = true
-                    }
-                    Logger.shared.logDebug("Changed database title", category: .databaseDebug)
-                }
+                fixedAnyError = try fixDuplicateTitle(uuid)
             }
         }
 
         return fixedAnyError
+    }
+
+    private func fixDuplicateTitle(_ databaseId: UUID) throws -> Bool {
+        let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
+
+        Logger.shared.logDebug("Changing database title", category: .database)
+        if let database = try Database.fetchWithId(context, databaseId) {
+            database.title = "\(database.title) \(databaseId)"
+            try Self.saveContext(context: context)
+            Logger.shared.logDebug("Changed database title", category: .databaseDebug)
+            return true
+        }
+
+        return false
     }
 
     func saveAllOnApi(_ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil, _ nested: Int = 1) {
@@ -460,12 +464,23 @@ extension DatabaseManager {
                 try databaseRequest.saveAll(databasesArray) { result in
                     switch result {
                     case .failure(let error):
+                        guard nested > 0 else {
+                            completion?(.failure(error))
+                            return
+                        }
+
                         // Server returns errors when uploaded few databases at once, we try to correct
                         // errors and reupload if possible
                         do {
                             if case APIRequestError.apiErrors(let errors) = error,
-                               try self.saveAllOnApiErrors(errors),
-                               nested > 0 {
+                               try self.saveAllOnApiErrors(errors) {
+                                self.saveAllOnApi(completion, nested - 1)
+                            } else if case APIRequestError.duplicateTitle = error,
+                                      let firstDatabase = databasesArray.first,
+                                      let databaseId = firstDatabase.id,
+                                      let uuid = UUID(uuidString: databaseId),
+                                      try self.fixDuplicateTitle(uuid) {
+                                // Only happens if we uploaded 1 database
                                 self.saveAllOnApi(completion, nested - 1)
                             } else {
                                 // error: from request

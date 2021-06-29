@@ -94,7 +94,6 @@ class ClusteringTests: XCTestCase {
             let expectedSimilarityMatrixFlat = [0.0, 0.8294351697354535, 0.26489349244685784,
                                              0.8294351697354535, 0.0, 0.1927173621278106,
                                              0.26489349244685784, 0.1927173621278106, 0.0]
-            print(cluster.textualSimilarityMatrix.matrix.flat)
             expect(cluster.textualSimilarityMatrix.matrix.flat).to(beCloseTo(expectedSimilarityMatrixFlat, within: 0.0001))
         }
     }

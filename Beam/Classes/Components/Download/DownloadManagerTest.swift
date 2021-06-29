@@ -68,7 +68,7 @@ class DownloadManagerTest: XCTestCase {
         let downloadManager = BeamDownloadManager()
         let urlToDownload = URL(string: "https://devimages-cdn.apple.com/design/resources/download/SF-Symbols.dmg")!
         XCTAssertTrue(downloadManager.downloads.isEmpty)
-        downloadManager.downloadFile(at: urlToDownload, headers: [:], destinationFoldedURL: tempURL)
+        downloadManager.downloadFile(at: urlToDownload, headers: [:], suggestedFileName: nil, destinationFoldedURL: tempURL)
 
         let exp = expectation(description: "downloads \(urlToDownload)")
 

@@ -56,7 +56,7 @@ struct OmniBarDownloadButton_Previews: PreviewProvider {
     static var previews: some View {
         let noDownloadsManager = BeamDownloadManager()
         let downloadsManager = BeamDownloadManager()
-        downloadsManager.downloadFile(at: URL(string: "https://devimages-cdn.apple.com/design/resources/download/SF-Symbols.dmg")!, headers: [:])
+        downloadsManager.downloadFile(at: URL(string: "https://devimages-cdn.apple.com/design/resources/download/SF-Symbols.dmg")!, headers: [:], suggestedFileName: nil)
         return Group {
             OmniBarDownloadButton(downloadManager: noDownloadsManager, action: {})
             OmniBarDownloadButton(downloadManager: downloadsManager, action: {})
