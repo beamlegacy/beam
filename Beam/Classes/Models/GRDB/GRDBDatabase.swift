@@ -54,17 +54,6 @@ struct GRDBDatabase {
             }
         }
 
-        migrator.registerMigration("addTimestampsToPasswords") { db in
-            if try db.tableExists(PasswordsDB.tableName) {
-                try db.alter(table: PasswordsDB.tableName) { t in
-                    t.add(column: "createdAt", .datetime).notNull()
-                    t.add(column: "updatedAt", .datetime).notNull()
-                    t.add(column: "deletedAt", .datetime)
-                    t.add(column: "previousChecksum", .text)
-                }
-            }
-        }
-
         migrator.registerMigration("createFrecencyUrlRecord") { db in
             // Delete the history
             try db.dropFTS4SynchronizationTriggers(forTable: "HistoryUrlRecord")

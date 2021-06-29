@@ -47,9 +47,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     static var indexPath: URL { return URL(fileURLWithPath: dataFolder + "/index.beamindex") }
     static var fileDBPath: String { return dataFolder + "/files.db" }
 
-    // TODO: should be removed from BeamData
-    static var passwordsDBPath: String { return dataFolder + "/passwords.db" }
-
     static var linkStorePath: URL { return URL(fileURLWithPath: dataFolder + "/links.store") }
 
     override init() {
@@ -73,8 +70,8 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         }
 
         do {
-            passwordsDB = try PasswordsDB(path: Self.passwordsDBPath)
-        } catch let error {
+            passwordsDB = try PasswordsDB()
+        } catch {
             Logger.shared.logError("Error while creating the Passwords Database [\(error)]", category: .passwordsDB)
             fatalError()
         }

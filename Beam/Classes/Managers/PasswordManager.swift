@@ -2,15 +2,13 @@ import Foundation
 import BeamCore
 
 class PasswordManager {
-    static var passwordsDBPath: String { BeamData.dataFolder + "/passwords.db" }
-
     func saveAllOnBeamObjectApi(_ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) throws {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             completion?(.success(false))
             return
         }
 
-        let passwordDb = try PasswordsDB(path: Self.passwordsDBPath)
+        let passwordDb = try PasswordsDB()
 
         try passwordDb.dbQueue.read { db in
             do {

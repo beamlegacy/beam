@@ -53,6 +53,7 @@ extension PasswordsRecord: MutablePersistableRecord {
         container[Columns.host] = host
         container[Columns.name] = name
         container[Columns.password] = password
+        container[Columns.updatedAt] = Date()
     }
 
     mutating func didInsert(with rowID: Int64, for column: String?) {
@@ -64,7 +65,7 @@ class PasswordsDB: PasswordStore {
     static let tableName = "PasswordsRecord"
     var dbQueue: DatabasePool
 
-    init(path: String, dropTableFirst: Bool = false) throws {
+    init(path: String = BeamData.dataFolder + "/passwords.db", dropTableFirst: Bool = false) throws {
         dbQueue = try DatabasePool(path: path, configuration: GRDB.Configuration())
 
         try dbQueue.write({ db in
@@ -78,12 +79,28 @@ class PasswordsDB: PasswordStore {
                 table.column("host", .text).notNull().indexed()
                 table.column("name", .text).notNull()
                 table.column("password", .text).notNull()
-                table.column("createdAt", .datetime).notNull()
-                table.column("updatedAt", .datetime).notNull()
+                table.column("createdAt", .datetime).notNull().defaults(sql: "CURRENT_TIMESTAMP")
+                table.column("updatedAt", .datetime).notNull().defaults(sql: "CURRENT_TIMESTAMP")
                 table.column("deletedAt", .datetime)
                 table.column("previousChecksum", .text).notNull()
             }
         })
+
+        var migrator = DatabaseMigrator()
+
+        migrator.registerMigration("addTimestampsToPasswords") { db in
+            if try db.tableExists(PasswordsDB.tableName) {
+                try db.alter(table: PasswordsDB.tableName) { t in
+                    t.add(column: "createdAt", .datetime).notNull().defaults(to: Date())
+                    t.add(column: "updatedAt", .datetime).notNull().defaults(to: Date())
+                    t.add(column: "deletedAt", .datetime)
+                    t.add(column: "previousChecksum", .text)
+                }
+            }
+        }
+
+        let dbPool = try DatabasePool(path: path)
+        try migrator.migrate(dbPool)
     }
 
     private func id(for host: String, and username: String) -> String {
