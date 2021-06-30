@@ -105,9 +105,9 @@ public class TextFrame {
 
             let y = Y // + CGFloat(line.bounds.ascent)
 
-            line.frame = NSRect(x: position.x + x, y: position.y + y, width: line.bounds.width, height: line.bounds.height)
+            line.frame = NSRect(x: (position.x + x).rounded(.toNearestOrEven), y: (position.y + y).rounded(.toNearestOrEven), width: line.bounds.width.rounded(.up), height: line.bounds.height.rounded(.up))
 
-            Y += line.frame.height * line.interlineFactor
+            Y += (line.frame.height * line.interlineFactor).rounded(.up)
             //if debug {
             //Logger.shared.logDebug("     line[\(i)] frame \(line.frame) (textPos \(textPos)")
             //}
@@ -171,7 +171,8 @@ public class TextFrame {
     public class func create(string: NSAttributedString, atPosition position: NSPoint, textWidth: CGFloat) -> TextFrame {
         assert(textWidth != 0)
         let framesetter = CTFramesetterCreateWithAttributedString(string)
-        let path = CGPath(rect: CGRect(origin: position, size: CGSize(width: textWidth, height: CGFloat.greatestFiniteMagnitude)), transform: nil)
+        let pos = CGPoint(x: position.x.rounded(), y: position.y.rounded())
+        let path = CGPath(rect: CGRect(origin: pos, size: CGSize(width: textWidth.rounded(), height: CGFloat.greatestFiniteMagnitude)), transform: nil)
 
         let frameAttributes: [String: Any] = [:]
         let frame = CTFramesetterCreateFrame(framesetter,
