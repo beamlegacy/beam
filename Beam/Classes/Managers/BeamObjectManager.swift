@@ -28,7 +28,11 @@ public class BeamObjectManager {
             switch key {
             case .document:
                 let documentObjects: [DocumentStruct] = objects.compactMap { $0.decode() }
-                DocumentManager().receivedBeamObjects(documentObjects)
+                do {
+                    try DocumentManager().receivedBeamObjects(documentObjects)
+                } catch {
+                    Logger.shared.logError("Error with documents: \(error)", category: .beamObjectNetwork)
+                }
             case .database:
                 let databaseObjects: [DatabaseStruct] = objects.compactMap { $0.decode() }
                 do {
@@ -59,6 +63,8 @@ extension BeamObjectManager {
         let beamRequest = BeamObjectRequest()
 
         let lastUpdatedAt = Persistence.Sync.BeamObjects.updated_at
+        let timeNow = BeamDate.now
+
         if let lastUpdatedAt = lastUpdatedAt {
             Logger.shared.logDebug("Using updatedAt for BeamObjects API call: \(lastUpdatedAt)",
                                    category: .beamObjectNetwork)
@@ -75,7 +81,11 @@ extension BeamObjectManager {
                                            category: .beamObjectNetwork)
                     completion?(.failure(error))
                 case .success(let beamObjects):
-                    completion?(.success(self.parseObjects(beamObjects)))
+                    let success = self.parseObjects(beamObjects)
+                    if success {
+                        Persistence.Sync.BeamObjects.updated_at = timeNow
+                    }
+                    completion?(.success(success))
                 }
             }
         } catch {
