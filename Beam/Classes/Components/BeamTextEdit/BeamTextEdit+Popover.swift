@@ -232,7 +232,7 @@ extension BeamTextEdit {
             cancelInternalLink(with: splitTitle, range: linkEnd..<splitTitle.count + linkEnd)
         }
 
-        node.text.makeInternalLink(replacementStart..<linkEnd)
+        node.text.makeInternalLink(replacementStart..<linkEnd, createNoteIfNeeded: true)
 
         rootNode.cursorPosition = linkEnd
         dismissPopover()
