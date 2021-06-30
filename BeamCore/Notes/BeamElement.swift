@@ -312,7 +312,10 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
             e === child
         }) else { return }
         children.remove(at: index)
-        child.parent = nil
+        // Only reset the child's parent if it was set to us, it may already have been reparented
+        if child.parent === self {
+            child.parent = nil
+        }
     }
 
     open func indexOfChild(_ child: BeamElement) -> Int? {
@@ -332,10 +335,8 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
     open func insert(_ child: BeamElement, after: BeamElement?) {
         guard child.parent != self else { return }
 
-        if let oldParent = child.parent {
-            oldParent.removeChild(child)
-        }
-
+        let previousParent = child.parent
+        defer { previousParent?.removeChild(child) }
         child.parent = self
         guard let after = after, let index = indexOfChild(after) else {
             children.insert(child, at: 0)
@@ -346,10 +347,9 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
     }
 
     open func insert(_ child: BeamElement, at pos: Int) {
-        if let oldParent = child.parent {
-            oldParent.removeChild(child)
-        }
-
+        // The order is important here, we first add the child then remove it from the previous parent so that any event resulting from both elements' children change will not generate a temporary loss of the child anywhere else in the app.
+        let previousParent = child.parent
+        defer { previousParent?.removeChild(child) }
         child.parent = self
         children.insert(child, at: min(children.count, pos))
     }
