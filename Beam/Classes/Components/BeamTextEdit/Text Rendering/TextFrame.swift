@@ -170,6 +170,12 @@ public class TextFrame {
 
     public class func create(string: NSAttributedString, atPosition position: NSPoint, textWidth: CGFloat) -> TextFrame {
         assert(textWidth != 0)
+        var string = string
+        if string.string.last == "\n" {
+            let newString = NSMutableAttributedString(attributedString: string)
+            newString.append(NSAttributedString(string: "\n"))
+            string = newString
+        }
         let framesetter = CTFramesetterCreateWithAttributedString(string)
         let pos = CGPoint(x: position.x.rounded(), y: position.y.rounded())
         let path = CGPath(rect: CGRect(origin: pos, size: CGSize(width: textWidth.rounded(), height: CGFloat.greatestFiniteMagnitude)), transform: nil)
