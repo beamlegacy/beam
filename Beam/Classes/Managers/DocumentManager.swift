@@ -690,51 +690,53 @@ extension DocumentManager {
         let cancellable = NotificationCenter.default
             .publisher(for: .documentUpdate)
             .sink { notification in
-                if let updatedDocuments = notification.userInfo?["updatedDocuments"] as? [DocumentStruct] {
-                    for document in updatedDocuments {
-                        if document.title == documentStruct.title &&
-                            document.databaseId == documentStruct.databaseId &&
-                            document.id != documentId {
+                guard let updatedDocuments = notification.userInfo?["updatedDocuments"] as? [DocumentStruct] else {
+                    return
+                }
+                
+                for document in updatedDocuments {
+                    if document.title == documentStruct.title &&
+                        document.databaseId == documentStruct.databaseId &&
+                        document.id != documentId {
 
-                            /*
-                             When a document is deleted and overwritten because of a title conflict, we want to let
-                             the editor know to update the editor UI with the new document.
+                        /*
+                         When a document is deleted and overwritten because of a title conflict, we want to let
+                         the editor know to update the editor UI with the new document.
 
-                             However when going on the "see all notes" debug window, and forcing a document refresh,
-                             we don't want the editor UI to change.
-                             */
+                         However when going on the "see all notes" debug window, and forcing a document refresh,
+                         we don't want the editor UI to change.
+                         */
 
-                            let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
-                            context.performAndWait {
-                                guard let coreDataDocument = try? Document.fetchWithId(context, documentId) else {
-                                    Logger.shared.logDebug("notification for \(document.title) {\(document.id)} version \(document.version) (new id)",
-                                                           category: .documentNotification)
-                                    documentId = document.id
-                                    completionHandler(document)
-                                    return
-                                }
-
-                                if documentStruct.deletedAt == nil, coreDataDocument.deleted_at != documentStruct.deletedAt {
-                                   Logger.shared.logDebug("notification for \(document.title) {\(document.id)} version \(document.version) (new id)",
-                                                          category: .documentNotification)
-                                    documentId = document.id
-                                    completionHandler(document)
-                                } else {
-                                    Logger.shared.logDebug("No notification for \(document.title) {\(document.id)} version \(document.version) (new id)",
-                                                           category: .documentNotification)
-                                }
+                        let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
+                        context.performAndWait {
+                            guard let coreDataDocument = try? Document.fetchWithId(context, documentId) else {
+                                Logger.shared.logDebug("notification for \(document.title) {\(document.id)} version \(document.version) (new id)",
+                                                       category: .documentNotification)
+                                documentId = document.id
+                                completionHandler(document)
+                                return
                             }
-                        } else if let documentManager = notification.object as? DocumentManager, documentManager == self {
-                            // Skip notification coming from this manager
-                            return
-                        } else if document.id == documentId {
-                            Logger.shared.logDebug("notification for \(document.title) {\(document.id)} version \(document.version)",
-                                                   category: .documentNotification)
-                            completionHandler(document)
-                        } else if document.title == documentStruct.title {
-                            Logger.shared.logDebug("notification for \(document.title) {\(document.id)} version \(document.version) but not detected. onDocumentChange() called with \(documentStruct.title) {\(documentId)}",
-                                                   category: .documentNotification)
+
+                            if documentStruct.deletedAt == nil, coreDataDocument.deleted_at != documentStruct.deletedAt {
+                                Logger.shared.logDebug("notification for \(document.title) {\(document.id)} version \(document.version) (new id)",
+                                                       category: .documentNotification)
+                                documentId = document.id
+                                completionHandler(document)
+                            } else {
+                                Logger.shared.logDebug("No notification for \(document.title) {\(document.id)} version \(document.version) (new id)",
+                                                       category: .documentNotification)
+                            }
                         }
+                    } else if let documentManager = notification.object as? DocumentManager, documentManager == self {
+                        // Skip notification coming from this manager
+                        return
+                    } else if document.id == documentId {
+                        Logger.shared.logDebug("notification for \(document.title) {\(document.id)} version \(document.version)",
+                                               category: .documentNotification)
+                        completionHandler(document)
+                    } else if document.title == documentStruct.title {
+                        Logger.shared.logDebug("notification for \(document.title) {\(document.id)} version \(document.version) but not detected. onDocumentChange() called with \(documentStruct.title) {\(documentId)}",
+                                               category: .documentNotification)
                     }
                 }
             }
