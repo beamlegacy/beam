@@ -195,6 +195,7 @@ extension TextRoot {
         }
     }
 
+    //swiftlint:disable:next cyclomatic_complexity
     func deleteBackward() {
         guard root?.state.nodeSelection == nil else {
             editor.cancelPopover()
@@ -231,7 +232,14 @@ extension TextRoot {
                     }
                     cmdManager.deleteElement(for: node)
                 } else {
-                    cmdManager.deleteElement(for: prevVisibleNode)
+                    if node.text.isEmpty {
+                        for (i, child) in node.displayedElement.children.enumerated() {
+                            cmdManager.reparentElement(child, to: prevVisibleNode.displayedElement, atIndex: i)
+                        }
+                        cmdManager.deleteElement(for: node)
+                    } else {
+                        cmdManager.deleteElement(for: prevVisibleNode)
+                    }
                 }
             }
         } else {
