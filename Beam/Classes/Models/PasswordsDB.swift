@@ -19,6 +19,7 @@ struct PasswordsRecord: BeamObjectProtocol {
     var updatedAt: Date
     var deletedAt: Date?
     var previousChecksum: String?
+    var checksum: String?
 }
 
 extension PasswordsRecord: TableRecord {

@@ -41,6 +41,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     let documentManager = DocumentManager()
     let databaseManager = DatabaseManager()
     let passwordManager = PasswordManager()
+    let beamObjectManager = BeamObjectManager()
 
     #if DEBUG
     var beamUIMenuGenerator: BeamUITestsMenuGenerator!
@@ -113,6 +114,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         // My feeling is we should sync + trigger notification and only start network calls when
         // this sync has finished.
+
+        beamObjectManager.fetchAllFromAPI { result in
+            Logger.shared.logInfo("fetchAllFromAPI called", category: .beamObjectNetwork)
+        }
 
         try? passwordManager.saveAllOnBeamObjectApi { result in
             switch result {

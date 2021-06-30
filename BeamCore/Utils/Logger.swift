@@ -38,6 +38,7 @@ public enum LogCategory: String {
     case clustering
     case commandManager
     case beamObject
+    case beamObjectNetwork
 }
 
 public final class Logger {

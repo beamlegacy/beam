@@ -34,6 +34,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
 
     var cookies: HTTPCookieStorage
     var documentManager: DocumentManager
+    var databaseManager: DatabaseManager
     var downloadManager: DownloadManager = BeamDownloadManager()
     var sessionLinkRanker = SessionLinkRanker()
     var clusteringManager: ClusteringManager
@@ -52,6 +53,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     override init() {
         clusteringManager = ClusteringManager(ranker: sessionLinkRanker)
         documentManager = DocumentManager()
+        databaseManager = DatabaseManager()
         noteAutoSaveService = NoteAutoSaveService()
         linkManager = LinkManager()
         let linkCount = LinkStore.shared.loadFromDB(linkManager: linkManager)

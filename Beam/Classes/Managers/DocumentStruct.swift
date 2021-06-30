@@ -9,7 +9,7 @@ public struct DocumentStruct: BeamObjectProtocol {
     var id: UUID
     var databaseId: UUID
     var title: String
-    let createdAt: Date
+    var createdAt: Date
     var updatedAt: Date
     var deletedAt: Date?
     var data: Data
@@ -18,6 +18,7 @@ public struct DocumentStruct: BeamObjectProtocol {
     var previousChecksum: String?
     var version: Int64 = 0
     var isPublic: Bool = false
+    var checksum: String?
 
     var uuidString: String {
         id.uuidString.lowercased()

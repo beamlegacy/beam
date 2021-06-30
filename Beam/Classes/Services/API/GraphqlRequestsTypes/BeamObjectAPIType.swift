@@ -4,23 +4,22 @@ import BeamCore
 
 protocol BeamObjectProtocol: Codable {
     var uuid: String { get }
-    var createdAt: Date { get }
-    var updatedAt: Date { get }
-    var deletedAt: Date? { get }
-    var previousChecksum: String? { get }
+    var createdAt: Date { get set }
+    var updatedAt: Date { get set }
+    var deletedAt: Date? { get set }
+    var previousChecksum: String? { get set }
+    var checksum: String? { get set }
 }
 
-enum BeamObjectType: String {
+enum BeamObjectType: String, Codable {
     case password
     case database
     case document
-    case file
-    case link
 }
 
 class BeamObjectAPIType: Codable {
     var id: String?
-    var beamObjectType: String?
+    var beamObjectType: BeamObjectType?
     var createdAt: Date?
     var updatedAt: Date?
     var deletedAt: Date?
@@ -42,7 +41,7 @@ class BeamObjectAPIType: Codable {
 
     init<T: BeamObjectProtocol>(_ object: T, _ type: BeamObjectType) throws {
         id = object.uuid
-        beamObjectType = type.rawValue
+        beamObjectType = type
 
         createdAt = object.createdAt
         updatedAt = object.updatedAt
@@ -81,6 +80,30 @@ class BeamObjectAPIType: Codable {
         }
     }
 
+    func decode<T: BeamObjectProtocol>() -> T? {
+        guard let data = data else { return nil }
+
+        do {
+            let dataAsData = data.asData
+
+            if dataAsData.SHA256 != dataChecksum {
+                Logger.shared.logError("Checksum is different :( Data is potentially corrupted",
+                                       category: .beamObjectNetwork)
+            }
+
+            var result = try Self.decoder.decode(T.self, from: dataAsData)
+
+            // Checksum is used to check *after* we encoded the string, so it's not embedded in that encoded string and
+            // I reinject it here so whatever is using beam objects can check for previous checksum if needed.
+            result.checksum = dataChecksum
+            return result
+        } catch {
+            Logger.shared.logError("Couldn't decode object \(T.self): \(self)",
+                                   category: .beamObject)
+        }
+        return nil
+    }
+
     func decrypt() throws {
         guard Configuration.encryptionEnabled else { return }
         guard let encodedData = data else { return }
@@ -95,7 +118,7 @@ class BeamObjectAPIType: Codable {
 
             do {
                 data = try EncryptionManager.shared.decryptString(encodedString, using: algorithm)
-                encryptedData = encodedData
+                encryptedData = nil // encodedData for debug purpose when needed
             } catch EncryptionManagerError.authenticationFailure {
                 Logger.shared.logError("Could not decrypt data with key \(decodedStruct.privateKeySha256 ?? "-")", category: .encryption)
             }

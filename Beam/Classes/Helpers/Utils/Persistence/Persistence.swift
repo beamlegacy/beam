@@ -34,11 +34,15 @@ enum Persistence {
             @StandardStorable("sync.documents.updated_at") static var updated_at: Date?
             @StandardStorable("sync.documents.sent_all_at") static var sent_all_at: Date?
         }
+        enum BeamObjects {
+            @StandardStorable("sync.beam_objects.updated_at") static var updated_at: Date?
+        }
 
         /// Clean all stored informations on logout
         static func cleanUp() {
             Persistence.Sync.Databases.updated_at = nil
             Persistence.Sync.Documents.updated_at = nil
+            Persistence.Sync.BeamObjects.updated_at = nil
             Persistence.Sync.Documents.sent_all_at = nil
         }
     }

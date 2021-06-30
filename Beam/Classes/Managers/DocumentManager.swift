@@ -415,6 +415,22 @@ public class DocumentManager: NSObject {
             document.id.uuidString.lowercased() == documentApiType.id
     }
 
+    private func isEqual(_ document: Document, to documentStruct: DocumentStruct) -> Bool {
+        // Server side doesn't store milliseconds for updatedAt and createdAt. Local coredata does, rounding using Int()
+        // to compare them
+
+        return Int(document.updated_at.timeIntervalSince1970) == Int(documentStruct.updatedAt.timeIntervalSince1970) &&
+            Int(document.created_at.timeIntervalSince1970) == Int(documentStruct.createdAt.timeIntervalSince1970) &&
+            document.title == documentStruct.title &&
+            document.data == documentStruct.data &&
+            document.is_public == documentStruct.isPublic &&
+            document.database_id == documentStruct.databaseId &&
+            document.document_type == documentStruct.documentType.rawValue &&
+            document.deleted_at == documentStruct.deletedAt &&
+            document.id == documentStruct.id
+    }
+
+
     // MARK: Refresh
     private func refreshAllAndSave(_ delete: Bool = true,
                                    _ context: NSManagedObjectContext,
@@ -1135,6 +1151,41 @@ extension DocumentManager {
         saveOperations[documentStruct.id]?.cancel()
         saveOperations[documentStruct.id] = blockOperation
         saveDocumentQueue.addOperation(blockOperation)
+    }
+
+    func receivedBeamObjects(_ documents: [DocumentStruct]) throws {
+        Logger.shared.logDebug("Received \(documents.count) documents: updating",
+                               category: .documentNetwork)
+
+        let context = coreDataManager.backgroundContext
+        try context.performAndWait {
+            for document in documents {
+                let localDocument = Document.rawFetchOrCreateWithId(context, document.id)
+
+                if self.isEqual(localDocument, to: document) {
+                    Logger.shared.logDebug("\(document.title): remote is equal to struct version, skip",
+                                           category: .documentNetwork)
+                    continue
+                }
+
+                localDocument.title = document.title
+                localDocument.created_at = document.createdAt
+                localDocument.updated_at = document.updatedAt
+                localDocument.deleted_at = document.deletedAt
+                localDocument.document_type = document.documentType.rawValue
+                localDocument.database_id = document.databaseId
+
+                // TODO: What to do when this fails? Because of duplicate titles, or other errors
+                try checkValidations(context, localDocument)
+
+                localDocument.version += 1
+            }
+
+            try Self.saveContext(context: context)
+        }
+
+        Logger.shared.logDebug("Received \(documents.count) documents: updated",
+                               category: .documentNetwork)
     }
 
     @discardableResult

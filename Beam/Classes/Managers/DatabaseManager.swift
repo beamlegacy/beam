@@ -10,11 +10,12 @@ public struct DatabaseStruct: BeamObjectProtocol {
         id.uuidString.lowercased()
     }
     var previousChecksum: String?
+    var checksum: String?
 
     var id: UUID
     var title: String
-    let createdAt: Date
-    let updatedAt: Date
+    var createdAt: Date
+    var updatedAt: Date
     var deletedAt: Date?
 
     var uuidString: String {
@@ -446,6 +447,30 @@ extension DatabaseManager {
         }
 
         return false
+    }
+
+    func receivedBeamObjects(_ databases: [DatabaseStruct]) throws {
+        Logger.shared.logDebug("Received \(databases.count) databases: updating",
+                               category: .databaseNetwork)
+
+        let context = coreDataManager.backgroundContext
+        try context.performAndWait {
+            for database in databases {
+                let localDatabase = Database.fetchOrCreateWithId(context, database.id)
+                localDatabase.title = database.title
+                localDatabase.created_at = database.createdAt
+                localDatabase.deleted_at = database.deletedAt
+                localDatabase.updated_at = database.updatedAt
+
+                // TODO: What to do when this fails? Because of duplicate titles, or other errors
+                try checkValidations(context, localDatabase)
+            }
+
+            try Self.saveContext(context: context)
+        }
+
+        Logger.shared.logDebug("Received \(databases.count) databases: updated",
+                               category: .databaseNetwork)
     }
 
     func saveAllOnBeamObjectApi(_ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
