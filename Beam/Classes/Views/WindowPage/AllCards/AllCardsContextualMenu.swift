@@ -78,7 +78,7 @@ class AllCardsContextualMenu {
         ))
 
         finalizeAllMenuItems(menu.items)
-        menu.popUp(positioning: nil, at: at, in: AppDelegate.main.window.contentView)
+        menu.popUp(positioning: nil, at: at, in: AppDelegate.main.window?.contentView)
     }
 
     private func setupImportMenu(in menu: NSMenu) {
@@ -197,7 +197,15 @@ class AllCardsContextualMenu {
         alert.addButton(withTitle: "Delete...")
         alert.addButton(withTitle: "Cancel")
         alert.alertStyle = .warning
-        alert.beginSheetModal(for: AppDelegate.main.window) { (response) in
+        guard let window = AppDelegate.main.window else {
+            if alert.runModal() == .alertFirstButtonReturn {
+                self.confirmedDeleteSelectedNotes()
+            } else {
+                self.onFinishBlock?(false)
+            }
+            return
+        }
+        alert.beginSheetModal(for: window) { (response) in
             if response == .alertFirstButtonReturn {
                 self.confirmedDeleteSelectedNotes()
             } else {

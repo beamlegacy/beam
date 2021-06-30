@@ -40,7 +40,7 @@ class BeamUITestsMenuGenerator {
     }
 
     private func insertTextInCurrentNote() {
-        guard let currentNote = AppDelegate.main.window.state.currentNote else {
+        guard let currentNote = AppDelegate.main.window?.state.currentNote else {
             Logger.shared.logDebug("Current note is nil", category: .general)
 
             return
@@ -76,7 +76,7 @@ class BeamUITestsMenuGenerator {
 
     private func loadUITestsPage(page: Int) {
         if let localUrl = Bundle.main.url(forResource: "UITests-\(page)", withExtension: "html", subdirectory: nil) {
-            _ = AppDelegate.main.window.state.createTab(withURL: localUrl, originalQuery: nil)
+            _ = AppDelegate.main.window?.state.createTab(withURL: localUrl, originalQuery: nil)
         }
     }
 

@@ -333,7 +333,6 @@ import Promises
                     reject(error!)
                 }
             }
-
         }
     }
 
@@ -342,7 +341,7 @@ import Promises
         return plainData?.base64EncodedString(options: [])
     }
 
-    func createNewTab(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, setCurrent: Bool) -> WebPage {
+    func createNewTab(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, setCurrent: Bool, state: BeamState) -> WebPage {
         let newWebView = BeamWebView(frame: NSRect(), configuration: configuration ?? Self.webViewConfiguration)
         newWebView.wantsLayer = true
         newWebView.allowsMagnification = true
@@ -356,6 +355,52 @@ import Promises
         navigationCount += 1
         browsingTree.openLinkInNewTab()
         return newTab
+    }
+
+    func createNewTab(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, setCurrent: Bool) -> WebPage {
+        return createNewTab(targetURL, configuration, setCurrent: setCurrent, state: state)
+    }
+
+    func createNewWindow(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, windowFeatures: WKWindowFeatures, setCurrent: Bool) -> BeamWebView {
+        // TODO: Open a new window compliant with windowFeatures instead.
+        let defaultValue = true
+        let menubar = windowFeatures.menuBarVisibility?.boolValue ?? defaultValue
+        let statusBar = windowFeatures.statusBarVisibility?.boolValue ?? defaultValue
+        let toolBars = windowFeatures.toolbarsVisibility?.boolValue ?? defaultValue
+        let resizing = windowFeatures.allowsResizing?.boolValue ?? defaultValue
+
+        let windowFrame = NSRect(x: windowFeatures.x?.floatValue ?? 0, y: windowFeatures.y?.floatValue ?? 0, width: windowFeatures.width?.floatValue ?? 800, height: windowFeatures.height?.floatValue ?? 600)
+
+        var newWebView: BeamWebView
+        var newWindow: NSWindow
+        if menubar && statusBar && toolBars && resizing {
+            // we are being asked for the full browser experience, give it to them...
+            let newBeamWindow = AppDelegate.main.createWindow(frame: windowFrame, reloadState: false)
+            let tab = createNewTab(targetURL, configuration, setCurrent: setCurrent, state: newBeamWindow.state)
+            newWindow = newBeamWindow
+            newWebView = tab.webView
+        } else {
+            // this is more likely a login window or something that should disappear at some point so let's create something transient:
+            newWebView = BeamWebView(frame: NSRect(), configuration: configuration ?? Self.webViewConfiguration)
+            newWebView.enableAutoCloseWindow = true
+            newWebView.wantsLayer = true
+            newWebView.allowsMagnification = true
+            state.setup(webView: newWebView)
+
+            var windowMasks: NSWindow.StyleMask = [.closable, .miniaturizable, .titled, .unifiedTitleAndToolbar]
+            if windowFeatures.allowsResizing != 0 {
+                windowMasks.insert(NSWindow.StyleMask.resizable)
+            }
+            newWindow = NSWindow(contentRect: windowFrame, styleMask: windowMasks, backing: .buffered, defer: true)
+            newWindow.isReleasedWhenClosed = false
+            newWindow.contentView = newWebView
+
+            newWindow.makeKeyAndOrderFront(nil)
+        }
+        if windowFeatures.x == nil || windowFeatures.y == nil {
+            newWindow.center()
+        }
+        return newWebView
     }
 
     var navigationCount: Int = 0

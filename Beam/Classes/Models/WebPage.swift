@@ -52,6 +52,7 @@ protocol WebPage: AnyObject, Scorable {
     var mediaPlayerController: MediaPlayerController? { get set }
 
     func createNewTab(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, setCurrent: Bool) -> WebPage
+    func createNewWindow(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, windowFeatures: WKWindowFeatures, setCurrent: Bool) -> BeamWebView
     func closeTab()
 
     /**

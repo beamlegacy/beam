@@ -29,7 +29,7 @@ struct GlobalCenteringContainer<Content: View>: View {
             containerGlobal = containerGeo.frame(in: .global)
         } else {
             // fallback, but prefer using the container geometry.
-            containerGlobal = AppDelegate.main.window.contentView?.bounds ?? .zero
+            containerGlobal = AppDelegate.main.window?.contentView?.bounds ?? .zero
         }
         let stackGlobal = searchStackGeo.frame(in: .global)
 
