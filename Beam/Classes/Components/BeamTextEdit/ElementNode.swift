@@ -544,11 +544,23 @@ public class ElementNode: Widget {
         return max(0, index - 1)
     }
 
-    public func positionAbove(_ position: Int) -> Int {
-        return max(0, position - 1)
+//    public func positionAbove(_ position: Int) -> Int {
+//        return max(0, position - 1)
+//    }
+//
+//    public func positionBelow(_ position: Int) -> Int {
+//        return min(1, position + 1)
+//    }
+
+    public func caretAbove(_ caretIndex: Int) -> Int {
+        return max(0, caretIndex - 1)
     }
 
-    public func positionBelow(_ position: Int) -> Int {
-        return min(1, position + 1)
+    public func caretBelow(_ caretIndex: Int) -> Int {
+        return min(1, caretIndex + 1)
+    }
+
+    public func positionForCaretIndex(_ caretIndex: Int) -> Int {
+        caretIndex
     }
 }
