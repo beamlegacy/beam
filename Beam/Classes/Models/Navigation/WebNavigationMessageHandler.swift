@@ -24,17 +24,19 @@ class WebNavigationMessageHandler: BeamMessageHandler<NavigationMessages> {
         /// Is only called when the JS history API registers a change
         case NavigationMessages.nav_locationChanged:
             guard let dict = msgPayload,
-                  let urlString = dict["url"] as? String
+                  let urlString = dict["url"] as? String,
+                  let type = dict["type"] as? String
                   else {
                 Logger.shared.logError("Expected a url in location change message \(String(describing: msgPayload))", category: .web)
                 return
             }
-            Logger.shared.logInfo("Location changed \(urlString))")
+            Logger.shared.logInfo("Location changed: \(type) \(urlString))")
             guard let url = URL(string: urlString) else {
                 Logger.shared.logError("\(urlString) is not a valid URL in navigation message", category: .web)
                 return
             }
-            webPage.navigationController.navigatedTo(url: url, webView: webPage.webView)
+            let replace: Bool = type == "replaceState" ? true : false
+            webPage.navigationController.navigatedTo(url: url, webView: webPage.webView, replace: replace)
             _ = webPage.executeJS("dispatchEvent(new Event('beam_historyLoad'))", objectName: nil)
         }
     }

@@ -55,6 +55,13 @@ class TestWebPage: WebPage {
                            fileStorage: storage, downloadManager: downloadManager, navigationController: navigationController)
     }
 
+    func createNewWindow(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, windowFeatures: WKWindowFeatures, setCurrent: Bool) -> BeamWebView {
+        events.append("createNewWindow \(targetURL) \(setCurrent))")
+        let webPage = TestWebPage(browsingScorer: browsingScorer, passwordOverlayController: passwordOverlayController, pns: pointAndShoot,
+                                  fileStorage: storage, downloadManager: downloadManager, navigationController: navigationController)
+        return webPage.webView
+    }
+
     func isActiveTab() -> Bool {
         true
     }
@@ -216,13 +223,14 @@ class DownloadManagerMock: DownloadManager {
 class NavigationControllerMock: WebNavigationController {
     var events: [String] = []
 
-    func navigatedTo(url: URL, webView: WKWebView) {
-        events.append("navigatedTo \(url)")
+    func navigatedTo(url: URL, webView: WKWebView, replace: Bool) {
+        events.append("navigatedTo \(url) \(replace)")
     }
 
     func setLoading() {
         events.append("setLoading")
     }
+
 }
 
 class PointAndShootTest: XCTestCase {
@@ -235,24 +243,24 @@ class PointAndShootTest: XCTestCase {
         let userInfoStore = MockUserInformationsStore()
         let testPasswordOverlayController = PasswordOverlayController(passwordStore: testPasswordStore, userInfoStore: userInfoStore)
         let testBrowsingScorer = BrowsingScorerMock()
-        self.testUI = PointAndShootUIMock()
+        testUI = PointAndShootUIMock()
 
         let testFileStorage = FileStorageMock()
         let testDownloadManager = DownloadManagerMock()
         let navigationController = NavigationControllerMock()
-        self.pns = PointAndShoot(ui: testUI, scorer: testBrowsingScorer)
+        pns = PointAndShoot(ui: testUI, scorer: testBrowsingScorer)
         let page = TestWebPage(browsingScorer: testBrowsingScorer,
                                passwordOverlayController: testPasswordOverlayController, pns: pns,
                                fileStorage: testFileStorage, downloadManager: testDownloadManager,
                                navigationController: navigationController)
-        self.testPage = page
+        testPage = page
         page.browsingScorer.page = page
         page.passwordOverlayController.page = page
         page.pointAndShoot.page = page
     }
 
     func helperCountUIEvents(_ label: String) -> Int {
-        return self.testUI.events.filter({ $0.contains(label) }).count
+        return testUI.events.filter({ $0.contains(label) }).count
     }
 
     // Note: this class is only used to setup the Point and Shoot Mocks and testbed

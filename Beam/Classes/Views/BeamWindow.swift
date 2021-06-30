@@ -73,6 +73,7 @@ class BeamWindow: NSWindow, NSDraggingDestination {
         self.toolbar?.isVisible = false
         self.titlebarAppearsTransparent = true
         self.titleVisibility = .hidden
+        self.isReleasedWhenClosed = false
 
         self.tabbingMode = .disallowed
         setFrameAutosaveName("BeamWindow")
@@ -187,7 +188,7 @@ class BeamWindow: NSWindow, NSDraggingDestination {
     // MARK: - IBAction
 
     @IBAction func newDocument(_ sender: Any?) {
-        AppDelegate.main.createWindow(reloadState: false)
+        AppDelegate.main.createWindow(frame: nil, reloadState: false)
     }
 
     @IBAction func showPreviousTab(_ sender: Any?) {
@@ -216,6 +217,45 @@ class BeamWindow: NSWindow, NSDraggingDestination {
 
     @IBAction func showCardSelector(_ sender: Any?) {
         state.destinationCardIsFocused = true
+    }
+
+    // MARK: Navigation
+    @IBAction func goBack(_ sender: Any?) {
+        state.goBack()
+    }
+
+    @IBAction func goForward(_ sender: Any?) {
+        state.goForward()
+    }
+
+    @IBAction func toggleBetweenWebAndNote(_ sender: Any) {
+        state.toggleBetweenWebAndNote()
+    }
+
+    @IBAction private func checkForUpdates(_ sender: Any) {
+        versionChecker.checkForUpdates()
+    }
+
+    // MARK: Web loading
+    @IBAction func stopLoading(_ sender: Any) {
+        state.browserTabsManager.currentTab?.webView.stopLoading()
+    }
+
+    @IBAction func reload(_ sender: Any) {
+        state.browserTabsManager.currentTab?.webView.reload()
+    }
+
+    // MARK: Webview Zoom
+    @IBAction func resetZoom(_ sender: Any) {
+        state.browserTabsManager.currentTab?.webView.zoomReset()
+    }
+
+    @IBAction func zoomIn(_ sender: Any) {
+        state.browserTabsManager.currentTab?.webView.zoomIn()
+    }
+
+    @IBAction func zoomOut(_ sender: Any) {
+        state.browserTabsManager.currentTab?.webView.zoomOut()
     }
 
     @IBAction func showRecentCard(_ sender: Any?) {
@@ -296,6 +336,10 @@ class BeamWindow: NSWindow, NSDraggingDestination {
         }
 
         return true
+    }
+
+    deinit {
+        contentView = nil
     }
 
 }

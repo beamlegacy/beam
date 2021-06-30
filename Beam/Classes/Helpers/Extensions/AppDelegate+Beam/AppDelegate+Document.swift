@@ -6,7 +6,7 @@ extension AppDelegate {
             documentsWindow.makeKeyAndOrderFront(window)
             return
         }
-        documentsWindow = DocumentsWindow(contentRect: window.frame)
+        documentsWindow = DocumentsWindow(contentRect: window?.frame ?? NSRect(origin: .zero, size: CGSize(width: 800, height: 600)))
         documentsWindow?.center()
         documentsWindow?.makeKeyAndOrderFront(window)
     }

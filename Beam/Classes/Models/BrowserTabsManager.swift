@@ -204,7 +204,7 @@ extension BrowserTabsManager {
 
     private func resetFirstResponderAfterClosingTab() {
         // This make sure any webview is not retained by the first responder chain
-        AppDelegate.main.window.makeFirstResponder(nil)
+        AppDelegate.main.window?.makeFirstResponder(nil)
         if let currentTab = currentTab {
             DispatchQueue.main.async {
                 currentTab.webView.window?.makeFirstResponder(currentTab.webView)
