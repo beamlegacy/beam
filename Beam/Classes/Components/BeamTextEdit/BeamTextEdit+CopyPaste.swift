@@ -147,32 +147,40 @@ extension BeamTextEdit {
 
     private func paste(elementHolder: BeamNoteDataHolder) {
         do {
+
             cmdManager.beginGroup(with: "PasteElementContent")
+            defer { cmdManager.endGroup() }
+
+            if rootNode.state.nodeSelection != nil {
+                rootNode.eraseNodeSelection(createEmptyNodeInPlace: true, createNodeInEmptyParent: false)
+            } else if !rootNode.state.selectedTextRange.isEmpty {
+                guard let node = focusedWidget as? TextNode else { return }
+                cmdManager.deleteText(in: node, for: rootNode.rangeToDeleteText(in: node, cursorAt: rootNode.cursorPosition, forward: false))
+            }
+            guard let firstNode = focusedWidget as? TextNode else { return }
+            let previousBullet = firstNode.element
+
+            guard let node = focusedWidget as? ElementNode,
+                  let parent = node.parent as? ElementNode else {
+                Logger.shared.logError("Can't paste on a node that is not an element node", category: .noteEditor)
+                return
+            }
+
             let decodedNote = try JSONDecoder().decode(BeamNote.self, from: elementHolder.noteData)
-            for (idx, element) in decodedNote.children.enumerated() {
+            for element in decodedNote.children {
                 guard let newElement = element.deepCopy(withNewId: true, selectedElements: nil) else {
                     Logger.shared.logError("Paste error, unable to copy \(element)", category: .noteEditor)
                     return
                 }
-                guard let node = focusedWidget as? TextNode,
-                      let parent = node.parent as? TextNode else { continue }
-                if idx == 0 {
-                    cmdManager.insertText(newElement.text, in: node, at: node.elementText.count)
-                    cmdManager.focusElement(node, cursorPosition: node.elementText.count)
-                    for child in newElement.children {
-                        guard let focusNode = focusedWidget as? TextNode else { continue }
-                        cmdManager.insertElement(child, inNode: node, afterNode: focusNode)
-                        cmdManager.focus(child, in: focusNode)
-                        if let deepestChild = child.deepestChildren() {
-                            cmdManager.focus(deepestChild, in: focusNode)
-                        }
-                    }
-                } else {
-                    cmdManager.insertElement(newElement, inNode: parent, afterNode: node)
-                    cmdManager.focus(newElement, in: node)
+                guard let node = focusedWidget as? ElementNode else {
+                    return
                 }
+                cmdManager.insertElement(newElement, inNode: parent, afterElement: node.element)
+                cmdManager.focus(newElement, in: node)
             }
-            cmdManager.endGroup()
+            if previousBullet.children.isEmpty, previousBullet.text.isEmpty {
+                cmdManager.deleteElement(for: previousBullet)
+            }
         } catch {
             Logger.shared.logError("Can't encode Cloned Note", category: .general)
         }

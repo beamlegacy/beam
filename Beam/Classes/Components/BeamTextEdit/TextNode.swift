@@ -835,22 +835,47 @@ public class TextNode: ElementNode {
         return (caret.offset.x, textLine.frame)
     }
 
-    override public func positionAbove(_ position: Int) -> Int {
+//    override public func positionAbove(_ position: Int) -> Int {
+//        guard let textFrame = textFrame else { return 0 }
+//        guard let l = lineAt(index: position), l > 0 else { return 0 }
+//        let offset = offsetAt(index: position)
+//        let indexAbove = textFrame.lines[l - 1].stringIndexFor(position: NSPoint(x: offset, y: 0))
+//        return sourceIndexFor(displayIndex: indexAbove)
+//    }
+//
+//    override public func positionBelow(_ position: Int) -> Int {
+//        guard let textFrame = textFrame else { return 0 }
+//        guard let l = lineAt(index: position), l < textFrame.lines.count - 1 else { return text.count }
+//        let offset = offsetAt(index: position)
+//        let indexBelow = textFrame.lines[l + 1].stringIndexFor(position: NSPoint(x: offset, y: 0))
+//        return sourceIndexFor(displayIndex: indexBelow)
+//    }
+//
+    override public func caretAbove(_ caretIndex: Int) -> Int {
         guard let textFrame = textFrame else { return 0 }
-        guard let l = lineAt(index: position), l > 0 else { return 0 }
-        let offset = offsetAt(index: position)
-        let indexAbove = textFrame.lines[l - 1].stringIndexFor(position: NSPoint(x: offset, y: 0))
-        return sourceIndexFor(displayIndex: indexAbove)
+        let currentCaret = textFrame.carets[caretIndex]
+        let lineAbove = currentCaret.line - 1
+        guard lineAbove >= 0 else { return 0 }
+        let offset = currentCaret.offset
+        return textFrame.carets.firstIndex { caret in
+            caret.line == lineAbove && caret.offset.x >= offset.x
+        } ?? 0
     }
 
-    override public func positionBelow(_ position: Int) -> Int {
+    override public func caretBelow(_ caretIndex: Int) -> Int {
         guard let textFrame = textFrame else { return 0 }
-        guard let l = lineAt(index: position), l < textFrame.lines.count - 1 else { return text.count }
-        let offset = offsetAt(index: position)
-        let indexBelow = textFrame.lines[l + 1].stringIndexFor(position: NSPoint(x: offset, y: 0))
-        return sourceIndexFor(displayIndex: indexBelow)
+        let currentCaret = textFrame.carets[caretIndex]
+        let lineAbove = currentCaret.line + 1
+        guard lineAbove < textFrame.lines.count else { return textFrame.carets.count - 1 }
+        let offset = currentCaret.offset
+        return textFrame.carets.firstIndex { caret in
+            caret.line == lineAbove && caret.offset.x >= offset.x
+        } ?? textFrame.carets.count - 1
     }
 
+    override public func positionForCaretIndex(_ caretIndex: Int) -> Int {
+        return textFrame?.carets[caretIndex].positionInSource ?? 0
+    }
     override public func isOnFirstLine(_ position: Int) -> Bool {
         guard let l = lineAt(index: position) else { return false }
         return l == 0
