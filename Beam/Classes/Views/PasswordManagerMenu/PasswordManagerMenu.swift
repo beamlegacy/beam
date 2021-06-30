@@ -27,7 +27,7 @@ struct PasswordManagerMenu: View {
     @State private var isShowingToast: Bool = false
 
     var body: some View {
-        FormatterViewBackground(shadowOpacity: 0.1) {
+        FormatterViewBackground {
             VStack(alignment: .leading, spacing: 0) {
                 if let passwordGeneratorViewModel = viewModel.passwordGeneratorViewModel {
                     PasswordGeneratorSuggestionCell(viewModel: passwordGeneratorViewModel)
@@ -85,7 +85,7 @@ struct PasswordManagerMenu: View {
         }
         .frame(width: max(width, 400), height: height, alignment: .top)
         .cornerRadius(6)
-        .shadow(color: Color.black.opacity(0.1), radius: 24, x: 0, y: 4)
+        .shadow(color: BeamColor.Formatter.shadow.swiftUI, radius: 15, x: 0, y: 7)
         .animation(nil)
     }
 }
