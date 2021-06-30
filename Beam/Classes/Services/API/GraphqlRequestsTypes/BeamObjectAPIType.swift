@@ -14,6 +14,8 @@ enum BeamObjectType: String {
     case password
     case database
     case document
+    case file
+    case link
 }
 
 class BeamObjectAPIType: Codable {
