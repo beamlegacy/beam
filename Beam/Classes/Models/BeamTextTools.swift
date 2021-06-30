@@ -10,7 +10,8 @@ import BeamCore
 
 // High level manipulation:
 extension BeamText {
-    @discardableResult mutating func makeInternalLink(_ range: Swift.Range<Int>) -> Bool {
+    //swiftlint:disable:next function_body_length
+    @discardableResult mutating func makeInternalLink(_ range: Swift.Range<Int>, createNoteIfNeeded: Bool) -> Bool {
         let text = self.extract(range: range)
         let t = text.text
 
@@ -44,7 +45,13 @@ extension BeamText {
             return false
         }
 
-        guard let linkID = BeamNote.idForNoteNamed(link) else { return false }
+        var _linkID = BeamNote.idForNoteNamed(link)
+        if _linkID == nil && createNoteIfNeeded {
+            let note = BeamNote.create(AppDelegate.main.data.documentManager, title: link)
+            _linkID = note.id
+            note.save(documentManager: AppDelegate.main.data.documentManager)
+        }
+        guard let linkID = _linkID else { return false }
         let linkText = BeamText(text: link, attributes: [.internalLink(linkID)])
         let actualRange = range.lowerBound + start ..< range.lowerBound + end
         Logger.shared.logInfo("makeInternalLink for range: \(range) | actual: \(actualRange)", category: .document)
@@ -71,7 +78,7 @@ extension BeamText {
         text.ranges(of: title).forEach { range in
             let start = text.position(at: range.lowerBound)
             let end = text.position(at: range.upperBound)
-            makeInternalLink(start..<end)
+            makeInternalLink(start..<end, createNoteIfNeeded: true)
         }
     }
 
