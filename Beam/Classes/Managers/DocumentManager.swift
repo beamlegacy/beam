@@ -400,8 +400,8 @@ public class DocumentManager: NSObject {
 
         let documentTypeInt = (documentType == .journal ? 0 : 1)
 
-        // Server side doesn't store milliseconds for updatedAt and createdAt. Local coredata does, rounding using Int()
-        // to compare them
+        // Server side doesn't store milliseconds for updatedAt and createdAt.
+        // Local coredata does, rounding using Int() to compare them
 
         return Int(document.updated_at.timeIntervalSince1970) == Int(updatedAt.timeIntervalSince1970) &&
             Int(document.created_at.timeIntervalSince1970) == Int(createdAt.timeIntervalSince1970) &&
@@ -416,8 +416,8 @@ public class DocumentManager: NSObject {
     }
 
     private func isEqual(_ document: Document, to documentStruct: DocumentStruct) -> Bool {
-        // Server side doesn't store milliseconds for updatedAt and createdAt. Local coredata does, rounding using Int()
-        // to compare them
+        // Server side doesn't store milliseconds for updatedAt and createdAt.
+        // Local coredata does, rounding using Int() to compare them
 
         return Int(document.updated_at.timeIntervalSince1970) == Int(documentStruct.updatedAt.timeIntervalSince1970) &&
             Int(document.created_at.timeIntervalSince1970) == Int(documentStruct.createdAt.timeIntervalSince1970) &&
@@ -429,7 +429,6 @@ public class DocumentManager: NSObject {
             document.deleted_at == documentStruct.deletedAt &&
             document.id == documentStruct.id
     }
-
 
     // MARK: Refresh
     private func refreshAllAndSave(_ delete: Bool = true,
@@ -1157,13 +1156,14 @@ extension DocumentManager {
         Logger.shared.logDebug("Received \(documents.count) documents: updating",
                                category: .documentNetwork)
 
+        var changed = false
         let context = coreDataManager.backgroundContext
         try context.performAndWait {
             for document in documents {
                 let localDocument = Document.rawFetchOrCreateWithId(context, document.id)
 
                 if self.isEqual(localDocument, to: document) {
-                    Logger.shared.logDebug("\(document.title): remote is equal to struct version, skip",
+                    Logger.shared.logDebug("\(document.title) {\(document.id)}: remote is equal to struct version, skip",
                                            category: .documentNetwork)
                     continue
                 }
@@ -1177,11 +1177,14 @@ extension DocumentManager {
 
                 // TODO: What to do when this fails? Because of duplicate titles, or other errors
                 try checkValidations(context, localDocument)
+                changed = true
 
                 localDocument.version += 1
             }
 
-            try Self.saveContext(context: context)
+            if changed {
+                try Self.saveContext(context: context)
+            }
         }
 
         Logger.shared.logDebug("Received \(documents.count) documents: updated",

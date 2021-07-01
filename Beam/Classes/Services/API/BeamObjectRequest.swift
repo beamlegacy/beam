@@ -2,6 +2,7 @@ import Foundation
 import CommonCrypto
 import PromiseKit
 import Promises
+import BeamCore
 
 class BeamObjectRequest: APIRequest {
     struct DeleteAllBeamObjects: Decodable, Errorable {
@@ -134,21 +135,44 @@ extension BeamObjectRequest {
             case .failure(let error):
                 completion(.failure(error))
             case .success(let me):
-                if let beamObjects = me.beamObjects {
-                    do {
-                        if Configuration.encryptionEnabled {
-                            try beamObjects.forEach { try $0.decrypt() }
-                        }
-                    } catch {
-                        // Will catch unencryption errors
-                        completion(.failure(error))
-                        return
-                    }
-
-                    completion(.success(beamObjects))
-                } else {
+                guard var beamObjects = me.beamObjects else {
                     completion(.failure(APIRequestError.parserError))
+                    return
                 }
+
+                var beamObjectErrors = Set<String>()
+
+                /*
+                 When fetching all beam objects, we decrypt them if needed. We might have decryption issue
+                 like not having the key it was encrypted with. In such case we filter those out as the calling
+                 code wouldn't know what to do with it anyway.
+                 */
+
+                do {
+                    if Configuration.encryptionEnabled {
+                        try beamObjects.forEach {
+                            do {
+                                try $0.decrypt()
+                            } catch EncryptionManagerError.authenticationFailure {
+                                // Could not decrypt, will remove it from the results
+                                beamObjectErrors.insert($0.id)
+                            }
+                        }
+                    }
+                } catch {
+                    // Will catch anything but encryption errors
+                    completion(.failure(error))
+                    return
+                }
+
+                if !beamObjectErrors.isEmpty {
+                    // Remove error elements
+                    beamObjects = beamObjects.filter { !beamObjectErrors.contains($0.id) }
+                    Logger.shared.logError("Removed \(beamObjectErrors.count) objects: \(beamObjectErrors)",
+                                           category: .beamObjectNetwork)
+                }
+
+                completion(.success(beamObjects))
             }
         }
     }

@@ -28,6 +28,8 @@ public class BeamObjectManager {
             switch key {
             case .document:
                 let documentObjects: [DocumentStruct] = objects.compactMap { $0.decode() }
+                guard !documentObjects.isEmpty else { continue }
+
                 do {
                     try DocumentManager().receivedBeamObjects(documentObjects)
                 } catch {
@@ -35,6 +37,7 @@ public class BeamObjectManager {
                 }
             case .database:
                 let databaseObjects: [DatabaseStruct] = objects.compactMap { $0.decode() }
+                guard !databaseObjects.isEmpty else { continue }
                 do {
                     try DatabaseManager().receivedBeamObjects(databaseObjects)
                 } catch {
@@ -62,7 +65,7 @@ extension BeamObjectManager {
 
         let beamRequest = BeamObjectRequest()
 
-        let lastUpdatedAt = Persistence.Sync.BeamObjects.updated_at
+        let lastUpdatedAt: Date? = nil // Persistence.Sync.BeamObjects.updated_at
         let timeNow = BeamDate.now
 
         if let lastUpdatedAt = lastUpdatedAt {

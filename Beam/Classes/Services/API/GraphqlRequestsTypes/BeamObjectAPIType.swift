@@ -18,7 +18,7 @@ enum BeamObjectType: String, Codable {
 }
 
 class BeamObjectAPIType: Codable {
-    var id: String?
+    var id: String
     var beamObjectType: BeamObjectType?
     var createdAt: Date?
     var updatedAt: Date?
@@ -87,8 +87,9 @@ class BeamObjectAPIType: Codable {
             let dataAsData = data.asData
 
             if dataAsData.SHA256 != dataChecksum {
-                Logger.shared.logError("Checksum is different :( Data is potentially corrupted",
+                Logger.shared.logError("Checksum received \(String(describing: dataChecksum)) is different from calculated one: \(dataAsData.SHA256) :( Data is potentially corrupted",
                                        category: .beamObjectNetwork)
+                Logger.shared.logError("data: \(data)", category: .beamObjectNetwork)
             }
 
             var result = try Self.decoder.decode(T.self, from: dataAsData)
@@ -109,22 +110,17 @@ class BeamObjectAPIType: Codable {
         guard let encodedData = data else { return }
 
         let decoder = JSONDecoder()
+        let decodedStruct = try decoder.decode(DataEncryption.self, from: encodedData.asData)
+
+        guard let encodedString = decodedStruct.data else { return }
+        guard let encryptionName = decodedStruct.encryptionName,
+              let algorithm = EncryptionManager.Algorithm(rawValue: encryptionName) else { return }
 
         do {
-            let decodedStruct = try decoder.decode(DataEncryption.self, from: encodedData.asData)
-            guard let encodedString = decodedStruct.data else { return }
-            guard let encryptionName = decodedStruct.encryptionName,
-                  let algorithm = EncryptionManager.Algorithm(rawValue: encryptionName) else { return }
-
-            do {
-                data = try EncryptionManager.shared.decryptString(encodedString, using: algorithm)
-                encryptedData = nil // encodedData for debug purpose when needed
-            } catch EncryptionManagerError.authenticationFailure {
-                Logger.shared.logError("Could not decrypt data with key \(decodedStruct.privateKeySha256 ?? "-")", category: .encryption)
-            }
+            data = try EncryptionManager.shared.decryptString(encodedString, using: algorithm)
+            encryptedData = nil // encodedData for debug purpose when needed
         } catch DecodingError.dataCorrupted {
             Logger.shared.logError("DecodingError.dataCorrupted", category: .encryption)
-            Logger.shared.logDebug("Encoded data: \(encodedData)", category: .encryption)
 
             // JSON decoding error might happen when the content wasn't encrypted
             encryptedData = nil
@@ -134,6 +130,10 @@ class BeamObjectAPIType: Codable {
 
             // JSON decoding error might happen when the content wasn't encrypted
             encryptedData = nil
+        } catch EncryptionManagerError.authenticationFailure {
+            Logger.shared.logError("Could not decrypt data with key \(decodedStruct.privateKeySha256 ?? "-")",
+                                   category: .encryption)
+            throw EncryptionManagerError.authenticationFailure
         } catch {
             Logger.shared.logError("\(type(of: error)): \(error) \(error.localizedDescription)", category: .encryption)
             Logger.shared.logDebug("Encoded data: \(encodedData)", category: .encryption)

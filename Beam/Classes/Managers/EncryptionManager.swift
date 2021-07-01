@@ -11,7 +11,7 @@ extension EncryptionManagerError: LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .authenticationFailure:
-            return loc("Couldn't decrypt data, did you encrypt content with a different private key?")
+            return loc("Couldn't decrypt data, encrypted with a different private key?")
         case .stringEncodingError:
             return loc("Couldn't change String to Data.")
         case .keyError:

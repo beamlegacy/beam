@@ -308,6 +308,17 @@ class DatabaseManager {
         database.created_at = databaseType.createdAt ?? database.created_at
         database.deleted_at = databaseType.deletedAt ?? database.deleted_at
     }
+
+    private func isEqual(_ database: Database, to databaseStruct: DatabaseStruct) -> Bool {
+        // Server side doesn't store milliseconds for updatedAt and createdAt.
+        // Local coredata does, rounding using Int() to compare them
+
+        return Int(database.updated_at.timeIntervalSince1970) == Int(databaseStruct.updatedAt.timeIntervalSince1970) &&
+            Int(database.created_at.timeIntervalSince1970) == Int(databaseStruct.createdAt.timeIntervalSince1970) &&
+            database.title == databaseStruct.title &&
+            database.deleted_at == databaseStruct.deletedAt &&
+            database.id == databaseStruct.id
+    }
 }
 
 // MARK: -
@@ -453,10 +464,18 @@ extension DatabaseManager {
         Logger.shared.logDebug("Received \(databases.count) databases: updating",
                                category: .databaseNetwork)
 
+        var changed = false
         let context = coreDataManager.backgroundContext
         try context.performAndWait {
             for database in databases {
                 let localDatabase = Database.fetchOrCreateWithId(context, database.id)
+
+                if self.isEqual(localDatabase, to: database) {
+                    Logger.shared.logDebug("\(database.title) {\(database.id)}: remote is equal to struct version, skip",
+                                           category: .databaseNetwork)
+                    continue
+                }
+
                 localDatabase.title = database.title
                 localDatabase.created_at = database.createdAt
                 localDatabase.deleted_at = database.deletedAt
@@ -464,9 +483,12 @@ extension DatabaseManager {
 
                 // TODO: What to do when this fails? Because of duplicate titles, or other errors
                 try checkValidations(context, localDatabase)
+                changed = true
             }
 
-            try Self.saveContext(context: context)
+            if changed {
+                try Self.saveContext(context: context)
+            }
         }
 
         Logger.shared.logDebug("Received \(databases.count) databases: updated",
