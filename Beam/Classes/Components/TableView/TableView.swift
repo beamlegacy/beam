@@ -111,7 +111,13 @@ class TableViewCoordinator: NSObject {
             }
         }
     }
-    var creationRowTitle: String?
+    var creationRowTitle: String? {
+        didSet {
+            if creationRowTitle != oldValue {
+                reloadData()
+            }
+        }
+    }
     private var creationgRowTextField: NSTextField?
 
     private var sortedData = [TableViewItem]()
