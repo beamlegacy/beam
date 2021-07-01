@@ -66,7 +66,6 @@ class PointAndShootUI: ObservableObject {
     @Published var groupsUI: [ShootGroupUI] = []
     @Published var shootConfirmation: SelectionConfirmationUI?
     @Published var swiftPointStatus: String = ""
-    @Published var pnsBorder: Bool = true
 
     private func drawSelection(
         target: PointAndShoot.Target,
