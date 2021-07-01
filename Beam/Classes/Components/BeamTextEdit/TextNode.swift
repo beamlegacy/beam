@@ -19,9 +19,24 @@ public class TextNode: ElementNode {
 
     var mouseIsDragged = false
     var lastHoverMouseInfo: MouseInfo?
-    var interlineFactor = CGFloat(1.3)
+    var interlineFactor: CGFloat {
+        switch elementKind {
+        case .heading:
+            return 1.2
+        default:
+            return 1.4
+        }
+    }
     var interNodeSpacing = CGFloat(0)
-    var fontSize: CGFloat = 15
+    var fontSize: CGFloat {
+        switch elementKind {
+        case .heading(let level):
+            let l = min(1, max(level, 2))
+            return [21, 18][l - 1]
+        default:
+            return 15
+        }
+    }
 
     private var isCursorInsideUneditableRange = false
 
@@ -1081,15 +1096,6 @@ public class TextNode: ElementNode {
     }
 
     private func buildAttributedString(for beamText: BeamText) -> NSMutableAttributedString {
-
-        switch elementKind {
-        case .heading(1):
-            fontSize = 22 // TODO: Change later (isBig ? 26 : 22)
-        case .heading(2):
-            fontSize = 18 // TODO: Change later (isBig ? 22 : 18)
-        default:
-            fontSize = 14 // TODO: Change later (isBig ? 17 : 15)
-        }
 
         var mouseInteraction: MouseInteraction?
         if let hoverMouse = lastHoverMouseInfo, isHoveringText() {

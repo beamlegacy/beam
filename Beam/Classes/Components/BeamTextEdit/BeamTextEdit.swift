@@ -366,7 +366,7 @@ public extension CALayer {
         cardHeaderLayer.isHidden = !showTitle
 
         cardTitleLayer.foregroundColor = BeamColor.Generic.text.cgColor
-        cardTitleLayer.font = BeamFont.semibold(size: 0).nsFont
+        cardTitleLayer.font = BeamFont.medium(size: 26).nsFont
         cardTitleLayer.fontSize = 26 // TODO: Change later (isBig ? 30 : 26)
         cardTitleLayer.string = cardNote.title
 
@@ -860,21 +860,6 @@ public extension CALayer {
         onBlinkTime = von == 0 ? onBlinkTime : von * 1000
         let voff = defaults.double(forKey: "NSTextInsertionPointBlinkPeriodOff")
         offBlinkTime = voff == 0 ? offBlinkTime : voff * 1000
-    }
-
-    var _title: TextFrame?
-    var title: TextFrame {
-        if let t = _title {
-            return t
-        }
-
-        guard let titleString = rootNode.note?.title.attributed else { fatalError() }
-        // TODO: Change later (isBig ? 13 : 11)
-        let f = NSFont.systemFont(ofSize: 11, weight: .semibold)
-        titleString.addAttribute(.font, value: f, range: titleString.wholeRange)
-        titleString.addAttribute(.foregroundColor, value: BeamColor.Editor.control.nsColor, range: titleString.wholeRange)
-        _title = TextFrame.create(string: titleString, atPosition: NSPoint(x: 0, y: 0), textWidth: frame.width)
-        return _title!
     }
 
     func reBlink() {
