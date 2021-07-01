@@ -104,5 +104,4 @@ class BeamWebView: WKWebView {
         }
         nextResponder?.scrollWheel(with: theEvent)
     }
-
 }
