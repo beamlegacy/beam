@@ -21,6 +21,7 @@ public struct Page {
     var content: String?
     var textEmbedding: [Double]?
     var entities: EntitiesInText?
+    var language: NLLanguage?
     var entitiesInTitle: EntitiesInText?
 }
 
@@ -244,13 +245,12 @@ public class Cluster {
     /// - Parameters:
     ///   - text: The text that will be turned into a contextual vector (embedding)
     /// - Returns: The embedding of the given piece of text as an optional.
-    func textualEmbeddingComputationWithNLEmbedding(text: String) -> [Double]? {
-        let language = self.getTextLanguage(text: text)
-
-        if #available(iOS 14, macOS 11, *), language == NLLanguage.english {
+    func textualEmbeddingComputationWithNLEmbedding(text: String) -> ([Double], NLLanguage)? {
+        if let language = self.getTextLanguage(text: text),
+           #available(iOS 14, macOS 11, *), language != NLLanguage.undetermined {
             if let sentenceEmbedding = NLEmbedding.sentenceEmbedding(for: .english),
                let vector = sentenceEmbedding.vector(for: text) {
-                    return vector
+                    return (vector, language)
             }
         }
 
@@ -301,16 +301,18 @@ public class Cluster {
     /// - Parameters:
     ///   - textualEmbedding: the embedding of the current page
     /// - Returns: A list of cosine similarity scores
-    func scoreTextualEmbedding(textualEmbedding: [Double]) -> [Double] {
+    func scoreTextualEmbedding(textualEmbedding: [Double], language: NLLanguage) -> [Double] {
         var scores = [Double]()
 
         for page in pages.dropLast() {
             // The textual vector might be empty, when the OS is not good or the page content is not in English
             // then the score will be 0.0
-            if let textualVectorID = page.textEmbedding {
+            if let textualVectorID = page.textEmbedding,
+               let textLanguage = page.language,
+               textLanguage ==  language {
                 scores.append(self.cosineSimilarity(vector1: textualVectorID, vector2: textualEmbedding))
             } else {
-                scores.append(0.0)
+                scores.append(1.0) // We don't want to "break" connections between langauges
             }
         }
         return scores
@@ -346,12 +348,13 @@ public class Cluster {
     ///   - pageIndex: the ID of the current page to process
     func textualSimilarityMatrixProcess(pageIndex: Int) throws {
         if let content = pages[pageIndex].content,
-           let textualEmbedding = self.textualEmbeddingComputationWithNLEmbedding(text: content) {
+           let (textualEmbedding, language) = self.textualEmbeddingComputationWithNLEmbedding(text: content) {
                 // if the OS is not good or the page content is not in English
                 // we create a vector of only 0.0 scores
-                let scores = self.scoreTextualEmbedding(textualEmbedding: textualEmbedding)
+                let scores = self.scoreTextualEmbedding(textualEmbedding: textualEmbedding, language: language)
                 try self.textualSimilarityMatrix.addPage(similarities: scores)
-                self.pages[pageIndex].textEmbedding = textualEmbedding
+            self.pages[pageIndex].textEmbedding = textualEmbedding
+            self.pages[pageIndex].language = language
         } else {
             try self.textualSimilarityMatrix.addPage(similarities: [Double](
                                                             repeating: 0.0,
@@ -371,7 +374,7 @@ public class Cluster {
         }
         if let title = pages[pageIndex].title {
             let entitiesInNewTitle = findEntitiesInText(text: title)
-            scores = zip(scores, self.scoreEntitySimilarities(entitiesInNewText: entitiesInNewTitle, in: FindEntitiesIn.title)).map({ $0.0 + $0.1 })
+            scores = zip(scores, self.scoreEntitySimilarities(entitiesInNewText: entitiesInNewTitle, in: FindEntitiesIn.title)).map({ min($0.0 + $0.1, 1.0) })
             self.pages[pageIndex].entitiesInTitle = entitiesInNewTitle
         }
         try self.entitiesMatrix.addPage(similarities: scores)
@@ -497,8 +500,9 @@ public class Cluster {
                 self.pages.append(page)
 
                 if let content = self.pages[0].content {
-                    if let textualEmbedding = self.textualEmbeddingComputationWithNLEmbedding(text: content) {
+                    if let (textualEmbedding, language) = self.textualEmbeddingComputationWithNLEmbedding(text: content) {
                         self.pages[0].textEmbedding = textualEmbedding
+                        self.pages[0].language = language
                     }
 
                     self.pages[0].entities = self.findEntitiesInText(text: content)

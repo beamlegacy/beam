@@ -1,6 +1,7 @@
 import Nimble
 import XCTest
 import LASwift
+import NaturalLanguage
 @testable import Clustering
 
 // swiftlint:disable:next type_body_length
@@ -36,13 +37,19 @@ class ClusteringTests: XCTestCase {
 
         if let content1 = page1.content,
            let content2 = page2.content {
-            page1.textEmbedding = cluster.textualEmbeddingComputationWithNLEmbedding(text: content1)
+            if let (textEmbedding, language) = cluster.textualEmbeddingComputationWithNLEmbedding(text: content1) {
+                page1.textEmbedding = textEmbedding
+                page1.language = language
+            }
             cluster.pages.append(page1)
 
-            page2.textEmbedding = cluster.textualEmbeddingComputationWithNLEmbedding(text: content2)
+            if let (textEmbedding, language) = cluster.textualEmbeddingComputationWithNLEmbedding(text: content2) {
+                page2.textEmbedding = textEmbedding
+                page2.language = language
+            }
             cluster.pages.append(page2)
 
-            let scores = cluster.scoreTextualEmbedding(textualEmbedding: page2.textEmbedding ?? [0.0])
+            let scores = cluster.scoreTextualEmbedding(textualEmbedding: page2.textEmbedding ?? [0.0], language: NLLanguage.english)
             expect(scores).to(beCloseTo([0.8294351697354525], within: 0.0001))
         }
     }
@@ -57,17 +64,26 @@ class ClusteringTests: XCTestCase {
         if let content1 = page1.content,
            let content2 = page2.content,
            let content3 = page3.content {
-            page1.textEmbedding = cluster.textualEmbeddingComputationWithNLEmbedding(text: content1)
-            cluster.pages.append(page1)
+            if let (textEmbedding, language) = cluster.textualEmbeddingComputationWithNLEmbedding(text: content1) {
+                page1.textEmbedding = textEmbedding
+                page1.language = language
+                cluster.pages.append(page1)
+            }
 
-            page2.textEmbedding = cluster.textualEmbeddingComputationWithNLEmbedding(text: content2)
-            cluster.pages.append(page2)
+            if let (textEmbedding, language) = cluster.textualEmbeddingComputationWithNLEmbedding(text: content2) {
+                page2.textEmbedding = textEmbedding
+                page2.language = language
+                cluster.pages.append(page2)
+            }
 
-            page3.textEmbedding = cluster.textualEmbeddingComputationWithNLEmbedding(text: content3)
-            cluster.pages.append(page3)
+            if let (textEmbedding, language) = cluster.textualEmbeddingComputationWithNLEmbedding(text: content3) {
+                page3.textEmbedding = textEmbedding
+                page3.language = language
+                cluster.pages.append(page3)
+            }
 
-            let scores = cluster.scoreTextualEmbedding(textualEmbedding: page3.textEmbedding ?? [0.0])
-            expect(scores).to(beCloseTo([0.26489349244685784, 0.0], within: 0.0001))
+            let scores = cluster.scoreTextualEmbedding(textualEmbedding: page3.textEmbedding ?? [0.0], language: NLLanguage.english)
+            expect(scores).to(beCloseTo([0.26489349244685784, 1.0], within: 0.0001))
         }
     }
 
@@ -80,8 +96,11 @@ class ClusteringTests: XCTestCase {
 
         // Simulate the first page of the navigation
         if let content = page1.content {
-            page1.textEmbedding = cluster.textualEmbeddingComputationWithNLEmbedding(text: content)
-            cluster.pages.append(page1)
+            if let (textEmbedding, language) = cluster.textualEmbeddingComputationWithNLEmbedding(text: content) {
+                page1.textEmbedding = textEmbedding
+                page1.language = language
+                cluster.pages.append(page1)
+            }
 
             // Add a second page
             cluster.pages.append(page2)
@@ -107,8 +126,11 @@ class ClusteringTests: XCTestCase {
 
         // Simulate the first page of the navigation
         if let content = page1.content {
-            page1.textEmbedding = cluster.textualEmbeddingComputationWithNLEmbedding(text: content)
-            cluster.pages.append(page1)
+            if let (textEmbedding, language) = cluster.textualEmbeddingComputationWithNLEmbedding(text: content) {
+                page1.textEmbedding = textEmbedding
+                page1.language = language
+                cluster.pages.append(page1)
+            }
 
             // Add a second page
             cluster.pages.append(page2)
@@ -118,9 +140,9 @@ class ClusteringTests: XCTestCase {
             cluster.pages.append(page3)
             try cluster.textualSimilarityMatrixProcess(pageIndex: 2)
 
-            let expectedSimilarityMatrixFlat = [0.0, 0.8294351697354535, 0.0,
-                                             0.8294351697354535, 0.0, 0.0,
-                                             0.0, 0.0, 0.0]
+            let expectedSimilarityMatrixFlat = [0.0, 0.8294351697354535, 1.0,
+                                             0.8294351697354535, 0.0, 1.0,
+                                             1.0, 1.0, 0.0]
             expect(cluster.textualSimilarityMatrix.matrix.flat).to(beCloseTo(expectedSimilarityMatrixFlat, within: 0.0001))
         }
     }
@@ -205,16 +227,21 @@ class ClusteringTests: XCTestCase {
     // swiftlint:disable:next cyclomatic_complexity function_body_length
     func testTextualSimilarityPipelineWithNonEnglishContent() throws {
         let cluster = Cluster()
-        cluster.matrixCandidate = SimilarityMatrixCandidate.textualSimilarityMatrix
-        cluster.clusteringCandidate = ClusteringCandidate.symetricLaplacian
-        cluster.numClustersCandidate = NumClusterComputationCandidate.biggestDistanceInAbsolute
-        let page1 = Page(id: 0, parentId: nil, title: "Page 1", content: "A man is eating food.")
-        let page2 = Page(id: 1, parentId: 0, title: "Page 2", content: "The girl is carrying a baby.")
-        let page3 = Page(id: 2, parentId: 0, title: "Page 3", content: "A man is eating food.")
-        let page4 = Page(id: 3, parentId: 0, title: "Page 4", content: "The girl is carrying a baby.")
-        let page5 = Page(id: 4, parentId: 0, title: "Page 5", content: "The girl is carrying a baby.")
-        let page6 = Page(id: 5, parentId: 0, title: "Page 6", content: "A man is eating food.")
-        let page7 = Page(id: 6, parentId: 0, title: "Page 7", content: "La fille est en train de porter un bébé.")
+        cluster.changeCandidate(to: 3, with: 0.6, with: 0.6, with: 0.6, completion: { result in
+            switch result {
+            case .failure(let error):
+                XCTFail(error.localizedDescription)
+            case .success(let result):
+                _ = result
+            }
+        })
+        let page1 = Page(id: 0, parentId: nil, title: nil, content: "A man is eating food.")
+        let page2 = Page(id: 1, parentId: nil, title: nil, content: "The girl is carrying a baby.")
+        let page3 = Page(id: 2, parentId: 0, title: nil, content: "A man is eating food.")
+        let page4 = Page(id: 3, parentId: 1, title: nil, content: "The girl is carrying a baby.")
+        let page5 = Page(id: 4, parentId: 1, title: nil, content: "The girl is carrying a baby.")
+        let page6 = Page(id: 5, parentId: 0, title: nil, content: "Un homme mange.")
+        let page7 = Page(id: 6, parentId: 1, title: nil, content: "La fille est en train de porter un bébé.")
 
         let expectation = self.expectation(description: "Add page expectation")
         var _ = [[UInt64]]()
@@ -278,7 +305,7 @@ class ClusteringTests: XCTestCase {
             case .failure(let error):
                 XCTFail(error.localizedDescription)
             case .success(let result):
-                expect(result.0) == [[0, 2, 5], [1, 3, 4], [6]]
+                expect(result.0) == [[0, 2, 5], [1, 3, 4, 6]]
             }
             expectation.fulfill()
         })
@@ -511,7 +538,7 @@ class ClusteringTests: XCTestCase {
                     case .failure(let error):
                         XCTFail(error.localizedDescription)
                     case .success(let result):
-                        expect(result.0) == correct_results[4]
+                        expect(result.0) == correct_results[i]
                     }
                 })
             }
