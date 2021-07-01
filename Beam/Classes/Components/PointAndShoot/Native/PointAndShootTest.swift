@@ -217,6 +217,9 @@ class DownloadManagerMock: DownloadManager {
 
     func downloadFile(at url: URL, headers: [String: String], suggestedFileName: String?, destinationFoldedURL: URL?) {}
 
+    func clearAllFileDownloads() {}
+    func clearFileDownload(_ download: Download) -> Download? { return nil }
+
     func waitForDownloadURL(_ url: URL, headers: [String: String]) -> DownloadManagerResult? { fatalError("waitForDownloadURL(_:headers:) has not been implemented") }
 }
 

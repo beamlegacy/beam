@@ -60,3 +60,18 @@ class Download: Identifiable, ObservableObject {
         }
     }
 }
+
+extension Download: Hashable {
+
+    static func == (lhs: Download, rhs: Download) -> Bool {
+        lhs.downloadDate == rhs.downloadDate &&
+        lhs.downloadURL == rhs.downloadURL &&
+        lhs.fileSystemURL == rhs.fileSystemURL
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(downloadDate)
+        hasher.combine(downloadURL)
+        hasher.combine(fileSystemURL)
+    }
+}
