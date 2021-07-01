@@ -11,7 +11,7 @@ function config(mode = "production") {
         import: "./index_native.js",
       },
     },
-    devtool: "source-map",
+    devtool: mode === "production" ? undefined : "inline-source-map",
     devServer: {
       contentBase: "./dist",
       https: false, // Required by service workers if we don't use localhost
