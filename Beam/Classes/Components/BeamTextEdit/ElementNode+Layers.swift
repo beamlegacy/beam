@@ -21,8 +21,11 @@ extension ElementNode {
     // MARK: - Create Layers
     func createElementLayers() {
         createIndentLayer()
-        let bulletPoint = NSPoint(x: Self.bulletLayerPositionX,
-                                     y: isHeader ? firstLineBaseline - 8 : firstLineBaseline - 13)
+        var posY = isHeader ? firstLineBaseline - 8 : firstLineBaseline - 13
+        if self as? EmbedNode != nil {
+            posY = 9
+        }
+        let bulletPoint = NSPoint(x: Self.bulletLayerPositionX, y: posY)
         createDisclosureLayer(at: bulletPoint)
         createBulletPointLayer(at: bulletPoint)
     }
