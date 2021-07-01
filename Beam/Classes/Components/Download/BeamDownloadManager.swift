@@ -156,6 +156,11 @@ public class BeamDownloadManager: NSObject, DownloadManager, ObservableObject {
             }.store(in: &scope)
 
         task.resume()
+
+        // We dispatch after to make sure the UI have been updated and that thez download button have been displayed and it's coordinates acquired.
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(16)) {
+            (NSApp.delegate as? AppDelegate)?.window?.downloadAnimation()
+        }
     }
 
     func clearAllFileDownloads() {
@@ -272,5 +277,42 @@ extension BeamDownloadManager {
             return nil
         }
 
+    }
+}
+
+// MARK: - Animation
+extension BeamDownloadManager {
+    static func flyingAnimationGroup(origin: CGPoint, destination: CGPoint) -> CAAnimationGroup {
+
+        let positionX = CAKeyframeAnimation(keyPath: "position.x")
+        positionX.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+        positionX.values = [origin.x, origin.x, destination.x]
+        positionX.keyTimes = [0.0, 0.16, 0.7]
+        positionX.duration = 1.0
+
+        let animationY = CAKeyframeAnimation(keyPath: "position.y")
+        animationY.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+        animationY.values = [origin.y, destination.y]
+        animationY.keyTimes = [0.0, 0.6]
+        animationY.duration = 1.0
+
+        let scale = CABasicAnimation(keyPath: "transform")
+        scale.valueFunction = CAValueFunction(name: CAValueFunctionName.scale)
+        scale.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+        scale.fromValue = [1.0, 1.0, 1.0]
+        scale.toValue = [0.05, 0.05, 0.05]
+        scale.duration = 1.0
+
+        let fade = CAKeyframeAnimation(keyPath: "opacity")
+        fade.timingFunction = CAMediaTimingFunction(name: .easeOut)
+        fade.values = [1.0, 1.0, 0.0, 0.0]
+        fade.keyTimes = [0.0, 0.6, 0.8, 1.0]
+        fade.duration = 1.0
+
+        let group = CAAnimationGroup()
+        group.duration = 1.0
+        group.animations = [positionX, animationY, scale, fade]
+
+        return group
     }
 }
