@@ -18,7 +18,8 @@ function beam_media_isAnyMediaPlaying() {
     let tags = beam_media_htmlMediaTags();
     for (let i = 0; i < tags.length; i++) {
         let tag = tags[i];
-        if (!tag.paused) {
+        let isMutedByDefault = tag.muted && !beam_media_isPageMuted
+        if (!tag.paused && !isMutedByDefault) {
             return true;
         }
     }
