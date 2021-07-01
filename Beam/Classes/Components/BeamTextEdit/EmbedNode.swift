@@ -11,7 +11,7 @@ import AppKit
 import WebKit
 
 public class EmbedNode: ElementNode {
-    var webView: WKWebView?
+    var webView: BeamWebView?
 
     init(parent: Widget, element: BeamElement) {
         super.init(parent: parent, element: element)
@@ -139,6 +139,7 @@ public class EmbedNode: ElementNode {
     override func onUnfocus() {
         updateFocus()
     }
+
     override func onFocus() {
         updateFocus()
     }
