@@ -119,7 +119,8 @@ public class BeamDownloadManager: NSObject, DownloadManager, ObservableObject {
         }
 
         let downloadedFileName = suggestedFileName ?? url.lastPathComponent
-        let fileInDownloadURL = destinationFolder.appendingPathComponent(downloadedFileName)
+        let fixedName = nonExistingFilename(for: downloadedFileName, at: destinationFolder)
+        let fileInDownloadURL = destinationFolder.appendingPathComponent(fixedName)
 
         var request = URLRequest(url: url)
         for (key, value) in headers {
@@ -131,7 +132,7 @@ public class BeamDownloadManager: NSObject, DownloadManager, ObservableObject {
         objectWillChange.send()
 
         let newDownload = Download(downloadURL: url, fileSystemURL: fileInDownloadURL, downloadTask: task)
-        downloads.append(newDownload)
+        downloads.insert(newDownload, at: 0)
 
         if overallProgress.isFinished {
             overallProgress = Progress()
@@ -157,10 +158,19 @@ public class BeamDownloadManager: NSObject, DownloadManager, ObservableObject {
         task.resume()
     }
 
-    func clearFileDownloads() {
+    func clearAllFileDownloads() {
         downloads.removeAll { d in
             d.state != .running
         }
+    }
+
+    @discardableResult
+    func clearFileDownload(_ download: Download) -> Download? {
+        guard download.state != .running else { return nil }
+        if let index = downloads.firstIndex(of: download) {
+            return downloads.remove(at: index)
+        }
+        return nil
     }
 
     private func downloadDirectoryURL() throws -> URL {
@@ -225,7 +235,10 @@ extension BeamDownloadManager: URLSessionDelegate, URLSessionDownloadDelegate {
     public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
         guard let downloadTask = task as? URLSessionDownloadTask,
               let download = taskDownloadAssociation[downloadTask] else { return }
-        download.errorMessage = error?.localizedDescription
+
+        DispatchQueue.main.async {
+            download.errorMessage = error?.localizedDescription
+        }
     }
 
     public func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {

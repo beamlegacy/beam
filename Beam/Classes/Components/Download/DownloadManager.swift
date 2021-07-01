@@ -15,7 +15,7 @@ public enum DownloadManagerError: Error {
     case serverError(code: Int)
 }
 
-protocol DownloadManager {
+protocol DownloadManager: AnyObject {
 
     var fractionCompleted: Double { get }
     var overallProgress: Progress { get }
@@ -30,4 +30,9 @@ protocol DownloadManager {
     ///   - headers: Headers that will be added to the URLRequest
     ///   - destinationFoldedURL: Desired destination folder. If not provided, the download will end up in the download folder
     func downloadFile(at url: URL, headers: [String: String], suggestedFileName: String?, destinationFoldedURL: URL?)
+
+    func clearAllFileDownloads()
+
+    @discardableResult
+    func clearFileDownload(_ download: Download) -> Download?
 }
