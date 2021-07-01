@@ -107,7 +107,6 @@ public class TextFrame {
 
             line.frame = NSRect(x: (position.x + x).rounded(.toNearestOrEven), y: (position.y + y).rounded(.toNearestOrEven), width: line.bounds.width.rounded(.up), height: line.bounds.height.rounded(.up))
 
-            Y += (line.frame.height * line.interlineFactor).rounded(.up)
             //if debug {
             //Logger.shared.logDebug("     line[\(i)] frame \(line.frame) (textPos \(textPos)")
             //}
@@ -115,6 +114,7 @@ public class TextFrame {
             if let paragraphStyle = attributedString.attribute(.paragraphStyle, at: line.range.lowerBound, longestEffectiveRange: nil, in: range) as? NSParagraphStyle {
                 line.interlineFactor = paragraphStyle.lineHeightMultiple
             }
+            Y += (line.frame.height * line.interlineFactor).rounded(.up)
 
             index += 1
             return line
