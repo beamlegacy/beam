@@ -42,13 +42,6 @@ public class EmbedNode: ElementNode {
         }
 
         // Setup URL in WkWebView
-
-//        let width = availableWidth - childInset
-//        let height = (width / image.size.width) * image.size.height
-//        let imageLayer = Layer.image(named: "image", image: image, size: CGSize(width: width, height: height))
-//        imageLayer.layer.position = CGPoint(x: indent, y: 0)
-//        addLayer(imageLayer, origin: CGPoint(x: indent, y: 0))
-
         let webView = BeamWebView(frame: .zero, configuration: BrowserTab.webViewConfiguration)
         webView.navigationDelegate = self
         webView.wantsLayer = true
@@ -69,6 +62,14 @@ public class EmbedNode: ElementNode {
 
     let embedWidth = CGFloat(320)
     let embedHeight = CGFloat(240)
+    override var elementNodePadding: NSEdgeInsets {
+        switch self.elementKind {
+        case .embed(_):
+            return NSEdgeInsets(top: 4, left: 0, bottom: 14, right: 0)
+        default:
+            return NSEdgeInsetsZero
+        }
+    }
 
     override func updateRendering() {
         guard availableWidth > 0 else { return }
@@ -76,14 +77,9 @@ public class EmbedNode: ElementNode {
         if invalidatedRendering {
             let width = availableWidth - indent
             let height = (width / embedWidth) * embedHeight
-            contentsFrame = NSRect(x: indent, y: 0, width: width, height: childInset + height)
+            contentsFrame = NSRect(x: indent, y: 0, width: width, height: childInset + height + elementNodePadding.bottom + elementNodePadding.top)
 
-//            if let imageLayer = layers["image"] {
-//                imageLayer.layer.position = CGPoint(x: indent + childInset, y: 0)
-//                imageLayer.layer.bounds = CGRect(origin: imageLayer.frame.origin, size: CGSize(width: width, height: height))
-//
-                updateFocus()
-//            }
+            updateFocus()
 
             computedIdealSize = contentsFrame.size
             computedIdealSize.width = frame.width
@@ -105,7 +101,7 @@ public class EmbedNode: ElementNode {
 
     override func updateChildrenLayout() {
         let r = layer.frame
-        webView?.frame = NSRect(x: r.minX + indent, y: r.minY, width: r.width - indent, height: r.height)
+        webView?.frame = NSRect(x: r.minX + indent, y: r.minY + elementNodePadding.top, width: r.width - indent, height: r.height - elementNodePadding.bottom - elementNodePadding.top )
         super.updateChildrenLayout()
     }
 

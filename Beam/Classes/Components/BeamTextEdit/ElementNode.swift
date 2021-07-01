@@ -161,6 +161,10 @@ public class ElementNode: Widget {
 
     private var actionLayerPadding = CGFloat(3.5)
 
+    var elementNodePadding: NSEdgeInsets {
+        return NSEdgeInsetsZero
+    }
+
     public static func == (lhs: ElementNode, rhs: ElementNode) -> Bool {
         return lhs === rhs
     }
