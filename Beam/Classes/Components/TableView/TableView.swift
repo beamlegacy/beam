@@ -97,7 +97,6 @@ struct TableView: NSViewRepresentable {
     func updateNSView(_ view: Self.NSViewType, context: Self.Context) {
         context.coordinator.creationRowTitle = creationRowTitle
         context.coordinator.originalData = items
-        context.coordinator.reloadData()
     }
 }
 
