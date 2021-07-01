@@ -38,6 +38,7 @@ struct OmniBarDownloadButton: View {
         .buttonStyle(RoundRectButtonStyle())
         .frame(width: 32, height: 32)
         .contentShape(Rectangle())
+        .animation(Animation.default.delay(0.2), value: ongoingDownload)
         .onHover { h in
             self.isHovering = h
         }

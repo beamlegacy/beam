@@ -140,6 +140,12 @@ struct OmniBar: View {
                         .popover(isPresented: $showDownloadPanel, content: {
                             DownloaderView(downloader: state.downloadManager)
                         })
+                        .background(GeometryReader { proxy -> Color in
+                            let rect = proxy.frame(in: .global)
+                            let center = CGPoint(x: rect.origin.x + rect.width / 2, y: rect.origin.y + rect.height / 2)
+                            state.downloadButtonPosition = center
+                            return Color.clear
+                        })
                     }
                     if showDestinationNotePicker, let currentTab = browserTabsManager.currentTab {
                         DestinationNotePicker(tab: currentTab)

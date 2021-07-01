@@ -185,6 +185,30 @@ class BeamWindow: NSWindow, NSDraggingDestination {
         self.state.isFullScreen.toggle()
     }
 
+    // MARK: - Animations
+
+    /// This methods creates a CALayer and animates it from the mouse current position to the position of the downloadButton of the window
+    /// It should be trigerred when a file download starts
+    func downloadAnimation() {
+
+        guard let buttonPosition = state.downloadButtonPosition else { return }
+        let animationLayer = CALayer()
+        animationLayer.frame = CGRect(origin: CGPoint(x: 50, y: 50), size: CGSize(width: 64, height: 64))
+        animationLayer.position = self.mouseLocationOutsideOfEventStream
+        animationLayer.zPosition = .greatestFiniteMagnitude
+
+        let flyingImage = NSImage(named: "flying-download")
+        animationLayer.contents = flyingImage?.cgImage
+
+        self.contentView?.layer?.addSublayer(animationLayer)
+
+        let animationGroup = BeamDownloadManager.flyingAnimationGroup(origin: animationLayer.position, destination: buttonPosition)
+        animationGroup.delegate = LayerRemoverAnimationDelegate(with: animationLayer)
+
+        animationLayer.add(animationGroup, forKey: "download")
+        animationLayer.opacity = 0.0
+    }
+
     // MARK: - IBAction
 
     @IBAction func newDocument(_ sender: Any?) {
