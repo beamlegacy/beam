@@ -50,39 +50,65 @@ class AutocompleteManager: ObservableObject {
         }.store(in: &scope)
     }
 
-    private func autocompleteNotesResults(for query: String) -> [AutocompleteResult] {
-        return beamData.documentManager.documentsWithLimitTitleMatch(title: query, limit: 6)
-            // Eventually, we should not show notes under a certain score threshold
-            // Disabling it for now until we have a better scoring system
-            .map { AutocompleteResult(text: $0.title, source: .note, completingText: query, uuid: $0.id) }
-    }
-
-    private func autocompleteNotesContentsResults(for query: String, excludingNotes: [AutocompleteResult]) -> [AutocompleteResult] {
-        var resultsToExclude = excludingNotes
-        let searchResults = GRDBDatabase.shared.search(matchingAllTokensIn: query, maxResults: 10)
-        return searchResults.compactMap { result -> AutocompleteResult? in
-            guard !resultsToExclude.contains(where: { $0.text == result.title || $0.uuid == result.uid }) else {
-                return nil
+    private func autocompleteNotesResults(for query: String,
+                                          completion: @escaping (Swift.Result<[AutocompleteResult], Error>) -> Void) {
+        beamData.documentManager.documentsWithLimitTitleMatch(title: query, limit: 6) { result in
+            switch result {
+            case .failure(let error): completion(.failure(error))
+            case .success(let documentStructs):
+                let autocompleteResults = documentStructs.map {
+                    AutocompleteResult(text: $0.title, source: .note, completingText: query, uuid: $0.id)
+                }
+                completion(.success(autocompleteResults))
             }
-            guard beamData.documentManager.loadDocumentByTitle(title: result.title) != nil else { return nil }
-            let autocompleteResult = AutocompleteResult(text: result.title,
-                                                        source: .note,
-                                                        completingText: query,
-                                                        uuid: result.uid)
-            resultsToExclude.append(autocompleteResult)
-            return autocompleteResult
         }
     }
 
-    private func autocompleteHistoryResults(for query: String) -> [AutocompleteResult] {
-        GRDBDatabase.shared.searchHistory(query: query, enabledFrecencyParam: .readingTime30d0).map {
-            var urlString = $0.url
-            let url = URL(string: urlString)
-            if let url = url {
-                urlString = url.urlStringWithoutScheme
+    private func autocompleteNotesContentsResults(for query: String,
+                                                  completion: @escaping (Swift.Result<[AutocompleteResult], Error>) -> Void) {
+        GRDBDatabase.shared.search(matchingAllTokensIn: query, maxResults: 10) { [weak beamData] result in
+            switch result {
+            case .failure(let error): completion(.failure(error))
+            case .success(let notesContentResults):
+                // TODO: get all titles and make a single CoreData request for all titles
+                let autocompleteResults = notesContentResults.compactMap { result -> AutocompleteResult? in
+                    // Check if the note still exists before proceeding.
+                    guard beamData?.documentManager.loadDocumentById(id: result.noteId) != nil else { return nil }
+                    return AutocompleteResult(text: result.title,
+                                              source: .note,
+                                              completingText: query,
+                                              uuid: result.uid)
+                }
+
+                completion(.success(autocompleteResults))
             }
-            return AutocompleteResult(text: $0.title, source: .history, url: url, information: urlString, completingText: query)
         }
+    }
+
+    private func autocompleteHistoryResults(for query: String,
+                                            completion: @escaping (Swift.Result<[AutocompleteResult], Error>) -> Void) {
+        GRDBDatabase.shared.searchHistory(query: query, enabledFrecencyParam: .readingTime30d0) { result in
+            switch result {
+            case .failure(let error): completion(.failure(error))
+            case .success(let historyResults):
+                let autocompleteResults = historyResults.map { result -> AutocompleteResult in
+                    var urlString = result.url
+                    let url = URL(string: urlString)
+                    if let url = url {
+                        urlString = url.urlStringWithoutScheme
+                    }
+                    return AutocompleteResult(text: result.title, source: .history, url: url, information: urlString, completingText: query)
+                }
+                completion(.success(autocompleteResults))
+            }
+        }
+    }
+
+    private func autocompleteResultsUnique(sequence: [AutocompleteResult]) -> [AutocompleteResult] {
+        var seenText = Set<String>()
+        var seenUUID = Set<UUID>()
+
+        return sequence.filter { seenText.update(with: $0.text) == nil && seenUUID.update(with: $0.uuid) == nil }
     }
 
     private func getSelectedText(for text: String) -> String? {
@@ -120,40 +146,103 @@ class AutocompleteManager: ObservableObject {
             return
         }
 
-        var finalResults = [AutocompleteResult]()
+        let queue = DispatchQueue.global(qos: .userInteractive)
+        queue.async {
+            var autocompleteResults = [AutocompleteResult.Source: [AutocompleteResult]]()
+            let group = DispatchGroup()
 
-        // #1 Existing Notes
-        var notesNamesResults = autocompleteNotesResults(for: searchText)
-        // #2 Notes contents
-        let notesContentsResults = autocompleteNotesContentsResults(for: searchText, excludingNotes: notesNamesResults)
-        notesNamesResults.append(contentsOf: notesContentsResults)
-        // #3 History results
-        let historyResults = autocompleteHistoryResults(for: searchText)
+            group.enter()
+            self.autocompleteNotesResults(for: searchText) { result in
+                switch result {
+                case .failure(let error):
+                    Logger.shared.logError(error.localizedDescription, category: .general)
+                    group.leave()
+                case .success(let acResults):
+                    queue.async {
+                        autocompleteResults[.note, default: []].append(contentsOf: acResults)
+                        group.leave()
+                    }
+                }
+            }
 
-        finalResults = sortResults(notesResults: notesNamesResults, historyResults: historyResults)
+            group.enter()
+            self.autocompleteNotesContentsResults(for: searchText) { result in
+                switch result {
+                case .failure(let error):
+                    Logger.shared.logError(error.localizedDescription, category: .general)
+                    group.leave()
+                case .success(let acResults):
+                    queue.async {
+                        autocompleteResults[.note, default: []].append(contentsOf: acResults)
+                        group.leave()
+                    }
+                }
+            }
 
-        // #5 Create Card
-        let canCreateNote = beamData.documentManager.loadDocumentByTitle(title: searchText) == nil && URL(string: searchText)?.scheme == nil
-        if canCreateNote {
-            // if the card doesn't exist, propose to create it
-            finalResults.append(AutocompleteResult(text: searchText, source: .createCard, information: "New card", completingText: searchText))
+            group.enter()
+            self.autocompleteHistoryResults(for: searchText) { result in
+                switch result {
+                case .failure(let error):
+                    Logger.shared.logError(error.localizedDescription, category: .general)
+                    group.leave()
+                case .success(let acResults):
+                    queue.async {
+                        autocompleteResults[.history, default: []].append(contentsOf: acResults)
+                        group.leave()
+                    }
+                }
+            }
+
+            var canCreateNote = false
+
+            group.enter()
+            self.beamData.documentManager.loadDocumentByTitle(title: searchText) { result in
+                switch result {
+                case .failure(let error):
+                    Logger.shared.logError(error.localizedDescription, category: .general)
+                    group.leave()
+                case .success(let documentStruct):
+                    queue.async {
+                        canCreateNote = documentStruct == nil && URL(string: searchText)?.scheme == nil
+                        group.leave()
+                    }
+                }
+            }
+
+            group.wait()
+
+            if let noteResults = autocompleteResults[.note] {
+                autocompleteResults[.note] = self.autocompleteResultsUnique(sequence: noteResults)
+            }
+
+            var finalResults = self.sortResults(notesResults: autocompleteResults[.note, default: []],
+                                                historyResults: autocompleteResults[.history, default: []])
+
+            if canCreateNote {
+                // if the card doesn't exist, propose to create it
+                finalResults.append(AutocompleteResult(text: searchText,
+                                                       source: .createCard,
+                                                       information: "New card",
+                                                       completingText: searchText))
+            }
+
+            guard searchText.count > 1 else {
+                DispatchQueue.main.async {
+                    self.autocompleteSearchGuessesHandler = nil
+                    self.autocompleteResults = finalResults
+                }
+                return
+            }
+
+            self.debouncedSearchEngineResults(for: searchText,
+                                              currentResults: finalResults,
+                                              allowCreateNote: canCreateNote,
+                                              onUpdateResultsBlock: isRemovingCharacters ? nil : { [weak self] results in
+                                                guard let self = self else { return }
+                                                // #6 Select the first result if compatible
+                                                self.automaticallySelectFirstResultIfNeeded(withResults: results, searchText: searchText)
+                                              })
         }
-
-        guard searchText.count > 1 else {
-            autocompleteSearchGuessesHandler = nil
-            self.autocompleteResults = finalResults
-            return
-        }
-
-        // #4 Search Engine Autocomplete results
-        debouncedSearchEngineResults(for: searchText,
-                                     currentResults: finalResults,
-                                     allowCreateNote: canCreateNote,
-                                     onUpdateResultsBlock: isRemovingCharacters ? nil : { [weak self] results in
-                                        guard let self = self else { return }
-                                        // #6 Select the first result if compatible
-                                        self.automaticallySelectFirstResultIfNeeded(withResults: results, searchText: searchText)
-                                     })
     }
 
     private func debouncedSearchEngineResults(for searchText: String,

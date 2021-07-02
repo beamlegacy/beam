@@ -212,6 +212,10 @@ extension GRDBDatabase {
         dbWriter
     }
 
+    enum ReadError: Error {
+        case invalidFTSPattern
+    }
+
     // MARK: - SearchResult (BeamElement/BeamNote)
 
     @available(*, deprecated, message: "redundant with BeamElementRecord")
@@ -222,37 +226,112 @@ extension GRDBDatabase {
         var text: String?
     }
 
-    func search(matchingAllTokensIn query: String, maxResults: Int? = 10, includeText: Bool = false) -> [SearchResult] {
-        guard let pattern = FTS3Pattern(matchingAllTokensIn: query) else { return [] }
-        return search(pattern: pattern, maxResults: maxResults, includeText: includeText)
-    }
+    typealias CompletionSearch = (Result<[SearchResult], Error>) -> Void
 
-    func search(matchingAnyTokensIn query: String, maxResults: Int? = 10, includeText: Bool = false) -> [SearchResult] {
-        guard let pattern = FTS3Pattern(matchingAnyTokenIn: query) else { return [] }
-        return search(pattern: pattern, maxResults: maxResults, includeText: includeText)
-    }
-
-    func search(matchingPhrase query: String, maxResults: Int? = 10, includeText: Bool = false) -> [SearchResult] {
-        guard let pattern = FTS3Pattern(matchingPhrase: query) else { return [] }
-        return search(pattern: pattern, maxResults: maxResults, includeText: includeText)
-    }
-
-    func search(pattern: FTS3Pattern, maxResults: Int? = 10, includeText: Bool = false) -> [SearchResult] {
-        do {
-            let results = try dbReader.read { db -> [SearchResult] in
-                var query = BeamElementRecord.matching(pattern)
-                if let maxResults = maxResults {
-                    query = query.limit(maxResults)
-                }
-                return try query.fetchAll(db).compactMap { record -> SearchResult? in
-                    guard let noteId = record.noteId.uuid,
-                          let uid = record.uid.uuid else { return nil }
-                    return SearchResult(title: record.title, noteId: noteId, uid: uid, text: includeText ? record.text : nil)
-                }
+    /// Search in notes content (asynchronous).
+    private func search(_ pattern: FTS3Pattern,
+                        _ maxResults: Int? = nil,
+                        _ includeText: Bool = false,
+                        _ completion: @escaping CompletionSearch) {
+        dbReader.asyncRead { (dbResult: Result<GRDB.Database, Error>) in
+            do {
+                let db = try dbResult.get()
+                let results = try search(db, pattern, maxResults, includeText)
+                completion(.success(results))
+            } catch {
+                completion(.failure(error))
             }
-            return results
+        }
+    }
+
+    /// Search in notes content (synchronous).
+    private func search(_ db: GRDB.Database,
+                        _ pattern: FTS3Pattern,
+                        _ maxResults: Int? = nil,
+                        _ includeText: Bool = false) throws -> [SearchResult] {
+        var query = BeamElementRecord.matching(pattern)
+        if let maxResults = maxResults {
+            query = query.limit(maxResults)
+        }
+
+        return try query.fetchAll(db).compactMap { record in
+            guard let noteId = record.noteId.uuid,
+                  let uid = record.uid.uuid else { return nil }
+            return SearchResult(title: record.title, noteId: noteId, uid: uid, text: includeText ? record.text : nil)
+        }
+    }
+
+    func search(matchingAllTokensIn string: String,
+                maxResults: Int? = nil,
+                includeText: Bool = false,
+                completion: @escaping CompletionSearch) {
+        guard let pattern = FTS3Pattern(matchingAllTokensIn: string) else {
+            return completion(.failure(ReadError.invalidFTSPattern))
+        }
+        search(pattern, maxResults, includeText, completion)
+    }
+
+    func search(matchingAnyTokenIn string: String,
+                maxResults: Int? = nil,
+                includeText: Bool = false,
+                completion: @escaping CompletionSearch) {
+        guard let pattern = FTS3Pattern(matchingAnyTokenIn: string) else {
+            return completion(.failure(ReadError.invalidFTSPattern))
+        }
+        search(pattern, maxResults, includeText, completion)
+    }
+
+    func search(matchingPhrase string: String,
+                maxResults: Int? = nil,
+                includeText: Bool = false,
+                completion: @escaping CompletionSearch) {
+        guard let pattern = FTS3Pattern(matchingPhrase: string) else {
+            return completion(.failure(ReadError.invalidFTSPattern))
+        }
+        search(pattern, maxResults, includeText, completion)
+    }
+
+    func search(matchingAllTokensIn string: String,
+                maxResults: Int? = nil,
+                includeText: Bool = false) -> [SearchResult] {
+        guard let pattern = FTS3Pattern(matchingAllTokensIn: string) else {
+            return []
+        }
+        do {
+            return try dbReader.read { db in
+                 try search(db, pattern, maxResults, includeText)
+            }
         } catch {
-            Logger.shared.logError("Search Error \(error)", category: .search)
+            return []
+        }
+    }
+
+    func search(matchingAnyTokenIn string: String,
+                maxResults: Int? = nil,
+                includeText: Bool = false) -> [SearchResult] {
+        guard let pattern = FTS3Pattern(matchingAnyTokenIn: string) else {
+            return []
+        }
+        do {
+            return try dbReader.read { db in
+                try search(db, pattern, maxResults, includeText)
+            }
+        } catch {
+            return []
+        }
+    }
+
+    func search(matchingPhrase string: String,
+                maxResults: Int? = nil,
+                includeText: Bool = false) -> [SearchResult] {
+        guard let pattern = FTS3Pattern(matchingPhrase: string) else {
+            return []
+        }
+        do {
+            return try dbReader.read { db in
+                try search(db, pattern, maxResults, includeText)
+            }
+        } catch {
             return []
         }
     }
@@ -278,15 +357,25 @@ extension GRDBDatabase {
     /// Perform a history search query.
     /// - Parameter prefixLast: when enabled the last token is prefix matched.
     /// - Parameter enabledFrecencyParam: select the frecency parameter to use to sort results.
-    func searchHistory(query: String, prefixLast: Bool = true, enabledFrecencyParam: FrecencyParamKey? = nil) -> [HistorySearchResult] {
-        guard var pattern = FTS3Pattern(matchingAnyTokenIn: query) else { return [] }
+    func searchHistory(query: String,
+                       prefixLast: Bool = true,
+                       enabledFrecencyParam: FrecencyParamKey? = nil,
+                       completion: @escaping (Result<[HistorySearchResult], Error>) -> Void) {
+        guard var pattern = FTS3Pattern(matchingAnyTokenIn: query) else {
+            completion(.failure(ReadError.invalidFTSPattern))
+            return
+        }
         if prefixLast {
-            guard let prefixLastPattern = try? FTS3Pattern(rawPattern: pattern.rawPattern + "*") else { return [] }
+            guard let prefixLastPattern = try? FTS3Pattern(rawPattern: pattern.rawPattern + "*") else {
+                completion(.failure(ReadError.invalidFTSPattern))
+                return
+            }
             pattern = prefixLastPattern
         }
 
-        do {
-            let results = try dbReader.read { db -> [HistorySearchResult] in
+        dbReader.asyncRead { (dbResult: Result<GRDB.Database, Error>) in
+            do {
+                let db = try dbResult.get()
                 var request = HistoryUrlRecord
                     .joining(required: HistoryUrlRecord.content.matching(pattern))
                     .including(optional: HistoryUrlRecord.frecency)
@@ -296,19 +385,19 @@ extension GRDBDatabase {
                         .order(literal: "frecencyUrlRecord.frecencySortScore DESC")
                 }
 
-                return try request
+                let results = try request
                     .asRequest(of: HistoryUrlRecordWithFrecency.self)
                     .fetchAll(db)
                     .map { record -> HistorySearchResult in
-                    HistorySearchResult(title: record.history.title,
-                                        url: record.history.url,
-                                        frecency: record.frecency)
-                }
+                        HistorySearchResult(title: record.history.title,
+                                            url: record.history.url,
+                                            frecency: record.frecency)
+                    }
+                completion(.success(results))
+            } catch {
+                Logger.shared.logError("history search failure: \(error)", category: .search)
+                completion(.failure(error))
             }
-            return results
-        } catch {
-            Logger.shared.logError("history search failure: \(error)", category: .search)
-            return []
         }
     }
 
