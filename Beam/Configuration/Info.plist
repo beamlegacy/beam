@@ -290,5 +290,11 @@
 	<string>$(AUTOMATIC_UPDATE)</string>
 	<key>SUFeedURL</key>
 	<string>https://s3.eu-west-3.amazonaws.com/downloads.dev.beamapp.co/master/appcast.xml</string>
+	<key>NSLocationUsageDescription</key>
+	<string>The website you are visiting is requesting to see your current location</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>The website you are visiting is requesting to see your current location (only when in use)</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>The website you are visiting is requesting to always see your location</string>
 </dict>
 </plist>

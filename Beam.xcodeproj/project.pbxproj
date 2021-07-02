@@ -420,6 +420,8 @@
 		96A3067C25F698FB0078A453 /* RefNoteTitle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96A3067B25F698FB0078A453 /* RefNoteTitle.swift */; };
 		96BBA79F25FBA573008276FC /* ReparentElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96BBA78A25FBA573008276FC /* ReparentElement.swift */; };
 		96C1D7EB2624C0ED0085FD23 /* BeamElement+Text.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C1D7EA2624C0ED0085FD23 /* BeamElement+Text.swift */; };
+		96C5FE2F268E80BA00889B5E /* Geolocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C5FE2E268E80BA00889B5E /* Geolocation.swift */; };
+		96C5FE44268F4D5700889B5E /* Geolocation.js in Resources */ = {isa = PBXBuildFile; fileRef = 96C5FE43268F4D5700889B5E /* Geolocation.js */; };
 		96C9AA5725901AA9007D3D98 /* LinksSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C9AA5625901AA9007D3D98 /* LinksSection.swift */; };
 		96C9AAB92593BB67007D3D98 /* Widget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C9AAB82593BB67007D3D98 /* Widget.swift */; };
 		96C9CC3E2535CE2C00D70AA6 /* LexerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C9CC3D2535CE2C00D70AA6 /* LexerTests.swift */; };
@@ -1202,6 +1204,8 @@
 		96A3067B25F698FB0078A453 /* RefNoteTitle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefNoteTitle.swift; sourceTree = "<group>"; };
 		96BBA78A25FBA573008276FC /* ReparentElement.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReparentElement.swift; sourceTree = "<group>"; };
 		96C1D7EA2624C0ED0085FD23 /* BeamElement+Text.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamElement+Text.swift"; sourceTree = "<group>"; };
+		96C5FE2E268E80BA00889B5E /* Geolocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Geolocation.swift; sourceTree = "<group>"; };
+		96C5FE43268F4D5700889B5E /* Geolocation.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = Geolocation.js; sourceTree = "<group>"; };
 		96C9AA3E259019E3007D3D98 /* ProxyTextNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProxyTextNode.swift; sourceTree = "<group>"; };
 		96C9AA5625901AA9007D3D98 /* LinksSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinksSection.swift; sourceTree = "<group>"; };
 		96C9AAB82593BB67007D3D98 /* Widget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Widget.swift; sourceTree = "<group>"; };
@@ -1810,6 +1814,7 @@
 		4181716B2581107C00317ED8 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				96C5FE3B268F4CF300889B5E /* Geolocation */,
 				0DD0DAC22681C6EB0005339A /* GRDB */,
 				418171712581107C00317ED8 /* Importers */,
 				418171762581107C00317ED8 /* CoreData */,
@@ -2959,6 +2964,15 @@
 			path = References;
 			sourceTree = "<group>";
 		};
+		96C5FE3B268F4CF300889B5E /* Geolocation */ = {
+			isa = PBXGroup;
+			children = (
+				96C5FE2E268E80BA00889B5E /* Geolocation.swift */,
+				96C5FE43268F4D5700889B5E /* Geolocation.js */,
+			);
+			path = Geolocation;
+			sourceTree = "<group>";
+		};
 		A02FD6E22665180C00EBE17E /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -3560,6 +3574,7 @@
 				4159E9E2259A2575005FD355 /* BidirectionalPopover.xib in Resources */,
 				418171F42581107C00317ED8 /* sign_up.graphql in Resources */,
 				032562AB26051D3B006513E4 /* Info.plist in Resources */,
+				96C5FE44268F4D5700889B5E /* Geolocation.js in Resources */,
 				52F4E4B42641844E0067B017 /* delete_identity.graphql in Resources */,
 				418171F62581107C00317ED8 /* sign_in.graphql in Resources */,
 				41D169A925DC07260018E5F2 /* Inter-Italic.otf in Resources */,
@@ -4163,6 +4178,7 @@
 				032562AA26051D3B006513E4 /* RBClient.m in Sources */,
 				A545D2FB25F7B1D800E68F94 /* DestinationNoteAutocompleteList.swift in Sources */,
 				5285672A26275A8D00DDBE45 /* BeamToBeam2Migration.xcmappingmodel in Sources */,
+				96C5FE2F268E80BA00889B5E /* Geolocation.swift in Sources */,
 				A51ED9A72608D0CD00CA99E5 /* ContextMenuFormatterView.swift in Sources */,
 				4105CE7525A60681009AB687 /* FormatterTypeButton.swift in Sources */,
 				961EC58625B7A75A009FA322 /* LinkManager.swift in Sources */,
