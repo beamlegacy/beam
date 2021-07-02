@@ -25,9 +25,14 @@ class WebNavigationMessageHandler: BeamMessageHandler<NavigationMessages> {
         case NavigationMessages.nav_locationChanged:
             guard let dict = msgPayload,
                   let urlString = dict["url"] as? String,
-                  let type = dict["type"] as? String
-                  else {
+                  let type = dict["type"] as? String,
+                  let href = dict["href"] as? String
+                else {
                 Logger.shared.logError("Expected a url in location change message \(String(describing: msgPayload))", category: .web)
+                return
+            }
+            guard href == webPage.url?.absoluteString else {
+                Logger.shared.logWarning("Location changed but in \(href) which is different from main frame \(webPage.url)", category: .web)
                 return
             }
             Logger.shared.logInfo("Location changed: \(type) \(urlString))")

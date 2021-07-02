@@ -73,7 +73,7 @@ import Promises
 
     func navigatedTo(url: URL, read: Readability, title: String, isNavigation: Bool) {
         appendToIndexer?(url, read)
-        _ = noteController.add(url: url, text: title, isNavigation: isNavigation)
+        _ = noteController.add(url: url, text: title, reason: isNavigation ? .navigation : .loading)
         updateScore()
     }
 
@@ -253,14 +253,14 @@ import Promises
             Logger.shared.logWarning("Adding search results is not allowed", category: .web)
             return nil
         } // Don't automatically add search results
-        return noteController.add(url: url, text: title)
+        return noteController.add(url: url, text: title, reason: .navigation)
     }
 
     private func receivedWebviewTitle(_ title: String? = nil) {
         guard let url = url else {
             return
         }
-        noteController.add(url: url, text: title)
+        noteController.add(url: url, text: title, reason: .navigation)
         self.title = noteController.element.text.text
     }
 
