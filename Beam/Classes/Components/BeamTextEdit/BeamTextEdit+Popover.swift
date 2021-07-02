@@ -140,7 +140,7 @@ extension BeamTextEdit {
         case .blockReference:
             let items = linkText.isEmpty ?
                 [] :
-                GRDBDatabase.shared.search(matchingAnyTokensIn: linkText, maxResults: 5, includeText: true)
+                GRDBDatabase.shared.search(matchingAnyTokenIn: linkText, maxResults: 5, includeText: true)
 
             popover.items = items.compactMap {
                 guard let text = $0.text,

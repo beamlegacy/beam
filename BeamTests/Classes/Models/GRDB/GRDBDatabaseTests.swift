@@ -13,6 +13,25 @@ class GRDBDatabaseHistoryTests: XCTestCase {
         _ = try GRDBDatabase(dbQueue)
     }
 
+    private func searchHistory(_ db: GRDBDatabase,
+                               query: String,
+                               enabledFrecencyParam: FrecencyParamKey? = nil,
+                               successCb: @escaping ([GRDBDatabase.HistorySearchResult]) -> Void,
+                               file: StaticString = #file,
+                               line: UInt = #line) {
+        waitUntil { done in
+            db.searchHistory(query: query, enabledFrecencyParam: enabledFrecencyParam) { result in
+                switch result {
+                case .failure(let error):
+                    fail("failed async searchHistory: \(error)", file: file, line: line)
+                case .success(let matches):
+                    successCb(matches)
+                }
+                done()
+            }
+        }
+    }
+
     func testSearchHistory() throws {
         let db = GRDBDatabase.empty()
 
@@ -30,43 +49,51 @@ La recopie vidéo est également au menu depuis le centre de contrôle de l'appa
         }
 
         // Match `Monterey` on title.
-        var matches = db.searchHistory(query: "Monterey")
-        expect(matches.count) == 1
-        expect(matches[0].url) == "https://macg.co"
+        searchHistory(db, query: "Monterey") { matches in
+            expect(matches.count) == 1
+            expect(matches[0].url) == "https://macg.co"
+        }
 
         // Match `iPhone` on page content.
-        matches = db.searchHistory(query: "iPhone")
-        expect(matches.count) == 1
-        expect(matches[0].url) == "https://macg.co"
+        searchHistory(db, query: "iPhone") { matches in
+            expect(matches.count) == 1
+            expect(matches[0].url) == "https://macg.co"
+        }
 
         // Prefix match `iPh` on page content.
-        matches = db.searchHistory(query: "iPh")
-        expect(matches.count) == 1
-        expect(matches[0].url) == "https://macg.co"
+        searchHistory(db, query: "iPh") { matches in
+            expect(matches.count) == 1
+            expect(matches[0].url) == "https://macg.co"
+        }
 
         // Prefix match on last token - anyToken match
-        matches = db.searchHistory(query: "max pho")
-        expect(matches.count) == 1
-        expect(matches[0].url) == "https://macg.co"
-        matches = db.searchHistory(query: "max nothing")
-        expect(matches.count) == 0
+        searchHistory(db, query: "max pho") { matches in
+            expect(matches.count) == 1
+            expect(matches[0].url) == "https://macg.co"
+        }
+        searchHistory(db, query: "max nothing") { matches in
+            expect(matches.count) == 0
+        }
 
         // Match with diacritic `écran` on page content.
-        matches = db.searchHistory(query: "écran")
-        expect(matches.count) == 1
-        expect(matches[0].url) == "https://macg.co"
+        searchHistory(db, query: "écran") { matches in
+            expect(matches.count) == 1
+            expect(matches[0].url) == "https://macg.co"
+        }
 
         // Match with diacritic `ecran` on page content.
         // Expect the page content to be normalized after tokenization.
-        matches = db.searchHistory(query: "ecran")
-        expect(matches.count) == 1
-        expect(matches[0].url) == "https://macg.co"
+        searchHistory(db, query: "ecran") { matches in
+            expect(matches.count) == 1
+            expect(matches[0].url) == "https://macg.co"
+        }
 
         // Match token `bar` on page content.
         // Expect the unicode `·` to be treated as a separator during tokenization.
-        matches = db.searchHistory(query: "bar")
-        expect(matches.count) == 1
-        expect(matches[0].url) == "https://unicode-separator.com"
+        searchHistory(db, query: "bar") { matches in
+            expect(matches.count) == 1
+            expect(matches[0].url) == "https://unicode-separator.com"
+        }
 
         // Check frecency record is retrieved
         do {
@@ -77,11 +104,15 @@ La recopie vidéo est également au menu depuis le centre de contrôle de l'appa
                                              frecencyKey: .visit30d0)
             try db.saveFrecencyUrl(&frecency)
             // Match urlId = 0, and check frecency record
-            matches = db.searchHistory(query: "Monterey")
-            expect(matches.count) == 1
-            let f = try XCTUnwrap(matches[0].frecency)
-            expect(f.frecencyScore) == 0.42
-            expect(f.frecencySortScore) == 0.0
+            searchHistory(db, query: "Monterey") { matches in
+                expect(matches.count) == 1
+                guard let f = matches[0].frecency else {
+                    fail("expect a frecency record")
+                    return
+                }
+                expect(f.frecencyScore) == 0.42
+                expect(f.frecencySortScore) == 0.0
+            }
         }
     }
 
@@ -114,21 +145,29 @@ La recopie vidéo est également au menu depuis le centre de contrôle de l'appa
         }
 
         // Retrieve search results with frecency sort on .visit30d0
-        var matches = db.searchHistory(query: "foo", enabledFrecencyParam: .visit30d0)
-        expect(matches.count) == 3
+        searchHistory(db, query: "foo", enabledFrecencyParam: .visit30d0) { matches in
+            expect(matches.count) == 3
 
-        for (expectedUrlId, match) in zip([ 2, 0, 1 ], matches) {
-            let frecency = try XCTUnwrap(match.frecency)
-            expect(frecency.urlId) == UInt64(expectedUrlId)
+            for (expectedUrlId, match) in zip([ 2, 0, 1 ], matches) {
+                guard let f = match.frecency else {
+                    fail("expect a frecency record")
+                    continue
+                }
+                expect(f.urlId) == UInt64(expectedUrlId)
+            }
         }
 
         // Retrieve search results with frecency sort on .readingTime30d0
-        matches = db.searchHistory(query: "foo", enabledFrecencyParam: .readingTime30d0)
-        expect(matches.count) == 1
+        searchHistory(db, query: "foo", enabledFrecencyParam: .readingTime30d0) { matches in
+            expect(matches.count) == 1
 
-        for (expectedUrlId, match) in zip([ 2 ], matches) {
-            let frecency = try XCTUnwrap(match.frecency)
-            expect(frecency.urlId) == UInt64(expectedUrlId)
+            for (expectedUrlId, match) in zip([ 2 ], matches) {
+                guard let f = match.frecency else {
+                    fail("expect a frecency record")
+                    continue
+                }
+                expect(f.urlId) == UInt64(expectedUrlId)
+            }
         }
     }
 
@@ -150,15 +189,17 @@ La recopie vidéo est également au menu depuis le centre de contrôle de l'appa
         }
 
         // Match `Monterey` on title.
-        var matches = db.searchHistory(query: "Monde")
-        expect(matches.count) == 1
-        expect(matches[0].url) == "https://www.lemonde.fr/"
+        searchHistory(db, query: "Monde") { matches in
+            expect(matches.count) == 1
+            expect(matches[0].url) == "https://www.lemonde.fr/"
+        }
 
         // Match `Mac` in the content. URLs are expected to be different.
-        matches = db.searchHistory(query: "Mac")
-        expect(matches.count) == 2
-        expect(matches[0].url) == "https://macg.co/article1"
-        expect(matches[1].url) == "https://macg.co/article2"
+        searchHistory(db, query: "Mac") { matches in
+            expect(matches.count) == 2
+            expect(matches[0].url) == "https://macg.co/article1"
+            expect(matches[1].url) == "https://macg.co/article2"
+        }
     }
 }
 
@@ -214,21 +255,21 @@ class GRDBDatabaseBeamElementTests: XCTestCase {
 
     func testMatchingAnyTokensIn() throws {
         // No match
-        var matches = db.search(matchingAnyTokensIn: "buzz").map { $0.uid }
+        var matches = db.search(matchingAnyTokenIn: "buzz").map { $0.uid }
         expect(matches.count) == 0
 
         // One match
-        matches = db.search(matchingAnyTokensIn: "tata").map { $0.uid }
+        matches = db.search(matchingAnyTokenIn: "tata").map { $0.uid }
         expect(matches.count) == 1
         expect(matches) == [note.children[3].id]
 
         // All tokens matches in multiple records
-        matches = db.search(matchingAnyTokensIn: "abcd foo baz").map { $0.uid }
+        matches = db.search(matchingAnyTokenIn: "abcd foo baz").map { $0.uid }
         expect(matches.count) == 3
         expect(matches) == note.children[0...2].map { $0.id }
 
         // Match on the note title - return all note children
-        matches = db.search(matchingAnyTokensIn: "bar note").map { $0.uid }
+        matches = db.search(matchingAnyTokenIn: "bar note").map { $0.uid }
         expect(matches.count) == 5
         expect(matches) == [note.id] + note.children.map { $0.id }
     }

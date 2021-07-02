@@ -184,6 +184,24 @@ public class DocumentManager: NSObject {
         return parseDocumentBody(document)
     }
 
+    func loadDocumentByTitle(title: String,
+                             context: NSManagedObjectContext? = nil,
+                             completion: @escaping (Swift.Result<DocumentStruct?, Error>) -> Void) {
+        let bgContext = context ?? CoreDataManager.shared.persistentContainer.newBackgroundContext()
+        bgContext.perform {
+            do {
+                guard let document = try Document.fetchWithTitle(bgContext, title) else {
+                    completion(.success(nil))
+                    return
+                }
+
+                completion(.success(self.parseDocumentBody(document)))
+            } catch {
+                completion(.failure(error))
+            }
+        }
+    }
+
     func loadDocumentById(id: UUID, context: NSManagedObjectContext? = nil) -> DocumentStruct? {
         guard let document = try? Document.fetchWithId(context ?? mainContext, id) else { return nil }
 
@@ -221,6 +239,21 @@ public class DocumentManager: NSObject {
                 parseDocumentBody(document)
             }
         } catch { return [] }
+    }
+
+    func documentsWithLimitTitleMatch(title: String, limit: Int = 4, completion: @escaping (Swift.Result<[DocumentStruct], Error>) -> Void) {
+        let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
+        context.perform {
+            do {
+                let results = try Document.fetchAllWithLimitedTitleMatch(context, title, limit)
+                    .compactMap { document -> DocumentStruct? in
+                        self.parseDocumentBody(document)
+                    }
+                completion(.success(results))
+            } catch {
+                completion(.failure(error))
+            }
+        }
     }
 
     func documentsWithLimitTitleMatch(title: String, limit: Int = 4) -> [DocumentStruct] {
