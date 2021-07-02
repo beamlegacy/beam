@@ -738,7 +738,7 @@
                                     <items>
                                         <menuItem title="Toggle Web / Note" tag="1001" keyEquivalent="d" id="wze-af-ouN">
                                             <connections>
-                                                <action selector="toggleBetweenWebAndNote:" target="Voe-Tx-rLC" id="ni4-5e-0wF"/>
+                                                <action selector="toggleBetweenWebAndNote:" target="Ady-hI-5gd" id="tM1-6e-6lt"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem title="Change Card" tag="4" keyEquivalent="D" id="NOl-ax-hus">
@@ -748,22 +748,22 @@
                                         </menuItem>
                                         <menuItem title="Go Back" tag="4" keyEquivalent="[" id="vfj-M7-Iu5" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
                                             <connections>
-                                                <action selector="goBack:" target="Voe-Tx-rLC" id="w7p-rt-yUD"/>
+                                                <action selector="goBack:" target="Ady-hI-5gd" id="dp8-wy-cmJ"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem title="Go Back" tag="-4" keyEquivalent="" id="JJG-Tc-9sk" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
                                             <connections>
-                                                <action selector="goBack:" target="Voe-Tx-rLC" id="ql9-2b-itW"/>
+                                                <action selector="goBack:" target="Ady-hI-5gd" id="eat-2J-6tu"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem title="Go Forward" tag="4" keyEquivalent="]" id="jIn-Gg-R6F" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
                                             <connections>
-                                                <action selector="goForward:" target="Voe-Tx-rLC" id="Sjy-FA-ty4"/>
+                                                <action selector="goForward:" target="Ady-hI-5gd" id="YCt-1o-xMT"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem title="Go Forward" tag="-4" keyEquivalent="" id="68V-0m-mxt" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
                                             <connections>
-                                                <action selector="goForward:" target="Voe-Tx-rLC" id="IaG-q2-Ng7"/>
+                                                <action selector="goForward:" target="Ady-hI-5gd" id="BPj-Sa-qKe"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" tag="-3" id="nTu-5u-Dge"/>
