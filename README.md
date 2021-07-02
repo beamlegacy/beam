@@ -7,6 +7,16 @@
 * If the tests fail, cd to the beam directory and run:
   `$ direnv allow`
 
+#### Allow the debug app to transmit browsing trees to http endpoint
+* Create a `.envrc.private` at root of repo
+* Declare following env vars inside (values should be found in 1Password)
+```bash
+export BROWSING_TREE_ACCESS_TOKEN="abc"
+export BROWSING_TREE_URL="https://url"
+```
+* Run `direnv allow`
+
+
 ### If not running from an admin account:
 
 * Homebrew will complain it can't write to its directories in `/opt/homebrew`. Apply `chown` and `chmod` as requested.

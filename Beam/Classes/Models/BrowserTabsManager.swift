@@ -171,8 +171,8 @@ extension BrowserTabsManager {
 
     func closeCurrentTab() -> Bool {
         guard tabsAreVisible, let tab = currentTab else { return false }
+        tab.closeTab()
         tab.cancelObservers()
-
         if let i = tabs.firstIndex(of: tab) {
             tabs.remove(at: i)
             let nextTabIndex = min(i, tabs.count - 1)

@@ -38,6 +38,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var sessionLinkRanker = SessionLinkRanker()
     var clusteringManager: ClusteringManager
     var scope = Set<AnyCancellable>()
+    var browsingTreeSender = BrowsingTreeSender()
 
     static var dataFolder: String {
         let paths = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)
