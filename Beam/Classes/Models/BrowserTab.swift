@@ -448,9 +448,20 @@ import Promises
 
     func closeTab() {
         browsingTree.closeTab()
+        sendTree()
     }
 
     func closeApp() {
         browsingTree.closeApp()
+        sendTree(blocking: true)
+    }
+
+    private func sendTree(blocking: Bool = false) {
+        guard let sender = state.data.browsingTreeSender else { return }
+        if blocking {
+            sender.blockingSend(browsingTree: browsingTree)
+        } else {
+            sender.send(browsingTree: browsingTree)
+        }
     }
 }

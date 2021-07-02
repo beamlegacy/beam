@@ -166,7 +166,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationWillTerminate(_ aNotification: Notification) {
         // Insert code here to tear down your application
         for window in windows {
-            window.state.browserTabsManager.currentTab?.closeApp()
+            for tab in window.state.browserTabsManager.tabs {
+                tab.closeApp()
+            }
         }
         if let beamWindow = windows.first {
             beamWindow.saveDefaults()
