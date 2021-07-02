@@ -100,7 +100,7 @@ import Promises
     }
 
     lazy var beamNavigationController: BeamWebNavigationController = {
-        let navController = BeamWebNavigationController(browsingTree: browsingTree, noteController: noteController)
+        let navController = BeamWebNavigationController(browsingTree: browsingTree, noteController: noteController, webView: webView)
         navController.page = self
         return navController
     }()

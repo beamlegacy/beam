@@ -7,10 +7,12 @@ class BeamWebNavigationController: WebPageHolder, WebNavigationController {
     let noteController: WebNoteController
 
     private var isNavigatingFromSearchBar: Bool = false
+    private weak var webView: WKWebView?
 
-    init(browsingTree: BrowsingTree, noteController: WebNoteController) {
+    init(browsingTree: BrowsingTree, noteController: WebNoteController, webView: WKWebView) {
         self.browsingTree = browsingTree
         self.noteController = noteController
+        self.webView = webView
     }
 
     func setLoading() {
