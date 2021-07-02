@@ -49,7 +49,7 @@ struct OmniBarSearchField: View {
     }
 
     private var selectedAutocompleteResult: AutocompleteResult? {
-        if let autocompleteIndex = autocompleteManager.autocompleteSelectedIndex, autocompleteIndex < autocompleteManager.autocompleteResults.count {
+        if let autocompleteIndex = autocompleteManager.autocompleteSelectedIndex, autocompleteIndex < autocompleteManager.autocompleteResults.count, autocompleteIndex >= 0 {
             return autocompleteManager.autocompleteResults[autocompleteIndex]
         }
         return nil

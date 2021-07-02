@@ -260,7 +260,7 @@ import Promises
         guard let url = url else {
             return
         }
-        noteController.add(url: url, text: title, reason: .navigation)
+        _ = noteController.add(url: url, text: title, reason: .navigation)
         self.title = noteController.element.text.text
     }
 
