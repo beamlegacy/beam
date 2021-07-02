@@ -59,7 +59,7 @@ protocol WebPage: AnyObject, Scorable {
      - Returns: if the webpage is displayed in the active browser tab.
      */
     func isActiveTab() -> Bool
-
+    func addTextToClusteringManager(_ text: String, url: URL)
     /*
      Leave the page, either by back or forward.
      */

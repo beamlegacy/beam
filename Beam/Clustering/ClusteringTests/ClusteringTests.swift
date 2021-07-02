@@ -49,7 +49,7 @@ class ClusteringTests: XCTestCase {
             }
             cluster.pages.append(page2)
 
-            let scores = cluster.scoreTextualEmbedding(textualEmbedding: page2.textEmbedding ?? [0.0], language: NLLanguage.english)
+            let scores = cluster.scoreTextualEmbedding(textualEmbedding: page2.textEmbedding ?? [0.0], language: NLLanguage.english, index: 1)
             expect(scores).to(beCloseTo([0.8294351697354525], within: 0.0001))
         }
     }
@@ -82,7 +82,7 @@ class ClusteringTests: XCTestCase {
                 cluster.pages.append(page3)
             }
 
-            let scores = cluster.scoreTextualEmbedding(textualEmbedding: page3.textEmbedding ?? [0.0], language: NLLanguage.english)
+            let scores = cluster.scoreTextualEmbedding(textualEmbedding: page3.textEmbedding ?? [0.0], language: NLLanguage.english, index: 2)
             expect(scores).to(beCloseTo([0.26489349244685784, 1.0], within: 0.0001))
         }
     }
@@ -505,47 +505,6 @@ class ClusteringTests: XCTestCase {
         }
     }
 
-    func testChangeCandidate() throws {
-        let cluster = Cluster()
-        cluster.candidate = 1
-        try cluster.performCandidateChange()
-        let ids: [UInt64] = Array(0...5)
-        // The ids array is not necessary at the moment as its values are equivalent to their indexes
-        // but hopefully in the future we'll have a better way to identify web pages in Beam
-        let parents = [1: 0, 2: 0, 4: 3, 5: 1] // Page 0 and 3 are "new"
-        let correct_results = [[[ids[0]]], [[ids[0], ids[1]]], [[ids[0], ids[1], ids[2]]], [[ids[0], ids[1], ids[2]], [ids[3]]], [[ids[0], ids[1], ids[2]], [ids[3], ids[4]]], [[ids[0], ids[1], ids[2], ids[5]], [ids[3], ids[4]]]]
-        let expectation = XCTestExpectation(description: "Add page expectation")
-        for i in 0...5 {
-            var from: UInt64?
-            if let parent = parents[i] {
-                from = ids[parent]
-            }
-            let page = Page(id: ids[i], parentId: from, title: nil, content: nil)
-            cluster.add(page, ranking: nil, completion: { result in
-                switch result {
-                case .failure(let error):
-                    XCTFail(error.localizedDescription)
-                case .success(let result):
-                    expect(result.0) == correct_results[i]
-                }
-                if i == 5 {
-                    expectation.fulfill()
-                }
-            })
-            if i == 4 {
-                cluster.changeCandidate(to: 2, with: nil, with: nil, with: nil, completion: { result in
-                    switch result {
-                    case .failure(let error):
-                        XCTFail(error.localizedDescription)
-                    case .success(let result):
-                        expect(result.0) == correct_results[i]
-                    }
-                })
-            }
-        }
-        wait(for: [expectation], timeout: 1)
-    }
-
     func testFindingEntities() throws {
         let cluster = Cluster()
         let myText = "Roger Federer is the best tennis player to ever play the game, but Rafael Nadal is best on clay"
@@ -785,6 +744,64 @@ class ClusteringTests: XCTestCase {
         })
 
         wait(for: [expectation], timeout: 1)
+    }
+
+    func testContentChange() throws {
+        let cluster = Cluster()
+        cluster.candidate = 3
+        try cluster.performCandidateChange()
+        let page1 = Page(id: 0, parentId: nil, title: "Page 1", content: "A man is eating food.")
+        var page2 = Page(id: 1, parentId: 0, title: "Page 2", content: "The girl is carrying a baby.")
+        let page3 = Page(id: 2, parentId: 0, title: "Page 3", content: "A man is eating food.")
+
+        let expectation = self.expectation(description: "Change content expectation")
+        var _ = [[UInt64]]()
+
+        cluster.add(page1, ranking: nil, completion: { result in
+            switch result {
+            case .failure(let error):
+                XCTFail(error.localizedDescription)
+            case .success(let result):
+                _ = result
+            }
+        })
+
+        cluster.add(page2, ranking: nil, completion: { result in
+            switch result {
+            case .failure(let error):
+                XCTFail(error.localizedDescription)
+            case .success(let result):
+                _ = result
+            }
+        })
+
+        cluster.add(page3, ranking: nil, completion: { result in
+            switch result {
+            case .failure(let error):
+                XCTFail(error.localizedDescription)
+            case .success(let result):
+                _ = result
+            }
+        })
+
+        page2.content = "A man is eating food."
+        cluster.add(page2, ranking: nil, replaceContent: true, completion: {result in
+            switch result {
+            case .failure(let error):
+                XCTFail(error.localizedDescription)
+            case .success(let result):
+                _ = result
+            }
+            expectation.fulfill()
+        })
+        wait(for: [expectation], timeout: 1)
+
+        let expectedMatrix = [0.0, 1.0, 1.0,
+                                1.0, 0.0, 1.0,
+                                1.0, 1.0, 0.0]
+        expect(cluster.textualSimilarityMatrix.matrix.flat).to(beCloseTo(expectedMatrix, within: 0.0001))
+        expect(cluster.entitiesMatrix.matrix.flat).to(beCloseTo(expectedMatrix, within: 0.0001))
+
     }
     // swiftlint:disable:next file_length
 }

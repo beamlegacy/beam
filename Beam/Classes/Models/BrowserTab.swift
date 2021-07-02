@@ -6,6 +6,7 @@ import BeamCore
 import Promises
 
 @objc class BrowserTab: NSObject, ObservableObject, Identifiable, Codable, WebPage, Scorable {
+
     var id: UUID
 
     var scrollX: CGFloat = 0
@@ -283,6 +284,22 @@ import Promises
     }
 
     var backListSize = 0
+
+    /// When using Point and Shoot to capture text in a webpage, notify the
+    /// clustering manager, so the important text can be taken into consideration
+    /// in the clustering process
+    ///
+    /// - Parameters:
+    ///   - text: The text that was captured, as a string. If possible - the cleaner the
+    ///   better (the text shouldn't include the caption of a photo, for example). If no text was captured,
+    ///   this function should not be called.
+    ///   - url: The url of the page the PnS was performed in.
+    ///
+    func addTextToClusteringManager(_ text: String, url: URL) {
+        let clusteringManager = state.data.clusteringManager
+        let id = browsingTree.current.link
+        clusteringManager.addPage(id: id, parentId: nil, newContent: text)
+    }
 
     private func setupObservers() {
         Logger.shared.logDebug("setupObservers", category: .javascript)

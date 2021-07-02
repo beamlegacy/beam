@@ -65,25 +65,37 @@ class ClusteringManager: ObservableObject {
         }.store(in: &scope)
     }
 
-    func addPage(id: UInt64, parentId: UInt64?, value: TabInformation) {
-        let page = Page(id: id, parentId: parentId, title: value.document.title, content: value.cleanedTextContentForClustering)
-        tabsInfo.append(value)
+    func addPage(id: UInt64, parentId: UInt64?, value: TabInformation? = nil, newContent: String? = nil) {
+        var pageToAdd: Page?
+        if let value = value {
+            pageToAdd = Page(id: id, parentId: parentId, title: value.document.title, content: value.cleanedTextContentForClustering)
+            tabsInfo.append(value)
+        } else if let newContent = newContent {
+            pageToAdd = Page(id: id, parentId: nil, title: nil, content: newContent)
+            // TODO: Shold we bother changing the content in tabsInfo?
+        }
         isClustering = true
         var ranking: [UInt64]?
         if self.sendRanking {
             ranking = self.ranker.clusteringRemovalSorted(links: self.clusteredPagesId.reduce([], +))
         }
-        cluster.add(page, ranking: ranking) { result in
-            switch result {
-            case .failure(let error):
-                self.isClustering = false
-                Logger.shared.logError("Error while adding page to cluster for \(page): \(error)", category: .clustering)
-            case .success(let result):
-                DispatchQueue.main.async {
+        var replaceContent = false
+        if let pageToAdd = pageToAdd {
+            if let _ = newContent {
+                replaceContent = true
+            }
+            cluster.add(pageToAdd, ranking: ranking, replaceContent: replaceContent) { result in
+                switch result {
+                case .failure(let error):
                     self.isClustering = false
-                    self.clusteredPagesId = result.0
-                    self.sendRanking = result.1
-                    self.logForClustering(result: result.0, changeCandidate: false)
+                    Logger.shared.logError("Error while adding page to cluster for \(pageToAdd): \(error)", category: .clustering)
+                case .success(let result):
+                    DispatchQueue.main.async {
+                        self.isClustering = false
+                        self.clusteredPagesId = result.0
+                        self.sendRanking = result.1
+                        self.logForClustering(result: result.0, changeCandidate: false)
+                    }
                 }
             }
         }

@@ -84,12 +84,6 @@
                <Test
                   Identifier = "ClusteringTests/testChangeCandidate()">
                </Test>
-               <Test
-                  Identifier = "ClusteringTests/testClusterize()">
-               </Test>
-               <Test
-                  Identifier = "ClusteringTests/testProcessWithOnlyNavigation()">
-               </Test>
             </SkippedTests>
          </TestableReference>
       </Testables>
