@@ -83,17 +83,17 @@ extension BeamWebNavigationController: WKNavigationDelegate {
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction,
                  preferences: WKWebpagePreferences,
                  decisionHandler: @escaping (WKNavigationActionPolicy, WKWebpagePreferences) -> Void) {
-        switch (navigationAction.navigationType) {
+        switch navigationAction.navigationType {
         case .backForward:
             handleBackForwardWebView(navigationAction: navigationAction)
         case .other:
-            Logger.shared.logInfo("Nav Redirecting toward \(navigationAction.request.url?.absoluteString)")
+            Logger.shared.logInfo("Nav Redirecting toward \(String(describing: navigationAction.request.url?.absoluteString))")
         default:
-            Logger.shared.logInfo("Creating new webview for \(navigationAction.request.url?.absoluteString)", category: .web)
+            Logger.shared.logInfo("Creating new webview for \(String(describing: navigationAction.request.url?.absoluteString))", category: .web)
         }
         if let targetURL = navigationAction.request.url {
             if navigationAction.modifierFlags.contains(.command) {
-                Logger.shared.logInfo("Cmd required create new tab toward \(navigationAction.request.url)")
+                Logger.shared.logInfo("Cmd required create new tab toward \(String(describing: navigationAction.request.url))")
                 _ = page.createNewTab(targetURL, nil, setCurrent: false)
                 decisionHandler(.cancel, preferences)
                 return
@@ -141,9 +141,21 @@ extension BeamWebNavigationController: WKNavigationDelegate {
         Logger.shared.logError("Webview failed: \(error)", category: .javascript)
     }
 
-    func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge,
-                 completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        completionHandler(.performDefaultHandling, challenge.proposedCredential)
+    func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+        let authenticationMethod = challenge.protectionSpace.authenticationMethod
+        if authenticationMethod == NSURLAuthenticationMethodDefault || authenticationMethod == NSURLAuthenticationMethodHTTPBasic || authenticationMethod == NSURLAuthenticationMethodHTTPDigest {
+            // TODO: Add UI to ask User for login and password (BE-1280)
+            let userId = "user"
+            let password = "pass"
+            let credential = URLCredential(user: userId, password: password, persistence: .none)
+            completionHandler(.useCredential, credential)
+        } else if authenticationMethod == NSURLAuthenticationMethodServerTrust {
+            let cred = URLCredential(trust: challenge.protectionSpace.serverTrust!)
+            completionHandler(.useCredential, cred)
+        } else {
+            completionHandler(.performDefaultHandling, nil)
+        }
+
     }
 
     func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
