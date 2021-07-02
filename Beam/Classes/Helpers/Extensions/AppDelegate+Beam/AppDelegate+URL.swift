@@ -121,7 +121,7 @@ extension AppDelegate {
 
     private func waitForWindowToProcessURL(_ components: NSURLComponents) {
         var cancellable: AnyCancellable?
-        cancellable = publisher(for: \.window)
+        cancellable = NotificationCenter.default.publisher(for: NSWindow.didBecomeKeyNotification)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 guard self?.window != nil else { return }
