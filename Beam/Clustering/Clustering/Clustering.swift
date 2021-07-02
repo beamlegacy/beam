@@ -248,7 +248,7 @@ public class Cluster {
     func textualEmbeddingComputationWithNLEmbedding(text: String) -> ([Double], NLLanguage)? {
         if let language = self.getTextLanguage(text: text),
            #available(iOS 14, macOS 11, *), language != NLLanguage.undetermined {
-            if let sentenceEmbedding = NLEmbedding.sentenceEmbedding(for: .english),
+            if let sentenceEmbedding = NLEmbedding.sentenceEmbedding(for: language),
                let vector = sentenceEmbedding.vector(for: text) {
                     return (vector, language)
             }
@@ -301,16 +301,20 @@ public class Cluster {
     /// - Parameters:
     ///   - textualEmbedding: the embedding of the current page
     /// - Returns: A list of cosine similarity scores
-    func scoreTextualEmbedding(textualEmbedding: [Double], language: NLLanguage) -> [Double] {
+    func scoreTextualEmbedding(textualEmbedding: [Double], language: NLLanguage, index: Int, changeContent: Bool = false) -> [Double] {
         var scores = [Double]()
 
-        for page in pages.dropLast() {
+        for page in pages.enumerated() {
             // The textual vector might be empty, when the OS is not good or the page content is not in English
             // then the score will be 0.0
-            if let textualVectorID = page.textEmbedding,
-               let textLanguage = page.language,
-               textLanguage ==  language {
-                scores.append(self.cosineSimilarity(vector1: textualVectorID, vector2: textualEmbedding))
+            if page.offset == index {
+                if changeContent {
+                    scores.append(0.0)
+                } else { break }
+            } else if let textualVectorID = page.element.textEmbedding,
+                      let textLanguage = page.element.language,
+                      textLanguage ==  language {
+                    scores.append(self.cosineSimilarity(vector1: textualVectorID, vector2: textualEmbedding))
             } else {
                 scores.append(1.0) // We don't want to "break" connections between langauges
             }
@@ -318,22 +322,29 @@ public class Cluster {
         return scores
     }
 
-    func scoreEntitySimilarities(entitiesInNewText: EntitiesInText, in whichText: FindEntitiesIn) -> [Double] {
+    func scoreEntitySimilarities(entitiesInNewText: EntitiesInText, in whichText: FindEntitiesIn, index: Int, changeContent: Bool = false) -> [Double] {
         var scores = [Double]()
         switch whichText {
         case .content:
-            for page in pages.dropLast() {
-                if let entitiesInPage = page.entities {
+            for page in pages.enumerated() {
+                if page.offset == index {
+                    if changeContent {
+                        scores.append(0.0)
+                    } else { break }
+                } else if let entitiesInPage = page.element.entities {
                     scores.append(self.jaccardEntities(entitiesText1: entitiesInNewText, entitiesText2: entitiesInPage))
                 } else { scores.append(0.0) }
             }
         case .title:
-            for page in pages.dropLast() {
-                if let entitiesInPage = page.entitiesInTitle {
+            for page in pages.enumerated() {
+                if page.offset == index {
+                    if changeContent {
+                        scores.append(0.0)
+                    } else { break }
+                } else if let entitiesInPage = page.element.entitiesInTitle {
                     scores.append(self.jaccardEntities(entitiesText1: entitiesInNewText, entitiesText2: entitiesInPage))
                 } else { scores.append(0.0) }
             }
-
         }
         return scores
     }
@@ -346,38 +357,45 @@ public class Cluster {
     ///
     /// - Parameters:
     ///   - pageIndex: the ID of the current page to process
-    func textualSimilarityMatrixProcess(pageIndex: Int) throws {
+    func textualSimilarityMatrixProcess(pageIndex: Int, changeContent: Bool = false) throws {
         if let content = pages[pageIndex].content,
            let (textualEmbedding, language) = self.textualEmbeddingComputationWithNLEmbedding(text: content) {
                 // if the OS is not good or the page content is not in English
                 // we create a vector of only 0.0 scores
-                let scores = self.scoreTextualEmbedding(textualEmbedding: textualEmbedding, language: language)
+                let scores = self.scoreTextualEmbedding(textualEmbedding: textualEmbedding, language: language, index: pageIndex, changeContent: changeContent)
+            if changeContent {
+                self.textualSimilarityMatrix.matrix[row: pageIndex] = scores
+                self.textualSimilarityMatrix.matrix[col: pageIndex] = scores
+            } else {
                 try self.textualSimilarityMatrix.addPage(similarities: scores)
+            }
             self.pages[pageIndex].textEmbedding = textualEmbedding
             self.pages[pageIndex].language = language
-        } else {
-            try self.textualSimilarityMatrix.addPage(similarities: [Double](
-                                                            repeating: 0.0,
-                                                            count: self.textualSimilarityMatrix.matrix.rows
-                                                        )
-                                                    )
+        } else  if !changeContent {
+            let scores = [Double](repeating: 1.0, count: self.textualSimilarityMatrix.matrix.rows)
+            try self.textualSimilarityMatrix.addPage(similarities: scores)
         }
 
     }
 
-    func entitiesProcess(pageIndex: Int) throws {
+    func entitiesProcess(pageIndex: Int, changeContent: Bool = false) throws {
         var scores = [Double](repeating: 0.0, count: self.entitiesMatrix.matrix.rows)
         if let content = pages[pageIndex].content {
             let entitiesInNewText = findEntitiesInText(text: content)
-            scores = zip(scores, self.scoreEntitySimilarities(entitiesInNewText: entitiesInNewText, in: FindEntitiesIn.content)).map({ $0.0 + $0.1 })
+            scores = zip(scores, self.scoreEntitySimilarities(entitiesInNewText: entitiesInNewText, in: FindEntitiesIn.content, index: pageIndex, changeContent: changeContent)).map({ $0.0 + $0.1 })
             self.pages[pageIndex].entities = entitiesInNewText
         }
         if let title = pages[pageIndex].title {
             let entitiesInNewTitle = findEntitiesInText(text: title)
-            scores = zip(scores, self.scoreEntitySimilarities(entitiesInNewText: entitiesInNewTitle, in: FindEntitiesIn.title)).map({ min($0.0 + $0.1, 1.0) })
+            scores = zip(scores, self.scoreEntitySimilarities(entitiesInNewText: entitiesInNewTitle, in: FindEntitiesIn.title, index: pageIndex, changeContent: changeContent)).map({ min($0.0 + $0.1, 1.0) })
             self.pages[pageIndex].entitiesInTitle = entitiesInNewTitle
         }
-        try self.entitiesMatrix.addPage(similarities: scores)
+        if changeContent {
+            self.entitiesMatrix.matrix[row: pageIndex] = scores
+            self.entitiesMatrix.matrix[col: pageIndex] = scores
+        } else {
+            try self.entitiesMatrix.addPage(similarities: scores)
+        }
     }
 
     func jaccardEntities(entitiesText1: EntitiesInText, entitiesText2: EntitiesInText) -> Double {
@@ -485,7 +503,7 @@ public class Cluster {
     }
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
-    public func add(_ page: Page, ranking: [UInt64]?, completion: @escaping (Result<([[UInt64]], Bool), Error>) -> Void) {
+    public func add(_ page: Page, ranking: [UInt64]?, replaceContent: Bool = false, completion: @escaping (Result<([[UInt64]], Bool), Error>) -> Void) {
         myQueue.async {
             // If ranking is received, remove pages
             if let ranking = ranking {
@@ -517,7 +535,18 @@ public class Cluster {
                 completion(.success((result, false)))
                 return
             }
-            if let id_index = self.findPageInPages(pageID: page.id) {
+            if replaceContent,
+               let id_index = self.findPageInPages(pageID: page.id),
+               let content = page.content {
+                self.pages[id_index].content = content
+                do {
+                    try self.textualSimilarityMatrixProcess(pageIndex: id_index, changeContent: true)
+                    try self.entitiesProcess(pageIndex: id_index, changeContent: true)
+                } catch let error {
+                    completion(.failure(error))
+                }
+
+            } else if let id_index = self.findPageInPages(pageID: page.id) {
                if let myParent = page.parentId,
                let parent_index = self.findPageInPages(pageID: myParent) {
                     self.navigationMatrix.matrix[id_index, parent_index] = 1.0

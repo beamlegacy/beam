@@ -110,6 +110,8 @@ class TestWebPage: WebPage {
         events.append("getNote \(fromTitle)")
         return testNotes[fromTitle]
     }
+
+    func addTextToClusteringManager(_ text: String, url: URL) {}
 }
 
 class PointAndShootUIMock: PointAndShootUI {

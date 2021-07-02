@@ -333,11 +333,9 @@ class PointAndShoot: WebPageHolder {
               let currentCard = page.getNote(fromTitle: noteTitle) else {
             return Promise(PointAndShootError("Could not find note to update with title \(noteTitle)"))
         }
-
         guard let shootGroup = activeShootGroup else {
             fatalError("Expected to have an active shoot group")
         }
-
         page.setDestinationNote(currentCard, rootElement: currentCard)
         scorer.addTextSelection()
 
@@ -353,6 +351,7 @@ class PointAndShoot: WebPageHolder {
                     return
                 }
                 var htmlText: BeamText = html2Text(url: sourceUrl, html: html)
+                self.page.addTextToClusteringManager(htmlText.text, url: sourceUrl)
                 htmlText.addAttributes([.emphasis], to: htmlText.wholeRange)
                 let collectedQuote = BeamElement()
                 collectedQuote.text = htmlText
