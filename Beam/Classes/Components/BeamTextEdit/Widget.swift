@@ -95,11 +95,10 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
                 set.remove(c)
             }
 
-            for c in set {
+            // Remove layers for previous children that haven't been reattached to the editor:
+            for c in set where c.parent === self || c.parent == nil {
                 c.removeFromSuperlayer(recursive: true)
-                if c.parent == self {
-                    c.parent = nil
-                }
+                c.parent = nil
             }
         }
 
