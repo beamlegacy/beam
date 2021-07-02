@@ -308,6 +308,7 @@ import Promises
         }.store(in: &scope)
         webView.publisher(for: \.url).sink { [unowned self] value in
             url = value
+            leave()
             if value?.absoluteString != nil {
                 updateFavIcon()
                 // self.browsingTree.current.score.openIndex = self.navigationCount

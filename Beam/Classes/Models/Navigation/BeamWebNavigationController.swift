@@ -34,12 +34,10 @@ class BeamWebNavigationController: WebPageHolder, WebNavigationController {
         } else {
             browsingTree.goForward()
         }
-        page.leave()
         currentBackForwardItem = webView.backForwardList.currentItem
     }
 
     func navigatedTo(url: URL, webView: WKWebView, replace: Bool) {
-        page.leave()
         let isLinkActivation = !isNavigatingFromSearchBar
         let earlyTitle = webView.title
         Readability.read(webView) { [weak self] result in
