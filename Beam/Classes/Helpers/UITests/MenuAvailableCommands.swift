@@ -13,6 +13,7 @@ public enum MenuAvailableCommands: String, CaseIterable {
     case loadUITestPage2 = "Load UITests Page 2"
     case loadUITestPage3 = "Load UITests Page 3"
     case loadUITestPage4 = "Load PasswordManager test page"
+    case loadUITestPage5 = "Load HTML playground"
     case separatorC
     case insertTextInCurrentNote = "Insert text in current note"
 }

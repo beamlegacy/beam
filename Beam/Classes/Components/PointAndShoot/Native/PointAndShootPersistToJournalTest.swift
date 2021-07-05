@@ -4,7 +4,6 @@
 //
 //  Created by Stef Kors on 08/06/2021.
 //
-
 import XCTest
 import Promises
 import Nimble
@@ -13,9 +12,20 @@ import Nimble
 @testable import BeamCore
 
 class PointAndShootPersistToJournalTest: PointAndShootTest {
+    var url: URL!
+    var page: TestWebPage!
 
     override func setUpWithError() throws {
         initTestBed()
+
+        if let page = self.testPage,
+           let url = page.url {
+            self.page = page
+            XCTAssertEqual(url.absoluteString, "https://webpage.com")
+            self.url = url
+        } else {
+            XCTFail("no page url available")
+        }
     }
 
     func testSingleShootToNote() throws {
@@ -35,10 +45,18 @@ class PointAndShootPersistToJournalTest: PointAndShootTest {
         self.pns.draw()
 
         // Add shoot to note
+        let text: [BeamText] = html2Text(url: self.url, html: paragraphTarget.html)
         waitUntil(timeout: .seconds(5)) { done in
-            self.pns.addShootToNote(noteTitle: self.testPage!.activeNote).then { quoteKinds in
-                XCTAssertEqual(quoteKinds.count, 1)
-                done()
+            let pendingQuotes = self.pns.text2Quote(text, self.url.absoluteString)
+            pendingQuotes.then { quotes in
+                XCTAssertEqual(quotes.count, 1)
+                if quotes.first != nil {
+                    let noteInfo = NoteInfo(id: UUID(), title: self.page.activeNote)
+                    self.pns.complete(noteInfo: noteInfo, group: self.pns.activeShootGroup!)
+                    done()
+                } else {
+                    XCTFail("expected quotes to contain 1 item")
+                }
             }
         }
 
@@ -64,10 +82,18 @@ class PointAndShootPersistToJournalTest: PointAndShootTest {
         self.pns.draw()
 
         // Add shoot to note
+        let text: [BeamText] = html2Text(url: self.url, html: paragraphTarget.html)
         waitUntil(timeout: .seconds(5)) { done in
-            self.pns.addShootToNote(noteTitle: self.testPage!.activeNote).then { quoteKinds in
-                XCTAssertEqual(quoteKinds.count, 1)
-                done()
+            let pendingQuotes = self.pns.text2Quote(text, self.url.absoluteString)
+            pendingQuotes.then { quotes in
+                XCTAssertEqual(quotes.count, 1)
+                if quotes.first != nil {
+                    let noteInfo = NoteInfo(id: UUID(), title: self.page.activeNote)
+                    self.pns.complete(noteInfo: noteInfo, group: self.pns.activeShootGroup!)
+                    done()
+                } else {
+                    XCTFail("expected quotes to contain 1 item")
+                }
             }
         }
 
@@ -94,18 +120,23 @@ class PointAndShootPersistToJournalTest: PointAndShootTest {
         self.pns.draw()
 
         // Add shoot to note
+        let text2: [BeamText] = html2Text(url: self.url, html: paragraphTarget2.html)
         waitUntil(timeout: .seconds(5)) { done in
-            self.pns.addShootToNote(noteTitle: self.testPage!.activeNote).then { quoteKinds in
-                XCTAssertEqual(quoteKinds.count, 1)
-                done()
+            let pendingQuotes = self.pns.text2Quote(text2, self.url.absoluteString)
+            pendingQuotes.then { quotes in
+                XCTAssertEqual(quotes.count, 1)
+                if quotes.first != nil {
+                    let noteInfo = NoteInfo(id: UUID(), title: self.page.activeNote)
+                    self.pns.complete(noteInfo: noteInfo, group: self.pns.activeShootGroup!)
+                    done()
+                } else {
+                    XCTFail("expected quotes to contain 1 item")
+                }
             }
         }
 
         XCTAssertEqual(self.pns.shootGroups.count, 2)
         XCTAssertEqual(self.pns.shootGroups.last?.targets.count, 1)
         XCTAssertEqual(self.pns.shootGroups.last?.targets.last?.html, paragraphTarget2.html)
-
-        let addToNoteEvents = page.events.filter({ $0.contains("addToNote") })
-        XCTAssertEqual(addToNoteEvents.count, 2)
     }
 }

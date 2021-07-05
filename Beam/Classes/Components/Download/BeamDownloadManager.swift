@@ -163,6 +163,21 @@ public class BeamDownloadManager: NSObject, DownloadManager, ObservableObject {
         }
     }
 
+    func downloadImage(_ src: URL, pageUrl: URL, completion: @escaping ((Data, String)?) -> Void) {
+        let headers = ["Referer": pageUrl.absoluteString]
+        self.downloadURLs([src], headers: headers) { results in
+            if let result = results.first {
+                guard case .binary(let data, let mimeType, _) = result,
+                      data.count > 0 else {
+                    Logger.shared.logError("Failed downloading Image from \(src)", category: .pointAndShoot)
+                    completion(nil)
+                    return
+                }
+                completion((data, mimeType))
+            }
+        }
+    }
+
     func clearAllFileDownloads() {
         downloads.removeAll { d in
             d.state != .running

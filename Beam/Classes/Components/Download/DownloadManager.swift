@@ -35,4 +35,10 @@ protocol DownloadManager: AnyObject {
 
     @discardableResult
     func clearFileDownload(_ download: Download) -> Download?
+    /// Download an image file from the provided URL. Resulting image will be inserted into BeamFileStorage
+    /// - Parameters:
+    ///   - src: The URL of the image to download
+    ///   - fileStorage: The file storage instance it should be inserted in
+    ///   - completion: Called when image is downloaded and stored. Returns the name of the stored file.
+    func downloadImage(_ src: URL, pageUrl: URL, completion: @escaping ((Data, String)?) -> Void)
 }

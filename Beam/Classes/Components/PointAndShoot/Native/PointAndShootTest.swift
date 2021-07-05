@@ -222,6 +222,18 @@ class DownloadManagerMock: DownloadManager {
     func clearAllFileDownloads() {}
     func clearFileDownload(_ download: Download) -> Download? { return nil }
 
+    func downloadImage(_ src: URL, pageUrl: URL, completion: @escaping ((Data, String)?) -> Void) {
+        let headers = ["Referer": pageUrl.absoluteString]
+        self.downloadURL(src, headers: headers) { result in
+            guard case .binary(let data, let mimeType, _) = result,
+                  data.count > 0 else {
+                Logger.shared.logError("Failed downloading Image from \(src)", category: .pointAndShoot)
+                completion(nil)
+                return
+            }
+            completion((data, mimeType))
+        }
+    }
     func waitForDownloadURL(_ url: URL, headers: [String: String]) -> DownloadManagerResult? { fatalError("waitForDownloadURL(_:headers:) has not been implemented") }
 }
 

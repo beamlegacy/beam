@@ -12,7 +12,6 @@
 		027CB665263163AC001311A0 /* PasswordManager.js in Resources */ = {isa = PBXBuildFile; fileRef = BAA67AD6C73B8B9546778E72 /* PasswordManager.js */; };
 		02A2B285263190F100D581A5 /* Scorer.js in Resources */ = {isa = PBXBuildFile; fileRef = BAA6705B2A0906FB4C068502 /* Scorer.js */; };
 		02C07A9B2670D98600894C5D /* Navigation.js in Resources */ = {isa = PBXBuildFile; fileRef = 02C07A9A2670D98600894C5D /* Navigation.js */; };
-		02E5805226308F1D00CEDEB1 /* index_prod.js in Resources */ = {isa = PBXBuildFile; fileRef = BAA6756C6F2D22423B668BAF /* index_prod.js */; };
 		0325628E26051D3B006513E4 /* RBZip.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325624A26051D3A006513E4 /* RBZip.m */; };
 		0325628F26051D3B006513E4 /* RBSQLite.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325624B26051D3A006513E4 /* RBSQLite.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		0325629026051D3B006513E4 /* RBCodeSignature.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325624D26051D3A006513E4 /* RBCodeSignature.m */; };
@@ -328,11 +327,10 @@
 		8A68F4652671159D00B0C022 /* PointAndShootMessageHandlerFrameBoundsTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A68F4642671159D00B0C022 /* PointAndShootMessageHandlerFrameBoundsTest.swift */; };
 		8A78699C264C7E4500F769D2 /* XCUIElementQuery+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A78699B264C7E4500F769D2 /* XCUIElementQuery+Beam.swift */; };
 		8A7920F02680AA1E00F74A75 /* URL+BeamTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A7920EF2680AA1E00F74A75 /* URL+BeamTest.swift */; };
+		8A96ECAE268F8FD600135838 /* PointAndShoot+Text2Quote.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A96ECAD268F8FD600135838 /* PointAndShoot+Text2Quote.swift */; };
 		8AA9EEB72678ACF6009D6B31 /* WebAutocompleteContextTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AA9EEB62678ACF6009D6B31 /* WebAutocompleteContextTest.swift */; };
 		8AB44A9B267C9BE400D18B65 /* PointAndShootMessageHandlerOnLoadTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB44A9A267C9BE400D18B65 /* PointAndShootMessageHandlerOnLoadTest.swift */; };
 		8AB44AAC267CD3AB00D18B65 /* String+Slice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB44AAB267CD3AB00D18B65 /* String+Slice.swift */; };
-		8AB966B02668542F003E7755 /* ParseHtml.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB966A72668542E003E7755 /* ParseHtml.swift */; };
-		8AB966B12668542F003E7755 /* Quote.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB966AF2668542F003E7755 /* Quote.swift */; };
 		8AC2EFC5266F81B000049005 /* PointAndShootStatusTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AC2EFC4266F81B000049005 /* PointAndShootStatusTest.swift */; };
 		8AC2EFCE266F82D900049005 /* PointAndShootHTMLTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AC2EFCD266F82D900049005 /* PointAndShootHTMLTest.swift */; };
 		8AC2EFD6266F86F500049005 /* yarn.lock in Resources */ = {isa = PBXBuildFile; fileRef = 8AC2EFD1266F86F500049005 /* yarn.lock */; };
@@ -343,11 +341,13 @@
 		8AC2EFDF266F8A6F00049005 /* PointAndShootPersistToJournalTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AC2EFDE266F8A6F00049005 /* PointAndShootPersistToJournalTest.swift */; };
 		8AEADBD126776BC500E36BAC /* UITests-4.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AEADBC926776BC500E36BAC /* UITests-4.html */; };
 		8AEADBD326776BEB00E36BAC /* PasswordManagerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AEADBD226776BEA00E36BAC /* PasswordManagerUITests.swift */; };
+		8AF0E33D268F30E0007C75D8 /* index_prod.js in Resources */ = {isa = PBXBuildFile; fileRef = 8AF0E335268F30E0007C75D8 /* index_prod.js */; };
 		8AF53BAA266A1BFA00C3CB2E /* Beam.css in Resources */ = {isa = PBXBuildFile; fileRef = 8AF53BA2266A1BFA00C3CB2E /* Beam.css */; };
 		8AF53BAC266A241700C3CB2E /* UITests-1.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AF53BAB266A241700C3CB2E /* UITests-1.html */; };
 		8AF53BAE266A241C00C3CB2E /* UITests-2.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AF53BAD266A241C00C3CB2E /* UITests-2.html */; };
 		8AF61F14267BA292006DD5C2 /* RBAllowlistEntry.m in Sources */ = {isa = PBXBuildFile; fileRef = 8AF61F13267BA292006DD5C2 /* RBAllowlistEntry.m */; };
 		8AFA9D50266924EE00AA59EE /* UITests-3.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AFA9D48266924EE00AA59EE /* UITests-3.html */; };
+		8AFD64882693394800166DC0 /* UITests-5.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AFD64802693394800166DC0 /* UITests-5.html */; };
 		9609AF502617159B00322141 /* URL+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418173BD2581251600317ED8 /* URL+Beam.swift */; };
 		960A57E4264C84BD0061E8D2 /* ProxyElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 960A57E3264C84BD0061E8D2 /* ProxyElement.swift */; };
 		960A57E6264C851E0061E8D2 /* ProxyImageNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 960A57E5264C851E0061E8D2 /* ProxyImageNode.swift */; };
@@ -1122,11 +1122,11 @@
 		8A68F4642671159D00B0C022 /* PointAndShootMessageHandlerFrameBoundsTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootMessageHandlerFrameBoundsTest.swift; sourceTree = "<group>"; };
 		8A78699B264C7E4500F769D2 /* XCUIElementQuery+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "XCUIElementQuery+Beam.swift"; sourceTree = "<group>"; };
 		8A7920EF2680AA1E00F74A75 /* URL+BeamTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+BeamTest.swift"; sourceTree = "<group>"; };
+		8A96ECAD268F8FD600135838 /* PointAndShoot+Text2Quote.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PointAndShoot+Text2Quote.swift"; sourceTree = "<group>"; };
+		8AA712942684F57D0081C126 /* index_prod.js.map */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.module-map"; path = index_prod.js.map; sourceTree = "<group>"; };
 		8AA9EEB62678ACF6009D6B31 /* WebAutocompleteContextTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebAutocompleteContextTest.swift; sourceTree = "<group>"; };
 		8AB44A9A267C9BE400D18B65 /* PointAndShootMessageHandlerOnLoadTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootMessageHandlerOnLoadTest.swift; sourceTree = "<group>"; };
 		8AB44AAB267CD3AB00D18B65 /* String+Slice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Slice.swift"; sourceTree = "<group>"; };
-		8AB966A72668542E003E7755 /* ParseHtml.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParseHtml.swift; sourceTree = "<group>"; };
-		8AB966AF2668542F003E7755 /* Quote.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Quote.swift; sourceTree = "<group>"; };
 		8AC2EFC4266F81B000049005 /* PointAndShootStatusTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootStatusTest.swift; sourceTree = "<group>"; };
 		8AC2EFCD266F82D900049005 /* PointAndShootHTMLTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootHTMLTest.swift; sourceTree = "<group>"; };
 		8AC2EFD1266F86F500049005 /* yarn.lock */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = yarn.lock; sourceTree = "<group>"; };
@@ -1137,6 +1137,7 @@
 		8AC2EFDE266F8A6F00049005 /* PointAndShootPersistToJournalTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootPersistToJournalTest.swift; sourceTree = "<group>"; };
 		8AEADBC926776BC500E36BAC /* UITests-4.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "UITests-4.html"; sourceTree = "<group>"; };
 		8AEADBD226776BEA00E36BAC /* PasswordManagerUITests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PasswordManagerUITests.swift; sourceTree = "<group>"; };
+		8AF0E335268F30E0007C75D8 /* index_prod.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = index_prod.js; sourceTree = "<group>"; };
 		8AF53BA2266A1BFA00C3CB2E /* Beam.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; path = Beam.css; sourceTree = "<group>"; };
 		8AF53BAB266A241700C3CB2E /* UITests-1.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "UITests-1.html"; sourceTree = "<group>"; };
 		8AF53BAD266A241C00C3CB2E /* UITests-2.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "UITests-2.html"; sourceTree = "<group>"; };
@@ -1144,6 +1145,7 @@
 		8AF61F12267BA292006DD5C2 /* RBAllowlistEntry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RBAllowlistEntry.h; sourceTree = "<group>"; };
 		8AF61F13267BA292006DD5C2 /* RBAllowlistEntry.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RBAllowlistEntry.m; sourceTree = "<group>"; };
 		8AFA9D48266924EE00AA59EE /* UITests-3.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "UITests-3.html"; sourceTree = "<group>"; };
+		8AFD64802693394800166DC0 /* UITests-5.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "UITests-5.html"; sourceTree = "<group>"; };
 		960A57E3264C84BD0061E8D2 /* ProxyElement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProxyElement.swift; sourceTree = "<group>"; };
 		960A57E5264C851E0061E8D2 /* ProxyImageNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProxyImageNode.swift; sourceTree = "<group>"; };
 		960A57E7264C88920061E8D2 /* ProxyEmbedNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProxyEmbedNode.swift; sourceTree = "<group>"; };
@@ -1387,7 +1389,6 @@
 		BAA675190ACFCE6361AC531B /* PointAndShootUI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PointAndShootUI.swift; sourceTree = "<group>"; };
 		BAA67555219BDD4CBD252C60 /* DownloadManagerTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DownloadManagerTest.swift; sourceTree = "<group>"; };
 		BAA6755F00C445E4C93AF3AA /* Scorable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Scorable.swift; sourceTree = "<group>"; };
-		BAA6756C6F2D22423B668BAF /* index_prod.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = index_prod.js; sourceTree = "<group>"; };
 		BAA675B80B855A4B2886805B /* PasswordMessageHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PasswordMessageHandler.swift; sourceTree = "<group>"; };
 		BAA67641C3624DA503CB21CF /* BeamWindowMock.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = BeamWindowMock.ts; sourceTree = "<group>"; };
 		BAA6768EED1949F79C1C7B3C /* Native.test.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = Native.test.ts; sourceTree = "<group>"; };
@@ -2643,8 +2644,6 @@
 		8AC2EFCF266F837C00049005 /* Native */ = {
 			isa = PBXGroup;
 			children = (
-				8AB966A72668542E003E7755 /* ParseHtml.swift */,
-				8AB966AF2668542F003E7755 /* Quote.swift */,
 				BAA67B138DFC6DBC31D184E0 /* PointAndShootMessageHandler.swift */,
 				8A68F4642671159D00B0C022 /* PointAndShootMessageHandlerFrameBoundsTest.swift */,
 				8AB44A9A267C9BE400D18B65 /* PointAndShootMessageHandlerOnLoadTest.swift */,
@@ -2652,6 +2651,7 @@
 				BAA670D8E6A58A6836DA2794 /* PointAndShootTest.swift */,
 				BAA675190ACFCE6361AC531B /* PointAndShootUI.swift */,
 				BAA67E198CBE7B676642992F /* PointAndShoot.swift */,
+				8A96ECAD268F8FD600135838 /* PointAndShoot+Text2Quote.swift */,
 				8AC2EFC4266F81B000049005 /* PointAndShootStatusTest.swift */,
 				8AC2EFCD266F82D900049005 /* PointAndShootHTMLTest.swift */,
 				BAA6754D043D1DD6321A8F80 /* Views */,
@@ -2665,6 +2665,8 @@
 		8AC2EFD0266F840D00049005 /* Web */ = {
 			isa = PBXGroup;
 			children = (
+				8AF0E335268F30E0007C75D8 /* index_prod.js */,
+				8AA712942684F57D0081C126 /* index_prod.js.map */,
 				8AC2EFD5266F86F500049005 /* WebFactory.ts */,
 				8AC2EFD4266F86F500049005 /* webpack.config.js */,
 				8AC2EFD1266F86F500049005 /* yarn.lock */,
@@ -2692,7 +2694,6 @@
 				BAA67B6D4C4A10AA8B362C0B /* TextSelectorUI.scss */,
 				BAA678F7FE18AF760346FB0B /* Frames.test.ts */,
 				BAA67E899E0DEB27DFE32C9E /* PointAndShootUI_web.ts */,
-				BAA6756C6F2D22423B668BAF /* index_prod.js */,
 				BAA67B0CD72063A53851CE52 /* Test */,
 				BAA67EA80CD97EDF95F98D66 /* Beam.scss */,
 				BAA67429E31F093002EE2693 /* BeamTypes.ts */,
@@ -2713,6 +2714,7 @@
 			children = (
 				8AEADBC926776BC500E36BAC /* UITests-4.html */,
 				8AF53BA2266A1BFA00C3CB2E /* Beam.css */,
+				8AFD64802693394800166DC0 /* UITests-5.html */,
 				8AF53BAB266A241700C3CB2E /* UITests-1.html */,
 				8AF53BAD266A241C00C3CB2E /* UITests-2.html */,
 				8AFA9D48266924EE00AA59EE /* UITests-3.html */,
@@ -3558,7 +3560,7 @@
 				02A2B285263190F100D581A5 /* Scorer.js in Resources */,
 				027CB665263163AC001311A0 /* PasswordManager.js in Resources */,
 				8AF53BAE266A241C00C3CB2E /* UITests-2.html in Resources */,
-				02E5805226308F1D00CEDEB1 /* index_prod.js in Resources */,
+				8AFD64882693394800166DC0 /* UITests-5.html in Resources */,
 				022843362617C4C3001C062E /* Readability.js in Resources */,
 				022843372617C4C3001C062E /* OverrideConsole.js in Resources */,
 				965A78362514F148009980D4 /* Main.storyboard in Resources */,
@@ -3606,6 +3608,7 @@
 				8AEADBD126776BC500E36BAC /* UITests-4.html in Resources */,
 				418171F52581107C00317ED8 /* forgot_password.graphql in Resources */,
 				BAA67DC79E1BCAF3869F3DBB /* build_js.sh in Resources */,
+				8AF0E33D268F30E0007C75D8 /* index_prod.js in Resources */,
 				8AF53BAA266A1BFA00C3CB2E /* Beam.css in Resources */,
 				BAA67380A92BBC1FB039AA3F /* WebEventsUI.ts in Resources */,
 				8AFA9D50266924EE00AA59EE /* UITests-3.html in Resources */,
@@ -3681,6 +3684,7 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "if [ $ENABLE_PREVIEWS == \"NO\" ]\nthen\n    export PATH=\"$PATH:/opt/homebrew/bin\"\n    ./scripts/build_js.sh\n \nelse\n    echo \"Skipping the script because of SwiftUI preview mode\"\nfi\n";
+			showEnvVarsInLog = 0;
 		};
 		3390376A26529BD700089E25 /* Sign AutoUpdate XPC */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -3859,7 +3863,6 @@
 				521EEDFB2593927100BA2485 /* Int+ByteSize.swift in Sources */,
 				A05ADF6E264D8C59002DF91A /* OverlayViewCenterViewModel.swift in Sources */,
 				5298268C2641A37500E9448C /* GithubButton.swift in Sources */,
-				8AB966B12668542F003E7755 /* Quote.swift in Sources */,
 				0D15BE3F2681CEA40035F322 /* GRDBDatabase+Persistence.swift in Sources */,
 				0D3DD8F52681CD4B009F2DF0 /* HistoryUrlRecord.swift in Sources */,
 				4181720E2581107C00317ED8 /* NoteBackForwardList.swift in Sources */,
@@ -4040,6 +4043,7 @@
 				9634DD79264AA1A10065383E /* TextFrameLayer.swift in Sources */,
 				418172442581107C00317ED8 /* ScrollableTextView.swift in Sources */,
 				418171EB2581107C00317ED8 /* Autocompleter.swift in Sources */,
+				8A96ECAE268F8FD600135838 /* PointAndShoot+Text2Quote.swift in Sources */,
 				418172082581107C00317ED8 /* NSManagedObject+initExtension.swift in Sources */,
 				9691C2A62645F90600F70DA1 /* ImageNode.swift in Sources */,
 				52F27FCB25B9B404006E09A2 /* ViewModelFetchedResults.swift in Sources */,
@@ -4061,7 +4065,6 @@
 				A08D739426413DEC00A9A604 /* UserProfileMenu.swift in Sources */,
 				418172AB25811A3A00317ED8 /* BeamTextFieldView.swift in Sources */,
 				965A78292514F147009980D4 /* AppDelegate.swift in Sources */,
-				8AB966B02668542F003E7755 /* ParseHtml.swift in Sources */,
 				96F2BF0F263B208500F02F16 /* Caret.swift in Sources */,
 				87C539C92617B35000D51877 /* PasswordGeneratorSuggestionCell.swift in Sources */,
 				418172092581107C00317ED8 /* CoreDataManager+backupExtension.swift in Sources */,
