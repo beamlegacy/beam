@@ -535,23 +535,30 @@ public class Cluster {
                 completion(.success((result, false)))
                 return
             }
+            // PnS text addition
             if replaceContent,
                let id_index = self.findPageInPages(pageID: page.id),
-               let content = page.content {
-                self.pages[id_index].content = content
+               let newContent = page.content {
+                let totalContentTokenized = (newContent + " " + (self.pages[id_index].content ?? "")).split(separator: " ")
+                if totalContentTokenized.count > 512 {
+                    self.pages[id_index].content = totalContentTokenized.dropLast(totalContentTokenized.count - 512).joined(separator: " ")
+                } else {
+                    self.pages[id_index].content = totalContentTokenized.joined(separator: " ")
+                }
                 do {
                     try self.textualSimilarityMatrixProcess(pageIndex: id_index, changeContent: true)
                     try self.entitiesProcess(pageIndex: id_index, changeContent: true)
                 } catch let error {
                     completion(.failure(error))
                 }
-
+            // Page exists, new parenting relation
             } else if let id_index = self.findPageInPages(pageID: page.id) {
                if let myParent = page.parentId,
                let parent_index = self.findPageInPages(pageID: myParent) {
                     self.navigationMatrix.matrix[id_index, parent_index] = 1.0
                     self.navigationMatrix.matrix[parent_index, id_index] = 1.0
                }
+            // New page
             } else {
                 // Navigation matrix computation
                 var navigationSimilarities = [Double](repeating: 0.0, count: self.adjacencyMatrix.rows)

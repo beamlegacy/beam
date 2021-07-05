@@ -750,9 +750,9 @@ class ClusteringTests: XCTestCase {
         let cluster = Cluster()
         cluster.candidate = 3
         try cluster.performCandidateChange()
-        let page1 = Page(id: 0, parentId: nil, title: "Page 1", content: "A man is eating food.")
-        var page2 = Page(id: 1, parentId: 0, title: "Page 2", content: "The girl is carrying a baby.")
-        let page3 = Page(id: 2, parentId: 0, title: "Page 3", content: "A man is eating food.")
+        let page1 = Page(id: 0, parentId: nil, title: nil, content: "A man is eating food.")
+        var page2 = Page(id: 1, parentId: 0, title: nil, content: "The girl is carrying a baby.")
+        let page3 = Page(id: 2, parentId: 0, title: nil, content: "A man is eating food.")
 
         let expectation = self.expectation(description: "Change content expectation")
         var _ = [[UInt64]]()
@@ -796,11 +796,10 @@ class ClusteringTests: XCTestCase {
         })
         wait(for: [expectation], timeout: 1)
 
-        let expectedMatrix = [0.0, 1.0, 1.0,
-                                1.0, 0.0, 1.0,
-                                1.0, 1.0, 0.0]
+        let expectedMatrix = [0.0, 0.7916, 1.0,
+                              0.7916, 0.0, 0.7916,
+                                1.0, 0.7916, 0.0]
         expect(cluster.textualSimilarityMatrix.matrix.flat).to(beCloseTo(expectedMatrix, within: 0.0001))
-        expect(cluster.entitiesMatrix.matrix.flat).to(beCloseTo(expectedMatrix, within: 0.0001))
 
     }
     // swiftlint:disable:next file_length
