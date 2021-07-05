@@ -545,6 +545,42 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
         return self
     }
 
+    /// Utility to convert BeamElement containing a single embedable url to embed kind
+   open func convertToEmbed() {
+        let links = text.links
+        if links.count == 1,
+           let link = links.first,
+           let url = URL(string: link),
+           let embedUrl = url.embed {
+            kind = .embed(embedUrl.absoluteString)
+        }
+    }
+
+    /// Utility to convert BeamElement containing a single image url to image kind
+    /// - Parameter id: Without id provided image link will be used instead
+    open func convertToImage(_ id: String?) {
+        if let url = imageLink {
+            // Either use id if provided, else use image url
+            let imageLocation = id ?? url.absoluteString
+            kind = .image(imageLocation)
+        }
+    }
+
+    /// Contains image url when a BeamElement's text contains a single image link
+    open var imageLink: URL? {
+        let imageLinks = text.links.compactMap({ link -> URL? in
+            if let url = URL(string: link), url.isImage {
+                return url
+            }
+            return nil
+        })
+
+        if let link = imageLinks.first {
+            return link
+        } else {
+            return nil
+        }
+    }
 }
 
 // MARK: - Text Stats

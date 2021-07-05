@@ -28,7 +28,6 @@ public extension BeamText {
             return nil
           }
         }
-
     }
 
     var links: [String] {

@@ -16,7 +16,8 @@
   --Bluetiful: #1179cf;
   --Charmed-Green: #0e8763;
   --Sanskrit: #ff9900;
-  --Sanskrit: #b00230;
+  --Sanskrit-Light: rgba(255, 153, 0, 0.3);
+  --Shiraz: #b00230;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -36,7 +37,8 @@
     --Bluetiful: #3a96cf;
     --Charmed-Green: #12b282;
     --Sanskrit: #ffb240;
-    --Sanskrit: #cf3a61;
+    --Sanskrit-Light: rgba(255, 178, 64, 0.4);
+    --Shiraz: #cf3a61;
   }
 }
 
@@ -64,7 +66,7 @@ h6 {
 
 a {
   border-radius: 4px;
-  padding: 0 .2rem;
+  padding: 0 0.2rem;
 }
 
 img {
@@ -78,9 +80,9 @@ img.thumb {
 .grid {
   display: grid;
   grid-template-areas:
-  'notice notice'
-  'introduction introduction'
-  'article aside';
+    "notice notice"
+    "introduction introduction"
+    "article aside";
   grid-template-columns: minmax(20ch, 70ch) minmax(20ch, 45ch);
   justify-content: space-between;
   gap: 2rem;
@@ -176,16 +178,15 @@ figure {
 
 figcaption {
   background-color: var(--Background-Light);
-  padding: .4rem .7rem;
-  font-size: .8rem;
+  padding: 0.4rem 0.7rem;
+  font-size: 0.8rem;
 }
 
-
 .flex {
-  display: flex;           /* establish flex container */
-  flex-direction: column;  /* make main axis vertical */
+  display: flex; /* establish flex container */
+  flex-direction: column; /* make main axis vertical */
   justify-content: center; /* center items vertically, in this case */
-  align-items: center;     /* center items horizontally, in this case */
+  align-items: center; /* center items horizontally, in this case */
   width: 100%;
   height: 100vh;
 }
@@ -193,7 +194,7 @@ figcaption {
 form {
   display: grid;
   grid-template-columns: 1fr;
-  gap: .4rem;
+  gap: 0.4rem;
 }
 
 form .form-row,
@@ -210,8 +211,8 @@ form {
 
 .form-result {
   background-color: var(--Background-Light);
-  padding: .5rem;
-  margin-bottom: .5rem;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
   border-radius: 4px;
 }
 
@@ -245,5 +246,5 @@ input {
   border: unset;
   border-bottom: 1px solid;
   border-radius: 4px;
-  padding-left: .5rem;
+  padding-left: 0.5rem;
 }

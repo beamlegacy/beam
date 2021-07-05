@@ -47,6 +47,7 @@ public extension URL {
     }
 
     func extractYouTubeId() -> String? {
+        // TODO: remove this when we can rely on oembed for url conversion
         let url = self.absoluteString
         let typePattern = "(?:(?:\\.be\\/|embed\\/|v\\/|\\?v=|\\&v=|\\/videos\\/)|(?:[\\w+]+#\\w\\/\\w(?:\\/[\\w]+)?\\/\\w\\/))([\\w-_]+)"
         let regex = try? NSRegularExpression(pattern: typePattern, options: .caseInsensitive)
@@ -62,6 +63,7 @@ public extension URL {
             return nil
         }
 
+        // TODO: remove this when we can rely on oembed for url conversion
         if let youtubeID = self.extractYouTubeId() {
             return URL(string: "\(scheme)://\(host)/embed/\(youtubeID)")
         }
@@ -71,6 +73,11 @@ public extension URL {
         }
 
         return nil
+    }
+
+    var isImage: Bool {
+        let imageExtensions = ["png", "jpg", "jepg", "gif"]
+        return imageExtensions.contains(self.pathExtension)
     }
 
     var tld: String? {

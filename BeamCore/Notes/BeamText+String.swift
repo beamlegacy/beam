@@ -107,6 +107,31 @@ public extension BeamText {
         }
         return text
     }
+
+    /// Split BeamText by CharacterSet without mutating itself
+    /// - Parameter charSet: NSCharacterSet
+    /// - Returns: Array of BeamTexts
+    func splitting(_ charSet: CharacterSet) -> [BeamText] {
+        let text = self
+        let string = text.text
+        let splits = string.components(separatedBy: charSet)
+
+        var start = 0
+        let rangesSplit = splits.compactMap({ split -> BeamText? in
+            let end: Int = start + split.count
+            let range: Swift.Range<Int> = start..<end
+            start = end + 1
+            let extractedText = text.extract(range: range)
+
+            if extractedText.text.trimmingCharacters(in: .whitespacesAndNewlines).count > 0 {
+                return extractedText
+            }
+
+            return nil
+        })
+
+        return rangesSplit
+    }
 }
 
 extension BeamText: Equatable {

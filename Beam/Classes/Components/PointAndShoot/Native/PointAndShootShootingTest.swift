@@ -69,7 +69,7 @@ class PointAndShootShootingTest: PointAndShootTest {
         XCTAssertEqual(self.pns.shootGroups.count, 0)         // But not validated yet
 
         // Complete shoot
-        self.pns.complete(noteInfo: NoteInfo(id: nil, title: "My note"), quoteId: UUID(uuidString: "347271F3-A6EA-495D-859D-B0F7B807DA3C")!, group: self.pns.activeShootGroup!)
+        self.pns.complete(noteInfo: NoteInfo(id: nil, title: "My note"), group: self.pns.activeShootGroup!)
         XCTAssertEqual(self.pns.status, .none)       // Disallow unpoint while shooting
         XCTAssertEqual(helperCountUIEvents("drawPoint"), 1)
         XCTAssertEqual(helperCountUIEvents("createGroup"), 2)
@@ -88,7 +88,7 @@ class PointAndShootShootingTest: PointAndShootTest {
         self.pns.shoot(targets: [target1], href: self.pns.page.url!.string)
         self.pns.status = .shooting
         self.pns.draw()
-        self.pns.complete(noteInfo: NoteInfo(id: nil, title: "My note"), quoteId: UUID(uuidString: "347271F3-A6EA-495D-859D-B0F7B807DA3C")!, group: self.pns.activeShootGroup!)
+        self.pns.complete(noteInfo: NoteInfo(id: nil, title: "My note"), group: self.pns.activeShootGroup!)
 
         let events = self.testUI.events
         let expectedEvents = [
@@ -122,7 +122,6 @@ class PointAndShootShootingTest: PointAndShootTest {
         self.pns.draw()
         self.pns.complete(
             noteInfo: NoteInfo(id: nil, title: "My note"),
-            quoteId: UUID(uuidString: "347271F3-A6EA-495D-859D-B0F7B807DA3C")!,
             group: self.pns.activeShootGroup!
         )
 
@@ -148,7 +147,6 @@ class PointAndShootShootingTest: PointAndShootTest {
         // Complete shoot
         self.pns.complete(
             noteInfo: NoteInfo(id: nil, title: "My note"),
-            quoteId: UUID(uuidString: "347271F3-A6EA-495D-859D-B0F7B807DA3C")!,
             group: self.pns.activeShootGroup!
         )
 

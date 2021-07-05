@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Point And Shoot Test Fixture HTML elements</title>
+    <link rel="stylesheet" href="Beam.css" />
+    <style>
+      /* Quirky element highly style shouldn't be shared */
+      time {
+        background-color: var(--Sanskrit-Light);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="grid">
+      <div class="notice">
+        <details open>
+          <summary>Related pages</summary>
+          <p>Go to <a id="pagelink-1"></a></p>
+          <p>Jump to <a id="pagelink-2"></a></p>
+        </details>
+      </div>
+      <div class="introduction">
+        <h2>Quirky html tags</h2>
+      </div>
+      <div class="interview">
+        <article>
+          <div class="block">
+            <details open>
+              <summary>Time</summary>
+              <p>
+                The Cure will be celebrating their 40th anniversary on <time datetime="2018-07-07">July 7</time> in
+                London's Hyde Park.
+              </p>
+
+              <p>
+                The concert starts at <time datetime="20:00">20:00</time> and you'll be able to enjoy the band for at
+                least <time datetime="PT2H30M">2h 30m</time>.
+              </p>
+            </details>
+          </div>
+        </article>
+      </div>
+      <aside>
+        <img
+          class="thumb"
+          src="https://upload.wikimedia.org/wikipedia/commons/4/45/I-beam_pointer.png"
+          alt="I beam pointer image"
+        />
+      </aside>
+    </div>
+  </body>
+</html>

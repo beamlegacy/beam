@@ -29,9 +29,6 @@ public struct NoteInfo: Encodable {
 }
 
 class PointAndShoot: WebPageHolder {
-    var quote: Quote = Quote()
-    let parseHtml: ParseHtml = ParseHtml()
-
     var webPositions: WebPositions = WebPositions()
 
     var _status: PointAndShootStatus = .none
@@ -321,64 +318,63 @@ class PointAndShoot: WebPageHolder {
         webPositions.removeFrameInfo()
     }
 
-    /**
-     - Parameters:
-       - noteTitle:
-       - target:
-       - additionalText:
-     - Throws: PointAndShootError
-     */
-    func addShootToNote(noteTitle: String, withNote noteText: String? = nil) -> Promise<[ElementKind]> {
+
+
+    /// Small Utility to create a BeamElement containing noteText
+    /// - Parameter noteText: Text of note
+    /// - Returns: BeamElement containing noteText without any styling
+    fileprivate func createNote(_ noteText: String) -> BeamElement {
+        let note = BeamElement(BeamText(text: noteText))
+        note.query = self.page.originalQuery
+        return note
+    }
+
+    func addShootToNote(noteTitle: String, withNote noteText: String? = nil) {
         guard let sourceUrl = page.url,
               let currentCard = page.getNote(fromTitle: noteTitle) else {
-            return Promise(PointAndShootError("Could not find note to update with title \(noteTitle)"))
+            fatalError("Could not find note to update with title \(noteTitle)")
         }
         guard let shootGroup = activeShootGroup else {
             fatalError("Expected to have an active shoot group")
         }
+        // Set Destination note to the current card
+        // Update BrowsingScorer about note submission
         page.setDestinationNote(currentCard, rootElement: currentCard)
         scorer.addTextSelection()
-
-        let htmls = shootGroup.html().split(separator: "\n").compactMap({
-            parseHtml.trim(url: shootGroup.href, html: String($0))
-        })
-        var collectedQuotes: [BeamElement] = []
-        let promises = htmls
-            .enumerated().map({ (index, html) in
-            quote.getQuoteKind(html: html, page: page).then { quoteKind -> Void in
-                guard let source = self.page.addToNote(allowSearchResult: true) else {
-                    Logger.shared.logError("Could not add note to page", category: .pointAndShoot)
-                    return
+        // Convert html to BeamText
+        let texts: [BeamText] = html2Text(url: sourceUrl, html: shootGroup.html())
+        // Reduce array of texts to a single string
+        let clusteringText = texts.reduce(String()) { (string, beamText) -> String in
+            string + " " + beamText.text
+        }
+        // Send this string to the ClusteringManager
+        self.page.addTextToClusteringManager(clusteringText, url: sourceUrl)
+        // Convert BeamText to BeamElement of quote type
+        let pendingQuotes = text2Quote(texts, sourceUrl.absoluteString)
+        // Add all quotes to source Note
+        if let source = self.page.addToNote(allowSearchResult: true) {
+            pendingQuotes.then({ resolvedQuotes in
+                var quotes = resolvedQuotes
+                if let noteText = noteText, !noteText.isEmpty,
+                   let lastQuote = quotes.popLast() {
+                    // Append NoteText last quote
+                    let note = self.createNote(noteText)
+                    lastQuote.addChild(note)
+                    quotes.append(lastQuote)
                 }
-                var htmlText: BeamText = html2Text(url: sourceUrl, html: html)
-                self.page.addTextToClusteringManager(htmlText.text, url: sourceUrl)
-                htmlText.addAttributes([.emphasis], to: htmlText.wholeRange)
-                let collectedQuote = BeamElement()
-                collectedQuote.text = htmlText
-                collectedQuote.query = self.page.originalQuery
-                collectedQuote.kind = quoteKind
-
-                if let noteText = noteText, !noteText.isEmpty, index == (htmls.endIndex - 1) {
-                    let note = BeamElement(BeamText(text: noteText))
-                    note.query = self.page.originalQuery
-                    collectedQuote.addChild(note)
-                }
-                source.addChild(collectedQuote)
-                collectedQuotes.append(collectedQuote)
-            }.catch { error in
-                Logger.shared.logError("Could not get quoteKind from html: \(error.localizedDescription)", category: .pointAndShoot)
-            }
-        })
-
-        return all(promises).then { _ in
-            let quoteId = UUID.init()
-            let noteInfo = NoteInfo(id: currentCard.id, title: currentCard.title)
-            self.complete(noteInfo: noteInfo, quoteId: quoteId, group: shootGroup)
+                // Add to source Note
+                quotes.forEach({ quote in
+                    source.addChild(quote)
+                })
+                // Complete PNS and clear stored data
+                let noteInfo = NoteInfo(id: currentCard.id, title: currentCard.title)
+                self.complete(noteInfo: noteInfo, group: shootGroup)
+            })
         }
     }
 
-    func complete(noteInfo: NoteInfo, quoteId: UUID, group: ShootGroup) {
-        group.quoteId = quoteId
+    func complete(noteInfo: NoteInfo, group: ShootGroup) {
+        let quoteId = UUID()
         group.noteInfo = noteInfo
         shootGroups.append(group)
         executeJS("assignNote('\(quoteId)')")
