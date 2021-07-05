@@ -188,6 +188,7 @@ extension BrowserTabsManager {
     }
 
     func reloadCurrentTab() {
+        currentTab?.leave()
         currentTab?.webView.reload()
     }
 
