@@ -31,6 +31,7 @@ struct ShootFrameSelectionView: View {
                     .frame(width: rect.width, height: rect.height)
                     .position(x: rect.minX + rect.width / 2, y: rect.minY + rect.height / 2)
                 }
+                .allowsHitTesting(false)
                 .animation(animated ? Animation.easeOut : nil)
             }
         }
