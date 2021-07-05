@@ -147,7 +147,6 @@ class BeamWindow: NSWindow, NSDraggingDestination {
     }
 
     // MARK: - Setup UI
-
     private func setupUI() {
         trafficLights = [
             standardWindowButton(.closeButton),
@@ -186,7 +185,6 @@ class BeamWindow: NSWindow, NSDraggingDestination {
     }
 
     // MARK: - Animations
-
     /// This methods creates a CALayer and animates it from the mouse current position to the position of the downloadButton of the window
     /// It should be trigerred when a file download starts
     func downloadAnimation() {
@@ -209,90 +207,6 @@ class BeamWindow: NSWindow, NSDraggingDestination {
         animationLayer.opacity = 0.0
     }
 
-    // MARK: - IBAction
-
-    @IBAction func newDocument(_ sender: Any?) {
-        AppDelegate.main.createWindow(frame: nil, reloadState: false)
-    }
-
-    @IBAction func showPreviousTab(_ sender: Any?) {
-        state.browserTabsManager.showPreviousTab()
-    }
-
-    @IBAction func showNextTab(_ sender: Any?) {
-        state.browserTabsManager.showNextTab()
-    }
-
-    @IBAction func showJournal(_ sender: Any?) {
-        state.navigateToJournal()
-    }
-
-    @IBAction func toggleScoreCard(_ sender: Any?) {
-        state.data.showTabStats.toggle()
-    }
-
-    @IBAction func newSearch(_ sender: Any?) {
-        state.startNewSearch()
-    }
-
-    @IBAction func openLocation(_ sender: Any?) {
-        state.focusOmnibox()
-    }
-
-    @IBAction func showCardSelector(_ sender: Any?) {
-        state.destinationCardIsFocused = true
-    }
-
-    // MARK: Navigation
-    @IBAction func goBack(_ sender: Any?) {
-        state.goBack()
-    }
-
-    @IBAction func goForward(_ sender: Any?) {
-        state.goForward()
-    }
-
-    @IBAction func toggleBetweenWebAndNote(_ sender: Any) {
-        state.toggleBetweenWebAndNote()
-    }
-
-    @IBAction private func checkForUpdates(_ sender: Any) {
-        versionChecker.checkForUpdates()
-    }
-
-    // MARK: Web loading
-    @IBAction func stopLoading(_ sender: Any) {
-        state.browserTabsManager.currentTab?.webView.stopLoading()
-    }
-
-    @IBAction func reload(_ sender: Any) {
-        state.browserTabsManager.currentTab?.webView.reload()
-    }
-
-    // MARK: Webview Zoom
-    @IBAction func resetZoom(_ sender: Any) {
-        state.browserTabsManager.currentTab?.webView.zoomReset()
-    }
-
-    @IBAction func zoomIn(_ sender: Any) {
-        state.browserTabsManager.currentTab?.webView.zoomIn()
-    }
-
-    @IBAction func zoomOut(_ sender: Any) {
-        state.browserTabsManager.currentTab?.webView.zoomOut()
-    }
-
-    @IBAction func showRecentCard(_ sender: Any?) {
-        let recents = state.recentsManager.recentNotes
-        if let item = sender as? NSMenuItem, let index = Int(item.title.components(separatedBy: CharacterSet.decimalDigits.inverted).joined()), index <= recents.count {
-            state.navigateToNote(named: recents[index - 1].title)
-        }
-    }
-
-    @IBAction func dumpBrowsingTree(_ sender: Any?) {
-        state.browserTabsManager.currentTab?.dumpBrowsingTree()
-    }
-
     static let savedTabsKey = "savedTabs"
 
     func saveDefaults() {
@@ -310,11 +224,9 @@ class BeamWindow: NSWindow, NSDraggingDestination {
         }
     }
 
-    public func draggingExited(_ sender: NSDraggingInfo?) {
-    }
+    public func draggingExited(_ sender: NSDraggingInfo?) { }
 
-    public func draggingEnded(_ sender: NSDraggingInfo) {
-    }
+    public func draggingEnded(_ sender: NSDraggingInfo) { }
 
     public func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
         guard let files = sender.draggingPasteboard.readObjects(forClasses: [NSURL.self], options: nil)
@@ -358,14 +270,12 @@ class BeamWindow: NSWindow, NSDraggingDestination {
             }
 
         }
-
         return true
     }
 
     deinit {
         contentView = nil
     }
-
 }
 
 extension BeamWindow: NSWindowDelegate {
