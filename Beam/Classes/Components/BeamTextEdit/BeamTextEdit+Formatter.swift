@@ -197,15 +197,19 @@ extension BeamTextEdit {
 
     internal func selectFormatterAction(_ type: TextFormatterType, _ isActive: Bool) {
         guard let node = focusedWidget as? TextNode else { return }
-        let (newElementKind, newAttribute) = elementAndAttribute(for: type, in: node)
+        var (newElementKind, newAttribute) = elementAndAttribute(for: type, in: node)
         var dismissFormatter = false
+        var cancelSelection = false
         switch type {
         case .link:
             showLinkFormatterForSelection()
             moveInlineFormatterAboveSelection()
         case .internalLink:
             dismissFormatter = true
-            showBidirectionalPopover(mode: .internalLink, prefix: 0, suffix: 0)
+            if let linkAttr = handleInternalLinkFormat(in: node) {
+                cancelSelection = true
+                newAttribute = linkAttr
+            }
         default:
             break
         }
@@ -218,6 +222,10 @@ extension BeamTextEdit {
         }
         if let newElementKind = newElementKind {
             changeTextFormat(with: node, kind: newElementKind, isActive: isActive)
+        }
+        if cancelSelection {
+            node.root?.cancelNodeSelection()
+            node.root?.cancelSelection()
         }
     }
 
@@ -238,6 +246,15 @@ extension BeamTextEdit {
             }
             clearDebounceTimer()
         }
+    }
+
+    private func handleInternalLinkFormat(in node: TextNode) -> BeamText.Attribute? {
+        let title = node.root?.state.nodeSelection != nil ? node.text.text : selectedText
+        guard !title.isEmpty, let doc = documentManager.loadDocumentByTitle(title: title) else {
+            showBidirectionalPopover(mode: .internalLink, prefix: 0, suffix: 0)
+            return nil
+        }
+        return .internalLink(doc.id)
     }
 
     // MARK: Private Methods (Text Formatting)
