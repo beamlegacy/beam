@@ -221,7 +221,7 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
                     height: rectArea.height
                 )
 
-                _ = positions.setFrameInfo(frame: frame)
+                positions.setFrameInfo(frame: frame)
             }
         }
     }

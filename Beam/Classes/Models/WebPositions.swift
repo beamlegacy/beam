@@ -89,19 +89,14 @@ class WebPositions {
 
     /// Sets frameInfo to stored dict. Will only set frameInfo when the provided frame is a child frame, or isn't registered yet.
     /// - Parameter frame: a full FrameInfo object
-    /// - Returns: Updated framesInfo dict
-    func setFrameInfo(frame: FrameInfo) -> [HREF: FrameInfo] {
+    func setFrameInfo(frame: FrameInfo) {
         if isChild(frame) {
             framesInfo[frame.href] = frame
-            return framesInfo
         }
 
         if framesInfo[frame.href] == nil {
             framesInfo[frame.href] = frame
-            return framesInfo
         }
-
-        return framesInfo
     }
 
     /// Sets scrollX and scrollY keys on an already registered frame
