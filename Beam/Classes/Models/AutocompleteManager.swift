@@ -28,21 +28,22 @@ class AutocompleteManager: ObservableObject {
 
     @Published var animateInputingCharacter = false
 
-    private let searchEngineCompleter = Autocompleter()
+    private let searchEngineCompleter: Autocompleter
     private var autocompleteSearchGuessesHandler: (([AutocompleteResult]) -> Void)?
     private var autocompleteTimeoutBlock: DispatchWorkItem?
     private let beamData: BeamData
     private var scope = Set<AnyCancellable>()
 
-    init(with data: BeamData) {
-        self.beamData = data
+    init(with data: BeamData, searchEngine: SearchEngine) {
+        beamData = data
+        searchEngineCompleter = Autocompleter(searchEngine: searchEngine)
 
         $searchQuery
             .dropFirst()
             .sink { [weak self] query in
-            guard let self = self else { return }
-            self.buildAutocompleteResults(for: query)
-        }.store(in: &scope)
+                guard let self = self else { return }
+                self.buildAutocompleteResults(for: query)
+            }.store(in: &scope)
 
         searchEngineCompleter.$results.receive(on: RunLoop.main).sink { [weak self] results in
             guard let self = self, let guessesHandler = self.autocompleteSearchGuessesHandler else { return }
@@ -142,7 +143,7 @@ class AutocompleteManager: ObservableObject {
         }
 
         guard !searchText.isEmpty else {
-            self.cancelAutocomplete()
+            cancelAutocomplete()
             return
         }
 
@@ -264,7 +265,7 @@ class AutocompleteManager: ObservableObject {
                 self.autocompleteResults.insert(contentsOf: toInsert, at: atIndex)
             }
         }
-        self.searchEngineCompleter.complete(query: searchText)
+        searchEngineCompleter.complete(query: searchText)
 
         // Delay setting the results, so we give some time for search engine
         // Preventing the UI to blink
@@ -283,8 +284,8 @@ class AutocompleteManager: ObservableObject {
 
     private func automaticallySelectFirstResultIfNeeded(withResults results: [AutocompleteResult], searchText: String) {
         if let firstResult = results.first, isResultCandidateForAutoselection(firstResult, forSearch: searchText) {
-            self.autocompleteSelectedIndex = 0
-        } else if self.autocompleteSelectedIndex == 0 {
+            autocompleteSelectedIndex = 0
+        } else if autocompleteSelectedIndex == 0 {
             // first result was selected but is not matching anymore
             self.resetAutocompleteSelection(resetText: true)
         }
@@ -387,7 +388,7 @@ extension AutocompleteManager {
     func shakeOmniBox() {
         let animation = Animation.interpolatingSpring(stiffness: 500, damping: 16)
         withAnimation(animation) {
-            self.animateInputingCharacter = true
+            animateInputingCharacter = true
         }
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: .milliseconds(150))) { [weak self] in
             withAnimation(animation) {
@@ -402,7 +403,7 @@ extension AutocompleteManager {
         let currentText = searchQuery
 
         guard let selectedText = getSelectedText(for: currentText),
-              let selectedRange = self.searchQuerySelectedRange,
+              let selectedRange = searchQuerySelectedRange,
               !selectedRange.isEmpty else { return nil }
 
         var unselectedProposedText = proposedText

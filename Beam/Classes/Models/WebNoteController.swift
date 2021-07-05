@@ -130,7 +130,7 @@ class WebNoteController: Encodable, Decodable {
        - text:
        - url:
      */
-    func setContents(url: URL, text: String? = nil) -> String {
+    func setContents(url: URL, text: String? = nil) {
         let beamText = element.text
         let titleStr = text ?? beamText.text
         let name = titleStr.isEmpty ? url.absoluteString : titleStr
@@ -145,6 +145,5 @@ class WebNoteController: Encodable, Decodable {
                 }
             }
         }
-        return name
     }
 }

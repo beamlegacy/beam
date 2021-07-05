@@ -18,6 +18,8 @@ import Promises
     let uiDelegateController = BeamWebkitUIDelegateController()
     let noteController: WebNoteController
 
+    private var isFromNoteSearch: Bool
+
     public func load(url: URL) {
         navigationController.setLoading()
         self.url = url
@@ -74,8 +76,17 @@ import Promises
 
     func navigatedTo(url: URL, read: Readability, title: String, isNavigation: Bool) {
         appendToIndexer?(url, read)
-        _ = noteController.add(url: url, text: title, reason: isNavigation ? .navigation : .loading)
+        logInNote(url: url, title: title, reason: isNavigation ? .navigation : .loading)
         updateScore()
+    }
+
+    private func logInNote(url: URL, title: String?, reason: NoteElementAddReason) {
+        if isFromNoteSearch {
+            noteController.setContents(url: url)
+            isFromNoteSearch = false
+        } else {
+            _ = noteController.add(url: url, text: title, reason: reason)
+        }
     }
 
     lazy var passwordOverlayController: PasswordOverlayController = {
@@ -97,7 +108,7 @@ import Promises
     }()
 
     var navigationController: WebNavigationController {
-        return beamNavigationController
+        beamNavigationController
     }
 
     lazy var beamNavigationController: BeamWebNavigationController = {
@@ -149,11 +160,24 @@ import Promises
     static var webViewConfiguration = BrowserTabConfiguration()
     var browsingTreeOrigin: BrowsingTreeOrigin?
 
+    /**
+
+     - Parameters:
+       - state:
+       - browsingTreeOrigin:
+       - note: The destination note to add elements to.
+       - rootElement: The root element to add elements to.
+           Will be nil if you created a new tab from omniBar for instance.
+           Will be the origin text element if you created the tab using Cmd+Enter.
+       - id:
+       - webView:
+     */
     init(state: BeamState, browsingTreeOrigin: BrowsingTreeOrigin?, note: BeamNote, rootElement: BeamElement? = nil,
          id: UUID = UUID(), webView: BeamWebView? = nil) {
         self.state = state
         self.id = id
         self.browsingTreeOrigin = browsingTreeOrigin
+        isFromNoteSearch = rootElement != nil
 
         if let suppliedWebView = webView {
             self.webView = suppliedWebView
@@ -208,6 +232,7 @@ import Promises
         browsingTree = tree
         noteController = try container.decode(WebNoteController.self, forKey: .noteController)
         privateMode = try container.decode(Bool.self, forKey: .privateMode)
+        isFromNoteSearch = false
 
         super.init()
         noteController.note.browsingSessions.append(tree)
@@ -250,7 +275,7 @@ import Promises
             Logger.shared.logError("Cannot get current URL", category: .general)
             return nil
         }
-        guard allowSearchResult || !url.isSearchResult else {
+        guard allowSearchResult || SearchEngines.get(url) != nil else {
             Logger.shared.logWarning("Adding search results is not allowed", category: .web)
             return nil
         } // Don't automatically add search results
@@ -261,7 +286,7 @@ import Promises
         guard let url = url else {
             return
         }
-        _ = noteController.add(url: url, text: title, reason: .navigation)
+        logInNote(url: url, title: title, reason: .loading)
         self.title = noteController.element.text.text
     }
 
@@ -376,7 +401,7 @@ import Promises
     }
 
     func createNewTab(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, setCurrent: Bool) -> WebPage {
-        return createNewTab(targetURL, configuration, setCurrent: setCurrent, state: state)
+        createNewTab(targetURL, configuration, setCurrent: setCurrent, state: state)
     }
 
     func createNewWindow(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, windowFeatures: WKWindowFeatures, setCurrent: Bool) -> BeamWebView {

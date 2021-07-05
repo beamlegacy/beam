@@ -27,10 +27,10 @@ import BeamCore
     @Published var scrollToElementId: UUID?
 
     private(set) lazy var recentsManager: RecentsManager = {
-        return RecentsManager(with: data.documentManager)
+        RecentsManager(with: data.documentManager)
     }()
     private(set) lazy var autocompleteManager: AutocompleteManager = {
-        return AutocompleteManager(with: data)
+        AutocompleteManager(with: data, searchEngine: searchEngine)
     }()
     private(set) lazy var browserTabsManager: BrowserTabsManager = {
         let manager = BrowserTabsManager(with: data)
@@ -427,15 +427,15 @@ extension BeamState: BrowserTabsManagerDelegate {
 
     // convenient vars
     var hasBrowserTabs: Bool {
-        return !browserTabsManager.tabs.isEmpty
+        !browserTabsManager.tabs.isEmpty
     }
     private weak var currentTab: BrowserTab? {
-        return browserTabsManager.currentTab
+        browserTabsManager.currentTab
     }
 
     // MARK: BrowserTabsManagerDelegate
     func areTabsVisible(for manager: BrowserTabsManager) -> Bool {
-        return mode == .web
+        mode == .web
     }
 
     func tabsManagerDidUpdateTabs(_ tabs: [BrowserTab]) {

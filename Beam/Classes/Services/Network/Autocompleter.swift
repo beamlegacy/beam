@@ -1,10 +1,3 @@
-//
-//  Autocomplete.swift
-//  Beam
-//
-//  Created by Sebastien Metrot on 18/09/2020.
-//
-
 import Foundation
 import Combine
 
@@ -12,6 +5,7 @@ import Combine
 // https://chromium.googlesource.com/chromium/src/+/master/components/omnibox/browser/search_suggestion_parser.cc
 
 struct AutocompleteResult: Identifiable, Equatable {
+
     enum Source {
         case history
         case note
@@ -34,7 +28,7 @@ struct AutocompleteResult: Identifiable, Equatable {
     }
 
     var id: String {
-        return "\(uuid)\(completingText ?? "")"
+        "\(uuid)\(completingText ?? "")"
     }
     var text: String
     var source: Source
@@ -45,11 +39,16 @@ struct AutocompleteResult: Identifiable, Equatable {
 }
 
 class Autocompleter: ObservableObject {
+
     @Published var results: [AutocompleteResult] = []
 
     static let autocompleteResultDescription = "Google Search"
-    private var searchEngine = GoogleSearch()
+    private var searchEngine: SearchEngine
     private var lastDataTask: URLSessionDataTask?
+
+    init(searchEngine: SearchEngine) {
+        self.searchEngine = searchEngine
+    }
 
     public func complete(query: String) {
         guard query.count > 0 else {
