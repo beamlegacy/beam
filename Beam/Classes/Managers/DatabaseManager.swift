@@ -519,11 +519,12 @@ extension DatabaseManager {
                 try request.saveAll(beamObjects) { result in
                     switch result {
                     case .failure(let error):
-                        Logger.shared.logError("Could not save all \(beamObjects): \(error.localizedDescription)", category: .beamObject)
+                        Logger.shared.logError("Could not save all \(beamObjects): \(error.localizedDescription)",
+                                               category: .databaseNetwork)
 
                         completion?(.failure(error))
                     case .success(let updateBeamObject):
-                        Logger.shared.logDebug("Saved \(updateBeamObject)", category: .beamObject)
+                        Logger.shared.logDebug("Saved \(updateBeamObject)", category: .databaseNetwork)
 
                         // TODO: store the checksum we sent
                         completion?(.success(true))

@@ -1635,6 +1635,48 @@ extension DocumentManager {
 
     // MARK: -
     // MARK: Bulk calls
+    func saveAllOnBeamObjectApi(_ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
+        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            completion?(.success(false))
+            return
+        }
+
+        CoreDataManager.shared.persistentContainer.performBackgroundTask { context in
+            do {
+                let documents = (try? Document.rawFetchAll(context, self.predicateForSaveAll())) ?? []
+
+                let beamObjects: [BeamObjectAPIType] = try documents.map {
+                    // TODO: get the `previousChecksum` and send it
+                    try BeamObjectAPIType(DocumentStruct(document: $0), .document)
+                }
+
+                guard !beamObjects.isEmpty else {
+                    completion?(.success(true))
+                    return
+                }
+
+                let request = BeamObjectRequest()
+
+                try request.saveAll(beamObjects) { result in
+                    switch result {
+                    case .failure(let error):
+                        Logger.shared.logError("Could not save all \(beamObjects): \(error.localizedDescription)",
+                                               category: .documentNetwork)
+
+                        completion?(.failure(error))
+                    case .success(let updateBeamObject):
+                        Logger.shared.logDebug("Saved \(updateBeamObject)", category: .documentNetwork)
+
+                        // TODO: store the checksum we sent
+                        completion?(.success(true))
+                    }
+                }
+            } catch {
+                completion?(.failure(error))
+            }
+        }
+    }
+
     func saveAllOnAPI(_ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             completion?(.success(false))
@@ -1659,10 +1701,10 @@ extension DocumentManager {
                 try documentRequest.saveAll(documentsArray) { result in
                     switch result {
                     case .failure(let error):
-                        Logger.shared.logError(error.localizedDescription, category: .network)
+                        Logger.shared.logError(error.localizedDescription, category: .documentNetwork)
                         completion?(.failure(error))
                     case .success:
-                        Logger.shared.logDebug("Documents uploaded", category: .network)
+                        Logger.shared.logDebug("Documents uploaded", category: .documentNetwork)
                         Persistence.Sync.Documents.sent_all_at = sent_all_at
                         context.performAndWait {
                             // TODO: do this with `NSBatchUpdateRequest` for performance
