@@ -6,6 +6,22 @@
 //
 
 import Foundation
+import BeamCore
+
+class PasswordsManager {
+    static var passwordsDBPath: String { BeamData.dataFolder(fileName: "passwords.db") }
+
+    var passwordsDB: PasswordsDB
+
+    init() {
+        do {
+            passwordsDB = try PasswordsDB(path: Self.passwordsDBPath)
+        } catch {
+            Logger.shared.logError("Error while creating the Passwords Database \(error)", category: .passwordsDB)
+            fatalError()
+        }
+    }
+}
 
 enum DOMInputElementType: String, Codable {
     case text

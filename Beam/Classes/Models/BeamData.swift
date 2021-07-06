@@ -78,8 +78,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
 
     static var indexPath: URL { URL(fileURLWithPath: dataFolder(fileName: "index.beamindex")) }
     static var fileDBPath: String { dataFolder(fileName: "files.db") }
-    static var passwordsDBPath: String { dataFolder(fileName: "passwords.db") }
-
     static var linkStorePath: URL { URL(fileURLWithPath: dataFolder(fileName: "links.store")) }
 
     override init() {
@@ -87,6 +85,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         documentManager = DocumentManager()
         noteAutoSaveService = NoteAutoSaveService()
         linkManager = LinkManager()
+        passwordsDB = PasswordsManager().passwordsDB
         let linkCount = LinkStore.shared.loadFromDB(linkManager: linkManager)
         Logger.shared.logInfo("Loaded \(linkCount) links from DB", category: .document)
         do {
@@ -99,13 +98,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
             fileDB = try BeamFileDB(path: Self.fileDBPath)
         } catch let error {
             Logger.shared.logError("Error while creating the File Database [\(error)]", category: .fileDB)
-            fatalError()
-        }
-
-        do {
-            passwordsDB = try PasswordsDB(path: Self.passwordsDBPath)
-        } catch let error {
-            Logger.shared.logError("Error while creating the Passwords Database [\(error)]", category: .passwordsDB)
             fatalError()
         }
 
