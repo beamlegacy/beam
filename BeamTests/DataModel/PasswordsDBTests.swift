@@ -11,38 +11,25 @@ import XCTest
 @testable import Beam
 @testable import BeamCore
 class PasswordsDBTests: XCTestCase {
-    static var passwordsDBPath: String { BeamData.dataFolder(fileName: "passwords.db") }
-
     static let host = URL(string: "http://www.github.com/signin")!
     static let username = "beamdev@beam.co"
     static let password = "BeamRocksss"
 
-    var passwordsDB: PasswordsDB!
     var passwordsStore: PasswordStore!
 
     override func setUp() {
         super.setUp()
-        do {
-            passwordsDB = try PasswordsDB(path: Self.passwordsDBPath, dropTableFirst: true)
-
-            passwordsStore = passwordsDB
-            passwordsStore.fetchAll { passwords in
-                XCTAssertEqual(passwords.count, 0)
-            }
-            
-        } catch {
-            XCTFail("PasswordsDB creation fail: \(error)")
-            fatalError()
-        }
+        let passwordManager = PasswordsManager()
+        passwordsStore = passwordManager.passwordsDB
     }
 
     func testSavingPassword() {
         passwordsStore.save(host: Self.host.minimizedHost!, username: Self.username, password: Self.password)
 
         passwordsStore.fetchAll { entries in
-            XCTAssertEqual(entries.count, 1)
-            XCTAssertEqual(entries.first?.minimizedHost, Self.host.minimizedHost)
-            XCTAssertEqual(entries.first?.username, Self.username)
+            XCTAssertTrue(entries.count > 0, "FetchAll has no passwords, it should be > 0")
+            XCTAssertEqual(entries.last?.minimizedHost, Self.host.minimizedHost)
+            XCTAssertEqual(entries.last?.username, Self.username)
         }
     }
 
@@ -51,8 +38,8 @@ class PasswordsDBTests: XCTestCase {
 
         passwordsStore.entries(for: Self.host.minimizedHost!) { entries in
             XCTAssertEqual(entries.count, 1)
-            XCTAssertEqual(entries.first?.minimizedHost, Self.host.minimizedHost)
-            XCTAssertEqual(entries.first?.username, Self.username)
+            XCTAssertEqual(entries.last?.minimizedHost, Self.host.minimizedHost)
+            XCTAssertEqual(entries.last?.username, Self.username)
         }
     }
 
@@ -61,8 +48,8 @@ class PasswordsDBTests: XCTestCase {
 
         passwordsStore.find("git") { entries in
             XCTAssertEqual(entries.count, 1)
-            XCTAssertEqual(entries.first?.minimizedHost, Self.host.minimizedHost)
-            XCTAssertEqual(entries.first?.username, Self.username)
+            XCTAssertEqual(entries.last?.minimizedHost, Self.host.minimizedHost)
+            XCTAssertEqual(entries.last?.username, Self.username)
         }
     }
 
@@ -70,9 +57,9 @@ class PasswordsDBTests: XCTestCase {
         passwordsStore.save(host: Self.host.minimizedHost!, username: Self.username, password: Self.password)
 
         passwordsStore.fetchAll { entries in
-            XCTAssertEqual(entries.count, 1)
-            XCTAssertEqual(entries.first?.minimizedHost, Self.host.minimizedHost)
-            XCTAssertEqual(entries.first?.username, Self.username)
+            XCTAssertTrue(entries.count > 0, "FetchAll has no passwords, it should be > 0")
+            XCTAssertEqual(entries.last?.minimizedHost, Self.host.minimizedHost)
+            XCTAssertEqual(entries.last?.username, Self.username)
         }
 
     }
@@ -91,8 +78,8 @@ class PasswordsDBTests: XCTestCase {
 
         passwordsStore.delete(host: Self.host.minimizedHost!, username: Self.username)
 
-        passwordsStore.fetchAll { passwords in
-            XCTAssertEqual(passwords.count, 0)
+        passwordsStore.entries(for: Self.host.minimizedHost!) { entries in
+            XCTAssertEqual(entries.count, 0)
         }
     }
 }

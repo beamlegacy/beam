@@ -153,6 +153,7 @@ struct AdvancedPreferencesView: View {
             }
             Preferences.Section(title: "Passwords") {
                 PasswordCSVImporter
+                PasswordsDBDrop
             }
             Preferences.Section(title: "Reindex notes contents") {
                 ReindexNotesContents
@@ -288,6 +289,15 @@ struct AdvancedPreferencesView: View {
             }
         }, label: {
             Text("Import Passwords CSV File")
+        })
+    }
+
+    private var PasswordsDBDrop: some View {
+        Button(action: {
+            let passwordManager = PasswordsManager()
+            passwordManager.passwordsDB.deleteAll()
+        }, label: {
+            Text("Erase Passwords Database")
         })
     }
 
