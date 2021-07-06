@@ -9,12 +9,18 @@ import Foundation
 import BeamCore
 
 public extension BeamNote {
-    var references: [BeamNoteReference] {
-        let links = try? GRDBDatabase.shared.fetchLinks(toNote: self.id).map({ bidiLink in
-            BeamNoteReference(noteID: bidiLink.sourceNoteId, elementID: bidiLink.sourceElementId)
-        })
-        return referencesMatching(self.title, id: self.id) + (links ?? [])
+    var linksAndReferences: [BeamNoteReference] {
+        return links + references
+    }
 
+    var links: [BeamNoteReference] {
+        return (try? GRDBDatabase.shared.fetchLinks(toNote: self.id).map({ bidiLink in
+            BeamNoteReference(noteID: bidiLink.sourceNoteId, elementID: bidiLink.sourceElementId)
+        })) ?? []
+    }
+
+    var references: [BeamNoteReference] {
+        return referencesMatching(self.title, id: self.id)
     }
 
     private func referencesMatching(_ titleToMatch: String, id idToMatch: UUID) -> [BeamNoteReference] {

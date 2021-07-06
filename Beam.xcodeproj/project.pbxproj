@@ -357,6 +357,7 @@
 		96120D0E260C917600592546 /* TextLine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96120D0D260C917600592546 /* TextLine.swift */; };
 		96120D12260C91C600592546 /* TextFrame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96120D11260C91C600592546 /* TextFrame.swift */; };
 		96120D4B260CD5E100592546 /* TextEdit+Hyperlink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96120D4A260CD5E100592546 /* TextEdit+Hyperlink.swift */; };
+		9617815526934ACC0019D9CA /* ReferencesSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9617815426934ACC0019D9CA /* ReferencesSection.swift */; };
 		961EC4F225B4511D009FA322 /* Layer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 961EC4F125B4511D009FA322 /* Layer.swift */; };
 		961EC50B25B495DB009FA322 /* ButtonLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 961EC50A25B495DB009FA322 /* ButtonLayer.swift */; };
 		961EC51725B5038E009FA322 /* ChevronButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 961EC51625B5038E009FA322 /* ChevronButton.swift */; };
@@ -1163,6 +1164,7 @@
 		96120D0D260C917600592546 /* TextLine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextLine.swift; sourceTree = "<group>"; };
 		96120D11260C91C600592546 /* TextFrame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextFrame.swift; sourceTree = "<group>"; };
 		96120D4A260CD5E100592546 /* TextEdit+Hyperlink.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "TextEdit+Hyperlink.swift"; sourceTree = "<group>"; };
+		9617815426934ACC0019D9CA /* ReferencesSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReferencesSection.swift; sourceTree = "<group>"; };
 		961EC4F125B4511D009FA322 /* Layer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Layer.swift; sourceTree = "<group>"; };
 		961EC50A25B495DB009FA322 /* ButtonLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonLayer.swift; sourceTree = "<group>"; };
 		961EC51625B5038E009FA322 /* ChevronButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChevronButton.swift; sourceTree = "<group>"; };
@@ -2982,6 +2984,7 @@
 				960A57E5264C851E0061E8D2 /* ProxyImageNode.swift */,
 				960A57E7264C88920061E8D2 /* ProxyEmbedNode.swift */,
 				9661A588266A289200CB56B3 /* BlockReferenceNode.swift */,
+				9617815426934ACC0019D9CA /* ReferencesSection.swift */,
 			);
 			path = References;
 			sourceTree = "<group>";
@@ -4025,6 +4028,7 @@
 				96FACC8A26079C7E0088DD67 /* InputText.swift in Sources */,
 				418172002581107C00317ED8 /* NotificationName+Beam.swift in Sources */,
 				A0DB19F026829BF900956579 /* AllowListViewModel.swift in Sources */,
+				9617815526934ACC0019D9CA /* ReferencesSection.swift in Sources */,
 				0325629226051D3B006513E4 /* RBUtils.m in Sources */,
 				A0E9B0E326668C1300FC99A5 /* FaviconView.swift in Sources */,
 				8726448F26199B8F0070E83D /* OptionSelector.swift in Sources */,
