@@ -10,12 +10,8 @@ protocol SearchEngine {
 }
 
 extension SearchEngine {
-
     var formattedQuery: String {
-        var q = query
-        q = q.replacingOccurrences(of: " ", with: "+")
-        q = q.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)!
-        return q
+        query.addingPercentEncoding(withAllowedCharacters: .urlSearchQueryAllowed) ?? query
     }
 }
 
@@ -80,5 +76,14 @@ class SearchEngines {
 
     static func get(_ queryUrl: URL) -> SearchEngine? {
         supported.first(where: { $0.canHandle(queryUrl) })
+    }
+}
+
+private extension CharacterSet {
+
+    static var urlSearchQueryAllowed: CharacterSet {
+        var allowedQueryParamAndKey = CharacterSet.urlQueryAllowed
+        allowedQueryParamAndKey.remove(charactersIn: ";/?:@&=+$, ")
+        return allowedQueryParamAndKey
     }
 }
