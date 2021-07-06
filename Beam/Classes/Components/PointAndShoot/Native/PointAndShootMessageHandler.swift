@@ -43,8 +43,8 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
                 Logger.shared.logError("Unsupported message \(messageName) for point and shoot message handler", category: .web)
                 return
             }
+            guard let pointAndShoot = webPage.pointAndShoot else { return }
             let msgPayload = messageBody as? [String: AnyObject]
-            let pointAndShoot = webPage.pointAndShoot
             let positions = pointAndShoot.webPositions
             switch messageKey {
 
@@ -183,7 +183,7 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
             case PointAndShootMessages.pointAndShoot_setStatus:
                 guard let dict = msgPayload,
                       let status = dict["status"] as? String,
-                      let href = dict["href"] as? String else {
+                      dict["href"] as? String != nil else {
                     Logger.shared.logError("Ignored beam_status: \(String(describing: msgPayload))", category: .pointAndShoot)
                     return
                 }
@@ -228,7 +228,7 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
 
     private func onPointMessage(msgPayload: [String: AnyObject]?, webPage: WebPage) throws {
         guard webPage.pointAndShootAllowed == true else { throw PointAndShootError("Point and shoot is not allowed on this page") }
-        let pointAndShoot = webPage.pointAndShoot
+        guard let pointAndShoot = webPage.pointAndShoot else { return }
         guard let dict = msgPayload,
               let href = dict["href"] as? String,
               let areas = areasValue(of: dict, from: webPage),
@@ -245,11 +245,12 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
     }
 
     func targetValues(of jsMessage: [String: AnyObject], from webPage: WebPage) -> (location: NSPoint, html: String)? {
-        guard let html = jsMessage["html"] as? String,
+        guard let pointAndShoot = webPage.pointAndShoot,
+              let html = jsMessage["html"] as? String,
               let location = jsMessage["location"] else {
             return nil
         }
-        let position = webPage.pointAndShoot.webPositions.jsToPoint(jsPoint: location)
+        let position = pointAndShoot.webPositions.jsToPoint(jsPoint: location)
         return (position, html)
     }
 
@@ -261,17 +262,19 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
     }
 
     func areasValue(of jsMessage: [String: AnyObject], from webPage: WebPage) -> [NSRect]? {
-        guard let areas = jsMessage["areas"] as? [AnyObject] else {
+        guard let pointAndShoot = webPage.pointAndShoot,
+              let areas = jsMessage["areas"] as? [AnyObject] else {
             return nil
         }
-        return areas.map { webPage.pointAndShoot.webPositions.jsToRect(jsArea: $0) }
+        return areas.map { pointAndShoot.webPositions.jsToRect(jsArea: $0) }
     }
 
     func offsetValue(of jsMessage: [String: AnyObject], from webPage: WebPage) -> NSPoint? {
-        guard let offset = jsMessage["offset"] else {
+        guard let pointAndShoot = webPage.pointAndShoot,
+              let offset = jsMessage["offset"] else {
             return nil
         }
-        return webPage.pointAndShoot.webPositions.jsToPoint(jsPoint: offset)
+        return pointAndShoot.webPositions.jsToPoint(jsPoint: offset)
     }
 
 }

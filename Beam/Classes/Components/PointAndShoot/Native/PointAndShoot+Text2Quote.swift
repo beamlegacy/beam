@@ -23,15 +23,15 @@ extension PointAndShoot {
         quote.kind = .quote(1, self.page.title, href)
         quote.convertToEmbed() // if possible converts url to embed
         // If quote is image, download and convert quote to image kind
-        if let src = quote.imageLink {
+        if let src = quote.imageLink,
+           let downloadImage = self.page.downloadManager?.downloadImage {
             let fileStorage = self.page.fileStorage
-            let downloadImage = self.page.downloadManager.downloadImage
             return Promise<BeamElement> { fulfill, reject in
                 downloadImage(src, self.page.url ?? src, { result in
                     do {
                         if let (data, mimeType) = result {
                             let fileId = data.MD5
-                            try fileStorage.insert(name: src.lastPathComponent, uid: fileId, data: data, type: mimeType)
+                            try fileStorage?.insert(name: src.lastPathComponent, uid: fileId, data: data, type: mimeType)
                             quote.convertToImage(fileId)
                             fulfill(quote)
                         }

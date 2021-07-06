@@ -40,8 +40,9 @@ class WebNavigationMessageHandler: BeamMessageHandler<NavigationMessages> {
                 Logger.shared.logError("\(urlString) is not a valid URL in navigation message", category: .web)
                 return
             }
+            guard let navigationController = webPage.navigationController else { return }
             let replace: Bool = type == "replaceState" ? true : false
-            webPage.navigationController.navigatedTo(url: url, webView: webPage.webView, replace: replace)
+            navigationController.navigatedTo(url: url, webView: webPage.webView, replace: replace)
             _ = webPage.executeJS("dispatchEvent(new Event('beam_historyLoad'))", objectName: nil)
         }
     }

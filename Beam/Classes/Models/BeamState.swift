@@ -37,6 +37,9 @@ import BeamCore
         manager.delegate = self
         return manager
     }()
+    private(set) lazy var noteMediaPlayerManager: NoteMediaPlayerManager = {
+        NoteMediaPlayerManager()
+    }()
 
     @Published var backForwardList = NoteBackForwardList()
     @Published var canGoBack: Bool = false

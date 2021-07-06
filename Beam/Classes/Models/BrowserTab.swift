@@ -21,7 +21,7 @@ import Promises
     private var isFromNoteSearch: Bool
 
     public func load(url: URL) {
-        navigationController.setLoading()
+        navigationController?.setLoading()
         self.url = url
         navigationCount = 0
         if url.isFileURL {
@@ -31,7 +31,7 @@ import Promises
         }
         $isLoading.sink { [unowned passwordOverlayController] loading in
             if !loading {
-                passwordOverlayController.detectInputFields()
+                passwordOverlayController?.detectInputFields()
             }
         }.store(in: &scope)
     }
@@ -71,7 +71,7 @@ import Promises
     }
 
     func leave() {
-        pointAndShoot.leavePage()
+        pointAndShoot?.leavePage()
     }
 
     func navigatedTo(url: URL, read: Readability, title: String, isNavigation: Bool) {
@@ -89,25 +89,26 @@ import Promises
         }
     }
 
-    lazy var passwordOverlayController: PasswordOverlayController = {
+    lazy var passwordOverlayController: PasswordOverlayController? = {
         let controller = PasswordOverlayController(passwordStore: state.data.passwordsDB, userInfoStore: MockUserInformationsStore.shared)
         controller.page = self
         return controller
     }()
 
-    lazy var browsingScorer: BrowsingScorer = {
+    lazy var browsingScorer: BrowsingScorer? = {
         let scorer = BrowsingTreeScorer(browsingTree: browsingTree)
         scorer.page = self
         return scorer
     }()
 
-    lazy var pointAndShoot: PointAndShoot = {
-        let pns = PointAndShoot(ui: PointAndShootUI(), scorer: browsingScorer)
+    lazy var pointAndShoot: PointAndShoot? = {
+        guard let scorer = browsingScorer else { return nil }
+        let pns = PointAndShoot(ui: PointAndShootUI(), scorer: scorer)
         pns.page = self
         return pns
     }()
 
-    var navigationController: WebNavigationController {
+    var navigationController: WebNavigationController? {
         beamNavigationController
     }
 
@@ -130,7 +131,7 @@ import Promises
         webView.window
     }
 
-    var downloadManager: DownloadManager {
+    var downloadManager: DownloadManager? {
         state.downloadManager
     }
 
@@ -138,7 +139,7 @@ import Promises
         webView.frame
     }
 
-    var fileStorage: BeamFileStorage {
+    var fileStorage: BeamFileStorage? {
         state.data.fileDB
     }
 
@@ -362,23 +363,6 @@ import Promises
         webView.uiDelegate = nil
     }
 
-    func executeJS(_ jsCode: String, objectName: String?) -> Promise<Any?> {
-        Promise<Any?> { [unowned self] fulfill, reject in
-            let parameterized = objectName != nil ? "beam.__ID__\(objectName!)." + jsCode : jsCode
-            let obfuscatedCommand = Self.webViewConfiguration.obfuscate(str: parameterized)
-
-            webView.evaluateJavaScript(obfuscatedCommand) { (result, error: Error?) in
-                if error == nil {
-                    Logger.shared.logInfo("(\(obfuscatedCommand) succeeded: \(String(describing: result))", category: .javascript)
-                    fulfill(result)
-                } else {
-                    Logger.shared.logError("(\(obfuscatedCommand) failed: \(String(describing: error))", category: .javascript)
-                    reject(error!)
-                }
-            }
-        }
-    }
-
     private func encodeStringTo64(fromString: String) -> String? {
         let plainData = fromString.data(using: .utf8)
         return plainData?.base64EncodedString(options: [])
@@ -449,7 +433,7 @@ import Promises
     var navigationCount: Int = 0
 
     func cancelShoot() {
-        pointAndShoot.resetStatus()
+        pointAndShoot?.resetStatus()
     }
 
     func startReading() {

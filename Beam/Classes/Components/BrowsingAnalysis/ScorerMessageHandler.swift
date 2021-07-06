@@ -19,6 +19,7 @@ class ScorerMessageHandler: BeamMessageHandler<ScorerMessages> {
             Logger.shared.logError("Unsupported message \(messageName) for scorer message handler", category: .web)
             return
         }
+        guard let browsingScorer = webPage.browsingScorer else { return }
         let scorerBody = messageBody as? [String: AnyObject]
         switch messageKey {
         case ScorerMessages.score_scroll:
@@ -33,11 +34,11 @@ class ScorerMessageHandler: BeamMessageHandler<ScorerMessages> {
                 return
             }
             if width > 0, height > 0 {
-                let currentScore = webPage.browsingScorer.currentScore
+                let currentScore = browsingScorer.currentScore
                 currentScore.scrollRatioX = max(Float(x / width), currentScore.scrollRatioX)
                 currentScore.scrollRatioY = max(Float(y / height), currentScore.scrollRatioY)
                 currentScore.area = Float(width * height)
-                webPage.browsingScorer.updateScore()
+                browsingScorer.updateScore()
             }
             Logger.shared.logDebug("Scorer handled scroll: \(x), \(y)", category: .web)
         }

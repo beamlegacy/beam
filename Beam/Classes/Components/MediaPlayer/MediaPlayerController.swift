@@ -30,8 +30,14 @@ struct MediaPlayerController: WebPageRelated {
     }
 
     mutating func toggleMute() {
-        isMuted = !isMuted
-        page.executeJS("beam_media_toggleMute()", objectName: nil)
+        setMuted(!isMuted)
+    }
+
+    mutating func setMuted(_ muted: Bool) {
+        if isMuted != muted {
+            isMuted = muted
+            page.executeJS("beam_media_toggleMute()", objectName: nil)
+        }
     }
 
     mutating func togglePiP() {
