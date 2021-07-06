@@ -51,14 +51,8 @@ struct WindowBottomToolBar: View {
                         }
                         Separator()
                     }
-                    ButtonLabel("?", customStyle: ButtonLabelStyle(font: BeamFont.medium(size: 11).swiftUI, horizontalPadding: 5, verticalPadding: 2))
-                        .overlay(
-                            Circle().stroke(BeamColor.Button.activeBackground.swiftUI, lineWidth: 1)
-                                .frame(width: 16, height: 16)
-                                .offset(x: -0.5)
-                        )
-                        .frame(width: 18, height: 18)
-                        .cornerRadius(9)
+                    BottomToolBarTrailingIconView()
+                        .environmentObject(state.noteMediaPlayerManager)
                 }
                 .fixedSize(horizontal: true, vertical: false)
                 .padding(.trailing, BeamSpacing._50)
@@ -72,6 +66,38 @@ struct WindowBottomToolBar: View {
             .frame(maxWidth: .infinity)
         }
         .frame(height: 30)
+    }
+}
+
+
+private struct BottomToolBarTrailingIconView: View {
+    @EnvironmentObject var state: BeamState
+    @EnvironmentObject var noteMediaPlayerManager: NoteMediaPlayerManager
+
+    var body: some View {
+        Group {
+            if noteMediaPlayerManager.playings.count > 0 {
+                NoteMediaPlayingButton(playerManager: noteMediaPlayerManager, onOpenNote: { notePlaying in
+                    state.navigateToNote(notePlaying.note)
+                }, onMuteNote: { notePlaying in
+                    if let n = notePlaying {
+                        noteMediaPlayerManager.toggleMuteNotePlaying(note: n.note)
+                    } else {
+                        noteMediaPlayerManager.toggleMuteAll()
+                    }
+                })
+                .padding(.trailing, BeamSpacing._50)
+            } else {
+                ButtonLabel("?", customStyle: ButtonLabelStyle(font: BeamFont.medium(size: 11).swiftUI, horizontalPadding: 5, verticalPadding: 2))
+                    .overlay(
+                        Circle().stroke(BeamColor.Button.activeBackground.swiftUI, lineWidth: 1)
+                            .frame(width: 16, height: 16)
+                            .offset(x: -0.5)
+                    )
+                    .frame(width: 18, height: 18)
+                    .cornerRadius(9)
+            }
+        }
     }
 }
 

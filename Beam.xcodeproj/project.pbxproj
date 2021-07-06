@@ -555,6 +555,10 @@
 		A57C745826709C8000840BBA /* BeamTextEdit+SlashMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57C745726709C8000840BBA /* BeamTextEdit+SlashMenu.swift */; };
 		A580D5EE26427BCB00EB2E24 /* ContextMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A580D5ED26427BCB00EB2E24 /* ContextMenuView.swift */; };
 		A58BD800266510390040A8C4 /* String+RegexTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58BD7FF266510390040A8C4 /* String+RegexTests.swift */; };
+		A5919F4B268BDDBA009015C5 /* NoteMediaPlayerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5919F4A268BDDBA009015C5 /* NoteMediaPlayerManager.swift */; };
+		A5919F54268BE208009015C5 /* NoteMediaPlayingButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5919F53268BE208009015C5 /* NoteMediaPlayingButton.swift */; };
+		A5919F6D268EA0A2009015C5 /* WebPageBaseImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5919F6C268EA0A2009015C5 /* WebPageBaseImpl.swift */; };
+		A5919F6F268EA499009015C5 /* EmbedNodeWebPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5919F6E268EA499009015C5 /* EmbedNodeWebPage.swift */; };
 		A5946804265CE5B30044A892 /* DeleteDocumentCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5946803265CE5B30044A892 /* DeleteDocumentCommand.swift */; };
 		A5946806265CE5ED0044A892 /* DocumentCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5946805265CE5ED0044A892 /* DocumentCommand.swift */; };
 		A5946826265D29350044A892 /* CGPath+Union.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5946825265D29350044A892 /* CGPath+Union.swift */; };
@@ -1333,6 +1337,10 @@
 		A57C745726709C8000840BBA /* BeamTextEdit+SlashMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamTextEdit+SlashMenu.swift"; sourceTree = "<group>"; };
 		A580D5ED26427BCB00EB2E24 /* ContextMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextMenuView.swift; sourceTree = "<group>"; };
 		A58BD7FF266510390040A8C4 /* String+RegexTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+RegexTests.swift"; sourceTree = "<group>"; };
+		A5919F4A268BDDBA009015C5 /* NoteMediaPlayerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteMediaPlayerManager.swift; sourceTree = "<group>"; };
+		A5919F53268BE208009015C5 /* NoteMediaPlayingButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteMediaPlayingButton.swift; sourceTree = "<group>"; };
+		A5919F6C268EA0A2009015C5 /* WebPageBaseImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebPageBaseImpl.swift; sourceTree = "<group>"; };
+		A5919F6E268EA499009015C5 /* EmbedNodeWebPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbedNodeWebPage.swift; sourceTree = "<group>"; };
 		A5946803265CE5B30044A892 /* DeleteDocumentCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteDocumentCommand.swift; sourceTree = "<group>"; };
 		A5946805265CE5ED0044A892 /* DocumentCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentCommand.swift; sourceTree = "<group>"; };
 		A5946825265D29350044A892 /* CGPath+Union.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CGPath+Union.swift"; sourceTree = "<group>"; };
@@ -1825,6 +1833,7 @@
 				418171712581107C00317ED8 /* Importers */,
 				418171762581107C00317ED8 /* CoreData */,
 				BAA67051B37A3398BDF678AB /* Navigation */,
+				A5919F6B268EA066009015C5 /* WebPage */,
 				4181716C2581107C00317ED8 /* BeamData.swift */,
 				4181734D2581204900317ED8 /* BeamState.swift */,
 				A05ADF6D264D8C59002DF91A /* OverlayViewCenterViewModel.swift */,
@@ -1844,7 +1853,6 @@
 				96E4CF75258EC88300D6DE22 /* BeamTextTools.swift */,
 				A050047425DA918A009CFEB6 /* NoteAutoSaveService.swift */,
 				A572629725FFADC5004416C0 /* MouseInteraction.swift */,
-				BAA67CEFFAFA38F29CF1C84F /* WebPage.swift */,
 				BAA67DD5764226E47DFA6F9E /* WebPositions.swift */,
 				8A141559267393E2005F2464 /* WebPositionsTest.swift */,
 				BAA67CDE485E5E7774A978D2 /* LoggingMessageHandler.swift */,
@@ -2027,7 +2035,7 @@
 				9691C28A2645369100F70DA1 /* ElementNode.swift */,
 				A5BF04D22681A4F800CC80EB /* ElementNode+Layers.swift */,
 				9691C2A52645F90600F70DA1 /* ImageNode.swift */,
-				9691C2BB2645F93100F70DA1 /* EmbedNode.swift */,
+				A5919F63268EA024009015C5 /* EmbedNode */,
 				9661A58A266A70DA00CB56B3 /* NodeProvider.swift */,
 			);
 			path = BeamTextEdit;
@@ -3038,6 +3046,7 @@
 			children = (
 				A5155979267786E1006F6D6F /* MediaPlayerMessageHandler.swift */,
 				A51559882677AC99006F6D6F /* MediaPlayerController.swift */,
+				A5919F4A268BDDBA009015C5 /* NoteMediaPlayerManager.swift */,
 				A5155978267786E1006F6D6F /* MediaPlayer.js */,
 			);
 			path = MediaPlayer;
@@ -3101,6 +3110,7 @@
 				A5FE1614264AD64900B7526D /* RecentsListView.swift */,
 				A53C8F37264440E4003A5DF8 /* SharingStatusView.swift */,
 				A53C8F4D26446C6C003A5DF8 /* SharingBannerInfo.swift */,
+				A5919F53268BE208009015C5 /* NoteMediaPlayingButton.swift */,
 			);
 			path = ToolBar;
 			sourceTree = "<group>";
@@ -3116,6 +3126,24 @@
 				A57BFEB82615B48300CFB646 /* CheckBoxTableCellView.swift */,
 			);
 			path = TableView;
+			sourceTree = "<group>";
+		};
+		A5919F63268EA024009015C5 /* EmbedNode */ = {
+			isa = PBXGroup;
+			children = (
+				9691C2BB2645F93100F70DA1 /* EmbedNode.swift */,
+				A5919F6E268EA499009015C5 /* EmbedNodeWebPage.swift */,
+			);
+			path = EmbedNode;
+			sourceTree = "<group>";
+		};
+		A5919F6B268EA066009015C5 /* WebPage */ = {
+			isa = PBXGroup;
+			children = (
+				BAA67CEFFAFA38F29CF1C84F /* WebPage.swift */,
+				A5919F6C268EA0A2009015C5 /* WebPageBaseImpl.swift */,
+			);
+			path = WebPage;
 			sourceTree = "<group>";
 		};
 		A59467ED265CE5510044A892 /* Document */ = {
@@ -3899,6 +3927,7 @@
 				A05ADF3F264D67D3002DF91A /* PasswordsDB.swift in Sources */,
 				4181721A2581107C00317ED8 /* StandardStorable.swift in Sources */,
 				032562A026051D3B006513E4 /* RBFilter+Mock.m in Sources */,
+				A5919F6F268EA499009015C5 /* EmbedNodeWebPage.swift in Sources */,
 				4181731725811E1800317ED8 /* CursorMovement.swift in Sources */,
 				A56DF8F12625D27500F1CF55 /* TextFormatterView.swift in Sources */,
 				A5946826265D29350044A892 /* CGPath+Union.swift in Sources */,
@@ -4106,6 +4135,7 @@
 				A0C63A6825FA249700FB4CCE /* BeamTextHolder.swift in Sources */,
 				418171F22581107C00317ED8 /* APIRequest.swift in Sources */,
 				529E1AD425D45CFA00DD25B8 /* APIRequestError.swift in Sources */,
+				A5919F54268BE208009015C5 /* NoteMediaPlayingButton.swift in Sources */,
 				032562B026051D3B006513E4 /* RBSynchronizeInterval.m in Sources */,
 				524CF6B225F27318007312F0 /* DocumentRequest+Encryption.swift in Sources */,
 				032562AD26051D3B006513E4 /* RBFilterBuilder.m in Sources */,
@@ -4219,6 +4249,7 @@
 				BAA67D3C5D44656448093D73 /* LoggingMessageHandler.swift in Sources */,
 				A52FCB632666514000BCD38A /* TextLinesDecorationLayer.swift in Sources */,
 				A514401B2638038C0021DD56 /* BrowserNewTabView.swift in Sources */,
+				A5919F4B268BDDBA009015C5 /* NoteMediaPlayerManager.swift in Sources */,
 				BAA67C4B9FEFA984D58B802F /* PointAndShootMessageHandler.swift in Sources */,
 				BAA67F19308A38C387C47D6E /* PointAndShootUI.swift in Sources */,
 				BAA677E962485A7EDFAF72AC /* PointAndShoot.swift in Sources */,
@@ -4249,6 +4280,7 @@
 				BAA67F0398B7B9D2CA9ADE25 /* ContentTypes.swift in Sources */,
 				BAA679A5A0853E5E53ACD3F1 /* BeamDownloadManager.swift in Sources */,
 				BAA673C9223F304A166B92D5 /* WebNoteController.swift in Sources */,
+				A5919F6D268EA0A2009015C5 /* WebPageBaseImpl.swift in Sources */,
 				BAA67A0791B680C684C00DFD /* BeamWebkitUIDelegate.swift in Sources */,
 				BAA67AB22C0A91EBCA6D7BB7 /* WebNavigationController.swift in Sources */,
 				BAA674265355DDF432FE4B7A /* WebNavigationMessageHandler.swift in Sources */,

@@ -37,7 +37,7 @@ private class BeamWebViewAutoClose: NSObject, WKUIDelegate {
 
 class BeamWebView: WKWebView {
 
-    weak var page: BrowserTab?
+    weak var page: WebPage?
     private let automaticallyResignResponder = true
 
     override init(frame: CGRect, configuration: WKWebViewConfiguration) {

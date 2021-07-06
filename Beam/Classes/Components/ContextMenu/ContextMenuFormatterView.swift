@@ -58,6 +58,7 @@ class ContextMenuFormatterView: FormatterView {
     override func setupUI() {
         super.setupUI()
         subviewModel.items = displayedItems
+        subviewModel.selectedIndex = handlesTyping ? 0 : nil
         subviewModel.animationDirection = direction
         subviewModel.onSelectMenuItem = onSelectMenuItem
         let rootView = ContextMenuView(viewModel: subviewModel)
@@ -82,6 +83,7 @@ class ContextMenuFormatterView: FormatterView {
             item.title.lowercased().hasPrefix(prefix)
         })
         subviewModel.items = displayedItems
+        subviewModel.selectedIndex = handlesTyping ? 0 : nil
         updateSize()
     }
 

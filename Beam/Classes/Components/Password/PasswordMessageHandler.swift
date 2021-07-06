@@ -25,7 +25,7 @@ class PasswordMessageHandler: BeamMessageHandler<PasswordMessages> {
             Logger.shared.logError("Unsupported message \(messageName) for password message handler", category: .web)
             return
         }
-        let passwordOverlayController = webPage.passwordOverlayController
+        guard let passwordOverlayController = webPage.passwordOverlayController else { return }
         switch messageKey {
 
         case PasswordMessages.password_textInputFields:

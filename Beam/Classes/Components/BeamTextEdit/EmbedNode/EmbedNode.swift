@@ -11,7 +11,14 @@ import AppKit
 import WebKit
 
 public class EmbedNode: ElementNode {
+
     var webView: BeamWebView?
+    private var webPage: EmbedNodeWebPage?
+
+    private var embedUrl: URL? {
+        guard case .embed(let sourceURL) = element.kind else { return nil }
+        return URL(string: sourceURL)?.embed
+    }
 
     init(parent: Widget, element: BeamElement) {
         super.init(parent: parent, element: element)
@@ -32,27 +39,39 @@ public class EmbedNode: ElementNode {
     }
 
     func setupEmbed() {
-        var source = ""
-        switch element.kind {
-        case .embed(let sourceURL):
-            source = sourceURL
-        default:
+        guard case .embed = element.kind else {
             Logger.shared.logError("EmbedNode can only handle url elements, not \(element.kind)", category: .noteEditor)
             return
         }
 
-        // Setup URL in WkWebView
-        let webView = BeamWebView(frame: .zero, configuration: BrowserTab.webViewConfiguration)
-        webView.navigationDelegate = self
-        webView.wantsLayer = true
-        webView.allowsMagnification = true
-        webView.setupForEmbed()
-        editor.addSubview(webView)
+        guard let url = embedUrl else { return }
 
-        guard let url = URL(string: source)?.embed
-        else { return }
-        AppDelegate.main.data.setup(webView: webView)
-        webView.load(URLRequest(url: url))
+        let webviewConfiguration = BrowserTab.webViewConfiguration
+        var webView: BeamWebView?
+        if let note = root?.editor.note as? BeamNote {
+            webView = mediaPlayerManager?.playingWebViewForNote(note: note, url: url)
+            webPage = webView?.page as? EmbedNodeWebPage
+        }
+
+        if webView == nil {
+            let wv = BeamWebView(frame: .zero, configuration: webviewConfiguration)
+            wv.setupForEmbed()
+            let p = EmbedNodeWebPage(webView: wv)
+            webPage = p
+            wv.page = p
+            AppDelegate.main.data.setup(webView: wv)
+            wv.load(URLRequest(url: url))
+            webView = wv
+        }
+
+        webView?.navigationDelegate = self
+        webView?.wantsLayer = true
+        webView?.allowsMagnification = true
+        webPage?.delegate = self
+        if let webView = webView {
+            editor.addSubview(webView)
+        }
+
         self.webView = webView
         layer.zPosition = -1
     }
@@ -142,6 +161,24 @@ public class EmbedNode: ElementNode {
 
     override func onFocus() {
         updateFocus()
+    }
+}
+
+extension EmbedNode: EmbedNodeWebPageDelegate {
+    var mediaPlayerManager: NoteMediaPlayerManager? {
+        AppDelegate.main.window?.state.noteMediaPlayerManager
+    }
+
+    func embedNodeDidUpdateMediaController(_ controller: MediaPlayerController?) {
+        guard let note = root?.editor.note as? BeamNote,
+              let webView = webView,
+              let mediaManager = mediaPlayerManager,
+              let url = self.embedUrl else { return }
+        if controller?.isPlaying == true {
+            mediaManager.addNotePlaying(note: note, webView: webView)
+        } else {
+            mediaManager.stopNotePlaying(note: note, url: url)
+        }
     }
 }
 

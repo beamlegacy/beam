@@ -15,24 +15,24 @@ class TestWebPage: WebPage {
     static let urlStr = "https://webpage.com"
     private(set) var url: URL? = URL(string: urlStr)
     var score: Float = 0
-    var pointAndShoot: PointAndShoot
-    var browsingScorer: BrowsingScorer
-    var storage: BeamFileStorage
-    var passwordOverlayController: PasswordOverlayController
+    var pointAndShoot: PointAndShoot?
+    var browsingScorer: BrowsingScorer?
+    var storage: BeamFileStorage?
+    var passwordOverlayController: PasswordOverlayController?
     private(set) var webviewWindow: NSWindow?
     private(set) var frame: NSRect = NSRect()
-    private(set) var downloadManager: DownloadManager
-    private(set) var navigationController: WebNavigationController
+    private(set) var downloadManager: DownloadManager?
+    private(set) var navigationController: WebNavigationController?
     var mediaPlayerController: MediaPlayerController?
     var webView: BeamWebView!
     var activeNote: String = "Card A"
     var testNotes: [String: BeamCore.BeamNote] = ["Card A": BeamNote(title: "Card A")]
-    var fileStorage: BeamFileStorage {
+    var fileStorage: BeamFileStorage? {
         storage
     }
 
-    init(browsingScorer: BrowsingScorer, passwordOverlayController: PasswordOverlayController, pns: PointAndShoot,
-         fileStorage: BeamFileStorage, downloadManager: DownloadManager, navigationController: WebNavigationController) {
+    init(browsingScorer: BrowsingScorer?, passwordOverlayController: PasswordOverlayController?, pns: PointAndShoot?,
+         fileStorage: BeamFileStorage?, downloadManager: DownloadManager?, navigationController: WebNavigationController?) {
         self.browsingScorer = browsingScorer
         self.passwordOverlayController = passwordOverlayController
         pointAndShoot = pns
@@ -76,14 +76,14 @@ class TestWebPage: WebPage {
         if objectName == "PointAndShoot" {
             switch jsCode {
             case "setStatus('pointing')":
-                pointAndShoot.status = PointAndShootStatus.pointing
+                pointAndShoot?.status = PointAndShootStatus.pointing
             case "setStatus('shooting')":
-                pointAndShoot.status = PointAndShootStatus.shooting
+                pointAndShoot?.status = PointAndShootStatus.shooting
             case "setStatus('none')":
-                pointAndShoot.status = PointAndShootStatus.none
+                pointAndShoot?.status = PointAndShootStatus.none
             case let assignString where jsCode.contains("assignNote"):
                 Logger.shared.logDebug("\(assignString) called", category: .pointAndShoot)
-                pointAndShoot.status = PointAndShootStatus.none
+                pointAndShoot?.status = PointAndShootStatus.none
             default:
                 Logger.shared.logDebug("no matching jsCode case, no js call mocked", category: .pointAndShoot)
             }
@@ -271,9 +271,9 @@ class PointAndShootTest: XCTestCase {
                                fileStorage: testFileStorage, downloadManager: testDownloadManager,
                                navigationController: navigationController)
         testPage = page
-        page.browsingScorer.page = page
-        page.passwordOverlayController.page = page
-        page.pointAndShoot.page = page
+        page.browsingScorer?.page = page
+        page.passwordOverlayController?.page = page
+        page.pointAndShoot?.page = page
     }
 
     func helperCountUIEvents(_ label: String) -> Int {
