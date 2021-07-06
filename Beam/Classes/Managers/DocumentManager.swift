@@ -13,6 +13,7 @@ enum DocumentManagerError: Error, Equatable {
     case localDocumentNotFound
     case idNotFound
     case operationCancelled
+    case wrongObjectsType
 }
 
 extension DocumentManagerError: LocalizedError {
@@ -26,6 +27,8 @@ extension DocumentManagerError: LocalizedError {
             return "id Not Found"
         case .operationCancelled:
             return "operation cancelled"
+        case .wrongObjectsType:
+            return "wrong objects type"
         }
     }
 }
@@ -1152,7 +1155,11 @@ extension DocumentManager {
         saveDocumentQueue.addOperation(blockOperation)
     }
 
-    func receivedBeamObjects(_ documents: [DocumentStruct]) throws {
+    func receivedBeamObjects(_ objects: [BeamObjectProtocol]) throws {
+        guard let documents = objects as? [DocumentStruct] else {
+            throw DocumentManagerError.wrongObjectsType
+        }
+
         Logger.shared.logDebug("Received \(documents.count) documents: updating",
                                category: .documentNetwork)
 

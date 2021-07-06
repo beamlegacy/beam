@@ -3,6 +3,7 @@ import BeamCore
 
 protocol BeamObjectManagerDelegateProtocol {
     func saveAllOnBeamObjectApi(_ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask?
+    func receivedBeamObjects(_ objects: [BeamObjectProtocol]) throws
 }
 
 enum BeamObjectManagerError: Error {
