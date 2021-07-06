@@ -11,39 +11,26 @@ import AppKit
 import BeamCore
 
 class LinksSection: Widget {
-    enum Mode {
-        case links
-        case references
-    }
-
-    var mode: Mode
     var note: BeamNote
-    var linkLayer: Layer?
 
     let sectionTitleLayer = CATextLayer()
-    let linkActionLayer = CATextLayer()
     let separatorLayer = CALayer()
     let offsetY: CGFloat = 40
 
     var titles: [UUID: RefNoteTitle] = [:]
 
-    override var open: Bool {
-        didSet {
-            linkLayer?.layer.isHidden = !open
-        }
-    }
+    var openChildrenDefault: Bool { true }
 
-    init(parent: Widget, note: BeamNote, mode: Mode) {
+    init(parent: Widget, note: BeamNote) {
         self.note = note
-        self.mode = mode
         super.init(parent: parent)
 
-        setupUI()
+        setupUI(openChildren: openChildrenDefault)
         setupSectionMode()
     }
 
-    func setupUI() {
-        addLayer(ChevronButton("disclosure", open: mode == .links, changed: { [unowned self] value in
+    func setupUI(openChildren: Bool) {
+        addLayer(ChevronButton("disclosure", open: openChildren, changed: { [unowned self] value in
             self.open = value
         }))
 
@@ -58,19 +45,14 @@ class LinksSection: Widget {
             chevron.open = self.open
         }))
 
-        linkActionLayer.font = BeamFont.medium(size: 0).nsFont
-        linkActionLayer.fontSize = 12
-        linkActionLayer.foregroundColor = BeamColor.LinkedSection.actionButton.cgColor
-        linkActionLayer.contentsScale = contentsScale
-        linkActionLayer.alignmentMode = .center
-        linkActionLayer.string = "Link All"
-
         separatorLayer.backgroundColor = BeamColor.LinkedSection.separator.cgColor
         self.layer.addSublayer(separatorLayer)
     }
 
+    var links: [BeamNoteReference] { note.links }
+
     func setupSectionMode() {
-        updateLinkedReferences(links: note.references)
+        updateLinkedReferences(links: links)
 
         AppDelegate.main.data.$lastChangedElement
             .filter({ element in
@@ -84,16 +66,12 @@ class LinksSection: Widget {
             })
             .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
             .sink { _ in
-                self.updateLinkedReferences(links: self.note.references)
+                self.updateLinkedReferences(links: self.links)
             }.store(in: &scope)
-        switch mode {
-        case .references:
-            createLinkAllLayer()
-        default: break
-        }
     }
 
     var currentReferences = [BeamNoteReference]()
+
     func updateLinkedReferences(links: [BeamNoteReference]) {
         currentReferences = links
 
@@ -106,9 +84,7 @@ class LinksSection: Widget {
             guard let breadCrumb = root?.getBreadCrumb(for: noteReference) else { continue }
 
             // Prepare title children:
-            guard let refTitleWidget = try? titles[noteID] ?? RefNoteTitle(parent: self, noteId: noteID, actionTitle: "Link", action: {
-                self.linkAllReferencesFromNote(withId: noteID)
-            }) else { continue }
+            guard let refTitleWidget = try? titles[noteID] ?? RefNoteTitle(parent: self, noteId: noteID, actionTitle: "Link", action: { self.linkAllReferencesFromNote(withId: noteID) }) else { continue }
             newrefs[noteID] = refTitleWidget
             toRemove.remove(refTitleWidget)
 
@@ -134,6 +110,10 @@ class LinksSection: Widget {
         updateHeading(validRefs)
     }
 
+    func linkAllReferencesFromNote(withId noteId: UUID) {
+        // TODO
+    }
+
     override func updateChildrenLayout() {
         super.updateChildrenLayout()
         layout(children: children)
@@ -145,17 +125,8 @@ class LinksSection: Widget {
         }
     }
 
-    func linkAllReferencesFromNote(withId noteId: UUID) {
-        // TODO
-    }
-
     func updateHeading(_ count: Int) {
-        switch mode {
-        case .links:
-            sectionTitleLayer.string = "link".localizedStringWith(comment: "link section title", count)
-        case .references:
-            sectionTitleLayer.string = "reference".localizedStringWith(comment: "reference section title", count)
-        }
+        sectionTitleLayer.string = "link".localizedStringWith(comment: "link section title", count)
         selfVisible = !children.isEmpty
         visible = selfVisible
         sectionTitleLayer.isHidden = !selfVisible
@@ -163,49 +134,15 @@ class LinksSection: Widget {
     }
 
     func shouldHandleReference(rootNote: String, rootNoteId: UUID, text: BeamText) -> Bool {
-        let linksToNote = text.hasLinkToNote(id: rootNoteId)
-        let referencesToNote = text.hasReferenceToNote(titled: rootNote)
-
-        switch mode {
-        case .links:
-            return linksToNote
-        case .references:
-            return !linksToNote && referencesToNote
-        }
+        return text.hasLinkToNote(id: rootNoteId)
     }
 
-    func createLinkAllLayer() {
-        let linkContentLayer = CALayer()
-        linkContentLayer.addSublayer(linkActionLayer)
-
-        linkLayer = LinkButtonLayer(
-            "linkAllLayer",
-            linkContentLayer,
-            activated: { [weak self] in
-                guard let self = self,
-                      let rootNote = self.editor.note.note else { return }
-
-                if let linkLayer = self.linkLayer, linkLayer.layer.isHidden { return }
-
-                self.children.forEach { child in
-                    guard let breadcrumb = child as? BreadCrumb else { return }
-                    breadcrumb.proxy.text.makeLinkToNoteExplicit(forNote: rootNote.title)
-                }
-            }, hovered: {[weak self] isHover in
-                guard let self = self else { return }
-
-                self.linkActionLayer.foregroundColor = isHover ? BeamColor.LinkedSection.actionButtonHover.cgColor : BeamColor.LinkedSection.actionButton.cgColor
-            })
-
-        guard let linkLayer = linkLayer else { return }
-        addLayer(linkLayer)
-    }
-
+    var layerFrameXPad = CGFloat(25)
     func setupLayerFrame() {
         sectionTitleLayer.frame = CGRect(
             origin: CGPoint(x: 22, y: 0),
             size: CGSize(
-                width: availableWidth - (linkLayer?.layer.frame.width ?? 0 + (mode == .references ? 30 : 25)),
+                width: availableWidth + layerFrameXPad,
                 height: sectionTitleLayer.preferredFrameSize().height
             )
         )
@@ -230,16 +167,6 @@ class LinksSection: Widget {
         CATransaction.disableAnimations {
             setupLayerFrame()
             separatorLayer.frame = CGRect(x: 0, y: sectionTitleLayer.frame.maxY + 4, width: 560, height: 1)
-
-            guard let linkAllLayer = linkLayer else { return }
-            let linkActionLayerFrameSize = linkActionLayer.preferredFrameSize()
-
-            linkAllLayer.frame = CGRect(origin: CGPoint(x: frame.width - linkActionLayerFrameSize.width, y: -3), size: NSSize(width: 54, height: 21))
-
-            let linkActionLayerXPosition = linkAllLayer.bounds.width / 2 - linkActionLayerFrameSize.width / 2
-            let linkActionLayerYPosition = linkAllLayer.bounds.height / 2 - linkActionLayerFrameSize.height / 2
-            linkActionLayer.frame = CGRect(x: linkActionLayerXPosition, y: linkActionLayerYPosition,
-                                     width: linkActionLayerFrameSize.width, height: linkActionLayerFrameSize.height)
         }
     }
 
