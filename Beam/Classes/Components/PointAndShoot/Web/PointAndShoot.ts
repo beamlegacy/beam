@@ -7,11 +7,12 @@ import {
   BeamQuoteId,
   BeamSelection,
   BeamRange,
-  BeamHTMLElement,
+  BeamHTMLElement, BeamElement, BeamNode,
 } from "./BeamTypes"
 import { Util } from "./Util"
 import { WebFactory } from "./WebFactory"
 import { BeamMouseEvent } from "./Test/BeamMocks"
+import { BeamElementHelper } from "./BeamElementHelper"
 
 const PNS_STATUS = process.env.PNS_STATUS
 
@@ -216,10 +217,16 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
     if (!this.hasSelection()) {
       this.pointingEv = ev
       // Enable pointing if alt is pressed
-      const withOption = this.isOnlyAltKey(ev)
-      this.setPointing(withOption)
-      if (!this.isPointing()) {
-        if (this.status === BeamPNSStatus.none && !this.hasSelection()) {
+      this.setPointing(this.isOnlyAltKey(ev))
+      // Ignore pointing if the pointed element isn't assimilable to an active text input
+      const isActiveTextualInput = this.isActiveTextualInput(ev)
+      if (isActiveTextualInput || !this.isPointing()) {
+        if (
+          isActiveTextualInput
+          || (
+            this.status === BeamPNSStatus.none && !this.hasSelection()
+          )
+        ) {
           this.cursor(ev.clientX, ev.clientY)
         }
         this.hideStatus()
@@ -235,7 +242,7 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
   }
 
   /**
-   * Show the status when poitedTarget is collected note
+   * Show the status when pointedTarget is collected note
    *
    * @memberof PointAndShoot
    */
@@ -333,8 +340,14 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
     this.log("onClick called!", ev.altKey, this.status)
     this.setPointing(ev.altKey)
     if (this.isPointing()) {
-      this.pointingEv = ev
-      this.onShoot(ev, ev.clientX, ev.clientY)
+      // We still have to check whether or not the target is assimilable to a textual input
+      // if so, we only send a cursor event, if not we proceed to shoot
+      if (this.isEventTargetTextualInput(ev)) {
+        this.cursor(ev.clientX, ev.clientY)
+      } else {
+        this.pointingEv = ev
+        this.onShoot(ev, ev.clientX, ev.clientY)
+      }
     } else if (this.isShooting()) {
       this.setStatus(BeamPNSStatus.none)
     }
@@ -426,8 +439,87 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
     return altKey && !ev.ctrlKey && !ev.metaKey && !ev.shiftKey
   }
 
+  /**
+   * Check for textarea and input elements with matching type attribute
+   *
+   * @param element {BeamElement} The DOM Element to check.
+   * @return If the element is some kind of text input.
+   */
+
+  isTextualInputType(element: BeamElement): boolean {
+    const tag = element.tagName.toLowerCase();
+    if (tag === 'textarea') {
+      return true
+    } else if (tag === 'input') {
+      const types = [
+        "text", "email", "password",
+        "date", "datetime-local", "month",
+        "number", "search", "tel",
+        "time", "url", "week",
+        // for legacy support
+        "datetime"
+      ]
+      return types.includes(BeamElementHelper.getType(element))
+    }
+
+    return false
+  }
+
+  // In addition to the target.type we have to check for contentEditable values
+  isExplicitlyContentEditable(element) {
+    return ["true", "plaintext-only"].includes(
+      BeamElementHelper.getContentEditable(element)
+    )
+  }
+
+  /**
+   * Check for inherited contenteditable attribute value by traversing
+   * the ancestors until an explicitly set value is found
+   *
+   * @param element {(BeamNode)} The DOM node to check.
+   * @return If the element inherits from an actual contenteditable valid values
+   *         ("true", "plaintext-only")
+   */
+  getInheritedContentEditable(element: BeamElement ): boolean {
+    let isEditable = this.isExplicitlyContentEditable(element)
+    const parent = element.parentElement
+    if (
+      parent
+      && BeamElementHelper.getContentEditable(element) === "inherit"
+    ) {
+      isEditable = this.getInheritedContentEditable(parent)
+    }
+    return isEditable
+  }
+
+  isEventTargetTextualInput(ev: BeamMouseEvent): boolean {
+    return (
+      this.isTextualInputType(ev.target)
+      || this.getInheritedContentEditable(ev.target)
+    )
+  }
+
+  isEventTargetActive(ev: BeamMouseEvent): boolean {
+    return !!(
+      this.win.document.activeElement
+      && this.win.document.activeElement !== this.win.document.body
+      && this.win.document.activeElement.contains(ev.target)
+    )
+  }
+
+  isActiveTextualInput(ev: BeamMouseEvent): boolean {
+    return (
+      this.isEventTargetActive(ev)
+      && this.isEventTargetTextualInput(ev)
+    )
+  }
+
   onKeyDown(ev) {
-    if (this.isOnlyAltKey(ev)) {
+    const processEvent = (
+      this.isOnlyAltKey(ev)
+      && !this.isActiveTextualInput(ev)
+    )
+    if (processEvent) {
       if (this.hasSelection()) {
         // Enable shooting mode
         this.setShooting()
