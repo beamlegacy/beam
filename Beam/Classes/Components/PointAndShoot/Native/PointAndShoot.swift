@@ -273,7 +273,8 @@ class PointAndShoot: WebPageHolder {
         case .shooting:
             ui.clearPoint()
             drawActiveShootGroup()
-        case .none: break
+        case .none:
+            ui.clearPoint()
         }
     }
 

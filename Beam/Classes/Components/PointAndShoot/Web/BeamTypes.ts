@@ -157,6 +157,7 @@ export interface BeamNode extends BeamEventTarget {
   nodeType: BeamNodeType
   childNodes: BeamNode[]
   parentNode?: BeamNode
+  parentElement?: BeamElement
 
   /**
    * Mock-specific property
@@ -173,6 +174,8 @@ export interface BeamNode extends BeamEventTarget {
    * @param el {HTMLElement}
    */
   removeChild(el: BeamHTMLElement)
+
+  contains(el: BeamNode): Boolean
 }
 
 export interface BeamParentNode extends BeamNode {
@@ -187,7 +190,7 @@ export interface BeamText extends BeamCharacterData {}
 
 export interface BeamElement extends BeamParentNode {
   dataset: any
-  attributes: {}
+  attributes: NamedNodeMap
 
   /**
    * @type string
@@ -201,6 +204,7 @@ export interface BeamElement extends BeamParentNode {
   readonly offsetParent: BeamElement
 
   readonly parentNode?: BeamNode
+  readonly parentElement?: BeamElement
 
   /**
    * Parent padding-relative x coordinate.
@@ -340,6 +344,8 @@ export interface BeamDocument extends BeamNode {
    * @type {HTMLHtmlElement}
    */
   documentElement
+
+  activeElement: BeamHTMLElement
 
   /**
    * @type BeamBody

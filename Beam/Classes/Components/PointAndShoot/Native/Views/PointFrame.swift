@@ -18,8 +18,8 @@ struct PointFrame: View {
 
             let rect = selectionUI.rect.insetBy(dx: -padding, dy: -padding)
 
-            let cornerRadius: CGFloat = selectionUI.round ? selectionUI.rect.width : 4
-            let shouldAnimateOpacity = selectionUI.animated && selectionUI.round
+            let cornerRadius: CGFloat = round ? selectionUI.rect.width : 4
+            let shouldAnimateOpacity = animated && round
             ZStack(alignment: .center) {
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                     .fill(bgColor)

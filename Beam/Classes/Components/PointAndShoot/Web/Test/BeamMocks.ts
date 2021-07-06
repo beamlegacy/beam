@@ -39,6 +39,7 @@ export class BeamNodeMock extends BeamEventTargetMock implements BeamNode {
 
   childNodes: BeamNode[] = []
   parentNode?: BeamNode
+  parentElement?: BeamElement
 
   /**
    * @deprecated Not standard, for test purpose
@@ -56,12 +57,27 @@ export class BeamNodeMock extends BeamEventTargetMock implements BeamNode {
   appendChild(node: BeamNode): BeamNode {
     this.childNodes.push(node)
     node.parentNode = this
+    if (this instanceof BeamElementMock) {
+      node.parentElement = this as unknown as BeamElement
+    }
     return node
   }
 
   removeChild(el: BeamNode) {
     this.childNodes = this.childNodes.splice(this.childNodes.indexOf(el), 1)
     el.parentNode = null
+    el.parentElement = null
+  }
+
+  contains(el: BeamNode): Boolean {
+    return (
+      this === el
+      || this.childNodes.some(
+        childNode => (
+          childNode === el || childNode.contains(el)
+        )
+      )
+    )
   }
 }
 
@@ -348,7 +364,7 @@ export class BeamElementMock extends BeamNodeMock implements BeamElement, BeamEl
   appendChild(node: BeamNode): BeamNode {
     const added = super.appendChild(node)
     if (node instanceof BeamElementMock) {
-      ;(node as BeamElementMock).offsetParent = this
+      (node as BeamElementMock).offsetParent = this
     }
     return added
   }
@@ -592,6 +608,8 @@ export class BeamDocumentMock extends BeamNodeMock implements BeamDocument {
    * @type {HTMLHtmlElement}
    */
   documentElement
+
+  activeElement: BeamHTMLElement
 
   /**
    * @type BeamBody

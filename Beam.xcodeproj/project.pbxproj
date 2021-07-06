@@ -59,6 +59,7 @@
 		0D4EC94526838FA800487B75 /* FrecencyUrlRecordTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D4EC94426838FA800487B75 /* FrecencyUrlRecordTests.swift */; };
 		0DD0DACC2681C9630005339A /* GRDBDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DD0DACB2681C9630005339A /* GRDBDatabase.swift */; };
 		0DEE978D2642965600AB95AE /* GRDBDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DEE978C2642965600AB95AE /* GRDBDatabaseTests.swift */; };
+		1A560E42AC5ED28BCC29054A /* BeamElementHelper.ts in Resources */ = {isa = PBXBuildFile; fileRef = 1A560CE45CC5BF86DC9F5778 /* BeamElementHelper.ts */; };
 		330D380E265FB76C00A2536B /* DownloaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 330D380D265FB76C00A2536B /* DownloaderView.swift */; };
 		330D3824265FC6B200A2536B /* DownloadCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 330D3823265FC6B200A2536B /* DownloadCell.swift */; };
 		3315DC912667859A002A47CF /* Preferences in Frameworks */ = {isa = PBXBuildFile; productRef = 524299AE25A47CA500F4DBF5 /* Preferences */; };
@@ -845,6 +846,7 @@
 		0D4EC94426838FA800487B75 /* FrecencyUrlRecordTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrecencyUrlRecordTests.swift; sourceTree = "<group>"; };
 		0DD0DACB2681C9630005339A /* GRDBDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GRDBDatabase.swift; sourceTree = "<group>"; };
 		0DEE978C2642965600AB95AE /* GRDBDatabaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GRDBDatabaseTests.swift; sourceTree = "<group>"; };
+		1A560CE45CC5BF86DC9F5778 /* BeamElementHelper.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = BeamElementHelper.ts; sourceTree = "<group>"; };
 		330D380D265FB76C00A2536B /* DownloaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloaderView.swift; sourceTree = "<group>"; };
 		330D3823265FC6B200A2536B /* DownloadCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadCell.swift; sourceTree = "<group>"; };
 		3330D7B4265E4441008C9E20 /* Download.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Download.swift; sourceTree = "<group>"; };
@@ -2719,6 +2721,7 @@
 				BAA679D78927DFBF9EB1B0E5 /* PopupUI_web.js */,
 				BAA678F0976FD26A8BF9B2CA /* PopupUI_web.scss */,
 				BAA676AA87963F568B000616 /* PointAndShootUI_native.test.ts */,
+				1A560CE45CC5BF86DC9F5778 /* BeamElementHelper.ts */,
 			);
 			path = Web;
 			sourceTree = "<group>";
@@ -3660,6 +3663,7 @@
 				BAA67B681D12191FE57E7807 /* PopupUI_web.scss in Resources */,
 				BAA675D3496DCF90EB35C8AD /* BeamEventTargetMock.ts in Resources */,
 				BAA6704CFB6AE4C1D090F4E4 /* BeamWebFactoryMock.ts in Resources */,
+				1A560E42AC5ED28BCC29054A /* BeamElementHelper.ts in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
