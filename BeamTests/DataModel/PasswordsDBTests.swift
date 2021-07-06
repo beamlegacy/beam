@@ -11,11 +11,7 @@ import XCTest
 @testable import Beam
 @testable import BeamCore
 class PasswordsDBTests: XCTestCase {
-    static var dataFolder: String {
-        let paths = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)
-        return paths.first ?? "~/Application Data/BeamApp/"
-    }
-    static var passwordsDBPath: String { return dataFolder + "/passwords.db" }
+    static var passwordsDBPath: String { BeamData.dataFolder(fileName: "passwords.db") }
 
     static let host = URL(string: "http://www.github.com/signin")!
     static let username = "beamdev@beam.co"

@@ -40,16 +40,47 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var scope = Set<AnyCancellable>()
     var browsingTreeSender = BrowsingTreeSender()
 
-    static var dataFolder: String {
+    static func dataFolder(fileName: String) -> String {
         let paths = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)
-        return paths.first ?? "~/Application Data/BeamApp/"
-    }
 
-    static var indexPath: URL { return URL(fileURLWithPath: dataFolder + "/index.beamindex") }
-    static var fileDBPath: String { return dataFolder + "/files.db" }
-    static var passwordsDBPath: String { return dataFolder + "/passwords.db" }
+        var name = "BeamData-\(Configuration.env)"
+         if let jobId = ProcessInfo.processInfo.environment["CI_JOB_ID"] {
+             Logger.shared.logDebug("Using Gitlab CI Job ID for dataFolder: \(jobId)", category: .general)
+            name += "-\(jobId)"
+         }
 
-    static var linkStorePath: URL { return URL(fileURLWithPath: dataFolder + "/links.store") }
+         guard let directory = paths.first else {
+             // Never supposed to happen
+             return "~/Application Data/BeamApp/"
+         }
+
+         let localDirectory = directory + "/Beam" + "/\(name)/"
+
+         do {
+             try FileManager.default.createDirectory(atPath: localDirectory,
+                                                     withIntermediateDirectories: true,
+                                                     attributes: nil)
+
+            if FileManager.default.fileExists(atPath: directory + "/\(fileName)") {
+                do {
+                    try FileManager.default.moveItem(atPath: directory + "/\(fileName)", toPath: localDirectory + fileName)
+                } catch {
+                    Logger.shared.logError("Unable to move item \(fileName) \(directory) to \(localDirectory): \(error)", category: .general)
+                }
+
+            }
+             return localDirectory + fileName
+         } catch {
+             // Does not generate error if directory already exist
+             return directory + fileName
+         }
+     }
+
+    static var indexPath: URL { URL(fileURLWithPath: dataFolder(fileName: "index.beamindex")) }
+    static var fileDBPath: String { dataFolder(fileName: "files.db") }
+    static var passwordsDBPath: String { dataFolder(fileName: "passwords.db") }
+
+    static var linkStorePath: URL { URL(fileURLWithPath: dataFolder(fileName: "links.store")) }
 
     override init() {
         clusteringManager = ClusteringManager(ranker: sessionLinkRanker)
