@@ -2369,11 +2369,19 @@ extension DocumentManager: BeamObjectManagerDelegateProtocol {
 
         let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
         let beamObjects: [BeamObjectAPIType] = try context.performAndWait {
-            try Document.rawFetchAll(context).map {
+            try Document.rawFetchAll(context).compactMap {
                 var documentStruct = DocumentStruct(document: $0)
                 documentStruct.previousChecksum = documentStruct.beamObjectPreviousChecksum
 
-                return try BeamObjectAPIType(documentStruct, .document)
+                let object = try BeamObjectAPIType(documentStruct, .document)
+
+                // We don't want to send updates for documents already sent. We know it's sent because the previousChecksum
+                // is the same as the current data Checksum
+                guard object.previousChecksum != object.dataChecksum, object.previousChecksum != nil else {
+                    return nil
+                }
+
+                return object
             }
         }
 

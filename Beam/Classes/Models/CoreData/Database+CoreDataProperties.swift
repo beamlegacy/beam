@@ -12,6 +12,8 @@ extension Database {
     @NSManaged public var updated_at: Date
     @NSManaged public var deleted_at: Date?
     @NSManaged public var title: String
+
+    @NSManaged public var beam_object_previous_checksum: String?
     //swiftlint:enable identifier_name
 }
 

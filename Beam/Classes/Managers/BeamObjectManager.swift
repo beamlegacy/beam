@@ -122,8 +122,6 @@ extension BeamObjectManager {
 
                 if let task = task {
                     dataTasks.append(task)
-                } else {
-                    fatalError("oops")
                 }
             } catch {
                 lock.wait()

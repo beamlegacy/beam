@@ -198,6 +198,7 @@
 		5206281825922D8A00D7CD9E /* delete_all_documents.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 5206281725922D8A00D7CD9E /* delete_all_documents.graphql */; };
 		5206282625923B6800D7CD9E /* DocumentRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5206282525923B6800D7CD9E /* DocumentRequest.swift */; };
 		5206283E25923EB500D7CD9E /* DocumentAPIType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5206283D25923EB500D7CD9E /* DocumentAPIType.swift */; };
+		521398D2269486B100AC29C1 /* Beam3ToBeam4MigrationPolicy.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 521398D1269486B100AC29C1 /* Beam3ToBeam4MigrationPolicy.xcmappingmodel */; };
 		521EEDDD25937E9200BA2485 /* DocumentsWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 521EEDDC25937E9200BA2485 /* DocumentsWindow.swift */; };
 		521EEDE125937F5B00BA2485 /* DocumentsContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 521EEDE025937F5B00BA2485 /* DocumentsContentView.swift */; };
 		521EEDE525937F7F00BA2485 /* DocumentsList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 521EEDE425937F7F00BA2485 /* DocumentsList.swift */; };
@@ -215,7 +216,6 @@
 		5224CD7C2686034200D4179E /* BeamObjectAPIType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5224CD7B2686034200D4179E /* BeamObjectAPIType.swift */; };
 		5224CD822686043600D4179E /* BeamObjectRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5224CD812686043600D4179E /* BeamObjectRequest.swift */; };
 		5224CD8C26860C0900D4179E /* BeamObjectManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5224CD8B26860C0900D4179E /* BeamObjectManager.swift */; };
-		5224CD9B26863EEB00D4179E /* Beam3ToBeam4MigrationPolicy.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 5224CD9A26863EEB00D4179E /* Beam3ToBeam4MigrationPolicy.xcmappingmodel */; };
 		522AFB2825CBFAB100F60647 /* DocumentManagerTestsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 522AFB2725CBFAB100F60647 /* DocumentManagerTestsHelper.swift */; };
 		522B17C82684E11E00741F94 /* String+SHA256.swift in Sources */ = {isa = PBXBuildFile; fileRef = 522B17C72684E11E00741F94 /* String+SHA256.swift */; };
 		523416A22629D465001F306F /* BeamCoreDataObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 523416A12629D465001F306F /* BeamCoreDataObject.swift */; };
@@ -991,6 +991,7 @@
 		5206281725922D8A00D7CD9E /* delete_all_documents.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = delete_all_documents.graphql; sourceTree = "<group>"; };
 		5206282525923B6800D7CD9E /* DocumentRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentRequest.swift; sourceTree = "<group>"; };
 		5206283D25923EB500D7CD9E /* DocumentAPIType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentAPIType.swift; sourceTree = "<group>"; };
+		521398D1269486B100AC29C1 /* Beam3ToBeam4MigrationPolicy.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = Beam3ToBeam4MigrationPolicy.xcmappingmodel; sourceTree = "<group>"; };
 		521EEDDC25937E9200BA2485 /* DocumentsWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentsWindow.swift; sourceTree = "<group>"; };
 		521EEDE025937F5B00BA2485 /* DocumentsContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentsContentView.swift; sourceTree = "<group>"; };
 		521EEDE425937F7F00BA2485 /* DocumentsList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentsList.swift; sourceTree = "<group>"; };
@@ -1009,7 +1010,6 @@
 		5224CD7B2686034200D4179E /* BeamObjectAPIType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamObjectAPIType.swift; sourceTree = "<group>"; };
 		5224CD812686043600D4179E /* BeamObjectRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamObjectRequest.swift; sourceTree = "<group>"; };
 		5224CD8B26860C0900D4179E /* BeamObjectManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamObjectManager.swift; sourceTree = "<group>"; };
-		5224CD9A26863EEB00D4179E /* Beam3ToBeam4MigrationPolicy.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = Beam3ToBeam4MigrationPolicy.xcmappingmodel; sourceTree = "<group>"; };
 		522AFB2725CBFAB100F60647 /* DocumentManagerTestsHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentManagerTestsHelper.swift; sourceTree = "<group>"; };
 		522B17C72684E11E00741F94 /* String+SHA256.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+SHA256.swift"; sourceTree = "<group>"; };
 		523416A12629D465001F306F /* BeamCoreDataObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamCoreDataObject.swift; sourceTree = "<group>"; };
@@ -2303,8 +2303,8 @@
 			isa = PBXGroup;
 			children = (
 				5298EB2C26274D530033862C /* BeamToBeam2MigrationPolicy.swift */,
-				5224CD9A26863EEB00D4179E /* Beam3ToBeam4MigrationPolicy.xcmappingmodel */,
 				5285672926275A8D00DDBE45 /* BeamToBeam2Migration.xcmappingmodel */,
+				521398D1269486B100AC29C1 /* Beam3ToBeam4MigrationPolicy.xcmappingmodel */,
 			);
 			path = Migrations;
 			sourceTree = "<group>";
@@ -3913,7 +3913,6 @@
 				4181721A2581107C00317ED8 /* StandardStorable.swift in Sources */,
 				032562A026051D3B006513E4 /* RBFilter+Mock.m in Sources */,
 				4181731725811E1800317ED8 /* CursorMovement.swift in Sources */,
-				5224CD9B26863EEB00D4179E /* Beam3ToBeam4MigrationPolicy.xcmappingmodel in Sources */,
 				A56DF8F12625D27500F1CF55 /* TextFormatterView.swift in Sources */,
 				A5946826265D29350044A892 /* CGPath+Union.swift in Sources */,
 				418172522581107C00317ED8 /* OmniBarSearchField.swift in Sources */,
@@ -4124,6 +4123,7 @@
 				529E1AD425D45CFA00DD25B8 /* APIRequestError.swift in Sources */,
 				032562B026051D3B006513E4 /* RBSynchronizeInterval.m in Sources */,
 				032562AD26051D3B006513E4 /* RBFilterBuilder.m in Sources */,
+				521398D2269486B100AC29C1 /* Beam3ToBeam4MigrationPolicy.xcmappingmodel in Sources */,
 				524CF6CA25F2735D007312F0 /* EncryptionManager.swift in Sources */,
 				96F673D225B7207100E8175B /* StoredLink.swift in Sources */,
 				032562AC26051D3B006513E4 /* punycode.c in Sources */,
