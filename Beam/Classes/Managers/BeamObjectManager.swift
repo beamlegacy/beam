@@ -1,6 +1,15 @@
 import Foundation
 import BeamCore
 
+protocol BeamObjectManagerDelegateProtocol {
+    func saveAllOnBeamObjectApi(_ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask?
+}
+
+enum BeamObjectManagerError: Error {
+    case notSuccess
+    case multipleErrors([Error])
+}
+
 public class BeamObjectManager {
     internal func parseObjects(_ beamObjects: [BeamObjectAPIType]) -> Bool {
         let lastUpdatedAt = Persistence.Sync.BeamObjects.updated_at
@@ -23,6 +32,16 @@ public class BeamObjectManager {
 
             result[beamObjectType]?.append(object)
         }
+        parseFilteredObjects(filteredObjects)
+
+//        dump(filteredObjects)
+
+        return true
+    }
+
+    internal func parseFilteredObjects(_ filteredObjects: [BeamObjectType: [BeamObjectAPIType]]) {
+        let documentManager = DocumentManager()
+        let databaseManager = DatabaseManager()
 
         for (key, objects) in filteredObjects {
             switch key {
@@ -31,7 +50,7 @@ public class BeamObjectManager {
                 guard !documentObjects.isEmpty else { continue }
 
                 do {
-                    try DocumentManager().receivedBeamObjects(documentObjects)
+                    try documentManager.receivedBeamObjects(documentObjects)
                 } catch {
                     Logger.shared.logError("Error with documents: \(error)", category: .beamObjectNetwork)
                 }
@@ -39,7 +58,7 @@ public class BeamObjectManager {
                 let databaseObjects: [DatabaseStruct] = objects.compactMap { $0.decode() }
                 guard !databaseObjects.isEmpty else { continue }
                 do {
-                    try DatabaseManager().receivedBeamObjects(databaseObjects)
+                    try databaseManager.receivedBeamObjects(databaseObjects)
                 } catch {
                     Logger.shared.logError("Error with databases: \(error)", category: .beamObjectNetwork)
                 }
@@ -47,16 +66,92 @@ public class BeamObjectManager {
                 Logger.shared.logError("Password not yet managed: \(key)", category: .beamObjectNetwork)
             }
         }
-
-//        dump(filteredObjects)
-
-        return true
     }
 }
 
 // MARK: - Foundation
 extension BeamObjectManager {
-    func fetchAllFromAPI(delete: Bool = true, _ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
+    func syncAllFromAPI(delete: Bool = true, _ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
+        fetchAllFromAPI { result in
+            switch result {
+            case .failure:
+                completion?(result)
+            case .success(let success):
+                guard success == true else {
+                    completion?(result)
+                    return
+                }
+
+                // Must call in another dispatchqueue or it fails, not sure why...
+                DispatchQueue.main.async {
+                    self.saveAllToAPI(completion)
+                }
+            }
+        }
+    }
+
+    func saveAllToAPI(_ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
+        let managers: [BeamObjectManagerDelegateProtocol] = [DatabaseManager(), DocumentManager()]
+        let group = DispatchGroup()
+        var errors: [Error] = []
+        let lock = DispatchSemaphore(value: 1)
+        var dataTasks: [URLSessionTask] = []
+
+        for manager in managers {
+            group.enter()
+
+            do {
+                let task = try manager.saveAllOnBeamObjectApi { result in
+                    switch result {
+                    case .failure(let error):
+                        Logger.shared.logError(error.localizedDescription, category: .beamObjectNetwork)
+                        lock.wait()
+                        errors.append(error)
+                        lock.signal()
+                    case .success(let success):
+                        guard success == true else {
+                            lock.wait()
+                            errors.append(BeamObjectManagerError.notSuccess)
+                            lock.signal()
+                            return
+                        }
+                    }
+
+                    group.leave()
+                }
+
+                if let task = task {
+                    dataTasks.append(task)
+                } else {
+                    fatalError("oops")
+                }
+            } catch {
+                lock.wait()
+                errors.append(BeamObjectManagerError.notSuccess)
+                lock.signal()
+                group.leave()
+            }
+        }
+
+        Logger.shared.logDebug("saveAllOnBeamObjectApi waiting",
+                               category: .beamObjectNetwork)
+        group.wait()
+
+        Logger.shared.logDebug("saveAllOnBeamObjectApi waited",
+                               category: .beamObjectNetwork)
+
+        guard errors.isEmpty else {
+            completion?(.failure(BeamObjectManagerError.multipleErrors(errors)))
+            return
+        }
+
+        completion?(.success(true))
+    }
+
+    /// Will fetch all updates from the API
+    /// - Parameters:
+    ///   - completion: <#completion description#>
+    func fetchAllFromAPI(_ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
         // If not authenticated
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             completion?(.success(false))
@@ -65,7 +160,7 @@ extension BeamObjectManager {
 
         let beamRequest = BeamObjectRequest()
 
-        let lastUpdatedAt: Date? = nil // Persistence.Sync.BeamObjects.updated_at
+        let lastUpdatedAt: Date? = Persistence.Sync.BeamObjects.updated_at
         let timeNow = BeamDate.now
 
         if let lastUpdatedAt = lastUpdatedAt {

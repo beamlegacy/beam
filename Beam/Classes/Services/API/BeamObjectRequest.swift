@@ -85,19 +85,31 @@ extension BeamObjectRequest {
 
     @discardableResult
     func saveAll(_ beamObjects: [BeamObjectAPIType],
-                 _ completionHandler: @escaping (Swift.Result<UpdateBeamObjects, Error>) -> Void) throws -> URLSessionDataTask? {
+                 _ completion: @escaping (Swift.Result<[BeamObjectAPIType], Error>) -> Void) throws -> URLSessionDataTask? {
         var parameters: UpdateBeamObjects
 
         do {
             parameters = try saveBeamObjectsParameters(beamObjects)
         } catch {
-            completionHandler(.failure(error))
+            completion(.failure(error))
             return nil
         }
 
         let bodyParamsRequest = GraphqlParameters(fileName: "update_beam_objects", variables: parameters)
 
-        return try performRequest(bodyParamsRequest: bodyParamsRequest, completionHandler: completionHandler)
+        return try performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<UpdateBeamObjects, Error>) in
+            switch result {
+            case .failure(let error):
+                completion(.failure(error))
+            case .success(let updateBeamObjects):
+                guard let beamObjects = updateBeamObjects.beamObjects else {
+                    completion(.failure(APIRequestError.parserError))
+                    return
+                }
+
+                completion(.success(beamObjects))
+            }
+        }
     }
 
     @discardableResult

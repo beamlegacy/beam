@@ -2,6 +2,7 @@ mutation UpdateBeamObject($beamObject: BeamObjectInput!) {
   updateBeamObject(input: {beamObject: $beamObject}) {
     beamObject {
       id
+      checksum
     }
     errors {
       path

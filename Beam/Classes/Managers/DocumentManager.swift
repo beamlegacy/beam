@@ -1635,47 +1635,6 @@ extension DocumentManager {
 
     // MARK: -
     // MARK: Bulk calls
-    func saveAllOnBeamObjectApi(_ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
-        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-            completion?(.success(false))
-            return
-        }
-
-        CoreDataManager.shared.persistentContainer.performBackgroundTask { context in
-            do {
-                let documents = (try? Document.rawFetchAll(context, self.predicateForSaveAll())) ?? []
-
-                let beamObjects: [BeamObjectAPIType] = try documents.map {
-                    // TODO: get the `previousChecksum` and send it
-                    try BeamObjectAPIType(DocumentStruct(document: $0), .document)
-                }
-
-                guard !beamObjects.isEmpty else {
-                    completion?(.success(true))
-                    return
-                }
-
-                let request = BeamObjectRequest()
-
-                try request.saveAll(beamObjects) { result in
-                    switch result {
-                    case .failure(let error):
-                        Logger.shared.logError("Could not save all \(beamObjects): \(error.localizedDescription)",
-                                               category: .documentNetwork)
-
-                        completion?(.failure(error))
-                    case .success(let updateBeamObject):
-                        Logger.shared.logDebug("Saved \(updateBeamObject)", category: .documentNetwork)
-
-                        // TODO: store the checksum we sent
-                        completion?(.success(true))
-                    }
-                }
-            } catch {
-                completion?(.failure(error))
-            }
-        }
-    }
 
     func saveAllOnAPI(_ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
@@ -2400,3 +2359,57 @@ extension DocumentManager {
     }
 }
 // swiftlint:enable file_length
+
+extension DocumentManager: BeamObjectManagerDelegateProtocol {
+    func saveAllOnBeamObjectApi(_ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
+        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            completion(.success(false))
+            return nil
+        }
+
+        let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
+        let beamObjects: [BeamObjectAPIType] = try context.performAndWait {
+            try Document.rawFetchAll(context).map {
+                var documentStruct = DocumentStruct(document: $0)
+                documentStruct.previousChecksum = documentStruct.beamObjectPreviousChecksum
+
+                return try BeamObjectAPIType(documentStruct, .document)
+            }
+        }
+
+        guard !beamObjects.isEmpty else {
+            completion(.success(true))
+            return nil
+        }
+
+        let request = BeamObjectRequest()
+
+        return try request.saveAll(beamObjects) { result in
+            switch result {
+            case .failure(let error):
+                Logger.shared.logError("Could not save all \(beamObjects): \(error.localizedDescription)",
+                                       category: .documentNetwork)
+
+                completion(.failure(error))
+            case .success(let updateBeamObjects):
+                Logger.shared.logDebug("Saved \(updateBeamObjects)", category: .documentNetwork)
+
+                do {
+                    try context.performAndWait {
+                        for updateBeamObject in updateBeamObjects {
+                            guard let uuid = UUID(uuidString: updateBeamObject.id),
+                                  let document = try Document.fetchWithId(context, uuid) else { continue }
+
+                            document.beam_object_previous_checksum = updateBeamObject.dataChecksum
+                        }
+                        try Self.saveContext(context: context)
+                    }
+                } catch {
+                    completion(.failure(error))
+                }
+
+                completion(.success(true))
+            }
+        }
+    }
+}

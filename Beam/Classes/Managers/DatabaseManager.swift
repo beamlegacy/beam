@@ -495,51 +495,7 @@ extension DatabaseManager {
                                category: .databaseNetwork)
     }
 
-    func saveAllOnBeamObjectApi(_ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
-        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-            completion?(.success(false))
-            return
-        }
-
-        CoreDataManager.shared.persistentContainer.performBackgroundTask { context in
-            do {
-                let databases = try Database.rawFetchAll(context)
-                let beamObjects: [BeamObjectAPIType] = try databases.map {
-                    // TODO: get the `previousChecksum` and send it
-                    try BeamObjectAPIType(DatabaseStruct(database: $0), .database)
-                }
-
-                guard !beamObjects.isEmpty else {
-                    completion?(.success(true))
-                    return
-                }
-
-                let request = BeamObjectRequest()
-
-                try request.saveAll(beamObjects) { result in
-                    switch result {
-                    case .failure(let error):
-                        Logger.shared.logError("Could not save all \(beamObjects): \(error.localizedDescription)",
-                                               category: .databaseNetwork)
-
-                        completion?(.failure(error))
-                    case .success(let updateBeamObject):
-                        Logger.shared.logDebug("Saved \(updateBeamObject)", category: .databaseNetwork)
-
-                        // TODO: store the checksum we sent
-                        completion?(.success(true))
-                    }
-                }
-            } catch {
-                completion?(.failure(error))
-            }
-        }
-    }
-
     func saveAllOnApi(_ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil, _ nested: Int = 1) {
-
-        saveAllOnBeamObjectApi()
-
         guard AuthenticationManager.shared.isAuthenticated,
               Configuration.networkEnabled else {
             completion?(.success(false))
@@ -1181,3 +1137,42 @@ extension DatabaseManager {
 }
 
 // swiftlint:enable file_length
+
+extension DatabaseManager: BeamObjectManagerDelegateProtocol {
+    func saveAllOnBeamObjectApi(_ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
+        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            completion(.success(false))
+            return nil
+        }
+
+        let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
+        let beamObjects: [BeamObjectAPIType] = try context.performAndWait {
+            try Database.rawFetchAll(context).map {
+                // TODO: get the `previousChecksum` and send it
+                try BeamObjectAPIType(DatabaseStruct(database: $0), .database)
+            }
+        }
+
+        guard !beamObjects.isEmpty else {
+            completion(.success(true))
+            return nil
+        }
+
+        let request = BeamObjectRequest()
+
+        return try request.saveAll(beamObjects) { result in
+            switch result {
+            case .failure(let error):
+                Logger.shared.logError("Could not save all \(beamObjects): \(error.localizedDescription)",
+                                       category: .databaseNetwork)
+
+                completion(.failure(error))
+            case .success(let updateBeamObject):
+                Logger.shared.logDebug("Saved \(updateBeamObject)", category: .databaseNetwork)
+
+                // TODO: store the checksum we sent
+                completion(.success(true))
+            }
+        }
+    }
+}
