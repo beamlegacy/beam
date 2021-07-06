@@ -4,7 +4,6 @@ public struct DocumentStruct: BeamObjectProtocol {
     var uuid: String {
         id.uuidString.lowercased()
     }
-    var beamObjectPreviousChecksum: String?
 
     var id: UUID
     var databaseId: UUID
@@ -19,6 +18,7 @@ public struct DocumentStruct: BeamObjectProtocol {
     var version: Int64 = 0
     var isPublic: Bool = false
     var checksum: String?
+    var beamObjectPreviousChecksum: String?
 
     var uuidString: String {
         id.uuidString.lowercased()
@@ -43,20 +43,19 @@ public struct DocumentStruct: BeamObjectProtocol {
     }
 
     func copy() -> DocumentStruct {
-        let copy = DocumentStruct(id: id,
-                                  databaseId: databaseId,
-                                  title: title,
-                                  createdAt: createdAt,
-                                  updatedAt: updatedAt,
-                                  deletedAt: deletedAt,
-                                  data: data,
-                                  documentType: documentType,
-                                  previousData: previousData,
-                                  previousChecksum: previousChecksum,
-                                  version: version,
-                                  isPublic: isPublic
-                                  )
-        return copy
+        DocumentStruct(id: id,
+                       databaseId: databaseId,
+                       title: title,
+                       createdAt: createdAt,
+                       updatedAt: updatedAt,
+                       deletedAt: deletedAt,
+                       data: data,
+                       documentType: documentType,
+                       previousData: previousData,
+                       previousChecksum: previousChecksum,
+                       version: version,
+                       isPublic: isPublic
+        )
     }
 }
 

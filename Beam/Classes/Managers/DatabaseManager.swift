@@ -9,14 +9,15 @@ public struct DatabaseStruct: BeamObjectProtocol {
     var uuid: String {
         id.uuidString.lowercased()
     }
-    var previousChecksum: String?
-    var checksum: String?
 
     var id: UUID
     var title: String
     var createdAt: Date
     var updatedAt: Date
     var deletedAt: Date?
+    var previousChecksum: String?
+    var checksum: String?
+    var beamObjectPreviousChecksum: String?
 
     var uuidString: String {
         id.uuidString.lowercased()
@@ -30,6 +31,16 @@ public struct DatabaseStruct: BeamObjectProtocol {
         case updatedAt
         case deletedAt
     }
+
+    func copy() -> DatabaseStruct {
+        DatabaseStruct(id: id,
+                       title: title,
+                       createdAt: createdAt,
+                       updatedAt: updatedAt,
+                       deletedAt: deletedAt,
+                       previousChecksum: previousChecksum
+        )
+    }
 }
 
 extension DatabaseStruct {
@@ -39,6 +50,7 @@ extension DatabaseStruct {
         self.updatedAt = database.updated_at
         self.deletedAt = database.deleted_at
         self.title = database.title
+        self.beamObjectPreviousChecksum = database.beam_object_previous_checksum
     }
 
     init(title: String) {
@@ -688,7 +700,7 @@ extension DatabaseManager {
         }
 
         let beamObject = try BeamObjectAPIType(databaseStruct, .database)
-//        beamObject.previousChecksum = documentStruct.beamObjectPreviousChecksum
+        beamObject.previousChecksum = databaseStruct.beamObjectPreviousChecksum
 
         let request = BeamObjectRequest()
 
@@ -701,29 +713,26 @@ extension DatabaseManager {
             case .success(let updateBeamObject):
                 Logger.shared.logDebug("Saved \(updateBeamObject)", category: .beamObject)
 
-                completion?(.success(true))
+                // `beamObjectPreviousChecksum` stores the checksum we sent to the API
+                var sentDatabaseStruct = databaseStruct.copy()
+                sentDatabaseStruct.beamObjectPreviousChecksum = updateBeamObject.beamObject?.previousChecksum
 
-            // TODO: store the checksum we sent
-//                // `beamObjectPreviousChecksum` stores the checksum we sent to the API
-//                var sentDocumentStruct = documentStruct.copy()
-//                sentDocumentStruct.beamObjectPreviousChecksum = updateBeamObject.beamObject?.previousChecksum
-//
-//                CoreDataManager.shared.persistentContainer.performBackgroundTask { context in
-//                    guard let documentCoreData = try? Document.fetchWithId(context, documentStruct.id) else {
-//                        completion?(.failure(DocumentManagerError.localDocumentNotFound))
-//                        return
-//                    }
-//
-//                    // TODO: store previous data sent for improved 3-ways merge?
-//                    documentCoreData.beam_object_previous_checksum = sentDocumentStruct.beamObjectPreviousChecksum
-//
-//                    do {
-//                        let success = try Self.saveContext(context: context)
-//                        completion?(.success(success))
-//                    } catch {
-//                        completion?(.failure(error))
-//                    }
-//                }
+                CoreDataManager.shared.persistentContainer.performBackgroundTask { context in
+                    guard let databaseCoreData = try? Database.fetchWithId(context, databaseStruct.id) else {
+                        completion?(.failure(DatabaseManagerError.localDatabaseNotFound))
+                        return
+                    }
+
+                    // TODO: store previous data sent for improved 3-ways merge?
+                    databaseCoreData.beam_object_previous_checksum = sentDatabaseStruct.beamObjectPreviousChecksum
+
+                    do {
+                        let success = try Self.saveContext(context: context)
+                        completion?(.success(success))
+                    } catch {
+                        completion?(.failure(error))
+                    }
+                }
             }
         }
     }
@@ -1136,8 +1145,6 @@ extension DatabaseManager {
     }
 }
 
-// swiftlint:enable file_length
-
 extension DatabaseManager: BeamObjectManagerDelegateProtocol {
     func saveAllOnBeamObjectApi(_ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
@@ -1147,9 +1154,19 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
 
         let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
         let beamObjects: [BeamObjectAPIType] = try context.performAndWait {
-            try Database.rawFetchAll(context).map {
-                // TODO: get the `previousChecksum` and send it
-                try BeamObjectAPIType(DatabaseStruct(database: $0), .database)
+            try Database.rawFetchAll(context).compactMap {
+                var databaseStruct = DatabaseStruct(database: $0)
+                databaseStruct.previousChecksum = databaseStruct.beamObjectPreviousChecksum
+
+                let object = try BeamObjectAPIType(databaseStruct, .document)
+
+                // We don't want to send updates for databases already sent.
+                // We know it's sent because the previousChecksum is the same as the current data Checksum
+                guard object.previousChecksum != object.dataChecksum, object.previousChecksum != nil else {
+                    return nil
+                }
+
+                return object
             }
         }
 
@@ -1167,12 +1184,26 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
                                        category: .databaseNetwork)
 
                 completion(.failure(error))
-            case .success(let updateBeamObject):
-                Logger.shared.logDebug("Saved \(updateBeamObject)", category: .databaseNetwork)
+            case .success(let updateBeamObjects):
+                Logger.shared.logDebug("Saved \(updateBeamObjects)", category: .databaseNetwork)
 
-                // TODO: store the checksum we sent
-                completion(.success(true))
+                do {
+                    try context.performAndWait {
+                        for updateBeamObject in updateBeamObjects {
+                            guard let uuid = UUID(uuidString: updateBeamObject.id),
+                                  let database = try Database.fetchWithId(context, uuid) else { continue }
+
+                            database.beam_object_previous_checksum = updateBeamObject.dataChecksum
+                        }
+                        try Self.saveContext(context: context)
+                    }
+                    completion(.success(true))
+                } catch {
+                    completion(.failure(error))
+                }
             }
         }
     }
 }
+
+// swiftlint:enable file_length

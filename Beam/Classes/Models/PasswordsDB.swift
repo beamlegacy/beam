@@ -89,16 +89,16 @@ class PasswordsDB: PasswordStore {
 
         var migrator = DatabaseMigrator()
 
-        migrator.registerMigration("addTimestampsToPasswords") { db in
-            if try db.tableExists(PasswordsDB.tableName) {
-                try db.alter(table: PasswordsDB.tableName) { t in
-                    t.add(column: "createdAt", .datetime).notNull().defaults(to: Date())
-                    t.add(column: "updatedAt", .datetime).notNull().defaults(to: Date())
-                    t.add(column: "deletedAt", .datetime)
-                    t.add(column: "previousChecksum", .text)
-                }
-            }
-        }
+//        migrator.registerMigration("addTimestampsToPasswords") { db in
+//            if try db.tableExists(PasswordsDB.tableName) {
+//                try db.alter(table: PasswordsDB.tableName) { t in
+//                    t.add(column: "createdAt", .datetime).notNull().defaults(to: Date())
+//                    t.add(column: "updatedAt", .datetime).notNull().defaults(to: Date())
+//                    t.add(column: "deletedAt", .datetime)
+//                    t.add(column: "previousChecksum", .text)
+//                }
+//            }
+//        }
 
         let dbPool = try DatabasePool(path: path)
         try migrator.migrate(dbPool)

@@ -161,4 +161,8 @@ js_test:
 	yarn --cwd ./Beam/Classes/Components/PointAndShoot/Web run build
 	yarn --cwd ./Beam/Classes/Components/PointAndShoot/Web run test-ci
 
+clean_app_files:
+	rm -rf "${HOME}/Library/Containers/co.beamapp.macos.dev/Data/Library/Application Support/"*
+	rm -rf "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/"*
+
 setup: git_checkout install_dependencies install_swiftlint install_cmake install_variable_injector build_libgit2 install_js

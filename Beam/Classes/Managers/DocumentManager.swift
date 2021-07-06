@@ -2358,7 +2358,6 @@ extension DocumentManager {
             }
     }
 }
-// swiftlint:enable file_length
 
 extension DocumentManager: BeamObjectManagerDelegateProtocol {
     func saveAllOnBeamObjectApi(_ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
@@ -2375,8 +2374,8 @@ extension DocumentManager: BeamObjectManagerDelegateProtocol {
 
                 let object = try BeamObjectAPIType(documentStruct, .document)
 
-                // We don't want to send updates for documents already sent. We know it's sent because the previousChecksum
-                // is the same as the current data Checksum
+                // We don't want to send updates for documents already sent.
+                // We know it's sent because the previousChecksum is the same as the current data Checksum
                 guard object.previousChecksum != object.dataChecksum, object.previousChecksum != nil else {
                     return nil
                 }
@@ -2412,12 +2411,13 @@ extension DocumentManager: BeamObjectManagerDelegateProtocol {
                         }
                         try Self.saveContext(context: context)
                     }
+                    completion(.success(true))
                 } catch {
                     completion(.failure(error))
                 }
-
-                completion(.success(true))
             }
         }
     }
 }
+
+// swiftlint:enable file_length
