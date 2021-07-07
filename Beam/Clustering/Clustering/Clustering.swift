@@ -34,11 +34,11 @@ enum ClusteringCandidate {
 
 enum SimilarityMatrixCandidate {
     case navigationMatrix
-    case navigationAndEntities
-    case textualSimilarityMatrix
     case combinationAllSimilarityMatrix
     case combinationAllBinarisedMatrix
     case combinationBinarizedWithTextErasure
+    case combinationSigmoid
+    case textualSimilarityMatrix
 }
 
 enum NumClusterComputationCandidate {
@@ -53,6 +53,12 @@ public class Cluster {
     enum FindEntitiesIn {
         case content
         case title
+    }
+
+    enum AllWeights {
+        case navigation
+        case text
+        case entities
     }
 
     enum MatrixError: Error {
@@ -80,8 +86,9 @@ public class Cluster {
     let tagger = NLTagger(tagSchemes: [.nameType])
     let entityOptions: NLTagger.Options = [.omitPunctuation, .omitWhitespace, .joinNames]
     let entityTags: [NLTag] = [.personalName, .placeName, .organizationName]
-    var timeToRemove = 0.5
+    var timeToRemove: Double = 0.5
     let titleSuffixes = [" - Google Search", " - YouTube"]
+    let beta = 50.0
 
     // The following will be deleted before the final product:
     // Define which affinity (laplacian) matrix to use
@@ -91,13 +98,13 @@ public class Cluster {
     // Define which number of clusters computation to use
     var numClustersCandidate = NumClusterComputationCandidate.threshold
     var candidate: Int
-    var weights = [String: Double]()
+    var weights = [AllWeights: Double]()
 
     public init(candidate: Int = 1, weightNavigation: Double = 0.5, weightText: Double = 0.5, weightEntities: Double = 0.5) {
         self.candidate = candidate
-        self.weights["navigation"] = weightNavigation
-        self.weights["text"] = weightText
-        self.weights["entities"] = weightEntities
+        self.weights[.navigation] = weightNavigation
+        self.weights[.text] = weightText
+        self.weights[.entities] = weightEntities
         // In general we always initialise with candidate 1
         // this is just to be safe:
         do {
@@ -168,7 +175,8 @@ public class Cluster {
         }
         let d = reduce(self.adjacencyMatrix, sum, .Row)
         let d1: [Double] = d.map { elem in
-            if elem == 0.0 { return 0.0 } else { return 1 / elem }
+            // if elem == 0.0 { return 0.0 } else { return 1 / elem }
+            if elem < 1e-5 { return elem } else { return 1 / elem }
         }
         let D = diag(d)
         let D1 = diag(d1)
@@ -439,10 +447,6 @@ public class Cluster {
     ///   - binarised matrix
 
     func binarise(matrix: Matrix, threshold: Double) -> Matrix {
-        // Bug in the thr() function in LASwift
-        // let firstCompomemtMatrix = thr(matrix, threshold)
-        // let secondComponentMatrix = -1 .* thr(firstCompomemtMatrix - 1, -0.99999)
-        // return firstCompomemtMatrix + secondComponentMatrix
         let result = zeros(matrix.rows, matrix.cols)
         for row in 0..<matrix.rows {
             for column in 0..<matrix.cols {
@@ -454,21 +458,38 @@ public class Cluster {
         return result
     }
 
+    /// This function receives a matrix and performs memberwise
+    /// Sigmoid function over it
+    ///
+    /// - Parameters:
+    ///   - matrix: The matrix to be binarised
+    ///   - middle: The middle point of the Sigmoid function, where it equals 0.5
+    ///   - beta: The steepness of the fumction
+    ///
+    /// - Returns
+    ///   - binarised matrix
+    func performSigmoidOn(matrix: Matrix, middle: Double, beta: Double) -> Matrix {
+        return 1 ./ (1 + exp(-beta .* (matrix - middle)))
+    }
+
     func createAdjacencyMatrix() {
         switch self.matrixCandidate {
         case .navigationMatrix:
             self.adjacencyMatrix = self.navigationMatrix.matrix
-        case .navigationAndEntities:
-            self.adjacencyMatrix = (self.weights["navigation"] ?? 0.5) .* self.navigationMatrix.matrix + (self.weights["entities"] ?? 0.5) * 8 .* self.entitiesMatrix.matrix
         case .textualSimilarityMatrix:
             self.adjacencyMatrix = self.textualSimilarityMatrix.matrix
         case .combinationAllSimilarityMatrix:
-            self.adjacencyMatrix = (self.weights["text"] ?? 0.5) .*  self.textualSimilarityMatrix.matrix + (self.weights["entities"] ?? 0.5) .* self.entitiesMatrix.matrix + (self.weights["navigation"] ?? 0.5) .* self.navigationMatrix.matrix
+            self.adjacencyMatrix = (self.weights[.text] ?? 0.5) .*  self.textualSimilarityMatrix.matrix + (self.weights[.entities] ?? 0.5) .* self.entitiesMatrix.matrix + (self.weights[.navigation] ?? 0.5) .* self.navigationMatrix.matrix
         case .combinationAllBinarisedMatrix:
-            self.adjacencyMatrix = self.binarise(matrix: self.navigationMatrix.matrix, threshold: (self.weights["navigation"] ?? 0.5)) + self.binarise(matrix: self.textualSimilarityMatrix.matrix, threshold: (weights["text"] ?? 0.5)) + self.binarise(matrix: self.entitiesMatrix.matrix, threshold: (weights["entities"] ?? 0.5))
+            self.adjacencyMatrix = self.binarise(matrix: self.navigationMatrix.matrix, threshold: (self.weights[.navigation] ?? 0.5)) + self.binarise(matrix: self.textualSimilarityMatrix.matrix, threshold: (weights[.text] ?? 0.5)) + self.binarise(matrix: self.entitiesMatrix.matrix, threshold: (weights[.entities] ?? 0.5))
         case .combinationBinarizedWithTextErasure:
-            let textErasureMatrix = self.binarise(matrix: self.textualSimilarityMatrix.matrix, threshold: (weights["text"] ?? 0.5))
-            self.adjacencyMatrix = textErasureMatrix .* self.binarise(matrix: self.navigationMatrix.matrix, threshold: (self.weights["navigation"] ?? 0.5)) + self.binarise(matrix: self.entitiesMatrix.matrix, threshold: (weights["entities"] ?? 0.5))
+            let textErasureMatrix = self.binarise(matrix: self.textualSimilarityMatrix.matrix, threshold: (weights[.text] ?? 0.5))
+            self.adjacencyMatrix = textErasureMatrix .* self.binarise(matrix: self.navigationMatrix.matrix, threshold: (self.weights[.navigation] ?? 0.5)) + self.binarise(matrix: self.entitiesMatrix.matrix, threshold: (weights[.entities] ?? 0.5))
+        case .combinationSigmoid:
+            let navigationSigmoidMatrix = self.performSigmoidOn(matrix: self.navigationMatrix.matrix, middle: self.weights[.navigation] ?? 0.5, beta: self.beta)
+            let textSigmoidMatrix = self.performSigmoidOn(matrix: self.textualSimilarityMatrix.matrix, middle: self.weights[.text] ?? 0.5, beta: self.beta)
+            let entitySigmoidMatrix = self.performSigmoidOn(matrix: self.entitiesMatrix.matrix, middle: self.weights[.entities] ?? 0.5, beta: self.beta)
+            self.adjacencyMatrix = textSigmoidMatrix .* navigationSigmoidMatrix + entitySigmoidMatrix
         }
     }
 
@@ -656,7 +677,7 @@ public class Cluster {
             self.numClustersCandidate = NumClusterComputationCandidate.threshold
         case 2:
             self.clusteringCandidate = ClusteringCandidate.randomWalkLaplacian
-            self.matrixCandidate = SimilarityMatrixCandidate.combinationAllBinarisedMatrix
+            self.matrixCandidate = SimilarityMatrixCandidate.combinationSigmoid
             self.numClustersCandidate = NumClusterComputationCandidate.biggestDistanceInPercentages
         case 3:
             self.clusteringCandidate = ClusteringCandidate.randomWalkLaplacian
@@ -670,9 +691,9 @@ public class Cluster {
         myQueue.async {
             // If ranking is received, remove pages
             self.candidate = candidate ?? self.candidate
-            self.weights["navigation"] = weightNavigation ?? self.weights["navigation"]
-            self.weights["text"] = weightText ?? self.weights["text"]
-            self.weights["entities"] = weightEntities ?? self.weights["entities"]
+            self.weights[.navigation] = weightNavigation ?? self.weights[.navigation]
+            self.weights[.text] = weightText ?? self.weights[.text]
+            self.weights[.entities] = weightEntities ?? self.weights[.entities]
             do {
                 try self.performCandidateChange()
             } catch {
