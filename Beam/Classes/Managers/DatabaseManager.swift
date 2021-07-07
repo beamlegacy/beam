@@ -1048,14 +1048,8 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
                                category: .databaseNetwork)
     }
 
-    func saveAllOnBeamObjectApi(_ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
-        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-            completion(.success(false))
-            return nil
-        }
-
-        let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
-        let beamObjects: [BeamObjectAPIType] = try context.performAndWait {
+    internal func databasesAsBeamObjects(_ context: NSManagedObjectContext) throws -> [BeamObjectAPIType] {
+        try context.performAndWait {
             try Database.rawFetchAll(context).compactMap {
                 var databaseStruct = DatabaseStruct(database: $0)
                 databaseStruct.previousChecksum = databaseStruct.beamObjectPreviousChecksum
@@ -1071,6 +1065,16 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
                 return object
             }
         }
+    }
+
+    func saveAllOnBeamObjectApi(_ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
+        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            completion(.success(false))
+            return nil
+        }
+
+        let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
+        let beamObjects = try databasesAsBeamObjects(context)
 
         guard !beamObjects.isEmpty else {
             completion(.success(true))

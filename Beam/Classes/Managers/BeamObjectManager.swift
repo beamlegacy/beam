@@ -75,25 +75,24 @@ public class BeamObjectManager {
             }
         }
     }
-
-//    internal func parseObject(_ object: BeamObjectAPIType) -> BeamObjectProtocol? {
-//        switch object.beamObjectType {
-//        case .document:
-//            let document: DocumentStruct? = object.decode()
-//            return document
-//        case .database:
-//            let database: DatabaseStruct? = object.decode()
-//            return database
-//        case .password, .none:
-//            break
-//        }
-//
-//        return nil
-//    }
 }
 
 // MARK: - Foundation
 extension BeamObjectManager {
+    func saveToAPI(_ beamObjects: [BeamObjectAPIType],
+                   _ completion: @escaping ((Swift.Result<[BeamObjectAPIType], Error>) -> Void)) throws -> URLSessionTask? {
+        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            completion(.failure(BeamObjectManagerError.notAuthenticated))
+            return nil
+        }
+
+        let request = BeamObjectRequest()
+
+        return try request.saveAll(beamObjects) { result in
+            completion(result)
+        }
+    }
+
     func saveToAPI(_ beamObject: BeamObjectAPIType,
                    _ completion: @escaping ((Swift.Result<BeamObjectAPIType, Error>) -> Void)) throws -> URLSessionTask? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {

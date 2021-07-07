@@ -2323,14 +2323,8 @@ extension DocumentManager: BeamObjectManagerDelegateProtocol {
                                category: .documentNetwork)
     }
 
-    func saveAllOnBeamObjectApi(_ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
-        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-            completion(.success(false))
-            return nil
-        }
-
-        let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
-        let beamObjects: [BeamObjectAPIType] = try context.performAndWait {
+    internal func documentsAsBeamObjects(_ context: NSManagedObjectContext) throws -> [BeamObjectAPIType] {
+        try context.performAndWait {
             try Document.rawFetchAll(context).compactMap {
                 var documentStruct = DocumentStruct(document: $0)
                 documentStruct.previousChecksum = documentStruct.beamObjectPreviousChecksum
@@ -2346,6 +2340,16 @@ extension DocumentManager: BeamObjectManagerDelegateProtocol {
                 return object
             }
         }
+    }
+
+    func saveAllOnBeamObjectApi(_ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
+        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            completion(.success(false))
+            return nil
+        }
+
+        let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
+        let beamObjects = try documentsAsBeamObjects(context)
 
         guard !beamObjects.isEmpty else {
             completion(.success(true))
