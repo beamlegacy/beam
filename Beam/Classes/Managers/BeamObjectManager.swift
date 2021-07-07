@@ -4,6 +4,9 @@ import BeamCore
 protocol BeamObjectManagerDelegateProtocol {
     func saveAllOnBeamObjectApi(_ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask?
     func receivedBeamObjects(_ objects: [BeamObjectProtocol]) throws
+    func saveOnBeamObjectAPI(_ object: BeamObjectProtocol,
+                             _ forced: Bool,
+                             _ completion: ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask?
 }
 
 enum BeamObjectManagerError: Error {
@@ -103,58 +106,59 @@ extension BeamObjectManager {
         return try request.save(beamObject) { result in
             switch result {
             case .failure(let error):
-                Logger.shared.logError("Could not save \(beamObject): \(error.localizedDescription)", category: .beamObject)
-
-                // Early return except for checksum issues.
-                guard case APIRequestError.beamObjectInvalidChecksum = error else {
-                    completion(.failure(error))
-                    return
-                }
-
-                /*
-                 When we have checksum issues, we fetch the current API saved object so the caller have both and is
-                 able to merge them if needed
-                 */
-                let fetchRequest = BeamObjectRequest()
-                do {
-                    try fetchRequest.fetch(beamObject.id) { result in
-                        switch result {
-                        case .failure(let error): completion(.failure(error))
-                        case .success(let beamObject):
-                            guard let type = beamObject.beamObjectType else {
-                                completion(.failure(BeamObjectManagerError.beamObjectDecodingError))
-                                return
-                            }
-
-                            switch type {
-                            case .document:
-                                if let document: DocumentStruct = beamObject.decode() {
-                                    completion(.failure(BeamObjectManagerError.beamObjectInvalidChecksum(document)))
-                                    return
-                                }
-                            case .database:
-                                if let database: DatabaseStruct = beamObject.decode() {
-                                    completion(.failure(BeamObjectManagerError.beamObjectInvalidChecksum(database)))
-                                    return
-                                }
-                            case .password:
-                                break
-                            }
-
-                            completion(.failure(BeamObjectManagerError.beamObjectDecodingError))
-                        }
-                    }
-                } catch {
-                    completion(.failure(error))
-                }
+                self.saveToAPIFailure(beamObject, error, completion)
             case .success(let updateBeamObject):
-                guard let beamObjectApiType = updateBeamObject.beamObject else {
-                    completion(.failure(APIRequestError.parserError))
-                    return
-                }
-
-                completion(.success(beamObjectApiType))
+                completion(.success(updateBeamObject))
             }
+        }
+    }
+
+    internal func saveToAPIFailure(_ beamObject: BeamObjectAPIType,
+                                   _ error: Error,
+                                   _ completion: @escaping ((Swift.Result<BeamObjectAPIType, Error>) -> Void)) {
+        Logger.shared.logError("Could not save \(beamObject): \(error.localizedDescription)", category: .beamObject)
+
+        // Early return except for checksum issues.
+        guard case APIRequestError.beamObjectInvalidChecksum = error else {
+            completion(.failure(error))
+            return
+        }
+
+        /*
+         When we have checksum issues, we fetch the current API saved object so the caller have both and is
+         able to merge them if needed
+         */
+        let fetchRequest = BeamObjectRequest()
+        do {
+            try fetchRequest.fetch(beamObject.id) { result in
+                switch result {
+                case .failure(let error): completion(.failure(error))
+                case .success(let beamObject):
+                    guard let type = beamObject.beamObjectType else {
+                        completion(.failure(BeamObjectManagerError.beamObjectDecodingError))
+                        return
+                    }
+
+                    switch type {
+                    case .document:
+                        if let document: DocumentStruct = beamObject.decode() {
+                            completion(.failure(BeamObjectManagerError.beamObjectInvalidChecksum(document)))
+                            return
+                        }
+                    case .database:
+                        if let database: DatabaseStruct = beamObject.decode() {
+                            completion(.failure(BeamObjectManagerError.beamObjectInvalidChecksum(database)))
+                            return
+                        }
+                    case .password:
+                        break
+                    }
+
+                    completion(.failure(BeamObjectManagerError.beamObjectDecodingError))
+                }
+            }
+        } catch {
+            completion(.failure(error))
         }
     }
 
@@ -182,6 +186,7 @@ extension BeamObjectManager {
         }
     }
 
+    // swiftlint:disable:next function_body_length
     func saveAllToAPI(_ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             completion?(.success(false))

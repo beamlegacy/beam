@@ -68,17 +68,22 @@ extension BeamObjectRequest {
     @discardableResult
     // return multiple errors, as the API might return more than one.
     func save(_ beamObject: BeamObjectAPIType,
-              _ completion: @escaping (Swift.Result<UpdateBeamObject, Error>) -> Void) throws -> URLSessionDataTask {
+              _ completion: @escaping (Swift.Result<BeamObjectAPIType, Error>) -> Void) throws -> URLSessionDataTask {
         let parameters = try saveBeamObjectParameters(beamObject)
         let bodyParamsRequest = GraphqlParameters(fileName: "update_beam_object", variables: parameters)
 
         return try performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<UpdateBeamObject, Error>) in
 
             switch result {
-            case .failure: completion(result)
+            case .failure(let error):
+                completion(.failure(error))
             case .success(let updateBeamObject):
-                updateBeamObject.beamObject?.previousChecksum = beamObject.dataChecksum
-                completion(.success(updateBeamObject))
+                guard let beamObject = updateBeamObject.beamObject else {
+                    completion(.failure(APIRequestError.parserError))
+                    return
+                }
+                beamObject.previousChecksum = beamObject.dataChecksum
+                completion(.success(beamObject))
             }
         }
     }
