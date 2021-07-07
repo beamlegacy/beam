@@ -58,6 +58,13 @@ public class LinkStore: Codable {
         return loadedLinks.count
     }
 
+    public func getLinks(matchingUrl url: String) -> [Link] {
+        ids.compactMap { (candidateUrl, linkId) in
+            guard candidateUrl.contains(url), let link = links[linkId] else { return nil }
+            return link
+        }
+    }
+
     required public init(from decoder: Decoder) throws {
         linkManager = FakeLinkManager()
 

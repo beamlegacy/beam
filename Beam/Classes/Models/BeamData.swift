@@ -143,6 +143,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
                 parentId = previousTabTree.current.link
             }
             self.clusteringManager.addPage(id: id, parentId: parentId, value: tabToIndex)
+            LinkStore.shared.visit(link: tabToIndex.url.string, title: tabToIndex.document.title)
 
             // Update history record
             do {
