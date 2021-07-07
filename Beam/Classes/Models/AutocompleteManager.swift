@@ -195,6 +195,22 @@ class AutocompleteManager: ObservableObject {
                 }
             }
 
+            group.enter()
+            queue.async {
+                let ac = LinkStore.shared.getLinks(matchingUrl: searchText).map { result -> AutocompleteResult in
+                    let url = URL(string: result.url)
+                    return AutocompleteResult(text: result.url,
+                                              source: .url,
+                                              url: url,
+                                              information: result.title,
+                                              completingText: searchText)
+                }
+                mergeQueue.async {
+                    autocompleteResults[.url, default: []].append(contentsOf: ac)
+                    group.leave()
+                }
+            }
+
             var canCreateNote = false
 
             group.enter()
@@ -218,7 +234,8 @@ class AutocompleteManager: ObservableObject {
             }
 
             var finalResults = self.sortResults(notesResults: autocompleteResults[.note, default: []],
-                                                historyResults: autocompleteResults[.history, default: []])
+                                                historyResults: autocompleteResults[.history, default: []],
+                                                urlResults: autocompleteResults[.url, default: []])
 
             if canCreateNote {
                 // if the card doesn't exist, propose to create it
@@ -280,7 +297,14 @@ class AutocompleteManager: ObservableObject {
     }
 
     private func isResultCandidateForAutoselection(_ result: AutocompleteResult, forSearch searchText: String) -> Bool {
-        return result.source == .history && result.text.lowercased().starts(with: searchText.lowercased())
+        switch result.source {
+        case .history: return result.text.lowercased().starts(with: searchText.lowercased())
+        case .url:
+            guard let host = URL(string: result.text)?.host else { return false }
+            return result.text.lowercased().contains(host)
+        default:
+            return false
+        }
     }
 
     private func automaticallySelectFirstResultIfNeeded(withResults results: [AutocompleteResult], searchText: String) {
@@ -292,7 +316,7 @@ class AutocompleteManager: ObservableObject {
         }
     }
 
-    private func sortResults(notesResults: [AutocompleteResult], historyResults: [AutocompleteResult]) -> [AutocompleteResult] {
+    private func sortResults(notesResults: [AutocompleteResult], historyResults: [AutocompleteResult], urlResults: [AutocompleteResult]) -> [AutocompleteResult] {
         // this logic should eventually become smarter to always include the right amount of result per source.
 
         var results = [AutocompleteResult]()
@@ -303,8 +327,18 @@ class AutocompleteManager: ObservableObject {
         let maxNotesSuggestions = historyResults.isEmpty ? 6 : 4
         let notesResultsTruncated = Array(notesResults.prefix(maxNotesSuggestions))
 
+        let maxUrlSuggestions = urlResults.isEmpty ? 6 : 4
+        let urlResultsTruncated = Array(urlResults.prefix(maxUrlSuggestions))
+
+        results.append(contentsOf: urlResultsTruncated)
         results.append(contentsOf: notesResultsTruncated)
         results.append(contentsOf: historyResultsTruncated)
+
+        results.sort(by: { (lhs, rhs) in
+            let lhsr = lhs.text.lowercased().commonPrefix(with: lhs.completingText?.lowercased() ?? "").count
+            let rhsr = rhs.text.lowercased().commonPrefix(with: rhs.completingText?.lowercased() ?? "").count
+            return lhsr > rhsr
+        })
 
         return results
     }
@@ -312,12 +346,17 @@ class AutocompleteManager: ObservableObject {
     private func updateSearchQueryWhenSelectingAutocomplete(_ selectedIndex: Int?, previousSelectedIndex: Int?) {
         if let i = autocompleteSelectedIndex, i >= 0, i < autocompleteResults.count {
             let result = autocompleteResults[i]
-            let resultText = result.text
+            var resultText = result.text
             textChangeIsFromSelection = true
 
             // if the first result is compatible with autoselection, select the added string
             if i == 0, let completingText = result.completingText,
                isResultCandidateForAutoselection(result, forSearch: completingText) {
+                if result.source == .url {
+                    if let resultTextDropped = resultText.dropBefore(substring: completingText) {
+                        resultText = resultTextDropped
+                    }
+                }
                 let newSelection = completingText.wholeRange.upperBound..<resultText.count
                 searchQuery = completingText + resultText.substring(range: newSelection)
                 searchQuerySelectedRange = newSelection
