@@ -127,6 +127,9 @@ class AutocompleteManager: ObservableObject {
     }
 
     private func buildAutocompleteResults(for receivedQueryString: String) {
+        // Track the elasped time to build autocomplete results
+        let startChrono = DispatchTime.now()
+
         guard !textChangeIsFromSelection else {
             textChangeIsFromSelection = false
             return
@@ -157,7 +160,7 @@ class AutocompleteManager: ObservableObject {
             self.autocompleteNotesResults(for: searchText) { result in
                 switch result {
                 case .failure(let error):
-                    Logger.shared.logError(error.localizedDescription, category: .general)
+                    Logger.shared.logError(error.localizedDescription, category: .autocompleteManager)
                     group.leave()
                 case .success(let acResults):
                     mergeQueue.async {
@@ -171,7 +174,7 @@ class AutocompleteManager: ObservableObject {
             self.autocompleteNotesContentsResults(for: searchText) { result in
                 switch result {
                 case .failure(let error):
-                    Logger.shared.logError(error.localizedDescription, category: .general)
+                    Logger.shared.logError(error.localizedDescription, category: .autocompleteManager)
                     group.leave()
                 case .success(let acResults):
                     mergeQueue.async {
@@ -185,7 +188,7 @@ class AutocompleteManager: ObservableObject {
             self.autocompleteHistoryResults(for: searchText) { result in
                 switch result {
                 case .failure(let error):
-                    Logger.shared.logError(error.localizedDescription, category: .general)
+                    Logger.shared.logError(error.localizedDescription, category: .autocompleteManager)
                     group.leave()
                 case .success(let acResults):
                     mergeQueue.async {
@@ -217,7 +220,7 @@ class AutocompleteManager: ObservableObject {
             self.beamData.documentManager.loadDocumentByTitle(title: searchText) { result in
                 switch result {
                 case .failure(let error):
-                    Logger.shared.logError(error.localizedDescription, category: .general)
+                    Logger.shared.logError(error.localizedDescription, category: .autocompleteManager)
                     group.leave()
                 case .success(let documentStruct):
                     mergeQueue.async {
@@ -244,6 +247,16 @@ class AutocompleteManager: ObservableObject {
                                                        information: "New card",
                                                        completingText: searchText))
             }
+
+            if !finalResults.isEmpty {
+                Logger.shared.logDebug("-- Autosuggest results for `\(searchText)` --", category: .autocompleteManager)
+                for result in finalResults {
+                    Logger.shared.logDebug("\(result.source) \(result.id) \(String(describing: result.url))", category: .autocompleteManager)
+                }
+            }
+
+            let (elapsedTime, timeUnit) = startChrono.endChrono()
+            Logger.shared.logInfo("autocomplete results in \(elapsedTime) \(timeUnit)", category: .autocompleteManager)
 
             guard searchText.count > 1 else {
                 DispatchQueue.main.async {

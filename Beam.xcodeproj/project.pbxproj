@@ -55,6 +55,8 @@
 		0D15BE432681DAC30035F322 /* BeamElementRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D15BE422681DAC30035F322 /* BeamElementRecord.swift */; };
 		0D3DD8F32681CBA4009F2DF0 /* IndexDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D3DD8F22681CBA4009F2DF0 /* IndexDocument.swift */; };
 		0D3DD8F52681CD4B009F2DF0 /* HistoryUrlRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D3DD8F42681CD4B009F2DF0 /* HistoryUrlRecord.swift */; };
+		0D45BA2F26949EF100D4E8A5 /* DispatchTime+Chrono.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D45BA2E26949EF100D4E8A5 /* DispatchTime+Chrono.swift */; };
+		0D45BA382694A1FE00D4E8A5 /* DispatchTime+ChronoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D45BA372694A1FE00D4E8A5 /* DispatchTime+ChronoTests.swift */; };
 		0D4EC934268372E800487B75 /* FrecencyScore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D4EC933268372E800487B75 /* FrecencyScore.swift */; };
 		0D4EC94526838FA800487B75 /* FrecencyUrlRecordTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D4EC94426838FA800487B75 /* FrecencyUrlRecordTests.swift */; };
 		0DD0DACC2681C9630005339A /* GRDBDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DD0DACB2681C9630005339A /* GRDBDatabase.swift */; };
@@ -846,6 +848,8 @@
 		0D15BE422681DAC30035F322 /* BeamElementRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamElementRecord.swift; sourceTree = "<group>"; };
 		0D3DD8F22681CBA4009F2DF0 /* IndexDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndexDocument.swift; sourceTree = "<group>"; };
 		0D3DD8F42681CD4B009F2DF0 /* HistoryUrlRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryUrlRecord.swift; sourceTree = "<group>"; };
+		0D45BA2E26949EF100D4E8A5 /* DispatchTime+Chrono.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DispatchTime+Chrono.swift"; sourceTree = "<group>"; };
+		0D45BA372694A1FE00D4E8A5 /* DispatchTime+ChronoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DispatchTime+ChronoTests.swift"; sourceTree = "<group>"; };
 		0D4EC933268372E800487B75 /* FrecencyScore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrecencyScore.swift; sourceTree = "<group>"; };
 		0D4EC94426838FA800487B75 /* FrecencyUrlRecordTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrecencyUrlRecordTests.swift; sourceTree = "<group>"; };
 		0DD0DACB2681C9630005339A /* GRDBDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GRDBDatabase.swift; sourceTree = "<group>"; };
@@ -2820,6 +2824,7 @@
 				8A7920EF2680AA1E00F74A75 /* URL+BeamTest.swift */,
 				964FE5B62624813E00966E03 /* RandomAccessCollection+BinarySearch.swift */,
 				964FE64C262D8ED300966E03 /* Dictionary+valuesMatchingKeys.swift */,
+				0D45BA2E26949EF100D4E8A5 /* DispatchTime+Chrono.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -2873,6 +2878,7 @@
 				0DF3376C26948BAB0024C504 /* String+SliceTests.swift */,
 				A5109F902670227800304B3A /* CommandManagerTests.swift */,
 				96319D202616232700D1CF31 /* Info.plist */,
+				0D45BA372694A1FE00D4E8A5 /* DispatchTime+ChronoTests.swift */,
 			);
 			path = BeamCoreTests;
 			sourceTree = "<group>";
@@ -3858,6 +3864,7 @@
 				96319D412616233E00D1CF31 /* Logger.swift in Sources */,
 				96319D442616233E00D1CF31 /* RWLock.swift in Sources */,
 				DAA60C232666893300C927E5 /* SessionLinkRanker.swift in Sources */,
+				0D45BA2F26949EF100D4E8A5 /* DispatchTime+Chrono.swift in Sources */,
 				96319D472616233E00D1CF31 /* String+Data.swift in Sources */,
 				523A32CF267764A200606768 /* EnvironmentVariables.swift in Sources */,
 				9609AF502617159B00322141 /* URL+Beam.swift in Sources */,
@@ -3895,6 +3902,7 @@
 				A58BD800266510390040A8C4 /* String+RegexTests.swift in Sources */,
 				0DF3376D26948BAB0024C504 /* String+SliceTests.swift in Sources */,
 				A06D5FA32683454C009D7C38 /* DeepCopyTests.swift in Sources */,
+				0D45BA382694A1FE00D4E8A5 /* DispatchTime+ChronoTests.swift in Sources */,
 				DA76129826614E5A00349F2C /* BrowsingTreeScoreTests.swift in Sources */,
 				DA63D519267CF28800D7C756 /* FrecencyScorerTest.swift in Sources */,
 				A5CA5DF52625C15D004E9D3E /* BeamElementTextStatsTests.swift in Sources */,
