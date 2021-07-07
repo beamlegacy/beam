@@ -30,6 +30,11 @@ struct DocumentDetail: View {
                                 Spacer()
                             }
                             HStack {
+                                Text("Beam Object Checksum:").bold()
+                                Text(document.beam_object_previous_checksum ?? "-")
+                                Spacer()
+                            }
+                            HStack {
                                 Text("Type:").bold()
                                 Text(document.document_type == 0 ? "Journal" : "Note")
                                 Spacer()

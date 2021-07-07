@@ -1155,95 +1155,6 @@ extension DocumentManager {
         saveDocumentQueue.addOperation(blockOperation)
     }
 
-    func receivedBeamObjects(_ objects: [BeamObjectProtocol]) throws {
-        guard let documents = objects as? [DocumentStruct] else {
-            throw DocumentManagerError.wrongObjectsType
-        }
-
-        Logger.shared.logDebug("Received \(documents.count) documents: updating",
-                               category: .documentNetwork)
-
-        var changed = false
-        let context = coreDataManager.backgroundContext
-        try context.performAndWait {
-            for document in documents {
-                let localDocument = Document.rawFetchOrCreateWithId(context, document.id)
-
-                if self.isEqual(localDocument, to: document) {
-                    Logger.shared.logDebug("\(document.title) {\(document.id)}: remote is equal to struct version, skip",
-                                           category: .documentNetwork)
-                    continue
-                }
-
-                localDocument.title = document.title
-                localDocument.created_at = document.createdAt
-                localDocument.updated_at = document.updatedAt
-                localDocument.deleted_at = document.deletedAt
-                localDocument.document_type = document.documentType.rawValue
-                localDocument.database_id = document.databaseId
-
-                // TODO: What to do when this fails? Because of duplicate titles, or other errors
-                try checkValidations(context, localDocument)
-                changed = true
-
-                localDocument.version += 1
-            }
-
-            if changed {
-                try Self.saveContext(context: context)
-            }
-        }
-
-        Logger.shared.logDebug("Received \(documents.count) documents: updated",
-                               category: .documentNetwork)
-    }
-
-    @discardableResult
-    internal func saveOnBeamObjectAPI(_ documentStruct: DocumentStruct,
-                                      _ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) throws -> URLSessionTask? {
-        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-            completion?(.success(false))
-            return nil
-        }
-
-        let beamObject = try BeamObjectAPIType(documentStruct, .document)
-        beamObject.previousChecksum = documentStruct.beamObjectPreviousChecksum
-
-        let request = BeamObjectRequest()
-
-        return try request.save(beamObject) { result in
-            switch result {
-            case .failure(let error):
-                Logger.shared.logError("Could not save \(beamObject): \(error.localizedDescription)", category: .beamObject)
-
-                completion?(.failure(error))
-            case .success(let updateBeamObject):
-                Logger.shared.logDebug("Saved \(updateBeamObject)", category: .beamObject)
-
-                // `beamObjectPreviousChecksum` stores the checksum we sent to the API
-                var sentDocumentStruct = documentStruct.copy()
-                sentDocumentStruct.beamObjectPreviousChecksum = updateBeamObject.beamObject?.previousChecksum
-
-                CoreDataManager.shared.persistentContainer.performBackgroundTask { context in
-                    guard let documentCoreData = try? Document.fetchWithId(context, documentStruct.id) else {
-                        completion?(.failure(DocumentManagerError.localDocumentNotFound))
-                        return
-                    }
-
-                    // TODO: store previous data sent for improved 3-ways merge?
-                    documentCoreData.beam_object_previous_checksum = sentDocumentStruct.beamObjectPreviousChecksum
-
-                    do {
-                        let success = try Self.saveContext(context: context)
-                        completion?(.success(success))
-                    } catch {
-                        completion?(.failure(error))
-                    }
-                }
-            }
-        }
-    }
-
     @discardableResult
     internal func saveDocumentStructOnAPI(_ documentStruct: DocumentStruct,
                                           _ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) -> URLSessionTask? {
@@ -2367,6 +2278,50 @@ extension DocumentManager {
 }
 
 extension DocumentManager: BeamObjectManagerDelegateProtocol {
+    func receivedBeamObjects(_ objects: [BeamObjectProtocol]) throws {
+        guard let documents = objects as? [DocumentStruct] else {
+            throw DocumentManagerError.wrongObjectsType
+        }
+
+        Logger.shared.logDebug("Received \(documents.count) documents: updating",
+                               category: .documentNetwork)
+
+        var changed = false
+        let context = coreDataManager.backgroundContext
+        try context.performAndWait {
+            for document in documents {
+                let localDocument = Document.rawFetchOrCreateWithId(context, document.id)
+
+                if self.isEqual(localDocument, to: document) {
+                    Logger.shared.logDebug("\(document.title) {\(document.id)}: remote is equal to struct version, skip",
+                                           category: .documentNetwork)
+                    continue
+                }
+
+                localDocument.title = document.title
+                localDocument.created_at = document.createdAt
+                localDocument.updated_at = document.updatedAt
+                localDocument.deleted_at = document.deletedAt
+                localDocument.document_type = document.documentType.rawValue
+                localDocument.database_id = document.databaseId
+                localDocument.beam_object_previous_checksum = document.checksum
+
+                // TODO: What to do when this fails? Because of duplicate titles, or other errors
+                try checkValidations(context, localDocument)
+                changed = true
+
+                localDocument.version += 1
+            }
+
+            if changed {
+                try Self.saveContext(context: context)
+            }
+        }
+
+        Logger.shared.logDebug("Received \(documents.count) documents: updated",
+                               category: .documentNetwork)
+    }
+
     func saveAllOnBeamObjectApi(_ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             completion(.success(false))
@@ -2421,6 +2376,75 @@ extension DocumentManager: BeamObjectManagerDelegateProtocol {
                     completion(.success(true))
                 } catch {
                     completion(.failure(error))
+                }
+            }
+        }
+    }
+
+    @discardableResult
+    internal func saveOnBeamObjectAPI(_ documentStruct: DocumentStruct,
+                                      _ forced: Bool = false,
+                                      _ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) throws -> URLSessionTask? {
+        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            completion?(.success(false))
+            return nil
+        }
+
+        let beamObject = try BeamObjectAPIType(documentStruct, .document)
+        if forced == false {
+            beamObject.previousChecksum = documentStruct.beamObjectPreviousChecksum
+        }
+
+        let objectManager = BeamObjectManager()
+
+        return try objectManager.saveToAPI(beamObject) { result in
+            switch result {
+            case .failure(let error):
+                // Early return except for checksum issues.
+                guard case BeamObjectManagerError.beamObjectInvalidChecksum(let remoteBeamObject) = error else {
+                    completion?(.failure(error))
+                    return
+                }
+
+                // Checksum issue, the API side of the object was updated since our last fetch
+                Logger.shared.logError("Could not save: \(error.localizedDescription)",
+                                       category: .beamObject)
+                Logger.shared.logError("local object \(documentStruct.beamObjectPreviousChecksum ?? "-"): \(documentStruct)",
+                                       category: .beamObject)
+                Logger.shared.logError("Remote saved object \(remoteBeamObject.checksum ?? "-"): \(remoteBeamObject)",
+                                       category: .beamObject)
+                Logger.shared.logError("Resending local object without checksum",
+                                       category: .beamObject)
+
+                do {
+                    // TODO: should merge both `documentStruct` and `remoteBeamObject`.
+                    // For now we just overwrite local to the remote.
+                    try self.saveOnBeamObjectAPI(documentStruct, true, completion)
+                } catch {
+                    completion?(.failure(error))
+                }
+            case .success(let updateBeamObject):
+                Logger.shared.logDebug("Saved \(updateBeamObject)", category: .beamObject)
+
+                // `beamObjectPreviousChecksum` stores the checksum we sent to the API
+                var sentDocumentStruct = documentStruct.copy()
+                sentDocumentStruct.beamObjectPreviousChecksum = updateBeamObject.previousChecksum
+
+                CoreDataManager.shared.persistentContainer.performBackgroundTask { context in
+                    guard let documentCoreData = try? Document.fetchWithId(context, documentStruct.id) else {
+                        completion?(.failure(DocumentManagerError.localDocumentNotFound))
+                        return
+                    }
+
+                    // TODO: store previous data sent for improved 3-ways merge?
+                    documentCoreData.beam_object_previous_checksum = sentDocumentStruct.beamObjectPreviousChecksum
+
+                    do {
+                        let success = try Self.saveContext(context: context)
+                        completion?(.success(success))
+                    } catch {
+                        completion?(.failure(error))
+                    }
                 }
             }
         }

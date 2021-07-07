@@ -11,6 +11,7 @@ enum APIRequestError: Error, Equatable {
     case deviceNotFound
     case notAuthenticated
     case documentConflict
+    case beamObjectInvalidChecksum
     case apiError([String])
     case apiErrors([UserErrorData])
     case operationCancelled
@@ -20,6 +21,8 @@ enum APIRequestError: Error, Equatable {
 extension APIRequestError: LocalizedError {
     public var errorDescription: String? {
         switch self {
+        case .beamObjectInvalidChecksum:
+            return loc("error.api.beamObject.invalidChecksum")
         case .documentConflict:
             return loc("error.api.document.conflict")
         case .parserError:

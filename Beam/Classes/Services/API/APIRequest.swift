@@ -192,8 +192,15 @@ class APIRequest {
         let error: Error
 
         guard let errors = result.errors, !errors.isEmpty else { return nil }
-        if errors.count == 1, errors[0].message == "Differs from current checksum" {
-            error = APIRequestError.documentConflict
+        if errors.count == 1,
+           errors[0].message == "Differs from current checksum",
+           errors[0].path == ["attributes", "previous_checksum"] {
+
+            if (result as? BeamObjectRequest.UpdateBeamObject) != nil {
+                error = APIRequestError.beamObjectInvalidChecksum
+            } else {
+                error = APIRequestError.documentConflict
+            }
         } else if errors.count == 1,
                   errors[0].path == ["attributes", "title"],
                   errors[0].message == "Title has already been taken" {

@@ -415,44 +415,6 @@ extension DatabaseManager {
         return false
     }
 
-    func receivedBeamObjects(_ objects: [BeamObjectProtocol]) throws {
-        guard let databases = objects as? [DatabaseStruct] else {
-            throw DatabaseManagerError.wrongObjectsType
-        }
-        Logger.shared.logDebug("Received \(databases.count) databases: updating",
-                               category: .databaseNetwork)
-
-        var changed = false
-        let context = coreDataManager.backgroundContext
-        try context.performAndWait {
-            for database in databases {
-                let localDatabase = Database.fetchOrCreateWithId(context, database.id)
-
-                if self.isEqual(localDatabase, to: database) {
-                    Logger.shared.logDebug("\(database.title) {\(database.id)}: remote is equal to struct version, skip",
-                                           category: .databaseNetwork)
-                    continue
-                }
-
-                localDatabase.title = database.title
-                localDatabase.created_at = database.createdAt
-                localDatabase.deleted_at = database.deletedAt
-                localDatabase.updated_at = database.updatedAt
-
-                // TODO: What to do when this fails? Because of duplicate titles, or other errors
-                try checkValidations(context, localDatabase)
-                changed = true
-            }
-
-            if changed {
-                try Self.saveContext(context: context)
-            }
-        }
-
-        Logger.shared.logDebug("Received \(databases.count) databases: updated",
-                               category: .databaseNetwork)
-    }
-
     func saveAllOnApi(_ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil, _ nested: Int = 1) {
         guard AuthenticationManager.shared.isAuthenticated,
               Configuration.networkEnabled else {
@@ -635,52 +597,6 @@ extension DatabaseManager {
 
         }
         saveDatabaseQueue.addOperation(blockOperation)
-    }
-
-    @discardableResult
-    internal func saveOnBeamObjectAPI(_ databaseStruct: DatabaseStruct,
-                                      _ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) throws -> URLSessionTask? {
-        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-            completion?(.success(false))
-            return nil
-        }
-
-        let beamObject = try BeamObjectAPIType(databaseStruct, .database)
-        beamObject.previousChecksum = databaseStruct.beamObjectPreviousChecksum
-
-        let request = BeamObjectRequest()
-
-        return try request.save(beamObject) { result in
-            switch result {
-            case .failure(let error):
-                Logger.shared.logError("Could not save \(beamObject): \(error.localizedDescription)", category: .beamObject)
-
-                completion?(.failure(error))
-            case .success(let updateBeamObject):
-                Logger.shared.logDebug("Saved \(updateBeamObject)", category: .beamObject)
-
-                // `beamObjectPreviousChecksum` stores the checksum we sent to the API
-                var sentDatabaseStruct = databaseStruct.copy()
-                sentDatabaseStruct.beamObjectPreviousChecksum = updateBeamObject.beamObject?.previousChecksum
-
-                CoreDataManager.shared.persistentContainer.performBackgroundTask { context in
-                    guard let databaseCoreData = try? Database.fetchWithId(context, databaseStruct.id) else {
-                        completion?(.failure(DatabaseManagerError.localDatabaseNotFound))
-                        return
-                    }
-
-                    // TODO: store previous data sent for improved 3-ways merge?
-                    databaseCoreData.beam_object_previous_checksum = sentDatabaseStruct.beamObjectPreviousChecksum
-
-                    do {
-                        let success = try Self.saveContext(context: context)
-                        completion?(.success(success))
-                    } catch {
-                        completion?(.failure(error))
-                    }
-                }
-            }
-        }
     }
 
     @discardableResult
@@ -1092,6 +1008,45 @@ extension DatabaseManager {
 }
 
 extension DatabaseManager: BeamObjectManagerDelegateProtocol {
+    func receivedBeamObjects(_ objects: [BeamObjectProtocol]) throws {
+        guard let databases = objects as? [DatabaseStruct] else {
+            throw DatabaseManagerError.wrongObjectsType
+        }
+        Logger.shared.logDebug("Received \(databases.count) databases: updating",
+                               category: .databaseNetwork)
+
+        var changed = false
+        let context = coreDataManager.backgroundContext
+        try context.performAndWait {
+            for database in databases {
+                let localDatabase = Database.fetchOrCreateWithId(context, database.id)
+
+                if self.isEqual(localDatabase, to: database) {
+                    Logger.shared.logDebug("\(database.title) {\(database.id)}: remote is equal to struct version, skip",
+                                           category: .databaseNetwork)
+                    continue
+                }
+
+                localDatabase.title = database.title
+                localDatabase.created_at = database.createdAt
+                localDatabase.deleted_at = database.deletedAt
+                localDatabase.updated_at = database.updatedAt
+                localDatabase.beam_object_previous_checksum = database.checksum
+
+                // TODO: What to do when this fails? Because of duplicate titles, or other errors
+                try checkValidations(context, localDatabase)
+                changed = true
+            }
+
+            if changed {
+                try Self.saveContext(context: context)
+            }
+        }
+
+        Logger.shared.logDebug("Received \(databases.count) databases: updated",
+                               category: .databaseNetwork)
+    }
+
     func saveAllOnBeamObjectApi(_ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             completion(.success(false))
@@ -1104,7 +1059,7 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
                 var databaseStruct = DatabaseStruct(database: $0)
                 databaseStruct.previousChecksum = databaseStruct.beamObjectPreviousChecksum
 
-                let object = try BeamObjectAPIType(databaseStruct, .document)
+                let object = try BeamObjectAPIType(databaseStruct, .database)
 
                 // We don't want to send updates for databases already sent.
                 // We know it's sent because the previousChecksum is the same as the current data Checksum
@@ -1150,6 +1105,53 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
             }
         }
     }
+
+    @discardableResult
+    internal func saveOnBeamObjectAPI(_ databaseStruct: DatabaseStruct,
+                                      _ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) throws -> URLSessionTask? {
+        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            completion?(.success(false))
+            return nil
+        }
+
+        let beamObject = try BeamObjectAPIType(databaseStruct, .database)
+        beamObject.previousChecksum = databaseStruct.beamObjectPreviousChecksum
+
+        let request = BeamObjectRequest()
+
+        return try request.save(beamObject) { result in
+            switch result {
+            case .failure(let error):
+                Logger.shared.logError("Could not save \(beamObject): \(error.localizedDescription)", category: .beamObject)
+
+                completion?(.failure(error))
+            case .success(let updateBeamObject):
+                Logger.shared.logDebug("Saved \(updateBeamObject)", category: .beamObject)
+
+                // `beamObjectPreviousChecksum` stores the checksum we sent to the API
+                var sentDatabaseStruct = databaseStruct.copy()
+                sentDatabaseStruct.beamObjectPreviousChecksum = updateBeamObject.beamObject?.previousChecksum
+
+                CoreDataManager.shared.persistentContainer.performBackgroundTask { context in
+                    guard let databaseCoreData = try? Database.fetchWithId(context, databaseStruct.id) else {
+                        completion?(.failure(DatabaseManagerError.localDatabaseNotFound))
+                        return
+                    }
+
+                    // TODO: store previous data sent for improved 3-ways merge?
+                    databaseCoreData.beam_object_previous_checksum = sentDatabaseStruct.beamObjectPreviousChecksum
+
+                    do {
+                        let success = try Self.saveContext(context: context)
+                        completion?(.success(success))
+                    } catch {
+                        completion?(.failure(error))
+                    }
+                }
+            }
+        }
+    }
+
 }
 
 // swiftlint:enable file_length
