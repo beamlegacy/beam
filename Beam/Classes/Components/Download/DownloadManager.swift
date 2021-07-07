@@ -31,6 +31,12 @@ protocol DownloadManager: AnyObject {
     ///   - destinationFoldedURL: Desired destination folder. If not provided, the download will end up in the download folder
     func downloadFile(at url: URL, headers: [String: String], suggestedFileName: String?, destinationFoldedURL: URL?)
 
+
+    /// Start a download with informations found in the download document.
+    /// Download can be started with some resume data if available, or from scratch using included infos
+    /// - Parameter document: A BeamDownloadDocument with at least download infos
+    func downloadFile(from document: BeamDownloadDocument) throws
+
     func clearAllFileDownloads()
 
     @discardableResult

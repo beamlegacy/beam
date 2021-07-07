@@ -132,7 +132,7 @@ import Promises
     }
 
     var downloadManager: DownloadManager? {
-        state.downloadManager
+        state.data.downloadManager
     }
 
     var frame: NSRect {

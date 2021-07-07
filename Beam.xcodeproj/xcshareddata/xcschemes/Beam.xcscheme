@@ -117,7 +117,7 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "com.apple.CoreData.MigrationDebug 1"
+            argument = "-com.apple.CoreData.MigrationDebug 1"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument

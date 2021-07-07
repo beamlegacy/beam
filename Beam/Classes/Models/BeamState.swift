@@ -65,7 +65,6 @@ import BeamCore
     @Published var currentPage: WindowPage?
     @Published var overlayViewModel: OverlayViewCenterViewModel = OverlayViewCenterViewModel()
 
-    var downloadManager: BeamDownloadManager = BeamDownloadManager()
     var downloadButtonPosition: CGPoint?
 
     private var scope = Set<AnyCancellable>()
@@ -331,7 +330,7 @@ import BeamCore
         super.init()
         setup(data: data)
 
-        downloadManager.$downloads.sink { [weak self] _ in
+        data.downloadManager.$downloads.sink { [weak self] _ in
             self?.objectWillChange.send()
         }.store(in: &scope)
     }

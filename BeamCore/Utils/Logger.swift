@@ -37,6 +37,7 @@ public enum LogCategory: String {
     case passwordManager
     case clustering
     case commandManager
+    case downloader
 }
 
 public final class Logger {

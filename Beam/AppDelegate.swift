@@ -312,4 +312,23 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    func application(_ sender: NSApplication, openFile filename: String) -> Bool {
+        let url = URL(fileURLWithPath: filename)
+        if url.pathExtension == BeamDownloadDocument.downloadDocumentFileExtension {
+            let documentURL = URL(fileURLWithPath: filename)
+            if let wrapper = try? FileWrapper(url: documentURL, options: .immediate) {
+                do {
+                    let doc = BeamDownloadDocument()
+                    doc.fileURL = documentURL
+                    try doc.read(from: wrapper, ofType: "co.beamapp.download")
+                    try self.data.downloadManager.downloadFile(from: doc)
+                } catch {
+                    Logger.shared.logError("Can't open Download Document from disk", category: .downloader)
+                    return false
+                }
+                return true
+            }
+        }
+        return true
+    }
 }
