@@ -151,6 +151,7 @@ class AutocompleteManager: ObservableObject {
         queue.async {
             var autocompleteResults = [AutocompleteResult.Source: [AutocompleteResult]]()
             let group = DispatchGroup()
+            let mergeQueue = DispatchQueue(label: "autocomplete.result.merge")
 
             group.enter()
             self.autocompleteNotesResults(for: searchText) { result in
@@ -159,7 +160,7 @@ class AutocompleteManager: ObservableObject {
                     Logger.shared.logError(error.localizedDescription, category: .general)
                     group.leave()
                 case .success(let acResults):
-                    queue.async {
+                    mergeQueue.async {
                         autocompleteResults[.note, default: []].append(contentsOf: acResults)
                         group.leave()
                     }
@@ -173,7 +174,7 @@ class AutocompleteManager: ObservableObject {
                     Logger.shared.logError(error.localizedDescription, category: .general)
                     group.leave()
                 case .success(let acResults):
-                    queue.async {
+                    mergeQueue.async {
                         autocompleteResults[.note, default: []].append(contentsOf: acResults)
                         group.leave()
                     }
@@ -187,7 +188,7 @@ class AutocompleteManager: ObservableObject {
                     Logger.shared.logError(error.localizedDescription, category: .general)
                     group.leave()
                 case .success(let acResults):
-                    queue.async {
+                    mergeQueue.async {
                         autocompleteResults[.history, default: []].append(contentsOf: acResults)
                         group.leave()
                     }
@@ -203,7 +204,7 @@ class AutocompleteManager: ObservableObject {
                     Logger.shared.logError(error.localizedDescription, category: .general)
                     group.leave()
                 case .success(let documentStruct):
-                    queue.async {
+                    mergeQueue.async {
                         canCreateNote = documentStruct == nil && URL(string: searchText)?.scheme == nil
                         group.leave()
                     }
