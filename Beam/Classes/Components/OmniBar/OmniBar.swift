@@ -64,7 +64,7 @@ struct OmniBar: View {
         isAboveContent ? BeamColor.BottomBar.shadow.swiftUI : BeamColor.BottomBar.shadow.swiftUI.opacity(0.0)
     }
     private var showDownloadsButton: Bool {
-        !state.downloadManager.downloads.isEmpty
+        !state.data.downloadManager.downloads.isEmpty
     }
     private var showPressedState: Bool {
         state.autocompleteManager.animateInputingCharacter
@@ -133,12 +133,12 @@ struct OmniBar: View {
             if hasRightActions {
                 HStack(alignment: .center) {
                     if showDownloadsButton {
-                        OmniBarDownloadButton(downloadManager: state.downloadManager, action: {
+                        OmniBarDownloadButton(downloadManager: state.data.downloadManager, action: {
                             showDownloadPanel.toggle()
                         })
                         .frame(height: 32, alignment: .top)
                         .popover(isPresented: $showDownloadPanel, content: {
-                            DownloaderView(downloader: state.downloadManager)
+                            DownloaderView(downloader: state.data.downloadManager)
                         })
                         .background(GeometryReader { proxy -> Color in
                             let rect = proxy.frame(in: .global)

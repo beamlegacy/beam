@@ -218,6 +218,7 @@ class DownloadManagerMock: DownloadManager {
     }
 
     func downloadFile(at url: URL, headers: [String: String], suggestedFileName: String?, destinationFoldedURL: URL?) {}
+    func downloadFile(from document: BeamDownloadDocument) throws {}
 
     func clearAllFileDownloads() {}
     func clearFileDownload(_ download: Download) -> Download? { return nil }

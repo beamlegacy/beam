@@ -20,9 +20,9 @@ struct DownloadCell: View {
     @State private var hoverState: OnHoverState?
     @State private var showAlertFileNotFound: Bool = false
     var isSelected: Bool
-    private weak var downloadManager: DownloadManager?
+    private weak var downloadManager: BeamDownloadManager?
 
-    init(download: Download, from downloadManager: DownloadManager? = nil, isSelected: Bool = false) {
+    init(download: Download, from downloadManager: BeamDownloadManager? = nil, isSelected: Bool = false) {
         self.download = download
         self.isSelected = isSelected
         self.downloadManager = downloadManager
@@ -46,19 +46,27 @@ struct DownloadCell: View {
                     .foregroundColor(BeamColor.LightStoneGray.swiftUI)
             }
             Spacer()
-            if download.state == .running {
+            switch download.state {
+            case .running:
                 CircledButton(image: "download-pause", action: pauseDownload, onHover: { hover in
                     hoverState = hover ? .pause : nil
                 }).blendMode(.multiply)
-            } else if download.state == .suspended {
+            case .suspended:
                 CircledButton(image: "download-resume", action: resumeDownload, onHover: { hover in
                     hoverState = hover ? .resume : nil
                 }).blendMode(.multiply)
-            } else if download.state == .completed {
-                CircledButton(image: "download-view", action: showInFinder, onHover: { hover in
-                    hoverState = hover ? .view : nil
+            case .completed where download.errorMessage != nil:
+                CircledButton(image: "download-resume", action: resumeDownload, onHover: { hover in
+                    hoverState = hover ? .resume : nil
                 }).blendMode(.multiply)
+            case .completed, .canceling:
+                EmptyView()
+            @unknown default:
+                EmptyView()
             }
+            CircledButton(image: "download-view", action: showInFinder, onHover: { hover in
+                hoverState = hover ? .view : nil
+            }).blendMode(.multiply)
         }
         .padding(.horizontal, 8)
         .animation(.easeInOut(duration: 0.3))
@@ -82,7 +90,7 @@ struct DownloadCell: View {
         if let buttonHovered = hoverState {
             switch buttonHovered {
             case .pause:
-                return "Pause Download"
+                return "Cancel Download"
             case .resume:
                 return "Resume Download"
             case .view:
@@ -90,7 +98,7 @@ struct DownloadCell: View {
             }
         } else {
             if let error = download.errorMessage {
-                return error
+                return error.capitalized
             }
             switch download.state {
             case .running:
@@ -98,7 +106,7 @@ struct DownloadCell: View {
             case .suspended:
                 return "\(download.localizedProgressString ?? "") · Stopped"
             case .canceling:
-                return "\(download.localizedProgressString ?? "") · Stopping"
+                return "\(download.localizedProgressString ?? "") · Canceling"
             case .completed:
                 return download.totalCount ?? ""
             @unknown default:
@@ -112,20 +120,24 @@ struct DownloadCell: View {
     }
 
     private func pauseDownload() {
-        download.downloadTask?.progress.pause()
+        downloadManager?.cancel(download)
     }
 
     private func resumeDownload() {
-        download.downloadTask?.progress.resume()
+        downloadManager?.resume(download)
     }
 
     private func showInFinder() {
-        let url = download.fileSystemURL
-        guard url.isFileURL, FileManager.default.fileExists(atPath: url.path) else {
+        let downloadedFileURL = download.fileSystemURL
+        let tempFileURL = download.downloadDocumentFileURL
+
+        if downloadedFileURL.isFileURL, FileManager.default.fileExists(atPath: downloadedFileURL.path) {
+            NSWorkspace.shared.activateFileViewerSelecting([downloadedFileURL])
+        } else if tempFileURL.isFileURL, FileManager.default.fileExists(atPath: tempFileURL.path) {
+            NSWorkspace.shared.activateFileViewerSelecting([tempFileURL])
+        } else {
             showAlertFileNotFound = true
-            return
         }
-        NSWorkspace.shared.activateFileViewerSelecting([url])
     }
 
     private func openFile() {
@@ -154,13 +166,13 @@ struct DownloadCell: View {
 
 struct DownloadCell_Previews: PreviewProvider {
     static var previews: some View {
-        let d1 = Download(downloadURL: URL(string: "https://devimages-cdn.apple.com/design/resources/download/SF-Symbols-2.1.dmg")!, fileSystemURL: URL(fileURLWithPath: "/"), downloadTask: nil)
+        let d1 = Download(downloadURL: URL(string: "https://devimages-cdn.apple.com/design/resources/download/SF-Symbols-2.1.dmg")!, fileSystemURL: URL(fileURLWithPath: "/"), suggestedFileName: "", downloadTask: nil)
         d1.fakeState = .completed
 
-        let d2 = Download(downloadURL: URL(string: "https://devimages-cdn.apple.com/design/resources/download/SF-Symbols-2.1.dmg")!, fileSystemURL: URL(fileURLWithPath: "/"), downloadTask: nil)
+        let d2 = Download(downloadURL: URL(string: "https://devimages-cdn.apple.com/design/resources/download/SF-Symbols-2.1.dmg")!, fileSystemURL: URL(fileURLWithPath: "/"), suggestedFileName: "", downloadTask: nil)
         d2.fakeState = .suspended
 
-        let d3 = Download(downloadURL: URL(string: "https://devimages-cdn.apple.com/design/resources/download/SF-Symbols-2.1.dmg")!, fileSystemURL: URL(fileURLWithPath: "/"), downloadTask: nil)
+        let d3 = Download(downloadURL: URL(string: "https://devimages-cdn.apple.com/design/resources/download/SF-Symbols-2.1.dmg")!, fileSystemURL: URL(fileURLWithPath: "/"), suggestedFileName: "", downloadTask: nil)
         d3.fakeState = .running
 
         return Group {

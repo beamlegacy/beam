@@ -75,6 +75,7 @@
 		33793AD2265CFEC50041E1B8 /* FavIcon in Frameworks */ = {isa = PBXBuildFile; productRef = 96474E3E254D9ADB00A920B3 /* FavIcon */; };
 		33793AD7265CFEC50041E1B8 /* KeychainAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 524CF6D225F276D1007312F0 /* KeychainAccess */; };
 		338A66A0268DC26000B056EB /* LayerRemoverAnimationDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 338A669F268DC26000B056EB /* LayerRemoverAnimationDelegate.swift */; };
+		338A66C2268E053C00B056EB /* BeamDownloadDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 338A66C1268E053C00B056EB /* BeamDownloadDocument.swift */; };
 		33B27467264C0F7100A318CD /* AutoUpdate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 33B27450264C0CDC00A318CD /* AutoUpdate.framework */; };
 		33B27468264C0F7100A318CD /* AutoUpdate.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 33B27450264C0CDC00A318CD /* AutoUpdate.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		33B2746A264C103400A318CD /* SmallUpdateIndicatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33B27469264C103400A318CD /* SmallUpdateIndicatorView.swift */; };
@@ -852,6 +853,7 @@
 		3330D7CC265E95E0008C9E20 /* LinearProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinearProgressView.swift; sourceTree = "<group>"; };
 		333A0A1F268C4EED004B7905 /* KeyEventHandlingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyEventHandlingView.swift; sourceTree = "<group>"; };
 		338A669F268DC26000B056EB /* LayerRemoverAnimationDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerRemoverAnimationDelegate.swift; sourceTree = "<group>"; };
+		338A66C1268E053C00B056EB /* BeamDownloadDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamDownloadDocument.swift; sourceTree = "<group>"; };
 		33B27441264C0CDB00A318CD /* AutoUpdate.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = AutoUpdate.xcodeproj; path = Extern/AutoUpdate/AutoUpdate.xcodeproj; sourceTree = "<group>"; };
 		33B27469264C103400A318CD /* SmallUpdateIndicatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmallUpdateIndicatorView.swift; sourceTree = "<group>"; };
 		33DEF48726617E0B00834839 /* CircledButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircledButton.swift; sourceTree = "<group>"; };
@@ -3230,6 +3232,7 @@
 				3330D7B4265E4441008C9E20 /* Download.swift */,
 				3330D7CA265E466D008C9E20 /* OmniBarDownloadButton.swift */,
 				330D3823265FC6B200A2536B /* DownloadCell.swift */,
+				338A66C1268E053C00B056EB /* BeamDownloadDocument.swift */,
 			);
 			path = Download;
 			sourceTree = "<group>";
@@ -4157,6 +4160,7 @@
 				4181725F2581107C00317ED8 /* DocumentManager.swift in Sources */,
 				032562B326051D3B006513E4 /* RBDateRange.m in Sources */,
 				520088B82613265900AED835 /* Database.swift in Sources */,
+				338A66C2268E053C00B056EB /* BeamDownloadDocument.swift in Sources */,
 				A5C9F01126136B5F0096380F /* AllCardsPageContentView.swift in Sources */,
 				A5946804265CE5B30044A892 /* DeleteDocumentCommand.swift in Sources */,
 				A050047525DA918A009CFEB6 /* NoteAutoSaveService.swift in Sources */,

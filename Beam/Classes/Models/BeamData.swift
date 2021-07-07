@@ -34,7 +34,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
 
     var cookies: HTTPCookieStorage
     var documentManager: DocumentManager
-    var downloadManager: DownloadManager = BeamDownloadManager()
+    var downloadManager: BeamDownloadManager = BeamDownloadManager()
     var sessionLinkRanker = SessionLinkRanker()
     var clusteringManager: ClusteringManager
     var scope = Set<AnyCancellable>()
@@ -137,6 +137,10 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
             if newDay {
                 self.reloadJournal()
             }
+        }.store(in: &scope)
+
+        downloadManager.$downloads.sink { [weak self] _ in
+            self?.objectWillChange.send()
         }.store(in: &scope)
 
         NotificationCenter.default.addObserver(self,
