@@ -209,6 +209,11 @@ public class BeamNote: BeamElement {
         fetchedNotes.removeValue(forKey: cacheKeyFromTitle(note.title))
     }
 
+    public static func reloadAfterRename(previousTitle: String, note: BeamNote) {
+        fetchedNotes.removeValue(forKey: cacheKeyFromTitle(previousTitle))
+        fetchedNotes[cacheKeyFromTitle(note.title)] = WeakReference(note)
+    }
+
     public func isEntireNoteEmpty() -> Bool {
         guard let child = children.first,
               child.text.isEmpty && children.count == 1 else {

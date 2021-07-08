@@ -171,6 +171,8 @@ public class TextNode: ElementNode {
 
         setAccessibilityLabel("TextNode")
         setAccessibilityRole(.textArea)
+
+        observeNoteTitles()
     }
 
     override init(editor: BeamTextEdit, element: BeamElement, nodeProvider: NodeProvider? = nil) {
@@ -190,9 +192,20 @@ public class TextNode: ElementNode {
         default:
             textPadding = NSEdgeInsetsZero
         }
+
+        observeNoteTitles()
     }
 
     // MARK: - Setup UI
+
+    private func observeNoteTitles() {
+        AppDelegate.main.data.$renamedNote.dropFirst().sink { [unowned self] (noteId, previousName, newName) in
+            Logger.shared.logInfo("Note '\(previousName)' renamed to '\(newName)' [\(noteId)]")
+            if self.elementText.internalLinks.contains(noteId) {
+               self.unproxyElement.updateNoteNamesInInternalLinks()
+            }
+        }.store(in: &scope)
+    }
 
     override public func draw(in context: CGContext) {
         updateRendering()

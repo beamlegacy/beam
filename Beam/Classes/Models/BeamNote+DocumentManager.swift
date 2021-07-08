@@ -90,20 +90,13 @@ extension BeamNote: BeamNoteDocument {
         recursiveUpdate(other: newSelf)
     }
 
-    public func updateTitle(_ newTitle: String, documentManager: DocumentManager, completion: ((Result<Bool, Error>) -> Void)? = nil) {
+    public func updateTitle(_ newTitle: String, documentManager: DocumentManager) {
         let previousTitle = self.title
         try? GRDBDatabase.shared.remove(note: self)
-        Self.unload(note: self)
         self.title = newTitle
-        self.save(documentManager: documentManager) { [weak self] result in
-            DispatchQueue.main.async { [weak self] in
-                guard let self = self else { return }
-                try? GRDBDatabase.shared.append(note: self)
-                Self.appendToFetchedNotes(self)
-            }
-
-            completion?(result)
-        }
+        Self.reloadAfterRename(previousTitle: previousTitle, note: self)
+        try? GRDBDatabase.shared.append(note: self)
+        AppDelegate.main.data.renamedNote = (id, previousTitle, title)
     }
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length

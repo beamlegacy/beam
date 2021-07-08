@@ -42,3 +42,23 @@ public extension BeamElement {
         return links + children.flatMap { $0.internalLinks }
     }
 }
+
+public extension BeamElement {
+    // Returns true is something was actually updated
+    @discardableResult
+    func updateNoteNamesInInternalLinks(recursive: Bool = false) -> Bool {
+        var res = text.resolveNotesNames()
+
+        if recursive {
+            for child in children {
+                res = child.updateNoteNamesInInternalLinks(recursive: recursive) || res
+            }
+        }
+
+        if res, let note = note, !note.cmdManager.isEmpty {
+            // If the card renaming has changed anything in the currently edited note we need to reset the commandManager
+            note.resetCommandManager()
+        }
+        return res
+    }
+}

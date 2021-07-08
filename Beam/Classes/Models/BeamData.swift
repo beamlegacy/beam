@@ -29,6 +29,8 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     @Published var isFetching = false
     @Published var newDay: Bool = false
     @Published var tabToIndex: TabInformation?
+    //swiftlint:disable:next large_tuple
+    @Published var renamedNote: (noteId: UUID, previousName: String, newName: String) = (UUID.null, "", "")
     var noteAutoSaveService: NoteAutoSaveService
     var linkManager: LinkManager
 
@@ -79,6 +81,8 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     static var indexPath: URL { URL(fileURLWithPath: dataFolder(fileName: "index.beamindex")) }
     static var fileDBPath: String { dataFolder(fileName: "files.db") }
     static var linkStorePath: URL { URL(fileURLWithPath: dataFolder(fileName: "links.store")) }
+    static var idToTitle: [UUID:String] = [:]
+    static var titleToId: [String:UUID] = [:]
 
     override init() {
         clusteringManager = ClusteringManager(ranker: sessionLinkRanker)
@@ -106,16 +110,35 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         super.init()
 
         BeamNote.idForNoteNamed = { title in
-            self.documentManager.loadDocumentByTitle(title: title)?.id
+            guard let id = Self.titleToId[title] else {
+                guard let id = self.documentManager.loadDocumentByTitle(title: title)?.id else { return nil }
+                Self.titleToId[title] = id
+                Self.idToTitle[id] = title
+                return id
+            }
+            return id
         }
         BeamNote.titleForNoteId = { id in
-            self.documentManager.loadDocumentById(id: id)?.title
+            guard let title = Self.idToTitle[id] else {
+                guard let title = self.documentManager.loadDocumentById(id: id)?.title else { return nil }
+                Self.titleToId[title] = id
+                Self.idToTitle[id] = title
+                return title
+            }
+            return title
         }
+
+        $renamedNote.dropFirst().sink { (noteId, previousName, newName) in
+            Self.titleToId.removeValue(forKey: previousName)
+            Self.titleToId[newName] = noteId
+            Self.idToTitle[noteId] = newName
+        }.store(in: &scope)
 
         updateNoteCount()
         setupSubscribers()
     }
 
+    // swiftlint:disable:next function_body_length
     private func setupSubscribers() {
         $lastChangedElement.sink { element in
             guard let element = element else { return }
