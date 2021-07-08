@@ -52,6 +52,7 @@ public extension CALayer {
     }
     var note: BeamElement! {
         didSet {
+            note?.updateNoteNamesInInternalLinks(recursive: true)
             DispatchQueue.main.async {
                 self.scroll(.zero)
             }
@@ -136,6 +137,7 @@ public extension CALayer {
         self.journalMode = journalMode
 
         note = root
+
         super.init(frame: NSRect())
 
         setAccessibilityIdentifier("TextEdit")
