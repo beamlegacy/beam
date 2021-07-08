@@ -125,23 +125,10 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         $tabToIndex.sink { [weak self] tabToIndex in
             guard let self = self,
                   let tabToIndex = tabToIndex else { return }
-
-            guard var id = tabToIndex.currentTabTree?.current.link else { return }
-            var parentId = tabToIndex.parentBrowsingNode?.link
-            if let parent = tabToIndex.parentBrowsingNode,
-               parent.events.contains(where: { $0.type == .searchBarNavigation }) {
-                parentId = nil
-            }
-            if let current = tabToIndex.currentTabTree?.current,
-               current.events.contains(where: { $0.type == .openLinkInNewTab }),
-               let tabTree = tabToIndex.tabTree?.current.link {
-                parentId = id
-                id = tabTree
-            }
-            if let previousTabTree = tabToIndex.previousTabTree,
-               previousTabTree.current.events.contains(where: { $0.type == .openLinkInNewTab }) {
-                parentId = previousTabTree.current.link
-            }
+            var currentId: UInt64?
+            var parentId: UInt64?
+            (currentId, parentId) = self.clusteringManager.getIdAndParent(tabToIndex: tabToIndex)
+            guard let id = currentId else { return }
             self.clusteringManager.addPage(id: id, parentId: parentId, value: tabToIndex)
             LinkStore.shared.visit(link: tabToIndex.url.string, title: tabToIndex.document.title)
 
