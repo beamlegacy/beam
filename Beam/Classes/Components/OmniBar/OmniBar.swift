@@ -204,9 +204,11 @@ struct OmniBar: View {
 }
 
 struct OmniBar_Previews: PreviewProvider {
-
     static let state = BeamState()
     static let focusedState = BeamState()
+    static let beamData = BeamData()
+    static let autocompleteManager = AutocompleteManager(with: beamData, searchEngine: GoogleSearch())
+    static let browserTabManager = BrowserTabsManager(with: beamData)
 
     static var previews: some View {
         state.focusOmniBox = false
@@ -215,8 +217,14 @@ struct OmniBar_Previews: PreviewProvider {
         let origin = BrowsingTreeOrigin.searchBar(query: "query")
         focusedState.browserTabsManager.currentTab = BrowserTab(state: focusedState, browsingTreeOrigin: origin, note: BeamNote(title: "Note title"))
         return Group {
-            OmniBar().environmentObject(state)
-            OmniBar().environmentObject(focusedState)
+            OmniBar()
+                .environmentObject(state)
+                .environmentObject(autocompleteManager)
+                .environmentObject(browserTabManager)
+            OmniBar()
+                .environmentObject(focusedState)
+                .environmentObject(autocompleteManager)
+                .environmentObject(browserTabManager)
         }.previewLayout(.fixed(width: 500, height: 60))
     }
 }
