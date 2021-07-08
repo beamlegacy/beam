@@ -59,6 +59,13 @@ class ImageNode: ElementNode {
         }
 
         imageSize = image.size
+        guard imageSize.width > 0,
+              imageSize.width.isFinite,
+              imageSize.height > 0,
+              imageSize.height.isFinite else {
+            Logger.shared.logError("Loaded Image '\(uid)' has invalid size \(imageSize)", category: .noteEditor)
+            return
+        }
         let width = availableWidth - childInset
         let height = (width / imageSize.width) * imageSize.height
 
@@ -72,8 +79,11 @@ class ImageNode: ElementNode {
 
         if invalidatedRendering {
             let available = availableWidth - indent
-            let width = imageSize.width > available ? available : imageSize.width
-            let height = (width / imageSize.width) * imageSize.height
+            let computedWidth = imageSize.width > available ? available : imageSize.width
+            let width = computedWidth.isNaN ? 0 : computedWidth
+            let computedHeight = (width / imageSize.width) * imageSize.height
+            let height = computedHeight.isNaN ? 0 : computedHeight
+
             contentsFrame = NSRect(x: indent, y: 0, width: width, height: childInset + height)
 
             if let imageLayer = layers["image"] {
