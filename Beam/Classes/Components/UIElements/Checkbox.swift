@@ -9,9 +9,9 @@ import SwiftUI
 
 struct Checkbox: View {
     @State var checkState: Bool
-    var text: String
-    var textColor: Color
-    var textFont: Font
+    var text: String?
+    var textColor: Color?
+    var textFont: Font?
     var activated: (Bool) -> Void
 
     var body: some View {
@@ -20,23 +20,37 @@ struct Checkbox: View {
                 checkState.toggle()
                 activated(checkState)
             }, label: {
-                Image(checkState ? "collect-generic" : "nil")
-                    .renderingMode(.template)
-                    .resizable()
-                    .foregroundColor(.white)
-                    .frame(width: 14, height: 14, alignment: .center)
-                    .cornerRadius(4)
-                    .background(
-                        Rectangle()
-                                 .fill(self.checkState ? Color.blue : Color.white)
-                                 .frame(width: 14, height: 14, alignment: .center)
-                                 .cornerRadius(4)
-                    )
+                if checkState {
+                    Image("collect-generic")
+                        .renderingMode(.template)
+                        .resizable()
+                        .foregroundColor(.white)
+                        .frame(width: 14, height: 14, alignment: .center)
+                        .cornerRadius(4)
+                        .background(
+                            Rectangle()
+                                     .fill(Color.blue)
+                                     .frame(width: 14, height: 14, alignment: .center)
+                                     .cornerRadius(4)
+                        )
+                } else {
+                    Rectangle()
+                             .fill(Color.white)
+                             .frame(width: 14, height: 14, alignment: .center)
+                             .cornerRadius(4)
+                }
             })
             .buttonStyle(PlainButtonStyle())
-            Text(text)
-                .foregroundColor(textColor)
-                .font(textFont)
+            if !(text?.isEmpty ?? false) {
+                Button {
+                    checkState.toggle()
+                    activated(checkState)
+                } label: {
+                    Text(text ?? "")
+                        .foregroundColor(textColor)
+                        .font(textFont)
+                }.buttonStyle(PlainButtonStyle())
+            }
         }
     }
 }
