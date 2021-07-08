@@ -190,7 +190,7 @@
 		</dict>
 		<dict>
 			<key>CFBundleTypeIconFile</key>
-			<string></string>
+			<string>download-document-icon</string>
 			<key>CFBundleTypeIconSystemGenerated</key>
 			<integer>1</integer>
 			<key>CFBundleTypeName</key>
@@ -324,11 +324,11 @@
 			<key>UTTypeDescription</key>
 			<string>Beam Download File</string>
 			<key>UTTypeIconFile</key>
-			<string></string>
+			<string>download-document-icon</string>
 			<key>UTTypeIcons</key>
 			<dict>
 				<key>UTTypeIconBadgeName</key>
-				<string>download-document-icon</string>
+				<string>AppIcon</string>
 				<key>UTTypeIconText</key>
 				<string>Download</string>
 			</dict>

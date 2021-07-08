@@ -21,17 +21,20 @@ struct DownloadCell: View {
     @State private var showAlertFileNotFound: Bool = false
     var isSelected: Bool
     private weak var downloadManager: BeamDownloadManager?
+    private var onDeleteKeyDownAction: (() -> Void)?
 
-    init(download: Download, from downloadManager: BeamDownloadManager? = nil, isSelected: Bool = false) {
+    init(download: Download, from downloadManager: BeamDownloadManager? = nil, isSelected: Bool = false, onDeleteKeyDownAction: (() -> Void)? = nil) {
         self.download = download
         self.isSelected = isSelected
         self.downloadManager = downloadManager
+        self.onDeleteKeyDownAction = onDeleteKeyDownAction
         showAlertFileNotFound = false
     }
 
     var body: some View {
         HStack(spacing: 8) {
             Image("download-icon")
+                .allowsHitTesting(false)
             VStack(alignment: .leading, spacing: 4) {
                 Text(download.fileSystemURL.lastPathComponent)
                     .font(BeamFont.regular(size: 13).swiftUI)
@@ -44,7 +47,7 @@ struct DownloadCell: View {
                     .animation(.none)
                     .font(BeamFont.regular(size: 10).swiftUI)
                     .foregroundColor(BeamColor.LightStoneGray.swiftUI)
-            }
+            }.allowsHitTesting(false)
             Spacer()
             switch download.state {
             case .running:
@@ -69,7 +72,7 @@ struct DownloadCell: View {
             }).blendMode(.multiply)
         }
         .padding(.horizontal, 8)
-        .animation(.easeInOut(duration: 0.3))
+        .animation(.easeInOut(duration: 0.3), value: hoverState)
         .frame(height: 53)
         .background(KeyEventHandlingView(onKeyDown: onKeyDown(event:), handledKeyCodes: [.space, .enter, .backspace, .delete]))
         .background(backgroundColor.cornerRadius(6))
@@ -115,10 +118,6 @@ struct DownloadCell: View {
         }
     }
 
-    private func deleteDownload() {
-        downloadManager?.clearFileDownload(download)
-    }
-
     private func pauseDownload() {
         downloadManager?.cancel(download)
     }
@@ -150,14 +149,25 @@ struct DownloadCell: View {
 
     private func onKeyDown(event: NSEvent) {
         switch event.keyCode {
-        case KeyCode.space.rawValue, KeyCode.enter.rawValue:
+        case KeyCode.enter.rawValue:
             openFile()
+        case KeyCode.space.rawValue:
+            pauseOrResumeDependingOnState()
         case KeyCode.backspace.rawValue, KeyCode.delete.rawValue:
-            if download.state == .running {
-                pauseDownload()
-            } else {
-                deleteDownload()
-            }
+            onDeleteKeyDownAction?()
+        default:
+            break
+        }
+    }
+
+    private func pauseOrResumeDependingOnState() {
+        switch download.state {
+        case .running:
+            pauseDownload()
+        case .suspended:
+            resumeDownload()
+        case .completed where download.errorMessage != nil:
+            resumeDownload()
         default:
             break
         }
