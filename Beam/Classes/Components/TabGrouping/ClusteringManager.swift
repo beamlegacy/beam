@@ -65,6 +65,48 @@ class ClusteringManager: ObservableObject {
         }.store(in: &scope)
     }
 
+    func getIdAndParent(tabToIndex: TabInformation) -> (UInt64?, UInt64?) {
+        var id = tabToIndex.currentTabTree?.current.link
+        var parentId = tabToIndex.parentBrowsingNode?.link
+        var parentTimeStamp = Date.distantPast
+        if let parent = tabToIndex.parentBrowsingNode,
+           let lastEventType = parent.events.last?.type {
+            if let lastEventTime = parent.events.last?.date {
+                parentTimeStamp = lastEventTime
+            }
+            if lastEventType == .searchBarNavigation || lastEventType == .exitForward || lastEventType == .exitBackward {
+                parentId = nil
+            }
+        }
+        if let children = tabToIndex.currentTabTree?.current.children {
+            for child in children {
+                if let lastEventType = child.events.last?.type,
+                   let lastEventTime = child.events.last?.date,
+                   lastEventType == .exitBackward,
+                   lastEventTime > parentTimeStamp {
+                    parentTimeStamp = lastEventTime
+                    parentId = nil
+                    // TODO: Reconsider the relation implied by the back button
+                    // when it is 100% reliable. (probably should stay the same)
+                }
+            }
+        }
+        // By definition, when opening a link in a new tab the link either
+        // has no children or their events are farther in the past
+        if let current = tabToIndex.currentTabTree?.current.events.last?.type,
+           current == .openLinkInNewTab,
+           let tabTree = tabToIndex.tabTree?.current.link {
+            parentId = id
+            id = tabTree
+        }
+        if let previousTabTree = tabToIndex.previousTabTree,
+           let type = previousTabTree.current.events.last?.type,
+           type == .openLinkInNewTab {
+            parentId = previousTabTree.current.link
+        }
+        return (id, parentId)
+    }
+
     func addPage(id: UInt64, parentId: UInt64?, value: TabInformation? = nil, newContent: String? = nil) {
         var pageToAdd: Page?
         if let value = value {

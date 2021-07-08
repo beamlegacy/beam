@@ -530,4 +530,5 @@ extension SwiftSoup.Document {
 
         return []
     }
+    // swiftlint:disable:next file_length
 }

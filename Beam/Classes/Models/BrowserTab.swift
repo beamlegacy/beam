@@ -5,6 +5,7 @@ import WebKit
 import BeamCore
 import Promises
 
+// swiftlint:disable:next type_body_length
 @objc class BrowserTab: NSObject, ObservableObject, Identifiable, Codable, WebPage, Scorable {
 
     var id: UUID
@@ -491,4 +492,5 @@ import Promises
             sender.send(browsingTree: browsingTree)
         }
     }
+    // swiftlint:disable:next file_length
 }
