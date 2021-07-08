@@ -147,6 +147,7 @@ class AutocompleteManager: ObservableObject {
             return
         }
 
+        stopCurrentCompletionBlocks()
         let queue = DispatchQueue.global(qos: .userInteractive)
         queue.async {
             var autocompleteResults = [AutocompleteResult.Source: [AutocompleteResult]]()
@@ -231,6 +232,9 @@ class AutocompleteManager: ObservableObject {
                 DispatchQueue.main.async {
                     self.autocompleteSearchGuessesHandler = nil
                     self.autocompleteResults = finalResults
+                    if !isRemovingCharacters {
+                        self.automaticallySelectFirstResultIfNeeded(withResults: finalResults, searchText: searchText)
+                    }
                 }
                 return
             }
@@ -309,7 +313,7 @@ class AutocompleteManager: ObservableObject {
     }
 
     private func updateSearchQueryWhenSelectingAutocomplete(_ selectedIndex: Int?, previousSelectedIndex: Int?) {
-        if let i = autocompleteSelectedIndex, i >= 0, i < autocompleteResults.count {
+        if let i = selectedIndex, i >= 0, i < autocompleteResults.count {
             let result = autocompleteResults[i]
             let resultText = result.text
             textChangeIsFromSelection = true
@@ -368,16 +372,20 @@ extension AutocompleteManager {
 
     func cancelAutocomplete() {
         resetAutocompleteSelection()
-        searchEngineCompleter.clear()
         autocompleteResults = []
-        autocompleteTimeoutBlock?.cancel()
+        stopCurrentCompletionBlocks()
     }
 
     func resetQuery() {
         searchQuery = ""
-        searchEngineCompleter.clear()
         autocompleteResults = []
+        stopCurrentCompletionBlocks()
+    }
+
+    private func stopCurrentCompletionBlocks() {
+        searchEngineCompleter.clear()
         autocompleteTimeoutBlock?.cancel()
+        autocompleteSearchGuessesHandler = nil
     }
 
     func setQueryWithoutAutocompleting(_ query: String) {
