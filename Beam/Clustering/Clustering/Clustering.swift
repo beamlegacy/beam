@@ -23,6 +23,7 @@ public struct Page {
     var entities: EntitiesInText?
     var language: NLLanguage?
     var entitiesInTitle: EntitiesInText?
+    var attachedPages = [UInt64]()
 }
 
 enum ClusteringCandidate {
@@ -499,6 +500,11 @@ public class Cluster {
         while pagesRemoved < 3 {
             if let pageToRemove = ranking.first {
                 if let pageIndexToRemove = self.findPageInPages(pageID: pageToRemove) {
+                    let adjacencyVector = self.adjacencyMatrix[row: pageIndexToRemove]
+                    if let pageIndexToAttach = adjacencyVector.firstIndex(of: max(adjacencyVector)) {
+                        pages[pageIndexToAttach].attachedPages.append(pageToRemove)
+                        pages[pageIndexToAttach].attachedPages += pages[pageIndexToRemove].attachedPages
+                    }
                     try self.navigationMatrix.removePage(index: pageIndexToRemove)
                     try self.textualSimilarityMatrix.removePage(index: pageIndexToRemove)
                     try self.entitiesMatrix.removePage(index: pageIndexToRemove)
@@ -661,8 +667,9 @@ public class Cluster {
         for label in labels.enumerated() {
             if label.element < nextCluster {
                 clusterized[label.element].append(self.pages[label.offset].id)
+                clusterized[label.element] += self.pages[label.offset].attachedPages
             } else {
-                clusterized.append([self.pages[label.offset].id])
+                clusterized.append([self.pages[label.offset].id] + self.pages[label.offset].attachedPages)
                 nextCluster += 1
             }
         }

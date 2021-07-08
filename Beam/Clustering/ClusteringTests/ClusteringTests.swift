@@ -734,9 +734,7 @@ class ClusteringTests: XCTestCase {
             case .failure(let error):
                 XCTFail(error.localizedDescription)
             case .success(let result):
-                expect(result.0[0]).toNot(contain(1))
-                expect(result.0[0]).toNot(contain(4))
-                expect(result.0[0]).toNot(contain(2))
+                expect(cluster.pages[0].attachedPages) == [1,4,2]
                 expect(cluster.adjacencyMatrix.rows) == 4
                 expect(cluster.pages.count) == 4
             }
