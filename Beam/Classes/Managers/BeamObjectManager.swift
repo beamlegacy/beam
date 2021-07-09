@@ -5,10 +5,8 @@ protocol BeamObjectManagerDelegateProtocol {
     func saveAllOnBeamObjectApi(_ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask?
     func receivedBeamObjects(_ objects: [BeamObjectProtocol]) throws
     func saveOnBeamObjectAPI(_ object: BeamObjectProtocol,
-                             _ forced: Bool,
                              _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask?
     func saveOnBeamObjectsAPI(_ objects: [BeamObjectProtocol],
-                              _ forced: Bool,
                               _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask?
 }
 

@@ -1132,28 +1132,25 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
     }
 
     func saveOnBeamObjectAPI(_ object: BeamObjectProtocol,
-                             _ forced: Bool = false,
                              _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
         guard let databaseStruct = object as? DatabaseStruct else {
             completion(.failure(DatabaseManagerError.wrongObjectsType))
             return nil
         }
-        return try saveOnBeamObjectAPI(databaseStruct: databaseStruct, forced, completion)
+        return try saveOnBeamObjectAPI(databaseStruct: databaseStruct, completion)
     }
 
     func saveOnBeamObjectsAPI(_ objects: [BeamObjectProtocol],
-                              _ forced: Bool = false,
                               _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
         guard let databaseStructs = objects as? [DatabaseStruct] else {
             completion(.failure(DatabaseManagerError.wrongObjectsType))
             return nil
         }
-        return try saveOnBeamObjectsAPI(databaseStructs: databaseStructs, forced, completion)
+        return try saveOnBeamObjectsAPI(databaseStructs: databaseStructs, completion)
     }
 
     @discardableResult
     internal func saveOnBeamObjectsAPI(databaseStructs: [DatabaseStruct],
-                                       _ forced: Bool = false,
                                        _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             completion(.success(false))
@@ -1161,12 +1158,6 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
         }
 
         let beamObjects = try databaseStructsAsBeamObjects(databaseStructs)
-
-        if forced {
-            for beamObject in beamObjects {
-                beamObject.previousChecksum = nil
-            }
-        }
 
         let objectManager = BeamObjectManager()
 
@@ -1207,7 +1198,6 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
 
     @discardableResult
     internal func saveOnBeamObjectAPI(databaseStruct: DatabaseStruct,
-                                      _ forced: Bool = false,
                                       _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             completion(.success(false))
@@ -1215,9 +1205,7 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
         }
 
         let beamObject = try BeamObjectAPIType(databaseStruct, .database)
-        if !forced {
-            beamObject.previousChecksum = databaseStruct.beamObjectPreviousChecksum
-        }
+        beamObject.previousChecksum = databaseStruct.beamObjectPreviousChecksum
 
         let objectManager = BeamObjectManager()
 
@@ -1280,7 +1268,7 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
         do {
             // TODO: should merge both `documentStruct` and `remoteBeamObject`.
             // For now we just overwrite local to the remote.
-            try self.saveOnBeamObjectAPI(databaseStruct: databaseStruct, true, completion)
+            try self.saveOnBeamObjectAPI(databaseStruct: databaseStruct, completion)
         } catch {
             completion(.failure(error))
         }
