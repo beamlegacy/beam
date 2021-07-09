@@ -30,7 +30,7 @@
                                         <menuItem title="Check for updates..." id="JrI-WQ-BzX">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
-                                                <action selector="checkForUpdates:" target="Voe-Tx-rLC" id="O2j-Hj-fck"/>
+                                                <action selector="checkForUpdates:" target="Ady-hI-5gd" id="wx4-Ef-ZCB"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="wFC-TO-SCJ"/>
