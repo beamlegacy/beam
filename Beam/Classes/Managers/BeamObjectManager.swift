@@ -127,50 +127,56 @@ extension BeamObjectManager {
             }
             return
         case APIRequestError.apiErrors(let errorable):
-            Logger.shared.logError("\(errorable)", category: .beamObject)
-
             guard let errors = errorable.errors else { break }
 
-            // We have multiple errors, we're going to fetch each beamObject on the server side to include them in
-            // the error we'll return to the object calling this manager
-            let group = DispatchGroup()
-
-            var resultErrors: [Error] = []
-            let lock = DispatchSemaphore(value: 1)
-
-            for error in errors {
-                // Matching beamObject with the returned error. Could be faster with Set but this is rarelly called
-                guard let beamObject = beamObjects.first(where: { $0.id == error.objectid }) else {
-                    continue
-                }
-
-                // We only call `saveToAPIFailure` with invalid checksum errors
-                guard isErrorInvalidChecksum(error) else { continue }
-
-                group.enter()
-                saveToAPIFailure(beamObject) { result in
-                    defer { group.leave() }
-
-                    switch result {
-                    case .failure(let error):
-                        lock.wait()
-                        resultErrors.append(error)
-                        lock.signal()
-                    case .success:
-                        // This is never called by `saveToAPIFailure`
-                        break
-                    }
-                }
-            }
-
-            group.wait()
-            completion(.failure(BeamObjectManagerError.multipleErrors(resultErrors)))
+            Logger.shared.logError("\(errorable)", category: .beamObject)
+            saveToAPIFailureAPIErrors(beamObjects, errors, completion)
             return
         default:
             break
         }
 
         completion(.failure(error))
+    }
+
+    internal func saveToAPIFailureAPIErrors(_ beamObjects: [BeamObjectAPIType],
+                                            _ errors: [UserErrorData],
+                                            _ completion: @escaping ((Swift.Result<[BeamObjectAPIType], Error>) -> Void)) {
+        // We have multiple errors, we're going to fetch each beamObject on the server side to include them in
+        // the error we'll return to the object calling this manager
+        let group = DispatchGroup()
+
+        var resultErrors: [Error] = []
+        let lock = DispatchSemaphore(value: 1)
+
+        for error in errors {
+            // Matching beamObject with the returned error. Could be faster with Set but this is rarelly called
+            guard let beamObject = beamObjects.first(where: { $0.id == error.objectid }) else {
+                continue
+            }
+
+            // We only call `saveToAPIFailure` with invalid checksum errors
+            guard isErrorInvalidChecksum(error) else { continue }
+
+            group.enter()
+
+            self.saveToAPIFailure(beamObject) { result in
+                switch result {
+                case .failure(let error):
+                    lock.wait()
+                    resultErrors.append(error)
+                    lock.signal()
+                case .success:
+                    // This is never called by `saveToAPIFailure`
+                    break
+                }
+
+                group.leave()
+            }
+        }
+
+        group.wait()
+        completion(.failure(BeamObjectManagerError.multipleErrors(resultErrors)))
     }
 
     internal func isErrorInvalidChecksum(_ error: UserErrorData) -> Bool {

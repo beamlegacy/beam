@@ -271,16 +271,24 @@ extension APIRequest {
         let localTimer = Date()
         let callsCount = Self.callsCount
 
+        // Note: all `completionHandler` call must use `backgroundQueue.async` because if the code called in the completion
+        // handler is blocking, it will prevent new following requests to be parsed in the NSURLSession delegate callback
+        // thread
+
         dataTask = BeamURLSession.shared.dataTask(with: request) { (data, response, error) -> Void in
             guard let dataTask = self.dataTask else {
-                completionHandler(.failure(APIRequestError.parserError))
+                self.backgroundQueue.async {
+                    completionHandler(.failure(APIRequestError.parserError))
+                }
                 return
             }
 
             // Quit early in case of already cancelled requests
             if let error = error as NSError?, error.code == NSURLErrorCancelled {
                 self.logCancelledRequest(filename, localTimer)
-                completionHandler(.failure(error))
+                self.backgroundQueue.async {
+                    completionHandler(.failure(error))
+                }
                 return
             }
 
@@ -298,16 +306,22 @@ extension APIRequest {
             Self.callsCount += 1
 
             if let error = error {
-                completionHandler(.failure(error))
+                self.backgroundQueue.async {
+                    completionHandler(.failure(error))
+                }
                 self.handleNetworkError(error)
                 return
             }
 
             do {
                 let value: T = try self.manageResponse(data, response)
-                completionHandler(.success(value))
+                self.backgroundQueue.async {
+                    completionHandler(.success(value))
+                }
             } catch {
-                completionHandler(.failure(error))
+                self.backgroundQueue.async {
+                    completionHandler(.failure(error))
+                }
             }
         }
 
