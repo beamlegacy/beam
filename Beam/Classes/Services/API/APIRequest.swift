@@ -201,6 +201,8 @@ class APIRequest {
 
             if (result as? BeamObjectRequest.UpdateBeamObject) != nil {
                 error = APIRequestError.beamObjectInvalidChecksum(result)
+            } else if (result as? BeamObjectRequest.UpdateBeamObjects) != nil {
+                error = APIRequestError.beamObjectInvalidChecksum(result)
             } else {
                 error = APIRequestError.documentConflict
             }

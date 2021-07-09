@@ -1161,7 +1161,7 @@ extension DocumentManager {
         _ = try? saveOnBeamObjectAPI(documentStruct) { _ in }
 
         // test for storing multiple objects at the same time
-//        _ = try? saveOnBeamObjectsAPI([documentStruct, documentStruct]) { _ in }
+//        _ = try? saveOnBeamObjectsAPI([documentStruct]) { _ in }
 
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             completion?(.success(false))
@@ -2489,6 +2489,13 @@ extension DocumentManager: BeamObjectManagerDelegateProtocol {
     internal func saveOnBeamObjectsAPIFailure(_ documentStructs: [DocumentStruct],
                                               _ error: Error,
                                               _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
+        // When we use the network call to send multiple documents, but only send 1 and have an invalid checksum
+        if case BeamObjectManagerError.beamObjectInvalidChecksum = error,
+           let documentStruct = documentStructs.first {
+            saveOnBeamObjectAPIFailure(documentStruct, error, completion)
+            return
+        }
+
         guard case BeamObjectManagerError.multipleErrors(let errors) = error else {
             completion(.failure(error))
             return
