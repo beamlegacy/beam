@@ -28,6 +28,14 @@ class BeamObjectAPIType: Codable {
     var dataChecksum: String?
     var previousChecksum: String?
 
+    public var debugDescription: String {
+        "<BeamObjectAPIType: \(id) [\(beamObjectType?.rawValue ?? "-")]>"
+    }
+
+    public var description: String {
+        "<BeamObjectAPIType: \(id) [\(beamObjectType?.rawValue ?? "-")]>"
+    }
+
     enum CodingKeys: String, CodingKey {
         case id
         case beamObjectType = "type"

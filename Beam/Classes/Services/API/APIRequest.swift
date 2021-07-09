@@ -124,9 +124,10 @@ class APIRequest {
     }
 
     private func handleNetworkError(_ error: Error) {
-        if [APIRequestError.unauthorized, APIRequestError.forbidden].contains(error as? APIRequestError) {
-            // Request unauthorized
-        } else {
+        switch error {
+        case APIRequestError.unauthorized, APIRequestError.forbidden:
+            break
+        default:
             let nsError = error as NSError
             Logger.shared.logError("\(nsError) - \(nsError.userInfo)", category: .network)
             LibrariesManager.nonFatalError(error: error)
@@ -152,8 +153,10 @@ class APIRequest {
         let error: Error
         if let errors = result.errors, !errors.isEmpty {
             error = handleTopLevelErrors(errors)
-        } else if let errors = result.data?.errors, !errors.isEmpty {
-            error = APIRequestError.apiErrors(errors)
+        } else if let errorable = result.data,
+                  let errors = errorable.errors,
+                  !errors.isEmpty {
+            error = APIRequestError.apiErrors(errorable)
         } else {
             error = APIRequestError.parserError
         }
@@ -197,7 +200,7 @@ class APIRequest {
            errors[0].path == ["attributes", "previous_checksum"] {
 
             if (result as? BeamObjectRequest.UpdateBeamObject) != nil {
-                error = APIRequestError.beamObjectInvalidChecksum
+                error = APIRequestError.beamObjectInvalidChecksum(result)
             } else {
                 error = APIRequestError.documentConflict
             }
@@ -206,7 +209,7 @@ class APIRequest {
                   errors[0].message == "Title has already been taken" {
             error = APIRequestError.duplicateTitle
         } else {
-            error = APIRequestError.apiErrors(errors)
+            error = APIRequestError.apiErrors(result)
         }
 
         Logger.shared.logError(error.localizedDescription, category: .network)
@@ -386,6 +389,10 @@ extension APIRequest {
                 throw APIRequestError.parserError
             }
 
+            /*
+             Manage errors returned by our GraphQL user codebase. Request was properly handled by the server but include
+             errors like checksum issues.
+             */
             if let error = self.handleError(value) {
                 throw error
             }

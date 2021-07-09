@@ -54,7 +54,8 @@ public struct DocumentStruct: BeamObjectProtocol {
                        previousData: previousData,
                        previousChecksum: previousChecksum,
                        version: version,
-                       isPublic: isPublic
+                       isPublic: isPublic,
+                       beamObjectPreviousChecksum: beamObjectPreviousChecksum
         )
     }
 }

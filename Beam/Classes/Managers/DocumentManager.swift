@@ -1158,7 +1158,8 @@ extension DocumentManager {
     @discardableResult
     internal func saveDocumentStructOnAPI(_ documentStruct: DocumentStruct,
                                           _ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) -> URLSessionTask? {
-        _ = try? saveOnBeamObjectAPI(documentStruct) { _ in }
+//        _ = try? saveOnBeamObjectAPI(documentStruct) { _ in }
+        _ = try? saveOnBeamObjectsAPI([documentStruct, documentStruct]) { _ in }
 
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             completion?(.success(false))
@@ -2333,12 +2334,29 @@ extension DocumentManager: BeamObjectManagerDelegateProtocol {
 
                 // We don't want to send updates for documents already sent.
                 // We know it's sent because the previousChecksum is the same as the current data Checksum
-                guard object.previousChecksum != object.dataChecksum, object.previousChecksum != nil else {
+                guard object.previousChecksum != object.dataChecksum, object.dataChecksum != nil else {
                     return nil
                 }
 
                 return object
             }
+        }
+    }
+
+    internal func documentStructsAsBeamObjects(_ documentStructs: [DocumentStruct]) throws -> [BeamObjectAPIType] {
+        try documentStructs.compactMap {
+            var documentStruct = $0.copy()
+            documentStruct.previousChecksum = $0.beamObjectPreviousChecksum
+
+            let object = try BeamObjectAPIType(documentStruct, .document)
+
+            // We don't want to send updates for documents already sent.
+            // We know it's sent because the previousChecksum is the same as the current data Checksum
+            guard object.previousChecksum != object.dataChecksum, object.dataChecksum != nil else {
+                return nil
+            }
+
+            return object
         }
     }
 
@@ -2356,9 +2374,10 @@ extension DocumentManager: BeamObjectManagerDelegateProtocol {
             return nil
         }
 
-        let request = BeamObjectRequest()
+        let objectManager = BeamObjectManager()
 
-        return try request.saveAll(beamObjects) { result in
+        // TODO: refactor with `saveOnBeamObjectsAPI`
+        return try objectManager.saveToAPI(beamObjects) { result in
             switch result {
             case .failure(let error):
                 Logger.shared.logError("Could not save all \(beamObjects): \(error.localizedDescription)",
@@ -2367,6 +2386,9 @@ extension DocumentManager: BeamObjectManagerDelegateProtocol {
                 completion(.failure(error))
             case .success(let updateBeamObjects):
                 Logger.shared.logDebug("Saved \(updateBeamObjects)", category: .documentNetwork)
+
+                // Not using `saveOnBeamObjectAPISuccess` on purpose, as it would have to reload the coredata document,
+                // and I would have to convert the document to a documentStruct
 
                 do {
                     try context.performAndWait {
@@ -2388,16 +2410,104 @@ extension DocumentManager: BeamObjectManagerDelegateProtocol {
 
     func saveOnBeamObjectAPI(_ object: BeamObjectProtocol,
                              _ forced: Bool = false,
-                             _ completion: ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
+                             _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
         guard let documentStruct = object as? DocumentStruct else {
             completion(.failure(DatabaseManagerError.wrongObjectsType))
             return nil
         }
-        return try saveOnBeamObjectAPI(documentStruct, forced, completion)
+        return try saveOnBeamObjectAPI(documentStruct: documentStruct, forced, completion)
+    }
+
+    func saveOnBeamObjectsAPI(_ objects: [BeamObjectProtocol],
+                              _ forced: Bool = false,
+                              _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
+        guard let documentStructs = objects as? [DocumentStruct] else {
+            completion(.failure(DatabaseManagerError.wrongObjectsType))
+            return nil
+        }
+        return try saveOnBeamObjectsAPI(documentStructs: documentStructs, forced, completion)
     }
 
     @discardableResult
-    internal func saveOnBeamObjectAPI(_ documentStruct: DocumentStruct,
+    internal func saveOnBeamObjectsAPI(documentStructs: [DocumentStruct],
+                                       _ forced: Bool = false,
+                                       _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
+        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            completion(.success(false))
+            return nil
+        }
+
+        let beamObjects = try documentStructsAsBeamObjects(documentStructs)
+
+        guard !beamObjects.isEmpty else {
+            completion(.success(true))
+            return nil
+        }
+
+        if forced {
+            for beamObject in beamObjects {
+                beamObject.previousChecksum = nil
+            }
+        }
+
+        let objectManager = BeamObjectManager()
+
+        // TODO: refactor with `saveAllOnBeamObjectApi`
+        return try objectManager.saveToAPI(beamObjects) { result in
+            switch result {
+            case .failure(let error):
+                Logger.shared.logError("Could not save all \(beamObjects): \(error.localizedDescription)",
+                                       category: .documentNetwork)
+                guard case APIRequestError.apiErrors(let errorable) = error,
+                      let errors = errorable.errors else {
+                    completion(.failure(error))
+                    return
+                }
+
+                /*
+                 We have multiple errors. If all errors are about invalid checksums, we can fix and retry
+                 */
+
+                for error in errors {
+                    Logger.shared.logError("Could not save \(error.objectid ?? "-"): \(error)",
+                                           category: .documentNetwork)
+                    guard let objectId = error.objectid else {
+                        continue
+                    }
+                }
+
+                completion(.failure(error))
+            case .success(let updateBeamObjects):
+                Logger.shared.logDebug("Saved \(updateBeamObjects)", category: .documentNetwork)
+
+                // Not using `saveOnBeamObjectAPISuccess` on purpose, as it would be slower saving coredata context
+                // multiple times (once per returned object)
+
+                CoreDataManager.shared.persistentContainer.performBackgroundTask { context in
+                    for updateBeamObject in updateBeamObjects {
+                        guard let uuid = UUID(uuidString: updateBeamObject.id),
+                              let documentCoreData = try? Document.fetchWithId(context, uuid) else {
+                            completion(.failure(DocumentManagerError.localDocumentNotFound))
+                            continue
+                        }
+
+                        // TODO: store previous data sent for improved 3-ways merge?
+                        documentCoreData.beam_object_previous_checksum = updateBeamObject.dataChecksum
+                    }
+
+                    do {
+                        let success = try Self.saveContext(context: context)
+                        completion(.success(success))
+                    } catch {
+                        completion(.failure(error))
+                    }
+                }
+            }
+        }
+    }
+
+    @discardableResult
+    internal func saveOnBeamObjectAPI(documentStruct: DocumentStruct,
                                       _ forced: Bool = false,
                                       _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
@@ -2417,28 +2527,24 @@ extension DocumentManager: BeamObjectManagerDelegateProtocol {
             case .failure(let error):
                 self.saveOnBeamObjectAPIFailure(documentStruct, error, completion)
             case .success(let updateBeamObject):
-                self.saveOnBeamObjectAPISuccess(documentStruct, updateBeamObject, completion)
+                self.saveOnBeamObjectAPISuccess(updateBeamObject, completion)
             }
         }
     }
 
-    internal func saveOnBeamObjectAPISuccess(_ documentStruct: DocumentStruct,
-                                             _ updateBeamObject: BeamObjectAPIType,
+    internal func saveOnBeamObjectAPISuccess(_ updateBeamObject: BeamObjectAPIType,
                                              _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
         Logger.shared.logDebug("Saved \(updateBeamObject)", category: .documentNetwork)
 
-        // `beamObjectPreviousChecksum` stores the checksum we sent to the API
-        var sentDocumentStruct = documentStruct.copy()
-        sentDocumentStruct.beamObjectPreviousChecksum = updateBeamObject.previousChecksum
-
         CoreDataManager.shared.persistentContainer.performBackgroundTask { context in
-            guard let documentCoreData = try? Document.fetchWithId(context, documentStruct.id) else {
+            guard let uuid = UUID(uuidString: updateBeamObject.id),
+                  let documentCoreData = try? Document.fetchWithId(context, uuid) else {
                 completion(.failure(DocumentManagerError.localDocumentNotFound))
                 return
             }
 
             // TODO: store previous data sent for improved 3-ways merge?
-            documentCoreData.beam_object_previous_checksum = sentDocumentStruct.beamObjectPreviousChecksum
+            documentCoreData.beam_object_previous_checksum = updateBeamObject.dataChecksum
 
             do {
                 let success = try Self.saveContext(context: context)
@@ -2471,7 +2577,7 @@ extension DocumentManager: BeamObjectManagerDelegateProtocol {
         do {
             // TODO: should merge both `documentStruct` and `remoteBeamObject`.
             // For now we just overwrite local to the remote.
-            try self.saveOnBeamObjectAPI(documentStruct, true, completion)
+            try self.saveOnBeamObjectAPI(documentStruct: documentStruct, true, completion)
         } catch {
             completion(.failure(error))
         }

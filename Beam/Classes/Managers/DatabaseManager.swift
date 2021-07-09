@@ -439,7 +439,8 @@ extension DatabaseManager {
                         // Server returns errors when uploaded few databases at once, we try to correct
                         // errors and reupload if possible
                         do {
-                            if case APIRequestError.apiErrors(let errors) = error,
+                            if case APIRequestError.apiErrors(let errorable) = error,
+                               let errors = errorable.errors,
                                try self.saveAllOnApiErrors(errors) {
                                 self.saveAllOnApi(completion, nested - 1)
                             } else if case APIRequestError.duplicateTitle = error,
@@ -714,7 +715,8 @@ extension DatabaseManager {
                     return saveDBPromise.map { _ in true }
                 }
             }.recover(on: backgroundQueue) { error throws -> PromiseKit.Promise<Bool> in
-                guard case APIRequestError.apiErrors(let errors) = error,
+                guard case APIRequestError.apiErrors(let errorable) = error,
+                      let errors = errorable.errors,
                    try self.saveAllOnApiErrors(errors),
                    nested > 0 else {
                     throw error
@@ -903,7 +905,8 @@ extension DatabaseManager {
                 }
             }.recover(on: backgroundQueue) { error throws -> Promises.Promise<Bool> in
                 // We might have fixable errors like title conflicts
-                guard case APIRequestError.apiErrors(let errors) = error,
+                guard case APIRequestError.apiErrors(let errorable) = error,
+                      let errors = errorable.errors,
                    try self.saveAllOnApiErrors(errors),
                    nested > 0 else {
                     throw error
@@ -1058,12 +1061,29 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
 
                 // We don't want to send updates for databases already sent.
                 // We know it's sent because the previousChecksum is the same as the current data Checksum
-                guard object.previousChecksum != object.dataChecksum, object.previousChecksum != nil else {
+                guard object.previousChecksum != object.dataChecksum, object.dataChecksum != nil else {
                     return nil
                 }
 
                 return object
             }
+        }
+    }
+
+    internal func databaseStructsAsBeamObjects(_ databaseStructs: [DatabaseStruct]) throws -> [BeamObjectAPIType] {
+        try databaseStructs.compactMap {
+            var databaseStruct = $0.copy()
+            databaseStruct.previousChecksum = databaseStruct.beamObjectPreviousChecksum
+
+            let object = try BeamObjectAPIType(databaseStruct, .database)
+
+            // We don't want to send updates for documents already sent.
+            // We know it's sent because the previousChecksum is the same as the current data Checksum
+            guard object.previousChecksum != object.dataChecksum, object.dataChecksum != nil else {
+                return nil
+            }
+
+            return object
         }
     }
 
@@ -1113,16 +1133,80 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
 
     func saveOnBeamObjectAPI(_ object: BeamObjectProtocol,
                              _ forced: Bool = false,
-                             _ completion: ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
+                             _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
         guard let databaseStruct = object as? DatabaseStruct else {
             completion(.failure(DatabaseManagerError.wrongObjectsType))
             return nil
         }
-        return try saveOnBeamObjectAPI(databaseStruct, forced, completion)
+        return try saveOnBeamObjectAPI(databaseStruct: databaseStruct, forced, completion)
+    }
+
+    func saveOnBeamObjectsAPI(_ objects: [BeamObjectProtocol],
+                              _ forced: Bool = false,
+                              _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
+        guard let databaseStructs = objects as? [DatabaseStruct] else {
+            completion(.failure(DatabaseManagerError.wrongObjectsType))
+            return nil
+        }
+        return try saveOnBeamObjectsAPI(databaseStructs: databaseStructs, forced, completion)
     }
 
     @discardableResult
-    internal func saveOnBeamObjectAPI(_ databaseStruct: DatabaseStruct,
+    internal func saveOnBeamObjectsAPI(databaseStructs: [DatabaseStruct],
+                                       _ forced: Bool = false,
+                                       _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
+        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            completion(.success(false))
+            return nil
+        }
+
+        let beamObjects = try databaseStructsAsBeamObjects(databaseStructs)
+
+        if forced {
+            for beamObject in beamObjects {
+                beamObject.previousChecksum = nil
+            }
+        }
+
+        let objectManager = BeamObjectManager()
+
+        return try objectManager.saveToAPI(beamObjects) { result in
+            switch result {
+            case .failure(let error):
+                Logger.shared.logError("Could not save all \(beamObjects): \(error.localizedDescription)",
+                                       category: .documentNetwork)
+                completion(.failure(error))
+            case .success(let updateBeamObjects):
+                Logger.shared.logDebug("Saved \(updateBeamObjects)", category: .documentNetwork)
+
+                // Not using `saveOnBeamObjectAPISuccess` on purpose, as it would be slower saving coredata context
+                // multiple times (once per returned object)
+
+                CoreDataManager.shared.persistentContainer.performBackgroundTask { context in
+                    for updateBeamObject in updateBeamObjects {
+                        guard let uuid = UUID(uuidString: updateBeamObject.id),
+                              let databaseCoreData = try? Database.fetchWithId(context, uuid) else {
+                            completion(.failure(DocumentManagerError.localDocumentNotFound))
+                            continue
+                        }
+
+                        // TODO: store previous data sent for improved 3-ways merge?
+                        databaseCoreData.beam_object_previous_checksum = updateBeamObject.dataChecksum
+                    }
+
+                    do {
+                        let success = try Self.saveContext(context: context)
+                        completion(.success(success))
+                    } catch {
+                        completion(.failure(error))
+                    }
+                }
+            }
+        }
+    }
+
+    @discardableResult
+    internal func saveOnBeamObjectAPI(databaseStruct: DatabaseStruct,
                                       _ forced: Bool = false,
                                       _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
@@ -1163,7 +1247,7 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
             }
 
             // TODO: store previous data sent for improved 3-ways merge?
-            databaseCoreData.beam_object_previous_checksum = sentDatabaseStruct.beamObjectPreviousChecksum
+            databaseCoreData.beam_object_previous_checksum = sentDatabaseStruct.checksum
 
             do {
                 let success = try Self.saveContext(context: context)
@@ -1196,7 +1280,7 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
         do {
             // TODO: should merge both `documentStruct` and `remoteBeamObject`.
             // For now we just overwrite local to the remote.
-            try self.saveOnBeamObjectAPI(databaseStruct, true, completion)
+            try self.saveOnBeamObjectAPI(databaseStruct: databaseStruct, true, completion)
         } catch {
             completion(.failure(error))
         }

@@ -5,6 +5,7 @@ mutation UpdateBeamObjects($beamObjects: [BeamObjectInput!]!) {
       checksum
     }
     errors {
+      objectid
       path
       message
     }

@@ -1,7 +1,7 @@
 import Foundation
 import BeamCore
 
-enum APIRequestError: Error, Equatable {
+enum APIRequestError: Error {
     case forbidden
     case unauthorized
     case internalServerError
@@ -11,9 +11,9 @@ enum APIRequestError: Error, Equatable {
     case deviceNotFound
     case notAuthenticated
     case documentConflict
-    case beamObjectInvalidChecksum
+    case beamObjectInvalidChecksum(Errorable)
     case apiError([String])
-    case apiErrors([UserErrorData])
+    case apiErrors(Errorable)
     case operationCancelled
     case duplicateTitle
 }
@@ -41,10 +41,10 @@ extension APIRequestError: LocalizedError {
             return explanations.joined(separator: ", ")
         case .duplicateTitle:
             return loc("error.api.duplicateTitle")
-        case .apiErrors(let errors):
-            return errors.compactMap {
+        case .apiErrors(let errorable):
+            return errorable.errors?.compactMap {
                 if let path = $0.path?.joined(separator: ", "), let message = $0.message {
-                    return "\(path): \(message)"
+                    return "\($0.objectid ?? "?"): \(path): \(message)"
                 } else {
                     return "\(String(describing: $0.path?.joined(separator: ", "))): \(String(describing: $0.message))"
                 }

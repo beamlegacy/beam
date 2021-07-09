@@ -33,7 +33,8 @@ public struct DatabaseStruct: BeamObjectProtocol {
                        createdAt: createdAt,
                        updatedAt: updatedAt,
                        deletedAt: deletedAt,
-                       previousChecksum: previousChecksum
+                       previousChecksum: previousChecksum,
+                       beamObjectPreviousChecksum: beamObjectPreviousChecksum
         )
     }
 }

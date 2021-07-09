@@ -6,7 +6,10 @@ protocol BeamObjectManagerDelegateProtocol {
     func receivedBeamObjects(_ objects: [BeamObjectProtocol]) throws
     func saveOnBeamObjectAPI(_ object: BeamObjectProtocol,
                              _ forced: Bool,
-                             _ completion: ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask?
+                             _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask?
+    func saveOnBeamObjectsAPI(_ objects: [BeamObjectProtocol],
+                              _ forced: Bool,
+                              _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask?
 }
 
 enum BeamObjectManagerError: Error {
@@ -89,8 +92,89 @@ extension BeamObjectManager {
         let request = BeamObjectRequest()
 
         return try request.saveAll(beamObjects) { result in
-            completion(result)
+            switch result {
+            case .failure(let error):
+                self.saveToAPIFailure(beamObjects, error, completion)
+            case .success(let updateBeamObject):
+                completion(.success(updateBeamObject))
+            }
         }
+    }
+
+    /// Will look at each errors, and fetch remote object to include it in the completion if it was a checksum error
+    internal func saveToAPIFailure(_ beamObjects: [BeamObjectAPIType],
+                                   _ error: Error,
+                                   _ completion: @escaping ((Swift.Result<[BeamObjectAPIType], Error>) -> Void)) {
+        Logger.shared.logError("Could not save \(beamObjects): \(error.localizedDescription)",
+                               category: .beamObject)
+
+        switch error {
+        case APIRequestError.beamObjectInvalidChecksum:
+            // We only have 1 item for such error
+            guard let beamObject = beamObjects.first else {
+                completion(.failure(error))
+                return
+            }
+
+            saveToAPIFailure(beamObject) { result in
+                switch result {
+                case .failure(let error):
+                    completion(.failure(error))
+                case .success:
+                    // This is never called by `saveToAPIFailure`
+                    break
+                }
+            }
+            return
+        case APIRequestError.apiErrors(let errorable):
+            Logger.shared.logError("\(errorable)", category: .beamObject)
+
+            guard let errors = errorable.errors else { break }
+
+            // We have multiple errors, we're going to fetch each beamObject on the server side to include them in
+            // the error we'll return to the object calling this manager
+            let group = DispatchGroup()
+
+            var resultErrors: [Error] = []
+            let lock = DispatchSemaphore(value: 1)
+
+            for error in errors {
+                // Matching beamObject with the returned error. Could be faster with Set but this is rarelly called
+                guard let beamObject = beamObjects.first(where: { $0.id == error.objectid }) else {
+                    continue
+                }
+
+                // We only call `saveToAPIFailure` with invalid checksum errors
+                guard isErrorInvalidChecksum(error) else { continue }
+
+                group.enter()
+                saveToAPIFailure(beamObject) { result in
+                    defer { group.leave() }
+
+                    switch result {
+                    case .failure(let error):
+                        lock.wait()
+                        resultErrors.append(error)
+                        lock.signal()
+                    case .success:
+                        // This is never called by `saveToAPIFailure`
+                        break
+                    }
+                }
+            }
+
+            group.wait()
+            completion(.failure(BeamObjectManagerError.multipleErrors(resultErrors)))
+            return
+        default:
+            break
+        }
+
+        completion(.failure(error))
+    }
+
+    internal func isErrorInvalidChecksum(_ error: UserErrorData) -> Bool {
+        error.message == "Differs from current checksum" && error.path == ["attributes", "previous_checksum"]
     }
 
     func saveToAPI(_ beamObject: BeamObjectAPIType,
@@ -105,23 +189,25 @@ extension BeamObjectManager {
         return try request.save(beamObject) { result in
             switch result {
             case .failure(let error):
-                self.saveToAPIFailure(beamObject, error, completion)
+                Logger.shared.logError("Could not save \(beamObject): \(error.localizedDescription)", category: .beamObject)
+
+                // Early return except for checksum issues.
+                guard case APIRequestError.beamObjectInvalidChecksum = error else {
+                    completion(.failure(error))
+                    return
+                }
+
+                self.saveToAPIFailure(beamObject, completion)
             case .success(let updateBeamObject):
                 completion(.success(updateBeamObject))
             }
         }
     }
 
+    /// In case of checksum issue, this will fetch the object on the API side to include remote side object + local object when returning the error to the caller
+    /// Only the `.failure` part of the result is used, but we don't change it so this can be used passing the completion handler as it is
     internal func saveToAPIFailure(_ beamObject: BeamObjectAPIType,
-                                   _ error: Error,
                                    _ completion: @escaping ((Swift.Result<BeamObjectAPIType, Error>) -> Void)) {
-        Logger.shared.logError("Could not save \(beamObject): \(error.localizedDescription)", category: .beamObject)
-
-        // Early return except for checksum issues.
-        guard case APIRequestError.beamObjectInvalidChecksum = error else {
-            completion(.failure(error))
-            return
-        }
 
         /*
          When we have checksum issues, we fetch the current API saved object so the caller have both and is
