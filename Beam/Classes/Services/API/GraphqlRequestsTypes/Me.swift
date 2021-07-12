@@ -6,7 +6,7 @@ class Me: Decodable, Errorable {
     var username: String?
     var email: String?
     var unconfirmedEmail: String?
-    var beamObjects: [BeamObjectAPIType]?
+    var beamObjects: [BeamObject]?
     var documents: [DocumentAPIType]?
     var databases: [DatabaseAPIType]?
     var errors: [UserErrorData]?

@@ -14,9 +14,9 @@ import BeamCore
 //            do {
 //                let passwords = try PasswordsRecord.fetchAll(db)
 //
-//                let beamObjects: [BeamObjectAPIType] = try passwords.map {
+//                let beamObjects: [BeamObject] = try passwords.map {
 //                    // TODO: get the `previousChecksum` and send it
-//                    try BeamObjectAPIType($0, .password)
+//                    try BeamObject($0, .password)
 //                }
 //
 //                guard !beamObjects.isEmpty else {

@@ -1021,7 +1021,7 @@ extension DatabaseManager {
 extension DatabaseManager: BeamObjectManagerDelegateProtocol {
     static var typeName: String { "database" }
 
-    func receivedBeamObjects(_ objects: [BeamObjectAPIType]) throws {
+    func receivedBeamObjects(_ objects: [BeamObject]) throws {
         let databases: [DatabaseStruct] = try objects.map {
             try $0.decodeBeamObject()
         }
@@ -1058,18 +1058,18 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
                                category: .databaseNetwork)
     }
 
-    internal func databasesAsBeamObjects(_ context: NSManagedObjectContext) throws -> [BeamObjectAPIType] {
+    internal func databasesAsBeamObjects(_ context: NSManagedObjectContext) throws -> [BeamObject] {
         try context.performAndWait {
             try databaseStructsAsBeamObjects(try Database.rawFetchAll(context).map { DatabaseStruct(database: $0) })
         }
     }
 
-    internal func databaseStructsAsBeamObjects(_ databaseStructs: [DatabaseStruct]) throws -> [BeamObjectAPIType] {
+    internal func databaseStructsAsBeamObjects(_ databaseStructs: [DatabaseStruct]) throws -> [BeamObject] {
         try databaseStructs.compactMap {
             var databaseStruct = $0.copy()
             databaseStruct.previousChecksum = databaseStruct.beamObjectPreviousChecksum
 
-            let object = try BeamObjectAPIType(databaseStruct, Self.typeName)
+            let object = try BeamObject(databaseStruct, Self.typeName)
 
             // We don't want to send updates for documents already sent.
             // We know it's sent because the previousChecksum is the same as the current data Checksum
@@ -1196,7 +1196,7 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
             return nil
         }
 
-        let beamObject = try BeamObjectAPIType(databaseStruct, Self.typeName)
+        let beamObject = try BeamObject(databaseStruct, Self.typeName)
         beamObject.previousChecksum = databaseStruct.beamObjectPreviousChecksum
 
         let objectManager = BeamObjectManager()
@@ -1212,7 +1212,7 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
     }
 
     internal func saveOnBeamObjectAPISuccess(_ databaseStruct: DatabaseStruct,
-                                             _ updateBeamObject: BeamObjectAPIType,
+                                             _ updateBeamObject: BeamObject,
                                              _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
         Logger.shared.logDebug("Saved \(updateBeamObject)", category: .databaseNetwork)
 

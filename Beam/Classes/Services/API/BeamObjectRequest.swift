@@ -14,16 +14,16 @@ class BeamObjectRequest: APIRequest {
         let id: String
     }
 
-    class FetchBeamObject: BeamObjectAPIType, Errorable {
+    class FetchBeamObject: BeamObject, Errorable {
         static let codingKey = "beamObject"
         let errors: [UserErrorData]? = nil
     }
 
     class UpdateBeamObject: Codable, Errorable {
-        let beamObject: BeamObjectAPIType?
+        let beamObject: BeamObject?
         var errors: [UserErrorData]?
 
-        init(beamObject: BeamObjectAPIType?) {
+        init(beamObject: BeamObject?) {
             self.beamObject = beamObject
         }
     }
@@ -31,7 +31,7 @@ class BeamObjectRequest: APIRequest {
     class DeleteBeamObject: UpdateBeamObject { }
 
     struct UpdateBeamObjects: Codable, Errorable {
-        let beamObjects: [BeamObjectAPIType]?
+        let beamObjects: [BeamObject]?
         var errors: [UserErrorData]?
     }
 
@@ -39,14 +39,14 @@ class BeamObjectRequest: APIRequest {
         let updatedAtAfter: Date?
     }
 
-    internal func saveBeamObjectParameters(_ beamObject: BeamObjectAPIType) throws -> UpdateBeamObject {
+    internal func saveBeamObjectParameters(_ beamObject: BeamObject) throws -> UpdateBeamObject {
         try beamObject.encrypt()
 
         return UpdateBeamObject(beamObject: beamObject)
     }
 
-    internal func saveBeamObjectsParameters(_ beamObjects: [BeamObjectAPIType]) throws -> UpdateBeamObjects {
-        let result: [BeamObjectAPIType] = try beamObjects.map {
+    internal func saveBeamObjectsParameters(_ beamObjects: [BeamObject]) throws -> UpdateBeamObjects {
+        let result: [BeamObject] = try beamObjects.map {
             try $0.encrypt()
             return $0
         }
@@ -54,7 +54,7 @@ class BeamObjectRequest: APIRequest {
         return UpdateBeamObjects(beamObjects: result)
     }
 
-    internal func encryptAllBeamObjects(_ beamObjects: [BeamObjectAPIType]) throws {
+    internal func encryptAllBeamObjects(_ beamObjects: [BeamObject]) throws {
         guard Configuration.encryptionEnabled else { return }
         try beamObjects.forEach {
             try $0.encrypt()
@@ -67,8 +67,8 @@ class BeamObjectRequest: APIRequest {
 extension BeamObjectRequest {
     @discardableResult
     // return multiple errors, as the API might return more than one.
-    func save(_ beamObject: BeamObjectAPIType,
-              _ completion: @escaping (Swift.Result<BeamObjectAPIType, Error>) -> Void) throws -> URLSessionDataTask {
+    func save(_ beamObject: BeamObject,
+              _ completion: @escaping (Swift.Result<BeamObject, Error>) -> Void) throws -> URLSessionDataTask {
         let parameters = try saveBeamObjectParameters(beamObject)
         let bodyParamsRequest = GraphqlParameters(fileName: "update_beam_object", variables: parameters)
 
@@ -89,8 +89,8 @@ extension BeamObjectRequest {
     }
 
     @discardableResult
-    func saveAll(_ beamObjects: [BeamObjectAPIType],
-                 _ completion: @escaping (Swift.Result<[BeamObjectAPIType], Error>) -> Void) throws -> URLSessionDataTask? {
+    func saveAll(_ beamObjects: [BeamObject],
+                 _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask? {
         var parameters: UpdateBeamObjects
 
         do {
@@ -135,7 +135,7 @@ extension BeamObjectRequest {
 
     @discardableResult
     func fetchAll(_ updatedAtAfter: Date? = nil,
-                  _ completion: @escaping (Swift.Result<[BeamObjectAPIType], Error>) -> Void) throws -> URLSessionDataTask {
+                  _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
         let parameters = BeamObjectsParameters(updatedAtAfter: updatedAtAfter)
 
         return try fetchAllWithFile("beam_objects", parameters, completion)
@@ -144,7 +144,7 @@ extension BeamObjectRequest {
     @discardableResult
     private func fetchAllWithFile<T: Encodable>(_ filename: String,
                                                 _ parameters: T,
-                                                _ completion: @escaping (Swift.Result<[BeamObjectAPIType], Error>) -> Void) throws -> URLSessionDataTask {
+                                                _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
         let bodyParamsRequest = GraphqlParameters(fileName: filename, variables: parameters)
 
         return try performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<Me, Error>) in
@@ -196,20 +196,20 @@ extension BeamObjectRequest {
 
     @discardableResult
     func fetch(_ beamObjectID: String,
-               _ completionHandler: @escaping (Swift.Result<BeamObjectAPIType, Error>) -> Void) throws -> URLSessionDataTask {
+               _ completionHandler: @escaping (Swift.Result<BeamObject, Error>) -> Void) throws -> URLSessionDataTask {
         try fetchWithFile("beam_object", beamObjectID, completionHandler)
     }
 
     @discardableResult
     func fetchUpdatedAt(_ beamObjectID: String,
-                        _ completionHandler: @escaping (Swift.Result<BeamObjectAPIType, Error>) -> Void) throws -> URLSessionDataTask {
+                        _ completionHandler: @escaping (Swift.Result<BeamObject, Error>) -> Void) throws -> URLSessionDataTask {
         try fetchWithFile("beam_object_updated_at", beamObjectID, completionHandler)
     }
 
     // swiftlint:disable:next cyclomatic_complexity
     private func fetchWithFile(_ filename: String,
                                _ beamObjectID: String,
-                               _ completionHandler: @escaping (Swift.Result<BeamObjectAPIType, Error>) -> Void) throws -> URLSessionDataTask {
+                               _ completionHandler: @escaping (Swift.Result<BeamObject, Error>) -> Void) throws -> URLSessionDataTask {
         let parameters = BeamObjectIdParameters(id: beamObjectID)
         let bodyParamsRequest = GraphqlParameters(fileName: filename, variables: parameters)
 

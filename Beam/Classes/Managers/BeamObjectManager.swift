@@ -5,8 +5,8 @@ protocol BeamObjectManagerDelegateProtocol {
     // The string used to store beam object types
     static var typeName: String { get }
 
-    // When new objects have been received through the syncAll
-    func receivedBeamObjects(_ objects: [BeamObjectAPIType]) throws
+    // When new beam objects have been received and should be locally stored
+    func receivedBeamObjects(_ objects: [BeamObject]) throws
 
     // Mandatory for using dynamic creation of managers. See `setup` and `parseFilteredObjects`
     init(_ manager: BeamObjectManager)
@@ -23,9 +23,9 @@ protocol BeamObjectManagerDelegateProtocol {
 }
 
 class BeamObjectManagerDelegate {
-    func structsAsBeamObjects<T: BeamObjectProtocol>(_ structs: [T]) throws -> [BeamObjectAPIType] {
+    func structsAsBeamObjects<T: BeamObjectProtocol>(_ structs: [T]) throws -> [BeamObject] {
         try structs.compactMap {
-            let object = try BeamObjectAPIType($0, T.beamObjectTypeName)
+            let object = try BeamObject($0, T.beamObjectTypeName)
 
             // We don't want to send updates for documents already sent.
             // We know it's sent because the previousChecksum is the same as the current data Checksum
@@ -42,7 +42,7 @@ enum BeamObjectManagerError: Error {
     case notSuccess
     case notAuthenticated
     case multipleErrors([Error])
-    case beamObjectInvalidChecksum(BeamObjectAPIType)
+    case beamObjectInvalidChecksum(BeamObject)
     case beamObjectDecodingError
 }
 
@@ -59,7 +59,7 @@ class BeamObjectManager {
         register(DatabaseManager.self)
     }
 
-    internal func parseObjects(_ beamObjects: [BeamObjectAPIType]) -> Bool {
+    internal func parseObjects(_ beamObjects: [BeamObject]) -> Bool {
         let lastUpdatedAt = Persistence.Sync.BeamObjects.updated_at
 
         // If we are doing a delta refreshAll, and 0 document is fetched, we exit early
@@ -74,7 +74,7 @@ class BeamObjectManager {
                                    category: .beamObjectNetwork)
         }
 
-        let filteredObjects: [String: [BeamObjectAPIType]] = beamObjects.reduce(into: [:]) { result, object in
+        let filteredObjects: [String: [BeamObject]] = beamObjects.reduce(into: [:]) { result, object in
             result[object.beamObjectType] = result[object.beamObjectType] ?? []
             result[object.beamObjectType]?.append(object)
         }
@@ -86,7 +86,7 @@ class BeamObjectManager {
         return true
     }
 
-    internal func parseFilteredObjects(_ filteredObjects: [String: [BeamObjectAPIType]]) {
+    internal func parseFilteredObjects(_ filteredObjects: [String: [BeamObject]]) {
         var initiatedManagers: [String: BeamObjectManagerDelegateProtocol] = [:]
 
         for (key, objects) in filteredObjects {
@@ -108,8 +108,8 @@ class BeamObjectManager {
 
 // MARK: - Foundation
 extension BeamObjectManager {
-    func saveToAPI(_ beamObjects: [BeamObjectAPIType],
-                   _ completion: @escaping ((Swift.Result<[BeamObjectAPIType], Error>) -> Void)) throws -> URLSessionTask? {
+    func saveToAPI(_ beamObjects: [BeamObject],
+                   _ completion: @escaping ((Swift.Result<[BeamObject], Error>) -> Void)) throws -> URLSessionTask? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             completion(.failure(BeamObjectManagerError.notAuthenticated))
             return nil
@@ -128,9 +128,9 @@ extension BeamObjectManager {
     }
 
     /// Will look at each errors, and fetch remote object to include it in the completion if it was a checksum error
-    internal func saveToAPIFailure(_ beamObjects: [BeamObjectAPIType],
+    internal func saveToAPIFailure(_ beamObjects: [BeamObject],
                                    _ error: Error,
-                                   _ completion: @escaping ((Swift.Result<[BeamObjectAPIType], Error>) -> Void)) {
+                                   _ completion: @escaping ((Swift.Result<[BeamObject], Error>) -> Void)) {
         Logger.shared.logError("Could not save \(beamObjects): \(error.localizedDescription)",
                                category: .beamObject)
 
@@ -160,9 +160,9 @@ extension BeamObjectManager {
         completion(.failure(error))
     }
 
-    internal func saveToAPIFailureAPIErrors(_ beamObjects: [BeamObjectAPIType],
+    internal func saveToAPIFailureAPIErrors(_ beamObjects: [BeamObject],
                                             _ errors: [UserErrorData],
-                                            _ completion: @escaping ((Swift.Result<[BeamObjectAPIType], Error>) -> Void)) {
+                                            _ completion: @escaping ((Swift.Result<[BeamObject], Error>) -> Void)) {
         // We have multiple errors, we're going to fetch each beamObject on the server side to include them in
         // the error we'll return to the object calling this manager
         let group = DispatchGroup()
@@ -198,8 +198,8 @@ extension BeamObjectManager {
         error.message == "Differs from current checksum" && error.path == ["attributes", "previous_checksum"]
     }
 
-    func saveToAPI(_ beamObject: BeamObjectAPIType,
-                   _ completion: @escaping ((Swift.Result<BeamObjectAPIType, Error>) -> Void)) throws -> URLSessionTask? {
+    func saveToAPI(_ beamObject: BeamObject,
+                   _ completion: @escaping ((Swift.Result<BeamObject, Error>) -> Void)) throws -> URLSessionTask? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             completion(.failure(BeamObjectManagerError.notAuthenticated))
             return nil
@@ -229,7 +229,7 @@ extension BeamObjectManager {
 
     /// In case of checksum issue, this will fetch the object on the API side to include remote side object + local object when returning the error to the caller
     /// Only the `.failure` part of the result is used, but we don't change it so this can be used passing the completion handler as it is
-    internal func saveToAPIFailure(_ beamObject: BeamObjectAPIType,
+    internal func saveToAPIFailure(_ beamObject: BeamObject,
                                    _ completion: @escaping (Error) -> Void) {
 
         /*

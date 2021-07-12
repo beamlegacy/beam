@@ -9,11 +9,10 @@ protocol BeamObjectProtocol: Codable {
     var deletedAt: Date? { get set }
     var previousChecksum: String? { get set }
     var checksum: String? { get set }
-//    func copyForBeamObject<T: BeamObjectProtocol>() -> T
     static var beamObjectTypeName: String { get }
 }
 
-class BeamObjectAPIType: Codable {
+class BeamObject: Codable {
     var id: UUID
     var beamObjectType: String
     var createdAt: Date?
@@ -25,14 +24,14 @@ class BeamObjectAPIType: Codable {
     var previousChecksum: String?
 
     public var debugDescription: String {
-        "<BeamObjectAPIType: \(id) [\(beamObjectType)]>"
+        "<BeamObject: \(id) [\(beamObjectType)]>"
     }
 
     public var description: String {
-        "<BeamObjectAPIType: \(id) [\(beamObjectType)]>"
+        "<BeamObject: \(id) [\(beamObjectType)]>"
     }
 
-    enum BeamObjectAPITypeError: Error {
+    enum BeamObjectError: Error {
         case noData
     }
 
@@ -90,7 +89,7 @@ class BeamObjectAPIType: Codable {
 
     func decodeBeamObject<T: BeamObjectProtocol>() throws -> T {
         guard let data = data else {
-            throw BeamObjectAPITypeError.noData
+            throw BeamObjectError.noData
         }
         var decodedObject = try Self.decoder.decode(T.self, from: Data(data.utf8))
         decodedObject.id = id

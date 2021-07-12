@@ -2295,7 +2295,7 @@ extension DocumentManager {
 extension DocumentManager: BeamObjectManagerDelegateProtocol {
     static var typeName: String { "document" }
 
-    func receivedBeamObjects(_ objects: [BeamObjectAPIType]) throws {
+    func receivedBeamObjects(_ objects: [BeamObject]) throws {
         let documents: [DocumentStruct] = try objects.map {
             try $0.decodeBeamObject()
         }
@@ -2334,13 +2334,13 @@ extension DocumentManager: BeamObjectManagerDelegateProtocol {
                                category: .documentNetwork)
     }
 
-    internal func documentsAsBeamObjects(_ context: NSManagedObjectContext) throws -> [BeamObjectAPIType] {
+    internal func documentsAsBeamObjects(_ context: NSManagedObjectContext) throws -> [BeamObject] {
         try context.performAndWait {
             try documentStructsAsBeamObjects(try Document.rawFetchAll(context).map { DocumentStruct(document: $0) })
         }
     }
 
-    internal func documentStructsAsBeamObjects(_ documentStructs: [DocumentStruct]) throws -> [BeamObjectAPIType] {
+    internal func documentStructsAsBeamObjects(_ documentStructs: [DocumentStruct]) throws -> [BeamObject] {
         let structs: [DocumentStruct] = documentStructs.map {
             var documentStruct = $0.copy()
             documentStruct.previousChecksum = $0.beamObjectPreviousChecksum
@@ -2352,7 +2352,7 @@ extension DocumentManager: BeamObjectManagerDelegateProtocol {
 //            var documentStruct = $0.copy()
 //            documentStruct.previousChecksum = $0.beamObjectPreviousChecksum
 //
-//            let object = try BeamObjectAPIType(documentStruct, Self.typeName)
+//            let object = try BeamObject(documentStruct, Self.typeName)
 //
 //            // We don't want to send updates for documents already sent.
 //            // We know it's sent because the previousChecksum is the same as the current data Checksum
@@ -2460,7 +2460,7 @@ extension DocumentManager: BeamObjectManagerDelegateProtocol {
         }
     }
 
-    internal func saveOnBeamObjectsAPISuccess(_ updateBeamObjects: [BeamObjectAPIType],
+    internal func saveOnBeamObjectsAPISuccess(_ updateBeamObjects: [BeamObject],
                                               _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
         Logger.shared.logDebug("Saved \(updateBeamObjects)", category: .documentNetwork)
 
@@ -2569,7 +2569,7 @@ extension DocumentManager: BeamObjectManagerDelegateProtocol {
             return nil
         }
 
-        let beamObject = try BeamObjectAPIType(documentStruct, Self.typeName)
+        let beamObject = try BeamObject(documentStruct, Self.typeName)
         beamObject.previousChecksum = documentStruct.beamObjectPreviousChecksum
 
         let objectManager = BeamObjectManager()
@@ -2584,7 +2584,7 @@ extension DocumentManager: BeamObjectManagerDelegateProtocol {
         }
     }
 
-    internal func saveOnBeamObjectAPISuccess(_ updateBeamObject: BeamObjectAPIType,
+    internal func saveOnBeamObjectAPISuccess(_ updateBeamObject: BeamObject,
                                              _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
         Logger.shared.logDebug("Saved \(updateBeamObject)", category: .documentNetwork)
 
