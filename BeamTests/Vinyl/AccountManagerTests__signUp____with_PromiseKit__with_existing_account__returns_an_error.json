@@ -2,44 +2,24 @@
   {
     "request" : {
       "method" : "POST",
-      "url" : "https:\/\/api.beamapp.co\/graphql",
       "headers" : {
         "Accept" : "application\/json",
         "Content-Type" : "application\/json",
-        "User-Agent" : "Beam client, 0.1.0 (1)",
-        "Accept-Language" : "en"
+        "Accept-Language" : "en",
+        "User-Agent" : "Beam client, 0.1.0 (1)"
       },
+      "url" : "https:\/\/api.beamapp.co\/graphql",
       "body" : {
         "query" : "mutation SignUp($email: Email!, $password: String!) {\n  signUp(input: {email: $email, password: $password}) {\n    user {\n      unconfirmedEmail\n      email\n      id\n    }\n    errors {\n      path\n      message\n    }\n  }\n}\n",
         "variables" : {
           "email" : "fabien+test@beamapp.co",
-          "password" : "4Gb0JW3eln5V"
+          "password" : "XBau1Ih1ofqw"
         }
       }
     },
     "response" : {
-      "headers" : {
-        "Referrer-Policy" : "strict-origin-when-cross-origin",
-        "X-Frame-Options" : "SAMEORIGIN",
-        "Date" : "Wed, 09 Jun 2021 10:27:11 GMT",
-        "Via" : "1.1 vegur",
-        "X-Runtime" : "0.009241",
-        "Vary" : "Accept, Origin",
-        "Connection" : "keep-alive",
-        "X-Content-Type-Options" : "nosniff",
-        "X-Permitted-Cross-Domain-Policies" : "none",
-        "Server" : "Cowboy",
-        "Transfer-Encoding" : "Identity",
-        "Content-Type" : "application\/json; charset=utf-8",
-        "Strict-Transport-Security" : "max-age=63072000; includeSubDomains",
-        "Etag" : "W\/\"423f85e48e0bb9c45bc60df22f356fbf\"",
-        "X-Request-Id" : "051ba79e-31e2-429f-a860-4d371a75d67c",
-        "Cache-Control" : "max-age=0, private, must-revalidate",
-        "X-Download-Options" : "noopen",
-        "X-Xss-Protection" : "1; mode=block"
-      },
-      "url" : "https:\/\/api.beamapp.co\/graphql",
       "status" : 200,
+      "url" : "https:\/\/api.beamapp.co\/graphql",
       "body" : {
         "data" : {
           "signUp" : {
@@ -55,6 +35,26 @@
             ]
           }
         }
+      },
+      "headers" : {
+        "Via" : "1.1 vegur",
+        "Vary" : "Accept, Origin",
+        "Content-Type" : "application\/json; charset=utf-8",
+        "X-Content-Type-Options" : "nosniff",
+        "X-Permitted-Cross-Domain-Policies" : "none",
+        "Etag" : "W\/\"423f85e48e0bb9c45bc60df22f356fbf\"",
+        "X-Request-Id" : "db1f0b6e-b3a1-486b-8fce-210c616606ac",
+        "X-Frame-Options" : "SAMEORIGIN",
+        "Referrer-Policy" : "strict-origin-when-cross-origin",
+        "X-Runtime" : "0.008047",
+        "Transfer-Encoding" : "Identity",
+        "X-Download-Options" : "noopen",
+        "Server" : "Cowboy",
+        "Strict-Transport-Security" : "max-age=63072000; includeSubDomains",
+        "Connection" : "keep-alive",
+        "Cache-Control" : "max-age=0, private, must-revalidate",
+        "Date" : "Mon, 12 Jul 2021 13:24:06 GMT",
+        "X-Xss-Protection" : "1; mode=block"
       }
     }
   }

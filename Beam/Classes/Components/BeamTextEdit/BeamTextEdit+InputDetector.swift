@@ -48,7 +48,7 @@ extension BeamTextEdit {
                 if pos > 0 && left == "[" {
                     if !self.selectedTextRange.isEmpty {
                         insertPair("[", "]")
-                        node.text.makeInternalLink(self.selectedTextRange, createNoteIfNeeded: true)
+                        node.unproxyElement.makeInternalLink(self.selectedTextRange, createNoteIfNeeded: true)
                         node.text.remove(count: 2, at: self.selectedTextRange.upperBound)
                         node.text.remove(count: 2, at: self.selectedTextRange.lowerBound - 2)
                         self.selectedTextRange = (self.selectedTextRange.lowerBound - 2) ..< (self.selectedTextRange.upperBound - 2)

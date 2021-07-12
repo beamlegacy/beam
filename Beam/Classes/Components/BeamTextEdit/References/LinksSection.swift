@@ -52,22 +52,24 @@ class LinksSection: Widget {
     var links: [BeamNoteReference] { note.links }
 
     func setupSectionMode() {
-        updateLinkedReferences(links: links)
-
         AppDelegate.main.data.$lastChangedElement
+            .dropFirst()
             .filter({ element in
                 guard let element = element,
                       let refNoteID = element.note?.id
                 else { return false }
                 let ref = BeamNoteReference(noteID: refNoteID, elementID: element.id)
-                return self.currentReferences.contains(ref)
-                    || element.text.hasLinkToNote(id: self.note.id)
-                    || element.text.hasReferenceToNote(titled: self.note.title)
+                let alreadyPresent = self.currentReferences.contains(ref)
+                let linked = element.text.hasLinkToNote(id: self.note.id)
+                let referenced = element.text.hasReferenceToNote(titled: self.note.title)
+                return alreadyPresent || linked || referenced
             })
             .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
             .sink { _ in
                 self.updateLinkedReferences(links: self.links)
             }.store(in: &scope)
+
+        self.updateLinkedReferences(links: self.links)
     }
 
     var currentReferences = [BeamNoteReference]()
@@ -84,7 +86,10 @@ class LinksSection: Widget {
             guard let breadCrumb = root?.getBreadCrumb(for: noteReference) else { continue }
 
             // Prepare title children:
-            guard let refTitleWidget = try? titles[noteID] ?? RefNoteTitle(parent: self, noteId: noteID, actionTitle: "Link", action: { self.linkAllReferencesFromNote(withId: noteID) }) else { continue }
+            guard let refTitleWidget = try? titles[noteID]
+                    ?? newrefs[noteID]
+                    ?? RefNoteTitle(parent: self, noteId: noteID, actionTitle: "Link", action: { self.linkAllReferencesFromNote(withId: noteID) })
+            else { continue }
             newrefs[noteID] = refTitleWidget
             toRemove.remove(refTitleWidget)
 

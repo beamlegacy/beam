@@ -1,28 +1,28 @@
 [
   {
+    "request" : {
+      "method" : "GET",
+      "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=Hello%20world"
+    },
     "response" : {
       "status" : 200,
+      "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=Hello%20world",
+      "body" : "[\"Hello world\",[\"hello world\",\"hello world anime\",\"hello world this is me\",\"hello world html\",\"hello world c++\",\"hello world python\",\"hello world java\",\"hello world bank\",\"hello world lyrics\",\"hello world vostfr\"]]",
       "headers" : {
-        "Cache-Control" : "no-cache, must-revalidate",
-        "Alt-Svc" : "h3-29=\":443\"; ma=2592000,h3-T051=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\"",
-        "Expires" : "-1",
-        "Server" : "gws",
-        "Date" : "Wed, 09 Jun 2021 10:27:14 GMT",
-        "Content-Type" : "text\/javascript; charset=ISO-8859-1",
-        "Set-Cookie" : "SIDCC=AJi4QfFhGoxe5Y5NkzpyGpJLILoyuzK3ZSRgGOTU9a4ljhn2QHBbpghUSUvyDX34-0Fs6_eVCg; expires=Thu, 09-Jun-2022 10:27:14 GMT; path=\/; domain=.google.com; priority=high, __Secure-3PSIDCC=AJi4QfHZJXN5Q38Aagh0OEQg-lq3MLCMspty-HMp7UvfxI5CKYfVW6ArGxSfWwxMROYqrJ23; expires=Thu, 09-Jun-2022 10:27:14 GMT; path=\/; domain=.google.com; Secure; HttpOnly; priority=high; SameSite=none",
-        "Content-Length" : "107",
-        "x-frame-options" : "SAMEORIGIN",
         "Content-Disposition" : "attachment; filename=\"f.txt\"",
+        "Server" : "gws",
+        "Date" : "Mon, 12 Jul 2021 13:24:09 GMT",
+        "Content-Type" : "text\/javascript; charset=ISO-8859-1",
+        "Expires" : "-1",
+        "x-xss-protection" : "0",
+        "Cache-Control" : "no-cache, must-revalidate",
+        "Set-Cookie" : "SIDCC=AJi4QfEr8CdqoYNUubxjFm9i5GoeOkl84cEepaXT04U6jDwO89RAbOQgt0bzfm7AHKl3U5DNwQ; expires=Tue, 12-Jul-2022 13:24:09 GMT; path=\/; domain=.google.com; priority=high, __Secure-3PSIDCC=AJi4QfEgQyGcA6Gpsf9QwIu_8VAZhVZ6DUn8JsDcIp7RmBH03W8ghSKdbUasa9V9l1cc3P4A; expires=Tue, 12-Jul-2022 13:24:09 GMT; path=\/; domain=.google.com; Secure; HttpOnly; priority=high; SameSite=none",
         "Pragma" : "no-cache",
+        "Alt-Svc" : "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000,h3-T051=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\"",
         "Content-Encoding" : "gzip",
-        "x-xss-protection" : "0"
-      },
-      "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=Hello+world",
-      "body" : "[\"Hello world\",[\"hello world\",\"hello world anime\",\"hello world this is me\",\"hello world java\",\"hello world c++\",\"hello world python\",\"hello world html\",\"hello world bank\",\"hello world bank card\",\"hello world javascript\"]]"
-    },
-    "request" : {
-      "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=Hello+world",
-      "method" : "GET"
+        "x-frame-options" : "SAMEORIGIN",
+        "Content-Length" : "104"
+      }
     }
   }
 ]

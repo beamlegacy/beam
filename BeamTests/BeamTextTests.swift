@@ -164,7 +164,7 @@ class BeamTextTests: XCTestCase {
 
     func testMakeLink1() {
         var text = BeamText(text: "some link test")
-        XCTAssert(text.makeInternalLink(5..<9, createNoteIfNeeded: true))
+        XCTAssertNotNil(text.makeInternalLink(5..<9, createNoteIfNeeded: true))
 
         let links1 = text.internalLinkRanges
         XCTAssertEqual(links1.count, 1)
@@ -182,7 +182,7 @@ class BeamTextTests: XCTestCase {
 
     func testMakeLink2() {
         var text = BeamText(text: "some link test")
-        XCTAssert(text.makeInternalLink(4..<9, createNoteIfNeeded: true))
+        XCTAssertNotNil(text.makeInternalLink(4..<9, createNoteIfNeeded: true))
 
         let links1 = text.internalLinkRanges
         XCTAssertEqual(links1.count, 1)
@@ -200,7 +200,7 @@ class BeamTextTests: XCTestCase {
 
     func testMakeLink3() {
         var text = BeamText(text: "some link test")
-        XCTAssert(text.makeInternalLink(5..<10, createNoteIfNeeded: true))
+        XCTAssertNotNil(text.makeInternalLink(5..<10, createNoteIfNeeded: true))
 
         let links1 = text.internalLinkRanges
         XCTAssertEqual(links1.count, 1)
@@ -218,7 +218,7 @@ class BeamTextTests: XCTestCase {
 
     func testPrefix() {
         var text = BeamText(text: "testText")
-        XCTAssert(text.makeInternalLink(2..<4, createNoteIfNeeded: true))
+        XCTAssertNotNil(text.makeInternalLink(2..<4, createNoteIfNeeded: true))
         XCTAssert(text.hasPrefix("test"))
         XCTAssertEqual(text.internalLinkRanges[0].string, "st")
         let prefix = text.prefix(3)
@@ -230,7 +230,7 @@ class BeamTextTests: XCTestCase {
 
     func testSuffix() {
         var text = BeamText(text: "testText")
-        XCTAssert(text.makeInternalLink(4..<6, createNoteIfNeeded: true))
+        XCTAssertNotNil(text.makeInternalLink(4..<6, createNoteIfNeeded: true))
         XCTAssert(text.hasSuffix("Text"))
         XCTAssertEqual(text.internalLinkRanges[0].string, "Te")
         let suffix = text.suffix(3)

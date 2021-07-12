@@ -400,6 +400,8 @@
 		9634DD8F264AF7940065383E /* TextLineLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9634DD8E264AF7940065383E /* TextLineLayer.swift */; };
 		9634DD91264B203E0065383E /* ShapeLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9634DD90264B203E0065383E /* ShapeLayer.swift */; };
 		9639FB1D2616FCA300C85B95 /* BeamCore.h in Headers */ = {isa = PBXBuildFile; fileRef = 96319C91261614C000D1CF31 /* BeamCore.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		963DBB3B2698605600080928 /* BeamTextLinksTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 963DBB3A2698605600080928 /* BeamTextLinksTests.swift */; };
+		963DBB3D2698655C00080928 /* BeamElementLinksTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 963DBB3C2698655C00080928 /* BeamElementLinksTests.swift */; };
 		964548A02523B3550064D062 /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9645489F2523B3550064D062 /* CloudKit.framework */; };
 		964FE5B72624813E00966E03 /* RandomAccessCollection+BinarySearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 964FE5B62624813E00966E03 /* RandomAccessCollection+BinarySearch.swift */; };
 		964FE64D262D8ED300966E03 /* Dictionary+valuesMatchingKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 964FE64C262D8ED300966E03 /* Dictionary+valuesMatchingKeys.swift */; };
@@ -1190,6 +1192,8 @@
 		9634DD78264AA1A10065383E /* TextFrameLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextFrameLayer.swift; sourceTree = "<group>"; };
 		9634DD8E264AF7940065383E /* TextLineLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextLineLayer.swift; sourceTree = "<group>"; };
 		9634DD90264B203E0065383E /* ShapeLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeLayer.swift; sourceTree = "<group>"; };
+		963DBB3A2698605600080928 /* BeamTextLinksTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamTextLinksTests.swift; sourceTree = "<group>"; };
+		963DBB3C2698655C00080928 /* BeamElementLinksTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BeamElementLinksTests.swift; path = BeamTests/TextLayout/BeamElementLinksTests.swift; sourceTree = SOURCE_ROOT; };
 		9645489F2523B3550064D062 /* CloudKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CloudKit.framework; path = System/Library/Frameworks/CloudKit.framework; sourceTree = SDKROOT; };
 		964FE5B62624813E00966E03 /* RandomAccessCollection+BinarySearch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RandomAccessCollection+BinarySearch.swift"; sourceTree = "<group>"; };
 		964FE64C262D8ED300966E03 /* Dictionary+valuesMatchingKeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Dictionary+valuesMatchingKeys.swift"; sourceTree = "<group>"; };
@@ -2389,6 +2393,7 @@
 		527DF48525710EAE00A0A56D /* Managers */ = {
 			isa = PBXGroup;
 			children = (
+				963DBB3C2698655C00080928 /* BeamElementLinksTests.swift */,
 				DA693059268DB375008EF756 /* BrowsingTreeSenderTest.swift */,
 				5281B07A25C9987100DF66D9 /* Fixtures */,
 				522AFB2725CBFAB100F60647 /* DocumentManagerTestsHelper.swift */,
@@ -2879,6 +2884,7 @@
 				A5109F902670227800304B3A /* CommandManagerTests.swift */,
 				96319D202616232700D1CF31 /* Info.plist */,
 				0D45BA372694A1FE00D4E8A5 /* DispatchTime+ChronoTests.swift */,
+				963DBB3A2698605600080928 /* BeamTextLinksTests.swift */,
 			);
 			path = BeamCoreTests;
 			sourceTree = "<group>";
@@ -2987,7 +2993,6 @@
 		96A3066625F698B10078A453 /* References */ = {
 			isa = PBXGroup;
 			children = (
-				96C9AA5625901AA9007D3D98 /* LinksSection.swift */,
 				96E4505725995CA200BFF36F /* BreadCrumb.swift */,
 				96C9AA3E259019E3007D3D98 /* ProxyTextNode.swift */,
 				96A3067B25F698FB0078A453 /* RefNoteTitle.swift */,
@@ -2995,6 +3000,7 @@
 				960A57E5264C851E0061E8D2 /* ProxyImageNode.swift */,
 				960A57E7264C88920061E8D2 /* ProxyEmbedNode.swift */,
 				9661A588266A289200CB56B3 /* BlockReferenceNode.swift */,
+				96C9AA5625901AA9007D3D98 /* LinksSection.swift */,
 				9617815426934ACC0019D9CA /* ReferencesSection.swift */,
 			);
 			path = References;
@@ -3906,6 +3912,7 @@
 				DA76129826614E5A00349F2C /* BrowsingTreeScoreTests.swift in Sources */,
 				DA63D519267CF28800D7C756 /* FrecencyScorerTest.swift in Sources */,
 				A5CA5DF52625C15D004E9D3E /* BeamElementTextStatsTests.swift in Sources */,
+				963DBB3B2698605600080928 /* BeamTextLinksTests.swift in Sources */,
 				A5A6A428267F123C007F1B2F /* CommandManagerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -4370,6 +4377,7 @@
 				969084CC25365AAE009D3C96 /* ParserTests.swift in Sources */,
 				8A68F4652671159D00B0C022 /* PointAndShootMessageHandlerFrameBoundsTest.swift in Sources */,
 				5273C65A25DA835500B00EC3 /* DocumentRequestTests.swift in Sources */,
+				963DBB3D2698655C00080928 /* BeamElementLinksTests.swift in Sources */,
 				96C9CC3E2535CE2C00D70AA6 /* LexerTests.swift in Sources */,
 				52442339261DAE940024B642 /* DatabaseRequestsTests.swift in Sources */,
 				8AB44A9B267C9BE400D18B65 /* PointAndShootMessageHandlerOnLoadTest.swift in Sources */,

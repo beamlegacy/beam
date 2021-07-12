@@ -242,7 +242,7 @@ class BreadCrumb: Widget {
         text.ranges(of: rootNote.title).forEach { range in
             let start = text.position(at: range.lowerBound)
             let end = text.position(at: range.upperBound)
-            self.proxy.text.makeInternalLink(start..<end, createNoteIfNeeded: true)
+            self.proxy.makeInternalLink(start..<end, createNoteIfNeeded: true)
         }
     }
 

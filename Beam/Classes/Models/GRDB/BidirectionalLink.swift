@@ -10,7 +10,8 @@ import GRDB
 import BeamCore
 
 /// BidirectionalLink
-public struct BidirectionalLink {
+public struct BidirectionalLink: Equatable {
+    var id: Int64?
     var sourceNoteId: UUID
     var sourceElementId: UUID
     var linkedNoteId: UUID
@@ -20,7 +21,7 @@ public struct BidirectionalLink {
 extension BidirectionalLink: TableRecord {
     /// The table columns
     enum Columns: String, ColumnExpression {
-        case sourceNoteId, sourceElementId, linkedNoteId
+        case id, sourceNoteId, sourceElementId, linkedNoteId
     }
 }
 
@@ -28,6 +29,7 @@ extension BidirectionalLink: TableRecord {
 extension BidirectionalLink: FetchableRecord {
     /// Creates a record from a database row
     public init(row: Row) {
+        id = row[Columns.id]
         sourceElementId = row[Columns.sourceElementId]
         sourceNoteId = row[Columns.sourceNoteId]
         linkedNoteId = row[Columns.linkedNoteId]
@@ -38,9 +40,32 @@ extension BidirectionalLink: FetchableRecord {
 extension BidirectionalLink: MutablePersistableRecord {
     /// The values persisted in the database
     public func encode(to container: inout PersistenceContainer) {
+        container[Columns.id] = id
         container[Columns.sourceNoteId] = sourceNoteId
         container[Columns.sourceElementId] = sourceElementId
         container[Columns.linkedNoteId] = linkedNoteId
     }
+
+    // Update auto-incremented id upon successful insertion
+    public mutating func didInsert(with rowID: Int64, for column: String?) {
+        id = rowID
+    }
 }
 
+public extension BidirectionalLink {
+    var reference: BeamNoteReference {
+        return BeamNoteReference(noteID: sourceNoteId, elementID: sourceElementId)
+    }
+
+    var linkedNote: BeamNote? {
+        BeamNote.fetch(DocumentManager(), id: linkedNoteId)
+    }
+
+    var sourceNote: BeamNote? {
+        BeamNote.fetch(DocumentManager(), id: sourceNoteId)
+    }
+
+    var sourceElement: BeamElement? {
+        return sourceNote?.findElement(sourceElementId)
+    }
+}
