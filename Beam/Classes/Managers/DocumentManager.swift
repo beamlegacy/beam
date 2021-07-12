@@ -2342,21 +2342,6 @@ extension DocumentManager: BeamObjectManagerDelegateProtocol {
         }
 
         return try BeamObjectManagerDelegate().structsAsBeamObjects(structs)
-
-//        try documentStructs.compactMap {
-//            var documentStruct = $0.copy()
-//            documentStruct.previousChecksum = $0.beamObjectPreviousChecksum
-//
-//            let object = try BeamObject(documentStruct, Self.typeName)
-//
-//            // We don't want to send updates for documents already sent.
-//            // We know it's sent because the previousChecksum is the same as the current data Checksum
-//            guard object.previousChecksum != object.dataChecksum, object.dataChecksum != nil else {
-//                return nil
-//            }
-//
-//            return object
-//        }
     }
 
     // Called when `BeamObjectManager` wants to store all existing `Document` as `BeamObject` it will call this method
@@ -2374,25 +2359,7 @@ extension DocumentManager: BeamObjectManagerDelegateProtocol {
             try Document.rawFetchAll(context).map { DocumentStruct(document: $0) }
         }
 
-        let beamObjects = try documentStructsAsBeamObjects(documentStructs)
-
-        guard !beamObjects.isEmpty else {
-            completion(.success(true))
-            return nil
-        }
-
-        let objectManager = BeamObjectManager()
-
-        return try objectManager.saveToAPI(beamObjects) { result in
-            switch result {
-            case .failure(let error):
-                Logger.shared.logError("Could not save all \(beamObjects.count) objects: \(error.localizedDescription)",
-                                       category: .documentNetwork)
-                self.saveOnBeamObjectsAPIFailure(documentStructs, error, completion)
-            case .success(let updateBeamObjects):
-                self.saveOnBeamObjectsAPISuccess(updateBeamObjects, completion)
-            }
-        }
+        return try saveOnBeamObjectsAPI(documentStructs, completion)
     }
 
     func saveOnBeamObjectAPI(_ object: BeamObjectProtocol,

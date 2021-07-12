@@ -1058,27 +1058,14 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
                                category: .databaseNetwork)
     }
 
-    internal func databasesAsBeamObjects(_ context: NSManagedObjectContext) throws -> [BeamObject] {
-        try context.performAndWait {
-            try databaseStructsAsBeamObjects(try Database.rawFetchAll(context).map { DatabaseStruct(database: $0) })
-        }
-    }
-
     internal func databaseStructsAsBeamObjects(_ databaseStructs: [DatabaseStruct]) throws -> [BeamObject] {
-        try databaseStructs.compactMap {
+        let structs: [DatabaseStruct] = databaseStructs.map {
             var databaseStruct = $0.copy()
-            databaseStruct.previousChecksum = databaseStruct.beamObjectPreviousChecksum
-
-            let object = try BeamObject(databaseStruct, Self.typeName)
-
-            // We don't want to send updates for documents already sent.
-            // We know it's sent because the previousChecksum is the same as the current data Checksum
-            guard object.previousChecksum != object.dataChecksum, object.dataChecksum != nil else {
-                return nil
-            }
-
-            return object
+            databaseStruct.previousChecksum = $0.beamObjectPreviousChecksum
+            return databaseStruct
         }
+
+        return try BeamObjectManagerDelegate().structsAsBeamObjects(structs)
     }
 
     func saveAllOnBeamObjectApi(_ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
@@ -1095,25 +1082,7 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
             try Database.rawFetchAll(context).map { DatabaseStruct(database: $0) }
         }
 
-        let beamObjects = try databaseStructsAsBeamObjects(databaseStructs)
-
-        guard !beamObjects.isEmpty else {
-            completion(.success(true))
-            return nil
-        }
-
-        let objectManager = BeamObjectManager()
-
-        return try objectManager.saveToAPI(beamObjects) { result in
-            switch result {
-            case .failure(let error):
-                Logger.shared.logError("Could not save all \(beamObjects.count) objects: \(error.localizedDescription)",
-                                       category: .documentNetwork)
-                self.saveOnBeamObjectsAPIFailure(databaseStructs, error, completion)
-            case .success(let updateBeamObjects):
-                self.saveOnBeamObjectsAPISuccess(updateBeamObjects, completion)
-            }
-        }
+        return try saveOnBeamObjectsAPI(databaseStructs, completion)
     }
 
     func saveOnBeamObjectAPI(_ object: BeamObjectProtocol,
@@ -1143,6 +1112,11 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
         }
 
         let beamObjects = try databaseStructsAsBeamObjects(databaseStructs)
+
+        guard !beamObjects.isEmpty else {
+            completion(.success(true))
+            return nil
+        }
 
         let objectManager = BeamObjectManager()
 
@@ -1267,16 +1241,6 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
             completion(.failure(error))
             return
         }
-
-        // Checksum issue, the API side of the object was updated since our last fetch
-        Logger.shared.logError("Could not save: \(error.localizedDescription)",
-                               category: .databaseNetwork)
-        Logger.shared.logError("local object \(databaseStruct.beamObjectPreviousChecksum ?? "-"): \(databaseStruct)",
-                               category: .databaseNetwork)
-        Logger.shared.logError("Remote saved object \(remoteBeamObject.dataChecksum ?? "-"): \(remoteBeamObject)",
-                               category: .databaseNetwork)
-        Logger.shared.logError("Resending local object without checksum",
-                               category: .databaseNetwork)
 
         do {
             // Checksum issue, the API side of the object was updated since our last fetch
