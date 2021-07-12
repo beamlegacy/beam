@@ -2486,9 +2486,8 @@ extension DocumentManager: BeamObjectManagerDelegateProtocol {
         for insideError in errors {
             /*
              We have multiple errors. If all errors are about invalid checksums, we can fix and retry. Else we'll just
-             stop
+             stop and call the completion handler with the original error
              */
-
             guard case BeamObjectManagerError.beamObjectInvalidChecksum(let remoteBeamObject) = insideError else {
                 completion(.failure(error))
                 return
