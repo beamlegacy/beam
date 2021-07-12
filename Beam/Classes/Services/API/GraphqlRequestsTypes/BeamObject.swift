@@ -2,6 +2,7 @@ import Foundation
 import CryptoKit
 import BeamCore
 
+/// Anything to be stored as BeamObject should implement this protocol.
 protocol BeamObjectProtocol: Codable {
     var id: UUID { get set }
     var createdAt: Date { get set }
@@ -12,6 +13,7 @@ protocol BeamObjectProtocol: Codable {
     static var beamObjectTypeName: String { get }
 }
 
+/// Used to store data on the BeamObject Beam API.
 class BeamObject: Codable {
     var id: UUID
     var beamObjectType: String
@@ -74,19 +76,6 @@ class BeamObject: Codable {
         return decoder
     }
 
-    // MARK: - Encryption
-    struct DataEncryption: Codable {
-        let encryptionName: String?
-        let privateKeySha256: String?
-        let data: String?
-        //swiftlint:disable:next nesting
-        enum CodingKeys: String, CodingKey {
-            case encryptionName
-            case privateKeySha256
-            case data
-        }
-    }
-
     func decodeBeamObject<T: BeamObjectProtocol>() throws -> T {
         guard let data = data else {
             throw BeamObjectError.noData
@@ -120,6 +109,23 @@ class BeamObject: Codable {
                                    category: .beamObject)
         }
         return nil
+    }
+
+}
+
+// MARK: - Encryption
+extension BeamObject {
+    // This struct will be used as `beamObject.data` on the server side
+    struct DataEncryption: Codable {
+        let encryptionName: String?
+        let privateKeySha256: String?
+        let data: String?
+        //swiftlint:disable:next nesting
+        enum CodingKeys: String, CodingKey {
+            case encryptionName
+            case privateKeySha256
+            case data
+        }
     }
 
     func decrypt() throws {
