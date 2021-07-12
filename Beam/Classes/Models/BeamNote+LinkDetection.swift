@@ -36,10 +36,13 @@ public extension BeamNote {
 }
 
 public extension BeamElement {
-    var internalLinks: [BidirectionalLink] {
+    var internalLinksInSelf: [BidirectionalLink] {
         guard let note = note else { return [] }
         let links = self.text.internalLinks.map { BidirectionalLink(sourceNoteId: note.id, sourceElementId: self.id, linkedNoteId: $0) }
-        return links + children.flatMap { $0.internalLinks }
+        return links
+    }
+    var internalLinks: [BidirectionalLink] {
+        return internalLinksInSelf + children.flatMap { $0.internalLinks }
     }
 }
 
@@ -60,5 +63,15 @@ public extension BeamElement {
             note.resetCommandManager()
         }
         return res
+    }
+}
+
+public extension BeamNoteReference {
+    var note: BeamNote? {
+        BeamNote.fetch(DocumentManager(), id: noteID)
+    }
+
+    var element: BeamElement? {
+        return note?.findElement(elementID)
     }
 }

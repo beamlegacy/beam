@@ -1,7 +1,7 @@
 import BeamCore
 import GRDB
 
-struct FrecencyUrlRecord {
+public struct FrecencyUrlRecord {
     /// URL id from LinkStore
     var urlId: UInt64
     var lastAccessAt: Date
@@ -49,8 +49,8 @@ extension FrecencyUrlRecord: MutablePersistableRecord {
     }
 }
 
-class GRDBFrecencyStorage: FrecencyStorage {
-    func fetchOne(urlId: UInt64, paramKey: FrecencyParamKey) throws -> FrecencyScore? {
+public class GRDBFrecencyStorage: FrecencyStorage {
+    public func fetchOne(urlId: UInt64, paramKey: FrecencyParamKey) throws -> FrecencyScore? {
         do {
             if let record = try GRDBDatabase.shared.fetchOneFrecency(fromUrl: urlId)[paramKey] {
                 return FrecencyScore(urlId: record.urlId,
@@ -65,7 +65,7 @@ class GRDBFrecencyStorage: FrecencyStorage {
         return nil
     }
 
-    func save(score: FrecencyScore, paramKey: FrecencyParamKey) throws {
+    public func save(score: FrecencyScore, paramKey: FrecencyParamKey) throws {
         var record = FrecencyUrlRecord(urlId: score.urlId,
                                        lastAccessAt: score.lastTimestamp,
                                        frecencyScore: score.lastScore,

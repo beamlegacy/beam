@@ -11,7 +11,7 @@ import BeamCore
 // High level manipulation:
 extension BeamText {
     //swiftlint:disable:next function_body_length
-    @discardableResult mutating func makeInternalLink(_ range: Swift.Range<Int>, createNoteIfNeeded: Bool) -> Bool {
+    @discardableResult mutating func makeInternalLink(_ range: Swift.Range<Int>, createNoteIfNeeded: Bool) -> UUID? {
         let text = self.extract(range: range)
         let t = text.text
 
@@ -42,7 +42,7 @@ extension BeamText {
         link = link.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
         guard linkCharacterSet.isSuperset(of: CharacterSet(charactersIn: link)) else {
 //            Logger.shared.logError("makeInternalLink for range: \(range) failed: forbidden characters in range", category: .document)
-            return false
+            return nil
         }
 
         var _linkID = BeamNote.idForNoteNamed(link)
@@ -52,7 +52,7 @@ extension BeamText {
             _linkID = note.id
             note.save(documentManager: AppDelegate.main.data.documentManager)
         }
-        guard let linkID = _linkID else { return false }
+        guard let linkID = _linkID else { return nil }
         let linkText = BeamText(text: link, attributes: [.internalLink(linkID)])
         let actualRange = range.lowerBound + start ..< range.lowerBound + end
         Logger.shared.logInfo("makeInternalLink for range: \(range) | actual: \(actualRange)", category: .document)
@@ -72,7 +72,8 @@ extension BeamText {
             // make sure it's saved at least once
             linkedNote.save(documentManager: AppDelegate.main.data.documentManager)
         }
-        return true
+
+        return linkedNote.id
     }
 
     mutating func makeLinkToNoteExplicit(forNote title: String) {
@@ -107,4 +108,12 @@ extension BeamText {
         return types
     }
 
+}
+
+public extension BeamElement {
+    @discardableResult func makeInternalLink(_ range: Swift.Range<Int>, createNoteIfNeeded: Bool) -> Bool {
+        guard let sourceNoteId = note?.id,
+        let linkedNoteId = text.makeInternalLink(range, createNoteIfNeeded: createNoteIfNeeded) else { return false }
+        return true
+    }
 }

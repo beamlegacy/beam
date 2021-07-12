@@ -38,6 +38,15 @@ class DocumentManagerNetworkTests: QuickSpec {
             // Try to avoid issues with BeamTextTests creating documents when parsing links
             BeamNote.clearCancellables()
             BeamTestsHelper.login()
+
+            let before = QuickSpec.current.continueAfterFailure
+            QuickSpec.current.continueAfterFailure = false
+            defer { QuickSpec.current.continueAfterFailure = before }
+            guard AuthenticationManager.shared.isAuthenticated else {
+                fail("Not authenticated")
+                return
+            }
+
             helper.deleteAllDatabases()
             helper.deleteAllDocuments()
 

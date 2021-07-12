@@ -301,8 +301,10 @@ class GRDBDatabaseBeamElementTests: XCTestCase {
     func testRemove() throws {
         var matches = db.search(matchingAllTokensIn: "tata").map { $0.uid }
         expect(matches.count) == 1
+        expect(self.db.elementsCount) == 5
 
         try db.remove(note: note)
+        expect(self.db.elementsCount) == 0
 
         matches = db.search(matchingAllTokensIn: "tata").map { $0.uid }
         expect(matches.count) == 0
