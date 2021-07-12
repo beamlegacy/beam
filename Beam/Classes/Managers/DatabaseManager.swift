@@ -85,6 +85,13 @@ class DatabaseManager {
         saveDatabaseQueue.maxConcurrentOperationCount = 1
     }
 
+    required init(_ manager: BeamObjectManager) {
+        self.coreDataManager = CoreDataManager.shared
+        self.mainContext = self.coreDataManager.mainContext
+        self.backgroundContext = self.coreDataManager.backgroundContext
+        saveDatabaseQueue.maxConcurrentOperationCount = 1
+    }
+
     static var savedCount = 0
     // MARK: -
     // MARK: NSManagedObjectContext saves
@@ -1012,10 +1019,13 @@ extension DatabaseManager {
 
 // MARK: - BeamObjectManagerDelegateProtocol
 extension DatabaseManager: BeamObjectManagerDelegateProtocol {
-    func receivedBeamObjects(_ objects: [BeamObjectProtocol]) throws {
-        guard let databases = objects as? [DatabaseStruct] else {
-            throw DatabaseManagerError.wrongObjectsType
+    static var typeName: String { "database" }
+
+    func receivedBeamObjects(_ objects: [BeamObjectAPIType]) throws {
+        let databases: [DatabaseStruct] = try objects.map {
+            try $0.decodeBeamObject()
         }
+
         Logger.shared.logDebug("Received \(databases.count) databases: updating",
                                category: .databaseNetwork)
 
@@ -1031,10 +1041,7 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
                     continue
                 }
 
-                localDatabase.title = database.title
-                localDatabase.created_at = database.createdAt
-                localDatabase.deleted_at = database.deletedAt
-                localDatabase.updated_at = database.updatedAt
+                localDatabase.update(database)
                 localDatabase.beam_object_previous_checksum = database.checksum
 
                 // TODO: What to do when this fails? Because of duplicate titles, or other errors
@@ -1053,20 +1060,7 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
 
     internal func databasesAsBeamObjects(_ context: NSManagedObjectContext) throws -> [BeamObjectAPIType] {
         try context.performAndWait {
-            try Database.rawFetchAll(context).compactMap {
-                var databaseStruct = DatabaseStruct(database: $0)
-                databaseStruct.previousChecksum = databaseStruct.beamObjectPreviousChecksum
-
-                let object = try BeamObjectAPIType(databaseStruct, .database)
-
-                // We don't want to send updates for databases already sent.
-                // We know it's sent because the previousChecksum is the same as the current data Checksum
-                guard object.previousChecksum != object.dataChecksum, object.dataChecksum != nil else {
-                    return nil
-                }
-
-                return object
-            }
+            try databaseStructsAsBeamObjects(try Database.rawFetchAll(context).map { DatabaseStruct(database: $0) })
         }
     }
 
@@ -1075,7 +1069,7 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
             var databaseStruct = $0.copy()
             databaseStruct.previousChecksum = databaseStruct.beamObjectPreviousChecksum
 
-            let object = try BeamObjectAPIType(databaseStruct, .database)
+            let object = try BeamObjectAPIType(databaseStruct, Self.typeName)
 
             // We don't want to send updates for documents already sent.
             // We know it's sent because the previousChecksum is the same as the current data Checksum
@@ -1116,8 +1110,7 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
                 do {
                     try context.performAndWait {
                         for updateBeamObject in updateBeamObjects {
-                            guard let uuid = UUID(uuidString: updateBeamObject.id),
-                                  let database = try Database.fetchWithId(context, uuid) else { continue }
+                            guard let database = try Database.fetchWithId(context, updateBeamObject.id) else { continue }
 
                             database.beam_object_previous_checksum = updateBeamObject.dataChecksum
                         }
@@ -1175,8 +1168,7 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
 
                 CoreDataManager.shared.persistentContainer.performBackgroundTask { context in
                     for updateBeamObject in updateBeamObjects {
-                        guard let uuid = UUID(uuidString: updateBeamObject.id),
-                              let databaseCoreData = try? Database.fetchWithId(context, uuid) else {
+                        guard let databaseCoreData = try? Database.fetchWithId(context, updateBeamObject.id) else {
                             completion(.failure(DocumentManagerError.localDocumentNotFound))
                             continue
                         }
@@ -1204,7 +1196,7 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
             return nil
         }
 
-        let beamObject = try BeamObjectAPIType(databaseStruct, .database)
+        let beamObject = try BeamObjectAPIType(databaseStruct, Self.typeName)
         beamObject.previousChecksum = databaseStruct.beamObjectPreviousChecksum
 
         let objectManager = BeamObjectManager()
@@ -1260,7 +1252,7 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
                                category: .databaseNetwork)
         Logger.shared.logError("local object \(databaseStruct.beamObjectPreviousChecksum ?? "-"): \(databaseStruct)",
                                category: .databaseNetwork)
-        Logger.shared.logError("Remote saved object \(remoteBeamObject.checksum ?? "-"): \(remoteBeamObject)",
+        Logger.shared.logError("Remote saved object \(remoteBeamObject.dataChecksum ?? "-"): \(remoteBeamObject)",
                                category: .databaseNetwork)
         Logger.shared.logError("Resending local object without checksum",
                                category: .databaseNetwork)

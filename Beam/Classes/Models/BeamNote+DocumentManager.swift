@@ -9,7 +9,7 @@ import Foundation
 import BeamCore
 
 extension BeamNote: BeamNoteDocument {
-    public var documentStruct: DocumentStruct? {
+    var documentStruct: DocumentStruct? {
         do {
             let encoder = JSONEncoder()
             // Will make conflict and merge easier to know what lines conflicted instead
@@ -62,7 +62,7 @@ extension BeamNote: BeamNoteDocument {
         }
     }
 
-    public func updateWithDocumentStruct(_ docStruct: DocumentStruct) {
+    func updateWithDocumentStruct(_ docStruct: DocumentStruct) {
         let decoder = JSONDecoder()
         guard let newSelf = try? decoder.decode(BeamNote.self, from: docStruct.data) else {
             Logger.shared.logError("Unable to decode new documentStruct \(docStruct.title)",
@@ -210,10 +210,10 @@ extension BeamNote: BeamNoteDocument {
         })
     }
 
-    public static func instanciateNote(_ documentManager: DocumentManager,
-                                       _ documentStruct: DocumentStruct,
-                                       keepInMemory: Bool = true,
-                                       decodeChildren: Bool = true) throws -> BeamNote {
+    static func instanciateNote(_ documentManager: DocumentManager,
+                                _ documentStruct: DocumentStruct,
+                                keepInMemory: Bool = true,
+                                decodeChildren: Bool = true) throws -> BeamNote {
         let decoder = JSONDecoder()
         if decodeChildren == false {
             decoder.userInfo[BeamElement.recursiveCoding] = false

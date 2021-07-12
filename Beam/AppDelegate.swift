@@ -40,7 +40,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     let documentManager = DocumentManager()
     let databaseManager = DatabaseManager()
-    let passwordManager = PasswordManager()
     let beamObjectManager = BeamObjectManager()
 
     #if DEBUG
@@ -58,6 +57,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         LibrariesManager.shared.configure()
         ContentBlockingManager.shared.setup()
         PasswordGenerator.shared.setup()
+        BeamObjectManager.setup()
 
         data = BeamData()
 

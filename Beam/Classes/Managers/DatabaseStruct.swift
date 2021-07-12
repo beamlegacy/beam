@@ -1,9 +1,11 @@
 import Foundation
 
-public struct DatabaseStruct: BeamObjectProtocol {
+struct DatabaseStruct: BeamObjectProtocol {
     var uuid: String {
         id.uuidString.lowercased()
     }
+
+    static var beamObjectTypeName: String { "database" }
 
     var id: UUID
     var title: String

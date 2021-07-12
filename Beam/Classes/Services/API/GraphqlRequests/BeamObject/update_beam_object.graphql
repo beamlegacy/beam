@@ -3,6 +3,7 @@ mutation UpdateBeamObject($beamObject: BeamObjectInput!) {
     beamObject {
       id
       checksum
+      type
     }
     errors {
       objectid

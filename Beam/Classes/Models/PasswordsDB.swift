@@ -9,7 +9,7 @@ import Foundation
 import BeamCore
 import GRDB
 
-struct PasswordsRecord: BeamObjectProtocol {
+struct PasswordsRecord {
     var id: Int64?
     var uuid: String
     var host: String

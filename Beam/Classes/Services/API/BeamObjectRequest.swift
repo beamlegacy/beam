@@ -157,7 +157,7 @@ extension BeamObjectRequest {
                     return
                 }
 
-                var beamObjectErrors = Set<String>()
+                var beamObjectErrors = Set<UUID>()
 
                 /*
                  When fetching all beam objects, we decrypt them if needed. We might have decryption issue

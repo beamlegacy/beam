@@ -2,23 +2,63 @@ import Foundation
 import BeamCore
 
 protocol BeamObjectManagerDelegateProtocol {
+    // The string used to store beam object types
+    static var typeName: String { get }
+
+    // When new objects have been received through the syncAll
+    func receivedBeamObjects(_ objects: [BeamObjectAPIType]) throws
+
+    // Mandatory for using dynamic creation of managers. See `setup` and `parseFilteredObjects`
+    init(_ manager: BeamObjectManager)
+
+    // Called when `BeamObjectManager` wants to store all existing `Document` as `BeamObject` it will call this method
     func saveAllOnBeamObjectApi(_ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask?
-    func receivedBeamObjects(_ objects: [BeamObjectProtocol]) throws
+
+    // Called within `DocumentManager` to store this object as `BeamObject`
     func saveOnBeamObjectAPI(_ object: BeamObjectProtocol,
                              _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask?
+    // Called within `DocumentManager` to store those objects as `BeamObject`
     func saveOnBeamObjectsAPI(_ objects: [BeamObjectProtocol],
                               _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask?
+}
+
+class BeamObjectManagerDelegate {
+    func structsAsBeamObjects<T: BeamObjectProtocol>(_ structs: [T]) throws -> [BeamObjectAPIType] {
+        try structs.compactMap {
+            let object = try BeamObjectAPIType($0, T.beamObjectTypeName)
+
+            // We don't want to send updates for documents already sent.
+            // We know it's sent because the previousChecksum is the same as the current data Checksum
+            guard object.previousChecksum != object.dataChecksum, object.dataChecksum != nil else {
+                return nil
+            }
+
+            return object
+        }
+    }
 }
 
 enum BeamObjectManagerError: Error {
     case notSuccess
     case notAuthenticated
     case multipleErrors([Error])
-    case beamObjectInvalidChecksum(BeamObjectProtocol)
+    case beamObjectInvalidChecksum(BeamObjectAPIType)
     case beamObjectDecodingError
 }
 
-public class BeamObjectManager {
+class BeamObjectManager {
+    static var managers: [String: BeamObjectManagerDelegateProtocol.Type] = [:]
+
+    static func register<T: BeamObjectManagerDelegateProtocol>(_ manager: T.Type) {
+        managers[T.typeName] = manager
+    }
+
+    static func setup() {
+        // Add any manager using BeamObjects here
+        register(DocumentManager.self)
+        register(DatabaseManager.self)
+    }
+
     internal func parseObjects(_ beamObjects: [BeamObjectAPIType]) -> Bool {
         let lastUpdatedAt = Persistence.Sync.BeamObjects.updated_at
 
@@ -34,11 +74,9 @@ public class BeamObjectManager {
                                    category: .beamObjectNetwork)
         }
 
-        let filteredObjects: [BeamObjectType: [BeamObjectAPIType]] = beamObjects.reduce(into: [:]) { result, object in
-            guard let beamObjectType = object.beamObjectType else { return }
-            result[beamObjectType] = result[beamObjectType] ?? []
-
-            result[beamObjectType]?.append(object)
+        let filteredObjects: [String: [BeamObjectAPIType]] = beamObjects.reduce(into: [:]) { result, object in
+            result[object.beamObjectType] = result[object.beamObjectType] ?? []
+            result[object.beamObjectType]?.append(object)
         }
 
         parseFilteredObjects(filteredObjects)
@@ -48,31 +86,21 @@ public class BeamObjectManager {
         return true
     }
 
-    internal func parseFilteredObjects(_ filteredObjects: [BeamObjectType: [BeamObjectAPIType]]) {
-        let documentManager = DocumentManager()
-        let databaseManager = DatabaseManager()
+    internal func parseFilteredObjects(_ filteredObjects: [String: [BeamObjectAPIType]]) {
+        var initiatedManagers: [String: BeamObjectManagerDelegateProtocol] = [:]
 
         for (key, objects) in filteredObjects {
-            switch key {
-            case .document:
-                let documentObjects: [DocumentStruct] = objects.compactMap { $0.decode() }
-                guard !documentObjects.isEmpty else { continue }
+            guard let manager = Self.managers[key] else {
+                Logger.shared.logError("**manager for \(key) not found**", category: .beamObjectNetwork)
+                continue
+            }
 
-                do {
-                    try documentManager.receivedBeamObjects(documentObjects)
-                } catch {
-                    Logger.shared.logError("Error with documents: \(error)", category: .beamObjectNetwork)
-                }
-            case .database:
-                let databaseObjects: [DatabaseStruct] = objects.compactMap { $0.decode() }
-                guard !databaseObjects.isEmpty else { continue }
-                do {
-                    try databaseManager.receivedBeamObjects(databaseObjects)
-                } catch {
-                    Logger.shared.logError("Error with databases: \(error)", category: .beamObjectNetwork)
-                }
-            case .password:
-                Logger.shared.logError("Password not yet managed: \(key)", category: .beamObjectNetwork)
+            initiatedManagers[key] = initiatedManagers[key] ?? manager.init(self)
+
+            do {
+                try initiatedManagers[key]?.receivedBeamObjects(objects)
+            } catch {
+                Logger.shared.logError("Error with objects: \(error)", category: .beamObjectNetwork)
             }
         }
     }
@@ -108,20 +136,15 @@ extension BeamObjectManager {
 
         switch error {
         case APIRequestError.beamObjectInvalidChecksum:
-            // We only have 1 item for such error
             guard let beamObject = beamObjects.first else {
                 completion(.failure(error))
                 return
             }
 
-            saveToAPIFailure(beamObject) { result in
-                switch result {
-                case .failure(let error):
-                    completion(.failure(error))
-                case .success:
-                    // This is never called by `saveToAPIFailure`
-                    break
-                }
+            // APIRequestError.beamObjectInvalidChecksum is only raised when having 1 object
+            // We can just return the error after fetching the object
+            saveToAPIFailure(beamObject) { error in
+                completion(.failure(error))
             }
             return
         case APIRequestError.apiErrors(let errorable):
@@ -149,25 +172,19 @@ extension BeamObjectManager {
 
         for error in errors {
             // Matching beamObject with the returned error. Could be faster with Set but this is rarelly called
-            guard let beamObject = beamObjects.first(where: { $0.id == error.objectid }) else {
+            guard let beamObject = beamObjects.first(where: { $0.id.uuidString.lowercased() == error.objectid?.lowercased() }) else {
                 continue
             }
 
-            // We only call `saveToAPIFailure` with invalid checksum errors
+            // We only call `saveToAPIFailure` to fetch remote object with invalid checksum errors
             guard isErrorInvalidChecksum(error) else { continue }
 
             group.enter()
 
-            self.saveToAPIFailure(beamObject) { result in
-                switch result {
-                case .failure(let error):
-                    lock.wait()
-                    resultErrors.append(error)
-                    lock.signal()
-                case .success:
-                    // This is never called by `saveToAPIFailure`
-                    break
-                }
+            self.saveToAPIFailure(beamObject) { error in
+                lock.wait()
+                resultErrors.append(error)
+                lock.signal()
 
                 group.leave()
             }
@@ -201,7 +218,9 @@ extension BeamObjectManager {
                     return
                 }
 
-                self.saveToAPIFailure(beamObject, completion)
+                self.saveToAPIFailure(beamObject) {
+                    completion(.failure($0))
+                }
             case .success(let updateBeamObject):
                 completion(.success(updateBeamObject))
             }
@@ -211,7 +230,7 @@ extension BeamObjectManager {
     /// In case of checksum issue, this will fetch the object on the API side to include remote side object + local object when returning the error to the caller
     /// Only the `.failure` part of the result is used, but we don't change it so this can be used passing the completion handler as it is
     internal func saveToAPIFailure(_ beamObject: BeamObjectAPIType,
-                                   _ completion: @escaping ((Swift.Result<BeamObjectAPIType, Error>) -> Void)) {
+                                   _ completion: @escaping (Error) -> Void) {
 
         /*
          When we have checksum issues, we fetch the current API saved object so the caller have both and is
@@ -219,35 +238,15 @@ extension BeamObjectManager {
          */
         let fetchRequest = BeamObjectRequest()
         do {
-            try fetchRequest.fetch(beamObject.id) { result in
+            try fetchRequest.fetch(beamObject.id.uuidString) { result in
                 switch result {
-                case .failure(let error): completion(.failure(error))
+                case .failure(let error): completion(error)
                 case .success(let beamObject):
-                    guard let type = beamObject.beamObjectType else {
-                        completion(.failure(BeamObjectManagerError.beamObjectDecodingError))
-                        return
-                    }
-
-                    switch type {
-                    case .document:
-                        if let document: DocumentStruct = beamObject.decode() {
-                            completion(.failure(BeamObjectManagerError.beamObjectInvalidChecksum(document)))
-                            return
-                        }
-                    case .database:
-                        if let database: DatabaseStruct = beamObject.decode() {
-                            completion(.failure(BeamObjectManagerError.beamObjectInvalidChecksum(database)))
-                            return
-                        }
-                    case .password:
-                        break
-                    }
-
-                    completion(.failure(BeamObjectManagerError.beamObjectDecodingError))
+                    completion(BeamObjectManagerError.beamObjectInvalidChecksum(beamObject))
                 }
             }
         } catch {
-            completion(.failure(error))
+            completion(error)
         }
     }
 

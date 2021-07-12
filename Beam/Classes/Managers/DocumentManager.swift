@@ -61,6 +61,17 @@ public class DocumentManager: NSObject {
         //observeCoredataNotification()
     }
 
+
+    required init(_ manager: BeamObjectManager) {
+        self.coreDataManager = CoreDataManager.shared
+        self.mainContext = self.coreDataManager.mainContext
+        self.backgroundContext = self.coreDataManager.backgroundContext
+
+        saveDocumentQueue.maxConcurrentOperationCount = 1
+
+        super.init()
+    }
+
     // MARK: Coredata Updates
     private var cancellables = [AnyCancellable]()
     private func observeCoredataNotification() {
@@ -2282,9 +2293,11 @@ extension DocumentManager {
 
 // MARK: - BeamObjectManagerDelegateProtocol
 extension DocumentManager: BeamObjectManagerDelegateProtocol {
-    func receivedBeamObjects(_ objects: [BeamObjectProtocol]) throws {
-        guard let documents = objects as? [DocumentStruct] else {
-            throw DocumentManagerError.wrongObjectsType
+    static var typeName: String { "document" }
+
+    func receivedBeamObjects(_ objects: [BeamObjectAPIType]) throws {
+        let documents: [DocumentStruct] = try objects.map {
+            try $0.decodeBeamObject()
         }
 
         Logger.shared.logDebug("Received \(documents.count) documents: updating",
@@ -2302,12 +2315,7 @@ extension DocumentManager: BeamObjectManagerDelegateProtocol {
                     continue
                 }
 
-                localDocument.title = document.title
-                localDocument.created_at = document.createdAt
-                localDocument.updated_at = document.updatedAt
-                localDocument.deleted_at = document.deletedAt
-                localDocument.document_type = document.documentType.rawValue
-                localDocument.database_id = document.databaseId
+                localDocument.update(document)
                 localDocument.beam_object_previous_checksum = document.checksum
 
                 // TODO: What to do when this fails? Because of duplicate titles, or other errors
@@ -2328,40 +2336,35 @@ extension DocumentManager: BeamObjectManagerDelegateProtocol {
 
     internal func documentsAsBeamObjects(_ context: NSManagedObjectContext) throws -> [BeamObjectAPIType] {
         try context.performAndWait {
-            try Document.rawFetchAll(context).compactMap {
-                var documentStruct = DocumentStruct(document: $0)
-                documentStruct.previousChecksum = documentStruct.beamObjectPreviousChecksum
-
-                let object = try BeamObjectAPIType(documentStruct, .document)
-
-                // We don't want to send updates for documents already sent.
-                // We know it's sent because the previousChecksum is the same as the current data Checksum
-                guard object.previousChecksum != object.dataChecksum, object.dataChecksum != nil else {
-                    return nil
-                }
-
-                return object
-            }
+            try documentStructsAsBeamObjects(try Document.rawFetchAll(context).map { DocumentStruct(document: $0) })
         }
     }
 
     internal func documentStructsAsBeamObjects(_ documentStructs: [DocumentStruct]) throws -> [BeamObjectAPIType] {
-        try documentStructs.compactMap {
+        let structs: [DocumentStruct] = documentStructs.map {
             var documentStruct = $0.copy()
             documentStruct.previousChecksum = $0.beamObjectPreviousChecksum
-
-            let object = try BeamObjectAPIType(documentStruct, .document)
-
-            // We don't want to send updates for documents already sent.
-            // We know it's sent because the previousChecksum is the same as the current data Checksum
-            guard object.previousChecksum != object.dataChecksum, object.dataChecksum != nil else {
-                return nil
-            }
-
-            return object
+            return documentStruct
         }
+        return try BeamObjectManagerDelegate().structsAsBeamObjects(structs)
+
+//        try documentStructs.compactMap {
+//            var documentStruct = $0.copy()
+//            documentStruct.previousChecksum = $0.beamObjectPreviousChecksum
+//
+//            let object = try BeamObjectAPIType(documentStruct, Self.typeName)
+//
+//            // We don't want to send updates for documents already sent.
+//            // We know it's sent because the previousChecksum is the same as the current data Checksum
+//            guard object.previousChecksum != object.dataChecksum, object.dataChecksum != nil else {
+//                return nil
+//            }
+//
+//            return object
+//        }
     }
 
+    // Called when `BeamObjectManager` wants to store all existing `Document` as `BeamObject` it will call this method
     func saveAllOnBeamObjectApi(_ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             completion(.success(false))
@@ -2395,8 +2398,7 @@ extension DocumentManager: BeamObjectManagerDelegateProtocol {
                 do {
                     try context.performAndWait {
                         for updateBeamObject in updateBeamObjects {
-                            guard let uuid = UUID(uuidString: updateBeamObject.id),
-                                  let document = try Document.fetchWithId(context, uuid) else { continue }
+                            guard let document = try Document.fetchWithId(context, updateBeamObject.id) else { continue }
 
                             document.beam_object_previous_checksum = updateBeamObject.dataChecksum
                         }
@@ -2467,8 +2469,7 @@ extension DocumentManager: BeamObjectManagerDelegateProtocol {
 
         CoreDataManager.shared.persistentContainer.performBackgroundTask { context in
             for updateBeamObject in updateBeamObjects {
-                guard let uuid = UUID(uuidString: updateBeamObject.id),
-                      let documentCoreData = try? Document.fetchWithId(context, uuid) else {
+                guard let documentCoreData = try? Document.fetchWithId(context, updateBeamObject.id) else {
                     completion(.failure(DocumentManagerError.localDocumentNotFound))
                     continue
                 }
@@ -2515,16 +2516,15 @@ extension DocumentManager: BeamObjectManagerDelegateProtocol {
 
             // Here we should try to merge remoteBeamObject converted as a DocumentStruct, and our local one.
             // For now we just overwrite the API with our local version with a batch call resending all of them
-            guard let documentStruct = documentStructs.first(where: { $0.id.uuidString.lowercased() == remoteBeamObject.uuid.lowercased() }) else {
+            guard let documentStruct = documentStructs.first(where: { $0.id == remoteBeamObject.id }) else {
                 Logger.shared.logError("Could not save: \(error.localizedDescription)",
                                        category: .documentNetwork)
-                Logger.shared.logError("No ID :( for \(remoteBeamObject.uuid)", category: .documentNetwork)
+                Logger.shared.logError("No ID :( for \(remoteBeamObject.id)", category: .documentNetwork)
                 continue
             }
 
-            guard let remoteDocumentStruct = remoteBeamObject as? DocumentStruct else {
-                Logger.shared.logError("remoteBeamObject is not a DocumentStruct",
-                                       category: .documentNetwork)
+            guard let remoteDocumentStruct: DocumentStruct = try? remoteBeamObject.decodeBeamObject() else {
+                Logger.shared.logError("Not a documentStruct :( for \(remoteBeamObject)", category: .documentNetwork)
                 continue
             }
 
@@ -2542,7 +2542,7 @@ extension DocumentManager: BeamObjectManagerDelegateProtocol {
                                    category: .documentNetwork)
             Logger.shared.logError("local object \(documentStruct.beamObjectPreviousChecksum ?? "-"): \(documentStruct)",
                                    category: .documentNetwork)
-            Logger.shared.logError("Remote saved object \(remoteBeamObject.checksum ?? "-"): \(remoteBeamObject)",
+            Logger.shared.logError("Remote saved object \(remoteBeamObject.dataChecksum ?? "-"): \(remoteBeamObject)",
                                    category: .documentNetwork)
             Logger.shared.logError("Resending local object with remote checksum \(remoteDocumentStruct.checksum ?? "-")",
                                    category: .documentNetwork)
@@ -2569,7 +2569,7 @@ extension DocumentManager: BeamObjectManagerDelegateProtocol {
             return nil
         }
 
-        let beamObject = try BeamObjectAPIType(documentStruct, .document)
+        let beamObject = try BeamObjectAPIType(documentStruct, Self.typeName)
         beamObject.previousChecksum = documentStruct.beamObjectPreviousChecksum
 
         let objectManager = BeamObjectManager()
@@ -2589,8 +2589,7 @@ extension DocumentManager: BeamObjectManagerDelegateProtocol {
         Logger.shared.logDebug("Saved \(updateBeamObject)", category: .documentNetwork)
 
         CoreDataManager.shared.persistentContainer.performBackgroundTask { context in
-            guard let uuid = UUID(uuidString: updateBeamObject.id),
-                  let documentCoreData = try? Document.fetchWithId(context, uuid) else {
+            guard let documentCoreData = try? Document.fetchWithId(context, updateBeamObject.id) else {
                 completion(.failure(DocumentManagerError.localDocumentNotFound))
                 return
             }
@@ -2616,9 +2615,8 @@ extension DocumentManager: BeamObjectManagerDelegateProtocol {
             return
         }
 
-        guard let remoteDocumentStruct = remoteBeamObject as? DocumentStruct else {
-            Logger.shared.logError("remoteBeamObject is not a DocumentStruct",
-                                   category: .documentNetwork)
+        guard let remoteDocumentStruct: DocumentStruct = try? remoteBeamObject.decodeBeamObject() else {
+            Logger.shared.logError("Not a documentStruct :( for \(remoteBeamObject)", category: .documentNetwork)
             completion(.failure(error))
             return
         }
@@ -2628,7 +2626,7 @@ extension DocumentManager: BeamObjectManagerDelegateProtocol {
                                category: .documentNetwork)
         Logger.shared.logError("local object \(documentStruct.beamObjectPreviousChecksum ?? "-"): \(documentStruct)",
                                category: .documentNetwork)
-        Logger.shared.logError("Remote saved object \(remoteBeamObject.checksum ?? "-"): \(remoteBeamObject)",
+        Logger.shared.logError("Remote saved object \(remoteBeamObject.dataChecksum ?? "-"): \(remoteBeamObject)",
                                category: .documentNetwork)
         Logger.shared.logError("Resending local object with remote checksum \(remoteDocumentStruct.checksum ?? "-")",
                                category: .documentNetwork)

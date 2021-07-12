@@ -3,23 +3,19 @@ import CryptoKit
 import BeamCore
 
 protocol BeamObjectProtocol: Codable {
-    var uuid: String { get }
+    var id: UUID { get set }
     var createdAt: Date { get set }
     var updatedAt: Date { get set }
     var deletedAt: Date? { get set }
     var previousChecksum: String? { get set }
     var checksum: String? { get set }
-}
-
-enum BeamObjectType: String, Codable {
-    case password
-    case database
-    case document
+//    func copyForBeamObject<T: BeamObjectProtocol>() -> T
+    static var beamObjectTypeName: String { get }
 }
 
 class BeamObjectAPIType: Codable {
-    var id: String
-    var beamObjectType: BeamObjectType?
+    var id: UUID
+    var beamObjectType: String
     var createdAt: Date?
     var updatedAt: Date?
     var deletedAt: Date?
@@ -29,11 +25,15 @@ class BeamObjectAPIType: Codable {
     var previousChecksum: String?
 
     public var debugDescription: String {
-        "<BeamObjectAPIType: \(id) [\(beamObjectType?.rawValue ?? "-")]>"
+        "<BeamObjectAPIType: \(id) [\(beamObjectType)]>"
     }
 
     public var description: String {
-        "<BeamObjectAPIType: \(id) [\(beamObjectType?.rawValue ?? "-")]>"
+        "<BeamObjectAPIType: \(id) [\(beamObjectType)]>"
+    }
+
+    enum BeamObjectAPITypeError: Error {
+        case noData
     }
 
     enum CodingKeys: String, CodingKey {
@@ -47,8 +47,8 @@ class BeamObjectAPIType: Codable {
         case previousChecksum
     }
 
-    init<T: BeamObjectProtocol>(_ object: T, _ type: BeamObjectType) throws {
-        id = object.uuid
+    init<T: BeamObjectProtocol>(_ object: T, _ type: String) throws {
+        id = object.id
         beamObjectType = type
 
         createdAt = object.createdAt
@@ -86,6 +86,16 @@ class BeamObjectAPIType: Codable {
             case privateKeySha256
             case data
         }
+    }
+
+    func decodeBeamObject<T: BeamObjectProtocol>() throws -> T {
+        guard let data = data else {
+            throw BeamObjectAPITypeError.noData
+        }
+        var decodedObject = try Self.decoder.decode(T.self, from: Data(data.utf8))
+        decodedObject.id = id
+
+        return decodedObject
     }
 
     func decode<T: BeamObjectProtocol>() -> T? {
