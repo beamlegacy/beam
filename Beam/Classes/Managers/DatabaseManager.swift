@@ -1194,7 +1194,7 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
             for updateBeamObject in updateBeamObjects {
                 guard let databaseCoreData = try? Database.fetchWithId(context, updateBeamObject.id) else {
                     completion(.failure(DatabaseManagerError.localDatabaseNotFound))
-                    continue
+                    return
                 }
 
                 // TODO: store previous data sent for improved 3-ways merge?

@@ -35,6 +35,7 @@ public enum LogCategory: String {
     case oauth
     case passwordsDB
     case passwordManager
+    case passwordNetwork
     case clustering
     case commandManager
     case beamObject

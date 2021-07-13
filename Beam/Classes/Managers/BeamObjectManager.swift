@@ -74,6 +74,7 @@ class BeamObjectManager {
         // Add any manager using BeamObjects here
         register(DocumentManager.self)
         register(DatabaseManager.self)
+        register(PasswordManager.self)
     }
 
     internal func parseObjects(_ beamObjects: [BeamObject]) -> Bool {

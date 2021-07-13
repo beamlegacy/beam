@@ -4,7 +4,7 @@ import BeamCore
 
 /// Anything to be stored as BeamObject should implement this protocol.
 protocol BeamObjectProtocol: Codable {
-    var id: UUID { get set }
+    var beamObjectId: UUID { get set }
     var createdAt: Date { get set }
     var updatedAt: Date { get set }
     var deletedAt: Date? { get set }
@@ -15,7 +15,7 @@ protocol BeamObjectProtocol: Codable {
 
 /// Used to store data on the BeamObject Beam API.
 class BeamObject: Codable {
-    var id: UUID
+    var beamObjectId: UUID
     var beamObjectType: String
     var createdAt: Date?
     var updatedAt: Date?
@@ -24,6 +24,15 @@ class BeamObject: Codable {
     var encryptedData: String?
     var dataChecksum: String?
     var previousChecksum: String?
+
+    var id: UUID {
+        get {
+            beamObjectId
+        }
+        set {
+            beamObjectId = newValue
+        }
+    }
 
     public var debugDescription: String {
         "<BeamObject: \(id) [\(beamObjectType)]>"
@@ -38,7 +47,7 @@ class BeamObject: Codable {
     }
 
     enum CodingKeys: String, CodingKey {
-        case id
+        case beamObjectId = "id"
         case beamObjectType = "type"
         case createdAt
         case updatedAt
@@ -49,7 +58,7 @@ class BeamObject: Codable {
     }
 
     init<T: BeamObjectProtocol>(_ object: T, _ type: String) throws {
-        id = object.id
+        beamObjectId = object.beamObjectId
         beamObjectType = type
 
         createdAt = object.createdAt
@@ -81,7 +90,7 @@ class BeamObject: Codable {
             throw BeamObjectError.noData
         }
         var decodedObject = try Self.decoder.decode(T.self, from: Data(data.utf8))
-        decodedObject.id = id
+        decodedObject.beamObjectId = id
         decodedObject.checksum = dataChecksum
         decodedObject.createdAt = createdAt ?? decodedObject.createdAt
         decodedObject.updatedAt = updatedAt ?? decodedObject.updatedAt

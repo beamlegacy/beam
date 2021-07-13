@@ -1,10 +1,6 @@
 import Foundation
 
 struct DocumentStruct: BeamObjectProtocol {
-    var uuid: UUID {
-        id
-    }
-
     static var beamObjectTypeName: String { "document" }
 
     var id: UUID
@@ -21,6 +17,11 @@ struct DocumentStruct: BeamObjectProtocol {
     var isPublic: Bool = false
     var checksum: String?
     var beamObjectPreviousChecksum: String?
+
+    var beamObjectId: UUID {
+        get { id }
+        set { id = newValue }
+    }
 
     var uuidString: String {
         id.uuidString.lowercased()

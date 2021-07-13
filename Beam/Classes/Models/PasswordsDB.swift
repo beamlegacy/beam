@@ -9,7 +9,7 @@ import Foundation
 import BeamCore
 import GRDB
 
-struct PasswordRecord {
+struct PasswordRecord: BeamObjectProtocol {
     var id: Int64?
     var uuid: UUID
     var entryId: String
@@ -20,6 +20,43 @@ struct PasswordRecord {
     var updatedAt: Date
     var deletedAt: Date?
     var previousCheckSum: String?
+
+    var checksum: String?
+    static var beamObjectTypeName: String = "password"
+    var beamObjectId: UUID {
+        get { uuid }
+        set { uuid = newValue }
+    }
+    var previousChecksum: String? {
+        get { previousCheckSum }
+        set { previousCheckSum = newValue }
+    }
+
+//    // Used for encoding this into BeamObject
+    enum CodingKeys: String, CodingKey {
+        case id
+        case uuid
+        case entryId
+        case host
+        case name
+        case password
+        case createdAt
+        case updatedAt
+        case deletedAt
+    }
+
+    func copy() -> PasswordRecord {
+        PasswordRecord(id: id,
+                       uuid: uuid,
+                       entryId: entryId,
+                       host: host, name: name,
+                       password: password,
+                       createdAt: createdAt,
+                       updatedAt: updatedAt,
+                       deletedAt: deletedAt,
+                       previousCheckSum: previousCheckSum,
+                       checksum: checksum)
+    }
 }
 
 extension PasswordRecord: TableRecord {
@@ -130,6 +167,12 @@ class PasswordsDB: PasswordStore {
         }
     }
 
+    func find(uuid: UUID) throws -> PasswordRecord? {
+        try dbPool.read { db in
+            try PasswordRecord.filter(PasswordRecord.Columns.uuid).fetchOne(db)
+        }
+    }
+
     func find(_ searchString: String, completion: @escaping ([PasswordManagerEntry]) -> Void) {
         do {
             try dbPool.read { db in
@@ -196,6 +239,27 @@ class PasswordsDB: PasswordStore {
             }
         } catch let error {
             Logger.shared.logError("Error while saving password for \(host): \(error)", category: .passwordsDB)
+        }
+    }
+
+    func save(passwords: [PasswordRecord]) throws {
+        try dbPool.write { db in
+            for password in passwords {
+                var pass = password.copy()
+                try pass.insert(db)
+            }
+        }
+    }
+
+    func allRecords() throws -> [PasswordRecord] {
+        try dbPool.read { db in
+            try PasswordRecord.fetchAll(db)
+        }
+    }
+
+    func fetchWithId(_ id: UUID) throws -> PasswordRecord? {
+        try dbPool.read { db in
+            try PasswordRecord.filter(PasswordRecord.Columns.uuid == id).fetchOne(db)
         }
     }
 

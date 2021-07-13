@@ -1,10 +1,6 @@
 import Foundation
 
 struct DatabaseStruct: BeamObjectProtocol {
-    var uuid: String {
-        id.uuidString.lowercased()
-    }
-
     static var beamObjectTypeName: String { "database" }
 
     var id: UUID
@@ -18,6 +14,11 @@ struct DatabaseStruct: BeamObjectProtocol {
 
     var uuidString: String {
         id.uuidString.lowercased()
+    }
+
+    var beamObjectId: UUID {
+        get { id }
+        set { id = newValue }
     }
 
     // Used for encoding this into BeamObject

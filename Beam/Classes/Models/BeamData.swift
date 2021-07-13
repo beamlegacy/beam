@@ -87,7 +87,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     override init() {
         clusteringManager = ClusteringManager(ranker: sessionLinkRanker)
         documentManager = DocumentManager()
-        databaseManager = DatabaseManager()
         noteAutoSaveService = NoteAutoSaveService()
         linkManager = LinkManager()
         passwordsDB = PasswordsManager().passwordsDB

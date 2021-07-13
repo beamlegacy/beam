@@ -2401,8 +2401,7 @@ extension DocumentManager: BeamObjectManagerDelegateProtocol {
     // Called when `BeamObjectManager` wants to store all existing `Document` as `BeamObject` it will call this method
     func saveAllOnBeamObjectApi(_ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-            completion(.success(false))
-            return nil
+            throw BeamObjectManagerError.notAuthenticated
         }
 
         let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
@@ -2436,8 +2435,7 @@ extension DocumentManager: BeamObjectManagerDelegateProtocol {
     internal func saveOnBeamObjectsAPI(documentStructs: [DocumentStruct],
                                        _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-            completion(.success(false))
-            return nil
+            throw BeamObjectManagerError.notAuthenticated
         }
 
         let beamObjects = try documentStructsAsBeamObjects(documentStructs)
@@ -2470,7 +2468,7 @@ extension DocumentManager: BeamObjectManagerDelegateProtocol {
             for updateBeamObject in updateBeamObjects {
                 guard let documentCoreData = try? Document.fetchWithId(context, updateBeamObject.id) else {
                     completion(.failure(DocumentManagerError.localDocumentNotFound))
-                    continue
+                    return
                 }
 
                 // TODO: store previous data sent for improved 3-ways merge?
@@ -2543,8 +2541,7 @@ extension DocumentManager: BeamObjectManagerDelegateProtocol {
     internal func saveOnBeamObjectAPI(documentStruct: DocumentStruct,
                                       _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-            completion(.success(false))
-            return nil
+            throw BeamObjectManagerError.notAuthenticated
         }
 
         let beamObject = try BeamObject(documentStruct, Self.typeName)
