@@ -38,6 +38,6 @@ class WebPageBaseImpl: WebPage {
     var browsingScorer: BrowsingScorer?
     var passwordOverlayController: PasswordOverlayController?
     var mediaPlayerController: MediaPlayerController?
-
+    var appendToIndexer: ((URL, Readability) -> Void)?
     var score: Float = 0
 }

@@ -38,23 +38,22 @@ class BeamWebNavigationController: WebPageHolder, WebNavigationController {
     }
 
     func navigatedTo(url: URL, webView: WKWebView, replace: Bool) {
-        let isLinkActivation = !isNavigatingFromSearchBar
-        let earlyTitle = webView.title
+        let isLinkActivation = !isNavigatingFromSearchBar && !replace
+        isNavigatingFromSearchBar = false
+        self.page.navigatedTo(url: url, title: webView.title, reason: isLinkActivation ? .navigation : .loading)
         Readability.read(webView) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case let .success(read):
-                // Note: Readability removes title separators
                 self.browsingTree.navigateTo(url: url.absoluteString, title: read.title, startReading: self.page.isActiveTab(),
                                              isLinkActivation: isLinkActivation, readCount: read.content.count)
                 let webPageTitle = self.page.title
-                self.page.navigatedTo(url: url, read: read, title: read.title, isNavigation: isLinkActivation)
+                self.page.appendToIndexer?(url, read)
                 try? TextSaver.shared?.save(nodeId: self.browsingTree.current.id, text: read)
             case let .failure(error):
                 Logger.shared.logError("Error while indexing web page: \(error)", category: .javascript)
             }
         }
-        isNavigatingFromSearchBar = false
     }
 
     private func shouldDownloadFile(for navigationResponse: WKNavigationResponse) -> Bool {
@@ -87,7 +86,7 @@ extension BeamWebNavigationController: WKNavigationDelegate {
         case .backForward:
             handleBackForwardWebView(navigationAction: navigationAction)
         case .other:
-            Logger.shared.logInfo("Nav Redirecting toward \(String(describing: navigationAction.request.url?.absoluteString))")
+            Logger.shared.logInfo("Nav Redirecting toward \(String(describing: navigationAction.request.url?.absoluteString))", category: .web)
         default:
             Logger.shared.logInfo("Creating new webview for \(String(describing: navigationAction.request.url?.absoluteString))", category: .web)
         }
