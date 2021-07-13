@@ -3,7 +3,7 @@ import BeamCore
 
 enum PasswordManagerError: Error, Equatable {
     case wrongObjectsType
-    case localDocumentNotFound
+    case localPasswordNotFound
 }
 
 extension PasswordManagerError: LocalizedError {
@@ -11,7 +11,7 @@ extension PasswordManagerError: LocalizedError {
         switch self {
         case .wrongObjectsType:
             return "wrong objects type"
-        case .localDocumentNotFound:
+        case .localPasswordNotFound:
             return "local Password not found"
         }
     }
@@ -100,7 +100,7 @@ extension PasswordManager: BeamObjectManagerDelegateProtocol {
             switch result {
             case .failure(let error):
                 Logger.shared.logError("Could not save all \(passwords.count) passwords: \(error.localizedDescription)",
-                                       category: .documentNetwork)
+                                       category: .passwordNetwork)
                 completion(.failure(error))
             case .success(let updateBeamObjects):
                 do {
@@ -116,14 +116,14 @@ extension PasswordManager: BeamObjectManagerDelegateProtocol {
     internal func saveOnBeamObjectsAPISuccess(_ updateBeamObjects: [BeamObject],
                                               _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws {
         Logger.shared.logDebug("Saved \(updateBeamObjects.count) objects on the BeamObject API",
-                               category: .documentNetwork)
+                               category: .passwordNetwork)
 
         let passwordsDB = try PasswordsDB(path: Self.passwordsDBPath)
         var passwords: [PasswordRecord] = []
         for updateBeamObject in updateBeamObjects {
             // TODO: make faster with a `fetchWithIds(ids: [UUID])`
             guard var password = try? passwordsDB.fetchWithId(updateBeamObject.id) else {
-                completion(.failure(PasswordManagerError.localDocumentNotFound))
+                completion(.failure(PasswordManagerError.localPasswordNotFound))
                 return
             }
 
