@@ -46,8 +46,13 @@ class UserSessionRequestTests: QuickSpec {
                         waitUntil(timeout: .seconds(10)) { done in
                             let _: URLSessionDataTask? = try? sut.signIn(email: existingAccountEmail, password: password) { result in
                                 expect { try result.get() }.to(throwError { (error: APIRequestError) in
-                                    expect(error).to(matchError(APIRequestError.apiErrors([UserErrorData(message: "Invalid password",
-                                                                                                         path: ["arguments", "password"])])))
+                                    let errorable = UserSessionRequest.SignIn(
+                                        accessToken: nil,
+                                        refreshToken: nil,
+                                        errors: [UserErrorData(message: "Invalid password", path: ["arguments", "password"])]
+                                    )
+
+                                    expect(error).to(matchError(APIRequestError.apiErrors(errorable)))
                                 })
                                 done()
                             }
@@ -81,8 +86,15 @@ class UserSessionRequestTests: QuickSpec {
                                 .done { _ in }
                                 .catch { error in
                                     expect(error).to(beAnInstanceOf(APIRequestError.self))
-                                    expect(error).to(matchError(APIRequestError.apiErrors([UserErrorData(message: "Invalid password",
-                                                                                                         path: ["arguments", "password"])])))
+
+                                    let errorable = UserSessionRequest.SignIn(
+                                        accessToken: nil,
+                                        refreshToken: nil,
+                                        errors: [UserErrorData(message: "Invalid password", path: ["arguments", "password"])]
+                                    )
+
+                                    expect(error).to(matchError(APIRequestError.apiErrors(errorable)))
+
                                     done()
                                 }
                         }
@@ -115,8 +127,14 @@ class UserSessionRequestTests: QuickSpec {
                                 .then { _ in }
                                 .catch { error in
                                     expect(error).to(beAnInstanceOf(APIRequestError.self))
-                                    expect(error).to(matchError(APIRequestError.apiErrors([UserErrorData(message: "Invalid password",
-                                                                                                         path: ["arguments", "password"])])))
+
+                                    let errorable = UserSessionRequest.SignIn(
+                                        accessToken: nil,
+                                        refreshToken: nil,
+                                        errors: [UserErrorData(message: "Invalid password", path: ["arguments", "password"])]
+                                    )
+
+                                    expect(error).to(matchError(APIRequestError.apiErrors(errorable)))
                                     done()
                                 }
                         }
