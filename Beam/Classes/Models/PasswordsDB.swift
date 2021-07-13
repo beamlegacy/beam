@@ -167,12 +167,6 @@ class PasswordsDB: PasswordStore {
         }
     }
 
-    func find(uuid: UUID) throws -> PasswordRecord? {
-        try dbPool.read { db in
-            try PasswordRecord.filter(PasswordRecord.Columns.uuid).fetchOne(db)
-        }
-    }
-
     func find(_ searchString: String, completion: @escaping ([PasswordManagerEntry]) -> Void) {
         do {
             try dbPool.read { db in
