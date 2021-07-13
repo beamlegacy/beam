@@ -46,6 +46,23 @@ enum BeamObjectManagerError: Error {
     case beamObjectDecodingError
 }
 
+extension BeamObjectManagerError: LocalizedError {
+    public var errorDescription: String? {
+        switch self {
+        case .notSuccess:
+            return "Not Success"
+        case .notAuthenticated:
+            return "Not Authenticated"
+        case .multipleErrors(let errors):
+            return "Multiple errors: \(errors)"
+        case .beamObjectInvalidChecksum(let object):
+            return "Invalid Checksum \(object.id)"
+        case .beamObjectDecodingError:
+            return "Decoding Error"
+        }
+    }
+}
+
 class BeamObjectManager {
     static var managers: [String: BeamObjectManagerDelegateProtocol.Type] = [:]
 

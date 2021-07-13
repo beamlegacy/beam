@@ -158,8 +158,8 @@ class DatabaseManager {
         }
     }
 
-    private func checkValidations(_ context: NSManagedObjectContext, _ document: Database) throws {
-        try checkDuplicateTitles(context, document)
+    private func checkValidations(_ context: NSManagedObjectContext, _ database: Database) throws {
+        try checkDuplicateTitles(context, database)
     }
 
     private func checkDuplicateTitles(_ context: NSManagedObjectContext, _ database: Database) throws {
@@ -171,7 +171,7 @@ class DatabaseManager {
         if Database.countWithPredicate(context, predicate) > 0 {
             let errString = "Title is already used in another database"
             let userInfo: [String: Any] = [NSLocalizedFailureReasonErrorKey: errString, NSValidationObjectErrorKey: self]
-            throw NSError(domain: "DOCUMENT_ERROR_DOMAIN", code: 1001, userInfo: userInfo)
+            throw NSError(domain: "DATABASE_ERROR_DOMAIN", code: 1001, userInfo: userInfo)
         }
     }
 
@@ -589,8 +589,8 @@ extension DatabaseManager {
 
                 // If not authenticated, we don't need to send to BeamAPI
                 if AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled, networkSave {
-                    // We want to fetch back the document, to update it's previousChecksum
-                    //  context.refresh(document, mergeChanges: false)
+                    // We want to fetch back the database, to update it's previousChecksum
+                    //  context.refresh(database, mergeChanges: false)
                     guard let updatedDatabase = try? Database.fetchWithId(context, databaseStruct.id) else {
                         Logger.shared.logError("Weird, database disappeared: \(databaseStruct.id) \(databaseStruct.title)", category: .coredata)
                         return
@@ -743,7 +743,7 @@ extension DatabaseManager {
             .then(on: backgroundQueue) { databases -> PromiseKit.Promise<Bool> in
                 try self.coreDataManager.backgroundContext.performAndWait {
                     guard databases.count > 0 else {
-                        Logger.shared.logDebug("0 database fetched.", category: .document)
+                        Logger.shared.logDebug("0 database fetched.", category: .database)
                         return .value(true)
                     }
 
@@ -751,7 +751,7 @@ extension DatabaseManager {
 
                     if let mostRecentUpdatedAt = mostRecentUpdatedAt {
                         Logger.shared.logDebug("new updatedAt: \(mostRecentUpdatedAt). \(databases.count) databases fetched.",
-                                               category: .document)
+                                               category: .database)
                     }
 
                     for database in databases {
@@ -933,7 +933,7 @@ extension DatabaseManager {
             .then(on: backgroundQueue) { databases -> Promises.Promise<Bool> in
                 try self.coreDataManager.backgroundContext.performAndWait {
                     guard databases.count > 0 else {
-                        Logger.shared.logDebug("0 database fetched.", category: .document)
+                        Logger.shared.logDebug("0 database fetched.", category: .database)
                         return Promise(true)
                     }
 
@@ -941,7 +941,7 @@ extension DatabaseManager {
 
                     if let mostRecentUpdatedAt = mostRecentUpdatedAt {
                         Logger.shared.logDebug("new updatedAt: \(mostRecentUpdatedAt). \(databases.count) databases fetched.",
-                                               category: .document)
+                                               category: .database)
                     }
 
                     for database in databases {
@@ -1076,7 +1076,7 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
 
         let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
 
-        // Note: when this becomes a memory hog because we manipulate all local documents, we'll want to loop through
+        // Note: when this becomes a memory hog because we manipulate all local databases, we'll want to loop through
         // them by 100s and make multiple network calls instead.
         let databaseStructs = try context.performAndWait {
             try Database.rawFetchAll(context).map { DatabaseStruct(database: $0) }
@@ -1135,7 +1135,7 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
     internal func saveOnBeamObjectsAPIFailure(_ databaseStructs: [DatabaseStruct],
                                               _ error: Error,
                                               _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
-        // This case happens when we use the network call to send multiple documents,
+        // This case happens when we use the network call to send multiple databases,
         // but only send 1 and have an invalid checksum
         if case BeamObjectManagerError.beamObjectInvalidChecksum = error,
            let databaseStruct = databaseStructs.first {
@@ -1160,18 +1160,18 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
                 return
             }
 
-            // Here we should try to merge remoteBeamObject converted as a DocumentStruct, and our local one.
+            // Here we should try to merge remoteBeamObject converted as a DatabaseStruct, and our local one.
             // For now we just overwrite the API with our local version with a batch call resending all of them
             guard let databaseStruct = databaseStructs.first(where: { $0.id == remoteBeamObject.id }) else {
                 Logger.shared.logError("Could not save: \(insideError.localizedDescription)",
-                                       category: .documentNetwork)
-                Logger.shared.logError("No ID :( for \(remoteBeamObject.id)", category: .documentNetwork)
+                                       category: .databaseNetwork)
+                Logger.shared.logError("No ID :( for \(remoteBeamObject.id)", category: .databaseNetwork)
                 continue
             }
 
             do {
-                let mergedDocumentStruct = try manageConflict(databaseStruct, remoteBeamObject, insideError)
-                newDatabaseStructs.append(mergedDocumentStruct)
+                let mergedDatabaseStruct = try manageConflict(databaseStruct, remoteBeamObject, insideError)
+                newDatabaseStructs.append(mergedDatabaseStruct)
             } catch {
                 completion(.failure(error))
                 return
@@ -1188,12 +1188,12 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
     internal func saveOnBeamObjectsAPISuccess(_ updateBeamObjects: [BeamObject],
                                               _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
         Logger.shared.logDebug("Saved \(updateBeamObjects.count) objects on the BeamObject API",
-                               category: .documentNetwork)
+                               category: .databaseNetwork)
 
         CoreDataManager.shared.persistentContainer.performBackgroundTask { context in
             for updateBeamObject in updateBeamObjects {
                 guard let databaseCoreData = try? Database.fetchWithId(context, updateBeamObject.id) else {
-                    completion(.failure(DocumentManagerError.localDocumentNotFound))
+                    completion(.failure(DatabaseManagerError.localDatabaseNotFound))
                     continue
                 }
 
@@ -1211,8 +1211,8 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
     }
 
     @discardableResult
-    internal func saveOnBeamObjectAPI(databaseStruct: DatabaseStruct,
-                                      _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
+    func saveOnBeamObjectAPI(databaseStruct: DatabaseStruct,
+                             _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             completion(.success(false))
             return nil
@@ -1258,16 +1258,16 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
         let remoteDatabaseStruct: DatabaseStruct = try remoteBeamObject.decodeBeamObject()
 
         Logger.shared.logError("Could not save: \(error.localizedDescription)",
-                               category: .documentNetwork)
+                               category: .databaseNetwork)
         Logger.shared.logError("local object \(databaseStruct.beamObjectPreviousChecksum ?? "-"): \(databaseStruct)",
-                               category: .documentNetwork)
+                               category: .databaseNetwork)
         Logger.shared.logError("Remote saved object \(remoteDatabaseStruct.checksum ?? "-"): \(remoteDatabaseStruct)",
-                               category: .documentNetwork)
+                               category: .databaseNetwork)
         Logger.shared.logError("Resending local object with remote checksum \(remoteDatabaseStruct.checksum ?? "-")",
-                               category: .documentNetwork)
+                               category: .databaseNetwork)
 
-        // TODO: we should merge `documentStruct` and `remoteBeamObject` instead of just resending the
-        // same documentStruct we sent before
+        // TODO: we should merge `databaseStruct` and `remoteBeamObject` instead of just resending the
+        // same databaseStruct we sent before
         var mergedDatabaseStruct = databaseStruct.copy()
 
         // Necessary?

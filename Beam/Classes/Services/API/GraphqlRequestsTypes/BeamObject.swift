@@ -82,6 +82,10 @@ class BeamObject: Codable {
         }
         var decodedObject = try Self.decoder.decode(T.self, from: Data(data.utf8))
         decodedObject.id = id
+        decodedObject.checksum = dataChecksum
+        decodedObject.createdAt = createdAt ?? decodedObject.createdAt
+        decodedObject.updatedAt = updatedAt ?? decodedObject.updatedAt
+        decodedObject.deletedAt = deletedAt ?? decodedObject.deletedAt
 
         return decodedObject
     }

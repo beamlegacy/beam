@@ -14,6 +14,7 @@ enum DocumentManagerError: Error, Equatable {
     case idNotFound
     case operationCancelled
     case wrongObjectsType
+    case databaseNotFound
 }
 
 extension DocumentManagerError: LocalizedError {
@@ -29,6 +30,8 @@ extension DocumentManagerError: LocalizedError {
             return "operation cancelled"
         case .wrongObjectsType:
             return "wrong objects type"
+        case .databaseNotFound:
+            return "Database not found"
         }
     }
 }
@@ -1169,10 +1172,26 @@ extension DocumentManager {
     @discardableResult
     internal func saveDocumentStructOnAPI(_ documentStruct: DocumentStruct,
                                           _ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) -> URLSessionTask? {
-        _ = try? saveOnBeamObjectAPI(documentStruct) { _ in }
-
+//        _ = try? saveOnBeamObjectAPI(documentStruct) { _ in }
         // test for storing multiple objects at the same time
 //        _ = try? saveOnBeamObjectsAPI([documentStruct]) { _ in }
+
+        /*
+         Saving documentStruct and database in one call as Document has a dependency on Database
+         */
+        let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
+        var dbStruct: DatabaseStruct?
+        context.performAndWait {
+            guard let dbDatabase = try? Database.rawFetchWithId(context, documentStruct.databaseId) else { return }
+            dbStruct = DatabaseStruct(database: dbDatabase)
+        }
+
+        if let databaseStruct = dbStruct {
+            let databaseManager = DatabaseManager()
+            _ = try? databaseManager.saveOnBeamObjectAPI(databaseStruct: databaseStruct) { _ in }
+        }
+
+        _ = try? saveOnBeamObjectAPI(documentStruct) { _ in }
 
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             completion?(.success(false))
