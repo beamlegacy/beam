@@ -45,7 +45,7 @@ class BidirectionalPopover: NSView {
         didSet {
             collectionView.reloadData()
 
-            if items.isEmpty && !isMatchItem {
+            if items.isEmpty {
                 resetIndexPath(section: 1)
             } else {
                 resetIndexPath(section: 0)
@@ -169,7 +169,7 @@ class BidirectionalPopover: NSView {
             collectionView.selectItems(at: [indexPath], scrollPosition: .bottom)
         }
 
-        guard indexPath.section == 0 && indexPath.item != items.count - 1 else { return }
+        guard indexPath.section == 0 && indexPath.item < items.count - 1 else { return }
 
         indexPath.item += 1
         let previousIndexPath = IndexPath(item: indexPath.item - 1, section: indexPath.section)
@@ -250,9 +250,7 @@ extension BidirectionalPopover: NSCollectionViewDataSource {
         let itemName = itemNameAt(index: section)
 
         switch itemName {
-        case BidirectionalPopoverResultItem.identifier:
-            return items.count
-        case BidirectionalPopoverBlockItem.identifier:
+        case BidirectionalPopoverResultItem.identifier, BidirectionalPopoverBlockItem.identifier:
             return items.count
         case BidirectionalPopoverActionItem.identifier:
             guard mode == .internalLink else { return 0 }
