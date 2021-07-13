@@ -25,6 +25,10 @@ enum Persistence {
         @KeychainStorable("encryption.privateKey") static var privateKey: String?
     }
 
+    enum BrowsingTree {
+        @StandardStorable("browsingTree.userId") static var userId: String?
+    }
+
     // swiftlint:disable nesting
     enum Sync {
         enum Databases {

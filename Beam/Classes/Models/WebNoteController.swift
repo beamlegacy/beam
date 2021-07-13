@@ -1,6 +1,18 @@
 import Foundation
 import BeamCore
 
+enum NoteElementAddReason {
+    /**
+     Page was loaded as the result of a new address typed in the omnibar for instance.
+     */
+    case loading
+
+    /**
+     Page was loaded following a link in an existing web page.
+     */
+    case navigation
+}
+
 class WebNoteController: Encodable, Decodable {
 
     enum CodingKeys: String, CodingKey {
@@ -32,18 +44,18 @@ class WebNoteController: Encodable, Decodable {
     /**
      Determine which element any add should target.
      */
-    private func targetElement(isNavigation: Bool) -> BeamElement {
+    private func targetElement(reason: NoteElementAddReason) -> BeamElement {
         guard let latest = element.children.last else {
-            element = addElement(isNavigation: isNavigation)
+            element = addElement(reason: reason)
             return element
         }
-        element = latest.text.isEmpty ? latest : addElement(isNavigation: isNavigation)
+        element = latest.text.isEmpty ? latest : addElement(reason: reason)
         return element
     }
 
-    private func addElement(isNavigation: Bool) -> BeamElement {
+    private func addElement(reason: NoteElementAddReason) -> BeamElement {
         let newElement = BeamElement()
-        if isNavigation && !nested {
+        if reason == .navigation && !nested {
             element.addChild(newElement)
             rootElement = element
             nested = true
@@ -69,10 +81,10 @@ class WebNoteController: Encodable, Decodable {
     - Parameter allowSearchResult:
     - Returns: the added (or selected) element
     */
-    func add(url: URL, text: String?, isNavigation: Bool = true) -> BeamElement {
+    func add(url: URL, text: String?, reason: NoteElementAddReason) -> BeamElement {
         let linkString = url.absoluteString
         let existing: BeamElement? = note.elementContainingLink(to: linkString)
-        element = existing ?? targetElement(isNavigation: isNavigation)
+        element = existing ?? targetElement(reason: reason)
         setContents(url: url, text: text)
         Logger.shared.logDebug("add current page '\(text)' with url \(url) to note '\(note.title)'", category: .web)
         return element
@@ -118,7 +130,7 @@ class WebNoteController: Encodable, Decodable {
        - text:
        - url:
      */
-    func setContents(url: URL, text: String? = nil) -> String {
+    func setContents(url: URL, text: String? = nil) {
         let beamText = element.text
         let titleStr = text ?? beamText.text
         let name = titleStr.isEmpty ? url.absoluteString : titleStr
@@ -133,6 +145,5 @@ class WebNoteController: Encodable, Decodable {
                 }
             }
         }
-        return name
     }
 }

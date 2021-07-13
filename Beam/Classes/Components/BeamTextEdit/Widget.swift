@@ -95,11 +95,10 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
                 set.remove(c)
             }
 
-            for c in set {
+            // Remove layers for previous children that haven't been reattached to the editor:
+            for c in set where c.parent === self || c.parent == nil {
                 c.removeFromSuperlayer(recursive: true)
-                if c.parent == self {
-                    c.parent = nil
-                }
+                c.parent = nil
             }
         }
 
@@ -482,11 +481,19 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         computedIdealSize = contentsFrame.size
         computedIdealSize.width = frame.width
 
-//        if open {
-            for c in children {
-                computedIdealSize.height += c.idealSize.height
-            }
-//        }
+        if computedIdealSize.width.isNaN || !computedIdealSize.width.isFinite {
+            Logger.shared.logError("computedIdealSize.width is not integral \(computedIdealSize.width)", category: .noteEditor)
+            computedIdealSize.width = availableWidth
+        }
+
+        if computedIdealSize.height.isNaN || !computedIdealSize.height.isFinite {
+            Logger.shared.logError("computedIdealSize.height is not integral \(computedIdealSize.height)", category: .noteEditor)
+            computedIdealSize.height = 0
+        }
+
+        for c in children {
+            computedIdealSize.height += c.idealSize.height
+        }
     }
 
     // MARK: - Methods Widget

@@ -171,8 +171,8 @@ extension BrowserTabsManager {
 
     func closeCurrentTab() -> Bool {
         guard tabsAreVisible, let tab = currentTab else { return false }
+        tab.closeTab()
         tab.cancelObservers()
-
         if let i = tabs.firstIndex(of: tab) {
             tabs.remove(at: i)
             let nextTabIndex = min(i, tabs.count - 1)
@@ -188,6 +188,7 @@ extension BrowserTabsManager {
     }
 
     func reloadCurrentTab() {
+        currentTab?.leave()
         currentTab?.webView.reload()
     }
 
@@ -204,7 +205,7 @@ extension BrowserTabsManager {
 
     private func resetFirstResponderAfterClosingTab() {
         // This make sure any webview is not retained by the first responder chain
-        AppDelegate.main.window.makeFirstResponder(nil)
+        AppDelegate.main.window?.makeFirstResponder(nil)
         if let currentTab = currentTab {
             DispatchQueue.main.async {
                 currentTab.webView.window?.makeFirstResponder(currentTab.webView)

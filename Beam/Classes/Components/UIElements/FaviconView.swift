@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 struct FaviconView: View {
     let url: URL?
@@ -33,7 +34,7 @@ struct FaviconView: View {
                 Color.clear
                     .frame(width: 16, height: 16)
             }
-        }.onAppear(perform: {
+        }.onReceive(Just(url), perform: { _ in
             guard let url = url else {
                 self.faviconState = .generic
                 return

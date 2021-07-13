@@ -64,7 +64,7 @@ struct OmniBar: View {
         isAboveContent ? BeamColor.BottomBar.shadow.swiftUI : BeamColor.BottomBar.shadow.swiftUI.opacity(0.0)
     }
     private var showDownloadsButton: Bool {
-        !state.downloadManager.downloads.isEmpty
+        !state.data.downloadManager.downloads.isEmpty
     }
     private var showPressedState: Bool {
         state.autocompleteManager.animateInputingCharacter
@@ -133,12 +133,18 @@ struct OmniBar: View {
             if hasRightActions {
                 HStack(alignment: .center) {
                     if showDownloadsButton {
-                        OmniBarDownloadButton(downloadManager: state.downloadManager, action: {
+                        OmniBarDownloadButton(downloadManager: state.data.downloadManager, action: {
                             showDownloadPanel.toggle()
                         })
                         .frame(height: 32, alignment: .top)
                         .popover(isPresented: $showDownloadPanel, content: {
-                            DownloaderView(downloader: state.downloadManager)
+                            DownloaderView(downloader: state.data.downloadManager)
+                        })
+                        .background(GeometryReader { proxy -> Color in
+                            let rect = proxy.frame(in: .global)
+                            let center = CGPoint(x: rect.origin.x + rect.width / 2, y: rect.origin.y + rect.height / 2)
+                            state.downloadButtonPosition = center
+                            return Color.clear
                         })
                     }
                     if showDestinationNotePicker, let currentTab = browserTabsManager.currentTab {
@@ -198,9 +204,11 @@ struct OmniBar: View {
 }
 
 struct OmniBar_Previews: PreviewProvider {
-
     static let state = BeamState()
     static let focusedState = BeamState()
+    static let beamData = BeamData()
+    static let autocompleteManager = AutocompleteManager(with: beamData, searchEngine: GoogleSearch())
+    static let browserTabManager = BrowserTabsManager(with: beamData)
 
     static var previews: some View {
         state.focusOmniBox = false
@@ -209,8 +217,14 @@ struct OmniBar_Previews: PreviewProvider {
         let origin = BrowsingTreeOrigin.searchBar(query: "query")
         focusedState.browserTabsManager.currentTab = BrowserTab(state: focusedState, browsingTreeOrigin: origin, note: BeamNote(title: "Note title"))
         return Group {
-            OmniBar().environmentObject(state)
-            OmniBar().environmentObject(focusedState)
+            OmniBar()
+                .environmentObject(state)
+                .environmentObject(autocompleteManager)
+                .environmentObject(browserTabManager)
+            OmniBar()
+                .environmentObject(focusedState)
+                .environmentObject(autocompleteManager)
+                .environmentObject(browserTabManager)
         }.previewLayout(.fixed(width: 500, height: 60))
     }
 }

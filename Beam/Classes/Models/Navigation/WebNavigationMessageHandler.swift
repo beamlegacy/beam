@@ -21,19 +21,29 @@ class WebNavigationMessageHandler: BeamMessageHandler<NavigationMessages> {
         }
         let msgPayload = messageBody as? [String: AnyObject]
         switch messageKey {
+        /// Is only called when the JS history API registers a change
         case NavigationMessages.nav_locationChanged:
             guard let dict = msgPayload,
-                  let urlString = dict["url"] as? String
-                  else {
+                  let urlString = dict["url"] as? String,
+                  let type = dict["type"] as? String,
+                  let href = dict["href"] as? String
+                else {
                 Logger.shared.logError("Expected a url in location change message \(String(describing: msgPayload))", category: .web)
                 return
             }
-            Logger.shared.logInfo("Location changed \(urlString))")
+            guard href == webPage.url?.absoluteString else {
+                Logger.shared.logWarning("Location changed but in \(href) which is different from main frame \(webPage.url)", category: .web)
+                return
+            }
+            Logger.shared.logInfo("Location changed: \(type) \(urlString))")
             guard let url = URL(string: urlString) else {
                 Logger.shared.logError("\(urlString) is not a valid URL in navigation message", category: .web)
                 return
             }
-            webPage.navigationController.navigatedTo(url: url, webView: webPage.webView)
+            guard let navigationController = webPage.navigationController else { return }
+            let replace: Bool = type == "replaceState" ? true : false
+            navigationController.navigatedTo(url: url, webView: webPage.webView, replace: replace)
+            _ = webPage.executeJS("dispatchEvent(new Event('beam_historyLoad'))", objectName: nil)
         }
     }
 }

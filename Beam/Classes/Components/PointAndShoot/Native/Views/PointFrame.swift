@@ -6,7 +6,6 @@ struct PointFrame: View {
     @ObservedObject var pointAndShootUI: PointAndShootUI
     let customTiming = Animation.timingCurve(0.165, 0.84, 0.44, 1, duration: 0.5)
     let padding: CGFloat = 4
-    let shouldDisplayStroke = UserDefaults.standard.bool(forKey: "pnsBorder")
 
     var body: some View {
         if let selectionUI = pointAndShootUI.pointSelection {
@@ -19,17 +18,11 @@ struct PointFrame: View {
 
             let rect = selectionUI.rect.insetBy(dx: -padding, dy: -padding)
 
-            let cornerRadius: CGFloat = selectionUI.round ? selectionUI.rect.width : 4
-            let shouldAnimateOpacity = selectionUI.animated && selectionUI.round
+            let cornerRadius: CGFloat = round ? selectionUI.rect.width : 4
+            let shouldAnimateOpacity = animated && round
             ZStack(alignment: .center) {
-                    ZStack {
-                        if shouldDisplayStroke {
-                            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                                .stroke(selectionUI.color, lineWidth: 2)
-                        }
-                        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                            .fill(bgColor)
-                    }
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .fill(bgColor)
                     .frame(width: rect.width, height: rect.height)
                     .offset(x: offsetX, y: offsetY)
                     .position(x: rect.minX + rect.width / 2, y: rect.minY + rect.height / 2)

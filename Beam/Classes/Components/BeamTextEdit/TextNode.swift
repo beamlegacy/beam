@@ -19,9 +19,24 @@ public class TextNode: ElementNode {
 
     var mouseIsDragged = false
     var lastHoverMouseInfo: MouseInfo?
-    var interlineFactor = CGFloat(1.3)
+    var interlineFactor: CGFloat {
+        switch elementKind {
+        case .heading:
+            return 1.2
+        default:
+            return 1.4
+        }
+    }
     var interNodeSpacing = CGFloat(0)
-    var fontSize: CGFloat = 15
+    var fontSize: CGFloat {
+        switch elementKind {
+        case .heading(let level):
+            let l = min(1, max(level, 2))
+            return [21, 18][l - 1]
+        default:
+            return 15
+        }
+    }
 
     private var isCursorInsideUneditableRange = false
 
@@ -156,6 +171,8 @@ public class TextNode: ElementNode {
 
         setAccessibilityLabel("TextNode")
         setAccessibilityRole(.textArea)
+
+        observeNoteTitles()
     }
 
     override init(editor: BeamTextEdit, element: BeamElement, nodeProvider: NodeProvider? = nil) {
@@ -175,9 +192,20 @@ public class TextNode: ElementNode {
         default:
             textPadding = NSEdgeInsetsZero
         }
+
+        observeNoteTitles()
     }
 
     // MARK: - Setup UI
+
+    private func observeNoteTitles() {
+        AppDelegate.main.data.$renamedNote.dropFirst().sink { [unowned self] (noteId, previousName, newName) in
+            Logger.shared.logInfo("Note '\(previousName)' renamed to '\(newName)' [\(noteId)]")
+            if self.elementText.internalLinks.contains(noteId) {
+               self.unproxyElement.updateNoteNamesInInternalLinks()
+            }
+        }.store(in: &scope)
+    }
 
     override public func draw(in context: CGContext) {
         updateRendering()
@@ -835,22 +863,47 @@ public class TextNode: ElementNode {
         return (caret.offset.x, textLine.frame)
     }
 
-    override public func positionAbove(_ position: Int) -> Int {
+//    override public func positionAbove(_ position: Int) -> Int {
+//        guard let textFrame = textFrame else { return 0 }
+//        guard let l = lineAt(index: position), l > 0 else { return 0 }
+//        let offset = offsetAt(index: position)
+//        let indexAbove = textFrame.lines[l - 1].stringIndexFor(position: NSPoint(x: offset, y: 0))
+//        return sourceIndexFor(displayIndex: indexAbove)
+//    }
+//
+//    override public func positionBelow(_ position: Int) -> Int {
+//        guard let textFrame = textFrame else { return 0 }
+//        guard let l = lineAt(index: position), l < textFrame.lines.count - 1 else { return text.count }
+//        let offset = offsetAt(index: position)
+//        let indexBelow = textFrame.lines[l + 1].stringIndexFor(position: NSPoint(x: offset, y: 0))
+//        return sourceIndexFor(displayIndex: indexBelow)
+//    }
+//
+    override public func caretAbove(_ caretIndex: Int) -> Int {
         guard let textFrame = textFrame else { return 0 }
-        guard let l = lineAt(index: position), l > 0 else { return 0 }
-        let offset = offsetAt(index: position)
-        let indexAbove = textFrame.lines[l - 1].stringIndexFor(position: NSPoint(x: offset, y: 0))
-        return sourceIndexFor(displayIndex: indexAbove)
+        let currentCaret = textFrame.carets[caretIndex]
+        let lineAbove = currentCaret.line - 1
+        guard lineAbove >= 0 else { return 0 }
+        let offset = currentCaret.offset
+        return textFrame.carets.firstIndex { caret in
+            caret.line == lineAbove && caret.offset.x >= offset.x
+        } ?? 0
     }
 
-    override public func positionBelow(_ position: Int) -> Int {
+    override public func caretBelow(_ caretIndex: Int) -> Int {
         guard let textFrame = textFrame else { return 0 }
-        guard let l = lineAt(index: position), l < textFrame.lines.count - 1 else { return text.count }
-        let offset = offsetAt(index: position)
-        let indexBelow = textFrame.lines[l + 1].stringIndexFor(position: NSPoint(x: offset, y: 0))
-        return sourceIndexFor(displayIndex: indexBelow)
+        let currentCaret = textFrame.carets[caretIndex]
+        let lineAbove = currentCaret.line + 1
+        guard lineAbove < textFrame.lines.count else { return textFrame.carets.count - 1 }
+        let offset = currentCaret.offset
+        return textFrame.carets.firstIndex { caret in
+            caret.line == lineAbove && caret.offset.x >= offset.x
+        } ?? textFrame.carets.count - 1
     }
 
+    override public func positionForCaretIndex(_ caretIndex: Int) -> Int {
+        return textFrame?.carets[caretIndex].positionInSource ?? 0
+    }
     override public func isOnFirstLine(_ position: Int) -> Bool {
         guard let l = lineAt(index: position) else { return false }
         return l == 0
@@ -1056,15 +1109,6 @@ public class TextNode: ElementNode {
     }
 
     private func buildAttributedString(for beamText: BeamText) -> NSMutableAttributedString {
-
-        switch elementKind {
-        case .heading(1):
-            fontSize = 22 // TODO: Change later (isBig ? 26 : 22)
-        case .heading(2):
-            fontSize = 18 // TODO: Change later (isBig ? 22 : 18)
-        default:
-            fontSize = 14 // TODO: Change later (isBig ? 17 : 15)
-        }
 
         var mouseInteraction: MouseInteraction?
         if let hoverMouse = lastHoverMouseInfo, isHoveringText() {

@@ -43,7 +43,7 @@ extension BeamElementRecord: FetchableRecord {
 extension BeamElementRecord: MutablePersistableRecord {
     /// The values persisted in the database
     func encode(to container: inout PersistenceContainer) {
-        container[Columns.id] = id
+        // We can't associate the id with the one in a virtual table, it creates errors in SQLite
         container[Columns.title] = title
         container[Columns.text] = text
         container[Columns.uid] = uid

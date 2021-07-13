@@ -161,6 +161,10 @@ public class ElementNode: Widget {
 
     private var actionLayerPadding = CGFloat(3.5)
 
+    var elementNodePadding: NSEdgeInsets {
+        return NSEdgeInsetsZero
+    }
+
     public static func == (lhs: ElementNode, rhs: ElementNode) -> Bool {
         return lhs === rhs
     }
@@ -242,7 +246,7 @@ public class ElementNode: Widget {
     }
 
     override func insert(node: Widget, after existingNode: Widget) -> Bool {
-        guard let node = node as? ElementNode, let existingNode = existingNode as? ElementNode else { fatalError () }
+        guard let node = node as? ElementNode, let existingNode = existingNode as? ElementNode else { fatalError() }
         element.insert(node.element, after: existingNode.element)
         invalidateLayout()
         return true
@@ -250,7 +254,7 @@ public class ElementNode: Widget {
 
     @discardableResult
     override func insert(node: Widget, at pos: Int) -> Bool {
-        guard let node = node as? ElementNode else { fatalError () }
+        guard let node = node as? ElementNode else { fatalError() }
         element.insert(node.element, at: pos)
         invalidateLayout()
         return true
@@ -459,7 +463,7 @@ public class ElementNode: Widget {
             "bounds": NSNull()
         ]
 
-        layer.layer.zPosition = 1
+        layer.layer.zPosition = 100
         layer.layer.position = CGPoint(x: indent, y: 0)
         _cursorLayer = layer
         addLayer(layer)
@@ -472,7 +476,7 @@ public class ElementNode: Widget {
 
     public func updateElementCursor() {
         let on = editor.hasFocus && isFocused && editor.blinkPhase && (root?.state.nodeSelection?.nodes.isEmpty ?? true)
-        let cursorRect = NSRect(x: caretIndex == 0 ? indent : availableWidth, y: 0, width: 1, height: frame.height )//rectAt(caretIndex: caretIndex)
+        let cursorRect = NSRect(x: caretIndex == 0 ? (indent - 5) : (availableWidth - indent + 3), y: 0, width: 2, height: frame.height )//rectAt(caretIndex: caretIndex)
         let layer = self.cursorLayer
 
         layer.shapeLayer.fillColor = enabled ? cursorColor.cgColor : disabledColor.cgColor
@@ -544,11 +548,15 @@ public class ElementNode: Widget {
         return max(0, index - 1)
     }
 
-    public func positionAbove(_ position: Int) -> Int {
-        return max(0, position - 1)
+    public func caretAbove(_ caretIndex: Int) -> Int {
+        return max(0, caretIndex - 1)
     }
 
-    public func positionBelow(_ position: Int) -> Int {
-        return min(1, position + 1)
+    public func caretBelow(_ caretIndex: Int) -> Int {
+        return min(1, caretIndex + 1)
+    }
+
+    public func positionForCaretIndex(_ caretIndex: Int) -> Int {
+        caretIndex
     }
 }

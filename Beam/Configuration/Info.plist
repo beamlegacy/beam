@@ -175,14 +175,38 @@
 		<dict>
 			<key>CFBundleTypeIconFile</key>
 			<string>document.icns</string>
+			<key>CFBundleTypeIconSystemGenerated</key>
+			<integer>1</integer>
 			<key>CFBundleTypeName</key>
 			<string>PDF Document</string>
 			<key>CFBundleTypeRole</key>
 			<string>Viewer</string>
+			<key>LSHandlerRank</key>
+			<string>Default</string>
 			<key>LSItemContentTypes</key>
 			<array>
 				<string>com.adobe.pdf</string>
 			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeIconFile</key>
+			<string>download-document-icon</string>
+			<key>CFBundleTypeIconSystemGenerated</key>
+			<integer>1</integer>
+			<key>CFBundleTypeName</key>
+			<string>Beam Download Document</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>co.beamapp.download</string>
+			</array>
+			<key>LSTypeIsPackage</key>
+			<true/>
+			<key>NSDocumentClass</key>
+			<string>$(PRODUCT_MODULE_NAME).BeamDownloadDocument</string>
 		</dict>
 	</array>
 	<key>CFBundleExecutable</key>
@@ -290,5 +314,41 @@
 	<string>$(AUTOMATIC_UPDATE)</string>
 	<key>SUFeedURL</key>
 	<string>https://s3.eu-west-3.amazonaws.com/downloads.dev.beamapp.co/master/appcast.xml</string>
+	<key>UTExportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>com.apple.package</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Beam Download File</string>
+			<key>UTTypeIconFile</key>
+			<string>download-document-icon</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>AppIcon</string>
+				<key>UTTypeIconText</key>
+				<string>Download</string>
+			</dict>
+			<key>UTTypeIdentifier</key>
+			<string>co.beamapp.download</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>beamdownload</string>
+				</array>
+			</dict>
+		</dict>
+		<dict/>
+	</array>
+	<key>NSLocationUsageDescription</key>
+	<string>The website you are visiting is requesting to see your current location</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>The website you are visiting is requesting to see your current location (only when in use)</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>The website you are visiting is requesting to always see your location</string>
 </dict>
 </plist>

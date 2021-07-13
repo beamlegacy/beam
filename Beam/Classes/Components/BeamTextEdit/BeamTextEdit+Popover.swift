@@ -140,7 +140,7 @@ extension BeamTextEdit {
         case .blockReference:
             let items = linkText.isEmpty ?
                 [] :
-                GRDBDatabase.shared.search(matchingAnyTokensIn: linkText, maxResults: 5, includeText: true)
+                GRDBDatabase.shared.search(matchingAnyTokenIn: linkText, maxResults: 5, includeText: true)
 
             popover.items = items.compactMap {
                 guard let text = $0.text,
@@ -232,7 +232,7 @@ extension BeamTextEdit {
             cancelInternalLink(with: splitTitle, range: linkEnd..<splitTitle.count + linkEnd)
         }
 
-        node.text.makeInternalLink(replacementStart..<linkEnd)
+        node.unproxyElement.makeInternalLink(replacementStart..<linkEnd, createNoteIfNeeded: true)
 
         rootNode.cursorPosition = linkEnd
         dismissPopover()

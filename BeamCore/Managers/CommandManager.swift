@@ -175,6 +175,18 @@ public class CommandManager<Context> {
         }
         return Date().timeIntervalSince(lastCmdDate)
     }
+
+    public var canUndo: Bool {
+        !doneQueue.isEmpty
+    }
+
+    public var canRedo: Bool {
+        !undoneQueue.isEmpty
+    }
+
+    public var isEmpty: Bool {
+        !canUndo && !canRedo
+    }
 }
 
 // MARK: - Asynchronous Commands

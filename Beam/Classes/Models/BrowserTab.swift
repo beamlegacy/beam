@@ -5,7 +5,9 @@ import WebKit
 import BeamCore
 import Promises
 
+// swiftlint:disable:next type_body_length
 @objc class BrowserTab: NSObject, ObservableObject, Identifiable, Codable, WebPage, Scorable {
+
     var id: UUID
 
     var scrollX: CGFloat = 0
@@ -17,8 +19,10 @@ import Promises
     let uiDelegateController = BeamWebkitUIDelegateController()
     let noteController: WebNoteController
 
+    private var isFromNoteSearch: Bool
+
     public func load(url: URL) {
-        navigationController.setLoading()
+        navigationController?.setLoading()
         self.url = url
         navigationCount = 0
         if url.isFileURL {
@@ -28,7 +32,7 @@ import Promises
         }
         $isLoading.sink { [unowned passwordOverlayController] loading in
             if !loading {
-                passwordOverlayController.detectInputFields()
+                passwordOverlayController?.detectInputFields()
             }
         }.store(in: &scope)
     }
@@ -68,39 +72,49 @@ import Promises
     }
 
     func leave() {
-        pointAndShoot.leavePage()
+        pointAndShoot?.leavePage()
     }
 
     func navigatedTo(url: URL, read: Readability, title: String, isNavigation: Bool) {
         appendToIndexer?(url, read)
-        noteController.add(url: url, text: title, isNavigation: isNavigation)
+        logInNote(url: url, title: title, reason: isNavigation ? .navigation : .loading)
         updateScore()
     }
 
-    lazy var passwordOverlayController: PasswordOverlayController = {
+    private func logInNote(url: URL, title: String?, reason: NoteElementAddReason) {
+        if isFromNoteSearch {
+            noteController.setContents(url: url)
+            isFromNoteSearch = false
+        } else {
+            _ = noteController.add(url: url, text: title, reason: reason)
+        }
+    }
+
+    lazy var passwordOverlayController: PasswordOverlayController? = {
         let controller = PasswordOverlayController(passwordStore: state.data.passwordsDB, userInfoStore: MockUserInformationsStore.shared)
         controller.page = self
         return controller
     }()
 
-    lazy var browsingScorer: BrowsingScorer = {
+    lazy var browsingScorer: BrowsingScorer? = {
         let scorer = BrowsingTreeScorer(browsingTree: browsingTree)
         scorer.page = self
         return scorer
     }()
 
-    lazy var pointAndShoot: PointAndShoot = {
-        let pns = PointAndShoot(ui: PointAndShootUI(), scorer: browsingScorer)
+    lazy var pointAndShoot: PointAndShoot? = {
+        guard let scorer = browsingScorer else { return nil }
+        let pns = PointAndShoot(ui: PointAndShootUI(), scorer: scorer)
         pns.page = self
         return pns
     }()
 
-    var navigationController: WebNavigationController {
-        return beamNavigationController
+    var navigationController: WebNavigationController? {
+        beamNavigationController
     }
 
     lazy var beamNavigationController: BeamWebNavigationController = {
-        let navController = BeamWebNavigationController(browsingTree: browsingTree, noteController: noteController)
+        let navController = BeamWebNavigationController(browsingTree: browsingTree, noteController: noteController, webView: webView)
         navController.page = self
         return navController
     }()
@@ -118,15 +132,15 @@ import Promises
         webView.window
     }
 
-    var downloadManager: DownloadManager {
-        state.downloadManager
+    var downloadManager: DownloadManager? {
+        state.data.downloadManager
     }
 
     var frame: NSRect {
         webView.frame
     }
 
-    var fileStorage: BeamFileStorage {
+    var fileStorage: BeamFileStorage? {
         state.data.fileDB
     }
 
@@ -148,11 +162,24 @@ import Promises
     static var webViewConfiguration = BrowserTabConfiguration()
     var browsingTreeOrigin: BrowsingTreeOrigin?
 
+    /**
+
+     - Parameters:
+       - state:
+       - browsingTreeOrigin:
+       - note: The destination note to add elements to.
+       - rootElement: The root element to add elements to.
+           Will be nil if you created a new tab from omniBar for instance.
+           Will be the origin text element if you created the tab using Cmd+Enter.
+       - id:
+       - webView:
+     */
     init(state: BeamState, browsingTreeOrigin: BrowsingTreeOrigin?, note: BeamNote, rootElement: BeamElement? = nil,
          id: UUID = UUID(), webView: BeamWebView? = nil) {
         self.state = state
         self.id = id
         self.browsingTreeOrigin = browsingTreeOrigin
+        isFromNoteSearch = rootElement != nil
 
         if let suppliedWebView = webView {
             self.webView = suppliedWebView
@@ -207,6 +234,7 @@ import Promises
         browsingTree = tree
         noteController = try container.decode(WebNoteController.self, forKey: .noteController)
         privateMode = try container.decode(Bool.self, forKey: .privateMode)
+        isFromNoteSearch = false
 
         super.init()
         noteController.note.browsingSessions.append(tree)
@@ -249,18 +277,18 @@ import Promises
             Logger.shared.logError("Cannot get current URL", category: .general)
             return nil
         }
-        guard allowSearchResult || !url.isSearchResult else {
+        guard allowSearchResult || SearchEngines.get(url) != nil else {
             Logger.shared.logWarning("Adding search results is not allowed", category: .web)
             return nil
         } // Don't automatically add search results
-        return noteController.add(url: url, text: title)
+        return noteController.add(url: url, text: title, reason: .navigation)
     }
 
     private func receivedWebviewTitle(_ title: String? = nil) {
         guard let url = url else {
             return
         }
-        noteController.add(url: url, text: title)
+        logInNote(url: url, title: title, reason: .loading)
         self.title = noteController.element.text.text
     }
 
@@ -284,6 +312,22 @@ import Promises
 
     var backListSize = 0
 
+    /// When using Point and Shoot to capture text in a webpage, notify the
+    /// clustering manager, so the important text can be taken into consideration
+    /// in the clustering process
+    ///
+    /// - Parameters:
+    ///   - text: The text that was captured, as a string. If possible - the cleaner the
+    ///   better (the text shouldn't include the caption of a photo, for example). If no text was captured,
+    ///   this function should not be called.
+    ///   - url: The url of the page the PnS was performed in.
+    ///
+    func addTextToClusteringManager(_ text: String, url: URL) {
+        let clusteringManager = state.data.clusteringManager
+        let id = browsingTree.current.link
+        clusteringManager.addPage(id: id, parentId: nil, newContent: text)
+    }
+
     private func setupObservers() {
         Logger.shared.logDebug("setupObservers", category: .javascript)
         webView.publisher(for: \.title).sink { [unowned self] value in
@@ -291,6 +335,7 @@ import Promises
         }.store(in: &scope)
         webView.publisher(for: \.url).sink { [unowned self] value in
             url = value
+            leave()
             if value?.absoluteString != nil {
                 updateFavIcon()
                 // self.browsingTree.current.score.openIndex = self.navigationCount
@@ -319,30 +364,12 @@ import Promises
         webView.uiDelegate = nil
     }
 
-    func executeJS(_ jsCode: String, objectName: String?) -> Promise<Any?> {
-        Promise<Any?> { [unowned self] fulfill, reject in
-            let parameterized = objectName != nil ? "beam.__ID__\(objectName!)." + jsCode : jsCode
-            let obfuscatedCommand = Self.webViewConfiguration.obfuscate(str: parameterized)
-
-            webView.evaluateJavaScript(obfuscatedCommand) { (result, error: Error?) in
-                if error == nil {
-                    Logger.shared.logInfo("(\(obfuscatedCommand) succeeded: \(String(describing: result))", category: .javascript)
-                    fulfill(result)
-                } else {
-                    Logger.shared.logError("(\(obfuscatedCommand) failed: \(String(describing: error))", category: .javascript)
-                    reject(error!)
-                }
-            }
-
-        }
-    }
-
     private func encodeStringTo64(fromString: String) -> String? {
         let plainData = fromString.data(using: .utf8)
         return plainData?.base64EncodedString(options: [])
     }
 
-    func createNewTab(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, setCurrent: Bool) -> WebPage {
+    func createNewTab(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, setCurrent: Bool, state: BeamState) -> WebPage {
         let newWebView = BeamWebView(frame: NSRect(), configuration: configuration ?? Self.webViewConfiguration)
         newWebView.wantsLayer = true
         newWebView.allowsMagnification = true
@@ -358,10 +385,56 @@ import Promises
         return newTab
     }
 
+    func createNewTab(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, setCurrent: Bool) -> WebPage {
+        createNewTab(targetURL, configuration, setCurrent: setCurrent, state: state)
+    }
+
+    func createNewWindow(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, windowFeatures: WKWindowFeatures, setCurrent: Bool) -> BeamWebView {
+        // TODO: Open a new window compliant with windowFeatures instead.
+        let defaultValue = true
+        let menubar = windowFeatures.menuBarVisibility?.boolValue ?? defaultValue
+        let statusBar = windowFeatures.statusBarVisibility?.boolValue ?? defaultValue
+        let toolBars = windowFeatures.toolbarsVisibility?.boolValue ?? defaultValue
+        let resizing = windowFeatures.allowsResizing?.boolValue ?? defaultValue
+
+        let windowFrame = NSRect(x: windowFeatures.x?.floatValue ?? 0, y: windowFeatures.y?.floatValue ?? 0, width: windowFeatures.width?.floatValue ?? 800, height: windowFeatures.height?.floatValue ?? 600)
+
+        var newWebView: BeamWebView
+        var newWindow: NSWindow
+        if menubar && statusBar && toolBars && resizing {
+            // we are being asked for the full browser experience, give it to them...
+            let newBeamWindow = AppDelegate.main.createWindow(frame: windowFrame, reloadState: false)
+            let tab = createNewTab(targetURL, configuration, setCurrent: setCurrent, state: newBeamWindow.state)
+            newWindow = newBeamWindow
+            newWebView = tab.webView
+        } else {
+            // this is more likely a login window or something that should disappear at some point so let's create something transient:
+            newWebView = BeamWebView(frame: NSRect(), configuration: configuration ?? Self.webViewConfiguration)
+            newWebView.enableAutoCloseWindow = true
+            newWebView.wantsLayer = true
+            newWebView.allowsMagnification = true
+            state.setup(webView: newWebView)
+
+            var windowMasks: NSWindow.StyleMask = [.closable, .miniaturizable, .titled, .unifiedTitleAndToolbar]
+            if windowFeatures.allowsResizing != 0 {
+                windowMasks.insert(NSWindow.StyleMask.resizable)
+            }
+            newWindow = NSWindow(contentRect: windowFrame, styleMask: windowMasks, backing: .buffered, defer: true)
+            newWindow.isReleasedWhenClosed = false
+            newWindow.contentView = newWebView
+
+            newWindow.makeKeyAndOrderFront(nil)
+        }
+        if windowFeatures.x == nil || windowFeatures.y == nil {
+            newWindow.center()
+        }
+        return newWebView
+    }
+
     var navigationCount: Int = 0
 
     func cancelShoot() {
-        pointAndShoot.resetStatus()
+        pointAndShoot?.resetStatus()
     }
 
     func startReading() {
@@ -403,9 +476,21 @@ import Promises
 
     func closeTab() {
         browsingTree.closeTab()
+        sendTree()
     }
 
     func closeApp() {
         browsingTree.closeApp()
+        sendTree(blocking: true)
     }
+
+    private func sendTree(blocking: Bool = false) {
+        guard let sender = state.data.browsingTreeSender else { return }
+        if blocking {
+            sender.blockingSend(browsingTree: browsingTree)
+        } else {
+            sender.send(browsingTree: browsingTree)
+        }
+    }
+    // swiftlint:disable:next file_length
 }

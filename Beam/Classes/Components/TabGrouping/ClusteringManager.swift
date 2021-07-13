@@ -65,25 +65,79 @@ class ClusteringManager: ObservableObject {
         }.store(in: &scope)
     }
 
-    func addPage(id: UInt64, parentId: UInt64?, value: TabInformation) {
-        let page = Page(id: id, parentId: parentId, title: value.document.title, content: value.cleanedTextContentForClustering)
-        tabsInfo.append(value)
+    func getIdAndParent(tabToIndex: TabInformation) -> (UInt64?, UInt64?) {
+        var id = tabToIndex.currentTabTree?.current.link
+        var parentId = tabToIndex.parentBrowsingNode?.link
+        var parentTimeStamp = Date.distantPast
+        if let parent = tabToIndex.parentBrowsingNode,
+           let lastEventType = parent.events.last?.type {
+            if let lastEventTime = parent.events.last?.date {
+                parentTimeStamp = lastEventTime
+            }
+            if lastEventType == .searchBarNavigation || lastEventType == .exitForward || lastEventType == .exitBackward {
+                parentId = nil
+            }
+        }
+        if let children = tabToIndex.currentTabTree?.current.children {
+            for child in children {
+                if let lastEventType = child.events.last?.type,
+                   let lastEventTime = child.events.last?.date,
+                   lastEventType == .exitBackward,
+                   lastEventTime > parentTimeStamp {
+                    parentTimeStamp = lastEventTime
+                    parentId = nil
+                    // TODO: Reconsider the relation implied by the back button
+                    // when it is 100% reliable. (probably should stay the same)
+                }
+            }
+        }
+        // By definition, when opening a link in a new tab the link either
+        // has no children or their events are farther in the past
+        if let current = tabToIndex.currentTabTree?.current.events.last?.type,
+           current == .openLinkInNewTab,
+           let tabTree = tabToIndex.tabTree?.current.link {
+            parentId = id
+            id = tabTree
+        }
+        if let previousTabTree = tabToIndex.previousTabTree,
+           let type = previousTabTree.current.events.last?.type,
+           type == .openLinkInNewTab {
+            parentId = previousTabTree.current.link
+        }
+        return (id, parentId)
+    }
+
+    func addPage(id: UInt64, parentId: UInt64?, value: TabInformation? = nil, newContent: String? = nil) {
+        var pageToAdd: Page?
+        if let value = value {
+            pageToAdd = Page(id: id, parentId: parentId, title: value.document.title, content: value.cleanedTextContentForClustering)
+            tabsInfo.append(value)
+        } else if let newContent = newContent {
+            pageToAdd = Page(id: id, parentId: nil, title: nil, content: newContent)
+            // TODO: Shold we bother changing the content in tabsInfo?
+        }
         isClustering = true
         var ranking: [UInt64]?
         if self.sendRanking {
             ranking = self.ranker.clusteringRemovalSorted(links: self.clusteredPagesId.reduce([], +))
         }
-        cluster.add(page, ranking: ranking) { result in
-            switch result {
-            case .failure(let error):
-                self.isClustering = false
-                Logger.shared.logError("Error while adding page to cluster for \(page): \(error)", category: .clustering)
-            case .success(let result):
-                DispatchQueue.main.async {
+        var replaceContent = false
+        if let pageToAdd = pageToAdd {
+            if let _ = newContent {
+                replaceContent = true
+            }
+            cluster.add(pageToAdd, ranking: ranking, replaceContent: replaceContent) { result in
+                switch result {
+                case .failure(let error):
                     self.isClustering = false
-                    self.clusteredPagesId = result.0
-                    self.sendRanking = result.1
-                    self.logForClustering(result: result.0, changeCandidate: false)
+                    Logger.shared.logError("Error while adding page to cluster for \(pageToAdd): \(error)", category: .clustering)
+                case .success(let result):
+                    DispatchQueue.main.async {
+                        self.isClustering = false
+                        self.clusteredPagesId = result.0
+                        self.sendRanking = result.1
+                        self.logForClustering(result: result.0, changeCandidate: false)
+                    }
                 }
             }
         }

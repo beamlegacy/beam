@@ -87,12 +87,12 @@ extension TextRoot {
     }
 
     // swiftlint:disable:next cyclomatic_complexity
-    func eraseNodeSelection(createEmptyNodeInPlace: Bool) {
-        guard let selection = root?.state.nodeSelection else { return }
+    @discardableResult func eraseNodeSelection(createEmptyNodeInPlace: Bool, createNodeInEmptyParent: Bool = true) -> BeamElement? {
+        guard let selection = root?.state.nodeSelection else { return nil }
         let sortedNodes = selection.sortedNodes
 
         // This will be used to create an empty node in place:
-        guard let firstParent = sortedNodes.first?.parent as? ElementNode ?? root else { return }
+        guard let firstParent = sortedNodes.first?.parent as? ElementNode ?? root else { return nil }
 
         cancelNodeSelection()
 
@@ -131,7 +131,7 @@ extension TextRoot {
             }
         }
 
-        if createEmptyNodeInPlace || root?.element.children.isEmpty == true {
+        if createEmptyNodeInPlace || (createNodeInEmptyParent && root?.element.children.isEmpty == true) {
             cmdManager.beginGroup(with: "Insert empty element")
             let newElement = BeamElement()
             cmdManager.insertElement(newElement, inNode: firstParent, afterElement: nil)
@@ -140,7 +140,9 @@ extension TextRoot {
             if !editor.journalMode {
                 editor.scroll(.zero)
             }
+            return newElement
         }
+        return nil
     }
 
     func replaceSelection(with str: String) {
@@ -193,6 +195,7 @@ extension TextRoot {
         }
     }
 
+    //swiftlint:disable:next cyclomatic_complexity
     func deleteBackward() {
         guard root?.state.nodeSelection == nil else {
             editor.cancelPopover()
@@ -229,7 +232,14 @@ extension TextRoot {
                     }
                     cmdManager.deleteElement(for: node)
                 } else {
-                    cmdManager.deleteElement(for: prevVisibleNode)
+                    if node.text.isEmpty {
+                        for (i, child) in node.displayedElement.children.enumerated() {
+                            cmdManager.reparentElement(child, to: prevVisibleNode.displayedElement, atIndex: i)
+                        }
+                        cmdManager.deleteElement(for: node)
+                    } else {
+                        cmdManager.deleteElement(for: prevVisibleNode)
+                    }
                 }
             }
         } else {
@@ -237,7 +247,7 @@ extension TextRoot {
         }
     }
 
-    private func rangeToDeleteText(in node: TextNode, cursorAt cursorPos: Int, forward: Bool) -> Range<Int> {
+    func rangeToDeleteText(in node: TextNode, cursorAt cursorPos: Int, forward: Bool) -> Range<Int> {
         guard selectedTextRange.isEmpty else {
             return extendRangeWithUneditableRanges(selectedTextRange, in: node)
         }

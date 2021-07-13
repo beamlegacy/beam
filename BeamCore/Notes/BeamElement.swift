@@ -312,7 +312,10 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
             e === child
         }) else { return }
         children.remove(at: index)
-        child.parent = nil
+        // Only reset the child's parent if it was set to us, it may already have been reparented
+        if child.parent === self {
+            child.parent = nil
+        }
     }
 
     open func indexOfChild(_ child: BeamElement) -> Int? {
@@ -332,10 +335,8 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
     open func insert(_ child: BeamElement, after: BeamElement?) {
         guard child.parent != self else { return }
 
-        if let oldParent = child.parent {
-            oldParent.removeChild(child)
-        }
-
+        let previousParent = child.parent
+        defer { previousParent?.removeChild(child) }
         child.parent = self
         guard let after = after, let index = indexOfChild(after) else {
             children.insert(child, at: 0)
@@ -346,10 +347,9 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
     }
 
     open func insert(_ child: BeamElement, at pos: Int) {
-        if let oldParent = child.parent {
-            oldParent.removeChild(child)
-        }
-
+        // The order is important here, we first add the child then remove it from the previous parent so that any event resulting from both elements' children change will not generate a temporary loss of the child anywhere else in the app.
+        let previousParent = child.parent
+        defer { previousParent?.removeChild(child) }
         child.parent = self
         children.insert(child, at: min(children.count, pos))
     }
@@ -545,6 +545,42 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
         return self
     }
 
+    /// Utility to convert BeamElement containing a single embedable url to embed kind
+   open func convertToEmbed() {
+        let links = text.links
+        if links.count == 1,
+           let link = links.first,
+           let url = URL(string: link),
+           let embedUrl = url.embed {
+            kind = .embed(embedUrl.absoluteString)
+        }
+    }
+
+    /// Utility to convert BeamElement containing a single image url to image kind
+    /// - Parameter id: Without id provided image link will be used instead
+    open func convertToImage(_ id: String?) {
+        if let url = imageLink {
+            // Either use id if provided, else use image url
+            let imageLocation = id ?? url.absoluteString
+            kind = .image(imageLocation)
+        }
+    }
+
+    /// Contains image url when a BeamElement's text contains a single image link
+    open var imageLink: URL? {
+        let imageLinks = text.links.compactMap({ link -> URL? in
+            if let url = URL(string: link), url.isImage {
+                return url
+            }
+            return nil
+        })
+
+        if let link = imageLinks.first {
+            return link
+        } else {
+            return nil
+        }
+    }
 }
 
 // MARK: - Text Stats

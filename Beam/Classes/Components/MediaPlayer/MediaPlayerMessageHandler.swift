@@ -22,16 +22,18 @@ class MediaPlayerMessageHandler: BeamMessageHandler<MediaPlayerMessages> {
         let msgPayload = messageBody as? [String: AnyObject]
         switch messageKey {
         case MediaPlayerMessages.media_playing_changed:
-            guard let msgPayload = msgPayload,
+            guard var controller = webPage.mediaPlayerController,
+                  let msgPayload = msgPayload,
                   let playing = msgPayload["playing"] as? Bool,
                   let muted = msgPayload["muted"] as? Bool,
                   let pipSupported = msgPayload["pipSupported"] as? Bool,
                   let isInPip = msgPayload["isInPip"] as? Bool
             else { return }
-            webPage.mediaPlayerController?.isPlaying = playing
-            webPage.mediaPlayerController?.isMuted = muted
-            webPage.mediaPlayerController?.isPiPSupported = pipSupported
-            webPage.mediaPlayerController?.isInPiP = isInPip
+            controller.isPlaying = playing
+            controller.isMuted = muted
+            controller.isPiPSupported = pipSupported
+            controller.isInPiP = isInPip
+            webPage.mediaPlayerController = controller
         }
     }
 }

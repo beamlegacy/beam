@@ -12,13 +12,19 @@ struct ContextMenuItem: Identifiable {
         case item
         case separator
     }
+    enum IconPlacement {
+        case leading
+        case trailing
+    }
 
     let id = UUID()
     let title: String
     var subtitle: String?
     var icon: String?
+    var iconPlacement: IconPlacement = .leading
     private(set) var type = ContextMenuItemType.item
     let action: (() -> Void)?
+    var iconAction: (() -> Void)?
 
     static func separator() -> ContextMenuItem {
         ContextMenuItem(title: "", type: ContextMenuItemType.separator, action: nil)
@@ -31,14 +37,26 @@ struct ContextMenuItemView: View {
     var item: ContextMenuItem
     var highlight = false
 
+    var iconView: some View {
+        Group {
+            if let icon = item.icon {
+                if let iconAction = item.iconAction {
+                    ButtonLabel(icon: icon, customStyle: .tinyIconStyle, action: iconAction)
+                } else {
+                    Icon(name: icon, size: 16, color: BeamColor.LightStoneGray.swiftUI)
+                }
+            }
+        }
+    }
+
     var body: some View {
         ZStack(alignment: .leading) {
             RoundedRectangle(cornerRadius: 3)
                 .fill(BeamColor.ContextMenu.hover.swiftUI.opacity(highlight ? 1.0 : 0.0))
                 .animation(nil)
             HStack(spacing: BeamSpacing._60) {
-                if let icon = item.icon {
-                    Icon(name: icon, size: 16, color: BeamColor.LightStoneGray.swiftUI)
+                if item.iconPlacement == .leading {
+                    iconView
                 }
                 Text(item.title)
                     .font(BeamFont.regular(size: 13).swiftUI)
@@ -48,6 +66,10 @@ struct ContextMenuItemView: View {
                     Text(subtitle)
                         .font(BeamFont.regular(size: 13).swiftUI)
                         .foregroundColor(BeamColor.AlphaGray.swiftUI)
+                }
+                if item.iconPlacement == .trailing {
+                    Spacer()
+                    iconView
                 }
             }
             .padding(.vertical, BeamSpacing._40)
@@ -62,11 +84,7 @@ struct ContextMenuItemView: View {
 }
 
 class ContextMenuViewModel: BaseFormatterViewViewModel, ObservableObject {
-    @Published var items: [ContextMenuItem] = [] {
-        didSet {
-            selectedIndex = 0
-        }
-    }
+    @Published var items: [ContextMenuItem] = []
     @Published var selectedIndex: Int?
     var onSelectMenuItem: (() -> Void)?
 }
@@ -151,6 +169,7 @@ struct ContextMenuView_Previews: PreviewProvider {
     private static var model: ContextMenuViewModel {
         let model = ContextMenuViewModel()
         model.items = Self.items
+        model.visible = true
         return model
     }
     static var previews: some View {

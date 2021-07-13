@@ -32,7 +32,6 @@ struct AdvancedPreferencesView: View {
     @State private var loggedIn: Bool = AccountManager().loggedIn
     @State private var networkEnabled: Bool = Configuration.networkEnabled
     @State private var pnsStatus: Bool = Configuration.pnsStatus
-    @State private var pnsBorder: Bool = false
     @State private var encryptionEnabled = Configuration.encryptionEnabled
     @State private var privateKey = EncryptionManager.shared.privateKey().asString()
     @State private var stateRestorationEnabled = Configuration.stateRestorationEnabled
@@ -99,11 +98,6 @@ struct AdvancedPreferencesView: View {
             Preferences.Section(title: "Show PNS status") {
                 PnsStatusButton
             }
-            Preferences.Section(title: "Toggle PNS UI border") {
-                if #available(macOS 11.0, *) {
-                    PnsBorderToggle
-                }
-            }
             Preferences.Section(title: "Encryption Enabled") {
                 EncryptionEnabledButton
             }
@@ -159,6 +153,7 @@ struct AdvancedPreferencesView: View {
             }
             Preferences.Section(title: "Passwords") {
                 PasswordCSVImporter
+                PasswordsDBDrop
             }
             Preferences.Section(title: "Reindex notes contents") {
                 ReindexNotesContents
@@ -186,13 +181,6 @@ struct AdvancedPreferencesView: View {
         }, label: {
             Text(String(describing: pnsStatus)).frame(minWidth: 100)
         })
-    }
-
-    @available(macOS 11.0, *)
-    private var PnsBorderToggle: some View {
-        Toggle("", isOn: $pnsBorder).onChange(of: pnsBorder) { _isOn in
-            UserDefaults.standard.set(_isOn, forKey: "pnsBorder")
-        }.toggleStyle(SwitchToggleStyle())
     }
 
     private var EncryptionEnabledButton: some View {
@@ -301,6 +289,15 @@ struct AdvancedPreferencesView: View {
             }
         }, label: {
             Text("Import Passwords CSV File")
+        })
+    }
+
+    private var PasswordsDBDrop: some View {
+        Button(action: {
+            let passwordManager = PasswordsManager()
+            passwordManager.passwordsDB.deleteAll()
+        }, label: {
+            Text("Erase Passwords Database")
         })
     }
 

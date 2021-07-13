@@ -78,12 +78,12 @@ class Layer: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     }
 
     var frame: NSRect {
+        get {
+            layer.frame
+        }
         set {
             layer.frame = newValue
             setAccessibilityFrameInParentSpace(newValue)
-        }
-        get {
-            layer.frame
         }
     }
 

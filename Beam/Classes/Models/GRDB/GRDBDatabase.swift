@@ -1,3 +1,4 @@
+//swiftlint:disable file_length
 import BeamCore
 import GRDB
 
@@ -5,7 +6,8 @@ import GRDB
 /// It's role is to setup the database schema.
 struct GRDBDatabase {
     /// Creates a `GRDBDatabase`, and make sure the database schema is ready.
-    init(_ dbWriter: DatabaseWriter) throws {
+    //swiftlint:disable:next function_body_length
+    public init(_ dbWriter: DatabaseWriter) throws {
 
         self.dbWriter = dbWriter
 
@@ -48,9 +50,10 @@ struct GRDBDatabase {
 
         migrator.registerMigration("createBidirectionalLinks") { db in
             try db.create(table: "BidirectionalLink", ifNotExists: true) { t in
-                t.column("sourceNoteId", .blob)
-                t.column("sourceElementId", .blob)
-                t.column("linkedNoteId", .blob).primaryKey()
+                t.column("id", .integer).primaryKey()
+                t.column("sourceNoteId", .blob).indexed()
+                t.column("sourceElementId", .blob).indexed()
+                t.column("linkedNoteId", .blob).indexed()
             }
         }
 
@@ -89,6 +92,26 @@ struct GRDBDatabase {
 
         }
 
+        migrator.registerMigration("create_index_on_BidirectionalLinks") { db in
+            try db.create(table: "NewBidirectionalLink") { t in
+                t.autoIncrementedPrimaryKey("id")
+                t.column("sourceNoteId", .blob).indexed()
+                t.column("sourceElementId", .blob).indexed()
+                t.column("linkedNoteId", .blob).indexed()
+            }
+
+            try db.execute(sql: """
+            INSERT INTO NewBidirectionalLink (sourceNoteId, sourceElementId, linkedNoteId)
+              SELECT sourceNoteId, sourceElementId, linkedNoteId
+              FROM BidirectionalLink;
+            """)
+
+            try db.drop(table: "BidirectionalLink")
+            try db.rename(table: "NewBidirectionalLink", to: "BidirectionalLink")
+            let count = try BidirectionalLink.fetchCount(db)
+            Logger.shared.logDebug("Migrated BidirectionalLink table with \(count) records")
+        }
+
         #if DEBUG
         // Speed up development by nuking the database when migrations change
         migrator.eraseDatabaseOnSchemaChange = true
@@ -117,15 +140,15 @@ extension GRDBDatabase {
     func append(note: BeamNote) throws {
         do {
             try dbWriter.write { db in
-                try db.execute(sql: "DELETE FROM BeamElementRecord WHERE title = ?", arguments: [note.title])
+                try BeamElementRecord.filter(Column("noteId") == note.id.uuidString).deleteAll(db)
                 for elem in note.allTexts {
-                    try db.execute(
-                        sql: "INSERT INTO BeamElementRecord (title, uid, text, noteId) VALUES (?, ?, ?, ?)",
-                        arguments: [note.title, elem.0.uuidString, elem.1.text, note.id.uuidString])
+                    var record = BeamElementRecord(title: note.title, text: elem.1.text, uid: elem.0.uuidString, noteId: note.id.uuidString)
+                    try record.insert(db)
                 }
             }
         } catch {
-            Logger.shared.logError("Error while indexing note \(note.title)", category: .search)
+            Logger.shared.logError("Error while indexing note \(note.title): \(error)", category: .search)
+            throw error
         }
     }
 
@@ -135,39 +158,45 @@ extension GRDBDatabase {
         let noteId = note.id
         do {
             try dbWriter.write { db in
-                try db.execute(sql: "DELETE FROM BeamElementRecord WHERE title = ? AND uid = ?", arguments: [noteTitle, element.id.uuidString])
-                try db.execute(
-                    sql: "INSERT INTO BeamElementRecord (title, uid, text, noteId) VALUES (?, ?, ?, ?)",
-                    arguments: [noteTitle, element.id.uuidString, element.text.text, noteId])
+                try BeamElementRecord.filter(Column("noteId") == noteId.uuidString && Column("uid") == element.id.uuidString).deleteAll(db)
+                var record = BeamElementRecord(id: nil, title: noteTitle, text: element.text.text, uid: element.id.uuidString, noteId: noteId.uuidString)
+                try record.insert(db)
+                try BidirectionalLink.filter(Column("sourceElementId") == element.id && Column("sourceNoteId") == noteId).deleteAll(db)
+            }
+
+            for link in element.internalLinksInSelf {
+                appendLink(link)
             }
         } catch {
-            Logger.shared.logError("Error while indexing element \(noteTitle) - \(element.id.uuidString)", category: .search)
+            Logger.shared.logError("Error while indexing element \(noteTitle) - \(element.id.uuidString): \(error)", category: .search)
+            throw error
         }
     }
 
     func remove(note: BeamNote) throws {
-        try dbWriter.write { db in
-            try db.execute(sql: "DELETE FROM BeamElementRecord WHERE title = ?", arguments: [note.title])
+        let noteId = note.id.uuidString
+        _ = try dbWriter.write { db in
+            try BeamElementRecord.filter(Column("noteId") == noteId).deleteAll(db)
         }
     }
 
     func remove(noteTitled: String) throws {
-        try dbWriter.write { db in
-            try db.execute(sql: "DELETE FROM BeamElementRecord WHERE title = ?", arguments: [noteTitled])
+        _ = try dbWriter.write { db in
+            try BeamElementRecord.filter(Column("title") == noteTitled).deleteAll(db)
         }
     }
 
     func remove(element: BeamElement) throws {
-        guard let noteTitle = element.note?.title else { return }
-        try dbWriter.write { db in
-            try db.execute(sql: "DELETE FROM BeamElementRecord WHERE title = ? AND uid = ?", arguments: [noteTitle, element.id.uuidString])
+        guard let noteId = element.note?.id else { return }
+        _ = try dbWriter.write { db in
+            try BeamElementRecord.filter(Column("noteId") == noteId.uuidString && Column("uid") == element.id.uuidString).deleteAll(db)
         }
     }
 
     func clear() throws {
         try dbWriter.write { db in
-            try db.execute(sql: "DELETE FROM BeamElementRecord")
-            try db.execute(sql: "DELETE FROM HistoryUrlRecord")
+            try BeamElementRecord.deleteAll(db)
+            try HistoryUrlRecord.deleteAll(db)
             try db.execute(sql: "DELETE FROM HistoryUrlContent")
             try db.dropFTS4SynchronizationTriggers(forTable: "HistoryUrlRecord")
         }
@@ -180,8 +209,8 @@ extension GRDBDatabase {
     }
 
     func clearBidirectionalLinks() throws {
-        try dbWriter.write { db in
-            try db.execute(sql: "DELETE FROM BidirectionalLink")
+        _ = try dbWriter.write { db in
+            try BidirectionalLink.deleteAll(db)
         }
     }
 
@@ -212,6 +241,10 @@ extension GRDBDatabase {
         dbWriter
     }
 
+    enum ReadError: Error {
+        case invalidFTSPattern
+    }
+
     // MARK: - SearchResult (BeamElement/BeamNote)
 
     @available(*, deprecated, message: "redundant with BeamElementRecord")
@@ -222,38 +255,135 @@ extension GRDBDatabase {
         var text: String?
     }
 
-    func search(matchingAllTokensIn query: String, maxResults: Int? = 10, includeText: Bool = false) -> [SearchResult] {
-        guard let pattern = FTS3Pattern(matchingAllTokensIn: query) else { return [] }
-        return search(pattern: pattern, maxResults: maxResults, includeText: includeText)
-    }
+    typealias CompletionSearch = (Result<[SearchResult], Error>) -> Void
 
-    func search(matchingAnyTokensIn query: String, maxResults: Int? = 10, includeText: Bool = false) -> [SearchResult] {
-        guard let pattern = FTS3Pattern(matchingAnyTokenIn: query) else { return [] }
-        return search(pattern: pattern, maxResults: maxResults, includeText: includeText)
-    }
-
-    func search(matchingPhrase query: String, maxResults: Int? = 10, includeText: Bool = false) -> [SearchResult] {
-        guard let pattern = FTS3Pattern(matchingPhrase: query) else { return [] }
-        return search(pattern: pattern, maxResults: maxResults, includeText: includeText)
-    }
-
-    func search(pattern: FTS3Pattern, maxResults: Int? = 10, includeText: Bool = false) -> [SearchResult] {
-        do {
-            let results = try dbReader.read { db -> [SearchResult] in
-                var query = BeamElementRecord.matching(pattern)
-                if let maxResults = maxResults {
-                    query = query.limit(maxResults)
-                }
-                return try query.fetchAll(db).compactMap { record -> SearchResult? in
-                    guard let noteId = record.noteId.uuid,
-                          let uid = record.uid.uuid else { return nil }
-                    return SearchResult(title: record.title, noteId: noteId, uid: uid, text: includeText ? record.text : nil)
-                }
+    /// Search in notes content (asynchronous).
+    private func search(_ pattern: FTS3Pattern,
+                        _ maxResults: Int? = nil,
+                        _ includeText: Bool = false,
+                        _ completion: @escaping CompletionSearch) {
+        dbReader.asyncRead { (dbResult: Result<GRDB.Database, Error>) in
+            do {
+                let db = try dbResult.get()
+                let results = try search(db, pattern, maxResults, includeText)
+                completion(.success(results))
+            } catch {
+                completion(.failure(error))
             }
-            return results
-        } catch {
-            Logger.shared.logError("Search Error \(error)", category: .search)
+        }
+    }
+
+    /// Search in notes content (synchronous).
+    private func search(_ db: GRDB.Database,
+                        _ pattern: FTS3Pattern,
+                        _ maxResults: Int? = nil,
+                        _ includeText: Bool = false) throws -> [SearchResult] {
+        var query = BeamElementRecord.matching(pattern)
+        if let maxResults = maxResults {
+            query = query.limit(maxResults)
+        }
+
+        return try query.fetchAll(db).compactMap { record in
+            guard let noteId = record.noteId.uuid,
+                  let uid = record.uid.uuid else { return nil }
+            return SearchResult(title: record.title, noteId: noteId, uid: uid, text: includeText ? record.text : nil)
+        }
+    }
+
+    func search(matchingAllTokensIn string: String,
+                maxResults: Int? = nil,
+                includeText: Bool = false,
+                completion: @escaping CompletionSearch) {
+        guard let pattern = FTS3Pattern(matchingAllTokensIn: string) else {
+            return completion(.failure(ReadError.invalidFTSPattern))
+        }
+        search(pattern, maxResults, includeText, completion)
+    }
+
+    func search(matchingAnyTokenIn string: String,
+                maxResults: Int? = nil,
+                includeText: Bool = false,
+                completion: @escaping CompletionSearch) {
+        guard let pattern = FTS3Pattern(matchingAnyTokenIn: string) else {
+            return completion(.failure(ReadError.invalidFTSPattern))
+        }
+        search(pattern, maxResults, includeText, completion)
+    }
+
+    func search(matchingPhrase string: String,
+                maxResults: Int? = nil,
+                includeText: Bool = false,
+                completion: @escaping CompletionSearch) {
+        guard let pattern = FTS3Pattern(matchingPhrase: string) else {
+            return completion(.failure(ReadError.invalidFTSPattern))
+        }
+        search(pattern, maxResults, includeText, completion)
+    }
+
+    func search(matchingAllTokensIn string: String,
+                maxResults: Int? = nil,
+                includeText: Bool = false) -> [SearchResult] {
+        guard let pattern = FTS3Pattern(matchingAllTokensIn: string) else {
             return []
+        }
+        do {
+            return try dbReader.read { db in
+                 try search(db, pattern, maxResults, includeText)
+            }
+        } catch {
+            return []
+        }
+    }
+
+    func search(matchingAnyTokenIn string: String,
+                maxResults: Int? = nil,
+                includeText: Bool = false) -> [SearchResult] {
+        guard let pattern = FTS3Pattern(matchingAnyTokenIn: string) else {
+            return []
+        }
+        do {
+            return try dbReader.read { db in
+                try search(db, pattern, maxResults, includeText)
+            }
+        } catch {
+            return []
+        }
+    }
+
+    func search(matchingPhrase string: String,
+                maxResults: Int? = nil,
+                includeText: Bool = false) -> [SearchResult] {
+        guard let pattern = FTS3Pattern(matchingPhrase: string) else {
+            return []
+        }
+        do {
+            return try dbReader.read { db in
+                try search(db, pattern, maxResults, includeText)
+            }
+        } catch {
+            return []
+        }
+    }
+
+    var linksCount: Int {
+        do {
+            return try dbReader.read({ db in
+                try BidirectionalLink.fetchCount(db)
+            })
+        } catch {
+            Logger.shared.logError("Error while couting links in database: \(error)", category: .database)
+            return 0
+        }
+    }
+
+    var elementsCount: Int {
+        do {
+            return try dbReader.read({ db in
+                try BeamElementRecord.fetchCount(db)
+            })
+        } catch {
+            Logger.shared.logError("Error while couting elements in database: \(error)", category: .database)
+            return 0
         }
     }
 
@@ -278,15 +408,25 @@ extension GRDBDatabase {
     /// Perform a history search query.
     /// - Parameter prefixLast: when enabled the last token is prefix matched.
     /// - Parameter enabledFrecencyParam: select the frecency parameter to use to sort results.
-    func searchHistory(query: String, prefixLast: Bool = true, enabledFrecencyParam: FrecencyParamKey? = nil) -> [HistorySearchResult] {
-        guard var pattern = FTS3Pattern(matchingAnyTokenIn: query) else { return [] }
+    func searchHistory(query: String,
+                       prefixLast: Bool = true,
+                       enabledFrecencyParam: FrecencyParamKey? = nil,
+                       completion: @escaping (Result<[HistorySearchResult], Error>) -> Void) {
+        guard var pattern = FTS3Pattern(matchingAnyTokenIn: query) else {
+            completion(.failure(ReadError.invalidFTSPattern))
+            return
+        }
         if prefixLast {
-            guard let prefixLastPattern = try? FTS3Pattern(rawPattern: pattern.rawPattern + "*") else { return [] }
+            guard let prefixLastPattern = try? FTS3Pattern(rawPattern: pattern.rawPattern + "*") else {
+                completion(.failure(ReadError.invalidFTSPattern))
+                return
+            }
             pattern = prefixLastPattern
         }
 
-        do {
-            let results = try dbReader.read { db -> [HistorySearchResult] in
+        dbReader.asyncRead { (dbResult: Result<GRDB.Database, Error>) in
+            do {
+                let db = try dbResult.get()
                 var request = HistoryUrlRecord
                     .joining(required: HistoryUrlRecord.content.matching(pattern))
                     .including(optional: HistoryUrlRecord.frecency)
@@ -296,19 +436,19 @@ extension GRDBDatabase {
                         .order(literal: "frecencyUrlRecord.frecencySortScore DESC")
                 }
 
-                return try request
+                let results = try request
                     .asRequest(of: HistoryUrlRecordWithFrecency.self)
                     .fetchAll(db)
                     .map { record -> HistorySearchResult in
-                    HistorySearchResult(title: record.history.title,
-                                        url: record.history.url,
-                                        frecency: record.frecency)
-                }
+                        HistorySearchResult(title: record.history.title,
+                                            url: record.history.url,
+                                            frecency: record.frecency)
+                    }
+                completion(.success(results))
+            } catch {
+                Logger.shared.logError("history search failure: \(error)", category: .search)
+                completion(.failure(error))
             }
-            return results
-        } catch {
-            Logger.shared.logError("history search failure: \(error)", category: .search)
-            return []
         }
     }
 
@@ -321,11 +461,16 @@ extension GRDBDatabase {
         do {
             try dbWriter.write { db in
                 var link = BidirectionalLink(sourceNoteId: fromNote, sourceElementId: element, linkedNoteId: toNote)
+                try BidirectionalLink
+                    .filter(Column("linkedNoteId") == toNote
+                        && Column("sourceNoteId") == fromNote
+                        && Column("sourceElementId") == element)
+                    .deleteAll(db)
                 try link.insert(db)
                 Logger.shared.logInfo("Append link \(fromNote):\(element) - \(toNote)", category: .search)
             }
         } catch {
-            Logger.shared.logError("Error while appending link \(fromNote):\(element) - \(toNote)", category: .search)
+            Logger.shared.logError("Error while appending link \(fromNote):\(element) - \(toNote): \(error)", category: .search)
         }
     }
 
@@ -343,7 +488,11 @@ extension GRDBDatabase {
     func fetchLinks(toNote noteId: UUID) throws -> [BidirectionalLink] {
         Logger.shared.logInfo("Fetch links for note \(noteId)", category: .search)
         return try dbWriter.read({ db in
-            return try BidirectionalLink.fetchAll(db, keys: [noteId])
+//            let all = try BidirectionalLink.fetchAll(db)
+            let found = try BidirectionalLink
+                .filter(Column("linkedNoteId") == noteId)
+                .fetchAll(db)
+            return found
         })
     }
 
@@ -366,5 +515,16 @@ extension GRDBDatabase {
         }
 
         return result
+    }
+}
+
+extension GRDBDatabase {
+    func dumpAllLinks() {
+        if let links = try? dbWriter.read({ db in
+            return try BidirectionalLink.fetchAll(db)
+        }) {
+            //swiftlint:disable:next print
+            print("links: \(links)")
+        }
     }
 }

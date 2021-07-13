@@ -29,26 +29,60 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     @Published var isFetching = false
     @Published var newDay: Bool = false
     @Published var tabToIndex: TabInformation?
+    //swiftlint:disable:next large_tuple
+    @Published var renamedNote: (noteId: UUID, previousName: String, newName: String) = (UUID.null, "", "")
     var noteAutoSaveService: NoteAutoSaveService
     var linkManager: LinkManager
 
     var cookies: HTTPCookieStorage
     var documentManager: DocumentManager
-    var databaseManager: DatabaseManager
-    var downloadManager: DownloadManager = BeamDownloadManager()
+    var downloadManager: BeamDownloadManager = BeamDownloadManager()
     var sessionLinkRanker = SessionLinkRanker()
     var clusteringManager: ClusteringManager
     var scope = Set<AnyCancellable>()
+    var browsingTreeSender = BrowsingTreeSender()
 
-    static var dataFolder: String {
+    static func dataFolder(fileName: String) -> String {
         let paths = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)
-        return paths.first ?? "~/Application Data/BeamApp/"
-    }
 
-    static var indexPath: URL { return URL(fileURLWithPath: dataFolder + "/index.beamindex") }
-    static var fileDBPath: String { return dataFolder + "/files.db" }
+        var name = "BeamData-\(Configuration.env)"
+         if let jobId = ProcessInfo.processInfo.environment["CI_JOB_ID"] {
+             Logger.shared.logDebug("Using Gitlab CI Job ID for dataFolder: \(jobId)", category: .general)
+            name += "-\(jobId)"
+         }
 
-    static var linkStorePath: URL { return URL(fileURLWithPath: dataFolder + "/links.store") }
+         guard let directory = paths.first else {
+             // Never supposed to happen
+             return "~/Application Data/BeamApp/"
+         }
+
+         let localDirectory = directory + "/Beam" + "/\(name)/"
+
+         do {
+             try FileManager.default.createDirectory(atPath: localDirectory,
+                                                     withIntermediateDirectories: true,
+                                                     attributes: nil)
+
+            if FileManager.default.fileExists(atPath: directory + "/\(fileName)") {
+                do {
+                    try FileManager.default.moveItem(atPath: directory + "/\(fileName)", toPath: localDirectory + fileName)
+                } catch {
+                    Logger.shared.logError("Unable to move item \(fileName) \(directory) to \(localDirectory): \(error)", category: .general)
+                }
+
+            }
+             return localDirectory + fileName
+         } catch {
+             // Does not generate error if directory already exist
+             return directory + fileName
+         }
+     }
+
+    static var indexPath: URL { URL(fileURLWithPath: dataFolder(fileName: "index.beamindex")) }
+    static var fileDBPath: String { dataFolder(fileName: "files.db") }
+    static var linkStorePath: URL { URL(fileURLWithPath: dataFolder(fileName: "links.store")) }
+    static var idToTitle: [UUID:String] = [:]
+    static var titleToId: [String:UUID] = [:]
 
     override init() {
         clusteringManager = ClusteringManager(ranker: sessionLinkRanker)
@@ -56,6 +90,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         databaseManager = DatabaseManager()
         noteAutoSaveService = NoteAutoSaveService()
         linkManager = LinkManager()
+        passwordsDB = PasswordsManager().passwordsDB
         let linkCount = LinkStore.shared.loadFromDB(linkManager: linkManager)
         Logger.shared.logInfo("Loaded \(linkCount) links from DB", category: .document)
         do {
@@ -71,28 +106,40 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
             fatalError()
         }
 
-        do {
-            passwordsDB = try PasswordsDB()
-        } catch {
-            Logger.shared.logError("Error while creating the Passwords Database [\(error)]", category: .passwordsDB)
-            fatalError()
-        }
-
         cookies = HTTPCookieStorage()
 
         super.init()
 
         BeamNote.idForNoteNamed = { title in
-            self.documentManager.loadDocumentByTitle(title: title)?.id
+            guard let id = Self.titleToId[title] else {
+                guard let id = self.documentManager.loadDocumentByTitle(title: title)?.id else { return nil }
+                Self.titleToId[title] = id
+                Self.idToTitle[id] = title
+                return id
+            }
+            return id
         }
         BeamNote.titleForNoteId = { id in
-            self.documentManager.loadDocumentById(id: id)?.title
+            guard let title = Self.idToTitle[id] else {
+                guard let title = self.documentManager.loadDocumentById(id: id)?.title else { return nil }
+                Self.titleToId[title] = id
+                Self.idToTitle[id] = title
+                return title
+            }
+            return title
         }
+
+        $renamedNote.dropFirst().sink { (noteId, previousName, newName) in
+            Self.titleToId.removeValue(forKey: previousName)
+            Self.titleToId[newName] = noteId
+            Self.idToTitle[noteId] = newName
+        }.store(in: &scope)
 
         updateNoteCount()
         setupSubscribers()
     }
 
+    // swiftlint:disable:next function_body_length
     private func setupSubscribers() {
         $lastChangedElement.sink { element in
             guard let element = element else { return }
@@ -102,24 +149,12 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         $tabToIndex.sink { [weak self] tabToIndex in
             guard let self = self,
                   let tabToIndex = tabToIndex else { return }
-
-            guard var id = tabToIndex.currentTabTree?.current.link else { return }
-            var parentId = tabToIndex.parentBrowsingNode?.link
-            if let parent = tabToIndex.parentBrowsingNode,
-               parent.events.contains(where: { $0.type == .searchBarNavigation }) {
-                parentId = nil
-            }
-            if let current = tabToIndex.currentTabTree?.current,
-               current.events.contains(where: { $0.type == .openLinkInNewTab }),
-               let tabTree = tabToIndex.tabTree?.current.link {
-                parentId = id
-                id = tabTree
-            }
-            if let previousTabTree = tabToIndex.previousTabTree,
-               previousTabTree.current.events.contains(where: { $0.type == .openLinkInNewTab }) {
-                parentId = previousTabTree.current.link
-            }
+            var currentId: UInt64?
+            var parentId: UInt64?
+            (currentId, parentId) = self.clusteringManager.getIdAndParent(tabToIndex: tabToIndex)
+            guard let id = currentId else { return }
             self.clusteringManager.addPage(id: id, parentId: parentId, value: tabToIndex)
+            LinkStore.shared.visit(link: tabToIndex.url.string, title: tabToIndex.document.title)
 
             // Update history record
             do {
@@ -130,6 +165,17 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
             } catch {
                 Logger.shared.logError("unable to save history url \(tabToIndex.url.string)", category: .search)
             }
+        }.store(in: &scope)
+
+        $newDay.sink { [weak self] newDay in
+            guard let self = self else { return }
+            if newDay {
+                self.reloadJournal()
+            }
+        }.store(in: &scope)
+
+        downloadManager.$downloads.sink { [weak self] _ in
+            self?.objectWillChange.send()
         }.store(in: &scope)
 
         NotificationCenter.default.addObserver(self,

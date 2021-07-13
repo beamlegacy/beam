@@ -72,6 +72,20 @@ struct BeamTextAttributedStringBuilder {
         BeamText.font(fontSize: fontSize, strong: strong, emphasis: emphasis, elementKind: elementKind)
     }
 
+    private func isCaretCloseToRange(caret: Caret, range: BeamText.Range) -> (isClose: Bool, isInside: Bool) {
+        let positionInSource = caret.indexInSource
+        let isTrailingChar = caret.edge == .trailing && caret.inSource
+        let close = positionInSource >= range.position &&
+            (positionInSource < range.end || (positionInSource == range.end && !isTrailingChar))
+        var inside = false
+        if close {
+            inside = positionInSource > range.position &&
+                caret.edge != .trailing &&
+                (positionInSource < range.end || !caret.inSource)
+        }
+        return (close, inside)
+    }
+
     // swiftlint:disable:next cyclomatic_complexity function_body_length
     private func attributesForRange(config: Config, range: BeamText.Range, selected: Bool) -> [NSAttributedString.Key: Any] {
         var stringAttributes = [NSAttributedString.Key: Any]()
@@ -83,15 +97,11 @@ struct BeamTextAttributedStringBuilder {
         var webLink: String?
         var internalLink: String?
         var isCursorCloseToRange = false
-        var isCursorInsideUneditableRange = false
-        if let caret = config.caret {
-            let positionInSource = caret.indexInSource
-            isCursorCloseToRange = !selected && positionInSource >= range.position && positionInSource <= range.end
-            if isCursorCloseToRange {
-                isCursorInsideUneditableRange = positionInSource > range.position &&
-                    caret.edge != .trailing &&
-                    (positionInSource < range.end || !caret.inSource)
-            }
+        var isCursorInsideRange = false
+        if let caret = config.caret, !selected {
+            let closenessInfo = isCaretCloseToRange(caret: caret, range: range)
+            isCursorCloseToRange = closenessInfo.isClose
+            isCursorInsideRange = closenessInfo.isInside
         }
 
         for attribute in range.attributes {
@@ -123,7 +133,7 @@ struct BeamTextAttributedStringBuilder {
             }
             if isCursorCloseToRange {
                 stringAttributes[.foregroundColor] = BeamColor.Editor.linkActive.nsColor
-                stringAttributes[.boxBackgroundColor] = isCursorInsideUneditableRange ?
+                stringAttributes[.boxBackgroundColor] = isCursorInsideRange ?
                     BeamColor.Editor.linkActiveHighlightedBackground.nsColor :
                     BeamColor.Editor.linkActiveBackground.nsColor
             } else {
@@ -136,7 +146,7 @@ struct BeamTextAttributedStringBuilder {
             stringAttributes[.link] = link
             stringAttributes[.foregroundColor] = BeamColor.Editor.bidirectionalLink.nsColor
             if isCursorCloseToRange {
-                stringAttributes[.boxBackgroundColor] = isCursorInsideUneditableRange ?
+                stringAttributes[.boxBackgroundColor] = isCursorInsideRange ?
                     BeamColor.Editor.bidirectionalLinkHighlightedBackground.nsColor :
                     BeamColor.Editor.bidirectionalLinkBackground.nsColor
             } else {

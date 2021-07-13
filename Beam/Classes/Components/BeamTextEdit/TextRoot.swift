@@ -175,9 +175,9 @@ public class TextRoot: TextNode {
             if !editor.journalMode {
                 topSpacerWidget = SpacerWidget(parent: self, spacerType: .top)
             }
-            linksSection = LinksSection(parent: self, note: note, mode: .links)
+            linksSection = LinksSection(parent: self, note: note)
             middleSpacerWidget = SpacerWidget(parent: self, spacerType: .middle)
-            referencesSection = LinksSection(parent: self, note: note, mode: .references)
+            referencesSection = ReferencesSection(parent: self, note: note)
             bottomSpacerWidget = SpacerWidget(parent: self, spacerType: .bottom)
             if Self.showBrowsingSection {
                 browsingSection = BrowsingSection(parent: self, note: note)

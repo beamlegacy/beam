@@ -7,10 +7,12 @@ class BeamWebNavigationController: WebPageHolder, WebNavigationController {
     let noteController: WebNoteController
 
     private var isNavigatingFromSearchBar: Bool = false
+    private weak var webView: WKWebView?
 
-    init(browsingTree: BrowsingTree, noteController: WebNoteController) {
+    init(browsingTree: BrowsingTree, noteController: WebNoteController, webView: WKWebView) {
         self.browsingTree = browsingTree
         self.noteController = noteController
+        self.webView = webView
     }
 
     func setLoading() {
@@ -23,23 +25,21 @@ class BeamWebNavigationController: WebPageHolder, WebNavigationController {
         guard let webView = navigationAction.targetFrame?.webView ?? navigationAction.sourceFrame.webView else {
             fatalError("Should emit handleBackForwardWebView() from a webview")
         }
-        if navigationAction.navigationType == .backForward {
-            let isBack = webView.backForwardList.backList
-                .filter { $0 == currentBackForwardItem }
-                .count == 0
+        let isBack = webView.backForwardList.backList
+            .filter { $0 == currentBackForwardItem }
+            .count == 0
 
-            if isBack {
-                browsingTree.goBack()
-            } else {
-                browsingTree.goForward()
-            }
+        if isBack {
+            browsingTree.goBack()
+        } else {
+            browsingTree.goForward()
         }
-        page.leave()
         currentBackForwardItem = webView.backForwardList.currentItem
     }
 
-    func navigatedTo(url: URL, webView: WKWebView) {
+    func navigatedTo(url: URL, webView: WKWebView, replace: Bool) {
         let isLinkActivation = !isNavigatingFromSearchBar
+        let earlyTitle = webView.title
         Readability.read(webView) { [weak self] result in
             guard let self = self else { return }
             switch result {
@@ -47,6 +47,7 @@ class BeamWebNavigationController: WebPageHolder, WebNavigationController {
                 // Note: Readability removes title separators
                 self.browsingTree.navigateTo(url: url.absoluteString, title: read.title, startReading: self.page.isActiveTab(),
                                              isLinkActivation: isLinkActivation, readCount: read.content.count)
+                let webPageTitle = self.page.title
                 self.page.navigatedTo(url: url, read: read, title: read.title, isNavigation: isLinkActivation)
                 try? TextSaver.shared?.save(nodeId: self.browsingTree.current.id, text: read)
             case let .failure(error):
@@ -82,10 +83,17 @@ extension BeamWebNavigationController: WKNavigationDelegate {
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction,
                  preferences: WKWebpagePreferences,
                  decisionHandler: @escaping (WKNavigationActionPolicy, WKWebpagePreferences) -> Void) {
-
-        handleBackForwardWebView(navigationAction: navigationAction)
+        switch navigationAction.navigationType {
+        case .backForward:
+            handleBackForwardWebView(navigationAction: navigationAction)
+        case .other:
+            Logger.shared.logInfo("Nav Redirecting toward \(String(describing: navigationAction.request.url?.absoluteString))")
+        default:
+            Logger.shared.logInfo("Creating new webview for \(String(describing: navigationAction.request.url?.absoluteString))", category: .web)
+        }
         if let targetURL = navigationAction.request.url {
             if navigationAction.modifierFlags.contains(.command) {
+                Logger.shared.logInfo("Cmd required create new tab toward \(String(describing: navigationAction.request.url))")
                 _ = page.createNewTab(targetURL, nil, setCurrent: false)
                 decisionHandler(.cancel, preferences)
                 return
@@ -105,7 +113,7 @@ extension BeamWebNavigationController: WKNavigationDelegate {
             if let sourceURL = webView.url {
                 headers["Referer"] = sourceURL.absoluteString
             }
-            page.downloadManager.downloadFile(at: url, headers: headers, suggestedFileName: response.suggestedFilename, destinationFoldedURL: nil)
+            page.downloadManager?.downloadFile(at: url, headers: headers, suggestedFileName: response.suggestedFilename, destinationFoldedURL: nil)
         } else {
             decisionHandler(.allow)
         }
@@ -126,16 +134,28 @@ extension BeamWebNavigationController: WKNavigationDelegate {
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         guard let url = webView.url else { return }
-        navigatedTo(url: url, webView: webView)
+        navigatedTo(url: url, webView: webView, replace: false)
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
         Logger.shared.logError("Webview failed: \(error)", category: .javascript)
     }
 
-    func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge,
-                 completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        completionHandler(.performDefaultHandling, challenge.proposedCredential)
+    func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+        let authenticationMethod = challenge.protectionSpace.authenticationMethod
+        if authenticationMethod == NSURLAuthenticationMethodDefault || authenticationMethod == NSURLAuthenticationMethodHTTPBasic || authenticationMethod == NSURLAuthenticationMethodHTTPDigest {
+            // TODO: Add UI to ask User for login and password (BE-1280)
+            let userId = "user"
+            let password = "pass"
+            let credential = URLCredential(user: userId, password: password, persistence: .none)
+            completionHandler(.useCredential, credential)
+        } else if authenticationMethod == NSURLAuthenticationMethodServerTrust {
+            let cred = URLCredential(trust: challenge.protectionSpace.serverTrust!)
+            completionHandler(.useCredential, cred)
+        } else {
+            completionHandler(.performDefaultHandling, nil)
+        }
+
     }
 
     func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {

@@ -9,98 +9,102 @@ import Foundation
 import BeamCore
 import GRDB
 
-struct PasswordsRecord {
+struct PasswordRecord {
     var id: Int64?
-    var uuid: String
+    var uuid: UUID
+    var entryId: String
     var host: String
     var name: String
     var password: String
     var createdAt: Date
     var updatedAt: Date
     var deletedAt: Date?
-    var previousChecksum: String?
-    var checksum: String?
+    var previousCheckSum: String?
 }
 
-extension PasswordsRecord: TableRecord {
+extension PasswordRecord: TableRecord {
     enum Columns: String, ColumnExpression {
-        case id, uuid, host, name, password, createdAt, updatedAt, deletedAt
+        case uuid, entryId, host, name, password, createdAt, updatedAt, deletedAt, previousChecksum
     }
 }
 
 // Fetching
-extension PasswordsRecord: FetchableRecord {
+extension PasswordRecord: FetchableRecord {
+    internal static let databaseUUIDEncodingStrategy = DatabaseUUIDEncodingStrategy.string
+
     init(row: Row) {
-        id = row[Columns.id]
         uuid = row[Columns.uuid]
+        entryId = row[Columns.entryId]
         host = row[Columns.host]
         name = row[Columns.name]
         password = row[Columns.password]
         createdAt = row[Columns.createdAt]
         updatedAt = row[Columns.updatedAt]
         deletedAt = row[Columns.deletedAt]
+        previousCheckSum = row[Columns.previousChecksum]
     }
 }
 
 // Persisting
-extension PasswordsRecord: MutablePersistableRecord {
+extension PasswordRecord: MutablePersistableRecord {
     static let persistenceConflictPolicy = PersistenceConflictPolicy(
         insert: .replace,
         update: .replace)
 
     func encode(to container: inout PersistenceContainer) {
-        container[Columns.id] = id
         container[Columns.uuid] = uuid
+        container[Columns.entryId] = entryId
         container[Columns.host] = host
         container[Columns.name] = name
         container[Columns.password] = password
-        container[Columns.updatedAt] = Date()
-    }
-
-    mutating func didInsert(with rowID: Int64, for column: String?) {
-        id = rowID
+        container[Columns.createdAt] = createdAt
+        container[Columns.updatedAt] = updatedAt
+        container[Columns.deletedAt] = deletedAt
+        container[Columns.previousChecksum] = previousCheckSum
     }
 }
 
 class PasswordsDB: PasswordStore {
-    static let tableName = "PasswordsRecord"
-    var dbQueue: DatabasePool
+    static let tableName = "passwordRecord"
+    var dbPool: DatabasePool
 
-    init(path: String = BeamData.dataFolder + "/passwords.db", dropTableFirst: Bool = false) throws {
-        dbQueue = try DatabasePool(path: path, configuration: GRDB.Configuration())
+    init(path: String) throws {
+        dbPool = try DatabasePool(path: path, configuration: GRDB.Configuration())
 
-        try dbQueue.write({ db in
-            if dropTableFirst {
-                try db.drop(table: Self.tableName)
-            }
+        var rows: [Row]?
+        var migrator = DatabaseMigrator()
 
-            try db.create(table: Self.tableName, ifNotExists: true) { table in
-                table.column("id", .integer)
+        migrator.registerMigration("saveOldData") { db in
+            rows = try? Row.fetchAll(db, sql: "SELECT host, name, password FROM PasswordsRecord")
+        }
+
+        migrator.registerMigration("passwordTableCreation") { db in
+            try db.create(table: PasswordsDB.tableName, ifNotExists: true) { table in
                 table.column("uuid", .text).notNull().primaryKey().unique()
+                table.column("entryId", .text).notNull().unique()
                 table.column("host", .text).notNull().indexed()
                 table.column("name", .text).notNull()
                 table.column("password", .text).notNull()
                 table.column("createdAt", .datetime).notNull().defaults(sql: "CURRENT_TIMESTAMP")
                 table.column("updatedAt", .datetime).notNull().defaults(sql: "CURRENT_TIMESTAMP")
                 table.column("deletedAt", .datetime)
-                table.column("previousChecksum", .text).notNull()
+                table.column("previousChecksum", .text)
             }
-        })
+        }
 
-        var migrator = DatabaseMigrator()
-
-//        migrator.registerMigration("addTimestampsToPasswords") { db in
-//            if try db.tableExists(PasswordsDB.tableName) {
-//                try db.alter(table: PasswordsDB.tableName) { t in
-//                    t.add(column: "createdAt", .datetime).notNull().defaults(to: Date())
-//                    t.add(column: "updatedAt", .datetime).notNull().defaults(to: Date())
-//                    t.add(column: "deletedAt", .datetime)
-//                    t.add(column: "previousChecksum", .text)
-//                }
-//            }
-//        }
-
-        let dbPool = try DatabasePool(path: path)
+        migrator.registerMigration("migrateOldData") { db in
+            if let storedPasswords = rows {
+                for password in storedPasswords {
+                    var passwordRecord = PasswordRecord(
+                        uuid: UUID(),
+                        entryId: self.id(for: password["host"], and: password["name"]),
+                        host: password["host"],
+                        name: password["name"],
+                        password: password["password"], createdAt: Date(), updatedAt: Date(), deletedAt: nil, previousCheckSum: nil)
+                    try passwordRecord.insert(db)
+                }
+            }
+        }
         try migrator.migrate(dbPool)
     }
 
@@ -108,16 +112,16 @@ class PasswordsDB: PasswordStore {
         return PasswordManagerEntry(minimizedHost: host, username: username).id
     }
 
-    private func entries(for passwordsRecord: [PasswordsRecord]) -> [PasswordManagerEntry] {
+    private func entries(for passwordsRecord: [PasswordRecord]) -> [PasswordManagerEntry] {
         passwordsRecord.map { PasswordManagerEntry(minimizedHost: $0.host, username: $0.name) }
     }
 
     // PasswordStore
     func entries(for host: String, completion: @escaping ([PasswordManagerEntry]) -> Void) {
         do {
-            try dbQueue.read { db in
-                let passwords = try PasswordsRecord
-                    .filter(PasswordsRecord.Columns.host == host)
+            try dbPool.read { db in
+                let passwords = try PasswordRecord
+                    .filter(PasswordRecord.Columns.host == host && PasswordRecord.Columns.deletedAt == nil)
                     .fetchAll(db)
                 completion(entries(for: passwords))
             }
@@ -128,9 +132,9 @@ class PasswordsDB: PasswordStore {
 
     func find(_ searchString: String, completion: @escaping ([PasswordManagerEntry]) -> Void) {
         do {
-            try dbQueue.read { db in
-                let passwords = try PasswordsRecord
-                    .filter(PasswordsRecord.Columns.host.like("%\(searchString)%"))
+            try dbPool.read { db in
+                let passwords = try PasswordRecord
+                    .filter(PasswordRecord.Columns.host.like("%\(searchString)%") && PasswordRecord.Columns.deletedAt == nil)
                     .fetchAll(db)
                 completion(entries(for: passwords))
             }
@@ -141,8 +145,10 @@ class PasswordsDB: PasswordStore {
 
     func fetchAll(completion: @escaping ([PasswordManagerEntry]) -> Void) {
         do {
-            try dbQueue.read { db in
-                let passwords = try PasswordsRecord.fetchAll(db)
+            try dbPool.read { db in
+                let passwords = try PasswordRecord
+                    .filter(PasswordRecord.Columns.deletedAt == nil)
+                    .fetchAll(db)
                 completion(entries(for: passwords))
             }
         } catch {
@@ -153,8 +159,10 @@ class PasswordsDB: PasswordStore {
     // TODO: Use Result to return the error
     func password(host: String, username: String, completion: @escaping (String?) -> Void) {
         do {
-            try dbQueue.read { db in
-                guard let passwordRecord = try PasswordsRecord.fetchOne(db, key: id(for: host, and: username)) else {
+            try dbPool.read { db in
+                guard let passwordRecord = try PasswordRecord
+                        .filter(PasswordRecord.Columns.entryId == id(for: host, and: username) && PasswordRecord.Columns.deletedAt == nil)
+                        .fetchOne(db) else {
                     completion(nil)
                     return
                 }
@@ -173,18 +181,17 @@ class PasswordsDB: PasswordStore {
     // TODO: add a completion in case of errors.
     func save(host: String, username: String, password: String) {
         do {
-            try dbQueue.write { db in
+            try dbPool.write { db in
                 guard let encryptedPassword = try? EncryptionManager.shared.encryptString(password) else {
                     Logger.shared.logError("Error while encrypting password for \(host) - \(username)", category: .encryption)
                     return
                 }
-                var passwordRecord = PasswordsRecord(id: nil,
-                                                     uuid: id(for: host, and: username),
-                                                     host: host,
-                                                     name: username,
-                                                     password: encryptedPassword,
-                                                     createdAt: Date(),
-                                                     updatedAt: Date())
+                var passwordRecord = PasswordRecord(
+                    uuid: UUID(),
+                    entryId: id(for: host, and: username),
+                    host: host,
+                    name: username,
+                    password: encryptedPassword, createdAt: Date(), updatedAt: Date(), deletedAt: nil, previousCheckSum: nil)
                 try passwordRecord.insert(db)
             }
         } catch let error {
@@ -193,15 +200,22 @@ class PasswordsDB: PasswordStore {
     }
 
     func delete(host: String, username: String) {
-        _ = try? dbQueue.write { db in
-            try PasswordsRecord.deleteOne(db, key: id(for: host, and: username))
+        try? dbPool.write { db in
+            if var password = try PasswordRecord
+                .filter(PasswordRecord.Columns.entryId == id(for: host, and: username) && PasswordRecord.Columns.deletedAt == nil)
+                .fetchOne(db) {
+                password.deletedAt = Date()
+                try password.update(db)
+            }
         }
     }
 
     // Added only in the purpose of testing maybe will be added in the protocol if needed
     func deleteAll() {
-        _ = try? dbQueue.write { db in
-            try PasswordsRecord.deleteAll(db)
+        _ = try? dbPool.write { db in
+            try PasswordRecord
+                .filter(Column("deleteAt") == nil)
+                .updateAll(db, Column("deleteAt").set(to: Date()))
         }
     }
 }

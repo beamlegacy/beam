@@ -53,10 +53,7 @@ struct ShootFrame: View {
     func onCompleteCardSelection(_ noteTitle: String?, withNote note: String?) {
         if let noteTitle = noteTitle {
             pointAndShootUI.groupsUI.last!.edited = false   // Find edited one instead of assuming last
-            browserTabsManager.currentTab?.pointAndShoot.addShootToNote(noteTitle: noteTitle, withNote: note)
-                .catch { error in
-                    Logger.shared.logError("Could not add selection to card: \(error.localizedDescription)", category: .pointAndShoot)
-                }
+            browserTabsManager.currentTab?.pointAndShoot?.addShootToNote(noteTitle: noteTitle, withNote: note)
         }
         browserTabsManager.currentTab?.cancelShoot()
     }

@@ -117,7 +117,6 @@ extension NoteHeaderView {
 
         @Published fileprivate var isEditingTitle = false
         @Published fileprivate var isTitleTaken = false
-        @Published fileprivate var isLoading = false
         @Published fileprivate var wiggleValue = CGFloat(0)
 
         private var documentManager: DocumentManager
@@ -151,7 +150,7 @@ extension NoteHeaderView {
 
         func commitRenameCard(fromTextField: Bool) {
             let newTitle = formatToValidTitle(titleText)
-            guard !newTitle.isEmpty, newTitle != note.title, !isLoading, !isTitleTaken, canEditTitle else {
+            guard !newTitle.isEmpty, newTitle != note.title, !isTitleTaken, canEditTitle else {
                 if fromTextField && isTitleTaken {
                     wiggleValue += 1
                 } else {
@@ -159,13 +158,8 @@ extension NoteHeaderView {
                 }
                 return
             }
-            isLoading = true
-            note.updateTitle(newTitle, documentManager: documentManager) { _ in
-                DispatchQueue.main.async {
-                    self.isEditingTitle = false
-                    self.isLoading = false
-                }
-            }
+            note.updateTitle(newTitle, documentManager: documentManager)
+            isEditingTitle = false
         }
 
         func focusTitle() {

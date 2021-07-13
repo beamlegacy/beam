@@ -70,7 +70,7 @@ class TextFrameTests: XCTestCase {
 
         expect(textFrame.frame.origin) == position
         XCTAssertLessThanOrEqual(textFrame.frame.width, textWidth + 3)
-        expect(textFrame.frame.height).to(beCloseTo(14.5, within: 0.1))
+        expect(textFrame.frame.height).to(beCloseTo(15, within: 0.1))
         expect(textFrame.lines.count) == 1
 
         expect(textFrame.carets.count) == actualString.count * 2 + 2 // * 2 because two edges per character, + 2 because the link add the virtual image character
@@ -163,7 +163,7 @@ class TextFrameTests: XCTestCase {
 
         expect(textFrame.frame.origin) == position
         expect(textFrame.frame.width) <= 30
-        expect(textFrame.frame.height).to(beCloseTo(29, within: 0.1))
+        expect(textFrame.frame.height).to(beCloseTo(30, within: 0.1))
         expect(textFrame.lines.count) == 2
 
         expect(textFrame.carets.count) == actualString.count * 2 + 2 // * 2 because two edges per character, + 2 because the link add the virtual image character

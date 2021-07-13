@@ -39,6 +39,8 @@ public enum LogCategory: String {
     case commandManager
     case beamObject
     case beamObjectNetwork
+    case downloader
+    case autocompleteManager
 }
 
 public final class Logger {
@@ -53,7 +55,7 @@ public final class Logger {
     // If you want to change this for you and uncluter your console logs, add into `.envrc.private`:
     // export HIDE_CATEGORIES="web documentDebug javascript pointAndShoot coredataDebug"
     // it will overwrite this `hideCategories`
-    private var hideCategories: [LogCategory] = [.web, .coredataDebug, .documentDebug, .commandManager]
+    private var hideCategories: [LogCategory] = [.web, .coredataDebug, .documentDebug, .commandManager, .autocompleteManager]
 
     private let hideLumberCategories: [LogCategory] = [.documentDebug]
 

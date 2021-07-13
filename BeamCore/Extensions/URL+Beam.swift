@@ -1,10 +1,3 @@
-//
-//  URL+Beam.swift
-//  Beam
-//
-//  Created by Ravichandrane Rajendran on 09/12/2020.
-//
-
 import Foundation
 
 public extension URL {
@@ -17,53 +10,62 @@ public extension URL {
     }
 
     var minimizedHost: String? {
-        guard let host = self.host else { return nil }
+        guard let host = host else { return nil }
         return removeWWWPrefix(in: host)
     }
 
     var urlStringWithoutScheme: String {
-        guard  let scheme = self.scheme else { return self.absoluteString }
-        let result = self.absoluteString.replacingOccurrences(of: "\(scheme)://", with: "")
+        guard let scheme = scheme else { return absoluteString }
+        let result = absoluteString.replacingOccurrences(of: "\(scheme)://", with: "")
         return removeWWWPrefix(in: result)
     }
 
     var urlWithScheme: URL {
-        if self.scheme != nil {
+        if scheme != nil {
             return self
         }
-        return URL(string: "https://\(self.absoluteString)") ?? self
-    }
-
-    var isSearchResult: Bool {
-        if let host = host {
-            return host.hasSuffix("google.com") && (path == "/url" || path == "/search")
-        }
-
-        return false
+        return URL(string: "https://\(absoluteString)") ?? self
     }
 
     static var urlSchemes: [String?] {
-        return ["http", "https", "file"]
+        ["http", "https", "file"]
+    }
+
+    func extractYouTubeId() -> String? {
+        // TODO: remove this when we can rely on oembed for url conversion
+        let url = absoluteString
+        let typePattern = "(?:(?:\\.be\\/|embed\\/|v\\/|\\?v=|\\&v=|\\/videos\\/)|(?:[\\w+]+#\\w\\/\\w(?:\\/[\\w]+)?\\/\\w\\/))([\\w-_]+)"
+        let regex = try? NSRegularExpression(pattern: typePattern, options: .caseInsensitive)
+        return regex
+            .flatMap { $0.firstMatch(in: url, range: NSRange(location: 0, length: url.count)) }
+            .flatMap { Range($0.range(at: 1), in: url) }
+            .map { String(url[$0]) }
     }
 
     var embed: URL? {
-        guard let scheme = self.scheme,
-              let host = self.host else {
+        guard let scheme = scheme,
+              let host = host else {
             return nil
         }
 
-        if let youtubeID = self.query?.capturedGroups(withRegex: "v=([\\w|\\d]+)&?.*").first {
+        // TODO: remove this when we can rely on oembed for url conversion
+        if let youtubeID = extractYouTubeId() {
             return URL(string: "\(scheme)://\(host)/embed/\(youtubeID)")
         }
 
-        if self.path.contains("/embed/") {
+        if path.contains("/embed/") {
             return self
         }
 
         return nil
     }
 
+    var isImage: Bool {
+        let imageExtensions = ["png", "jpg", "jepg", "gif"]
+        return imageExtensions.contains(self.pathExtension)
+    }
+
     var tld: String? {
-        return host?.tld
+        host?.tld
     }
 }

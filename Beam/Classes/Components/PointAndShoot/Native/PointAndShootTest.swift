@@ -15,24 +15,24 @@ class TestWebPage: WebPage {
     static let urlStr = "https://webpage.com"
     private(set) var url: URL? = URL(string: urlStr)
     var score: Float = 0
-    var pointAndShoot: PointAndShoot
-    var browsingScorer: BrowsingScorer
-    var storage: BeamFileStorage
-    var passwordOverlayController: PasswordOverlayController
+    var pointAndShoot: PointAndShoot?
+    var browsingScorer: BrowsingScorer?
+    var storage: BeamFileStorage?
+    var passwordOverlayController: PasswordOverlayController?
     private(set) var webviewWindow: NSWindow?
     private(set) var frame: NSRect = NSRect()
-    private(set) var downloadManager: DownloadManager
-    private(set) var navigationController: WebNavigationController
+    private(set) var downloadManager: DownloadManager?
+    private(set) var navigationController: WebNavigationController?
     var mediaPlayerController: MediaPlayerController?
     var webView: BeamWebView!
     var activeNote: String = "Card A"
     var testNotes: [String: BeamCore.BeamNote] = ["Card A": BeamNote(title: "Card A")]
-    var fileStorage: BeamFileStorage {
+    var fileStorage: BeamFileStorage? {
         storage
     }
 
-    init(browsingScorer: BrowsingScorer, passwordOverlayController: PasswordOverlayController, pns: PointAndShoot,
-         fileStorage: BeamFileStorage, downloadManager: DownloadManager, navigationController: WebNavigationController) {
+    init(browsingScorer: BrowsingScorer?, passwordOverlayController: PasswordOverlayController?, pns: PointAndShoot?,
+         fileStorage: BeamFileStorage?, downloadManager: DownloadManager?, navigationController: WebNavigationController?) {
         self.browsingScorer = browsingScorer
         self.passwordOverlayController = passwordOverlayController
         pointAndShoot = pns
@@ -55,6 +55,13 @@ class TestWebPage: WebPage {
                            fileStorage: storage, downloadManager: downloadManager, navigationController: navigationController)
     }
 
+    func createNewWindow(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, windowFeatures: WKWindowFeatures, setCurrent: Bool) -> BeamWebView {
+        events.append("createNewWindow \(targetURL) \(setCurrent))")
+        let webPage = TestWebPage(browsingScorer: browsingScorer, passwordOverlayController: passwordOverlayController, pns: pointAndShoot,
+                                  fileStorage: storage, downloadManager: downloadManager, navigationController: navigationController)
+        return webPage.webView
+    }
+
     func isActiveTab() -> Bool {
         true
     }
@@ -69,14 +76,14 @@ class TestWebPage: WebPage {
         if objectName == "PointAndShoot" {
             switch jsCode {
             case "setStatus('pointing')":
-                pointAndShoot.status = PointAndShootStatus.pointing
+                pointAndShoot?.status = PointAndShootStatus.pointing
             case "setStatus('shooting')":
-                pointAndShoot.status = PointAndShootStatus.shooting
+                pointAndShoot?.status = PointAndShootStatus.shooting
             case "setStatus('none')":
-                pointAndShoot.status = PointAndShootStatus.none
+                pointAndShoot?.status = PointAndShootStatus.none
             case let assignString where jsCode.contains("assignNote"):
                 Logger.shared.logDebug("\(assignString) called", category: .pointAndShoot)
-                pointAndShoot.status = PointAndShootStatus.none
+                pointAndShoot?.status = PointAndShootStatus.none
             default:
                 Logger.shared.logDebug("no matching jsCode case, no js call mocked", category: .pointAndShoot)
             }
@@ -103,6 +110,8 @@ class TestWebPage: WebPage {
         events.append("getNote \(fromTitle)")
         return testNotes[fromTitle]
     }
+
+    func addTextToClusteringManager(_ text: String, url: URL) {}
 }
 
 class PointAndShootUIMock: PointAndShootUI {
@@ -209,20 +218,37 @@ class DownloadManagerMock: DownloadManager {
     }
 
     func downloadFile(at url: URL, headers: [String: String], suggestedFileName: String?, destinationFoldedURL: URL?) {}
+    func downloadFile(from document: BeamDownloadDocument) throws {}
 
+    func clearAllFileDownloads() {}
+    func clearFileDownload(_ download: Download) -> Download? { return nil }
+
+    func downloadImage(_ src: URL, pageUrl: URL, completion: @escaping ((Data, String)?) -> Void) {
+        let headers = ["Referer": pageUrl.absoluteString]
+        self.downloadURL(src, headers: headers) { result in
+            guard case .binary(let data, let mimeType, _) = result,
+                  data.count > 0 else {
+                Logger.shared.logError("Failed downloading Image from \(src)", category: .pointAndShoot)
+                completion(nil)
+                return
+            }
+            completion((data, mimeType))
+        }
+    }
     func waitForDownloadURL(_ url: URL, headers: [String: String]) -> DownloadManagerResult? { fatalError("waitForDownloadURL(_:headers:) has not been implemented") }
 }
 
 class NavigationControllerMock: WebNavigationController {
     var events: [String] = []
 
-    func navigatedTo(url: URL, webView: WKWebView) {
-        events.append("navigatedTo \(url)")
+    func navigatedTo(url: URL, webView: WKWebView, replace: Bool) {
+        events.append("navigatedTo \(url) \(replace)")
     }
 
     func setLoading() {
         events.append("setLoading")
     }
+
 }
 
 class PointAndShootTest: XCTestCase {
@@ -235,24 +261,24 @@ class PointAndShootTest: XCTestCase {
         let userInfoStore = MockUserInformationsStore()
         let testPasswordOverlayController = PasswordOverlayController(passwordStore: testPasswordStore, userInfoStore: userInfoStore)
         let testBrowsingScorer = BrowsingScorerMock()
-        self.testUI = PointAndShootUIMock()
+        testUI = PointAndShootUIMock()
 
         let testFileStorage = FileStorageMock()
         let testDownloadManager = DownloadManagerMock()
         let navigationController = NavigationControllerMock()
-        self.pns = PointAndShoot(ui: testUI, scorer: testBrowsingScorer)
+        pns = PointAndShoot(ui: testUI, scorer: testBrowsingScorer)
         let page = TestWebPage(browsingScorer: testBrowsingScorer,
                                passwordOverlayController: testPasswordOverlayController, pns: pns,
                                fileStorage: testFileStorage, downloadManager: testDownloadManager,
                                navigationController: navigationController)
-        self.testPage = page
-        page.browsingScorer.page = page
-        page.passwordOverlayController.page = page
-        page.pointAndShoot.page = page
+        testPage = page
+        page.browsingScorer?.page = page
+        page.passwordOverlayController?.page = page
+        page.pointAndShoot?.page = page
     }
 
     func helperCountUIEvents(_ label: String) -> Int {
-        return self.testUI.events.filter({ $0.contains(label) }).count
+        return testUI.events.filter({ $0.contains(label) }).count
     }
 
     // Note: this class is only used to setup the Point and Shoot Mocks and testbed

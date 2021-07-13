@@ -32,7 +32,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // swiftlint:disable:next force_cast
     class var main: AppDelegate { NSApplication.shared.delegate as! AppDelegate }
 
-    @IBOutlet var window: BeamWindow!
+    var window: BeamWindow? {
+        (NSApplication.shared.keyWindow ?? NSApplication.shared.mainWindow) as? BeamWindow
+    }
     var windows: [BeamWindow] = []
     var data: BeamData!
 
@@ -47,9 +49,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     #endif
 
     func resizeWindow(width: CGFloat) {
-        var windowRect = window.frame
+        var windowRect = window?.frame ?? NSRect(origin: .zero, size: CGSize(width: width, height: 600))
         windowRect.size.width = width
-        window.setFrame(windowRect, display: true)
+        window?.setFrame(windowRect, display: true)
     }
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
@@ -72,7 +74,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         updateBadge()
-        createWindow(reloadState: Configuration.stateRestorationEnabled)
+        createWindow(frame: nil, reloadState: Configuration.stateRestorationEnabled)
 
         // So we remember we're not currently using the default api server
         if Configuration.apiHostnameDefault != Configuration.apiHostname {
@@ -164,21 +166,27 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.dockTile.badgeLabel = count > 0 ? String(count) : ""
     }
 
-    func createWindow(reloadState: Bool) {
+    @discardableResult
+    func createWindow(frame: NSRect?, reloadState: Bool) -> BeamWindow {
         // Create the window and set the content view.
-        window = BeamWindow(contentRect: NSRect(x: 0, y: 0, width: 800, height: 600),
+        let window = BeamWindow(contentRect: frame ?? NSRect(x: 0, y: 0, width: 800, height: 600),
                             data: data,
                             reloadState: reloadState)
-        window.center()
+        if frame == nil {
+            window.center()
+        }
         window.makeKeyAndOrderFront(nil)
         windows.append(window)
         subscribeToStateChanges(for: window.state)
+        return window
     }
 
     func applicationWillTerminate(_ aNotification: Notification) {
         // Insert code here to tear down your application
         for window in windows {
-            window.state.browserTabsManager.currentTab?.closeApp()
+            for tab in window.state.browserTabsManager.tabs {
+                tab.closeApp()
+            }
         }
         if let beamWindow = windows.first {
             beamWindow.saveDefaults()
@@ -187,7 +195,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         if !flag {
-            createWindow(reloadState: Configuration.stateRestorationEnabled)
+            createWindow(frame: nil, reloadState: Configuration.stateRestorationEnabled)
         }
 
         return true
@@ -276,7 +284,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @IBAction func newDocument(_ sender: Any?) {
-        createWindow(reloadState: false)
+        createWindow(frame: nil, reloadState: false)
     }
 
     // MARK: -
@@ -322,4 +330,23 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    func application(_ sender: NSApplication, openFile filename: String) -> Bool {
+        let url = URL(fileURLWithPath: filename)
+        if url.pathExtension == BeamDownloadDocument.downloadDocumentFileExtension {
+            let documentURL = URL(fileURLWithPath: filename)
+            if let wrapper = try? FileWrapper(url: documentURL, options: .immediate) {
+                do {
+                    let doc = BeamDownloadDocument()
+                    doc.fileURL = documentURL
+                    try doc.read(from: wrapper, ofType: "co.beamapp.download")
+                    try self.data.downloadManager.downloadFile(from: doc)
+                } catch {
+                    Logger.shared.logError("Can't open Download Document from disk", category: .downloader)
+                    return false
+                }
+                return true
+            }
+        }
+        return true
+    }
 }

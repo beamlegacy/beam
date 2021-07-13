@@ -27,15 +27,18 @@ import BeamCore
     @Published var scrollToElementId: UUID?
 
     private(set) lazy var recentsManager: RecentsManager = {
-        return RecentsManager(with: data.documentManager)
+        RecentsManager(with: data.documentManager)
     }()
     private(set) lazy var autocompleteManager: AutocompleteManager = {
-        return AutocompleteManager(with: data)
+        AutocompleteManager(with: data, searchEngine: searchEngine)
     }()
     private(set) lazy var browserTabsManager: BrowserTabsManager = {
         let manager = BrowserTabsManager(with: data)
         manager.delegate = self
         return manager
+    }()
+    private(set) lazy var noteMediaPlayerManager: NoteMediaPlayerManager = {
+        NoteMediaPlayerManager()
     }()
 
     @Published var backForwardList = NoteBackForwardList()
@@ -62,7 +65,7 @@ import BeamCore
     @Published var currentPage: WindowPage?
     @Published var overlayViewModel: OverlayViewCenterViewModel = OverlayViewCenterViewModel()
 
-    var downloadManager: BeamDownloadManager = BeamDownloadManager()
+    var downloadButtonPosition: CGPoint?
 
     private var scope = Set<AnyCancellable>()
     func goBack() {
@@ -247,7 +250,8 @@ import BeamCore
 
     private func urlFor(query: String) -> URL? {
         //TODO make a better url detector and rewritter to transform xxx.com in https://xxx.com with less corner cases and clearer code path:
-        guard query.mayBeURL, let u = URL(string: query) else {
+        let csCopy = CharacterSet(bitmapRepresentation: CharacterSet.urlPathAllowed.bitmapRepresentation)
+        guard query.mayBeURL, let u = URL(string: query.addingPercentEncoding(withAllowedCharacters: csCopy) ?? query) else {
             searchEngine.query = query
             return URL(string: searchEngine.searchUrl)
         }
@@ -326,7 +330,7 @@ import BeamCore
         super.init()
         setup(data: data)
 
-        downloadManager.$downloads.sink { [weak self] _ in
+        data.downloadManager.$downloads.sink { [weak self] _ in
             self?.objectWillChange.send()
         }.store(in: &scope)
     }
@@ -425,15 +429,15 @@ extension BeamState: BrowserTabsManagerDelegate {
 
     // convenient vars
     var hasBrowserTabs: Bool {
-        return !browserTabsManager.tabs.isEmpty
+        !browserTabsManager.tabs.isEmpty
     }
     private weak var currentTab: BrowserTab? {
-        return browserTabsManager.currentTab
+        browserTabsManager.currentTab
     }
 
     // MARK: BrowserTabsManagerDelegate
     func areTabsVisible(for manager: BrowserTabsManager) -> Bool {
-        return mode == .web
+        mode == .web
     }
 
     func tabsManagerDidUpdateTabs(_ tabs: [BrowserTab]) {

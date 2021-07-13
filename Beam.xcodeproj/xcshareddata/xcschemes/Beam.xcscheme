@@ -84,12 +84,6 @@
                <Test
                   Identifier = "ClusteringTests/testChangeCandidate()">
                </Test>
-               <Test
-                  Identifier = "ClusteringTests/testClusterize()">
-               </Test>
-               <Test
-                  Identifier = "ClusteringTests/testProcessWithOnlyNavigation()">
-               </Test>
             </SkippedTests>
          </TestableReference>
       </Testables>
@@ -123,7 +117,7 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "com.apple.CoreData.MigrationDebug 1"
+            argument = "-com.apple.CoreData.MigrationDebug 1"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument

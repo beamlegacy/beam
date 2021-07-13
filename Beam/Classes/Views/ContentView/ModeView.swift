@@ -29,9 +29,10 @@ struct ModeView: View {
                     if data.showTabStats, let score = tab.browsingTree.current.score {
                         TabStats(score: score)
                     }
-
-                    PointFrame(pointAndShootUI: tab.pointAndShoot.ui)
-                    ShootFrame(pointAndShootUI: tab.pointAndShoot.ui)
+                    if let pns = tab.pointAndShoot {
+                        PointFrame(pointAndShootUI: pns.ui)
+                        ShootFrame(pointAndShootUI: pns.ui)
+                    }
                 }.clipped()
             }
         }

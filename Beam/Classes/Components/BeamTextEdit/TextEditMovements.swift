@@ -186,12 +186,12 @@ extension TextRoot {
                 }
             }
         } else {
-            var pos = node.positionAbove(cursorPosition)
-            if let node = focusedWidget as? TextNode, let caretIndex = node.caretIndexForSourcePosition(pos),
-               let updatedCaretIndex = node.caretIndexAvoidingUneditableRange(caretIndex, after: false) {
-                pos = node.caretAtIndex(updatedCaretIndex).positionOnScreen
+            var _caretIndex = node.caretAbove(caretIndex)
+            if let node = focusedWidget as? TextNode,
+               let updatedCaretIndex = node.caretIndexAvoidingUneditableRange(_caretIndex, after: false) {
+                _caretIndex = updatedCaretIndex
             }
-            cursorPosition = pos
+            self.caretIndex = _caretIndex
         }
         cancelSelection()
         node.invalidateText()
@@ -211,13 +211,12 @@ extension TextRoot {
                 cursorPosition = node.text.count
             }
         } else {
-            var pos = node.positionBelow(cursorPosition)
+            var _caretIndex = node.caretBelow(caretIndex)
             if let node = focusedWidget as? TextNode,
-               let caretIndex = node.caretIndexForSourcePosition(pos),
-               let updatedCaretIndex = node.caretIndexAvoidingUneditableRange(caretIndex, after: true) {
-                pos = node.caretAtIndex(updatedCaretIndex).positionOnScreen
+               let updatedCaretIndex = node.caretIndexAvoidingUneditableRange(_caretIndex, after: false) {
+                _caretIndex = updatedCaretIndex
             }
-            cursorPosition = pos
+            self.caretIndex = _caretIndex
         }
         cancelSelection()
         node.invalidateText()
@@ -317,7 +316,7 @@ extension TextRoot {
         if cursorPosition == 0 {
             extendNodeSelectionUp()
         } else {
-            extendSelection(to: node.positionAbove(cursorPosition))
+            extendSelection(to: node.positionForCaretIndex(node.caretAbove(caretIndex)))
         }
         node.invalidateText()
     }
@@ -333,7 +332,7 @@ extension TextRoot {
         if cursorPosition == node.text.text.count {
             extendNodeSelectionDown()
         } else {
-            extendSelection(to: node.positionBelow(cursorPosition))
+            extendSelection(to: node.positionForCaretIndex(node.caretBelow(caretIndex)))
         }
         node.invalidateText()
     }

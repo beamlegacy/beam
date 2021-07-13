@@ -26,3 +26,30 @@ test("children", () => {
   p.appendChild(a)
   expect(p.toString()).toEqual(`<p><b>MEAN</b> (<a href="/wiki/MongoDB">MongoDB</a></p>`)
 })
+
+test("contains", () => {
+  const parent = new BeamHTMLElementMock("div")
+  const child = new BeamHTMLElementMock("p")
+  const parentSibling = new BeamHTMLElementMock("div")
+  parent.appendChild(child)
+
+  expect(parent.contains(child)).toEqual(true)
+  expect(parent.contains(parent)).toEqual(true)
+  expect(parentSibling.contains(child)).toEqual(false)
+  expect(child.contains(parent)).toEqual(false)
+})
+
+test("parentElement", () => {
+  const parent = new BeamHTMLElementMock("div")
+  const child = new BeamHTMLElementMock("p")
+  expect(child.parentElement).toBeUndefined()
+  expect(parent.parentElement).toBeUndefined()
+
+  parent.appendChild(child)
+  expect(child.parentElement).toEqual(parent)
+  expect(parent.parentElement).toBeUndefined()
+
+  parent.removeChild(child)
+  expect(child.parentElement).toBeNull()
+  expect(parent.parentElement).toBeUndefined()
+})

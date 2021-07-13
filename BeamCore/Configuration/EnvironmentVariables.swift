@@ -27,6 +27,12 @@ public struct EnvironmentVariables {
         }
     }
 
+    public struct BrowsingTree {
+        static public private(set) var accessToken = "$(BROWSING_TREE_ACCESS_TOKEN)"
+        static public private(set) var url = "$(BROWSING_TREE_URL)"
+
+    }
+
     public struct Sentry {
         static public private(set) var key = "$(SENTRY_KEY)"
     }

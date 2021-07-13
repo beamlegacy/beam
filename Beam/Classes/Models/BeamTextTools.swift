@@ -10,7 +10,8 @@ import BeamCore
 
 // High level manipulation:
 extension BeamText {
-    @discardableResult mutating func makeInternalLink(_ range: Swift.Range<Int>) -> Bool {
+    //swiftlint:disable:next function_body_length
+    @discardableResult mutating func makeInternalLink(_ range: Swift.Range<Int>, createNoteIfNeeded: Bool) -> UUID? {
         let text = self.extract(range: range)
         let t = text.text
 
@@ -41,10 +42,17 @@ extension BeamText {
         link = link.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
         guard linkCharacterSet.isSuperset(of: CharacterSet(charactersIn: link)) else {
 //            Logger.shared.logError("makeInternalLink for range: \(range) failed: forbidden characters in range", category: .document)
-            return false
+            return nil
         }
 
-        guard let linkID = BeamNote.idForNoteNamed(link) else { return false }
+        var _linkID = BeamNote.idForNoteNamed(link)
+        if _linkID == nil && createNoteIfNeeded {
+            let note = BeamNote.create(AppDelegate.main.data.documentManager, title: link)
+            note.addChild(BeamElement())
+            _linkID = note.id
+            note.save(documentManager: AppDelegate.main.data.documentManager)
+        }
+        guard let linkID = _linkID else { return nil }
         let linkText = BeamText(text: link, attributes: [.internalLink(linkID)])
         let actualRange = range.lowerBound + start ..< range.lowerBound + end
         Logger.shared.logInfo("makeInternalLink for range: \(range) | actual: \(actualRange)", category: .document)
@@ -64,14 +72,15 @@ extension BeamText {
             // make sure it's saved at least once
             linkedNote.save(documentManager: AppDelegate.main.data.documentManager)
         }
-        return true
+
+        return linkedNote.id
     }
 
     mutating func makeLinkToNoteExplicit(forNote title: String) {
         text.ranges(of: title).forEach { range in
             let start = text.position(at: range.lowerBound)
             let end = text.position(at: range.upperBound)
-            makeInternalLink(start..<end)
+            makeInternalLink(start..<end, createNoteIfNeeded: true)
         }
     }
 
@@ -99,4 +108,12 @@ extension BeamText {
         return types
     }
 
+}
+
+public extension BeamElement {
+    @discardableResult func makeInternalLink(_ range: Swift.Range<Int>, createNoteIfNeeded: Bool) -> Bool {
+        guard let sourceNoteId = note?.id,
+        let linkedNoteId = text.makeInternalLink(range, createNoteIfNeeded: createNoteIfNeeded) else { return false }
+        return true
+    }
 }

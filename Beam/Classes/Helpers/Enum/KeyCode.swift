@@ -15,4 +15,6 @@ enum KeyCode: UInt16 {
     case down = 125
     case up = 126
     case enter = 36
+    case space = 49
+    case backspace = 51
 }

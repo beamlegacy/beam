@@ -73,6 +73,7 @@ class BeamWindow: NSWindow, NSDraggingDestination {
         self.toolbar?.isVisible = false
         self.titlebarAppearsTransparent = true
         self.titleVisibility = .hidden
+        self.isReleasedWhenClosed = false
 
         self.tabbingMode = .disallowed
         setFrameAutosaveName("BeamWindow")
@@ -146,7 +147,6 @@ class BeamWindow: NSWindow, NSDraggingDestination {
     }
 
     // MARK: - Setup UI
-
     private func setupUI() {
         trafficLights = [
             standardWindowButton(.closeButton),
@@ -184,49 +184,27 @@ class BeamWindow: NSWindow, NSDraggingDestination {
         self.state.isFullScreen.toggle()
     }
 
-    // MARK: - IBAction
+    // MARK: - Animations
+    /// This methods creates a CALayer and animates it from the mouse current position to the position of the downloadButton of the window
+    /// It should be trigerred when a file download starts
+    func downloadAnimation() {
 
-    @IBAction func newDocument(_ sender: Any?) {
-        AppDelegate.main.createWindow(reloadState: false)
-    }
+        guard let buttonPosition = state.downloadButtonPosition else { return }
+        let animationLayer = CALayer()
+        animationLayer.frame = CGRect(origin: CGPoint(x: 50, y: 50), size: CGSize(width: 64, height: 64))
+        animationLayer.position = self.mouseLocationOutsideOfEventStream
+        animationLayer.zPosition = .greatestFiniteMagnitude
 
-    @IBAction func showPreviousTab(_ sender: Any?) {
-        state.browserTabsManager.showPreviousTab()
-    }
+        let flyingImage = NSImage(named: "flying-download")
+        animationLayer.contents = flyingImage?.cgImage
 
-    @IBAction func showNextTab(_ sender: Any?) {
-        state.browserTabsManager.showNextTab()
-    }
+        self.contentView?.layer?.addSublayer(animationLayer)
 
-    @IBAction func showJournal(_ sender: Any?) {
-        state.navigateToJournal()
-    }
+        let animationGroup = BeamDownloadManager.flyingAnimationGroup(origin: animationLayer.position, destination: buttonPosition)
+        animationGroup.delegate = LayerRemoverAnimationDelegate(with: animationLayer)
 
-    @IBAction func toggleScoreCard(_ sender: Any?) {
-        state.data.showTabStats.toggle()
-    }
-
-    @IBAction func newSearch(_ sender: Any?) {
-        state.startNewSearch()
-    }
-
-    @IBAction func openLocation(_ sender: Any?) {
-        state.focusOmnibox()
-    }
-
-    @IBAction func showCardSelector(_ sender: Any?) {
-        state.destinationCardIsFocused = true
-    }
-
-    @IBAction func showRecentCard(_ sender: Any?) {
-        let recents = state.recentsManager.recentNotes
-        if let item = sender as? NSMenuItem, let index = Int(item.title.components(separatedBy: CharacterSet.decimalDigits.inverted).joined()), index <= recents.count {
-            state.navigateToNote(named: recents[index - 1].title)
-        }
-    }
-
-    @IBAction func dumpBrowsingTree(_ sender: Any?) {
-        state.browserTabsManager.currentTab?.dumpBrowsingTree()
+        animationLayer.add(animationGroup, forKey: "download")
+        animationLayer.opacity = 0.0
     }
 
     static let savedTabsKey = "savedTabs"
@@ -246,11 +224,9 @@ class BeamWindow: NSWindow, NSDraggingDestination {
         }
     }
 
-    public func draggingExited(_ sender: NSDraggingInfo?) {
-    }
+    public func draggingExited(_ sender: NSDraggingInfo?) { }
 
-    public func draggingEnded(_ sender: NSDraggingInfo) {
-    }
+    public func draggingEnded(_ sender: NSDraggingInfo) { }
 
     public func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
         guard let files = sender.draggingPasteboard.readObjects(forClasses: [NSURL.self], options: nil)
@@ -294,10 +270,12 @@ class BeamWindow: NSWindow, NSDraggingDestination {
             }
 
         }
-
         return true
     }
 
+    deinit {
+        contentView = nil
+    }
 }
 
 extension BeamWindow: NSWindowDelegate {

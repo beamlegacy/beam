@@ -6,7 +6,7 @@ import Nimble
 
 class CoreDataTests: XCTestCase {
     lazy var coreDataManager = {
-        CoreDataManager()
+        CoreDataManager(storeType: NSInMemoryStoreType)
     }()
     lazy var context = {
         coreDataManager.mainContext
@@ -17,8 +17,6 @@ class CoreDataTests: XCTestCase {
     override func setUp() {
         super.setUp()
 
-        // Can't use `NSInMemoryStoreType` as model constraints don't work
-        // storeType: NSInMemoryStoreType
         coreDataManager.setup()
 
         CoreDataManager.shared = coreDataManager

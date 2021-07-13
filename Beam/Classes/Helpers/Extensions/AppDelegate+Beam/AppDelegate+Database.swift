@@ -6,7 +6,7 @@ extension AppDelegate {
             databasesWindow.makeKeyAndOrderFront(window)
             return
         }
-        databasesWindow = DatabasesWindow(contentRect: window.frame)
+        databasesWindow = DatabasesWindow(contentRect: window?.frame ?? NSRect(origin: .zero, size: CGSize(width: 800, height: 600)))
         databasesWindow?.center()
         databasesWindow?.makeKeyAndOrderFront(window)
     }

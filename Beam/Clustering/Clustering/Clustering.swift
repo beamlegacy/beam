@@ -21,6 +21,9 @@ public struct Page {
     var content: String?
     var textEmbedding: [Double]?
     var entities: EntitiesInText?
+    var language: NLLanguage?
+    var entitiesInTitle: EntitiesInText?
+    var attachedPages = [UInt64]()
 }
 
 enum ClusteringCandidate {
@@ -32,10 +35,11 @@ enum ClusteringCandidate {
 
 enum SimilarityMatrixCandidate {
     case navigationMatrix
-    case navigationAndEntities
-    case textualSimilarityMatrix
     case combinationAllSimilarityMatrix
     case combinationAllBinarisedMatrix
+    case combinationBinarizedWithTextErasure
+    case combinationSigmoid
+    case textualSimilarityMatrix
 }
 
 enum NumClusterComputationCandidate {
@@ -46,6 +50,17 @@ enum NumClusterComputationCandidate {
 
 // swiftlint:disable:next type_body_length
 public class Cluster {
+
+    enum FindEntitiesIn {
+        case content
+        case title
+    }
+
+    enum AllWeights {
+        case navigation
+        case text
+        case entities
+    }
 
     enum MatrixError: Error {
         case dimensionsNotMatching
@@ -72,7 +87,9 @@ public class Cluster {
     let tagger = NLTagger(tagSchemes: [.nameType])
     let entityOptions: NLTagger.Options = [.omitPunctuation, .omitWhitespace, .joinNames]
     let entityTags: [NLTag] = [.personalName, .placeName, .organizationName]
-    var timeToRemove = 0.5
+    var timeToRemove: Double = 0.5
+    let titleSuffixes = [" - Google Search", " - YouTube"]
+    let beta = 50.0
 
     // The following will be deleted before the final product:
     // Define which affinity (laplacian) matrix to use
@@ -82,13 +99,13 @@ public class Cluster {
     // Define which number of clusters computation to use
     var numClustersCandidate = NumClusterComputationCandidate.threshold
     var candidate: Int
-    var weights = [String: Double]()
+    var weights = [AllWeights: Double]()
 
     public init(candidate: Int = 1, weightNavigation: Double = 0.5, weightText: Double = 0.5, weightEntities: Double = 0.5) {
         self.candidate = candidate
-        self.weights["navigation"] = weightNavigation
-        self.weights["text"] = weightText
-        self.weights["entities"] = weightEntities
+        self.weights[.navigation] = weightNavigation
+        self.weights[.text] = weightText
+        self.weights[.entities] = weightEntities
         // In general we always initialise with candidate 1
         // this is just to be safe:
         do {
@@ -159,7 +176,8 @@ public class Cluster {
         }
         let d = reduce(self.adjacencyMatrix, sum, .Row)
         let d1: [Double] = d.map { elem in
-            if elem == 0.0 { return 0.0 } else { return 1 / elem }
+            // if elem == 0.0 { return 0.0 } else { return 1 / elem }
+            if elem < 1e-5 { return elem } else { return 1 / elem }
         }
         let D = diag(d)
         let D1 = diag(d1)
@@ -236,13 +254,12 @@ public class Cluster {
     /// - Parameters:
     ///   - text: The text that will be turned into a contextual vector (embedding)
     /// - Returns: The embedding of the given piece of text as an optional.
-    func textualEmbeddingComputationWithNLEmbedding(text: String) -> [Double]? {
-        let language = self.getTextLanguage(text: text)
-
-        if #available(iOS 14, macOS 11, *), language == NLLanguage.english {
-            if let sentenceEmbedding = NLEmbedding.sentenceEmbedding(for: .english),
+    func textualEmbeddingComputationWithNLEmbedding(text: String) -> ([Double], NLLanguage)? {
+        if let language = self.getTextLanguage(text: text),
+           #available(iOS 14, macOS 11, *), language != NLLanguage.undetermined {
+            if let sentenceEmbedding = NLEmbedding.sentenceEmbedding(for: language),
                let vector = sentenceEmbedding.vector(for: text) {
-                    return vector
+                    return (vector, language)
             }
         }
 
@@ -254,8 +271,8 @@ public class Cluster {
         self.tagger.string = text
         tagger.enumerateTags(in: text.startIndex..<text.endIndex, unit: .word, scheme: .nameType, options: entityOptions) { tag, tokenRange in
             // Get the most likely tag, and include it if it's a named entity.
-            if let tag = tag, entityTags.contains(tag), let contains = entitiesInCurrentText.entities[tag.rawValue]?.contains(String(text[tokenRange])), contains == false {
-                entitiesInCurrentText.entities[tag.rawValue]?.append(String(text[tokenRange]))
+            if let tag = tag, entityTags.contains(tag), let contains = entitiesInCurrentText.entities[tag.rawValue]?.contains(String(text[tokenRange]).lowercased()), contains == false {
+                entitiesInCurrentText.entities[tag.rawValue]?.append(String(text[tokenRange]).lowercased())
             }
             return true
         }
@@ -293,28 +310,50 @@ public class Cluster {
     /// - Parameters:
     ///   - textualEmbedding: the embedding of the current page
     /// - Returns: A list of cosine similarity scores
-    func scoreTextualEmbedding(textualEmbedding: [Double]) -> [Double] {
+    func scoreTextualEmbedding(textualEmbedding: [Double], language: NLLanguage, index: Int, changeContent: Bool = false) -> [Double] {
         var scores = [Double]()
 
-        for page in pages.dropLast() {
+        for page in pages.enumerated() {
             // The textual vector might be empty, when the OS is not good or the page content is not in English
             // then the score will be 0.0
-            if let textualVectorID = page.textEmbedding {
-                scores.append(self.cosineSimilarity(vector1: textualVectorID, vector2: textualEmbedding))
+            if page.offset == index {
+                if changeContent {
+                    scores.append(0.0)
+                } else { break }
+            } else if let textualVectorID = page.element.textEmbedding,
+                      let textLanguage = page.element.language,
+                      textLanguage ==  language {
+                    scores.append(self.cosineSimilarity(vector1: textualVectorID, vector2: textualEmbedding))
             } else {
-                scores.append(0.0)
+                scores.append(1.0) // We don't want to "break" connections between langauges
             }
         }
         return scores
     }
 
-    func scoreEntitySimilarities(entitiesInNewText: EntitiesInText) -> [Double] {
+    func scoreEntitySimilarities(entitiesInNewText: EntitiesInText, in whichText: FindEntitiesIn, index: Int, changeContent: Bool = false) -> [Double] {
         var scores = [Double]()
-        for page in pages.dropLast() {
-            if let entitiesInPage = page.entities {
-                scores.append(self.jaccardEntities(entitiesText1: entitiesInNewText, entitiesText2: entitiesInPage))
-            } else { scores.append(0.0) }
-            // Todo: No page should be missing. Verify
+        switch whichText {
+        case .content:
+            for page in pages.enumerated() {
+                if page.offset == index {
+                    if changeContent {
+                        scores.append(0.0)
+                    } else { break }
+                } else if let entitiesInPage = page.element.entities {
+                    scores.append(self.jaccardEntities(entitiesText1: entitiesInNewText, entitiesText2: entitiesInPage))
+                } else { scores.append(0.0) }
+            }
+        case .title:
+            for page in pages.enumerated() {
+                if page.offset == index {
+                    if changeContent {
+                        scores.append(0.0)
+                    } else { break }
+                } else if let entitiesInPage = page.element.entitiesInTitle {
+                    scores.append(self.jaccardEntities(entitiesText1: entitiesInNewText, entitiesText2: entitiesInPage))
+                } else { scores.append(0.0) }
+            }
         }
         return scores
     }
@@ -327,48 +366,70 @@ public class Cluster {
     ///
     /// - Parameters:
     ///   - pageIndex: the ID of the current page to process
-    func textualSimilarityMatrixProcess(pageIndex: Int) throws {
+    func textualSimilarityMatrixProcess(pageIndex: Int, changeContent: Bool = false) throws {
         if let content = pages[pageIndex].content,
-           let textualEmbedding = self.textualEmbeddingComputationWithNLEmbedding(text: content) {
+           let (textualEmbedding, language) = self.textualEmbeddingComputationWithNLEmbedding(text: content) {
                 // if the OS is not good or the page content is not in English
                 // we create a vector of only 0.0 scores
-                let scores = self.scoreTextualEmbedding(textualEmbedding: textualEmbedding)
+                let scores = self.scoreTextualEmbedding(textualEmbedding: textualEmbedding, language: language, index: pageIndex, changeContent: changeContent)
+            if changeContent {
+                self.textualSimilarityMatrix.matrix[row: pageIndex] = scores
+                self.textualSimilarityMatrix.matrix[col: pageIndex] = scores
+            } else {
                 try self.textualSimilarityMatrix.addPage(similarities: scores)
-                self.pages[pageIndex].textEmbedding = textualEmbedding
-        } else {
-            try self.textualSimilarityMatrix.addPage(similarities: [Double](
-                                                            repeating: 0.0,
-                                                            count: self.textualSimilarityMatrix.matrix.rows
-                                                        )
-                                                    )
+            }
+            self.pages[pageIndex].textEmbedding = textualEmbedding
+            self.pages[pageIndex].language = language
+        } else  if !changeContent {
+            let scores = [Double](repeating: 1.0, count: self.textualSimilarityMatrix.matrix.rows)
+            try self.textualSimilarityMatrix.addPage(similarities: scores)
         }
 
     }
 
-    func entitiesProcess(pageIndex: Int) throws {
+    func entitiesProcess(pageIndex: Int, changeContent: Bool = false) throws {
+        var scores = [Double](repeating: 0.0, count: self.entitiesMatrix.matrix.rows)
         if let content = pages[pageIndex].content {
             let entitiesInNewText = findEntitiesInText(text: content)
-            let scores = self.scoreEntitySimilarities(entitiesInNewText: entitiesInNewText)
-            try self.entitiesMatrix.addPage(similarities: scores)
+            scores = zip(scores, self.scoreEntitySimilarities(entitiesInNewText: entitiesInNewText, in: FindEntitiesIn.content, index: pageIndex, changeContent: changeContent)).map({ $0.0 + $0.1 })
             self.pages[pageIndex].entities = entitiesInNewText
+        }
+        if let title = pages[pageIndex].title {
+            let entitiesInNewTitle = findEntitiesInText(text: title)
+            scores = zip(scores, self.scoreEntitySimilarities(entitiesInNewText: entitiesInNewTitle, in: FindEntitiesIn.title, index: pageIndex, changeContent: changeContent)).map({ min($0.0 + $0.1, 1.0) })
+            self.pages[pageIndex].entitiesInTitle = entitiesInNewTitle
+        }
+        if changeContent {
+            self.entitiesMatrix.matrix[row: pageIndex] = scores
+            self.entitiesMatrix.matrix[col: pageIndex] = scores
         } else {
-            try self.entitiesMatrix.addPage(similarities: [Double](repeating: 0.0, count: self.entitiesMatrix.matrix.rows))
+            try self.entitiesMatrix.addPage(similarities: scores)
         }
     }
 
     func jaccardEntities(entitiesText1: EntitiesInText, entitiesText2: EntitiesInText) -> Double {
         var intersection: Set<String> = Set([String]())
         var union: Set<String> = Set([String]())
+        var totalEntities1: Set<String> = Set([String]())
+        var totalEntities2: Set<String> = Set([String]())
 
         for entityType in entitiesText1.entities.keys {
             union = Set(entitiesText1.entities[entityType] ?? [String]()).union(Set(entitiesText2.entities[entityType] ?? [String]())).union(union)
             intersection = Set(entitiesText1.entities[entityType] ?? [String]()).intersection(Set(entitiesText2.entities[entityType] ?? [String]())).union(intersection)
+            totalEntities1 = Set(entitiesText1.entities[entityType] ?? [String]()).union(totalEntities1)
+            totalEntities2 = Set(entitiesText2.entities[entityType] ?? [String]()).union(totalEntities2)
         }
-        if union.count > 0 {
-            return Double(intersection.count) / Double(union.count)
+        let minimumEntities = min(totalEntities1.count, totalEntities2.count)
+        if minimumEntities > 0 {
+            return Double(intersection.count) / Double(minimumEntities)
         } else {
-            return 0.0
+            return 0
         }
+        // if union.count > 0 {
+        //     return Double(intersection.count) / Double(union.count)
+        // } else {
+        //     return 0.0
+        // }
     }
 
     func findPageInPages(pageID: UInt64) -> Int? {
@@ -387,10 +448,6 @@ public class Cluster {
     ///   - binarised matrix
 
     func binarise(matrix: Matrix, threshold: Double) -> Matrix {
-        // Bug in the thr() function in LASwift
-        // let firstCompomemtMatrix = thr(matrix, threshold)
-        // let secondComponentMatrix = -1 .* thr(firstCompomemtMatrix - 1, -0.99999)
-        // return firstCompomemtMatrix + secondComponentMatrix
         let result = zeros(matrix.rows, matrix.cols)
         for row in 0..<matrix.rows {
             for column in 0..<matrix.cols {
@@ -402,18 +459,38 @@ public class Cluster {
         return result
     }
 
+    /// This function receives a matrix and performs memberwise
+    /// Sigmoid function over it
+    ///
+    /// - Parameters:
+    ///   - matrix: The matrix to be binarised
+    ///   - middle: The middle point of the Sigmoid function, where it equals 0.5
+    ///   - beta: The steepness of the fumction
+    ///
+    /// - Returns
+    ///   - binarised matrix
+    func performSigmoidOn(matrix: Matrix, middle: Double, beta: Double) -> Matrix {
+        return 1 ./ (1 + exp(-beta .* (matrix - middle)))
+    }
+
     func createAdjacencyMatrix() {
         switch self.matrixCandidate {
         case .navigationMatrix:
             self.adjacencyMatrix = self.navigationMatrix.matrix
-        case .navigationAndEntities:
-            self.adjacencyMatrix = (self.weights["navigation"] ?? 0.5) .* self.navigationMatrix.matrix + (self.weights["entities"] ?? 0.5) * 8 .* self.entitiesMatrix.matrix
         case .textualSimilarityMatrix:
             self.adjacencyMatrix = self.textualSimilarityMatrix.matrix
         case .combinationAllSimilarityMatrix:
-            self.adjacencyMatrix = (self.weights["text"] ?? 0.5) .*  self.textualSimilarityMatrix.matrix + (self.weights["entities"] ?? 0.5) .* self.entitiesMatrix.matrix + (self.weights["navigation"] ?? 0.5) .* self.navigationMatrix.matrix
+            self.adjacencyMatrix = (self.weights[.text] ?? 0.5) .*  self.textualSimilarityMatrix.matrix + (self.weights[.entities] ?? 0.5) .* self.entitiesMatrix.matrix + (self.weights[.navigation] ?? 0.5) .* self.navigationMatrix.matrix
         case .combinationAllBinarisedMatrix:
-            self.adjacencyMatrix = self.binarise(matrix: self.navigationMatrix.matrix, threshold: (self.weights["navigation"] ?? 0.5)) + self.binarise(matrix: self.textualSimilarityMatrix.matrix, threshold: (weights["text"] ?? 0.5)) + self.binarise(matrix: self.entitiesMatrix.matrix, threshold: (weights["entities"] ?? 0.5))
+            self.adjacencyMatrix = self.binarise(matrix: self.navigationMatrix.matrix, threshold: (self.weights[.navigation] ?? 0.5)) + self.binarise(matrix: self.textualSimilarityMatrix.matrix, threshold: (weights[.text] ?? 0.5)) + self.binarise(matrix: self.entitiesMatrix.matrix, threshold: (weights[.entities] ?? 0.5))
+        case .combinationBinarizedWithTextErasure:
+            let textErasureMatrix = self.binarise(matrix: self.textualSimilarityMatrix.matrix, threshold: (weights[.text] ?? 0.5))
+            self.adjacencyMatrix = textErasureMatrix .* self.binarise(matrix: self.navigationMatrix.matrix, threshold: (self.weights[.navigation] ?? 0.5)) + self.binarise(matrix: self.entitiesMatrix.matrix, threshold: (weights[.entities] ?? 0.5))
+        case .combinationSigmoid:
+            let navigationSigmoidMatrix = self.performSigmoidOn(matrix: self.navigationMatrix.matrix, middle: self.weights[.navigation] ?? 0.5, beta: self.beta)
+            let textSigmoidMatrix = self.performSigmoidOn(matrix: self.textualSimilarityMatrix.matrix, middle: self.weights[.text] ?? 0.5, beta: self.beta)
+            let entitySigmoidMatrix = self.performSigmoidOn(matrix: self.entitiesMatrix.matrix, middle: self.weights[.entities] ?? 0.5, beta: self.beta)
+            self.adjacencyMatrix = textSigmoidMatrix .* navigationSigmoidMatrix + entitySigmoidMatrix
         }
     }
 
@@ -423,6 +500,11 @@ public class Cluster {
         while pagesRemoved < 3 {
             if let pageToRemove = ranking.first {
                 if let pageIndexToRemove = self.findPageInPages(pageID: pageToRemove) {
+                    let adjacencyVector = self.adjacencyMatrix[row: pageIndexToRemove]
+                    if let pageIndexToAttach = adjacencyVector.firstIndex(of: max(adjacencyVector)) {
+                        pages[pageIndexToAttach].attachedPages.append(pageToRemove)
+                        pages[pageIndexToAttach].attachedPages += pages[pageIndexToRemove].attachedPages
+                    }
                     try self.navigationMatrix.removePage(index: pageIndexToRemove)
                     try self.textualSimilarityMatrix.removePage(index: pageIndexToRemove)
                     try self.entitiesMatrix.removePage(index: pageIndexToRemove)
@@ -435,8 +517,20 @@ public class Cluster {
         }
     }
 
+    func titlePreprocessing(of title: String) -> String {
+        var preprocessedTitle = title
+        for suffix in self.titleSuffixes {
+            if preprocessedTitle.hasSuffix(suffix) {
+                preprocessedTitle = String(preprocessedTitle.dropLast(suffix.count))
+                break
+            }
+        }
+        preprocessedTitle = preprocessedTitle.capitalized + " and some text"
+        return preprocessedTitle
+    }
+
     // swiftlint:disable:next cyclomatic_complexity function_body_length
-    public func add(_ page: Page, ranking: [UInt64]?, completion: @escaping (Result<([[UInt64]], Bool), Error>) -> Void) {
+    public func add(_ page: Page, ranking: [UInt64]?, replaceContent: Bool = false, completion: @escaping (Result<([[UInt64]], Bool), Error>) -> Void) {
         myQueue.async {
             // If ranking is received, remove pages
             if let ranking = ranking {
@@ -446,28 +540,52 @@ public class Cluster {
                     completion(.failure(error))
                 }
             }
-            //Check if this is the first page in the session
+            // Check if this is the first page in the session
             guard self.pages.count > 0 else {
                 self.pages.append(page)
 
                 if let content = self.pages[0].content {
-                    if let textualEmbedding = self.textualEmbeddingComputationWithNLEmbedding(text: content) {
+                    if let (textualEmbedding, language) = self.textualEmbeddingComputationWithNLEmbedding(text: content) {
                         self.pages[0].textEmbedding = textualEmbedding
+                        self.pages[0].language = language
                     }
 
                     self.pages[0].entities = self.findEntitiesInText(text: content)
+                }
+                if let title = self.pages[0].title {
+                    let preprocessedTitle = self.titlePreprocessing(of: title)
+                    self.pages[0].title = preprocessedTitle
+                    self.pages[0].entitiesInTitle = self.findEntitiesInText(text: preprocessedTitle)
                 }
 
                 let result: [[UInt64]] = [[self.pages[0].id]]
                 completion(.success((result, false)))
                 return
             }
-            if let id_index = self.findPageInPages(pageID: page.id) {
+            // PnS text addition
+            if replaceContent,
+               let id_index = self.findPageInPages(pageID: page.id),
+               let newContent = page.content {
+                let totalContentTokenized = (newContent + " " + (self.pages[id_index].content ?? "")).split(separator: " ")
+                if totalContentTokenized.count > 512 {
+                    self.pages[id_index].content = totalContentTokenized.dropLast(totalContentTokenized.count - 512).joined(separator: " ")
+                } else {
+                    self.pages[id_index].content = totalContentTokenized.joined(separator: " ")
+                }
+                do {
+                    try self.textualSimilarityMatrixProcess(pageIndex: id_index, changeContent: true)
+                    try self.entitiesProcess(pageIndex: id_index, changeContent: true)
+                } catch let error {
+                    completion(.failure(error))
+                }
+            // Page exists, new parenting relation
+            } else if let id_index = self.findPageInPages(pageID: page.id) {
                if let myParent = page.parentId,
                let parent_index = self.findPageInPages(pageID: myParent) {
                     self.navigationMatrix.matrix[id_index, parent_index] = 1.0
                     self.navigationMatrix.matrix[parent_index, id_index] = 1.0
                }
+            // New page
             } else {
                 // Navigation matrix computation
                 var navigationSimilarities = [Double](repeating: 0.0, count: self.adjacencyMatrix.rows)
@@ -483,6 +601,9 @@ public class Cluster {
 
                 let newPageIndex = self.pages.count
                 self.pages.append(page)
+                if let title = self.pages[newPageIndex].title {
+                    self.pages[newPageIndex].title = self.titlePreprocessing(of: title)
+                }
                 // Handle Text similarity matrix
                 do {
                     try self.textualSimilarityMatrixProcess(pageIndex: newPageIndex)
@@ -546,8 +667,9 @@ public class Cluster {
         for label in labels.enumerated() {
             if label.element < nextCluster {
                 clusterized[label.element].append(self.pages[label.offset].id)
+                clusterized[label.element] += self.pages[label.offset].attachedPages
             } else {
-                clusterized.append([self.pages[label.offset].id])
+                clusterized.append([self.pages[label.offset].id] + self.pages[label.offset].attachedPages)
                 nextCluster += 1
             }
         }
@@ -562,11 +684,11 @@ public class Cluster {
             self.numClustersCandidate = NumClusterComputationCandidate.threshold
         case 2:
             self.clusteringCandidate = ClusteringCandidate.randomWalkLaplacian
-            self.matrixCandidate = SimilarityMatrixCandidate.combinationAllBinarisedMatrix
+            self.matrixCandidate = SimilarityMatrixCandidate.combinationSigmoid
             self.numClustersCandidate = NumClusterComputationCandidate.biggestDistanceInPercentages
         case 3:
-            self.clusteringCandidate = ClusteringCandidate.symetricLaplacian
-            self.matrixCandidate = SimilarityMatrixCandidate.combinationAllBinarisedMatrix
+            self.clusteringCandidate = ClusteringCandidate.randomWalkLaplacian
+            self.matrixCandidate = SimilarityMatrixCandidate.combinationBinarizedWithTextErasure
             self.numClustersCandidate = NumClusterComputationCandidate.biggestDistanceInPercentages
         default:
             throw CandidateError.unknownCandidate
@@ -576,9 +698,9 @@ public class Cluster {
         myQueue.async {
             // If ranking is received, remove pages
             self.candidate = candidate ?? self.candidate
-            self.weights["navigation"] = weightNavigation ?? self.weights["navigation"]
-            self.weights["text"] = weightText ?? self.weights["text"]
-            self.weights["entities"] = weightEntities ?? self.weights["entities"]
+            self.weights[.navigation] = weightNavigation ?? self.weights[.navigation]
+            self.weights[.text] = weightText ?? self.weights[.text]
+            self.weights[.entities] = weightEntities ?? self.weights[.entities]
             do {
                 try self.performCandidateChange()
             } catch {

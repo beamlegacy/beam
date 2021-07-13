@@ -160,7 +160,7 @@ class OmniBarAutocompleteUITests: QuickSpec {
                     self.helper.cleanupDB()
                 }
 
-                it("handle selection") {
+                it("handle history title selection") {
                     self.helper.searchField.typeText("fr.wikipedia.org/wiki/Hello_world")
                     self.helper.searchField.typeKey(.enter, modifierFlags: [])
                     expect(self.app.images["browserTabBarView"].waitForExistence(timeout: 2)) == true
@@ -214,6 +214,52 @@ class OmniBarAutocompleteUITests: QuickSpec {
                     self.helper.typeInSearchAndWait("s")
                     expect(self.helper.searchField.value as? String) == "Hello worlds"
                 }
+
+                it("handle URL selection") {
+                    self.helper.searchField.typeText("fr.wikipedia.org/wiki/Hello_world")
+                    self.helper.searchField.typeKey(.enter, modifierFlags: [])
+                    expect(self.app.images["browserTabBarView"].waitForExistence(timeout: 2)) == true
+
+                    self.helper.focusSearchField()
+                    expect(self.helper.inputHasFocus(self.helper.searchField)).to(beTrue())
+
+                    // Start Typing
+                    self.helper.typeInSearchAndWait("fr.wiki")
+                    let results = self.helper.allAutocompleteResults
+                    expect(results.count) > 1
+                    let firstResult = results.firstMatch
+                    let selectedResultQuery = self.helper.allAutocompleteResults.matching(self.helper.autocompleteSelectedPredicate)
+                    let expectedIdentifier = "autocompleteResult-selected-https://fr.wikipedia.org/wiki/Hello_world-url"
+                    expect(firstResult.identifier) == expectedIdentifier
+                    expect(self.helper.searchField.value as? String) == "fr.wikipedia.org/wiki/Hello_world"
+
+                    // Adding 1 letter, keep selection
+                    self.helper.typeInSearchAndWait("p")
+                    expect(firstResult.identifier) == expectedIdentifier
+                    expect(self.helper.searchField.value as? String) == "fr.wikipedia.org/wiki/Hello_world"
+
+                    // Adding other letter, clear selection
+                    self.helper.typeInSearchAndWait("a")
+                    expect(self.helper.searchField.value as? String) == "fr.wikipa"
+                    expect(selectedResultQuery.count) == 0
+
+                    // clear the selected text cancel selection
+                    self.helper.searchField.typeKey(.delete, modifierFlags: [])
+                    expect(self.helper.searchField.value as? String) == "fr.wikip"
+                    expect(selectedResultQuery.count) == 0
+
+                    // re-select again
+                    self.helper.typeInSearchAndWait("e")
+                    expect(firstResult.identifier) == expectedIdentifier
+                    expect(self.helper.searchField.value as? String) == "fr.wikipedia.org/wiki/Hello_world"
+                    expect(selectedResultQuery.count) == 1
+
+                    // moving at end of selection
+                    self.helper.searchField.typeKey(.rightArrow, modifierFlags: [])
+                    expect(selectedResultQuery.count) == 0
+                    self.helper.typeInSearchAndWait("s")
+                    expect(self.helper.searchField.value as? String) == "fr.wikipedia.org/wiki/Hello_worlds"
+               }
 
                 it("typing fast") {
                     self.helper.searchField.typeText("en.wikipedia.org/wiki/Hubert_Blaine_Wolfeschlegelsteinhausenbergerdorff_Sr.")

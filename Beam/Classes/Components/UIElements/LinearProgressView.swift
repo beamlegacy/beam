@@ -19,6 +19,7 @@ struct LinearProgressView: View {
                     .frame(height: 3)
                     .cornerRadius(1.5)
                     .foregroundColor(Color("Mercury"))
+                    .blendMode(.multiply)
                 Rectangle()
                     .frame(width: proxy.size.width * CGFloat(progress), height: 3)
                     .cornerRadius(1.5)

@@ -5,14 +5,16 @@ import Nimble
 import Combine
 
 @testable import Beam
+
 class AutocompleteTests: QuickSpec {
     override func spec() {
         var scope = Set<AnyCancellable>()
         var sut: Autocompleter!
         let beamHelper = BeamTestsHelper()
+        let searchEngine = GoogleSearch()
 
         beforeEach {
-            sut = Autocompleter()
+            sut = Autocompleter(searchEngine: searchEngine)
         }
 
         describe(".complete(query)") {
@@ -57,7 +59,7 @@ class AutocompleteTests: QuickSpec {
 
                     sut.complete(query: "Hello")
                     beamHelper.beginNetworkRecording()
-                    // 2nd call cancel previous query immediatly
+                    // 2nd call cancel previous query immediately
                     sut.complete(query: "Hello world")
                     beamHelper.endNetworkRecording()
                 }

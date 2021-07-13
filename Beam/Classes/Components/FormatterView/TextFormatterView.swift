@@ -27,6 +27,7 @@ private class TextFormatterViewModel: BaseFormatterViewViewModel, ObservableObje
 
 private struct TextFormatterViewSwiftUI: View {
     @ObservedObject var viewModel: TextFormatterViewModel
+    @Environment(\.colorScheme) var colorScheme
     var alwaysShowShadow = true
     @State private var isHovering = false
 
@@ -45,7 +46,7 @@ private struct TextFormatterViewSwiftUI: View {
 
     var body: some View {
         let size = Self.idealSize(forNumberOfItems: viewModel.formatterItems.count)
-        FormatterViewBackground(shadowOpacity: !alwaysShowShadow && !isHovering ? 0.5 : 1.0) {
+        FormatterViewBackground(shadowOpacity: colorScheme == .dark ? 1 : 0.5) {
             HStack {
                 ForEach(viewModel.formatterItems) { item in
                     ButtonLabel(icon: item.type.icon,

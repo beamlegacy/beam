@@ -1,11 +1,22 @@
 # New Dev Checklist
 
 ### Setting up Beam
+* Clone this repo and cd into it
 * Run:
-  `$ [arch -x86_64] make setup`
+  `make setup`
 * Setup Apple Developer Account with Beam AppleID.
 * If the tests fail, cd to the beam directory and run:
-  `$ direnv allow`
+  `direnv allow`
+
+#### Allow the debug app to transmit browsing trees to http endpoint
+* Create a `.envrc.private` at root of repo
+* Declare following env vars inside (values should be found in 1Password)
+```bash
+export BROWSING_TREE_ACCESS_TOKEN="abc"
+export BROWSING_TREE_URL="https://url"
+```
+* Run `direnv allow`
+
 
 ### If not running from an admin account:
 

@@ -32,6 +32,7 @@ public class BeamDownloadManager: NSObject, DownloadManager, ObservableObject {
         setProgressPublisher()
     }
 
+    // MARK: - P&S downloads
     // swiftlint:disable:next cyclomatic_complexity function_body_length
     func downloadURLs(_ urls: [URL], headers: [String: String], completion: @escaping ([DownloadManagerResult]) -> Void) {
         let dispatchGroup = DispatchGroup()
@@ -108,6 +109,23 @@ public class BeamDownloadManager: NSObject, DownloadManager, ObservableObject {
         }
     }
 
+    func downloadImage(_ src: URL, pageUrl: URL, completion: @escaping ((Data, String)?) -> Void) {
+        let headers = ["Referer": pageUrl.absoluteString]
+        self.downloadURLs([src], headers: headers) { results in
+            if let result = results.first {
+                guard case .binary(let data, let mimeType, _) = result,
+                      data.count > 0 else {
+                    Logger.shared.logError("Failed downloading Image from \(src)", category: .pointAndShoot)
+                    completion(nil)
+                    return
+                }
+                completion((data, mimeType))
+            }
+        }
+    }
+
+    // MARK: - File downloads control
+
     func downloadFile(at url: URL, headers: [String: String], suggestedFileName: String?, destinationFoldedURL: URL? = nil) {
 
         let destinationFolder: URL
@@ -119,49 +137,85 @@ public class BeamDownloadManager: NSObject, DownloadManager, ObservableObject {
         }
 
         let downloadedFileName = suggestedFileName ?? url.lastPathComponent
-        let fileInDownloadURL = destinationFolder.appendingPathComponent(downloadedFileName)
+        let fixedName = nonExistingFilename(for: downloadedFileName, at: destinationFolder, shouldAlsoCheckDownloadDoc: true)
+        let fileInDownloadURL = destinationFolder.appendingPathComponent(fixedName)
 
         var request = URLRequest(url: url)
         for (key, value) in headers {
             request.setValue(value, forHTTPHeaderField: key)
         }
 
-        let task = fileDownloadSession.downloadTask(with: request)
-
         objectWillChange.send()
 
-        let newDownload = Download(downloadURL: url, fileSystemURL: fileInDownloadURL, downloadTask: task)
-        downloads.append(newDownload)
+        let task = fileDownloadSession.downloadTask(with: request)
+        let newDownload = Download(downloadURL: url, fileSystemURL: fileInDownloadURL, suggestedFileName: downloadedFileName, downloadTask: task)
+        downloads.insert(newDownload, at: 0)
 
-        if overallProgress.isFinished {
-            overallProgress = Progress()
-            setProgressPublisher()
+        configure(downloadTask: task, for: newDownload)
+
+            // We dispatch after to make sure the UI have been updated and that thez download button have been displayed and it's coordinates acquired.
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(16)) {
+            (NSApp.delegate as? AppDelegate)?.window?.downloadAnimation()
         }
-        overallProgress.totalUnitCount += task.progress.totalUnitCount
-        overallProgress.addChild(task.progress, withPendingUnitCount: task.progress.totalUnitCount)
-
-        taskDownloadAssociation[task] = newDownload
-
-        task
-            .publisher(for: \.state)
-            .receive(on: RunLoop.main)
-            .sink { [weak self] _ in
-                guard let running = self?.downloads.filter({ $0.state == .running }) else { return }
-                if running.isEmpty {
-                    self?.ongoingDownload = false
-                } else {
-                    self?.ongoingDownload = true
-                }
-            }.store(in: &scope)
-
-        task.resume()
     }
 
-    func clearFileDownloads() {
+    func downloadFile(from document: BeamDownloadDocument) throws {
+        let decoder = PropertyListDecoder()
+        guard let downloadData = document.downloadData,
+              let recoveredDownload = try? decoder.decode(Download.self, from: downloadData) else { throw BeamDownloadDocumentError.incompleteDownloadDocument }
+
+        if let existingDownloadIndex = downloads.firstIndex(of: recoveredDownload) {
+            let existingDownload = downloads[existingDownloadIndex]
+            existingDownload.downloadDocument = document
+            resume(existingDownload)
+        } else {
+            downloadFile(at: recoveredDownload.downloadURL, headers: [:], suggestedFileName: recoveredDownload.suggestedFileName)
+            if let url = document.fileURL {
+                try? fileManager.removeItem(at: url)
+            }
+        }
+    }
+
+    func clearAllFileDownloads() {
         downloads.removeAll { d in
             d.state != .running
         }
     }
+
+    @discardableResult
+    func clearFileDownload(_ download: Download) -> Download? {
+        guard download.state != .running else { return nil }
+        if let index = downloads.firstIndex(of: download) {
+            return downloads.remove(at: index)
+        }
+        return nil
+    }
+
+    /// If we can get resume data from the download's document, resume with it. Else, we create a brand new task from scratch
+    func resume(_ download: Download) {
+
+        let resumeData = download.downloadDocument?.resumeData
+        let resumedTask: URLSessionDownloadTask
+
+        if let resumeData = resumeData {
+            resumedTask = fileDownloadSession.downloadTask(withResumeData: resumeData)
+        } else {
+            resumedTask = fileDownloadSession.downloadTask(with: download.downloadURL)
+        }
+
+        download.setDownloadTask(resumedTask)
+        configure(downloadTask: resumedTask, for: download)
+    }
+
+    /// Cancels the specified download and store the resumeData in the download file if available
+    func cancel(_ download: Download) {
+        download.downloadTask?.cancel(byProducingResumeData: { resumeData in
+            download.downloadDocument?.resumeData = resumeData
+            download.saveDownloadDocument()
+        })
+    }
+
+    // MARK: - File downloads private funcs
 
     private func downloadDirectoryURL() throws -> URL {
         guard let downloadFolder = fileManager.urls(for: .downloadsDirectory, in: .userDomainMask).first else {
@@ -185,11 +239,26 @@ public class BeamDownloadManager: NSObject, DownloadManager, ObservableObject {
         }
     }
 
-    private func nonExistingFilename(for initialName: String, at destination: URL) -> String {
+    private func nonExistingFilename(for initialName: String, at destination: URL, shouldAlsoCheckDownloadDoc checksDownloadDoc: Bool = false) -> String {
 
         var completeURL = destination.appendingPathComponent(initialName)
-        guard fileManager.fileExists(atPath: completeURL.path) else { return initialName }
+        var completeDownloadDocURL = completeURL.appendingPathExtension(BeamDownloadDocument.downloadDocumentFileExtension)
 
+        let downloadExists = fileManager.fileExists(atPath: completeURL.path)
+        let downloadDocumentExists = fileManager.fileExists(atPath: completeDownloadDocURL.path)
+
+        // If we don't have any existing file, use the initial name
+        if checksDownloadDoc {
+            if !downloadExists && !downloadDocumentExists {
+                return initialName
+            }
+        } else {
+            if !downloadExists {
+                return initialName
+            }
+        }
+
+        // If a file with a name already exists, find the first available name
         let nameWithoutExtension = completeURL.deletingPathExtension().lastPathComponent
         let fileExtension = completeURL.pathExtension
 
@@ -200,14 +269,24 @@ public class BeamDownloadManager: NSObject, DownloadManager, ObservableObject {
             count += 1
             newName = "\(nameWithoutExtension)-\(count)"
             completeURL = destination.appendingPathComponent(newName).appendingPathExtension(fileExtension)
+            completeDownloadDocURL = completeURL.appendingPathExtension(BeamDownloadDocument.downloadDocumentFileExtension)
         }
-        while fileManager.fileExists(atPath: completeURL.path)
+        while (fileManager.fileExists(atPath: completeURL.path) || (checksDownloadDoc && fileManager.fileExists(atPath: completeDownloadDocURL.path)))
 
         return "\(newName).\(fileExtension)"
     }
 
     private func download(for task: URLSessionDownloadTask) -> Download? {
         return taskDownloadAssociation[task]
+    }
+
+    private func addTaskToProgress(task: URLSessionDownloadTask) {
+        if overallProgress.isFinished {
+            overallProgress = Progress()
+            setProgressPublisher()
+        }
+        overallProgress.totalUnitCount += task.progress.totalUnitCount
+        overallProgress.addChild(task.progress, withPendingUnitCount: task.progress.totalUnitCount)
     }
 
     private func setProgressPublisher() {
@@ -218,14 +297,44 @@ public class BeamDownloadManager: NSObject, DownloadManager, ObservableObject {
             .assign(to: \.fractionCompleted, on: self)
             .store(in: &scope)
     }
+
+    private func setStatePublisher(for task: URLSessionDownloadTask) {
+        task
+            .publisher(for: \.state)
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                guard let running = self?.downloads.filter({ $0.state == .running }) else { return }
+                if running.isEmpty {
+                    self?.ongoingDownload = false
+                } else {
+                    self?.ongoingDownload = true
+                }
+            }.store(in: &scope)
+    }
+
+    private func configure(downloadTask: URLSessionDownloadTask, for download: Download) {
+        addTaskToProgress(task: downloadTask)
+        setStatePublisher(for: downloadTask)
+        taskDownloadAssociation[downloadTask] = download
+        downloadTask.resume()
+    }
 }
 
+// MARK: - URLSession and download delegates
 extension BeamDownloadManager: URLSessionDelegate, URLSessionDownloadDelegate {
 
     public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
         guard let downloadTask = task as? URLSessionDownloadTask,
               let download = taskDownloadAssociation[downloadTask] else { return }
-        download.errorMessage = error?.localizedDescription
+
+        if let error = error {
+            DispatchQueue.main.async {
+                download.errorMessage = error.localizedDescription
+            }
+        } else {
+            try? fileManager.removeItem(at: download.downloadDocumentFileURL)
+            download.downloadDocument = nil
+        }
     }
 
     public func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
@@ -241,6 +350,7 @@ extension BeamDownloadManager: URLSessionDelegate, URLSessionDownloadDelegate {
     }
 }
 
+// MARK: - Content-Disposion parser from headers
 extension BeamDownloadManager {
 
     enum ContentDisposition {
@@ -259,5 +369,42 @@ extension BeamDownloadManager {
             return nil
         }
 
+    }
+}
+
+// MARK: - Animation
+extension BeamDownloadManager {
+    static func flyingAnimationGroup(origin: CGPoint, destination: CGPoint) -> CAAnimationGroup {
+
+        let positionX = CAKeyframeAnimation(keyPath: "position.x")
+        positionX.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+        positionX.values = [origin.x, origin.x, destination.x]
+        positionX.keyTimes = [0.0, 0.16, 0.7]
+        positionX.duration = 1.0
+
+        let animationY = CAKeyframeAnimation(keyPath: "position.y")
+        animationY.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+        animationY.values = [origin.y, destination.y]
+        animationY.keyTimes = [0.0, 0.6]
+        animationY.duration = 1.0
+
+        let scale = CABasicAnimation(keyPath: "transform")
+        scale.valueFunction = CAValueFunction(name: CAValueFunctionName.scale)
+        scale.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+        scale.fromValue = [1.0, 1.0, 1.0]
+        scale.toValue = [0.05, 0.05, 0.05]
+        scale.duration = 1.0
+
+        let fade = CAKeyframeAnimation(keyPath: "opacity")
+        fade.timingFunction = CAMediaTimingFunction(name: .easeOut)
+        fade.values = [1.0, 1.0, 0.0, 0.0]
+        fade.keyTimes = [0.0, 0.6, 0.8, 1.0]
+        fade.duration = 1.0
+
+        let group = CAAnimationGroup()
+        group.duration = 1.0
+        group.animations = [positionX, animationY, scale, fade]
+
+        return group
     }
 }

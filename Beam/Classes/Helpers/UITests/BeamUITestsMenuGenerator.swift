@@ -16,6 +16,7 @@ class BeamUITestsMenuGenerator {
         case .loadUITestPage2: loadUITestsPage(page: 2)
         case .loadUITestPage3: loadUITestsPage(page: 3)
         case .loadUITestPage4: loadUITestsPage(page: 4)
+        case .loadUITestPage5: loadUITestsPage(page: 5)
         case .insertTextInCurrentNote: insertTextInCurrentNote()
         default: break
         }
@@ -40,7 +41,7 @@ class BeamUITestsMenuGenerator {
     }
 
     private func insertTextInCurrentNote() {
-        guard let currentNote = AppDelegate.main.window.state.currentNote else {
+        guard let currentNote = AppDelegate.main.window?.state.currentNote else {
             Logger.shared.logDebug("Current note is nil", category: .general)
 
             return
@@ -76,7 +77,7 @@ class BeamUITestsMenuGenerator {
 
     private func loadUITestsPage(page: Int) {
         if let localUrl = Bundle.main.url(forResource: "UITests-\(page)", withExtension: "html", subdirectory: nil) {
-            _ = AppDelegate.main.window.state.createTab(withURL: localUrl, originalQuery: nil)
+            _ = AppDelegate.main.window?.state.createTab(withURL: localUrl, originalQuery: nil)
         }
     }
 

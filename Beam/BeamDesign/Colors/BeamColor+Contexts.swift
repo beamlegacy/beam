@@ -80,7 +80,7 @@ extension BeamColor {
         static let background = BeamColor.From(color: NSColor(withLightColor: NSColor.white.withAlphaComponent(0.98), darkColor: BeamColor.Nero.nsColor.withAlphaComponent(0.98)))
         static let backgroundHover = BeamColor.Custom(named: "FormatterBackgroundHoverColor")
         static let border = BeamColor.Custom(named: "FormatterBorderColor")
-        static let shadow = BeamColor.From(color: NSColor(withLightColor: NSColor.black.withAlphaComponent(0.070), darkColor: NSColor.black.withAlphaComponent(0.4)))
+        static let shadow = BeamColor.From(color: NSColor(withLightColor: NSColor.black.withAlphaComponent(0.25), darkColor: NSColor.black.withAlphaComponent(0.60)))
         static let icon = BeamColor.Corduroy
         static let iconHoverAndActive = BeamColor.Niobium
         static let buttonBackgroundHover = BeamColor.Custom(named: "FormatterItemHoverColor")

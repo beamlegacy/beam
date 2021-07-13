@@ -79,7 +79,7 @@ class ContextMenuPresenter {
     }
 
     func presentMenu(_ menu: FormatterView, atPoint: CGPoint, from fromView: NSView? = nil, animated: Bool = true) {
-        guard let view = fromView ?? AppDelegate.main.window.contentView else { return }
+        guard let view = fromView ?? AppDelegate.main.window?.contentView else { return }
         if currentMenu != nil {
             dismissMenu(removeWindow: true)
         }
