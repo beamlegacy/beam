@@ -75,15 +75,14 @@ import Promises
         pointAndShoot?.leavePage()
     }
 
-    func navigatedTo(url: URL, read: Readability, title: String, isNavigation: Bool) {
-        appendToIndexer?(url, read)
-        logInNote(url: url, title: title, reason: isNavigation ? .navigation : .loading)
+    func navigatedTo(url: URL, title: String?, reason: NoteElementAddReason) {
+        logInNote(url: url, title: title, reason: reason)
         updateScore()
     }
 
     private func logInNote(url: URL, title: String?, reason: NoteElementAddReason) {
         if isFromNoteSearch {
-            noteController.setContents(url: url)
+            noteController.setContents(url: url, text: title)
             isFromNoteSearch = false
         } else {
             _ = noteController.add(url: url, text: title, reason: reason)

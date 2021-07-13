@@ -24,6 +24,7 @@ class TestWebPage: WebPage {
     private(set) var downloadManager: DownloadManager?
     private(set) var navigationController: WebNavigationController?
     var mediaPlayerController: MediaPlayerController?
+    var appendToIndexer: ((URL, Readability) -> Void)?
     var webView: BeamWebView!
     var activeNote: String = "Card A"
     var testNotes: [String: BeamCore.BeamNote] = ["Card A": BeamNote(title: "Card A")]
@@ -70,7 +71,7 @@ class TestWebPage: WebPage {
         events.append("leave")
     }
 
-    func navigatedTo(url: URL, read: Readability, title: String, isNavigation: Bool) {}
+    func navigatedTo(url: URL, title: String, isNavigation: Bool) {}
 
     func executeJS(_ jsCode: String, objectName: String?) -> Promise<Any?> {
         if objectName == "PointAndShoot" {
