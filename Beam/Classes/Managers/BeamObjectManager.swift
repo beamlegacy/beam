@@ -63,6 +63,15 @@ extension BeamObjectManagerError: LocalizedError {
     }
 }
 
+enum BeamObjectConflictResolution {
+    // Will overwrite remote object with values from local ones
+    case replace
+
+    // Will fetch the remote object, and call the completion with an error and the remote object
+    // so the caller can manage conflicts
+    case fetchRemoteAndError
+}
+
 class BeamObjectManager {
     static var managers: [String: BeamObjectManagerDelegateProtocol.Type] = [:]
 
@@ -76,6 +85,8 @@ class BeamObjectManager {
         register(DatabaseManager.self)
         register(PasswordManager.self)
     }
+
+    var conflictPolicyForSave: BeamObjectConflictResolution = .replace
 
     internal func parseObjects(_ beamObjects: [BeamObject]) -> Bool {
         let lastUpdatedAt = Persistence.Sync.BeamObjects.updated_at
@@ -138,7 +149,7 @@ extension BeamObjectManager {
         return try request.saveAll(beamObjects) { result in
             switch result {
             case .failure(let error):
-                self.saveToAPIFailure(beamObjects, error, completion)
+                self.saveToAPIBeamObjectsFailure(beamObjects, error, completion)
             case .success(let updateBeamObject):
                 completion(.success(updateBeamObject))
             }
@@ -146,14 +157,15 @@ extension BeamObjectManager {
     }
 
     /// Will look at each errors, and fetch remote object to include it in the completion if it was a checksum error
-    internal func saveToAPIFailure(_ beamObjects: [BeamObject],
-                                   _ error: Error,
-                                   _ completion: @escaping ((Swift.Result<[BeamObject], Error>) -> Void)) {
+    internal func saveToAPIBeamObjectsFailure(_ beamObjects: [BeamObject],
+                                              _ error: Error,
+                                              _ completion: @escaping ((Swift.Result<[BeamObject], Error>) -> Void)) {
         Logger.shared.logError("Could not save \(beamObjects): \(error.localizedDescription)",
                                category: .beamObject)
 
         switch error {
         case APIRequestError.beamObjectInvalidChecksum:
+            // APIRequestError.beamObjectInvalidChecksum only has 1 object
             guard let beamObject = beamObjects.first else {
                 completion(.failure(error))
                 return
@@ -161,8 +173,16 @@ extension BeamObjectManager {
 
             // APIRequestError.beamObjectInvalidChecksum is only raised when having 1 object
             // We can just return the error after fetching the object
-            saveToAPIFailure(beamObject) { error in
-                completion(.failure(error))
+            fetchAndReturnErrorBasedOnConflictPolicy(beamObject) { result in
+                switch result {
+                case .failure(let error): completion(.failure(error))
+                case .success(let beamObject):
+                    do {
+                        _ = try self.saveToAPI([beamObject], completion)
+                    } catch {
+                        completion(.failure(error))
+                    }
+                }
             }
             return
         case APIRequestError.apiErrors(let errorable):
@@ -186,6 +206,7 @@ extension BeamObjectManager {
         let group = DispatchGroup()
 
         var resultErrors: [Error] = []
+        var newBeamObjects: [BeamObject] = []
         let lock = DispatchSemaphore(value: 1)
 
         for error in errors {
@@ -199,17 +220,47 @@ extension BeamObjectManager {
 
             group.enter()
 
-            self.saveToAPIFailure(beamObject) { error in
-                lock.wait()
-                resultErrors.append(error)
-                lock.signal()
-
+            fetchAndReturnErrorBasedOnConflictPolicy(beamObject) { result in
+                switch result {
+                case .failure(let error):
+                    lock.wait()
+                    resultErrors.append(error)
+                    lock.signal()
+                case .success(let beamObject):
+                    lock.wait()
+                    newBeamObjects.append(beamObject)
+                    lock.signal()
+                }
                 group.leave()
             }
         }
 
         group.wait()
-        completion(.failure(BeamObjectManagerError.multipleErrors(resultErrors)))
+
+        if !newBeamObjects.isEmpty, conflictPolicyForSave == .fetchRemoteAndError {
+            fatalError("Should never happen")
+        }
+
+        if !resultErrors.isEmpty, conflictPolicyForSave == .replace {
+            fatalError("Should never happen")
+        }
+
+        switch conflictPolicyForSave {
+        case .replace:
+            guard resultErrors.isEmpty else {
+                fatalError("Should never happen")
+            }
+            do {
+                _ = try saveToAPI(newBeamObjects, completion)
+            } catch {
+                completion(.failure(error))
+            }
+        case .fetchRemoteAndError:
+            guard newBeamObjects.isEmpty else {
+                fatalError("Should never happen")
+            }
+            completion(.failure(BeamObjectManagerError.multipleErrors(resultErrors)))
+        }
     }
 
     internal func isErrorInvalidChecksum(_ error: UserErrorData) -> Bool {
@@ -225,10 +276,13 @@ extension BeamObjectManager {
 
         let request = BeamObjectRequest()
 
-        return try request.save(beamObject) { result in
-            switch result {
+        return try request.save(beamObject) { requestResult in
+            switch requestResult {
+            case .success(let updateBeamObject):
+                completion(.success(updateBeamObject))
             case .failure(let error):
-                Logger.shared.logError("Could not save \(beamObject): \(error.localizedDescription)", category: .beamObject)
+                Logger.shared.logError("Could not save \(beamObject): \(error.localizedDescription)",
+                                       category: .beamObjectNetwork)
 
                 // Early return except for checksum issues.
                 guard case APIRequestError.beamObjectInvalidChecksum = error else {
@@ -236,35 +290,62 @@ extension BeamObjectManager {
                     return
                 }
 
-                self.saveToAPIFailure(beamObject) {
-                    completion(.failure($0))
+                Logger.shared.logError("Invalid Checksum. Local previous checksum: \(beamObject.previousChecksum ?? "-")",
+                                       category: .beamObjectNetwork)
+
+                self.fetchAndReturnErrorBasedOnConflictPolicy(beamObject) { result in
+                    switch result {
+                    case .failure: completion(result)
+                    case .success(let newBeamObject):
+                        do {
+                            Logger.shared.logError("Remote object checksum: \(newBeamObject.dataChecksum ?? "-")",
+                                                   category: .beamObjectNetwork)
+                            Logger.shared.logError("Overwriting local object with remote checksum",
+                                                   category: .beamObjectNetwork)
+
+                            _ = try self.saveToAPI(newBeamObject, completion)
+                        } catch {
+                            completion(.failure(error))
+                        }
+                    }
                 }
-            case .success(let updateBeamObject):
-                completion(.success(updateBeamObject))
             }
         }
     }
 
-    /// In case of checksum issue, this will fetch the object on the API side to include remote side object + local object when returning the error to the caller
-    /// Only the `.failure` part of the result is used, but we don't change it so this can be used passing the completion handler as it is
-    internal func saveToAPIFailure(_ beamObject: BeamObject,
-                                   _ completion: @escaping (Error) -> Void) {
+    /// Fetch remote object, and based on policy will either return the object with remote checksum, or return and error containing the remote object
+    internal func fetchAndReturnErrorBasedOnConflictPolicy(_ beamObject: BeamObject,
+                                                           _ completion: @escaping (Result<BeamObject, Error>) -> Void) {
+        fetchObject(beamObject) { fetchResult in
+            switch fetchResult {
+            case .failure(let error): completion(.failure(error))
+            case .success(let remoteBeamObject):
+                switch self.conflictPolicyForSave {
+                case .replace:
+                    let newBeamObject = beamObject.copy()
+                    newBeamObject.previousChecksum = remoteBeamObject.dataChecksum
+                    completion(.success(newBeamObject))
+                case .fetchRemoteAndError:
+                    completion(.failure(BeamObjectManagerError.beamObjectInvalidChecksum(remoteBeamObject)))
+                }
+            }
+        }
+    }
 
-        /*
-         When we have checksum issues, we fetch the current API saved object so the caller have both and is
-         able to merge them if needed
-         */
+    internal func fetchObject(_ beamObject: BeamObject,
+                              _ completion: @escaping (Result<BeamObject, Error>) -> Void) {
         let fetchRequest = BeamObjectRequest()
         do {
             try fetchRequest.fetch(beamObject.id.uuidString) { result in
                 switch result {
-                case .failure(let error): completion(error)
+                case .failure(let error):
+                    completion(.failure(error))
                 case .success(let beamObject):
-                    completion(BeamObjectManagerError.beamObjectInvalidChecksum(beamObject))
+                    completion(.success(beamObject))
                 }
             }
         } catch {
-            completion(error)
+            completion(.failure(error))
         }
     }
 
@@ -285,9 +366,9 @@ extension BeamObjectManager {
                 }
 
                 // Must call in another dispatchqueue or it fails, not sure why...
-                DispatchQueue.main.async {
+//                DispatchQueue.main.async {
                     self.saveAllToAPI(completion)
-                }
+//                }
             }
         }
     }
@@ -299,15 +380,15 @@ extension BeamObjectManager {
             return
         }
 
-        let managers: [BeamObjectManagerDelegateProtocol] = [DatabaseManager(), DocumentManager()]
         let group = DispatchGroup()
         var errors: [Error] = []
         let lock = DispatchSemaphore(value: 1)
         var dataTasks: [URLSessionTask] = []
 
-        for manager in managers {
+        for (_, managerClass) in Self.managers {
             group.enter()
 
+            let manager = managerClass.init(self)
             do {
                 let task = try manager.saveAllOnBeamObjectApi { result in
                     switch result {
@@ -354,9 +435,7 @@ extension BeamObjectManager {
         completion?(.success(true))
     }
 
-    /// Will fetch all updates from the API
-    /// - Parameters:
-    ///   - completion: <#completion description#>
+    /// Will fetch all updates from the API and call each managers based on object's type
     func fetchAllFromAPI(_ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
         // If not authenticated
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {

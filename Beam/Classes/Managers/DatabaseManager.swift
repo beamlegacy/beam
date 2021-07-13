@@ -1160,6 +1160,9 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
                 return
             }
 
+            // This should never be called since invalid checksum are managed inside BeamObjectManager
+            assert(false)
+            
             // Here we should try to merge remoteBeamObject converted as a DatabaseStruct, and our local one.
             // For now we just overwrite the API with our local version with a batch call resending all of them
             guard let databaseStruct = databaseStructs.first(where: { $0.id == remoteBeamObject.id }) else {
@@ -1242,6 +1245,8 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
             return
         }
 
+        // This should never be called since invalid checksum are managed inside BeamObjectManager
+        assert(false)
         do {
             // Checksum issue, the API side of the object was updated since our last fetch
             let mergedDatabaseStruct = try manageConflict(databaseStruct, remoteBeamObject, error)

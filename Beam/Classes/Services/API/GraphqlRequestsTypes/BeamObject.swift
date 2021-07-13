@@ -57,6 +57,11 @@ class BeamObject: Codable {
         case previousChecksum
     }
 
+    init(beamObjectId: UUID, beamObjectType: String) {
+        self.beamObjectId = beamObjectId
+        self.beamObjectType = beamObjectType
+    }
+
     init<T: BeamObjectProtocol>(_ object: T, _ type: String) throws {
         beamObjectId = object.beamObjectId
         beamObjectType = type
@@ -83,6 +88,18 @@ class BeamObject: Codable {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         return decoder
+    }
+
+    func copy() -> BeamObject {
+        let result = BeamObject(beamObjectId: beamObjectId, beamObjectType: beamObjectType)
+        result.createdAt = createdAt
+        result.updatedAt = updatedAt
+        result.deletedAt = deletedAt
+        result.data = data
+        result.encryptedData = encryptedData
+        result.previousChecksum = previousChecksum
+        result.dataChecksum = dataChecksum
+        return result
     }
 
     func decodeBeamObject<T: BeamObjectProtocol>() throws -> T {

@@ -2446,6 +2446,7 @@ extension DocumentManager: BeamObjectManagerDelegateProtocol {
         }
 
         let objectManager = BeamObjectManager()
+        objectManager.conflictPolicyForSave = .fetchRemoteAndError
 
         return try objectManager.saveToAPI(beamObjects) { result in
             switch result {
@@ -2548,6 +2549,7 @@ extension DocumentManager: BeamObjectManagerDelegateProtocol {
         beamObject.previousChecksum = documentStruct.beamObjectPreviousChecksum
 
         let objectManager = BeamObjectManager()
+        objectManager.conflictPolicyForSave = .fetchRemoteAndError
 
         return try objectManager.saveToAPI(beamObject) { result in
             switch result {
