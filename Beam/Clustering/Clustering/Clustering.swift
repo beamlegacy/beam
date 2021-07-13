@@ -529,6 +529,12 @@ public class Cluster {
         return preprocessedTitle
     }
 
+    func removeFromDeleted(newPageID: UInt64) {
+        for page in self.pages.enumerated() {
+            pages[page.offset].attachedPages = page.element.attachedPages.filter {$0 != newPageID}
+        }
+    }
+
     // swiftlint:disable:next cyclomatic_complexity function_body_length
     public func add(_ page: Page, ranking: [UInt64]?, replaceContent: Bool = false, completion: @escaping (Result<([[UInt64]], Bool), Error>) -> Void) {
         myQueue.async {
@@ -587,6 +593,9 @@ public class Cluster {
                }
             // New page
             } else {
+                // If page was visited in the past and deleted, remove from
+                // deleted pages
+                self.removeFromDeleted(newPageID: page.id)
                 // Navigation matrix computation
                 var navigationSimilarities = [Double](repeating: 0.0, count: self.adjacencyMatrix.rows)
 

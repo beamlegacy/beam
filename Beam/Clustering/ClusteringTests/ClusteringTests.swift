@@ -734,7 +734,8 @@ class ClusteringTests: XCTestCase {
             case .failure(let error):
                 XCTFail(error.localizedDescription)
             case .success(let result):
-                expect(cluster.pages[0].attachedPages) == [1,4,2]
+                _ = result
+                expect(cluster.pages[0].attachedPages) == [1, 4, 2]
                 expect(cluster.adjacencyMatrix.rows) == 4
                 expect(cluster.pages.count) == 4
             }
@@ -743,6 +744,76 @@ class ClusteringTests: XCTestCase {
 
         wait(for: [expectation], timeout: 1)
     }
+
+    // swiftlint:disable:next function_body_length
+     func testRevisitPageAfterRemoval() throws {
+         let cluster = Cluster()
+         cluster.candidate = 2
+         try cluster.performCandidateChange()
+         let page1 = Page(id: 0, parentId: nil, title: "Page 1", content: "A man is eating food.")
+         let page2 = Page(id: 1, parentId: 0, title: "Page 2", content: "The girl is carrying a baby.")
+         let page3 = Page(id: 2, parentId: 0, title: "Page 3", content: "A man is eating food.")
+         let page4 = Page(id: 3, parentId: 0, title: "Page 4", content: "The girl is carrying a baby.")
+         let page5 = Page(id: 4, parentId: 0, title: "Page 5", content: "The girl is carrying a baby.")
+
+         let firstExpectation = self.expectation(description: "Add page expectation")
+         let secondExpectation = self.expectation(description: "Add page expectation")
+         var _ = [[UInt64]]()
+
+         cluster.add(page1, ranking: nil, completion: { result in
+             switch result {
+             case .failure(let error):
+                 XCTFail(error.localizedDescription)
+             case .success(let result):
+                 _ = result
+             }
+         })
+
+         cluster.add(page2, ranking: nil, completion: { result in
+             switch result {
+             case .failure(let error):
+                 XCTFail(error.localizedDescription)
+             case .success(let result):
+                 _ = result
+             }
+         })
+
+         cluster.add(page3, ranking: nil, completion: { result in
+             switch result {
+             case .failure(let error):
+                 XCTFail(error.localizedDescription)
+             case .success(let result):
+                 _ = result
+             }
+             firstExpectation.fulfill()
+         })
+         wait(for: [firstExpectation], timeout: 1)
+
+         cluster.pages[0].attachedPages = [3]
+         cluster.pages[1].attachedPages = [4]
+
+         cluster.add(page4, ranking: nil, completion: { result in
+             switch result {
+             case .failure(let error):
+                 XCTFail(error.localizedDescription)
+             case .success(let result):
+                 _ = result
+             }
+         })
+
+         cluster.add(page5, ranking: nil, completion: { result in
+             switch result {
+             case .failure(let error):
+                 XCTFail(error.localizedDescription)
+             case .success(let result):
+                 _ = result
+             }
+             secondExpectation.fulfill()
+         })
+         wait(for: [secondExpectation], timeout: 1)
+         expect(cluster.pages[0].attachedPages) == []
+         expect(cluster.pages[1].attachedPages) == []
+     }
 
     func testContentChange() throws {
         let cluster = Cluster()
