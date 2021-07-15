@@ -245,7 +245,7 @@ public extension CALayer {
     public var openCard: (UUID, UUID?) -> Void = { _, _ in }
     public var onStartEditing: () -> Void = { }
     public var onEndEditing: () -> Void = { }
-    public var onStartQuery: (TextNode) -> Void = { _ in }
+    public var onStartQuery: (TextNode, Bool) -> Void = { _, _ in }
 
     public var config = TextConfig()
 
@@ -613,7 +613,7 @@ public extension CALayer {
                 return
             case KeyCode.enter.rawValue:
                 if command && rootNode.state.nodeSelection == nil, let node = rootNode.focusedWidget as? TextNode {
-                    onStartQuery(node)
+                    triggerCmdReturn(from: node)
                     return
                 }
             default:
@@ -723,6 +723,18 @@ public extension CALayer {
         }
 
         inputContext?.handleEvent(event)
+    }
+
+    private func triggerCmdReturn(from node: TextNode) {
+        blinkPhase = false
+        hasFocus = false
+        node.updateCursor()
+        node.updateActionLayerVisibility(hidden: true)
+
+        let animator = TextEditCmdReturnAnimator(node: node, editorLayer: self.layer)
+        animator.startAnimation { [unowned self] in
+            self.onStartQuery(node, true)
+        }
     }
 
     // NSTextInputHandler:
