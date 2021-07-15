@@ -64,7 +64,6 @@ public class DocumentManager: NSObject {
         //observeCoredataNotification()
     }
 
-
     required init(_ manager: BeamObjectManager) {
         self.coreDataManager = CoreDataManager.shared
         self.mainContext = self.coreDataManager.mainContext
@@ -727,11 +726,16 @@ public class DocumentManager: NSObject {
                 }
 
                 let updatedDocStruct = DocumentStruct(document: updatedDocument)
-                self.saveDocumentStructOnAPI(updatedDocStruct) { result in
-                    Self.networkTasksSemaphore.wait()
-                    Self.networkTasks.removeValue(forKey: document_id)
-                    Self.networkTasksSemaphore.signal()
-                    networkCompletion?(result)
+
+                if EnvironmentVariables.BeamObjectAPIEnabled {
+
+                } else {
+                    self.saveDocumentStructOnAPI(updatedDocStruct) { result in
+                        Self.networkTasksSemaphore.wait()
+                        Self.networkTasks.removeValue(forKey: document_id)
+                        Self.networkTasksSemaphore.signal()
+                        networkCompletion?(result)
+                    }
                 }
             }
         }

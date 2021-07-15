@@ -41,7 +41,7 @@ public struct EnvironmentVariables {
         static public private(set) var testPassword = "$(TEST_ACCOUNT_PASSWORD)"
     }
 
-    static public private(set) var BeamObjectAPIEnabled = "$(BEAM_OBJECT_API_ENABLED)"
+    static public private(set) var BeamObjectAPIEnabled = NSString("$(BEAM_OBJECT_API_ENABLED)").boolValue
     static public private(set) var env = "$(ENV)"
     static public private(set) var autoUpdate = NSString("$(AUTOMATIC_UPDATE)").boolValue
     static public private(set) var networkStubs = NSString("$(NETWORK_STUBS)").boolValue

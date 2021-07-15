@@ -117,48 +117,38 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // My feeling is we should sync + trigger notification and only start network calls when
         // this sync has finished.
 
-        beamObjectManager.syncAllFromAPI { _ in
-            Logger.shared.logInfo("syncAllFromAPI called", category: .beamObjectNetwork)
+        if EnvironmentVariables.BeamObjectAPIEnabled {
+            beamObjectManager.syncAllFromAPI { _ in
+                Logger.shared.logInfo("syncAllFromAPI called", category: .beamObjectNetwork)
+            }
+        } else {
+            databaseManager.syncAll { result in
+                switch result {
+                case .failure(let error):
+                    Logger.shared.logError("Couldn't sync databases: \(error.localizedDescription)",
+                                           category: .database)
+                case .success(let success):
+                    guard success == true else {
+                        Logger.shared.logError("Couldn't sync databases but no error",
+                                               category: .database)
+                        return
+                    }
+
+                    self.documentManager.syncAll { result in
+                        switch result {
+                        case .failure(let error):
+                            Logger.shared.logError("Couldn't sync documents: \(error.localizedDescription)",
+                                                   category: .document)
+                        case .success(let success):
+                            if !success {
+                                Logger.shared.logError("Couldn't sync documents but no error",
+                                                       category: .document)
+                            }
+                        }
+                    }
+                }
+            }
         }
-
-//        try? passwordManager.saveAllOnBeamObjectApi { result in
-//            switch result {
-//            case .failure(let error):
-//                Logger.shared.logError("Couldn't sync passwords: \(error.localizedDescription)",
-//                                       category: .passwordManager)
-//            case .success(let success):
-//                Logger.shared.logDebug("Synced passwords: \(success)",
-//                                       category: .passwordManager)
-//            }
-//        }
-
-        
-//        databaseManager.syncAll { result in
-//            switch result {
-//            case .failure(let error):
-//                Logger.shared.logError("Couldn't sync databases: \(error.localizedDescription)",
-//                                       category: .database)
-//            case .success(let success):
-//                guard success == true else {
-//                    Logger.shared.logError("Couldn't sync databases but no error",
-//                                           category: .database)
-//                    return
-//                }
-//
-//                self.documentManager.syncAll { result in
-//                    switch result {
-//                    case .failure(let error):
-//                        Logger.shared.logError("Couldn't sync documents: \(error.localizedDescription)",
-//                                               category: .document)
-//                    case .success(let success):
-//                        if !success {
-//                            Logger.shared.logError("Couldn't sync documents but no error",
-//                                                   category: .document)
-//                        }
-//                    }
-//                }
-//            }
-//        }
     }
 
     func updateBadge() {
