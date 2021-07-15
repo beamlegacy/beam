@@ -30,6 +30,7 @@ class DatabaseManager {
     private let backgroundContext: NSManagedObjectContext
     private let saveDatabaseQueue = OperationQueue()
     private static var networkRequests: [UUID: APIRequest] = [:]
+    private static var networkTasks: [UUID: URLSessionTask] = [:]
     private let backgroundQueue = DispatchQueue.global(qos: .background)
     private var saveDatabasePromiseCancels: [UUID: () -> Void] = [:]
 
@@ -597,7 +598,18 @@ extension DatabaseManager {
                     }
 
                     let updatedDatabaseStruct = DatabaseStruct(database: updatedDatabase)
-                    self.saveDatabaseStructOnAPI(updatedDatabaseStruct, networkCompletion)
+
+                    if EnvironmentVariables.BeamObjectAPIEnabled {
+                        do {
+                            try self.saveOnBeamObjectAPI(updatedDatabaseStruct) {
+                                networkCompletion?($0)
+                            }
+                        } catch {
+                            networkCompletion?(.failure(error))
+                        }
+                    } else {
+                        self.saveDatabaseStructOnAPI(updatedDatabaseStruct, networkCompletion)
+                    }
                 } else {
                     networkCompletion?(.failure(APIRequestError.notAuthenticated))
                 }
@@ -610,8 +622,6 @@ extension DatabaseManager {
     @discardableResult
     internal func saveDatabaseStructOnAPI(_ databaseStruct: DatabaseStruct,
                                           _ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) -> URLSessionTask? {
-        _ = try? saveOnBeamObjectAPI(databaseStruct) { _ in }
-
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             completion?(.success(false))
             return nil
@@ -1085,13 +1095,20 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
         return try saveOnBeamObjectsAPI(databaseStructs, completion)
     }
 
+    @discardableResult
     func saveOnBeamObjectAPI(_ object: BeamObjectProtocol,
                              _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
         guard let databaseStruct = object as? DatabaseStruct else {
             completion(.failure(DatabaseManagerError.wrongObjectsType))
             return nil
         }
-        return try saveOnBeamObjectAPI(databaseStruct: databaseStruct, completion)
+
+        // TODO: Race conditions, add semaphore 
+        Self.networkTasks[databaseStruct.id]?.cancel()
+        let networkTask = try saveOnBeamObjectAPI(databaseStruct: databaseStruct, completion)
+        Self.networkTasks[databaseStruct.id] = networkTask
+
+        return networkTask
     }
 
     func saveOnBeamObjectsAPI(_ objects: [BeamObjectProtocol],

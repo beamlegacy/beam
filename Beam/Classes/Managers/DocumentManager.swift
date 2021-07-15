@@ -728,7 +728,16 @@ public class DocumentManager: NSObject {
                 let updatedDocStruct = DocumentStruct(document: updatedDocument)
 
                 if EnvironmentVariables.BeamObjectAPIEnabled {
-
+                    do {
+                        try self.saveOnBeamObjectAPI(updatedDocStruct) { result in
+                            Self.networkTasksSemaphore.wait()
+                            Self.networkTasks.removeValue(forKey: document_id)
+                            Self.networkTasksSemaphore.signal()
+                            networkCompletion?(result)
+                        }
+                    } catch {
+                        networkCompletion?(.failure(error))
+                    }
                 } else {
                     self.saveDocumentStructOnAPI(updatedDocStruct) { result in
                         Self.networkTasksSemaphore.wait()
@@ -1211,27 +1220,6 @@ extension DocumentManager {
     @discardableResult
     internal func saveDocumentStructOnAPI(_ documentStruct: DocumentStruct,
                                           _ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) -> URLSessionTask? {
-//        _ = try? saveOnBeamObjectAPI(documentStruct) { _ in }
-        // test for storing multiple objects at the same time
-//        _ = try? saveOnBeamObjectsAPI([documentStruct]) { _ in }
-
-        /*
-         Saving documentStruct and database in one call as Document has a dependency on Database
-         */
-        let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
-        var dbStruct: DatabaseStruct?
-        context.performAndWait {
-            guard let dbDatabase = try? Database.rawFetchWithId(context, documentStruct.databaseId) else { return }
-            dbStruct = DatabaseStruct(database: dbDatabase)
-        }
-
-        if let databaseStruct = dbStruct {
-            let databaseManager = DatabaseManager()
-            _ = try? databaseManager.saveOnBeamObjectAPI(databaseStruct: databaseStruct) { _ in }
-        }
-
-        _ = try? saveOnBeamObjectAPI(documentStruct) { _ in }
-
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             completion?(.success(false))
             return nil
@@ -2419,11 +2407,29 @@ extension DocumentManager: BeamObjectManagerDelegateProtocol {
         return try saveOnBeamObjectsAPI(documentStructs, completion)
     }
 
+    @discardableResult
     func saveOnBeamObjectAPI(_ object: BeamObjectProtocol,
                              _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
         guard let documentStruct = object as? DocumentStruct else {
             throw DatabaseManagerError.wrongObjectsType
         }
+
+        /*
+         Saving documentStruct and database in one call as Document has a dependency on Database
+         */
+        // TODO: use DispatchGroup or 1 API call for database+documentstruct
+        let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
+        var dbStruct: DatabaseStruct?
+        context.performAndWait {
+            guard let dbDatabase = try? Database.rawFetchWithId(context, documentStruct.databaseId) else { return }
+            dbStruct = DatabaseStruct(database: dbDatabase)
+        }
+
+        if let databaseStruct = dbStruct {
+            let databaseManager = DatabaseManager()
+            _ = try? databaseManager.saveOnBeamObjectAPI(databaseStruct: databaseStruct) { _ in }
+        }
+
         return try saveOnBeamObjectAPI(documentStruct: documentStruct, completion)
     }
 
