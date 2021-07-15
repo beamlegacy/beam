@@ -555,7 +555,8 @@ public extension CALayer {
                 return
             }
 
-            let insertAsChild = node.parent as? BreadCrumb != nil || node._displayedElement != nil
+            let isOpenWithChildren = node.open && node.element.children.count > 0
+            let insertAsChild = node.parent as? BreadCrumb != nil || node._displayedElement != nil || isOpenWithChildren && rootNode.cursorPosition == node.text.count
 
             if !rootNode.selectedTextRange.isEmpty {
                 rootNode.cmdManager.deleteText(in: node, for: rootNode.selectedTextRange)
@@ -582,10 +583,11 @@ public extension CALayer {
                 guard let newElement = node.nodeFor(newElement)?.element else { return }
 
                 // reparent all children of node to newElement
-                for child in children {
-                    cmdManager.reparentElement(child, to: newElement, atIndex: newElement.children.count)
+                if isOpenWithChildren || !node.open && children.count > 0 && rootNode.cursorPosition == 0 {
+                    for child in children {
+                        cmdManager.reparentElement(child, to: newElement, atIndex: newElement.children.count)
+                    }
                 }
-
             }
 
             if let toFocus = node.nodeFor(newElement) {
