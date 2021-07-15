@@ -46,92 +46,9 @@ enum SynchronizeInterval: String, CaseIterable {
 }
 
 class RadBlockPreferencesManager {
-    let defaults = UserDefaults.standard
-
-    // MARK: - Global ON/OFF of AdBlocker
-    var isfilterGroupsEnabled: Bool {
-        get {
-            !FilterManager.default.state.isDisabled
-        }
-        set {
-            FilterManager.default.state.isDisabled = !newValue
-            if !newValue {
-                ContentBlockingManager.shared.removeAllRulesLists()
-            } else {
-                ContentBlockingManager.shared.synchronize()
-            }
-        }
-    }
-
-    var isAdsFilterEnabled: Bool {
-        get {
-            defaults.bool(forKey: "adsFilter")
-        }
-        set {
-            if newValue {
-                isfilterGroupsEnabled = true
-            }
-            defaults.setValue(newValue, forKey: "adsFilter")
-            ContentBlockingManager.shared.synchronize()
-        }
-    }
-
-    var isPrivacyFilterEnabled: Bool {
-        get {
-            defaults.bool(forKey: "privacyFilter")
-        }
-        set {
-            if newValue {
-                isfilterGroupsEnabled = true
-            }
-            defaults.setValue(newValue, forKey: "privacyFilter")
-            ContentBlockingManager.shared.synchronize()
-        }
-    }
-
-    var isSocialMediaFilterEnabled: Bool {
-        get {
-            FilterManager.default.state.privacyFilterGroup.isSocialMediaFilterEnabled
-        }
-        set {
-            if newValue {
-                isfilterGroupsEnabled = true
-            }
-            FilterManager.default.state.privacyFilterGroup.isSocialMediaFilterEnabled = newValue
-            ContentBlockingManager.shared.synchronize()
-        }
-    }
-
-    var isAnnoyancesFilterEnabled: Bool {
-        get {
-            defaults.bool(forKey: "annoyanceFilter")
-        }
-        set {
-            if newValue {
-                isfilterGroupsEnabled = true
-            }
-            defaults.set(newValue, forKey: "annoyanceFilter")
-            ContentBlockingManager.shared.synchronize()
-        }
-    }
-
-    var isCookiesFilterEnabled: Bool {
-        get {
-            FilterManager.default.state.annoyanceFilterGroup.isCookiesFilterEnabled
-        }
-        set {
-            if newValue {
-                isfilterGroupsEnabled = true
-            }
-            FilterManager.default.state.annoyanceFilterGroup.isCookiesFilterEnabled = newValue
-            ContentBlockingManager.shared.synchronize()
-        }
-    }
-
     var activatedFiltersGroup: [String] = []
 
-    init() {
-    }
+    init() {}
 
     // MARK: - Synchronization
 

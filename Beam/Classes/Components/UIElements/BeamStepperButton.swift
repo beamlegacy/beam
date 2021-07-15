@@ -20,14 +20,15 @@ struct BeamStepperButton: View {
                 Button(action: leftBtnAction) {
                     Image("basicAdd")
                         .renderingMode(.template)
+                        .foregroundColor(BeamColor.Generic.background.swiftUI)
                         .frame(width: 10, height: 10, alignment: .center)
                 }.buttonStyle(PlainButtonStyle())
 
                 Button(action: rightBtnAction) {
                     Image("basicRemove")
                         .renderingMode(.template)
-                        .frame(width: 10, height: 10, alignment: .center
-                        )
+                        .foregroundColor(BeamColor.Generic.background.swiftUI)
+                        .frame(width: 10, height: 10, alignment: .center)
                 }.buttonStyle(PlainButtonStyle())
 
             }

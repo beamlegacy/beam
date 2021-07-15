@@ -8,14 +8,39 @@
 
 import SwiftUI
 
-class TableViewItem: NSObject { }
+class TableViewItem: NSObject {
+    var placeholder: String?
+}
+
+class IconAndTextTableViewItem: TableViewItem {
+    var favIcon: NSImage?
+    var text: String?
+
+    override init() {
+        super.init()
+    }
+}
+
+class TwoTextFieldViewItem: IconAndTextTableViewItem {
+    var topTextFieldValue: String?
+    var topTextFieldPlaceholder: String?
+    var botTextFieldValue: String?
+    var botTextFieldPlaceholder: String?
+
+    override init() {
+        super.init()
+    }
+}
 
 struct TableView: NSViewRepresentable {
 
     static let rowHeight: CGFloat = 32.0
     static let headerHeight: CGFloat = 32.0
 
+    var customRowHeight: CGFloat?
     var hasSeparator: Bool = true
+    var hasHeader: Bool = true
+    var allowsMultipleSelection: Bool = true
     var items: [TableViewItem] = []
     var columns: [TableViewColumn] = []
     var creationRowTitle: String? = "New Private Card"
@@ -28,7 +53,7 @@ struct TableView: NSViewRepresentable {
     typealias NSViewType = NSScrollView
 
     func makeCoordinator() -> TableViewCoordinator {
-        TableViewCoordinator(self, with: hasSeparator)
+        TableViewCoordinator(self)
     }
 
     func makeNSView(context: Self.Context) -> Self.NSViewType {
@@ -37,7 +62,7 @@ struct TableView: NSViewRepresentable {
         view.backgroundColor = .clear
         view.frame = scrollView.bounds
         view.autoresizingMask = [.width, .height]
-        view.allowsMultipleSelection = true
+        view.allowsMultipleSelection = allowsMultipleSelection
         view.allowsColumnReordering = false
         view.columnAutoresizingStyle = .reverseSequentialColumnAutoresizingStyle
         if #available(OSX 11.0, *) {
@@ -49,6 +74,9 @@ struct TableView: NSViewRepresentable {
         view.additionalDelegate = context.coordinator
         view.dataSource = context.coordinator
         setupColumns(in: view, context: context)
+        if !hasHeader {
+            view.headerView = nil
+        }
         scrollView.horizontalScrollElasticity = .none
         scrollView.contentView.drawsBackground = false
         scrollView.contentView.postsBoundsChangedNotifications = true
@@ -128,9 +156,12 @@ class TableViewCoordinator: NSObject {
 
     let parent: TableView
     var hasSeparator: Bool
-    init(_ tableView: TableView, with separator: Bool) {
+    var customRowHeight: CGFloat?
+
+    init(_ tableView: TableView) {
         self.parent = tableView
-        self.hasSeparator = separator
+        self.hasSeparator = tableView.hasSeparator
+        self.customRowHeight = tableView.customRowHeight
         super.init()
         reloadData()
         DispatchQueue.main.async {
@@ -262,24 +293,36 @@ extension TableViewCoordinator: NSTableViewDelegate {
                 }
                 cell = textCell
             }
-        } else if column.type == .CheckBox {
-            cell = setupCheckBoxCell(tableView, at: row)
-        } else if column.type == .Text {
-            let textCell = BeamTableCellView()
-            let item = sortedData[row]
-            let value = item.value(forKey: column.key)
-            let text = column.stringFromKeyValue(value)
-            let editable = column.editable && !column.isLink
-            textCell.textField?.stringValue = text
-            textCell.textField?.isEditable = editable
-            textCell.textField?.font = BeamFont.regular(size: column.fontSize).nsFont
-            textCell.isLink = column.isLink
-            textCell.textField?.delegate = self
-            cell = textCell
-        } else {
-            cell = setupIconAndTextCell(tableView, at: row, column: column)
         }
+        switch column.type {
+        case .CheckBox:
+            cell = setupCheckBoxCell(tableView, at: row)
+        case .Text:
+            cell = setupTextCell(tableView, at: row, column: column)
+        case .IconAndText:
+            cell = setupIconAndTextCell(tableView, at: row, column: column)
+        case .TwoTextField:
+            cell = setupTwoTextFieldViewCell(tableView, at: row, column: column)
+        }
+
         return cell
+    }
+
+    private func setupTextCell(_ tableView: NSTableView, at row: Int, column: TableViewColumn) -> BeamTableCellView {
+        let textCell = BeamTableCellView()
+        let item = sortedData[row]
+        let value = item.value(forKey: column.key)
+        let text = column.stringFromKeyValue(value)
+        let editable = column.editable && !column.isLink
+        textCell.textField?.stringValue = text
+        textCell.textField?.isEditable = editable
+        textCell.textField?.font = BeamFont.regular(size: column.fontSize).nsFont
+        if let textColor = column.fontColor {
+            textCell.textField?.textColor = textColor
+        }
+        textCell.isLink = column.isLink
+        textCell.textField?.delegate = self
+        return textCell
     }
 
     private func setupCheckBoxCell(_ tableView: NSTableView, at row: Int) -> CheckBoxTableCellView {
@@ -298,18 +341,45 @@ extension TableViewCoordinator: NSTableViewDelegate {
     private func setupIconAndTextCell(_ tableView: NSTableView, at row: Int, column: TableViewColumn)
     -> BeamTableCellIconAndTextView {
         let iconAndTextCell = BeamTableCellIconAndTextView()
-        let item = sortedData[row] as? PasswordTableViewItem
-        iconAndTextCell.updateWithIcon(item?.hostInfo.favIcon)
+        let item = sortedData[row] as? IconAndTextTableViewItem
+        iconAndTextCell.updateWithIcon(item?.favIcon)
         let editable = column.editable && !column.isLink
-        iconAndTextCell.textField?.stringValue = item?.hostInfo.host ?? ""
+        iconAndTextCell.textField?.stringValue = item?.text ?? ""
         iconAndTextCell.textField?.isEditable = editable
         iconAndTextCell.textField?.font = BeamFont.regular(size: column.fontSize).nsFont
+        if let textColor = column.fontColor {
+            iconAndTextCell.textField?.textColor = textColor
+        }
         iconAndTextCell.textField?.delegate = self
         return iconAndTextCell
     }
 
+    private func setupTwoTextFieldViewCell(_ tableView: NSTableView, at row: Int, column: TableViewColumn) -> BeamTableCellTwoTextFieldView {
+        let twoTextFieldViewCell = BeamTableCellTwoTextFieldView()
+        let item = sortedData[row] as? TwoTextFieldViewItem
+        let editable = column.editable && !column.isLink
+
+        twoTextFieldViewCell.topTextField.stringValue = item?.topTextFieldValue ?? ""
+        twoTextFieldViewCell.botTextField.stringValue = item?.botTextFieldValue ?? ""
+        twoTextFieldViewCell.topTextField.placeholderString = item?.topTextFieldPlaceholder
+        twoTextFieldViewCell.botTextField.placeholderString = item?.botTextFieldPlaceholder
+
+        twoTextFieldViewCell.topTextField.isEditable = editable
+        twoTextFieldViewCell.botTextField.isEditable = editable
+        twoTextFieldViewCell.topTextField.font = BeamFont.regular(size: column.fontSize).nsFont
+        twoTextFieldViewCell.botTextField.font = BeamFont.regular(size: column.fontSize).nsFont
+        if let textColor = column.fontColor {
+            twoTextFieldViewCell.topTextField.textColor = textColor
+            twoTextFieldViewCell.botTextField.textColor = textColor
+        }
+        return twoTextFieldViewCell
+    }
+
     func tableView(_ tableView: NSTableView, heightOfRow row: Int) -> CGFloat {
-        return TableView.rowHeight
+        guard let customRowHeight = self.customRowHeight else {
+            return TableView.rowHeight
+        }
+        return customRowHeight
     }
 
     func tableView(_ tableView: NSTableView, shouldSelectRow row: Int) -> Bool {

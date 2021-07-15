@@ -10,7 +10,8 @@ import BeamCore
 import GRDB
 
 struct PasswordRecord {
-    var id: Int64?
+    internal static let databaseUUIDEncodingStrategy = DatabaseUUIDEncodingStrategy.string
+
     var uuid: UUID
     var entryId: String
     var host: String
@@ -30,8 +31,6 @@ extension PasswordRecord: TableRecord {
 
 // Fetching
 extension PasswordRecord: FetchableRecord {
-    internal static let databaseUUIDEncodingStrategy = DatabaseUUIDEncodingStrategy.string
-
     init(row: Row) {
         uuid = row[Columns.uuid]
         entryId = row[Columns.entryId]

@@ -8,67 +8,84 @@
 import SwiftUI
 import Preferences
 
-/**
- Function wrapping SwiftUI into `PreferencePane`, which is mimicking view controller's default construction syntax.
- */
-let PrivacyPreferenceViewController: () -> PreferencePane = {
-    /// Wrap your custom view into `Preferences.Pane`, while providing necessary toolbar info.
-    let paneView = Preferences.Pane(
-        identifier: .privacy,
-        title: "Privacy",
-        toolbarIcon: NSImage(named: "preferences-privacy")!.fill(color: NSColor.white)
-    ) {
-        PrivacyView(selectedUpdate: ContentBlockingManager.shared.radBlockPreferences.synchronizeInterval)
-    }
-
-    return Preferences.PaneHostingController(pane: paneView)
+let PrivacyPreferencesViewController: PreferencePane = PreferencesPaneBuilder.build(identifier: .privacy, title: "Privacy", imageName: "preferences-privacy") {
+    PrivacyPreferencesView(selectedUpdate: ContentBlockingManager.shared.radBlockPreferences.synchronizeInterval)
 }
 
-struct PrivacyView: View {
-    private let contentWidth: Double = 450.0
+struct PrivacyPreferencesView: View {
+    private let contentWidth: Double = PreferencesManager.contentWidth
 
     @State var allowListIsPresented: Bool = false
     @State var selectedUpdate: SynchronizeInterval
 
     var body: some View {
         Preferences.Container(contentWidth: contentWidth) {
-            Preferences.Section(title: "Ads") {
+            Preferences.Section {
+                Text("Ads:")
+                    .font(BeamFont.regular(size: 13).swiftUI)
+                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+                    .frame(width: 250, alignment: .trailing)
+            } content: {
                 AdsSection()
             }
-            Preferences.Section(title: "Trackers") {
+            Preferences.Section {
+                Text("Trackers:")
+                    .font(BeamFont.regular(size: 13).swiftUI)
+                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+                    .frame(width: 250, alignment: .trailing)
+            } content: {
                 TrackersSection()
             }
-            Preferences.Section(title: "Annoyances") {
+
+            Preferences.Section {
+                Text("Annoyances:")
+                    .font(BeamFont.regular(size: 13).swiftUI)
+                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+                    .frame(width: 250, alignment: .trailing)
+            } content: {
                 AnnoyancesSection()
             }
-            Preferences.Section(title: "Updates Rules") {
+
+            Preferences.Section {
+                Text("Updates Rules:")
+                    .font(BeamFont.regular(size: 13).swiftUI)
+                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+                    .frame(width: 250, alignment: .trailing)
+            } content: {
                 UpdateRulesSection(selectedUpdate: $selectedUpdate)
             }
-            Preferences.Section(title: "Allowlist") {
+
+            Preferences.Section(bottomDivider: true) {
+            Text("Allowlist:")
+                .font(BeamFont.regular(size: 13).swiftUI)
+                .foregroundColor(BeamColor.Generic.text.swiftUI)
+                .frame(width: 250, alignment: .trailing)
+            } content: {
                 AllowListSection(allowListIsPresented: $allowListIsPresented)
             }
-            Preferences.Section(title: "") {
-                VStack(alignment: .leading) {
-                    Separator(horizontal: true, hairline: false)
-                }
-            }
-            Preferences.Section(title: "Website Data") {
+
+            Preferences.Section {
+                Text("Website Data:")
+                    .font(BeamFont.regular(size: 13).swiftUI)
+                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+                    .frame(width: 250, alignment: .trailing)
+            } content: {
                 WebsiteDataSection()
             }
         }
     }
 }
 
-struct PrivacyView_Previews: PreviewProvider {
+struct PrivacyPreferencesView_Previews: PreviewProvider {
     static var previews: some View {
-        PrivacyView(selectedUpdate: .daily)
+        PrivacyPreferencesView(selectedUpdate: .daily)
     }
 }
 
 struct AdsSection: View {
     var body: some View {
-        Checkbox(checkState: ContentBlockingManager.shared.radBlockPreferences.isAdsFilterEnabled, text: "Remove most advertisments while browsing", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
-            ContentBlockingManager.shared.radBlockPreferences.isAdsFilterEnabled = activated
+        Checkbox(checkState: PreferencesManager.isAdsFilterEnabled, text: "Remove most advertisments while browsing", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
+            PreferencesManager.isAdsFilterEnabled = activated
         }
     }
 }
@@ -76,19 +93,19 @@ struct AdsSection: View {
 struct TrackersSection: View {
     var body: some View {
         VStack(alignment: .leading) {
-            Checkbox(checkState: ContentBlockingManager.shared.radBlockPreferences.isPrivacyFilterEnabled, text: "Prevent Internet history tracking", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
-                ContentBlockingManager.shared.radBlockPreferences.isPrivacyFilterEnabled = activated
-                if !activated && ContentBlockingManager.shared.radBlockPreferences.isSocialMediaFilterEnabled {
-                    ContentBlockingManager.shared.radBlockPreferences.isSocialMediaFilterEnabled = false
+            Checkbox(checkState: PreferencesManager.isPrivacyFilterEnabled, text: "Prevent Internet history tracking", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
+                PreferencesManager.isPrivacyFilterEnabled = activated
+                if !activated && PreferencesManager.isSocialMediaFilterEnabled {
+                    PreferencesManager.isSocialMediaFilterEnabled = false
                 }
             }
-            Checkbox(checkState: ContentBlockingManager.shared.radBlockPreferences.isSocialMediaFilterEnabled, text: "Block Social Media Buttons", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
-                ContentBlockingManager.shared.radBlockPreferences.isSocialMediaFilterEnabled = activated
+            Checkbox(checkState: PreferencesManager.isSocialMediaFilterEnabled, text: "Block Social Media Buttons", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
+                PreferencesManager.isSocialMediaFilterEnabled = activated
             }
             VStack {
                 Text("Websites which embed social media buttons implicitly track your browser history, even if you don’t have an account.")
                     .font(BeamFont.regular(size: 11).swiftUI)
-                    .foregroundColor(BeamColor.Generic.placeholder.swiftUI)
+                    .foregroundColor(BeamColor.Corduroy.swiftUI)
                     .padding(.leading, 22)
                     .lineLimit(nil)
                     .multilineTextAlignment(.leading)
@@ -100,20 +117,20 @@ struct TrackersSection: View {
 struct AnnoyancesSection: View {
     var body: some View {
         VStack(alignment: .leading) {
-            Checkbox(checkState: ContentBlockingManager.shared.radBlockPreferences.isAnnoyancesFilterEnabled, text: "Remove banners and popups from websites", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
-                ContentBlockingManager.shared.radBlockPreferences.isAnnoyancesFilterEnabled = activated
-                if !activated && ContentBlockingManager.shared.radBlockPreferences.isCookiesFilterEnabled {
-                    ContentBlockingManager.shared.radBlockPreferences.isCookiesFilterEnabled = false
+            Checkbox(checkState: PreferencesManager.isAnnoyancesFilterEnabled, text: "Remove banners and popups from websites", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
+                PreferencesManager.isAnnoyancesFilterEnabled = activated
+                if !activated && PreferencesManager.isCookiesFilterEnabled {
+                    PreferencesManager.isCookiesFilterEnabled = false
                 }
             }
-            Checkbox(checkState: ContentBlockingManager.shared.radBlockPreferences.isCookiesFilterEnabled, text: "Hide cookie banners", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
-                ContentBlockingManager.shared.radBlockPreferences.isCookiesFilterEnabled = activated
+            Checkbox(checkState: PreferencesManager.isCookiesFilterEnabled, text: "Hide cookie banners", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
+                PreferencesManager.isCookiesFilterEnabled = activated
             }
             VStack {
                 Text("Some websites display banners which impair the site’s functionality in order to force your content to be tracked.")
                     .font(BeamFont.regular(size: 11).swiftUI)
                     .multilineTextAlignment(.leading)
-                    .foregroundColor(BeamColor.Generic.placeholder.swiftUI)
+                    .foregroundColor(BeamColor.Corduroy.swiftUI)
                     .padding(.leading, 18)
                     .lineLimit(nil)
                     .multilineTextAlignment(.leading)
@@ -143,7 +160,7 @@ struct UpdateRulesSection: View {
             }
             Text("Last updated: \(ContentBlockingManager.shared.radBlockPreferences.lastSynchronizationDate)")
                 .font(BeamFont.regular(size: 11).swiftUI)
-                .foregroundColor(BeamColor.Generic.placeholder.swiftUI)
+                .foregroundColor(BeamColor.Corduroy.swiftUI)
         }
     }
 }

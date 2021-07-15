@@ -29,7 +29,7 @@ class PasswordManagerMenuViewModel: ObservableObject {
         var allEntries: [PasswordManagerEntry]
         var hasScroll: Bool
         var hasMoreThanOneEntry: Bool
-        var userInfo: UserInformations
+        var userInfo: UserInformations?
     }
 
     weak var delegate: PasswordManagerMenuDelegate?
@@ -53,7 +53,7 @@ class PasswordManagerMenuViewModel: ObservableObject {
         self.userInfoStore = userInfoStore
         self.entriesForHost = []
         self.allEntries = []
-        self.display = Contents(entriesForHost: Array(entriesForHost.prefix(1)), allEntries: allEntries, hasScroll: false, hasMoreThanOneEntry: entriesForHost.count > 1, userInfo: userInfoStore.get())
+        self.display = Contents(entriesForHost: Array(entriesForHost.prefix(1)), allEntries: allEntries, hasScroll: false, hasMoreThanOneEntry: entriesForHost.count > 1, userInfo: userInfoStore.fetchAll().first ?? nil)
         if passwordGenerator {
             let passwordGeneratorViewModel = PasswordGeneratorViewModel()
             passwordGeneratorViewModel.delegate = self

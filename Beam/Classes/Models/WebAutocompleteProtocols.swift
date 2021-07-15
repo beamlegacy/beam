@@ -17,13 +17,6 @@ extension PasswordManagerEntry {
     }
 }
 
-struct UserInformations {
-    var email: String
-    var firstName: String
-    var lastName: String
-    var adresses: String
-}
-
 extension PasswordManagerEntry: Identifiable {
     var id: String {
         "\(minimizedHost) \(username)"
@@ -39,8 +32,38 @@ protocol PasswordStore {
     func delete(host: String, username: String)
 }
 
+struct UserInformations: Identifiable {
+    var id = UUID()
+    var country: Int?
+    var organization: String?
+    var firstName: String?
+    var lastName: String?
+    var adresses: String?
+    var postalCode: String?
+    var city: String?
+    var phone: String?
+    var email: String?
+}
+
 protocol UserInformationsStore {
     func save(userInfo: UserInformations)
-    func get() -> UserInformations
-    func delete()
+    func update(userInfoUUIDToUpdate: UUID, updatedUserInformations: UserInformations)
+    func fetchAll() -> [UserInformations]
+    func fetchFirst() -> UserInformations
+    func delete(id: UUID)
+}
+
+struct CreditCard {
+    var id = UUID()
+    var cardDescription: String
+    var cardNumber: Int
+    var cardHolder: String
+    var cardDate: Date
+}
+
+protocol CreditCardsStore {
+    func save(creditCard: CreditCard)
+    func fetchAll() -> [CreditCard]
+    func update(id: UUID, creditCard: CreditCard)
+    func delete(id: UUID)
 }

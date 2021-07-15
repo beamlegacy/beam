@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import BeamCore
 
 enum PasswordImporter {
     enum Error: Swift.Error {
@@ -68,6 +69,35 @@ enum PasswordImporter {
         for record in parser {
             if let entry = decoder.decode(record) {
                 store.save(host: entry.host, username: entry.username, password: entry.password)
+            }
+        }
+    }
+
+    static func exportPasswords(from store: PasswordStore, toCSV file: URL) throws {
+        let serialQueue = DispatchQueue(label: "exportPasswordsQueue")
+        var allEntries: [PasswordManagerEntry] = []
+        var csvString = "\("URL"), \("Username"),\("Password")\n"
+
+        serialQueue.async {
+            store.fetchAll { entries in
+                allEntries = entries
+            }
+        }
+        serialQueue.async {
+            for entry in allEntries {
+                store.password(host: entry.minimizedHost, username: entry.username) { password in
+                    if let passwordStr = password {
+                        csvString.append("\(entry.minimizedHost), \(entry.username), \(passwordStr)\n")
+
+                    }
+                }
+            }
+        }
+        serialQueue.async {
+            do {
+                try csvString.write(to: file, atomically: true, encoding: .utf8)
+            } catch {
+                Logger.shared.logError(error.localizedDescription, category: .general)
             }
         }
     }
