@@ -258,12 +258,24 @@ import BeamCore
         return u.urlWithScheme
     }
 
-    func startQuery(_ node: TextNode) {
+    func startQuery(_ node: TextNode, animated: Bool) {
         let query = node.currentSelectionWithFullSentences()
         guard !query.isEmpty, let url = urlFor(query: query) else { return }
 
-        createTabFromNode(node, withURL: url)
-        mode = .web
+        let completeQuery = { [unowned self] in
+            self.createTabFromNode(node, withURL: url)
+            self.mode = .web
+        }
+        if animated {
+            autocompleteManager.animateDirectQuery(with: query)
+            let animationDuration = 300
+            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: .milliseconds(animationDuration))) { [unowned self] in
+                autocompleteManager.animateDirectQuery(with: nil)
+                completeQuery()
+            }
+        } else {
+            completeQuery()
+        }
     }
 
     private func selectAutocompleteResult(_ result: AutocompleteResult) {

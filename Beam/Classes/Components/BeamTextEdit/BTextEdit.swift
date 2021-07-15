@@ -18,7 +18,7 @@ public struct BTextEdit: NSViewRepresentable {
     var openCard: (UUID, UUID?) -> Void
     var onStartEditing: () -> Void = { }
     var onEndEditing: () -> Void = { }
-    var onStartQuery: (TextNode) -> Void = { _ in }
+    var onStartQuery: (TextNode, Bool) -> Void = { _, _ in }
     var minimumWidth: CGFloat = 800
     var maximumWidth: CGFloat = 1024
 
@@ -108,7 +108,7 @@ public struct BTextEditScrollable: NSViewRepresentable {
     var openCard: (UUID, UUID?) -> Void
     var onStartEditing: () -> Void = { }
     var onEndEditing: () -> Void = { }
-    var onStartQuery: (TextNode) -> Void = { _ in }
+    var onStartQuery: (TextNode, Bool) -> Void = { _, _ in }
     var onScroll: ((CGPoint) -> Void)?
     var minimumWidth: CGFloat = 800
     var maximumWidth: CGFloat = 1024

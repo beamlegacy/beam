@@ -27,6 +27,7 @@ class AutocompleteManager: ObservableObject {
     }
 
     @Published var animateInputingCharacter = false
+    @Published var animatedQuery: String?
 
     private let searchEngineCompleter: Autocompleter
     private var autocompleteSearchGuessesHandler: (([AutocompleteResult]) -> Void)?
@@ -446,18 +447,6 @@ extension AutocompleteManager {
         searchQuery = query
     }
 
-    func shakeOmniBox() {
-        let animation = Animation.interpolatingSpring(stiffness: 500, damping: 16)
-        withAnimation(animation) {
-            animateInputingCharacter = true
-        }
-        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: .milliseconds(150))) { [weak self] in
-            withAnimation(animation) {
-                self?.animateInputingCharacter = false
-            }
-        }
-    }
-
     // Allows the user to enter the next character of the suggestion
     // while keeping the same visual state
     func replacementTextForProposedText(_ proposedText: String) -> (String, Range<Int>)? {
@@ -483,5 +472,30 @@ extension AutocompleteManager {
         searchQuerySelectedRange = unselectedProposedText.count..<currentText.count
         let newText = unselectedProposedText + currentText.substring(range: newRange)
         return (newText, newRange)
+    }
+
+    // MARK: - Animations
+    func shakeOmniBox() {
+        let animation = Animation.interpolatingSpring(stiffness: 500, damping: 16)
+        withAnimation(animation) {
+            animateInputingCharacter = true
+        }
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: .milliseconds(150))) { [weak self] in
+            withAnimation(animation) {
+                self?.animateInputingCharacter = false
+            }
+        }
+    }
+
+    func animateDirectQuery(with text: String?) {
+        guard text != nil else {
+            self.animatedQuery = nil
+            return
+        }
+        var transaction = Transaction(animation: .interpolatingSpring(stiffness: 380, damping: 20))
+        transaction.disablesAnimations = true
+        withTransaction(transaction) {
+            self.animatedQuery = text
+        }
     }
 }

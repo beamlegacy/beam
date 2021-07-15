@@ -589,6 +589,7 @@
 		A5919F54268BE208009015C5 /* NoteMediaPlayingButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5919F53268BE208009015C5 /* NoteMediaPlayingButton.swift */; };
 		A5919F6D268EA0A2009015C5 /* WebPageBaseImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5919F6C268EA0A2009015C5 /* WebPageBaseImpl.swift */; };
 		A5919F6F268EA499009015C5 /* EmbedNodeWebPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5919F6E268EA499009015C5 /* EmbedNodeWebPage.swift */; };
+		A5919F7F268EF964009015C5 /* TextEditCmdReturnAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5919F7E268EF964009015C5 /* TextEditCmdReturnAnimator.swift */; };
 		A5946804265CE5B30044A892 /* DeleteDocumentCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5946803265CE5B30044A892 /* DeleteDocumentCommand.swift */; };
 		A5946806265CE5ED0044A892 /* DocumentCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5946805265CE5ED0044A892 /* DocumentCommand.swift */; };
 		A5946826265D29350044A892 /* CGPath+Union.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5946825265D29350044A892 /* CGPath+Union.swift */; };
@@ -1405,6 +1406,7 @@
 		A5919F53268BE208009015C5 /* NoteMediaPlayingButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteMediaPlayingButton.swift; sourceTree = "<group>"; };
 		A5919F6C268EA0A2009015C5 /* WebPageBaseImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebPageBaseImpl.swift; sourceTree = "<group>"; };
 		A5919F6E268EA499009015C5 /* EmbedNodeWebPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbedNodeWebPage.swift; sourceTree = "<group>"; };
+		A5919F7E268EF964009015C5 /* TextEditCmdReturnAnimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditCmdReturnAnimator.swift; sourceTree = "<group>"; };
 		A5946803265CE5B30044A892 /* DeleteDocumentCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteDocumentCommand.swift; sourceTree = "<group>"; };
 		A5946805265CE5ED0044A892 /* DocumentCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentCommand.swift; sourceTree = "<group>"; };
 		A5946825265D29350044A892 /* CGPath+Union.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CGPath+Union.swift"; sourceTree = "<group>"; };
@@ -2108,6 +2110,7 @@
 				9691C2A52645F90600F70DA1 /* ImageNode.swift */,
 				A5919F63268EA024009015C5 /* EmbedNode */,
 				9661A58A266A70DA00CB56B3 /* NodeProvider.swift */,
+				A5919F7E268EF964009015C5 /* TextEditCmdReturnAnimator.swift */,
 			);
 			path = BeamTextEdit;
 			sourceTree = "<group>";
@@ -4252,6 +4255,7 @@
 				A520D8DF25F8DF8D00400720 /* TouchDownModifier.swift in Sources */,
 				418171ED2581107C00317ED8 /* Session.swift in Sources */,
 				A5C9F00A261364F50096380F /* WindowPageView.swift in Sources */,
+				A5919F7F268EF964009015C5 /* TextEditCmdReturnAnimator.swift in Sources */,
 				4181713325810CDC00317ED8 /* Constants.swift in Sources */,
 				A0A4301626655993003A3C08 /* ClusteringManager.swift in Sources */,
 				52F4E4A8264180000067B017 /* Identity.swift in Sources */,

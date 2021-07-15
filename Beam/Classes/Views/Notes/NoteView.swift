@@ -45,8 +45,8 @@ struct NoteView: View {
                     state.navigateToNote(id: cardId, elementId: elementId)
                 },
                 onStartEditing: { onStartEditing?() },
-                onStartQuery: { textNode in
-                    state.startQuery(textNode)
+                onStartQuery: { textNode, animated in
+                    state.startQuery(textNode, animated: animated)
                 },
                 onScroll: { scrollPoint in
                     scrollOffset = scrollPoint
