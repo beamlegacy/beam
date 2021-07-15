@@ -13,6 +13,7 @@ struct TableViewColumn {
         case Text
         case IconAndText
         case CheckBox
+        case TwoTextField
     }
 
     let key: String
@@ -26,6 +27,7 @@ struct TableViewColumn {
     var resizable = true
     var width: CGFloat = 100
     var fontSize: CGFloat = 13
+    var fontColor: NSColor?
     var stringFromKeyValue: ((Any?) -> String) = { value in
         return value as? String ?? ""
     }

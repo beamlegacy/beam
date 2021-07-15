@@ -3,20 +3,8 @@ import Preferences
 import BeamCore
 import OAuthSwift
 
-/**
-Function wrapping SwiftUI into `PreferencePane`, which is mimicking view controller's default construction syntax.
-*/
-let AccountsPreferenceViewController: () -> PreferencePane = {
-	/// Wrap your custom view into `Preferences.Pane`, while providing necessary toolbar info.
-	let paneView = Preferences.Pane(
-		identifier: .accounts,
-		title: "Account",
-		toolbarIcon: NSImage(named: "person.crop.circle")!
-	) {
-		AccountsView()
-	}
-
-	return Preferences.PaneHostingController(pane: paneView)
+let AccountsPreferenceViewController: PreferencePane = PreferencesPaneBuilder.build(identifier: .accounts, title: "Account", imageName: "preferences-account") {
+    AccountsView()
 }
 
 /**
@@ -32,7 +20,7 @@ struct AccountsView: View {
     @State private var identities: [IdentityType] = []
 
     private let accountManager = AccountManager()
-    private let contentWidth: Double = 450.0
+    private let contentWidth: Double = PreferencesManager.contentWidth
 
 	var body: some View {
         Preferences.Container(contentWidth: contentWidth) {
