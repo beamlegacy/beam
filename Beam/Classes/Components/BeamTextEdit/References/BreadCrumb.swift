@@ -21,7 +21,9 @@ class BreadCrumb: Widget {
     var container: Layer?
 
     var proxyTextNode: ProxyTextNode!
-    var hasLink: Bool = false
+    var hasLink: Bool {
+        isLink ? isLink : proxyTextNode.childrenIsLink()
+    }
 
     override var open: Bool {
         didSet {
@@ -61,7 +63,6 @@ class BreadCrumb: Widget {
         ref.open = element.children.isEmpty // Yes, this is intentional
         self.proxyTextNode = ref
         self.currentLinkedRefNode = ref
-        hasLink = isLink ? isLink : proxyTextNode.childrenIsLink()
 
         guard let note = self.crumbChain.first as? BeamNote else { return }
 
@@ -101,12 +102,24 @@ class BreadCrumb: Widget {
                     self.linkLayer.foregroundColor = isHover ? BeamColor.LinkedSection.actionButtonHover.cgColor : BeamColor.LinkedSection.actionButton.cgColor
                 }
             )
-        actionLayer.layer.isHidden = isLink
+        updateLinkLayerState()
         addLayer(actionLayer)
 
         createCrumbLayers()
         guard let container = container else { return }
         addLayer(container)
+    }
+
+    override var parent: Widget? {
+        didSet {
+            updateLinkLayerState()
+        }
+    }
+
+    func updateLinkLayerState() {
+        actionLinkLayer?.layer.isHidden = isLink
+        deepInvalidateRendering()
+        invalidateLayout()
     }
 
     func computeCrumbChain(from element: BeamElement) -> [BeamElement] {
@@ -264,6 +277,10 @@ class BreadCrumb: Widget {
         }
     }
 
+    var actionLinkLayer: LinkButtonLayer? {
+        layers["actionLinkLayer"] as? LinkButtonLayer
+    }
+
     override func updateRendering() {
         contentsFrame = NSRect(x: 14, y: 0, width: availableWidth, height: showCrumbs ? 37 : 18)
 
@@ -271,7 +288,7 @@ class BreadCrumb: Widget {
 
         CATransaction.disableAnimations {
             let linkLayerFrameSize = linkLayer.preferredFrameSize()
-            if let actionLinkLayer = layers["actionLinkLayer"] as? LinkButtonLayer {
+            if let actionLinkLayer = actionLinkLayer {
                 actionLinkLayer.frame = CGRect(
                     origin: CGPoint(x: availableWidth - linkLayerFrameSize.width / 2, y: -2),
                     size: NSSize(width: 36, height: 21)
