@@ -62,6 +62,7 @@ struct ModeView: View {
         .clipped()
         .onAppear { contentIsScrolled = false }
         .onDisappear { data.reloadJournal() }
+        .animation(nil)
         .transition(.noteContentTransition(transitionModel: transitionModel))
         .accessibility(identifier: "journalView")
     }
