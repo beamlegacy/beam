@@ -153,6 +153,9 @@ public class BrowsingNode: ObservableObject, Codable {
     @Published public var events = [ReadingEvent(type: .creation, date: Date())]
     @Published public var children = [BrowsingNode]()
     public var score: Score { tree.scoreFor(link: link) }
+    public func longTermScoreApply(changes: (LongTermUrlScore) -> Void) {
+        tree.longTermScoreStore?.apply(to: link, changes: changes)
+    }
 
     public var title: String {
         LinkStore.linkFor(link)?.title ?? "<???>"
@@ -169,7 +172,9 @@ public class BrowsingNode: ObservableObject, Codable {
     }
 
     public func addEvent(_ type: ReadingEventType, date: Date = Date()) {
-        score.readingTimeToLastEvent += readingTimeSinceLastEvent(date: date)
+        let incrementalReadingTime = readingTimeSinceLastEvent(date: date)
+        score.readingTimeToLastEvent += incrementalReadingTime
+        longTermScoreApply { $0.readingTimeToLastEvent += incrementalReadingTime }
         let event = ReadingEvent(type: type, date: date)
         events.append(event)
         score.lastEvent = event
@@ -208,9 +213,11 @@ public class BrowsingNode: ObservableObject, Codable {
         self.isLinkActivation = isLinkActivation
         let creationDate = events.first?.date
         score.lastCreationDate = creationDate
+        longTermScoreApply { $0.lastCreationDate = creationDate }
         if let creationDate = creationDate {
             tree.frecencyScorer?.update(urlId: link, value: 1, visitType: visitType, date: creationDate, paramKey: .visit30d0)
         }
+        longTermScoreApply { $0.visitCount += 1 }
     }
 
     // Codable:
@@ -317,10 +324,12 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
 
     public let origin: BrowsingTreeOrigin
     var frecencyScorer: FrecencyScorer?
+    var longTermScoreStore: LongTermUrlScoreStoreProtocol?
 
-    public init(_ origin: BrowsingTreeOrigin?, frecencyScorer: FrecencyScorer? = nil) {
+    public init(_ origin: BrowsingTreeOrigin?, frecencyScorer: FrecencyScorer? = nil, longTermScoreStore: LongTermUrlScoreStoreProtocol? = nil) {
         self.origin = origin ?? defaultOrigin
         self.frecencyScorer = frecencyScorer
+        self.longTermScoreStore = longTermScoreStore
         self.root = BrowsingNode(tree: self, parent: nil, url: "<???>", title: nil, isLinkActivation: false)
         self.current = root
     }
@@ -420,6 +429,7 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
             current.addEvent(.startReading)
         }
         current.score.textAmount = readCount
+        current.longTermScoreApply { $0.textAmount = readCount }
         Logger.shared.logInfo("current now is \(currentLink)", category: .web)
     }
 
