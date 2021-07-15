@@ -110,6 +110,21 @@ struct GRDBDatabase {
             try db.rename(table: "NewBidirectionalLink", to: "BidirectionalLink")
             let count = try BidirectionalLink.fetchCount(db)
             Logger.shared.logDebug("Migrated BidirectionalLink table with \(count) records")
+
+        }
+
+        migrator.registerMigration("createLongTermUrlScore") { db in
+            try db.create(table: "longTermUrlScore", ifNotExists: true) { t in
+                t.column("urlId", .integer).primaryKey()
+                t.column("visitCount", .integer)
+                t.column("readingTimeToLastEvent", .double)
+                t.column("textSelections", .integer)
+                t.column("scrollRatioX", .double)
+                t.column("scrollRatioY", .double)
+                t.column("textAmount", .integer)
+                t.column("area", .double)
+                t.column("lastCreationDate", .datetime)
+            }
         }
 
         #if DEBUG
@@ -515,6 +530,23 @@ extension GRDBDatabase {
         }
 
         return result
+    }
+
+    // MARK: - LongTermUrlScore
+    func getLongTermUrlScore(urlId: UInt64) -> LongTermUrlScore? {
+        return try? dbReader.read { db in try LongTermUrlScore.fetchOne(db, id: urlId) }
+    }
+
+    func updateLongTermUrlScore(urlId: UInt64, changes: (LongTermUrlScore) -> Void ) {
+        do {
+            try dbWriter.write {db in
+                let score = (try? LongTermUrlScore.fetchOne(db, id: urlId)) ?? LongTermUrlScore(urlId: urlId)
+                changes(score)
+                try score.save(db)
+            }
+        } catch {
+            Logger.shared.logError("Couldn't update url long term score for \(urlId)", category: .database)
+        }
     }
 }
 

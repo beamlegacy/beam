@@ -188,6 +188,8 @@ class BrowsingScorerMock: WebPageHolder, BrowsingScorer {
     func updateScore() {}
 
     func addTextSelection() {}
+
+    func applyLongTermScore(changes: (LongTermUrlScore) -> Void) {}
 }
 
 class FileStorageMock: BeamFileStorage {

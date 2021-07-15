@@ -35,9 +35,18 @@ class ScorerMessageHandler: BeamMessageHandler<ScorerMessages> {
             }
             if width > 0, height > 0 {
                 let currentScore = browsingScorer.currentScore
-                currentScore.scrollRatioX = max(Float(x / width), currentScore.scrollRatioX)
-                currentScore.scrollRatioY = max(Float(y / height), currentScore.scrollRatioY)
-                currentScore.area = Float(width * height)
+                let currentScrollRatioX = Float(x / width)
+                currentScore.scrollRatioX = max(currentScrollRatioX, currentScore.scrollRatioX)
+                browsingScorer.applyLongTermScore {$0.scrollRatioX = max(currentScrollRatioX, $0.scrollRatioX)}
+
+                let currentScrollRatioY = Float(y / height)
+                currentScore.scrollRatioY = max(currentScrollRatioY, currentScore.scrollRatioY)
+                browsingScorer.applyLongTermScore {$0.scrollRatioY = max(currentScrollRatioY, $0.scrollRatioY)}
+
+                let currentArea = Float(width * height)
+                currentScore.area = currentArea
+                browsingScorer.applyLongTermScore {$0.area = currentArea}
+
                 browsingScorer.updateScore()
             }
             Logger.shared.logDebug("Scorer handled scroll: \(x), \(y)", category: .web)

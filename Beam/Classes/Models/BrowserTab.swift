@@ -193,7 +193,11 @@ import Promises
             self.webView = web
         }
 
-        browsingTree = BrowsingTree(browsingTreeOrigin, frecencyScorer: ExponentialFrecencyScorer(storage: GRDBFrecencyStorage()))
+        browsingTree = BrowsingTree(
+            browsingTreeOrigin,
+            frecencyScorer: ExponentialFrecencyScorer(storage: GRDBFrecencyStorage()),
+            longTermScoreStore: LongTermUrlScoreStore()
+        )
         noteController = WebNoteController(note: note, rootElement: rootElement)
 
         super.init()
