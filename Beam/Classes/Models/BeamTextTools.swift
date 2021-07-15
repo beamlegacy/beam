@@ -76,7 +76,7 @@ extension BeamText {
         return linkedNote.id
     }
 
-    mutating func makeLinkToNoteExplicit(forNote title: String) {
+    mutating func makeLinksToNoteExplicit(forNote title: String) {
         text.ranges(of: title).forEach { range in
             let start = text.position(at: range.lowerBound)
             let end = text.position(at: range.upperBound)

@@ -63,9 +63,9 @@ class ReferencesSection: LinksSection {
 
                 if let linkLayer = self.linkLayer, linkLayer.layer.isHidden { return }
 
-                self.children.forEach { child in
-                    guard let breadcrumb = child as? BreadCrumb else { return }
-                    breadcrumb.proxy.text.makeLinkToNoteExplicit(forNote: rootNote.title)
+                for child in self.children {
+                    guard let title = child as? RefNoteTitle else { continue }
+                    title.makeLinksToNoteExplicit(forNote: rootNote.title)
                 }
             }, hovered: {[weak self] isHover in
                 guard let self = self else { return }

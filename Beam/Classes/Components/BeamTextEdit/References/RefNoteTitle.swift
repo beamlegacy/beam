@@ -80,6 +80,13 @@ class RefNoteTitle: Widget {
         }
     }
 
+    func makeLinksToNoteExplicit(forNote title: String) {
+        for child in children {
+            guard let breadcrumb = child as? BreadCrumb else { continue }
+            breadcrumb.proxy.text.makeLinksToNoteExplicit(forNote: title)
+        }
+    }
+
     override var mainLayerName: String {
         "RefNoteTitle - \(noteTitle)"
     }
