@@ -14,7 +14,7 @@ enum CharacterEvent: Equatable {
 
 struct CSVUnescapingSequence<Input: Sequence>: Sequence, IteratorProtocol where Input.Element == Character {
     typealias Element = CharacterEvent
-    
+
     enum State {
         case lineStart
         case fieldStart
@@ -22,20 +22,20 @@ struct CSVUnescapingSequence<Input: Sequence>: Sequence, IteratorProtocol where 
         case quoted
         case escaping
     }
-    
+
     let fieldSeparator: Character = ","
     let lineFeed: Character = "\n"
     let carriageReturn: Character = "\r"
     let crlf: Character = "\r\n"
     let quote: Character = "\""
-    
+
     private var inputIterator: Input.Iterator
     private var state = State.lineStart
 
     init(input: Input) {
         inputIterator = input.makeIterator()
     }
-    
+
     mutating func next() -> CharacterEvent? {
         var event: CharacterEvent?
         repeat {
@@ -44,7 +44,7 @@ struct CSVUnescapingSequence<Input: Sequence>: Sequence, IteratorProtocol where 
         } while event == .skip
         return event
     }
-    
+
     private mutating func handleNext(_ character: Character) -> CharacterEvent {
         switch state {
         case .lineStart:
@@ -59,7 +59,7 @@ struct CSVUnescapingSequence<Input: Sequence>: Sequence, IteratorProtocol where 
             return handleCharacterInEscapingState(character)
         }
     }
-    
+
     private mutating func handleCharacterInLineStartState(_ character: Character) -> CharacterEvent {
         switch character {
         case fieldSeparator:
@@ -74,7 +74,7 @@ struct CSVUnescapingSequence<Input: Sequence>: Sequence, IteratorProtocol where 
             return .character(character)
         }
     }
-    
+
     private mutating func handleCharacterInFieldStartState(_ character: Character) -> CharacterEvent {
         switch character {
         case fieldSeparator:
@@ -90,7 +90,7 @@ struct CSVUnescapingSequence<Input: Sequence>: Sequence, IteratorProtocol where 
             return .character(character)
         }
     }
-    
+
     private mutating func handleCharacterInUnquotedState(_ character: Character) -> CharacterEvent {
         switch character {
         case fieldSeparator:
@@ -103,7 +103,7 @@ struct CSVUnescapingSequence<Input: Sequence>: Sequence, IteratorProtocol where 
             return .character(character)
         }
     }
-    
+
     private mutating func handleCharacterInQuotedState(_ character: Character) -> CharacterEvent {
         switch character {
         case quote:
@@ -113,7 +113,7 @@ struct CSVUnescapingSequence<Input: Sequence>: Sequence, IteratorProtocol where 
             return .character(character)
         }
     }
-    
+
     private mutating func handleCharacterInEscapingState(_ character: Character) -> CharacterEvent {
         switch character {
         case fieldSeparator:
@@ -139,7 +139,7 @@ struct CSVParser<Input: Sequence>: Sequence, IteratorProtocol where Input.Elemen
         case fieldData
         case end
     }
-    
+
     private var inputIterator: Input.Iterator
     private var state = State.recordStart
     private var fields = [String]()
@@ -148,7 +148,7 @@ struct CSVParser<Input: Sequence>: Sequence, IteratorProtocol where Input.Elemen
     init(input: Input) {
         inputIterator = input.makeIterator()
     }
-    
+
     mutating func next() -> [String]? {
         while handleEvent(inputIterator.next()) {}
         if fields.isEmpty && state == .end {
@@ -159,7 +159,7 @@ struct CSVParser<Input: Sequence>: Sequence, IteratorProtocol where Input.Elemen
         }
         return fields
     }
-    
+
     private mutating func handleEvent(_ event: CharacterEvent?) -> Bool {
         switch state {
         case .recordStart:
@@ -172,7 +172,7 @@ struct CSVParser<Input: Sequence>: Sequence, IteratorProtocol where Input.Elemen
             return false
         }
     }
-    
+
     private mutating func handleEventAtRecordStart(_ event: CharacterEvent?) -> Bool {
         switch event {
         case nil:
@@ -193,7 +193,7 @@ struct CSVParser<Input: Sequence>: Sequence, IteratorProtocol where Input.Elemen
             fatalError()
         }
     }
-    
+
     private mutating func handleEventAtFieldStart(_ event: CharacterEvent?) -> Bool {
         switch event {
         case nil:
@@ -216,7 +216,7 @@ struct CSVParser<Input: Sequence>: Sequence, IteratorProtocol where Input.Elemen
             fatalError()
         }
     }
-    
+
     private mutating func handleEventAtFieldData(_ event: CharacterEvent?) -> Bool {
         switch event {
         case nil:
