@@ -32,6 +32,10 @@ struct KeyEventHandlingView: NSViewRepresentable {
                 super.keyDown(with: event)
             }
         }
+
+        override func mouseDown(with event: NSEvent) {
+            self.window?.makeFirstResponder(self)
+        }
     }
 
     let onKeyDown: ((NSEvent) -> Void)

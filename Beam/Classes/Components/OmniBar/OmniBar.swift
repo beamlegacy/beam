@@ -137,9 +137,6 @@ struct OmniBar: View {
                             showDownloadPanel.toggle()
                         })
                         .frame(height: 32, alignment: .top)
-                        .popover(isPresented: $showDownloadPanel, content: {
-                            DownloaderView(downloader: state.data.downloadManager)
-                        })
                         .background(GeometryReader { proxy -> Color in
                             let rect = proxy.frame(in: .global)
                             let center = CGPoint(x: rect.origin.x + rect.width / 2, y: rect.origin.y + rect.height / 2)
@@ -175,6 +172,9 @@ struct OmniBar: View {
             .background(BeamColor.Generic.background.swiftUI
                             .shadow(color: barShadowColor, radius: 0, x: 0, y: 0.5)
             )
+        }
+        .popup(isPresented: showDownloadPanel, config: .init(alignment: .topTrailing, offset: CGSize(width: -18, height: 45))) {
+            DownloaderView(downloader: state.data.downloadManager, isPresented: $showDownloadPanel)
         }
         .frame(height: 52, alignment: .top)
     }

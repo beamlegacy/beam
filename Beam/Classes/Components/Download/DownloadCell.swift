@@ -18,7 +18,6 @@ struct DownloadCell: View {
 
     @ObservedObject var download: Download
     @State private var hoverState: OnHoverState?
-    @State private var showAlertFileNotFound: Bool = false
     var isSelected: Bool
     private weak var downloadManager: BeamDownloadManager?
     private var onDeleteKeyDownAction: (() -> Void)?
@@ -28,7 +27,6 @@ struct DownloadCell: View {
         self.isSelected = isSelected
         self.downloadManager = downloadManager
         self.onDeleteKeyDownAction = onDeleteKeyDownAction
-        showAlertFileNotFound = false
     }
 
     var body: some View {
@@ -76,13 +74,6 @@ struct DownloadCell: View {
         .frame(height: 53)
         .background(KeyEventHandlingView(onKeyDown: onKeyDown(event:), handledKeyCodes: [.space, .enter, .backspace, .delete]))
         .background(backgroundColor.cornerRadius(6))
-        .alert(isPresented: $showAlertFileNotFound, content: {
-            Alert(title: Text("Beam can’t show the file “\(download.downloadURL.lastPathComponent)” in the Finder."),
-                  message: Text("The file has moved since you downloaded it. You can download it again or remove it from Beam."))
-        })
-        .onTapGesture(count: 2) {
-            openFile()
-        }
     }
 
     private var backgroundColor: Color {
@@ -126,25 +117,12 @@ struct DownloadCell: View {
         downloadManager?.resume(download)
     }
 
-    private func showInFinder() {
-        let downloadedFileURL = download.fileSystemURL
-        let tempFileURL = download.downloadDocumentFileURL
-
-        if downloadedFileURL.isFileURL, FileManager.default.fileExists(atPath: downloadedFileURL.path) {
-            NSWorkspace.shared.activateFileViewerSelecting([downloadedFileURL])
-        } else if tempFileURL.isFileURL, FileManager.default.fileExists(atPath: tempFileURL.path) {
-            NSWorkspace.shared.activateFileViewerSelecting([tempFileURL])
-        } else {
-            showAlertFileNotFound = true
-        }
+    private func openFile() {
+        downloadManager?.openFile(download)
     }
 
-    private func openFile() {
-        let url = download.fileSystemURL
-        guard url.isFileURL, FileManager.default.fileExists(atPath: url.path) else {
-            return
-        }
-        NSWorkspace.shared.open(url)
+    private func showInFinder() {
+        downloadManager?.showInFinder(download)
     }
 
     private func onKeyDown(event: NSEvent) {

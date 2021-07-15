@@ -80,9 +80,11 @@
 		33793AD7265CFEC50041E1B8 /* KeychainAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 524CF6D225F276D1007312F0 /* KeychainAccess */; };
 		338A66A0268DC26000B056EB /* LayerRemoverAnimationDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 338A669F268DC26000B056EB /* LayerRemoverAnimationDelegate.swift */; };
 		338A66C2268E053C00B056EB /* BeamDownloadDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 338A66C1268E053C00B056EB /* BeamDownloadDocument.swift */; };
+		3392E56D269D82FE000FA401 /* ClickCatchingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3392E56C269D82FE000FA401 /* ClickCatchingView.swift */; };
 		33B27467264C0F7100A318CD /* AutoUpdate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 33B27450264C0CDC00A318CD /* AutoUpdate.framework */; };
 		33B27468264C0F7100A318CD /* AutoUpdate.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 33B27450264C0CDC00A318CD /* AutoUpdate.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		33B2746A264C103400A318CD /* SmallUpdateIndicatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33B27469264C103400A318CD /* SmallUpdateIndicatorView.swift */; };
+		33D5F85A2697478E002C4F25 /* PopupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33D5F8592697478E002C4F25 /* PopupView.swift */; };
 		33DEF48826617E0B00834839 /* CircledButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33DEF48726617E0B00834839 /* CircledButton.swift */; };
 		4100D96B25AEFEEA00EF04CB /* BeamTextEdit+Shortcut.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4100D96A25AEFEEA00EF04CB /* BeamTextEdit+Shortcut.swift */; };
 		4105CE2225A5ECA2009AB687 /* BidirectionalPopoverItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4105CE2125A5ECA2009AB687 /* BidirectionalPopoverItem.swift */; };
@@ -866,8 +868,10 @@
 		333A0A1F268C4EED004B7905 /* KeyEventHandlingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyEventHandlingView.swift; sourceTree = "<group>"; };
 		338A669F268DC26000B056EB /* LayerRemoverAnimationDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerRemoverAnimationDelegate.swift; sourceTree = "<group>"; };
 		338A66C1268E053C00B056EB /* BeamDownloadDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamDownloadDocument.swift; sourceTree = "<group>"; };
+		3392E56C269D82FE000FA401 /* ClickCatchingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClickCatchingView.swift; sourceTree = "<group>"; };
 		33B27441264C0CDB00A318CD /* AutoUpdate.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = AutoUpdate.xcodeproj; path = Extern/AutoUpdate/AutoUpdate.xcodeproj; sourceTree = "<group>"; };
 		33B27469264C103400A318CD /* SmallUpdateIndicatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmallUpdateIndicatorView.swift; sourceTree = "<group>"; };
+		33D5F8592697478E002C4F25 /* PopupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopupView.swift; sourceTree = "<group>"; };
 		33DEF48726617E0B00834839 /* CircledButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircledButton.swift; sourceTree = "<group>"; };
 		4100D96A25AEFEEA00EF04CB /* BeamTextEdit+Shortcut.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamTextEdit+Shortcut.swift"; sourceTree = "<group>"; };
 		4105CE2125A5ECA2009AB687 /* BidirectionalPopoverItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BidirectionalPopoverItem.swift; sourceTree = "<group>"; };
@@ -2196,6 +2200,7 @@
 				418172D525811B8700317ED8 /* RoundRectButtonStyle.swift */,
 				A567157025F66F8600B46110 /* StyledText.swift */,
 				A520D8DE25F8DF8D00400720 /* TouchDownModifier.swift */,
+				3392E56C269D82FE000FA401 /* ClickCatchingView.swift */,
 				A5ECC8FE2679EBB500D8A087 /* HoverVisibleModifier.swift */,
 				A5144000263803600021DD56 /* TrackableScrollView.swift */,
 				A5D53696264BE2F50011A095 /* RetroCompatibleScrollViewReader.swift */,
@@ -3063,6 +3068,7 @@
 				A0A3BED4266FD1B200566D6C /* BeamStepperButton.swift */,
 				3330D7CC265E95E0008C9E20 /* LinearProgressView.swift */,
 				33DEF48726617E0B00834839 /* CircledButton.swift */,
+				33D5F8592697478E002C4F25 /* PopupView.swift */,
 			);
 			path = UIElements;
 			sourceTree = "<group>";
@@ -4085,6 +4091,7 @@
 				A52BFDF72608D6710028D3F3 /* BeamFont.swift in Sources */,
 				96319D6D26163AAD00D1CF31 /* BeamNote+CommandManager.swift in Sources */,
 				A005909F26677E8400698E75 /* PrivacyView.swift in Sources */,
+				3392E56D269D82FE000FA401 /* ClickCatchingView.swift in Sources */,
 				960A57E8264C88920061E8D2 /* ProxyEmbedNode.swift in Sources */,
 				4181724E2581107C00317ED8 /* TabStats.swift in Sources */,
 				4181724F2581107C00317ED8 /* WebView.swift in Sources */,
@@ -4266,6 +4273,7 @@
 				414B98F025A239F8002E81A3 /* FormatterView.swift in Sources */,
 				525C235125BAFC6B001B9625 /* Merge.swift in Sources */,
 				526017F425AE074E00634695 /* ConsoleWindow.swift in Sources */,
+				33D5F85A2697478E002C4F25 /* PopupView.swift in Sources */,
 				52C3077B25C311950027C4B1 /* BeamDate.swift in Sources */,
 				961EC4F225B4511D009FA322 /* Layer.swift in Sources */,
 				A552DF2D25F12A3600570C85 /* OmniBarButton.swift in Sources */,

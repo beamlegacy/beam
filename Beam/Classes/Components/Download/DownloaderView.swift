@@ -11,7 +11,6 @@ import Combine
 struct DownloaderView: View {
 
     @ObservedObject var downloader: BeamDownloadManager
-    @Environment(\.presentationMode) var presentationMode
 
     private let disabledContentColor = BeamColor.Button.text.swiftUI.opacity(0.13)
     private let contentColor = BeamColor.Button.text.swiftUI
@@ -22,9 +21,11 @@ struct DownloaderView: View {
 
     @State private var selectedDownloads: Set<Download> = []
     @State private var lastManuallyInsertedDownload: Download?
+    @Binding var isPresented: Bool
 
-    init(downloader: BeamDownloadManager) {
+    init(downloader: BeamDownloadManager, isPresented: Binding<Bool>) {
         self.downloader = downloader
+        self._isPresented = isPresented
     }
 
     var body: some View {
@@ -40,7 +41,7 @@ struct DownloaderView: View {
                     .opacity(shouldDisplayClearButton ? 1 : 0)
                     .animation(.easeInOut(duration: 0.3), value: shouldDisplayClearButton)
                     Button(action: {
-                        presentationMode.wrappedValue.dismiss()
+                        isPresented = false
                     }, label: {
                         Image("tabs-close")
                             .renderingMode(.template)
@@ -49,20 +50,29 @@ struct DownloaderView: View {
                     .buttonStyle(RoundRectButtonStyle())
                     .foregroundColor(foregroundColor)
                     .onHover { h in
-                        self.isHovering = h
+                        withAnimation {
+                            self.isHovering = h
+                        }
                     }
                 }.onHover { h in
-                    self.isHoveringHeader = h
+                    withAnimation {
+                        self.isHoveringHeader = h
+                    }
                 }
                 Separator(horizontal: true)
                     .padding(.top, 6)
             }
             .padding(.horizontal, 12)
             .padding(.top, 12)
-                VStack(spacing: 2) {
-                    ForEach(downloader.downloads) { d in
+            .animation(.easeInOut(duration: 1), value: isHoveringHeader)
+            .animation(.easeInOut(duration: 1), value: isHovering)
+            .transition(.opacity)
+            VStack(spacing: 2) {
+                ForEach(downloader.downloads) { d in
+                    ZStack {
                         DownloadCell(download: d, from: downloader, isSelected: selectedDownloads.contains(d), onDeleteKeyDownAction: backspaceTappedInCell)
-                            .gesture(TapGesture().modifiers(.command).onEnded({ _ in
+                        ClickCatchingView(onTap: { event in
+                            if event.modifierFlags.contains(.command) {
                                 if selectedDownloads.contains(d) {
                                     selectedDownloads.remove(d)
                                     lastManuallyInsertedDownload = nil
@@ -70,8 +80,7 @@ struct DownloaderView: View {
                                     selectedDownloads.insert(d)
                                     lastManuallyInsertedDownload = d
                                 }
-                            }))
-                            .gesture(TapGesture().modifiers(.shift).onEnded({ _ in
+                            } else if event.modifierFlags.contains(.shift) {
                                 guard let tappedIndex = downloader.downloads.firstIndex(of: d) else { return }
                                 if let last = lastManuallyInsertedDownload, let initialIndex = downloader.downloads.firstIndex(of: last) {
                                     let minIndex = min(initialIndex, tappedIndex)
@@ -80,19 +89,30 @@ struct DownloaderView: View {
                                 } else {
                                     selectedDownloads = Set(downloader.downloads[0...tappedIndex])
                                 }
-                            }))
-                            .onTapGesture {
+                            } else {
                                 selectedDownloads = [d]
                                 lastManuallyInsertedDownload = d
                             }
+                        }, onDoubleTap: { _ in
+                            downloader.openFile(d)
+                        })
+                        .padding(.trailing, d.state == URLSessionDownloadTask.State.completed ? 20 : 40)
                     }
                 }
+            }
             .padding(.horizontal, 6)
             .padding(.bottom, 6)
             .padding(.top, 2)
-        }.transition(.opacity)
+        }
         .frame(width: 368.0)
-        .background(BeamColor.Generic.background.swiftUI)
+        .alert(item: $downloader.showAlertFileNotFoundForDownload, content: { download in
+            Alert(title: Text("Beam can’t show the file “\(download.fileSystemURL.lastPathComponent)” in the Finder."), message: Text("The file has moved since you downloaded it. You can download it again or remove it from Beam."), primaryButton: .default(Text("Download again"), action: {
+                downloader.clearFileDownload(download)
+                downloader.downloadFile(at: download.downloadURL, headers: [:], suggestedFileName: download.suggestedFileName)
+            }), secondaryButton: .destructive(Text("Remove"), action: {
+                downloader.clearFileDownload(download)
+            }))
+        })
     }
 
     private var shouldDisplayClearButton: Bool {
@@ -127,7 +147,7 @@ struct DownloaderView_Previews: PreviewProvider {
         downloader.downloadFile(at: URL(string: "https://devimages-cdn.apple.com/design/resources/download/SF-Symbols-2.1")!, headers: [:], suggestedFileName: nil)
 
         return Group {
-            DownloaderView(downloader: downloader)
+            DownloaderView(downloader: downloader, isPresented: .constant(true))
         }
     }
 }
