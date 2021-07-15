@@ -22,7 +22,7 @@ struct BeamStepperButton: View {
                         .renderingMode(.template)
                         .frame(width: 10, height: 10, alignment: .center)
                 }.buttonStyle(PlainButtonStyle())
-                
+
                 Button(action: rightBtnAction) {
                     Image("basicRemove")
                         .renderingMode(.template)

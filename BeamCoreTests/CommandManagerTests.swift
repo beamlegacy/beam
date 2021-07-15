@@ -232,7 +232,7 @@ extension CommandManagerTests {
 
         let add = AsyncCalculator(operand: "+", right: 2, opRes: opRes)
         let runExpectation = XCTestExpectation(description: "AsyncCalculator Run")
-        cmdManager.run(command: add, on: nil) { done in
+        cmdManager.run(command: add, on: nil) { _ in
             runExpectation.fulfill()
         }
         wait(for: [runExpectation], timeout: 5)

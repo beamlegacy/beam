@@ -507,6 +507,20 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
         return nil
     }
 
+    open func elementContainingText(someText: String) -> BeamElement? {
+        if text.text == someText {
+            return self
+        }
+
+        for c in children {
+            if let element = c.elementContainingText(someText: someText) {
+                return element
+            }
+        }
+
+        return nil
+    }
+
     open func nextSibbling() -> BeamElement? {
         if let p = parent {
             let sibblings = p.children

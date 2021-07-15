@@ -300,7 +300,7 @@ struct BrowserTabBar: View {
 
 }
 
-struct BrowserTabBar_Preview: PreviewProvider {
+struct BrowserTabBar_Previews: PreviewProvider {
     static var state = BeamState()
 
     static func tab(_ title: String) -> BrowserTab {

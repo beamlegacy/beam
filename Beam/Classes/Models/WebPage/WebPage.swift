@@ -49,7 +49,8 @@ protocol WebPage: AnyObject, Scorable {
     // MARK: Navigation handling
     /// Leave the page, either by back or forward.
     func leave()
-    func navigatedTo(url: URL, read: Readability, title: String, isNavigation: Bool)
+    var appendToIndexer: ((URL, Readability) -> Void)? { get }
+    func navigatedTo(url: URL, title: String?, reason: NoteElementAddReason)
     func addTextToClusteringManager(_ text: String, url: URL)
 }
 
@@ -115,7 +116,8 @@ extension WebPage {
         self
     }
 
-    func navigatedTo(url: URL, read: Readability, title: String, isNavigation: Bool) { }
+    func navigatedTo(url: URL, title: String?, reason: NoteElementAddReason) { }
+
     func createNewWindow(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, windowFeatures: WKWindowFeatures, setCurrent: Bool) -> BeamWebView {
         webView
     }

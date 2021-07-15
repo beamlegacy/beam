@@ -109,7 +109,7 @@ class BrowserTabsManager: ObservableObject {
                     DispatchQueue.main.async { [weak self] in
                         guard let self = self else { return }
                         let indexDocument = IndexDocument(source: url.absoluteString, title: read.title, contents: text)
-                        
+
                         let tabInformation: TabInformation? = TabInformation(url: url,
                                                                              tabTree: tabTree,
                                                                              currentTabTree: currentTabTree,

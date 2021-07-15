@@ -13,7 +13,7 @@ import Nimble
 @testable import Beam
 @testable import BeamCore
 
-// swiftlint:disable:next type_body_length file_length
+// swiftlint:disable type_body_length type_name file_length
 class PointAndShootMessageHandlerFrameBoundsTest: PointAndShootTest {
     var browserTabConfiguration: BrowserTabConfiguration!
     var pointAndShootMessageHandler: PointAndShootMessageHandler!

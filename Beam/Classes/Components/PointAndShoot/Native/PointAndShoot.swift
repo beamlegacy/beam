@@ -319,8 +319,6 @@ class PointAndShoot: WebPageHolder {
         webPositions.removeFrameInfo()
     }
 
-
-
     /// Small Utility to create a BeamElement containing noteText
     /// - Parameter noteText: Text of note
     /// - Returns: BeamElement containing noteText without any styling

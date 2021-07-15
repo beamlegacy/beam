@@ -13,6 +13,9 @@ enum NoteElementAddReason {
     case navigation
 }
 
+/**
+ Rules to log items into notes from web navigation.
+ */
 class WebNoteController: Encodable, Decodable {
 
     enum CodingKeys: String, CodingKey {
@@ -29,12 +32,8 @@ class WebNoteController: Encodable, Decodable {
     var nested: Bool = false
 
     public var score: Float {
-        set {
-            element.score = newValue
-        }
-        get {
-            element.score ?? 0
-        }
+        get { element.score }
+        set { element.score = newValue }
     }
 
     public var isTodaysNote: Bool {
@@ -83,10 +82,11 @@ class WebNoteController: Encodable, Decodable {
     */
     func add(url: URL, text: String?, reason: NoteElementAddReason) -> BeamElement {
         let linkString = url.absoluteString
-        let existing: BeamElement? = note.elementContainingLink(to: linkString)
-        element = existing ?? targetElement(reason: reason)
+        let existingLink = note.elementContainingLink(to: linkString)
+        let existingText = (text != nil && !text!.isEmpty ? note.elementContainingText(someText: text!) : nil)
+        element = existingLink ?? existingText ?? targetElement(reason: reason)
         setContents(url: url, text: text)
-        Logger.shared.logDebug("add current page '\(text)' with url \(url) to note '\(note.title)'", category: .web)
+        Logger.shared.logDebug("add current page '\(text ?? "nil")' with url \(url) to note '\(note.title)'", category: .web)
         return element
     }
 
@@ -135,13 +135,16 @@ class WebNoteController: Encodable, Decodable {
         let titleStr = text ?? beamText.text
         let name = titleStr.isEmpty ? url.absoluteString : titleStr
         if currentElementIsSimple() {
-            let attributes = beamText.ranges[0].attributes
+            var range = beamText.ranges[0]
+            let attributes = range.attributes
             if attributes.isEmpty {    // New contents?
                 element.text = BeamText(text: name, attributes: [.link(url.absoluteString)])
+            } else if name == range.string {
+                range.attributes = [.link(url.absoluteString)]
             } else {
                 let attr: BeamText.Attribute = attributes[0]
-                if case let .link(url.absoluteString) = attr {
-                    element.text = BeamText(text: name, attributes: [.link(url.absoluteString)])
+                if case .link(url.absoluteString) = attr {
+                    element.text = BeamText(text: name, attributes: attributes)
                 }
             }
         }

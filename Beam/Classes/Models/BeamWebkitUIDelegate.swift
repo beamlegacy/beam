@@ -5,17 +5,18 @@ class BeamWebkitUIDelegateController: WebPageHolder, WKUIDelegate {
 
     func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
         guard let url = navigationAction.request.url else { return nil }
-        switch (navigationAction.navigationType) {
+        switch navigationAction.navigationType {
         case .other:
+            let numberOrNil: (NSNumber?) -> String = { $0?.stringValue ?? "nil" }
             Logger.shared.logInfo("""
-                                  Redirecting toward a new window x=\(windowFeatures.x), y=\(windowFeatures.y),
-                                  width=\(windowFeatures.width), height=\(windowFeatures.height), 
+                                  Redirecting toward a new window x=\(numberOrNil(windowFeatures.x)), y=\(numberOrNil(windowFeatures.y)),
+                                  width=\(numberOrNil(windowFeatures.width)), height=\(numberOrNil(windowFeatures.height)),
                                   \(windowFeatures.allowsResizing != nil ? "resizable" : "not resizable")
-                                  containing \(navigationAction.request.url?.absoluteString)
+                                  containing \(url.absoluteString)
                                   """, category: .web)
             return page.createNewWindow(url, configuration, windowFeatures: windowFeatures, setCurrent: true)
         default:
-            Logger.shared.logInfo("Creating new webview tab for \(navigationAction.request.url?.absoluteString)", category: .web)
+            Logger.shared.logInfo("Creating new webview tab for \(url.absoluteString)", category: .web)
             let newTab = page.createNewTab(url, configuration, setCurrent: true)
             return newTab.webView
         }

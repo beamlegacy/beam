@@ -27,7 +27,7 @@ func export_all_browsing_sessions() {
     let sessionsFileURL = documentDirectory.appendingPathComponent("beam_all_browsing_sessions \(Date()).json")
     let linksFileURL = documentDirectory.appendingPathComponent("beam_all_links \(Date()).json")
 
-    ////////// Browsing sessions
+    // MARK: Browsing sessions
     guard let sessionsData = try? encoder.encode(sessions)
     else {
         Logger.shared.logError("Unable to encode list of browsing sessions", category: .web)
@@ -42,7 +42,7 @@ func export_all_browsing_sessions() {
     //swiftlint:disable:next print
     print("All browsing sessions saved to file \(sessionsFileURL)")
 
-    ////////// Links
+    // MARK: Links
     guard let linksData = try? encoder.encode(LinkStore.shared.links)
     else {
         Logger.shared.logError("Unable to encode list of links", category: .web)

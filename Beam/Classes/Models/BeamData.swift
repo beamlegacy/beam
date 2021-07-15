@@ -81,8 +81,8 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     static var indexPath: URL { URL(fileURLWithPath: dataFolder(fileName: "index.beamindex")) }
     static var fileDBPath: String { dataFolder(fileName: "files.db") }
     static var linkStorePath: URL { URL(fileURLWithPath: dataFolder(fileName: "links.store")) }
-    static var idToTitle: [UUID:String] = [:]
-    static var titleToId: [String:UUID] = [:]
+    static var idToTitle: [UUID: String] = [:]
+    static var titleToId: [String: UUID] = [:]
 
     override init() {
         clusteringManager = ClusteringManager(ranker: sessionLinkRanker)

@@ -49,6 +49,10 @@ extension GRDBDatabase {
     /// Creates an empty database (in-memory).
     static func empty() -> GRDBDatabase {
         let dbQueue = DatabaseQueue()
-        return try! GRDBDatabase(dbQueue)
+        do {
+            return try GRDBDatabase(dbQueue)
+        } catch {
+            fatalError("Error creating empty GRDBDatabase \(error)")
+        }
     }
 }

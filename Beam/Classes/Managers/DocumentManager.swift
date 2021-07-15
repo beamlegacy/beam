@@ -758,7 +758,7 @@ extension DocumentManager {
                 guard let updatedDocuments = notification.userInfo?["updatedDocuments"] as? [DocumentStruct] else {
                     return
                 }
-                
+
                 for document in updatedDocuments {
                     if document.title == documentStruct.title &&
                         document.databaseId == documentStruct.databaseId &&

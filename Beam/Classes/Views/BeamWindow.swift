@@ -36,10 +36,8 @@ class BeamWindow: NSWindow, NSDraggingDestination {
 
     // This is a hack to prevent a crash with swiftUI being dumb about the initialFirstResponder
     override var initialFirstResponder: NSView? {
-        get {
-            nil
-        }
-        set { }
+        get { nil }
+        set { _ = newValue }
     }
 
     // swiftlint:disable:next function_body_length

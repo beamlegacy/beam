@@ -1,6 +1,6 @@
 import Foundation
 
-//swiftlint:disable:next type_name
+// swiftlint:disable:next type_name
 class Me: Decodable, Errorable {
     var id: String?
     var username: String?

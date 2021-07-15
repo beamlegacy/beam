@@ -19,7 +19,7 @@ struct SmallUpdateIndicatorView: View {
     var body: some View {
         Group {
             switch versionChecker.state {
-            case .updateAvailable (let release):
+            case .updateAvailable(let release):
                 ButtonLabel("Update available", icon: "status-publish") {
                     showReleaseNotes.toggle()
                 }.popover(isPresented: $showReleaseNotes, content: {

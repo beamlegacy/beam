@@ -16,6 +16,14 @@ struct KeychainStorable<T> {
     }
 
     var wrappedValue: T? {
+        get {
+            if T.self == String.self {
+                return store[key] as? T
+            } else if T.self == Data.self {
+                return store[data: key] as? T
+            }
+            return nil
+        }
         set {
             do {
                 if newValue == nil {
@@ -43,14 +51,6 @@ struct KeychainStorable<T> {
             } catch {
                 Logger.shared.logError(error.localizedDescription, category: .keychain)
             }
-        }
-        get {
-            if T.self == String.self {
-                return store[key] as? T
-            } else if T.self == Data.self {
-                return store[data: key] as? T
-            }
-            return nil
         }
     }
 }

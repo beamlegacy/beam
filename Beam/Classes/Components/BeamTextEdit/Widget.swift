@@ -874,7 +874,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         return ""
 //        return String.tabs(level)
 //            + (children.isEmpty ? "- " : (open ? "v - " : "> - "))
-////            + text.text + "\n"
+// //            + text.text + "\n"
 //            + (open ?
 //                children.reduce("", { result, child -> String in
 //                    result + child.printTree(level: level + 1)

@@ -250,14 +250,14 @@ public extension CALayer {
     public var config = TextConfig()
 
     var selectedTextRange: Range<Int> {
+        get {
+            rootNode.state.selectedTextRange
+        }
         set {
             assert(newValue.lowerBound != NSNotFound)
             assert(newValue.upperBound != NSNotFound)
             rootNode.state.selectedTextRange = newValue
             reBlink()
-        }
-        get {
-            rootNode.state.selectedTextRange
         }
     }
 
@@ -334,22 +334,16 @@ public extension CALayer {
 
     // This is the node that the user is currently editing. It can be any node in the rootNode tree
     var focusedWidget: Widget? {
+        get { rootNode.focusedWidget }
         set {
             invalidate()
             rootNode.focusedWidget = newValue
             invalidate()
         }
-        get {
-            rootNode.focusedWidget
-        }
     }
     var mouseHandler: Widget? {
-        set {
-            rootNode.mouseHandler = newValue
-        }
-        get {
-            rootNode.mouseHandler
-        }
+        get { rootNode.mouseHandler }
+        set { rootNode.mouseHandler = newValue }
     }
 
     var topOffset: CGFloat = 28 { didSet { invalidateLayout() } }
@@ -846,13 +840,13 @@ public extension CALayer {
         _ = rootNode.note?.cmdManager.redo(context: rootNode.cmdContext)
     }
 
-    //MARK: Input detector properties
+    // MARK: Input detector properties
     // State to detect shortcuts: @ / [[ ]]
     internal var inputDetectorState: Int = 0
     internal var inputDetectorEnabled: Bool { inputDetectorState >= 0 }
     internal var inputDetectorLastInput: String = ""
 
-    //MARK: Paste properties
+    // MARK: Paste properties
     internal let supportedCopyTypes: [NSPasteboard.PasteboardType] = [.noteDataHolder, .bTextHolder, .rtf, .string]
     internal let supportedPasteObjects = [BeamNoteDataHolder.self, BeamTextHolder.self, NSAttributedString.self, NSString.self]
 
@@ -1417,7 +1411,6 @@ public extension CALayer {
 //
 //    override public func insertDoubleQuoteIgnoringSubstitution(_ sender: Any?) {
 //    }
-
 
         /* Case changes */
 
