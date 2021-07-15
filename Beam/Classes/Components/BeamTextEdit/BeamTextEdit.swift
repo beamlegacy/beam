@@ -1234,8 +1234,11 @@ public extension CALayer {
     }
 
     override public func moveLeftAndModifySelection(_ sender: Any?) {
+        let showFormatter = rootNode.cursorPosition != 0
         rootNode.moveLeftAndModifySelection()
-        showInlineFormatterOnKeyEventsAndClick(isKeyEvent: true)
+        if showFormatter {
+            showInlineFormatterOnKeyEventsAndClick(isKeyEvent: true)
+        }
     }
 
     override public func moveWordRight(_ sender: Any?) {
@@ -1257,8 +1260,12 @@ public extension CALayer {
     }
 
     override public func moveRightAndModifySelection(_ sender: Any?) {
+        guard let node = focusedWidget as? TextNode else { return }
+        let showFormatter = rootNode.cursorPosition != node.text.count
         rootNode.moveRightAndModifySelection()
-        showInlineFormatterOnKeyEventsAndClick(isKeyEvent: true)
+        if showFormatter {
+            showInlineFormatterOnKeyEventsAndClick(isKeyEvent: true)
+        }
     }
 
     override public func moveToBeginningOfLine(_ sender: Any?) {
