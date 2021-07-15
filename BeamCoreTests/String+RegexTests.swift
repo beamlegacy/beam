@@ -7,7 +7,7 @@
 
 import XCTest
 
-class String_RegexTests: XCTestCase {
+class StringRegexTests: XCTestCase {
 
     let validWebURLs = ["swift.fr", "http://swift.fr", "http://SwIft.Fr"]
     let validFileURLs = ["file:///swift.beamappfile", "file:///path/to/swift.html"]

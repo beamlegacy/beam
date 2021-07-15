@@ -123,7 +123,7 @@ class ClusteringManager: ObservableObject {
         }
         var replaceContent = false
         if let pageToAdd = pageToAdd {
-            if let _ = newContent {
+            if newContent != nil {
                 replaceContent = true
             }
             cluster.add(pageToAdd, ranking: ranking, replaceContent: replaceContent) { result in

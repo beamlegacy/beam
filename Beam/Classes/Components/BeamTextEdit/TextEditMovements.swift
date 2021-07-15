@@ -1,10 +1,3 @@
-//
-//  TextEditMovements.swift
-//  Beam
-//
-//  Created by Sebastien Metrot on 26/10/2020.
-//
-
 import Foundation
 
 extension TextRoot {
@@ -239,9 +232,7 @@ extension TextRoot {
     @discardableResult
     public func selectAllNodes() -> Bool {
         let alreadySelectingNodes = root?.state.nodeSelection != nil
-        guard let selection = startNodeSelection() else {
-            return false
-        }
+        guard let selection = startNodeSelection() else { return false }
 
         // If we are starting the selection we need to bail out now: we have just seleted the first node
         guard alreadySelectingNodes else { return true }
@@ -377,7 +368,6 @@ extension TextRoot {
         if let selection = root?.state.nodeSelection {
             return selection
         }
-
         guard let node = focusedWidget as? TextNode,
               node.placeholder.isEmpty || !node.text.isEmpty else { return nil }
         node.updateActionLayerVisibility(hidden: true)

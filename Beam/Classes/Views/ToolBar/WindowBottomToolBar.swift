@@ -69,7 +69,6 @@ struct WindowBottomToolBar: View {
     }
 }
 
-
 private struct BottomToolBarTrailingIconView: View {
     @EnvironmentObject var state: BeamState
     @EnvironmentObject var noteMediaPlayerManager: NoteMediaPlayerManager

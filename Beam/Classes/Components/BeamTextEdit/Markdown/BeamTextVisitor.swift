@@ -86,7 +86,7 @@ class BeamTextVisitor {
 //            context.append(.quote(depth, "", ""))
             return visitChildren(node)
 
-        case let .check:
+        case .check:
             pushContext(); defer { popContext() }
 //            context.append(.check(checked))
             return visitChildren(node)

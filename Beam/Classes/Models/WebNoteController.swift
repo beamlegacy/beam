@@ -32,12 +32,8 @@ class WebNoteController: Encodable, Decodable {
     var nested: Bool = false
 
     public var score: Float {
-        set {
-            element.score = newValue
-        }
-        get {
-            element.score ?? 0
-        }
+        get { element.score }
+        set { element.score = newValue }
     }
 
     public var isTodaysNote: Bool {
@@ -90,7 +86,7 @@ class WebNoteController: Encodable, Decodable {
         let existingText = (text != nil && !text!.isEmpty ? note.elementContainingText(someText: text!) : nil)
         element = existingLink ?? existingText ?? targetElement(reason: reason)
         setContents(url: url, text: text)
-        Logger.shared.logDebug("add current page '\(text)' with url \(url) to note '\(note.title)'", category: .web)
+        Logger.shared.logDebug("add current page '\(text ?? "nil")' with url \(url) to note '\(note.title)'", category: .web)
         return element
     }
 
@@ -147,7 +143,7 @@ class WebNoteController: Encodable, Decodable {
                 range.attributes = [.link(url.absoluteString)]
             } else {
                 let attr: BeamText.Attribute = attributes[0]
-                if case let .link(url.absoluteString) = attr {
+                if case .link(url.absoluteString) = attr {
                     element.text = BeamText(text: name, attributes: attributes)
                 }
             }
