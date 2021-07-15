@@ -17,7 +17,7 @@ class Download: Identifiable, ObservableObject, Codable {
 
     let id: UUID
     var fileSystemURL: URL
-    
+
     private(set) var downloadTask: URLSessionDownloadTask?
 
     var downloadDocument: BeamDownloadDocument?

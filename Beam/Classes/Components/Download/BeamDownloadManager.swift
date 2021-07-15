@@ -2,32 +2,22 @@ import Foundation
 import BeamCore
 import Combine
 
-/**
- This is derived from FavIcon's download code
- */
 public class BeamDownloadManager: NSObject, DownloadManager, ObservableObject {
 
     private let ephemeralDownloadSession = URLSession(configuration: .ephemeral)
     private var fileDownloadSession: URLSession!
 
-    @Published private(set) var downloads: [Download]
-    @Published private(set) var fractionCompleted: Double
-    @Published private(set) var ongoingDownload: Bool
+    @Published private(set) var downloads: [Download] = []
+    @Published private(set) var fractionCompleted: Double = 0.0
+    @Published private(set) var ongoingDownload: Bool = false
 
-    var overallProgress: Progress
-    private(set) var scope: Set<AnyCancellable>
+    var overallProgress = Progress()
+    private(set) var scope = Set<AnyCancellable>()
     private let fileManager = FileManager.default
-    private var taskDownloadAssociation: [URLSessionDownloadTask: Download]
+    private var taskDownloadAssociation = [URLSessionDownloadTask: Download]()
 
     override init() {
-        downloads = []
-        fractionCompleted = 0.0
-        overallProgress = Progress()
-        scope = []
-        taskDownloadAssociation = [:]
-        ongoingDownload = false
         super.init()
-
         fileDownloadSession = URLSession(configuration: .default, delegate: self, delegateQueue: nil)
         setProgressPublisher()
     }

@@ -105,12 +105,8 @@ class BeamTableCellIconView: NSTableCellView {
 class CustomImageView: NSImageView {
 
     override var isHighlighted: Bool {
-        set {
-
-        }
-        get {
-            return false
-        }
+        get { false }
+        set { _ = newValue }
     }
 }
 

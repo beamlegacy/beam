@@ -173,8 +173,7 @@ struct AllowListSection: View {
 struct WebsiteDataSection: View {
     var body: some View {
         VStack(alignment: .leading) {
-            Checkbox(checkState: false, text: "Block All Cookies", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
-            }
+            Checkbox(checkState: false, text: "Block All Cookies", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { _ in }
             HStack {
                 Button("Manage Website Data...") {
 

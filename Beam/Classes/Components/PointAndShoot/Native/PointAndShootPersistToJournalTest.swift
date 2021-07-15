@@ -65,6 +65,7 @@ class PointAndShootPersistToJournalTest: PointAndShootTest {
         XCTAssertEqual(self.pns.shootGroups.first?.targets.first?.html, paragraphTarget.html)
     }
 
+    // swiftlint:disable:next function_body_length
     func testTwoShootsToTwoDifferentCards() throws {
         // Add Paragraph 1 to Card 1
         let paragraphTarget: PointAndShoot.Target = PointAndShoot.Target(

@@ -37,7 +37,6 @@ extension NSColor {
         var fgB: CGFloat = 0
         var fgA: CGFloat = 0
 
-
         self.usingColorSpace(.deviceRGB)?.getRed(&bgR, green: &bgG, blue: &bgB, alpha: &bgA)
         overlay.usingColorSpace(.deviceRGB)?.getRed(&fgR, green: &fgG, blue: &fgB, alpha: &fgA)
 
@@ -48,7 +47,7 @@ extension NSColor {
         return NSColor(red: r, green: g, blue: b, alpha: 1.0)
     }
 
-    static func +(lhs: NSColor, rhs: NSColor) -> NSColor {
+    static func + (lhs: NSColor, rhs: NSColor) -> NSColor {
         return lhs.add(rhs)
     }
 }

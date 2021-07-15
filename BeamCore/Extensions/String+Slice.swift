@@ -22,7 +22,7 @@ public extension String {
     }
 
     func dropBefore(substring: String) -> String? {
-        guard let prefixRange = self.range(of:substring) else { return nil }
+        guard let prefixRange = self.range(of: substring) else { return nil }
         let newStartIndex = self.index(prefixRange.lowerBound, offsetBy: 0)
         return String(self[newStartIndex...])
     }

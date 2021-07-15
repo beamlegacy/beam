@@ -47,7 +47,6 @@ class BeamWebNavigationController: WebPageHolder, WebNavigationController {
             case let .success(read):
                 self.browsingTree.navigateTo(url: url.absoluteString, title: read.title, startReading: self.page.isActiveTab(),
                                              isLinkActivation: isLinkActivation, readCount: read.content.count)
-                let webPageTitle = self.page.title
                 self.page.appendToIndexer?(url, read)
                 try? TextSaver.shared?.save(nodeId: self.browsingTree.current.id, text: read)
             case let .failure(error):

@@ -106,12 +106,8 @@ class Layer: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     }
 
     var contentsScale: CGFloat {
-        get {
-            self.layer.contentsScale
-        }
-        set {
-            self.layer.deepContentsScale = contentsScale
-        }
+        get { self.layer.contentsScale }
+        set { self.layer.deepContentsScale = newValue }
     }
 }
 

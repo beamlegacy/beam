@@ -196,8 +196,10 @@ class BrowsingTreeScoreTests: XCTestCase {
         let readStart = child.events[1].date
         let readEnd = child.events[2].date
         let readDuration = Float(readEnd.timeIntervalSince(readStart))
-        let updateScoreCalls = (tree.frecencyScorer as! FakeFrecencyScorer).updateCalls
-
+        guard let fakeFrecencyScorer = tree.frecencyScorer as? FakeFrecencyScorer else {
+            fatalError("frecencyScorer should be a FakeFrecencyScorer")
+        }
+        let updateScoreCalls = fakeFrecencyScorer.updateCalls
         //root visit has no read period so only info at creation is sent
         testCall(call: updateScoreCalls[0], expectedUrlId: root.link, expectedValue: 1, expectedVisitType: .root, expectedDate: rootCreationDate, expectedKey: .visit30d0)
         //child parent is root and tree origin is search so child visit type is .searchBar

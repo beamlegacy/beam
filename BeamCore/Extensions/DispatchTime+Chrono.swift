@@ -1,7 +1,7 @@
 import Foundation
 
 public extension DispatchTime {
-    enum TimeUnit : String {
+    enum TimeUnit: String {
         case ns
         case µs
         case ms

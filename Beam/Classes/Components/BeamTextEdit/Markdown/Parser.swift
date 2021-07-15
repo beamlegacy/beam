@@ -173,6 +173,11 @@ class Parser {
                 try container.encode(children, forKey: .children)
             }
 
+            try encodeDecorations(to: encoder)
+        }
+
+        private func encodeDecorations(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
             if let value = decorations[.prefix] { try container.encode(value, forKey: .prefix) }
             if let value = decorations[.infix] { try container.encode(value, forKey: .infix) }
             if let value = decorations[.suffix] { try container.encode(value, forKey: .suffix) }

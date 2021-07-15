@@ -32,7 +32,7 @@ class WebNavigationMessageHandler: BeamMessageHandler<NavigationMessages> {
                 return
             }
             guard href == webPage.url?.absoluteString else {
-                Logger.shared.logWarning("Location changed but in \(href) which is different from main frame \(webPage.url)", category: .web)
+                Logger.shared.logWarning("Location changed but in \(href) which is different from main frame \(String(describing: webPage.url))", category: .web)
                 return
             }
             Logger.shared.logInfo("Location changed: \(type) \(urlString))")
