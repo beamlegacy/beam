@@ -762,6 +762,10 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     }
 
     func mouseMoved(mouseInfo: MouseInfo) -> Bool {
+        if debug {
+            let inContentsFrame = contentsFrame.contains(mouseInfo.position)
+            Logger.shared.logInfo("mouse moved pos \(mouseInfo.position) \(inContentsFrame ? "Contents" : "")")
+        }
         return false
     }
 
@@ -890,7 +894,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
         let c = NSColor.gray.cgColor
         context.setStrokeColor(c)
-        let bounds = NSRect(origin: CGPoint(), size: currentFrameInDocument.size)
+        let bounds = NSRect(origin: .zero, size: currentFrameInDocument.size)
         context.stroke(bounds)
 
         context.setFillColor(c.copy(alpha: 0.2)!)
