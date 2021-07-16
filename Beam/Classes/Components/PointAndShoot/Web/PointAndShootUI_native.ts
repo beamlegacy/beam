@@ -1,19 +1,23 @@
-import { PointAndShootUI } from "./PointAndShootUI"
-import { Native } from "./Native"
-import { WebEventsUI_native } from "./WebEventsUI_native"
+import {PointAndShootUI} from "./PointAndShootUI"
+import {Native} from "./Native"
+import {WebEventsUI_native} from "./WebEventsUI_native"
 import {
+  BeamCollectedQuote,
   BeamElement,
+  BeamElementMessagePayload,
   BeamHTMLElement,
+  BeamMouseLocation,
   BeamNodeType,
+  BeamQuoteId,
+  BeamRange,
   BeamRect,
   BeamSelectionMessagePayload,
-  BeamElementMessagePayload,
-  BeamQuoteId,
-  BeamMouseLocation,
-  BeamCollectedQuote,
-  BeamRange,
+  BeamText,
 } from "./BeamTypes"
-import { Util } from "./Util"
+import {Util} from "./Util"
+import {BeamElementHelper} from "./BeamElementHelper";
+import {BeamRectHelper} from "./BeamRectHelper";
+import {PointAndShootHelper} from "./PointAndShootHelper";
 
 export class PointAndShootUI_native extends WebEventsUI_native implements PointAndShootUI {
   /**
@@ -24,64 +28,99 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
   }
 
   /**
-   * Update a given area's bounds with it's childBounds and containerBounds
+   * Update a given area's bounds with it's bounds and containerBounds
    *
    * @private
    * @param {*} area
-   * @param {*} childBounds
-   * @param {*} containerBounds
-   * @return {*}  {BeamRect}
+   * @param {*} bounds
+   * @param clippingArea
+   * @return {*} {BeamRect}
    * @memberof PointAndShootUI_native
    */
-  private setArea(area, childBounds, containerBounds): BeamRect {
-    return {
-      x: Math.min(area.x, area.x + childBounds.x),
-      y: Math.min(area.y, area.y + childBounds.y),
-      width: Math.max(area.width, childBounds.x - containerBounds.x + childBounds.width),
-      height: Math.max(area.height, childBounds.y - containerBounds.y + childBounds.height),
+  private setArea(area, bounds, clippingArea): BeamRect {
+    let newArea
+
+    if (area && bounds) {
+      newArea = BeamRectHelper.boundingRect(area, bounds)
+    } else if (bounds) {
+      // No previous area, use bounds
+      const { x, y, width, height } = bounds
+      newArea = { x, y, width, height }
     }
+
+    if (newArea && clippingArea) {
+      newArea = BeamRectHelper.intersection(newArea, clippingArea)
+    }
+
+    return newArea
   }
 
   /**
-   * Gets the element bounds of a given element. If the element contains child nodes,
-   * the sum of all child node bounds is used instead.
+   * Gets the visual bounds of a given element. If the element contains child nodes,
+   * the sum of all child node bounds is used instead (recursively)
    *
    * Supported child node types are:
    *  - Element
    *  - Text
    *  See: https://developer.mozilla.org/en-US/docs/Web/API/Node/nodeType
    *
-   * @private
    * @param {BeamElement} el
-   * @return {*}  {BeamRect}
+   * @param {BeamRect} area
+   * @param clippingArea
+   * @return {*} {BeamRect}
    * @memberof PointAndShootUI_native
    */
-  private elementBounds(el: BeamElement): BeamRect {
-    const containerBounds = el.getBoundingClientRect()
-    // We only need to get first-level children
-    const childNodes = el.childNodes
+  elementBounds(el: BeamElement, area?: BeamRect, clippingArea?: BeamRect): BeamRect {
+    const { win } = this.native
 
-    if (childNodes.length > 0) {
-      // Init rect with container offset
-      let area: BeamRect = { x: containerBounds.x, y: containerBounds.y, width: 0, height: 0 }
+    // Find svg root if any and use it for bounds calculation
+    const svgRoot = BeamElementHelper.getSvgRoot(el)
+    if (svgRoot) {
+      el = svgRoot
+    }
+
+    // Make sure the element has something we're interested in
+    if (!PointAndShootHelper.isMeaningfulOrChildrenAre(el, win)) {
+      return
+    }
+
+    // Filter useful childNodes
+    const childNodes = PointAndShootHelper.getMeaningfulChildNodes(el, win)
+
+    // Get clipping area if previously undefined
+    const computeClippingArea = el !== win.document.body && el !== win.document.documentElement
+    if (!clippingArea && computeClippingArea) {
+      const clippingContainers = BeamElementHelper.getClippingContainers(el, win)
+      if (clippingContainers && clippingContainers.length > 0) {
+        clippingArea = BeamElementHelper.getClippingArea(clippingContainers, win)
+      }
+    }
+
+    // If it's an image or media, select the whole element
+    const selectWholeElement = BeamElementHelper.isImage(el, win) || BeamElementHelper.isMedia(el)
+
+    // We have meaningful children, inspect them and compute their bounds
+    if (childNodes.length > 0 && !selectWholeElement) {
 
       for (const child of childNodes) {
         switch (child.nodeType) {
           case BeamNodeType.element:
-            let childBounds = (child as BeamElement).getBoundingClientRect()
-            area = this.setArea(area, childBounds, containerBounds)
+            const childElement = child as BeamElement
+            if (childElement.tagName.toLowerCase() === "svg") {
+              let childBounds = childElement.getBoundingClientRect()
+              area = this.setArea(area, childBounds, clippingArea)
+            } else {
+              const bounds = this.elementBounds(childElement, area, clippingArea)
+              area = this.setArea(area, bounds, clippingArea)
+            }
             break
           case BeamNodeType.text:
-            const nodeRange = this.native.win.document.createRange()
+            const nodeRange = win.document.createRange()
             nodeRange.selectNode(child)
             let rangeBounds = nodeRange.getBoundingClientRect()
-            area = this.setArea(area, rangeBounds, containerBounds)
-            break
-          case BeamNodeType.comment:
-            this.log(`Skipping: ${child.nodeType} (Comment)`)
-            break
-          default:
-            this.log(`Unsupported node type: ${child.nodeType}, skipping iteration`)
+            if (rangeBounds.width > 0 && rangeBounds.height > 0) {
+              area = this.setArea(area, rangeBounds, clippingArea)
+            }
             break
         }
       }
@@ -89,12 +128,13 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
       return area
     }
 
-    return {
-      x: containerBounds.x,
-      y: containerBounds.y,
-      width: containerBounds.width,
-      height: containerBounds.height,
+    // No meaningful childNodes, check the element itself
+    if (PointAndShootHelper.isMeaningful(el, win)) {
+      const elementBounds = el.getBoundingClientRect()
+      area = this.setArea(area, elementBounds, clippingArea)
     }
+
+    return area
   }
 
   /**
@@ -102,7 +142,7 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
    *
    * @private
    * @param {*} area
-   * @param {*} location
+   * @param mouseLocation
    * @return {*}
    * @memberof PointAndShootUI_native
    */
@@ -133,7 +173,7 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
    */
   calculateDistance(coordinate: number, areaCoord: number, areaSize: number) {
     const distance = coordinate - (areaCoord + areaSize / 2)
-    // we want paralax to start when it snaps on the graceDistance
+    // we want parallax to start when it snaps on the graceDistance
     const edge = areaSize / 2 + 40
     const distanceClamp = Util.clamp(distance, -edge, edge)
     const displacement = 10
@@ -170,7 +210,7 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
   }
 
   /**
-   * Computes element bounds of a given selection range. Returns an array of rectanges which are computed to a polygon in the UI.
+   * Computes element bounds of a given selection range. Returns an array of rectangles which are computed to a polygon in the UI.
    *
    * @private
    * @param {BeamRange} range
@@ -191,7 +231,7 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
 
   /**
    * Formats the message to be send to the UI based on selection range.
-   * Mouselocation is included in the return but defaulted to `{x: -1, y: -1}`
+   * Mouse location is included in the return but defaulted to `{x: -1, y: -1}`
    *
    * @private
    * @param {*} quoteId
@@ -253,7 +293,7 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
 
   /**
    * Formats the message to be send to the UI based on element and mouse location.
-   * Message is only send when mouselocation and (child) element location overlap.
+   * Message is only send when mouse location and (child) element location overlap.
    *
    * @param {*} quoteId
    * @param {BeamElement} el

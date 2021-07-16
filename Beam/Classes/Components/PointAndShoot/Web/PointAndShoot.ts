@@ -406,7 +406,7 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    */
   updateDebugStatusUI() {
     if (PNS_STATUS) {
-      let debugEl = this.win.document.querySelector("#debug-beam")
+      let debugEl = this.win.document.querySelector("#debug-beam") as BeamHTMLElement
 
       if (debugEl) {
         debugEl.innerText = `JS ${this.status} | ${this.win.location.href}`
@@ -439,32 +439,6 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
     return altKey && !ev.ctrlKey && !ev.metaKey && !ev.shiftKey
   }
 
-  /**
-   * Check for textarea and input elements with matching type attribute
-   *
-   * @param element {BeamElement} The DOM Element to check.
-   * @return If the element is some kind of text input.
-   */
-
-  isTextualInputType(element: BeamElement): boolean {
-    const tag = element.tagName.toLowerCase();
-    if (tag === 'textarea') {
-      return true
-    } else if (tag === 'input') {
-      const types = [
-        "text", "email", "password",
-        "date", "datetime-local", "month",
-        "number", "search", "tel",
-        "time", "url", "week",
-        // for legacy support
-        "datetime"
-      ]
-      return types.includes(BeamElementHelper.getType(element))
-    }
-
-    return false
-  }
-
   // In addition to the target.type we have to check for contentEditable values
   isExplicitlyContentEditable(element) {
     return ["true", "plaintext-only"].includes(
@@ -494,7 +468,7 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
 
   isEventTargetTextualInput(ev: BeamMouseEvent): boolean {
     return (
-      this.isTextualInputType(ev.target)
+      BeamElementHelper.isTextualInputType(ev.target)
       || this.getInheritedContentEditable(ev.target)
     )
   }
