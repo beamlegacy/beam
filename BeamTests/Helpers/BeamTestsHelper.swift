@@ -66,6 +66,13 @@ class BeamTestsHelper {
                 done()
             }
         }
+
+        let before = QuickSpec.current.continueAfterFailure
+        QuickSpec.current.continueAfterFailure = false
+        defer { QuickSpec.current.continueAfterFailure = before }
+        if !AuthenticationManager.shared.isAuthenticated {
+            fail("Not authenticated")
+        }
     }
 
     static func logout() {

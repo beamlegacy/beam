@@ -39,14 +39,6 @@ class DocumentManagerNetworkTests: QuickSpec {
             BeamNote.clearCancellables()
             BeamTestsHelper.login()
 
-            let before = QuickSpec.current.continueAfterFailure
-            QuickSpec.current.continueAfterFailure = false
-            defer { QuickSpec.current.continueAfterFailure = before }
-            guard AuthenticationManager.shared.isAuthenticated else {
-                fail("Not authenticated")
-                return
-            }
-
             helper.deleteAllDatabases()
             helper.deleteAllDocuments()
 

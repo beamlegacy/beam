@@ -4,13 +4,14 @@ import BeamCore
 
 /// Anything to be stored as BeamObject should implement this protocol.
 protocol BeamObjectProtocol: Codable {
+    static var beamObjectTypeName: String { get }
+
     var beamObjectId: UUID { get set }
     var createdAt: Date { get set }
     var updatedAt: Date { get set }
     var deletedAt: Date? { get set }
     var previousChecksum: String? { get set }
     var checksum: String? { get set }
-    static var beamObjectTypeName: String { get }
 }
 
 /// Used to store data on the BeamObject Beam API.
@@ -159,7 +160,6 @@ extension BeamObject {
     }
 
     func decrypt() throws {
-        guard Configuration.encryptionEnabled else { return }
         guard let encodedData = data else { return }
 
         let decoder = JSONDecoder()

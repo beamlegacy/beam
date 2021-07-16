@@ -62,7 +62,6 @@
 		0DD0DACC2681C9630005339A /* GRDBDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DD0DACB2681C9630005339A /* GRDBDatabase.swift */; };
 		0DEE978D2642965600AB95AE /* GRDBDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DEE978C2642965600AB95AE /* GRDBDatabaseTests.swift */; };
 		0DF3376D26948BAB0024C504 /* String+SliceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DF3376C26948BAB0024C504 /* String+SliceTests.swift */; };
-		1A5604E9D38ECB37566C11C6 /* PBXBuildFile */ = {isa = PBXBuildFile; fileRef = 1A5608C8E6F139D545DA110A /* BeamRectHelper.ts */; };
 		1A560C30E74FFFB97685C043 /* PointAndShootHelper.ts in Resources */ = {isa = PBXBuildFile; fileRef = 1A5601F85613AA978F874B3E /* PointAndShootHelper.ts */; };
 		1A560E42AC5ED28BCC29054A /* BeamElementHelper.ts in Resources */ = {isa = PBXBuildFile; fileRef = 1A560CE45CC5BF86DC9F5778 /* BeamElementHelper.ts */; };
 		330D380E265FB76C00A2536B /* DownloaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 330D380D265FB76C00A2536B /* DownloaderView.swift */; };
@@ -258,6 +257,8 @@
 		5273C65B25DA835500B00EC3 /* APIRequestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5273C65825DA835400B00EC3 /* APIRequestTests.swift */; };
 		5273C65C25DA835500B00EC3 /* UserSessionRequestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5273C65925DA835400B00EC3 /* UserSessionRequestTests.swift */; };
 		5273C66D25DA857400B00EC3 /* BeamUITestsMenuGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5273C66C25DA857400B00EC3 /* BeamUITestsMenuGenerator.swift */; };
+		527524E126A1909200C2F385 /* BeamObjectManagerNetworkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 527524E026A1909200C2F385 /* BeamObjectManagerNetworkTests.swift */; };
+		527524EB26A1A9E100C2F385 /* BeamObjectTestsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 527524EA26A1A9E100C2F385 /* BeamObjectTestsHelper.swift */; };
 		527DF48725710ECB00A0A56D /* DocumentManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 527DF48625710ECB00A0A56D /* DocumentManagerTests.swift */; };
 		5281B01825C962EF00DF66D9 /* DocumentManagerNetworkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5281B01725C962EF00DF66D9 /* DocumentManagerNetworkTests.swift */; };
 		5281B06425C98D2600DF66D9 /* PersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5281B06325C98D2600DF66D9 /* PersistenceTests.swift */; };
@@ -678,7 +679,6 @@
 		BAA67C4B9FEFA984D58B802F /* PointAndShootMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67B138DFC6DBC31D184E0 /* PointAndShootMessageHandler.swift */; };
 		BAA67C5AEE52409E39DB25C8 /* BeamWebViewConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67765B4D27F2D4F2B8562 /* BeamWebViewConfiguration.swift */; };
 		BAA67C9D1849C8B7A045A51F /* PointAndShootTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA670D8E6A58A6836DA2794 /* PointAndShootTest.swift */; };
-		BAA67CB7B8DE8FC709C996B3 /* PasswordManagerElements.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA678E2B362F5D8A1A801D4 /* PasswordManagerElements.swift */; };
 		BAA67C9D53B68FDB60AD6844 /* SearchEngineTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67BB2F54210479C1DB836 /* SearchEngineTest.swift */; };
 		BAA67CB7B8DE8FC709C996B3 /* PasswordManagerElements.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA678E2B362F5D8A1A801D4 /* PasswordManagerElements.swift */; };
 		BAA67CE03D8FFB795346CD06 /* WebPositions.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67DD5764226E47DFA6F9E /* WebPositions.swift */; };
@@ -1104,6 +1104,8 @@
 		5273C65825DA835400B00EC3 /* APIRequestTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = APIRequestTests.swift; sourceTree = "<group>"; };
 		5273C65925DA835400B00EC3 /* UserSessionRequestTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserSessionRequestTests.swift; sourceTree = "<group>"; };
 		5273C66C25DA857400B00EC3 /* BeamUITestsMenuGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamUITestsMenuGenerator.swift; sourceTree = "<group>"; };
+		527524E026A1909200C2F385 /* BeamObjectManagerNetworkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamObjectManagerNetworkTests.swift; sourceTree = "<group>"; };
+		527524EA26A1A9E100C2F385 /* BeamObjectTestsHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamObjectTestsHelper.swift; sourceTree = "<group>"; };
 		527DF48625710ECB00A0A56D /* DocumentManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentManagerTests.swift; sourceTree = "<group>"; };
 		5281B01725C962EF00DF66D9 /* DocumentManagerNetworkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentManagerNetworkTests.swift; sourceTree = "<group>"; };
 		5281B06325C98D2600DF66D9 /* PersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceTests.swift; sourceTree = "<group>"; };
@@ -2210,8 +2212,8 @@
 				5298EADE26272C2C0033862C /* CoreData */,
 				418171E72581107C00317ED8 /* AuthenticationManager.swift */,
 				418171E82581107C00317ED8 /* AccountManager.swift */,
-				03CA9A9625CC61BF00E7CFA2 /* ContentBlockingManager.swift */,
 				5224CD8B26860C0900D4179E /* BeamObjectManager.swift */,
+				03CA9A9625CC61BF00E7CFA2 /* ContentBlockingManager.swift */,
 				520088BF2613295000AED835 /* DatabaseManager.swift */,
 				521398D72694931C00AC29C1 /* DatabaseStruct.swift */,
 				418171E92581107C00317ED8 /* DocumentManager.swift */,
@@ -2513,17 +2515,19 @@
 		527DF48525710EAE00A0A56D /* Managers */ = {
 			isa = PBXGroup;
 			children = (
+				5281B07A25C9987100DF66D9 /* Fixtures */,
+				524425F025C832110095422A /* AccountManagerTests.swift */,
 				963DBB3C2698655C00080928 /* BeamElementLinksTests.swift */,
 				DA693059268DB375008EF756 /* BrowsingTreeSenderTest.swift */,
-				5281B07A25C9987100DF66D9 /* Fixtures */,
-				522AFB2725CBFAB100F60647 /* DocumentManagerTestsHelper.swift */,
 				52DEF1C9252B259700561493 /* CoreDataManagerTests.swift */,
 				A53EC2F82657C175001BCCCD /* CoreDataContextObserverTests.swift */,
 				520303D8261CAEF10028BC8E /* DatabaseManagerTests.swift */,
 				524B110126283F2D00E3C61B /* DatabaseManagerNetworkTests.swift */,
+				527524E026A1909200C2F385 /* BeamObjectManagerNetworkTests.swift */,
+				527524EA26A1A9E100C2F385 /* BeamObjectTestsHelper.swift */,
+				522AFB2725CBFAB100F60647 /* DocumentManagerTestsHelper.swift */,
 				527DF48625710ECB00A0A56D /* DocumentManagerTests.swift */,
 				5281B01725C962EF00DF66D9 /* DocumentManagerNetworkTests.swift */,
-				524425F025C832110095422A /* AccountManagerTests.swift */,
 				524CF6D625F28F97007312F0 /* EncryptionManagerTests.swift */,
 				A5153EE6260DDC9D00C84902 /* RecentsManagerTests.swift */,
 			);
@@ -4243,7 +4247,7 @@
 				A52BFDF72608D6710028D3F3 /* BeamFont.swift in Sources */,
 				96319D6D26163AAD00D1CF31 /* BeamNote+CommandManager.swift in Sources */,
 				A005909F26677E8400698E75 /* PrivacyPreferencesView.swift in Sources */,
-				A005909F26677E8400698E75 /* PrivacyView.swift in Sources */,
+				A005909F26677E8400698E75 /* PrivacyPreferencesView.swift in Sources */,
 				5291CEE8268B5969001645A2 /* PasswordManager.swift in Sources */,
 				3392E56D269D82FE000FA401 /* ClickCatchingView.swift in Sources */,
 				960A57E8264C88920061E8D2 /* ProxyEmbedNode.swift in Sources */,
@@ -4508,6 +4512,7 @@
 				525C235825BAFCAA001B9625 /* MergeTests.swift in Sources */,
 				032562BB26051D45006513E4 /* RBFilterManagerTests.m in Sources */,
 				8AC2EFCE266F82D900049005 /* PointAndShootHTMLTest.swift in Sources */,
+				527524EB26A1A9E100C2F385 /* BeamObjectTestsHelper.swift in Sources */,
 				8AC2EFDB266F8A0800049005 /* PointAndShootPointingTest.swift in Sources */,
 				8AA9EEB72678ACF6009D6B31 /* WebAutocompleteContextTest.swift in Sources */,
 				032562CF26051D50006513E4 /* RBZipTests.m in Sources */,
@@ -4577,6 +4582,7 @@
 				BAA6734B9E1478E3084B0A3A /* WebNoteControllerTest.swift in Sources */,
 				0D4EC94526838FA800487B75 /* FrecencyUrlRecordTests.swift in Sources */,
 				BAA67C9D53B68FDB60AD6844 /* SearchEngineTest.swift in Sources */,
+				527524E126A1909200C2F385 /* BeamObjectManagerNetworkTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

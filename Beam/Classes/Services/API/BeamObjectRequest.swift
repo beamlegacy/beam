@@ -11,7 +11,7 @@ class BeamObjectRequest: APIRequest {
     }
 
     struct BeamObjectIdParameters: Encodable {
-        let id: String
+        let id: UUID
     }
 
     class FetchBeamObject: BeamObject, Errorable, APIResponseCodingKeyProtocol {
@@ -118,7 +118,7 @@ extension BeamObjectRequest {
     }
 
     @discardableResult
-    func delete(_ id: String,
+    func delete(_ id: UUID,
                 _ completion: @escaping (Swift.Result<DeleteBeamObject, Error>) -> Void) throws  -> URLSessionDataTask {
         let parameters = BeamObjectIdParameters(id: id)
         let bodyParamsRequest = GraphqlParameters(fileName: "delete_beam_object", variables: parameters)
@@ -195,20 +195,20 @@ extension BeamObjectRequest {
     }
 
     @discardableResult
-    func fetch(_ beamObjectID: String,
+    func fetch(_ beamObjectID: UUID,
                _ completionHandler: @escaping (Swift.Result<BeamObject, Error>) -> Void) throws -> URLSessionDataTask {
         try fetchWithFile("beam_object", beamObjectID, completionHandler)
     }
 
     @discardableResult
-    func fetchUpdatedAt(_ beamObjectID: String,
+    func fetchUpdatedAt(_ beamObjectID: UUID,
                         _ completionHandler: @escaping (Swift.Result<BeamObject, Error>) -> Void) throws -> URLSessionDataTask {
         try fetchWithFile("beam_object_updated_at", beamObjectID, completionHandler)
     }
 
     // swiftlint:disable:next cyclomatic_complexity
     private func fetchWithFile(_ filename: String,
-                               _ beamObjectID: String,
+                               _ beamObjectID: UUID,
                                _ completionHandler: @escaping (Swift.Result<BeamObject, Error>) -> Void) throws -> URLSessionDataTask {
         let parameters = BeamObjectIdParameters(id: beamObjectID)
         let bodyParamsRequest = GraphqlParameters(fileName: filename, variables: parameters)

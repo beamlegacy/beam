@@ -75,6 +75,7 @@ enum BeamObjectConflictResolution {
 
 class BeamObjectManager {
     static var managers: [String: BeamObjectManagerDelegateProtocol.Type] = [:]
+    private static var networkRequests: [UUID: APIRequest] = [:]
 
     static func register<T: BeamObjectManagerDelegateProtocol>(_ manager: T.Type) {
         managers[T.typeName] = manager
@@ -85,6 +86,12 @@ class BeamObjectManager {
         register(DocumentManager.self)
         register(DatabaseManager.self)
         register(PasswordManager.self)
+    }
+
+    func clearNetworkCalls() {
+        for (_, request) in Self.networkRequests {
+            request.cancel()
+        }
     }
 
     var conflictPolicyForSave: BeamObjectConflictResolution = .replace
@@ -276,7 +283,9 @@ extension BeamObjectManager {
             return nil
         }
 
+        Self.networkRequests[beamObject.id]?.cancel()
         let request = BeamObjectRequest()
+        Self.networkRequests[beamObject.id] = request
 
         return try request.save(beamObject) { requestResult in
             switch requestResult {
@@ -338,7 +347,7 @@ extension BeamObjectManager {
                               _ completion: @escaping (Result<BeamObject, Error>) -> Void) {
         let fetchRequest = BeamObjectRequest()
         do {
-            try fetchRequest.fetch(beamObject.id.uuidString) { result in
+            try fetchRequest.fetch(beamObject.id) { result in
                 switch result {
                 case .failure(let error):
                     completion(.failure(error))
@@ -348,6 +357,28 @@ extension BeamObjectManager {
             }
         } catch {
             completion(.failure(error))
+        }
+    }
+
+    func delete(_ id: UUID, _ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
+        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            completion?(.success(false))
+            return
+        }
+
+        Self.networkRequests[id]?.cancel()
+        let request = BeamObjectRequest()
+        Self.networkRequests[id] = request
+
+        do {
+            try request.delete(id) { result in
+                switch result {
+                case .failure(let error): completion?(.failure(error))
+                case .success: completion?(.success(true))
+                }
+            }
+        } catch {
+            completion?(.failure(error))
         }
     }
 
