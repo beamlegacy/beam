@@ -62,6 +62,8 @@
 		0DD0DACC2681C9630005339A /* GRDBDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DD0DACB2681C9630005339A /* GRDBDatabase.swift */; };
 		0DEE978D2642965600AB95AE /* GRDBDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DEE978C2642965600AB95AE /* GRDBDatabaseTests.swift */; };
 		0DF3376D26948BAB0024C504 /* String+SliceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DF3376C26948BAB0024C504 /* String+SliceTests.swift */; };
+		1A5604E9D38ECB37566C11C6 /* PBXBuildFile */ = {isa = PBXBuildFile; fileRef = 1A5608C8E6F139D545DA110A /* BeamRectHelper.ts */; };
+		1A560C30E74FFFB97685C043 /* PointAndShootHelper.ts in Resources */ = {isa = PBXBuildFile; fileRef = 1A5601F85613AA978F874B3E /* PointAndShootHelper.ts */; };
 		1A560E42AC5ED28BCC29054A /* BeamElementHelper.ts in Resources */ = {isa = PBXBuildFile; fileRef = 1A560CE45CC5BF86DC9F5778 /* BeamElementHelper.ts */; };
 		330D380E265FB76C00A2536B /* DownloaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 330D380D265FB76C00A2536B /* DownloaderView.swift */; };
 		330D3824265FC6B200A2536B /* DownloadCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 330D3823265FC6B200A2536B /* DownloadCell.swift */; };
@@ -883,6 +885,8 @@
 		0DD0DACB2681C9630005339A /* GRDBDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GRDBDatabase.swift; sourceTree = "<group>"; };
 		0DEE978C2642965600AB95AE /* GRDBDatabaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GRDBDatabaseTests.swift; sourceTree = "<group>"; };
 		0DF3376C26948BAB0024C504 /* String+SliceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+SliceTests.swift"; sourceTree = "<group>"; };
+		1A5601F85613AA978F874B3E /* PointAndShootHelper.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = PointAndShootHelper.ts; sourceTree = "<group>"; };
+		1A5608C8E6F139D545DA110A /* BeamRectHelper.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = BeamRectHelper.ts; sourceTree = "<group>"; };
 		1A560CE45CC5BF86DC9F5778 /* BeamElementHelper.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = BeamElementHelper.ts; sourceTree = "<group>"; };
 		330D380D265FB76C00A2536B /* DownloaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloaderView.swift; sourceTree = "<group>"; };
 		330D3823265FC6B200A2536B /* DownloadCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadCell.swift; sourceTree = "<group>"; };
@@ -2810,6 +2814,8 @@
 				BAA678F0976FD26A8BF9B2CA /* PopupUI_web.scss */,
 				BAA676AA87963F568B000616 /* PointAndShootUI_native.test.ts */,
 				1A560CE45CC5BF86DC9F5778 /* BeamElementHelper.ts */,
+				1A5608C8E6F139D545DA110A /* BeamRectHelper.ts */,
+				1A5601F85613AA978F874B3E /* PointAndShootHelper.ts */,
 			);
 			path = Web;
 			sourceTree = "<group>";
@@ -3774,6 +3780,7 @@
 				BAA675D3496DCF90EB35C8AD /* BeamEventTargetMock.ts in Resources */,
 				BAA6704CFB6AE4C1D090F4E4 /* BeamWebFactoryMock.ts in Resources */,
 				1A560E42AC5ED28BCC29054A /* BeamElementHelper.ts in Resources */,
+				1A560C30E74FFFB97685C043 /* PointAndShootHelper.ts in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

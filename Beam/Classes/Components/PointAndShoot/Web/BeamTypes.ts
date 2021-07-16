@@ -122,6 +122,8 @@ export interface BeamWindow extends BeamEventTarget {
   webkit
 
   scroll(xCoord: number, yCoord: number): void
+
+  getComputedStyle(el: BeamElement, pseudo?: string): CSSStyleDeclaration
 }
 
 export interface BeamLocation extends Location {}
@@ -152,7 +154,7 @@ export interface BeamEventTarget<E extends BeamEvent = BeamEvent> {
 export interface BeamDOMRect extends DOMRect {}
 
 export interface BeamNode extends BeamEventTarget {
-  innerText: string
+  textContent: string
   nodeName: string
   nodeType: BeamNodeType
   childNodes: BeamNode[]
@@ -168,7 +170,7 @@ export interface BeamNode extends BeamEventTarget {
   /**
    * @param el {HTMLElement}
    */
-  appendChild(el: BeamHTMLElement): BeamNode
+  appendChild(el: BeamElement): BeamNode
 
   /**
    * @param el {HTMLElement}
@@ -246,9 +248,18 @@ export interface BeamElementCSSInlineStyle {
 }
 
 export interface BeamHTMLElement extends BeamElement, BeamElementCSSInlineStyle {
+  innerText: string
   nodeValue: any
-
   dataset: {}
+}
+
+export interface BeamHTMLInputElement extends BeamHTMLElement {
+  type: string
+  value: string
+}
+
+export interface BeamHTMLTextAreaElement extends BeamHTMLElement{
+  value: string
 }
 
 export interface BeamHTMLIFrameElement extends BeamHTMLElement {

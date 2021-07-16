@@ -2,7 +2,7 @@ import { BeamPNSStatus, BeamRange } from "./BeamTypes"
 import { PointAndShoot } from "./PointAndShoot"
 import {
   BeamDocumentMock,
-  BeamHTMLElementMock,
+  BeamHTMLElementMock, BeamHTMLInputElementMock, BeamHTMLTextAreaElementMock,
   BeamKeyEvent,
   BeamMouseEvent,
   BeamRangeMock,
@@ -127,7 +127,7 @@ test("point with mouse move + Option", () => {
 
 test("point with mouse move + Option should be allowed on unfocused input elements", () => {
   const { pns, testUI } = pointAndShootTestBed()
-  const pointedElement = new BeamHTMLElementMock("input")
+  const pointedElement = new BeamHTMLInputElementMock("input")
   pointedElement.bounds = {
     width: 130,
     height: 120,
@@ -167,7 +167,7 @@ const textualInputTypes = [
 test.each(textualInputTypes)(
   "point with mouse move + Option should be prevented on active textual inputs",
   (type) => {
-    const pointedElement = new BeamHTMLElementMock("input", {type: type})
+    const pointedElement = new BeamHTMLInputElementMock("input", {type: type})
     pointedElement.bounds = {
       width: 130,
       height: 120,
@@ -202,7 +202,7 @@ test.each(textualInputTypes)(
 )
 
 test("point with mouse move + Option should be prevented on active text inputs", () => {
-  const pointedElement = new BeamHTMLElementMock("input", {type: "text"})
+  const pointedElement = new BeamHTMLInputElementMock("input", {type: "text"})
   pointedElement.bounds = {
     width: 130,
     height: 120,
@@ -236,7 +236,7 @@ test("point with mouse move + Option should be prevented on active text inputs",
 })
 
 test("point with mouse move + Option should be prevented on active textarea", () => {
-  const pointedElement = new BeamHTMLElementMock("textarea")
+  const pointedElement = new BeamHTMLTextAreaElementMock("textarea")
   pointedElement.bounds = {
     width: 130,
     height: 120,
@@ -345,7 +345,7 @@ test("point with mouse move + Option should be prevented on elements nested with
 })
 
 test("mouse move + Option then click on an arbitrary input element should not shoot", () => {
-  const pointedElement = new BeamHTMLElementMock("input", {type: "text"})
+  const pointedElement = new BeamHTMLInputElementMock("input", {type: "text"})
   pointedElement.bounds = {
     width: 130,
     height: 120,
@@ -602,7 +602,7 @@ test("onSelection should create selection event in testUI", () => {
   expect(testUI.events[0]).toEqual({ name: "select", selection: [{ quoteId: undefined, el: range }] })
 })
 
-test("click in shooting mode should dismis shoot", () => {
+test("click in shooting mode should dismiss shoot", () => {
   const { pns, testUI } = pointAndShootTestBed()
 
   const pointedElement = new BeamHTMLElementMock("p")

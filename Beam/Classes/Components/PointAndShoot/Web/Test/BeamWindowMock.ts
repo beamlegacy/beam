@@ -1,4 +1,12 @@
-import { BeamDocument, BeamLocation, BeamMessageHandler, BeamVisualViewport, BeamWindow } from "../BeamTypes"
+import {
+  BeamDocument,
+  BeamElement,
+  BeamHTMLElement,
+  BeamLocation,
+  BeamMessageHandler,
+  BeamVisualViewport,
+  BeamWindow
+} from "../BeamTypes"
 import { BeamDocumentMock, BeamLocationMock } from "./BeamMocks"
 import { PointAndShoot } from "../PointAndShoot"
 import { BeamEventTargetMock } from "./BeamEventTargetMock"
@@ -49,6 +57,13 @@ export class BeamWindowMock extends BeamEventTargetMock implements BeamWindow {
 
   getEventListeners(_win: BeamWindow) {
     return this.eventListeners
+  }
+
+  getComputedStyle(el: BeamHTMLElement, pseudo?: string): CSSStyleDeclaration {
+    if (pseudo) {
+      throw new Error("getComputedStyle not implemented for pseudo elements")
+    }
+    return el.style
   }
 
   innerHeight
