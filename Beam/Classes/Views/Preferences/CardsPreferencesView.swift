@@ -26,6 +26,16 @@ struct CardsPreferencesView: View {
                 SpellingGrammarSection()
             }
             Preferences.Section {
+                Text("Indentation:")
+                    .font(BeamFont.regular(size: 13).swiftUI)
+                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+                    .frame(width: 250, alignment: .trailing)
+            } content: {
+                Checkbox(checkState: PreferencesManager.alwaysShowBullets, text: "Always show bullets", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
+                    PreferencesManager.alwaysShowBullets = activated
+                }
+            }
+            Preferences.Section {
                 Text("Embed Content:")
                     .font(BeamFont.regular(size: 13).swiftUI)
                     .foregroundColor(BeamColor.Generic.text.swiftUI)
