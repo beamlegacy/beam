@@ -599,7 +599,7 @@ extension DatabaseManager {
 
                     let updatedDatabaseStruct = DatabaseStruct(database: updatedDatabase)
 
-                    if EnvironmentVariables.BeamObjectAPIEnabled {
+                    if Configuration.beamObjectAPIEnabled {
                         do {
                             try self.saveOnBeamObjectAPI(updatedDatabaseStruct) {
                                 networkCompletion?($0)

@@ -53,6 +53,22 @@ struct Configuration {
         }
     }
 
+    static private var beamObjectAPIEnabledKey = "beamObjectAPIEnabled"
+    static var beamObjectAPIEnabled: Bool {
+        get {
+            if UserDefaults.standard.object(forKey: beamObjectAPIEnabledKey) != nil {
+                return UserDefaults.standard.bool(forKey: beamObjectAPIEnabledKey)
+            }
+
+            return EnvironmentVariables.beamObjectAPIEnabled
+        }
+        set {
+            if newValue != beamObjectAPIEnabled {
+                UserDefaults.standard.set(newValue, forKey: beamObjectAPIEnabledKey)
+            }
+        }
+    }
+
     static private var databaseIdKey = "databaseId"
     static var databaseId: String? {
         get {

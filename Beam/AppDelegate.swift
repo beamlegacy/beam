@@ -117,7 +117,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // My feeling is we should sync + trigger notification and only start network calls when
         // this sync has finished.
 
-        if EnvironmentVariables.BeamObjectAPIEnabled {
+        if Configuration.beamObjectAPIEnabled {
             beamObjectManager.syncAllFromAPI { _ in
                 Logger.shared.logInfo("syncAllFromAPI called", category: .beamObjectNetwork)
             }

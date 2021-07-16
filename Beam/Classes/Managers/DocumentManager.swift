@@ -727,7 +727,7 @@ public class DocumentManager: NSObject {
 
                 let updatedDocStruct = DocumentStruct(document: updatedDocument)
 
-                if EnvironmentVariables.BeamObjectAPIEnabled {
+                if Configuration.beamObjectAPIEnabled {
                     do {
                         try self.saveOnBeamObjectAPI(updatedDocStruct) { result in
                             Self.networkTasksSemaphore.wait()
