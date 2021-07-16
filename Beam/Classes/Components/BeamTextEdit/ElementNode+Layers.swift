@@ -67,20 +67,28 @@ extension ElementNode {
 
     // MARK: - Update Layers
     func updateElementLayers() {
-        updateBulletAndDisclosureLayers()
+        updateBulletLayer()
+        updateDisclosureLayer()
         updateIndentLayer()
         updateCheckboxLayer()
     }
 
-    private func updateBulletAndDisclosureLayers() {
+    private func updateBulletLayer() {
         guard let bulletLayer = self.layers[LayerName.bullet.rawValue] else { return }
+
+        if showDisclosureButton || !PreferencesManager.alwaysShowBullets {
+            bulletLayer.layer.isHidden = true
+        } else if PreferencesManager.alwaysShowBullets {
+            bulletLayer.layer.isHidden = false
+        }
+    }
+
+    private func updateDisclosureLayer() {
         guard let disclosureLayer = self.layers[LayerName.disclosure.rawValue] as? ChevronButton else { return }
 
-        if showDisclosureButton {
-            bulletLayer.layer.isHidden = true
+        if showDisclosureButton && PreferencesManager.alwaysShowBullets {
             disclosureLayer.layer.isHidden = false
         } else {
-            bulletLayer.layer.isHidden = false
             disclosureLayer.layer.isHidden = true
         }
     }
@@ -90,6 +98,15 @@ extension ElementNode {
         let y = firstLineHeight + 8
         indentLayer.frame = NSRect(x: childInset + 4.5, y: y - 5, width: 1, height: frame.height - y - 5)
         indentLayer.layer.isHidden = children.isEmpty || !open
+        indentLayer.layer.isHidden = !PreferencesManager.alwaysShowBullets
+    }
+
+    internal func handle(hover: Bool) {
+        guard let disclosureLayer = self.layers[LayerName.disclosure.rawValue] as? ChevronButton else { return }
+        guard let indentLayer = layers[LayerName.indentLayer.rawValue] else { return }
+
+        disclosureLayer.layer.isHidden = !hover
+        indentLayer.layer.isHidden = !hover
     }
 
     private func updateCheckboxLayer() {

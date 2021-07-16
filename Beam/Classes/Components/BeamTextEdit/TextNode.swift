@@ -681,6 +681,7 @@ public class TextNode: ElementNode {
     }
 
     override func mouseMoved(mouseInfo: MouseInfo) -> Bool {
+        _ = super.mouseMoved(mouseInfo: mouseInfo)
         self.handleMouseHoverState(mouseInfo: mouseInfo)
         return false
     }
