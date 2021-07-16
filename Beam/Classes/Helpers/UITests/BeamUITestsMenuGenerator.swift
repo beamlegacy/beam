@@ -72,7 +72,11 @@ class BeamUITestsMenuGenerator {
     private func destroyDatabase() {
         DocumentManager().deleteAll { _ in }
         DatabaseManager().deleteAll { _ in }
+        let data = AppDelegate.main.window?.state.data
+        try? LinkStore.shared.deleteAll()
+        data?.linkManager.deleteAllLinks()
         try? GRDBDatabase.shared.clear()
+        data?.saveData()
     }
 
     private func loadUITestsPage(page: Int) {
