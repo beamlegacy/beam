@@ -48,7 +48,7 @@ extension IdentityRequest {
     }
 
     @discardableResult
-    func fetchAll(_ completion: @escaping (Swift.Result<Me, Error>) -> Void) throws -> URLSessionDataTask {
+    func fetchAll(_ completion: @escaping (Swift.Result<UserMe, Error>) -> Void) throws -> URLSessionDataTask {
         let bodyParamsRequest = GraphqlParameters(fileName: "identities", variables: EmptyVariable())
 
         return try performRequest(bodyParamsRequest: bodyParamsRequest, completionHandler: completion)
@@ -83,7 +83,7 @@ extension IdentityRequest {
     func fetchAll() -> PromiseKit.Promise<[IdentityType]> {
         let bodyParamsRequest = GraphqlParameters(fileName: "identities", variables: EmptyVariable())
 
-        let promise: PromiseKit.Promise<Me> = performRequest(bodyParamsRequest: bodyParamsRequest,
+        let promise: PromiseKit.Promise<UserMe> = performRequest(bodyParamsRequest: bodyParamsRequest,
                                                              authenticatedCall: true)
 
         return promise.map(on: backgroundQueue) { me in
@@ -124,7 +124,7 @@ extension IdentityRequest {
     func fetchAll() -> Promises.Promise<[IdentityType]> {
         let bodyParamsRequest = GraphqlParameters(fileName: "identities", variables: EmptyVariable())
 
-        let promise: Promises.Promise<Me> = performRequest(bodyParamsRequest: bodyParamsRequest,
+        let promise: Promises.Promise<UserMe> = performRequest(bodyParamsRequest: bodyParamsRequest,
                                                            authenticatedCall: true)
 
         return promise.then(on: backgroundQueue) { me in

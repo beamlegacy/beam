@@ -12,6 +12,10 @@ struct UserErrorData: Codable, Equatable {
     var path: [String]?
 }
 
+protocol APIResponseCodingKeyProtocol {
+    static var codingKey: String { get }
+}
+
 extension APIRequest {
     /// Wrapper for result of GraphQL mutation
     struct APIResult<T>: Decodable where T: Decodable, T: Errorable {
@@ -27,26 +31,7 @@ extension APIRequest {
         var errors: [ErrorData]?
     }
 
-    class FetchDocument: DocumentAPIType, Errorable {
-        static let codingKey = "document"
-        let errors: [UserErrorData]? = nil
-    }
-
     /// Wrapper for the data result of the GraphQL mutation result `APIResult`
-    ///
-    /// Use to generate the right `CodingKey` for generic json data.
-    ///
-    /// For example the setPasscode mutation returns the following json:
-    /// ```
-    /// data {
-    ///     setPasscode {
-    ///         passcodeSet
-    ///     }
-    ///}
-    /// ```
-    /// `APIResult<T>` is used to wrap the `data` level of the json, the `setPasscode` level is obtained
-    /// from `T`. But the class used is `SetPasscode`, this wrapper is used to generate the `setPasscode` `CodingKey` from
-    /// the `SetPasscode` class.
     ///
     struct APIResultWrapper<T>: Decodable, Errorable where T: Decodable, T: Errorable {
         let value: T?
@@ -59,8 +44,8 @@ extension APIRequest {
             let name = String(describing: T.self)
             let finalName: String
 
-            if T.self == FetchDocument.self {
-                finalName = FetchDocument.codingKey
+            if let klass = (T.self as? APIResponseCodingKeyProtocol.Type) {
+                finalName = klass.codingKey
             } else {
                 finalName = name.prefix(1).lowercased() + name.dropFirst()
             }
