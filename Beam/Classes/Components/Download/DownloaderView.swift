@@ -96,7 +96,7 @@ struct DownloaderView: View {
                         }, onDoubleTap: { _ in
                             downloader.openFile(d)
                         })
-                        .padding(.trailing, d.state == URLSessionDownloadTask.State.completed ? 20 : 40)
+                        .padding(.trailing, (d.state == URLSessionDownloadTask.State.completed && d.errorMessage == nil) ? 20 : 40)
                     }
                 }
             }

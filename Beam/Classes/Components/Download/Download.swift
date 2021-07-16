@@ -109,6 +109,11 @@ class Download: Identifiable, ObservableObject, Codable {
                 })
                 .store(in: &scope)
         }
+
+        if let total = task.progress.userInfo[ProgressUserInfoKey("NSProgressByteTotalCountKey")] as? Int64 {
+            self.totalCount = self.byteFormatter.string(fromByteCount: total)
+            self.localizedProgressString = task.progress.localizedAdditionalDescription
+        }
     }
 
     func saveDownloadDocument() {
