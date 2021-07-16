@@ -19,7 +19,7 @@ class UserSessionRequest: APIRequest {
     }
 
     struct SignUp: Decodable, Errorable {
-        let user: Me?
+        let user: UserMe?
         let errors: [UserErrorData]?
     }
 
@@ -42,7 +42,7 @@ class UserSessionRequest: APIRequest {
         let accessToken: String?
         let refreshToken: String?
         let errors: [UserErrorData]?
-        let me: Me?
+        let me: UserMe?
     }
 
     struct ForgotPasswordParameters: Encodable {

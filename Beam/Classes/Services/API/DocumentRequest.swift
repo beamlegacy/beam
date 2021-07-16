@@ -30,6 +30,11 @@ class DocumentRequest: APIRequest {
         }
     }
 
+    class FetchDocument: DocumentAPIType, Errorable, APIResponseCodingKeyProtocol {
+        static let codingKey = "document"
+        let errors: [UserErrorData]? = nil
+    }
+
     class DeleteDocument: UpdateDocument { }
 
     struct UpdateDocuments: Codable, Errorable {
@@ -108,7 +113,7 @@ extension DocumentRequest {
 
         let bodyParamsRequest = GraphqlParameters(fileName: "documents", variables: parameters)
 
-        let promise: PromiseKit.Promise<Me> = performRequest(bodyParamsRequest: bodyParamsRequest,
+        let promise: PromiseKit.Promise<UserMe> = performRequest(bodyParamsRequest: bodyParamsRequest,
                                                              authenticatedCall: true)
         return promise.map(on: self.backgroundQueue) {
             guard let documents = $0.documents else {
@@ -228,7 +233,7 @@ extension DocumentRequest {
 
         let bodyParamsRequest = GraphqlParameters(fileName: "documents", variables: parameters)
 
-        let promise: Promises.Promise<Me> = performRequest(bodyParamsRequest: bodyParamsRequest,
+        let promise: Promises.Promise<UserMe> = performRequest(bodyParamsRequest: bodyParamsRequest,
                                                            authenticatedCall: true)
         return promise.then(on: self.backgroundQueue) {
             guard let documents = $0.documents else {
@@ -372,7 +377,7 @@ extension DocumentRequest {
                                                 _ completion: @escaping (Swift.Result<[DocumentAPIType], Error>) -> Void) throws -> URLSessionDataTask {
         let bodyParamsRequest = GraphqlParameters(fileName: filename, variables: parameters)
 
-        return try performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<Me, Error>) in
+        return try performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<UserMe, Error>) in
             switch result {
             case .failure(let error):
                 completion(.failure(error))

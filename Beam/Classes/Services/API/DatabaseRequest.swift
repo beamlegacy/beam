@@ -84,7 +84,7 @@ extension DatabaseRequest {
         let parameters = DatabasesParameters(updatedAtAfter: updatedAtAfter)
         let bodyParamsRequest = GraphqlParameters(fileName: "databases", variables: parameters)
 
-        return try performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<Me, Error>) in
+        return try performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<UserMe, Error>) in
             switch result {
             case .failure(let error):
                 completion(.failure(error))
@@ -210,7 +210,7 @@ extension DatabaseRequest {
         let parameters = DatabasesParameters(updatedAtAfter: updatedAtAfter)
         let bodyParamsRequest = GraphqlParameters(fileName: "databases", variables: parameters)
 
-        let promise: PromiseKit.Promise<Me> = performRequest(bodyParamsRequest: bodyParamsRequest,
+        let promise: PromiseKit.Promise<UserMe> = performRequest(bodyParamsRequest: bodyParamsRequest,
                                                              authenticatedCall: true)
         return promise.map(on: self.backgroundQueue) {
             guard let databases = $0.databases else {
@@ -281,7 +281,7 @@ extension DatabaseRequest {
         let parameters = DatabasesParameters(updatedAtAfter: updatedAtAfter)
         let bodyParamsRequest = GraphqlParameters(fileName: "databases", variables: parameters)
 
-        let promise: Promises.Promise<Me> = performRequest(bodyParamsRequest: bodyParamsRequest,
+        let promise: Promises.Promise<UserMe> = performRequest(bodyParamsRequest: bodyParamsRequest,
                                                            authenticatedCall: true)
         return promise.then(on: self.backgroundQueue) {
             guard let databases = $0.databases else {
