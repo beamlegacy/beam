@@ -1,7 +1,7 @@
 import Foundation
 
-// swiftlint:disable:next type_name
-class Me: Decodable, Errorable {
+class UserMe: Decodable, Errorable, APIResponseCodingKeyProtocol {
+    static let codingKey = "me"
     var id: String?
     var username: String?
     var email: String?

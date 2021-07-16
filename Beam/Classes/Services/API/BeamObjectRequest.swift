@@ -14,7 +14,7 @@ class BeamObjectRequest: APIRequest {
         let id: String
     }
 
-    class FetchBeamObject: BeamObject, Errorable {
+    class FetchBeamObject: BeamObject, Errorable, APIResponseCodingKeyProtocol {
         static let codingKey = "beamObject"
         let errors: [UserErrorData]? = nil
     }
@@ -147,7 +147,7 @@ extension BeamObjectRequest {
                                                 _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
         let bodyParamsRequest = GraphqlParameters(fileName: filename, variables: parameters)
 
-        return try performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<Me, Error>) in
+        return try performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<UserMe, Error>) in
             switch result {
             case .failure(let error):
                 completion(.failure(error))

@@ -109,7 +109,7 @@
 		418171122581082200317ED8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 418171112581082200317ED8 /* Assets.xcassets */; };
 		4181713325810CDC00317ED8 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181712B25810CDC00317ED8 /* Constants.swift */; };
 		418171EB2581107C00317ED8 /* Autocompleter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181715B2581107C00317ED8 /* Autocompleter.swift */; };
-		418171EC2581107C00317ED8 /* Me.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181715E2581107C00317ED8 /* Me.swift */; };
+		418171EC2581107C00317ED8 /* UserMe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181715E2581107C00317ED8 /* UserMe.swift */; };
 		418171ED2581107C00317ED8 /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181715F2581107C00317ED8 /* Session.swift */; };
 		418171EE2581107C00317ED8 /* GraphqlParametersProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171602581107C00317ED8 /* GraphqlParametersProtocol.swift */; };
 		418171EF2581107C00317ED8 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171612581107C00317ED8 /* User.swift */; };
@@ -680,7 +680,7 @@
 		BAA67C9D1849C8B7A045A51F /* PointAndShootTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA670D8E6A58A6836DA2794 /* PointAndShootTest.swift */; };
 		BAA67CB7B8DE8FC709C996B3 /* PasswordManagerElements.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA678E2B362F5D8A1A801D4 /* PasswordManagerElements.swift */; };
 		BAA67C9D53B68FDB60AD6844 /* SearchEngineTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67BB2F54210479C1DB836 /* SearchEngineTest.swift */; };
-		BAA67CB7B8DE8FC709C996B3 /* PasswordManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA678E2B362F5D8A1A801D4 /* PasswordManager.swift */; };
+		BAA67CB7B8DE8FC709C996B3 /* PasswordManagerElements.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA678E2B362F5D8A1A801D4 /* PasswordManagerElements.swift */; };
 		BAA67CE03D8FFB795346CD06 /* WebPositions.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67DD5764226E47DFA6F9E /* WebPositions.swift */; };
 		BAA67D3C5D44656448093D73 /* LoggingMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67CDE485E5E7774A978D2 /* LoggingMessageHandler.swift */; };
 		BAA67DC79E1BCAF3869F3DBB /* build_js.sh in Resources */ = {isa = PBXBuildFile; fileRef = BAA6740CED2A340CD3002907 /* build_js.sh */; };
@@ -939,7 +939,7 @@
 		4181713025810CDC00317ED8 /* Release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
 		4181713125810CDC00317ED8 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4181715B2581107C00317ED8 /* Autocompleter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Autocompleter.swift; sourceTree = "<group>"; };
-		4181715E2581107C00317ED8 /* Me.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Me.swift; sourceTree = "<group>"; };
+		4181715E2581107C00317ED8 /* UserMe.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserMe.swift; sourceTree = "<group>"; };
 		4181715F2581107C00317ED8 /* Session.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Session.swift; sourceTree = "<group>"; };
 		418171602581107C00317ED8 /* GraphqlParametersProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GraphqlParametersProtocol.swift; sourceTree = "<group>"; };
 		418171612581107C00317ED8 /* User.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
@@ -1894,7 +1894,7 @@
 		4181715D2581107C00317ED8 /* GraphqlRequestsTypes */ = {
 			isa = PBXGroup;
 			children = (
-				4181715E2581107C00317ED8 /* Me.swift */,
+				4181715E2581107C00317ED8 /* UserMe.swift */,
 				52F4E4A7264180000067B017 /* Identity.swift */,
 				4181715F2581107C00317ED8 /* Session.swift */,
 				418171602581107C00317ED8 /* GraphqlParametersProtocol.swift */,
@@ -4238,7 +4238,7 @@
 				9678217526726005001413EF /* LockButton.swift in Sources */,
 				964FE5B72624813E00966E03 /* RandomAccessCollection+BinarySearch.swift in Sources */,
 				A0E3150525ED1ECB001A5E55 /* FormatText.swift in Sources */,
-				418171EC2581107C00317ED8 /* Me.swift in Sources */,
+				418171EC2581107C00317ED8 /* UserMe.swift in Sources */,
 				A0CB5AE8268B20C200D1EF02 /* BrowserPreferencesView.swift in Sources */,
 				A52BFDF72608D6710028D3F3 /* BeamFont.swift in Sources */,
 				96319D6D26163AAD00D1CF31 /* BeamNote+CommandManager.swift in Sources */,
