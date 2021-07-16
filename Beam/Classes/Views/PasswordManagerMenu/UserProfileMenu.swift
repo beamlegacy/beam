@@ -38,23 +38,30 @@ struct UserProfileCell: View {
 
     var body: some View {
             VStack(alignment: .leading) {
-                Text(viewModel.display.userInfo.email)
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
-                    .padding(.bottom, BeamSpacing._40)
-                HStack {
-                    Text(viewModel.display.userInfo.firstName)
+                if let email = viewModel.display.userInfo?.email {
+                    Text(email)
                         .font(BeamFont.regular(size: 13).swiftUI)
                         .foregroundColor(BeamColor.Generic.text.swiftUI)
-                    Text(viewModel.display.userInfo.lastName)
-                        .font(BeamFont.regular(size: 13).swiftUI)
-                        .foregroundColor(BeamColor.Generic.text.swiftUI)
-                        .padding(.leading, -5.0)
+                        .padding(.bottom, BeamSpacing._40)
                 }
-                .padding(.bottom, BeamSpacing._40)
-                Text(viewModel.display.userInfo.adresses)
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+                if let firstName = viewModel.display.userInfo?.firstName,
+                let lastName = viewModel.display.userInfo?.lastName {
+                    HStack {
+                        Text(firstName)
+                            .font(BeamFont.regular(size: 13).swiftUI)
+                            .foregroundColor(BeamColor.Generic.text.swiftUI)
+                        Text(lastName)
+                            .font(BeamFont.regular(size: 13).swiftUI)
+                            .foregroundColor(BeamColor.Generic.text.swiftUI)
+                            .padding(.leading, -5.0)
+                    }
+                    .padding(.bottom, BeamSpacing._40)
+                }
+                if let adresses = viewModel.display.userInfo?.adresses {
+                    Text(adresses)
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.text.swiftUI)
+                }
             }
             .frame(maxHeight: 76, alignment: .leading)
     }

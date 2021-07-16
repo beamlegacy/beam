@@ -280,15 +280,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: -
     // MARK: Preferences
     lazy var preferences: [PreferencePane] = [
-        AccountsPreferenceViewController(),
-        PrivacyPreferenceViewController(),
-        AdvancedPreferencesViewController()
+        GeneralPreferencesViewController,
+        BrowserPreferencesViewController,
+        CardsPreferencesViewController,
+        PrivacyPreferencesViewController,
+        PasswordsPreferencesViewController,
+        AccountsPreferenceViewController,
+        AboutPreferencesViewController,
+        AdvancedPreferencesViewController
     ]
 
     lazy var preferencesWindowController = PreferencesWindowController(
         preferencePanes: preferences,
         style: .toolbarItems,
-        animated: true,
+        animated: false,
         hidesToolbarForSingleItem: true
     )
 

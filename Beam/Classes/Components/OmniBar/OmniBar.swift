@@ -81,24 +81,19 @@ struct OmniBar: View {
                                enableAnimations: enableAnimations) {
             VStack(spacing: 0) {
                 HStack(spacing: 4) {
-                    if !isEditing {
-                        if state.mode != .today {
-                            OmniBarButton(icon: "nav-journal", accessibilityId: "journal", action: goToJournal)
-                        }
-                        Chevrons()
-                        if state.mode == .web {
-                            OmniBarButton(icon: "nav-refresh", accessibilityId: "refresh", action: refreshWeb)
-                        }
-                    }
+                    leftFieldActions
                     GlobalCenteringContainer(enabled: !isEditing && state.mode != .web, containerGeometry: containerGeometry) {
-                        OmniBarSearchField(isEditing: Binding<Bool>(get: {
-                            isEditing
-                        }, set: {
-                            setIsEditing($0)
-                        }),
-                        modifierFlagsPressed: $modifierFlagsPressed,
-                        enableAnimations: enableAnimations)
-                        .frame(maxHeight: .infinity)
+                            OmniBarSearchField(isEditing: Binding<Bool>(get: {
+                                isEditing
+                            }, set: {
+                                setIsEditing($0)
+                            }),
+                            modifierFlagsPressed: $modifierFlagsPressed,
+                            enableAnimations: enableAnimations)
+                            .frame(maxHeight: .infinity)
+                            .offset(x: 0, y: autocompleteManager.animatedQuery != nil ? -12 : 0)
+                            .opacity(autocompleteManager.animatedQuery != nil ? 0 : 1)
+                            .overlay(cmdReturnAnimatedOverlay)
                     }
                     .padding(.leading, !isEditing && state.mode == .web ? 8 : 7)
                 }
@@ -128,6 +123,38 @@ struct OmniBar: View {
         .animatableOffsetEffect(offset: CGSize(width: 0, height: showPressedState ? 3 : 0))
     }
 
+    var leftFieldActions: some View {
+        Group {
+            if !isEditing {
+                if state.mode != .today {
+                    OmniBarButton(icon: "nav-journal", accessibilityId: "journal", action: goToJournal)
+                }
+                Chevrons()
+                if state.mode == .web {
+                    OmniBarButton(icon: "nav-refresh", accessibilityId: "refresh", action: refreshWeb)
+                }
+            }
+        }
+    }
+
+    var cmdReturnAnimatedOverlay: some View {
+        Group {
+            if let animatedQuery = autocompleteManager.animatedQuery {
+                HStack(spacing: BeamSpacing._50) {
+                    Icon(name: "field-search", size: 16, color: BeamColor.Bluetiful.swiftUI)
+                    Text(animatedQuery)
+                        .font(BeamFont.medium(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Bluetiful.swiftUI)
+                }
+                .transition(AnyTransition.asymmetric(
+                    insertion: AnyTransition.move(edge: .bottom).combined(with: .opacity),
+                    removal: AnyTransition.move(edge: .leading).combined(with: .opacity)
+                ))
+                .frame(maxWidth: .infinity, alignment: .center)
+            }
+        }
+    }
+
     var rightActionsView: some View {
         Group {
             if hasRightActions {
@@ -137,9 +164,6 @@ struct OmniBar: View {
                             showDownloadPanel.toggle()
                         })
                         .frame(height: 32, alignment: .top)
-                        .popover(isPresented: $showDownloadPanel, content: {
-                            DownloaderView(downloader: state.data.downloadManager)
-                        })
                         .background(GeometryReader { proxy -> Color in
                             let rect = proxy.frame(in: .global)
                             let center = CGPoint(x: rect.origin.x + rect.width / 2, y: rect.origin.y + rect.height / 2)
@@ -175,6 +199,9 @@ struct OmniBar: View {
             .background(BeamColor.Generic.background.swiftUI
                             .shadow(color: barShadowColor, radius: 0, x: 0, y: 0.5)
             )
+        }
+        .popup(isPresented: showDownloadPanel, config: .init(alignment: .topTrailing, offset: CGSize(width: -18, height: 45))) {
+            DownloaderView(downloader: state.data.downloadManager, isPresented: $showDownloadPanel)
         }
         .frame(height: 52, alignment: .top)
     }

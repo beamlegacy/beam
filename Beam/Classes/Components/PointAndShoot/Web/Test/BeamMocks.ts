@@ -5,6 +5,8 @@ import {
   BeamElementCSSInlineStyle,
   BeamHTMLElement,
   BeamHTMLIFrameElement,
+  BeamHTMLInputElement,
+  BeamHTMLTextAreaElement,
   BeamLocation,
   BeamNode,
   BeamNodeType,
@@ -14,9 +16,9 @@ import {
   BeamText,
   BeamWindow,
 } from "../BeamTypes"
-import { BeamWindowMock } from "./BeamWindowMock"
-import { BeamEventTargetMock } from "./BeamEventTargetMock"
-import { Util } from "../Util"
+import {BeamWindowMock} from "./BeamWindowMock"
+import {BeamEventTargetMock} from "./BeamEventTargetMock"
+import {Util} from "../Util"
 
 export class BeamDOMTokenList {
   list = []
@@ -34,8 +36,6 @@ export class BeamNodeMock extends BeamEventTargetMock implements BeamNode {
   static readonly DOCUMENT_NODE = BeamNodeType.document
   static readonly DOCUMENT_TYPE_NODE = BeamNodeType.document_type
   static readonly DOCUMENT_FRAGMENT_NODE = BeamNodeType.document_fragment
-
-  innerText: string
 
   childNodes: BeamNode[] = []
   parentNode?: BeamNode
@@ -78,6 +78,22 @@ export class BeamNodeMock extends BeamEventTargetMock implements BeamNode {
         )
       )
     )
+  }
+
+  get textContent(): string {
+    const collectTextNodes = (node: BeamNode): string => {
+      const text = node.childNodes.reduce(
+        (acc: string[], node) => {
+        if (node.nodeType === BeamNodeType.text) {
+          acc.push(`${node}`)
+        } else if (node.nodeType === BeamNodeType.element) {
+          acc.push(...collectTextNodes(node))
+        }
+        return acc
+      }, [])
+      return text.join('')
+    }
+    return collectTextNodes(this)
   }
 }
 
@@ -414,7 +430,38 @@ export class BeamHTMLElementMock extends BeamElementMock implements BeamHTMLElem
   constructor(nodeName: string, attributes = {}) {
     super(nodeName, new BeamNamedNodeMap(attributes))
   }
+
   nodeValue: any
+
+  get innerText(): string {
+    return this.textContent
+  }
+
+  set innerText(text: string) {
+    const textNodes = this.childNodes.filter(node => node.nodeType === BeamNodeType.text)
+    for (const textNode of textNodes) {
+      this.removeChild(textNode)
+    }
+    this.appendChild(new BeamTextMock(text))
+  }
+}
+
+export class BeamHTMLInputElementMock extends BeamHTMLElementMock implements BeamHTMLInputElement {
+  value: string
+
+  get type():string {
+    const attribute = this.attributes.getNamedItem("type")
+    return attribute?.value
+  }
+
+  set type(value: string) {
+    this.attributes.getNamedItem("type").value = value
+  }
+
+}
+
+export class BeamHTMLTextAreaElementMock extends BeamHTMLElementMock implements BeamHTMLTextAreaElement {
+  value: string
 }
 
 export class BeamSelectionMock implements BeamSelection {
@@ -600,6 +647,11 @@ export class BeamRangeMock implements BeamRange {
 
   selectNode(node: BeamNode): void {
     this.node = node
+    const parentBox = node.parentElement.getBoundingClientRect()
+    this.node.bounds.x = this.node.bounds.x || parentBox.x
+    this.node.bounds.y = this.node.bounds.y || parentBox.y
+    this.node.bounds.width = this.node.bounds.width || parentBox.width
+    this.node.bounds.height = this.node.bounds.height || parentBox.height
   }
 }
 

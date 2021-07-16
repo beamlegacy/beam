@@ -16,8 +16,8 @@ struct PasswordsTableView: View {
     @State private var allPasswordItems = [PasswordTableViewItem]()
     var passwordColumns = [
         TableViewColumn(key: "hostinfo", title: "Sites", type: TableViewColumn.ColumnType.IconAndText, sortable: true, resizable: false, width: 195, fontSize: 11),
-        TableViewColumn(key: "username", title: "Username", width: 150, fontSize: 11, stringFromKeyValue: { "\($0 ?? "")" }),
-        TableViewColumn(key: "password", title: "Passwords", sortable: false, fontSize: 11, stringFromKeyValue: { "\($0 ?? "")" })
+        TableViewColumn(key: "username", title: "Username", width: 150, fontSize: 11),
+        TableViewColumn(key: "password", title: "Passwords", sortable: false, fontSize: 11)
     ]
 
     var body: some View {
@@ -35,7 +35,7 @@ struct PasswordsTableView: View {
 
     private func filterPasswordItemsBy(searchStr: String) -> [PasswordTableViewItem] {
         return allPasswordItems.filter { item in
-            item.username.contains(searchStr) || item.hostInfo.host.contains(searchStr)
+            item.username.contains(searchStr) || item.host.contains(searchStr)
         }
     }
 
@@ -47,26 +47,23 @@ struct PasswordsTableView: View {
     }
 }
 
-struct HostInfo {
-    var host: String
-    var favIcon: NSImage?
-}
-
 @objcMembers
-class PasswordTableViewItem: TableViewItem {
+class PasswordTableViewItem: IconAndTextTableViewItem {
     var username: String
     var password: String
-    var hostInfo: HostInfo
+    var host: String
 
     init(host: String, username: String, password: String) {
         self.username = username
         self.password = password
-        self.hostInfo = HostInfo(host: host, favIcon: NSImage(named: "field-web"))
+        self.host = host
         super.init()
+        self.favIcon = NSImage(named: "field-web")
+        self.text = host
         guard let hostURL = URL(string: "https://\(host)") else { return }
         FaviconProvider.shared.imageForUrl(hostURL) { [weak self] (image) in
             guard let self = self else { return }
-            self.hostInfo.favIcon = image
+            self.favIcon = image
         }
 
     }

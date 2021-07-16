@@ -93,19 +93,19 @@ class ContentBlockingManager {
         if let ruleList = ruleList, (identifier == "hush" || identifier == "regional") {
             add(ruleList: ruleList, identifier: identifier)
         }
-        if radBlockPreferences.isAdsFilterEnabled && identifier == "ads" {
+        if PreferencesManager.isAdsFilterEnabled && identifier == "ads" {
             add(ruleList: ruleList, identifier: identifier)
-        } else if !radBlockPreferences.isAdsFilterEnabled && identifier == "ads" {
+        } else if !PreferencesManager.isAdsFilterEnabled && identifier == "ads" {
             remove(ruleList: ruleList, identifier: identifier)
         }
-        if radBlockPreferences.isAnnoyancesFilterEnabled && identifier == "annoyance" {
+        if PreferencesManager.isAnnoyancesFilterEnabled && identifier == "annoyance" {
             add(ruleList: ruleList, identifier: identifier)
-        } else if !radBlockPreferences.isAnnoyancesFilterEnabled && identifier == "annoyance" {
+        } else if !PreferencesManager.isAnnoyancesFilterEnabled && identifier == "annoyance" {
             remove(ruleList: ruleList, identifier: identifier)
         }
-        if radBlockPreferences.isPrivacyFilterEnabled && identifier == "privacy" {
+        if PreferencesManager.isPrivacyFilterEnabled && identifier == "privacy" {
             add(ruleList: ruleList, identifier: identifier)
-        } else if !radBlockPreferences.isPrivacyFilterEnabled && identifier == "privacy" {
+        } else if !PreferencesManager.isPrivacyFilterEnabled && identifier == "privacy" {
             remove(ruleList: ruleList, identifier: identifier)
         }
     }

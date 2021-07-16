@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import BeamCore
 
 enum PasswordImporter {
     enum Error: Swift.Error {
@@ -31,17 +32,14 @@ enum PasswordImporter {
         }
     }
 
-    private struct LineParser {
+    private struct RecordDecoder {
         var urlIndex: Int
         var usernameIndex: Int
         var passwordIndex: Int
         var expectedColumnCount: Int
 
-        private static let columnSeparator = CharacterSet(charactersIn: ",;\t")
-        private static let quotes = CharacterSet(charactersIn: "\"")
-
-        init(header: String) throws {
-            let headerColumns = header.lowercased().components(separatedBy: Self.columnSeparator)
+        init(header: [String]) throws {
+            let headerColumns = header.map { $0.lowercased() }
             guard let urlIndex = headerColumns.firstIndex(of: "url"),
                   let usernameIndex = headerColumns.firstIndex(of: "username"),
                   let passwordIndex = headerColumns.firstIndex(of: "password") else {
@@ -51,29 +49,61 @@ enum PasswordImporter {
             expectedColumnCount = max(urlIndex, usernameIndex, passwordIndex) + 1
         }
 
-        func decode(_ line: String) -> Entry? {
-            let columns = line.components(separatedBy: Self.columnSeparator)
+        func decode(_ columns: [String]) -> Entry? {
             guard columns.count >= expectedColumnCount else { return nil }
-            let url = columns[urlIndex].trimmingCharacters(in: Self.quotes)
-            let username = columns[usernameIndex].trimmingCharacters(in: Self.quotes)
-            let password = columns[passwordIndex].trimmingCharacters(in: Self.quotes)
+            let url = columns[urlIndex]
+            let username = columns[usernameIndex]
+            let password = columns[passwordIndex]
             guard !url.isEmpty, !username.isEmpty, !password.isEmpty else { return nil }
             return Entry(url: url, username: username, password: password)
         }
     }
 
-    static func importPasswords(fromCSV file: URL, into store: PasswordStore) throws {
-        let text = try String(contentsOf: file, encoding: .utf8)
-        var lines = text.components(separatedBy: .newlines)
-        guard !lines.isEmpty else {
-            throw Error.unexpectedFormat
-        }
-        let header = lines.removeFirst()
-        let parser = try LineParser(header: header)
-        lines.forEach { line in
-            if let entry = parser.decode(line) {
+    static func importPasswords(fromCSV text: String, into store: PasswordStore) throws {
+        let seq = CSVUnescapingSequence(input: text)
+        var parser = CSVParser(input: seq)
+
+        guard let header = parser.next() else { throw Error.headerNotFound }
+        let decoder = try RecordDecoder(header: header)
+
+        for record in parser {
+            if let entry = decoder.decode(record) {
                 store.save(host: entry.host, username: entry.username, password: entry.password)
             }
         }
+    }
+
+    static func exportPasswords(from store: PasswordStore, toCSV file: URL) throws {
+        let serialQueue = DispatchQueue(label: "exportPasswordsQueue")
+        var allEntries: [PasswordManagerEntry] = []
+        var csvString = "\("URL"), \("Username"),\("Password")\n"
+
+        serialQueue.async {
+            store.fetchAll { entries in
+                allEntries = entries
+            }
+        }
+        serialQueue.async {
+            for entry in allEntries {
+                store.password(host: entry.minimizedHost, username: entry.username) { password in
+                    if let passwordStr = password {
+                        csvString.append("\(entry.minimizedHost), \(entry.username), \(passwordStr)\n")
+
+                    }
+                }
+            }
+        }
+        serialQueue.async {
+            do {
+                try csvString.write(to: file, atomically: true, encoding: .utf8)
+            } catch {
+                Logger.shared.logError(error.localizedDescription, category: .general)
+            }
+        }
+    }
+
+    static func importPasswords(fromCSV file: URL, into store: PasswordStore) throws {
+        let text = try String(contentsOf: file, encoding: .utf8)
+        try importPasswords(fromCSV: text, into: store)
     }
 }

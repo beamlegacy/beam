@@ -10,6 +10,7 @@ import BeamCore
 
 struct AllowListModalView: View {
     @Environment(\.presentationMode) var presentationMode
+
     @ObservedObject var viewModel: AllowListViewModel
 
     @State private var searchString: String = ""
@@ -41,7 +42,7 @@ struct AllowListModalView: View {
                 } label: {
                     Image("basicAdd")
                         .renderingMode(.template)
-                        .foregroundColor(.white)
+                        .foregroundColor(BeamColor.Generic.background.swiftUI)
                 }.buttonStyle(BorderedButtonStyle())
                 Button {
                     if selectedItems.count > 0 {
@@ -53,7 +54,7 @@ struct AllowListModalView: View {
                 } label: {
                     Image("basicRemove")
                         .renderingMode(.template)
-                        .foregroundColor(.white)
+                        .foregroundColor(BeamColor.Generic.background.swiftUI)
                 }.buttonStyle(BorderedButtonStyle())
                 Spacer()
                 Button(action: {

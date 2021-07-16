@@ -10,6 +10,7 @@ public class BeamDownloadManager: NSObject, DownloadManager, ObservableObject {
     @Published private(set) var downloads: [Download] = []
     @Published private(set) var fractionCompleted: Double = 0.0
     @Published private(set) var ongoingDownload: Bool = false
+    @Published var showAlertFileNotFoundForDownload: Download?
 
     var overallProgress = Progress()
     private(set) var scope = Set<AnyCancellable>()
@@ -203,6 +204,28 @@ public class BeamDownloadManager: NSObject, DownloadManager, ObservableObject {
             download.downloadDocument?.resumeData = resumeData
             download.saveDownloadDocument()
         })
+    }
+
+    func showInFinder(_ download: Download) {
+        let downloadedFileURL = download.fileSystemURL
+        let tempFileURL = download.downloadDocumentFileURL
+
+        if downloadedFileURL.isFileURL, FileManager.default.fileExists(atPath: downloadedFileURL.path) {
+            NSWorkspace.shared.activateFileViewerSelecting([downloadedFileURL])
+        } else if tempFileURL.isFileURL, FileManager.default.fileExists(atPath: tempFileURL.path) {
+            NSWorkspace.shared.activateFileViewerSelecting([tempFileURL])
+        } else {
+            showAlertFileNotFoundForDownload = download
+        }
+    }
+
+    func openFile(_ download: Download) {
+        let url = download.fileSystemURL
+        guard url.isFileURL, FileManager.default.fileExists(atPath: url.path) else {
+            showAlertFileNotFoundForDownload = download
+            return
+        }
+        NSWorkspace.shared.open(url)
     }
 
     // MARK: - File downloads private funcs

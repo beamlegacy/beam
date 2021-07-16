@@ -245,7 +245,7 @@ public extension CALayer {
     public var openCard: (UUID, UUID?) -> Void = { _, _ in }
     public var onStartEditing: () -> Void = { }
     public var onEndEditing: () -> Void = { }
-    public var onStartQuery: (TextNode) -> Void = { _ in }
+    public var onStartQuery: (TextNode, Bool) -> Void = { _, _ in }
 
     public var config = TextConfig()
 
@@ -555,7 +555,8 @@ public extension CALayer {
                 return
             }
 
-            let insertAsChild = node.parent as? BreadCrumb != nil || node._displayedElement != nil
+            let isOpenWithChildren = node.open && node.element.children.count > 0
+            let insertAsChild = node.parent as? BreadCrumb != nil || node._displayedElement != nil || isOpenWithChildren && rootNode.cursorPosition == node.text.count
 
             if !rootNode.selectedTextRange.isEmpty {
                 rootNode.cmdManager.deleteText(in: node, for: rootNode.selectedTextRange)
@@ -582,10 +583,11 @@ public extension CALayer {
                 guard let newElement = node.nodeFor(newElement)?.element else { return }
 
                 // reparent all children of node to newElement
-                for child in children {
-                    cmdManager.reparentElement(child, to: newElement, atIndex: newElement.children.count)
+                if isOpenWithChildren || !node.open && children.count > 0 && rootNode.cursorPosition == 0 {
+                    for child in children {
+                        cmdManager.reparentElement(child, to: newElement, atIndex: newElement.children.count)
+                    }
                 }
-
             }
 
             if let toFocus = node.nodeFor(newElement) {
@@ -611,7 +613,7 @@ public extension CALayer {
                 return
             case KeyCode.enter.rawValue:
                 if command && rootNode.state.nodeSelection == nil, let node = rootNode.focusedWidget as? TextNode {
-                    onStartQuery(node)
+                    triggerCmdReturn(from: node)
                     return
                 }
             default:
@@ -721,6 +723,18 @@ public extension CALayer {
         }
 
         inputContext?.handleEvent(event)
+    }
+
+    private func triggerCmdReturn(from node: TextNode) {
+        blinkPhase = false
+        hasFocus = false
+        node.updateCursor()
+        node.updateActionLayerVisibility(hidden: true)
+
+        let animator = TextEditCmdReturnAnimator(node: node, editorLayer: self.layer)
+        animator.startAnimation { [unowned self] in
+            self.onStartQuery(node, true)
+        }
     }
 
     // NSTextInputHandler:
@@ -1232,8 +1246,11 @@ public extension CALayer {
     }
 
     override public func moveLeftAndModifySelection(_ sender: Any?) {
+        let showFormatter = rootNode.cursorPosition != 0
         rootNode.moveLeftAndModifySelection()
-        showInlineFormatterOnKeyEventsAndClick(isKeyEvent: true)
+        if showFormatter {
+            showInlineFormatterOnKeyEventsAndClick(isKeyEvent: true)
+        }
     }
 
     override public func moveWordRight(_ sender: Any?) {
@@ -1255,8 +1272,12 @@ public extension CALayer {
     }
 
     override public func moveRightAndModifySelection(_ sender: Any?) {
+        guard let node = focusedWidget as? TextNode else { return }
+        let showFormatter = rootNode.cursorPosition != node.text.count
         rootNode.moveRightAndModifySelection()
-        showInlineFormatterOnKeyEventsAndClick(isKeyEvent: true)
+        if showFormatter {
+            showInlineFormatterOnKeyEventsAndClick(isKeyEvent: true)
+        }
     }
 
     override public func moveToBeginningOfLine(_ sender: Any?) {

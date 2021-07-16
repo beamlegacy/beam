@@ -10,7 +10,8 @@ import BeamCore
 import GRDB
 
 struct PasswordRecord: BeamObjectProtocol {
-    var id: Int64?
+    internal static let databaseUUIDEncodingStrategy = DatabaseUUIDEncodingStrategy.string
+
     var uuid: UUID
     var entryId: String
     var host: String
@@ -34,7 +35,6 @@ struct PasswordRecord: BeamObjectProtocol {
 
 //    // Used for encoding this into BeamObject
     enum CodingKeys: String, CodingKey {
-        case id
         case uuid
         case entryId
         case host
@@ -46,8 +46,7 @@ struct PasswordRecord: BeamObjectProtocol {
     }
 
     func copy() -> PasswordRecord {
-        PasswordRecord(id: id,
-                       uuid: uuid,
+        PasswordRecord(uuid: uuid,
                        entryId: entryId,
                        host: host, name: name,
                        password: password,
@@ -67,8 +66,6 @@ extension PasswordRecord: TableRecord {
 
 // Fetching
 extension PasswordRecord: FetchableRecord {
-    internal static let databaseUUIDEncodingStrategy = DatabaseUUIDEncodingStrategy.string
-
     init(row: Row) {
         uuid = row[Columns.uuid]
         entryId = row[Columns.entryId]

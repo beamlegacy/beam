@@ -1,6 +1,7 @@
 // Configuration settings file format documentation can be found at:
 // https://help.apple.com/xcode/#/dev745c5c974
 
+CUSTOM_OTHER_SWIFT_FLAGS = -DBEAM_WEBKIT_ENHANCEMENT_ENABLED
 AUTOMATIC_UPDATE = 1
 SENTRY_ENABLED = 1
 ENV = release

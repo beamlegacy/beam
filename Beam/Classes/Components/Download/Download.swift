@@ -53,7 +53,7 @@ class Download: Identifiable, ObservableObject, Codable {
         self.id = UUID()
         self.downloadDate = Date()
 
-        self.byteFormatter.allowedUnits = [.useGB, .useMB]
+        self.byteFormatter.allowedUnits = [.useGB, .useMB, .useKB]
         self.byteFormatter.countStyle = .file
 
         if let task = downloadTask {

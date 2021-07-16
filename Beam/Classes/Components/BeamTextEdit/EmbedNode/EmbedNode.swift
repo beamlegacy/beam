@@ -84,7 +84,7 @@ public class EmbedNode: ElementNode {
     let embedHeight = CGFloat(240)
     override var elementNodePadding: NSEdgeInsets {
         switch self.elementKind {
-        case .embed(_):
+        case .embed:
             return NSEdgeInsets(top: 4, left: 0, bottom: 14, right: 0)
         default:
             return NSEdgeInsetsZero

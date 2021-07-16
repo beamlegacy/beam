@@ -4,21 +4,9 @@ import Sentry
 import Combine
 import BeamCore
 
-/**
-Function wrapping SwiftUI into `PreferencePane`, which is mimicking view controller's default construction syntax.
-*/
-let AdvancedPreferencesViewController: () -> PreferencePane = {
-    /// Wrap your custom view into `Preferences.Pane`, while providing necessary toolbar info.
-    let paneView = Preferences.Pane(
-        identifier: .advanced,
-        title: "Advanced",
-        toolbarIcon: NSImage(named: "gearshape.2")!
-    ) {
-        AdvancedPreferencesView()
-            .environment(\.managedObjectContext, CoreDataManager.shared.mainContext)
-    }
-
-    return Preferences.PaneHostingController(pane: paneView)
+var AdvancedPreferencesViewController: PreferencePane = PreferencesPaneBuilder.build(identifier: .advanced, title: "Advanced", imageName: "preferences-developer") {
+    AdvancedPreferencesView()
+        .environment(\.managedObjectContext, CoreDataManager.shared.mainContext)
 }
 
 struct AdvancedPreferencesView: View {
@@ -45,7 +33,7 @@ struct AdvancedPreferencesView: View {
                   predicate: NSPredicate(format: "deleted_at == nil"))
     var databases: FetchedResults<Database>
 
-    private let contentWidth: Double = 650.0
+    private let contentWidth: Double = PreferencesManager.contentWidth
 
     var body: some View {
         let apiHostnameBinding = Binding<String>(get: {
@@ -63,23 +51,47 @@ struct AdvancedPreferencesView: View {
         })
 
         Preferences.Container(contentWidth: contentWidth) {
-            Preferences.Section(title: "Bundle identifier:") {
+            Preferences.Section(bottomDivider: true) {
+                Text("Bundle identifier:")
+                    .font(BeamFont.regular(size: 13).swiftUI)
+                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+                    .frame(width: 250, alignment: .trailing)
+            } content: {
                 Text(bundleIdentifier)
             }
-            Preferences.Section(title: "API endpoint:") {
+            Preferences.Section {
+                Text("API endpoint:")
+                    .font(BeamFont.regular(size: 13).swiftUI)
+                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+            } content: {
                 TextField("api hostname", text: apiHostnameBinding)
                     .lineLimit(1)
-                    .textFieldStyle(RoundedBorderTextFieldStyle()).frame(maxWidth: 400)
+                    .textFieldStyle(RoundedBorderTextFieldStyle()).frame(maxWidth: 286)
             }
-            Preferences.Section(title: "Public endpoint:") {
+            Preferences.Section {
+                Text("Public endpoint:")
+                    .font(BeamFont.regular(size: 13).swiftUI)
+                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+            } content: {
                 Text(publicHostname)
             }
-            Preferences.Section(title: "Environment:") {
+            Preferences.Section {
+                Text("Environment:")
+                    .font(BeamFont.regular(size: 13).swiftUI)
+                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+            } content: {
                 Text(env)
             }
-            Preferences.Section(title: "CoreData:") {
+            Preferences.Section(bottomDivider: true) {
+                Text("CoreData:")
+                    .font(BeamFont.regular(size: 13).swiftUI)
+                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+            } content: {
                 Text(CoreDataManager.shared.storeURL?.absoluteString ?? "-").fixedSize(horizontal: false, vertical: true)
+                    .lineLimit(4)
+                    .frame(maxWidth: 387)
             }
+
             Preferences.Section(title: "Automatic Update:") {
                 Text(String(describing: autoUpdate))
             }
@@ -98,6 +110,14 @@ struct AdvancedPreferencesView: View {
             Preferences.Section(title: "Show PNS status") {
                 PnsStatusButton
             }
+            Preferences.Section {
+                Text("Browsing Session collection")
+                    .font(BeamFont.regular(size: 13).swiftUI)
+                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+            } content: {
+                BrowsingSessionCollectionCheckbox
+            }
+
             Preferences.Section(title: "Encryption Enabled") {
                 EncryptionEnabledButton
             }
@@ -181,6 +201,12 @@ struct AdvancedPreferencesView: View {
         }, label: {
             Text(String(describing: pnsStatus)).frame(minWidth: 100)
         })
+    }
+
+    private var BrowsingSessionCollectionCheckbox: some View {
+        Checkbox(checkState: Configuration.browsingSessionCollectionIsOn, text: "Enable Browsing Session collection", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
+            Configuration.browsingSessionCollectionIsOn = activated
+        }
     }
 
     private var EncryptionEnabledButton: some View {
