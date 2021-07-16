@@ -1,6 +1,7 @@
 import Foundation
 import BeamCore
 
+// swiftlint:disable file_length
 protocol BeamObjectManagerDelegateProtocol {
     // The string used to store beam object types
     static var typeName: String { get }
@@ -198,6 +199,7 @@ extension BeamObjectManager {
         completion(.failure(error))
     }
 
+    // swiftlint:disable:next cyclomatic_complexity
     internal func saveToAPIFailureAPIErrors(_ beamObjects: [BeamObject],
                                             _ errors: [UserErrorData],
                                             _ completion: @escaping ((Swift.Result<[BeamObject], Error>) -> Void)) {
@@ -476,3 +478,5 @@ extension BeamObjectManager {
         }
     }
 }
+
+// swiftlint:enable file_length

@@ -540,6 +540,7 @@ extension DatabaseManager {
         }
     }
 
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
     func save(_ databaseStruct: DatabaseStruct,
               _ networkSave: Bool = true,
               _ networkCompletion: ((Swift.Result<Bool, Error>) -> Void)? = nil,
@@ -1179,7 +1180,7 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
 
             // This should never be called since invalid checksum are managed inside BeamObjectManager
             assert(false)
-            
+
             // Here we should try to merge remoteBeamObject converted as a DatabaseStruct, and our local one.
             // For now we just overwrite the API with our local version with a batch call resending all of them
             guard let databaseStruct = databaseStructs.first(where: { $0.id == remoteBeamObject.id }) else {

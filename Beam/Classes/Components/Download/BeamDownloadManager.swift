@@ -2,6 +2,8 @@ import Foundation
 import BeamCore
 import Combine
 
+// swiftlint:disable file_length
+
 public class BeamDownloadManager: NSObject, DownloadManager, ObservableObject {
 
     private let ephemeralDownloadSession = URLSession(configuration: .ephemeral)
@@ -421,3 +423,5 @@ extension BeamDownloadManager {
         return group
     }
 }
+
+// swiftlint:enable file_length
