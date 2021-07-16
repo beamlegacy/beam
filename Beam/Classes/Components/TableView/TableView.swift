@@ -271,7 +271,6 @@ extension TableViewCoordinator: NSTableViewDelegate {
     }
 
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
-        var cell: NSView?
         guard let column = self.parent.columns.first(where: { $0.key == tableColumn?.identifier.rawValue }) else {
             return nil
         }
@@ -281,7 +280,7 @@ extension TableViewCoordinator: NSTableViewDelegate {
             if column.type == .CheckBox {
                 let iconCell = BeamTableCellIconView()
                 iconCell.updateWithIcon(NSImage(named: "tabs-new"))
-                cell = iconCell
+                return iconCell
             } else {
                 let textCell = BeamTableCellView()
                 textCell.textField?.isEditable = false
@@ -291,21 +290,19 @@ extension TableViewCoordinator: NSTableViewDelegate {
                     creationgRowTextField = textCell.textField
                     textCell.textField?.delegate = self
                 }
-                cell = textCell
+                return textCell
             }
         }
         switch column.type {
         case .CheckBox:
-            cell = setupCheckBoxCell(tableView, at: row)
+            return setupCheckBoxCell(tableView, at: row)
         case .Text:
-            cell = setupTextCell(tableView, at: row, column: column)
+            return setupTextCell(tableView, at: row, column: column)
         case .IconAndText:
-            cell = setupIconAndTextCell(tableView, at: row, column: column)
+            return setupIconAndTextCell(tableView, at: row, column: column)
         case .TwoTextField:
-            cell = setupTwoTextFieldViewCell(tableView, at: row, column: column)
+            return setupTwoTextFieldViewCell(tableView, at: row, column: column)
         }
-
-        return cell
     }
 
     private func setupTextCell(_ tableView: NSTableView, at row: Int, column: TableViewColumn) -> BeamTableCellView {
