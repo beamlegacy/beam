@@ -64,7 +64,13 @@ struct OmniBar: View {
         isAboveContent ? BeamColor.BottomBar.shadow.swiftUI : BeamColor.BottomBar.shadow.swiftUI.opacity(0.0)
     }
     private var showDownloadsButton: Bool {
-        !state.data.downloadManager.downloads.isEmpty
+        let showButton = !state.data.downloadManager.downloads.isEmpty
+        if !showButton {
+            DispatchQueue.main.asyncAfter(deadline: .now()) {
+                self.showDownloadPanel = false
+            }
+        }
+        return showButton
     }
     private var showPressedState: Bool {
         state.autocompleteManager.animateInputingCharacter
