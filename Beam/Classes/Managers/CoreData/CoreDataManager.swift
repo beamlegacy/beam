@@ -52,11 +52,16 @@ class CoreDataManager {
             semaphore.signal()
         }
 
-        semaphore.wait()
+        let semaphoreResult = semaphore.wait(timeout: DispatchTime.now() + .seconds(10))
+        if case .timedOut = semaphoreResult {
+            Logger.shared.logError("Semaphore for CoreData setup timedout", category: .coredata)
+            assert(false)
+        }
     }
 
     private func loadPersistentStore(completion: @escaping () -> Void) {
         migrateStoreIfNeeded {
+            Logger.shared.logDebug("Coredata migrations checked", category: .coredata)
             self.persistentContainer.loadPersistentStores { description, error in
                 self.storeURL = description.url
 
@@ -79,6 +84,7 @@ class CoreDataManager {
         }
 
         if migrator.requiresMigration(at: storeURL, toVersion: CoreDataMigrationVersion.current) {
+            Logger.shared.logDebug("Coredata migrations needed", category: .coredata)
             DispatchQueue.global(qos: .userInitiated).async {
                 self.migrator.migrateStore(at: storeURL, toVersion: CoreDataMigrationVersion.current)
 

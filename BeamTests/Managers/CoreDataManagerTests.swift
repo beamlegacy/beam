@@ -65,7 +65,7 @@ class CoreDataManagerTests: QuickSpec {
 
         describe(".importBackup(url)") {
             let url = Bundle(for: type(of: self)).url(forResource: "BeamExport", withExtension: "sqlite")!
-            let backupStructTitle = "Awesome Cotton Hat Nck9sefqhh50ItopCfCErGZ2UetLQhu7oxY27SyF"
+            let backupStructTitle = "Intelligent Rubber Table UEycai0djEmn6auAdpPTqdXs6IXsSzApZNvszFa9"
             var docStruct: DocumentStruct!
             beforeEach {
                 helper.deleteAllDocuments()

@@ -20,7 +20,9 @@ class CoreDataMigrator: CoreDataMigratorProtocol {
 
     // MARK: - Migration
     func migrateStore(at storeURL: URL, toVersion version: CoreDataMigrationVersion) {
+        Logger.shared.logDebug("Coredata migrateStore", category: .coredata)
         forceWALCheckpointingForStore(at: storeURL)
+        Logger.shared.logDebug("Coredata forceWALCheckpointingForStore called", category: .coredata)
 
         var currentURL = storeURL
         let migrationSteps = self.migrationStepsForStore(at: storeURL, toVersion: version)
@@ -97,7 +99,8 @@ class CoreDataMigrator: CoreDataMigratorProtocol {
     // MARK: - WAL
 
     func forceWALCheckpointingForStore(at storeURL: URL) {
-        guard let metadata = NSPersistentStoreCoordinator.metadata(at: storeURL), let currentModel = NSManagedObjectModel.compatibleModelForStoreMetadata(metadata) else {
+        guard let metadata = NSPersistentStoreCoordinator.metadata(at: storeURL),
+              let currentModel = NSManagedObjectModel.compatibleModelForStoreMetadata(metadata) else {
             return
         }
 
