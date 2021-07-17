@@ -1561,11 +1561,12 @@ public extension CALayer {
         dragIndicator.backgroundColor = .black
         dragIndicator.borderWidth = 0
         dragIndicator.isHidden = false
+
+        dragIndicator.frame = CGRect(x: node.offsetInDocument.x + node.indent, y: node.offsetInDocument.y + node.contentsFrame.maxY, width: node.frame.width - node.indent, height: 1)
+
         if point.y < (node.offsetInDocument.y + node.contentsFrame.height / 2) {
-            dragIndicator.frame = CGRect(x: rootNode.frame.minX, y: node.offsetInDocument.y, width: rootNode.frame.width, height: 1)
             return (node, false)
         } else {
-            dragIndicator.frame = CGRect(x: rootNode.frame.minX, y: node.offsetInDocument.y + node.contentsFrame.maxY, width: rootNode.frame.width, height: 1)
             return (node, true)
         }
     }
