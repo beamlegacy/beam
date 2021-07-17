@@ -74,14 +74,21 @@ class LinksSection: Widget {
 
     var currentReferences = [BeamNoteReference]()
 
+    var initialUpdate = true
     func updateLinkedReferences(links: [BeamNoteReference]) {
+        defer {
+            initialUpdate = false
+        }
+
+        // Mix existing references and new ones, make them unique in a set and let "shouldHandleReference" handle what should stay and what should go
+        let allLinks = Set(links + currentReferences)
         currentReferences = links
 
         var validRefs = 0
         var newrefs = [UUID: RefNoteTitle]()
         var toRemove = Set<RefNoteTitle>(titles.values)
 
-        for noteReference in links {
+        for noteReference in allLinks {
             let noteID = noteReference.noteID
             guard let breadCrumb = root?.getBreadCrumb(for: noteReference) else { continue }
 
@@ -112,6 +119,13 @@ class LinksSection: Widget {
             removeChild(oldChild)
         }
 
+        // Purge empty titles
+        for child in children {
+            if child.children.isEmpty {
+                removeChild(child)
+            }
+        }
+
         updateHeading(validRefs)
     }
 
@@ -139,7 +153,15 @@ class LinksSection: Widget {
     }
 
     func shouldHandleReference(rootNote: String, rootNoteId: UUID, text: BeamText) -> Bool {
-        return text.hasLinkToNote(id: rootNoteId)
+        let linksToNote = text.hasLinkToNote(id: rootNoteId)
+        let referencesToNote = text.hasReferenceToNote(titled: rootNote)
+
+        // This is subtle: we don't want hide nodes that have just been edited so that they are not a link to this card anymore, so we make them disapear only if the became a reference to the curent card. This only happens after the initial update as the initial update should filter out anything that is not a link. It has the symetrical behaviour of ReferencesSection
+        if initialUpdate {
+            return linksToNote
+        } else {
+            return linksToNote || !referencesToNote
+        }
     }
 
     var layerFrameXPad = CGFloat(25)
