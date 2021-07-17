@@ -571,8 +571,10 @@ public extension CALayer {
             let newElement = BeamElement(str)
             if insertAsChild {
                 if let parent = node._displayedElement {
+                    parent.open = true
                     cmdManager.insertElement(newElement, inElement: parent, afterElement: nil)
                 } else {
+                    node.open = true
                     cmdManager.insertElement(newElement, inNode: node, afterElement: nil)
                 }
             } else {

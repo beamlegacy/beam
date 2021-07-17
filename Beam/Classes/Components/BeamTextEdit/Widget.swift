@@ -449,6 +449,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
             }
             updateChildrenVisibility(visible && open)
             invalidateRendering()
+            invalidateLayout()
         }
     }
 
