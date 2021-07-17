@@ -120,10 +120,8 @@ class LinksSection: Widget {
         }
 
         // Purge empty titles
-        for child in children {
-            if child.children.isEmpty {
-                removeChild(child)
-            }
+        for child in children where child.children.isEmpty {
+            removeChild(child)
         }
 
         updateHeading(validRefs)
