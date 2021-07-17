@@ -163,6 +163,17 @@ extension TextRoot {
             return
         }
 
+        // Rather elegant solution: if we're not on a TextNode, let's move to a neighbouring node if it makes sense and then move back to the original position to prevent having to do complex things to handle all cases for the types of focussedWidget
+        let shiftNeeded = focusedWidget as? TextNode == nil && cursorPosition != 0
+        if shiftNeeded {
+            moveRight()
+        }
+        defer {
+            if shiftNeeded {
+                moveLeft()
+            }
+        }
+
         guard let node = focusedWidget as? TextNode, !node.readOnly,
               node.displayedElementNoteTitle != nil else {
             if let node = focusedWidget as? ElementNode {
@@ -201,6 +212,17 @@ extension TextRoot {
             editor.cancelPopover()
             eraseNodeSelection(createEmptyNodeInPlace: false)
             return
+        }
+
+        // Rather elegant solution: if we're not on a TextNode, let's move to a neighbouring node if it makes sense and then move back to the original position to prevent having to do complex things to handle all cases for the types of focussedWidget
+        let shiftNeeded = focusedWidget as? TextNode == nil && cursorPosition == 0
+        if shiftNeeded {
+            moveLeft()
+        }
+        defer {
+            if shiftNeeded {
+                moveRight()
+            }
         }
 
         guard let node = focusedWidget as? TextNode, !node.readOnly else {
