@@ -105,6 +105,16 @@ class ImageNode: ElementNode {
         }
     }
 
+    public override func updateElementCursor() {
+        let on = editor.hasFocus && isFocused && editor.blinkPhase && (root?.state.nodeSelection?.nodes.isEmpty ?? true)
+        let cursorRect = NSRect(x: caretIndex == 0 ? (indent - 5) : (contentsFrame.width + indent + 3), y: -5, width: 2, height: contentsFrame.height - 5)//rectAt(caretIndex: caretIndex)
+        let layer = self.cursorLayer
+
+        layer.shapeLayer.fillColor = enabled ? cursorColor.cgColor : disabledColor.cgColor
+        layer.layer.isHidden = !on
+        layer.shapeLayer.path = CGPath(rect: cursorRect, transform: nil)
+    }
+
     func updateFocus() {
         guard let imageLayer = layers["image"] else { return }
 
