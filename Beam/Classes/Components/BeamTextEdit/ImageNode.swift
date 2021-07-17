@@ -84,7 +84,7 @@ class ImageNode: ElementNode {
             let computedHeight = (width / imageSize.width) * imageSize.height
             let height = computedHeight.isNaN ? 0 : computedHeight
 
-            contentsFrame = NSRect(x: indent, y: 0, width: width, height: childInset + height)
+            contentsFrame = NSRect(x: indent, y: 0, width: width, height: height)
 
             if let imageLayer = layers["image"] {
                 imageLayer.layer.position = CGPoint(x: indent + childInset, y: 0)
@@ -92,11 +92,12 @@ class ImageNode: ElementNode {
 
                 updateFocus()
             }
-            computedIdealSize = contentsFrame.size
-            computedIdealSize.width = frame.width
 
             invalidatedRendering = false
         }
+
+        computedIdealSize = contentsFrame.size
+        computedIdealSize.width = frame.width
 
         if open && selfVisible {
             for c in children {
@@ -145,6 +146,9 @@ class ImageNode: ElementNode {
         imageLayer.layer.addSublayer(borderLayer)
     }
 
+    override func setLayout(_ frame: NSRect) {
+        super.setLayout(frame)
+    }
     override func onUnfocus() {
         updateFocus()
     }
