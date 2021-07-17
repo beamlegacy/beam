@@ -104,11 +104,11 @@ public class EmbedNode: ElementNode {
 
             updateFocus()
 
-            computedIdealSize = contentsFrame.size
-            computedIdealSize.width = frame.width
-
             invalidatedRendering = false
         }
+
+        computedIdealSize = contentsFrame.size
+        computedIdealSize.width = frame.width
 
         if open && selfVisible {
             for c in children {
