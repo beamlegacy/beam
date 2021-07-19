@@ -20,8 +20,10 @@ class MockURLSession: URLSessionProtocol {
     private (set) var lastPayload: Data?
     var response: HTTPURLResponse?
     var error: Error?
+    public var taskCallCount: Int = 0
 
     func mockableUploadTask(with: URLRequest, from: Data?, completionHandler: @escaping DataTaskResult) -> URLSessionUploadTaskProtocol {
+        taskCallCount += 1
         lastPayload = from
         return MockUploadTask { [self] in completionHandler(nil, self.response, self.error) }
     }
@@ -34,8 +36,16 @@ class BrowsingTreeSenderTest: XCTestCase {
 
     override func setUpWithError() throws {
         super.setUp()
+        Configuration.browsingSessionCollectionIsOn = true
         session = MockURLSession()
-        subject = BrowsingTreeSender(session: session, testDataStoreUrl: "www.abc.com")
+        let testConfig = BrowsingTreeSenderConfig(
+            dataStoreUrl: "http://url.fr",
+            dataStoreApiToken: "abc"
+        )
+        subject = BrowsingTreeSender(session: session, config: testConfig)
+    }
+    override func tearDownWithError() throws {
+        Configuration.browsingSessionCollectionIsOn = true
     }
 
     func testSentData() throws {
@@ -74,21 +84,49 @@ class BrowsingTreeSenderTest: XCTestCase {
         subject.send(browsingTree: tree) {completionCalled = true}
         XCTAssert(completionCalled)
     }
-    
+
     func testCompletionCallOnServerError() throws {
         let tree = BrowsingTree(nil)
         var completionCalled = false
-        session.response = HTTPURLResponse(url: URL(string: "www.abc.com")!, statusCode: 400, httpVersion: nil, headerFields: nil)
-        subject.send(browsingTree: tree) {completionCalled = true}
-        XCTAssert(completionCalled)
-    }
-    
-    func testCompletionCallOnSuccess() throws {
-        let tree = BrowsingTree(nil)
-        var completionCalled = false
-        session.response = HTTPURLResponse(url: URL(string: "www.abc.com")!, statusCode: 200, httpVersion: nil, headerFields: nil)
+        session.response = HTTPURLResponse(url: URL(string: "http://url.fr")!, statusCode: 400, httpVersion: nil, headerFields: nil)
         subject.send(browsingTree: tree) {completionCalled = true}
         XCTAssert(completionCalled)
     }
 
+    func testCompletionCallOnSuccess() throws {
+        let tree = BrowsingTree(nil)
+        var completionCalled = false
+        session.response = HTTPURLResponse(url: URL(string: "http://url.fr")!, statusCode: 200, httpVersion: nil, headerFields: nil)
+        subject.send(browsingTree: tree) {completionCalled = true}
+        XCTAssert(completionCalled)
+    }
+
+    func testDisabledByConfiguration() throws {
+        let tree = BrowsingTree(nil)
+        Configuration.browsingSessionCollectionIsOn = false
+        subject.send(browsingTree: tree)
+        XCTAssertEqual(session.taskCallCount, 0)
+        Configuration.browsingSessionCollectionIsOn = true
+        subject.send(browsingTree: tree)
+        XCTAssertEqual(session.taskCallCount, 1)
+        Configuration.browsingSessionCollectionIsOn = false
+        subject.send(browsingTree: tree)
+        XCTAssertEqual(session.taskCallCount, 1)
+    }
+    
+    func testFaultyConfig() throws {
+        let missingUrlConfig = BrowsingTreeSenderConfig(
+            dataStoreUrl: "$(BROWSING_TREE_URL)",
+            dataStoreApiToken: "abc"
+        )
+        var sender = BrowsingTreeSender(session: session, config: missingUrlConfig)
+        XCTAssertNil(sender)
+
+        let missingTokenConfig = BrowsingTreeSenderConfig(
+            dataStoreUrl: "http://url.fr",
+            dataStoreApiToken: "$(BROWSING_TREE_ACCESS_TOKEN)"
+        )
+        sender = BrowsingTreeSender(session: session, config: missingTokenConfig)
+        XCTAssertNil(sender)
+    }
 }

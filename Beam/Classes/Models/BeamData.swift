@@ -40,7 +40,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var sessionLinkRanker = SessionLinkRanker()
     var clusteringManager: ClusteringManager
     var scope = Set<AnyCancellable>()
-    var browsingTreeSender = BrowsingTreeSender()
+    var browsingTreeSender: BrowsingTreeSender?
 
     static func dataFolder(fileName: String) -> String {
         let paths = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)
@@ -106,7 +106,11 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         }
 
         cookies = HTTPCookieStorage()
-
+        let treeConfig = BrowsingTreeSenderConfig(
+            dataStoreUrl: EnvironmentVariables.BrowsingTree.url,
+            dataStoreApiToken: EnvironmentVariables.BrowsingTree.accessToken
+        )
+        browsingTreeSender = BrowsingTreeSender(config: treeConfig)
         super.init()
 
         BeamNote.idForNoteNamed = { title in
