@@ -53,14 +53,6 @@ class BeamObjectRequest: APIRequest {
 
         return UpdateBeamObjects(beamObjects: result)
     }
-
-    internal func encryptAllBeamObjects(_ beamObjects: [BeamObject]) throws {
-        guard Configuration.encryptionEnabled else { return }
-        try beamObjects.forEach {
-            try $0.encrypt()
-            $0.data = $0.encryptedData
-        }
-    }
 }
 
 // MARK: Foundation
@@ -70,10 +62,10 @@ extension BeamObjectRequest {
     func save(_ beamObject: BeamObject,
               _ completion: @escaping (Swift.Result<BeamObject, Error>) -> Void) throws -> URLSessionDataTask {
         let parameters = try saveBeamObjectParameters(beamObject)
+        defer { try? beamObject.decrypt() }
         let bodyParamsRequest = GraphqlParameters(fileName: "update_beam_object", variables: parameters)
 
         return try performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<UpdateBeamObject, Error>) in
-
             switch result {
             case .failure(let error):
                 completion(.failure(error))
@@ -99,6 +91,8 @@ extension BeamObjectRequest {
             completion(.failure(error))
             return nil
         }
+
+        defer { beamObjects.forEach { try? $0.decrypt() } }
 
         let bodyParamsRequest = GraphqlParameters(fileName: "update_beam_objects", variables: parameters)
 
@@ -166,14 +160,12 @@ extension BeamObjectRequest {
                  */
 
                 do {
-                    if Configuration.encryptionEnabled {
-                        try beamObjects.forEach {
-                            do {
-                                try $0.decrypt()
-                            } catch EncryptionManagerError.authenticationFailure {
-                                // Could not decrypt, will remove it from the results
-                                beamObjectErrors.insert($0.id)
-                            }
+                    try beamObjects.forEach {
+                        do {
+                            try $0.decrypt()
+                        } catch EncryptionManagerError.authenticationFailure {
+                            // Could not decrypt, will remove it from the results
+                            beamObjectErrors.insert($0.id)
                         }
                     }
                 } catch {

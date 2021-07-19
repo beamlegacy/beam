@@ -226,7 +226,6 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                                 expect(APIRequest.callsCount - networkCalls) == 4
 
                                 var remoteBeamObject = beamObjectHelper.fetchOnAPI(object.beamObjectId)
-                                try remoteBeamObject?.decrypt()
                                 var remoteObject: MyRemoteObject? = try remoteBeamObject?.decodeBeamObject()
 
                                 expect(remoteObject?.beamObjectId) == object.beamObjectId
@@ -234,7 +233,6 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                                 expect(remoteObject?.checksum) == beamObject.dataChecksum
 
                                 remoteBeamObject = beamObjectHelper.fetchOnAPI(object2.beamObjectId)
-                                try remoteBeamObject?.decrypt()
                                 remoteObject = try remoteBeamObject?.decodeBeamObject()
 
                                 expect(remoteObject?.beamObjectId) == object2.beamObjectId
@@ -270,7 +268,6 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                                 expect(APIRequest.callsCount - networkCalls) == 4
 
                                 var remoteBeamObject = beamObjectHelper.fetchOnAPI(object.beamObjectId)
-                                try remoteBeamObject?.decrypt()
                                 var remoteObject: MyRemoteObject? = try remoteBeamObject?.decodeBeamObject()
 
                                 expect(remoteObject?.beamObjectId) == object.beamObjectId
@@ -278,7 +275,6 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                                 expect(remoteObject?.checksum) == beamObject.dataChecksum
 
                                 remoteBeamObject = beamObjectHelper.fetchOnAPI(object2.beamObjectId)
-                                try remoteBeamObject?.decrypt()
                                 remoteObject = try remoteBeamObject?.decodeBeamObject()
 
                                 expect(remoteObject?.beamObjectId) == object2.beamObjectId
@@ -476,7 +472,6 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                                 expect(APIRequest.callsCount - networkCalls) == 3
 
                                 let remoteBeamObject = beamObjectHelper.fetchOnAPI(object.beamObjectId)
-                                try remoteBeamObject?.decrypt()
                                 let remoteObject: MyRemoteObject? = try remoteBeamObject?.decodeBeamObject()
 
                                 expect(remoteObject?.beamObjectId) == object.beamObjectId
@@ -506,7 +501,6 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                                 expect(APIRequest.callsCount - networkCalls) == 3
 
                                 let remoteBeamObject = beamObjectHelper.fetchOnAPI(object.beamObjectId)
-                                try remoteBeamObject?.decrypt()
                                 let remoteObject: MyRemoteObject? = try remoteBeamObject?.decodeBeamObject()
 
                                 expect(remoteObject?.beamObjectId) == object.beamObjectId
