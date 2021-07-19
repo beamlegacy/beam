@@ -92,7 +92,7 @@ class BeamUITestsMenuGenerator {
             let date = faker.date.backward(days: nbrOfJournal)
             let title = todaysName(date)
             let note = BeamNote(title: title)
-            note.type = .journal
+            note.type = BeamNoteType.journalForDate(date)
             note.creationDate = date
             note.updateDate = date
             guard let docStruct = note.documentStruct else { return }

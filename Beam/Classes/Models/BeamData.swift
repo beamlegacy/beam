@@ -217,8 +217,8 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     func setupJournal() {
         _todaysNote = BeamNote.fetchOrCreate(documentManager, title: todaysName)
         if let today = _todaysNote {
-            if today.type != .journal {
-                today.type = .journal
+            if !today.type.isJournal {
+                today.type = BeamNoteType.todaysJournal
             }
             journal.append(today)
         }
@@ -228,7 +228,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
 
     func updateJournal(with limit: Int = 0, and fetchOffset: Int = 0) {
         isFetching = true
-        let _journal = BeamNote.fetchNotesWithType(documentManager, type: .journal, limit, fetchOffset)
+        let _journal = BeamNote.fetchNotesWithType(documentManager, type: .journal, limit, fetchOffset).compactMap { $0.type.isJournal && !$0.type.isFutureJournal ? $0 : nil }
         journal.append(contentsOf: _journal)
     }
 
