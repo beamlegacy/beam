@@ -12,6 +12,7 @@ struct AutocompleteResult: Identifiable, Equatable {
         case autocomplete
         case url
         case createCard
+        case topDomain
 
         var iconName: String {
             switch self {
@@ -23,6 +24,8 @@ struct AutocompleteResult: Identifiable, Equatable {
                 return "field-card_new"
             case .note:
                 return "field-card"
+            case .topDomain:
+                return "field-top-domain"
             }
         }
     }

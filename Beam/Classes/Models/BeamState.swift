@@ -279,7 +279,6 @@ import BeamCore
     }
 
     private func selectAutocompleteResult(_ result: AutocompleteResult) {
-
         switch result.source {
         case .autocomplete:
             searchEngine.query = result.text
@@ -292,7 +291,7 @@ import BeamCore
                 mode = .web
             }
 
-        case .history, .url:
+        case .history, .url, .topDomain:
             guard let url = result.url?.urlWithScheme ?? urlFor(query: result.text) else {
                 Logger.shared.logError("autocomplete result without correct url \(result.text)", category: .search)
                 return
