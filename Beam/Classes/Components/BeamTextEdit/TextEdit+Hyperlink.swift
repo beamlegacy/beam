@@ -39,8 +39,7 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
                 self.showHyperlinkContextMenu(for: node, targetRange: targetRange, frame: frame, url: link, linkTitle: linkTitle, fromPaste: false)
             } else {
                 let frame = linkFrame ?? node.rectAt(caretIndex: node.cursorPosition)
-                let url = link ?? URL(string: linkTitle)
-                self.showHyperlinkFormatter(for: node, targetRange: targetRange, frame: frame, url: url, linkTitle: linkTitle, debounce: false)
+                self.showHyperlinkFormatter(for: node, targetRange: targetRange, frame: frame, url: link, linkTitle: linkTitle, debounce: false)
                 DispatchQueue.main.async {
                     if let linkEditor = self.inlineFormatter as? HyperlinkFormatterView {
                         linkEditor.startEditingUrl()
@@ -197,7 +196,10 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
 
         formatterTargetRange = targetRange
         formatterTargetNode = targetNode
-        hyperlinkView.updateHyperlinkFormatterView(withUrl: url?.absoluteString, title: linkTitle)
+        hyperlinkView.setInitialValues(url: url?.absoluteString, title: linkTitle)
+        if url == nil, let linkTitle = linkTitle, let guessedUrl = URL(string: linkTitle) {
+            hyperlinkView.setEditedValues(url: guessedUrl.absoluteString, title: linkTitle)
+        }
         let linkViewSize = hyperlinkView.idealSize
         hyperlinkView.frame.origin.y = frame.minY + node.offsetInDocument.y - linkViewSize.height - 4
         hyperlinkView.frame.origin.x = frame.maxX + node.offsetInDocument.x - linkViewSize.width / 2
