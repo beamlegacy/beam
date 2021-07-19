@@ -18,12 +18,13 @@ struct NoteView: View {
     }
 
     var note: BeamNote
+    var containerGeometry: GeometryProxy
     var onStartEditing: (() -> Void)?
+    var leadingPercentage: CGFloat
     var centerText: Bool
     var scrollToElementId: UUID?
     var onScroll: ((CGPoint) -> Void)?
 
-    private let leadingAlignement: CGFloat = 185
     @State private var scrollOffset: CGPoint = .zero
     @State private var headerViewModel: NoteHeaderView.ViewModel?
 
@@ -52,9 +53,9 @@ struct NoteView: View {
                     scrollOffset = scrollPoint
                     onScroll?(scrollPoint)
                 },
-                leadingAlignment: leadingAlignement,
                 topOffset: NoteHeaderView.topPadding + 90,
                 footerHeight: 60,
+                leadingPercentage: leadingPercentage,
                 centerText: centerText,
                 showTitle: false,
                 scrollToElementId: scrollToElementId
@@ -62,11 +63,13 @@ struct NoteView: View {
             .accessibility(identifier: "noteView")
             .animation(nil)
             if let headerViewModel = headerViewModel {
-                NoteHeaderView(model: headerViewModel)
-                    .frame(maxWidth: BeamTextEdit.textWidth)
-                    .offset(x: -scrollOffset.x, y: -scrollOffset.y)
-                    .transition(.identity)
-                    .animation(nil)
+                GeometryReader { reader in
+                    NoteHeaderView(model: headerViewModel)
+                        .frame(maxWidth: BeamTextEdit.textWidth)
+                        .offset(x: centerText ? -scrollOffset.x : (containerGeometry.frame(in: .global).width - BeamTextEdit.textWidth) * (leadingPercentage / 100) - reader.frame(in: .global).minX, y: -scrollOffset.y)
+                        .transition(.identity)
+                        .animation(nil)
+                }
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)

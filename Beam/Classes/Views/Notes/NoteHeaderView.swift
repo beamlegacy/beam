@@ -10,7 +10,7 @@ import BeamCore
 
 struct NoteHeaderView: View {
 
-    static let topPadding: CGFloat = 104
+    static let topPadding: CGFloat = 120
     @ObservedObject var model: NoteHeaderView.ViewModel
 
     private let errorColor = BeamColor.Shiraz

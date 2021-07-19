@@ -22,8 +22,6 @@ public struct BTextEdit: NSViewRepresentable {
     var minimumWidth: CGFloat = 800
     var maximumWidth: CGFloat = 1024
 
-    var leadingAlignment: CGFloat = 160
-    var traillingPadding: CGFloat = 80
     var topOffset: CGFloat = 45
     var footerHeight: CGFloat = 0
 
@@ -46,8 +44,6 @@ public struct BTextEdit: NSViewRepresentable {
         nsView.minimumWidth = minimumWidth
         nsView.maximumWidth = maximumWidth
 
-        nsView.leadingAlignment = leadingAlignment
-        nsView.traillingPadding = traillingPadding
         nsView.topOffset = topOffset
         nsView.footerHeight = footerHeight
 
@@ -72,8 +68,6 @@ public struct BTextEdit: NSViewRepresentable {
         nsView.minimumWidth = minimumWidth
         nsView.maximumWidth = maximumWidth
 
-        nsView.leadingAlignment = leadingAlignment
-        nsView.traillingPadding = traillingPadding
         nsView.topOffset = topOffset
         nsView.footerHeight = footerHeight
 
@@ -113,11 +107,9 @@ public struct BTextEditScrollable: NSViewRepresentable {
     var minimumWidth: CGFloat = 800
     var maximumWidth: CGFloat = 1024
 
-    var leadingAlignment = CGFloat(160)
-    var traillingPadding = CGFloat(80)
     var topOffset = CGFloat(28)
     var footerHeight = CGFloat(28)
-
+    var leadingPercentage = CGFloat(48.7)
     var centerText = false
     var showTitle = true
 
@@ -141,11 +133,10 @@ public struct BTextEditScrollable: NSViewRepresentable {
         edit.minimumWidth = minimumWidth
         edit.maximumWidth = maximumWidth
 
-        edit.leadingAlignment = leadingAlignment
-        edit.traillingPadding = traillingPadding
         edit.topOffset = topOffset
         edit.footerHeight = footerHeight
 
+        edit.leadingPercentage = leadingPercentage
         edit.centerText = centerText
         edit.showTitle = showTitle
         edit.scrollToElementId = scrollToElementId
@@ -195,8 +186,6 @@ public struct BTextEditScrollable: NSViewRepresentable {
         edit.minimumWidth = minimumWidth
         edit.maximumWidth = maximumWidth
 
-        edit.leadingAlignment = leadingAlignment
-        edit.traillingPadding = traillingPadding
         edit.topOffset = topOffset
         edit.footerHeight = footerHeight
 

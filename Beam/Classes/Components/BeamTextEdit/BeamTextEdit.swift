@@ -34,7 +34,7 @@ public extension CALayer {
 // swiftlint:disable:next type_body_length
 @objc public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
-    static let textWidth: CGFloat = 550
+    static let textWidth: CGFloat = 620
 
     var data: BeamData?
     var cardTopSpace: CGFloat {
@@ -217,16 +217,9 @@ public extension CALayer {
         }
     }
 
-    var leadingAlignment = CGFloat(160) {
+    var leadingPercentage: CGFloat = 50 {
         didSet {
-            if oldValue != minimumWidth {
-                invalidateLayout()
-            }
-        }
-    }
-    var traillingPadding = CGFloat(80) {
-        didSet {
-            if oldValue != minimumWidth {
+            if oldValue != leadingPercentage {
                 invalidateLayout()
             }
         }
@@ -288,12 +281,10 @@ public extension CALayer {
     }
     func relayoutRoot() {
         let r = bounds
-        let width = CGFloat(isBig ? frame.width - 200 - leadingAlignment : 450)
-        var rect = NSRect(x: leadingAlignment, y: topOffsetActual, width: width, height: r.height)
+        var rect = NSRect(x: 0, y: topOffsetActual + cardTopSpace, width: textNodeWidth, height: r.height)
 
         if centerText {
             let x = (frame.width - Self.textWidth) / 2
-
             rect = NSRect(x: x, y: topOffsetActual + cardTopSpace, width: textNodeWidth, height: r.height)
 
             if isResizing || shouldDisableAnimationAtNextLayout {
@@ -307,23 +298,22 @@ public extension CALayer {
                     }
                     rootNode.setLayout(rect)
                 }
-            } else {
-                rootNode.availableWidth = textNodeWidth
-                updateCardHearderLayer(rect)
-                if journalMode {
-                    updateSideLayer(rect)
-                }
-                rootNode.setLayout(rect)
+                return
             }
-
         } else {
-            rootNode.availableWidth = textNodeWidth
-            rootNode.setLayout(rect)
+            let x = (frame.width - Self.textWidth) * (leadingPercentage / 100)
+            rect = NSRect(x: x, y: topOffsetActual + cardTopSpace, width: textNodeWidth, height: r.height)
         }
+        rootNode.availableWidth = textNodeWidth
+        updateCardHearderLayer(rect)
+        if journalMode {
+            updateSideLayer(rect)
+        }
+        rootNode.setLayout(rect)
     }
 
     var textNodeWidth: CGFloat {
-        return centerText ? Self.textWidth : CGFloat(isBig ? frame.width - 200 - leadingAlignment : 450)
+        return Self.textWidth
     }
 
     // This is the root node of what we are editing:
@@ -441,9 +431,7 @@ public extension CALayer {
 
     override public var intrinsicContentSize: NSSize {
         rootNode.availableWidth = textNodeWidth
-        let height = centerText ?
-            rootNode.idealSize.height + topOffsetActual + footerHeight + cardTopSpace :
-            rootNode.idealSize.height + topOffsetActual + footerHeight
+        let height = rootNode.idealSize.height + topOffsetActual + footerHeight + cardTopSpace
         return NSSize(width: textNodeWidth, height: height)
     }
 

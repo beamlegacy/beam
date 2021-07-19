@@ -14,6 +14,7 @@ struct JournalScrollView: NSViewRepresentable {
 
     var axes: Axis.Set
     var showsIndicators: Bool
+    var centerText: Bool
     let proxy: GeometryProxy
     let onScroll: ((CGPoint) -> Void)?
 
@@ -105,9 +106,8 @@ struct JournalScrollView: NSViewRepresentable {
         textEditView.maximumWidth = 1024
         textEditView.footerHeight = 0
         textEditView.topOffset = 0
-        textEditView.leadingAlignment = 160
-        textEditView.traillingPadding = 80
-        textEditView.centerText = true
+        textEditView.leadingPercentage = 48.7
+        textEditView.centerText = centerText
         textEditView.showTitle = true
 
         return textEditView
