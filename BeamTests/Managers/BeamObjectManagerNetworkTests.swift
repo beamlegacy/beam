@@ -63,6 +63,56 @@ class BeamObjectManagerNetworkTests: QuickSpec {
         }
 
         describe("delete()") {
+            let uuid = UUID()
+            let title = "my title"
+            context("with Foundation") {
+                context("with non-existing object") {
+                    it("returns 404") {
+                        waitUntil(timeout: .seconds(10)) { done in
+                            do {
+                                try sut.delete(uuid) { result in
+                                    expect { try result.get() }.to(throwError { (error: APIRequestError) in
+                                        expect(error).to(matchError(APIRequestError.notFound))
+                                    })
+                                    done()
+                                }
+                            } catch {
+                                fail(error.localizedDescription)
+                                done()
+                            }
+                        }
+                    }
+                }
+                context("with existing object") {
+                    beforeEach {
+                        let object = MyRemoteObject(beamObjectId: uuid,
+                                                    createdAt: BeamDate.now,
+                                                    updatedAt: BeamDate.now,
+                                                    deletedAt: nil,
+                                                    previousChecksum: nil,
+                                                    checksum: nil,
+                                                    title: title)
+                        _ = beamObjectHelper.saveOnAPI(object)
+                    }
+
+                    it("returns object") {
+                        var beamObject: BeamObject?
+                        waitUntil(timeout: .seconds(10)) { done in
+                            do {
+                                try sut.delete(uuid) { result in
+                                    expect { beamObject = try result.get() }.toNot(throwError())
+
+                                    expect(beamObject?.beamObjectId) == uuid
+                                    done()
+                                }
+                            } catch {
+                                fail(error.localizedDescription)
+                                done()
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         describe("saveToAPI(beamObjects)") {
@@ -94,7 +144,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
             afterEach {
                 let semaphore = DispatchSemaphore(value: 0)
-                sut.delete(object.beamObjectId) { _ in
+                try? sut.delete(object.beamObjectId) { _ in
                     semaphore.signal()
                 }
 
@@ -372,7 +422,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
             afterEach {
                 let semaphore = DispatchSemaphore(value: 0)
-                sut.delete(object.beamObjectId) { _ in
+                try? sut.delete(object.beamObjectId) { _ in
                     semaphore.signal()
                 }
 

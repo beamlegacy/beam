@@ -113,11 +113,31 @@ extension BeamObjectRequest {
 
     @discardableResult
     func delete(_ id: UUID,
-                _ completion: @escaping (Swift.Result<DeleteBeamObject, Error>) -> Void) throws  -> URLSessionDataTask {
+                _ completion: @escaping (Swift.Result<BeamObject, Error>) -> Void) throws  -> URLSessionDataTask {
         let parameters = BeamObjectIdParameters(id: id)
         let bodyParamsRequest = GraphqlParameters(fileName: "delete_beam_object", variables: parameters)
 
-        return try performRequest(bodyParamsRequest: bodyParamsRequest, completionHandler: completion)
+        return try performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<DeleteBeamObject, Error>) in
+            switch result {
+            case .failure(let error):
+                completion(.failure(error))
+            case .success(let deletedBeamObject):
+                guard let object = deletedBeamObject.beamObject else {
+                    completion(.failure(APIRequestError.parserError))
+                    return
+                }
+
+                do {
+                    try object.decrypt()
+                } catch {
+                    // Will catch uncrypting errors
+                    completion(.failure(error))
+                    return
+                }
+
+                completion(.success(object))
+            }
+        }
     }
 
     @discardableResult

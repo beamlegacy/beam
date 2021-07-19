@@ -149,8 +149,7 @@ extension BeamObjectManager {
     func saveToAPI(_ beamObjects: [BeamObject],
                    _ completion: @escaping ((Swift.Result<[BeamObject], Error>) -> Void)) throws -> URLSessionTask? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-            completion(.failure(BeamObjectManagerError.notAuthenticated))
-            return nil
+            throw BeamObjectManagerError.notAuthenticated
         }
 
         let request = BeamObjectRequest()
@@ -280,8 +279,7 @@ extension BeamObjectManager {
     func saveToAPI(_ beamObject: BeamObject,
                    _ completion: @escaping ((Swift.Result<BeamObject, Error>) -> Void)) throws -> URLSessionTask? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-            completion(.failure(BeamObjectManagerError.notAuthenticated))
-            return nil
+            throw BeamObjectManagerError.notAuthenticated
         }
 
         Self.networkRequests[beamObject.id]?.cancel()
@@ -361,10 +359,9 @@ extension BeamObjectManager {
         }
     }
 
-    func delete(_ id: UUID, _ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
+    func delete(_ id: UUID, _ completion: ((Swift.Result<BeamObject, Error>) -> Void)? = nil) throws {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-            completion?(.success(false))
-            return
+            throw BeamObjectManagerError.notAuthenticated
         }
 
         Self.networkRequests[id]?.cancel()
@@ -375,7 +372,7 @@ extension BeamObjectManager {
             try request.delete(id) { result in
                 switch result {
                 case .failure(let error): completion?(.failure(error))
-                case .success: completion?(.success(true))
+                case .success(let object): completion?(.success(object))
                 }
             }
         } catch {
