@@ -179,11 +179,16 @@ class HyperlinkFormatterView: FormatterView {
 // MARK: Public methods
 extension HyperlinkFormatterView {
 
-    func updateHyperlinkFormatterView(withUrl url: String?, title: String?) {
+    func setInitialValues(url: String?, title: String?) {
         self.originalUrlValue = url
         self.originalTitleValue = title
         self.editingTitle = title ?? ""
         self.editingUrl = url ?? ""
+    }
+
+    func setEditedValues(url: String?, title: String?) {
+        self.editingTitle = title ?? self.editingTitle
+        self.editingUrl = url ?? self.editingUrl
     }
 
     func hasEditedUrl() -> Bool {
