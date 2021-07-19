@@ -74,6 +74,8 @@ class AutocompleteManager: ObservableObject {
         return text.substring(from: 0, to: range.startIndex)
     }
 
+    typealias AutocompleteSourceResult = [AutocompleteResult.Source: [AutocompleteResult]]
+
     private func buildAutocompleteResults(for receivedQueryString: String) {
 
         guard !textChangeIsFromSelection else {
@@ -133,7 +135,8 @@ class AutocompleteManager: ObservableObject {
         }
         var finalResults = self.sortResults(notesResults: autocompleteResults[.note, default: []],
                                             historyResults: autocompleteResults[.history, default: []],
-                                            urlResults: autocompleteResults[.url, default: []])
+                                            urlResults: autocompleteResults[.url, default: []],
+                                            topDomainResults: autocompleteResults[.topDomain, default: []])
         var canCreateNote = false
         if let createNoteResults = autocompleteResults[.createCard] {
             canCreateNote = true
@@ -207,7 +210,7 @@ class AutocompleteManager: ObservableObject {
         }
     }
 
-    private func sortResults(notesResults: [AutocompleteResult], historyResults: [AutocompleteResult], urlResults: [AutocompleteResult]) -> [AutocompleteResult] {
+    private func sortResults(notesResults: [AutocompleteResult], historyResults: [AutocompleteResult], urlResults: [AutocompleteResult], topDomainResults: [AutocompleteResult]) -> [AutocompleteResult] {
         // this logic should eventually become smarter to always include the right amount of result per source.
 
         var results = [AutocompleteResult]()
@@ -231,8 +234,20 @@ class AutocompleteManager: ObservableObject {
             return lhsr > rhsr
         })
 
+        // Push top domain suggestion only when no other candidate is satisfying.
+        if let topDomain = topDomainResults.first {
+            if let topResult = results.first {
+                if !isResultCandidateForAutoselection(topResult, forSearch: searchQuery) {
+                    results.insert(topDomain, at: 0)
+                }
+            } else {
+                results.insert(topDomain, at: 0)
+            }
+        }
+
         return results
     }
+
 
     private func updateSearchQueryWhenSelectingAutocomplete(_ selectedIndex: Int?, previousSelectedIndex: Int?) {
         if let i = selectedIndex, i >= 0, i < autocompleteResults.count {

@@ -39,6 +39,7 @@ public enum LogCategory: String {
     case commandManager
     case downloader
     case autocompleteManager
+    case topDomain
 }
 
 public final class Logger {

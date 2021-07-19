@@ -33,7 +33,7 @@ struct AutocompleteItem: View {
         switch item.source {
         case .history:
             return "field-history"
-        case .autocomplete, .url:
+        case .autocomplete, .url, .topDomain:
             return "field-search"
         case .createCard:
             return "field-card_new"

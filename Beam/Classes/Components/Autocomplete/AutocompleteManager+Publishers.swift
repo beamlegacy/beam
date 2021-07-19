@@ -16,6 +16,7 @@ extension AutocompleteManager {
         [
             futureToPublisher(autocompleteNotesResults(for: searchText), source: .note),
             futureToPublisher(autocompleteNotesContentsResults(for: searchText), source: .note),
+            futureToPublisher(autocompleteTopDomainResults(for: searchText), source: .topDomain),
             futureToPublisher(autocompleteHistoryResults(for: searchText), source: .history),
             futureToPublisher(autocompleteLinkStoreResults(for: searchText), source: .url),
             self.autocompleteCanCreateNoteResult(for: searchText)
@@ -127,4 +128,27 @@ extension AutocompleteManager {
             }
         }
     }
+
+    private func autocompleteTopDomainResults(for query: String) -> Future<[AutocompleteResult], Error> {
+        Future { promise in
+            TopDomainDatabase.shared.search(withPrefix: query) { result in
+                switch result {
+                case .failure(let error): promise(.failure(error))
+                case .success(let topDomain):
+                    guard let url = URL(string: topDomain.url) else {
+                        promise(.failure(TopDomainDatabaseError.notFound))
+                        return
+                    }
+                    let ac = AutocompleteResult(text: url.absoluteString,
+                                                source: .topDomain,
+                                                url: url,
+                                                information: "top domain",
+                                                completingText: query)
+
+                    promise(.success([ac]))
+                }
+            }
+        }
+    }
+
 }

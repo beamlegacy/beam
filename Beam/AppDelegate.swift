@@ -85,6 +85,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         #endif
 
         syncData()
+        fetchTopDomains()
     }
 
     // MARK: -
