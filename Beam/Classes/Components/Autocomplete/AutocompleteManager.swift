@@ -115,7 +115,7 @@ class AutocompleteManager: ObservableObject {
                     return
                 }
 
-                let insertIndex = finalResults.count - (canCreateNote ? 1 : 0)
+                let insertIndex = max(0, finalResults.count - (canCreateNote ? 1 : 0))
                 self.debouncedSearchEngineResults(for: searchText, currentResults: finalResults,
                                                   insertIndex: insertIndex, onUpdateResultsBlock: onUpdateResultsBlock)
 
