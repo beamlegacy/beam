@@ -118,8 +118,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // this sync has finished.
 
         if Configuration.beamObjectAPIEnabled {
-            beamObjectManager.syncAllFromAPI { _ in
-                Logger.shared.logInfo("syncAllFromAPI called", category: .beamObjectNetwork)
+            do {
+                try beamObjectManager.syncAllFromAPI { _ in
+                    Logger.shared.logInfo("syncAllFromAPI called", category: .beamObjectNetwork)
+                }
+            } catch {
+                Logger.shared.logError("Couldn't sync beam objects: \(error.localizedDescription)",
+                                       category: .document)
             }
         } else {
             databaseManager.syncAll { result in

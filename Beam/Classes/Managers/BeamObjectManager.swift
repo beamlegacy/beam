@@ -380,13 +380,12 @@ extension BeamObjectManager {
         }
     }
 
-    func syncAllFromAPI(delete: Bool = true, _ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
+    func syncAllFromAPI(delete: Bool = true, _ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) throws {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-            completion?(.success(false))
-            return
+            throw BeamObjectManagerError.notAuthenticated
         }
 
-        fetchAllFromAPI { result in
+        try fetchAllFromAPI { result in
             switch result {
             case .failure:
                 completion?(result)
@@ -396,16 +395,20 @@ extension BeamObjectManager {
                     return
                 }
 
-                self.saveAllToAPI(completion)
+                do {
+                    try self.saveAllToAPI()
+                    completion?(.success(true))
+                } catch {
+                    completion?(.failure(error))
+                }
             }
         }
     }
 
     // swiftlint:disable:next function_body_length
-    func saveAllToAPI(_ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
+    func saveAllToAPI() throws {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-            completion?(.success(false))
-            return
+            throw BeamObjectManagerError.notAuthenticated
         }
 
         let group = DispatchGroup()
@@ -417,6 +420,9 @@ extension BeamObjectManager {
             group.enter()
 
             let manager = managerClass.init(self)
+
+            Logger.shared.logDebug("saveAllOnBeamObjectApi using \(manager)",
+                                   category: .beamObjectNetwork)
             do {
                 let task = try manager.saveAllOnBeamObjectApi { result in
                     switch result {
@@ -456,19 +462,15 @@ extension BeamObjectManager {
                                category: .beamObjectNetwork)
 
         guard errors.isEmpty else {
-            completion?(.failure(BeamObjectManagerError.multipleErrors(errors)))
-            return
+            throw BeamObjectManagerError.multipleErrors(errors)
         }
-
-        completion?(.success(true))
     }
 
     /// Will fetch all updates from the API and call each managers based on object's type
-    func fetchAllFromAPI(_ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
+    func fetchAllFromAPI(_ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) throws {
         // If not authenticated
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-            completion?(.success(false))
-            return
+            throw BeamObjectManagerError.notAuthenticated
         }
 
         let beamRequest = BeamObjectRequest()
@@ -484,23 +486,19 @@ extension BeamObjectManager {
                                    category: .beamObjectNetwork)
         }
 
-        do {
-            try beamRequest.fetchAll(lastUpdatedAt) { result in
-                switch result {
-                case .failure(let error):
-                    Logger.shared.logDebug("fetchAllFromAPI: \(error.localizedDescription)",
-                                           category: .beamObjectNetwork)
-                    completion?(.failure(error))
-                case .success(let beamObjects):
-                    let success = self.parseObjects(beamObjects)
-                    if success {
-                        Persistence.Sync.BeamObjects.updated_at = timeNow
-                    }
-                    completion?(.success(success))
+        try beamRequest.fetchAll(lastUpdatedAt) { result in
+            switch result {
+            case .failure(let error):
+                Logger.shared.logDebug("fetchAllFromAPI: \(error.localizedDescription)",
+                                       category: .beamObjectNetwork)
+                completion?(.failure(error))
+            case .success(let beamObjects):
+                let success = self.parseObjects(beamObjects)
+                if success {
+                    Persistence.Sync.BeamObjects.updated_at = timeNow
                 }
+                completion?(.success(success))
             }
-        } catch {
-            completion?(.failure(error))
         }
     }
 }

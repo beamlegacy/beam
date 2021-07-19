@@ -57,13 +57,87 @@ class BeamObjectManagerNetworkTests: QuickSpec {
         }
 
         describe("fetchAllFromAPI()") {
+            let uuid = "995d94e1-e0df-4eca-93e6-8778984bcd58".uuid ?? UUID()
+            let title = "my title"
+
+            beforeEach {
+                let object = MyRemoteObject(beamObjectId: uuid,
+                                            createdAt: BeamDate.now,
+                                            updatedAt: BeamDate.now,
+                                            deletedAt: nil,
+                                            previousChecksum: nil,
+                                            checksum: nil,
+                                            title: title)
+                _ = beamObjectHelper.saveOnAPI(object)
+                sleep(1)
+            }
+
+            afterEach {
+                let semaphore = DispatchSemaphore(value: 0)
+                try? sut.delete(uuid) { _ in
+                    semaphore.signal()
+                }
+
+                _ = semaphore.wait(timeout: DispatchTime.now() + .seconds(5))
+                sleep(1)
+            }
+
+            context("without previous updated_at") {
+                beforeEach {
+                    Persistence.Sync.BeamObjects.updated_at = nil
+                }
+
+                it("fetches all objects") {
+                    let networkCalls = APIRequest.callsCount
+
+                    waitUntil(timeout: .seconds(10)) { done in
+                        do {
+                            try sut.fetchAllFromAPI { result in
+                                done()
+                            }
+                        } catch {
+                            fail(error.localizedDescription)
+                            done()
+                        }
+                    }
+
+                    expect(APIRequest.callsCount - networkCalls) == 1
+                    expect(Persistence.Sync.BeamObjects.updated_at).toNot(beNil())
+                }
+            }
         }
 
         describe("saveAllToAPI()") {
+            afterEach {
+                let semaphore = DispatchSemaphore(value: 0)
+
+                _ = try? BeamObjectRequest().deleteAll { _ in
+                    semaphore.signal()
+                }
+
+                _ = semaphore.wait(timeout: DispatchTime.now() + .seconds(5))
+                sleep(1)
+            }
+
+            context("without content") {
+                beforeEach {
+                    try? Document.deleteWithPredicate(CoreDataManager.shared.mainContext)
+                    try? Database.deleteWithPredicate(CoreDataManager.shared.mainContext)
+                    try? PasswordsDB(path: BeamData.dataFolder(fileName: "passwords.db")).deleteAll()
+                }
+
+                it("calls managers but no network calls") {
+                    let networkCalls = APIRequest.callsCount
+
+                    try sut.saveAllToAPI()
+
+                    expect(APIRequest.callsCount - networkCalls) == 0
+                }
+            }
         }
 
         describe("delete()") {
-            let uuid = UUID()
+            let uuid = "995d94e1-e0df-4eca-93e6-8778984bcd18".uuid ?? UUID()
             let title = "my title"
             context("with Foundation") {
                 context("with non-existing object") {
@@ -93,6 +167,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                                                     checksum: nil,
                                                     title: title)
                         _ = beamObjectHelper.saveOnAPI(object)
+                        sleep(1)
                     }
 
                     it("returns object") {
@@ -123,16 +198,18 @@ class BeamObjectManagerNetworkTests: QuickSpec {
             let title2 = "This is my other title"
             let newTitle = "This is a new title"
             let newTitle2 = "This is a new title for other title"
+            let uuid = "995d94e1-e0df-4eca-93e6-8778984bcd38".uuid ?? UUID()
+            let uuid2 = "995d94e1-e0df-4eca-93e6-8778984bcd39".uuid ?? UUID()
 
             beforeEach {
-                object = MyRemoteObject(beamObjectId: UUID(),
+                object = MyRemoteObject(beamObjectId: uuid,
                                         createdAt: BeamDate.now,
                                         updatedAt: BeamDate.now,
                                         deletedAt: nil,
                                         previousChecksum: nil,
                                         checksum: nil,
                                         title: title)
-                object2 = MyRemoteObject(beamObjectId: UUID(),
+                object2 = MyRemoteObject(beamObjectId: uuid2,
                                         createdAt: BeamDate.now,
                                         updatedAt: BeamDate.now,
                                         deletedAt: nil,
@@ -149,6 +226,13 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                 }
 
                 _ = semaphore.wait(timeout: DispatchTime.now() + .seconds(5))
+
+                try? sut.delete(object2.beamObjectId) { _ in
+                    semaphore.signal()
+                }
+
+                _ = semaphore.wait(timeout: DispatchTime.now() + .seconds(5))
+                sleep(1)
             }
 
             context("with Foundation") {
@@ -409,9 +493,10 @@ class BeamObjectManagerNetworkTests: QuickSpec {
             var object: MyRemoteObject!
             let title = "This is my title"
             let newTitle = "This is a new title"
+            let uuid = "995d94e1-e0df-4eca-93e6-8778984bcd28".uuid ?? UUID()
 
             beforeEach {
-                object = MyRemoteObject(beamObjectId: UUID(),
+                object = MyRemoteObject(beamObjectId: uuid,
                                         createdAt: BeamDate.now,
                                         updatedAt: BeamDate.now,
                                         deletedAt: nil,
@@ -427,6 +512,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                 }
 
                 _ = semaphore.wait(timeout: DispatchTime.now() + .seconds(5))
+                sleep(1)
             }
 
             context("with Foundation") {
