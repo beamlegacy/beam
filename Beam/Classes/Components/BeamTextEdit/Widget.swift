@@ -367,7 +367,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         }
     }
 
-    var selectionLayerWidth: CGFloat = 570
+    var selectionLayerWidth: CGFloat = 640
 
     private func configureSelectionLayer() {
         selectionLayer.anchorPoint = CGPoint()
