@@ -86,7 +86,7 @@ extension ElementNode {
     private func updateDisclosureLayer() {
         guard let disclosureLayer = self.layers[LayerName.disclosure.rawValue] as? ChevronButton else { return }
 
-        if showDisclosureButton && PreferencesManager.alwaysShowBullets {
+        if showDisclosureButton && PreferencesManager.alwaysShowBullets || !open {
             disclosureLayer.layer.isHidden = false
         } else {
             disclosureLayer.layer.isHidden = true
@@ -105,8 +105,10 @@ extension ElementNode {
         guard let disclosureLayer = self.layers[LayerName.disclosure.rawValue] as? ChevronButton else { return }
         guard let indentLayer = layers[LayerName.indentLayer.rawValue] else { return }
 
-        disclosureLayer.layer.isHidden = !hover
-        indentLayer.layer.isHidden = !hover
+        if open {
+            disclosureLayer.layer.isHidden = !hover
+            indentLayer.layer.isHidden = !hover
+        }
     }
 
     private func updateCheckboxLayer() {
