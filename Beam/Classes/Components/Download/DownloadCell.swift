@@ -102,7 +102,7 @@ struct DownloadCell: View {
             case .canceling:
                 return "\(download.localizedProgressString ?? "") · Canceling"
             case .completed:
-                return download.totalCount ?? ""
+                return download.totalByteCount ?? ""
             @unknown default:
                 return ""
             }
