@@ -12,7 +12,8 @@ protocol BeamObjectManagerDelegateProtocol {
     // Mandatory for using dynamic creation of managers. See `setup` and `parseFilteredObjects`
     init(_ manager: BeamObjectManager)
 
-    // Called when `BeamObjectManager` wants to store all existing `Document` as `BeamObject` it will call this method
+    // Called when `BeamObjectManager` wants to store all existing `Document` as `BeamObject`
+    // it will call this method
     func saveAllOnBeamObjectApi(_ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask?
 
     // Called within `DocumentManager` to store this object as `BeamObject`
@@ -398,10 +399,7 @@ extension BeamObjectManager {
                     return
                 }
 
-                // Must call in another dispatchqueue or it fails, not sure why...
-//                DispatchQueue.main.async {
-                    self.saveAllToAPI(completion)
-//                }
+                self.saveAllToAPI(completion)
             }
         }
     }
