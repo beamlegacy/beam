@@ -25,6 +25,26 @@ class BeamObjectTestsHelper {
         return beamObject
     }
 
+    func fetchOnAPI<T: BeamObjectProtocol>(_ objectID: UUID) throws -> T? {
+        let beamObjectRequest = BeamObjectRequest()
+        var beamObject: BeamObject?
+
+        let semaphore = DispatchSemaphore(value: 0)
+
+        _ = try? beamObjectRequest.fetch(objectID) { result in
+            beamObject = try? result.get()
+            semaphore.signal()
+        }
+
+        let semaResult = semaphore.wait(timeout: DispatchTime.now() + .seconds(5))
+
+        if case .timedOut = semaResult {
+            fail("Timedout")
+        }
+
+        return try beamObject?.decodeBeamObject()
+    }
+
     func saveOnAPI<T: BeamObjectProtocol>(_ object: T) -> BeamObject? {
         let beamObjectRequest = BeamObjectRequest()
 
