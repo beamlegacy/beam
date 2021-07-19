@@ -121,7 +121,7 @@ extension NoteHeaderView {
 
         private var documentManager: DocumentManager
         fileprivate var canEditTitle: Bool {
-            note.type != .journal
+            !note.type.isJournal
         }
 
         init(note: BeamNote, documentManager: DocumentManager) {
