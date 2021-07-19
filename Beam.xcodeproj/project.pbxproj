@@ -591,6 +591,7 @@
 		A56696B12614CF7F00B814D2 /* TableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A56696B02614CF7F00B814D2 /* TableView.swift */; };
 		A567157125F66F8600B46110 /* StyledText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A567157025F66F8600B46110 /* StyledText.swift */; };
 		A5679CE2262ECB9500E7FA69 /* NavigationCollectUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5679CE1262ECB9500E7FA69 /* NavigationCollectUITests.swift */; };
+		A569EA3026A196F600B0861B /* AutocompleteManager+Publishers.swift in Sources */ = {isa = PBXBuildFile; fileRef = A569EA2F26A196F600B0861B /* AutocompleteManager+Publishers.swift */; };
 		A56DF8F12625D27500F1CF55 /* TextFormatterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A56DF8F02625D27500F1CF55 /* TextFormatterView.swift */; };
 		A572370D2655654900AE6BFC /* CoreDataContextObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = A572370C2655654900AE6BFC /* CoreDataContextObserver.swift */; };
 		A572629825FFADC5004416C0 /* MouseInteraction.swift in Sources */ = {isa = PBXBuildFile; fileRef = A572629725FFADC5004416C0 /* MouseInteraction.swift */; };
@@ -1425,6 +1426,7 @@
 		A56696B02614CF7F00B814D2 /* TableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableView.swift; sourceTree = "<group>"; };
 		A567157025F66F8600B46110 /* StyledText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StyledText.swift; sourceTree = "<group>"; };
 		A5679CE1262ECB9500E7FA69 /* NavigationCollectUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationCollectUITests.swift; sourceTree = "<group>"; };
+		A569EA2F26A196F600B0861B /* AutocompleteManager+Publishers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AutocompleteManager+Publishers.swift"; sourceTree = "<group>"; };
 		A56DF8F02625D27500F1CF55 /* TextFormatterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextFormatterView.swift; sourceTree = "<group>"; };
 		A572370C2655654900AE6BFC /* CoreDataContextObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataContextObserver.swift; sourceTree = "<group>"; };
 		A572629725FFADC5004416C0 /* MouseInteraction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MouseInteraction.swift; sourceTree = "<group>"; };
@@ -1944,7 +1946,6 @@
 				4181734D2581204900317ED8 /* BeamState.swift */,
 				A05ADF6D264D8C59002DF91A /* OverlayViewCenterViewModel.swift */,
 				A5E04DEA263BEDA600BFB4C1 /* BrowserTabsManager.swift */,
-				A5FE96CC2612469C002A2B73 /* AutocompleteManager.swift */,
 				4181716E2581107C00317ED8 /* SearchEngine.swift */,
 				418171752581107C00317ED8 /* Html2Md.swift */,
 				418171822581107C00317ED8 /* BrowserTab.swift */,
@@ -2107,6 +2108,8 @@
 		418171AA2581107C00317ED8 /* Autocomplete */ = {
 			isa = PBXGroup;
 			children = (
+				A5FE96CC2612469C002A2B73 /* AutocompleteManager.swift */,
+				A569EA2F26A196F600B0861B /* AutocompleteManager+Publishers.swift */,
 				418171AB2581107C00317ED8 /* AutocompleteList.swift */,
 				418171AD2581107C00317ED8 /* AutocompleteItem.swift */,
 			);
@@ -4351,6 +4354,7 @@
 				DAA60C2C2666899A00C927E5 /* BeamState.swift in Sources */,
 				96DDF54B26823A4200FF8CCE /* BidirectionalLink.swift in Sources */,
 				0325629126051D3B006513E4 /* RBDigest.m in Sources */,
+				A569EA3026A196F600B0861B /* AutocompleteManager+Publishers.swift in Sources */,
 				A04B9B71269500100033E9AD /* PasswordsPreferencesViewModel.swift in Sources */,
 				416C09F3259C919200AF2903 /* CATransaction+Beam.swift in Sources */,
 				418172382581107C00317ED8 /* TextNode.swift in Sources */,

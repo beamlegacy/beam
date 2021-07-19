@@ -10,6 +10,7 @@ import CoreData
 import BeamCore
 
 class LinkManager: LinkManagerBase {
+
     var coreDataManager: CoreDataManager
     let mainContext: NSManagedObjectContext
 
@@ -113,18 +114,10 @@ class LinkManager: LinkManagerBase {
         }
     }
 
-    func deleteAllLinks(completion: ((Result<Bool, Error>) -> Void)? = nil) {
-//        CoreDataManager.shared.destroyPersistentStore()
-//        CoreDataManager.shared.setup()
-
-//            self.linkRequest.deleteAllLinks { result in
-//                switch result {
-//                case .failure(let error):
-//                    completion?(.failure(error))
-//                case .success:
-//                    completion?(.success(true))
-//                }
-//            }
+    func deleteAllLinks() {
+        coreDataManager.persistentContainer.performBackgroundTask { context in
+            _ = StoredLink.deleteForPredicate(NSPredicate(value: true), context)
+        }
     }
 
 //    func uploadAll(_ completionHandler: ((Result<Bool, Error>) -> Void)? = nil) {

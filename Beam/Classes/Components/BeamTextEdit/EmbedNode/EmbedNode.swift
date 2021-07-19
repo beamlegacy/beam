@@ -77,7 +77,10 @@ public class EmbedNode: ElementNode {
     }
 
     deinit {
-        webView?.removeFromSuperview()
+        if webPage?.delegate as? EmbedNode == self {
+            webView?.removeFromSuperview()
+            webView = nil
+        }
     }
 
     let embedWidth = CGFloat(320)
@@ -101,11 +104,11 @@ public class EmbedNode: ElementNode {
 
             updateFocus()
 
-            computedIdealSize = contentsFrame.size
-            computedIdealSize.width = frame.width
-
             invalidatedRendering = false
         }
+
+        computedIdealSize = contentsFrame.size
+        computedIdealSize.width = frame.width
 
         if open && selfVisible {
             for c in children {

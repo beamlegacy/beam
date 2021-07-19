@@ -28,6 +28,7 @@ public struct LinkStruct {
 public protocol LinkManagerBase {
     func loadLinks() -> [LinkStruct]
     func saveLink(_ linkStruct: LinkStruct, completion: ((Result<Bool, Error>) -> Void)?)
+    func deleteAllLinks()
 }
 
 public class FakeLinkManager: LinkManagerBase {
@@ -35,6 +36,7 @@ public class FakeLinkManager: LinkManagerBase {
     public func saveLink(_ linkStruct: LinkStruct, completion: ((Result<Bool, Error>) -> Void)?) {
         //completion
     }
+    public func deleteAllLinks() { }
 }
 
 public class LinkStore: Codable {
@@ -130,6 +132,11 @@ public class LinkStore: Codable {
             linkStruct.title = title
         }
         links[id] = linkStruct
+    }
+
+    public func deleteAll() throws {
+        linkManager.deleteAllLinks()
+        links.removeAll()
     }
 
     public static func linkFor(_ id: UInt64) -> Link? {

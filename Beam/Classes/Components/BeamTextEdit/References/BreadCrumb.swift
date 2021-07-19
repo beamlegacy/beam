@@ -263,26 +263,12 @@ class BreadCrumb: Widget {
         crumbChain.count > 1
     }
 
-    override func updateChildrenLayout() {
-        super.updateChildrenLayout()
-        layout(children: children)
-    }
-
-    private func layout(children: [Widget]) {
-        for child in children {
-            child.availableWidth = (hasLink ? containerLinkSize : containerRefSize) - child.offsetInRoot.x + child.childInset
-            child.selectionLayerWidth = child.layer.frame.width + child.offsetInRoot.x + child.childInset
-            child.layer.frame.origin = CGPoint(x: child.layer.frame.origin.x - 8, y: child.frameInDocument.origin.y - 16)
-            layout(children: child.children)
-        }
-    }
-
     var actionLinkLayer: LinkButtonLayer? {
         layers["actionLinkLayer"] as? LinkButtonLayer
     }
 
     override func updateRendering() {
-        contentsFrame = NSRect(x: 14, y: 0, width: availableWidth, height: showCrumbs ? 37 : 18)
+        contentsFrame = NSRect(x: 14, y: 0, width: availableWidth, height: showCrumbs ? 21 : 2)
 
         computedIdealSize = contentsFrame.size
 

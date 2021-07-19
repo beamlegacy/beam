@@ -277,6 +277,14 @@ public class ElementNode: Widget {
     }
 
     // MARK: - Mouse Events
+
+    override func mouseMoved(mouseInfo: MouseInfo) -> Bool {
+        if !PreferencesManager.alwaysShowBullets && children.count > 0 {
+            handle(hover: localTextFrame.contains(mouseInfo.position))
+        }
+        return false
+    }
+
     override func mouseDown(mouseInfo: MouseInfo) -> Bool {
         guard contentsFrame.contains(mouseInfo.position) else { return false }
         focus(position: 0)

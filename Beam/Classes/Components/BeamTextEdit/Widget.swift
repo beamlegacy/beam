@@ -449,6 +449,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
             }
             updateChildrenVisibility(visible && open)
             invalidateRendering()
+            invalidateLayout()
         }
     }
 
@@ -594,14 +595,6 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
     func dispatchMouseDown(mouseInfo: MouseInfo) -> Widget? {
         guard inVisibleBranch else { return nil }
-        for c in children {
-            var i = mouseInfo
-            i.position.x -= c.frame.origin.x
-            i.position.y -= c.frame.origin.y
-            if let d = c.dispatchMouseDown(mouseInfo: i) {
-                return d
-            }
-        }
 
         clickedLayer = nil
         for layer in layers.values where !layer.layer.isHidden {
@@ -611,6 +604,15 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
                     clickedLayer = layer
                     return self
                 }
+            }
+        }
+
+        for c in children {
+            var i = mouseInfo
+            i.position.x -= c.frame.origin.x
+            i.position.y -= c.frame.origin.y
+            if let d = c.dispatchMouseDown(mouseInfo: i) {
+                return d
             }
         }
 
@@ -762,6 +764,10 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     }
 
     func mouseMoved(mouseInfo: MouseInfo) -> Bool {
+        if debug {
+            let inContentsFrame = contentsFrame.contains(mouseInfo.position)
+            Logger.shared.logInfo("mouse moved pos \(mouseInfo.position) \(inContentsFrame ? "Contents" : "")")
+        }
         return false
     }
 
@@ -890,7 +896,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
         let c = NSColor.gray.cgColor
         context.setStrokeColor(c)
-        let bounds = NSRect(origin: CGPoint(), size: currentFrameInDocument.size)
+        let bounds = NSRect(origin: .zero, size: currentFrameInDocument.size)
         context.stroke(bounds)
 
         context.setFillColor(c.copy(alpha: 0.2)!)

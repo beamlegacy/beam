@@ -31,6 +31,7 @@ extension PreferencesManager {
     static let checkGrammarIsOnKey = "checkGrammarIsOn"
     static let correctSpellingIsOnKey = "correctSpellingIsOn"
     static let embedContentPreferenceKey = "embedContentPreference"
+    static let alwaysShowBulletsKey = "alwaysShowBullets"
 }
 
 // MARK: - Default Values
@@ -39,6 +40,7 @@ extension PreferencesManager {
     static let checkGrammarIsOnDefault = true
     static let correctSpellingIsOnDefault = true
     static let embedContentPreferenceDefault = 0
+    static let alwaysShowBulletsDefault = false
 }
 
 extension PreferencesManager {
@@ -55,4 +57,7 @@ extension PreferencesManager {
 
     @UserDefault(key: embedContentPreferenceKey, defaultValue: embedContentPreferenceDefault, container: cardsPreferencesContainer)
     static var embedContentPreference: Int
+
+    @UserDefault(key: alwaysShowBulletsKey, defaultValue: alwaysShowBulletsDefault, container: cardsPreferencesContainer)
+    static var alwaysShowBullets: Bool
 }

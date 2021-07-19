@@ -84,7 +84,7 @@ class ImageNode: ElementNode {
             let computedHeight = (width / imageSize.width) * imageSize.height
             let height = computedHeight.isNaN ? 0 : computedHeight
 
-            contentsFrame = NSRect(x: indent, y: 0, width: width, height: childInset + height)
+            contentsFrame = NSRect(x: indent, y: 0, width: width, height: height)
 
             if let imageLayer = layers["image"] {
                 imageLayer.layer.position = CGPoint(x: indent + childInset, y: 0)
@@ -92,17 +92,28 @@ class ImageNode: ElementNode {
 
                 updateFocus()
             }
-            computedIdealSize = contentsFrame.size
-            computedIdealSize.width = frame.width
 
             invalidatedRendering = false
         }
+
+        computedIdealSize = contentsFrame.size
+        computedIdealSize.width = frame.width
 
         if open && selfVisible {
             for c in children {
                 computedIdealSize.height += c.idealSize.height
             }
         }
+    }
+
+    public override func updateElementCursor() {
+        let on = editor.hasFocus && isFocused && editor.blinkPhase && (root?.state.nodeSelection?.nodes.isEmpty ?? true)
+        let cursorRect = NSRect(x: caretIndex == 0 ? (indent - 5) : (contentsFrame.width + indent + 3), y: -5, width: 2, height: contentsFrame.height - 5)//rectAt(caretIndex: caretIndex)
+        let layer = self.cursorLayer
+
+        layer.shapeLayer.fillColor = enabled ? cursorColor.cgColor : disabledColor.cgColor
+        layer.layer.isHidden = !on
+        layer.shapeLayer.path = CGPath(rect: cursorRect, transform: nil)
     }
 
     func updateFocus() {
@@ -135,6 +146,9 @@ class ImageNode: ElementNode {
         imageLayer.layer.addSublayer(borderLayer)
     }
 
+    override func setLayout(_ frame: NSRect) {
+        super.setLayout(frame)
+    }
     override func onUnfocus() {
         updateFocus()
     }

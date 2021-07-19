@@ -47,7 +47,12 @@ class ReferencesSection: LinksSection {
         let linksToNote = text.hasLinkToNote(id: rootNoteId)
         let referencesToNote = text.hasReferenceToNote(titled: rootNote)
 
-        return !linksToNote && referencesToNote
+        // This is subtle: we don't want hide nodes that have just been edited so that they are not a reference to this card anymore, so we make them disapear only if the became a link to the curent card. This only happens after the initial update as the initial update should filter out anything that is not a reference. It has the symetrical behaviour of LinksSection
+        if initialUpdate {
+            return !linksToNote && referencesToNote
+        } else {
+            return !linksToNote
+        }
     }
 
     func createLinkAllLayer() {
