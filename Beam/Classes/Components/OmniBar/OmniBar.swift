@@ -218,7 +218,7 @@ struct OmniBar: View {
     }
 
     func goToJournal() {
-        state.navigateToJournal(clearNavigation: true)
+        state.navigateToJournal(note: nil, clearNavigation: true)
     }
 
     func refreshWeb() {
@@ -228,7 +228,11 @@ struct OmniBar: View {
     func toggleMode() {
         if state.mode == .web {
             guard let tab = browserTabsManager.currentTab else { return }
-            state.navigateToNote(tab.noteController.note)
+            if tab.originMode == .today && tab.noteController.note.type.isJournal {
+                state.navigateToJournal(note: tab.noteController.note)
+            } else {
+                state.navigateToNote(tab.noteController.note)
+            }
             autocompleteManager.resetQuery()
         } else {
             state.mode = .web
@@ -248,7 +252,7 @@ struct OmniBar_Previews: PreviewProvider {
         focusedState.focusOmniBox = true
         focusedState.mode = .web
         let origin = BrowsingTreeOrigin.searchBar(query: "query")
-        focusedState.browserTabsManager.currentTab = BrowserTab(state: focusedState, browsingTreeOrigin: origin, note: BeamNote(title: "Note title"))
+        focusedState.browserTabsManager.currentTab = BrowserTab(state: focusedState, browsingTreeOrigin: origin, originMode: .today, note: BeamNote(title: "Note title"))
         return Group {
             OmniBar()
                 .environmentObject(state)

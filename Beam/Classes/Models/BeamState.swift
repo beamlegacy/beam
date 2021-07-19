@@ -125,7 +125,11 @@ import BeamCore
 
         switch mode {
         case .web:
-            navigateToNote(note)
+            if currentTab?.originMode == .today && note.type.isJournal {
+                navigateToJournal(note: note)
+            } else {
+                navigateToNote(note)
+            }
         case .today, .note, .page:
             if hasBrowserTabs { mode = .web }
         }
@@ -174,7 +178,7 @@ import BeamCore
         return true
     }
 
-    @discardableResult func navigateToJournal(clearNavigation: Bool = false) -> Bool {
+    @discardableResult func navigateToJournal(note: BeamNote?, clearNavigation: Bool = false) -> Bool {
         mode = .today
 
         currentPage = nil
@@ -207,7 +211,7 @@ import BeamCore
     }
 
     func addNewTab(origin: BrowsingTreeOrigin?, setCurrent: Bool = true, note: BeamNote, element: BeamElement? = nil, url: URL? = nil, webView: BeamWebView? = nil) -> BrowserTab {
-        let tab = BrowserTab(state: self, browsingTreeOrigin: origin, note: note, rootElement: element, webView: webView)
+        let tab = BrowserTab(state: self, browsingTreeOrigin: origin, originMode: mode, note: note, rootElement: element, webView: webView)
         browserTabsManager.addNewTab(tab, setCurrent: setCurrent, withURL: url)
         mode = .web
         return tab
@@ -456,7 +460,7 @@ extension BeamState: BrowserTabsManagerDelegate {
             if let note = currentNote {
                 navigateToNote(note)
             } else {
-                navigateToJournal(clearNavigation: true)
+                navigateToJournal(note: nil, clearNavigation: true)
             }
         }
     }
