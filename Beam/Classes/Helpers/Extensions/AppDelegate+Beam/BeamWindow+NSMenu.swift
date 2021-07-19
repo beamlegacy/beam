@@ -22,7 +22,7 @@ extension BeamWindow {
     }
 
     @IBAction func showJournal(_ sender: Any?) {
-        state.navigateToJournal()
+        state.navigateToJournal(note: nil)
     }
 
     @IBAction func toggleScoreCard(_ sender: Any?) {

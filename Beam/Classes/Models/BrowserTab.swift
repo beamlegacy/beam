@@ -59,6 +59,8 @@ import Promises
     @Published var browsingTree: BrowsingTree
     @Published var privateMode = false
 
+    var originMode: Mode
+
     var pointAndShootAllowed: Bool {
         true
     }
@@ -173,11 +175,12 @@ import Promises
        - id:
        - webView:
      */
-    init(state: BeamState, browsingTreeOrigin: BrowsingTreeOrigin?, note: BeamNote, rootElement: BeamElement? = nil,
+    init(state: BeamState, browsingTreeOrigin: BrowsingTreeOrigin?, originMode: Mode, note: BeamNote, rootElement: BeamElement? = nil,
          id: UUID = UUID(), webView: BeamWebView? = nil) {
         self.state = state
         self.id = id
         self.browsingTreeOrigin = browsingTreeOrigin
+        self.originMode = originMode
         isFromNoteSearch = rootElement != nil
 
         if let suppliedWebView = webView {
@@ -239,6 +242,7 @@ import Promises
         privateMode = try container.decode(Bool.self, forKey: .privateMode)
         isFromNoteSearch = false
 
+        originMode = .today
         super.init()
         noteController.note.browsingSessions.append(tree)
     }

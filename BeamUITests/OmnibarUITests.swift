@@ -100,7 +100,7 @@ class OmniBarUITests: QuickSpec {
                 expect(self.app.buttons["pivot-card"].exists).to(beTrue())
 
                 self.app.buttons["pivot-card"].tap()
-                expect(self.app.scrollViews["noteView"].exists).to(beTrue())
+                expect(self.app.scrollViews["journalView"].exists).to(beTrue())
                 expect(self.app.buttons["refresh"].exists).to(beFalse())
 
                 self.app.buttons["pivot-web"].tap()
