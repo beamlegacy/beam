@@ -16,4 +16,5 @@ public enum MenuAvailableCommands: String, CaseIterable {
     case loadUITestPage5 = "Load HTML playground"
     case separatorC
     case insertTextInCurrentNote = "Insert text in current note"
+    case create100Notes = "Create 100 random notes"
 }
