@@ -10,6 +10,9 @@ protocol BeamObjectProtocol: Codable {
     var createdAt: Date { get set }
     var updatedAt: Date { get set }
     var deletedAt: Date? { get set }
+
+    // IMPORTANT: make sure you list in `enum CodingKeys: String, CodingKey` what you want to store as `BeamObject`
+    // and not include `previousChecksum` and `checksum`
     var previousChecksum: String? { get set }
     var checksum: String? { get set }
 }
@@ -22,7 +25,6 @@ class BeamObject: Codable {
     var updatedAt: Date?
     var deletedAt: Date?
     var data: String?
-    var encryptedData: String?
     var dataChecksum: String?
     var previousChecksum: String?
 
@@ -97,7 +99,6 @@ class BeamObject: Codable {
         result.updatedAt = updatedAt
         result.deletedAt = deletedAt
         result.data = data
-        result.encryptedData = encryptedData
         result.previousChecksum = previousChecksum
         result.dataChecksum = dataChecksum
         return result
@@ -171,18 +172,13 @@ extension BeamObject {
 
         do {
             data = try EncryptionManager.shared.decryptString(encodedString, using: algorithm)
-            encryptedData = nil // encodedData for debug purpose when needed
         } catch DecodingError.dataCorrupted {
             Logger.shared.logError("DecodingError.dataCorrupted", category: .encryption)
 
-            // JSON decoding error might happen when the content wasn't encrypted
-            encryptedData = nil
         } catch DecodingError.typeMismatch {
             Logger.shared.logError("DecodingError.typeMismatch", category: .encryption)
             Logger.shared.logDebug("Encoded data: \(encodedData)", category: .encryption)
 
-            // JSON decoding error might happen when the content wasn't encrypted
-            encryptedData = nil
         } catch EncryptionManagerError.authenticationFailure {
             Logger.shared.logError("Could not decrypt data with key \(decodedStruct.privateKeySha256 ?? "-")",
                                    category: .encryption)
@@ -196,8 +192,6 @@ extension BeamObject {
 
     func encrypt() throws {
         guard let clearData = data else { return }
-
-        dataChecksum = try clearData.SHA256()
 
         let encryptedClearData = try EncryptionManager.shared.encryptString(clearData)
 

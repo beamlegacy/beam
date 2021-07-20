@@ -411,10 +411,54 @@ extension BeamObjectManager {
     }
 
     func saveToAPI<T: BeamObjectProtocol>(_ object: T,
-                                          _ completion: @escaping ((Swift.Result<BeamObject, Error>) -> Void)) throws -> URLSessionTask? {
+                                          _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
+        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            throw BeamObjectManagerError.notAuthenticated
+        }
+
         let beamObject = try BeamObject(object, T.beamObjectTypeName)
 
-        return try saveToAPI(beamObject, completion)
+        Self.networkRequests[beamObject.id]?.cancel()
+        let request = BeamObjectRequest()
+        Self.networkRequests[beamObject.id] = request
+
+        return try request.save(beamObject) { requestResult in
+            switch requestResult {
+            case .success:
+                // Not: we can't decode the remote `BeamObject` as that would require to fetch all details back from
+                // the API when saving. We only return Bool.
+                completion(.success(true))
+            case .failure(let error):
+                Logger.shared.logError("Could not save \(beamObject): \(error.localizedDescription)",
+                                       category: .beamObjectNetwork)
+
+                // Early return except for checksum issues.
+                guard case APIRequestError.beamObjectInvalidChecksum = error else {
+                    completion(.failure(error))
+                    return
+                }
+
+                Logger.shared.logError("Invalid Checksum. Local previous checksum: \(beamObject.previousChecksum ?? "-")",
+                                       category: .beamObjectNetwork)
+
+                self.fetchAndReturnErrorBasedOnConflictPolicy(object) { result in
+                    switch result {
+                    case .failure(let error): completion(.failure(error))
+                    case .success(let remoteObject):
+                        do {
+                            Logger.shared.logError("Remote object checksum: \(remoteObject.checksum ?? "-")",
+                                                   category: .beamObjectNetwork)
+                            Logger.shared.logError("Overwriting local object with remote checksum",
+                                                   category: .beamObjectNetwork)
+
+                            _ = try self.saveToAPI(remoteObject, completion)
+                        } catch {
+                            completion(.failure(error))
+                        }
+                    }
+                }
+            }
+        }
     }
 
     func saveToAPI(_ beamObject: BeamObject,
