@@ -1,9 +1,9 @@
-import { BeamCollectedQuote } from "./BeamTypes"
-import { PointAndShootUI } from "./PointAndShootUI"
-import { PointAndShootUI_native } from "./PointAndShootUI_native"
-import { PointAndShootUI_web } from "./PointAndShootUI_web"
-import { FrameInfo } from "./WebEventsUI"
-import { BeamHTMLElement } from "./BeamTypes"
+import {BeamCollectedQuote} from "./BeamTypes"
+import {PointAndShootUI} from "./PointAndShootUI"
+import {PointAndShootUI_native} from "./PointAndShootUI_native"
+import {PointAndShootUI_web} from "./PointAndShootUI_web"
+import {FrameInfo} from "./WebEventsUI"
+import {BeamHTMLElement} from "./BeamTypes"
 
 export class PointAndShootUI_debug implements PointAndShootUI {
   /**
@@ -15,8 +15,9 @@ export class PointAndShootUI_debug implements PointAndShootUI {
     this.native = native
     this.web = web
   }
+
   cursor(x: any, y: any) {
-    throw new Error("Method not implemented.");
+    throw new Error("Method not implemented.")
   }
 
   select(selection: BeamCollectedQuote[]) {
@@ -34,80 +35,80 @@ export class PointAndShootUI_debug implements PointAndShootUI {
     this.native.getMouseLocation(el, x, y)
   }
 
-  point(quoteId: string, el: BeamHTMLElement, x: number, y: number, callback) {
+  point(quoteId: string, el: BeamHTMLElement, x: number, y: number, callback): void {
     this.web.point(quoteId, el, x, y)
     this.native.point(quoteId, el, x, y, callback)
   }
 
-  unpoint(el) {
+  unpoint(el): void {
     this.web.unpoint(el)
     this.native.unpoint(el)
   }
 
-  shoot(quoteId: string, el: BeamHTMLElement, x: number, y: number, selectedEls) {
+  shoot(quoteId: string, el: BeamHTMLElement, x: number, y: number, selectedEls): void {
     this.web.shoot(quoteId, el, x, y, selectedEls)
     this.native.shoot(quoteId, el, x, y, selectedEls)
   }
 
-  unshoot(el: BeamHTMLElement) {
+  unshoot(el: BeamHTMLElement): void {
     this.web.unshoot(el)
     this.native.unshoot(el)
   }
 
-  hidePopup() {
+  hidePopup(): void {
     this.web.hidePopup()
     this.native.hidePopup()
   }
 
-  hideStatus() {
+  hideStatus(): void {
     this.web.hideStatus()
     this.native.hideStatus()
   }
 
-  pinched(pinchInfo: any) {
+  pinched(pinchInfo: any): void {
     this.web.pinched(pinchInfo)
     this.native.pinched(pinchInfo)
   }
 
-  setFramesInfo(framesInfo: FrameInfo[]) {
+  setFramesInfo(framesInfo: FrameInfo[]): void {
     this.web.setFramesInfo(framesInfo)
     this.native.setFramesInfo(framesInfo)
   }
 
-  setOnLoadInfo(framesInfo: FrameInfo[]) {
+  setOnLoadInfo(framesInfo: FrameInfo[]): void {
     this.web.setOnLoadInfo()
     this.native.setOnLoadInfo(framesInfo)
   }
 
-  setResizeInfo(resizeInfo: any) {
+  setResizeInfo(resizeInfo: any): void {
     this.web.setResizeInfo(resizeInfo)
     this.native.setResizeInfo(resizeInfo)
   }
 
-  setScrollInfo(scrollInfo: any) {
+  setScrollInfo(scrollInfo: any): void {
     this.web.setScrollInfo(scrollInfo)
     this.native.setScrollInfo(scrollInfo)
   }
 
-  setStatus(status) {
+  setStatus(status): void {
     this.web.setStatus(status)
     this.native.setStatus(status)
   }
 
-  showStatus(el: BeamHTMLElement, collected) {
+  showStatus(el: BeamHTMLElement, collected): void {
     this.web.showStatus(el, collected)
     this.native.showStatus(el, collected)
   }
 
-  enterSelection() {
+  enterSelection(): void {
     this.web.enterSelection()
   }
 
-  leaveSelection() {
+  leaveSelection(): void {
     this.web.leaveSelection()
   }
 
-  addTextSelection(selection) {
+  addTextSelection(selection): void {
     this.web.addTextSelection(selection)
   }
 }

@@ -1,4 +1,4 @@
-import {BeamRect} from "./BeamTypes";
+import {BeamRect} from "./BeamTypes"
 
 export class BeamRectHelper {
 
@@ -32,9 +32,9 @@ export class BeamRectHelper {
     // rects can have Infinite dimensions, in which case have to filter out NaN values
     // since -Infinity + Infinity is NaN (rect.x + rect.width or rect.y + rect.height)
     const validX2 = [rect1.x + rect1.width, rect2.x + rect2.width].filter(v => !isNaN(v))
-    let x2 = Math.min(...validX2)
+    const x2 = Math.min(...validX2)
     const validY2 = [rect1.y + rect1.height, rect2.y + rect2.height].filter(v => !isNaN(v))
-    let y2 = Math.min(...validY2)
+    const y2 = Math.min(...validY2)
 
     if (x2 > x && y2 > y) {
       return { x, y, width: x2 - x, height: y2 - y }

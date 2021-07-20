@@ -6,7 +6,7 @@ export class EventsMock {
   events = []
 
   constructor() {
-    this.log('instantiated')
+    this.log("instantiated")
   }
 
   get eventsCount() {

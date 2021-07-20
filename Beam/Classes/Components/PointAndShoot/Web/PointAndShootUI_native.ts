@@ -12,12 +12,12 @@ import {
   BeamRange,
   BeamRect,
   BeamSelectionMessagePayload,
-  BeamText,
+  BeamText
 } from "./BeamTypes"
 import {Util} from "./Util"
-import {BeamElementHelper} from "./BeamElementHelper";
-import {BeamRectHelper} from "./BeamRectHelper";
-import {PointAndShootHelper} from "./PointAndShootHelper";
+import {BeamElementHelper} from "./BeamElementHelper"
+import {BeamRectHelper} from "./BeamRectHelper"
+import {PointAndShootHelper} from "./PointAndShootHelper"
 
 export class PointAndShootUI_native extends WebEventsUI_native implements PointAndShootUI {
   /**
@@ -44,8 +44,8 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
       newArea = BeamRectHelper.boundingRect(area, bounds)
     } else if (bounds) {
       // No previous area, use bounds
-      const { x, y, width, height } = bounds
-      newArea = { x, y, width, height }
+      const {x, y, width, height} = bounds
+      newArea = {x, y, width, height}
     }
 
     if (newArea && clippingArea) {
@@ -71,7 +71,7 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
    * @memberof PointAndShootUI_native
    */
   elementBounds(el: BeamElement, area?: BeamRect, clippingArea?: BeamRect): BeamRect {
-    const { win } = this.native
+    const {win} = this.native
 
     // Find svg root if any and use it for bounds calculation
     const svgRoot = BeamElementHelper.getSvgRoot(el)
@@ -104,23 +104,25 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
 
       for (const child of childNodes) {
         switch (child.nodeType) {
-          case BeamNodeType.element:
+          case BeamNodeType.element: {
             const childElement = child as BeamElement
             if (childElement.tagName.toLowerCase() === "svg") {
-              let childBounds = childElement.getBoundingClientRect()
+              const childBounds = childElement.getBoundingClientRect()
               area = this.setArea(area, childBounds, clippingArea)
             } else {
               const bounds = this.elementBounds(childElement, area, clippingArea)
               area = this.setArea(area, bounds, clippingArea)
             }
+          }
             break
-          case BeamNodeType.text:
+          case BeamNodeType.text: {
             const nodeRange = win.document.createRange()
             nodeRange.selectNode(child)
-            let rangeBounds = nodeRange.getBoundingClientRect()
+            const rangeBounds = nodeRange.getBoundingClientRect()
             if (rangeBounds.width > 0 && rangeBounds.height > 0) {
               area = this.setArea(area, rangeBounds, clippingArea)
             }
+          }
             break
         }
       }
@@ -203,9 +205,9 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
       quoteId,
       location: {
         x: location.x,
-        y: location.y,
+        y: location.y
       },
-      offset: { x: xOffset, y: yOffset }
+      offset: {x: xOffset, y: yOffset}
     }
   }
 
@@ -224,7 +226,7 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
         x: rangeRect.x,
         y: rangeRect.y,
         width: rangeRect.width,
-        height: rangeRect.height,
+        height: rangeRect.height
       }
     })
   }
@@ -242,9 +244,9 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
   private selectionAreaMessage(quoteId, range: BeamRange): BeamSelectionMessagePayload {
     const text = range.toString()
     const html = Array.prototype.reduce.call(
-      range.cloneContents().childNodes,
-      (result, node) => result + (node.outerHTML || node.nodeValue),
-      ""
+        range.cloneContents().childNodes,
+        (result, node) => result + (node.outerHTML || node.nodeValue),
+        ""
     )
     const areas = this.selectionBounds(range)
     return {
@@ -252,7 +254,7 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
       text,
       html,
       quoteId,
-      location: { x: -1, y: -1 },
+      location: {x: -1, y: -1}
     }
   }
 
@@ -264,7 +266,7 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
    */
   selectMessage(ranges: BeamCollectedQuote[]) {
     // TODO: Throttle
-    const selectPayloads = ranges.map(({ quoteId, el }) => {
+    const selectPayloads = ranges.map(({quoteId, el}) => {
       return this.selectionAreaMessage(quoteId, el as BeamRange)
     })
 
@@ -287,7 +289,7 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
   }
 
   cursorMessage(x: any, y: any) {
-    const cursorPayload = { x, y }
+    const cursorPayload = {x, y}
     this.native.sendMessage("cursor", cursorPayload)
   }
 
@@ -308,12 +310,12 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
       return
     }
 
-    if (this.hasRectAndMouseOverlap(area, { x, y })) {
+    if (this.hasRectAndMouseOverlap(area, {x, y})) {
       const pointPayload = this.elementAreaMessage(quoteId, el, x, y)
       this.native.sendMessage("point", pointPayload)
       return
     } else {
-      this.native.sendMessage("cursor", { x, y })
+      this.native.sendMessage("cursor", {x, y})
     }
   }
 
@@ -335,7 +337,9 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
     this.pointMessage(quoteId, el, x, y, callback)
   }
 
-  unpoint(el) {}
+  unpoint(el): void {
+    // Nothing to do in native case
+  }
 
   /**
    * Handles select event
@@ -347,7 +351,9 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
     this.selectMessage(ranges)
   }
 
-  unselect(selection) {}
+  unselect(selection): void {
+    // Nothing to do in native case
+  }
 
   /**
    * Handles shoot event
@@ -367,9 +373,13 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
     this.shootMessage(quoteId, el, x, y)
   }
 
-  unshoot(el: BeamHTMLElement) {}
+  unshoot(el: BeamHTMLElement): void {
+    // Nothing to do in native case
+  }
 
-  hidePopup() {}
+  hidePopup(): void {
+    // Nothing to do in native case
+  }
 
   /**
    * Show the if a given was added to a card.
@@ -394,18 +404,18 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
   getMouseLocation(el: BeamElement, x: number, y: number): BeamMouseLocation {
     const area = this.elementBounds(el)
     // limit min / max of mouse location to area bounds
-    let clampedX = Util.clamp(x, area.x, area.x + area.width)
-    let clampedY = Util.clamp(y, area.y, area.y + area.height)
+    const clampedX = Util.clamp(x, area.x, area.x + area.width)
+    const clampedY = Util.clamp(y, area.y, area.y + area.height)
 
     // return x / y position relative to element area
     return {
       x: clampedX - area.x,
-      y: clampedY - area.y,
+      y: clampedY - area.y
     }
   }
 
   setStatus(status) {
-    this.native.sendMessage("setStatus", { status })
+    this.native.sendMessage("setStatus", {status})
   }
 
   setResizeInfo(setResizeInfo) {

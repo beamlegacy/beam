@@ -7,7 +7,7 @@ import {
   BeamQuoteId,
   BeamSelection,
   BeamRange,
-  BeamHTMLElement, BeamElement, BeamNode,
+  BeamHTMLElement, BeamElement, BeamNode
 } from "./BeamTypes"
 import { Util } from "./Util"
 import { WebFactory } from "./WebFactory"
@@ -248,7 +248,7 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    */
   displayStatus(el) {
     const data = el.dataset[this.datasetKey]
-    if (Boolean(data)) {
+    if (data) {
       this.showStatus(el, data)
       return
     }
@@ -299,11 +299,11 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
   shoot(targetEl: BeamHTMLElement, x: number, y: number, multi: boolean) {
     this.shootingTarget = {
       el: targetEl,
-      quoteId: targetEl.dataset[this.datasetKey],
+      quoteId: targetEl.dataset[this.datasetKey]
     }
     this.shootMouseLocation = {
       x,
-      y,
+      y
     }
     this.ui.shoot(this.shootingTarget.quoteId, this.shootingTarget.el, x, y, this.collectedQuotes)
     this.setShooting()
@@ -330,7 +330,7 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    * @param {Boolean} [bool=true]
    * @memberof PointAndShoot
    */
-  setShooting(bool: boolean = true) {
+  setShooting(bool = true) {
     if (bool) {
       this.setStatus(BeamPNSStatus.shooting)
     }
@@ -387,7 +387,7 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    *
    * @param {BeamPNSStatus} newStatus
    */
-  setStatus(newStatus: BeamPNSStatus, broadcast: boolean = true) {
+  setStatus(newStatus: BeamPNSStatus, broadcast = true) {
     // this.setChildFrameStatus(newStatus)
     if (this.status != newStatus) {
       this.status = newStatus
@@ -406,7 +406,7 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    */
   updateDebugStatusUI() {
     if (PNS_STATUS) {
-      let debugEl = this.win.document.querySelector("#debug-beam") as BeamHTMLElement
+      const debugEl = this.win.document.querySelector("#debug-beam") as BeamHTMLElement
 
       if (debugEl) {
         debugEl.innerText = `JS ${this.status} | ${this.win.location.href}`
@@ -517,7 +517,7 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
       ...resizeInfo,
       selected: selected,
       datasetKey: this.datasetKey,
-      coordinates: this.shootMouseLocation,
+      coordinates: this.shootMouseLocation
     }
   }
 
@@ -551,7 +551,7 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
     this.selectionRanges = ranges.map((range) => {
       return {
         quoteId: undefined,
-        el: range,
+        el: range
       }
     })
     this.ui.select(this.selectionRanges)

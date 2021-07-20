@@ -1,13 +1,11 @@
 import {
   BeamElement,
-  BeamHTMLElement,
-  BeamHTMLInputElement,
   BeamNode,
   BeamNodeType,
   BeamText,
   BeamWindow
-} from "./BeamTypes";
-import {BeamElementHelper} from "./BeamElementHelper";
+} from "./BeamTypes"
+import {BeamElementHelper} from "./BeamElementHelper"
 
 export class PointAndShootHelper {
   /**
@@ -38,12 +36,12 @@ export class PointAndShootHelper {
    */
   static isMeaningful(element: BeamElement, win: BeamWindow): boolean {
     return (
-      (
-        BeamElementHelper.isMedia(element)
-        || BeamElementHelper.isImageContainer(element, win)
-        || PointAndShootHelper.isTextMeaningful( BeamElementHelper.getTextValue(element) )
-      )
-      && BeamElementHelper.isVisible(element, win)
+        (
+            BeamElementHelper.isMedia(element)
+            || BeamElementHelper.isImageContainer(element, win)
+            || PointAndShootHelper.isTextMeaningful(BeamElementHelper.getTextValue(element))
+        )
+        && BeamElementHelper.isVisible(element, win)
     )
   }
 
@@ -58,19 +56,19 @@ export class PointAndShootHelper {
       return true
     }
     return [...element.children].some(
-      child => PointAndShootHelper.isMeaningful(child, win)
+        child => PointAndShootHelper.isMeaningful(child, win)
     )
   }
 
   static getMeaningfulChildNodes(element: BeamElement, win: BeamWindow): BeamNode[] {
     return [...element.childNodes].filter(
-      child => (
-        child.nodeType === BeamNodeType.element
-        && PointAndShootHelper.isMeaningfulOrChildrenAre(child as BeamElement, win)
-      ) || (
-        child.nodeType === BeamNodeType.text
-        && PointAndShootHelper.isTextMeaningful( (child as BeamText).data )
-      )
+        child => (
+            child.nodeType === BeamNodeType.element
+            && PointAndShootHelper.isMeaningfulOrChildrenAre(child as BeamElement, win)
+        ) || (
+            child.nodeType === BeamNodeType.text
+            && PointAndShootHelper.isTextMeaningful((child as BeamText).data)
+        )
     )
   }
 }

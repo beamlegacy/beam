@@ -1,21 +1,20 @@
 import {
   BeamDocument,
-  BeamElement,
   BeamHTMLElement,
   BeamLocation,
   BeamMessageHandler,
   BeamVisualViewport,
   BeamWindow
 } from "../BeamTypes"
-import { BeamDocumentMock, BeamLocationMock } from "./BeamMocks"
-import { PointAndShoot } from "../PointAndShoot"
-import { BeamEventTargetMock } from "./BeamEventTargetMock"
+import {BeamDocumentMock, BeamLocationMock} from "./BeamMocks"
+import {PointAndShoot} from "../PointAndShoot"
+import {BeamEventTargetMock} from "./BeamEventTargetMock"
 
 export class MessageHandlerMock implements BeamMessageHandler {
   events = []
 
-  postMessage(payload) {
-    this.events.push({ name: "postMessage", payload })
+  postMessage(payload): void {
+    this.events.push({name: "postMessage", payload})
   }
 }
 
@@ -41,6 +40,7 @@ export class BeamWindowMock extends BeamEventTargetMock implements BeamWindow {
     this.location = location
     this.visualViewport.scale = 1
   }
+
   frameElement: any
   frames: any
 
@@ -51,8 +51,8 @@ export class BeamWindowMock extends BeamEventTargetMock implements BeamWindow {
 
   webkit = {
     messageHandlers: {
-      pointAndShoot_frameBounds: new MessageHandlerMock(),
-    },
+      pointAndShoot_frameBounds: new MessageHandlerMock()
+    }
   }
 
   getEventListeners(_win: BeamWindow) {
