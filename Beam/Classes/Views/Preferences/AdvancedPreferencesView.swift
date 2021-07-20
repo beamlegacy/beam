@@ -178,6 +178,9 @@ struct AdvancedPreferencesView: View {
             Preferences.Section(title: "Reindex notes contents") {
                 ReindexNotesContents
             }
+            Preferences.Section(title: "Create 100 random notes") {
+                Create100RandomNotes
+            }
         }.onAppear {
             observeDefaultDatabase()
         }
@@ -332,6 +335,20 @@ struct AdvancedPreferencesView: View {
             Text("Reindex all notes' contents")
         })
     }
+
+    private var Create100RandomNotes: some View {
+        Button(action: {
+            let documentManager = DocumentManager()
+            let generator = FakeNoteGenerator(count: 100, journalRatio: 0.2, futureRatio: 0.05)
+            generator.generateNotes()
+            for note in generator.notes {
+                note.save(documentManager: documentManager)
+            }
+        }, label: {
+            Text("Create 100 Random notes")
+        })
+    }
+
 }
 
 struct AdvancedPreferencesView_Previews: PreviewProvider {

@@ -18,6 +18,7 @@ class BeamUITestsMenuGenerator {
         case .loadUITestPage4: loadUITestsPage(page: 4)
         case .loadUITestPage5: loadUITestsPage(page: 5)
         case .insertTextInCurrentNote: insertTextInCurrentNote()
+        case .create100Notes: create100Notes()
         default: break
         }
     }
@@ -107,5 +108,14 @@ class BeamUITestsMenuGenerator {
         fmt.doesRelativeDateFormatting = false
         fmt.timeStyle = .none
         return fmt.string(from: date)
+    }
+
+    private func create100Notes() {
+        let documentManager = DocumentManager()
+        let generator = FakeNoteGenerator(count: 100, journalRatio: 0.2, futureRatio: 0.1)
+        generator.generateNotes()
+        for note in generator.notes {
+            note.save(documentManager: documentManager)
+        }
     }
 }
