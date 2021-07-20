@@ -61,6 +61,10 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
             Configuration.beamObjectAPIEnabled = EnvironmentVariables.beamObjectAPIEnabled
             Configuration.apiHostname = beforeConfigApiHostname
+
+            if !sut.isAllNetworkCallsCompleted() {
+                fail("not all network calls are completed")
+            }
         }
 
         describe("syncAllFromAPI()") {
@@ -79,7 +83,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                                             checksum: nil,
                                             title: title)
                 _ = beamObjectHelper.saveOnAPI(object)
-                sleep(1)
+//                sleep(1)
             }
 
             afterEach {
@@ -89,7 +93,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                 }
 
                 _ = semaphore.wait(timeout: DispatchTime.now() + .seconds(5))
-                sleep(1)
+//                sleep(1)
             }
 
             context("without previous updated_at") {
@@ -141,7 +145,8 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
                     try sut.saveAllToAPI()
 
-                    expect(APIRequest.callsCount - networkCalls) == 0
+                    // today's journal is usually saved, adding 1 network call
+                    expect(APIRequest.callsCount - networkCalls) <= 1
                 }
             }
         }
@@ -178,7 +183,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                                                     checksum: nil,
                                                     title: title)
                         _ = beamObjectHelper.saveOnAPI(object)
-                        sleep(1)
+//                        sleep(1)
                     }
 
                     it("returns object") {
@@ -243,7 +248,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                 }
 
                 _ = semaphore.wait(timeout: DispatchTime.now() + .seconds(5))
-                sleep(2)
+//                sleep(2)
             }
 
             context("with Foundation") {
@@ -727,7 +732,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                 }
 
                 _ = semaphore.wait(timeout: DispatchTime.now() + .seconds(5))
-                sleep(1)
+//                sleep(1)
             }
 
             context("with Foundation") {

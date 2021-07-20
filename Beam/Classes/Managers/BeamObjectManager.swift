@@ -84,6 +84,7 @@ enum BeamObjectConflictResolution {
 class BeamObjectManager {
     static var managers: [String: BeamObjectManagerDelegateProtocol.Type] = [:]
     private static var networkRequests: [UUID: APIRequest] = [:]
+    private static var urlSessionTasks: [URLSessionTask] = []
 
     static func register<T: BeamObjectManagerDelegateProtocol>(_ manager: T.Type) {
         managers[T.typeName] = manager
@@ -100,6 +101,26 @@ class BeamObjectManager {
         for (_, request) in Self.networkRequests {
             request.cancel()
         }
+
+//        for task in Self.urlSessionTasks {
+//            task.cancel()
+//        }
+    }
+
+    func isAllNetworkCallsCompleted() -> Bool {
+        for task in Self.urlSessionTasks {
+            if [URLSessionTask.State.suspended, .running].contains(task.state) {
+                return false
+            }
+        }
+
+        for (_, request) in Self.networkRequests {
+            if [URLSessionTask.State.suspended, .running].contains(request.dataTask?.state) {
+                return false
+            }
+        }
+
+        return true
     }
 
     var conflictPolicyForSave: BeamObjectConflictResolution = .replace
@@ -163,7 +184,8 @@ extension BeamObjectManager {
         let beamObjects = try objects.map {
             try BeamObject($0, T.beamObjectTypeName)
         }
-        return try request.saveAll(beamObjects) { result in
+
+        let sessionTask = try request.saveAll(beamObjects) { result in
             switch result {
             case .failure(let error):
                 self.saveToAPIBeamObjectsFailure(objects, error, completion)
@@ -174,6 +196,11 @@ extension BeamObjectManager {
                 completion(.success(true))
             }
         }
+
+        guard let task = sessionTask else { return nil }
+
+        Self.urlSessionTasks.append(task)
+        return task
     }
 
     func saveToAPI(_ beamObjects: [BeamObject],
@@ -184,7 +211,7 @@ extension BeamObjectManager {
 
         let request = BeamObjectRequest()
 
-        return try request.saveAll(beamObjects) { result in
+        let sessionTask = try request.saveAll(beamObjects) { result in
             switch result {
             case .failure(let error):
                 self.saveToAPIBeamObjectsFailure(beamObjects, error, completion)
@@ -192,6 +219,11 @@ extension BeamObjectManager {
                 completion(.success(updateBeamObjects))
             }
         }
+
+        guard let task = sessionTask else { return nil }
+
+        Self.urlSessionTasks.append(task)
+        return task
     }
 
     /// Will look at each errors, and fetch remote object to include it in the completion if it was a checksum error
@@ -422,7 +454,7 @@ extension BeamObjectManager {
         let request = BeamObjectRequest()
         Self.networkRequests[beamObject.id] = request
 
-        return try request.save(beamObject) { requestResult in
+        let sessionTask = try request.save(beamObject) { requestResult in
             switch requestResult {
             case .success:
                 // Not: we can't decode the remote `BeamObject` as that would require to fetch all details back from
@@ -459,6 +491,9 @@ extension BeamObjectManager {
                 }
             }
         }
+
+        Self.urlSessionTasks.append(sessionTask)
+        return sessionTask
     }
 
     func saveToAPI(_ beamObject: BeamObject,
@@ -471,7 +506,7 @@ extension BeamObjectManager {
         let request = BeamObjectRequest()
         Self.networkRequests[beamObject.id] = request
 
-        return try request.save(beamObject) { requestResult in
+        let sessionTask = try request.save(beamObject) { requestResult in
             switch requestResult {
             case .success(let updateBeamObject):
                 completion(.success(updateBeamObject))
@@ -506,6 +541,9 @@ extension BeamObjectManager {
                 }
             }
         }
+
+        Self.urlSessionTasks.append(sessionTask)
+        return sessionTask
     }
 
     /// Fetch remote object, and based on policy will either return the object with remote checksum, or return and error containing the remote object
@@ -668,6 +706,7 @@ extension BeamObjectManager {
 
                 if let task = task {
                     dataTasks.append(task)
+                    Self.urlSessionTasks.append(task)
                 }
             } catch {
                 lock.wait()
@@ -709,7 +748,7 @@ extension BeamObjectManager {
                                    category: .beamObjectNetwork)
         }
 
-        try beamRequest.fetchAll(lastUpdatedAt) { result in
+        let task = try beamRequest.fetchAll(lastUpdatedAt) { result in
             switch result {
             case .failure(let error):
                 Logger.shared.logDebug("fetchAllFromAPI: \(error.localizedDescription)",
@@ -723,6 +762,8 @@ extension BeamObjectManager {
                 completion?(.success(success))
             }
         }
+
+        Self.urlSessionTasks.append(task)
     }
 }
 
