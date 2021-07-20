@@ -85,7 +85,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     static var titleToId: [String: UUID] = [:]
 
     override init() {
-        clusteringManager = ClusteringManager(ranker: sessionLinkRanker)
+        clusteringManager = ClusteringManager(ranker: sessionLinkRanker, candidate: 2, navigation: 0.5, text: 0.8, entities: 0.3)
         documentManager = DocumentManager()
         noteAutoSaveService = NoteAutoSaveService()
         linkManager = LinkManager()

@@ -21,18 +21,24 @@ class ClusteringManager: ObservableObject {
     var ranker: SessionLinkRanker
     @Published var clusteredTabs: [[TabInformation?]] = [[]]
     @Published var isClustering: Bool = false
-    @Published var selectedTabGroupingCandidate = 1
-    @Published var weightNavigation = 0.5
-    @Published var weightText = 0.5
-    @Published var weightEntities = 0.5
+    @Published var selectedTabGroupingCandidate: Int
+    @Published var weightNavigation: Double
+    @Published var weightText: Double
+    @Published var weightEntities: Double
     private var tabsInfo: [TabInformation] = []
     private var cluster: Cluster
     private var scope = Set<AnyCancellable>()
 
-    init(ranker: SessionLinkRanker) {
-        self.cluster = Cluster()
+    init(ranker: SessionLinkRanker, candidate: Int, navigation: Double, text: Double, entities: Double) {
+        self.selectedTabGroupingCandidate = candidate
+        self.weightNavigation = navigation
+        self.weightText = text
+        self.weightEntities = entities
+        self.cluster = Cluster(candidate: candidate, weightNavigation: navigation, weightText: text, weightEntities: entities)
         self.ranker = ranker
+        #if DEBUG
         setupObservers()
+        #endif
     }
 
     private func setupObservers() {

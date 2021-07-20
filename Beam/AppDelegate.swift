@@ -82,6 +82,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         #if DEBUG
         self.beamUIMenuGenerator = BeamUITestsMenuGenerator()
         prepareMenuForTestEnv()
+        NSApp.windowsMenu?.addItem(NSMenuItem(title: "Show TabGrouping",
+                                              action: #selector(showTabGroupingWindow(_:)),
+                                              keyEquivalent: ""))
         #endif
 
         syncData()

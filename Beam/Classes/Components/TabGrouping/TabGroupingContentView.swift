@@ -14,7 +14,10 @@ struct TabGroupingContentView: View {
     @ObservedObject var clusteringManager: ClusteringManager
 
     var body: some View {
-        ClusterSlidersView(clusteringManager: clusteringManager)
+        ClusterSlidersView(clusteringManager: clusteringManager,
+                           weightNavigation: clusteringManager.weightNavigation,
+                           weightText: clusteringManager.weightText,
+                           weightEntities: clusteringManager.weightEntities)
         ScrollView {
             VStack(alignment: .center) {
                 ZStack {
@@ -99,9 +102,9 @@ struct TabView_Previews: PreviewProvider {
 struct ClusterSlidersView: View {
     @ObservedObject var clusteringManager: ClusteringManager
 
-    @State private var weightNavigation = 0.5
-    @State private var weightText = 0.5
-    @State private var weightEntities = 0.5
+    @State var weightNavigation: Double
+    @State var weightText: Double
+    @State var weightEntities: Double
 
     var body: some View {
         HStack {
