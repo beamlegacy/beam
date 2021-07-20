@@ -125,17 +125,14 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         BeamNote.titleForNoteId = { id in
             guard let title = Self.idToTitle[id] else {
                 guard let title = self.documentManager.loadDocumentById(id: id)?.title else { return nil }
-                Self.titleToId[title] = id
-                Self.idToTitle[id] = title
+                Self.updateTitleIdNoteMapping(noteId: id, currentName: nil, newName: title)
                 return title
             }
             return title
         }
 
         $renamedNote.dropFirst().sink { (noteId, previousName, newName) in
-            Self.titleToId.removeValue(forKey: previousName)
-            Self.titleToId[newName] = noteId
-            Self.idToTitle[noteId] = newName
+            Self.updateTitleIdNoteMapping(noteId: noteId, currentName: previousName, newName: newName)
         }.store(in: &scope)
 
         updateNoteCount()
@@ -258,5 +255,19 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         }
 
         webView.configuration.websiteDataStore.httpCookieStore.add(self)
+    }
+}
+
+extension BeamData {
+    static func updateTitleIdNoteMapping(noteId: UUID, currentName: String?, newName: String?) {
+        if let currentName = currentName {
+            Self.titleToId.removeValue(forKey: currentName)
+        }
+        if let newName = newName {
+            Self.titleToId[newName] = noteId
+            Self.idToTitle[noteId] = newName
+        } else {
+            Self.idToTitle.removeValue(forKey: noteId)
+        }
     }
 }
