@@ -65,15 +65,19 @@ export class NoteInfo {
   title
 }
 
+export type MessagePayload = Record<string, unknown>
+
 export interface BeamMessageHandler {
-  postMessage(payload: any)
+  postMessage(message: MessagePayload, targetOrigin: string, transfer?: Transferable[]): void
 }
 
 export interface BeamWebkit {
   /**
    *
    */
-  messageHandlers: {}
+  messageHandlers: {
+    [name: string]: BeamMessageHandler
+  }
 }
 
 export interface BeamWindow extends BeamEventTarget {
@@ -126,7 +130,7 @@ export interface BeamWindow extends BeamEventTarget {
   getComputedStyle(el: BeamElement, pseudo?: string): CSSStyleDeclaration
 }
 
-export interface BeamLocation extends Location {}
+export type BeamLocation = Location
 
 export enum BeamNodeType {
   element = 1,
@@ -151,7 +155,7 @@ export interface BeamEventTarget<E extends BeamEvent = BeamEvent> {
   dispatchEvent(e: E)
 }
 
-export interface BeamDOMRect extends DOMRect {}
+export type BeamDOMRect = DOMRect
 
 export interface BeamNode extends BeamEventTarget {
   textContent: string
@@ -177,7 +181,7 @@ export interface BeamNode extends BeamEventTarget {
    */
   removeChild(el: BeamHTMLElement)
 
-  contains(el: BeamNode): Boolean
+  contains(el: BeamNode): boolean
 }
 
 export interface BeamParentNode extends BeamNode {
@@ -188,7 +192,7 @@ export interface BeamCharacterData extends BeamNode {
   data: string
 }
 
-export interface BeamText extends BeamCharacterData {}
+export type BeamText = BeamCharacterData
 
 export interface BeamElement extends BeamParentNode {
   dataset: any
@@ -250,7 +254,7 @@ export interface BeamElementCSSInlineStyle {
 export interface BeamHTMLElement extends BeamElement, BeamElementCSSInlineStyle {
   innerText: string
   nodeValue: any
-  dataset: {}
+  dataset: Record<string, string>
 }
 
 export interface BeamHTMLInputElement extends BeamHTMLElement {
@@ -340,7 +344,7 @@ export interface BeamRange {
   getBoundingClientRect(): DOMRect
 }
 
-export declare var BeamRange: {
+export declare const BeamRange: {
   prototype: BeamRange
   new (): BeamRange
   readonly END_TO_END: number
@@ -401,14 +405,14 @@ export interface BeamTextSelection {
    * @type {String}
    * @memberof TextSelection
    */
-  text: String
+  text: string
   /**
    * Selected HTML
    *
    * @type {String}
    * @memberof TextSelection
    */
-  html: String
+  html: string
   /**
    * Selected rectangles.
    *
@@ -418,14 +422,14 @@ export interface BeamTextSelection {
   areas: DOMRect[]
 }
 
-export interface BeamElementAreaMessage {
+export interface BeamElementAreaMessage extends MessagePayload {
   /**
    * Selected HTML
    *
    * @type {String}
    * @memberof BeamElementAreaMessage
    */
-  html: String
+  html: string
   /**
    * {x, y} of mouse location
    *
@@ -440,7 +444,7 @@ export interface BeamElementAreaMessage {
    * @memberof BeamElementMessagePayload
    */
   areas: BeamRect[]
-  quoteId: any
+  quoteId: string
 }
 
 export interface BeamSelectionMessagePayload extends BeamElementAreaMessage {
@@ -450,7 +454,7 @@ export interface BeamSelectionMessagePayload extends BeamElementAreaMessage {
    * @type {String}
    * @memberof BeamSelectionMessagePayload
    */
-  text: String
+  text: string
 }
 
 export interface BeamElementMessagePayload extends BeamElementAreaMessage {
@@ -467,7 +471,7 @@ export interface BeamElementMessagePayload extends BeamElementAreaMessage {
  * @interface BeamQuoteId
  * @extends {String}
  */
-export interface BeamQuoteId extends String {}
+export type BeamQuoteId = string
 
 /**
  * {x, y} of mouse location
@@ -530,7 +534,7 @@ export class BeamMutationObserver {
   disconnect(): void {
     throw new Error("Method not implemented.")
   }
-  observe(target: BeamNode, options?: MutationObserverInit): void {
+  observe(_target: BeamNode, _options?: MutationObserverInit): void {
     throw new Error("Method not implemented.")
   }
   takeRecords(): BeamMutationRecord[] {

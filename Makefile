@@ -100,6 +100,7 @@ swiftlint_rules:
 
 lint:
 	fastlane lint
+	yarn --cwd ./Beam/Classes/Components/PointAndShoot/Web run lint
 
 install_variable_injector:
 	git clone --depth 1 https://github.com/penso/variable-injector.git

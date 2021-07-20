@@ -14,7 +14,7 @@ import {
   BeamRect,
   BeamSelection,
   BeamText,
-  BeamWindow,
+  BeamWindow
 } from "../BeamTypes"
 import {BeamWindowMock} from "./BeamWindowMock"
 import {BeamEventTargetMock} from "./BeamEventTargetMock"
@@ -69,29 +69,29 @@ export class BeamNodeMock extends BeamEventTargetMock implements BeamNode {
     el.parentElement = null
   }
 
-  contains(el: BeamNode): Boolean {
+  contains(el: BeamNode): boolean {
     return (
-      this === el
-      || this.childNodes.some(
-        childNode => (
-          childNode === el || childNode.contains(el)
+        this === el
+        || this.childNodes.some(
+            childNode => (
+                childNode === el || childNode.contains(el)
+            )
         )
-      )
     )
   }
 
   get textContent(): string {
     const collectTextNodes = (node: BeamNode): string => {
       const text = node.childNodes.reduce(
-        (acc: string[], node) => {
-        if (node.nodeType === BeamNodeType.text) {
-          acc.push(`${node}`)
-        } else if (node.nodeType === BeamNodeType.element) {
-          acc.push(...collectTextNodes(node))
-        }
-        return acc
-      }, [])
-      return text.join('')
+          (acc: string[], node) => {
+            if (node.nodeType === BeamNodeType.text) {
+              acc.push(`${node}`)
+            } else if (node.nodeType === BeamNodeType.element) {
+              acc.push(...collectTextNodes(node))
+            }
+            return acc
+          }, [])
+      return text.join("")
     }
     return collectTextNodes(this)
   }
@@ -125,7 +125,7 @@ export class BeamNamedNodeMap extends Object implements NamedNodeMap {
   constructor(props = {}) {
     super()
     for (const p in props) {
-      if (props.hasOwnProperty(p)) {
+      if (Object.prototype.hasOwnProperty.call(props, p)) {
         const attr: Attr = {
           ATTRIBUTE_NODE: 0,
           CDATA_SECTION_NODE: 0,
@@ -146,16 +146,20 @@ export class BeamNamedNodeMap extends Object implements NamedNodeMap {
           PROCESSING_INSTRUCTION_NODE: 0,
           TEXT_NODE: 0,
           addEventListener(
-            type: string,
-            listener: EventListenerOrEventListenerObject | null,
-            options: boolean | AddEventListenerOptions | undefined
-          ): void {},
+              type: string,
+              listener: EventListenerOrEventListenerObject | null,
+              options: boolean | AddEventListenerOptions | undefined
+          ): void {
+            // TODO: Shouldn't we implement it?
+          },
           appendChild<T>(newChild: T): T {
+            // TODO: Shouldn't we implement it?
             return undefined
           },
           baseURI: "",
           childNodes: undefined,
           cloneNode(deep: boolean | undefined): Node {
+            // TODO: Shouldn't we implement it?
             return undefined
           },
           compareDocumentPosition(other: Node): number {
@@ -209,19 +213,23 @@ export class BeamNamedNodeMap extends Object implements NamedNodeMap {
             return undefined
           },
           removeEventListener(
-            type: string,
-            callback: EventListenerOrEventListenerObject | null,
-            options: EventListenerOptions | boolean | undefined
-          ): void {},
+              type: string,
+              callback: EventListenerOrEventListenerObject | null,
+              options: EventListenerOptions | boolean | undefined
+          ): void {
+            // TODO: Shouldn't we implement it?
+          },
           replaceChild<T>(newChild: Node, oldChild: T): T {
             return undefined
           },
           specified: false,
           textContent: undefined,
-          normalize(): void {},
+          normalize(): void {
+            // TODO: Shouldn't we implement it?
+          },
           name: p,
           localName: p,
-          value: props[p],
+          value: props[p]
         }
         this.setNamedItem(attr)
       }
@@ -278,7 +286,8 @@ export class BeamNamedNodeMap extends Object implements NamedNodeMap {
 }
 
 export class BeamHTMLCollection<E extends BeamElement = BeamElement> /*implements HTMLCollection*/ {
-  constructor(private values: E[]) {}
+  constructor(private values: E[]) {
+  }
 
   [index: number]: E
 
@@ -300,7 +309,8 @@ export class BeamHTMLCollection<E extends BeamElement = BeamElement> /*implement
 }
 
 export class BeamDOMRectList implements DOMRectList {
-  constructor(private list: DOMRect[]) {}
+  constructor(private list: DOMRect[]) {
+  }
 
   [index: number]: DOMRect
 
@@ -339,24 +349,25 @@ export class BeamElementMock extends BeamNodeMock implements BeamElement, BeamEl
   style: CSSStyleDeclaration
   attributes: NamedNodeMap
   classList: DOMTokenList
-  clientLeft: number = 0
-  clientTop: number = 0
-  offsetLeft: number = 0
-  offsetTop: number = 0
+  clientLeft = 0
+  clientTop = 0
+  offsetLeft = 0
+  offsetTop = 0
   offsetParent: BeamElement
-  scrollLeft: number = 0
-  scrollTop: number = 0
+  scrollLeft = 0
+  scrollTop = 0
 
   scrollHeight: number
   scrollWidth: number
 
-  _height: number = 0
-  _width: number = 0
+  _height = 0
+  _width = 0
 
   constructor(readonly tagName: string, attributes: NamedNodeMap = new BeamNamedNodeMap(), props = {}) {
     super(tagName, BeamNodeType.element)
     this.attributes = attributes
   }
+
   dataset: any
 
   set width(value: number) {
@@ -424,7 +435,7 @@ export class BeamElementMock extends BeamNodeMock implements BeamElement, BeamEl
 
 export class BeamHTMLElementMock extends BeamElementMock implements BeamHTMLElement {
   dataset = {
-    "beam-mock": "uuid-uuid-uuid-uuid",
+    "beam-mock": "uuid-uuid-uuid-uuid"
   }
 
   constructor(nodeName: string, attributes = {}) {
@@ -449,7 +460,7 @@ export class BeamHTMLElementMock extends BeamElementMock implements BeamHTMLElem
 export class BeamHTMLInputElementMock extends BeamHTMLElementMock implements BeamHTMLInputElement {
   value: string
 
-  get type():string {
+  get type(): string {
     const attribute = this.attributes.getNamedItem("type")
     return attribute?.value
   }
@@ -469,60 +480,76 @@ export class BeamSelectionMock implements BeamSelection {
     this.anchorNode = new BeamElementMock(nodeName)
     this.focusNode = new BeamElementMock(nodeName)
   }
+
   anchorNode: BeamNode
   focusNode: BeamNode
   anchorOffset: 0
   focusOffset: 0
   isCollapsed: false
-  rangeCount: number = 0
+  rangeCount = 0
   type: "Range"
   caretBidiLevel: 0
   private rangelist: BeamRange[] = []
+
   addRange(range: BeamRange): void {
     this.anchorNode = range.startContainer
     this.focusNode = range.endContainer
     this.rangelist.push(range)
     this.rangeCount++
   }
+
   collapse(node: BeamNode, offset?: number): void {
     throw new Error("Method not implemented.")
   }
+
   collapseToEnd(): void {
     throw new Error("Method not implemented.")
   }
+
   collapseToStart(): void {
     throw new Error("Method not implemented.")
   }
+
   containsNode(node: BeamNode, allowPartialContainment?: boolean): boolean {
     throw new Error("Method not implemented.")
   }
+
   deleteFromDocument(): void {
     throw new Error("Method not implemented.")
   }
+
   empty(): void {
     throw new Error("Method not implemented.")
   }
+
   extend(node: BeamNode, offset?: number): void {
     throw new Error("Method not implemented.")
   }
+
   getRangeAt(index: number): BeamRange {
     return this.rangelist[index]
   }
+
   removeAllRanges(): void {
     throw new Error("Method not implemented.")
   }
+
   removeRange(range: BeamRange): void {
     throw new Error("Method not implemented.")
   }
+
   selectAllChildren(node: BeamNode): void {
     throw new Error("Method not implemented.")
   }
+
   setBaseAndExtent(anchorNode: BeamNode, anchorOffset: number, focusNode: BeamNode, focusOffset: number): void {
     throw new Error("Method not implemented.")
   }
+
   setPosition(node: BeamNode, offset?: number): void {
     throw new Error("Method not implemented.")
   }
+
   toString(): string {
     return ""
   }
@@ -536,6 +563,7 @@ export class BeamHTMLIFrameElementMock extends BeamHTMLElementMock implements Be
   constructor(attributes: NamedNodeMap = new BeamNamedNodeMap()) {
     super("iframe", attributes)
   }
+
   nodeValue: any
 
   /**
@@ -547,7 +575,7 @@ export class BeamHTMLIFrameElementMock extends BeamHTMLElementMock implements Be
     const win = this.contentWindow as BeamWindowMock
     win.scroll(0, win.scrollY + delta)
     const scrollEvent = new BeamUIEvent()
-    Object.assign(scrollEvent, { name: "scroll" })
+    Object.assign(scrollEvent, {name: "scroll"})
     win.pns.onScroll(scrollEvent)
   }
 }
@@ -556,69 +584,90 @@ export class BeamRangeMock implements BeamRange {
   cloneRange(): BeamRange {
     throw new Error("Method not implemented.")
   }
+
   collapse(toStart?: boolean): void {
     throw new Error("Method not implemented.")
   }
+
   compareBoundaryPoints(how: number, sourceRange: BeamRange): number {
     throw new Error("Method not implemented.")
   }
+
   comparePoint(node: BeamNode, offset: number): number {
     throw new Error("Method not implemented.")
   }
+
   createContextualFragment(fragment: string): DocumentFragment {
     throw new Error("Method not implemented.")
   }
+
   deleteContents(): void {
     throw new Error("Method not implemented.")
   }
+
   detach(): void {
     throw new Error("Method not implemented.")
   }
+
   extractContents(): DocumentFragment {
     throw new Error("Method not implemented.")
   }
+
   getClientRects(): BeamDOMRectList {
     const rect = new BeamDOMRectMock(0, 0, 0, 0)
     return new BeamDOMRectList([rect])
   }
+
   insertNode(node: BeamNode): void {
     throw new Error("Method not implemented.")
   }
+
   intersectsNode(node: BeamNode): boolean {
     throw new Error("Method not implemented.")
   }
+
   isPointInRange(node: BeamNode, offset: number): boolean {
     throw new Error("Method not implemented.")
   }
+
   selectNodeContents(node: BeamNode): void {
     throw new Error("Method not implemented.")
   }
+
   setEnd(node: BeamNode, offset: number): void {
     this.endOffset = offset
     this.endContainer = node
   }
+
   setEndAfter(node: BeamNode): void {
     throw new Error("Method not implemented.")
   }
+
   setEndBefore(node: BeamNode): void {
     throw new Error("Method not implemented.")
   }
+
   setStart(node: BeamNode, offset: number): void {
     this.startOffset = offset
     this.startContainer = node
   }
+
   setStartAfter(node: BeamNode): void {
     throw new Error("Method not implemented.")
   }
+
   setStartBefore(node: BeamNode): void {
     throw new Error("Method not implemented.")
   }
+
   surroundContents(newParent: BeamNode): void {
     throw new Error("Method not implemented.")
   }
+
   toString(): string {
     return "mock range content"
   }
+
   END_TO_END: number
   END_TO_START: number
   START_TO_END: number
@@ -629,9 +678,11 @@ export class BeamRangeMock implements BeamRange {
   startContainer: BeamNode
   startOffset: number
   commonAncestorContainer: BeamNode
+
   cloneContents(): DocumentFragment {
     return this.startContainer as any
   }
+
   private node: BeamNode
 
   getBoundingClientRect(): DOMRect {
@@ -641,7 +692,7 @@ export class BeamRangeMock implements BeamRange {
       left: 0,
       right: 0,
       top: 0,
-      toJSON: () => "toJSON value not implemented",
+      toJSON: () => "toJSON value not implemented"
     }
   }
 
@@ -682,14 +733,18 @@ export class BeamDocumentMock extends BeamNodeMock implements BeamDocument {
   /**
    * @param tag {string}
    */
-  createElement(tag) {}
+  createElement(tag) {
+    // TODO: Shouldn't we implement it?
+  }
 
   /**
    *
    * @param eventName {String}
    * @param cb {Function}
    */
-  addEventListener(eventName, cb) {}
+  addEventListener(eventName, cb) {
+    // TODO: Shouldn't we implement it?
+  }
 
   /**
    * @return {BeamSelection}
@@ -723,27 +778,33 @@ export class BeamLocationMock implements BeamLocation {
   constructor(attributes = {}) {
     Object.assign(this, attributes)
   }
+
   ancestorOrigins: DOMStringList
   hash: string
   host: string
   hostname: string
   href: string
+
   toString(): string {
     throw new Error("Method not implemented.")
   }
+
   origin: string
   pathname: string
   port: string
   protocol: string
   search: string
+
   assign(url: string): void {
     throw new Error("Method not implemented.")
   }
+
   reload(): void
   reload(forcedReload: boolean): void
   reload(forcedReload?: any) {
     throw new Error("Method not implemented.")
   }
+
   replace(url: string): void {
     throw new Error("Method not implemented.")
   }
@@ -758,9 +819,13 @@ export class BeamUIEvent {
    */
   target
 
-  preventDefault() {}
+  preventDefault() {
+    // TODO: Shouldn't we implement it?
+  }
 
-  stopPropagation() {}
+  stopPropagation() {
+    // TODO: Shouldn't we implement it?
+  }
 }
 
 export class BeamMouseEvent extends BeamUIEvent {

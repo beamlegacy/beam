@@ -50,7 +50,7 @@ export class WebEvents<UI extends WebEventsUI> {
     const target = this.win.document.querySelector(query) as unknown as BeamNode
     const options = {
       attributes: true,
-      attributeFilter: ["style"],
+      attributeFilter: ["style"]
     }
     this.mutationObserver.observe(target, options)
   }
@@ -81,8 +81,8 @@ export class WebEvents<UI extends WebEventsUI> {
    * The document zoom level is used in webkit for macOS < 11.0
    */
   getScale(): number {
-    let zoom = this.getZoomLevel() || 1
-    let scale = this.win.visualViewport.scale
+    const zoom = this.getZoomLevel() || 1
+    const scale = this.win.visualViewport.scale
     return Number(zoom) * scale
   }
 
@@ -102,7 +102,7 @@ export class WebEvents<UI extends WebEventsUI> {
     return zoomLevel
   }
 
-  zoomMutationCallback(mutationRecords, self) {
+  zoomMutationCallback(mutationRecords, self): void {
     mutationRecords.map((mutationRecord) => {
       if (mutationRecord.attributeName == "style") {
         const resizeInfo = self.resizeInfo()
@@ -111,7 +111,7 @@ export class WebEvents<UI extends WebEventsUI> {
     })
   }
 
-  checkFrames() {
+  checkFrames(): void {
     const framesInfo = this.getFramesInfo()
     this.ui.setFramesInfo(framesInfo)
   }
@@ -128,8 +128,8 @@ export class WebEvents<UI extends WebEventsUI> {
           x: bounds.x,
           y: bounds.y,
           width: bounds.width,
-          height: bounds.height,
-        },
+          height: bounds.height
+        }
       }
       framesInfo.push(frameInfo)
     }
@@ -140,8 +140,8 @@ export class WebEvents<UI extends WebEventsUI> {
         x: 0,
         y: 0,
         width: this.win.innerWidth,
-        height: this.win.innerHeight,
-      },
+        height: this.win.innerHeight
+      }
     })
     return framesInfo
   }
@@ -172,7 +172,7 @@ export class WebEvents<UI extends WebEventsUI> {
       y: this.win.scrollY,
       width: scrollWidth,
       height: scrollHeight,
-      scale: this.getScale(),
+      scale: this.getScale()
     }
     this.ui.setScrollInfo(scrollInfo)
   }
@@ -202,7 +202,7 @@ export class WebEvents<UI extends WebEventsUI> {
       pageLeft: vv.pageLeft,
       width: vv.width,
       height: vv.height,
-      scale: this.getScale(),
+      scale: this.getScale()
     })
   }
 

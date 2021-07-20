@@ -1,6 +1,6 @@
-import { BeamCollectedQuote } from "./BeamTypes";
+import {BeamCollectedQuote} from "./BeamTypes"
 import {PointAndShootUI} from "./PointAndShootUI"
-import {WebEventsUI_web} from "./WebEventsUI_web";
+import {WebEventsUI_web} from "./WebEventsUI_web"
 import {BeamHTMLElement} from "./BeamTypes"
 
 export class PointAndShootUI_web extends WebEventsUI_web implements PointAndShootUI {
@@ -95,15 +95,19 @@ export class PointAndShootUI_web extends WebEventsUI_web implements PointAndShoo
     super(win)
     this.log(`${this.toString()} instantiated`)
   }
+
   cursor(x: any, y: any) {
-    throw new Error("Method not implemented.");
+    throw new Error("Method not implemented.")
   }
+
   select(selection: BeamCollectedQuote[]) {
-    throw new Error("Method not implemented.");
+    throw new Error("Method not implemented.")
   }
+
   unselect(selection: any) {
-    throw new Error("Method not implemented.");
+    throw new Error("Method not implemented.")
   }
+
   getMouseLocation(_el: any, _x: any, _y: any) {
     // not used in web
   }
@@ -115,7 +119,7 @@ export class PointAndShootUI_web extends WebEventsUI_web implements PointAndShoo
 
   unpoint(el) {
     el.classList.remove(this.pointClass)
-    el.style.cursor = ``
+    el.style.cursor = ""
     this.leaveSelection()
   }
 
@@ -129,7 +133,9 @@ export class PointAndShootUI_web extends WebEventsUI_web implements PointAndShoo
     }
     this.hidePopup()  // Hide previous, if any
     // TODO: remove submitCB completely 
-    this.showPopup(el, x, y, () => {})
+    this.showPopup(el, x, y, () => {
+      // Nothing to do here
+    })
   }
 
   unshoot(el: BeamHTMLElement) {
@@ -221,14 +227,14 @@ export class PointAndShootUI_web extends WebEventsUI_web implements PointAndShoo
   }
 
   cardToProposal(c, txt, proposals) {
-    let title = c.title
-    let matchPos = title.toLowerCase().indexOf(txt)
+    const title = c.title
+    const matchPos = title.toLowerCase().indexOf(txt)
     if (matchPos >= 0) {
       let value = `${title.substr(0, matchPos)}<b>${title.substr(
           matchPos,
           txt.length
       )}</b>${title.substr(matchPos + txt.length)}`
-      let hint = c.hint
+      const hint = c.hint
       if (hint) {
         value += ` <span class="hint">${hint}</span>`
       }
@@ -276,7 +282,7 @@ export class PointAndShootUI_web extends WebEventsUI_web implements PointAndShoo
     if (!this.inputTouched) {
       input.value = ev.data
     }
-    let inputValue = input.value
+    const inputValue = input.value
     let possibles = this.existingCards
     if (inputValue) {
       input.value =
@@ -344,7 +350,7 @@ export class PointAndShootUI_web extends WebEventsUI_web implements PointAndShoo
     `
     this.popupAnchor.append(this.popup)
 
-    const form = this.popup.querySelector(`form`)
+    const form = this.popup.querySelector("form")
     form.addEventListener("submit", () => this.submit(submitCb))
     const cardInput = this.popup.querySelector(`#${this.cardInputId}`)
     cardInput.addEventListener("keydown", (ev) => this.cardKeyDown(ev, submitCb))

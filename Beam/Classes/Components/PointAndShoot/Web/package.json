@@ -13,6 +13,7 @@
     "watch": "webpack --watch --mode=development",
     "start": "webpack serve --mode=development",
     "dist": "webpack --mode=production",
+    "lint": "eslint **/*.ts --format gitlab .",
     "test": "node --experimental-vm-modules node_modules/.bin/jest --reporters=default",
     "test-ci": "node --experimental-vm-modules node_modules/.bin/jest --ci --reporters=default --reporters=jest-junit --coverage"
   },
@@ -45,14 +46,17 @@
     "style-loader": "^2.0.0",
     "sass": "1.32.8",
     "sass-loader": "^11.0.1",
-    "prettier": "^2.3.0",
     "typescript": "^4.3.2",
     "ts-loader": "^9.1.0",
     "ts-jest": "^26.5.5",
     "webpack": "^5.35.1",
     "webpack-cli": "4.6.0",
     "webpack-dev-server": "^3.11.2",
-    "uuid": "^8.3.2"
+    "uuid": "^8.3.2",
+    "@typescript-eslint/parser": "^4.28.4",
+    "@typescript-eslint/eslint-plugin": "^4.28.4",
+    "eslint": "^7.31.0",
+    "eslint-formatter-gitlab": "^2.2.0"
   },
   "browserslist": [
     "safari 13"

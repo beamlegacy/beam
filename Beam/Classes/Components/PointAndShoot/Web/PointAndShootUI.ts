@@ -31,7 +31,7 @@ export interface PointAndShootUI extends WebEventsUI {
    * @param el {HTMLElement}
    * @memberof PointAndShootUI
    */
-  unpoint(el)
+  unpoint(el): void
 
   /**
    * Select HTML selection to be drawn
@@ -47,7 +47,7 @@ export interface PointAndShootUI extends WebEventsUI {
    * @param {*} selection
    * @memberof PointAndShootUI
    */
-  unselect(selection)
+  unselect(selection): void
 
   /**
    * Select an HTML element to be added to a card.
@@ -73,14 +73,14 @@ export interface PointAndShootUI extends WebEventsUI {
    * @param el {BeamHTMLElement}
    * @memberof PointAndShootUI
    */
-  unshoot(el: BeamHTMLElement)
+  unshoot(el: BeamHTMLElement): void
 
   /**
    * Hide popup ui
    *
    * @memberof PointAndShootUI
    */
-  hidePopup()
+  hidePopup(): void
 
   /**
    * Show status

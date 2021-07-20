@@ -91,7 +91,7 @@ xctests UI:
 
 js_test:
   stage: test
-  image: node:15.12.0
+  image: node:16-alpine
   cache:
     key: .yarn-cache
   before_script:
@@ -106,6 +106,7 @@ js_test:
   artifacts:
     reports:
       junit: ./Beam/Classes/Components/PointAndShoot/Web/junit.xml
+      codequality: gl-codequality.json
   interruptible: true
 
 coverage_check:
