@@ -276,10 +276,10 @@ class DatabaseManager {
         // Server side doesn't store milliseconds for updatedAt and createdAt.
         // Local coredata does, rounding using Int() to compare them
 
-        return Int(database.updated_at.timeIntervalSince1970) == Int(databaseStruct.updatedAt.timeIntervalSince1970) &&
-            Int(database.created_at.timeIntervalSince1970) == Int(databaseStruct.createdAt.timeIntervalSince1970) &&
+        database.updated_at.intValue == databaseStruct.updatedAt.intValue &&
+            database.created_at.intValue == databaseStruct.createdAt.intValue &&
             database.title == databaseStruct.title &&
-            database.deleted_at == databaseStruct.deletedAt &&
+            database.deleted_at?.intValue == databaseStruct.deletedAt?.intValue &&
             database.id == databaseStruct.id
     }
 }
@@ -1079,6 +1079,12 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
         return try BeamObjectManagerDelegate().structsAsBeamObjects(structs)
     }
 
+    internal func updatedDatabaseStructs(_ databaseStructs: [DatabaseStruct]) -> [DatabaseStruct] {
+        databaseStructs.filter {
+            $0.previousChecksum != $0.checksum || $0.previousChecksum == nil
+        }
+    }
+
     func saveAllOnBeamObjectApi(_ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             completion(.success(false))
@@ -1112,6 +1118,7 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
         return networkTask
     }
 
+    @discardableResult
     func saveOnBeamObjectsAPI(_ objects: [BeamObjectProtocol],
                               _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
         guard let databaseStructs = objects as? [DatabaseStruct] else {
@@ -1129,23 +1136,24 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
             return nil
         }
 
-        let beamObjects = try databaseStructsAsBeamObjects(databaseStructs)
+        let databaseStructsToSave = updatedDatabaseStructs(databaseStructs)
 
-        guard !beamObjects.isEmpty else {
+        guard !databaseStructsToSave.isEmpty else {
             completion(.success(true))
             return nil
         }
 
         let objectManager = BeamObjectManager()
 
-        return try objectManager.saveToAPI(beamObjects) { result in
+        return try objectManager.saveToAPI(databaseStructsToSave) { result in
             switch result {
             case .failure(let error):
-                Logger.shared.logError("Could not save all \(beamObjects): \(error.localizedDescription)",
+                Logger.shared.logError("Could not save all \(databaseStructsToSave): \(error.localizedDescription)",
                                        category: .databaseNetwork)
                 self.saveOnBeamObjectsAPIFailure(databaseStructs, error, completion)
-            case .success(let updateBeamObjects):
-                self.saveOnBeamObjectsAPISuccess(updateBeamObjects, completion)
+            case .success:
+                break
+                // self.saveOnBeamObjectsAPISuccess(databaseStructsToSave, completion)
             }
         }
     }
@@ -1206,7 +1214,7 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
         }
     }
 
-    internal func saveOnBeamObjectsAPISuccess(_ updateBeamObjects: [BeamObject],
+    internal func saveOnBeamObjectsAPISuccess(_ updateBeamObjects: [DatabaseStruct],
                                               _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
         Logger.shared.logDebug("Saved \(updateBeamObjects.count) objects on the BeamObject API",
                                category: .databaseNetwork)
@@ -1219,7 +1227,7 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
                 }
 
                 // TODO: store previous data sent for improved 3-ways merge?
-                databaseCoreData.beam_object_previous_checksum = updateBeamObject.dataChecksum
+                databaseCoreData.beam_object_previous_checksum = updateBeamObject.previousChecksum
             }
 
             do {
@@ -1248,8 +1256,8 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
             switch result {
             case .failure(let error):
                 self.saveOnBeamObjectAPIFailure(databaseStruct, error, completion)
-            case .success(let updateBeamObject):
-                self.saveOnBeamObjectsAPISuccess([updateBeamObject], completion)
+            case .success:
+                self.saveOnBeamObjectsAPISuccess([databaseStruct], completion)
             }
         }
     }

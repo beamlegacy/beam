@@ -228,6 +228,7 @@
 		5224CD8C26860C0900D4179E /* BeamObjectManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5224CD8B26860C0900D4179E /* BeamObjectManager.swift */; };
 		522AFB2825CBFAB100F60647 /* DocumentManagerTestsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 522AFB2725CBFAB100F60647 /* DocumentManagerTestsHelper.swift */; };
 		522B17C82684E11E00741F94 /* String+SHA256.swift in Sources */ = {isa = PBXBuildFile; fileRef = 522B17C72684E11E00741F94 /* String+SHA256.swift */; };
+		522BC3D726A6EAEE0018B51E /* Date+IntValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 522BC3D626A6EAEE0018B51E /* Date+IntValue.swift */; };
 		523416A22629D465001F306F /* BeamCoreDataObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 523416A12629D465001F306F /* BeamCoreDataObject.swift */; };
 		523A32CF267764A200606768 /* EnvironmentVariables.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52B9A38B264562E60063AEEF /* EnvironmentVariables.swift */; };
 		523FF66125C31D8800B4BD6E /* Data+String.swift in Sources */ = {isa = PBXBuildFile; fileRef = 523FF66025C31D8800B4BD6E /* Data+String.swift */; };
@@ -714,13 +715,6 @@
 			remoteGlobalIDString = 331E18A62640351200C4593E;
 			remoteInfo = AutoUpdateDemo;
 		};
-		33B2744B264C0CDC00A318CD /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 33B27441264C0CDB00A318CD /* AutoUpdate.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 331E18C326404D3C00C4593E;
-			remoteInfo = AutoUpdateTests;
-		};
 		33B2744D264C0CDC00A318CD /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 33B27441264C0CDB00A318CD /* AutoUpdate.xcodeproj */;
@@ -741,6 +735,13 @@
 			proxyType = 2;
 			remoteGlobalIDString = 33EBA55D264ABD3E00369730;
 			remoteInfo = AppFeedBuilder;
+		};
+		522BC3DD26A6EAEF0018B51E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 33B27441264C0CDB00A318CD /* AutoUpdate.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 3397C6F7269DD9540092FDD7;
+			remoteInfo = AutoUpdateFrameworkTests;
 		};
 		96319D192616232700D1CF31 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -1076,6 +1077,7 @@
 		5224CD8B26860C0900D4179E /* BeamObjectManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamObjectManager.swift; sourceTree = "<group>"; };
 		522AFB2725CBFAB100F60647 /* DocumentManagerTestsHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentManagerTestsHelper.swift; sourceTree = "<group>"; };
 		522B17C72684E11E00741F94 /* String+SHA256.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+SHA256.swift"; sourceTree = "<group>"; };
+		522BC3D626A6EAEE0018B51E /* Date+IntValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+IntValue.swift"; sourceTree = "<group>"; };
 		523416A12629D465001F306F /* BeamCoreDataObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamCoreDataObject.swift; sourceTree = "<group>"; };
 		523FF66025C31D8800B4BD6E /* Data+String.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data+String.swift"; sourceTree = "<group>"; };
 		523FF67825C31D9D00B4BD6E /* String+Data.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Data.swift"; sourceTree = "<group>"; };
@@ -1786,10 +1788,10 @@
 			isa = PBXGroup;
 			children = (
 				33B2744A264C0CDC00A318CD /* AutoUpdateDemo.app */,
-				33B2744C264C0CDC00A318CD /* AutoUpdateTests.xctest */,
 				33B2744E264C0CDC00A318CD /* UpdateInstaller.xpc */,
 				33B27450264C0CDC00A318CD /* AutoUpdate.framework */,
 				33B27452264C0CDC00A318CD /* AppFeedBuilder */,
+				522BC3DE26A6EAEF0018B51E /* AutoUpdateFrameworkTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -2960,6 +2962,7 @@
 				964FE5B62624813E00966E03 /* RandomAccessCollection+BinarySearch.swift */,
 				964FE64C262D8ED300966E03 /* Dictionary+valuesMatchingKeys.swift */,
 				0D45BA2E26949EF100D4E8A5 /* DispatchTime+Chrono.swift */,
+				522BC3D626A6EAEE0018B51E /* Date+IntValue.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -3698,13 +3701,6 @@
 			remoteRef = 33B27449264C0CDC00A318CD /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		33B2744C264C0CDC00A318CD /* AutoUpdateTests.xctest */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = AutoUpdateTests.xctest;
-			remoteRef = 33B2744B264C0CDC00A318CD /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
 		33B2744E264C0CDC00A318CD /* UpdateInstaller.xpc */ = {
 			isa = PBXReferenceProxy;
 			fileType = "wrapper.xpc-service";
@@ -3724,6 +3720,13 @@
 			fileType = "compiled.mach-o.executable";
 			path = AppFeedBuilder;
 			remoteRef = 33B27451264C0CDC00A318CD /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		522BC3DE26A6EAEF0018B51E /* AutoUpdateFrameworkTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = AutoUpdateFrameworkTests.xctest;
+			remoteRef = 522BC3DD26A6EAEF0018B51E /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		A02FD6E72665180C00EBE17E /* Clustering.framework */ = {
@@ -4028,6 +4031,7 @@
 				96319D472616233E00D1CF31 /* String+Data.swift in Sources */,
 				523A32CF267764A200606768 /* EnvironmentVariables.swift in Sources */,
 				9609AF502617159B00322141 /* URL+Beam.swift in Sources */,
+				522BC3D726A6EAEE0018B51E /* Date+IntValue.swift in Sources */,
 				96319D3D2616233E00D1CF31 /* BeamText+String.swift in Sources */,
 				96319D372616233E00D1CF31 /* String+LoremIpsum.swift in Sources */,
 				8AB44AAC267CD3AB00D18B65 /* String+Slice.swift in Sources */,

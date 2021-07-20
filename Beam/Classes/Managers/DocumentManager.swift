@@ -452,15 +452,15 @@ public class DocumentManager: NSObject {
         // Server side doesn't store milliseconds for updatedAt and createdAt.
         // Local coredata does, rounding using Int() to compare them
 
-        return Int(document.updated_at.timeIntervalSince1970) == Int(updatedAt.timeIntervalSince1970) &&
-            Int(document.created_at.timeIntervalSince1970) == Int(createdAt.timeIntervalSince1970) &&
+        return document.updated_at.intValue == updatedAt.intValue &&
+            document.created_at.intValue == createdAt.intValue &&
             document.title == documentApiType.title &&
             document.data == documentApiType.data?.asData &&
             document.is_public == documentApiType.isPublic &&
             document.database_id.uuidString.lowercased() == documentApiType.database?.id &&
             document.beam_api_data == documentApiType.data?.asData &&
             document.document_type == documentTypeInt &&
-            document.deleted_at == documentApiType.deletedAt &&
+            document.deleted_at?.intValue == documentApiType.deletedAt?.intValue &&
             document.id.uuidString.lowercased() == documentApiType.id
     }
 
@@ -468,14 +468,14 @@ public class DocumentManager: NSObject {
         // Server side doesn't store milliseconds for updatedAt and createdAt.
         // Local coredata does, rounding using Int() to compare them
 
-        return Int(document.updated_at.timeIntervalSince1970) == Int(documentStruct.updatedAt.timeIntervalSince1970) &&
-            Int(document.created_at.timeIntervalSince1970) == Int(documentStruct.createdAt.timeIntervalSince1970) &&
+        return document.updated_at.intValue == documentStruct.updatedAt.intValue &&
+            document.created_at.intValue == documentStruct.createdAt.intValue &&
             document.title == documentStruct.title &&
             document.data == documentStruct.data &&
             document.is_public == documentStruct.isPublic &&
             document.database_id == documentStruct.databaseId &&
             document.document_type == documentStruct.documentType.rawValue &&
-            document.deleted_at == documentStruct.deletedAt &&
+            document.deleted_at?.intValue == documentStruct.deletedAt?.intValue &&
             document.id == documentStruct.id
     }
 

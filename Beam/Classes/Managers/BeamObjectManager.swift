@@ -175,7 +175,7 @@ class BeamObjectManager {
 // MARK: - Foundation
 extension BeamObjectManager {
     func saveToAPI<T: BeamObjectProtocol>(_ objects: [T],
-                                          _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
+                                          _ completion: @escaping ((Swift.Result<[T], Error>) -> Void)) throws -> URLSessionTask? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw BeamObjectManagerError.notAuthenticated
         }
@@ -189,11 +189,25 @@ extension BeamObjectManager {
             switch result {
             case .failure(let error):
                 self.saveToAPIBeamObjectsFailure(objects, error, completion)
-            case .success:
+            case .success(let remoteBeamObjects):
                 // Not: we can't decode the remote `BeamObject` as that would require to fetch all details back from
-                // the API when saving. We only return Bool.
+                // the API when saving.
 
-                completion(.success(true))
+                do {
+                    // Caller will need to store those previousCheckum into its data storage, we must return it
+                    let savedObjects: [T] = try beamObjects.map {
+                        var remoteObject: T = try $0.decodeBeamObject()
+                        remoteObject.previousChecksum = remoteBeamObjects.first(where: {
+                            $0.id == remoteObject.beamObjectId
+                        })?.dataChecksum
+
+                        return remoteObject
+                    }
+
+                    completion(.success(savedObjects))
+                } catch {
+                    completion(.failure(error))
+                }
             }
         }
 
@@ -216,7 +230,13 @@ extension BeamObjectManager {
             case .failure(let error):
                 self.saveToAPIBeamObjectsFailure(beamObjects, error, completion)
             case .success(let updateBeamObjects):
-                completion(.success(updateBeamObjects))
+                let savedBeamObjects: [BeamObject] = updateBeamObjects.map {
+                    let result = $0.copy()
+                    result.previousChecksum = $0.dataChecksum
+                    return result
+                }
+
+                completion(.success(savedBeamObjects))
             }
         }
 
@@ -229,7 +249,7 @@ extension BeamObjectManager {
     /// Will look at each errors, and fetch remote object to include it in the completion if it was a checksum error
     internal func saveToAPIBeamObjectsFailure<T: BeamObjectProtocol>(_ beamObjects: [T],
                                                                      _ error: Error,
-                                                                     _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
+                                                                     _ completion: @escaping ((Swift.Result<[T], Error>) -> Void)) {
         Logger.shared.logError("Could not save \(beamObjects): \(error.localizedDescription)",
                                category: .beamObject)
 
@@ -317,7 +337,7 @@ extension BeamObjectManager {
     // swiftlint:disable:next cyclomatic_complexity function_body_length
     internal func saveToAPIFailureAPIErrors<T: BeamObjectProtocol>(_ objects: [T],
                                                                    _ errors: [UserErrorData],
-                                                                   _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws {
+                                                                   _ completion: @escaping ((Swift.Result<[T], Error>) -> Void)) throws {
         // We have multiple errors, we're going to fetch each beamObject on the server side to include them in
         // the error we'll return to the object calling this manager
         let group = DispatchGroup()
@@ -443,7 +463,7 @@ extension BeamObjectManager {
     }
 
     func saveToAPI<T: BeamObjectProtocol>(_ object: T,
-                                          _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
+                                          _ completion: @escaping ((Swift.Result<T, Error>) -> Void)) throws -> URLSessionTask? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw BeamObjectManagerError.notAuthenticated
         }
@@ -456,10 +476,18 @@ extension BeamObjectManager {
 
         let sessionTask = try request.save(beamObject) { requestResult in
             switch requestResult {
-            case .success:
+            case .success(let remoteBeamObject):
                 // Not: we can't decode the remote `BeamObject` as that would require to fetch all details back from
-                // the API when saving. We only return Bool.
-                completion(.success(true))
+                // the API when saving. We're decoding back what we sent, and set `previousChecksum` as the caller needs
+                // to persist it
+                do {
+                    var savedObject: T = try beamObject.decodeBeamObject()
+                    savedObject.previousChecksum = remoteBeamObject.dataChecksum
+
+                    completion(.success(savedObject))
+                } catch {
+                    completion(.failure(error))
+                }
             case .failure(let error):
                 Logger.shared.logError("Could not save \(beamObject): \(error.localizedDescription)",
                                        category: .beamObjectNetwork)
@@ -509,7 +537,9 @@ extension BeamObjectManager {
         let sessionTask = try request.save(beamObject) { requestResult in
             switch requestResult {
             case .success(let updateBeamObject):
-                completion(.success(updateBeamObject))
+                let savedBeamObject = updateBeamObject.copy()
+                savedBeamObject.previousChecksum = updateBeamObject.dataChecksum
+                completion(.success(savedBeamObject))
             case .failure(let error):
                 Logger.shared.logError("Could not save \(beamObject): \(error.localizedDescription)",
                                        category: .beamObjectNetwork)

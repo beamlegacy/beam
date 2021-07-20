@@ -1,4 +1,5 @@
 import Foundation
+import BeamCore
 
 struct DatabaseStruct: BeamObjectProtocol {
     static var beamObjectTypeName: String { "database" }
@@ -67,7 +68,15 @@ extension DatabaseStruct {
 
 extension DatabaseStruct: Equatable {
     static public func == (lhs: DatabaseStruct, rhs: DatabaseStruct) -> Bool {
-        lhs.id == rhs.id
+
+        // Server side doesn't store milliseconds for updatedAt and createdAt.
+        // Local coredata does, rounding using Int() to compare them
+
+        lhs.id == rhs.id &&
+            lhs.title == rhs.title &&
+            lhs.createdAt.intValue == rhs.createdAt.intValue &&
+            lhs.updatedAt.intValue == rhs.updatedAt.intValue &&
+            lhs.deletedAt?.intValue == rhs.deletedAt?.intValue
     }
 }
 

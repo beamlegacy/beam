@@ -19,12 +19,15 @@ class DatabaseManagerNetworkTests: QuickSpec {
 
         beforeEach {
             Configuration.encryptionEnabled = true
+            Configuration.beamObjectAPIEnabled = false
 
             sut = DatabaseManager()
             BeamTestsHelper.logout()
             sut.deleteAll(includedRemote: false) { _ in }
 
             beamHelper.beginNetworkRecording()
+//            beamHelper.disableNetworkRecording()
+
             helper = DocumentManagerTestsHelper(documentManager: DocumentManager(),
                                                 coreDataManager: CoreDataManager.shared)
 
@@ -511,6 +514,105 @@ class DatabaseManagerNetworkTests: QuickSpec {
                     let count = Database.countWithPredicate(CoreDataManager.shared.mainContext,
                                                             NSPredicate(format: "id = %@", dbStruct.id as CVarArg))
                     expect(count) == 1
+                }
+            }
+        }
+
+        describe("BeamObject API") {
+            let beamObjectHelper: BeamObjectTestsHelper = BeamObjectTestsHelper()
+
+            beforeEach {
+                Configuration.apiHostname = "http://api.beam.lvh.me:5000"
+                beamHelper.disableNetworkRecording()
+                Configuration.beamObjectAPIEnabled = true
+            }
+
+            describe("saveOnBeamObjectAPI()") {
+                var dbStruct: DatabaseStruct!
+                beforeEach {
+                    dbStruct = helper.createDatabaseStruct("995d94e1-e0df-4eca-93e6-8778984bcd29")
+                    helper.saveDatabaseLocally(dbStruct)
+                }
+
+                it("saves as beamObject") {
+                    waitUntil(timeout: .seconds(10)) { done in
+                        do {
+                            try sut.saveOnBeamObjectAPI(dbStruct) { result in
+                                expect { try result.get() }.toNot(throwError())
+                                expect { try result.get() } == true
+                                done()
+                            }
+                        } catch {
+                            fail(error.localizedDescription)
+                        }
+                    }
+
+                    let remoteObject: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct.beamObjectId)
+                    expect(remoteObject) == dbStruct
+                }
+            }
+
+            describe("saveOnBeamObjectsAPI()") {
+                var dbStruct: DatabaseStruct!
+                var dbStruct2: DatabaseStruct!
+                beforeEach {
+                    dbStruct = helper.createDatabaseStruct("995d94e1-e0df-4eca-93e6-8778984bcd29", "Database 1")
+                    helper.saveDatabaseLocally(dbStruct)
+
+                    dbStruct2 = helper.createDatabaseStruct("995d94e1-e0df-4eca-93e6-8778984bcd39", "Database 2")
+                    helper.saveDatabaseLocally(dbStruct2)
+                }
+
+                it("saves as beamObjects") {
+                    waitUntil(timeout: .seconds(10)) { done in
+                        do {
+                            _ = try sut.saveOnBeamObjectsAPI([dbStruct, dbStruct2]) { result in
+                                expect { try result.get() }.toNot(throwError())
+                                expect { try result.get() } == true
+                                done()
+                            }
+                        } catch {
+                            fail(error.localizedDescription)
+                        }
+                    }
+
+                    let remoteObject1: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct.beamObjectId)
+                    expect(remoteObject1) == dbStruct
+
+                    let remoteObject2: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct2.beamObjectId)
+                    expect(remoteObject2) == dbStruct2
+                }
+            }
+
+            describe("saveAllOnBeamObjectApi()") {
+                var dbStruct: DatabaseStruct!
+                var dbStruct2: DatabaseStruct!
+                beforeEach {
+                    dbStruct = helper.createDatabaseStruct("995d94e1-e0df-4eca-93e6-8778984bcd29", "Database 1")
+                    helper.saveDatabaseLocally(dbStruct)
+
+                    dbStruct2 = helper.createDatabaseStruct("995d94e1-e0df-4eca-93e6-8778984bcd39", "Database 2")
+                    helper.saveDatabaseLocally(dbStruct2)
+                }
+
+                it("saves as beamObjects") {
+                    waitUntil(timeout: .seconds(10)) { done in
+                        do {
+                            _ = try sut.saveAllOnBeamObjectApi { result in
+                                expect { try result.get() }.toNot(throwError())
+                                expect { try result.get() } == true
+                                done()
+                            }
+                        } catch {
+                            fail(error.localizedDescription)
+                        }
+                    }
+
+                    let remoteObject1: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct.beamObjectId)
+                    expect(remoteObject1) == dbStruct
+
+                    let remoteObject2: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct2.beamObjectId)
+                    expect(remoteObject2) == dbStruct2
                 }
             }
         }
