@@ -2340,10 +2340,19 @@ extension DocumentManager {
 // MARK: - BeamObjectManagerDelegateProtocol
 extension DocumentManager: BeamObjectManagerDelegateProtocol {
     static var typeName: String { "document" }
+    static var objectType: BeamObjectProtocol.Type { DocumentStruct.self }
 
     func receivedBeamObjects(_ objects: [BeamObject]) throws {
         let documents: [DocumentStruct] = try objects.map {
             try $0.decodeBeamObject()
+        }
+
+        try receivedBeamObjects(documents)
+    }
+
+    func receivedBeamObjects<T: BeamObjectProtocol>(_ objects: [T]) throws {
+        guard let documents: [DocumentStruct] = objects as? [DocumentStruct] else {
+            throw DocumentManagerError.wrongObjectsType
         }
 
         Logger.shared.logDebug("Received \(documents.count) documents: updating",

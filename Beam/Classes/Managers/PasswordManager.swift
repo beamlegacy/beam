@@ -26,10 +26,18 @@ class PasswordManager {
 
 extension PasswordManager: BeamObjectManagerDelegateProtocol {
     static var typeName: String { "password" }
+    static var objectType: BeamObjectProtocol.Type { PasswordRecord.self }
 
     func receivedBeamObjects(_ objects: [BeamObject]) throws {
         let passwords: [PasswordRecord] = try objects.map {
             try $0.decodeBeamObject()
+        }
+        try receivedBeamObjects(passwords)
+    }
+
+    func receivedBeamObjects<T: BeamObjectProtocol>(_ objects: [T]) throws {
+        guard let passwords: [PasswordRecord] = objects as? [PasswordRecord] else {
+            throw PasswordManagerError.wrongObjectsType
         }
 
         Logger.shared.logDebug("Received \(passwords.count) passwords: updating",

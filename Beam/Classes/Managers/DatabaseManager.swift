@@ -1031,10 +1031,19 @@ extension DatabaseManager {
 // MARK: - BeamObjectManagerDelegateProtocol
 extension DatabaseManager: BeamObjectManagerDelegateProtocol {
     static var typeName: String { "database" }
+    static var objectType: BeamObjectProtocol.Type { DatabaseStruct.self }
 
     func receivedBeamObjects(_ objects: [BeamObject]) throws {
         let databases: [DatabaseStruct] = try objects.map {
             try $0.decodeBeamObject()
+        }
+
+        try receivedBeamObjects(databases)
+    }
+
+    func receivedBeamObjects<T: BeamObjectProtocol>(_ objects: [T]) throws {
+        guard let databases: [DatabaseStruct] = objects as? [DatabaseStruct] else {
+            throw DatabaseManagerError.wrongObjectsType
         }
 
         Logger.shared.logDebug("Received \(databases.count) databases: updating",

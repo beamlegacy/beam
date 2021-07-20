@@ -10,38 +10,6 @@ import BeamCore
 
 class BeamObjectManagerNetworkTests: QuickSpec {
 
-    // Minimal object for the purpose of testing and storing during tests
-    struct MyRemoteObject: BeamObjectProtocol, Equatable {
-        static var beamObjectTypeName = "my_remote_object"
-
-        var beamObjectId = UUID()
-        var createdAt = BeamDate.now
-        var updatedAt = BeamDate.now
-        var deletedAt: Date?
-
-        var previousChecksum: String?
-        var checksum: String?
-
-        var title: String?
-
-        // Used for encoding this into BeamObject
-        enum CodingKeys: String, CodingKey {
-            case beamObjectId
-            case title
-            case createdAt
-            case updatedAt
-            case deletedAt
-        }
-
-        static func == (lhs: Self, rhs: Self) -> Bool {
-            lhs.beamObjectId == rhs.beamObjectId &&
-                lhs.createdAt.intValue == rhs.createdAt.intValue &&
-                lhs.updatedAt.intValue == rhs.updatedAt.intValue &&
-                lhs.deletedAt?.intValue == rhs.deletedAt?.intValue &&
-                lhs.title == rhs.title
-        }
-    }
-
     override func spec() {
         var sut: BeamObjectManager!
 //        var helper: DocumentManagerTestsHelper!
@@ -62,6 +30,8 @@ class BeamObjectManagerNetworkTests: QuickSpec {
             BeamTestsHelper.login()
 
             Configuration.beamObjectAPIEnabled = true
+
+            BeamObjectManager.register(MyRemoteObjectManager.self)
         }
 
         afterEach {
@@ -79,9 +49,10 @@ class BeamObjectManagerNetworkTests: QuickSpec {
         describe("fetchAllFromAPI()") {
             let uuid = "995d94e1-e0df-4eca-93e6-8778984bcd58".uuid ?? UUID()
             let title = "my title"
+            var object: MyRemoteObject!
 
             beforeEach {
-                let object = MyRemoteObject(beamObjectId: uuid,
+                object = MyRemoteObject(beamObjectId: uuid,
                                             createdAt: BeamDate.now,
                                             updatedAt: BeamDate.now,
                                             deletedAt: nil,
@@ -105,7 +76,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                     Persistence.Sync.BeamObjects.updated_at = nil
                 }
 
-                it("fetches all objects") {
+                fit("fetches all objects") {
                     let networkCalls = APIRequest.callsCount
 
                     waitUntil(timeout: .seconds(10)) { done in
@@ -121,6 +92,12 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
                     expect(APIRequest.callsCount - networkCalls) == 1
                     expect(Persistence.Sync.BeamObjects.updated_at).toNot(beNil())
+
+                    expect(MyRemoteObjectManager.receivedObjects).to(haveCount(1))
+
+                    let remoteObject: MyRemoteObject? = try MyRemoteObjectManager.receivedObjects.first?.decodeBeamObject()
+
+                    expect(remoteObject) == object
                 }
             }
         }
@@ -437,6 +414,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                                 let beamObject = try BeamObject(object, MyRemoteObject.beamObjectTypeName)
                                 expect(returnedObjects.first?.previousChecksum) == beamObject.dataChecksum
 
+                                // TODO: random  error
                                 let beamObject2 = try BeamObject(object2, MyRemoteObject.beamObjectTypeName)
                                 expect(returnedObjects.last?.previousChecksum) == beamObject2.dataChecksum
                             }
@@ -473,6 +451,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                                 expect(object2) == (try beamObjectHelper.fetchOnAPI(object2.beamObjectId))
 
                                 // `previousChecksum` should be set on returned objects
+                                // TODO: random error
                                 expect(returnedBeamObjects.first?.previousChecksum) == beamObjects.first?.dataChecksum
                                 expect(returnedBeamObjects.last?.previousChecksum) == beamObjects.last?.dataChecksum
                             }
@@ -594,16 +573,19 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                                 // update_beam_object + beam_object + beam_object
                                 expect(APIRequest.callsCount - networkCalls) == 3
 
-                                expect(remoteObjects.first) != object
-                                expect(remoteObjects.last) != object2
+                                let remoteObject = remoteObjects.first(where: { $0.beamObjectId == object.beamObjectId })!
+                                let remoteObject2 = remoteObjects.first(where: { $0.beamObjectId == object2.beamObjectId })!
 
-                                expect(remoteObjects.first?.beamObjectId) == object.beamObjectId
-                                expect(remoteObjects.first?.checksum) == previousChecksum
-                                expect(remoteObjects.first?.title) == title
+                                expect(remoteObject) != object
+                                expect(remoteObject2) != object2
 
-                                expect(remoteObjects.last?.beamObjectId) == object2.beamObjectId
-                                expect(remoteObjects.last?.title) == title2
-                                expect(remoteObjects.last?.checksum) == previousChecksum2
+                                expect(remoteObject.beamObjectId) == object.beamObjectId
+                                expect(remoteObject.checksum) == previousChecksum
+                                expect(remoteObject.title) == title
+
+                                expect(remoteObject2.beamObjectId) == object2.beamObjectId
+                                expect(remoteObject2.title) == title2
+                                expect(remoteObject2.checksum) == previousChecksum2
                             }
 
                             it("raise error and return remote object") {
@@ -654,16 +636,19 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                                 // update_beam_object + beam_object + beam_object
                                 expect(APIRequest.callsCount - networkCalls) == 3
 
-                                expect(remoteBeamObjects.first?.beamObjectId) == object.beamObjectId
-                                expect(remoteBeamObjects.first?.dataChecksum) == previousChecksum
+                                let remoteBeamObject = remoteBeamObjects.first(where: { $0.beamObjectId == object.beamObjectId })!
+                                let remoteBeamObject2 = remoteBeamObjects.first(where: { $0.beamObjectId == object2.beamObjectId })!
 
-                                let remoteObject: MyRemoteObject? = try remoteBeamObjects.first?.decodeBeamObject()
+                                expect(remoteBeamObject.beamObjectId) == object.beamObjectId
+                                expect(remoteBeamObject.dataChecksum) == previousChecksum
+
+                                let remoteObject: MyRemoteObject? = try remoteBeamObject.decodeBeamObject()
                                 expect(remoteObject?.title) == title
 
-                                expect(remoteBeamObjects.last?.beamObjectId) == object2.beamObjectId
-                                expect(remoteBeamObjects.last?.dataChecksum) == previousChecksum2
+                                expect(remoteBeamObject2.beamObjectId) == object2.beamObjectId
+                                expect(remoteBeamObject2.dataChecksum) == previousChecksum2
 
-                                let remoteObject2: MyRemoteObject? = try remoteBeamObjects.last?.decodeBeamObject()
+                                let remoteObject2: MyRemoteObject? = try remoteBeamObject2.decodeBeamObject()
                                 expect(remoteObject2?.title) == title2
                             }
                         }
@@ -1014,5 +999,73 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                 }
             }
         }
+    }
+}
+
+// Minimal object for the purpose of testing and storing during tests
+struct MyRemoteObject: BeamObjectProtocol, Equatable {
+    static var beamObjectTypeName = "my_remote_object"
+
+    var beamObjectId = UUID()
+    var createdAt = BeamDate.now
+    var updatedAt = BeamDate.now
+    var deletedAt: Date?
+
+    var previousChecksum: String?
+    var checksum: String?
+
+    var title: String?
+
+    // Used for encoding this into BeamObject
+    enum CodingKeys: String, CodingKey {
+        case beamObjectId
+        case title
+        case createdAt
+        case updatedAt
+        case deletedAt
+    }
+
+    static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.beamObjectId == rhs.beamObjectId &&
+            lhs.createdAt.intValue == rhs.createdAt.intValue &&
+            lhs.updatedAt.intValue == rhs.updatedAt.intValue &&
+            lhs.deletedAt?.intValue == rhs.deletedAt?.intValue &&
+            lhs.title == rhs.title
+    }
+}
+
+// Minimal manager
+class MyRemoteObjectManager {
+    static var receivedObjects: [BeamObject] = []
+
+    required init(_ manager: BeamObjectManager) {
+    }
+}
+
+extension MyRemoteObjectManager: BeamObjectManagerDelegateProtocol {
+    static var objectType: BeamObjectProtocol.Type { MyRemoteObject.self }
+
+    func receivedBeamObjects(_ objects: [BeamObject]) throws {
+        Logger.shared.logDebug("Received \(objects)", category: .beamObjectNetwork)
+        Self.receivedObjects.append(contentsOf: objects)
+    }
+
+    func receivedBeamObjects<T>(_ objects: [T]) throws where T : BeamObjectProtocol {
+        Logger.shared.logDebug("Received \(objects)", category: .beamObjectNetwork)
+    }
+
+    func saveAllOnBeamObjectApi(_ completion: @escaping ((Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
+        completion(.success(true))
+        return nil
+    }
+
+    func saveOnBeamObjectAPI(_ object: BeamObjectProtocol, _ completion: @escaping ((Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
+        completion(.success(true))
+        return nil
+    }
+
+    func saveOnBeamObjectsAPI(_ objects: [BeamObjectProtocol], _ completion: @escaping ((Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
+        completion(.success(true))
+        return nil
     }
 }

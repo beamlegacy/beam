@@ -3,11 +3,12 @@ import BeamCore
 
 // swiftlint:disable file_length
 protocol BeamObjectManagerDelegateProtocol {
-    // The string used to store beam object types
-    static var typeName: String { get }
+    // The object we store
+    static var objectType: BeamObjectProtocol.Type { get }
 
     // When new beam objects have been received and should be locally stored
     func receivedBeamObjects(_ objects: [BeamObject]) throws
+    func receivedBeamObjects<T: BeamObjectProtocol>(_ objects: [T]) throws
 
     // Mandatory for using dynamic creation of managers. See `setup` and `parseFilteredObjects`
     init(_ manager: BeamObjectManager)
@@ -83,11 +84,14 @@ enum BeamObjectConflictResolution {
 
 class BeamObjectManager {
     static var managers: [String: BeamObjectManagerDelegateProtocol.Type] = [:]
+    static var managersObjects: [String: BeamObjectProtocol.Type] = [:]
+
     private static var networkRequests: [UUID: APIRequest] = [:]
     private static var urlSessionTasks: [URLSessionTask] = []
 
     static func register<T: BeamObjectManagerDelegateProtocol>(_ manager: T.Type) {
-        managers[T.typeName] = manager
+        managers[T.objectType.beamObjectTypeName] = manager
+        managersObjects[T.objectType.beamObjectTypeName] = manager.objectType
     }
 
     static func setup() {
@@ -102,9 +106,9 @@ class BeamObjectManager {
             request.cancel()
         }
 
-//        for task in Self.urlSessionTasks {
-//            task.cancel()
-//        }
+        for task in Self.urlSessionTasks {
+            task.cancel()
+        }
     }
 
     func isAllNetworkCallsCompleted() -> Bool {
@@ -158,6 +162,11 @@ class BeamObjectManager {
         for (key, objects) in filteredObjects {
             guard let manager = Self.managers[key] else {
                 Logger.shared.logError("**manager for \(key) not found**", category: .beamObjectNetwork)
+                continue
+            }
+
+            guard let document = Self.managersObjects[key] else {
+                Logger.shared.logError("**object type for \(key) not found**", category: .beamObjectNetwork)
                 continue
             }
 
