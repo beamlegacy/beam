@@ -286,30 +286,32 @@ public extension CALayer {
         if centerText {
             let x = (frame.width - Self.textWidth) / 2
             rect = NSRect(x: x, y: topOffsetActual + cardTopSpace, width: textNodeWidth, height: r.height)
-
-            if isResizing || shouldDisableAnimationAtNextLayout {
-                shouldDisableAnimationAtNextLayout = false
-                // Disable CALayer animation on resize
-                CATransaction.disableAnimations {
-                    rootNode.availableWidth = textNodeWidth
-                    updateCardHearderLayer(rect)
-                    if journalMode {
-                        updateSideLayer(rect)
-                    }
-                    rootNode.setLayout(rect)
-                }
-                return
-            }
         } else {
             let x = (frame.width - Self.textWidth) * (leadingPercentage / 100)
             rect = NSRect(x: x, y: topOffsetActual + cardTopSpace, width: textNodeWidth, height: r.height)
         }
-        rootNode.availableWidth = textNodeWidth
-        updateCardHearderLayer(rect)
-        if journalMode {
-            updateSideLayer(rect)
+        updateLayout(for: rect)
+    }
+
+    private func updateLayout(for rect: NSRect) {
+        if isResizing || shouldDisableAnimationAtNextLayout {
+            shouldDisableAnimationAtNextLayout = false
+            CATransaction.disableAnimations {
+                rootNode.availableWidth = textNodeWidth
+                updateCardHearderLayer(rect)
+                if journalMode {
+                    updateSideLayer(rect)
+                }
+                rootNode.setLayout(rect)
+            }
+        } else {
+            rootNode.availableWidth = textNodeWidth
+            updateCardHearderLayer(rect)
+            if journalMode {
+                updateSideLayer(rect)
+            }
+            rootNode.setLayout(rect)
         }
-        rootNode.setLayout(rect)
     }
 
     var textNodeWidth: CGFloat {
