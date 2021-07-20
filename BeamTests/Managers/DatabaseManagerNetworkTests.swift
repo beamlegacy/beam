@@ -534,7 +534,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
                     helper.saveDatabaseLocally(dbStruct)
                 }
 
-                it("saves as beamObject") {
+                fit("saves as beamObject") {
                     waitUntil(timeout: .seconds(10)) { done in
                         do {
                             try sut.saveOnBeamObjectAPI(dbStruct) { result in
@@ -563,7 +563,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
                     helper.saveDatabaseLocally(dbStruct2)
                 }
 
-                it("saves as beamObjects") {
+                fit("saves as beamObjects") {
                     waitUntil(timeout: .seconds(10)) { done in
                         do {
                             _ = try sut.saveOnBeamObjectsAPI([dbStruct, dbStruct2]) { result in
@@ -595,7 +595,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
                     helper.saveDatabaseLocally(dbStruct2)
                 }
 
-                it("saves as beamObjects") {
+                fit("saves as beamObjects") {
                     waitUntil(timeout: .seconds(10)) { done in
                         do {
                             _ = try sut.saveAllOnBeamObjectApi { result in

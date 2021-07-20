@@ -1151,9 +1151,8 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
                 Logger.shared.logError("Could not save all \(databaseStructsToSave): \(error.localizedDescription)",
                                        category: .databaseNetwork)
                 self.saveOnBeamObjectsAPIFailure(databaseStructs, error, completion)
-            case .success:
-                break
-                // self.saveOnBeamObjectsAPISuccess(databaseStructsToSave, completion)
+            case .success(let remoteStructs):
+                self.saveOnBeamObjectsAPISuccess(remoteStructs, completion)
             }
         }
     }
@@ -1175,43 +1174,22 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
             return
         }
 
-        var newDatabaseStructs: [DatabaseStruct] = []
         for insideError in errors {
             /*
              We have multiple errors. If all errors are about invalid checksums, we can fix and retry. Else we'll just
              stop and call the completion handler with the original error
              */
-            guard case BeamObjectManagerError.beamObjectInvalidChecksum(let remoteBeamObject) = insideError else {
+            guard case BeamObjectManagerError.beamObjectInvalidChecksum = insideError else {
                 completion(.failure(error))
                 return
             }
 
             // This should never be called since invalid checksum are managed inside BeamObjectManager
             assert(false)
-
-            // Here we should try to merge remoteBeamObject converted as a DatabaseStruct, and our local one.
-            // For now we just overwrite the API with our local version with a batch call resending all of them
-            guard let databaseStruct = databaseStructs.first(where: { $0.id == remoteBeamObject.id }) else {
-                Logger.shared.logError("Could not save: \(insideError.localizedDescription)",
-                                       category: .databaseNetwork)
-                Logger.shared.logError("No ID :( for \(remoteBeamObject.id)", category: .databaseNetwork)
-                continue
-            }
-
-            do {
-                let mergedDatabaseStruct = try manageConflict(databaseStruct, remoteBeamObject, insideError)
-                newDatabaseStructs.append(mergedDatabaseStruct)
-            } catch {
-                completion(.failure(error))
-                return
-            }
         }
 
-        do {
-            try self.saveOnBeamObjectsAPI(databaseStructs: newDatabaseStructs, completion)
-        } catch {
-            completion(.failure(error))
-        }
+        // This should never be called since invalid checksum are managed inside BeamObjectManager
+        assert(false)
     }
 
     internal func saveOnBeamObjectsAPISuccess(_ updateBeamObjects: [DatabaseStruct],
@@ -1226,7 +1204,6 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
                     return
                 }
 
-                // TODO: store previous data sent for improved 3-ways merge?
                 databaseCoreData.beam_object_previous_checksum = updateBeamObject.previousChecksum
             }
 
@@ -1247,17 +1224,14 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
             return nil
         }
 
-        let beamObject = try BeamObject(databaseStruct, Self.typeName)
-        beamObject.previousChecksum = databaseStruct.beamObjectPreviousChecksum
-
         let objectManager = BeamObjectManager()
 
-        return try objectManager.saveToAPI(beamObject) { result in
+        return try objectManager.saveToAPI(databaseStruct) { result in
             switch result {
             case .failure(let error):
                 self.saveOnBeamObjectAPIFailure(databaseStruct, error, completion)
-            case .success:
-                self.saveOnBeamObjectsAPISuccess([databaseStruct], completion)
+            case .success(let remoteDatabaseStruct):
+                self.saveOnBeamObjectsAPISuccess([remoteDatabaseStruct], completion)
             }
         }
     }
@@ -1266,46 +1240,13 @@ extension DatabaseManager: BeamObjectManagerDelegateProtocol {
                                              _ error: Error,
                                              _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
         // Early return except for checksum issues.
-        guard case BeamObjectManagerError.beamObjectInvalidChecksum(let remoteBeamObject) = error else {
+        guard case BeamObjectManagerError.beamObjectInvalidChecksum = error else {
             completion(.failure(error))
             return
         }
 
         // This should never be called since invalid checksum are managed inside BeamObjectManager
         assert(false)
-        do {
-            // Checksum issue, the API side of the object was updated since our last fetch
-            let mergedDatabaseStruct = try manageConflict(databaseStruct, remoteBeamObject, error)
-
-            try self.saveOnBeamObjectAPI(databaseStruct: mergedDatabaseStruct, completion)
-        } catch {
-            completion(.failure(error))
-        }
-    }
-
-    internal func manageConflict(_ databaseStruct: DatabaseStruct,
-                                 _ remoteBeamObject: BeamObject,
-                                 _ error: Error) throws -> DatabaseStruct {
-        let remoteDatabaseStruct: DatabaseStruct = try remoteBeamObject.decodeBeamObject()
-
-        Logger.shared.logError("Could not save: \(error.localizedDescription)",
-                               category: .databaseNetwork)
-        Logger.shared.logError("local object \(databaseStruct.beamObjectPreviousChecksum ?? "-"): \(databaseStruct)",
-                               category: .databaseNetwork)
-        Logger.shared.logError("Remote saved object \(remoteDatabaseStruct.checksum ?? "-"): \(remoteDatabaseStruct)",
-                               category: .databaseNetwork)
-        Logger.shared.logError("Resending local object with remote checksum \(remoteDatabaseStruct.checksum ?? "-")",
-                               category: .databaseNetwork)
-
-        // TODO: we should merge `databaseStruct` and `remoteBeamObject` instead of just resending the
-        // same databaseStruct we sent before
-        var mergedDatabaseStruct = databaseStruct.copy()
-
-        // Necessary?
-        mergedDatabaseStruct.previousChecksum = remoteDatabaseStruct.checksum
-
-        mergedDatabaseStruct.beamObjectPreviousChecksum = remoteDatabaseStruct.checksum
-        return mergedDatabaseStruct
     }
 }
 
