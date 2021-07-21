@@ -5,13 +5,13 @@ import BeamCore
  from the frame-relative positions provided by JavaScript in a web frame.
  */
 
-class WebPositions {
-    var scale: CGFloat = 1
+class WebPositions: ObservableObject {
+    @Published var scale: CGFloat = 1
 
     /**
      * Frame info by frame URL
      */
-    var framesInfo = [HREF: FrameInfo]()
+    @Published var framesInfo = [HREF: FrameInfo]()
 
     typealias HREF = String
     typealias ParentHREF = String

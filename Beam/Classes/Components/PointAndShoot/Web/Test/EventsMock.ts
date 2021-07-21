@@ -16,6 +16,12 @@ export class EventsMock {
   get latestEvent() {
     return this.events[this.eventsCount - 1]
   }
+  
+  findEventByName(name: string) {
+    return this.events.find(event => {
+      return event.name == name
+    })
+  }
 
   clearEvents() {
     this.events = []

@@ -2,19 +2,17 @@ import { WebEvents } from "./WebEvents"
 import { PointAndShootUI } from "./PointAndShootUI"
 import {
   BeamWindow,
-  BeamPNSStatus,
-  BeamCollectedQuote,
-  BeamQuoteId,
   BeamSelection,
   BeamRange,
-  BeamHTMLElement, BeamElement, BeamNode
+  BeamHTMLElement,
+  BeamElement,
+  BeamRangeGroup,
+  BeamShootGroup
 } from "./BeamTypes"
 import { Util } from "./Util"
 import { WebFactory } from "./WebFactory"
-import { BeamMouseEvent } from "./Test/BeamMocks"
+import { BeamMouseEvent, BeamUIEvent } from "./Test/BeamMocks"
 import { BeamElementHelper } from "./BeamElementHelper"
-
-const PNS_STATUS = process.env.PNS_STATUS
 
 /**
  * Listen to events that hover and select web blocks with Option.
@@ -28,54 +26,18 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
   /**
    * @type string
    */
-  datasetKey
-
-  /**
-   * @type number
-   */
-  scrollWidth
-
-  /**
-   *
-   */
-  status: BeamPNSStatus = BeamPNSStatus.none
-
-  /**
-   * Collected quotes.
-   */
-  collectedQuotes: BeamCollectedQuote[] = []
-
-  /**
-   * Active selection element
-   */
-  selectionRanges: BeamCollectedQuote[]
-
-  /**
-   * The currently hovered element.
-   *
-   * This allows to remember what the cursor is pointing when entering in collect mode
-   * just by hitting the Option key (not moving the mouse cursor).
-   */
-  pointingEv: BeamMouseEvent
-
-  /**
-   * The currently highlighted target.
-   */
-  pointedTarget: BeamCollectedQuote = null
-
-  /**
-   * The currently shooted target.
-   */
-  shootingTarget: BeamCollectedQuote
-
-  shootMouseLocation
-
-  timer
+  datasetKey: string
 
   /**
    * Amount of time we want the user to touch before we do something
    */
+  timer
   touchDuration = 2500
+  mouseLocation = { x: 0, y: 0 }
+  selectionUUID?: string
+  pointTarget: BeamShootGroup
+  shootTargets: BeamShootGroup[] = []
+  selectionRangeGroups: BeamRangeGroup[] = []
 
   /**
    *
@@ -84,7 +46,7 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    * @param webFactory
    * @return {PointAndShoot}
    */
-  static getInstance(win: BeamWindow, ui: PointAndShootUI, webFactory: WebFactory) {
+  static getInstance(win: BeamWindow, ui: PointAndShootUI, webFactory: WebFactory): PointAndShoot {
     if (!PointAndShoot.instance) {
       PointAndShoot.instance = new PointAndShoot(win, ui, webFactory)
     }
@@ -99,9 +61,10 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
   constructor(win: BeamWindow, ui: PointAndShootUI, webFactory: WebFactory) {
     super(win, ui, webFactory)
     this.datasetKey = `${this.prefix}Collect`
+    this.selectionUUID = Util.uuid(win)
   }
 
-  setWindow(win) {
+  setWindow(win: BeamWindow): void {
     super.setWindow(win)
     this.log("setWindow")
 
@@ -110,97 +73,71 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
     win.addEventListener("touchstart", this.onTouchstart.bind(this), false)
     win.addEventListener("touchend", this.onTouchend.bind(this), false)
     win.addEventListener("keydown", this.onKeyDown.bind(this), false)
-    win.addEventListener("keyup", this.onKeyUp.bind(this), false)
-
     win.addEventListener("mouseup", this.onMouseUp.bind(this))
-    win.document.addEventListener("selectionchange", (ev) => this.onSelection(ev))
-
-    win.document.addEventListener("keypress", this.onKeyPress.bind(this))
+    win.document.addEventListener("selectionchange", () => this.onSelection())
+    win.addEventListener("scroll", this.onScroll.bind(this), true)
     this.log("events registered")
-    if (PNS_STATUS) {
-      win.document.body.innerHTML =
-        `<div id="debug-beam" style="bottom: 0px;right: 0;padding: 1rem;background: #7373FF; color: white;">JS ${this.status} | ${this.win.location.href}</div>` +
-        win.document.body.innerHTML
-    }
+
+    win.addEventListener("resize", this.onResize.bind(this), true)
+    win.addEventListener("orientationchange", this.onResize.bind(this), true)
+
+    const vv = win.visualViewport
+    vv.addEventListener("onresize", this.onResize.bind(this))
+    vv.addEventListener("scroll", this.onResize.bind(this))
   }
 
-  log(...args) {
+  log(...args: unknown[]): void {
     console.log(this.toString(), args)
   }
 
-  cursor(x, y) {
-    this.ui.cursor(x, y)
+  sendBounds(): void {
+    this.sendFramesInfo()
+    this.ui.pointBounds(this.pointTarget)
+    this.ui.shootBounds(this.shootTargets)
+    this.ui.selectBounds(this.selectionRangeGroups)
+    this.ui.hasSelection(this.hasSelection())
   }
 
-  /**
-   * Enable pointing UI.
-   *
-   * @param el {BeamHTMLElement}
-   * @param x {number}
-   * @param y {number}
-   */
-  point(el, x, y) {
-    if (this.pointedTarget) {
-      this.unpoint(this.pointedTarget) // Before creating new point, unpoint
-    } else {
-      const framesInfo = this.getFramesInfo()
-      this.ui.setFramesInfo(framesInfo) // Not yet set, update frameInfo
+  shoot(targetEl: BeamHTMLElement): void {
+    const shootGroup = {
+      id: Util.uuid(this.win),
+      element: targetEl
+    }
+    this.upsertShootGroup(shootGroup, this.shootTargets)
+    this.sendBounds()
+  }
+
+  point(targetEl: BeamHTMLElement): void {
+    // only assign new pointTarget when pointTarget is different
+    if (this.pointTarget?.element != targetEl) {
+      this.pointTarget = {
+        id: Util.uuid(this.win),
+        element: targetEl
+      }
     }
 
-    // Only create point if no active selection on page
-    if (!this.hasSelection()) {
-      const quoteId = el.dataset[this.datasetKey]
-      this.pointedTarget = { el, quoteId }
-      this.ui.point(quoteId, el, x, y, () => {
-        // if point gets canceled clear pointedTarget element
-        this.pointedTarget = null
-      })
+    this.sendBounds()
+  }
+
+  select(): void {
+    const selection = this.getSelection()
+    // reset the uuid to store a new selection next time
+    if (selection.rangeCount == 0) { return }
+    if (selection.isCollapsed) {
+      this.selectionUUID = Util.uuid(this.win)
     }
-  }
+    // Rangecount is always array of 1, unless programatically modified
+    // https://developer.mozilla.org/en-US/docs/Web/API/Selection/rangeCount
+    const range = selection.getRangeAt(0)
 
-  /**
-   * Disables / clears pointing UI
-   *
-   * @param {*} [el=this.pointingEv.target]
-   * @return {*}
-   * @memberof PointAndShoot
-   */
-  unpoint(el = this.pointingEv.target) {
-    const changed = this.isPointing()
-    if (changed) {
-      this.ui.unpoint(el)
-      this.pointedTarget = null
+    const rangeGroup: BeamRangeGroup = {
+      id: this.selectionUUID,
+      range: range as BeamRange
     }
-    return changed
-  }
 
-  /**
-   * Unselect an element.
-   *
-   * @param el {BeamHTMLElement}
-   */
-  unshoot(el: BeamHTMLElement) {
-    this.shootingTarget = undefined
-    this.ui.unshoot(el)
-    this.setStatus(BeamPNSStatus.none)
-  }
+    this.upsertRangeGroup(rangeGroup, this.selectionRangeGroups)
 
-  hidePopup() {
-    this.ui.hidePopup()
-  }
-
-  /**
-   * Returns boolean if current status is pointing
-   */
-  isPointing(): boolean {
-    return this.status === BeamPNSStatus.pointing
-  }
-
-  /**
-   * Returns boolean if current status is shooting
-   */
-  isShooting(): boolean {
-    return this.status === BeamPNSStatus.shooting
+    this.sendBounds()
   }
 
   /**
@@ -211,239 +148,142 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
   }
 
   /**
-   * @param ev {BeamMouseEvent}
+   * ======================================================================
+   * Eventlisteners =======================================================
+   * ======================================================================
    */
-  onMouseMove(ev: BeamMouseEvent) {
-    if (!this.hasSelection()) {
-      this.pointingEv = ev
-      // Enable pointing if alt is pressed
-      this.setPointing(this.isOnlyAltKey(ev))
-      // Ignore pointing if the pointed element isn't assimilable to an active text input
-      const isActiveTextualInput = this.isActiveTextualInput(ev)
-      if (isActiveTextualInput || !this.isPointing()) {
-        if (
-          isActiveTextualInput
-          || (
-            this.status === BeamPNSStatus.none && !this.hasSelection()
-          )
-        ) {
-          this.cursor(ev.clientX, ev.clientY)
-        }
-        this.hideStatus()
-        return
+
+  onScroll(ev: BeamUIEvent): void {
+    this.sendBounds()
+    if (this.mouseLocation?.x) {
+      if (!this.isPointDisabled(ev)) {
+        const target = this.win.document.elementFromPoint(this.mouseLocation.x, this.mouseLocation.y)
+        this.point(target)
       }
-
-      ev.preventDefault()
-      ev.stopPropagation()
-
-      this.point(this.pointingEv.target, ev.clientX, ev.clientY)
-      this.displayStatus(this.pointingEv.target)
     }
   }
 
-  /**
-   * Show the status when pointedTarget is collected note
-   *
-   * @memberof PointAndShoot
-   */
-  displayStatus(el) {
-    const data = el.dataset[this.datasetKey]
-    if (data) {
-      this.showStatus(el, data)
-      return
-    }
-
-    this.hideStatus()
-  }
-
-  /**
-   * Show
-   *
-   * @param {HTMLElement} el
-   * @param {*} data
-   * @memberof PointAndShoot
-   */
-  showStatus(el: BeamHTMLElement, data) {
-    this.ui.showStatus(el, data)
-  }
-
-  /**
-   *
-   */
-  hideStatus() {
-    this.ui.hideStatus()
-  }
-
-  /**
-   * Remember shoots in DOM.
-   *
-   * @param quoteId: BeamQuoteId
-   */
-  assignNote(quoteId: BeamQuoteId) {
-    const els = this.shootingTarget ? [this.shootingTarget] : this.selectionRanges
-    els.forEach(({ el }) => {
-      this.collectedQuotes.push({ el, quoteId })
-      this.unshoot(el as BeamHTMLElement)
-    })
-    this.selectionRanges = []
-  }
-
-  /**
-   * Select an HTML element to be added to a card.
-   *
-   * @param targetEl {BeamHTMLElement} The element to select.
-   * @param x {number} Horizontal coordinate of click/touch
-   * @param y {number} Vertical coordinate of click/touch
-   * @param multi {boolean} If this is a multiple-selection action.
-   */
-  shoot(targetEl: BeamHTMLElement, x: number, y: number, multi: boolean) {
-    this.shootingTarget = {
-      el: targetEl,
-      quoteId: targetEl.dataset[this.datasetKey]
-    }
-    this.shootMouseLocation = {
-      x,
-      y
-    }
-    this.ui.shoot(this.shootingTarget.quoteId, this.shootingTarget.el, x, y, this.collectedQuotes)
-    this.setShooting()
-  }
-
-  /**
-   * Select an HTML element to be added to a card.
-   *
-   * @param ev {MouseEvent} The selection event (click or touch).
-   * @param x {number} Horizontal coordinate of click/touch
-   * @param y {number} Vertical coordinate of click/touch
-   */
-  onShoot(ev: MouseEvent, x: number, y: number) {
-    const el = ev.target as BeamHTMLElement
-    ev.preventDefault()
-    ev.stopPropagation()
-    const multi = ev.metaKey
-    this.shoot(el, x, y, multi)
-  }
-
-  /**
-   * Set status to BeamPNSStatus.shooting
-   *
-   * @param {Boolean} [bool=true]
-   * @memberof PointAndShoot
-   */
-  setShooting(bool = true) {
-    if (bool) {
-      this.setStatus(BeamPNSStatus.shooting)
-    }
-  }
-
-  onClick(ev) {
-    this.log("onClick called!", ev.altKey, this.status)
-    this.setPointing(ev.altKey)
-    if (this.isPointing()) {
-      // We still have to check whether or not the target is assimilable to a textual input
-      // if so, we only send a cursor event, if not we proceed to shoot
-      if (this.isEventTargetTextualInput(ev)) {
-        this.cursor(ev.clientX, ev.clientY)
-      } else {
-        this.pointingEv = ev
-        this.onShoot(ev, ev.clientX, ev.clientY)
+  onMouseMove(ev: BeamMouseEvent): void {
+    if (this.mouseLocation?.x !== ev.clientX || this.mouseLocation?.y !== ev.clientY) {
+      // Code when the (physical) mouse actually moves
+      if (!this.isPointDisabled(ev)) {
+        this.point(ev.target)
       }
-    } else if (this.isShooting()) {
-      this.setStatus(BeamPNSStatus.none)
+    }
+    this.mouseLocation.x = ev.clientX
+    this.mouseLocation.y = ev.clientY
+  }
+
+  onClick(ev: BeamUIEvent): void {
+    if (!this.isPointDisabled(ev)) {
+      this.shoot(ev.target)
     }
   }
 
-  onlongtouch(ev) {
-    const touch = ev.touches[0]
-    this.onShoot(ev, touch.clientX, touch.clientY)
+  onlongtouch(ev: BeamUIEvent): void {
+    if (!this.isPointDisabled(ev)) {
+      this.shoot(ev.target)
+    }
   }
 
-  onTouchstart(ev) {
+  onTouchstart(ev: TouchEvent): void {
     if (!this.timer) {
       this.timer = setTimeout(() => this.onlongtouch(ev), this.touchDuration)
     }
   }
 
-  onTouchend(_ev) {
+  onTouchend(): void {
     if (this.timer) {
       clearTimeout(this.timer)
       this.timer = null
     }
   }
 
-  onKeyPress(ev) {
-    if (ev.code === "Escape") {
-      this.ui.hidePopup()
+  onKeyDown(ev: BeamMouseEvent): void {
+    this.sendBounds()
+    if (!this.isPointDisabled(ev)) {
+      const target = this.win.document.elementFromPoint(this.mouseLocation.x, this.mouseLocation.y)
+      this.point(target)
     }
   }
 
-  syncStatus(newStatus: BeamPNSStatus) {
-    // When recieving new status from swift, don't broadcast that change
-    this.setStatus(newStatus, false)
+  onMouseUp(): void {
+    this.sendBounds()
   }
 
-  /**
-   * Update the Point and Shoot status
-   *
-   * @param {BeamPNSStatus} newStatus
-   */
-  setStatus(newStatus: BeamPNSStatus, broadcast = true) {
-    // this.setChildFrameStatus(newStatus)
-    if (this.status != newStatus) {
-      this.status = newStatus
-      this.updateDebugStatusUI()
-
-      if (broadcast) {
-        this.ui.setStatus(newStatus)
-      }
-    }
+  onSelection(): void {
+    this.select()
   }
 
-  /**
-   * Re-draws the PNS debug status UI with updated value
-   *
-   * @memberof PointAndShoot
-   */
-  updateDebugStatusUI() {
-    if (PNS_STATUS) {
-      const debugEl = this.win.document.querySelector("#debug-beam") as BeamHTMLElement
-
-      if (debugEl) {
-        debugEl.innerText = `JS ${this.status} | ${this.win.location.href}`
-      }
-    }
+  onResize(): void {
+    this.sendBounds()
   }
-
   /**
-   * Enable pointing based on boolean param. Only permits going from  `status.none` to `status.pointing`.
-   *
-   * @param c {boolean}
+   * ======================================================================
+   * Helpers ==============================================================
+   * ======================================================================
    */
-  setPointing(c: boolean) {
-    if (c) {
-      if (this.status === BeamPNSStatus.none) {
-        this.setStatus(BeamPNSStatus.pointing)
-      }
+
+  upsertShootGroup(newItem: BeamShootGroup, groups: BeamShootGroup[]): void {
+    // Update existing rangeGroup
+    const index = groups.findIndex(({ id }) => {
+      return id == newItem.id
+    })
+    if (index != -1) {
+      groups[index] = newItem
     } else {
-      if (this.status !== BeamPNSStatus.none) {
-        this.pointedTarget = null
-        if (this.isPointing()) {
-          this.setStatus(BeamPNSStatus.none)
-        }
-      }
+      groups.push(newItem)
     }
   }
 
-  isOnlyAltKey(ev) {
-    const altKey = ev.altKey || ev.key == "Alt"
-    return altKey && !ev.ctrlKey && !ev.metaKey && !ev.shiftKey
+  upsertRangeGroup(newItem: BeamRangeGroup, groups: BeamRangeGroup[]): void {
+    // Update existing rangeGroup
+    const index = groups.findIndex(({ id }) => {
+      return id == newItem.id
+    })
+    if (index != -1) {
+      groups[index] = newItem
+    } else {
+      groups.push(newItem)
+    }
+  }
+
+  /**
+   * Check for textarea and input elements with matching type attribute
+   *
+   * @param element {BeamElement} The DOM Element to check.
+   * @return If the element is some kind of text input.
+   */
+  isTextualInputType(element: BeamElement): boolean {
+    const tag = element.tagName.toLowerCase()
+    if (tag === "textarea") {
+      return true
+    } else if (tag === "input") {
+      const types = [
+        "text",
+        "email",
+        "password",
+        "date",
+        "datetime-local",
+        "month",
+        "number",
+        "search",
+        "tel",
+        "time",
+        "url",
+        "week",
+        // for legacy support
+        "datetime"
+      ]
+      return types.includes(BeamElementHelper.getType(element))
+    }
+
+    return false
   }
 
   // In addition to the target.type we have to check for contentEditable values
-  isExplicitlyContentEditable(element) {
-    return ["true", "plaintext-only"].includes(
-      BeamElementHelper.getContentEditable(element)
-    )
+  isExplicitlyContentEditable(element: BeamHTMLElement): boolean {
+    return ["true", "plaintext-only"].includes(BeamElementHelper.getContentEditable(element))
   }
 
   /**
@@ -454,107 +294,33 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    * @return If the element inherits from an actual contenteditable valid values
    *         ("true", "plaintext-only")
    */
-  getInheritedContentEditable(element: BeamElement ): boolean {
+  getInheritedContentEditable(element: BeamHTMLElement): boolean {
     let isEditable = this.isExplicitlyContentEditable(element)
-    const parent = element.parentElement
-    if (
-      parent
-      && BeamElementHelper.getContentEditable(element) === "inherit"
-    ) {
+    const parent = element.parentElement as BeamHTMLElement
+    if (parent && BeamElementHelper.getContentEditable(element) === "inherit") {
       isEditable = this.getInheritedContentEditable(parent)
     }
     return isEditable
   }
 
-  isEventTargetTextualInput(ev: BeamMouseEvent): boolean {
-    return (
-      BeamElementHelper.isTextualInputType(ev.target)
-      || this.getInheritedContentEditable(ev.target)
-    )
+  isEventTargetTextualInput(ev: BeamUIEvent): boolean {
+    return BeamElementHelper.isTextualInputType(ev.target) || this.getInheritedContentEditable(ev.target)
   }
 
-  isEventTargetActive(ev: BeamMouseEvent): boolean {
+  isEventTargetActive(ev: BeamUIEvent): boolean {
     return !!(
-      this.win.document.activeElement
-      && this.win.document.activeElement !== this.win.document.body
-      && this.win.document.activeElement.contains(ev.target)
+      this.win.document.activeElement &&
+      this.win.document.activeElement !== this.win.document.body &&
+      this.win.document.activeElement.contains(ev.target)
     )
   }
 
-  isActiveTextualInput(ev: BeamMouseEvent): boolean {
-    return (
-      this.isEventTargetActive(ev)
-      && this.isEventTargetTextualInput(ev)
-    )
+  isActiveTextualInput(ev: BeamUIEvent): boolean {
+    return this.isEventTargetActive(ev) && this.isEventTargetTextualInput(ev)
   }
 
-  onKeyDown(ev) {
-    const processEvent = (
-      this.isOnlyAltKey(ev)
-      && !this.isActiveTextualInput(ev)
-    )
-    if (processEvent) {
-      if (this.hasSelection()) {
-        // Enable shooting mode
-        this.setShooting()
-      } else {
-        this.setPointing(true)
-        const pointingEv = this.pointingEv
-        if (pointingEv) {
-          this.log("KeyDown sending point")
-          this.point(pointingEv.target, pointingEv.clientX, pointingEv.clientY)
-        }
-      }
-    }
-  }
-
-  protected resizeInfo(): any {
-    const resizeInfo = super.resizeInfo()
-    const elementArray = [].concat(this.shootingTarget, this.pointedTarget, this.selectionRanges)
-    const activeAndStoredElements = this.collectedQuotes.concat(elementArray)
-    const selected = Util.compact(activeAndStoredElements)
-    return {
-      ...resizeInfo,
-      selected: selected,
-      datasetKey: this.datasetKey,
-      coordinates: this.shootMouseLocation
-    }
-  }
-
-  onKeyUp(ev) {
-    if (ev.key === "Alt") {
-      if (this.hasSelection() || this.isShooting()) {
-        this.unpoint()
-      }
-      this.setPointing(false)
-    }
-  }
-
-  onMouseUp(_ev) {
-    // TODO: replace with actual value
-    if (this.selectionRanges) {
-      this.ui.select(this.selectionRanges)
-    }
-  }
-
-  /**
-   * onSelection changes dispatch ui select event for each active selection range
-   *
-   * @param {*} _ev
-   */
-  onSelection(_ev) {
-    const selection = this.getSelection()
-    if (selection.isCollapsed) {
-      return
-    }
-    const ranges = this.getSelectionRanges(selection)
-    this.selectionRanges = ranges.map((range) => {
-      return {
-        quoteId: undefined,
-        el: range
-      }
-    })
-    this.ui.select(this.selectionRanges)
+  isPointDisabled(ev: BeamUIEvent): boolean {
+    return this.isActiveTextualInput(ev) || this.hasSelection()
   }
 
   /**
@@ -567,7 +333,8 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
     const ranges = []
     const count = selection.rangeCount
     for (let index = 0; index < count; ++index) {
-      ranges.push(selection.getRangeAt(index))
+      const range = selection.getRangeAt(index)
+      ranges.push(range)
     }
     return ranges
   }

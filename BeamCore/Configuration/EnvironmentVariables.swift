@@ -47,7 +47,6 @@ public struct EnvironmentVariables {
     static public private(set) var sentryEnabled = NSString("$(SENTRY_ENABLED)").boolValue
     static public private(set) var networkEnabled = NSString("$(NETWORK_ENABLED)").boolValue
     static public private(set) var encryptionEnabled = NSString("$(ENCRYPTION_ENABLED)").boolValue
-    static public private(set) var pnsStatus = NSString("$(PNS_STATUS)").boolValue
     static public private(set) var hideCategories = "$(HIDE_CATEGORIES)".split(separator: " ").compactMap {
         LogCategory(rawValue: String($0))
     }

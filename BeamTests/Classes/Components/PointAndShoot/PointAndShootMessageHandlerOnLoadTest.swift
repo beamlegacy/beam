@@ -35,7 +35,7 @@ class PointAndShootMessageHandlerOnLoadTest: PointAndShootTest {
         let positions = self.pns.webPositions
         let windowHref = self.pns.page.url!.string
         self.pointAndShootMessageHandler.onMessage(
-            messageName: "pointAndShoot_onLoad",
+            messageName: "pointAndShoot_frameBounds",
             messageBody: [
                 "href": windowHref,
                 "frames": [

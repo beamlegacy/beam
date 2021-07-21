@@ -6,8 +6,8 @@ class ShootFrameFusionRect {
     var maxX: CGFloat = -CGFloat.greatestFiniteMagnitude
     var maxY: CGFloat = -CGFloat.greatestFiniteMagnitude
 
-    func getRect(shootSelections: [SelectionUI]) -> CGRect {
-        shootSelections.forEach { (selection) in
+    func getRect(targets: [PointAndShoot.Target]) -> CGRect {
+        targets.forEach { (selection) in
             let rect = selection.rect
             if rect.minX < minX {
                 minX = rect.minX

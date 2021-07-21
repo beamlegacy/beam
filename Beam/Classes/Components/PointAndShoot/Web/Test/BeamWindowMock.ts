@@ -1,4 +1,5 @@
 import {
+    BeamCrypto,
   BeamDocument,
   BeamHTMLElement,
   BeamLocation,
@@ -28,6 +29,15 @@ export class BeamVisualViewportMock extends BeamEventTargetMock implements BeamV
   width: number
 }
 
+export class BeamCryptoMock implements BeamCrypto {
+    getRandomValues(buffer: []) {
+      // Really basic mock for getting random numbers
+      return buffer.map(item => {
+        return Math.floor(Math.random() * 9999999)
+      })
+    }
+}
+
 export class BeamWindowMock extends BeamEventTargetMock implements BeamWindow {
   visualViewport = new BeamVisualViewportMock()
 
@@ -40,7 +50,7 @@ export class BeamWindowMock extends BeamEventTargetMock implements BeamWindow {
     this.location = location
     this.visualViewport.scale = 1
   }
-
+  crypto = new BeamCryptoMock()
   frameElement: any
   frames: any
 

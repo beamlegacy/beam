@@ -1,23 +1,12 @@
 {
-  "include": [
-    "**/*",
-    ".prettierrc.js"
-  ],
+  "include": ["**/*", ".prettierrc.js"],
   "compilerOptions": {
     "target": "ES2018",
-    "types": [
-      "jest",
-      "node"
-    ],
+    "types": ["jest", "node"],
     "sourceMap": true,
-    "typeRoots": [
-      "node_modules/@types"
-    ]
+    "typeRoots": ["node_modules/@types"],
+    "moduleResolution": "node"
   },
-  "types": [
-    "jest"
-  ],
-  "exclude": [
-    "**/*.test.ts"
-  ]
+  "types": ["jest"],
+  "exclude": ["**/*.test.ts"]
 }
