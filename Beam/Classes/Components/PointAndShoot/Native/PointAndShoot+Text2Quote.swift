@@ -21,7 +21,10 @@ extension PointAndShoot {
         let quote = BeamElement(mutableText)
         quote.query = self.page.originalQuery
         quote.kind = .quote(1, self.page.title, href)
-        quote.convertToEmbed() // if possible converts url to embed
+        if PreferencesManager.embedContentPreference == EmbedContent.always.id ||
+            PreferencesManager.embedContentPreference == EmbedContent.only.id {
+            quote.convertToEmbed() // if possible converts url to embed
+        }
         // If quote is image, download and convert quote to image kind
         if let src = quote.imageLink,
            let downloadImage = self.page.downloadManager?.downloadImage {

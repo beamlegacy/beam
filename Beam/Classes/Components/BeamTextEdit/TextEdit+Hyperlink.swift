@@ -57,7 +57,11 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
               linkCanBeEmbed(link) else { return }
         dismissFormatterView(inlineFormatter)
         let targetRange = linkRange.position..<linkRange.end
-        showHyperlinkContextMenu(for: node, targetRange: targetRange, frame: rect, url: link, linkTitle: selectedText, fromPaste: true)
+        if PreferencesManager.embedContentPreference == EmbedContent.always.id {
+            self.updateLinkToEmbed(in: node, at: targetRange)
+        } else if PreferencesManager.embedContentPreference == EmbedContent.only.id {
+            showHyperlinkContextMenu(for: node, targetRange: targetRange, frame: rect, url: link, linkTitle: selectedText, fromPaste: true)
+        }
     }
 
     public func linkStartedHovering(for currentNode: TextNode?, targetRange: Range<Int>, frame: NSRect?, url: URL?, linkTitle: String?) {
