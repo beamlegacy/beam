@@ -43,7 +43,6 @@ extension ElementNode {
             self.open = value
             layers[LayerName.indentLayer.rawValue]?.layer.isHidden = !value
         })
-        disclosureLayer.layer.isHidden = true
         addLayer(disclosureLayer, origin: point)
     }
 
@@ -88,7 +87,9 @@ extension ElementNode {
 
         if showDisclosureButton && PreferencesManager.alwaysShowBullets || !open {
             disclosureLayer.layer.isHidden = false
-        } else {
+        } else if showDisclosureButton && !PreferencesManager.alwaysShowBullets {
+            disclosureLayer.layer.opacity = 0
+        } else if !showDisclosureButton {
             disclosureLayer.layer.isHidden = true
         }
     }
@@ -98,7 +99,7 @@ extension ElementNode {
         let y = firstLineHeight + 8
         indentLayer.frame = NSRect(x: childInset + 4.5, y: y - 5, width: 1, height: frame.height - y - 5)
         indentLayer.layer.isHidden = children.isEmpty || !open
-        indentLayer.layer.isHidden = !PreferencesManager.alwaysShowBullets
+        indentLayer.layer.opacity = 0
     }
 
     internal func handle(hover: Bool) {
@@ -106,8 +107,27 @@ extension ElementNode {
         guard let indentLayer = layers[LayerName.indentLayer.rawValue] else { return }
 
         if open {
-            disclosureLayer.layer.isHidden = !hover
-            indentLayer.layer.isHidden = !hover
+            if hover && disclosureLayer.layer.opacity == 0 && indentLayer.layer.opacity == 0 {
+                let fadeIn = CABasicAnimation(keyPath: "opacity")
+                fadeIn.fromValue = 0
+                fadeIn.toValue = 1
+                fadeIn.duration = 0.1
+                fadeIn.timingFunction = CAMediaTimingFunction(name: .easeIn)
+                disclosureLayer.layer.add(fadeIn, forKey: "disclosureFadeIn")
+                indentLayer.layer.add(fadeIn, forKey: "indentFadeIn")
+                disclosureLayer.layer.opacity = 1
+                indentLayer.layer.opacity = 1
+            } else if !hover && disclosureLayer.layer.opacity == 1 && indentLayer.layer.opacity == 1 {
+                let fadeOut = CABasicAnimation(keyPath: "opacity")
+                fadeOut.fromValue = 1
+                fadeOut.toValue = 0
+                fadeOut.duration = 0.1
+                fadeOut.timingFunction = CAMediaTimingFunction(name: .easeOut)
+                disclosureLayer.layer.add(fadeOut, forKey: "disclosureFadeOut")
+                indentLayer.layer.add(fadeOut, forKey: "indentFadeOut")
+                disclosureLayer.layer.opacity = 0
+                indentLayer.layer.opacity = 0
+            }
         }
     }
 

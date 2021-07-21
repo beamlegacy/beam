@@ -280,7 +280,7 @@ public class ElementNode: Widget {
 
     override func mouseMoved(mouseInfo: MouseInfo) -> Bool {
         if !PreferencesManager.alwaysShowBullets && children.count > 0 {
-            handle(hover: localTextFrame.contains(mouseInfo.position))
+            handle(hover: localFrame.contains(mouseInfo.position))
         }
         return false
     }
