@@ -86,7 +86,7 @@ import Promises
         if isFromNoteSearch {
             noteController.setContents(url: url, text: title)
             isFromNoteSearch = false
-        } else {
+        } else if Configuration.browsingSessionCollectionIsOn {
             _ = noteController.add(url: url, text: title, reason: reason)
         }
     }
@@ -296,7 +296,7 @@ import Promises
             return
         }
         logInNote(url: url, title: title, reason: .loading)
-        self.title = noteController.element.text.text
+        self.title = title ?? ""
     }
 
     private func updateFavIcon() {
