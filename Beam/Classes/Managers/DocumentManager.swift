@@ -2328,12 +2328,9 @@ extension DocumentManager {
 }
 
 // MARK: - BeamObjectManagerDelegateProtocol
-extension DocumentManager: BeamObjectManagerDelegateProtocol {
-    func receivedBeamObjects<T: BeamObjectProtocol>(_ objects: [T]) throws {
-        guard let documents: [DocumentStruct] = objects as? [DocumentStruct] else {
-            throw DocumentManagerError.wrongObjectsType
-        }
-
+extension DocumentManager: BeamObjectManagerDelegate {
+    
+    func receivedObjects(_ documents: [DocumentStruct]) throws {
         Logger.shared.logDebug("Received \(documents.count) documents: updating",
                                category: .documentNetwork)
 

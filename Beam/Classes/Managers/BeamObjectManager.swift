@@ -3,8 +3,10 @@ import BeamCore
 
 // swiftlint:disable file_length
 protocol BeamObjectManagerDelegateProtocol {
-    // When new beam objects have been received and should be locally stored
-    func receivedBeamObjects<T: BeamObjectProtocol>(_ objects: [T]) throws
+    func parse<T: BeamObjectProtocol>(objects: [T]) throws
+
+//    // When new beam objects have been received and should be locally stored
+//    func receivedBeamObjects<T: BeamObjectProtocol>(_ objects: [T]) throws
 
     // Called when `BeamObjectManager` wants to store all existing `Document` as `BeamObject`
     // it will call this method
@@ -16,6 +18,26 @@ protocol BeamObjectManagerDelegateProtocol {
     // Called within `DocumentManager` to store those objects as `BeamObject`
     func saveOnBeamObjectsAPI(_ objects: [BeamObjectProtocol],
                               _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask?
+}
+
+protocol BeamObjectManagerDelegate: BeamObjectManagerDelegateProtocol {
+    associatedtype BeamObjectType: BeamObjectProtocol
+    func registerOnBeamObjectManager()
+    func receivedObjects(_ objects: [BeamObjectType]) throws
+}
+
+extension BeamObjectManagerDelegate {
+    func registerOnBeamObjectManager() {
+        BeamObjectManager.register(self, object: BeamObjectType.self)
+    }
+
+    func parse<T: BeamObjectProtocol>(objects: [T]) throws {
+        guard let parsedObjects = objects as? [BeamObjectType] else {
+            return
+        }
+
+        try receivedObjects(parsedObjects)
+    }
 }
 
 enum BeamObjectManagerError: Error {
@@ -75,7 +97,7 @@ class BeamObjectManager {
     private static var networkRequests: [UUID: APIRequest] = [:]
     private static var urlSessionTasks: [URLSessionTask] = []
 
-    static func register<M: BeamObjectManagerDelegateProtocol, O: BeamObjectProtocol>(_ manager: M, object: O.Type) {
+    public static func register<M: BeamObjectManagerDelegateProtocol, O: BeamObjectProtocol>(_ manager: M, object: O.Type) {
         managerInstances[object.beamObjectTypeName] = manager
         translators[object.beamObjectTypeName] = { manager, objects in
             do {
@@ -83,7 +105,7 @@ class BeamObjectManager {
                     try $0.decodeBeamObject()
                 }
 
-                try manager.receivedBeamObjects(encapsulatedObjects)
+                try manager.parse(objects: encapsulatedObjects)
             } catch {
                 Logger.shared.logError("Could not call manager: \(error.localizedDescription)", category: .beamObject)
             }

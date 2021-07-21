@@ -21,22 +21,10 @@ class PasswordManager {
     static var passwordsDBPath: String { BeamData.dataFolder(fileName: "passwords.db") }
 }
 
-extension PasswordManager: BeamObjectManagerDelegateProtocol {
-    static var typeName: String { "password" }
-    static var objectType: BeamObjectProtocol.Type { PasswordRecord.self }
+extension PasswordManager: BeamObjectManagerDelegate {
+    typealias BeamObjectType = PasswordRecord
 
-    func receivedBeamObjects(_ objects: [BeamObject]) throws {
-        let passwords: [PasswordRecord] = try objects.map {
-            try $0.decodeBeamObject()
-        }
-        try receivedBeamObjects(passwords)
-    }
-
-    func receivedBeamObjects<T: BeamObjectProtocol>(_ objects: [T]) throws {
-        guard let passwords: [PasswordRecord] = objects as? [PasswordRecord] else {
-            throw PasswordManagerError.wrongObjectsType
-        }
-
+    func receivedObjects(_ passwords: [PasswordRecord]) throws {
         Logger.shared.logDebug("Received \(passwords.count) passwords: updating",
                                category: .passwordNetwork)
 

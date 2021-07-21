@@ -35,7 +35,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
             Configuration.beamObjectAPIEnabled = true
 
             BeamObjectManager.unRegisterAll()
-            BeamObjectManager.register(MyRemoteObjectManager(), object: MyRemoteObject.self)
+            MyRemoteObjectManager().registerOnBeamObjectManager()
         }
 
         afterEach {
@@ -1039,13 +1039,11 @@ class MyRemoteObjectManager {
     static var receivedMyRemoteObjects: [MyRemoteObject] = []
 }
 
-extension MyRemoteObjectManager: BeamObjectManagerDelegateProtocol {
-    func receivedBeamObjects<T: BeamObjectProtocol>(_ objects: [T]) throws {
-        guard let myRemoteObjects: [MyRemoteObject] = objects as? [MyRemoteObject] else {
-            throw DocumentManagerError.wrongObjectsType
-        }
+extension MyRemoteObjectManager: BeamObjectManagerDelegate {
+    typealias BeamObjectType = MyRemoteObject
 
-        Self.receivedMyRemoteObjects.append(contentsOf: myRemoteObjects)
+    func receivedObjects(_ objects: [MyRemoteObject]) throws {
+        Self.receivedMyRemoteObjects.append(contentsOf: objects)
     }
 
     func saveAllOnBeamObjectApi(_ completion: @escaping ((Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {

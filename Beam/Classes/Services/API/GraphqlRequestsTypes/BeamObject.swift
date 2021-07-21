@@ -11,8 +11,8 @@ protocol BeamObjectProtocol: Codable {
     var updatedAt: Date { get set }
     var deletedAt: Date? { get set }
 
-    // IMPORTANT: make sure you list in `enum CodingKeys: String, CodingKey` what you want to store as `BeamObject`
-    // and not include `previousChecksum` and `checksum`
+    // IMPORTANT: make sure you list in `enum CodingKeys: String, CodingKey` what you want
+    // to store as `BeamObject` and not include `previousChecksum` and `checksum`
     var previousChecksum: String? { get set }
     var checksum: String? { get set }
 }
