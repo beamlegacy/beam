@@ -194,6 +194,10 @@ public class ElementNode: Widget {
                 updateTextChildren(elements: elements)
             }.store(in: &scope)
 
+        PreferencesManager.$alwaysShowBullets.sink { [unowned self] newValue in
+            self.alwaysShowLayers(isOn: newValue)
+        }.store(in: &scope)
+
         subscribeToElement(element)
 
         setAccessibilityLabel("ElementNode")
@@ -211,6 +215,10 @@ public class ElementNode: Widget {
             .sink { [unowned self] elements in
                 updateTextChildren(elements: elements)
             }.store(in: &scope)
+
+        PreferencesManager.$alwaysShowBullets.sink { [unowned self] newValue in
+            self.alwaysShowLayers(isOn: newValue)
+        }.store(in: &scope)
 
         subscribeToElement(element)
 
@@ -279,7 +287,7 @@ public class ElementNode: Widget {
     // MARK: - Mouse Events
 
     override func mouseMoved(mouseInfo: MouseInfo) -> Bool {
-        if !PreferencesManager.alwaysShowBullets && children.count > 0 {
+        if !PreferencesManager.alwaysShowBullets && children.count > 0 && self != root {
             handle(hover: localFrame.contains(mouseInfo.position))
         }
         return false

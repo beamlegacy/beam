@@ -35,7 +35,7 @@ extension ElementNode {
         indentLayer.backgroundColor = BeamColor.Editor.indentBackground.cgColor
         indentLayer.enableAnimations = false
         addLayer(Layer(name: LayerName.indentLayer.rawValue, layer: indentLayer))
-        updateIndentLayer()
+        updateIndentLayer(with: PreferencesManager.alwaysShowBullets ? 1 : 0)
     }
 
     private func createDisclosureLayer(at point: NSPoint) {
@@ -44,6 +44,7 @@ extension ElementNode {
             layers[LayerName.indentLayer.rawValue]?.layer.isHidden = !value
         })
         addLayer(disclosureLayer, origin: point)
+        updateDisclosureLayer(alwaysShowBullets: PreferencesManager.alwaysShowBullets, with: PreferencesManager.alwaysShowBullets ? 1 : 0)
     }
 
     private func createBulletPointLayer(at point: NSPoint) {
@@ -66,67 +67,69 @@ extension ElementNode {
 
     // MARK: - Update Layers
     func updateElementLayers() {
-        updateBulletLayer()
-        updateDisclosureLayer()
+        updateBulletLayer(alwaysShowBullets: PreferencesManager.alwaysShowBullets)
+        updateDisclosureLayer(alwaysShowBullets: PreferencesManager.alwaysShowBullets)
         updateIndentLayer()
         updateCheckboxLayer()
     }
 
-    private func updateBulletLayer() {
+    func alwaysShowLayers(isOn: Bool) {
+        updateBulletLayer(alwaysShowBullets: isOn)
+        updateDisclosureLayer(alwaysShowBullets: isOn, with: isOn ? 1 : 0)
+        updateIndentLayer(with: isOn ? 1 : 0)
+    }
+
+    private func updateBulletLayer(alwaysShowBullets: Bool) {
         guard let bulletLayer = self.layers[LayerName.bullet.rawValue] else { return }
 
-        if showDisclosureButton || !PreferencesManager.alwaysShowBullets {
+        if showDisclosureButton || !alwaysShowBullets {
             bulletLayer.layer.isHidden = true
-        } else if PreferencesManager.alwaysShowBullets {
+        } else if alwaysShowBullets {
             bulletLayer.layer.isHidden = false
         }
     }
 
-    private func updateDisclosureLayer() {
+    private func updateDisclosureLayer(alwaysShowBullets: Bool, with opacity: Float? = nil) {
         guard let disclosureLayer = self.layers[LayerName.disclosure.rawValue] as? ChevronButton else { return }
 
-        if showDisclosureButton && PreferencesManager.alwaysShowBullets || !open {
+        if showDisclosureButton && alwaysShowBullets || !open {
             disclosureLayer.layer.isHidden = false
-        } else if showDisclosureButton && !PreferencesManager.alwaysShowBullets {
-            disclosureLayer.layer.opacity = 0
+        } else if showDisclosureButton && !alwaysShowBullets {
+            disclosureLayer.layer.isHidden = false
         } else if !showDisclosureButton {
             disclosureLayer.layer.isHidden = true
         }
+        if let opacityValue = opacity {
+            disclosureLayer.layer.opacity = opacityValue
+        }
     }
 
-    private func updateIndentLayer() {
+    private func updateIndentLayer(with opacity: Float? = nil) {
         guard let indentLayer = layers[LayerName.indentLayer.rawValue] else { return }
         let y = firstLineHeight + 8
         indentLayer.frame = NSRect(x: childInset + 4.5, y: y - 5, width: 1, height: frame.height - y - 5)
         indentLayer.layer.isHidden = children.isEmpty || !open
-        indentLayer.layer.opacity = 0
+        if let opacityValue = opacity {
+            indentLayer.layer.opacity = opacityValue
+        }
     }
 
     internal func handle(hover: Bool) {
-        guard let disclosureLayer = self.layers[LayerName.disclosure.rawValue] as? ChevronButton else { return }
+        guard let disclosureLayer = layers[LayerName.disclosure.rawValue] else { return }
         guard let indentLayer = layers[LayerName.indentLayer.rawValue] else { return }
-
         if open {
-            if hover && disclosureLayer.layer.opacity == 0 && indentLayer.layer.opacity == 0 {
-                let fadeIn = CABasicAnimation(keyPath: "opacity")
-                fadeIn.fromValue = 0
-                fadeIn.toValue = 1
-                fadeIn.duration = 0.1
-                fadeIn.timingFunction = CAMediaTimingFunction(name: .easeIn)
-                disclosureLayer.layer.add(fadeIn, forKey: "disclosureFadeIn")
-                indentLayer.layer.add(fadeIn, forKey: "indentFadeIn")
-                disclosureLayer.layer.opacity = 1
-                indentLayer.layer.opacity = 1
-            } else if !hover && disclosureLayer.layer.opacity == 1 && indentLayer.layer.opacity == 1 {
-                let fadeOut = CABasicAnimation(keyPath: "opacity")
-                fadeOut.fromValue = 1
-                fadeOut.toValue = 0
-                fadeOut.duration = 0.1
-                fadeOut.timingFunction = CAMediaTimingFunction(name: .easeOut)
-                disclosureLayer.layer.add(fadeOut, forKey: "disclosureFadeOut")
-                indentLayer.layer.add(fadeOut, forKey: "indentFadeOut")
-                disclosureLayer.layer.opacity = 0
-                indentLayer.layer.opacity = 0
+            if hover && disclosureLayer.layer.opacity == 0 && indentLayer.layer.opacity == 0 ||
+                !hover && disclosureLayer.layer.opacity == 1 && indentLayer.layer.opacity == 1 {
+                let oldValue = disclosureLayer.layer.opacity
+                let newValue: Float = oldValue == 0 ? 1 : 0
+                let opacityAnimation = CABasicAnimation(keyPath: "opacity")
+                opacityAnimation.fromValue = oldValue
+                opacityAnimation.toValue = newValue
+                opacityAnimation.duration = 0.3
+                disclosureLayer.layer.add(opacityAnimation, forKey: "disclosureOpacity")
+                indentLayer.layer.add(opacityAnimation, forKey: "indentOpacity")
+                disclosureLayer.layer.opacity = newValue
+                indentLayer.layer.opacity = newValue
             }
         }
     }
