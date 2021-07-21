@@ -13,8 +13,6 @@ enum DocumentManagerError: Error, Equatable {
     case localDocumentNotFound
     case idNotFound
     case operationCancelled
-    case wrongObjectsType
-    case databaseNotFound
 }
 
 extension DocumentManagerError: LocalizedError {
@@ -28,10 +26,6 @@ extension DocumentManagerError: LocalizedError {
             return "id Not Found"
         case .operationCancelled:
             return "operation cancelled"
-        case .wrongObjectsType:
-            return "wrong objects type"
-        case .databaseNotFound:
-            return "Database not found"
         }
     }
 }
@@ -2329,7 +2323,6 @@ extension DocumentManager {
 
 // MARK: - BeamObjectManagerDelegateProtocol
 extension DocumentManager: BeamObjectManagerDelegate {
-    
     func receivedObjects(_ documents: [DocumentStruct]) throws {
         Logger.shared.logDebug("Received \(documents.count) documents: updating",
                                category: .documentNetwork)
@@ -2389,12 +2382,8 @@ extension DocumentManager: BeamObjectManagerDelegate {
     }
 
     @discardableResult
-    func saveOnBeamObjectAPI(_ object: BeamObjectProtocol,
+    func saveOnBeamObjectAPI(_ documentStruct: DocumentStruct,
                              _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
-        guard let documentStruct = object as? DocumentStruct else {
-            throw DatabaseManagerError.wrongObjectsType
-        }
-
         /*
          Saving documentStruct and database in one call as Document has a dependency on Database
          */
@@ -2414,11 +2403,8 @@ extension DocumentManager: BeamObjectManagerDelegate {
         return try saveOnBeamObjectAPI(documentStruct: documentStruct, completion)
     }
 
-    func saveOnBeamObjectsAPI(_ objects: [BeamObjectProtocol],
+    func saveOnBeamObjectsAPI(_ documentStructs: [DocumentStruct],
                               _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
-        guard let documentStructs = objects as? [DocumentStruct] else {
-            throw DatabaseManagerError.wrongObjectsType
-        }
         return try saveOnBeamObjectsAPI(documentStructs: documentStructs, completion)
     }
 

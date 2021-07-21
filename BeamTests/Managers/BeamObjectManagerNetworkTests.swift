@@ -1051,12 +1051,12 @@ extension MyRemoteObjectManager: BeamObjectManagerDelegate {
         return nil
     }
 
-    func saveOnBeamObjectAPI(_ object: BeamObjectProtocol, _ completion: @escaping ((Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
+    func saveOnBeamObjectAPI(_ object: MyRemoteObject, _ completion: @escaping ((Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
         completion(.success(true))
         return nil
     }
 
-    func saveOnBeamObjectsAPI(_ objects: [BeamObjectProtocol], _ completion: @escaping ((Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
+    func saveOnBeamObjectsAPI(_ objects: [MyRemoteObject], _ completion: @escaping ((Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
         completion(.success(true))
         return nil
     }

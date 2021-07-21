@@ -1082,13 +1082,8 @@ extension DatabaseManager: BeamObjectManagerDelegate {
     }
 
     @discardableResult
-    func saveOnBeamObjectAPI(_ object: BeamObjectProtocol,
+    func saveOnBeamObjectAPI(_ databaseStruct: DatabaseStruct,
                              _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
-        guard let databaseStruct = object as? DatabaseStruct else {
-            completion(.failure(DatabaseManagerError.wrongObjectsType))
-            return nil
-        }
-
         // TODO: Race conditions, add semaphore 
         Self.networkTasks[databaseStruct.id]?.cancel()
         let networkTask = try saveOnBeamObjectAPI(databaseStruct: databaseStruct, completion)
@@ -1098,12 +1093,8 @@ extension DatabaseManager: BeamObjectManagerDelegate {
     }
 
     @discardableResult
-    func saveOnBeamObjectsAPI(_ objects: [BeamObjectProtocol],
+    func saveOnBeamObjectsAPI(_ databaseStructs: [DatabaseStruct],
                               _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
-        guard let databaseStructs = objects as? [DatabaseStruct] else {
-            completion(.failure(DatabaseManagerError.wrongObjectsType))
-            return nil
-        }
         return try saveOnBeamObjectsAPI(databaseStructs: databaseStructs, completion)
     }
 

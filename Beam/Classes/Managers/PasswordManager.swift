@@ -43,14 +43,10 @@ extension PasswordManager: BeamObjectManagerDelegate {
         return try saveOnBeamObjectsAPI(passwords, completion)
     }
 
-    func saveOnBeamObjectAPI(_ object: BeamObjectProtocol,
+    func saveOnBeamObjectAPI(_ password: PasswordRecord,
                              _ completion: @escaping ((Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw BeamObjectManagerError.notAuthenticated
-        }
-
-        guard let password = object as? PasswordRecord else {
-            throw PasswordManagerError.wrongObjectsType
         }
 
         let objectManager = BeamObjectManager()
@@ -69,13 +65,10 @@ extension PasswordManager: BeamObjectManagerDelegate {
         }
     }
 
-    func saveOnBeamObjectsAPI(_ objects: [BeamObjectProtocol], _ completion: @escaping ((Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
+    func saveOnBeamObjectsAPI(_ passwords: [PasswordRecord],
+                              _ completion: @escaping ((Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw BeamObjectManagerError.notAuthenticated
-        }
-
-        guard let passwords = objects as? [PasswordRecord] else {
-            throw PasswordManagerError.wrongObjectsType
         }
 
         let objectManager = BeamObjectManager()
