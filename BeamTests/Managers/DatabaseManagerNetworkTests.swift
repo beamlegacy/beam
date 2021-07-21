@@ -615,6 +615,28 @@ class DatabaseManagerNetworkTests: QuickSpec {
                     expect(remoteObject2) == dbStruct2
                 }
             }
+
+            describe("receivedObjects()") {
+                var dbStruct: DatabaseStruct!
+                var dbStruct2: DatabaseStruct!
+                beforeEach {
+                    dbStruct = helper.createDatabaseStruct("995d94e1-e0df-4eca-93e6-8778984bcd29", "Database 1")
+                    dbStruct2 = helper.createDatabaseStruct("995d94e1-e0df-4eca-93e6-8778984bcd39", "Database 2")
+                }
+
+                it("saves to local objects") {
+                    try sut.receivedObjects([dbStruct, dbStruct2]) { result in
+                        expect { try result.get() }.toNot(throwError())
+                        expect { try result.get() } == true
+                        done()
+                    }
+
+                    expect(1) == Database.countWithPredicate(CoreDataManager.shared.mainContext,
+                                                             NSPredicate(format: "id = %@", dbStruct.id as CVarArg))
+                    expect(1) == Database.countWithPredicate(CoreDataManager.shared.mainContext,
+                                                             NSPredicate(format: "id = %@", dbStruct2.id as CVarArg))
+                }
+            }
         }
     }
 }

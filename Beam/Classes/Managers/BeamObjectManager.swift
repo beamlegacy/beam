@@ -2,83 +2,6 @@ import Foundation
 import BeamCore
 
 // swiftlint:disable file_length
-protocol BeamObjectManagerDelegateProtocol {
-    func parse<T: BeamObjectProtocol>(objects: [T]) throws
-
-    // Called when `BeamObjectManager` wants to store all existing `Document` as `BeamObject`
-    // it will call this method
-    func saveAllOnBeamObjectApi(_ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask?
-}
-
-protocol BeamObjectManagerDelegate: class, BeamObjectManagerDelegateProtocol {
-    associatedtype BeamObjectType: BeamObjectProtocol
-    func registerOnBeamObjectManager()
-
-    // When new objects have been received and should be stored locally by the manager
-    func receivedObjects(_ objects: [BeamObjectType]) throws
-
-    // Called within `DocumentManager` to store this object as `BeamObject`
-    func saveOnBeamObjectAPI(_ object: BeamObjectType,
-                             _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask?
-    // Called within `DocumentManager` to store those objects as `BeamObject`
-    func saveOnBeamObjectsAPI(_ objects: [BeamObjectType],
-                              _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask?
-}
-
-extension BeamObjectManagerDelegate {
-    func registerOnBeamObjectManager() {
-        BeamObjectManager.register(self, object: BeamObjectType.self)
-    }
-
-    func parse<T: BeamObjectProtocol>(objects: [T]) throws {
-        guard let parsedObjects = objects as? [BeamObjectType] else {
-            return
-        }
-
-        try receivedObjects(parsedObjects)
-    }
-}
-
-enum BeamObjectManagerError: Error {
-    case notSuccess
-    case notAuthenticated
-    case multipleErrors([Error])
-    case beamObjectInvalidChecksum(BeamObject)
-    case beamObjectDecodingError
-    case beamObjectEncodingError
-}
-
-extension BeamObjectManagerError: LocalizedError {
-    public var errorDescription: String? {
-        switch self {
-        case .notSuccess:
-            return "Not Success"
-        case .notAuthenticated:
-            return "Not Authenticated"
-        case .multipleErrors(let errors):
-            return "Multiple errors: \(errors)"
-        case .beamObjectInvalidChecksum(let object):
-            return "Invalid Checksum \(object.id)"
-        case .beamObjectDecodingError:
-            return "Decoding Error"
-        case .beamObjectEncodingError:
-            return "Encoding Error"
-        }
-    }
-}
-
-enum BeamObjectManagerObjectError<T: BeamObjectProtocol>: Error {
-    case beamObjectInvalidChecksum(T)
-}
-
-extension BeamObjectManagerObjectError: LocalizedError {
-    public var errorDescription: String? {
-        switch self {
-        case .beamObjectInvalidChecksum(let object):
-            return "Invalid Checksum \(object.beamObjectId)"
-        }
-    }
-}
 
 enum BeamObjectConflictResolution {
     // Will overwrite remote object with values from local ones
@@ -96,7 +19,7 @@ class BeamObjectManager {
     private static var networkRequests: [UUID: APIRequest] = [:]
     private static var urlSessionTasks: [URLSessionTask] = []
 
-    public static func register<M: BeamObjectManagerDelegateProtocol, O: BeamObjectProtocol>(_ manager: M, object: O.Type) {
+    static func register<M: BeamObjectManagerDelegateProtocol, O: BeamObjectProtocol>(_ manager: M, object: O.Type) {
         managerInstances[object.beamObjectTypeName] = manager
         translators[object.beamObjectTypeName] = { manager, objects in
             do {
@@ -118,9 +41,9 @@ class BeamObjectManager {
 
     static func setup() {
         // Add any manager using BeamObjects here
-        register(DocumentManager(), object: DocumentStruct.self)
-        register(DatabaseManager(), object: DatabaseStruct.self)
-        register(PasswordManager(), object: PasswordRecord.self)
+        DocumentManager().registerOnBeamObjectManager()
+        DatabaseManager().registerOnBeamObjectManager()
+        PasswordManager().registerOnBeamObjectManager()
     }
 
     func clearNetworkCalls() {

@@ -2382,34 +2382,7 @@ extension DocumentManager: BeamObjectManagerDelegate {
     }
 
     @discardableResult
-    func saveOnBeamObjectAPI(_ documentStruct: DocumentStruct,
-                             _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
-        /*
-         Saving documentStruct and database in one call as Document has a dependency on Database
-         */
-        // TODO: use DispatchGroup or 1 API call for database+documentstruct
-        let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
-        var dbStruct: DatabaseStruct?
-        context.performAndWait {
-            guard let dbDatabase = try? Database.rawFetchWithId(context, documentStruct.databaseId) else { return }
-            dbStruct = DatabaseStruct(database: dbDatabase)
-        }
-
-        if let databaseStruct = dbStruct {
-            let databaseManager = DatabaseManager()
-            _ = try? databaseManager.saveOnBeamObjectAPI(databaseStruct: databaseStruct) { _ in }
-        }
-
-        return try saveOnBeamObjectAPI(documentStruct: documentStruct, completion)
-    }
-
-    func saveOnBeamObjectsAPI(_ documentStructs: [DocumentStruct],
-                              _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
-        return try saveOnBeamObjectsAPI(documentStructs: documentStructs, completion)
-    }
-
-    @discardableResult
-    internal func saveOnBeamObjectsAPI(documentStructs: [DocumentStruct],
+    internal func saveOnBeamObjectsAPI(_ documentStructs: [DocumentStruct],
                                        _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw BeamObjectManagerError.notAuthenticated
@@ -2509,18 +2482,37 @@ extension DocumentManager: BeamObjectManagerDelegate {
         }
 
         do {
-            try self.saveOnBeamObjectsAPI(documentStructs: newDocumentStructs, completion)
+            try self.saveOnBeamObjectsAPI(newDocumentStructs, completion)
         } catch {
             completion(.failure(error))
         }
     }
 
     @discardableResult
-    internal func saveOnBeamObjectAPI(documentStruct: DocumentStruct,
-                                      _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
+    func saveOnBeamObjectAPI(_ documentStruct: DocumentStruct,
+                             _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw BeamObjectManagerError.notAuthenticated
         }
+
+        /*
+         Saving documentStruct and database in one call as Document has a dependency on Database
+         */
+        // TODO: use DispatchGroup or 1 API call for database+documentstruct
+        let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
+        var dbStruct: DatabaseStruct?
+        context.performAndWait {
+            guard let dbDatabase = try? Database.rawFetchWithId(context, documentStruct.databaseId) else { return }
+            dbStruct = DatabaseStruct(database: dbDatabase)
+        }
+
+        if let databaseStruct = dbStruct {
+            let databaseManager = DatabaseManager()
+            _ = try? databaseManager.saveOnBeamObjectAPI(databaseStruct) { _ in }
+        }
+        /*
+         *
+         */
 
         let objectManager = BeamObjectManager()
         objectManager.conflictPolicyForSave = .fetchRemoteAndError
@@ -2548,7 +2540,7 @@ extension DocumentManager: BeamObjectManagerDelegate {
             // Checksum issue, the API side of the object was updated since our last fetch
             let mergedDocumentStruct = try manageConflict(documentStruct, remoteBeamObject, error)
 
-            try self.saveOnBeamObjectAPI(documentStruct: mergedDocumentStruct, completion)
+            try self.saveOnBeamObjectAPI(mergedDocumentStruct, completion)
         } catch {
             completion(.failure(error))
         }

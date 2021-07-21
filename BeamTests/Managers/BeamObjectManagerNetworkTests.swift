@@ -411,12 +411,12 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                                 expect(object2) == (try beamObjectHelper.fetchOnAPI(object2.beamObjectId))
 
                                 // `previousChecksum` should be set on returned objects
-                                let beamObject = try BeamObject(object, MyRemoteObject.beamObjectTypeName)
-                                expect(returnedObjects.first?.previousChecksum) == beamObject.dataChecksum
-
                                 // TODO: random  error
+                                let beamObject = try BeamObject(object, MyRemoteObject.beamObjectTypeName)
                                 let beamObject2 = try BeamObject(object2, MyRemoteObject.beamObjectTypeName)
+                                expect(returnedObjects.first?.previousChecksum) == beamObject.dataChecksum
                                 expect(returnedObjects.last?.previousChecksum) == beamObject2.dataChecksum
+                                
                             }
 
                             it("updates object with incorrect checksum") {
@@ -518,6 +518,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                                 expect(object2) == (try beamObjectHelper.fetchOnAPI(object2.beamObjectId))
 
                                 // `previousChecksum` should be set on returned objects
+                                // TODO: random error
                                 expect(returnedBeamObjects.first?.previousChecksum) == beamObjects.first?.dataChecksum
                                 expect(returnedBeamObjects.last?.previousChecksum) == beamObjects.last?.dataChecksum
                             }

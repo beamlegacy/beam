@@ -2,15 +2,12 @@ import Foundation
 import BeamCore
 
 enum PasswordManagerError: Error, Equatable {
-    case wrongObjectsType
     case localPasswordNotFound
 }
 
 extension PasswordManagerError: LocalizedError {
     public var errorDescription: String? {
         switch self {
-        case .wrongObjectsType:
-            return "wrong objects type"
         case .localPasswordNotFound:
             return "local Password not found"
         }

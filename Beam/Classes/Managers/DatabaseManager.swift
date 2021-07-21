@@ -8,7 +8,6 @@ import BeamCore
 enum DatabaseManagerError: Error, Equatable {
     case operationCancelled
     case localDatabaseNotFound
-    case wrongObjectsType
 }
 
 extension DatabaseManagerError: LocalizedError {
@@ -16,8 +15,6 @@ extension DatabaseManagerError: LocalizedError {
         switch self {
         case .operationCancelled:
             return "operation cancelled"
-        case .wrongObjectsType:
-            return "wrong objects type"
         case .localDatabaseNotFound:
             return "local Database Not Found"
         }
@@ -1082,25 +1079,8 @@ extension DatabaseManager: BeamObjectManagerDelegate {
     }
 
     @discardableResult
-    func saveOnBeamObjectAPI(_ databaseStruct: DatabaseStruct,
-                             _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
-        // TODO: Race conditions, add semaphore 
-        Self.networkTasks[databaseStruct.id]?.cancel()
-        let networkTask = try saveOnBeamObjectAPI(databaseStruct: databaseStruct, completion)
-        Self.networkTasks[databaseStruct.id] = networkTask
-
-        return networkTask
-    }
-
-    @discardableResult
     func saveOnBeamObjectsAPI(_ databaseStructs: [DatabaseStruct],
                               _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
-        return try saveOnBeamObjectsAPI(databaseStructs: databaseStructs, completion)
-    }
-
-    @discardableResult
-    internal func saveOnBeamObjectsAPI(databaseStructs: [DatabaseStruct],
-                                       _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             completion(.success(false))
             return nil
@@ -1187,7 +1167,7 @@ extension DatabaseManager: BeamObjectManagerDelegate {
     }
 
     @discardableResult
-    func saveOnBeamObjectAPI(databaseStruct: DatabaseStruct,
+    func saveOnBeamObjectAPI(_ databaseStruct: DatabaseStruct,
                              _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             completion(.success(false))
@@ -1196,7 +1176,10 @@ extension DatabaseManager: BeamObjectManagerDelegate {
 
         let objectManager = BeamObjectManager()
 
-        return try objectManager.saveToAPI(databaseStruct) { result in
+        // TODO: Race conditions, add semaphore
+        Self.networkTasks[databaseStruct.id]?.cancel()
+
+        let networkTask = try objectManager.saveToAPI(databaseStruct) { result in
             switch result {
             case .failure(let error):
                 self.saveOnBeamObjectAPIFailure(databaseStruct, error, completion)
@@ -1204,6 +1187,10 @@ extension DatabaseManager: BeamObjectManagerDelegate {
                 self.saveOnBeamObjectsAPISuccess([remoteDatabaseStruct], completion)
             }
         }
+
+        Self.networkTasks[databaseStruct.id] = networkTask
+
+        return networkTask
     }
 
     internal func saveOnBeamObjectAPIFailure(_ databaseStruct: DatabaseStruct,
