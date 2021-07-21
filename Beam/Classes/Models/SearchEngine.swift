@@ -2,6 +2,7 @@ import Foundation
 
 protocol SearchEngine {
     var name: String { get }
+    var description: String { get }
     var query: String { get set }
     var formattedQuery: String { get }
     var searchUrl: String { get }
@@ -17,6 +18,7 @@ extension SearchEngine {
 
 class GoogleSearch: SearchEngine {
     let name: String = "Google"
+    let description: String = "Google Search"
     var query: String = ""
     let prefix: String = "https://www.google.com/search?q="
     var searchUrl: String {
@@ -36,6 +38,7 @@ class GoogleSearch: SearchEngine {
 
 class BingSearch: SearchEngine {
     let name: String = "Bing"
+    let description: String = "Bing Search"
     var query: String = ""
     let prefix: String = "https://www.bing.com/search?q="
     var searchUrl: String {
@@ -52,6 +55,7 @@ class BingSearch: SearchEngine {
 
 class DuckDuckGoSearch: SearchEngine {
     let name: String = "Duck Duck Go"
+    let description: String = "Duck Duck Search"
     var query: String = ""
     let prefix: String = "https://duckduckgo.com/?q="
     var searchUrl: String {

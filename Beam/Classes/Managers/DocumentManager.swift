@@ -208,6 +208,14 @@ public class DocumentManager: NSObject {
         return parseDocumentBody(document)
     }
 
+    func loadDocumentsById(ids: [UUID], context: NSManagedObjectContext? = nil) -> [DocumentStruct] {
+        do {
+            return try Document.fetchAllWithIds(context ?? mainContext, ids).compactMap {
+                parseDocumentBody($0)
+            }
+        } catch { return [] }
+    }
+
     func loadDocumentsWithType(type: DocumentType, _ limit: Int, _ fetchOffset: Int) -> [DocumentStruct] {
         do {
             return try Document.fetchWithTypeAndLimit(context: mainContext,
