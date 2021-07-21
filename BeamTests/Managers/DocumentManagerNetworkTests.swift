@@ -24,6 +24,8 @@ class DocumentManagerNetworkTests: QuickSpec {
         let beamHelper = BeamTestsHelper()
 
         beforeEach {
+            Configuration.beamObjectAPIEnabled = false
+
             coreDataManager = CoreDataManager()
             // Setup CoreData
             coreDataManager.setup()
@@ -34,6 +36,7 @@ class DocumentManagerNetworkTests: QuickSpec {
 
             sut.clearNetworkCalls()
             beamHelper.beginNetworkRecording()
+//            beamHelper.disableNetworkRecording()
 
             // Try to avoid issues with BeamTextTests creating documents when parsing links
             BeamNote.clearCancellables()
@@ -1892,6 +1895,126 @@ class DocumentManagerNetworkTests: QuickSpec {
                             }
                         }
                     }
+                }
+            }
+        }
+
+        describe("BeamObject API") {
+            let beamObjectHelper: BeamObjectTestsHelper = BeamObjectTestsHelper()
+
+            beforeEach {
+                Configuration.apiHostname = "http://api.beam.lvh.me:5000"
+                beamHelper.disableNetworkRecording()
+                Configuration.beamObjectAPIEnabled = true
+            }
+
+            describe("saveOnBeamObjectAPI()") {
+                var docStruct: DocumentStruct!
+                beforeEach {
+                    docStruct = helper.createDocumentStruct("995d94e1-e0df-4eca-93e6-8778984bcd29")
+                    _ = helper.saveLocally(docStruct)
+                }
+
+                it("saves as beamObject") {
+                    waitUntil(timeout: .seconds(10)) { done in
+                        do {
+                            try sut.saveOnBeamObjectAPI(docStruct) { result in
+                                expect { try result.get() }.toNot(throwError())
+                                expect { try result.get() } == true
+                                done()
+                            }
+                        } catch {
+                            fail(error.localizedDescription)
+                        }
+                    }
+
+                    let remoteObject: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct.beamObjectId)
+                    expect(remoteObject) == docStruct
+                }
+            }
+
+            describe("saveOnBeamObjectsAPI()") {
+                var docStruct: DocumentStruct!
+                var docStruct2: DocumentStruct!
+                beforeEach {
+                    docStruct = helper.createDocumentStruct("995d94e1-e0df-4eca-93e6-8778984bcd29", title: "Doc 1")
+                    _ = helper.saveLocally(docStruct)
+
+                    docStruct2 = helper.createDocumentStruct("995d94e1-e0df-4eca-93e6-8778984bcd39", title: "Doc 2")
+                    _ = helper.saveLocally(docStruct2)
+                }
+
+                it("saves as beamObjects") {
+                    waitUntil(timeout: .seconds(10)) { done in
+                        do {
+                            let objects: [DocumentStruct] = [docStruct, docStruct2]
+                            _ = try sut.saveOnBeamObjectsAPI(objects) { result in
+                                expect { try result.get() }.toNot(throwError())
+                                expect { try result.get() } == true
+                                done()
+                            }
+                        } catch {
+                            fail(error.localizedDescription)
+                        }
+                    }
+
+                    let remoteObject1: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct.beamObjectId)
+                    expect(remoteObject1) == docStruct
+
+                    let remoteObject2: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct2.beamObjectId)
+                    expect(remoteObject2) == docStruct2
+                }
+            }
+
+            describe("saveAllOnBeamObjectApi()") {
+                var docStruct: DocumentStruct!
+                var docStruct2: DocumentStruct!
+                beforeEach {
+                    docStruct = helper.createDocumentStruct("995d94e1-e0df-4eca-93e6-8778984bcd29", title: "Doc 1")
+                    _ = helper.saveLocally(docStruct)
+
+                    docStruct2 = helper.createDocumentStruct("995d94e1-e0df-4eca-93e6-8778984bcd39", title: "Doc 2")
+                    _ = helper.saveLocally(docStruct2)
+                }
+
+                it("saves as beamObjects") {
+                    waitUntil(timeout: .seconds(10)) { done in
+                        do {
+                            _ = try sut.saveAllOnBeamObjectApi { result in
+                                expect { try result.get() }.toNot(throwError())
+                                expect { try result.get() } == true
+                                done()
+                            }
+                        } catch {
+                            fail(error.localizedDescription)
+                        }
+                    }
+
+                    let remoteObject1: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct.beamObjectId)
+                    expect(remoteObject1) == docStruct
+
+                    let remoteObject2: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct2.beamObjectId)
+                    expect(remoteObject2) == docStruct2
+                }
+            }
+
+            describe("receivedObjects()") {
+                var docStruct: DocumentStruct!
+                var docStruct2: DocumentStruct!
+                beforeEach {
+                    docStruct = helper.createDocumentStruct("995d94e1-e0df-4eca-93e6-8778984bcd29", title: "Doc 1")
+                    docStruct2 = helper.createDocumentStruct("995d94e1-e0df-4eca-93e6-8778984bcd39", title: "Doc 2")
+                }
+
+                it("saves to local objects") {
+                    let objects: [DocumentStruct] = [docStruct, docStruct2]
+
+                    try sut.receivedObjects(objects)
+
+                    expect(1) == Document.countWithPredicate(CoreDataManager.shared.mainContext,
+                                                             NSPredicate(format: "id = %@", docStruct.id as CVarArg))
+                    expect(1) == Document.countWithPredicate(CoreDataManager.shared.mainContext,
+                                                             NSPredicate(format: "id = %@", docStruct2.id as CVarArg))
                 }
             }
         }

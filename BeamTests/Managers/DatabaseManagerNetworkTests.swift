@@ -625,11 +625,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
                 }
 
                 it("saves to local objects") {
-                    try sut.receivedObjects([dbStruct, dbStruct2]) { result in
-                        expect { try result.get() }.toNot(throwError())
-                        expect { try result.get() } == true
-                        done()
-                    }
+                    try sut.receivedObjects([dbStruct, dbStruct2])
 
                     expect(1) == Database.countWithPredicate(CoreDataManager.shared.mainContext,
                                                              NSPredicate(format: "id = %@", dbStruct.id as CVarArg))

@@ -85,3 +85,21 @@ extension DocumentStruct {
         return result
     }
 }
+
+extension DocumentStruct: Equatable {
+    static public func == (lhs: DocumentStruct, rhs: DocumentStruct) -> Bool {
+
+        // Server side doesn't store milliseconds for updatedAt and createdAt.
+        // Local coredata does, rounding using Int() to compare them
+
+        lhs.id == rhs.id &&
+            lhs.title == rhs.title &&
+            lhs.data == rhs.data &&
+            lhs.documentType == rhs.documentType &&
+            lhs.isPublic == rhs.isPublic &&
+            lhs.databaseId == rhs.databaseId &&
+            lhs.createdAt.intValue == rhs.createdAt.intValue &&
+            lhs.updatedAt.intValue == rhs.updatedAt.intValue &&
+            lhs.deletedAt?.intValue == rhs.deletedAt?.intValue
+    }
+}
