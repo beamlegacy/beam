@@ -57,6 +57,7 @@ class OmniBarAutocompleteUITests: QuickSpec {
                 self.helper.searchField.typeText("Testing escape key")
                 expect(self.helper.inputHasFocus(self.helper.searchField)).to(beTrue())
                 let results = self.helper.allAutocompleteResults
+                expect(results.firstMatch.waitForExistence(timeout: 1)) == true
                 expect(results.count) > 0
 
                 // 1st esc clean autocomlete
@@ -229,7 +230,7 @@ class OmniBarAutocompleteUITests: QuickSpec {
                     expect(results.count) > 1
                     let firstResult = results.firstMatch
                     let selectedResultQuery = self.helper.allAutocompleteResults.matching(self.helper.autocompleteSelectedPredicate)
-                    let expectedIdentifier = "autocompleteResult-selected-https://fr.wikipedia.org/wiki/Hello_world-url"
+                    let expectedIdentifier = "autocompleteResult-selected-fr.wikipedia.org/wiki/Hello_world-url"
                     expect(firstResult.identifier) == expectedIdentifier
                     expect(self.helper.searchField.value as? String) == "fr.wikipedia.org/wiki/Hello_world"
 

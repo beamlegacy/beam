@@ -278,6 +278,10 @@ class Document: NSManagedObject, BeamCoreDataObject {
         return []
     }
 
+    class func fetchAllWithIds(_ context: NSManagedObjectContext, _ ids: [UUID]) throws -> [Document] {
+        try fetchAll(context, NSPredicate(format: "id IN %@", ids))
+    }
+
     class func fetchWithId(_ context: NSManagedObjectContext, _ id: UUID) throws -> Document? {
         try rawFetchFirst(context, NSPredicate(format: "id = %@", id as CVarArg))
     }

@@ -31,10 +31,11 @@ class AutocompleteManager: ObservableObject {
     let beamData: BeamData
 
     private let searchEngineCompleter: Autocompleter
-    private var searchEngineResultHandler: (([AutocompleteResult]) -> Void)?
-    private var searchEngineTimeoutBlock: DispatchWorkItem?
+    var searchEngine: SearchEngine {
+        searchEngineCompleter.searchEngine
+    }
     private var scope = Set<AnyCancellable>()
-    private var searchRequestsCancellables = Set<AnyCancellable>()
+    var searchRequestsCancellables = Set<AnyCancellable>()
 
     init(with data: BeamData, searchEngine: SearchEngine) {
         beamData = data
@@ -46,18 +47,6 @@ class AutocompleteManager: ObservableObject {
                 guard let self = self else { return }
                 self.buildAutocompleteResults(for: query)
             }.store(in: &scope)
-
-        searchEngineCompleter.$results.receive(on: RunLoop.main).sink { [weak self] results in
-            guard let self = self, let guessesHandler = self.searchEngineResultHandler else { return }
-            guessesHandler(results)
-        }.store(in: &scope)
-    }
-
-    private func autocompleteResultsUnique(sequence: [AutocompleteResult]) -> [AutocompleteResult] {
-        var seenText = Set<String>()
-        var seenUUID = Set<UUID>()
-
-        return sequence.filter { seenText.update(with: $0.text) == nil && seenUUID.update(with: $0.uuid) == nil }
     }
 
     private func getSelectedText(for text: String) -> String? {
@@ -99,84 +88,20 @@ class AutocompleteManager: ObservableObject {
         }
 
         stopCurrentCompletionWork()
-        let publishers = self.getAutocompletePublishers(for: searchText)
+        let publishers = getAutocompletePublishers(for: searchText) +
+            [getSearchEnginePublisher(for: searchText, searchEngine: searchEngineCompleter)]
         Publishers.MergeMany(publishers).collect()
             .receive(on: DispatchQueue.main)
             .sink { [weak self] publishersResults in
                 guard let self = self else { return }
-                let (finalResults, canCreateNote) = self.mergeAndSortPublishersResults(publishersResults: publishersResults, for: searchText)
+                let (finalResults, _) = self.mergeAndSortPublishersResults(publishersResults: publishersResults, for: searchText)
                 self.logAutocompleteResultFinished(for: searchText, finalResults: finalResults, startedAt: startChrono)
 
-                let onUpdateResultsBlock: (([AutocompleteResult]) -> Void)? = isRemovingCharacters ? nil : { [weak self] results in
-                    guard let self = self else { return }
-                    self.automaticallySelectFirstResultIfNeeded(withResults: results, searchText: searchText)
+                self.autocompleteResults = finalResults
+                if !isRemovingCharacters {
+                    self.automaticallySelectFirstResultIfNeeded(withResults: finalResults, searchText: searchText)
                 }
-                guard searchText.count > 1 else {
-                    self.autocompleteResults = finalResults
-                    onUpdateResultsBlock?(finalResults)
-                    return
-                }
-
-                let insertIndex = max(0, finalResults.count - (canCreateNote ? 1 : 0))
-                self.debouncedSearchEngineResults(for: searchText, currentResults: finalResults,
-                                                  insertIndex: insertIndex, onUpdateResultsBlock: onUpdateResultsBlock)
-
             }.store(in: &searchRequestsCancellables)
-    }
-
-    private func mergeAndSortPublishersResults(publishersResults: [AutocompletePublisherSourceResults],
-                                               for searchText: String) -> (results: [AutocompleteResult], canCreateNote: Bool) {
-        var autocompleteResults = [AutocompleteResult.Source: [AutocompleteResult]]()
-        publishersResults.forEach { someResults in
-            autocompleteResults[someResults.source, default: []].append(contentsOf: someResults.results)
-        }
-        if let noteResults = autocompleteResults[.note] {
-            autocompleteResults[.note] = self.autocompleteResultsUnique(sequence: noteResults)
-        }
-        var finalResults = self.sortResults(notesResults: autocompleteResults[.note, default: []],
-                                            historyResults: autocompleteResults[.history, default: []],
-                                            urlResults: autocompleteResults[.url, default: []],
-                                            topDomainResults: autocompleteResults[.topDomain, default: []])
-        var canCreateNote = false
-        if let createNoteResults = autocompleteResults[.createCard] {
-            canCreateNote = true
-            finalResults.append(contentsOf: createNoteResults)
-        }
-
-        return (results: finalResults, canCreateNote: canCreateNote)
-    }
-
-    private func debouncedSearchEngineResults(for searchText: String,
-                                              currentResults: [AutocompleteResult],
-                                              insertIndex: Int,
-                                              onUpdateResultsBlock: (([AutocompleteResult]) -> Void)?) {
-        searchEngineResultHandler = { [weak self] results in
-            guard let self = self else { return }
-            var newResults = currentResults
-            let maxGuesses = newResults.count > 2 ? 4 : 6
-            let toInsert = results.prefix(maxGuesses)
-            let atIndex = insertIndex
-            self.searchEngineTimeoutBlock?.cancel()
-            if self.searchEngineTimeoutBlock != nil {
-                newResults.insert(contentsOf: toInsert, at: atIndex)
-                self.autocompleteResults = newResults
-                onUpdateResultsBlock?(newResults)
-            } else if atIndex < self.autocompleteResults.count {
-                self.autocompleteResults.insert(contentsOf: toInsert, at: atIndex)
-            }
-        }
-        searchEngineCompleter.complete(query: searchText)
-
-        // Delay setting the results, so we give some time for search engine
-        // Preventing the UI to blink
-        searchEngineTimeoutBlock?.cancel()
-        let block = DispatchWorkItem(block: {
-            self.searchEngineTimeoutBlock = nil
-            self.autocompleteResults = currentResults
-            onUpdateResultsBlock?(currentResults)
-        })
-        searchEngineTimeoutBlock = block
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: block)
     }
 
     private func logAutocompleteResultFinished(for searchText: String, finalResults: [AutocompleteResult], startedAt: DispatchTime) {
@@ -190,11 +115,11 @@ class AutocompleteManager: ObservableObject {
         Logger.shared.logInfo("autocomplete results in \(elapsedTime) \(timeUnit)", category: .autocompleteManager)
     }
 
-    private func isResultCandidateForAutoselection(_ result: AutocompleteResult, forSearch searchText: String) -> Bool {
+    func isResultCandidateForAutoselection(_ result: AutocompleteResult, forSearch searchText: String) -> Bool {
         switch result.source {
         case .history: return result.text.lowercased().starts(with: searchText.lowercased())
         case .url:
-            guard let host = URL(string: result.text)?.host else { return false }
+            guard let host = result.url?.host ?? URL(string: result.text)?.host else { return false }
             return result.text.lowercased().contains(host)
         default:
             return false
@@ -209,45 +134,6 @@ class AutocompleteManager: ObservableObject {
             self.resetAutocompleteSelection(resetText: true)
         }
     }
-
-    private func sortResults(notesResults: [AutocompleteResult], historyResults: [AutocompleteResult], urlResults: [AutocompleteResult], topDomainResults: [AutocompleteResult]) -> [AutocompleteResult] {
-        // this logic should eventually become smarter to always include the right amount of result per source.
-
-        var results = [AutocompleteResult]()
-
-        let maxHistoryResults = notesResults.isEmpty ? 6 : 4
-        let historyResultsTruncated = Array(historyResults.prefix(maxHistoryResults))
-
-        let maxNotesSuggestions = historyResults.isEmpty ? 6 : 4
-        let notesResultsTruncated = Array(notesResults.prefix(maxNotesSuggestions))
-
-        let maxUrlSuggestions = urlResults.isEmpty ? 6 : 4
-        let urlResultsTruncated = Array(urlResults.prefix(maxUrlSuggestions))
-
-        results.append(contentsOf: urlResultsTruncated)
-        results.append(contentsOf: notesResultsTruncated)
-        results.append(contentsOf: historyResultsTruncated)
-
-        results.sort(by: { (lhs, rhs) in
-            let lhsr = lhs.text.lowercased().commonPrefix(with: lhs.completingText?.lowercased() ?? "").count
-            let rhsr = rhs.text.lowercased().commonPrefix(with: rhs.completingText?.lowercased() ?? "").count
-            return lhsr > rhsr
-        })
-
-        // Push top domain suggestion only when no other candidate is satisfying.
-        if let topDomain = topDomainResults.first {
-            if let topResult = results.first {
-                if !isResultCandidateForAutoselection(topResult, forSearch: searchQuery) {
-                    results.insert(topDomain, at: 0)
-                }
-            } else {
-                results.insert(topDomain, at: 0)
-            }
-        }
-
-        return results
-    }
-
 
     private func updateSearchQueryWhenSelectingAutocomplete(_ selectedIndex: Int?, previousSelectedIndex: Int?) {
         if let i = selectedIndex, i >= 0, i < autocompleteResults.count {
@@ -286,9 +172,6 @@ class AutocompleteManager: ObservableObject {
     private func stopCurrentCompletionWork() {
         searchRequestsCancellables.forEach { $0.cancel() }
         searchRequestsCancellables.removeAll()
-        searchEngineCompleter.clear()
-        searchEngineTimeoutBlock?.cancel()
-        searchEngineResultHandler = nil
     }
 }
 

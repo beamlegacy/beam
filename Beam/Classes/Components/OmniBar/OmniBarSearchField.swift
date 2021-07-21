@@ -71,7 +71,7 @@ struct OmniBarSearchField: View {
         if let info = autocompleteResult.information {
             return info
         } else if autocompleteResult.source == .autocomplete {
-            return Autocompleter.autocompleteResultDescription
+            return autocompleteManager.searchEngine.description
         }
         return nil
     }

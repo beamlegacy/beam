@@ -618,6 +618,7 @@
 		A5946846265E30350044A892 /* Fakery in Frameworks */ = {isa = PBXBuildFile; productRef = A5946845265E30350044A892 /* Fakery */; };
 		A59C4413268233960066AA0E /* CheckboxLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A59C4412268233960066AA0E /* CheckboxLayer.swift */; };
 		A59D33882655101A002E7E96 /* WiggleEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = A59D33872655101A002E7E96 /* WiggleEffect.swift */; };
+		A5A6152526A808B600193C03 /* AutocompleteManager+Sorting.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A6152426A808B600193C03 /* AutocompleteManager+Sorting.swift */; };
 		A5A6A428267F123C007F1B2F /* CommandManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5109F902670227800304B3A /* CommandManagerTests.swift */; };
 		A5B268A426845549001797ED /* BeamTextAttributedStringBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5B268A326845549001797ED /* BeamTextAttributedStringBuilder.swift */; };
 		A5BF04D32681A4F800CC80EB /* ElementNode+Layers.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BF04D22681A4F800CC80EB /* ElementNode+Layers.swift */; };
@@ -1455,6 +1456,7 @@
 		A5946825265D29350044A892 /* CGPath+Union.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CGPath+Union.swift"; sourceTree = "<group>"; };
 		A59C4412268233960066AA0E /* CheckboxLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckboxLayer.swift; sourceTree = "<group>"; };
 		A59D33872655101A002E7E96 /* WiggleEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WiggleEffect.swift; sourceTree = "<group>"; };
+		A5A6152426A808B600193C03 /* AutocompleteManager+Sorting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AutocompleteManager+Sorting.swift"; sourceTree = "<group>"; };
 		A5B268A326845549001797ED /* BeamTextAttributedStringBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamTextAttributedStringBuilder.swift; sourceTree = "<group>"; };
 		A5BF04D22681A4F800CC80EB /* ElementNode+Layers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ElementNode+Layers.swift"; sourceTree = "<group>"; };
 		A5C7F109267CC9FD002EE550 /* BeamTextEdit+InputDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamTextEdit+InputDetector.swift"; sourceTree = "<group>"; };
@@ -2137,6 +2139,7 @@
 			children = (
 				A5FE96CC2612469C002A2B73 /* AutocompleteManager.swift */,
 				A569EA2F26A196F600B0861B /* AutocompleteManager+Publishers.swift */,
+				A5A6152426A808B600193C03 /* AutocompleteManager+Sorting.swift */,
 				418171AB2581107C00317ED8 /* AutocompleteList.swift */,
 				418171AD2581107C00317ED8 /* AutocompleteItem.swift */,
 			);
@@ -4123,6 +4126,7 @@
 				A0A84FF1263835D3008F0326 /* PasswordsTableView.swift in Sources */,
 				87C539B92616297300D51877 /* SearchPasswordsCell.swift in Sources */,
 				417628A525B05DFB0082FFDF /* NSBezierPath+CGPath.swift in Sources */,
+				A5A6152526A808B600193C03 /* AutocompleteManager+Sorting.swift in Sources */,
 				0DD0DACC2681C9630005339A /* GRDBDatabase.swift in Sources */,
 				032562A726051D3B006513E4 /* RBFilterManagerState.m in Sources */,
 				418172592581107C00317ED8 /* ContentView.swift in Sources */,
