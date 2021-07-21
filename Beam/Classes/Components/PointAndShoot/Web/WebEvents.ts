@@ -111,12 +111,7 @@ export class WebEvents<UI extends WebEventsUI> {
     })
   }
 
-  checkFrames(): void {
-    const framesInfo = this.getFramesInfo()
-    this.ui.setFramesInfo(framesInfo)
-  }
-
-  getFramesInfo(): FrameInfo[] {
+  sendFramesInfo() {
     const frameEls = this.win.document.querySelectorAll("iframe") as BeamHTMLIFrameElement[]
     const framesInfo: FrameInfo[] = []
     for (const frameEl of frameEls) {
@@ -143,35 +138,13 @@ export class WebEvents<UI extends WebEventsUI> {
         height: this.win.innerHeight
       }
     })
-    return framesInfo
+    this.ui.setFramesInfo(framesInfo)
   }
 
   onScroll(_ev?) {
-    // TODO: Throttle
-    const doc = this.win.document
-    const body = doc.body
-    const documentEl = doc.documentElement
-    const scrollWidth = (this.scrollWidth = Math.max(
-      body.scrollWidth,
-      documentEl.scrollWidth,
-      body.offsetWidth,
-      documentEl.offsetWidth,
-      body.clientWidth,
-      documentEl.clientWidth
-    ))
-    const scrollHeight = Math.max(
-      body.scrollHeight,
-      documentEl.scrollHeight,
-      body.offsetHeight,
-      documentEl.offsetHeight,
-      body.clientHeight,
-      documentEl.clientHeight
-    )
     const scrollInfo = {
       x: this.win.scrollX,
       y: this.win.scrollY,
-      width: scrollWidth,
-      height: scrollHeight,
       scale: this.getScale()
     }
     this.ui.setScrollInfo(scrollInfo)
@@ -188,22 +161,13 @@ export class WebEvents<UI extends WebEventsUI> {
 
   onLoad(_ev) {
     this.log("Page load.", this.win.location.href)
-    this.log("Flushing frames.", this.win.location.href)
-    const framesInfo: FrameInfo[] = this.getFramesInfo()
-    this.ui.setOnLoadInfo(framesInfo)
+    this.log("Send inital frameInfo", this.win.location.href)
+    this.sendFramesInfo()
   }
 
   onPinch(_ev) {
     const vv = this.win.visualViewport
-    this.ui.pinched({
-      offsetTop: vv.offsetTop,
-      pageTop: vv.pageTop,
-      offsetLeft: vv.offsetLeft,
-      pageLeft: vv.pageLeft,
-      width: vv.width,
-      height: vv.height,
-      scale: this.getScale()
-    })
+    this.ui.pinched({ scale: this.getScale() })
   }
 
   toString() {

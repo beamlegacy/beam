@@ -32,8 +32,8 @@ struct ShootCardPicker: View {
     @State private var isVisible = false
 
     private let searchColorPalette = AutocompleteItemColorPalette(
-            selectedBackgroundColor: BeamColor.NotePicker.selected.nsColor,
-            touchdownBackgroundColor: BeamColor.NotePicker.active.nsColor)
+        selectedBackgroundColor: BeamColor.NotePicker.selected.nsColor,
+        touchdownBackgroundColor: BeamColor.NotePicker.active.nsColor)
 
     var body: some View {
         FormatterViewBackground {
@@ -46,7 +46,7 @@ struct ShootCardPicker: View {
                                   placeholder: autocompleteModel.todaysCardReplacementName,
                                   font: BeamFont.regular(size: 13).nsFont,
                                   textColor: currentCardName == nil ? BeamColor.Generic.text.nsColor
-                                          : BeamColor.Sonic.nsColor,
+                                    : BeamColor.Sonic.nsColor,
                                   placeholderColor: BeamColor.Generic.placeholder.nsColor,
                                   selectedRange: cardSearchFieldSelection) { (text) in
                         onTextDidChange(text)
@@ -112,7 +112,7 @@ struct ShootCardPicker: View {
                 .padding(.vertical, BeamSpacing._100)
             }
         }
-        .frame(width: Self.size.width, height: Self.size.height, alignment: .top)
+        .frame(width: Self.size.width, height: Self.size.height, alignment: .topLeading)
         .zIndex(20)
         .animation(.easeInOut(duration: 0.3))
         .scaleEffect(isVisible ? 1.0 : 0.98)
@@ -201,9 +201,9 @@ struct ShootCardPicker: View {
 
 extension ShootCardPicker {
     func onComplete(perform action: @escaping (_ cardName: String?, _ note: String?) -> Void ) -> Self {
-         var copy = self
-         copy.onComplete = action
-         return copy
+        var copy = self
+        copy.onComplete = action
+        return copy
     }
 }
 
@@ -214,3 +214,4 @@ struct ShootCardPicker_Previews: PreviewProvider {
             .environmentObject(data)
     }
 }
+

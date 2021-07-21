@@ -1,6 +1,7 @@
 import XCTest
 import Promises
 import Nimble
+import Fakery
 
 @testable import Beam
 @testable import BeamCore
@@ -20,7 +21,8 @@ class TestWebPage: WebPage {
     var storage: BeamFileStorage?
     var passwordOverlayController: PasswordOverlayController?
     private(set) var webviewWindow: NSWindow?
-    private(set) var frame: NSRect = NSRect()
+    private(set) var frame: NSRect = NSRect(x: 0, y: 0, width: 600, height: 800)
+    private(set) var mouseLocation: NSPoint!
     private(set) var downloadManager: DownloadManager?
     private(set) var navigationController: WebNavigationController?
     var mediaPlayerController: MediaPlayerController?
@@ -40,6 +42,7 @@ class TestWebPage: WebPage {
         storage = fileStorage
         self.downloadManager = downloadManager
         self.navigationController = navigationController
+        self.webView = BeamWebView()
     }
 
     func addCSS(source: String, when: WKUserScriptInjectionTime) {
@@ -75,19 +78,7 @@ class TestWebPage: WebPage {
 
     func executeJS(_ jsCode: String, objectName: String?) -> Promise<Any?> {
         if objectName == "PointAndShoot" {
-            switch jsCode {
-            case "setStatus('pointing')":
-                pointAndShoot?.status = PointAndShootStatus.pointing
-            case "setStatus('shooting')":
-                pointAndShoot?.status = PointAndShootStatus.shooting
-            case "setStatus('none')":
-                pointAndShoot?.status = PointAndShootStatus.none
-            case let assignString where jsCode.contains("assignNote"):
-                Logger.shared.logDebug("\(assignString) called", category: .pointAndShoot)
-                pointAndShoot?.status = PointAndShootStatus.none
-            default:
-                Logger.shared.logDebug("no matching jsCode case, no js call mocked", category: .pointAndShoot)
-            }
+            Logger.shared.logDebug("no matching jsCode case, no js call mocked", category: .pointAndShoot)
         }
         events.append("executeJS \(objectName ?? "").\(jsCode)")
         return Promise(true)
@@ -113,44 +104,6 @@ class TestWebPage: WebPage {
     }
 
     func addTextToClusteringManager(_ text: String, url: URL) {}
-}
-
-class PointAndShootUIMock: PointAndShootUI {
-    var events: [String] = []
-
-    override func drawPoint(target: PointAndShoot.Target) {
-        events.append("drawPoint \(target)")
-    }
-
-    override func clearPoint() {
-        events.append("clearPoint")
-        return super.clearPoint()
-    }
-
-    override func createUI(shootTarget: PointAndShoot.Target) -> SelectionUI {
-        events.append("createUI \(shootTarget)")
-        return super.createUI(shootTarget: shootTarget)
-    }
-
-    override func createGroup(noteInfo: NoteInfo, selectionUIs: [SelectionUI], edited: Bool) -> ShootGroupUI {
-        events.append("createGroup \(String(describing: noteInfo)) \(edited)")
-        return super.createGroup(noteInfo: noteInfo, selectionUIs: selectionUIs, edited: edited)
-    }
-
-    override func drawShootConfirmation(shootTarget: PointAndShoot.Target, noteInfo: NoteInfo) {
-        events.append("drawShootConfirmation \(shootTarget)")
-        return super.drawShootConfirmation(shootTarget: shootTarget, noteInfo: noteInfo)
-    }
-
-    override func clearShoots() {
-        events.append("clearShoots")
-        return super.clearShoots()
-    }
-
-    override func clearConfirmation() {
-        events.append("clearConfirmation")
-        return super.clearConfirmation()
-    }
 }
 
 class PasswordStoreMock: PasswordStore {
@@ -262,19 +215,17 @@ class NavigationControllerMock: WebNavigationController {
 class PointAndShootTest: XCTestCase {
     var testPage: TestWebPage?
     var pns: PointAndShoot!
-    var testUI: PointAndShootUIMock!
 
     func initTestBed() {
         let testPasswordStore = PasswordStoreMock()
         let userInfoStore = MockUserInformationsStore()
         let testPasswordOverlayController = PasswordOverlayController(passwordStore: testPasswordStore, userInfoStore: userInfoStore)
         let testBrowsingScorer = BrowsingScorerMock()
-        testUI = PointAndShootUIMock()
 
         let testFileStorage = FileStorageMock()
         let testDownloadManager = DownloadManagerMock()
         let navigationController = NavigationControllerMock()
-        pns = PointAndShoot(ui: testUI, scorer: testBrowsingScorer)
+        pns = PointAndShoot(scorer: testBrowsingScorer)
         let page = TestWebPage(browsingScorer: testBrowsingScorer,
                                passwordOverlayController: testPasswordOverlayController, pns: pns,
                                fileStorage: testFileStorage, downloadManager: testDownloadManager,
@@ -285,8 +236,28 @@ class PointAndShootTest: XCTestCase {
         page.pointAndShoot?.page = page
     }
 
-    func helperCountUIEvents(_ label: String) -> Int {
-        return testUI.events.filter({ $0.contains(label) }).count
+    let faker = Faker(locale: "en-US")
+    func helperCreateRandomGroup() -> PointAndShoot.ShootGroup {
+        var targets: [PointAndShoot.Target] = []
+
+        let count = faker.number.randomInt(min: 1, max: 12)
+        for _ in 0..<count {
+            let target: PointAndShoot.Target = PointAndShoot.Target(
+                id: UUID().uuidString,
+                rect: NSRect(
+                    x: faker.number.randomInt(),
+                    y: faker.number.randomInt(),
+                    width: faker.number.randomInt(),
+                    height: faker.number.randomInt()
+                ),
+                mouseLocation: NSPoint(x: faker.number.randomInt(), y: faker.number.randomInt()),
+                html: "<p>\(faker.hobbit.quote())</p>",
+                animated: false
+            )
+            targets.append(target)
+        }
+
+        return PointAndShoot.ShootGroup(UUID().uuidString, targets, faker.internet.url())
     }
 
     // Note: this class is only used to setup the Point and Shoot Mocks and testbed

@@ -1,4 +1,4 @@
-import {BeamCollectedQuote} from "./BeamTypes"
+import { BeamRangeGroup, BeamShootGroup} from "./BeamTypes"
 import {PointAndShootUI} from "./PointAndShootUI"
 import {WebEventsUI_web} from "./WebEventsUI_web"
 import {BeamHTMLElement} from "./BeamTypes"
@@ -95,12 +95,19 @@ export class PointAndShootUI_web extends WebEventsUI_web implements PointAndShoo
     super(win)
     this.log(`${this.toString()} instantiated`)
   }
-
-  cursor(x: any, y: any) {
-    throw new Error("Method not implemented.")
+  pointBounds(pointTarget?: BeamShootGroup): void {
+      throw new Error("Method not implemented.")
   }
-
-  select(selection: BeamCollectedQuote[]) {
+  shootBounds(shootTargets: BeamShootGroup[]): void {
+      throw new Error("Method not implemented.")
+  }
+  selectBounds(rangeGroups: BeamRangeGroup[]): void {
+      throw new Error("Method not implemented.")
+  }
+  hasSelection(hasSelection: boolean): void {
+      throw new Error("Method not implemented.")
+  }
+  cursor(x: any, y: any) {
     throw new Error("Method not implemented.")
   }
 

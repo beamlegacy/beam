@@ -5,8 +5,7 @@ struct ShootCardConfirmationView: View {
 
     static let size = CGSize(width: 170, height: 42)
 
-    var noteTitle = ""
-    var numberOfElements = 1
+    var group: PointAndShoot.ShootGroup
     var isText = true
     @State var isVisible = false
 
@@ -14,7 +13,7 @@ struct ShootCardConfirmationView: View {
         return isText ? "collect-text" : "collect-generic"
     }
     private var prefixText: String {
-        return numberOfElements == 1 ? "Added to " : "\(numberOfElements) Added to "
+        return group.numberOfElements == 1 ? "Added to " : "\(group.numberOfElements) Added to "
     }
     var body: some View {
         FormatterViewBackground {
@@ -24,14 +23,14 @@ struct ShootCardConfirmationView: View {
                     .foregroundColor(BeamColor.Generic.text.swiftUI)
                     .font(BeamFont.medium(size: 13).swiftUI)
                     +
-                Text(noteTitle)
+                Text(group.noteInfo.title)
                     .foregroundColor(BeamColor.Beam.swiftUI)
                     .font(BeamFont.regular(size: 13).swiftUI)
             }
             .lineLimit(1)
             .padding(BeamSpacing._100)
             .onTapGesture {
-                state.navigateToNote(named: noteTitle)
+                state.navigateToNote(named: group.noteInfo.title)
             }
         }
         .fixedSize(horizontal: true, vertical: true)
@@ -53,7 +52,15 @@ struct ShootCardConfirmationView: View {
 
 struct ShootCardConfirmationView_Previews: PreviewProvider {
     static var previews: some View {
-        ShootCardConfirmationView(noteTitle: "A Long Card Name", numberOfElements: 4, isText: false)
+        let target = PointAndShoot.Target(
+            id: "uuid-uuid",
+            rect: NSRect(x: 10, y: 10, width: 100, height: 100),
+            mouseLocation: NSPoint(x: 20, y: 20),
+            html: "",
+            animated: false
+        )
+        let group = PointAndShoot.ShootGroup("uuid-uuid", [target], "https://example.com")
+        ShootCardConfirmationView(group: group)
             .frame(width: 300, height: 70)
             .accessibility(identifier: "ShootCardConfirmationView")
     }

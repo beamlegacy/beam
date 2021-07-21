@@ -105,7 +105,7 @@ import Promises
 
     lazy var pointAndShoot: PointAndShoot? = {
         guard let scorer = browsingScorer else { return nil }
-        let pns = PointAndShoot(ui: PointAndShootUI(), scorer: scorer)
+        let pns = PointAndShoot(scorer: scorer)
         pns.page = self
         return pns
     }()
@@ -441,7 +441,7 @@ import Promises
     var navigationCount: Int = 0
 
     func cancelShoot() {
-        pointAndShoot?.resetStatus()
+        pointAndShoot?.dismissShoot()
     }
 
     func startReading() {

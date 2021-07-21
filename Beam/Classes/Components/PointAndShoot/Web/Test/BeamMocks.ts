@@ -16,9 +16,9 @@ import {
   BeamText,
   BeamWindow
 } from "../BeamTypes"
-import {BeamWindowMock} from "./BeamWindowMock"
-import {BeamEventTargetMock} from "./BeamEventTargetMock"
-import {Util} from "../Util"
+import { BeamWindowMock } from "./BeamWindowMock"
+import { BeamEventTargetMock } from "./BeamEventTargetMock"
+import { Util } from "../Util"
 
 export class BeamDOMTokenList {
   list = []
@@ -70,27 +70,19 @@ export class BeamNodeMock extends BeamEventTargetMock implements BeamNode {
   }
 
   contains(el: BeamNode): boolean {
-    return (
-        this === el
-        || this.childNodes.some(
-            childNode => (
-                childNode === el || childNode.contains(el)
-            )
-        )
-    )
+    return this === el || this.childNodes.some((childNode) => childNode === el || childNode.contains(el))
   }
 
   get textContent(): string {
     const collectTextNodes = (node: BeamNode): string => {
-      const text = node.childNodes.reduce(
-          (acc: string[], node) => {
-            if (node.nodeType === BeamNodeType.text) {
-              acc.push(`${node}`)
-            } else if (node.nodeType === BeamNodeType.element) {
-              acc.push(...collectTextNodes(node))
-            }
-            return acc
-          }, [])
+      const text = node.childNodes.reduce((acc: string[], node) => {
+        if (node.nodeType === BeamNodeType.text) {
+          acc.push(`${node}`)
+        } else if (node.nodeType === BeamNodeType.element) {
+          acc.push(...collectTextNodes(node))
+        }
+        return acc
+      }, [])
       return text.join("")
     }
     return collectTextNodes(this)
@@ -367,7 +359,15 @@ export class BeamElementMock extends BeamNodeMock implements BeamElement, BeamEl
     super(tagName, BeamNodeType.element)
     this.attributes = attributes
   }
-
+  removeAttribute(pointDatasetKey: any) {
+    throw new Error("Method not implemented.")
+  }
+  setAttribute(qualifiedName: string, value: string): void {
+    throw new Error("Method not implemented.")
+  }
+  getAttribute(qualifiedName: string): string {
+    throw new Error("Method not implemented.")
+  }
   dataset: any
 
   set width(value: number) {
@@ -441,7 +441,12 @@ export class BeamHTMLElementMock extends BeamElementMock implements BeamHTMLElem
   constructor(nodeName: string, attributes = {}) {
     super(nodeName, new BeamNamedNodeMap(attributes))
   }
-
+  setAttribute(qualifiedName: string, value: string): void {
+    throw new Error("Method not implemented.")
+  }
+  getAttribute(qualifiedName: string): string {
+    throw new Error("Method not implemented.")
+  }
   nodeValue: any
 
   get innerText(): string {
@@ -449,7 +454,7 @@ export class BeamHTMLElementMock extends BeamElementMock implements BeamHTMLElem
   }
 
   set innerText(text: string) {
-    const textNodes = this.childNodes.filter(node => node.nodeType === BeamNodeType.text)
+    const textNodes = this.childNodes.filter((node) => node.nodeType === BeamNodeType.text)
     for (const textNode of textNodes) {
       this.removeChild(textNode)
     }
@@ -468,7 +473,6 @@ export class BeamHTMLInputElementMock extends BeamHTMLElementMock implements Bea
   set type(value: string) {
     this.attributes.getNamedItem("type").value = value
   }
-
 }
 
 export class BeamHTMLTextAreaElementMock extends BeamHTMLElementMock implements BeamHTMLTextAreaElement {
@@ -563,7 +567,12 @@ export class BeamHTMLIFrameElementMock extends BeamHTMLElementMock implements Be
   constructor(attributes: NamedNodeMap = new BeamNamedNodeMap()) {
     super("iframe", attributes)
   }
-
+  setAttribute(qualifiedName: string, value: string): void {
+    throw new Error("Method not implemented.")
+  }
+  getAttribute(qualifiedName: string): string {
+    throw new Error("Method not implemented.")
+  }
   nodeValue: any
 
   /**
@@ -729,6 +738,9 @@ export class BeamDocumentMock extends BeamNodeMock implements BeamDocument {
     this.childNodes = [new BeamNodeMock("#text", 3)]
     Object.assign(this, attributes)
   }
+  elementFromPoint(x: any, y: any) {
+    return this.documentElement
+  }
 
   /**
    * @param tag {string}
@@ -852,7 +864,7 @@ export class BeamMouseEvent extends BeamUIEvent {
   clientY
 }
 
-export class BeamKeyEvent extends BeamUIEvent {
+export class BeamKeyEvent extends BeamMouseEvent {
   constructor(attributes = {}) {
     super()
     Object.assign(this, attributes)

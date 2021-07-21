@@ -1,4 +1,4 @@
-import { BeamElement } from "./BeamTypes"
+import { BeamElement, BeamWindow } from "./BeamTypes"
 
 export class Util {
 
@@ -89,5 +89,12 @@ export class Util {
    */
   static mapRangeToRange(from: [number, number], to: [number, number], s: number): number {
     return to[0] + ((s - from[0]) * (to[1] - to[0])) / (from[1] - from[0])
+  }
+  /**
+   * Generates a good enough non-compliant UUID.
+   */
+  static uuid(win: BeamWindow) {
+    const buf = new Uint32Array(4)
+    return win.crypto.getRandomValues(buf).join("-")
   }
 }

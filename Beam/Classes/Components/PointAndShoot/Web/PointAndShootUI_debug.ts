@@ -1,9 +1,8 @@
-import {BeamCollectedQuote} from "./BeamTypes"
-import {PointAndShootUI} from "./PointAndShootUI"
-import {PointAndShootUI_native} from "./PointAndShootUI_native"
-import {PointAndShootUI_web} from "./PointAndShootUI_web"
-import {FrameInfo} from "./WebEventsUI"
-import {BeamHTMLElement} from "./BeamTypes"
+import { BeamElement, BeamRangeGroup, BeamShootGroup } from "./BeamTypes"
+import { PointAndShootUI } from "./PointAndShootUI"
+import { PointAndShootUI_native } from "./PointAndShootUI_native"
+import { PointAndShootUI_web } from "./PointAndShootUI_web"
+import { FrameInfo } from "./WebEventsUI"
 
 export class PointAndShootUI_debug implements PointAndShootUI {
   /**
@@ -15,100 +14,31 @@ export class PointAndShootUI_debug implements PointAndShootUI {
     this.native = native
     this.web = web
   }
-
-  cursor(x: any, y: any) {
+  hasSelection(hasSelection: boolean) {
     throw new Error("Method not implemented.")
   }
-
-  select(selection: BeamCollectedQuote[]) {
-    this.web.select(selection)
-    this.native.select(selection)
+  setFramesInfo(framesInfo: FrameInfo[]) {
+    throw new Error("Method not implemented.")
   }
-
-  unselect(selection: any) {
-    this.web.unselect(selection)
-    this.native.unselect(selection)
+  setScrollInfo(scrollInfo: any) {
+    throw new Error("Method not implemented.")
   }
-
-  getMouseLocation(el: any, x: any, y: any) {
-    this.web.getMouseLocation(el, x, y)
-    this.native.getMouseLocation(el, x, y)
+  setResizeInfo(resizeInfo: any) {
+    throw new Error("Method not implemented.")
   }
-
-  point(quoteId: string, el: BeamHTMLElement, x: number, y: number, callback): void {
-    this.web.point(quoteId, el, x, y)
-    this.native.point(quoteId, el, x, y, callback)
+  setOnLoadInfo(framesInfo: FrameInfo[]) {
+    throw new Error("Method not implemented.")
   }
-
-  unpoint(el): void {
-    this.web.unpoint(el)
-    this.native.unpoint(el)
+  pinched(pinchInfo: any) {
+    throw new Error("Method not implemented.")
   }
-
-  shoot(quoteId: string, el: BeamHTMLElement, x: number, y: number, selectedEls): void {
-    this.web.shoot(quoteId, el, x, y, selectedEls)
-    this.native.shoot(quoteId, el, x, y, selectedEls)
+  pointBounds(pointTarget?: BeamShootGroup) {
+    throw new Error("Method not implemented.")
   }
-
-  unshoot(el: BeamHTMLElement): void {
-    this.web.unshoot(el)
-    this.native.unshoot(el)
+  shootBounds(shootTargets: BeamShootGroup[]) {
+    throw new Error("Method not implemented.")
   }
-
-  hidePopup(): void {
-    this.web.hidePopup()
-    this.native.hidePopup()
-  }
-
-  hideStatus(): void {
-    this.web.hideStatus()
-    this.native.hideStatus()
-  }
-
-  pinched(pinchInfo: any): void {
-    this.web.pinched(pinchInfo)
-    this.native.pinched(pinchInfo)
-  }
-
-  setFramesInfo(framesInfo: FrameInfo[]): void {
-    this.web.setFramesInfo(framesInfo)
-    this.native.setFramesInfo(framesInfo)
-  }
-
-  setOnLoadInfo(framesInfo: FrameInfo[]): void {
-    this.web.setOnLoadInfo()
-    this.native.setOnLoadInfo(framesInfo)
-  }
-
-  setResizeInfo(resizeInfo: any): void {
-    this.web.setResizeInfo(resizeInfo)
-    this.native.setResizeInfo(resizeInfo)
-  }
-
-  setScrollInfo(scrollInfo: any): void {
-    this.web.setScrollInfo(scrollInfo)
-    this.native.setScrollInfo(scrollInfo)
-  }
-
-  setStatus(status): void {
-    this.web.setStatus(status)
-    this.native.setStatus(status)
-  }
-
-  showStatus(el: BeamHTMLElement, collected): void {
-    this.web.showStatus(el, collected)
-    this.native.showStatus(el, collected)
-  }
-
-  enterSelection(): void {
-    this.web.enterSelection()
-  }
-
-  leaveSelection(): void {
-    this.web.leaveSelection()
-  }
-
-  addTextSelection(selection): void {
-    this.web.addTextSelection(selection)
+  selectBounds(rangeGroups: BeamRangeGroup[]) {
+    throw new Error("Method not implemented.")
   }
 }

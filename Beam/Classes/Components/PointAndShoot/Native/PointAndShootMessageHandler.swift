@@ -2,29 +2,13 @@ import Foundation
 import BeamCore
 
 enum PointAndShootMessages: String, CaseIterable {
-    /**
-     Hover a block with Option key.
-     */
-    case pointAndShoot_point
-    case pointAndShoot_cursor
-    /**
-     Selection of text or block
-     */
-    case pointAndShoot_select
-    /**
-     Validate a pointed block for selection.
-     */
-    case pointAndShoot_shoot
-    /**
-     Completed text highlight
-     */
-    case pointAndShoot_shootConfirmation
-    case pointAndShoot_onLoad
-    case pointAndShoot_scroll
-    case pointAndShoot_resize
+    case pointAndShoot_pointBounds
+    case pointAndShoot_shootBounds
+    case pointAndShoot_selectBounds
+    case pointAndShoot_hasSelection
     case pointAndShoot_pinch
     case pointAndShoot_frameBounds
-    case pointAndShoot_setStatus
+    case pointAndShoot_scroll
 }
 
 /**
@@ -43,153 +27,63 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
                 Logger.shared.logError("Unsupported message \(messageName) for point and shoot message handler", category: .web)
                 return
             }
-            guard let pointAndShoot = webPage.pointAndShoot else { return }
-            let msgPayload = messageBody as? [String: AnyObject]
-            let positions = pointAndShoot.webPositions
+            guard let pointAndShoot = webPage.pointAndShoot else { throw PointAndShootError("webPage should have a pointAndShoot component") }
+            guard webPage.pointAndShootAllowed == true else { throw PointAndShootError("Point and shoot is not allowed on this page") }
+            guard let dict = messageBody as? [String: AnyObject],
+                  let href = dict["href"] as? String else {
+                throw PointAndShootError("href payload is incorrect")
+            }
+
             switch messageKey {
+            case PointAndShootMessages.pointAndShoot_pointBounds:
+                guard let pointBounds = dict["point"] as? [String: AnyObject],
+                      let targets = boundsToTargets([pointBounds], webPage, href, animated: true) else { throw PointAndShootError("point payload incomplete") }
 
-            case PointAndShootMessages.pointAndShoot_cursor:
-                guard let dict = msgPayload,
-                      let x = dict["x"] as? CGFloat,
-                      let y = dict["y"] as? CGFloat,
-                      let href = dict["href"] as? String else { return }
-
-                let size: CGFloat = 20
-
-                let target = pointAndShoot.createTarget(
-                    area: NSRect(x: x - (size / 2), y: y - (size / 2), width: size, height: size),
-                    quoteId: nil,
-                    mouseLocation: NSPoint(x: x, y: y),
-                    html: "nil",
-                    href: href
-                )
-
-                pointAndShoot.cursor(target: target, href: href)
-
-            case PointAndShootMessages.pointAndShoot_onLoad:
-                onFramesInfoMessage(msgPayload: msgPayload, webPage: webPage, positions: positions)
-
-            case PointAndShootMessages.pointAndShoot_point:
-                try onPointMessage(msgPayload: msgPayload, webPage: webPage)
-
-            case PointAndShootMessages.pointAndShoot_shoot:
-                guard webPage.pointAndShootAllowed == true else { return }
-                guard let dict = msgPayload,
-                      let areas = areasValue(of: dict, from: webPage),
-                      let (location, html) = targetValues(of: dict, from: webPage),
-                      let href = dict["href"] as? String else {
-                    Logger.shared.logError("Ignored shoot event: \(String(describing: msgPayload))", category: .pointAndShoot)
-                    return
+                if let target = targets.first {
+                    pointAndShoot.point(target, href)
                 }
-                let quoteId = pointAndShootQuoteIdValue(from: dict)
-                let targets = areas.map { area -> PointAndShoot.Target in
-                    Logger.shared.logInfo("Web shoot point: \(area)", category: .pointAndShoot)
-                    return pointAndShoot.createTarget(area: area, quoteId: quoteId, mouseLocation: location, html: html, href: href)
-                }
-                pointAndShoot.shoot(targets: targets, href: href)
-                pointAndShoot.draw()
 
-            case PointAndShootMessages.pointAndShoot_shootConfirmation:
-                guard webPage.pointAndShootAllowed == true else { return }
-                guard let dict = msgPayload,
-                      let areas = areasValue(of: dict, from: webPage),
-                      dict["href"] as? String != nil else {
-                    Logger.shared.logError("Ignored shoot event: \(String(describing: msgPayload))", category: .pointAndShoot)
-                    return
-                }
-                pointAndShoot.showShootInfo(group: pointAndShoot.activeShootGroup!)
-                Logger.shared.logInfo("Web shoot confirmation: \(areas)", category: .pointAndShoot)
+            case PointAndShootMessages.pointAndShoot_shootBounds:
+                guard let shootBounds = dict["shoot"] as? [[String: AnyObject]],
+                      let targets = boundsToTargets(shootBounds, webPage, href, animated: false) else { throw PointAndShootError("shoot payload incomplete") }
 
-            case PointAndShootMessages.pointAndShoot_select:
-                guard webPage.pointAndShootAllowed == true else { return }
-                guard let dict = msgPayload,
-                      dict["text"] as? String != nil,
-                      let href = dict["href"] as? String,
-                      let html = dict["html"] as? String,
-                      let areas = areasValue(of: dict, from: webPage),
-                      !html.isEmpty else {
-                    Logger.shared.logError("Ignored text selected event: \(String(describing: msgPayload))",
-                                           category: .pointAndShoot)
-                    return
+                for target in targets {
+                    pointAndShoot.pointShoot(target.id, target, href)
                 }
-                let targets = areas.map { area -> PointAndShoot.Target in
-                    let x: CGFloat = 0
-                    let y: CGFloat = area.maxY - area.minY
-                    return pointAndShoot.createTarget(area: area, mouseLocation: CGPoint(x: x, y: y), html: html, href: href)
+
+            case PointAndShootMessages.pointAndShoot_hasSelection:
+                guard let hasSelection = dict["hasSelection"] as? Bool else { throw PointAndShootError("hasSelection payload incomplete") }
+                pointAndShoot.hasActiveSelection = hasSelection
+
+            case PointAndShootMessages.pointAndShoot_selectBounds:
+                guard let selectBounds = dict["select"] as? [[String: AnyObject]]
+                    else { throw PointAndShootError("select payload incomplete") }
+
+                for bounds in selectBounds {
+                    if let id = bounds["id"] as? String,
+                       let targetData = bounds["rectData"] as? [[String: AnyObject]],
+                       let targets = boundsToTargets(targetData, webPage, href, animated: false) {
+                        pointAndShoot.select(id, targets, href)
+                    }
                 }
-                Logger.shared.logInfo("Web text selected, shooting targets: \(targets)", category: .pointAndShoot)
-                pointAndShoot.ui.clearPoint()
-                pointAndShoot.shoot(targets: targets, href: href)
 
             case PointAndShootMessages.pointAndShoot_pinch:
-                guard let dict = msgPayload,
-                      (dict["offsetLeft"] as? CGFloat) != nil,
-                      (dict["pageLeft"] as? CGFloat) != nil,
-                      (dict["offsetTop"] as? CGFloat) != nil,
-                      (dict["pageTop"] as? CGFloat) != nil,
-                      (dict["width"] as? CGFloat) != nil,
-                      (dict["height"] as? CGFloat) != nil,
-                      let scale = dict["scale"] as? CGFloat
-                    else {
-                    return
-                }
-                positions.scale = scale
+                guard let scale = dict["scale"] as? CGFloat else { return }
+                pointAndShoot.webPositions.scale = scale
 
             case PointAndShootMessages.pointAndShoot_scroll:
-                guard let dict = msgPayload,
-                      let x = dict["x"] as? CGFloat,
+                guard let x = dict["x"] as? CGFloat,
                       let y = dict["y"] as? CGFloat,
-                      dict["width"] as? CGFloat != nil,
-                      dict["height"] as? CGFloat != nil,
                       let href = dict["href"] as? String,
-                      let scale = dict["scale"] as? CGFloat
-                    else {
-                    Logger.shared.logError("Ignored scroll event: \(String(describing: msgPayload))", category: .web)
+                      let scale = dict["scale"] as? CGFloat else {
+                    Logger.shared.logError("Ignored scroll event: \(String(describing: dict))", category: .web)
                     return
                 }
-                positions.scale = scale
-                positions.setFrameInfoScroll(href: href, scrollX: x, scrollY: y)
-                pointAndShoot.draw()
+                pointAndShoot.webPositions.scale = scale
+                pointAndShoot.webPositions.setFrameInfoScroll(href: href, scrollX: x, scrollY: y)
 
             case PointAndShootMessages.pointAndShoot_frameBounds:
-                onFramesInfoMessage(msgPayload: msgPayload, webPage: webPage, positions: positions)
-
-            case PointAndShootMessages.pointAndShoot_resize:
-                guard let dict = msgPayload,
-                      let scale = dict["scale"] as? CGFloat,
-                      let selectedElements = dict["selected"] as? [[String: AnyObject]],
-                      let href = dict["href"] as? String else {
-                    Logger.shared.logError("Ignored beam_resize: \(String(describing: msgPayload))", category: .web)
-                    return
-                }
-                positions.scale = scale
-                if selectedElements.count == 0 {
-                    Logger.shared.logWarning("beam_resize selectedElements is empty. Skipping shoot updates", category: .web)
-                    return
-                }
-
-                let newTargets = selectedElements.compactMap { element -> [PointAndShoot.Target]? in
-                    if let areas = areasValue(of: element, from: webPage),
-                       let (location, html) = targetValues(of: element, from: webPage) {
-                        let quoteId = pointAndShootQuoteIdValue(from: element)
-                        return areas.map { area -> PointAndShoot.Target in
-                            pointAndShoot.createTarget(area: area, quoteId: quoteId, mouseLocation: location, html: html, href: href)
-                        }
-                    }
-                    return nil
-                }.flatMap { $0 }
-                pointAndShoot.updateShoots(targets: newTargets, href: href)
-
-            case PointAndShootMessages.pointAndShoot_setStatus:
-                guard let dict = msgPayload,
-                      let status = dict["status"] as? String,
-                      dict["href"] as? String != nil else {
-                    Logger.shared.logError("Ignored beam_status: \(String(describing: msgPayload))", category: .pointAndShoot)
-                    return
-                }
-
-                _ = webPage.executeJS("syncStatus('\(status)')", objectName: "PointAndShoot")
-                pointAndShoot.status = PointAndShootStatus(rawValue: status)!
+                onFramesInfoMessage(dict: dict, positions: pointAndShoot.webPositions, href: href)
             }
 
         } catch {
@@ -198,23 +92,21 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
         }
     }
 
-    private func onFramesInfoMessage(msgPayload: [String: AnyObject]?, webPage: WebPage, positions: WebPositions) {
-        guard let dict = msgPayload,
-              let windowHref = dict["href"] as? String,
-              let jsFramesInfo = dict["frames"] as? NSArray
-        else {
-            Logger.shared.logError("Ignored beam_frameBounds: \(String(describing: msgPayload))", category: .web)
+    private func onFramesInfoMessage(dict: [String: AnyObject], positions: WebPositions, href: String) {
+        guard let jsFramesInfo = dict["frames"] as? NSArray else {
+            Logger.shared.logError("Ignored beam_frameBounds: \(String(describing: dict))", category: .web)
             return
         }
+
         for jsFrameInfo in jsFramesInfo {
             let jsFrameInfo = jsFrameInfo as AnyObject
             let bounds = jsFrameInfo["bounds"] as AnyObject
-            if let href = jsFrameInfo["href"] as? String {
+            if let frameHref = jsFrameInfo["href"] as? String {
                 let rectArea = positions.jsToRect(jsArea: bounds)
 
                 let frame = WebPositions.FrameInfo(
-                    href: href,
-                    parentHref: windowHref,
+                    href: frameHref,
+                    parentHref: href,
                     x: rectArea.minX,
                     y: rectArea.minY,
                     width: rectArea.width,
@@ -226,55 +118,20 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
         }
     }
 
-    private func onPointMessage(msgPayload: [String: AnyObject]?, webPage: WebPage) throws {
-        guard webPage.pointAndShootAllowed == true else { throw PointAndShootError("Point and shoot is not allowed on this page") }
-        guard let pointAndShoot = webPage.pointAndShoot else { return }
-        guard let dict = msgPayload,
-              let href = dict["href"] as? String,
-              let areas = areasValue(of: dict, from: webPage),
-              let offset = offsetValue(of: dict, from: webPage),
-              let (location, html) = targetValues(of: dict, from: webPage) else {
-            pointAndShoot.unPoint()
-            throw PointAndShootError("Point payload is incorrect")
-        }
-        let quoteId = pointAndShootQuoteIdValue(from: dict)
-        if let area = areas.first {
-            let target = pointAndShoot.createTarget(area: area, quoteId: quoteId, mouseLocation: location, html: html, offset: offset, href: href)
-            pointAndShoot.point(target: target, href: href)
-        }
-    }
-
-    func targetValues(of jsMessage: [String: AnyObject], from webPage: WebPage) -> (location: NSPoint, html: String)? {
-        guard let pointAndShoot = webPage.pointAndShoot,
-              let html = jsMessage["html"] as? String,
-              let location = jsMessage["location"] else {
+    func boundsToTargets(_ bounds: [[String: AnyObject]], _ webPage: WebPage, _ href: String, animated: Bool) -> [PointAndShoot.Target]? {
+        guard let pointAndShoot = webPage.pointAndShoot else {
+            Logger.shared.logDebug("Bounds payload can't be unwrapped")
             return nil
         }
-        let position = pointAndShoot.webPositions.jsToPoint(jsPoint: location)
-        return (position, html)
-    }
 
-    func pointAndShootQuoteIdValue(from jsMessage: [String: AnyObject]) -> UUID? {
-        guard let quoteId = jsMessage["quoteId"] as? String else {
+        return bounds.compactMap { element -> PointAndShoot.Target? in
+            let rectObject = element["rect"] as AnyObject
+            let rect = pointAndShoot.webPositions.jsToRect(jsArea: rectObject)
+            if let html = element["html"] as? String,
+               let id = element["id"] as? String {
+                return pointAndShoot.createTarget(id, rect, html, href, animated)
+            }
             return nil
         }
-        return UUID(uuidString: quoteId)
     }
-
-    func areasValue(of jsMessage: [String: AnyObject], from webPage: WebPage) -> [NSRect]? {
-        guard let pointAndShoot = webPage.pointAndShoot,
-              let areas = jsMessage["areas"] as? [AnyObject] else {
-            return nil
-        }
-        return areas.map { pointAndShoot.webPositions.jsToRect(jsArea: $0) }
-    }
-
-    func offsetValue(of jsMessage: [String: AnyObject], from webPage: WebPage) -> NSPoint? {
-        guard let pointAndShoot = webPage.pointAndShoot,
-              let offset = jsMessage["offset"] else {
-            return nil
-        }
-        return pointAndShoot.webPositions.jsToPoint(jsPoint: offset)
-    }
-
 }

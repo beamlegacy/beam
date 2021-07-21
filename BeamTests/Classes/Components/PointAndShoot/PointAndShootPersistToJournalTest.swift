@@ -18,6 +18,8 @@ class PointAndShootPersistToJournalTest: PointAndShootTest {
     override func setUpWithError() throws {
         initTestBed()
 
+        self.pns.mouseLocation = NSPoint(x: 201, y: 202)
+
         if let page = self.testPage,
            let url = page.url {
             self.page = page
@@ -29,20 +31,20 @@ class PointAndShootPersistToJournalTest: PointAndShootTest {
     }
 
     func testSingleShootToNote() throws {
-        // Add Paragraph 1 to Card 1
         let paragraphTarget: PointAndShoot.Target = PointAndShoot.Target(
-            area: NSRect(x: 101, y: 102, width: 301, height: 302),
+            id: UUID().uuidString,
+            rect: NSRect(x: 101, y: 102, width: 301, height: 302),
             mouseLocation: NSPoint(x: 201, y: 202),
-            html: "<p>paragraph1</p>"
+            html: "<p>paragraph1</p>",
+            animated: false
         )
-
         // Point
-        self.pns.point(target: paragraphTarget, href: self.pns.page.url!.string)
-        self.pns.draw()
+        self.pns.point(paragraphTarget, "https://pnsTest.co")
         // Shoot
-        self.pns.shoot(targets: [paragraphTarget], href: self.pns.page.url!.string)
-        self.pns.status = .shooting
-        self.pns.draw()
+        XCTAssertNil(self.pns.activeShootGroup)
+        self.pns.isAltKeyDown = true
+        self.pns.pointShoot(paragraphTarget.id, paragraphTarget, "https://pnsTest.co")
+        XCTAssertNotNil(self.pns.activeShootGroup)
 
         // Add shoot to note
         let text: [BeamText] = html2Text(url: self.url, html: paragraphTarget.html)
@@ -50,9 +52,10 @@ class PointAndShootPersistToJournalTest: PointAndShootTest {
             let pendingQuotes = self.pns.text2Quote(text, self.url.absoluteString)
             pendingQuotes.then { quotes in
                 XCTAssertEqual(quotes.count, 1)
-                if quotes.first != nil {
-                    let noteInfo = NoteInfo(id: UUID(), title: self.page.activeNote)
-                    self.pns.complete(noteInfo: noteInfo, group: self.pns.activeShootGroup!)
+                if quotes.first != nil,
+                   let group = self.pns.activeShootGroup {
+                    self.pns.collectedGroups.append(group)
+                    self.pns.activeShootGroup = nil
                     done()
                 } else {
                     XCTFail("expected quotes to contain 1 item")
@@ -60,27 +63,28 @@ class PointAndShootPersistToJournalTest: PointAndShootTest {
             }
         }
 
-        XCTAssertEqual(self.pns.shootGroups.count, 1)
-        XCTAssertEqual(self.pns.shootGroups.first?.targets.count, 1)
-        XCTAssertEqual(self.pns.shootGroups.first?.targets.first?.html, paragraphTarget.html)
+        XCTAssertEqual(self.pns.collectedGroups.count, 1)
+        XCTAssertEqual(self.pns.collectedGroups.first?.targets.count, 1)
+        XCTAssertEqual(self.pns.collectedGroups.first?.targets.first?.html, paragraphTarget.html)
     }
 
     // swiftlint:disable:next function_body_length
     func testTwoShootsToTwoDifferentCards() throws {
         // Add Paragraph 1 to Card 1
         let paragraphTarget: PointAndShoot.Target = PointAndShoot.Target(
-            area: NSRect(x: 101, y: 102, width: 301, height: 302),
+            id: UUID().uuidString,
+            rect: NSRect(x: 101, y: 102, width: 301, height: 302),
             mouseLocation: NSPoint(x: 201, y: 202),
-            html: "<p>paragraph1</p>"
+            html: "<p>paragraph1</p>",
+            animated: false
         )
-
         // Point
-        self.pns.point(target: paragraphTarget, href: self.pns.page.url!.string)
-        self.pns.draw()
+        self.pns.point(paragraphTarget, "https://pnsTest.co")
         // Shoot
-        self.pns.shoot(targets: [paragraphTarget], href: self.pns.page.url!.string)
-        self.pns.status = .shooting
-        self.pns.draw()
+        XCTAssertNil(self.pns.activeShootGroup)
+        self.pns.isAltKeyDown = true
+        self.pns.pointShoot(paragraphTarget.id, paragraphTarget, "https://pnsTest.co")
+        XCTAssertNotNil(self.pns.activeShootGroup)
 
         // Add shoot to note
         let text: [BeamText] = html2Text(url: self.url, html: paragraphTarget.html)
@@ -88,9 +92,10 @@ class PointAndShootPersistToJournalTest: PointAndShootTest {
             let pendingQuotes = self.pns.text2Quote(text, self.url.absoluteString)
             pendingQuotes.then { quotes in
                 XCTAssertEqual(quotes.count, 1)
-                if quotes.first != nil {
-                    let noteInfo = NoteInfo(id: UUID(), title: self.page.activeNote)
-                    self.pns.complete(noteInfo: noteInfo, group: self.pns.activeShootGroup!)
+                if quotes.first != nil,
+                   let group = self.pns.activeShootGroup {
+                    self.pns.collectedGroups.append(group)
+                    self.pns.activeShootGroup = nil
                     done()
                 } else {
                     XCTFail("expected quotes to contain 1 item")
@@ -98,27 +103,23 @@ class PointAndShootPersistToJournalTest: PointAndShootTest {
             }
         }
 
-        XCTAssertEqual(self.pns.shootGroups.count, 1)
-        XCTAssertEqual(self.pns.shootGroups.first?.targets.count, 1)
-        XCTAssertEqual(self.pns.shootGroups.first?.targets.first?.html, paragraphTarget.html)
+        XCTAssertEqual(self.pns.collectedGroups.count, 1)
 
         // Add Paragraph 2 to Card 2
         let paragraphTarget2: PointAndShoot.Target = PointAndShoot.Target(
-            area: NSRect(x: 101, y: 102, width: 301, height: 302),
+            id: UUID().uuidString,
+            rect: NSRect(x: 101, y: 102, width: 301, height: 302),
             mouseLocation: NSPoint(x: 201, y: 202),
-            html: "<p>paragraph2</p>"
+            html: "<p>paragraph2</p>",
+            animated: false
         )
-        let page = self.testPage!
-        page.activeNote = "Card B"
-        page.testNotes["Card B"] = BeamNote(title: "Card B")
-
         // Point
-        self.pns.point(target: paragraphTarget2, href: self.pns.page.url!.string)
-        self.pns.draw()
+        self.pns.point(paragraphTarget2, "https://pnsTest.co")
         // Shoot
-        self.pns.shoot(targets: [paragraphTarget2], href: self.pns.page.url!.string)
-        self.pns.status = .shooting
-        self.pns.draw()
+        XCTAssertNil(self.pns.activeShootGroup)
+        self.pns.isAltKeyDown = true
+        self.pns.pointShoot(paragraphTarget2.id, paragraphTarget2, "https://pnsTest.co")
+        XCTAssertNotNil(self.pns.activeShootGroup)
 
         // Add shoot to note
         let text2: [BeamText] = html2Text(url: self.url, html: paragraphTarget2.html)
@@ -126,9 +127,10 @@ class PointAndShootPersistToJournalTest: PointAndShootTest {
             let pendingQuotes = self.pns.text2Quote(text2, self.url.absoluteString)
             pendingQuotes.then { quotes in
                 XCTAssertEqual(quotes.count, 1)
-                if quotes.first != nil {
-                    let noteInfo = NoteInfo(id: UUID(), title: self.page.activeNote)
-                    self.pns.complete(noteInfo: noteInfo, group: self.pns.activeShootGroup!)
+                if quotes.first != nil,
+                   let group = self.pns.activeShootGroup {
+                    self.pns.collectedGroups.append(group)
+                    self.pns.activeShootGroup = nil
                     done()
                 } else {
                     XCTFail("expected quotes to contain 1 item")
@@ -136,8 +138,6 @@ class PointAndShootPersistToJournalTest: PointAndShootTest {
             }
         }
 
-        XCTAssertEqual(self.pns.shootGroups.count, 2)
-        XCTAssertEqual(self.pns.shootGroups.last?.targets.count, 1)
-        XCTAssertEqual(self.pns.shootGroups.last?.targets.last?.html, paragraphTarget2.html)
+        XCTAssertEqual(self.pns.collectedGroups.count, 2)
     }
 }

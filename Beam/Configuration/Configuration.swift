@@ -16,7 +16,6 @@ struct Configuration {
     static private(set) var sentryEnabled = EnvironmentVariables.sentryEnabled
     static var networkEnabled = EnvironmentVariables.networkEnabled
     static var encryptionEnabledDefault = EnvironmentVariables.encryptionEnabled
-    static var pnsStatus = EnvironmentVariables.pnsStatus
     static private(set) var topDomainDBMaxSize = 10000
 
     static private(set) var sentryDsn = "https://\(sentryKey)@\(sentryHostname)/\(sentryProject)"

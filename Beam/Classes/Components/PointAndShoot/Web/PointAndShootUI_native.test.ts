@@ -43,8 +43,8 @@ function pointAndShootTestBed(frameEls = []) {
   return {pnsNativeUI, native}
 }
 
-test("sends element nodes rectangles", () => {
-  const {pnsNativeUI, native} = pointAndShootTestBed()
+test("test pointBounds payload", () => {
+  const { pnsNativeUI, native } = pointAndShootTestBed()
 
   const block = new BeamHTMLElementMock("p")
   block.offsetLeft = 11
@@ -81,34 +81,72 @@ test("sends element nodes rectangles", () => {
     block.appendChild(mostRightChild)
   }
 
-  pnsNativeUI.point("quoteId", block, 70, 22, () => {
-    // TODO: Do nothing?
-  })
+  pnsNativeUI.pointBounds({id: "uuid", element: block})
   const events = native.events
   expect(events.length).toEqual(1)
   const event0 = events[0]
-  expect(event0.name).toEqual("sendMessage point")
-  const pointArea = event0.payload.areas[0]
-  expect(pointArea.x).toEqual(block.offsetLeft)
-  expect(pointArea.y).toEqual(block.offsetTop)
-  expect(pointArea.width).toEqual(mostRightChild.offsetLeft + mostRightChild.width - mostLeftChild.offsetLeft)
-  // expect(totalArea.height).toEqual(mostBottomChild.bounds.y + mostBottomChild.bounds.height - mostTopChild.offsetTop)
-  expect(pointArea.height).toEqual(34 - mostTopChild.offsetTop)
-  expect(event0.payload.html).toEqual("<p><b>MEAN</b> (<a href=\"/wiki/MongoDB\">MongoDB</a></p>")
-  expect(event0.payload.location).toEqual({x: 59, y: 10})
+  expect(event0.name).toEqual("sendMessage pointBounds")
+  
+  const payload = event0.payload.point
+  const pointRect = payload.rect
+  expect(pointRect.x).toEqual(block.offsetLeft)
+  expect(pointRect.y).toEqual(block.offsetTop)
+  expect(pointRect.width).toEqual(mostRightChild.offsetLeft + mostRightChild.width - mostLeftChild.offsetLeft)
+  expect(pointRect.height).toEqual(34 - mostTopChild.offsetTop)
+  expect(payload.html).toEqual("<p><b>MEAN</b> (<a href=\"/wiki/MongoDB\">MongoDB</a></p>")
+})
 
-  pnsNativeUI.shoot("quoteId", block, 70, 22, null)
-  expect(events.length).toEqual(2)
-  const event1 = events[1]
-  expect(event1.name).toEqual("sendMessage shoot")
-  const shootArea = event1.payload.areas[0]
-  expect(shootArea.x).toEqual(block.offsetLeft)
-  expect(shootArea.y).toEqual(block.offsetTop)
-  expect(shootArea.width).toEqual(mostRightChild.offsetLeft + mostRightChild.width - mostLeftChild.offsetLeft)
-  // expect(totalArea.height).toEqual(mostBottomChild.bounds.y + mostBottomChild.bounds.height - mostTopChild.offsetTop)
-  expect(shootArea.height).toEqual(34 - mostTopChild.offsetTop)
-  expect(event1.payload.html).toEqual("<p><b>MEAN</b> (<a href=\"/wiki/MongoDB\">MongoDB</a></p>")
-  expect(event1.payload.location).toEqual({x: 59, y: 10})
+test("test shootBounds payload", () => {
+  const { pnsNativeUI, native } = pointAndShootTestBed()
+
+  const block = new BeamHTMLElementMock("p")
+  block.offsetLeft = 11
+  block.offsetTop = 12
+  block.width = 100
+  block.height = 200
+
+  const mostLeftChild = new BeamHTMLElementMock("b")
+  const mostTopChild = mostLeftChild
+  {
+	mostLeftChild.offsetLeft = 0
+	mostLeftChild.offsetTop = 0
+	mostLeftChild.width = 50
+	mostLeftChild.height = 16
+	mostLeftChild.appendChild(new BeamTextMock("MEAN"))
+	block.appendChild(mostLeftChild)
+  }
+  const mostBottomChild = new BeamTextMock(" (")
+  {
+	mostBottomChild.bounds.x = 15
+	mostBottomChild.bounds.y = 30
+	mostBottomChild.bounds.width = 20
+	mostBottomChild.bounds.height = 16
+	block.appendChild(mostBottomChild)
+  }
+  const attributes = { href: "/wiki/MongoDB" }
+  const mostRightChild = new BeamHTMLElementMock("a", attributes)
+  {
+	mostRightChild.offsetLeft = 10
+	mostRightChild.offsetTop = 5
+	mostRightChild.width = 60
+	mostRightChild.height = 16
+	mostRightChild.appendChild(new BeamTextMock("MongoDB"))
+	block.appendChild(mostRightChild)
+  }
+
+  pnsNativeUI.shootBounds([{id: "uuid", element: block}])
+  const events = native.events
+  expect(events.length).toEqual(1)
+  const event0 = events[0]
+  expect(event0.name).toEqual("sendMessage shootBounds")
+  
+  const payload = event0.payload.shoot[0]
+  const pointRect = payload.rect
+  expect(pointRect.x).toEqual(block.offsetLeft)
+  expect(pointRect.y).toEqual(block.offsetTop)
+  expect(pointRect.width).toEqual(mostRightChild.offsetLeft + mostRightChild.width - mostLeftChild.offsetLeft)
+  expect(pointRect.height).toEqual(34 - mostTopChild.offsetTop)
+  expect(payload.html).toEqual("<p><b>MEAN</b> (<a href=\"/wiki/MongoDB\">MongoDB</a></p>")
 })
 
 test("select event should return areas containing only x, y, width and height", () => {
@@ -120,20 +158,19 @@ test("select event should return areas containing only x, y, width and height", 
   range.setEnd(node, 3)
   const selectElements = [
     {
-      quoteId: undefined,
-      el: range
-    }
+	  id: "uuid",
+	  range: range
+	}
   ]
-  pnsNativeUI.select(selectElements)
+  pnsNativeUI.selectBounds(selectElements)
   const events = native.events
   expect(events.length).toEqual(1)
   const event0 = events[0]
-  expect(event0.name).toEqual("sendMessage select")
-  const pointAreas = event0.payload.areas
-  expect(pointAreas.length).toEqual(1)
-  expect(pointAreas).toEqual([{x: 0, y: 0, width: 0, height: 0}])
+  expect(event0.name).toEqual("sendMessage selectBounds")
+  const pointRects = event0.payload.select[0].rectData
+  expect(pointRects.length).toEqual(1)
+  expect(pointRects[0].rect).toEqual({ x: 0, y: 0, width: 0, height: 0 })
 })
-
 
 describe("Pointing mode overlay bounding area calculation", () => {
   const {pnsNativeUI, native} = pointAndShootTestBed()
@@ -295,6 +332,7 @@ describe("Pointing mode overlay bounding area calculation", () => {
 
   })
 })
+
 
 describe("isMeaningful filtering", () => {
   const {pnsNativeUI, native} = pointAndShootTestBed()

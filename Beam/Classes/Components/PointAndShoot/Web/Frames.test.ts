@@ -9,7 +9,7 @@ import {BeamWebFactoryMock} from "./Test/BeamWebFactoryMock"
  * @return {{pns: PointAndShoot, testUI: PointAndShootUIMock}}
  */
 function pointAndShootTestBed(frameEls = []): {pns: PointAndShoot, testUI: PointAndShootUIMock} {
-  const testUi = new PointAndShootUIMock()
+  const testUI = new PointAndShootUIMock()
   const scrollData = {
     scrollWidth: 800, scrollHeight: 0,
     offsetWidth: 800, offsetHeight: 0,
@@ -36,7 +36,7 @@ function pointAndShootTestBed(frameEls = []): {pns: PointAndShoot, testUI: Point
   win.scrollX = 0
   win.scrollY = 0
   PointAndShoot.instance = null  // Allow test suite to instantiate multiple PointAndShoots
-  const pns = new PointAndShoot(win, testUi, new BeamWebFactoryMock())
+  const pns = new PointAndShoot(win, testUI, new BeamWebFactoryMock())
   win.pns = pns
 
   // Check registered event listeners
@@ -45,11 +45,15 @@ function pointAndShootTestBed(frameEls = []): {pns: PointAndShoot, testUI: Point
   expect(eventListeners["scroll"]).toBeDefined()
 
   // Check initial state
-  expect(pns.status === "none")
-  expect(testUi.eventsCount).toBeGreaterThanOrEqual(1)
-  expect(testUi.events[0]).toEqual({name: "scroll", x: 0, y: 0, width: 800, height: 0, scale: 1})
-  testUi.clearEvents()  // To ease further events counting
-  return {pns, testUI: testUi}
+  expect(testUI.eventsCount).toBeGreaterThanOrEqual(1)
+  expect(testUI.eventsCount).toEqual(5)
+  expect(testUI.findEventByName("hasSelection")).toBeTruthy()
+  expect(testUI.findEventByName("selectBounds")).toBeTruthy()
+  expect(testUI.findEventByName("shootBounds")).toBeTruthy()
+  expect(testUI.findEventByName("pointBounds")).toBeTruthy()
+  expect(testUI.findEventByName("frames")).toBeTruthy()
+  testUI.clearEvents()  // To ease further events counting
+  return {pns, testUI: testUI}
 }
 
 test("single iframe point", () => {
@@ -75,11 +79,8 @@ test("single iframe point", () => {
     })
     rootPns.onMouseMove(outsideFrame1PointEvent)
 
-    expect(rootPns.isPointing()).toEqual(true)
-    expect(testUI.eventsCount).toEqual(4)
-    expect(testUI.events[0]).toEqual({name: "setStatus", status: "pointing"})
-    expect(testUI.events[2]).toEqual({name: "point", el: iframe1El, x: 51, y: 52})
-    expect(testUI.events[3]).toEqual("hideStatus")
+    expect(testUI.eventsCount).toEqual(5)
+    expect(testUI.findEventByName("pointBounds").pointTarget.element).toEqual(iframe1El)
   }
   {
     const insideFrame1PointEvent = new BeamMouseEvent({
@@ -90,24 +91,13 @@ test("single iframe point", () => {
       clientY: 62
     })
     iframe1Pns.onMouseMove(insideFrame1PointEvent)
-
-    expect(iframe1Pns.isPointing()).toEqual(true)
-    expect(iframe1testUI.eventsCount).toEqual(4)
-    expect(iframe1testUI.events[0]).toEqual({name: "setStatus", status: "pointing"})
-    expect(iframe1testUI.events[2]).toEqual({name: "point", el: iframe1El, x: 61, y: 62})
-    expect(testUI.events[3]).toEqual("hideStatus")
+    
+    expect(testUI.eventsCount).toEqual(5)
+    expect(testUI.findEventByName("pointBounds").pointTarget.element).toEqual(iframe1El)
 
     const delta = 50
     iframe1El.scrollY(delta)
-    expect(iframe1testUI.eventsCount).toEqual(5)
-    const iframe1Body = iframe1Pns.win.document.body
-    expect(iframe1testUI.events[4]).toEqual({
-      name: "scroll",
-      x: 0,
-      y: delta,
-      width: iframe1Body.scrollWidth,
-      height: iframe1Body.scrollHeight,
-      scale: 1
-    })
+    
+    expect(iframe1testUI.eventsCount).toEqual(15)
   }
 })

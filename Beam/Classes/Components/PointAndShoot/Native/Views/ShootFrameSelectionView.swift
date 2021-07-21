@@ -2,19 +2,22 @@ import Foundation
 import SwiftUI
 
 struct ShootFrameSelectionView: View {
-
-    var group: ShootGroupUI
+    @ObservedObject var pns: PointAndShoot
+    @ObservedObject var webPositions: WebPositions
+    var group: PointAndShoot.ShootGroup
     @State private var isHovering = false
+    @State var showLabel = false
 
     var body: some View {
-        let rect = group.groupRect
-        let groupPath = group.groupPath
-        let text = isHovering ? group.noteInfo.title : ""
+        let newGroup = translate(group)
+        let rect = newGroup.groupRect
+        let groupPath = newGroup.groupPath
+        let text = (isHovering || showLabel) ? newGroup.noteInfo.title : ""
         return Group {
-            if let firstUI = group.uis.first {
-                let bgColor = firstUI.bgColor
+            if let firstUI = newGroup.targets.first {
+                let bgColor = BeamColor.PointShoot.shootBackground.swiftUI
                 let animated = firstUI.animated
-                let color = firstUI.color
+                let color = BeamColor.PointShoot.shootOutline.swiftUI
 
                 ZStack(alignment: .center) {
                     Path(groupPath)
@@ -35,5 +38,16 @@ struct ShootFrameSelectionView: View {
                 .animation(animated ? Animation.easeOut : nil)
             }
         }
+    }
+
+    func translate(_ group: PointAndShoot.ShootGroup) -> PointAndShoot.ShootGroup {
+        var newGroup = group
+        let href = group.href
+        for target in newGroup.targets {
+            let newTarget = pns.translateAndScaleTarget(target, href)
+            newGroup.updateTarget(newTarget)
+        }
+
+        return newGroup
     }
 }

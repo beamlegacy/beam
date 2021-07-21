@@ -17,306 +17,312 @@ struct PointAndShootError: LocalizedError {
     }
 }
 
-public enum PointAndShootStatus: String, CodingKey {
-    case none
-    case pointing
-    case shooting
-}
-
 public struct NoteInfo: Encodable {
-    let id: UUID?   // Should not be nilable once we get it
+    var id: UUID = UUID()
     let title: String
 }
 
-class PointAndShoot: WebPageHolder {
+// swiftlint:disable file_length
+class PointAndShoot: WebPageHolder, ObservableObject {
     var webPositions: WebPositions = WebPositions()
+    private let scorer: BrowsingScorer
+    @Published var activePointGroup: ShootGroup?
+    @Published var activeSelectGroup: ShootGroup?
+    @Published var activeShootGroup: ShootGroup?
+    @Published var collectedGroups: [ShootGroup] = []
+    @Published var dismissedGroups: [ShootGroup] = []
+    @Published var shootConfirmationGroup: ShootGroup?
+    @Published var isAltKeyDown: Bool = false
+    @Published var hasActiveSelection: Bool = false
+    @Published var mouseLocation: NSPoint = NSPoint()
 
-    var _status: PointAndShootStatus = .none
-    var status: PointAndShootStatus {
+    init(scorer: BrowsingScorer) {
+        self.scorer = scorer
+    }
+
+    override var page: WebPage {
         get {
-            return _status
+            super.page
         }
         set {
-            if newValue != _status {
-                switch newValue {
-                case .none:
-                    if _status == .pointing {
-                        hidePointing()
-                        hideShoot()
-                    }
-
-                    if _status == .shooting {
-                        hideShoot()
-                    }
-
-                case .shooting:
-                    if _status == .pointing {
-                        hidePointing()
-                    }
-
-                default: break
-                }
-                _status = newValue
-                if Configuration.pnsStatus {
-                    ui.swiftPointStatus = _status.rawValue
-                }
+            super.page = newValue
+            self.page.webView.optionKeyToggle = { key in
+                self.refresh(self.mouseLocation, key)
             }
-
-            draw()
+            self.page.webView.mouseClickChange = { (mousePos) in
+                self.handleMouseClick(mousePos)
+            }
+            self.page.webView.mouseMoveTriggeredChange = { (mousePos, modifier) in
+                self.refresh(mousePos, modifier)
+            }
         }
     }
 
-    var isPointing: Bool {
-        @inline(__always) get { status == .pointing }
+    /// If activeShootGorup and click location overlap, cancel active shoot
+    /// - Parameter mousePos: Point of mousePosition
+    func handleMouseClick(_ mousePos: NSPoint) {
+        if let group = self.activeShootGroup {
+            for target in group.targets {
+                if !hasGraceRectAndMouseOverlap(target, group.href, mousePos) {
+                    cancelShoot()
+                }
+            }
+        }
     }
 
-    private func hidePointing() {
-        Logger.shared.logDebug("leavePointing()", category: .pointAndShoot)
-        pointTarget = nil
-    }
+    /// Refreshes the mouseLocation, isAltKeyDown variables with updated values. If key modifier contains option
+    /// and there's an active selection + selectgroup we shoot the select group.
+    /// - Parameters:
+    ///   - mousePos: Point of mousePosition
+    ///   - modifier: Array of modifier keys used in event
+    func refresh(_ mousePos: NSPoint, _ modifier: NSEvent.ModifierFlags) {
+        self.mouseLocation = mousePos
+        isAltKeyDown = modifier.contains(.option)
 
-    private func hideShoot() {
-        Logger.shared.logDebug("leaveShoot()", category: .pointAndShoot)
-        ui.clearShoots()
-        activeShootGroup = nil
-    }
-
-    func resetStatus() {
-        executeJS("setStatus('none')")
-    }
-
-    private func executeJS(_ method: String) {
-        page.executeJS(method, objectName: "PointAndShoot")
+        // refresh event contains option key, and we have a active selection + activeSelectGroup
+        if modifier.contains(.option),
+           let group = self.activeSelectGroup,
+           hasActiveSelection {
+            // shoot the selection
+            self.selectShoot(group)
+        }
     }
 
     /**
      * A group of blocks that can be associated to a Note as a whole and at once.
      */
-    class ShootGroup {
-
-        let href: String
-
-        init(href: String) {
+    struct ShootGroup {
+        init(_ id: String, _ targets: [Target], _ href: String, _ noteInfo: NoteInfo = NoteInfo(title: "")) {
+            self.id = id
             self.href = href
+            self.targets = targets
+            self.noteInfo = noteInfo
+            self.updateSelectionPath()
         }
 
-        /**
-         * The blocks that compose this group.
-         */
+        let href: String
+        var id: String
         var targets: [Target] = []
-
-        var quoteId: UUID?
-
-        /**
-         * The associated Note, if any.
-         */
-        var noteInfo: NoteInfo = NoteInfo(id: nil, title: "")
-
+        var noteInfo: NoteInfo
+        var numberOfElements: Int = 0
         func html() -> String {
             targets.reduce("", {
                 $1.html.count > $0.count ? $1.html : $0
             })
         }
+        private(set) var groupPath: CGPath = CGPath(rect: .zero, transform: nil)
+        private(set) var groupRect: CGRect = .zero
+        private let groupPadding: CGFloat = 4
+        private let groupRadius: CGFloat = 4
+        mutating func setNoteInfo(_ note: NoteInfo) {
+            noteInfo = note
+        }
+        mutating func updateSelectionPath() {
+            let fusionRect = ShootFrameFusionRect().getRect(targets: targets).insetBy(dx: -groupPadding, dy: -groupPadding)
+            groupRect = fusionRect
+            if targets.count > 1 {
+                let allRects = targets.map { $0.rect.insetBy(dx: -groupPadding, dy: -groupPadding) }
+                groupPath = CGPath.makeUnion(of: allRects, cornerRadius: groupRadius)
+            } else {
+                groupPath = CGPath(roundedRect: fusionRect, cornerWidth: groupRadius, cornerHeight: groupRadius, transform: nil)
+            }
+        }
+        /// If target exists update the rect and translate the mouseLocation point.
+        /// - Parameter newTarget: Target containing new rect
+        mutating func updateTarget(_ newTarget: Target) {
+            // find the matching targets and update Rect and MouseLocation
+            if let index = targets.firstIndex(where: { $0.id == newTarget.id }) {
+                let diffX = targets[index].rect.minX - newTarget.rect.minX
+                let diffY = targets[index].rect.minY - newTarget.rect.minY
+                let oldPoint = targets[index].mouseLocation
+                targets[index].rect = newTarget.rect
+                targets[index].mouseLocation = NSPoint(x: oldPoint.x - diffX, y: oldPoint.y - diffY)
+                updateSelectionPath()
+            }
+        }
     }
 
     /// Describes a target area as part of a Shoot group
     struct Target {
+        /// ID of the target
+        var id: String
         /// Rectangle Area of the target
-        var area: NSRect
-        /// Optional reference to the quoteId. This UUID references a quote in a BeamNote
-        var quoteId: UUID?
+        var rect: NSRect
         /// Point location of the mouse. It's used to draw the ShootCardPicker location.
         /// It's `x` and `y` location is relative to the top left corner of the area
         var mouseLocation: NSPoint
-        // HTML string of the targeted element
+        /// HTML string of the targeted element
         var html: String
-        // Optional `x`, `y` coordinates for offsetting the quoteArea position toward the mouse cursor
-        var offset: NSPoint?
-        // Prefer using the parent class method
-        func translateTarget(xDelta: CGFloat, yDelta: CGFloat, scale: CGFloat) -> Target {
-            let newArea = NSRect(
-                x: (area.minX + xDelta) * scale,
-                y: (area.minY + yDelta) * scale,
-                width: area.width * scale,
-                height: area.height * scale
+        /// Decides if ui applies animations
+        var animated: Bool
+        /// Translates target for scaling and positioning of frame
+        func translateTarget(_ xDelta: CGFloat = 0, _ yDelta: CGFloat = 0, scale: CGFloat) -> Target {
+            let newRect = NSRect(
+                x: (rect.minX + xDelta) * scale,
+                y: (rect.minY + yDelta) * scale,
+                width: rect.width * scale,
+                height: rect.height * scale
             )
             let newLocation = NSPoint(
-                x: mouseLocation.x * scale,
-                y: mouseLocation.y * scale
+                x: (mouseLocation.x + xDelta) * scale,
+                y: (mouseLocation.y + yDelta) * scale
             )
-            return Target(area: newArea, quoteId: quoteId, mouseLocation: newLocation, html: html, offset: offset)
+            return Target(id: id, rect: newRect, mouseLocation: newLocation, html: html, animated: animated)
         }
     }
 
-    /// Translates a previously created target based on:
-    /// - page horizontal scroll
-    /// - page vertical scroll
-    /// - page scaling
-    /// Page scaling is calculated by multiplying the webView zoomLevel and the scaling received from JS.
-    ///
-    /// - Parameter target: The target to be translated
-    /// - Parameter href: href of the frame containing the target
-    /// - Returns: The translated target
-    func translateTarget(target: Target, href: String) -> Target {
+    /// Creates initial Point and Shoot target
+    /// - Parameters:
+    ///   - rect: area of target to be drawn
+    ///   - id: id of html element
+    ///   - href: url location of target
+    /// - Returns: Translated target
+    func createTarget(_ id: String, _ rect: NSRect, _ html: String, _ href: String, _ animated: Bool) -> Target {
+        return Target(
+            id: id,
+            rect: rect,
+            mouseLocation: mouseLocation.clamp(rect),
+            html: html,
+            animated: animated
+        )
+    }
+
+    func translateAndScaleTarget(_ target: PointAndShoot.Target, _ href: String) -> PointAndShoot.Target {
+        guard let view = page.webView else {
+            fatalError("Webview is required to scale target correctly")
+        }
         let frameOffsetX = webPositions.viewportPosition(href, prop: WebPositions.FramePosition.x).reduce(0, +)
         let frameOffsetY = webPositions.viewportPosition(href, prop: WebPositions.FramePosition.y).reduce(0, +)
         let frameScrollX = webPositions.viewportPosition(href, prop: WebPositions.FramePosition.scrollX)
         let frameScrollY = webPositions.viewportPosition(href, prop: WebPositions.FramePosition.scrollY)
         let xDelta = frameOffsetX - frameScrollX.reduce(0, +)
         let yDelta = frameOffsetY - frameScrollY.reduce(0, +)
-        guard let view = page.webView else {
-            Logger.shared.logWarning("page webView required to translate target correctly", category: .pointAndShoot)
-            return target.translateTarget(xDelta: xDelta, yDelta: yDelta, scale: webPositions.scale)
-        }
+        let scale: CGFloat = webPositions.scale * view.zoomLevel()
 
-        let scale = view.zoomLevel() * webPositions.scale
-        return target.translateTarget(xDelta: xDelta, yDelta: yDelta, scale: scale)
+        return target.translateTarget(xDelta, yDelta, scale: scale)
     }
 
-    /// Creates initial Point and Shoot target that takes into account page horizontal and vertical scroll and page scaling.
-    /// Note: When creating a target we position it with scale set to `1`. We call `translateTarget()` before drawing the target which does use the current scaling value.
+    /// Set activePointGroup with target. Updating the activePointGroup will update the UI directly.
+    func point(_ target: Target, _ href: String) {
+        activePointGroup = ShootGroup("point-uuid", [target], href)
+    }
+
+    /// Draw function for selection. `activeSelectGroup` is used as a storage variable until option is pressed.
+    /// Assigning the selection targets to the `activeShootGroup` happens in `refresh()`.
     /// - Parameters:
-    ///   - area: The area coords.
-    ///   - quoteId: ID of the stored quote. Defaults to `nil`.
-    ///   - mouseLocation: Mouse location coords.
-    ///   - html: The HTML content of the targeted element
-    /// - Returns: Translated target
-    func createTarget(area: NSRect, quoteId: UUID? = nil, mouseLocation: NSPoint, html: String, offset: NSPoint? = nil, href: String) -> Target {
-        let target = Target(area: area, quoteId: quoteId, mouseLocation: mouseLocation, html: html, offset: offset)
-        let xDelta = webPositions.viewportPosition(href, prop: WebPositions.FramePosition.scrollX).reduce(0, +)
-        let yDelta = webPositions.viewportPosition(href, prop: WebPositions.FramePosition.scrollY).reduce(0, +)
-        return target.translateTarget(xDelta: xDelta, yDelta: yDelta, scale: 1)
-    }
-
-    let ui: PointAndShootUI
-    let scorer: BrowsingScorer
-
-    init(ui: PointAndShootUI, scorer: BrowsingScorer) {
-        self.ui = ui
-        self.scorer = scorer
-    }
-
-    /**
-     The pointing area (before shoot), if any.
-
-     There is only one at a time.
-     */
-    var pointTarget: Target?
-
-    /**
-     The registered shoot sessions.
-
-     Groups have associated ShootGroupUI managed by the PointAndShootUI
-     */
-    var shootGroups: [ShootGroup] = []
-
-    /**
-     The group being shot. It will added to groups once the card has been validated.
-     */
-    var activeShootGroup: ShootGroup?
-
-    func point(target: Target, href: String) {
-        pointTarget = translateTarget(target: target, href: href)
-        ui.drawPoint(target: pointTarget!)
-    }
-
-    func cursor(target: Target, href: String) {
-        pointTarget = translateTarget(target: target, href: href)
-        ui.drawCursor(target: pointTarget!)
-    }
-
-    /// Removes PointFrame UI and resets the PNS status to .none, only runs when status is .pointing
-    func unPoint() {
-        if status == .pointing {
-            resetStatus()
-        }
-    }
-
-    func shoot(targets: [Target], href: String) {
-        if activeShootGroup == nil {
-            activeShootGroup = ShootGroup(href: href)
-        }
-        activeShootGroup?.targets = targets
-    }
-
-    /// update shootGroups with targets
-    /// - Parameters:
-    ///   - targets: the shoot targets to update
-    ///   - href: browser tab href
-    func updateShoots(targets: [Target], href: String) {
-        let allGroups = [activeShootGroup] + shootGroups
-        for group in allGroups.compactMap({ $0 }) {
-            let newTargets = targets.filter { target in
-                return group.quoteId == target.quoteId
-            }
-
-            if newTargets.count > 0 {
-                group.targets = newTargets
-            }
-        }
-    }
-
-    func showShootInfo(group: ShootGroup) {
-        let shootTarget = translateTarget(target: group.targets[0], href: group.href)
-        ui.drawShootConfirmation(shootTarget: shootTarget, noteInfo: group.noteInfo)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
-            guard let self = self else { return }
-            self.ui.clearConfirmation()
-        }
-    }
-
-    func draw() {
-        ui.clearShoots()
-        switch status {
-        case .pointing:
-            drawAllGroups()
-        case .shooting:
-            ui.clearPoint()
-            drawActiveShootGroup()
-        case .none:
-            ui.clearPoint()
-        }
-    }
-
-    private func drawShootGroup(groups: [ShootGroup], edited: Bool) {
-        for group in groups {
-            let shootTargets = group.targets
-            if shootTargets.count > 0 {
-                var selectionUIs = [SelectionUI]()
-                for shootTarget in shootTargets {
-                    let target = translateTarget(target: shootTarget, href: group.href)
-                    let selectionUI = ui.createUI(shootTarget: target)
-                    selectionUIs.append(selectionUI)
-                }
-                _ = ui.createGroup(noteInfo: group.noteInfo, selectionUIs: selectionUIs, edited: edited)
-            }
-        }
-    }
-
-    private func drawAllGroups() {
-        drawShootGroup(groups: shootGroups, edited: false)
-    }
-
-    private func drawActiveShootGroup() {
-        guard let group = activeShootGroup else {
-            Logger.shared.logInfo("Skipping drawCurrentGroup() currentGroup not defined", category: .pointAndShoot)
+    ///   - groupId: id of group, for selections this is the non-number version. Targets have the same `id + index`
+    ///   - targets: Target rects to draw
+    ///   - href: href of frame
+    func select(_ groupId: String, _ targets: [Target], _ href: String) {
+        // first check if the incomming group is already collected
+        if targetIsCollected(groupId) {
+            collect(groupId, targets, href)
             return
         }
-        drawShootGroup(groups: [group], edited: true)
+
+        // probably always false, but just in case check if the target was previously dismissed
+        if targetIsDismissed(groupId) {
+            return
+        }
+
+        // if the activeShootGroup and the incomming select group match, update the targets
+        if let group = activeShootGroup,
+           group.id == groupId {
+            for target in targets {
+                activeShootGroup?.updateTarget(target)
+            }
+            return
+        }
+
+        // then only continue if we have an active selection
+        guard hasActiveSelection else {
+            activeSelectGroup = nil
+            return
+        }
+
+        // If we didn't exit earlier, set the activeSelectGroup
+        activeSelectGroup = ShootGroup(groupId, targets, href)
     }
 
-    /**
-     Clear all remembered shoots
-     */
-    func removeAll() {
-        shootGroups.removeAll()
-        resetStatus()
+    /// Sets selection group as activeShootGroup
+    /// - Parameters:
+    ///   - group: Group to be converted
+    func selectShoot(_ group: ShootGroup) {
+        if targetIsDismissed(group.id) {
+            return
+        }
+
+        if targetIsCollected(group.id) {
+            collect(group.id, group.targets, group.href)
+            return
+        }
+
+        activeShootGroup = group
     }
 
-    /// Clears all remembered shoots and frameInfo
-    func leavePage() {
-        removeAll()
-        webPositions.removeFrameInfo()
+    /// Set targets as activeShootGroup
+    /// - Parameters:
+    ///   - groupId: id of group
+    ///   - targets: Set of targets to draw
+    ///   - href: Url of frame targets are located in
+    func pointShoot(_ groupId: String, _ target: Target, _ href: String) {
+        if targetIsDismissed(groupId) {
+            return
+        }
+        if targetIsCollected(groupId) {
+            collect(groupId, [target], href)
+            return
+        }
+
+        if (isAltKeyDown || activeShootGroup != nil), activePointGroup != nil, activeSelectGroup == nil {
+            // if we have an existing group
+            if activeShootGroup != nil {
+                activeShootGroup?.updateTarget(target)
+            } else {
+                // only allow creating new a shootGroup when these conditions are met:
+                guard hasGraceRectAndMouseOverlap(target, href, mouseLocation),
+                      !isLargeTargetArea(target) else { return }
+
+                activeShootGroup = ShootGroup(groupId, [target], href)
+            }
+        }
+    }
+
+    /// Set or update targets to collectedGroup
+    /// - Parameters:
+    ///   - groupId: id of group to update
+    ///   - targets: Set of targets to draw
+    ///   - href: Url of frame targets are located in
+    func collect(_ groupId: String, _ targets: [Target], _ href: String) {
+        guard targets.count > 0 else { return }
+
+        // Keep shootConfirmationGroup position when scrolling
+        if shootConfirmationGroup != nil {
+            for target in targets {
+                shootConfirmationGroup?.updateTarget(target)
+            }
+        }
+
+        if let index = collectedGroups.firstIndex(where: {$0.id == groupId}) {
+            var existingGroup = collectedGroups[index]
+            for target in targets {
+                existingGroup.updateTarget(target)
+            }
+            collectedGroups[index] = existingGroup
+        } else {
+            let newGroup = ShootGroup(groupId, targets, href)
+            collectedGroups.append(newGroup)
+        }
+    }
+
+    /// Draws shoot confirmation
+    /// - Parameter group: ShootGroup of targets to draw the confirmation UI
+    private func showShootInfo(group: ShootGroup) {
+        shootConfirmationGroup = group
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
+            guard let self = self else { return }
+            self.shootConfirmationGroup = nil
+        }
     }
 
     /// Small Utility to create a BeamElement containing noteText
@@ -328,12 +334,16 @@ class PointAndShoot: WebPageHolder {
         return note
     }
 
+    /// Adds the activeShootGroup to the journal. It will convert the html to beamtext, apply quote styling and download any target images.
+    /// - Parameters:
+    ///   - noteTitle: title of note to assign to.
+    ///   - noteText: optional text to add underneath the shoot quote
     func addShootToNote(noteTitle: String, withNote noteText: String? = nil) {
         guard let sourceUrl = page.url,
               let currentCard = page.getNote(fromTitle: noteTitle) else {
             fatalError("Could not find note to update with title \(noteTitle)")
         }
-        guard let shootGroup = activeShootGroup else {
+        guard var shootGroup = activeShootGroup else {
             fatalError("Expected to have an active shoot group")
         }
         // Set Destination note to the current card
@@ -366,18 +376,35 @@ class PointAndShoot: WebPageHolder {
                     source.addChild(quote)
                 })
                 // Complete PNS and clear stored data
-                let noteInfo = NoteInfo(id: currentCard.id, title: currentCard.title)
-                self.complete(noteInfo: noteInfo, group: shootGroup)
+                shootGroup.setNoteInfo(NoteInfo(id: currentCard.id, title: currentCard.title))
+                shootGroup.numberOfElements = resolvedQuotes.count
+                self.collectedGroups.append(shootGroup)
+                self.showShootInfo(group: shootGroup)
+                self.activeShootGroup = nil
             })
         }
     }
 
-    func complete(noteInfo: NoteInfo, group: ShootGroup) {
-        let quoteId = UUID()
-        group.noteInfo = noteInfo
-        shootGroups.append(group)
-        executeJS("assignNote('\(quoteId)')")
-        showShootInfo(group: group)
+    /// Clears all stored Point and Shoot session data
+    func leavePage() {
+        activePointGroup = nil
+        activeSelectGroup = nil
         activeShootGroup = nil
+        collectedGroups.removeAll()
+        dismissedGroups.removeAll()
+        shootConfirmationGroup = nil
+        isAltKeyDown = false
+        hasActiveSelection = false
+    }
+
+    func cancelShoot() {
+        if let group = activeShootGroup {
+            dismissedGroups.append(group)
+            activeShootGroup = nil
+        }
+        if let group = activeSelectGroup {
+            dismissedGroups.append(group)
+            activeSelectGroup = nil
+        }
     }
 }
