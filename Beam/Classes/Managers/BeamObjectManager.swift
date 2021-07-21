@@ -3,15 +3,8 @@ import BeamCore
 
 // swiftlint:disable file_length
 protocol BeamObjectManagerDelegateProtocol {
-    // The object we store
-    static var objectType: BeamObjectProtocol.Type { get }
-
     // When new beam objects have been received and should be locally stored
-    func receivedBeamObjects(_ objects: [BeamObject]) throws
     func receivedBeamObjects<T: BeamObjectProtocol>(_ objects: [T]) throws
-
-    // Mandatory for using dynamic creation of managers. See `setup` and `parseFilteredObjects`
-    init(_ manager: BeamObjectManager)
 
     // Called when `BeamObjectManager` wants to store all existing `Document` as `BeamObject`
     // it will call this method
@@ -25,22 +18,6 @@ protocol BeamObjectManagerDelegateProtocol {
                               _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask?
 }
 
-class BeamObjectManagerDelegate {
-    func structsAsBeamObjects<T: BeamObjectProtocol>(_ structs: [T]) throws -> [BeamObject] {
-        try structs.compactMap {
-            let object = try BeamObject($0, T.beamObjectTypeName)
-
-            // We don't want to send updates for documents already sent.
-            // We know it's sent because the previousChecksum is the same as the current data Checksum
-            guard object.previousChecksum != object.dataChecksum, object.dataChecksum != nil else {
-                return nil
-            }
-
-            return object
-        }
-    }
-}
-
 enum BeamObjectManagerError: Error {
     case notSuccess
     case notAuthenticated
@@ -48,10 +25,6 @@ enum BeamObjectManagerError: Error {
     case beamObjectInvalidChecksum(BeamObject)
     case beamObjectDecodingError
     case beamObjectEncodingError
-}
-
-enum BeamObjectManagerObjectError<T: BeamObjectProtocol>: Error {
-    case beamObjectInvalidChecksum(T)
 }
 
 extension BeamObjectManagerError: LocalizedError {
@@ -73,6 +46,19 @@ extension BeamObjectManagerError: LocalizedError {
     }
 }
 
+enum BeamObjectManagerObjectError<T: BeamObjectProtocol>: Error {
+    case beamObjectInvalidChecksum(T)
+}
+
+extension BeamObjectManagerObjectError: LocalizedError {
+    public var errorDescription: String? {
+        switch self {
+        case .beamObjectInvalidChecksum(let object):
+            return "Invalid Checksum \(object.beamObjectId)"
+        }
+    }
+}
+
 enum BeamObjectConflictResolution {
     // Will overwrite remote object with values from local ones
     case replace
@@ -83,22 +69,37 @@ enum BeamObjectConflictResolution {
 }
 
 class BeamObjectManager {
-    static var managers: [String: BeamObjectManagerDelegateProtocol.Type] = [:]
-    static var managersObjects: [String: BeamObjectProtocol.Type] = [:]
+    static var managerInstances: [String: BeamObjectManagerDelegateProtocol] = [:]
+    static var translators: [String: (BeamObjectManagerDelegateProtocol, [BeamObject]) -> Void] = [:]
 
     private static var networkRequests: [UUID: APIRequest] = [:]
     private static var urlSessionTasks: [URLSessionTask] = []
 
-    static func register<T: BeamObjectManagerDelegateProtocol>(_ manager: T.Type) {
-        managers[T.objectType.beamObjectTypeName] = manager
-        managersObjects[T.objectType.beamObjectTypeName] = manager.objectType
+    static func register<M: BeamObjectManagerDelegateProtocol, O: BeamObjectProtocol>(_ manager: M, object: O.Type) {
+        managerInstances[object.beamObjectTypeName] = manager
+        translators[object.beamObjectTypeName] = { manager, objects in
+            do {
+                let encapsulatedObjects: [O] = try objects.map {
+                    try $0.decodeBeamObject()
+                }
+
+                try manager.receivedBeamObjects(encapsulatedObjects)
+            } catch {
+                Logger.shared.logError("Could not call manager: \(error.localizedDescription)", category: .beamObject)
+            }
+        }
+    }
+
+    static func unRegisterAll() {
+        managerInstances = [:]
+        translators = [:]
     }
 
     static func setup() {
         // Add any manager using BeamObjects here
-        register(DocumentManager.self)
-        register(DatabaseManager.self)
-        register(PasswordManager.self)
+        register(DocumentManager(), object: DocumentStruct.self)
+        register(DatabaseManager(), object: DatabaseStruct.self)
+        register(PasswordManager(), object: PasswordRecord.self)
     }
 
     func clearNetworkCalls() {
@@ -157,26 +158,18 @@ class BeamObjectManager {
     }
 
     internal func parseFilteredObjects(_ filteredObjects: [String: [BeamObject]]) {
-        var initiatedManagers: [String: BeamObjectManagerDelegateProtocol] = [:]
-
         for (key, objects) in filteredObjects {
-            guard let manager = Self.managers[key] else {
-                Logger.shared.logError("**manager for \(key) not found**", category: .beamObjectNetwork)
+            guard let managerInstance = Self.managerInstances[key] else {
+                print("**managerInstance for \(key) not found** keys: \(Self.managerInstances.keys)")
                 continue
             }
 
-            guard let document = Self.managersObjects[key] else {
-                Logger.shared.logError("**object type for \(key) not found**", category: .beamObjectNetwork)
+            guard let translator = Self.translators[key] else {
+                print("**translator for \(key) not found** keys: \(Self.translators.keys)")
                 continue
             }
 
-            initiatedManagers[key] = initiatedManagers[key] ?? manager.init(self)
-
-            do {
-                try initiatedManagers[key]?.receivedBeamObjects(objects)
-            } catch {
-                Logger.shared.logError("Error with objects: \(error)", category: .beamObjectNetwork)
-            }
+            translator(managerInstance, objects)
         }
     }
 }
@@ -716,10 +709,8 @@ extension BeamObjectManager {
         let lock = DispatchSemaphore(value: 1)
         var dataTasks: [URLSessionTask] = []
 
-        for (_, managerClass) in Self.managers {
+        for (_, manager) in Self.managerInstances {
             group.enter()
-
-            let manager = managerClass.init(self)
 
             Logger.shared.logDebug("saveAllOnBeamObjectApi using \(manager)",
                                    category: .beamObjectNetwork)

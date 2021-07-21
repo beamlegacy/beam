@@ -12,17 +12,20 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
     override func spec() {
         var sut: BeamObjectManager!
-//        var helper: DocumentManagerTestsHelper!
-        var beamObjectHelper: BeamObjectTestsHelper!
-        let beamHelper = BeamTestsHelper()
+//        var documentHelper: DocumentManagerTestsHelper!
+        let beamObjectHelper = BeamObjectTestsHelper()
+//        let beamHelper = BeamTestsHelper()
         let beforeConfigApiHostname = Configuration.apiHostname
 
         beforeEach {
             Configuration.apiHostname = "http://api.beam.lvh.me:5000"
 
             sut = BeamObjectManager()
-            beamObjectHelper = BeamObjectTestsHelper()
 
+//            documentHelper = DocumentManagerTestsHelper(documentManager: DocumentManager(),
+//                                                        coreDataManager: CoreDataManager.shared)
+//            documentHelper.deleteAllDocuments()
+//            documentHelper.deleteAllDatabases()
             sut.clearNetworkCalls()
 
 //            beamHelper.beginNetworkRecording()
@@ -31,7 +34,8 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
             Configuration.beamObjectAPIEnabled = true
 
-            BeamObjectManager.register(MyRemoteObjectManager.self)
+            BeamObjectManager.unRegisterAll()
+            BeamObjectManager.register(MyRemoteObjectManager(), object: MyRemoteObject.self)
         }
 
         afterEach {
@@ -76,7 +80,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                     Persistence.Sync.BeamObjects.updated_at = nil
                 }
 
-                fit("fetches all objects") {
+                it("fetches all objects") {
                     let networkCalls = APIRequest.callsCount
 
                     waitUntil(timeout: .seconds(10)) { done in
@@ -93,11 +97,8 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                     expect(APIRequest.callsCount - networkCalls) == 1
                     expect(Persistence.Sync.BeamObjects.updated_at).toNot(beNil())
 
-                    expect(MyRemoteObjectManager.receivedObjects).to(haveCount(1))
-
-                    let remoteObject: MyRemoteObject? = try MyRemoteObjectManager.receivedObjects.first?.decodeBeamObject()
-
-                    expect(remoteObject) == object
+                    expect(MyRemoteObjectManager.receivedMyRemoteObjects).to(haveCount(1))
+                    expect(MyRemoteObjectManager.receivedMyRemoteObjects.first) == object
                 }
             }
         }
@@ -126,8 +127,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
                     try sut.saveAllToAPI()
 
-                    // today's journal is usually saved, adding 1 network call
-                    expect(APIRequest.callsCount - networkCalls) <= 1
+                    expect(APIRequest.callsCount - networkCalls) == 0
                 }
             }
         }
@@ -1036,22 +1036,16 @@ struct MyRemoteObject: BeamObjectProtocol, Equatable {
 
 // Minimal manager
 class MyRemoteObjectManager {
-    static var receivedObjects: [BeamObject] = []
-
-    required init(_ manager: BeamObjectManager) {
-    }
+    static var receivedMyRemoteObjects: [MyRemoteObject] = []
 }
 
 extension MyRemoteObjectManager: BeamObjectManagerDelegateProtocol {
-    static var objectType: BeamObjectProtocol.Type { MyRemoteObject.self }
+    func receivedBeamObjects<T: BeamObjectProtocol>(_ objects: [T]) throws {
+        guard let myRemoteObjects: [MyRemoteObject] = objects as? [MyRemoteObject] else {
+            throw DocumentManagerError.wrongObjectsType
+        }
 
-    func receivedBeamObjects(_ objects: [BeamObject]) throws {
-        Logger.shared.logDebug("Received \(objects)", category: .beamObjectNetwork)
-        Self.receivedObjects.append(contentsOf: objects)
-    }
-
-    func receivedBeamObjects<T>(_ objects: [T]) throws where T : BeamObjectProtocol {
-        Logger.shared.logDebug("Received \(objects)", category: .beamObjectNetwork)
+        Self.receivedMyRemoteObjects.append(contentsOf: myRemoteObjects)
     }
 
     func saveAllOnBeamObjectApi(_ completion: @escaping ((Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {

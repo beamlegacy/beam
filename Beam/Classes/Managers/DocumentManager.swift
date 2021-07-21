@@ -64,16 +64,6 @@ public class DocumentManager: NSObject {
         //observeCoredataNotification()
     }
 
-    required init(_ manager: BeamObjectManager) {
-        self.coreDataManager = CoreDataManager.shared
-        self.mainContext = self.coreDataManager.mainContext
-        self.backgroundContext = self.coreDataManager.backgroundContext
-
-        saveDocumentQueue.maxConcurrentOperationCount = 1
-
-        super.init()
-    }
-
     // MARK: Coredata Updates
     private var cancellables = [AnyCancellable]()
     private func observeCoredataNotification() {
@@ -2339,17 +2329,6 @@ extension DocumentManager {
 
 // MARK: - BeamObjectManagerDelegateProtocol
 extension DocumentManager: BeamObjectManagerDelegateProtocol {
-    static var typeName: String { "document" }
-    static var objectType: BeamObjectProtocol.Type { DocumentStruct.self }
-
-    func receivedBeamObjects(_ objects: [BeamObject]) throws {
-        let documents: [DocumentStruct] = try objects.map {
-            try $0.decodeBeamObject()
-        }
-
-        try receivedBeamObjects(documents)
-    }
-
     func receivedBeamObjects<T: BeamObjectProtocol>(_ objects: [T]) throws {
         guard let documents: [DocumentStruct] = objects as? [DocumentStruct] else {
             throw DocumentManagerError.wrongObjectsType
@@ -2389,14 +2368,10 @@ extension DocumentManager: BeamObjectManagerDelegateProtocol {
                                category: .documentNetwork)
     }
 
-    internal func documentStructsAsBeamObjects(_ documentStructs: [DocumentStruct]) throws -> [BeamObject] {
-        let structs: [DocumentStruct] = documentStructs.map {
-            var documentStruct = $0.copy()
-            documentStruct.previousChecksum = $0.beamObjectPreviousChecksum
-            return documentStruct
+    internal func updatedDocumentStructs(_ documentStructs: [DocumentStruct]) -> [DocumentStruct] {
+        documentStructs.filter {
+            $0.previousChecksum != $0.checksum || $0.previousChecksum == nil
         }
-
-        return try BeamObjectManagerDelegate().structsAsBeamObjects(structs)
     }
 
     // Called when `BeamObjectManager` wants to store all existing `Document` as `BeamObject` it will call this method
@@ -2457,9 +2432,9 @@ extension DocumentManager: BeamObjectManagerDelegateProtocol {
             throw BeamObjectManagerError.notAuthenticated
         }
 
-        let beamObjects = try documentStructsAsBeamObjects(documentStructs)
+        let filteredDocumentStructs = updatedDocumentStructs(documentStructs)
 
-        guard !beamObjects.isEmpty else {
+        guard !filteredDocumentStructs.isEmpty else {
             completion(.success(true))
             return nil
         }
@@ -2467,10 +2442,10 @@ extension DocumentManager: BeamObjectManagerDelegateProtocol {
         let objectManager = BeamObjectManager()
         objectManager.conflictPolicyForSave = .fetchRemoteAndError
 
-        return try objectManager.saveToAPI(beamObjects) { result in
+        return try objectManager.saveToAPI(filteredDocumentStructs) { result in
             switch result {
             case .failure(let error):
-                Logger.shared.logError("Could not save all \(beamObjects): \(error.localizedDescription)",
+                Logger.shared.logError("Could not save all \(filteredDocumentStructs): \(error.localizedDescription)",
                                        category: .documentNetwork)
                 self.saveOnBeamObjectsAPIFailure(documentStructs, error, completion)
             case .success(let updateBeamObjects):
@@ -2479,7 +2454,7 @@ extension DocumentManager: BeamObjectManagerDelegateProtocol {
         }
     }
 
-    internal func saveOnBeamObjectsAPISuccess(_ updateBeamObjects: [BeamObject],
+    internal func saveOnBeamObjectsAPISuccess(_ updateBeamObjects: [DocumentStruct],
                                               _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
         Logger.shared.logDebug("Saved \(updateBeamObjects.count) objects on the BeamObject API",
                                category: .documentNetwork)
@@ -2492,7 +2467,7 @@ extension DocumentManager: BeamObjectManagerDelegateProtocol {
                 }
 
                 // TODO: store previous data sent for improved 3-ways merge?
-                documentCoreData.beam_object_previous_checksum = updateBeamObject.dataChecksum
+                documentCoreData.beam_object_previous_checksum = updateBeamObject.previousChecksum
             }
 
             do {
@@ -2564,13 +2539,10 @@ extension DocumentManager: BeamObjectManagerDelegateProtocol {
             throw BeamObjectManagerError.notAuthenticated
         }
 
-        let beamObject = try BeamObject(documentStruct, Self.typeName)
-        beamObject.previousChecksum = documentStruct.beamObjectPreviousChecksum
-
         let objectManager = BeamObjectManager()
         objectManager.conflictPolicyForSave = .fetchRemoteAndError
 
-        return try objectManager.saveToAPI(beamObject) { result in
+        return try objectManager.saveToAPI(documentStruct) { result in
             switch result {
             case .failure(let error):
                 self.saveOnBeamObjectAPIFailure(documentStruct, error, completion)

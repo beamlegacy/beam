@@ -19,9 +19,6 @@ extension PasswordManagerError: LocalizedError {
 
 class PasswordManager {
     static var passwordsDBPath: String { BeamData.dataFolder(fileName: "passwords.db") }
-
-    required init(_ manager: BeamObjectManager) {
-    }
 }
 
 extension PasswordManager: BeamObjectManagerDelegateProtocol {
@@ -68,11 +65,9 @@ extension PasswordManager: BeamObjectManagerDelegateProtocol {
             throw PasswordManagerError.wrongObjectsType
         }
 
-        let beamObject = try BeamObject(password, Self.typeName)
-
         let objectManager = BeamObjectManager()
 
-        return try objectManager.saveToAPI(beamObject) { result in
+        return try objectManager.saveToAPI(password) { result in
             switch result {
             case .failure(let error):
                 completion(.failure(error))
@@ -95,16 +90,9 @@ extension PasswordManager: BeamObjectManagerDelegateProtocol {
             throw PasswordManagerError.wrongObjectsType
         }
 
-        let beamObjects = try BeamObjectManagerDelegate().structsAsBeamObjects(passwords)
-
-        guard !beamObjects.isEmpty else {
-            completion(.success(true))
-            return nil
-        }
-
         let objectManager = BeamObjectManager()
 
-        return try objectManager.saveToAPI(beamObjects) { result in
+        return try objectManager.saveToAPI(passwords) { result in
             switch result {
             case .failure(let error):
                 Logger.shared.logError("Could not save all \(passwords.count) passwords: \(error.localizedDescription)",
@@ -121,7 +109,7 @@ extension PasswordManager: BeamObjectManagerDelegateProtocol {
     }
 
     /// Will store dataChecksum
-    internal func saveOnBeamObjectsAPISuccess(_ updateBeamObjects: [BeamObject],
+    internal func saveOnBeamObjectsAPISuccess(_ updateBeamObjects: [PasswordRecord],
                                               _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws {
         Logger.shared.logDebug("Saved \(updateBeamObjects.count) objects on the BeamObject API",
                                category: .passwordNetwork)
@@ -130,12 +118,12 @@ extension PasswordManager: BeamObjectManagerDelegateProtocol {
         var passwords: [PasswordRecord] = []
         for updateBeamObject in updateBeamObjects {
             // TODO: make faster with a `fetchWithIds(ids: [UUID])`
-            guard var password = try? passwordsDB.fetchWithId(updateBeamObject.id) else {
+            guard var password = try? passwordsDB.fetchWithId(updateBeamObject.beamObjectId) else {
                 completion(.failure(PasswordManagerError.localPasswordNotFound))
                 return
             }
 
-            password.previousChecksum = updateBeamObject.dataChecksum
+            password.previousChecksum = updateBeamObject.previousChecksum
             passwords.append(password)
         }
         try passwordsDB.save(passwords: passwords)

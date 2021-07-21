@@ -26,7 +26,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
             sut.deleteAll(includedRemote: false) { _ in }
 
             beamHelper.beginNetworkRecording()
-//            beamHelper.disableNetworkRecording()
+            beamHelper.disableNetworkRecording()
 
             helper = DocumentManagerTestsHelper(documentManager: DocumentManager(),
                                                 coreDataManager: CoreDataManager.shared)
