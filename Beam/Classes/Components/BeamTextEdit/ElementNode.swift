@@ -419,9 +419,22 @@ public class ElementNode: Widget {
                 }
             }.store(in: &elementScope)
 
+        element.$hasNote
+            .sink { [unowned self] newValue in
+                if newValue {
+                    willBeRemovedFromNote()
+                } else {
+                    willBeAddedToNote()
+                }
+            }.store(in: &elementScope)
+
         elementText = element.text
         elementKind = element.kind
     }
+
+    // Override these two methods if you need to know when a beem element will be added or removed from a note
+    func willBeRemovedFromNote() { }
+    func willBeAddedToNote() { }
 
     // The default implementation doesn't know anything about text
     public func indexOnLastLine(atOffset x: CGFloat) -> Int {

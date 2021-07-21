@@ -164,9 +164,14 @@ public class BeamNote: BeamElement {
         return self
     }
 
+    public override func checkHasNote() {
+        hasNote = true
+    }
+
     public init(title: String) {
         self.title = Self.validTitle(fromTitle: title)
         super.init()
+        checkHasNote()
     }
 
     enum CodingKeys: String, CodingKey {
