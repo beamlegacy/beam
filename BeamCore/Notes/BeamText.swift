@@ -143,11 +143,11 @@ public struct BeamText: Codable {
 
     public struct Range: Codable, Equatable {
         public var string: String
-        public var resolvedString: String {
+        public var resolvedString: String? {
             guard let noteId = internalLink else {
                 return string
             }
-            return BeamNote.titleForNoteId(noteId) ?? string
+            return BeamNote.titleForNoteId(noteId)
         }
         public var attributes: [Attribute]
 
@@ -192,18 +192,25 @@ public struct BeamText: Codable {
             return nil
         }
 
-        public mutating func resolveString() {
-            string = resolvedString
+        @discardableResult
+        public mutating func resolveString() -> String? {
+            let value = resolvedString
+            string = value ?? string
+            return value
         }
 
         public func resolved() -> Self {
             var new = self
             new.resolveString()
+            let hasResolvedString = new.resolveString()
+            if hasResolvedString == nil, internalLink != nil {
+                new.attributes.removeAll { $0.isInternalLink }
+            }
             return new
         }
     }
 
-    // Returns true is something was actually updated
+    /// - Returns: true is something was actually updated
     public mutating func resolveNotesNames() -> Bool {
         if !internalLinks.isEmpty {
             ranges = ranges.map({ $0.resolved() })
