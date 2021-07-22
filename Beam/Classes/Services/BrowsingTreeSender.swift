@@ -103,7 +103,7 @@ class BrowsingTreeSender {
 
     func send(browsingTree: BrowsingTree, completion:  @escaping () -> Void = {}) {
         guard let payload = payload(browsingTree: browsingTree),
-              Configuration.browsingSessionCollectionIsOn else { return }
+              !PreferencesManager.isPrivacyFilterEnabled else { return }
         let task = session.mockableUploadTask(with: request, from: payload) { data, response, error in
             if let error = error {
                 Logger.shared.logError("Browsing Tree sender Error: \(error)", category: .general)

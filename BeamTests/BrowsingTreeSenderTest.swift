@@ -36,7 +36,7 @@ class BrowsingTreeSenderTest: XCTestCase {
 
     override func setUpWithError() throws {
         super.setUp()
-        Configuration.browsingSessionCollectionIsOn = true
+        PreferencesManager.isPrivacyFilterEnabled = false
         session = MockURLSession()
         let testConfig = BrowsingTreeSenderConfig(
             dataStoreUrl: "http://url.fr",
@@ -45,7 +45,7 @@ class BrowsingTreeSenderTest: XCTestCase {
         subject = BrowsingTreeSender(session: session, config: testConfig)
     }
     override func tearDownWithError() throws {
-        Configuration.browsingSessionCollectionIsOn = true
+        PreferencesManager.isPrivacyFilterEnabled = PreferencesManager.privacyFilterDefault
     }
 
     func testSentData() throws {
@@ -103,13 +103,13 @@ class BrowsingTreeSenderTest: XCTestCase {
 
     func testDisabledByConfiguration() throws {
         let tree = BrowsingTree(nil)
-        Configuration.browsingSessionCollectionIsOn = false
+        PreferencesManager.isPrivacyFilterEnabled = true
         subject.send(browsingTree: tree)
         XCTAssertEqual(session.taskCallCount, 0)
-        Configuration.browsingSessionCollectionIsOn = true
+        PreferencesManager.isPrivacyFilterEnabled = false
         subject.send(browsingTree: tree)
         XCTAssertEqual(session.taskCallCount, 1)
-        Configuration.browsingSessionCollectionIsOn = false
+        PreferencesManager.isPrivacyFilterEnabled = true
         subject.send(browsingTree: tree)
         XCTAssertEqual(session.taskCallCount, 1)
     }
