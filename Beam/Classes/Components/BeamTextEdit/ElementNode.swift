@@ -428,11 +428,12 @@ public class ElementNode: Widget {
             }.store(in: &elementScope)
 
         element.$hasNote
+            .drop(while: { newValue in newValue == false })
             .sink { [unowned self] newValue in
                 if newValue {
-                    willBeRemovedFromNote()
-                } else {
                     willBeAddedToNote()
+                } else {
+                    willBeRemovedFromNote()
                 }
             }.store(in: &elementScope)
 

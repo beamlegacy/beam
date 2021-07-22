@@ -199,6 +199,7 @@ public class BeamNote: BeamElement {
         }
 
         try super.init(from: decoder)
+        checkHasNote()
     }
 
     override public func encode(to encoder: Encoder) throws {

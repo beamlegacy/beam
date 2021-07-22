@@ -158,7 +158,7 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
         } else {
             items = self.getDefaultItemsForLink(for: node, link: link)
         }
-        let menuView = ContextMenuFormatterView(items: items)
+        let menuView = ContextMenuFormatterView(items: items, defaultSelectedIndex: fromPaste ? 0 : nil)
         inlineFormatter = menuView
         ContextMenuPresenter.shared.presentMenu(menuView, atPoint: atPoint, from: self, animated: false)
 
