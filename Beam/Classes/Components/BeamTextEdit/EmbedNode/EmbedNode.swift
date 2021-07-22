@@ -10,8 +10,16 @@ import BeamCore
 import AppKit
 import WebKit
 
+private class EmbedNodeWebViewConfiguration: BeamWebViewConfigurationBase {
+    override func registerAllMessageHandlers() {
+        LoggingMessageHandler(config: self).register(to: self)
+        MediaPlayerMessageHandler(config: self).register(to: self)
+    }
+}
+
 public class EmbedNode: ElementNode {
 
+    private static var webViewConfiguration = EmbedNodeWebViewConfiguration()
     var webView: BeamWebView?
     private var webPage: EmbedNodeWebPage?
 
@@ -46,10 +54,10 @@ public class EmbedNode: ElementNode {
 
         guard let url = embedUrl else { return }
 
-        let webviewConfiguration = BrowserTab.webViewConfiguration
+        let webviewConfiguration = EmbedNode.webViewConfiguration
         var webView: BeamWebView?
-        if let note = root?.editor.note as? BeamNote {
-            webView = mediaPlayerManager?.playingWebViewForNote(note: note, url: url)
+        if let note = editor.note as? BeamNote {
+            webView = mediaPlayerManager?.playingWebViewForNote(note: note, elementId: elementId, url: url)
             webPage = webView?.page as? EmbedNodeWebPage
         }
 
@@ -77,10 +85,23 @@ public class EmbedNode: ElementNode {
     }
 
     deinit {
-        if webPage?.delegate as? EmbedNode == self {
+        let nodeStillOwnsTheWebView = webPage?.delegate as? EmbedNode == self
+        if nodeStillOwnsTheWebView || webPage?.delegate == nil {
             webView?.removeFromSuperview()
-            webView = nil
         }
+    }
+
+    override func willBeRemovedFromNote() {
+        super.willBeRemovedFromNote()
+        clearWebViewAndStopPlaying()
+    }
+
+    private func clearWebViewAndStopPlaying() {
+        guard let note = editor.note as? BeamNote,
+              let url = self.embedUrl else { return }
+        mediaPlayerManager?.stopNotePlaying(note: note, elementId: elementId, url: url)
+        webView?.page = nil
+        webPage = nil
     }
 
     let embedWidth = CGFloat(320)
@@ -178,9 +199,9 @@ extension EmbedNode: EmbedNodeWebPageDelegate {
               let mediaManager = mediaPlayerManager,
               let url = self.embedUrl else { return }
         if controller?.isPlaying == true {
-            mediaManager.addNotePlaying(note: note, webView: webView)
+            mediaManager.addNotePlaying(note: note, elementId: elementId, webView: webView)
         } else {
-            mediaManager.stopNotePlaying(note: note, url: url)
+            mediaManager.stopNotePlaying(note: note, elementId: elementId, url: url)
         }
     }
 }

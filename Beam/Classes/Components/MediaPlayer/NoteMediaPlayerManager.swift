@@ -10,6 +10,7 @@ import BeamCore
 
 struct NoteMediaPlaying {
     var note: BeamNote
+    var elementId: UUID
     var webview: BeamWebView?
     var page: WebPage?
     var originalURL: URL?
@@ -24,22 +25,22 @@ class NoteMediaPlayerManager: ObservableObject {
         playings.firstIndex { !$0.muted } != nil
     }
 
-    func playingWebViewForNote(note: BeamNote, url: URL) -> BeamWebView? {
+    func playingWebViewForNote(note: BeamNote, elementId: UUID, url: URL) -> BeamWebView? {
         let item = playings.first { i in
-            i.note.id == note.id && i.originalURL == url
+            i.note.id == note.id && i.elementId == elementId && i.originalURL == url
         }
         return item?.webview
     }
 
-    func addNotePlaying(note: BeamNote, webView: BeamWebView? = nil) {
+    func addNotePlaying(note: BeamNote, elementId: UUID, webView: BeamWebView? = nil) {
         playings.append(
-            NoteMediaPlaying(note: note, webview: webView, page: webView?.page, originalURL: webView?.url)
+            NoteMediaPlaying(note: note, elementId: elementId, webview: webView, page: webView?.page, originalURL: webView?.url)
         )
     }
 
-    func stopNotePlaying(note: BeamNote, url: URL) {
+    func stopNotePlaying(note: BeamNote, elementId: UUID, url: URL) {
         playings.removeAll { i in
-            if i.note.id == note.id && i.originalURL == url {
+            if i.note.id == note.id && i.elementId == elementId && i.originalURL == url {
                 return true
             }
             return false
