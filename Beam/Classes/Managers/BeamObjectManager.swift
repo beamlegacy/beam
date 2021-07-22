@@ -29,7 +29,8 @@ class BeamObjectManager {
 
                 try manager.parse(objects: encapsulatedObjects)
             } catch {
-                Logger.shared.logError("Could not call manager: \(error.localizedDescription)", category: .beamObject)
+                Logger.shared.logError("manager \(manager) returned error: \(error.localizedDescription)",
+                                       category: .beamObject)
             }
         }
     }

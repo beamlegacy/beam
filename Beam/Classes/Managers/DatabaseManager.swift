@@ -8,6 +8,7 @@ import BeamCore
 enum DatabaseManagerError: Error, Equatable {
     case operationCancelled
     case localDatabaseNotFound
+    case titleAlreadyExists
 }
 
 extension DatabaseManagerError: LocalizedError {
@@ -17,6 +18,8 @@ extension DatabaseManagerError: LocalizedError {
             return "operation cancelled"
         case .localDatabaseNotFound:
             return "local Database Not Found"
+        case .titleAlreadyExists:
+            return "Title already exists"
         }
     }
 }
@@ -146,6 +149,21 @@ class DatabaseManager {
             let title = (conflict.sourceObject as? Database)?.title ?? ":( DB Not found"
             Logger.shared.logError("Old version: \(conflict.oldVersionNumber), new version: \(conflict.newVersionNumber), title: \(title)",
                                    category: .coredata)
+        }
+    }
+
+    private func checkValidationsEarly(_ databaseStruct: DatabaseStruct) throws {
+        // If database is deleted, we don't need to check title uniqueness
+        guard databaseStruct.deletedAt == nil else { return }
+
+        let predicate = NSPredicate(format: "title = %@ AND id != %@", databaseStruct.title, databaseStruct.id as CVarArg)
+
+        let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
+
+        try context.performAndWait {
+            guard Database.countWithPredicate(context, predicate) == 0 else {
+                throw DatabaseManagerError.titleAlreadyExists
+            }
         }
     }
 
@@ -1026,9 +1044,20 @@ extension DatabaseManager: BeamObjectManagerDelegate {
         Logger.shared.logDebug("Received \(databases.count) databases: updating",
                                category: .databaseNetwork)
 
-        var changed = false
+//        var databasesInError: [DatabaseStruct] = []
+//        
+//        for database in databases {
+//            do {
+//                try checkValidationsEarly(database)
+//            } catch {
+//                // This database has a local conflict we must resolve, let's change its title
+//            }
+//        }
+
         let context = coreDataManager.backgroundContext
         try context.performAndWait {
+            var changed = false
+
             for database in databases {
                 let localDatabase = Database.fetchOrCreateWithId(context, database.id)
 

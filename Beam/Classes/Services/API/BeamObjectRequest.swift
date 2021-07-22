@@ -63,7 +63,7 @@ extension BeamObjectRequest {
               _ completion: @escaping (Swift.Result<BeamObject, Error>) -> Void) throws -> URLSessionDataTask {
         let parameters = try saveBeamObjectParameters(beamObject)
         let bodyParamsRequest = GraphqlParameters(fileName: "update_beam_object", variables: parameters)
-        defer { try? beamObject.decrypt() }
+        try? beamObject.decrypt()
 
         return try performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<UpdateBeamObject, Error>) in
             switch result {
@@ -92,7 +92,7 @@ extension BeamObjectRequest {
             return nil
         }
 
-        defer { beamObjects.forEach { try? $0.decrypt() } }
+        beamObjects.forEach { try? $0.decrypt() }
 
         let bodyParamsRequest = GraphqlParameters(fileName: "update_beam_objects", variables: parameters)
 

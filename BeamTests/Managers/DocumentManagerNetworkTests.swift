@@ -1903,8 +1903,6 @@ class DocumentManagerNetworkTests: QuickSpec {
             let beamObjectHelper: BeamObjectTestsHelper = BeamObjectTestsHelper()
 
             beforeEach {
-                Configuration.apiHostname = "http://api.beam.lvh.me:5000"
-                beamHelper.disableNetworkRecording()
                 Configuration.beamObjectAPIEnabled = true
             }
 

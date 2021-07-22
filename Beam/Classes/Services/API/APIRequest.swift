@@ -334,6 +334,9 @@ extension APIRequest {
         return dataTask!
     }
 
+    static var networkCallFiles: [String] = []
+    static var networkCallFilesSemaphore = DispatchSemaphore(value: 1)
+
     // swiftlint:disable:next function_parameter_count
     private func logRequest(_ filename: String,
                             _ response: URLResponse?,
@@ -342,6 +345,13 @@ extension APIRequest {
                             _ bytesSent: Int64,
                             _ bytesReceived: Int64,
                             _ authenticated: Bool) {
+
+        #if DEBUG
+        Self.networkCallFilesSemaphore.wait()
+        Self.networkCallFiles.append(filename)
+        Self.networkCallFilesSemaphore.signal()
+        #endif
+
         #if DEBUG_API_0
         guard let httpResponse = response as? HTTPURLResponse else {
             Logger.shared.logDebug("- \(filename)", category: .network)

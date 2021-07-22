@@ -521,9 +521,15 @@ class DatabaseManagerNetworkTests: QuickSpec {
             let beamObjectHelper: BeamObjectTestsHelper = BeamObjectTestsHelper()
 
             beforeEach {
-                Configuration.apiHostname = "http://api.beam.lvh.me:5000"
-                beamHelper.disableNetworkRecording()
                 Configuration.beamObjectAPIEnabled = true
+
+                // Must freeze time as `checksum` takes createdAt/updatedAt/deletedAt into consideration
+                BeamDate.freeze("2021-03-19T12:21:03Z")
+            }
+
+            afterEach {
+                // Used when I need to debug network calls order
+                print("\n🦞 network calls: \(APIRequest.networkCallFiles)\n")
             }
 
             describe("saveOnBeamObjectAPI()") {
