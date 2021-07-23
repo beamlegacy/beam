@@ -5,23 +5,22 @@
       "method" : "GET"
     },
     "response" : {
-      "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=Beam",
       "status" : 200,
-      "body" : "[\"Beam\",[\"beam suntory\",\"beamer\",\"beam\",\"beamng drive\",\"beamy\",\"beam me up scotty\",\"beam search\",\"beam traduction\",\"beamery\",\"beam meaning\"]]",
+      "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=Beam",
+      "body" : "[\"Beam\",[\"beamng drive\",\"beams\",\"beamy\",\"beamer\",\"beam traduction\",\"beam suntory\",\"beamery\",\"beam advisory\",\"beam me up scotty\",\"beams plus\"],[],{\"google:suggestsubtypes\":[[433],[433],[],[433],[],[],[],[],[],[]]}]",
       "headers" : {
-        "Server" : "gws",
-        "Content-Disposition" : "attachment; filename=\"f.txt\"",
-        "Content-Encoding" : "gzip",
-        "x-xss-protection" : "0",
         "Content-Type" : "text\/javascript; charset=ISO-8859-1",
-        "Expires" : "-1",
-        "Pragma" : "no-cache",
-        "Cache-Control" : "no-cache, must-revalidate",
-        "Alt-Svc" : "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000,h3-T051=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\"",
+        "Content-Disposition" : "attachment; filename=\"f.txt\"",
+        "Content-Length" : "141",
+        "Date" : "Fri, 23 Jul 2021 10:58:08 GMT",
         "x-frame-options" : "SAMEORIGIN",
-        "Date" : "Mon, 12 Jul 2021 13:24:09 GMT",
-        "Content-Length" : "104",
-        "Set-Cookie" : "SIDCC=AJi4QfEtt9ZRZITc-gIazoC6_44afiFtieYh6jKUQRzLfob5pnuXW4kzzY7rZFW0WIeZiP3wHw; expires=Tue, 12-Jul-2022 13:24:09 GMT; path=\/; domain=.google.com; priority=high, __Secure-3PSIDCC=AJi4QfHhqntBasszKk1XCPIcTna9EqtaUZIyHxlGF_1z-wPX-DoJSd8zzRX6gk_oTkII8Y22; expires=Tue, 12-Jul-2022 13:24:09 GMT; path=\/; domain=.google.com; Secure; HttpOnly; priority=high; SameSite=none"
+        "Content-Encoding" : "gzip",
+        "Server" : "gws",
+        "Cache-Control" : "no-cache, must-revalidate",
+        "Pragma" : "no-cache",
+        "Alt-Svc" : "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000,h3-T051=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\"",
+        "Expires" : "-1",
+        "x-xss-protection" : "0"
       }
     }
   }
