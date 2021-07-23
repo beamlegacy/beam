@@ -88,7 +88,11 @@ public final class Logger {
         print("Storing log files to \(ddFileLogger.currentLogFileInfo?.filePath ?? "-")")
 
         ddFileLogger.logFileManager.maximumNumberOfLogFiles = 2
-        ddFileLogger.maximumFileSize = 1024 * 1024 // 1MB
+        #if DEBUG
+        ddFileLogger.maximumFileSize = 1024 * 1024 * 50 // 50MB
+        #else
+        ddFileLogger.maximumFileSize = 1024 * 1024 * 1 // 1MB
+        #endif
         ddFileLogger.rollingFrequency = 3600 * 24 * 7 // 1 week
 
         if !EnvironmentVariables.hideCategories.isEmpty {
