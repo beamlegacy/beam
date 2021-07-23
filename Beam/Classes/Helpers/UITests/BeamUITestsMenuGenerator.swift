@@ -17,6 +17,7 @@ class BeamUITestsMenuGenerator {
         case .loadUITestPage3: loadUITestsPage(page: 3)
         case .loadUITestPage4: loadUITestsPage(page: 4)
         case .loadUITestPage5: loadUITestsPage(page: 5)
+        case .loadUITestPage6: loadUITestsPage(page: 6)
         case .insertTextInCurrentNote: insertTextInCurrentNote()
         case .create100Notes: create100Notes()
         default: break

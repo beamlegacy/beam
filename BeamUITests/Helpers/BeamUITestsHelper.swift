@@ -56,6 +56,8 @@ class BeamUITestsHelper {
                 tapCommand(.loadUITestPage3)
             case 4:
                 tapCommand(.loadUITestPage4)
+            case 6:
+                tapCommand(.loadUITestPage6)
             default:
                 tapCommand(.loadUITestPage1)
         }

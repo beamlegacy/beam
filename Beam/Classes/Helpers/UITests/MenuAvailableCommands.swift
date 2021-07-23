@@ -14,6 +14,7 @@ public enum MenuAvailableCommands: String, CaseIterable {
     case loadUITestPage3 = "Load UITests Page 3"
     case loadUITestPage4 = "Load PasswordManager test page"
     case loadUITestPage5 = "Load HTML playground"
+    case loadUITestPage6 = "Load JS/Native alert panels"
     case separatorC
     case insertTextInCurrentNote = "Insert text in current note"
     case create100Notes = "Create 100 random notes"

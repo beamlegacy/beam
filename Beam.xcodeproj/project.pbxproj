@@ -85,6 +85,8 @@
 		33793AD1265CFEC50041E1B8 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 9631C746251CE997009B40C4 /* SwiftSoup */; };
 		33793AD2265CFEC50041E1B8 /* FavIcon in Frameworks */ = {isa = PBXBuildFile; productRef = 96474E3E254D9ADB00A920B3 /* FavIcon */; };
 		33793AD7265CFEC50041E1B8 /* KeychainAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 524CF6D225F276D1007312F0 /* KeychainAccess */; };
+		337EAE5726A9511D008E4020 /* JavascriptNativeAlertsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 337EAE5626A9511D008E4020 /* JavascriptNativeAlertsTests.swift */; };
+		337EAE6026A954AD008E4020 /* UITests-6.html in Resources */ = {isa = PBXBuildFile; fileRef = 337EAE5F26A954AD008E4020 /* UITests-6.html */; };
 		338A66A0268DC26000B056EB /* LayerRemoverAnimationDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 338A669F268DC26000B056EB /* LayerRemoverAnimationDelegate.swift */; };
 		338A66C2268E053C00B056EB /* BeamDownloadDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 338A66C1268E053C00B056EB /* BeamDownloadDocument.swift */; };
 		3392E56D269D82FE000FA401 /* ClickCatchingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3392E56C269D82FE000FA401 /* ClickCatchingView.swift */; };
@@ -917,6 +919,8 @@
 		3330D7CA265E466D008C9E20 /* OmniBarDownloadButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniBarDownloadButton.swift; sourceTree = "<group>"; };
 		3330D7CC265E95E0008C9E20 /* LinearProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinearProgressView.swift; sourceTree = "<group>"; };
 		333A0A1F268C4EED004B7905 /* KeyEventHandlingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyEventHandlingView.swift; sourceTree = "<group>"; };
+		337EAE5626A9511D008E4020 /* JavascriptNativeAlertsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JavascriptNativeAlertsTests.swift; sourceTree = "<group>"; };
+		337EAE5F26A954AD008E4020 /* UITests-6.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = "UITests-6.html"; sourceTree = "<group>"; };
 		338A669F268DC26000B056EB /* LayerRemoverAnimationDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerRemoverAnimationDelegate.swift; sourceTree = "<group>"; };
 		338A66C1268E053C00B056EB /* BeamDownloadDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamDownloadDocument.swift; sourceTree = "<group>"; };
 		3392E56C269D82FE000FA401 /* ClickCatchingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClickCatchingView.swift; sourceTree = "<group>"; };
@@ -2933,6 +2937,7 @@
 				8AF53BAB266A241700C3CB2E /* UITests-1.html */,
 				8AF53BAD266A241C00C3CB2E /* UITests-2.html */,
 				8AFA9D48266924EE00AA59EE /* UITests-3.html */,
+				337EAE5F26A954AD008E4020 /* UITests-6.html */,
 			);
 			path = Fixtures;
 			sourceTree = "<group>";
@@ -3154,6 +3159,7 @@
 				528286B525E806CD00C0CCEE /* NoteEditorUITests.swift */,
 				A5679CE1262ECB9500E7FA69 /* NavigationCollectUITests.swift */,
 				8AEADBD226776BEA00E36BAC /* PasswordManagerUITests.swift */,
+				337EAE5626A9511D008E4020 /* JavascriptNativeAlertsTests.swift */,
 			);
 			path = BeamUITests;
 			sourceTree = "<group>";
@@ -3872,6 +3878,7 @@
 				BAA6792F5CF42C0D8FEC2A9B /* WebEvents.ts in Resources */,
 				52FB84E42638124A0085A444 /* update_documents.graphql in Resources */,
 				BAA6704409BDC8AB92E95F8D /* WebEventsUI_native.ts in Resources */,
+				337EAE6026A954AD008E4020 /* UITests-6.html in Resources */,
 				52CA917E26737CCB00DDF388 /* documents_title.graphql in Resources */,
 				BAA67B13B4EBCFF2D7A94F93 /* WebEventsUI_web.ts in Resources */,
 				BAA67EC2B781F8A78CD5A6B0 /* Beam.scss in Resources */,
@@ -4653,6 +4660,7 @@
 				52DF49A625E42110009A651E /* BeamUITestsHelper.swift in Sources */,
 				8AEADBD326776BEB00E36BAC /* PasswordManagerUITests.swift in Sources */,
 				52BB69A925CD5A49007A1173 /* OmniBarUITests.swift in Sources */,
+				337EAE5726A9511D008E4020 /* JavascriptNativeAlertsTests.swift in Sources */,
 				965A784D2514F149009980D4 /* BeamUITests.swift in Sources */,
 				A53C8F532644B22B003A5DF8 /* OmniBarUITestsHelper.swift in Sources */,
 				8A78699C264C7E4500F769D2 /* XCUIElementQuery+Beam.swift in Sources */,

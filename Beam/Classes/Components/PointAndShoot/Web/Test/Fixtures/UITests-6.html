@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JS/Native Alert panels</title>
+  <link rel="stylesheet" href="Beam.css" />
+</head>
+
+<body>
+  <div class="flex">
+    <div class="form-result">
+      <h3>Alert test:</h3>
+      <p>Click the button to display an alert box.</p>
+      <button onclick="displayAlert()">Trigger an alert</button>
+    </div>
+    <div class="form-result">
+      <h3>Prompt test:</h3>
+      <p>Click the button to display prompt.</p>
+      <button onclick="displayPrompt()">Trigger a prompt</button>
+      <p id="prompResponse"></p>
+    </div>
+    <div class="form-result">
+      <h3>Confirm test:</h3>
+      <p>Click the button to display confirm.</p>
+      <button onclick="displayConfirm()">Trigger a confirm</button>
+      <p id="confirmResponse"></p>
+    </div>
+    <div class="form-result">
+      <h3>Open file test:</h3>
+      <p>Click the button to choose a file.</p>
+      <input type='file' onchange='showFile(this)'><br>
+      <p id="fileResponse">NO FILE</p>
+    </div>
+</div>
+  <script>
+      function displayAlert() {
+        alert("Hello! I am an alert box!");
+      }
+      function displayPrompt() {
+        var person = prompt("Beam me up");
+        if (person != null) {
+          document.getElementById("prompResponse").innerHTML = "Beam me up, " + person + "!";
+        }
+      }
+      function displayConfirm() {
+          var response = confirm("Press a button!");
+          document.getElementById("confirmResponse").innerHTML = response ? "YES" : "NO";
+      }
+      function showFile(input) {
+        let selectedFile = input.files[0];
+        document.getElementById("fileResponse").innerHTML = selectedFile.name;
+      }
+  </script>
+</body>
+
+</html>
