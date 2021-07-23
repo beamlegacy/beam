@@ -202,9 +202,56 @@ class PointAndShoot: WebPageHolder, ObservableObject {
         return target.translateTarget(xDelta, yDelta, scale: scale)
     }
 
+    func translateAndScaleGroup(_ group: PointAndShoot.ShootGroup) -> PointAndShoot.ShootGroup {
+        var newGroup = group
+        let href = group.href
+        for target in newGroup.targets {
+            let newTarget = translateAndScaleTarget(target, href)
+            newGroup.updateTarget(newTarget)
+        }
+        return newGroup
+    }
+
+    func convertTargetToCircleShootGroup(_ target: Target, _ href: String) -> ShootGroup {
+        let size: CGFloat = 20
+        let circleRect = NSRect(x: mouseLocation.x - (size / 2), y: mouseLocation.y - (size / 2), width: size, height: size)
+        var circleTarget = target
+        circleTarget.rect = circleRect
+        return ShootGroup("point-uuid", [circleTarget], href)
+    }
+
     /// Set activePointGroup with target. Updating the activePointGroup will update the UI directly.
     func point(_ target: Target, _ href: String) {
+        guard activeShootGroup == nil else { return }
         activePointGroup = ShootGroup("point-uuid", [target], href)
+    }
+
+    /// Set targets as activeShootGroup
+    /// - Parameters:
+    ///   - groupId: id of group
+    ///   - targets: Set of targets to draw
+    ///   - href: Url of frame targets are located in
+    func pointShoot(_ groupId: String, _ target: Target, _ href: String) {
+        guard !targetIsDismissed(groupId) else {
+            return
+        }
+        if targetIsCollected(groupId) {
+            collect(groupId, [target], href)
+            return
+        }
+
+        if (isAltKeyDown || activeShootGroup != nil), activePointGroup != nil, activeSelectGroup == nil {
+            // if we have an existing group
+            if activeShootGroup != nil {
+                activeShootGroup?.updateTarget(target)
+            } else {
+                // only allow creating new a shootGroup when these conditions are met:
+                guard hasGraceRectAndMouseOverlap(target, href, mouseLocation),
+                      !isLargeTargetArea(target) else { return }
+
+                activeShootGroup = ShootGroup(groupId, [target], href)
+            }
+        }
     }
 
     /// Draw function for selection. `activeSelectGroup` is used as a storage variable until option is pressed.
@@ -248,7 +295,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
     /// - Parameters:
     ///   - group: Group to be converted
     func selectShoot(_ group: ShootGroup) {
-        if targetIsDismissed(group.id) {
+        guard !targetIsDismissed(group.id) else {
             return
         }
 
@@ -258,34 +305,6 @@ class PointAndShoot: WebPageHolder, ObservableObject {
         }
 
         activeShootGroup = group
-    }
-
-    /// Set targets as activeShootGroup
-    /// - Parameters:
-    ///   - groupId: id of group
-    ///   - targets: Set of targets to draw
-    ///   - href: Url of frame targets are located in
-    func pointShoot(_ groupId: String, _ target: Target, _ href: String) {
-        if targetIsDismissed(groupId) {
-            return
-        }
-        if targetIsCollected(groupId) {
-            collect(groupId, [target], href)
-            return
-        }
-
-        if (isAltKeyDown || activeShootGroup != nil), activePointGroup != nil, activeSelectGroup == nil {
-            // if we have an existing group
-            if activeShootGroup != nil {
-                activeShootGroup?.updateTarget(target)
-            } else {
-                // only allow creating new a shootGroup when these conditions are met:
-                guard hasGraceRectAndMouseOverlap(target, href, mouseLocation),
-                      !isLargeTargetArea(target) else { return }
-
-                activeShootGroup = ShootGroup(groupId, [target], href)
-            }
-        }
     }
 
     /// Set or update targets to collectedGroup
