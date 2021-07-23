@@ -77,7 +77,7 @@ private struct BottomToolBarTrailingIconView: View {
         Group {
             if noteMediaPlayerManager.playings.count > 0 {
                 NoteMediaPlayingButton(playerManager: noteMediaPlayerManager, onOpenNote: { notePlaying in
-                    state.navigateToNote(notePlaying.note)
+                    state.navigateToNote(notePlaying.note, elementId: notePlaying.elementId)
                 }, onMuteNote: { notePlaying in
                     if let n = notePlaying {
                         noteMediaPlayerManager.toggleMuteNotePlaying(note: n.note)

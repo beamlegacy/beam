@@ -15,6 +15,7 @@ class ContextMenuFormatterView: FormatterView {
     private var displayedItems: [ContextMenuItem] = []
     private var subviewModel = ContextMenuViewModel()
     private var direction: Edge = .bottom
+    private var defaultSelectedIndex: Int?
     private var onSelectMenuItem: (() -> Void)?
 
     override var idealSize: NSSize {
@@ -28,12 +29,13 @@ class ContextMenuFormatterView: FormatterView {
 
     var typingPrefix = 1
 
-    convenience init(items: [ContextMenuItem], direction: Edge = .bottom, handlesTyping: Bool = false, onSelectHandler: (() -> Void)? = nil) {
+    convenience init(items: [ContextMenuItem], direction: Edge = .bottom, handlesTyping: Bool = false, defaultSelectedIndex: Int? = nil, onSelectHandler: (() -> Void)? = nil) {
         self.init(frame: CGRect.zero)
         self.viewType = .inline
         self.items = items
         self.displayedItems = items
         self.direction = direction
+        self.defaultSelectedIndex = defaultSelectedIndex
         self.onSelectMenuItem = onSelectHandler
         self._handlesTyping = handlesTyping
         setupUI()
@@ -58,7 +60,7 @@ class ContextMenuFormatterView: FormatterView {
     override func setupUI() {
         super.setupUI()
         subviewModel.items = displayedItems
-        subviewModel.selectedIndex = handlesTyping ? 0 : nil
+        subviewModel.selectedIndex = defaultSelectedIndex ?? (handlesTyping ? 0 : nil)
         subviewModel.animationDirection = direction
         subviewModel.onSelectMenuItem = onSelectMenuItem
         let rootView = ContextMenuView(viewModel: subviewModel)

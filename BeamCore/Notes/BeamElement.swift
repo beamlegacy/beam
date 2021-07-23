@@ -354,7 +354,30 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
         children.insert(child, at: min(children.count, pos))
     }
 
-    open weak var parent: BeamElement?
+    func checkHasParent() {
+        let newValue = parent != nil
+        guard newValue != hasParent else { return }
+        hasParent = newValue
+        checkHasNote()
+    }
+
+    func checkHasNote() {
+        let newValue = parent?.hasNote ?? false
+        guard newValue != hasNote else { return }
+        hasNote = newValue
+        for child in children {
+            child.checkHasNote()
+        }
+    }
+
+    @Published public var hasParent: Bool = false
+    @Published public var hasNote: Bool = false
+
+    open weak var parent: BeamElement? {
+        didSet {
+            checkHasParent()
+        }
+    }
 
     public static func == (lhs: BeamElement, rhs: BeamElement) -> Bool {
         lhs.id == rhs.id

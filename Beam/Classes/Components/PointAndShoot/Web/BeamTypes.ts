@@ -8,6 +8,18 @@ export class BeamSize {
   constructor(public width: number, public height: number) {}
 }
 
+// TODO: Move to correct place
+export interface BeamRangeGroup {
+  id: string
+  range: BeamRange
+}
+
+// TODO: Move to correct place
+export interface BeamShootGroup {
+  id: string
+  element: BeamHTMLElement
+}
+
 export interface BeamVisualViewport {
   /**
    * @type {number}
@@ -65,18 +77,27 @@ export class NoteInfo {
   title
 }
 
+export type MessagePayload = Record<string, unknown>
+
 export interface BeamMessageHandler {
-  postMessage(payload: any)
+  postMessage(message: MessagePayload, targetOrigin: string, transfer?: Transferable[]): void
 }
 
 export interface BeamWebkit {
   /**
    *
    */
-  messageHandlers: {}
+  messageHandlers: {
+    [name: string]: BeamMessageHandler
+  }
+}
+
+export interface BeamCrypto {
+  getRandomValues: any
 }
 
 export interface BeamWindow extends BeamEventTarget {
+  crypto: BeamCrypto
   frameElement: any
   frames: BeamWindow[]
   /**
@@ -126,7 +147,7 @@ export interface BeamWindow extends BeamEventTarget {
   getComputedStyle(el: BeamElement, pseudo?: string): CSSStyleDeclaration
 }
 
-export interface BeamLocation extends Location {}
+export type BeamLocation = Location
 
 export enum BeamNodeType {
   element = 1,
@@ -144,14 +165,14 @@ export interface BeamEvent {
 }
 
 export interface BeamEventTarget<E extends BeamEvent = BeamEvent> {
-  addEventListener(type: string, callback: (e: E) => any)
+  addEventListener(type: string, callback: (e: E) => any, useCapture?: boolean)
 
   removeEventListener(type: string, callback: (e: E) => any)
 
   dispatchEvent(e: E)
 }
 
-export interface BeamDOMRect extends DOMRect {}
+export type BeamDOMRect = DOMRect
 
 export interface BeamNode extends BeamEventTarget {
   textContent: string
@@ -177,7 +198,7 @@ export interface BeamNode extends BeamEventTarget {
    */
   removeChild(el: BeamHTMLElement)
 
-  contains(el: BeamNode): Boolean
+  contains(el: BeamNode): boolean
 }
 
 export interface BeamParentNode extends BeamNode {
@@ -188,9 +209,10 @@ export interface BeamCharacterData extends BeamNode {
   data: string
 }
 
-export interface BeamText extends BeamCharacterData {}
+export type BeamText = BeamCharacterData
 
 export interface BeamElement extends BeamParentNode {
+  removeAttribute(pointDatasetKey: any)
   dataset: any
   attributes: NamedNodeMap
 
@@ -236,6 +258,8 @@ export interface BeamElement extends BeamParentNode {
   tagName: string
 
   getClientRects(): DOMRectList
+  setAttribute(qualifiedName: string, value: string): void
+  getAttribute(qualifiedName: string): string | null
 
   /**
    * Viewport-relative position.
@@ -250,7 +274,7 @@ export interface BeamElementCSSInlineStyle {
 export interface BeamHTMLElement extends BeamElement, BeamElementCSSInlineStyle {
   innerText: string
   nodeValue: any
-  dataset: {}
+  dataset: Record<string, string>
 }
 
 export interface BeamHTMLInputElement extends BeamHTMLElement {
@@ -258,7 +282,7 @@ export interface BeamHTMLInputElement extends BeamHTMLElement {
   value: string
 }
 
-export interface BeamHTMLTextAreaElement extends BeamHTMLElement{
+export interface BeamHTMLTextAreaElement extends BeamHTMLElement {
   value: string
 }
 
@@ -340,7 +364,7 @@ export interface BeamRange {
   getBoundingClientRect(): DOMRect
 }
 
-export declare var BeamRange: {
+export declare const BeamRange: {
   prototype: BeamRange
   new (): BeamRange
   readonly END_TO_END: number
@@ -351,6 +375,7 @@ export declare var BeamRange: {
 }
 
 export interface BeamDocument extends BeamNode {
+  elementFromPoint(x: any, y: any)
   /**
    * @type {HTMLHtmlElement}
    */
@@ -388,87 +413,6 @@ export interface BeamDocument extends BeamNode {
   createRange(): BeamRange
 }
 
-export enum BeamPNSStatus {
-  pointing = "pointing",
-  shooting = "shooting",
-  none = "none",
-}
-
-export interface BeamTextSelection {
-  /**
-   * Selected text
-   *
-   * @type {String}
-   * @memberof TextSelection
-   */
-  text: String
-  /**
-   * Selected HTML
-   *
-   * @type {String}
-   * @memberof TextSelection
-   */
-  html: String
-  /**
-   * Selected rectangles.
-   *
-   * @type {DOMRect[]}
-   * @memberof BeamTextSelection
-   */
-  areas: DOMRect[]
-}
-
-export interface BeamElementAreaMessage {
-  /**
-   * Selected HTML
-   *
-   * @type {String}
-   * @memberof BeamElementAreaMessage
-   */
-  html: String
-  /**
-   * {x, y} of mouse location
-   *
-   * @type {BeamMouseLocation}
-   * @memberof BeamElementMessagePayload
-   */
-  location: BeamMouseLocation
-  /**
-   * Area of element
-   *
-   * @type {BeamRect}
-   * @memberof BeamElementMessagePayload
-   */
-  areas: BeamRect[]
-  quoteId: any
-}
-
-export interface BeamSelectionMessagePayload extends BeamElementAreaMessage {
-  /**
-   * Selected text
-   *
-   * @type {String}
-   * @memberof BeamSelectionMessagePayload
-   */
-  text: String
-}
-
-export interface BeamElementMessagePayload extends BeamElementAreaMessage {
-  offset?: {
-    x: number,
-    y: number
-  } 
-}
-
-/**
- * The UUID of a stored beam quote. Used to identify stored quotes in native code
- *
- * @export
- * @interface BeamQuoteId
- * @extends {String}
- */
-export interface BeamQuoteId extends String {}
-
 /**
  * {x, y} of mouse location
  *
@@ -478,11 +422,6 @@ export interface BeamQuoteId extends String {}
 export interface BeamMouseLocation {
   x: number
   y: number
-}
-
-export interface BeamCollectedQuote {
-  el: BeamHTMLElement | BeamRange
-  quoteId?: BeamQuoteId
 }
 
 export interface BeamSelection {
@@ -530,7 +469,7 @@ export class BeamMutationObserver {
   disconnect(): void {
     throw new Error("Method not implemented.")
   }
-  observe(target: BeamNode, options?: MutationObserverInit): void {
+  observe(_target: BeamNode, _options?: MutationObserverInit): void {
     throw new Error("Method not implemented.")
   }
   takeRecords(): BeamMutationRecord[] {

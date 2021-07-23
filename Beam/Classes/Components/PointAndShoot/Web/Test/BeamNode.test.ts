@@ -24,7 +24,7 @@ test("children", () => {
   const mongo = new BeamTextMock("MongoDB")
   a.appendChild(mongo)
   p.appendChild(a)
-  expect(p.toString()).toEqual(`<p><b>MEAN</b> (<a href="/wiki/MongoDB">MongoDB</a></p>`)
+  expect(p.toString()).toEqual("<p><b>MEAN</b> (<a href=\"/wiki/MongoDB\">MongoDB</a></p>")
 })
 
 test("contains", () => {

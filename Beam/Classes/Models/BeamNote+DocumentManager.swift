@@ -23,7 +23,7 @@ extension BeamNote: BeamNoteDocument {
                                   createdAt: creationDate,
                                   updatedAt: updateDate,
                                   data: data,
-                                  documentType: type == .journal ? .journal : .note,
+                                  documentType: type.isJournal ? .journal : .note,
                                   version: version,
                                   isPublic: isPublic)
         } catch {
@@ -330,7 +330,7 @@ extension BeamNote: BeamNoteDocument {
         AppDelegate.main.data.updateNoteCount()
     }
 
-    var isTodaysNote: Bool { (type == .journal) && (self === AppDelegate.main.data.todaysNote) }
+    var isTodaysNote: Bool { type.isJournal && (self === AppDelegate.main.data.todaysNote) }
 
     public static func indexAllNotes() {
         let documentManager = DocumentManager()

@@ -1,24 +1,28 @@
-import { BeamMessageHandler, BeamWindow } from "./BeamTypes"
+import {BeamMessageHandler, BeamWindow, MessagePayload} from "./BeamTypes"
 
 export class Native {
   /**
+   * Singleton
    */
   static instance: Native
 
   readonly href: string
-  protected readonly messageHandlers: BeamMessageHandler[]
+
+  protected readonly messageHandlers: {
+    [name: string]: BeamMessageHandler
+  }
 
   /**
    * @param win {BeamWindow}
    */
-  static getInstance(win: BeamWindow) {
+  static getInstance(win: BeamWindow): Native {
     if (!Native.instance) {
       Native.instance = new Native(win)
     }
     return Native.instance
   }
 
-  log(...args) {
+  log(...args): void {
     console.log(this.toString(), args)
   }
 
@@ -40,21 +44,21 @@ export class Native {
    *
    * @param name {string} Message name.
    *        Will be converted to ${prefix}_beam_${name} before sending.
-   * @param payload {any} The message data.
+   * @param payload {MessagePayload} The message data.
    *        An "href" property will always be added as the base URI of the current frame.
    */
-  sendMessage(name: string, payload: {}) {
+  sendMessage(name: string, payload: MessagePayload): void {
     const messageKey = `pointAndShoot_${name}`
     const messageHandler = this.messageHandlers[messageKey]
     if (messageHandler) {
       const href = this.href
-      messageHandler.postMessage({ href, ...payload }, href)
+      messageHandler.postMessage({href, ...payload}, href)
     } else {
       throw Error(`No message handler for message "${name}"`)
     }
   }
 
-  toString() {
+  toString(): string {
     return this.constructor.name
   }
 }

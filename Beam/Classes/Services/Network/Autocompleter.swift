@@ -12,17 +12,20 @@ struct AutocompleteResult: Identifiable, Equatable {
         case autocomplete
         case url
         case createCard
+        case topDomain
 
         var iconName: String {
             switch self {
             case .history:
                 return "field-history"
-            case .autocomplete, .url:
+            case .autocomplete:
                 return "field-search"
             case .createCard:
                 return "field-card_new"
             case .note:
                 return "field-card"
+            case .topDomain, .url:
+                return "field-web"
             }
         }
     }
@@ -40,53 +43,55 @@ struct AutocompleteResult: Identifiable, Equatable {
 
 class Autocompleter: ObservableObject {
 
-    @Published var results: [AutocompleteResult] = []
-
-    static let autocompleteResultDescription = "Google Search"
-    private var searchEngine: SearchEngine
+    private(set) var searchEngine: SearchEngine
     private var lastDataTask: URLSessionDataTask?
 
     init(searchEngine: SearchEngine) {
         self.searchEngine = searchEngine
     }
 
-    public func complete(query: String) {
-        guard query.count > 0 else {
-            self.results = []
-            return
-        }
-
-        searchEngine.query = query
-        guard let url = URL(string: searchEngine.autocompleteUrl) else {
-            return
-        }
-        lastDataTask?.cancel()
-        lastDataTask = BeamURLSession.shared.dataTask(with: url) { [weak self] data, _, _ in
-            guard let self = self else { return }
-            guard let data = data else { return }
-
-            let obj = try? JSONSerialization.jsonObject(with: data)
-
-            if let array = obj as? [Any], let r = array[1] as? [String] {
-                var res = [AutocompleteResult]()
-                for (index, str) in r.enumerated() {
-                    let isURL = str.mayBeWebURL
-                    let source: AutocompleteResult.Source = isURL ? .url : .autocomplete
-                    let url = isURL ? URL(string: str) : nil
-                    var text = str
-                    let info = index == 0 ? Self.autocompleteResultDescription : nil
-                    if let url = url {
-                        text = url.urlStringWithoutScheme
-                    }
-                    res.append(AutocompleteResult(text: text,
-                                                  source: source,
-                                                  url: url, information: info,
-                                                  completingText: query))
-                }
-                self.results = res
+    public func complete(query: String) -> Future<[AutocompleteResult], Never> {
+        Future { promise in
+            self.searchEngine.query = query
+            guard query.count > 0,
+                  let url = URL(string: self.searchEngine.autocompleteUrl) else {
+                promise(.success([]))
+                return
             }
+
+            self.lastDataTask?.cancel()
+            let description = self.searchEngine.description
+            self.lastDataTask = BeamURLSession.shared.dataTask(with: url) { data, _, error in
+                if let error = error as? URLError, error.code == .cancelled {
+                    return
+                }
+                guard let data = data else {
+                    promise(.success([]))
+                    return
+                }
+
+                let obj = try? JSONSerialization.jsonObject(with: data)
+                var res = [AutocompleteResult]()
+                if let array = obj as? [Any], let r = array[1] as? [String] {
+                    for (index, str) in r.enumerated() {
+                        let isURL = str.mayBeWebURL
+                        let source: AutocompleteResult.Source = isURL ? .url : .autocomplete
+                        let url = isURL ? URL(string: str) : nil
+                        var text = str
+                        let info = index == 0 && url == nil ? description : nil
+                        if let url = url {
+                            text = url.urlStringWithoutScheme
+                        }
+                        res.append(AutocompleteResult(text: text,
+                                                      source: source,
+                                                      url: url, information: info,
+                                                      completingText: query))
+                    }
+                }
+                promise(.success(res))
+            }
+            self.lastDataTask?.resume()
         }
-        lastDataTask?.resume()
     }
 
     public func clear() {

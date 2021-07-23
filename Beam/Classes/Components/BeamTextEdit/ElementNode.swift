@@ -194,6 +194,10 @@ public class ElementNode: Widget {
                 updateTextChildren(elements: elements)
             }.store(in: &scope)
 
+        PreferencesManager.$alwaysShowBullets.sink { [unowned self] newValue in
+            self.alwaysShowLayers(isOn: newValue)
+        }.store(in: &scope)
+
         subscribeToElement(element)
 
         setAccessibilityLabel("ElementNode")
@@ -211,6 +215,10 @@ public class ElementNode: Widget {
             .sink { [unowned self] elements in
                 updateTextChildren(elements: elements)
             }.store(in: &scope)
+
+        PreferencesManager.$alwaysShowBullets.sink { [unowned self] newValue in
+            self.alwaysShowLayers(isOn: newValue)
+        }.store(in: &scope)
 
         subscribeToElement(element)
 
@@ -279,8 +287,8 @@ public class ElementNode: Widget {
     // MARK: - Mouse Events
 
     override func mouseMoved(mouseInfo: MouseInfo) -> Bool {
-        if !PreferencesManager.alwaysShowBullets && children.count > 0 {
-            handle(hover: localTextFrame.contains(mouseInfo.position))
+        if !PreferencesManager.alwaysShowBullets && children.count > 0 && self != root {
+            handle(hover: localFrame.contains(mouseInfo.position))
         }
         return false
     }
@@ -419,9 +427,23 @@ public class ElementNode: Widget {
                 }
             }.store(in: &elementScope)
 
+        element.$hasNote
+            .drop(while: { newValue in newValue == false })
+            .sink { [unowned self] newValue in
+                if newValue {
+                    willBeAddedToNote()
+                } else {
+                    willBeRemovedFromNote()
+                }
+            }.store(in: &elementScope)
+
         elementText = element.text
         elementKind = element.kind
     }
+
+    // Override these two methods if you need to know when a beem element will be added or removed from a note
+    func willBeRemovedFromNote() { }
+    func willBeAddedToNote() { }
 
     // The default implementation doesn't know anything about text
     public func indexOnLastLine(atOffset x: CGFloat) -> Int {

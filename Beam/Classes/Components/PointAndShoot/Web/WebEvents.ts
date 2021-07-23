@@ -50,7 +50,7 @@ export class WebEvents<UI extends WebEventsUI> {
     const target = this.win.document.querySelector(query) as unknown as BeamNode
     const options = {
       attributes: true,
-      attributeFilter: ["style"],
+      attributeFilter: ["style"]
     }
     this.mutationObserver.observe(target, options)
   }
@@ -81,8 +81,8 @@ export class WebEvents<UI extends WebEventsUI> {
    * The document zoom level is used in webkit for macOS < 11.0
    */
   getScale(): number {
-    let zoom = this.getZoomLevel() || 1
-    let scale = this.win.visualViewport.scale
+    const zoom = this.getZoomLevel() || 1
+    const scale = this.win.visualViewport.scale
     return Number(zoom) * scale
   }
 
@@ -102,7 +102,7 @@ export class WebEvents<UI extends WebEventsUI> {
     return zoomLevel
   }
 
-  zoomMutationCallback(mutationRecords, self) {
+  zoomMutationCallback(mutationRecords, self): void {
     mutationRecords.map((mutationRecord) => {
       if (mutationRecord.attributeName == "style") {
         const resizeInfo = self.resizeInfo()
@@ -111,12 +111,7 @@ export class WebEvents<UI extends WebEventsUI> {
     })
   }
 
-  checkFrames() {
-    const framesInfo = this.getFramesInfo()
-    this.ui.setFramesInfo(framesInfo)
-  }
-
-  getFramesInfo(): FrameInfo[] {
+  sendFramesInfo() {
     const frameEls = this.win.document.querySelectorAll("iframe") as BeamHTMLIFrameElement[]
     const framesInfo: FrameInfo[] = []
     for (const frameEl of frameEls) {
@@ -128,8 +123,8 @@ export class WebEvents<UI extends WebEventsUI> {
           x: bounds.x,
           y: bounds.y,
           width: bounds.width,
-          height: bounds.height,
-        },
+          height: bounds.height
+        }
       }
       framesInfo.push(frameInfo)
     }
@@ -140,39 +135,17 @@ export class WebEvents<UI extends WebEventsUI> {
         x: 0,
         y: 0,
         width: this.win.innerWidth,
-        height: this.win.innerHeight,
-      },
+        height: this.win.innerHeight
+      }
     })
-    return framesInfo
+    this.ui.setFramesInfo(framesInfo)
   }
 
   onScroll(_ev?) {
-    // TODO: Throttle
-    const doc = this.win.document
-    const body = doc.body
-    const documentEl = doc.documentElement
-    const scrollWidth = (this.scrollWidth = Math.max(
-      body.scrollWidth,
-      documentEl.scrollWidth,
-      body.offsetWidth,
-      documentEl.offsetWidth,
-      body.clientWidth,
-      documentEl.clientWidth
-    ))
-    const scrollHeight = Math.max(
-      body.scrollHeight,
-      documentEl.scrollHeight,
-      body.offsetHeight,
-      documentEl.offsetHeight,
-      body.clientHeight,
-      documentEl.clientHeight
-    )
     const scrollInfo = {
       x: this.win.scrollX,
       y: this.win.scrollY,
-      width: scrollWidth,
-      height: scrollHeight,
-      scale: this.getScale(),
+      scale: this.getScale()
     }
     this.ui.setScrollInfo(scrollInfo)
   }
@@ -188,22 +161,13 @@ export class WebEvents<UI extends WebEventsUI> {
 
   onLoad(_ev) {
     this.log("Page load.", this.win.location.href)
-    this.log("Flushing frames.", this.win.location.href)
-    const framesInfo: FrameInfo[] = this.getFramesInfo()
-    this.ui.setOnLoadInfo(framesInfo)
+    this.log("Send inital frameInfo", this.win.location.href)
+    this.sendFramesInfo()
   }
 
   onPinch(_ev) {
     const vv = this.win.visualViewport
-    this.ui.pinched({
-      offsetTop: vv.offsetTop,
-      pageTop: vv.pageTop,
-      offsetLeft: vv.offsetLeft,
-      pageLeft: vv.pageLeft,
-      width: vv.width,
-      height: vv.height,
-      scale: this.getScale(),
-    })
+    this.ui.pinched({ scale: this.getScale() })
   }
 
   toString() {

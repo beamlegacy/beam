@@ -26,28 +26,6 @@ public struct Page {
     var attachedPages = [UInt64]()
 }
 
-enum ClusteringCandidate {
-    case nonNormalizedLaplacian
-    case randomWalkLaplacian
-    case symetricLaplacian
-    case similarityMatrix
-}
-
-enum SimilarityMatrixCandidate {
-    case navigationMatrix
-    case combinationAllSimilarityMatrix
-    case combinationAllBinarisedMatrix
-    case combinationBinarizedWithTextErasure
-    case combinationSigmoid
-    case textualSimilarityMatrix
-}
-
-enum NumClusterComputationCandidate {
-    case threshold
-    case biggestDistanceInPercentages
-    case biggestDistanceInAbsolute
-}
-
 // swiftlint:disable:next type_body_length
 public class Cluster {
 
@@ -60,6 +38,28 @@ public class Cluster {
         case navigation
         case text
         case entities
+    }
+
+    enum ClusteringCandidate {
+        case nonNormalizedLaplacian
+        case randomWalkLaplacian
+        case symetricLaplacian
+        case similarityMatrix
+    }
+
+    enum SimilarityMatrixCandidate {
+        case navigationMatrix
+        case combinationAllSimilarityMatrix
+        case combinationAllBinarisedMatrix
+        case combinationBinarizedWithTextErasure
+        case combinationSigmoid
+        case textualSimilarityMatrix
+    }
+
+    enum NumClusterComputationCandidate {
+        case threshold
+        case biggestDistanceInPercentages
+        case biggestDistanceInAbsolute
     }
 
     enum MatrixError: Error {
@@ -87,12 +87,11 @@ public class Cluster {
     let tagger = NLTagger(tagSchemes: [.nameType])
     let entityOptions: NLTagger.Options = [.omitPunctuation, .omitWhitespace, .joinNames]
     let entityTags: [NLTag] = [.personalName, .placeName, .organizationName]
-    var timeToRemove: Double = 0.5
+    var timeToRemove: Double = 0.5 // If clustering takes more than this (in seconds)
+                                    // we start removing pages
     let titleSuffixes = [" - Google Search", " - YouTube"]
     let beta = 50.0
 
-    // The following will be deleted before the final product:
-    // Define which affinity (laplacian) matrix to use
     var clusteringCandidate = ClusteringCandidate.nonNormalizedLaplacian
     // Define which similarity matrix to use
     var matrixCandidate = SimilarityMatrixCandidate.navigationMatrix
@@ -106,8 +105,6 @@ public class Cluster {
         self.weights[.navigation] = weightNavigation
         self.weights[.text] = weightText
         self.weights[.entities] = weightEntities
-        // In general we always initialise with candidate 1
-        // this is just to be safe:
         do {
             try self.performCandidateChange()
         } catch {

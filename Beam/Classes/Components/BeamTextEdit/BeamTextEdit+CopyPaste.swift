@@ -42,16 +42,7 @@ extension BeamTextEdit {
     @IBAction func cut(_ sender: Any) {
         setPasteboard()
         if let nodes = rootNode.state.nodeSelection?.sortedNodes, !nodes.isEmpty {
-            let insertEmptyNode = nodes.count == rootNode.element.children.count
-            cmdManager.beginGroup(with: "CutElementContent")
-            for node in nodes {
-                cmdManager.deleteElement(for: node)
-            }
-            if insertEmptyNode {
-                let newElement = BeamElement()
-                cmdManager.insertElement(newElement, inNode: rootNode, afterElement: nil)
-            }
-            cmdManager.endGroup()
+            rootNode.eraseNodeSelection(createEmptyNodeInPlace: nodes.count == rootNode.element.children.count)
         } else {
             guard let node = rootNode.focusedWidget as? TextNode else { return }
             cmdManager.deleteText(in: node, for: rootNode.selectedTextRange)

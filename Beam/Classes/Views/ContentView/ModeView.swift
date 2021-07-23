@@ -30,8 +30,10 @@ struct ModeView: View {
                         TabStats(score: score)
                     }
                     if let pns = tab.pointAndShoot {
-                        PointFrame(pointAndShootUI: pns.ui)
-                        ShootFrame(pointAndShootUI: pns.ui)
+                        PointFrame(pns: pns, webPositions: pns.webPositions)
+                        ShootFrame(pns: pns)
+                        CollectedFrames(pns: pns)
+                        ShootConfirmationView(pns: pns)
                     }
                 }.clipped()
             }
@@ -42,7 +44,7 @@ struct ModeView: View {
     private var noteContent: some View {
         Group {
             if let currentNote = state.currentNote {
-                NoteView(note: currentNote, centerText: true, scrollToElementId: state.scrollToElementId) { scrollPoint in
+                NoteView(note: currentNote, containerGeometry: containerGeometry, leadingPercentage: 48.7, centerText: false, scrollToElementId: state.scrollToElementId) { scrollPoint in
                     contentIsScrolled = scrollPoint.y > NoteView.topSpacingBeforeTitle
                 }
                 .onAppear { contentIsScrolled = false }
@@ -53,7 +55,7 @@ struct ModeView: View {
 
     private func journalContent(containerGeometry: GeometryProxy) -> some View {
         JournalScrollView(axes: [.vertical],
-                          showsIndicators: false,
+                          showsIndicators: false, centerText: false,
                           proxy: containerGeometry) { scrollPoint in
             contentIsScrolled = scrollPoint.y >
                 JournalScrollView.firstNoteTopOffset(forProxy: containerGeometry)

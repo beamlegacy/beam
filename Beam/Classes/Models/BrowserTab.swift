@@ -59,6 +59,8 @@ import Promises
     @Published var browsingTree: BrowsingTree
     @Published var privateMode = false
 
+    var originMode: Mode
+
     var pointAndShootAllowed: Bool {
         true
     }
@@ -84,7 +86,7 @@ import Promises
         if isFromNoteSearch {
             noteController.setContents(url: url, text: title)
             isFromNoteSearch = false
-        } else {
+        } else if Configuration.browsingSessionCollectionIsOn {
             _ = noteController.add(url: url, text: title, reason: reason)
         }
     }
@@ -103,7 +105,7 @@ import Promises
 
     lazy var pointAndShoot: PointAndShoot? = {
         guard let scorer = browsingScorer else { return nil }
-        let pns = PointAndShoot(ui: PointAndShootUI(), scorer: scorer)
+        let pns = PointAndShoot(scorer: scorer)
         pns.page = self
         return pns
     }()
@@ -173,11 +175,12 @@ import Promises
        - id:
        - webView:
      */
-    init(state: BeamState, browsingTreeOrigin: BrowsingTreeOrigin?, note: BeamNote, rootElement: BeamElement? = nil,
+    init(state: BeamState, browsingTreeOrigin: BrowsingTreeOrigin?, originMode: Mode, note: BeamNote, rootElement: BeamElement? = nil,
          id: UUID = UUID(), webView: BeamWebView? = nil) {
         self.state = state
         self.id = id
         self.browsingTreeOrigin = browsingTreeOrigin
+        self.originMode = originMode
         isFromNoteSearch = rootElement != nil
 
         if let suppliedWebView = webView {
@@ -239,6 +242,7 @@ import Promises
         privateMode = try container.decode(Bool.self, forKey: .privateMode)
         isFromNoteSearch = false
 
+        originMode = .today
         super.init()
         noteController.note.browsingSessions.append(tree)
     }
@@ -292,7 +296,7 @@ import Promises
             return
         }
         logInNote(url: url, title: title, reason: .loading)
-        self.title = noteController.element.text.text
+        self.title = title ?? ""
     }
 
     private func updateFavIcon() {
@@ -437,7 +441,7 @@ import Promises
     var navigationCount: Int = 0
 
     func cancelShoot() {
-        pointAndShoot?.resetStatus()
+        pointAndShoot?.dismissShoot()
     }
 
     func startReading() {

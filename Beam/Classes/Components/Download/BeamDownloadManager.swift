@@ -343,9 +343,7 @@ extension BeamDownloadManager: URLSessionDelegate, URLSessionDownloadDelegate {
               let download = taskDownloadAssociation[downloadTask] else { return }
 
         if let error = error {
-            DispatchQueue.main.async {
-                download.errorMessage = error.localizedDescription
-            }
+            download.setErrorMessage(error.localizedDescription)
         } else {
             try? fileManager.removeItem(at: download.downloadDocumentFileURL)
             download.downloadDocument = nil
@@ -362,6 +360,10 @@ extension BeamDownloadManager: URLSessionDelegate, URLSessionDownloadDelegate {
         guard let downloadDirectory = try? downloadDirectoryURL() else { return }
 
         moveFile(sourceDownload: download, from: location, to: downloadDirectory)
+
+        //At the end of the download, re-set the total size of the download.
+        //This is to avoid missing size for very small and fast downloads
+        download.setDownloadTotalSizeCount(size: downloadTask.countOfBytesReceived)
     }
 }
 

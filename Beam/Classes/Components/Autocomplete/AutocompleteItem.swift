@@ -33,7 +33,7 @@ struct AutocompleteItem: View {
         switch item.source {
         case .history:
             return "field-history"
-        case .autocomplete, .url:
+        case .autocomplete, .url, .topDomain:
             return "field-search"
         case .createCard:
             return "field-card_new"
@@ -60,7 +60,7 @@ struct AutocompleteItem: View {
         guard let completingText = item.completingText else {
             return []
         }
-        if [.autocomplete, .history, .url].contains(item.source) {
+        if [.autocomplete, .history, .url, .topDomain].contains(item.source) {
             return text.ranges(of: completingText, options: .caseInsensitive)
         }
         if let firstRange = text.range(of: completingText, options: .caseInsensitive), firstRange.lowerBound == text.startIndex {
@@ -85,7 +85,7 @@ struct AutocompleteItem: View {
                     StyledText(verbatim: item.text)
                         .style(.semibold(), ranges: boldTextRanges)
                         .font(BeamFont.regular(size: 13).swiftUI)
-                        .foregroundColor(item.source == .url ? subtitleLinkColor : textColor)
+                        .foregroundColor([.url, .topDomain].contains(item.source) ? subtitleLinkColor : textColor)
                 }
                 .layoutPriority(10)
                 if let info = item.information {
@@ -114,8 +114,8 @@ struct AutocompleteItem: View {
             isTouchDown = t
         }
         .onAppear {
-            if let url = item.url, item.source == .history {
-                FaviconProvider.shared.imageForUrl(url, cacheOnly: true) { (image) in
+            if let url = item.url {
+                FaviconProvider.shared.imageForUrl(url, cacheOnly: item.source != .topDomain) { (image) in
                     self.favicon = image
                 }
             }

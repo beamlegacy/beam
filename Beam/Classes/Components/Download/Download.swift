@@ -36,11 +36,11 @@ class Download: Identifiable, ObservableObject, Codable {
         return downloadTask?.state ?? .completed
     }
 
-    @Published var progress: Double = 0.0
-    @Published var remainingTime: TimeInterval = 0.0
-    @Published var totalCount: String?
-    @Published var localizedProgressString: String?
-    @Published var errorMessage: String?
+    @Published private(set) var progress: Double = 0.0
+    @Published private(set) var remainingTime: TimeInterval = 0.0
+    @Published private(set) var totalByteCount: String?
+    @Published private(set) var localizedProgressString: String?
+    @Published private(set) var errorMessage: String?
 
     private var scope: Set<AnyCancellable> = []
     private lazy var byteFormatter = ByteCountFormatter()
@@ -90,7 +90,7 @@ class Download: Identifiable, ObservableObject, Codable {
 
     func setDownloadTask(_ task: URLSessionDownloadTask) {
         scope.removeAll()
-        errorMessage = nil
+        setErrorMessage(nil)
 
         self.downloadTask = task
 
@@ -99,20 +99,28 @@ class Download: Identifiable, ObservableObject, Codable {
                 .publisher(for: \.fractionCompleted)
                 .throttle(for: 1, scheduler: RunLoop.main, latest: true)
                 .receive(on: RunLoop.main)
-                .sink(receiveValue: { [downloadDocumentFileURL] p in
-                    self.progress = p
+                .sink(receiveValue: { [downloadDocumentFileURL, weak self] p in
+                    self?.progress = p
                     if let total = task.progress.userInfo[ProgressUserInfoKey("NSProgressByteTotalCountKey")] as? Int64 {
-                        self.totalCount = self.byteFormatter.string(fromByteCount: total)
-                        self.localizedProgressString = task.progress.localizedAdditionalDescription
+                        self?.setDownloadTotalSizeCount(size: total)
+                        self?.localizedProgressString = task.progress.localizedAdditionalDescription
                     }
                     BeamDownloadDocument.setProgress(p, onFileAt: downloadDocumentFileURL)
                 })
                 .store(in: &scope)
         }
+    }
 
-        if let total = task.progress.userInfo[ProgressUserInfoKey("NSProgressByteTotalCountKey")] as? Int64 {
-            self.totalCount = self.byteFormatter.string(fromByteCount: total)
-            self.localizedProgressString = task.progress.localizedAdditionalDescription
+    func setDownloadTotalSizeCount(size: Int64) {
+        guard size != -1 else { return }
+        DispatchQueue.main.async {
+            self.totalByteCount = self.byteFormatter.string(fromByteCount: size)
+        }
+    }
+
+    func setErrorMessage(_ error: String?) {
+        DispatchQueue.main.async {
+            self.errorMessage = error
         }
     }
 

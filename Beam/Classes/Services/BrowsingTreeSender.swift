@@ -39,18 +39,26 @@ extension URLSession: URLSessionProtocol {
     }
 }
 
+struct BrowsingTreeSenderConfig {
+    let dataStoreUrl: String
+    let dataStoreApiToken: String
+}
+
 class BrowsingTreeSender {
     var session: URLSessionProtocol
-    var url: URL
     var encoder: JSONEncoder
-    let dataStoreUrl: String = EnvironmentVariables.BrowsingTree.url
-    private let dataStoreApiToken: String = EnvironmentVariables.BrowsingTree.accessToken
+    var url: URL
+    private let config: BrowsingTreeSenderConfig
 
-    init?(session: URLSessionProtocol = URLSession.shared, testDataStoreUrl: String? = nil) {
-        guard let url = URL(string: testDataStoreUrl == nil ? dataStoreUrl : testDataStoreUrl!) else { // using ?? raises 'self' captured by a closure before all members were initialized
-            Logger.shared.logError("wrong browsing tree endpoint url", category: .general)
+    init?(session: URLSessionProtocol = URLSession.shared, config: BrowsingTreeSenderConfig) {
+        guard config.dataStoreApiToken != "$(BROWSING_TREE_ACCESS_TOKEN)",
+              config.dataStoreUrl != "$(BROWSING_TREE_URL)",
+              let url = URL(string: config.dataStoreUrl)
+        else {
+            Logger.shared.logError("Browsing tree sender credential issue", category: .general)
             return nil
         }
+        self.config = config
         self.url = url
         self.session = session
         encoder = JSONEncoder()
@@ -60,7 +68,7 @@ class BrowsingTreeSender {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue(dataStoreApiToken, forHTTPHeaderField: "access_token")
+        request.setValue(config.dataStoreApiToken, forHTTPHeaderField: "access_token")
         return request
     }
 
@@ -94,7 +102,8 @@ class BrowsingTreeSender {
     }
 
     func send(browsingTree: BrowsingTree, completion:  @escaping () -> Void = {}) {
-        guard let payload = payload(browsingTree: browsingTree) else { return }
+        guard let payload = payload(browsingTree: browsingTree),
+              !PreferencesManager.isPrivacyFilterEnabled else { return }
         let task = session.mockableUploadTask(with: request, from: payload) { data, response, error in
             if let error = error {
                 Logger.shared.logError("Browsing Tree sender Error: \(error)", category: .general)

@@ -6,7 +6,7 @@ export class EventsMock {
   events = []
 
   constructor() {
-    this.log('instantiated')
+    this.log("instantiated")
   }
 
   get eventsCount() {
@@ -15,6 +15,12 @@ export class EventsMock {
 
   get latestEvent() {
     return this.events[this.eventsCount - 1]
+  }
+  
+  findEventByName(name: string) {
+    return this.events.find(event => {
+      return event.name == name
+    })
   }
 
   clearEvents() {

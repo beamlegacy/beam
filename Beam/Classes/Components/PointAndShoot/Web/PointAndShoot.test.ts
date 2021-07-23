@@ -1,4 +1,4 @@
-import { BeamPNSStatus, BeamRange } from "./BeamTypes"
+import { BeamRange } from "./BeamTypes"
 import { PointAndShoot } from "./PointAndShoot"
 import {
   BeamDocumentMock,
@@ -6,8 +6,7 @@ import {
   BeamKeyEvent,
   BeamMouseEvent,
   BeamRangeMock,
-  BeamSelectionMock,
-  BeamUIEvent,
+  BeamSelectionMock
 } from "./Test/BeamMocks"
 import { BeamWindowMock } from "./Test/BeamWindowMock"
 import { PointAndShootUIMock } from "./Test/PointAndShootUIMock"
@@ -27,17 +26,17 @@ function pointAndShootTestBed(frameEls = [], documentAttributes = {}) {
     offsetWidth: 800,
     offsetHeight: 0,
     clientWidth: 800,
-    clientHeight: 0,
+    clientHeight: 0
   }
   const styleData = {
     style: {
-      zoom: "1",
-    },
+      zoom: "1"
+    }
   }
   const testDocument = new BeamDocumentMock({
     body: {
       ...styleData,
-      ...scrollData,
+      ...scrollData
     },
     documentElement: scrollData,
     querySelectorAll: (selector) => {
@@ -45,7 +44,7 @@ function pointAndShootTestBed(frameEls = [], documentAttributes = {}) {
         return frameEls
       }
     },
-    querySelector: (selector) => {
+    querySelector: (_selector) => {
       return
     },
     ...documentAttributes
@@ -60,9 +59,7 @@ function pointAndShootTestBed(frameEls = [], documentAttributes = {}) {
   expect(eventListeners["scroll"]).toBeDefined()
 
   // Check initial state
-  expect(pns.status === "none")
   expect(testUI.eventsCount).toBeGreaterThanOrEqual(1)
-  expect(testUI.events[0]).toEqual({ name: "scroll", x: 0, y: 0, width: 800, height: 0, scale: 1 })
   testUI.clearEvents() // To ease further events counting
   return { pns, testUI }
 }
@@ -77,32 +74,36 @@ function createRange(): BeamRange {
 }
 
 test("mouse move without Option", () => {
+  // Note: option isn't taken into account on the JS side anymore
   const { pns, testUI } = pointAndShootTestBed()
-
   const hoveredElement = new BeamHTMLElementMock("p")
   hoveredElement.bounds = {
     width: 130,
     height: 120,
     x: 11,
-    y: 12,
+    y: 12
   }
   hoveredElement.width = 130
   hoveredElement.height = 120
   const pointEvent = new BeamMouseEvent({ name: "mousemove", target: hoveredElement, clientX: 101, clientY: 102 })
   pns.onMouseMove(pointEvent)
-  expect(pns.status).toEqual("none")
-  expect(testUI.eventsCount).toEqual(2)
-  expect(testUI.latestEvent).toEqual("hideStatus")
+  expect(testUI.eventsCount).toEqual(5)
+  expect(testUI.findEventByName("hasSelection")).toEqual({ name: "hasSelection", hasSelection: false })
+  expect(testUI.findEventByName("selectBounds")).toEqual({ name: "selectBounds", rangeGroups: [] })
+  expect(testUI.findEventByName("shootBounds")).toEqual({ name: "shootBounds", shootTargets: [] })
+  expect(testUI.findEventByName("pointBounds")).toBeTruthy()
+  expect(testUI.findEventByName("frames")).toBeTruthy()
 })
 
 test("point with mouse move + Option", () => {
+  // Note: option isn't taken into account on the JS side anymore
   const { pns, testUI } = pointAndShootTestBed()
   const pointedElement = new BeamHTMLElementMock("p")
   pointedElement.bounds = {
     width: 130,
     height: 120,
     x: 11,
-    y: 12,
+    y: 12
   }
   pointedElement.width = 130
   pointedElement.height = 120
@@ -112,17 +113,13 @@ test("point with mouse move + Option", () => {
     target: pointedElement,
     altKey: true,
     clientX: 101,
-    clientY: 102,
+    clientY: 102
   })
   pns.onMouseMove(pointEvent)
 
-  expect(pns.isPointing()).toEqual(true)
-  expect(pns.status).toEqual("pointing") // Check low level too because it will be in a postMessage
-  expect(testUI.eventsCount).toEqual(4)
-  expect(testUI.events[0]).toEqual({ name: "setStatus", status: "pointing" })
-
-  expect(testUI.events[2]).toEqual({ name: "point", el: pointedElement, x: 101, y: 102 })
-  expect(testUI.events[3]).toEqual("hideStatus")
+  expect(testUI.eventsCount).toEqual(5)
+  const testEvent = testUI.findEventByName("pointBounds")
+  expect(testEvent.pointTarget.element).toEqual(pointedElement)
 })
 
 test("point with mouse move + Option should be allowed on unfocused input elements", () => {
@@ -132,7 +129,7 @@ test("point with mouse move + Option should be allowed on unfocused input elemen
     width: 130,
     height: 120,
     x: 11,
-    y: 12,
+    y: 12
   }
   pointedElement.width = 130
   pointedElement.height = 120
@@ -142,17 +139,13 @@ test("point with mouse move + Option should be allowed on unfocused input elemen
     target: pointedElement,
     altKey: true,
     clientX: 101,
-    clientY: 102,
+    clientY: 102
   })
   pns.onMouseMove(pointEvent)
 
-  expect(pns.isPointing()).toEqual(true)
-  expect(pns.status).toEqual(BeamPNSStatus.pointing) // Check low level too because it will be in a postMessage
-  expect(testUI.eventsCount).toEqual(4)
-
-  expect(testUI.events[0]).toEqual({ name: "setStatus", status: "pointing" })
-  expect(testUI.events[2]).toEqual({ name: "point", el: pointedElement, x: 101, y: 102 })
-  expect(testUI.events[3]).toEqual("hideStatus")
+  expect(testUI.eventsCount).toEqual(5)
+  const testEvent = testUI.findEventByName("pointBounds")
+  expect(testEvent.pointTarget.element).toEqual(pointedElement)
 })
 
 const textualInputTypes = [
@@ -172,7 +165,7 @@ test.each(textualInputTypes)(
       width: 130,
       height: 120,
       x: 11,
-      y: 12,
+      y: 12
     }
     pointedElement.width = 130
     pointedElement.height = 120
@@ -183,21 +176,16 @@ test.each(textualInputTypes)(
       target: pointedElement,
       altKey: true,
       clientX: 101,
-      clientY: 102,
+      clientY: 102
     })
     pns.onMouseMove(pointEvent)
 
     expect(pointedElement.contains(pointedElement)).toEqual(true)
-    expect(pointedElement.tagName).toEqual('input')
+    expect(pointedElement.tagName).toEqual("input")
     expect(BeamElementHelper.getType(pointedElement)).toEqual(type)
 
-    expect(pns.isPointing()).toEqual(true)
-    expect(pns.status).toEqual(BeamPNSStatus.pointing) // Check low level too because it will be in a postMessage
-
-    expect(testUI.eventsCount).toEqual(3)
-    expect(testUI.events[0]).toEqual({ name: "setStatus", status: "pointing" })
-    expect(testUI.events[1]).toEqual({ name: "cursor", x: 101, y: 102 })
-    expect(testUI.events[2]).toEqual("hideStatus")
+    // expect no event on active text inputs
+    expect(testUI.eventsCount).toEqual(0)
   }
 )
 
@@ -207,7 +195,7 @@ test("point with mouse move + Option should be prevented on active text inputs",
     width: 130,
     height: 120,
     x: 11,
-    y: 12,
+    y: 12
   }
   pointedElement.width = 130
   pointedElement.height = 120
@@ -218,21 +206,16 @@ test("point with mouse move + Option should be prevented on active text inputs",
     target: pointedElement,
     altKey: true,
     clientX: 101,
-    clientY: 102,
+    clientY: 102
   })
   pns.onMouseMove(pointEvent)
 
   expect(pointedElement.contains(pointedElement)).toEqual(true)
-  expect(pointedElement.tagName).toEqual('input')
-  expect(BeamElementHelper.getType(pointedElement)).toEqual('text')
+  expect(pointedElement.tagName).toEqual("input")
+  expect(BeamElementHelper.getType(pointedElement)).toEqual("text")
 
-  expect(pns.isPointing()).toEqual(true)
-  expect(pns.status).toEqual(BeamPNSStatus.pointing) // Check low level too because it will be in a postMessage
-
-  expect(testUI.eventsCount).toEqual(3)
-  expect(testUI.events[0]).toEqual({ name: "setStatus", status: "pointing" })
-  expect(testUI.events[1]).toEqual({ name: "cursor", x: 101, y: 102 })
-  expect(testUI.events[2]).toEqual("hideStatus")
+  // expect no event on active text inputs
+  expect(testUI.eventsCount).toEqual(0)
 })
 
 test("point with mouse move + Option should be prevented on active textarea", () => {
@@ -241,7 +224,7 @@ test("point with mouse move + Option should be prevented on active textarea", ()
     width: 130,
     height: 120,
     x: 11,
-    y: 12,
+    y: 12
   }
   pointedElement.width = 130
   pointedElement.height = 120
@@ -252,20 +235,15 @@ test("point with mouse move + Option should be prevented on active textarea", ()
     target: pointedElement,
     altKey: true,
     clientX: 101,
-    clientY: 102,
+    clientY: 102
   })
   pns.onMouseMove(pointEvent)
 
   expect(pointedElement.contains(pointedElement)).toEqual(true)
-  expect(pointedElement.tagName).toEqual('textarea')
+  expect(pointedElement.tagName).toEqual("textarea")
 
-  expect(pns.isPointing()).toEqual(true)
-  expect(pns.status).toEqual(BeamPNSStatus.pointing) // Check low level too because it will be in a postMessage
-
-  expect(testUI.eventsCount).toEqual(3)
-  expect(testUI.events[0]).toEqual({ name: "setStatus", status: "pointing" })
-  expect(testUI.events[1]).toEqual({ name: "cursor", x: 101, y: 102 })
-  expect(testUI.events[2]).toEqual("hideStatus")
+  // expect no event on active text inputs
+  expect(testUI.eventsCount).toEqual(0)
 })
 
 test("point with mouse move + Option should be prevented on active contentEditable element", () => {
@@ -274,7 +252,7 @@ test("point with mouse move + Option should be prevented on active contentEditab
     width: 130,
     height: 120,
     x: 11,
-    y: 12,
+    y: 12
   }
   pointedElement.width = 130
   pointedElement.height = 120
@@ -285,21 +263,17 @@ test("point with mouse move + Option should be prevented on active contentEditab
     target: pointedElement,
     altKey: true,
     clientX: 101,
-    clientY: 102,
+    clientY: 102
   })
   pns.onMouseMove(pointEvent)
 
   expect(pointedElement.contains(pointedElement)).toEqual(true)
-  expect(pointedElement.tagName).toEqual('div')
+  expect(pointedElement.tagName).toEqual("div")
   expect(BeamElementHelper.getContentEditable(pointedElement)).toEqual("true")
 
-  expect(pns.isPointing()).toEqual(true)
-  expect(pns.status).toEqual(BeamPNSStatus.pointing) // Check low level too because it will be in a postMessage
 
-  expect(testUI.eventsCount).toEqual(3)
-  expect(testUI.events[0]).toEqual({ name: "setStatus", status: "pointing" })
-  expect(testUI.events[1]).toEqual({ name: "cursor", x: 101, y: 102 })
-  expect(testUI.events[2]).toEqual("hideStatus")
+  // expect no event on active text inputs
+  expect(testUI.eventsCount).toEqual(0)
 })
 
 test("point with mouse move + Option should be prevented on elements nested within an active contentEditable element", () => {
@@ -309,7 +283,7 @@ test("point with mouse move + Option should be prevented on elements nested with
     width: 130,
     height: 120,
     x: 11,
-    y: 12,
+    y: 12
   }
   pointedElement.width = 130
   pointedElement.height = 120
@@ -326,22 +300,18 @@ test("point with mouse move + Option should be prevented on elements nested with
     target: pointedElement,
     altKey: true,
     clientX: 101,
-    clientY: 102,
+    clientY: 102
   })
   pns.onMouseMove(pointEvent)
 
   expect(pointedElement.contains(pointedElement)).toEqual(true)
-  expect(pointedElement.tagName).toEqual('p')
+  expect(pointedElement.tagName).toEqual("p")
 
-  expect(pns.isPointing()).toEqual(true)
-  expect(pns.status).toEqual(BeamPNSStatus.pointing) // Check low level too because it will be in a postMessage
 
   expect(BeamElementHelper.getContentEditable(pointedElement.parentElement)).toEqual("true")
   expect(BeamElementHelper.getContentEditable(pointedElement)).toEqual("inherit")
-  expect(testUI.eventsCount).toEqual(3)
-  expect(testUI.events[0]).toEqual({ name: "setStatus", status: "pointing" })
-  expect(testUI.events[1]).toEqual({ name: "cursor", x: 101, y: 102 })
-  expect(testUI.events[2]).toEqual("hideStatus")
+  // expect no event on active text inputs
+  expect(testUI.eventsCount).toEqual(0)
 })
 
 test("mouse move + Option then click on an arbitrary input element should not shoot", () => {
@@ -350,7 +320,7 @@ test("mouse move + Option then click on an arbitrary input element should not sh
     width: 130,
     height: 120,
     x: 11,
-    y: 12,
+    y: 12
   }
   pointedElement.width = 130
   pointedElement.height = 120
@@ -362,7 +332,7 @@ test("mouse move + Option then click on an arbitrary input element should not sh
     target: pointedElement,
     altKey: true,
     clientX: 101,
-    clientY: 102,
+    clientY: 102
   })
   pns.onMouseMove(pointEvent)
   const clickEvent = new BeamMouseEvent({
@@ -370,18 +340,13 @@ test("mouse move + Option then click on an arbitrary input element should not sh
     target: pointedElement,
     altKey: true,
     clientX: 101,
-    clientY: 102,
+    clientY: 102
   })
   pns.onClick(clickEvent)
 
-  expect(pns.isPointing()).toEqual(true)
-  expect(pns.status).toEqual(BeamPNSStatus.pointing) // Check low level too because it will be in a postMessage
 
-  expect(testUI.eventsCount).toEqual(4)
-  expect(testUI.events[0]).toEqual({ name: "setStatus", status: "pointing" })
-  expect(testUI.events[1]).toEqual({ name: "cursor", x: 101, y: 102 })
-  expect(testUI.events[2]).toEqual("hideStatus")
-  expect(testUI.events[3]).toEqual({ name: "cursor", x: 101, y: 102 })
+  // expect no event on active text inputs
+  expect(testUI.eventsCount).toEqual(0)
 })
 
 test("point with Option key down then mouse move", () => {
@@ -395,7 +360,7 @@ test("point with Option key down then mouse move", () => {
     width: 130,
     height: 120,
     x: 11,
-    y: 12,
+    y: 12
   }
   pointedElement.width = 130
   pointedElement.height = 120
@@ -404,181 +369,27 @@ test("point with Option key down then mouse move", () => {
     target: pointedElement,
     altKey: true,
     clientX: 101,
-    clientY: 102,
+    clientY: 102
   })
   pns.onMouseMove(pointEvent)
 
-  expect(pns.isPointing()).toEqual(true)
-  expect(pns.status).toEqual("pointing") // Check low level too because it will be in a postMessage
-  expect(testUI.eventsCount).toEqual(4)
-  expect(testUI.events[0]).toEqual({ name: "setStatus", status: "pointing" })
-  expect(testUI.events[2]).toEqual({ name: "point", el: pointedElement, x: 101, y: 102 })
-  expect(testUI.events[3]).toEqual("hideStatus")
-})
-
-test("point with mouse move then key down", () => {
-  const { pns, testUI } = pointAndShootTestBed()
-
-  const pointedElement = new BeamHTMLElementMock("p")
-  pointedElement.bounds = {
-    width: 130,
-    height: 120,
-    x: 11,
-    y: 12,
-  }
-  pointedElement.width = 130
-  pointedElement.height = 120
-  const pointEvent = new BeamMouseEvent({
-    name: "mousemove",
-    target: pointedElement,
-    altKey: false,
-    clientX: 101,
-    clientY: 102,
-  })
-  pns.onMouseMove(pointEvent)
-
-  pns.onKeyDown(new BeamKeyEvent({ key: "Alt" }))
-
-  expect(pns.isPointing()).toEqual(true)
-  expect(pns.status).toEqual("pointing") // Check low level too because it will be in a postMessage
-  expect(testUI.eventsCount).toEqual(5)
-  expect(testUI.events[1]).toEqual("hideStatus")
-  expect(testUI.events[2]).toEqual({ name: "setStatus", status: "pointing" })
-  expect(testUI.events[4]).toEqual({ name: "point", el: pointedElement, x: 101, y: 102 })
-})
-
-test("point then release Option", () => {
-  const { pns, testUI } = pointAndShootTestBed()
-
-  const pointedElement = new BeamHTMLElementMock("p")
-  pointedElement.bounds = {
-    width: 130,
-    height: 120,
-    x: 11,
-    y: 12,
-  }
-  pointedElement.width = 130
-  pointedElement.height = 120
-  const pointEvent = new BeamMouseEvent({
-    name: "mousemove",
-    altKey: true,
-    target: pointedElement,
-    clientX: 101,
-    clientY: 102,
-  })
-  pns.onMouseMove(pointEvent)
-  expect(testUI.eventsCount).toEqual(4)
-
-  // Move mouse with Option key released
-  const unpointEvent = new BeamMouseEvent({
-    name: "mousemove",
-    altKey: false,
-    target: pointedElement,
-    clientX: 101,
-    clientY: 102,
-  })
-  pns.onMouseMove(unpointEvent)
-  pns.onKeyUp(new BeamKeyEvent({ key: "Alt" })) // Release option
-
-  expect(pns.status).toEqual("none")
-  expect(testUI.eventsCount).toEqual(7)
-  expect(testUI.events[4]).toEqual({ name: "setStatus", status: "none" })
-  expect(testUI.events[6]).toEqual("hideStatus")
-})
-
-test("point with mouse move + Option, then scroll", () => {
-  const { pns, testUI } = pointAndShootTestBed()
-
-  const pointedElement = new BeamHTMLElementMock("p")
-  pointedElement.bounds = {
-    width: 130,
-    height: 120,
-    x: 11,
-    y: 12,
-  }
-  pointedElement.width = 130
-  pointedElement.height = 120
-  const pointEvent = new BeamMouseEvent({
-    name: "mousemove",
-    target: pointedElement,
-    altKey: true,
-    clientX: 101,
-    clientY: 102,
-  })
-  pns.onMouseMove(pointEvent)
-
-  // Scroll with Option still pressed
-  const scrollEvent = new BeamUIEvent()
-  Object.assign(scrollEvent, { name: "scroll", target: pointedElement })
-  pns.onScroll(scrollEvent)
-  expect(pns.isPointing()).toEqual(true) // Pointing was not disabled by scroll
-  expect(testUI.eventsCount).toEqual(5)
-  expect(testUI.latestEvent).toEqual({ name: "scroll", height: 0, width: 800, x: 0, y: 0, scale: 1 })
-})
-
-test("point then shoot, then cancel", () => {
-  const { pns, testUI } = pointAndShootTestBed()
-
-  const pointedElement = new BeamHTMLElementMock("p")
-  pointedElement.bounds = {
-    width: 130,
-    height: 120,
-    x: 11,
-    y: 12,
-  }
-  pointedElement.width = 130
-  pointedElement.height = 120
-  const pointEvent = new BeamMouseEvent({
-    name: "mousemove",
-    target: pointedElement,
-    altKey: true,
-    clientX: 101,
-    clientY: 102,
-  })
-  pns.onMouseMove(pointEvent)
-  expect(pns.status).toEqual("pointing")
-  expect(testUI.eventsCount).toEqual(4)
-  expect(testUI.events[2]).toEqual({ name: "point", el: pointedElement, x: 101, y: 102 })
-  expect(pns.pointedTarget.el).toEqual(pointedElement)
-
-  // Shoot
-  const shotElement = new BeamHTMLElementMock("p")
-  shotElement.bounds = {
-    width: 130,
-    height: 120,
-    x: 11,
-    y: 12,
-  }
-  shotElement.width = 130
-  shotElement.height = 120
-  const clickEvent = new BeamMouseEvent()
-  Object.assign(clickEvent, { name: "mouseclick", clientX: 103, clientY: 104, target: shotElement, altKey: true })
-  pns.onClick(clickEvent)
-  expect(pns.status).toEqual("shooting")
-  expect(testUI.eventsCount).toEqual(6)
-  expect(testUI.events[4]).toEqual({ name: "shoot", el: pointedElement, x: 103, y: 104, collectedQuotes: [] })
-  expect(pns.collectedQuotes).toEqual([])
-  expect(pns.shootingTarget.el).toEqual(shotElement)
-
-  // Cancel shoot
-  pns.setStatus(BeamPNSStatus.none)
-  expect(pns.shootingTarget.el).toEqual(shotElement)
-  expect(pns.pointedTarget.el).toEqual(pointedElement)
-  expect(pns.status).toEqual("none")
-  expect(testUI.eventsCount).toEqual(7)
-  expect(testUI.events[6]).toEqual({ name: "setStatus", status: "none" })
-  expect(pns.collectedQuotes).toEqual([])
+  expect(testUI.eventsCount).toEqual(15) // aka 3 document events
+  expect(testUI.findEventByName("hasSelection")).toEqual({ name: "hasSelection", hasSelection: false })
+  expect(testUI.findEventByName("selectBounds")).toEqual({ name: "selectBounds", rangeGroups: [] })
+  expect(testUI.findEventByName("shootBounds")).toEqual({ name: "shootBounds", shootTargets: [] })
+  expect(testUI.findEventByName("pointBounds")).toBeTruthy()
+  expect(testUI.findEventByName("frames")).toBeTruthy()
 })
 
 test("getSelectionRanges should return the number of available ranges", () => {
-  const { pns, testUI } = pointAndShootTestBed()
+  const { pns } = pointAndShootTestBed()
 
   const selection = new BeamSelectionMock("p")
   selection.addRange(createRange())
   selection.addRange(createRange())
   selection.addRange(createRange())
   selection.addRange(createRange())
-  let ranges = pns.getSelectionRanges(selection)
+  const ranges = pns.getSelectionRanges(selection)
 
   expect(ranges.length).toEqual(4)
 })
@@ -593,55 +404,9 @@ test("onSelection should create selection event in testUI", () => {
   range.setStart(node, 2)
   range.setEnd(node, 3)
   selection.addRange(range)
-  // create empty event
-  const event = new BeamUIEvent()
   // run onSelection event
-  pns.onSelection(event)
+  pns.onSelection()
   // expect:
-  expect(testUI.eventsCount).toEqual(1)
-  expect(testUI.events[0]).toEqual({ name: "select", selection: [{ quoteId: undefined, el: range }] })
-})
-
-test("click in shooting mode should dismiss shoot", () => {
-  const { pns, testUI } = pointAndShootTestBed()
-
-  const pointedElement = new BeamHTMLElementMock("p")
-  pointedElement.bounds = {
-    width: 130,
-    height: 120,
-    x: 11,
-    y: 12,
-  }
-  pointedElement.width = 130
-  pointedElement.height = 120
-  const pointEvent = new BeamMouseEvent({
-    name: "mousemove",
-    target: pointedElement,
-    altKey: true,
-    clientX: 101,
-    clientY: 102,
-  })
-  pns.onMouseMove(pointEvent)
-  expect(pns.status).toEqual("pointing")
-  expect(testUI.eventsCount).toEqual(4)
-  expect(testUI.events[2]).toEqual({ name: "point", el: pointedElement, x: 101, y: 102 })
-  expect(pns.pointedTarget.el).toEqual(pointedElement)
-
-  // Shoot
-  const shotElement = new BeamHTMLElementMock("p")
-  shotElement.bounds = {
-    width: 130,
-    height: 120,
-    x: 11,
-    y: 12,
-  }
-  shotElement.width = 130
-  shotElement.height = 120
-  const clickEvent = new BeamMouseEvent()
-  Object.assign(clickEvent, { name: "mouseclick", clientX: 103, clientY: 104, target: shotElement, altKey: true })
-  pns.onClick(clickEvent)
-  expect(pns.status).toEqual("shooting")
-  Object.assign(clickEvent, { name: "mouseclick", clientX: 1, clientY: 1, target: shotElement, altKey: true })
-  pns.onClick(clickEvent)
-  expect(pns.status).toEqual("none")
+  expect(testUI.eventsCount).toEqual(5)
+  expect(testUI.findEventByName("selectBounds").rangeGroups.length).toEqual(1)
 })

@@ -42,6 +42,7 @@ public enum LogCategory: String {
     case beamObjectNetwork
     case downloader
     case autocompleteManager
+    case topDomain
 }
 
 public final class Logger {

@@ -16,6 +16,7 @@ extension AutocompleteManager {
         [
             futureToPublisher(autocompleteNotesResults(for: searchText), source: .note),
             futureToPublisher(autocompleteNotesContentsResults(for: searchText), source: .note),
+            futureToPublisher(autocompleteTopDomainResults(for: searchText), source: .topDomain),
             futureToPublisher(autocompleteHistoryResults(for: searchText), source: .history),
             futureToPublisher(autocompleteLinkStoreResults(for: searchText), source: .url),
             self.autocompleteCanCreateNoteResult(for: searchText)
@@ -30,6 +31,14 @@ extension AutocompleteManager {
                 }.eraseToAnyPublisher()
         ]
     }
+
+    func getSearchEnginePublisher(for searchText: String,
+                                  searchEngine: Autocompleter) -> AnyPublisher<AutocompletePublisherSourceResults, Never> {
+        futureToPublisher(autocompleteSearchEngineResults(for: searchText, searchEngine: searchEngine), source: .autocomplete).handleEvents(receiveCancel: { [weak searchEngine] in
+            searchEngine?.clear()
+        }).eraseToAnyPublisher()
+    }
+
     private func futureToPublisher(_ future: Future<[AutocompleteResult], Error>,
                                    source: AutocompleteResult.Source) -> AnyPublisher<AutocompletePublisherSourceResults, Never> {
         future
@@ -65,14 +74,13 @@ extension AutocompleteManager {
                 switch result {
                 case .failure(let error): promise(.failure(error))
                 case .success(let notesContentResults):
-                    // TODO: get all titles and make a single CoreData request for all titles
+                    let ids = notesContentResults.map { $0.noteId }
+                    let docs = beamData?.documentManager.loadDocumentsById(ids: ids)
                     let autocompleteResults = notesContentResults.compactMap { result -> AutocompleteResult? in
                         // Check if the note still exists before proceeding.
-                        guard beamData?.documentManager.loadDocumentById(id: result.noteId) != nil else { return nil }
-                        return AutocompleteResult(text: result.title,
-                                                  source: .note,
-                                                  completingText: query,
-                                                  uuid: result.uid)
+                        guard docs?.first(where: { $0.id == result.noteId }) != nil else { return nil }
+                        return AutocompleteResult(text: result.title, source: .note,
+                                                  completingText: query, uuid: result.uid)
                     }
                     promise(.success(autocompleteResults))
                 }
@@ -92,7 +100,8 @@ extension AutocompleteManager {
                         if let url = url {
                             urlString = url.urlStringWithoutScheme
                         }
-                        return AutocompleteResult(text: result.title, source: .history, url: url, information: urlString, completingText: query)
+                        return AutocompleteResult(text: result.title, source: .history,
+                                                  url: url, information: urlString, completingText: query)
                     }
                     promise(.success(autocompleteResults))
                 }
@@ -104,11 +113,9 @@ extension AutocompleteManager {
         Future { promise in
             let results = LinkStore.shared.getLinks(matchingUrl: query).map { result -> AutocompleteResult in
                 let url = URL(string: result.url)
-                return AutocompleteResult(text: result.url,
-                                          source: .url,
-                                          url: url,
-                                          information: result.title,
-                                          completingText: query)
+                let text = url?.urlStringWithoutScheme ?? result.url
+                return AutocompleteResult(text: text, source: .url, url: url,
+                                          information: result.title, completingText: query)
             }
             promise(.success(results))
         }
@@ -127,4 +134,60 @@ extension AutocompleteManager {
             }
         }
     }
+
+    private func autocompleteTopDomainResults(for query: String) -> Future<[AutocompleteResult], Error> {
+        Future { promise in
+            TopDomainDatabase.shared.search(withPrefix: query) { result in
+                switch result {
+                case .failure(let error): promise(.failure(error))
+                case .success(let topDomain):
+                    guard let url = URL(string: topDomain.url) else {
+                        promise(.failure(TopDomainDatabaseError.notFound))
+                        return
+                    }
+                    let ac = AutocompleteResult(text: url.absoluteString, source: .topDomain, url: url, completingText: query)
+                    promise(.success([ac]))
+                }
+            }
+        }
+    }
+
+    private func autocompleteSearchEngineResults(for searchText: String, searchEngine: Autocompleter) -> Future<[AutocompleteResult], Error> {
+        Future { promise in
+            var promiseReturnedAlready = false
+
+            searchEngine.complete(query: searchText)
+                .sink { [weak self] results in
+                guard let self = self else { return }
+                guard !promiseReturnedAlready else {
+                    DispatchQueue.main.async {
+                        self.searchEngineArrivedTooLate(results)
+                    }
+                    return
+                }
+                promiseReturnedAlready = true
+                promise(.success(results))
+            }.store(in: &self.searchRequestsCancellables)
+
+            let debounceSearchEngineTime = DispatchTime.now().advanced(by: .milliseconds(300))
+            DispatchQueue.main.asyncAfter(deadline: debounceSearchEngineTime) {
+                guard !promiseReturnedAlready else { return }
+                promiseReturnedAlready = true
+                promise(.success([]))
+            }
+        }
+    }
+
+    private func searchEngineArrivedTooLate(_ results: [AutocompleteResult]) {
+        var finalResults = self.autocompleteResults
+        let canCreate = finalResults.firstIndex { $0.source == .createCard } != nil
+        let maxGuesses = finalResults.count > 2 ? 4 : 6
+        let toInsert = results.prefix(maxGuesses)
+        let atIndex = max(0, finalResults.count - (canCreate ? 1 : 0))
+        if atIndex < finalResults.count {
+            finalResults.insert(contentsOf: toInsert, at: atIndex)
+            self.autocompleteResults = finalResults
+        }
+    }
+
 }

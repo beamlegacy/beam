@@ -11,7 +11,6 @@ import Combine
 class PreferencesManager {
     static let contentWidth = 726.0
     static let shared: PreferencesManager = PreferencesManager()
-    let defaults = UserDefaults.standard
     var scope = Set<AnyCancellable>()
 
     @Published var beamAppearance: BeamAppearance = .system

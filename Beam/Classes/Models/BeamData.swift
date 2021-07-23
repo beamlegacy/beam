@@ -40,7 +40,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var sessionLinkRanker = SessionLinkRanker()
     var clusteringManager: ClusteringManager
     var scope = Set<AnyCancellable>()
-    var browsingTreeSender = BrowsingTreeSender()
+    var browsingTreeSender: BrowsingTreeSender?
 
     static func dataFolder(fileName: String) -> String {
         let paths = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)
@@ -84,8 +84,9 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     static var idToTitle: [UUID: String] = [:]
     static var titleToId: [String: UUID] = [:]
 
+    //swiftlint:disable:next function_body_length
     override init() {
-        clusteringManager = ClusteringManager(ranker: sessionLinkRanker)
+        clusteringManager = ClusteringManager(ranker: sessionLinkRanker, candidate: 2, navigation: 0.5, text: 0.8, entities: 0.3)
         documentManager = DocumentManager()
         noteAutoSaveService = NoteAutoSaveService()
         linkManager = LinkManager()
@@ -106,7 +107,11 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         }
 
         cookies = HTTPCookieStorage()
-
+        let treeConfig = BrowsingTreeSenderConfig(
+            dataStoreUrl: EnvironmentVariables.BrowsingTree.url,
+            dataStoreApiToken: EnvironmentVariables.BrowsingTree.accessToken
+        )
+        browsingTreeSender = BrowsingTreeSender(config: treeConfig)
         super.init()
 
         BeamNote.idForNoteNamed = { title in
@@ -121,17 +126,14 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         BeamNote.titleForNoteId = { id in
             guard let title = Self.idToTitle[id] else {
                 guard let title = self.documentManager.loadDocumentById(id: id)?.title else { return nil }
-                Self.titleToId[title] = id
-                Self.idToTitle[id] = title
+                Self.updateTitleIdNoteMapping(noteId: id, currentName: nil, newName: title)
                 return title
             }
             return title
         }
 
         $renamedNote.dropFirst().sink { (noteId, previousName, newName) in
-            Self.titleToId.removeValue(forKey: previousName)
-            Self.titleToId[newName] = noteId
-            Self.idToTitle[noteId] = newName
+            Self.updateTitleIdNoteMapping(noteId: noteId, currentName: previousName, newName: newName)
         }.store(in: &scope)
 
         updateNoteCount()
@@ -213,8 +215,8 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     func setupJournal() {
         _todaysNote = BeamNote.fetchOrCreate(documentManager, title: todaysName)
         if let today = _todaysNote {
-            if today.type != .journal {
-                today.type = .journal
+            if !today.type.isJournal {
+                today.type = BeamNoteType.todaysJournal
             }
             journal.append(today)
         }
@@ -224,7 +226,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
 
     func updateJournal(with limit: Int = 0, and fetchOffset: Int = 0) {
         isFetching = true
-        let _journal = BeamNote.fetchNotesWithType(documentManager, type: .journal, limit, fetchOffset)
+        let _journal = BeamNote.fetchNotesWithType(documentManager, type: .journal, limit, fetchOffset).compactMap { $0.type.isJournal && !$0.type.isFutureJournal ? $0 : nil }
         journal.append(contentsOf: _journal)
     }
 
@@ -254,5 +256,19 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         }
 
         webView.configuration.websiteDataStore.httpCookieStore.add(self)
+    }
+}
+
+extension BeamData {
+    static func updateTitleIdNoteMapping(noteId: UUID, currentName: String?, newName: String?) {
+        if let currentName = currentName {
+            Self.titleToId.removeValue(forKey: currentName)
+        }
+        if let newName = newName {
+            Self.titleToId[newName] = noteId
+            Self.idToTitle[noteId] = newName
+        } else {
+            Self.idToTitle.removeValue(forKey: noteId)
+        }
     }
 }

@@ -1,5 +1,5 @@
-import { BeamMutationObserver, BeamMutationRecord, BeamNode } from "../BeamTypes";
-import { WebFactory } from "../WebFactory";
+import { BeamMutationObserver, BeamMutationRecord, BeamNode } from "../BeamTypes"
+import { WebFactory } from "../WebFactory"
 
 export class BeamMutationObserverMock implements BeamMutationObserver {
   constructor(public fn) {
@@ -13,7 +13,7 @@ export class BeamMutationObserverMock implements BeamMutationObserver {
     this.targets.push(target)
   }
   takeRecords(): BeamMutationRecord[] {
-    throw new Error("Method not implemented.");
+    throw new Error("Method not implemented.")
   }
 }
 

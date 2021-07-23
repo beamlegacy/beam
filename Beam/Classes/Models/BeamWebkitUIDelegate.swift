@@ -5,21 +5,24 @@ class BeamWebkitUIDelegateController: WebPageHolder, WKUIDelegate {
 
     func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
         guard let url = navigationAction.request.url else { return nil }
-        switch navigationAction.navigationType {
-        case .other:
-            let numberOrNil: (NSNumber?) -> String = { $0?.stringValue ?? "nil" }
-            Logger.shared.logInfo("""
-                                  Redirecting toward a new window x=\(numberOrNil(windowFeatures.x)), y=\(numberOrNil(windowFeatures.y)),
-                                  width=\(numberOrNil(windowFeatures.width)), height=\(numberOrNil(windowFeatures.height)),
-                                  \(windowFeatures.allowsResizing != nil ? "resizable" : "not resizable")
-                                  containing \(url.absoluteString)
-                                  """, category: .web)
-            return page.createNewWindow(url, configuration, windowFeatures: windowFeatures, setCurrent: true)
-        default:
-            Logger.shared.logInfo("Creating new webview tab for \(url.absoluteString)", category: .web)
-            let newTab = page.createNewTab(url, configuration, setCurrent: true)
-            return newTab.webView
+        if navigationAction.navigationType == .other {
+            let isNewWindow = windowFeatures.width?.intValue ?? 0 > 0 || windowFeatures.height?.intValue ?? 0 > 0
+            if isNewWindow {
+                let numberOrNil: (NSNumber?) -> String = { $0?.stringValue ?? "nil" }
+                Logger.shared.logInfo("""
+                                      Redirecting toward a new window x=\(numberOrNil(windowFeatures.x)), y=\(numberOrNil(windowFeatures.y)),
+                                      width=\(numberOrNil(windowFeatures.width)), height=\(numberOrNil(windowFeatures.height)),
+                                      \(windowFeatures.allowsResizing != nil ? "resizable" : "not resizable")
+                                      containing \(url.absoluteString)
+                                      """, category: .web)
+                return page.createNewWindow(url, configuration, windowFeatures: windowFeatures, setCurrent: true)
+            } else {
+                Logger.shared.logInfo("Redirecting toward new tab containing \(url.absoluteString)", category: .web)
+            }
         }
+        Logger.shared.logInfo("Creating new webview tab for \(url.absoluteString)", category: .web)
+        let newTab = page.createNewTab(url, configuration, setCurrent: true)
+        return newTab.webView
     }
 
     func webViewDidClose(_ webView: WKWebView) {

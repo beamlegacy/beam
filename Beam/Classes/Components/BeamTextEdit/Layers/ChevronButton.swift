@@ -29,7 +29,9 @@ class ChevronButton: ButtonLayer {
 
         self.layer.bounds = chevron.bounds
         self.layer.addSublayer(chevron)
-
+        self.layer.actions = [
+            "opacity": NSNull()
+        ]
         updateChevron()
 
         setAccessibilityLabel("disclosure triangle")

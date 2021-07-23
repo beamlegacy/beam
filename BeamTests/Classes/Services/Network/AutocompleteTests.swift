@@ -22,25 +22,9 @@ class AutocompleteTests: QuickSpec {
                 beamHelper.beginNetworkRecording()
 
                 waitUntil(timeout: .seconds(10)) { done in
-                    sut.$results
-                        .dropFirst(1)
+                    sut.complete(query: "Beam")
                         .sink { results in
                             expect(results.count).to(equal(10))
-                            done()
-                        }.store(in: &scope)
-                    sut.complete(query: "Beam")
-                }
-
-                beamHelper.endNetworkRecording()
-            }
-
-            it("has an empty first call") {
-                beamHelper.beginNetworkRecording()
-
-                waitUntil(timeout: .seconds(10)) { done in
-                    sut.$results
-                        .sink { results in
-                            expect(results.count).to(equal(0))
                             done()
                         }.store(in: &scope)
                 }
@@ -50,17 +34,18 @@ class AutocompleteTests: QuickSpec {
 
             it("called twice updates results only once") {
                 waitUntil(timeout: .seconds(10)) { done in
-                    sut.$results
-                        .dropFirst(1)
+                    sut.complete(query: "red")
+                        .sink { results in
+                            fail("1st search should have been cancelled")
+                        }.store(in: &scope)
+
+                    beamHelper.beginNetworkRecording()
+                    // 2nd call cancel previous query immediately
+                    sut.complete(query: "green")
                         .sink { results in
                             expect(results.count).to(equal(10))
                             done()
                         }.store(in: &scope)
-
-                    sut.complete(query: "Hello")
-                    beamHelper.beginNetworkRecording()
-                    // 2nd call cancel previous query immediately
-                    sut.complete(query: "Hello world")
                     beamHelper.endNetworkRecording()
                 }
             }

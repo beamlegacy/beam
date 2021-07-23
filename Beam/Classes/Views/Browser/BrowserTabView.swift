@@ -175,18 +175,18 @@ struct BrowserTabView: View {
 struct BrowserTabView_Previews: PreviewProvider {
     static var state = BeamState()
     static var tab: BrowserTab = {
-        let t = BrowserTab(state: state, browsingTreeOrigin: nil, note: BeamNote(title: "test"))
+        let t = BrowserTab(state: state, browsingTreeOrigin: nil, originMode: .today, note: BeamNote(title: "test"))
         t.title = "Tab Title"
         t.mediaPlayerController?.isPlaying = true
         return t
     }()
     static var longTab: BrowserTab = {
-        let t = BrowserTab(state: state, browsingTreeOrigin: nil, note: BeamNote(title: "test2"))
+        let t = BrowserTab(state: state, browsingTreeOrigin: nil, originMode: .today, note: BeamNote(title: "test2"))
         t.title = "Very Very Very Very Very Very Very Very Very Long Tab"
         return t
     }()
     static var tabPlaying: BrowserTab = {
-        let t = BrowserTab(state: state, browsingTreeOrigin: nil, note: BeamNote(title: "test3"))
+        let t = BrowserTab(state: state, browsingTreeOrigin: nil, originMode: .today, note: BeamNote(title: "test3"))
         t.title = "Playing Tab"
         t.mediaPlayerController?.isPlaying = true
         return t

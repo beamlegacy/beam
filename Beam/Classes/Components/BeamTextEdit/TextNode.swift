@@ -24,7 +24,7 @@ public class TextNode: ElementNode {
         case .heading:
             return 1.2
         default:
-            return 1.4
+            return 1.3
         }
     }
     var interNodeSpacing = CGFloat(0)
@@ -488,8 +488,8 @@ public class TextNode: ElementNode {
     }
 
     func beginningOfLineFromPosition(_ position: Int) -> Int {
-        guard let textFrame = textFrame else { return 0 }
-        guard textFrame.lines.count > 1 else { return 0 }
+        guard let textFrame = textFrame,
+              textFrame.lines.count > 1 else { return 0 }
         if let l = lineAt(index: position) {
             return textFrame.lines[l].range.lowerBound
         }
@@ -497,10 +497,10 @@ public class TextNode: ElementNode {
     }
 
     func endOfLineFromPosition(_ position: Int) -> Int {
-        guard let textFrame = textFrame else { return textCount }
-        guard textFrame.lines.count != 1 else {
-            return text.count
-        }
+        guard let textFrame = textFrame,
+              !textFrame.lines.isEmpty,
+              textFrame.lines.count != 1 else { return textCount }
+
         if let l = lineAt(index: position) {
             let off = l < textFrame.lines.count - 1 ? -1 : 0
             return textFrame.lines[l].range.upperBound + off

@@ -1,21 +1,21 @@
 import {
+    BeamCrypto,
   BeamDocument,
-  BeamElement,
   BeamHTMLElement,
   BeamLocation,
   BeamMessageHandler,
   BeamVisualViewport,
   BeamWindow
 } from "../BeamTypes"
-import { BeamDocumentMock, BeamLocationMock } from "./BeamMocks"
-import { PointAndShoot } from "../PointAndShoot"
-import { BeamEventTargetMock } from "./BeamEventTargetMock"
+import {BeamDocumentMock, BeamLocationMock} from "./BeamMocks"
+import {PointAndShoot} from "../PointAndShoot"
+import {BeamEventTargetMock} from "./BeamEventTargetMock"
 
 export class MessageHandlerMock implements BeamMessageHandler {
   events = []
 
-  postMessage(payload) {
-    this.events.push({ name: "postMessage", payload })
+  postMessage(payload): void {
+    this.events.push({name: "postMessage", payload})
   }
 }
 
@@ -27,6 +27,15 @@ export class BeamVisualViewportMock extends BeamEventTargetMock implements BeamV
   pageTop: number
   scale: number
   width: number
+}
+
+export class BeamCryptoMock implements BeamCrypto {
+    getRandomValues(buffer: []) {
+      // Really basic mock for getting random numbers
+      return buffer.map(item => {
+        return Math.floor(Math.random() * 9999999)
+      })
+    }
 }
 
 export class BeamWindowMock extends BeamEventTargetMock implements BeamWindow {
@@ -41,6 +50,7 @@ export class BeamWindowMock extends BeamEventTargetMock implements BeamWindow {
     this.location = location
     this.visualViewport.scale = 1
   }
+  crypto = new BeamCryptoMock()
   frameElement: any
   frames: any
 
@@ -51,8 +61,8 @@ export class BeamWindowMock extends BeamEventTargetMock implements BeamWindow {
 
   webkit = {
     messageHandlers: {
-      pointAndShoot_frameBounds: new MessageHandlerMock(),
-    },
+      pointAndShoot_frameBounds: new MessageHandlerMock()
+    }
   }
 
   getEventListeners(_win: BeamWindow) {

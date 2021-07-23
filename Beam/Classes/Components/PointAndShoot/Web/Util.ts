@@ -1,27 +1,6 @@
-import { BeamElement } from "./BeamTypes"
+import { BeamElement, BeamWindow } from "./BeamTypes"
 
 export class Util {
-  /**
-   *
-   * @param callback The function to call
-   * @param limit Time limit in ms
-   * @returns {function(): void}
-   */
-  static throttle(callback, limit) {
-    let waiting = false // Initially, we're not waiting
-    return function () {
-      // We return a throttled function
-      if (!waiting) {
-        // If we're not waiting
-        callback.apply(this, arguments) // Execute users function
-        waiting = true // Prevent future invocations
-        setTimeout(function () {
-          // After a period of time
-          waiting = false // And allow future invocations
-        }, limit)
-      }
-    }
-  }
 
   static getOffset(object, offset) {
     if (object) {
@@ -110,5 +89,12 @@ export class Util {
    */
   static mapRangeToRange(from: [number, number], to: [number, number], s: number): number {
     return to[0] + ((s - from[0]) * (to[1] - to[0])) / (from[1] - from[0])
+  }
+  /**
+   * Generates a good enough non-compliant UUID.
+   */
+  static uuid(win: BeamWindow) {
+    const buf = new Uint32Array(4)
+    return win.crypto.getRandomValues(buf).join("-")
   }
 }

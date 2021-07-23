@@ -210,7 +210,7 @@ struct DestinationNotePicker_Previews: PreviewProvider {
     static var previews: some View {
         let state = BeamState()
         let origin = BrowsingTreeOrigin.searchBar(query: "original query")
-        let tab = BrowserTab(state: state, browsingTreeOrigin: origin, note: BeamNote(title: "Query text"))
+        let tab = BrowserTab(state: state, browsingTreeOrigin: origin, originMode: .today, note: BeamNote(title: "Query text"))
         let focusedState = BeamState()
         focusedState.destinationCardIsFocused = true
         let itemHeight: CGFloat = 32.0

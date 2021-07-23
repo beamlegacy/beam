@@ -1,23 +1,11 @@
-import {PointAndShootUI} from "./PointAndShootUI"
-import {Native} from "./Native"
-import {WebEventsUI_native} from "./WebEventsUI_native"
-import {
-  BeamCollectedQuote,
-  BeamElement,
-  BeamElementMessagePayload,
-  BeamHTMLElement,
-  BeamMouseLocation,
-  BeamNodeType,
-  BeamQuoteId,
-  BeamRange,
-  BeamRect,
-  BeamSelectionMessagePayload,
-  BeamText,
-} from "./BeamTypes"
-import {Util} from "./Util"
-import {BeamElementHelper} from "./BeamElementHelper";
-import {BeamRectHelper} from "./BeamRectHelper";
-import {PointAndShootHelper} from "./PointAndShootHelper";
+import { PointAndShootUI } from "./PointAndShootUI"
+import { Native } from "./Native"
+import { WebEventsUI_native } from "./WebEventsUI_native"
+import { BeamElement, BeamNodeType, BeamRect, BeamRange, BeamRangeGroup, BeamShootGroup } from "./BeamTypes"
+import { BeamElementHelper } from "./BeamElementHelper"
+import { BeamRectHelper } from "./BeamRectHelper"
+import { PointAndShootHelper } from "./PointAndShootHelper"
+import { dequal as isDeepEqual } from "dequal"
 
 export class PointAndShootUI_native extends WebEventsUI_native implements PointAndShootUI {
   /**
@@ -25,6 +13,96 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
    */
   constructor(native: Native) {
     super(native)
+    this.datasetKey = `${this.prefix}Collect`
+  }
+  protected prefix = "__ID__"
+  datasetKey
+
+  pointPayload = {}
+  pointBounds(pointTarget?: BeamShootGroup) {
+    if (!pointTarget) {
+      return
+    }
+    const { id, element } = pointTarget
+    const rect = this.elementBounds(element)
+
+    const payload = {
+      point: { id, rect, html: element.outerHTML }
+    }
+
+    if (!isDeepEqual(this.pointPayload, payload)) {
+      this.pointPayload = payload
+      this.native.sendMessage("pointBounds", payload)
+    }
+  }
+
+  shootPayload = {}
+  shootBounds(shootTargets: BeamShootGroup[]) {
+    if (!shootTargets) {
+      return
+    }
+
+    const targets = shootTargets.map(({ id, element }) => {
+      const rect = this.elementBounds(element)
+      return { id, rect, html: element.outerHTML }
+    })
+
+    const payload = {
+      shoot: targets
+    }
+
+    // only update targets when they are different than before
+    if (!isDeepEqual(this.shootPayload, payload)) {
+      this.shootPayload = payload
+      this.native.sendMessage("shootBounds", payload)
+    }
+  }
+
+  selectPayload = {}
+  selectBounds(rangeGroups: BeamRangeGroup[]) {
+    if (!rangeGroups) {
+      return
+    }
+
+    const rects = []
+    rangeGroups.forEach((group) => {
+      const { id, range } = group
+      // Get the rectangles that make up the range
+      const rangeRects = Array.from(range.getClientRects())
+      const rectData = rangeRects.map((rangeRect, rectIndex) => {
+        // add each rect to the targets array
+        return {
+          id: `${id}-${rectIndex}`,
+          html: this.rangeToHtml(range),
+          rect: {
+            x: rangeRect.x,
+            y: rangeRect.y,
+            width: rangeRect.width,
+            height: rangeRect.height
+          }
+        }
+      })
+
+      rects.push({ id, rectData })
+    })
+
+    const payload = { select: rects }
+    if (!isDeepEqual(this.selectPayload, payload)) {
+      this.selectPayload = payload
+      this.native.sendMessage("selectBounds", payload)
+    }
+  }
+
+  hasSelection(hasSelection: boolean) {
+    this.native.sendMessage("hasSelection", { hasSelection })
+  }
+
+  private rangeToHtml(range: BeamRange) {
+    return Array.prototype.reduce.call(
+      range.cloneContents().childNodes,
+      (result, node) => result + (node.outerHTML || node.nodeValue),
+      ""
+    )
   }
 
   /**
@@ -44,8 +122,8 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
       newArea = BeamRectHelper.boundingRect(area, bounds)
     } else if (bounds) {
       // No previous area, use bounds
-      const { x, y, width, height } = bounds
-      newArea = { x, y, width, height }
+      const {x, y, width, height} = bounds
+      newArea = {x, y, width, height}
     }
 
     if (newArea && clippingArea) {
@@ -71,7 +149,7 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
    * @memberof PointAndShootUI_native
    */
   elementBounds(el: BeamElement, area?: BeamRect, clippingArea?: BeamRect): BeamRect {
-    const { win } = this.native
+    const {win} = this.native
 
     // Find svg root if any and use it for bounds calculation
     const svgRoot = BeamElementHelper.getSvgRoot(el)
@@ -101,26 +179,27 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
 
     // We have meaningful children, inspect them and compute their bounds
     if (childNodes.length > 0 && !selectWholeElement) {
-
       for (const child of childNodes) {
         switch (child.nodeType) {
-          case BeamNodeType.element:
+          case BeamNodeType.element: {
             const childElement = child as BeamElement
             if (childElement.tagName.toLowerCase() === "svg") {
-              let childBounds = childElement.getBoundingClientRect()
+              const childBounds = childElement.getBoundingClientRect()
               area = this.setArea(area, childBounds, clippingArea)
             } else {
               const bounds = this.elementBounds(childElement, area, clippingArea)
               area = this.setArea(area, bounds, clippingArea)
             }
+          }
             break
-          case BeamNodeType.text:
+          case BeamNodeType.text: {
             const nodeRange = win.document.createRange()
             nodeRange.selectNode(child)
-            let rangeBounds = nodeRange.getBoundingClientRect()
+            const rangeBounds = nodeRange.getBoundingClientRect()
             if (rangeBounds.width > 0 && rangeBounds.height > 0) {
               area = this.setArea(area, rangeBounds, clippingArea)
             }
+          }
             break
         }
       }
@@ -135,288 +214,5 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
     }
 
     return area
-  }
-
-  /**
-   * Checks if element and mouse coordinates overlap
-   *
-   * @private
-   * @param {*} area
-   * @param mouseLocation
-   * @return {*}
-   * @memberof PointAndShootUI_native
-   */
-  private hasRectAndMouseOverlap(area, mouseLocation) {
-    // TODO: be way smarter about this logic
-    // const xPercent = (100 / this.native.win.innerWidth) * area.width
-    // const xIsLarge = xPercent > 80
-    const yPercent = (100 / this.native.win.innerHeight) * area.height
-    const yIsLarge = yPercent > 150
-    if (yIsLarge) {
-      return false
-    }
-
-    const graceDistance = 40
-
-    const xMin = area.x - graceDistance
-    const yMin = area.y - graceDistance
-    const xMax = area.x + area.width + graceDistance
-    const yMax = area.y + area.height + graceDistance
-
-    const xIsInRange = Util.isNumberInRange(mouseLocation.x, xMin, xMax)
-    const yIsInRange = Util.isNumberInRange(mouseLocation.y, yMin, yMax)
-    return xIsInRange && yIsInRange
-  }
-
-  /**
-   * Based on: https://css-tricks.com/snippets/jquery/calculate-distance-between-mouse-and-element/
-   */
-  calculateDistance(coordinate: number, areaCoord: number, areaSize: number) {
-    const distance = coordinate - (areaCoord + areaSize / 2)
-    // we want parallax to start when it snaps on the graceDistance
-    const edge = areaSize / 2 + 40
-    const distanceClamp = Util.clamp(distance, -edge, edge)
-    const displacement = 10
-    const mapped = Util.mapRangeToRange([-edge, edge], [-displacement, displacement], distanceClamp)
-    return mapped
-  }
-
-  /**
-   * Formats the message to be send to the UI based on element and mouse location
-   *
-   * @private
-   * @param {BeamQuoteId} quoteId
-   * @param {BeamElement} el
-   * @param {number} x page x value of mouse location
-   * @param {number} y page y value of mouse location
-   * @return {*}  {BeamElementMessagePayload}
-   * @memberof PointAndShootUI_native
-   */
-  private elementAreaMessage(quoteId: BeamQuoteId, el: BeamElement, x: number, y: number): BeamElementMessagePayload {
-    const area = this.elementBounds(el)
-    const location = this.getMouseLocation(el, x, y)
-    const xOffset = this.calculateDistance(x, area.x, area.width)
-    const yOffset = this.calculateDistance(y, area.y, area.height)
-    return {
-      areas: [area],
-      html: el.outerHTML,
-      quoteId,
-      location: {
-        x: location.x,
-        y: location.y,
-      },
-      offset: { x: xOffset, y: yOffset }
-    }
-  }
-
-  /**
-   * Computes element bounds of a given selection range. Returns an array of rectangles which are computed to a polygon in the UI.
-   *
-   * @private
-   * @param {BeamRange} range
-   * @return {*}  {BeamRect[]}
-   * @memberof PointAndShootUI_native
-   */
-  private selectionBounds(range: BeamRange): BeamRect[] {
-    const rangeRects = Array.from(range.getClientRects())
-    return rangeRects.map((rangeRect) => {
-      return {
-        x: rangeRect.x,
-        y: rangeRect.y,
-        width: rangeRect.width,
-        height: rangeRect.height,
-      }
-    })
-  }
-
-  /**
-   * Formats the message to be send to the UI based on selection range.
-   * Mouse location is included in the return but defaulted to `{x: -1, y: -1}`
-   *
-   * @private
-   * @param {*} quoteId
-   * @param {BeamRange} range
-   * @return {*}  {BeamSelectionMessagePayload}
-   * @memberof PointAndShootUI_native
-   */
-  private selectionAreaMessage(quoteId, range: BeamRange): BeamSelectionMessagePayload {
-    const text = range.toString()
-    const html = Array.prototype.reduce.call(
-      range.cloneContents().childNodes,
-      (result, node) => result + (node.outerHTML || node.nodeValue),
-      ""
-    )
-    const areas = this.selectionBounds(range)
-    return {
-      areas,
-      text,
-      html,
-      quoteId,
-      location: { x: -1, y: -1 },
-    }
-  }
-
-  /**
-   * Formats the message to be send to the UI based on selection range.
-   *
-   * @param {BeamCollectedQuote[]} ranges
-   * @memberof PointAndShootUI_native
-   */
-  selectMessage(ranges: BeamCollectedQuote[]) {
-    // TODO: Throttle
-    const selectPayloads = ranges.map(({ quoteId, el }) => {
-      return this.selectionAreaMessage(quoteId, el as BeamRange)
-    })
-
-    selectPayloads.forEach((selectPayload) => {
-      this.native.sendMessage("select", selectPayload)
-    })
-  }
-
-  /**
-   * Formats the message to be send to the UI based on element and mouse location.
-   *
-   * @param quoteId
-   * @param el {BeamHTMLElement}
-   * @param {number} x page x value of mouse location
-   * @param {number} y page y value of mouse location
-   */
-  shootMessage(quoteId: string, el: BeamHTMLElement, x: number, y: number) {
-    const shootPayload = this.elementAreaMessage(quoteId, el, x, y)
-    this.native.sendMessage("shoot", shootPayload)
-  }
-
-  cursorMessage(x: any, y: any) {
-    const cursorPayload = { x, y }
-    this.native.sendMessage("cursor", cursorPayload)
-  }
-
-  /**
-   * Formats the message to be send to the UI based on element and mouse location.
-   * Message is only send when mouse location and (child) element location overlap.
-   *
-   * @param {*} quoteId
-   * @param {BeamElement} el
-   * @param {number} x page x value of mouse location
-   * @param {number} y page y value of mouse location
-   * @param callback
-   * @memberof PointAndShootUI_native
-   */
-  pointMessage(quoteId, el: BeamElement, x: number, y: number, callback) {
-    const area = this.elementBounds(el)
-    if (!area) {
-      return
-    }
-
-    if (this.hasRectAndMouseOverlap(area, { x, y })) {
-      const pointPayload = this.elementAreaMessage(quoteId, el, x, y)
-      this.native.sendMessage("point", pointPayload)
-      return
-    } else {
-      this.native.sendMessage("cursor", { x, y })
-    }
-  }
-
-  cursor(x, y) {
-    this.cursorMessage(x, y)
-  }
-
-  /**
-   * Handles point event
-   *
-   * @param {string} quoteId
-   * @param {BeamHTMLElement} el
-   * @param {number} x page x value of mouse location
-   * @param {number} y page y value of mouse location
-   * @param callback
-   * @memberof PointAndShootUI_native
-   */
-  point(quoteId: string, el: BeamHTMLElement, x: number, y: number, callback) {
-    this.pointMessage(quoteId, el, x, y, callback)
-  }
-
-  unpoint(el) {}
-
-  /**
-   * Handles select event
-   *
-   * @param {BeamCollectedQuote[]} ranges
-   * @memberof PointAndShootUI_native
-   */
-  select(ranges: BeamCollectedQuote[]) {
-    this.selectMessage(ranges)
-  }
-
-  unselect(selection) {}
-
-  /**
-   * Handles shoot event
-   *
-   * @param {string} quoteId
-   * @param {BeamHTMLElement} el
-   * @param {number} x page x value of mouse location
-   * @param {number} y page y value of mouse location
-   * @param {*} selectedEls
-   * @memberof PointAndShootUI_native
-   */
-  shoot(quoteId: string, el: BeamHTMLElement, x: number, y: number, selectedEls) {
-    /*
-     * - Hide previous native popup if any
-     * - Show native popup
-     */
-    this.shootMessage(quoteId, el, x, y)
-  }
-
-  unshoot(el: BeamHTMLElement) {}
-
-  hidePopup() {}
-
-  /**
-   * Show the if a given was added to a card.
-   */
-  showStatus(el: BeamHTMLElement, collected) {
-    // TODO: Send message to display native status as "collected" data
-  }
-
-  hideStatus() {
-    // TODO: Send message to hide native status display
-  }
-
-  /**
-   * Returns a relative computed mouse location for a given element
-   *
-   * @param {BeamElement} el HTML element
-   * @param {number} x page x value of mouse location
-   * @param {number} y page y value of mouse location
-   * @return {*}
-   * @memberof PointAndShootUI_native
-   */
-  getMouseLocation(el: BeamElement, x: number, y: number): BeamMouseLocation {
-    const area = this.elementBounds(el)
-    // limit min / max of mouse location to area bounds
-    let clampedX = Util.clamp(x, area.x, area.x + area.width)
-    let clampedY = Util.clamp(y, area.y, area.y + area.height)
-
-    // return x / y position relative to element area
-    return {
-      x: clampedX - area.x,
-      y: clampedY - area.y,
-    }
-  }
-
-  setStatus(status) {
-    this.native.sendMessage("setStatus", { status })
-  }
-
-  setResizeInfo(setResizeInfo) {
-    setResizeInfo.selected = setResizeInfo.selected.map((item) => {
-      const element = item.el
-      const quoteId = item.quoteId
-      if (element instanceof Range) {
-        return this.selectionAreaMessage(quoteId, element as unknown as BeamRange)
-      }
-      return this.elementAreaMessage(quoteId, element, setResizeInfo.coordinates.x, setResizeInfo.coordinates.y)
-    })
-    super.setResizeInfo(setResizeInfo)
   }
 }

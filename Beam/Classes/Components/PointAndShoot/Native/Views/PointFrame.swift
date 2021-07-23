@@ -2,33 +2,27 @@ import Foundation
 import SwiftUI
 
 struct PointFrame: View {
-
-    @ObservedObject var pointAndShootUI: PointAndShootUI
-    let customTiming = Animation.timingCurve(0.165, 0.84, 0.44, 1, duration: 0.5)
+    @ObservedObject var pns: PointAndShoot
+    @ObservedObject var webPositions: WebPositions
+    let customTiming = Animation.timingCurve(0.165, 0.84, 0.44, 1, duration: 0.4)
     let padding: CGFloat = 4
 
     var body: some View {
-        if let selectionUI = pointAndShootUI.pointSelection {
-            let offset = selectionUI.target.offset
-            let offsetX = offset?.x ?? 1
-            let offsetY = offset?.y ?? 1
-            let animated = selectionUI.animated
-            let round = selectionUI.round
-            let bgColor = selectionUI.bgColor
-
-            let rect = selectionUI.rect.insetBy(dx: -padding, dy: -padding)
-
-            let cornerRadius: CGFloat = round ? selectionUI.rect.width : 4
-            let shouldAnimateOpacity = animated && round
+        if let group = pns.activePointGroup,
+           let target = group.targets.first {
+            let pointTarget = pns.translateAndScaleTarget(target, group.href)
+            let showPoint = pns.hasGraceRectAndMouseOverlap(target, group.href, pns.mouseLocation) && pns.isAltKeyDown && !pns.isLargeTargetArea(pointTarget)
+            let size: CGFloat = 20
+            let circleRect = NSRect(x: pns.mouseLocation.x - (size / 2), y: pns.mouseLocation.y - (size / 2), width: size, height: size)
+            let rect = showPoint ? pointTarget.rect.insetBy(dx: -padding, dy: -padding) : circleRect
+            let cornerRadius: CGFloat = showPoint ? 4 : size / 2
             ZStack(alignment: .center) {
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .fill(bgColor)
+                    .fill(BeamColor.PointShoot.pointBackground.swiftUI)
                     .frame(width: rect.width, height: rect.height)
-                    .offset(x: offsetX, y: offsetY)
                     .position(x: rect.minX + rect.width / 2, y: rect.minY + rect.height / 2)
-                    .animation(animated ? customTiming : nil)
-                    .opacity(round ? 0 : 1)
-                    .animation(shouldAnimateOpacity ? customTiming : nil)
+                    .opacity(showPoint ? 1 : 0)
+                    .animation(customTiming)
                     .allowsHitTesting(false)
                     .accessibility(identifier: "PointFrame")
             }

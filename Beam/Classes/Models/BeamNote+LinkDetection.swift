@@ -47,7 +47,7 @@ public extension BeamElement {
 }
 
 public extension BeamElement {
-    // Returns true is something was actually updated
+    /// - Returns: true is something was actually updated
     @discardableResult
     func updateNoteNamesInInternalLinks(recursive: Bool = false) -> Bool {
         var res = text.resolveNotesNames()

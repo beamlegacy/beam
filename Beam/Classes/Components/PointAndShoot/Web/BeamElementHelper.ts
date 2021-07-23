@@ -4,8 +4,8 @@ import {
   BeamHTMLInputElement, BeamHTMLTextAreaElement,
   BeamRect,
   BeamWindow
-} from "./BeamTypes";
-import {BeamRectHelper} from "./BeamRectHelper";
+} from "./BeamTypes"
+import {BeamRectHelper} from "./BeamRectHelper"
 
 /**
  * Useful methods for HTML Elements
@@ -33,10 +33,10 @@ export class BeamElementHelper {
    */
 
   static isTextualInputType(element: BeamElement): boolean {
-    const tag = element.tagName.toLowerCase();
-    if (tag === 'textarea') {
+    const tag = element.tagName.toLowerCase()
+    if (tag === "textarea") {
       return true
-    } else if (tag === 'input') {
+    } else if (tag === "input") {
       const types = [
         "text", "email", "password",
         "date", "datetime-local", "month",
@@ -60,11 +60,12 @@ export class BeamElementHelper {
     let textValue
     const tagName = el.tagName.toLowerCase()
     switch (tagName) {
-      case "input":
+      case "input": {
         const inputEl = el as BeamHTMLInputElement
         if (BeamElementHelper.isTextualInputType(inputEl)) {
           textValue = inputEl.value
         }
+      }
         break
       case "textarea":
         textValue = (el as BeamHTMLTextAreaElement).value
@@ -92,28 +93,28 @@ export class BeamElementHelper {
       const style = win.getComputedStyle?.(element)
       if (style) {
         visible = !(
-          style.getPropertyValue("display") === "none"
-          // Maybe hidden shouldn't be filtered out see the opacity comment
-          || ["hidden", "collapse"].includes(style.getPropertyValue("visibility"))
-          // The following heuristic isn't enough: twitter uses transparent inputs on top of their custom UI
-          // (see theme selector in display settings for an example)
-          // || style.opacity === '0'
-          || (style.getPropertyValue("width") === "1px" && style.getPropertyValue("height") === "1px")
-          || ["0px", "0"].includes(style.getPropertyValue("width"))
-          || ["0px", "0"].includes(style.getPropertyValue("height"))
-          // many clipPath values could cause the element to not be visible, but for now we only deal with single % values
-          || (
-            style.getPropertyValue("position") === "absolute"
-            && style.getPropertyValue("clip").match(/rect\((0(px)?[, ]+){3}0px\)/)
-          )
-          || style.getPropertyValue("clip-path").match(/inset\(([5-9]\d|100)%\)/)
+            style.getPropertyValue("display") === "none"
+            // Maybe hidden shouldn't be filtered out see the opacity comment
+            || ["hidden", "collapse"].includes(style.getPropertyValue("visibility"))
+            // The following heuristic isn't enough: twitter uses transparent inputs on top of their custom UI
+            // (see theme selector in display settings for an example)
+            // || style.opacity === '0'
+            || (style.getPropertyValue("width") === "1px" && style.getPropertyValue("height") === "1px")
+            || ["0px", "0"].includes(style.getPropertyValue("width"))
+            || ["0px", "0"].includes(style.getPropertyValue("height"))
+            // many clipPath values could cause the element to not be visible, but for now we only deal with single % values
+            || (
+                style.getPropertyValue("position") === "absolute"
+                && style.getPropertyValue("clip").match(/rect\((0(px)?[, ]+){3}0px\)/)
+            )
+            || style.getPropertyValue("clip-path").match(/inset\(([5-9]\d|100)%\)/)
         )
       }
 
       // Still visible? Use boundingClientRect as a final check, it's expensive
       // so we should strive no to call it if it's unnecessary
       if (visible) {
-        const rect: BeamRect = element.getBoundingClientRect();
+        const rect: BeamRect = element.getBoundingClientRect()
         visible = (rect.width > 0 && rect.height > 0)
       }
     }
@@ -140,8 +141,8 @@ export class BeamElementHelper {
   static isImage(element: BeamElement, win: BeamWindow): boolean {
     // currentSrc vs src
     if (
-      element.tagName.toLowerCase() === "img"
-      || element.tagName.toLowerCase() === "svg"
+        element.tagName.toLowerCase() === "img"
+        || element.tagName.toLowerCase() === "svg"
     ) {
       return true
     }
@@ -163,7 +164,7 @@ export class BeamElementHelper {
     }
     if (element.children.length > 0) {
       return [...element.children].every(
-        child => BeamElementHelper.isImageContainer(child, win)
+          child => BeamElementHelper.isImageContainer(child, win)
       )
     }
     return false
@@ -223,19 +224,20 @@ export class BeamElementHelper {
     const style = win.getComputedStyle?.(element)
     if (style) {
       switch (style.position) {
-        case "absolute":
+        case "absolute": {
           // If absolute, we need to make sure it's not within a positioned element already
           const positionedAncestor = BeamElementHelper.getPositionedElement(element.parentElement, win)
           if (positionedAncestor && positionedAncestor.contains(clippingContainer)) {
             return element
           }
           return element
+        }
         case "fixed":
           // Fixed elements always escape overflow clipping
           return element
         default:
           return BeamElementHelper.getOverflowEscapingElement(
-            element.parentElement, clippingContainer, win
+              element.parentElement, clippingContainer, win
           )
       }
     }
@@ -256,11 +258,11 @@ export class BeamElementHelper {
     const style = win.getComputedStyle?.(element)
     if (style) {
       if (
-        style.getPropertyValue("overflow") === "visible"
-        && style.getPropertyValue("overflow-x") === "visible"
-        && style.getPropertyValue("overflow-y") === "visible"
-        && style.getPropertyValue("clip") === "auto"
-        && style.getPropertyValue("clip-path") === "none"
+          style.getPropertyValue("overflow") === "visible"
+          && style.getPropertyValue("overflow-x") === "visible"
+          && style.getPropertyValue("overflow-y") === "visible"
+          && style.getPropertyValue("clip") === "auto"
+          && style.getPropertyValue("clip-path") === "none"
       ) {
         if (element.parentElement) {
           return BeamElementHelper.getClippingElement(element.parentElement, win)
@@ -308,8 +310,8 @@ export class BeamElementHelper {
     const areas: BeamRect[] = elements.map(el => {
       const style = win.getComputedStyle?.(el)
       if (style) {
-        const overflowX = style.getPropertyValue('overflow-x') !== "visible"
-        const overflowY = style.getPropertyValue('overflow-y') !== "visible"
+        const overflowX = style.getPropertyValue("overflow-x") !== "visible"
+        const overflowY = style.getPropertyValue("overflow-y") !== "visible"
         const bounds = el.getBoundingClientRect()
         if (overflowX && !overflowY) {
           return {x: bounds.x, width: bounds.width, y: -Infinity, height: Infinity}
@@ -322,11 +324,11 @@ export class BeamElementHelper {
     })
 
     return areas.reduce(
-      (clippingArea, area) => (
-        clippingArea
-          ? BeamRectHelper.intersection(clippingArea, area)
-          : area
-      ), null
+        (clippingArea, area) => (
+            clippingArea
+                ? BeamRectHelper.intersection(clippingArea, area)
+                : area
+        ), null
     )
   }
 
@@ -337,10 +339,10 @@ export class BeamElementHelper {
    */
   static getClippingContainers(element: BeamElement, win: BeamWindow): BeamElement[] {
     return BeamElementHelper
-      .getClippingElements(element, win)
-      .filter(container => {
-        const escapingElement = BeamElementHelper.getOverflowEscapingElement(element, container, win)
-        return !escapingElement || escapingElement.contains(container)
-      })
+        .getClippingElements(element, win)
+        .filter(container => {
+          const escapingElement = BeamElementHelper.getOverflowEscapingElement(element, container, win)
+          return !escapingElement || escapingElement.contains(container)
+        })
   }
 }

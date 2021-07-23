@@ -1,5 +1,6 @@
 import Foundation
 import WebKit
+import BeamCore
 
 @objc
 private class BeamWebViewAutoClose: NSObject, WKUIDelegate {
@@ -40,11 +41,23 @@ class BeamWebView: WKWebView {
     weak var page: WebPage?
     private let automaticallyResignResponder = true
 
+    var monitor: Any?
+
     override init(frame: CGRect, configuration: WKWebViewConfiguration) {
         super.init(frame: frame, configuration: configuration)
         allowsBackForwardNavigationGestures = true
         allowsLinkPreview = true
         allowsMagnification = true
+
+        monitor = NSEvent.addLocalMonitorForEvents(matching: .flagsChanged) { [unowned self] event in
+            optionKeyToggle(event.modifierFlags)
+            return event
+        }
+    }
+
+    deinit {
+        guard let monitor = monitor else { return }
+        NSEvent.removeMonitor(monitor)
     }
 
     required init?(coder: NSCoder) {
@@ -72,6 +85,11 @@ class BeamWebView: WKWebView {
         super.keyDown(with: event)
     }
 
+    public override func flagsChanged(with event: NSEvent) {
+        super.keyUp(with: event)
+        optionKeyToggle(event.modifierFlags)
+    }
+
     //swiftlint:disable:next weak_delegate
     private var autoCloseDelegate: BeamWebViewAutoClose?
     var enableAutoCloseWindow: Bool {
@@ -96,12 +114,41 @@ class BeamWebView: WKWebView {
         preventScrolling = true
     }
 
+    var optionKeyToggle: (NSEvent.ModifierFlags) -> Void = { _ in
+        // update the positions of the point and shoot elements
+    }
+
+    var mouseClickChange: (NSPoint) -> Void = { _ in
+        // clickc event
+    }
+
+    var mouseMoveTriggeredChange: (NSPoint, NSEvent.ModifierFlags) -> Void = { (_, _) in
+        // update the positions of the point and shoot elements
+    }
     var preventScrolling: Bool = false
+
+    public override func mouseDown(with theEvent: NSEvent) {
+        super.mouseDown(with: theEvent)
+        mouseClickChange(convert(theEvent.locationInWindow, from: nil))
+    }
+
     public override func scrollWheel(with theEvent: NSEvent) {
         guard preventScrolling else {
             super.scrollWheel(with: theEvent)
+            mouseMoveTriggeredChange(convert(theEvent.locationInWindow, from: nil), theEvent.modifierFlags)
             return
         }
         nextResponder?.scrollWheel(with: theEvent)
+        mouseMoveTriggeredChange(convert(theEvent.locationInWindow, from: nil), theEvent.modifierFlags)
+    }
+
+    public override func mouseMoved(with theEvent: NSEvent) {
+        super.mouseMoved(with: theEvent)
+        mouseMoveTriggeredChange(convert(theEvent.locationInWindow, from: nil), theEvent.modifierFlags)
+    }
+
+    public override func mouseDragged(with theEvent: NSEvent) {
+        super.mouseDragged(with: theEvent)
+        mouseMoveTriggeredChange(convert(theEvent.locationInWindow, from: nil), theEvent.modifierFlags)
     }
 }
