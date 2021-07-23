@@ -1,6 +1,9 @@
 default:
   before_script:
     - date
+    - echo "${CI_JOB_ID}"
+    - echo "Application logs will be at ${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Logs/Beam/*.log"
+    - echo "${PATH}"
     - pwd
     - unset cd
     - direnv allow
