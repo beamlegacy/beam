@@ -70,4 +70,18 @@ class BeamObjectTestsHelper {
 
         return returnedBeamObject
     }
+
+    func delete(_ uuid: UUID) {
+        let semaphore = DispatchSemaphore(value: 0)
+
+        let request = BeamObjectRequest()
+        _ = try? request.delete(uuid) { _ in
+            semaphore.signal()
+        }
+
+        let semaResult = semaphore.wait(timeout: DispatchTime.now() + .seconds(5))
+        if case .timedOut = semaResult {
+            fail("Timedout")
+        }
+    }
 }

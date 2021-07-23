@@ -999,6 +999,7 @@ extension DocumentManager {
                         completion?(.success(false))
                         return
                     }
+
                     self.fetchDocumentFromAPI(documentStruct.id, completion)
                 }
             }
@@ -1057,7 +1058,7 @@ extension DocumentManager {
     // MARK: -
     // MARK: Save
 
-    private func cancelAllPreviousThrottledAPICall() {
+    static func cancelAllPreviousThrottledAPICall() {
         Self.networkTasksSemaphore.wait()
         defer { Self.networkTasksSemaphore.signal() }
 
@@ -1070,7 +1071,7 @@ extension DocumentManager {
         }
     }
 
-    private func cancelPreviousThrottledAPICall(_ documentStructId: UUID) {
+    static func cancelPreviousThrottledAPICall(_ documentStructId: UUID) {
         Self.networkTasksSemaphore.wait()
         defer { Self.networkTasksSemaphore.signal() }
 
@@ -1093,7 +1094,7 @@ extension DocumentManager {
     /// `save()` throttles network calls, this is calling API immediately.
     func saveThenSaveOnAPI(_ documentStruct: DocumentStruct,
                            completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
-        cancelPreviousThrottledAPICall(documentStruct.id)
+        Self.cancelPreviousThrottledAPICall(documentStruct.id)
 
         self.save(documentStruct, false, completion: { result in
             switch result {
@@ -1430,7 +1431,7 @@ extension DocumentManager {
     // MARK: -
     // MARK: Delete
     func delete(id: UUID, completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
-        cancelPreviousThrottledAPICall(id)
+        Self.cancelPreviousThrottledAPICall(id)
 
         coreDataManager.persistentContainer.performBackgroundTask { context in
 
@@ -1502,7 +1503,7 @@ extension DocumentManager {
             return
         }
 
-        cancelAllPreviousThrottledAPICall()
+        Self.cancelAllPreviousThrottledAPICall()
 
         let documentRequest = DocumentRequest()
 
@@ -1939,7 +1940,7 @@ extension DocumentManager {
             return Promise(true)
         }
 
-        cancelAllPreviousThrottledAPICall()
+        Self.cancelAllPreviousThrottledAPICall()
         let documentRequest = DocumentRequest()
 
         return documentRequest.deleteAll()
@@ -2282,7 +2283,7 @@ extension DocumentManager {
             return .value(true)
         }
 
-        cancelAllPreviousThrottledAPICall()
+        Self.cancelAllPreviousThrottledAPICall()
 
         let documentRequest = DocumentRequest()
         let promise: PromiseKit.Promise<Bool> = documentRequest.deleteAll()
@@ -2440,7 +2441,7 @@ extension DocumentManager: BeamObjectManagerDelegate {
                                               _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
         // This case happens when we use the network call to send multiple documents,
         // but only send 1 and have an invalid checksum
-        if case BeamObjectManagerError.beamObjectInvalidChecksum = error,
+        if case BeamObjectManagerError.invalidChecksum = error,
            let documentStruct = documentStructs.first {
             saveOnBeamObjectAPIFailure(documentStruct, error, completion)
             return
@@ -2458,7 +2459,7 @@ extension DocumentManager: BeamObjectManagerDelegate {
              We have multiple errors. If all errors are about invalid checksums, we can fix and retry. Else we'll just
              stop and call the completion handler with the original error
              */
-            guard case BeamObjectManagerError.beamObjectInvalidChecksum(let remoteBeamObject) = insideError else {
+            guard case BeamObjectManagerError.invalidChecksum(let remoteBeamObject) = insideError else {
                 completion(.failure(error))
                 return
             }
@@ -2488,31 +2489,45 @@ extension DocumentManager: BeamObjectManagerDelegate {
         }
     }
 
+    private func saveDatabaseAndDocumentOnBeamObjectAPI(_ documentStruct: DocumentStruct,
+                                                        _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws {
+
+        let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
+        var dbStruct: DatabaseStruct?
+        try context.performAndWait {
+            guard let dbDatabase = try Database.rawFetchWithId(context, documentStruct.databaseId) else { return }
+            dbStruct = DatabaseStruct(database: dbDatabase)
+        }
+
+        guard let databaseStruct = dbStruct else {
+            throw DatabaseManagerError.localDatabaseNotFound
+        }
+
+        let databaseManager = DatabaseManager()
+        let objectManager = BeamObjectManager()
+        objectManager.conflictPolicyForSave = .fetchRemoteAndError
+
+        // TODO: add a way to cancel the database API calls
+        _ = try databaseManager.saveOnBeamObjectAPI(databaseStruct) { result in
+            switch result {
+            case .failure(let error):
+                completion(.failure(error))
+            case .success:
+                do {
+                    try self.saveOnBeamObjectAPI(documentStruct, completion)
+                } catch {
+                    completion(.failure(error))
+                }
+            }
+        }
+    }
+
     @discardableResult
     func saveOnBeamObjectAPI(_ documentStruct: DocumentStruct,
                              _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw BeamObjectManagerError.notAuthenticated
         }
-
-        /*
-         Saving documentStruct and database in one call as Document has a dependency on Database
-         */
-        // TODO: use DispatchGroup or 1 API call for database+documentstruct
-        let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
-        var dbStruct: DatabaseStruct?
-        context.performAndWait {
-            guard let dbDatabase = try? Database.rawFetchWithId(context, documentStruct.databaseId) else { return }
-            dbStruct = DatabaseStruct(database: dbDatabase)
-        }
-
-        if let databaseStruct = dbStruct {
-            let databaseManager = DatabaseManager()
-            _ = try? databaseManager.saveOnBeamObjectAPI(databaseStruct) { _ in }
-        }
-        /*
-         *
-         */
 
         let objectManager = BeamObjectManager()
         objectManager.conflictPolicyForSave = .fetchRemoteAndError
@@ -2531,7 +2546,7 @@ extension DocumentManager: BeamObjectManagerDelegate {
                                              _ error: Error,
                                              _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
         // Early return except for checksum issues.
-        guard case BeamObjectManagerError.beamObjectInvalidChecksum(let remoteBeamObject) = error else {
+        guard case BeamObjectManagerError.invalidChecksum(let remoteBeamObject) = error else {
             completion(.failure(error))
             return
         }

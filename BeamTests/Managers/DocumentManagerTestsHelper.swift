@@ -155,15 +155,6 @@ class DocumentManagerTestsHelper {
     func deleteDocumentStruct(_ docStruct: DocumentStruct) {
         waitUntil(timeout: .seconds(10)) { done in
             self.documentManager.delete(id: docStruct.id) { result in
-                // we might get 404 from server API, but we want to make sure we deleted data
-//                expect { try result.get() }.toNot(throwError())
-//                expect { try result.get() }.to(beTrue())
-//                if case .failure(let error) = result {
-//                    fail(error.localizedDescription)
-//                }
-//                if case .success(let success) = result, success == false {
-//                    fail("Should not happen")
-//                }
                 done()
             }
         }
@@ -172,37 +163,25 @@ class DocumentManagerTestsHelper {
     func deleteDatabaseStruct(_ dbStruct: DatabaseStruct, includedRemote: Bool = true) {
         waitUntil(timeout: .seconds(10)) { done in
             self.databaseManager.delete(dbStruct, includedRemote: includedRemote) { result in
-                expect { try result.get() }.toNot(throwError())
-                expect { try result.get() }.to(beTrue())
-                if case .failure(let error) = result {
-                    fail(error.localizedDescription)
-                }
-                if case .success(let success) = result, success == false {
-                    fail("Should not happen")
-                }
                 done()
             }
         }
     }
 
     private let faker = Faker(locale: "en-US")
-    func createDocumentStruct(_ dataString: String? = nil, title titleParam: String? = nil, id: String? = nil) -> DocumentStruct {
-        let dataString = dataString ?? "whatever binary data"
-
-        var docStruct = DocumentStruct(id: UUID(),
-                                       databaseId: DatabaseManager.defaultDatabase.id,
-                                       title: titleParam ?? String.randomTitle(),
-                                       createdAt: BeamDate.now,
-                                       updatedAt: BeamDate.now,
-                                       data: dataString.asData,
-                                       documentType: .note,
-                                       version: 0)
-
-        if let id = id {
-            docStruct.id = UUID(uuidString: id) ?? docStruct.id
-        }
-
-        return docStruct
+    func createDocumentStruct(_ dataString: String? = nil,
+                              title titleParam: String? = nil,
+                              id: String? = nil) -> DocumentStruct {
+        var uuid = UUID()
+        if let id = id, let newuuid = UUID(uuidString: id) { uuid = newuuid }
+        return DocumentStruct(id: uuid,
+                              databaseId: DatabaseManager.defaultDatabase.id,
+                              title: titleParam ?? String.randomTitle(),
+                              createdAt: BeamDate.now,
+                              updatedAt: BeamDate.now,
+                              data: (dataString ?? "whatever binary data").asData,
+                              documentType: .note,
+                              version: 0)
     }
 
     func createDefaultDatabase(_ id: String? = nil) {

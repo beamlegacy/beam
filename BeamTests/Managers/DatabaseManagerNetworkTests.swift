@@ -52,6 +52,10 @@ class DatabaseManagerNetworkTests: QuickSpec {
                     helper.saveDatabaseLocally(dbStruct)
                 }
 
+                afterEach {
+                    helper.deleteDatabaseStruct(dbStruct)
+                }
+
                 context("with Foundation") {
                     it("creates remote database") {
                         let networkCalls = APIRequest.callsCount
@@ -183,6 +187,10 @@ class DatabaseManagerNetworkTests: QuickSpec {
                 dbStruct = helper.createDatabaseStruct("995d94e1-e0df-4eca-93e6-8778984bcd29")
             }
 
+            afterEach {
+                helper.deleteDatabaseStruct(dbStruct)
+            }
+
             context("with Foundation") {
                 it("saves database") {
                     let networkCalls = APIRequest.callsCount
@@ -260,6 +268,10 @@ class DatabaseManagerNetworkTests: QuickSpec {
                 helper.saveDatabaseRemotely(dbStruct)
             }
 
+            afterEach {
+                helper.deleteDatabaseStruct(dbStruct)
+            }
+
             context("with Foundation") {
                 it("deletes database") {
                     let networkCalls = APIRequest.callsCount
@@ -323,6 +335,10 @@ class DatabaseManagerNetworkTests: QuickSpec {
                 dbStruct = helper.createDatabaseStruct("995d94e1-e0df-4eca-93e6-8778984bcd29")
                 helper.saveDatabaseLocally(dbStruct)
                 helper.saveDatabaseRemotely(dbStruct)
+            }
+
+            afterEach {
+                helper.deleteDatabaseStruct(dbStruct)
             }
 
             context("with Foundation") {
@@ -528,8 +544,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
             }
 
             afterEach {
-                // Used when I need to debug network calls order
-                print("\n🦞 network calls: \(APIRequest.networkCallFiles)\n")
+                BeamDate.reset()
             }
 
             describe("saveOnBeamObjectAPI()") {
@@ -537,6 +552,11 @@ class DatabaseManagerNetworkTests: QuickSpec {
                 beforeEach {
                     dbStruct = helper.createDatabaseStruct("995d94e1-e0df-4eca-93e6-8778984bcd29")
                     helper.saveDatabaseLocally(dbStruct)
+                }
+
+                afterEach {
+                    helper.deleteDatabaseStruct(dbStruct)
+                    beamObjectHelper.delete(dbStruct.id)
                 }
 
                 it("saves as beamObject") {
@@ -566,6 +586,11 @@ class DatabaseManagerNetworkTests: QuickSpec {
 
                     dbStruct2 = helper.createDatabaseStruct("995d94e1-e0df-4eca-93e6-8778984bcd39", "Database 2")
                     helper.saveDatabaseLocally(dbStruct2)
+                }
+
+                afterEach {
+                    beamObjectHelper.delete(dbStruct.id)
+                    beamObjectHelper.delete(dbStruct2.id)
                 }
 
                 it("saves as beamObjects") {
@@ -598,6 +623,11 @@ class DatabaseManagerNetworkTests: QuickSpec {
 
                     dbStruct2 = helper.createDatabaseStruct("995d94e1-e0df-4eca-93e6-8778984bcd39", "Database 2")
                     helper.saveDatabaseLocally(dbStruct2)
+                }
+
+                afterEach {
+                    beamObjectHelper.delete(dbStruct.id)
+                    beamObjectHelper.delete(dbStruct2.id)
                 }
 
                 it("saves as beamObjects") {

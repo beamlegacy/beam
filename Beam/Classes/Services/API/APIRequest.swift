@@ -70,7 +70,7 @@ class APIRequest {
 //                    Logger.shared.logDebug("-> HTTP Request:\n\(jsonResult.description)", category: .network)
 //                }
 //                #if DEBUG_API_2
-                Logger.shared.logDebug("-> HTTP Request:\n\(queryDataString.replacingOccurrences(of: "\\n", with: "\n"))",
+                Logger.shared.logDebug("-> HTTP Request: \(route)\n\(queryDataString.replacingOccurrences(of: "\\n", with: "\n"))",
                                        category: .network)
 //                #endif
             } else {
@@ -263,6 +263,7 @@ class APIRequest {
 
 // MARK: Foundation
 extension APIRequest {
+    //swiftlint:disable:next function_body_length
     @discardableResult
     func performRequest<T: Decodable & Errorable, E: GraphqlParametersProtocol>(bodyParamsRequest: E,
                                                                                 authenticatedCall: Bool? = nil,
@@ -272,6 +273,18 @@ extension APIRequest {
         let filename = bodyParamsRequest.fileName ?? "no filename"
         let localTimer = Date()
         let callsCount = Self.callsCount
+
+        #if DEBUG
+        Self.networkCallFilesSemaphore.wait()
+        Self.networkCallFiles.append(filename)
+        Self.networkCallFilesSemaphore.signal()
+
+        if !Self.expectedCallFiles.isEmpty, !Self.expectedCallFiles.starts(with: Self.networkCallFiles) {
+            Logger.shared.logDebug("expectedFiles: \(Self.expectedCallFiles)", category: .network)
+            Logger.shared.logDebug("current network: \(Self.networkCallFiles)", category: .network)
+            Logger.shared.logError("🕸 current network calls is different from expected", category: .network)
+        }
+        #endif
 
         // Note: all `completionHandler` call must use `backgroundQueue.async` because if the code called in the completion
         // handler is blocking, it will prevent new following requests to be parsed in the NSURLSession delegate callback
@@ -317,6 +330,7 @@ extension APIRequest {
 
             do {
                 let value: T = try self.manageResponse(data, response)
+
                 self.backgroundQueue.async {
                     completionHandler(.success(value))
                 }
@@ -335,7 +349,15 @@ extension APIRequest {
     }
 
     static var networkCallFiles: [String] = []
+    static var expectedCallFiles: [String] = []
     static var networkCallFilesSemaphore = DispatchSemaphore(value: 1)
+
+    static public func clearNetworkCallsFiles() {
+        Self.networkCallFilesSemaphore.wait()
+        Self.networkCallFiles = []
+        Self.expectedCallFiles = []
+        Self.networkCallFilesSemaphore.signal()
+    }
 
     // swiftlint:disable:next function_parameter_count
     private func logRequest(_ filename: String,
@@ -347,9 +369,11 @@ extension APIRequest {
                             _ authenticated: Bool) {
 
         #if DEBUG
-        Self.networkCallFilesSemaphore.wait()
-        Self.networkCallFiles.append(filename)
-        Self.networkCallFilesSemaphore.signal()
+        if !Self.expectedCallFiles.isEmpty, !Self.expectedCallFiles.starts(with: Self.networkCallFiles) {
+            Logger.shared.logDebug("expectedFiles: \(Self.expectedCallFiles)", category: .network)
+            Logger.shared.logDebug("current network: \(Self.networkCallFiles)", category: .network)
+            Logger.shared.logError("🕸 current network calls is different from expected", category: .network)
+        }
         #endif
 
         #if DEBUG_API_0
@@ -359,7 +383,13 @@ extension APIRequest {
         }
         let diffTime = Date().timeIntervalSince(localTimer)
         let diff = String(format: "%.2f", diffTime)
-        Logger.shared.logDebug("[\(callsCount)] [\(Self.uploadedBytes.byteSize)/\(Self.downloadedBytes.byteSize)] [\(bytesSent.byteSize)/\(bytesReceived.byteSize)] [\(authenticated ? "authenticated" : "anonymous")] \(diff)sec \(httpResponse.statusCode) \(filename)", category: .network)
+        let text = "[\(callsCount)] [\(Self.uploadedBytes.byteSize)/\(Self.downloadedBytes.byteSize)] [\(bytesSent.byteSize)/\(bytesReceived.byteSize)] [\(authenticated ? "authenticated" : "anonymous")] \(diff)sec \(httpResponse.statusCode) \(filename)"
+
+        if diffTime > 1.0 {
+            Logger.shared.logError(text, category: .network)
+        } else {
+            Logger.shared.logDebug(text, category: .network)
+        }
         #endif
     }
 

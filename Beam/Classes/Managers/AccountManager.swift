@@ -37,7 +37,6 @@ extension AccountManager {
                         AppDelegate.main.syncData()
                     }
 
-                    Logger.shared.logInfo("signIn succeeded: \(signIn.accessToken ?? "-")", category: .network)
                     completionHandler?(.success(true))
                 }
             }
@@ -72,7 +71,6 @@ extension AccountManager {
                         AppDelegate.main.syncData()
                     }
 
-                    Logger.shared.logInfo("signIn succeeded: \(signIn.accessToken ?? "-")", category: .network)
                     completionHandler?(.success(true))
                 }
             }
@@ -143,7 +141,6 @@ extension AccountManager {
             Persistence.Authentication.password = password
             LibrariesManager.shared.setSentryUser()
 
-            Logger.shared.logInfo("signIn succeeded: \(signIn.accessToken ?? "-")", category: .network)
             return .value(true)
         }
     }
@@ -159,7 +156,6 @@ extension AccountManager {
             }
             LibrariesManager.shared.setSentryUser()
 
-            Logger.shared.logInfo("signIn succeeded: \(signIn.accessToken ?? "-")", category: .network)
             return .value(true)
         }
     }
@@ -187,7 +183,6 @@ extension AccountManager {
             Persistence.Authentication.email = email
             Persistence.Authentication.password = password
             LibrariesManager.shared.setSentryUser()
-            Logger.shared.logInfo("signIn succeeded: \(signIn.accessToken ?? "-")", category: .network)
             return Promise(true)
         }
     }
@@ -202,7 +197,6 @@ extension AccountManager {
                 Persistence.Authentication.password = nil
             }
             LibrariesManager.shared.setSentryUser()
-            Logger.shared.logInfo("signIn succeeded: \(signIn.accessToken ?? "-")", category: .network)
             return Promise(true)
         }
     }

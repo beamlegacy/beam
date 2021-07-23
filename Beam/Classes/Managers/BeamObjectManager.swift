@@ -57,6 +57,10 @@ class BeamObjectManager {
         }
     }
 
+    /*
+     Wrote this for our tests, and detect when we have still running network tasks on test ends. Sadly, this seems to
+     not work when used with Vinyl, which doesn't implement `cancel()`.
+     */
     func isAllNetworkCallsCompleted() -> Bool {
         for task in Self.urlSessionTasks {
             if [URLSessionTask.State.suspended, .running].contains(task.state) {
@@ -105,12 +109,14 @@ class BeamObjectManager {
     internal func parseFilteredObjects(_ filteredObjects: [String: [BeamObject]]) {
         for (key, objects) in filteredObjects {
             guard let managerInstance = Self.managerInstances[key] else {
-                print("**managerInstance for \(key) not found** keys: \(Self.managerInstances.keys)")
+                Logger.shared.logDebug("**managerInstance for \(key) not found** keys: \(Self.managerInstances.keys)",
+                                       category: .beamObject)
                 continue
             }
 
             guard let translator = Self.translators[key] else {
-                print("**translator for \(key) not found** keys: \(Self.translators.keys)")
+                Logger.shared.logDebug("**translator for \(key) not found** keys: \(Self.translators.keys)",
+                                       category: .beamObject)
                 continue
             }
 
@@ -334,7 +340,6 @@ extension BeamObjectManager {
                 completion(.failure(error))
             }
         case .fetchRemoteAndError:
-
             completion(.failure(BeamObjectManagerError.multipleErrors(resultErrors)))
         }
     }
@@ -528,7 +533,7 @@ extension BeamObjectManager {
                                                                                   _ completion: @escaping (Result<T, Error>) -> Void) {
 
         guard let beamObject = try? BeamObject(object, T.beamObjectTypeName) else {
-            completion(.failure(BeamObjectManagerError.beamObjectEncodingError))
+            completion(.failure(BeamObjectManagerError.encodingError))
             return
         }
 
@@ -536,6 +541,12 @@ extension BeamObjectManager {
             switch fetchResult {
             case .failure(let error): completion(.failure(error))
             case .success(let remoteBeamObject):
+                // This happened during tests, but could happen again if you have the same IDs for 2 different objects
+                guard remoteBeamObject.beamObjectType == beamObject.beamObjectType else {
+                    completion(.failure(BeamObjectManagerError.invalidObjectType(beamObject, remoteBeamObject)))
+                    return
+                }
+
                 switch self.conflictPolicyForSave {
                 case .replace:
                     let newBeamObject = beamObject.copy()
@@ -546,15 +557,15 @@ extension BeamObjectManager {
                         newObject.previousChecksum = remoteBeamObject.dataChecksum
                         completion(.success(newObject))
                     } catch {
-                        completion(.failure(BeamObjectManagerError.beamObjectDecodingError))
+                        completion(.failure(BeamObjectManagerError.decodingError(newBeamObject)))
                     }
                 case .fetchRemoteAndError:
                     do {
                         var decodedObject: T = try remoteBeamObject.decodeBeamObject()
                         decodedObject.previousChecksum = remoteBeamObject.dataChecksum
-                        completion(.failure(BeamObjectManagerObjectError<T>.beamObjectInvalidChecksum(decodedObject)))
+                        completion(.failure(BeamObjectManagerObjectError<T>.invalidChecksum(decodedObject)))
                     } catch {
-                        completion(.failure(error))
+                        completion(.failure(BeamObjectManagerError.decodingError(remoteBeamObject)))
                     }
                 }
             }
@@ -568,13 +579,19 @@ extension BeamObjectManager {
             switch fetchResult {
             case .failure(let error): completion(.failure(error))
             case .success(let remoteBeamObject):
+                // This happened during tests, but could happen again if you have the same IDs for 2 different objects
+                guard remoteBeamObject.beamObjectType == beamObject.beamObjectType else {
+                    completion(.failure(BeamObjectManagerError.invalidObjectType(beamObject, remoteBeamObject)))
+                    return
+                }
+
                 switch self.conflictPolicyForSave {
                 case .replace:
                     let newBeamObject = beamObject.copy()
                     newBeamObject.previousChecksum = remoteBeamObject.dataChecksum
                     completion(.success(newBeamObject))
                 case .fetchRemoteAndError:
-                    completion(.failure(BeamObjectManagerError.beamObjectInvalidChecksum(remoteBeamObject)))
+                    completion(.failure(BeamObjectManagerError.invalidChecksum(remoteBeamObject)))
                 }
             }
         }

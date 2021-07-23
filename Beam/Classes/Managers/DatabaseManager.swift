@@ -1141,7 +1141,7 @@ extension DatabaseManager: BeamObjectManagerDelegate {
                                               _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
         // This case happens when we use the network call to send multiple databases,
         // but only send 1 and have an invalid checksum
-        if case BeamObjectManagerError.beamObjectInvalidChecksum = error,
+        if case BeamObjectManagerError.invalidChecksum = error,
            let databaseStruct = databaseStructs.first {
             saveOnBeamObjectAPIFailure(databaseStruct, error, completion)
             return
@@ -1158,7 +1158,7 @@ extension DatabaseManager: BeamObjectManagerDelegate {
              We have multiple errors. If all errors are about invalid checksums, we can fix and retry. Else we'll just
              stop and call the completion handler with the original error
              */
-            guard case BeamObjectManagerError.beamObjectInvalidChecksum = insideError else {
+            guard case BeamObjectManagerError.invalidChecksum = insideError else {
                 completion(.failure(error))
                 return
             }
@@ -1225,8 +1225,8 @@ extension DatabaseManager: BeamObjectManagerDelegate {
     internal func saveOnBeamObjectAPIFailure(_ databaseStruct: DatabaseStruct,
                                              _ error: Error,
                                              _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
-        // Early return except for checksum issues.
-        guard case BeamObjectManagerError.beamObjectInvalidChecksum = error else {
+        // Early return except for checksum issues.
+        guard case BeamObjectManagerError.invalidChecksum = error else {
             completion(.failure(error))
             return
         }

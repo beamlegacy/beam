@@ -4,9 +4,10 @@ enum BeamObjectManagerError: Error {
     case notSuccess
     case notAuthenticated
     case multipleErrors([Error])
-    case beamObjectInvalidChecksum(BeamObject)
-    case beamObjectDecodingError
-    case beamObjectEncodingError
+    case invalidChecksum(BeamObject)
+    case decodingError(BeamObject)
+    case encodingError
+    case invalidObjectType(BeamObject, BeamObject)
 }
 
 extension BeamObjectManagerError: LocalizedError {
@@ -18,24 +19,26 @@ extension BeamObjectManagerError: LocalizedError {
             return "Not Authenticated"
         case .multipleErrors(let errors):
             return "Multiple errors: \(errors)"
-        case .beamObjectInvalidChecksum(let object):
+        case .invalidChecksum(let object):
             return "Invalid Checksum \(object.id)"
-        case .beamObjectDecodingError:
-            return "Decoding Error"
-        case .beamObjectEncodingError:
+        case .decodingError(let object):
+            return "Decoding Error \(object)"
+        case .encodingError:
             return "Encoding Error"
+        case .invalidObjectType(let localObject, let remoteObject):
+            return "invalidObjectType local: \(localObject) remote: \(remoteObject)"
         }
     }
 }
 
 enum BeamObjectManagerObjectError<T: BeamObjectProtocol>: Error {
-    case beamObjectInvalidChecksum(T)
+    case invalidChecksum(T)
 }
 
 extension BeamObjectManagerObjectError: LocalizedError {
     public var errorDescription: String? {
         switch self {
-        case .beamObjectInvalidChecksum(let object):
+        case .invalidChecksum(let object):
             return "Invalid Checksum \(object.beamObjectId)"
         }
     }

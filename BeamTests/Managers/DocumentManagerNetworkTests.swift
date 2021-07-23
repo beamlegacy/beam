@@ -24,6 +24,7 @@ class DocumentManagerNetworkTests: QuickSpec {
         let beamHelper = BeamTestsHelper()
 
         beforeEach {
+            Configuration.reset()
             Configuration.beamObjectAPIEnabled = false
 
             coreDataManager = CoreDataManager()
@@ -35,11 +36,13 @@ class DocumentManagerNetworkTests: QuickSpec {
                                                      coreDataManager: coreDataManager)
 
             sut.clearNetworkCalls()
+            BeamTestsHelper.logout()
+
             beamHelper.beginNetworkRecording()
-//            beamHelper.disableNetworkRecording()
 
             // Try to avoid issues with BeamTextTests creating documents when parsing links
             BeamNote.clearCancellables()
+
             BeamTestsHelper.login()
 
             helper.deleteAllDatabases()
@@ -65,7 +68,6 @@ class DocumentManagerNetworkTests: QuickSpec {
             }
 
             afterEach {
-                // Not to leave any on the server
                 helper.deleteDocumentStruct(docStruct)
             }
 
@@ -229,7 +231,6 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                 afterEach {
                     Configuration.encryptionEnabled = false
-                    // Not to leave any on the server
                     helper.deleteDocumentStruct(docStruct)
                 }
 
@@ -283,7 +284,7 @@ class DocumentManagerNetworkTests: QuickSpec {
 
             context("when remote has the same updatedAt") {
                 beforeEach {
-                    BeamDate.freeze()
+                    BeamDate.freeze("2021-03-19T12:21:03Z")
                     docStruct = self.createStruct("995d94e1-e0df-4eca-93e6-8778984bcd18", helper)
                     helper.saveRemotely(docStruct)
                 }
@@ -337,7 +338,6 @@ class DocumentManagerNetworkTests: QuickSpec {
                 }
 
                 afterEach {
-                    // Not to leave any on the server
                     helper.deleteDocumentStruct(remoteDocStruct)
                 }
 
@@ -644,7 +644,7 @@ class DocumentManagerNetworkTests: QuickSpec {
 
             context("when remote has the same updatedAt") {
                 beforeEach {
-                    BeamDate.freeze()
+                    BeamDate.freeze("2021-03-19T12:21:03Z")
                     docStruct = self.createStruct("995d94e1-e0df-4eca-93e6-8778984bcd18", helper)
                     helper.saveRemotely(docStruct)
                     networkCalls = APIRequest.callsCount
@@ -652,6 +652,10 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                 afterEach {
                     BeamDate.reset()
+                }
+
+                afterEach {
+                    helper.deleteDocumentStruct(docStruct)
                 }
 
                 context("with Foundation") {
@@ -770,6 +774,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                     }
 
                     afterEach {
+                        helper.deleteDocumentStruct(docStruct)
                         BeamDate.reset()
                     }
 
@@ -859,6 +864,11 @@ class DocumentManagerNetworkTests: QuickSpec {
                                                                              newLocal: newLocal,
                                                                              newRemote: newRemote,
                                                                              "995d94e1-e0df-4eca-93e6-8778984bcd18")
+                    }
+
+                    afterEach {
+                        helper.deleteDocumentStruct(docStruct)
+                        BeamDate.reset()
                     }
 
                     context("with Foundation") {
@@ -1016,7 +1026,6 @@ class DocumentManagerNetworkTests: QuickSpec {
                 docStruct = helper.createDocumentStruct(id: "995d94e1-e0df-4eca-93e6-8778984bcd18")
             }
             afterEach {
-                // Not to leave any on the server
                 helper.deleteDocumentStruct(docStruct)
             }
 
@@ -1046,11 +1055,6 @@ class DocumentManagerNetworkTests: QuickSpec {
                                 remoteDocStruct = helper.createDocumentStruct(title: docStruct.title,
                                                                               id: "00000000-e0df-4eca-93e6-8778984bcd18")
                                 helper.saveRemotelyOnly(remoteDocStruct)
-                            }
-
-                            afterEach {
-                                // Not to leave any on the server
-                                helper.deleteDocumentStruct(remoteDocStruct)
                             }
 
                             it("deletes the local document, fetch the remote document and saves it") {
@@ -1583,6 +1587,10 @@ class DocumentManagerNetworkTests: QuickSpec {
                                                                              "995d94e1-e0df-4eca-93e6-8778984bcd18")
                     }
 
+                    afterEach {
+                        helper.deleteDocumentStruct(docStruct)
+                    }
+
                     context("with Foundation") {
                         it("updates the remote document with the local version") {
                             let localDocStruct = sut.loadById(id: docStruct.id)
@@ -1758,6 +1766,10 @@ class DocumentManagerNetworkTests: QuickSpec {
                                                                              "995d94e1-e0df-4eca-93e6-8778984bcd18")
                     }
 
+                    afterEach {
+                        helper.deleteDocumentStruct(docStruct)
+                    }
+
                     context("with Foundation") {
                         it("updates the remote document") {
                             let networkCalls = APIRequest.callsCount
@@ -1903,14 +1915,25 @@ class DocumentManagerNetworkTests: QuickSpec {
             let beamObjectHelper: BeamObjectTestsHelper = BeamObjectTestsHelper()
 
             beforeEach {
+                BeamDate.freeze("2021-03-19T12:21:03Z")
                 Configuration.beamObjectAPIEnabled = true
+            }
+
+            afterEach {
+                BeamDate.reset()
+                Configuration.beamObjectAPIEnabled = false
             }
 
             describe("saveOnBeamObjectAPI()") {
                 var docStruct: DocumentStruct!
                 beforeEach {
-                    docStruct = helper.createDocumentStruct("995d94e1-e0df-4eca-93e6-8778984bcd29")
+                    docStruct = helper.createDocumentStruct(title: "Doc 3",
+                                                            id: "995d94e1-e0df-4eca-93e6-8778984bcd29")
                     _ = helper.saveLocally(docStruct)
+                }
+
+                afterEach {
+                    beamObjectHelper.delete(docStruct.id)
                 }
 
                 it("saves as beamObject") {
@@ -1935,11 +1958,16 @@ class DocumentManagerNetworkTests: QuickSpec {
                 var docStruct: DocumentStruct!
                 var docStruct2: DocumentStruct!
                 beforeEach {
-                    docStruct = helper.createDocumentStruct("995d94e1-e0df-4eca-93e6-8778984bcd29", title: "Doc 1")
+                    docStruct = helper.createDocumentStruct(title: "Doc 1", id: "995d94e1-e0df-4eca-93e6-8778984bcd29")
                     _ = helper.saveLocally(docStruct)
 
-                    docStruct2 = helper.createDocumentStruct("995d94e1-e0df-4eca-93e6-8778984bcd39", title: "Doc 2")
+                    docStruct2 = helper.createDocumentStruct(title: "Doc 2", id: "995d94e1-e0df-4eca-93e6-8778984bcd39")
                     _ = helper.saveLocally(docStruct2)
+                }
+
+                afterEach {
+                    beamObjectHelper.delete(docStruct.id)
+                    beamObjectHelper.delete(docStruct2.id)
                 }
 
                 it("saves as beamObjects") {
@@ -1967,12 +1995,18 @@ class DocumentManagerNetworkTests: QuickSpec {
             describe("saveAllOnBeamObjectApi()") {
                 var docStruct: DocumentStruct!
                 var docStruct2: DocumentStruct!
+
                 beforeEach {
-                    docStruct = helper.createDocumentStruct("995d94e1-e0df-4eca-93e6-8778984bcd29", title: "Doc 1")
+                    docStruct = helper.createDocumentStruct(title: "Doc 1", id: "995d94e1-e0df-4eca-93e6-8778984bcd29")
                     _ = helper.saveLocally(docStruct)
 
-                    docStruct2 = helper.createDocumentStruct("995d94e1-e0df-4eca-93e6-8778984bcd39", title: "Doc 2")
+                    docStruct2 = helper.createDocumentStruct(title: "Doc 2", id: "995d94e1-e0df-4eca-93e6-8778984bcd39")
                     _ = helper.saveLocally(docStruct2)
+                }
+
+                afterEach {
+                    beamObjectHelper.delete(docStruct.id)
+                    beamObjectHelper.delete(docStruct2.id)
                 }
 
                 it("saves as beamObjects") {
@@ -1981,6 +2015,12 @@ class DocumentManagerNetworkTests: QuickSpec {
                             _ = try sut.saveAllOnBeamObjectApi { result in
                                 expect { try result.get() }.toNot(throwError())
                                 expect { try result.get() } == true
+
+                                do {
+                                    try result.get()
+                                } catch {
+                                    print("oops")
+                                }
                                 done()
                             }
                         } catch {
@@ -2000,8 +2040,8 @@ class DocumentManagerNetworkTests: QuickSpec {
                 var docStruct: DocumentStruct!
                 var docStruct2: DocumentStruct!
                 beforeEach {
-                    docStruct = helper.createDocumentStruct("995d94e1-e0df-4eca-93e6-8778984bcd29", title: "Doc 1")
-                    docStruct2 = helper.createDocumentStruct("995d94e1-e0df-4eca-93e6-8778984bcd39", title: "Doc 2")
+                    docStruct = helper.createDocumentStruct(title: "Doc 1", id: "995d94e1-e0df-4eca-93e6-8778984bcd29")
+                    docStruct2 = helper.createDocumentStruct(title: "Doc 2", id: "995d94e1-e0df-4eca-93e6-8778984bcd39")
                 }
 
                 it("saves to local objects") {

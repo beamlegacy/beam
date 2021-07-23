@@ -15,17 +15,21 @@ class BeamTestsHelper {
     func beginNetworkRecording() {
         guard Configuration.networkStubs else { return }
 
+        // Cancel today's journal throttled document save. Else we get random network calls where not expecting any,
+        // and this fails with Vinyl
+        DocumentManager.cancelAllPreviousThrottledAPICall()
+
         let recordingPath = NSSearchPathForDirectoriesInDomains(.libraryDirectory, .userDomainMask, true).first!
         let filename = QuickSpec.current.name.c99ExtendedIdentifier
         var fullFilename = "\(recordingPath)/Logs/Beam/Vinyl/\(filename).json"
 
         if let jobId = ProcessInfo.processInfo.environment["CI_JOB_ID"] {
-            Logger.shared.logDebug("Using Gitlab CI Job ID for Vinyl files: \(jobId)")
+            Logger.shared.logDebug("Using Gitlab CI Job ID for Vinyl files: \(jobId)", category: .network)
 
             fullFilename = "\(recordingPath)/Logs/Beam/Vinyl/\(jobId)/\(filename).json"
         }
 
-        Logger.shared.logDebug("Vinyl: Using \(fullFilename)")
+        Logger.shared.logDebug("Vinyl: Using \(fullFilename)", category: .network)
 
         let recordingMode = RecordingMode.missingVinyl(recordingPath: fullFilename)
         let configuration = TurntableConfiguration(matchingStrategy: .trackOrder,
@@ -33,19 +37,75 @@ class BeamTestsHelper {
         turntable = Turntable(vinylName: fullFilename, turntableConfiguration: configuration)
 
         BeamURLSession.shared = turntable!
+        APIRequest.clearNetworkCallsFiles()
+
+        let expected = expectedAPIRequests()
+        Logger.shared.logDebug("Expected network requests: \(expected)")
+        APIRequest.expectedCallFiles = expected
     }
 
     func endNetworkRecording() {
         guard Configuration.networkStubs else { return }
+        APIRequest.expectedCallFiles = []
+
+        let expectedNetworkCalls = expectedAPIRequests()
+        if !expectedNetworkCalls.isEmpty, expectedNetworkCalls != APIRequest.networkCallFiles {
+            Logger.shared.logError("Expected network calls: \(expectedNetworkCalls)", category: .network)
+            Logger.shared.logError("Current network calls: \(APIRequest.networkCallFiles)", category: .network)
+
+            fail("Expected network calls is different from current network calls")
+        }
+        saveAPIRequests()
 
         turntable?.stopRecording()
         turntable = nil
         BeamURLSession.reset()
     }
 
+    static let encoder = JSONEncoder()
+    static let decoder = JSONDecoder()
+    private func saveAPIRequestsFilename() -> URL {
+        let recordingPath = NSSearchPathForDirectoriesInDomains(.libraryDirectory, .userDomainMask, true).first!
+        let filename = QuickSpec.current.name.c99ExtendedIdentifier
+
+        var networkRequestsFilename = "\(recordingPath)/Logs/Beam/Vinyl/\(filename)_calls.json"
+        if let jobId = ProcessInfo.processInfo.environment["CI_JOB_ID"] {
+            Logger.shared.logDebug("Using Gitlab CI Job ID for Vinyl files: \(jobId)")
+
+            networkRequestsFilename = "\(recordingPath)/Logs/Beam/Vinyl/\(jobId)/\(filename)_calls.json"
+        }
+
+        return URL(fileURLWithPath: networkRequestsFilename)
+    }
+
+    func saveAPIRequests() {
+        let filename = saveAPIRequestsFilename()
+        guard turntable != nil else { return }
+
+        guard !FileManager.default.fileExists(atPath: filename.path) else { return }
+
+        if let text = try? Self.encoder.encode(APIRequest.networkCallFiles) {
+            try? text.write(to: filename)
+            Logger.shared.logDebug("Wrote network requests to \(filename)")
+        }
+    }
+
+    func expectedAPIRequests() -> [String] {
+        guard turntable != nil else { return [] }
+
+        let filename = saveAPIRequestsFilename()
+        guard let data = try? String(contentsOf: filename, encoding: .utf8),
+           let result: [String] = try? Self.decoder.decode([String].self, from: data.asData) else {
+            return []
+        }
+
+        return result
+    }
+
     func disableNetworkRecording() {
         guard Configuration.networkStubs else { return }
 
+        APIRequest.expectedCallFiles = []
         turntable = nil
         BeamURLSession.reset()
     }

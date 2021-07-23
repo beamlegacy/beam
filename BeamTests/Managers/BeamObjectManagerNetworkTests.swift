@@ -16,12 +16,15 @@ class BeamObjectManagerNetworkTests: QuickSpec {
         let beforeConfigApiHostname = Configuration.apiHostname
 
         beforeEach {
+            // Need to freeze date to compare objects, as `createdAt` would be different from the network stubs we get
+            // back from Vinyl
             BeamDate.freeze("2021-03-19T12:21:03Z")
 
             APIRequest.networkCallFiles = []
 
             sut = BeamObjectManager()
             sut.clearNetworkCalls()
+            BeamTestsHelper.logout()
 
             beamHelper.beginNetworkRecording()
 
@@ -41,10 +44,10 @@ class BeamObjectManagerNetworkTests: QuickSpec {
             Configuration.beamObjectAPIEnabled = EnvironmentVariables.beamObjectAPIEnabled
             Configuration.apiHostname = beforeConfigApiHostname
 
+            // Sad: this is broken when using Vinyl
 //            if !sut.isAllNetworkCallsCompleted() {
 //                fail("not all network calls are completed")
 //            }
-            Logger.shared.logDebug("🦞 network calls for \(QuickSpec.current.name): \(APIRequest.networkCallFiles)", category: .network)
         }
 
         describe("fetchAllFromAPI()") {
@@ -409,12 +412,14 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                                 expect(object) == (try beamObjectHelper.fetchOnAPI(object.beamObjectId))
                                 expect(object2) == (try beamObjectHelper.fetchOnAPI(object2.beamObjectId))
 
+                                let remoteObject = returnedObjects.first(where: { $0.beamObjectId == object.beamObjectId })
+                                let remoteObject2 = returnedObjects.first(where: { $0.beamObjectId == object2.beamObjectId })
+
                                 // `previousChecksum` should be set on returned objects
-                                // TODO: random  error
                                 let beamObject = try BeamObject(object, MyRemoteObject.beamObjectTypeName)
                                 let beamObject2 = try BeamObject(object2, MyRemoteObject.beamObjectTypeName)
-                                expect(returnedObjects.first?.previousChecksum) == beamObject.dataChecksum
-                                expect(returnedObjects.last?.previousChecksum) == beamObject2.dataChecksum
+                                expect(remoteObject?.previousChecksum) == beamObject.dataChecksum
+                                expect(remoteObject2?.previousChecksum) == beamObject2.dataChecksum
                                 
                             }
 
@@ -449,10 +454,12 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                                 expect(object) == (try beamObjectHelper.fetchOnAPI(object.beamObjectId))
                                 expect(object2) == (try beamObjectHelper.fetchOnAPI(object2.beamObjectId))
 
+                                let remoteBeamObject = returnedBeamObjects.first(where: { $0.beamObjectId == object.beamObjectId })
+                                let remoteBeamObject2 = returnedBeamObjects.first(where: { $0.beamObjectId == object2.beamObjectId })
+
                                 // `previousChecksum` should be set on returned objects
-                                // TODO: random error
-                                expect(returnedBeamObjects.first?.previousChecksum) == beamObjects.first?.dataChecksum
-                                expect(returnedBeamObjects.last?.previousChecksum) == beamObjects.last?.dataChecksum
+                                expect(remoteBeamObject?.previousChecksum) == beamObject.dataChecksum
+                                expect(remoteBeamObject2?.previousChecksum) == beamObject2.dataChecksum
                             }
 
                             it("updates object with empty checksum") {
@@ -481,14 +488,15 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                                 expect(object) == (try beamObjectHelper.fetchOnAPI(object.beamObjectId))
                                 expect(object2) == (try beamObjectHelper.fetchOnAPI(object2.beamObjectId))
 
+                                let remoteObject = returnedObjects.first(where: { $0.beamObjectId == object.beamObjectId })
+                                let remoteObject2 = returnedObjects.first(where: { $0.beamObjectId == object2.beamObjectId })
+
                                 // `previousChecksum` should be set on returned objects
-                                // TODO: random error
                                 let beamObject = try BeamObject(object, MyRemoteObject.beamObjectTypeName)
                                 let beamObject2 = try BeamObject(object2, MyRemoteObject.beamObjectTypeName)
 
-                                // TODO: random error
-                                expect(returnedObjects.first?.previousChecksum) == beamObject.dataChecksum
-                                expect(returnedObjects.last?.previousChecksum) == beamObject2.dataChecksum
+                                expect(remoteObject?.previousChecksum) == beamObject.dataChecksum
+                                expect(remoteObject2?.previousChecksum) == beamObject2.dataChecksum
                             }
 
                             it("updates object with empty checksum") {
@@ -518,10 +526,12 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                                 expect(object) == (try beamObjectHelper.fetchOnAPI(object.beamObjectId))
                                 expect(object2) == (try beamObjectHelper.fetchOnAPI(object2.beamObjectId))
 
+                                let remoteBeamObject = returnedBeamObjects.first(where: { $0.beamObjectId == object.beamObjectId })
+                                let remoteBeamObject2 = returnedBeamObjects.first(where: { $0.beamObjectId == object2.beamObjectId })
+
                                 // `previousChecksum` should be set on returned objects
-                                // TODO: random error
-                                expect(returnedBeamObjects.first?.previousChecksum) == beamObjects.first?.dataChecksum
-                                expect(returnedBeamObjects.last?.previousChecksum) == beamObjects.last?.dataChecksum
+                                expect(remoteBeamObject?.previousChecksum) == beamObjects.first?.dataChecksum
+                                expect(remoteBeamObject2?.previousChecksum) == beamObjects.last?.dataChecksum
                             }
                         }
 
@@ -549,9 +559,9 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                                                     expect(errors).to(haveCount(2))
 
                                                     guard let error1 = errors.first,
-                                                          case BeamObjectManagerObjectError<MyRemoteObject>.beamObjectInvalidChecksum(let remoteObject) = error1,
+                                                          case BeamObjectManagerObjectError<MyRemoteObject>.invalidChecksum(let remoteObject) = error1,
                                                           let error2 = errors.last,
-                                                          case BeamObjectManagerObjectError<MyRemoteObject>.beamObjectInvalidChecksum(let remoteObject2) = error2
+                                                          case BeamObjectManagerObjectError<MyRemoteObject>.invalidChecksum(let remoteObject2) = error2
                                                           else {
                                                         fail("Failed for error type")
                                                         return
@@ -560,7 +570,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                                                     remoteObjects.append(remoteObject)
                                                     remoteObjects.append(remoteObject2)
                                                 default:
-                                                    fail("Expecting beamObjectInvalidChecksum error")
+                                                    fail("Expecting invalidChecksum error")
                                                 }
                                             })
 
@@ -575,19 +585,19 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                                 // update_beam_object + beam_object + beam_object
                                 expect(APIRequest.callsCount - networkCalls) == 3
 
-                                let remoteObject = remoteObjects.first(where: { $0.beamObjectId == object.beamObjectId })!
-                                let remoteObject2 = remoteObjects.first(where: { $0.beamObjectId == object2.beamObjectId })!
+                                let remoteObject = remoteObjects.first(where: { $0.beamObjectId == object.beamObjectId })
+                                let remoteObject2 = remoteObjects.first(where: { $0.beamObjectId == object2.beamObjectId })
 
                                 expect(remoteObject) != object
                                 expect(remoteObject2) != object2
 
-                                expect(remoteObject.beamObjectId) == object.beamObjectId
-                                expect(remoteObject.checksum) == previousChecksum
-                                expect(remoteObject.title) == title
+                                expect(remoteObject?.beamObjectId) == object.beamObjectId
+                                expect(remoteObject?.checksum) == previousChecksum
+                                expect(remoteObject?.title) == title
 
-                                expect(remoteObject2.beamObjectId) == object2.beamObjectId
-                                expect(remoteObject2.title) == title2
-                                expect(remoteObject2.checksum) == previousChecksum2
+                                expect(remoteObject2?.beamObjectId) == object2.beamObjectId
+                                expect(remoteObject2?.title) == title2
+                                expect(remoteObject2?.checksum) == previousChecksum2
                             }
 
                             it("raise error and return remote object") {
@@ -612,9 +622,9 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                                                     expect(errors).to(haveCount(2))
 
                                                     guard let error1 = errors.first,
-                                                          case BeamObjectManagerError.beamObjectInvalidChecksum(let remoteBeamObject) = error1,
+                                                          case BeamObjectManagerError.invalidChecksum(let remoteBeamObject) = error1,
                                                           let error2 = errors.last,
-                                                          case BeamObjectManagerError.beamObjectInvalidChecksum(let remoteBeamObject2) = error2
+                                                          case BeamObjectManagerError.invalidChecksum(let remoteBeamObject2) = error2
                                                           else {
                                                         fail("Failed for error type")
                                                         return
@@ -623,7 +633,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                                                     remoteBeamObjects.append(remoteBeamObject)
                                                     remoteBeamObjects.append(remoteBeamObject2)
                                                 default:
-                                                    fail("Expecting beamObjectInvalidChecksum error")
+                                                    fail("Expecting invalidChecksum error")
                                                 }
                                             })
 
@@ -793,7 +803,6 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                             }
                         }
 
-                        // TODO random error
                         expect(APIRequest.callsCount - networkCalls) == 1
 
                         expect(object) == (try beamObjectHelper.fetchOnAPI(object.beamObjectId))
@@ -911,6 +920,9 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
                                 // update_beam_object + beam_object + update_beam_object
                                 expect(APIRequest.callsCount - networkCalls) == 3
+                                expect(APIRequest.networkCallFiles) == ["sign_in",
+                                                                        "update_beam_object", "update_beam_object",
+                                                                        "beam_object", "update_beam_object"]
 
                                 expect(object) == (try beamObjectHelper.fetchOnAPI(object.beamObjectId))
 
@@ -935,7 +947,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                                         _ = try sut.saveToAPI(object) { result in
                                             expect { try result.get() }.to(throwError { (error: BeamObjectManagerObjectError<MyRemoteObject>) in
                                                 switch error {
-                                                case .beamObjectInvalidChecksum(let remoteOldObject):
+                                                case .invalidChecksum(let remoteOldObject):
                                                     remoteObject = remoteOldObject
                                                 }
                                             })
@@ -972,10 +984,10 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                                         _ = try sut.saveToAPI(beamObject) { result in
                                             expect { try result.get() }.to(throwError { (error: BeamObjectManagerError) in
                                                 switch error {
-                                                case .beamObjectInvalidChecksum(let remoteBeamOldObject):
+                                                case .invalidChecksum(let remoteBeamOldObject):
                                                     remoteBeamObject = remoteBeamOldObject
                                                 default:
-                                                    fail("Expecting beamObjectInvalidChecksum error")
+                                                    fail("Expecting invalidChecksum error")
                                                 }
                                             })
 
