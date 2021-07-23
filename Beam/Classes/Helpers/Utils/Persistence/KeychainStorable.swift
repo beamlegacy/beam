@@ -46,10 +46,11 @@ struct KeychainStorable<T> {
                 } else if let value = newValue as? Data {
                     try storeWithLabelAndComment.set(value, key: key)
                 } else {
-                    Logger.shared.logError("Can't store: \(newValue.debugDescription)", category: .keychain)
+                    Logger.shared.logError("Can't store \(key) -> \(newValue.debugDescription)", category: .keychain)
                 }
             } catch {
-                Logger.shared.logError(error.localizedDescription, category: .keychain)
+                Logger.shared.logError("Can't store \(key): \(error.localizedDescription)",
+                                       category: .keychain)
             }
         }
     }

@@ -1,7 +1,8 @@
 default:
   before_script:
     - echo "${CI_JOB_ID}"
-    - echo "${PATH}"
+    - echo "Application logs will be at ${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Logs/Beam/*.log"
+    - echo "Current path: ${PATH}"
     - date
     - pwd
     - unset cd
