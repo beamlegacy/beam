@@ -1,5 +1,6 @@
 default:
   before_script:
+    - echo "${CI_JOB_ID}"
     - echo "${PATH}"
     - date
     - pwd
