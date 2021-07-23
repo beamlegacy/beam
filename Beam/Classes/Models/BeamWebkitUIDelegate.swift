@@ -96,6 +96,13 @@ class BeamWebkitUIDelegateController: WebPageHolder, WKUIDelegate {
 
     func webView(_ webView: WKWebView, runOpenPanelWith parameters: WKOpenPanelParameters, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping ([URL]?) -> Void) {
         Logger.shared.logDebug("webView runOpenPanel", category: .web)
-        completionHandler(nil)
+
+        let openPanel = NSOpenPanel()
+        openPanel.canChooseDirectories = parameters.allowsDirectories
+        openPanel.allowsMultipleSelection = parameters.allowsMultipleSelection
+        openPanel.canChooseFiles = true
+        let response = openPanel.runModal()
+        let choice = response == .OK ? openPanel.urls : nil
+        completionHandler(choice)
     }
 }
