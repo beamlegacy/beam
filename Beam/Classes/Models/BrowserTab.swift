@@ -440,10 +440,6 @@ import Promises
 
     var navigationCount: Int = 0
 
-    func cancelShoot() {
-        pointAndShoot?.dismissShoot()
-    }
-
     func startReading() {
         lastViewDate = Date()
         browsingTree.startReading()

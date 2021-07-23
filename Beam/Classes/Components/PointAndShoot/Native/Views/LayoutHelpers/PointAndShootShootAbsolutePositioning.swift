@@ -1,9 +1,7 @@
 import Foundation
 import SwiftUI
 
-struct ShootAbsolutePositioning<Content: View>: View {
-    @ObservedObject var pns: PointAndShoot
-    @ObservedObject var webPositions: WebPositions
+struct PointAndShootShootAbsolutePositioning<Content: View>: View {
     var group: PointAndShoot.ShootGroup
     var contentSize: CGSize
     var content: () -> Content
@@ -12,7 +10,6 @@ struct ShootAbsolutePositioning<Content: View>: View {
     var body: some View {
         // To reduce overlap with the content we use the last target
         if let target = group.targets.last {
-            let target = pns.translateAndScaleTarget(target, group.href)
             GeometryReader { geo in
                 let halfWidth = contentSize.width / 2
                 let halfHeight = contentSize.height / 2
