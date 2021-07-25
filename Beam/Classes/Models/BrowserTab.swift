@@ -474,7 +474,7 @@ import Promises
     }
 
     func passwordManagerToast(saved: Bool) {
-        state.overlayViewModel.credentialsToast = CredentialsConfirmationToast(saved: saved)
+        state.overlayViewModel.toastView = AnyView(CredentialsConfirmationToast(saved: saved))
     }
 
     func closeTab() {

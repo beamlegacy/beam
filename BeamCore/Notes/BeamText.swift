@@ -17,6 +17,7 @@ public struct BeamText: Codable {
     }
 
     public enum Attribute: Codable, Equatable, Hashable {
+
         case strong
         case emphasis
         case source(String)
@@ -24,6 +25,8 @@ public struct BeamText: Codable {
         case internalLink(UUID)
         case strikethrough
         case underline
+        /// meant for UI temporary styling; will not be persisted
+        case decorated(AttributeDecoratedValue)
 
         // swiftlint:disable:next nesting
         enum CodingKeys: String, CodingKey {
@@ -63,6 +66,7 @@ public struct BeamText: Codable {
                     }
                 case "strikethrough": self = .strikethrough
                 case "underline": self = .underline
+                case "decorated": self = .decorated(AttributeDecoratedValue())
                 default:
                     throw AttributeError.unknownAttribute
                 }
@@ -76,6 +80,7 @@ public struct BeamText: Codable {
                 case 4: self = .internalLink(try container.decode(UUID.self, forKey: .payload))
                 case 5: self = .strikethrough
                 case 6: self = .underline
+                case 7: self = .decorated(AttributeDecoratedValue())
                 default:
                     throw AttributeError.unknownAttribute
                 }
@@ -98,6 +103,7 @@ public struct BeamText: Codable {
                 try container.encode(value, forKey: .payload)
             case .strikethrough: break
             case .underline: break
+            case .decorated: break
             }
         }
 
@@ -117,6 +123,8 @@ public struct BeamText: Codable {
                 return "strikethrough"
             case .underline:
                 return "underline"
+            case .decorated:
+                return "decorated"
             }
         }
 
@@ -138,6 +146,18 @@ public struct BeamText: Codable {
             default:
                 return false
             }
+        }
+    }
+
+    open class AttributeDecoratedValue: Equatable, Hashable {
+        public static func == (lhs: AttributeDecoratedValue, rhs: AttributeDecoratedValue) -> Bool {
+            false
+        }
+
+        public init() { }
+
+        public func hash(into hasher: inout Hasher) {
+            // not hashable
         }
     }
 

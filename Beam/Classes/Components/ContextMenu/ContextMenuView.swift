@@ -22,6 +22,8 @@ struct ContextMenuItem: Identifiable {
     var subtitle: String?
     var icon: String?
     var iconPlacement: IconPlacement = .leading
+    var iconSize: CGFloat = 16
+    var iconColor: BeamColor = .LightStoneGray
     private(set) var type = ContextMenuItemType.item
     let action: (() -> Void)?
     var iconAction: (() -> Void)?
@@ -43,7 +45,7 @@ struct ContextMenuItemView: View {
                 if let iconAction = item.iconAction {
                     ButtonLabel(icon: icon, customStyle: .tinyIconStyle, action: iconAction)
                 } else {
-                    Icon(name: icon, size: 16, color: BeamColor.LightStoneGray.swiftUI)
+                    Icon(name: icon, size: item.iconSize, color: item.iconColor.swiftUI)
                 }
             }
         }
@@ -86,6 +88,7 @@ struct ContextMenuItemView: View {
 class ContextMenuViewModel: BaseFormatterViewViewModel, ObservableObject {
     @Published var items: [ContextMenuItem] = []
     @Published var selectedIndex: Int?
+    @Published var sizeToFit: Bool = false
     var onSelectMenuItem: (() -> Void)?
 }
 
@@ -143,7 +146,8 @@ struct ContextMenuView: View {
             .padding(viewModel.items.count > 0 ? BeamSpacing._50 : 0)
         }
         .zIndex(1000)
-        .frame(maxWidth: .infinity)
+        .fixedSize(horizontal: viewModel.sizeToFit, vertical: viewModel.sizeToFit)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .animation(.easeInOut(duration: 0.15))
         .scaleEffect(viewModel.visible ? 1.0 : 0.98)
         .offset(x: 0, y: viewModel.visible ? 0.0 :
@@ -170,10 +174,14 @@ struct ContextMenuView_Previews: PreviewProvider {
         let model = ContextMenuViewModel()
         model.items = Self.items
         model.visible = true
+        model.sizeToFit = true
         return model
     }
     static var previews: some View {
-        return ContextMenuView(viewModel: model)
-            .padding(.all)
+        ZStack {
+            ContextMenuView(viewModel: model)
+        }
+        .frame(width: 200, height: 200)
+        .padding(.all)
     }
 }

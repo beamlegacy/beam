@@ -28,7 +28,7 @@ class BeamDate {
         currentDate = nil
     }
 
-    static func str(for date: Date, with style: DateFormatter.Style) -> String {
+    static func journalNoteTitle(for date: Date, with style: DateFormatter.Style = .long) -> String {
         let fmt = DateFormatter()
         if style == .short {
             fmt.dateFormat = "MMM d, yy"

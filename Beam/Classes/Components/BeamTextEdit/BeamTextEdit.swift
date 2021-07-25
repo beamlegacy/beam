@@ -390,7 +390,7 @@ public extension CALayer {
         cardSideTitleLayer.foregroundColor = BeamColor.Generic.text.cgColor
         cardSideTitleLayer.font = BeamFont.semibold(size: 0).nsFont
         cardSideTitleLayer.fontSize = 15 // TODO: Change later (isBig ? 30 : 26)
-        cardSideTitleLayer.string = isBig ? cardNote.title : BeamDate.str(for: cardNote.creationDate, with: .short)
+        cardSideTitleLayer.string = isBig ? cardNote.title : BeamDate.journalNoteTitle(for: cardNote.creationDate, with: .short)
         cardSideTitleLayer.name = "cardSideTitleLayer"
 
         cardSideLayer.addSublayer(cardSideTitleLayer)
@@ -401,7 +401,7 @@ public extension CALayer {
 
     func updateSideLayer(_ rect: CGRect) {
         guard let cardNote = note as? BeamNote else { return }
-        cardSideTitleLayer.string = isBig ? cardNote.title : BeamDate.str(for: cardNote.creationDate, with: .short)
+        cardSideTitleLayer.string = isBig ? cardNote.title : BeamDate.journalNoteTitle(for: cardNote.creationDate, with: .short)
         let sideLayerPos = CGPoint(x: cardHeaderLayer.frame.origin.x - cardSideTitleLayer.preferredFrameSize().width - 46.5, y: topOffsetActual + cardTopSpace + sideLayerOffset)
         cardSideLayer.frame = CGRect(origin: sideLayerPos, size: NSSize(width: cardSideLayer.preferredFrameSize().width, height: cardSideLayer.preferredFrameSize().height))
         cardSideTitleLayer.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: NSSize(width: cardSideTitleLayer.preferredFrameSize().width, height: cardSideTitleLayer.preferredFrameSize().height))

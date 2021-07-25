@@ -317,6 +317,15 @@ extension BeamNote: BeamNoteDocument {
         return create(documentManager, title: title)
     }
 
+    public static func fetchOrCreateJournalNote(_ documentManager: DocumentManager, date: Date) -> BeamNote {
+        let title = BeamDate.journalNoteTitle(for: date)
+        let note = fetchOrCreate(documentManager, title: title)
+        if !note.type.isJournal {
+            note.type = BeamNoteType.journalForDate(date)
+        }
+        return note
+    }
+
     public var lastChangedElement: BeamElement? {
         get {
             AppDelegate.main.data.lastChangedElement

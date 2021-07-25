@@ -39,6 +39,10 @@ extension BeamTextEdit {
             inlineFormatter = formatterView
         }
         guard let formatterView = inlineFormatter else { return }
+        setupInlineFormatterView(formatterView)
+    }
+
+    internal func setupInlineFormatterView(_ formatterView: FormatterView) {
         let idealSize = formatterView.idealSize
         formatterView.frame = NSRect(x: 0, y: 0, width: idealSize.width, height: idealSize.height)
         addSubview(formatterView)
@@ -112,7 +116,7 @@ extension BeamTextEdit {
         }
 
         if inlineFormatter is TextFormatterView {
-            moveInlineFormatterAboveSelection()
+            moveInlineFormatterAtSelection()
         }
     }
 
@@ -203,7 +207,7 @@ extension BeamTextEdit {
         switch type {
         case .link:
             showLinkFormatterForSelection()
-            moveInlineFormatterAboveSelection()
+            moveInlineFormatterAtSelection()
         case .internalLink:
             dismissFormatter = true
             if let linkAttr = handleInternalLinkFormat(in: node) {
@@ -246,6 +250,43 @@ extension BeamTextEdit {
             }
             clearDebounceTimer()
         }
+    }
+
+    internal func moveInlineFormatterAtSelection(below: Bool = false) {
+        guard let node = focusedWidget as? TextNode,
+              let view = inlineFormatter else { return }
+        view.frame.origin = containedFormatterPosition(in: node, formatter: view, tryBelow: below)
+    }
+
+    private func containedFormatterPosition(in node: TextNode, formatter: FormatterView, tryBelow: Bool) -> CGPoint {
+        let idealSize = formatter.idealSize
+        var yPos = node.offsetInDocument.y - idealSize.height - 8
+        var xPos: CGFloat = node.offsetInDocument.x
+        if rootNode.state.nodeSelection == nil {
+            let (xOffset, rect) = node.offsetAndFrameAt(index: node.cursorPosition)
+            let positionBelow = rect.maxY + node.offsetInDocument.y + 8
+            if tryBelow && positionBelow + idealSize.height < self.frame.height {
+                // below
+                yPos = positionBelow
+            } else {
+                // above
+                yPos = rect.minY + node.offsetInDocument.y - idealSize.height - 8
+            }
+            xPos += xOffset - (idealSize.width / 2)
+            if yPos < 0 {
+                if xPos > idealSize.width / 2 {
+                    // on the left
+                    xPos -= idealSize.width / 2 + 8
+                } else {
+                    // or on the right
+                    xPos += idealSize.width
+                }
+                yPos = max(0, rect.minY + node.offsetInDocument.y - idealSize.height / 2)
+            }
+        }
+        xPos = xPos.clamp(0, self.frame.width - idealSize.width)
+        yPos = yPos.clamp(0, self.frame.height - idealSize.height)
+        return CGPoint(x: xPos, y: yPos)
     }
 
     private func handleInternalLinkFormat(in node: TextNode) -> BeamText.Attribute? {
@@ -305,22 +346,6 @@ extension BeamTextEdit {
     }
 
     // MARK: Private Methods (UI)
-    private func moveInlineFormatterAboveSelection() {
-        guard let node = focusedWidget as? TextNode,
-              let view = inlineFormatter else { return }
-
-        let idealSize = view.idealSize
-        var yPos = node.offsetInDocument.y - idealSize.height - 8
-        var xPos: CGFloat = node.offsetInDocument.x
-        if rootNode.state.nodeSelection == nil {
-            let (xOffset, rect) = node.offsetAndFrameAt(index: node.cursorPosition)
-            yPos = rect.minY + node.offsetInDocument.y - idealSize.height - 8
-            xPos += xOffset - (idealSize.width / 2)
-        }
-
-        view.frame.origin = CGPoint(x: xPos, y: yPos)
-    }
-
     private func addConstraint(to view: FormatterView, with contentView: NSView) {
         BeamTextEdit.bottomAnchor = view.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: BeamTextEdit.bottomConstraint)
         BeamTextEdit.centerXAnchor = view.centerXAnchor.constraint(equalTo: contentView.centerXAnchor)

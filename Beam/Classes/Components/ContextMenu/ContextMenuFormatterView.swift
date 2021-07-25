@@ -16,6 +16,7 @@ class ContextMenuFormatterView: FormatterView {
     private var subviewModel = ContextMenuViewModel()
     private var direction: Edge = .bottom
     private var defaultSelectedIndex: Int?
+    private var sizeToFit: Bool = false
     private var onSelectMenuItem: (() -> Void)?
 
     override var idealSize: NSSize {
@@ -29,13 +30,19 @@ class ContextMenuFormatterView: FormatterView {
 
     var typingPrefix = 1
 
-    convenience init(items: [ContextMenuItem], direction: Edge = .bottom, handlesTyping: Bool = false, defaultSelectedIndex: Int? = nil, onSelectHandler: (() -> Void)? = nil) {
+    convenience init(items: [ContextMenuItem],
+                     direction: Edge = .bottom,
+                     handlesTyping: Bool = false,
+                     defaultSelectedIndex: Int? = nil,
+                     sizeToFit: Bool = false,
+                     onSelectHandler: (() -> Void)? = nil) {
         self.init(frame: CGRect.zero)
         self.viewType = .inline
         self.items = items
         self.displayedItems = items
         self.direction = direction
         self.defaultSelectedIndex = defaultSelectedIndex
+        self.sizeToFit = sizeToFit
         self.onSelectMenuItem = onSelectHandler
         self._handlesTyping = handlesTyping
         setupUI()
@@ -62,6 +69,7 @@ class ContextMenuFormatterView: FormatterView {
         subviewModel.items = displayedItems
         subviewModel.selectedIndex = defaultSelectedIndex ?? (handlesTyping ? 0 : nil)
         subviewModel.animationDirection = direction
+        subviewModel.sizeToFit = sizeToFit
         subviewModel.onSelectMenuItem = onSelectMenuItem
         let rootView = ContextMenuView(viewModel: subviewModel)
         let hostingView = NSHostingView(rootView: rootView)
