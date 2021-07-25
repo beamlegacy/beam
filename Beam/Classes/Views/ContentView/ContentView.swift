@@ -34,7 +34,7 @@ struct ContentView: View {
                 .background(BeamColor.Generic.background.swiftUI)
                 .edgesIgnoringSafeArea(.top)
                 .zIndex(0)
-            OverlayViewCenter()
+            OverlayViewCenter(viewModel: state.overlayViewModel)
                 .zIndex(1)
         }
     }

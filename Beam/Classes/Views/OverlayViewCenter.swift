@@ -9,12 +9,12 @@ import Foundation
 import SwiftUI
 
 struct OverlayViewCenter: View {
-    @EnvironmentObject var state: BeamState
+    @ObservedObject var viewModel: OverlayViewCenterViewModel
 
     var body: some View {
         ZStack {
-        }.toast(isPresented: $state.overlayViewModel.show) {
-            state.overlayViewModel.credentialsToast
+        }.toast(isPresented: $viewModel.show) {
+            viewModel.toastView
         }.toastStyle(BottomTraillingToastStyle())
     }
 }

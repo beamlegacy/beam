@@ -204,22 +204,14 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     }
 
     var todaysName: String {
-        let fmt = DateFormatter()
         let today = Date()
-        fmt.dateStyle = .long
-        fmt.doesRelativeDateFormatting = false
-        fmt.timeStyle = .none
-        return fmt.string(from: today)
+        return BeamDate.journalNoteTitle(for: today)
     }
 
     func setupJournal() {
-        _todaysNote = BeamNote.fetchOrCreate(documentManager, title: todaysName)
-        if let today = _todaysNote {
-            if !today.type.isJournal {
-                today.type = BeamNoteType.todaysJournal
-            }
-            journal.append(today)
-        }
+        let note  = BeamNote.fetchOrCreateJournalNote(documentManager, date: Date())
+        journal.append(note)
+        _todaysNote = note
 
         updateJournal(with: 2, and: journal.count)
     }

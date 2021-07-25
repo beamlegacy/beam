@@ -6,13 +6,18 @@
 //
 
 import Foundation
+import SwiftUI
 
 class OverlayViewCenterViewModel: ObservableObject {
 
     @Published var show = false
-    @Published var credentialsToast: CredentialsConfirmationToast? {
+    @Published var toastView: AnyView? {
         didSet {
             show.toggle()
         }
+    }
+
+    func present(text: String?, icon: String?) {
+        toastView = AnyView(ToastTextIconView(text: text, icon: icon))
     }
 }

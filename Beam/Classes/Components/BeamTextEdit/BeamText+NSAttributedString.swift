@@ -15,6 +15,14 @@ extension NSAttributedString.Key {
     static let boxBackgroundColor = NSAttributedString.Key(rawValue: "beam_boxBackgroundColor") // NSColor, default nil
 }
 
+class AttributeDecoratedValueAttributedString: BeamText.AttributeDecoratedValue {
+    var attributes: [NSAttributedString.Key: Any]
+    init(attributes: [NSAttributedString.Key: Any]) {
+        self.attributes = attributes
+        super.init()
+    }
+}
+
 extension BeamText {
     init(_ attributedString: NSAttributedString) {
         self.init()

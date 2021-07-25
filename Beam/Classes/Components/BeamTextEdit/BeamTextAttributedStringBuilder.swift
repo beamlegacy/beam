@@ -96,6 +96,7 @@ struct BeamTextAttributedStringBuilder {
         var source: String?
         var webLink: String?
         var internalLink: String?
+        var decoratedValue: BeamText.AttributeDecoratedValue?
         var isCursorCloseToRange = false
         var isCursorInsideRange = false
         if let caret = config.caret, !selected {
@@ -120,6 +121,8 @@ struct BeamTextAttributedStringBuilder {
                 strikethrough = true
             case .underline:
                 underline = true
+            case .decorated(let value):
+                decoratedValue = value
             }
         }
 
@@ -168,6 +171,11 @@ struct BeamTextAttributedStringBuilder {
 
         if let source = source {
             stringAttributes[.source] = source
+        }
+
+        if let decoratedValue = decoratedValue as? AttributeDecoratedValueAttributedString {
+            let valueAttributedString = decoratedValue.attributes
+            stringAttributes.merge(valueAttributedString, uniquingKeysWith: { $1 })
         }
 
         return stringAttributes
