@@ -114,6 +114,14 @@ struct AdvancedPreferencesView: View {
                 BrowsingSessionCollectionCheckbox
             }
 
+            Preferences.Section {
+                Text("Enable TabGrouping Window menu")
+                    .font(BeamFont.regular(size: 13).swiftUI)
+                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+            } content: {
+                EnableTabGroupingWindowCheckbox
+            }
+
             Preferences.Section(title: "Encryption Enabled") {
                 EncryptionEnabledButton
             }
@@ -194,8 +202,14 @@ struct AdvancedPreferencesView: View {
     }
 
     private var BrowsingSessionCollectionCheckbox: some View {
-        Checkbox(checkState: Configuration.browsingSessionCollectionIsOn, text: "Enable Browsing Session collection", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
-            Configuration.browsingSessionCollectionIsOn = activated
+        Checkbox(checkState: PreferencesManager.browsingSessionCollectionIsOn, text: "Enable Browsing Session collection", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
+            PreferencesManager.browsingSessionCollectionIsOn = activated
+        }
+    }
+
+    private var EnableTabGroupingWindowCheckbox: some View {
+        Checkbox(checkState: PreferencesManager.showTabGrougpingMenuItem, text: "Enable TabGrouping Window menu", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
+            PreferencesManager.showTabGrougpingMenuItem = activated
         }
     }
 

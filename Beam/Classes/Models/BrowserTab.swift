@@ -86,7 +86,7 @@ import Promises
         if isFromNoteSearch {
             noteController.setContents(url: url, text: title)
             isFromNoteSearch = false
-        } else if Configuration.browsingSessionCollectionIsOn {
+        } else if PreferencesManager.browsingSessionCollectionIsOn {
             _ = noteController.add(url: url, text: title, reason: reason)
         }
     }
