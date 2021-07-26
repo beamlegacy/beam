@@ -167,6 +167,7 @@ import BeamCore
 
         guard note != currentNote else { return true }
 
+        note.sources.refreshScores()
         currentPage = nil
         currentNote = note
         scrollToElementId = elementId

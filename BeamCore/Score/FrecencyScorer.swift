@@ -13,9 +13,6 @@ private let visitWeights: [VisitType: Float] = [
     .fromNote: 1.5
 ]
 
-private func timeDecay(duration: Float, halfLife: Float) -> Float {
-    return exp(-(duration * log(2) / halfLife))
-}
 private func scoreSortValue(score: Float, timeStamp: Date, halfLife: Float) -> Float {
     guard score != 0.0 else { return -1 * Float.infinity }
     return log(score) + Float(timeStamp.timeIntervalSinceReferenceDate) * log(2) / halfLife

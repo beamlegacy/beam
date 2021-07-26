@@ -31,7 +31,17 @@ extension LongTermUrlScore: TableRecord {
 }
 
 class LongTermUrlScoreStore: LongTermUrlScoreStoreProtocol {
+    let db: GRDBDatabase
+    static let shared = LongTermUrlScoreStore()
+    init(db: GRDBDatabase = GRDBDatabase.shared) {
+        self.db = db
+    }
+
     func apply(to urlId: UInt64, changes: (LongTermUrlScore) -> Void) {
-        GRDBDatabase.shared.updateLongTermUrlScore(urlId: urlId, changes: changes)
+        db.updateLongTermUrlScore(urlId: urlId, changes: changes)
+    }
+
+    func getMany(urlIds: [UInt64]) -> [LongTermUrlScore] {
+        return db.getManyLongTermUrlScore(urlIds: urlIds)
     }
 }

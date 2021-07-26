@@ -156,6 +156,7 @@ public class BeamNote: BeamElement {
     @Published public var searchQueries: [String] = [] { didSet { change(.meta) } } ///< Search queries whose results were used to populate this note
     @Published public var visitedSearchResults: [VisitedPage] = [] { didSet { change(.meta) } } ///< URLs whose content were used to create this note
     @Published public var browsingSessions = [BrowsingTree]() { didSet { change(.meta) } }
+    public var sources = NoteSources()
     public var version: Int64 = 0
     public var savedVersion: Int64 = 0
     public var databaseId: UUID?
@@ -180,6 +181,7 @@ public class BeamNote: BeamElement {
         case searchQueries
         case visitedSearchResults
         case browsingSessions
+        case sources
     }
 
     public required init(from decoder: Decoder) throws {
@@ -197,7 +199,7 @@ public class BeamNote: BeamElement {
         if container.contains(.browsingSessions) {
             browsingSessions = try container.decode([BrowsingTree].self, forKey: .browsingSessions)
         }
-
+        sources = try container.decode(NoteSources.self, forKey: .sources)
         try super.init(from: decoder)
         checkHasNote()
     }
@@ -212,7 +214,7 @@ public class BeamNote: BeamElement {
         if !browsingSessions.isEmpty {
             try container.encode(browsingSessions, forKey: .browsingSessions)
         }
-
+        try container.encode(sources, forKey: .sources)
         try super.encode(to: encoder)
     }
 

@@ -379,6 +379,9 @@ class PointAndShoot: WebPageHolder, ObservableObject {
         self.page.addTextToClusteringManager(clusteringText, url: sourceUrl)
         // Convert BeamText to BeamElement of quote type
         let pendingQuotes = text2Quote(texts, sourceUrl.absoluteString)
+        // Adds urlId to current card source
+        let urlId = LinkStore.createIdFor(sourceUrl.absoluteString, title: nil)
+        currentCard.sources.add(urlId: urlId, type: .user)
         // Add all quotes to source Note
         if let source = self.page.addToNote(allowSearchResult: true) {
             pendingQuotes.then({ resolvedQuotes in

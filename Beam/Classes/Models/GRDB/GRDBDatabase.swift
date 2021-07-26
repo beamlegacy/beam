@@ -548,6 +548,10 @@ extension GRDBDatabase {
             Logger.shared.logError("Couldn't update url long term score for \(urlId)", category: .database)
         }
     }
+
+    func getManyLongTermUrlScore(urlIds: [UInt64]) -> [LongTermUrlScore] {
+        return (try? dbReader.read { db in try LongTermUrlScore.fetchAll(db, ids: urlIds) }) ?? []
+    }
 }
 
 extension GRDBDatabase {
