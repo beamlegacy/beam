@@ -281,7 +281,7 @@ private class NoteTableViewItem: TableViewItem {
         createdAt = document.createdAt
         updatedAt = document.updatedAt
         words = note.textStats.wordsCount
-        mentions = note.linksAndReferences.count
+        mentions = note.fastLinksAndReferences.count
     }
 
     override func isEqual(_ object: Any?) -> Bool {

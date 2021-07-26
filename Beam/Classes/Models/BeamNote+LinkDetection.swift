@@ -13,6 +13,10 @@ public extension BeamNote {
         return links + references
     }
 
+    var fastLinksAndReferences: [BeamNoteReference] {
+        return links + fastReferences
+    }
+
     var links: [BeamNoteReference] {
         return (try? GRDBDatabase.shared.fetchLinks(toNote: self.id).map({ bidiLink in
             BeamNoteReference(noteID: bidiLink.sourceNoteId, elementID: bidiLink.sourceElementId)
@@ -20,17 +24,23 @@ public extension BeamNote {
     }
 
     var references: [BeamNoteReference] {
-        return referencesMatching(self.title, id: self.id)
+        return referencesMatching(self.title, id: self.id, verifyMatch: true)
     }
 
-    private func referencesMatching(_ titleToMatch: String, id idToMatch: UUID) -> [BeamNoteReference] {
+    var fastReferences: [BeamNoteReference] {
+        return referencesMatching(self.title, id: self.id, verifyMatch: false)
+    }
+
+    private func referencesMatching(_ titleToMatch: String, id idToMatch: UUID, verifyMatch: Bool) -> [BeamNoteReference] {
         GRDBDatabase.shared.search(matchingPhrase: titleToMatch).compactMap { result -> BeamNoteReference? in
+            let noteRef = BeamNoteReference(noteID: result.noteId, elementID: result.uid)
+            guard verifyMatch else { return noteRef }
             guard result.noteId != self.id,
                   let note = BeamNote.fetch(AppDelegate.main.documentManager, id: result.noteId),
                   let element = note.findElement(result.uid),
                   element.hasReferenceToNote(named: titleToMatch)
             else { return nil }
-            return BeamNoteReference(noteID: result.noteId, elementID: result.uid)
+            return noteRef
         }
     }
 }
