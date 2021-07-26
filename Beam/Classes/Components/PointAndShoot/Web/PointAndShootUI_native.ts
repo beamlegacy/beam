@@ -96,6 +96,10 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
   hasSelection(hasSelection: boolean) {
     this.native.sendMessage("hasSelection", { hasSelection })
   }
+  
+  isTypingOnWebView(isTypingOnWebView: boolean): void {
+    this.native.sendMessage("isTypingOnWebView", { isTypingOnWebView })
+  }
 
   private rangeToHtml(range: BeamRange) {
     return Array.prototype.reduce.call(

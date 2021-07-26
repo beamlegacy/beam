@@ -46,7 +46,7 @@ function pointAndShootTestBed(frameEls = []): {pns: PointAndShoot, testUI: Point
 
   // Check initial state
   expect(testUI.eventsCount).toBeGreaterThanOrEqual(1)
-  expect(testUI.eventsCount).toEqual(5)
+  expect(testUI.eventsCount).toEqual(6)
   expect(testUI.findEventByName("hasSelection")).toBeTruthy()
   expect(testUI.findEventByName("selectBounds")).toBeTruthy()
   expect(testUI.findEventByName("shootBounds")).toBeTruthy()
@@ -79,7 +79,7 @@ test("single iframe point", () => {
     })
     rootPns.onMouseMove(outsideFrame1PointEvent)
 
-    expect(testUI.eventsCount).toEqual(5)
+    expect(testUI.eventsCount).toEqual(6)
     expect(testUI.findEventByName("pointBounds").pointTarget.element).toEqual(iframe1El)
   }
   {
@@ -92,12 +92,12 @@ test("single iframe point", () => {
     })
     iframe1Pns.onMouseMove(insideFrame1PointEvent)
     
-    expect(testUI.eventsCount).toEqual(5)
+    expect(testUI.eventsCount).toEqual(6)
     expect(testUI.findEventByName("pointBounds").pointTarget.element).toEqual(iframe1El)
 
     const delta = 50
     iframe1El.scrollY(delta)
     
-    expect(iframe1testUI.eventsCount).toEqual(15)
+    expect(iframe1testUI.eventsCount).toEqual(18)
   }
 })

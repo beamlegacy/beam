@@ -3,6 +3,9 @@ import { WebEventsUIMock } from "./WebEventsUIMock"
 import { BeamElement, BeamRange, BeamRangeGroup, BeamShootGroup } from "../BeamTypes"
 
 export class PointAndShootUIMock extends WebEventsUIMock implements PointAndShootUI {
+  isTypingOnWebView(isTypingOnWebView: boolean): void {
+      this.events.push({name: "isTypingOnWebView", isTypingOnWebView})
+  }
   pointBounds(pointTarget?: BeamShootGroup) {
     this.events.push({name: "pointBounds", pointTarget})
   }

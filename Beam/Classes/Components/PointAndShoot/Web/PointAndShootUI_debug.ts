@@ -14,6 +14,9 @@ export class PointAndShootUI_debug implements PointAndShootUI {
     this.native = native
     this.web = web
   }
+  isTypingOnWebView(isTypingOnWebView: boolean): void {
+      throw new Error("Method not implemented.")
+  }
   hasSelection(hasSelection: boolean) {
     throw new Error("Method not implemented.")
   }

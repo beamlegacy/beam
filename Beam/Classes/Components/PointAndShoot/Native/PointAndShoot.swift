@@ -34,6 +34,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
     @Published var shootConfirmationGroup: ShootGroup?
     @Published var isAltKeyDown: Bool = false
     @Published var hasActiveSelection: Bool = false
+    @Published var isTypingOnWebView: Bool = false
     @Published var mouseLocation: NSPoint = NSPoint()
 
     init(scorer: BrowsingScorer) {
@@ -223,6 +224,8 @@ class PointAndShoot: WebPageHolder, ObservableObject {
     /// Set activePointGroup with target. Updating the activePointGroup will update the UI directly.
     func point(_ target: Target, _ href: String) {
         guard activeShootGroup == nil else { return }
+        guard !isTypingOnWebView else { return }
+
         activePointGroup = ShootGroup("point-uuid", [target], href)
     }
 
@@ -232,9 +235,9 @@ class PointAndShoot: WebPageHolder, ObservableObject {
     ///   - targets: Set of targets to draw
     ///   - href: Url of frame targets are located in
     func pointShoot(_ groupId: String, _ target: Target, _ href: String) {
-        guard !targetIsDismissed(groupId) else {
-            return
-        }
+        guard !targetIsDismissed(groupId) else { return }
+        guard !isTypingOnWebView else { return }
+
         if targetIsCollected(groupId) {
             collect(groupId, [target], href)
             return
@@ -261,6 +264,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
     ///   - targets: Target rects to draw
     ///   - href: href of frame
     func select(_ groupId: String, _ targets: [Target], _ href: String) {
+        guard !isTypingOnWebView else { return }
         // first check if the incomming group is already collected
         if targetIsCollected(groupId) {
             collect(groupId, targets, href)
@@ -295,6 +299,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
     /// - Parameters:
     ///   - group: Group to be converted
     func selectShoot(_ group: ShootGroup) {
+        guard !isTypingOnWebView else { return }
         guard !targetIsDismissed(group.id) else {
             return
         }
@@ -314,6 +319,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
     ///   - href: Url of frame targets are located in
     func collect(_ groupId: String, _ targets: [Target], _ href: String) {
         guard targets.count > 0 else { return }
+        guard !isTypingOnWebView else { return }
 
         // Keep shootConfirmationGroup position when scrolling
         if shootConfirmationGroup != nil {
