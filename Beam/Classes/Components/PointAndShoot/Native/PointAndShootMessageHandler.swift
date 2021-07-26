@@ -6,6 +6,7 @@ enum PointAndShootMessages: String, CaseIterable {
     case pointAndShoot_shootBounds
     case pointAndShoot_selectBounds
     case pointAndShoot_hasSelection
+    case pointAndShoot_isTypingOnWebView
     case pointAndShoot_pinch
     case pointAndShoot_frameBounds
     case pointAndShoot_scroll
@@ -51,10 +52,6 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
                     pointAndShoot.pointShoot(target.id, target, href)
                 }
 
-            case PointAndShootMessages.pointAndShoot_hasSelection:
-                guard let hasSelection = dict["hasSelection"] as? Bool else { throw PointAndShootError("hasSelection payload incomplete") }
-                pointAndShoot.hasActiveSelection = hasSelection
-
             case PointAndShootMessages.pointAndShoot_selectBounds:
                 guard let selectBounds = dict["select"] as? [[String: AnyObject]]
                     else { throw PointAndShootError("select payload incomplete") }
@@ -66,6 +63,14 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
                         pointAndShoot.select(id, targets, href)
                     }
                 }
+
+            case PointAndShootMessages.pointAndShoot_hasSelection:
+                guard let hasSelection = dict["hasSelection"] as? Bool else { throw PointAndShootError("hasSelection payload incomplete") }
+                pointAndShoot.hasActiveSelection = hasSelection
+
+            case PointAndShootMessages.pointAndShoot_isTypingOnWebView:
+                guard let isTypingOnWebView = dict["isTypingOnWebView"] as? Bool else { throw PointAndShootError("isTypingOnWebView payload incomplete") }
+                pointAndShoot.isTypingOnWebView = isTypingOnWebView
 
             case PointAndShootMessages.pointAndShoot_pinch:
                 guard let scale = dict["scale"] as? CGFloat else { return }

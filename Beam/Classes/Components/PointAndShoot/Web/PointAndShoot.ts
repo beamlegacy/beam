@@ -38,6 +38,7 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
   pointTarget: BeamShootGroup
   shootTargets: BeamShootGroup[] = []
   selectionRangeGroups: BeamRangeGroup[] = []
+  isTypingOnWebView = false
 
   /**
    *
@@ -96,6 +97,7 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
     this.ui.shootBounds(this.shootTargets)
     this.ui.selectBounds(this.selectionRangeGroups)
     this.ui.hasSelection(this.hasSelection())
+    this.ui.isTypingOnWebView(this.isTypingOnWebView)
   }
 
   shoot(targetEl: BeamHTMLElement): void {
@@ -168,6 +170,7 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
       // Code when the (physical) mouse actually moves
       if (!this.isPointDisabled(ev)) {
         this.point(ev.target)
+        this.isTypingOnWebView = false
       }
     }
     this.mouseLocation.x = ev.clientX
@@ -201,7 +204,9 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
 
   onKeyDown(ev: BeamMouseEvent): void {
     this.sendBounds()
-    if (!this.isPointDisabled(ev)) {
+    if (this.isPointDisabled(ev)) {
+      this.isTypingOnWebView = true
+    } else {
       const target = this.win.document.elementFromPoint(this.mouseLocation.x, this.mouseLocation.y)
       this.point(target)
     }

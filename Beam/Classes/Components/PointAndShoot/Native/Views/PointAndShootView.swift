@@ -16,7 +16,7 @@ struct PointAndShootView: View {
         if let activeGroup = pns.activeShootGroup ?? pns.activePointGroup {
             if activeGroup.targets.count == 1,
                let target = activeGroup.targets.first {
-                let useActiveGroup = pns.hasGraceRectAndMouseOverlap(target, activeGroup.href, pns.mouseLocation) && pns.isAltKeyDown && !pns.isLargeTargetArea(target) || pns.activeShootGroup != nil
+                let useActiveGroup = pns.hasGraceRectAndMouseOverlap(target, activeGroup.href, pns.mouseLocation) && pns.isAltKeyDown && !pns.isLargeTargetArea(target) && !pns.isTypingOnWebView || pns.activeShootGroup != nil
                 let rectangleGroup = useActiveGroup ? activeGroup : pns.convertTargetToCircleShootGroup(target, activeGroup.href)
                 PointAndShootRectangleFrame(group: pns.translateAndScaleGroup(rectangleGroup), isRect: useActiveGroup)
             } else {

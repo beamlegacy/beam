@@ -6,4 +6,5 @@ export interface PointAndShootUI extends WebEventsUI {
   shootBounds(shootTargets: BeamShootGroup[]): void
   selectBounds(rangeGroups: BeamRangeGroup[]): void
   hasSelection(hasSelection: boolean): void
+  isTypingOnWebView(isTypingOnWebView: boolean): void
 }

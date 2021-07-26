@@ -95,6 +95,9 @@ export class PointAndShootUI_web extends WebEventsUI_web implements PointAndShoo
     super(win)
     this.log(`${this.toString()} instantiated`)
   }
+    isTypingOnWebView(isTypingOnWebView: boolean): void {
+        throw new Error("Method not implemented.")
+    }
   pointBounds(pointTarget?: BeamShootGroup): void {
       throw new Error("Method not implemented.")
   }
