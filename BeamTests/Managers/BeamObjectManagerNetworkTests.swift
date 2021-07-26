@@ -13,7 +13,6 @@ class BeamObjectManagerNetworkTests: QuickSpec {
         var sut: BeamObjectManager!
         let beamObjectHelper = BeamObjectTestsHelper()
         let beamHelper = BeamTestsHelper()
-        let beforeConfigApiHostname = Configuration.apiHostname
 
         beforeEach {
             // Need to freeze date to compare objects, as `createdAt` would be different from the network stubs we get
@@ -42,7 +41,6 @@ class BeamObjectManagerNetworkTests: QuickSpec {
             sut.clearNetworkCalls()
 
             Configuration.beamObjectAPIEnabled = EnvironmentVariables.beamObjectAPIEnabled
-            Configuration.apiHostname = beforeConfigApiHostname
 
             // Sad: this is broken when using Vinyl
 //            if !sut.isAllNetworkCallsCompleted() {
@@ -1013,65 +1011,5 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                 }
             }
         }
-    }
-}
-
-// Minimal object for the purpose of testing and storing during tests
-struct MyRemoteObject: BeamObjectProtocol, Equatable {
-    static var beamObjectTypeName = "my_remote_object"
-
-    var beamObjectId = UUID()
-    var createdAt = BeamDate.now
-    var updatedAt = BeamDate.now
-    var deletedAt: Date?
-
-    var previousChecksum: String?
-    var checksum: String?
-
-    var title: String?
-
-    // Used for encoding this into BeamObject
-    enum CodingKeys: String, CodingKey {
-        case beamObjectId
-        case title
-        case createdAt
-        case updatedAt
-        case deletedAt
-    }
-
-    static func == (lhs: Self, rhs: Self) -> Bool {
-        lhs.beamObjectId == rhs.beamObjectId &&
-            lhs.createdAt.intValue == rhs.createdAt.intValue &&
-            lhs.updatedAt.intValue == rhs.updatedAt.intValue &&
-            lhs.deletedAt?.intValue == rhs.deletedAt?.intValue &&
-            lhs.title == rhs.title
-    }
-}
-
-// Minimal manager
-class MyRemoteObjectManager {
-    static var receivedMyRemoteObjects: [MyRemoteObject] = []
-    static var store: [UUID: MyRemoteObject] = [:]
-}
-
-extension MyRemoteObjectManager: BeamObjectManagerDelegate {
-    typealias BeamObjectType = MyRemoteObject
-
-    func receivedObjects(_ objects: [MyRemoteObject]) throws {
-        Self.receivedMyRemoteObjects.append(contentsOf: objects)
-    }
-
-    func allObjects() throws -> [MyRemoteObject] {
-        Array(Self.store.values)
-    }
-
-    func persistChecksum(_ objects: [BeamObjectType],
-                         _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws {
-
-        for object in objects {
-            Self.store[object.beamObjectId]?.previousChecksum = object.previousChecksum
-        }
-
-        completion(.success(true))
     }
 }

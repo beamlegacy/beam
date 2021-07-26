@@ -610,8 +610,11 @@ extension DatabaseManager {
 
                     if Configuration.beamObjectAPIEnabled {
                         do {
-                            try self.saveOnBeamObjectAPI(updatedDatabaseStruct) {
-                                networkCompletion?($0)
+                            try self.saveOnBeamObjectAPI(updatedDatabaseStruct) { result in
+                                switch result {
+                                case .failure(let error): networkCompletion?(.failure(error))
+                                case .success: networkCompletion?(.success(true))
+                                }
                             }
                         } catch {
                             networkCompletion?(.failure(error))
@@ -1096,26 +1099,19 @@ extension DatabaseManager: BeamObjectManagerDelegate {
         return databaseStructs
     }
 
-    func persistChecksum(_ objects: [BeamObjectType],
-                         _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws {
+    func persistChecksum(_ objects: [BeamObjectType]) throws {
         let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
 
-        context.perform {
+        try context.performAndWait {
             for updateObject in objects {
                 guard let databaseCoreData = try? Database.fetchWithId(context, updateObject.id) else {
-                    completion(.failure(DatabaseManagerError.localDatabaseNotFound))
-                    return
+                    throw DatabaseManagerError.localDatabaseNotFound
                 }
 
                 databaseCoreData.beam_object_previous_checksum = updateObject.previousChecksum
             }
 
-            do {
-                let success = try Self.saveContext(context: context)
-                completion(.success(success))
-            } catch {
-                completion(.failure(error))
-            }
+            try Self.saveContext(context: context)
         }
     }
 }

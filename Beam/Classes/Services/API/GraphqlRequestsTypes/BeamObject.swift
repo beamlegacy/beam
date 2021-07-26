@@ -15,6 +15,8 @@ protocol BeamObjectProtocol: Codable {
     // to store as `BeamObject` and not include `previousChecksum` and `checksum`
     var previousChecksum: String? { get set }
     var checksum: String? { get set }
+
+//    func copy() -> BeamObjectProtocol
 }
 
 /// Used to store data on the BeamObject Beam API.
@@ -78,6 +80,11 @@ class BeamObject: Codable {
         let jsonData = try Self.encoder.encode(object)
         data = jsonData.asString
         dataChecksum = jsonData.SHA256
+
+//        if let data = data, let dataChecksum = dataChecksum {
+//            Logger.shared.logDebug("☘ SHA checksum on \(data): \(dataChecksum)",
+//                                   category: .beamObjectNetwork)
+//        }
     }
 
     static var encoder: JSONEncoder {

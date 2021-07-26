@@ -1,0 +1,55 @@
+import Foundation
+import XCTest
+import Fakery
+import Quick
+import Nimble
+import Combine
+import BeamCore
+
+@testable import Beam
+
+// Minimal object for the purpose of testing and storing during tests
+struct MyRemoteObject: BeamObjectProtocol {
+    static var beamObjectTypeName = "my_remote_object"
+
+    var beamObjectId = UUID()
+    var createdAt = BeamDate.now
+    var updatedAt = BeamDate.now
+    var deletedAt: Date?
+
+    var previousChecksum: String?
+    var checksum: String?
+
+    var title: String?
+
+    // Used for encoding this into BeamObject
+    enum CodingKeys: String, CodingKey {
+        case beamObjectId
+        case title
+        case createdAt
+        case updatedAt
+        case deletedAt
+    }
+}
+
+extension MyRemoteObject: Equatable {
+    static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.beamObjectId == rhs.beamObjectId &&
+            lhs.createdAt.intValue == rhs.createdAt.intValue &&
+            lhs.updatedAt.intValue == rhs.updatedAt.intValue &&
+            lhs.deletedAt?.intValue == rhs.deletedAt?.intValue &&
+            lhs.title == rhs.title
+    }
+}
+
+extension MyRemoteObject {
+    func copy() -> MyRemoteObject {
+        MyRemoteObject(beamObjectId: beamObjectId,
+                       createdAt: createdAt,
+                       updatedAt: updatedAt,
+                       deletedAt: deletedAt,
+                       previousChecksum: previousChecksum,
+                       checksum: checksum,
+                       title: title)
+    }
+}

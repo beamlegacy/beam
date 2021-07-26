@@ -725,7 +725,11 @@ public class DocumentManager: NSObject {
                             Self.networkTasksSemaphore.wait()
                             Self.networkTasks.removeValue(forKey: document_id)
                             Self.networkTasksSemaphore.signal()
-                            networkCompletion?(result)
+
+                            switch result {
+                            case .failure(let error): networkCompletion?(.failure(error))
+                            case .success: networkCompletion?(.success(true))
+                            }
                         }
                     } catch {
                         networkCompletion?(.failure(error))
@@ -2332,27 +2336,23 @@ extension DocumentManager {
 
 // MARK: - BeamObjectManagerDelegateProtocol
 extension DocumentManager: BeamObjectManagerDelegate {
-    func persistChecksum(_ objects: [DocumentStruct], _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws {
+    func persistChecksum(_ objects: [DocumentStruct]) throws {
         Logger.shared.logDebug("Saved \(objects.count) documents on the BeamObject API",
                                category: .documentNetwork)
 
-        CoreDataManager.shared.persistentContainer.performBackgroundTask { context in
+        let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
+
+        try context.performAndWait {
             for updateObject in objects {
                 guard let documentCoreData = try? Document.fetchWithId(context, updateObject.id) else {
-                    completion(.failure(DocumentManagerError.localDocumentNotFound))
-                    return
+                    throw DocumentManagerError.localDocumentNotFound
                 }
 
                 // TODO: store previous data sent for improved 3-ways merge?
                 documentCoreData.beam_object_previous_checksum = updateObject.previousChecksum
             }
 
-            do {
-                let success = try Self.saveContext(context: context)
-                completion(.success(success))
-            } catch {
-                completion(.failure(error))
-            }
+            try Self.saveContext(context: context)
         }
     }
 
@@ -2424,7 +2424,12 @@ extension DocumentManager: BeamObjectManagerDelegate {
                 completion(.failure(error))
             case .success:
                 do {
-                    try self.saveOnBeamObjectAPI(documentStruct, .fetchRemoteAndError, completion)
+                    try self.saveOnBeamObjectAPI(documentStruct, .fetchRemoteAndError) { result in
+                        switch result {
+                        case .failure(let error): completion(.failure(error))
+                        case .success: completion(.success(true))
+                        }
+                    }
                 } catch {
                     completion(.failure(error))
                 }
@@ -2433,11 +2438,8 @@ extension DocumentManager: BeamObjectManagerDelegate {
     }
 
     func manageConflict(_ documentStruct: DocumentStruct,
-                        _ remoteBeamObject: BeamObject,
-                        _ error: Error) throws -> DocumentStruct {
-        let remoteDocumentStruct: DocumentStruct = try remoteBeamObject.decodeBeamObject()
-
-        Logger.shared.logError("Could not save: \(error.localizedDescription)",
+                        _ remoteDocumentStruct: DocumentStruct) throws -> DocumentStruct {
+        Logger.shared.logError("Could not save because of conflict",
                                category: .documentNetwork)
         Logger.shared.logError("local object \(documentStruct.beamObjectPreviousChecksum ?? "-"): \(documentStruct)",
                                category: .documentNetwork)
@@ -2448,13 +2450,7 @@ extension DocumentManager: BeamObjectManagerDelegate {
 
         // TODO: we should merge `documentStruct` and `remoteBeamObject` instead of just resending the
         // same documentStruct we sent before
-        var mergedDocumentStruct = documentStruct.copy()
-
-        // Necessary?
-        mergedDocumentStruct.previousChecksum = remoteDocumentStruct.checksum
-
-        mergedDocumentStruct.beamObjectPreviousChecksum = remoteDocumentStruct.checksum
-        return mergedDocumentStruct
+        return documentStruct.copy()
     }
 }
 

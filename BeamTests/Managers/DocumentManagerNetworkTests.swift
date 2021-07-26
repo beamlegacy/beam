@@ -1941,7 +1941,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                         do {
                             try sut.saveOnBeamObjectAPI(docStruct) { result in
                                 expect { try result.get() }.toNot(throwError())
-                                expect { try result.get() } == true
+                                expect { try result.get() } == docStruct
                                 done()
                             }
                         } catch {
@@ -1976,7 +1976,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                             let objects: [DocumentStruct] = [docStruct, docStruct2]
                             _ = try sut.saveOnBeamObjectsAPI(objects) { result in
                                 expect { try result.get() }.toNot(throwError())
-                                expect { try result.get() } == true
+                                expect { try result.get() } == objects
                                 done()
                             }
                         } catch {

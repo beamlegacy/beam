@@ -564,7 +564,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
                         do {
                             try sut.saveOnBeamObjectAPI(dbStruct) { result in
                                 expect { try result.get() }.toNot(throwError())
-                                expect { try result.get() } == true
+                                expect { try result.get() } == dbStruct
                                 done()
                             }
                         } catch {
@@ -596,9 +596,11 @@ class DatabaseManagerNetworkTests: QuickSpec {
                 it("saves as beamObjects") {
                     waitUntil(timeout: .seconds(10)) { done in
                         do {
-                            _ = try sut.saveOnBeamObjectsAPI([dbStruct, dbStruct2]) { result in
+                            let objects: [DatabaseStruct] = [dbStruct, dbStruct2]
+
+                            _ = try sut.saveOnBeamObjectsAPI(objects) { result in
                                 expect { try result.get() }.toNot(throwError())
-                                expect { try result.get() } == true
+                                expect { try result.get() } == objects
                                 done()
                             }
                         } catch {

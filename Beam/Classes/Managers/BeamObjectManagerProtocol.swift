@@ -17,15 +17,17 @@ protocol BeamObjectManagerDelegate: class, BeamObjectManagerDelegateProtocol {
     func receivedObjects(_ objects: [BeamObjectType]) throws
 
     // Needed to store checksum and resend them in a future network request
-    func persistChecksum(_ objects: [BeamObjectType], _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws
+    func persistChecksum(_ objects: [BeamObjectType]) throws
 
     // Returns all objects, used to save all of them as beam objects
     func allObjects() throws -> [BeamObjectType]
 
     // When doing manual conflict management
     func manageConflict(_ object: BeamObjectType,
-                        _ remoteBeamObject: BeamObject,
-                        _ error: Error) throws -> BeamObjectType
+                        _ remoteObject: BeamObjectType) throws -> BeamObjectType
+
+    // When a conflict happens, we will resend a potentially updated version and should store its result
+    func saveObjectsAfterConflict(_ objects: [BeamObjectType]) throws
 }
 
 enum BeamObjectManagerDelegateError: Error {
@@ -46,9 +48,12 @@ extension BeamObjectManagerDelegate {
     }
 
     func manageConflict(_ object: BeamObjectType,
-                        _ remoteBeamObject: BeamObject,
-                        _ error: Error) throws -> BeamObjectType {
+                        _ remoteObject: BeamObjectType) throws -> BeamObjectType {
         throw BeamObjectManagerDelegateError.runtimeError("manageConflict must be implemented by the class")
+    }
+
+    func saveObjectsAfterConflict(_ objects: [BeamObjectType]) throws {
+        throw BeamObjectManagerDelegateError.runtimeError("saveObjectsAfterConflict must be implemented by the class")
     }
 
     func updatedObjectsOnly(_ objects: [BeamObjectType]) -> [BeamObjectType] {
@@ -62,13 +67,18 @@ extension BeamObjectManagerDelegate {
             throw APIRequestError.notAuthenticated
         }
 
-        return try saveOnBeamObjectsAPI(try allObjects(), .replace, completion)
+        return try saveOnBeamObjectsAPI(try allObjects(), .replace) { result in
+            switch result {
+            case .failure(let error): completion(.failure(error))
+            case .success: completion(.success(true))
+            }
+        }
     }
 
     @discardableResult
     func saveOnBeamObjectsAPI(_ objects: [BeamObjectType],
                               _ conflictPolicyForSave: BeamObjectConflictResolution = .replace,
-                              _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
+                              _ completion: @escaping ((Swift.Result<[BeamObjectType], Error>) -> Void)) throws -> URLSessionTask? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw APIRequestError.notAuthenticated
         }
@@ -76,7 +86,7 @@ extension BeamObjectManagerDelegate {
         let objectsToSave = updatedObjectsOnly(objects)
 
         guard !objectsToSave.isEmpty else {
-            completion(.success(true))
+            completion(.success([]))
             return nil
         }
 
@@ -93,11 +103,19 @@ extension BeamObjectManagerDelegate {
                 case .replace:
                     completion(.failure(error))
                 case .fetchRemoteAndError:
-                    self.manageConflictAndSave(objectsToSave, error, completion)
+                    self.manageConflictAndSave(objectsToSave, error) { result in
+                        switch result {
+                        case .failure(let error):
+                            completion(.failure(error))
+                        case .success(let remoteObjects):
+                            completion(.success(remoteObjects))
+                        }
+                    }
                 }
             case .success(let remoteObjects):
                 do {
-                    try self.persistChecksum(remoteObjects, completion)
+                    try self.persistChecksum(remoteObjects)
+                    completion(.success(remoteObjects))
                 } catch {
                     completion(.failure(error))
                 }
@@ -105,23 +123,10 @@ extension BeamObjectManagerDelegate {
         }
     }
 
-    func saveOnBeamObjectAPIFailure(_ object: BeamObjectType,
-                                    _ error: Error,
-                                    _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
-        // Early return except for checksum issues.
-        guard case BeamObjectManagerError.invalidChecksum = error else {
-            completion(.failure(error))
-            return
-        }
-
-        // This should never be called since invalid checksum are managed inside BeamObjectManager
-        assert(false)
-    }
-
     @discardableResult
     func saveOnBeamObjectAPI(_ object: BeamObjectType,
                              _ conflictPolicyForSave: BeamObjectConflictResolution = .replace,
-                             _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
+                             _ completion: @escaping ((Swift.Result<BeamObjectType, Error>) -> Void)) throws -> URLSessionTask? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw APIRequestError.notAuthenticated
         }
@@ -144,7 +149,8 @@ extension BeamObjectManagerDelegate {
 
             case .success(let remoteObject):
                 do {
-                    try self.persistChecksum([remoteObject], completion)
+                    try self.persistChecksum([remoteObject])
+                    completion(.success(remoteObject))
                 } catch {
                     completion(.failure(error))
                 }
@@ -158,31 +164,67 @@ extension BeamObjectManagerDelegate {
 
     func manageConflictAndSave(_ object: BeamObjectType,
                                _ error: Error,
-                               _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
+                               _ completion: @escaping ((Swift.Result<BeamObjectType, Error>) -> Void)) {
         // Early return except for checksum issues.
-        guard case BeamObjectManagerError.invalidChecksum(let remoteBeamObject) = error else {
+        guard case BeamObjectManagerObjectError<BeamObjectType>.invalidChecksum(let remoteObject) = error else {
             completion(.failure(error))
             return
         }
 
         do {
             // Checksum issue, the API side of the object was updated since our last fetch
-            let mergedObject = try manageConflict(object, remoteBeamObject, error)
+            var mergedObject = try manageConflict(object, remoteObject)
+            mergedObject.previousChecksum = remoteObject.checksum
 
-            try self.saveOnBeamObjectAPI(mergedObject, .fetchRemoteAndError, completion)
+            try self.saveOnBeamObjectAPI(mergedObject, .fetchRemoteAndError) { result in
+                switch result {
+                case .failure: completion(result)
+                case .success(let remoteObject):
+                    do {
+                        try self.saveObjectsAfterConflict([remoteObject])
+                        completion(result)
+                    } catch {
+                        completion(.failure(error))
+                    }
+                }
+            }
         } catch {
             completion(.failure(error))
         }
     }
 
+    // swiftlint:disable:next cyclomatic_complexity
     func manageConflictAndSave(_ objects: [BeamObjectType],
                                _ error: Error,
-                               _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
+                               _ completion: @escaping ((Swift.Result<[BeamObjectType], Error>) -> Void)) {
+//        // This case happens when we use the network call to send multiple documents,
+//        // but only send 1 and have an invalid checksum
+//        if case BeamObjectManagerError.invalidChecksum = error,
+//           let object = objects.first {
+//            manageConflictAndSave(object, error) { result in
+//                switch result {
+//                case .failure(let error): completion(.failure(error))
+//                case .success(let remoteObject): completion(.success([remoteObject]))
+//                }
+//            }
+//            return
+//        }
+
         // This case happens when we use the network call to send multiple documents,
         // but only send 1 and have an invalid checksum
-        if case BeamObjectManagerError.invalidChecksum = error,
-           let object = objects.first {
-            manageConflictAndSave(object, error, completion)
+        if case BeamObjectManagerObjectError<BeamObjectType>.invalidChecksum(let object) = error {
+            print(object)
+            print(objects)
+
+            print("foo")
+            manageConflictAndSave(object, error) { result in
+                switch result {
+                case .failure(let error): completion(.failure(error))
+                case .success(let remoteObject):
+
+                    completion(.success([remoteObject]))
+                }
+            }
             return
         }
 
@@ -198,7 +240,7 @@ extension BeamObjectManagerDelegate {
              We have multiple errors. If all errors are about invalid checksums, we can fix and retry. Else we'll just
              stop and call the completion handler with the original error
              */
-            guard case BeamObjectManagerError.invalidChecksum(let remoteObject) = insideError else {
+            guard case BeamObjectManagerObjectError<BeamObjectType>.invalidChecksum(let remoteObject) = insideError else {
                 completion(.failure(error))
                 return
             }
@@ -208,12 +250,14 @@ extension BeamObjectManagerDelegate {
             guard let object = objects.first(where: { $0.beamObjectId == remoteObject.beamObjectId }) else {
                 Logger.shared.logError("Could not save: \(insideError.localizedDescription)",
                                        category: .documentNetwork)
-                Logger.shared.logError("No ID :( for \(remoteObject.id)", category: .documentNetwork)
+                Logger.shared.logError("No ID :( for \(remoteObject.beamObjectId)", category: .documentNetwork)
                 continue
             }
 
             do {
-                let mergedObject = try manageConflict(object, remoteObject, insideError)
+                var mergedObject = try manageConflict(object, remoteObject)
+                mergedObject.previousChecksum = remoteObject.checksum
+
                 newObjects.append(mergedObject)
             } catch {
                 completion(.failure(error))
@@ -222,7 +266,18 @@ extension BeamObjectManagerDelegate {
         }
 
         do {
-            try self.saveOnBeamObjectsAPI(newObjects, .fetchRemoteAndError, completion)
+            try self.saveOnBeamObjectsAPI(newObjects, .fetchRemoteAndError) { result in
+                switch result {
+                case .failure: completion(result)
+                case .success(let remoteObjects):
+                    do {
+                        try self.saveObjectsAfterConflict(remoteObjects)
+                        completion(result)
+                    } catch {
+                        completion(.failure(error))
+                    }
+                }
+            }
         } catch {
             completion(.failure(error))
         }

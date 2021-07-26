@@ -35,7 +35,7 @@ extension PasswordManager: BeamObjectManagerDelegate {
         return passwords
     }
 
-    func persistChecksum(_ objects: [PasswordRecord], _ completion: @escaping ((Result<Bool, Error>) -> Void)) throws {
+    func persistChecksum(_ objects: [PasswordRecord]) throws {
         Logger.shared.logDebug("Saved \(objects.count) passwords on the BeamObject API",
                                category: .passwordNetwork)
 
@@ -44,14 +44,12 @@ extension PasswordManager: BeamObjectManagerDelegate {
         for updateObject in objects {
             // TODO: make faster with a `fetchWithIds(ids: [UUID])`
             guard var password = try? passwordsDB.fetchWithId(updateObject.beamObjectId) else {
-                completion(.failure(PasswordManagerError.localPasswordNotFound))
-                return
+                throw PasswordManagerError.localPasswordNotFound
             }
 
             password.previousChecksum = updateObject.previousChecksum
             passwords.append(password)
         }
         try passwordsDB.save(passwords: passwords)
-        completion(.success(true))
     }
 }
