@@ -199,7 +199,9 @@ public class BeamNote: BeamElement {
         if container.contains(.browsingSessions) {
             browsingSessions = try container.decode([BrowsingTree].self, forKey: .browsingSessions)
         }
-        sources = try container.decode(NoteSources.self, forKey: .sources)
+        if container.contains(.sources) {
+            sources = try container.decode(NoteSources.self, forKey: .sources)
+        }
         try super.init(from: decoder)
         checkHasNote()
     }
