@@ -1084,18 +1084,7 @@ extension DatabaseManager: BeamObjectManagerDelegate {
                                category: .databaseNetwork)
     }
 
-    internal func updatedDatabaseStructs(_ databaseStructs: [DatabaseStruct]) -> [DatabaseStruct] {
-        databaseStructs.filter {
-            $0.previousChecksum != $0.checksum || $0.previousChecksum == nil
-        }
-    }
-
-    func saveAllOnBeamObjectApi(_ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
-        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-            completion(.success(false))
-            return nil
-        }
-
+    func allObjects() throws -> [DatabaseStruct] {
         let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
 
         // Note: when this becomes a memory hog because we manipulate all local databases, we'll want to loop through
@@ -1104,86 +1093,21 @@ extension DatabaseManager: BeamObjectManagerDelegate {
             try Database.rawFetchAll(context).map { DatabaseStruct(database: $0) }
         }
 
-        return try saveOnBeamObjectsAPI(databaseStructs, completion)
+        return databaseStructs
     }
 
-    @discardableResult
-    func saveOnBeamObjectsAPI(_ databaseStructs: [DatabaseStruct],
-                              _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
-        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-            completion(.success(false))
-            return nil
-        }
+    func persistChecksum(_ objects: [BeamObjectType],
+                         _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws {
+        let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
 
-        let databaseStructsToSave = updatedDatabaseStructs(databaseStructs)
-
-        guard !databaseStructsToSave.isEmpty else {
-            completion(.success(true))
-            return nil
-        }
-
-        let objectManager = BeamObjectManager()
-
-        return try objectManager.saveToAPI(databaseStructsToSave) { result in
-            switch result {
-            case .failure(let error):
-                Logger.shared.logError("Could not save all \(databaseStructsToSave): \(error.localizedDescription)",
-                                       category: .databaseNetwork)
-                self.saveOnBeamObjectsAPIFailure(databaseStructs, error, completion)
-            case .success(let remoteStructs):
-                self.saveOnBeamObjectsAPISuccess(remoteStructs, completion)
-            }
-        }
-    }
-
-    internal func saveOnBeamObjectsAPIFailure(_ databaseStructs: [DatabaseStruct],
-                                              _ error: Error,
-                                              _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
-        // This case happens when we use the network call to send multiple databases,
-        // but only send 1 and have an invalid checksum
-        if case BeamObjectManagerError.invalidChecksum = error,
-           let databaseStruct = databaseStructs.first {
-            saveOnBeamObjectAPIFailure(databaseStruct, error, completion)
-            return
-        }
-
-        // We don't manage anything else than `BeamObjectManagerError.multipleErrors`
-        guard case BeamObjectManagerError.multipleErrors(let errors) = error else {
-            completion(.failure(error))
-            return
-        }
-
-        for insideError in errors {
-            /*
-             We have multiple errors. If all errors are about invalid checksums, we can fix and retry. Else we'll just
-             stop and call the completion handler with the original error
-             */
-            guard case BeamObjectManagerError.invalidChecksum = insideError else {
-                completion(.failure(error))
-                return
-            }
-
-            // This should never be called since invalid checksum are managed inside BeamObjectManager
-            assert(false)
-        }
-
-        // This should never be called since invalid checksum are managed inside BeamObjectManager
-        assert(false)
-    }
-
-    internal func saveOnBeamObjectsAPISuccess(_ updateBeamObjects: [DatabaseStruct],
-                                              _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
-        Logger.shared.logDebug("Saved \(updateBeamObjects.count) objects on the BeamObject API",
-                               category: .databaseNetwork)
-
-        CoreDataManager.shared.persistentContainer.performBackgroundTask { context in
-            for updateBeamObject in updateBeamObjects {
-                guard let databaseCoreData = try? Database.fetchWithId(context, updateBeamObject.id) else {
+        context.perform {
+            for updateObject in objects {
+                guard let databaseCoreData = try? Database.fetchWithId(context, updateObject.id) else {
                     completion(.failure(DatabaseManagerError.localDatabaseNotFound))
                     return
                 }
 
-                databaseCoreData.beam_object_previous_checksum = updateBeamObject.previousChecksum
+                databaseCoreData.beam_object_previous_checksum = updateObject.previousChecksum
             }
 
             do {
@@ -1193,46 +1117,6 @@ extension DatabaseManager: BeamObjectManagerDelegate {
                 completion(.failure(error))
             }
         }
-    }
-
-    @discardableResult
-    func saveOnBeamObjectAPI(_ databaseStruct: DatabaseStruct,
-                             _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
-        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-            completion(.success(false))
-            return nil
-        }
-
-        let objectManager = BeamObjectManager()
-
-        // TODO: Race conditions, add semaphore
-        Self.networkTasks[databaseStruct.id]?.cancel()
-
-        let networkTask = try objectManager.saveToAPI(databaseStruct) { result in
-            switch result {
-            case .failure(let error):
-                self.saveOnBeamObjectAPIFailure(databaseStruct, error, completion)
-            case .success(let remoteDatabaseStruct):
-                self.saveOnBeamObjectsAPISuccess([remoteDatabaseStruct], completion)
-            }
-        }
-
-        Self.networkTasks[databaseStruct.id] = networkTask
-
-        return networkTask
-    }
-
-    internal func saveOnBeamObjectAPIFailure(_ databaseStruct: DatabaseStruct,
-                                             _ error: Error,
-                                             _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
-        // Early return except for checksum issues.
-        guard case BeamObjectManagerError.invalidChecksum = error else {
-            completion(.failure(error))
-            return
-        }
-
-        // This should never be called since invalid checksum are managed inside BeamObjectManager
-        assert(false)
     }
 }
 

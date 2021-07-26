@@ -1051,6 +1051,7 @@ struct MyRemoteObject: BeamObjectProtocol, Equatable {
 // Minimal manager
 class MyRemoteObjectManager {
     static var receivedMyRemoteObjects: [MyRemoteObject] = []
+    static var store: [UUID: MyRemoteObject] = [:]
 }
 
 extension MyRemoteObjectManager: BeamObjectManagerDelegate {
@@ -1060,18 +1061,17 @@ extension MyRemoteObjectManager: BeamObjectManagerDelegate {
         Self.receivedMyRemoteObjects.append(contentsOf: objects)
     }
 
-    func saveAllOnBeamObjectApi(_ completion: @escaping ((Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
-        completion(.success(true))
-        return nil
+    func allObjects() throws -> [MyRemoteObject] {
+        Array(Self.store.values)
     }
 
-    func saveOnBeamObjectAPI(_ object: MyRemoteObject, _ completion: @escaping ((Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
-        completion(.success(true))
-        return nil
-    }
+    func persistChecksum(_ objects: [BeamObjectType],
+                         _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws {
 
-    func saveOnBeamObjectsAPI(_ objects: [MyRemoteObject], _ completion: @escaping ((Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
+        for object in objects {
+            Self.store[object.beamObjectId]?.previousChecksum = object.previousChecksum
+        }
+
         completion(.success(true))
-        return nil
     }
 }

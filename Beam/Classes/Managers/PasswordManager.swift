@@ -29,79 +29,26 @@ extension PasswordManager: BeamObjectManagerDelegate {
         try passwordsDB.save(passwords: passwords)
     }
 
-    func saveAllOnBeamObjectApi(_ completion: @escaping ((Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
-        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-            throw BeamObjectManagerError.notAuthenticated
-        }
-
+    func allObjects() throws -> [PasswordRecord] {
         let passwordsDB = try PasswordsDB(path: Self.passwordsDBPath)
         let passwords = try passwordsDB.allRecords()
-
-        return try saveOnBeamObjectsAPI(passwords, completion)
+        return passwords
     }
 
-    func saveOnBeamObjectAPI(_ password: PasswordRecord,
-                             _ completion: @escaping ((Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
-        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-            throw BeamObjectManagerError.notAuthenticated
-        }
-
-        let objectManager = BeamObjectManager()
-
-        return try objectManager.saveToAPI(password) { result in
-            switch result {
-            case .failure(let error):
-                completion(.failure(error))
-            case .success(let updateBeamObject):
-                do {
-                    try self.saveOnBeamObjectsAPISuccess([updateBeamObject], completion)
-                } catch {
-                    completion(.failure(error))
-                }
-            }
-        }
-    }
-
-    func saveOnBeamObjectsAPI(_ passwords: [PasswordRecord],
-                              _ completion: @escaping ((Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
-        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-            throw BeamObjectManagerError.notAuthenticated
-        }
-
-        let objectManager = BeamObjectManager()
-
-        return try objectManager.saveToAPI(passwords) { result in
-            switch result {
-            case .failure(let error):
-                Logger.shared.logError("Could not save all \(passwords.count) passwords: \(error.localizedDescription)",
-                                       category: .passwordNetwork)
-                completion(.failure(error))
-            case .success(let updateBeamObjects):
-                do {
-                    try self.saveOnBeamObjectsAPISuccess(updateBeamObjects, completion)
-                } catch {
-                    completion(.failure(error))
-                }
-            }
-        }
-    }
-
-    /// Will store dataChecksum
-    internal func saveOnBeamObjectsAPISuccess(_ updateBeamObjects: [PasswordRecord],
-                                              _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws {
-        Logger.shared.logDebug("Saved \(updateBeamObjects.count) objects on the BeamObject API",
+    func persistChecksum(_ objects: [PasswordRecord], _ completion: @escaping ((Result<Bool, Error>) -> Void)) throws {
+        Logger.shared.logDebug("Saved \(objects.count) passwords on the BeamObject API",
                                category: .passwordNetwork)
 
         let passwordsDB = try PasswordsDB(path: Self.passwordsDBPath)
         var passwords: [PasswordRecord] = []
-        for updateBeamObject in updateBeamObjects {
+        for updateObject in objects {
             // TODO: make faster with a `fetchWithIds(ids: [UUID])`
-            guard var password = try? passwordsDB.fetchWithId(updateBeamObject.beamObjectId) else {
+            guard var password = try? passwordsDB.fetchWithId(updateObject.beamObjectId) else {
                 completion(.failure(PasswordManagerError.localPasswordNotFound))
                 return
             }
 
-            password.previousChecksum = updateBeamObject.previousChecksum
+            password.previousChecksum = updateObject.previousChecksum
             passwords.append(password)
         }
         try passwordsDB.save(passwords: passwords)

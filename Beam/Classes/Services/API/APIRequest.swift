@@ -263,8 +263,8 @@ class APIRequest {
 
 // MARK: Foundation
 extension APIRequest {
-    //swiftlint:disable:next function_body_length
     @discardableResult
+    //swiftlint:disable:next function_body_length
     func performRequest<T: Decodable & Errorable, E: GraphqlParametersProtocol>(bodyParamsRequest: E,
                                                                                 authenticatedCall: Bool? = nil,
                                                                                 completionHandler: @escaping (Swift.Result<T, Error>) -> Void) throws -> URLSessionDataTask {
