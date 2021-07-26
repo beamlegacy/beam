@@ -47,7 +47,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
 
         var name = "BeamData-\(Configuration.env)"
          if let jobId = ProcessInfo.processInfo.environment["CI_JOB_ID"] {
-             Logger.shared.logDebug("Using Gitlab CI Job ID for dataFolder: \(jobId)", category: .general)
+            Logger.shared.logDebug("Using Gitlab CI Job ID for dataFolder: \(jobId)", category: .general)
             name += "-\(jobId)"
          }
 
@@ -69,7 +69,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
                 } catch {
                     Logger.shared.logError("Unable to move item \(fileName) \(directory) to \(localDirectory): \(error)", category: .general)
                 }
-
             }
              return localDirectory + fileName
          } catch {

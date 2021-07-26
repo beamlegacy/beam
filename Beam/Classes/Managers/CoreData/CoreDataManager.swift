@@ -193,8 +193,6 @@ class CoreDataManager {
     static func storeURLFromEnv() -> URL? {
         var name = "Beam-\(Configuration.env)"
         if let jobId = ProcessInfo.processInfo.environment["CI_JOB_ID"] {
-            Logger.shared.logDebug("Using Gitlab CI Job ID for sqlite file: \(jobId)", category: .coredata)
-
             name = "Beam-\(Configuration.env)-\(jobId)"
         }
 

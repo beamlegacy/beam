@@ -24,8 +24,6 @@ class BeamTestsHelper {
         var fullFilename = "\(recordingPath)/Logs/Beam/Vinyl/\(filename).json"
 
         if let jobId = ProcessInfo.processInfo.environment["CI_JOB_ID"] {
-            Logger.shared.logDebug("Using Gitlab CI Job ID for Vinyl files: \(jobId)", category: .network)
-
             fullFilename = "\(recordingPath)/Logs/Beam/Vinyl/\(jobId)/\(filename).json"
         }
 
@@ -70,8 +68,6 @@ class BeamTestsHelper {
 
         var networkRequestsFilename = "\(recordingPath)/Logs/Beam/Vinyl/\(filename)_calls.json"
         if let jobId = ProcessInfo.processInfo.environment["CI_JOB_ID"] {
-            Logger.shared.logDebug("Using Gitlab CI Job ID for Vinyl files: \(jobId)")
-
             networkRequestsFilename = "\(recordingPath)/Logs/Beam/Vinyl/\(jobId)/\(filename)_calls.json"
         }
 
