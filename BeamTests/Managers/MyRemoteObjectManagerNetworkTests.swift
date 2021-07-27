@@ -189,8 +189,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     // Create 1 conflicted object
                     object1.title = newTitle1
                     object1.previousChecksum = "00a3c318664ebae8b2239cd2be6dae3f546feb789cb005fa9f31512709f2fb00"
-
-//                    APIRequest.networkCallFiles = []
                 }
 
                 context("with replace policy") {
@@ -307,6 +305,159 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
             }
 
             context("with multiple conflicted object") {
+                let newTitle1 = "new Title1"
+                let newTitle2 = "new Title2"
+                var object3: MyRemoteObject!
+
+                beforeEach {
+                    let values = Array(MyRemoteObjectManager.store.values)
+
+                    object3 = values.first(where: { $0.beamObjectId.uuidString.lowercased() == "395d94e1-e0df-4eca-93e6-8778984bcd58" })
+
+                    MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum = beamObjectHelper.saveOnAPI(object1)?.dataChecksum
+
+                    // Create 1 conflicted object
+                    object1.title = newTitle1
+                    object1.previousChecksum = "00a3c318664ebae8b2239cd2be6dae3f546feb789cb005fa9f31512709f2fb00"
+
+                    MyRemoteObjectManager.store[object2.beamObjectId]?.previousChecksum = beamObjectHelper.saveOnAPI(object2)?.dataChecksum
+
+                    // Create 1 conflicted object
+                    object2.title = newTitle2
+                    object2.previousChecksum = "11a3c318664ebae8b2239cd2be6dae3f546feb789cb005fa9f31512709f2fb11"
+                }
+
+                context("with replace policy") {
+                    fit("saves objects") {
+                        let networkCalls = APIRequest.callsCount
+
+                        waitUntil(timeout: .seconds(10)) { done in
+                            do {
+                                _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3]) { result in
+                                    expect { try result.get() }.toNot(throwError())
+
+                                    done()
+                                }
+                            } catch {
+                                fail(error.localizedDescription)
+                            }
+                        }
+
+                        expect(APIRequest.callsCount - networkCalls) == 4
+                        expect(APIRequest.networkCallFiles) == ["sign_in",
+                                                                "update_beam_object",
+                                                                "update_beam_object",
+                                                                "update_beam_objects",
+                                                                "beam_object",
+                                                                "beam_object",
+                                                                "update_beam_objects"]
+
+                        let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1.beamObjectId)
+                        expect(object1) == remoteObject1
+
+                        let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2.beamObjectId)
+                        expect(object2) == remoteObject2
+
+                        let remoteObject3: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object3.beamObjectId)
+                        expect(object3) == remoteObject3
+
+                        expect(remoteObject1?.checksum) == (try self.checksum(object1))
+                        expect(remoteObject2?.checksum) == (try self.checksum(object2))
+                        expect(remoteObject3?.checksum) == (try self.checksum(object3))
+                    }
+
+                    fit("stores previousChecksum") {
+                        waitUntil(timeout: .seconds(1800)) { done in
+                            do {
+                                _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3]) { result in
+                                    expect { try result.get() }.toNot(throwError())
+
+                                    done()
+                                }
+                            } catch {
+                                fail(error.localizedDescription)
+                            }
+                        }
+
+                        expect(MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum) == (try self.checksum(object1))
+                        expect(MyRemoteObjectManager.store[object2.beamObjectId]?.previousChecksum) == (try self.checksum(object2))
+                        expect(MyRemoteObjectManager.store[object3.beamObjectId]?.previousChecksum) == (try self.checksum(object3))
+                    }
+                }
+
+                context("with fetch and raise error policy") {
+                    fit("saves objects") {
+                        let networkCalls = APIRequest.callsCount
+
+                        waitUntil(timeout: .seconds(1800)) { done in
+                            do {
+                                _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3], .fetchRemoteAndError) { result in
+                                    expect { try result.get() }.toNot(throwError())
+
+                                    done()
+                                }
+                            } catch {
+                                fail(error.localizedDescription)
+                            }
+                        }
+
+                        expect(APIRequest.callsCount - networkCalls) == 4
+                        expect(APIRequest.networkCallFiles) == ["sign_in",
+                                                                "update_beam_object",
+                                                                "update_beam_object",
+                                                                "update_beam_objects",
+                                                                "beam_object",
+                                                                "beam_object",
+                                                                "update_beam_objects"]
+
+                        var expectedResult1 = object1.copy()
+                        expectedResult1.title = "merged: \(newTitle1)\(title1!)"
+
+                        var expectedResult2 = object2.copy()
+                        expectedResult2.title = "merged: \(newTitle2)\(title2!)"
+
+                        let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1.beamObjectId)
+                        expect(expectedResult1) == remoteObject1
+
+                        let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2.beamObjectId)
+                        expect(expectedResult2) == remoteObject2
+
+                        let remoteObject3: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object3.beamObjectId)
+                        expect(object3) == remoteObject3
+
+                        expect(remoteObject1?.checksum) == (try self.checksum(expectedResult1))
+                        expect(remoteObject2?.checksum) == (try self.checksum(expectedResult2))
+                        expect(remoteObject3?.checksum) == (try self.checksum(object3))
+                    }
+
+                    fit("stores previousChecksum") {
+                        waitUntil(timeout: .seconds(1800)) { done in
+                            do {
+                                _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3], .fetchRemoteAndError) { result in
+                                    expect { try result.get() }.toNot(throwError())
+
+                                    if let objects = try? result.get() {
+                                        Logger.shared.logDebug("⚠️ received objects:", category: .beamObjectNetwork)
+                                        dump(objects)
+                                    }
+                                    done()
+                                }
+                            } catch {
+                                fail(error.localizedDescription)
+                            }
+                        }
+
+                        var expectedResult1 = object1.copy()
+                        expectedResult1.title = "merged: \(newTitle1)\(title1!)"
+
+                        var expectedResult2 = object2.copy()
+                        expectedResult2.title = "merged: \(newTitle2)\(title2!)"
+
+                        expect(MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum) == (try self.checksum(expectedResult1))
+                        expect(MyRemoteObjectManager.store[object2.beamObjectId]?.previousChecksum) == (try self.checksum(expectedResult2))
+                        expect(MyRemoteObjectManager.store[object3.beamObjectId]?.previousChecksum) == (try self.checksum(object3))
+                    }
+                }
             }
 
             context("with all objects in conflict") {
@@ -316,7 +467,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                 beforeEach {
                     MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum = beamObjectHelper.saveOnAPI(object1)?.dataChecksum
                     MyRemoteObjectManager.store[object2.beamObjectId]?.previousChecksum = beamObjectHelper.saveOnAPI(object2)?.dataChecksum
-//                    APIRequest.networkCallFiles = []
                 }
 
                 context("with replace policy") {
@@ -661,8 +811,17 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                      checksum: nil,
                                      title: "Object 2")
 
+        let object3 = MyRemoteObject(beamObjectId: "395d94e1-e0df-4eca-93e6-8778984bcd58".uuid ?? UUID(),
+                                     createdAt: BeamDate.now,
+                                     updatedAt: BeamDate.now,
+                                     deletedAt: nil,
+                                     previousChecksum: nil,
+                                     checksum: nil,
+                                     title: "Object 3")
+
         MyRemoteObjectManager.store[object1.beamObjectId] = object1
         MyRemoteObjectManager.store[object2.beamObjectId] = object2
+        MyRemoteObjectManager.store[object3.beamObjectId] = object3
     }
 
     func checksum(_ object: MyRemoteObject) throws -> String {
