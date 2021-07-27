@@ -404,7 +404,11 @@ import Promises
         let toolBars = windowFeatures.toolbarsVisibility?.boolValue ?? defaultValue
         let resizing = windowFeatures.allowsResizing?.boolValue ?? defaultValue
 
-        let windowFrame = NSRect(x: windowFeatures.x?.floatValue ?? 0, y: windowFeatures.y?.floatValue ?? 0, width: windowFeatures.width?.floatValue ?? 800, height: windowFeatures.height?.floatValue ?? 600)
+        let x = windowFeatures.x?.floatValue ?? 0
+        let y = windowFeatures.y?.floatValue ?? 0
+        let width = windowFeatures.width?.floatValue ?? Float(webviewWindow?.frame.width ?? 800)
+        let height = windowFeatures.height?.floatValue ?? Float(webviewWindow?.frame.height ?? 600)
+        let windowFrame = NSRect(x: x, y: y, width: width, height: height)
 
         var newWebView: BeamWebView
         var newWindow: NSWindow
