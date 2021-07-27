@@ -17,6 +17,7 @@ private enum MenuEnablingConditionTag: Int {
 
     // other conditions
     case hasBrowserTab = 1001 // enable only if browser tabs are open
+    case hasTabGroupingWindowPrefOn = 1011
 }
 
 extension AppDelegate: NSMenuDelegate, NSMenuItemValidation {
@@ -57,6 +58,8 @@ extension AppDelegate: NSMenuDelegate, NSMenuItemValidation {
             return rawTag & mode.rawValue != 0
         } else if tagEnum == .hasBrowserTab {
             return state?.hasBrowserTabs ?? false
+        } else if tagEnum == .hasTabGroupingWindowPrefOn {
+            return PreferencesManager.showTabGrougpingMenuItem
         }
         return false
     }
