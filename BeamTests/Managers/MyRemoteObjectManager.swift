@@ -35,16 +35,17 @@ extension MyRemoteObjectManager: BeamObjectManagerDelegate {
                         _ remoteObject: BeamObjectType) throws -> BeamObjectType {
         var result = object.copy()
 
-        result.title = "merged: "
+        var newTitle = "merged: "
 
         if let title = object.title {
-            result.title = result.title! + title
+            newTitle = newTitle + title
         }
 
         if let title = remoteObject.title {
-            result.title = result.title! + title
+            newTitle = newTitle + title
         }
 
+        result.title = newTitle
         return result
     }
 

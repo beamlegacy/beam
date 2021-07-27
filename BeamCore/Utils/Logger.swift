@@ -40,6 +40,7 @@ public enum LogCategory: String {
     case commandManager
     case beamObject
     case beamObjectNetwork
+    case beamObjectDebug
     case downloader
     case autocompleteManager
     case topDomain

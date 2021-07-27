@@ -81,10 +81,10 @@ class BeamObject: Codable {
         data = jsonData.asString
         dataChecksum = jsonData.SHA256
 
-//        if let data = data, let dataChecksum = dataChecksum {
-//            Logger.shared.logDebug("☘ SHA checksum on \(data): \(dataChecksum)",
-//                                   category: .beamObjectNetwork)
-//        }
+        if let data = data, let dataChecksum = dataChecksum {
+            Logger.shared.logDebug("🦞 SHA checksum on \(data): \(dataChecksum)",
+                                   category: .beamObjectNetwork)
+        }
     }
 
     static var encoder: JSONEncoder {

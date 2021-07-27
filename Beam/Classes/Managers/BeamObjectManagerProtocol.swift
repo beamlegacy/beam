@@ -79,6 +79,8 @@ extension BeamObjectManagerDelegate {
     func saveOnBeamObjectsAPI(_ objects: [BeamObjectType],
                               _ conflictPolicyForSave: BeamObjectConflictResolution = .replace,
                               _ completion: @escaping ((Swift.Result<[BeamObjectType], Error>) -> Void)) throws -> URLSessionTask? {
+        Logger.shared.logDebug("⚠️ inside saveOnBeamObjectsAPI", category: .beamObjectNetwork)
+
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw APIRequestError.notAuthenticated
         }
@@ -96,21 +98,16 @@ extension BeamObjectManagerDelegate {
         return try objectManager.saveToAPI(objectsToSave) { result in
             switch result {
             case .failure(let error):
-                Logger.shared.logError("Could not save all \(objectsToSave): \(error.localizedDescription)",
+                Logger.shared.logError("Could not save all \(objectsToSave.count) objects: \(error.localizedDescription)",
                                        category: .databaseNetwork)
 
                 switch conflictPolicyForSave {
                 case .replace:
                     completion(.failure(error))
                 case .fetchRemoteAndError:
-                    self.manageConflictAndSave(objectsToSave, error) { result in
-                        switch result {
-                        case .failure(let error):
-                            completion(.failure(error))
-                        case .success(let remoteObjects):
-                            completion(.success(remoteObjects))
-                        }
-                    }
+                    Logger.shared.logDebug("⚠️ will call manageConflictAndSave", category: .beamObjectNetwork)
+
+                    self.manageConflictAndSave(objectsToSave, error, completion)
                 }
             case .success(let remoteObjects):
                 do {
@@ -127,6 +124,8 @@ extension BeamObjectManagerDelegate {
     func saveOnBeamObjectAPI(_ object: BeamObjectType,
                              _ conflictPolicyForSave: BeamObjectConflictResolution = .replace,
                              _ completion: @escaping ((Swift.Result<BeamObjectType, Error>) -> Void)) throws -> URLSessionTask? {
+        Logger.shared.logDebug("⚠️ inside saveOnBeamObjectAPI", category: .beamObjectNetwork)
+
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw APIRequestError.notAuthenticated
         }
@@ -144,7 +143,18 @@ extension BeamObjectManagerDelegate {
                 case .replace:
                     completion(.failure(error))
                 case .fetchRemoteAndError:
-                    self.manageConflictAndSave(object, error, completion)
+                    self.manageConflictAndSave(error) { result in
+                        switch result {
+                        case .failure(let error): completion(.failure(error))
+                        case .success(let objects):
+                            guard let newObject = objects.first, objects.count == 1 else {
+                                completion(.failure(BeamObjectManagerDelegateError.runtimeError("Had more than one object back")))
+                                return
+                            }
+
+                            completion(.success(newObject))
+                        }
+                    }
                 }
 
             case .success(let remoteObject):
@@ -162,27 +172,47 @@ extension BeamObjectManagerDelegate {
         return networkTask
     }
 
-    func manageConflictAndSave(_ object: BeamObjectType,
-                               _ error: Error,
-                               _ completion: @escaping ((Swift.Result<BeamObjectType, Error>) -> Void)) {
+    func manageConflictAndSave(_ error: Error,
+                               _ completion: @escaping ((Swift.Result<[BeamObjectType], Error>) -> Void)) {
         // Early return except for checksum issues.
-        guard case BeamObjectManagerObjectError<BeamObjectType>.invalidChecksum(let remoteObject) = error else {
+        guard case BeamObjectManagerObjectError<BeamObjectType>.invalidChecksum(let conflictedObjects, let goodObjects, let remoteObjects) = error else {
             completion(.failure(error))
             return
         }
 
         do {
-            // Checksum issue, the API side of the object was updated since our last fetch
-            var mergedObject = try manageConflict(object, remoteObject)
-            mergedObject.previousChecksum = remoteObject.checksum
+            var mergedObjects: [BeamObjectType] = []
 
-            try self.saveOnBeamObjectAPI(mergedObject, .fetchRemoteAndError) { result in
+            for conflictedObject in conflictedObjects {
+                guard let remoteObject = remoteObjects.first(where: { $0.beamObjectId == conflictedObject.beamObjectId }) else { continue }
+
+                var mergedObject = try manageConflict(conflictedObject, remoteObject)
+                mergedObject.previousChecksum = remoteObject.checksum
+
+                mergedObjects.append(mergedObject)
+            }
+
+            Logger.shared.logDebug("⚠️ merged Objects", category: .beamObjectNetwork)
+            dump(mergedObjects)
+
+            try self.saveOnBeamObjectsAPI(mergedObjects, .fetchRemoteAndError) { result in
                 switch result {
-                case .failure: completion(result)
-                case .success(let remoteObject):
+                case .failure(let error):
+                    completion(.failure(error))
+                case .success(let remoteObjects):
                     do {
-                        try self.saveObjectsAfterConflict([remoteObject])
-                        completion(result)
+                        try self.saveObjectsAfterConflict(remoteObjects)
+
+                        var allObjects: [BeamObjectType] = []
+                        allObjects.append(contentsOf: goodObjects)
+                        allObjects.append(contentsOf: remoteObjects)
+
+                        Logger.shared.logDebug("⚠️ allObjects Objects", category: .beamObjectNetwork)
+                        dump(allObjects)
+
+                        try self.persistChecksum(goodObjects)
+
+                        completion(.success(allObjects))
                     } catch {
                         completion(.failure(error))
                     }
@@ -193,38 +223,34 @@ extension BeamObjectManagerDelegate {
         }
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
     func manageConflictAndSave(_ objects: [BeamObjectType],
                                _ error: Error,
                                _ completion: @escaping ((Swift.Result<[BeamObjectType], Error>) -> Void)) {
-//        // This case happens when we use the network call to send multiple documents,
-//        // but only send 1 and have an invalid checksum
-//        if case BeamObjectManagerError.invalidChecksum = error,
-//           let object = objects.first {
-//            manageConflictAndSave(object, error) { result in
-//                switch result {
-//                case .failure(let error): completion(.failure(error))
-//                case .success(let remoteObject): completion(.success([remoteObject]))
-//                }
-//            }
-//            return
-//        }
 
         // This case happens when we use the network call to send multiple documents,
         // but only send 1 and have an invalid checksum
-        if case BeamObjectManagerObjectError<BeamObjectType>.invalidChecksum(let object) = error {
-            print(object)
-            print(objects)
+        if case BeamObjectManagerObjectError<BeamObjectType>.invalidChecksum(let conflictedObjects, let goodObjects, let remoteObjects) = error {
+            Logger.shared.logDebug("⚠️ inside BeamObjectManagerObjectError", category: .beamObjectNetwork)
 
-            print("foo")
-            manageConflictAndSave(object, error) { result in
-                switch result {
-                case .failure(let error): completion(.failure(error))
-                case .success(let remoteObject):
+            Logger.shared.logDebug("⚠️ conflictedObjects: ", category: .beamObjectNetwork)
+            dump(conflictedObjects)
 
-                    completion(.success([remoteObject]))
-                }
+            Logger.shared.logDebug("⚠️ goodObjects: ", category: .beamObjectNetwork)
+            dump(goodObjects)
+
+            Logger.shared.logDebug("⚠️ remoteObjects: ", category: .beamObjectNetwork)
+            dump(remoteObjects)
+
+            Logger.shared.logDebug("⚠️ objects: ", category: .beamObjectNetwork)
+            dump(objects)
+
+            guard conflictedObjects.count == 1 else {
+                completion(.failure(BeamObjectManagerDelegateError.runtimeError("Had more than one object back")))
+                return
             }
+
+            manageConflictAndSave(error, completion)
             return
         }
 
@@ -235,29 +261,32 @@ extension BeamObjectManagerDelegate {
         }
 
         var newObjects: [BeamObjectType] = []
+        var goodObjects: [BeamObjectType] = []
         for insideError in errors {
             /*
              We have multiple errors. If all errors are about invalid checksums, we can fix and retry. Else we'll just
              stop and call the completion handler with the original error
              */
-            guard case BeamObjectManagerObjectError<BeamObjectType>.invalidChecksum(let remoteObject) = insideError else {
+            guard case BeamObjectManagerObjectError<BeamObjectType>.invalidChecksum(let conflictedObjects, let errorGoodObjects, let remoteObjects) = insideError else {
                 completion(.failure(error))
                 return
             }
 
-            // Here we should try to merge remoteBeamObject converted as a DocumentStruct, and our local one.
-            // For now we just overwrite the API with our local version with a batch call resending all of them
-            guard let object = objects.first(where: { $0.beamObjectId == remoteObject.beamObjectId }) else {
-                Logger.shared.logError("Could not save: \(insideError.localizedDescription)",
-                                       category: .documentNetwork)
-                Logger.shared.logError("No ID :( for \(remoteObject.beamObjectId)", category: .documentNetwork)
-                continue
+            guard let conflictedObject = conflictedObjects.first, conflictedObjects.count == 1 else {
+                completion(.failure(BeamObjectManagerDelegateError.runtimeError("Had more than one object back")))
+                return
+            }
+
+            guard let remoteObject = remoteObjects.first, remoteObjects.count == 1 else {
+                completion(.failure(BeamObjectManagerDelegateError.runtimeError("Had more than one object back")))
+                return
             }
 
             do {
-                var mergedObject = try manageConflict(object, remoteObject)
+                var mergedObject = try manageConflict(conflictedObject, remoteObject)
                 mergedObject.previousChecksum = remoteObject.checksum
 
+                goodObjects.append(contentsOf: errorGoodObjects)
                 newObjects.append(mergedObject)
             } catch {
                 completion(.failure(error))
@@ -265,14 +294,17 @@ extension BeamObjectManagerDelegate {
             }
         }
 
+        Logger.shared.logDebug("⚠️ inside manageConflictAndSave, will save multiple objects", category: .beamObjectNetwork)
+
         do {
             try self.saveOnBeamObjectsAPI(newObjects, .fetchRemoteAndError) { result in
                 switch result {
                 case .failure: completion(result)
-                case .success(let remoteObjects):
+                case .success(let newObjectsSaved):
                     do {
-                        try self.saveObjectsAfterConflict(remoteObjects)
-                        completion(result)
+                        try self.saveObjectsAfterConflict(newObjectsSaved)
+
+                        completion(.success(goodObjects + newObjectsSaved))
                     } catch {
                         completion(.failure(error))
                     }

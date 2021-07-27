@@ -32,14 +32,14 @@ extension BeamObjectManagerError: LocalizedError {
 }
 
 enum BeamObjectManagerObjectError<T: BeamObjectProtocol>: Error {
-    case invalidChecksum(T)
+    case invalidChecksum([T], [T], [T])
 }
 
 extension BeamObjectManagerObjectError: LocalizedError {
     public var errorDescription: String? {
         switch self {
-        case .invalidChecksum(let object):
-            return "Invalid Checksum \(object.beamObjectId)"
+        case .invalidChecksum(let conflictedObjects, let goodObjects, let remoteObjects):
+            return "Invalid Checksums: \(conflictedObjects.map { $0.beamObjectId }), good objects: \(goodObjects.map { $0.beamObjectId }), remote objects: \(remoteObjects.map { $0.beamObjectId })"
         }
     }
 }

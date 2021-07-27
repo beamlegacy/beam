@@ -30,6 +30,8 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
             BeamObjectManager.unRegisterAll()
             sut.registerOnBeamObjectManager()
+
+            self.deleteAll()
         }
 
         afterEach {
@@ -41,17 +43,11 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
         describe("saveAllOnBeamObjectApi()") {
             beforeEach {
                 self.createObjects()
+                APIRequest.networkCallFiles = []
             }
 
             afterEach {
-                let semaphore = DispatchSemaphore(value: 0)
-
-                _ = try? BeamObjectRequest().deleteAll { _ in
-                    semaphore.signal()
-                }
-
-                _ = semaphore.wait(timeout: DispatchTime.now() + .seconds(5))
-                MyRemoteObjectManager.store.removeAll()
+                self.deleteAll()
             }
 
             it("saves all objects") {
@@ -111,21 +107,16 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                 let values = Array(MyRemoteObjectManager.store.values)
 
-                object1 = values.first
+                object1 = values.first(where: { $0.beamObjectId.uuidString.lowercased() == "195d94e1-e0df-4eca-93e6-8778984bcd58" })
                 title1 = object1.title!
-                object2 = values.last
+                object2 = values.first(where: { $0.beamObjectId.uuidString.lowercased() == "295d94e1-e0df-4eca-93e6-8778984bcd58" })
                 title2 = object2.title!
+
+                APIRequest.networkCallFiles = []
             }
 
             afterEach {
-                let semaphore = DispatchSemaphore(value: 0)
-
-                _ = try? BeamObjectRequest().deleteAll { _ in
-                    semaphore.signal()
-                }
-
-                _ = semaphore.wait(timeout: DispatchTime.now() + .seconds(5))
-                MyRemoteObjectManager.store.removeAll()
+                self.deleteAll()
             }
 
             it("saves all objects") {
@@ -178,8 +169,8 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                 }
 
                 let values = Array(MyRemoteObjectManager.store.values)
-                let newObject1 = values.first
-                let newObject2 = values.last
+                let newObject1 = values.first(where: { $0.beamObjectId.uuidString.lowercased() == "195d94e1-e0df-4eca-93e6-8778984bcd58" })
+                let newObject2 = values.first(where: { $0.beamObjectId.uuidString.lowercased() == "295d94e1-e0df-4eca-93e6-8778984bcd58" })
 
                 expect(newObject1?.previousChecksum) == (try self.checksum(object1))
                 expect(newObject2?.previousChecksum) == (try self.checksum(object2))
@@ -193,13 +184,16 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                 beforeEach {
                     MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum = beamObjectHelper.saveOnAPI(object1)?.dataChecksum
+
+                    // Create 1 conflicted object
+                    object1.title = newTitle1
+                    object1.previousChecksum = "00a3c318664ebae8b2239cd2be6dae3f546feb789cb005fa9f31512709f2fb00"
+
                     APIRequest.networkCallFiles = []
                 }
 
                 context("with replace policy") {
                     it("saves objects") {
-                        object1.title = newTitle1
-
                         let networkCalls = APIRequest.callsCount
 
                         waitUntil(timeout: .seconds(10)) { done in
@@ -230,9 +224,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     }
 
                     it("stores previousChecksum") {
-                        object1.title = newTitle1
-
-                        waitUntil(timeout: .seconds(10)) { done in
+                        waitUntil(timeout: .seconds(1800)) { done in
                             do {
                                 _ = try sut.saveOnBeamObjectsAPI([object1, object2]) { result in
                                     expect { try result.get() }.toNot(throwError())
@@ -251,11 +243,9 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                 context("with fetch and raise error policy") {
                     it("saves objects") {
-                        object1.title = newTitle1
-
                         let networkCalls = APIRequest.callsCount
 
-                        waitUntil(timeout: .seconds(10)) { done in
+                        waitUntil(timeout: .seconds(1800)) { done in
                             do {
                                 _ = try sut.saveOnBeamObjectsAPI([object1, object2], .fetchRemoteAndError) { result in
                                     expect { try result.get() }.toNot(throwError())
@@ -270,7 +260,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         expect(APIRequest.callsCount - networkCalls) == 3
                         expect(APIRequest.networkCallFiles) == ["update_beam_objects",
                                                                 "beam_object",
-                                                                "update_beam_object"]
+                                                                "update_beam_objects"]
 
                         var expectedResult1 = object1.copy()
                         expectedResult1.title = "merged: \(newTitle1)\(title1!)"
@@ -285,14 +275,16 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         expect(remoteObject2?.checksum) == (try self.checksum(object2))
                     }
 
-                    fit("stores previousChecksum") {
-                        object1.title = newTitle1
-
-                        waitUntil(timeout: .seconds(10)) { done in
+                    it("stores previousChecksum") {
+                        waitUntil(timeout: .seconds(1800)) { done in
                             do {
                                 _ = try sut.saveOnBeamObjectsAPI([object1, object2], .fetchRemoteAndError) { result in
                                     expect { try result.get() }.toNot(throwError())
 
+                                    if let objects = try? result.get() {
+                                        Logger.shared.logDebug("⚠️ received objects:", category: .beamObjectNetwork)
+                                        dump(objects)
+                                    }
                                     done()
                                 }
                             } catch {
@@ -309,7 +301,10 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                 }
             }
 
-            context("with conflict") {
+            context("with multiple conflicted object") {
+            }
+
+            context("with all objects in conflict") {
                 let newTitle1 = "new Title1"
                 let newTitle2 = "new Title2"
 
@@ -463,17 +458,11 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                         checksum: nil,
                                         title: title)
                 MyRemoteObjectManager.store[object.beamObjectId] = object
+                APIRequest.networkCallFiles = []
             }
 
             afterEach {
-                let semaphore = DispatchSemaphore(value: 0)
-
-                _ = try? BeamObjectRequest().deleteAll { _ in
-                    semaphore.signal()
-                }
-
-                _ = semaphore.wait(timeout: DispatchTime.now() + .seconds(5))
-                MyRemoteObjectManager.store.removeAll()
+                self.deleteAll()
             }
 
             it("saves object") {
@@ -525,6 +514,10 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                 beforeEach {
                     MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum = beamObjectHelper.saveOnAPI(object)?.dataChecksum
                     APIRequest.networkCallFiles = []
+
+                    // Create 1 conflicted object
+//                    object.title = newTitle
+                    object.previousChecksum = "00a3c318664ebae8b2239cd2be6dae3f546feb789cb005fa9f31512709f2fb00"
                 }
 
                 context("with replace policy") {
@@ -596,7 +589,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         expect(APIRequest.callsCount - networkCalls) == 3
                         expect(APIRequest.networkCallFiles) == ["update_beam_object",
                                                                 "beam_object",
-                                                                "update_beam_object"]
+                                                                "update_beam_objects"]
 
                         var expectedResult = object.copy()
                         expectedResult.title = "merged: \(newTitle)\(title)"
@@ -661,8 +654,21 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
         let jsonData = try BeamObject.encoder.encode(object)
         let result = jsonData.SHA256
 
-//        Logger.shared.logDebug("☠️ SHA on \(jsonData.asString): \(result)", category: .beamObject)
+        if let string = jsonData.asString {
+            Logger.shared.logDebug("🍀 SHA checksum on \(string): \(result)", category: .beamObjectNetwork)
+        }
 
         return result
+    }
+
+    func deleteAll() {
+        let semaphore = DispatchSemaphore(value: 0)
+
+        _ = try? BeamObjectRequest().deleteAll { _ in
+            semaphore.signal()
+        }
+
+        _ = semaphore.wait(timeout: DispatchTime.now() + .seconds(5))
+        MyRemoteObjectManager.store.removeAll()
     }
 }
