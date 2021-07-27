@@ -71,6 +71,12 @@ public enum BeamNoteType: Codable, Equatable {
         return formater.string(from: date)
     }
 
+    public static func iso8601ForDate(_ date: Date) -> String {
+        let formater = ISO8601DateFormatter()
+        formater.formatOptions = .withFullDate
+        return formater.string(from: date)
+    }
+
     public static func journalForDate(_ date: Date) -> BeamNoteType {
         return .journal(titleForDate(date))
     }
