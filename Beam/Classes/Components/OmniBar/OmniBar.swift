@@ -36,11 +36,11 @@ struct OmniBar: View {
     private func setIsEditing(_ editing: Bool) {
         state.focusOmniBox = editing
         if editing {
-            if let url = browserTabsManager.currentTab?.url?.absoluteString, state.mode == .web {
+            if state.mode == .web, let url = browserTabsManager.currentTab?.url?.absoluteString {
                 autocompleteManager.searchQuerySelectedRange = url.wholeRange
                 autocompleteManager.setQueryWithoutAutocompleting(url)
             }
-        } else if state.mode == .web {
+        } else if state.mode == .web && browserTabsManager.currentTab?.url != nil {
             autocompleteManager.resetQuery()
         }
     }
