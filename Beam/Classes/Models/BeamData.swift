@@ -145,6 +145,12 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         $lastChangedElement.sink { element in
             guard let element = element else { return }
             try? GRDBDatabase.shared.append(element: element)
+            if let note = element.note,
+               note.type == .note,
+               let changed = note.changed?.1,
+               changed == .text {
+                self.clusteringManager.addNote(note: note)
+            }
         }.store(in: &scope)
 
         $tabToIndex.sink { [weak self] tabToIndex in
