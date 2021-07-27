@@ -92,6 +92,7 @@ class ContextMenuPresenter {
         window.contentView?.addSubview(menu)
 
         var position = convertPointToScreen(atPoint, fromView: view, inWindow: parentWindow)
+        position = window.convertPoint(fromScreen: position)
         position.y = max(0, position.y - menu.bounds.height)
         menu.setFrameOrigin(position)
 
