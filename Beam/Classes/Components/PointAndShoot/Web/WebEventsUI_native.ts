@@ -43,7 +43,7 @@ export class WebEventsUI_native implements WebEventsUI {
   }
 
   setResizeInfo(resizeInfo) {
-    this.native.sendMessage("resize", resizeInfo)
+    // Nothing to do here
   }
 
   setOnLoadInfo(framesInfo: FrameInfo[]) {
