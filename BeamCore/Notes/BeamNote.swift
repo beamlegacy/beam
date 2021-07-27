@@ -36,6 +36,15 @@ public enum BeamNoteType: Codable, Equatable {
         }
     }
 
+    public var journalDateString: String? {
+        switch self {
+        case .journal(let dateString):
+            return dateString
+        default:
+            return nil
+        }
+    }
+
     public var isFutureJournal: Bool {
         switch self {
         case .journal(let dateString):

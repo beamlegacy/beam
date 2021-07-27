@@ -25,7 +25,8 @@ extension BeamNote: BeamNoteDocument {
                                   data: data,
                                   documentType: type.isJournal ? .journal : .note,
                                   version: version,
-                                  isPublic: isPublic)
+                                  isPublic: isPublic,
+                                  journalDate: type.journalDateString)
         } catch {
             Logger.shared.logError("Unable to encode BeamNote into DocumentStruct [\(title) {\(id)}]", category: .document)
             return nil

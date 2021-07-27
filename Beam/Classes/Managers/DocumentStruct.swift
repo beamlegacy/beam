@@ -13,6 +13,7 @@ public struct DocumentStruct {
     var previousChecksum: String?
     var version: Int64
     var isPublic: Bool = false
+    var journalDate: String?
 
     var uuidString: String {
         id.uuidString.lowercased()
@@ -55,6 +56,7 @@ extension DocumentStruct {
         self.version = document.version
         self.isPublic = document.is_public
         self.databaseId = document.database_id
+        self.journalDate = document.journal_date
     }
 
     func asApiType() -> DocumentAPIType {
