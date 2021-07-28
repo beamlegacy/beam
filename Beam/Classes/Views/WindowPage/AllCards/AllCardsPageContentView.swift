@@ -11,28 +11,31 @@ import Combine
 
 class AllCardsViewModel: ObservableObject {
 
-    var data: BeamData?
-
+    fileprivate var data: BeamData?
     @Published fileprivate var allNotes = [DocumentStruct]() {
         didSet {
             updateNoteItemsFromAllNotes()
         }
     }
-
-    private var cancellables = Set<AnyCancellable>()
-
     @Published fileprivate var allNotesItems = [NoteTableViewItem]()
     @Published fileprivate var privateNotesItems = [NoteTableViewItem]()
     @Published fileprivate var publicNotesItems = [NoteTableViewItem]()
+    @Published fileprivate var shouldReloadData: Bool? = false
+
+    private var coreDataObservers = Set<AnyCancellable>()
+    private var metadataFetchers = Set<AnyCancellable>()
+    private var notesMetadataCache: NoteListMetadataCache {
+        NoteListMetadataCache.shared
+    }
 
     init() {
         CoreDataContextObserver.shared
             .publisher(for: .anyDocumentChange)
             .debounce(for: .milliseconds(500), scheduler: DispatchQueue.main)
-            .sink { _ in
-                self.refreshAllNotes()
+            .sink { [weak self] _ in
+                self?.refreshAllNotes()
             }
-            .store(in: &cancellables)
+            .store(in: &coreDataObservers)
     }
 
     fileprivate func refreshAllNotes() {
@@ -40,19 +43,74 @@ class AllCardsViewModel: ObservableObject {
         allNotes = documentManager.loadAll()
     }
 
-    fileprivate func updateNoteItemsFromAllNotes() {
-        guard let documentManager = data?.documentManager else { return }
-        allNotesItems = allNotes.map { doc in
-            var note: BeamNote
-            do {
-                note = try BeamNote.instanciateNote(documentManager, doc, keepInMemory: false, decodeChildren: false)
-            } catch {
-                note = BeamNote.fetchOrCreate(documentManager, title: doc.title)
+    private func updateNoteItemsFromAllNotes() {
+        allNotesItems = allNotes.compactMap { doc in
+            let note = BeamNote.getFetchedNote(doc.id)
+            let item = NoteTableViewItem(document: doc, note: note)
+            if let metadata = notesMetadataCache.metadata(for: item.id) {
+                item.mentions = metadata.mentions
+                if item.words < 0 {
+                    item.words = metadata.wordsCount
+                }
             }
-            return NoteTableViewItem(document: doc, note: note)
+            return item
         }
-        publicNotesItems = allNotesItems.filter({ $0.note.isPublic })
-        privateNotesItems = allNotesItems.filter({ !$0.note.isPublic })
+        updatePublicPrivateLists()
+        asyncComputeNotesMetadata(notesItems: allNotesItems)
+    }
+
+    private func updatePublicPrivateLists() {
+        publicNotesItems = allNotesItems.filter({ $0.isPublic })
+        privateNotesItems = allNotesItems.filter({ !$0.isPublic })
+    }
+
+    private func updateMetadatasForItems(with fetchedNotes: [UUID: BeamNote]) {
+        var shouldReload = false
+        allNotesItems = allNotesItems.map { item in
+            if let metadata = notesMetadataCache.metadata(for: item.id), let note = fetchedNotes[item.id] {
+                item.mentions = metadata.mentions
+                item.words = metadata.wordsCount
+                item.note = note
+                shouldReload = true
+            }
+            return item
+        }
+        updatePublicPrivateLists()
+        shouldReloadData = shouldReload
+    }
+
+    private func asyncComputeNotesMetadata(notesItems: [NoteTableViewItem]) {
+        guard let documentManager = data?.documentManager else { return }
+        metadataFetchers.removeAll()
+        fetchAllNotesMetadata(for: notesItems, documentManager: documentManager)
+            .receive(on: DispatchQueue.main)
+            .sink { fetchedNotes in
+                self.updateMetadatasForItems(with: fetchedNotes)
+            }
+            .store(in: &metadataFetchers)
+    }
+
+    private func fetchAllNotesMetadata(for notesItems: [NoteTableViewItem], documentManager: DocumentManager) -> AnyPublisher<[UUID: BeamNote], Never> {
+        Future { promise in
+            var metadatas = [UUID: NoteListMetadata]()
+            var fetchedNotes = [UUID: BeamNote]()
+            DispatchQueue.global(qos: .userInteractive).async {
+                notesItems.forEach { item in
+                    guard item.note == nil || item.mentions < 0 else { return }
+                    guard let note = item.note ?? item.note(withDocumentManager: documentManager) else { return }
+                    let mentions = note.linksAndReferences(with: documentManager, fast: true).count
+                    let metadata = NoteListMetadata(mentions: mentions, wordsCount: note.textStats.wordsCount)
+                    metadatas[item.id] = metadata
+                    fetchedNotes[item.id] = note
+                }
+                DispatchQueue.main.async {
+                    metadatas.forEach { key, value in
+                        NoteListMetadataCache.shared.saveMetadata(value, for: key)
+                    }
+                    promise(.success(fetchedNotes))
+                }
+            }
+        }.eraseToAnyPublisher()
     }
 }
 
@@ -94,13 +152,18 @@ struct AllCardsPageContentView: View {
         return fmt
     }()
 
+    static private func loadingIntValueString(_ value: Any?) -> String {
+        guard let intValue = value as? Int else { return "" }
+        return intValue >= 0 ? "\(intValue)" : "--"
+    }
+
     private var columns = [
         TableViewColumn(key: "checkbox", title: "", type: TableViewColumn.ColumnType.CheckBox,
                         sortable: false, resizable: false, width: 16),
         TableViewColumn(key: "title", title: "Title", editable: true,
                         isLink: true, sortableDefaultAscending: true, width: 200),
-        TableViewColumn(key: "words", title: "Words", width: 50, stringFromKeyValue: { "\($0 ?? "")" }),
-        TableViewColumn(key: "mentions", title: "Mentions", width: 70, stringFromKeyValue: { "\($0 ?? "")" }),
+        TableViewColumn(key: "words", title: "Words", width: 50, stringFromKeyValue: Self.loadingIntValueString),
+        TableViewColumn(key: "mentions", title: "Mentions", width: 70, stringFromKeyValue: Self.loadingIntValueString),
         TableViewColumn(key: "createdAt", title: "Created", stringFromKeyValue: { value in
             if let date = value as? Date {
                 return AllCardsPageContentView.dateFormatter.string(from: date)
@@ -153,7 +216,9 @@ struct AllCardsPageContentView: View {
             }
             .frame(height: 22)
             .padding(.vertical, 3)
-            TableView(items: currentNotesList, columns: columns, creationRowTitle: listType == .publicNotes ? "New Public Card" : "New Private Card") { (newText, row) in
+            TableView(items: currentNotesList, columns: columns,
+                      creationRowTitle: listType == .publicNotes ? "New Public Card" : "New Private Card",
+                      shouldReloadData: $model.shouldReloadData) { (newText, row) in
                 onEditingText(newText, row: row, in: currentNotesList)
             } onSelectionChanged: { (selectedIndexes) in
                 Logger.shared.logDebug("selected: \(selectedIndexes.map { $0 })")
@@ -207,14 +272,18 @@ struct AllCardsPageContentView: View {
     func showGlobalContextualMenu(at: NSPoint, for row: Int? = nil, allowImports: Bool = false) {
         let notes = currentNotesList
         var selectedNotes: [BeamNote] = []
+        let docManager = data.documentManager
         if let row = row, row < notes.count {
-            selectedNotes = [notes[row].note]
+            let item = notes[row]
+            if let note = item.note ?? item.note(withDocumentManager: docManager) {
+                selectedNotes = [note]
+            }
         } else {
-            selectedNotes = notes.enumerated().filter { i, _ in selectedRowsIndexes.contains(i) }.map({ _, el -> BeamNote in
-                el.note
+            selectedNotes = notes.enumerated().filter { i, _ in selectedRowsIndexes.contains(i) }.compactMap({ _, item -> BeamNote? in
+                item.note ?? item.note(withDocumentManager: docManager)
             })
         }
-        let handler = AllCardsContextualMenu(documentManager: state.data.documentManager, selectedNotes: selectedNotes, onFinish: { shouldReload in
+        let handler = AllCardsContextualMenu(documentManager: docManager, selectedNotes: selectedNotes, onFinish: { shouldReload in
             if shouldReload {
                 model.refreshAllNotes()
             }
@@ -268,26 +337,44 @@ private enum CellIdentifiers {
 
 @objcMembers
 private class NoteTableViewItem: TableViewItem {
-    var note: BeamNote
+    var id: UUID {
+        note?.id ?? document.id
+    }
+
+    var isPublic: Bool {
+        note?.isPublic ?? document.isPublic
+    }
+
+    var note: BeamNote? {
+        didSet {
+            words = note?.textStats.wordsCount ?? words
+        }
+    }
+    private var document: DocumentStruct
 
     var title: String
     var createdAt: Date = Date()
     var updatedAt: Date = Date()
-    var words: Int = 0
-    var mentions: Int = 0
-    init(document: DocumentStruct, note: BeamNote) {
+    var words: Int = -1
+    var mentions: Int = -1
+
+    init(document: DocumentStruct, note: BeamNote?) {
         self.note = note
-        title = note.title
+        self.document = document
+        title = note?.title ?? document.title
         createdAt = document.createdAt
         updatedAt = document.updatedAt
-        words = note.textStats.wordsCount
-        mentions = note.fastLinksAndReferences.count
+        words = note?.textStats.wordsCount ?? -1
+    }
+
+    func note(withDocumentManager documentManager: DocumentManager) -> BeamNote? {
+        note ?? BeamNote.fetch(documentManager, id: id, keepInMemory: false, decodeChildren: false)
     }
 
     override func isEqual(_ object: Any?) -> Bool {
         guard let otherNote = object as? NoteTableViewItem else {
             return false
         }
-        return note.id == otherNote.note.id
+        return note?.id == otherNote.note?.id
     }
 }
