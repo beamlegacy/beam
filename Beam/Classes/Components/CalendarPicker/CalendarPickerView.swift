@@ -101,9 +101,9 @@ struct CalendarPickerView: View {
 
     func showContextMenu(items: [ContextMenuItem], at: CGPoint) {
         let menuView = ContextMenuFormatterView(items: items, direction: .bottom, sizeToFit: true) {
-            ContextMenuPresenter.shared.dismissMenu()
+            CustomPopoverPresenter.shared.dismissMenu()
         }
-        ContextMenuPresenter.shared.presentMenu(menuView, atPoint: at)
+        CustomPopoverPresenter.shared.presentMenu(menuView, atPoint: at)
     }
 }
 

@@ -8,6 +8,7 @@
 import Foundation
 import Combine
 import BeamCore
+import AutoUpdate
 
 public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var _todaysNote: BeamNote?
@@ -41,6 +42,8 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var clusteringManager: ClusteringManager
     var scope = Set<AnyCancellable>()
     var browsingTreeSender: BrowsingTreeSender?
+
+    var versionChecker: VersionChecker
 
     static func dataFolder(fileName: String) -> String {
         let paths = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)
@@ -107,11 +110,20 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         }
 
         cookies = HTTPCookieStorage()
+
+        if let feed = URL(string: Configuration.updateFeedURL) {
+            self.versionChecker = VersionChecker(feedURL: feed, autocheckEnabled: true)
+        } else {
+            self.versionChecker = VersionChecker(mockedReleases: AppRelease.mockedReleases(), autocheckEnabled: true)
+        }
+        self.versionChecker.allowAutoDownload = PreferencesManager.isAutoUpdateOn
+
         let treeConfig = BrowsingTreeSenderConfig(
             dataStoreUrl: EnvironmentVariables.BrowsingTree.url,
             dataStoreApiToken: EnvironmentVariables.BrowsingTree.accessToken
         )
         browsingTreeSender = BrowsingTreeSender(config: treeConfig)
+
         super.init()
 
         BeamNote.idForNoteNamed = { title in

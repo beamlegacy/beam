@@ -7,43 +7,39 @@
 
 import SwiftUI
 import AutoUpdate
+import Parma
 
 struct SmallUpdateIndicatorView: View {
 
-    @EnvironmentObject var versionChecker: VersionChecker
+    @ObservedObject var versionChecker: VersionChecker
 
     @State private var showReleaseNotes = false
     @State private var opacity = 1.0
-    @State private var opacityTimer = Timer.publish(every: 30, on: .main, in: .common).autoconnect()
+    @State private var opacityTimer = Timer.publish(every: 15, on: .main, in: .common).autoconnect()
 
     var body: some View {
         Group {
             switch versionChecker.state {
             case .updateAvailable(let release):
-                ButtonLabel("Update available", icon: "status-publish") {
-                    showReleaseNotes.toggle()
-                }.popover(isPresented: $showReleaseNotes, content: {
-                    ReleaseNoteView(release: release, history: versionChecker.missedReleases, checker: versionChecker)
-                })
-
-            case .noUpdate where versionChecker.currentRelease != nil :
-                ButtonLabel("Beam is up to date", icon: "tooltip-mark") {
-                    showReleaseNotes.toggle()
-                }
-                .onReceive(opacityTimer, perform: { _ in
-                    withAnimation {
-                        opacity = 0
+                GeometryReader { proxy in
+                    ButtonLabel("Update available", icon: "status-publish") {
+                        showReleaseNoteWindow(with: release, at: proxy.frame(in: .global).origin)
+                    }.onAppear {
+                        opacity = 1
                     }
-                    opacityTimer.upstream.connect().cancel()
-                })
-                .popover(isPresented: $showReleaseNotes, content: {
-                    ReleaseNoteView(release: versionChecker.currentRelease!)
-                        .onDisappear(perform: {
-                            withAnimation {
-                                opacity = 0
-                            }
-                        })
-                })
+                }.frame(maxWidth: 250)
+            case .noUpdate where versionChecker.currentRelease != nil :
+                GeometryReader { proxy in
+                    ButtonLabel("Updated", icon: "tooltip-mark") {
+                        showReleaseNoteWindow(with: versionChecker.currentRelease!, at: proxy.frame(in: .global).origin, hideButtonOnClose: true)
+                    }
+                    .onReceive(opacityTimer, perform: { _ in
+                        withAnimation {
+                            opacity = 0
+                        }
+                        opacityTimer.upstream.connect().cancel()
+                    })
+                }.frame(maxWidth: 250)
             case .noUpdate where versionChecker.lastCheck == nil :
                 EmptyView()
             case .checking:
@@ -51,7 +47,15 @@ struct SmallUpdateIndicatorView: View {
             case .error(errorDesc: let errorDesc):
                 ButtonLabel("Update error : \(errorDesc)")
             case .downloading(progress: _):
-                ButtonLabel("Downloading update…")
+                EmptyView()
+            case .downloaded(let downloadedRelease):
+                GeometryReader { proxy in
+                    ButtonLabel("Update now", icon: "status-publish") {
+                        showReleaseNoteWindow(with: downloadedRelease.appRelease, at: proxy.frame(in: .global).origin)
+                    }.onAppear {
+                        opacity = 1
+                    }
+                }.frame(maxWidth: 250)
             case .installing:
                 ButtonLabel("Installing update…")
             case .updateInstalled:
@@ -62,13 +66,89 @@ struct SmallUpdateIndicatorView: View {
                 EmptyView()
             }
         }.opacity(opacity)
+        .padding(.leading, 7)
+    }
+
+    private var beamStyle: ReleaseNoteView.ReleaseNoteViewStyle {
+
+        let style = ReleaseNoteView.ReleaseNoteViewStyle(titleFont: BeamFont.medium(size: 13).swiftUI, titleColor: BeamColor.Niobium.swiftUI,
+                                                         buttonFont: BeamFont.medium(size: 12).swiftUI, buttonColor: BeamColor.LightStoneGray.swiftUI,
+                                                         buttonHoverColor: BeamColor.Niobium.swiftUI, closeButtonColor: BeamColor.LightStoneGray.swiftUI,
+                                                         closeButtonHoverColor: BeamColor.Niobium.swiftUI, dateFont: BeamFont.medium(size: 12).swiftUI,
+                                                         dateColor: BeamColor.LightStoneGray.swiftUI, versionNameFont: BeamFont.medium(size: 15).swiftUI,
+                                                         versionNameColor: BeamColor.Niobium.swiftUI, parmaRenderer: BeamRender(),
+                                                         backgroundColor: BeamColor.Generic.background.swiftUI)
+
+        return style
+    }
+
+    private func showReleaseNoteWindow(with release: AppRelease, at origin: CGPoint, hideButtonOnClose: Bool = false) {
+        let window = CustomPopoverPresenter.shared.presentAutoDismissingChildWindow()
+        let releaseNoteView = ReleaseNoteView(release: release, closeAction: {
+            if hideButtonOnClose {
+                withAnimation {
+                    opacity = 0
+                }
+            }
+            window?.close()
+        }, history: versionChecker.missedReleases, checker: self.versionChecker, style: beamStyle).cornerRadius(6)
+
+        var origin = origin
+        origin.x += 3
+        origin.y += 25
+
+        window?.setView(with: releaseNoteView, at: origin)
+        window?.makeKey()
     }
 }
 
 struct SmallUpdateIndicatorView_Previews: PreviewProvider {
     static var previews: some View {
         let checker = VersionChecker(mockedReleases: AppRelease.mockedReleases())
-        SmallUpdateIndicatorView()
-            .environmentObject(checker)
+        SmallUpdateIndicatorView(versionChecker: checker)
+    }
+}
+
+struct BeamRender: ParmaRenderable {
+
+    func paragraph(text: String) -> Text {
+        Text(text)
+            .font(BeamFont.regular(size: 12).swiftUI)
+            .foregroundColor(BeamColor.Generic.text.swiftUI)
+    }
+
+    func heading(level: HeadingLevel?, textView: Text) -> Text {
+        textView
+            .font(BeamFont.medium(size: 13).swiftUI)
+            .foregroundColor(BeamColor.Generic.text.swiftUI)
+    }
+
+    func listItem(attributes: ListAttributes, index: [Int], view: AnyView) -> AnyView {
+        let delimiter: String
+        switch attributes.delimiter {
+        case .period:
+            delimiter = "."
+        case .parenthesis:
+            delimiter = ")"
+        }
+
+        let separator: String
+        switch attributes.type {
+        case .bullet:
+            separator = index.count % 2 == 1 ? "•" : "◦"
+        case .ordered:
+            separator = index
+                .map({ String($0) })
+                .joined(separator: ".")
+                .appending(delimiter)
+        }
+
+        return AnyView(
+            HStack(alignment: .top, spacing: 4) {
+                Text(separator)
+                    .foregroundColor(BeamColor.AlphaGray.swiftUI)
+                view
+            }
+        )
     }
 }

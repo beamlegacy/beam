@@ -130,11 +130,11 @@ class SharingStatusViewModel: ObservableObject {
         }
         items.append(ContextMenuItem(title: note.isPublic ? "Unpublish" : "Publish", action: togglePublish))
         let menuView = ContextMenuFormatterView(items: items, direction: .top) {
-            ContextMenuPresenter.shared.dismissMenu()
+            CustomPopoverPresenter.shared.dismissMenu()
         }
         // Temporarily fixed position, will be replaced by a "toast" implementation
         let atPoint = CGPoint(x: 5, y: menuView.idealSize.height + 27)
-        ContextMenuPresenter.shared.presentMenu(menuView, atPoint: atPoint)
+        CustomPopoverPresenter.shared.presentMenu(menuView, atPoint: atPoint)
     }
 
     func cancelChange() {
