@@ -91,7 +91,7 @@ extension BeamText {
         }
 
         if strong {
-            font = BeamFont.bold(size: fontSize).nsFont
+            font = BeamFont.medium(size: fontSize).nsFont
         }
 
         if emphasis {
