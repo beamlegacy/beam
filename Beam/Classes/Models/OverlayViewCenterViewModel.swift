@@ -11,13 +11,21 @@ import SwiftUI
 class OverlayViewCenterViewModel: ObservableObject {
 
     @Published var show = false
+    @Published var toastStyle: AnyToastStyle?
     @Published var toastView: AnyView? {
         didSet {
             show.toggle()
         }
     }
 
-    func present(text: String?, icon: String?) {
+    func present(text: String?, icon: String? = nil, alignment: Alignment = .bottomTrailing) {
+        if alignment == .bottomLeading {
+            toastStyle = AnyToastStyle(BottomLeadingToastStyle())
+        } else if alignment == .bottomTrailing {
+            toastStyle = AnyToastStyle(BottomTrailingToastStyle())
+        } else {
+            toastStyle = nil // default
+        }
         toastView = AnyView(ToastTextIconView(text: text, icon: icon))
     }
 }

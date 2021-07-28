@@ -26,21 +26,18 @@ struct ToastView<Content: View>: View {
             VStack {
                 if isPresented {
                     style.makeToast(configuration: ToastStyleContentConfiguration(alignment: .bottomTrailing, content: AnyView(self.content)), isPresented: $isPresented)
-                        .animation(.easeInOut)
+                        .transition(AnyTransition.offset(x: 0, y: 20).combined(with: .opacity))
                         .onTapGesture {
-                            withAnimation {
-                                self.isPresented = false
-                            }
+                            self.isPresented = false
                         }
                         .onAppear(perform: {
                             DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-                                withAnimation {
-                                    self.isPresented = false
-                                }
+                                self.isPresented = false
                             }
                         })
                 }
             }
+            .animation(.easeInOut(duration: 0.15))
         }
     }
 }
@@ -85,7 +82,7 @@ struct DefaultToastStyle: ToastStyle {
     }
 }
 
-struct BottomTraillingToastStyle: ToastStyle {
+struct BottomTrailingToastStyle: ToastStyle {
     func makeToast(configuration: ToastStyleContentConfiguration, isPresented: Binding<Bool>) -> some View {
         VStack {
             Spacer()
@@ -94,6 +91,20 @@ struct BottomTraillingToastStyle: ToastStyle {
                 ToastContent(height: 42, cornerRadius: 6, shadowRadius: 16, shadowX: 0, shadowY: 6, configuration: configuration)
                     .padding(.bottom, 20)
                     .padding(.trailing, 20)
+            }
+        }
+    }
+}
+
+struct BottomLeadingToastStyle: ToastStyle {
+    func makeToast(configuration: ToastStyleContentConfiguration, isPresented: Binding<Bool>) -> some View {
+        VStack {
+            Spacer()
+            HStack {
+                ToastContent(height: 42, cornerRadius: 6, shadowRadius: 16, shadowX: 0, shadowY: 6, configuration: configuration)
+                    .padding(.bottom, 20)
+                    .padding(.leading, 20)
+                Spacer()
             }
         }
     }
@@ -123,7 +134,7 @@ struct ToastContent: View {
 
 struct ToastStyleKey: EnvironmentKey {
     public static let defaultValue: AnyToastStyle = AnyToastStyle(DefaultToastStyle())
-    public static let bottomTraillingvalue: AnyToastStyle = AnyToastStyle(BottomTraillingToastStyle())
+    public static let bottomTrailingvalue: AnyToastStyle = AnyToastStyle(BottomTrailingToastStyle())
 }
 
 extension EnvironmentValues {
