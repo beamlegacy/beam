@@ -162,9 +162,9 @@ class BeamObject: Codable {
 extension BeamObject {
     // This struct will be used as `beamObject.data` on the server side
     struct DataEncryption: Codable {
-        let encryptionName: String?
+        let encryptionName: String
         let privateKeySha256: String?
-        let data: String?
+        let data: String
         //swiftlint:disable:next nesting
         enum CodingKeys: String, CodingKey {
             case encryptionName
@@ -179,19 +179,18 @@ extension BeamObject {
         let decoder = JSONDecoder()
         let decodedStruct = try decoder.decode(DataEncryption.self, from: encodedData.asData)
 
-        guard let encodedString = decodedStruct.data else { return }
-        guard let encryptionName = decodedStruct.encryptionName,
-              let algorithm = EncryptionManager.Algorithm(rawValue: encryptionName) else { return }
+        let encodedString = decodedStruct.data
+        let encryptionName = decodedStruct.encryptionName
+
+        guard let algorithm = EncryptionManager.Algorithm(rawValue: encryptionName) else { return }
 
         do {
             data = try EncryptionManager.shared.decryptString(encodedString, using: algorithm)
         } catch DecodingError.dataCorrupted {
             Logger.shared.logError("DecodingError.dataCorrupted", category: .encryption)
-
         } catch DecodingError.typeMismatch {
             Logger.shared.logError("DecodingError.typeMismatch", category: .encryption)
             Logger.shared.logDebug("Encoded data: \(encodedData)", category: .encryption)
-
         } catch EncryptionManagerError.authenticationFailure {
             Logger.shared.logError("Could not decrypt data with key \(decodedStruct.privateKeySha256 ?? "-")",
                                    category: .encryption)
@@ -206,7 +205,24 @@ extension BeamObject {
     func encrypt() throws {
         guard let clearData = data else { return }
 
-        let encryptedClearData = try EncryptionManager.shared.encryptString(clearData)
+        #if DEBUG
+        // This is an important check to verify data has not yet been already encrypted
+        do {
+            let encryptedStruct = try BeamObject.decoder.decode(DataEncryption.self,
+                                                                from: clearData.asData)
+            Logger.shared.logError("data: \(clearData)", category: .beamObject)
+
+            if encryptedStruct.privateKeySha256 != nil {
+                fatalError("Data has already been encrypted!")
+            }
+        } catch {
+
+        }
+        #endif
+
+        guard let encryptedClearData = try EncryptionManager.shared.encryptString(clearData) else {
+            throw BeamObjectError.noData
+        }
 
         let encryptStruct = DataEncryption(encryptionName: EncryptionManager.Algorithm.AES_GCM.rawValue,
                                            privateKeySha256: try? EncryptionManager.shared.privateKey().asString().SHA256(),

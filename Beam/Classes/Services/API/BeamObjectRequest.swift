@@ -61,9 +61,10 @@ extension BeamObjectRequest {
     // return multiple errors, as the API might return more than one.
     func save(_ beamObject: BeamObject,
               _ completion: @escaping (Swift.Result<BeamObject, Error>) -> Void) throws -> URLSessionDataTask {
-        let parameters = try saveBeamObjectParameters(beamObject)
+        let saveObject = beamObject.copy()
+
+        let parameters = try saveBeamObjectParameters(saveObject)
         let bodyParamsRequest = GraphqlParameters(fileName: "update_beam_object", variables: parameters)
-        try? beamObject.decrypt()
 
         return try performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<UpdateBeamObject, Error>) in
             switch result {
@@ -85,14 +86,16 @@ extension BeamObjectRequest {
                  _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask? {
         var parameters: UpdateBeamObjects
 
+        let saveObjects: [BeamObject] = beamObjects.map {
+            $0.copy()
+        }
+
         do {
-            parameters = try saveBeamObjectsParameters(beamObjects)
+            parameters = try saveBeamObjectsParameters(saveObjects)
         } catch {
             completion(.failure(error))
             return nil
         }
-
-        beamObjects.forEach { try? $0.decrypt() }
 
         let bodyParamsRequest = GraphqlParameters(fileName: "update_beam_objects", variables: parameters)
 
@@ -233,10 +236,26 @@ extension BeamObjectRequest {
                 do {
                     try fetchBeamObject.decrypt()
                 } catch {
-                    // Will catch uncrypting errors
+                    // Will catch decrypting errors
                     completionHandler(.failure(error))
                     return
                 }
+
+                #if DEBUG
+                // This is an important check to verify if data has been properly decrypted
+                if let data = fetchBeamObject.data {
+                    do {
+                        try fetchBeamObject.decrypt()
+                        _ = try BeamObject.decoder.decode(BeamObject.DataEncryption.self,
+                                                          from: data.asData)
+
+                        Logger.shared.logError("data: \(data)", category: .beamObject)
+                        fatalError("Data has not been decrypted!")
+                    } catch {
+
+                    }
+                }
+                #endif
 
                 completionHandler(.success(fetchBeamObject))
             }

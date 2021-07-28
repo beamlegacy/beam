@@ -347,6 +347,7 @@ extension BeamObjectManager {
             let groupSemaphore = DispatchSemaphore(value: 1)
             var groupErrors: [Error] = []
             var fetchedObjects: [T] = []
+            var toSaveObjects: [T] = []
 
             for conflictedObject in conflictedObjects {
                 group.enter()
@@ -354,7 +355,6 @@ extension BeamObjectManager {
                 fetchAndReturn(conflictedObject) { result in
                     switch result {
                     case .failure(let error):
-                        Logger.shared.logDebug("⚠️ inside fetchAndReturn failure", category: .beamObjectNetwork)
                         groupSemaphore.wait()
                         groupErrors.append(error)
                         groupSemaphore.signal()
@@ -370,33 +370,35 @@ extension BeamObjectManager {
                                 var fixedConflictedObject: T = try ( try BeamObject(conflictedObject, T.beamObjectTypeName)).decodeBeamObject()
 
                                 fixedConflictedObject.previousChecksum = fetchedObject.checksum
+                                toSaveObjects.append(fixedConflictedObject)
+                                group.leave()
 
-                                _ = try self.saveToAPI(fixedConflictedObject) { result in
-                                    switch result {
-                                    case .failure(let error):
-                                        groupSemaphore.wait()
-                                        groupErrors.append(error)
-                                        groupSemaphore.signal()
-                                    case .success(let newSavedObject):
-                                        Logger.shared.logDebug("⚠️ inside fetchAndReturn saveToAPI success", category: .beamObjectNetwork)
-
-                                        Logger.shared.logDebug("⚠️ newSavedObject: ", category: .beamObjectNetwork)
-                                        dump(newSavedObject)
-
-                                        Logger.shared.logDebug("⚠️ goodObjects: ", category: .beamObjectNetwork)
-                                        dump(goodObjects)
-
-                                        Logger.shared.logDebug("⚠️ fixedConflictedObject: ", category: .beamObjectNetwork)
-                                        dump(fixedConflictedObject)
-
-                                        fixedConflictedObject.checksum = newSavedObject.checksum
-
-                                        groupSemaphore.wait()
-                                        goodObjects.append(fixedConflictedObject)
-                                        groupSemaphore.signal()
-                                    }
-                                    group.leave()
-                                }
+//                                _ = try self.saveToAPI(fixedConflictedObject) { result in
+//                                    switch result {
+//                                    case .failure(let error):
+//                                        groupSemaphore.wait()
+//                                        groupErrors.append(error)
+//                                        groupSemaphore.signal()
+//                                    case .success(let newSavedObject):
+//                                        Logger.shared.logDebug("⚠️ inside fetchAndReturn saveToAPI success", category: .beamObjectNetwork)
+//
+//                                        Logger.shared.logDebug("⚠️ newSavedObject: ", category: .beamObjectNetwork)
+//                                        dump(newSavedObject)
+//
+//                                        Logger.shared.logDebug("⚠️ goodObjects: ", category: .beamObjectNetwork)
+//                                        dump(goodObjects)
+//
+//                                        Logger.shared.logDebug("⚠️ fixedConflictedObject: ", category: .beamObjectNetwork)
+//                                        dump(fixedConflictedObject)
+//
+//                                        fixedConflictedObject.checksum = newSavedObject.checksum
+//
+//                                        groupSemaphore.wait()
+//                                        goodObjects.append(fixedConflictedObject)
+//                                        groupSemaphore.signal()
+//                                    }
+//                                    group.leave()
+//                                }
                             } catch {
                                 groupSemaphore.wait()
                                 groupErrors.append(error)
@@ -420,11 +422,27 @@ extension BeamObjectManager {
                 return
             }
 
-            switch self.conflictPolicyForSave {
-            case .replace:
-                completion(.success(goodObjects))
-            case .fetchRemoteAndError:
-                completion(.failure(BeamObjectManagerObjectError<T>.invalidChecksum(conflictedObjects, goodObjects, fetchedObjects)))
+            if !toSaveObjects.isEmpty {
+                do {
+                    _ = try saveToAPI(toSaveObjects) { result in
+                        switch result {
+                        case .failure(let error):
+                            completion(.failure(error))
+                        case .success(let _):
+                            goodObjects.append(contentsOf: toSaveObjects)
+                            completion(.success(goodObjects))
+                        }
+                    }
+                } catch {
+                    completion(.failure(error))
+                }
+            } else {
+                switch self.conflictPolicyForSave {
+                case .replace:
+                    completion(.success(goodObjects))
+                case .fetchRemoteAndError:
+                    completion(.failure(BeamObjectManagerObjectError<T>.invalidChecksum(conflictedObjects, goodObjects, fetchedObjects)))
+                }
             }
 
             return

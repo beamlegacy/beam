@@ -14,6 +14,7 @@ enum APIRequestError: Error {
     case beamObjectInvalidChecksum(Errorable)
     case apiError([String])
     case apiErrors(Errorable)
+    case apiRequestErrors([APIRequest.ErrorData])
     case operationCancelled
     case duplicateTitle
 }
@@ -55,6 +56,10 @@ extension APIRequestError: LocalizedError {
             return loc("error.api.Error")
         case .operationCancelled:
             return loc("error.api.operationCancelled")
+        case .apiRequestErrors(let errors):
+            return errors.compactMap {
+                $0.message
+            }.joined(separator: ", ")
         }
     }
 }

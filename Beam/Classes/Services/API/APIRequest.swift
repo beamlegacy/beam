@@ -436,6 +436,10 @@ extension APIRequest {
 
             let jsonStruct = try self.defaultDecoder().decode(APIRequest.APIResult<T>.self, from: data)
 
+            if let errors = jsonStruct.errors, !errors.isEmpty {
+                throw APIRequestError.apiRequestErrors(errors)
+            }
+
             guard let value = jsonStruct.data?.value else {
                 // When the API returns top level errors
                 if let errors = jsonStruct.errors {
