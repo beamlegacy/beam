@@ -184,7 +184,10 @@ extension BeamObjectManagerDelegate {
             var mergedObjects: [BeamObjectType] = []
 
             for conflictedObject in conflictedObjects {
-                guard let remoteObject = remoteObjects.first(where: { $0.beamObjectId == conflictedObject.beamObjectId }) else { continue }
+                guard let remoteObject = remoteObjects.first(where: { $0.beamObjectId == conflictedObject.beamObjectId }) else {
+                    Logger.shared.logError("Can't find the remote object connected to the conflict object!",
+                                           category: .beamObject)
+                    continue }
 
                 var mergedObject = try manageConflict(conflictedObject, remoteObject)
                 mergedObject.previousChecksum = remoteObject.checksum
@@ -245,10 +248,10 @@ extension BeamObjectManagerDelegate {
             Logger.shared.logDebug("⚠️ objects: ", category: .beamObjectNetwork)
             dump(objects)
 
-            guard conflictedObjects.count == 1 else {
-                completion(.failure(BeamObjectManagerDelegateError.runtimeError("Had more than one object back")))
-                return
-            }
+//            guard conflictedObjects.count == 1 else {
+//                completion(.failure(BeamObjectManagerDelegateError.runtimeError("Had more than one object back")))
+//                return
+//            }
 
             manageConflictAndSave(error, completion)
             return

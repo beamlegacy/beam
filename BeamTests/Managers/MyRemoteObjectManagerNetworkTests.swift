@@ -328,7 +328,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                 }
 
                 context("with replace policy") {
-                    fit("saves objects") {
+                    it("saves objects") {
                         let networkCalls = APIRequest.callsCount
 
                         waitUntil(timeout: .seconds(10)) { done in
@@ -343,14 +343,15 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             }
                         }
 
-                        expect(APIRequest.callsCount - networkCalls) == 4
+                        expect(APIRequest.callsCount - networkCalls) == 5
                         expect(APIRequest.networkCallFiles) == ["sign_in",
                                                                 "update_beam_object",
                                                                 "update_beam_object",
                                                                 "update_beam_objects",
                                                                 "beam_object",
                                                                 "beam_object",
-                                                                "update_beam_objects"]
+                                                                "update_beam_object",
+                                                                "update_beam_object"]
 
                         let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1.beamObjectId)
                         expect(object1) == remoteObject1
@@ -366,7 +367,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         expect(remoteObject3?.checksum) == (try self.checksum(object3))
                     }
 
-                    fit("stores previousChecksum") {
+                    it("stores previousChecksum") {
                         waitUntil(timeout: .seconds(1800)) { done in
                             do {
                                 _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3]) { result in
@@ -386,7 +387,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                 }
 
                 context("with fetch and raise error policy") {
-                    fit("saves objects") {
+                    it("saves objects") {
                         let networkCalls = APIRequest.callsCount
 
                         waitUntil(timeout: .seconds(1800)) { done in
@@ -430,7 +431,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         expect(remoteObject3?.checksum) == (try self.checksum(object3))
                     }
 
-                    fit("stores previousChecksum") {
+                    it("stores previousChecksum") {
                         waitUntil(timeout: .seconds(1800)) { done in
                             do {
                                 _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3], .fetchRemoteAndError) { result in
@@ -488,14 +489,15 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             }
                         }
 
-                        expect(APIRequest.callsCount - networkCalls) == 4
+                        expect(APIRequest.callsCount - networkCalls) == 5
                         expect(APIRequest.networkCallFiles) == ["sign_in",
                                                                 "update_beam_object",
                                                                 "update_beam_object",
                                                                 "update_beam_objects",
                                                                 "beam_object",
                                                                 "beam_object",
-                                                                "update_beam_objects"]
+                                                                "update_beam_object",
+                                                                "update_beam_object"]
 
                         let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1.beamObjectId)
                         expect(object1) == remoteObject1

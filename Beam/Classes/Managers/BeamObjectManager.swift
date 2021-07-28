@@ -297,17 +297,136 @@ extension BeamObjectManager {
             }
             return
         case APIRequestError.apiErrors(let errorable):
-            Logger.shared.logDebug("⚠️ saveToAPIBeamObjectsFailure: APIRequestError.apiErrors",
-                                   category: .beamObject)
+            Logger.shared.logDebug("⚠️ errorable:", category: .beamObjectDebug)
+            dump(errorable)
 
-            guard let errors = errorable.errors else { break }
-
-            Logger.shared.logError("\(errorable)", category: .beamObject)
-            do {
-                try saveToAPIFailureAPIErrors(objects, errors, completion)
-            } catch {
+            // Make sure we have proper network request call, including the objects which were properly saved
+            guard let remoteBeamObjects = (errorable as? BeamObjectRequest.UpdateBeamObjects)?.beamObjects,
+                  let errors = errorable.errors else {
                 completion(.failure(error))
+                return
             }
+
+            /*
+             Note: we might have multiple error types on return, like 1 checksum issue and 1 unrelated issue. We should
+             only get conflicted objects
+
+             TODO: if we have another error type, we should probably call completion with that error instead. Question is
+             do we still proceed the checksum errors or not.
+             */
+
+            let objectErrorIds: [String] = errors.compactMap {
+                guard isErrorInvalidChecksum($0) else { return nil }
+
+                return $0.objectid?.lowercased()
+            }
+
+            let conflictedObjects: [T] = objects.filter {
+                objectErrorIds.contains($0.beamObjectId.uuidString.lowercased())
+            }
+
+            Logger.shared.logDebug("⚠️ conflictedObjects:", category: .beamObjectDebug)
+            dump(conflictedObjects)
+
+            // Set `checksum` on the objects who were saved successfully as this will be used later
+            var goodObjects: [T] = objects.compactMap {
+                if objectErrorIds.contains($0.beamObjectId.uuidString.lowercased()) { return nil }
+
+                var remoteObject = $0
+                remoteObject.checksum = remoteBeamObjects.first(where: {
+                    $0.id == remoteObject.beamObjectId
+                })?.dataChecksum
+
+                return remoteObject
+            }
+
+            Logger.shared.logDebug("⚠️ goodObjects:", category: .beamObjectDebug)
+            dump(goodObjects)
+
+            let group = DispatchGroup()
+            let groupSemaphore = DispatchSemaphore(value: 1)
+            var groupErrors: [Error] = []
+            var fetchedObjects: [T] = []
+
+            for conflictedObject in conflictedObjects {
+                group.enter()
+
+                fetchAndReturn(conflictedObject) { result in
+                    switch result {
+                    case .failure(let error):
+                        Logger.shared.logDebug("⚠️ inside fetchAndReturn failure", category: .beamObjectNetwork)
+                        groupSemaphore.wait()
+                        groupErrors.append(error)
+                        groupSemaphore.signal()
+                        group.leave()
+                    case .success(let fetchedObject):
+                        Logger.shared.logDebug("⚠️ fetchedObject: ", category: .beamObjectNetwork)
+                        dump(fetchedObject)
+
+                        switch self.conflictPolicyForSave {
+                        case .replace:
+                            do {
+                                // Ugly
+                                var fixedConflictedObject: T = try ( try BeamObject(conflictedObject, T.beamObjectTypeName)).decodeBeamObject()
+
+                                fixedConflictedObject.previousChecksum = fetchedObject.checksum
+
+                                _ = try self.saveToAPI(fixedConflictedObject) { result in
+                                    switch result {
+                                    case .failure(let error):
+                                        groupSemaphore.wait()
+                                        groupErrors.append(error)
+                                        groupSemaphore.signal()
+                                    case .success(let newSavedObject):
+                                        Logger.shared.logDebug("⚠️ inside fetchAndReturn saveToAPI success", category: .beamObjectNetwork)
+
+                                        Logger.shared.logDebug("⚠️ newSavedObject: ", category: .beamObjectNetwork)
+                                        dump(newSavedObject)
+
+                                        Logger.shared.logDebug("⚠️ goodObjects: ", category: .beamObjectNetwork)
+                                        dump(goodObjects)
+
+                                        Logger.shared.logDebug("⚠️ fixedConflictedObject: ", category: .beamObjectNetwork)
+                                        dump(fixedConflictedObject)
+
+                                        fixedConflictedObject.checksum = newSavedObject.checksum
+
+                                        groupSemaphore.wait()
+                                        goodObjects.append(fixedConflictedObject)
+                                        groupSemaphore.signal()
+                                    }
+                                    group.leave()
+                                }
+                            } catch {
+                                groupSemaphore.wait()
+                                groupErrors.append(error)
+                                groupSemaphore.signal()
+                                group.leave()
+                            }
+                        case .fetchRemoteAndError:
+                            groupSemaphore.wait()
+                            fetchedObjects.append(fetchedObject)
+                            groupSemaphore.signal()
+                            group.leave()
+                        }
+                    }
+                }
+            }
+
+            group.wait()
+
+            guard groupErrors.isEmpty else {
+                completion(.failure(BeamObjectManagerError.multipleErrors(groupErrors)))
+                return
+            }
+
+            switch self.conflictPolicyForSave {
+            case .replace:
+                completion(.success(goodObjects))
+            case .fetchRemoteAndError:
+                completion(.failure(BeamObjectManagerObjectError<T>.invalidChecksum(conflictedObjects, goodObjects, fetchedObjects)))
+            }
+
             return
         default:
             break
@@ -390,9 +509,9 @@ extension BeamObjectManager {
     }
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
-    internal func saveToAPIFailureAPIErrors<T: BeamObjectProtocol>(_ objects: [T],
-                                                                   _ errors: [UserErrorData],
-                                                                   _ completion: @escaping ((Swift.Result<[T], Error>) -> Void)) throws {
+    internal func saveToAPIFailureAPIErrorsDeprecated<T: BeamObjectProtocol>(_ objects: [T],
+                                                                             _ errors: [UserErrorData],
+                                                                             _ completion: @escaping ((Swift.Result<[T], Error>) -> Void)) throws {
         // We have multiple errors, we're going to fetch each beamObject on the server side to include them in
         // the error we'll return to the object calling this manager
         let group = DispatchGroup()
@@ -799,20 +918,11 @@ extension BeamObjectManager {
                               _ completion: @escaping (Result<BeamObject, Error>) -> Void) {
         let fetchRequest = BeamObjectRequest()
         do {
-//            try fetchRequest.fetch(beamObject.id) { result in
-//                switch result {
-//                case .failure(let error):
-//                    completion(.failure(error))
-//                case .success(let beamObject):
-//                    completion(.success(beamObject))
-//                }
-//            }
             try fetchRequest.fetch(beamObject.id, completion)
         } catch {
             completion(.failure(error))
         }
     }
-
 
     internal func fetchObject(_ id: UUID,
                               _ completion: @escaping (Result<BeamObject, Error>) -> Void) {
