@@ -226,7 +226,8 @@ extension BeamNote: BeamNoteDocument {
 
     public static func fetch(_ documentManager: DocumentManager,
                              title: String,
-                             keepInMemory: Bool = true) -> BeamNote? {
+                             keepInMemory: Bool = true,
+                             decodeChildren: Bool = true) -> BeamNote? {
         // Is the note in the cache?
         if let note = getFetchedNote(title) {
             return note
@@ -240,7 +241,7 @@ extension BeamNote: BeamNoteDocument {
 //        Logger.shared.logDebug("Note loaded:\n\(String(data: doc.data, encoding: .utf8)!)\n", category: .document)
 
         do {
-            return try instanciateNote(documentManager, doc, keepInMemory: keepInMemory)
+            return try instanciateNote(documentManager, doc, keepInMemory: keepInMemory, decodeChildren: decodeChildren)
         } catch {
             Logger.shared.logError("Unable to decode note \(doc.title) (\(doc.id))", category: .document)
         }
@@ -249,7 +250,8 @@ extension BeamNote: BeamNoteDocument {
     }
 
     public static func fetch(_ documentManager: DocumentManager, id: UUID,
-                             keepInMemory: Bool = true) -> BeamNote? {
+                             keepInMemory: Bool = true,
+                             decodeChildren: Bool = true) -> BeamNote? {
         // Is the note in the cache?
         if let note = getFetchedNote(id) {
             return note
@@ -263,7 +265,7 @@ extension BeamNote: BeamNoteDocument {
 //        Logger.shared.logDebug("Note loaded:\n\(String(data: doc.data, encoding: .utf8)!)\n", category: .document)
 
         do {
-            return try instanciateNote(documentManager, doc, keepInMemory: keepInMemory)
+            return try instanciateNote(documentManager, doc, keepInMemory: keepInMemory, decodeChildren: decodeChildren)
         } catch {
             Logger.shared.logError("Unable to decode note \(doc.title) (\(doc.id))", category: .document)
         }
