@@ -35,7 +35,9 @@ struct WindowBottomToolBar: View {
         GeometryReader { geo in
             HStack {
                 if let note = currentNote, state.mode == .note {
-                    SharingStatusView(model: SharingStatusViewModel(note: note, documentManager: state.data.documentManager))
+                    SharingStatusView(model: SharingStatusViewModel(note: note,
+                                                                    state: state,
+                                                                    documentManager: state.data.documentManager))
                 } else {
                     SmallUpdateIndicatorView(versionChecker: state.data.versionChecker)
                 }

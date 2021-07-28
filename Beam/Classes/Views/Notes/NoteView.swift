@@ -78,7 +78,7 @@ struct NoteView: View {
             // Ideally we could use @StateObject in NoteHeaderView to let it manage its model
             // But its macOS > 11. So the parent need to own the model.
             guard headerViewModel?.note != newNote else { return }
-            headerViewModel = NoteHeaderView.ViewModel(note: newNote, documentManager: state.data.documentManager)
+            headerViewModel = NoteHeaderView.ViewModel(note: newNote, state: state, documentManager: state.data.documentManager)
         }
     }
 }
