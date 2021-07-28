@@ -20,6 +20,10 @@ class BeamNoteSharingUtils {
         self.note = note
     }
 
+    var canMakePublic: Bool {
+        AuthenticationManager.shared.isAuthenticated
+    }
+
     func getPublicLink(completion: @escaping ((Result<String, Error>) -> Void)) {
         let documentRequest = DocumentRequest()
 

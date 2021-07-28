@@ -22,7 +22,7 @@ struct PasswordsTableView: View {
 
     var body: some View {
         TableView(hasSeparator: false, items: searchStr.isEmpty ? allPasswordItems : filterPasswordItemsBy(searchStr: searchStr),
-                  columns: passwordColumns, creationRowTitle: nil) { (_, _) in
+                  columns: passwordColumns, creationRowTitle: nil, shouldReloadData: .constant(nil)) { (_, _) in
         } onSelectionChanged: { idx in
             onSelectionChanged(idx)
             DispatchQueue.main.async {

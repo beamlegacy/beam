@@ -586,6 +586,7 @@
 		A52FCB632666514000BCD38A /* TextLinesDecorationLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52FCB622666514000BCD38A /* TextLinesDecorationLayer.swift */; };
 		A5316A192667B9110039ED9C /* Range+BeamTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5316A182667B9110039ED9C /* Range+BeamTests.swift */; };
 		A536DE0F269C6ABD003FAAF4 /* ToastTextIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A536DE0E269C6ABD003FAAF4 /* ToastTextIconView.swift */; };
+		A53B43F326B0946B0043D37A /* NoteListMetadataCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53B43F226B0946B0043D37A /* NoteListMetadataCache.swift */; };
 		A53C8F38264440E4003A5DF8 /* SharingStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53C8F37264440E4003A5DF8 /* SharingStatusView.swift */; };
 		A53C8F4E26446C6C003A5DF8 /* SharingBannerInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53C8F4D26446C6C003A5DF8 /* SharingBannerInfo.swift */; };
 		A53C8F532644B22B003A5DF8 /* OmniBarUITestsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53C8F522644B22B003A5DF8 /* OmniBarUITestsHelper.swift */; };
@@ -1440,6 +1441,7 @@
 		A530C03726A9AFA6000565AF /* CalendarPickerViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarPickerViewModelTests.swift; sourceTree = "<group>"; };
 		A5316A182667B9110039ED9C /* Range+BeamTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Range+BeamTests.swift"; sourceTree = "<group>"; };
 		A536DE0E269C6ABD003FAAF4 /* ToastTextIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastTextIconView.swift; sourceTree = "<group>"; };
+		A53B43F226B0946B0043D37A /* NoteListMetadataCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteListMetadataCache.swift; sourceTree = "<group>"; };
 		A53C8F37264440E4003A5DF8 /* SharingStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharingStatusView.swift; sourceTree = "<group>"; };
 		A53C8F4D26446C6C003A5DF8 /* SharingBannerInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharingBannerInfo.swift; sourceTree = "<group>"; };
 		A53C8F522644B22B003A5DF8 /* OmniBarUITestsHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniBarUITestsHelper.swift; sourceTree = "<group>"; };
@@ -3348,6 +3350,7 @@
 			children = (
 				A5C9F01026136B5F0096380F /* AllCardsPageContentView.swift */,
 				A5208E04261F2156006193AF /* AllCardsContextualMenu.swift */,
+				A53B43F226B0946B0043D37A /* NoteListMetadataCache.swift */,
 			);
 			path = AllCards;
 			sourceTree = "<group>";
@@ -4286,6 +4289,7 @@
 				4181720A2581107C00317ED8 /* BrowserTab.swift in Sources */,
 				032562A926051D3B006513E4 /* RBDatabase.m in Sources */,
 				5206283E25923EB500D7CD9E /* DocumentAPIType.swift in Sources */,
+				A53B43F326B0946B0043D37A /* NoteListMetadataCache.swift in Sources */,
 				418172D625811B8700317ED8 /* RoundRectButtonStyle.swift in Sources */,
 				A0C58C382640026600FB95D8 /* ToastView.swift in Sources */,
 				96FACC8626050B1E0088DD67 /* SetSelection.swift in Sources */,
