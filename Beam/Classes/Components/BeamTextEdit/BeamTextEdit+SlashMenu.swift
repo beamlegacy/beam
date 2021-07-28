@@ -51,7 +51,7 @@ extension BeamTextEdit {
         let items = getSlashMenuItems()
         let menuView = ContextMenuFormatterView(items: items, handlesTyping: true)
         inlineFormatter = menuView
-        ContextMenuPresenter.shared.presentMenu(menuView, atPoint: atPoint, from: self, animated: false)
+        CustomPopoverPresenter.shared.presentMenu(menuView, atPoint: atPoint, from: self, animated: false)
 
         formatterTargetRange = targetRange
         formatterTargetNode = targetNode

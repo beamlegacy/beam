@@ -160,7 +160,7 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
         }
         let menuView = ContextMenuFormatterView(items: items, defaultSelectedIndex: fromPaste ? 0 : nil)
         inlineFormatter = menuView
-        ContextMenuPresenter.shared.presentMenu(menuView, atPoint: atPoint, from: self, animated: false)
+        CustomPopoverPresenter.shared.presentMenu(menuView, atPoint: atPoint, from: self, animated: false)
 
         formatterTargetRange = targetRange
         formatterTargetNode = targetNode

@@ -240,7 +240,7 @@ extension BeamTextEdit {
         }
 
         if view == inlineFormatter {
-            ContextMenuPresenter.shared.dismissMenu()
+            CustomPopoverPresenter.shared.dismissMenu()
             isInlineFormatterHidden = true
             inlineFormatter = nil
             formatterTargetRange = nil

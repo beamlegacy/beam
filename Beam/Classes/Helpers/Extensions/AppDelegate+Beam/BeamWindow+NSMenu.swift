@@ -55,7 +55,7 @@ extension BeamWindow {
     }
 
     @IBAction private func checkForUpdates(_ sender: Any) {
-        versionChecker.checkForUpdates()
+        data.versionChecker.checkForUpdates()
     }
 
     // MARK: Web loading

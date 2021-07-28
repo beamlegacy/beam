@@ -116,14 +116,14 @@ class PasswordOverlayController: WebPageHolder {
         viewModel.delegate = self
         let passwordManagerMenu = PasswordManagerMenu(width: location.size.width, viewModel: viewModel)
         guard let webView = (page as? BrowserTab)?.webView,
-              let passwordWindow = ContextMenuPresenter.shared.present(view: BeamHostingView(rootView: passwordManagerMenu), from: webView, atPoint: location.origin) else { return }
+              let passwordWindow = CustomPopoverPresenter.shared.present(view: BeamHostingView(rootView: passwordManagerMenu), from: webView, atPoint: location.origin) else { return }
 //        passwordMenuPosition = bottomLeftOnScreen(for: location) // Not needed atm
         passwordWindow.makeKeyAndOrderFront(nil)
         passwordMenuWindow = passwordWindow
     }
 
     private func dismissPasswordManagerMenu() {
-        ContextMenuPresenter.shared.dismissMenu()
+        CustomPopoverPresenter.shared.dismissMenu()
         passwordMenuWindow = nil
     }
 
