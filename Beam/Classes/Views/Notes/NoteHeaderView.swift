@@ -194,9 +194,9 @@ extension NoteHeaderView {
             ])
 
             let menuView = ContextMenuFormatterView(items: items, direction: .bottom) {
-                ContextMenuPresenter.shared.dismissMenu()
+                CustomPopoverPresenter.shared.dismissMenu()
             }
-            ContextMenuPresenter.shared.presentMenu(menuView, atPoint: at)
+            CustomPopoverPresenter.shared.presentMenu(menuView, atPoint: at)
         }
 
         func onTap() {

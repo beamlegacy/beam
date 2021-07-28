@@ -87,19 +87,12 @@ class BeamUITestsMenuGenerator {
         }
     }
 
-    let faker = Faker(locale: "en-US")
     private func populateWithJournalNote(count: Int) {
-        var nbrOfJournal = count
-        while nbrOfJournal > 0 {
-            let date = faker.date.backward(days: nbrOfJournal)
-            let title = todaysName(date)
-            let note = BeamNote(title: title)
-            note.type = BeamNoteType.journalForDate(date)
-            note.creationDate = date
-            note.updateDate = date
-            guard let docStruct = note.documentStruct else { return }
-            self.documentManager.save(docStruct, completion: nil)
-            nbrOfJournal -= 1
+        let documentManager = DocumentManager()
+        let generator = FakeNoteGenerator(count: count, journalRatio: 1, futureRatio: -1)
+        generator.generateNotes()
+        for note in generator.notes {
+            note.save(documentManager: documentManager)
         }
     }
 

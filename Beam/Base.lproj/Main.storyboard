@@ -888,6 +888,12 @@ CQ
                                                 <action selector="showConsole:" target="Voe-Tx-rLC" id="Ryh-ht-LIN"/>
                                             </connections>
                                         </menuItem>
+                                        <menuItem title="Show TabGrouping" tag="1011" id="uXo-6f-A9j" userLabel="Show TabGrouping">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="showTabGroupingWindow:" target="Ady-hI-5gd" id="7JO-gB-gJr"/>
+                                            </connections>
+                                        </menuItem>
                                     </items>
                                 </menu>
                             </menuItem>
