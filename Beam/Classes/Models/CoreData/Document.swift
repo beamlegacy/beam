@@ -317,7 +317,8 @@ class Document: NSManagedObject, BeamCoreDataObject {
                                      _ fetchOffset: Int) throws -> [Document] {
         try fetchAllWithLimit(context,
                               NSPredicate(format: "document_type = \(type)"),
-                              [NSSortDescriptor(key: "journal_date", ascending: false)],
+                              [NSSortDescriptor(key: "journal_date", ascending: false),
+                              NSSortDescriptor(key: "created_at", ascending: false)],
                               limit,
                               fetchOffset)
     }
