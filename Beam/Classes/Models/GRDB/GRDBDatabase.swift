@@ -262,7 +262,6 @@ extension GRDBDatabase {
 
     // MARK: - SearchResult (BeamElement/BeamNote)
 
-    @available(*, deprecated, message: "redundant with BeamElementRecord")
     struct SearchResult {
         var title: String
         var noteId: UUID
