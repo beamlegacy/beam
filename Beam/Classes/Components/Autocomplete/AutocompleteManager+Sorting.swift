@@ -54,7 +54,8 @@ extension AutocompleteManager {
         })
 
         if let topDomain = topDomainResults.first {
-            if let firstResult = results.first, isResultCandidateForAutoselection(firstResult, forSearch: firstResult.completingText ?? "") {
+            if let firstResult = results.first,
+               isResultCandidateForAutoselection(firstResult, forSearch: firstResult.completingText ?? "") {
                 // Push top domain suggestion only when the first result is not satisfying.
             } else {
                 results.insert(topDomain, at: 0)
