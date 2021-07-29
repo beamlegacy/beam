@@ -366,8 +366,7 @@ extension BeamObjectManager {
                         switch self.conflictPolicyForSave {
                         case .replace:
                             do {
-                                // Ugly
-                                var fixedConflictedObject: T = try ( try BeamObject(conflictedObject, T.beamObjectTypeName)).decodeBeamObject()
+                                var fixedConflictedObject: T = try conflictedObject.copy()
 
                                 fixedConflictedObject.previousChecksum = fetchedObject.checksum
                                 toSaveObjects.append(fixedConflictedObject)
@@ -556,8 +555,7 @@ extension BeamObjectManager {
                 case .failure(let error): resultErrors.append(error)
                 case .success(let fetchedObject):
                     do {
-                        // Ugly hack to avoid `copy()` in protocol
-                        var conflictedObject: T = try ( try BeamObject(object, T.beamObjectTypeName) ).decodeBeamObject()
+                        var conflictedObject: T = try object.copy()
 
                         switch self.conflictPolicyForSave {
                         case .fetchRemoteAndError:
@@ -728,8 +726,8 @@ extension BeamObjectManager {
                         dump(fetchedObject)
 
                         do {
-                            // Ugly hack to avoid `copy()` in protocol
-                            var conflictedObject: T = try ( try BeamObject(object, T.beamObjectTypeName) ).decodeBeamObject()
+                            var conflictedObject: T = try object.copy()
+
                             switch self.conflictPolicyForSave {
                             case .replace:
                                 conflictedObject.previousChecksum = fetchedObject.checksum
@@ -853,8 +851,8 @@ extension BeamObjectManager {
     }
 
     /// Fetch remote object, and based on policy will either return the object with remote checksum, or return and error containing the remote object
-    internal func fetchAndReturnErrorBasedOnConflictPolicy<T: BeamObjectProtocol>(_ object: T,
-                                                                                  _ completion: @escaping (Result<T, Error>) -> Void) {
+    internal func fetchAndReturnErrorBasedOnConflictPolicyDeprecated<T: BeamObjectProtocol>(_ object: T,
+                                                                                            _ completion: @escaping (Result<T, Error>) -> Void) {
 
         guard let beamObject = try? BeamObject(object, T.beamObjectTypeName) else {
             completion(.failure(BeamObjectManagerError.encodingError))
@@ -867,7 +865,7 @@ extension BeamObjectManager {
             switch fetchResult {
             case .failure(let error): completion(.failure(error))
             case .success(let remoteBeamObject):
-                // This happened during tests, but could happen again if you have the same IDs for 2 different objects
+                // This happened during tests, but could happen again if you have the same IDs for 2 different object types
                 guard remoteBeamObject.beamObjectType == beamObject.beamObjectType else {
                     completion(.failure(BeamObjectManagerError.invalidObjectType(beamObject, remoteBeamObject)))
                     return

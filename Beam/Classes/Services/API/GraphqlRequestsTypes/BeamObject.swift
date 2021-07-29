@@ -4,8 +4,6 @@ import BeamCore
 
 /// Anything to be stored as BeamObject should implement this protocol.
 protocol BeamObjectProtocol: Codable {
-//    associatedtype ObjectType = Self
-
     static var beamObjectTypeName: String { get }
 
     var beamObjectId: UUID { get set }
@@ -19,11 +17,12 @@ protocol BeamObjectProtocol: Codable {
     var checksum: String? { get set }
 }
 
-//extension BeamObjectProtocol {
-//    func copy() throws -> ObjectType {
-//        try ( try BeamObject(self, Self.beamObjectTypeName)).decodeBeamObject()
-//    }
-//}
+extension BeamObjectProtocol {
+    func copy() throws -> Self {
+        // TODO: might be slow on big object?
+        try ( try BeamObject(self, Self.beamObjectTypeName)).decodeBeamObject()
+    }
+}
 
 /// Used to store data on the BeamObject Beam API.
 class BeamObject: Codable {
