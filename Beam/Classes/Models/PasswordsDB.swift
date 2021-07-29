@@ -129,6 +129,20 @@ class PasswordsDB: PasswordStore {
         }
     }
 
+    func entriesWithSubdomains(for host: String, completion: @escaping ([PasswordManagerEntry]) -> Void) {
+        do {
+            try dbPool.read { db in
+                let passwords = try PasswordRecord
+                    .filter(PasswordRecord.Columns.host == host || PasswordRecord.Columns.host.like("%.\(host)"))
+                    .filter(PasswordRecord.Columns.deletedAt == nil)
+                    .fetchAll(db)
+                completion(entries(for: passwords).sorted(by: { $0.minimizedHost.count < $1.minimizedHost.count }))
+            }
+        } catch let error {
+            Logger.shared.logError("Error while fetching password entries for \(host): \(error)", category: .passwordsDB)
+        }
+    }
+
     func find(_ searchString: String, completion: @escaping ([PasswordManagerEntry]) -> Void) {
         do {
             try dbPool.read { db in

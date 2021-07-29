@@ -59,7 +59,7 @@ class PasswordManagerMenuViewModel: ObservableObject {
             passwordGeneratorViewModel.delegate = self
             self.passwordGeneratorViewModel = passwordGeneratorViewModel
         } else {
-            self.passwordStore.entries(for: host.minimizedHost ?? host.urlStringWithoutScheme) {
+            self.passwordStore.entries(for: host.minimizedHost ?? host.urlStringWithoutScheme, exact: false) {
                 self.entriesForHost = $0
                 self.updateDisplay()
             }
