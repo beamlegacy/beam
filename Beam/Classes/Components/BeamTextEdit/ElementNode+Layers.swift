@@ -69,7 +69,7 @@ extension ElementNode {
     func updateElementLayers() {
         updateBulletLayer(alwaysShowBullets: PreferencesManager.alwaysShowBullets)
         updateDisclosureLayer(alwaysShowBullets: PreferencesManager.alwaysShowBullets)
-        updateIndentLayer()
+        updateIndentLayer(with: PreferencesManager.alwaysShowBullets ? 1 : 0)
         updateCheckboxLayer()
     }
 
@@ -92,15 +92,16 @@ extension ElementNode {
     private func updateDisclosureLayer(alwaysShowBullets: Bool, with opacity: Float? = nil) {
         guard let disclosureLayer = self.layers[LayerName.disclosure.rawValue] as? ChevronButton else { return }
 
-        if showDisclosureButton && alwaysShowBullets || !open {
+        if let opacityValue = opacity {
+            disclosureLayer.layer.opacity = opacityValue
+        }
+        if showDisclosureButton && alwaysShowBullets {
             disclosureLayer.layer.isHidden = false
         } else if showDisclosureButton && !alwaysShowBullets {
             disclosureLayer.layer.isHidden = false
+            disclosureLayer.layer.opacity = open ? 0 : 1
         } else if !showDisclosureButton {
             disclosureLayer.layer.isHidden = true
-        }
-        if let opacityValue = opacity {
-            disclosureLayer.layer.opacity = opacityValue
         }
     }
 
