@@ -10,7 +10,7 @@ import BeamCore
 
 func export_all_browsing_sessions() {
     let docManager = DocumentManager()
-    let sessions = docManager.allDocumentsTitles().compactMap({ title -> [BrowsingTree]? in
+    let sessions = docManager.allDocumentsTitles(includeDeletedNotes: true).compactMap({ title -> [BrowsingTree]? in
         guard let note = BeamNote.fetch(docManager, title: title, keepInMemory: false) else { return nil }
         return note.browsingSessions
     }).reduce([], { result, trees -> [BrowsingTree] in

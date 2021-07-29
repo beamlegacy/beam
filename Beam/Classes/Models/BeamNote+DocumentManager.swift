@@ -348,7 +348,7 @@ extension BeamNote: BeamNoteDocument {
         let documentManager = DocumentManager()
         try? GRDBDatabase.shared.clearElements()
         try? GRDBDatabase.shared.clearBidirectionalLinks()
-        for title in documentManager.allDocumentsTitles() {
+        for title in documentManager.allDocumentsTitles(includeDeletedNotes: false) {
             if let note = BeamNote.fetch(documentManager, title: title) {
                 try? GRDBDatabase.shared.append(note: note)
                 for link in note.internalLinks {
