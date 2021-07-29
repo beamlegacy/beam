@@ -19,12 +19,13 @@ class ClusteringManager: ObservableObject {
     }
     var clusteredNotesId: [[UUID]] = [[]] {
         didSet {
-            // TODO: Add to debug window?
+            transformToClusteredNotes()
         }
     }
     var sendRanking = false
     var ranker: SessionLinkRanker
     @Published var clusteredTabs: [[TabInformation?]] = [[]]
+    @Published var clusteredNotes: [[String?]] = [[]]
     @Published var isClustering: Bool = false
     @Published var selectedTabGroupingCandidate: Int
     @Published var weightNavigation: Double
@@ -220,6 +221,14 @@ class ClusteringManager: ObservableObject {
         DispatchQueue.main.async {
             self.clusteredTabs = clusteredTabs
         }
+    }
+
+    private func transformToClusteredNotes() {
+        self.clusteredNotes = self.clusteredNotesId.compactMap({ cluster in
+            return cluster.map { noteUuid in
+                return BeamNote.titleForNoteId(noteUuid)
+            }
+        })
     }
 
     private func logForClustering(result: [[UInt64]], changeCandidate: Bool) {
