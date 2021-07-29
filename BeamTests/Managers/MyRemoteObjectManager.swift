@@ -25,12 +25,6 @@ extension MyRemoteObjectManager: BeamObjectManagerDelegate {
         Array(Self.store.values)
     }
 
-    func persistChecksum(_ objects: [BeamObjectType]) throws {
-        for object in objects {
-            Self.store[object.beamObjectId]?.previousChecksum = object.checksum
-        }
-    }
-
     func manageConflict(_ object: BeamObjectType,
                         _ remoteObject: BeamObjectType) throws -> BeamObjectType {
         var result = object.copy()
@@ -52,6 +46,12 @@ extension MyRemoteObjectManager: BeamObjectManagerDelegate {
     func saveObjectsAfterConflict(_ objects: [BeamObjectType]) throws {
         for object in objects {
             Self.store[object.beamObjectId] = object
+            Self.store[object.beamObjectId]?.previousChecksum = object.checksum
+        }
+    }
+
+    func persistChecksum(_ objects: [BeamObjectType]) throws {
+        for object in objects {
             Self.store[object.beamObjectId]?.previousChecksum = object.checksum
         }
     }

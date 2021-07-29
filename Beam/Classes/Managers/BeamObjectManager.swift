@@ -543,6 +543,7 @@ extension BeamObjectManager {
                 // Note: we can't decode the remote `BeamObject` as that would require to fetch all details back from
                 // the API when saving (it needs `data`). Instead we use the objects passed within the method attribute,
                 // and set their `previousChecksum`
+
                 // We'll use `copy()` when it's faster and doesn't encode/decode
 
                 do {
