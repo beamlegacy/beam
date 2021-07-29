@@ -157,115 +157,168 @@ extension TextRoot {
         cmdManager.focusElement(node, cursorPosition: selectedTextRange.lowerBound + bText.count)
     }
 
-    func deleteForward() {
-        guard root?.state.nodeSelection == nil else {
+    public func deleteForward() {
+        guard state.nodeSelection == nil else {
+            editor.cancelPopover()
             eraseNodeSelection(createEmptyNodeInPlace: false)
             return
         }
 
-        // Rather elegant solution: if we're not on a TextNode, let's move to a neighbouring node if it makes sense and then move back to the original position to prevent having to do complex things to handle all cases for the types of focussedWidget
-        let shiftNeeded = focusedWidget as? TextNode == nil && cursorPosition != 0
-        if shiftNeeded {
-            moveRight()
-        }
-        defer {
-            if shiftNeeded {
-                moveLeft()
-            }
-        }
-
-        guard let node = focusedWidget as? TextNode, !node.readOnly,
-              node.displayedElementNoteTitle != nil else {
-            if let node = focusedWidget as? ElementNode {
-                cmdManager.beginGroup(with: "Delete forward")
-                if let nextVisibleNode = node.nextVisibleNode(ElementNode.self) {
-                    cmdManager.focusElement(nextVisibleNode, cursorPosition: 0)
-                }
-                cmdManager.deleteElement(for: node)
-                cmdManager.endGroup()
-            }
+        guard let node = focusedWidget as? ElementNode,
+              let nodeParent = node.parent as? ElementNode
+        else {
             return
-
         }
 
-        if !selectedTextRange.isEmpty || cursorPosition != node.text.count {
-            cmdManager.deleteText(in: node, for: rangeToDeleteText(in: node, cursorAt: cursorPosition, forward: true))
-        } else {
-            // Delete element forward
-            cmdManager.beginGroup(with: "Delete forward")
-            defer { cmdManager.endGroup() }
-            if let nextVisibleNode = node.nextVisibleNode(ElementNode.self) {
-                let pos = cursorPosition
-                if let nextVisibleNode = nextVisibleNode as? TextNode {
-                    cmdManager.replaceText(in: node, for: cursorPosition..<cursorPosition, with: nextVisibleNode.text)
+        cmdManager.beginGroup(with: "Delete forward")
+        defer {
+            cmdManager.endGroup()
+        }
+
+        if let textNode = node as? TextNode {
+            if cursorPosition == textNode.textCount {
+                guard let nextNode = node.nextVisibleNode(ElementNode.self) else {
+                    return
                 }
-                cmdManager.cancelSelection(node)
-                cmdManager.focusElement(node, cursorPosition: pos)
-                cmdManager.deleteElement(for: nextVisibleNode)
+
+                // Simple case: the next node contains text:
+                if let nextTextNode = nextNode as? TextNode {
+                    let pos = textNode.textCount
+                    cmdManager.insertText(nextTextNode.elementText, in: textNode, at: pos)
+                    moveChildrenOf(nextTextNode, to: textNode)
+                    cmdManager.deleteElement(for: nextTextNode)
+                    return
+                }
+
+                // Complex case: the next node contains an embed or an image
+                cmdManager.focusElement(nextNode, cursorPosition: 0)
+                deleteForward()
+                return
+            } else {
+                // Standard text deletion
+                cmdManager.deleteText(in: textNode, for: rangeToDeleteText(in: textNode, cursorAt: cursorPosition, forward: true))
+            }
+        } else {
+            // we are not in a text node
+            if cursorPosition == node.textCount {
+                // We must delete whatever is following us, unless it's not an element node
+                guard let nextNode = node.nextVisibleNode(ElementNode.self) else { return }
+
+                // If it's a text node then we must remove the first character from the text node and leave the cursor there
+                if let nextTextNode = nextNode as? TextNode {
+                    cmdManager.focusElement(nextTextNode, cursorPosition: 0)
+                    deleteForward()
+                    return
+                } else {
+                    // If the next node is not a text node then we must remove the node altogether and leave the cursor where it is
+                    cmdManager.focusElement(nextNode, cursorPosition: 0)
+                    deleteForward()
+                    cmdManager.focusElement(node, cursorPosition: node.textCount)
+                }
+            } else {
+                // we are at the start of the element node, we can just delete it and move all its children to the previous node
+                guard let nextNode = node.nextVisibleNode(ElementNode.self) else {
+                    let newNextElement = BeamElement()
+                    cmdManager.insertElement(newNextElement, inNode: nodeParent, afterNode: node)
+                    let newNode = nodeFor(newNextElement, withParent: nodeParent)
+                    cmdManager.focusElement(newNode, cursorPosition: 0)
+                    cmdManager.deleteElement(for: node)
+                    return
+                }
+                moveChildrenOf(node, to: nodeParent, atOffset: node.displayedElement.indexInParent)
+                cmdManager.focusElement(nextNode, cursorPosition: 0)
+                cmdManager.deleteElement(for: node)
             }
         }
     }
 
-    //swiftlint:disable:next cyclomatic_complexity
-    func deleteBackward() {
+    func moveChildrenOf(_ node: ElementNode, to newParent: ElementNode, atOffset: Int? = nil) {
+        let offset = atOffset ?? newParent.children.count
+        for (i, child) in node.displayedElement.children.enumerated() {
+            cmdManager.reparentElement(child, to: newParent.displayedElement, atIndex: offset + i)
+        }
+    }
+
+    //swiftlint:disable:next cyclomatic_complexity function_body_length
+    public func deleteBackward() {
         guard root?.state.nodeSelection == nil else {
             editor.cancelPopover()
             eraseNodeSelection(createEmptyNodeInPlace: false)
             return
         }
 
-        // Rather elegant solution: if we're not on a TextNode, let's move to a neighbouring node if it makes sense and then move back to the original position to prevent having to do complex things to handle all cases for the types of focussedWidget
-        let shiftNeeded = focusedWidget as? TextNode == nil && cursorPosition == 0
-        if shiftNeeded {
-            moveLeft()
-        }
-        defer {
-            if shiftNeeded {
-                moveRight()
-            }
-        }
-
-        guard let node = focusedWidget as? TextNode, !node.readOnly else {
-            if let node = focusedWidget as? ElementNode {
-                cmdManager.beginGroup(with: "Delete backward")
-                if let nextVisibleNode = node.nextVisibleNode(ElementNode.self) {
-                    cmdManager.focusElement(nextVisibleNode, cursorPosition: 0)
-                }
-                cmdManager.deleteElement(for: node.unproxyElement)
-                cmdManager.endGroup()
-            }
+        guard let node = focusedWidget as? ElementNode,
+              let nodeParent = node.parent as? ElementNode
+        else {
             return
         }
 
-        if cursorPosition == 0, selectedTextRange.isEmpty {
-            if node.element == node.element.note?.children.first {
-                return // can't erase the first element of the note
-            }
-            // Delete element backward
-            cmdManager.beginGroup(with: "Delete backward")
-            defer { cmdManager.endGroup() }
-            if let prevVisibleNode = node.previousVisibleNode(ElementNode.self) {
-                if let prevVisibleNode = prevVisibleNode as? TextNode {
-                    let pos = prevVisibleNode.text.count
-                    cmdManager.replaceText(in: prevVisibleNode, for: pos..<pos, with: node.text)
-                    cmdManager.focusElement(prevVisibleNode, cursorPosition: pos)
-                    for (i, child) in node.displayedElement.children.enumerated() {
-                        cmdManager.reparentElement(child, to: prevVisibleNode.displayedElement, atIndex: i)
-                    }
-                    cmdManager.deleteElement(for: node)
-                } else {
-                    if node.text.isEmpty {
-                        for (i, child) in node.displayedElement.children.enumerated() {
-                            cmdManager.reparentElement(child, to: prevVisibleNode.displayedElement, atIndex: i)
-                        }
-                        cmdManager.deleteElement(for: node)
-                    } else {
-                        cmdManager.deleteElement(for: prevVisibleNode)
-                    }
+        // We can't remove the root of a link & ref proxy node:
+        if let ref = node as? ProxyTextNode,
+           nil == ref.parent as? BreadCrumb,
+           cursorPosition == 0 {
+            return
+        }
+
+        cmdManager.beginGroup(with: "Delete backward")
+        defer {
+            cmdManager.endGroup()
+        }
+
+        if let textNode = node as? TextNode {
+            if cursorPosition == 0 {
+                guard let prevNode = node.previousVisibleNode(ElementNode.self) else {
+                    return
                 }
+
+                // Simple case: the previous node contains text:
+                if let prevTextNode = prevNode as? TextNode {
+                    let pos = prevTextNode.textCount
+                    cmdManager.insertText(textNode.elementText, in: prevTextNode, at: pos)
+                    moveChildrenOf(textNode, to: prevTextNode)
+                    cmdManager.focusElement(prevTextNode, cursorPosition: pos)
+                    cmdManager.deleteElement(for: textNode)
+                    return
+                }
+
+                // Complex case: the previous node contains an embed or an image
+                cmdManager.focusElement(prevNode, cursorPosition: prevNode.textCount)
+                deleteBackward()
+                return
+            } else {
+                // Standard text deletion
+                cmdManager.deleteText(in: textNode, for: rangeToDeleteText(in: textNode, cursorAt: cursorPosition, forward: false))
             }
         } else {
-            cmdManager.deleteText(in: node, for: rangeToDeleteText(in: node, cursorAt: cursorPosition, forward: false))
+            // we are not in a text node
+            if cursorPosition == 0 {
+                // We must delete whatever is behind us, unless it's not an element node
+                guard let prevNode = node.previousVisibleNode(ElementNode.self) else { return }
+
+                // If it's a text node then we must remove the last character from the text node and leave the cursor there
+                if let prevTextNode = prevNode as? TextNode {
+                    cmdManager.focusElement(prevTextNode, cursorPosition: prevTextNode.textCount)
+                    deleteBackward()
+
+                    return
+                } else {
+                    // If the previous node is not a text node then we must remove the node altogether and leave the cursor where it is
+                    cmdManager.focusElement(prevNode, cursorPosition: prevNode.textCount)
+                    deleteBackward()
+                    cmdManager.focusElement(node, cursorPosition: 0)
+                }
+            } else {
+                // we are at the end of the element node, we can just delete it and move all its children to the previous node
+                // but if the node is the first node then we must replace it with an empty text node
+                let prevNode = node.previousVisibleNode(ElementNode.self) ?? {
+                    let newPrevElement = BeamElement()
+                    cmdManager.insertElement(newPrevElement, inNode: nodeParent, afterNode: node)
+                    return nodeFor(newPrevElement, withParent: nodeParent)
+                }()
+                moveChildrenOf(node, to: prevNode)
+                cmdManager.deleteElement(for: node)
+                cmdManager.focusElement(prevNode, cursorPosition: prevNode.textCount)
+            }
         }
     }
 

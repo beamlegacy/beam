@@ -105,7 +105,7 @@ struct UserInformationsModalView: View {
     }
 
     private func removeEntry() {
-        if let _ = self.selectedEntries.first {
+        if self.selectedEntries.first != nil {
             // ViewModel remove UserInfo
         }
     }
