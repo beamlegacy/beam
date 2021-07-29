@@ -114,6 +114,9 @@ public struct BTextEditScrollable: NSViewRepresentable {
     var showTitle = true
 
     var scrollToElementId: UUID?
+
+    var headerView: AnyView?
+
     private let focusOnAppear = true
 
     public func makeCoordinator() -> BTextEditScrollableCoordinator {
@@ -147,22 +150,24 @@ public struct BTextEditScrollable: NSViewRepresentable {
 
         let scrollView = NSScrollView()
         scrollView.automaticallyAdjustsContentInsets = false
-
         let clipView = NSClipView()
         clipView.translatesAutoresizingMaskIntoConstraints = false
         clipView.drawsBackground = false
         scrollView.contentView = clipView
-        clipView.addConstraint(NSLayoutConstraint(item: clipView, attribute: .left, relatedBy: .equal, toItem: edit, attribute: .left, multiplier: 1.0, constant: 0))
-        clipView.addConstraint(NSLayoutConstraint(item: clipView, attribute: .top, relatedBy: .equal, toItem: edit, attribute: .top, multiplier: 1.0, constant: 0))
-        clipView.addConstraint(NSLayoutConstraint(item: clipView, attribute: .right, relatedBy: .equal, toItem: edit, attribute: .right, multiplier: 1.0, constant: 0))
-
+        clipView.addConstraints([
+            clipView.leftAnchor.constraint(equalTo: edit.leftAnchor),
+            clipView.rightAnchor.constraint(equalTo: edit.rightAnchor),
+            clipView.topAnchor.constraint(equalTo: edit.topAnchor)
+        ])
         edit.translatesAutoresizingMaskIntoConstraints = false
         scrollView.drawsBackground = false
         scrollView.hasVerticalScroller = true
         scrollView.hasHorizontalScroller = false
         scrollView.borderType = .noBorder
         scrollView.documentView = edit
+
         context.coordinator.adjustScrollViewContentAutomatically(scrollView)
+        updateHeaderView(scrollView, context: context)
         return scrollView
     }
 
@@ -193,15 +198,33 @@ public struct BTextEditScrollable: NSViewRepresentable {
 
         edit.scrollToElementId = scrollToElementId
 
+        updateHeaderView(nsView, context: context)
+
         context.coordinator.onDeinit = {
             edit.hideFloatingView()
         }
+    }
+    private func updateHeaderView(_ scrollView: NSViewType, context: Context) {
+        guard let headerView = headerView, let documentView = scrollView.documentView
+        else { return }
+        context.coordinator.headerHostingView?.removeFromSuperview()
+        let hosting = NSHostingView<AnyView>(rootView: headerView)
+        hosting.translatesAutoresizingMaskIntoConstraints = false
+        documentView.addSubview(hosting)
+        documentView.addConstraints([
+            hosting.leftAnchor.constraint(equalTo: documentView.leftAnchor),
+            hosting.rightAnchor.constraint(equalTo: documentView.rightAnchor),
+            hosting.topAnchor.constraint(equalTo: documentView.topAnchor)
+        ])
+        context.coordinator.headerHostingView = hosting
     }
 
     public class BTextEditScrollableCoordinator: NSObject, ScrollViewContentAdjusterDelegate {
         private let parent: BTextEditScrollable
         fileprivate var onDeinit: () -> Void = {}
         fileprivate var compensatingBottomInset = CGFloat(0)
+        fileprivate var headerHostingView: NSHostingView<AnyView>?
+
         private var scrollViewContentAdjuster: ScrollViewContentAdjuster?
 
         init(_ edit: BTextEditScrollable) {
