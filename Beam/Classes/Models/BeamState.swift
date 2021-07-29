@@ -66,6 +66,7 @@ import BeamCore
     @Published var overlayViewModel: OverlayViewCenterViewModel = OverlayViewCenterViewModel()
 
     var downloadButtonPosition: CGPoint?
+    weak var downloaderWindow: AutoDismissingWindow?
 
     private var scope = Set<AnyCancellable>()
     func goBack() {

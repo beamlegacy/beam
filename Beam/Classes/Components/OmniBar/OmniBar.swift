@@ -67,7 +67,7 @@ struct OmniBar: View {
         let showButton = !state.data.downloadManager.downloads.isEmpty
         if !showButton {
             DispatchQueue.main.asyncAfter(deadline: .now()) {
-                self.showDownloadPanel = false
+                state.downloaderWindow?.close()
             }
         }
         return showButton
@@ -161,13 +161,24 @@ struct OmniBar: View {
         }
     }
 
-    var rightActionsView: some View {
+    func rightActionsView(containerGeometry: GeometryProxy) -> some View {
         Group {
             if hasRightActions {
                 HStack(alignment: .center) {
                     if showDownloadsButton {
                         OmniBarDownloadButton(downloadManager: state.data.downloadManager, action: {
-                            showDownloadPanel.toggle()
+                            if let downloaderWindow = state.downloaderWindow {
+                                downloaderWindow.close()
+                            } else if let window = CustomPopoverPresenter.shared.presentAutoDismissingChildWindow() {
+                                let downloaderView = DownloaderView(downloader: state.data.downloadManager) { [weak window] in
+                                    window?.close()
+                                }
+                                let omnibarFrame = containerGeometry.frame(in: .global)
+                                let origin = CGPoint(x: omnibarFrame.origin.x + omnibarFrame.width - DownloaderView.width - 18, y: omnibarFrame.origin.y)
+                                window.setView(with: downloaderView, at: origin, fromtopLeft: true)
+                                window.makeKey()
+                                state.downloaderWindow = window
+                            }
                         })
                         .frame(height: 32, alignment: .top)
                         .background(GeometryReader { proxy -> Color in
@@ -176,6 +187,7 @@ struct OmniBar: View {
                             state.downloadButtonPosition = center
                             return Color.clear
                         })
+
                     }
                     if showDestinationNotePicker, let currentTab = browserTabsManager.currentTab {
                         DestinationNotePicker(tab: currentTab)
@@ -198,16 +210,13 @@ struct OmniBar: View {
         GeometryReader { containerGeometry in
             HStack(alignment: .top, spacing: 2) {
                 fieldView(containerGeometry: containerGeometry)
-                rightActionsView
+                rightActionsView(containerGeometry: containerGeometry)
             }
             .padding(.leading, state.isFullScreen ? 0 : windowControlsWidth)
             .frame(height: 52, alignment: .top)
             .background(BeamColor.Generic.background.swiftUI
                             .shadow(color: barShadowColor, radius: 0, x: 0, y: 0.5)
             )
-        }
-        .popup(isPresented: showDownloadPanel, config: .init(alignment: .topTrailing, offset: CGSize(width: -18, height: 45))) {
-            DownloaderView(downloader: state.data.downloadManager, isPresented: $showDownloadPanel)
         }
         .frame(height: 52, alignment: .top)
     }
