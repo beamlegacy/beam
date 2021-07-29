@@ -214,4 +214,3 @@ struct ShootCardPicker_Previews: PreviewProvider {
             .environmentObject(data)
     }
 }
-
