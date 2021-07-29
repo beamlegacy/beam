@@ -156,14 +156,15 @@ public class DocumentManager: NSObject {
         return result
     }
 
-    func allDocumentsTitles() -> [String] {
+    func allDocumentsTitles(includeDeletedNotes: Bool) -> [String] {
+        let predicate = includeDeletedNotes ? nil : NSPredicate(format: "deleted_at == nil")
         if Thread.isMainThread {
-            return Document.fetchAllNames(mainContext)
+            return Document.fetchAllNames(mainContext, predicate)
         } else {
             var result: [String] = []
             let context = coreDataManager.persistentContainer.newBackgroundContext()
             context.performAndWait {
-                result = Document.fetchAllNames(context)
+                result = Document.fetchAllNames(context, predicate)
             }
             return result
         }
