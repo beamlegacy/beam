@@ -102,7 +102,7 @@ extension BeamTextEdit {
             ContextMenuItem(title: "Bold", subtitle: "*", action: { action(.bold) }),
             ContextMenuItem(title: "Italic", subtitle: "**", action: { action(.italic) }),
             ContextMenuItem(title: "Strikethrough", subtitle: "~~", action: { action(.strikethrough) }),
-            ContextMenuItem(title: "Underline", subtitle: "", action: { action(.underline) }),
+            ContextMenuItem(title: "Underline", subtitle: "_", action: { action(.underline) }),
             ContextMenuItem(title: "Heading 1", subtitle: "#", action: { action(.h1) }),
             ContextMenuItem(title: "Heading 2", subtitle: "##", action: { action(.h2) }),
             ContextMenuItem(title: "Text", subtitle: "-", action: { action(.text) }),

@@ -69,14 +69,25 @@
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="File" id="bib-Uj-vzu">
                                     <items>
-                                        <menuItem title="New" keyEquivalent="n" id="Was-JA-tGl">
+                                        <menuItem title="New Window" keyEquivalent="n" id="Was-JA-tGl">
                                             <connections>
                                                 <action selector="newDocument:" target="Ady-hI-5gd" id="4Si-XN-c54"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="New Search..." keyEquivalent="t" id="XvS-Ku-fBs" userLabel="New Search...">
+                                        <menuItem title="New Tab" keyEquivalent="t" id="XvS-Ku-fBs" userLabel="New Search...">
                                             <connections>
                                                 <action selector="newSearch:" target="Ady-hI-5gd" id="A5z-dM-XS8"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="New Tab with Current Note" tag="4" keyEquivalent="T" id="3vf-wY-DiQ">
+                                            <modifierMask key="keyEquivalentModifierMask" option="YES"/>
+                                            <connections>
+                                                <action selector="createEmptyTabWithCurrentNote:" target="Ady-hI-5gd" id="4Wf-w8-oWg"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Re-Open Closed Tab" tag="4" keyEquivalent="T" id="11s-ye-snn" userLabel="Re-Open Closed Tab">
+                                            <connections>
+                                                <action selector="reOpenClosedTab:" target="Ady-hI-5gd" id="f8F-r4-bRg"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem title="New Search..." tag="-15" keyEquivalent="F" id="7bQ-0P-W15" userLabel="New Search...">
@@ -84,14 +95,36 @@
                                                 <action selector="newSearch:" target="Ady-hI-5gd" id="AAg-12-xc0"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Open…" keyEquivalent="o" id="IAo-SY-fd9">
-                                            <connections>
-                                                <action selector="openDocument:" target="Ady-hI-5gd" id="bVn-NM-KNZ"/>
-                                            </connections>
-                                        </menuItem>
                                         <menuItem title="Open Location" keyEquivalent="l" id="l1c-OY-XPx">
                                             <connections>
                                                 <action selector="openLocation:" target="Ady-hI-5gd" id="HM6-VX-pQz"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="xzN-76-ztW"/>
+                                        <menuItem title="Close Window" keyEquivalent="W" id="bvf-vf-Qoo" userLabel="Close Beam">
+                                            <connections>
+                                                <action selector="performHardClose:" target="Ady-hI-5gd" id="0rF-Pr-VsW"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Close" keyEquivalent="w" id="DVo-aG-piG">
+                                            <connections>
+                                                <action selector="performClose:" target="Ady-hI-5gd" id="HmO-Ls-i7Q"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Save…" keyEquivalent="s" id="pxx-59-PXV">
+                                            <connections>
+                                                <action selector="saveDocument:" target="Ady-hI-5gd" id="teZ-XB-qJY"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Save As…" keyEquivalent="S" id="Bw7-FT-i3A">
+                                            <connections>
+                                                <action selector="saveDocumentAs:" target="Ady-hI-5gd" id="mDf-zr-I0C"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="24w-bP-3Wy"/>
+                                        <menuItem title="Open…" keyEquivalent="o" id="IAo-SY-fd9">
+                                            <connections>
+                                                <action selector="openDocument:" target="Ady-hI-5gd" id="bVn-NM-KNZ"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem title="Open Recent" id="tXI-mr-wws">
@@ -171,22 +204,6 @@
                                                     </menuItem>
                                                 </items>
                                             </menu>
-                                        </menuItem>
-                                        <menuItem isSeparatorItem="YES" id="m54-Is-iLE"/>
-                                        <menuItem title="Close" keyEquivalent="w" id="DVo-aG-piG">
-                                            <connections>
-                                                <action selector="performClose:" target="Ady-hI-5gd" id="HmO-Ls-i7Q"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="Save…" keyEquivalent="s" id="pxx-59-PXV">
-                                            <connections>
-                                                <action selector="saveDocument:" target="Ady-hI-5gd" id="teZ-XB-qJY"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="Save As…" keyEquivalent="S" id="Bw7-FT-i3A">
-                                            <connections>
-                                                <action selector="saveDocumentAs:" target="Ady-hI-5gd" id="mDf-zr-I0C"/>
-                                            </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="aJh-i4-bef"/>
                                         <menuItem title="Page Setup…" keyEquivalent="P" id="qIS-W8-SiK">
@@ -432,6 +449,74 @@
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Format" id="GEO-Iw-cKr">
                                     <items>
+                                        <menuItem title="Heading 1" tag="3" keyEquivalent="1" id="mTe-s3-Ozp" userLabel="Heading 1">
+                                            <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
+                                            <connections>
+                                                <action selector="toggleHeadingOneAction:" target="Ady-hI-5gd" id="j1M-qc-u9z"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Heading 2" tag="3" keyEquivalent="2" id="lCq-r0-4fT" userLabel="Heading 2">
+                                            <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
+                                            <connections>
+                                                <action selector="toggleHeadingTwoAction:" target="Ady-hI-5gd" id="k3S-C2-Pfk"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" tag="3" id="86o-Xn-jpY"/>
+                                        <menuItem title="Bold" tag="3" keyEquivalent="b" id="GB9-OM-e27">
+                                            <connections>
+                                                <action selector="toggleBoldAction:" target="Ady-hI-5gd" id="8iv-ge-jc7"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Italic" tag="3" keyEquivalent="i" id="Vjx-xi-njq">
+                                            <connections>
+                                                <action selector="toggleItalicAction:" target="Ady-hI-5gd" id="sdU-6p-VCH"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Strikethrough" tag="3" keyEquivalent="y" id="qoB-GF-2Bz">
+                                            <connections>
+                                                <action selector="toggleStrikethroughAction:" target="Ady-hI-5gd" id="zeQ-xJ-mNE"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Underline" tag="3" keyEquivalent="u" id="WRG-CD-K1S">
+                                            <connections>
+                                                <action selector="toggleUnderlineAction:" target="Ady-hI-5gd" id="Hbe-el-FhP"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Insert Link" tag="3" keyEquivalent="k" id="A9C-EA-pZr" userLabel="Insert Link">
+                                            <connections>
+                                                <action selector="toggleInsertLinkAction:" target="Ady-hI-5gd" id="1n8-Ra-cb3"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Bi-directional Link" tag="3" keyEquivalent="K" id="VSb-Zp-ItO" userLabel="Bi-directional Link">
+                                            <connections>
+                                                <action selector="toggleBidiLinkAction:" target="Ady-hI-5gd" id="obf-Ue-9NR"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="3ia-Mc-ZNX"/>
+                                        <menuItem title="List" tag="3" keyEquivalent="L" id="btz-BQ-M8Q" userLabel="List">
+                                            <connections>
+                                                <action selector="toggleListAction:" target="Ady-hI-5gd" id="YSj-JS-lsb"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Quote" tag="3" keyEquivalent="U" id="quo-dq-hts" userLabel="Quote">
+                                            <connections>
+                                                <action selector="toggleQuoteAction:" target="Ady-hI-5gd" id="88N-gp-ci6"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Todo" tag="3" keyEquivalent="t" id="Hl0-Oy-suj" userLabel="Todo">
+                                            <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
+                                            <connections>
+                                                <action selector="toggleTodoAction:" target="Ady-hI-5gd" id="Hpg-aX-p9L"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="yXb-tL-n71"/>
+                                        <menuItem title="Code Block" tag="3" keyEquivalent="c" id="U2P-gg-A4g">
+                                            <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
+                                            <connections>
+                                                <action selector="toggleCodeBlockAction:" target="Ady-hI-5gd" id="hdp-3Z-it5"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="neh-RN-Ogc"/>
                                         <menuItem title="Font" id="Gi5-1S-RQB">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <menu key="submenu" title="Font" systemMenu="font" id="aXa-aM-Jaq">
@@ -439,21 +524,6 @@
                                                     <menuItem title="Show Fonts" keyEquivalent="t" id="Q5e-8K-NDq">
                                                         <connections>
                                                             <action selector="orderFrontFontPanel:" target="YLy-65-1bz" id="WHr-nq-2xA"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                    <menuItem title="Bold" tag="2" keyEquivalent="b" id="GB9-OM-e27">
-                                                        <connections>
-                                                            <action selector="addFontTrait:" target="YLy-65-1bz" id="hqk-hr-sYV"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                    <menuItem title="Italic" tag="1" keyEquivalent="i" id="Vjx-xi-njq">
-                                                        <connections>
-                                                            <action selector="addFontTrait:" target="YLy-65-1bz" id="IHV-OB-c03"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                    <menuItem title="Underline" keyEquivalent="u" id="WRG-CD-K1S">
-                                                        <connections>
-                                                            <action selector="underline:" target="Ady-hI-5gd" id="FYS-2b-JAY"/>
                                                         </connections>
                                                     </menuItem>
                                                     <menuItem isSeparatorItem="YES" id="5gT-KC-WSO"/>
@@ -696,19 +766,12 @@
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="View" id="HyV-fh-RgO">
                                     <items>
-                                        <menuItem title="Enter Full Screen" keyEquivalent="f" id="KMy-Je-3TA">
-                                            <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
-                                            <connections>
-                                                <action selector="toggleFullScreen:" target="Ady-hI-5gd" id="eha-6e-Nsv"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem isSeparatorItem="YES" id="jze-PA-szA"/>
                                         <menuItem title="Stop" tag="4" keyEquivalent="." id="VKe-84-02R" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
                                             <connections>
                                                 <action selector="stopLoading:" target="Ady-hI-5gd" id="gVj-cq-iUJ"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Reload" tag="4" keyEquivalent="r" id="fwX-73-9bH" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
+                                        <menuItem title="Reload Page" tag="4" keyEquivalent="r" id="fwX-73-9bH" userLabel="Reload Page" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
                                             <connections>
                                                 <action selector="reload:" target="Ady-hI-5gd" id="laU-LK-ORh"/>
                                             </connections>
@@ -729,6 +792,13 @@
                                                 <action selector="zoomOut:" target="Ady-hI-5gd" id="s1X-bM-fCG"/>
                                             </connections>
                                         </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="jze-PA-szA"/>
+                                        <menuItem title="Enter Full Screen" keyEquivalent="f" id="KMy-Je-3TA">
+                                            <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
+                                            <connections>
+                                                <action selector="toggleFullScreen:" target="Ady-hI-5gd" id="eha-6e-Nsv"/>
+                                            </connections>
+                                        </menuItem>
                                     </items>
                                 </menu>
                             </menuItem>
@@ -736,67 +806,55 @@
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Navigation" id="cCx-1g-tLY">
                                     <items>
-                                        <menuItem title="Toggle Web / Note" tag="1001" keyEquivalent="d" id="wze-af-ouN">
-                                            <connections>
-                                                <action selector="toggleBetweenWebAndNote:" target="Ady-hI-5gd" id="tM1-6e-6lt"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="Change Card" tag="4" keyEquivalent="D" id="NOl-ax-hus">
-                                            <connections>
-                                                <action selector="showCardSelector:" target="Ady-hI-5gd" id="FiE-9C-fLE"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="Go Back" tag="4" keyEquivalent="[" id="vfj-M7-Iu5" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
+                                        <menuItem title="Back" tag="4" keyEquivalent="[" id="vfj-M7-Iu5" userLabel="Back" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
                                             <connections>
                                                 <action selector="goBack:" target="Ady-hI-5gd" id="dp8-wy-cmJ"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem title="Go Back" tag="-4" keyEquivalent="" id="JJG-Tc-9sk" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
                                             <connections>
-                                                <action selector="goBack:" target="Ady-hI-5gd" id="eat-2J-6tu"/>
+                                                <action selector="showPreviousTabInNewTab:" target="Ady-hI-5gd" id="Lf0-wb-GhI"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Go Forward" tag="4" keyEquivalent="]" id="jIn-Gg-R6F" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
+                                        <menuItem title="Forward" tag="4" keyEquivalent="]" id="jIn-Gg-R6F" userLabel="Forward" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
                                             <connections>
                                                 <action selector="goForward:" target="Ady-hI-5gd" id="YCt-1o-xMT"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem title="Go Forward" tag="-4" keyEquivalent="" id="68V-0m-mxt" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
                                             <connections>
-                                                <action selector="goForward:" target="Ady-hI-5gd" id="BPj-Sa-qKe"/>
+                                                <action selector="showNextTabInNewTab:" target="Ady-hI-5gd" id="0s2-BC-Ir1"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem isSeparatorItem="YES" tag="-3" id="nTu-5u-Dge"/>
-                                        <menuItem title="Show Journal [0]" tag="-3" keyEquivalent="0" id="tjl-Q9-d8d">
+                                        <menuItem isSeparatorItem="YES" id="Hyi-3c-HLP"/>
+                                        <menuItem title="Journal" keyEquivalent="H" id="VIl-9f-vjQ" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
                                             <connections>
-                                                <action selector="showJournal:" target="Ady-hI-5gd" id="zpT-Kn-hB1"/>
+                                                <action selector="showJournal:" target="Ady-hI-5gd" id="mle-Tg-ab1"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Select Recent Card 1" tag="-3" keyEquivalent="1" id="C1g-c1-8fA">
+                                        <menuItem title="Card / Web" tag="1001" keyEquivalent="d" id="wze-af-ouN">
                                             <connections>
-                                                <action selector="showRecentCard:" target="Ady-hI-5gd" id="yMd-VZ-XD0"/>
+                                                <action selector="toggleBetweenWebAndNote:" target="Ady-hI-5gd" id="tM1-6e-6lt"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Select Recent Card 2" tag="-3" keyEquivalent="2" id="G0G-q6-hMG">
+                                        <menuItem isSeparatorItem="YES" id="eqG-OD-aZE"/>
+                                        <menuItem title="Recent Cards" id="WLc-C7-aT2">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <menu key="submenu" title="Recent Cards" id="J7q-IY-RS5">
+                                                <items>
+                                                    <menuItem title="Item" id="tUW-ac-Sxk">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                    </menuItem>
+                                                </items>
+                                            </menu>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="yW5-VT-bM3"/>
+                                        <menuItem title="Change Card" tag="4" keyEquivalent="D" id="NOl-ax-hus">
                                             <connections>
-                                                <action selector="showRecentCard:" target="Ady-hI-5gd" id="wgC-j9-U32"/>
+                                                <action selector="showCardSelector:" target="Ady-hI-5gd" id="FiE-9C-fLE"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Select Recent Card 3" tag="-3" keyEquivalent="3" id="80D-gr-PVN">
-                                            <connections>
-                                                <action selector="showRecentCard:" target="Ady-hI-5gd" id="yB2-Na-uJB"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="Select Recent Card 4" tag="-3" keyEquivalent="4" id="WBf-9k-y4c">
-                                            <connections>
-                                                <action selector="showRecentCard:" target="Ady-hI-5gd" id="stC-as-544"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="Select Recent Card 5" tag="-3" keyEquivalent="5" id="esw-z0-LHW">
-                                            <connections>
-                                                <action selector="showRecentCard:" target="Ady-hI-5gd" id="9SO-pC-ALz"/>
-                                            </connections>
-                                        </menuItem>
+                                        <menuItem title="Re-open Closed Tab" tag="4" keyEquivalent="T" id="g8X-sC-Ejj" userLabel="Re-open Closed Tab" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target"/>
                                     </items>
                                 </menu>
                             </menuItem>
@@ -825,8 +883,8 @@ GQ
                                                 <action selector="showPreviousTab:" target="Ady-hI-5gd" id="QFs-kq-p2g"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Show Previous Tab" tag="-4" keyEquivalent="[" id="oAb-PD-njU" userLabel="Show Previous Tab">
-                                            <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
+                                        <menuItem title="Show Previous Tab" tag="-4" keyEquivalent="" id="oAb-PD-njU" userLabel="Show Previous Tab">
+                                            <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
                                             <connections>
                                                 <action selector="showPreviousTab:" target="Ady-hI-5gd" id="cP6-aq-98d"/>
                                             </connections>
@@ -840,23 +898,42 @@ CQ
                                                 <action selector="showNextTab:" target="Ady-hI-5gd" id="NFT-aq-DrR"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Show Next Tab" tag="-4" keyEquivalent="]" id="KJE-FH-Z16" userLabel="Show Next Tab">
-                                            <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
+                                        <menuItem title="Show Next Tab" tag="-4" keyEquivalent="" id="KJE-FH-Z16" userLabel="Show Next Tab">
+                                            <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
                                             <connections>
                                                 <action selector="showNextTab:" target="Ady-hI-5gd" id="q1N-Nw-YOb"/>
                                             </connections>
                                         </menuItem>
+                                        <menuItem title="Duplicate Tab" tag="4" id="NF5-tG-Vup" userLabel="Duplicate Tab">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                        </menuItem>
+                                        <menuItem title="Move Tab To New Window" tag="4" id="AZk-qw-poP" userLabel="Move Tab To New Window">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                        </menuItem>
+                                        <menuItem title="Merge All Windows" tag="4" id="N64-k2-oKz" userLabel="Merge All Windows">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="k1W-lq-tQq"/>
+                                        <menuItem title="Mute This Tab" tag="4" id="x3e-qD-Fxs" userLabel="Mute This Tab">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="muteCurrentTab:" target="Ady-hI-5gd" id="JhP-aL-ojD"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Mute Other Tabs" tag="4" id="iD6-bt-KWt" userLabel="Mute Other Tabs">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="muteOtherTabs:" target="Ady-hI-5gd" id="TQr-9e-QBg"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="g5S-y9-mpb"/>
                                         <menuItem title="Bring All to Front" id="LE2-aR-0XJ">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
                                                 <action selector="arrangeInFront:" target="Ady-hI-5gd" id="DRN-fu-gQh"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Show journal" keyEquivalent="H" id="VoL-pJ-EC7">
-                                            <connections>
-                                                <action selector="showJournal:" target="Ady-hI-5gd" id="ysb-J3-SMJ"/>
-                                            </connections>
-                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="Ibu-FF-ieA"/>
                                         <menuItem title="Toggle score card" tag="4" id="AED-TZ-YmC" userLabel="Toggle score card">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
@@ -918,6 +995,8 @@ CQ
                         <outlet property="delegate" destination="Voe-Tx-rLC" id="PrD-fu-P6m"/>
                     </connections>
                 </application>
+                <menuItem isSeparatorItem="YES" id="KDb-TQ-lnW"/>
+                <menuItem isSeparatorItem="YES" id="hYr-qB-Q6o"/>
                 <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="Beam" customModuleProvider="target"/>
                 <customObject id="YLy-65-1bz" customClass="NSFontManager"/>
                 <customObject id="Ady-hI-5gd" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>

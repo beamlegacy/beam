@@ -230,12 +230,12 @@ extension TextRoot {
     }
 
     @discardableResult
-    public func selectAllNodes() -> Bool {
+    public func selectAllNodes(force: Bool = false) -> Bool {
         let alreadySelectingNodes = root?.state.nodeSelection != nil
         guard let selection = startNodeSelection() else { return false }
 
         // If we are starting the selection we need to bail out now: we have just seleted the first node
-        guard alreadySelectingNodes else { return true }
+        guard alreadySelectingNodes || force else { return true }
 
         if let proxyNodeStart = selection.start as? ProxyNode, selection.isSelectingProxy {
             let parent = proxyNodeStart.highestParent()

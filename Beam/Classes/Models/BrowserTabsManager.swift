@@ -46,6 +46,7 @@ class BrowserTabsManager: ObservableObject {
             self.delegate?.tabsManagerDidUpdateTabs(tabs)
         }
     }
+    public var tabHistory: [Data] = []
     private weak var latestCurrentTab: BrowsingTree?
     @Published var currentTab: BrowserTab? {
         didSet {
@@ -169,8 +170,17 @@ extension BrowserTabsManager {
         currentTab = tabs[index]
     }
 
+    func showTab(at index: Int) {
+        currentTab = tabs[index]
+    }
+
     func closeCurrentTab() -> Bool {
         guard tabsAreVisible, let tab = currentTab else { return false }
+
+        let encoder = JSONEncoder()
+        guard let data = try? encoder.encode(tab) else { return false }
+        tabHistory.append(data)
+
         tab.closeTab()
         tab.cancelObservers()
         if let i = tabs.firstIndex(of: tab) {
@@ -182,6 +192,18 @@ extension BrowserTabsManager {
                 currentTab = nil
             }
             resetFirstResponderAfterClosingTab()
+            return true
+        }
+        return false
+    }
+
+    func reOpenedClosedTabFromHistory() -> Bool {
+        if !tabHistory.isEmpty {
+            let decoder = JSONDecoder()
+            let lastClosedTabData = tabHistory.removeLast()
+            guard let lastClosedTab = try? decoder.decode(BrowserTab.self, from: lastClosedTabData) else { return false }
+            lastClosedTab.id = UUID()
+            addNewTab(lastClosedTab, setCurrent: true, withURL: nil)
             return true
         }
         return false

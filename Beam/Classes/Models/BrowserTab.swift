@@ -59,6 +59,7 @@ import Promises
     @Published var browsingTree: BrowsingTree
     @Published var privateMode = false
 
+    var backForwardUrlList: [URL]?
     var originMode: Mode
 
     var pointAndShootAllowed: Bool {
@@ -221,6 +222,7 @@ import Promises
         case title
         case originalQuery
         case url
+        case backForwardUrlList
         case browsingTree
         case privateMode
         case noteController
@@ -233,8 +235,9 @@ import Promises
 
         id = try container.decode(UUID.self, forKey: .id)
         title = try container.decode(String.self, forKey: .title)
-        originalQuery = try container.decode(String.self, forKey: .originalQuery)
+        originalQuery = try? container.decode(String.self, forKey: .originalQuery)
         preloadUrl = try? container.decode(URL.self, forKey: .url)
+        backForwardUrlList = try container.decode([URL].self, forKey: .backForwardUrlList)
 
         let tree: BrowsingTree = try container.decode(BrowsingTree.self, forKey: .browsingTree)
         browsingTree = tree
@@ -256,7 +259,16 @@ import Promises
         state.setup(webView: web)
         backForwardList = web.backForwardList
         webView = web
-//        setupObservers()
+        self.webView.page = self
+        uiDelegateController.page = self
+        mediaPlayerController = MediaPlayerController(page: self)
+        setupObservers()
+        if let backForwardListUrl = backForwardUrlList {
+            for url in backForwardListUrl {
+                self.webView.load(URLRequest(url: url))
+            }
+            self.backForwardUrlList = nil
+        }
         if let suppliedPreloadURL = preloadUrl {
             preloadUrl = nil
             DispatchQueue.main.async { [weak self] in
@@ -270,10 +282,18 @@ import Promises
 
         try container.encode(id, forKey: .id)
         try container.encode(title, forKey: .title)
-        try container.encode(originalQuery, forKey: .originalQuery)
+        if let originalQuery = originalQuery {
+            try container.encode(originalQuery, forKey: .originalQuery)
+        }
         if let currentURL = webView.url {
             try container.encode(currentURL, forKey: .url)
         }
+        var backForwardUrlList = [URL]()
+        for backForwardListItem in webView.backForwardList.backList {
+            backForwardUrlList.append(backForwardListItem.url)
+        }
+        try container.encode(backForwardUrlList, forKey: .backForwardUrlList)
+
         try container.encode(browsingTree, forKey: .browsingTree)
         try container.encode(privateMode, forKey: .privateMode)
         try container.encode(noteController, forKey: .noteController)

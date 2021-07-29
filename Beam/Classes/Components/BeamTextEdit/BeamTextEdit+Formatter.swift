@@ -193,6 +193,8 @@ extension BeamTextEdit {
             elementKind = .heading(2)
         case .quote:
             elementKind = .quote(1, node.text.text, node.text.text)
+        case .checkmark:
+            elementKind = .check(false)
         default:
             break
         }
