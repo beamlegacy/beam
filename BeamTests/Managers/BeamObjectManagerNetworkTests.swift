@@ -551,24 +551,11 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                                 waitUntil(timeout: .seconds(10)) { done in
                                     do {
                                         _ = try sut.saveToAPI(beamObjects) { result in
-                                            expect { try result.get() }.to(throwError { (error: BeamObjectManagerError) in
+                                            expect { try result.get() }.to(throwError { (error: BeamObjectManagerObjectError<MyRemoteObject>) in
                                                 switch error {
-                                                case .multipleErrors(let errors):
-                                                    expect(errors).to(haveCount(2))
-
-//                                                    guard let error1 = errors.first,
-//                                                          case BeamObjectManagerObjectError<MyRemoteObject>.invalidChecksum(let remoteObject) = error1,
-//                                                          let error2 = errors.last,
-//                                                          case BeamObjectManagerObjectError<MyRemoteObject>.invalidChecksum(let remoteObject2) = error2
-//                                                          else {
-//                                                        fail("Failed for error type")
-//                                                        return
-//                                                    }
-//
-//                                                    remoteObjects.append(remoteObject)
-//                                                    remoteObjects.append(remoteObject2)
-                                                default:
-                                                    fail("Expecting invalidChecksum error")
+                                                case .invalidChecksum(_, _, let remoteObjects1):
+                                                    expect(remoteObjects1).to(haveCount(2))
+                                                    remoteObjects = remoteObjects1
                                                 }
                                             })
 
@@ -944,10 +931,10 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                                     do {
                                         _ = try sut.saveToAPI(object) { result in
                                             expect { try result.get() }.to(throwError { (error: BeamObjectManagerObjectError<MyRemoteObject>) in
-//                                                switch error {
-//                                                case .invalidChecksum(let remoteOldObject):
-//                                                    remoteObject = remoteOldObject
-//                                                }
+                                                switch error {
+                                                case .invalidChecksum(_, _, let remoteOldObjects):
+                                                    remoteObject = remoteOldObjects.first
+                                                }
                                             })
 
                                             done()

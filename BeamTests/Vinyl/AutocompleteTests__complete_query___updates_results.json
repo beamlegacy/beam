@@ -1,0 +1,27 @@
+[
+  {
+    "request" : {
+      "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=Beam",
+      "method" : "GET"
+    },
+    "response" : {
+      "status" : 200,
+      "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=Beam",
+      "headers" : {
+        "Server" : "gws",
+        "Content-Encoding" : "gzip",
+        "Pragma" : "no-cache",
+        "x-frame-options" : "SAMEORIGIN",
+        "x-xss-protection" : "0",
+        "Alt-Svc" : "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000,h3-T051=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\"",
+        "Date" : "Thu, 29 Jul 2021 13:37:38 GMT",
+        "Cache-Control" : "no-cache, must-revalidate",
+        "Content-Length" : "148",
+        "Content-Disposition" : "attachment; filename=\"f.txt\"",
+        "Content-Type" : "text\/javascript; charset=ISO-8859-1",
+        "Expires" : "-1"
+      },
+      "body" : "[\"Beam\",[\"beamng drive\",\"beams\",\"beamy\",\"beamer\",\"beam traduction\",\"beam suntory\",\"beamery\",\"beam advisory\",\"beam me up scotty\",\"beams plus\"],[],{\"google:suggestsubtypes\":[[512,433],[512],[512],[512,433],[512],[512],[512],[512],[512],[512]]}]"
+    }
+  }
+]

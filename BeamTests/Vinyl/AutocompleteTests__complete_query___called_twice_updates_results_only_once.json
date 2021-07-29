@@ -1,0 +1,27 @@
+[
+  {
+    "response" : {
+      "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=green",
+      "status" : 200,
+      "body" : "[\"green\",[\"greenweez\",\"greenpeace\",\"greenwashing\",\"green book\",\"greengo\",\"green zone\",\"greenflex\",\"greenhouse\",\"green farmers\",\"greenly\"],[],{\"google:suggestsubtypes\":[[512,433],[512,433],[512],[512,433],[512,433],[433,131],[512,433],[512],[512],[512]]}]",
+      "headers" : {
+        "Content-Length" : "147",
+        "Date" : "Thu, 29 Jul 2021 13:37:38 GMT",
+        "x-frame-options" : "SAMEORIGIN",
+        "Expires" : "-1",
+        "Pragma" : "no-cache",
+        "x-xss-protection" : "0",
+        "Server" : "gws",
+        "Content-Encoding" : "gzip",
+        "Cache-Control" : "no-cache, must-revalidate",
+        "Content-Disposition" : "attachment; filename=\"f.txt\"",
+        "Alt-Svc" : "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000,h3-T051=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\"",
+        "Content-Type" : "text\/javascript; charset=ISO-8859-1"
+      }
+    },
+    "request" : {
+      "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=green",
+      "method" : "GET"
+    }
+  }
+]

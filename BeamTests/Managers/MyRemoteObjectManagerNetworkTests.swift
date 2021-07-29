@@ -43,7 +43,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
         describe("saveAllOnBeamObjectApi()") {
             beforeEach {
-                self.createObjects()
+                _ = self.createObjects()
             }
 
             afterEach {

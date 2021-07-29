@@ -374,6 +374,7 @@ extension BeamObjectManager {
                     case .failure(let error): completion(.failure(error))
                     case .success(let newSavedObject):
                         conflictedObject.checksum = newSavedObject.checksum
+                        conflictedObject.previousChecksum = newSavedObject.checksum
                         goodObjects.append(conflictedObject)
 
                         completion(.success(goodObjects))
@@ -509,8 +510,15 @@ extension BeamObjectManager {
                     switch result {
                     case .failure(let error):
                         completion(.failure(error))
-                    case .success: // TODO: use object?
-                        goodObjects.append(contentsOf: toSaveObjects)
+                    case .success(let savedObjects):
+                        let toSaveObjectsWithChecksum: [T] = toSaveObjects.map {
+                            var toSaveObject = $0
+                            let savedObject = savedObjects.first(where: { $0.beamObjectId == toSaveObject.beamObjectId })
+                            toSaveObject.previousChecksum = savedObject?.checksum
+                            return toSaveObject
+                        }
+
+                        goodObjects.append(contentsOf: toSaveObjectsWithChecksum)
                         completion(.success(goodObjects))
                     }
                 }
@@ -590,7 +598,8 @@ extension BeamObjectManager {
                     switch result {
                     case .failure(let error): completion(.failure(error))
                     case .success(let newSavedObject):
-                        conflictedObject.checksum = newSavedObject.checksum
+//                        conflictedObject.checksum = newSavedObject.checksum
+                        conflictedObject.previousChecksum = newSavedObject.checksum
 
                         completion(.success(conflictedObject))
                     }
