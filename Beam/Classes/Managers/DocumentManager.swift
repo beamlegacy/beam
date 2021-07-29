@@ -302,7 +302,8 @@ public class DocumentManager: NSObject {
                        previousData: document.beam_api_data,
                        previousChecksum: document.beam_api_checksum,
                        version: document.version,
-                       isPublic: document.is_public
+                       isPublic: document.is_public,
+                       journalDate: document.journal_date
         )
     }
 
@@ -453,7 +454,8 @@ public class DocumentManager: NSObject {
             document.beam_api_data == documentApiType.data?.asData &&
             document.document_type == documentTypeInt &&
             document.deleted_at == documentApiType.deletedAt &&
-            document.id.uuidString.lowercased() == documentApiType.id
+            document.id.uuidString.lowercased() == documentApiType.id &&
+            documentApiType.journalDate == document.journal_date
     }
 
     // MARK: Refresh

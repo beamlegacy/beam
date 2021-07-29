@@ -30,6 +30,7 @@ class DocumentAPIType: Codable {
     var previousChecksum: String?
     var database: DatabaseAPIType?
     var publicUrl: String?
+    var journalDate: String?
 
     init(document: Document, context: NSManagedObjectContext) {
         title = document.title
@@ -41,6 +42,7 @@ class DocumentAPIType: Codable {
         previousChecksum = document.beam_api_checksum
         data = document.data?.asString
         isPublic = document.is_public
+        journalDate = document.journal_date
 
         let dbDatabase = try? Database.rawFetchWithId(context, document.database_id)
 

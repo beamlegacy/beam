@@ -392,6 +392,8 @@
 		961EC50B25B495DB009FA322 /* ButtonLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 961EC50A25B495DB009FA322 /* ButtonLayer.swift */; };
 		961EC51725B5038E009FA322 /* ChevronButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 961EC51625B5038E009FA322 /* ChevronButton.swift */; };
 		961EC58625B7A75A009FA322 /* LinkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 961EC58525B7A75A009FA322 /* LinkManager.swift */; };
+		9623ABBD26B002DC00309E5E /* Beam3ToBeam4MigrationPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9623ABBC26B002DC00309E5E /* Beam3ToBeam4MigrationPolicy.swift */; };
+		9623ABBF26B0061400309E5E /* Beam3ToBeam4Migration.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 9623ABBE26B0061400309E5E /* Beam3ToBeam4Migration.xcmappingmodel */; };
 		96319C6E26160AB400D1CF31 /* BeamNote+DocumentManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96319C6D26160AB400D1CF31 /* BeamNote+DocumentManager.swift */; };
 		96319C8626160E4A00D1CF31 /* BeamNote+LinkDetection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96319C8526160E4A00D1CF31 /* BeamNote+LinkDetection.swift */; };
 		96319D182616232700D1CF31 /* BeamCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96319D0F2616232600D1CF31 /* BeamCore.framework */; };
@@ -1266,6 +1268,9 @@
 		961EC50A25B495DB009FA322 /* ButtonLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonLayer.swift; sourceTree = "<group>"; };
 		961EC51625B5038E009FA322 /* ChevronButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChevronButton.swift; sourceTree = "<group>"; };
 		961EC58525B7A75A009FA322 /* LinkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkManager.swift; sourceTree = "<group>"; };
+		9623ABB226AFFCB600309E5E /* Beam4.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Beam4.xcdatamodel; sourceTree = "<group>"; };
+		9623ABBC26B002DC00309E5E /* Beam3ToBeam4MigrationPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Beam3ToBeam4MigrationPolicy.swift; sourceTree = "<group>"; };
+		9623ABBE26B0061400309E5E /* Beam3ToBeam4Migration.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = Beam3ToBeam4Migration.xcmappingmodel; sourceTree = "<group>"; };
 		96319C6D26160AB400D1CF31 /* BeamNote+DocumentManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamNote+DocumentManager.swift"; sourceTree = "<group>"; };
 		96319C8526160E4A00D1CF31 /* BeamNote+LinkDetection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamNote+LinkDetection.swift"; sourceTree = "<group>"; };
 		96319C91261614C000D1CF31 /* BeamCore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BeamCore.h; sourceTree = "<group>"; };
@@ -2472,6 +2477,8 @@
 			children = (
 				5298EB2C26274D530033862C /* BeamToBeam2MigrationPolicy.swift */,
 				5285672926275A8D00DDBE45 /* BeamToBeam2Migration.xcmappingmodel */,
+				9623ABBC26B002DC00309E5E /* Beam3ToBeam4MigrationPolicy.swift */,
+				9623ABBE26B0061400309E5E /* Beam3ToBeam4Migration.xcmappingmodel */,
 			);
 			path = Migrations;
 			sourceTree = "<group>";
@@ -4303,6 +4310,7 @@
 				A01030AA25F149EA00D740C5 /* TextEditorCommand.swift in Sources */,
 				5298EB0526272D400033862C /* NSManagedObjectModel+Extension.swift in Sources */,
 				418172042581107C00317ED8 /* TemporaryFile.swift in Sources */,
+				9623ABBD26B002DC00309E5E /* Beam3ToBeam4MigrationPolicy.swift in Sources */,
 				523FF66125C31D8800B4BD6E /* Data+String.swift in Sources */,
 				A57BFEBD2615B49C00CFB646 /* TableRowView.swift in Sources */,
 				A515597B267786E1006F6D6F /* MediaPlayerMessageHandler.swift in Sources */,
@@ -4347,6 +4355,7 @@
 				87F11BD9266533C1003BE98E /* PasswordGenerator.swift in Sources */,
 				A5153EDD260CC4DC00C84902 /* ButtonLabel.swift in Sources */,
 				A55760822665501000DEE86C /* TableViewColumn.swift in Sources */,
+				9623ABBF26B0061400309E5E /* Beam3ToBeam4Migration.xcmappingmodel in Sources */,
 				877888D9269C743F00D703F0 /* CSVParser.swift in Sources */,
 				96E4CF30258DFB0800D6DE22 /* BeamText+NSAttributedString.swift in Sources */,
 				41855A3A25D1334F00DA49DC /* BeamCollectionView.swift in Sources */,
@@ -5808,11 +5817,12 @@
 		4181712E25810CDC00317ED8 /* Beam.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				9623ABB226AFFCB600309E5E /* Beam4.xcdatamodel */,
 				520354002636CF7700173C30 /* Beam3.xcdatamodel */,
 				5298EB0E26274C130033862C /* Beam2.xcdatamodel */,
 				4181712F25810CDC00317ED8 /* Beam.xcdatamodel */,
 			);
-			currentVersion = 520354002636CF7700173C30 /* Beam3.xcdatamodel */;
+			currentVersion = 9623ABB226AFFCB600309E5E /* Beam4.xcdatamodel */;
 			path = Beam.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;

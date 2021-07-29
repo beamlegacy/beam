@@ -36,6 +36,15 @@ public enum BeamNoteType: Codable, Equatable {
         }
     }
 
+    public var journalDateString: String? {
+        switch self {
+        case .journal(let dateString):
+            return dateString
+        default:
+            return nil
+        }
+    }
+
     public var isFutureJournal: Bool {
         switch self {
         case .journal(let dateString):
@@ -57,6 +66,12 @@ public enum BeamNoteType: Codable, Equatable {
     }
 
     public static func titleForDate(_ date: Date) -> String {
+        let formater = ISO8601DateFormatter()
+        formater.formatOptions = .withFullDate
+        return formater.string(from: date)
+    }
+
+    public static func iso8601ForDate(_ date: Date) -> String {
         let formater = ISO8601DateFormatter()
         formater.formatOptions = .withFullDate
         return formater.string(from: date)

@@ -42,10 +42,8 @@ class CoreDataManagerTests: QuickSpec {
 
 
                 // I use this when I need to copy a new backup and know one of the note's title
-                /*
-                print(backupURL)
-                print(docStruct.title)
-                 */
+//                print(backupURL)
+//                print(docStruct.title)
 
                 // New note exists, then is deleted
                 expect(try! Document.fetchAll(sut.mainContext).map { $0.title }.contains(docStruct.title)) == true
@@ -65,7 +63,7 @@ class CoreDataManagerTests: QuickSpec {
 
         describe(".importBackup(url)") {
             let url = Bundle(for: type(of: self)).url(forResource: "BeamExport", withExtension: "sqlite")!
-            let backupStructTitle = "Awesome Cotton Hat Nck9sefqhh50ItopCfCErGZ2UetLQhu7oxY27SyF"
+            let backupStructTitle = "Gorgeous Rubber Shoes 2eiHyWghJfBiFGyKNSUX7KIiaJw98lSm3ivCR40q"
             var docStruct: DocumentStruct!
             beforeEach {
                 helper.deleteAllDocuments()
