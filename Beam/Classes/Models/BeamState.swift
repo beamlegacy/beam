@@ -232,6 +232,11 @@ import BeamCore
         _ = addNewTab(origin: nil, note: data.todaysNote)
     }
 
+    func createEmptyTabWithCurrentDestinationCard() {
+        guard let destinationNote = BeamNote.fetch(data.documentManager, title: destinationCardName) else { return }
+        _ = addNewTab(origin: nil, note: destinationNote)
+    }
+
     func createTabFromNode(_ node: TextNode, withURL url: URL) {
         guard let note = node.root?.note else { return }
         let origin = BrowsingTreeOrigin.searchFromNode(nodeText: node.strippedText)

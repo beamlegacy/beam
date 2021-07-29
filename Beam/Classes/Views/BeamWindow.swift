@@ -108,6 +108,13 @@ class BeamWindow: NSWindow, NSDraggingDestination {
         super.performClose(sender)
     }
 
+    @IBAction func performHardClose(_ sender: Any?) {
+        for window in AppDelegate.main.windows where window === self {
+            window.close()
+        }
+        super.close()
+    }
+
     override func close() {
         // TODO: Add a proper way to clean the entire window state
         // https://linear.app/beamapp/issue/BE-1152/

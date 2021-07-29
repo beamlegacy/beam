@@ -112,7 +112,7 @@ class WebNoteController: Encodable, Decodable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(note.title, forKey: .note)
         try container.encode(rootElement.id, forKey: .rootElement)
-        try container.encode(element, forKey: .element)
+        try container.encode(element.id, forKey: .element)
     }
 
     private func currentElementIsSimple() -> Bool {
