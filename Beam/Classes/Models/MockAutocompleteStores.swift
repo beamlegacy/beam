@@ -135,6 +135,13 @@ class MockPasswordStore: PasswordStore {
         completion(results)
     }
 
+    func entriesWithSubdomains(for host: String, completion: @escaping ([PasswordManagerEntry]) -> Void) {
+        let results = entries.filter {
+            $0.minimizedHost == host || $0.minimizedHost.hasSuffix(".\(host)")
+        }
+        completion(results)
+    }
+
     func find(_ searchString: String, completion: @escaping ([PasswordManagerEntry]) -> Void) {
         let results = entries.filter {
             $0.id.contains(searchString)
