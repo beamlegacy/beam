@@ -1,7 +1,6 @@
 [
   {
     "response" : {
-      "url" : "https:\/\/api.beamapp.co\/graphql",
       "status" : 200,
       "body" : {
         "data" : {
@@ -14,41 +13,42 @@
         }
       },
       "headers" : {
-        "Strict-Transport-Security" : "max-age=63072000; includeSubDomains",
-        "X-Request-Id" : "281de90e-3c97-4de2-836b-35465d6c2441",
-        "X-Content-Type-Options" : "nosniff",
-        "Date" : "Thu, 29 Jul 2021 13:37:33 GMT",
-        "Via" : "1.1 vegur",
         "Content-Type" : "application\/json; charset=utf-8",
-        "Referrer-Policy" : "strict-origin-when-cross-origin",
-        "X-Permitted-Cross-Domain-Policies" : "none",
-        "Etag" : "W\/\"7b29a7c56f1c592fb5b308a997767ae1\"",
-        "X-Xss-Protection" : "1; mode=block",
-        "X-Frame-Options" : "SAMEORIGIN",
+        "Vary" : "Accept, Origin",
         "X-Download-Options" : "noopen",
-        "X-Runtime" : "0.020537",
+        "Via" : "1.1 vegur",
+        "Referrer-Policy" : "strict-origin-when-cross-origin",
+        "Etag" : "W\/\"7b29a7c56f1c592fb5b308a997767ae1\"",
+        "X-Frame-Options" : "SAMEORIGIN",
+        "X-Content-Type-Options" : "nosniff",
+        "X-Xss-Protection" : "1; mode=block",
+        "X-Permitted-Cross-Domain-Policies" : "none",
         "Cache-Control" : "max-age=0, private, must-revalidate",
-        "Server" : "Cowboy",
         "Connection" : "keep-alive",
+        "Date" : "Thu, 29 Jul 2021 14:13:14 GMT",
+        "Strict-Transport-Security" : "max-age=63072000; includeSubDomains",
+        "X-Request-Id" : "5e93b5e7-bc89-4e99-b202-6991f13a227f",
+        "X-Runtime" : "0.015289",
         "Transfer-Encoding" : "Identity",
-        "Vary" : "Accept, Origin"
-      }
+        "Server" : "Cowboy"
+      },
+      "url" : "https:\/\/api.beamapp.co\/graphql"
     },
     "request" : {
+      "method" : "POST",
+      "headers" : {
+        "Accept" : "application\/json",
+        "Accept-Language" : "en",
+        "User-Agent" : "Beam client, 0.1.0 (1)",
+        "Content-Type" : "application\/json"
+      },
       "body" : {
         "query" : "mutation ForgotPassword($email: Email!) {\n  forgotPassword(input: {email: $email}) {\n    errors { path message}\n    success\n  }\n}\n",
         "variables" : {
           "email" : "fabien+test@beamapp.co"
         }
       },
-      "url" : "https:\/\/api.beamapp.co\/graphql",
-      "method" : "POST",
-      "headers" : {
-        "Accept" : "application\/json",
-        "User-Agent" : "Beam client, 0.1.0 (1)",
-        "Accept-Language" : "en",
-        "Content-Type" : "application\/json"
-      }
+      "url" : "https:\/\/api.beamapp.co\/graphql"
     }
   }
 ]
