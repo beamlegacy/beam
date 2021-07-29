@@ -656,18 +656,153 @@ class DatabaseManagerNetworkTests: QuickSpec {
             describe("receivedObjects()") {
                 var dbStruct: DatabaseStruct!
                 var dbStruct2: DatabaseStruct!
+                let newTitle1 = "Database 3"
+                let newTitle2 = "Database 4"
+
                 beforeEach {
+                    BeamDate.freeze("2021-03-19T12:21:03Z")
+
                     dbStruct = helper.createDatabaseStruct("995d94e1-e0df-4eca-93e6-8778984bcd29", "Database 1")
                     dbStruct2 = helper.createDatabaseStruct("995d94e1-e0df-4eca-93e6-8778984bcd39", "Database 2")
                 }
 
-                it("saves to local objects") {
-                    try sut.receivedObjects([dbStruct, dbStruct2])
+                afterEach {
+                    helper.deleteDatabaseStruct(dbStruct, includedRemote: false)
+                    helper.deleteDatabaseStruct(dbStruct2, includedRemote: false)
 
-                    expect(1) == Database.countWithPredicate(CoreDataManager.shared.mainContext,
-                                                             NSPredicate(format: "id = %@", dbStruct.id as CVarArg))
-                    expect(1) == Database.countWithPredicate(CoreDataManager.shared.mainContext,
-                                                             NSPredicate(format: "id = %@", dbStruct2.id as CVarArg))
+                    beamObjectHelper.delete(dbStruct.beamObjectId)
+                    beamObjectHelper.delete(dbStruct2.beamObjectId)
+                }
+
+                context("without any locally saved databases") {
+                    beforeEach {
+                        helper.deleteDatabaseStruct(dbStruct)
+                        helper.deleteDatabaseStruct(dbStruct2)
+                    }
+
+                    context("with 2 databases with different titles") {
+                        it("saves to local objects") {
+                            let networkCalls = APIRequest.callsCount
+
+                            try sut.receivedObjects([dbStruct, dbStruct2])
+
+                            expect(APIRequest.callsCount - networkCalls) == 0
+
+                            expect(Database.countWithPredicate(CoreDataManager.shared.mainContext,
+                                                               NSPredicate(format: "id = %@", dbStruct.id as CVarArg))) == 1
+
+                            expect(Database.countWithPredicate(CoreDataManager.shared.mainContext,
+                                                               NSPredicate(format: "id = %@", dbStruct2.id as CVarArg))) == 1
+
+                            expect(try? Database.fetchWithId(CoreDataManager.shared.mainContext, dbStruct.id)?.title) == dbStruct.title
+
+                            expect(try? Database.fetchWithId(CoreDataManager.shared.mainContext, dbStruct2.id)?.title) == dbStruct2.title
+                        }
+                    }
+
+                    context("with 2 databases with same titles") {
+                        beforeEach {
+                            dbStruct = helper.createDatabaseStruct("995d94e1-e0df-4eca-93e6-8778984bcd29", "Database 1")
+                            dbStruct2 = helper.createDatabaseStruct("995d94e1-e0df-4eca-93e6-8778984bcd39", "Database 1")
+                        }
+
+                        it("saves them locally, change the title and save it remotely") {
+                            let networkCalls = APIRequest.callsCount
+
+                            try sut.receivedObjects([dbStruct, dbStruct2])
+
+                            expect(APIRequest.callsCount - networkCalls) == 1
+
+                            let expectedNetworkCalls = ["update_beam_objects"]
+
+                            expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
+
+                            expect(1) == Database.countWithPredicate(CoreDataManager.shared.mainContext,
+                                                                     NSPredicate(format: "id = %@", dbStruct.id as CVarArg))
+                            expect(1) == Database.countWithPredicate(CoreDataManager.shared.mainContext,
+                                                                     NSPredicate(format: "id = %@", dbStruct2.id as CVarArg))
+
+                            expect(try? Database.fetchWithId(CoreDataManager.shared.mainContext, dbStruct.id)?.title) == dbStruct.title
+
+                            let remoteObject1: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct.beamObjectId)
+                            expect(remoteObject1).to(beNil())
+
+                            let remoteObject2: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct2.beamObjectId)
+                            dbStruct2.title = "Database 1 2"
+                            expect(remoteObject2) == dbStruct2
+
+                            expect(try? Database.fetchWithId(CoreDataManager.shared.mainContext, dbStruct2.id)?.title) == dbStruct2.title
+                        }
+                    }
+                }
+
+                context("with local databases saved") {
+                    beforeEach {
+                        dbStruct = helper.createDatabaseStruct("995d94e1-e0df-4eca-93e6-8778984bcd29", "Database 1")
+                        dbStruct2 = helper.createDatabaseStruct("995d94e1-e0df-4eca-93e6-8778984bcd39", "Database 2")
+
+                        helper.saveDatabaseLocally(dbStruct)
+                        helper.saveDatabaseLocally(dbStruct2)
+                    }
+
+                    context("with 2 databases with different titles") {
+                        beforeEach {
+                            dbStruct.title = newTitle1
+                            dbStruct2.title = newTitle2
+                        }
+
+                        it("saves to local objects") {
+                            let networkCalls = APIRequest.callsCount
+
+                            try sut.receivedObjects([dbStruct, dbStruct2])
+
+                            expect(APIRequest.callsCount - networkCalls) == 0
+
+                            expect(Database.countWithPredicate(CoreDataManager.shared.mainContext,
+                                                               NSPredicate(format: "id = %@", dbStruct.id as CVarArg))) == 1
+
+                            expect(Database.countWithPredicate(CoreDataManager.shared.mainContext,
+                                                               NSPredicate(format: "id = %@", dbStruct2.id as CVarArg))) == 1
+
+                            expect(try? Database.fetchWithId(CoreDataManager.shared.mainContext, dbStruct.id)?.title) == dbStruct.title
+
+                            expect(try? Database.fetchWithId(CoreDataManager.shared.mainContext, dbStruct2.id)?.title) == dbStruct2.title
+                        }
+                    }
+
+                    context("with 2 databases with same titles") {
+                        beforeEach {
+                            dbStruct.title = newTitle1
+                            dbStruct2.title = newTitle1
+                        }
+
+                        it("saves to local objects") {
+                            let networkCalls = APIRequest.callsCount
+
+                            try sut.receivedObjects([dbStruct, dbStruct2])
+
+                            expect(APIRequest.callsCount - networkCalls) == 1
+
+                            let expectedNetworkCalls = ["update_beam_objects"]
+                            expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
+
+                            expect(1) == Database.countWithPredicate(CoreDataManager.shared.mainContext,
+                                                                     NSPredicate(format: "id = %@", dbStruct.id as CVarArg))
+                            expect(1) == Database.countWithPredicate(CoreDataManager.shared.mainContext,
+                                                                     NSPredicate(format: "id = %@", dbStruct2.id as CVarArg))
+
+                            expect(try? Database.fetchWithId(CoreDataManager.shared.mainContext, dbStruct.id)?.title) == dbStruct.title
+
+                            let remoteObject1: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct.beamObjectId)
+                            expect(remoteObject1).to(beNil())
+
+                            let remoteObject2: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct2.beamObjectId)
+                            dbStruct2.title = "Database 3 2"
+                            expect(remoteObject2) == dbStruct2
+
+                            expect(try? Database.fetchWithId(CoreDataManager.shared.mainContext, dbStruct2.id)?.title) == dbStruct2.title
+                        }
+                    }
                 }
             }
         }

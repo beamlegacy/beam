@@ -1046,22 +1046,12 @@ extension DatabaseManager: BeamObjectManagerDelegate {
     func receivedObjects(_ databases: [DatabaseStruct]) throws {
         Logger.shared.logDebug("Received \(databases.count) databases: updating",
                                category: .databaseNetwork)
-
-//        var databasesInError: [DatabaseStruct] = []
-//        
-//        for database in databases {
-//            do {
-//                try checkValidationsEarly(database)
-//            } catch {
-//                // This database has a local conflict we must resolve, let's change its title
-//            }
-//        }
-
         let context = coreDataManager.backgroundContext
+        var changedDatabase: [DatabaseStruct] = []
         try context.performAndWait {
             var changed = false
 
-            for database in databases {
+            for var database in databases {
                 let localDatabase = Database.fetchOrCreateWithId(context, database.id)
 
                 if self.isEqual(localDatabase, to: database) {
@@ -1070,16 +1060,54 @@ extension DatabaseManager: BeamObjectManagerDelegate {
                     continue
                 }
 
-                localDatabase.update(database)
-                localDatabase.beam_object_previous_checksum = database.checksum
+                var good = false
+                let originalTitle = database.title
+                var index = 2
 
-                // TODO: What to do when this fails? Because of duplicate titles, or other errors
-                try checkValidations(context, localDatabase)
+                while !good {
+                    do {
+                        localDatabase.update(database)
+                        localDatabase.beam_object_previous_checksum = database.checksum
+
+                        try checkValidations(context, localDatabase)
+
+                        good = true
+                    } catch {
+                        database.title = "\(originalTitle) \(index)"
+                        index += 1
+                    }
+                }
+
+                // Database's title was changed, we need to save it on the API
+                if index > 2 {
+                    changedDatabase.append(database)
+                }
+
                 changed = true
             }
 
             if changed {
                 try Self.saveContext(context: context)
+            }
+        }
+
+        if !changedDatabase.isEmpty {
+            let semaphore = DispatchSemaphore(value: 0)
+
+            try self.saveOnBeamObjectsAPI(changedDatabase) { result in
+                switch result {
+                case .failure(let error):
+                    Logger.shared.logError(error.localizedDescription, category: .databaseNetwork)
+                case .success:
+                    Logger.shared.logDebug("Saved \(changedDatabase)", category: .databaseNetwork)
+                }
+                semaphore.signal()
+
+            }
+
+            let semaphoreResult = semaphore.wait(timeout: DispatchTime.now() + .seconds(10))
+            if case .timedOut = semaphoreResult {
+                Logger.shared.logError("Semaphore timedout", category: .databaseNetwork)
             }
         }
 

@@ -34,7 +34,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
             MyRemoteObjectManager.store.removeAll()
 
             try? EncryptionManager.shared.replacePrivateKey("j6tifPZTjUtGoz+1RJkO8dOMlu48MUUSlwACw/fCBw0=")
-//            self.deleteAll()
         }
 
         afterEach {
@@ -45,7 +44,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
         describe("saveAllOnBeamObjectApi()") {
             beforeEach {
-                _ = self.createObjects()
+                self.createObjects()
             }
 
             afterEach {
@@ -874,6 +873,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
     }
 
     /// Create all objects and persist them locally
+    @discardableResult
     private func createObjects() -> [MyRemoteObject] {
         let object1 = MyRemoteObject(beamObjectId: "195d94e1-e0df-4eca-93e6-8778984bcd58".uuid ?? UUID(),
                                      createdAt: BeamDate.now,
