@@ -24,11 +24,11 @@ extension AutocompleteManager {
                                             topDomainResults: autocompleteResults[.topDomain] ?? [],
                                             searchEngineResults: autocompleteResults[.autocomplete] ?? [],
                                             createCardResults: autocompleteResults[.createCard] ?? [])
-        
+
         let canCreateNote = autocompleteResults[.createCard]?.isEmpty == false
         return (results: finalResults, canCreateNote: canCreateNote)
     }
-    
+
     private func sortResults(notesResults: [AutocompleteResult],
                              historyResults: [AutocompleteResult],
                              urlResults: [AutocompleteResult],

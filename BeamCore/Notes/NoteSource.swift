@@ -7,7 +7,6 @@
 
 import Foundation
 
-
 public struct NoteSource: Codable {
     public enum SourceType: Int, Codable, Comparable {
         case user
