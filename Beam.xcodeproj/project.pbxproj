@@ -295,7 +295,6 @@
 		529E1AD425D45CFA00DD25B8 /* APIRequestError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 529E1AD325D45CFA00DD25B8 /* APIRequestError.swift */; };
 		529E1EE625D3EDA300F8B500 /* BeamTestsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 529E1EE525D3EDA300F8B500 /* BeamTestsHelper.swift */; };
 		52A06978264E909A00B4B80A /* document_public_url.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 52A06963264E909A00B4B80A /* document_public_url.graphql */; };
-		52A7DE1926AECF59003E770E /* BeamObjectProtocolNetworkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52A7DE1826AECF59003E770E /* BeamObjectProtocolNetworkTests.swift */; };
 		52A7DE2826AECFAC003E770E /* MyRemoteObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52A7DE2726AECFAC003E770E /* MyRemoteObject.swift */; };
 		52A7DE3226AECFC6003E770E /* MyRemoteObjectManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52A7DE3126AECFC6003E770E /* MyRemoteObjectManager.swift */; };
 		52A7DE3826AED01A003E770E /* MyRemoteObjectManagerNetworkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52A7DE3726AED01A003E770E /* MyRemoteObjectManagerNetworkTests.swift */; };
@@ -1171,7 +1170,6 @@
 		529E1AD325D45CFA00DD25B8 /* APIRequestError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIRequestError.swift; sourceTree = "<group>"; };
 		529E1EE525D3EDA300F8B500 /* BeamTestsHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamTestsHelper.swift; sourceTree = "<group>"; };
 		52A06963264E909A00B4B80A /* document_public_url.graphql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = document_public_url.graphql; sourceTree = "<group>"; };
-		52A7DE1826AECF59003E770E /* BeamObjectProtocolNetworkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamObjectProtocolNetworkTests.swift; sourceTree = "<group>"; };
 		52A7DE2726AECFAC003E770E /* MyRemoteObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyRemoteObject.swift; sourceTree = "<group>"; };
 		52A7DE3126AECFC6003E770E /* MyRemoteObjectManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyRemoteObjectManager.swift; sourceTree = "<group>"; };
 		52A7DE3726AED01A003E770E /* MyRemoteObjectManagerNetworkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyRemoteObjectManagerNetworkTests.swift; sourceTree = "<group>"; };
@@ -2605,7 +2603,6 @@
 				520303D8261CAEF10028BC8E /* DatabaseManagerTests.swift */,
 				524B110126283F2D00E3C61B /* DatabaseManagerNetworkTests.swift */,
 				527524E026A1909200C2F385 /* BeamObjectManagerNetworkTests.swift */,
-				52A7DE1826AECF59003E770E /* BeamObjectProtocolNetworkTests.swift */,
 				52A7DE2726AECFAC003E770E /* MyRemoteObject.swift */,
 				52A7DE3126AECFC6003E770E /* MyRemoteObjectManager.swift */,
 				52A7DE3726AED01A003E770E /* MyRemoteObjectManagerNetworkTests.swift */,
@@ -4655,7 +4652,6 @@
 				562A8B7925B6ED03004D3D8A /* CoreMLTests.swift in Sources */,
 				8A7F949026A85D7600270A74 /* PointAndShootShootGroupTest.swift in Sources */,
 				52A7DE2826AECFAC003E770E /* MyRemoteObject.swift in Sources */,
-				52A7DE1926AECF59003E770E /* BeamObjectProtocolNetworkTests.swift in Sources */,
 				52E04FED252C814D00AD9F56 /* RoamImporterTests.swift in Sources */,
 				52B5EF78252F520100914D52 /* CoreDataTests.swift in Sources */,
 				032562CC26051D4D006513E4 /* RBFilterGroupTests.m in Sources */,

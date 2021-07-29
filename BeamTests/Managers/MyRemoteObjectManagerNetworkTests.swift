@@ -911,9 +911,10 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
         let jsonData = try BeamObject.encoder.encode(object)
         let result = jsonData.SHA256
 
-        if let string = jsonData.asString {
-            Logger.shared.logDebug("🍀 SHA checksum on \(string): \(result)", category: .beamObjectDebug)
-        }
+        // Used when going deep in debug
+//        if let string = jsonData.asString {
+//            Logger.shared.logDebug("🍀 SHA checksum on \(string): \(result)", category: .beamObjectDebug)
+//        }
 
         return result
     }
