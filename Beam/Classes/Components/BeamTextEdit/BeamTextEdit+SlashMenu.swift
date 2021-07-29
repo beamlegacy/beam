@@ -180,16 +180,13 @@ extension BeamTextEdit {
         let calendarPicker = CalendarPickerFormatterView()
         calendarPicker.onDateChange = { [weak node, weak self] date in
             guard let node = node else { return }
-            guard selectedDate != date else {
-                self?.hideInlineFormatter()
-                return
-            }
             selectedDate = date
             let text = BeamDate.journalNoteTitle(for: date)
             let dateText = BeamText(text: text, attributes: [.internalLink(UUID.null)])
             node.root?.insertText(text: dateText, replacementRange: editableRange)
             editableRange = editableRange.lowerBound..<(editableRange.lowerBound+dateText.count)
             node.focus(position: editableRange.upperBound)
+            self?.hideInlineFormatter()
         }
         calendarPicker.onDismiss = { [weak node, weak self] _ in
             guard let node = node else { return }
@@ -220,9 +217,9 @@ extension BeamTextEdit {
         var rangesToDelete = [BeamText.Range]()
         var rangesToClean = [BeamText.Range]()
         node.cmdManager.beginGroup(with: "DatePicker cancel")
-        node.text.ranges.forEach { r in
-            guard r.attributes.first?.rawValue == decoAttribute?.rawValue else { return }
-            if r.position >= range.lowerBound && r.end < range.upperBound {
+        let decoRanges = node.text.ranges.filter { $0.attributes.first?.rawValue == decoAttribute?.rawValue }
+        decoRanges.forEach { r in
+            if decoRanges.count == 1 || r.position >= range.lowerBound && r.end < range.upperBound {
                 rangesToDelete.append(r)
             } else {
                 rangesToClean.append(r)

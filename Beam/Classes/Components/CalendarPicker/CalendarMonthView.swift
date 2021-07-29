@@ -49,7 +49,6 @@ struct CalendarMonthView: View {
             .frame(maxWidth: .infinity)
             .padding([.horizontal, .top], 3)
             .padding(.bottom, 6)
-
     }
 
     fileprivate func dayView(_ day: CalendarDay) -> some View {
@@ -72,6 +71,7 @@ struct CalendarMonthView: View {
                             .cornerRadius(3)
                             : nil
             )
+            .contentShape(Rectangle())
             .onTapGesture {
                 selectedDate = day.date
             }
