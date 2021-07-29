@@ -10,6 +10,7 @@ import BeamCore
 
 struct NoteHeaderView: View {
 
+    static let leadingPadding: CGFloat = 17
     static let topPadding: CGFloat = 120
     @ObservedObject var model: NoteHeaderView.ViewModel
 
@@ -87,7 +88,7 @@ struct NoteHeaderView: View {
 
     var body: some View {
         HStack {
-            VStack(alignment: .leading, spacing: BeamSpacing._60) {
+            VStack(alignment: .leading, spacing: BeamSpacing._40) {
                 dateView
                 HStack {
                     titleView
@@ -104,7 +105,7 @@ struct NoteHeaderView: View {
             }
         }
         .padding(.top, Self.topPadding)
-        .padding(.leading, 20)
+        .padding(.leading, Self.leadingPadding)
     }
 }
 
