@@ -16,6 +16,8 @@ struct DownloadCell: View {
         case view
     }
 
+    @Environment(\.colorScheme) var colorScheme
+
     @ObservedObject var download: Download
     @State private var hoverState: OnHoverState?
     var isSelected: Bool
@@ -51,15 +53,15 @@ struct DownloadCell: View {
             case .running:
                 CircledButton(image: "download-pause", action: pauseDownload, onHover: { hover in
                     hoverState = hover ? .pause : nil
-                }).blendMode(.multiply)
+                }).blendMode(colorScheme == .dark ? .screen : .multiply)
             case .suspended:
                 CircledButton(image: "download-resume", action: resumeDownload, onHover: { hover in
                     hoverState = hover ? .resume : nil
-                }).blendMode(.multiply)
+                }).blendMode(colorScheme == .dark ? .screen : .multiply)
             case .completed where download.errorMessage != nil:
                 CircledButton(image: "download-resume", action: resumeDownload, onHover: { hover in
                     hoverState = hover ? .resume : nil
-                }).blendMode(.multiply)
+                }).blendMode(colorScheme == .dark ? .screen : .multiply)
             case .completed, .canceling:
                 EmptyView()
             @unknown default:
@@ -67,7 +69,7 @@ struct DownloadCell: View {
             }
             CircledButton(image: "download-view", action: showInFinder, onHover: { hover in
                 hoverState = hover ? .view : nil
-            }).blendMode(.multiply)
+            }).blendMode(colorScheme == .dark ? .screen : .multiply)
         }
         .padding(.horizontal, 8)
         .animation(.easeInOut(duration: 0.3), value: hoverState)
