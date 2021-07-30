@@ -116,7 +116,7 @@ struct DocumentDetail: View {
                 }
                 Spacer()
             }.onAppear {
-                refresh()
+                softRefresh()
                 if let database = try? Database.fetchWithId(CoreDataManager.shared.mainContext, document.database_id) {
                     selectedDatabase = database
                 }
@@ -131,11 +131,32 @@ struct DocumentDetail: View {
             refreshing = true
         }
 
-        documentManager.refresh(DocumentStruct(document: document), true) { _ in
-            DispatchQueue.main.async {
-                timer.invalidate()
-                refreshing = false
+        do {
+            try documentManager.refresh(DocumentStruct(document: document), true) { _ in
+                DispatchQueue.main.async {
+                    timer.invalidate()
+                    refreshing = false
+                }
             }
+        } catch {
+            Logger.shared.logError(error.localizedDescription, category: .document)
+        }
+    }
+
+    private func softRefresh() {
+        let timer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { _ in
+            refreshing = true
+        }
+
+        do {
+            try documentManager.refresh(DocumentStruct(document: document), false) { _ in
+                DispatchQueue.main.async {
+                    timer.invalidate()
+                    refreshing = false
+                }
+            }
+        } catch {
+            Logger.shared.logError(error.localizedDescription, category: .document)
         }
     }
 

@@ -982,10 +982,14 @@ extension DocumentManager {
 
     /// Fetch most recent document from API
     /// First we fetch the remote updated_at, if it's more recent we fetch all details
-    func refresh(_ documentStruct: DocumentStruct, _ forced: Bool = false, completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
+    func refresh(_ documentStruct: DocumentStruct, _ forced: Bool = false, completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) throws {
         // If not authenticated
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-            completion?(.success(false))
+            throw APIRequestError.notAuthenticated
+        }
+
+        if Configuration.beamObjectAPIEnabled {
+            try refreshFromBeamObjectAPIAndSaveLocally(documentStruct, forced, completion)
             return
         }
 
@@ -1017,6 +1021,52 @@ extension DocumentManager {
             }
         } catch {
             completion?(.failure(error))
+        }
+    }
+
+    func refreshFromBeamObjectAPIAndSaveLocally(_ documentStruct: DocumentStruct,
+                                                _ forced: Bool = false,
+                                                _ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) throws {
+        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            throw APIRequestError.notAuthenticated
+        }
+
+        guard Configuration.beamObjectAPIEnabled else {
+            throw BeamObjectManagerError.beamObjectAPIDisabled
+        }
+
+        try refreshFromBeamObjectAPI(documentStruct, forced) { result in
+            switch result {
+            case .failure(let error): completion?(.failure(error))
+            case .success(let remoteDocumentStruct):
+                guard let remoteDocumentStruct = remoteDocumentStruct else {
+                    Logger.shared.logDebug("\(documentStruct.title): remote is not more recent",
+                                           category: .documentNetwork)
+                    completion?(.success(false))
+                    return
+                }
+
+                guard remoteDocumentStruct != documentStruct else {
+                    Logger.shared.logDebug("\(documentStruct.title): remote is equal to stored version, skip",
+                                           category: .documentNetwork)
+                    completion?(.success(false))
+                    return
+                }
+
+                // Saving the remote version locally
+                self.coreDataManager.persistentContainer.performBackgroundTask { context in
+                    let document = Document.rawFetchOrCreateWithId(context, documentStruct.id)
+
+                    do {
+                        document.update(remoteDocumentStruct)
+                        self.notificationDocumentUpdate(remoteDocumentStruct)
+
+                        completion?(.success(try Self.saveContext(context: context)))
+                    } catch {
+                        completion?(.failure(error))
+                    }
+                }
+            }
         }
     }
 

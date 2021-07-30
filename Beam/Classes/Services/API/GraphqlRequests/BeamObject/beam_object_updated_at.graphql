@@ -1,5 +1,8 @@
 query BeamObject($id: ID!) {
   beamObject(id: $id) {
+    id
+    type
+    checksum
     updatedAt
   }
 }

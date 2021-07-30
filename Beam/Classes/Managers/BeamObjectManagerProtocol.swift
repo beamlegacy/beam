@@ -150,11 +150,64 @@ extension BeamObjectManagerDelegate {
     }
 
     @discardableResult
+    // swiftlint:disable:next cyclomatic_complexity
+    func refreshFromBeamObjectAPI(_ object: BeamObjectType,
+                                  _ forced: Bool = false,
+                                  _ completion: @escaping ((Swift.Result<BeamObjectType?, Error>) -> Void)) throws -> URLSessionDataTask? {
+        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            throw APIRequestError.notAuthenticated
+        }
+
+        let objectManager = BeamObjectManager()
+
+        guard !forced else {
+            return try objectManager.fetchObject(object) { result in
+                switch result {
+                case .failure(let error):
+                    if case APIRequestError.notFound = error {
+                        completion(.success(nil))
+                        return
+                    }
+                    completion(.failure(error))
+                case .success(let remoteObject): completion(.success(remoteObject))
+                }
+            }
+        }
+
+        return try objectManager.fetchObjectUpdatedAt(object) { result in
+            switch result {
+            case .failure(let error):
+                if case APIRequestError.notFound = error {
+                    completion(.success(nil))
+                    return
+                }
+
+                completion(.failure(error))
+            case .success(let updatedAt):
+                guard let updatedAt = updatedAt, updatedAt > object.updatedAt else {
+                    completion(.success(nil))
+                    return
+                }
+
+                do {
+                    _ = try objectManager.fetchObject(object) { result in
+                        switch result {
+                        case .failure(let error): completion(.failure(error))
+                        case .success(let remoteObject):
+                            completion(.success(remoteObject))
+                        }
+                    }
+                } catch {
+                    completion(.failure(error))
+                }
+            }
+        }
+    }
+
+    @discardableResult
     func saveOnBeamObjectAPI(_ object: BeamObjectType,
                              _ conflictPolicyForSave: BeamObjectConflictResolution = .replace,
                              _ completion: @escaping ((Swift.Result<BeamObjectType, Error>) -> Void)) throws -> URLSessionTask? {
-        Logger.shared.logDebug("⚠️ inside saveOnBeamObjectAPI", category: .beamObjectNetwork)
-
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw APIRequestError.notAuthenticated
         }

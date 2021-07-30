@@ -216,8 +216,8 @@ extension BeamObjectRequest {
     }
 
     @discardableResult
-    func fetchUpdatedAt(_ beamObjectID: UUID,
-                        _ completionHandler: @escaping (Swift.Result<BeamObject, Error>) -> Void) throws -> URLSessionDataTask {
+    func fetchMinimalBeamObject(_ beamObjectID: UUID,
+                                _ completionHandler: @escaping (Swift.Result<BeamObject, Error>) -> Void) throws -> URLSessionDataTask {
         try fetchWithFile("beam_object_updated_at", beamObjectID, completionHandler)
     }
 

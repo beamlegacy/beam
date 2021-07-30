@@ -123,6 +123,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         if Configuration.beamObjectAPIEnabled {
             do {
+                Logger.shared.logInfo("syncAllFromAPI calling", category: .beamObjectNetwork)
                 try beamObjectManager.syncAllFromAPI { _ in
                     Logger.shared.logInfo("syncAllFromAPI called", category: .beamObjectNetwork)
                 }

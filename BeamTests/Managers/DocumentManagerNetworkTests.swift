@@ -664,7 +664,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                         expect(Configuration.networkEnabled) == true
 
                         waitUntil(timeout: .seconds(10)) { done in
-                            sut.refresh(docStruct) { result in
+                            try? sut.refresh(docStruct) { result in
                                 expect { try result.get() }.toNot(throwError())
                                 expect { try result.get() } == false
                                 done()
@@ -679,7 +679,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                             Configuration.encryptionEnabled = true
 
                             waitUntil(timeout: .seconds(10)) { done in
-                                sut.refresh(docStruct) { result in
+                                try? sut.refresh(docStruct) { result in
                                     expect { try result.get() }.toNot(throwError())
                                     expect { try result.get() } == false
                                     done()
@@ -781,7 +781,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                     context("with Foundation") {
                         it("refreshes the local document") {
                             waitUntil(timeout: .seconds(10)) { done in
-                                sut.refresh(docStruct) { result in
+                                try? sut.refresh(docStruct) { result in
                                     expect { try result.get() }.toNot(throwError())
                                     expect { try result.get() } == true
                                     done()
@@ -799,7 +799,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                                 Configuration.encryptionEnabled = true
 
                                 waitUntil(timeout: .seconds(10)) { done in
-                                    sut.refresh(docStruct) { result in
+                                    try? sut.refresh(docStruct) { result in
                                         expect { try result.get() }.toNot(throwError())
                                         expect { try result.get() } == true
                                         done()
@@ -876,8 +876,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                             let networkCalls = APIRequest.callsCount
 
                             waitUntil(timeout: .seconds(10)) { done in
-
-                                sut.refresh(docStruct) { result in
+                                try? sut.refresh(docStruct) { result in
                                     expect { try result.get() }.toNot(throwError())
                                     expect { try result.get() } == true
                                     done()
@@ -897,8 +896,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                                 let networkCalls = APIRequest.callsCount
 
                                 waitUntil(timeout: .seconds(10)) { done in
-
-                                    sut.refresh(docStruct) { result in
+                                    try? sut.refresh(docStruct) { result in
                                         expect { try result.get() }.toNot(throwError())
                                         expect { try result.get() } == true
                                         done()
@@ -964,7 +962,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                 context("with Foundation") {
                     it("doesn't refresh the local document") {
                         waitUntil(timeout: .seconds(10)) { done in
-                            sut.refresh(docStruct) { result in
+                            try? sut.refresh(docStruct) { result in
                                 expect { try result.get() }.to(throwError { error in
                                     expect(error).to(matchError(APIRequestError.notFound))
                                 })
@@ -2017,7 +2015,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                                 expect { try result.get() } == true
 
                                 do {
-                                    try result.get()
+                                    _ = try result.get()
                                 } catch {
                                     print("oops")
                                 }

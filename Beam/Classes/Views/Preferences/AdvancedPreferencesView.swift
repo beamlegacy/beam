@@ -107,7 +107,7 @@ struct AdvancedPreferencesView: View {
             }
             Preferences.Section(title: "Software update URL", bottomDivider: true) {
                 Text(String(describing: updateFeedURL))
-                    .fixedSize(horizontal: false, vertical: true)
+                    .fixedSize(horizontal: false, vertical: false)
                     .lineLimit(4)
                     .frame(maxWidth: 387)
             }

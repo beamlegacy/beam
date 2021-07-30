@@ -399,14 +399,22 @@ extension BeamObjectManager {
         for object in objects {
             group.enter()
 
-            fetchObject(object) { result in
-                groupSemaphore.wait()
-                switch result {
-                case .failure(let error): groupErrors.append(error)
-                case .success(let fetchedObject): fetchedObjects.append(fetchedObject)
+            do {
+                _ = try fetchObject(object) { result in
+                    groupSemaphore.wait()
+                    switch result {
+                    case .failure(let error): groupErrors.append(error)
+                    case .success(let fetchedObject): fetchedObjects.append(fetchedObject)
+                    }
+                    groupSemaphore.signal()
+                    group.leave()
                 }
+            } catch {
+                groupSemaphore.wait()
+                groupErrors.append(error)
                 groupSemaphore.signal()
                 group.leave()
+
             }
         }
 
@@ -423,7 +431,7 @@ extension BeamObjectManager {
         let semaphore = DispatchSemaphore(value: 0)
         var result: Swift.Result<T, Error>!
 
-        fetchObject(object) { fetchObjectResult in
+        try fetchObject(object) { fetchObjectResult in
             result = fetchObjectResult
             semaphore.signal()
         }
@@ -457,6 +465,7 @@ extension BeamObjectManager {
         }
     }
 
+    // swiftlint:disable:next function_body_length
     internal func saveToAPIFailureApiErrors<T: BeamObjectProtocol>(_ objects: [T],
                                                                    _ error: Error,
                                                                    _ completion: @escaping ((Swift.Result<[T], Error>) -> Void)) {
@@ -598,7 +607,6 @@ extension BeamObjectManager {
                     switch result {
                     case .failure(let error): completion(.failure(error))
                     case .success(let newSavedObject):
-//                        conflictedObject.checksum = newSavedObject.checksum
                         conflictedObject.previousChecksum = newSavedObject.checksum
 
                         completion(.success(conflictedObject))
@@ -615,9 +623,9 @@ extension BeamObjectManager {
     }
 
     /// Fetch remote object
-    internal func fetchObject<T: BeamObjectProtocol>(_ object: T,
-                                                     _ completion: @escaping (Result<T, Error>) -> Void) {
-        fetchBeamObject(object.beamObjectId) { fetchResult in
+    func fetchObject<T: BeamObjectProtocol>(_ object: T,
+                                            _ completion: @escaping (Result<T, Error>) -> Void) throws -> URLSessionDataTask {
+        try fetchBeamObject(object.beamObjectId) { fetchResult in
             switch fetchResult {
             case .failure(let error): completion(.failure(error))
             case .success(let remoteBeamObject):
@@ -633,6 +641,40 @@ extension BeamObjectManager {
                 } catch {
                     completion(.failure(BeamObjectManagerError.decodingError(remoteBeamObject)))
                 }
+            }
+        }
+    }
+
+    func fetchObjectUpdatedAt<T: BeamObjectProtocol>(_ object: T,
+                                                     _ completion: @escaping (Result<Date?, Error>) -> Void) throws -> URLSessionDataTask {
+        try fetchMinimalBeamObject(object.beamObjectId) { fetchResult in
+            switch fetchResult {
+            case .failure(let error): completion(.failure(error))
+            case .success(let remoteBeamObject):
+                // Check if you have the same IDs for 2 different object types
+                guard remoteBeamObject.beamObjectType == T.beamObjectTypeName else {
+                    completion(.failure(BeamObjectManagerDelegateError.runtimeError("returned object \(remoteBeamObject) is not a \(T.beamObjectTypeName)")))
+                    return
+                }
+
+                completion(.success(remoteBeamObject.updatedAt))
+            }
+        }
+    }
+
+    func fetchObjectChecksum<T: BeamObjectProtocol>(_ object: T,
+                                                    _ completion: @escaping (Result<String?, Error>) -> Void) throws -> URLSessionDataTask {
+        try fetchMinimalBeamObject(object.beamObjectId) { fetchResult in
+            switch fetchResult {
+            case .failure(let error): completion(.failure(error))
+            case .success(let remoteBeamObject):
+                // Check if you have the same IDs for 2 different object types
+                guard remoteBeamObject.beamObjectType == T.beamObjectTypeName else {
+                    completion(.failure(BeamObjectManagerDelegateError.runtimeError("returned object \(remoteBeamObject) is not a \(T.beamObjectTypeName)")))
+                    return
+                }
+
+                completion(.success(remoteBeamObject.dataChecksum))
             }
         }
     }
@@ -669,6 +711,7 @@ extension BeamObjectManager {
         return task
     }
 
+    // swiftlint:disable:next cyclomatic_complexity
     /// Will look at each errors, and fetch remote object to include it in the completion if it was a checksum error
     internal func saveToAPIBeamObjectsFailure(_ beamObjects: [BeamObject],
                                               _ error: Error,
@@ -895,14 +938,16 @@ extension BeamObjectManager {
         }
     }
 
+    @discardableResult
     internal func fetchBeamObject(_ id: UUID,
-                                  _ completion: @escaping (Result<BeamObject, Error>) -> Void) {
-        let fetchRequest = BeamObjectRequest()
-        do {
-            try fetchRequest.fetch(id, completion)
-        } catch {
-            completion(.failure(error))
-        }
+                                  _ completion: @escaping (Result<BeamObject, Error>) -> Void) throws -> URLSessionDataTask {
+        try BeamObjectRequest().fetch(id, completion)
+    }
+
+    @discardableResult
+    internal func fetchMinimalBeamObject(_ id: UUID,
+                                         _ completion: @escaping (Result<BeamObject, Error>) -> Void) throws -> URLSessionDataTask {
+        try BeamObjectRequest().fetchMinimalBeamObject(id, completion)
     }
 
     func delete(_ id: UUID, _ completion: ((Swift.Result<BeamObject, Error>) -> Void)? = nil) throws {

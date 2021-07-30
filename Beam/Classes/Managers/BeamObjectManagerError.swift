@@ -8,6 +8,7 @@ enum BeamObjectManagerError: Error {
     case decodingError(BeamObject)
     case encodingError
     case invalidObjectType(BeamObject, BeamObject)
+    case beamObjectAPIDisabled
 }
 
 extension BeamObjectManagerError: LocalizedError {
@@ -25,6 +26,8 @@ extension BeamObjectManagerError: LocalizedError {
             return "Decoding Error \(object)"
         case .encodingError:
             return "Encoding Error"
+        case .beamObjectAPIDisabled:
+            return "BeamObject API is disabled"
         case .invalidObjectType(let localObject, let remoteObject):
             return "invalidObjectType local: \(localObject) remote: \(remoteObject)"
         }
