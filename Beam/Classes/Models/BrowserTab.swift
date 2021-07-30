@@ -28,6 +28,16 @@ import Promises
         if url.isFileURL {
             webView.loadFileURL(url, allowingReadAccessTo: url.deletingLastPathComponent())
         } else {
+            // Google Sheets shows an error message when using the Safari User Agent
+            // The alternative of setting the applicationNameForUserAgent in BeamWebViewConfiguration
+            // creates unexpected behaviour on google search results pages.
+            // Source: https://github.com/sindresorhus/Plash/blob/main/Plash/WebViewController.swift#L69-L72
+            if url.host == "docs.google.com" {
+                webView.customUserAgent = ""
+            } else {
+                webView.customUserAgent = Constants.SafariUserAgent
+            }
+
             webView.load(URLRequest(url: url))
         }
         $isLoading.sink { [unowned passwordOverlayController] loading in

@@ -39,8 +39,6 @@ class BeamWebViewConfigurationBase: WKWebViewConfiguration, BeamWebViewConfigura
 
     override init() {
         super.init()
-        applicationNameForUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_0) "
-            + "AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Safari/605.1.15"
         preferences.javaScriptEnabled = true
         preferences.javaScriptCanOpenWindowsAutomatically = false
         preferences.tabFocusesLinks = true
