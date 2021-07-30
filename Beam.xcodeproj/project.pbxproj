@@ -778,21 +778,12 @@
 			remoteGlobalIDString = 33EBA55D264ABD3E00369730;
 			remoteInfo = AppFeedBuilder;
 		};
-<<<<<<< HEAD
-		52A7DE1F26AECF5A003E770E /* PBXContainerItemProxy */ = {
+		52DB7F5626B447A5009C4BBE /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 33B27441264C0CDB00A318CD /* AutoUpdate.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 331E18C326404D3C00C4593E;
 			remoteInfo = AutoUpdateTests;
-=======
-		33CCBFAC26A61C15004B6236 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 33B27441264C0CDB00A318CD /* AutoUpdate.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 3397C6F7269DD9540092FDD7;
-			remoteInfo = AutoUpdateFrameworkTests;
->>>>>>> develop
 		};
 		96319D192616232700D1CF31 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -1229,10 +1220,6 @@
 		52E2527F26173F9C00E54C45 /* update_database.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = update_database.graphql; sourceTree = "<group>"; };
 		52E2528326173FA800E54C45 /* databases.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = databases.graphql; sourceTree = "<group>"; };
 		52E2528726175F1C00E54C45 /* DatabaseAPIType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseAPIType.swift; sourceTree = "<group>"; };
-		52E570822686409F002F34C9 /* Beam3.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Beam3.xcdatamodel; sourceTree = "<group>"; };
-		52E570832686409F002F34C9 /* Beam.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Beam.xcdatamodel; sourceTree = "<group>"; };
-		52E570842686409F002F34C9 /* Beam2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Beam2.xcdatamodel; sourceTree = "<group>"; };
-		52E570852686409F002F34C9 /* Beam5.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Beam5.xcdatamodel; sourceTree = "<group>"; };
 		52F27FB625B9B404006E09A2 /* ViewModelFetchedResults.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewModelFetchedResults.swift; sourceTree = "<group>"; };
 		52F4E49726417EF00067B017 /* create_identity.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = create_identity.graphql; sourceTree = "<group>"; };
 		52F4E4A126417F210067B017 /* sign_in_with_provider.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = sign_in_with_provider.graphql; sourceTree = "<group>"; };
@@ -1901,10 +1888,10 @@
 			isa = PBXGroup;
 			children = (
 				33B2744A264C0CDC00A318CD /* AutoUpdateDemo.app */,
+				52DB7F5726B447A5009C4BBE /* AutoUpdateTests.xctest */,
 				33B2744E264C0CDC00A318CD /* UpdateInstaller.xpc */,
 				33B27450264C0CDC00A318CD /* AutoUpdate.framework */,
 				33B27452264C0CDC00A318CD /* AppFeedBuilder */,
-				33CCBFAD26A61C15004B6236 /* AutoUpdateFrameworkTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -2552,12 +2539,8 @@
 			children = (
 				5298EB2C26274D530033862C /* BeamToBeam2MigrationPolicy.swift */,
 				5285672926275A8D00DDBE45 /* BeamToBeam2Migration.xcmappingmodel */,
-<<<<<<< HEAD
-				521398D1269486B100AC29C1 /* Beam3ToBeam4MigrationPolicy.xcmappingmodel */,
-=======
 				9623ABBC26B002DC00309E5E /* Beam3ToBeam4MigrationPolicy.swift */,
 				9623ABBE26B0061400309E5E /* Beam3ToBeam4Migration.xcmappingmodel */,
->>>>>>> develop
 			);
 			path = Migrations;
 			sourceTree = "<group>";
@@ -3581,6 +3564,7 @@
 			isa = PBXGroup;
 			children = (
 				A530C03726A9AFA6000565AF /* CalendarPickerViewModelTests.swift */,
+				521398D1269486B100AC29C1 /* Beam3ToBeam4MigrationPolicy.xcmappingmodel */,
 			);
 			name = "Recovered References";
 			sourceTree = "<group>";
@@ -3926,11 +3910,11 @@
 			remoteRef = 33B27451264C0CDC00A318CD /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		33CCBFAD26A61C15004B6236 /* AutoUpdateFrameworkTests.xctest */ = {
+		52DB7F5726B447A5009C4BBE /* AutoUpdateTests.xctest */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
-			path = AutoUpdateFrameworkTests.xctest;
-			remoteRef = 33CCBFAC26A61C15004B6236 /* PBXContainerItemProxy */;
+			path = AutoUpdateTests.xctest;
+			remoteRef = 52DB7F5626B447A5009C4BBE /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		A02FD6E72665180C00EBE17E /* Clustering.framework */ = {
@@ -5939,21 +5923,9 @@
 		52E570812686409F002F34C9 /* Beam.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
-<<<<<<< HEAD
-				52E570822686409F002F34C9 /* Beam3.xcdatamodel */,
-				52E570832686409F002F34C9 /* Beam.xcdatamodel */,
-				52E570842686409F002F34C9 /* Beam2.xcdatamodel */,
-				52E570852686409F002F34C9 /* Beam5.xcdatamodel */,
-			);
-			currentVersion = 52E570852686409F002F34C9 /* Beam5.xcdatamodel */;
-=======
 				9623ABB226AFFCB600309E5E /* Beam4.xcdatamodel */,
-				520354002636CF7700173C30 /* Beam3.xcdatamodel */,
-				5298EB0E26274C130033862C /* Beam2.xcdatamodel */,
-				4181712F25810CDC00317ED8 /* Beam.xcdatamodel */,
 			);
 			currentVersion = 9623ABB226AFFCB600309E5E /* Beam4.xcdatamodel */;
->>>>>>> develop
 			path = Beam.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;
