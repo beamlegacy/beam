@@ -1,5 +1,5 @@
 xctests:
-  timeout: 25 minutes
+  timeout: 10 minutes
   dependencies: []
   stage: test
   artifacts:
