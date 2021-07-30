@@ -109,6 +109,8 @@ class TestWebPage: WebPage {
 class PasswordStoreMock: PasswordStore {
     func entries(for host: String, completion: @escaping ([PasswordManagerEntry]) -> Void) {}
 
+    func entriesWithSubdomains(for host: String, completion: @escaping ([PasswordManagerEntry]) -> Void) {}
+
     func find(_ searchString: String, completion: @escaping ([PasswordManagerEntry]) -> Void) {}
 
     func fetchAll(completion: @escaping ([PasswordManagerEntry]) -> Void) {}

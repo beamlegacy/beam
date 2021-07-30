@@ -17,9 +17,17 @@ class ClusteringManager: ObservableObject {
             transformToClusteredPages()
         }
     }
+    var clusteredNotesId: [[UUID]] = [[]] {
+        didSet {
+            transformToClusteredNotes()
+        }
+    }
     var sendRanking = false
+    var initialiseNotes = true
     var ranker: SessionLinkRanker
+    var documentManager: DocumentManager
     @Published var clusteredTabs: [[TabInformation?]] = [[]]
+    @Published var clusteredNotes: [[String?]] = [[]]
     @Published var isClustering: Bool = false
     @Published var selectedTabGroupingCandidate: Int
     @Published var weightNavigation: Double
@@ -29,13 +37,14 @@ class ClusteringManager: ObservableObject {
     private var cluster: Cluster
     private var scope = Set<AnyCancellable>()
 
-    init(ranker: SessionLinkRanker, candidate: Int, navigation: Double, text: Double, entities: Double) {
+    init(ranker: SessionLinkRanker, documentManager: DocumentManager, candidate: Int, navigation: Double, text: Double, entities: Double) {
         self.selectedTabGroupingCandidate = candidate
         self.weightNavigation = navigation
         self.weightText = text
         self.weightEntities = entities
         self.cluster = Cluster(candidate: candidate, weightNavigation: navigation, weightText: text, weightEntities: entities)
         self.ranker = ranker
+        self.documentManager = documentManager
         #if DEBUG
         setupObservers()
         #endif
@@ -132,7 +141,7 @@ class ClusteringManager: ObservableObject {
             if newContent != nil {
                 replaceContent = true
             }
-            cluster.add(pageToAdd, ranking: ranking, replaceContent: replaceContent) { result in
+            cluster.add(page: pageToAdd, ranking: ranking, replaceContent: replaceContent) { result in
                 switch result {
                 case .failure(let error):
                     self.isClustering = false
@@ -140,10 +149,48 @@ class ClusteringManager: ObservableObject {
                 case .success(let result):
                     DispatchQueue.main.async {
                         self.isClustering = false
-                        self.clusteredPagesId = result.0
-                        self.sendRanking = result.1
-                        self.logForClustering(result: result.0, changeCandidate: false)
+                        self.clusteredPagesId = result.pageGroups
+                        self.clusteredNotesId = result.noteGroups
+                        self.sendRanking = result.sendRanking
+                        self.logForClustering(result: result.pageGroups, changeCandidate: false)
                     }
+                }
+            }
+        }
+        // After adding the first page, add notes from previous sessions
+        if initialiseNotes {
+            let notes = BeamNote.fetchNotesWithType(documentManager, type: .note, 10, 0)
+            for note in notes {
+                self.addNote(note: note)
+            }
+            self.initialiseNotes = false 
+        }
+    }
+
+    func addNote(note: BeamNote) {
+        var fullText = note.text.text
+        for child in note.children {
+            fullText += " " + child.text.text
+        }
+        let clusteringNote = ClusteringNote(id: note.id, title: note.title, content: fullText)
+        // TODO: Add link information to notes
+        isClustering = true
+        var ranking: [UInt64]?
+        if self.sendRanking {
+            ranking = self.ranker.clusteringRemovalSorted(links: self.clusteredPagesId.reduce([], +))
+        }
+        cluster.add(note: clusteringNote, ranking: ranking) { result in
+            switch result {
+            case .failure(let error):
+                self.isClustering = false
+                Logger.shared.logError("Error while adding note to cluster for \(clusteringNote): \(error)", category: .clustering)
+            case .success(let result):
+                DispatchQueue.main.async {
+                    self.isClustering = false
+                    self.clusteredPagesId = result.pageGroups
+                    self.clusteredNotesId = result.noteGroups
+                    self.sendRanking = result.sendRanking
+                    self.logForClustering(result: result.pageGroups, changeCandidate: false)
                 }
             }
         }
@@ -159,9 +206,10 @@ class ClusteringManager: ObservableObject {
             case .success(let result):
                 DispatchQueue.main.async {
                     self.isClustering = false
-                    self.clusteredPagesId = self.reorganizeGroups(clusters: result.0)
-                    self.sendRanking = result.1
-                    self.logForClustering(result: result.0, changeCandidate: true)
+                    self.clusteredPagesId = self.reorganizeGroups(clusters: result.pageGroups)
+                    self.clusteredNotesId = result.noteGroups
+                    self.sendRanking = result.sendRanking
+                    self.logForClustering(result: result.pageGroups, changeCandidate: true)
                 }
             }
         }
@@ -184,6 +232,14 @@ class ClusteringManager: ObservableObject {
         DispatchQueue.main.async {
             self.clusteredTabs = clusteredTabs
         }
+    }
+
+    private func transformToClusteredNotes() {
+        self.clusteredNotes = self.clusteredNotesId.compactMap({ cluster in
+            return cluster.map { noteUuid in
+                return BeamNote.titleForNoteId(noteUuid)
+            }
+        })
     }
 
     private func logForClustering(result: [[UInt64]], changeCandidate: Bool) {

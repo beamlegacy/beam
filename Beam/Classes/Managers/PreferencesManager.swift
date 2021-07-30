@@ -58,6 +58,7 @@ extension PreferencesManager {
     static let fontSizeIndexKey = "fontSizeIndex"
     static let tabToHighlightKey = "tabToHighlight"
     static let autoUpdateKey = "autoUpdate"
+    static let dataBackupOnUpdate = "dataBackupOnUpdate"
 }
 
 // MARK: - Default Values
@@ -67,6 +68,7 @@ extension PreferencesManager {
     static let fontSizeIndexPreferenceDefault = 5
     static let isTabToHighlightOnDefault = false
     static let isAutoUpdateOnDefault = true
+    static let isDataBackupOnUpdateOnDefault = true
 }
 
 extension PreferencesManager {
@@ -86,4 +88,7 @@ extension PreferencesManager {
 
     @UserDefault(key: autoUpdateKey, defaultValue: isAutoUpdateOnDefault, container: generalPreferencesContainer)
     static var isAutoUpdateOn: Bool
+
+    @UserDefault(key: dataBackupOnUpdate, defaultValue: isDataBackupOnUpdateOnDefault, container: generalPreferencesContainer)
+    static var isDataBackupOnUpdateOn: Bool
 }

@@ -297,6 +297,15 @@
           "revision": "c4d04bc6f1e4be2dbd535fedf8d93efeec8f68d0",
           "version": "0.10.5"
         }
+      },
+      {
+        "package": "ZIPFoundation",
+        "repositoryURL": "https://github.com/weichsel/ZIPFoundation",
+        "state": {
+          "branch": null,
+          "revision": "cf10bbff6ac3b873e97b36b9784c79866a051a8e",
+          "version": "0.9.12"
+        }
       }
     ]
   },

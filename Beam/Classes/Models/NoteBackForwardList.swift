@@ -145,8 +145,16 @@ class NoteBackForwardList: Codable {
 
     func clear() {
         current = nil
-        backList.removeAll()
+        clearBackward()
+        clearForward()
+    }
+
+    func clearForward() {
         forwardList.removeAll()
+    }
+
+    func clearBackward() {
+        backList.removeAll()
     }
 
     private(set) var backList: [Element] = []

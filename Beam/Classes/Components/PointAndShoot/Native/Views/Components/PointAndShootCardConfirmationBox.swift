@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct ShootCardConfirmationView: View {
+struct PointAndShootCardConfirmationBox: View {
     @EnvironmentObject var state: BeamState
 
     static let size = CGSize(width: 170, height: 42)
@@ -60,7 +60,7 @@ struct ShootCardConfirmationView_Previews: PreviewProvider {
             animated: false
         )
         let group = PointAndShoot.ShootGroup("uuid-uuid", [target], "https://example.com")
-        ShootCardConfirmationView(group: group)
+        PointAndShootCardConfirmationBox(group: group)
             .frame(width: 300, height: 70)
             .accessibility(identifier: "ShootCardConfirmationView")
     }

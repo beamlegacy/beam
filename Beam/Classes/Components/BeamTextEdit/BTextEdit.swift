@@ -114,6 +114,9 @@ public struct BTextEditScrollable: NSViewRepresentable {
     var showTitle = true
 
     var scrollToElementId: UUID?
+
+    var headerView: AnyView?
+
     private let focusOnAppear = true
 
     public func makeCoordinator() -> BTextEditScrollableCoordinator {
@@ -134,7 +137,7 @@ public struct BTextEditScrollable: NSViewRepresentable {
         edit.maximumWidth = maximumWidth
 
         edit.topOffset = topOffset
-        edit.footerHeight = footerHeight
+        edit.footerHeight = footerHeight + context.coordinator.compensatingBottomInset
 
         edit.leadingPercentage = leadingPercentage
         edit.centerText = centerText
@@ -147,15 +150,15 @@ public struct BTextEditScrollable: NSViewRepresentable {
 
         let scrollView = NSScrollView()
         scrollView.automaticallyAdjustsContentInsets = false
-
         let clipView = NSClipView()
         clipView.translatesAutoresizingMaskIntoConstraints = false
         clipView.drawsBackground = false
         scrollView.contentView = clipView
-        clipView.addConstraint(NSLayoutConstraint(item: clipView, attribute: .left, relatedBy: .equal, toItem: edit, attribute: .left, multiplier: 1.0, constant: 0))
-        clipView.addConstraint(NSLayoutConstraint(item: clipView, attribute: .top, relatedBy: .equal, toItem: edit, attribute: .top, multiplier: 1.0, constant: 0))
-        clipView.addConstraint(NSLayoutConstraint(item: clipView, attribute: .right, relatedBy: .equal, toItem: edit, attribute: .right, multiplier: 1.0, constant: 0))
-
+        clipView.addConstraints([
+            clipView.leftAnchor.constraint(equalTo: edit.leftAnchor),
+            clipView.rightAnchor.constraint(equalTo: edit.rightAnchor),
+            clipView.topAnchor.constraint(equalTo: edit.topAnchor)
+        ])
         edit.translatesAutoresizingMaskIntoConstraints = false
         scrollView.drawsBackground = false
         scrollView.hasVerticalScroller = true
@@ -164,6 +167,7 @@ public struct BTextEditScrollable: NSViewRepresentable {
         scrollView.documentView = edit
 
         context.coordinator.adjustScrollViewContentAutomatically(scrollView)
+        updateHeaderView(scrollView, context: context)
         return scrollView
     }
 
@@ -187,22 +191,41 @@ public struct BTextEditScrollable: NSViewRepresentable {
         edit.maximumWidth = maximumWidth
 
         edit.topOffset = topOffset
-        edit.footerHeight = footerHeight
+        edit.footerHeight = footerHeight + context.coordinator.compensatingBottomInset
 
         edit.centerText = centerText
         edit.showTitle = showTitle
 
         edit.scrollToElementId = scrollToElementId
 
+        updateHeaderView(nsView, context: context)
+
         context.coordinator.onDeinit = {
             edit.hideFloatingView()
         }
     }
+    private func updateHeaderView(_ scrollView: NSViewType, context: Context) {
+        guard let headerView = headerView, let documentView = scrollView.documentView
+        else { return }
+        context.coordinator.headerHostingView?.removeFromSuperview()
+        let hosting = NSHostingView<AnyView>(rootView: headerView)
+        hosting.translatesAutoresizingMaskIntoConstraints = false
+        documentView.addSubview(hosting)
+        documentView.addConstraints([
+            hosting.leftAnchor.constraint(equalTo: documentView.leftAnchor),
+            hosting.rightAnchor.constraint(equalTo: documentView.rightAnchor),
+            hosting.topAnchor.constraint(equalTo: documentView.topAnchor)
+        ])
+        context.coordinator.headerHostingView = hosting
+    }
 
-    public class BTextEditScrollableCoordinator: NSObject {
-        let parent: BTextEditScrollable
-        var onDeinit: () -> Void = {}
-        internal var scrollViewContentAdjuster: ScrollViewContentAdjuster?
+    public class BTextEditScrollableCoordinator: NSObject, ScrollViewContentAdjusterDelegate {
+        private let parent: BTextEditScrollable
+        fileprivate var onDeinit: () -> Void = {}
+        fileprivate var compensatingBottomInset = CGFloat(0)
+        fileprivate var headerHostingView: NSHostingView<AnyView>?
+
+        private var scrollViewContentAdjuster: ScrollViewContentAdjuster?
 
         init(_ edit: BTextEditScrollable) {
             self.parent = edit
@@ -210,11 +233,19 @@ public struct BTextEditScrollable: NSViewRepresentable {
 
         func adjustScrollViewContentAutomatically(_ scrollView: NSScrollView) {
             scrollViewContentAdjuster = ScrollViewContentAdjuster(with: scrollView)
-            scrollViewContentAdjuster?.onScroll = parent.onScroll
+            scrollViewContentAdjuster?.delegate = self
         }
 
         deinit {
             onDeinit()
+        }
+
+        func scrollViewNeedOffsetCompensation(of: CGSize) {
+            compensatingBottomInset = of.height
+        }
+
+        func scrollViewDidScroll(to point: CGPoint) {
+            parent.onScroll?(point)
         }
     }
 
@@ -225,9 +256,20 @@ public struct BTextEditScrollable: NSViewRepresentable {
  A NSScrollView helper that will adjust behavior when resizing the container or content.
  Currently only support content height becoming smaller.
 */
+protocol ScrollViewContentAdjusterDelegate: AnyObject {
+    func scrollViewDidScroll(to point: CGPoint)
+    func scrollViewNeedOffsetCompensation(of: CGSize)
+}
+
 @objc class ScrollViewContentAdjuster: NSObject {
-    var onScroll: ((CGPoint) -> Void)?
+    weak var delegate: ScrollViewContentAdjusterDelegate?
+
     private var lastContentBounds: NSRect = .zero
+    private var offsetCompensation: CGSize = .zero {
+        didSet {
+            delegate?.scrollViewNeedOffsetCompensation(of: offsetCompensation)
+        }
+    }
 
     init(with scrollView: NSScrollView) {
         super.init()
@@ -261,7 +303,11 @@ public struct BTextEditScrollable: NSViewRepresentable {
             return
         }
         lastContentBounds.origin = clipView.bounds.origin
-        onScroll?(clipView.bounds.origin)
+        delegate?.scrollViewDidScroll(to: clipView.bounds.origin)
+        if offsetCompensation != .zero && documentView.frame.height - clipView.bounds.origin.y - clipView.bounds.height > offsetCompensation.height {
+            // reset compensating height when out of view
+            offsetCompensation = .zero
+        }
     }
 
     @objc private func contentSizeDidChange(notification: Notification) {
@@ -277,6 +323,8 @@ public struct BTextEditScrollable: NSViewRepresentable {
             // Force the content offset to stay the same
             // even if that means having a white space at the bottom
             // but no more than 0.5 * the window height
+            let height = previousContentOffset.y - scrollView.contentView.bounds.origin.y
+            offsetCompensation = CGSize(width: 0, height: height)
             scrollView.scroll(scrollView.contentView, to: previousContentOffset)
         } else {
             lastContentBounds.origin = scrollView.contentView.bounds.origin

@@ -135,12 +135,12 @@ extension BeamTextEdit {
         return true
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
-    func postDetectInput(_ input: String) {
-        guard inputDetectorEnabled else { return }
-        guard let node = focusedWidget as? TextNode else { return }
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
+    func postDetectInput(_ input: String) -> BeamText.Attribute? {
+        guard inputDetectorEnabled else { return nil }
+        guard let node = focusedWidget as? TextNode else { return nil }
 
-        let makeQuote = { [unowned self] in
+        let makeQuote = { [unowned self] () -> BeamText.Attribute? in
             let level1 = node.text.prefix(2).text == "> "
             let level2 = node.text.prefix(3).text == ">> "
             let level = level1 ? 1 : (level2 ? 2 : 0)
@@ -151,9 +151,52 @@ extension BeamTextEdit {
                 node.text.removeFirst(level + 1)
                 self.rootNode.cursorPosition = 0
             }
+            return nil
         }
 
-        let makeHeader = { [unowned self] in
+        let makeBoldOrItalic = { [unowned self] () -> BeamText.Attribute? in
+            let isBold = node.text.prefix(2).text == "* "
+            let isItalic = node.text.prefix(3).text == "** "
+
+            if node.cursorPosition <= 2, isBold {
+                Logger.shared.logInfo("Make Bold", category: .ui)
+                node.text.removeFirst(2)
+                self.rootNode.cursorPosition = 0
+                return .strong
+            }
+
+            if node.cursorPosition <= 3, isItalic {
+                Logger.shared.logInfo("Make Italic", category: .ui)
+                node.text.removeFirst(3)
+                self.rootNode.cursorPosition = 0
+                return .emphasis
+            }
+            return nil
+        }
+
+        let makeStrikethrough = { [unowned self] () -> BeamText.Attribute? in
+            let isStrikethrough = node.text.prefix(3).text == "~~ "
+            if node.cursorPosition <= 3, isStrikethrough {
+                Logger.shared.logInfo("Make Strikethrough", category: .ui)
+                node.text.removeFirst(3)
+                self.rootNode.cursorPosition = 0
+                return .strikethrough
+            }
+            return nil
+        }
+
+        let makeUnderline = { [unowned self] () -> BeamText.Attribute? in
+            let isUnderline = node.text.prefix(3).text == "_ "
+            if node.cursorPosition <= 2, isUnderline {
+                Logger.shared.logInfo("Make Underline", category: .ui)
+                node.text.removeFirst(2)
+                self.rootNode.cursorPosition = 0
+                return .underline
+            }
+            return nil
+        }
+
+        let makeHeader = { [unowned self] () -> BeamText.Attribute? in
             let level1 = node.text.prefix(2).text == "# "
             let level2 = node.text.prefix(3).text == "## "
             let level = level1 ? 1 : (level2 ? 2 : 0)
@@ -161,37 +204,53 @@ extension BeamTextEdit {
                 Logger.shared.logInfo("Make header", category: .ui)
 
                 // In this case we will reparent all following sibblings that are not a header to the current node as Paper does
-                guard self.focusedWidget?.isEmpty ?? false else { return }
-                guard let node = self.focusedWidget as? TextNode else { return }
+                guard self.focusedWidget?.isEmpty ?? false else { return nil }
+                guard let node = self.focusedWidget as? TextNode else { return nil }
                 let element = node.element
-                guard let parentNode = self.focusedWidget?.parent as? TextNode else { return }
+                guard let parentNode = self.focusedWidget?.parent as? TextNode else { return nil }
                 let parent = parentNode.element
-                guard let index = self.focusedWidget?.indexInParent else { return }
+                guard let index = self.focusedWidget?.indexInParent else { return nil }
                 for sibbling in parent.children.suffix(from: index + 1) {
-                    guard !sibbling.isHeader else { return }
+                    guard !sibbling.isHeader else { return nil }
                     element.addChild(sibbling)
                 }
 
                 element.kind = .heading(level)
                 element.text.removeFirst(level + 1)
                 self.rootNode.cursorPosition = 0
+                return nil
             }
+            return nil
         }
 
-        let handlers: [String: () -> Void] = [
+        let handlers: [String: () -> BeamText.Attribute?] = [
             "#": makeHeader,
             ">": makeQuote,
-            " ": { //[unowned self] in
-                makeHeader()
-                makeQuote()
+            "*": makeBoldOrItalic,
+            "~": makeStrikethrough,
+            "_": makeUnderline,
+            " ": {
+                if let res = makeHeader() {
+                    return res
+                } else if let res = makeQuote() {
+                    return res
+                } else if let res = makeBoldOrItalic() {
+                    return res
+                } else if let res = makeStrikethrough() {
+                    return res
+                } else if let res = makeUnderline() {
+                    return res
+                }
+                return nil
             }
         ]
 
         if let handler = handlers[input] {
-            handler()
+            return handler()
         } else if let handler = handlers[inputDetectorLastInput + input] {
-            handler()
+            return handler()
         }
+        return nil
     }
 
 }

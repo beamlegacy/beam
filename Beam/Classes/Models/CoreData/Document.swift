@@ -124,6 +124,7 @@ class Document: NSManagedObject, BeamCoreDataObject {
         updated_at = BeamDate.now
         deleted_at = documentStruct.deletedAt
         is_public = documentStruct.isPublic
+        journal_date = documentStruct.journalDate
     }
 
     class func countWithPredicate(_ context: NSManagedObjectContext,
@@ -316,7 +317,8 @@ class Document: NSManagedObject, BeamCoreDataObject {
                                      _ fetchOffset: Int) throws -> [Document] {
         try fetchAllWithLimit(context,
                               NSPredicate(format: "document_type = \(type)"),
-                              [NSSortDescriptor(key: "created_at", ascending: false)],
+                              [NSSortDescriptor(key: "journal_date", ascending: false),
+                              NSSortDescriptor(key: "created_at", ascending: false)],
                               limit,
                               fetchOffset)
     }

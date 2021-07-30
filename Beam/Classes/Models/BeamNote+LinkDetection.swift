@@ -13,6 +13,10 @@ public extension BeamNote {
         return links + references
     }
 
+    var fastLinksAndReferences: [BeamNoteReference] {
+        return links + fastReferences
+    }
+
     var links: [BeamNoteReference] {
         return (try? GRDBDatabase.shared.fetchLinks(toNote: self.id).map({ bidiLink in
             BeamNoteReference(noteID: bidiLink.sourceNoteId, elementID: bidiLink.sourceElementId)
@@ -20,17 +24,31 @@ public extension BeamNote {
     }
 
     var references: [BeamNoteReference] {
-        return referencesMatching(self.title, id: self.id)
+        references(with: AppDelegate.main.documentManager, verifyMatch: true)
     }
 
-    private func referencesMatching(_ titleToMatch: String, id idToMatch: UUID) -> [BeamNoteReference] {
+    var fastReferences: [BeamNoteReference] {
+        references(with: AppDelegate.main.documentManager, verifyMatch: false)
+    }
+
+    func linksAndReferences(with documentManager: DocumentManager, fast: Bool) -> [BeamNoteReference] {
+        return links + references(with: documentManager, verifyMatch: !fast)
+    }
+
+    private func references(with documentManager: DocumentManager, verifyMatch: Bool) -> [BeamNoteReference] {
+        referencesMatching(self.title, id: self.id, documentManager: documentManager, verifyMatch: verifyMatch)
+    }
+
+    private func referencesMatching(_ titleToMatch: String, id idToMatch: UUID, documentManager: DocumentManager, verifyMatch: Bool) -> [BeamNoteReference] {
         GRDBDatabase.shared.search(matchingPhrase: titleToMatch).compactMap { result -> BeamNoteReference? in
+            let noteRef = BeamNoteReference(noteID: result.noteId, elementID: result.uid)
+            guard verifyMatch else { return noteRef }
             guard result.noteId != self.id,
-                  let note = BeamNote.fetch(AppDelegate.main.documentManager, id: result.noteId),
+                  let note = BeamNote.fetch(documentManager, id: result.noteId),
                   let element = note.findElement(result.uid),
                   element.hasReferenceToNote(named: titleToMatch)
             else { return nil }
-            return BeamNoteReference(noteID: result.noteId, elementID: result.uid)
+            return noteRef
         }
     }
 }

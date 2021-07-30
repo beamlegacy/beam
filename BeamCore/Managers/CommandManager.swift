@@ -68,6 +68,8 @@ public class GroupCommand<Context>: Command<Context> {
         }
         return true
     }
+
+    public var isEmpty: Bool { commands.isEmpty }
 }
 
 // MARK: - CommandManager
@@ -163,8 +165,15 @@ public class CommandManager<Context> {
 
     public func endGroup() {
         guard let lastGrp = groupCmd.last else { return }
-        doneQueue.append(lastGrp)
         groupCmd.removeLast()
+        // Prune empty group commands:
+        guard !lastGrp.isEmpty else { return }
+        // Skip command group if it only contains one command and directly add it
+        if lastGrp.commands.count == 1, let cmd = lastGrp.commands.first {
+            appendToDone(command: cmd)
+            return
+        }
+        doneQueue.append(lastGrp)
     }
 
     // MARK: - Timer

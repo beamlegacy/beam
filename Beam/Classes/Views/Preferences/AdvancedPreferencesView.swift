@@ -121,6 +121,38 @@ struct AdvancedPreferencesView: View {
                     .frame(maxWidth: 387)
             }
 
+            Preferences.Section {
+                Text("Enable TabGrouping Window menu")
+                    .font(BeamFont.regular(size: 13).swiftUI)
+                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+            } content: {
+                EnableTabGroupingWindowCheckbox
+            }
+
+            Preferences.Section {
+                Text("Data backup")
+                    .font(BeamFont.regular(size: 13).swiftUI)
+                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+            } content: {
+                AutomaticBackupBeforeUpdate
+            }
+
+            Preferences.Section(title: "Encryption Enabled") {
+                EncryptionEnabledButton
+            }
+            Preferences.Section(title: "Encryption key") {
+                TextField("Private Key", text: privateKeyBinding)
+                    .textFieldStyle(RoundedBorderTextFieldStyle()).frame(maxWidth: 400)
+            }
+            Preferences.Section(title: "Actions") {
+                ResetAPIEndpointsButton
+                CrashButton
+                CopyAccessToken
+                ResetPrivateKey
+            }
+            Preferences.Section(title: "State Restoration Enabled") {
+                StateRestorationEnabledButton
+            }
             Preferences.Section(title: "Database", bottomDivider: true) {
                 DatabasePicker
                 Button(action: {
@@ -211,8 +243,20 @@ struct AdvancedPreferencesView: View {
     }
 
     private var BrowsingSessionCollectionCheckbox: some View {
-        Checkbox(checkState: Configuration.browsingSessionCollectionIsOn, text: "Enable Browsing Session collection", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
-            Configuration.browsingSessionCollectionIsOn = activated
+        Checkbox(checkState: PreferencesManager.browsingSessionCollectionIsOn, text: "Enable Browsing Session collection", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
+            PreferencesManager.browsingSessionCollectionIsOn = activated
+        }
+    }
+
+    private var EnableTabGroupingWindowCheckbox: some View {
+        Checkbox(checkState: PreferencesManager.showTabGrougpingMenuItem, text: "Enable TabGrouping Window menu", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
+            PreferencesManager.showTabGrougpingMenuItem = activated
+        }
+    }
+
+    private var AutomaticBackupBeforeUpdate: some View {
+        Checkbox(checkState: PreferencesManager.isDataBackupOnUpdateOn, text: "Backup data before update", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
+            PreferencesManager.isDataBackupOnUpdateOn = activated
         }
     }
 

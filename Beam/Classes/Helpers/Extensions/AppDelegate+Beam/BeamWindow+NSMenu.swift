@@ -33,12 +33,37 @@ extension BeamWindow {
         state.startNewSearch()
     }
 
+    @IBAction func createEmptyTabWithCurrentNote(_ sender: Any?) {
+        state.createEmptyTabWithCurrentDestinationCard()
+    }
+
+    @IBAction func reOpenClosedTab(_ sender: Any?) {
+        if state.browserTabsManager.reOpenedClosedTabFromHistory() {
+            guard let currentTab = state.browserTabsManager.currentTab else { return }
+            currentTab.postLoadSetup(state: state)
+        }
+    }
+
     @IBAction func openLocation(_ sender: Any?) {
         state.focusOmnibox()
     }
 
     @IBAction func showCardSelector(_ sender: Any?) {
         state.destinationCardIsFocused = true
+    }
+
+    @IBAction func muteCurrentTab(_ sender: Any?) {
+        if let currentTabIsPlaying = state.browserTabsManager.currentTab?.mediaPlayerController?.isPlaying, currentTabIsPlaying {
+            state.browserTabsManager.currentTab?.mediaPlayerController?.isMuted = true
+        }
+    }
+
+    @IBAction func muteOtherTabs(_ sender: Any?) {
+        for tab in state.browserTabsManager.tabs where tab != state.browserTabsManager.currentTab {
+            if let tabIsPlaying = tab.mediaPlayerController?.isPlaying, tabIsPlaying {
+                tab.mediaPlayerController?.isMuted = true
+            }
+        }
     }
 
     // MARK: Navigation
@@ -55,7 +80,7 @@ extension BeamWindow {
     }
 
     @IBAction private func checkForUpdates(_ sender: Any) {
-        versionChecker.checkForUpdates()
+        data.versionChecker.checkForUpdates()
     }
 
     // MARK: Web loading
@@ -79,15 +104,52 @@ extension BeamWindow {
         state.browserTabsManager.currentTab?.webView.zoomOut()
     }
 
-    @IBAction func showRecentCard(_ sender: Any?) {
-        let recents = state.recentsManager.recentNotes
-        if let item = sender as? NSMenuItem, let index = Int(item.title.components(separatedBy: CharacterSet.decimalDigits.inverted).joined()), index <= recents.count {
-            state.navigateToNote(named: recents[index - 1].title)
-        }
-    }
-
     @IBAction func dumpBrowsingTree(_ sender: Any?) {
         state.browserTabsManager.currentTab?.dumpBrowsingTree()
+    }
+
+    // MARK: - Web Navigation
+
+    var shift: Bool { NSEvent.modifierFlags.contains(.shift) }
+    var option: Bool { NSEvent.modifierFlags.contains(.option) }
+    var control: Bool { NSEvent.modifierFlags.contains(.control) }
+    var command: Bool { NSEvent.modifierFlags.contains(.command) }
+
+    // swiftlint:disable:next cyclomatic_complexity
+    override func keyDown(with event: NSEvent) {
+        guard let keyValue = KeyCode.getKeyValueFrom(for: event.keyCode) else { return }
+        switch event.keyCode {
+        case KeyCode.zero.rawValue:
+            if command {
+                if state.mode != .web {
+                    state.navigateToJournal(note: nil)
+                }
+                if command && state.mode == .web {
+                    state.browserTabsManager.currentTab?.webView.zoomReset()
+                }
+                return
+            }
+        case KeyCode.one.rawValue, KeyCode.two.rawValue, KeyCode.three.rawValue, KeyCode.four.rawValue, KeyCode.five.rawValue, KeyCode.six.rawValue, KeyCode.seven.rawValue, KeyCode.eight.rawValue:
+            if command {
+                if state.mode == .web && keyValue <= state.browserTabsManager.tabs.count {
+                    state.browserTabsManager.showTab(at: keyValue - 1)
+                } else if state.mode != .web {
+                    let recents = state.recentsManager.recentNotes
+                    if keyValue <= recents.count {
+                        state.navigateToNote(named: recents[keyValue - 1].title)
+                    }
+                }
+                return
+            }
+        case KeyCode.nine.rawValue:
+            if command && state.mode == .web {
+                state.browserTabsManager.showTab(at: state.browserTabsManager.tabs.count - 1)
+                return
+            }
+        default:
+            break
+        }
+        super.keyDown(with: event)
     }
 }
 

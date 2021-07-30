@@ -44,6 +44,8 @@ struct TableView: NSViewRepresentable {
     var items: [TableViewItem] = []
     var columns: [TableViewColumn] = []
     var creationRowTitle: String? = "New Private Card"
+    @Binding var shouldReloadData: Bool?
+
     var onEditingText: ((String?, Int) -> Void)?
     var onSelectionChanged: ((IndexSet) -> Void)?
     var onHover: ((_ row: Int?, _ location: NSRect?) -> Void)?
@@ -125,6 +127,10 @@ struct TableView: NSViewRepresentable {
     func updateNSView(_ view: Self.NSViewType, context: Self.Context) {
         context.coordinator.creationRowTitle = creationRowTitle
         context.coordinator.originalData = items
+        if shouldReloadData == true {
+            context.coordinator.reloadData(soft: true)
+            self.shouldReloadData = false
+        }
     }
 }
 
@@ -169,15 +175,22 @@ class TableViewCoordinator: NSObject {
         }
     }
 
-    func reloadData() {
+    /// - Parameters:
+    ///   - soft: keep selection or not
+    func reloadData(soft: Bool = false) {
         if let descriptor = sortDescriptor, let sorted = NSArray(array: originalData).sortedArray(using: [descriptor]) as? [TableViewItem] {
             sortedData = sorted
         } else {
             sortedData = originalData
         }
-        currentSelectedIndexes = nil
-        parent.onSelectionChanged?([])
+        if !soft {
+            currentSelectedIndexes = nil
+            parent.onSelectionChanged?([])
+        }
         tableView?.reloadData()
+        if soft, let selectedIndexes = currentSelectedIndexes {
+            tableView?.selectRowIndexes(selectedIndexes, byExtendingSelection: false)
+        }
         updateSelectAllCheckBox()
     }
 

@@ -25,7 +25,8 @@ extension BeamNote: BeamNoteDocument {
                                   data: data,
                                   documentType: type.isJournal ? .journal : .note,
                                   version: version,
-                                  isPublic: isPublic)
+                                  isPublic: isPublic,
+                                  journalDate: type.journalDateString)
         } catch {
             Logger.shared.logError("Unable to encode BeamNote into DocumentStruct [\(title) {\(id)}]", category: .document)
             return nil
@@ -226,7 +227,8 @@ extension BeamNote: BeamNoteDocument {
 
     public static func fetch(_ documentManager: DocumentManager,
                              title: String,
-                             keepInMemory: Bool = true) -> BeamNote? {
+                             keepInMemory: Bool = true,
+                             decodeChildren: Bool = true) -> BeamNote? {
         // Is the note in the cache?
         if let note = getFetchedNote(title) {
             return note
@@ -240,7 +242,7 @@ extension BeamNote: BeamNoteDocument {
 //        Logger.shared.logDebug("Note loaded:\n\(String(data: doc.data, encoding: .utf8)!)\n", category: .document)
 
         do {
-            return try instanciateNote(documentManager, doc, keepInMemory: keepInMemory)
+            return try instanciateNote(documentManager, doc, keepInMemory: keepInMemory, decodeChildren: decodeChildren)
         } catch {
             Logger.shared.logError("Unable to decode note \(doc.title) (\(doc.id))", category: .document)
         }
@@ -249,7 +251,8 @@ extension BeamNote: BeamNoteDocument {
     }
 
     public static func fetch(_ documentManager: DocumentManager, id: UUID,
-                             keepInMemory: Bool = true) -> BeamNote? {
+                             keepInMemory: Bool = true,
+                             decodeChildren: Bool = true) -> BeamNote? {
         // Is the note in the cache?
         if let note = getFetchedNote(id) {
             return note
@@ -263,7 +266,7 @@ extension BeamNote: BeamNoteDocument {
 //        Logger.shared.logDebug("Note loaded:\n\(String(data: doc.data, encoding: .utf8)!)\n", category: .document)
 
         do {
-            return try instanciateNote(documentManager, doc, keepInMemory: keepInMemory)
+            return try instanciateNote(documentManager, doc, keepInMemory: keepInMemory, decodeChildren: decodeChildren)
         } catch {
             Logger.shared.logError("Unable to decode note \(doc.title) (\(doc.id))", category: .document)
         }
@@ -317,6 +320,15 @@ extension BeamNote: BeamNoteDocument {
         return create(documentManager, title: title)
     }
 
+    public static func fetchOrCreateJournalNote(_ documentManager: DocumentManager, date: Date) -> BeamNote {
+        let title = BeamDate.journalNoteTitle(for: date)
+        let note = fetchOrCreate(documentManager, title: title)
+        if !note.type.isJournal {
+            note.type = BeamNoteType.journalForDate(date)
+        }
+        return note
+    }
+
     public var lastChangedElement: BeamElement? {
         get {
             AppDelegate.main.data.lastChangedElement
@@ -336,7 +348,7 @@ extension BeamNote: BeamNoteDocument {
         let documentManager = DocumentManager()
         try? GRDBDatabase.shared.clearElements()
         try? GRDBDatabase.shared.clearBidirectionalLinks()
-        for title in documentManager.allDocumentsTitles() {
+        for title in documentManager.allDocumentsTitles(includeDeletedNotes: false) {
             if let note = BeamNote.fetch(documentManager, title: title) {
                 try? GRDBDatabase.shared.append(note: note)
                 for link in note.internalLinks {

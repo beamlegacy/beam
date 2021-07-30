@@ -66,6 +66,7 @@ import BeamCore
     @Published var overlayViewModel: OverlayViewCenterViewModel = OverlayViewCenterViewModel()
 
     var downloadButtonPosition: CGPoint?
+    weak var downloaderWindow: AutoDismissingWindow?
 
     private var scope = Set<AnyCancellable>()
     func goBack() {
@@ -167,6 +168,7 @@ import BeamCore
 
         guard note != currentNote else { return true }
 
+        note.sources.refreshScores()
         currentPage = nil
         currentNote = note
         scrollToElementId = elementId
@@ -229,6 +231,11 @@ import BeamCore
 
     func createEmptyTab() {
         _ = addNewTab(origin: nil, note: data.todaysNote)
+    }
+
+    func createEmptyTabWithCurrentDestinationCard() {
+        guard let destinationNote = BeamNote.fetch(data.documentManager, title: destinationCardName) else { return }
+        _ = addNewTab(origin: nil, note: destinationNote)
     }
 
     func createTabFromNode(_ node: TextNode, withURL url: URL) {
@@ -300,7 +307,11 @@ import BeamCore
                 Logger.shared.logError("autocomplete result without correct url \(result.text)", category: .search)
                 return
             }
-            _ = createTab(withURL: url, originalQuery: "")
+            if  mode == .web && currentTab != nil && currentTab?.url == nil {
+                navigateCurrentTab(toURL: url)
+            } else {
+                _ = createTab(withURL: url, originalQuery: result.text)
+            }
             mode = .web
 
         case .note:

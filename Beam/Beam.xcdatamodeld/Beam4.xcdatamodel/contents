@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="18154" systemVersion="20G70" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="Database" representedClassName=".Database" syncable="YES">
+        <attribute name="created_at" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="deleted_at" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="title" attributeType="String"/>
+        <attribute name="updated_at" attributeType="Date" usesScalarValueType="NO"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="id"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
+    </entity>
+    <entity name="Document" representedClassName=".Document" syncable="YES">
+        <attribute name="beam_api_checksum" optional="YES" attributeType="String"/>
+        <attribute name="beam_api_data" optional="YES" attributeType="Binary"/>
+        <attribute name="beam_api_sent_at" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="created_at" attributeType="Date" defaultDateTimeInterval="628161600" usesScalarValueType="NO"/>
+        <attribute name="data" optional="YES" attributeType="Binary"/>
+        <attribute name="database_id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="deleted_at" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="document_type" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="id" attributeType="UUID" defaultValueString="6A275532-F5C5-4FA1-8EF5-4D8BE0DAAD71" usesScalarValueType="NO"/>
+        <attribute name="is_public" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="journal_date" optional="YES" attributeType="String"/>
+        <attribute name="title" attributeType="String" defaultValueString=""/>
+        <attribute name="updated_at" attributeType="Date" defaultDateTimeInterval="628161600" usesScalarValueType="NO"/>
+        <attribute name="version" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="id"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
+    </entity>
+    <entity name="StoredLink" representedClassName=".StoredLink" syncable="YES">
+        <attribute name="bid" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="title" optional="YES" attributeType="String"/>
+        <attribute name="url" attributeType="String" defaultValueString=""/>
+        <fetchIndex name="byPropertyId">
+            <fetchIndexElement property="bid" type="Binary" order="ascending"/>
+        </fetchIndex>
+        <fetchIndex name="byPropertyUrl">
+            <fetchIndexElement property="url" type="Binary" order="ascending"/>
+        </fetchIndex>
+    </entity>
+    <elements>
+        <element name="Database" positionX="-279" positionY="-162" width="128" height="104"/>
+        <element name="Document" positionX="-176.8372802734375" positionY="-258.5739135742188" width="128" height="239"/>
+        <element name="StoredLink" positionX="-410.7252197265625" positionY="-248.30859375" width="128" height="74"/>
+    </elements>
+</model>

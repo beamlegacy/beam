@@ -125,20 +125,4 @@ struct Configuration {
         }
         return value
     }
-
-    static var browsingSessionCollectionIsOnDefault = true
-    static var browsingSessionCollectionIsOn: Bool {
-        get {
-            if UserDefaults.standard.object(forKey: "browsingSessionCollectionIsOn") != nil {
-                return UserDefaults.standard.bool(forKey: "browsingSessionCollectionIsOn")
-            }
-
-            return browsingSessionCollectionIsOnDefault
-        }
-        set {
-            if newValue != browsingSessionCollectionIsOn {
-                UserDefaults.standard.set(newValue, forKey: "browsingSessionCollectionIsOn")
-            }
-        }
-    }
 }

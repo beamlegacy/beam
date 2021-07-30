@@ -21,11 +21,14 @@ struct DownloaderView: View {
 
     @State private var selectedDownloads: Set<Download> = []
     @State private var lastManuallyInsertedDownload: Download?
-    @Binding var isPresented: Bool
 
-    init(downloader: BeamDownloadManager, isPresented: Binding<Bool>) {
+    static var width: CGFloat = 368.0
+
+    private var onClose: () -> Void
+
+    init(downloader: BeamDownloadManager, onCloseButtonTap: @escaping () -> Void) {
         self.downloader = downloader
-        self._isPresented = isPresented
+        self.onClose = onCloseButtonTap
     }
 
     var body: some View {
@@ -41,7 +44,7 @@ struct DownloaderView: View {
                     .opacity(shouldDisplayClearButton ? 1 : 0)
                     .animation(.easeInOut(duration: 0.3), value: shouldDisplayClearButton)
                     Button(action: {
-                        isPresented = false
+                        onClose()
                     }, label: {
                         Image("tabs-close")
                             .renderingMode(.template)
@@ -104,7 +107,9 @@ struct DownloaderView: View {
             .padding(.bottom, 6)
             .padding(.top, 2)
         }
-        .frame(width: 368.0)
+        .frame(width: Self.width)
+        .background(BeamColor.Generic.background.swiftUI)
+        .cornerRadius(6)
         .alert(item: $downloader.showAlertFileNotFoundForDownload, content: { download in
             Alert(title: Text("Beam can’t show the file “\(download.fileSystemURL.lastPathComponent)” in the Finder."), message: Text("The file has moved since you downloaded it. You can download it again or remove it from Beam."), primaryButton: .default(Text("Download again"), action: {
                 downloader.clearFileDownload(download)
@@ -147,7 +152,7 @@ struct DownloaderView_Previews: PreviewProvider {
         downloader.downloadFile(at: URL(string: "https://devimages-cdn.apple.com/design/resources/download/SF-Symbols-2.1")!, headers: [:], suggestedFileName: nil)
 
         return Group {
-            DownloaderView(downloader: downloader, isPresented: .constant(true))
+            DownloaderView(downloader: downloader, onCloseButtonTap: {})
         }
     }
 }

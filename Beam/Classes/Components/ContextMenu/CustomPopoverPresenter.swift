@@ -15,17 +15,17 @@ private class ContextMenuWindow: NSWindow {
 
     override func mouseDown(with event: NSEvent) {
         super.mouseDown(with: event)
-        ContextMenuPresenter.shared.dismissMenu()
+        CustomPopoverPresenter.shared.dismissMenu()
     }
 
     override func rightMouseDown(with event: NSEvent) {
         super.rightMouseDown(with: event)
-        ContextMenuPresenter.shared.dismissMenu()
+        CustomPopoverPresenter.shared.dismissMenu()
     }
 
     override func otherMouseDown(with event: NSEvent) {
         super.otherMouseDown(with: event)
-        ContextMenuPresenter.shared.dismissMenu()
+        CustomPopoverPresenter.shared.dismissMenu()
     }
 }
 
@@ -33,8 +33,8 @@ class FlippedView: NSView {
     override var isFlipped: Bool { true }
 }
 
-class ContextMenuPresenter {
-    static var shared = ContextMenuPresenter()
+class CustomPopoverPresenter {
+    static var shared = CustomPopoverPresenter()
 
     private var currentView: NSView?
     private var currentMenu: FormatterView?
@@ -92,6 +92,7 @@ class ContextMenuPresenter {
         window.contentView?.addSubview(menu)
 
         var position = convertPointToScreen(atPoint, fromView: view, inWindow: parentWindow)
+        position = window.convertPoint(fromScreen: position)
         position.y = max(0, position.y - menu.bounds.height)
         menu.setFrameOrigin(position)
 
@@ -121,5 +122,20 @@ class ContextMenuPresenter {
 
     private func convertPointToScreen(_ point: CGPoint, fromView: NSView, inWindow: NSWindow) -> CGPoint {
         return inWindow.convertPoint(toScreen: fromView.convert(point, to: nil))
+    }
+
+    func presentAutoDismissingChildWindow() -> AutoDismissingWindow? {
+
+        guard let mainWindow = AppDelegate.main.window else { return nil }
+
+        let window = AutoDismissingWindow()
+        window.isReleasedWhenClosed = false
+        window.isMovableByWindowBackground = true
+        window.backgroundColor = .clear
+
+        window.styleMask = [.fullSizeContentView, .borderless]
+
+        mainWindow.addChildWindow(window, ordered: .above)
+        return window
     }
 }

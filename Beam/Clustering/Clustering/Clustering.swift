@@ -26,6 +26,24 @@ public struct Page {
     var attachedPages = [UInt64]()
 }
 
+public struct ClusteringNote {
+    public init(id: UUID, title: String? = nil, content: String? = nil) {
+        self.id = id
+        self.title = title
+        self.content = content
+    }
+    var id: UUID
+    var urls: [UInt64]? // These are urls from which content was actively
+                        // added to the note.
+    var title: String?
+    var content: String?  // Text in the note.
+                          // TODO: Should we save to source (copy-paste from a page, user input...)
+    var textEmbedding: [Double]?
+    var entities: EntitiesInText?
+    var language: NLLanguage?
+    var entitiesInTitle: EntitiesInText?
+}
+
 // swiftlint:disable:next type_body_length
 public class Cluster {
 
@@ -38,6 +56,17 @@ public class Cluster {
         case navigation
         case text
         case entities
+    }
+
+    enum DataPoint {
+        case page
+        case note
+    }
+
+    enum WhereToAdd {
+        case first
+        case last
+        case middle
     }
 
     enum ClusteringCandidate {
@@ -76,8 +105,14 @@ public class Cluster {
         case unknownMatrixType
     }
 
+    enum ClusteringError: Error {
+        case moreThanOneObjectToAdd
+        case noObjectsToAdd
+    }
+
     let myQueue = DispatchQueue(label: "clusteringThread")
     var pages = [Page]()
+    var notes = [ClusteringNote]()
     // As the adjacency matrix is never touched on its own, just through the sub matrices, it
     // does not need add or remove methods.
     var adjacencyMatrix = Matrix([[0]])
@@ -115,17 +150,51 @@ public class Cluster {
     public class SimilarityMatrix {
         var matrix = Matrix([[0]])
 
-        func addPage(similarities: [Double]) throws {
+        func addDataPoint(similarities: [Double], type: DataPoint, numExistingNotes: Int, numExistingPages: Int) throws {
+
             guard matrix.rows == matrix.cols else {
               throw MatrixError.matrixNotSquare
             }
             guard matrix.rows == similarities.count else {
               throw MatrixError.dimensionsNotMatching
             }
-            self.matrix = self.matrix ||| similarities
-            var similarities_row = similarities
-            similarities_row.append(0.0)
-            self.matrix = self.matrix === similarities_row
+
+            var whereToAdd: WhereToAdd?
+            if numExistingPages == 0 && numExistingNotes == 0 {
+                self.matrix = Matrix([[0]])
+                return
+            } else if type == .page || numExistingPages == 0 {
+                whereToAdd = .last
+            } else if numExistingNotes == 0 {
+                whereToAdd = .first
+            } else { // Adding a note, when there's already at least one note and one page
+                whereToAdd = .middle
+            }
+
+            if let whereToAdd = whereToAdd {
+                switch whereToAdd {
+                case .first:
+                    self.matrix = similarities ||| self.matrix
+                    var similarities_row = similarities
+                    similarities_row.insert(0.0, at: 0)
+                    self.matrix = similarities_row === self.matrix
+                case .last:
+                    self.matrix = self.matrix ||| similarities
+                    var similarities_row = similarities
+                    similarities_row.append(0.0)
+                    self.matrix = self.matrix === similarities_row
+                case .middle:
+                    let upLeft = self.matrix ?? (.Take(numExistingNotes), .Take(numExistingNotes))
+                    let upRight = self.matrix ?? (.Take(numExistingNotes), .TakeLast(numExistingPages))
+                    let downLeft = self.matrix ?? (.TakeLast(numExistingPages), .Take(numExistingNotes))
+                    let downRight = self.matrix ?? (.TakeLast(numExistingPages), .TakeLast(numExistingPages))
+                    let left = upLeft === (Array(similarities[0..<numExistingNotes]) === downLeft)
+                    let right = upRight === (Array(similarities[numExistingNotes..<similarities.count]) === downRight)
+                    var longSimilarities = similarities
+                    longSimilarities.insert(0, at: numExistingNotes)
+                    self.matrix = left ||| (longSimilarities ||| right)
+                }
+            }
         }
 
         func removePage(index: Int) throws {
@@ -307,13 +376,26 @@ public class Cluster {
     /// - Parameters:
     ///   - textualEmbedding: the embedding of the current page
     /// - Returns: A list of cosine similarity scores
-    func scoreTextualEmbedding(textualEmbedding: [Double], language: NLLanguage, index: Int, changeContent: Bool = false) -> [Double] {
+    func scoreTextualEmbedding(textualEmbedding: [Double], language: NLLanguage, index: Int, dataPointType: DataPoint, changeContent: Bool = false) -> [Double] {
         var scores = [Double]()
+         for note in notes.enumerated() {
+            if dataPointType == . note {
+                if !changeContent && note.offset == index && dataPointType == .note { break }
+                scores.append(0.0)
+            } else if let textualVectorID = note.element.textEmbedding,
+                      let textLanguage = note.element.language,
+                      textLanguage == language {
+                scores.append(self.cosineSimilarity(vector1: textualVectorID, vector2: textualEmbedding))
+            } else {
+                scores.append(0.0)
+            }
+
+        }
 
         for page in pages.enumerated() {
             // The textual vector might be empty, when the OS is not good or the page content is not in English
             // then the score will be 0.0
-            if page.offset == index {
+            if page.offset == index && dataPointType == .page {
                 if changeContent {
                     scores.append(0.0)
                 } else { break }
@@ -321,19 +403,32 @@ public class Cluster {
                       let textLanguage = page.element.language,
                       textLanguage ==  language {
                     scores.append(self.cosineSimilarity(vector1: textualVectorID, vector2: textualEmbedding))
-            } else {
+            } else if dataPointType == .page {
                 scores.append(1.0) // We don't want to "break" connections between langauges
+            } else {
+                scores.append(0.0)
             }
         }
         return scores
     }
 
-    func scoreEntitySimilarities(entitiesInNewText: EntitiesInText, in whichText: FindEntitiesIn, index: Int, changeContent: Bool = false) -> [Double] {
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
+    func scoreEntitySimilarities(entitiesInNewText: EntitiesInText, in whichText: FindEntitiesIn, index: Int, dataPointType: DataPoint, changeContent: Bool = false) -> [Double] {
         var scores = [Double]()
         switch whichText {
         case .content:
+            for note in notes.enumerated() {
+                if dataPointType == .note {
+                    if !changeContent && note.offset == index && dataPointType == .note { break }
+                    scores.append(0.0)
+                } else if let entitiesInNote = note.element.entities {
+                    scores.append(self.jaccardEntities(entitiesText1: entitiesInNewText, entitiesText2: entitiesInNote))
+                } else {
+                    scores.append(0.0)
+                }
+            }
             for page in pages.enumerated() {
-                if page.offset == index {
+                if page.offset == index  && dataPointType == .page {
                     if changeContent {
                         scores.append(0.0)
                     } else { break }
@@ -342,8 +437,18 @@ public class Cluster {
                 } else { scores.append(0.0) }
             }
         case .title:
+            for note in notes.enumerated() {
+                if dataPointType == .note {
+                    if !changeContent && note.offset == index && dataPointType == .note { break }
+                    scores.append(0.0)
+                } else if let entitiesInNoteTitle = note.element.entitiesInTitle {
+                    scores.append(jaccardEntities(entitiesText1: entitiesInNewText, entitiesText2: entitiesInNoteTitle))
+                } else {
+                    scores.append(0.0)
+                }
+            }
             for page in pages.enumerated() {
-                if page.offset == index {
+                if page.offset == index && dataPointType == .page {
                     if changeContent {
                         scores.append(0.0)
                     } else { break }
@@ -355,6 +460,52 @@ public class Cluster {
         return scores
     }
 
+    func textualSimilarityProcess(index: Int, dataPointType: DataPoint, changeContent: Bool = false) throws {
+        var scores = [Double](repeating: 0.0, count: self.textualSimilarityMatrix.matrix.rows)
+        if dataPointType == .page {
+            scores = [Double](repeating: 0.0, count: max(self.notes.count, 0))
+            scores += [Double](repeating: 1.0, count: max(self.pages.count - 1, 0))
+            if changeContent {
+                scores.append(0.0)
+            }
+        } else {
+            scores = [Double](repeating: 0.0, count: max(self.notes.count - 1, 0))
+            scores += [Double](repeating: 1.0, count: max(self.pages.count, 0))
+            if changeContent {
+                scores.insert(1.0, at: 0)
+            }
+        }
+        var content: String?
+        switch dataPointType {
+        case .page:
+            content = pages[index].content
+        case .note:
+            content = notes[index].content
+        }
+        if let content = content,
+           let (textualEmbedding, language) = self.textualEmbeddingComputationWithNLEmbedding(text: content) {
+            scores = self.scoreTextualEmbedding(textualEmbedding: textualEmbedding, language: language, index: index, dataPointType: dataPointType, changeContent: changeContent)
+            switch dataPointType {
+            case .page:
+                pages[index].textEmbedding = textualEmbedding
+                pages[index].language = language
+            case .note:
+                notes[index].textEmbedding = textualEmbedding
+                notes[index].language = language
+            }
+        }
+        if changeContent {
+            var indexToChange = index
+            if dataPointType == .page {
+                indexToChange += self.notes.count
+            }
+            self.textualSimilarityMatrix.matrix[row: indexToChange] = scores
+            self.textualSimilarityMatrix.matrix[col: indexToChange] = scores
+        } else if self.pages.count + self.notes.count > 1 {
+            try self.textualSimilarityMatrix.addDataPoint(similarities: scores, type: dataPointType, numExistingNotes: max(self.notes.count - 1, 0), numExistingPages: self.pages.count)
+        }
+    }
+
     /// This function handles the entire textual similarity process:
     ///      - Compute the text embedding of the current page
     ///      - Compute the scores against all the other pages
@@ -363,44 +514,50 @@ public class Cluster {
     ///
     /// - Parameters:
     ///   - pageIndex: the ID of the current page to process
-    func textualSimilarityMatrixProcess(pageIndex: Int, changeContent: Bool = false) throws {
-        if let content = pages[pageIndex].content,
-           let (textualEmbedding, language) = self.textualEmbeddingComputationWithNLEmbedding(text: content) {
-                // if the OS is not good or the page content is not in English
-                // we create a vector of only 0.0 scores
-                let scores = self.scoreTextualEmbedding(textualEmbedding: textualEmbedding, language: language, index: pageIndex, changeContent: changeContent)
-            if changeContent {
-                self.textualSimilarityMatrix.matrix[row: pageIndex] = scores
-                self.textualSimilarityMatrix.matrix[col: pageIndex] = scores
-            } else {
-                try self.textualSimilarityMatrix.addPage(similarities: scores)
-            }
-            self.pages[pageIndex].textEmbedding = textualEmbedding
-            self.pages[pageIndex].language = language
-        } else  if !changeContent {
-            let scores = [Double](repeating: 1.0, count: self.textualSimilarityMatrix.matrix.rows)
-            try self.textualSimilarityMatrix.addPage(similarities: scores)
-        }
 
-    }
-
-    func entitiesProcess(pageIndex: Int, changeContent: Bool = false) throws {
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
+    func entitiesProcess(index: Int, dataPointType: DataPoint, changeContent: Bool = false) throws {
         var scores = [Double](repeating: 0.0, count: self.entitiesMatrix.matrix.rows)
-        if let content = pages[pageIndex].content {
-            let entitiesInNewText = findEntitiesInText(text: content)
-            scores = zip(scores, self.scoreEntitySimilarities(entitiesInNewText: entitiesInNewText, in: FindEntitiesIn.content, index: pageIndex, changeContent: changeContent)).map({ $0.0 + $0.1 })
-            self.pages[pageIndex].entities = entitiesInNewText
+        var content: String?
+        var title: String?
+        switch dataPointType {
+        case .page:
+            content = self.pages[index].content
+            title = self.pages[index].title
+        case .note:
+            content = self.notes[index].content
+            title = self.notes[index].title
         }
-        if let title = pages[pageIndex].title {
+        if let content = content {
+            let entitiesInNewText = self.findEntitiesInText(text: content)
+            scores = zip(scores, self.scoreEntitySimilarities(entitiesInNewText: entitiesInNewText, in: FindEntitiesIn.content, index: index, dataPointType: dataPointType, changeContent: changeContent)).map({ $0.0 + $0.1 })
+            switch dataPointType {
+            case .page:
+                pages[index].entities = entitiesInNewText
+            case .note:
+                notes[index].entities = entitiesInNewText
+            }
+        }
+        if let title = title {
             let entitiesInNewTitle = findEntitiesInText(text: title)
-            scores = zip(scores, self.scoreEntitySimilarities(entitiesInNewText: entitiesInNewTitle, in: FindEntitiesIn.title, index: pageIndex, changeContent: changeContent)).map({ min($0.0 + $0.1, 1.0) })
-            self.pages[pageIndex].entitiesInTitle = entitiesInNewTitle
+            scores = zip(scores, self.scoreEntitySimilarities(entitiesInNewText: entitiesInNewTitle, in: FindEntitiesIn.title, index: index, dataPointType: dataPointType, changeContent: changeContent)).map({ min($0.0 + $0.1, 1.0) })
+            switch dataPointType {
+            case .page:
+                pages[index].entitiesInTitle = entitiesInNewTitle
+            case .note:
+                notes[index].entitiesInTitle = entitiesInNewTitle
+            }
         }
+
         if changeContent {
-            self.entitiesMatrix.matrix[row: pageIndex] = scores
-            self.entitiesMatrix.matrix[col: pageIndex] = scores
-        } else {
-            try self.entitiesMatrix.addPage(similarities: scores)
+            var indexToChange = index
+            if dataPointType == .page {
+                indexToChange += self.notes.count
+            }
+            self.entitiesMatrix.matrix[row: indexToChange] = scores
+            self.entitiesMatrix.matrix[col: indexToChange] = scores
+        } else if self.pages.count + self.notes.count > 1 {
+            try self.entitiesMatrix.addDataPoint(similarities: scores, type: dataPointType, numExistingNotes: max(self.notes.count - 1, 0), numExistingPages: self.pages.count)
         }
     }
 
@@ -432,6 +589,11 @@ public class Cluster {
     func findPageInPages(pageID: UInt64) -> Int? {
         let pageIDs = self.pages.map({ $0.id })
         return pageIDs.firstIndex(of: pageID)
+    }
+
+    func findNoteInNotes(noteID: UUID) -> Int? {
+        let noteIDs = self.notes.map({ $0.id })
+        return noteIDs.firstIndex(of: noteID)
     }
 
     /// This function receives a matrix and binarises it - all values above the
@@ -487,7 +649,17 @@ public class Cluster {
             let navigationSigmoidMatrix = self.performSigmoidOn(matrix: self.navigationMatrix.matrix, middle: self.weights[.navigation] ?? 0.5, beta: self.beta)
             let textSigmoidMatrix = self.performSigmoidOn(matrix: self.textualSimilarityMatrix.matrix, middle: self.weights[.text] ?? 0.5, beta: self.beta)
             let entitySigmoidMatrix = self.performSigmoidOn(matrix: self.entitiesMatrix.matrix, middle: self.weights[.entities] ?? 0.5, beta: self.beta)
-            self.adjacencyMatrix = textSigmoidMatrix .* navigationSigmoidMatrix + entitySigmoidMatrix
+            let adjacencyForPages = textSigmoidMatrix .* navigationSigmoidMatrix + entitySigmoidMatrix
+            var finalAdjacency = adjacencyForPages
+
+            if self.notes.count > 0 {
+                let adjacencyForNotes = self.performSigmoidOn(matrix: self.textualSimilarityMatrix.matrix[0..<self.notes.count, 0..<self.textualSimilarityMatrix.matrix.cols] + self.entitiesMatrix.matrix[0..<self.notes.count, 0..<self.entitiesMatrix.matrix.cols], middle: 1, beta: self.beta)
+
+                finalAdjacency[0..<self.notes.count, 0..<finalAdjacency.cols] = adjacencyForNotes
+                finalAdjacency[0..<finalAdjacency.rows, 0..<self.notes.count] = adjacencyForNotes.T
+            }
+
+            self.adjacencyMatrix = finalAdjacency
         }
     }
 
@@ -497,14 +669,16 @@ public class Cluster {
         while pagesRemoved < 3 {
             if let pageToRemove = ranking.first {
                 if let pageIndexToRemove = self.findPageInPages(pageID: pageToRemove) {
-                    let adjacencyVector = self.adjacencyMatrix[row: pageIndexToRemove]
-                    if let pageIndexToAttach = adjacencyVector.firstIndex(of: max(adjacencyVector)) {
+                    let adjacencyVector = self.adjacencyMatrix[row: pageIndexToRemove + self.notes.count]
+                    if var pageIndexToAttach = adjacencyVector.firstIndex(of: max(adjacencyVector)) {
+                        // TODO: Make sure that it can't be a note. Or the opposite - attach to a note!
+                        pageIndexToAttach -= self.notes.count
                         pages[pageIndexToAttach].attachedPages.append(pageToRemove)
                         pages[pageIndexToAttach].attachedPages += pages[pageIndexToRemove].attachedPages
                     }
-                    try self.navigationMatrix.removePage(index: pageIndexToRemove)
-                    try self.textualSimilarityMatrix.removePage(index: pageIndexToRemove)
-                    try self.entitiesMatrix.removePage(index: pageIndexToRemove)
+                    try self.navigationMatrix.removePage(index: pageIndexToRemove + self.notes.count)
+                    try self.textualSimilarityMatrix.removePage(index: pageIndexToRemove + self.notes.count)
+                    try self.entitiesMatrix.removePage(index: pageIndexToRemove + self.notes.count)
                     self.pages.remove(at: pageIndexToRemove)
                     pagesRemoved += 1
                     ranking = Array(ranking.dropFirst())
@@ -532,9 +706,22 @@ public class Cluster {
         }
     }
 
-    // swiftlint:disable:next cyclomatic_complexity function_body_length
-    public func add(_ page: Page, ranking: [UInt64]?, replaceContent: Bool = false, completion: @escaping (Result<([[UInt64]], Bool), Error>) -> Void) {
+    // swiftlint:disable:next cyclomatic_complexity function_body_length large_tuple
+    public func add(page: Page? = nil, note: ClusteringNote? = nil, ranking: [UInt64]?, replaceContent: Bool = false, completion: @escaping (Result<(pageGroups: [[UInt64]], noteGroups: [[UUID]], sendRanking: Bool), Error>) -> Void) {
         myQueue.async {
+            // Check that we are adding exactly one object
+            if page != nil && note != nil {
+                completion(.failure(ClusteringError.moreThanOneObjectToAdd))
+                return
+            }
+            if page == nil && note == nil {
+                completion(.failure(ClusteringError.noObjectsToAdd))
+                return
+            }
+            var dataPointType: DataPoint = .note
+            if page != nil {
+                dataPointType = .page
+            }
             // If ranking is received, remove pages
             if let ranking = ranking {
                 do {
@@ -543,83 +730,82 @@ public class Cluster {
                     completion(.failure(error))
                 }
             }
-            // Check if this is the first page in the session
-            guard self.pages.count > 0 else {
-                self.pages.append(page)
-
-                if let content = self.pages[0].content {
-                    if let (textualEmbedding, language) = self.textualEmbeddingComputationWithNLEmbedding(text: content) {
-                        self.pages[0].textEmbedding = textualEmbedding
-                        self.pages[0].language = language
+            // PnS text addition (only available for pages)
+            if let page = page,
+               let id_index = self.findPageInPages(pageID: page.id) {
+                if replaceContent,
+                   let newContent = page.content {
+                    let totalContentTokenized = (newContent + " " + (self.pages[id_index].content ?? "")).split(separator: " ")
+                    if totalContentTokenized.count > 512 {
+                        self.pages[id_index].content = totalContentTokenized.dropLast(totalContentTokenized.count - 512).joined(separator: " ")
+                    } else {
+                        self.pages[id_index].content = totalContentTokenized.joined(separator: " ")
                     }
-
-                    self.pages[0].entities = self.findEntitiesInText(text: content)
-                }
-                if let title = self.pages[0].title {
-                    let preprocessedTitle = self.titlePreprocessing(of: title)
-                    self.pages[0].title = preprocessedTitle
-                    self.pages[0].entitiesInTitle = self.findEntitiesInText(text: preprocessedTitle)
-                }
-
-                let result: [[UInt64]] = [[self.pages[0].id]]
-                completion(.success((result, false)))
-                return
-            }
-            // PnS text addition
-            if replaceContent,
-               let id_index = self.findPageInPages(pageID: page.id),
-               let newContent = page.content {
-                let totalContentTokenized = (newContent + " " + (self.pages[id_index].content ?? "")).split(separator: " ")
-                if totalContentTokenized.count > 512 {
-                    self.pages[id_index].content = totalContentTokenized.dropLast(totalContentTokenized.count - 512).joined(separator: " ")
-                } else {
-                    self.pages[id_index].content = totalContentTokenized.joined(separator: " ")
-                }
+                    do {
+                        try self.textualSimilarityProcess(index: id_index, dataPointType: dataPointType, changeContent: true)
+                        try self.entitiesProcess(index: id_index, dataPointType: dataPointType, changeContent: true)
+                    } catch let error {
+                        completion(.failure(error))
+                    }
+            // Page exists, new parenting relation
+               }
+               if let myParent = page.parentId,
+               let parent_index = self.findPageInPages(pageID: myParent) {
+                self.navigationMatrix.matrix[id_index + self.notes.count, parent_index + self.notes.count] = 1.0
+                self.navigationMatrix.matrix[parent_index + self.notes.count, id_index + self.notes.count] = 1.0
+               }
+            // Updating existing note
+            } else if let note = note,
+                      let id_index = self.findNoteInNotes(noteID: note.id) {
                 do {
-                    try self.textualSimilarityMatrixProcess(pageIndex: id_index, changeContent: true)
-                    try self.entitiesProcess(pageIndex: id_index, changeContent: true)
+                    if let newContent = note.content {
+                        self.notes[id_index].content = newContent
+                    }
+                    if let newTitle = note.title {
+                        self.notes[id_index].title = self.titlePreprocessing(of: newTitle)
+                    }
+                    try self.textualSimilarityProcess(index: id_index, dataPointType: .note, changeContent: true)
+                    try self.entitiesProcess(index: id_index, dataPointType: .note, changeContent: true)
                 } catch let error {
                     completion(.failure(error))
                 }
-            // Page exists, new parenting relation
-            } else if let id_index = self.findPageInPages(pageID: page.id) {
-               if let myParent = page.parentId,
-               let parent_index = self.findPageInPages(pageID: myParent) {
-                    self.navigationMatrix.matrix[id_index, parent_index] = 1.0
-                    self.navigationMatrix.matrix[parent_index, id_index] = 1.0
-               }
-            // New page
+            // New page or note
             } else {
                 // If page was visited in the past and deleted, remove from
                 // deleted pages
-                self.removeFromDeleted(newPageID: page.id)
+                if let page = page {
+                    self.removeFromDeleted(newPageID: page.id)
+                }
                 // Navigation matrix computation
                 var navigationSimilarities = [Double](repeating: 0.0, count: self.adjacencyMatrix.rows)
 
-                if let myParent = page.parentId, let parent_index = self.findPageInPages(pageID: myParent) {
-                    navigationSimilarities[parent_index] = 1.0
+                if let page = page, let myParent = page.parentId, let parent_index = self.findPageInPages(pageID: myParent) {
+                    navigationSimilarities[parent_index + self.notes.count] = 1.0
                 }
+
                 do {
-                    try self.navigationMatrix.addPage(similarities: navigationSimilarities)
+                    try self.navigationMatrix.addDataPoint(similarities: navigationSimilarities, type: dataPointType, numExistingNotes: self.notes.count, numExistingPages: self.pages.count)
                 } catch let error {
                     completion(.failure(error))
                 }
 
-                let newPageIndex = self.pages.count
-                self.pages.append(page)
-                if let title = self.pages[newPageIndex].title {
-                    self.pages[newPageIndex].title = self.titlePreprocessing(of: title)
+                var newIndex = self.pages.count
+                if let page = page {
+                    self.pages.append(page)
+                    if let title = self.pages[newIndex].title {
+                        self.pages[newIndex].title = self.titlePreprocessing(of: title)
+                    }
+                } else if let note = note {
+                    newIndex = self.notes.count
+                    self.notes.append(note)
+                    if let title = self.notes[newIndex].title {
+                        self.notes[newIndex].title = self.titlePreprocessing(of: title)
+                    }
                 }
-                // Handle Text similarity matrix
+                // Handle Text similarity and entities
                 do {
-                    try self.textualSimilarityMatrixProcess(pageIndex: newPageIndex)
-                } catch let error {
-                    completion(.failure(error))
-                }
-
-                // Handle entitites
-                do {
-                    try self.entitiesProcess(pageIndex: newPageIndex)
+                    try self.textualSimilarityProcess(index: newIndex, dataPointType: dataPointType)
+                    try self.entitiesProcess(index: newIndex, dataPointType: dataPointType)
                 } catch let error {
                     completion(.failure(error))
                 }
@@ -636,13 +822,13 @@ public class Cluster {
             }
             let clusteringTime = CFAbsoluteTimeGetCurrent() - start
             let stablizedClusters = self.stabilize(predictedClusters)
-            let result = self.clusterizeIDs(labels: stablizedClusters)
+            let (resultPages, resultNotes) = self.clusterizeIDs(labels: stablizedClusters)
 
             DispatchQueue.main.async {
                 if clusteringTime > self.timeToRemove {
-                    completion(.success((result, true)))
+                    completion(.success((pageGroups: resultPages, noteGroups: resultNotes, sendRanking: true)))
                 } else {
-                    completion(.success((result, false)))
+                    completion(.success((pageGroups: resultPages, noteGroups: resultNotes, sendRanking: false)))
                 }
             }
         }
@@ -664,22 +850,31 @@ public class Cluster {
         return newClusters
     }
 
-    private func clusterizeIDs(labels: [Int]) -> [[UInt64]] {
-        guard self.pages.count > 0 else {
-            return [[UInt64]]()
-        }
-        var nextCluster = 0
-        var clusterized = [[UInt64]]()
-        for label in labels.enumerated() {
-            if label.element < nextCluster {
-                clusterized[label.element].append(self.pages[label.offset].id)
-                clusterized[label.element] += self.pages[label.offset].attachedPages
-            } else {
-                clusterized.append([self.pages[label.offset].id] + self.pages[label.offset].attachedPages)
-                nextCluster += 1
+    private func clusterizeIDs(labels: [Int]) -> ([[UInt64]], [[UUID]]) {
+        guard self.notes.count + self.pages.count > 0 else { return ([[UInt64]](), [[UUID]]())}
+
+        var clusterizedPages = [[UInt64]]()
+        if self.pages.count > 0 {
+            for _ in 0...(labels.max() ?? 0) {
+                clusterizedPages.append([UInt64]())
             }
         }
-        return clusterized
+        var clusterizedNotes = [[UUID]]()
+        if self.notes.count > 0 {
+            for _ in 0...(labels.max() ?? 0) {
+                clusterizedNotes.append([UUID]())
+            }
+        }
+
+        for label in labels.enumerated() {
+            if label.offset < self.notes.count {
+                clusterizedNotes[label.element].append(self.notes[label.offset].id)
+            } else {
+                clusterizedPages[label.element].append(self.pages[label.offset - self.notes.count].id)
+                clusterizedPages[label.element] += self.pages[label.offset - self.notes.count].attachedPages
+            }
+        }
+        return (clusterizedPages, clusterizedNotes)
     }
 
     func performCandidateChange() throws {
@@ -700,7 +895,8 @@ public class Cluster {
             throw CandidateError.unknownCandidate
         }
     }
-    public func changeCandidate(to candidate: Int?, with weightNavigation: Double?, with weightText: Double?, with weightEntities: Double?, completion: @escaping (Result<([[UInt64]], Bool), Error>) -> Void) {
+    // swiftlint:disable:next large_tuple
+    public func changeCandidate(to candidate: Int?, with weightNavigation: Double?, with weightText: Double?, with weightEntities: Double?, completion: @escaping (Result<(pageGroups: [[UInt64]], noteGroups: [[UUID]], sendRanking: Bool), Error>) -> Void) {
         myQueue.async {
             // If ranking is received, remove pages
             self.candidate = candidate ?? self.candidate
@@ -721,10 +917,10 @@ public class Cluster {
                 completion(.failure(error))
             }
             let stablizedClusters = self.stabilize(predictedClusters)
-            let result = self.clusterizeIDs(labels: stablizedClusters)
+            let (resultPages, resultNotes) = self.clusterizeIDs(labels: stablizedClusters)
 
             DispatchQueue.main.async {
-                completion(.success((result, false)))
+                completion(.success((pageGroups: resultPages, noteGroups: resultNotes, sendRanking: false)))
             }
         }
     }

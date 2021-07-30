@@ -6,13 +6,21 @@ class BeamWebkitUIDelegateController: WebPageHolder, WKUIDelegate {
     func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
         guard let url = navigationAction.request.url else { return nil }
         if navigationAction.navigationType == .other {
-            let isNewWindow = windowFeatures.width?.intValue ?? 0 > 0 || windowFeatures.height?.intValue ?? 0 > 0
+            let defaultValue = true
+            let menubar = windowFeatures.menuBarVisibility?.boolValue ?? defaultValue
+            let statusBar = windowFeatures.statusBarVisibility?.boolValue ?? defaultValue
+            let toolBars = windowFeatures.toolbarsVisibility?.boolValue ?? defaultValue
+            let resizing = windowFeatures.allowsResizing?.boolValue ?? defaultValue
+            let isNewWindow = !toolBars
             if isNewWindow {
                 let numberOrNil: (NSNumber?) -> String = { $0?.stringValue ?? "nil" }
                 Logger.shared.logInfo("""
                                       Redirecting toward a new window x=\(numberOrNil(windowFeatures.x)), y=\(numberOrNil(windowFeatures.y)),
                                       width=\(numberOrNil(windowFeatures.width)), height=\(numberOrNil(windowFeatures.height)),
-                                      \(windowFeatures.allowsResizing != nil ? "resizable" : "not resizable")
+                                      \(windowFeatures.allowsResizing != nil ? "resizable" : "not resizable"),
+                                      menuBar=\(menubar),
+                                      statusBar=\(statusBar),
+                                      toolBars=\(toolBars),
                                       containing \(url.absoluteString)
                                       """, category: .web)
                 return page.createNewWindow(url, configuration, windowFeatures: windowFeatures, setCurrent: true)
@@ -96,6 +104,13 @@ class BeamWebkitUIDelegateController: WebPageHolder, WKUIDelegate {
 
     func webView(_ webView: WKWebView, runOpenPanelWith parameters: WKOpenPanelParameters, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping ([URL]?) -> Void) {
         Logger.shared.logDebug("webView runOpenPanel", category: .web)
-        completionHandler(nil)
+
+        let openPanel = NSOpenPanel()
+        openPanel.canChooseDirectories = parameters.allowsDirectories
+        openPanel.allowsMultipleSelection = parameters.allowsMultipleSelection
+        openPanel.canChooseFiles = true
+        let response = openPanel.runModal()
+        let choice = response == .OK ? openPanel.urls : nil
+        completionHandler(choice)
     }
 }

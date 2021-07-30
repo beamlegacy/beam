@@ -390,7 +390,7 @@ public extension CALayer {
         cardSideTitleLayer.foregroundColor = BeamColor.Generic.text.cgColor
         cardSideTitleLayer.font = BeamFont.semibold(size: 0).nsFont
         cardSideTitleLayer.fontSize = 15 // TODO: Change later (isBig ? 30 : 26)
-        cardSideTitleLayer.string = isBig ? cardNote.title : BeamDate.str(for: cardNote.creationDate, with: .short)
+        cardSideTitleLayer.string = isBig ? cardNote.title : BeamDate.journalNoteTitle(for: cardNote.creationDate, with: .short)
         cardSideTitleLayer.name = "cardSideTitleLayer"
 
         cardSideLayer.addSublayer(cardSideTitleLayer)
@@ -401,7 +401,7 @@ public extension CALayer {
 
     func updateSideLayer(_ rect: CGRect) {
         guard let cardNote = note as? BeamNote else { return }
-        cardSideTitleLayer.string = isBig ? cardNote.title : BeamDate.str(for: cardNote.creationDate, with: .short)
+        cardSideTitleLayer.string = isBig ? cardNote.title : BeamDate.journalNoteTitle(for: cardNote.creationDate, with: .short)
         let sideLayerPos = CGPoint(x: cardHeaderLayer.frame.origin.x - cardSideTitleLayer.preferredFrameSize().width - 46.5, y: topOffsetActual + cardTopSpace + sideLayerOffset)
         cardSideLayer.frame = CGRect(origin: sideLayerPos, size: NSSize(width: cardSideLayer.preferredFrameSize().width, height: cardSideLayer.preferredFrameSize().height))
         cardSideTitleLayer.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: NSSize(width: cardSideTitleLayer.preferredFrameSize().width, height: cardSideTitleLayer.preferredFrameSize().height))
@@ -474,7 +474,9 @@ public extension CALayer {
         defer { inputDetectorLastInput = string }
         guard preDetectInput(string) else { return }
         rootNode.insertText(string: string, replacementRange: replacementRange)
-        postDetectInput(string)
+        if let res = postDetectInput(string) {
+            rootNode.state.attributes.append(res)
+        }
         reBlink()
         updateInlineFormatterView(isKeyEvent: true)
         updatePopover()
@@ -608,18 +610,24 @@ public extension CALayer {
                     triggerCmdReturn(from: node)
                     return
                 }
+            case KeyCode.up.rawValue:
+                if command, rootNode.state.nodeSelection == nil,
+                   let node = rootNode.focusedWidget as? ElementNode, node.children.count > 0, node.open {
+                    toggleOpen(node)
+                    return
+                }
+            case KeyCode.down.rawValue:
+                if command, rootNode.state.nodeSelection == nil,
+                   let node = rootNode.focusedWidget as? ElementNode, node.children.count > 0, !node.open {
+                    toggleOpen(node)
+                    return
+                }
             default:
                 break
             }
 
             if let ch = event.charactersIgnoringModifiers {
                 switch ch.lowercased() {
-                case "1", "2":
-                    if command && option || shift && command && option {
-                        cancelPopover()
-                        toggleHeading(Int(ch) ?? 1)
-                        return
-                    }
                 case "[":
                     if command {
                         cancelPopover()
@@ -632,62 +640,9 @@ public extension CALayer {
                         rootNode.increaseIndentation()
                         return
                     }
-                case "b" :
-                    if command {
-                        cancelPopover()
-                        toggleBold()
-                        return
-                    }
-                case "c":
-                    if option && command {
-                        cancelPopover()
-                        toggleCode()
-                        return
-                    }
-                case "i":
-                    if command {
-                        cancelPopover()
-                        toggleEmphasis()
-                        return
-                    }
-                case "k":
-                    if shift && command {
-                        toggleBiDirectionalLink()
-                        return
-                    }
-
-                    if command {
-                        cancelPopover()
-                        toggleLink()
-                        return
-                    }
-                case "l":
-                    if shift && command {
-                        cancelPopover()
-                        toggleUnorderedAndOrderedList()
-                        return
-                    }
-                case "u":
-                    if shift && command {
-                        cancelPopover()
-                        toggleQuote()
-                        return
-                    }
-
-                    if command && rootNode.textIsSelected {
-                        toggleUnderline()
-                        return
-                    }
-                case "t":
-                    if option && command {
-                        cancelPopover()
-                        toggleTodo()
-                        return
-                    }
-                case "y":
-                    if command {
-                        cancelPopover()
-                        toggleStrikeThrough()
+                case "a":
+                    if command && shift {
+                        rootNode.selectAllNodes(force: true)
                         return
                     }
                 case "d":
@@ -715,6 +670,11 @@ public extension CALayer {
         }
 
         inputContext?.handleEvent(event)
+    }
+
+    private func toggleOpen(_ node: ElementNode) {
+        cancelPopover()
+        node.open.toggle()
     }
 
     private func triggerCmdReturn(from node: TextNode) {

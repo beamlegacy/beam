@@ -31,8 +31,7 @@ public class TextNode: ElementNode {
     var fontSize: CGFloat {
         switch elementKind {
         case .heading(let level):
-            let l = min(1, max(level, 2))
-            return [21, 18][l - 1]
+            return [21, 18][level - 1]
         default:
             return 15
         }

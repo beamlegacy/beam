@@ -262,7 +262,6 @@ extension GRDBDatabase {
 
     // MARK: - SearchResult (BeamElement/BeamNote)
 
-    @available(*, deprecated, message: "redundant with BeamElementRecord")
     struct SearchResult {
         var title: String
         var noteId: UUID
@@ -547,6 +546,10 @@ extension GRDBDatabase {
         } catch {
             Logger.shared.logError("Couldn't update url long term score for \(urlId)", category: .database)
         }
+    }
+
+    func getManyLongTermUrlScore(urlIds: [UInt64]) -> [LongTermUrlScore] {
+        return (try? dbReader.read { db in try LongTermUrlScore.fetchAll(db, ids: urlIds) }) ?? []
     }
 }
 

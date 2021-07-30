@@ -57,11 +57,22 @@ class LongTermUrlScoreStoreTests: XCTestCase {
         db.updateLongTermUrlScore(urlId: otherUrlId) { $0.lastCreationDate = otherDate }
         score = try XCTUnwrap(db.getLongTermUrlScore(urlId: urlId))
         XCTAssertEqual(fetchedDate.timeIntervalSince1970, date.timeIntervalSince1970, accuracy: 1.0/1000.0)
-
-
-
-
-        
     }
-
+    
+    func testGetMany() {
+        let db = GRDBDatabase.empty()
+        //fetching works for an empty list
+        XCTAssertEqual(db.getManyLongTermUrlScore(urlIds: []).count, 0)
+        
+        let idsToInsert: [UInt64] = [0, 1, 3]
+        let idsToFetch: [UInt64] = [1, 3, 7]
+        //no score are fetched prior insertion
+        XCTAssertEqual(db.getManyLongTermUrlScore(urlIds: idsToFetch).count, 0)
+        for id in idsToInsert {
+            db.updateLongTermUrlScore(urlId: id) { $0.lastCreationDate = Date() }
+        }
+        //2 of requested score ids were inserted prior fetch
+        let fetchedScores = db.getManyLongTermUrlScore(urlIds: idsToFetch)
+        XCTAssertEqual(fetchedScores.count, 2)
+    }
 }

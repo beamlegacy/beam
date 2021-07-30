@@ -7,6 +7,8 @@
 
 import Foundation
 
+private let HALF_LIFE = Float(30.0 * 24.0 * 60.0 * 60.0)
+
 public class LongTermUrlScore: Codable {
     public enum CodingKeys: String, CodingKey {
         case urlId
@@ -33,8 +35,19 @@ public class LongTermUrlScore: Codable {
     public init(urlId: UInt64) {
         self.urlId = urlId
     }
+
+    func score(date: Date = Date()) -> Float {
+        guard let lastCreationDate = lastCreationDate else { return 0 }
+        let timeSinceLastCreation = Float(date.timeIntervalSince(lastCreationDate))
+        return scrollRatioY
+            + log(1 + Float(readingTimeToLastEvent))
+            + log(1 + Float(textAmount))
+            + log(1 + Float(textSelections))
+            + logTimeDecay(duration: timeSinceLastCreation, halfLife: HALF_LIFE)
+    }
 }
 
 public protocol LongTermUrlScoreStoreProtocol {
     func apply(to urlId: UInt64, changes: (LongTermUrlScore) -> Void)
+    func getMany(urlIds: [UInt64]) -> [LongTermUrlScore]
 }

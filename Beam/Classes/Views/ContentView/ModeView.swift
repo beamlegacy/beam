@@ -30,10 +30,7 @@ struct ModeView: View {
                         TabStats(score: score)
                     }
                     if let pns = tab.pointAndShoot {
-                        PointFrame(pns: pns, webPositions: pns.webPositions)
-                        ShootFrame(pns: pns)
-                        CollectedFrames(pns: pns)
-                        ShootConfirmationView(pns: pns)
+                        PointAndShootView(pns: pns)
                     }
                 }.clipped()
             }

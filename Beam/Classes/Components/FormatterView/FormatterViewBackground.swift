@@ -10,7 +10,7 @@ import SwiftUI
 struct FormatterViewBackground<Content: View>: View {
 
     var shadowOpacity: Double? = 1
-    var content: () -> Content
+    var content: (() -> Content)?
 
     private let boxCornerRadius: CGFloat = 6
 
@@ -35,9 +35,10 @@ struct FormatterViewBackground<Content: View>: View {
             RoundedRectangle(cornerRadius: boxCornerRadius)
                 .fill(backgroundColor)
                 .shadow(color: shadowColor, radius: shadowRadius, x: 0.0, y: shadowOffsetY)
-            content()
+            content?()
                 .cornerRadius(boxCornerRadius)
                 .clipped()
         }
+        .onTapGesture { /* stop any click propagation */ }
     }
 }

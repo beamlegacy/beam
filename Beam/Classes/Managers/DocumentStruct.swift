@@ -22,6 +22,7 @@ struct DocumentStruct: BeamObjectProtocol {
         get { id }
         set { id = newValue }
     }
+    var journalDate: String?
 
     var uuidString: String {
         id.uuidString.lowercased()
@@ -38,6 +39,7 @@ struct DocumentStruct: BeamObjectProtocol {
         case data
         case documentType
         case isPublic
+        case journalDate
     }
 
     mutating func clearPreviousData() {
@@ -78,6 +80,7 @@ extension DocumentStruct {
         self.isPublic = document.is_public
         self.databaseId = document.database_id
         self.beamObjectPreviousChecksum = document.beam_object_previous_checksum
+        self.journalDate = document.journal_date
     }
 
     func asApiType() -> DocumentAPIType {

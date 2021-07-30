@@ -375,6 +375,7 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
 
     open weak var parent: BeamElement? {
         didSet {
+            assert(parent !== self)
             checkHasParent()
         }
     }

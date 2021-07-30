@@ -156,14 +156,15 @@ public class DocumentManager: NSObject {
         return result
     }
 
-    func allDocumentsTitles() -> [String] {
+    func allDocumentsTitles(includeDeletedNotes: Bool) -> [String] {
+        let predicate = includeDeletedNotes ? nil : NSPredicate(format: "deleted_at == nil")
         if Thread.isMainThread {
-            return Document.fetchAllNames(mainContext)
+            return Document.fetchAllNames(mainContext, predicate)
         } else {
             var result: [String] = []
             let context = coreDataManager.persistentContainer.newBackgroundContext()
             context.performAndWait {
-                result = Document.fetchAllNames(context)
+                result = Document.fetchAllNames(context, predicate)
             }
             return result
         }
@@ -302,7 +303,8 @@ public class DocumentManager: NSObject {
                        previousData: document.beam_api_data,
                        previousChecksum: document.beam_api_checksum,
                        version: document.version,
-                       isPublic: document.is_public
+                       isPublic: document.is_public,
+                       journalDate: document.journal_date
         )
     }
 
@@ -453,7 +455,8 @@ public class DocumentManager: NSObject {
             document.beam_api_data == documentApiType.data?.asData &&
             document.document_type == documentTypeInt &&
             document.deleted_at?.intValue == documentApiType.deletedAt?.intValue &&
-            document.id.uuidString.lowercased() == documentApiType.id
+            document.id.uuidString.lowercased() == documentApiType.id &&
+            documentApiType.journalDate == document.journal_date
     }
 
     private func isEqual(_ document: Document, to documentStruct: DocumentStruct) -> Bool {

@@ -1,5 +1,5 @@
 //
-//  ShootCardPicker.swift
+//  PointAndShootCardPicker.swift
 //  Beam
 //
 //  Created by Remi Santos on 07/04/2021.
@@ -9,7 +9,7 @@ import Foundation
 import BeamCore
 import SwiftUI
 
-struct ShootCardPicker: View {
+struct PointAndShootCardPicker: View {
     static let size = CGSize(width: 300, height: 80)
     private static let rowHeight: CGFloat = 24
 
@@ -199,7 +199,7 @@ struct ShootCardPicker: View {
     }
 }
 
-extension ShootCardPicker {
+extension PointAndShootCardPicker {
     func onComplete(perform action: @escaping (_ cardName: String?, _ note: String?) -> Void ) -> Self {
         var copy = self
         copy.onComplete = action
@@ -210,8 +210,7 @@ extension ShootCardPicker {
 struct ShootCardPicker_Previews: PreviewProvider {
     static let data = BeamData()
     static var previews: some View {
-        ShootCardPicker()
+        PointAndShootCardPicker()
             .environmentObject(data)
     }
 }
-

@@ -10,6 +10,70 @@ import Cocoa
 import BeamCore
 
 extension BeamTextEdit {
+    // MARK: - Shortcuts IBAction
+
+    @IBAction func toggleHeadingOneAction(_ sender: Any?) {
+        cancelPopover()
+        toggleHeading(1)
+    }
+
+    @IBAction func toggleHeadingTwoAction(_ sender: Any?) {
+        cancelPopover()
+        toggleHeading(2)
+    }
+
+    @IBAction func toggleBoldAction(_ sender: Any?) {
+        cancelPopover()
+        toggleBold()
+    }
+
+    @IBAction func toggleItalicAction(_ sender: Any?) {
+        cancelPopover()
+        toggleEmphasis()
+    }
+
+    @IBAction func toggleUnderlineAction(_ sender: Any?) {
+        cancelPopover()
+        toggleUnderline()
+    }
+
+    @IBAction func toggleStrikethroughAction(_ sender: Any?) {
+        cancelPopover()
+        toggleStrikeThrough()
+    }
+
+    @IBAction func toggleInsertLinkAction(_ sender: Any?) {
+        cancelPopover()
+        toggleLink()
+    }
+
+    @IBAction func toggleBidiLinkAction(_ sender: Any?) {
+        cancelPopover()
+        toggleBiDirectionalLink()
+    }
+
+    @IBAction func toggleListAction(_ sender: Any?) {
+        cancelPopover()
+        toggleUnorderedAndOrderedList()
+    }
+
+    @IBAction func toggleQuoteAction(_ sender: Any?) {
+        cancelPopover()
+        toggleQuote()
+    }
+
+    @IBAction func toggleTodoAction(_ sender: Any?) {
+        cancelPopover()
+        toggleTodo()
+    }
+
+    @IBAction func toggleCodeBlockAction(_ sender: Any?) {
+        cancelPopover()
+        toggleCode()
+
+    }
+
+    // MARK: - Shortcuts Functional
     internal func toggleHeading(_ level: Int) {
         updateFormatterView(with: level == 1 ? .h1 : .h2, kind: .heading(level))
     }
@@ -53,7 +117,7 @@ extension BeamTextEdit {
     }
 
     internal func toggleTodo() {
-        Logger.shared.logDebug("todo")
+        updateFormatterView(with: .checkmark)
     }
 
     internal func toggleCode() {

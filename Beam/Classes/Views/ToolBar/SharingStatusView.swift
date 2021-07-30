@@ -7,6 +7,7 @@
 
 import SwiftUI
 import BeamCore
+import Combine
 
 struct SharingStatusView: View {
 
@@ -25,7 +26,7 @@ struct SharingStatusView: View {
         case .unpublishing:
             return "Unpublishing..."
         default:
-            return note.isPublic ? "Published" : "Private"
+            return model.noteIsPublic ? "Published" : "Private"
         }
     }
 
@@ -39,7 +40,7 @@ struct SharingStatusView: View {
         case .unpublishing:
             return "status-unpublish"
         default:
-            return note.isPublic ? "editor-url_link" : "status-private"
+            return model.noteIsPublic ? "editor-url_link" : "status-private"
         }
     }
 
@@ -52,7 +53,7 @@ struct SharingStatusView: View {
     }
 
     private var shouldShowLinkButton: Bool {
-        note.isPublic == true && !model.isLoading
+        model.noteIsPublic == true && !model.isLoading
     }
 
     var body: some View {
@@ -79,17 +80,6 @@ struct SharingStatusView: View {
         }
         .padding(.horizontal, showLinkButton ? 7 : BeamSpacing._40)
         .fixedSize(horizontal: true, vertical: false)
-        .overlay(
-            VStack {
-                if let info = model.toastInformation {
-                    // TODO: Replace this with OverlayViewCenter once implemented
-                    // by password ui work (here https://gitlab.com/beamgroup/beam/-/merge_requests/547)
-                    SharingBannerInfo(text: info, icon: "tooltip-mark")
-                        .offset(x: 0, y: -32)
-                }
-            }
-            .animation(.easeInOut(duration: 0.15))
-        )
     }
 }
 
@@ -101,17 +91,25 @@ class SharingStatusViewModel: ObservableObject {
     }
 
     @ObservedObject var note: BeamNote
+    @Published fileprivate var noteIsPublic: Bool
+
+    private weak var state: BeamState?
     private var documentManager: DocumentManager
     private var sharingUtils: BeamNoteSharingUtils
 
-    init(note: BeamNote, documentManager: DocumentManager) {
+    private var scope = Set<AnyCancellable>()
+    init(note: BeamNote, state: BeamState, documentManager: DocumentManager) {
         self.note = note
+        self.noteIsPublic = note.isPublic
+        self.state = state
         self.documentManager = documentManager
         self.sharingUtils = BeamNoteSharingUtils(note: note)
+        note.$isPublic.sink { newValue in
+            self.noteIsPublic = newValue
+        }.store(in: &scope)
     }
 
     @Published var loadingState: LoadingState = .none
-    @Published var toastInformation: String?
     @Published var isCancelling: Bool = false
     @Published var isHovering: Bool = false
 
@@ -130,11 +128,11 @@ class SharingStatusViewModel: ObservableObject {
         }
         items.append(ContextMenuItem(title: note.isPublic ? "Unpublish" : "Publish", action: togglePublish))
         let menuView = ContextMenuFormatterView(items: items, direction: .top) {
-            ContextMenuPresenter.shared.dismissMenu()
+            CustomPopoverPresenter.shared.dismissMenu()
         }
         // Temporarily fixed position, will be replaced by a "toast" implementation
         let atPoint = CGPoint(x: 5, y: menuView.idealSize.height + 27)
-        ContextMenuPresenter.shared.presentMenu(menuView, atPoint: atPoint)
+        CustomPopoverPresenter.shared.presentMenu(menuView, atPoint: atPoint)
     }
 
     func cancelChange() {
@@ -152,16 +150,16 @@ class SharingStatusViewModel: ObservableObject {
 
     func copyLink() {
         sharingUtils.copyLinkToClipboard(completion: { [weak self] _ in
-            guard let self = self else { return }
-            self.toastInformation = "Link copied"
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                self.toastInformation = nil
-            }
+            self?.state?.overlayViewModel.present(text: "Link Copied", icon: "tooltip-mark", alignment: .bottomLeading)
         })
     }
 
     func togglePublish() {
         let isPublic = note.isPublic
+        guard isPublic || sharingUtils.canMakePublic else {
+            state?.overlayViewModel.present(text: "You need to be logged in", icon: "status-private", alignment: .bottomLeading)
+            return
+        }
         withAnimation {
             if isPublic {
                 loadingState = .unpublishing

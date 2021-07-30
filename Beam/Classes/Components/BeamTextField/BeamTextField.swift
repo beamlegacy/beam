@@ -74,7 +74,17 @@ struct BeamTextField: NSViewRepresentable {
 
         clearSelectionIfNeeded(textField, context: context)
 
-        DispatchQueue.main.async {
+        if selectedRange != context.coordinator.lastSelectedRange {
+            if let range = selectedRange {
+                let pos = Int(range.startIndex)
+                let len = Int(range.endIndex - range.startIndex)
+                updateSelectedRange(textField, range: NSRange(location: pos, length: len))
+            }
+            context.coordinator.lastSelectedRange = selectedRange
+        }
+
+        context.coordinator.firstResponderSetterBlock?.cancel()
+        let firstResponderSetterBlock = DispatchWorkItem {
             let coordinator = context.coordinator
             // Force focus on textField
             let isCurrentlyFirstResponder = textField.isFirstResponder
@@ -91,17 +101,9 @@ struct BeamTextField: NSViewRepresentable {
                 textField.invalidateIntrinsicContentSize()
             }
             coordinator.lastUpdateWasEditing = isEditing
-
-            // Set the selected range on the textField
-            if self.selectedRange != coordinator.lastSelectedRange {
-                if let range = self.selectedRange {
-                    let pos = Int(range.startIndex)
-                    let len = Int(range.endIndex - range.startIndex)
-                    self.updateSelectedRange(textField, range: NSRange(location: pos, length: len))
-                }
-                context.coordinator.lastSelectedRange = self.selectedRange
-            }
         }
+        context.coordinator.firstResponderSetterBlock = firstResponderSetterBlock
+        DispatchQueue.main.async(execute: firstResponderSetterBlock)
     }
 
     private func updateSelectedRange(_ textField: Self.NSViewType, range: NSRange) {
@@ -123,6 +125,7 @@ struct BeamTextField: NSViewRepresentable {
         var nextUpdateShouldClearSelection = false
         var lastUpdateWasEditing = false
         var lastSelectedRange: Range<Int>?
+        var firstResponderSetterBlock: DispatchWorkItem?
 
         init(_ textField: BeamTextField) {
             self.parent = textField

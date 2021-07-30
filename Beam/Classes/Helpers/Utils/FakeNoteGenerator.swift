@@ -37,6 +37,9 @@ class FakeNoteGenerator {
         let date = randomJournalDate
         let title = BeamNoteType.titleForDate(date)
         let note = BeamNote(title: title)
+        if date < Date() {
+            note.creationDate = date
+        }
         note.type = BeamNoteType.journalForDate(date)
         return note
     }

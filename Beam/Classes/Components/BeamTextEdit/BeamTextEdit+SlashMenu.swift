@@ -26,6 +26,7 @@ extension BeamTextEdit {
         case strikethrough
         case underline
         case internalLink
+        case date
     }
 
     public func showSlashFormatter() {
@@ -50,7 +51,7 @@ extension BeamTextEdit {
         let items = getSlashMenuItems()
         let menuView = ContextMenuFormatterView(items: items, handlesTyping: true)
         inlineFormatter = menuView
-        ContextMenuPresenter.shared.presentMenu(menuView, atPoint: atPoint, from: self, animated: false)
+        CustomPopoverPresenter.shared.presentMenu(menuView, atPoint: atPoint, from: self, animated: false)
 
         formatterTargetRange = targetRange
         formatterTargetNode = targetNode
@@ -66,7 +67,6 @@ extension BeamTextEdit {
               else { return }
         showOrHideInlineFormatter(isPresent: false)
 
-        showOrHideInlineFormatter(isPresent: false)
         node.cmdManager.beginGroup(with: "Slash Menu Formatting")
         let range = initialRange.lowerBound..<node.cursorPosition
         node.cmdManager.deleteText(in: node, for: range)
@@ -77,6 +77,8 @@ extension BeamTextEdit {
             insertDivider(in: node)
         case .internalLink:
             insertInternalLink(in: node, for: range)
+        case .date:
+            insertDate(in: node, for: range)
         default:
             break
         }
@@ -95,11 +97,12 @@ extension BeamTextEdit {
             ContextMenuItem(title: "Card Reference", subtitle: "@ or [[", icon: "field-card", action: { action(.internalLink) }),
             ContextMenuItem(title: "Todo", subtitle: "-[]", icon: "editor-task", action: { action(.task) }),
             ContextMenuItem(title: "Quote", subtitle: "\"", icon: "editor-format_quote", action: { action(.quote) }),
+            ContextMenuItem(title: "Date Picker", subtitle: "", icon: "editor-calendar", action: { action(.date) }),
             ContextMenuItem.separator(),
             ContextMenuItem(title: "Bold", subtitle: "*", action: { action(.bold) }),
             ContextMenuItem(title: "Italic", subtitle: "**", action: { action(.italic) }),
             ContextMenuItem(title: "Strikethrough", subtitle: "~~", action: { action(.strikethrough) }),
-            ContextMenuItem(title: "Underline", subtitle: "", action: { action(.underline) }),
+            ContextMenuItem(title: "Underline", subtitle: "_", action: { action(.underline) }),
             ContextMenuItem(title: "Heading 1", subtitle: "#", action: { action(.h1) }),
             ContextMenuItem(title: "Heading 2", subtitle: "##", action: { action(.h2) }),
             ContextMenuItem(title: "Text", subtitle: "-", action: { action(.text) }),
@@ -156,5 +159,80 @@ extension BeamTextEdit {
         node.cmdManager.insertText(BeamText(text: "@", attributes: [.internalLink(UUID.null)]), in: node, at: range.lowerBound)
         node.cmdManager.focusElement(node, cursorPosition: range.lowerBound + 1)
         showBidirectionalPopover(mode: .internalLink, prefix: 1, suffix: 0)
+    }
+
+}
+
+// MARK: - Date Picker
+extension BeamTextEdit {
+    private func insertDate(in node: TextNode, for range: Range<Int>) {
+        let placeholderDecoration: [NSAttributedString.Key: Any] = [
+            .foregroundColor: BeamColor.LightStoneGray.nsColor,
+            .boxBackgroundColor: BeamColor.Mercury.nsColor
+        ]
+        let placeholderText = BeamText(text: "@date ", attributes: [
+            BeamText.Attribute.decorated(AttributeDecoratedValueAttributedString(attributes: placeholderDecoration))
+        ])
+        node.root?.insertText(text: placeholderText, replacementRange: nil)
+        var editableRange = range.lowerBound..<range.lowerBound+placeholderText.count
+        var selectedDate: Date?
+
+        let calendarPicker = CalendarPickerFormatterView()
+        calendarPicker.onDateChange = { [weak node, weak self] date in
+            guard let node = node else { return }
+            selectedDate = date
+            let text = BeamDate.journalNoteTitle(for: date)
+            let dateText = BeamText(text: text, attributes: [.internalLink(UUID.null)])
+            node.root?.insertText(text: dateText, replacementRange: editableRange)
+            editableRange = editableRange.lowerBound..<(editableRange.lowerBound+dateText.count)
+            node.focus(position: editableRange.upperBound)
+            self?.hideInlineFormatter()
+        }
+        calendarPicker.onDismiss = { [weak node, weak self] _ in
+            guard let node = node else { return }
+            self?.onFinishPickingDate(selectedDate, in: node, for: editableRange, placeholderText: placeholderText)
+        }
+        inlineFormatter = calendarPicker
+        setupInlineFormatterView(calendarPicker)
+        moveInlineFormatterAtSelection(below: true)
+        node.focus(position: editableRange.upperBound - 1)
+        DispatchQueue.main.async {
+            self.showOrHideInlineFormatter(isPresent: true)
+        }
+    }
+
+    private func onFinishPickingDate(_ date: Date?, in node: TextNode, for range: Range<Int>, placeholderText: BeamText) {
+        guard let date = date else {
+            cleanupDatePickerPlaceholder(in: node, for: range, placeholderText: placeholderText)
+            return
+        }
+        let title = BeamDate.journalNoteTitle(for: date)
+        let note = BeamNote.fetchOrCreateJournalNote(documentManager, date: date)
+        let dateText = BeamText(text: title, attributes: [.internalLink(note.id)])
+        node.cmdManager.replaceText(in: node, for: range, with: dateText)
+    }
+
+    private func cleanupDatePickerPlaceholder(in node: TextNode, for range: Range<Int>, placeholderText: BeamText) {
+        let decoAttribute = placeholderText.ranges.first?.attributes.first
+        var rangesToDelete = [BeamText.Range]()
+        var rangesToClean = [BeamText.Range]()
+        node.cmdManager.beginGroup(with: "DatePicker cancel")
+        let decoRanges = node.text.ranges.filter { $0.attributes.first?.rawValue == decoAttribute?.rawValue }
+        decoRanges.forEach { r in
+            if decoRanges.count == 1 || r.position >= range.lowerBound && r.end < range.upperBound {
+                rangesToDelete.append(r)
+            } else {
+                rangesToClean.append(r)
+            }
+        }
+        let cursorPosition = max(0, node.cursorPosition - (placeholderText.count - 1))
+        rangesToClean.forEach { r in
+            node.cmdManager.formatText(in: node, for: nil, with: r.attributes.first, for: r.position..<r.end, isActive: true)
+        }
+        rangesToDelete.forEach { r in
+            node.cmdManager.deleteText(in: node, for: r.position..<r.end)
+        }
+        node.focus(position: cursorPosition)
+        node.cmdManager.endGroup()
     }
 }

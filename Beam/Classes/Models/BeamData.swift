@@ -8,6 +8,8 @@
 import Foundation
 import Combine
 import BeamCore
+import AutoUpdate
+import ZIPFoundation
 
 public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var _todaysNote: BeamNote?
@@ -42,40 +44,47 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var scope = Set<AnyCancellable>()
     var browsingTreeSender: BrowsingTreeSender?
 
+    var versionChecker: VersionChecker
+
     static func dataFolder(fileName: String) -> String {
         let paths = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)
 
         var name = "BeamData-\(Configuration.env)"
-         if let jobId = ProcessInfo.processInfo.environment["CI_JOB_ID"] {
+        if let jobId = ProcessInfo.processInfo.environment["CI_JOB_ID"] {
             Logger.shared.logDebug("Using Gitlab CI Job ID for dataFolder: \(jobId)", category: .general)
             name += "-\(jobId)"
-         }
+        }
 
-         guard let directory = paths.first else {
-             // Never supposed to happen
-             return "~/Application Data/BeamApp/"
-         }
+        guard let directory = paths.first else {
+            // Never supposed to happen
+            return "~/Application Data/BeamApp/"
+        }
 
-         let localDirectory = directory + "/Beam" + "/\(name)/"
+        let localDirectory = directory + "/Beam" + "/\(name)/"
+        
+        var destinationName = fileName
+        if destinationName.hasPrefix("Beam/") {
+            destinationName.removeFirst(5)
+        }
 
-         do {
-             try FileManager.default.createDirectory(atPath: localDirectory,
-                                                     withIntermediateDirectories: true,
-                                                     attributes: nil)
+        do {
+            try FileManager.default.createDirectory(atPath: localDirectory,
+                                                    withIntermediateDirectories: true,
+                                                    attributes: nil)
 
             if FileManager.default.fileExists(atPath: directory + "/\(fileName)") {
                 do {
-                    try FileManager.default.moveItem(atPath: directory + "/\(fileName)", toPath: localDirectory + fileName)
+                    try FileManager.default.moveItem(atPath: directory + "/\(fileName)", toPath: localDirectory + destinationName)
                 } catch {
                     Logger.shared.logError("Unable to move item \(fileName) \(directory) to \(localDirectory): \(error)", category: .general)
                 }
             }
-             return localDirectory + fileName
-         } catch {
-             // Does not generate error if directory already exist
-             return directory + fileName
-         }
-     }
+            return localDirectory + destinationName
+        } catch {
+            // Does not generate error if directory already exist
+            return directory + destinationName
+        }
+    }
 
     static var indexPath: URL { URL(fileURLWithPath: dataFolder(fileName: "index.beamindex")) }
     static var fileDBPath: String { dataFolder(fileName: "files.db") }
@@ -85,8 +94,8 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
 
     //swiftlint:disable:next function_body_length
     override init() {
-        clusteringManager = ClusteringManager(ranker: sessionLinkRanker, candidate: 2, navigation: 0.5, text: 0.8, entities: 0.3)
         documentManager = DocumentManager()
+        clusteringManager = ClusteringManager(ranker: sessionLinkRanker, documentManager: documentManager, candidate: 2, navigation: 0.5, text: 0.8, entities: 0.3)
         noteAutoSaveService = NoteAutoSaveService()
         linkManager = LinkManager()
         passwordsDB = PasswordsManager().passwordsDB
@@ -106,11 +115,20 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         }
 
         cookies = HTTPCookieStorage()
+
+        if let feed = URL(string: Configuration.updateFeedURL) {
+            self.versionChecker = VersionChecker(feedURL: feed, autocheckEnabled: true)
+        } else {
+            self.versionChecker = VersionChecker(mockedReleases: AppRelease.mockedReleases(), autocheckEnabled: true)
+        }
+        self.versionChecker.allowAutoDownload = PreferencesManager.isAutoUpdateOn
+
         let treeConfig = BrowsingTreeSenderConfig(
             dataStoreUrl: EnvironmentVariables.BrowsingTree.url,
             dataStoreApiToken: EnvironmentVariables.BrowsingTree.accessToken
         )
         browsingTreeSender = BrowsingTreeSender(config: treeConfig)
+
         super.init()
 
         BeamNote.idForNoteNamed = { title in
@@ -137,6 +155,10 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
 
         updateNoteCount()
         setupSubscribers()
+
+        self.versionChecker.customPreinstall = {
+            self.backup()
+        }
     }
 
     // swiftlint:disable:next function_body_length
@@ -144,6 +166,12 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         $lastChangedElement.sink { element in
             guard let element = element else { return }
             try? GRDBDatabase.shared.append(element: element)
+            if let note = element.note,
+               note.type == .note,
+               let changed = note.changed?.1,
+               changed == .text {
+                self.clusteringManager.addNote(note: note)
+            }
         }.store(in: &scope)
 
         $tabToIndex.sink { [weak self] tabToIndex in
@@ -203,22 +231,14 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     }
 
     var todaysName: String {
-        let fmt = DateFormatter()
         let today = Date()
-        fmt.dateStyle = .long
-        fmt.doesRelativeDateFormatting = false
-        fmt.timeStyle = .none
-        return fmt.string(from: today)
+        return BeamDate.journalNoteTitle(for: today)
     }
 
     func setupJournal() {
-        _todaysNote = BeamNote.fetchOrCreate(documentManager, title: todaysName)
-        if let today = _todaysNote {
-            if !today.type.isJournal {
-                today.type = BeamNoteType.todaysJournal
-            }
-            journal.append(today)
-        }
+        let note  = BeamNote.fetchOrCreateJournalNote(documentManager, date: Date())
+        journal.append(note)
+        _todaysNote = note
 
         updateJournal(with: 2, and: journal.count)
     }
@@ -255,6 +275,23 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         }
 
         webView.configuration.websiteDataStore.httpCookieStore.add(self)
+    }
+
+    ///Create a .zip backup of all the content of the BeamData folder in Beam sandbox
+    private func backup() {
+        let fileManager = FileManager.default
+
+        guard PreferencesManager.isDataBackupOnUpdateOn else { return }
+
+        let downloadFolder = fileManager.urls(for: .downloadsDirectory, in: .userDomainMask).first!
+        var archiveName = "Beam data archive"
+
+        if let infos = Bundle.main.infoDictionary, let name = infos["CFBundleName"] as? String,
+           let version = infos["CFBundleShortVersionString"] as? String, let build = infos["CFBundleVersion"] as? String {
+            archiveName = "\(name) v.\(version)_\(build) data backup"
+        }
+
+        try? fileManager.zipItem(at: URL(fileURLWithPath: Self.dataFolder(fileName: "")), to: downloadFolder.appendingPathComponent("\(archiveName).zip"), compressionMethod: .deflate)
     }
 }
 

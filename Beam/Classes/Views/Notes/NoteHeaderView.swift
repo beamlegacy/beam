@@ -10,6 +10,7 @@ import BeamCore
 
 struct NoteHeaderView: View {
 
+    private static let leadingPadding: CGFloat = 12
     static let topPadding: CGFloat = 120
     @ObservedObject var model: NoteHeaderView.ViewModel
 
@@ -87,7 +88,7 @@ struct NoteHeaderView: View {
 
     var body: some View {
         HStack {
-            VStack(alignment: .leading, spacing: BeamSpacing._60) {
+            VStack(alignment: .leading, spacing: BeamSpacing._40) {
                 dateView
                 HStack {
                     titleView
@@ -104,13 +105,14 @@ struct NoteHeaderView: View {
             }
         }
         .padding(.top, Self.topPadding)
-        .padding(.leading, 20)
+        .padding(.leading, Self.leadingPadding)
     }
 }
 
 extension NoteHeaderView {
     class ViewModel: ObservableObject {
         @Published var note: BeamNote
+        private weak var state: BeamState?
 
         @Published fileprivate var titleText: String
         @Published fileprivate var titleSelectedRange: Range<Int>?
@@ -124,8 +126,9 @@ extension NoteHeaderView {
             !note.type.isJournal
         }
 
-        init(note: BeamNote, documentManager: DocumentManager) {
+        init(note: BeamNote, state: BeamState? = nil, documentManager: DocumentManager) {
             self.note = note
+            self.state = state
             self.documentManager = documentManager
             self.titleText = note.title
         }
@@ -172,31 +175,28 @@ extension NoteHeaderView {
             let isNotePublic = note.isPublic
             if isNotePublic {
                 items.append(contentsOf: [
-                    ContextMenuItem(title: "Copy Link", action: nil),
+                    ContextMenuItem(title: "Copy Link", action: copyLink),
                     ContextMenuItem(title: "Invite...", action: nil),
                     ContextMenuItem.separator()
                 ])
             }
-            items.append(ContextMenuItem(title: isNotePublic ? "Unpublish" : "Publish", action: nil))
-            var thirdGroup = [
-                ContextMenuItem.separator(),
-                ContextMenuItem(title: "Favorite", action: nil),
-                ContextMenuItem(title: "Export", action: nil)
-            ]
+            items.append(contentsOf: [
+                ContextMenuItem(title: isNotePublic ? "Unpublish" : "Publish", action: togglePublish),
+                ContextMenuItem.separator()
+            ])
             if canEditTitle {
-                thirdGroup.insert(ContextMenuItem(title: "Rename", action: focusTitle), at: 1)
+                items.append(ContextMenuItem(title: "Rename", action: focusTitle))
             }
-            items.append(contentsOf: thirdGroup)
 
             items.append(contentsOf: [
                 ContextMenuItem.separator(),
-                ContextMenuItem(title: "Delete", action: nil)
+                ContextMenuItem(title: "Delete", action: onDelete)
             ])
 
             let menuView = ContextMenuFormatterView(items: items, direction: .bottom) {
-                ContextMenuPresenter.shared.dismissMenu()
+                CustomPopoverPresenter.shared.dismissMenu()
             }
-            ContextMenuPresenter.shared.presentMenu(menuView, atPoint: at)
+            CustomPopoverPresenter.shared.presentMenu(menuView, atPoint: at)
         }
 
         func onTap() {
@@ -213,6 +213,42 @@ extension NoteHeaderView {
             guard canEditTitle else { return }
             titleSelectedRange = titleText.wholeRange
             isEditingTitle = true
+        }
+
+        private func copyLink() {
+            let sharingUtils = BeamNoteSharingUtils(note: note)
+            sharingUtils.copyLinkToClipboard { [weak self] _ in
+                self?.state?.overlayViewModel.present(text: "Link Copied", icon: "tooltip-mark", alignment: .bottomLeading)
+            }
+        }
+
+        private func togglePublish() {
+            let sharingUtils = BeamNoteSharingUtils(note: note)
+            let isPublic = note.isPublic
+            guard isPublic || sharingUtils.canMakePublic else {
+                state?.overlayViewModel.present(text: "You need to be logged in", icon: "status-private", alignment: .bottomLeading)
+                return
+            }
+            sharingUtils.makeNotePublic(!isPublic, documentManager: documentManager) { [weak self] _ in
+                if self?.note.isPublic == true {
+                    self?.copyLink()
+                }
+            }
+        }
+
+        private func onDelete() {
+            let cmdManager = CommandManagerAsync<DocumentManager>()
+            cmdManager.deleteDocuments(ids: [note.id], in: documentManager)
+            guard let state = state else { return }
+            DispatchQueue.main.async {
+                if state.canGoBack {
+                    state.goBack()
+                } else {
+                    state.navigateToJournal(note: nil)
+                }
+                state.backForwardList.clearForward()
+                state.updateCanGoBackForward()
+            }
         }
     }
 }

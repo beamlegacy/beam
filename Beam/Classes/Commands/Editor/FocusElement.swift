@@ -73,9 +73,9 @@ extension CommandManager where Context == Widget {
         return run(command: cmd, on: node)
     }
 
-    func focus(_ element: BeamElement, in node: ElementNode) {
+    func focus(_ element: BeamElement, in node: ElementNode, leading: Bool = false) {
         if let toFocus = node.nodeFor(element) {
-            focusElement(toFocus, cursorPosition: element.text.count)
+            focusElement(toFocus, cursorPosition: leading ? 0 : element.text.count)
         }
     }
 }

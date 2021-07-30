@@ -60,24 +60,48 @@ struct ClusterContentView: View {
 
     var body: some View {
         ForEach(0..<clusteringManager.clusteredTabs.count, id: \.self) { clusterGroupIdx in
-            let clusterGroup = clusteringManager.clusteredTabs[clusterGroupIdx]
-            VStack(alignment: .leading) {
-                ForEach(0..<clusterGroup.count, id: \.self) { clusteredTabIdx in
-                    if let tab = clusterGroup[clusteredTabIdx] {
-                        TabView(tabInfo: tab)
-                            .padding(.bottom, clusteredTabIdx == clusterGroup.count - 1 ? 0 : 10)
+            if clusteringManager.clusteredNotes.count > clusterGroupIdx {
+                VStack(alignment: .leading) {
+                    let clusterNoteGroup = clusteringManager.clusteredNotes[clusterGroupIdx]
+                    if !clusterNoteGroup.isEmpty {
+                        Text("Cards:")
+                            .font(BeamFont.medium(size: 13).swiftUI)
+                            .foregroundColor(BeamColor.Generic.text.swiftUI)
+                        ForEach(0..<clusterNoteGroup.count, id: \.self) { clusteredNoteIdx in
+                            if let noteName = clusterNoteGroup[clusteredNoteIdx] {
+                                NoteRowView(noteName: noteName)
+                                    .padding(.bottom, clusteredNoteIdx == clusterNoteGroup.count - 1 ? 0 : 10)
+                            }
+                        }
+                    }
+                }.padding(.bottom, 5)
+            }
+
+            let clusterTabGroup = clusteringManager.clusteredTabs[clusterGroupIdx]
+            if !clusterTabGroup.isEmpty {
+                VStack(alignment: .leading) {
+                    Text("Tabs:")
+                        .font(BeamFont.medium(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.text.swiftUI)
+                    ForEach(0..<clusterTabGroup.count, id: \.self) { clusteredTabIdx in
+                        if let tab = clusterTabGroup[clusteredTabIdx] {
+                            TabRowView(tabInfo: tab)
+                                .padding(.bottom, clusteredTabIdx == clusterTabGroup.count - 1 ? 0 : 10)
+                        }
                     }
                 }
             }
+
             if clusterGroupIdx != clusteringManager.clusteredTabs.count - 1 {
                 Separator(horizontal: true, hairline: false)
                     .padding([.top, .bottom], 21.5)
             }
         }
     }
+
 }
 
-struct TabView: View {
+struct TabRowView: View {
     var tabInfo: TabInformation
 
     var body: some View {
@@ -92,10 +116,30 @@ struct TabView: View {
     }
 }
 
-struct TabView_Previews: PreviewProvider {
+struct TabRowView_Previews: PreviewProvider {
     static var previews: some View {
         Text("Beam")
-        //        TabView(tabName: "Donald Trump - Wikipedia")
+    }
+}
+
+struct NoteRowView: View {
+    var noteName: String
+
+    var body: some View {
+        HStack {
+            Icon(name: "field-card", color: BeamColor.Generic.text.swiftUI)
+                .padding(.trailing, 4)
+            Text(noteName)
+                .font(BeamFont.medium(size: 11).swiftUI)
+                .foregroundColor(BeamColor.Generic.text.swiftUI)
+            Spacer()
+        }
+    }
+}
+
+struct NoteView_Previews: PreviewProvider {
+    static var previews: some View {
+        NoteRowView(noteName: "Kanye West")
     }
 }
 

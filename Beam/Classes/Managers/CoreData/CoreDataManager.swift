@@ -196,10 +196,8 @@ class CoreDataManager {
             name = "Beam-\(Configuration.env)-\(jobId)"
         }
 
-        let urls = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)
-        guard let directory = urls.first else { return nil }
-
-        return directory.appendingPathComponent("Beam/\(name).sqlite")
+        let coreDataFileName = BeamData.dataFolder(fileName: "Beam/\(name).sqlite")
+        return URL(fileURLWithPath: coreDataFileName)
     }
 
     lazy var persistentContainer: NSPersistentContainer! = {

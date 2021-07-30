@@ -19,6 +19,9 @@ class UrlScoresCollectionTest: XCTestCase {
             changes(score)
             data[urlId] = score
         }
+        func getMany(urlIds: [UInt64]) -> [LongTermUrlScore] {
+            return []
+        }
     }
     
     class FakeBeamWebViewConfiguration: BeamWebViewConfiguration {

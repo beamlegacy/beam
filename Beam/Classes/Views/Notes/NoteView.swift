@@ -25,8 +25,16 @@ struct NoteView: View {
     var scrollToElementId: UUID?
     var onScroll: ((CGPoint) -> Void)?
 
-    @State private var scrollOffset: CGPoint = .zero
     @State private var headerViewModel: NoteHeaderView.ViewModel?
+
+    var headerView: some View {
+        Group {
+            if let headerViewModel = headerViewModel {
+                NoteHeaderView(model: headerViewModel)
+                    .frame(maxWidth: BeamTextEdit.textWidth)
+            }
+        }.frame(maxWidth: .infinity)
+    }
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -49,28 +57,17 @@ struct NoteView: View {
                 onStartQuery: { textNode, animated in
                     state.startQuery(textNode, animated: animated)
                 },
-                onScroll: { scrollPoint in
-                    scrollOffset = scrollPoint
-                    onScroll?(scrollPoint)
-                },
+                onScroll: onScroll,
                 topOffset: NoteHeaderView.topPadding + 90,
                 footerHeight: 60,
                 leadingPercentage: leadingPercentage,
                 centerText: centerText,
                 showTitle: false,
-                scrollToElementId: scrollToElementId
+                scrollToElementId: scrollToElementId,
+                headerView: AnyView(headerView)
             )
             .accessibility(identifier: "noteView")
             .animation(nil)
-            if let headerViewModel = headerViewModel {
-                GeometryReader { reader in
-                    NoteHeaderView(model: headerViewModel)
-                        .frame(maxWidth: BeamTextEdit.textWidth)
-                        .offset(x: centerText ? -scrollOffset.x : (containerGeometry.frame(in: .global).width - BeamTextEdit.textWidth) * (leadingPercentage / 100) - reader.frame(in: .global).minX, y: -scrollOffset.y)
-                        .transition(.identity)
-                        .animation(nil)
-                }
-            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(BeamColor.Generic.background.swiftUI)
@@ -78,7 +75,7 @@ struct NoteView: View {
             // Ideally we could use @StateObject in NoteHeaderView to let it manage its model
             // But its macOS > 11. So the parent need to own the model.
             guard headerViewModel?.note != newNote else { return }
-            headerViewModel = NoteHeaderView.ViewModel(note: newNote, documentManager: state.data.documentManager)
+            headerViewModel = NoteHeaderView.ViewModel(note: newNote, state: state, documentManager: state.data.documentManager)
         }
     }
 }
