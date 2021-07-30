@@ -144,13 +144,20 @@ class AutocompleteManager: ObservableObject {
             // if the first result is compatible with autoselection, select the added string
             if i == 0, let completingText = result.completingText,
                isResultCandidateForAutoselection(result, forSearch: completingText) {
-                if result.source == .url {
+                if result.source == .url || result.source == .history {
                     if let resultTextDropped = resultText.dropBefore(substring: completingText) {
                         resultText = resultTextDropped
                     }
                 }
-                let newSelection = completingText.wholeRange.upperBound..<resultText.count
-                searchQuery = completingText + resultText.substring(range: newSelection)
+                let completingTextEnd = completingText.wholeRange.upperBound
+                let newSelection = completingTextEnd..<max(resultText.count, completingTextEnd)
+                guard newSelection.count > 0 else { return }
+
+                let resultPrefix = resultText.prefix(newSelection.lowerBound)
+                guard resultPrefix.lowercased() == completingText.lowercased() else { return }
+
+                let additionalText = resultText.substring(range: newSelection)
+                searchQuery = completingText + additionalText
                 searchQuerySelectedRange = newSelection
             } else {
                 searchQuery = resultText
