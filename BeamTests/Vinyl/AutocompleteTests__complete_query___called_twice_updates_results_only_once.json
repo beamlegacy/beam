@@ -1,27 +1,27 @@
 [
   {
     "request" : {
-      "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=green",
-      "method" : "GET"
+      "method" : "GET",
+      "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=green"
     },
     "response" : {
-      "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=green",
-      "headers" : {
-        "Server" : "gws",
-        "Alt-Svc" : "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000,h3-T051=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\"",
-        "x-frame-options" : "SAMEORIGIN",
-        "Expires" : "-1",
-        "Content-Disposition" : "attachment; filename=\"f.txt\"",
-        "Content-Type" : "text\/javascript; charset=ISO-8859-1",
-        "Content-Encoding" : "gzip",
-        "Cache-Control" : "no-cache, must-revalidate",
-        "x-xss-protection" : "0",
-        "Content-Length" : "152",
-        "Date" : "Fri, 30 Jul 2021 09:12:34 GMT",
-        "Pragma" : "no-cache"
-      },
       "status" : 200,
-      "body" : "[\"green\",[\"greenweez\",\"greenpeace\",\"green pass\",\"green pass italie\",\"greenwashing\",\"green book\",\"greengo\",\"greenflex\",\"greenhouse\",\"green farmers\"],[],{\"google:suggestsubtypes\":[[512,433],[512,433],[512,433,131],[433,131],[512],[512,433],[512,433],[512,433],[512],[512]]}]"
+      "body" : "[\"green\",[\"greenweez\",\"greenpeace\",\"green pass\",\"green pass italie\",\"greenwashing\",\"green book\",\"greengo\",\"greenflex\",\"greenhouse\",\"green farmers\"],[],{\"google:suggestsubtypes\":[[512,433],[512,433],[512,433,131],[433,131],[512],[512,433],[512,433],[512,433],[512],[512]]}]",
+      "headers" : {
+        "Date" : "Fri, 30 Jul 2021 13:44:33 GMT",
+        "Cache-Control" : "no-cache, must-revalidate",
+        "Content-Length" : "152",
+        "Alt-Svc" : "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000,h3-T051=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\"",
+        "Content-Disposition" : "attachment; filename=\"f.txt\"",
+        "x-frame-options" : "SAMEORIGIN",
+        "x-xss-protection" : "0",
+        "Server" : "gws",
+        "Content-Type" : "text\/javascript; charset=ISO-8859-1",
+        "Pragma" : "no-cache",
+        "Expires" : "-1",
+        "Content-Encoding" : "gzip"
+      },
+      "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=green"
     }
   }
 ]
