@@ -70,7 +70,7 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
     this.log("setWindow")
 
     win.addEventListener("mousemove", this.onMouseMove.bind(this))
-    win.addEventListener("click", this.onClick.bind(this))
+    win.addEventListener("click", this.onClick.bind(this), true)
     win.addEventListener("touchstart", this.onTouchstart.bind(this), false)
     win.addEventListener("touchend", this.onTouchend.bind(this), false)
     win.addEventListener("keydown", this.onKeyDown.bind(this), false)
@@ -177,7 +177,12 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
     this.mouseLocation.y = ev.clientY
   }
 
-  onClick(ev: BeamUIEvent): void {
+  onClick(ev: BeamUIEvent): void {    
+    if (this.isOnlyAltKey(ev)) {
+      ev.preventDefault()
+      ev.stopPropagation()
+    }
+
     if (!this.isPointDisabled(ev)) {
       this.shoot(ev.target)
     }
@@ -228,11 +233,17 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    * Helpers ==============================================================
    * ======================================================================
    */
+   
+   isOnlyAltKey(ev): boolean {
+     const altKey = ev.altKey || ev.key == "Alt"
+     return altKey && !ev.ctrlKey && !ev.metaKey && !ev.shiftKey
+   }
+ 
 
   upsertShootGroup(newItem: BeamShootGroup, groups: BeamShootGroup[]): void {
     // Update existing rangeGroup
-    const index = groups.findIndex(({ id }) => {
-      return id == newItem.id
+    const index = groups.findIndex(({ element }) => {
+      return element == newItem.element
     })
     if (index != -1) {
       groups[index] = newItem
