@@ -2418,31 +2418,10 @@ extension DocumentManager: BeamObjectManagerDelegate {
             }
         }
 
-        try receivedObjectsSaveDocuments(changedDocuments)
+        try saveOnBeamObjectsAPI(changedDocuments)
 
         Logger.shared.logDebug("Received \(documents.count) documents: updated",
                                category: .documentNetwork)
-    }
-
-    private func receivedObjectsSaveDocuments(_ changedDocuments: [DocumentStruct]) throws {
-        guard !changedDocuments.isEmpty else { return }
-
-        let semaphore = DispatchSemaphore(value: 0)
-
-        try self.saveOnBeamObjectsAPI(changedDocuments) { result in
-            switch result {
-            case .failure(let error):
-                Logger.shared.logError(error.localizedDescription, category: .documentNetwork)
-            case .success:
-                Logger.shared.logDebug("Saved \(changedDocuments)", category: .documentNetwork)
-            }
-            semaphore.signal()
-        }
-
-        let semaphoreResult = semaphore.wait(timeout: DispatchTime.now() + .seconds(10))
-        if case .timedOut = semaphoreResult {
-            Logger.shared.logError("Semaphore timedout", category: .documentNetwork)
-        }
     }
 
     func allObjects() throws -> [DocumentStruct] {
