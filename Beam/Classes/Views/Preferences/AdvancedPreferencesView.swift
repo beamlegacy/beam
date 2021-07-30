@@ -122,6 +122,14 @@ struct AdvancedPreferencesView: View {
                 EnableTabGroupingWindowCheckbox
             }
 
+            Preferences.Section {
+                Text("Data backup")
+                    .font(BeamFont.regular(size: 13).swiftUI)
+                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+            } content: {
+                AutomaticBackupBeforeUpdate
+            }
+
             Preferences.Section(title: "Encryption Enabled") {
                 EncryptionEnabledButton
             }
@@ -210,6 +218,12 @@ struct AdvancedPreferencesView: View {
     private var EnableTabGroupingWindowCheckbox: some View {
         Checkbox(checkState: PreferencesManager.showTabGrougpingMenuItem, text: "Enable TabGrouping Window menu", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
             PreferencesManager.showTabGrougpingMenuItem = activated
+        }
+    }
+
+    private var AutomaticBackupBeforeUpdate: some View {
+        Checkbox(checkState: PreferencesManager.isDataBackupOnUpdateOn, text: "Backup data before update", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
+            PreferencesManager.isDataBackupOnUpdateOn = activated
         }
     }
 

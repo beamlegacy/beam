@@ -7,7 +7,7 @@ extension GRDBDatabase {
 
     /// Compute the DB filename based on the CI JobID.
     /// - Parameter dataDir: URL of the directory storing the database.
-    private static func storeURLFromEnv(_ dataDir: URL) -> URL {
+    private static func fileName() -> String {
         var suffix = "-\(Configuration.env)"
         if let jobId = ProcessInfo.processInfo.environment["CI_JOB_ID"] {
             Logger.shared.logDebug("Using Gitlab CI Job ID for GRDB sqlite file: \(jobId)", category: .search)
@@ -15,7 +15,7 @@ extension GRDBDatabase {
             suffix += "-\(jobId)"
         }
 
-        return dataDir.appendingPathComponent("GRDB\(suffix).sqlite")
+        return "GRDB\(suffix).sqlite"
     }
 
     private static func makeShared() -> GRDBDatabase {
@@ -23,13 +23,10 @@ extension GRDBDatabase {
             // Pick a folder for storing the SQLite database, as well as
             // the various temporary files created during normal database
             // operations (https://sqlite.org/tempfiles.html).
-            let fileManager = FileManager()
-            let dataFolder = try fileManager
-                .url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+            let dataFolder = BeamData.dataFolder(fileName: fileName())
 
             // Connect to a database on disk
-            let dbURL = storeURLFromEnv(dataFolder)
-            let dbPool = try DatabasePool(path: dbURL.path)
+            let dbPool = try DatabasePool(path: dataFolder)
 
             return try GRDBDatabase(dbPool)
         } catch {
