@@ -180,6 +180,7 @@ struct AdvancedPreferencesView: View {
             Preferences.Section(title: "Encryption key", bottomDivider: true) {
                 TextField("Private Key", text: privateKeyBinding)
                     .textFieldStyle(RoundedBorderTextFieldStyle()).frame(maxWidth: 400)
+                Text((try? privateKeyBinding.wrappedValue.SHA256()) ?? "-")
                 ResetPrivateKey
             }
 
