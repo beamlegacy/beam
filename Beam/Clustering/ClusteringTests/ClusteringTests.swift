@@ -132,12 +132,15 @@ class ClusteringTests: XCTestCase {
         // Add a second page
         cluster.pages.append(page2)
         try cluster.textualSimilarityProcess(index: 1, dataPointType: .page)
+        // Add a second page
+        cluster.pages.append(page2)
+        try cluster.textualSimilarityProcess(index: 1, dataPointType: .page)
 
         // Add a third page
         cluster.pages.append(page3)
         try cluster.textualSimilarityProcess(index: 2, dataPointType: .page)
 
-        let expectedSimilarityMatrixFlat = [0.0, 0.8294351697354535, 1.0,
+            let expectedSimilarityMatrixFlat = [0.0, 0.8294351697354535, 1.0,
                                              0.8294351697354535, 0.0, 1.0,
                                              1.0, 1.0, 0.0]
         expect(cluster.textualSimilarityMatrix.matrix.flat).to(beCloseTo(expectedSimilarityMatrixFlat, within: 0.0001))
@@ -673,6 +676,15 @@ class ClusteringTests: XCTestCase {
         var _ = [[UInt64]]()
 
         cluster.add(page: page1, ranking: nil, completion: { result in
+            switch result {
+            case .failure(let error):
+                XCTFail(error.localizedDescription)
+            case .success(let result):
+                _ = result
+            }
+        })
+
+        cluster.add(page: page2, ranking: nil, completion: { result in
             switch result {
             case .failure(let error):
                 XCTFail(error.localizedDescription)

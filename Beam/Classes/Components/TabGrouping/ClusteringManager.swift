@@ -23,7 +23,9 @@ class ClusteringManager: ObservableObject {
         }
     }
     var sendRanking = false
+    var initialiseNotes = true
     var ranker: SessionLinkRanker
+    var documentManager: DocumentManager
     @Published var clusteredTabs: [[TabInformation?]] = [[]]
     @Published var clusteredNotes: [[String?]] = [[]]
     @Published var isClustering: Bool = false
@@ -35,13 +37,14 @@ class ClusteringManager: ObservableObject {
     private var cluster: Cluster
     private var scope = Set<AnyCancellable>()
 
-    init(ranker: SessionLinkRanker, candidate: Int, navigation: Double, text: Double, entities: Double) {
+    init(ranker: SessionLinkRanker, documentManager: DocumentManager, candidate: Int, navigation: Double, text: Double, entities: Double) {
         self.selectedTabGroupingCandidate = candidate
         self.weightNavigation = navigation
         self.weightText = text
         self.weightEntities = entities
         self.cluster = Cluster(candidate: candidate, weightNavigation: navigation, weightText: text, weightEntities: entities)
         self.ranker = ranker
+        self.documentManager = documentManager
         #if DEBUG
         setupObservers()
         #endif
@@ -153,6 +156,14 @@ class ClusteringManager: ObservableObject {
                     }
                 }
             }
+        }
+        // After adding the first page, add notes from previous sessions
+        if initialiseNotes {
+            let notes = BeamNote.fetchNotesWithType(documentManager, type: .note, 10, 0)
+            for note in notes {
+                self.addNote(note: note)
+            }
+            self.initialiseNotes = false 
         }
     }
 
