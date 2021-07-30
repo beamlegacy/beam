@@ -275,6 +275,17 @@ class DatabaseManager {
             database.deleted_at?.intValue == databaseStruct.deletedAt?.intValue &&
             database.id == databaseStruct.id
     }
+
+    private func isEqual(_ database: Database, to databaseType: DatabaseAPIType) -> Bool {
+        // Server side doesn't store milliseconds for updatedAt and createdAt.
+        // Local coredata does, rounding using Int() to compare them
+
+        database.updated_at.intValue == databaseType.updatedAt?.intValue &&
+            database.created_at.intValue == databaseType.createdAt?.intValue &&
+            database.title == databaseType.title &&
+            database.deleted_at?.intValue == databaseType.deletedAt?.intValue &&
+            database.id.uuidString.lowercased() == databaseType.id
+    }
 }
 
 // MARK: -
@@ -389,6 +400,124 @@ extension DatabaseManager {
             }
 
             completion?(result)
+        }
+    }
+
+    /// Fetch most recent document from API
+    /// First we fetch the remote updated_at, if it's more recent we fetch all details
+    func refresh(_ databaseStruct: DatabaseStruct,
+                 _ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) throws {
+        // If not authenticated
+        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            throw APIRequestError.notAuthenticated
+        }
+
+        if Configuration.beamObjectAPIEnabled {
+            try refreshFromBeamObjectAPIAndSaveLocally(databaseStruct, completion)
+            return
+        }
+
+        fetchDatabaseFromAPI(databaseStruct.id, completion)
+    }
+
+    func refreshFromBeamObjectAPIAndSaveLocally(_ databaseStruct: DatabaseStruct,
+                                                _ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) throws {
+        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            throw APIRequestError.notAuthenticated
+        }
+
+        guard Configuration.beamObjectAPIEnabled else {
+            throw BeamObjectManagerError.beamObjectAPIDisabled
+        }
+
+        try refreshFromBeamObjectAPI(databaseStruct, true) { result in
+            switch result {
+            case .failure(let error): completion?(.failure(error))
+            case .success(let remoteDatabaseStruct):
+                guard let remoteDatabaseStruct = remoteDatabaseStruct else {
+                    Logger.shared.logDebug("\(databaseStruct.title): remote is not more recent",
+                                           category: .documentNetwork)
+                    completion?(.success(false))
+                    return
+                }
+
+                guard remoteDatabaseStruct != databaseStruct else {
+                    Logger.shared.logDebug("\(databaseStruct.title): remote is equal to stored version, skip",
+                                           category: .documentNetwork)
+                    completion?(.success(false))
+                    return
+                }
+
+                // Saving the remote version locally
+                self.coreDataManager.persistentContainer.performBackgroundTask { context in
+                    let database = Database.rawFetchOrCreateWithId(context, databaseStruct.id)
+
+                    do {
+                        database.update(remoteDatabaseStruct)
+                        completion?(.success(try Self.saveContext(context: context)))
+                    } catch {
+                        completion?(.failure(error))
+                    }
+                }
+            }
+        }
+    }
+
+    private func fetchDatabaseFromAPI(_ id: UUID,
+                                      _ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
+        let databaseRequest = DatabaseRequest()
+
+        do {
+            try databaseRequest.fetchDatabase(id) { result in
+                switch result {
+                case .failure(let error):
+                    if case APIRequestError.notFound = error {
+                        try? self.deleteLocalDatabaseAndWait(id)
+                    }
+                    completion?(.failure(error))
+                case .success(let databaseType):
+                    self.fetchDatabaseFromAPISuccess(id, databaseType, completion)
+                }
+            }
+        } catch {
+            completion?(.failure(error))
+        }
+    }
+
+    private func deleteLocalDatabaseAndWait(_ id: UUID) throws {
+        let context = coreDataManager.persistentContainer.newBackgroundContext()
+        try context.performAndWait {
+            guard let database = try? Database.fetchWithId(context, id) else {
+                return
+            }
+
+            database.deleted_at = BeamDate.now
+
+            try Self.saveContext(context: context)
+        }
+    }
+
+    private func fetchDatabaseFromAPISuccess(_ id: UUID,
+                                             _ databaseType: DatabaseAPIType,
+                                             _ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
+        // Saving the remote version locally
+        coreDataManager.persistentContainer.performBackgroundTask { context in
+            let database = Database.rawFetchOrCreateWithId(context, id)
+
+            guard !self.isEqual(database, to: databaseType) else {
+                Logger.shared.logDebug("\(database.title): remote is equal to stored version, skip",
+                                       category: .documentNetwork)
+                completion?(.success(false))
+                return
+            }
+
+            do {
+                self.updateDatabaseWithDatabaseAPIType(database, databaseType)
+
+                completion?(.success(try Self.saveContext(context: context)))
+            } catch {
+                completion?(.failure(error))
+            }
         }
     }
 

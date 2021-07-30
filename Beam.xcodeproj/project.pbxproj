@@ -254,6 +254,7 @@
 		524CF6DB25F29119007312F0 /* SymmetricKey+Serialize.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524CF6DA25F29119007312F0 /* SymmetricKey+Serialize.swift */; };
 		525098E5264E9817002D1548 /* ProxyTextNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C9AA3E259019E3007D3D98 /* ProxyTextNode.swift */; };
 		525098EA264E9824002D1548 /* HyperlinkFormatterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418EA94125D696EA005894AA /* HyperlinkFormatterView.swift */; };
+		525627B126B43CE00047429B /* database.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 525627B026B43CE00047429B /* database.graphql */; };
 		525C233C25BAF8EF001B9625 /* libgit2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 525C233B25BAF8EF001B9625 /* libgit2.a */; };
 		525C235125BAFC6B001B9625 /* Merge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 525C235025BAFC6B001B9625 /* Merge.swift */; };
 		525C235825BAFCAA001B9625 /* MergeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 525C235725BAFCAA001B9625 /* MergeTests.swift */; };
@@ -1126,6 +1127,7 @@
 		524CF6CD25F27609007312F0 /* KeychainStorable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStorable.swift; sourceTree = "<group>"; };
 		524CF6D625F28F97007312F0 /* EncryptionManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EncryptionManagerTests.swift; sourceTree = "<group>"; };
 		524CF6DA25F29119007312F0 /* SymmetricKey+Serialize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SymmetricKey+Serialize.swift"; sourceTree = "<group>"; };
+		525627B026B43CE00047429B /* database.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = database.graphql; sourceTree = "<group>"; };
 		525C233B25BAF8EF001B9625 /* libgit2.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgit2.a; path = Extern/libgit2/build/libgit2.a; sourceTree = "<group>"; };
 		525C235025BAFC6B001B9625 /* Merge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Merge.swift; sourceTree = "<group>"; };
 		525C235725BAFCAA001B9625 /* MergeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MergeTests.swift; sourceTree = "<group>"; };
@@ -2769,6 +2771,7 @@
 				52FB84CD263812060085A444 /* update_databases.graphql */,
 				52E2528326173FA800E54C45 /* databases.graphql */,
 				52FB936526209CA900FEF632 /* delete_all_databases.graphql */,
+				525627B026B43CE00047429B /* database.graphql */,
 			);
 			path = Databases;
 			sourceTree = "<group>";
@@ -3869,6 +3872,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				525627B126B43CE00047429B /* database.graphql in Resources */,
 				5224CD462685FF7E00D4179E /* update_beam_objects.graphql in Resources */,
 				02C07A9B2670D98600894C5D /* Navigation.js in Resources */,
 				A0F8DC87268488C900654046 /* hush.json in Resources */,

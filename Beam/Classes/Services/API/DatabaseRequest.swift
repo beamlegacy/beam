@@ -30,6 +30,11 @@ class DatabaseRequest: APIRequest {
 
     class DeleteDatabase: UpdateDatabase { }
 
+    class FetchDatabase: DatabaseAPIType, Errorable, APIResponseCodingKeyProtocol {
+        static let codingKey = "database"
+        let errors: [UserErrorData]? = nil
+    }
+
     struct UpdateDatabases: Codable, Errorable {
         let databases: [DatabaseAPIType]?
         var errors: [UserErrorData]?
@@ -94,6 +99,22 @@ extension DatabaseRequest {
                 } else {
                     completion(.failure(APIRequestError.parserError))
                 }
+            }
+        }
+    }
+
+    @discardableResult
+    func fetchDatabase(_ id: UUID,
+                       _ completion: @escaping (Swift.Result<DatabaseAPIType, Error>) -> Void) throws -> URLSessionDataTask {
+        let parameters = DatabaseIdParameters(id: id.uuidString.lowercased())
+        let bodyParamsRequest = GraphqlParameters(fileName: "database", variables: parameters)
+
+        return try performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<FetchDatabase, Error>) in
+            switch result {
+            case .failure(let error):
+                completion(.failure(error))
+            case .success(let fetchDatabase):
+                completion(.success(fetchDatabase))
             }
         }
     }

@@ -951,7 +951,6 @@ extension BeamObjectManager {
     }
 
     @discardableResult
-
     func delete(_ id: UUID, _ completion: ((Swift.Result<BeamObject, Error>) -> Void)? = nil) throws -> URLSessionDataTask {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw BeamObjectManagerError.notAuthenticated
