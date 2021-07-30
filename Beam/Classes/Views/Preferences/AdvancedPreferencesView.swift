@@ -105,12 +105,20 @@ struct AdvancedPreferencesView: View {
             Preferences.Section(title: "Automatic Update") {
                 Text(String(describing: autoUpdate))
             }
-            Preferences.Section(title: "Software update URL", bottomDivider: true) {
+            Preferences.Section(title: "Software update URL") {
                 Text(String(describing: updateFeedURL))
-                    .fixedSize(horizontal: false, vertical: false)
+                    .fixedSize(horizontal: false, vertical: true)
                     .lineLimit(4)
                     .frame(maxWidth: 387)
             }
+            Preferences.Section(bottomDivider: true) {
+                Text("Data backup")
+                    .font(BeamFont.regular(size: 13).swiftUI)
+                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+            } content: {
+                AutomaticBackupBeforeUpdate
+            }
+
             Preferences.Section(title: "Sentry enabled") {
                 Text(String(describing: sentryEnabled)).fixedSize(horizontal: false, vertical: true)
             }
@@ -121,37 +129,12 @@ struct AdvancedPreferencesView: View {
                     .frame(maxWidth: 387)
             }
 
-            Preferences.Section {
-                Text("Enable TabGrouping Window menu")
+            Preferences.Section(bottomDivider: true) {
+                Text("TabGrouping Window menu")
                     .font(BeamFont.regular(size: 13).swiftUI)
                     .foregroundColor(BeamColor.Generic.text.swiftUI)
             } content: {
                 EnableTabGroupingWindowCheckbox
-            }
-
-            Preferences.Section {
-                Text("Data backup")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
-            } content: {
-                AutomaticBackupBeforeUpdate
-            }
-
-            Preferences.Section(title: "Encryption Enabled") {
-                EncryptionEnabledButton
-            }
-            Preferences.Section(title: "Encryption key") {
-                TextField("Private Key", text: privateKeyBinding)
-                    .textFieldStyle(RoundedBorderTextFieldStyle()).frame(maxWidth: 400)
-            }
-            Preferences.Section(title: "Actions") {
-                ResetAPIEndpointsButton
-                CrashButton
-                CopyAccessToken
-                ResetPrivateKey
-            }
-            Preferences.Section(title: "State Restoration Enabled") {
-                StateRestorationEnabledButton
             }
             Preferences.Section(title: "Database", bottomDivider: true) {
                 DatabasePicker
@@ -197,6 +180,7 @@ struct AdvancedPreferencesView: View {
             Preferences.Section(title: "Encryption key", bottomDivider: true) {
                 TextField("Private Key", text: privateKeyBinding)
                     .textFieldStyle(RoundedBorderTextFieldStyle()).frame(maxWidth: 400)
+                ResetPrivateKey
             }
 
             Preferences.Section(bottomDivider: true) {
@@ -210,7 +194,6 @@ struct AdvancedPreferencesView: View {
             Preferences.Section(title: "Actions", bottomDivider: true) {
                 CrashButton
                 CopyAccessToken
-                ResetPrivateKey
             }
             Preferences.Section(title: "State Restoration Enabled", bottomDivider: true) {
                 StateRestorationEnabledButton
@@ -249,7 +232,7 @@ struct AdvancedPreferencesView: View {
     }
 
     private var EnableTabGroupingWindowCheckbox: some View {
-        Checkbox(checkState: PreferencesManager.showTabGrougpingMenuItem, text: "Enable TabGrouping Window menu", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
+        Checkbox(checkState: PreferencesManager.showTabGrougpingMenuItem, text: "Enabled", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
             PreferencesManager.showTabGrougpingMenuItem = activated
         }
     }
