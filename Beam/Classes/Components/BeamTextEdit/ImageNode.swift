@@ -74,6 +74,7 @@ class ImageNode: ElementNode {
         addLayer(imageLayer, origin: CGPoint(x: indent, y: 0))
     }
 
+    var bottomMargin = CGFloat(5)
     override func updateRendering() {
         guard availableWidth > 0 else { return }
 
@@ -84,7 +85,7 @@ class ImageNode: ElementNode {
             let computedHeight = (width / imageSize.width) * imageSize.height
             let height = computedHeight.isNaN ? 0 : computedHeight
 
-            contentsFrame = NSRect(x: indent, y: 0, width: width, height: height)
+            contentsFrame = NSRect(x: indent, y: 0, width: width, height: height + bottomMargin)
 
             if let imageLayer = layers["image"] {
                 imageLayer.layer.position = CGPoint(x: indent + childInset, y: 0)
@@ -108,7 +109,7 @@ class ImageNode: ElementNode {
 
     public override func updateElementCursor() {
         let on = editor.hasFocus && isFocused && editor.blinkPhase && (root?.state.nodeSelection?.nodes.isEmpty ?? true)
-        let cursorRect = NSRect(x: caretIndex == 0 ? (indent - 5) : (contentsFrame.width + indent + 3), y: -5, width: 2, height: contentsFrame.height - 5)//rectAt(caretIndex: caretIndex)
+        let cursorRect = NSRect(x: caretIndex == 0 ? (indent - 5) : (contentsFrame.width + indent + 3), y: 0, width: 2, height: contentsFrame.height - bottomMargin)//rectAt(caretIndex: caretIndex)
         let layer = self.cursorLayer
 
         layer.shapeLayer.fillColor = enabled ? cursorColor.cgColor : disabledColor.cgColor
