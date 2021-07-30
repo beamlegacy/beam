@@ -15,10 +15,10 @@ class InputText: TextEditorCommand {
     var cancelSelection: CancelSelection
     var focusElement: FocusElement
 
-    init(text: BeamText, in elementId: UUID, of noteTitle: String, at position: Int) {
-        insertText = InsertText(text: text, in: elementId, of: noteTitle, at: position)
+    init(text: BeamText, in elementId: UUID, of noteId: UUID, at position: Int) {
+        insertText = InsertText(text: text, in: elementId, of: noteId, at: position)
         cancelSelection = CancelSelection()
-        focusElement = FocusElement(element: elementId, from: noteTitle, at: position + text.count)
+        focusElement = FocusElement(element: elementId, from: noteId, at: position + text.count)
         super.init(name: Self.name)
     }
 
@@ -39,7 +39,7 @@ class InputText: TextEditorCommand {
     override func coalesce(command: Command<Widget>) -> Bool {
         guard let inputText = command as? InputText,
               inputText.insertText.elementId == insertText.elementId,
-              inputText.insertText.noteTitle == insertText.noteTitle,
+              inputText.insertText.noteId == insertText.noteId,
               inputText.insertText.cursorPosition == insertText.cursorPosition + insertText.text.count
         else { return false }
 
@@ -50,8 +50,8 @@ class InputText: TextEditorCommand {
 extension CommandManager where Context == Widget {
     @discardableResult
     func inputText(_ text: BeamText, in node: TextNode, at position: Int) -> Bool {
-        guard let title = node.displayedElementNoteTitle else { return false }
-        let cmd = InputText(text: text, in: node.displayedElementId, of: title, at: position)
+        guard let noteId = node.displayedElementNoteId else { return false }
+        let cmd = InputText(text: text, in: node.displayedElementId, of: noteId, at: position)
         return run(command: cmd, on: node)
     }
 }

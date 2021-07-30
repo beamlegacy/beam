@@ -57,7 +57,7 @@ public struct BeamText: Codable {
                 case "internalLink":
                     if let string = try? container.decode(String.self, forKey: .payload) {
                         // this is the old type of link that contains string instead of UUIDs, let's translate that
-                        guard let uuid = UUID(uuidString: string) ?? BeamNote.idForNoteNamed(string) else {
+                        guard let uuid = UUID(uuidString: string) ?? BeamNote.idForNoteNamed(string, false) else {
                             throw AttributeError.noNoteWithName(string)
                         }
                         self = .internalLink(uuid)
@@ -167,7 +167,7 @@ public struct BeamText: Codable {
             guard let noteId = internalLink else {
                 return string
             }
-            return BeamNote.titleForNoteId(noteId)
+            return BeamNote.titleForNoteId(noteId, false)
         }
         public var attributes: [Attribute]
 
@@ -221,7 +221,6 @@ public struct BeamText: Codable {
 
         public func resolved() -> Self {
             var new = self
-            new.resolveString()
             let hasResolvedString = new.resolveString()
             if hasResolvedString == nil, internalLink != nil {
                 new.attributes.removeAll { $0.isInternalLink }

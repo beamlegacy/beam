@@ -13,22 +13,22 @@ class ReparentElement: TextEditorCommand {
     var elementId: UUID
     var newParentId: UUID
     var newIndexInParent: Int
-    var noteTitle: String
+    var noteId: UUID
     var previousParentId: UUID?
     var previousIndexInParent: Int?
 
-    init(_ elementId: UUID, of noteTitle: String, to newParent: UUID, atIndex newIndexInParent: Int) {
+    init(_ elementId: UUID, of noteId: UUID, to newParent: UUID, atIndex newIndexInParent: Int) {
         self.elementId = elementId
         self.newParentId = newParent
         self.newIndexInParent = newIndexInParent
-        self.noteTitle = noteTitle
+        self.noteId = noteId
 
         super.init(name: Self.name)
     }
 
     override func run(context: Widget?) -> Bool {
-        guard let elementInstance = getElement(for: noteTitle, and: elementId),
-            let newParentInstance = getElement(for: noteTitle, and: newParentId),
+        guard let elementInstance = getElement(for: noteId, and: elementId),
+            let newParentInstance = getElement(for: noteId, and: newParentId),
             let previousParent = elementInstance.element.parent
         else { return false }
 
@@ -49,10 +49,10 @@ class ReparentElement: TextEditorCommand {
     }
 
     override func undo(context: Widget?) -> Bool {
-        guard let elementInstance = getElement(for: noteTitle, and: elementId),
+        guard let elementInstance = getElement(for: noteId, and: elementId),
               let previousParentId = self.previousParentId,
               let previousIndexInParent = self.previousIndexInParent,
-              let previousElementInstance = getElement(for: noteTitle, and: previousParentId)
+              let previousElementInstance = getElement(for: noteId, and: previousParentId)
         else { return false }
 
         // Bread Crumbs are a bitch
@@ -74,17 +74,17 @@ extension CommandManager where Context == Widget {
     @discardableResult
     func reparentElement(_ node: ElementNode, to parent: ElementNode, atIndex newIndex: Int) -> Bool {
         // make sure all elements are in the name note
-        guard let title = node.displayedElementNoteTitle ?? parent.displayedElementNoteTitle
+        guard let noteId = node.displayedElementNoteId ?? parent.displayedElementNoteId
         else { return false }
-        let cmd = ReparentElement(node.displayedElementId, of: title, to: parent.displayedElementId, atIndex: newIndex)
+        let cmd = ReparentElement(node.displayedElementId, of: noteId, to: parent.displayedElementId, atIndex: newIndex)
         return run(command: cmd, on: parent)
     }
 
     @discardableResult
     func reparentElement(_ element: BeamElement, to parent: BeamElement, atIndex newIndex: Int) -> Bool {
         // make sure all elements are in the name note
-        guard let title = element.note?.title ?? parent.note?.title else { return false }
-        let cmd = ReparentElement(element.id, of: title, to: parent.id, atIndex: newIndex)
+        guard let noteId = element.note?.id ?? parent.note?.id else { return false }
+        let cmd = ReparentElement(element.id, of: noteId, to: parent.id, atIndex: newIndex)
         return run(command: cmd, on: nil)
     }
 }
