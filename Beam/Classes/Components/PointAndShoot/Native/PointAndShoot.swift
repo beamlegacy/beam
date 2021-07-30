@@ -236,7 +236,6 @@ class PointAndShoot: WebPageHolder, ObservableObject {
     ///   - href: Url of frame targets are located in
     func pointShoot(_ groupId: String, _ target: Target, _ href: String) {
         guard !targetIsDismissed(groupId) else { return }
-        guard !isTypingOnWebView else { return }
 
         if targetIsCollected(groupId) {
             collect(groupId, [target], href)
@@ -250,7 +249,8 @@ class PointAndShoot: WebPageHolder, ObservableObject {
             } else {
                 // only allow creating new a shootGroup when these conditions are met:
                 guard hasGraceRectAndMouseOverlap(target, href, mouseLocation),
-                      !isLargeTargetArea(target) else { return }
+                      !isLargeTargetArea(target),
+                      !isTypingOnWebView else { return }
 
                 activeShootGroup = ShootGroup(groupId, [target], href)
             }
@@ -264,7 +264,9 @@ class PointAndShoot: WebPageHolder, ObservableObject {
     ///   - targets: Target rects to draw
     ///   - href: href of frame
     func select(_ groupId: String, _ targets: [Target], _ href: String) {
-        guard !isTypingOnWebView else { return }
+        guard !isTypingOnWebView else {
+            return
+        }
         // first check if the incomming group is already collected
         if targetIsCollected(groupId) {
             collect(groupId, targets, href)
@@ -277,8 +279,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
         }
 
         // if the activeShootGroup and the incomming select group match, update the targets
-        if let group = activeShootGroup,
-           group.id == groupId {
+        if let group = activeShootGroup {
             for target in targets {
                 activeShootGroup?.updateTarget(target)
             }
@@ -299,7 +300,6 @@ class PointAndShoot: WebPageHolder, ObservableObject {
     /// - Parameters:
     ///   - group: Group to be converted
     func selectShoot(_ group: ShootGroup) {
-        guard !isTypingOnWebView else { return }
         guard !targetIsDismissed(group.id) else {
             return
         }
@@ -308,7 +308,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
             collect(group.id, group.targets, group.href)
             return
         }
-
+        guard !isTypingOnWebView else { return }
         activeShootGroup = group
     }
 
