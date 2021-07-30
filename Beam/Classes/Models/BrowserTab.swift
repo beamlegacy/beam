@@ -22,7 +22,10 @@ import Promises
     private var isFromNoteSearch: Bool
 
     public func load(url: URL) {
-        navigationController?.setLoading()
+        if !isFromNoteSearch {
+            navigationController?.setLoading()
+        }
+        beamNavigationController.isNavigatingFromNote = isFromNoteSearch
         self.url = url
         navigationCount = 0
         if url.isFileURL {
@@ -88,6 +91,14 @@ import Promises
             isFromNoteSearch = false
         } else if PreferencesManager.browsingSessionCollectionIsOn {
             _ = noteController.add(url: url, text: title, reason: reason)
+        } else if !PreferencesManager.browsingSessionCollectionIsOn,
+                  beamNavigationController.isNavigatingFromNote {
+            switch self.browsingTree.origin {
+            case .searchFromNode, .browsingNode:
+                _ = noteController.add(url: url, text: title, reason: reason)
+            default:
+                break
+            }
         }
     }
 

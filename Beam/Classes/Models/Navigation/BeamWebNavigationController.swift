@@ -6,6 +6,7 @@ class BeamWebNavigationController: WebPageHolder, WebNavigationController {
     let browsingTree: BrowsingTree
     let noteController: WebNoteController
 
+    public var isNavigatingFromNote: Bool = false
     private var isNavigatingFromSearchBar: Bool = false
     private weak var webView: WKWebView?
 
