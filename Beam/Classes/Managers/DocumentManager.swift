@@ -720,10 +720,12 @@ public class DocumentManager: NSObject {
                     return
                 }
 
-                let updatedDocStruct = DocumentStruct(document: updatedDocument)
+                var updatedDocStruct = DocumentStruct(document: updatedDocument)
 
                 if Configuration.beamObjectAPIEnabled {
                     do {
+                        updatedDocStruct.previousChecksum = updatedDocStruct.beamObjectPreviousChecksum
+
                         try self.saveOnBeamObjectAPI(updatedDocStruct) { result in
                             Self.networkTasksSemaphore.wait()
                             Self.networkTasks.removeValue(forKey: document_id)
@@ -2495,7 +2497,11 @@ extension DocumentManager: BeamObjectManagerDelegate {
         // Note: when this becomes a memory hog because we manipulate all local documents, we'll want to loop through
         // them by 100s and make multiple network calls instead.
         return try context.performAndWait {
-            try Document.rawFetchAll(context).map { DocumentStruct(document: $0) }
+            try Document.rawFetchAll(context).map {
+                var result = DocumentStruct(document: $0)
+                result.previousChecksum = result.beamObjectPreviousChecksum
+                return result
+            }
         }
     }
 

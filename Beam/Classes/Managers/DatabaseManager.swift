@@ -728,10 +728,12 @@ extension DatabaseManager {
                         return
                     }
 
-                    let updatedDatabaseStruct = DatabaseStruct(database: updatedDatabase)
+                    var updatedDatabaseStruct = DatabaseStruct(database: updatedDatabase)
 
                     if Configuration.beamObjectAPIEnabled {
                         do {
+                            updatedDatabaseStruct.previousChecksum = updatedDatabaseStruct.beamObjectPreviousChecksum
+
                             try self.saveOnBeamObjectAPI(updatedDatabaseStruct) { result in
                                 switch result {
                                 case .failure(let error): networkCompletion?(.failure(error))
@@ -1225,11 +1227,13 @@ extension DatabaseManager: BeamObjectManagerDelegate {
 
         // Note: when this becomes a memory hog because we manipulate all local databases, we'll want to loop through
         // them by 100s and make multiple network calls instead.
-        let databaseStructs = try context.performAndWait {
-            try Database.rawFetchAll(context).map { DatabaseStruct(database: $0) }
+        return try context.performAndWait {
+            try Database.rawFetchAll(context).map {
+                var result = DatabaseStruct(database: $0)
+                result.previousChecksum = result.beamObjectPreviousChecksum
+                return result
+            }
         }
-
-        return databaseStructs
     }
 
     func persistChecksum(_ objects: [BeamObjectType]) throws {

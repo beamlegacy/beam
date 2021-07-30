@@ -112,7 +112,7 @@ struct AdvancedPreferencesView: View {
                     .frame(maxWidth: 387)
             }
             Preferences.Section(bottomDivider: true) {
-                Text("Data backup")
+                Text("Data backup before update")
                     .font(BeamFont.regular(size: 13).swiftUI)
                     .foregroundColor(BeamColor.Generic.text.swiftUI)
             } content: {
@@ -226,7 +226,7 @@ struct AdvancedPreferencesView: View {
     }
 
     private var BrowsingSessionCollectionCheckbox: some View {
-        Checkbox(checkState: PreferencesManager.browsingSessionCollectionIsOn, text: "Enable Browsing Session collection", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
+        Checkbox(checkState: PreferencesManager.browsingSessionCollectionIsOn, text: "Enabled", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
             PreferencesManager.browsingSessionCollectionIsOn = activated
         }
     }
@@ -238,7 +238,7 @@ struct AdvancedPreferencesView: View {
     }
 
     private var AutomaticBackupBeforeUpdate: some View {
-        Checkbox(checkState: PreferencesManager.isDataBackupOnUpdateOn, text: "Backup data before update", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
+        Checkbox(checkState: PreferencesManager.isDataBackupOnUpdateOn, text: "enabled", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
             PreferencesManager.isDataBackupOnUpdateOn = activated
         }
     }
