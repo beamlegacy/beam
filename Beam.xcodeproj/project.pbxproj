@@ -70,6 +70,7 @@
 		0DF3376D26948BAB0024C504 /* String+SliceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DF3376C26948BAB0024C504 /* String+SliceTests.swift */; };
 		1A560C30E74FFFB97685C043 /* PointAndShootHelper.ts in Resources */ = {isa = PBXBuildFile; fileRef = 1A5601F85613AA978F874B3E /* PointAndShootHelper.ts */; };
 		1A560E42AC5ED28BCC29054A /* BeamElementHelper.ts in Resources */ = {isa = PBXBuildFile; fileRef = 1A560CE45CC5BF86DC9F5778 /* BeamElementHelper.ts */; };
+		33088D6326B06677004FAE99 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 33088D6226B06677004FAE99 /* ZIPFoundation */; };
 		330D380E265FB76C00A2536B /* DownloaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 330D380D265FB76C00A2536B /* DownloaderView.swift */; };
 		330D3824265FC6B200A2536B /* DownloadCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 330D3823265FC6B200A2536B /* DownloadCell.swift */; };
 		3315DC912667859A002A47CF /* Preferences in Frameworks */ = {isa = PBXBuildFile; productRef = 524299AE25A47CA500F4DBF5 /* Preferences */; };
@@ -1647,6 +1648,7 @@
 				964548A02523B3550064D062 /* CloudKit.framework in Frameworks */,
 				3315DC962667859A002A47CF /* OAuthSwift in Frameworks */,
 				33793AD1265CFEC50041E1B8 /* SwiftSoup in Frameworks */,
+				33088D6326B06677004FAE99 /* ZIPFoundation in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3672,6 +3674,7 @@
 				521FEC992604F9B4009000F9 /* Vinyl */,
 				964FE5E02625D8AA00966E03 /* GRDB */,
 				52CA277B26401D7000146A00 /* OAuthSwift */,
+				33088D6226B06677004FAE99 /* ZIPFoundation */,
 			);
 			productName = Beam;
 			productReference = 965A78252514F147009980D4 /* Beam.app */;
@@ -3785,6 +3788,7 @@
 				964FE5DF2625D8AA00966E03 /* XCRemoteSwiftPackageReference "GRDB.swift" */,
 				52CA277A26401D7000146A00 /* XCRemoteSwiftPackageReference "OAuthSwift" */,
 				96D5AE83264C01AD003AD516 /* XCRemoteSwiftPackageReference "TLDExtractSwift" */,
+				33088D6126B06677004FAE99 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
 			);
 			productRefGroup = 965A78262514F147009980D4 /* Products */;
 			projectDirPath = "";
@@ -5524,6 +5528,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		33088D6126B06677004FAE99 /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/weichsel/ZIPFoundation";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.9.12;
+			};
+		};
 		521FEC982604F9B4009000F9 /* XCRemoteSwiftPackageReference "Vinyl" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/penso/Vinyl";
@@ -5671,6 +5683,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		33088D6226B06677004FAE99 /* ZIPFoundation */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 33088D6126B06677004FAE99 /* XCRemoteSwiftPackageReference "ZIPFoundation" */;
+			productName = ZIPFoundation;
+		};
 		521FEC992604F9B4009000F9 /* Vinyl */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 521FEC982604F9B4009000F9 /* XCRemoteSwiftPackageReference "Vinyl" */;

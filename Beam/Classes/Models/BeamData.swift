@@ -9,6 +9,7 @@ import Foundation
 import Combine
 import BeamCore
 import AutoUpdate
+import ZIPFoundation
 
 public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var _todaysNote: BeamNote?
@@ -49,37 +50,41 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         let paths = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)
 
         var name = "BeamData-\(Configuration.env)"
-         if let jobId = ProcessInfo.processInfo.environment["CI_JOB_ID"] {
-             Logger.shared.logDebug("Using Gitlab CI Job ID for dataFolder: \(jobId)", category: .general)
+        if let jobId = ProcessInfo.processInfo.environment["CI_JOB_ID"] {
+            Logger.shared.logDebug("Using Gitlab CI Job ID for dataFolder: \(jobId)", category: .general)
             name += "-\(jobId)"
-         }
+        }
 
-         guard let directory = paths.first else {
-             // Never supposed to happen
-             return "~/Application Data/BeamApp/"
-         }
+        guard let directory = paths.first else {
+            // Never supposed to happen
+            return "~/Application Data/BeamApp/"
+        }
 
-         let localDirectory = directory + "/Beam" + "/\(name)/"
+        let localDirectory = directory + "/Beam" + "/\(name)/"
+        
+        var destinationName = fileName
+        if destinationName.hasPrefix("Beam/") {
+            destinationName.removeFirst(5)
+        }
 
-         do {
-             try FileManager.default.createDirectory(atPath: localDirectory,
-                                                     withIntermediateDirectories: true,
-                                                     attributes: nil)
+        do {
+            try FileManager.default.createDirectory(atPath: localDirectory,
+                                                    withIntermediateDirectories: true,
+                                                    attributes: nil)
 
             if FileManager.default.fileExists(atPath: directory + "/\(fileName)") {
                 do {
-                    try FileManager.default.moveItem(atPath: directory + "/\(fileName)", toPath: localDirectory + fileName)
+                    try FileManager.default.moveItem(atPath: directory + "/\(fileName)", toPath: localDirectory + destinationName)
                 } catch {
                     Logger.shared.logError("Unable to move item \(fileName) \(directory) to \(localDirectory): \(error)", category: .general)
                 }
-
             }
-             return localDirectory + fileName
-         } catch {
-             // Does not generate error if directory already exist
-             return directory + fileName
-         }
-     }
+            return localDirectory + destinationName
+        } catch {
+            // Does not generate error if directory already exist
+            return directory + destinationName
+        }
+    }
 
     static var indexPath: URL { URL(fileURLWithPath: dataFolder(fileName: "index.beamindex")) }
     static var fileDBPath: String { dataFolder(fileName: "files.db") }
@@ -150,6 +155,10 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
 
         updateNoteCount()
         setupSubscribers()
+
+        self.versionChecker.customPreinstall = {
+            self.backup()
+        }
     }
 
     // swiftlint:disable:next function_body_length
@@ -266,6 +275,23 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         }
 
         webView.configuration.websiteDataStore.httpCookieStore.add(self)
+    }
+
+    ///Create a .zip backup of all the content of the BeamData folder in Beam sandbox
+    private func backup() {
+        let fileManager = FileManager.default
+
+        guard PreferencesManager.isDataBackupOnUpdateOn else { return }
+
+        let downloadFolder = fileManager.urls(for: .downloadsDirectory, in: .userDomainMask).first!
+        var archiveName = "Beam data archive"
+
+        if let infos = Bundle.main.infoDictionary, let name = infos["CFBundleName"] as? String,
+           let version = infos["CFBundleShortVersionString"] as? String, let build = infos["CFBundleVersion"] as? String {
+            archiveName = "\(name) v.\(version)_\(build) data backup"
+        }
+
+        try? fileManager.zipItem(at: URL(fileURLWithPath: Self.dataFolder(fileName: "")), to: downloadFolder.appendingPathComponent("\(archiveName).zip"), compressionMethod: .deflate)
     }
 }
 
