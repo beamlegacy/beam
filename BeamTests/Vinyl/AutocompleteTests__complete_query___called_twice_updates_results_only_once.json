@@ -1,27 +1,27 @@
 [
   {
+    "request" : {
+      "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=green",
+      "method" : "GET"
+    },
     "response" : {
-      "status" : 200,
+      "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=green",
       "headers" : {
-        "Content-Disposition" : "attachment; filename=\"f.txt\"",
-        "Pragma" : "no-cache",
-        "Content-Type" : "text\/javascript; charset=ISO-8859-1",
-        "Content-Encoding" : "gzip",
-        "Content-Length" : "153",
-        "x-xss-protection" : "0",
         "Server" : "gws",
-        "Cache-Control" : "no-cache, must-revalidate",
+        "Alt-Svc" : "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000,h3-T051=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\"",
         "x-frame-options" : "SAMEORIGIN",
         "Expires" : "-1",
-        "Alt-Svc" : "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000,h3-T051=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\"",
-        "Date" : "Thu, 29 Jul 2021 14:13:18 GMT"
+        "Content-Disposition" : "attachment; filename=\"f.txt\"",
+        "Content-Type" : "text\/javascript; charset=ISO-8859-1",
+        "Content-Encoding" : "gzip",
+        "Cache-Control" : "no-cache, must-revalidate",
+        "x-xss-protection" : "0",
+        "Content-Length" : "152",
+        "Date" : "Fri, 30 Jul 2021 09:12:34 GMT",
+        "Pragma" : "no-cache"
       },
-      "body" : "[\"green\",[\"greenweez\",\"greenpeace\",\"greenwashing\",\"green book\",\"greengo\",\"green zone\",\"greenflex\",\"greenhouse\",\"green farmers\",\"green pass italie\"],[],{\"google:suggestsubtypes\":[[512,433],[512,433],[512],[512,433],[512,433],[433,131],[512,433],[512],[512],[433,131]]}]",
-      "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=green"
-    },
-    "request" : {
-      "method" : "GET",
-      "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=green"
+      "status" : 200,
+      "body" : "[\"green\",[\"greenweez\",\"greenpeace\",\"green pass\",\"green pass italie\",\"greenwashing\",\"green book\",\"greengo\",\"greenflex\",\"greenhouse\",\"green farmers\"],[],{\"google:suggestsubtypes\":[[512,433],[512,433],[512,433,131],[433,131],[512],[512,433],[512,433],[512,433],[512],[512]]}]"
     }
   }
 ]
