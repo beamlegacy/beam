@@ -282,21 +282,21 @@ class DatabaseManager {
 extension DatabaseManager {
     // MARK: -
     // MARK: Deletes
-    func delete(_ database: DatabaseStruct,
+    func delete(id: UUID,
                 includedRemote: Bool = true,
-                completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
+                completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
         let context = CoreDataManager.shared.mainContext
-        guard let coredataDb = try? Database.fetchWithId(context, database.id) else {
-            completion?(.failure(DatabaseManagerError.localDatabaseNotFound))
+        guard let coredataDb = try? Database.fetchWithId(context, id) else {
+            completion(.failure(DatabaseManagerError.localDatabaseNotFound))
             return
         }
 
         do {
             try Document.deleteWithPredicate(context, NSPredicate(format: "database_id = %@",
-                                                                  database.id as CVarArg))
+                                                                  id as CVarArg))
         } catch {
             Logger.shared.logError(error.localizedDescription, category: .database)
-            completion?(.failure(error))
+            completion(.failure(error))
             return
         }
         coredataDb.delete(context)
@@ -306,31 +306,39 @@ extension DatabaseManager {
                                         object: DatabaseManager.defaultDatabase)
 
         guard includedRemote else {
-            completion?(.success(true))
+            completion(.success(true))
             return
         }
 
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-            completion?(.success(false))
+            completion(.success(false))
             return
         }
 
-        let databaseRequest = DatabaseRequest()
-
-        do {
-            // Remotely, deleting a database will delete all related documents
-            try databaseRequest.delete(database.id.uuidString.lowercased()) { result in
-                switch result {
-                case .failure(let error):
-                    Logger.shared.logError(error.localizedDescription, category: .database)
-                    completion?(.failure(error))
-                case .success:
-                    completion?(.success(true))
-                }
+        if Configuration.beamObjectAPIEnabled {
+            do {
+                try self.deleteFromBeamObjectAPI(id, completion)
+            } catch {
+                completion(.failure(error))
             }
-        } catch {
-            Logger.shared.logError(error.localizedDescription, category: .database)
-            completion?(.failure(error))
+        } else {
+            let databaseRequest = DatabaseRequest()
+
+            do {
+                // Remotely, deleting a database will delete all related documents
+                try databaseRequest.delete(id.uuidString.lowercased()) { result in
+                    switch result {
+                    case .failure(let error):
+                        Logger.shared.logError(error.localizedDescription, category: .database)
+                        completion(.failure(error))
+                    case .success:
+                        completion(.success(true))
+                    }
+                }
+            } catch {
+                Logger.shared.logError(error.localizedDescription, category: .database)
+                completion(.failure(error))
+            }
         }
     }
 

@@ -1492,13 +1492,13 @@ extension DocumentManager {
 
     // MARK: -
     // MARK: Delete
-    func delete(id: UUID, completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
+    func delete(id: UUID, completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
         Self.cancelPreviousThrottledAPICall(id)
 
         coreDataManager.persistentContainer.performBackgroundTask { context in
 
             guard let document = try? Document.fetchWithId(context, id) else {
-                completion?(.failure(DocumentManagerError.idNotFound))
+                completion(.failure(DocumentManagerError.idNotFound))
                 return
             }
 
@@ -1516,7 +1516,7 @@ extension DocumentManager {
                 try Self.saveContext(context: context)
             } catch {
                 Logger.shared.logError(error.localizedDescription, category: .document)
-                completion?(.failure(error))
+                completion(.failure(error))
                 return
             }
 
@@ -1525,25 +1525,33 @@ extension DocumentManager {
 
             // If not authenticated
             guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-                completion?(.success(false))
+                completion(.success(false))
                 return
             }
 
-            Self.networkRequests[id]?.cancel()
-            let documentRequest = DocumentRequest()
-            Self.networkRequests[id] = documentRequest
-
-            do {
-                try documentRequest.delete(id.uuidString.lowercased()) { result in
-                    switch result {
-                    case .failure(let error):
-                        completion?(.failure(error))
-                    case .success:
-                        completion?(.success(true))
-                    }
+            if Configuration.beamObjectAPIEnabled {
+                do {
+                    try self.deleteFromBeamObjectAPI(id, completion)
+                } catch {
+                    completion(.failure(error))
                 }
-            } catch {
-                completion?(.failure(error))
+            } else {
+            Self.networkRequests[id]?.cancel()
+                let documentRequest = DocumentRequest()
+                Self.networkRequests[id] = documentRequest
+
+                do {
+                    try documentRequest.delete(id.uuidString.lowercased()) { result in
+                        switch result {
+                        case .failure(let error):
+                            completion(.failure(error))
+                        case .success:
+                            completion(.success(true))
+                        }
+                    }
+                } catch {
+                    completion(.failure(error))
+                }
             }
         }
     }
@@ -1563,6 +1571,10 @@ extension DocumentManager {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             completion?(.success(false))
             return
+        }
+
+        if Configuration.beamObjectAPIEnabled {
+            fatalError("You can't delete all documents with the beam object API")
         }
 
         Self.cancelAllPreviousThrottledAPICall()

@@ -1964,8 +1964,8 @@ class DocumentManagerNetworkTests: QuickSpec {
                 }
 
                 afterEach {
-                    beamObjectHelper.delete(docStruct.id)
-                    beamObjectHelper.delete(docStruct2.id)
+                    helper.deleteDocumentStruct(docStruct)
+                    helper.deleteDocumentStruct(docStruct2)
                 }
 
                 it("saves as beamObjects") {
@@ -2048,9 +2048,6 @@ class DocumentManagerNetworkTests: QuickSpec {
                 afterEach {
                     helper.deleteDocumentStruct(docStruct)
                     helper.deleteDocumentStruct(docStruct2)
-
-                    beamObjectHelper.delete(docStruct.beamObjectId)
-                    beamObjectHelper.delete(docStruct2.beamObjectId)
                 }
 
                 it("saves to local objects") {

@@ -161,7 +161,7 @@ struct DocumentDetail: View {
     }
 
     private func delete() {
-        documentManager.delete(id: document.id, completion: nil)
+        documentManager.delete(id: document.id) { _ in }
     }
 
     private func softDelete() {

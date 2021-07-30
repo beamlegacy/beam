@@ -162,7 +162,7 @@ class DocumentManagerTestsHelper {
 
     func deleteDatabaseStruct(_ dbStruct: DatabaseStruct, includedRemote: Bool = true) {
         waitUntil(timeout: .seconds(10)) { done in
-            self.databaseManager.delete(dbStruct, includedRemote: includedRemote) { result in
+            self.databaseManager.delete(id: dbStruct.id, includedRemote: includedRemote) { result in
                 done()
             }
         }

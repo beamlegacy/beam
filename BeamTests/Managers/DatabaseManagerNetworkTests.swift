@@ -277,7 +277,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
                     let networkCalls = APIRequest.callsCount
 
                     waitUntil(timeout: .seconds(10)) { done in
-                        sut.delete(dbStruct) { result in
+                        sut.delete(id: dbStruct.id) { result in
                             expect { try result.get() }.toNot(throwError())
                             expect { try result.get() } == true
                             done()
@@ -667,17 +667,14 @@ class DatabaseManagerNetworkTests: QuickSpec {
                 }
 
                 afterEach {
-                    helper.deleteDatabaseStruct(dbStruct, includedRemote: false)
-                    helper.deleteDatabaseStruct(dbStruct2, includedRemote: false)
-
-                    beamObjectHelper.delete(dbStruct.beamObjectId)
-                    beamObjectHelper.delete(dbStruct2.beamObjectId)
+                    helper.deleteDatabaseStruct(dbStruct, includedRemote: true)
+                    helper.deleteDatabaseStruct(dbStruct2, includedRemote: true)
                 }
 
                 context("without any locally saved databases") {
                     beforeEach {
-                        helper.deleteDatabaseStruct(dbStruct)
-                        helper.deleteDatabaseStruct(dbStruct2)
+                        helper.deleteDatabaseStruct(dbStruct, includedRemote: true)
+                        helper.deleteDatabaseStruct(dbStruct2, includedRemote: true)
                     }
 
                     context("with 2 databases with different titles") {

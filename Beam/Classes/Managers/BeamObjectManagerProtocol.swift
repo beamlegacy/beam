@@ -150,10 +150,27 @@ extension BeamObjectManagerDelegate {
     }
 
     @discardableResult
+    func deleteFromBeamObjectAPI(_ id: UUID,
+                                 _ completion: @escaping (Swift.Result<Bool, Error>) -> Void) throws -> URLSessionDataTask {
+        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            throw APIRequestError.notAuthenticated
+        }
+
+        let objectManager = BeamObjectManager()
+
+        return try objectManager.delete(id) { result in
+            switch result {
+            case .failure(let error): completion(.failure(error))
+            case .success: completion(.success(true))
+            }
+        }
+    }
+
+    @discardableResult
     // swiftlint:disable:next cyclomatic_complexity
     func refreshFromBeamObjectAPI(_ object: BeamObjectType,
                                   _ forced: Bool = false,
-                                  _ completion: @escaping ((Swift.Result<BeamObjectType?, Error>) -> Void)) throws -> URLSessionDataTask? {
+                                  _ completion: @escaping ((Swift.Result<BeamObjectType?, Error>) -> Void)) throws -> URLSessionDataTask {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw APIRequestError.notAuthenticated
         }

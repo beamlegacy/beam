@@ -20,8 +20,7 @@ struct DatabaseDetail: View {
     }
 
     private func delete() {
-        let dbStruct = DatabaseStruct(database: database)
-        databaseManager.delete(dbStruct, completion: nil)
+        databaseManager.delete(id: database.id) { _ in }
     }
 
     private func softDelete() {

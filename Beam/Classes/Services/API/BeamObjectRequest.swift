@@ -130,13 +130,8 @@ extension BeamObjectRequest {
                     return
                 }
 
-                do {
-                    try object.decrypt()
-                } catch {
-                    // Will catch uncrypting errors
-                    completion(.failure(error))
-                    return
-                }
+                // To be safe, but deleted objects won't fetch `data`
+                try? object.decrypt()
 
                 completion(.success(object))
             }

@@ -48,9 +48,8 @@ struct DatabaseRow: View {
 
                 Button("Delete") {
                     showingAlert = true
-                    let dbStruct = DatabaseStruct(database: database)
-                    databaseManager.delete(dbStruct) { _ in
-                        Logger.shared.logInfo("database \(dbStruct.title) deleted")
+                    databaseManager.delete(id: database.id) { _ in
+                        Logger.shared.logInfo("database \(database.title) deleted")
                     }
                 }
             }

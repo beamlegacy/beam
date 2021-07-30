@@ -711,8 +711,8 @@ extension BeamObjectManager {
         return task
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
     /// Will look at each errors, and fetch remote object to include it in the completion if it was a checksum error
+    // swiftlint:disable:next cyclomatic_complexity
     internal func saveToAPIBeamObjectsFailure(_ beamObjects: [BeamObject],
                                               _ error: Error,
                                               _ completion: @escaping ((Swift.Result<[BeamObject], Error>) -> Void)) {
@@ -950,7 +950,9 @@ extension BeamObjectManager {
         try BeamObjectRequest().fetchMinimalBeamObject(id, completion)
     }
 
-    func delete(_ id: UUID, _ completion: ((Swift.Result<BeamObject, Error>) -> Void)? = nil) throws {
+    @discardableResult
+
+    func delete(_ id: UUID, _ completion: ((Swift.Result<BeamObject, Error>) -> Void)? = nil) throws -> URLSessionDataTask {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw BeamObjectManagerError.notAuthenticated
         }
@@ -959,15 +961,11 @@ extension BeamObjectManager {
         let request = BeamObjectRequest()
         Self.networkRequests[id] = request
 
-        do {
-            try request.delete(id) { result in
-                switch result {
-                case .failure(let error): completion?(.failure(error))
-                case .success(let object): completion?(.success(object))
-                }
+        return try request.delete(id) { result in
+            switch result {
+            case .failure(let error): completion?(.failure(error))
+            case .success(let object): completion?(.success(object))
             }
-        } catch {
-            completion?(.failure(error))
         }
     }
 }

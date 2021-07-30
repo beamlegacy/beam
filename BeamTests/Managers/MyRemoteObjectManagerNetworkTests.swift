@@ -61,6 +61,9 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                 context("when remote updatedAt is more recent") {
                     beforeEach {
+                        // to fetch previousChecksum
+                        object1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
+
                         var object = object1.copy()
                         BeamDate.travel(10)
                         object.updatedAt = BeamDate.now
