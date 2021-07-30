@@ -84,6 +84,12 @@
                <Test
                   Identifier = "ClusteringTests/testChangeCandidate()">
                </Test>
+               <Test
+                  Identifier = "ClusteringTests/testTextualSimilarityMatrixProcessWithNonEnglishContent()">
+               </Test>
+               <Test
+                  Identifier = "ClusteringTests/testTextualSimilarityPipelineWithNonEnglishContent()">
+               </Test>
             </SkippedTests>
          </TestableReference>
       </Testables>

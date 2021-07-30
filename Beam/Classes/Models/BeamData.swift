@@ -94,8 +94,8 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
 
     //swiftlint:disable:next function_body_length
     override init() {
-        clusteringManager = ClusteringManager(ranker: sessionLinkRanker, candidate: 2, navigation: 0.5, text: 0.8, entities: 0.3)
         documentManager = DocumentManager()
+        clusteringManager = ClusteringManager(ranker: sessionLinkRanker, documentManager: documentManager, candidate: 2, navigation: 0.5, text: 0.8, entities: 0.3)
         noteAutoSaveService = NoteAutoSaveService()
         linkManager = LinkManager()
         passwordsDB = PasswordsManager().passwordsDB
