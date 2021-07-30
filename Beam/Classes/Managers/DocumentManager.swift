@@ -2356,15 +2356,19 @@ extension DocumentManager: BeamObjectManagerDelegate {
         }
     }
 
+    // swiftlint:disable:next function_body_length
     func receivedObjects(_ documents: [DocumentStruct]) throws {
         Logger.shared.logDebug("Received \(documents.count) documents: updating",
                                category: .documentNetwork)
 
-        var changed = false
+        var changedDocuments: [DocumentStruct] = []
+
         let context = coreDataManager.backgroundContext
         try context.performAndWait {
-            for document in documents {
-                let localDocument = Document.rawFetchOrCreateWithId(context, document.id)
+            var changed = false
+
+            for var document in documents {
+                var localDocument = Document.rawFetchOrCreateWithId(context, document.id)
 
                 if self.isEqual(localDocument, to: document) {
                     Logger.shared.logDebug("\(document.title) {\(document.id)}: remote is equal to struct version, skip",
@@ -2372,12 +2376,39 @@ extension DocumentManager: BeamObjectManagerDelegate {
                     continue
                 }
 
-                localDocument.update(document)
-                localDocument.beam_object_previous_checksum = document.checksum
+                var good = false
+                let originalTitle = document.title
+                var index = 2
+                while !good && index < 10 {
+                    do {
+                        localDocument.update(document)
+                        localDocument.beam_object_previous_checksum = document.checksum
 
-                // TODO: What to do when this fails? Because of duplicate titles, or other errors
-                try checkValidations(context, localDocument)
-                changed = true
+                        try checkValidations(context, localDocument)
+
+                        good = true
+                        changed = true
+                    } catch {
+                        guard (error as NSError).domain == "DOCUMENT_ERROR_DOMAIN" else {
+                            Logger.shared.logError(error.localizedDescription, category: .documentNetwork)
+                            throw error
+                        }
+
+                        switch (error as NSError).code {
+                        case 1001:
+                            document.title = "\(originalTitle) \(index)"
+                        case 1002:
+                            localDocument = Document.rawFetchOrCreateWithId(context, document.id)
+                        default: break
+                        }
+
+                        index += 1
+                    }
+                }
+
+                if index > 2 {
+                    changedDocuments.append(document)
+                }
 
                 localDocument.version += 1
             }
@@ -2387,8 +2418,31 @@ extension DocumentManager: BeamObjectManagerDelegate {
             }
         }
 
+        try receivedObjectsSaveDocuments(changedDocuments)
+
         Logger.shared.logDebug("Received \(documents.count) documents: updated",
                                category: .documentNetwork)
+    }
+
+    private func receivedObjectsSaveDocuments(_ changedDocuments: [DocumentStruct]) throws {
+        guard !changedDocuments.isEmpty else { return }
+
+        let semaphore = DispatchSemaphore(value: 0)
+
+        try self.saveOnBeamObjectsAPI(changedDocuments) { result in
+            switch result {
+            case .failure(let error):
+                Logger.shared.logError(error.localizedDescription, category: .documentNetwork)
+            case .success:
+                Logger.shared.logDebug("Saved \(changedDocuments)", category: .documentNetwork)
+            }
+            semaphore.signal()
+        }
+
+        let semaphoreResult = semaphore.wait(timeout: DispatchTime.now() + .seconds(10))
+        if case .timedOut = semaphoreResult {
+            Logger.shared.logError("Semaphore timedout", category: .documentNetwork)
+        }
     }
 
     func allObjects() throws -> [DocumentStruct] {

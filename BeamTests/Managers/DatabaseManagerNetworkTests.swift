@@ -728,7 +728,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
                             expect(remoteObject1).to(beNil())
 
                             let remoteObject2: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct2.beamObjectId)
-                            dbStruct2.title = "Database 1 2"
+                            dbStruct2.title = "\(dbStruct2.title) 2"
                             expect(remoteObject2) == dbStruct2
 
                             expect(try? Database.fetchWithId(CoreDataManager.shared.mainContext, dbStruct2.id)?.title) == dbStruct2.title
@@ -776,7 +776,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
                             dbStruct2.title = newTitle1
                         }
 
-                        it("saves to local objects") {
+                        it("saves to local objects and save it remotely") {
                             let networkCalls = APIRequest.callsCount
 
                             try sut.receivedObjects([dbStruct, dbStruct2])
@@ -797,7 +797,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
                             expect(remoteObject1).to(beNil())
 
                             let remoteObject2: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct2.beamObjectId)
-                            dbStruct2.title = "Database 3 2"
+                            dbStruct2.title = "\(newTitle1) 2"
                             expect(remoteObject2) == dbStruct2
 
                             expect(try? Database.fetchWithId(CoreDataManager.shared.mainContext, dbStruct2.id)?.title) == dbStruct2.title

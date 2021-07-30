@@ -2039,9 +2039,20 @@ class DocumentManagerNetworkTests: QuickSpec {
             describe("receivedObjects()") {
                 var docStruct: DocumentStruct!
                 var docStruct2: DocumentStruct!
+                let newTitle1 = "Doc 3"
+                let newTitle2 = "Doc 4"
+
                 beforeEach {
                     docStruct = helper.createDocumentStruct(title: "Doc 1", id: "995d94e1-e0df-4eca-93e6-8778984bcd29")
                     docStruct2 = helper.createDocumentStruct(title: "Doc 2", id: "995d94e1-e0df-4eca-93e6-8778984bcd39")
+                }
+
+                afterEach {
+                    helper.deleteDocumentStruct(docStruct)
+                    helper.deleteDocumentStruct(docStruct2)
+
+                    beamObjectHelper.delete(docStruct.beamObjectId)
+                    beamObjectHelper.delete(docStruct2.beamObjectId)
                 }
 
                 it("saves to local objects") {
@@ -2054,6 +2065,135 @@ class DocumentManagerNetworkTests: QuickSpec {
                     expect(1) == Document.countWithPredicate(CoreDataManager.shared.mainContext,
                                                              NSPredicate(format: "id = %@", docStruct2.id as CVarArg))
                 }
+
+                context("without any locally saved documents") {
+                    beforeEach {
+                        helper.deleteDocumentStruct(docStruct)
+                        helper.deleteDocumentStruct(docStruct2)
+                    }
+
+                    context("with 2 documents with different titles") {
+                        it("saves to local objects") {
+                            let networkCalls = APIRequest.callsCount
+
+                            try sut.receivedObjects([docStruct, docStruct2])
+
+                            expect(APIRequest.callsCount - networkCalls) == 0
+
+                            expect(1) == Document.countWithPredicate(CoreDataManager.shared.mainContext,
+                                                                     NSPredicate(format: "id = %@", docStruct.id as CVarArg))
+                            expect(1) == Document.countWithPredicate(CoreDataManager.shared.mainContext,
+                                                                     NSPredicate(format: "id = %@", docStruct2.id as CVarArg))
+
+                            expect(try? Document.fetchWithId(CoreDataManager.shared.mainContext, docStruct.id)?.title) == docStruct.title
+                            expect(try? Document.fetchWithId(CoreDataManager.shared.mainContext, docStruct2.id)?.title) == docStruct2.title
+                        }
+                    }
+
+                    context("with 2 documents with same titles") {
+                        beforeEach {
+                            docStruct = helper.createDocumentStruct(title: "Doc 1", id: "995d94e1-e0df-4eca-93e6-8778984bcd29")
+                            docStruct2 = helper.createDocumentStruct(title: "Doc 1", id: "995d94e1-e0df-4eca-93e6-8778984bcd39")
+                        }
+
+                        it("saves them locally, change the title and save it remotely") {
+                            let networkCalls = APIRequest.callsCount
+
+                            try sut.receivedObjects([docStruct, docStruct2])
+
+                            expect(APIRequest.callsCount - networkCalls) == 1
+
+                            let expectedNetworkCalls = ["update_beam_objects"]
+
+                            expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
+
+                            expect(1) == Document.countWithPredicate(CoreDataManager.shared.mainContext,
+                                                                     NSPredicate(format: "id = %@", docStruct.id as CVarArg))
+                            expect(1) == Document.countWithPredicate(CoreDataManager.shared.mainContext,
+                                                                     NSPredicate(format: "id = %@", docStruct2.id as CVarArg))
+
+                            expect(try? Document.fetchWithId(CoreDataManager.shared.mainContext, docStruct.id)?.title) == docStruct.title
+
+                            docStruct2.title = "\(docStruct2.title) 2"
+
+                            expect(try? Document.fetchWithId(CoreDataManager.shared.mainContext, docStruct2.id)?.title) == docStruct2.title
+
+                            let remoteObject1: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct.beamObjectId)
+                            expect(remoteObject1).to(beNil())
+
+                            let remoteObject2: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct2.beamObjectId)
+                            expect(remoteObject2) == docStruct2
+                        }
+                    }
+                }
+
+                context("with locally saved documents") {
+                    beforeEach {
+                        docStruct = helper.createDocumentStruct(title: "Doc 1", id: "995d94e1-e0df-4eca-93e6-8778984bcd29")
+                        docStruct2 = helper.createDocumentStruct(title: "Doc 2", id: "995d94e1-e0df-4eca-93e6-8778984bcd39")
+
+                        _ = helper.saveLocally(docStruct)
+                        _ = helper.saveLocally(docStruct2)
+                    }
+
+                    context("with 2 documents with different titles") {
+                        beforeEach {
+                            docStruct.title = newTitle1
+                            docStruct2.title = newTitle2
+                        }
+
+                        it("saves to local objects") {
+                            let networkCalls = APIRequest.callsCount
+
+                            try sut.receivedObjects([docStruct, docStruct2])
+
+                            expect(APIRequest.callsCount - networkCalls) == 0
+
+                            expect(1) == Document.countWithPredicate(CoreDataManager.shared.mainContext,
+                                                                     NSPredicate(format: "id = %@", docStruct.id as CVarArg))
+                            expect(1) == Document.countWithPredicate(CoreDataManager.shared.mainContext,
+                                                                     NSPredicate(format: "id = %@", docStruct2.id as CVarArg))
+
+                            expect(try? Document.fetchWithId(CoreDataManager.shared.mainContext, docStruct.id)?.title) == docStruct.title
+                            expect(try? Document.fetchWithId(CoreDataManager.shared.mainContext, docStruct2.id)?.title) == docStruct2.title
+                        }
+                    }
+
+                    context("with 2 documents with same titles") {
+                        beforeEach {
+                            docStruct.title = newTitle1
+                            docStruct2.title = newTitle1
+                        }
+
+                        it("saves to local objects and save it remotely") {
+                            let networkCalls = APIRequest.callsCount
+
+                            try sut.receivedObjects([docStruct, docStruct2])
+
+                            expect(APIRequest.callsCount - networkCalls) == 1
+
+                            let expectedNetworkCalls = ["update_beam_objects"]
+                            expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
+
+                            expect(1) == Document.countWithPredicate(CoreDataManager.shared.mainContext,
+                                                                     NSPredicate(format: "id = %@", docStruct.id as CVarArg))
+                            expect(1) == Document.countWithPredicate(CoreDataManager.shared.mainContext,
+                                                                     NSPredicate(format: "id = %@", docStruct2.id as CVarArg))
+
+                            docStruct2.title = "\(newTitle1) 2"
+
+                            expect(try? Document.fetchWithId(CoreDataManager.shared.mainContext, docStruct.id)?.title) == docStruct.title
+                            expect(try? Document.fetchWithId(CoreDataManager.shared.mainContext, docStruct2.id)?.title) == docStruct2.title
+
+                            let remoteObject1: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct.beamObjectId)
+                            expect(remoteObject1).to(beNil())
+
+                            let remoteObject2: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct2.beamObjectId)
+                            expect(remoteObject2) == docStruct2
+                        }
+                    }
+                }
+
             }
         }
     }

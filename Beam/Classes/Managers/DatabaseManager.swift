@@ -152,21 +152,6 @@ class DatabaseManager {
         }
     }
 
-    private func checkValidationsEarly(_ databaseStruct: DatabaseStruct) throws {
-        // If database is deleted, we don't need to check title uniqueness
-        guard databaseStruct.deletedAt == nil else { return }
-
-        let predicate = NSPredicate(format: "title = %@ AND id != %@", databaseStruct.title, databaseStruct.id as CVarArg)
-
-        let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
-
-        try context.performAndWait {
-            guard Database.countWithPredicate(context, predicate) == 0 else {
-                throw DatabaseManagerError.titleAlreadyExists
-            }
-        }
-    }
-
     private func checkValidations(_ context: NSManagedObjectContext, _ database: Database) throws {
         try checkDuplicateTitles(context, database)
     }
@@ -1043,11 +1028,12 @@ extension DatabaseManager {
 extension DatabaseManager: BeamObjectManagerDelegate {
     typealias BeamObjectType = DatabaseStruct
 
+    //swiftlint:disable:next function_body_length
     func receivedObjects(_ databases: [DatabaseStruct]) throws {
         Logger.shared.logDebug("Received \(databases.count) databases: updating",
                                category: .databaseNetwork)
         let context = coreDataManager.backgroundContext
-        var changedDatabase: [DatabaseStruct] = []
+        var changedDatabases: [DatabaseStruct] = []
         try context.performAndWait {
             var changed = false
 
@@ -1078,9 +1064,9 @@ extension DatabaseManager: BeamObjectManagerDelegate {
                     }
                 }
 
-                // Database's title was changed, we need to save it on the API
+                // Database's title was changed, we need to save it on the API to propagate to other devices
                 if index > 2 {
-                    changedDatabase.append(database)
+                    changedDatabases.append(database)
                 }
 
                 changed = true
@@ -1091,18 +1077,17 @@ extension DatabaseManager: BeamObjectManagerDelegate {
             }
         }
 
-        if !changedDatabase.isEmpty {
+        if !changedDatabases.isEmpty {
             let semaphore = DispatchSemaphore(value: 0)
 
-            try self.saveOnBeamObjectsAPI(changedDatabase) { result in
+            try self.saveOnBeamObjectsAPI(changedDatabases) { result in
                 switch result {
                 case .failure(let error):
                     Logger.shared.logError(error.localizedDescription, category: .databaseNetwork)
                 case .success:
-                    Logger.shared.logDebug("Saved \(changedDatabase)", category: .databaseNetwork)
+                    Logger.shared.logDebug("Saved \(changedDatabases)", category: .databaseNetwork)
                 }
                 semaphore.signal()
-
             }
 
             let semaphoreResult = semaphore.wait(timeout: DispatchTime.now() + .seconds(10))
