@@ -1203,7 +1203,7 @@
 		52E570822686409F002F34C9 /* Beam3.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Beam3.xcdatamodel; sourceTree = "<group>"; };
 		52E570832686409F002F34C9 /* Beam.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Beam.xcdatamodel; sourceTree = "<group>"; };
 		52E570842686409F002F34C9 /* Beam2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Beam2.xcdatamodel; sourceTree = "<group>"; };
-		52E570852686409F002F34C9 /* Beam4.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Beam4.xcdatamodel; sourceTree = "<group>"; };
+		52E570852686409F002F34C9 /* Beam5.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Beam5.xcdatamodel; sourceTree = "<group>"; };
 		52F27FB625B9B404006E09A2 /* ViewModelFetchedResults.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewModelFetchedResults.swift; sourceTree = "<group>"; };
 		52F4E49726417EF00067B017 /* create_identity.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = create_identity.graphql; sourceTree = "<group>"; };
 		52F4E4A126417F210067B017 /* sign_in_with_provider.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = sign_in_with_provider.graphql; sourceTree = "<group>"; };
@@ -5818,9 +5818,9 @@
 				52E570822686409F002F34C9 /* Beam3.xcdatamodel */,
 				52E570832686409F002F34C9 /* Beam.xcdatamodel */,
 				52E570842686409F002F34C9 /* Beam2.xcdatamodel */,
-				52E570852686409F002F34C9 /* Beam4.xcdatamodel */,
+				52E570852686409F002F34C9 /* Beam5.xcdatamodel */,
 			);
-			currentVersion = 52E570852686409F002F34C9 /* Beam4.xcdatamodel */;
+			currentVersion = 52E570852686409F002F34C9 /* Beam5.xcdatamodel */;
 			path = Beam.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;
