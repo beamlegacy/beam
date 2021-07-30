@@ -34,14 +34,15 @@ extension BeamNote: BeamNoteDocument {
     }
 
     public func observeDocumentChange(documentManager: DocumentManager) {
-        guard activeDocumentCancellable == nil else {
+        guard activeDocumentCancellables.isEmpty else {
             Logger.shared.logError("BeamNote already has change observer", category: .document)
             return
         }
         guard let docStruct = documentStruct else { return }
 
         Logger.shared.logInfo("Observe changes for note \(title)", category: .document)
-        activeDocumentCancellable = documentManager.onDocumentChange(docStruct) { [unowned self] docStruct in
+        activeDocumentCancellables = []
+        activeDocumentCancellables.append(documentManager.onDocumentChange(docStruct) { [unowned self] docStruct in
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
 
@@ -60,7 +61,20 @@ extension BeamNote: BeamNoteDocument {
 
                 updateWithDocumentStruct(docStruct)
             }
-        }
+        })
+
+        activeDocumentCancellables.append(documentManager.onDocumentDelete(docStruct) { [unowned self] _ in
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+
+                self.deleted = true
+                Self.unload(note: self)
+                for note in Self.fetchedNotes {
+                    note.value.ref?.updateNoteNamesInInternalLinks(recursive: true)
+                }
+
+            }
+        })
     }
 
     public func updateWithDocumentStruct(_ docStruct: DocumentStruct) {
@@ -85,6 +99,7 @@ extension BeamNote: BeamNoteDocument {
         self.version = docStruct.version
         self.databaseId = docStruct.databaseId
         self.isPublic = docStruct.isPublic
+        self.deleted = docStruct.deletedAt != nil
 
         self.savedVersion = self.version
 
@@ -130,11 +145,16 @@ extension BeamNote: BeamNoteDocument {
             switch result {
             case .success(let success):
                 guard success else { break }
-                self.savedVersion = self.version
-                self.pendingSave = 0
+                // TSAN: We need to sync dispatch it to the main thread to make sure it doesn't create a data race.
+                DispatchQueue.main.async {
+                    self.savedVersion = self.version
+                    self.pendingSave = 0
+                }
 
             case .failure(BeamNoteError.saveAlreadyRunning):
-                self.pendingSave += 1
+                DispatchQueue.main.async {
+                    self.pendingSave += 1
+                }
 
             case .failure(let error):
                 if (error as NSError).domain == "DOCUMENT_ERROR_DOMAIN" {
@@ -190,7 +210,9 @@ extension BeamNote: BeamNoteDocument {
                     }
                 }
 
-                self.version = self.savedVersion
+                DispatchQueue.main.async {
+                    self.version = self.savedVersion
+                }
                 Logger.shared.logError("Saving note \(self.title) failed: \(error)", category: .document)
 
                 if self.pendingSave > 0 {
@@ -218,6 +240,7 @@ extension BeamNote: BeamNoteDocument {
         note.savedVersion = note.version
         note.updateDate = documentStruct.updatedAt
         note.isPublic = documentStruct.isPublic
+        note.deleted = documentStruct.deletedAt != nil
         if keepInMemory {
             try? GRDBDatabase.shared.append(note: note)
             appendToFetchedNotes(note)

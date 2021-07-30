@@ -12,19 +12,19 @@ class DeleteElement: TextEditorCommand {
     static let name: String = "DeleteElement"
 
     var elementId: UUID
-    var noteTitle: String
+    var noteId: UUID
     var parentId: UUID?
     var indexInParent: Int?
     var data: Data?
 
-    init(elementId: UUID, of noteTitle: String) {
+    init(elementId: UUID, of noteId: UUID) {
         self.elementId = elementId
-        self.noteTitle = noteTitle
+        self.noteId = noteId
         super.init(name: Self.name)
     }
 
     override func run(context: Widget?) -> Bool {
-        guard let elementInstance = getElement(for: noteTitle, and: elementId),
+        guard let elementInstance = getElement(for: noteId, and: elementId),
               let parent = elementInstance.element.parent,
               let indexInParent = elementInstance.element.indexInParent
               else { return false }
@@ -42,7 +42,7 @@ class DeleteElement: TextEditorCommand {
               let deletedElement = decode(data: data),
               let parentId = self.parentId,
               let indexInParent = indexInParent,
-              let parentElementInstance = getElement(for: noteTitle, and: parentId) else { return false }
+              let parentElementInstance = getElement(for: noteId, and: parentId) else { return false }
 
         parentElementInstance.element.insert(deletedElement, at: indexInParent)
 
@@ -53,15 +53,15 @@ class DeleteElement: TextEditorCommand {
 extension CommandManager where Context == Widget {
     @discardableResult
     func deleteElement(for node: ElementNode) -> Bool {
-        guard let title = node.displayedElementNoteTitle else { return false }
-        let cmd = DeleteElement(elementId: node.displayedElementId, of: title)
+        guard let noteId = node.displayedElementNoteId else { return false }
+        let cmd = DeleteElement(elementId: node.displayedElementId, of: noteId)
         return run(command: cmd, on: node)
     }
 
     @discardableResult
     func deleteElement(for element: BeamElement, context: Widget? = nil) -> Bool {
-        guard let title = element.note?.title else { return false }
-        let cmd = DeleteElement(elementId: element.id, of: title)
+        guard let noteId = element.note?.id else { return false }
+        let cmd = DeleteElement(elementId: element.id, of: noteId)
         return run(command: cmd, on: context)
     }
 }

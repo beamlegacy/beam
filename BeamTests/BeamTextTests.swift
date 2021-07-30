@@ -25,10 +25,10 @@ class BeamTextTests: XCTestCase {
         // To prevent saving on the API side
         AccountManager.logout()
         Configuration.networkEnabled = false
-        BeamNote.idForNoteNamed = { _ in
+        BeamNote.idForNoteNamed = { _, _ in
             return UUID.null
         }
-        BeamNote.titleForNoteId = { _ in
+        BeamNote.titleForNoteId = { _, _ in
             return "link"
         }
 

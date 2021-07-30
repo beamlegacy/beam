@@ -12,16 +12,16 @@ class FormatText: TextEditorCommand {
     static let name: String = "FormatText"
 
     var elementId: UUID
-    var noteTitle: String
+    var noteId: UUID
     var oldKind: ElementKind?
     let newKind: ElementKind?
     let newAttribute: BeamText.Attribute?
     let range: Range<Int>?
     var isActive: Bool
 
-    init(in elementId: UUID, of noteTitle: String, for kind: ElementKind?, with attribute: BeamText.Attribute?, for range: Range<Int>?, isActive: Bool) {
+    init(in elementId: UUID, of noteId: UUID, for kind: ElementKind?, with attribute: BeamText.Attribute?, for range: Range<Int>?, isActive: Bool) {
         self.elementId = elementId
-        self.noteTitle = noteTitle
+        self.noteId = noteId
         self.newKind = kind
         self.newAttribute = attribute
         self.range = range
@@ -32,12 +32,12 @@ class FormatText: TextEditorCommand {
 
     private func saveOldKind() {
         guard newKind != nil,
-              let elementInstance = getElement(for: noteTitle, and: elementId) else { return }
+              let elementInstance = getElement(for: noteId, and: elementId) else { return }
         self.oldKind = elementInstance.element.kind
     }
 
     override func run(context: Widget?) -> Bool {
-        guard let elementInstance = getElement(for: noteTitle, and: elementId) else { return false }
+        guard let elementInstance = getElement(for: noteId, and: elementId) else { return false }
 
         var result = true
         if let newKind = self.newKind {
@@ -72,7 +72,7 @@ class FormatText: TextEditorCommand {
     }
 
     override func undo(context: Widget?) -> Bool {
-        guard let elementInstance = getElement(for: noteTitle, and: elementId) else { return false }
+        guard let elementInstance = getElement(for: noteId, and: elementId) else { return false }
 
         var result: Bool = true
         if let oldKind = self.oldKind, self.newKind != nil {
@@ -91,8 +91,8 @@ class FormatText: TextEditorCommand {
 extension CommandManager where Context == Widget {
     @discardableResult
     func formatText(in node: TextNode, for kind: ElementKind?, with attribute: BeamText.Attribute?, for range: Range<Int>?, isActive: Bool) -> Bool {
-        guard let title = node.displayedElementNoteTitle else { return false }
-        let cmd = FormatText(in: node.displayedElementId, of: title, for: kind, with: attribute, for: range, isActive: isActive)
+        guard let noteId = node.displayedElementNoteId else { return false }
+        let cmd = FormatText(in: node.displayedElementId, of: noteId, for: kind, with: attribute, for: range, isActive: isActive)
         return run(command: cmd, on: node)
     }
 }

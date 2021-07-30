@@ -234,7 +234,7 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
     }
 
     private func updateLink(in node: TextNode, at range: Range<Int>, newTitle: String?, newUrl: String?, originalUrl: String?) {
-        guard let noteTitle = node.displayedElementNoteTitle else {
+        guard let noteId = node.displayedElementNoteId else {
             return
         }
         var attributes = rootNode.state.attributes
@@ -248,7 +248,7 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
             let fallbackTitle = newUrl ?? originalUrl ?? "Link"
             let alwaysATitle = !newTitle.isEmpty ? newTitle : fallbackTitle
             let newBeamText = BeamText(text: alwaysATitle, attributes: attributes)
-            let replaceText = ReplaceText(in: node.element.id, of: noteTitle, for: range, with: newBeamText)
+            let replaceText = ReplaceText(in: node.element.id, of: noteId, for: range, with: newBeamText)
             newCursorPosition = range.lowerBound + newBeamText.wholeRange.count + 1
             rootNode.note?.cmdManager.run(command: replaceText, on: rootNode.cmdContext)
         } else if newUrl != nil {

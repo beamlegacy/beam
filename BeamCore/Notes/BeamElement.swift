@@ -76,7 +76,7 @@ public enum ElementKind: Codable, Equatable {
         case "embed":
             self = .embed(try container.decode(String.self, forKey: .source))
         case "blockReference":
-            let noteID = try (try? container.decode(UUID.self, forKey: .title)) ?? BeamNote.idForNoteNamed(try container.decode(String.self, forKey: .title)) ?? UUID.null
+            let noteID = try (try? container.decode(UUID.self, forKey: .title)) ?? BeamNote.idForNoteNamed(try container.decode(String.self, forKey: .title), false) ?? UUID.null
             let elementID = try (try? container.decode(UUID.self, forKey: .source)) ?? UUID(uuidString: try container.decode(String.self, forKey: .source)) ?? UUID.null
             self = .blockReference(noteID, elementID)
         default:
@@ -123,6 +123,7 @@ public enum ElementChildrenFormat: String, Codable {
 }
 
 // Editable Text Data:
+//swiftlint:disable:next type_body_length
 open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, CustomDebugStringConvertible {
     @Published open var id = UUID() { didSet { change(.meta) } }
     @Published open var text = BeamText() { didSet { change(.text) } }
@@ -456,6 +457,7 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
                 newChildren.append(child)
             } else {
                 newChildren.append(c)
+                c.parent = self
             }
         }
 

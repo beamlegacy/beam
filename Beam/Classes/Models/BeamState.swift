@@ -16,10 +16,21 @@ import BeamCore
     var data: BeamData
     public var searchEngine: SearchEngine = GoogleSearch()
 
+    private var noteCancellable: AnyCancellable?
     @Published var currentNote: BeamNote? {
         didSet {
             if let note = currentNote {
                 recentsManager.currentNoteChanged(note)
+                noteCancellable = note.$deleted.sink { [unowned self] deleted in
+                    if deleted {
+                        self.navigateToJournal(note: nil)
+                        let alert = NSAlert()
+                        alert.messageText = "The note '\(note.title)' has been deleted."
+                        alert.alertStyle = .critical
+                        alert.informativeText = "Navigating back to the journal."
+                        alert.runModal()
+                    }
+                }
             }
             focusOmniBox = false
         }

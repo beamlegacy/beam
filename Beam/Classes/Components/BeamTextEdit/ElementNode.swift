@@ -33,16 +33,16 @@ public class ElementNode: Widget {
         unproxyElement.id
     }
 
-    var elementNoteTitle: String? {
-        unproxyElement.note?.title
+    var elementNoteId: UUID? {
+        unproxyElement.note?.id
     }
 
     var displayedElementId: UUID {
         displayedElement.id
     }
 
-    var displayedElementNoteTitle: String? {
-        displayedElement.note?.title
+    var displayedElementNoteId: UUID? {
+        displayedElement.note?.id
     }
 
     var _displayedElement: BeamElement?

@@ -137,8 +137,14 @@ public extension CALayer {
         self.journalMode = journalMode
 
         note = root
+        root.updateNoteNamesInInternalLinks(recursive: true)
 
         super.init(frame: NSRect())
+
+        // TODO: remove this when we add websocket sync
+        if let documentStruct = root.note?.documentStruct {
+            documentManager.refresh(documentStruct, true)
+        }
 
         setAccessibilityIdentifier("TextEdit")
         setAccessibilityLabel("Note Editor")
