@@ -10,7 +10,7 @@ import BeamCore
 
 struct NoteHeaderView: View {
 
-    static let leadingPadding: CGFloat = 17
+    private static let leadingPadding: CGFloat = 12
     static let topPadding: CGFloat = 120
     @ObservedObject var model: NoteHeaderView.ViewModel
 
