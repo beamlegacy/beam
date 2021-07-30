@@ -51,7 +51,7 @@ struct AdvancedPreferencesView: View {
         })
 
         Preferences.Container(contentWidth: contentWidth) {
-            Preferences.Section(bottomDivider: true) {
+            Preferences.Section {
                 Text("Bundle identifier:")
                     .font(BeamFont.regular(size: 13).swiftUI)
                     .foregroundColor(BeamColor.Generic.text.swiftUI)
@@ -59,6 +59,14 @@ struct AdvancedPreferencesView: View {
             } content: {
                 Text(bundleIdentifier)
             }
+            Preferences.Section(bottomDivider: true) {
+                Text("Environment:")
+                    .font(BeamFont.regular(size: 13).swiftUI)
+                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+            } content: {
+                Text(env)
+            }
+
             Preferences.Section {
                 Text("API endpoint:")
                     .font(BeamFont.regular(size: 13).swiftUI)
@@ -67,74 +75,53 @@ struct AdvancedPreferencesView: View {
                 TextField("api hostname", text: apiHostnameBinding)
                     .lineLimit(1)
                     .textFieldStyle(RoundedBorderTextFieldStyle()).frame(maxWidth: 286)
+                ResetAPIEndpointsButton
             }
             Preferences.Section {
-                Text("Public endpoint:")
+                Text("Public endpoint")
                     .font(BeamFont.regular(size: 13).swiftUI)
                     .foregroundColor(BeamColor.Generic.text.swiftUI)
             } content: {
                 Text(publicHostname)
             }
-            Preferences.Section {
-                Text("Environment:")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
-            } content: {
-                Text(env)
+            Preferences.Section(title: "Network Enabled") {
+                NetworkEnabledButton
             }
+            Preferences.Section(title: "Beam Object API Enabled", bottomDivider: true) {
+                BeamObjectAPIEnabledButton
+            }
+
             Preferences.Section(bottomDivider: true) {
                 Text("CoreData:")
                     .font(BeamFont.regular(size: 13).swiftUI)
                     .foregroundColor(BeamColor.Generic.text.swiftUI)
             } content: {
-                Text(CoreDataManager.shared.storeURL?.absoluteString ?? "-").fixedSize(horizontal: false, vertical: true)
+                Text(CoreDataManager.shared.storeURL?.absoluteString ?? "-")
+                    .fixedSize(horizontal: false, vertical: true)
                     .lineLimit(4)
                     .frame(maxWidth: 387)
             }
 
-            Preferences.Section(title: "Automatic Update:") {
+            Preferences.Section(title: "Automatic Update") {
                 Text(String(describing: autoUpdate))
             }
-            Preferences.Section(title: "Software update URL:") {
-                Text(String(describing: updateFeedURL)).fixedSize(horizontal: false, vertical: true)
+            Preferences.Section(title: "Software update URL", bottomDivider: true) {
+                Text(String(describing: updateFeedURL))
+                    .fixedSize(horizontal: false, vertical: true)
+                    .lineLimit(4)
+                    .frame(maxWidth: 387)
             }
-            Preferences.Section(title: "Sentry enabled:") {
+            Preferences.Section(title: "Sentry enabled") {
                 Text(String(describing: sentryEnabled)).fixedSize(horizontal: false, vertical: true)
             }
-            Preferences.Section(title: "Sentry dsn:") {
-                Text(Configuration.sentryDsn).fixedSize(horizontal: false, vertical: true)
-            }
-            Preferences.Section(title: "Network Enabled") {
-                NetworkEnabledButton
-            }
-            Preferences.Section(title: "Beam Object API Enabled") {
-                BeamObjectAPIEnabledButton
-            }
-            Preferences.Section {
-                Text("Browsing Session collection")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
-            } content: {
-                BrowsingSessionCollectionCheckbox
+            Preferences.Section(title: "Sentry dsn", bottomDivider: true) {
+                Text(Configuration.sentryDsn)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .lineLimit(4)
+                    .frame(maxWidth: 387)
             }
 
-            Preferences.Section(title: "Encryption Enabled") {
-                EncryptionEnabledButton
-            }
-            Preferences.Section(title: "Encryption key") {
-                TextField("Private Key", text: privateKeyBinding)
-                    .textFieldStyle(RoundedBorderTextFieldStyle()).frame(maxWidth: 400)
-            }
-            Preferences.Section(title: "Actions") {
-                ResetAPIEndpointsButton
-                CrashButton
-                CopyAccessToken
-                ResetPrivateKey
-            }
-            Preferences.Section(title: "State Restoration Enabled") {
-                StateRestorationEnabledButton
-            }
-            Preferences.Section(title: "Database") {
+            Preferences.Section(title: "Database", bottomDivider: true) {
                 DatabasePicker
                 Button(action: {
                     showNewDatabase = true
@@ -171,7 +158,33 @@ struct AdvancedPreferencesView: View {
                     }
                 }
             }
-            Preferences.Section(title: "Passwords") {
+
+            Preferences.Section(title: "Encryption Enabled") {
+                EncryptionEnabledButton
+            }
+            Preferences.Section(title: "Encryption key", bottomDivider: true) {
+                TextField("Private Key", text: privateKeyBinding)
+                    .textFieldStyle(RoundedBorderTextFieldStyle()).frame(maxWidth: 400)
+            }
+
+            Preferences.Section(bottomDivider: true) {
+                Text("Browsing Session collection")
+                    .font(BeamFont.regular(size: 13).swiftUI)
+                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+            } content: {
+                BrowsingSessionCollectionCheckbox
+            }
+
+            Preferences.Section(title: "Actions", bottomDivider: true) {
+                CrashButton
+                CopyAccessToken
+                ResetPrivateKey
+            }
+            Preferences.Section(title: "State Restoration Enabled", bottomDivider: true) {
+                StateRestorationEnabledButton
+            }
+
+            Preferences.Section(title: "Passwords", bottomDivider: true) {
                 PasswordCSVImporter
                 PasswordsDBDrop
             }
