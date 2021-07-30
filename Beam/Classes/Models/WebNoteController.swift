@@ -39,6 +39,11 @@ class WebNoteController: Encodable, Decodable {
     public var isTodaysNote: Bool {
         note.isTodaysNote
     }
+    public var hasSetNote: Bool
+
+    static private var defaultNote: BeamNote {
+        AppDelegate.main.data.todaysNote
+    }
 
     /**
      Determine which element any add should target.
@@ -64,15 +69,18 @@ class WebNoteController: Encodable, Decodable {
         return newElement
     }
 
-    init(note: BeamNote, rootElement from: BeamElement? = nil) {
-        self.note = note
-        rootElement = from ?? note
+    init(note: BeamNote?, rootElement from: BeamElement? = nil) {
+        let notetoUse = note ?? Self.defaultNote
+        self.note = notetoUse
+        hasSetNote = note != nil
+        rootElement = from ?? notetoUse
         element = rootElement
     }
 
     func setDestination(note: BeamNote, rootElement: BeamElement? = nil) {
         self.note = note
         self.rootElement = rootElement ?? note
+        hasSetNote = true
     }
 
     /*
@@ -93,19 +101,20 @@ class WebNoteController: Encodable, Decodable {
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let noteTitle = try container.decode(String.self, forKey: .note)
-        let loadedNote = BeamNote.fetch(AppDelegate.main.documentManager, title: noteTitle)
-            ?? AppDelegate.main.data.todaysNote
+        let fetchedNote = BeamNote.fetch(AppDelegate.main.documentManager, title: noteTitle)
+        let noteToUse = fetchedNote ?? Self.defaultNote
         let rootId = try? container.decode(UUID.self, forKey: .rootElement)
-        rootElement = loadedNote.findElement(rootId ?? loadedNote.id) ?? loadedNote.children.first!
+        rootElement = noteToUse.findElement(rootId ?? noteToUse.id) ?? noteToUse.children.first!
         if let elementId = try? container.decode(UUID.self, forKey: .element) {
-            guard let foundElement = loadedNote.findElement(elementId) else {
+            guard let foundElement = noteToUse.findElement(elementId) else {
                 fatalError("Should have found referenced element \(elementId)")
             }
             element = foundElement
         } else {
             fatalError("Should have found referenced element id")
         }
-        note = loadedNote
+        note = noteToUse
+        hasSetNote = fetchedNote != nil
     }
 
     func encode(to encoder: Encoder) throws {
