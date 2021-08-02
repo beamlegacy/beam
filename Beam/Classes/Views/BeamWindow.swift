@@ -24,7 +24,7 @@ class BeamHostingView<Content>: NSHostingView<Content> where Content: View {
 }
 
 class BeamWindow: NSWindow, NSDraggingDestination {
-    var state: BeamState!
+    var state: BeamState = BeamState()
     var data: BeamData
 
     private var trafficLights: [NSButton?]?
@@ -41,16 +41,10 @@ class BeamWindow: NSWindow, NSDraggingDestination {
     init(contentRect: NSRect, data: BeamData, reloadState: Bool) {
         self.data = data
 
-        if reloadState && !NSEvent.modifierFlags.contains(.option) && Configuration.env != "test" {
-            if let savedData = UserDefaults.standard.data(forKey: Self.savedTabsKey) {
-                let decoder = JSONDecoder()
-                let state = try? decoder.decode(BeamState.self, from: savedData)
-                self.state = state
-            }
-        }
-
-        if state == nil {
-            state = BeamState()
+        if reloadState && !NSEvent.modifierFlags.contains(.option) && Configuration.env != "test",
+           let savedData = UserDefaults.standard.data(forKey: Self.savedTabsKey),
+           let state = try? JSONDecoder().decode(BeamState.self, from: savedData) {
+            self.state = state
         }
 
         data.setupJournal()
@@ -122,13 +116,6 @@ class BeamWindow: NSWindow, NSDraggingDestination {
             window === self
         }
         super.close()
-    }
-
-    override func setFrame(_ frameRect: NSRect, display flag: Bool) {
-        state.windowIsResizing = true
-        super.setFrame(frameRect, display: flag)
-        state.windowIsResizing = false
-        self.setTrafficLightsLayout()
     }
 
     override func restoreState(with coder: NSCoder) {
@@ -275,7 +262,12 @@ class BeamWindow: NSWindow, NSDraggingDestination {
 
 extension BeamWindow: NSWindowDelegate {
 
-    func windowDidResize(_ notification: Notification) {
+    func windowWillStartLiveResize(_ notification: Notification) {
+        self.state.windowIsResizing = true
+    }
+
+    func windowDidEndLiveResize(_ notification: Notification) {
+        self.state.windowIsResizing = false
         self.setTrafficLightsLayout()
     }
 
