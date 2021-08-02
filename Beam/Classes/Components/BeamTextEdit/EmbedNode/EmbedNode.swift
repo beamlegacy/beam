@@ -81,6 +81,9 @@ public class EmbedNode: ElementNode {
         }
 
         self.webView = webView
+        let embedLayer = Layer.init(name: "embed", layer: CALayer())
+        embedLayer.layer.position = CGPoint(x: indent, y: 0)
+        addLayer(embedLayer, origin: CGPoint(x: indent, y: 0))
         layer.zPosition = -1
     }
 
@@ -107,12 +110,7 @@ public class EmbedNode: ElementNode {
     let embedWidth = CGFloat(320)
     let embedHeight = CGFloat(240)
     override var elementNodePadding: NSEdgeInsets {
-        switch self.elementKind {
-        case .embed:
-            return NSEdgeInsets(top: 4, left: 0, bottom: 14, right: 0)
-        default:
-            return NSEdgeInsetsZero
-        }
+        NSEdgeInsets(top: 4, left: 0, bottom: 14, right: 0)
     }
 
     override func updateRendering() {
@@ -123,7 +121,11 @@ public class EmbedNode: ElementNode {
             let height = (width / embedWidth) * embedHeight
             contentsFrame = NSRect(x: indent, y: 0, width: width, height: childInset + height + elementNodePadding.bottom + elementNodePadding.top)
 
-            updateFocus()
+            if let embedLayer = layers["embed"] {
+                embedLayer.layer.position = CGPoint(x: indent, y: 0)
+                embedLayer.layer.bounds = CGRect(origin: embedLayer.frame.origin, size: CGSize(width: width - indent, height: contentsFrame.height - elementNodePadding.bottom - elementNodePadding.top))
+                updateFocus()
+            }
 
             invalidatedRendering = false
         }
@@ -149,17 +151,28 @@ public class EmbedNode: ElementNode {
         super.updateChildrenLayout()
     }
 
-    func updateFocus() {
-        guard let imageLayer = layers["image"] else { return }
+    var focusMargin = CGFloat(3)
+    public override func updateElementCursor() {
+        let on = editor.hasFocus && isFocused && editor.blinkPhase && (root?.state.nodeSelection?.nodes.isEmpty ?? true)
+        let cursorRect = NSRect(x: caretIndex == 0 ? (indent - 5) : (contentsFrame.width + 3), y: elementNodePadding.top - focusMargin, width: 2, height: layer.frame.height - elementNodePadding.bottom - elementNodePadding.top + focusMargin * 2)
+        let layer = self.cursorLayer
 
-        imageLayer.layer.sublayers?.forEach { l in
+        layer.shapeLayer.fillColor = enabled ? cursorColor.cgColor : disabledColor.cgColor
+        layer.layer.isHidden = !on
+        layer.shapeLayer.path = CGPath(rect: cursorRect, transform: nil)
+    }
+
+    override func updateFocus() {
+        guard let embedLayer = layers["embed"] else { return }
+
+        embedLayer.layer.sublayers?.forEach { l in
             l.removeFromSuperlayer()
         }
         guard isFocused else {
-            imageLayer.layer.mask = nil
+            embedLayer.layer.mask = nil
             return
         }
-        let bounds = imageLayer.bounds.insetBy(dx: -3, dy: -3)
+        let bounds = embedLayer.bounds.insetBy(dx: -focusMargin, dy: -focusMargin)
         let position = CGPoint(x: 0, y: 0)
         let path = NSBezierPath(roundedRect: bounds, xRadius: 2, yRadius: 2)
 
@@ -174,9 +187,9 @@ public class EmbedNode: ElementNode {
         borderLayer.strokeColor = selectionColor.cgColor
         borderLayer.fillColor = NSColor.clear.cgColor
         borderLayer.bounds = bounds
-        borderLayer.position = CGPoint(x: indent + childInset + imageLayer.layer.bounds.width / 2, y: imageLayer.layer.bounds.height / 2)
+        borderLayer.position = CGPoint(x: indent + childInset + embedLayer.layer.bounds.width / 2, y: embedLayer.layer.bounds.height / 2 + elementNodePadding.top)
         borderLayer.mask = mask
-        imageLayer.layer.addSublayer(borderLayer)
+        embedLayer.layer.addSublayer(borderLayer)
     }
 
     override func onUnfocus() {
@@ -259,4 +272,9 @@ extension EmbedNode: WKNavigationDelegate {
         decisionHandler(true)
     }
 
+}
+
+// MARK: - EmbedNode + Layer
+extension EmbedNode {
+    override var bulletLayerPositionY: CGFloat { 9 }
 }
