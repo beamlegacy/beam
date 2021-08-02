@@ -1,10 +1,10 @@
-import {BeamDocumentMock, BeamHTMLElementMock, BeamRangeMock, BeamTextMock} from "./Test/BeamMocks"
-import {BeamWindowMock} from "./Test/BeamWindowMock"
-import {PointAndShootUI_native} from "./PointAndShootUI_native"
-import {NativeMock} from "./Test/NativeMock"
-import {BeamElement, BeamRange} from "./BeamTypes"
-import {BeamElementHelper} from "./BeamElementHelper"
-import {BeamRectHelper} from "./BeamRectHelper"
+import { BeamDocumentMock, BeamHTMLElementMock, BeamRangeMock, BeamTextMock } from "./Test/BeamMocks"
+import { BeamWindowMock } from "./Test/BeamWindowMock"
+import { PointAndShootUI_native } from "./PointAndShootUI_native"
+import { NativeMock } from "./Test/NativeMock"
+import { BeamElement, BeamRange } from "./BeamTypes"
+import { BeamElementHelper } from "./BeamElementHelper"
+import { BeamRectHelper } from "./BeamRectHelper"
 
 /**
  * @param frameEls {BeamHTMLElement[]}
@@ -40,7 +40,7 @@ function pointAndShootTestBed(frameEls = []) {
   const native = new NativeMock(win)
   const pnsNativeUI = new PointAndShootUI_native(native)
 
-  return {pnsNativeUI, native}
+  return { pnsNativeUI, native }
 }
 
 test("test pointBounds payload", () => {
@@ -70,7 +70,7 @@ test("test pointBounds payload", () => {
     mostBottomChild.bounds.height = 16
     block.appendChild(mostBottomChild)
   }
-  const attributes = {href: "/wiki/MongoDB"}
+  const attributes = { href: "/wiki/MongoDB" }
   const mostRightChild = new BeamHTMLElementMock("a", attributes)
   {
     mostRightChild.offsetLeft = 10
@@ -81,12 +81,12 @@ test("test pointBounds payload", () => {
     block.appendChild(mostRightChild)
   }
 
-  pnsNativeUI.pointBounds({id: "uuid", element: block})
+  pnsNativeUI.pointBounds({ id: "uuid", element: block })
   const events = native.events
   expect(events.length).toEqual(1)
   const event0 = events[0]
   expect(event0.name).toEqual("sendMessage pointBounds")
-  
+
   const payload = event0.payload.point
   const pointRect = payload.rect
   expect(pointRect.x).toEqual(block.offsetLeft)
@@ -108,38 +108,38 @@ test("test shootBounds payload", () => {
   const mostLeftChild = new BeamHTMLElementMock("b")
   const mostTopChild = mostLeftChild
   {
-	mostLeftChild.offsetLeft = 0
-	mostLeftChild.offsetTop = 0
-	mostLeftChild.width = 50
-	mostLeftChild.height = 16
-	mostLeftChild.appendChild(new BeamTextMock("MEAN"))
-	block.appendChild(mostLeftChild)
+    mostLeftChild.offsetLeft = 0
+    mostLeftChild.offsetTop = 0
+    mostLeftChild.width = 50
+    mostLeftChild.height = 16
+    mostLeftChild.appendChild(new BeamTextMock("MEAN"))
+    block.appendChild(mostLeftChild)
   }
   const mostBottomChild = new BeamTextMock(" (")
   {
-	mostBottomChild.bounds.x = 15
-	mostBottomChild.bounds.y = 30
-	mostBottomChild.bounds.width = 20
-	mostBottomChild.bounds.height = 16
-	block.appendChild(mostBottomChild)
+    mostBottomChild.bounds.x = 15
+    mostBottomChild.bounds.y = 30
+    mostBottomChild.bounds.width = 20
+    mostBottomChild.bounds.height = 16
+    block.appendChild(mostBottomChild)
   }
   const attributes = { href: "/wiki/MongoDB" }
   const mostRightChild = new BeamHTMLElementMock("a", attributes)
   {
-	mostRightChild.offsetLeft = 10
-	mostRightChild.offsetTop = 5
-	mostRightChild.width = 60
-	mostRightChild.height = 16
-	mostRightChild.appendChild(new BeamTextMock("MongoDB"))
-	block.appendChild(mostRightChild)
+    mostRightChild.offsetLeft = 10
+    mostRightChild.offsetTop = 5
+    mostRightChild.width = 60
+    mostRightChild.height = 16
+    mostRightChild.appendChild(new BeamTextMock("MongoDB"))
+    block.appendChild(mostRightChild)
   }
 
-  pnsNativeUI.shootBounds([{id: "uuid", element: block}])
+  pnsNativeUI.shootBounds([{ id: "uuid", element: block }])
   const events = native.events
   expect(events.length).toEqual(1)
   const event0 = events[0]
   expect(event0.name).toEqual("sendMessage shootBounds")
-  
+
   const payload = event0.payload.shoot[0]
   const pointRect = payload.rect
   expect(pointRect.x).toEqual(block.offsetLeft)
@@ -150,7 +150,7 @@ test("test shootBounds payload", () => {
 })
 
 test("select event should return areas containing only x, y, width and height", () => {
-  const {pnsNativeUI, native} = pointAndShootTestBed()
+  const { pnsNativeUI, native } = pointAndShootTestBed()
   // manually init selection with selection range
   const range = new BeamRangeMock() as BeamRange
   const node = new BeamHTMLElementMock("b")
@@ -158,9 +158,9 @@ test("select event should return areas containing only x, y, width and height", 
   range.setEnd(node, 3)
   const selectElements = [
     {
-	  id: "uuid",
-	  range: range
-	}
+      id: "uuid",
+      range: range
+    }
   ]
   pnsNativeUI.selectBounds(selectElements)
   const events = native.events
@@ -173,7 +173,7 @@ test("select event should return areas containing only x, y, width and height", 
 })
 
 describe("Pointing mode overlay bounding area calculation", () => {
-  const {pnsNativeUI, native} = pointAndShootTestBed()
+  const { pnsNativeUI, native } = pointAndShootTestBed()
 
   test("point area is based on children bounds", () => {
     const parent = new BeamHTMLElementMock("div")
@@ -198,7 +198,7 @@ describe("Pointing mode overlay bounding area calculation", () => {
     const isChildVisible = BeamElementHelper.isVisible(child as BeamElement, native.win)
     expect(isChildVisible).toBe(true)
     const area = pnsNativeUI.elementBounds(parent)
-    const expected = {x: 20, y: 20, width: 10, height: 10}
+    const expected = { x: 20, y: 20, width: 10, height: 10 }
     expect(area).toMatchObject(expected)
   })
 
@@ -236,7 +236,7 @@ describe("Pointing mode overlay bounding area calculation", () => {
     const isChild2Visible = BeamElementHelper.isVisible(child2 as BeamElement, native.win)
     expect(isChild2Visible).toBe(true)
     const area = pnsNativeUI.elementBounds(parent)
-    const expected = {x: 20, y: 20, width: 100, height: 100}
+    const expected = { x: 20, y: 20, width: 100, height: 100 }
     expect(area).toMatchObject(expected)
   })
 
@@ -274,7 +274,7 @@ describe("Pointing mode overlay bounding area calculation", () => {
     const isChild2Visible = BeamElementHelper.isVisible(child2, native.win)
     expect(isChild2Visible).toBe(false)
     const area = pnsNativeUI.elementBounds(parent)
-    const expected = {x: 20, y: 20, width: 10, height: 10}
+    const expected = { x: 20, y: 20, width: 10, height: 10 }
     expect(area).toMatchObject(expected)
   })
 
@@ -302,7 +302,6 @@ describe("Pointing mode overlay bounding area calculation", () => {
       parent.appendChild(child)
       const area = pnsNativeUI.elementBounds(child)
       const isChildVisible = BeamElementHelper.isVisible(child as BeamElement, native.win)
-      const p = props
       if (expected) {
         expect(isChildVisible).toBe(true)
         expect(area).toMatchObject(expected)
@@ -316,7 +315,7 @@ describe("Pointing mode overlay bounding area calculation", () => {
     const isParentVisible = BeamElementHelper.isVisible(parent as BeamElement, native.win)
     expect(isParentVisible).toBe(true)
 
-    testChild([[]], {x: 20, y: 20, width: 10, height: 10})
+    testChild([[]], { x: 20, y: 20, width: 10, height: 10 })
     testChild([["display", "none"]])
     testChild([["visibility", "hidden"]])
     testChild([["visibility", "collapse"]])
@@ -325,33 +324,33 @@ describe("Pointing mode overlay bounding area calculation", () => {
     testChild([["height", "0px"]])
     // Only absolutely positioned elements can have a `clip` property
     testChild([["clip", "rect(0, 0, 0, 0)"], ["position", "absolute"]])
-    testChild([["clip", "rect(0, 0, 0, 0)"], ["position", "static"]], {x: 20, y: 20, width: 10, height: 10})
+    testChild([["clip", "rect(0, 0, 0, 0)"], ["position", "static"]], { x: 20, y: 20, width: 10, height: 10 })
     testChild([["clip-path", "inset(50%)"]])
     testChild([["clip-path", "inset(100%)"]])
-    testChild([["clip-path", "inset(49%)"]], {x: 20, y: 20, width: 10, height: 10})
+    testChild([["clip-path", "inset(49%)"]], { x: 20, y: 20, width: 10, height: 10 })
 
   })
 })
 
 
 describe("isMeaningful filtering", () => {
-  const {pnsNativeUI, native} = pointAndShootTestBed()
+  const { pnsNativeUI, native } = pointAndShootTestBed()
   test(
-      "filter out empty element without any childNodes (including text nodes)",
-      () => {
-        const parent = new BeamHTMLElementMock("div")
-        {
-          parent.offsetLeft = 10
-          parent.offsetTop = 10
-          parent.width = 40
-          parent.height = 40
-        }
-
-        const isParentVisible = BeamElementHelper.isVisible(parent as BeamElement, native.win)
-        expect(isParentVisible).toBe(true)
-        const area = pnsNativeUI.elementBounds(parent)
-        expect(area).toBeUndefined()
+    "filter out empty element without any childNodes (including text nodes)",
+    () => {
+      const parent = new BeamHTMLElementMock("div")
+      {
+        parent.offsetLeft = 10
+        parent.offsetTop = 10
+        parent.width = 40
+        parent.height = 40
       }
+
+      const isParentVisible = BeamElementHelper.isVisible(parent as BeamElement, native.win)
+      expect(isParentVisible).toBe(true)
+      const area = pnsNativeUI.elementBounds(parent)
+      expect(area).toBeUndefined()
+    }
   )
 
   describe("image and media elements are allowed in selection despite being empty", () => {
@@ -372,7 +371,7 @@ describe("isMeaningful filtering", () => {
       expect(isVisible).toBe(true)
       const area = pnsNativeUI.elementBounds(element)
       if (expectsTagToBeSelected) {
-        const expected = {x: element.offsetLeft, y: element.offsetTop, width: element.width, height: element.height}
+        const expected = { x: element.offsetLeft, y: element.offsetTop, width: element.width, height: element.height }
         expect(area).toMatchObject(expected)
       } else {
         expect(area).toBeUndefined()
@@ -405,70 +404,70 @@ describe("isMeaningful filtering", () => {
     }
 
     test(
-        "empty image elements allowed in selection: <img> & <svg> tags or because it has a valid url() in css `background-image` property value",
-        () => {
-          testSelection("img", [], true)
-          testSelection("svg", [], true)
-          testSelection("div", [], false)
-          testSelection(
-              "div",
-              [["background-image", "url(\"https://interactive-examples.mdn.mozilla.net/media/examples/balloon-small.jpg\")"]],
-              true
-          )
-          testSelection(
-              "div",
-              [["background-image", "url(data:image/gif;base64,R0lGODlhEAAQAMQAAORHHOVSKudfOulrSOp3WOyDZu6QdvCchPGolfO0o/XBs/fNwfjZ0frl3/zy7////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAkAABAALAAAAAAQABAAAAVVICSOZGlCQAosJ6mu7fiyZeKqNKToQGDsM8hBADgUXoGAiqhSvp5QAnQKGIgUhwFUYLCVDFCrKUE1lBavAViFIDlTImbKC5Gm2hB0SlBCBMQiB0UjIQA7)"]],
-              true
-          )
-          testSelection(
-              "div",
-              [["background-image", "linear-gradient(to left, #333, #333 50%, #eee 75%, #333 75%)"]],
-              false
-          )
-        }
+      "empty image elements allowed in selection: <img> & <svg> tags or because it has a valid url() in css `background-image` property value",
+      () => {
+        testSelection("img", [], true)
+        testSelection("svg", [], true)
+        testSelection("div", [], false)
+        testSelection(
+          "div",
+          [["background-image", "url(\"https://interactive-examples.mdn.mozilla.net/media/examples/balloon-small.jpg\")"]],
+          true
+        )
+        testSelection(
+          "div",
+          [["background-image", "url(data:image/gif;base64,R0lGODlhEAAQAMQAAORHHOVSKudfOulrSOp3WOyDZu6QdvCchPGolfO0o/XBs/fNwfjZ0frl3/zy7////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAkAABAALAAAAAAQABAAAAVVICSOZGlCQAosJ6mu7fiyZeKqNKToQGDsM8hBADgUXoGAiqhSvp5QAnQKGIgUhwFUYLCVDFCrKUE1lBavAViFIDlTImbKC5Gm2hB0SlBCBMQiB0UjIQA7)"]],
+          true
+        )
+        testSelection(
+          "div",
+          [["background-image", "linear-gradient(to left, #333, #333 50%, #eee 75%, #333 75%)"]],
+          false
+        )
+      }
     )
 
     test(
-        "media elements <video> and <audio> allowed in selection",
-        () => {
+      "media elements <video> and <audio> allowed in selection",
+      () => {
 
-          testSelection("video", [], true)
-          testSelection("audio", [], true)
-          testSelection("div", [], false)
-        }
+        testSelection("video", [], true)
+        testSelection("audio", [], true)
+        testSelection("div", [], false)
+      }
     )
   })
 
 
   test(
-      "filter out elements without any meaningful text",
-      () => {
-        const parent = new BeamHTMLElementMock("div")
-        {
-          parent.offsetLeft = 10
-          parent.offsetTop = 10
-          parent.width = 40
-          parent.height = 40
-          parent.appendChild(new BeamTextMock("•"))
-        }
-
-        const isParentVisible = BeamElementHelper.isVisible(parent as BeamElement, native.win)
-        expect(isParentVisible).toBe(true)
-        const area = pnsNativeUI.elementBounds(parent)
-        expect(area).toBeUndefined()
-
-        // Update text to be meaningful
-        parent.removeChild(parent.childNodes[0])
-        parent.appendChild(new BeamTextMock("• Hello"))
-        const area2 = pnsNativeUI.elementBounds(parent)
-        const expected = {x: 10, y: 10, width: 40, height: 40}
-        expect(area2).toMatchObject(expected)
+    "filter out elements without any meaningful text",
+    () => {
+      const parent = new BeamHTMLElementMock("div")
+      {
+        parent.offsetLeft = 10
+        parent.offsetTop = 10
+        parent.width = 40
+        parent.height = 40
+        parent.appendChild(new BeamTextMock("•"))
       }
+
+      const isParentVisible = BeamElementHelper.isVisible(parent as BeamElement, native.win)
+      expect(isParentVisible).toBe(true)
+      const area = pnsNativeUI.elementBounds(parent)
+      expect(area).toBeUndefined()
+
+      // Update text to be meaningful
+      parent.removeChild(parent.childNodes[0])
+      parent.appendChild(new BeamTextMock("• Hello"))
+      const area2 = pnsNativeUI.elementBounds(parent)
+      const expected = { x: 10, y: 10, width: 40, height: 40 }
+      expect(area2).toMatchObject(expected)
+    }
   )
 })
 
 describe("overflow / clipping handling", () => {
-  const {pnsNativeUI, native} = pointAndShootTestBed()
+  const { pnsNativeUI, native } = pointAndShootTestBed()
   test("pointing area is constrained to the overflowing parent bounds", () => {
     const parent = new BeamHTMLElementMock("div")
     {
@@ -496,7 +495,7 @@ describe("overflow / clipping handling", () => {
     expect(isChildVisible).toBe(true)
 
     const area = pnsNativeUI.elementBounds(parent)
-    const expected = {x: 20, y: 20, width: 90, height: 90}
+    const expected = { x: 20, y: 20, width: 90, height: 90 }
     expect(area).toMatchObject(expected)
   })
 
@@ -539,7 +538,7 @@ describe("overflow / clipping handling", () => {
     expect(isChild2Visible).toBe(true)
 
     const area = pnsNativeUI.elementBounds(child2)
-    const expected = {x: 60, y: 60, width: 50, height: 50}
+    const expected = { x: 60, y: 60, width: 50, height: 50 }
     expect(area).toMatchObject(expected)
   })
 
@@ -574,9 +573,9 @@ describe("overflow / clipping handling", () => {
     const area = pnsNativeUI.elementBounds(child)
     const clippingElements = BeamElementHelper.getClippingElements(child, native.win)
     const clippingArea = BeamElementHelper.getClippingArea(clippingElements, native.win)
-    const inter = BeamRectHelper.intersection(child.getBoundingClientRect(), clippingArea)
+    const _ = BeamRectHelper.intersection(child.getBoundingClientRect(), clippingArea)
 
-    const expected = {x: 60, y: 60, width: 50, height: 200}
+    const expected = { x: 60, y: 60, width: 50, height: 200 }
     expect(area).toMatchObject(expected)
   })
 
@@ -628,7 +627,7 @@ describe("overflow / clipping handling", () => {
     expect(isChild2Visible).toBe(true)
 
     const area = pnsNativeUI.elementBounds(child2)
-    const expected = {x: 50, y: 50, width: 300, height: 300}
+    const expected = { x: 50, y: 50, width: 300, height: 300 }
     expect(area).toMatchObject(expected)
   })
 
@@ -666,7 +665,7 @@ describe("overflow / clipping handling", () => {
     expect(isChildVisible).toBe(true)
 
     const area = pnsNativeUI.elementBounds(child)
-    const expected = {x: 0, y: 0, width: 200, height: 200}
+    const expected = { x: 0, y: 0, width: 200, height: 200 }
     expect(area).toMatchObject(expected)
   })
 
@@ -727,12 +726,11 @@ describe("overflow / clipping handling", () => {
     expect(isChildVisible).toBe(true)
 
     const area = pnsNativeUI.elementBounds(parent)
-    const expected = {x: 10, y: 10, width: 100, height: 100}
+    const expected = { x: 10, y: 10, width: 100, height: 100 }
     expect(area).toMatchObject(expected)
 
     parent.style.setProperty("clip", "auto")
     const area2 = pnsNativeUI.elementBounds(parent)
-    const expected2 = {x: -90, y: -90, width: 500, height: 500}
     expect(area2).toMatchObject(expected)
   })
 
@@ -763,13 +761,184 @@ describe("overflow / clipping handling", () => {
     expect(isChildVisible).toBe(true)
 
     const area = pnsNativeUI.elementBounds(parent)
-    const expected = {x: 10, y: 10, width: 100, height: 100}
+    const expected = { x: 10, y: 10, width: 100, height: 100 }
     expect(area).toMatchObject(expected)
 
     parent.style.setProperty("clip-path", "none")
     const area2 = pnsNativeUI.elementBounds(parent)
-    const expected2 = {x: -90, y: -90, width: 500, height: 500}
     expect(area2).toMatchObject(expected)
   })
 
+})
+
+describe.skip("performance timing", () => {
+  const { pnsNativeUI } = pointAndShootTestBed()
+
+  function getRandomInt(max) {
+    return Math.floor(Math.random() * max)
+  }
+
+  function createComplexTree() {
+    const parent = new BeamHTMLElementMock("div")
+    {
+      parent.offsetLeft = 10
+      parent.offsetTop = 10
+      parent.width = 140
+      parent.height = 240
+    }
+
+    for (let index = 0; index < 2000; index++) {
+      const block1 = new BeamHTMLElementMock("h1")
+      {
+        block1.offsetLeft = getRandomInt(14)
+        block1.offsetTop = getRandomInt(7)
+        block1.width = getRandomInt(140)
+        block1.height = getRandomInt(340)
+        block1.appendChild(new BeamTextMock("Some text h1"))
+      }
+
+      const block2 = new BeamHTMLElementMock("span")
+      {
+        block2.offsetLeft = getRandomInt(14)
+        block2.offsetTop = getRandomInt(7)
+        block2.width = getRandomInt(140)
+        block2.height = getRandomInt(440)
+        block2.appendChild(new BeamTextMock("Some text span"))
+      }
+
+      block2.appendChild(block1)
+      block2.setQuerySelectorResult("h1", block1)
+
+      const block3 = new BeamHTMLElementMock("p")
+      {
+        block3.offsetLeft = getRandomInt(40)
+        block3.offsetTop = getRandomInt(70)
+        block3.width = getRandomInt(140)
+        block3.height = getRandomInt(540)
+        block3.appendChild(new BeamTextMock("Some text p"))
+      }
+
+      parent.appendChild(block2)
+      parent.setQuerySelectorResult("span", block2)
+      parent.appendChild(block3)
+      parent.setQuerySelectorResult("p", block3)
+    }
+
+    return parent
+  }
+
+  function createDeeplyNestedTree() {
+    const parent = new BeamHTMLElementMock("div")
+    {
+      parent.offsetLeft = 10
+      parent.offsetTop = 10
+      parent.width = 140
+      parent.height = 240
+    }
+
+    let lastChild = parent
+    for (let index = 0; index < 200; index++) {
+      const block1 = new BeamHTMLElementMock("h1")
+      parent.setQuerySelectorResult("h1", block1)
+      block1.offsetLeft = getRandomInt(14)
+      block1.offsetTop = getRandomInt(7)
+      block1.width = getRandomInt(140)
+      block1.height = getRandomInt(340)
+      block1.appendChild(new BeamTextMock(`child #${index}`))
+
+      lastChild.appendChild(block1)
+      lastChild = block1
+    }
+
+    return parent
+  }
+
+  function createDeeplyNestedTreeWithImages() {
+    const parent = new BeamHTMLElementMock("div")
+    {
+      parent.offsetLeft = 10
+      parent.offsetTop = 10
+      parent.width = 140
+      parent.height = 240
+    }
+
+    let lastChild = parent
+    for (let index = 0; index < 200; index++) {
+      const block1 = new BeamHTMLElementMock("h1")
+      parent.setQuerySelectorResult("h1", block1)
+      block1.offsetLeft = getRandomInt(14)
+      block1.offsetTop = getRandomInt(7)
+      block1.width = getRandomInt(140)
+      block1.height = getRandomInt(340)
+      block1.appendChild(new BeamTextMock(`child #${index}`))
+
+      lastChild.appendChild(block1)
+      lastChild = block1
+    }
+
+    for (let index = 0; index < 5; index++) {
+      const img = new BeamHTMLElementMock("img")
+      parent.setQuerySelectorResult("img", img)
+      parent.appendChild(img)
+    }
+    return parent
+  }
+
+  /**
+   * This DOM structure only tests the recursion of child elements
+   * DOM structure:
+   * - div
+   * (2000x)
+   *   - span 
+   *     - some text span
+   *     - h1
+   *       - some text h1
+   *   - p
+   *     - some text p 
+   */
+  test("elementBounds + complex DOM", () => {
+    const parent = createComplexTree()
+    const t0 = performance.now()
+    const _ = pnsNativeUI.elementBounds(parent)
+    const t1 = performance.now()
+    const time = t1 - t0
+    expect(time).toBeLessThanOrEqual(13)
+  })
+  
+  /**
+   * This DOM structure only tests the recursion of child elements
+   * DOM structure:
+   * - div
+   *     - h1
+   *       - some text h1
+   *          - h1
+   *            - some text h1
+   *              (... 200x)
+   */
+  test("elementBounds + deeply nested DOM", () => {
+    const parent = createDeeplyNestedTree()
+    const t0 = performance.now()
+    const _ = pnsNativeUI.elementBounds(parent)
+    const t1 = performance.now()
+    const time = t1 - t0
+    expect(time).toBeLessThanOrEqual(9)
+  })
+  /**
+   * This DOM structure only tests the recursion of child elements
+   * DOM structure:
+   * - div
+   *     - h1
+   *       - some text h1
+   *          - h1
+   *            - some text h1
+   *              (... 200x)
+   */
+  test("elementBounds + deeply nested DOM with images", () => {
+    const parent = createDeeplyNestedTreeWithImages()
+    const t0 = performance.now()
+    const _ = pnsNativeUI.elementBounds(parent)
+    const t1 = performance.now()
+    const time = t1 - t0
+    expect(time).toBeLessThanOrEqual(0.1)
+  })
 })
