@@ -133,14 +133,15 @@ import BeamCore
     }
 
     func toggleBetweenWebAndNote() {
-        guard let note = currentTab?.noteController.note else { return }
-
         switch mode {
         case .web:
-            if currentTab?.originMode == .today && note.type.isJournal {
+            let noteController = currentTab?.noteController
+            if currentTab?.originMode == .today, let note = noteController?.note, note.type.isJournal {
                 navigateToJournal(note: note)
-            } else {
+            } else if let note = noteController?.hasSetNote == true ? noteController?.note : currentNote {
                 navigateToNote(note)
+            } else {
+                navigateToJournal(note: nil)
             }
         case .today, .note, .page:
             if hasBrowserTabs { mode = .web }
@@ -223,7 +224,7 @@ import BeamCore
         currentTab?.load(url: url)
     }
 
-    func addNewTab(origin: BrowsingTreeOrigin?, setCurrent: Bool = true, note: BeamNote, element: BeamElement? = nil, url: URL? = nil, webView: BeamWebView? = nil) -> BrowserTab {
+    func addNewTab(origin: BrowsingTreeOrigin?, setCurrent: Bool = true, note: BeamNote?, element: BeamElement? = nil, url: URL? = nil, webView: BeamWebView? = nil) -> BrowserTab {
         let tab = BrowserTab(state: self, browsingTreeOrigin: origin, originMode: mode, note: note, rootElement: element, webView: webView)
         browserTabsManager.addNewTab(tab, setCurrent: setCurrent, withURL: url)
         mode = .web
@@ -232,7 +233,7 @@ import BeamCore
 
     func createTab(withURL url: URL, originalQuery: String?, setCurrent: Bool = true, note: BeamNote? = nil, rootElement: BeamElement? = nil, webView: BeamWebView? = nil) -> BrowserTab {
         let origin = BrowsingTreeOrigin.searchBar(query: originalQuery ?? "<???>")
-        return addNewTab(origin: origin, setCurrent: setCurrent, note: note ?? data.todaysNote, element: rootElement, url: url, webView: webView)
+        return addNewTab(origin: origin, setCurrent: setCurrent, note: note, element: rootElement, url: url, webView: webView)
     }
 
     func createTabFromNote(_ note: BeamNote, element: BeamElement, withURL url: URL) {

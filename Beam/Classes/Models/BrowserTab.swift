@@ -197,7 +197,7 @@ import Promises
        - id:
        - webView:
      */
-    init(state: BeamState, browsingTreeOrigin: BrowsingTreeOrigin?, originMode: Mode, note: BeamNote, rootElement: BeamElement? = nil,
+    init(state: BeamState, browsingTreeOrigin: BrowsingTreeOrigin?, originMode: Mode, note: BeamNote?, rootElement: BeamElement? = nil,
          id: UUID = UUID(), webView: BeamWebView? = nil) {
         self.state = state
         self.id = id
@@ -230,7 +230,7 @@ import Promises
         self.webView.page = self
         uiDelegateController.page = self
         mediaPlayerController = MediaPlayerController(page: self)
-        note.browsingSessions.append(browsingTree)
+        noteController.note.browsingSessions.append(browsingTree)
         setupObservers()
     }
 
