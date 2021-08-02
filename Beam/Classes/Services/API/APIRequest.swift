@@ -286,9 +286,9 @@ extension APIRequest {
         }
         #endif
 
-        // Note: all `completionHandler` call must use `backgroundQueue.async` because if the code called in the completion
-        // handler is blocking, it will prevent new following requests to be parsed in the NSURLSession delegate callback
-        // thread
+        // Note: all `completionHandler` call must use `backgroundQueue.async` because if the
+        // code called in the completion handler is blocking, it will prevent new following requests
+        // to be parsed in the NSURLSession delegate callback thread
 
         dataTask = BeamURLSession.shared.dataTask(with: request) { (data, response, error) -> Void in
             guard let dataTask = self.dataTask else {
@@ -450,8 +450,8 @@ extension APIRequest {
             }
 
             /*
-             Manage errors returned by our GraphQL user codebase. Request was properly handled by the server but include
-             errors like checksum issues.
+             Manage errors returned by our GraphQL user codebase. Request was properly handled
+             by the server but include errors like checksum issues.
              */
             if let error = self.handleError(value) {
                 throw error

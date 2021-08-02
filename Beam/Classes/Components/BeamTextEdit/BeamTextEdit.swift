@@ -143,7 +143,7 @@ public extension CALayer {
 
         // TODO: remove this when we add websocket sync
         if let documentStruct = root.note?.documentStruct {
-            documentManager.refresh(documentStruct, true)
+            try? documentManager.refresh(documentStruct, true)
         }
 
         setAccessibilityIdentifier("TextEdit")

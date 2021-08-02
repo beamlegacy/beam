@@ -9,7 +9,7 @@ import Foundation
 import BeamCore
 import GRDB
 
-struct PasswordRecord: BeamObjectProtocol {
+struct PasswordRecord {
     internal static let databaseUUIDEncodingStrategy = DatabaseUUIDEncodingStrategy.string
 
     var uuid: UUID
@@ -21,8 +21,10 @@ struct PasswordRecord: BeamObjectProtocol {
     var updatedAt: Date
     var deletedAt: Date?
     var previousCheckSum: String?
-
     var checksum: String?
+}
+
+extension PasswordRecord: BeamObjectProtocol {
     static var beamObjectTypeName: String = "password"
     var beamObjectId: UUID {
         get { uuid }
@@ -33,7 +35,7 @@ struct PasswordRecord: BeamObjectProtocol {
         set { previousCheckSum = newValue }
     }
 
-//    // Used for encoding this into BeamObject
+    // Used for encoding this into BeamObject
     enum CodingKeys: String, CodingKey {
         case uuid
         case entryId

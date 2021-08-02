@@ -454,7 +454,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                     expect { try result.get() }.toNot(throwError())
 
                                     if let objects = try? result.get() {
-                                        Logger.shared.logDebug("⚠️ received objects:", category: .beamObjectNetwork)
+                                        Logger.shared.logWarning("Received objects:", category: .beamObjectNetwork)
                                         dump(objects)
                                     }
                                     done()

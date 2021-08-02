@@ -300,7 +300,7 @@ extension BeamObjectManagerDelegate {
                 mergedObjects.append(mergedObject)
             }
 
-            Logger.shared.logDebug("⚠️ merged Objects", category: .beamObjectNetwork)
+            Logger.shared.logWarning("Merged Objects", category: .beamObjectNetwork)
             dump(mergedObjects)
 
             try self.saveOnBeamObjectsAPI(mergedObjects, .fetchRemoteAndError) { result in
@@ -314,7 +314,7 @@ extension BeamObjectManagerDelegate {
                         allObjects.append(contentsOf: goodObjects)
                         allObjects.append(contentsOf: remoteObjects)
 
-                        Logger.shared.logDebug("⚠️ allObjects Objects", category: .beamObjectNetwork)
+                        Logger.shared.logWarning("AllObjects Objects", category: .beamObjectNetwork)
                         dump(allObjects)
 
                         try self.saveObjectsAfterConflict(remoteObjects)
