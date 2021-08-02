@@ -279,7 +279,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
         }
 
         // if the activeShootGroup and the incomming select group match, update the targets
-        if let group = activeShootGroup {
+        if activeShootGroup != nil {
             for target in targets {
                 activeShootGroup?.updateTarget(target)
             }

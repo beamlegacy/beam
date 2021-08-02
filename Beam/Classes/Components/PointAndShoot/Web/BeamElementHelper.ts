@@ -127,7 +127,11 @@ export class BeamElementHelper {
    * @param element
    */
   static isMedia(element: BeamElement): boolean {
-    return ["video", "audio"].includes(element.tagName.toLowerCase())
+    return  (
+      ["video", "audio"].includes(element.tagName.toLowerCase()) || 
+      Boolean(element.querySelectorAll("video").length) || 
+      Boolean(element.querySelectorAll("audio").length)
+    )
   }
 
   /**
@@ -141,8 +145,9 @@ export class BeamElementHelper {
   static isImage(element: BeamElement, win: BeamWindow): boolean {
     // currentSrc vs src
     if (
-        element.tagName.toLowerCase() === "img"
-        || element.tagName.toLowerCase() === "svg"
+      ["img", "svg"].includes(element.tagName.toLowerCase()) ||
+      Boolean(element.querySelectorAll("img").length) || 
+      Boolean(element.querySelectorAll("svg").length)
     ) {
       return true
     }

@@ -165,7 +165,7 @@ export interface BeamEvent {
 }
 
 export interface BeamEventTarget<E extends BeamEvent = BeamEvent> {
-  addEventListener(type: string, callback: (e: E) => any, useCapture?: boolean)
+  addEventListener(type: string, callback: (e: E) => any, options?: any)
 
   removeEventListener(type: string, callback: (e: E) => any)
 
@@ -212,6 +212,7 @@ export interface BeamCharacterData extends BeamNode {
 export type BeamText = BeamCharacterData
 
 export interface BeamElement extends BeamParentNode {
+  querySelectorAll(query: string): BeamElement[]
   removeAttribute(pointDatasetKey: any)
   dataset: any
   attributes: NamedNodeMap
@@ -375,6 +376,7 @@ export declare const BeamRange: {
 }
 
 export interface BeamDocument extends BeamNode {
+  createDocumentFragment(): any
   elementFromPoint(x: any, y: any)
   /**
    * @type {HTMLHtmlElement}
