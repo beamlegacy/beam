@@ -12,14 +12,14 @@ class InsertElement: TextEditorCommand {
     static let name: String = "InsertNode"
 
     var parentElementId: UUID
-    var noteTitle: String
+    var noteId: UUID
     var newElementId: UUID
     var after: UUID?
     var data: Data?
 
-    init(_ element: BeamElement, in elementId: UUID, of noteTitle: String, after: UUID?) {
+    init(_ element: BeamElement, in elementId: UUID, of noteId: UUID, after: UUID?) {
         self.parentElementId = elementId
-        self.noteTitle = noteTitle
+        self.noteId = noteId
         self.after = after
         self.newElementId = element.id
         super.init(name: Self.name)
@@ -27,7 +27,7 @@ class InsertElement: TextEditorCommand {
     }
 
     override func run(context: Widget?) -> Bool {
-        guard let elementInstance = getElement(for: noteTitle, and: parentElementId) else { return false }
+        guard let elementInstance = getElement(for: noteId, and: parentElementId) else { return false }
         guard let element = decode(data: data) else { return false }
 
         var afterElement: BeamElement?
@@ -40,8 +40,8 @@ class InsertElement: TextEditorCommand {
     }
 
     override func undo(context: Widget?) -> Bool {
-        guard let newElementInstance = getElement(for: noteTitle, and: newElementId),
-              let elementInstance = getElement(for: noteTitle, and: parentElementId)
+        guard let newElementInstance = getElement(for: noteId, and: newElementId),
+              let elementInstance = getElement(for: noteId, and: parentElementId)
         else { return false }
 
         elementInstance.element.removeChild(newElementInstance.element)
@@ -52,22 +52,22 @@ class InsertElement: TextEditorCommand {
 extension CommandManager where Context == Widget {
     @discardableResult
     func insertElement(_ element: BeamElement, inNode: ElementNode, afterNode: ElementNode?) -> Bool {
-        guard let title = inNode.displayedElementNoteTitle else { return false }
-        let cmd = InsertElement(element, in: inNode.displayedElementId, of: title, after: afterNode?.displayedElementId)
+        guard let noteId = inNode.displayedElementNoteId else { return false }
+        let cmd = InsertElement(element, in: inNode.displayedElementId, of: noteId, after: afterNode?.displayedElementId)
         return run(command: cmd, on: inNode)
     }
 
     @discardableResult
     func insertElement(_ element: BeamElement, inNode: ElementNode, afterElement: BeamElement?) -> Bool {
-        guard let title = inNode.displayedElementNoteTitle else { return false }
-        let cmd = InsertElement(element, in: inNode.displayedElementId, of: title, after: afterElement?.id)
+        guard let noteId = inNode.displayedElementNoteId else { return false }
+        let cmd = InsertElement(element, in: inNode.displayedElementId, of: noteId, after: afterElement?.id)
         return run(command: cmd, on: inNode)
     }
 
     @discardableResult
     func insertElement(_ element: BeamElement, inElement: BeamElement, afterElement: BeamElement?) -> Bool {
-        guard let title = inElement.note?.title else { return false }
-        let cmd = InsertElement(element, in: inElement.id, of: title, after: afterElement?.id)
+        guard let noteId = inElement.note?.id else { return false }
+        let cmd = InsertElement(element, in: inElement.id, of: noteId, after: afterElement?.id)
         return run(command: cmd, on: nil)
     }
 }

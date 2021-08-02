@@ -175,6 +175,7 @@ public class BeamNote: BeamElement {
     public var version: Int64 = 0
     public var savedVersion: Int64 = 0
     public var databaseId: UUID?
+    @Published public var deleted: Bool = false
 
     public override var note: BeamNote? {
         return self
@@ -252,7 +253,7 @@ public class BeamNote: BeamElement {
         return newNote
     }
 
-    public var activeDocumentCancellable: AnyCancellable?
+    public var activeDocumentCancellables = [AnyCancellable]()
     public func merge(other: BeamNote) {
         var oldElems = [UUID: BeamElement]()
         for e in flatElements {
@@ -403,10 +404,13 @@ public class BeamNote: BeamElement {
         lock.writeUnlock()
     }
 
-    static public var idForNoteNamed: (String) -> UUID? = { _ in
+    // (Note name, include deleted notes)
+    static public var idForNoteNamed: (String, Bool) -> UUID? = { _, _ in
         fatalError()
     }
-    static public var titleForNoteId: (UUID) -> String? = { _ in
+
+    // (Note id, include deleted notes)
+    static public var titleForNoteId: (UUID, Bool) -> String? = { _, _ in
         fatalError()
     }
 }

@@ -13,26 +13,26 @@ class InsertText: TextEditorCommand {
 
     var text: BeamText
     var elementId: UUID
-    var noteTitle: String
+    var noteId: UUID
     var cursorPosition: Int
     var oldText: BeamText?
 
-    init(text: BeamText, in elementId: UUID, of noteTitle: String, at cursorPosition: Int) {
+    init(text: BeamText, in elementId: UUID, of noteId: UUID, at cursorPosition: Int) {
         self.text = text
         self.elementId = elementId
-        self.noteTitle = noteTitle
+        self.noteId = noteId
         self.cursorPosition = cursorPosition
         super.init(name: Self.name)
         saveOldText()
     }
 
     private func saveOldText() {
-        guard let elementInstance = getElement(for: noteTitle, and: elementId) else { return }
+        guard let elementInstance = getElement(for: noteId, and: elementId) else { return }
         self.oldText = elementInstance.element.text
     }
 
     override func run(context: Widget?) -> Bool {
-        guard let elementInstance = getElement(for: noteTitle, and: elementId) else { return false }
+        guard let elementInstance = getElement(for: noteId, and: elementId) else { return false }
         elementInstance.element.text.replaceSubrange(cursorPosition..<cursorPosition, with: text)
 
         // Update the UI if possible:
@@ -45,7 +45,7 @@ class InsertText: TextEditorCommand {
     }
 
     override func undo(context: Widget?) -> Bool {
-        guard let elementInstance = getElement(for: noteTitle, and: elementId),
+        guard let elementInstance = getElement(for: noteId, and: elementId),
               let oldText = self.oldText else { return false }
         elementInstance.element.text.replaceSubrange(elementInstance.element.text.wholeRange, with: oldText)
 
@@ -64,7 +64,7 @@ class InsertText: TextEditorCommand {
               insertText.cursorPosition == cursorPosition + text.count,
               insertText.text.text != "\n",
               insertText.elementId == elementId,
-              insertText.noteTitle == noteTitle
+              insertText.noteId == noteId
               else { return false }
 
         self.text.append(insertText.text)
@@ -75,8 +75,8 @@ class InsertText: TextEditorCommand {
 extension CommandManager where Context == Widget {
     @discardableResult
     func insertText(_ text: BeamText, in node: TextNode, at cursorPosition: Int) -> Bool {
-        guard let title = node.displayedElementNoteTitle else { return false }
-        let cmd = InsertText(text: text, in: node.displayedElementId, of: title, at: cursorPosition)
+        guard let id = node.displayedElementNoteId else { return false }
+        let cmd = InsertText(text: text, in: node.displayedElementId, of: id, at: cursorPosition)
         return run(command: cmd, on: node)
     }
 }

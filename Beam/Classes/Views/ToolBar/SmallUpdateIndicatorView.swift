@@ -59,7 +59,7 @@ struct SmallUpdateIndicatorView: View {
             case .installing:
                 ButtonLabel("Installing update…")
             case .updateInstalled:
-                ButtonLabel("Update installed. Click here to relaunch") {
+                ButtonLabel("Update installed. Relaunch Beam.") {
                     NSApp.terminate(nil)
                 }
             default:

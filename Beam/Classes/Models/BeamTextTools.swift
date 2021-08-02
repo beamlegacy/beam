@@ -45,7 +45,7 @@ extension BeamText {
             return nil
         }
 
-        var _linkID = BeamNote.idForNoteNamed(link)
+        var _linkID = BeamNote.idForNoteNamed(link, false)
         if _linkID == nil && createNoteIfNeeded {
             let note = BeamNote.create(AppDelegate.main.data.documentManager, title: link)
             note.addChild(BeamElement())

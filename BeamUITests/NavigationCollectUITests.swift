@@ -37,7 +37,7 @@ class NavigationCollectUITests: QuickSpec {
     }
 
     override func spec() {
-        
+
         let titles = [
             "Point And Shoot Test Fixture Ultralight Beam",
             "Point And Shoot Test Fixture I-Beam",
@@ -54,7 +54,7 @@ class NavigationCollectUITests: QuickSpec {
                 self.journalChildren = self.journalScrollView.children(matching: .textView)
                     .matching(identifier: "TextNode")
             }
-            
+
             it("add links to journal in order") {
                 self.helper.openTestPage(number: 1)
                 let title0 = titles[0]
@@ -130,172 +130,191 @@ class NavigationCollectUITests: QuickSpec {
             }
         }
 
-        context("PNS") {
-            guard RUN_PNS_TEST else { return }
-
-            beforeEach {
-                self.manualBeforeTestSuite()
-                self.helper.tapCommand(.destroyDB)
-                self.continueAfterFailure = false
-                self.app.launch()
-                self.journalScrollView = self.app.scrollViews["journalView"]
-                self.journalChildren = self.journalScrollView.children(matching: .textView)
-                    .matching(identifier: "TextNode")
-                self.helper.tapCommand(.resizeWindowLandscape)
-            }
-            describe("Shoot") {
-                it("dismiss shootCardPicker by clicking on page and pressing escape") {
+        describe("PointAndShoot") {
+            context("with PointAndShoot enabled") {
+                it("Point and Shoot on click should open ShootCardPicker and not navigate the page") {
                     self.helper.openTestPage(number: 1)
-                    let searchText = "Ultralight Beam, Kanye West"
-                    let parent = self.app.webViews.containing(.staticText,
-                                                              identifier: searchText).element
-                    
-                    // click and drag between start and end of full text
-                    let child = parent.staticTexts[searchText]
-                    let start = child.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0.1))
-                    let end = child.coordinate(withNormalizedOffset: CGVector(dx: 1.1, dy: 0.9))
-                    start.click(forDuration: 1, thenDragTo: end)
-                    
-                    // Press option once to enable shoot mode
-                    XCUIElement.perform(withKeyModifiers: .option) {}
-                    
-                    let shootSelections = self.app.otherElements.matching(identifier:"ShootFrameSelection")
-                    expect(shootSelections.count) == 1
-                    
-                    let emptyLocation = child.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: -1))
-                    emptyLocation.click()
-                    sleep(1)
-                    let shootSelections2 = self.app.otherElements.matching(identifier:"ShootFrameSelection")
-                    expect(shootSelections2.count) == 0
-
-                    start.click(forDuration: 1, thenDragTo: end)
-
-                    // Press option once to enable shoot mode
-                    XCUIElement.perform(withKeyModifiers: .option) {}
-
-                    let shootSelections3 = self.app.otherElements.matching(identifier:"ShootFrameSelection")
-                    expect(shootSelections3.count) == 1
-
-                    // dismiss shootCardPicker with escape
-                    self.app.typeKey(.escape, modifierFlags: [])
-
-                    let shootSelections4 = self.app.otherElements.matching(identifier:"ShootFrameSelection")
-                    expect(shootSelections4.count) == 0
-                }
-            }
-            describe("Select") {
-                it("frame position placement") {
-                    self.helper.openTestPage(number: 1)
-                    let searchText = "Ultralight Beam, Kanye West"
-                    let parent = self.app.webViews.containing(.staticText,
-                                                              identifier: searchText).element
-                    
-                    // click and drag between start and end of full text
-                    let child = parent.staticTexts[searchText]
-                    let start = child.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0.1))
-                    let end = child.coordinate(withNormalizedOffset: CGVector(dx: 1.1, dy: 0.9))
-                    start.click(forDuration: 1, thenDragTo: end)
-                    
-                    // Press option once to enable shoot mode
+                    // Press option once to enable pointing mode
                     XCUIElement.perform(withKeyModifiers: .option) {
                         sleep(1)
-                    }
-                    
-                    self.helper.assertFramePositions(searchText: searchText, identifier: "ShootFrameSelection")
-                    // Zoom in
-                    self.app.typeKey("+", modifierFlags: .command)
-                    self.app.typeKey("+", modifierFlags: .command)
-                    self.app.typeKey("+", modifierFlags: .command)
-                    
-                    self.helper.assertFramePositions(searchText: searchText, identifier: "ShootFrameSelection")
-                    // Zoom out
-                    self.app.typeKey("-", modifierFlags: .command)
-                    self.app.typeKey("-", modifierFlags: .command)
-                    self.app.typeKey("-", modifierFlags: .command)
-                    
-                    self.helper.assertFramePositions(searchText: searchText, identifier: "ShootFrameSelection")
-                    // Scroll page
-                    self.app.webViews.firstMatch.scroll(byDeltaX: 0, deltaY: -200)
-                    
-                    self.helper.assertFramePositions(searchText: searchText, identifier: "ShootFrameSelection")
-                    // Resize window
-                    self.helper.tapCommand(.resizeWindowPortrait)
-                    
-                    self.helper.assertFramePositions(searchText: searchText, identifier: "ShootFrameSelection")
-                    // Add to today's note
-                    self.helper.addNote()
-                    
-                    // After shooting then pressing and releasing option shouldn't keep pointframe active
-                    XCUIElement.perform(withKeyModifiers: .option) {
+                        // get the url before clicking
+                        let beforeUrl = self.omnibarHelper.searchField.value as? String
+                        let page2Link = self.app.webViews.staticTexts["I-Beam"].firstMatch
+                        expect(page2Link.waitForExistence(timeout: 4)) == true
+                        page2Link.tap()
                         sleep(1)
+                        // compare with url after clicking
+                        expect(self.omnibarHelper.searchField.value as? String).to(equal(beforeUrl))
                     }
-                    
-                    let pointFrames = self.app.otherElements.matching(identifier:"PointFrame")
-                    expect(pointFrames.count) == 0
                 }
             }
-                
-            describe("Point") {
-                it("frame position placement") {
-                    self.helper.openTestPage(number: 1)
-                    let searchText = "Ultralight Beam, Kanye West"
-                    let parent = self.app.webViews.containing(.staticText,
-                                                              identifier: searchText).element
-                    
-                    let child = parent.staticTexts[searchText]
-                    let center = child.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
-                    // click at middle of searchText to focus on page
-                    center.click()
-                    
-                    // Hold option to enable point mode
-                    XCUIElement.perform(withKeyModifiers: .option) {
-                        // While holding option
-                        center.hover()
-                        self.helper.assertFramePositions(searchText: searchText, identifier: "PointFrame")
+            context("with PointAndShoot disabled") {
+                guard RUN_PNS_TEST else { return }
+
+                beforeEach {
+                    self.manualBeforeTestSuite()
+                    self.helper.tapCommand(.destroyDB)
+                    self.continueAfterFailure = false
+                    self.app.launch()
+                    self.journalScrollView = self.app.scrollViews["journalView"]
+                    self.journalChildren = self.journalScrollView.children(matching: .textView)
+                        .matching(identifier: "TextNode")
+                    self.helper.tapCommand(.resizeWindowLandscape)
+                }
+                describe("Shoot") {
+                    it("dismiss shootCardPicker by clicking on page and pressing escape") {
+                        self.helper.openTestPage(number: 1)
+                        let searchText = "Ultralight Beam, Kanye West"
+                        let parent = self.app.webViews.containing(.staticText,
+                                                                  identifier: searchText).element
+
+                        // click and drag between start and end of full text
+                        let child = parent.staticTexts[searchText]
+                        let start = child.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0.1))
+                        let end = child.coordinate(withNormalizedOffset: CGVector(dx: 1.1, dy: 0.9))
+                        start.click(forDuration: 1, thenDragTo: end)
+
+                        // Press option once to enable shoot mode
+                        XCUIElement.perform(withKeyModifiers: .option) {}
+
+                        let shootSelections = self.app.otherElements.matching(identifier:"ShootFrameSelection")
+                        expect(shootSelections.count) == 1
+
+                        let emptyLocation = child.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: -1))
+                        emptyLocation.click()
+                        sleep(1)
+                        let shootSelections2 = self.app.otherElements.matching(identifier:"ShootFrameSelection")
+                        expect(shootSelections2.count) == 0
+
+                        start.click(forDuration: 1, thenDragTo: end)
+
+                        // Press option once to enable shoot mode
+                        XCUIElement.perform(withKeyModifiers: .option) {}
+
+                        let shootSelections3 = self.app.otherElements.matching(identifier:"ShootFrameSelection")
+                        expect(shootSelections3.count) == 1
+
+                        // dismiss shootCardPicker with escape
+                        self.app.typeKey(.escape, modifierFlags: [])
+
+                        let shootSelections4 = self.app.otherElements.matching(identifier:"ShootFrameSelection")
+                        expect(shootSelections4.count) == 0
+                    }
+                }
+                describe("Select") {
+                    it("frame position placement") {
+                        self.helper.openTestPage(number: 1)
+                        let searchText = "Ultralight Beam, Kanye West"
+                        let parent = self.app.webViews.containing(.staticText,
+                                                                  identifier: searchText).element
+
+                        // click and drag between start and end of full text
+                        let child = parent.staticTexts[searchText]
+                        let start = child.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0.1))
+                        let end = child.coordinate(withNormalizedOffset: CGVector(dx: 1.1, dy: 0.9))
+                        start.click(forDuration: 1, thenDragTo: end)
+
+                        // Press option once to enable shoot mode
+                        XCUIElement.perform(withKeyModifiers: .option) {
+                            sleep(1)
+                        }
+
+                        self.helper.assertFramePositions(searchText: searchText, identifier: "ShootFrameSelection")
                         // Zoom in
                         self.app.typeKey("+", modifierFlags: .command)
                         self.app.typeKey("+", modifierFlags: .command)
                         self.app.typeKey("+", modifierFlags: .command)
-                        
-                        self.helper.assertFramePositions(searchText: searchText, identifier: "PointFrame")
+
+                        self.helper.assertFramePositions(searchText: searchText, identifier: "ShootFrameSelection")
                         // Zoom out
                         self.app.typeKey("-", modifierFlags: .command)
                         self.app.typeKey("-", modifierFlags: .command)
                         self.app.typeKey("-", modifierFlags: .command)
-                        
-                        self.helper.assertFramePositions(searchText: searchText, identifier: "PointFrame")
+
+                        self.helper.assertFramePositions(searchText: searchText, identifier: "ShootFrameSelection")
                         // Scroll page
                         self.app.webViews.firstMatch.scroll(byDeltaX: 0, deltaY: -200)
 
-                        self.helper.assertFramePositions(searchText: searchText, identifier: "PointFrame")
+                        self.helper.assertFramePositions(searchText: searchText, identifier: "ShootFrameSelection")
                         // Resize window
                         self.helper.tapCommand(.resizeWindowPortrait)
-                        center.hover()
 
-                        self.helper.assertFramePositions(searchText: searchText, identifier: "PointFrame")
-                        // Shoot
-                        center.click()
-                        // Release option
+                        self.helper.assertFramePositions(searchText: searchText, identifier: "ShootFrameSelection")
+                        // Add to today's note
+                        self.helper.addNote()
+
+                        // After shooting then pressing and releasing option shouldn't keep pointframe active
+                        XCUIElement.perform(withKeyModifiers: .option) {
+                            sleep(1)
+                        }
+
+                        let pointFrames = self.app.otherElements.matching(identifier:"PointFrame")
+                        expect(pointFrames.count) == 0
                     }
-                    
-                    let pointFrames = self.app.otherElements.matching(identifier:"PointFrame")
-                    expect(pointFrames.count) == 0
-                    
-                    self.helper.assertFramePositions(searchText: searchText, identifier: "ShootFrameSelection")
-                    
-                    // Add to today's note
-                    let noteTitle = "Ultralight Beam"
-                    self.helper.addNote(noteTitle: noteTitle)
-                    
-                    // Assert card association
-                    XCUIElement.perform(withKeyModifiers: .option) {
-                        // While holding option, hover text
-                        center.hover()
-                        self.helper.assertFramePositions(searchText: searchText, identifier: "PointFrame")
-                        
-                        let ShootFrameSelectionLabel = self.app.staticTexts.matching(identifier: "ShootFrameSelectionLabel").element
-                        let shootValue = ShootFrameSelectionLabel.value as! String
-                        expect(shootValue) == noteTitle
+                }
+
+                describe("Point") {
+                    it("frame position placement") {
+                        self.helper.openTestPage(number: 1)
+                        let searchText = "Ultralight Beam, Kanye West"
+                        let parent = self.app.webViews.containing(.staticText,
+                                                                  identifier: searchText).element
+
+                        let child = parent.staticTexts[searchText]
+                        let center = child.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+                        // click at middle of searchText to focus on page
+                        center.click()
+
+                        // Hold option to enable point mode
+                        XCUIElement.perform(withKeyModifiers: .option) {
+                            // While holding option
+                            center.hover()
+                            self.helper.assertFramePositions(searchText: searchText, identifier: "PointFrame")
+                            // Zoom in
+                            self.app.typeKey("+", modifierFlags: .command)
+                            self.app.typeKey("+", modifierFlags: .command)
+                            self.app.typeKey("+", modifierFlags: .command)
+
+                            self.helper.assertFramePositions(searchText: searchText, identifier: "PointFrame")
+                            // Zoom out
+                            self.app.typeKey("-", modifierFlags: .command)
+                            self.app.typeKey("-", modifierFlags: .command)
+                            self.app.typeKey("-", modifierFlags: .command)
+
+                            self.helper.assertFramePositions(searchText: searchText, identifier: "PointFrame")
+                            // Scroll page
+                            self.app.webViews.firstMatch.scroll(byDeltaX: 0, deltaY: -200)
+
+                            self.helper.assertFramePositions(searchText: searchText, identifier: "PointFrame")
+                            // Resize window
+                            self.helper.tapCommand(.resizeWindowPortrait)
+                            center.hover()
+
+                            self.helper.assertFramePositions(searchText: searchText, identifier: "PointFrame")
+                            // Shoot
+                            center.click()
+                            // Release option
+                        }
+
+                        let pointFrames = self.app.otherElements.matching(identifier:"PointFrame")
+                        expect(pointFrames.count) == 0
+
+                        self.helper.assertFramePositions(searchText: searchText, identifier: "ShootFrameSelection")
+
+                        // Add to today's note
+                        let noteTitle = "Ultralight Beam"
+                        self.helper.addNote(noteTitle: noteTitle)
+
+                        // Assert card association
+                        XCUIElement.perform(withKeyModifiers: .option) {
+                            // While holding option, hover text
+                            center.hover()
+                            self.helper.assertFramePositions(searchText: searchText, identifier: "PointFrame")
+
+                            let ShootFrameSelectionLabel = self.app.staticTexts.matching(identifier: "ShootFrameSelectionLabel").element
+                            let shootValue = ShootFrameSelectionLabel.value as! String
+                            expect(shootValue) == noteTitle
+                        }
                     }
                 }
             }

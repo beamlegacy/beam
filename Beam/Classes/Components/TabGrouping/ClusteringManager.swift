@@ -237,7 +237,7 @@ class ClusteringManager: ObservableObject {
     private func transformToClusteredNotes() {
         self.clusteredNotes = self.clusteredNotesId.compactMap({ cluster in
             return cluster.map { noteUuid in
-                return BeamNote.titleForNoteId(noteUuid)
+                return BeamNote.titleForNoteId(noteUuid, false)
             }
         })
     }

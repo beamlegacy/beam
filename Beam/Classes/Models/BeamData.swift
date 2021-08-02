@@ -131,18 +131,24 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
 
         super.init()
 
-        BeamNote.idForNoteNamed = { title in
+        BeamNote.idForNoteNamed = { title, includeDeletedNotes in
             guard let id = Self.titleToId[title] else {
-                guard let id = self.documentManager.loadDocumentByTitle(title: title)?.id else { return nil }
+                guard let doc = self.documentManager.loadDocumentByTitle(title: title),
+                      includeDeletedNotes || doc.deletedAt == nil
+                else { return nil }
+                let id = doc.id
                 Self.titleToId[title] = id
                 Self.idToTitle[id] = title
                 return id
             }
             return id
         }
-        BeamNote.titleForNoteId = { id in
+        BeamNote.titleForNoteId = { id, includeDeletedNotes in
             guard let title = Self.idToTitle[id] else {
-                guard let title = self.documentManager.loadDocumentById(id: id)?.title else { return nil }
+                guard let doc = self.documentManager.loadDocumentById(id: id),
+                      includeDeletedNotes || doc.deletedAt == nil
+                else { return nil }
+                let title = doc.title
                 Self.updateTitleIdNoteMapping(noteId: id, currentName: nil, newName: title)
                 return title
             }
@@ -235,8 +241,19 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         return BeamDate.journalNoteTitle(for: today)
     }
 
+    private var journalCancellables = [AnyCancellable]()
+    private func observeJournal(note: BeamNote) {
+        note.$deleted.sink { [unowned self] deleted in
+            if deleted {
+                self.reloadJournal()
+            }
+        }.store(in: &journalCancellables)
+    }
+
     func setupJournal() {
+        journalCancellables = []
         let note  = BeamNote.fetchOrCreateJournalNote(documentManager, date: Date())
+        observeJournal(note: note)
         journal.append(note)
         _todaysNote = note
 
@@ -246,6 +263,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     func updateJournal(with limit: Int = 0, and fetchOffset: Int = 0) {
         isFetching = true
         let _journal = BeamNote.fetchNotesWithType(documentManager, type: .journal, limit, fetchOffset).compactMap { $0.type.isJournal && !$0.type.isFutureJournal ? $0 : nil }
+        for note in _journal { observeJournal(note: note) }
         journal.append(contentsOf: _journal)
     }
 
