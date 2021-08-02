@@ -67,6 +67,7 @@ struct Configuration {
         set {
             if newValue != beamObjectAPIEnabled {
                 UserDefaults.standard.set(newValue, forKey: beamObjectAPIEnabledKey)
+                AppDelegate.main.syncData()
             }
         }
     }

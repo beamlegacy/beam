@@ -599,6 +599,9 @@ extension BeamObjectManager {
             let fetchedObject = try fetchObject(object)
             var conflictedObject: T = try object.copy()
 
+            Logger.shared.logWarning("Remote object checksum: \(fetchedObject.checksum ?? "-")",
+                                   category: .beamObjectNetwork)
+
             switch self.conflictPolicyForSave {
             case .replace:
                 conflictedObject.previousChecksum = fetchedObject.checksum
