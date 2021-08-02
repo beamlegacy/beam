@@ -461,6 +461,7 @@ public class Cluster {
     }
 
     func textualSimilarityProcess(index: Int, dataPointType: DataPoint, changeContent: Bool = false) throws {
+        var content: String?
         var scores = [Double](repeating: 0.0, count: self.textualSimilarityMatrix.matrix.rows)
         if dataPointType == .page {
             scores = [Double](repeating: 0.0, count: max(self.notes.count, 0))
@@ -468,18 +469,13 @@ public class Cluster {
             if changeContent {
                 scores.append(0.0)
             }
+            content = pages[index].content
         } else {
             scores = [Double](repeating: 0.0, count: max(self.notes.count - 1, 0))
             scores += [Double](repeating: 1.0, count: max(self.pages.count, 0))
             if changeContent {
                 scores.insert(1.0, at: 0)
             }
-        }
-        var content: String?
-        switch dataPointType {
-        case .page:
-            content = pages[index].content
-        case .note:
             content = notes[index].content
         }
         if let content = content,
@@ -650,7 +646,7 @@ public class Cluster {
             let textSigmoidMatrix = self.performSigmoidOn(matrix: self.textualSimilarityMatrix.matrix, middle: self.weights[.text] ?? 0.5, beta: self.beta)
             let entitySigmoidMatrix = self.performSigmoidOn(matrix: self.entitiesMatrix.matrix, middle: self.weights[.entities] ?? 0.5, beta: self.beta)
             let adjacencyForPages = textSigmoidMatrix .* navigationSigmoidMatrix + entitySigmoidMatrix
-            var finalAdjacency = adjacencyForPages
+            let finalAdjacency = adjacencyForPages
 
             if self.notes.count > 0 {
                 let adjacencyForNotes = self.performSigmoidOn(matrix: self.textualSimilarityMatrix.matrix[0..<self.notes.count, 0..<self.textualSimilarityMatrix.matrix.cols] + self.entitiesMatrix.matrix[0..<self.notes.count, 0..<self.entitiesMatrix.matrix.cols], middle: 1, beta: self.beta)
