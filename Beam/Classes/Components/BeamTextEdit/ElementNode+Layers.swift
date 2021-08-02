@@ -10,7 +10,9 @@ import Foundation
 extension ElementNode {
 
     private static var bulletLayerPositionX = CGFloat(14)
-
+    @objc var bulletLayerPositionY: CGFloat {
+        isHeader ? firstLineBaseline - 8 : firstLineBaseline - 13
+    }
     private enum LayerName: String {
         case indentLayer
         case bullet
@@ -21,11 +23,7 @@ extension ElementNode {
     // MARK: - Create Layers
     func createElementLayers() {
         createIndentLayer()
-        var posY = isHeader ? firstLineBaseline - 8 : firstLineBaseline - 13
-        if self as? EmbedNode != nil {
-            posY = 9
-        }
-        let bulletPoint = NSPoint(x: Self.bulletLayerPositionX, y: posY)
+        let bulletPoint = NSPoint(x: Self.bulletLayerPositionX, y: bulletLayerPositionY)
         createDisclosureLayer(at: bulletPoint)
         createBulletPointLayer(at: bulletPoint)
     }
@@ -156,5 +154,4 @@ extension ElementNode {
         layer?.isChecked = checked
         layer?.layer.isHidden = hidden
     }
-
 }
