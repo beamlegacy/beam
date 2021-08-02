@@ -61,7 +61,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         }
 
         let localDirectory = directory + "/Beam" + "/\(name)/"
-        
+
         var destinationName = fileName
         if destinationName.hasPrefix("Beam/") {
             destinationName.removeFirst(5)

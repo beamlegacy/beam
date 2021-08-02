@@ -802,9 +802,9 @@
                                     </items>
                                 </menu>
                             </menuItem>
-                            <menuItem title="Navigation" id="An6-Hf-p3M" userLabel="Navigation">
+                            <menuItem title="Go" id="An6-Hf-p3M" userLabel="Navigation">
                                 <modifierMask key="keyEquivalentModifierMask"/>
-                                <menu key="submenu" title="Navigation" id="cCx-1g-tLY">
+                                <menu key="submenu" title="Go" id="cCx-1g-tLY">
                                     <items>
                                         <menuItem title="Back" tag="4" keyEquivalent="[" id="vfj-M7-Iu5" userLabel="Back" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
                                             <connections>
