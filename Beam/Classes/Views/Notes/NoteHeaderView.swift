@@ -10,7 +10,7 @@ import BeamCore
 
 struct NoteHeaderView: View {
 
-    private static let leadingPadding: CGFloat = 12
+    private static let leadingPadding: CGFloat = 18
     static let topPadding: CGFloat = 120
     @ObservedObject var model: NoteHeaderView.ViewModel
 
@@ -81,7 +81,7 @@ struct NoteHeaderView: View {
     }
 
     private var dateView: some View {
-        Text("\(Self.dateFormatter.string(from: model.note.creationDate))")
+        Text("\(BeamDate.journalNoteTitle(for: model.note.creationDate))")
             .font(BeamFont.medium(size: 12).swiftUI)
             .foregroundColor(BeamColor.Generic.placeholder.swiftUI)
     }
@@ -90,6 +90,8 @@ struct NoteHeaderView: View {
         HStack {
             VStack(alignment: .leading, spacing: BeamSpacing._40) {
                 dateView
+                    .opacity(model.note.type.isJournal ? 0 : 1)
+                    .offset(x: 1, y: 0) // compensate for different font size leading alignment
                 HStack {
                     titleView
                     Spacer()
@@ -184,9 +186,7 @@ extension NoteHeaderView {
                 ContextMenuItem(title: isNotePublic ? "Unpublish" : "Publish", action: togglePublish),
                 ContextMenuItem.separator()
             ])
-            if canEditTitle {
-                items.append(ContextMenuItem(title: "Rename", action: focusTitle))
-            }
+            items.append(ContextMenuItem(title: "Rename", action: canEditTitle ? focusTitle : nil))
 
             items.append(contentsOf: [
                 ContextMenuItem.separator(),
