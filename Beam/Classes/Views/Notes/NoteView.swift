@@ -27,13 +27,24 @@ struct NoteView: View {
 
     @State private var headerViewModel: NoteHeaderView.ViewModel?
 
+    private var headerHeight: CGFloat {
+        NoteHeaderView.topPadding + 90
+    }
+
     var headerView: some View {
-        Group {
-            if let headerViewModel = headerViewModel {
-                NoteHeaderView(model: headerViewModel)
-                    .frame(maxWidth: BeamTextEdit.textWidth)
+        GeometryReader { geoProxy in
+            let headerWidth = BeamTextEdit.textWidth
+            let leadingPadding = centerText ? 0 : (geoProxy.size.width - headerWidth) * (leadingPercentage / 100)
+            Group {
+                if let headerViewModel = headerViewModel {
+                    NoteHeaderView(model: headerViewModel)
+                        .frame(maxWidth: headerWidth)
+                }
             }
-        }.frame(maxWidth: .infinity)
+            .frame(maxWidth: .infinity, alignment: centerText ? .center : .bottomLeading)
+            .padding(.leading, leadingPadding)
+        }
+        .frame(height: headerHeight)
     }
 
     var body: some View {
@@ -61,7 +72,7 @@ struct NoteView: View {
                     state.updateNoteFocusedState(note: note, focusedElement: elementId, cursorPosition: cursorPosition)
                 },
                 onScroll: onScroll,
-                topOffset: NoteHeaderView.topPadding + 90,
+                topOffset: headerHeight,
                 footerHeight: 60,
                 leadingPercentage: leadingPercentage,
                 centerText: centerText,
