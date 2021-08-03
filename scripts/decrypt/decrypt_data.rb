@@ -60,4 +60,15 @@ decipher.auth_tag = combinedTag
 decrypted = decipher.update(combinedCipherText) + decipher.final
 if decrypted == text
   puts "OK!"
+else
+  puts "NOT OK! decrypted text: #{decrypted}"
 end
+
+# Encryption
+cipher = OpenSSL::Cipher.new("AES-256-GCM").encrypt
+iv = cipher.random_iv
+cipher.key = key
+
+cipher_text = cipher.update(text) + cipher.final
+
+puts Base64.strict_encode64(iv + cipher_text + cipher.auth_tag)
