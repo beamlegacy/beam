@@ -19,6 +19,8 @@ struct CalendarMonthView: View {
     var days: [CalendarDay]
     var baseDate: Date
     @Binding var selectedDate: Date
+    @State private var hoveredDate: Date?
+    @State private var touchdownDate: Date?
 
     private var weekDays: [WeekDay] {
         let alldays: [WeekDay] = calendar.weekdaySymbols.map { symbol in
@@ -58,15 +60,24 @@ struct CalendarMonthView: View {
             color = BeamColor.Bluetiful
             font = BeamFont.medium(size: 13)
         }
+        let isHovering = hoveredDate == day.date
+        let isTouchDown = touchdownDate == day.date
+        var backgroundColor: BeamColor?
+        if isTouchDown {
+            backgroundColor = day.isSelected ? BeamColor.CalendarPicker.selectedDayClickedBackground : BeamColor.CalendarPicker.dayClickedBackground
+        } else if isHovering {
+            backgroundColor = day.isSelected ? BeamColor.CalendarPicker.selectedDayHoverBackground : BeamColor.CalendarPicker.dayHoverBackground
+        } else if day.isSelected {
+            backgroundColor = BeamColor.CalendarPicker.selectedDayBackground
+        }
         return Text(day.number)
             .foregroundColor(color.swiftUI)
             .font(font.swiftUI)
             .padding(3)
             .frame(maxWidth: .infinity)
-            .background(day.isSelected ?
+            .background(backgroundColor != nil ?
                             Rectangle()
-                            .fill(BeamColor.Bluetiful.swiftUI)
-                            .opacity(0.08)
+                            .fill(backgroundColor?.swiftUI ?? Color.clear)
                             .frame(width: 22, height: 22)
                             .cornerRadius(3)
                             : nil
@@ -74,6 +85,20 @@ struct CalendarMonthView: View {
             .contentShape(Rectangle())
             .onTapGesture {
                 selectedDate = day.date
+            }
+            .onHover { hovering in
+                if hovering {
+                    hoveredDate = day.date
+                } else if hoveredDate == day.date {
+                    hoveredDate = nil
+                }
+            }
+            .onTouchDown { touchdown in
+                if touchdown {
+                    touchdownDate = day.date
+                } else if touchdownDate == day.date {
+                    touchdownDate = nil
+                }
             }
     }
 
