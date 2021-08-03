@@ -35,7 +35,7 @@ struct ModeView: View {
                 }.clipped()
             }
         }
-        .transition(.webContentTransition)
+        .transition(.webContentTransition(state.windowIsResizing))
     }
 
     private var noteContent: some View {

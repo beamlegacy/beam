@@ -52,6 +52,30 @@
 			<key>targetArchitecture</key>
 			<string>x86_64</string>
 		</dict>
+		<key>94B20617-56BB-48FF-B3A0-9F11D3FD6960</key>
+		<dict>
+			<key>localComputer</key>
+			<dict>
+				<key>busSpeedInMHz</key>
+				<integer>0</integer>
+				<key>cpuCount</key>
+				<integer>1</integer>
+				<key>cpuKind</key>
+				<string>Apple M1</string>
+				<key>cpuSpeedInMHz</key>
+				<integer>0</integer>
+				<key>logicalCPUCoresPerPackage</key>
+				<integer>8</integer>
+				<key>modelCode</key>
+				<string>MacBookPro17,1</string>
+				<key>physicalCPUCoresPerPackage</key>
+				<integer>8</integer>
+				<key>platformIdentifier</key>
+				<string>com.apple.platform.macosx</string>
+			</dict>
+			<key>targetArchitecture</key>
+			<string>arm64</string>
+		</dict>
 	</dict>
 </dict>
 </plist>

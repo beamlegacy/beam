@@ -82,11 +82,13 @@ class PointAndShootTargetTest: PointAndShootTest {
         XCTAssertEqual(positions.framesInfo.count, 1, "Should contain 1 frameInfo objects")
         let expectedTarget: PointAndShoot.Target = PointAndShoot.Target(
             id: UUID().uuidString,
-            rect: NSRect(x: 101, y: 102 - scrollDelta, width: 301, height: 302),
-            mouseLocation: NSPoint(x: 201, y: 202 - scrollDelta),
+            rect: NSRect(x: 101, y: 102, width: 301, height: 302),
+            mouseLocation: NSPoint(x: 201, y: 202),
             html: "<h1>Target</h1>",
             animated: false
         )
+        // translateAndScaleTarget shouldn't change the location of the windowFrame.
+        // The sendBounds function on the JS side takes care repositioning the Targets.
         XCTAssertEqual(translatedTarget.rect, expectedTarget.rect)
         XCTAssertEqual(translatedTarget.mouseLocation, expectedTarget.mouseLocation)
     }
@@ -110,11 +112,13 @@ class PointAndShootTargetTest: PointAndShootTest {
         let translatedWindowTarget = self.pns.translateAndScaleTarget(target, windowHref)
         let expectedWindowTarget: PointAndShoot.Target = PointAndShoot.Target(
             id: UUID().uuidString,
-            rect: NSRect(x: 101, y: 102 - scrollDeltaWindow, width: 301, height: 302),
-            mouseLocation: NSPoint(x: 201, y: 202 - scrollDeltaWindow),
+            rect: NSRect(x: 101, y: 102, width: 301, height: 302),
+            mouseLocation: NSPoint(x: 201, y: 202),
             html: "<h1>Target</h1>",
             animated: false
         )
+        // translateAndScaleTarget shouldn't change the location of the windowFrame.
+        // The sendBounds function on the JS side takes care repositioning the Targets.
         XCTAssertEqual(translatedWindowTarget.rect, expectedWindowTarget.rect)
         XCTAssertEqual(translatedWindowTarget.mouseLocation, expectedWindowTarget.mouseLocation)
 
@@ -196,11 +200,13 @@ class PointAndShootTargetTest: PointAndShootTest {
         let translatedWindowTarget = self.pns.translateAndScaleTarget(target, windowHref)
         let expectedWindowTarget: PointAndShoot.Target = PointAndShoot.Target(
             id: UUID().uuidString,
-            rect: NSRect(x: 101, y: 102 - scrollDeltaWindow, width: 301, height: 302),
-            mouseLocation: NSPoint(x: 201, y: 202 - scrollDeltaWindow),
+            rect: NSRect(x: 101, y: 102, width: 301, height: 302),
+            mouseLocation: NSPoint(x: 201, y: 202),
             html: "<h1>Target</h1>",
             animated: false
         )
+        // translateAndScaleTarget shouldn't change the location of the windowFrame.
+        // The sendBounds function on the JS side takes care repositioning the Targets.
         XCTAssertEqual(translatedWindowTarget.rect, expectedWindowTarget.rect)
         XCTAssertEqual(translatedWindowTarget.mouseLocation, expectedWindowTarget.mouseLocation)
 

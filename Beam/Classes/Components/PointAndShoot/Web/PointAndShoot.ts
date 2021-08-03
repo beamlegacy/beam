@@ -92,12 +92,18 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
   }
 
   sendBounds(): void {
+    // First send frame positioning
     this.sendFramesInfo()
-    this.ui.pointBounds(this.pointTarget)
-    this.ui.shootBounds(this.shootTargets)
-    this.ui.selectBounds(this.selectionRangeGroups)
+    // Second send Boolean flags
     this.ui.hasSelection(this.hasSelection())
     this.ui.isTypingOnWebView(this.isTypingOnWebView)
+    // Lastly send positioning bounds
+    // When we have an active selection we don't want to update any other bounds
+    if (!this.hasSelection()) {
+      this.ui.pointBounds(this.pointTarget)
+      this.ui.shootBounds(this.shootTargets)
+    }
+    this.ui.selectBounds(this.selectionRangeGroups)
   }
 
   shoot(targetEl: BeamHTMLElement): void {
