@@ -19,13 +19,11 @@ struct PointAndShootPathFrame: View {
         ZStack(alignment: .center) {
             Path(group.groupPath)
                 .fill(BeamColor.PointShoot.shootBackground.swiftUI)
-                .accessibility(identifier: "ShootFrameSelection")
 
             ZStack {
                 Rectangle().fill(Color.clear) // needed  to enable hover
                 Text(text)
                     .foregroundColor(BeamColor.PointShoot.shootOutline.swiftUI)
-                    .accessibility(identifier: "ShootFrameSelectionLabel")
             }
             .onHover { isHovering = $0 }
             .frame(width: rect.width, height: rect.height)

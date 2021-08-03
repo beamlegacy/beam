@@ -73,7 +73,7 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
         // add each rect to the targets array
         return {
           id: `${id}-${rectIndex}`,
-          html: this.rangeToHtml(range),
+          html: "",
           rect: {
             x: rangeRect.x,
             y: rangeRect.y,
@@ -83,7 +83,7 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
         }
       })
 
-      rects.push({ id, rectData })
+      rects.push({ id, rectData, html: this.rangeToHtml(range) })
     })
 
     const payload = { select: rects }

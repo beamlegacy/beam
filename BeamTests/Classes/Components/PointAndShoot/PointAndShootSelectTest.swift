@@ -19,7 +19,7 @@ class PointAndShootSelectTest: PointAndShootTest {
     }
 
     func testSelect_set() throws {
-        let group = helperCreateRandomGroup()
+        let group = helperCreateRandomGroups()
 
         XCTAssertNil(self.pns.activePointGroup)
         XCTAssertNil(self.pns.activeSelectGroup)
@@ -38,7 +38,7 @@ class PointAndShootSelectTest: PointAndShootTest {
     }
 
     func testSelect_update() throws {
-        let group = helperCreateRandomGroup()
+        let group = helperCreateRandomGroups()
 
         XCTAssertNil(self.pns.activePointGroup)
         XCTAssertNil(self.pns.activeSelectGroup)
@@ -53,7 +53,7 @@ class PointAndShootSelectTest: PointAndShootTest {
         XCTAssertNotNil(self.pns.activeSelectGroup)
         XCTAssertNil(self.pns.activeShootGroup)
 
-        let group2 = helperCreateRandomGroup()
+        let group2 = helperCreateRandomGroups()
         // calling select for the second time with the same group id updates the activeSelectGroup
         self.pns.select(group.id, group2.targets, group.href)
         XCTAssertEqual(self.pns.activeSelectGroup?.id, group.id)
@@ -68,7 +68,7 @@ class PointAndShootSelectTest: PointAndShootTest {
     }
 
     func testSelect_update_differentId() throws {
-        let group = helperCreateRandomGroup()
+        let group = helperCreateRandomGroups()
 
         XCTAssertNil(self.pns.activePointGroup)
         XCTAssertNil(self.pns.activeSelectGroup)
@@ -83,7 +83,7 @@ class PointAndShootSelectTest: PointAndShootTest {
         XCTAssertNotNil(self.pns.activeSelectGroup)
         XCTAssertNil(self.pns.activeShootGroup)
 
-        let group2 = helperCreateRandomGroup()
+        let group2 = helperCreateRandomGroups()
         // calling select for the second time with group2
         self.pns.select(group2.id, group2.targets, group2.href)
         XCTAssertEqual(self.pns.activeSelectGroup?.id, group2.id)
@@ -98,7 +98,7 @@ class PointAndShootSelectTest: PointAndShootTest {
     }
 
     func testSelect_noActiveSelection() throws {
-        let group = helperCreateRandomGroup()
+        let group = helperCreateRandomGroups()
 
         XCTAssertNil(self.pns.activePointGroup)
         XCTAssertNil(self.pns.activeSelectGroup)
@@ -116,7 +116,7 @@ class PointAndShootSelectTest: PointAndShootTest {
     }
 
     func testSelectShoot() throws {
-        let group = helperCreateRandomGroup()
+        let group = helperCreateRandomGroups()
 
         XCTAssertNil(self.pns.activePointGroup)
         XCTAssertNil(self.pns.activeSelectGroup)
@@ -152,7 +152,7 @@ class PointAndShootSelectTest: PointAndShootTest {
 
     func testSelect_SelectShoot_Collect() throws {
         // calling select when group has been collect should update the targets
-        let group = helperCreateRandomGroup()
+        let group = helperCreateRandomGroups()
 
         self.pns.collectedGroups = [group]
         // create a new set of targets

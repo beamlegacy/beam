@@ -141,6 +141,27 @@ class PointAndShoot: WebPageHolder, ObservableObject {
                 updateSelectionPath()
             }
         }
+
+        mutating func updateTargets(_ groupId: String, _ newTargets: [Target]) {
+            guard id == groupId,
+                  var lastTarget = targets.last else {
+                return
+            }
+
+            // Take the last of the newTargets and current targets
+            // Use those to calculate and set the rect and mouselocation of the lastNewTarget
+            // Set the value of newTargets as the current targets inlcuding the computed one
+            var mutableNewTargets = newTargets
+            let lastNewTarget = mutableNewTargets.removeLast()
+            let diffX = lastTarget.rect.minX - lastNewTarget.rect.minX
+            let diffY = lastTarget.rect.minY - lastNewTarget.rect.minY
+            let oldPoint = lastTarget.mouseLocation
+            lastTarget.rect = lastNewTarget.rect
+            lastTarget.mouseLocation = NSPoint(x: oldPoint.x - diffX, y: oldPoint.y - diffY)
+            mutableNewTargets.append(lastTarget)
+            targets = mutableNewTargets
+            updateSelectionPath()
+        }
     }
 
     /// Describes a target area as part of a Shoot group
@@ -192,13 +213,22 @@ class PointAndShoot: WebPageHolder, ObservableObject {
         guard let view = page.webView else {
             fatalError("Webview is required to scale target correctly")
         }
+        let scale: CGFloat = webPositions.scale * view.zoomLevel()
+        // We can reduce calculations for the MainWindowFrame
+        guard href != page.url?.absoluteString else {
+            // We can futher reduce calculations if the scale is 1
+            guard scale != 1 else {
+                return target
+            }
+            return target.translateTarget(0, 0, scale: scale)
+        }
+
         let frameOffsetX = webPositions.viewportPosition(href, prop: WebPositions.FramePosition.x).reduce(0, +)
         let frameOffsetY = webPositions.viewportPosition(href, prop: WebPositions.FramePosition.y).reduce(0, +)
         let frameScrollX = webPositions.viewportPosition(href, prop: WebPositions.FramePosition.scrollX)
         let frameScrollY = webPositions.viewportPosition(href, prop: WebPositions.FramePosition.scrollY)
         let xDelta = frameOffsetX - frameScrollX.reduce(0, +)
         let yDelta = frameOffsetY - frameScrollY.reduce(0, +)
-        let scale: CGFloat = webPositions.scale * view.zoomLevel()
 
         return target.translateTarget(xDelta, yDelta, scale: scale)
     }
@@ -206,10 +236,10 @@ class PointAndShoot: WebPageHolder, ObservableObject {
     func translateAndScaleGroup(_ group: PointAndShoot.ShootGroup) -> PointAndShoot.ShootGroup {
         var newGroup = group
         let href = group.href
-        for target in newGroup.targets {
-            let newTarget = translateAndScaleTarget(target, href)
-            newGroup.updateTarget(newTarget)
-        }
+        let newTargets = newGroup.targets.map({ target in
+            return translateAndScaleTarget(target, href)
+        })
+        newGroup.updateTargets(newGroup.id, newTargets)
         return newGroup
     }
 
@@ -245,7 +275,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
         if (isAltKeyDown || activeShootGroup != nil), activePointGroup != nil, activeSelectGroup == nil {
             // if we have an existing group
             if activeShootGroup != nil {
-                activeShootGroup?.updateTarget(target)
+                activeShootGroup?.updateTargets(groupId, [target])
             } else {
                 // only allow creating new a shootGroup when these conditions are met:
                 guard hasGraceRectAndMouseOverlap(target, href, mouseLocation),
@@ -280,10 +310,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
 
         // if the activeShootGroup and the incomming select group match, update the targets
         if activeShootGroup != nil {
-            for target in targets {
-                activeShootGroup?.updateTarget(target)
-            }
-            return
+            activeShootGroup?.updateTargets(groupId, targets)
         }
 
         // then only continue if we have an active selection
@@ -323,16 +350,12 @@ class PointAndShoot: WebPageHolder, ObservableObject {
 
         // Keep shootConfirmationGroup position when scrolling
         if shootConfirmationGroup != nil {
-            for target in targets {
-                shootConfirmationGroup?.updateTarget(target)
-            }
+            shootConfirmationGroup?.updateTargets(groupId, targets)
         }
 
         if let index = collectedGroups.firstIndex(where: {$0.id == groupId}) {
             var existingGroup = collectedGroups[index]
-            for target in targets {
-                existingGroup.updateTarget(target)
-            }
+            existingGroup.updateTargets(groupId, targets)
             collectedGroups[index] = existingGroup
         } else {
             let newGroup = ShootGroup(groupId, targets, href)
