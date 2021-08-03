@@ -243,11 +243,13 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
 
     private var journalCancellables = [AnyCancellable]()
     private func observeJournal(note: BeamNote) {
-        note.$deleted.sink { [unowned self] deleted in
-            if deleted {
-                self.reloadJournal()
-            }
-        }.store(in: &journalCancellables)
+        note.$deleted
+            .drop(while: { $0 == true }) // skip notes that started already deleted
+            .sink { [unowned self] deleted in
+                if deleted {
+                    self.reloadJournal()
+                }
+            }.store(in: &journalCancellables)
     }
 
     func setupJournal() {

@@ -137,14 +137,8 @@ public extension CALayer {
         self.journalMode = journalMode
 
         note = root
-        root.updateNoteNamesInInternalLinks(recursive: true)
 
         super.init(frame: NSRect())
-
-        // TODO: remove this when we add websocket sync
-        if let documentStruct = root.note?.documentStruct {
-            documentManager.refresh(documentStruct, true)
-        }
 
         setAccessibilityIdentifier("TextEdit")
         setAccessibilityLabel("Note Editor")
@@ -176,6 +170,18 @@ public extension CALayer {
         setupSideLayer()
 
         registerForDraggedTypes([.fileURL])
+        refreshAndHandleDeletionsAsync()
+    }
+
+    func refreshAndHandleDeletionsAsync() {
+        // This was disabled because it produced a freeze when opening a note
+        // see https://gitlab.com/beamgroup/beam/-/merge_requests/1026#note_641742413
+//        let root = self.note
+//        if let documentStruct = root?.note?.documentStruct {
+//            // TODO: remove this when we add websocket sync
+//            self.documentManager.refresh(documentStruct, false)
+//        }
+//        root?.updateNoteNamesInInternalLinks(recursive: true)
     }
 
     deinit {
