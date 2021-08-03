@@ -97,20 +97,31 @@ import Promises
     }
 
     private func logInNote(url: URL, title: String?, reason: NoteElementAddReason) {
+        var elementToFocus: BeamElement?
         if isFromNoteSearch {
             noteController.setContents(url: url, text: title)
             isFromNoteSearch = false
+            elementToFocus = noteController.element
         } else if PreferencesManager.browsingSessionCollectionIsOn {
-            _ = noteController.add(url: url, text: title, reason: reason)
+            elementToFocus = noteController.add(url: url, text: title, reason: reason)
         } else if !PreferencesManager.browsingSessionCollectionIsOn,
                   beamNavigationController.isNavigatingFromNote {
             switch self.browsingTree.origin {
             case .searchFromNode, .browsingNode:
-                _ = noteController.add(url: url, text: title, reason: reason)
+                elementToFocus = noteController.add(url: url, text: title, reason: reason)
             default:
                 break
             }
         }
+        if let elementToFocus = elementToFocus {
+            updateFocusedStateToElement(elementToFocus)
+        }
+    }
+
+    private func updateFocusedStateToElement(_ element: BeamElement) {
+        state.updateNoteFocusedState(note: noteController.note,
+                                     focusedElement: element.id,
+                                     cursorPosition: element.text.wholeRange.upperBound)
     }
 
     lazy var passwordOverlayController: PasswordOverlayController? = {
@@ -329,7 +340,9 @@ import Promises
             Logger.shared.logWarning("Adding search results is not allowed", category: .web)
             return nil
         } // Don't automatically add search results
-        return noteController.add(url: url, text: title, reason: .navigation)
+        let element = noteController.add(url: url, text: title, reason: .navigation)
+        updateFocusedStateToElement(element)
+        return element
     }
 
     private func receivedWebviewTitle(_ title: String? = nil) {

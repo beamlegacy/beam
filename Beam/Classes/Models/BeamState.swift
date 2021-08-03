@@ -16,26 +16,15 @@ import BeamCore
     var data: BeamData
     public var searchEngine: SearchEngine = GoogleSearch()
 
-    private var noteCancellable: AnyCancellable?
     @Published var currentNote: BeamNote? {
         didSet {
             if let note = currentNote {
                 recentsManager.currentNoteChanged(note)
-                noteCancellable = note.$deleted.sink { [unowned self] deleted in
-                    guard deleted else { return }
-                    noteCancellable = nil
-                    self.navigateToJournal(note: nil)
-                    let alert = NSAlert()
-                    alert.messageText = "The note '\(note.title)' has been deleted."
-                    alert.alertStyle = .critical
-                    alert.informativeText = "Navigating back to the journal."
-                    alert.runModal()
-                }
+                handleNoteDeletion(note)
             }
             focusOmniBox = false
         }
     }
-    @Published var scrollToElementId: UUID?
 
     private(set) lazy var recentsManager: RecentsManager = {
         RecentsManager(with: data.documentManager)
@@ -53,6 +42,7 @@ import BeamCore
     }()
 
     @Published var backForwardList = NoteBackForwardList()
+    @Published var notesFocusedStates = NoteEditFocusedStateStorage()
     @Published var canGoBack: Bool = false
     @Published var canGoForward: Bool = false
     @Published var isFullScreen: Bool = false
@@ -61,7 +51,6 @@ import BeamCore
     @Published var destinationCardIsFocused: Bool = false
     @Published var destinationCardName: String = ""
     @Published var destinationCardNameSelectedRange: Range<Int>?
-    var bidirectionalPopover: BidirectionalPopover?
 
     @Published var windowIsResizing = false
 
@@ -80,23 +69,19 @@ import BeamCore
     weak var downloaderWindow: AutoDismissingWindow?
 
     private var scope = Set<AnyCancellable>()
+
     func goBack() {
         guard canGoBack else { return }
         switch mode {
-        // swiftlint:disable:next fallthrough no_fallthrough_only
-        case .note, .page: fallthrough
-        case .today:
+        case .note, .page, .today:
             if let back = backForwardList.goBack() {
                 switch back {
                 case .journal:
-                    mode = .today
-                    currentNote = nil
+                    navigateToJournal(note: nil)
                 case let .note(note):
-                    mode = .note
-                    currentNote = note
+                    navigateToNote(note)
                 case let .page(page):
-                    mode = .page
-                    currentPage = page
+                    navigateToPage(page)
                 }
             }
         case .web:
@@ -109,20 +94,15 @@ import BeamCore
     func goForward() {
         guard canGoForward else { return }
         switch mode {
-        // swiftlint:disable:next fallthrough no_fallthrough_only
-        case .note, .page: fallthrough
-        case .today:
+        case .note, .page, .today:
             if let forward = backForwardList.goForward() {
                 switch forward {
                 case .journal:
-                    mode = .today
-                    currentNote = nil
+                    navigateToJournal(note: nil)
                 case let .note(note):
-                    mode = .note
-                    currentNote = note
+                    navigateToNote(note)
                 case let .page(page):
-                    mode = .page
-                    currentPage = page
+                    navigateToPage(page)
                 }
             }
         case .web:
@@ -150,9 +130,7 @@ import BeamCore
 
     func updateCanGoBackForward() {
         switch mode {
-        // swiftlint:disable:next fallthrough no_fallthrough_only
-        case .today: fallthrough
-        case .note, .page:
+        case .today, .note, .page:
             canGoBack = !backForwardList.backList.isEmpty
             canGoForward = !backForwardList.forwardList.isEmpty
         case .web:
@@ -183,7 +161,12 @@ import BeamCore
         note.sources.refreshScores()
         currentPage = nil
         currentNote = note
-        scrollToElementId = elementId
+        if let elementId = elementId {
+            notesFocusedStates.currentFocusedState = NoteEditFocusedState(elementId: elementId, cursorPosition: 0, highlight: true)
+        } else {
+            notesFocusedStates.currentFocusedState = notesFocusedStates.getSavedNoteFocusedState(noteId: note.id)
+        }
+
         autocompleteManager.resetQuery()
         autocompleteManager.autocompleteSelectedIndex = nil
 
@@ -460,6 +443,20 @@ import BeamCore
         destinationCardNameSelectedRange = nil
         destinationCardIsFocused = false
     }
+
+    private var noteDeletionCancellable: AnyCancellable?
+    func handleNoteDeletion(_ note: BeamNote) {
+        noteDeletionCancellable = note.$deleted.sink { [unowned self] deleted in
+            guard deleted else { return }
+            noteDeletionCancellable = nil
+            self.navigateToJournal(note: nil)
+            let alert = NSAlert()
+            alert.messageText = "The note '\(note.title)' has been deleted."
+            alert.alertStyle = .critical
+            alert.informativeText = "Navigating back to the journal."
+            alert.runModal()
+        }
+    }
 }
 
 // MARK: - Browser Tabs
@@ -495,5 +492,16 @@ extension BeamState: BrowserTabsManagerDelegate {
     func tabsManagerBrowsingHistoryChanged(canGoBack: Bool, canGoForward: Bool) {
         self.canGoBack = canGoBack
         self.canGoForward = canGoForward
+    }
+}
+
+// MARK: - Notes focused state
+extension BeamState {
+
+    func updateNoteFocusedState(note: BeamNote, focusedElement: UUID, cursorPosition: Int) {
+        if note == currentNote {
+            notesFocusedStates.currentFocusedState = NoteEditFocusedState(elementId: focusedElement, cursorPosition: cursorPosition)
+        }
+        notesFocusedStates.saveNoteFocusedState(noteId: note.id, focusedElement: focusedElement, cursorPosition: cursorPosition)
     }
 }

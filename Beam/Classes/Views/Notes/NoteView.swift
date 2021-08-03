@@ -22,7 +22,7 @@ struct NoteView: View {
     var onStartEditing: (() -> Void)?
     var leadingPercentage: CGFloat
     var centerText: Bool
-    var scrollToElementId: UUID?
+    var initialFocusedState: NoteEditFocusedState?
     var onScroll: ((CGPoint) -> Void)?
 
     @State private var headerViewModel: NoteHeaderView.ViewModel?
@@ -53,9 +53,12 @@ struct NoteView: View {
                 openCard: { cardId, elementId in
                     state.navigateToNote(id: cardId, elementId: elementId)
                 },
-                onStartEditing: { onStartEditing?() },
-                onStartQuery: { textNode, animated in
+                startQuery: { textNode, animated in
                     state.startQuery(textNode, animated: animated)
+                },
+                onStartEditing: { onStartEditing?() },
+                onFocusChanged: { elementId, cursorPosition in
+                    state.updateNoteFocusedState(note: note, focusedElement: elementId, cursorPosition: cursorPosition)
                 },
                 onScroll: onScroll,
                 topOffset: NoteHeaderView.topPadding + 90,
@@ -63,7 +66,7 @@ struct NoteView: View {
                 leadingPercentage: leadingPercentage,
                 centerText: centerText,
                 showTitle: false,
-                scrollToElementId: scrollToElementId,
+                initialFocusedState: initialFocusedState,
                 headerView: AnyView(headerView)
             )
             .accessibility(identifier: "noteView")

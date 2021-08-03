@@ -53,9 +53,6 @@ public extension CALayer {
     var note: BeamElement! {
         didSet {
             note?.updateNoteNamesInInternalLinks(recursive: true)
-            DispatchQueue.main.async {
-                self.scroll(.zero)
-            }
             updateRoot(with: note)
         }
     }
@@ -115,23 +112,6 @@ public extension CALayer {
 
     private (set) var isResizing = false
     public private (set) var journalMode: Bool
-    public var scrollToElementId: UUID? {
-        didSet {
-            guard let id = scrollToElementId,
-                  let element = note.findElement(id),
-                  let node = rootNode.nodeFor(element)
-            else {
-                return
-            }
-            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: .milliseconds(50))) {
-                self.setHotSpot(node.frameInDocument)
-                node.hightlight()
-                if let w = self.window as? BeamWindow {
-                    w.state.scrollToElementId = nil
-                }
-            }
-        }
-    }
 
     public init(root: BeamElement, journalMode: Bool) {
         self.journalMode = journalMode
@@ -246,11 +226,14 @@ public extension CALayer {
     public var activated: () -> Void = { }
     public var activateOnLostFocus = true
     public var useFocusRing = false
+
     public var openURL: (URL, BeamElement) -> Void = { _, _ in }
     public var openCard: (UUID, UUID?) -> Void = { _, _ in }
-    public var onStartEditing: () -> Void = { }
-    public var onEndEditing: () -> Void = { }
-    public var onStartQuery: (TextNode, Bool) -> Void = { _, _ in }
+    public var startQuery: (TextNode, Bool) -> Void = { _, _ in }
+
+    public var onStartEditing: (() -> Void)?
+    public var onEndEditing: (() -> Void)?
+    public var onFocusChanged: ((UUID, Int) -> Void)?
 
     public var config = TextConfig()
 
@@ -506,14 +489,14 @@ public extension CALayer {
         blinkPhase = true
         hasFocus = true
         invalidate()
-        onStartEditing()
+        onStartEditing?()
         return true
     }
 
     public override func resignFirstResponder() -> Bool {
         blinkPhase = true
         hasFocus = false
-        onEndEditing()
+        onEndEditing?()
 
         guard (inlineFormatter as? HyperlinkFormatterView) == nil else { return super.resignFirstResponder() }
 
@@ -529,6 +512,22 @@ public extension CALayer {
         dismissPopover()
         showOrHideInlineFormatter(isPresent: false)
         return true
+    }
+
+    func focusElement(withId elementId: UUID?, atCursorPosition: Int?, highlight: Bool = false) {
+        guard let id = elementId,
+              let element = note.findElement(id),
+              let node = rootNode.nodeFor(element)
+        else {
+            self.scroll(.zero)
+            return
+        }
+        self.setHotSpot(node.frameInDocument)
+        self.focusedWidget = node
+        node.focus(position: atCursorPosition)
+        if highlight == true {
+            node.highlight()
+        }
     }
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
@@ -697,7 +696,7 @@ public extension CALayer {
 
         let animator = TextEditCmdReturnAnimator(node: node, editorLayer: self.layer)
         animator.startAnimation { [unowned self] in
-            self.onStartQuery(node, true)
+            self.startQuery(node, true)
         }
     }
 

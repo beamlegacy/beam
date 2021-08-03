@@ -99,8 +99,11 @@ struct JournalScrollView: NSViewRepresentable {
         textEditView.openCard = { cardId, elementId in
             self.state.navigateToNote(id: cardId, elementId: elementId)
         }
-        textEditView.onStartQuery = { textNode, animated in
+        textEditView.startQuery = { textNode, animated in
             self.state.startQuery(textNode, animated: animated)
+        }
+        textEditView.onFocusChanged = { elementId, cursorPosition in
+            self.state.updateNoteFocusedState(note: note, focusedElement: elementId, cursorPosition: cursorPosition)
         }
         textEditView.minimumWidth = 800
         textEditView.maximumWidth = 1024

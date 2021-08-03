@@ -1017,7 +1017,7 @@ extension Widget {
 }
 
 extension Widget {
-    func hightlight() {
+    func highlight() {
         let animation = CAKeyframeAnimation(keyPath: "backgroundColor")
         let sanskrit = BeamColor.Sanskrit.nsColor
         let colr = sanskrit.withAlphaComponent(0.14).cgColor

@@ -450,7 +450,7 @@ public class TextNode: ElementNode {
         }
 
         let actionLayer = ShortcutLayer(name: Self.cmdEnterLayer, text: "Search", icons: ["editor-cmdreturn"]) { [unowned self] _ in
-            self.editor.onStartQuery(self, true)
+            self.editor.startQuery(self, true)
         }
         actionLayer.layer.isHidden = true
         addLayer(actionLayer, origin: CGPoint(x: availableWidth + childInset + actionLayerPadding, y: firstLineBaseline), global: false)
