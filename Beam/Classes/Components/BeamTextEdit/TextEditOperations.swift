@@ -157,6 +157,7 @@ extension TextRoot {
         cmdManager.focusElement(node, cursorPosition: selectedTextRange.lowerBound + bText.count)
     }
 
+    // swiftlint:disable:next function_body_length
     public func deleteForward() {
         guard state.nodeSelection == nil else {
             editor.cancelPopover()
@@ -176,7 +177,7 @@ extension TextRoot {
         }
 
         if let textNode = node as? TextNode {
-            if cursorPosition == textNode.textCount {
+            if cursorPosition == textNode.textCount && state.selectedTextRange.isEmpty {
                 guard let nextNode = node.nextVisibleNode(ElementNode.self) else {
                     return
                 }
@@ -266,7 +267,7 @@ extension TextRoot {
         }
 
         if let textNode = node as? TextNode {
-            if cursorPosition == 0 {
+            if cursorPosition == 0 && state.selectedTextRange.isEmpty {
                 guard let prevNode = node.previousVisibleNode(ElementNode.self) else {
                     return
                 }
