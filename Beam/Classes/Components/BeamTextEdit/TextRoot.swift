@@ -72,6 +72,9 @@ public class TextRoot: TextNode {
             let position = newValue > textCount ? textCount : newValue
             let caretIndex = n?.caretIndexForSourcePosition(position) ?? 0
             self.caretIndex = caretIndex
+            if let n = n {
+                editor.onFocusChanged?(n.elementId, position)
+            }
         }
     }
 

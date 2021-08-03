@@ -608,6 +608,7 @@
 		A567157125F66F8600B46110 /* StyledText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A567157025F66F8600B46110 /* StyledText.swift */; };
 		A5679CE2262ECB9500E7FA69 /* NavigationCollectUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5679CE1262ECB9500E7FA69 /* NavigationCollectUITests.swift */; };
 		A569EA3026A196F600B0861B /* AutocompleteManager+Publishers.swift in Sources */ = {isa = PBXBuildFile; fileRef = A569EA2F26A196F600B0861B /* AutocompleteManager+Publishers.swift */; };
+		A56BAF5826B937CE0006F8D5 /* NoteEditFocusedState.swift in Sources */ = {isa = PBXBuildFile; fileRef = A56BAF5726B937CE0006F8D5 /* NoteEditFocusedState.swift */; };
 		A56DF8F12625D27500F1CF55 /* TextFormatterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A56DF8F02625D27500F1CF55 /* TextFormatterView.swift */; };
 		A56FFE0326971F8500BEE6A1 /* CalendarPickerFormatterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A56FFE0226971F8500BEE6A1 /* CalendarPickerFormatterView.swift */; };
 		A572370D2655654900AE6BFC /* CoreDataContextObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = A572370C2655654900AE6BFC /* CoreDataContextObserver.swift */; };
@@ -1464,6 +1465,7 @@
 		A567157025F66F8600B46110 /* StyledText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StyledText.swift; sourceTree = "<group>"; };
 		A5679CE1262ECB9500E7FA69 /* NavigationCollectUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationCollectUITests.swift; sourceTree = "<group>"; };
 		A569EA2F26A196F600B0861B /* AutocompleteManager+Publishers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AutocompleteManager+Publishers.swift"; sourceTree = "<group>"; };
+		A56BAF5726B937CE0006F8D5 /* NoteEditFocusedState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteEditFocusedState.swift; sourceTree = "<group>"; };
 		A56DF8F02625D27500F1CF55 /* TextFormatterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextFormatterView.swift; sourceTree = "<group>"; };
 		A56FFE0226971F8500BEE6A1 /* CalendarPickerFormatterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarPickerFormatterView.swift; sourceTree = "<group>"; };
 		A572370C2655654900AE6BFC /* CoreDataContextObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataContextObserver.swift; sourceTree = "<group>"; };
@@ -2018,6 +2020,7 @@
 				96319C8526160E4A00D1CF31 /* BeamNote+LinkDetection.swift */,
 				A5F1F6252643EDA600D41505 /* BeamNoteSharingUtils.swift */,
 				418171862581107C00317ED8 /* NoteBackForwardList.swift */,
+				A56BAF5726B937CE0006F8D5 /* NoteEditFocusedState.swift */,
 				A0C63A6725FA249700FB4CCE /* BeamTextHolder.swift */,
 				96E4CF75258EC88300D6DE22 /* BeamTextTools.swift */,
 				A050047425DA918A009CFEB6 /* NoteAutoSaveService.swift */,
@@ -4278,6 +4281,7 @@
 				4181724A2581107C00317ED8 /* TextView.swift in Sources */,
 				526017FC25AE081E00634695 /* AppDelegate+Console.swift in Sources */,
 				0325628F26051D3B006513E4 /* RBSQLite.m in Sources */,
+				A56BAF5826B937CE0006F8D5 /* NoteEditFocusedState.swift in Sources */,
 				DA9E5B9D26A843520040F09B /* NoteSources+LongTermUrlScoreStore.swift in Sources */,
 				A0E9B0FB2666A80600FC99A5 /* TabGroupingTitleBarView.swift in Sources */,
 				A567157125F66F8600B46110 /* StyledText.swift in Sources */,
