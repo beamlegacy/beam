@@ -7,6 +7,7 @@ protocol BeamObjectProtocol: Codable {
     static var beamObjectTypeName: String { get }
 
     var beamObjectId: UUID { get set }
+
     var createdAt: Date { get set }
     var updatedAt: Date { get set }
     var deletedAt: Date? { get set }
@@ -26,7 +27,6 @@ extension BeamObjectProtocol {
 
 /// Used to store data on the BeamObject Beam API.
 class BeamObject: Codable {
-    var beamObjectId: UUID
     var beamObjectType: String
     var createdAt: Date?
     var updatedAt: Date?
@@ -35,14 +35,7 @@ class BeamObject: Codable {
     var dataChecksum: String?
     var previousChecksum: String?
 
-    var id: UUID {
-        get {
-            beamObjectId
-        }
-        set {
-            beamObjectId = newValue
-        }
-    }
+    var id: UUID
 
     public var debugDescription: String {
         "<BeamObject: \(id) [\(beamObjectType)]>"
@@ -56,8 +49,8 @@ class BeamObject: Codable {
         case noData
     }
 
-    enum CodingKeys: String, CodingKey {
-        case beamObjectId = "id"
+    private enum CodingKeys: String, CodingKey {
+        case id = "id"
         case beamObjectType = "type"
         case createdAt
         case updatedAt
@@ -67,13 +60,13 @@ class BeamObject: Codable {
         case previousChecksum
     }
 
-    init(beamObjectId: UUID, beamObjectType: String) {
-        self.beamObjectId = beamObjectId
+    init(id: UUID, beamObjectType: String) {
+        self.id = id
         self.beamObjectType = beamObjectType
     }
 
     init<T: BeamObjectProtocol>(_ object: T, _ type: String) throws {
-        beamObjectId = object.beamObjectId
+        id = object.beamObjectId
         beamObjectType = type
 
         createdAt = object.createdAt
@@ -81,10 +74,7 @@ class BeamObject: Codable {
         deletedAt = object.deletedAt
 
         previousChecksum = object.previousChecksum
-
-        let jsonData = try Self.encoder.encode(object)
-        data = jsonData.asString
-        dataChecksum = jsonData.SHA256
+        try encodeObject(object)
 
         // Used when going deep in debug
 //        if let data = data, let dataChecksum = dataChecksum {
@@ -97,17 +87,19 @@ class BeamObject: Codable {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
         encoder.outputFormatting = .sortedKeys
+        encoder.keyEncodingStrategy = .convertToSnakeCase
         return encoder
     }
 
     static var decoder: JSONDecoder {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
         return decoder
     }
 
     func copy() -> BeamObject {
-        let result = BeamObject(beamObjectId: beamObjectId, beamObjectType: beamObjectType)
+        let result = BeamObject(id: id, beamObjectType: beamObjectType)
         result.createdAt = createdAt
         result.updatedAt = updatedAt
         result.deletedAt = deletedAt
@@ -131,18 +123,25 @@ class BeamObject: Codable {
         return decodedObject
     }
 
+    func encodeObject<T: BeamObjectProtocol>(_ object: T) throws {
+        let jsonData = try Self.encoder.encode(object)
+
+        data = jsonData.asString
+        dataChecksum = jsonData.SHA256
+    }
+
     func decode<T: BeamObjectProtocol>() -> T? {
         guard let data = data else { return nil }
 
+        let dataAsData = data.asData
+
+        if let dataChecksum = dataChecksum, dataAsData.SHA256 != dataChecksum {
+            Logger.shared.logError("Checksum received \(dataChecksum) is different from calculated one: \(dataAsData.SHA256) :( Data is potentially corrupted",
+                                   category: .beamObjectNetwork)
+            Logger.shared.logError("data: \(data)", category: .beamObjectNetwork)
+        }
+
         do {
-            let dataAsData = data.asData
-
-            if dataAsData.SHA256 != dataChecksum {
-                Logger.shared.logError("Checksum received \(String(describing: dataChecksum)) is different from calculated one: \(dataAsData.SHA256) :( Data is potentially corrupted",
-                                       category: .beamObjectNetwork)
-                Logger.shared.logError("data: \(data)", category: .beamObjectNetwork)
-            }
-
             var result = try Self.decoder.decode(T.self, from: dataAsData)
 
             // Checksum is used to check *after* we encoded the string, so it's not embedded in that encoded string and

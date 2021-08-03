@@ -626,6 +626,7 @@ extension BeamObjectManager {
     }
 
     /// Fetch remote object
+    @discardableResult
     func fetchObject<T: BeamObjectProtocol>(_ object: T,
                                             _ completion: @escaping (Result<T, Error>) -> Void) throws -> URLSessionDataTask {
         try fetchBeamObject(object.beamObjectId) { fetchResult in
@@ -737,18 +738,18 @@ extension BeamObjectManager {
             }
 
             // APIRequestError.beamObjectInvalidChecksum happens when only 1 object is in error, if not something is bogus
-            guard let beamObject = beamObjects.first(where: { $0.beamObjectId.uuidString.lowercased() == updateBeamObjects.errors?.first?.objectid?.lowercased()}) else {
+            guard let beamObject = beamObjects.first(where: { $0.id.uuidString.lowercased() == updateBeamObjects.errors?.first?.objectid?.lowercased()}) else {
                 completion(.failure(error))
                 return
             }
 
             // Set `checksum` on the objects who were saved successfully as this will be used later
             var remoteFilteredBeamObjects: [BeamObject] = beamObjects.compactMap {
-                if beamObject.beamObjectId == $0.beamObjectId { return nil }
+                if beamObject.id == $0.id { return nil }
 
                 let remoteObject = $0
                 remoteObject.dataChecksum = remoteBeamObjects.first(where: {
-                    $0.id == remoteObject.beamObjectId
+                    $0.id == remoteObject.id
                 })?.dataChecksum
 
                 return remoteObject

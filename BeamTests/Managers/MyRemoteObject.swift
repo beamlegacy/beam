@@ -13,6 +13,7 @@ struct MyRemoteObject: BeamObjectProtocol {
     static var beamObjectTypeName = "my_remote_object"
 
     var beamObjectId = UUID()
+
     var createdAt = BeamDate.now
     var updatedAt = BeamDate.now
     var deletedAt: Date?
@@ -24,7 +25,6 @@ struct MyRemoteObject: BeamObjectProtocol {
 
     // Used for encoding this into BeamObject
     enum CodingKeys: String, CodingKey {
-        case beamObjectId
         case title
         case createdAt
         case updatedAt

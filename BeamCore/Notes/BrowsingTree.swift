@@ -24,11 +24,11 @@ public enum BrowsingTreeOrigin: Codable {
     case browsingNode(id: UUID)
 
     enum CodingKeys: CodingKey {
-           case type, value
-       }
+        case type, value
+    }
 
     public func encode(to encoder: Encoder) throws {
-            var container = encoder.container(keyedBy: CodingKeys.self)
+        var container = encoder.container(keyedBy: CodingKeys.self)
         switch self {
         case .searchBar(let query):
             try container.encode("searchBar", forKey: .type)
