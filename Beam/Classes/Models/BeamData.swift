@@ -176,7 +176,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
                note.type == .note,
                let changed = note.changed?.1,
                changed == .text {
-                self.clusteringManager.addNote(note: note)
+                self.clusteringManager.noteToAdd = note
             }
         }.store(in: &scope)
 
