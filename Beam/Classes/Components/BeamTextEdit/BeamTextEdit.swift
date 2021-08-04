@@ -617,8 +617,8 @@ public extension CALayer {
                 dismissPopoverOrFormatter()
                 return
             case KeyCode.enter.rawValue:
-                if command && rootNode.state.nodeSelection == nil, let node = rootNode.focusedWidget as? TextNode {
-                    triggerCmdReturn(from: node)
+                if command && rootNode.state.nodeSelection == nil,
+                   let node = rootNode.focusedWidget as? TextNode, triggerCmdReturn(from: node) == true {
                     return
                 }
             case KeyCode.up.rawValue:
@@ -688,16 +688,21 @@ public extension CALayer {
         node.open.toggle()
     }
 
-    private func triggerCmdReturn(from node: TextNode) {
-        blinkPhase = false
-        hasFocus = false
-        node.updateCursor()
-        node.updateActionLayerVisibility(hidden: true)
+    /// - Returns: true if action is possible
+    private func triggerCmdReturn(from node: TextNode) -> Bool {
+        guard node.text.count > 0 else { return false }
 
         let animator = TextEditCmdReturnAnimator(node: node, editorLayer: self.layer)
-        animator.startAnimation { [unowned self] in
+        let canAnimate = animator.startAnimation { [unowned self] in
             self.startQuery(node, true)
         }
+        if canAnimate {
+            blinkPhase = false
+            hasFocus = false
+            node.updateCursor()
+            node.updateActionLayerVisibility(hidden: true)
+        }
+        return canAnimate
     }
 
     // NSTextInputHandler:
