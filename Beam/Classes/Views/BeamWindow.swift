@@ -106,14 +106,16 @@ class BeamWindow: NSWindow, NSDraggingDestination {
         for window in AppDelegate.main.windows where window === self {
             window.close()
         }
-        super.close()
     }
 
     override func close() {
         // TODO: Add a proper way to clean the entire window state
         // https://linear.app/beamapp/issue/BE-1152/
         AppDelegate.main.windows.removeAll { window in
-            window === self
+            if window === self {
+                window.contentView = nil
+            }
+            return window === self
         }
         super.close()
     }
@@ -253,10 +255,6 @@ class BeamWindow: NSWindow, NSDraggingDestination {
 
         }
         return true
-    }
-
-    deinit {
-        contentView = nil
     }
 }
 

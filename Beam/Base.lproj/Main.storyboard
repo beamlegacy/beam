@@ -71,7 +71,7 @@
                                     <items>
                                         <menuItem title="New Window" keyEquivalent="n" id="Was-JA-tGl">
                                             <connections>
-                                                <action selector="newDocument:" target="Ady-hI-5gd" id="4Si-XN-c54"/>
+                                                <action selector="newWindow:" target="Ady-hI-5gd" id="3A8-wm-3V3"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem title="New Tab" keyEquivalent="t" id="XvS-Ku-fBs" userLabel="New Search...">

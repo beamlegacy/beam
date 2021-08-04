@@ -9,10 +9,6 @@ import Foundation
 
 /// NSMenu bar methods handling
 extension BeamWindow {
-    @IBAction func newDocument(_ sender: Any?) {
-        AppDelegate.main.createWindow(frame: nil, reloadState: false)
-    }
-
     @IBAction func showPreviousTab(_ sender: Any?) {
         state.browserTabsManager.showPreviousTab()
     }
