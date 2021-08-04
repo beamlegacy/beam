@@ -21,10 +21,12 @@ class BeamObjectRequest: APIRequest {
 
     class UpdateBeamObject: Codable, Errorable {
         let beamObject: BeamObject?
+        let privateKey: String?
         var errors: [UserErrorData]?
 
-        init(beamObject: BeamObject?) {
+        init(beamObject: BeamObject?, privateKey: String?) {
             self.beamObject = beamObject
+            self.privateKey = privateKey
         }
     }
 
@@ -32,6 +34,7 @@ class BeamObjectRequest: APIRequest {
 
     struct UpdateBeamObjects: Codable, Errorable {
         let beamObjects: [BeamObject]?
+        let privateKey: String?
         var errors: [UserErrorData]?
     }
 
@@ -42,7 +45,12 @@ class BeamObjectRequest: APIRequest {
     internal func saveBeamObjectParameters(_ beamObject: BeamObject) throws -> UpdateBeamObject {
         try beamObject.encrypt()
 
-        return UpdateBeamObject(beamObject: beamObject)
+        #if DEBUG
+        return UpdateBeamObject(beamObject: beamObject, privateKey: EncryptionManager.shared.privateKey().asString())
+        #else
+        return UpdateBeamObject(beamObject: beamObject, privateKey: nil)
+        #endif
+
     }
 
     internal func saveBeamObjectsParameters(_ beamObjects: [BeamObject]) throws -> UpdateBeamObjects {
@@ -51,7 +59,11 @@ class BeamObjectRequest: APIRequest {
             return $0
         }
 
-        return UpdateBeamObjects(beamObjects: result)
+        #if DEBUG
+        return UpdateBeamObjects(beamObjects: result, privateKey: EncryptionManager.shared.privateKey().asString())
+        #else
+        return UpdateBeamObjects(beamObjects: result, privateKey: nil)
+        #endif
     }
 }
 

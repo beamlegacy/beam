@@ -33,7 +33,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
             MyRemoteObjectManager.store.removeAll()
 
-            try? EncryptionManager.shared.replacePrivateKey("j6tifPZTjUtGoz+1RJkO8dOMlu48MUUSlwACw/fCBw0=")
+            try? EncryptionManager.shared.replacePrivateKey(Configuration.testPrivateKey)
         }
 
         afterEach {

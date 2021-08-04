@@ -4,7 +4,7 @@ import BeamCore
 struct DatabaseStruct: BeamObjectProtocol {
     static var beamObjectTypeName: String { "database" }
 
-    var id: UUID
+    var id: UUID = .null
     var title: String
     var createdAt: Date
     var updatedAt: Date
@@ -24,7 +24,6 @@ struct DatabaseStruct: BeamObjectProtocol {
 
     // Used for encoding this into BeamObject
     enum CodingKeys: String, CodingKey {
-        case id
         case title
         case createdAt
         case updatedAt

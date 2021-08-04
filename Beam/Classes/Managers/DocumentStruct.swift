@@ -3,7 +3,7 @@ import Foundation
 struct DocumentStruct: BeamObjectProtocol {
     static var beamObjectTypeName: String { "document" }
 
-    var id: UUID
+    var id: UUID = .null
     var databaseId: UUID
     var title: String
     var createdAt: Date
@@ -30,7 +30,6 @@ struct DocumentStruct: BeamObjectProtocol {
 
     // Used for encoding this into BeamObject
     enum CodingKeys: String, CodingKey {
-        case id
         case databaseId
         case title
         case createdAt

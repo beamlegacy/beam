@@ -215,7 +215,7 @@ extension BeamObject {
                 fatalError("Data has already been encrypted!")
             }
         } catch {
-
+            // it fails, it's not an encryptedStruct
         }
         #endif
 

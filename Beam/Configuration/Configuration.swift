@@ -20,8 +20,10 @@ struct Configuration {
 
     static private(set) var sentryDsn = "https://\(sentryKey)@\(sentryHostname)/\(sentryProject)"
 
+    static private(set) var testPrivateKey = "j6tifPZTjUtGoz+1RJkO8dOMlu48MUUSlwACw/fCBw0="
+
     // Runtime configuration
-    static private(set) var apiHostnameDefault = "https://api.beamapp.co"
+    static private(set) var apiHostnameDefault = "https://api.beamapp.co" // "http://api.beam.lvh.me:5000"
     static private(set) var publicHostnameDefault = "https://app.beamapp.co"
 
     static private var apiHostnameKey = "apiHostname"

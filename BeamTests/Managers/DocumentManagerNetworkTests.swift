@@ -52,7 +52,7 @@ class DocumentManagerNetworkTests: QuickSpec {
 
             helper.createDefaultDatabase("00000000-e0df-4eca-93e6-8778984bcd18")
 
-            try? EncryptionManager.shared.replacePrivateKey("j6tifPZTjUtGoz+1RJkO8dOMlu48MUUSlwACw/fCBw0=")
+            try? EncryptionManager.shared.replacePrivateKey(Configuration.testPrivateKey)
         }
 
         afterEach {
