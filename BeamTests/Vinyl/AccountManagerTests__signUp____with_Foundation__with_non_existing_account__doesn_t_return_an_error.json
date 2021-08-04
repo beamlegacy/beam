@@ -1,29 +1,29 @@
 [
   {
     "request" : {
-      "method" : "POST",
-      "body" : {
-        "query" : "mutation SignUp($email: Email!, $password: String!) {\n  signUp(input: {email: $email, password: $password}) {\n    user {\n      unconfirmedEmail\n      email\n      id\n    }\n    errors {\n      path\n      message\n    }\n  }\n}\n",
-        "variables" : {
-          "email" : "fabien+test-22C9E354-9EC2-4321-AC9E-42006C55A103@beamapp.co",
-          "password" : "mBZML6G7vat7"
-        }
-      },
+      "url" : "https:\/\/api.beamapp.co\/graphql",
       "headers" : {
-        "Content-Type" : "application\/json",
         "User-Agent" : "Beam client, 0.1.0 (1)",
+        "Content-Type" : "application\/json",
         "Accept" : "application\/json",
         "Accept-Language" : "en"
       },
-      "url" : "https:\/\/api.beamapp.co\/graphql"
+      "body" : {
+        "query" : "mutation SignUp($email: Email!, $password: String!) {\n  signUp(input: {email: $email, password: $password}) {\n    user {\n      unconfirmedEmail\n      email\n      id\n    }\n    errors {\n      path\n      message\n    }\n  }\n}\n",
+        "variables" : {
+          "email" : "fabien+test-764474E4-140E-4B55-A507-4910D5043431@beamapp.co",
+          "password" : "Y575IWLIk1l0"
+        }
+      },
+      "method" : "POST"
     },
     "response" : {
       "body" : {
         "data" : {
           "signUp" : {
             "user" : {
-              "email" : "fabien+test-22c9e354-9ec2-4321-ac9e-42006c55a103@beamapp.co",
-              "id" : "865be942-ec2a-4315-a5bd-b616b82c63ed",
+              "email" : "fabien+test-764474e4-140e-4b55-a507-4910d5043431@beamapp.co",
+              "id" : "c8cd9fb1-9d9f-40fe-b5fe-6ad4301c1bec",
               "unconfirmedEmail" : null
             },
             "errors" : [
@@ -32,27 +32,27 @@
           }
         }
       },
-      "url" : "https:\/\/api.beamapp.co\/graphql",
       "status" : 200,
+      "url" : "https:\/\/api.beamapp.co\/graphql",
       "headers" : {
-        "X-Request-Id" : "fa939c9b-ed19-4b61-aefd-2e7e8be94698",
-        "Transfer-Encoding" : "Identity",
-        "Referrer-Policy" : "strict-origin-when-cross-origin",
-        "Cache-Control" : "max-age=0, private, must-revalidate",
-        "X-Download-Options" : "noopen",
         "X-Permitted-Cross-Domain-Policies" : "none",
-        "X-Runtime" : "0.266008",
-        "Content-Type" : "application\/json; charset=utf-8",
-        "Via" : "1.1 vegur",
-        "X-Content-Type-Options" : "nosniff",
-        "X-Frame-Options" : "SAMEORIGIN",
-        "Date" : "Tue, 03 Aug 2021 08:54:55 GMT",
-        "X-Xss-Protection" : "1; mode=block",
-        "Server" : "Cowboy",
         "Vary" : "Accept, Origin",
-        "Etag" : "W\/\"80a20abdf07ea90fd8a610408fff5405\"",
         "Connection" : "keep-alive",
-        "Strict-Transport-Security" : "max-age=63072000; includeSubDomains"
+        "Transfer-Encoding" : "Identity",
+        "X-Frame-Options" : "SAMEORIGIN",
+        "Etag" : "W\/\"c2d2aeff884d739de8d7adec5120ef30\"",
+        "Via" : "1.1 vegur",
+        "Server" : "Cowboy",
+        "X-Request-Id" : "4383e988-5608-462d-8110-cabf1d793818",
+        "Cache-Control" : "max-age=0, private, must-revalidate",
+        "X-Runtime" : "0.259643",
+        "X-Download-Options" : "noopen",
+        "Date" : "Wed, 04 Aug 2021 14:09:56 GMT",
+        "X-Content-Type-Options" : "nosniff",
+        "Strict-Transport-Security" : "max-age=63072000; includeSubDomains",
+        "Referrer-Policy" : "strict-origin-when-cross-origin",
+        "X-Xss-Protection" : "1; mode=block",
+        "Content-Type" : "application\/json; charset=utf-8"
       }
     }
   }
