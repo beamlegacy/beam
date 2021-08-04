@@ -84,4 +84,19 @@ class BeamObjectTestsHelper {
             fail("Timedout")
         }
     }
+
+    /// Delete all beam objects
+    func deleteAll() {
+        let semaphore = DispatchSemaphore(value: 0)
+
+        _ = try? BeamObjectRequest().deleteAll { _ in
+            semaphore.signal()
+        }
+
+        let semaResult = semaphore.wait(timeout: DispatchTime.now() + .seconds(5))
+
+        if case .timedOut = semaResult {
+            fail("Timedout")
+        }
+    }
 }

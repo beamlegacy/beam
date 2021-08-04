@@ -34,6 +34,8 @@ class BeamObjectManagerNetworkTests: QuickSpec {
             BeamObjectManager.unRegisterAll()
             MyRemoteObjectManager().registerOnBeamObjectManager()
 
+            MyRemoteObjectManager.store.removeAll()
+
             try? EncryptionManager.shared.replacePrivateKey(Configuration.testPrivateKey)
         }
 
@@ -63,6 +65,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                                             previousChecksum: nil,
                                             checksum: nil,
                                             title: title)
+
                 _ = beamObjectHelper.saveOnAPI(object)
             }
 

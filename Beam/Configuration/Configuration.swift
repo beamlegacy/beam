@@ -23,7 +23,8 @@ struct Configuration {
     static private(set) var testPrivateKey = "j6tifPZTjUtGoz+1RJkO8dOMlu48MUUSlwACw/fCBw0="
 
     // Runtime configuration
-    static private(set) var apiHostnameDefault = "https://api.beamapp.co" // "http://api.beam.lvh.me:5000"
+    // Set to "http://api.beam.lvh.me:5000" for running on a local API instance
+    static private(set) var apiHostnameDefault = "https://api.beamapp.co"
     static private(set) var publicHostnameDefault = "https://app.beamapp.co"
 
     static private var apiHostnameKey = "apiHostname"

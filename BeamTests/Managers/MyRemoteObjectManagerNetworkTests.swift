@@ -51,7 +51,8 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
             }
 
             afterEach {
-                self.deleteAll()
+                beamObjectHelper.deleteAll()
+                MyRemoteObjectManager.store.removeAll()
             }
 
             context("when objects exist on the API side") {
@@ -181,7 +182,8 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
             }
 
             afterEach {
-                self.deleteAll()
+                beamObjectHelper.deleteAll()
+                MyRemoteObjectManager.store.removeAll()
             }
 
             context("when objects don't exist on the API") {
@@ -265,7 +267,8 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
             }
 
             afterEach {
-                self.deleteAll()
+                beamObjectHelper.deleteAll()
+                MyRemoteObjectManager.store.removeAll()
             }
 
             context("when objects don't exist on the API") {
@@ -824,7 +827,8 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
             }
 
             afterEach {
-                self.deleteAll()
+                beamObjectHelper.deleteAll()
+                MyRemoteObjectManager.store.removeAll()
             }
 
             context("when object doesn't exist on the API") {
@@ -1064,17 +1068,5 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
         saveObjectAndSaveChecksum(MyRemoteObjectManager.store["195d94e1-e0df-4eca-93e6-8778984bcd58".uuid!]!)
         saveObjectAndSaveChecksum(MyRemoteObjectManager.store["295d94e1-e0df-4eca-93e6-8778984bcd58".uuid!]!)
         saveObjectAndSaveChecksum(MyRemoteObjectManager.store["395d94e1-e0df-4eca-93e6-8778984bcd58".uuid!]!)
-    }
-
-    /// Delete all beam objects
-    private func deleteAll() {
-        let semaphore = DispatchSemaphore(value: 0)
-
-        _ = try? BeamObjectRequest().deleteAll { _ in
-            semaphore.signal()
-        }
-
-        _ = semaphore.wait(timeout: DispatchTime.now() + .seconds(5))
-        MyRemoteObjectManager.store.removeAll()
     }
 }

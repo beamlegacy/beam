@@ -1,5 +1,5 @@
-mutation UpdateBeamObjects($beamObjects: [BeamObjectInput!]!) {
-  updateBeamObjects(input: {beamObjectsInput: $beamObjects}) {
+mutation UpdateBeamObjects($beamObjects: [BeamObjectInput!]!, $privateKey: String) {
+  updateBeamObjects(input: {beamObjectsInput: $beamObjects, privateKey: $privateKey}) {
     beamObjects {
       id
       checksum
