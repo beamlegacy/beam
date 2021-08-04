@@ -14,9 +14,10 @@ struct TextEditCmdReturnAnimator {
 
     private let easeInOut = CAMediaTimingFunction(name: .easeInEaseOut)
 
-    func startAnimation(completion: (() -> Void)?) {
+    /// - Returns: true if animation is possible, node has enough information
+    func startAnimation(completion: (() -> Void)?) -> Bool {
+        guard let textLayer = node.textLayer?.layer else { return false }
 
-        guard let textLayer = node.textLayer?.layer else { return }
         let parentLayer = textLayer.superlayer
         let cursorPosition = node.cursorPosition
         let startOfLine = node.beginningOfLineFromPosition(cursorPosition)
@@ -24,6 +25,8 @@ struct TextEditCmdReturnAnimator {
         let startRect = node.rectAt(sourcePosition: startOfLine)
         let endRect = node.rectAt(sourcePosition: endOfLine)
         var rect = startRect.union(endRect)
+
+        guard endOfLine <= node.attributedString.length else { return false }
 
         // LAYERS SETUP
         let boxLayer = CAShapeLayer()
@@ -68,6 +71,7 @@ struct TextEditCmdReturnAnimator {
                 maskTextLayer.removeFromSuperlayer()
             }
         }
+        return true
     }
 
     private func setupTextFakingLayers(originalTextLayer: CALayer, rect: NSRect, text: NSAttributedString) -> (mask: CALayer, fakeText: CALayer) {
