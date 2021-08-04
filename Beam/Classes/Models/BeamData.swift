@@ -122,6 +122,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
             self.versionChecker = VersionChecker(mockedReleases: AppRelease.mockedReleases(), autocheckEnabled: true)
         }
         self.versionChecker.allowAutoDownload = PreferencesManager.isAutoUpdateOn
+        self.versionChecker.allReleaseNotesURL = URL(string: "https://beamapp.co")
 
         let treeConfig = BrowsingTreeSenderConfig(
             dataStoreUrl: EnvironmentVariables.BrowsingTree.url,
