@@ -81,6 +81,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             Logger.shared.logInfo("🛑 API HOSTNAME is \(Configuration.apiHostname)", category: .general)
         }
 
+        if Configuration.env == "$(ENV)" {
+            Logger.shared.logError("ENV wasn't properly detected", category: .general)
+        }
+
         #if DEBUG
         self.beamUIMenuGenerator = BeamUITestsMenuGenerator()
         prepareMenuForTestEnv()

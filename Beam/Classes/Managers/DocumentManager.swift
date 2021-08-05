@@ -1064,9 +1064,12 @@ extension DocumentManager {
 
                     do {
                         document.beam_object_previous_checksum = remoteDocumentStruct.checksum
-
                         document.update(remoteDocumentStruct)
-                        self.notificationDocumentUpdate(remoteDocumentStruct)
+                        document.version += 1
+
+                        try self.checkValidations(context, document)
+
+                        self.notificationDocumentUpdate(DocumentStruct(document: document))
 
                         completion?(.success(try Self.saveContext(context: context)))
                     } catch {
