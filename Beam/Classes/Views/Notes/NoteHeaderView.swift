@@ -64,6 +64,7 @@ struct NoteHeaderView: View {
         .onDisappear {
             model.commitRenameCard(fromTextField: false)
         }
+        .accessibility(identifier: "Card's title")
     }
 
     private var subtitleInfoView: some View {
