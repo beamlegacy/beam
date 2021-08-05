@@ -38,6 +38,15 @@ enum BeamObjectManagerDelegateError: Error {
     case runtimeError(String)
 }
 
+extension BeamObjectManagerDelegateError: LocalizedError {
+    public var errorDescription: String? {
+        switch self {
+        case .runtimeError(let text):
+            return text
+        }
+    }
+}
+
 extension BeamObjectManagerDelegate {
     func registerOnBeamObjectManager() {
         BeamObjectManager.register(self, object: BeamObjectType.self)
@@ -53,11 +62,11 @@ extension BeamObjectManagerDelegate {
 
     func manageConflict(_ object: BeamObjectType,
                         _ remoteObject: BeamObjectType) throws -> BeamObjectType {
-        throw BeamObjectManagerDelegateError.runtimeError("manageConflict must be implemented by the class")
+        fatalError("manageConflict must be implemented by \(BeamObjectType.beamObjectTypeName) manager")
     }
 
     func saveObjectsAfterConflict(_ objects: [BeamObjectType]) throws {
-        throw BeamObjectManagerDelegateError.runtimeError("saveObjectsAfterConflict must be implemented by the class")
+        fatalError("saveObjectsAfterConflict must be implemented by \(BeamObjectType.beamObjectTypeName) manager")
     }
 
     func updatedObjectsOnly(_ objects: [BeamObjectType]) -> [BeamObjectType] {
@@ -293,20 +302,18 @@ extension BeamObjectManagerDelegate {
             var mergedObjects: [BeamObjectType] = []
 
             for conflictedObject in conflictedObjects {
-                guard let remoteObject = remoteObjects.first(where: { $0.beamObjectId == conflictedObject.beamObjectId }) else {
-                    Logger.shared.logError("Can't find the remote object connected to the conflict object!",
-                                           category: .beamObject)
-                    continue
+                if let remoteObject = remoteObjects.first(where: { $0.beamObjectId == conflictedObject.beamObjectId }) {
+                    var mergedObject = try manageConflict(conflictedObject, remoteObject)
+                    mergedObject.previousChecksum = remoteObject.checksum
+
+                    mergedObjects.append(mergedObject)
+                } else {
+                    var mergedObject = try conflictedObject.copy()
+                    mergedObject.previousChecksum = nil
+
+                    mergedObjects.append(mergedObject)
                 }
-
-                var mergedObject = try manageConflict(conflictedObject, remoteObject)
-                mergedObject.previousChecksum = remoteObject.checksum
-
-                mergedObjects.append(mergedObject)
             }
-
-            Logger.shared.logWarning("Merged Objects", category: .beamObjectNetwork)
-            dump(mergedObjects)
 
             try self.saveOnBeamObjectsAPI(mergedObjects, .fetchRemoteAndError) { result in
                 switch result {
@@ -318,9 +325,6 @@ extension BeamObjectManagerDelegate {
                         var allObjects: [BeamObjectType] = []
                         allObjects.append(contentsOf: goodObjects)
                         allObjects.append(contentsOf: remoteObjects)
-
-                        Logger.shared.logWarning("AllObjects Objects", category: .beamObjectNetwork)
-                        dump(allObjects)
 
                         try self.saveObjectsAfterConflict(remoteObjects)
                         try self.persistChecksum(goodObjects)

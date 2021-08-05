@@ -363,11 +363,14 @@ extension BeamObjectManager {
         var goodObjects: [T] = extractGoodObjects(objects, conflictedObject, remoteBeamObjects)
 
         do {
-            let fetchedObject = try fetchObject(conflictedObject)
+            var fetchedObject: T?
+            do {
+                fetchedObject = try fetchObject(conflictedObject)
+            } catch APIRequestError.notFound { }
 
             switch self.conflictPolicyForSave {
             case .replace:
-                conflictedObject.previousChecksum = fetchedObject.checksum
+                conflictedObject.previousChecksum = fetchedObject?.checksum
 
                 _ = try self.saveToAPI(conflictedObject) { result in
                     switch result {
@@ -383,7 +386,7 @@ extension BeamObjectManager {
             case .fetchRemoteAndError:
                 completion(.failure(BeamObjectManagerObjectError<T>.invalidChecksum([conflictedObject],
                                                                                     goodObjects,
-                                                                                    [fetchedObject])))
+                                                                                    [fetchedObject].compactMap { $0 })))
             }
         } catch {
             completion(.failure(error))
