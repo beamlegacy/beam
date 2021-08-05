@@ -32,6 +32,7 @@ class Database: NSManagedObject, BeamCoreDataObject {
     func update(_ databaseStruct: DatabaseStruct) {
         title = databaseStruct.title
         created_at = databaseStruct.createdAt
+        updated_at = databaseStruct.updatedAt
         deleted_at = databaseStruct.deletedAt
     }
 
