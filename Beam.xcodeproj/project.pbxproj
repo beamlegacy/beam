@@ -91,6 +91,10 @@
 		338A66A0268DC26000B056EB /* LayerRemoverAnimationDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 338A669F268DC26000B056EB /* LayerRemoverAnimationDelegate.swift */; };
 		338A66C2268E053C00B056EB /* BeamDownloadDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 338A66C1268E053C00B056EB /* BeamDownloadDocument.swift */; };
 		3392E56D269D82FE000FA401 /* ClickCatchingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3392E56C269D82FE000FA401 /* ClickCatchingView.swift */; };
+		339D193926AED9E1006DE745 /* AuthenticationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 339D193826AED9E1006DE745 /* AuthenticationView.swift */; };
+		33AC9D8E26AF482E004E7EF4 /* EnhancedWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AC9D8D26AF482E004E7EF4 /* EnhancedWebView.swift */; };
+		33AC9D9826AFF453004E7EF4 /* FocusableTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AC9D9726AFF453004E7EF4 /* FocusableTextField.swift */; };
+		33AC9D9A26B01A60004E7EF4 /* AuthenticationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AC9D9926B01A60004E7EF4 /* AuthenticationViewModel.swift */; };
 		33B27467264C0F7100A318CD /* AutoUpdate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 33B27450264C0CDC00A318CD /* AutoUpdate.framework */; };
 		33B27468264C0F7100A318CD /* AutoUpdate.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 33B27450264C0CDC00A318CD /* AutoUpdate.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		33B2746A264C103400A318CD /* SmallUpdateIndicatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33B27469264C103400A318CD /* SmallUpdateIndicatorView.swift */; };
@@ -943,6 +947,10 @@
 		338A669F268DC26000B056EB /* LayerRemoverAnimationDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerRemoverAnimationDelegate.swift; sourceTree = "<group>"; };
 		338A66C1268E053C00B056EB /* BeamDownloadDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamDownloadDocument.swift; sourceTree = "<group>"; };
 		3392E56C269D82FE000FA401 /* ClickCatchingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClickCatchingView.swift; sourceTree = "<group>"; };
+		339D193826AED9E1006DE745 /* AuthenticationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationView.swift; sourceTree = "<group>"; };
+		33AC9D8D26AF482E004E7EF4 /* EnhancedWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnhancedWebView.swift; sourceTree = "<group>"; };
+		33AC9D9726AFF453004E7EF4 /* FocusableTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusableTextField.swift; sourceTree = "<group>"; };
+		33AC9D9926B01A60004E7EF4 /* AuthenticationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationViewModel.swift; sourceTree = "<group>"; };
 		33B27441264C0CDB00A318CD /* AutoUpdate.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = AutoUpdate.xcodeproj; path = Extern/AutoUpdate/AutoUpdate.xcodeproj; sourceTree = "<group>"; };
 		33B27469264C103400A318CD /* SmallUpdateIndicatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmallUpdateIndicatorView.swift; sourceTree = "<group>"; };
 		33CCBFA526A61C14004B6236 /* AutoDismissingWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoDismissingWindow.swift; sourceTree = "<group>"; };
@@ -1850,6 +1858,23 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		339D193026AED9B2006DE745 /* Authentication */ = {
+			isa = PBXGroup;
+			children = (
+				339D193826AED9E1006DE745 /* AuthenticationView.swift */,
+				33AC9D9926B01A60004E7EF4 /* AuthenticationViewModel.swift */,
+			);
+			path = Authentication;
+			sourceTree = "<group>";
+		};
+		33AC9D9626AFF43E004E7EF4 /* FocusableTextField */ = {
+			isa = PBXGroup;
+			children = (
+				33AC9D9726AFF453004E7EF4 /* FocusableTextField.swift */,
+			);
+			path = FocusableTextField;
+			sourceTree = "<group>";
+		};
 		33B27442264C0CDB00A318CD /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -2252,6 +2277,7 @@
 				A514401A2638038C0021DD56 /* BrowserNewTabView.swift */,
 				418171D22581107C00317ED8 /* TabStats.swift */,
 				418171D32581107C00317ED8 /* WebView.swift */,
+				33AC9D8D26AF482E004E7EF4 /* EnhancedWebView.swift */,
 			);
 			path = Browser;
 			sourceTree = "<group>";
@@ -2327,6 +2353,8 @@
 		418172A625811A3A00317ED8 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				33AC9D9626AFF43E004E7EF4 /* FocusableTextField */,
+				339D193026AED9B2006DE745 /* Authentication */,
 				A5A955C22695575900F3FDD2 /* CalendarPicker */,
 				A043B7FC26593A4800E267E5 /* TabGrouping */,
 				A0C5D845263C636C00FA6F6E /* Toast */,
@@ -4210,6 +4238,7 @@
 				032562FD26051DCB006513E4 /* RBMockClient.m in Sources */,
 				96FD761B25B1C43500B04ED3 /* BrowsingNodeWidget.swift in Sources */,
 				521EEDFB2593927100BA2485 /* Int+ByteSize.swift in Sources */,
+				33AC9D8E26AF482E004E7EF4 /* EnhancedWebView.swift in Sources */,
 				9652A93426A6B24E00F0590C /* FakeNoteGenerator.swift in Sources */,
 				A05ADF6E264D8C59002DF91A /* OverlayViewCenterViewModel.swift in Sources */,
 				5298268C2641A37500E9448C /* GithubButton.swift in Sources */,
@@ -4253,6 +4282,7 @@
 				87F11BC3266524B2003BE98E /* WebAutocompleteProtocols.swift in Sources */,
 				521EEDF72593824100BA2485 /* AppDelegate+Document.swift in Sources */,
 				418172532581107C00317ED8 /* Chevrons.swift in Sources */,
+				33AC9D9A26B01A60004E7EF4 /* AuthenticationViewModel.swift in Sources */,
 				5206282625923B6800D7CD9E /* DocumentRequest.swift in Sources */,
 				A536DE0F269C6ABD003FAAF4 /* ToastTextIconView.swift in Sources */,
 				A0208F8225D6BB1C00CA054C /* AppDelegate+BeamTests.swift in Sources */,
@@ -4335,6 +4365,7 @@
 				520088C02613295000AED835 /* DatabaseManager.swift in Sources */,
 				418172152581107C00317ED8 /* NSContainerView.swift in Sources */,
 				A0CB7E5F268E7E9200D15AFD /* PreferencesManager+Cards.swift in Sources */,
+				339D193926AED9E1006DE745 /* AuthenticationView.swift in Sources */,
 				A5144001263803600021DD56 /* TrackableScrollView.swift in Sources */,
 				8AB7DFA526AAEDB30033C747 /* PointAndShootView.swift in Sources */,
 				A07A90E5268E1804000C502C /* PreferencesManager.swift in Sources */,
@@ -4388,6 +4419,7 @@
 				96319D6D26163AAD00D1CF31 /* BeamNote+CommandManager.swift in Sources */,
 				3392E56D269D82FE000FA401 /* ClickCatchingView.swift in Sources */,
 				960A57E8264C88920061E8D2 /* ProxyEmbedNode.swift in Sources */,
+				33AC9D9826AFF453004E7EF4 /* FocusableTextField.swift in Sources */,
 				4181724E2581107C00317ED8 /* TabStats.swift in Sources */,
 				4181724F2581107C00317ED8 /* WebView.swift in Sources */,
 				A5208E05261F2156006193AF /* AllCardsContextualMenu.swift in Sources */,

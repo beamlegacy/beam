@@ -10,6 +10,11 @@ struct PasswordManagerEntry {
     var username: String
 }
 
+struct Credential {
+    var username: String
+    var password: String
+}
+
 extension PasswordManagerEntry {
     init(host: URL, username: String) {
         self.minimizedHost = host.minimizedHost ?? host.urlStringWithoutScheme
