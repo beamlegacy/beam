@@ -31,7 +31,7 @@ class BeamObject: Codable {
     var createdAt: Date?
     var updatedAt: Date?
     var deletedAt: Date?
-    var data: String?
+    var data: Data?
     var dataChecksum: String?
     var previousChecksum: String?
     var privateKeySignature: String?
@@ -115,7 +115,7 @@ class BeamObject: Codable {
         guard let data = data else {
             throw BeamObjectError.noData
         }
-        var decodedObject = try Self.decoder.decode(T.self, from: Data(data.utf8))
+        var decodedObject = try Self.decoder.decode(T.self, from: data)
         decodedObject.beamObjectId = id
         decodedObject.checksum = dataChecksum
         decodedObject.createdAt = createdAt ?? decodedObject.createdAt
@@ -128,23 +128,21 @@ class BeamObject: Codable {
     func encodeObject<T: BeamObjectProtocol>(_ object: T) throws {
         let jsonData = try Self.encoder.encode(object)
 
-        data = jsonData.asString
+        data = jsonData
         dataChecksum = jsonData.SHA256
     }
 
     func decode<T: BeamObjectProtocol>() -> T? {
         guard let data = data else { return nil }
 
-        let dataAsData = data.asData
-
-        if let dataChecksum = dataChecksum, dataAsData.SHA256 != dataChecksum {
-            Logger.shared.logError("Checksum received \(dataChecksum) is different from calculated one: \(dataAsData.SHA256) :( Data is potentially corrupted",
+        if let dataChecksum = dataChecksum, data.SHA256 != dataChecksum {
+            Logger.shared.logError("Checksum received \(dataChecksum) is different from calculated one: \(data.SHA256) :( Data is potentially corrupted",
                                    category: .beamObjectNetwork)
             Logger.shared.logError("data: \(data)", category: .beamObjectNetwork)
         }
 
         do {
-            var result = try Self.decoder.decode(T.self, from: dataAsData)
+            var result = try Self.decoder.decode(T.self, from: data)
 
             // Checksum is used to check *after* we encoded the string, so it's not embedded in that encoded string and
             // I reinject it here so whatever is using beam objects can check for previous checksum if needed.
@@ -162,22 +160,22 @@ class BeamObject: Codable {
 // MARK: - Encryption
 extension BeamObject {
     func decrypt() throws {
-        guard let encodedString = data else { return }
+        guard let dataBang = data else { return }
 
         do {
-            data = try EncryptionManager.shared.decryptString(encodedString)
+            data = try EncryptionManager.shared.decryptData(dataBang)
         } catch DecodingError.dataCorrupted {
             Logger.shared.logError("DecodingError.dataCorrupted", category: .encryption)
         } catch DecodingError.typeMismatch {
             Logger.shared.logError("DecodingError.typeMismatch", category: .encryption)
-            Logger.shared.logDebug("Encoded data: \(encodedString)", category: .encryption)
+            Logger.shared.logDebug("Encoded data: \(dataBang)", category: .encryption)
         } catch EncryptionManagerError.authenticationFailure {
             Logger.shared.logError("Could not decrypt data with key \(privateKeySignature ?? "-")",
                                    category: .encryption)
             throw EncryptionManagerError.authenticationFailure
         } catch {
             Logger.shared.logError("\(type(of: error)): \(error) \(error.localizedDescription)", category: .encryption)
-            Logger.shared.logDebug("Encoded string: \(encodedString)", category: .encryption)
+            Logger.shared.logDebug("Encoded string: \(dataBang)", category: .encryption)
             throw error
         }
     }
@@ -185,7 +183,7 @@ extension BeamObject {
     func encrypt() throws {
         guard let clearData = data else { return }
 
-        guard let encryptedClearData = try EncryptionManager.shared.encryptString(clearData) else {
+        guard let encryptedClearData = try EncryptionManager.shared.encryptData(clearData) else {
             throw BeamObjectError.noData
         }
 
