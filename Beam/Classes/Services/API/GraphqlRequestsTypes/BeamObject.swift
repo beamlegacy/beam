@@ -105,7 +105,10 @@ class BeamObject: Codable {
         result.createdAt = createdAt
         result.updatedAt = updatedAt
         result.deletedAt = deletedAt
+
         result.data = data
+        result.privateKeySignature = privateKeySignature
+
         result.previousChecksum = previousChecksum
         result.dataChecksum = dataChecksum
         return result
