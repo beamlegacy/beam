@@ -335,7 +335,11 @@ extension BeamObjectManager {
 
             switch self.conflictPolicyForSave {
             case .replace:
-                conflictedObject.previousChecksum = fetchedObject?.checksum
+                if let fetchedObject = fetchedObject {
+                    conflictedObject = manageConflict(conflictedObject, fetchedObject)
+                } else {
+                    conflictedObject.previousChecksum = nil
+                }
 
                 _ = try self.saveToAPI(conflictedObject) { result in
                     switch result {
@@ -479,10 +483,14 @@ extension BeamObjectManager {
                     let fetchedObject: T? = fetchedConflictedObjects.first(where: {
                         $0.beamObjectId == conflictedObject.beamObjectId
                     })
-                    var fixedConflictedObject: T = try conflictedObject.copy()
-                    fixedConflictedObject.previousChecksum = fetchedObject?.checksum
 
-                    return fixedConflictedObject
+                    if let fetchedObject = fetchedObject {
+                        return manageConflict(conflictedObject, fetchedObject)
+                    } else {
+                        var fixedConflictedObject: T = try conflictedObject.copy()
+                        fixedConflictedObject.previousChecksum = nil
+                        return fixedConflictedObject
+                    }
                 }
 
                 _ = try saveToAPI(toSaveObjects) { result in
@@ -577,7 +585,11 @@ extension BeamObjectManager {
 
             switch self.conflictPolicyForSave {
             case .replace:
-                conflictedObject.previousChecksum = fetchedObject?.checksum
+                if let fetchedObject = fetchedObject {
+                    conflictedObject = manageConflict(conflictedObject, fetchedObject)
+                } else {
+                    conflictedObject.previousChecksum = nil
+                }
 
                 _ = try self.saveToAPI(conflictedObject) { result in
                     switch result {
@@ -654,6 +666,17 @@ extension BeamObjectManager {
                 completion(.success(remoteBeamObject.dataChecksum))
             }
         }
+    }
+
+    internal func manageConflict<T: BeamObjectProtocol>(_ object: T,
+                                                        _ remoteObject: T) -> T {
+        guard object.updatedAt > remoteObject.updatedAt else {
+            return remoteObject
+        }
+
+        var result = object
+        result.previousChecksum = remoteObject.checksum
+        return result
     }
 }
 
@@ -913,8 +936,7 @@ extension BeamObjectManager {
 
                 switch self.conflictPolicyForSave {
                 case .replace:
-                    let newBeamObject = beamObject.copy()
-                    newBeamObject.previousChecksum = remoteBeamObject.dataChecksum
+                    let newBeamObject = self.manageConflict(beamObject, remoteBeamObject)
                     completion(.success(newBeamObject))
                 case .fetchRemoteAndError:
                     completion(.failure(BeamObjectManagerError.invalidChecksum(remoteBeamObject)))
@@ -961,6 +983,20 @@ extension BeamObjectManager {
             case .success(let object): completion?(.success(object))
             }
         }
+    }
+
+    internal func manageConflict(_ object: BeamObject,
+                                 _ remoteObject: BeamObject) -> BeamObject {
+
+        guard let objectUpdatedAt = object.updatedAt,
+              let remoteUpdatedAt = remoteObject.updatedAt,
+              objectUpdatedAt > remoteUpdatedAt else {
+            return remoteObject
+        }
+
+        let result = object
+        result.previousChecksum = remoteObject.dataChecksum
+        return result
     }
 }
 
