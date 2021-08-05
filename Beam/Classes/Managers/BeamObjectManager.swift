@@ -671,11 +671,12 @@ extension BeamObjectManager {
 
     internal func manageConflict<T: BeamObjectProtocol>(_ object: T,
                                                         _ remoteObject: T) -> T {
-        guard object.updatedAt > remoteObject.updatedAt else {
-            return remoteObject
+        var result = object
+
+        if remoteObject.updatedAt > object.updatedAt {
+            result = remoteObject
         }
 
-        var result = object
         result.previousChecksum = remoteObject.checksum
         return result
     }
@@ -988,14 +989,14 @@ extension BeamObjectManager {
 
     internal func manageConflict(_ object: BeamObject,
                                  _ remoteObject: BeamObject) -> BeamObject {
-
-        guard let objectUpdatedAt = object.updatedAt,
-              let remoteUpdatedAt = remoteObject.updatedAt,
-              objectUpdatedAt > remoteUpdatedAt else {
-            return remoteObject
+        var result = object
+        
+        if let objectUpdatedAt = object.updatedAt,
+           let remoteUpdatedAt = remoteObject.updatedAt,
+           remoteUpdatedAt > objectUpdatedAt {
+            result = remoteObject
         }
 
-        let result = object
         result.previousChecksum = remoteObject.dataChecksum
         return result
     }

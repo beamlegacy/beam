@@ -2578,8 +2578,10 @@ extension DocumentManager: BeamObjectManagerDelegate {
                                  category: .documentNetwork)
 
         // TODO: we should merge `documentStruct` and `remoteBeamObject` instead of just resending the
-        // same documentStruct we sent before
-        return documentStruct.copy()
+        // same documentStruct we sent before. It's important to update `updatedAt`
+        var result = documentStruct.copy()
+        result.updatedAt = BeamDate.now
+        return result
     }
 }
 
