@@ -2567,14 +2567,14 @@ extension DocumentManager: BeamObjectManagerDelegate {
 
     func manageConflict(_ documentStruct: DocumentStruct,
                         _ remoteDocumentStruct: DocumentStruct) throws -> DocumentStruct {
-        Logger.shared.logError("Could not save because of conflict",
-                               category: .documentNetwork)
-        Logger.shared.logError("local object \(documentStruct.beamObjectPreviousChecksum ?? "-"): \(documentStruct)",
-                               category: .documentNetwork)
-        Logger.shared.logError("Remote saved object \(remoteDocumentStruct.checksum ?? "-"): \(remoteDocumentStruct)",
-                               category: .documentNetwork)
-        Logger.shared.logError("Resending local object with remote checksum \(remoteDocumentStruct.checksum ?? "-")",
-                               category: .documentNetwork)
+        Logger.shared.logWarning("Could not save because of conflict",
+                                 category: .documentNetwork)
+        Logger.shared.logWarning("local object \(documentStruct.beamObjectPreviousChecksum ?? "-"): \(documentStruct)",
+                                 category: .documentNetwork)
+        Logger.shared.logWarning("Remote saved object \(remoteDocumentStruct.checksum ?? "-"): \(remoteDocumentStruct)",
+                                 category: .documentNetwork)
+        Logger.shared.logWarning("Resending local object with remote checksum \(remoteDocumentStruct.checksum ?? "-")",
+                                 category: .documentNetwork)
 
         // TODO: we should merge `documentStruct` and `remoteBeamObject` instead of just resending the
         // same documentStruct we sent before

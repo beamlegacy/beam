@@ -306,20 +306,24 @@ extension BeamObjectManager {
     internal func saveToAPIFailure<T: BeamObjectProtocol>(_ objects: [T],
                                                           _ error: Error,
                                                           _ completion: @escaping ((Swift.Result<[T], Error>) -> Void)) {
-        Logger.shared.logError("saveToAPIBeamObjectsFailure -- could not save \(objects.count) objects: \(error.localizedDescription)",
-                               category: .beamObject)
 
         switch error {
         case APIRequestError.beamObjectInvalidChecksum:
+            Logger.shared.logWarning("beamObjectInvalidChecksum -- could not save \(objects.count) objects",
+                                     category: .beamObject)
             saveToAPIFailureBeamObjectInvalidChecksum(objects, error, completion)
             return
         case APIRequestError.apiErrors:
+            Logger.shared.logWarning("APIRequestError.apiErrors -- could not save \(objects.count) objects",
+                                     category: .beamObject)
             saveToAPIFailureApiErrors(objects, error, completion)
             return
         default:
             break
         }
 
+        Logger.shared.logError("saveToAPIBeamObjectsFailure -- could not save \(objects.count) objects: \(error.localizedDescription)",
+                               category: .beamObject)
         completion(.failure(error))
     }
 
@@ -597,8 +601,8 @@ extension BeamObjectManager {
             return
         }
 
-        Logger.shared.logError("Invalid Checksum. Local previous checksum: \(object.previousChecksum ?? "-")",
-                               category: .beamObjectNetwork)
+        Logger.shared.logWarning("Invalid Checksum. Local previousChecksum: \(object.previousChecksum ?? "-")",
+                                 category: .beamObjectNetwork)
 
         do {
             var fetchedObject: T?
@@ -880,27 +884,26 @@ extension BeamObjectManager {
                 savedBeamObject.previousChecksum = updateBeamObject.dataChecksum
                 completion(.success(savedBeamObject))
             case .failure(let error):
-                Logger.shared.logError("Could not save \(beamObject): \(error.localizedDescription)",
-                                       category: .beamObjectNetwork)
-
                 // Early return except for checksum issues.
                 guard case APIRequestError.beamObjectInvalidChecksum = error else {
+                    Logger.shared.logError("Could not save \(beamObject): \(error.localizedDescription)",
+                                           category: .beamObjectNetwork)
                     completion(.failure(error))
                     return
                 }
 
-                Logger.shared.logError("Invalid Checksum. Local previous checksum: \(beamObject.previousChecksum ?? "-")",
-                                       category: .beamObjectNetwork)
+                Logger.shared.logWarning("Invalid Checksum. Local previous checksum: \(beamObject.previousChecksum ?? "-")",
+                                         category: .beamObjectNetwork)
 
                 self.fetchAndReturnErrorBasedOnConflictPolicy(beamObject) { result in
                     switch result {
                     case .failure: completion(result)
                     case .success(let newBeamObject):
                         do {
-                            Logger.shared.logError("Remote object checksum: \(newBeamObject.dataChecksum ?? "-")",
-                                                   category: .beamObjectNetwork)
-                            Logger.shared.logError("Overwriting local object with remote checksum",
-                                                   category: .beamObjectNetwork)
+                            Logger.shared.logWarning("Remote object checksum: \(newBeamObject.dataChecksum ?? "-")",
+                                                     category: .beamObjectNetwork)
+                            Logger.shared.logWarning("Overwriting local object with remote checksum",
+                                                     category: .beamObjectNetwork)
 
                             _ = try self.saveToAPI(newBeamObject, completion)
                         } catch {
