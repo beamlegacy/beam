@@ -87,8 +87,15 @@ struct AdvancedPreferencesView: View {
             Preferences.Section(title: "Network Enabled") {
                 NetworkEnabledButton
             }
-            Preferences.Section(title: "Beam Object API Enabled", bottomDivider: true) {
+            Preferences.Section(title: "Beam Object API Enabled") {
                 BeamObjectAPIEnabledButton
+            }
+            Preferences.Section(title: "", bottomDivider: true) {
+                Button(action: {
+                    AppDelegate.main.syncData()
+                }, label: {
+                    Text("Force full sync").frame(minWidth: 100)
+                })
             }
 
             Preferences.Section(bottomDivider: true) {
