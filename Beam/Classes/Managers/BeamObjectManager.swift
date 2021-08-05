@@ -502,6 +502,7 @@ extension BeamObjectManager {
                             var toSaveObject = $0
                             let savedObject = savedObjects.first(where: { $0.beamObjectId == toSaveObject.beamObjectId })
                             toSaveObject.previousChecksum = savedObject?.checksum
+
                             return toSaveObject
                         }
 

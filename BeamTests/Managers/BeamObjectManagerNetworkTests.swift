@@ -388,8 +388,12 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                     context("with empty previousChecksum") {
                         context("with automatic conflict management") {
                             beforeEach {
+                                BeamDate.travel(2)
+
                                 object.title = newTitle
                                 object2.title = newTitle2
+                                object.updatedAt = BeamDate.now
+                                object2.updatedAt = BeamDate.now
                             }
 
                             it("updates object") {
@@ -581,11 +585,16 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
                     context("with incorrect previousChecksum") {
                         beforeEach {
+                            BeamDate.travel(2)
+
                             object.previousChecksum = try? "wrong checksum".SHA256()
                             object2.previousChecksum = try? "wrong checksum".SHA256()
 
                             object.title = newTitle
                             object2.title = newTitle2
+
+                            object.updatedAt = BeamDate.now
+                            object2.updatedAt = BeamDate.now
                         }
 
                         context("with automatic conflict management") {
@@ -932,7 +941,10 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
                     context("with empty previousChecksum") {
                         beforeEach {
+                            BeamDate.travel(2)
+
                             object.title = newTitle
+                            object.updatedAt = BeamDate.now
                         }
 
                         context("with automatic conflict management") {
@@ -1077,8 +1089,11 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
                     context("with incorrect previousChecksum") {
                         beforeEach {
+                            BeamDate.travel(2)
+
                             object.previousChecksum = try? "wrong checksum".SHA256()
                             object.title = newTitle
+                            object.updatedAt = BeamDate.now
                         }
 
                         context("with automatic conflict management") {

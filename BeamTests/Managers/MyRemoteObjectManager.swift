@@ -52,7 +52,7 @@ extension MyRemoteObjectManager: BeamObjectManagerDelegate {
 
     func persistChecksum(_ objects: [MyRemoteObject]) throws {
         for object in objects {
-            Self.store[object.beamObjectId]?.previousChecksum = object.checksum
+            Self.store[object.beamObjectId]?.previousChecksum = object.previousChecksum
         }
     }
 }
