@@ -1,27 +1,27 @@
 [
   {
-    "response" : {
-      "status" : 200,
-      "headers" : {
-        "Content-Encoding" : "gzip",
-        "Pragma" : "no-cache",
-        "Content-Length" : "166",
-        "x-frame-options" : "SAMEORIGIN",
-        "Server" : "gws",
-        "Content-Disposition" : "attachment; filename=\"f.txt\"",
-        "x-xss-protection" : "0",
-        "Content-Type" : "text\/javascript; charset=ISO-8859-1",
-        "Expires" : "-1",
-        "Cache-Control" : "no-cache, must-revalidate",
-        "Date" : "Thu, 05 Aug 2021 11:35:32 GMT",
-        "Alt-Svc" : "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000,h3-T051=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\""
-      },
-      "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=green",
-      "body" : "[\"green\",[\"greenweez\",\"greenpeace\",\"greenwashing\",\"greengo\",\"green acres\",\"green acres paris\",\"green acres ile de france\",\"green book\",\"green pass italie\",\"green pass italia\"],[],{\"google:suggestsubtypes\":[[512,433],[512,433],[512,433],[512,433],[512,433,131,457],[402],[402],[512,433],[433,131],[512,433,131]]}]"
-    },
     "request" : {
       "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=green",
       "method" : "GET"
+    },
+    "response" : {
+      "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=green",
+      "headers" : {
+        "Pragma" : "no-cache",
+        "Cache-Control" : "no-cache, must-revalidate",
+        "x-frame-options" : "SAMEORIGIN",
+        "Content-Encoding" : "gzip",
+        "Content-Length" : "166",
+        "Content-Type" : "text\/javascript; charset=ISO-8859-1",
+        "x-xss-protection" : "0",
+        "Date" : "Thu, 05 Aug 2021 16:31:57 GMT",
+        "Server" : "gws",
+        "Expires" : "-1",
+        "Alt-Svc" : "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000,h3-T051=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\"",
+        "Content-Disposition" : "attachment; filename=\"f.txt\""
+      },
+      "body" : "[\"green\",[\"greenweez\",\"greenpeace\",\"greenwashing\",\"greengo\",\"green pass italie\",\"green book\",\"green pass italia\",\"green acres\",\"green acres paris\",\"green acres ile de france\"],[],{\"google:suggestsubtypes\":[[512,433],[512,433],[512,433],[512],[433,131],[512,433],[512,433,131],[512,433,131,457],[402],[402]]}]",
+      "status" : 200
     }
   }
 ]

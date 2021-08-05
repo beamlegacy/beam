@@ -1,60 +1,60 @@
 [
   {
+    "response" : {
+      "status" : 200,
+      "url" : "https:\/\/api.beamapp.co\/graphql",
+      "body" : {
+        "data" : {
+          "signIn" : {
+            "accessToken" : "eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJmZWNkMTFkMy0yZDZmLTQ3OTgtYTM4YS1lMjkzN2JmZGZmNjIiLCJzdWIiOiJlMTQwYzU5YS1lYmIyLTQ3YjEtYmU3OC05ZDJkNTYyNWRjYWQiLCJzY3AiOiJ1c2VyIiwiYXVkIjpudWxsLCJpYXQiOjE2MjgxODEwODgsImV4cCI6MTYzMDgxMDgzNH0.4TbCVMby9BazTRtHj94HyKaviNCAmaXp2mEgWJ6LVCU",
+            "errors" : [
+
+            ]
+          }
+        }
+      },
+      "headers" : {
+        "Etag" : "W\/\"de8e085659c6c25b969bc2312aeac434\"",
+        "Connection" : "keep-alive",
+        "X-Request-Id" : "8572674c-013b-49f6-a705-1317d6efdee5",
+        "Cache-Control" : "max-age=0, private, must-revalidate",
+        "Vary" : "Accept, Origin",
+        "X-Permitted-Cross-Domain-Policies" : "none",
+        "X-Content-Type-Options" : "nosniff",
+        "Content-Type" : "application\/json; charset=utf-8",
+        "Server" : "Cowboy",
+        "X-Runtime" : "0.283124",
+        "Date" : "Thu, 05 Aug 2021 16:31:28 GMT",
+        "Transfer-Encoding" : "Identity",
+        "Via" : "1.1 vegur",
+        "X-Frame-Options" : "SAMEORIGIN",
+        "Referrer-Policy" : "strict-origin-when-cross-origin",
+        "X-Xss-Protection" : "1; mode=block",
+        "Strict-Transport-Security" : "max-age=63072000; includeSubDomains",
+        "X-Download-Options" : "noopen"
+      }
+    },
     "request" : {
+      "method" : "POST",
+      "headers" : {
+        "Accept" : "application\/json",
+        "Content-Type" : "application\/json",
+        "Accept-Language" : "en",
+        "User-Agent" : "Beam client, 0.1.0 (1)"
+      },
+      "url" : "https:\/\/api.beamapp.co\/graphql",
       "body" : {
         "query" : "mutation SignIn($email: Email!, $password: String!) {\n  signIn(input: {email: $email, password: $password}) {\n    accessToken\n    errors {\n      path\n      message\n    }\n  }\n}\n",
         "variables" : {
           "email" : "fabien+test@beamapp.co",
           "password" : "pict9ZUNG@mouc_vilt"
         }
-      },
-      "url" : "https:\/\/api.beamapp.co\/graphql",
-      "headers" : {
-        "Content-Type" : "application\/json",
-        "Accept-Language" : "en",
-        "Accept" : "application\/json",
-        "User-Agent" : "Beam client, 0.1.0 (1)"
-      },
-      "method" : "POST"
-    },
-    "response" : {
-      "url" : "https:\/\/api.beamapp.co\/graphql",
-      "headers" : {
-        "Connection" : "keep-alive",
-        "X-Frame-Options" : "SAMEORIGIN",
-        "X-Download-Options" : "noopen",
-        "Server" : "Cowboy",
-        "Date" : "Thu, 05 Aug 2021 11:37:55 GMT",
-        "Transfer-Encoding" : "Identity",
-        "Referrer-Policy" : "strict-origin-when-cross-origin",
-        "X-Content-Type-Options" : "nosniff",
-        "X-Runtime" : "0.249917",
-        "Cache-Control" : "max-age=0, private, must-revalidate",
-        "X-Xss-Protection" : "1; mode=block",
-        "Strict-Transport-Security" : "max-age=63072000; includeSubDomains",
-        "Content-Type" : "application\/json; charset=utf-8",
-        "Etag" : "W\/\"5e58fb63a53ad08474df84fbfd6c470e\"",
-        "X-Permitted-Cross-Domain-Policies" : "none",
-        "X-Request-Id" : "54111b5b-3b7d-48c7-b228-845040c58b29",
-        "Vary" : "Accept, Origin",
-        "Via" : "1.1 vegur"
-      },
-      "status" : 200,
-      "body" : {
-        "data" : {
-          "signIn" : {
-            "accessToken" : "eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJmZWNkMTFkMy0yZDZmLTQ3OTgtYTM4YS1lMjkzN2JmZGZmNjIiLCJzdWIiOiJlMTQwYzU5YS1lYmIyLTQ3YjEtYmU3OC05ZDJkNTYyNWRjYWQiLCJzY3AiOiJ1c2VyIiwiYXVkIjpudWxsLCJpYXQiOjE2MjgxNjM0NzUsImV4cCI6MTYzMDc5MzIyMX0.X89aQU9Avs5laZBIDOGmDdh1C2gUKc5pdo06N-8qsf8",
-            "errors" : [
-
-            ]
-          }
-        }
       }
     }
   },
   {
     "response" : {
-      "url" : "https:\/\/api.beamapp.co\/graphql",
+      "status" : 200,
       "body" : {
         "data" : {
           "updateBeamObject" : {
@@ -70,41 +70,34 @@
         }
       },
       "headers" : {
-        "X-Download-Options" : "noopen",
-        "Connection" : "keep-alive",
-        "X-Frame-Options" : "SAMEORIGIN",
+        "Referrer-Policy" : "strict-origin-when-cross-origin",
         "X-Xss-Protection" : "1; mode=block",
-        "Date" : "Thu, 05 Aug 2021 11:37:55 GMT",
-        "X-Runtime" : "0.020124",
+        "Server" : "Cowboy",
         "Strict-Transport-Security" : "max-age=63072000; includeSubDomains",
         "Via" : "1.1 vegur",
-        "Cache-Control" : "max-age=0, private, must-revalidate",
-        "X-Request-Id" : "f39039a9-6191-4be7-8c84-2b93d1165b68",
         "X-Content-Type-Options" : "nosniff",
-        "Vary" : "Accept, Origin",
-        "X-Permitted-Cross-Domain-Policies" : "none",
-        "Referrer-Policy" : "strict-origin-when-cross-origin",
-        "Transfer-Encoding" : "Identity",
+        "Connection" : "keep-alive",
+        "X-Runtime" : "0.022305",
+        "X-Frame-Options" : "SAMEORIGIN",
         "Content-Type" : "application\/json; charset=utf-8",
-        "Server" : "Cowboy",
-        "Etag" : "W\/\"a8a311b2628b8bf3e25297188328faf1\""
+        "Transfer-Encoding" : "Identity",
+        "X-Download-Options" : "noopen",
+        "Etag" : "W\/\"a8a311b2628b8bf3e25297188328faf1\"",
+        "Cache-Control" : "max-age=0, private, must-revalidate",
+        "X-Request-Id" : "d84d5d16-1f68-4b71-af88-e5e3bac70790",
+        "Date" : "Thu, 05 Aug 2021 16:31:28 GMT",
+        "Vary" : "Accept, Origin",
+        "X-Permitted-Cross-Domain-Policies" : "none"
       },
-      "status" : 200
+      "url" : "https:\/\/api.beamapp.co\/graphql"
     },
     "request" : {
-      "headers" : {
-        "Accept-Language" : "en",
-        "Authorization" : "Bearer eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJmZWNkMTFkMy0yZDZmLTQ3OTgtYTM4YS1lMjkzN2JmZGZmNjIiLCJzdWIiOiJlMTQwYzU5YS1lYmIyLTQ3YjEtYmU3OC05ZDJkNTYyNWRjYWQiLCJzY3AiOiJ1c2VyIiwiYXVkIjpudWxsLCJpYXQiOjE2MjgxNjM0NzUsImV4cCI6MTYzMDc5MzIyMX0.X89aQU9Avs5laZBIDOGmDdh1C2gUKc5pdo06N-8qsf8",
-        "User-Agent" : "Beam client, 0.1.0 (1)",
-        "Accept" : "application\/json",
-        "Content-Type" : "application\/json"
-      },
       "body" : {
         "query" : "mutation UpdateBeamObject($beamObject: BeamObjectInput!, $privateKey: String) {\n  updateBeamObject(input: {beamObject: $beamObject, privateKey: $privateKey}) {\n    beamObject {\n      id\n      checksum\n      type\n    }\n    errors {\n      objectid\n      path\n      message\n    }\n  }\n}\n",
         "variables" : {
           "beamObject" : {
             "id" : "195D94E1-E0DF-4ECA-93E6-8778984BCD58",
-            "data" : "NC4yjIHbfQZK0jxQS5S7nx8kiNwViYQ3WU1LS5P5Yu3Y5m33mgQ3aK74HVNO\/iInVa6dF8pp2GHunoEyFJcB1IpGlzMfUBnXsyEmltbAIan2U0Mgb\/KtMbeTYg4WEx3rmhd2wjk\/erMD5Cka7i\/XHP0jl5NVZQYT",
+            "data" : "koomReQ53q79sROWX47L+\/adhVuJxNkSkWkHahnOpWAI6QkzptC8zUn6N7dzVj1SsSdLz7j8+fFu6tVKTviDknEGhe6WXoADc5gINH9HhqqIvGqTQpbZ+tEcg63Tiqes\/2TiKxO7Ct4xFfLz3Fa\/AIml9A5\/BDKQ",
             "checksum" : "1329717e2a5c440af3e94efeecba3bee495963998506bb662c0ab2da0cd459e6",
             "privateKeySignature" : "45cb7cb283d0b9ca64219bd0bc033c0fad461aaf6783d5be71eac2e772c3c828",
             "updatedAt" : "2021-03-19T12:21:03Z",
@@ -113,6 +106,13 @@
           },
           "privateKey" : "j6tifPZTjUtGoz+1RJkO8dOMlu48MUUSlwACw\/fCBw0="
         }
+      },
+      "headers" : {
+        "Accept-Language" : "en",
+        "Authorization" : "Bearer eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJmZWNkMTFkMy0yZDZmLTQ3OTgtYTM4YS1lMjkzN2JmZGZmNjIiLCJzdWIiOiJlMTQwYzU5YS1lYmIyLTQ3YjEtYmU3OC05ZDJkNTYyNWRjYWQiLCJzY3AiOiJ1c2VyIiwiYXVkIjpudWxsLCJpYXQiOjE2MjgxODEwODgsImV4cCI6MTYzMDgxMDgzNH0.4TbCVMby9BazTRtHj94HyKaviNCAmaXp2mEgWJ6LVCU",
+        "Content-Type" : "application\/json",
+        "User-Agent" : "Beam client, 0.1.0 (1)",
+        "Accept" : "application\/json"
       },
       "method" : "POST",
       "url" : "https:\/\/api.beamapp.co\/graphql"
@@ -137,35 +137,33 @@
         }
       },
       "headers" : {
-        "Server" : "Cowboy",
-        "Etag" : "W\/\"2100926b6305b0ca2eb4150b0db75563\"",
-        "X-Request-Id" : "18c3afbf-e5f5-4650-9f4a-daebe86d0f3b",
-        "Transfer-Encoding" : "Identity",
+        "X-Download-Options" : "noopen",
+        "X-Request-Id" : "73fe3469-a117-4a70-8c29-086009e6c4c7",
+        "X-Frame-Options" : "SAMEORIGIN",
+        "Date" : "Thu, 05 Aug 2021 16:31:28 GMT",
+        "X-Runtime" : "0.023153",
+        "Vary" : "Accept, Origin",
         "X-Permitted-Cross-Domain-Policies" : "none",
         "Cache-Control" : "max-age=0, private, must-revalidate",
-        "X-Download-Options" : "noopen",
-        "Date" : "Thu, 05 Aug 2021 11:37:55 GMT",
         "X-Xss-Protection" : "1; mode=block",
-        "X-Runtime" : "0.020049",
-        "Via" : "1.1 vegur",
-        "Connection" : "close",
+        "Strict-Transport-Security" : "max-age=63072000; includeSubDomains",
         "X-Content-Type-Options" : "nosniff",
-        "X-Frame-Options" : "SAMEORIGIN",
-        "Referrer-Policy" : "strict-origin-when-cross-origin",
         "Content-Type" : "application\/json; charset=utf-8",
-        "Vary" : "Accept, Origin",
-        "Strict-Transport-Security" : "max-age=63072000; includeSubDomains"
+        "Connection" : "keep-alive",
+        "Referrer-Policy" : "strict-origin-when-cross-origin",
+        "Transfer-Encoding" : "Identity",
+        "Etag" : "W\/\"2100926b6305b0ca2eb4150b0db75563\"",
+        "Via" : "1.1 vegur",
+        "Server" : "Cowboy"
       }
     },
     "request" : {
-      "method" : "POST",
-      "url" : "https:\/\/api.beamapp.co\/graphql",
       "body" : {
         "query" : "mutation UpdateBeamObject($beamObject: BeamObjectInput!, $privateKey: String) {\n  updateBeamObject(input: {beamObject: $beamObject, privateKey: $privateKey}) {\n    beamObject {\n      id\n      checksum\n      type\n    }\n    errors {\n      objectid\n      path\n      message\n    }\n  }\n}\n",
         "variables" : {
           "beamObject" : {
             "id" : "295D94E1-E0DF-4ECA-93E6-8778984BCD58",
-            "data" : "9h8nKjU3bIjfk1e5AttHaWp274v8TgxIMU1QfYWejVul5A0UdEpG5571VjvSXnmru2qDPSus\/nGur8bHOS18PGS8QifE7ef0fiib8mXrL4+1vQ70nYFxeS1nK3OHAP4mLm215d\/K3xQ2FtpZO\/rpPMDhC3Vs2uoY",
+            "data" : "58U4HdyPxcXMbaKfOGN7IWxV7PWCeYB5lZCOeo8JHvM4qUWrLz37YpQVY4mrPl0DIuNdTN5U5mN17v9la78BhGn+n5h+gEDUT+ihcufc81luUuisShe9f8DZIHjH4D0+tVMbnWeOEyA\/5bPP9n9vabUbNS3OMiO5",
             "checksum" : "dbc369736dade41722b7005db5efae1fb99aca7aae9417b6184eaf423e2d860b",
             "privateKeySignature" : "45cb7cb283d0b9ca64219bd0bc033c0fad461aaf6783d5be71eac2e772c3c828",
             "updatedAt" : "2021-03-19T12:21:03Z",
@@ -175,43 +173,20 @@
           "privateKey" : "j6tifPZTjUtGoz+1RJkO8dOMlu48MUUSlwACw\/fCBw0="
         }
       },
+      "method" : "POST",
+      "url" : "https:\/\/api.beamapp.co\/graphql",
       "headers" : {
-        "Authorization" : "Bearer eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJmZWNkMTFkMy0yZDZmLTQ3OTgtYTM4YS1lMjkzN2JmZGZmNjIiLCJzdWIiOiJlMTQwYzU5YS1lYmIyLTQ3YjEtYmU3OC05ZDJkNTYyNWRjYWQiLCJzY3AiOiJ1c2VyIiwiYXVkIjpudWxsLCJpYXQiOjE2MjgxNjM0NzUsImV4cCI6MTYzMDc5MzIyMX0.X89aQU9Avs5laZBIDOGmDdh1C2gUKc5pdo06N-8qsf8",
         "Accept-Language" : "en",
         "User-Agent" : "Beam client, 0.1.0 (1)",
-        "Accept" : "application\/json",
-        "Content-Type" : "application\/json"
+        "Content-Type" : "application\/json",
+        "Authorization" : "Bearer eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJmZWNkMTFkMy0yZDZmLTQ3OTgtYTM4YS1lMjkzN2JmZGZmNjIiLCJzdWIiOiJlMTQwYzU5YS1lYmIyLTQ3YjEtYmU3OC05ZDJkNTYyNWRjYWQiLCJzY3AiOiJ1c2VyIiwiYXVkIjpudWxsLCJpYXQiOjE2MjgxODEwODgsImV4cCI6MTYzMDgxMDgzNH0.4TbCVMby9BazTRtHj94HyKaviNCAmaXp2mEgWJ6LVCU",
+        "Accept" : "application\/json"
       }
     }
   },
   {
-    "request" : {
-      "headers" : {
-        "Authorization" : "Bearer eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJmZWNkMTFkMy0yZDZmLTQ3OTgtYTM4YS1lMjkzN2JmZGZmNjIiLCJzdWIiOiJlMTQwYzU5YS1lYmIyLTQ3YjEtYmU3OC05ZDJkNTYyNWRjYWQiLCJzY3AiOiJ1c2VyIiwiYXVkIjpudWxsLCJpYXQiOjE2MjgxNjM0NzUsImV4cCI6MTYzMDc5MzIyMX0.X89aQU9Avs5laZBIDOGmDdh1C2gUKc5pdo06N-8qsf8",
-        "Content-Type" : "application\/json",
-        "User-Agent" : "Beam client, 0.1.0 (1)",
-        "Accept" : "application\/json",
-        "Accept-Language" : "en"
-      },
-      "method" : "POST",
-      "url" : "https:\/\/api.beamapp.co\/graphql",
-      "body" : {
-        "query" : "mutation UpdateBeamObject($beamObject: BeamObjectInput!, $privateKey: String) {\n  updateBeamObject(input: {beamObject: $beamObject, privateKey: $privateKey}) {\n    beamObject {\n      id\n      checksum\n      type\n    }\n    errors {\n      objectid\n      path\n      message\n    }\n  }\n}\n",
-        "variables" : {
-          "beamObject" : {
-            "id" : "395D94E1-E0DF-4ECA-93E6-8778984BCD58",
-            "data" : "JEV9O5oQdEQfxSn8lo8FARVIeLSc53zJ6NzSLm5V7tNrNAfAIJ9rzAnRHGx\/BclBbKulJuY7tBogmLlw1ie4wVVNwkXn4+wz9rg1+aI7mk1vhALBuQKbHEeKzuEnc6lkj3VPeeLBCD9MbbNG0sXL7+zCuVHgZsaR",
-            "checksum" : "fe147aac80e027967f9dae92fc5d272bd0c06519b18f7b27d1aa7feb2a4e3d3f",
-            "privateKeySignature" : "45cb7cb283d0b9ca64219bd0bc033c0fad461aaf6783d5be71eac2e772c3c828",
-            "updatedAt" : "2021-03-19T12:21:03Z",
-            "type" : "my_remote_object",
-            "createdAt" : "2021-03-19T12:21:03Z"
-          },
-          "privateKey" : "j6tifPZTjUtGoz+1RJkO8dOMlu48MUUSlwACw\/fCBw0="
-        }
-      }
-    },
     "response" : {
+      "url" : "https:\/\/api.beamapp.co\/graphql",
       "body" : {
         "data" : {
           "updateBeamObject" : {
@@ -226,40 +201,66 @@
           }
         }
       },
-      "status" : 200,
       "headers" : {
+        "Referrer-Policy" : "strict-origin-when-cross-origin",
+        "Via" : "1.1 vegur",
         "Connection" : "keep-alive",
-        "X-Frame-Options" : "SAMEORIGIN",
-        "Date" : "Thu, 05 Aug 2021 11:37:56 GMT",
-        "X-Permitted-Cross-Domain-Policies" : "none",
-        "Server" : "Cowboy",
+        "Vary" : "Accept, Origin",
         "X-Content-Type-Options" : "nosniff",
-        "Cache-Control" : "max-age=0, private, must-revalidate",
+        "X-Xss-Protection" : "1; mode=block",
+        "X-Runtime" : "0.022180",
+        "Content-Type" : "application\/json; charset=utf-8",
         "Strict-Transport-Security" : "max-age=63072000; includeSubDomains",
         "Transfer-Encoding" : "Identity",
-        "Via" : "1.1 vegur",
-        "X-Request-Id" : "55160dca-fe94-4c98-95be-dc1d13bea6bc",
+        "Cache-Control" : "max-age=0, private, must-revalidate",
         "Etag" : "W\/\"cd5231149cee0fb2dc2c1125957f91a8\"",
-        "Vary" : "Accept, Origin",
-        "Content-Type" : "application\/json; charset=utf-8",
+        "X-Frame-Options" : "SAMEORIGIN",
+        "Date" : "Thu, 05 Aug 2021 16:31:28 GMT",
+        "X-Permitted-Cross-Domain-Policies" : "none",
         "X-Download-Options" : "noopen",
-        "X-Xss-Protection" : "1; mode=block",
-        "X-Runtime" : "0.022348",
-        "Referrer-Policy" : "strict-origin-when-cross-origin"
+        "X-Request-Id" : "dfdf3ae5-ee1a-43d4-8ce0-c68f40b198f0",
+        "Server" : "Cowboy"
       },
-      "url" : "https:\/\/api.beamapp.co\/graphql"
+      "status" : 200
+    },
+    "request" : {
+      "headers" : {
+        "Content-Type" : "application\/json",
+        "User-Agent" : "Beam client, 0.1.0 (1)",
+        "Authorization" : "Bearer eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJmZWNkMTFkMy0yZDZmLTQ3OTgtYTM4YS1lMjkzN2JmZGZmNjIiLCJzdWIiOiJlMTQwYzU5YS1lYmIyLTQ3YjEtYmU3OC05ZDJkNTYyNWRjYWQiLCJzY3AiOiJ1c2VyIiwiYXVkIjpudWxsLCJpYXQiOjE2MjgxODEwODgsImV4cCI6MTYzMDgxMDgzNH0.4TbCVMby9BazTRtHj94HyKaviNCAmaXp2mEgWJ6LVCU",
+        "Accept" : "application\/json",
+        "Accept-Language" : "en"
+      },
+      "url" : "https:\/\/api.beamapp.co\/graphql",
+      "method" : "POST",
+      "body" : {
+        "query" : "mutation UpdateBeamObject($beamObject: BeamObjectInput!, $privateKey: String) {\n  updateBeamObject(input: {beamObject: $beamObject, privateKey: $privateKey}) {\n    beamObject {\n      id\n      checksum\n      type\n    }\n    errors {\n      objectid\n      path\n      message\n    }\n  }\n}\n",
+        "variables" : {
+          "beamObject" : {
+            "id" : "395D94E1-E0DF-4ECA-93E6-8778984BCD58",
+            "data" : "kC0we688fbzpU1iCqwE4IbEA9sWqCuYgS2ziz1zwpm+Av7qkHtL1uIBqSIkvfdmdcHs5GnN2ryduxO2Gl0qumas5Z3iNWR02+068Gv9z2KvEDx7istgbF4S9rRUPP1BVKGiBVUxZ5QBWNaMgpYe6gGc+1SpGTSYU",
+            "checksum" : "fe147aac80e027967f9dae92fc5d272bd0c06519b18f7b27d1aa7feb2a4e3d3f",
+            "privateKeySignature" : "45cb7cb283d0b9ca64219bd0bc033c0fad461aaf6783d5be71eac2e772c3c828",
+            "updatedAt" : "2021-03-19T12:21:03Z",
+            "type" : "my_remote_object",
+            "createdAt" : "2021-03-19T12:21:03Z"
+          },
+          "privateKey" : "j6tifPZTjUtGoz+1RJkO8dOMlu48MUUSlwACw\/fCBw0="
+        }
+      }
     }
   },
   {
     "request" : {
       "headers" : {
-        "Authorization" : "Bearer eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJmZWNkMTFkMy0yZDZmLTQ3OTgtYTM4YS1lMjkzN2JmZGZmNjIiLCJzdWIiOiJlMTQwYzU5YS1lYmIyLTQ3YjEtYmU3OC05ZDJkNTYyNWRjYWQiLCJzY3AiOiJ1c2VyIiwiYXVkIjpudWxsLCJpYXQiOjE2MjgxNjM0NzUsImV4cCI6MTYzMDc5MzIyMX0.X89aQU9Avs5laZBIDOGmDdh1C2gUKc5pdo06N-8qsf8",
-        "User-Agent" : "Beam client, 0.1.0 (1)",
-        "Accept-Language" : "en",
         "Accept" : "application\/json",
-        "Content-Type" : "application\/json"
+        "Accept-Language" : "en",
+        "Authorization" : "Bearer eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJmZWNkMTFkMy0yZDZmLTQ3OTgtYTM4YS1lMjkzN2JmZGZmNjIiLCJzdWIiOiJlMTQwYzU5YS1lYmIyLTQ3YjEtYmU3OC05ZDJkNTYyNWRjYWQiLCJzY3AiOiJ1c2VyIiwiYXVkIjpudWxsLCJpYXQiOjE2MjgxODEwODgsImV4cCI6MTYzMDgxMDgzNH0.4TbCVMby9BazTRtHj94HyKaviNCAmaXp2mEgWJ6LVCU",
+        "Content-Type" : "application\/json",
+        "User-Agent" : "Beam client, 0.1.0 (1)"
       },
       "url" : "https:\/\/api.beamapp.co\/graphql",
+      "method" : "POST",
       "body" : {
         "query" : "mutation UpdateBeamObjects($beamObjects: [BeamObjectInput!]!, $privateKey: String) {\n  updateBeamObjects(input: {beamObjectsInput: $beamObjects, privateKey: $privateKey}) {\n    beamObjects {\n      id\n      checksum\n      type\n    }\n    errors {\n      objectid\n      path\n      message\n    }\n  }\n}\n",
         "variables" : {
@@ -267,42 +268,39 @@
           "beamObjects" : [
             {
               "id" : "195D94E1-E0DF-4ECA-93E6-8778984BCD58",
-              "data" : "bCVlGwZu3PcX1dkfMeMAppV\/dHhxu2ixqQPT1bzfmeSgd28DQQP9DuwZbemhisr+CLUA3coNcckhwods\/VsAwnuwhfFuA99AzVePTTrxwD3upCl0PJbLMGcvUuZF9btXfnozF+YrexHa2+Bb03HSAidIfV29yqYV+k8=",
-              "checksum" : "6bd6950a479d12bbd7ca9824b570b15510803b24f0667b275a6c9be7b46ab0b9",
+              "data" : "RCWfnFpjZ2Fw+3ReIYaEGCTiY\/zN5iqg86zeAbid3o9jXf3zPcmLaO5Fti60ChwPca0aDEJFj66\/u2uxR13COxjW2Quj9sMoJe1q35Tk896MUnt2UUMD4SV9Fq1HDbyHECoXAZKMFEYT7ac0Y\/GAol\/YZQ9BnFCqhVs=",
+              "checksum" : "99c2a930a9ec9f254054eb9abc55352e0d26b4e3ce249b6595277265603470a0",
               "previousChecksum" : "11a3c318664ebae8b2239cd2be6dae3f546feb789cb005fa9f31512709f2fb00",
               "privateKeySignature" : "45cb7cb283d0b9ca64219bd0bc033c0fad461aaf6783d5be71eac2e772c3c828",
-              "updatedAt" : "2021-03-19T12:21:03Z",
+              "updatedAt" : "2021-03-19T12:21:05Z",
               "type" : "my_remote_object",
               "createdAt" : "2021-03-19T12:21:03Z"
             },
             {
               "id" : "295D94E1-E0DF-4ECA-93E6-8778984BCD58",
-              "data" : "P4B+9m+x445D9abu4PbiGvL13YtNsXIT7n2ih\/lYsKGAt5YnViYIsaiVt4tMTU24PiU\/hEb0QBs3\/cO7dRp30mOk1x9mF8eZuoijHgJwF1od28K0GWUAzOc6XOXSbMGeFM3ROjgmbPtnDRmFTZQ3XS5CgEBIkuSd9q4=",
-              "checksum" : "30be1cf47851e3baa34f1c06b2ded0f683e84284962b46bcd1a8a166449c9c8c",
+              "data" : "A4ZOjowH7cpGwdnSxPKCS+XZLkKouMa53FiwxP\/FQNGeV0cVRT0i9q+N6XzfIc08nCK7wROpOzW3Gak9wy7Mv0tUuOJAv\/Om7tUzf453ktNXsvrQLfVwF0Llyt6LxsUVlWbZf3rjuSvrQdlNGC7vFn+qLzVSwVeonbQ=",
+              "checksum" : "1f9eac2cfe2e1cecc501084eb8a3c3fc3b1ffee1b6ac8219ac40f37a72d490c0",
               "previousChecksum" : "22a3c318664ebae8b2239cd2be6dae3f546feb789cb005fa9f31512709f2fb00",
               "privateKeySignature" : "45cb7cb283d0b9ca64219bd0bc033c0fad461aaf6783d5be71eac2e772c3c828",
-              "updatedAt" : "2021-03-19T12:21:03Z",
+              "updatedAt" : "2021-03-19T12:21:05Z",
               "type" : "my_remote_object",
               "createdAt" : "2021-03-19T12:21:03Z"
             },
             {
               "id" : "395D94E1-E0DF-4ECA-93E6-8778984BCD58",
-              "data" : "EBHJOLZ\/YSAXguVz0M6A2NHcYkW3wZoTKv1wNK0J0DUBuEwHiR2ytf26rtC2MIqB73xweufRgkSmEqgfUM4UBmIAOEdYQevqSFIlDTKqpIzziKGS\/JuOEhthhpqGa4+trj+qsSbPsIfqfd+kvqfR6qTuXqYXXakhO18=",
-              "checksum" : "52b354a2b4976c25d49edee09586e3e415fbfc6d264d3db5c488e437160fb4dd",
+              "data" : "j3T4cuVj5NQNbSAn0E\/EeCBFPOfJlgfAWf8F1lv6wu\/k0jBW4zdOIy+u1F1AyXyu8r\/ptwTEm1rhxFT0H7tLYvS8qt0okZZK3WdQAx4OeAAqGDjIcMZnn4jEV0hSjtfnN2ysWjuekbX54BMUsKwPPFu6c944HibG8yk=",
+              "checksum" : "95c5e547023a9ecdc6485311afb86c7aaf5bd6709e843d755ec5b1a5b5ec9f5e",
               "previousChecksum" : "33a3c318664ebae8b2239cd2be6dae3f546feb789cb005fa9f31512709f2fb00",
               "privateKeySignature" : "45cb7cb283d0b9ca64219bd0bc033c0fad461aaf6783d5be71eac2e772c3c828",
-              "updatedAt" : "2021-03-19T12:21:03Z",
+              "updatedAt" : "2021-03-19T12:21:05Z",
               "type" : "my_remote_object",
               "createdAt" : "2021-03-19T12:21:03Z"
             }
           ]
         }
-      },
-      "method" : "POST"
+      }
     },
     "response" : {
-      "status" : 200,
-      "url" : "https:\/\/api.beamapp.co\/graphql",
       "body" : {
         "data" : {
           "updateBeamObjects" : {
@@ -338,52 +336,93 @@
           }
         }
       },
+      "url" : "https:\/\/api.beamapp.co\/graphql",
       "headers" : {
-        "X-Request-Id" : "54fadb22-7471-4b35-8c13-91216ad1b952",
-        "X-Frame-Options" : "SAMEORIGIN",
-        "Server" : "Cowboy",
-        "Date" : "Thu, 05 Aug 2021 11:37:56 GMT",
-        "Strict-Transport-Security" : "max-age=63072000; includeSubDomains",
-        "Cache-Control" : "max-age=0, private, must-revalidate",
-        "Referrer-Policy" : "strict-origin-when-cross-origin",
-        "X-Runtime" : "0.025472",
-        "Vary" : "Accept, Origin",
-        "X-Xss-Protection" : "1; mode=block",
-        "X-Permitted-Cross-Domain-Policies" : "none",
         "Transfer-Encoding" : "Identity",
-        "Etag" : "W\/\"6af31f7a776811a3a7c538abebe1b966\"",
         "X-Content-Type-Options" : "nosniff",
         "Connection" : "keep-alive",
-        "Via" : "1.1 vegur",
+        "Vary" : "Accept, Origin",
+        "Date" : "Thu, 05 Aug 2021 16:31:29 GMT",
         "Content-Type" : "application\/json; charset=utf-8",
-        "X-Download-Options" : "noopen"
-      }
+        "X-Download-Options" : "noopen",
+        "X-Request-Id" : "b561bd7e-5c3a-4bdf-815a-7ee5f7197bb2",
+        "Cache-Control" : "max-age=0, private, must-revalidate",
+        "Etag" : "W\/\"6af31f7a776811a3a7c538abebe1b966\"",
+        "Strict-Transport-Security" : "max-age=63072000; includeSubDomains",
+        "Referrer-Policy" : "strict-origin-when-cross-origin",
+        "X-Xss-Protection" : "1; mode=block",
+        "X-Frame-Options" : "SAMEORIGIN",
+        "X-Permitted-Cross-Domain-Policies" : "none",
+        "Via" : "1.1 vegur",
+        "X-Runtime" : "0.023344",
+        "Server" : "Cowboy"
+      },
+      "status" : 200
     }
   },
   {
-    "request" : {
-      "method" : "POST",
+    "response" : {
+      "headers" : {
+        "Strict-Transport-Security" : "max-age=63072000; includeSubDomains",
+        "Transfer-Encoding" : "Identity",
+        "X-Frame-Options" : "SAMEORIGIN",
+        "Connection" : "keep-alive",
+        "Via" : "1.1 vegur",
+        "Server" : "Cowboy",
+        "X-Request-Id" : "3867152b-ff6a-43f7-9553-d4bc44f770ba",
+        "X-Runtime" : "0.012413",
+        "X-Permitted-Cross-Domain-Policies" : "none",
+        "Content-Type" : "application\/json; charset=utf-8",
+        "Date" : "Thu, 05 Aug 2021 16:31:29 GMT",
+        "X-Content-Type-Options" : "nosniff",
+        "Cache-Control" : "max-age=0, private, must-revalidate",
+        "X-Download-Options" : "noopen",
+        "Vary" : "Accept, Origin",
+        "X-Xss-Protection" : "1; mode=block",
+        "Referrer-Policy" : "strict-origin-when-cross-origin",
+        "Etag" : "W\/\"ea3722474468fff9bf089a0c557eac78\""
+      },
       "body" : {
-        "query" : "query beamObject($id: ID!) {\n  beamObject(id: $id) {\n    id\n    data\n    checksum\n    type\n    createdAt\n    updatedAt\n    deletedAt\n  }\n}\n",
-        "variables" : {
-          "id" : "295D94E1-E0DF-4ECA-93E6-8778984BCD58"
+        "data" : {
+          "beamObject" : {
+            "id" : "195d94e1-e0df-4eca-93e6-8778984bcd58",
+            "data" : "koomReQ53q79sROWX47L+\/adhVuJxNkSkWkHahnOpWAI6QkzptC8zUn6N7dzVj1SsSdLz7j8+fFu6tVKTviDknEGhe6WXoADc5gINH9HhqqIvGqTQpbZ+tEcg63Tiqes\/2TiKxO7Ct4xFfLz3Fa\/AIml9A5\/BDKQ",
+            "checksum" : "1329717e2a5c440af3e94efeecba3bee495963998506bb662c0ab2da0cd459e6",
+            "deletedAt" : null,
+            "updatedAt" : "2021-03-19T12:21:03Z",
+            "type" : "my_remote_object",
+            "createdAt" : "2021-03-19T12:21:03Z"
+          }
         }
       },
       "url" : "https:\/\/api.beamapp.co\/graphql",
-      "headers" : {
-        "Authorization" : "Bearer eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJmZWNkMTFkMy0yZDZmLTQ3OTgtYTM4YS1lMjkzN2JmZGZmNjIiLCJzdWIiOiJlMTQwYzU5YS1lYmIyLTQ3YjEtYmU3OC05ZDJkNTYyNWRjYWQiLCJzY3AiOiJ1c2VyIiwiYXVkIjpudWxsLCJpYXQiOjE2MjgxNjM0NzUsImV4cCI6MTYzMDc5MzIyMX0.X89aQU9Avs5laZBIDOGmDdh1C2gUKc5pdo06N-8qsf8",
-        "Content-Type" : "application\/json",
-        "Accept" : "application\/json",
-        "Accept-Language" : "en",
-        "User-Agent" : "Beam client, 0.1.0 (1)"
-      }
+      "status" : 200
     },
+    "request" : {
+      "method" : "POST",
+      "headers" : {
+        "User-Agent" : "Beam client, 0.1.0 (1)",
+        "Content-Type" : "application\/json",
+        "Accept-Language" : "en",
+        "Accept" : "application\/json",
+        "Authorization" : "Bearer eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJmZWNkMTFkMy0yZDZmLTQ3OTgtYTM4YS1lMjkzN2JmZGZmNjIiLCJzdWIiOiJlMTQwYzU5YS1lYmIyLTQ3YjEtYmU3OC05ZDJkNTYyNWRjYWQiLCJzY3AiOiJ1c2VyIiwiYXVkIjpudWxsLCJpYXQiOjE2MjgxODEwODgsImV4cCI6MTYzMDgxMDgzNH0.4TbCVMby9BazTRtHj94HyKaviNCAmaXp2mEgWJ6LVCU"
+      },
+      "body" : {
+        "query" : "query beamObject($id: ID!) {\n  beamObject(id: $id) {\n    id\n    data\n    checksum\n    type\n    createdAt\n    updatedAt\n    deletedAt\n  }\n}\n",
+        "variables" : {
+          "id" : "195D94E1-E0DF-4ECA-93E6-8778984BCD58"
+        }
+      },
+      "url" : "https:\/\/api.beamapp.co\/graphql"
+    }
+  },
+  {
     "response" : {
       "body" : {
         "data" : {
           "beamObject" : {
             "id" : "295d94e1-e0df-4eca-93e6-8778984bcd58",
-            "data" : "9h8nKjU3bIjfk1e5AttHaWp274v8TgxIMU1QfYWejVul5A0UdEpG5571VjvSXnmru2qDPSus\/nGur8bHOS18PGS8QifE7ef0fiib8mXrL4+1vQ70nYFxeS1nK3OHAP4mLm215d\/K3xQ2FtpZO\/rpPMDhC3Vs2uoY",
+            "data" : "58U4HdyPxcXMbaKfOGN7IWxV7PWCeYB5lZCOeo8JHvM4qUWrLz37YpQVY4mrPl0DIuNdTN5U5mN17v9la78BhGn+n5h+gEDUT+ihcufc81luUuisShe9f8DZIHjH4D0+tVMbnWeOEyA\/5bPP9n9vabUbNS3OMiO5",
             "checksum" : "dbc369736dade41722b7005db5efae1fb99aca7aae9417b6184eaf423e2d860b",
             "deletedAt" : null,
             "updatedAt" : "2021-03-19T12:21:03Z",
@@ -394,110 +433,74 @@
       },
       "status" : 200,
       "headers" : {
+        "Connection" : "keep-alive",
         "Referrer-Policy" : "strict-origin-when-cross-origin",
-        "X-Content-Type-Options" : "nosniff",
-        "Date" : "Thu, 05 Aug 2021 11:37:55 GMT",
+        "Etag" : "W\/\"5d87e06168a5c86f27e7753c0bcff3be\"",
+        "Via" : "1.1 vegur",
+        "X-Permitted-Cross-Domain-Policies" : "none",
         "Strict-Transport-Security" : "max-age=63072000; includeSubDomains",
         "Transfer-Encoding" : "Identity",
-        "X-Frame-Options" : "SAMEORIGIN",
-        "Server" : "Cowboy",
-        "Etag" : "W\/\"a42cf7000ac05df96a71d51ca86c121e\"",
-        "X-Xss-Protection" : "1; mode=block",
-        "Via" : "1.1 vegur",
-        "Vary" : "Accept, Origin",
-        "Content-Type" : "application\/json; charset=utf-8",
-        "Connection" : "keep-alive",
-        "X-Request-Id" : "58ea8f02-effb-4622-b064-22e25191692e",
-        "Cache-Control" : "max-age=0, private, must-revalidate",
-        "X-Runtime" : "0.012349",
         "X-Download-Options" : "noopen",
-        "X-Permitted-Cross-Domain-Policies" : "none"
+        "Content-Type" : "application\/json; charset=utf-8",
+        "Cache-Control" : "max-age=0, private, must-revalidate",
+        "X-Content-Type-Options" : "nosniff",
+        "Vary" : "Accept, Origin",
+        "Server" : "Cowboy",
+        "X-Request-Id" : "8b2d8e6c-6fe8-4d7f-99c6-0b6f74a1efcf",
+        "X-Runtime" : "0.017382",
+        "X-Frame-Options" : "SAMEORIGIN",
+        "X-Xss-Protection" : "1; mode=block",
+        "Date" : "Thu, 05 Aug 2021 16:31:28 GMT"
       },
       "url" : "https:\/\/api.beamapp.co\/graphql"
-    }
-  },
-  {
-    "response" : {
-      "body" : {
-        "data" : {
-          "beamObject" : {
-            "id" : "195d94e1-e0df-4eca-93e6-8778984bcd58",
-            "data" : "NC4yjIHbfQZK0jxQS5S7nx8kiNwViYQ3WU1LS5P5Yu3Y5m33mgQ3aK74HVNO\/iInVa6dF8pp2GHunoEyFJcB1IpGlzMfUBnXsyEmltbAIan2U0Mgb\/KtMbeTYg4WEx3rmhd2wjk\/erMD5Cka7i\/XHP0jl5NVZQYT",
-            "checksum" : "1329717e2a5c440af3e94efeecba3bee495963998506bb662c0ab2da0cd459e6",
-            "deletedAt" : null,
-            "updatedAt" : "2021-03-19T12:21:03Z",
-            "type" : "my_remote_object",
-            "createdAt" : "2021-03-19T12:21:03Z"
-          }
-        }
-      },
-      "status" : 200,
-      "url" : "https:\/\/api.beamapp.co\/graphql",
-      "headers" : {
-        "Cache-Control" : "max-age=0, private, must-revalidate",
-        "X-Frame-Options" : "SAMEORIGIN",
-        "Server" : "Cowboy",
-        "Date" : "Thu, 05 Aug 2021 11:37:56 GMT",
-        "X-Permitted-Cross-Domain-Policies" : "none",
-        "X-Xss-Protection" : "1; mode=block",
-        "Etag" : "W\/\"af26e5125c4cb8c3311f8657a44e6d37\"",
-        "Referrer-Policy" : "strict-origin-when-cross-origin",
-        "Vary" : "Accept, Origin",
-        "X-Content-Type-Options" : "nosniff",
-        "Content-Type" : "application\/json; charset=utf-8",
-        "X-Runtime" : "0.013330",
-        "X-Request-Id" : "ab98ef8b-d258-4fec-80a6-794e3e2f2036",
-        "Via" : "1.1 vegur",
-        "Strict-Transport-Security" : "max-age=63072000; includeSubDomains",
-        "Connection" : "keep-alive",
-        "Transfer-Encoding" : "Identity",
-        "X-Download-Options" : "noopen"
-      }
     },
     "request" : {
       "headers" : {
-        "Authorization" : "Bearer eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJmZWNkMTFkMy0yZDZmLTQ3OTgtYTM4YS1lMjkzN2JmZGZmNjIiLCJzdWIiOiJlMTQwYzU5YS1lYmIyLTQ3YjEtYmU3OC05ZDJkNTYyNWRjYWQiLCJzY3AiOiJ1c2VyIiwiYXVkIjpudWxsLCJpYXQiOjE2MjgxNjM0NzUsImV4cCI6MTYzMDc5MzIyMX0.X89aQU9Avs5laZBIDOGmDdh1C2gUKc5pdo06N-8qsf8",
         "Accept-Language" : "en",
+        "Authorization" : "Bearer eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJmZWNkMTFkMy0yZDZmLTQ3OTgtYTM4YS1lMjkzN2JmZGZmNjIiLCJzdWIiOiJlMTQwYzU5YS1lYmIyLTQ3YjEtYmU3OC05ZDJkNTYyNWRjYWQiLCJzY3AiOiJ1c2VyIiwiYXVkIjpudWxsLCJpYXQiOjE2MjgxODEwODgsImV4cCI6MTYzMDgxMDgzNH0.4TbCVMby9BazTRtHj94HyKaviNCAmaXp2mEgWJ6LVCU",
         "Accept" : "application\/json",
         "Content-Type" : "application\/json",
         "User-Agent" : "Beam client, 0.1.0 (1)"
       },
+      "url" : "https:\/\/api.beamapp.co\/graphql",
+      "method" : "POST",
       "body" : {
         "query" : "query beamObject($id: ID!) {\n  beamObject(id: $id) {\n    id\n    data\n    checksum\n    type\n    createdAt\n    updatedAt\n    deletedAt\n  }\n}\n",
         "variables" : {
-          "id" : "195D94E1-E0DF-4ECA-93E6-8778984BCD58"
+          "id" : "295D94E1-E0DF-4ECA-93E6-8778984BCD58"
         }
-      },
-      "method" : "POST",
-      "url" : "https:\/\/api.beamapp.co\/graphql"
+      }
     }
   },
   {
-    "request" : {
-      "headers" : {
-        "Accept" : "application\/json",
-        "User-Agent" : "Beam client, 0.1.0 (1)",
-        "Authorization" : "Bearer eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJmZWNkMTFkMy0yZDZmLTQ3OTgtYTM4YS1lMjkzN2JmZGZmNjIiLCJzdWIiOiJlMTQwYzU5YS1lYmIyLTQ3YjEtYmU3OC05ZDJkNTYyNWRjYWQiLCJzY3AiOiJ1c2VyIiwiYXVkIjpudWxsLCJpYXQiOjE2MjgxNjM0NzUsImV4cCI6MTYzMDc5MzIyMX0.X89aQU9Avs5laZBIDOGmDdh1C2gUKc5pdo06N-8qsf8",
-        "Accept-Language" : "en",
-        "Content-Type" : "application\/json"
-      },
-      "body" : {
-        "query" : "query beamObject($id: ID!) {\n  beamObject(id: $id) {\n    id\n    data\n    checksum\n    type\n    createdAt\n    updatedAt\n    deletedAt\n  }\n}\n",
-        "variables" : {
-          "id" : "395D94E1-E0DF-4ECA-93E6-8778984BCD58"
-        }
-      },
-      "url" : "https:\/\/api.beamapp.co\/graphql",
-      "method" : "POST"
-    },
     "response" : {
-      "url" : "https:\/\/api.beamapp.co\/graphql",
+      "headers" : {
+        "Date" : "Thu, 05 Aug 2021 16:31:28 GMT",
+        "Etag" : "W\/\"ad921e8bc74f502af3f599abe08c4c9d\"",
+        "Content-Type" : "application\/json; charset=utf-8",
+        "X-Frame-Options" : "SAMEORIGIN",
+        "X-Xss-Protection" : "1; mode=block",
+        "Strict-Transport-Security" : "max-age=63072000; includeSubDomains",
+        "Cache-Control" : "max-age=0, private, must-revalidate",
+        "X-Download-Options" : "noopen",
+        "Connection" : "keep-alive",
+        "X-Permitted-Cross-Domain-Policies" : "none",
+        "X-Content-Type-Options" : "nosniff",
+        "X-Runtime" : "0.016373",
+        "Transfer-Encoding" : "Identity",
+        "Server" : "Cowboy",
+        "X-Request-Id" : "91a63f3b-ab28-49e8-b4a5-d2b3e2134ff8",
+        "Vary" : "Accept, Origin",
+        "Via" : "1.1 vegur",
+        "Referrer-Policy" : "strict-origin-when-cross-origin"
+      },
       "status" : 200,
+      "url" : "https:\/\/api.beamapp.co\/graphql",
       "body" : {
         "data" : {
           "beamObject" : {
             "id" : "395d94e1-e0df-4eca-93e6-8778984bcd58",
-            "data" : "JEV9O5oQdEQfxSn8lo8FARVIeLSc53zJ6NzSLm5V7tNrNAfAIJ9rzAnRHGx\/BclBbKulJuY7tBogmLlw1ie4wVVNwkXn4+wz9rg1+aI7mk1vhALBuQKbHEeKzuEnc6lkj3VPeeLBCD9MbbNG0sXL7+zCuVHgZsaR",
+            "data" : "kC0we688fbzpU1iCqwE4IbEA9sWqCuYgS2ziz1zwpm+Av7qkHtL1uIBqSIkvfdmdcHs5GnN2ryduxO2Gl0qumas5Z3iNWR02+068Gv9z2KvEDx7istgbF4S9rRUPP1BVKGiBVUxZ5QBWNaMgpYe6gGc+1SpGTSYU",
             "checksum" : "fe147aac80e027967f9dae92fc5d272bd0c06519b18f7b27d1aa7feb2a4e3d3f",
             "deletedAt" : null,
             "updatedAt" : "2021-03-19T12:21:03Z",
@@ -505,31 +508,78 @@
             "createdAt" : "2021-03-19T12:21:03Z"
           }
         }
-      },
+      }
+    },
+    "request" : {
+      "method" : "POST",
+      "url" : "https:\/\/api.beamapp.co\/graphql",
       "headers" : {
-        "Strict-Transport-Security" : "max-age=63072000; includeSubDomains",
-        "X-Permitted-Cross-Domain-Policies" : "none",
-        "Cache-Control" : "max-age=0, private, must-revalidate",
-        "Connection" : "keep-alive",
-        "X-Runtime" : "0.008962",
-        "Date" : "Thu, 05 Aug 2021 11:37:55 GMT",
-        "Vary" : "Accept, Origin",
-        "Via" : "1.1 vegur",
-        "X-Xss-Protection" : "1; mode=block",
-        "X-Frame-Options" : "SAMEORIGIN",
-        "Content-Type" : "application\/json; charset=utf-8",
-        "X-Content-Type-Options" : "nosniff",
-        "Etag" : "W\/\"f361c9d5d8bfb8bcd057b612626070ea\"",
-        "Server" : "Cowboy",
-        "Referrer-Policy" : "strict-origin-when-cross-origin",
-        "X-Download-Options" : "noopen",
-        "X-Request-Id" : "b431b557-3fa0-49e9-9c4a-03317f6bf1d0",
-        "Transfer-Encoding" : "Identity"
+        "Accept-Language" : "en",
+        "User-Agent" : "Beam client, 0.1.0 (1)",
+        "Content-Type" : "application\/json",
+        "Authorization" : "Bearer eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJmZWNkMTFkMy0yZDZmLTQ3OTgtYTM4YS1lMjkzN2JmZGZmNjIiLCJzdWIiOiJlMTQwYzU5YS1lYmIyLTQ3YjEtYmU3OC05ZDJkNTYyNWRjYWQiLCJzY3AiOiJ1c2VyIiwiYXVkIjpudWxsLCJpYXQiOjE2MjgxODEwODgsImV4cCI6MTYzMDgxMDgzNH0.4TbCVMby9BazTRtHj94HyKaviNCAmaXp2mEgWJ6LVCU",
+        "Accept" : "application\/json"
+      },
+      "body" : {
+        "query" : "query beamObject($id: ID!) {\n  beamObject(id: $id) {\n    id\n    data\n    checksum\n    type\n    createdAt\n    updatedAt\n    deletedAt\n  }\n}\n",
+        "variables" : {
+          "id" : "395D94E1-E0DF-4ECA-93E6-8778984BCD58"
+        }
       }
     }
   },
   {
+    "request" : {
+      "url" : "https:\/\/api.beamapp.co\/graphql",
+      "body" : {
+        "query" : "mutation UpdateBeamObjects($beamObjects: [BeamObjectInput!]!, $privateKey: String) {\n  updateBeamObjects(input: {beamObjectsInput: $beamObjects, privateKey: $privateKey}) {\n    beamObjects {\n      id\n      checksum\n      type\n    }\n    errors {\n      objectid\n      path\n      message\n    }\n  }\n}\n",
+        "variables" : {
+          "privateKey" : "j6tifPZTjUtGoz+1RJkO8dOMlu48MUUSlwACw\/fCBw0=",
+          "beamObjects" : [
+            {
+              "id" : "195D94E1-E0DF-4ECA-93E6-8778984BCD58",
+              "data" : "wBwp7CzzgFE8vi3M5HYS2QAzzd8z67o\/\/DaVgU9KKGOANBH2glt9DwRDdd8LoaRlmLPkIg6iSnudm8BGf3aRGST7q0fA4wX+XPE1sELvKar0Bd3lgidDGuQ0REUvcGVCbygiBqyDQK4VjlBUo7OyiuAKNdF4d9modv4=",
+              "checksum" : "99c2a930a9ec9f254054eb9abc55352e0d26b4e3ce249b6595277265603470a0",
+              "previousChecksum" : "1329717e2a5c440af3e94efeecba3bee495963998506bb662c0ab2da0cd459e6",
+              "privateKeySignature" : "45cb7cb283d0b9ca64219bd0bc033c0fad461aaf6783d5be71eac2e772c3c828",
+              "updatedAt" : "2021-03-19T12:21:05Z",
+              "type" : "my_remote_object",
+              "createdAt" : "2021-03-19T12:21:03Z"
+            },
+            {
+              "id" : "295D94E1-E0DF-4ECA-93E6-8778984BCD58",
+              "data" : "4jtsmJMET483KlOM3ZPiHxVB6jUtH\/BoTNoyWfu69HraJe9Dc9ETIF9sO7RZYDXgl1VcvRyKPuce07JxNJpJ\/fZ7dehCrNBPnOJrYtjAhFMUEuoxxsBEWut\/\/ezSD0UtEXgRKGLkNJdyI6vz5nFQeOSCiAOKpP2pTFg=",
+              "checksum" : "1f9eac2cfe2e1cecc501084eb8a3c3fc3b1ffee1b6ac8219ac40f37a72d490c0",
+              "previousChecksum" : "dbc369736dade41722b7005db5efae1fb99aca7aae9417b6184eaf423e2d860b",
+              "privateKeySignature" : "45cb7cb283d0b9ca64219bd0bc033c0fad461aaf6783d5be71eac2e772c3c828",
+              "updatedAt" : "2021-03-19T12:21:05Z",
+              "type" : "my_remote_object",
+              "createdAt" : "2021-03-19T12:21:03Z"
+            },
+            {
+              "id" : "395D94E1-E0DF-4ECA-93E6-8778984BCD58",
+              "data" : "xb06BNzWHkdJQwlnRY7gXuvumF0l1qUfKdAHMjLPryGPHKCn7oemMxa5CD8mkNV6tmZH141b\/zNOOUYqSu2scfkaWnBY\/yvmTQOr3zb0mCOUeGbJBknPbS8z4QQbdARzLamve3BiwGgvwPg03VV3SoEmXHWlmUqhm90=",
+              "checksum" : "95c5e547023a9ecdc6485311afb86c7aaf5bd6709e843d755ec5b1a5b5ec9f5e",
+              "previousChecksum" : "fe147aac80e027967f9dae92fc5d272bd0c06519b18f7b27d1aa7feb2a4e3d3f",
+              "privateKeySignature" : "45cb7cb283d0b9ca64219bd0bc033c0fad461aaf6783d5be71eac2e772c3c828",
+              "updatedAt" : "2021-03-19T12:21:05Z",
+              "type" : "my_remote_object",
+              "createdAt" : "2021-03-19T12:21:03Z"
+            }
+          ]
+        }
+      },
+      "method" : "POST",
+      "headers" : {
+        "Content-Type" : "application\/json",
+        "User-Agent" : "Beam client, 0.1.0 (1)",
+        "Accept-Language" : "en",
+        "Authorization" : "Bearer eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJmZWNkMTFkMy0yZDZmLTQ3OTgtYTM4YS1lMjkzN2JmZGZmNjIiLCJzdWIiOiJlMTQwYzU5YS1lYmIyLTQ3YjEtYmU3OC05ZDJkNTYyNWRjYWQiLCJzY3AiOiJ1c2VyIiwiYXVkIjpudWxsLCJpYXQiOjE2MjgxODEwODgsImV4cCI6MTYzMDgxMDgzNH0.4TbCVMby9BazTRtHj94HyKaviNCAmaXp2mEgWJ6LVCU",
+        "Accept" : "application\/json"
+      }
+    },
     "response" : {
+      "url" : "https:\/\/api.beamapp.co\/graphql",
       "body" : {
         "data" : {
           "updateBeamObjects" : {
@@ -539,17 +589,17 @@
             "beamObjects" : [
               {
                 "id" : "195d94e1-e0df-4eca-93e6-8778984bcd58",
-                "checksum" : "6bd6950a479d12bbd7ca9824b570b15510803b24f0667b275a6c9be7b46ab0b9",
+                "checksum" : "99c2a930a9ec9f254054eb9abc55352e0d26b4e3ce249b6595277265603470a0",
                 "type" : "my_remote_object"
               },
               {
                 "id" : "295d94e1-e0df-4eca-93e6-8778984bcd58",
-                "checksum" : "30be1cf47851e3baa34f1c06b2ded0f683e84284962b46bcd1a8a166449c9c8c",
+                "checksum" : "1f9eac2cfe2e1cecc501084eb8a3c3fc3b1ffee1b6ac8219ac40f37a72d490c0",
                 "type" : "my_remote_object"
               },
               {
                 "id" : "395d94e1-e0df-4eca-93e6-8778984bcd58",
-                "checksum" : "52b354a2b4976c25d49edee09586e3e415fbfc6d264d3db5c488e437160fb4dd",
+                "checksum" : "95c5e547023a9ecdc6485311afb86c7aaf5bd6709e843d755ec5b1a5b5ec9f5e",
                 "type" : "my_remote_object"
               }
             ]
@@ -557,119 +607,69 @@
         }
       },
       "status" : 200,
-      "url" : "https:\/\/api.beamapp.co\/graphql",
       "headers" : {
-        "Server" : "Cowboy",
-        "X-Request-Id" : "10827bec-21e5-4b3e-b679-a6b3c07722c1",
-        "Content-Type" : "application\/json; charset=utf-8",
-        "Etag" : "W\/\"729cf4a7a43e675920feb0dc53b64afe\"",
-        "X-Xss-Protection" : "1; mode=block",
-        "Vary" : "Accept, Origin",
-        "X-Content-Type-Options" : "nosniff",
-        "Connection" : "keep-alive",
-        "X-Permitted-Cross-Domain-Policies" : "none",
-        "X-Download-Options" : "noopen",
-        "Date" : "Thu, 05 Aug 2021 11:37:56 GMT",
-        "X-Runtime" : "0.042064",
-        "Cache-Control" : "max-age=0, private, must-revalidate",
         "Referrer-Policy" : "strict-origin-when-cross-origin",
-        "Via" : "1.1 vegur",
-        "X-Frame-Options" : "SAMEORIGIN",
+        "Content-Type" : "application\/json; charset=utf-8",
+        "Server" : "Cowboy",
+        "X-Permitted-Cross-Domain-Policies" : "none",
         "Transfer-Encoding" : "Identity",
-        "Strict-Transport-Security" : "max-age=63072000; includeSubDomains"
+        "X-Request-Id" : "54998587-cbf2-4b2f-92aa-06a96ec378b0",
+        "Connection" : "keep-alive",
+        "X-Content-Type-Options" : "nosniff",
+        "Vary" : "Accept, Origin",
+        "X-Xss-Protection" : "1; mode=block",
+        "X-Runtime" : "0.041953",
+        "Cache-Control" : "max-age=0, private, must-revalidate",
+        "X-Download-Options" : "noopen",
+        "Etag" : "W\/\"1f527a3ff2f8ff53c90cc6b5b391be37\"",
+        "Strict-Transport-Security" : "max-age=63072000; includeSubDomains",
+        "Date" : "Thu, 05 Aug 2021 16:31:29 GMT",
+        "X-Frame-Options" : "SAMEORIGIN",
+        "Via" : "1.1 vegur"
       }
-    },
-    "request" : {
-      "headers" : {
-        "Authorization" : "Bearer eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJmZWNkMTFkMy0yZDZmLTQ3OTgtYTM4YS1lMjkzN2JmZGZmNjIiLCJzdWIiOiJlMTQwYzU5YS1lYmIyLTQ3YjEtYmU3OC05ZDJkNTYyNWRjYWQiLCJzY3AiOiJ1c2VyIiwiYXVkIjpudWxsLCJpYXQiOjE2MjgxNjM0NzUsImV4cCI6MTYzMDc5MzIyMX0.X89aQU9Avs5laZBIDOGmDdh1C2gUKc5pdo06N-8qsf8",
-        "Accept" : "application\/json",
-        "Content-Type" : "application\/json",
-        "Accept-Language" : "en",
-        "User-Agent" : "Beam client, 0.1.0 (1)"
-      },
-      "method" : "POST",
-      "body" : {
-        "query" : "mutation UpdateBeamObjects($beamObjects: [BeamObjectInput!]!, $privateKey: String) {\n  updateBeamObjects(input: {beamObjectsInput: $beamObjects, privateKey: $privateKey}) {\n    beamObjects {\n      id\n      checksum\n      type\n    }\n    errors {\n      objectid\n      path\n      message\n    }\n  }\n}\n",
-        "variables" : {
-          "privateKey" : "j6tifPZTjUtGoz+1RJkO8dOMlu48MUUSlwACw\/fCBw0=",
-          "beamObjects" : [
-            {
-              "id" : "195D94E1-E0DF-4ECA-93E6-8778984BCD58",
-              "data" : "wOsWk8UjDLPYx8uuVfbTsVf3xuArjVf\/Bb3uQha8cbXkl7EuA97PrE2wIQzFdh0x\/xMXgZo1KnxYdCSKRqXx\/0zFSJpu9O5mSAXlItgY4U1+n0+DSGwrN8UWhZlZnARgs\/Thg0bdyHDBHFyuLVGAey\/6smoQzkxr738=",
-              "checksum" : "6bd6950a479d12bbd7ca9824b570b15510803b24f0667b275a6c9be7b46ab0b9",
-              "previousChecksum" : "1329717e2a5c440af3e94efeecba3bee495963998506bb662c0ab2da0cd459e6",
-              "privateKeySignature" : "45cb7cb283d0b9ca64219bd0bc033c0fad461aaf6783d5be71eac2e772c3c828",
-              "updatedAt" : "2021-03-19T12:21:03Z",
-              "type" : "my_remote_object",
-              "createdAt" : "2021-03-19T12:21:03Z"
-            },
-            {
-              "id" : "295D94E1-E0DF-4ECA-93E6-8778984BCD58",
-              "data" : "Hl0f2J3+K+CwO6034D6n9ZOR0+SzxpkDsylCOaVH\/4mC9K2skt1d85jllWiS6ragv3U38mvrX33LZpxVIMIncns\/yr1iTUCNNf1qJgL\/AfpPJv4gIcr3ZKvU1t\/QsrtnRqK71mZKbzgKJKbeNk7GoFBKw4l+tSUfLTg=",
-              "checksum" : "30be1cf47851e3baa34f1c06b2ded0f683e84284962b46bcd1a8a166449c9c8c",
-              "previousChecksum" : "dbc369736dade41722b7005db5efae1fb99aca7aae9417b6184eaf423e2d860b",
-              "privateKeySignature" : "45cb7cb283d0b9ca64219bd0bc033c0fad461aaf6783d5be71eac2e772c3c828",
-              "updatedAt" : "2021-03-19T12:21:03Z",
-              "type" : "my_remote_object",
-              "createdAt" : "2021-03-19T12:21:03Z"
-            },
-            {
-              "id" : "395D94E1-E0DF-4ECA-93E6-8778984BCD58",
-              "data" : "SlwMwj9aN83PMxLyTTD6JykeZn+O2awjTRRhe1dbwT1ln84ioH7+xIt3bdFDJJXqQS3TseOmZklj786ihPNavKdTDDR2DjVsvx9bsNJGAibHjTsLbUJ9TWN+LEnqiMvAuCcZM0oCe5wUzQ5yYyinWHnA+b1oTz74qfo=",
-              "checksum" : "52b354a2b4976c25d49edee09586e3e415fbfc6d264d3db5c488e437160fb4dd",
-              "previousChecksum" : "fe147aac80e027967f9dae92fc5d272bd0c06519b18f7b27d1aa7feb2a4e3d3f",
-              "privateKeySignature" : "45cb7cb283d0b9ca64219bd0bc033c0fad461aaf6783d5be71eac2e772c3c828",
-              "updatedAt" : "2021-03-19T12:21:03Z",
-              "type" : "my_remote_object",
-              "createdAt" : "2021-03-19T12:21:03Z"
-            }
-          ]
-        }
-      },
-      "url" : "https:\/\/api.beamapp.co\/graphql"
     }
   },
   {
     "request" : {
+      "method" : "POST",
       "body" : {
         "query" : "mutation DeleteAllBeamObjects {\n  deleteAllBeamObjects(input: {}) {\n    success\n    errors {\n      path\n      message\n    }\n  }\n}\n",
         "variables" : {
 
         }
       },
-      "url" : "https:\/\/api.beamapp.co\/graphql",
-      "method" : "POST",
       "headers" : {
         "User-Agent" : "Beam client, 0.1.0 (1)",
-        "Content-Type" : "application\/json",
+        "Accept-Language" : "en",
         "Accept" : "application\/json",
-        "Authorization" : "Bearer eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJmZWNkMTFkMy0yZDZmLTQ3OTgtYTM4YS1lMjkzN2JmZGZmNjIiLCJzdWIiOiJlMTQwYzU5YS1lYmIyLTQ3YjEtYmU3OC05ZDJkNTYyNWRjYWQiLCJzY3AiOiJ1c2VyIiwiYXVkIjpudWxsLCJpYXQiOjE2MjgxNjM0NzUsImV4cCI6MTYzMDc5MzIyMX0.X89aQU9Avs5laZBIDOGmDdh1C2gUKc5pdo06N-8qsf8",
-        "Accept-Language" : "en"
-      }
+        "Content-Type" : "application\/json",
+        "Authorization" : "Bearer eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJmZWNkMTFkMy0yZDZmLTQ3OTgtYTM4YS1lMjkzN2JmZGZmNjIiLCJzdWIiOiJlMTQwYzU5YS1lYmIyLTQ3YjEtYmU3OC05ZDJkNTYyNWRjYWQiLCJzY3AiOiJ1c2VyIiwiYXVkIjpudWxsLCJpYXQiOjE2MjgxODEwODgsImV4cCI6MTYzMDgxMDgzNH0.4TbCVMby9BazTRtHj94HyKaviNCAmaXp2mEgWJ6LVCU"
+      },
+      "url" : "https:\/\/api.beamapp.co\/graphql"
     },
     "response" : {
+      "status" : 200,
       "url" : "https:\/\/api.beamapp.co\/graphql",
       "headers" : {
-        "Strict-Transport-Security" : "max-age=63072000; includeSubDomains",
-        "Via" : "1.1 vegur",
-        "X-Download-Options" : "noopen",
-        "X-Permitted-Cross-Domain-Policies" : "none",
-        "Referrer-Policy" : "strict-origin-when-cross-origin",
-        "Server" : "Cowboy",
-        "X-Runtime" : "0.011064",
-        "X-Request-Id" : "2d6f0010-fd26-44f6-8c27-d5a0833ee97e",
-        "Content-Type" : "application\/json; charset=utf-8",
-        "Date" : "Thu, 05 Aug 2021 11:37:56 GMT",
-        "X-Xss-Protection" : "1; mode=block",
         "X-Frame-Options" : "SAMEORIGIN",
+        "Content-Type" : "application\/json; charset=utf-8",
         "Vary" : "Accept, Origin",
+        "Date" : "Thu, 05 Aug 2021 16:31:29 GMT",
         "X-Content-Type-Options" : "nosniff",
-        "Transfer-Encoding" : "Identity",
-        "Cache-Control" : "max-age=0, private, must-revalidate",
+        "Referrer-Policy" : "strict-origin-when-cross-origin",
+        "X-Permitted-Cross-Domain-Policies" : "none",
+        "Etag" : "W\/\"4979b027853222033b78668c613a2e60\"",
         "Connection" : "keep-alive",
-        "Etag" : "W\/\"4979b027853222033b78668c613a2e60\""
+        "Strict-Transport-Security" : "max-age=63072000; includeSubDomains",
+        "X-Xss-Protection" : "1; mode=block",
+        "X-Request-Id" : "920e669b-d486-40ab-b756-0fbc8a636a7d",
+        "Transfer-Encoding" : "Identity",
+        "X-Download-Options" : "noopen",
+        "Server" : "Cowboy",
+        "X-Runtime" : "0.009484",
+        "Via" : "1.1 vegur",
+        "Cache-Control" : "max-age=0, private, must-revalidate"
       },
-      "status" : 200,
       "body" : {
         "data" : {
           "deleteAllBeamObjects" : {
