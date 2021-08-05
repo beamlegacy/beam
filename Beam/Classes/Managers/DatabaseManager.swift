@@ -1165,7 +1165,6 @@ extension DatabaseManager {
 
 // MARK: - BeamObjectManagerDelegateProtocol
 extension DatabaseManager: BeamObjectManagerDelegate {
-    typealias BeamObjectType = DatabaseStruct
     static var conflictPolicy: BeamObjectConflictResolution = .replace
 
     //swiftlint:disable:next function_body_length
@@ -1237,7 +1236,7 @@ extension DatabaseManager: BeamObjectManagerDelegate {
         }
     }
 
-    func persistChecksum(_ objects: [BeamObjectType]) throws {
+    func persistChecksum(_ objects: [DatabaseStruct]) throws {
         let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
 
         try context.performAndWait {

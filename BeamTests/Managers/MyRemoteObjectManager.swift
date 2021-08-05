@@ -16,18 +16,17 @@ class MyRemoteObjectManager {
 
 extension MyRemoteObjectManager: BeamObjectManagerDelegate {
     static var conflictPolicy: BeamObjectConflictResolution = .replace
-    typealias BeamObjectType = MyRemoteObject
 
-    func receivedObjects(_ objects: [BeamObjectType]) throws {
+    func receivedObjects(_ objects: [MyRemoteObject]) throws {
         Self.receivedMyRemoteObjects.append(contentsOf: objects)
     }
 
-    func allObjects() throws -> [BeamObjectType] {
+    func allObjects() throws -> [MyRemoteObject] {
         Array(Self.store.values)
     }
 
-    func manageConflict(_ object: BeamObjectType,
-                        _ remoteObject: BeamObjectType) throws -> BeamObjectType {
+    func manageConflict(_ object: MyRemoteObject,
+                        _ remoteObject: MyRemoteObject) throws -> MyRemoteObject {
         var result = object.copy()
 
         var newTitle = "merged: "
@@ -44,14 +43,14 @@ extension MyRemoteObjectManager: BeamObjectManagerDelegate {
         return result
     }
 
-    func saveObjectsAfterConflict(_ objects: [BeamObjectType]) throws {
+    func saveObjectsAfterConflict(_ objects: [MyRemoteObject]) throws {
         for object in objects {
             Self.store[object.beamObjectId] = object
             Self.store[object.beamObjectId]?.previousChecksum = object.checksum
         }
     }
 
-    func persistChecksum(_ objects: [BeamObjectType]) throws {
+    func persistChecksum(_ objects: [MyRemoteObject]) throws {
         for object in objects {
             Self.store[object.beamObjectId]?.previousChecksum = object.checksum
         }
