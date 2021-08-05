@@ -1,27 +1,27 @@
 [
   {
     "request" : {
-      "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=Beam",
-      "method" : "GET"
+      "method" : "GET",
+      "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=Beam"
     },
     "response" : {
+      "status" : 200,
+      "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=Beam",
+      "body" : "[\"Beam\",[\"beamng drive\",\"beams\",\"beamy\",\"beamer\",\"beam traduction\",\"beam suntory\",\"beamery\",\"beam me up scotty\",\"beams plus\",\"beam advisory\"],[],{\"google:suggestsubtypes\":[[512,433,131],[512,433],[512],[512],[512],[512],[512],[512],[512],[512]]}]",
       "headers" : {
-        "Alt-Svc" : "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000,h3-T051=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\"",
-        "Content-Length" : "148",
-        "Content-Type" : "text\/javascript; charset=ISO-8859-1",
-        "x-xss-protection" : "0",
-        "Content-Disposition" : "attachment; filename=\"f.txt\"",
-        "Date" : "Wed, 04 Aug 2021 15:02:20 GMT",
-        "x-frame-options" : "SAMEORIGIN",
-        "Content-Encoding" : "gzip",
         "Expires" : "-1",
+        "Content-Length" : "150",
+        "Content-Type" : "text\/javascript; charset=ISO-8859-1",
+        "Pragma" : "no-cache",
+        "Content-Disposition" : "attachment; filename=\"f.txt\"",
+        "Content-Encoding" : "gzip",
+        "x-xss-protection" : "0",
+        "x-frame-options" : "SAMEORIGIN",
+        "Alt-Svc" : "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000,h3-T051=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\"",
         "Cache-Control" : "no-cache, must-revalidate",
         "Server" : "gws",
-        "Pragma" : "no-cache"
-      },
-      "body" : "[\"Beam\",[\"beamng drive\",\"beams\",\"beamon\",\"beamy\",\"beamer\",\"beam traduction\",\"beamng\",\"beam suntory\",\"beamery\",\"beam me up scotty\"],[],{\"google:suggestsubtypes\":[[512,433,131],[512,433],[433,131],[512],[512,433],[512],[512,433],[512],[512],[512]]}]",
-      "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=Beam",
-      "status" : 200
+        "Date" : "Thu, 05 Aug 2021 09:16:59 GMT"
+      }
     }
   }
 ]

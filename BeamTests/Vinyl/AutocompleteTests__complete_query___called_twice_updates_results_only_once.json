@@ -1,27 +1,27 @@
 [
   {
     "request" : {
-      "method" : "GET",
-      "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=green"
+      "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=green",
+      "method" : "GET"
     },
     "response" : {
-      "status" : 200,
       "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=green",
-      "body" : "[\"green\",[\"greenweez\",\"greenpeace\",\"greenwashing\",\"greengo\",\"green book\",\"green acres\",\"green acres paris\",\"green acres ile de france\",\"greenflex\",\"greenly\"],[],{\"google:suggestsubtypes\":[[512,433],[512,433],[512],[512,433],[512,433],[512,433,131,457],[402],[402],[512],[512]]}]",
+      "body" : "[\"green\",[\"greenweez\",\"greenpeace\",\"greenwashing\",\"greengo\",\"green acres\",\"green acres paris\",\"green acres ile de france\",\"green book\",\"greenflex\",\"green pass italie\"],[],{\"google:suggestsubtypes\":[[512,433],[512,433],[512,433],[512,433],[512,433,131,457],[402],[402],[512,433],[512],[433,131]]}]",
       "headers" : {
-        "Alt-Svc" : "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000,h3-T051=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\"",
-        "Content-Length" : "158",
-        "Cache-Control" : "no-cache, must-revalidate",
-        "Pragma" : "no-cache",
-        "x-frame-options" : "SAMEORIGIN",
         "Content-Type" : "text\/javascript; charset=ISO-8859-1",
-        "Content-Encoding" : "gzip",
+        "Date" : "Thu, 05 Aug 2021 09:16:59 GMT",
         "Content-Disposition" : "attachment; filename=\"f.txt\"",
+        "Content-Length" : "167",
+        "Alt-Svc" : "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000,h3-T051=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\"",
         "Expires" : "-1",
-        "Date" : "Wed, 04 Aug 2021 15:02:20 GMT",
+        "Cache-Control" : "no-cache, must-revalidate",
         "x-xss-protection" : "0",
-        "Server" : "gws"
-      }
+        "x-frame-options" : "SAMEORIGIN",
+        "Server" : "gws",
+        "Content-Encoding" : "gzip",
+        "Pragma" : "no-cache"
+      },
+      "status" : 200
     }
   }
 ]
