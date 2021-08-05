@@ -24,7 +24,7 @@ struct LinearProgressView: View {
                     .frame(width: proxy.size.width * CGFloat(progress), height: 3)
                     .cornerRadius(1.5)
                     .foregroundColor(Color("CharmedGreen"))
-                    .animation(.easeInOut)
+                    .animation(.easeInOut, value: progress)
             }
         }
         .frame(height: 3)
