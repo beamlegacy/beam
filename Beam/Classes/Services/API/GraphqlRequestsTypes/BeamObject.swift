@@ -34,6 +34,7 @@ class BeamObject: Codable {
     var data: String?
     var dataChecksum: String?
     var previousChecksum: String?
+    var privateKeySignature: String?
 
     var id: UUID
 
@@ -58,6 +59,7 @@ class BeamObject: Codable {
         case data
         case dataChecksum = "checksum"
         case previousChecksum
+        case privateKeySignature
     }
 
     init(id: UUID, beamObjectType: String) {
@@ -159,44 +161,23 @@ class BeamObject: Codable {
 
 // MARK: - Encryption
 extension BeamObject {
-    // This struct will be used as `beamObject.data` on the server side
-    struct DataEncryption: Codable {
-        let encryptionName: String
-        let privateKeySha256: String?
-        let data: String
-        //swiftlint:disable:next nesting
-        enum CodingKeys: String, CodingKey {
-            case encryptionName
-            case privateKeySha256
-            case data
-        }
-    }
-
     func decrypt() throws {
-        guard let encodedData = data else { return }
-
-        let decoder = JSONDecoder()
-        let decodedStruct = try decoder.decode(DataEncryption.self, from: encodedData.asData)
-
-        let encodedString = decodedStruct.data
-        let encryptionName = decodedStruct.encryptionName
-
-        guard let algorithm = EncryptionManager.Algorithm(rawValue: encryptionName) else { return }
+        guard let encodedString = data else { return }
 
         do {
-            data = try EncryptionManager.shared.decryptString(encodedString, using: algorithm)
+            data = try EncryptionManager.shared.decryptString(encodedString)
         } catch DecodingError.dataCorrupted {
             Logger.shared.logError("DecodingError.dataCorrupted", category: .encryption)
         } catch DecodingError.typeMismatch {
             Logger.shared.logError("DecodingError.typeMismatch", category: .encryption)
-            Logger.shared.logDebug("Encoded data: \(encodedData)", category: .encryption)
+            Logger.shared.logDebug("Encoded data: \(encodedString)", category: .encryption)
         } catch EncryptionManagerError.authenticationFailure {
-            Logger.shared.logError("Could not decrypt data with key \(decodedStruct.privateKeySha256 ?? "-")",
+            Logger.shared.logError("Could not decrypt data with key \(privateKeySignature ?? "-")",
                                    category: .encryption)
             throw EncryptionManagerError.authenticationFailure
         } catch {
             Logger.shared.logError("\(type(of: error)): \(error) \(error.localizedDescription)", category: .encryption)
-            Logger.shared.logDebug("Encoded data: \(encodedData)", category: .encryption)
+            Logger.shared.logDebug("Encoded string: \(encodedString)", category: .encryption)
             throw error
         }
     }
@@ -204,32 +185,11 @@ extension BeamObject {
     func encrypt() throws {
         guard let clearData = data else { return }
 
-        #if DEBUG
-        // This is an important check to verify data has not yet been already encrypted
-        do {
-            let encryptedStruct = try BeamObject.decoder.decode(DataEncryption.self,
-                                                                from: clearData.asData)
-            Logger.shared.logError("data: \(clearData)", category: .beamObject)
-
-            if encryptedStruct.privateKeySha256 != nil {
-                fatalError("Data has already been encrypted!")
-            }
-        } catch {
-            // it fails, it's not an encryptedStruct
-        }
-        #endif
-
         guard let encryptedClearData = try EncryptionManager.shared.encryptString(clearData) else {
             throw BeamObjectError.noData
         }
 
-        let encryptStruct = DataEncryption(encryptionName: EncryptionManager.Algorithm.AES_GCM.rawValue,
-                                           privateKeySha256: try? EncryptionManager.shared.privateKey().asString().SHA256(),
-                                           data: encryptedClearData)
-
-        let encoder = JSONEncoder()
-        let encodedStruct = try encoder.encode(encryptStruct)
-
-        data = encodedStruct.asString
+        data = encryptedClearData
+        privateKeySignature = try EncryptionManager.shared.privateKey().asString().SHA256()
     }
 }

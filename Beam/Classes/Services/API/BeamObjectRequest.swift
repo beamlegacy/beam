@@ -248,22 +248,6 @@ extension BeamObjectRequest {
                     return
                 }
 
-                #if DEBUG
-                // This is an important check to verify if data has been properly decrypted
-                if let data = fetchBeamObject.data {
-                    do {
-                        try fetchBeamObject.decrypt()
-                        _ = try BeamObject.decoder.decode(BeamObject.DataEncryption.self,
-                                                          from: data.asData)
-
-                        Logger.shared.logError("data: \(data)", category: .beamObject)
-                        fatalError("Data has not been decrypted!")
-                    } catch {
-
-                    }
-                }
-                #endif
-
                 completionHandler(.success(fetchBeamObject))
             }
         }
