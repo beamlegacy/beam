@@ -1,6 +1,7 @@
 import Foundation
 import Fakery
 import BeamCore
+import AutoUpdate
 
 class BeamUITestsMenuGenerator {
     // swiftlint:disable:next cyclomatic_complexity
@@ -20,6 +21,7 @@ class BeamUITestsMenuGenerator {
         case .loadUITestPage6: loadUITestsPage(page: 6)
         case .insertTextInCurrentNote: insertTextInCurrentNote()
         case .create100Notes: create100Notes()
+        case .setAutoUpdateToMock: setAutoUpdateToMock()
         default: break
         }
     }
@@ -111,5 +113,13 @@ class BeamUITestsMenuGenerator {
         for note in generator.notes {
             note.save(documentManager: documentManager)
         }
+    }
+
+    private func setAutoUpdateToMock() {
+        let appDel = AppDelegate.main
+        let checker = VersionChecker(mockedReleases: AppRelease.mockedReleases(), autocheckEnabled: true)
+        appDel.data.versionChecker = checker
+
+        checker.checkForUpdates()
     }
 }

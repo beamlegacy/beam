@@ -18,4 +18,5 @@ public enum MenuAvailableCommands: String, CaseIterable {
     case separatorC
     case insertTextInCurrentNote = "Insert text in current note"
     case create100Notes = "Create 100 random notes"
+    case setAutoUpdateToMock = "Set autoupdate to mock"
 }
