@@ -1565,9 +1565,9 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
         let result = jsonData.SHA256
 
         // Used when going deep in debug
-//        if let string = jsonData.asString {
-//            Logger.shared.logDebug("🍀 SHA checksum on \(string): \(result)", category: .beamObjectDebug)
-//        }
+        if let string = jsonData.asString {
+            Logger.shared.logDebug("🍀 SHA checksum on \(string): \(result)", category: .beamObjectDebug)
+        }
 
         return result
     }

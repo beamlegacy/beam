@@ -79,10 +79,10 @@ class BeamObject: Codable {
         try encodeObject(object)
 
         // Used when going deep in debug
-//        if let data = data, let dataChecksum = dataChecksum {
-//            Logger.shared.logDebug("🦞 SHA checksum on \(data): \(dataChecksum)",
-//                                   category: .beamObjectDebug)
-//        }
+        if let data = data, let dataChecksum = dataChecksum, let text = data.asString {
+            Logger.shared.logDebug("🦞 SHA checksum on \(text): \(dataChecksum)",
+                                   category: .beamObjectDebug)
+        }
     }
 
     static var encoder: JSONEncoder {
