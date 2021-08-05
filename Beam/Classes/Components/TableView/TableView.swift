@@ -327,6 +327,7 @@ extension TableViewCoordinator: NSTableViewDelegate {
         textCell.textField?.stringValue = text
         textCell.textField?.isEditable = editable
         textCell.textField?.font = BeamFont.regular(size: column.fontSize).nsFont
+        textCell.textField?.setAccessibilityIdentifier("\(column.title)")
         if let textColor = column.fontColor {
             textCell.textField?.textColor = textColor
         }
