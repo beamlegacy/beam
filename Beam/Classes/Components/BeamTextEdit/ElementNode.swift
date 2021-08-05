@@ -514,6 +514,8 @@ public class ElementNode: Widget {
         layer.shapeLayer.path = CGPath(rect: cursorRect, transform: nil)
     }
 
+    func updateFocus() {}
+
     override func onFocus() {
         super.onFocus()
         updateCursor()

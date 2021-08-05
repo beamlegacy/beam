@@ -31,11 +31,14 @@ class WebNavigationMessageHandler: BeamMessageHandler<NavigationMessages> {
                 Logger.shared.logError("Expected a url in location change message \(String(describing: msgPayload))", category: .web)
                 return
             }
+            guard urlString != webPage.url?.absoluteString else {
+                Logger.shared.logDebug("Location change event url isn't different from current webPage url", category: .web)
+                return
+            }
             guard href == webPage.url?.absoluteString else {
                 Logger.shared.logWarning("Location changed but in \(href) which is different from main frame \(String(describing: webPage.url))", category: .web)
                 return
             }
-            Logger.shared.logInfo("Location changed: \(type) \(urlString))")
             guard let url = URL(string: urlString) else {
                 Logger.shared.logError("\(urlString) is not a valid URL in navigation message", category: .web)
                 return

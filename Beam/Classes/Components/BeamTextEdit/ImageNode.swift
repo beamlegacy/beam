@@ -74,7 +74,10 @@ class ImageNode: ElementNode {
         addLayer(imageLayer, origin: CGPoint(x: indent, y: 0))
     }
 
-    var bottomMargin = CGFloat(5)
+    override var elementNodePadding: NSEdgeInsets {
+        NSEdgeInsets(top: 4, left: 0, bottom: 14, right: 0)
+    }
+
     override func updateRendering() {
         guard availableWidth > 0 else { return }
 
@@ -85,10 +88,10 @@ class ImageNode: ElementNode {
             let computedHeight = (width / imageSize.width) * imageSize.height
             let height = computedHeight.isNaN ? 0 : computedHeight
 
-            contentsFrame = NSRect(x: indent, y: 0, width: width, height: height + bottomMargin)
+            contentsFrame = NSRect(x: indent, y: 0, width: width, height: height + elementNodePadding.bottom + elementNodePadding.top)
 
             if let imageLayer = layers["image"] {
-                imageLayer.layer.position = CGPoint(x: indent + childInset, y: 0)
+                imageLayer.layer.position = CGPoint(x: indent + childInset, y: elementNodePadding.top)
                 imageLayer.layer.bounds = CGRect(origin: imageLayer.frame.origin, size: CGSize(width: width, height: height))
 
                 updateFocus()
@@ -109,7 +112,7 @@ class ImageNode: ElementNode {
 
     public override func updateElementCursor() {
         let on = editor.hasFocus && isFocused && editor.blinkPhase && (root?.state.nodeSelection?.nodes.isEmpty ?? true)
-        let cursorRect = NSRect(x: caretIndex == 0 ? (indent - 5) : (contentsFrame.width + indent + 3), y: 0, width: 2, height: contentsFrame.height - bottomMargin)//rectAt(caretIndex: caretIndex)
+        let cursorRect = NSRect(x: caretIndex == 0 ? (indent - 5) : (contentsFrame.width + indent + 3), y: elementNodePadding.top - focusMargin, width: 2, height: (layers["image"]?.layer.bounds.height ?? 0) + focusMargin * 2)//rectAt(caretIndex: caretIndex)
         let layer = self.cursorLayer
 
         layer.shapeLayer.fillColor = enabled ? cursorColor.cgColor : disabledColor.cgColor
@@ -117,7 +120,8 @@ class ImageNode: ElementNode {
         layer.shapeLayer.path = CGPath(rect: cursorRect, transform: nil)
     }
 
-    func updateFocus() {
+    var focusMargin = CGFloat(3)
+    override func updateFocus() {
         guard let imageLayer = layers["image"] else { return }
 
         imageLayer.layer.sublayers?.forEach { l in
@@ -127,7 +131,7 @@ class ImageNode: ElementNode {
             imageLayer.layer.mask = nil
             return
         }
-        let bounds = imageLayer.bounds.insetBy(dx: -3, dy: -3)
+        let bounds = imageLayer.bounds.insetBy(dx: -focusMargin, dy: -focusMargin)
         let position = CGPoint(x: 0, y: 0)
         let path = NSBezierPath(roundedRect: bounds, xRadius: 2, yRadius: 2)
 
@@ -142,7 +146,7 @@ class ImageNode: ElementNode {
         borderLayer.strokeColor = selectionColor.cgColor
         borderLayer.fillColor = NSColor.clear.cgColor
         borderLayer.bounds = bounds
-        borderLayer.position = CGPoint(x: indent + childInset + imageLayer.layer.bounds.width / 2, y: imageLayer.layer.bounds.height / 2)
+        borderLayer.position = CGPoint(x: indent + childInset + imageLayer.layer.bounds.width / 2, y: imageLayer.layer.bounds.height / 2 + elementNodePadding.top)
         borderLayer.mask = mask
         imageLayer.layer.addSublayer(borderLayer)
     }
@@ -157,4 +161,9 @@ class ImageNode: ElementNode {
     override func onFocus() {
         updateFocus()
     }
+}
+
+// MARK: - ImageNode + Layer
+extension ImageNode {
+    override var bulletLayerPositionY: CGFloat { 9 }
 }

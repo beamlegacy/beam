@@ -35,13 +35,14 @@ struct ModeView: View {
                 }.clipped()
             }
         }
-        .transition(.webContentTransition)
+        .transition(.webContentTransition(state.windowIsResizing))
     }
 
     private var noteContent: some View {
         Group {
             if let currentNote = state.currentNote {
-                NoteView(note: currentNote, containerGeometry: containerGeometry, leadingPercentage: 48.7, centerText: false, scrollToElementId: state.scrollToElementId) { scrollPoint in
+                NoteView(note: currentNote, containerGeometry: containerGeometry, leadingPercentage: 48.7,
+                         centerText: false, initialFocusedState: state.notesFocusedStates.currentFocusedState) { scrollPoint in
                     contentIsScrolled = scrollPoint.y > NoteView.topSpacingBeforeTitle
                 }
                 .onAppear { contentIsScrolled = false }

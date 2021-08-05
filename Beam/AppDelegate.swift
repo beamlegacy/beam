@@ -163,14 +163,24 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.dockTile.badgeLabel = count > 0 ? String(count) : ""
     }
 
+    @IBAction func newWindow(_ sender: Any?) {
+        self.createWindow(frame: nil, reloadState: false)
+    }
+
     @discardableResult
     func createWindow(frame: NSRect?, reloadState: Bool) -> BeamWindow {
         // Create the window and set the content view.
         let window = BeamWindow(contentRect: frame ?? NSRect(x: 0, y: 0, width: 800, height: 600),
                             data: data,
                             reloadState: reloadState)
-        if frame == nil {
+        if frame == nil && windows.count == 0 {
             window.center()
+        } else {
+            if var origin = self.window?.frame.origin {
+                origin.x += 20
+                origin.y -= 20
+                window.setFrameOrigin(origin)
+            }
         }
         window.makeKeyAndOrderFront(nil)
         windows.append(window)
@@ -278,10 +288,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         // If we got here, it is time to quit.
         return .terminateNow
-    }
-
-    @IBAction func newDocument(_ sender: Any?) {
-        createWindow(frame: nil, reloadState: false)
     }
 
     // MARK: -

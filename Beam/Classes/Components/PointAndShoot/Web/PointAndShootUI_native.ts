@@ -73,7 +73,7 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
         // add each rect to the targets array
         return {
           id: `${id}-${rectIndex}`,
-          html: this.rangeToHtml(range),
+          html: "",
           rect: {
             x: rangeRect.x,
             y: rangeRect.y,
@@ -83,7 +83,7 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
         }
       })
 
-      rects.push({ id, rectData })
+      rects.push({ id, rectData, html: this.rangeToHtml(range) })
     })
 
     const payload = { select: rects }
@@ -166,9 +166,6 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
       return
     }
 
-    // Filter useful childNodes
-    const childNodes = PointAndShootHelper.getMeaningfulChildNodes(el, win)
-
     // Get clipping area if previously undefined
     const computeClippingArea = el !== win.document.body && el !== win.document.documentElement
     if (!clippingArea && computeClippingArea) {
@@ -176,6 +173,22 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
       if (clippingContainers && clippingContainers.length > 0) {
         clippingArea = BeamElementHelper.getClippingArea(clippingContainers, win)
       }
+    }
+
+    const childElementTreeCount = el.querySelectorAll("*").length
+    // For performance reasons, if an element contains a large DOM
+    // return early with the simple element rect
+    // check if the whole tree contains more than 50 html elements
+    if (childElementTreeCount > 50) {
+      const area = el.getBoundingClientRect()
+      return this.setArea(area, area, clippingArea)
+    }
+    // check if the direct childNodes (this includes text nodes) are more than 50
+    const childNodes = PointAndShootHelper.getMeaningfulChildNodes(el, win)
+    // Filter useful childNodes
+    if (childNodes.length > 50) {
+      const area = el.getBoundingClientRect()
+      return this.setArea(area, area, clippingArea)
     }
 
     // If it's an image or media, select the whole element

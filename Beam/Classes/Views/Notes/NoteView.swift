@@ -22,18 +22,29 @@ struct NoteView: View {
     var onStartEditing: (() -> Void)?
     var leadingPercentage: CGFloat
     var centerText: Bool
-    var scrollToElementId: UUID?
+    var initialFocusedState: NoteEditFocusedState?
     var onScroll: ((CGPoint) -> Void)?
 
     @State private var headerViewModel: NoteHeaderView.ViewModel?
 
+    private var headerHeight: CGFloat {
+        NoteHeaderView.topPadding + 90
+    }
+
     var headerView: some View {
-        Group {
-            if let headerViewModel = headerViewModel {
-                NoteHeaderView(model: headerViewModel)
-                    .frame(maxWidth: BeamTextEdit.textWidth)
+        GeometryReader { geoProxy in
+            let headerWidth = BeamTextEdit.textWidth
+            let leadingPadding = centerText ? 0 : (geoProxy.size.width - headerWidth) * (leadingPercentage / 100)
+            Group {
+                if let headerViewModel = headerViewModel {
+                    NoteHeaderView(model: headerViewModel)
+                        .frame(maxWidth: headerWidth)
+                }
             }
-        }.frame(maxWidth: .infinity)
+            .frame(maxWidth: .infinity, alignment: centerText ? .center : .bottomLeading)
+            .padding(.leading, leadingPadding)
+        }
+        .frame(height: headerHeight)
     }
 
     var body: some View {
@@ -53,17 +64,20 @@ struct NoteView: View {
                 openCard: { cardId, elementId in
                     state.navigateToNote(id: cardId, elementId: elementId)
                 },
-                onStartEditing: { onStartEditing?() },
-                onStartQuery: { textNode, animated in
+                startQuery: { textNode, animated in
                     state.startQuery(textNode, animated: animated)
                 },
+                onStartEditing: { onStartEditing?() },
+                onFocusChanged: { elementId, cursorPosition in
+                    state.updateNoteFocusedState(note: note, focusedElement: elementId, cursorPosition: cursorPosition)
+                },
                 onScroll: onScroll,
-                topOffset: NoteHeaderView.topPadding + 90,
+                topOffset: headerHeight,
                 footerHeight: 60,
                 leadingPercentage: leadingPercentage,
                 centerText: centerText,
                 showTitle: false,
-                scrollToElementId: scrollToElementId,
+                initialFocusedState: initialFocusedState,
                 headerView: AnyView(headerView)
             )
             .accessibility(identifier: "noteView")

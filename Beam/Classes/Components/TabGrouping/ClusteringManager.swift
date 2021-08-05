@@ -26,6 +26,7 @@ class ClusteringManager: ObservableObject {
     var initialiseNotes = true
     var ranker: SessionLinkRanker
     var documentManager: DocumentManager
+    @Published var noteToAdd: BeamNote?
     @Published var clusteredTabs: [[TabInformation?]] = [[]]
     @Published var clusteredNotes: [[String?]] = [[]]
     @Published var isClustering: Bool = false
@@ -45,12 +46,23 @@ class ClusteringManager: ObservableObject {
         self.cluster = Cluster(candidate: candidate, weightNavigation: navigation, weightText: text, weightEntities: entities)
         self.ranker = ranker
         self.documentManager = documentManager
-        #if DEBUG
         setupObservers()
+        #if DEBUG
+        setupDebugObservers()
         #endif
     }
 
     private func setupObservers() {
+        $noteToAdd
+            .debounce(for: .milliseconds(1000), scheduler: RunLoop.main)
+            .sink { value in
+                if let note = value {
+                    self.addNote(note: note)
+                }
+            }.store(in: &scope)
+    }
+
+    private func setupDebugObservers() {
         $selectedTabGroupingCandidate.sink { value in
             self.change(candidate: value,
                         weightNavigation: self.weightNavigation,
@@ -163,7 +175,7 @@ class ClusteringManager: ObservableObject {
             for note in notes {
                 self.addNote(note: note)
             }
-            self.initialiseNotes = false 
+            self.initialiseNotes = false
         }
     }
 
@@ -174,12 +186,12 @@ class ClusteringManager: ObservableObject {
         }
         let clusteringNote = ClusteringNote(id: note.id, title: note.title, content: fullText)
         // TODO: Add link information to notes
-        isClustering = true
+        self.isClustering = true
         var ranking: [UInt64]?
         if self.sendRanking {
             ranking = self.ranker.clusteringRemovalSorted(links: self.clusteredPagesId.reduce([], +))
         }
-        cluster.add(note: clusteringNote, ranking: ranking) { result in
+        self.cluster.add(note: clusteringNote, ranking: ranking) { result in
             switch result {
             case .failure(let error):
                 self.isClustering = false

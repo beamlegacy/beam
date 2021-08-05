@@ -12,24 +12,27 @@ import Combine
 import BeamCore
 
 public struct BTextEditScrollable: NSViewRepresentable {
+    public typealias NSViewType = NSScrollView
+
     var note: BeamNote
     var data: BeamData
     var openURL: (URL, BeamElement) -> Void
     var openCard: (UUID, UUID?) -> Void
+    var startQuery: (TextNode, Bool) -> Void = { _, _ in }
+
     var onStartEditing: () -> Void = { }
     var onEndEditing: () -> Void = { }
-    var onStartQuery: (TextNode, Bool) -> Void = { _, _ in }
+    var onFocusChanged: ((UUID, Int) -> Void)?
     var onScroll: ((CGPoint) -> Void)?
+
     var minimumWidth: CGFloat = 800
     var maximumWidth: CGFloat = 1024
-
     var topOffset = CGFloat(28)
     var footerHeight = CGFloat(28)
     var leadingPercentage = CGFloat(48.7)
     var centerText = false
     var showTitle = true
-
-    var scrollToElementId: UUID?
+    var initialFocusedState: NoteEditFocusedState?
 
     var headerView: AnyView?
 
@@ -43,83 +46,71 @@ public struct BTextEditScrollable: NSViewRepresentable {
         let edit = BeamTextEdit(root: note, journalMode: false)
 
         edit.data = data
-        edit.openURL = openURL
-        edit.openCard = openCard
-        edit.onStartEditing = onStartEditing
-        edit.onEndEditing = onEndEditing
-        edit.onStartQuery = onStartQuery
+        updateEditorProperties(edit, context: context)
 
-        edit.minimumWidth = minimumWidth
-        edit.maximumWidth = maximumWidth
-
-        edit.topOffset = topOffset
-        edit.footerHeight = footerHeight + context.coordinator.compensatingBottomInset
-
-        edit.leadingPercentage = leadingPercentage
-        edit.centerText = centerText
-        edit.showTitle = showTitle
-        edit.scrollToElementId = scrollToElementId
-
-        if focusOnAppear {
-            _ = edit.becomeFirstResponder()
-        }
-
-        let scrollView = NSScrollView()
-        scrollView.automaticallyAdjustsContentInsets = false
-        let clipView = NSClipView()
-        clipView.translatesAutoresizingMaskIntoConstraints = false
-        clipView.drawsBackground = false
-        scrollView.contentView = clipView
-        clipView.addConstraints([
-            clipView.leftAnchor.constraint(equalTo: edit.leftAnchor),
-            clipView.rightAnchor.constraint(equalTo: edit.rightAnchor),
-            clipView.topAnchor.constraint(equalTo: edit.topAnchor)
-        ])
+        let scrollView = buildScrollView()
         edit.translatesAutoresizingMaskIntoConstraints = false
-        scrollView.drawsBackground = false
-        scrollView.hasVerticalScroller = true
-        scrollView.hasHorizontalScroller = false
-        scrollView.borderType = .noBorder
         scrollView.documentView = edit
+        scrollView.contentView.addConstraints([
+            scrollView.contentView.leftAnchor.constraint(equalTo: edit.leftAnchor),
+            scrollView.contentView.rightAnchor.constraint(equalTo: edit.rightAnchor),
+            scrollView.contentView.topAnchor.constraint(equalTo: edit.topAnchor)
+        ])
 
         context.coordinator.adjustScrollViewContentAutomatically(scrollView)
         updateHeaderView(scrollView, context: context)
+        if focusOnAppear {
+            focusEditor(edit)
+        }
+
         return scrollView
     }
 
     public func updateNSView(_ nsView: NSViewType, context: Context) {
         guard let edit = nsView.documentView as? BeamTextEdit else { return }
 
+        updateEditorProperties(edit, context: context)
         if edit.note !== note {
             edit.note = note
             if focusOnAppear {
-                _ = edit.becomeFirstResponder()
+                focusEditor(edit)
             }
         }
 
-        edit.openURL = openURL
-        edit.openCard = openCard
-        edit.onStartEditing = onStartEditing
-        edit.onEndEditing = onEndEditing
-        edit.onStartQuery = onStartQuery
-
-        edit.minimumWidth = minimumWidth
-        edit.maximumWidth = maximumWidth
-
-        edit.topOffset = topOffset
-        edit.footerHeight = footerHeight + context.coordinator.compensatingBottomInset
-
-        edit.centerText = centerText
-        edit.showTitle = showTitle
-
-        edit.scrollToElementId = scrollToElementId
-
         updateHeaderView(nsView, context: context)
-
-        context.coordinator.onDeinit = {
-            edit.hideFloatingView()
+        context.coordinator.onDeinit = { [weak edit] in
+            edit?.hideFloatingView()
         }
     }
+
+    private func updateEditorProperties(_ editor: BeamTextEdit, context: Context) {
+        editor.openURL = openURL
+        editor.openCard = openCard
+        editor.startQuery = startQuery
+
+        editor.onStartEditing = onStartEditing
+        editor.onEndEditing = onEndEditing
+        editor.onFocusChanged = onFocusChanged
+
+        editor.minimumWidth = minimumWidth
+        editor.maximumWidth = maximumWidth
+        editor.topOffset = topOffset
+        editor.footerHeight = footerHeight + context.coordinator.compensatingBottomInset
+        editor.leadingPercentage = leadingPercentage
+        editor.centerText = centerText
+
+        editor.showTitle = showTitle
+    }
+
+    private func focusEditor(_ editor: BeamTextEdit) {
+        if let fs = initialFocusedState {
+            editor.focusElement(withId: fs.elementId, atCursorPosition: fs.cursorPosition, highlight: fs.highlight)
+        }
+        DispatchQueue.main.async {
+            editor.window?.makeFirstResponder(editor)
+        }
+    }
+
     private func updateHeaderView(_ scrollView: NSViewType, context: Context) {
         guard let headerView = headerView, let documentView = scrollView.documentView
         else { return }
@@ -135,6 +126,23 @@ public struct BTextEditScrollable: NSViewRepresentable {
         context.coordinator.headerHostingView = hosting
     }
 
+    private func buildScrollView() -> NSScrollView {
+        let clipView = NSClipView()
+        clipView.translatesAutoresizingMaskIntoConstraints = false
+        clipView.drawsBackground = false
+
+        let scrollView = NSScrollView()
+        scrollView.contentView = clipView
+        scrollView.automaticallyAdjustsContentInsets = false
+        scrollView.drawsBackground = false
+        scrollView.hasVerticalScroller = true
+        scrollView.hasHorizontalScroller = false
+        scrollView.borderType = .noBorder
+        return scrollView
+    }
+}
+
+extension BTextEditScrollable {
     public class BTextEditScrollableCoordinator: NSObject, ScrollViewContentAdjusterDelegate {
         private let parent: BTextEditScrollable
         fileprivate var onDeinit: () -> Void = {}
@@ -164,8 +172,6 @@ public struct BTextEditScrollable: NSViewRepresentable {
             parent.onScroll?(point)
         }
     }
-
-    public typealias NSViewType = NSScrollView
 }
 
 /**

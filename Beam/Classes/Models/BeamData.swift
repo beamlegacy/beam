@@ -122,6 +122,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
             self.versionChecker = VersionChecker(mockedReleases: AppRelease.mockedReleases(), autocheckEnabled: true)
         }
         self.versionChecker.allowAutoDownload = PreferencesManager.isAutoUpdateOn
+        self.versionChecker.allReleaseNotesURL = URL(string: "https://beamapp.co")
 
         let treeConfig = BrowsingTreeSenderConfig(
             dataStoreUrl: EnvironmentVariables.BrowsingTree.url,
@@ -176,7 +177,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
                note.type == .note,
                let changed = note.changed?.1,
                changed == .text {
-                self.clusteringManager.addNote(note: note)
+                self.clusteringManager.noteToAdd = note
             }
         }.store(in: &scope)
 
@@ -243,11 +244,13 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
 
     private var journalCancellables = [AnyCancellable]()
     private func observeJournal(note: BeamNote) {
-        note.$deleted.sink { [unowned self] deleted in
-            if deleted {
-                self.reloadJournal()
-            }
-        }.store(in: &journalCancellables)
+        note.$deleted
+            .drop(while: { $0 == true }) // skip notes that started already deleted
+            .sink { [unowned self] deleted in
+                if deleted {
+                    self.reloadJournal()
+                }
+            }.store(in: &journalCancellables)
     }
 
     func setupJournal() {

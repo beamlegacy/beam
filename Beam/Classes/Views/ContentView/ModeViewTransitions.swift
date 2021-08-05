@@ -35,6 +35,7 @@ class ModeTransitionModel {
 
 // MARK: - Web Mode Content Transition
 private struct WebContentTransitionModifier: ViewModifier {
+    var isResizing: Bool
     var opacity: Double = 1.0
     var scale: CGFloat = 1.0
     var delay: Double = 0.0
@@ -44,27 +45,27 @@ private struct WebContentTransitionModifier: ViewModifier {
         content
             .scaleEffect(scale)
             .offsetEffect(offset)
-            .animation(Animation.easeInOut(duration: 0.2).delay(delay))
+            .animation(isResizing ? nil : Animation.easeInOut(duration: 0.2).delay(delay))
             .opacity(opacity)
-            .animation(Animation.easeInOut(duration: 0.1).delay(opacityDelay))
+            .animation(isResizing ? nil : Animation.easeInOut(duration: 0.1).delay(opacityDelay))
     }
 }
 
 extension AnyTransition {
-    private static var webContentInTransition: AnyTransition {
+    private static func webContentInTransition(_ isResizing: Bool) -> AnyTransition {
         .modifier(
-            active: WebContentTransitionModifier(opacity: 0.0, scale: 0.98, offset: CGSize(width: 0, height: 20)),
-            identity: WebContentTransitionModifier(delay: 0.05, opacityDelay: 0.05)
+            active: WebContentTransitionModifier(isResizing: isResizing, opacity: 0.0, scale: 0.98, offset: CGSize(width: 0, height: 20)),
+            identity: WebContentTransitionModifier(isResizing: isResizing, delay: 0.05, opacityDelay: 0.05)
         )
     }
-    private static var webContentOutTransition: AnyTransition {
+    private static func webContentOutTransition(_ isResizing: Bool) -> AnyTransition {
         .modifier(
-            active: WebContentTransitionModifier(opacity: 0.0, scale: 0.98, delay: 0.0, opacityDelay: 0.1, offset: CGSize(width: 0, height: 20)),
-            identity: WebContentTransitionModifier()
+            active: WebContentTransitionModifier(isResizing: isResizing, opacity: 0.0, scale: 0.98, delay: 0.0, opacityDelay: 0.1, offset: CGSize(width: 0, height: 20)),
+            identity: WebContentTransitionModifier(isResizing: isResizing)
         )
     }
-    static var webContentTransition: AnyTransition {
-        .asymmetric(insertion: .webContentInTransition, removal: .webContentOutTransition)
+    static func webContentTransition(_ isResizing: Bool) -> AnyTransition {
+        .asymmetric(insertion: .webContentInTransition(isResizing), removal: .webContentOutTransition(isResizing))
     }
 }
 

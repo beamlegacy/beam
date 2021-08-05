@@ -354,10 +354,26 @@ export class BeamElementMock extends BeamNodeMock implements BeamElement, BeamEl
 
   _height = 0
   _width = 0
+  querySelectorResult = {}
 
   constructor(readonly tagName: string, attributes: NamedNodeMap = new BeamNamedNodeMap(), props = {}) {
     super(tagName, BeamNodeType.element)
     this.attributes = attributes
+  }
+  setQuerySelectorResult(query: string, element: BeamElementMock) {
+    // if no array exists yet, create one
+    if (!this.querySelectorResult[query]) {
+      this.querySelectorResult[query] = []
+    }
+    this.querySelectorResult[query].push(element)
+  }
+  querySelectorAll(query: string): BeamElementMock[] {
+    if (query == "*") {
+      const arrays = Object.values(this.querySelectorResult) || []
+      return [].concat(...arrays)
+    }
+
+    return this.querySelectorResult[query] || []
   }
   removeAttribute(pointDatasetKey: any) {
     throw new Error("Method not implemented.")
@@ -434,12 +450,28 @@ export class BeamElementMock extends BeamNodeMock implements BeamElement, BeamEl
 }
 
 export class BeamHTMLElementMock extends BeamElementMock implements BeamHTMLElement {
+  querySelectorResult = {}
   dataset = {
     "beam-mock": "uuid-uuid-uuid-uuid"
   }
 
   constructor(nodeName: string, attributes = {}) {
     super(nodeName, new BeamNamedNodeMap(attributes))
+  }
+  setQuerySelectorResult(query: string, element: BeamHTMLElementMock) {
+    // if no array exists yet, create one
+    if (!this.querySelectorResult[query]) {
+      this.querySelectorResult[query] = []
+    }
+    this.querySelectorResult[query].push(element)
+  }
+  querySelectorAll(query: string): BeamHTMLElementMock[] {
+    if (query == "*") {
+      const arrays = Object.values(this.querySelectorResult) || []
+      return [].concat(...arrays)
+    }
+
+    return this.querySelectorResult[query] || []
   }
   setAttribute(qualifiedName: string, value: string): void {
     throw new Error("Method not implemented.")
@@ -737,6 +769,9 @@ export class BeamDocumentMock extends BeamNodeMock implements BeamDocument {
     this.selection = new BeamSelectionMock("div")
     this.childNodes = [new BeamNodeMock("#text", 3)]
     Object.assign(this, attributes)
+  }
+  createDocumentFragment() {
+    throw new Error("Method not implemented.")
   }
   elementFromPoint(x: any, y: any) {
     return this.documentElement

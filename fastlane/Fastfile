@@ -465,13 +465,12 @@ platform :mac do
     release_notes_html_url = "#{directory}/release_notes.html"
     human_version = "#{lane_context[SharedValues::VERSION_NUMBER]}"
     machine_version = "#{lane_context[SharedValues::BUILD_NUMBER]}"
-    release_title = "Version #{human_version}"
+    release_title = "Version #{human_version}, build #{machine_version}"
         
     rootFolder = Dir.chdir("..") { Dir.pwd } 
     UI.success "#{rootFolder}"
     
     appFeedBuilder = "../Extern/AutoUpdate/AppFeedBuilder"
-    notes = "#{rootFolder}/builds/release_notes.md"
 
     build = "cd #{appFeedBuilder} && swift build"
     
@@ -480,8 +479,9 @@ platform :mac do
     UI.success "#{outputBuild}"
       
     run = ["cd #{appFeedBuilder} &&",
-      "swift run AppFeedBuilder", update_json_url, "'#{release_title}'", human_version, machine_version, notes, app_download_url, "--output-path", "#{rootFolder}/builds"
-    ].join(' ')
+      "swift run AppFeedBuilder", update_json_url, "'#{release_title}'", human_version, machine_version, app_download_url, 
+      "--output-path", "#{rootFolder}/builds", 
+      "--release-notes-url", release_notes_html_url].join(' ')
     
     UI.success "#{run}"
     output = Actions.sh(run)

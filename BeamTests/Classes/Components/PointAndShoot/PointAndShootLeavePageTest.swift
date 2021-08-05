@@ -30,12 +30,12 @@ class PointAndShootLeavePageTest: PointAndShootTest {
         XCTAssertFalse(self.pns.hasActiveSelection)
 
         // assign groups
-        self.pns.activePointGroup = helperCreateRandomGroup()
-        self.pns.activeSelectGroup = helperCreateRandomGroup()
-        self.pns.activeShootGroup = helperCreateRandomGroup()
-        self.pns.collectedGroups = [helperCreateRandomGroup(), helperCreateRandomGroup()]
-        self.pns.dismissedGroups = [helperCreateRandomGroup(), helperCreateRandomGroup()]
-        self.pns.shootConfirmationGroup = helperCreateRandomGroup()
+        self.pns.activePointGroup = helperCreateRandomGroups()
+        self.pns.activeSelectGroup = helperCreateRandomGroups()
+        self.pns.activeShootGroup = helperCreateRandomGroups()
+        self.pns.collectedGroups = [helperCreateRandomGroups(), helperCreateRandomGroups()]
+        self.pns.dismissedGroups = [helperCreateRandomGroups(), helperCreateRandomGroups()]
+        self.pns.shootConfirmationGroup = helperCreateRandomGroups()
         self.pns.isAltKeyDown = true
         self.pns.hasActiveSelection = true
 

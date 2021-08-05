@@ -8,6 +8,7 @@
 import SwiftUI
 import AutoUpdate
 import Parma
+import Combine
 
 struct SmallUpdateIndicatorView: View {
 
@@ -17,12 +18,15 @@ struct SmallUpdateIndicatorView: View {
     @State private var opacity = 1.0
     @State private var opacityTimer = Timer.publish(every: 15, on: .main, in: .common).autoconnect()
 
+    @State private var updateInstalledTimerCancellable: Cancellable?
+    @State private var timerExpired = false
+
     var body: some View {
         Group {
             switch versionChecker.state {
             case .updateAvailable(let release):
                 GeometryReader { proxy in
-                    ButtonLabel("Update available", icon: "status-publish") {
+                    ButtonLabel("Update available", icon: "status-publish", customStyle: buttonLabelStyle) {
                         showReleaseNoteWindow(with: release, at: proxy.frame(in: .global).origin)
                     }.onAppear {
                         opacity = 1
@@ -30,7 +34,7 @@ struct SmallUpdateIndicatorView: View {
                 }.frame(maxWidth: 250)
             case .noUpdate where versionChecker.currentRelease != nil :
                 GeometryReader { proxy in
-                    ButtonLabel("Updated", icon: "tooltip-mark") {
+                    ButtonLabel("Updated", icon: "tooltip-mark", customStyle: buttonLabelStyle) {
                         showReleaseNoteWindow(with: versionChecker.currentRelease!, at: proxy.frame(in: .global).origin, hideButtonOnClose: true)
                     }
                     .onReceive(opacityTimer, perform: { _ in
@@ -45,12 +49,12 @@ struct SmallUpdateIndicatorView: View {
             case .checking:
                 EmptyView()
             case .error(errorDesc: let errorDesc):
-                ButtonLabel("Update error : \(errorDesc)")
+                ButtonLabel("Update error : \(errorDesc)", customStyle: buttonLabelStyle)
             case .downloading(progress: _):
                 EmptyView()
             case .downloaded(let downloadedRelease):
                 GeometryReader { proxy in
-                    ButtonLabel("Update now", icon: "status-publish") {
+                    ButtonLabel("Update now", icon: "status-publish", customStyle: buttonLabelStyle) {
                         showReleaseNoteWindow(with: downloadedRelease.appRelease, at: proxy.frame(in: .global).origin)
                     }.onAppear {
                         opacity = 1
@@ -59,14 +63,25 @@ struct SmallUpdateIndicatorView: View {
             case .installing:
                 ButtonLabel("Installing update…")
             case .updateInstalled:
-                ButtonLabel("Update installed. Relaunch Beam.") {
+                ButtonLabel(updateInstalledMessage(timerExpired: timerExpired), customStyle: buttonLabelStyle) {
                     NSApp.terminate(nil)
-                }
+                }.onAppear(perform: {
+                    updateInstalledTimerCancellable = Timer.publish(every: 3, on: .main, in: .common).autoconnect().sink(receiveValue: { _ in
+                        timerExpired = true
+                    })
+                })
             default:
                 EmptyView()
             }
         }.opacity(opacity)
-        .padding(.leading, 7)
+    }
+
+    func updateInstalledMessage(timerExpired: Bool) -> String {
+        timerExpired ? "Update installed… Click to relaunch" : "Update installed."
+    }
+
+    private var buttonLabelStyle: ButtonLabelStyle {
+        return ButtonLabelStyle(spacing: 1, activeBackgroundColor: .clear)
     }
 
     private var beamStyle: ReleaseNoteView.ReleaseNoteViewStyle {
@@ -75,9 +90,7 @@ struct SmallUpdateIndicatorView: View {
                                                          buttonFont: BeamFont.medium(size: 12).swiftUI, buttonColor: BeamColor.LightStoneGray.swiftUI,
                                                          buttonHoverColor: BeamColor.Niobium.swiftUI, closeButtonColor: BeamColor.LightStoneGray.swiftUI,
                                                          closeButtonHoverColor: BeamColor.Niobium.swiftUI, dateFont: BeamFont.medium(size: 12).swiftUI,
-                                                         dateColor: BeamColor.LightStoneGray.swiftUI, versionNameFont: BeamFont.medium(size: 15).swiftUI,
-                                                         versionNameColor: BeamColor.Niobium.swiftUI, parmaRenderer: BeamRender(),
-                                                         backgroundColor: BeamColor.Generic.background.swiftUI)
+                                                         dateColor: BeamColor.AlphaGray.swiftUI, versionNameFont: BeamFont.medium(size: 13).swiftUI, versionNameColor: BeamColor.Niobium.swiftUI, backgroundColor: BeamColor.Generic.background.swiftUI, cellHoverColor: BeamColor.Nero.swiftUI, separatorColor: BeamColor.Mercury.swiftUI, parmaRenderer: BeamRender())
 
         return style
     }
@@ -94,7 +107,7 @@ struct SmallUpdateIndicatorView: View {
         }, history: versionChecker.missedReleases, checker: self.versionChecker, style: beamStyle).cornerRadius(6)
 
         var origin = origin
-        origin.x += 3
+        origin.x += 7
         origin.y += 25
 
         window?.setView(with: releaseNoteView, at: origin)

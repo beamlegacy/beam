@@ -38,7 +38,7 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
             switch messageKey {
             case PointAndShootMessages.pointAndShoot_pointBounds:
                 guard let pointBounds = dict["point"] as? [String: AnyObject],
-                      let targets = boundsToTargets([pointBounds], webPage, href, animated: true) else { throw PointAndShootError("point payload incomplete") }
+                      let targets = pointBoundsToTargets([pointBounds], webPage, href, animated: true) else { throw PointAndShootError("point payload incomplete") }
 
                 if let target = targets.first {
                     pointAndShoot.point(target, href)
@@ -46,7 +46,7 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
 
             case PointAndShootMessages.pointAndShoot_shootBounds:
                 guard let shootBounds = dict["shoot"] as? [[String: AnyObject]],
-                      let targets = boundsToTargets(shootBounds, webPage, href, animated: false) else { throw PointAndShootError("shoot payload incomplete") }
+                      let targets = pointBoundsToTargets(shootBounds, webPage, href, animated: false) else { throw PointAndShootError("shoot payload incomplete") }
 
                 for target in targets {
                     pointAndShoot.pointShoot(target.id, target, href)
@@ -58,9 +58,12 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
 
                 for bounds in selectBounds {
                     if let id = bounds["id"] as? String,
-                       let targetData = bounds["rectData"] as? [[String: AnyObject]],
-                       let targets = boundsToTargets(targetData, webPage, href, animated: false) {
-                        pointAndShoot.select(id, targets, href)
+                       let html = bounds["html"] as? String,
+                       let targetData = bounds["rectData"] as? [[String: AnyObject]] {
+
+                        if let targets = selectBoundsToTargets(targetData, webPage, href, html, animated: false) {
+                            pointAndShoot.select(id, targets, href)
+                        }
                     }
                 }
 
@@ -123,7 +126,7 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
         }
     }
 
-    func boundsToTargets(_ bounds: [[String: AnyObject]], _ webPage: WebPage, _ href: String, animated: Bool) -> [PointAndShoot.Target]? {
+    func pointBoundsToTargets(_ bounds: [[String: AnyObject]], _ webPage: WebPage, _ href: String, animated: Bool) -> [PointAndShoot.Target]? {
         guard let pointAndShoot = webPage.pointAndShoot else {
             Logger.shared.logDebug("Bounds payload can't be unwrapped")
             return nil
@@ -138,5 +141,23 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
             }
             return nil
         }
+    }
+
+    func selectBoundsToTargets(_ bounds: [[String: AnyObject]], _ webPage: WebPage, _ href: String, _ html: String, animated: Bool) -> [PointAndShoot.Target]? {
+        guard let pointAndShoot = webPage.pointAndShoot else {
+            Logger.shared.logDebug("Bounds payload can't be unwrapped")
+            return nil
+        }
+
+        let res = bounds.compactMap { element -> PointAndShoot.Target? in
+            let rectObject = element["rect"] as AnyObject
+            let rect = pointAndShoot.webPositions.jsToRect(jsArea: rectObject)
+            if let id = element["id"] as? String {
+                return pointAndShoot.createTarget(id, rect, html, href, animated)
+            }
+            return nil
+        }
+
+        return res
     }
 }

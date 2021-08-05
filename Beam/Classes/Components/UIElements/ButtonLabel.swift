@@ -26,6 +26,7 @@ struct ButtonLabelStyle {
     var horizontalPadding: CGFloat = 6
     var verticalPadding: CGFloat = 3
     var iconSize: CGFloat = 16
+    var spacing: CGFloat = 2
     var foregroundColor: Color = BeamColor.Button.text.swiftUI
     var activeForegroundColor: Color = BeamColor.Button.activeText.swiftUI
     var backgroundColor: Color?
@@ -74,7 +75,7 @@ struct ButtonLabel: View {
     }
 
     var body: some View {
-        HStack(spacing: 2) {
+        HStack(spacing: style.spacing) {
             if let icon = iconName {
                 Icon(name: icon, size: style.iconSize, color: foregroundColor)
             }

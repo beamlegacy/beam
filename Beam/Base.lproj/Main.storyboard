@@ -71,7 +71,7 @@
                                     <items>
                                         <menuItem title="New Window" keyEquivalent="n" id="Was-JA-tGl">
                                             <connections>
-                                                <action selector="newDocument:" target="Ady-hI-5gd" id="4Si-XN-c54"/>
+                                                <action selector="newWindow:" target="Ady-hI-5gd" id="3A8-wm-3V3"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem title="New Tab" keyEquivalent="t" id="XvS-Ku-fBs" userLabel="New Search...">
@@ -802,9 +802,9 @@
                                     </items>
                                 </menu>
                             </menuItem>
-                            <menuItem title="Navigation" id="An6-Hf-p3M" userLabel="Navigation">
+                            <menuItem title="Go" id="An6-Hf-p3M" userLabel="Navigation">
                                 <modifierMask key="keyEquivalentModifierMask"/>
-                                <menu key="submenu" title="Navigation" id="cCx-1g-tLY">
+                                <menu key="submenu" title="Go" id="cCx-1g-tLY">
                                     <items>
                                         <menuItem title="Back" tag="4" keyEquivalent="[" id="vfj-M7-Iu5" userLabel="Back" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
                                             <connections>

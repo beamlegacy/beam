@@ -146,7 +146,7 @@ struct BrowserTabBar: View {
                                         .frame(width: isTheDraggedTab ? 0 :
                                                 widthForTab(selected: selected, containerGeometry: geometry))
                                         .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .identity))
-                                        .animation(disableAnimation ? nil : .easeInOut(duration: animationDuration))
+                                        .animation(disableAnimation || state.windowIsResizing ? nil : .easeInOut(duration: animationDuration))
                                         .disabled(isDraggingATab && !selected)
                                         .opacity(isTheDraggedTab ? 0 : 1)
                                         .onAppear {

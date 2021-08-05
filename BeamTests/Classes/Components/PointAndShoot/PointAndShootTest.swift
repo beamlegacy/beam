@@ -239,12 +239,16 @@ class PointAndShootTest: XCTestCase {
     }
 
     let faker = Faker(locale: "en-US")
-    func helperCreateRandomGroup() -> PointAndShoot.ShootGroup {
+    func helperCreateRandomGroups() -> PointAndShoot.ShootGroup {
+        let count = faker.number.randomInt(min: 1, max: 12)
+        return self.helperCreateRandomGroupCount(count)
+    }
+
+    func helperCreateRandomGroupCount(_ count: Int) -> PointAndShoot.ShootGroup {
         var targets: [PointAndShoot.Target] = []
 
-        let count = faker.number.randomInt(min: 1, max: 12)
         for _ in 0..<count {
-            let target: PointAndShoot.Target = PointAndShoot.Target(
+            let target = PointAndShoot.Target(
                 id: UUID().uuidString,
                 rect: NSRect(
                     x: faker.number.randomInt(),

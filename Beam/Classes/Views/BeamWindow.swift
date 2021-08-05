@@ -24,7 +24,7 @@ class BeamHostingView<Content>: NSHostingView<Content> where Content: View {
 }
 
 class BeamWindow: NSWindow, NSDraggingDestination {
-    var state: BeamState!
+    var state: BeamState = BeamState()
     var data: BeamData
 
     private var trafficLights: [NSButton?]?
@@ -41,16 +41,10 @@ class BeamWindow: NSWindow, NSDraggingDestination {
     init(contentRect: NSRect, data: BeamData, reloadState: Bool) {
         self.data = data
 
-        if reloadState && !NSEvent.modifierFlags.contains(.option) && Configuration.env != "test" {
-            if let savedData = UserDefaults.standard.data(forKey: Self.savedTabsKey) {
-                let decoder = JSONDecoder()
-                let state = try? decoder.decode(BeamState.self, from: savedData)
-                self.state = state
-            }
-        }
-
-        if state == nil {
-            state = BeamState()
+        if reloadState && !NSEvent.modifierFlags.contains(.option) && Configuration.env != "test",
+           let savedData = UserDefaults.standard.data(forKey: Self.savedTabsKey),
+           let state = try? JSONDecoder().decode(BeamState.self, from: savedData) {
+            self.state = state
         }
 
         data.setupJournal()
@@ -112,23 +106,18 @@ class BeamWindow: NSWindow, NSDraggingDestination {
         for window in AppDelegate.main.windows where window === self {
             window.close()
         }
-        super.close()
     }
 
     override func close() {
         // TODO: Add a proper way to clean the entire window state
         // https://linear.app/beamapp/issue/BE-1152/
         AppDelegate.main.windows.removeAll { window in
-            window === self
+            if window === self {
+                window.contentView = nil
+            }
+            return window === self
         }
         super.close()
-    }
-
-    override func setFrame(_ frameRect: NSRect, display flag: Bool) {
-        state.windowIsResizing = true
-        super.setFrame(frameRect, display: flag)
-        state.windowIsResizing = false
-        self.setTrafficLightsLayout()
     }
 
     override func restoreState(with coder: NSCoder) {
@@ -267,15 +256,16 @@ class BeamWindow: NSWindow, NSDraggingDestination {
         }
         return true
     }
-
-    deinit {
-        contentView = nil
-    }
 }
 
 extension BeamWindow: NSWindowDelegate {
 
-    func windowDidResize(_ notification: Notification) {
+    func windowWillStartLiveResize(_ notification: Notification) {
+        self.state.windowIsResizing = true
+    }
+
+    func windowDidEndLiveResize(_ notification: Notification) {
+        self.state.windowIsResizing = false
         self.setTrafficLightsLayout()
     }
 

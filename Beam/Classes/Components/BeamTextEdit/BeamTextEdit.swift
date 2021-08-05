@@ -53,9 +53,6 @@ public extension CALayer {
     var note: BeamElement! {
         didSet {
             note?.updateNoteNamesInInternalLinks(recursive: true)
-            DispatchQueue.main.async {
-                self.scroll(.zero)
-            }
             updateRoot(with: note)
         }
     }
@@ -115,36 +112,13 @@ public extension CALayer {
 
     private (set) var isResizing = false
     public private (set) var journalMode: Bool
-    public var scrollToElementId: UUID? {
-        didSet {
-            guard let id = scrollToElementId,
-                  let element = note.findElement(id),
-                  let node = rootNode.nodeFor(element)
-            else {
-                return
-            }
-            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: .milliseconds(50))) {
-                self.setHotSpot(node.frameInDocument)
-                node.hightlight()
-                if let w = self.window as? BeamWindow {
-                    w.state.scrollToElementId = nil
-                }
-            }
-        }
-    }
 
     public init(root: BeamElement, journalMode: Bool) {
         self.journalMode = journalMode
 
         note = root
-        root.updateNoteNamesInInternalLinks(recursive: true)
 
         super.init(frame: NSRect())
-
-        // TODO: remove this when we add websocket sync
-        if let documentStruct = root.note?.documentStruct {
-            try? documentManager.refresh(documentStruct, true)
-        }
 
         setAccessibilityIdentifier("TextEdit")
         setAccessibilityLabel("Note Editor")
@@ -176,6 +150,18 @@ public extension CALayer {
         setupSideLayer()
 
         registerForDraggedTypes([.fileURL])
+        refreshAndHandleDeletionsAsync()
+    }
+
+    func refreshAndHandleDeletionsAsync() {
+        // This was disabled because it produced a freeze when opening a note
+        // see https://gitlab.com/beamgroup/beam/-/merge_requests/1026#note_641742413
+//        let root = self.note
+//        if let documentStruct = root?.note?.documentStruct {
+//            // TODO: remove this when we add websocket sync
+//            self.documentManager.refresh(documentStruct, false)
+//        }
+//        root?.updateNoteNamesInInternalLinks(recursive: true)
     }
 
     deinit {
@@ -240,11 +226,14 @@ public extension CALayer {
     public var activated: () -> Void = { }
     public var activateOnLostFocus = true
     public var useFocusRing = false
+
     public var openURL: (URL, BeamElement) -> Void = { _, _ in }
     public var openCard: (UUID, UUID?) -> Void = { _, _ in }
-    public var onStartEditing: () -> Void = { }
-    public var onEndEditing: () -> Void = { }
-    public var onStartQuery: (TextNode, Bool) -> Void = { _, _ in }
+    public var startQuery: (TextNode, Bool) -> Void = { _, _ in }
+
+    public var onStartEditing: (() -> Void)?
+    public var onEndEditing: (() -> Void)?
+    public var onFocusChanged: ((UUID, Int) -> Void)?
 
     public var config = TextConfig()
 
@@ -500,14 +489,14 @@ public extension CALayer {
         blinkPhase = true
         hasFocus = true
         invalidate()
-        onStartEditing()
+        onStartEditing?()
         return true
     }
 
     public override func resignFirstResponder() -> Bool {
         blinkPhase = true
         hasFocus = false
-        onEndEditing()
+        onEndEditing?()
 
         guard (inlineFormatter as? HyperlinkFormatterView) == nil else { return super.resignFirstResponder() }
 
@@ -523,6 +512,22 @@ public extension CALayer {
         dismissPopover()
         showOrHideInlineFormatter(isPresent: false)
         return true
+    }
+
+    func focusElement(withId elementId: UUID?, atCursorPosition: Int?, highlight: Bool = false) {
+        guard let id = elementId,
+              let element = note.findElement(id),
+              let node = rootNode.nodeFor(element)
+        else {
+            self.scroll(.zero)
+            return
+        }
+        self.setHotSpot(node.frameInDocument)
+        self.focusedWidget = node
+        node.focus(position: atCursorPosition)
+        if highlight == true {
+            node.highlight()
+        }
     }
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
@@ -612,8 +617,8 @@ public extension CALayer {
                 dismissPopoverOrFormatter()
                 return
             case KeyCode.enter.rawValue:
-                if command && rootNode.state.nodeSelection == nil, let node = rootNode.focusedWidget as? TextNode {
-                    triggerCmdReturn(from: node)
+                if command && rootNode.state.nodeSelection == nil,
+                   let node = rootNode.focusedWidget as? TextNode, triggerCmdReturn(from: node) == true {
                     return
                 }
             case KeyCode.up.rawValue:
@@ -683,16 +688,21 @@ public extension CALayer {
         node.open.toggle()
     }
 
-    private func triggerCmdReturn(from node: TextNode) {
-        blinkPhase = false
-        hasFocus = false
-        node.updateCursor()
-        node.updateActionLayerVisibility(hidden: true)
+    /// - Returns: true if action is possible
+    private func triggerCmdReturn(from node: TextNode) -> Bool {
+        guard node.text.count > 0 else { return false }
 
         let animator = TextEditCmdReturnAnimator(node: node, editorLayer: self.layer)
-        animator.startAnimation { [unowned self] in
-            self.onStartQuery(node, true)
+        let canAnimate = animator.startAnimation { [unowned self] in
+            self.startQuery(node, true)
         }
+        if canAnimate {
+            blinkPhase = false
+            hasFocus = false
+            node.updateCursor()
+            node.updateActionLayerVisibility(hidden: true)
+        }
+        return canAnimate
     }
 
     // NSTextInputHandler:
