@@ -403,7 +403,8 @@ platform :mac do
       region: ENV["AWS_DEFAULT_REGION"],
       upload_metadata: true,
       files: [
-        "builds/AppFeed.json"
+        "builds/AppFeed.json",
+        "builds/commit"
       ],
       # Doesn't work the way I expected
       # endpoint: "http://downloads.dev.beamapp.co",
