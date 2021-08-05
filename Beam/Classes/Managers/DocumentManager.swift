@@ -1063,6 +1063,8 @@ extension DocumentManager {
                     let document = Document.rawFetchOrCreateWithId(context, documentStruct.id)
 
                     do {
+                        document.beam_object_previous_checksum = remoteDocumentStruct.checksum
+                        
                         document.update(remoteDocumentStruct)
                         self.notificationDocumentUpdate(remoteDocumentStruct)
 

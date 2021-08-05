@@ -453,6 +453,7 @@ extension DatabaseManager {
                     let database = Database.rawFetchOrCreateWithId(context, databaseStruct.id)
 
                     do {
+                        database.beam_object_previous_checksum = remoteDatabaseStruct.checksum
                         database.update(remoteDatabaseStruct)
                         completion?(.success(try Self.saveContext(context: context)))
                     } catch {

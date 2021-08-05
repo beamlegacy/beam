@@ -61,6 +61,7 @@ struct DatabaseDetail: View {
             refresh()
         }
     }
+
     private func refresh() {
         let timer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { _ in
             refreshing = true
