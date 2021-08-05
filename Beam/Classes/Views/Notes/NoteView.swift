@@ -31,20 +31,20 @@ struct NoteView: View {
         NoteHeaderView.topPadding + 90
     }
 
-    var headerView: some View {
-        GeometryReader { geoProxy in
+    var headerView: AnyView? {
+        guard let headerViewModel = headerViewModel else {
+            return nil
+        }
+        return AnyView(GeometryReader { geoProxy in
             let headerWidth = BeamTextEdit.textWidth
             let leadingPadding = centerText ? 0 : (geoProxy.size.width - headerWidth) * (leadingPercentage / 100)
             Group {
-                if let headerViewModel = headerViewModel {
-                    NoteHeaderView(model: headerViewModel)
-                        .frame(maxWidth: headerWidth)
-                }
+                NoteHeaderView(model: headerViewModel)
+                    .frame(maxWidth: headerWidth)
             }
             .frame(maxWidth: .infinity, alignment: centerText ? .center : .bottomLeading)
             .padding(.leading, leadingPadding)
-        }
-        .frame(height: headerHeight)
+        }.frame(height: headerHeight))
     }
 
     var body: some View {
@@ -78,7 +78,7 @@ struct NoteView: View {
                 centerText: centerText,
                 showTitle: false,
                 initialFocusedState: initialFocusedState,
-                headerView: AnyView(headerView)
+                headerView: headerView
             )
             .accessibility(identifier: "noteView")
             .animation(nil)
