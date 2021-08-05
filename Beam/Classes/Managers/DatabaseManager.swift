@@ -435,14 +435,7 @@ extension DatabaseManager {
             case .failure(let error): completion?(.failure(error))
             case .success(let remoteDatabaseStruct):
                 guard let remoteDatabaseStruct = remoteDatabaseStruct else {
-                    Logger.shared.logDebug("\(databaseStruct.title): remote is not more recent",
-                                           category: .documentNetwork)
-                    completion?(.success(false))
-                    return
-                }
-
-                guard remoteDatabaseStruct != databaseStruct else {
-                    Logger.shared.logDebug("\(databaseStruct.title): remote is equal to stored version, skip",
+                    Logger.shared.logError("\(databaseStruct.title): Couldn't fetch the remote database",
                                            category: .documentNetwork)
                     completion?(.success(false))
                     return
@@ -507,7 +500,7 @@ extension DatabaseManager {
 
             guard !self.isEqual(database, to: databaseType) else {
                 Logger.shared.logDebug("\(database.title): remote is equal to stored version, skip",
-                                       category: .documentNetwork)
+                                       category: .databaseNetwork)
                 completion?(.success(false))
                 return
             }
