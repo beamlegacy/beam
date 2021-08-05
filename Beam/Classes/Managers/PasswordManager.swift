@@ -19,6 +19,7 @@ class PasswordManager {
 }
 
 extension PasswordManager: BeamObjectManagerDelegate {
+    static var conflictPolicy: BeamObjectConflictResolution = .replace
     typealias BeamObjectType = PasswordRecord
 
     func receivedObjects(_ passwords: [PasswordRecord]) throws {

@@ -2403,6 +2403,9 @@ extension DocumentManager {
 
 // MARK: - BeamObjectManagerDelegateProtocol
 extension DocumentManager: BeamObjectManagerDelegate {
+    static var conflictPolicy: BeamObjectConflictResolution = .fetchRemoteAndError
+    typealias BeamObjectType = DocumentStruct
+
     func persistChecksum(_ objects: [DocumentStruct]) throws {
         Logger.shared.logDebug("Saved \(objects.count) documents on the BeamObject API",
                                category: .documentNetwork)

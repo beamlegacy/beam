@@ -403,7 +403,11 @@ extension BeamObjectManager {
                 _ = try fetchObject(object) { result in
                     groupSemaphore.wait()
                     switch result {
-                    case .failure(let error): groupErrors.append(error)
+                    case .failure(let error):
+                        if case APIRequestError.notFound = error {
+                        } else {
+                            groupErrors.append(error)
+                        }
                     case .success(let fetchedObject): fetchedObjects.append(fetchedObject)
                     }
                     groupSemaphore.signal()
@@ -504,13 +508,11 @@ extension BeamObjectManager {
                 let toSaveObjects: [T] = try conflictedObjects.compactMap {
                     let conflictedObject = $0
 
-                    guard let fetchedObject: T = fetchedConflictedObjects.first(where: {
+                    let fetchedObject: T? = fetchedConflictedObjects.first(where: {
                         $0.beamObjectId == conflictedObject.beamObjectId
-                    }) else {
-                        return nil
-                    }
+                    })
                     var fixedConflictedObject: T = try conflictedObject.copy()
-                    fixedConflictedObject.previousChecksum = fetchedObject.checksum
+                    fixedConflictedObject.previousChecksum = fetchedObject?.checksum
 
                     return fixedConflictedObject
                 }
@@ -596,15 +598,18 @@ extension BeamObjectManager {
                                category: .beamObjectNetwork)
 
         do {
-            let fetchedObject = try fetchObject(object)
+            var fetchedObject: T?
+            do {
+                fetchedObject = try fetchObject(object)
+            } catch APIRequestError.notFound { }
             var conflictedObject: T = try object.copy()
 
-            Logger.shared.logWarning("Remote object checksum: \(fetchedObject.checksum ?? "-")",
+            Logger.shared.logWarning("Remote object checksum: \(fetchedObject?.checksum ?? "-")",
                                    category: .beamObjectNetwork)
 
             switch self.conflictPolicyForSave {
             case .replace:
-                conflictedObject.previousChecksum = fetchedObject.checksum
+                conflictedObject.previousChecksum = fetchedObject?.checksum
 
                 _ = try self.saveToAPI(conflictedObject) { result in
                     switch result {
@@ -618,7 +623,7 @@ extension BeamObjectManager {
             case .fetchRemoteAndError:
                 completion(.failure(BeamObjectManagerObjectError<T>.invalidChecksum([conflictedObject],
                                                                                     [],
-                                                                                    [fetchedObject])))
+                                                                                    [fetchedObject].compactMap { $0 })))
             }
         } catch {
             completion(.failure(error))
@@ -912,13 +917,32 @@ extension BeamObjectManager {
                                                            _ completion: @escaping (Result<BeamObject, Error>) -> Void) {
         fetchBeamObject(beamObject) { fetchResult in
             switch fetchResult {
-            case .failure(let error): completion(.failure(error))
+            case .failure(let error):
+                /*
+                 We tried fetching the remote beam object but it doesn't exist, we set `previousChecksum` to `nil`
+                 */
+                if case APIRequestError.notFound = error {
+                    let newBeamObject = beamObject.copy()
+                    newBeamObject.previousChecksum = nil
+
+                    switch self.conflictPolicyForSave {
+                    case .replace:
+                        completion(.success(newBeamObject))
+                    case .fetchRemoteAndError:
+                        completion(.failure(BeamObjectManagerError.invalidChecksum(newBeamObject)))
+                    }
+                }
+                completion(.failure(error))
             case .success(let remoteBeamObject):
                 // This happened during tests, but could happen again if you have the same IDs for 2 different objects
                 guard remoteBeamObject.beamObjectType == beamObject.beamObjectType else {
                     completion(.failure(BeamObjectManagerError.invalidObjectType(beamObject, remoteBeamObject)))
                     return
                 }
+
+                /*
+                 We fetched the remote beam object, we set `previousChecksum` to the remote checksum
+                 */
 
                 switch self.conflictPolicyForSave {
                 case .replace:

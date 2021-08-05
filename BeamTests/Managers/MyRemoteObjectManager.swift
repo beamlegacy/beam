@@ -15,6 +15,7 @@ class MyRemoteObjectManager {
 }
 
 extension MyRemoteObjectManager: BeamObjectManagerDelegate {
+    static var conflictPolicy: BeamObjectConflictResolution = .replace
     typealias BeamObjectType = MyRemoteObject
 
     func receivedObjects(_ objects: [BeamObjectType]) throws {

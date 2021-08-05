@@ -2,6 +2,8 @@ import Foundation
 import BeamCore
 
 protocol BeamObjectManagerDelegateProtocol {
+    static var conflictPolicy: BeamObjectConflictResolution { get }
+
     func parse<T: BeamObjectProtocol>(objects: [T]) throws
 
     // Called when `BeamObjectManager` wants to store all existing `Document` as `BeamObject`
@@ -22,7 +24,9 @@ protocol BeamObjectManagerDelegate: class, BeamObjectManagerDelegateProtocol {
     // Returns all objects, used to save all of them as beam objects
     func allObjects() throws -> [BeamObjectType]
 
-    // When doing manual conflict management
+    // When doing manual conflict management. `object` and `remoteObject` can be the same if the conflict was only
+    // because of a checksum issue, when we locally have stored previousChecksum but it's been deleted on the server
+    // side
     func manageConflict(_ object: BeamObjectType,
                         _ remoteObject: BeamObjectType) throws -> BeamObjectType
 
@@ -67,7 +71,7 @@ extension BeamObjectManagerDelegate {
             throw APIRequestError.notAuthenticated
         }
 
-        return try saveOnBeamObjectsAPI(try allObjects(), .replace) { result in
+        return try saveOnBeamObjectsAPI(try allObjects(), Self.conflictPolicy) { result in
             switch result {
             case .failure(let error): completion(.failure(error))
             case .success: completion(.success(true))
@@ -122,7 +126,7 @@ extension BeamObjectManagerDelegate {
         return try objectManager.saveToAPI(objectsToSave) { result in
             switch result {
             case .failure(let error):
-                Logger.shared.logError("Could not save all \(objectsToSave.count) objects: \(error.localizedDescription)",
+                Logger.shared.logError("Could not save all \(objectsToSave.count) \(BeamObjectType.beamObjectTypeName) objects: \(error.localizedDescription)",
                                        category: .databaseNetwork)
 
                 if case BeamObjectManagerObjectError<BeamObjectType>.invalidChecksum = error {
@@ -292,7 +296,8 @@ extension BeamObjectManagerDelegate {
                 guard let remoteObject = remoteObjects.first(where: { $0.beamObjectId == conflictedObject.beamObjectId }) else {
                     Logger.shared.logError("Can't find the remote object connected to the conflict object!",
                                            category: .beamObject)
-                    continue }
+                    continue
+                }
 
                 var mergedObject = try manageConflict(conflictedObject, remoteObject)
                 mergedObject.previousChecksum = remoteObject.checksum

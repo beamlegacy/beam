@@ -1166,6 +1166,7 @@ extension DatabaseManager {
 // MARK: - BeamObjectManagerDelegateProtocol
 extension DatabaseManager: BeamObjectManagerDelegate {
     typealias BeamObjectType = DatabaseStruct
+    static var conflictPolicy: BeamObjectConflictResolution = .replace
 
     //swiftlint:disable:next function_body_length
     func receivedObjects(_ databases: [DatabaseStruct]) throws {
