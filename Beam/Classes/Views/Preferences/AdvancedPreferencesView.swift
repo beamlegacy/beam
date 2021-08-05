@@ -92,6 +92,7 @@ struct AdvancedPreferencesView: View {
             }
             Preferences.Section(title: "", bottomDivider: true) {
                 Button(action: {
+                    Persistence.Sync.BeamObjects.updated_at = nil
                     AppDelegate.main.syncData()
                 }, label: {
                     Text("Force full sync").frame(minWidth: 100)

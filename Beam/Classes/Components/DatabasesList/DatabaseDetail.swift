@@ -16,9 +16,47 @@ struct DatabaseDetail: View {
                 Spacer()
             }.padding()
 
-            VStack {
-                Text(database.title)
+            HStack {
+                VStack {
+                    HStack {
+                        Text("ID:").bold()
+                        Text(database.uuidString)
+                        Spacer()
+                    }
+
+                    HStack {
+                        Text("Beam Object Checksum:").bold()
+                        Text(database.beam_object_previous_checksum ?? "-")
+                        Spacer()
+                    }
+
+                    HStack {
+                        Text("Title:").bold()
+                        Text(database.title)
+                        Spacer()
+                    }
+
+                    HStack {
+                        Text("Created At:").bold()
+                        Text("\(database.created_at, formatter: Self.dateFormat)")
+                        Spacer()
+                    }
+                    HStack {
+                        Text("Updated At:").bold()
+                        Text("\(database.updated_at, formatter: Self.dateFormat)")
+                        Spacer()
+                    }
+                    if let deleted_at = database.deleted_at {
+                        HStack {
+                            Text("Deleted At:").bold()
+                            Text("\(deleted_at, formatter: Self.dateFormat)")
+                            Spacer()
+                        }
+                    }
+                }.background(Color.white).padding()
+                Spacer()
             }
+            Spacer()
         }.onAppear {
             refresh()
         }
