@@ -15,22 +15,22 @@ protocol BeamObjectManagerDelegate: class, BeamObjectManagerDelegateProtocol {
     associatedtype BeamObjectType: BeamObjectProtocol
     func registerOnBeamObjectManager()
 
-    // When new objects have been received and should be stored locally by the manager
+    /// When new objects have been received and should be stored locally by the manager
     func receivedObjects(_ objects: [BeamObjectType]) throws
 
-    // Needed to store checksum and resend them in a future network request
+    /// Needed to store checksum and resend them in a future network request
     func persistChecksum(_ objects: [BeamObjectType]) throws
 
-    // Returns all objects, used to save all of them as beam objects
+    /// Returns all objects, used to save all of them as beam objects
     func allObjects() throws -> [BeamObjectType]
 
-    // When doing manual conflict management. `object` and `remoteObject` can be the same if the conflict was only
-    // because of a checksum issue, when we locally have stored previousChecksum but it's been deleted on the server
-    // side
+    /// When doing manual conflict management. `object` and `remoteObject` can be the same if the conflict was only
+    /// because of a checksum issue, when we locally have stored previousChecksum but it's been deleted on the server
+    /// side
     func manageConflict(_ object: BeamObjectType,
                         _ remoteObject: BeamObjectType) throws -> BeamObjectType
 
-    // When a conflict happens, we will resend a potentially updated version and should store its result
+    /// When a conflict happens, we will resend a potentially updated version and should store its result
     func saveObjectsAfterConflict(_ objects: [BeamObjectType]) throws
 }
 
@@ -245,9 +245,6 @@ extension BeamObjectManagerDelegate {
         let objectManager = BeamObjectManager()
         objectManager.conflictPolicyForSave = conflictPolicyForSave
 
-        // TODO: Race conditions, add semaphore
-//        Self.networkTasks[databaseStruct.id]?.cancel()
-
         let networkTask = try objectManager.saveToAPI(object) { result in
             switch result {
             case .failure(let error):
@@ -282,8 +279,6 @@ extension BeamObjectManagerDelegate {
                 }
             }
         }
-
-//        Self.networkTasks[databaseStruct.id] = networkTask
 
         return networkTask
     }

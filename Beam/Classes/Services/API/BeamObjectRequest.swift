@@ -176,42 +176,34 @@ extension BeamObjectRequest {
             case .failure(let error):
                 completion(.failure(error))
             case .success(let me):
-                guard var beamObjects = me.beamObjects else {
+                guard let beamObjects = me.beamObjects else {
                     completion(.failure(APIRequestError.parserError))
                     return
                 }
-
-                var beamObjectErrors = Set<UUID>()
 
                 /*
                  When fetching all beam objects, we decrypt them if needed. We might have decryption issue
                  like not having the key it was encrypted with. In such case we filter those out as the calling
                  code wouldn't know what to do with it anyway.
                  */
-
                 do {
-                    try beamObjects.forEach {
+                    let decryptedObjects: [BeamObject] = try beamObjects.compactMap {
                         do {
                             try $0.decrypt()
+                            return $0
                         } catch EncryptionManagerError.authenticationFailure {
-                            // Could not decrypt, will remove it from the results
-                            beamObjectErrors.insert($0.id)
+                            Logger.shared.logError("Can't decrypt \($0)", category: .beamObjectNetwork)
                         }
+
+                        return nil
                     }
+
+                    completion(.success(decryptedObjects))
                 } catch {
                     // Will catch anything but encryption errors
                     completion(.failure(error))
                     return
                 }
-
-                if !beamObjectErrors.isEmpty {
-                    // Remove error elements
-                    beamObjects = beamObjects.filter { !beamObjectErrors.contains($0.id) }
-                    Logger.shared.logError("Removed \(beamObjectErrors.count) objects: \(beamObjectErrors)",
-                                           category: .beamObjectNetwork)
-                }
-
-                completion(.success(beamObjects))
             }
         }
     }

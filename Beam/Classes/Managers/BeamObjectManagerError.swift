@@ -1,7 +1,6 @@
 import Foundation
 
 enum BeamObjectManagerError: Error {
-    case notSuccess
     case notAuthenticated
     case multipleErrors([Error])
     case invalidChecksum(BeamObject)
@@ -14,8 +13,6 @@ enum BeamObjectManagerError: Error {
 extension BeamObjectManagerError: LocalizedError {
     public var errorDescription: String? {
         switch self {
-        case .notSuccess:
-            return "Not Success"
         case .notAuthenticated:
             return "Not Authenticated"
         case .multipleErrors(let errors):

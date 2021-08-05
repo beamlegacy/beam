@@ -3,12 +3,12 @@ import BeamCore
 
 // swiftlint:disable file_length
 
+/// How do you want to resolve checksum conflicts
 enum BeamObjectConflictResolution {
-    // Will overwrite remote object with values from local ones
+    /// Overwrite remote object with values from local object
     case replace
 
-    // Will fetch the remote object, and call the completion with an error and the remote object
-    // so the caller can manage conflicts
+    /// Raise invalidChecksum error, which will include remote object, sent object, and potentially other good objects if any
     case fetchRemoteAndError
 }
 
@@ -35,7 +35,7 @@ class BeamObjectManager {
         }
     }
 
-    static func unRegisterAll() {
+    static func unregisterAll() {
         managerInstances = [:]
         translators = [:]
     }
@@ -47,36 +47,6 @@ class BeamObjectManager {
         PasswordManager().registerOnBeamObjectManager()
     }
 
-    func clearNetworkCalls() {
-        for (_, request) in Self.networkRequests {
-            request.cancel()
-        }
-
-        for task in Self.urlSessionTasks {
-            task.cancel()
-        }
-    }
-
-    /*
-     Wrote this for our tests, and detect when we have still running network tasks on test ends. Sadly, this seems to
-     not work when used with Vinyl, which doesn't implement `cancel()`.
-     */
-    func isAllNetworkCallsCompleted() -> Bool {
-        for task in Self.urlSessionTasks {
-            if [URLSessionTask.State.suspended, .running].contains(task.state) {
-                return false
-            }
-        }
-
-        for (_, request) in Self.networkRequests {
-            if [URLSessionTask.State.suspended, .running].contains(request.dataTask?.state) {
-                return false
-            }
-        }
-
-        return true
-    }
-
     var conflictPolicyForSave: BeamObjectConflictResolution = .replace
 
     internal func parseObjects(_ beamObjects: [BeamObject]) -> Bool {
@@ -84,7 +54,7 @@ class BeamObjectManager {
 
         // If we are doing a delta refreshAll, and 0 document is fetched, we exit early
         // If not doing a delta sync, we don't as we want to update local document as `deleted`
-        if lastUpdatedAt != nil && beamObjects.isEmpty {
+        guard lastUpdatedAt == nil || !beamObjects.isEmpty else {
             Logger.shared.logDebug("0 beam object fetched.", category: .beamObjectNetwork)
             return true
         }
@@ -100,8 +70,6 @@ class BeamObjectManager {
         }
 
         parseFilteredObjects(filteredObjects)
-
-//        dump(filteredObjects)
 
         return true
     }
@@ -180,13 +148,7 @@ extension BeamObjectManager {
                         lock.wait()
                         errors.append(error)
                         lock.signal()
-                    case .success(let success):
-                        guard success == true else {
-                            lock.wait()
-                            errors.append(BeamObjectManagerError.notSuccess)
-                            lock.signal()
-                            return
-                        }
+                    case .success: break
                     }
 
                     group.leave()
@@ -198,7 +160,7 @@ extension BeamObjectManager {
                 }
             } catch {
                 lock.wait()
-                errors.append(BeamObjectManagerError.notSuccess)
+                errors.append(error)
                 lock.signal()
                 group.leave()
             }
@@ -218,7 +180,6 @@ extension BeamObjectManager {
 
     /// Will fetch all updates from the API and call each managers based on object's type
     func fetchAllFromAPI(_ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) throws {
-        // If not authenticated
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw BeamObjectManagerError.notAuthenticated
         }
@@ -841,18 +802,18 @@ extension BeamObjectManager {
 
         group.wait()
 
-        if !newBeamObjects.isEmpty, conflictPolicyForSave == .fetchRemoteAndError {
-            fatalError("Should never happen")
+        if conflictPolicyForSave == .fetchRemoteAndError, !newBeamObjects.isEmpty {
+            fatalError("When using fetchRemoteAndError conflict policy, ")
         }
 
-        if !resultErrors.isEmpty, conflictPolicyForSave == .replace {
-            fatalError("Should never happen")
+        if conflictPolicyForSave == .replace, !resultErrors.isEmpty {
+            fatalError("When using replace conflict policy, ")
         }
 
         switch conflictPolicyForSave {
         case .replace:
             guard resultErrors.isEmpty else {
-                fatalError("Should never happen")
+                fatalError("When using replace conflict policy, we won't raise error and therefore it should be empty")
             }
             do {
                 _ = try saveToAPI(newBeamObjects, completion)
@@ -861,7 +822,7 @@ extension BeamObjectManager {
             }
         case .fetchRemoteAndError:
             guard newBeamObjects.isEmpty else {
-                fatalError("Should never happen")
+                fatalError("When using fetchRemoteAndError conflict policy, we will raise error and we shouldn't have already saved merged objects")
             }
             completion(.failure(BeamObjectManagerError.multipleErrors(resultErrors)))
         }
@@ -1003,4 +964,35 @@ extension BeamObjectManager {
     }
 }
 
-// swiftlint:enable file_length
+// MARK: - For tests
+extension BeamObjectManager {
+    func clearNetworkCalls() {
+        for (_, request) in Self.networkRequests {
+            request.cancel()
+        }
+
+        for task in Self.urlSessionTasks {
+            task.cancel()
+        }
+    }
+
+    /*
+     Wrote this for our tests, and detect when we have still running network tasks on test ends. Sadly, this seems to
+     not work when used with Vinyl, which doesn't implement `cancel()`.
+     */
+    func isAllNetworkCallsCompleted() -> Bool {
+        for task in Self.urlSessionTasks {
+            if [URLSessionTask.State.suspended, .running].contains(task.state) {
+                return false
+            }
+        }
+
+        for (_, request) in Self.networkRequests {
+            if [URLSessionTask.State.suspended, .running].contains(request.dataTask?.state) {
+                return false
+            }
+        }
+
+        return true
+    }
+}

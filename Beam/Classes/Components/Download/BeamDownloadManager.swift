@@ -426,5 +426,3 @@ extension BeamDownloadManager {
         return group
     }
 }
-
-// swiftlint:enable file_length

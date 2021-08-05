@@ -28,7 +28,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
             Configuration.beamObjectAPIEnabled = true
 
-            BeamObjectManager.unRegisterAll()
+            BeamObjectManager.unregisterAll()
             sut.registerOnBeamObjectManager()
 
             MyRemoteObjectManager.store.removeAll()

@@ -403,7 +403,7 @@ extension DatabaseManager {
         }
     }
 
-    /// Fetch most recent document from API
+    /// Fetch most recent database from API
     /// First we fetch the remote updated_at, if it's more recent we fetch all details
     func refresh(_ databaseStruct: DatabaseStruct,
                  _ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) throws {
