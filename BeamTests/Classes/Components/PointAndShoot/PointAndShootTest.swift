@@ -33,6 +33,8 @@ class TestWebPage: WebPage {
     var fileStorage: BeamFileStorage? {
         storage
     }
+    var authenticationViewModel: AuthenticationViewModel?
+    var passwordDB: PasswordsDB?
 
     init(browsingScorer: BrowsingScorer?, passwordOverlayController: PasswordOverlayController?, pns: PointAndShoot?,
          fileStorage: BeamFileStorage?, downloadManager: DownloadManager?, navigationController: WebNavigationController?) {

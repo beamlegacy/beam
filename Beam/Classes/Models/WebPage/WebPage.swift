@@ -25,6 +25,7 @@ protocol WebPage: AnyObject, Scorable {
     var browsingScorer: BrowsingScorer? { get }
     var passwordOverlayController: PasswordOverlayController? { get }
     var mediaPlayerController: MediaPlayerController? { get set }
+    var passwordDB: PasswordsDB? { get }
 
     var pointAndShootAllowed: Bool { get }
     var pointAndShoot: PointAndShoot? { get }
@@ -52,6 +53,8 @@ protocol WebPage: AnyObject, Scorable {
     var appendToIndexer: ((URL, Readability) -> Void)? { get }
     func navigatedTo(url: URL, title: String?, reason: NoteElementAddReason)
     func addTextToClusteringManager(_ text: String, url: URL)
+
+    var authenticationViewModel: AuthenticationViewModel? { get set }
 }
 
 protocol WebPageRelated {
@@ -109,7 +112,10 @@ extension WebPage {
         nil
     }
 
-    func closeTab() { }
+    func closeTab() {
+        self.authenticationViewModel?.cancel()
+    }
+    
     func isActiveTab() -> Bool { false }
     func leave() { }
     func createNewTab(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, setCurrent: Bool) -> WebPage {
