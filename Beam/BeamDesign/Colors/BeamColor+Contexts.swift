@@ -179,7 +179,7 @@ extension BeamColor {
                                                                               darkColor: BeamColor.Bluetiful.nsColor.withAlphaComponent(0.24)))
         static let selectedDayClickedBackground = BeamColor.From(color: NSColor(withLightColor: BeamColor.Bluetiful.nsColor.withAlphaComponent(0.2),
                                                                                 darkColor: BeamColor.Bluetiful.nsColor.withAlphaComponent(0.4)))
-        
+
         static let dayHoverBackground = BeamColor.From(color: NSColor(withLightColor: BeamColor.Mercury.nsColor,
                                                                       darkColor: BeamColor.AlphaGray.nsColor))
         static let dayClickedBackground = BeamColor.From(color: NSColor(withLightColor: BeamColor.AlphaGray.nsColor,

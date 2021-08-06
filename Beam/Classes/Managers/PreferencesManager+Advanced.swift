@@ -15,7 +15,10 @@ extension PreferencesManager {
 
 // MARK: - Default Values
 extension PreferencesManager {
+    #if TEST
     static let browsingSessionCollectionIsOnDefault = true
+    #endif
+    static let browsingSessionCollectionIsOnDefault = false
     static let showTabGrougpingMenuItemDefault = false
 }
 

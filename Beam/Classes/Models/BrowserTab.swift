@@ -75,7 +75,7 @@ import Promises
     @Published var authenticationViewModel: AuthenticationViewModel?
 
     var backForwardUrlList: [URL]?
-    
+
     var originMode: Mode
 
     var pointAndShootAllowed: Bool {
@@ -105,16 +105,8 @@ import Promises
             noteController.setContents(url: url, text: title)
             isFromNoteSearch = false
             elementToFocus = noteController.element
-        } else if PreferencesManager.browsingSessionCollectionIsOn {
-            elementToFocus = noteController.add(url: url, text: title, reason: reason)
-        } else if !PreferencesManager.browsingSessionCollectionIsOn,
-                  beamNavigationController.isNavigatingFromNote {
-            switch self.browsingTree.origin {
-            case .searchFromNode, .browsingNode:
-                elementToFocus = noteController.add(url: url, text: title, reason: reason)
-            default:
-                break
-            }
+        } else {
+            elementToFocus = noteController.add(url: url, text: title, reason: reason, isNavigatingFromNote: beamNavigationController.isNavigatingFromNote, browsingOrigin: self.browsingTree.origin)
         }
         if let elementToFocus = elementToFocus {
             updateFocusedStateToElement(elementToFocus)
@@ -347,9 +339,11 @@ import Promises
             Logger.shared.logWarning("Adding search results is not allowed", category: .web)
             return nil
         } // Don't automatically add search results
-        let element = noteController.add(url: url, text: title, reason: .navigation)
-        updateFocusedStateToElement(element)
-        return element
+        if let element = noteController.add(url: url, text: title, reason: .navigation, isNavigatingFromNote: beamNavigationController.isNavigatingFromNote, browsingOrigin: self.browsingTree.origin) {
+            updateFocusedStateToElement(element)
+            return element
+        }
+        return nil
     }
 
     private func receivedWebviewTitle(_ title: String? = nil) {

@@ -88,7 +88,22 @@ class WebNoteController: Encodable, Decodable {
     - Parameter allowSearchResult:
     - Returns: the added (or selected) element
     */
-    func add(url: URL, text: String?, reason: NoteElementAddReason) -> BeamElement {
+    public func add(url: URL, text: String?, reason: NoteElementAddReason, isNavigatingFromNote: Bool? = nil, browsingOrigin: BrowsingTreeOrigin? = nil) -> BeamElement? {
+        if PreferencesManager.browsingSessionCollectionIsOn {
+            return addContent(url: url, text: text, reason: reason)
+        } else if !PreferencesManager.browsingSessionCollectionIsOn,
+                  let isNavigatingFromNote = isNavigatingFromNote, isNavigatingFromNote {
+            switch browsingOrigin {
+            case .searchFromNode, .browsingNode:
+                return addContent(url: url, text: text, reason: reason)
+            default:
+                break
+            }
+        }
+        return nil
+    }
+
+    private func addContent(url: URL, text: String?, reason: NoteElementAddReason) -> BeamElement {
         let linkString = url.absoluteString
         let existingLink = note.elementContainingLink(to: linkString)
         let existingText = (text != nil && !text!.isEmpty ? note.elementContainingText(someText: text!) : nil)
