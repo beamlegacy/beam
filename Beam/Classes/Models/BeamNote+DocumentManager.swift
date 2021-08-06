@@ -346,9 +346,7 @@ extension BeamNote: BeamNoteDocument {
     public static func fetchOrCreateJournalNote(_ documentManager: DocumentManager, date: Date) -> BeamNote {
         let title = BeamDate.journalNoteTitle(for: date)
         let note = fetchOrCreate(documentManager, title: title)
-        if !note.type.isJournal {
-            note.type = BeamNoteType.journalForDate(date)
-        }
+        note.type = BeamNoteType.journalForDate(date)
         return note
     }
 
