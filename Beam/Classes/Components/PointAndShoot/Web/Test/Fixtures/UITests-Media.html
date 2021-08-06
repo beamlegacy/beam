@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Media Player Test Page</title>
+  <link rel="stylesheet" href="Beam.css" />
+</head>
+
+<body>
+  <div class="flex">
+    <div class="form-result">
+        <h3>Audio</h3>
+        <p id="audio-status">Audio loading...</p>
+        <button onclick="playAudio()">Play Audio</button>
+        <button onclick="pauseAudio()">Pause Audio</button>
+        <br/>
+        <audio controls loop id="audio" width="200">
+            <source src="audio.mp3" type="audio/mpeg">
+        </audio>
+    </div>
+    <div class="form-result">
+        <h3>Video</h3>
+        <p id="video-status">Video loading...</p>
+        <button onclick="playVideo()">Play Video</button>
+        <button onclick="pauseVideo()">Pause Video</button>
+        <br/>
+        <video controls loop id="video" width="200">
+            <source src="video.mov" type="video/mp4">
+        </video>
+    </div>
+</div>
+  <script>
+
+      var audio = document.getElementById("audio");
+      audio.oncanplay = function() {
+          audioIsReady();
+      };
+      var video = document.getElementById("video");
+      video.oncanplay = function() {
+          videoIsReady();
+      };
+
+      function playAudio() {
+          audio.play();
+      }
+      function pauseAudio() {
+          audio.pause();
+      }
+      function audioIsReady() {
+          document.getElementById("audio-status").innerHTML = "Audio ready";
+      }
+
+      function playVideo() {
+          video.play();
+      }
+      function pauseVideo() {
+          video.pause();
+      }
+      function videoIsReady() {
+          document.getElementById("video-status").innerHTML = "Video ready";
+      }
+  </script>
+</body>
+
+</html>

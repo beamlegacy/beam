@@ -65,6 +65,8 @@ struct BeamTextField: NSViewRepresentable {
     }
 
     func updateNSView(_ textField: Self.NSViewType, context: Self.Context) {
+        let coordinator = context.coordinator
+
         if textField.textColor != textColor {
             textField.textColor = textColor
         }
@@ -74,18 +76,17 @@ struct BeamTextField: NSViewRepresentable {
 
         clearSelectionIfNeeded(textField, context: context)
 
-        if selectedRange != context.coordinator.lastSelectedRange {
+        if selectedRange != coordinator.lastSelectedRange {
             if let range = selectedRange {
                 let pos = Int(range.startIndex)
                 let len = Int(range.endIndex - range.startIndex)
                 updateSelectedRange(textField, range: NSRange(location: pos, length: len))
             }
-            context.coordinator.lastSelectedRange = selectedRange
+            coordinator.lastSelectedRange = selectedRange
         }
 
-        context.coordinator.firstResponderSetterBlock?.cancel()
-        let firstResponderSetterBlock = DispatchWorkItem {
-            let coordinator = context.coordinator
+        coordinator.firstResponderSetterBlock?.cancel()
+        let firstResponderSetterBlock = DispatchWorkItem { [unowned coordinator] in
             // Force focus on textField
             let isCurrentlyFirstResponder = textField.isFirstResponder
             let wasEditing = coordinator.lastUpdateWasEditing
@@ -102,7 +103,7 @@ struct BeamTextField: NSViewRepresentable {
             }
             coordinator.lastUpdateWasEditing = isEditing
         }
-        context.coordinator.firstResponderSetterBlock = firstResponderSetterBlock
+        coordinator.firstResponderSetterBlock = firstResponderSetterBlock
         DispatchQueue.main.async(execute: firstResponderSetterBlock)
     }
 
@@ -129,6 +130,10 @@ struct BeamTextField: NSViewRepresentable {
 
         init(_ textField: BeamTextField) {
             self.parent = textField
+        }
+
+        deinit {
+            firstResponderSetterBlock?.cancel()
         }
 
         fileprivate func focusChangedHandler(isFocused: Bool) {

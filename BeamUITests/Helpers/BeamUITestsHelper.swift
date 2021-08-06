@@ -45,21 +45,30 @@ class BeamUITestsHelper {
     func moveMouseOutOfTheWay() {
         app.windows.firstMatch.coordinate(withNormalizedOffset: .zero).hover()
     }
-    
-    func openTestPage(number: CGFloat) {
-        switch number {
-            case 1:
-                tapCommand(.loadUITestPage1)
-            case 2:
-                tapCommand(.loadUITestPage2)
-            case 3:
-                tapCommand(.loadUITestPage3)
-            case 4:
-                tapCommand(.loadUITestPage4)
-            case 6:
-                tapCommand(.loadUITestPage6)
-            default:
-                tapCommand(.loadUITestPage1)
+
+    enum UITestsPageCommand {
+        case page1
+        case page2
+        case page3
+        case password
+        case alerts
+        case media
+    }
+
+    func openTestPage(page: UITestsPageCommand) {
+        switch page {
+        case .page1:
+            tapCommand(.loadUITestPage1)
+        case .page2:
+            tapCommand(.loadUITestPage2)
+        case .page3:
+            tapCommand(.loadUITestPage3)
+        case .password:
+            tapCommand(.loadUITestPagePassword)
+        case .alerts:
+            tapCommand(.loadUITestPageAlerts)
+        case .media:
+            tapCommand(.loadUITestPageMedia)
         }
         
         let centerOfPage = self.app.webViews.element.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.1))
