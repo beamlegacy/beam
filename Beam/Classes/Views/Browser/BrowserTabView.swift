@@ -85,6 +85,7 @@ struct BrowserTabView: View {
                     tab.mediaPlayerController?.toggleMute()
                 }
                 .padding(.horizontal, showIcon ? BeamSpacing._60 : 0)
+                .accessibility(identifier: "browserTabMediaIndicator")
                 .contextMenu {
                     Button("\(audioIsMuted ? "Unmute" : "Mute") this tab") {
                         tab.mediaPlayerController?.toggleMute()
@@ -158,6 +159,7 @@ struct BrowserTabView: View {
                 .onHover { hovering in
                     isHovering = isEnabled && hovering
                 }
+                .accessibilityElement(children: .contain)
                 .accessibility(identifier: "browserTabBarView")
             }
 

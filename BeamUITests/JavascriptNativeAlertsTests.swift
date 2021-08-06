@@ -26,7 +26,7 @@ class JavascriptNativeAlertsTests: QuickSpec {
         }
         self.app.launch()
         self.helper = BeamUITestsHelper(self.app)
-        self.helper.openTestPage(number: 6)
+        self.helper.openTestPage(page: .alerts)
     }
 
     override func spec() {
