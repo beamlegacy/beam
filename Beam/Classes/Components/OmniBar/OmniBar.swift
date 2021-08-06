@@ -150,6 +150,7 @@ struct OmniBar: View {
                     Icon(name: "field-search", size: 16, color: BeamColor.Bluetiful.swiftUI)
                     Text(animatedQuery)
                         .font(BeamFont.medium(size: 13).swiftUI)
+                        .lineLimit(1)
                         .foregroundColor(BeamColor.Bluetiful.swiftUI)
                 }
                 .transition(AnyTransition.asymmetric(

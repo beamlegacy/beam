@@ -95,7 +95,8 @@ struct UserInformationsEditModalView: View {
                               placeholder: "",
                               font: BeamFont.regular(size: 13).nsFont,
                               textColor: BeamColor.Generic.text.nsColor,
-                              placeholderColor: BeamColor.Generic.text.nsColor)
+                              placeholderColor: BeamColor.Generic.text.nsColor,
+                              multiline: true)
                     .disableAutocorrection(true)
                     .frame(width: 286, height: 94, alignment: .center)
                     .border(Color.gray, width: 1)

@@ -8,11 +8,18 @@
 import Cocoa
 
 class BeamTextFieldViewFieldEditor: NSTextView {
+    var disableAutomaticScrollOnType: Bool = false
+
     override func preferredPasteboardType(from availableTypes: [NSPasteboard.PasteboardType], restrictedToTypesFrom allowedTypes: [NSPasteboard.PasteboardType]?) -> NSPasteboard.PasteboardType? {
         if availableTypes.contains(.string) {
             return .string
         }
         return super.preferredPasteboardType(from: availableTypes, restrictedToTypesFrom: allowedTypes)
+    }
+
+    override func scrollRangeToVisible(_ range: NSRange) {
+        guard disableAutomaticScrollOnType == false else { return }
+        super.scrollRangeToVisible(range)
     }
 }
 

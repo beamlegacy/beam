@@ -19,6 +19,7 @@ struct BeamTextField: NSViewRepresentable {
     var textColor: NSColor?
     var placeholderColor: NSColor?
     var selectedRange: Range<Int>?
+    var multiline = false
 
     var onTextChanged: (String) -> Void = { _ in }
     // Return a replacement text and selection
@@ -45,6 +46,10 @@ struct BeamTextField: NSViewRepresentable {
 
         textField.delegate = coordinator
         textField.focusRingType = .none
+
+        if !multiline {
+            textField.usesSingleLineMode = true
+        }
 
         if let textColor = textColor {
             textField.textColor = textColor
@@ -126,6 +131,7 @@ struct BeamTextField: NSViewRepresentable {
         var lastUpdateWasEditing = false
         var lastSelectedRange: Range<Int>?
         var firstResponderSetterBlock: DispatchWorkItem?
+        private var automaticScrollSetterBlock: DispatchWorkItem?
 
         init(_ textField: BeamTextField) {
             self.parent = textField
@@ -180,11 +186,20 @@ struct BeamTextField: NSViewRepresentable {
 
             var finalText = textField.stringValue
 
-            if let (newText, newRange) = parent.textWillChange?(finalText) {
+            if let (newText, newRange) = parent.textWillChange?(finalText),
+               let textView = textField.currentEditor() as? BeamTextFieldViewFieldEditor {
+                textView.disableAutomaticScrollOnType = true
                 // Changing the replacement text here instantaneously, faster than waiting for SwiftUI update
                 textField.setText(newText, font: parent.font, skipGuards: true)
                 parent.updateSelectedRange(textField, range: NSRange(location: newRange.lowerBound, length: newRange.count))
                 finalText = newText
+
+                let block = DispatchWorkItem { [weak textView] in
+                    textView?.disableAutomaticScrollOnType = false
+                }
+                automaticScrollSetterBlock?.cancel()
+                automaticScrollSetterBlock = block
+                DispatchQueue.main.async(execute: block)
             }
             parent.text = finalText
             parent.onTextChanged(textField.stringValue)

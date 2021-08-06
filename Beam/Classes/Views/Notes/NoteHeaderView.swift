@@ -36,6 +36,7 @@ struct NoteHeaderView: View {
                               textColor: textColor.nsColor,
                               placeholderColor: BeamColor.Generic.placeholder.nsColor,
                               selectedRange: model.titleSelectedRange,
+                              multiline: true,
                               onTextChanged: model.textFieldDidChange,
                               onCommit: { _ in
                                 model.commitRenameCard(fromTextField: true)
