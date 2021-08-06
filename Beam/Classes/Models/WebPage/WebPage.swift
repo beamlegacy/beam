@@ -115,7 +115,7 @@ extension WebPage {
     func closeTab() {
         self.authenticationViewModel?.cancel()
     }
-    
+
     func isActiveTab() -> Bool { false }
     func leave() { }
     func createNewTab(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, setCurrent: Bool) -> WebPage {

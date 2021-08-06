@@ -34,6 +34,7 @@ class WebNoteControllerTest: XCTestCase {
     }
 
     func testAdd() throws {
+        PreferencesManager.browsingSessionCollectionIsOn = true
         let note = BeamNote(title: "Sample note")
 
         let controller = WebNoteController(note: note)
@@ -45,10 +46,11 @@ class WebNoteControllerTest: XCTestCase {
         XCTAssertEqual(noteChildren.count, 1)
         XCTAssertEqual(noteChildren[0], added)
         XCTAssertEqual(controller.element, added)
-        let addedText = added.text
-        XCTAssertEqual(addedText.text, someTitle)
-        let attribute = addedText.ranges[0].attributes[0]
-        XCTAssertEqual(attribute, .link(someUrl))
+        if let addedText = added?.text {
+            XCTAssertEqual(addedText.text, someTitle)
+            let attribute = addedText.ranges[0].attributes[0]
+            XCTAssertEqual(attribute, .link(someUrl))
+        }
 
         // Add the same
         let addedAgain = controller.add(url: URL(string: someUrl)!, text: someTitle, reason: .navigation)
