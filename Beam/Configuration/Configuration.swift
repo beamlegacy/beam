@@ -14,7 +14,7 @@ struct Configuration {
     static private(set) var networkStubs = EnvironmentVariables.networkStubs
     static private(set) var updateFeedURL: String = Configuration.value(for: "SUFeedURL")
     static private(set) var sentryEnabled = EnvironmentVariables.sentryEnabled
-    static var networkEnabled = EnvironmentVariables.networkEnabled
+    static private(set) var networkEnabledDefault = EnvironmentVariables.networkEnabled
     static var encryptionEnabledDefault = EnvironmentVariables.encryptionEnabled
     static private(set) var topDomainDBMaxSize = 10000
 
@@ -36,6 +36,22 @@ struct Configuration {
             if newValue != apiHostname {
                 UserDefaults.standard.set(newValue, forKey: apiHostnameKey)
                 AccountManager.logout()
+            }
+        }
+    }
+
+    static private var networkEnabledKey = "networkEnabled"
+    static var networkEnabled: Bool {
+        get {
+            if UserDefaults.standard.object(forKey: networkEnabledKey) != nil {
+                return UserDefaults.standard.bool(forKey: networkEnabledKey)
+            }
+
+            return networkEnabledDefault
+        }
+        set {
+            if newValue != networkEnabled {
+                UserDefaults.standard.set(newValue, forKey: networkEnabledKey)
             }
         }
     }
