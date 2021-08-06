@@ -152,6 +152,10 @@ class PasswordsDB: PasswordStore {
         passwordsRecord.map { PasswordManagerEntry(minimizedHost: $0.host, username: $0.name) }
     }
 
+    private func credentials(for passwordsRecord: [PasswordRecord]) -> [Credential] {
+        passwordsRecord.map { Credential(username: $0.name, password: $0.password) }
+    }
+
     // PasswordStore
     func entries(for host: String, completion: @escaping ([PasswordManagerEntry]) -> Void) {
         do {
@@ -287,6 +291,20 @@ class PasswordsDB: PasswordStore {
             try PasswordRecord
                 .filter(Column("deleteAt") == nil)
                 .updateAll(db, Column("deleteAt").set(to: Date()))
+        }
+    }
+
+    // Added for getting the credential for HTTP Basic / Digest auth. Not in the protocol for now…
+    func credentials(for host: String, completion: @escaping ([Credential]) -> Void) {
+        do {
+            try dbPool.read { db in
+                let passwords = try PasswordRecord
+                    .filter(PasswordRecord.Columns.host == host && PasswordRecord.Columns.deletedAt == nil)
+                    .fetchAll(db)
+                completion(credentials(for: passwords))
+            }
+        } catch let error {
+            Logger.shared.logError("Error while fetching password entries for \(host): \(error)", category: .passwordsDB)
         }
     }
 }

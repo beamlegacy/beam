@@ -40,4 +40,7 @@ class WebPageBaseImpl: WebPage {
     var mediaPlayerController: MediaPlayerController?
     var appendToIndexer: ((URL, Readability) -> Void)?
     var score: Float = 0
+    var passwordDB: PasswordsDB?
+
+    var authenticationViewModel: AuthenticationViewModel?
 }

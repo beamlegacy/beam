@@ -23,16 +23,7 @@ struct ModeView: View {
             BrowserTabBar(tabs: $browserTabsManager.tabs, currentTab: $browserTabsManager.currentTab)
                 .zIndex(9)
             if let tab = browserTabsManager.currentTab {
-                ZStack {
-                    WebView(webView: tab.webView)
-
-                    if data.showTabStats, let score = tab.browsingTree.current.score {
-                        TabStats(score: score)
-                    }
-                    if let pns = tab.pointAndShoot {
-                        PointAndShootView(pns: pns)
-                    }
-                }.clipped()
+                EnhancedWebView(tab: tab).clipped()
             }
         }
         .transition(.webContentTransition(state.windowIsResizing))

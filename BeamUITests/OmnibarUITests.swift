@@ -88,11 +88,11 @@ class OmniBarUITests: QuickSpec {
                 self.helper.makeAppScreenShots()
             }
 
-            it("can toggle web and note") {
+            fit("can toggle web and note") {
                 self.helper.focusSearchField()
                 self.helper.searchField.typeText("hello")
                 self.helper.searchField.typeText("\r")
-                expect(self.app.images["browserTabBarView"].waitForExistence(timeout: 1)).to(beTrue())
+                expect(self.app.groups["browserTabBarView"].waitForExistence(timeout: 1)).to(beTrue())
 
                 expect(self.helper.allAutocompleteResults.count).to(equal(0))
                 expect(self.app.buttons["journal"].exists).to(beTrue())

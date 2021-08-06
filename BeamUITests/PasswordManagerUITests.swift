@@ -55,7 +55,7 @@ class PasswordManagerUITests: XCTestCase {
     }
 
     func testLogin() throws {
-        self.helper.openTestPage(number: 4)
+        self.helper.openTestPage(page: .password)
         enterInput(self.helper.randomEmail(), .username)
         enterInput(self.helper.randomPassword(), .password)
         tapSubmit()

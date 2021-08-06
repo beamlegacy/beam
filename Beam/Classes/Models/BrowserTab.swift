@@ -72,7 +72,10 @@ import Promises
     @Published var browsingTree: BrowsingTree
     @Published var privateMode = false
 
+    @Published var authenticationViewModel: AuthenticationViewModel?
+
     var backForwardUrlList: [URL]?
+    
     var originMode: Mode
 
     var pointAndShootAllowed: Bool {
@@ -176,6 +179,10 @@ import Promises
 
     var fileStorage: BeamFileStorage? {
         state.data.fileDB
+    }
+
+    var passwordDB: PasswordsDB? {
+        state.data.passwordsDB
     }
 
     func setDestinationNote(_ note: BeamNote, rootElement: BeamElement? = nil) {
@@ -536,11 +543,13 @@ import Promises
     }
 
     func closeTab() {
+        authenticationViewModel?.cancel()
         browsingTree.closeTab()
         sendTree()
     }
 
     func closeApp() {
+        authenticationViewModel?.cancel()
         browsingTree.closeApp()
         sendTree(blocking: true)
     }

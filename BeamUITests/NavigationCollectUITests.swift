@@ -56,7 +56,7 @@ class NavigationCollectUITests: QuickSpec {
             }
 
             it("add links to journal in order") {
-                self.helper.openTestPage(number: 1)
+                self.helper.openTestPage(page: .page1)
                 let title0 = titles[0]
                 let staticText0 = self.app.staticTexts[title0]
                 expect(staticText0.waitForExistence(timeout: 10)) == true
@@ -64,7 +64,7 @@ class NavigationCollectUITests: QuickSpec {
                 expect(self.journalChildren.element(matching: NSPredicate(format: "value = %@", title0)).firstMatch.waitForExistence(timeout: 2)) == true
                 expect(self.journalChildren.element(boundBy: 0).value as? String) == title0
 
-                self.helper.openTestPage(number: 2)
+                self.helper.openTestPage(page: .page2)
                 let title1 = titles[1]
                 let staticText1 = self.app.staticTexts[title1]
                 expect(staticText1.waitForExistence(timeout: 10)) == true
@@ -73,7 +73,7 @@ class NavigationCollectUITests: QuickSpec {
                 expect(self.journalChildren.element(boundBy: 0).value as? String) == title0
                 expect(self.journalChildren.element(boundBy: 1).value as? String) == title1
 
-                self.helper.openTestPage(number: 3)
+                self.helper.openTestPage(page: .page3)
                 let title2 = titles[2]
                 expect(self.app.staticTexts[title2].waitForExistence(timeout: 10)) == true
                 self.helper.showJournal()
@@ -84,7 +84,7 @@ class NavigationCollectUITests: QuickSpec {
             }
 
             it("can navigate links in collected text") {
-                self.helper.openTestPage(number: 3)
+                self.helper.openTestPage(page: .page3)
 
                 let prefix = "Go to "
                 let linkText = "UITests-1"
@@ -133,7 +133,7 @@ class NavigationCollectUITests: QuickSpec {
         describe("PointAndShoot") {
             context("with PointAndShoot enabled") {
                 it("Point and Shoot on click should open ShootCardPicker and not navigate the page") {
-                    self.helper.openTestPage(number: 1)
+                    self.helper.openTestPage(page: .page1)
                     // Press option once to enable pointing mode
                     XCUIElement.perform(withKeyModifiers: .option) {
                         sleep(1)
@@ -163,7 +163,7 @@ class NavigationCollectUITests: QuickSpec {
                 }
                 describe("Shoot") {
                     it("dismiss shootCardPicker by clicking on page and pressing escape") {
-                        self.helper.openTestPage(number: 1)
+                        self.helper.openTestPage(page: .page1)
                         let searchText = "Ultralight Beam, Kanye West"
                         let parent = self.app.webViews.containing(.staticText,
                                                                   identifier: searchText).element
@@ -203,7 +203,7 @@ class NavigationCollectUITests: QuickSpec {
                 }
                 describe("Select") {
                     it("frame position placement") {
-                        self.helper.openTestPage(number: 1)
+                        self.helper.openTestPage(page: .page1)
                         let searchText = "Ultralight Beam, Kanye West"
                         let parent = self.app.webViews.containing(.staticText,
                                                                   identifier: searchText).element
@@ -255,7 +255,7 @@ class NavigationCollectUITests: QuickSpec {
 
                 describe("Point") {
                     it("frame position placement") {
-                        self.helper.openTestPage(number: 1)
+                        self.helper.openTestPage(page: .page1)
                         let searchText = "Ultralight Beam, Kanye West"
                         let parent = self.app.webViews.containing(.staticText,
                                                                   identifier: searchText).element

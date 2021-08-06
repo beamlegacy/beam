@@ -143,18 +143,41 @@ extension BeamWebNavigationController: WKNavigationDelegate {
     func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
         let authenticationMethod = challenge.protectionSpace.authenticationMethod
         if authenticationMethod == NSURLAuthenticationMethodDefault || authenticationMethod == NSURLAuthenticationMethodHTTPBasic || authenticationMethod == NSURLAuthenticationMethodHTTPDigest {
-            // TODO: Add UI to ask User for login and password (BE-1280)
-            let userId = "user"
-            let password = "pass"
-            let credential = URLCredential(user: userId, password: password, persistence: .none)
-            completionHandler(.useCredential, credential)
+
+            let viewModel  = AuthenticationViewModel(challenge: challenge, onValidate: { [weak self] username, password, savePassword in
+                NSApp.mainWindow?.makeFirstResponder(nil)
+                let credential = URLCredential(user: username, password: password, persistence: .forSession)
+                completionHandler(.useCredential, credential)
+                if savePassword && (!password.isEmpty || !username.isEmpty) {
+                    self?.page.passwordDB?.save(host: challenge.protectionSpace.host, username: username, password: password)
+                }
+                self?.page.authenticationViewModel = nil
+
+            }, onCancel: { [weak self] in
+                NSApp.mainWindow?.makeFirstResponder(nil)
+                completionHandler(.performDefaultHandling, nil)
+                self?.page.authenticationViewModel = nil
+            })
+
+            if challenge.previousFailureCount == 0 {
+                self.page.passwordDB?.credentials(for: challenge.protectionSpace.host, completion: { entries in
+                    if let firstCredential = entries.first,
+                       let decrypted = try? EncryptionManager.shared.decryptString(firstCredential.password),
+                       !decrypted.isEmpty || !firstCredential.username.isEmpty {
+                        completionHandler(.useCredential, URLCredential(user: firstCredential.username, password: decrypted, persistence: .forSession))
+                    } else {
+                        self.page.authenticationViewModel = viewModel
+                    }
+                })
+            } else {
+                self.page.authenticationViewModel = viewModel
+            }
         } else if authenticationMethod == NSURLAuthenticationMethodServerTrust {
             let cred = URLCredential(trust: challenge.protectionSpace.serverTrust!)
             completionHandler(.useCredential, cred)
         } else {
             completionHandler(.performDefaultHandling, nil)
         }
-
     }
 
     func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {

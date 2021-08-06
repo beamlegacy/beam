@@ -37,7 +37,7 @@ function beam_media_toggleMute() {
 }
 
 function beam_media_elemenSupportsPictureInPicture(element) {
-    return element.webkitSupportsPresentationMode && typeof element.webkitSetPresentationMode === "function"
+    return element.webkitSupportsPresentationMode !== undefined && typeof element.webkitSetPresentationMode === "function"
 }
 
 function beam_media_elemenIsInPictureInPicture(element) {

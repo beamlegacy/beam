@@ -93,7 +93,7 @@ class OmniBarAutocompleteUITests: QuickSpec {
             it("can go to web on enter") {
                 self.helper.typeInSearchAndWait(self.helper.randomSearchTerm())
                 self.helper.searchField.typeKey(.enter, modifierFlags: [])
-                expect(self.app.images["browserTabBarView"].waitForExistence(timeout: 2)).to(beTrue())
+                expect(self.app.groups["browserTabBarView"].waitForExistence(timeout: 2)).to(beTrue())
                 expect(self.helper.inputHasFocus(self.helper.searchField)).to(beFalse())
 
                 let results = self.helper.allAutocompleteResults
@@ -164,7 +164,7 @@ class OmniBarAutocompleteUITests: QuickSpec {
                 it("handle history title selection") {
                     self.helper.searchField.typeText("fr.wikipedia.org/wiki/Hello_world")
                     self.helper.searchField.typeKey(.enter, modifierFlags: [])
-                    expect(self.app.images["browserTabBarView"].waitForExistence(timeout: 2)) == true
+                    expect(self.app.groups["browserTabBarView"].waitForExistence(timeout: 2)) == true
 
                     self.helper.focusSearchField()
                     expect(self.helper.inputHasFocus(self.helper.searchField)).to(beTrue())
@@ -219,7 +219,7 @@ class OmniBarAutocompleteUITests: QuickSpec {
                 it("handle URL selection") {
                     self.helper.searchField.typeText("fr.wikipedia.org/wiki/Hello_world")
                     self.helper.searchField.typeKey(.enter, modifierFlags: [])
-                    expect(self.app.images["browserTabBarView"].waitForExistence(timeout: 2)) == true
+                    expect(self.app.groups["browserTabBarView"].waitForExistence(timeout: 2)) == true
 
                     self.helper.focusSearchField()
                     expect(self.helper.inputHasFocus(self.helper.searchField)).to(beTrue())
@@ -265,7 +265,7 @@ class OmniBarAutocompleteUITests: QuickSpec {
                 it("typing fast") {
                     self.helper.searchField.typeText("en.wikipedia.org/wiki/Hubert_Blaine_Wolfeschlegelsteinhausenbergerdorff_Sr.")
                     self.helper.searchField.typeKey(.enter, modifierFlags: [])
-                    expect(self.app.images["browserTabBarView"].waitForExistence(timeout: 2)) == true
+                    expect(self.app.groups["browserTabBarView"].waitForExistence(timeout: 2)) == true
                     expect(self.helper.inputHasFocus(self.helper.searchField)) == false
 
                     self.helper.focusSearchField()

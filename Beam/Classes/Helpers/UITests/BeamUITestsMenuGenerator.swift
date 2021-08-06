@@ -12,12 +12,13 @@ class BeamUITestsMenuGenerator {
         case .deleteLogs: deleteLogs()
         case .resizeWindowLandscape: resizeWindowLandscape()
         case .resizeWindowPortrait: resizeWindowPortrait()
-        case .loadUITestPage1: loadUITestsPage(page: 1)
-        case .loadUITestPage2: loadUITestsPage(page: 2)
-        case .loadUITestPage3: loadUITestsPage(page: 3)
-        case .loadUITestPage4: loadUITestsPage(page: 4)
-        case .loadUITestPage5: loadUITestsPage(page: 5)
-        case .loadUITestPage6: loadUITestsPage(page: 6)
+        case .loadUITestPage1: loadUITestsPage(identifier: "1")
+        case .loadUITestPage2: loadUITestsPage(identifier: "2")
+        case .loadUITestPage3: loadUITestsPage(identifier: "3")
+        case .loadUITestPagePassword: loadUITestsPage(identifier: "Password")
+        case .loadUITestPagePlayground: loadUITestsPage(identifier: "Playground")
+        case .loadUITestPageAlerts: loadUITestsPage(identifier: "Alerts")
+        case .loadUITestPageMedia: loadUITestsPage(identifier: "Media")
         case .insertTextInCurrentNote: insertTextInCurrentNote()
         case .create100Notes: create100Notes()
         default: break
@@ -81,8 +82,8 @@ class BeamUITestsMenuGenerator {
         data?.saveData()
     }
 
-    private func loadUITestsPage(page: Int) {
-        if let localUrl = Bundle.main.url(forResource: "UITests-\(page)", withExtension: "html", subdirectory: nil) {
+    private func loadUITestsPage(identifier: String) {
+        if let localUrl = Bundle.main.url(forResource: "UITests-\(identifier)", withExtension: "html", subdirectory: nil) {
             _ = AppDelegate.main.window?.state.createTab(withURL: localUrl, originalQuery: nil)
         }
     }

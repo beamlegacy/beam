@@ -26,7 +26,7 @@ class JavascriptNativeAlertsTests: QuickSpec {
         }
         self.app.launch()
         self.helper = BeamUITestsHelper(self.app)
-        self.helper.openTestPage(number: 6)
+        self.helper.openTestPage(page: .alerts)
     }
 
     override func spec() {
@@ -75,14 +75,15 @@ class JavascriptNativeAlertsTests: QuickSpec {
 
                 let alert = self.app.dialogs.firstMatch
                 XCTAssert(alert.waitForExistence(timeout: 4))
+
                 let ok = alert.buttons["OK"].firstMatch
                 XCTAssertTrue(ok.exists)
                 let cancel = alert.buttons["Cancel"].firstMatch
                 XCTAssertTrue(cancel.exists)
                 ok.tap()
-
                 XCTAssertTrue(webView.staticTexts["YES"].exists)
                 button.tap()
+                XCTAssert(alert.waitForExistence(timeout: 4))
                 cancel.tap()
                 XCTAssertTrue(webView.staticTexts["NO"].exists)
             }
@@ -114,6 +115,7 @@ class JavascriptNativeAlertsTests: QuickSpec {
                 XCTAssert(input.exists)
                 input.typeText("/Applications")
                 goButton.tap()
+                sleep(2)
                 app.typeKey(.downArrow, modifierFlags: [])
                 ok.tap()
                 XCTAssertFalse(webView.staticTexts["NO FILE"].exists)
