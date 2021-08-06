@@ -2457,8 +2457,11 @@ extension DocumentManager: BeamObjectManagerDelegate {
                     do {
                         localDocument.update(document)
                         localDocument.beam_object_previous_checksum = document.checksum
+                        document.version += 1
 
                         try checkValidations(context, localDocument)
+
+                        self.notificationDocumentUpdate(document)
 
                         good = true
                         changed = true
@@ -2562,8 +2565,10 @@ extension DocumentManager: BeamObjectManagerDelegate {
 
                 localDocument.update(document)
                 localDocument.beam_object_previous_checksum = document.checksum
+                localDocument.version += 1
 
                 try checkValidations(context, localDocument)
+                self.notificationDocumentUpdate(document)
             }
             try Self.saveContext(context: context)
         }
