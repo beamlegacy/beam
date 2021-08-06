@@ -269,6 +269,10 @@ extension BeamWindow: NSWindowDelegate {
         self.setTrafficLightsLayout()
     }
 
+    func windowDidResize(_ notification: Notification) {
+        self.setTrafficLightsLayout()
+    }
+
     func windowWillEnterFullScreen(_ notification: Notification) {
         self.toggleTitleBarAccessoryView()
     }

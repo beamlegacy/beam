@@ -119,7 +119,7 @@ class AutocompleteManager: ObservableObject {
         switch result.source {
         case .history: return result.text.lowercased().starts(with: searchText.lowercased())
         case .url:
-            guard let host = result.url?.host ?? URL(string: result.text)?.host else { return false }
+            guard let host = result.url?.minimizedHost ?? URL(string: result.text)?.minimizedHost else { return false }
             return result.text.lowercased().contains(host)
         default:
             return false
