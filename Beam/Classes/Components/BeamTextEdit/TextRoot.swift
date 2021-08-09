@@ -126,6 +126,7 @@ public class TextRoot: TextNode {
     var linksSection: LinksSection?
     var referencesSection: LinksSection?
     var browsingSection: BrowsingSection?
+    var debugSection: DebugSection?
 
     var otherSections: [Widget?] {
         [
@@ -134,7 +135,8 @@ public class TextRoot: TextNode {
             middleSpacerWidget,
             referencesSection,
             bottomSpacerWidget,
-            browsingSection
+            browsingSection,
+            debugSection
         ]
     }
     override func buildTextChildren(elements: [BeamElement]) -> [Widget] {
@@ -184,6 +186,9 @@ public class TextRoot: TextNode {
             bottomSpacerWidget = SpacerWidget(parent: self, spacerType: .bottom)
             if Self.showBrowsingSection {
                 browsingSection = BrowsingSection(parent: self, note: note)
+            }
+            if PreferencesManager.showDebugSection {
+                debugSection = DebugSection(parent: self, note: note)
             }
         }
         updateTextChildren(elements: element.children)

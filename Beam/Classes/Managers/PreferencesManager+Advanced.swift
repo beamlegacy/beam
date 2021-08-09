@@ -11,6 +11,7 @@ import Foundation
 extension PreferencesManager {
     static let browsingSessionCollectionIsOnKey = "browsingSessionCollectionIsOn"
     static let showTabGrougpingMenuItemKey = "showTabGrougpingMenuItem"
+    static let showDebugSectionKey = "showDebugSection"
 }
 
 // MARK: - Default Values
@@ -20,6 +21,7 @@ extension PreferencesManager {
     #endif
     static let browsingSessionCollectionIsOnDefault = false
     static let showTabGrougpingMenuItemDefault = false
+    static let showDebugSectionDefault = false
 }
 
 extension PreferencesManager {
@@ -30,4 +32,7 @@ extension PreferencesManager {
 
     @UserDefault(key: showTabGrougpingMenuItemKey, defaultValue: showTabGrougpingMenuItemDefault, container: advancedPreferencesContainer)
     static var showTabGrougpingMenuItem: Bool
+
+    @UserDefault(key: showDebugSectionKey, defaultValue: showDebugSectionDefault, container: advancedPreferencesContainer)
+    static var showDebugSection: Bool
 }

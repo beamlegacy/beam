@@ -69,6 +69,13 @@ extension BeamColor {
 }
 
 extension BeamColor {
+    enum DebugSection {
+        static let sectionTitle = BeamColor.AlphaGray
+        static let separator = BeamColor.Nero
+    }
+}
+
+extension BeamColor {
     enum BidirectionalPopover {
         static let background = BeamColor.Custom(named: "PopoverBackgroudColor")
         static let backgroundHover = BeamColor.Custom(named: "PopoverBackgroundHoverColor")

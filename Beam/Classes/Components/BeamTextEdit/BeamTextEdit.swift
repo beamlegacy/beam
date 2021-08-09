@@ -656,13 +656,19 @@ public extension CALayer {
                         rootNode.selectAllNodes(force: true)
                         return
                     }
+                #if DEBUG
                 case "d":
                     if control, shift {
                         dumpWidgetTree()
                         dumpLayers()
                         return
                     }
-
+                case "i":
+                    if control, shift, command {
+                        let pasteboard = NSPasteboard.general
+                        pasteboard.clearContents()
+                        pasteboard.setString(self.note.id.uuidString, forType: .string)
+                    }
                 case "s":
                     if command, shift {
                         let encoder = JSONEncoder()
@@ -674,6 +680,7 @@ public extension CALayer {
                         }
                         return
                     }
+                #endif
                 default:
                     break
                 }

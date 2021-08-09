@@ -200,6 +200,14 @@ struct AdvancedPreferencesView: View {
                 BrowsingSessionCollectionCheckbox
             }
 
+            Preferences.Section(bottomDivider: true) {
+                Text("Show Debug Section")
+                    .font(BeamFont.regular(size: 13).swiftUI)
+                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+            } content: {
+                DebugSectionCheckbox
+            }
+
             Preferences.Section(title: "Actions", bottomDivider: true) {
                 CrashButton
                 CopyAccessToken
@@ -237,6 +245,12 @@ struct AdvancedPreferencesView: View {
     private var BrowsingSessionCollectionCheckbox: some View {
         Checkbox(checkState: PreferencesManager.browsingSessionCollectionIsOn, text: "Enabled", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
             PreferencesManager.browsingSessionCollectionIsOn = activated
+        }
+    }
+
+    private var DebugSectionCheckbox: some View {
+        Checkbox(checkState: PreferencesManager.showDebugSection, text: "Enabled", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
+            PreferencesManager.showDebugSection = activated
         }
     }
 
