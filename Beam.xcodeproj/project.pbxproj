@@ -587,6 +587,7 @@
 		A0E9B0FB2666A80600FC99A5 /* TabGroupingTitleBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0E9B0FA2666A80600FC99A5 /* TabGroupingTitleBarView.swift */; };
 		A0EDF5DB266EE08C0079803E /* BeamPlaceholder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0EDF5DA266EE08C0079803E /* BeamPlaceholder.swift */; };
 		A0F462352668D79E0003EAD6 /* RadBlockPreferencesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0F462342668D79E0003EAD6 /* RadBlockPreferencesManager.swift */; };
+		A0F558F526BD8F260024C47E /* DebugSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0F558F426BD8F260024C47E /* DebugSection.swift */; };
 		A0F8DC87268488C900654046 /* hush.json in Resources */ = {isa = PBXBuildFile; fileRef = A0F8DC86268488C900654046 /* hush.json */; };
 		A500F93626BAD78A0029D34F /* audio.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = A500F92E26BAD78A0029D34F /* audio.mp3 */; };
 		A500F93A26BAE2850029D34F /* UITests-Media.html in Resources */ = {isa = PBXBuildFile; fileRef = A500F93926BAE2850029D34F /* UITests-Media.html */; };
@@ -859,12 +860,12 @@
 			remoteGlobalIDString = 4EEEAF582652AC4A0082D77E;
 			remoteInfo = ClusteringTests;
 		};
-		B5F8BBA026BA8980009AE35B /* PBXContainerItemProxy */ = {
+		A0F558FB26BD8F260024C47E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 33B27441264C0CDB00A318CD /* AutoUpdate.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = 331E18C326404D3C00C4593E;
-			remoteInfo = AutoUpdateTests;
+			remoteGlobalIDString = 3397C6F7269DD9540092FDD7;
+			remoteInfo = AutoUpdateFrameworkTests;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -1494,6 +1495,7 @@
 		A0E9B0FA2666A80600FC99A5 /* TabGroupingTitleBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupingTitleBarView.swift; sourceTree = "<group>"; };
 		A0EDF5DA266EE08C0079803E /* BeamPlaceholder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamPlaceholder.swift; sourceTree = "<group>"; };
 		A0F462342668D79E0003EAD6 /* RadBlockPreferencesManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadBlockPreferencesManager.swift; sourceTree = "<group>"; };
+		A0F558F426BD8F260024C47E /* DebugSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugSection.swift; sourceTree = "<group>"; };
 		A0F8DC86268488C900654046 /* hush.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = hush.json; sourceTree = "<group>"; };
 		A500F92E26BAD78A0029D34F /* audio.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = audio.mp3; sourceTree = "<group>"; };
 		A500F93926BAE2850029D34F /* UITests-Media.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "UITests-Media.html"; sourceTree = "<group>"; };
@@ -1973,10 +1975,10 @@
 			isa = PBXGroup;
 			children = (
 				33B2744A264C0CDC00A318CD /* AutoUpdateDemo.app */,
-				B5F8BBA126BA8980009AE35B /* AutoUpdateTests.xctest */,
 				33B2744E264C0CDC00A318CD /* UpdateInstaller.xpc */,
 				33B27450264C0CDC00A318CD /* AutoUpdate.framework */,
 				33B27452264C0CDC00A318CD /* AppFeedBuilder */,
+				A0F558FC26BD8F260024C47E /* AutoUpdateFrameworkTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -2340,6 +2342,7 @@
 				A5919F63268EA024009015C5 /* EmbedNode */,
 				9661A58A266A70DA00CB56B3 /* NodeProvider.swift */,
 				A5919F7E268EF964009015C5 /* TextEditCmdReturnAnimator.swift */,
+				A0F558F426BD8F260024C47E /* DebugSection.swift */,
 			);
 			path = BeamTextEdit;
 			sourceTree = "<group>";
@@ -4104,11 +4107,11 @@
 			remoteRef = A02FD6E82665180C00EBE17E /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		B5F8BBA126BA8980009AE35B /* AutoUpdateTests.xctest */ = {
+		A0F558FC26BD8F260024C47E /* AutoUpdateFrameworkTests.xctest */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
-			path = AutoUpdateTests.xctest;
-			remoteRef = B5F8BBA026BA8980009AE35B /* PBXContainerItemProxy */;
+			path = AutoUpdateFrameworkTests.xctest;
+			remoteRef = A0F558FB26BD8F260024C47E /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -4565,6 +4568,7 @@
 				4181722A2581107C00317ED8 /* NSRect+Beam.swift in Sources */,
 				A0CB5AEA268B231400D1EF02 /* CardsPreferencesView.swift in Sources */,
 				96FACC6C2604F2650088DD67 /* FocusElement.swift in Sources */,
+				A0F558F526BD8F260024C47E /* DebugSection.swift in Sources */,
 				418171F92581107C00317ED8 /* SearchEngine.swift in Sources */,
 				8775C5F32613212C00A26CAC /* StoredPasswordCell.swift in Sources */,
 				A5B268A426845549001797ED /* BeamTextAttributedStringBuilder.swift in Sources */,
