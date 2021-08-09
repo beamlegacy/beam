@@ -171,6 +171,12 @@ public class TextRoot: TextNode {
         editor.invalidate()
     }
 
+    override var idealSize: NSSize {
+        super.updateRendering()
+        computedIdealSize.height += self.idealSpacingSize
+        return computedIdealSize
+    }
+
     init(editor: BeamTextEdit, element: BeamElement) {
         super.init(editor: editor, element: element, nodeProvider: NodeProviderImpl(proxy: false))
 
@@ -217,6 +223,8 @@ public class TextRoot: TextNode {
             focusedWidget = nodeFor(element.children.first ?? element, withParent: self)
             focusedWidget?.onFocus()
         }
+        self.layer.backgroundColor = NSColor(red: .random(in: 0...1), green: .random(in: 0...1), blue: .random(in: 0...1), alpha: 1.0).cgColor
+
     }
 
     public override func printTree(level: Int = 0) -> String {

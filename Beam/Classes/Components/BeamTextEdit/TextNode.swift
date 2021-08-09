@@ -24,7 +24,7 @@ public class TextNode: ElementNode {
         case .heading:
             return 1.2
         default:
-            return 1.3
+            return self.textFrame?.lines.count ?? 0 > 1 ? 1.1 : 1.3
         }
     }
     var interNodeSpacing = CGFloat(0)

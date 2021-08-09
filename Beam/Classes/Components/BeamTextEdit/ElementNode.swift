@@ -227,13 +227,50 @@ public class ElementNode: Widget {
     }
 
     // MARK: - Setup UI
+
+    let nodeRootSpacing: CGFloat = 8
+    let nodeChildrenSpacing: CGFloat = 2
+    var idealSpacingSize: CGFloat {
+        var spacingHeight: CGFloat = .zero
+        var spacing: CGFloat = .zero
+        if self as? TextRoot != nil {
+            spacing = nodeRootSpacing
+        } else {
+            spacing = nodeChildrenSpacing
+        }
+        if self.open {
+            let elementNodeChild = self.children.filter({ $0 as? ElementNode != nil})
+            if elementNodeChild.count > 0 {
+                spacingHeight += spacing * CGFloat(elementNodeChild.count - 1)
+                for c in elementNodeChild {
+                    if let nodeChild = c as? ElementNode {
+                        spacingHeight += nodeChild.idealSpacingSize
+                    }
+                }
+            }
+        }
+        return spacingHeight
+    }
+
     override func updateChildrenLayout() {
         updateElementLayers()
         var pos = NSPoint(x: childInset, y: self.contentsFrame.height)
-
+        var spacing: CGFloat = .zero
+        if self as? TextRoot != nil {
+            spacing = nodeRootSpacing
+        } else {
+            spacing = nodeChildrenSpacing
+        }
+        let firstNode = children.first
         for c in children {
             var childSize = c.idealSize
             childSize.width = frame.width - childInset
+            if let nodeChild = c as? ElementNode, nodeChild.open {
+                childSize.height += nodeChild.idealSpacingSize
+                if c !== firstNode || self as? TextRoot == nil {
+                    pos.y += spacing
+                }
+            }
             let childFrame = NSRect(origin: pos, size: childSize)
             c.setLayout(childFrame)
             pos.y += childSize.height
