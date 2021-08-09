@@ -1,27 +1,27 @@
 [
   {
     "request" : {
-      "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=green",
-      "method" : "GET"
+      "method" : "GET",
+      "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=green"
     },
     "response" : {
-      "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=green",
+      "status" : 200,
       "headers" : {
-        "Pragma" : "no-cache",
-        "Cache-Control" : "no-cache, must-revalidate",
-        "x-frame-options" : "SAMEORIGIN",
-        "Content-Encoding" : "gzip",
-        "Content-Length" : "166",
-        "Content-Type" : "text\/javascript; charset=ISO-8859-1",
-        "x-xss-protection" : "0",
-        "Date" : "Thu, 05 Aug 2021 16:31:57 GMT",
-        "Server" : "gws",
-        "Expires" : "-1",
         "Alt-Svc" : "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000,h3-T051=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\"",
-        "Content-Disposition" : "attachment; filename=\"f.txt\""
+        "Pragma" : "no-cache",
+        "Date" : "Mon, 09 Aug 2021 12:07:06 GMT",
+        "Content-Disposition" : "attachment; filename=\"f.txt\"",
+        "Expires" : "-1",
+        "Server" : "gws",
+        "Content-Encoding" : "gzip",
+        "Content-Length" : "169",
+        "Content-Type" : "text\/javascript; charset=ISO-8859-1",
+        "Cache-Control" : "no-cache, must-revalidate",
+        "x-xss-protection" : "0",
+        "x-frame-options" : "SAMEORIGIN"
       },
-      "body" : "[\"green\",[\"greenweez\",\"greenpeace\",\"greenwashing\",\"greengo\",\"green pass italie\",\"green book\",\"green pass italia\",\"green acres\",\"green acres paris\",\"green acres ile de france\"],[],{\"google:suggestsubtypes\":[[512,433],[512,433],[512,433],[512],[433,131],[512,433],[512,433,131],[512,433,131,457],[402],[402]]}]",
-      "status" : 200
+      "body" : "[\"green\",[\"greenweez\",\"greenpeace\",\"greenville\",\"greenwashing\",\"greengo\",\"green book\",\"green pass italie\",\"green acres\",\"green acres paris\",\"green acres ile de france\"],[],{\"google:suggestsubtypes\":[[512,433],[512,433],[433,131],[512],[512],[512,433],[433,131],[512,433,131,457],[402],[402]]}]",
+      "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=green"
     }
   }
 ]
