@@ -30,7 +30,7 @@ struct PointAndShootCardConfirmationBox: View {
             .lineLimit(1)
             .padding(BeamSpacing._100)
             .onTapGesture {
-                state.navigateToNote(named: group.noteInfo.title)
+                state.navigateToNote(id: group.noteInfo.id)
             }
         }
         .fixedSize(horizontal: true, vertical: true)

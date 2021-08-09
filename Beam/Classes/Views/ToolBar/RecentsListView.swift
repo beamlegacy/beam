@@ -27,7 +27,7 @@ struct RecentsListView: View {
                     let isActive = !isToday && note.id == currentNote?.id
                     ButtonLabel(note.title, state: isActive ? .active : .normal)
                         .simultaneousGesture(TapGesture(count: 1).onEnded {
-                            state.navigateToNote(named: note.title)
+                            state.navigateToNote(id: note.id)
                         })
                 }
             }

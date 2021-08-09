@@ -990,7 +990,7 @@ extension BeamObjectManager {
     internal func manageConflict(_ object: BeamObject,
                                  _ remoteObject: BeamObject) -> BeamObject {
         var result = object
-        
+
         if let objectUpdatedAt = object.updatedAt,
            let remoteUpdatedAt = remoteObject.updatedAt,
            remoteUpdatedAt > objectUpdatedAt {

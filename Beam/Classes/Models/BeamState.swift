@@ -139,6 +139,7 @@ import BeamCore
         }
     }
 
+    @available(*, deprecated, message: "Using title might navigate to a different card if multiple databases, use ID if possible.")
     @discardableResult func navigateToNote(named: String, elementId: UUID? = nil) -> Bool {
         //Logger.shared.logDebug("load note named \(named)")
         let note = BeamNote.fetchOrCreate(data.documentManager, title: named)
@@ -310,7 +311,7 @@ import BeamCore
             mode = .web
 
         case .note:
-            navigateToNote(named: result.text)
+            navigateToNote(id: result.uuid)
 
         case .createCard:
             navigateToNote(createNoteForQuery(result.text))
