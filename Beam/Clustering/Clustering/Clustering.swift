@@ -83,6 +83,14 @@ public class Cluster {
         case combinationBinarizedWithTextErasure
         case combinationSigmoid
         case textualSimilarityMatrix
+        case fixedPagesTestNotes
+    }
+
+    enum SimilarityForNotesCandidate {
+        case nothing
+        case fixed
+        case combinationBeforeSigmoid
+        case combinationAfterSigmoid
     }
 
     enum NumClusterComputationCandidate {
@@ -130,12 +138,13 @@ public class Cluster {
     var clusteringCandidate = ClusteringCandidate.nonNormalizedLaplacian
     // Define which similarity matrix to use
     var matrixCandidate = SimilarityMatrixCandidate.navigationMatrix
+    var noteMatrixCandidate = SimilarityForNotesCandidate.fixed
     // Define which number of clusters computation to use
     var numClustersCandidate = NumClusterComputationCandidate.threshold
     var candidate: Int
     var weights = [AllWeights: Double]()
 
-    public init(candidate: Int = 1, weightNavigation: Double = 0.5, weightText: Double = 0.5, weightEntities: Double = 0.5) {
+    public init(candidate: Int = 2, weightNavigation: Double = 0.5, weightText: Double = 0.5, weightEntities: Double = 0.5) {
         self.candidate = candidate
         self.weights[.navigation] = weightNavigation
         self.weights[.text] = weightText
@@ -628,6 +637,7 @@ public class Cluster {
         return 1 ./ (1 + exp(-beta .* (matrix - middle)))
     }
 
+    // swiftlint:disable:next cyclomatic_complexity
     func createAdjacencyMatrix() {
         switch self.matrixCandidate {
         case .navigationMatrix:
@@ -646,16 +656,31 @@ public class Cluster {
             let textSigmoidMatrix = self.performSigmoidOn(matrix: self.textualSimilarityMatrix.matrix, middle: self.weights[.text] ?? 0.5, beta: self.beta)
             let entitySigmoidMatrix = self.performSigmoidOn(matrix: self.entitiesMatrix.matrix, middle: self.weights[.entities] ?? 0.5, beta: self.beta)
             let adjacencyForPages = textSigmoidMatrix .* navigationSigmoidMatrix + entitySigmoidMatrix
-            let finalAdjacency = adjacencyForPages
+            self.adjacencyMatrix = adjacencyForPages
+        case .fixedPagesTestNotes:
+            let navigationSigmoidMatrix = self.performSigmoidOn(matrix: self.navigationMatrix.matrix, middle: 0.5, beta: self.beta)
+            let textSigmoidMatrix = self.performSigmoidOn(matrix: self.textualSimilarityMatrix.matrix, middle: 0.8, beta: self.beta)
+            let entitySigmoidMatrix = self.performSigmoidOn(matrix: self.entitiesMatrix.matrix, middle: 0.3, beta: self.beta)
+            let adjacencyForPages = textSigmoidMatrix .* navigationSigmoidMatrix + entitySigmoidMatrix
+            self.adjacencyMatrix = adjacencyForPages
+        }
 
-            if self.notes.count > 0 {
-                let adjacencyForNotes = self.performSigmoidOn(matrix: self.textualSimilarityMatrix.matrix[0..<self.notes.count, 0..<self.textualSimilarityMatrix.matrix.cols] + self.entitiesMatrix.matrix[0..<self.notes.count, 0..<self.entitiesMatrix.matrix.cols], middle: 1, beta: self.beta)
+        guard self.notes.count > 0 else { return }
+        var adjacencyForNotes: Matrix?
+        switch noteMatrixCandidate {
+        case .nothing:
+            break
+        case .fixed:
+            adjacencyForNotes = self.performSigmoidOn(matrix: self.textualSimilarityMatrix.matrix[0..<self.notes.count, 0..<self.textualSimilarityMatrix.matrix.cols] + self.entitiesMatrix.matrix[0..<self.notes.count, 0..<self.entitiesMatrix.matrix.cols], middle: 1, beta: self.beta)
+        case .combinationAfterSigmoid:
+            adjacencyForNotes = (self.weights[.text] ?? 0.5) .* self.performSigmoidOn(matrix: self.textualSimilarityMatrix.matrix[0..<self.notes.count, 0..<self.textualSimilarityMatrix.matrix.cols], middle: 1, beta: self.beta) + (self.weights[.entities] ?? 0.5) .* self.performSigmoidOn(matrix: self.entitiesMatrix.matrix[0..<self.notes.count, 0..<self.entitiesMatrix.matrix.cols], middle: (self.weights[.navigation] ?? 0.5) * 2, beta: beta)
+        case .combinationBeforeSigmoid:
+            adjacencyForNotes = self.performSigmoidOn(matrix: (self.weights[.text] ?? 0.5) .* self.textualSimilarityMatrix.matrix[0..<self.notes.count, 0..<self.textualSimilarityMatrix.matrix.cols] + (self.weights[.entities] ?? 0.5) .* self.entitiesMatrix.matrix[0..<self.notes.count, 0..<self.entitiesMatrix.matrix.cols], middle: (self.weights[.navigation] ?? 0.5) * 2, beta: self.beta)
+        }
 
-                finalAdjacency[0..<self.notes.count, 0..<finalAdjacency.cols] = adjacencyForNotes
-                finalAdjacency[0..<finalAdjacency.rows, 0..<self.notes.count] = adjacencyForNotes.T
-            }
-
-            self.adjacencyMatrix = finalAdjacency
+        if let adjacencyForNotes = adjacencyForNotes {
+            self.adjacencyMatrix[0..<self.notes.count, 0..<self.adjacencyMatrix.cols] = adjacencyForNotes
+            self.adjacencyMatrix[0..<self.adjacencyMatrix.rows, 0..<self.notes.count] = adjacencyForNotes.T
         }
     }
 
@@ -878,14 +903,17 @@ public class Cluster {
         case 1:
             self.clusteringCandidate = ClusteringCandidate.nonNormalizedLaplacian
             self.matrixCandidate = SimilarityMatrixCandidate.navigationMatrix
+            self.noteMatrixCandidate = SimilarityForNotesCandidate.nothing
             self.numClustersCandidate = NumClusterComputationCandidate.threshold
         case 2:
             self.clusteringCandidate = ClusteringCandidate.randomWalkLaplacian
             self.matrixCandidate = SimilarityMatrixCandidate.combinationSigmoid
+            self.noteMatrixCandidate = SimilarityForNotesCandidate.fixed
             self.numClustersCandidate = NumClusterComputationCandidate.biggestDistanceInPercentages
         case 3:
             self.clusteringCandidate = ClusteringCandidate.randomWalkLaplacian
-            self.matrixCandidate = SimilarityMatrixCandidate.combinationBinarizedWithTextErasure
+            self.matrixCandidate = SimilarityMatrixCandidate.fixedPagesTestNotes
+            self.noteMatrixCandidate = SimilarityForNotesCandidate.combinationBeforeSigmoid
             self.numClustersCandidate = NumClusterComputationCandidate.biggestDistanceInPercentages
         default:
             throw CandidateError.unknownCandidate
