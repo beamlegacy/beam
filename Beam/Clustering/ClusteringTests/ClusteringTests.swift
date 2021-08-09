@@ -664,13 +664,13 @@ class ClusteringTests: XCTestCase {
         let cluster = Cluster()
         cluster.candidate = 2
         try cluster.performCandidateChange()
-        let page1 = Page(id: 0, parentId: nil, title: "Page 1", content: "A man is eating food.")
-        let page2 = Page(id: 1, parentId: 0, title: "Page 2", content: "The girl is carrying a baby.")
-        let page3 = Page(id: 2, parentId: 0, title: "Page 3", content: "A man is eating food.")
-        let page4 = Page(id: 3, parentId: 0, title: "Page 4", content: "The girl is carrying a baby.")
-        let page5 = Page(id: 4, parentId: 0, title: "Page 5", content: "The girl is carrying a baby.")
-        let page6 = Page(id: 5, parentId: 0, title: "Page 6", content: "A man is eating food.")
-        let page7 = Page(id: 6, parentId: 0, title: "Page 7", content: "La fille est en train de porter un bébé.")
+        let page1 = Page(id: 0, parentId: nil, title: "man", content: "A man is eating food.")
+        let page2 = Page(id: 1, parentId: 0, title: "girl", content: "The girl is carrying a baby.")
+        let page3 = Page(id: 2, parentId: 0, title: "man", content: "A man is eating food.")
+        let page4 = Page(id: 3, parentId: 0, title: "girl", content: "The girl is carrying a baby.")
+        let page5 = Page(id: 4, parentId: 0, title: "girl", content: "The girl is carrying a baby.")
+        let page6 = Page(id: 5, parentId: 0, title: "man", content: "A man is eating food.")
+        let page7 = Page(id: 6, parentId: 0, title: "fille", content: "La fille est en train de porter un bébé.")
 
         let expectation = self.expectation(description: "Add page expectation")
         var _ = [[UInt64]]()
@@ -755,7 +755,11 @@ class ClusteringTests: XCTestCase {
                 XCTFail(error.localizedDescription)
             case .success(let result):
                 _ = result
-                expect(cluster.pages[0].attachedPages) == [1, 4, 2]
+                var attachedPages = [UInt64]()
+                for page in cluster.pages {
+                    attachedPages += page.attachedPages
+                }
+                expect(Set(attachedPages)) == Set([1, 4, 2])
                 expect(cluster.adjacencyMatrix.rows) == 5 // 4 pages and one note
                 expect(cluster.pages.count) == 4
                 expect(cluster.notes.count) == 1
