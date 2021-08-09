@@ -1,4 +1,4 @@
-//swiftlint:disable file_length
+// swiftlint:disable file_length
 import BeamCore
 import GRDB
 

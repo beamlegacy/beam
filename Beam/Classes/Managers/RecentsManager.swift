@@ -28,8 +28,9 @@ class RecentsManager: ObservableObject {
     }
 
     private func fetchRecents() {
-        recentNotes = documentManager.loadAllWithLimit(maxNumberOfRecents, [NSSortDescriptor(key: "updated_at", ascending: false)]).compactMap {
-            BeamNote.fetch(documentManager, title: $0.title)
+        recentNotes = documentManager.loadAllWithLimit(maxNumberOfRecents,
+                                                       [NSSortDescriptor(key: "updated_at", ascending: false)]).compactMap {
+            BeamNote.fetch(documentManager, id: $0.id)
         }
     }
 
@@ -46,7 +47,7 @@ class RecentsManager: ObservableObject {
         var result = recentNotes
         var lowestScore = Int.max
         var lowestScoreId: UUID?
-        recentNotes.forEach { (note) in
+        recentNotes.forEach { note in
             let score = recentsScores[note.id] ?? 0
             if score <= lowestScore {
                 lowestScore = score

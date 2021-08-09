@@ -132,7 +132,7 @@ extension BeamWindow {
                 } else if state.mode != .web {
                     let recents = state.recentsManager.recentNotes
                     if keyValue <= recents.count {
-                        state.navigateToNote(named: recents[keyValue - 1].title)
+                        state.navigateToNote(id: recents[keyValue - 1].id)
                     }
                 }
                 return

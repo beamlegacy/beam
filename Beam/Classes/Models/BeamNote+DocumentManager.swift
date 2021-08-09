@@ -315,6 +315,7 @@ extension BeamNote: BeamNoteDocument {
     public static func create(_ documentManager: DocumentManager, title: String) -> BeamNote {
         assert(getFetchedNote(title) == nil)
         let note = BeamNote(title: title)
+        note.databaseId = DatabaseManager.defaultDatabase.id
 
         // TODO: should force a first quick save to trigger any title conflicts with the API asap
         appendToFetchedNotes(note)

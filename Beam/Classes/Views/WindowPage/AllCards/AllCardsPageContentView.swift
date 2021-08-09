@@ -260,7 +260,7 @@ struct AllCardsPageContentView: View {
         guard column.isLink else { return }
         let items = currentNotesList
         let item = items[row]
-        state.navigateToNote(named: item.title)
+        state.navigateToNote(id: item.id)
     }
 
     func showContextualMenuForHoveredRow(tableViewGeometry: GeometryProxy) {
