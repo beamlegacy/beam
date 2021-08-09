@@ -6,22 +6,22 @@
     },
     "response" : {
       "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=Beam",
+      "body" : "[\"Beam\",[\"beamng drive\",\"beam\",\"beamer\",\"beam traduction\",\"beam suntory\",\"beamy\",\"beam ng\",\"beamery\",\"beam me up scotty\",\"beams plus\"],[],{\"google:suggestsubtypes\":[[512,433],[512,433],[512,433],[512],[512],[512],[433],[512],[512],[512]]}]",
       "headers" : {
+        "Content-Type" : "text\/javascript; charset=ISO-8859-1",
+        "Expires" : "-1",
+        "Server" : "gws",
+        "Alt-Svc" : "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000,h3-T051=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\"",
+        "x-frame-options" : "SAMEORIGIN",
+        "Cache-Control" : "no-cache, must-revalidate",
+        "Content-Length" : "144",
+        "Content-Disposition" : "attachment; filename=\"f.txt\"",
+        "Date" : "Mon, 09 Aug 2021 12:07:05 GMT",
         "Pragma" : "no-cache",
         "x-xss-protection" : "0",
-        "Content-Length" : "152",
-        "x-frame-options" : "SAMEORIGIN",
-        "Alt-Svc" : "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000,h3-T051=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\"",
-        "Cache-Control" : "no-cache, must-revalidate",
-        "Server" : "gws",
-        "Expires" : "-1",
-        "Date" : "Thu, 05 Aug 2021 16:31:57 GMT",
-        "Content-Disposition" : "attachment; filename=\"f.txt\"",
-        "Content-Type" : "text\/javascript; charset=ISO-8859-1",
         "Content-Encoding" : "gzip"
       },
-      "status" : 200,
-      "body" : "[\"Beam\",[\"beamng drive\",\"beams\",\"beamy\",\"beamer\",\"beam traduction\",\"beam suntory\",\"beamery\",\"beam me up scotty\",\"beams plus\",\"beam advisory\"],[],{\"google:suggestsubtypes\":[[512,433,131],[512,433],[512],[512,433],[512],[512],[512],[512],[512],[512]]}]"
+      "status" : 200
     }
   }
 ]

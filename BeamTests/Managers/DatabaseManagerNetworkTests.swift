@@ -725,7 +725,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
                             expect(remoteObject1).to(beNil())
 
                             let remoteObject2: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct2.beamObjectId)
-                            dbStruct2.title = "\(dbStruct2.title) 2"
+                            dbStruct2.title = "\(dbStruct2.title) (2)"
                             expect(remoteObject2) == dbStruct2
 
                             expect(try? Database.fetchWithId(CoreDataManager.shared.mainContext, dbStruct2.id)?.title) == dbStruct2.title
@@ -794,7 +794,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
                             expect(remoteObject1).to(beNil())
 
                             let remoteObject2: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct2.beamObjectId)
-                            dbStruct2.title = "\(newTitle1) 2"
+                            dbStruct2.title = "\(newTitle1) (2)"
                             expect(remoteObject2) == dbStruct2
 
                             expect(try? Database.fetchWithId(CoreDataManager.shared.mainContext, dbStruct2.id)?.title) == dbStruct2.title

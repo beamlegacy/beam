@@ -2473,7 +2473,7 @@ extension DocumentManager: BeamObjectManagerDelegate {
 
                         switch (error as NSError).code {
                         case 1001:
-                            document.title = "\(originalTitle) \(index)"
+                            document.title = "\(originalTitle) (\(index))"
                         case 1002:
                             localDocument = Document.rawFetchOrCreateWithId(context, document.id)
                         default: break

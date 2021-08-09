@@ -2109,7 +2109,7 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                             expect(try? Document.fetchWithId(CoreDataManager.shared.mainContext, docStruct.id)?.title) == docStruct.title
 
-                            docStruct2.title = "\(docStruct2.title) 2"
+                            docStruct2.title = "\(docStruct2.title) (2)"
 
                             expect(try? Document.fetchWithId(CoreDataManager.shared.mainContext, docStruct2.id)?.title) == docStruct2.title
 
@@ -2175,7 +2175,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                             expect(1) == Document.countWithPredicate(CoreDataManager.shared.mainContext,
                                                                      NSPredicate(format: "id = %@", docStruct2.id as CVarArg))
 
-                            docStruct2.title = "\(newTitle1) 2"
+                            docStruct2.title = "\(newTitle1) (2)"
 
                             expect(try? Document.fetchWithId(CoreDataManager.shared.mainContext, docStruct.id)?.title) == docStruct.title
                             expect(try? Document.fetchWithId(CoreDataManager.shared.mainContext, docStruct2.id)?.title) == docStruct2.title

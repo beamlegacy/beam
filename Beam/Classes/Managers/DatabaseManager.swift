@@ -1192,7 +1192,7 @@ extension DatabaseManager: BeamObjectManagerDelegate {
 
                         good = true
                     } catch {
-                        database.title = "\(originalTitle) \(index)"
+                        database.title = "\(originalTitle) (\(index))"
                         index += 1
                     }
                 }
