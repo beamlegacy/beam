@@ -248,3 +248,19 @@ input {
   border-radius: 4px;
   padding-left: 0.5rem;
 }
+
+
+.background-image {
+  width: 600px;
+  background-size: cover;
+  height: 600px;
+  overflow: hidden;
+  background: url("beam-logo-test.png") no-repeat center center; 
+  background-size: contain;
+  border: 1px solid;
+}
+.bg-image-reference {
+  width: 600px;
+  height: 600px;
+  border: 1px solid;
+}

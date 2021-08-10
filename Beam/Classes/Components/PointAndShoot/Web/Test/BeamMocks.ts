@@ -376,13 +376,13 @@ export class BeamElementMock extends BeamNodeMock implements BeamElement, BeamEl
     return this.querySelectorResult[query] || []
   }
   removeAttribute(pointDatasetKey: any) {
-    throw new Error("Method not implemented.")
+    delete this.attributes[pointDatasetKey]
   }
   setAttribute(qualifiedName: string, value: string): void {
-    throw new Error("Method not implemented.")
+    this.attributes[qualifiedName] = value
   }
   getAttribute(qualifiedName: string): string {
-    throw new Error("Method not implemented.")
+    return this.attributes[qualifiedName]
   }
   dataset: any
 
@@ -781,7 +781,7 @@ export class BeamDocumentMock extends BeamNodeMock implements BeamDocument {
    * @param tag {string}
    */
   createElement(tag) {
-    // TODO: Shouldn't we implement it?
+    return new BeamElementMock(tag)
   }
 
   /**
