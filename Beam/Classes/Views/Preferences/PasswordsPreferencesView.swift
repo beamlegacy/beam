@@ -10,12 +10,12 @@ import Preferences
 import BeamCore
 
 let PasswordsPreferencesViewController: PreferencePane = PreferencesPaneBuilder.build(identifier: .passwords, title: "Passwords", imageName: "preferences-passwords") {
-    PasswordsPreferencesView(passwordsViewModel: PasswordsPreferencesViewModel())
+    PasswordsPreferencesView(passwordsViewModel: PasswordListViewModel(passwordStore: PasswordsManager().passwordsDB))
 }
 
 struct PasswordsPreferencesView: View {
     private let contentWidth: Double = PreferencesManager.contentWidth
-    var passwordsViewModel: PasswordsPreferencesViewModel
+    var passwordsViewModel: PasswordListViewModel
 
     var body: some View {
         Preferences.Container(contentWidth: contentWidth) {
@@ -35,12 +35,12 @@ struct PasswordsPreferencesView: View {
 
 struct PasswordsPreferencesView_Previews: PreviewProvider {
     static var previews: some View {
-        PasswordsPreferencesView(passwordsViewModel: PasswordsPreferencesViewModel())
+        PasswordsPreferencesView(passwordsViewModel: PasswordListViewModel(passwordStore: MockPasswordStore()))
     }
 }
 
 struct Passwords: View {
-    @ObservedObject var passwordsViewModel: PasswordsPreferencesViewModel
+    @ObservedObject var passwordsViewModel: PasswordListViewModel
 
     @State var searchString: String = ""
     @State var isEditing: Bool = false
@@ -48,6 +48,7 @@ struct Passwords: View {
     @State private var selectedEntries = IndexSet()
     @State private var passwordSelected: Bool = false
     @State private var multipleSelection: Bool = false
+
     var body: some View {
         HStack {
             Spacer()
@@ -59,19 +60,18 @@ struct Passwords: View {
                     Spacer()
                     BeamSearchField(searchStr: $searchString, isEditing: $isEditing, placeholderStr: "Search", font: BeamFont.regular(size: 13).nsFont, textColor: BeamColor.Generic.text.nsColor, placeholderColor: BeamColor.Generic.placeholder.nsColor)
                         .frame(width: 220, height: 21, alignment: .center)
+                        .onUpdate(of: searchString) { searchString in
+                            passwordsViewModel.searchString = searchString
+                        }
                 }
                 HStack {
                     Spacer()
-                    PasswordsTableView(passwordEntries: passwordsViewModel.entries, searchStr: searchString,
-                                       passwordSelected: $passwordSelected, onSelectionChanged: { idx in
-                                        DispatchQueue.main.async {
-                                            self.multipleSelection = idx.count > 1
-                                            self.selectedEntries = idx
-                                        }
-                                       })
-                        .frame(width: 573, height: 240, alignment: .center)
-                        .border(BeamColor.Mercury.swiftUI, width: 1)
-                        .background(BeamColor.Generic.background.swiftUI)
+                    PasswordsTableView(passwordEntries: passwordsViewModel.filteredPasswordTableViewItems, onSelectionChanged: { idx in
+                        passwordsViewModel.updateSelection(idx)
+                    })
+                    .frame(width: 573, height: 240, alignment: .center)
+                    .border(BeamColor.Mercury.swiftUI, width: 1)
+                    .background(BeamColor.Generic.background.swiftUI)
                     Spacer()
                 }
                 HStack {
@@ -92,7 +92,7 @@ struct Passwords: View {
                     HStack {
                         Button {
                             importPasswordAction(completion: {
-                                passwordsViewModel.fetchAllEntries()
+                                passwordsViewModel.refresh()
                             })
                         } label: {
                             Text("Import...")

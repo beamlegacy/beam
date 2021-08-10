@@ -63,7 +63,7 @@ struct PasswordManagerMenu: View {
                                 showingOtherPasswordsSheet.toggle()
                             }
                         }.sheet(isPresented: $showingOtherPasswordsSheet, content: {
-                            OtherPasswordModal(passwordEntries: viewModel.display.allEntries, onFill: { entry in
+                            OtherPasswordModal(viewModel: viewModel.otherPasswordsViewModel, onFill: { entry in
                                 viewModel.fillCredentials(entry)
                             }, onRemove: { entry in
                                 viewModel.deleteCredentials(entry)

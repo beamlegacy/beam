@@ -8,41 +8,20 @@
 import SwiftUI
 
 struct PasswordsTableView: View {
-    var passwordEntries: [PasswordManagerEntry]
-    var searchStr: String
-    @Binding var passwordSelected: Bool
-    var onSelectionChanged: (IndexSet) -> Void
+    var passwordEntries: [PasswordTableViewItem]
+    var onSelectionChanged: (IndexSet) -> Void // identifiable --> use id somewhere
 
-    @State private var allPasswordItems = [PasswordTableViewItem]()
-    var passwordColumns = [
+    static let passwordColumns = [
         TableViewColumn(key: "hostinfo", title: "Sites", type: TableViewColumn.ColumnType.IconAndText, sortable: true, resizable: false, width: 195, fontSize: 11),
         TableViewColumn(key: "username", title: "Username", width: 150, fontSize: 11),
         TableViewColumn(key: "password", title: "Passwords", sortable: false, fontSize: 11)
     ]
 
     var body: some View {
-        TableView(hasSeparator: false, items: searchStr.isEmpty ? allPasswordItems : filterPasswordItemsBy(searchStr: searchStr),
-                  columns: passwordColumns, creationRowTitle: nil, shouldReloadData: .constant(nil)) { (_, _) in
+        TableView(hasSeparator: false, items: passwordEntries,
+                  columns: Self.passwordColumns, creationRowTitle: nil, shouldReloadData: .constant(nil)) { (_, _) in
         } onSelectionChanged: { idx in
             onSelectionChanged(idx)
-            DispatchQueue.main.async {
-                passwordSelected = idx.count > 0
-            }
-        }.onAppear {
-            refreshAllPasswordItems()
-        }
-    }
-
-    private func filterPasswordItemsBy(searchStr: String) -> [PasswordTableViewItem] {
-        return allPasswordItems.filter { item in
-            item.username.contains(searchStr) || item.host.contains(searchStr)
-        }
-    }
-
-    private func refreshAllPasswordItems() {
-        for entry in passwordEntries {
-            let item = PasswordTableViewItem(host: entry.minimizedHost, username: entry.username, password: "••••••••")
-            allPasswordItems.append(item)
         }
     }
 }
@@ -63,14 +42,19 @@ class PasswordTableViewItem: IconAndTextTableViewItem {
         guard let hostURL = URL(string: "https://\(host)") else { return }
         FaviconProvider.shared.imageForUrl(hostURL) { [weak self] (image) in
             guard let self = self else { return }
-            self.favIcon = image
+            self.favIcon = image // TODO: refresh table view
         }
+    }
+}
 
+extension PasswordTableViewItem {
+    convenience init(_ entry: PasswordManagerEntry) {
+        self.init(host: entry.minimizedHost, username: entry.username, password: "••••••••")
     }
 }
 
 struct PasswordsTableView_Previews: PreviewProvider {
     static var previews: some View {
-        PasswordsTableView(passwordEntries: [], searchStr: "", passwordSelected: .constant(true), onSelectionChanged: { _ in })
+        PasswordsTableView(passwordEntries: [], onSelectionChanged: { _ in })
     }
 }
