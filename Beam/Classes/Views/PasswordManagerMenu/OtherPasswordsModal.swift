@@ -12,14 +12,13 @@ struct OtherPasswordModal: View {
 
     @State private var searchString: String = ""
     @State private var isEditing: Bool = true
-    @State private var passwordSelected: Bool = false
-    @State private var multipleSelection: Bool = false
     @State private var showingAlert: Bool = false
     @State private var selectedEntries = IndexSet()
 
-    @State var passwordEntries: [PasswordManagerEntry]
+    @ObservedObject var viewModel: PasswordListViewModel
+
     var onFill: ((PasswordManagerEntry) -> Void)
-    var onRemove: ((PasswordManagerEntry) -> Void)
+    var onRemove: (([PasswordManagerEntry]) -> Void)
     var onDismiss: (() -> Void)
 
     var body: some View {
@@ -31,28 +30,28 @@ struct OtherPasswordModal: View {
                 Spacer()
                 BeamSearchField(searchStr: $searchString, isEditing: $isEditing, placeholderStr: "Search", font: BeamFont.regular(size: 13).nsFont, textColor: BeamColor.Generic.text.nsColor, placeholderColor: BeamColor.Generic.placeholder.nsColor)
                     .frame(width: 220, height: 21, alignment: .center)
+                    .onUpdate(of: searchString) { // FIXME: use onChange(searchString) when available
+                        viewModel.searchString = $0
+                    }
             }
             Spacer()
-            PasswordsTableView(passwordEntries: passwordEntries, searchStr: searchString,
-                               passwordSelected: $passwordSelected, onSelectionChanged: { idx in
-                                DispatchQueue.main.async {
-                                    self.multipleSelection = idx.count > 1
-                                    self.selectedEntries = idx
-                                }
+            PasswordsTableView(passwordEntries: viewModel.filteredPasswordTableViewItems,
+                               onSelectionChanged: { idx in
+                                viewModel.updateSelection(idx)
                                })
                 .frame(width: 528, height: 240, alignment: .center)
                 .border(BeamColor.Mercury.swiftUI, width: 1)
                 .background(BeamColor.Generic.background.swiftUI)
             Spacer()
             HStack {
-                OtherPasswordModalButton(title: "Remove", isDisabled: !passwordSelected) {
+                OtherPasswordModalButton(title: "Remove", isDisabled: viewModel.disableRemoveButton) {
                     self.showingAlert.toggle()
                 }
                 .alert(isPresented: $showingAlert) {
-                    Alert(title: Text("Are you sure you want to remove the login details \(passwordEntries[selectedEntries.first ?? 0].username) for \(passwordEntries[selectedEntries.first ?? 0].minimizedHost) ?"),
+                    Alert(title: Text(removeAlertMessage(for: viewModel.selectedEntries)),
                           primaryButton: .destructive(Text("Remove"), action: {
-                            guard let index = selectedEntries.first else { return }
-                            onRemove(passwordEntries[index])
+                            onRemove(viewModel.selectedEntries)
+                            viewModel.refresh()
                           }),
                           secondaryButton: .cancel(Text("Cancel")))
                 }
@@ -61,9 +60,9 @@ struct OtherPasswordModal: View {
                     OtherPasswordModalButton(title: "Cancel", isDisabled: false) {
                         dismiss()
                     }
-                    OtherPasswordModalButton(title: "Fill", isDisabled: (!passwordSelected || multipleSelection)) {
-                        guard let index = selectedEntries.first else { return }
-                        onFill(passwordEntries[index])
+                    OtherPasswordModalButton(title: "Fill", isDisabled: viewModel.disableFillButton) {
+                        guard let selectedEntry = viewModel.selectedEntries.first else { return }
+                        onFill(selectedEntry)
                         dismiss()
                     }
                 }
@@ -73,15 +72,41 @@ struct OtherPasswordModal: View {
         .padding(20)
     }
 
+    private func removeAlertMessage(for entries: [PasswordManagerEntry]) -> String {
+        if entries.count == 1, let entry = entries.first {
+            return "Are you sure you want to remove the login details \(entry.username) for \(entry.minimizedHost)?"
+        } else {
+            return "Are you sure you want to remove the login details for \(entries.count) accounts?"
+        }
+    }
+
     private func dismiss() {
         onDismiss()
         presentationMode.wrappedValue.dismiss()
     }
 }
 
+extension View {
+    func onUpdate<T>(of variable: T, perform: (T) -> Void) -> Self {
+        perform(variable)
+        return self
+    }
+}
+
+fileprivate extension Sequence where Element == (offset: Int, element: PasswordTableViewItem) {
+    func filtered(by searchStr: String) -> [Element] {
+        guard !searchStr.isEmpty else {
+            return Array(self)
+        }
+        return filter { (_, item) in
+            item.username.contains(searchStr) || item.host.contains(searchStr)
+        }
+    }
+}
+
 struct OtherPasswordModal_Previews: PreviewProvider {
     static var previews: some View {
-        OtherPasswordModal(passwordEntries: [], onFill: { _ in }, onRemove: { _ in }, onDismiss: {})
+        OtherPasswordModal(viewModel: PasswordListViewModel(passwordStore: MockPasswordStore()), onFill: { _ in }, onRemove: { _ in }, onDismiss: {})
 
     }
 }

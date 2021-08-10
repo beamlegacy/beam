@@ -12,7 +12,7 @@ import BeamCore
 protocol PasswordManagerMenuDelegate: AnyObject {
     func fillCredentials(_ entry: PasswordManagerEntry)
     func fillNewPassword(_ password: String, dismiss: Bool)
-    func deleteCredentials(_ entry: PasswordManagerEntry)
+    func deleteCredentials(_ entries: [PasswordManagerEntry])
     func emptyPasswordField()
     func dismiss()
 }
@@ -34,6 +34,8 @@ class PasswordManagerMenuViewModel: ObservableObject {
 
     weak var delegate: PasswordManagerMenuDelegate?
 
+    var otherPasswordsViewModel: PasswordListViewModel
+
     @Published var passwordGeneratorViewModel: PasswordGeneratorViewModel?
     @Published var display: Contents
     @Published var scrollingListHeight: CGFloat?
@@ -54,6 +56,7 @@ class PasswordManagerMenuViewModel: ObservableObject {
         self.entriesForHost = []
         self.allEntries = []
         self.display = Contents(entriesForHost: Array(entriesForHost.prefix(1)), allEntries: allEntries, hasScroll: false, hasMoreThanOneEntry: entriesForHost.count > 1, userInfo: userInfoStore.fetchAll().first ?? nil)
+        self.otherPasswordsViewModel = PasswordListViewModel(passwordStore: passwordStore)
         if passwordGenerator {
             let passwordGeneratorViewModel = PasswordGeneratorViewModel()
             passwordGeneratorViewModel.delegate = self
@@ -125,9 +128,9 @@ extension PasswordManagerMenuViewModel: PasswordManagerMenuDelegate {
         delegate?.fillNewPassword(password, dismiss: dismiss)
     }
 
-    func deleteCredentials(_ entry: PasswordManagerEntry) {
-        Logger.shared.logDebug("Delete entry: \(entry.username) @ \(entry.minimizedHost)")
-        delegate?.deleteCredentials(entry)
+    func deleteCredentials(_ entries: [PasswordManagerEntry]) {
+        Logger.shared.logDebug("Delete \(entries.count) password manager entries")
+        delegate?.deleteCredentials(entries)
         updateAllEntries()
     }
 }

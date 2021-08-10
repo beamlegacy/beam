@@ -260,8 +260,10 @@ class PasswordOverlayController: WebPageHolder {
 }
 
 extension PasswordOverlayController: PasswordManagerMenuDelegate {
-    func deleteCredentials(_ entry: PasswordManagerEntry) {
-        passwordStore.delete(host: entry.minimizedHost, username: entry.username)
+    func deleteCredentials(_ entries: [PasswordManagerEntry]) {
+        for entry in entries {
+            passwordStore.delete(host: entry.minimizedHost, username: entry.username)
+        }
     }
 
     func fillCredentials(_ entry: PasswordManagerEntry) {
