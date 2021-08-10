@@ -163,4 +163,15 @@ class Html2MdTests: XCTestCase {
         XCTAssertEqual(links.count, 1)
         XCTAssertEqual(links.first!, "https://i.imgur.com/someImage.png")
     }
+
+    func testHtml2Text_imageWithLocalFileScheme() {
+        let html = "<img src=\"file:///Users/stefkors/Library/Developer/Xcode/DerivedData/Beam-aorwqrkozzstkmcrhprefoujlbhw/Build/Products/Debug/Beam.app/Contents/Resources/logo.png\">"
+
+        let results: [BeamText] = html2Text(url: URL(string: "file:///Users/stefkors/Library/Developer/Xcode/DerivedData/Beam-aorwqrkozzstkmcrhprefoujlbhw/Build/Products/Debug/Beam.app/Contents/Resources/UITests-7.html")!, html: html)
+        XCTAssertEqual(results.count, 1)
+        XCTAssertEqual(results.count, 1)
+        let links = results[0].links
+        XCTAssertEqual(links.count, 1)
+        XCTAssertEqual(links.first!, "file:///Users/stefkors/Library/Developer/Xcode/DerivedData/Beam-aorwqrkozzstkmcrhprefoujlbhw/Build/Products/Debug/Beam.app/Contents/Resources/logo.png")
+    }
 }

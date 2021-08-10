@@ -328,7 +328,8 @@ class HtmlVisitor {
     }
 
     fileprivate func getUrl(_ src: String) -> URL? {
-        if let url = URL(string: src), url.host != nil {
+        if let url = URL(string: src),
+           (url.host != nil || url.scheme == "file") {
             if url.scheme != nil {
                 return url
             }

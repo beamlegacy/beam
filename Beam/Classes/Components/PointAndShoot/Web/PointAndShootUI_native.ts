@@ -1,7 +1,7 @@
 import { PointAndShootUI } from "./PointAndShootUI"
 import { Native } from "./Native"
 import { WebEventsUI_native } from "./WebEventsUI_native"
-import { BeamElement, BeamNodeType, BeamRect, BeamRange, BeamRangeGroup, BeamShootGroup } from "./BeamTypes"
+import { BeamElement, BeamNodeType, BeamRect, BeamRange, BeamRangeGroup, BeamShootGroup, BeamHTMLElement } from "./BeamTypes"
 import { BeamElementHelper } from "./BeamElementHelper"
 import { BeamRectHelper } from "./BeamRectHelper"
 import { PointAndShootHelper } from "./PointAndShootHelper"
@@ -27,7 +27,11 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
     const rect = this.elementBounds(element)
 
     const payload = {
-      point: { id, rect, html: element.outerHTML }
+      point: { 
+        id, 
+        rect, 
+        html: this.getHtml(element) 
+      }
     }
 
     if (!isDeepEqual(this.pointPayload, payload)) {
@@ -44,7 +48,11 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
 
     const targets = shootTargets.map(({ id, element }) => {
       const rect = this.elementBounds(element)
-      return { id, rect, html: element.outerHTML }
+      return { 
+        id, 
+        rect, 
+        html: this.getHtml(element) 
+      }
     })
 
     const payload = {
@@ -59,6 +67,11 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
   }
 
   selectPayload = {}
+  private getHtml(element: BeamHTMLElement): string {
+    const parsedElement = BeamElementHelper.parseElementBasedOnStyles(element, this.native.win)
+    return parsedElement.outerHTML
+  }
+
   selectBounds(rangeGroups: BeamRangeGroup[]) {
     if (!rangeGroups) {
       return

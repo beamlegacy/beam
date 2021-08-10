@@ -76,6 +76,25 @@ export class BeamElementHelper {
     return textValue
   }
 
+  static getBackgroundImageURL(element: BeamElement, win: BeamWindow): string | null {
+    const style = win.getComputedStyle?.(element)
+    const matchArray = style?.backgroundImage.match(/url\(([^)]+)/)
+    if (matchArray && matchArray.length > 1) {
+      return matchArray[1].replace(/('|")/g,"")
+    }
+  }
+
+  static parseElementBasedOnStyles(element: BeamElement, win: BeamWindow): BeamHTMLElement {
+    const imgUrl = this.getBackgroundImageURL(element, win)
+    if (imgUrl) {
+      const img = win.document.createElement("img")
+      img.setAttribute("src", imgUrl)
+      return img
+    } else {
+      return element as BeamHTMLElement
+    }
+  }
+
   /**
    * Determine whether or not an element is visible based on it's style
    * and bounding box if necessary

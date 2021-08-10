@@ -16,6 +16,7 @@ class BeamUITestsMenuGenerator {
         case .loadUITestPage1: loadUITestsPage(identifier: "1")
         case .loadUITestPage2: loadUITestsPage(identifier: "2")
         case .loadUITestPage3: loadUITestsPage(identifier: "3")
+        case .loadUITestPage4: loadUITestsPage(identifier: "4")
         case .loadUITestPagePassword: loadUITestsPage(identifier: "Password")
         case .loadUITestPagePlayground: loadUITestsPage(identifier: "Playground")
         case .loadUITestPageAlerts: loadUITestsPage(identifier: "Alerts")
