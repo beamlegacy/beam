@@ -31,6 +31,61 @@ struct WebInputField {
 struct WebAutocompleteGroup {
     var action: WebAutocompleteAction
     var relatedFields: [WebInputField]
+    var isAmbiguous = false // can be part of either login or account creation, must be determined by context
+}
+
+struct WebAutocompleteRules {
+    let ignoreTextAutocompleteOff: Bool
+    let ignoreEmailAutocompleteOff: Bool
+    let ignorePasswordAutocompleteOff: Bool
+
+    init(ignoreTextAutocompleteOff: Bool = false, ignoreEmailAutocompleteOff: Bool = false, ignorePasswordAutocompleteOff: Bool = false) {
+        self.ignoreTextAutocompleteOff = ignoreTextAutocompleteOff
+        self.ignoreEmailAutocompleteOff = ignoreEmailAutocompleteOff
+        self.ignorePasswordAutocompleteOff = ignorePasswordAutocompleteOff
+    }
+
+    static let `default` = Self()
+
+    func allowUntaggedField(_ field: DOMInputElement) -> Bool {
+        switch field.decodedAutocomplete {
+        case nil:
+            return true
+        case .off:
+            switch field.type {
+            case .text:
+                return ignoreTextAutocompleteOff
+            case .email:
+                return ignoreEmailAutocompleteOff
+            case .password:
+                return ignorePasswordAutocompleteOff
+            default:
+                return false
+            }
+        default:
+            return false
+        }
+    }
+
+    func allowTaggedField(_ field: DOMInputElement) -> Bool {
+        switch field.decodedAutocomplete {
+        case nil:
+            return field.type == .email
+        case .off:
+            switch field.type {
+            case .text:
+                return ignoreTextAutocompleteOff
+            case .email:
+                return ignoreEmailAutocompleteOff
+            case .password:
+                return ignorePasswordAutocompleteOff
+            default:
+                return false
+            }
+        default:
+            return true
+        }
+    }
 }
 
 extension DOMInputElement {
@@ -46,7 +101,7 @@ extension DOMInputElement {
         return DOMInputAutocomplete.off
     }
 
-    var isLoginField: Bool {
+    var isUsedForLogin: Bool {
         switch decodedAutocomplete {
         case .email:
             return true
@@ -55,7 +110,20 @@ extension DOMInputElement {
         case .currentPassword:
             return true
         default:
-            return false
+            return type == .email
+        }
+    }
+
+    var isUsedForAccountCreation: Bool {
+        switch decodedAutocomplete {
+        case .email:
+            return true
+        case .username:
+            return true
+        case .newPassword:
+            return true
+        default:
+            return type == .email
         }
     }
 
@@ -137,11 +205,13 @@ extension WebInputField {
 final class WebAutocompleteContext {
     let passwordStore: PasswordStore
 
+    private var autocompleteRules: WebAutocompleteRules
     private var autocompleteFields: [WebAutocompleteAction: [WebInputField]]
     var autocompleteGroups: [String: WebAutocompleteGroup] // key = beamId
 
     init(passwordStore: PasswordStore) {
         self.passwordStore = passwordStore
+        self.autocompleteRules = .default
         self.autocompleteFields = [:]
         self.autocompleteGroups = [:]
     }
@@ -157,17 +227,20 @@ final class WebAutocompleteContext {
         var personalInfoFields: [WebInputField] = []
         var paymentFields: [WebInputField] = []
 
-        for field in fields {
-            let containsCurrentPasswordField = fields.contains { $0.isCurrentPasswordField }
-            let containsNewPasswordField = fields.contains { $0.isNewPasswordField }
+        let containsCurrentPasswordField = fields.contains { $0.isCurrentPasswordField }
+        let containsNewPasswordField = fields.contains { $0.isNewPasswordField }
 
-            if (field.isLoginField || field.isAutocompleteOnField) && !containsNewPasswordField {
+        for field in fields {
+            if (field.isUsedForLogin || field.isAutocompleteOnField) && containsCurrentPasswordField {
                 loginFields.append(WebInputField(field, action: .login))
-            } else if field.isNewPasswordField && containsCurrentPasswordField {
+            }
+            if (field.isUsedForAccountCreation || field.isAutocompleteOnField) && containsNewPasswordField {
                 createAccountFields.append(WebInputField(field, action: .createAccount))
-            } else if field.isPersonalInfoField {
+            }
+            if field.isPersonalInfoField {
                 personalInfoFields.append(WebInputField(field))
-            } else if field.isPaymentInfoField {
+            }
+            if field.isPaymentInfoField {
                 paymentFields.append(WebInputField(field))
             }
         }
@@ -245,21 +318,36 @@ final class WebAutocompleteContext {
         autocompleteGroups.removeAll()
     }
 
-    func update(with fields: [DOMInputElement] /* on webPage */) -> [String] {
-        let fieldsWithAutocompleteAttribute = fields.filter { $0.decodedAutocomplete != nil }
-        if fieldsWithAutocompleteAttribute.count == 0 {
-            return update(withUntagged: fields)
+    // Minimal implementation for now.
+    // If more special cases arise it could make sense to define rules in a plist file and create a separate class.
+    private func autocompleteRules(for host: String?) -> WebAutocompleteRules {
+        guard let host = host else {
+            return .default
         }
-        // If any field has a known autocomplete attribute, we can assume all fields participating in autocomplete do.
-        return update(withTagged: fieldsWithAutocompleteAttribute)
+        switch host {
+        case "accounts.spotify.com":
+            return WebAutocompleteRules(ignoreTextAutocompleteOff: true, ignorePasswordAutocompleteOff: true)
+        case "metallica.com":
+            return WebAutocompleteRules(ignorePasswordAutocompleteOff: true)
+        default:
+            return .default
+        }
+    }
+
+    func update(with fields: [DOMInputElement], on host: String?) -> [String] {
+        autocompleteRules = autocompleteRules(for: host)
+        let fieldsWithAutocompleteAttribute = fields.filter { $0.decodedAutocomplete != nil && $0.decodedAutocomplete != .off }
+        if fieldsWithAutocompleteAttribute.count == 0 {
+            let untaggedFields = fields.filter { autocompleteRules.allowUntaggedField($0) }
+            return update(withUntagged: untaggedFields)
+        }
+        // If any field has a known autocomplete attribute, we can NOT safely assume all fields participating in autocomplete do.
+        let candidateFields = fields.filter { autocompleteRules.allowTaggedField($0) }
+        return update(withTagged: candidateFields)
     }
 
     private func update(withUntagged fields: [DOMInputElement]) -> [String] {
         let passwordFields = fields.filter { $0.type == .password }
-        guard fields.count > passwordFields.count else {
-            clear()
-            return []
-        }
         switch passwordFields.count {
         case 1:
             return update(withUntagged: fields, action: .login)
@@ -272,19 +360,19 @@ final class WebAutocompleteContext {
     }
 
     private func update(withUntagged fields: [DOMInputElement], action: WebAutocompleteAction) -> [String] {
-        // If any field is a password entry field, let's assume the login field is either right before or after it.
         guard let passwordIndex = fields.firstIndex(where: { $0.type == .password }) else {
             clear()
             return []
         }
-        guard let usernameField = passwordIndex > 0 ? fields[passwordIndex - 1] : fields.first(where: { $0.type != .password }) else {
-            clear()
-            return []
-        }
+        // If any field is a password entry field, the login field is probably right before it.
+        // We build an ordered list of candidate username fields by taking all (obviously non-password) fields before the first password field in reversed order,
+        // followed by all non-password fields after the first password field in natural order.
+        let usernameFields = fields[0..<passwordIndex].reversed() + fields[passwordIndex...].filter { $0.type != .password }
         let passwordFields = fields.filter { $0.type == .password }
-        let autocompleteFields = [WebInputField(usernameField, role: action == .createAccount ? .newUsername : .currentUsername)] + passwordFields.map { WebInputField($0, role: action == .createAccount ? .newPassword : .currentPassword) }
-        let autocompleteGroup = WebAutocompleteGroup(action: action, relatedFields: autocompleteFields)
-        let autocompleteIds = autocompleteFields.map(\.id)
+        let autocompleteUsernamePasswordFields = usernameFields.map { WebInputField($0, role: action == .createAccount ? .newUsername : .currentUsername) } + passwordFields.map { WebInputField($0, role: action == .createAccount ? .newPassword : .currentPassword) }
+        autocompleteFields = [action: autocompleteUsernamePasswordFields]
+        let autocompleteGroup = WebAutocompleteGroup(action: action, relatedFields: autocompleteUsernamePasswordFields, isAmbiguous: true)
+        let autocompleteIds = autocompleteUsernamePasswordFields.map(\.id)
         let addedIds = autocompleteIds.filter { autocompleteGroups[$0] == nil }
         autocompleteGroups = autocompleteIds.reduce(into: [:]) { dict, id in
             dict[id] = autocompleteGroup
@@ -306,5 +394,9 @@ final class WebAutocompleteContext {
 
     var allInputFields: [WebInputField] {
         autocompleteFields.values.flatMap { $0 }
+    }
+
+    var allInputFieldIds: [String] {
+        Array(Set(allInputFields.map(\.id)))
     }
 }
