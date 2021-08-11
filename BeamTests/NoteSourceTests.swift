@@ -24,10 +24,11 @@ class NoteSourceTests: XCTestCase {
         let secondUrlId: UInt64 = 1
         let now = Date()
         let before = Date() - Double(60.0 * 60.0)
+        let sessionId = UUID()
 
         //added sources can be retreived
-        sources.add(urlId: firstUrlId, type: .suggestion, date: before)
-        sources.add(urlId: secondUrlId, type: .suggestion, date: before)
+        sources.add(urlId: firstUrlId, type: .suggestion, date: before, sessionId: sessionId)
+        sources.add(urlId: secondUrlId, type: .suggestion, date: before, sessionId: sessionId)
         XCTAssertEqual(sources.count, 2)
         var firstSource = try XCTUnwrap(sources.get(urlId: firstUrlId))
         var secondSource = try XCTUnwrap(sources.get(urlId: secondUrlId))
@@ -38,26 +39,32 @@ class NoteSourceTests: XCTestCase {
 
         //re-adding sources with same url overwrites info when the source is of user type
         //nothing happens when the source is of type suggesion
-        sources.add(urlId: firstUrlId, type: .user, date: now)
-        sources.add(urlId: secondUrlId, type: .suggestion, date: now)
+        sources.add(urlId: firstUrlId, type: .user, date: now, sessionId: sessionId)
+        sources.add(urlId: secondUrlId, type: .suggestion, date: now, sessionId: sessionId)
         XCTAssertEqual(sources.count, 2)
         firstSource = try XCTUnwrap(sources.get(urlId: firstUrlId))
         secondSource = try XCTUnwrap(sources.get(urlId: secondUrlId))
         XCTAssertEqual(firstSource.addedAt, now)
         XCTAssertEqual(firstSource.type, .user)
+        XCTAssertEqual(firstSource.sessionId, sessionId)
         XCTAssertEqual(secondSource.addedAt, before)
         XCTAssertEqual(secondSource.type, .suggestion)
+        XCTAssertEqual(secondSource.sessionId, sessionId)
+
     }
 
     func testRemoveProtected() throws {
         let firstUrlId: UInt64 = 0
         let secondUrlId: UInt64 = 1
-        sources.add(urlId: firstUrlId, type: .user)
-        sources.add(urlId: secondUrlId, type: .suggestion)
+        let sessionId = UUID()
+        sources.add(urlId: firstUrlId, type: .user, sessionId: sessionId)
+        sources.add(urlId: secondUrlId, type: .suggestion, sessionId: sessionId)
 
         //removing a .user added source with isUserSourceProtected
         //only removes .suggested sources
         sources.remove(urlId: firstUrlId, isUserSourceProtected: true)
+        //it doesnt remove protected source event if sessionId matches
+        sources.remove(urlId: firstUrlId, isUserSourceProtected: true, sessionId: sessionId)
         sources.remove(urlId: secondUrlId, isUserSourceProtected: true)
         _ = try XCTUnwrap(sources.get(urlId: firstUrlId))
         XCTAssertEqual(sources.count, 1)
@@ -66,13 +73,28 @@ class NoteSourceTests: XCTestCase {
     func testRemoveUnprotected() throws {
         let firstUrlId: UInt64 = 0
         let secondUrlId: UInt64 = 1
-        sources.add(urlId: firstUrlId, type: .user)
-        sources.add(urlId: secondUrlId, type: .suggestion)
+        let sessionId = UUID()
+        sources.add(urlId: firstUrlId, type: .user, sessionId: sessionId)
+        sources.add(urlId: secondUrlId, type: .suggestion, sessionId: sessionId)
 
         //removing with not isUserSourceProtected removes all types of sources
         sources.remove(urlId: firstUrlId, isUserSourceProtected: false)
         sources.remove(urlId: secondUrlId, isUserSourceProtected: false)
         XCTAssertEqual(sources.count, 0)
+    }
+    func testRemoveWithSessionId() throws {
+        let firstUrlId: UInt64 = 0
+        let secondUrlId: UInt64 = 1
+        let firstSessionId = UUID()
+        let secondSessionId = UUID()
+        sources.add(urlId: firstUrlId, type: .suggestion, sessionId: firstSessionId)
+        sources.add(urlId: secondUrlId, type: .suggestion, sessionId: secondSessionId)
+
+        //only source with matching session id is removed
+        sources.remove(urlId: firstUrlId, sessionId: firstSessionId)
+        sources.remove(urlId: secondUrlId, sessionId: firstSessionId)
+        XCTAssertEqual(sources.count, 1)
+        _ = try XCTUnwrap(sources.get(urlId: secondUrlId))
     }
 
     func testSourcesScoreRefresh() throws {
@@ -82,13 +104,14 @@ class NoteSourceTests: XCTestCase {
             ("http://www.green.com", 3),
             ("http://www.blue.com", nil),
         ]
+        let sessionId = UUID()
         //At source addition, sources longTermScore objects are nil
         for row in dataSet {
             let id = LinkStore.createIdFor(row.0, title: "")
             if let selections = row.1 {
                 scoreStore.apply(to: id) { $0.textSelections = selections }
             }
-            sources.add(urlId: id, type: .user)
+            sources.add(urlId: id, type: .user, sessionId: sessionId)
             let source = try XCTUnwrap(sources.get(urlId: id))
             XCTAssertNil(source.longTermScore)
         }
@@ -116,6 +139,7 @@ class NoteSourceTests: XCTestCase {
         let oneDay = Double(24.0 * 60.0 * 60.0)
         let yesterday = now - oneDay
         let beforeYesterday = now - 2 * oneDay
+        let sessionId = UUID()
         
         let dataSet: [(String, Int, NoteSource.SourceType, Date)] = [
             //url, textAddCount, sourceType, addDate
@@ -137,7 +161,7 @@ class NoteSourceTests: XCTestCase {
                 $0.lastCreationDate = now
                 $0.textSelections = row.1
             }
-            sources.add(urlId: id, type: row.2, date: row.3)
+            sources.add(urlId: id, type: row.2, date: row.3, sessionId: sessionId)
         }
         //syncing note sources scores with db
         let expectation = self.expectation(description: "Score Refresh")

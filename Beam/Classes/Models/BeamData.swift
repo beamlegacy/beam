@@ -43,6 +43,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var clusteringManager: ClusteringManager
     var scope = Set<AnyCancellable>()
     var browsingTreeSender: BrowsingTreeSender?
+    let sessionId = UUID()
 
     var versionChecker: VersionChecker
 

@@ -18,11 +18,13 @@ public struct NoteSource: Codable {
         case urlId
         case addedAt
         case type
+        case sessionId
     }
 
     let urlId: UInt64
     let addedAt: Date
     let type: SourceType
+    var sessionId: UUID?
     var longTermScore: LongTermUrlScore?
 
     var domain: String {
@@ -52,8 +54,8 @@ public class NoteSources: Codable {
         return sources[urlId]
     }
 
-    public func add(urlId: UInt64, type: NoteSource.SourceType, date: Date = Date()) {
-        let sourceToAdd = NoteSource(urlId: urlId, addedAt: date, type: type)
+    public func add(urlId: UInt64, type: NoteSource.SourceType, date: Date = Date(), sessionId: UUID) {
+        let sourceToAdd = NoteSource(urlId: urlId, addedAt: date, type: type, sessionId: sessionId)
         switch type {
         case .suggestion: sources[urlId] = sources[urlId] ?? sourceToAdd
         case .user: sources[urlId] = sourceToAdd
@@ -63,9 +65,13 @@ public class NoteSources: Codable {
         self.sources[score.urlId]?.longTermScore = score
     }
 
-    func remove(urlId: UInt64, isUserSourceProtected: Bool = true) {
+    // if sessionId is not nil, removes source only if its session id matches
+    func remove(urlId: UInt64, isUserSourceProtected: Bool = true, sessionId: UUID? = nil) {
         guard let source = sources[urlId] else { return }
         if source.type == .user, isUserSourceProtected { return }
+        if let sessionId = sessionId,
+           let sourceSessionId = source.sessionId,
+           sessionId != sourceSessionId { return }
         sources[urlId] = nil
     }
 
