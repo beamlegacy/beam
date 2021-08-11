@@ -76,7 +76,7 @@ enum PasswordImporter {
     static func exportPasswords(from store: PasswordStore, toCSV file: URL) throws {
         let serialQueue = DispatchQueue(label: "exportPasswordsQueue")
         var allEntries: [PasswordManagerEntry] = []
-        var csvString = "\("URL"), \("Username"),\("Password")\n"
+        var csvString = "\("URL"),\("Username"),\("Password")\n"
 
         serialQueue.async {
             store.fetchAll { entries in
@@ -87,8 +87,8 @@ enum PasswordImporter {
             for entry in allEntries {
                 store.password(host: entry.minimizedHost, username: entry.username) { password in
                     if let passwordStr = password {
-                        csvString.append("\(entry.minimizedHost), \(entry.username), \(passwordStr)\n")
-
+                        let row = encodeToCSV(entry: entry, password: passwordStr)
+                        csvString.append("\(row)\n")
                     }
                 }
             }
@@ -102,8 +102,20 @@ enum PasswordImporter {
         }
     }
 
+    static func encodeToCSV(entry: PasswordManagerEntry, password: String) -> String {
+        [entry.minimizedHost, entry.username, password]
+            .map(\.quotedForCSV)
+            .joined(separator: ",")
+    }
+
     static func importPasswords(fromCSV file: URL, into store: PasswordStore) throws {
         let text = try String(contentsOf: file, encoding: .utf8)
         try importPasswords(fromCSV: text, into: store)
+    }
+}
+
+fileprivate extension String {
+    var quotedForCSV: String {
+        "\"" + replacingOccurrences(of: "\"", with: "\"\"") + "\""
     }
 }
