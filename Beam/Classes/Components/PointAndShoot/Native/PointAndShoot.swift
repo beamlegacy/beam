@@ -25,6 +25,7 @@ public struct NoteInfo: Encodable {
 // swiftlint:disable file_length
 class PointAndShoot: WebPageHolder, ObservableObject {
     var webPositions: WebPositions = WebPositions()
+    var data: BeamData = AppDelegate.main.data
     private let scorer: BrowsingScorer
     @Published var activePointGroup: ShootGroup?
     @Published var activeSelectGroup: ShootGroup?
@@ -410,7 +411,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
         let pendingQuotes = text2Quote(texts, sourceUrl.absoluteString)
         // Adds urlId to current card source
         let urlId = LinkStore.createIdFor(sourceUrl.absoluteString, title: nil)
-        currentCard.sources.add(urlId: urlId, type: .user)
+        currentCard.sources.add(urlId: urlId, type: .user, sessionId: data.sessionId)
         // Add all quotes to source Note
         if let source = self.page.addToNote(allowSearchResult: true) {
             pendingQuotes.then({ resolvedQuotes in
