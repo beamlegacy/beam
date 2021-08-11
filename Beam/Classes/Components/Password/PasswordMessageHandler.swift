@@ -40,17 +40,21 @@ class PasswordMessageHandler: BeamMessageHandler<PasswordMessages> {
                 Logger.shared.logError("Ignoring message as body is not a String", category: .web)
                 return
             }
-            passwordOverlayController.updateInputFocus(for: elementId, becomingActive: true)
+            passwordOverlayController.inputFieldDidGainFocus(elementId)
 
         case PasswordMessages.password_textInputFocusOut:
             guard let elementId = messageBody as? String else {
                 Logger.shared.logError("Ignoring message as body is not a String", category: .web)
                 return
             }
-            passwordOverlayController.updateInputFocus(for: elementId, becomingActive: false)
+            passwordOverlayController.inputFieldDidLoseFocus(elementId)
 
         case PasswordMessages.password_formSubmit:
-            passwordOverlayController.handleWebFormSubmit()
+            guard let elementId = messageBody as? String else {
+                Logger.shared.logError("Ignoring message as body is not a String", category: .web)
+                return
+            }
+            passwordOverlayController.handleWebFormSubmit(with: elementId)
 
         case PasswordMessages.password_scroll:
             let passwordBody = messageBody as? [String: AnyObject]

@@ -95,7 +95,6 @@ function password_scroll(_ev) {
 }
 
 function password_elementDidLoseFocus(event) {
-    beam_postSubmitMessage(event)
     if (event.target !== null && beam_isTextField(event.target)) {
         window.webkit.messageHandlers.password_textInputFocusOut.postMessage(beam_getOrCreateBeamId(event.target))
     }
@@ -110,7 +109,7 @@ function beam_mutationCallback(changes, observer) {
     window.webkit.messageHandlers.password_textInputFields.postMessage(JSON.stringify(textFields))
 }
 
-function password_sendTextFields() {
+function beam_sendTextFields() {
     let observer = new MutationObserver(beam_mutationCallback)
     observer.observe(document, {childList: true, subtree: true})
     let textFields = beam_getTextFieldsInDocument(document, null)
@@ -144,6 +143,8 @@ function beam_setTextFieldValues(fields_json) {
         let element = beam_getElementById(field.id)
         if (element) {
             element.value = field.value
+            let event = new Event('input')
+            element.dispatchEvent(event)
             if (field.background) {
                 var styleAttribute = document.createAttribute('style')
                 styleAttribute.value = 'background-color:' + background

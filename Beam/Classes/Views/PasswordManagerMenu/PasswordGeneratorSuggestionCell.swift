@@ -7,11 +7,6 @@
 
 import SwiftUI
 
-enum PasswordGeneratorAction {
-    case generate
-    case togglePreferences
-}
-
 struct PasswordGeneratorSuggestionCell: View {
     @ObservedObject var viewModel: PasswordGeneratorViewModel
     var body: some View {

@@ -26,6 +26,10 @@ class PasswordOverlayController: WebPageHolder {
     private let decoder: JSONDecoder
     private var autocompleteContext: WebAutocompleteContext
     private var currentlyFocusedElementId: String?
+    private var previouslyFocusedElementId: String?
+    private var lastFocusOutTimestamp: Date = .distantPast
+    private var disabledForSubmit = false
+    private var valuesOnFocusOut: [String: String]?
 
     init(passwordStore: PasswordStore, userInfoStore: UserInformationsStore) {
         self.passwordStore = passwordStore
@@ -38,7 +42,7 @@ class PasswordOverlayController: WebPageHolder {
     func detectInputFields() {
         autocompleteContext.clear()
         dismissPasswordManagerMenu()
-        page.executeJS("password_sendTextFields()", objectName: nil)
+        page.executeJS("beam_sendTextFields()", objectName: nil)
     }
 
     func updateInputFields(with jsResult: String) {
@@ -55,18 +59,19 @@ class PasswordOverlayController: WebPageHolder {
                 }
             }
             elements = deduplicated
-            Logger.shared.logDebug("🔑 decoded: \(elements)", category: .javascript)
+            Logger.shared.logDebug("Detected fields: \(elements)", category: .passwordManager)
         } catch {
-            Logger.shared.logError(String(describing: error), category: .javascript)
+            Logger.shared.logError(String(describing: error), category: .passwordManager)
             return
         }
 
-        let addedIds = autocompleteContext.update(with: elements) // + webPage
+        let addedIds = autocompleteContext.update(with: elements, on: getPageHost())
         if !addedIds.isEmpty {
             page.executeJS("beam_installSubmitHandler()", objectName: nil).then { _ in
                 self.installFocusHandlers(addedIds: addedIds)
             }
         }
+        disabledForSubmit = false
     }
 
     private func installFocusHandlers(addedIds: [String]) {
@@ -75,14 +80,13 @@ class PasswordOverlayController: WebPageHolder {
         page.executeJS(focusScript, objectName: nil)
     }
 
-    func updateInputFocus(for elementId: String, becomingActive: Bool) {
-        Logger.shared.logDebug("Text field \(elementId) changed focus to \(becomingActive).", category: .passwordManager)
-        guard becomingActive else {
-            dismissPasswordManagerMenu()
-            currentlyFocusedElementId = nil
+    func inputFieldDidGainFocus(_ elementId: String) {
+        Logger.shared.logDebug("Text field \(elementId) gained focus.", category: .passwordManager)
+        guard elementId != currentlyFocusedElementId else {
             return
         }
-        guard elementId != currentlyFocusedElementId else {
+        guard elementId != previouslyFocusedElementId || lastFocusOutTimestamp.timeIntervalSinceNow < -0.1 else {
+            Logger.shared.logDebug("Focus in detected within 100ms after focus out on the same field, ignoring", category: .passwordManager)
             return
         }
         guard let autocompleteGroup = autocompleteContext.autocompleteGroup(for: elementId) else {
@@ -90,19 +94,50 @@ class PasswordOverlayController: WebPageHolder {
             currentlyFocusedElementId = nil
             return
         }
+        guard !disabledForSubmit else {
+            disabledForSubmit = false
+            return
+        }
         currentlyFocusedElementId = elementId
+        if autocompleteGroup.isAmbiguous, let host = page.url?.minimizedHost {
+            passwordStore.entries(for: host, exact: false) { entries in
+                let createAccount = entries.isEmpty
+                self.showPasswordManagerMenu(for: elementId, withPasswordGenerator: createAccount)
+            }
+        } else {
+            switch autocompleteGroup.action {
+            case .createAccount:
+                self.showPasswordManagerMenu(for: elementId, withPasswordGenerator: true)
+            case .login:
+                self.showPasswordManagerMenu(for: elementId, withPasswordGenerator: false)
+            default:
+                break
+            }
+        }
+    }
+
+    func inputFieldDidLoseFocus(_ elementId: String) {
+        Logger.shared.logDebug("Text field \(elementId) lost focus.", category: .passwordManager)
+        requestValuesFromTextFields { dict in
+            self.valuesOnFocusOut = dict
+        }
+        dismissPasswordManagerMenu()
+        lastFocusOutTimestamp = Date()
+        previouslyFocusedElementId = elementId
+        currentlyFocusedElementId = nil
+    }
+
+    private func showPasswordManagerMenu(for elementId: String, withPasswordGenerator passwordGenerator: Bool) {
         requestWebFieldFrame(elementId: elementId) { frame in
             if let frame = frame {
                 DispatchQueue.main.async {
-                    switch autocompleteGroup.action {
-                    case .createAccount:
-                        self.showPasswordManagerMenu(at: frame, withPasswordGenerator: true)
-                    case .login:
-                        self.showPasswordManagerMenu(at: frame, withPasswordGenerator: false)
-                    default:
-                        break
+                    guard self.currentlyFocusedElementId == elementId else {
+                        return
                     }
+                    self.showPasswordManagerMenu(at: frame, withPasswordGenerator: passwordGenerator)
                 }
+            } else {
+                Logger.shared.logError("Could not get frame for element \(elementId)", category: .passwordManager)
             }
         }
     }
@@ -176,19 +211,12 @@ class PasswordOverlayController: WebPageHolder {
         return window.convertPoint(toScreen: localPoint)
     }
 
-    func handleWebFormSubmit() {
-        let fields = autocompleteContext.allInputFields
-        let ids = fields.map(\.id)
-        let formattedList = ids.map { "\"\($0)\"" }.joined(separator: ",")
-        let script = "beam_getTextFieldValues('[\(formattedList)]')"
-        page.executeJS(script, objectName: nil).then { jsResult in
-            if let jsonString = jsResult as? String,
-               let jsonData = jsonString.data(using: .utf8),
-               let values = try? self.decoder.decode([String].self, from: jsonData) {
-                let dict = Dictionary(uniqueKeysWithValues: zip(ids, values))
-                self.updateStoredValues(dict)
-            } else {
-                Logger.shared.logWarning("Unable to decode text field values from \(String(describing: jsResult))", category: .passwordManager)
+    func handleWebFormSubmit(with elementId: String) {
+        Logger.shared.logDebug("Submit: \(elementId)", category: .passwordManager)
+        disabledForSubmit = true // disable focus handler temporarily, to prevent the password manager menu from reappearing if the JS code triggers a selection in a text field
+        requestValuesFromTextFields { dict in
+            if let values = dict ?? self.valuesOnFocusOut {
+                self.updateStoredValues(with: values)
             }
         }
     }
@@ -206,13 +234,32 @@ class PasswordOverlayController: WebPageHolder {
         return host
     }
 
-    private func updateStoredValues(_ values: [String: String]) {
+    private func requestValuesFromTextFields(completion: @escaping (([String: String]?) -> Void)) {
+        let ids = autocompleteContext.allInputFieldIds
+        let formattedList = ids.map { "\"\($0)\"" }.joined(separator: ",")
+        let script = "beam_getTextFieldValues('[\(formattedList)]')"
+        page.executeJS(script, objectName: nil).then { jsResult in
+            if let jsonString = jsResult as? String,
+               let jsonData = jsonString.data(using: .utf8),
+               let values = try? self.decoder.decode([String].self, from: jsonData) {
+                let dict = Dictionary(uniqueKeysWithValues: zip(ids, values))
+                completion(dict)
+            } else {
+                Logger.shared.logWarning("Unable to decode text field values from \(String(describing: jsResult))", category: .passwordManager)
+                completion(nil)
+            }
+        }
+    }
+
+    private func updateStoredValues(with values: [String: String]) {
         guard let host = getPageHost() else { return }
         guard let (loginFieldIds, passwordFieldIds) = passwordFieldIdsForStorage() else {
             Logger.shared.logDebug("Login/password fields not found", category: .passwordManager)
             return
         }
-        guard let login = values.valuesMatchingKeys(in: loginFieldIds).first, let password = values.valuesMatchingKeys(in: passwordFieldIds).first else {
+        let firstNonEmptyLogin = values.valuesMatchingKeys(in: loginFieldIds).first { !$0.isEmpty }
+        let firstNonEmptyPassword = values.valuesMatchingKeys(in: passwordFieldIds).first { !$0.isEmpty }
+        guard let login = firstNonEmptyLogin, let password = firstNonEmptyPassword else {
             Logger.shared.logDebug("No field match for submitted values in \(values)", category: .passwordManager)
             return
         }
@@ -242,20 +289,32 @@ class PasswordOverlayController: WebPageHolder {
         let currentPasswordIds = inputFields.filter { $0.role == .currentPassword }.map(\.id)
         let passwordIds = newPasswordIds + currentPasswordIds
         guard !passwordIds.isEmpty else {
+            Logger.shared.logWarning("Storage: password fields not found", category: .passwordManager)
+            dumpInputFields(inputFields)
             return nil
         }
         var usernameIds: [String]
         if !newPasswordIds.isEmpty {
+            Logger.shared.logDebug("Storage: new password field(s) found", category: .passwordManager)
             usernameIds = inputFields.filter { $0.role == .newUsername }.map(\.id)
         } else {
+            Logger.shared.logDebug("Storage: current password field(s) found", category: .passwordManager)
             usernameIds = []
         }
         usernameIds += inputFields.filter { $0.role == .currentUsername }.map(\.id)
         usernameIds += inputFields.filter { $0.role == .email }.map(\.id)
         guard !usernameIds.isEmpty else {
+            Logger.shared.logWarning("Storage: login fields not found", category: .passwordManager)
+            dumpInputFields(inputFields)
             return nil
         }
         return (usernameIds: usernameIds, passwordIds: passwordIds)
+    }
+
+    private func dumpInputFields(_ inputFields: [WebInputField]) {
+        for field in inputFields {
+            Logger.shared.logDebug(" - field id \(field.id), role: \(field.role)")
+        }
     }
 }
 
@@ -267,8 +326,8 @@ extension PasswordOverlayController: PasswordManagerMenuDelegate {
     }
 
     func fillCredentials(_ entry: PasswordManagerEntry) {
-        guard let elementId = currentlyFocusedElementId, let autocompleteGroup = autocompleteContext.autocompleteGroup(for: elementId), autocompleteGroup.action == .login else {
-            Logger.shared.logError("AutocompleteContext mismatch for id \(String(describing: currentlyFocusedElementId))", category: .passwordManager)
+        guard let elementId = currentlyFocusedElementId, let autocompleteGroup = autocompleteContext.autocompleteGroup(for: elementId), autocompleteGroup.action == .login || autocompleteGroup.isAmbiguous else {
+            Logger.shared.logError("AutocompleteContext (login) mismatch for id \(String(describing: currentlyFocusedElementId))", category: .passwordManager)
             dismissPasswordManagerMenu()
             return
         }
@@ -277,12 +336,17 @@ extension PasswordOverlayController: PasswordManagerMenuDelegate {
                 Logger.shared.logError("PasswordStore did not provide password for selected entry.", category: .passwordManager)
                 return
             }
+            Logger.shared.logDebug(String(describing: autocompleteGroup.relatedFields), category: .passwordManager)
             let autofill = autocompleteGroup.relatedFields.compactMap { field -> WebFieldAutofill? in
                 switch field.role {
                 case .currentUsername:
                     return WebFieldAutofill(id: field.id, value: entry.username, background: nil)
+                case .newUsername:
+                    return autocompleteGroup.isAmbiguous ? WebFieldAutofill(id: field.id, value: entry.username, background: nil) : nil
                 case .currentPassword:
                     return WebFieldAutofill(id: field.id, value: password, background: nil)
+                case .newPassword:
+                    return autocompleteGroup.isAmbiguous ? WebFieldAutofill(id: field.id, value: password, background: nil) : nil
                 default:
                     return nil
                 }
@@ -295,15 +359,18 @@ extension PasswordOverlayController: PasswordManagerMenuDelegate {
     }
 
     func fillNewPassword(_ password: String, dismiss: Bool = true) {
-        guard let elementId = currentlyFocusedElementId, let autocompleteGroup = autocompleteContext.autocompleteGroup(for: elementId), autocompleteGroup.action == .createAccount else {
-            Logger.shared.logError("AutocompleteContext mismatch for id \(String(describing: currentlyFocusedElementId))", category: .passwordManager)
+        guard let elementId = currentlyFocusedElementId, let autocompleteGroup = autocompleteContext.autocompleteGroup(for: elementId), autocompleteGroup.action == .createAccount || autocompleteGroup.isAmbiguous else {
+            Logger.shared.logError("AutocompleteContext (createAccount) mismatch for id \(String(describing: currentlyFocusedElementId))", category: .passwordManager)
             dismissPasswordManagerMenu()
             return
         }
         let autofill = autocompleteGroup.relatedFields.compactMap { field -> WebFieldAutofill? in
-            if field.role == .newPassword {
+            switch field.role {
+            case .newPassword:
                 return WebFieldAutofill(id: field.id, value: password, background: nil)
-            } else {
+            case .currentPassword:
+                return autocompleteGroup.isAmbiguous ? WebFieldAutofill(id: field.id, value: password, background: nil) : nil
+            default:
                 return nil
             }
         }
@@ -368,10 +435,4 @@ extension PasswordOverlayController: PasswordManagerMenuDelegate {
             Logger.shared.logError("JSON encoding failure: \(error.localizedDescription))", category: .general)
         }
     }
-}
-
-private class FirstResponderWindow: NSWindow {
-    override var acceptsFirstResponder: Bool { true }
-    override var canBecomeKey: Bool { true }
-    override var canBecomeMain: Bool { true }
 }
