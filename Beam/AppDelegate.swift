@@ -58,7 +58,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         CoreDataManager.shared.setup()
         LibrariesManager.shared.configure()
         ContentBlockingManager.shared.setup()
-        PasswordGenerator.shared.setup()
         BeamObjectManager.setup()
 
         data = BeamData()
