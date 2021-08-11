@@ -25,6 +25,7 @@ class TopDomainDelegate: NSObject, URLSessionDataDelegate {
     }
 
     var processedRecordCount = 0
+    var totalDiffTime = 0.0
 
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive chunk: Data) {
         let lfValue = Character("\n").asciiValue!
@@ -52,26 +53,61 @@ class TopDomainDelegate: NSObject, URLSessionDataDelegate {
             headerSkipped = true
         }
 
-        serial.async {
-            guard !self.isCancelled else { return }
-            let seq = CSVUnescapingSequence(input: String(decoding: data, as: UTF8.self))
-            let parser = CSVParser(input: seq)
-            for columns in parser {
-                if self.processedRecordCount >= Configuration.topDomainDBMaxSize {
-                    dataTask.cancel()
-                    self.cancelRequest = true
-                    return
-                }
+        parseData(dataTask, data)
+    }
 
-                assert(columns.count == 12)
-                var record = TopDomainRecord(url: String(columns[2]), globalRank: Int(columns[0])!)
-                do {
-                    try self.db.insert(topDomain: &record)
-                    self.processedRecordCount += 1
+    internal func parseData(_ dataTask: URLSessionDataTask, _ data: Data) {
+        /*
+         If using `serial.async` this block will continue and `hasStopped` has no meaning as the request will be finished
+         before all data has been inserted into the DB.
 
-                } catch {
-                    Logger.shared.logDebug("while inserting top domain record: \(error)", category: .topDomain)
+         Removed async instead.
+         */
+        guard !self.isCancelled else { return }
+        let input = String(decoding: data, as: UTF8.self)
+
+        let seq = CSVUnescapingSequence(input: input)
+        let parser = CSVParser(input: seq)
+        let localTimer = BeamDate.now
+
+        serial.sync {
+            do {
+                try self.db.dbWriter.write { db in
+
+                    var localCount = 0
+
+                    for columns in parser {
+                        if self.processedRecordCount >= Configuration.topDomainDBMaxSize {
+                            dataTask.cancel()
+                            self.cancelRequest = true
+                            self.totalDiffTime += BeamDate.now.timeIntervalSince(localTimer)
+
+                            Logger.shared.logWarning("Reached \(self.processedRecordCount) total entries. Parsed \(localCount) entries",
+                                                     category: .topDomain,
+                                                     localTimer: localTimer)
+                            return
+                        }
+
+                        guard columns.count == 12 else {
+                            Logger.shared.logError("CSV doesn't have 12 columns", category: .topDomain)
+                            return
+                        }
+
+                        var record = TopDomainRecord(url: String(columns[2]), globalRank: Int(columns[0])!)
+                        try record.insert(db)
+                        self.processedRecordCount += 1
+                        localCount += 1
+                    }
+
+                    self.totalDiffTime += BeamDate.now.timeIntervalSince(localTimer)
+
+                    Logger.shared.logDebug("Parsed \(localCount) entries",
+                                           category: .topDomain,
+                                           localTimer: localTimer)
                 }
+            } catch {
+                Logger.shared.logError("while inserting top domain record: \(error.localizedDescription)",
+                                       category: .topDomain)
             }
         }
     }
@@ -80,6 +116,17 @@ class TopDomainDelegate: NSObject, URLSessionDataDelegate {
         serial.async {
             self.hasStopped = true
         }
-        Logger.shared.logDebug("top domain CSV download completed with \(String(describing: error))", category: .topDomain)
+
+        let diff = String(format: "%.2f", totalDiffTime)
+
+        // -999 are cancelled requests
+        if let error = error, ((error as NSError).code != -999 || (error as NSError).domain != "NSURLErrorDomain") {
+            Logger.shared.logDebug("CSV download completed with error: \(error.localizedDescription) in \(diff)sec",
+                                   category: .topDomain)
+            return
+        }
+
+        Logger.shared.logDebug("CSV download and parsing completed in \(diff)sec", category: .topDomain)
+        Persistence.TopDomains.lastFetchedAt = BeamDate.now
     }
 }

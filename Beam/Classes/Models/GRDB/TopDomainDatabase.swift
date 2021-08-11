@@ -2,7 +2,7 @@ import GRDB
 
 struct TopDomainDatabase {
     static let shared = makeShared()
-    private var dbWriter: DatabaseWriter
+    private(set) var dbWriter: DatabaseWriter
 
     /// Creates a `GRDBDatabase`, and make sure the database schema is ready.
     init(_ dbWriter: DatabaseWriter) throws {
@@ -36,11 +36,15 @@ struct TopDomainDatabase {
             fatalError("Unresolved error \(error)")
         }
     }
+}
 
+// MARK: - Used for tests
+extension TopDomainDatabase {
     public static func empty() throws -> TopDomainDatabase {
-        return try TopDomainDatabase(DatabaseQueue())
+        try TopDomainDatabase(DatabaseQueue())
     }
 }
+// MARK: -
 
 struct TopDomainRecord {
     let url: String
@@ -80,16 +84,14 @@ enum TopDomainDatabaseError: Error {
 }
 
 extension TopDomainDatabase {
-    public func insert(topDomain: inout TopDomainRecord) throws {
-        try dbWriter.write { db in
-            try topDomain.insert(db)
-        }
-    }
-
     public func clear() throws {
         _ = try dbWriter.write { db in
             try TopDomainRecord.deleteAll(db)
         }
+    }
+
+    public func count() -> Int {
+        (try? dbWriter.read { db in try TopDomainRecord.fetchCount(db) }) ?? 0
     }
 
     /// Search the top domain database for the best hit completing the url.

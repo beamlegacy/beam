@@ -29,6 +29,10 @@ enum Persistence {
         @StandardStorable("browsingTree.userId") static var userId: String?
     }
 
+    enum TopDomains {
+        @StandardStorable("last_fetched_at") static var lastFetchedAt: Date?
+    }
+
     // swiftlint:disable nesting
     enum Sync {
         enum Databases {
