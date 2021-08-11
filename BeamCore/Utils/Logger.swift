@@ -117,44 +117,52 @@ public final class Logger {
         return String(data: logFileData, encoding: .utf8) ?? "Couldn't parse logs data"
     }
 
-    public func logInfo(_ message: String, category: LogCategory = .general) {
+    public func logInfo(_ message: String, category: LogCategory = .general, localTimer: Date? = nil) {
         if !hideLumberCategories.contains(category) {
             DDLogInfo("[\(category.rawValue)] \(message)")
         }
 
-        log(message, level: .info, category: category)
+        log(message, level: .info, category: category, localTimer: localTimer)
     }
 
-    public func logDebug(_ message: String, category: LogCategory = .general) {
+    public func logDebug(_ message: String, category: LogCategory = .general, localTimer: Date? = nil) {
         if !hideLumberCategories.contains(category) {
             DDLogDebug("[\(category.rawValue)] \(message)")
         }
 
-        log(message, level: .debug, category: category)
+        log(message, level: .debug, category: category, localTimer: localTimer)
     }
 
-    public func logError(_ message: String, category: LogCategory) {
+    public func logError(_ message: String, category: LogCategory, localTimer: Date? = nil) {
         if !hideLumberCategories.contains(category) {
             DDLogError("[\(category.rawValue)] 🛑 \(message)")
         }
 
-        log("🛑 \(message)", level: .error, category: category)
+        log("🛑 \(message)", level: .error, category: category, localTimer: localTimer)
     }
 
-    public func logWarning(_ message: String, category: LogCategory) {
+    public func logWarning(_ message: String, category: LogCategory, localTimer: Date? = nil) {
         if !hideLumberCategories.contains(category) {
             DDLogWarn("[\(category.rawValue)] ⚠️ \(message)")
         }
 
-        log("⚠️ \(message)", level: .default, category: category)
+        log("⚠️ \(message)", level: .default, category: category, localTimer: localTimer)
     }
 
-    private func log(_ message: String, level: OSLogType, category: LogCategory) {
+    private func log(_ message: String, level: OSLogType, category: LogCategory, localTimer: Date? = nil) {
         #if DEBUG
         if hideCategories.contains(category) { return }
 
         let log = OSLog(subsystem: subsystem, category: category.rawValue)
-        os_log("%{public}@", log: log, type: level, message)
+
+        if let localTimer = localTimer {
+            let diff = String(format: "%.2f", Date().timeIntervalSince(localTimer))
+
+            os_log("%{public}@ in %@sec", log: log, type: level, message, diff)
+        } else {
+            os_log("%{public}@", log: log, type: level, message)
+        }
+
         #endif
     }
 }
