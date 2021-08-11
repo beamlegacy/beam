@@ -55,13 +55,14 @@ class BrowsingTreeSender {
               config.dataStoreUrl != "$(BROWSING_TREE_URL)",
               let url = URL(string: config.dataStoreUrl)
         else {
-            Logger.shared.logError("Browsing tree sender credential issue", category: .general)
+            Logger.shared.logError("Sender credential issue", category: .browsingTreeSender)
             return nil
         }
         self.config = config
         self.url = url
         self.session = session
         encoder = JSONEncoder()
+        Logger.shared.logDebug("Sender successful instanciation", category: .browsingTreeSender)
     }
 
     private var request: URLRequest {
@@ -102,17 +103,18 @@ class BrowsingTreeSender {
     }
 
     func send(browsingTree: BrowsingTree, completion:  @escaping () -> Void = {}) {
+        Logger.shared.logDebug("Browsing tree sending start for tree id: \(browsingTree.root.id)", category: .browsingTreeSender)
         guard let payload = payload(browsingTree: browsingTree),
               !PreferencesManager.isPrivacyFilterEnabled else { return }
         let task = session.mockableUploadTask(with: request, from: payload) { data, response, error in
             if let error = error {
-                Logger.shared.logError("Browsing Tree sender Error: \(error)", category: .general)
+                Logger.shared.logError("Sender error for tree id: \(browsingTree.root.id). \(error.localizedDescription)", category: .browsingTreeSender)
                 completion()
                 return
                 }
             guard let response = response as? HTTPURLResponse,
                 (200...299).contains(response.statusCode) else {
-                Logger.shared.logError("Remote data store server error", category: .general)
+                Logger.shared.logError("Remote data store server error for tree id: \(browsingTree.root.id)", category: .browsingTreeSender)
                 completion()
                 return
             }
@@ -120,7 +122,7 @@ class BrowsingTreeSender {
                 mimeType == "application/json",
                 let data = data,
                 let dataString = String(data: data, encoding: .utf8) {
-                Logger.shared.logInfo("Remote data store response \(dataString)", category: .general)
+                Logger.shared.logInfo("Remote data store response \(dataString) for tree id: \(browsingTree.root.id)", category: .browsingTreeSender)
             }
             completion()
         }
