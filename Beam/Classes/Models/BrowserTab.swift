@@ -184,9 +184,9 @@ import Promises
     }
 
     var appendToIndexer: ((URL, Readability) -> Void)?
-    var creationDate: Date = Date()
+    var creationDate: Date = BeamDate.now
 
-    var lastViewDate: Date = Date()
+    var lastViewDate: Date = BeamDate.now
 
     public var onNewTabCreated: ((BrowserTab) -> Void)?
 
@@ -500,7 +500,7 @@ import Promises
     var navigationCount: Int = 0
 
     func startReading() {
-        lastViewDate = Date()
+        lastViewDate = BeamDate.now
         browsingTree.startReading()
     }
 

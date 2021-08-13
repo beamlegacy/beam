@@ -57,9 +57,12 @@ class DebugSection: Widget {
         if open {
             guard let nodeIdLayer = layers["noteIdBtn"],
                   let noteDatabaseLayer = layers["noteDatabaseIdBtn"],
-                  let defaultDatabaseIdLayer = layers["defaultDatabaseIdBtn"] else { return }
+                  let defaultDatabaseIdLayer = layers["defaultDatabaseIdBtn"],
+                  let previousChecksumLayer = layers["previousChecksum"] else { return }
             computedIdealSize.height += nodeIdLayer.bounds.height +
-                noteDatabaseLayer.bounds.height + defaultDatabaseIdLayer.bounds.height
+                noteDatabaseLayer.bounds.height +
+                defaultDatabaseIdLayer.bounds.height +
+                previousChecksumLayer.bounds.height
         }
         updateLayerVisibility()
     }
@@ -67,15 +70,20 @@ class DebugSection: Widget {
     func updateLayerVisibility() {
         guard let nodeIdLayer = layers["noteIdBtn"],
               let noteDatabaseLayer = layers["noteDatabaseIdBtn"],
-              let defaultDatabaseIdLayer = layers["defaultDatabaseIdBtn"] else { return }
+              let defaultDatabaseIdLayer = layers["defaultDatabaseIdBtn"],
+              let previousChecksumLayer = layers["previousChecksum"] else { return }
         nodeIdLayer.layer.isHidden = !open
         noteDatabaseLayer.layer.isHidden = !open
         defaultDatabaseIdLayer.layer.isHidden = !open
+        previousChecksumLayer.layer.isHidden = !open
         separatorLayer.isHidden = !open
     }
 
     private func setupDebugInfoLayer() {
-        let nodeDatabaseId = self.note.documentStruct?.databaseId.uuidString ?? "nil"
+        let nodeDatabaseId = self.note.documentStruct?.databaseId.uuidString ?? "-"
+        let localDocument = try? Document.fetchWithId(CoreDataManager.shared.mainContext, self.note.id)
+        let previousChecksum = localDocument?.beam_object_previous_checksum ?? "-"
+
         let defaultDatabaseId = DatabaseManager.defaultDatabase.id.uuidString
         let databaseTextColor = nodeDatabaseId == defaultDatabaseId ? BeamColor.Generic.text.nsColor : BeamColor.Shiraz.nsColor
 
@@ -86,7 +94,7 @@ class DebugSection: Widget {
             pasteboard.setString(self.note.id.uuidString, forType: .string)
         }, hovered: { [unowned self] hovered in
             self.layers["noteIdBtn"]?.layer.backgroundColor = hovered ? BeamColor.Generic.textSelection.cgColor : NSColor.clear.cgColor
-        }), origin: CGPoint(x: 0, y: 20))
+        }), origin: CGPoint(x: 0, y: 30))
 
         let databaseIdLayer = Layer.text("Database ID: \(nodeDatabaseId)", color: databaseTextColor, size: 12)
         addLayer(ButtonLayer("noteDatabaseIdBtn", databaseIdLayer, activated: {
@@ -95,7 +103,7 @@ class DebugSection: Widget {
             pasteboard.setString(nodeDatabaseId, forType: .string)
         }, hovered: { [unowned self] hovered in
             self.layers["noteDatabaseIdBtn"]?.layer.backgroundColor = hovered ? BeamColor.Generic.textSelection.cgColor : NSColor.clear.cgColor
-        }), origin: CGPoint(x: 0, y: 40))
+        }), origin: CGPoint(x: 0, y: 50))
 
         let defaultDatabaseIdLayer = Layer.text("Default Database ID: \(defaultDatabaseId)", color: databaseTextColor, size: 12)
         addLayer(ButtonLayer("defaultDatabaseIdBtn", defaultDatabaseIdLayer, activated: {
@@ -104,44 +112,22 @@ class DebugSection: Widget {
             pasteboard.setString(defaultDatabaseId, forType: .string)
         }, hovered: { [unowned self] hovered in
             self.layers["defaultDatabaseIdBtn"]?.layer.backgroundColor = hovered ? BeamColor.Generic.textSelection.cgColor : NSColor.clear.cgColor
-        }), origin: CGPoint(x: 0, y: 60))
-    }
+        }), origin: CGPoint(x: 0, y: 70))
 
-    var layerFrameXPad = CGFloat(25)
-    func setupLayerFrame() {
-        guard let nodeIdLayer = layers["noteIdBtn"],
-              let noteDatabaseLayer = layers["noteDatabaseIdBtn"],
-              let defaultDatabaseIdLayer = layers["defaultDatabaseIdBtn"] else { return }
-        let space: CGFloat = 10.0
-
-        nodeIdLayer.frame = CGRect(
-            origin: CGPoint(x: nodeIdLayer.frame.origin.x, y: 20 + space),
-            size: CGSize(
-                width: nodeIdLayer.frame.width,
-                height: nodeIdLayer.frame.height
-            )
-        )
-        noteDatabaseLayer.frame = CGRect(
-            origin: CGPoint(x: noteDatabaseLayer.frame.origin.x, y: (20*2)+space),
-            size: CGSize(
-                width: noteDatabaseLayer.frame.width,
-                height: noteDatabaseLayer.frame.height
-            )
-        )
-        defaultDatabaseIdLayer.frame = CGRect(
-            origin: CGPoint(x: defaultDatabaseIdLayer.frame.origin.x, y: (20*3)+space),
-            size: CGSize(
-                width: defaultDatabaseIdLayer.frame.width,
-                height: defaultDatabaseIdLayer.frame.height
-            )
-        )
+        let previousChecksumIdLayer = Layer.text("Previous Checksum: \(previousChecksum)", color: BeamColor.Generic.text.nsColor, size: 12)
+        addLayer(ButtonLayer("previousChecksum", previousChecksumIdLayer, activated: {
+            let pasteboard = NSPasteboard.general
+            pasteboard.clearContents()
+            pasteboard.setString(previousChecksum, forType: .string)
+        }, hovered: { [unowned self] hovered in
+            self.layers["previousChecksum"]?.layer.backgroundColor = hovered ? BeamColor.Generic.textSelection.cgColor : NSColor.clear.cgColor
+        }), origin: CGPoint(x: 0, y: 90))
     }
 
     override func updateSubLayersLayout() {
         super.updateSubLayersLayout()
 
         CATransaction.disableAnimations {
-            setupLayerFrame()
             separatorLayer.frame = CGRect(x: 0, y: textLayer.frame.maxY + 4, width: 560, height: 1)
         }
     }

@@ -157,7 +157,7 @@ public final class Logger {
         let log = OSLog(subsystem: subsystem, category: category.rawValue)
 
         if let localTimer = localTimer {
-            let diff = String(format: "%.2f", Date().timeIntervalSince(localTimer))
+            let diff = String(format: "%.2f", BeamDate.now.timeIntervalSince(localTimer))
 
             os_log("%{public}@ in %@sec", log: log, type: level, message, diff)
         } else {

@@ -54,7 +54,7 @@ public class NoteSources: Codable {
         return sources[urlId]
     }
 
-    public func add(urlId: UInt64, type: NoteSource.SourceType, date: Date = Date(), sessionId: UUID) {
+    public func add(urlId: UInt64, type: NoteSource.SourceType, date: Date = BeamDate.now, sessionId: UUID) {
         let sourceToAdd = NoteSource(urlId: urlId, addedAt: date, type: type, sessionId: sessionId)
         switch type {
         case .suggestion: sources[urlId] = sources[urlId] ?? sourceToAdd

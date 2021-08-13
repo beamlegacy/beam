@@ -1,3 +1,4 @@
+// swiftlint:disable file_length
 import Foundation
 import BeamCore
 
@@ -8,7 +9,7 @@ protocol BeamObjectManagerDelegateProtocol {
 
     // Called when `BeamObjectManager` wants to store all existing `Document` as `BeamObject`
     // it will call this method
-    func saveAllOnBeamObjectApi(_ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask?
+    func saveAllOnBeamObjectApi(_ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> APIRequest?
 }
 
 protocol BeamObjectManagerDelegate: class, BeamObjectManagerDelegateProtocol {
@@ -23,6 +24,9 @@ protocol BeamObjectManagerDelegate: class, BeamObjectManagerDelegateProtocol {
 
     /// Returns all objects, used to save all of them as beam objects
     func allObjects() throws -> [BeamObjectType]
+
+    /// Will be called before savingAll objects
+    func willSaveAllOnBeamObjectApi()
 
     /// When doing manual conflict management. `object` and `remoteObject` can be the same if the conflict was only
     /// because of a checksum issue, when we locally have stored previousChecksum but it's been deleted on the server
@@ -75,12 +79,15 @@ extension BeamObjectManagerDelegate {
         }
     }
 
-    func saveAllOnBeamObjectApi(_ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> URLSessionTask? {
+    func saveAllOnBeamObjectApi(_ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> APIRequest? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw APIRequestError.notAuthenticated
         }
 
-        return try saveOnBeamObjectsAPI(try allObjects(), Self.conflictPolicy) { result in
+        self.willSaveAllOnBeamObjectApi()
+
+        let toSaveObjects = try allObjects()
+        return try saveOnBeamObjectsAPI(toSaveObjects, Self.conflictPolicy) { result in
             switch result {
             case .failure(let error): completion(.failure(error))
             case .success: completion(.success(true))
@@ -117,7 +124,7 @@ extension BeamObjectManagerDelegate {
     @discardableResult
     func saveOnBeamObjectsAPI(_ objects: [BeamObjectType],
                               _ conflictPolicyForSave: BeamObjectConflictResolution = .replace,
-                              _ completion: @escaping ((Swift.Result<[BeamObjectType], Error>) -> Void)) throws -> URLSessionTask? {
+                              _ completion: @escaping ((Swift.Result<[BeamObjectType], Error>) -> Void)) throws -> APIRequest? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw APIRequestError.notAuthenticated
         }
@@ -136,7 +143,7 @@ extension BeamObjectManagerDelegate {
             switch result {
             case .failure(let error):
                 Logger.shared.logError("Could not save all \(objectsToSave.count) \(BeamObjectType.beamObjectTypeName) objects: \(error.localizedDescription)",
-                                       category: .databaseNetwork)
+                                       category: .beamObjectNetwork)
 
                 if case BeamObjectManagerObjectError<BeamObjectType>.invalidChecksum = error {
                     self.manageInvalidChecksum(error, completion)
@@ -164,7 +171,7 @@ extension BeamObjectManagerDelegate {
 
     @discardableResult
     func deleteFromBeamObjectAPI(_ id: UUID,
-                                 _ completion: @escaping (Swift.Result<Bool, Error>) -> Void) throws -> URLSessionDataTask {
+                                 _ completion: @escaping (Swift.Result<Bool, Error>) -> Void) throws -> APIRequest {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw APIRequestError.notAuthenticated
         }
@@ -180,10 +187,26 @@ extension BeamObjectManagerDelegate {
     }
 
     @discardableResult
+    func deleteAllFromBeamObjectAPI(_ completion: @escaping (Swift.Result<Bool, Error>) -> Void) throws -> APIRequest {
+        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            throw APIRequestError.notAuthenticated
+        }
+
+        let objectManager = BeamObjectManager()
+
+        return try objectManager.deleteAll(BeamObjectType.beamObjectTypeName) { result in
+            switch result {
+            case .failure(let error): completion(.failure(error))
+            case .success: completion(.success(true))
+            }
+        }
+    }
+
+    @discardableResult
     // swiftlint:disable:next cyclomatic_complexity
     func refreshFromBeamObjectAPI(_ object: BeamObjectType,
                                   _ forced: Bool = false,
-                                  _ completion: @escaping ((Swift.Result<BeamObjectType?, Error>) -> Void)) throws -> URLSessionDataTask {
+                                  _ completion: @escaping ((Swift.Result<BeamObjectType?, Error>) -> Void)) throws -> APIRequest {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw APIRequestError.notAuthenticated
         }
@@ -237,7 +260,7 @@ extension BeamObjectManagerDelegate {
     @discardableResult
     func saveOnBeamObjectAPI(_ object: BeamObjectType,
                              _ conflictPolicyForSave: BeamObjectConflictResolution = .replace,
-                             _ completion: @escaping ((Swift.Result<BeamObjectType, Error>) -> Void)) throws -> URLSessionTask? {
+                             _ completion: @escaping ((Swift.Result<BeamObjectType, Error>) -> Void)) throws -> APIRequest {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw APIRequestError.notAuthenticated
         }

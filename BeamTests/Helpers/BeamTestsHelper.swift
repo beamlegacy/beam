@@ -51,6 +51,7 @@ class BeamTestsHelper {
             Logger.shared.logError("Expected network calls: \(expectedNetworkCalls)", category: .network)
             Logger.shared.logError("Current network calls: \(APIRequest.networkCallFiles)", category: .network)
 
+            Logger.shared.logDebug("\nrm BeamTests/Vinyl/\(QuickSpec.current.name.c99ExtendedIdentifier)*", category: .network)
             fail("Expected network calls is different from current network calls")
         }
         saveAPIRequests()

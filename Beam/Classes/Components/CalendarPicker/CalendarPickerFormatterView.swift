@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import BeamCore
 
 // MARK: - SwiftUI View
 
@@ -65,7 +66,7 @@ class CalendarPickerFormatterView: FormatterView {
         }
     }
 
-    private var date = Date() {
+    private var date = BeamDate.now {
         didSet {
             dateHasChanged = true
             onDateChange?(date)

@@ -4,6 +4,11 @@ custom_rules:
     regex: 'print\(([^\)]*)\)'
     message: "Use Logger.shared.logDebug() instead"
     severity: warning
+  date_init:
+    name: "date_init"
+    regex: '(:?\s|\()Date\(\)'
+    message: "Use BeamDate.now instead"
+    severity: warning
 
 disabled_rules:
   - line_length

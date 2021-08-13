@@ -21,6 +21,8 @@ class PasswordManager {
 extension PasswordManager: BeamObjectManagerDelegate {
     static var conflictPolicy: BeamObjectConflictResolution = .replace
 
+    func willSaveAllOnBeamObjectApi() {}
+
     func receivedObjects(_ passwords: [PasswordRecord]) throws {
         Logger.shared.logDebug("Received \(passwords.count) passwords: updating",
                                category: .passwordNetwork)

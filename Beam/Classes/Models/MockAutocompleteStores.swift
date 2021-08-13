@@ -4,6 +4,7 @@
 //
 //  Created by Frank Lefebvre on 31/05/2021.
 //
+import BeamCore
 
 class MockCreditCardStore: CreditCardsStore {
 
@@ -11,7 +12,7 @@ class MockCreditCardStore: CreditCardsStore {
     private var creditCards: [CreditCard] = []
 
     init() {
-        creditCards.append(CreditCard(cardDescription: "Black Card", cardNumber: 000000000000000, cardHolder: "Jean-Louis Darmon", cardDate: Date()))
+        creditCards.append(CreditCard(cardDescription: "Black Card", cardNumber: 000000000000000, cardHolder: "Jean-Louis Darmon", cardDate: BeamDate.now))
     }
 
     func save(creditCard: CreditCard) {

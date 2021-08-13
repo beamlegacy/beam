@@ -45,12 +45,10 @@ class DatabaseManager {
                     return DatabaseStruct(database: database)
                 }
 
-                // Saved Database not found, or none has been set, going default.
+                // Saved Database not found, or none has been set, going for any existing one, if not create a `Default`
+                let database = (try? Database.fetchFirst(context)) ?? Database.fetchOrCreateWithTitle(context, "Default")
 
-                // TODO: loc
-                let result = Database.fetchOrCreateWithTitle(context, "Default")
-
-                if result.objectID.isTemporaryID {
+                if database.objectID.isTemporaryID {
                     do {
                         try saveContext(context: context)
                     } catch {
@@ -59,7 +57,7 @@ class DatabaseManager {
                     }
                 }
 
-                return DatabaseStruct(database: result)
+                return DatabaseStruct(database: database)
             }
         }
         set {
@@ -305,12 +303,14 @@ extension DatabaseManager {
         do {
             try Document.deleteWithPredicate(context, NSPredicate(format: "database_id = %@",
                                                                   id as CVarArg))
+            coredataDb.delete(context)
+
+            try Self.saveContext(context: context)
         } catch {
             Logger.shared.logError(error.localizedDescription, category: .database)
             completion(.failure(error))
             return
         }
-        coredataDb.delete(context)
 
         // Trigger updates for Advanced Settings
         NotificationCenter.default.post(name: .defaultDatabaseUpdate,
@@ -357,6 +357,7 @@ extension DatabaseManager {
                    completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
         do {
             try Database.deleteWithPredicate(CoreDataManager.shared.mainContext)
+            try Self.saveContext(context: CoreDataManager.shared.mainContext)
         } catch {
             Logger.shared.logError(error.localizedDescription, category: .coredata)
         }
@@ -797,6 +798,7 @@ extension DatabaseManager {
                     try Document.deleteWithPredicate(context, NSPredicate(format: "database_id = %@",
                                                                           database.id as CVarArg))
                     coreDataDatabase.delete(context)
+                    try Self.saveContext(context: context)
 
                     // Trigger updates for Advanced Settings
                     NotificationCenter.default.post(name: .defaultDatabaseUpdate, object: DatabaseManager.defaultDatabase)
@@ -817,6 +819,7 @@ extension DatabaseManager {
     func deleteAll(includedRemote: Bool = true) -> PromiseKit.Promise<Bool> {
         do {
             try Database.deleteWithPredicate(CoreDataManager.shared.mainContext)
+            try Self.saveContext(context: CoreDataManager.shared.mainContext)
         } catch {
             return Promise(error: error)
         }
@@ -985,6 +988,7 @@ extension DatabaseManager {
                     try Document.deleteWithPredicate(context, NSPredicate(format: "database_id = %@",
                                                                           database.id as CVarArg))
                     coreDataDatabase.delete(context)
+                    try Self.saveContext(context: context)
 
                     // Trigger updates for Advanced Settings
                     NotificationCenter.default.post(name: .defaultDatabaseUpdate,
@@ -1006,6 +1010,7 @@ extension DatabaseManager {
     func deleteAll(includedRemote: Bool = true) -> Promises.Promise<Bool> {
         do {
             try Database.deleteWithPredicate(CoreDataManager.shared.mainContext)
+            try Self.saveContext(context: CoreDataManager.shared.mainContext)
         } catch {
             return Promise(error)
         }
@@ -1161,11 +1166,14 @@ extension DatabaseManager {
 extension DatabaseManager: BeamObjectManagerDelegate {
     static var conflictPolicy: BeamObjectConflictResolution = .replace
 
+    func willSaveAllOnBeamObjectApi() {}
+
     //swiftlint:disable:next function_body_length
     func receivedObjects(_ databases: [DatabaseStruct]) throws {
-        Logger.shared.logDebug("Received \(databases.count) databases: updating",
+        Logger.shared.logDebug("Received \(databases.count) databases",
                                category: .databaseNetwork)
         let context = coreDataManager.backgroundContext
+        let localTimer = BeamDate.now
         var changedDatabases: [DatabaseStruct] = []
         try context.performAndWait {
             var changed = false
@@ -1180,8 +1188,32 @@ extension DatabaseManager: BeamObjectManagerDelegate {
                 }
 
                 var good = false
-                let originalTitle = database.title
+
+                var originalTitle = database.title
                 var index = 2
+
+                /*
+                 Will catch previous conflicted title and change from "title (2)" to "title" so if another conflict
+                 happens, it will change the title to "title (3)" and not "title (2) (2)".
+                 */
+                let range = NSRange(location: 0, length: database.title.count)
+                if let regex = try? NSRegularExpression(pattern: "\\A(.+) \\(([0-9-]+)\\)\\z"),
+                   let match = regex.firstMatch(in: originalTitle,
+                                                options: [],
+                                                range: range) {
+
+                    // Index
+                    var matchRange = match.range(at: 2)
+                    if let substringRange = Range(matchRange, in: originalTitle) {
+                        index = Int(String(originalTitle[substringRange])) ?? index
+                    }
+
+                    // Title
+                    matchRange = match.range(at: 1)
+                    if let substringRange = Range(matchRange, in: originalTitle) {
+                        originalTitle = String(originalTitle[substringRange])
+                    }
+                }
 
                 while !good {
                     do {
@@ -1193,6 +1225,8 @@ extension DatabaseManager: BeamObjectManagerDelegate {
                         good = true
                     } catch {
                         database.title = "\(originalTitle) (\(index))"
+                        Logger.shared.logWarning("Validation issue, new title is \(database.title)",
+                                                 category: .databaseNetwork)
                         index += 1
                     }
                 }
@@ -1210,10 +1244,13 @@ extension DatabaseManager: BeamObjectManagerDelegate {
             }
         }
 
-        try saveOnBeamObjectsAPI(changedDatabases)
+        if !changedDatabases.isEmpty {
+            try saveOnBeamObjectsAPI(changedDatabases)
+        }
 
-        Logger.shared.logDebug("Received \(databases.count) databases: updated",
-                               category: .databaseNetwork)
+        Logger.shared.logDebug("Received \(databases.count) databases: done. \(changedDatabases.count) remodified",
+                               category: .databaseNetwork,
+                               localTimer: localTimer)
     }
 
     func allObjects() throws -> [DatabaseStruct] {

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import BeamCore
 
 struct CalendarPickerView: View {
 
@@ -108,7 +109,7 @@ struct CalendarPickerView: View {
 }
 
 struct CalendarPickerView_Previews: PreviewProvider {
-    static let date = Date()
+    static let date = BeamDate.now
     static var customCalendar: Calendar {
         var calendar = Calendar(identifier: .hebrew)
         calendar.firstWeekday = 4

@@ -136,7 +136,11 @@ class PasswordsDB: PasswordStore {
                         entryId: self.id(for: password["host"], and: password["name"]),
                         host: password["host"],
                         name: password["name"],
-                        password: password["password"], createdAt: Date(), updatedAt: Date(), deletedAt: nil, previousCheckSum: nil)
+                        password: password["password"],
+                        createdAt: BeamDate.now,
+                        updatedAt: BeamDate.now,
+                        deletedAt: nil,
+                        previousCheckSum: nil)
                     try passwordRecord.insert(db)
                 }
             }
@@ -245,7 +249,11 @@ class PasswordsDB: PasswordStore {
                     entryId: id(for: host, and: username),
                     host: host,
                     name: username,
-                    password: encryptedPassword, createdAt: Date(), updatedAt: Date(), deletedAt: nil, previousCheckSum: nil)
+                    password: encryptedPassword,
+                    createdAt: BeamDate.now,
+                    updatedAt: BeamDate.now,
+                    deletedAt: nil,
+                    previousCheckSum: nil)
                 try passwordRecord.insert(db)
             }
         } catch let error {
@@ -279,7 +287,7 @@ class PasswordsDB: PasswordStore {
             if var password = try PasswordRecord
                 .filter(PasswordRecord.Columns.entryId == id(for: host, and: username) && PasswordRecord.Columns.deletedAt == nil)
                 .fetchOne(db) {
-                password.deletedAt = Date()
+                password.deletedAt = BeamDate.now
                 try password.update(db)
             }
         }
@@ -290,7 +298,7 @@ class PasswordsDB: PasswordStore {
         _ = try? dbPool.write { db in
             try PasswordRecord
                 .filter(Column("deleteAt") == nil)
-                .updateAll(db, Column("deleteAt").set(to: Date()))
+                .updateAll(db, Column("deleteAt").set(to: BeamDate.now))
         }
     }
 

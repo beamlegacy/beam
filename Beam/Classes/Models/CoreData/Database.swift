@@ -11,6 +11,7 @@ class Database: NSManagedObject, BeamCoreDataObject {
     }
 
     override func willSave() {
+        guard !isDeleted else { return }
         let keys = self.changedValues().keys
         if updated_at.timeIntervalSince(BeamDate.now) < -1.0 {
             if keys.contains("title") {

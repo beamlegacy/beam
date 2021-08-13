@@ -51,7 +51,7 @@ class Download: Identifiable, ObservableObject, Codable {
         self.suggestedFileName = suggestedFileName
 
         self.id = UUID()
-        self.downloadDate = Date()
+        self.downloadDate = BeamDate.now
 
         self.byteFormatter.allowedUnits = [.useGB, .useMB, .useKB]
         self.byteFormatter.countStyle = .file

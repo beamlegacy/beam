@@ -32,3 +32,14 @@ export BROWSING_TREE_URL="https://url"
 	- download and unzip `https://github.com/LucianoPAlmeida/variable-injector/releases/download/0.3.3/x86_64-apple-macosx.zip`
 	- copy `release/variable-injector` to `/usr/local/bin`.
 
+### Update Vinyl files and minimize MR size
+
+* Make sure you have the Vinyl files from `develop`: `git checkout develop BeamTests/Vinyl/`
+
+* Run the tests, if some network calls have changed you'll have errors,
+	copy/paste the Xcode console logs to a file, then `grep rm <log file>  | grep
+	Vinyl` will give you a list of files to delete. Copy paste it to a terminal.
+
+* Run the tests, then `make copy_vinyl_files`
+
+* Commit just the Vinyl files with `Update Vinyl` as a commit message

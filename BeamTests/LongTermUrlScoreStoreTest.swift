@@ -42,7 +42,7 @@ class LongTermUrlScoreStoreTests: XCTestCase {
         try assertCount(urlId: urlId, count: 1)
 
         //when the urlId's record already exists, it's updated
-        let date = Date()
+        let date = BeamDate.now
         db.updateLongTermUrlScore(urlId: urlId) { $0.lastCreationDate = date }
         score = try XCTUnwrap(db.getLongTermUrlScore(urlId: urlId))
         XCTAssertEqual(score.textSelections, 1)
@@ -53,7 +53,7 @@ class LongTermUrlScoreStoreTests: XCTestCase {
         
         //an other url id update doesnt interfere with previous one
         let otherUrlId: UInt64 = 1
-        let otherDate =  Date()
+        let otherDate = BeamDate.now
         db.updateLongTermUrlScore(urlId: otherUrlId) { $0.lastCreationDate = otherDate }
         score = try XCTUnwrap(db.getLongTermUrlScore(urlId: urlId))
         XCTAssertEqual(fetchedDate.timeIntervalSince1970, date.timeIntervalSince1970, accuracy: 1.0/1000.0)
@@ -69,7 +69,7 @@ class LongTermUrlScoreStoreTests: XCTestCase {
         //no score are fetched prior insertion
         XCTAssertEqual(db.getManyLongTermUrlScore(urlIds: idsToFetch).count, 0)
         for id in idsToInsert {
-            db.updateLongTermUrlScore(urlId: id) { $0.lastCreationDate = Date() }
+            db.updateLongTermUrlScore(urlId: id) { $0.lastCreationDate = BeamDate.now }
         }
         //2 of requested score ids were inserted prior fetch
         let fetchedScores = db.getManyLongTermUrlScore(urlIds: idsToFetch)

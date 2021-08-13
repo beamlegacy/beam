@@ -291,6 +291,7 @@
 		528286B625E806CD00C0CCEE /* NoteEditorUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 528286B525E806CD00C0CCEE /* NoteEditorUITests.swift */; };
 		5285672A26275A8D00DDBE45 /* BeamToBeam2Migration.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 5285672926275A8D00DDBE45 /* BeamToBeam2Migration.xcmappingmodel */; };
 		528910ED25FBBDE800492969 /* DocumentAPITypeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 528910EC25FBBDE800492969 /* DocumentAPITypeTests.swift */; };
+		528DBBC226C440820054F9FF /* BeamDate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C3077A25C311950027C4B1 /* BeamDate.swift */; };
 		528F296D26B449EA006857E5 /* Beam.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 528F296826B449EA006857E5 /* Beam.xcdatamodeld */; };
 		5291CEE8268B5969001645A2 /* PasswordManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5291CEE7268B5969001645A2 /* PasswordManager.swift */; };
 		5298268C2641A37500E9448C /* GithubButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5298268B2641A37500E9448C /* GithubButton.swift */; };
@@ -319,7 +320,6 @@
 		52B9A370264546570063AEEF /* OauthWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52B9A36F264546570063AEEF /* OauthWindow.swift */; };
 		52B9A39A264566D60063AEEF /* OauthButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52B9A399264566D60063AEEF /* OauthButton.swift */; };
 		52BB69A925CD5A49007A1173 /* OmniBarUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52BB69A825CD5A49007A1173 /* OmniBarUITests.swift */; };
-		52C3077B25C311950027C4B1 /* BeamDate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C3077A25C311950027C4B1 /* BeamDate.swift */; };
 		52C3078225C311B00027C4B1 /* BeamDateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C3078125C311B00027C4B1 /* BeamDateTests.swift */; };
 		52C3294225AC7A8E00EF11E7 /* DocumentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C3294125AC7A8E00EF11E7 /* DocumentTests.swift */; };
 		52CA917E26737CCB00DDF388 /* documents_title.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 52CA917D26737CCB00DDF388 /* documents_title.graphql */; };
@@ -4416,6 +4416,7 @@
 				96319D462616233E00D1CF31 /* String+URL.swift in Sources */,
 				96319D492616233E00D1CF31 /* BeamNote.swift in Sources */,
 				96319D58261626AC00D1CF31 /* BrowsingTree.swift in Sources */,
+				528DBBC226C440820054F9FF /* BeamDate.swift in Sources */,
 				96319D422616233E00D1CF31 /* BeamText+Links.swift in Sources */,
 				96319D412616233E00D1CF31 /* Logger.swift in Sources */,
 				96319D442616233E00D1CF31 /* RWLock.swift in Sources */,
@@ -4872,7 +4873,6 @@
 				525C235125BAFC6B001B9625 /* Merge.swift in Sources */,
 				526017F425AE074E00634695 /* ConsoleWindow.swift in Sources */,
 				33D5F85A2697478E002C4F25 /* PopupView.swift in Sources */,
-				52C3077B25C311950027C4B1 /* BeamDate.swift in Sources */,
 				961EC4F225B4511D009FA322 /* Layer.swift in Sources */,
 				A552DF2D25F12A3600570C85 /* OmniBarButton.swift in Sources */,
 				A52393A826541A06008D4C85 /* ModeViewTransitions.swift in Sources */,

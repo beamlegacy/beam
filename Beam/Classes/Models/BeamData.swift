@@ -239,7 +239,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     }
 
     var todaysName: String {
-        let today = Date()
+        let today = BeamDate.now
         return BeamDate.journalNoteTitle(for: today)
     }
 
@@ -256,7 +256,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
 
     func setupJournal() {
         journalCancellables = []
-        let note  = BeamNote.fetchOrCreateJournalNote(documentManager, date: Date())
+        let note  = BeamNote.fetchOrCreateJournalNote(documentManager, date: BeamDate.now)
         observeJournal(note: note)
         journal.append(note)
         _todaysNote = note

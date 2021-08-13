@@ -57,7 +57,7 @@ public class Score: Codable {
     public var isForeground: Bool = false
     public var lastCreationDate: Date?
 
-    public func readingTimeScore(toDate: Date = Date()) -> Float {
+    public func readingTimeScore(toDate: Date = BeamDate.now) -> Float {
         guard let lastEvent = lastEvent else { return Float(readingTimeToLastEvent) }
         return Float(readingTimeToLastEvent + lastEvent.readingTime(isForeground: isForeground, toDate: toDate))
     }

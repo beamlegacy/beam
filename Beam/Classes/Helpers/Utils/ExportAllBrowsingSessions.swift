@@ -24,8 +24,8 @@ func export_all_browsing_sessions() {
         Logger.shared.logError("Unable to get document direction", category: .web)
         return
     }
-    let sessionsFileURL = documentDirectory.appendingPathComponent("beam_all_browsing_sessions \(Date()).json")
-    let linksFileURL = documentDirectory.appendingPathComponent("beam_all_links \(Date()).json")
+    let sessionsFileURL = documentDirectory.appendingPathComponent("beam_all_browsing_sessions \(BeamDate.now).json")
+    let linksFileURL = documentDirectory.appendingPathComponent("beam_all_links \(BeamDate.now).json")
 
     // MARK: Browsing sessions
     guard let sessionsData = try? encoder.encode(sessions)

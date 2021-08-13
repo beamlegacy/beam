@@ -169,10 +169,10 @@ class SharingStatusViewModel: ObservableObject {
         }
         // Add a little time to emphasize in the UI that we're publishing...
         let minimumLoadingTime: Double = 1.5
-        let startTime = Date()
+        let startTime = BeamDate.now
         sharingUtils.makeNotePublic(!isPublic, documentManager: documentManager) { [weak self] _ in
             guard let self = self, !self.isCancelling else { return }
-            let delay = max(0, minimumLoadingTime - Date().timeIntervalSince(startTime))
+            let delay = max(0, minimumLoadingTime - BeamDate.now.timeIntervalSince(startTime))
             DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
                 withAnimation {
                     self.loadingState = .none

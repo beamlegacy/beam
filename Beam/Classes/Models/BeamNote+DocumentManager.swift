@@ -17,8 +17,14 @@ extension BeamNote: BeamNoteDocument {
             encoder.outputFormatting = .prettyPrinted
             let data = try encoder.encode(self)
 
+            if databaseId == nil {
+                Logger.shared.logError("DatabaseID should already have been set", category: .document)
+            }
+
+            let structDBId = databaseId ?? DatabaseManager.defaultDatabase.id
+
             return DocumentStruct(id: id,
-                                  databaseId: databaseId ?? DatabaseManager.defaultDatabase.id,
+                                  databaseId: structDBId,
                                   title: title,
                                   createdAt: creationDate,
                                   updatedAt: updateDate,
@@ -195,6 +201,7 @@ extension BeamNote: BeamNoteDocument {
                            let existingDocument = documents.first {
                             Logger.shared.logError("\(documents.count) other documents, fetching existing one",
                                                    category: .document)
+                            dump(documents)
                             DispatchQueue.main.sync {
                                 self.updateWithDocumentStruct(existingDocument)
                                 self.savedVersion = existingDocument.version
@@ -273,7 +280,8 @@ extension BeamNote: BeamNoteDocument {
         return nil
     }
 
-    public static func fetch(_ documentManager: DocumentManager, id: UUID,
+    public static func fetch(_ documentManager: DocumentManager,
+                             id: UUID,
                              keepInMemory: Bool = true,
                              decodeChildren: Bool = true) -> BeamNote? {
         // Is the note in the cache?
@@ -285,8 +293,6 @@ extension BeamNote: BeamNoteDocument {
         guard let doc = documentManager.loadDocumentById(id: id) else {
             return nil
         }
-
-//        Logger.shared.logDebug("Note loaded:\n\(String(data: doc.data, encoding: .utf8)!)\n", category: .document)
 
         do {
             return try instanciateNote(documentManager, doc, keepInMemory: keepInMemory, decodeChildren: decodeChildren)
@@ -305,7 +311,7 @@ extension BeamNote: BeamNoteDocument {
             do {
                 return try instanciateNote(documentManager, doc)
             } catch {
-                Logger.shared.logError("Unable to load document \(doc.title) (\(doc.id))", category: .document)
+                Logger.shared.logError("Unable to load document \(doc.title) (\(doc.id)): \(error.localizedDescription)", category: .document)
                 return nil
             }
         }

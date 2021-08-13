@@ -14,6 +14,10 @@ class BeamObjectRequest: APIRequest {
         let id: UUID
     }
 
+    struct DeleteAllBeamObjectsParameters: Encodable {
+        let beamObjectType: String?
+    }
+
     class FetchBeamObject: BeamObject, Errorable, APIResponseCodingKeyProtocol {
         static let codingKey = "beamObject"
         let errors: [UserErrorData]? = nil
@@ -40,6 +44,7 @@ class BeamObjectRequest: APIRequest {
 
     struct BeamObjectsParameters: Encodable {
         let updatedAtAfter: Date?
+        let ids: [UUID]?
     }
 
     internal func saveBeamObjectParameters(_ beamObject: BeamObject) throws -> UpdateBeamObject {
@@ -151,16 +156,29 @@ extension BeamObjectRequest {
     }
 
     @discardableResult
-    func deleteAll(_ completion: @escaping (Swift.Result<DeleteAllBeamObjects, Error>) -> Void) throws -> URLSessionDataTask {
-        let bodyParamsRequest = GraphqlParameters(fileName: "delete_all_beam_objects", variables: EmptyVariable())
+    func deleteAll(beamObjectType: String? = nil,
+                   _ completion: @escaping (Swift.Result<Bool, Error>) -> Void) throws -> URLSessionDataTask {
+        let parameters = DeleteAllBeamObjectsParameters(beamObjectType: beamObjectType)
+        let bodyParamsRequest = GraphqlParameters(fileName: "delete_all_beam_objects", variables: parameters)
 
-        return try performRequest(bodyParamsRequest: bodyParamsRequest, completionHandler: completion)
+        return try performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<DeleteAllBeamObjects, Error>) in
+            switch result {
+            case .failure(let error): completion(.failure(error))
+            case .success(let deletedBeamObjects):
+                guard deletedBeamObjects.success ?? false else {
+                    completion(.failure(APIRequestError.parserError))
+                    return
+                }
+                completion(.success(true))
+            }
+        }
     }
 
     @discardableResult
-    func fetchAll(_ updatedAtAfter: Date? = nil,
+    func fetchAll(updatedAtAfter: Date? = nil,
+                  ids: [UUID]? = nil,
                   _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
-        let parameters = BeamObjectsParameters(updatedAtAfter: updatedAtAfter)
+        let parameters = BeamObjectsParameters(updatedAtAfter: updatedAtAfter, ids: nil)
 
         return try fetchAllWithFile("beam_objects", parameters, completion)
     }

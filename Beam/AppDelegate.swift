@@ -112,8 +112,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func syncData() {
-        guard Configuration.env != "test" else { return }
-        guard AuthenticationManager.shared.isAuthenticated else { return }
+        guard Configuration.env != "test",
+              AuthenticationManager.shared.isAuthenticated,
+              Configuration.networkEnabled else { return }
 
         // With Vinyl and Network test recording, and this executing, it generates async network
         // calls and randomly fails.
@@ -122,14 +123,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // this sync has finished.
 
         if Configuration.beamObjectAPIEnabled {
+            let localTimer = BeamDate.now
+
             do {
                 Logger.shared.logInfo("syncAllFromAPI calling", category: .beamObjectNetwork)
                 try beamObjectManager.syncAllFromAPI { _ in
-                    Logger.shared.logInfo("syncAllFromAPI called", category: .beamObjectNetwork)
+                    Logger.shared.logInfo("syncAllFromAPI called", category: .beamObjectNetwork, localTimer: localTimer)
                 }
             } catch {
                 Logger.shared.logError("Couldn't sync beam objects: \(error.localizedDescription)",
-                                       category: .document)
+                                       category: .document,
+                                       localTimer: localTimer)
             }
         } else {
             databaseManager.syncAll { result in

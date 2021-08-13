@@ -238,7 +238,7 @@ struct DocumentDetail: View {
 
     static private let dateFormat: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.dateStyle = .short
+        formatter.dateStyle = .long
         formatter.timeStyle = .long
         return formatter
     }()

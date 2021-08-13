@@ -11,6 +11,8 @@ import PromiseKit
 import PMKFoundation
 
 @testable import Beam
+@testable import BeamCore
+
 class DatabaseManagerNetworkTests: QuickSpec {
     override func spec() {
         var sut: DatabaseManager!

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import BeamCore
 
 extension View {
     /**
@@ -27,12 +28,12 @@ private struct HoverOnceVisibleModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .onAppear {
-                appearTime = Date()
+                appearTime = BeamDate.now
             }
             .onHover { hovering in
                 if hovering {
                     if let appearTime = appearTime {
-                        let timeSinceAppear = Date().timeIntervalSince(appearTime)
+                        let timeSinceAppear = BeamDate.now.timeIntervalSince(appearTime)
                         hoverEnabled = timeSinceAppear >= Self.timeBeforeHover
                     }
                     if hoverEnabled {

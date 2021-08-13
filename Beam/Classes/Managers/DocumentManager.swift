@@ -432,7 +432,21 @@ public class DocumentManager: NSObject {
         }
 
         // Local version was merged with remote version
-        Logger.shared.logError("Document has local change! Merged both local and remote", category: .documentMerge)
+        Logger.shared.logWarning("Document has local change! Merged both local and remote", category: .documentMerge)
+        return true
+    }
+
+    private func mergeDocumentWithNewData(_ document: Document, _ documentStruct: DocumentStruct) -> Bool {
+        guard mergeWithLocalChanges(document, documentStruct.data) else {
+            // Local version could not be merged with remote version
+            Logger.shared.logError("Document has local change but could not merge", category: .documentMerge)
+            NotificationCenter.default.post(name: .apiDocumentConflict,
+                                            object: DocumentStruct(document: document))
+            return false
+        }
+
+        // Local version was merged with remote version
+        Logger.shared.logWarning("Document has local change! Merged both local and remote", category: .documentMerge)
         return true
     }
 
@@ -620,12 +634,19 @@ public class DocumentManager: NSObject {
         // If document is deleted, we don't need to check title uniqueness
         guard document.deleted_at == nil else { return }
 
-        let predicate = NSPredicate(format: "title = %@ AND id != %@ AND deleted_at == nil", document.title,
-                                    document.id as CVarArg)
-        let count = Document.countWithPredicate(context, predicate, document.database_id)
-        if count > 0 {
-            let errString = "Title \(document.title) {\(document.id)} is already used in \(count) other documents"
-            let documents = (try? Document.fetchAll(context, predicate).map { DocumentStruct(document: $0) }) ?? []
+        let predicate = NSPredicate(format: "title = %@ AND id != %@ AND deleted_at == nil AND database_id = %@",
+                                    document.title,
+                                    document.id as CVarArg,
+                                    document.database_id as CVarArg)
+        let documents = (try? Document.fetchAll(context, predicate).map { DocumentStruct(document: $0) }) ?? []
+
+        if !documents.isEmpty {
+            let errString = "Title \(document.title) {\(document.id)} is already used in \(documents.count) other documents"
+
+            Logger.shared.logWarning("Title \(document.title) ID: {\(document.id)} DB: \(document.database_id) is already used",
+                                     category: .document)
+            dump(documents)
+
             let userInfo: [String: Any] = [NSLocalizedFailureReasonErrorKey: errString,
                                            NSValidationObjectErrorKey: self,
                                            "documents": documents]
@@ -709,6 +730,11 @@ public class DocumentManager: NSObject {
 
         networkTask = DispatchWorkItem { [weak self] in
             guard let self = self else { return }
+
+            Logger.shared.logDebug("Network task for \(documentStruct.title) {\(documentStruct.id)} executing",
+                                   category: .documentNetwork)
+            let localTimer = BeamDate.now
+
             let context = self.coreDataManager.backgroundContext
             context.perform {
                 // We want to fetch back the document, to update it's previousChecksum
@@ -720,32 +746,14 @@ public class DocumentManager: NSObject {
                     return
                 }
 
-                var updatedDocStruct = DocumentStruct(document: updatedDocument)
-
-                if Configuration.beamObjectAPIEnabled {
-                    do {
-                        updatedDocStruct.previousChecksum = updatedDocStruct.beamObjectPreviousChecksum
-
-                        try self.saveOnBeamObjectAPI(updatedDocStruct) { result in
-                            Self.networkTasksSemaphore.wait()
-                            Self.networkTasks.removeValue(forKey: document_id)
-                            Self.networkTasksSemaphore.signal()
-
-                            switch result {
-                            case .failure(let error): networkCompletion?(.failure(error))
-                            case .success: networkCompletion?(.success(true))
-                            }
-                        }
-                    } catch {
-                        networkCompletion?(.failure(error))
-                    }
-                } else {
-                    self.saveDocumentStructOnAPI(updatedDocStruct) { result in
-                        Self.networkTasksSemaphore.wait()
-                        Self.networkTasks.removeValue(forKey: document_id)
-                        Self.networkTasksSemaphore.signal()
-                        networkCompletion?(result)
-                    }
+                self.saveDocumentStructOnAPI(DocumentStruct(document: updatedDocument)) { result in
+                    Self.networkTasksSemaphore.wait()
+                    Self.networkTasks.removeValue(forKey: document_id)
+                    Self.networkTasksSemaphore.signal()
+                    networkCompletion?(result)
+                    Logger.shared.logDebug("Network task for \(documentStruct.title) {\(documentStruct.id)} executed",
+                                           category: .documentNetwork,
+                                           localTimer: localTimer)
                 }
             }
         }
@@ -1063,7 +1071,13 @@ extension DocumentManager {
                     let document = Document.rawFetchOrCreateWithId(context, documentStruct.id)
 
                     do {
+                        Logger.shared.logDebug("Fetched \(remoteDocumentStruct.title) {\(remoteDocumentStruct.id)} with previous checksum \(remoteDocumentStruct.checksum ?? "-")",
+                                               category: .documentNetwork)
                         document.beam_object_previous_checksum = remoteDocumentStruct.checksum
+
+                        if !self.mergeDocumentWithNewData(document, remoteDocumentStruct) {
+                            document.data = remoteDocumentStruct.data
+                        }
                         document.update(remoteDocumentStruct)
                         document.version += 1
 
@@ -1219,6 +1233,7 @@ extension DocumentManager {
 
                 let document = Document.rawFetchOrCreateWithId(context, documentStruct.id)
                 document.update(documentStruct)
+                document.data = documentStruct.data
 
                 do {
                     try self.checkValidations(context, document)
@@ -1275,11 +1290,35 @@ extension DocumentManager {
     }
 
     @discardableResult
+    // swiftlint:disable:next function_body_length
     internal func saveDocumentStructOnAPI(_ documentStruct: DocumentStruct,
-                                          _ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) -> URLSessionTask? {
+                                          _ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) -> APIRequest? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             completion?(.success(false))
             return nil
+        }
+
+        if Configuration.beamObjectAPIEnabled {
+            do {
+                var documentStruct = documentStruct.copy()
+
+                documentStruct.previousChecksum = documentStruct.beamObjectPreviousChecksum
+                let document_id = documentStruct.id
+
+                return try self.saveOnBeamObjectAPI(documentStruct) { result in
+                    Self.networkTasksSemaphore.wait()
+                    Self.networkTasks.removeValue(forKey: document_id)
+                    Self.networkTasksSemaphore.signal()
+
+                    switch result {
+                    case .failure(let error): completion?(.failure(error))
+                    case .success: completion?(.success(true))
+                    }
+                }
+            } catch {
+                completion?(.failure(error))
+                return nil
+            }
         }
 
         Self.networkRequests[documentStruct.id]?.cancel()
@@ -1314,7 +1353,8 @@ extension DocumentManager {
         } catch {
             completion?(.failure(error))
         }
-        return nil
+
+        return documentRequest
     }
 
     private func saveDocumentStructOnAPIFailureDocumentConflict(_ documentStruct: DocumentStruct,
@@ -1566,28 +1606,33 @@ extension DocumentManager {
         }
     }
 
-    func deleteAll(includedRemote: Bool = true, completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
+    func deleteAll(includedRemote: Bool = true, completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
         do {
-            try Document.deleteBatchWithPredicate(CoreDataManager.shared.mainContext)
+            try Document.deleteWithPredicate(CoreDataManager.shared.mainContext)
+            try Self.saveContext(context: CoreDataManager.shared.mainContext)
         } catch {
             Logger.shared.logError(error.localizedDescription, category: .coredata)
         }
 
         guard includedRemote else {
-            completion?(.success(true))
+            completion(.success(true))
             return
         }
 
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-            completion?(.success(false))
+            completion(.success(false))
             return
         }
+        Self.cancelAllPreviousThrottledAPICall()
 
         if Configuration.beamObjectAPIEnabled {
-            fatalError("You can't delete all documents with the beam object API")
+            do {
+                try deleteAllFromBeamObjectAPI(completion)
+            } catch {
+                completion(.failure(error))
+            }
+            return
         }
-
-        Self.cancelAllPreviousThrottledAPICall()
 
         let documentRequest = DocumentRequest()
 
@@ -1595,13 +1640,13 @@ extension DocumentManager {
             try documentRequest.deleteAll { result in
                 switch result {
                 case .failure(let error):
-                    completion?(.failure(error))
+                    completion(.failure(error))
                 case .success:
-                    completion?(.success(true))
+                    completion(.success(true))
                 }
             }
         } catch {
-            completion?(.failure(error))
+            completion(.failure(error))
         }
     }
 
@@ -1702,7 +1747,8 @@ extension DocumentManager {
                     return
                 }
 
-                // TODO: what happens when one of the document we upload has a title conflict?
+                // Cancel previous saves as we're saving all of the objects anyway
+                Self.cancelAllPreviousThrottledAPICall()
 
                 try documentRequest.saveAll(documentsArray) { result in
                     switch result {
@@ -1834,6 +1880,7 @@ extension DocumentManager {
                 return try context.performAndWait {
                     let document = Document.fetchOrCreateWithId(context, documentStruct.id)
                     document.update(documentStruct)
+                    document.data = documentStruct.data
 
                     guard !cancelme else { throw DocumentManagerError.operationCancelled }
                     try self.checkValidations(context, document)
@@ -2173,6 +2220,7 @@ extension DocumentManager {
                 return try context.performAndWait {
                     let document = Document.fetchOrCreateWithId(context, documentStruct.id)
                     document.update(documentStruct)
+                    document.data = documentStruct.data
 
                     guard !cancelme else { throw PMKError.cancelled }
                     try self.checkValidations(context, document)
@@ -2408,6 +2456,10 @@ extension DocumentManager {
 
 // MARK: - BeamObjectManagerDelegateProtocol
 extension DocumentManager: BeamObjectManagerDelegate {
+    func willSaveAllOnBeamObjectApi() {
+        Self.cancelAllPreviousThrottledAPICall()
+    }
+
     static var conflictPolicy: BeamObjectConflictResolution = .fetchRemoteAndError
 
     func persistChecksum(_ objects: [DocumentStruct]) throws {
@@ -2422,20 +2474,23 @@ extension DocumentManager: BeamObjectManagerDelegate {
                     throw DocumentManagerError.localDocumentNotFound
                 }
 
-                // TODO: store previous data sent for improved 3-ways merge?
+                Logger.shared.logDebug("PersistChecksum \(updateObject.title) {\(updateObject.id)} with previous checksum \(updateObject.previousChecksum ?? "-")",
+                                       category: .documentNetwork)
                 documentCoreData.beam_object_previous_checksum = updateObject.previousChecksum
+                documentCoreData.beam_api_data = updateObject.data
             }
 
             try Self.saveContext(context: context)
         }
     }
 
-    // swiftlint:disable:next function_body_length
+    // swiftlint:disable:next function_body_length cyclomatic_complexity
     func receivedObjects(_ documents: [DocumentStruct]) throws {
-        Logger.shared.logDebug("Received \(documents.count) documents: updating",
+        Logger.shared.logDebug("Received \(documents.count) documents",
                                category: .documentNetwork)
 
         var changedDocuments: [DocumentStruct] = []
+        let localTimer = BeamDate.now
 
         let context = coreDataManager.backgroundContext
         try context.performAndWait {
@@ -2450,18 +2505,56 @@ extension DocumentManager: BeamObjectManagerDelegate {
                     continue
                 }
 
+                if document.checksum == localDocument.beam_object_previous_checksum &&
+                    document.data == localDocument.beam_api_data {
+                    Logger.shared.logDebug("Received object \(document.title) {\(document.id)}, but has same checksum \(document.checksum ?? "-") and previous data, skip",
+                                           category: .documentNetwork)
+                    continue
+                }
+
                 var good = false
-                let originalTitle = document.title
+                var originalTitle = document.title
                 var index = 2
+
+                /*
+                 Will catch previous conflicted title and change from "title (2)" to "title" so if another conflict
+                 happens, it will change the title to "title (3)" and not "title (2) (2)".
+                 */
+                let range = NSRange(location: 0, length: document.title.count)
+                if let regex = try? NSRegularExpression(pattern: "\\A(.+) \\(([0-9-]+)\\)\\z"),
+                   let match = regex.firstMatch(in: originalTitle,
+                                                options: [],
+                                                range: range) {
+
+                    // Index
+                    var matchRange = match.range(at: 2)
+                    if let substringRange = Range(matchRange, in: originalTitle) {
+                        index = Int(String(originalTitle[substringRange])) ?? index
+                    }
+
+                    // Title
+                    matchRange = match.range(at: 1)
+                    if let substringRange = Range(matchRange, in: originalTitle) {
+                        originalTitle = String(originalTitle[substringRange])
+                    }
+                }
+
                 while !good && index < 10 {
                     do {
+                        if !self.mergeDocumentWithNewData(localDocument, document) {
+                            localDocument.data = document.data
+                        }
+
                         localDocument.update(document)
+                        Logger.shared.logDebug("Received object \(document.title) {\(document.id)}, set previous checksum \(document.checksum ?? "-")",
+                                               category: .documentNetwork)
+
                         localDocument.beam_object_previous_checksum = document.checksum
-                        document.version += 1
+                        localDocument.version += 1
 
                         try checkValidations(context, localDocument)
 
-                        self.notificationDocumentUpdate(document)
+                        self.notificationDocumentUpdate(DocumentStruct(document: localDocument))
 
                         good = true
                         changed = true
@@ -2474,8 +2567,14 @@ extension DocumentManager: BeamObjectManagerDelegate {
                         switch (error as NSError).code {
                         case 1001:
                             document.title = "\(originalTitle) (\(index))"
+                            Logger.shared.logWarning("Title is in conflict", category: .documentNetwork)
                         case 1002:
+                            Logger.shared.logWarning("Version \(localDocument.version) is higher than \(document.version)",
+                                                     category: .documentNetwork)
                             localDocument = Document.rawFetchOrCreateWithId(context, document.id)
+                            Logger.shared.logWarning("After reload: \(localDocument.version)",
+                                                     category: .documentNetwork)
+
                         default: break
                         }
 
@@ -2495,10 +2594,13 @@ extension DocumentManager: BeamObjectManagerDelegate {
             }
         }
 
-        try saveOnBeamObjectsAPI(changedDocuments)
+        if !changedDocuments.isEmpty {
+            try saveOnBeamObjectsAPI(changedDocuments)
+        }
 
-        Logger.shared.logDebug("Received \(documents.count) documents: updated",
-                               category: .documentNetwork)
+        Logger.shared.logDebug("Received \(documents.count) documents: done. \(changedDocuments.count) remodified.",
+                               category: .documentNetwork,
+                               localTimer: localTimer)
     }
 
     func allObjects() throws -> [DocumentStruct] {
@@ -2563,7 +2665,14 @@ extension DocumentManager: BeamObjectManagerDelegate {
                     continue
                 }
 
+                if !self.mergeDocumentWithNewData(localDocument, document) {
+                    localDocument.data = document.data
+                }
                 localDocument.update(document)
+
+                Logger.shared.logDebug("Saved after conflict \(document.title) {\(document.id)}, set previous checksum \(document.checksum ?? "-")",
+                                       category: .documentNetwork)
+
                 localDocument.beam_object_previous_checksum = document.checksum
                 localDocument.version += 1
 
@@ -2585,12 +2694,28 @@ extension DocumentManager: BeamObjectManagerDelegate {
         Logger.shared.logWarning("Resending local object with remote checksum \(remoteDocumentStruct.checksum ?? "-")",
                                  category: .documentNetwork)
 
-        // TODO: we should merge `documentStruct` and `remoteBeamObject` instead of just resending the
-        // same documentStruct we sent before. It's important to update `updatedAt`
+        let context = self.coreDataManager.persistentContainer.newBackgroundContext()
+
         var result = documentStruct.copy()
+
+        // Merging might fail, in such case we send the remote version of the document
+        context.performAndWait {
+            let document = Document.rawFetchOrCreateWithId(context, documentStruct.id)
+            if let beam_api_data = document.beam_api_data,
+               let data = BeamElement.threeWayMerge(ancestor: beam_api_data,
+                                                    input1: documentStruct.data,
+                                                    input2: remoteDocumentStruct.data) {
+                result.updatedAt = BeamDate.now
+                result.data = data
+            }
+        }
+
         result.updatedAt = BeamDate.now
         return result
     }
 }
 
+extension DocumentManager {
+    public override var description: String { "Beam.DocumentManager" }
+}
 // swiftlint:enable file_length

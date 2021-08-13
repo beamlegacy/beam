@@ -127,7 +127,7 @@ public class LinkStore: Codable {
             Logger.shared.logError("Unable to fetch Link Structure for link \(link)", category: .search)
             return
         }
-        linkStruct.visits.append(Date())
+        linkStruct.visits.append(BeamDate.now)
         if let title = title {
             linkStruct.title = title
         }

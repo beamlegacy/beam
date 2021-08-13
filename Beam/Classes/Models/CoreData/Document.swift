@@ -27,6 +27,7 @@ class Document: NSManagedObject, BeamCoreDataObject {
     }
 
     override func willSave() {
+        guard !isDeleted else { return }
         let keys = self.changedValues().keys
         if updated_at.timeIntervalSince(BeamDate.now) < -1.0 {
             if keys.contains("data") {
@@ -117,7 +118,8 @@ class Document: NSManagedObject, BeamCoreDataObject {
 
     func update(_ documentStruct: DocumentStruct) {
         database_id = documentStruct.databaseId
-        data = documentStruct.data
+        // use mergeWithLocalChanges for `data`
+        // data = documentStruct.data
         title = documentStruct.title
         document_type = documentStruct.documentType.rawValue
         created_at = documentStruct.createdAt
@@ -138,10 +140,10 @@ class Document: NSManagedObject, BeamCoreDataObject {
     class func countWithPredicate(_ context: NSManagedObjectContext,
                                   _ predicate: NSPredicate? = nil,
                                   _ databaseId: UUID? = nil) -> Int {
-        return countWithPredicate(context,
-                                  predicate,
-                                  databaseId ?? DatabaseManager.defaultDatabase.id,
-                                  onlyNonDeleted: true)
+        countWithPredicate(context,
+                           predicate,
+                           databaseId ?? DatabaseManager.defaultDatabase.id,
+                           onlyNonDeleted: true)
     }
 
     class func rawCountWithPredicate(_ context: NSManagedObjectContext,

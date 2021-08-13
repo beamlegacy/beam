@@ -22,7 +22,7 @@ class NoteSourceTests: XCTestCase {
     func testAdd() throws {
         let firstUrlId: UInt64 = 0
         let secondUrlId: UInt64 = 1
-        let now = Date()
+        let now = BeamDate.now
         let before = Date() - Double(60.0 * 60.0)
         let sessionId = UUID()
 
@@ -135,7 +135,7 @@ class NoteSourceTests: XCTestCase {
 
     
     func testSourceSort() throws {
-        let now = Date()
+        let now = BeamDate.now
         let oneDay = Double(24.0 * 60.0 * 60.0)
         let yesterday = now - oneDay
         let beforeYesterday = now - 2 * oneDay
