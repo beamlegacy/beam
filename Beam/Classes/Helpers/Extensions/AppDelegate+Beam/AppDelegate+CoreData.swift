@@ -54,7 +54,7 @@ extension AppDelegate {
 
         let dateFormatter = ISO8601DateFormatter()
         dateFormatter.formatOptions = [.withYear, .withMonth, .withDay, .withTime]
-        let dateString = dateFormatter.string(from: Date())
+        let dateString = dateFormatter.string(from: BeamDate.now)
         savePanel.nameFieldStringValue = "BeamExport-\(dateString).sqlite"
 
         if savePanel.runModal() == .OK, let url = savePanel.url {

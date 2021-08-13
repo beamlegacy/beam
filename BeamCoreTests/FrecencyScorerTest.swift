@@ -61,7 +61,7 @@ class FrecencyScorerTest: XCTestCase {
         ]
 
         let scorer = ExponentialFrecencyScorer(storage: fakeStorage, params: frecencyParameters)
-        let now = Date()
+        let now = BeamDate.now
         let later = Date(timeInterval: Double(halfLife), since: now)
         // non pre exisiting score insertion
         scorer.update(urlId: 0, value: 1, visitType: .searchBar, date: now, paramKey: .readingTime30d0)

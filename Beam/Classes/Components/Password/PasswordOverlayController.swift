@@ -122,7 +122,7 @@ class PasswordOverlayController: WebPageHolder {
             self.valuesOnFocusOut = dict
         }
         dismissPasswordManagerMenu()
-        lastFocusOutTimestamp = Date()
+        lastFocusOutTimestamp = BeamDate.now
         previouslyFocusedElementId = elementId
         currentlyFocusedElementId = nil
     }

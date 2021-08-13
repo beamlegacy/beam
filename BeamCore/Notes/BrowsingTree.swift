@@ -150,7 +150,7 @@ public class BrowsingNode: ObservableObject, Codable {
             }
         }
     }
-    @Published public var events = [ReadingEvent(type: .creation, date: Date())]
+    @Published public var events = [ReadingEvent(type: .creation, date: BeamDate.now)]
     @Published public var children = [BrowsingNode]()
     public var score: Score { tree.scoreFor(link: link) }
     public func longTermScoreApply(changes: (LongTermUrlScore) -> Void) {
@@ -171,7 +171,7 @@ public class BrowsingNode: ObservableObject, Codable {
         return lastEvent.readingTime(isForeground: isForeground, toDate: date)
     }
 
-    public func addEvent(_ type: ReadingEventType, date: Date = Date()) {
+    public func addEvent(_ type: ReadingEventType, date: Date = BeamDate.now) {
         let incrementalReadingTime = readingTimeSinceLastEvent(date: date)
         score.readingTimeToLastEvent += incrementalReadingTime
         longTermScoreApply { $0.readingTimeToLastEvent += incrementalReadingTime }

@@ -60,7 +60,7 @@ class BeamUITestsMenuGenerator {
         }
 
         for index in 0...3 {
-            newNote.addChild(BeamElement("test \(index): \(Date().description)"))
+            newNote.addChild(BeamElement("test \(index): \(BeamDate.now.description)"))
         }
 
         Logger.shared.logDebug("current Note: \(currentNote.id) copy: \(newNote.id)", category: .documentDebug)

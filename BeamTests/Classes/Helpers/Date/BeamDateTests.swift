@@ -3,6 +3,7 @@ import XCTest
 import Nimble
 
 @testable import Beam
+@testable import BeamCore
 
 class BeamDateTests: XCTestCase {
     override func tearDown() {

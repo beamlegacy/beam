@@ -1,5 +1,6 @@
 import CoreData
 import Foundation
+import BeamCore
 
 /*
  Code taken from https://oleb.net/blog/2018/03/core-data-sqlite-backup/
@@ -54,7 +55,7 @@ extension NSPersistentStoreCoordinator {
             let basename = sourceStore.url?.deletingPathExtension().lastPathComponent ?? "store-backup"
             let dateFormatter = ISO8601DateFormatter()
             dateFormatter.formatOptions = [.withYear, .withMonth, .withDay, .withTime]
-            let dateString = dateFormatter.string(from: Date())
+            let dateString = dateFormatter.string(from: BeamDate.now)
             return "\(basename)-\(dateString).sqlite"
         }
 

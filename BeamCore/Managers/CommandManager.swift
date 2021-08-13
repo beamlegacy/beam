@@ -179,10 +179,10 @@ public class CommandManager<Context> {
     // MARK: - Timer
     public func getTimeInterval() -> TimeInterval? {
         guard let lastCmdDate = self.lastCmdDate else {
-            self.lastCmdDate = Date()
+            self.lastCmdDate = BeamDate.now
             return nil
         }
-        return Date().timeIntervalSince(lastCmdDate)
+        return BeamDate.now.timeIntervalSince(lastCmdDate)
     }
 
     public var canUndo: Bool {

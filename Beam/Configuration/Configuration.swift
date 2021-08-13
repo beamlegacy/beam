@@ -52,11 +52,14 @@ struct Configuration {
         set {
             if newValue != networkEnabled {
                 UserDefaults.standard.set(newValue, forKey: networkEnabledKey)
+                if newValue {
+                    AppDelegate.main.syncData()
+                }
             }
         }
     }
 
-    static var topDomainUrl: URL { return URL(string: "http://downloads.majestic.com/majestic_million.csv")! }
+    static var topDomainUrl: URL = URL(string: "http://downloads.majestic.com/majestic_million.csv")!
 
     static private var encryptionEnabledKey = "encryptionEnabled"
     static var encryptionEnabled: Bool {

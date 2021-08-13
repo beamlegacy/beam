@@ -353,8 +353,8 @@ private class NoteTableViewItem: TableViewItem {
     private var document: DocumentStruct
 
     var title: String
-    var createdAt: Date = Date()
-    var updatedAt: Date = Date()
+    var createdAt: Date = BeamDate.now
+    var updatedAt: Date = BeamDate.now
     var words: Int = -1
     var mentions: Int = -1
 

@@ -271,7 +271,7 @@ extension APIRequest {
         let request = try makeUrlRequest(bodyParamsRequest, authenticatedCall: authenticatedCall)
 
         let filename = bodyParamsRequest.fileName ?? "no filename"
-        let localTimer = Date()
+        let localTimer = BeamDate.now
         let callsCount = Self.callsCount
 
         #if DEBUG
@@ -381,7 +381,7 @@ extension APIRequest {
             Logger.shared.logDebug("- \(filename)", category: .network)
             return
         }
-        let diffTime = Date().timeIntervalSince(localTimer)
+        let diffTime = BeamDate.now.timeIntervalSince(localTimer)
         let diff = String(format: "%.2f", diffTime)
         let text = "[\(callsCount)] [\(Self.uploadedBytes.byteSize)/\(Self.downloadedBytes.byteSize)] [\(bytesSent.byteSize)/\(bytesReceived.byteSize)] [\(authenticated ? "authenticated" : "anonymous")] \(diff)sec \(httpResponse.statusCode) \(filename)"
 
@@ -396,7 +396,7 @@ extension APIRequest {
     private func logCancelledRequest(_ filename: String,
                                      _ localTimer: Date) {
         #if DEBUG_API_0
-        let diffTime = Date().timeIntervalSince(localTimer)
+        let diffTime = BeamDate.now.timeIntervalSince(localTimer)
         let diff = String(format: "%.2f", diffTime)
         Logger.shared.logDebug("\(diff)sec cancelled \(filename)", category: .network)
         #endif

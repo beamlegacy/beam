@@ -67,7 +67,7 @@ class AllowListViewItem: TableViewItem {
         let dateFormatter = DateFormatter()
         dateFormatter.doesRelativeDateFormatting = true
         dateFormatter.dateStyle = .long
-        self.addedDate = dateFormatter.string(from: Date())
+        self.addedDate = dateFormatter.string(from: BeamDate.now)
         super.init()
     }
 }

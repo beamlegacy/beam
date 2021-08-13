@@ -54,7 +54,7 @@ public enum BeamNoteType: Codable, Equatable {
             // First check is the date is today, which means it's not in the future
             guard !calendar.isDateInToday(date) else { return false }
             // Then compare with now
-            return date > Date()
+            return date > BeamDate.now
 
         default:
             return false
@@ -62,7 +62,7 @@ public enum BeamNoteType: Codable, Equatable {
     }
 
     public static var todaysJournal: BeamNoteType {
-        return Self.journalForDate(Date())
+        return Self.journalForDate(BeamDate.now)
     }
 
     public static func titleForDate(_ date: Date) -> String {

@@ -60,7 +60,7 @@ class BrowsingTreeScoreTests: XCTestCase {
 
     func testScoreHalflive() throws {
         let score = Score()
-        let now = Date()
+        let now = BeamDate.now
         score.textAmount = 1
         score.lastCreationDate = now
         let clusteringScore = score.clusteringScore(date: now)
@@ -72,18 +72,18 @@ class BrowsingTreeScoreTests: XCTestCase {
     func testLinkRemovalComparison() {
         let score0 = Score()
         score0.lastCreationDate = Date(timeIntervalSinceNow: -0.5 * 60 * 60)
-        score0.lastEvent = ReadingEvent(type: .closeTab, date: Date())
+        score0.lastEvent = ReadingEvent(type: .closeTab, date: BeamDate.now)
         let score1 = Score()
         score1.lastCreationDate = Date(timeIntervalSinceNow: -1 * 60 * 60)
-        score1.lastEvent = ReadingEvent(type: .switchToBackground, date: Date())
+        score1.lastEvent = ReadingEvent(type: .switchToBackground, date: BeamDate.now)
 
         //score0 is less than score1 because score 0 last event is closing
-        XCTAssert(score0.clusteringRemovalLessThan(score1, date: Date()))
-        XCTAssert(!score1.clusteringRemovalLessThan(score0, date: Date()))
+        XCTAssert(score0.clusteringRemovalLessThan(score1, date: BeamDate.now))
+        XCTAssert(!score1.clusteringRemovalLessThan(score0, date: BeamDate.now))
 
         //both scores are not isClosed so score1 is below score0 because its linkRemovalScore is lower
-        score0.lastEvent = ReadingEvent(type: .switchToBackground, date: Date())
-        XCTAssert(score1.clusteringRemovalLessThan(score0, date: Date()))
+        score0.lastEvent = ReadingEvent(type: .switchToBackground, date: BeamDate.now)
+        XCTAssert(score1.clusteringRemovalLessThan(score0, date: BeamDate.now))
     }
     func testDeserialization() {
 

@@ -13,6 +13,7 @@ class TopDomainDelegate: NSObject, URLSessionDataDelegate {
     var buffer = Data()
     var headerSkipped = false
     var serial = DispatchQueue(label: "topDomainCSVParser", qos: .utility)
+    var queue = OperationQueue()
 
     private var cancelRequest: Bool = false
     var isCancelled: Bool {
@@ -81,10 +82,12 @@ class TopDomainDelegate: NSObject, URLSessionDataDelegate {
                             dataTask.cancel()
                             self.cancelRequest = true
                             self.totalDiffTime += BeamDate.now.timeIntervalSince(localTimer)
+                            Logger.shared.logDebug("Parsed \(localCount) entries",
+                                                   category: .topDomain,
+                                                   localTimer: localTimer)
 
-                            Logger.shared.logWarning("Reached \(self.processedRecordCount) total entries. Parsed \(localCount) entries",
-                                                     category: .topDomain,
-                                                     localTimer: localTimer)
+                            Logger.shared.logWarning("Reached \(self.processedRecordCount) total entries",
+                                                     category: .topDomain)
                             return
                         }
 

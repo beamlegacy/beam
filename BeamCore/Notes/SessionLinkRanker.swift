@@ -26,13 +26,13 @@ public class SessionLinkRanker {
             return (link, score)
         }
     }
-    public func clusteringSorted(links: [UInt64], date: Date = Date()) -> [UInt64] {
+    public func clusteringSorted(links: [UInt64], date: Date = BeamDate.now) -> [UInt64] {
         //leftmost elements are to be displayed first
         let existingScoredLinks = scoredLinks(links: links)
         return existingScoredLinks.sorted(by: { $0.1.clusteringScore(date: date) > $1.1.clusteringScore(date: date) }).map { $0.0 }
     }
 
-    public func clusteringRemovalSorted(links: [UInt64], date: Date = Date()) -> [UInt64] {
+    public func clusteringRemovalSorted(links: [UInt64], date: Date = BeamDate.now) -> [UInt64] {
         //leftmost returned elements are to be removed first
         let existingScoredLinks = scoredLinks(links: links)
         return existingScoredLinks.sorted(by: { $0.1.clusteringRemovalLessThan($1.1, date: date) }).map { $0.0 }

@@ -10,6 +10,8 @@ import PromiseKit
 import Promises
 
 @testable import Beam
+@testable import BeamCore
+
 // swiftlint:disable:next type_body_length
 class DocumentManagerTests: QuickSpec {
     // swiftlint:disable:next function_body_length
@@ -23,6 +25,10 @@ class DocumentManagerTests: QuickSpec {
             helper = DocumentManagerTestsHelper(documentManager: sut,
                                                 coreDataManager: CoreDataManager.shared)
             BeamTestsHelper.logout()
+        }
+
+        afterEach {
+            helper.deleteAllDocuments()
         }
 
         describe(".deleteAllDocuments()") {
@@ -126,7 +132,7 @@ class DocumentManagerTests: QuickSpec {
                             })
                         }
 
-                        docStruct2.deletedAt = Date()
+                        docStruct2.deletedAt = BeamDate.now
 
                         waitUntil(timeout: .seconds(10)) { done in
                             docStruct2.version += 1
@@ -214,7 +220,7 @@ class DocumentManagerTests: QuickSpec {
                             }
                         }
 
-                        docStruct2.deletedAt = Date()
+                        docStruct2.deletedAt = BeamDate.now
 
                         waitUntil(timeout: .seconds(10)) { done in
                             let promise: PromiseKit.Promise<Bool> = sut.save(docStruct2)
@@ -300,7 +306,7 @@ class DocumentManagerTests: QuickSpec {
                             }
                         }
 
-                        docStruct2.deletedAt = Date()
+                        docStruct2.deletedAt = BeamDate.now
 
                         waitUntil(timeout: .seconds(10)) { done in
                             let promise: Promises.Promise<Bool> = sut.save(docStruct2)
@@ -708,8 +714,8 @@ class DocumentManagerTests: QuickSpec {
                 docStruct = DocumentStruct(id: UUID(),
                                            databaseId: UUID(),
                                            title: title,
-                                           createdAt: Date(),
-                                           updatedAt: Date(),
+                                           createdAt: BeamDate.now,
+                                           updatedAt: BeamDate.now,
                                            data: jsonData,
                                            documentType: .note,
                                            version: 0)

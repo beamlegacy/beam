@@ -147,6 +147,7 @@ struct AdvancedPreferencesView: View {
             }
             Preferences.Section(title: "Database", bottomDivider: true) {
                 DatabasePicker
+                Text("You *must* restart Beam if you change database.")
                 Button(action: {
                     showNewDatabase = true
                 }, label: {
@@ -337,14 +338,16 @@ struct AdvancedPreferencesView: View {
     }
 
     private var DatabasePicker: some View {
-        return Picker("", selection: $selectedDatabase.onChange(dbChange), content: {
+        Picker("", selection: $selectedDatabase.onChange(dbChange)) {
             ForEach(databases, id: \.id) {
                 Text($0.title).tag($0)
             }
-        }).frame(idealWidth: 100, maxWidth: 400)
+        }
+        .frame(idealWidth: 100, maxWidth: 400)
     }
 
-    private func dbChange(_ database: Database) {
+    private func dbChange(_ database: Database?) {
+        guard let database = database else { return }
         DatabaseManager.defaultDatabase = DatabaseStruct(database: database)
     }
 

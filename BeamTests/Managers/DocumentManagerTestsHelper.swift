@@ -6,6 +6,7 @@ import Nimble
 import Combine
 
 @testable import Beam
+@testable import BeamCore
 
 class DocumentManagerTestsHelper {
     var documentManager: DocumentManager!

@@ -89,7 +89,7 @@ class BrowserTabsManager: ObservableObject {
                 // TODO bind visited sites with note contents:
                 //                        if note.searchQueries.contains(newTab.originalQuery) {
                 //                            if let url = newTab.url {
-                //                                note.visitedSearchResults.append(VisitedPage(originalSearchQuery: newTab.originalQuery, url: url, date: Date(), duration: 0))
+                //                                note.visitedSearchResults.append(VisitedPage(originalSearchQuery: newTab.originalQuery, url: url, date: BeamDate.now, duration: 0))
                 //                                self.currentNote = note
                 //                            }
                 //                        }

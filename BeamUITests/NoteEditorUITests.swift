@@ -38,7 +38,7 @@ class NoteEditorUITests: QuickSpec {
                 let dateFormatter = DateFormatter()
                 // some CI macs don't like to input ":"
                 dateFormatter.dateFormat = "dd-MM-yyyy HH-mm Z"
-                let textInput = "Testing typing date \(dateFormatter.string(from: Date())) ok"
+                let textInput = "Testing typing date \(dateFormatter.string(from: BeamDate.now)) ok"
 
                 app.typeSlowly(textInput, everyNChar: 1)
                 expect(firstJournalEntry.value as? String) == textInput

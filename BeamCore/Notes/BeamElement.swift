@@ -131,8 +131,8 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
     @Published open var children = [BeamElement]() { didSet { change(.tree) } }
     @Published open var readOnly = false { didSet { change(.meta) } }
     @Published open var score: Float = 0 { didSet { change(.meta) } }
-    @Published open var creationDate = Date() { didSet { change(.meta) } }
-    @Published open var updateDate = Date()
+    @Published open var creationDate = BeamDate.now { didSet { change(.meta) } }
+    @Published open var updateDate = BeamDate.now
     @Published open var kind: ElementKind = .bullet { didSet { change(.meta) } }
     @Published open var childrenFormat: ElementChildrenFormat = .bullet { didSet { change(.meta) } }
     @Published open private(set) var textStats: ElementTextStats = ElementTextStats(wordsCount: 0)
@@ -396,7 +396,7 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
     }
     open func change(_ type: ChangeType) {
         guard changePropagationEnabled else { return }
-        updateDate = Date()
+        updateDate = BeamDate.now
         changed = (self, type)
 
         if type == .text || type == .tree {
@@ -407,7 +407,7 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
 
     open func childChanged(_ child: BeamElement, _ type: ChangeType) {
         guard changePropagationEnabled else { return }
-        updateDate = Date()
+        updateDate = BeamDate.now
         changed = (child, type)
         if type == .text || type == .tree {
             updateTextStats()

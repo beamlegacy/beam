@@ -22,9 +22,10 @@ extension AppDelegate {
             Logger.shared.logWarning("unable to clear top domain DB: \(error)", category: .topDomain)
         }
 
-        let session = URLSession(configuration: .ephemeral,
-                                 delegate: TopDomainDelegate(TopDomainDatabase.shared),
-                                 delegateQueue: nil)
+        let delegate = TopDomainDelegate(TopDomainDatabase.shared)
+        let session = URLSession(configuration: .default,
+                                 delegate: delegate,
+                                 delegateQueue: delegate.queue)
         session.dataTask(with: Configuration.topDomainUrl).resume()
     }
 }

@@ -4,9 +4,9 @@ import Fakery
 import Quick
 import Nimble
 import Combine
-import BeamCore
 
 @testable import Beam
+@testable import BeamCore
 
 class BeamObjectManagerNetworkTests: QuickSpec {
     override func spec() {
@@ -71,7 +71,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
             afterEach {
                 let semaphore = DispatchSemaphore(value: 0)
-                try? sut.delete(uuid) { _ in
+                _ = try? sut.delete(uuid) { _ in
                     semaphore.signal()
                 }
 
@@ -222,13 +222,13 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
             afterEach {
                 let semaphore = DispatchSemaphore(value: 0)
-                try? sut.delete(object.beamObjectId) { _ in
+                _ = try? sut.delete(object.beamObjectId) { _ in
                     semaphore.signal()
                 }
 
                 _ = semaphore.wait(timeout: DispatchTime.now() + .seconds(5))
 
-                try? sut.delete(object2.beamObjectId) { _ in
+                _ = try? sut.delete(object2.beamObjectId) { _ in
                     semaphore.signal()
                 }
 
@@ -414,8 +414,13 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                                     }
                                 }
 
-                                // update_beam_object + beam_object + beam_object + update_beam_object
-                                expect(APIRequest.callsCount - networkCalls) == 4
+                                let expectedNetworkCalls = ["update_beam_objects",
+                                                            "beam_objects",
+                                                            "update_beam_objects"]
+
+                                expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
+
+                                expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
 
                                 expect(object) == (try beamObjectHelper.fetchOnAPI(object.beamObjectId))
                                 expect(object2) == (try beamObjectHelper.fetchOnAPI(object2.beamObjectId))
@@ -499,8 +504,12 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                                     }
                                 }
 
-                                // update_beam_object + beam_object + beam_object
-                                expect(APIRequest.callsCount - networkCalls) == 3
+                                let expectedNetworkCalls = ["update_beam_objects",
+                                                            "beam_objects"]
+
+                                expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
+
+                                expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
 
                                 let remoteObject = remoteObjects.first(where: { $0.beamObjectId == object.beamObjectId })
                                 let remoteObject2 = remoteObjects.first(where: { $0.beamObjectId == object2.beamObjectId })
@@ -619,8 +628,13 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                                     }
                                 }
 
-                                // update_beam_object + beam_object + beam_object + update_beam_object
-                                expect(APIRequest.callsCount - networkCalls) == 4
+                                let expectedNetworkCalls = ["update_beam_objects",
+                                                            "beam_objects",
+                                                            "update_beam_objects"]
+
+                                expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
+
+                                expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
 
                                 expect(object) == (try beamObjectHelper.fetchOnAPI(object.beamObjectId))
                                 expect(object2) == (try beamObjectHelper.fetchOnAPI(object2.beamObjectId))
@@ -706,8 +720,12 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                                     }
                                 }
 
-                                // update_beam_object + beam_object + beam_object
-                                expect(APIRequest.callsCount - networkCalls) == 3
+                                let expectedNetworkCalls = ["update_beam_objects",
+                                                            "beam_objects"]
+
+                                expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
+
+                                expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
 
                                 let remoteObject = remoteObjects.first(where: { $0.beamObjectId == object.beamObjectId })
                                 let remoteObject2 = remoteObjects.first(where: { $0.beamObjectId == object2.beamObjectId })
@@ -811,7 +829,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
             afterEach {
                 let semaphore = DispatchSemaphore(value: 0)
-                try? sut.delete(object.beamObjectId) { _ in
+                _ = try? sut.delete(object.beamObjectId) { _ in
                     semaphore.signal()
                 }
 

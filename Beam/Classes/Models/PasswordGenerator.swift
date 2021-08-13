@@ -5,6 +5,8 @@
 //  Created by Frank Lefebvre on 31/05/2021.
 //
 
+import BeamCore
+
 // TODO Add unit tests
 class PasswordGenerator {
     static let shared = PasswordGenerator()

@@ -34,7 +34,7 @@ class AuthenticationManager {
         set { Persistence.Authentication.refreshToken = newValue }
     }
     var isAuthenticated: Bool {
-        let now = Date()
+        let now = BeamDate.now
         guard let accessToken = accessToken,
             let accessTokenExpirationDate = expirationDate(accessToken),
             (accessTokenExpirationDate > now) else {
@@ -139,7 +139,7 @@ class AuthenticationManager {
         }
 
         // add 1 hour just in case
-        let result = expirationDate > Date().addingTimeInterval(60 * 60)
+        let result = expirationDate > BeamDate.now.addingTimeInterval(60 * 60)
         if !result {
             Logger.shared.logDebug("Access token is invalid: \(expirationDate)", category: .network)
         }
@@ -153,7 +153,7 @@ class AuthenticationManager {
         }
 
         // add 1 hour just in case
-        let result = expirationDate > Date().addingTimeInterval(60 * 60)
+        let result = expirationDate > BeamDate.now.addingTimeInterval(60 * 60)
         if result {
             Logger.shared.logInfo("Refresh token is valid: \(expirationDate)", category: .network)
         }

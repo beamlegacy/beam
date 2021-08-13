@@ -1,20 +1,21 @@
 import Foundation
 
-class BeamDate {
+public class BeamDate {
     static var currentDate: Date?
 
-    static var now: Date {
+    public static var now: Date {
+        // swiftlint:disable:next date_init
         currentDate ?? Date()
     }
 
-    static func travel(_ duration: TimeInterval) {
+    public static func travel(_ duration: TimeInterval) {
         // Force storing the value of time
         currentDate = currentDate ?? now
 
         currentDate?.addTimeInterval(duration)
     }
 
-    static func freeze(_ dateString: String? = nil) {
+    public static func freeze(_ dateString: String? = nil) {
         guard let dateString = dateString else {
             currentDate = now
             return
@@ -24,11 +25,11 @@ class BeamDate {
         currentDate = dateFormatter.date(from: dateString)
     }
 
-    static func reset() {
+    public static func reset() {
         currentDate = nil
     }
 
-    static func journalNoteTitle(for date: Date, with style: DateFormatter.Style = .long) -> String {
+    public static func journalNoteTitle(for date: Date, with style: DateFormatter.Style = .long) -> String {
         let fmt = DateFormatter()
         if style == .short {
             fmt.dateFormat = "MMM d, yy"

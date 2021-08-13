@@ -15,22 +15,22 @@ import Nimble
 
 class RecentsManagerTests: QuickSpec {
 
-    var documentHelper: DocumentManagerTestsHelper?
+    var documentHelper: DocumentManagerTestsHelper!
     let documentManager = DocumentManager()
 
     func fillWithRandomDocuments(_ documentManager: DocumentManager) {
         guard documentHelper == nil else {
             return
         }
-        let helper = DocumentManagerTestsHelper(documentManager: documentManager,
-                                                coreDataManager: CoreDataManager.shared)
-        helper.deleteAllDocuments()
+        documentHelper = DocumentManagerTestsHelper(documentManager: documentManager,
+                                                    coreDataManager: CoreDataManager.shared)
+
         for _ in 0..<7 {
             let note = BeamNote(title: String.randomTitle())
+            note.databaseId = DatabaseManager.defaultDatabase.id
             let doc = note.documentStruct!
-            _ = helper.saveLocally(doc)
+            _ = documentHelper.saveLocally(doc)
         }
-        documentHelper = helper
     }
 
     override func spec() {
@@ -121,8 +121,8 @@ class RecentsManagerTests: QuickSpec {
                                 numberOfPublishes += 1
                                 done()
                         }
-                        let note = recentsManager.recentNotes.last!
-                        note.title = newTitle
+                        let note = recentsManager.recentNotes.last
+                        note?.title = newTitle
                     }
                     expect(recentsManager.recentNotes.last?.title) == newTitle
                     expect(numberOfPublishes) == 1
@@ -130,7 +130,12 @@ class RecentsManagerTests: QuickSpec {
 
                 it("handles deleted notes") {
                     expect(recentsManager.recentNotes.count) == 5
-                    let note = recentsManager.recentNotes.last!
+
+                    guard let note = recentsManager.recentNotes.last else {
+                        fail("Last recent notes is nil")
+                        return
+                    }
+
                     waitUntil(timeout: .seconds(10)) { done in
                         self.documentManager.delete(id: note.id) { _ in
                             done()

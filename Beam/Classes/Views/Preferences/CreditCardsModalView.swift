@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import BeamCore
 
 struct CreditCardsModalView: View {
     @Environment(\.presentationMode) var presentationMode
@@ -33,7 +34,7 @@ struct CreditCardsModalView: View {
 
             HStack {
                 Button {
-                    MockCreditCardStore.shared.save(creditCard: CreditCard(cardDescription: "Another Card", cardNumber: 18989898, cardHolder: "Moi", cardDate: Date()))
+                    MockCreditCardStore.shared.save(creditCard: CreditCard(cardDescription: "Another Card", cardNumber: 18989898, cardHolder: "Moi", cardDate: BeamDate.now))
                 } label: {
                     Image("basicAdd")
                         .renderingMode(.template)
@@ -100,7 +101,7 @@ struct CreditCardsTableView: View {
 
 struct CreditCardsTableView_Previews: PreviewProvider {
     static var previews: some View {
-        CreditCardsTableView(allCreditCards: [CreditCard(cardDescription: "Black Card", cardNumber: 0000000000000000, cardHolder: "Jean-Louis Darmon", cardDate: Date())], onSelectionChanged: {_ in})
+        CreditCardsTableView(allCreditCards: [CreditCard(cardDescription: "Black Card", cardNumber: 0000000000000000, cardHolder: "Jean-Louis Darmon", cardDate: BeamDate.now)], onSelectionChanged: {_ in})
     }
 }
 

@@ -6,13 +6,14 @@
 //
 
 import Foundation
+import BeamCore
 
 class DateHelper {
     
     func getTodaysDateString(_ format: String) -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = format
-        return dateFormatter.string(from: Date())
+        return dateFormatter.string(from: BeamDate.now)
     }
     
     enum DateFormats: String {

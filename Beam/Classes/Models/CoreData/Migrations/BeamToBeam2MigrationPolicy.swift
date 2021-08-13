@@ -1,5 +1,6 @@
 import Foundation
 import CoreData
+import BeamCore
 
 class BeamToBeam2MigrationPolicy: NSEntityMigrationPolicy {
     let defaultDatabaseId = UUID()
@@ -13,8 +14,8 @@ class BeamToBeam2MigrationPolicy: NSEntityMigrationPolicy {
 
         let defaultDatabase = NSEntityDescription.insertNewObject(forEntityName: "Database", into: manager.destinationContext)
         defaultDatabase.setValue("Default", forKey: "title")
-        defaultDatabase.setValue(Date(), forKey: "created_at")
-        defaultDatabase.setValue(Date(), forKey: "updated_at")
+        defaultDatabase.setValue(BeamDate.now, forKey: "created_at")
+        defaultDatabase.setValue(BeamDate.now, forKey: "updated_at")
         defaultDatabase.setValue(defaultDatabaseId, forKey: "id")
     }
 }

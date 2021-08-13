@@ -131,10 +131,10 @@ La recopie vidéo est également au menu depuis le centre de contrôle de l'appa
         }
 
         for f in [
-            (urlId: 0, lastAccessAt: Date(), frecencyScore: 0.0, frecencySortScore: 0.42,            frecencyKey: FrecencyParamKey.visit30d0),
-            (urlId: 1, lastAccessAt: Date(), frecencyScore: 0.0, frecencySortScore: -0.05,           frecencyKey: FrecencyParamKey.visit30d0),
-            (urlId: 2, lastAccessAt: Date(), frecencyScore: 0.0, frecencySortScore: 1.42,            frecencyKey: FrecencyParamKey.visit30d0),
-            (urlId: 2, lastAccessAt: Date(), frecencyScore: 0.0, frecencySortScore: -Float.infinity, frecencyKey: FrecencyParamKey.readingTime30d0),
+            (urlId: 0, lastAccessAt: BeamDate.now, frecencyScore: 0.0, frecencySortScore: 0.42,            frecencyKey: FrecencyParamKey.visit30d0),
+            (urlId: 1, lastAccessAt: BeamDate.now, frecencyScore: 0.0, frecencySortScore: -0.05,           frecencyKey: FrecencyParamKey.visit30d0),
+            (urlId: 2, lastAccessAt: BeamDate.now, frecencyScore: 0.0, frecencySortScore: 1.42,            frecencyKey: FrecencyParamKey.visit30d0),
+            (urlId: 2, lastAccessAt: BeamDate.now, frecencyScore: 0.0, frecencySortScore: -Float.infinity, frecencyKey: FrecencyParamKey.readingTime30d0),
         ] {
             var frecency = FrecencyUrlRecord(urlId: UInt64(f.urlId),
                                              lastAccessAt: f.lastAccessAt,

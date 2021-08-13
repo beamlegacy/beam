@@ -4,9 +4,9 @@ import Fakery
 import Quick
 import Nimble
 import Combine
-import BeamCore
 
 @testable import Beam
+@testable import BeamCore
 
 // Minimal object for the purpose of testing and storing during tests
 struct MyRemoteObject: BeamObjectProtocol {
@@ -19,6 +19,7 @@ struct MyRemoteObject: BeamObjectProtocol {
     var deletedAt: Date?
 
     var previousChecksum: String?
+    var previousData: Data?
     var checksum: String?
 
     var title: String?

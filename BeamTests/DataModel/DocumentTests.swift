@@ -6,6 +6,8 @@ import Nimble
 import Combine
 
 @testable import Beam
+@testable import BeamCore
+
 class DocumentTests: QuickSpec {
     // swiftlint:disable:next function_body_length
     override func spec() {
@@ -34,6 +36,7 @@ class DocumentTests: QuickSpec {
 
         afterEach {
             BeamDate.reset()
+            helper.deleteAllDocuments()
         }
 
         describe(".countWithPredicate()") {

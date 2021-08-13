@@ -1,8 +1,8 @@
-query ($updatedAtAfter: ISO8601DateTime) {
+query ($updatedAtAfter: ISO8601DateTime, $ids: [ID!]) {
   me {
     id
     email
-    beamObjects(updatedAtAfter: $updatedAtAfter) {
+    beamObjects(updatedAtAfter: $updatedAtAfter, ids: $ids) {
       id
       createdAt
       updatedAt
