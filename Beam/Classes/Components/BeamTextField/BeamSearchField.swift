@@ -16,6 +16,8 @@ struct BeamSearchField: View {
     var font: NSFont
     var textColor: NSColor
     var placeholderColor: NSColor
+    var onEscape: (() -> Void)?
+
     @State var xMarkIsHovered: Bool = false
 
     var body: some View {
@@ -38,7 +40,8 @@ struct BeamSearchField: View {
                                   placeholder: placeholderStr,
                                   font: font,
                                   textColor: textColor,
-                                  placeholderColor: placeholderColor)
+                                  placeholderColor: placeholderColor,
+                                  onEscape: onEscape)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .disableAutocorrection(true)
                     if !searchStr.isEmpty {

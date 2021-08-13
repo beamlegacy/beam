@@ -532,6 +532,10 @@ import Promises
         browsingTree.dump()
     }
 
+    func respondToEscapeKey() {
+        passwordOverlayController?.dismiss()
+    }
+
     func passwordManagerToast(saved: Bool) {
         state.overlayViewModel.toastView = AnyView(CredentialsConfirmationToast(saved: saved))
     }

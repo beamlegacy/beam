@@ -28,11 +28,13 @@ struct OtherPasswordModal: View {
                     .foregroundColor(BeamColor.Generic.text.swiftUI)
                     .font(BeamFont.medium(size: 13).swiftUI)
                 Spacer()
-                BeamSearchField(searchStr: $searchString, isEditing: $isEditing, placeholderStr: "Search", font: BeamFont.regular(size: 13).nsFont, textColor: BeamColor.Generic.text.nsColor, placeholderColor: BeamColor.Generic.placeholder.nsColor)
-                    .frame(width: 220, height: 21, alignment: .center)
-                    .onUpdate(of: searchString) { // FIXME: use onChange(searchString) when available
-                        viewModel.searchString = $0
-                    }
+                BeamSearchField(searchStr: $searchString, isEditing: $isEditing, placeholderStr: "Search", font: BeamFont.regular(size: 13).nsFont, textColor: BeamColor.Generic.text.nsColor, placeholderColor: BeamColor.Generic.placeholder.nsColor, onEscape: {
+                    dismiss()
+                })
+                .frame(width: 220, height: 21, alignment: .center)
+                .onUpdate(of: searchString) { // use onChange(of: searchString) when deployment target is upgraded to macOS 11
+                    viewModel.searchString = $0
+                }
             }
             Spacer()
             PasswordsTableView(passwordEntries: viewModel.filteredPasswordTableViewItems,
@@ -57,7 +59,7 @@ struct OtherPasswordModal: View {
                 }
                 Spacer()
                 HStack {
-                    OtherPasswordModalButton(title: "Cancel", isDisabled: false) {
+                    OtherPasswordModalCancelButton(title: "Cancel", isDisabled: false) {
                         dismiss()
                     }
                     OtherPasswordModalButton(title: "Fill", isDisabled: viewModel.disableFillButton) {
@@ -127,6 +129,21 @@ struct OtherPasswordModalButton: View {
         .buttonStyle(BorderedButtonStyle())
         .foregroundColor(BeamColor.Generic.background.swiftUI)
         .opacity(isDisabled ? 0.35 : 1)
+    }
+}
+
+struct OtherPasswordModalCancelButton: View {
+    var title: String
+    let isDisabled: Bool
+    var action:() -> Void
+
+    var body: some View {
+        if #available(macOS 11.0, *) {
+            OtherPasswordModalButton(title: title, isDisabled: isDisabled, action: action)
+                .keyboardShortcut(.cancelAction)
+        } else {
+            OtherPasswordModalButton(title: title, isDisabled: isDisabled, action: action)
+        }
     }
 }
 
