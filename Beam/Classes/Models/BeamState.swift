@@ -53,6 +53,7 @@ import BeamCore
     @Published var destinationCardNameSelectedRange: Range<Int>?
 
     @Published var windowIsResizing = false
+    @Published var windowFrame = CGRect.zero
 
     @Published var mode: Mode = .today {
         didSet {

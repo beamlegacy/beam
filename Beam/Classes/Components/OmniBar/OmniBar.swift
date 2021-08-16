@@ -19,6 +19,7 @@ struct OmniBar: View {
     @State private var title = ""
     @State private var modifierFlagsPressed: NSEvent.ModifierFlags?
     @State private var showDownloadPanel: Bool = false
+    @State private var dragStartWindowPosition: CGPoint?
 
     private var enableAnimations: Bool {
         !state.windowIsResizing
@@ -113,13 +114,18 @@ struct OmniBar: View {
                 }
             }
         }
-        .gesture(DragGesture(minimumDistance: 0).onEnded { (value) in
-            // onTapGesture is triggered when moving NSWindow quickly.
-            // Using a drag gesture instead to make sure the cursor hasn't moved.
-            guard value.translation.width == 0.0 && value.translation.height == 0.0 else {
-                return
-            }
-            setIsEditing(true)
+        .gesture(DragGesture(minimumDistance: 0)
+                    // onTapGesture is triggered when moving NSWindow quickly.
+                    // Using a drag gesture instead to make sure the cursor/window hasn't moved.
+                    .onChanged { _ in
+                        guard dragStartWindowPosition == nil else { return }
+                        dragStartWindowPosition = state.windowFrame.origin
+                    }
+                    .onEnded { value in
+                        let windowHasMoved = hasWindowMovedSinceDragStart()
+                        dragStartWindowPosition = nil
+                        guard value.translation == .zero || !windowHasMoved else { return }
+                        setIsEditing(true)
         })
         .frame(maxWidth: .infinity)
         .fixedSize(horizontal: false, vertical: true)
@@ -220,6 +226,14 @@ struct OmniBar: View {
             )
         }
         .frame(height: 52, alignment: .top)
+    }
+
+    private func hasWindowMovedSinceDragStart() -> Bool {
+        guard let startDragWindowPosition = dragStartWindowPosition else { return false }
+        let minimumDragThreshold: CGFloat = 5.0
+        let currentPosition = state.windowFrame.origin
+        let offset = max(abs(startDragWindowPosition.x - currentPosition.x), abs(startDragWindowPosition.y - currentPosition.y))
+        return offset > minimumDragThreshold
     }
 
     // MARK: Actions
