@@ -75,7 +75,8 @@ extension CommandManager where Context == Widget {
 
     func focus(_ element: BeamElement, in node: ElementNode, leading: Bool = false) {
         if let toFocus = node.nodeFor(element) {
-            focusElement(toFocus, cursorPosition: leading ? 0 : element.text.count)
+            let textCount = element.kind.isMedia ? 1 : element.text.count
+            focusElement(toFocus, cursorPosition: leading ? 0 : textCount)
         }
     }
 }

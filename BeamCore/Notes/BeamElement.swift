@@ -23,6 +23,21 @@ public enum ElementKind: Codable, Equatable {
     case embed(String)
     case blockReference(UUID, UUID)
 
+    public var isText: Bool {
+        !isMedia
+    }
+
+    public var isMedia: Bool {
+        switch self {
+        case .image:
+            return true
+        case .embed:
+            return true
+        default:
+            return false
+        }
+    }
+
     enum CodingKeys: String, CodingKey {
         case type
         case level

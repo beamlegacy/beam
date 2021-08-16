@@ -230,6 +230,7 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
         } else {
             cmdManager?.deleteText(in: node, for: range)
         }
+        cmdManager?.focus(embedElement, in: parent, leading: false)
         cmdManager?.endGroup()
     }
 
