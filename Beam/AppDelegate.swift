@@ -40,9 +40,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     var cancellableScope = Set<AnyCancellable>()
 
-    let documentManager = DocumentManager()
-    let databaseManager = DatabaseManager()
-    let beamObjectManager = BeamObjectManager()
+    public private(set) lazy var documentManager = DocumentManager()
+    public private(set) lazy var databaseManager = DatabaseManager()
+    public private(set) lazy var beamObjectManager = BeamObjectManager()
 
     #if DEBUG
     var beamUIMenuGenerator: BeamUITestsMenuGenerator!
@@ -55,7 +55,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        CoreDataManager.shared.setup()
         LibrariesManager.shared.configure()
         ContentBlockingManager.shared.setup()
         BeamObjectManager.setup()
@@ -81,7 +80,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         if Configuration.env == "$(ENV)" {
-            Logger.shared.logError("ENV wasn't properly detected", category: .general)
+            fatalError("Please restart your build, your ENV wasn't detected properly")
         }
 
         #if DEBUG
@@ -215,12 +214,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return true
     }
 
-    func windowWillReturnUndoManager(window: NSWindow) -> UndoManager? {
-        // Returns the NSUndoManager for the application. In this case, the manager returned is that of the managed object context for the application.
-        return CoreDataManager.shared.mainContext.undoManager
-    }
-
     func applicationWillFinishLaunching(_ notification: Notification) {
+        CoreDataManager.shared.setup()
+
         // Register for URL opening event
         NSAppleEventManager
             .shared()
