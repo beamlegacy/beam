@@ -111,8 +111,7 @@ extension BeamText {
 }
 
 public extension BeamElement {
-    @discardableResult func makeInternalLink(_ range: Swift.Range<Int>, createNoteIfNeeded: Bool) -> Bool {
-        return note?.id != nil &&
-            text.makeInternalLink(range, createNoteIfNeeded: createNoteIfNeeded) != nil
+    @discardableResult func makeInternalLink(_ range: Swift.Range<Int>, createNoteIfNeeded: Bool) -> (UUID?, UUID?) {
+        return (note?.id, text.makeInternalLink(range, createNoteIfNeeded: createNoteIfNeeded))
     }
 }

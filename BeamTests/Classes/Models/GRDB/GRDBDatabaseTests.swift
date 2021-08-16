@@ -101,7 +101,7 @@ La recopie vidéo est également au menu depuis le centre de contrôle de l'appa
                                              lastAccessAt: Date(timeIntervalSince1970: 0),
                                              frecencyScore: 0.42,
                                              frecencySortScore: 0,
-                                             frecencyKey: .visit30d0)
+                                             frecencyKey: .webVisit30d0)
             try db.saveFrecencyUrl(&frecency)
             // Match urlId = 0, and check frecency record
             searchHistory(db, query: "Monterey") { matches in
@@ -131,10 +131,10 @@ La recopie vidéo est également au menu depuis le centre de contrôle de l'appa
         }
 
         for f in [
-            (urlId: 0, lastAccessAt: BeamDate.now, frecencyScore: 0.0, frecencySortScore: 0.42,            frecencyKey: FrecencyParamKey.visit30d0),
-            (urlId: 1, lastAccessAt: BeamDate.now, frecencyScore: 0.0, frecencySortScore: -0.05,           frecencyKey: FrecencyParamKey.visit30d0),
-            (urlId: 2, lastAccessAt: BeamDate.now, frecencyScore: 0.0, frecencySortScore: 1.42,            frecencyKey: FrecencyParamKey.visit30d0),
-            (urlId: 2, lastAccessAt: BeamDate.now, frecencyScore: 0.0, frecencySortScore: -Float.infinity, frecencyKey: FrecencyParamKey.readingTime30d0),
+            (urlId: 0, lastAccessAt: BeamDate.now, frecencyScore: 0.0, frecencySortScore: 0.42,            frecencyKey: FrecencyParamKey.webVisit30d0),
+            (urlId: 1, lastAccessAt: BeamDate.now, frecencyScore: 0.0, frecencySortScore: -0.05,           frecencyKey: FrecencyParamKey.webVisit30d0),
+            (urlId: 2, lastAccessAt: BeamDate.now, frecencyScore: 0.0, frecencySortScore: 1.42,            frecencyKey: FrecencyParamKey.webVisit30d0),
+            (urlId: 2, lastAccessAt: BeamDate.now, frecencyScore: 0.0, frecencySortScore: -Float.infinity, frecencyKey: FrecencyParamKey.webReadingTime30d0),
         ] {
             var frecency = FrecencyUrlRecord(urlId: UInt64(f.urlId),
                                              lastAccessAt: f.lastAccessAt,
@@ -145,7 +145,7 @@ La recopie vidéo est également au menu depuis le centre de contrôle de l'appa
         }
 
         // Retrieve search results with frecency sort on .visit30d0
-        searchHistory(db, query: "foo", enabledFrecencyParam: .visit30d0) { matches in
+        searchHistory(db, query: "foo", enabledFrecencyParam: .webVisit30d0) { matches in
             expect(matches.count) == 3
 
             for (expectedUrlId, match) in zip([ 2, 0, 1 ], matches) {
@@ -158,7 +158,7 @@ La recopie vidéo est également au menu depuis le centre de contrôle de l'appa
         }
 
         // Retrieve search results with frecency sort on .readingTime30d0
-        searchHistory(db, query: "foo", enabledFrecencyParam: .readingTime30d0) { matches in
+        searchHistory(db, query: "foo", enabledFrecencyParam: .webReadingTime30d0) { matches in
             expect(matches.count) == 1
 
             for (expectedUrlId, match) in zip([ 2 ], matches) {
@@ -308,5 +308,25 @@ class GRDBDatabaseBeamElementTests: XCTestCase {
 
         matches = db.search(matchingAllTokensIn: "tata").map { $0.uid }
         expect(matches.count) == 0
+    }
+
+    func testMatchingNotesWithMatchingFrecency() throws {
+        let noteId = note.id
+        let frecencies = [
+            FrecencyNoteRecord(noteId: noteId, lastAccessAt: Date(), frecencyScore: 1, frecencySortScore: 2, frecencyKey: .note30d0),
+            FrecencyNoteRecord(noteId: noteId, lastAccessAt: Date(), frecencyScore: 3, frecencySortScore: 4, frecencyKey: .note30d1)
+        ]
+        for frecency in frecencies {
+            try db.saveFrecencyNote(frecency)
+        }
+        let scores = db.search(matchingAnyTokenIn: "tata", frecencyParam: .note30d0).map { $0.frecency?.frecencyScore }
+        expect(scores.count) == 1
+        expect(scores) == [1.0]
+    }
+
+    func testMatchingNotesWithoutMatchingFrecency() throws {
+        let scores = db.search(matchingAnyTokenIn: "tata", frecencyParam: .note30d0).map { $0.frecency?.frecencyScore }
+        expect(scores.count) == 1
+        expect(scores) == [nil]
     }
 }

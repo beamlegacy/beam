@@ -234,7 +234,7 @@ import Promises
 
         browsingTree = BrowsingTree(
             browsingTreeOrigin,
-            frecencyScorer: ExponentialFrecencyScorer(storage: GRDBFrecencyStorage()),
+            frecencyScorer: ExponentialFrecencyScorer(storage: GRDBUrlFrecencyStorage()),
             longTermScoreStore: LongTermUrlScoreStore()
         )
         noteController = WebNoteController(note: note, rootElement: rootElement)

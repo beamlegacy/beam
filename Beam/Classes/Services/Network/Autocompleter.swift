@@ -39,6 +39,7 @@ struct AutocompleteResult: Identifiable, Equatable {
     var information: String?
     var completingText: String?
     var uuid = UUID()
+    var score: Float?
 }
 
 class Autocompleter: ObservableObject {

@@ -231,8 +231,10 @@ extension BeamTextEdit {
             let splitTitle = node.text.text[linkEnd...]
             cancelInternalLink(with: splitTitle, range: linkEnd..<splitTitle.count + linkEnd)
         }
-
-        node.unproxyElement.makeInternalLink(replacementStart..<linkEnd, createNoteIfNeeded: true)
+        let (_, linkedNoteId) = node.unproxyElement.makeInternalLink(replacementStart..<linkEnd, createNoteIfNeeded: true)
+        if let linkedNoteId = linkedNoteId {
+            data?.noteFrecencyScorer.update(id: linkedNoteId, value: 1.0, eventType: .noteBiDiLink, date: Date(), paramKey: .note30d0)
+        }
 
         rootNode.cursorPosition = linkEnd
         dismissPopover()

@@ -10,13 +10,6 @@
 import Foundation
 import Combine
 
-public enum VisitType {
-    case root
-    case linkActivation
-    case fromNote
-    case searchBar
-}
-
 public enum BrowsingTreeOrigin: Codable {
     case searchBar(query: String)
     case searchFromNode(nodeText: String)
@@ -186,23 +179,23 @@ public class BrowsingNode: ObservableObject, Codable {
             isForeground = false
             if let lastStartReading = lastStartReading {
                 let readingTime = Float(date.timeIntervalSince(lastStartReading))
-                tree.frecencyScorer?.update(urlId: link, value: readingTime, visitType: visitType, date: lastStartReading, paramKey: .readingTime30d0)
+                tree.frecencyScorer?.update(id: link, value: readingTime, eventType: visitType, date: lastStartReading, paramKey: .webReadingTime30d0)
                 self.lastStartReading = nil
             }
         }
         score.isForeground = isForeground
     }
-    var visitType: VisitType {
-        guard let parent = parent else { return .root }
+    var visitType: FrecencyEventType {
+        guard let parent = parent else { return .webRoot }
         if parent.id == tree.root.id {
             switch tree.origin {
-            case .browsingNode: return .linkActivation
-            case .searchFromNode: return .fromNote
-            case .linkFromNote: return .fromNote
-            case .searchBar: return .searchBar
+            case .browsingNode: return .webLinkActivation
+            case .searchFromNode: return .webFromNote
+            case .linkFromNote: return .webFromNote
+            case .searchBar: return .webSearchBar
             }
         }
-        return isLinkActivation ? .linkActivation : .searchBar
+        return isLinkActivation ? .webLinkActivation : .webSearchBar
     }
 
     public init(tree: BrowsingTree, parent: BrowsingNode?, url: String, title: String?, isLinkActivation: Bool) {
@@ -215,7 +208,7 @@ public class BrowsingNode: ObservableObject, Codable {
         score.lastCreationDate = creationDate
         longTermScoreApply { $0.lastCreationDate = creationDate }
         if let creationDate = creationDate {
-            tree.frecencyScorer?.update(urlId: link, value: 1, visitType: visitType, date: creationDate, paramKey: .visit30d0)
+            tree.frecencyScorer?.update(id: link, value: 1, eventType: visitType, date: creationDate, paramKey: .webVisit30d0)
         }
         longTermScoreApply { $0.visitCount += 1 }
     }

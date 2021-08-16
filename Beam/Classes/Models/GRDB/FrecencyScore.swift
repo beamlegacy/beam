@@ -49,28 +49,92 @@ extension FrecencyUrlRecord: MutablePersistableRecord {
     }
 }
 
-public class GRDBFrecencyStorage: FrecencyStorage {
-    public func fetchOne(urlId: UInt64, paramKey: FrecencyParamKey) throws -> FrecencyScore? {
+public struct FrecencyNoteRecord: Codable {
+    public static let databaseUUIDEncodingStrategy = DatabaseUUIDEncodingStrategy.string
+    var noteId: UUID
+    var lastAccessAt: Date
+    /// Frecency internal score. Not suited for querying.
+    var frecencyScore: Float
+    /// Frecency score to sort notes in a search query.
+    var frecencySortScore: Float
+    var frecencyKey: FrecencyParamKey
+
+    static let BeamElementForeignKey = ForeignKey([FrecencyNoteRecord.Columns.noteId], to: [BeamElementRecord.Columns.noteId])
+
+    enum CodingKeys: String, CodingKey {
+        case noteId
+        case lastAccessAt
+        case frecencyScore
+        case frecencySortScore
+        case frecencyKey
+    }
+}
+
+extension FrecencyNoteRecord: FetchableRecord {}
+
+extension FrecencyNoteRecord: PersistableRecord {}
+
+extension FrecencyNoteRecord: TableRecord {
+    enum Columns {
+            static let noteId = Column(CodingKeys.noteId)
+            static let lastAccessAt = Column(CodingKeys.lastAccessAt)
+            static let frecencyScore = Column(CodingKeys.frecencyScore)
+            static let frecencySortScore = Column(CodingKeys.frecencySortScore)
+            static let frecencyKey = Column(CodingKeys.frecencyKey)
+        }
+}
+
+public class GRDBUrlFrecencyStorage: FrecencyStorage {
+    public func fetchOne(id: FrecencyScoreIdKey, paramKey: FrecencyParamKey) throws -> FrecencyScore? {
+        guard let id = id as? UInt64 else { return nil }
         do {
-            if let record = try GRDBDatabase.shared.fetchOneFrecency(fromUrl: urlId)[paramKey] {
-                return FrecencyScore(urlId: record.urlId,
+            if let record = try GRDBDatabase.shared.fetchOneFrecency(fromUrl: id)[paramKey] {
+                return FrecencyScore(id: record.urlId,
                                      lastTimestamp: record.lastAccessAt,
                                      lastScore: record.frecencyScore,
                                      sortValue: record.frecencySortScore)
             }
         } catch {
-            Logger.shared.logError("unable to fetch frecency for urlId \(urlId): \(error)", category: .database)
+            Logger.shared.logError("unable to fetch frecency for urlId \(id): \(error)", category: .database)
         }
 
         return nil
     }
 
     public func save(score: FrecencyScore, paramKey: FrecencyParamKey) throws {
-        var record = FrecencyUrlRecord(urlId: score.urlId,
+        guard let id = score.id as? UInt64 else { return }
+        var record = FrecencyUrlRecord(urlId: id,
                                        lastAccessAt: score.lastTimestamp,
                                        frecencyScore: score.lastScore,
                                        frecencySortScore: score.sortValue,
                                        frecencyKey: paramKey)
         try GRDBDatabase.shared.saveFrecencyUrl(&record)
+    }
+}
+
+public class GRDBNoteFrecencyStorage: FrecencyStorage {
+    public func fetchOne(id: FrecencyScoreIdKey, paramKey: FrecencyParamKey) throws -> FrecencyScore? {
+        guard let id = id as? UUID else { return nil }
+        do {
+            if let record = try GRDBDatabase.shared.fetchOneFrecencyNote(noteId: id, paramKey: paramKey) {
+                return FrecencyScore(id: record.noteId,
+                                     lastTimestamp: record.lastAccessAt,
+                                     lastScore: record.frecencyScore,
+                                     sortValue: record.frecencySortScore)
+            }
+        } catch {
+            Logger.shared.logError("unable to fetch frecency for urlId \(id): \(error)", category: .database)
+        }
+        return nil
+    }
+
+    public func save(score: FrecencyScore, paramKey: FrecencyParamKey) throws {
+        guard let id = score.id as? UUID else { return }
+        let record = FrecencyNoteRecord(noteId: id,
+                                       lastAccessAt: score.lastTimestamp,
+                                       frecencyScore: score.lastScore,
+                                       frecencySortScore: score.sortValue,
+                                       frecencyKey: paramKey)
+        try GRDBDatabase.shared.saveFrecencyNote(record)
     }
 }
