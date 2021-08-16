@@ -357,8 +357,7 @@ public class BeamNote: BeamElement {
         return true
     }
 
-    public static var linkDetectionQueue = DispatchQueue(label: "LinkDetector")
-    public static var linkDetectionRunning = false
+    public static var indexingQueue = DispatchQueue(label: "BeamNoteIndexing")
     public private(set) static var fetchedNotes: [String: WeakReference<BeamNote>] = [:]
     private static var fetchedNotesCancellables: [UUID: Cancellable] = [:]
 
