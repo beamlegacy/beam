@@ -73,6 +73,8 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
   }
 
   selectBounds(rangeGroups: BeamRangeGroup[]) {
+    const {win} = this.native
+
     if (!rangeGroups) {
       return
     }
@@ -81,7 +83,36 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
     rangeGroups.forEach((group) => {
       const { id, range } = group
       // Get the rectangles that make up the range
-      const rangeRects = Array.from(range.getClientRects())
+      let rangeRects = Array.from(range.getClientRects()) as BeamRect[]
+
+      const parent = range.commonAncestorContainer as BeamElement
+
+      // Recursively get the bounds of all useless elements in the parent container
+      const childNodes = PointAndShootHelper.getChildNodes(parent, win)
+
+      const arrayOfRectsToDismiss = []
+      for (const child of childNodes) {
+        switch (child?.nodeType) {
+          case BeamNodeType.element: {
+            const childElement = child as BeamElement
+            if (PointAndShootHelper.isUselessOrChildrenAre(childElement, win)) {
+              const bounds = childElement.getBoundingClientRect() as BeamRect
+              // getBoundingClientRect takes the visual size. 
+              // scrollHeight and scrollWidth gets the actual size of the elements
+              bounds.height = childElement.scrollHeight
+              bounds.width = childElement.scrollWidth
+              arrayOfRectsToDismiss.push(bounds)
+            }
+          }
+            break
+        }
+      }
+      
+      if (arrayOfRectsToDismiss.length > 0) {
+        // By matching the areas of useless rects with the rangeRects, we can filter out the rects we don't need.
+        rangeRects = BeamRectHelper.filterRectArrayByRectArray(rangeRects, arrayOfRectsToDismiss) 
+      }
+
       const rectData = rangeRects.map((rangeRect, rectIndex) => {
         // add each rect to the targets array
         return {
@@ -98,7 +129,7 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
 
       rects.push({ id, rectData, html: this.rangeToHtml(range) })
     })
-
+    
     const payload = { select: rects }
     if (!isDeepEqual(this.selectPayload, payload)) {
       this.selectPayload = payload
@@ -213,16 +244,19 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
         switch (child.nodeType) {
           case BeamNodeType.element: {
             const childElement = child as BeamElement
+            // If we have an SVG element return the SVG bounding rect
             if (childElement.tagName.toLowerCase() === "svg") {
               const childBounds = childElement.getBoundingClientRect()
               area = this.setArea(area, childBounds, clippingArea)
             } else {
+              // For any other element recursively call `elementBounds`
               const bounds = this.elementBounds(childElement, area, clippingArea)
               area = this.setArea(area, bounds, clippingArea)
             }
           }
             break
           case BeamNodeType.text: {
+            // For text get the text bounding rect by creating selection.
             const nodeRange = win.document.createRange()
             nodeRange.selectNode(child)
             const rangeBounds = nodeRange.getBoundingClientRect()

@@ -6,6 +6,7 @@ import {
   BeamWindow
 } from "./BeamTypes"
 import {BeamElementHelper} from "./BeamElementHelper"
+import { Util } from "./Util"
 
 export class PointAndShootHelper {
   /**
@@ -48,8 +49,11 @@ export class PointAndShootHelper {
   /**
    * Recursively check for the presence of any meaningful child nodes within a given element
    *
-   * @param element
-   * @param win
+   * @static
+   * @param {BeamElement} element The Element to query
+   * @param {BeamWindow} win
+   * @return {*}  {boolean} Boolean if element or any of it's children are meaningful
+   * @memberof PointAndShootHelper
    */
   static isMeaningfulOrChildrenAre(element: BeamElement, win: BeamWindow): boolean {
     if (PointAndShootHelper.isMeaningful(element, win)) {
@@ -60,6 +64,15 @@ export class PointAndShootHelper {
     )
   }
 
+  /**
+   * Recursively check for the presence of any meaningful child nodes within a given element. 
+   *
+   * @static
+   * @param {BeamElement} element The Element to query
+   * @param {BeamWindow} win
+   * @return {*}  {BeamNode[]} return the element's meaningful child nodes
+   * @memberof PointAndShootHelper
+   */
   static getMeaningfulChildNodes(element: BeamElement, win: BeamWindow): BeamNode[] {
     return [...element.childNodes].filter(
         child => (
@@ -70,5 +83,56 @@ export class PointAndShootHelper {
             && PointAndShootHelper.isTextMeaningful((child as BeamText).data)
         )
     )
+  }
+
+  /**
+   * Recursively check for the presence of any Useless child nodes within a given element
+   *
+   * @static
+   * @param {BeamElement} element The Element to query
+   * @param {BeamWindow} win
+   * @return {*}  {boolean} Boolean if element or any of it's children are Useless
+   * @memberof PointAndShootHelper
+   */
+  static isUselessOrChildrenAre(element: BeamElement, win: BeamWindow): boolean {
+    return PointAndShootHelper.isMeaningfulOrChildrenAre(element, win) == false
+  }
+
+  /**
+   * Get all child nodes of type element or text
+   *
+   * @static
+   * @param {BeamElement} element
+   * @param {BeamWindow} win
+   * @return {*}  {BeamNode[]}
+   * @memberof PointAndShootHelper
+   */
+  static getChildNodes(element: BeamElement, win: BeamWindow): BeamNode[] {
+    if (!element?.childNodes) {
+      return [element]
+    }
+    // Filter childNodes down to the nodes we want.
+    let childNodes = [...element.childNodes].filter(child => {
+      return child.nodeType === (BeamNodeType.element || BeamNodeType.text)
+    })
+
+    // if no useless child nodes return the element itself
+    if (childNodes.length == 0) {
+      return [element]
+    }
+
+    // map through the nodes we have
+    childNodes.forEach((node) => {
+      // For element nodes we should get their children
+      if (node.nodeType === BeamNodeType.element) {
+        const nodes = this.getChildNodes(node as BeamElement, win)
+        childNodes = [...childNodes, ...nodes]
+      }
+
+      // any others return the node
+      childNodes.push(node)
+    })
+
+    return Util.compact(childNodes)
   }
 }

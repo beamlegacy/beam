@@ -5,7 +5,8 @@
     "types": ["jest", "node"],
     "sourceMap": true,
     "typeRoots": ["node_modules/@types"],
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "lib": ["ES2019", "DOM"]
   },
   "types": ["jest"],
   "exclude": ["**/*.test.ts"]
