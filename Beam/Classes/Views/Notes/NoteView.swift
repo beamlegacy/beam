@@ -36,7 +36,7 @@ struct NoteView: View {
             return nil
         }
         return AnyView(GeometryReader { geoProxy in
-            let headerWidth = BeamTextEdit.textWidth
+            let headerWidth = BeamTextEdit.textNodeWidth(for: geoProxy.size)
             let leadingPadding = centerText ? 0 : (geoProxy.size.width - headerWidth) * (leadingPercentage / 100)
             Group {
                 NoteHeaderView(model: headerViewModel)

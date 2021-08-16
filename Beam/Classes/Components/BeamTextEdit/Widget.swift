@@ -329,7 +329,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
             selectionLayer.bounds.size = CGSize(width: selectionLayerWidth - offsetInRoot.x - selectionInset, height: contentsFrame.height)
         } else {
             selectionLayer.position = CGPoint(x: selectionLayerPosX + selectionInset, y: -2.5)
-            selectionLayer.bounds.size = CGSize(width: selectionLayerWidth - offsetInRoot.x - selectionLayerPosX - selectionInset, height: contentsFrame.height)
+            selectionLayer.bounds.size = CGSize(width: selectionLayerWidth - selectionLayerPosX - selectionInset, height: contentsFrame.height)
         }
         updateSubLayersLayout()
 
@@ -367,7 +367,9 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         }
     }
 
-    var selectionLayerWidth: CGFloat = 640
+    var selectionLayerWidth: CGFloat {
+        return frame.width + 20
+    }
 
     private func configureSelectionLayer() {
         selectionLayer.anchorPoint = CGPoint()
