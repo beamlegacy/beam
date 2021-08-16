@@ -389,7 +389,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
     ///   - noteText: optional text to add underneath the shoot quote
     func addShootToNote(noteTitle: String, withNote noteText: String? = nil) {
         guard let sourceUrl = page.url,
-              let currentCard = page.getNote(fromTitle: noteTitle) else {
+              let currentNote = page.getNote(fromTitle: noteTitle) else {
             fatalError("Could not find note to update with title \(noteTitle)")
         }
         guard var shootGroup = activeShootGroup else {
@@ -397,7 +397,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
         }
         // Set Destination note to the current card
         // Update BrowsingScorer about note submission
-        page.setDestinationNote(currentCard, rootElement: currentCard)
+        page.setDestinationNote(currentNote, rootElement: currentNote)
         scorer.addTextSelection()
         // Convert html to BeamText
         let texts: [BeamText] = html2Text(url: sourceUrl, html: shootGroup.html())
@@ -411,7 +411,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
         let pendingQuotes = text2Quote(texts, sourceUrl.absoluteString)
         // Adds urlId to current card source
         let urlId = LinkStore.createIdFor(sourceUrl.absoluteString, title: nil)
-        currentCard.sources.add(urlId: urlId, type: .user, sessionId: data.sessionId)
+        currentNote.sources.add(urlId: urlId, type: .user, sessionId: data.sessionId)
         // Add all quotes to source Note
         if let source = self.page.addToNote(allowSearchResult: true) {
             pendingQuotes.then({ resolvedQuotes in
@@ -428,7 +428,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
                     source.addChild(quote)
                 })
                 // Complete PNS and clear stored data
-                shootGroup.setNoteInfo(NoteInfo(id: currentCard.id, title: currentCard.title))
+                shootGroup.setNoteInfo(NoteInfo(id: currentNote.id, title: currentNote.title))
                 shootGroup.numberOfElements = resolvedQuotes.count
                 self.collectedGroups.append(shootGroup)
                 self.showShootInfo(group: shootGroup)

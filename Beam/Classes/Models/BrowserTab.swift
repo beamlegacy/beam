@@ -99,7 +99,8 @@ import Promises
         updateScore()
     }
 
-    private func logInNote(url: URL, title: String?, reason: NoteElementAddReason) {
+    @discardableResult
+    private func logInNote(url: URL, title: String?, reason: NoteElementAddReason) -> BeamElement? {
         var elementToFocus: BeamElement?
         if isFromNoteSearch {
             noteController.setContents(url: url, text: title)
@@ -110,6 +111,9 @@ import Promises
         }
         if let elementToFocus = elementToFocus {
             updateFocusedStateToElement(elementToFocus)
+            return elementToFocus
+        } else {
+            return nil
         }
     }
 
@@ -339,11 +343,9 @@ import Promises
             Logger.shared.logWarning("Adding search results is not allowed", category: .web)
             return nil
         } // Don't automatically add search results
-        if let element = noteController.add(url: url, text: title, reason: .navigation, isNavigatingFromNote: beamNavigationController.isNavigatingFromNote, browsingOrigin: self.browsingTree.origin) {
-            updateFocusedStateToElement(element)
-            return element
-        }
-        return nil
+
+        let element = noteController.addContent(url: url, text: title, reason: .pointandshoot)
+        return element
     }
 
     private func receivedWebviewTitle(_ title: String? = nil) {
