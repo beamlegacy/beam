@@ -34,7 +34,8 @@ public extension CALayer {
 // swiftlint:disable:next type_body_length
 @objc public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
-    static let textWidth: CGFloat = 620
+    static let textWidthMin: CGFloat = 500
+    static let textWidthMax: CGFloat = 700
 
     var data: BeamData?
     var cardTopSpace: CGFloat {
@@ -253,6 +254,7 @@ public extension CALayer {
         return rootNode.selectedText
     }
 
+    static let smallTreshold = CGFloat(800)
     static let bigThreshold = CGFloat(1024)
     var isBig: Bool {
         frame.width >= Self.bigThreshold
@@ -276,19 +278,21 @@ public extension CALayer {
     }
     func relayoutRoot() {
         let r = bounds
+        let textNodeWidth = Self.textNodeWidth(for: frame.size)
         var rect = NSRect(x: 0, y: topOffsetActual + cardTopSpace, width: textNodeWidth, height: r.height)
 
         if centerText {
-            let x = (frame.width - Self.textWidth) / 2
+            let x = (frame.width - textNodeWidth) / 2
             rect = NSRect(x: x, y: topOffsetActual + cardTopSpace, width: textNodeWidth, height: r.height)
         } else {
-            let x = (frame.width - Self.textWidth) * (leadingPercentage / 100)
+            let x = (frame.width - textNodeWidth) * (leadingPercentage / 100)
             rect = NSRect(x: x, y: topOffsetActual + cardTopSpace, width: textNodeWidth, height: r.height)
         }
         updateLayout(for: rect)
     }
 
     private func updateLayout(for rect: NSRect) {
+        let textNodeWidth = Self.textNodeWidth(for: frame.size)
         if isResizing || shouldDisableAnimationAtNextLayout {
             shouldDisableAnimationAtNextLayout = false
             CATransaction.disableAnimations {
@@ -309,8 +313,9 @@ public extension CALayer {
         }
     }
 
-    var textNodeWidth: CGFloat {
-        return Self.textWidth
+    static func textNodeWidth(for containerSize: CGSize) -> CGFloat {
+        let ratio = Self.bigThreshold / min(max(containerSize.width, Self.smallTreshold), Self.bigThreshold)
+        return max(Self.textWidthMax / ratio, Self.textWidthMin)
     }
 
     // This is the root node of what we are editing:
@@ -427,6 +432,7 @@ public extension CALayer {
     }
 
     override public var intrinsicContentSize: NSSize {
+        let textNodeWidth = Self.textNodeWidth(for: frame.size)
         rootNode.availableWidth = textNodeWidth
         let height = rootNode.idealSize.height + topOffsetActual + footerHeight + cardTopSpace
         return NSSize(width: textNodeWidth, height: height)
