@@ -780,7 +780,7 @@ describe("parseElementBasedOnStyles", () => {
     element.width = 100
     element.height = 100
     element.style = new CSSStyleDeclaration()
-  });
+  })
 
   test("background: url('logo.png'); should convert element to img tag", () => {
     element.style.setProperty("background", "url('logo.png')")
@@ -942,7 +942,7 @@ describe.skip("performance timing", () => {
     }
     return parent
   }
-
+  
   /**
    * This DOM structure only tests the recursion of child elements
    * DOM structure:
@@ -955,13 +955,31 @@ describe.skip("performance timing", () => {
    *   - p
    *     - some text p 
    */
-  test("elementBounds + complex DOM", () => {
+  test("Pointing: elementBounds + complex DOM", () => {
     const parent = createComplexTree()
     const t0 = performance.now()
     const _ = pnsNativeUI.elementBounds(parent)
     const t1 = performance.now()
     const time = t1 - t0
     expect(time).toBeLessThanOrEqual(13)
+  })
+
+  test("Selection: elementBounds + complex DOM", () => {
+    const parent = createComplexTree()
+    const range = new BeamRangeMock() as BeamRange
+    range.setStart(parent, 2)
+    range.setEnd(parent, 3)
+    const t0 = performance.now()
+    const selectElements = [
+      {
+        id: "uuid",
+        range: range
+      }
+    ]
+    pnsNativeUI.selectBounds(selectElements)
+    const t1 = performance.now()
+    const time = t1 - t0
+    expect(time).toBeLessThanOrEqual(9) // used to be: 4-9
   })
   
   /**
@@ -974,13 +992,31 @@ describe.skip("performance timing", () => {
    *            - some text h1
    *              (... 200x)
    */
-  test("elementBounds + deeply nested DOM", () => {
+  test("Pointing: elementBounds + deeply nested DOM", () => {
     const parent = createDeeplyNestedTree()
     const t0 = performance.now()
     const _ = pnsNativeUI.elementBounds(parent)
     const t1 = performance.now()
     const time = t1 - t0
     expect(time).toBeLessThanOrEqual(9)
+  })
+
+  test("Selection: elementBounds + deeply nested DOM", () => {
+    const parent = createDeeplyNestedTree()
+    const range = new BeamRangeMock() as BeamRange
+    range.setStart(parent, 2)
+    range.setEnd(parent, 3)
+    const t0 = performance.now()
+    const selectElements = [
+      {
+        id: "uuid",
+        range: range
+      }
+    ]
+    pnsNativeUI.selectBounds(selectElements)
+    const t1 = performance.now()
+    const time = t1 - t0
+    expect(time).toBeLessThanOrEqual(1) // used to be: 0.7 - 1
   })
   /**
    * This DOM structure only tests the recursion of child elements
@@ -992,12 +1028,30 @@ describe.skip("performance timing", () => {
    *            - some text h1
    *              (... 200x)
    */
-  test("elementBounds + deeply nested DOM with images", () => {
+  test("Pointing: elementBounds + deeply nested DOM with images", () => {
     const parent = createDeeplyNestedTreeWithImages()
     const t0 = performance.now()
     const _ = pnsNativeUI.elementBounds(parent)
     const t1 = performance.now()
     const time = t1 - t0
     expect(time).toBeLessThanOrEqual(0.1)
+  })
+
+  test("Selection: elementBounds + deeply nested DOM with images", () => {
+    const parent = createDeeplyNestedTreeWithImages()
+    const range = new BeamRangeMock() as BeamRange
+    range.setStart(parent, 2)
+    range.setEnd(parent, 3)
+    const t0 = performance.now()
+    const selectElements = [
+      {
+        id: "uuid",
+        range: range
+      }
+    ]
+    pnsNativeUI.selectBounds(selectElements)
+    const t1 = performance.now()
+    const time = t1 - t0
+    expect(time).toBeLessThanOrEqual(1) // used to be: 0.7 - 1
   })
 })

@@ -1,6 +1,27 @@
 import {BeamRect} from "./BeamTypes"
 
 export class BeamRectHelper {
+  static filterRectArrayByRectArray(sourceArray: BeamRect[], filterArray: BeamRect[]): BeamRect[] {
+    return sourceArray.filter((sourceRect) => {
+      // When rect matches array return true to filter it
+      return this.doRectMatchesRectsInArray(sourceRect, filterArray) == false
+    })
+  }
+  
+  static doRectMatchesRectsInArray(sourceRect: BeamRect, filterArray: BeamRect[]): boolean {
+    return filterArray.some((filterRect) => {
+        return this.doRectsMatch(sourceRect, filterRect)
+    })
+  }
+
+  static doRectsMatch(rect1: BeamRect, rect2: BeamRect): boolean {
+    return (
+      Math.round(rect1?.x) == Math.round(rect2?.x) &&
+      Math.round(rect1?.y) == Math.round(rect2?.y) &&
+      Math.round(rect1?.height) == Math.round(rect2?.height) &&
+      Math.round(rect1?.width) == Math.round(rect2?.width)
+    )
+  }
 
   /**
    * Return the bounding rectangle for two given rectangles
