@@ -260,6 +260,10 @@ class BeamWindow: NSWindow, NSDraggingDestination {
 
 extension BeamWindow: NSWindowDelegate {
 
+    func windowDidMove(_ notification: Notification) {
+        self.state.windowFrame = self.frame
+    }
+
     func windowWillStartLiveResize(_ notification: Notification) {
         self.state.windowIsResizing = true
     }
@@ -271,6 +275,7 @@ extension BeamWindow: NSWindowDelegate {
 
     func windowDidResize(_ notification: Notification) {
         self.setTrafficLightsLayout()
+        self.state.windowFrame = self.frame
     }
 
     func windowWillEnterFullScreen(_ notification: Notification) {
