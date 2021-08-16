@@ -2554,7 +2554,9 @@ extension DocumentManager: BeamObjectManagerDelegate {
 
                         try checkValidations(context, localDocument)
 
-                        self.notificationDocumentUpdate(DocumentStruct(document: localDocument))
+                        let savedDoc = DocumentStruct(document: localDocument)
+                        self.notificationDocumentUpdate(savedDoc)
+                        indexDocument(savedDoc)
 
                         good = true
                         changed = true
@@ -2601,6 +2603,18 @@ extension DocumentManager: BeamObjectManagerDelegate {
         Logger.shared.logDebug("Received \(documents.count) documents: done. \(changedDocuments.count) remodified.",
                                category: .documentNetwork,
                                localTimer: localTimer)
+    }
+
+    func indexDocument(_ docStruct: DocumentStruct) {
+        BeamNote.indexingQueue.async {
+            let decoder = JSONDecoder()
+            do {
+                let note = try decoder.decode(BeamNote.self, from: docStruct.data)
+                try GRDBDatabase.shared.append(note: note)
+            } catch {
+                Logger.shared.logError("Error while trying to index synced note '\(docStruct.title)' [\(docStruct.id)]: \(error)", category: .document)
+            }
+        }
     }
 
     func allObjects() throws -> [DocumentStruct] {
