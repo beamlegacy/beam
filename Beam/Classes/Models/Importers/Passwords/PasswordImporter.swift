@@ -68,7 +68,7 @@ enum PasswordImporter {
 
         for record in parser {
             if let entry = decoder.decode(record) {
-                store.save(host: entry.host, username: entry.username, password: entry.password)
+                store.save(host: entry.host.trimmingCharacters(in: CharacterSet(charactersIn: "/.\\")), username: entry.username, password: entry.password)
             }
         }
     }
