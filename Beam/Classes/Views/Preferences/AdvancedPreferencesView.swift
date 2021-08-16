@@ -51,186 +51,196 @@ struct AdvancedPreferencesView: View {
             try? EncryptionManager.shared.replacePrivateKey($0)
         })
 
-        Preferences.Container(contentWidth: contentWidth) {
-            Preferences.Section {
-                Text("Bundle identifier:")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
-                    .frame(width: 250, alignment: .trailing)
-            } content: {
-                Text(bundleIdentifier)
-            }
-            Preferences.Section(bottomDivider: true) {
-                Text("Environment:")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
-            } content: {
-                Text(env)
-            }
+        ScrollView(.vertical, showsIndicators: false) {
+            Preferences.Container(contentWidth: contentWidth) {
+                Preferences.Section {
+                    Text("Bundle identifier:")
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.text.swiftUI)
+                        .frame(width: 250, alignment: .trailing)
+                } content: {
+                    Text(bundleIdentifier)
+                }
+                Preferences.Section(bottomDivider: true) {
+                    Text("Environment:")
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.text.swiftUI)
+                } content: {
+                    Text(env)
+                }
 
-            Preferences.Section {
-                Text("API endpoint:")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
-            } content: {
-                TextField("api hostname", text: apiHostnameBinding)
-                    .lineLimit(1)
-                    .textFieldStyle(RoundedBorderTextFieldStyle()).frame(maxWidth: 286)
-                ResetAPIEndpointsButton
-            }
-            Preferences.Section {
-                Text("Public endpoint")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
-            } content: {
-                Text(publicHostname)
-            }
-            Preferences.Section(title: "Network Enabled") {
-                NetworkEnabledButton
-            }
-            Preferences.Section(title: "Beam Object API Enabled") {
-                BeamObjectAPIEnabledButton
-            }
-            Preferences.Section(title: "", bottomDivider: true) {
-                Button(action: {
-                    Persistence.Sync.BeamObjects.updated_at = nil
-                    AppDelegate.main.syncData()
-                }, label: {
-                    Text("Force full sync").frame(minWidth: 100)
-                })
-            }
+                Preferences.Section {
+                    Text("API endpoint:")
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.text.swiftUI)
+                } content: {
+                    TextField("api hostname", text: apiHostnameBinding)
+                        .lineLimit(1)
+                        .textFieldStyle(RoundedBorderTextFieldStyle()).frame(maxWidth: 286)
+                    ResetAPIEndpointsButton
+                }
+                Preferences.Section {
+                    Text("Public endpoint")
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.text.swiftUI)
+                } content: {
+                    Text(publicHostname)
+                }
+                Preferences.Section(title: "Network Enabled") {
+                    NetworkEnabledButton
+                }
+                Preferences.Section(title: "Beam Object API Enabled") {
+                    BeamObjectAPIEnabledButton
+                }
+                Preferences.Section(title: "", bottomDivider: true) {
+                    Button(action: {
+                        Persistence.Sync.BeamObjects.updated_at = nil
+                        AppDelegate.main.syncData()
+                    }, label: {
+                        Text("Force full sync").frame(minWidth: 100)
+                    })
+                }
 
-            Preferences.Section(bottomDivider: true) {
-                Text("CoreData:")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
-            } content: {
-                Text(CoreDataManager.shared.storeURL?.absoluteString ?? "-")
-                    .fixedSize(horizontal: false, vertical: true)
-                    .lineLimit(4)
-                    .frame(maxWidth: 387)
-            }
-
-            Preferences.Section(title: "Automatic Update") {
-                Text(String(describing: autoUpdate))
-            }
-            Preferences.Section(title: "Software update URL") {
-                Text(String(describing: updateFeedURL))
-                    .fixedSize(horizontal: false, vertical: true)
-                    .lineLimit(4)
-                    .frame(maxWidth: 387)
-            }
-            Preferences.Section(bottomDivider: true) {
-                Text("Data backup before update")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
-            } content: {
-                AutomaticBackupBeforeUpdate
-            }
-
-            Preferences.Section(title: "Sentry enabled") {
-                Text(String(describing: sentryEnabled)).fixedSize(horizontal: false, vertical: true)
-            }
-            Preferences.Section(title: "Sentry dsn", bottomDivider: true) {
-                Text(Configuration.sentryDsn)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .lineLimit(4)
-                    .frame(maxWidth: 387)
-            }
-
-            Preferences.Section(bottomDivider: true) {
-                Text("TabGrouping Window menu")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
-            } content: {
-                EnableTabGroupingWindowCheckbox
-            }
-            Preferences.Section(title: "Database", bottomDivider: true) {
-                DatabasePicker
-                Text("You *must* restart Beam if you change database.")
-                Button(action: {
-                    showNewDatabase = true
-                }, label: {
-                    Text("New Database").frame(minWidth: 100)
-                })
-                .popover(isPresented: $showNewDatabase) {
+                Preferences.Section(bottomDivider: true) {
+                    Text("CoreData:")
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.text.swiftUI)
+                } content: {
                     HStack {
-                        TextField("title", text: $newDatabaseTitle)
-                            .textFieldStyle(RoundedBorderTextFieldStyle()).frame(minWidth: 100, maxWidth: 400)
-                            .padding()
-
+                        Text(CoreDataManager.shared.storeURL?.absoluteString ?? "-")
+                            .fixedSize(horizontal: false, vertical: true)
+                            .lineLimit(4)
+                            .frame(maxWidth: 387)
                         Button(action: {
-                            if !newDatabaseTitle.isEmpty {
-                                let database = DatabaseStruct(title: newDatabaseTitle)
-                                databaseManager.save(database, completion: { result in
-                                    if case .success(let done) = result, done {
-
-                                        if let database = try? Database.fetchWithId(CoreDataManager.shared.mainContext, database.id) {
-                                            DatabaseManager.defaultDatabase = DatabaseStruct(database: database)
-                                            selectedDatabase = database
-                                            try? CoreDataManager.shared.save()
-                                        }
-                                    }
-                                    showNewDatabase = false
-                                })
-                            } else {
-                                showNewDatabase = false
-                            }
-                            newDatabaseTitle = ""
-                        }, label: {
-                            Text("Create")
-                        }).padding()
+                            let pasteboard = NSPasteboard.general
+                            pasteboard.clearContents()
+                            pasteboard.setString(CoreDataManager.shared.storeURL?.absoluteString ?? "-", forType: .string)
+                        },
+                        label: { Text("copy") })
                     }
                 }
-            }
 
-            Preferences.Section(title: "Encryption Enabled") {
-                EncryptionEnabledButton
-            }
-            Preferences.Section(title: "Encryption key", bottomDivider: true) {
-                TextField("Private Key", text: privateKeyBinding)
-                    .textFieldStyle(RoundedBorderTextFieldStyle()).frame(maxWidth: 400)
-                Text((try? privateKeyBinding.wrappedValue.SHA256()) ?? "-")
-                ResetPrivateKey
-            }
+                Preferences.Section(title: "Automatic Update") {
+                    Text(String(describing: autoUpdate))
+                }
+                Preferences.Section(title: "Software update URL") {
+                    Text(String(describing: updateFeedURL))
+                        .fixedSize(horizontal: false, vertical: true)
+                        .lineLimit(4)
+                        .frame(maxWidth: 387)
+                }
+                Preferences.Section(bottomDivider: true) {
+                    Text("Data backup before update")
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.text.swiftUI)
+                } content: {
+                    AutomaticBackupBeforeUpdate
+                }
 
-            Preferences.Section(bottomDivider: true) {
-                Text("Browsing Session collection")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
-            } content: {
-                BrowsingSessionCollectionCheckbox
-            }
+                Preferences.Section(title: "Sentry enabled") {
+                    Text(String(describing: sentryEnabled)).fixedSize(horizontal: false, vertical: true)
+                }
+                Preferences.Section(title: "Sentry dsn", bottomDivider: true) {
+                    Text(Configuration.sentryDsn)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .lineLimit(4)
+                        .frame(maxWidth: 387)
+                }
 
-            Preferences.Section(bottomDivider: true) {
-                Text("Show Debug Section")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
-            } content: {
-                DebugSectionCheckbox
-            }
+                Preferences.Section(bottomDivider: true) {
+                    Text("TabGrouping Window menu")
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.text.swiftUI)
+                } content: {
+                    EnableTabGroupingWindowCheckbox
+                }
+                Preferences.Section(title: "Database", bottomDivider: true) {
+                    DatabasePicker
+                    Text("You *must* restart Beam if you change database.")
+                    Button(action: {
+                        showNewDatabase = true
+                    }, label: {
+                        Text("New Database").frame(minWidth: 100)
+                    })
+                    .popover(isPresented: $showNewDatabase) {
+                        HStack {
+                            TextField("title", text: $newDatabaseTitle)
+                                .textFieldStyle(RoundedBorderTextFieldStyle()).frame(minWidth: 100, maxWidth: 400)
+                                .padding()
 
-            Preferences.Section(title: "Actions", bottomDivider: true) {
-                CrashButton
-                CopyAccessToken
-            }
-            Preferences.Section(title: "State Restoration Enabled", bottomDivider: true) {
-                StateRestorationEnabledButton
-            }
+                            Button(action: {
+                                if !newDatabaseTitle.isEmpty {
+                                    let database = DatabaseStruct(title: newDatabaseTitle)
+                                    databaseManager.save(database, completion: { result in
+                                        if case .success(let done) = result, done {
 
-            Preferences.Section(title: "Passwords", bottomDivider: true) {
-                PasswordCSVImporter
-                PasswordsDBDrop
+                                            if let database = try? Database.fetchWithId(CoreDataManager.shared.mainContext, database.id) {
+                                                DatabaseManager.defaultDatabase = DatabaseStruct(database: database)
+                                                selectedDatabase = database
+                                                try? CoreDataManager.shared.save()
+                                            }
+                                        }
+                                        showNewDatabase = false
+                                    })
+                                } else {
+                                    showNewDatabase = false
+                                }
+                                newDatabaseTitle = ""
+                            }, label: {
+                                Text("Create")
+                            }).padding()
+                        }
+                    }
+                }
+
+                Preferences.Section(title: "Encryption Enabled") {
+                    EncryptionEnabledButton
+                }
+                Preferences.Section(title: "Encryption key", bottomDivider: true) {
+                    TextField("Private Key", text: privateKeyBinding)
+                        .textFieldStyle(RoundedBorderTextFieldStyle()).frame(maxWidth: 400)
+                    Text((try? privateKeyBinding.wrappedValue.SHA256()) ?? "-")
+                    ResetPrivateKey
+                }
+
+                Preferences.Section(bottomDivider: true) {
+                    Text("Browsing Session collection")
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.text.swiftUI)
+                } content: {
+                    BrowsingSessionCollectionCheckbox
+                }
+
+                Preferences.Section(bottomDivider: true) {
+                    Text("Show Debug Section")
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.text.swiftUI)
+                } content: {
+                    DebugSectionCheckbox
+                }
+
+                Preferences.Section(title: "Actions", bottomDivider: true) {
+                    CrashButton
+                    CopyAccessToken
+                }
+                Preferences.Section(title: "State Restoration Enabled", bottomDivider: true) {
+                    StateRestorationEnabledButton
+                }
+
+                Preferences.Section(title: "Passwords", bottomDivider: true) {
+                    PasswordCSVImporter
+                    PasswordsDBDrop
+                }
+                Preferences.Section(title: "Reindex notes contents") {
+                    ReindexNotesContents
+                }
+                Preferences.Section(title: "Create 100 random notes") {
+                    Create100RandomNotes
+                }
+            }.onAppear {
+                observeDefaultDatabase()
             }
-            Preferences.Section(title: "Reindex notes contents") {
-                ReindexNotesContents
-            }
-            Preferences.Section(title: "Create 100 random notes") {
-                Create100RandomNotes
-            }
-        }.onAppear {
-            observeDefaultDatabase()
-        }
+        }.frame(minHeight: 500)
     }
 
     @State private var showNewDatabase = false
