@@ -92,6 +92,10 @@ extension AppDelegate {
             Logger.shared.logDebug("Opened external URL: \(url.absoluteString)", category: .general)
             _ = window.state.createTab(withURL: url, originalQuery: url.absoluteString)
             NSApp.activate(ignoringOtherApps: true)
+            if window.isMiniaturized {
+                window.deminiaturize(nil)
+            }
+            window.makeKeyAndOrderFront(nil)
             return true
         }
 
