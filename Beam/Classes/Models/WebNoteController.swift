@@ -11,6 +11,11 @@ enum NoteElementAddReason {
      Page was loaded following a link in an existing web page.
      */
     case navigation
+
+    /**
+     Point and Shoot content collected from the page
+     */
+    case pointandshoot
 }
 
 /**
@@ -83,11 +88,14 @@ class WebNoteController: Encodable, Decodable {
         hasSetNote = true
     }
 
-    /*
-    Add the current page to the current note. and return
-    - Parameter allowSearchResult:
-    - Returns: the added (or selected) element
-    */
+    /// Add the current page to the current note based on the browsing session collection preference.
+    /// - Parameters:
+    ///   - url: Url of current page
+    ///   - text: Text to add
+    ///   - reason: Enum reason for adding the note
+    ///   - isNavigatingFromNote: Boolean if it's navigating from a note
+    ///   - browsingOrigin: browsing tree origin value
+    /// - Returns: BeamElement of updated note or nil
     public func add(url: URL, text: String?, reason: NoteElementAddReason, isNavigatingFromNote: Bool? = nil, browsingOrigin: BrowsingTreeOrigin? = nil) -> BeamElement? {
         if PreferencesManager.browsingSessionCollectionIsOn {
             return addContent(url: url, text: text, reason: reason)
@@ -103,7 +111,13 @@ class WebNoteController: Encodable, Decodable {
         return nil
     }
 
-    private func addContent(url: URL, text: String?, reason: NoteElementAddReason) -> BeamElement {
+    /// Add the current page url to the current note. and return
+    /// - Parameters:
+    ///   - url: Url of current page
+    ///   - text: Text to add
+    ///   - reason: Enum reason for adding the note
+    /// - Returns: BeamElement with added url
+    func addContent(url: URL, text: String?, reason: NoteElementAddReason) -> BeamElement {
         let linkString = url.absoluteString
         let existingLink = note.elementContainingLink(to: linkString)
         let existingText = (text != nil && !text!.isEmpty ? note.elementContainingText(someText: text!) : nil)

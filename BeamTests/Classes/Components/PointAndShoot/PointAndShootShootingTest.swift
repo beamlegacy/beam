@@ -105,7 +105,8 @@ class PointAndShootShootingTest: PointAndShootTest {
         XCTAssertNotNil(self.pns.activeShootGroup)
 
         self.pns.addShootToNote(noteTitle: "Card A")
-        XCTAssertEqual(self.testPage?.events.count, 3)
+        XCTAssertEqual(self.testPage?.events.count, 4)
         XCTAssertEqual(self.testPage?.events[2], "addToNote true")
+        XCTAssertEqual(self.testPage?.events[3], "logInNote https://webpage.com Optional(\"PNS MockPage\") pointandshoot")
     }
 }

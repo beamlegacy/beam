@@ -76,7 +76,12 @@ class TestWebPage: WebPage {
         events.append("leave")
     }
 
-    func navigatedTo(url: URL, title: String, isNavigation: Bool) {}
+    func navigatedTo(url: URL, title: String, isNavigation: Bool) {
+        events.append("navigatedTo \(url) \(title)")
+        self.url = url
+        self.title = title
+        self.logInNote(url: url, title: title, reason: .pointandshoot)
+    }
 
     func executeJS(_ jsCode: String, objectName: String?) -> Promise<Any?> {
         if objectName == "PointAndShoot" {
@@ -86,8 +91,15 @@ class TestWebPage: WebPage {
         return Promise(true)
     }
 
+    func logInNote(url: URL, title: String?, reason: NoteElementAddReason) {
+        events.append("logInNote \(url) \(title) \(reason)")
+    }
+
     func addToNote(allowSearchResult: Bool) -> BeamCore.BeamElement? {
         events.append("addToNote \(allowSearchResult)")
+        if let url = self.url {
+            self.logInNote(url: url, title: self.title, reason: .pointandshoot)
+        }
         // use last note
         return testNotes[activeNote]
     }
