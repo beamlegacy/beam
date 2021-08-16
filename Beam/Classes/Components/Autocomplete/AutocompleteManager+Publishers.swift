@@ -9,6 +9,9 @@ import Foundation
 import Combine
 import BeamCore
 
+private var noteFrecencyParamKey: FrecencyParamKey = .note30d0
+private var urlFrecencyParamKey: FrecencyParamKey = .webReadingTime30d0
+
 extension AutocompleteManager {
     typealias AutocompletePublisherSourceResults = (source: AutocompleteResult.Source, results: [AutocompleteResult])
 
@@ -59,8 +62,10 @@ extension AutocompleteManager {
                 switch result {
                 case .failure(let error): promise(.failure(error))
                 case .success(let documentStructs):
+                    let ids = documentStructs.map { $0.id }
+                    let scores = GRDBDatabase.shared.getFrecencyScoreValues(noteIds: ids, paramKey: noteFrecencyParamKey)
                     let autocompleteResults = documentStructs.map {
-                        AutocompleteResult(text: $0.title, source: .note, completingText: query, uuid: $0.id)
+                        AutocompleteResult(text: $0.title, source: .note, completingText: query, uuid: $0.id, score: scores[$0.id])
                     }
                     promise(.success(autocompleteResults))
                 }
@@ -70,7 +75,7 @@ extension AutocompleteManager {
 
     private func autocompleteNotesContentsResults(for query: String) -> Future<[AutocompleteResult], Error> {
         Future { [weak beamData] promise in
-            GRDBDatabase.shared.search(matchingAllTokensIn: query, maxResults: 10) { result in
+            GRDBDatabase.shared.search(matchingAllTokensIn: query, maxResults: 10, frecencyParam: noteFrecencyParamKey) { result in
                 switch result {
                 case .failure(let error): promise(.failure(error))
                 case .success(let notesContentResults):
@@ -80,7 +85,7 @@ extension AutocompleteManager {
                         // Check if the note still exists before proceeding.
                         guard docs?.first(where: { $0.id == result.noteId }) != nil else { return nil }
                         return AutocompleteResult(text: result.title, source: .note,
-                                                  completingText: query, uuid: result.uid)
+                                                  completingText: query, uuid: result.uid, score: result.frecency?.frecencySortScore)
                     }
                     promise(.success(autocompleteResults))
                 }
@@ -90,7 +95,7 @@ extension AutocompleteManager {
 
     private func autocompleteHistoryResults(for query: String) -> Future<[AutocompleteResult], Error> {
         Future { promise in
-            GRDBDatabase.shared.searchHistory(query: query, enabledFrecencyParam: .readingTime30d0) { result in
+            GRDBDatabase.shared.searchHistory(query: query, enabledFrecencyParam: urlFrecencyParamKey) { result in
                 switch result {
                 case .failure(let error): promise(.failure(error))
                 case .success(let historyResults):
@@ -101,7 +106,7 @@ extension AutocompleteManager {
                             urlString = url.urlStringWithoutScheme
                         }
                         return AutocompleteResult(text: result.title, source: .history,
-                                                  url: url, information: urlString, completingText: query)
+                                                  url: url, information: urlString, completingText: query, score: result.frecency?.frecencySortScore)
                     }
                     promise(.success(autocompleteResults))
                 }

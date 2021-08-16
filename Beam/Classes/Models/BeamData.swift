@@ -44,7 +44,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var scope = Set<AnyCancellable>()
     var browsingTreeSender: BrowsingTreeSender?
     let sessionId = UUID()
-
+    var noteFrecencyScorer: FrecencyScorer = ExponentialFrecencyScorer(storage: GRDBNoteFrecencyStorage())
     var versionChecker: VersionChecker
 
     static func dataFolder(fileName: String) -> String {

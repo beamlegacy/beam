@@ -17,7 +17,8 @@ struct BeamElementRecord {
     var text: String
     var uid: String
     var noteId: String // Added noteId
-}
+    static let frecency = hasOne(FrecencyNoteRecord.self, key: "frecency", using: FrecencyNoteRecord.BeamElementForeignKey)
+    }
 
 // SQL generation
 extension BeamElementRecord: TableRecord {

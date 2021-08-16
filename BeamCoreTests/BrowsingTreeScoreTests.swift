@@ -131,44 +131,45 @@ class BrowsingTreeScoreTests: XCTestCase {
     func testNodeVisitType() {
         // First case: root node
         let tree0 = BrowsingTree(nil)
-        XCTAssertEqual(tree0.current.visitType, VisitType.root)
+        XCTAssertEqual(tree0.current.visitType, FrecencyEventType.webRoot)
 
-        func testRootChildVisitType(origin: BrowsingTreeOrigin, expected visitType: VisitType) {
+        func testRootChildVisitType(origin: BrowsingTreeOrigin, expected visitType: FrecencyEventType) {
             let tree = BrowsingTree(origin)
             tree.navigateTo(url: "www.google.com?q=beam", title: nil, startReading: true, isLinkActivation: true, readCount: 10)
             XCTAssertEqual(tree.current.visitType, visitType)
         }
 
         // Second case: root direct children
-        testRootChildVisitType(origin: BrowsingTreeOrigin.searchBar(query: "beam"), expected: VisitType.searchBar)
-        testRootChildVisitType(origin: BrowsingTreeOrigin.searchFromNode(nodeText: "beam"), expected: VisitType.fromNote)
-        testRootChildVisitType(origin: BrowsingTreeOrigin.linkFromNote(noteName: "beam beam"), expected: VisitType.fromNote)
-        testRootChildVisitType(origin: BrowsingTreeOrigin.browsingNode(id: UUID()), expected: VisitType.linkActivation)
+        testRootChildVisitType(origin: BrowsingTreeOrigin.searchBar(query: "beam"), expected: FrecencyEventType.webSearchBar)
+        testRootChildVisitType(origin: BrowsingTreeOrigin.searchFromNode(nodeText: "beam"), expected: FrecencyEventType.webFromNote)
+        testRootChildVisitType(origin: BrowsingTreeOrigin.linkFromNote(noteName: "beam beam"), expected: FrecencyEventType.webFromNote)
+        testRootChildVisitType(origin: BrowsingTreeOrigin.browsingNode(id: UUID()), expected: FrecencyEventType.webLinkActivation)
 
         //controls visitType value of a root grand child node
-        func testAnyOtherNodeVisitType(isLinkActivation: Bool, expected visitType: VisitType) {
+        func testAnyOtherNodeVisitType(isLinkActivation: Bool, expected visitType: FrecencyEventType) {
             let tree = BrowsingTree(nil)
             tree.navigateTo(url: "www.somesite.com", title: nil, startReading: true, isLinkActivation: true, readCount: 10)
             tree.navigateTo(url: "www.someothersite.com", title: nil, startReading: true, isLinkActivation: isLinkActivation, readCount: 10)
             XCTAssertEqual(tree.current.visitType, visitType)
         }
         //Third case: any other node
-        testAnyOtherNodeVisitType(isLinkActivation: true, expected: VisitType.linkActivation)
-        testAnyOtherNodeVisitType(isLinkActivation: false, expected: VisitType.searchBar)
+        testAnyOtherNodeVisitType(isLinkActivation: true, expected: FrecencyEventType.webLinkActivation)
+        testAnyOtherNodeVisitType(isLinkActivation: false, expected: FrecencyEventType.webSearchBar)
     }
 
     struct UpdateScoreArgs {
-        let urlId: UInt64
+        let id: UInt64
         let scoreValue: Float
-        let visitType: VisitType
+        let eventType: FrecencyEventType
         let date: Date
         let paramKey: FrecencyParamKey
     }
 
     class FakeFrecencyScorer: FrecencyScorer {
         public var updateCalls = [UpdateScoreArgs]()
-        func update(urlId: UInt64, value: Float, visitType: VisitType, date: Date, paramKey: FrecencyParamKey) {
-            let args = UpdateScoreArgs(urlId: urlId, scoreValue: value, visitType: visitType, date: date, paramKey: paramKey)
+        func update(id: FrecencyScoreIdKey, value: Float, eventType: FrecencyEventType, date: Date, paramKey: FrecencyParamKey) {
+            guard let id = id as? UInt64 else { return }
+            let args = UpdateScoreArgs(id: id, scoreValue: value, eventType: eventType, date: date, paramKey: paramKey)
             updateCalls.append(args)
         }
         func rank(urlIds: [UInt64], paramKey: FrecencyParamKey, date: Date) -> [UInt64] {
@@ -178,8 +179,8 @@ class BrowsingTreeScoreTests: XCTestCase {
 
     func testFrecencyWrite() {
         //checks that frecency writer is called with right values
-        func testCall(call: UpdateScoreArgs, expectedUrlId urlId: UInt64, expectedValue value: Float, expectedVisitType visitType: VisitType, expectedDate date: Date, expectedKey paramKey: FrecencyParamKey) {
-            XCTAssertEqual(call.urlId, urlId)
+        func testCall(call: UpdateScoreArgs, expectedUrlId urlId: UInt64, expectedValue value: Float, expectedEventType eventType: FrecencyEventType, expectedDate date: Date, expectedKey paramKey: FrecencyParamKey) {
+            XCTAssertEqual(call.id, urlId)
             XCTAssertEqual(call.scoreValue, value)
             XCTAssertEqual(call.date, date)
             XCTAssertEqual(call.paramKey, paramKey)
@@ -201,9 +202,9 @@ class BrowsingTreeScoreTests: XCTestCase {
         }
         let updateScoreCalls = fakeFrecencyScorer.updateCalls
         //root visit has no read period so only info at creation is sent
-        testCall(call: updateScoreCalls[0], expectedUrlId: root.link, expectedValue: 1, expectedVisitType: .root, expectedDate: rootCreationDate, expectedKey: .visit30d0)
+        testCall(call: updateScoreCalls[0], expectedUrlId: root.link, expectedValue: 1, expectedEventType: .webRoot, expectedDate: rootCreationDate, expectedKey: .webVisit30d0)
         //child parent is root and tree origin is search so child visit type is .searchBar
-        testCall(call: updateScoreCalls[1], expectedUrlId: child.link, expectedValue: 1, expectedVisitType: .searchBar, expectedDate: childCreationDate, expectedKey: .visit30d0)
-        testCall(call: updateScoreCalls[2], expectedUrlId: child.link, expectedValue: readDuration, expectedVisitType: .searchBar, expectedDate: readStart, expectedKey: .readingTime30d0)
+        testCall(call: updateScoreCalls[1], expectedUrlId: child.link, expectedValue: 1, expectedEventType: .webSearchBar, expectedDate: childCreationDate, expectedKey: .webVisit30d0)
+        testCall(call: updateScoreCalls[2], expectedUrlId: child.link, expectedValue: readDuration, expectedEventType: .webSearchBar, expectedDate: readStart, expectedKey: .webReadingTime30d0)
     }
 }
