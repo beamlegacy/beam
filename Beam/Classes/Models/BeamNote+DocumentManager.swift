@@ -372,7 +372,7 @@ extension BeamNote: BeamNoteDocument {
         AppDelegate.main.data.updateNoteCount()
     }
 
-    var isTodaysNote: Bool { type.isJournal && (self === AppDelegate.main.data.todaysNote) }
+    var isTodaysNote: Bool { type.isJournal && type.journalDateString == BeamNoteType.iso8601ForDate(BeamDate.now) }
 
     public static func indexAllNotes() {
         let documentManager = DocumentManager()
