@@ -105,7 +105,10 @@ class BrowsingTreeSender {
     func send(browsingTree: BrowsingTree, completion:  @escaping () -> Void = {}) {
         Logger.shared.logDebug("Browsing tree sending start for tree id: \(browsingTree.root.id)", category: .browsingTreeSender)
         guard let payload = payload(browsingTree: browsingTree),
-              !PreferencesManager.isPrivacyFilterEnabled else { return }
+              !PreferencesManager.isPrivacyFilterEnabled else {
+            completion()
+            return
+        }
         let task = session.mockableUploadTask(with: request, from: payload) { data, response, error in
             if let error = error {
                 Logger.shared.logError("Sender error for tree id: \(browsingTree.root.id). \(error.localizedDescription)", category: .browsingTreeSender)
