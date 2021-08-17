@@ -79,8 +79,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             Logger.shared.logInfo("🛑 API HOSTNAME is \(Configuration.apiHostname)", category: .general)
         }
 
-        if Configuration.env == "$(ENV)" {
-            fatalError("Please restart your build, your ENV wasn't detected properly")
+        if Configuration.env == "$(ENV)",
+           let previewing = ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"], !NSString(string: previewing).boolValue {
+            fatalError("Please restart your build, your ENV wasn't detected properly, and this should only happens for SwiftUI Previews")
         }
 
         #if DEBUG
