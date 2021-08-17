@@ -330,3 +330,58 @@ extension BeamData {
         }
     }
 }
+
+public extension BeamData {
+    // Looked at how chromium does it in their third_party/mozilla/NSWorkspace+Utils.m file
+    static var installedBrowserURLs: [URL] {
+        var apps = [URL]()
+        if let url = URL(string: "http://beamapp.co"),
+           let handlers = LSCopyApplicationURLsForURL(url as CFURL, .viewer)?.takeRetainedValue() {
+            if let array = handlers as [AnyObject] as? [URL] {
+                apps = array
+            }
+        }
+        // add the default if it isn't there
+
+        if let defaultHandler = defaultBrowserURL, !apps.contains(defaultHandler) {
+            apps.append(defaultHandler)
+        }
+        return apps
+    }
+
+    static var defaultBrowserURL: URL? {
+        guard let url = URL(string: "http://beamapp.co"),
+              let defaultBundleURL = LSCopyDefaultApplicationURLForURL(url as CFURL, .viewer, nil)?.takeRetainedValue() else {
+            // Sometimes LaunchServices likes to pretend there's no default browser.
+            // If that happens, we'll assume it's probably Safari.
+            return nil
+        }
+        return defaultBundleURL as URL
+    }
+
+    static var isDefaultBrowser: Bool {
+        Self.defaultBrowserURL == Bundle.main.bundleURL
+    }
+
+    @discardableResult
+    static func setAsMainBrowser() -> Bool {
+        guard let _bundleID = Bundle.main.bundleIdentifier else {
+            Logger.shared.logError("Unable to get main bundle id to set Beam as the default browser", category: .general)
+            return false
+        }
+        setMainBrowser(bundleID: _bundleID)
+        return true
+    }
+
+    static func setSafariAsMainBrowser() {
+        setMainBrowser(bundleID: "com.apple.safari")
+    }
+
+    static func setMainBrowser(bundleID _bundleID: String) {
+        let bundleID = _bundleID as CFString
+        LSSetDefaultHandlerForURLScheme("http" as CFString, bundleID)
+        LSSetDefaultHandlerForURLScheme("https" as CFString, bundleID)
+        LSSetDefaultRoleHandlerForContentType(kUTTypeHTML, .viewer, bundleID)
+        LSSetDefaultRoleHandlerForContentType(kUTTypeURL, .viewer, bundleID)
+    }
+}

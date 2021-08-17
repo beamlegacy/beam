@@ -73,9 +73,6 @@ extension PreferencesManager {
 extension PreferencesManager {
     static var browserPreferencesContainer = UserDefaults(suiteName: "app_browser_preferences") ?? .standard
 
-    @UserDefault(key: isDefaultBrowserKey, defaultValue: false, container: browserPreferencesContainer)
-    static var isDefaultBrowser: Bool
-
     @UserDefault(key: selectedDefaultSearchEngineKey, defaultValue: defaultSearchEngine, container: browserPreferencesContainer)
     static var selectedSearchEngine: Int
 

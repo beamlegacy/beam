@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Preferences
+import Combine
 
 let BrowserPreferencesViewController: PreferencePane = PreferencesPaneBuilder.build(identifier: .browser, title: "Browser", imageName: "preferences-browser") {
     BrowserPreferencesView()
@@ -67,12 +68,16 @@ struct BrowserPreferencesView_Previews: PreviewProvider {
 }
 
 struct DefaultBrowserSection: View {
-    @State var isDefaultBrowser: Bool = PreferencesManager.isDefaultBrowser
+    @State var isDefaultBrowser: Bool = BeamData.isDefaultBrowser
 
     var body: some View {
         Button {
-            PreferencesManager.isDefaultBrowser.toggle()
-            isDefaultBrowser.toggle()
+            self.cancellable = Timer.publish(every: 0.1, on: .main, in: .default)
+                .autoconnect()
+                .sink { _ in
+                    self.isDefaultBrowser = BeamData.isDefaultBrowser
+                }
+            BeamData.setAsMainBrowser()
         } label: {
             Text("Set Default...")
                 .font(BeamFont.regular(size: 13).swiftUI)
@@ -80,6 +85,8 @@ struct DefaultBrowserSection: View {
         }.frame(width: 99, height: 20, alignment: .leading)
         .disabled(isDefaultBrowser)
     }
+
+    @State var cancellable: Cancellable?
 }
 
 struct SearchEngineSection: View {
