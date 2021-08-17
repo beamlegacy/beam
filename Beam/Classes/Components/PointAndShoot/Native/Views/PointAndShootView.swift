@@ -30,7 +30,7 @@ struct PointAndShootView: View {
                     PointAndShootCardPicker()
                         .onComplete { (noteTitle, note) in
                             if let noteTitle = noteTitle {
-                                pns.addShootToNote(noteTitle: noteTitle, withNote: note)
+                                pns.addShootToNote(noteTitle: noteTitle, withNote: note, group: shootGroup)
                             } else {
                                 pns.dismissShoot()
                             }

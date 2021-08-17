@@ -129,7 +129,10 @@ class FrecencyNoteTriggerTests: XCTestCase {
 
         //When point and shooting to a note, frecency score of note gets updated
         XCTAssertEqual(scorer.updateCalls.count, 0)
-        pns.addShootToNote(noteTitle: pnsNoteTitle)
+        XCTAssertNotNil(pns.activeShootGroup)
+        if let group = pns.activeShootGroup {
+            pns.addShootToNote(noteTitle: pnsNoteTitle, group: group)
+        }
         XCTAssertEqual(scorer.updateCalls.count, 1)
         let call = scorer.updateCalls[0]
         XCTAssertEqual(call.id, pnsNote.id)

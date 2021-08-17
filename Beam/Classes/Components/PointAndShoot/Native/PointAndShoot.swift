@@ -387,14 +387,13 @@ class PointAndShoot: WebPageHolder, ObservableObject {
     /// - Parameters:
     ///   - noteTitle: title of note to assign to.
     ///   - noteText: optional text to add underneath the shoot quote
-    func addShootToNote(noteTitle: String, withNote noteText: String? = nil) {
+    func addShootToNote(noteTitle: String, withNote noteText: String? = nil, group: ShootGroup) {
         guard let sourceUrl = page.url,
               let currentNote = page.getNote(fromTitle: noteTitle) else {
             fatalError("Could not find note to update with title \(noteTitle)")
         }
-        guard var shootGroup = activeShootGroup else {
-            fatalError("Expected to have an active shoot group")
-        }
+        // Make group mutable
+        var shootGroup = group
         // Set Destination note to the current card
         // Update BrowsingScorer about note submission
         page.setDestinationNote(currentNote, rootElement: currentNote)
