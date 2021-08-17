@@ -14,7 +14,7 @@ import ZIPFoundation
 public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var _todaysNote: BeamNote?
     var todaysNote: BeamNote {
-        if let note = _todaysNote, note.title == todaysName {
+        if let note = _todaysNote, note.isTodaysNote {
             return note
         }
 
