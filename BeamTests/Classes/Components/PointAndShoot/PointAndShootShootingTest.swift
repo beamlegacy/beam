@@ -104,7 +104,10 @@ class PointAndShootShootingTest: PointAndShootTest {
         self.pns.pointShoot(target.id, target, "https://pnsTest.co")
         XCTAssertNotNil(self.pns.activeShootGroup)
 
-        self.pns.addShootToNote(noteTitle: "Card A")
+        if let group = self.pns.activeShootGroup {
+            self.pns.addShootToNote(noteTitle: "Card A", group: group)
+        }
+
         XCTAssertEqual(self.testPage?.events.count, 4)
         XCTAssertEqual(self.testPage?.events[2], "addToNote true")
         XCTAssertEqual(self.testPage?.events[3], "logInNote https://webpage.com Optional(\"PNS MockPage\") pointandshoot")
