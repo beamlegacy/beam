@@ -25,22 +25,22 @@ class FakeNoteGenerator {
         self.futureRatio = futureRatio
     }
 
+    var daysRange: Double { Double(count) * 2 }
+    var journalCount: Double { Double(count) * Double(journalRatio) }
+    var futureCount: Double { journalCount * Double(futureRatio) }
+    var pastCount: Double { journalCount - futureCount }
+    var firstDay: Date { BeamDate.now.addingTimeInterval(-60 * 60 * 24 * daysRange * (1 - Double(futureRatio))) }
+
     var randomJournalDate: Date {
-        let daysRange = Double(count) * 10
-        let futureCount = daysRange * Double(futureRatio)
-        let pastCount = 1 - futureCount
-        let firstDay = BeamDate.now.addingTimeInterval(-60 * 60 * 24 * pastCount)
-        return firstDay.addingTimeInterval(60 * 60 * 24 * daysRange * Double.random(in: 0..<1))
+        return firstDay.addingTimeInterval(Double.random(in: 0 ..< 60 * 60 * 24 * daysRange))
     }
 
     var randomJournalNote: BeamNote {
         let date = randomJournalDate
-        let title = BeamNoteType.titleForDate(date)
-        let note = BeamNote(title: title)
+        let note = BeamNote(journalDate: date)
         if date < BeamDate.now {
             note.creationDate = date
         }
-        note.type = BeamNoteType.journalForDate(date)
         return note
     }
 

@@ -52,7 +52,6 @@ struct ModeView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .clipped()
         .onAppear { contentIsScrolled = false }
-        .onDisappear { data.reloadJournal() }
         .animation(nil)
         .transition(.noteContentTransition(transitionModel: transitionModel))
         .accessibility(identifier: "journalView")
