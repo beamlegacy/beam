@@ -8,130 +8,6 @@
 import Foundation
 import Combine
 
-private enum NoteType: String, Codable {
-    case journal
-    case note
-}
-
-public enum BeamNoteType: Codable, Equatable {
-    case journal(String) // The date is stored as an ISO 8601 string
-    case note
-
-    public var isJournal: Bool {
-        switch self {
-        case .journal:
-            return true
-        default:
-            return false
-        }
-    }
-
-    public var journalDate: Date? {
-        switch self {
-        case .journal(let dateString):
-            let formater = ISO8601DateFormatter()
-            return formater.date(from: dateString)
-        default:
-            return nil
-        }
-    }
-
-    public var journalDateString: String? {
-        switch self {
-        case .journal(let dateString):
-            return dateString
-        default:
-            return nil
-        }
-    }
-
-    public var isFutureJournal: Bool {
-        switch self {
-        case .journal(let dateString):
-            let formater = ISO8601DateFormatter()
-            guard let date = formater.date(from: dateString) else { return false }
-            let calendar = Calendar(identifier: .iso8601)
-            // First check is the date is today, which means it's not in the future
-            guard !calendar.isDateInToday(date) else { return false }
-            // Then compare with now
-            return date > BeamDate.now
-
-        default:
-            return false
-        }
-    }
-
-    public static var todaysJournal: BeamNoteType {
-        return Self.journalForDate(BeamDate.now)
-    }
-
-    public static func titleForDate(_ date: Date) -> String {
-        let formater = ISO8601DateFormatter()
-        formater.formatOptions = .withFullDate
-        return formater.string(from: date)
-    }
-
-    public static func iso8601ForDate(_ date: Date) -> String {
-        let formater = ISO8601DateFormatter()
-        formater.formatOptions = .withFullDate
-        return formater.string(from: date)
-    }
-
-    public static func journalForDate(_ date: Date) -> BeamNoteType {
-        return .journal(titleForDate(date))
-    }
-
-    fileprivate static func fromOldType(_ oldType: NoteType, title: String) -> BeamNoteType {
-        switch oldType {
-        case .journal:
-            let fmt = DateFormatter()
-            fmt.dateStyle = .long
-            fmt.doesRelativeDateFormatting = false
-            fmt.timeStyle = .none
-            guard let date = fmt.date(from: title) else { return .journal("") }
-            return journalForDate(date)
-        case .note:
-            return .note
-        }
-    }
-
-    enum CodingKeys: String, CodingKey {
-        case type
-        case date
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        let value = try container.decode(String.self, forKey: .type)
-        switch value {
-        case "journal":
-            var date = (try? container.decode(String.self, forKey: .date)) ?? ""
-            // make sure the stored date is valid:
-            if ISO8601DateFormatter().date(from: date) == nil {
-                date = ""
-            }
-            self = .journal(date)
-        case "note":
-            self = .note
-        default:
-            Logger.shared.logError("Invalid NoteType '\(value)'", category: .document)
-            self = .note
-        }
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-
-        switch self {
-        case .journal(let date):
-            try container.encode("journal", forKey: .type)
-            try container.encode(date, forKey: .date)
-        case .note:
-            try container.encode("note", forKey: .type)
-        }
-    }
-}
-
 public protocol BeamNoteDocument {
     func observeDocumentChange()
     func autoSave(_ relink: Bool)
@@ -191,6 +67,13 @@ public class BeamNote: BeamElement {
         checkHasNote()
     }
 
+    public init(journalDate: Date) {
+        self.title = BeamDate.journalNoteTitle(for: journalDate)
+        self.type = BeamNoteType.journalForDate(journalDate)
+        super.init()
+        checkHasNote()
+    }
+
     enum CodingKeys: String, CodingKey {
         case title
         case type
@@ -205,11 +88,7 @@ public class BeamNote: BeamElement {
 
         let ttl = try container.decode(String.self, forKey: .title)
         title = ttl
-        if let oldType = try? container.decode(NoteType.self, forKey: .type) {
-            type = BeamNoteType.fromOldType(oldType, title: ttl)
-        } else {
-            type = try container.decode(BeamNoteType.self, forKey: .type)
-        }
+
         searchQueries = try container.decode([String].self, forKey: .searchQueries)
         visitedSearchResults = try container.decode([VisitedPage].self, forKey: .visitedSearchResults)
         if container.contains(.browsingSessions) {
@@ -219,6 +98,21 @@ public class BeamNote: BeamElement {
             sources = try container.decode(NoteSources.self, forKey: .sources)
         }
         try super.init(from: decoder)
+
+        if let oldType = try? container.decode(NoteType.self, forKey: .type) {
+            type = BeamNoteType.fromOldType(oldType, title: ttl, fallbackDate: creationDate)
+        } else {
+            type = try container.decode(BeamNoteType.self, forKey: .type)
+        }
+
+        switch type {
+        case .note:
+            break
+        case .journal:
+            let date = type.journalDate ?? creationDate
+            title = BeamDate.journalNoteTitle(for: date)
+        }
+
         checkHasNote()
     }
 

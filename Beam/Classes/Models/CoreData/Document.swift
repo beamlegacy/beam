@@ -309,6 +309,11 @@ class Document: NSManagedObject, BeamCoreDataObject {
             ?? create(context, title: title)
     }
 
+    class func fetchOrCreateWithJournalDate(_ context: NSManagedObjectContext, _ date: String) -> Document {
+        (try? fetchFirst(context, NSPredicate(format: "journal_date ==[cd] %@", date as CVarArg)))
+            ?? create(context, title: date)
+    }
+
     class func fetchAllWithType(_ context: NSManagedObjectContext, _ type: Int16) throws -> [Document] {
         try fetchAll(context, NSPredicate(format: "document_type = \(type)"))
     }

@@ -118,6 +118,7 @@ extension BeamNote: BeamNoteDocument {
         self.title = newTitle
         Self.reloadAfterRename(previousTitle: previousTitle, note: self)
         try? GRDBDatabase.shared.append(note: self)
+        Logger.shared.logInfo("Rename \(previousTitle) to \(title) [\(id)]", category: .document)
         AppDelegate.main.data.renamedNote = (id, previousTitle, title)
     }
 
@@ -351,9 +352,10 @@ extension BeamNote: BeamNoteDocument {
     }
 
     public static func fetchOrCreateJournalNote(_ documentManager: DocumentManager, date: Date) -> BeamNote {
+        let type = BeamNoteType.journalForDate(date)
         let title = BeamDate.journalNoteTitle(for: date)
         let note = fetchOrCreate(documentManager, title: title)
-        note.type = BeamNoteType.journalForDate(date)
+        note.type = type
         return note
     }
 
