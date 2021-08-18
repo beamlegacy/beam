@@ -46,6 +46,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
             Configuration.beamObjectAPIEnabled = EnvironmentVariables.beamObjectAPIEnabled
 
+            BeamDate.reset()
             // Sad: this is broken when using Vinyl
 //            if !sut.isAllNetworkCallsCompleted() {
 //                fail("not all network calls are completed")

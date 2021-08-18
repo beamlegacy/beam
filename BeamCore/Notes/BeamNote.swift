@@ -68,6 +68,7 @@ public class BeamNote: BeamElement {
     public init(title: String) {
         self.title = Self.validTitle(fromTitle: title)
         super.init()
+        setupSourceObserver()
         checkHasNote()
     }
 
@@ -75,6 +76,7 @@ public class BeamNote: BeamElement {
         self.title = BeamDate.journalNoteTitle(for: journalDate)
         self.type = BeamNoteType.journalForDate(journalDate)
         super.init()
+        setupSourceObserver()
         checkHasNote()
     }
 
@@ -98,10 +100,11 @@ public class BeamNote: BeamElement {
         if container.contains(.browsingSessions) {
             browsingSessions = try container.decode([BrowsingTree].self, forKey: .browsingSessions)
         }
+        try super.init(from: decoder)
         if container.contains(.sources) {
             sources = try container.decode(NoteSources.self, forKey: .sources)
+            setupSourceObserver()
         }
-        try super.init(from: decoder)
 
         if let oldType = try? container.decode(NoteType.self, forKey: .type) {
             type = BeamNoteType.fromOldType(oldType, title: ttl, fallbackDate: creationDate)
@@ -116,7 +119,6 @@ public class BeamNote: BeamElement {
             let date = type.journalDate ?? creationDate
             title = BeamDate.journalNoteTitle(for: date)
         }
-
         checkHasNote()
     }
 
@@ -309,6 +311,13 @@ public class BeamNote: BeamElement {
     // (Note id, include deleted notes)
     static public var titleForNoteId: (UUID, Bool) -> String? = { _, _ in
         fatalError()
+    }
+
+    var sourceObserver: Cancellable?
+    private func setupSourceObserver() {
+        sourceObserver = sources.$changed
+            .dropFirst(1)
+            .sink { [weak self] _ in self?.change(.meta) }
     }
 }
 
