@@ -1,8 +1,17 @@
+// swiftlint:disable file_length
 import Foundation
 import CoreData
 import BeamCore
 
 class Document: NSManagedObject, BeamCoreDataObject {
+    /*
+     Updating `updated_at` in `override func willSave()` raises an issue: when we receive objects from API with
+     `receivedObjects` it will overwrite `updated_at` but we don't want to, as it will keep updating it
+     for every remote updates we get. We want the local object to represent exactly what we fetched.
+
+     Instead we should update `updated_at` manually when doing changes (on save).
+     */
+
     override func awakeFromInsert() {
         super.awakeFromInsert()
         created_at = BeamDate.now
@@ -12,6 +21,10 @@ class Document: NSManagedObject, BeamCoreDataObject {
 
     var uuidString: String {
         id.uuidString.lowercased()
+    }
+
+    var titleAndId: String {
+        "\(title) {\(id)} v\(version)"
     }
 
     var hasLocalChanges: Bool {
@@ -24,17 +37,6 @@ class Document: NSManagedObject, BeamCoreDataObject {
     func asApiType(_ context: NSManagedObjectContext = CoreDataManager.shared.mainContext) -> DocumentAPIType {
         let result = DocumentAPIType(document: self, context: context)
         return result
-    }
-
-    override func willSave() {
-        guard !isDeleted else { return }
-        let keys = self.changedValues().keys
-        if updated_at.timeIntervalSince(BeamDate.now) < -1.0 {
-            if keys.contains("data") {
-                self.updated_at = BeamDate.now
-            }
-        }
-        super.willSave()
     }
 
     func delete(_ context: NSManagedObjectContext = CoreDataManager.shared.mainContext) {
@@ -211,7 +213,14 @@ class Document: NSManagedObject, BeamCoreDataObject {
     class func fetchAll(_ context: NSManagedObjectContext,
                         _ predicate: NSPredicate? = nil,
                         _ sortDescriptors: [NSSortDescriptor]? = nil) throws -> [Document] {
-        try fetchAllWithLimit(context, predicate, sortDescriptors)
+        try fetchAllWithLimit(context, predicate, sortDescriptors, 0, 0)
+    }
+
+    class func fetchAll(_ context: NSManagedObjectContext,
+                        _ predicate: NSPredicate? = nil,
+                        _ sortDescriptors: [NSSortDescriptor]? = nil,
+                        _ databaseId: UUID? = DatabaseManager.defaultDatabase.id) throws -> [Document] {
+        try fetchAllWithLimit(context, predicate, sortDescriptors, 0, 0, databaseId)
     }
 
     class func rawFetchAll(_ context: NSManagedObjectContext,
@@ -225,9 +234,18 @@ class Document: NSManagedObject, BeamCoreDataObject {
                                  _ sortDescriptors: [NSSortDescriptor]? = nil,
                                  _ limit: Int = 0,
                                  _ fetchOffset: Int = 0) throws -> [Document] {
+        try fetchAllWithLimit(context, predicate, sortDescriptors, limit, fetchOffset, nil)
+    }
+
+    class func fetchAllWithLimit(_ context: NSManagedObjectContext,
+                                 _ predicate: NSPredicate? = nil,
+                                 _ sortDescriptors: [NSSortDescriptor]? = nil,
+                                 _ limit: Int = 0,
+                                 _ fetchOffset: Int = 0,
+                                 _ databaseId: UUID? = DatabaseManager.defaultDatabase.id) throws -> [Document] {
         let fetchRequest: NSFetchRequest<Document> = Document.fetchRequest()
         fetchRequest.predicate = processPredicate(predicate,
-                                                  DatabaseManager.defaultDatabase.id,
+                                                  databaseId,
                                                   onlyNonDeleted: true)
         fetchRequest.fetchLimit = limit
         fetchRequest.sortDescriptors = sortDescriptors

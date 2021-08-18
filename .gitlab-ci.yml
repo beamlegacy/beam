@@ -48,5 +48,3 @@ code_quality:
   artifacts:
     paths: [gl-code-quality-report.json]
     when: always
-  tags:
-    - intel

@@ -28,6 +28,10 @@ struct DocumentStruct: BeamObjectProtocol {
         id.uuidString.lowercased()
     }
 
+    var titleAndId: String {
+        "\(title) {\(id)} v\(version)"
+    }
+
     // Used for encoding this into BeamObject
     enum CodingKeys: String, CodingKey {
         case databaseId

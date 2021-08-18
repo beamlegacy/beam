@@ -145,7 +145,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                     it("returns 404") {
                         waitUntil(timeout: .seconds(10)) { done in
                             do {
-                                try sut.delete(uuid) { result in
+                                try sut.delete(uuid, raise404: true) { result in
                                     expect { try result.get() }.to(throwError { (error: APIRequestError) in
                                         expect(error).to(matchError(APIRequestError.notFound))
                                     })

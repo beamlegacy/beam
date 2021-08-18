@@ -33,6 +33,10 @@ enum Persistence {
         @StandardStorable("last_fetched_at") static var lastFetchedAt: Date?
     }
 
+    enum Database {
+        @StandardStorable("currentDatabaseId") static var currentDatabaseId: UUID?
+    }
+
     // swiftlint:disable nesting
     enum Sync {
         enum Databases {

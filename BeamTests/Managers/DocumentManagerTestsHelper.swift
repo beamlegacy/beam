@@ -175,6 +175,7 @@ class DocumentManagerTestsHelper {
                               id: String? = nil) -> DocumentStruct {
         var uuid = UUID()
         if let id = id, let newuuid = UUID(uuidString: id) { uuid = newuuid }
+
         return DocumentStruct(id: uuid,
                               databaseId: DatabaseManager.defaultDatabase.id,
                               title: titleParam ?? String.randomTitle(),
@@ -183,6 +184,16 @@ class DocumentManagerTestsHelper {
                               data: (dataString ?? "whatever binary data").asData,
                               documentType: .note,
                               version: 0)
+    }
+
+    func fillDocumentStruct(_ docStruct: DocumentStruct) -> DocumentStruct {
+        let fakeNoteGenerator = FakeNoteGenerator(count: 1, journalRatio: 0.0, futureRatio: 0.05)
+        fakeNoteGenerator.generateNotes()
+        var result = fakeNoteGenerator.notes.first!.documentStruct!
+        result.id = docStruct.id
+        result.title = docStruct.title
+        result.databaseId = docStruct.databaseId
+        return result
     }
 
     func createDefaultDatabase(_ id: String? = nil) {

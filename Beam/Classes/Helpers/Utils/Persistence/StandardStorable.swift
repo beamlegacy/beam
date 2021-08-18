@@ -11,10 +11,32 @@ struct StandardStorable<T> {
 
     var wrappedValue: T? {
         get {
-            return store.object(forKey: key) as? T
+            switch T.self {
+            case is UUID.Type:
+                if let unarchivedObject = store.object(forKey: key) as? Data {
+                    return try? NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(unarchivedObject) as? T
+                }
+
+                return nil
+            default:
+                return store.object(forKey: key) as? T
+            }
         }
+
         set {
-            store.set(newValue, forKey: key)
+            switch T.self {
+            case is UUID.Type:
+                guard let newValue = newValue else {
+                    store.set(nil, forKey: key)
+                    return
+                }
+                let data: Data? = try? NSKeyedArchiver.archivedData(withRootObject: newValue,
+                                                                    requiringSecureCoding: true)
+
+                store.set(data, forKey: key)
+            default:
+                store.set(newValue, forKey: key)
+            }
         }
     }
 }

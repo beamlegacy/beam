@@ -56,27 +56,6 @@ class DocumentTests: QuickSpec {
             }
         }
 
-        describe(".updatedAt") {
-            it("updates attribute on context save only if more than a second difference, and has data changes") {
-                let document = Document.create(mainContext, title: String.randomTitle())
-                expect(document.updated_at).toNot(beNil())
-
-                BeamDate.travel(0.5)
-                let initialUpdatedAt = document.updated_at
-                document.title = String.randomTitle()
-                try? mainContext.save()
-                expect(document.updated_at) == initialUpdatedAt
-
-                BeamDate.travel(1.5)
-                document.title = String.randomTitle()
-                document.data = String.randomTitle().asData // force updatedAt change
-                try? mainContext.save()
-                expect(document.updated_at).toNot(equal(initialUpdatedAt))
-                expect(document.updated_at).to(beGreaterThan(initialUpdatedAt))
-                expect(document.updated_at.timeIntervalSince(initialUpdatedAt)).to(beGreaterThan(2.0))
-            }
-        }
-
         describe(".fetchWithTitle()") {
             // Checks https://linear.app/beamapp/issue/BE-1116/sqlcore-crash-in-documentfetchfirst-when-typing-/-in-omnibar
             // Typing `\` in Omnibar used to crash

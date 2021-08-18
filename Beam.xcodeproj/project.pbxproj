@@ -279,6 +279,7 @@
 		527524E126A1909200C2F385 /* BeamObjectManagerNetworkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 527524E026A1909200C2F385 /* BeamObjectManagerNetworkTests.swift */; };
 		527524EB26A1A9E100C2F385 /* BeamObjectTestsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 527524EA26A1A9E100C2F385 /* BeamObjectTestsHelper.swift */; };
 		527DF48725710ECB00A0A56D /* DocumentManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 527DF48625710ECB00A0A56D /* DocumentManagerTests.swift */; };
+		527F371426C6C42000BA9A25 /* BeamNote+Debug.swift in Sources */ = {isa = PBXBuildFile; fileRef = 527F370C26C6C42000BA9A25 /* BeamNote+Debug.swift */; };
 		5281B01825C962EF00DF66D9 /* DocumentManagerNetworkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5281B01725C962EF00DF66D9 /* DocumentManagerNetworkTests.swift */; };
 		5281B06425C98D2600DF66D9 /* PersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5281B06325C98D2600DF66D9 /* PersistenceTests.swift */; };
 		5281B07525C994BE00DF66D9 /* ConfigurationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5281B07425C994BE00DF66D9 /* ConfigurationTests.swift */; };
@@ -290,6 +291,8 @@
 		5281B09425C99D3300DF66D9 /* 2_local.json in Resources */ = {isa = PBXBuildFile; fileRef = 5281B09325C99D3300DF66D9 /* 2_local.json */; };
 		5281B09825C99D4B00DF66D9 /* 2_remote.json in Resources */ = {isa = PBXBuildFile; fileRef = 5281B09725C99D4B00DF66D9 /* 2_remote.json */; };
 		528286B625E806CD00C0CCEE /* NoteEditorUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 528286B525E806CD00C0CCEE /* NoteEditorUITests.swift */; };
+		5284894E26C54C460064878B /* String+TitleConflict.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5284894126C54C220064878B /* String+TitleConflict.swift */; };
+		5284895426C5650A0064878B /* Error+NotFound.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5284895326C5650A0064878B /* Error+NotFound.swift */; };
 		5285672A26275A8D00DDBE45 /* BeamToBeam2Migration.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 5285672926275A8D00DDBE45 /* BeamToBeam2Migration.xcmappingmodel */; };
 		528910ED25FBBDE800492969 /* DocumentAPITypeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 528910EC25FBBDE800492969 /* DocumentAPITypeTests.swift */; };
 		528DBBC226C440820054F9FF /* BeamDate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C3077A25C311950027C4B1 /* BeamDate.swift */; };
@@ -310,6 +313,7 @@
 		52A7DE2826AECFAC003E770E /* MyRemoteObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52A7DE2726AECFAC003E770E /* MyRemoteObject.swift */; };
 		52A7DE3226AECFC6003E770E /* MyRemoteObjectManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52A7DE3126AECFC6003E770E /* MyRemoteObjectManager.swift */; };
 		52A7DE3826AED01A003E770E /* MyRemoteObjectManagerNetworkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52A7DE3726AED01A003E770E /* MyRemoteObjectManagerNetworkTests.swift */; };
+		52A8698D26CBB3C000FCCC69 /* AppDelegate+ShowError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52A8698C26CBB3C000FCCC69 /* AppDelegate+ShowError.swift */; };
 		52A94E3C25E90094004BAC93 /* XCUIElement+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52A94E3B25E90094004BAC93 /* XCUIElement+Beam.swift */; };
 		52B17AB0262441D600CB4728 /* DatabasesWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52B17AAF262441D600CB4728 /* DatabasesWindow.swift */; };
 		52B17AB62624422800CB4728 /* DatabasesContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52B17AB52624422800CB4728 /* DatabasesContentView.swift */; };
@@ -1210,6 +1214,7 @@
 		527524E026A1909200C2F385 /* BeamObjectManagerNetworkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamObjectManagerNetworkTests.swift; sourceTree = "<group>"; };
 		527524EA26A1A9E100C2F385 /* BeamObjectTestsHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamObjectTestsHelper.swift; sourceTree = "<group>"; };
 		527DF48625710ECB00A0A56D /* DocumentManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentManagerTests.swift; sourceTree = "<group>"; };
+		527F370C26C6C42000BA9A25 /* BeamNote+Debug.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "BeamNote+Debug.swift"; sourceTree = "<group>"; };
 		5281B01725C962EF00DF66D9 /* DocumentManagerNetworkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentManagerNetworkTests.swift; sourceTree = "<group>"; };
 		5281B06325C98D2600DF66D9 /* PersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceTests.swift; sourceTree = "<group>"; };
 		5281B07025C9900C00DF66D9 /* Test.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Test.xcconfig; sourceTree = "<group>"; };
@@ -1222,6 +1227,8 @@
 		5281B09325C99D3300DF66D9 /* 2_local.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = 2_local.json; sourceTree = "<group>"; };
 		5281B09725C99D4B00DF66D9 /* 2_remote.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = 2_remote.json; sourceTree = "<group>"; };
 		528286B525E806CD00C0CCEE /* NoteEditorUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteEditorUITests.swift; sourceTree = "<group>"; };
+		5284894126C54C220064878B /* String+TitleConflict.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+TitleConflict.swift"; sourceTree = "<group>"; };
+		5284895326C5650A0064878B /* Error+NotFound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Error+NotFound.swift"; sourceTree = "<group>"; };
 		5285672926275A8D00DDBE45 /* BeamToBeam2Migration.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = BeamToBeam2Migration.xcmappingmodel; sourceTree = "<group>"; };
 		5287EC2E25C42B0100CE1DD9 /* String+UUID.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+UUID.swift"; sourceTree = "<group>"; };
 		528910EC25FBBDE800492969 /* DocumentAPITypeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentAPITypeTests.swift; sourceTree = "<group>"; };
@@ -1246,6 +1253,7 @@
 		52A7DE2726AECFAC003E770E /* MyRemoteObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyRemoteObject.swift; sourceTree = "<group>"; };
 		52A7DE3126AECFC6003E770E /* MyRemoteObjectManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyRemoteObjectManager.swift; sourceTree = "<group>"; };
 		52A7DE3726AED01A003E770E /* MyRemoteObjectManagerNetworkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyRemoteObjectManagerNetworkTests.swift; sourceTree = "<group>"; };
+		52A8698C26CBB3C000FCCC69 /* AppDelegate+ShowError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+ShowError.swift"; sourceTree = "<group>"; };
 		52A94E3B25E90094004BAC93 /* XCUIElement+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "XCUIElement+Beam.swift"; sourceTree = "<group>"; };
 		52B17AAF262441D600CB4728 /* DatabasesWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabasesWindow.swift; sourceTree = "<group>"; };
 		52B17AB52624422800CB4728 /* DatabasesContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabasesContentView.swift; sourceTree = "<group>"; };
@@ -2272,6 +2280,7 @@
 				41817276258110D100317ED8 /* AppDelegate+Beam */,
 				418173992581238E00317ED8 /* String+Beam */,
 				525C5471261F619D00378FAA /* Binding+onChange.swift */,
+				5284895326C5650A0064878B /* Error+NotFound.swift */,
 				418171A42581107C00317ED8 /* Range+Beam.swift */,
 				418171992581107C00317ED8 /* OSLog+Beam.swift */,
 				418171982581107C00317ED8 /* NSImage+Beam.swift */,
@@ -2469,6 +2478,7 @@
 				A5DE86A32692AEEC00E05C20 /* BeamWindow+NSMenu.swift */,
 				A043B7E6265937DA00E267E5 /* AppDelegate+TabGrouping.swift */,
 				0DC6E2CE269DE73B00BD2E2A /* AppDelegate+TopDomain.swift */,
+				52A8698C26CBB3C000FCCC69 /* AppDelegate+ShowError.swift */,
 			);
 			path = "AppDelegate+Beam";
 			sourceTree = "<group>";
@@ -2566,6 +2576,7 @@
 		418173992581238E00317ED8 /* String+Beam */ = {
 			isa = PBXGroup;
 			children = (
+				5284894126C54C220064878B /* String+TitleConflict.swift */,
 				418173C22581276F00317ED8 /* String+NSMutableAttributedString.swift */,
 				52FB30C925E3D7B3001BF098 /* String+Title.swift */,
 			);
@@ -3253,6 +3264,7 @@
 				96F93617258CFDD2006D8E53 /* BeamText.swift */,
 				418171702581107C00317ED8 /* BeamElement.swift */,
 				418171842581107C00317ED8 /* BeamNote.swift */,
+				527F370C26C6C42000BA9A25 /* BeamNote+Debug.swift */,
 				96319CB22616155300D1CF31 /* BeamText+String.swift */,
 				96319CC8261616B300D1CF31 /* BeamText+Links.swift */,
 				4181716D2581107C00317ED8 /* Score.swift */,
@@ -4463,6 +4475,7 @@
 				522B17C82684E11E00741F94 /* String+SHA256.swift in Sources */,
 				96319D482616233E00D1CF31 /* BeamText.swift in Sources */,
 				DAEEA74826A6B96A00AE72DE /* Utilities.swift in Sources */,
+				527F371426C6C42000BA9A25 /* BeamNote+Debug.swift in Sources */,
 				96319D382616233E00D1CF31 /* BeamElement.swift in Sources */,
 				96319D4B2616233E00D1CF31 /* String+UUID.swift in Sources */,
 				96319D432616233E00D1CF31 /* String+Split.swift in Sources */,
@@ -4648,6 +4661,7 @@
 				A0E9B0E326668C1300FC99A5 /* FaviconView.swift in Sources */,
 				8726448F26199B8F0070E83D /* OptionSelector.swift in Sources */,
 				87B7394426BD640C005D2DD6 /* PasswordListViewModel.swift in Sources */,
+				5284895426C5650A0064878B /* Error+NotFound.swift in Sources */,
 				418172112581107C00317ED8 /* Readability.swift in Sources */,
 				A5208D80261D231B006193AF /* BeamColor+Contexts.swift in Sources */,
 				418171F12581107C00317ED8 /* UserSessionRequest.swift in Sources */,
@@ -4803,10 +4817,12 @@
 				520088B82613265900AED835 /* Database.swift in Sources */,
 				338A66C2268E053C00B056EB /* BeamDownloadDocument.swift in Sources */,
 				A5C9F01126136B5F0096380F /* AllCardsPageContentView.swift in Sources */,
+				52A8698D26CBB3C000FCCC69 /* AppDelegate+ShowError.swift in Sources */,
 				A5946804265CE5B30044A892 /* DeleteDocumentCommand.swift in Sources */,
 				A050047525DA918A009CFEB6 /* NoteAutoSaveService.swift in Sources */,
 				96319C8626160E4A00D1CF31 /* BeamNote+LinkDetection.swift in Sources */,
 				A0E7D98726139FCA00D70676 /* JournalStackView.swift in Sources */,
+				5284894E26C54C460064878B /* String+TitleConflict.swift in Sources */,
 				524299E725A480A300F4DBF5 /* AccountsView.swift in Sources */,
 				87F11BDB26655170003BE98E /* MockAutocompleteStores.swift in Sources */,
 				032562AE26051D3B006513E4 /* RBFilterGroup.m in Sources */,
