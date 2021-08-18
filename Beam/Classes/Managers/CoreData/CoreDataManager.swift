@@ -231,7 +231,7 @@ extension CoreDataManager {
         .value(backgroundContext)
     }
 
-    func newBackground() -> PromiseKit.Guarantee<NSManagedObjectContext> {
+    func newBackgroundContext() -> PromiseKit.Guarantee<NSManagedObjectContext> {
         .value(persistentContainer.newBackgroundContext())
     }
 }
@@ -242,7 +242,7 @@ extension CoreDataManager {
         Promises.Promise(backgroundContext)
     }
 
-    func newBackground() -> Promises.Promise<NSManagedObjectContext> {
+    func newBackgroundContext() -> Promises.Promise<NSManagedObjectContext> {
         Promises.Promise(persistentContainer.newBackgroundContext())
     }
 }

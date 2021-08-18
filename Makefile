@@ -166,4 +166,11 @@ clean_app_files:
 	rm -rf "${HOME}/Library/Containers/co.beamapp.macos.dev/Data/Library/Application Support/"*
 	rm -rf "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/"*
 
+clean_ci_server:
+	docker system prune --volumes
+	rm -rf ${HOME}/Library/Containers/co.beamapp.macos/
+	rm -rf ${HOME}/Library/Containers/co.beamapp.macos.dev
+	rm -rf ${HOME}/Library/Developer/Xcode/Archives/*
+	rm -rf ${HOME}/Library/Developer/Xcode/DerivedData/*
+
 setup: git_checkout install_dependencies install_swiftlint install_cmake install_variable_injector build_libgit2 install_js

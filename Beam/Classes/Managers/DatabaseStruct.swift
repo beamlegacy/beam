@@ -63,6 +63,10 @@ extension DatabaseStruct {
         let result = DatabaseAPIType(database: self)
         return result
     }
+
+    var titleAndId: String {
+        "\(title) {\(id)}"
+    }
 }
 
 extension DatabaseStruct: Equatable {

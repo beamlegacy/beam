@@ -46,7 +46,7 @@ extension BeamNote: BeamNoteDocument {
         }
         guard let docStruct = documentStruct else { return }
 
-        Logger.shared.logInfo("Observe changes for note \(title)", category: .document)
+        Logger.shared.logInfo("Observe changes for note \(titleAndId)", category: .document)
         activeDocumentCancellables = []
         activeDocumentCancellables.append(documentManager.onDocumentChange(docStruct) { [unowned self] docStruct in
             DispatchQueue.main.async { [weak self] in
@@ -56,7 +56,7 @@ extension BeamNote: BeamNoteDocument {
                  When receiving updates for a new document, we don't check the version
                  */
                 if self.version >= docStruct.version, self.id == docStruct.id {
-                    Logger.shared.logDebug("BeamNote \(self.title) {\(self.id)} observer skipped {\(docStruct.id)} version \(docStruct.version) (must be greater than current \(self.version))")
+                    Logger.shared.logDebug("BeamNote \(self.titleAndId) observer skipped \(docStruct.titleAndId) (must be greater than current \(self.version))")
                     return
                 }
 
@@ -125,8 +125,8 @@ extension BeamNote: BeamNoteDocument {
     // swiftlint:disable:next cyclomatic_complexity function_body_length
     public func save(documentManager: DocumentManager, completion: ((Result<Bool, Error>) -> Void)? = nil) {
         guard version == savedVersion else {
-            Logger.shared.logError("Waiting for last save [\(title) {\(id)} - saved version \(savedVersion) / current \(version)]",
-                                   category: .document)
+            Logger.shared.logWarning("Waiting for last save: \(title) {\(id)} - saved version \(savedVersion) / current \(version)",
+                                     category: .document)
             completion?(.failure(BeamNoteError.saveAlreadyRunning))
             return
         }
@@ -145,7 +145,7 @@ extension BeamNote: BeamNoteDocument {
             return
         }
 
-        Logger.shared.logInfo("BeamNote wants to save: \(title) {\(id)} version \(version)", category: .document)
+        Logger.shared.logInfo("BeamNote wants to save: \(titleAndId)", category: .document)
         documentManager.save(documentStruct, completion: { [weak self] result in
             guard let self = self else { completion?(result); return }
 
@@ -234,8 +234,7 @@ extension BeamNote: BeamNoteDocument {
         })
     }
 
-    static func instanciateNote(_ documentManager: DocumentManager,
-                                _ documentStruct: DocumentStruct,
+    static func instanciateNote(_ documentStruct: DocumentStruct,
                                 keepInMemory: Bool = true,
                                 decodeChildren: Bool = true) throws -> BeamNote {
         let decoder = JSONDecoder()
@@ -270,10 +269,8 @@ extension BeamNote: BeamNoteDocument {
             return nil
         }
 
-//        Logger.shared.logDebug("Note loaded:\n\(String(data: doc.data, encoding: .utf8)!)\n", category: .document)
-
         do {
-            return try instanciateNote(documentManager, doc, keepInMemory: keepInMemory, decodeChildren: decodeChildren)
+            return try instanciateNote(doc, keepInMemory: keepInMemory, decodeChildren: decodeChildren)
         } catch {
             Logger.shared.logError("Unable to decode note \(doc.title) (\(doc.id))", category: .document)
         }
@@ -296,7 +293,7 @@ extension BeamNote: BeamNoteDocument {
         }
 
         do {
-            return try instanciateNote(documentManager, doc, keepInMemory: keepInMemory, decodeChildren: decodeChildren)
+            return try instanciateNote(doc, keepInMemory: keepInMemory, decodeChildren: decodeChildren)
         } catch {
             Logger.shared.logError("Unable to decode note \(doc.title) (\(doc.id))", category: .document)
         }
@@ -310,7 +307,7 @@ extension BeamNote: BeamNoteDocument {
                 return note
             }
             do {
-                return try instanciateNote(documentManager, doc)
+                return try instanciateNote(doc)
             } catch {
                 Logger.shared.logError("Unable to load document \(doc.title) (\(doc.id)): \(error.localizedDescription)", category: .document)
                 return nil

@@ -896,12 +896,18 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                 }
 
                 context("with fetch and raise error policy") {
+                    beforeEach {
+                        MyRemoteObjectManager.conflictPolicy = .fetchRemoteAndError
+                    }
+                    afterEach {
+                        MyRemoteObjectManager.conflictPolicy = .replace
+                    }
                     it("saves objects") {
                         let networkCalls = APIRequest.callsCount
 
                         waitUntil(timeout: .seconds(10)) { done in
                             do {
-                                _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3], .fetchRemoteAndError) { result in
+                                _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3]) { result in
                                     expect { try result.get() }.toNot(throwError())
 
                                     done()
@@ -934,7 +940,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     it("stores previousChecksum") {
                         waitUntil(timeout: .seconds(1800)) { done in
                             do {
-                                _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3], .fetchRemoteAndError) { result in
+                                _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3]) { result in
                                     expect { try result.get() }.toNot(throwError())
 
                                     if let objects = try? result.get() {
@@ -1044,12 +1050,19 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                 }
 
                 context("with fetch and raise error policy") {
+                    beforeEach {
+                        MyRemoteObjectManager.conflictPolicy = .fetchRemoteAndError
+                    }
+                    afterEach {
+                        MyRemoteObjectManager.conflictPolicy = .replace
+                    }
+
                     it("saves all objects with merged content") {
                         let networkCalls = APIRequest.callsCount
 
                         waitUntil(timeout: .seconds(1800)) { done in
                             do {
-                                _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3], .fetchRemoteAndError) { result in
+                                _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3]) { result in
                                     expect { try result.get() }.toNot(throwError())
 
                                     done()
@@ -1090,7 +1103,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     it("stores all objects previousChecksum with merged content") {
                         waitUntil(timeout: .seconds(1800)) { done in
                             do {
-                                _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3], .fetchRemoteAndError) { result in
+                                _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3]) { result in
                                     expect { try result.get() }.toNot(throwError())
                                     done()
                                 }
@@ -1209,6 +1222,12 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                 }
 
                 context("with fetch and raise error policy") {
+                    beforeEach {
+                        MyRemoteObjectManager.conflictPolicy = .fetchRemoteAndError
+                    }
+                    afterEach {
+                        MyRemoteObjectManager.conflictPolicy = .replace
+                    }
                     it("saves all objects with merged content") {
                         object1.title = newTitle1
                         object2.title = newTitle2
@@ -1218,7 +1237,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                         waitUntil(timeout: .seconds(10)) { done in
                             do {
-                                _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3], .fetchRemoteAndError) { result in
+                                _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3]) { result in
                                     expect { try result.get() }.toNot(throwError())
 
                                     done()
@@ -1274,7 +1293,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                         waitUntil(timeout: .seconds(10)) { done in
                             do {
-                                _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3], .fetchRemoteAndError) { result in
+                                _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3]) { result in
                                     expect { try result.get() }.toNot(throwError())
 
                                     done()
@@ -1489,13 +1508,19 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     }
 
                     context("with fetch and raise error policy") {
+                        beforeEach {
+                            MyRemoteObjectManager.conflictPolicy = .fetchRemoteAndError
+                        }
+                        afterEach {
+                            MyRemoteObjectManager.conflictPolicy = .replace
+                        }
                         it("saves object with merged content") {
                             object.title = newTitle
                             let networkCalls = APIRequest.callsCount
 
                             waitUntil(timeout: .seconds(10)) { done in
                                 do {
-                                    _ = try sut.saveOnBeamObjectAPI(object, .fetchRemoteAndError) { result in
+                                    _ = try sut.saveOnBeamObjectAPI(object) { result in
                                         expect { try result.get() }.toNot(throwError())
 
                                         done()
@@ -1531,7 +1556,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                             waitUntil(timeout: .seconds(10)) { done in
                                 do {
-                                    _ = try sut.saveOnBeamObjectAPI(object, .fetchRemoteAndError) { result in
+                                    _ = try sut.saveOnBeamObjectAPI(object) { result in
                                         expect { try result.get() }.toNot(throwError())
 
                                         done()

@@ -643,7 +643,9 @@ class DocumentManagerTests: QuickSpec {
                 }
             }
 
-            it("does not call handler for same document manager") {
+            // Disabling this one, I changed the code to call the handler even if the same manager, as sometimes when
+            // saving on the API, we have a conflict, fix/merge the document, and need the UI to be updated.
+            xit("does not call handler for same document manager") {
                 var docStruct = helper.createDocumentStruct()
                 docStruct = helper.saveLocally(docStruct)
                 docStruct.version += 1

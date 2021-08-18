@@ -53,6 +53,10 @@ public class BeamNote: BeamElement {
     public var databaseId: UUID?
     @Published public var deleted: Bool = false
 
+    public var titleAndId: String {
+        "\(title) {\(id)} v\(version)"
+    }
+
     public override var note: BeamNote? {
         return self
     }

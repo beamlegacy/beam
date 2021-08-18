@@ -178,7 +178,7 @@ extension BeamObjectRequest {
     func fetchAll(updatedAtAfter: Date? = nil,
                   ids: [UUID]? = nil,
                   _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
-        let parameters = BeamObjectsParameters(updatedAtAfter: updatedAtAfter, ids: nil)
+        let parameters = BeamObjectsParameters(updatedAtAfter: updatedAtAfter, ids: ids)
 
         return try fetchAllWithFile("beam_objects", parameters, completion)
     }

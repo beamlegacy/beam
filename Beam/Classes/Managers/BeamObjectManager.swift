@@ -14,24 +14,23 @@ enum BeamObjectConflictResolution {
 
 class BeamObjectManager {
     static var managerInstances: [String: BeamObjectManagerDelegateProtocol] = [:]
-    static var translators: [String: (BeamObjectManagerDelegateProtocol, [BeamObject]) -> Void] = [:]
+    static var translators: [String: (BeamObjectManagerDelegateProtocol, [BeamObject]) throws -> Void] = [:]
 
     private static var networkRequests: [UUID: APIRequest] = [:]
     private static var networkRequestsWithoutID: [APIRequest] = []
 
     static func register<M: BeamObjectManagerDelegateProtocol, O: BeamObjectProtocol>(_ manager: M, object: O.Type) {
         managerInstances[object.beamObjectTypeName] = manager
-        translators[object.beamObjectTypeName] = { manager, objects in
-            do {
-                let encapsulatedObjects: [O] = try objects.map {
-                    try $0.decodeBeamObject()
-                }
 
-                try manager.parse(objects: encapsulatedObjects)
-            } catch {
-                Logger.shared.logError("manager \(manager) returned error: \(error.localizedDescription)",
-                                       category: .beamObject)
+        /*
+         Translators is a way to know what object type is being processed by the manager
+         */
+        translators[object.beamObjectTypeName] = { manager, objects in
+            let encapsulatedObjects: [O] = try objects.map {
+                try $0.decodeBeamObject()
             }
+
+            try manager.parse(objects: encapsulatedObjects)
         }
     }
 
@@ -49,18 +48,20 @@ class BeamObjectManager {
 
     var conflictPolicyForSave: BeamObjectConflictResolution = .replace
 
-    internal func parseObjects(_ beamObjects: [BeamObject]) -> Bool {
+    internal func parseObjects(_ beamObjects: [BeamObject]) throws {
         let lastUpdatedAt = Persistence.Sync.BeamObjects.updated_at
 
         // If we are doing a delta refreshAll, and 0 document is fetched, we exit early
         // If not doing a delta sync, we don't as we want to update local document as `deleted`
         guard lastUpdatedAt == nil || !beamObjects.isEmpty else {
             Logger.shared.logDebug("0 beam object fetched.", category: .beamObjectNetwork)
-            return true
+            return
         }
 
         if let mostRecentUpdatedAt = beamObjects.compactMap({ $0.updatedAt }).sorted().last {
             Logger.shared.logDebug("new updatedAt: \(mostRecentUpdatedAt). \(beamObjects.count) beam objects fetched.",
+                                   category: .beamObjectNetwork)
+            Logger.shared.logDebug("objects IDs: \(beamObjects.map { $0.id.uuidString.lowercased() }.joined(separator: ", "))",
                                    category: .beamObjectNetwork)
         }
 
@@ -69,12 +70,10 @@ class BeamObjectManager {
             result[object.beamObjectType]?.append(object)
         }
 
-        parseFilteredObjects(filteredObjects)
-
-        return true
+        try parseFilteredObjects(filteredObjects)
     }
 
-    internal func parseFilteredObjects(_ filteredObjects: [String: [BeamObject]]) {
+    internal func parseFilteredObjects(_ filteredObjects: [String: [BeamObject]]) throws {
         for (key, objects) in filteredObjects {
             guard let managerInstance = Self.managerInstances[key] else {
                 Logger.shared.logDebug("**managerInstance for \(key) not found** keys: \(Self.managerInstances.keys)",
@@ -88,7 +87,7 @@ class BeamObjectManager {
                 continue
             }
 
-            translator(managerInstance, objects)
+            try translator(managerInstance, objects)
         }
     }
 
@@ -108,12 +107,7 @@ extension BeamObjectManager {
             switch result {
             case .failure:
                 completion?(result)
-            case .success(let success):
-                guard success == true else {
-                    completion?(result)
-                    return
-                }
-
+            case .success:
                 do {
                     try self.saveAllToAPI()
                     completion?(.success(true))
@@ -178,7 +172,7 @@ extension BeamObjectManager {
     }
 
     /// Will fetch all updates from the API and call each managers based on object's type
-    func fetchAllFromAPI(_ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) throws {
+    func fetchAllFromAPI(_ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw BeamObjectManagerError.notAuthenticated
         }
@@ -201,13 +195,17 @@ extension BeamObjectManager {
             case .failure(let error):
                 Logger.shared.logDebug("fetchAllFromAPI: \(error.localizedDescription)",
                                        category: .beamObjectNetwork)
-                completion?(.failure(error))
+                completion(.failure(error))
             case .success(let beamObjects):
-                let success = self.parseObjects(beamObjects)
-                if success {
+                do {
+                    try self.parseObjects(beamObjects)
                     Persistence.Sync.BeamObjects.updated_at = timeNow
+                    completion(.success(true))
+                } catch {
+                    Logger.shared.logError("Error parsing remote beamobjects: \(error.localizedDescription)",
+                                           category: .beamObjectNetwork)
+                    completion(.failure(error))
                 }
-                completion?(.success(success))
             }
         }
 
@@ -359,28 +357,6 @@ extension BeamObjectManager {
         }
     }
 
-    internal func fetchObjects<T: BeamObjectProtocol>(_ objects: [T]) throws -> [T] {
-        let semaphore = DispatchSemaphore(value: 0)
-        var result: Swift.Result<[T], Error>!
-
-        try fetchObjects(objects) { fetchAllResult in
-            result = fetchAllResult
-            semaphore.signal()
-        }
-
-        let semaphoreResult = semaphore.wait(timeout: DispatchTime.now() + .seconds(10))
-        if case .timedOut = semaphoreResult {
-            throw BeamObjectManagerDelegateError.runtimeError("Couldn't fetch object")
-        }
-
-        switch result {
-        case .failure(let error): throw error
-        case .success(let objects): return objects
-        case .none:
-            throw BeamObjectManagerDelegateError.runtimeError("Couldn't fetch object")
-        }
-    }
-
     /// Fetch remote objects
     @discardableResult
     func fetchObjects<T: BeamObjectProtocol>(_ objects: [T],
@@ -389,33 +365,38 @@ extension BeamObjectManager {
             switch fetchResult {
             case .failure(let error): completion(.failure(error))
             case .success(let remoteBeamObjects):
-                var errors: [Error]?
-                let remoteObjects: [T] = remoteBeamObjects.compactMap { remoteBeamObject in
-                    // Check if you have the same IDs for 2 different object types
-                    guard remoteBeamObject.beamObjectType == T.beamObjectTypeName else {
-                        completion(.failure(BeamObjectManagerDelegateError.runtimeError("returned object \(remoteBeamObject) \(remoteBeamObject.id) is not a \(T.beamObjectTypeName)")))
-                        return nil
-                    }
-
-                    do {
-                        let remoteObject: T = try remoteBeamObject.decodeBeamObject()
-                        return remoteObject
-
-                    } catch {
-                        errors?.append(BeamObjectManagerError.decodingError(remoteBeamObject))
-                    }
-
-                    return nil
+                do {
+                    completion(.success(try self.beamObjectsToObjects(remoteBeamObjects)))
+                } catch {
+                    completion(.failure(error))
                 }
-
-                if let errors = errors {
-                    completion(.failure(BeamObjectManagerError.multipleErrors(errors)))
-                    return
-                }
-
-                completion(.success(remoteObjects))
             }
         }
+    }
+
+    internal func beamObjectsToObjects<T: BeamObjectProtocol>(_ beamObjects: [BeamObject]) throws -> [T] {
+        var errors: [Error] = []
+        let remoteObjects: [T] = try beamObjects.compactMap { beamObject in
+            // Check if you have the same IDs for 2 different object types
+            guard beamObject.beamObjectType == T.beamObjectTypeName else {
+                // This is an important fail, we throw now
+                let error = BeamObjectManagerDelegateError.runtimeError("returned object \(beamObject) \(beamObject.id) is not a \(T.beamObjectTypeName).")
+                throw error
+            }
+
+            do {
+                let remoteObject: T = try beamObject.decodeBeamObject()
+                return remoteObject
+            } catch {
+                errors.append(BeamObjectManagerError.decodingError(beamObject))
+            }
+
+            return nil
+        }
+
+        guard errors.isEmpty else { throw BeamObjectManagerError.multipleErrors(errors) }
+
+        return remoteObjects
     }
 
     internal func fetchObject<T: BeamObjectProtocol>(_ object: T) throws -> T {
@@ -427,16 +408,16 @@ extension BeamObjectManager {
             semaphore.signal()
         }
 
-        let semaphoreResult = semaphore.wait(timeout: DispatchTime.now() + .seconds(10))
+        let semaphoreResult = semaphore.wait(timeout: DispatchTime.now() + .seconds(30))
         if case .timedOut = semaphoreResult {
-            throw BeamObjectManagerDelegateError.runtimeError("Couldn't fetch object")
+            throw BeamObjectManagerDelegateError.runtimeError("Couldn't fetch object, timedout")
         }
 
         switch result {
         case .failure(let error): throw error
         case .success(let object): return object
         case .none:
-            throw BeamObjectManagerDelegateError.runtimeError("Couldn't fetch object")
+            throw BeamObjectManagerDelegateError.runtimeError("Couldn't fetch object, got none!")
         }
     }
 
@@ -488,47 +469,56 @@ extension BeamObjectManager {
         var goodObjects: [T] = extractGoodObjects(objects, objectErrorIds, remoteBeamObjects)
 
         do {
-            let fetchedConflictedObjects = try fetchObjects(conflictedObjects)
+            try fetchObjects(conflictedObjects) { result in
+                switch result {
+                case .failure(let error): completion(.failure(error))
+                case .success(let fetchedConflictedObjects):
+                    switch self.conflictPolicyForSave {
+                    case .replace:
+                        do {
 
-            switch self.conflictPolicyForSave {
-            case .replace:
-                let toSaveObjects: [T] = try conflictedObjects.compactMap {
-                    let conflictedObject = $0
+                            let toSaveObjects: [T] = try conflictedObjects.compactMap {
+                                let conflictedObject = $0
 
-                    let fetchedObject: T? = fetchedConflictedObjects.first(where: {
-                        $0.beamObjectId == conflictedObject.beamObjectId
-                    })
+                                let fetchedObject: T? = fetchedConflictedObjects.first(where: {
+                                    $0.beamObjectId == conflictedObject.beamObjectId
+                                })
 
-                    if let fetchedObject = fetchedObject {
-                        return manageConflict(conflictedObject, fetchedObject)
-                    } else {
-                        var fixedConflictedObject: T = try conflictedObject.copy()
-                        fixedConflictedObject.previousChecksum = nil
-                        return fixedConflictedObject
-                    }
-                }
+                                if let fetchedObject = fetchedObject {
+                                    return self.manageConflict(conflictedObject, fetchedObject)
+                                } else {
+                                    var fixedConflictedObject: T = try conflictedObject.copy()
+                                    fixedConflictedObject.previousChecksum = nil
+                                    return fixedConflictedObject
+                                }
+                            }
 
-                _ = try saveToAPI(toSaveObjects) { result in
-                    switch result {
-                    case .failure(let error):
-                        completion(.failure(error))
-                    case .success(let savedObjects):
-                        let toSaveObjectsWithChecksum: [T] = toSaveObjects.map {
-                            var toSaveObject = $0
-                            let savedObject = savedObjects.first(where: { $0.beamObjectId == toSaveObject.beamObjectId })
-                            toSaveObject.previousChecksum = savedObject?.checksum
+                            _ = try self.saveToAPI(toSaveObjects) { result in
+                                switch result {
+                                case .failure(let error):
+                                    completion(.failure(error))
+                                case .success(let savedObjects):
+                                    let toSaveObjectsWithChecksum: [T] = toSaveObjects.map {
+                                        var toSaveObject = $0
+                                        let savedObject = savedObjects.first(where: { $0.beamObjectId == toSaveObject.beamObjectId })
+                                        toSaveObject.previousChecksum = savedObject?.checksum
 
-                            return toSaveObject
+                                        return toSaveObject
+                                    }
+
+                                    goodObjects.append(contentsOf: toSaveObjectsWithChecksum)
+                                    completion(.success(goodObjects))
+                                }
+                            }
+                        } catch {
+                            completion(.failure(error))
                         }
-
-                        goodObjects.append(contentsOf: toSaveObjectsWithChecksum)
-                        completion(.success(goodObjects))
+                    case .fetchRemoteAndError:
+                        completion(.failure(BeamObjectManagerObjectError<T>.invalidChecksum(conflictedObjects,
+                                                                                            goodObjects,
+                                                                                            fetchedConflictedObjects)))
                     }
                 }
-            case .fetchRemoteAndError:
-                completion(.failure(BeamObjectManagerObjectError<T>.invalidChecksum(conflictedObjects,
-                                                                                    goodObjects,
-                                                                                    fetchedConflictedObjects)))
             }
         } catch {
             completion(.failure(error))
@@ -1014,7 +1004,7 @@ extension BeamObjectManager {
     }
 
     @discardableResult
-    func delete(_ id: UUID, _ completion: ((Swift.Result<BeamObject, Error>) -> Void)? = nil) throws -> APIRequest {
+    func delete(_ id: UUID, raise404: Bool = false, _ completion: ((Swift.Result<BeamObject?, Error>) -> Void)? = nil) throws -> APIRequest {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw BeamObjectManagerError.notAuthenticated
         }
@@ -1025,7 +1015,13 @@ extension BeamObjectManager {
 
         try request.delete(id) { result in
             switch result {
-            case .failure(let error): completion?(.failure(error))
+            case .failure(let error):
+                // We don't mind 404
+                if raise404 || !BeamError.isNotFound(error) {
+                    completion?(.failure(error))
+                } else {
+                    completion?(.success(nil))
+                }
             case .success(let object): completion?(.success(object))
             }
         }

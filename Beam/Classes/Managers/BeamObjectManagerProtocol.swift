@@ -87,7 +87,7 @@ extension BeamObjectManagerDelegate {
         self.willSaveAllOnBeamObjectApi()
 
         let toSaveObjects = try allObjects()
-        return try saveOnBeamObjectsAPI(toSaveObjects, Self.conflictPolicy) { result in
+        return try saveOnBeamObjectsAPI(toSaveObjects) { result in
             switch result {
             case .failure(let error): completion(.failure(error))
             case .success: completion(.success(true))
@@ -108,12 +108,12 @@ extension BeamObjectManagerDelegate {
                 Logger.shared.logError(returnedError.localizedDescription, category: .beamObjectNetwork)
                 error = returnedError
             case .success:
-                Logger.shared.logDebug("Saved \(objects)", category: .beamObjectNetwork)
+                Logger.shared.logDebug("Saved \(objects.count) objects", category: .beamObjectNetwork)
             }
             semaphore.signal()
         }
 
-        let semaphoreResult = semaphore.wait(timeout: DispatchTime.now() + .seconds(10))
+        let semaphoreResult = semaphore.wait(timeout: DispatchTime.now() + .seconds(30))
         if case .timedOut = semaphoreResult {
             Logger.shared.logError("Semaphore timedout", category: .beamObjectNetwork)
         }
@@ -123,7 +123,6 @@ extension BeamObjectManagerDelegate {
 
     @discardableResult
     func saveOnBeamObjectsAPI(_ objects: [BeamObjectType],
-                              _ conflictPolicyForSave: BeamObjectConflictResolution = .replace,
                               _ completion: @escaping ((Swift.Result<[BeamObjectType], Error>) -> Void)) throws -> APIRequest? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw APIRequestError.notAuthenticated
@@ -137,7 +136,7 @@ extension BeamObjectManagerDelegate {
         }
 
         let objectManager = BeamObjectManager()
-        objectManager.conflictPolicyForSave = conflictPolicyForSave
+        objectManager.conflictPolicyForSave = Self.conflictPolicy
 
         return try objectManager.saveToAPI(objectsToSave) { result in
             switch result {
@@ -184,6 +183,43 @@ extension BeamObjectManagerDelegate {
             case .success: completion(.success(true))
             }
         }
+    }
+
+    func deleteFromBeamObjectAPI(_ ids: [UUID],
+                                 _ completion: @escaping (Swift.Result<Bool, Error>) -> Void) throws {
+        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            throw APIRequestError.notAuthenticated
+        }
+
+        let group = DispatchGroup()
+        var errors: [Error] = []
+        let lock = DispatchSemaphore(value: 1)
+        let objectManager = BeamObjectManager()
+
+        for id in ids {
+            group.enter()
+
+            try objectManager.delete(id) { result in
+                switch result {
+                case .failure(let error):
+                    lock.wait()
+                    errors.append(error)
+                    lock.signal()
+                case .success: break
+                }
+
+                group.leave()
+            }
+        }
+
+        group.wait()
+
+        guard errors.isEmpty else {
+            completion(.failure(BeamObjectManagerError.multipleErrors(errors)))
+            return
+        }
+
+        completion(.success(true))
     }
 
     @discardableResult
@@ -259,14 +295,13 @@ extension BeamObjectManagerDelegate {
 
     @discardableResult
     func saveOnBeamObjectAPI(_ object: BeamObjectType,
-                             _ conflictPolicyForSave: BeamObjectConflictResolution = .replace,
                              _ completion: @escaping ((Swift.Result<BeamObjectType, Error>) -> Void)) throws -> APIRequest {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw APIRequestError.notAuthenticated
         }
 
         let objectManager = BeamObjectManager()
-        objectManager.conflictPolicyForSave = conflictPolicyForSave
+        objectManager.conflictPolicyForSave = Self.conflictPolicy
 
         let networkTask = try objectManager.saveToAPI(object) { result in
             switch result {
@@ -326,6 +361,8 @@ extension BeamObjectManagerDelegate {
 
                     mergedObjects.append(mergedObject)
                 } else {
+                    // The remote object doesn't exist, we can just resend it without a `previousChecksum` to create it
+                    // server-side
                     var mergedObject = try conflictedObject.copy()
                     mergedObject.previousChecksum = nil
 
@@ -333,24 +370,21 @@ extension BeamObjectManagerDelegate {
                 }
             }
 
-            try self.saveOnBeamObjectsAPI(mergedObjects, .fetchRemoteAndError) { result in
+            try self.saveObjectsAfterConflict(mergedObjects)
+
+            try self.saveOnBeamObjectsAPI(mergedObjects) { result in
                 switch result {
                 case .failure(let error):
+                    if !goodObjects.isEmpty {
+                        try? self.persistChecksum(goodObjects)
+                    }
                     completion(.failure(error))
                 case .success(let remoteObjects):
-                    do {
+                    var allObjects: [BeamObjectType] = []
+                    allObjects.append(contentsOf: goodObjects)
+                    allObjects.append(contentsOf: remoteObjects)
 
-                        var allObjects: [BeamObjectType] = []
-                        allObjects.append(contentsOf: goodObjects)
-                        allObjects.append(contentsOf: remoteObjects)
-
-                        try self.saveObjectsAfterConflict(remoteObjects)
-                        try self.persistChecksum(goodObjects)
-
-                        completion(.success(allObjects))
-                    } catch {
-                        completion(.failure(error))
-                    }
+                    completion(.success(allObjects))
                 }
             }
         } catch {
@@ -400,7 +434,7 @@ extension BeamObjectManagerDelegate {
         }
 
         do {
-            try self.saveOnBeamObjectsAPI(newObjects, .fetchRemoteAndError) { result in
+            try self.saveOnBeamObjectsAPI(newObjects) { result in
                 switch result {
                 case .failure: completion(result)
                 case .success(let newObjectsSaved):

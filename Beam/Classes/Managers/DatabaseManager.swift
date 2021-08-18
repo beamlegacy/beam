@@ -5,10 +5,12 @@ import BeamCore
 
 // swiftlint:disable file_length
 
-enum DatabaseManagerError: Error, Equatable {
+enum DatabaseManagerError: Error {
     case operationCancelled
     case localDatabaseNotFound
     case titleAlreadyExists
+    case multipleErrors([Error])
+    case networkTimeout
 }
 
 extension DatabaseManagerError: LocalizedError {
@@ -20,6 +22,10 @@ extension DatabaseManagerError: LocalizedError {
             return "local Database Not Found"
         case .titleAlreadyExists:
             return "Title already exists"
+        case .multipleErrors(let errors):
+            return "Multiple errors: \(errors)"
+        case .networkTimeout:
+            return "Network timeout"
         }
     }
 }
@@ -39,14 +45,26 @@ class DatabaseManager {
             let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
             return context.performAndWait {
                 // We look at a default database set by the user
-                if let savedDatabaseId = Configuration.databaseId,
-                   let databaseId = UUID(uuidString: savedDatabaseId),
-                   let database = try? Database.fetchWithId(context, databaseId) {
+                if let currentDatabaseId = Persistence.Database.currentDatabaseId,
+                   let database = try? Database.fetchWithId(context, currentDatabaseId) {
                     return DatabaseStruct(database: database)
                 }
 
-                // Saved Database not found, or none has been set, going for any existing one, if not create a `Default`
-                let database = (try? Database.fetchFirst(context)) ?? Database.fetchOrCreateWithTitle(context, "Default")
+                // Reset it, it wasn't found with `fetchWithId` and is probably deleted since
+                Persistence.Database.currentDatabaseId = nil
+
+                // Saved Database not found, or none has been set, going for any existing one, most recent first
+                let existingDB = try? Database.fetchFirst(context,
+                                                          nil,
+                                                          [NSSortDescriptor(key: "updated_at", ascending: false)])
+
+                if existingDB == nil {
+                    Logger.shared.logWarning("Create default database and reset BeamObjects sync last updated",
+                                             category: .database)
+                    Persistence.Sync.BeamObjects.updated_at = nil
+                }
+
+                let database = existingDB ?? Database.fetchOrCreateWithTitle(context, "Default")
 
                 if database.objectID.isTemporaryID {
                     do {
@@ -62,7 +80,8 @@ class DatabaseManager {
         }
         set {
             guard newValue != defaultDatabase else { return }
-            Configuration.databaseId = newValue.id.uuidString.lowercased()
+            let oldValue = defaultDatabase
+            Persistence.Database.currentDatabaseId = newValue.id
             let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
             context.performAndWait {
                 do {
@@ -73,7 +92,25 @@ class DatabaseManager {
                     Logger.shared.logError(error.localizedDescription, category: .database)
                 }
             }
+
+            Self.showRestartAlert(oldValue, newValue)
+        }
+    }
+
+    static func showRestartAlert(_ oldValue: DatabaseStruct, _ newValue: DatabaseStruct) {
+        DispatchQueue.main.async {
             NotificationCenter.default.post(name: .defaultDatabaseUpdate, object: newValue)
+
+            // TODO: remove this once the app knows how to switch database live
+            let alert = NSAlert()
+            alert.messageText = "Database changed"
+            alert.alertStyle = .critical
+            alert.informativeText = "DB Changed from \(oldValue.title) {\(oldValue.id)} to \(newValue.title) {\(newValue.id)}. Beam must exit now."
+
+            alert.addButton(withTitle: "Exit now")
+            alert.runModal()
+
+            NSApplication.shared.terminate(nil)
         }
     }
 
@@ -96,8 +133,9 @@ class DatabaseManager {
         savedCount += 1
 
         do {
+            let localTimer = BeamDate.now
             try CoreDataManager.save(context)
-            Logger.shared.logDebug("[\(savedCount)] CoreDataManager saved", category: .coredata)
+            Logger.shared.logDebug("[\(savedCount)] CoreDataManager saved", category: .coredata, localTimer: localTimer)
             return true
         } catch let error as NSError {
             switch error.code {
@@ -261,6 +299,7 @@ class DatabaseManager {
         database.title = databaseType.title ?? database.title
         database.created_at = databaseType.createdAt ?? database.created_at
         database.deleted_at = databaseType.deletedAt ?? database.deleted_at
+        database.updated_at = BeamDate.now
     }
 
     private func isEqual(_ database: Database, to databaseStruct: DatabaseStruct) -> Bool {
@@ -284,6 +323,100 @@ class DatabaseManager {
             database.deleted_at?.intValue == databaseType.deletedAt?.intValue &&
             database.id.uuidString.lowercased() == databaseType.id
     }
+
+    // MARK: - Default database check
+
+    /// Will check if the newDatabase we received is older than our current default database, and if our current default database has no document it will switch
+    static func changeDefaultDatabaseIfNeeded() {
+        // A default database was manually set by the user
+        // guard Configuration.databaseId == nil else { return }
+
+        guard isDefaultDatabaseAutomaticallyCreated() else { return }
+
+        let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
+
+        context.perform {
+            guard Database.countWithPredicate(context) > 1 else { return }
+            guard isDefaultDatabaseEmpty(context) else { return }
+
+            let predicate = NSPredicate(format: "id != %@", DatabaseManager.defaultDatabase.id as CVarArg)
+            let sortDescriptor = NSSortDescriptor(key: "updated_at", ascending: false)
+            guard let databases = try? Database.fetchAll(context, predicate, [sortDescriptor]) else { return }
+            for database in databases {
+                guard !isDatabaseEmpty(context, database.id) else { continue }
+
+                Logger.shared.logInfo("Changing default database to \(database.title) {\(database.id)}",
+                                      category: .database)
+
+                DatabaseManager.defaultDatabase = DatabaseStruct(database: database)
+
+                return
+            }
+        }
+    }
+
+    private static func isDefaultDatabaseEmpty(_ context: NSManagedObjectContext) -> Bool {
+        isDatabaseEmpty(context, Self.defaultDatabase.id)
+    }
+
+    // TODO: we should add a `automaticCreated` in `Database` to know when we created one automatically at start, so a
+    // user creating one manually with `Default` as title won't match this
+    private static func isDefaultDatabaseAutomaticallyCreated() -> Bool {
+        DatabaseManager.defaultDatabase.title == "Default"
+    }
+
+    /// Is database completly empty, without any documents
+    private static func isDatabaseEmpty(_ context: NSManagedObjectContext, _ databaseId: UUID) -> Bool {
+        context.performAndWait {
+            do {
+                for document in try Document.fetchAll(context, nil, nil, databaseId) {
+                    let beamNote = try BeamNote.instanciateNote(DocumentStruct(document: document),
+                                                                keepInMemory: false,
+                                                                decodeChildren: true)
+                    guard beamNote.isEntireNoteEmpty() else { return false }
+                }
+            } catch { return false }
+
+            return true
+        }
+    }
+
+    /// Delete all empty databases, including their empty documents. Delete on the API.
+    func deleteEmptyDatabases(onlyAutomaticCreated: Bool = true,
+                              completion: (Swift.Result<Bool, Error>) -> Void) {
+        let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
+
+        context.performAndWait {
+            let predicate = NSPredicate(format: "id != %@", DatabaseManager.defaultDatabase.id as CVarArg)
+            guard let databases = try? Database.fetchAll(context, predicate) else { return }
+
+            let group = DispatchGroup()
+            var errors: [Error] = []
+
+            for database in databases {
+                // Only automatically created DB should be deleted.
+                // TODO: we should add a `automaticCreated` in `Database` instead of checking for title
+                if onlyAutomaticCreated, database.title.prefix(7) != "Default" { continue }
+
+                guard Self.isDatabaseEmpty(context, database.id) else { continue }
+
+                group.enter()
+                self.delete(id: database.id) { result in
+                    do { _ = try result.get() } catch { errors.append(error) }
+                    group.leave()
+                }
+            }
+
+            group.wait()
+
+            guard errors.isEmpty else {
+                completion(.failure(DatabaseManagerError.multipleErrors(errors)))
+                return
+            }
+
+            completion(.success(true))
+        }
+    }
 }
 
 // MARK: -
@@ -301,55 +434,106 @@ extension DatabaseManager {
         }
 
         do {
-            try Document.deleteWithPredicate(context, NSPredicate(format: "database_id = %@",
-                                                                  id as CVarArg))
+            let documentIds = try Document.fetchAll(context, NSPredicate(format: "database_id = %@", id as CVarArg)).map { $0.id }
+
+            try Document.deleteWithPredicate(context, NSPredicate(format: "database_id = %@", id as CVarArg))
             coredataDb.delete(context)
 
             try Self.saveContext(context: context)
+
+            // Trigger updates for Advanced Settings, will force update for the Picker listing all DBs
+            // Important: Don't use `DatabaseManager.defaultDatabase` here as object, as it recreates a default DB.
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(name: .defaultDatabaseUpdate,
+                                                object: nil)
+            }
+
+            guard includedRemote else {
+                completion(.success(true))
+                return
+            }
+
+            guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+                completion(.success(false))
+                return
+            }
+
+            if Configuration.beamObjectAPIEnabled {
+                deleteWithBeamObjectAPI(id, documentIds, completion)
+            } else {
+                let databaseRequest = DatabaseRequest()
+
+                do {
+                    // Remotely, deleting a database will delete all related documents
+                    try databaseRequest.delete(id.uuidString.lowercased()) { result in
+                        switch result {
+                        case .failure(let error):
+                            Logger.shared.logError(error.localizedDescription, category: .database)
+                            completion(.failure(error))
+                        case .success:
+                            completion(.success(true))
+                        }
+                    }
+                } catch {
+                    Logger.shared.logError(error.localizedDescription, category: .database)
+                    completion(.failure(error))
+                }
+            }
         } catch {
             Logger.shared.logError(error.localizedDescription, category: .database)
             completion(.failure(error))
             return
         }
+    }
 
-        // Trigger updates for Advanced Settings
-        NotificationCenter.default.post(name: .defaultDatabaseUpdate,
-                                        object: DatabaseManager.defaultDatabase)
+    private func deleteWithBeamObjectAPI(_ id: UUID,
+                                         _ documentIds: [UUID],
+                                         _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
+        guard Configuration.beamObjectAPIEnabled else { return }
 
-        guard includedRemote else {
-            completion(.success(true))
-            return
-        }
+        do {
 
-        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-            completion(.success(false))
-            return
-        }
+            let group = DispatchGroup()
+            var errors: [Error] = []
+            let lock = DispatchSemaphore(value: 1)
 
-        if Configuration.beamObjectAPIEnabled {
-            do {
-                try self.deleteFromBeamObjectAPI(id, completion)
-            } catch {
-                completion(.failure(error))
-            }
-        } else {
-            let databaseRequest = DatabaseRequest()
-
-            do {
-                // Remotely, deleting a database will delete all related documents
-                try databaseRequest.delete(id.uuidString.lowercased()) { result in
-                    switch result {
-                    case .failure(let error):
-                        Logger.shared.logError(error.localizedDescription, category: .database)
-                        completion(.failure(error))
-                    case .success:
-                        completion(.success(true))
-                    }
+            // Delete database
+            group.enter()
+            try self.deleteFromBeamObjectAPI(id) { result in
+                switch result {
+                case .success: break
+                case .failure(let error):
+                    lock.wait()
+                    errors.append(error)
+                    lock.signal()
                 }
-            } catch {
-                Logger.shared.logError(error.localizedDescription, category: .database)
-                completion(.failure(error))
+                group.leave()
             }
+
+            let documentManager = DocumentManager()
+
+            group.enter()
+            try documentManager.deleteFromBeamObjectAPI(documentIds) { result in
+                switch result {
+                case .success: break
+                case .failure(let error):
+                    lock.wait()
+                    errors.append(error)
+                    lock.signal()
+                }
+                group.leave()
+            }
+
+            group.wait()
+
+            guard errors.isEmpty else {
+                completion(.failure(DatabaseManagerError.multipleErrors(errors)))
+                return
+            }
+
+            completion(.success(true))
+        } catch {
+            completion(.failure(error))
         }
     }
 
@@ -670,7 +854,7 @@ extension DatabaseManager {
               _ networkSave: Bool = true,
               _ networkCompletion: ((Swift.Result<Bool, Error>) -> Void)? = nil,
               completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
-        Logger.shared.logDebug("Saving \(databaseStruct.title)", category: .database)
+        Logger.shared.logDebug("Saving \(databaseStruct.titleAndId)", category: .database)
         var blockOperation: BlockOperation!
         blockOperation = BlockOperation { [weak self] in
             guard let self = self else { return }
@@ -704,6 +888,8 @@ extension DatabaseManager {
                     completion?(.failure(DatabaseManagerError.operationCancelled))
                     return
                 }
+
+                database.updated_at = BeamDate.now
 
                 do {
                     try Self.saveContext(context: context)
@@ -801,7 +987,10 @@ extension DatabaseManager {
                     try Self.saveContext(context: context)
 
                     // Trigger updates for Advanced Settings
-                    NotificationCenter.default.post(name: .defaultDatabaseUpdate, object: DatabaseManager.defaultDatabase)
+                    DispatchQueue.main.async {
+                        NotificationCenter.default.post(name: .defaultDatabaseUpdate,
+                                                        object: nil)
+                    }
 
                     guard AuthenticationManager.shared.isAuthenticated,
                           Configuration.networkEnabled,
@@ -944,6 +1133,7 @@ extension DatabaseManager {
                 return try context.performAndWait {
                     let database = Database.fetchOrCreateWithId(context, databaseStruct.id)
                     database.update(databaseStruct)
+                    database.updated_at = BeamDate.now
 
                     guard !cancelme else { throw PMKError.cancelled }
                     try Self.saveContext(context: context)
@@ -991,9 +1181,10 @@ extension DatabaseManager {
                     try Self.saveContext(context: context)
 
                     // Trigger updates for Advanced Settings
-                    NotificationCenter.default.post(name: .defaultDatabaseUpdate,
-                                                    object: DatabaseManager.defaultDatabase)
-
+                    DispatchQueue.main.async {
+                        NotificationCenter.default.post(name: .defaultDatabaseUpdate,
+                                                        object: nil)
+                    }
                     guard AuthenticationManager.shared.isAuthenticated,
                           Configuration.networkEnabled,
                           includedRemote else {
@@ -1136,6 +1327,7 @@ extension DatabaseManager {
                 return try context.performAndWait {
                     let database = Database.fetchOrCreateWithId(context, databaseStruct.id)
                     database.update(databaseStruct)
+                    database.updated_at = BeamDate.now
 
                     guard !cancelme else { throw PMKError.cancelled }
                     try Self.saveContext(context: context)
@@ -1175,6 +1367,9 @@ extension DatabaseManager: BeamObjectManagerDelegate {
         let context = coreDataManager.backgroundContext
         let localTimer = BeamDate.now
         var changedDatabases: [DatabaseStruct] = []
+
+        try deleteCurrentDatabaseIfEmpty(databases, context)
+
         try context.performAndWait {
             var changed = false
 
@@ -1182,40 +1377,16 @@ extension DatabaseManager: BeamObjectManagerDelegate {
                 let localDatabase = Database.fetchOrCreateWithId(context, database.id)
 
                 if self.isEqual(localDatabase, to: database) {
-                    Logger.shared.logDebug("\(database.title) {\(database.id)}: remote is equal to struct version, skip",
+                    Logger.shared.logDebug("\(database.titleAndId): remote is equal to struct version, skip",
                                            category: .databaseNetwork)
                     continue
                 }
 
                 var good = false
 
-                var originalTitle = database.title
-                var index = 2
+                var (originalTitle, index) = database.title.originalTitleWithIndex()
 
-                /*
-                 Will catch previous conflicted title and change from "title (2)" to "title" so if another conflict
-                 happens, it will change the title to "title (3)" and not "title (2) (2)".
-                 */
-                let range = NSRange(location: 0, length: database.title.count)
-                if let regex = try? NSRegularExpression(pattern: "\\A(.+) \\(([0-9-]+)\\)\\z"),
-                   let match = regex.firstMatch(in: originalTitle,
-                                                options: [],
-                                                range: range) {
-
-                    // Index
-                    var matchRange = match.range(at: 2)
-                    if let substringRange = Range(matchRange, in: originalTitle) {
-                        index = Int(String(originalTitle[substringRange])) ?? index
-                    }
-
-                    // Title
-                    matchRange = match.range(at: 1)
-                    if let substringRange = Range(matchRange, in: originalTitle) {
-                        originalTitle = String(originalTitle[substringRange])
-                    }
-                }
-
-                while !good {
+                while !good && index < 10 {
                     do {
                         localDatabase.update(database)
                         localDatabase.beam_object_previous_checksum = database.checksum
@@ -1251,6 +1422,42 @@ extension DatabaseManager: BeamObjectManagerDelegate {
         Logger.shared.logDebug("Received \(databases.count) databases: done. \(changedDatabases.count) remodified",
                                category: .databaseNetwork,
                                localTimer: localTimer)
+    }
+
+    /// Special case when the defaultDatabase is empty, was probably recently created during Beam app start,
+    /// and should be deleted first to not conflict with one we're receiving now from the API sync with the same title
+    private func deleteCurrentDatabaseIfEmpty(_ databases: [DatabaseStruct], _ context: NSManagedObjectContext) throws {
+        // Don't delete if the database was manually set
+        guard Persistence.Database.currentDatabaseId == nil else { return }
+
+        // TODO: should memoize `Self.defaultDatabase.id` or have a version without CD call
+        let defaultDatabaseId = Self.defaultDatabase.id
+
+        let databasesWithoutDefault = databases.map { $0.id }.filter { $0 != defaultDatabaseId }
+        guard !databasesWithoutDefault.isEmpty else { return }
+
+        guard Self.isDatabaseEmpty(context, defaultDatabaseId) else { return }
+
+        Logger.shared.logWarning("Default Database: \(Self.defaultDatabase.titleAndId) is empty, deleting now",
+                                 category: .database)
+
+        let semaphore = DispatchSemaphore(value: 0)
+        var error: Error?
+
+        delete(id: defaultDatabaseId) { result in
+            switch result {
+            case .failure(let deleteError): error = deleteError
+            case .success: break
+            }
+            semaphore.signal()
+        }
+
+        let semaphoreResult = semaphore.wait(timeout: DispatchTime.now() + .seconds(30))
+        if case .timedOut = semaphoreResult {
+            throw DatabaseManagerError.networkTimeout
+        }
+
+        if let error = error { throw error }
     }
 
     func allObjects() throws -> [DatabaseStruct] {

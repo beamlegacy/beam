@@ -276,8 +276,6 @@ class DatabaseManagerNetworkTests: QuickSpec {
 
             context("with Foundation") {
                 it("deletes database") {
-                    let networkCalls = APIRequest.callsCount
-
                     waitUntil(timeout: .seconds(10)) { done in
                         sut.delete(id: dbStruct.id) { result in
                             expect { try result.get() }.toNot(throwError())
@@ -285,7 +283,9 @@ class DatabaseManagerNetworkTests: QuickSpec {
                             done()
                         }
                     }
-                    expect(APIRequest.callsCount - networkCalls) == 1
+
+                    let expectedNetworkCalls = ["sign_in", "delete_all_databases", "delete_all_documents", "update_database", "delete_database"]
+                    expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
 
                     let remoteStruct = helper.fetchDatabaseOnAPI(dbStruct)
                     expect(remoteStruct).to(beNil())
@@ -666,6 +666,9 @@ class DatabaseManagerNetworkTests: QuickSpec {
 
                     dbStruct = helper.createDatabaseStruct("995d94e1-e0df-4eca-93e6-8778984bcd29", "Database 1")
                     dbStruct2 = helper.createDatabaseStruct("995d94e1-e0df-4eca-93e6-8778984bcd39", "Database 2")
+
+                    // Avoid trigger a delete of the new defaultDatabase
+                    helper.deleteDatabaseStruct(DatabaseManager.defaultDatabase, includedRemote: false)
                 }
 
                 afterEach {
@@ -677,15 +680,20 @@ class DatabaseManagerNetworkTests: QuickSpec {
                     beforeEach {
                         helper.deleteDatabaseStruct(dbStruct, includedRemote: true)
                         helper.deleteDatabaseStruct(dbStruct2, includedRemote: true)
+
+                        // Default database is first updatedAt
+                        BeamDate.travel(2)
+                        dbStruct2.updatedAt = BeamDate.now
                     }
 
                     context("with 2 databases with different titles") {
                         it("saves to local objects") {
                             let networkCalls = APIRequest.callsCount
-
                             try sut.receivedObjects([dbStruct, dbStruct2])
+                            expect(APIRequest.callsCount - networkCalls) == 1
 
-                            expect(APIRequest.callsCount - networkCalls) == 0
+                            let expectedNetworkCalls = ["sign_in", "delete_all_databases", "delete_all_documents", "delete_beam_object"]
+                            expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
 
                             expect(Database.countWithPredicate(CoreDataManager.shared.mainContext,
                                                                NSPredicate(format: "id = %@", dbStruct.id as CVarArg))) == 1
@@ -696,6 +704,8 @@ class DatabaseManagerNetworkTests: QuickSpec {
                             expect(try? Database.fetchWithId(CoreDataManager.shared.mainContext, dbStruct.id)?.title) == dbStruct.title
 
                             expect(try? Database.fetchWithId(CoreDataManager.shared.mainContext, dbStruct2.id)?.title) == dbStruct2.title
+
+                            expect(DatabaseManager.defaultDatabase) == dbStruct2
                         }
                     }
 
@@ -706,11 +716,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
                         }
 
                         it("saves them locally, change the title and save it remotely") {
-                            let networkCalls = APIRequest.callsCount
-
                             try sut.receivedObjects([dbStruct, dbStruct2])
-
-                            expect(APIRequest.callsCount - networkCalls) == 1
 
                             let expectedNetworkCalls = ["update_beam_objects"]
 
@@ -735,6 +741,35 @@ class DatabaseManagerNetworkTests: QuickSpec {
                     }
                 }
 
+                context("with an empty default database and no other databases") {
+                    var defaultDatabase = DatabaseManager.defaultDatabase
+
+                    beforeEach {
+                        helper.deleteDatabaseStruct(dbStruct, includedRemote: true)
+                        helper.deleteDatabaseStruct(dbStruct2, includedRemote: true)
+
+                        defaultDatabase = DatabaseManager.defaultDatabase // force default db creation
+
+                        // Default database is first updatedAt
+                        BeamDate.travel(2)
+                        dbStruct2.updatedAt = BeamDate.now
+                    }
+
+                    it("saves new DB locally, deletes the default Database and reset it to received one") {
+                        let networkCalls = APIRequest.callsCount
+                        try sut.receivedObjects([dbStruct, dbStruct2])
+                        expect(APIRequest.callsCount - networkCalls) == 1
+
+                        let expectedNetworkCalls = ["sign_in", "delete_all_databases", "delete_all_documents", "delete_beam_object"]
+                        expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
+
+                        expect(Database.countWithPredicate(CoreDataManager.shared.mainContext,
+                                                           NSPredicate(format: "id = %@", defaultDatabase.id as CVarArg))) == 0
+
+                        expect(DatabaseManager.defaultDatabase) == dbStruct2
+                    }
+                }
+
                 context("with local databases saved") {
                     beforeEach {
                         dbStruct = helper.createDatabaseStruct("995d94e1-e0df-4eca-93e6-8778984bcd29", "Database 1")
@@ -742,6 +777,13 @@ class DatabaseManagerNetworkTests: QuickSpec {
 
                         helper.saveDatabaseLocally(dbStruct)
                         helper.saveDatabaseLocally(dbStruct2)
+
+                        // Prevent the triggering of deleting the automatically created default Database
+                        Persistence.Database.currentDatabaseId = dbStruct.id
+                    }
+
+                    afterEach {
+                        Persistence.Database.currentDatabaseId = nil
                     }
 
                     context("with 2 databases with different titles") {

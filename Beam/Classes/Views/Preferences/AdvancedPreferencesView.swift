@@ -156,7 +156,6 @@ struct AdvancedPreferencesView: View {
                 }
                 Preferences.Section(title: "Database", bottomDivider: true) {
                     DatabasePicker
-                    Text("You *must* restart Beam if you change database.")
                     Button(action: {
                         showNewDatabase = true
                     }, label: {
@@ -191,6 +190,19 @@ struct AdvancedPreferencesView: View {
                             }).padding()
                         }
                     }
+                    Button(action: {
+                        DispatchQueue.global(qos: .userInteractive).async {
+                            let databaseManager = DatabaseManager()
+                            databaseManager.deleteEmptyDatabases(onlyAutomaticCreated: false) { result in
+                                switch result {
+                                case .success: AppDelegate.showMessage("Empty databases deleted")
+                                case .failure(let error): AppDelegate.showError(error)
+                                }
+                            }
+                        }
+                    }, label: {
+                        Text("Delete empty databases").frame(minWidth: 100)
+                    })
                 }
 
                 Preferences.Section(title: "Encryption Enabled") {

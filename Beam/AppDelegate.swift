@@ -122,41 +122,74 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // this sync has finished.
 
         if Configuration.beamObjectAPIEnabled {
-            let localTimer = BeamDate.now
-
-            do {
-                Logger.shared.logInfo("syncAllFromAPI calling", category: .beamObjectNetwork)
-                try beamObjectManager.syncAllFromAPI { _ in
-                    Logger.shared.logInfo("syncAllFromAPI called", category: .beamObjectNetwork, localTimer: localTimer)
-                }
-            } catch {
-                Logger.shared.logError("Couldn't sync beam objects: \(error.localizedDescription)",
-                                       category: .document,
-                                       localTimer: localTimer)
-            }
+            syncDataWithBeamObject()
         } else {
-            databaseManager.syncAll { result in
-                switch result {
-                case .failure(let error):
-                    Logger.shared.logError("Couldn't sync databases: \(error.localizedDescription)",
-                                           category: .database)
-                case .success(let success):
-                    guard success == true else {
-                        Logger.shared.logError("Couldn't sync databases but no error",
-                                               category: .database)
-                        return
-                    }
+            syncDataWithOldAPI()
+        }
+    }
 
-                    self.documentManager.syncAll { result in
+    private func syncDataWithBeamObject() {
+        guard Configuration.beamObjectAPIEnabled else { return }
+
+        let localTimer = BeamDate.now
+
+        let previousDefaultDatabase = DatabaseManager.defaultDatabase
+
+        do {
+            Logger.shared.logInfo("syncAllFromAPI calling", category: .beamObjectNetwork)
+            try beamObjectManager.syncAllFromAPI { result in
+                Logger.shared.logInfo("syncAllFromAPI called", category: .beamObjectNetwork, localTimer: localTimer)
+                switch result {
+                case .success:
+                    DatabaseManager.changeDefaultDatabaseIfNeeded()
+                    self.databaseManager.deleteEmptyDatabases { result in
                         switch result {
                         case .failure(let error):
-                            Logger.shared.logError("Couldn't sync documents: \(error.localizedDescription)",
-                                                   category: .document)
-                        case .success(let success):
-                            if !success {
-                                Logger.shared.logError("Couldn't sync documents but no error",
-                                                       category: .document)
+                            Logger.shared.logError("Error deleting empty databases: \(error.localizedDescription)",
+                                                   category: .database,
+                                                   localTimer: localTimer)
+                        case .success:
+                            if previousDefaultDatabase.id != DatabaseManager.defaultDatabase.id {
+                                Logger.shared.logWarning("Default database changed, showing alert",
+                                                         category: .database,
+                                                         localTimer: localTimer)
+                                DatabaseManager.showRestartAlert(previousDefaultDatabase,
+                                                                 DatabaseManager.defaultDatabase)
                             }
+                        }
+                    }
+                case .failure: break
+                }
+            }
+        } catch {
+            Logger.shared.logError("Couldn't sync beam objects: \(error.localizedDescription)",
+                                   category: .document,
+                                   localTimer: localTimer)
+        }
+    }
+
+    private func syncDataWithOldAPI() {
+        databaseManager.syncAll { result in
+            switch result {
+            case .failure(let error):
+                Logger.shared.logError("Couldn't sync databases: \(error.localizedDescription)",
+                                       category: .database)
+            case .success(let success):
+                guard success == true else {
+                    Logger.shared.logError("Couldn't sync databases but no error",
+                                           category: .database)
+                    return
+                }
+
+                self.documentManager.syncAll { result in
+                    switch result {
+                    case .failure(let error):
+                        Logger.shared.logError("Couldn't sync documents: \(error.localizedDescription)",
+                                               category: .document)
+                    case .success(let success):
+                        if !success {
+                            Logger.shared.logError("Couldn't sync documents but no error",
+                                                   category: .document)
                         }
                     }
                 }

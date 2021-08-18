@@ -329,6 +329,8 @@ class DocumentManagerNetworkTests: QuickSpec {
                 var remoteDocStruct: DocumentStruct!
 
                 beforeEach {
+                    Configuration.beamObjectAPIEnabled = false
+
                     docStruct = helper.createDocumentStruct(title: "foobar",
                                                             id: "995d94e1-e0df-4eca-93e6-8778984bcd18")
 
@@ -385,19 +387,18 @@ class DocumentManagerNetworkTests: QuickSpec {
                     var updateDocumentStruct: DocumentStruct?
                     var cancellable: AnyCancellable!
                     var callsOrder: [String] = []
+                    var callsIds: [UUID] = []
 
-                    // Force a previous save
+                    docStruct = helper.fillDocumentStruct(docStruct)
                     docStruct = helper.saveLocally(docStruct)
-                    docStruct = helper.saveLocally(docStruct)
+
+                    cancellable = sut.onDocumentChange(docStruct) { updateDocumentStructCallback in
+                        updateDocumentStruct = updateDocumentStructCallback
+                        callsIds.append(updateDocumentStructCallback.id)
+                        callsOrder.append("onDocumentChange")
+                    }
 
                     waitUntil(timeout: .seconds(10)) { done in
-                        cancellable = sut.onDocumentChange(docStruct) { updateDocumentStructCallback in
-                            updateDocumentStruct = updateDocumentStructCallback
-                            expect(updateDocumentStructCallback.id) == remoteDocStruct.id
-                            callsOrder.append("onDocumentChange")
-                            cancellable.cancel()
-                        }
-
                         sut.refreshAllFromAPI { result in
                             expect { try result.get() }.toNot(throwError())
                             expect { try result.get() } == true
@@ -407,8 +408,19 @@ class DocumentManagerNetworkTests: QuickSpec {
                         }
                     }
 
-                    expect(callsOrder) == ["onDocumentChange", "refreshAllFromAPI"]
+                    cancellable.cancel()
+
+                    // Will get 2 callbacks, for the first update when deleting the first local document, then for the
+                    // remote one replacing the original
+                    expect(callsIds) == ["995D94E1-E0DF-4ECA-93E6-8778984BCD18".uuid!,
+                                         "00000000-E0DF-4ECA-93E6-8778984BCD18".uuid!]
+                    expect(callsOrder) == ["onDocumentChange", "onDocumentChange", "refreshAllFromAPI"]
                     expect(updateDocumentStruct?.id) == remoteDocStruct.id
+
+                    let expectedNetworkCalls = ["sign_in", "delete_all_databases",
+                                                "delete_all_documents", "update_document", "documents",
+                                                "update_document"]
+                    expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
                     expect(APIRequest.callsCount - networkCalls) == 2
 
                     let count = Document.rawCountWithPredicate(CoreDataManager.shared.mainContext,
@@ -1063,14 +1075,12 @@ class DocumentManagerNetworkTests: QuickSpec {
                                 var cancellable: AnyCancellable!
                                 var callsOrder: [String] = []
 
-                                waitUntil(timeout: .seconds(10)) { done in
-                                    cancellable = sut.onDocumentChange(docStruct) { updateDocumentStructCallback in
-                                        updateDocumentStruct = updateDocumentStructCallback
-                                        expect(updateDocumentStructCallback.id) == remoteDocStruct.id
-                                        callsOrder.append("onDocumentChange")
-                                        cancellable.cancel()
-                                    }
+                                cancellable = sut.onDocumentChange(docStruct) { updateDocumentStructCallback in
+                                    updateDocumentStruct = updateDocumentStructCallback
+                                    callsOrder.append("onDocumentChange")
+                                }
 
+                                waitUntil(timeout: .seconds(10)) { done in
                                     docStruct.version += 1
                                     sut.save(docStruct, true, { result in
                                         expect { try result.get() }.toNot(throwError())
@@ -1079,7 +1089,9 @@ class DocumentManagerNetworkTests: QuickSpec {
                                     }, completion: nil)
                                 }
 
-                                expect(callsOrder) == ["onDocumentChange", "save"]
+                                cancellable.cancel()
+
+                                expect(callsOrder) == ["onDocumentChange", "onDocumentChange", "save"]
                                 expect(updateDocumentStruct?.id) == remoteDocStruct.id
                                 expect(APIRequest.callsCount - previousNetworkCall) == 4
 
@@ -1094,17 +1106,15 @@ class DocumentManagerNetworkTests: QuickSpec {
                                 var cancellable: AnyCancellable!
                                 var callsOrder: [String] = []
 
-                                // Force a previous save
+                                docStruct = helper.fillDocumentStruct(docStruct)
                                 docStruct = helper.saveLocally(docStruct)
 
-                                waitUntil(timeout: .seconds(10)) { done in
-                                    cancellable = sut.onDocumentChange(docStruct) { updateDocumentStructCallback in
-                                        updateDocumentStruct = updateDocumentStructCallback
-                                        expect(updateDocumentStructCallback.id) == remoteDocStruct.id
-                                        callsOrder.append("onDocumentChange")
-                                        cancellable.cancel()
-                                    }
+                                cancellable = sut.onDocumentChange(docStruct) { updateDocumentStructCallback in
+                                    updateDocumentStruct = updateDocumentStructCallback
+                                    callsOrder.append("onDocumentChange")
+                                }
 
+                                waitUntil(timeout: .seconds(10)) { done in
                                     docStruct.version += 1
                                     sut.save(docStruct, true, { result in
                                         expect { try result.get() }.toNot(throwError())
@@ -1112,8 +1122,9 @@ class DocumentManagerNetworkTests: QuickSpec {
                                         done()
                                     }, completion: nil)
                                 }
+                                cancellable.cancel()
 
-                                expect(callsOrder) == ["onDocumentChange", "save"]
+                                expect(callsOrder) == ["onDocumentChange", "onDocumentChange", "onDocumentChange", "save"]
                                 expect(updateDocumentStruct?.id) == remoteDocStruct.id
                                 expect(APIRequest.callsCount - previousNetworkCall) == 4
 
