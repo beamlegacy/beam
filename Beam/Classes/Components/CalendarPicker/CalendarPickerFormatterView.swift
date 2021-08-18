@@ -19,8 +19,9 @@ private struct CalendarPickerFormatterContainerView: View {
 
     @ObservedObject var viewModel: ViewModel = ViewModel()
     @Binding var selectedDate: Date
+    var calendar: Calendar
     var body: some View {
-        CalendarPickerView(selectedDate: $selectedDate)
+        CalendarPickerView(selectedDate: $selectedDate, calendar: calendar)
             .frame(width: Self.idealSize.width)
             .fixedSize(horizontal: false, vertical: true)
             .frame(height: Self.idealSize.height, alignment: .topLeading)
@@ -69,15 +70,53 @@ class CalendarPickerFormatterView: FormatterView {
     private var date = BeamDate.now {
         didSet {
             dateHasChanged = true
-            onDateChange?(date)
         }
+    }
+
+    private func updateDate(_ newDate: Date, sendUpdate: Bool) {
+        date = newDate
+        if sendUpdate {
+            onDateChange?(date)
+        } else {
+            subviewModel.objectWillChange.send()
+        }
+    }
+
+    private let calendar = Calendar.current
+
+    // MARK: Key Handlers
+    override func formatterHandlesCursorMovement(direction: CursorMovement,
+                                                 modifierFlags: NSEvent.ModifierFlags? = nil) -> Bool {
+        let hasCommand = modifierFlags == .command
+        var addition: DateComponents
+        let daysPerWeek = calendar.numberOfDaysInWeek(for: date)
+        switch direction {
+        case .up:
+            addition = hasCommand ? DateComponents(month: -1) : DateComponents(day: -daysPerWeek)
+        case .down:
+            addition = hasCommand ? DateComponents(month: 1) : DateComponents(day: daysPerWeek)
+        case .left:
+            addition = DateComponents(day: -1)
+        case .right:
+            addition = DateComponents(day: 1)
+        }
+        let newDate = calendar.date(byAdding: addition, to: date) ?? date
+        updateDate(newDate, sendUpdate: false)
+        return true
+    }
+
+    override func formatterHandlesEnter() -> Bool {
+        onDateChange?(date)
+        return true
     }
 
     // MARK: Private Methods
     override func setupUI() {
         super.setupUI()
-        let bindingDate = Binding<Date>(get: { self.date }, set: { self.date = $0 })
-        let rootView = CalendarPickerFormatterContainerView(viewModel: subviewModel, selectedDate: bindingDate)
+        let bindingDate = Binding<Date>(get: { self.date }, set: { self.updateDate($0, sendUpdate: true) })
+        let rootView = CalendarPickerFormatterContainerView(viewModel: subviewModel,
+                                                            selectedDate: bindingDate,
+                                                            calendar: calendar)
         let hostingView = NSHostingView(rootView: rootView)
         hostingView.autoresizingMask = [.width, .height]
         hostingView.frame = self.bounds

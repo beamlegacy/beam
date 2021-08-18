@@ -548,7 +548,7 @@ public extension CALayer {
         } else if let popover = popover {
             popover.selectItem()
             return
-        } else if inlineFormatter?.pressEnter() != true {
+        } else if inlineFormatter?.formatterHandlesEnter() != true {
             hideInlineFormatter()
             cmdManager.beginGroup(with: "Insert line")
             defer {
@@ -1191,15 +1191,11 @@ public extension CALayer {
             return
         }
 
+        guard inlineFormatter?.formatterHandlesCursorMovement(direction: .left) != true else { return }
+
         rootNode.moveLeft()
-
-        if popover != nil {
-            updatePopover(with: .moveLeft)
-        }
-
-        if inlineFormatter != nil {
-            hideInlineFormatter()
-        }
+        hideInlineFormatter()
+        updatePopover(with: .moveLeft)
     }
 
     override public func moveRight(_ sender: Any?) {
@@ -1214,16 +1210,11 @@ public extension CALayer {
                   node.text.text.count > rootNode.cursorPosition else { return }
         }
 
+        guard inlineFormatter?.formatterHandlesCursorMovement(direction: .right) != true else { return }
+
         rootNode.moveRight()
-
-        if popover != nil {
-            updatePopover(with: .moveRight)
-        }
-
-        if inlineFormatter != nil {
-            hideInlineFormatter()
-        }
-
+        hideInlineFormatter()
+        updatePopover(with: .moveRight)
     }
 
     override public func moveLeftAndModifySelection(_ sender: Any?) {
@@ -1284,10 +1275,22 @@ public extension CALayer {
         showInlineFormatterOnKeyEventsAndClick()
     }
 
+    public override func moveToBeginningOfDocument(_ sender: Any?) {
+        guard inlineFormatter?.formatterHandlesCursorMovement(direction: .up,
+                                                              modifierFlags: .command) != true else { return }
+        rootNode.moveToBeginningOfDocument()
+    }
+
+    public override func moveToEndOfDocument(_ sender: Any?) {
+        guard inlineFormatter?.formatterHandlesCursorMovement(direction: .down,
+                                                              modifierFlags: .command) != true else { return }
+        rootNode.moveToEndOfDocument()
+    }
+
     override public func moveUp(_ sender: Any?) {
         if popover != nil {
             updatePopover(with: .moveUp)
-        } else if inlineFormatter?.moveUp() != true {
+        } else if inlineFormatter?.formatterHandlesCursorMovement(direction: .up) != true {
             rootNode.moveUp()
             hideInlineFormatter()
         }
@@ -1296,7 +1299,7 @@ public extension CALayer {
     override public func moveDown(_ sender: Any?) {
         if popover != nil {
             updatePopover(with: .moveDown)
-        } else if inlineFormatter?.moveDown() != true {
+        } else if inlineFormatter?.formatterHandlesCursorMovement(direction: .down) != true {
             rootNode.moveDown()
             hideInlineFormatter()
         }

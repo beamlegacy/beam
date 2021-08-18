@@ -70,19 +70,17 @@ class FormatterView: NSView {
     }
 
     // MARK: - Key Handlers
-    func moveUp() -> Bool {
+
+    func formatterHandlesCursorMovement(direction: CursorMovement,
+                                        modifierFlags: NSEvent.ModifierFlags? = nil) -> Bool {
         false
     }
 
-    func moveDown() -> Bool {
+    func formatterHandlesEnter() -> Bool {
         false
     }
 
-    func pressEnter() -> Bool {
-        false
-    }
-
-    func inputText(_ text: String) -> Bool {
+    func formatterHandlesInputText(_ text: String) -> Bool {
         false
     }
 }

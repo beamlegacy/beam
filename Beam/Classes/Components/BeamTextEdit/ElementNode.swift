@@ -382,6 +382,18 @@ public class ElementNode: Widget {
         return nil
     }
 
+    func lastVisibleNode<NodeType: Widget>(_ type: NodeType.Type) -> NodeType? {
+        children.reversed().first { widget in
+            return widget.visible && widget is NodeType
+        } as? NodeType
+    }
+
+    func firstVisibleNode<NodeType: Widget>(_ type: NodeType.Type) -> NodeType? {
+        children.first { widget in
+            return widget.visible && widget is NodeType
+        } as? NodeType
+    }
+
     func previousVisibleNode<NodeType: Widget>(_ type: NodeType.Type) -> NodeType? {
         var node = previousVisible()
         while node != nil {

@@ -121,17 +121,21 @@ class ContextMenuFormatterView: FormatterView {
     }
 
     // MARK: - keyboard actions
-    override func moveDown() -> Bool {
-        selectNextItem()
-        return subviewModel.selectedIndex != nil
+    override func formatterHandlesCursorMovement(direction: CursorMovement,
+                                                 modifierFlags: NSEvent.ModifierFlags? = nil) -> Bool {
+        switch direction {
+        case .down:
+            selectNextItem()
+            return subviewModel.selectedIndex != nil
+        case .up:
+            selectPreviousItem()
+            return subviewModel.selectedIndex != nil
+        default:
+            return false
+        }
     }
 
-    override func moveUp() -> Bool {
-        selectPreviousItem()
-        return subviewModel.selectedIndex != nil
-    }
-
-    override func pressEnter() -> Bool {
+    override func formatterHandlesEnter() -> Bool {
         guard let selectedIndex = subviewModel.selectedIndex,
               selectedIndex < displayedItems.count
         else { return false }
@@ -139,7 +143,7 @@ class ContextMenuFormatterView: FormatterView {
         return true
     }
 
-    override func inputText(_ text: String) -> Bool {
+    override func formatterHandlesInputText(_ text: String) -> Bool {
         let searchText = text.dropFirst(typingPrefix)
         guard handlesTyping,
               !text.isEmpty,
