@@ -53,7 +53,7 @@ public extension String {
 
     // MARK: - Url checking
     var mayBeURL: Bool {
-        return mayBeWebURL || mayBeFileURL
+        return mayBeWebURL || mayBeFileURL || mayBeIP || isLocalhost
     }
 
     var mayBeWebURL: Bool {
@@ -62,6 +62,14 @@ public extension String {
 
     var mayBeFileURL: Bool {
         self.matches(withRegex: "^(file:\\/\\/\\/){1}(.)+(\\.[a-z0-9]+){1}$", options: .caseInsensitive)
+    }
+
+    var mayBeIP: Bool {
+        self.matches(withRegex: "^(http:\\/\\/|https:\\/\\/)?(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}", options: .caseInsensitive)
+    }
+
+    var isLocalhost: Bool {
+        self.matches(withRegex: "^(http:\\/\\/|https:\\/\\/)(localhost)", options: .caseInsensitive)
     }
 
 }
