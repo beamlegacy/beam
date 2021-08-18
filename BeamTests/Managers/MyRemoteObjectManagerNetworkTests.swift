@@ -40,6 +40,8 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
             beamHelper.endNetworkRecording()
 
             Configuration.beamObjectAPIEnabled = EnvironmentVariables.beamObjectAPIEnabled
+
+            BeamDate.reset()
         }
 
         describe("refreshFromBeamObjectAPI()") {

@@ -42,7 +42,8 @@ public class NoteSources: Codable {
     enum CodingKeys: CodingKey {
         case sources
     }
-    var sources: [UInt64: NoteSource]
+    private var sources: [UInt64: NoteSource]
+    @Published var changed: Bool = false
 
     init() {
         sources = [UInt64: NoteSource]()
@@ -60,6 +61,7 @@ public class NoteSources: Codable {
         case .suggestion: sources[urlId] = sources[urlId] ?? sourceToAdd
         case .user: sources[urlId] = sourceToAdd
         }
+        changed = true
     }
     public func refreshScore(score: LongTermUrlScore) {
         self.sources[score.urlId]?.longTermScore = score
@@ -73,6 +75,7 @@ public class NoteSources: Codable {
            let sourceSessionId = source.sessionId,
            sessionId != sourceSessionId { return }
         sources[urlId] = nil
+        changed = true
     }
 
     private func commonLowerThan(lhs: NoteSource, rhs: NoteSource) -> Bool {
