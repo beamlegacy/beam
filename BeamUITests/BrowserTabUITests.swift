@@ -34,6 +34,16 @@ class BrowserTabUITests: QuickSpec {
         self.app.typeKey("w", modifierFlags: .command)
     }
 
+
+    func waitUntilAudioPlayingIs(_ value: Bool, timeout: TimeInterval) -> Bool {
+        var count: TimeInterval = 0
+        while self.isAnyAudioPlaying() != value && count < timeout {
+            sleep(1)
+            count += 1
+        }
+        return count < timeout
+    }
+
     override func spec() {
 
         describe("BrowserTab Media") {
@@ -62,15 +72,12 @@ class BrowserTabUITests: QuickSpec {
                 }
 
                 it("stops audio when closing") {
-                    // core audio can be a little slow to sync, so we wait before fetching
-                    sleep(1)
-                    expect(self.isAnyAudioPlaying()).to(beFalse(), description: "Mac has some audio playing already. This UITest needs silence.")
+                    // core audio can be a little slow to sync, so we wait a little
+                    expect(self.waitUntilAudioPlayingIs(false, timeout: 2)).to(beTrue(), description: "Mac has some audio playing already. This UITest needs silence.")
                     openPageAndStartPlaying()
-                    sleep(1)
-                    expect(self.isAnyAudioPlaying()) == true
+                    expect(self.waitUntilAudioPlayingIs(true, timeout: 2)) == true
                     self.closeTab()
-                    sleep(1)
-                    expect(self.isAnyAudioPlaying()).to(beFalse(), description: "Tab is still playing audio, this might indicate a webView leak")
+                    expect(self.waitUntilAudioPlayingIs(false, timeout: 10)).to(beTrue(), description: "Tab is still playing audio, this might indicate a webView leak")
                 }
             }
 
@@ -94,15 +101,12 @@ class BrowserTabUITests: QuickSpec {
                 }
 
                 it("stops video when closing") {
-                    // core audio can be a little slow to sync, so we wait before fetching
-                    sleep(1)
-                    expect(self.isAnyAudioPlaying()).to(beFalse(), description: "Mac has some audio playing already. This UITest needs silence.")
+                    // core audio can be a little slow to sync, so we wait a little
+                    expect(self.waitUntilAudioPlayingIs(false, timeout: 2)).to(beTrue(), description: "Mac has some audio playing already. This UITest needs silence.")
                     openPageAndStartPlaying()
-                    sleep(1)
-                    expect(self.isAnyAudioPlaying()) == true
+                    expect(self.waitUntilAudioPlayingIs(true, timeout: 2)) == true
                     self.closeTab()
-                    sleep(1)
-                    expect(self.isAnyAudioPlaying()).to(beFalse(), description: "Tab is still playing audio, this might indicate a webView leak")
+                    expect(self.waitUntilAudioPlayingIs(false, timeout: 10)).to(beTrue(), description: "Tab is still playing audio, this might indicate a webView leak")
                 }
             }
         }
