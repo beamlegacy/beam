@@ -56,15 +56,7 @@ class BeamWebViewConfigurationBase: WKWebViewConfiguration, BeamWebViewConfigura
         registerAllMessageHandlers()
     }
 
-    func registerAllMessageHandlers() {
-        LoggingMessageHandler(config: self).register(to: self)
-        PasswordMessageHandler(config: self).register(to: self)
-        ScorerMessageHandler(config: self).register(to: self)
-        PointAndShootMessageHandler(config: self).register(to: self)
-        WebNavigationMessageHandler(config: self).register(to: self)
-        MediaPlayerMessageHandler(config: self).register(to: self)
-        GeolocationMessageHandler(config: self).register(to: self)
-    }
+    func registerAllMessageHandlers() {}
 
     func addJS(source: String, when: WKUserScriptInjectionTime) {
         let parameterized = source.replacingOccurrences(of: "__ENABLED__", with: "true")

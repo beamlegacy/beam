@@ -15,7 +15,7 @@ struct EnhancedWebView: View {
     var body: some View {
         ZStack {
             WebView(webView: tab.webView)
-            if let pns = tab.pointAndShoot {
+            if let pns = tab.pointAndShoot, PreferencesManager.showPNSview == true {
                 PointAndShootView(pns: pns)
             }
             if data.showTabStats, let score = tab.browsingTree.current.score {
