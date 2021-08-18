@@ -194,25 +194,32 @@ extension TextRoot {
         cancelNodeSelection()
         guard let node = focusedWidget as? ElementNode else { return }
         if node.isOnLastLine(cursorPosition) {
-            if let newNode = node.nextVisibleNode(ElementNode.self),
-               canMove(from: node, to: newNode) {
-                let offset = node.offsetAt(index: cursorPosition) + node.offsetInDocument.x - newNode.offsetInDocument.x
-                node.invalidateText()
-                newNode.focus(position: newNode.indexOnFirstLine(atOffset: offset))
-            } else {
+            if !moveToNextNodeIfPossible(fromNode: node, cursor: cursorPosition) {
                 guard let node = focusedWidget as? TextNode else { return }
                 cursorPosition = node.text.count
             }
         } else {
             var _caretIndex = node.caretBelow(caretIndex)
             if let node = focusedWidget as? TextNode,
-               let updatedCaretIndex = node.caretIndexAvoidingUneditableRange(_caretIndex, after: false) {
+               let updatedCaretIndex = node.caretIndexAvoidingUneditableRange(_caretIndex, after: true) {
                 _caretIndex = updatedCaretIndex
             }
-            self.caretIndex = _caretIndex
+            let isLastCaret = _caretIndex == node.caretIndexForSourcePosition(node.textCount)
+            if !isLastCaret || !moveToNextNodeIfPossible(fromNode: node, cursor: cursorPosition) {
+                self.caretIndex = _caretIndex
+            }
         }
         cancelSelection()
         node.invalidateText()
+    }
+
+    private func moveToNextNodeIfPossible(fromNode node: ElementNode, cursor: Int) -> Bool {
+        guard let newNode = node.nextVisibleNode(ElementNode.self),
+        self.canMove(from: node, to: newNode) else { return false }
+        let offset = node.offsetAt(index: cursor) + node.offsetInDocument.x - newNode.offsetInDocument.x
+        node.invalidateText()
+        newNode.focus(position: newNode.indexOnFirstLine(atOffset: offset))
+        return true
     }
 
     private func canMove(from currentNode: ElementNode, to newNode: ElementNode) -> Bool {
