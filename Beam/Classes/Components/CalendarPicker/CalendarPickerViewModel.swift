@@ -49,7 +49,7 @@ extension CalendarPickerView {
         }
 
         private var daysPerWeek: Int {
-            calendar.range(of: .weekday, in: .weekOfYear, for: baseDate)?.count ?? 7
+            calendar.numberOfDaysInWeek(for: baseDate)
         }
 
         private var calendarFormatter: DateFormatter {

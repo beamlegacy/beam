@@ -103,7 +103,7 @@ extension BeamTextEdit {
                   targetRange.lowerBound <= node.cursorPosition {
             var text = node.text.text
             text = text.substring(range: targetRange.lowerBound..<node.cursorPosition)
-            if inlineFormatter?.inputText(text) != true {
+            if inlineFormatter?.formatterHandlesInputText(text) != true {
                 showOrHideInlineFormatter(isPresent: false, isDragged: isDragged)
             }
         } else if hasNodeSelection {

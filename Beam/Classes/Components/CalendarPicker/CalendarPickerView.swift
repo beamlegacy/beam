@@ -12,11 +12,11 @@ struct CalendarPickerView: View {
 
     @ObservedObject private var model: CalendarPickerView.Model
 
-    private var selectedDate: Binding<Date>
+    @Binding private var selectedDate: Date
     init(selectedDate: Binding<Date>, calendar: Calendar? = nil) {
         let model = CalendarPickerView.Model(date: selectedDate.wrappedValue, calendar: calendar)
         self.model = model
-        self.selectedDate = selectedDate
+        self._selectedDate = selectedDate
     }
 
     var headerMonthAndYearView: some View {
@@ -54,7 +54,7 @@ struct CalendarPickerView: View {
             CalendarMonthView(calendar: model.calendar,
                               days: model.daysInMonth,
                               baseDate: model.baseDate,
-                              selectedDate: selectedDate.onChange { d in
+                              selectedDate: $selectedDate.onChange { d in
                                 model.selectedDate = d
                               })
         }

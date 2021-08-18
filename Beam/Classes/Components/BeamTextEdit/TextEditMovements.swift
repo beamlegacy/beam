@@ -163,6 +163,16 @@ extension TextRoot {
         node.invalidateText()
     }
 
+    func moveToBeginningOfDocument() {
+        root?.firstVisibleNode(ElementNode.self)?.focus()
+    }
+
+    func moveToEndOfDocument() {
+        guard let lastNode = root?.lastVisibleNode(TextNode.self) else { return }
+        cursorPosition = lastNode.endOfLineFromPosition(lastNode.indexOnLastLine(atOffset: 0))
+        lastNode.focus(position: cursorPosition)
+    }
+
     func moveUp() {
         cancelNodeSelection()
         guard let node = focusedWidget as? ElementNode else { return }
