@@ -228,15 +228,15 @@ public class ElementNode: Widget {
 
     // MARK: - Setup UI
 
-    let nodeRootSpacing: CGFloat = 8
-    let nodeChildrenSpacing: CGFloat = 2
+//    let nodeRootSpacing: CGFloat = 8
+//    let nodeChildrenSpacing: CGFloat = 2
     var idealSpacingSize: CGFloat {
         var spacingHeight: CGFloat = .zero
         var spacing: CGFloat = .zero
         if self as? TextRoot != nil {
-            spacing = nodeRootSpacing
+            spacing = PreferencesManager.editorParentSpacing
         } else {
-            spacing = nodeChildrenSpacing
+            spacing = PreferencesManager.editorChildSpacing
         }
         if self.open {
             let elementNodeChild = self.children.filter({ $0 as? ElementNode != nil})
@@ -257,9 +257,9 @@ public class ElementNode: Widget {
         var pos = NSPoint(x: childInset, y: self.contentsFrame.height)
         var spacing: CGFloat = .zero
         if self as? TextRoot != nil {
-            spacing = nodeRootSpacing
+            spacing = PreferencesManager.editorParentSpacing
         } else {
-            spacing = nodeChildrenSpacing
+            spacing = PreferencesManager.editorChildSpacing
         }
         let firstNode = children.first
         for c in children {

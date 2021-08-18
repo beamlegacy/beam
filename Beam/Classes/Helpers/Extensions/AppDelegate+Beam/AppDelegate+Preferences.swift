@@ -11,4 +11,6 @@ extension Preferences.PaneIdentifier {
     static let accounts = Self("accounts")
     static let about = Self("about")
     static let advanced = Self("advanced")
+    static let editorDebug = Self("editorDebug")
+
 }

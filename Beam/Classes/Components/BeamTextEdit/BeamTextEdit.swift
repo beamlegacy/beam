@@ -39,7 +39,7 @@ public extension CALayer {
 
     var data: BeamData?
     var cardTopSpace: CGFloat {
-        journalMode ? 135 : 0
+        journalMode ? PreferencesManager.editorJournalTopPadding : PreferencesManager.editorCardTopPadding
     }
     var centerText = false {
         didSet {
