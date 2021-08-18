@@ -116,7 +116,7 @@ class NavigationCollectUITests: QuickSpec {
                 expect(self.journalChildren.element(boundBy: 0).value as? String) == titles[2]
                 expect((self.journalChildren.element(boundBy: 1).value as? String)?.contains(prefix + linkText)) == true
                 // tap on collected sublink (end of new bullet)
-                let linkCoordinate = self.journalChildren.element(boundBy: 1).coordinate(withNormalizedOffset: CGVector(dx: 0.2, dy: 0.5))
+                let linkCoordinate = self.journalChildren.element(boundBy: 1).coordinate(withNormalizedOffset: CGVector(dx: 0.18, dy: 0.5))
                 linkCoordinate.click()
                 // tap on a link in the page, should be added to opened bullet
                 let page2Link = self.app.webViews.staticTexts["I-Beam"].firstMatch
