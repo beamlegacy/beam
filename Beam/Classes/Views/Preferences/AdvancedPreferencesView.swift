@@ -219,6 +219,22 @@ struct AdvancedPreferencesView: View {
                     DebugSectionCheckbox
                 }
 
+                Preferences.Section(bottomDivider: false) {
+                    Text("Enable Point and Shoot view")
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.text.swiftUI)
+                } content: {
+                    PnsViewEnabledCheckbox
+                }
+
+                Preferences.Section(bottomDivider: true) {
+                    Text("Enable Point and Shoot Javascript")
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.text.swiftUI)
+                } content: {
+                    PnsJSEnabledCheckbox
+                }
+
                 Preferences.Section(title: "Actions", bottomDivider: true) {
                     CrashButton
                     CopyAccessToken
@@ -252,6 +268,18 @@ struct AdvancedPreferencesView: View {
         }, label: {
             Text(String(describing: networkEnabled)).frame(minWidth: 100)
         })
+    }
+
+    private var PnsViewEnabledCheckbox: some View {
+        Checkbox(checkState: PreferencesManager.showPNSview, text: "Enabled", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
+            PreferencesManager.showPNSview = activated
+        }
+    }
+
+    private var PnsJSEnabledCheckbox: some View {
+        Checkbox(checkState: PreferencesManager.PnsJSIsOn, text: "Enabled", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
+            PreferencesManager.PnsJSIsOn = activated
+        }
     }
 
     private var BrowsingSessionCollectionCheckbox: some View {

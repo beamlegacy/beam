@@ -12,6 +12,8 @@ extension PreferencesManager {
     static let browsingSessionCollectionIsOnKey = "browsingSessionCollectionIsOn"
     static let showTabGrougpingMenuItemKey = "showTabGrougpingMenuItem"
     static let showDebugSectionKey = "showDebugSection"
+    static let showPNSKey = "showPNSview"
+    static let PnsJSIsOnKey = "PnsJSIsOn"
 }
 
 // MARK: - Default Values
@@ -22,6 +24,8 @@ extension PreferencesManager {
     static let browsingSessionCollectionIsOnDefault = false
     static let showTabGrougpingMenuItemDefault = false
     static let showDebugSectionDefault = false
+    static let showPNSDefault = true
+    static let PnsJSIsOnDefault = true
 }
 
 extension PreferencesManager {
@@ -35,4 +39,10 @@ extension PreferencesManager {
 
     @UserDefault(key: showDebugSectionKey, defaultValue: showDebugSectionDefault, container: advancedPreferencesContainer)
     static var showDebugSection: Bool
+
+    @UserDefault(key: showPNSKey, defaultValue: showPNSDefault, container: advancedPreferencesContainer)
+    static var showPNSview: Bool
+
+    @UserDefault(key: PnsJSIsOnKey, defaultValue: PnsJSIsOnDefault, container: advancedPreferencesContainer)
+    static var PnsJSIsOn: Bool
 }

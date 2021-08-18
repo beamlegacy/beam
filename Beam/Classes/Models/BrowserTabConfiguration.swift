@@ -6,7 +6,9 @@ class BrowserTabConfiguration: BeamWebViewConfigurationBase {
         LoggingMessageHandler(config: self).register(to: self)
         PasswordMessageHandler(config: self).register(to: self)
         ScorerMessageHandler(config: self).register(to: self)
-        PointAndShootMessageHandler(config: self).register(to: self)
+        if  PreferencesManager.showPNSview == true {
+            PointAndShootMessageHandler(config: self).register(to: self)
+        }
         WebNavigationMessageHandler(config: self).register(to: self)
         MediaPlayerMessageHandler(config: self).register(to: self)
         GeolocationMessageHandler(config: self).register(to: self)
