@@ -69,7 +69,7 @@ struct Passwords: View {
                     PasswordsTableView(passwordEntries: passwordsViewModel.filteredPasswordTableViewItems, onSelectionChanged: { idx in
                         passwordsViewModel.updateSelection(idx)
                     })
-                    .frame(width: 573, height: 240, alignment: .center)
+                    .frame(width: 682, height: 240, alignment: .center)
                     .border(BeamColor.Mercury.swiftUI, width: 1)
                     .background(BeamColor.Generic.background.swiftUI)
                     Spacer()
@@ -108,7 +108,7 @@ struct Passwords: View {
                         }.buttonStyle(BorderedButtonStyle())
                     }
                 }
-            }.frame(width: 573, alignment: .center)
+            }.frame(width: 682, alignment: .center)
             Spacer()
         }.foregroundColor(BeamColor.Generic.background.swiftUI)
     }
@@ -163,6 +163,7 @@ struct Webforms: View {
 
     var body: some View {
         HStack(alignment: .firstTextBaseline) {
+            Spacer()
             Text("Autofill webforms:")
                 .font(BeamFont.regular(size: 13).swiftUI)
                 .foregroundColor(BeamColor.Generic.text.swiftUI)
@@ -174,6 +175,7 @@ struct Webforms: View {
                     PreferencesManager.autofillCreditCards = activated
                 }
             }
+            Spacer()
             VStack(alignment: .trailing) {
                 Button {
                     self.showingAdressesSheet.toggle()
@@ -198,6 +200,6 @@ struct Webforms: View {
                         .frame(width: 568, height: 361, alignment: .center)
                 }
             }
-        }.frame(width: 573, alignment: .center)
+        }.frame(width: 608, alignment: .trailing)
     }
 }
