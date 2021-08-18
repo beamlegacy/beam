@@ -100,7 +100,7 @@ struct BrowserTabView: View {
             }
         }
         .transition(.opacity)
-        .animation(.easeInOut(duration: 0.15))
+        .animation(.easeInOut(duration: 0.15), value: audioIsPlaying)
         .frame(width: sideSpace)
     }
 
@@ -124,8 +124,7 @@ struct BrowserTabView: View {
             .overlay(Rectangle()
                         .fill(BeamColor.BottomBar.shadow.swiftUI)
                         .frame(height: 0.5)
-                        .opacity(isSelected ? 0.0 : 1.0)
-                        .animation(isDragging ? nil : .easeInOut(duration: 0.15)),
+                        .opacity(isSelected ? 0.0 : 1.0),
                      alignment: .top)
             .overlay(Separator(hairline: true).padding(.vertical, CGFloat(isSelected ? 0 : 7)),
                      alignment: .trailing)
@@ -159,6 +158,7 @@ struct BrowserTabView: View {
                 .onHover { hovering in
                     isHovering = isEnabled && hovering
                 }
+                .animation(.easeInOut(duration: 0.15), value: isHovering)
                 .accessibilityElement(children: .contain)
                 .accessibility(identifier: "browserTabBarView")
             }

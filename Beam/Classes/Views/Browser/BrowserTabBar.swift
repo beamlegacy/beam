@@ -120,6 +120,9 @@ struct BrowserTabBar: View {
     @State private var scrollOffset: CGFloat = 0
     private let animationDuration = 0.3
 
+    private var stackAnimation: Animation? {
+        disableAnimation ? nil : .easeInOut(duration: animationDuration)
+    }
     var body: some View {
         HStack(spacing: 0) {
             GeometryReader { geometry in
@@ -146,7 +149,6 @@ struct BrowserTabBar: View {
                                         .frame(width: isTheDraggedTab ? 0 :
                                                 widthForTab(selected: selected, containerGeometry: geometry))
                                         .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .identity))
-                                        .animation(disableAnimation || state.windowIsResizing ? nil : .easeInOut(duration: animationDuration))
                                         .disabled(isDraggingATab && !selected)
                                         .opacity(isTheDraggedTab ? 0 : 1)
                                         .onAppear {
@@ -160,6 +162,9 @@ struct BrowserTabBar: View {
                                     }
                                 }
                             }
+                            .animation(stackAnimation, value: tabs)
+                            .animation(stackAnimation, value: dragModel.offset)
+                            .animation(stackAnimation, value: dragModel.draggingOverIndex)
                             .onAppear {
                                 guard let currentTab = currentTab else { return }
                                 scrollToTabIfNeeded(currentTab, containerGeometry: geometry, scrollViewProxy: retroProxy, animated: false)
@@ -172,7 +177,7 @@ struct BrowserTabBar: View {
                         BrowserTabView(tab: currentTab, isSelected: true, isDragging: true)
                             .offset(x: dragModel.offset.x, y: dragModel.offset.y)
                             .frame(width: dragModel.activeTabWidth)
-                            .animation(.easeInOut)
+                            .animation(.interactiveSpring(), value: dragModel.offset)
                     }
                 }
                 .frame(maxWidth: .infinity)
@@ -192,7 +197,7 @@ struct BrowserTabBar: View {
                 .shadow(color: Color.black.opacity(0.1), radius: 0, x: 0, y: 0.5)
                 .shadow(color: Color.black.opacity(0.04), radius: 7, x: 0, y: 2)
         )
-        .animation(!state.windowIsResizing && !disableAnimation ? .easeInOut(duration: animationDuration) : nil)
+        .animation(nil)
     }
 
     private func dragGestureOnChange(gestureValue: DragGesture.Value,
@@ -233,9 +238,7 @@ struct BrowserTabBar: View {
             // it was just a quick tap
             self.dragModel.cleanAfterDrag()
         } else {
-            withAnimation(.easeInOut(duration: animationDuration)) {
-                self.dragModel.dragGestureEnded(contentOffset: scrollOffset)
-            }
+            self.dragModel.dragGestureEnded(contentOffset: scrollOffset)
             DispatchQueue.main.asyncAfter(deadline: .now() + animationDuration) {
                 self.disableAnimation = true
                 self.moveTabs(from: dragStartIndex, to: draggingOverIndex, with: currentTab)
