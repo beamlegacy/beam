@@ -14,8 +14,6 @@ extension AppDelegate {
     private func deleteDocuments(includedRemote: Bool) {
         documentManager.deleteAll(includedRemote: includedRemote) { result in
             DispatchQueue.main.async {
-                self.updateBadge()
-
                 let alert = NSAlert()
 
                 switch result {
@@ -107,8 +105,6 @@ extension AppDelegate {
                 alert.informativeText = error.localizedDescription
                 alert.alertStyle = .critical
             }
-            self.updateBadge()
-
             alert.runModal()
 
             openPanel?.close()
@@ -137,8 +133,6 @@ extension AppDelegate {
                 // TODO: raise error?
                 Logger.shared.logError("error: \(error.localizedDescription)", category: .general)
             }
-            self.updateBadge()
-
             let afterNotesCount = Document.countWithPredicate(CoreDataManager.shared.mainContext)
 
             let alert = NSAlert()
