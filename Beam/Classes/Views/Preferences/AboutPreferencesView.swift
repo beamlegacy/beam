@@ -47,6 +47,9 @@ struct BeamAboutSection: View {
         VStack {
             HStack {
                 Image("preferences-about-beam")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 128, height: 128, alignment: .center)
                 VStack(alignment: .leading) {
                     Text("Beam")
                         .font(BeamFont.medium(size: 20).swiftUI)

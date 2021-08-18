@@ -72,7 +72,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
 
-        updateBadge()
         createWindow(frame: nil, reloadState: Configuration.stateRestorationEnabled)
 
         // So we remember we're not currently using the default api server
@@ -163,11 +162,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 }
             }
         }
-    }
-
-    func updateBadge() {
-        let count = Document.countWithPredicate(CoreDataManager.shared.mainContext)
-        NSApp.dockTile.badgeLabel = count > 0 ? String(count) : ""
     }
 
     @IBAction func newWindow(_ sender: Any?) {
