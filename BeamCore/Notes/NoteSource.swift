@@ -42,7 +42,7 @@ public class NoteSources: Codable {
     enum CodingKeys: CodingKey {
         case sources
     }
-    private var sources: [UInt64: NoteSource]
+    var sources: [UInt64: NoteSource]
 
     init() {
         sources = [UInt64: NoteSource]()
@@ -66,7 +66,7 @@ public class NoteSources: Codable {
     }
 
     // if sessionId is not nil, removes source only if its session id matches
-    func remove(urlId: UInt64, isUserSourceProtected: Bool = true, sessionId: UUID? = nil) {
+    public func remove(urlId: UInt64, isUserSourceProtected: Bool = true, sessionId: UUID? = nil) {
         guard let source = sources[urlId] else { return }
         if source.type == .user, isUserSourceProtected { return }
         if let sessionId = sessionId,

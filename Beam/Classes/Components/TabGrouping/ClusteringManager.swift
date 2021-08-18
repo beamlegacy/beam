@@ -20,6 +20,7 @@ class ClusteringManager: ObservableObject {
     var clusteredNotesId: [[UUID]] = [[]] {
         didSet {
             transformToClusteredNotes()
+            updateNoteSources()
         }
     }
     var sendRanking = false
@@ -37,12 +38,14 @@ class ClusteringManager: ObservableObject {
     private var tabsInfo: [TabInformation] = []
     private var cluster: Cluster
     private var scope = Set<AnyCancellable>()
+    var suggestedNoteUpdater: SuggestedNoteSourceUpdater
 
-    init(ranker: SessionLinkRanker, documentManager: DocumentManager, candidate: Int, navigation: Double, text: Double, entities: Double) {
+    init(ranker: SessionLinkRanker, documentManager: DocumentManager, candidate: Int, navigation: Double, text: Double, entities: Double, sessionId: UUID) {
         self.selectedTabGroupingCandidate = candidate
         self.weightNavigation = navigation
         self.weightText = text
         self.weightEntities = entities
+        self.suggestedNoteUpdater = SuggestedNoteSourceUpdater(sessionId: sessionId, documentManager: documentManager)
         self.cluster = Cluster(candidate: candidate, weightNavigation: navigation, weightText: text, weightEntities: entities)
         self.ranker = ranker
         self.documentManager = documentManager
@@ -180,10 +183,7 @@ class ClusteringManager: ObservableObject {
     }
 
     func addNote(note: BeamNote) {
-        var fullText = note.text.text
-        for child in note.children {
-            fullText += " " + child.text.text
-        }
+        let fullText = note.allTexts.map { $0.1.text }.joined(separator: "\n")
         let clusteringNote = ClusteringNote(id: note.id, title: note.title, content: fullText)
         // TODO: Add link information to notes
         self.isClustering = true
@@ -252,6 +252,10 @@ class ClusteringManager: ObservableObject {
                 return BeamNote.titleForNoteId(noteUuid, false)
             }
         })
+    }
+
+    private func updateNoteSources() {
+        self.suggestedNoteUpdater.update(urlGroups: self.clusteredPagesId, noteGroups: self.clusteredNotesId)
     }
 
     private func logForClustering(result: [[UInt64]], changeCandidate: Bool) {
