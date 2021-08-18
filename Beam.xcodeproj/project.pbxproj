@@ -596,6 +596,8 @@
 		A0E9B0FB2666A80600FC99A5 /* TabGroupingTitleBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0E9B0FA2666A80600FC99A5 /* TabGroupingTitleBarView.swift */; };
 		A0EDF5DB266EE08C0079803E /* BeamPlaceholder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0EDF5DA266EE08C0079803E /* BeamPlaceholder.swift */; };
 		A0F462352668D79E0003EAD6 /* RadBlockPreferencesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0F462342668D79E0003EAD6 /* RadBlockPreferencesManager.swift */; };
+		A0F558E626BD51A70024C47E /* EditorDebugPreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0F558E526BD51A70024C47E /* EditorDebugPreferencesView.swift */; };
+		A0F558F126BD536A0024C47E /* PreferencesManager+EditorDebug.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0F558F026BD536A0024C47E /* PreferencesManager+EditorDebug.swift */; };
 		A0F558F526BD8F260024C47E /* DebugSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0F558F426BD8F260024C47E /* DebugSection.swift */; };
 		A0F8DC87268488C900654046 /* hush.json in Resources */ = {isa = PBXBuildFile; fileRef = A0F8DC86268488C900654046 /* hush.json */; };
 		A500F93626BAD78A0029D34F /* audio.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = A500F92E26BAD78A0029D34F /* audio.mp3 */; };
@@ -1518,6 +1520,8 @@
 		A0E9B0FA2666A80600FC99A5 /* TabGroupingTitleBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupingTitleBarView.swift; sourceTree = "<group>"; };
 		A0EDF5DA266EE08C0079803E /* BeamPlaceholder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamPlaceholder.swift; sourceTree = "<group>"; };
 		A0F462342668D79E0003EAD6 /* RadBlockPreferencesManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadBlockPreferencesManager.swift; sourceTree = "<group>"; };
+		A0F558E526BD51A70024C47E /* EditorDebugPreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorDebugPreferencesView.swift; sourceTree = "<group>"; };
+		A0F558F026BD536A0024C47E /* PreferencesManager+EditorDebug.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PreferencesManager+EditorDebug.swift"; sourceTree = "<group>"; };
 		A0F558F426BD8F260024C47E /* DebugSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugSection.swift; sourceTree = "<group>"; };
 		A0F8DC86268488C900654046 /* hush.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = hush.json; sourceTree = "<group>"; };
 		A500F92E26BAD78A0029D34F /* audio.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = audio.mp3; sourceTree = "<group>"; };
@@ -2460,6 +2464,7 @@
 				A07F2439269D9624008918B0 /* PreferencesManager+Privacy.swift */,
 				A0A0FED0268F05CC0080EAEF /* PreferencesManager+Passwords.swift */,
 				A0184F7026AF56AB00993C32 /* PreferencesManager+Advanced.swift */,
+				A0F558F026BD536A0024C47E /* PreferencesManager+EditorDebug.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -2690,6 +2695,7 @@
 				524299E225A480A300F4DBF5 /* AccountsView.swift */,
 				A0CB5AED268B244800D1EF02 /* AboutPreferencesView.swift */,
 				524299ED25A488E000F4DBF5 /* AdvancedPreferencesView.swift */,
+				A0F558E526BD51A70024C47E /* EditorDebugPreferencesView.swift */,
 				5298268B2641A37500E9448C /* GithubButton.swift */,
 				52B9A399264566D60063AEEF /* OauthButton.swift */,
 				529826A52641A46E00E9448C /* GoogleButton.swift */,
@@ -4669,6 +4675,7 @@
 				526017F825AE078600634695 /* ConsoleContentView.swift in Sources */,
 				52B17AB62624422800CB4728 /* DatabasesContentView.swift in Sources */,
 				529826A62641A46E00E9448C /* GoogleButton.swift in Sources */,
+				A0F558E626BD51A70024C47E /* EditorDebugPreferencesView.swift in Sources */,
 				A050049F25DAEE73009CFEB6 /* ProgressIndicator.swift in Sources */,
 				418172192581107C00317ED8 /* Persistence.swift in Sources */,
 				418172282581107C00317ED8 /* Range+Beam.swift in Sources */,
@@ -4898,6 +4905,7 @@
 				9661A587266980AF00CB56B3 /* BidirectionalPopoverBlockItem.swift in Sources */,
 				032562A626051D3B006513E4 /* RBFilterManager.m in Sources */,
 				418172372581107C00317ED8 /* TextEditOperations.swift in Sources */,
+				A0F558F126BD536A0024C47E /* PreferencesManager+EditorDebug.swift in Sources */,
 				333A0A20268C4EED004B7905 /* KeyEventHandlingView.swift in Sources */,
 				52E2528826175F1C00E54C45 /* DatabaseAPIType.swift in Sources */,
 				A0A84FEB26381B64008F0326 /* OtherPasswordsModal.swift in Sources */,

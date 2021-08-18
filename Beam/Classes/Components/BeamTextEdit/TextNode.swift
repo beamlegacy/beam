@@ -22,18 +22,18 @@ public class TextNode: ElementNode {
     var interlineFactor: CGFloat {
         switch elementKind {
         case .heading:
-            return 1.2
+            return PreferencesManager.editorLineHeightHeading
         default:
-            return self.textFrame?.lines.count ?? 0 > 1 ? 1.1 : 1.3
+            return self.textFrame?.lines.count ?? 0 > 1 ? PreferencesManager.editorLineHeightMultipleLine : PreferencesManager.editorLineHeight
         }
     }
     var interNodeSpacing = CGFloat(0)
     var fontSize: CGFloat {
         switch elementKind {
         case .heading(let level):
-            return [21, 18][level - 1]
+            return [PreferencesManager.editorFontSizeHeadingOne, PreferencesManager.editorFontSizeHeadingTwo][level - 1]
         default:
-            return 15
+            return PreferencesManager.editorFontSize
         }
     }
 

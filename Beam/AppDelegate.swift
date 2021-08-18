@@ -331,7 +331,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         PasswordsPreferencesViewController,
         AccountsPreferenceViewController,
         AboutPreferencesViewController,
-        AdvancedPreferencesViewController
+        AdvancedPreferencesViewController,
+        EditorDebugPreferencesViewController
     ]
 
     lazy var preferencesWindowController = PreferencesWindowController(

@@ -29,8 +29,8 @@ public struct BTextEditScrollable: NSViewRepresentable {
     var maximumWidth: CGFloat = 1024
     var topOffset = CGFloat(28)
     var footerHeight = CGFloat(28)
-    var leadingPercentage = CGFloat(48.7)
-    var centerText = false
+    var leadingPercentage = PreferencesManager.editorLeadingPercentage
+    var centerText = PreferencesManager.editorIsCentered
     var showTitle = true
     var initialFocusedState: NoteEditFocusedState?
 

@@ -32,7 +32,7 @@ struct ModeView: View {
     private var noteContent: some View {
         Group {
             if let currentNote = state.currentNote {
-                NoteView(note: currentNote, containerGeometry: containerGeometry, leadingPercentage: 48.7,
+                NoteView(note: currentNote, containerGeometry: containerGeometry, leadingPercentage: PreferencesManager.editorLeadingPercentage,
                          centerText: false, initialFocusedState: state.notesFocusedStates.currentFocusedState) { scrollPoint in
                     contentIsScrolled = scrollPoint.y > NoteView.topSpacingBeforeTitle
                 }
@@ -44,7 +44,7 @@ struct ModeView: View {
 
     private func journalContent(containerGeometry: GeometryProxy) -> some View {
         JournalScrollView(axes: [.vertical],
-                          showsIndicators: false, centerText: false,
+                          showsIndicators: false,
                           proxy: containerGeometry) { scrollPoint in
             contentIsScrolled = scrollPoint.y >
                 JournalScrollView.firstNoteTopOffset(forProxy: containerGeometry)
