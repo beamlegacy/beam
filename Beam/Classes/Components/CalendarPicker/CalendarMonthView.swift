@@ -54,16 +54,16 @@ struct CalendarMonthView: View {
     }
 
     fileprivate func dayView(_ day: CalendarDay) -> some View {
-        var color = day.isWithinDisplayedMonth ? BeamColor.Niobium : BeamColor.AlphaGray
         var font = BeamFont.regular(size: 13)
+        let isHovering = hoveredDate == day.date
+        let isTouchingDown = touchdownDate == day.date
+        var color = day.isWithinDisplayedMonth || isHovering || isTouchingDown ? BeamColor.Niobium : BeamColor.AlphaGray
         if day.isSelected {
             color = BeamColor.Bluetiful
             font = BeamFont.medium(size: 13)
         }
-        let isHovering = hoveredDate == day.date
-        let isTouchDown = touchdownDate == day.date
         var backgroundColor: BeamColor?
-        if isTouchDown {
+        if isTouchingDown {
             backgroundColor = day.isSelected ? BeamColor.CalendarPicker.selectedDayClickedBackground : BeamColor.CalendarPicker.dayClickedBackground
         } else if isHovering {
             backgroundColor = day.isSelected ? BeamColor.CalendarPicker.selectedDayHoverBackground : BeamColor.CalendarPicker.dayHoverBackground
