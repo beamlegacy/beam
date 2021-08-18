@@ -118,7 +118,7 @@ public class Cluster {
         case noObjectsToAdd
     }
 
-    let myQueue = DispatchQueue(label: "clusteringThread")
+    let myQueue = DispatchQueue(label: "clusteringQueue")
     var pages = [Page]()
     var notes = [ClusteringNote]()
     // As the adjacency matrix is never touched on its own, just through the sub matrices, it
@@ -875,13 +875,13 @@ public class Cluster {
         guard self.notes.count + self.pages.count > 0 else { return ([[UInt64]](), [[UUID]]())}
 
         var clusterizedPages = [[UInt64]]()
-        if self.pages.count > 0 {
+        if labels.count > 0 {
             for _ in 0...(labels.max() ?? 0) {
                 clusterizedPages.append([UInt64]())
             }
         }
         var clusterizedNotes = [[UUID]]()
-        if self.notes.count > 0 {
+        if labels.count > 0 {
             for _ in 0...(labels.max() ?? 0) {
                 clusterizedNotes.append([UUID]())
             }
