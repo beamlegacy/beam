@@ -1,15 +1,22 @@
 {
   "images" : [
     {
-      "filename" : "preferences-browser.pdf",
-      "idiom" : "universal"
+      "filename" : "preferences-browser.png",
+      "idiom" : "universal",
+      "scale" : "1x"
+    },
+    {
+      "filename" : "preferences-browser@2x.png",
+      "idiom" : "universal",
+      "scale" : "2x"
+    },
+    {
+      "idiom" : "universal",
+      "scale" : "3x"
     }
   ],
   "info" : {
     "author" : "xcode",
     "version" : 1
-  },
-  "properties" : {
-    "template-rendering-intent" : "template"
   }
 }
