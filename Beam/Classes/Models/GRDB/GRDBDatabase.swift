@@ -137,6 +137,13 @@ struct GRDBDatabase {
             }
         }
 
+        migrator.registerMigration("createBeamNoteIndexingRecord") { db in
+            try db.create(table: "BeamNoteIndexingRecord", ifNotExists: true) { t in
+                t.column("noteId", .text).primaryKey()
+                t.column("indexedAt", .date)
+            }
+        }
+
         #if DEBUG
         // Speed up development by nuking the database when migrations change
         migrator.eraseDatabaseOnSchemaChange = true
@@ -163,6 +170,9 @@ struct GRDBDatabase {
 extension GRDBDatabase {
     // MARK: - BeamNote / BeamElement
     func append(note: BeamNote) throws {
+        // only reindex note if needed:
+        guard shouldReindex(note: note) else { return }
+
         do {
             try dbWriter.write { db in
                 try BeamElementRecord.filter(Column("noteId") == note.id.uuidString).deleteAll(db)
@@ -175,6 +185,12 @@ extension GRDBDatabase {
             Logger.shared.logError("Error while indexing note \(note.title): \(error)", category: .search)
             throw error
         }
+
+        for link in note.internalLinks {
+            appendLink(link)
+        }
+
+        updateIndexedAt(for: note)
     }
 
     func append(element: BeamElement) throws {
@@ -196,6 +212,7 @@ extension GRDBDatabase {
             Logger.shared.logError("Error while indexing element \(noteTitle) - \(element.id.uuidString): \(error)", category: .search)
             throw error
         }
+        updateIndexedAt(for: note)
     }
 
     func remove(note: BeamNote) throws {
@@ -203,6 +220,56 @@ extension GRDBDatabase {
         _ = try dbWriter.write { db in
             try BeamElementRecord.filter(Column("noteId") == noteId).deleteAll(db)
         }
+        removeIndexedAt(for: note)
+    }
+
+    func updateIndexedAt(for note: BeamNote) {
+        do {
+            _ = try dbWriter.write({ db in
+                var noteIndexingRecord = BeamNoteIndexingRecord(id: nil, noteId: note.id.uuidString, indexedAt: BeamDate.now)
+                try noteIndexingRecord.insert(db)
+            })
+        } catch {
+            Logger.shared.logError("Error trying to add indexing date for note [\(note.id)]: \(error)", category: .database)
+
+        }
+    }
+
+    func removeIndexedAt(for note: BeamNote) {
+        do {
+            _ = try dbWriter.write({ db in
+                try BeamNoteIndexingRecord
+                    .filter(BeamNoteIndexingRecord.Columns.noteId == note.id.uuidString)
+                    .deleteAll(db)
+            })
+        } catch {
+            Logger.shared.logError("Error trying to delete note [\(note.id)] indexing date: \(error)", category: .database)
+
+        }
+    }
+
+    func shouldReindex(note: BeamNote) -> Bool {
+        var result = true
+        do {
+            result = try dbReader.read({ db in
+                let dates = try BeamNoteIndexingRecord
+                    .filter(BeamNoteIndexingRecord.Columns.noteId == note.id.uuidString)
+                    .fetchAll(db)
+                guard dates.count <= 1 else {
+                    Logger.shared.logError("There should only be one BeamNoteIndexingRecord instance for note [\(note.id)] but there are \(dates.count)", category: .database)
+                    return true
+                }
+
+                guard let date = dates.first else {
+                    return true
+                }
+
+                return note.updateDate > date.indexedAt
+            })
+        } catch {
+            Logger.shared.logError("Error trying to find if note [\(note.id)] should be reindexed: \(error)", category: .database)
+        }
+        return result
     }
 
     func remove(noteTitled: String) throws {

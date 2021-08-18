@@ -10,7 +10,7 @@ import Combine
 
 public protocol BeamNoteDocument {
     func observeDocumentChange()
-    func autoSave(_ relink: Bool)
+    func autoSave()
     var lastChangedElement: BeamElement? { get set }
 }
 
@@ -212,13 +212,10 @@ public class BeamNote: BeamElement {
         fetchedNotesCancellables[cancellableKey] =
             note.$changed
             .dropFirst(1)
-
-//            .debounce(for: .seconds(2), scheduler: RunLoop.main)
-//            .throttle(for: .seconds(2), scheduler: RunLoop.main, latest: false)
             .receive(on: DispatchQueue.main)
-            .sink { [weak note] change in
+            .sink { [weak note] _ in
                 guard let note = note as? BeamNoteDocument else { return }
-                note.autoSave(change?.1 == .text)
+                note.autoSave()
             }
         if let note = note as? BeamNoteDocument {
             note.observeDocumentChange()
