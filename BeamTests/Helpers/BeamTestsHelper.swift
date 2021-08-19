@@ -20,7 +20,12 @@ class BeamTestsHelper {
         DocumentManager.cancelAllPreviousThrottledAPICall()
 
         let recordingPath = NSSearchPathForDirectoriesInDomains(.libraryDirectory, .userDomainMask, true).first!
-        let filename = QuickSpec.current.name.c99ExtendedIdentifier
+        var filename = QuickSpec.current.name.c99ExtendedIdentifier
+        do {
+            filename = try filename.SHA256()
+        } catch {
+            fatalError("Couldn't SHA \(filename)")
+        }
         var fullFilename = "\(recordingPath)/Logs/Beam/Vinyl/\(filename).json"
 
         if let jobId = ProcessInfo.processInfo.environment["CI_JOB_ID"] {
@@ -65,7 +70,12 @@ class BeamTestsHelper {
     static let decoder = JSONDecoder()
     private func saveAPIRequestsFilename() -> URL {
         let recordingPath = NSSearchPathForDirectoriesInDomains(.libraryDirectory, .userDomainMask, true).first!
-        let filename = QuickSpec.current.name.c99ExtendedIdentifier
+        var filename = QuickSpec.current.name.c99ExtendedIdentifier
+        do {
+            filename = try filename.SHA256()
+        } catch {
+            fatalError("Couldn't SHA \(filename)")
+        }
 
         var networkRequestsFilename = "\(recordingPath)/Logs/Beam/Vinyl/\(filename)_calls.json"
         if let jobId = ProcessInfo.processInfo.environment["CI_JOB_ID"] {

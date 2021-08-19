@@ -4406,7 +4406,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ \"$(ls -A ${SRCROOT}/BeamTests/Vinyl/ | grep -v .gitignore)\" ]; then\n    echo \"$(ls -A ${SRCROOT}/BeamTests/Vinyl/ | grep -v .gitignore)\"\n    echo \"Copying ${SRCROOT}/BeamTests/Vinyl/* to ${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam\"\n    mkdir -p ${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Logs/Beam/Vinyl/${CI_JOB_ID}/\n    cp -r ${SRCROOT}/BeamTests/Vinyl/* ${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Logs/Beam/Vinyl/${CI_JOB_ID}/\nfi\n";
+			shellScript = "scripts/copy_vinyl.sh\n";
 		};
 		523A32DC26776D0400606768 /* Variable env injector */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -4424,7 +4424,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ $ENABLE_PREVIEWS == \"NO\" ]\nthen\n    # your code to execute here\n    PATH=${PATH}:/opt/homebrew/bin\n    direnv allow ..\n    eval \"$(direnv export bash)\"\n\n    git checkout ${SRCROOT}/BeamCore/Configuration/EnvironmentVariables.swift\n\n    if which variable-injector >/dev/null; then\n      variable-injector --file ${SRCROOT}/BeamCore/Configuration/EnvironmentVariables.swift # --verbose # Pass your paramenters\n    else\n      echo \"Warning: Swift Variable Injector not installed, download from https://github.com/penso/variable-injector\"\n      exit 1\n    fi\n\nelse\n  echo \"Skipping the script because of SwiftUI preview mode\"\nfi\n";
+			shellScript = "if [ $ENABLE_PREVIEWS == \"NO\" ]\nthen\n    # your code to execute here\n    PATH=/opt/homebrew/bin:${PATH}\n    direnv allow ..\n    eval \"$(direnv export bash)\"\n\n    git checkout ${SRCROOT}/BeamCore/Configuration/EnvironmentVariables.swift\n\n    if which variable-injector >/dev/null; then\n      variable-injector --file ${SRCROOT}/BeamCore/Configuration/EnvironmentVariables.swift # --verbose # Pass your paramenters\n    else\n      echo \"Warning: Swift Variable Injector not installed, download from https://github.com/penso/variable-injector\"\n      exit 1\n    fi\n\nelse\n  echo \"Skipping the script because of SwiftUI preview mode\"\nfi\n";
 		};
 		523A32DD26776D3000606768 /* Clean Variable env injector */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -4442,7 +4442,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "git checkout ${SRCROOT}/BeamCore/Configuration/EnvironmentVariables.swift\n";
+			shellScript = "if [ $ENABLE_PREVIEWS == \"NO\" ]\nthen\n    PATH=/opt/homebrew/bin:${PATH}\n    git checkout ${SRCROOT}/BeamCore/Configuration/EnvironmentVariables.swift\nelse\n  echo \"Skipping the script because of SwiftUI preview mode\"\nfi\n\n\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
