@@ -394,7 +394,9 @@ import Promises
 
     private func setupObservers() {
         Logger.shared.logDebug("setupObservers", category: .javascript)
-        webView.publisher(for: \.title).sink { [unowned self] value in
+        webView.publisher(for: \.title)
+            .debounce(for: .milliseconds(200), scheduler: DispatchQueue.main)
+            .sink { [unowned self] value in
             self.receivedWebviewTitle(value)
         }.store(in: &scope)
         webView.publisher(for: \.url).sink { [unowned self] value in
