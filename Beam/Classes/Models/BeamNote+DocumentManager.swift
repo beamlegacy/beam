@@ -145,7 +145,7 @@ extension BeamNote: BeamNoteDocument {
 
         guard let documentStruct = documentStruct else {
             version -= 1
-            Logger.shared.logError("Unable to find active document struct [\(title) {\(id)}]", category: .document)
+            Logger.shared.logError("Unable to find active document struct \(titleAndId)", category: .document)
             completion?(.failure(BeamNoteError.unableToCreateDocumentStruct))
             return
         }
@@ -175,7 +175,7 @@ extension BeamNote: BeamNoteDocument {
                 if (error as NSError).domain == "DOCUMENT_ERROR_DOMAIN" {
                     switch (error as NSError).code {
                     case 1002:
-                        Logger.shared.logError("Version error with \(self.version), reloading from the DB", category: .document)
+                        Logger.shared.logError("Version error with \(self.titleAndId), reloading from the DB", category: .document)
 
                         /*
                          The saved CoreData model has a higher version, and this instance of BeamNote didn't receive it
@@ -194,7 +194,7 @@ extension BeamNote: BeamNoteDocument {
                         Logger.shared.logError("Version changed to \(self.savedVersion)/\(self.version)",
                                                category: .document)
                     case 1001:
-                        Logger.shared.logError("Title already exists for \(self.title). id: \(self.id)",
+                        Logger.shared.logError("Title already exists for \(self.titleAndId)",
                                                category: .document)
 
                         /*
@@ -208,31 +208,58 @@ extension BeamNote: BeamNoteDocument {
 
                         if let documents = (error as NSError).userInfo["documents"] as? [DocumentStruct],
                            let existingDocument = documents.first {
-                            Logger.shared.logError("\(documents.count) other documents, fetching existing one",
+                            Logger.shared.logError("\(documents.count) other documents, fetching existing one. Documents:",
                                                    category: .document)
-                            dump(documents)
-                            DispatchQueue.main.sync {
-                                self.updateWithDocumentStruct(existingDocument)
-                                self.savedVersion = existingDocument.version
-                            }
 
-                            completion?(result)
+                            dump(documents)
+
+                            Logger.shared.logError("documentStruct:",
+                                                   category: .document)
+                            dump(documentStruct)
+
+                            // We delete the passed documentStruct as it conflicts with existing
+                            documentManager.delete(id: documentStruct.id) { _ in
+                                DispatchQueue.main.sync {
+
+                                    self.updateWithDocumentStruct(existingDocument)
+                                    self.savedVersion = existingDocument.version
+                                }
+
+                                completion?(result)
+                            }
 
                             // Avoid calling save() again
                             return
                         }
+                    case 1003:
+                        Logger.shared.logError("Error saving: \(error.localizedDescription)",
+                                               category: .document)
+                    case 1004:
+                        Logger.shared.logError("Error saving, journal date conflicts: \(error.localizedDescription)",
+                                               category: .document)
+                        if let documents = (error as NSError).userInfo["documents"] as? [DocumentStruct] {
+                            Logger.shared.logError("\(documents.count) other documents, fetching existing one. Documents:",
+                                                   category: .document)
+
+                            dump(documents)
+
+                            Logger.shared.logError("documentStruct:",
+                                                   category: .document)
+                            dump(documentStruct)
+                        }
                     default:
-                        break
+                        Logger.shared.logError("Error saving: \(error.localizedDescription)",
+                                               category: .document)
                     }
                 }
 
                 DispatchQueue.main.async {
                     self.version = self.savedVersion
                 }
-                Logger.shared.logError("Saving note \(self.title) failed: \(error)", category: .document)
+                Logger.shared.logError("Saving note \(self.titleAndId) failed: \(error)", category: .document)
 
                 if self.pendingSave > 0 {
-                    Logger.shared.logDebug("Trying again: Saving note \(self.title) as there were \(self.pendingSave) pending save operations",
+                    Logger.shared.logDebug("Trying again: Saving note \(self.titleAndId) as there were \(self.pendingSave) pending save operations",
                                            category: .document)
                     self.save(documentManager: documentManager, completion: completion)
                 }
@@ -297,6 +324,17 @@ extension BeamNote: BeamNoteDocument {
 
         // Is the note in the document store?
         guard let doc = documentManager.loadDocumentWithJournalDate(BeamNoteType.iso8601ForDate(journalDate)) else {
+            return nil
+        }
+
+        // HOTFIX: remove empty notes that were errounously saved
+        guard !doc.data.isEmpty else {
+            Logger.shared.logError("HOTFIX - Data for note \(doc.title) (\(doc.id)) is empty -> deleting the note from the DB", category: .document)
+            do {
+                try documentManager.delete([doc.id])
+            } catch {
+                Logger.shared.logError("HOTFIX - Error while deleting \(doc.title) (\(doc.id))", category: .document)
+            }
             return nil
         }
 
@@ -367,6 +405,7 @@ extension BeamNote: BeamNoteDocument {
         // TODO: should force a first quick save to trigger any title conflicts with the API asap
         appendToFetchedNotes(note)
         updateNoteCount()
+        note.save(documentManager: documentManager)
         return note
     }
 
@@ -388,7 +427,7 @@ extension BeamNote: BeamNoteDocument {
         return create(documentManager, title: title)
     }
 
-    public static func fetchOrCreate(_ documentManager: DocumentManager, date: Date) -> BeamNote {
+    public static func fetchOrCreateJournalNote(_ documentManager: DocumentManager, date: Date) -> BeamNote {
         // Is the note in the cache?
         if let note = fetch(documentManager, journalDate: date) {
             return note
@@ -396,10 +435,6 @@ extension BeamNote: BeamNoteDocument {
 
         // create a new note and add it to the cache
         return create(documentManager, journalDate: date)
-    }
-
-    public static func fetchOrCreateJournalNote(_ documentManager: DocumentManager, date: Date) -> BeamNote {
-        return fetchOrCreate(documentManager, date: date)
     }
 
     public var lastChangedElement: BeamElement? {
