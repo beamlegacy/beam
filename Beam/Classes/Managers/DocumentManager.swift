@@ -218,7 +218,8 @@ public class DocumentManager: NSObject {
     }
 
     func loadDocumentWithJournalDate(_ date: String) -> DocumentStruct? {
-        parseDocumentBody(Document.fetchOrCreateWithJournalDate(mainContext, date))
+        guard let document = Document.fetchWithJournalDate(mainContext, date) else { return nil }
+        return parseDocumentBody(document)
     }
 
     func loadDocumentsWithType(type: DocumentType, _ limit: Int, _ fetchOffset: Int) -> [DocumentStruct] {
@@ -632,7 +633,48 @@ public class DocumentManager: NSObject {
     // MARK: Validations
     private func checkValidations(_ context: NSManagedObjectContext, _ document: Document) throws {
         Logger.shared.logDebug("checkValidations for \(document.titleAndId)", category: .documentDebug)
+        try checkJournalDate(document)
+        try checkDuplicateJournalDates(context, document)
         try checkDuplicateTitles(context, document)
+    }
+
+    private func checkJournalDate(_ document: Document) throws {
+        guard document.documentType == .journal else { return }
+        guard document.journal_date == nil else { return }
+
+        let errString = "journal_date is nil for \(document.titleAndId)"
+
+        Logger.shared.logError(errString, category: .document)
+
+        let userInfo: [String: Any] = [NSLocalizedFailureReasonErrorKey: errString,
+                                       NSValidationObjectErrorKey: self]
+        throw NSError(domain: "DOCUMENT_ERROR_DOMAIN", code: 1003, userInfo: userInfo)
+    }
+
+    private func checkDuplicateJournalDates(_ context: NSManagedObjectContext, _ document: Document) throws {
+        // If document is deleted, we don't need to check title uniqueness
+        guard document.deleted_at == nil else { return }
+        guard document.documentType == .journal else { return }
+        guard let journal_date = document.journal_date else { return }
+
+        let predicate = NSPredicate(format: "journal_date = %@ AND id != %@ AND deleted_at == nil AND database_id = %@",
+                                    journal_date,
+                                    document.id as CVarArg,
+                                    document.database_id as CVarArg)
+        let documents = (try? Document.fetchAll(context, predicate).map { DocumentStruct(document: $0) }) ?? []
+
+        if !documents.isEmpty {
+            let errString = "Journal Date \(journal_date) for \(document.titleAndId) already used in \(documents.count) other documents"
+
+            Logger.shared.logWarning("\(document.titleAndId) DB: \(document.database_id) is already used",
+                                     category: .document)
+
+            let userInfo: [String: Any] = [NSLocalizedFailureReasonErrorKey: errString,
+                                           NSValidationObjectErrorKey: self,
+                                           "documents": documents]
+
+            throw NSError(domain: "DOCUMENT_ERROR_DOMAIN", code: 1004, userInfo: userInfo)
+        }
     }
 
     private func checkDuplicateTitles(_ context: NSManagedObjectContext, _ document: Document) throws {
@@ -1562,6 +1604,31 @@ extension DocumentManager {
 
     // MARK: -
     // MARK: Delete
+    func delete(_ ids: [UUID]) throws {
+        let group = DispatchGroup()
+        var errors: [Error] = []
+        let lock = DispatchSemaphore(value: 1)
+
+        for id in ids {
+            group.enter()
+            delete(id: id) { result in
+                switch result {
+                case .failure(let error):
+                    lock.wait()
+                    errors.append(error)
+                    lock.signal()
+                case .success: break
+                }
+                group.leave()
+            }
+        }
+        group.wait()
+
+        if let error = errors.first {
+            throw error
+        }
+    }
+
     func delete(id: UUID, completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
         Self.cancelPreviousThrottledAPICall(id)
 
@@ -2046,7 +2113,7 @@ extension DocumentManager {
     }
 
     func delete(ids: [UUID]) -> Promises.Promise<Bool> {
-        return self.coreDataManager.background()
+        self.coreDataManager.background()
             .then(on: backgroundQueue) { context in
 
                 context.performAndWait {
