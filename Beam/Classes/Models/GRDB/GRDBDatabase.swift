@@ -227,6 +227,9 @@ extension GRDBDatabase {
         do {
             _ = try dbWriter.write({ db in
                 var noteIndexingRecord = BeamNoteIndexingRecord(id: nil, noteId: note.id.uuidString, indexedAt: BeamDate.now)
+                try BeamNoteIndexingRecord
+                    .filter(BeamNoteIndexingRecord.Columns.noteId == note.id.uuidString)
+                    .deleteAll(db)
                 try noteIndexingRecord.insert(db)
             })
         } catch {
