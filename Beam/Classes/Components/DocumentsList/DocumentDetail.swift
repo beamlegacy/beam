@@ -23,6 +23,13 @@ struct DocumentDetail: View {
 
                 HStack {
                     VStack {
+                        if let date = document.journal_date {
+                            HStack {
+                                Text("Journal Date:").bold()
+                                Text(date)
+                                Spacer()
+                            }
+                        }
                         VStack {
                             HStack {
                                 Text("ID:").bold()

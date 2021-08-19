@@ -279,6 +279,32 @@ extension BeamNote: BeamNoteDocument {
     }
 
     public static func fetch(_ documentManager: DocumentManager,
+                             journalDate: Date,
+                             keepInMemory: Bool = true,
+                             decodeChildren: Bool = true) -> BeamNote? {
+        // Is the note in the cache?
+        let title = BeamDate.journalNoteTitle(for: journalDate)
+        if let note = getFetchedNote(title) {
+            return note
+        }
+
+        // Is the note in the document store?
+        guard let doc = documentManager.loadDocumentWithJournalDate(BeamNoteType.iso8601ForDate(journalDate)) else {
+            return nil
+        }
+
+        //        Logger.shared.logDebug("Note loaded:\n\(String(data: doc.data, encoding: .utf8)!)\n", category: .document)
+
+        do {
+            return try instanciateNote(doc, keepInMemory: keepInMemory, decodeChildren: decodeChildren)
+        } catch {
+            Logger.shared.logError("Unable to decode note \(doc.title) (\(doc.id))", category: .document)
+        }
+
+        return nil
+    }
+
+    public static func fetch(_ documentManager: DocumentManager,
                              id: UUID,
                              keepInMemory: Bool = true,
                              decodeChildren: Bool = true) -> BeamNote? {
@@ -327,6 +353,16 @@ extension BeamNote: BeamNoteDocument {
         return note
     }
 
+    public static func create(_ documentManager: DocumentManager, journalDate: Date) -> BeamNote {
+        let note = BeamNote(journalDate: journalDate)
+        note.databaseId = DatabaseManager.defaultDatabase.id
+
+        // TODO: should force a first quick save to trigger any title conflicts with the API asap
+        appendToFetchedNotes(note)
+        updateNoteCount()
+        return note
+    }
+
     public func observeDocumentChange() {
         observeDocumentChange(documentManager: AppDelegate.main.data.documentManager)
     }
@@ -348,12 +384,18 @@ extension BeamNote: BeamNoteDocument {
         return create(documentManager, title: title)
     }
 
+    public static func fetchOrCreate(_ documentManager: DocumentManager, date: Date) -> BeamNote {
+        // Is the note in the cache?
+        if let note = fetch(documentManager, journalDate: date) {
+            return note
+        }
+
+        // create a new note and add it to the cache
+        return create(documentManager, journalDate: date)
+    }
+
     public static func fetchOrCreateJournalNote(_ documentManager: DocumentManager, date: Date) -> BeamNote {
-        let type = BeamNoteType.journalForDate(date)
-        let title = BeamDate.journalNoteTitle(for: date)
-        let note = fetchOrCreate(documentManager, title: title)
-        note.type = type
-        return note
+        return fetchOrCreate(documentManager, date: date)
     }
 
     public var lastChangedElement: BeamElement? {

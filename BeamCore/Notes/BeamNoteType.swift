@@ -40,6 +40,7 @@ public enum BeamNoteType: Codable, Equatable {
 
     public static var dateFormater: ISO8601DateFormatter {
         let formater = ISO8601DateFormatter()
+        formater.timeZone = .current
         formater.formatOptions = .withFullDate
         return formater
     }
