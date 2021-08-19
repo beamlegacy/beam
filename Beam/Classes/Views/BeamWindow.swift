@@ -237,7 +237,7 @@ class BeamWindow: NSWindow, NSDraggingDestination {
                 }
 
                 Logger.shared.logError("Saving imported note '\(note.title)' from \(url)", category: .document)
-                note.autoSave(false)
+                note.autoSave()
 
                 let alert = NSAlert()
                 alert.addButton(withTitle: "OK")

@@ -12,8 +12,8 @@ import BeamCore
 class NoteAutoSaveService: ObservableObject {
     private var scope = Set<AnyCancellable>()
 
-    func addNoteToSave(_ note: BeamNote, _ detectLinks: Bool) {
-        notesToSave[note] = (notesToSave[note] ?? false) || detectLinks
+    func addNoteToSave(_ note: BeamNote) {
+        notesToSave[note] = (notesToSave[note] ?? false)
         noteToSaveChanged = true
     }
 

@@ -455,12 +455,7 @@ struct AdvancedPreferencesView: View {
 
     private var Create100RandomNotes: some View {
         Button(action: {
-            let documentManager = DocumentManager()
-            let generator = FakeNoteGenerator(count: 100, journalRatio: 0.2, futureRatio: 0.05)
-            generator.generateNotes()
-            for note in generator.notes {
-                note.save(documentManager: documentManager)
-            }
+            BeamUITestsMenuGenerator.create100Notes()
         }, label: {
             Text("Create 100 Random notes")
         })

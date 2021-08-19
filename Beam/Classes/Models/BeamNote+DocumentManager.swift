@@ -4,6 +4,7 @@
 //
 //  Created by Sebastien Metrot on 01/04/2021.
 //
+//swiftlint:disable file_length
 
 import Foundation
 import BeamCore
@@ -117,9 +118,13 @@ extension BeamNote: BeamNoteDocument {
         try? GRDBDatabase.shared.remove(note: self)
         self.title = newTitle
         Self.reloadAfterRename(previousTitle: previousTitle, note: self)
-        try? GRDBDatabase.shared.append(note: self)
+        indexContents()
         Logger.shared.logInfo("Rename \(previousTitle) to \(title) [\(id)]", category: .document)
         AppDelegate.main.data.renamedNote = (id, previousTitle, title)
+    }
+
+    func indexContents() {
+        try? GRDBDatabase.shared.append(note: self)
     }
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
@@ -144,6 +149,9 @@ extension BeamNote: BeamNoteDocument {
             completion?(.failure(BeamNoteError.unableToCreateDocumentStruct))
             return
         }
+
+        // Index saved notes:
+        indexContents()
 
         Logger.shared.logInfo("BeamNote wants to save: \(titleAndId)", category: .document)
         documentManager.save(documentStruct, completion: { [weak self] result in
@@ -249,7 +257,6 @@ extension BeamNote: BeamNoteDocument {
         note.isPublic = documentStruct.isPublic
         note.deleted = documentStruct.deletedAt != nil
         if keepInMemory {
-            try? GRDBDatabase.shared.append(note: note)
             appendToFetchedNotes(note)
         }
         return note
@@ -367,11 +374,8 @@ extension BeamNote: BeamNoteDocument {
         observeDocumentChange(documentManager: AppDelegate.main.data.documentManager)
     }
 
-    public func autoSave(_ relink: Bool) {
-        if relink {
-            try? GRDBDatabase.shared.append(note: self)
-        }
-        AppDelegate.main.data.noteAutoSaveService.addNoteToSave(self, relink)
+    public func autoSave() {
+        AppDelegate.main.data.noteAutoSaveService.addNoteToSave(self)
     }
 
     public static func fetchOrCreate(_ documentManager: DocumentManager, title: String) -> BeamNote {
@@ -419,10 +423,7 @@ extension BeamNote: BeamNoteDocument {
         try? GRDBDatabase.shared.clearBidirectionalLinks()
         for title in documentManager.allDocumentsTitles(includeDeletedNotes: false) {
             if let note = BeamNote.fetch(documentManager, title: title) {
-                try? GRDBDatabase.shared.append(note: note)
-                for link in note.internalLinks {
-                    GRDBDatabase.shared.appendLink(link)
-                }
+                note.indexContents()
             }
         }
     }

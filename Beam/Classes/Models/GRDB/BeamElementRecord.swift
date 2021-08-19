@@ -56,3 +56,42 @@ extension BeamElementRecord: MutablePersistableRecord {
         id = rowID
     }
 }
+
+struct BeamNoteIndexingRecord {
+    var id: Int64?
+    var noteId: String
+    var indexedAt: Date
+}
+
+// SQL generation
+extension BeamNoteIndexingRecord: TableRecord {
+    /// The table columns
+    enum Columns: String, ColumnExpression {
+        case id, noteId, indexedAt
+    }
+}
+
+// Fetching methods
+extension BeamNoteIndexingRecord: FetchableRecord {
+    /// Creates a record from a database row
+    init(row: Row) {
+        id = row[Columns.id]
+        noteId = row[Columns.noteId]
+        indexedAt = row[Columns.indexedAt]
+    }
+}
+
+// Persistence methods
+extension BeamNoteIndexingRecord: MutablePersistableRecord {
+    /// The values persisted in the database
+    func encode(to container: inout PersistenceContainer) {
+        // We can't associate the id with the one in a virtual table, it creates errors in SQLite
+        container[Columns.noteId] = noteId
+        container[Columns.indexedAt] = indexedAt
+    }
+
+    // Update auto-incremented id upon successful insertion
+    mutating func didInsert(with rowID: Int64, for column: String?) {
+        id = rowID
+    }
+}
