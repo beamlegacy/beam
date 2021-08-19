@@ -73,9 +73,9 @@ class BrowserTabUITests: QuickSpec {
 
                 it("stops audio when closing") {
                     // core audio can be a little slow to sync, so we wait a little
-                    expect(self.waitUntilAudioPlayingIs(false, timeout: 2)).to(beTrue(), description: "Mac has some audio playing already. This UITest needs silence.")
+                    expect(self.waitUntilAudioPlayingIs(false, timeout: 10)).to(beTrue(), description: "Mac has some audio playing already. This UITest needs silence.")
                     openPageAndStartPlaying()
-                    expect(self.waitUntilAudioPlayingIs(true, timeout: 2)) == true
+                    expect(self.waitUntilAudioPlayingIs(true, timeout: 10)) == true
                     self.closeTab()
                     expect(self.waitUntilAudioPlayingIs(false, timeout: 10)).to(beTrue(), description: "Tab is still playing audio, this might indicate a webView leak")
                 }
@@ -102,9 +102,9 @@ class BrowserTabUITests: QuickSpec {
 
                 it("stops video when closing") {
                     // core audio can be a little slow to sync, so we wait a little
-                    expect(self.waitUntilAudioPlayingIs(false, timeout: 2)).to(beTrue(), description: "Mac has some audio playing already. This UITest needs silence.")
+                    expect(self.waitUntilAudioPlayingIs(false, timeout: 10)).to(beTrue(), description: "Mac has some audio playing already. This UITest needs silence.")
                     openPageAndStartPlaying()
-                    expect(self.waitUntilAudioPlayingIs(true, timeout: 2)) == true
+                    expect(self.waitUntilAudioPlayingIs(true, timeout: 10)) == true
                     self.closeTab()
                     expect(self.waitUntilAudioPlayingIs(false, timeout: 10)).to(beTrue(), description: "Tab is still playing audio, this might indicate a webView leak")
                 }
