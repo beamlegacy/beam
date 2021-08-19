@@ -145,6 +145,8 @@ install_codeclimate:
 	brew install codeclimate
 
 git_checkout:
+	brew install git-lfs
+	git lfs install
 	git submodule sync && git submodule update --init --recursive
 
 delete_db_files:
@@ -152,11 +154,14 @@ delete_db_files:
 	rm -f ${HOME}/Library/Containers/co.beamapp.macos.dev/Data/Library/Application\ Support/Beam/Beam-*.sqlite*
 
 copy_vinyl_files:
-	cp ${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Logs/Beam/Vinyl/*.json BeamTests/Vinyl/
+	tar -a -cf BeamTests/Vinyl.tar.bz2 -C ${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Logs/Beam/Vinyl/ .
 
 reset_vinyl_files:
 	rm -r ${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Logs/Beam/Vinyl/*.json
-	rm -r BeamTests/Vinyl/*.json
+	rm BeamTests/Vinyl.tar.bz2
+
+extract_vinyl_files:
+	tar -xf BeamTests/Vinyl.tar.bz2 -C ${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Logs/Beam/Vinyl/
 
 js_test:
 	yarn --cwd ./Beam/Classes/Components/PointAndShoot/Web run build
