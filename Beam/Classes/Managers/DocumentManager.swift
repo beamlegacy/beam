@@ -217,6 +217,10 @@ public class DocumentManager: NSObject {
         } catch { return [] }
     }
 
+    func loadDocumentWithJournalDate(_ date: String) -> DocumentStruct? {
+        parseDocumentBody(Document.fetchOrCreateWithJournalDate(mainContext, date))
+    }
+
     func loadDocumentsWithType(type: DocumentType, _ limit: Int, _ fetchOffset: Int) -> [DocumentStruct] {
         do {
             return try Document.fetchWithTypeAndLimit(context: mainContext,

@@ -118,6 +118,18 @@ class Document: NSManagedObject, BeamCoreDataObject {
         return document
     }
 
+    class func create(_ context: NSManagedObjectContext = CoreDataManager.shared.mainContext,
+                      journalDate: String) -> Document {
+        let document = Document(context: context)
+        document.id = UUID()
+        document.database_id = DatabaseManager.defaultDatabase.id
+        document.version = 0
+        document.title = "journal-" + journalDate + "-" + document.id.uuidString // This is a temporary unique title, it will be replaced by the localized date dynamically by the app
+        document.journal_date = journalDate
+
+        return document
+    }
+
     func update(_ documentStruct: DocumentStruct) {
         database_id = documentStruct.databaseId
         // use mergeWithLocalChanges for `data`
@@ -329,7 +341,7 @@ class Document: NSManagedObject, BeamCoreDataObject {
 
     class func fetchOrCreateWithJournalDate(_ context: NSManagedObjectContext, _ date: String) -> Document {
         (try? fetchFirst(context, NSPredicate(format: "journal_date ==[cd] %@", date as CVarArg)))
-            ?? create(context, title: date)
+            ?? create(context, journalDate: date)
     }
 
     class func fetchAllWithType(_ context: NSManagedObjectContext, _ type: Int16) throws -> [Document] {
