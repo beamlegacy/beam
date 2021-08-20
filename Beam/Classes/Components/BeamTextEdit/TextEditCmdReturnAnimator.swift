@@ -18,60 +18,96 @@ struct TextEditCmdReturnAnimator {
     func startAnimation(completion: (() -> Void)?) -> Bool {
         guard let textLayer = node.textLayer?.layer else { return false }
 
+        // INITIAL LAYOUT VALUES
         let parentLayer = textLayer.superlayer
-        let cursorPosition = node.cursorPosition
-        let startOfLine = node.beginningOfLineFromPosition(cursorPosition)
-        let endOfLine = node.endOfLineFromPosition(cursorPosition)
-        let startRect = node.rectAt(sourcePosition: startOfLine)
-        let endRect = node.rectAt(sourcePosition: endOfLine)
-        var rect = startRect.union(endRect)
+        var cursorPosition = node.cursorPosition
+        let (startLine, endLine) = linesToAnimate(node: node, cursorPosition: &cursorPosition)
+        var layersToRemoveAfterAnimation = [CALayer]()
+        var lastExpandedBoxRect = CGRect.zero
+        var lastBoxLayer: CALayer?
+        for i in startLine...endLine {
+            let startOfText = node.beginningOfLineFromPosition(cursorPosition)
+            let endOfText = node.endOfLineFromPosition(cursorPosition)
+            let startRect = node.rectAt(sourcePosition: startOfText)
+            let endRect = node.rectAt(sourcePosition: endOfText)
+            var rect = startRect.union(endRect)
+            rect.size.width *= 1.03 // faketext font is slighlty larger
+            rect.origin.x += node.offsetAt(index: startOfText)
 
-        guard endOfLine <= node.attributedString.length else { return false }
+            guard endOfText <= node.attributedString.length else { return false }
 
-        // LAYERS SETUP
+            // LAYERS SETUP
+            let (boxLayer, expandedBoxRect) = self.setupBoxLayer(for: rect, expandForIcon: i == endLine)
+            parentLayer?.addSublayer(boxLayer)
+
+            let text = node.attributedString.attributedSubstring(from: NSRange(location: startOfText, length: endOfText-startOfText))
+            let (maskTextLayer, fakeTextLayer) = setupTextFakingLayers(originalTextLayer: textLayer, rect: rect, text: text)
+
+            layersToRemoveAfterAnimation.append(maskTextLayer)
+            layersToRemoveAfterAnimation.append(fakeTextLayer)
+            lastExpandedBoxRect = expandedBoxRect
+            lastBoxLayer = boxLayer
+            cursorPosition = node.position(after: endOfText)
+        }
+
+        if let lastBoxLayer = lastBoxLayer {
+            let iconLayer = setupIconLayer(expandedBoxRect: lastExpandedBoxRect)
+            parentLayer?.insertSublayer(iconLayer, above: lastBoxLayer)
+            layersToRemoveAfterAnimation.append(iconLayer)
+        }
+
+        // ANIMATIONS ENDS
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: .milliseconds(300))) {
+            completion?()
+            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: .milliseconds(1000))) {
+                layersToRemoveAfterAnimation.forEach { $0.removeFromSuperlayer() }
+            }
+        }
+        return true
+    }
+
+    private func linesToAnimate(node: TextNode, cursorPosition: inout Int) -> (startLine: Int, endLine: Int) {
+        var startLine = node.lineAt(index: cursorPosition) ?? 0
+        let endOfCurrentLine = node.endOfLineFromPosition(cursorPosition)
+        let startOfCurrentLine = node.beginningOfLineFromPosition(cursorPosition)
+        var endLine = startLine
+        if let uneditableRange = node.uneditableRangeAt(index: cursorPosition) ?? node.uneditableRangeAt(index: endOfCurrentLine) ?? node.uneditableRangeAt(index: startOfCurrentLine) {
+            startLine = node.lineAt(index: uneditableRange.lowerBound) ?? startLine
+            endLine = node.lineAt(index: uneditableRange.upperBound) ?? endLine
+            cursorPosition = uneditableRange.lowerBound
+        }
+        return (startLine, endLine)
+    }
+
+    private func setupBoxLayer(for rect: CGRect, expandForIcon: Bool)
+    -> (boxLayer: CALayer, expandedBoxRect: CGRect) {
         let boxLayer = CAShapeLayer()
-        rect.origin.x += node.offsetAt(index: startOfLine)
         var originalBoxRect = rect
         originalBoxRect.size.height = max(27, originalBoxRect.height)
         originalBoxRect.size.width += 4
         originalBoxRect = originalBoxRect.offsetBy(dx: -4, dy: -4)
-        var expandedRect = originalBoxRect
-        expandedRect.size.width += 25
         boxLayer.path = NSBezierPath(roundedRect: originalBoxRect, xRadius: 4, yRadius: 4).cgPath
         boxLayer.fillColor = BeamColor.Mercury.cgColor
-        parentLayer?.addSublayer(boxLayer)
-
-        let text = node.attributedString.attributedSubstring(from: NSRange(location: startOfLine, length: endOfLine-startOfLine))
-        let (maskTextLayer, fakeTextLayer) = setupTextFakingLayers(originalTextLayer: textLayer, rect: rect, text: text)
-
-        let iconLayer = Layer.icon(named: "editor-cmdreturn", color: BeamColor.LightStoneGray.nsColor)
-        iconLayer.frame.origin = CGPoint(x: expandedRect.maxX - 25, y: expandedRect.minY + 5)
-        parentLayer?.insertSublayer(iconLayer, above: boxLayer)
+        var expandedRect = originalBoxRect
+        if expandForIcon {
+            expandedRect.size.width += 25
+        }
 
         // ANIMATIONS
-        // Text layer animation
-        maskTextLayer.add(textFadeAnimation(), forKey: "textMaskOpacity")
-        fakeTextLayer.add(textLayerAnimation(), forKey: "textLayerAnimationGroup")
-        fakeTextLayer.add(textFadeAnimation(), forKey: "fakeTextOpacity")
+        boxLayer.add(boxLayerAnimation(originalBoxRect: originalBoxRect, expandedRect: expandedRect), forKey: "boxAnimationGroup")
 
-        // icon animation
+        return (boxLayer, expandedRect)
+    }
+
+    private func setupIconLayer(expandedBoxRect: NSRect) -> CALayer {
+        let iconLayer = Layer.icon(named: "editor-cmdreturn", color: BeamColor.LightStoneGray.nsColor)
+        iconLayer.frame.origin = CGPoint(x: expandedBoxRect.maxX - 25, y: expandedBoxRect.minY + 5)
+
+        // ANIMATIONS
         iconLayer.add(iconLayerAnimation(), forKey: "iconAnimationGroup")
         iconLayer.opacity = 0
 
-        // box animation
-        boxLayer.add(boxLayerAnimation(originalBoxRect: originalBoxRect, expandedRect: expandedRect), forKey: "boxAnimationGroup")
-
-        // Animation ends
-        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: .milliseconds(300))) {
-            completion?()
-            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: .milliseconds(1000))) {
-                boxLayer.removeFromSuperlayer()
-                iconLayer.removeFromSuperlayer()
-                fakeTextLayer.removeFromSuperlayer()
-                maskTextLayer.removeFromSuperlayer()
-            }
-        }
-        return true
+        return iconLayer
     }
 
     private func setupTextFakingLayers(originalTextLayer: CALayer, rect: NSRect, text: NSAttributedString) -> (mask: CALayer, fakeText: CALayer) {
@@ -80,12 +116,18 @@ struct TextEditCmdReturnAnimator {
 
         fakeTextLayer.contentsScale = originalTextLayer.contentsScale
         fakeTextLayer.frame = rect
+        fakeTextLayer.isWrapped = true
         fakeTextLayer.setAttributedString(text)
-        originalTextLayer.superlayer?.addSublayer(fakeTextLayer)
+        originalTextLayer.superlayer?.insertSublayer(fakeTextLayer, at: UINT32_MAX)
 
         textMaskLayer.frame = fakeTextLayer.frame.insetBy(dx: -6, dy: -6)
         textMaskLayer.backgroundColor = BeamColor.Generic.background.cgColor
         originalTextLayer.superlayer?.insertSublayer(textMaskLayer, above: originalTextLayer)
+
+        // ANIMATIONS
+        textMaskLayer.add(textFadeAnimation(), forKey: "textMaskOpacity")
+        fakeTextLayer.add(textLayerAnimation(), forKey: "textLayerAnimationGroup")
+        fakeTextLayer.add(textFadeAnimation(), forKey: "fakeTextOpacity")
 
         return (mask: textMaskLayer, fakeText: fakeTextLayer)
     }
