@@ -13,6 +13,16 @@ import Nimble
 @testable import BeamCore
 
 class URLBeamTest: XCTestCase {
+    func testYouTubeWatchToEmbedURL() throws {
+        let url = URL(string: "https://www.youtube.com/watch?v=iCtffPv9yKY")!
+        XCTAssertEqual(url.embed?.absoluteString, "https://www.youtube.com/embed/iCtffPv9yKY")
+    }
+
+    func testYouTubeWatchShortToEmbedURL() throws {
+        let url = URL(string: "https://youtu.be/iCtffPv9yKY")!
+        XCTAssertEqual(url.embed?.absoluteString, "https://www.youtube.com/embed/iCtffPv9yKY")
+    }
+
     func testYouTubeWatchURL() throws {
         let strings = [
             "http://www.youtube.com/watch?v=peFZbP64dsU",
@@ -30,23 +40,31 @@ class URLBeamTest: XCTestCase {
             "https://www.youtube.com/embed/M7lc1UVf-VE",
             "https://www.youtube.com/embed/ZnuwB35GYMY",
             "https://www.youtube.com/embed/q0mljE9K-gY",
+            "www.youtube-nocookie.com/embed/up_lNV-yoK4?rel=0",
+            "www.youtube.com/watch?v=C0DPdy98e4c",
+            "youtube.com/watch?v=C0DPdy98e4c",
+            "youtu.be/C0DPdy98e4c",
             "https://www.youtube.com/watch?v=C0DPdy98e4c",
             "https://youtube.com/watch?v=C0DPdy98e4c",
-            "https://youtu.be/q0mljE9K-gY"
+            "https://youtu.be/q0mljE9K-gY",
+            "https://youtu.be/iCtffPv9yKY",
+            "https://www.youtube.com/watch?v=iCtffPv9yKY",
+            "https://www.youtube.com/embed/iCtffPv9yKY"
         ]
 
         for string in strings {
             let url = URL(string: string)!
             XCTAssertNotNil(url.embed, "failed: \(string)")
+            if let id = url.extractYouTubeId() {
+                XCTAssertEqual(url.embed?.absoluteString, "https://www.youtube.com/embed/\(id)")
+            } else {
+                XCTFail("failed to get correct youtube embed url")
+            }
         }
     }
 
     func testYouTubeWatchURL_failure() throws {
         let strings = [
-            "www.youtube-nocookie.com/embed/up_lNV-yoK4?rel=0",
-            "www.youtube.com/watch?v=C0DPdy98e4c",
-            "youtube.com/watch?v=C0DPdy98e4c",
-            "youtu.be/C0DPdy98e4c",
             "http://youtube.com/vi/dQw4w9WgXcQ?feature=youtube_gdata_player",
             "http://youtube.com/?vi=dQw4w9WgXcQ&feature=youtube_gdata_player",
             "http://youtube.com/watch?vi=dQw4w9WgXcQ&feature=youtube_gdata_player",
@@ -84,7 +102,9 @@ class URLBeamTest: XCTestCase {
             "www.youtube-nocookie.com/embed/up_lNV-yoK4?rel=0",
             "www.youtube.com/watch?v=C0DPdy98e4c",
             "youtube.com/watch?v=C0DPdy98e4c",
-            "youtu.be/C0DPdy98e4c"
+            "youtu.be/C0DPdy98e4c",
+            "https://youtu.be/iCtffPv9yKY",
+            "https://www.youtube.com/watch?v=iCtffPv9yKY"
         ]
 
         for string in strings {
