@@ -1,5 +1,5 @@
 xctests:
-  timeout: 20 minutes
+  timeout: 40 minutes
   dependencies: []
   stage: test
   artifacts:
@@ -55,7 +55,7 @@ swift lint:
     - macos
 
 xctests UI:
-  timeout: 25 minutes
+  timeout: 45 minutes
   dependencies: []
   stage: test
   artifacts:
