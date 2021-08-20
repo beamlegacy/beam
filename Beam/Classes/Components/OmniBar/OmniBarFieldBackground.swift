@@ -33,11 +33,10 @@ struct OmniBarFieldBackground<Content: View>: View {
     }
     private var shadowRadius: CGFloat {
         if isPressingCharacter { return 8 }
-        return isEditing ? 12 : 6
+        return isEditing ? 3 : 4
     }
     private var shadowOffsetY: CGFloat {
-        if isPressingCharacter { return 2 }
-        return isEditing ? 4 : 2
+        2
     }
     private var containerAnimation: Animation? {
         guard enableAnimations else { return nil }
