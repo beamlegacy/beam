@@ -35,6 +35,7 @@ class DocumentManagerNetworkTests: QuickSpec {
             helper = DocumentManagerTestsHelper(documentManager: sut,
                                                      coreDataManager: coreDataManager)
 
+            DocumentManager.cancelAllPreviousThrottledAPICall()
             sut.clearNetworkCalls()
             BeamTestsHelper.logout()
 
