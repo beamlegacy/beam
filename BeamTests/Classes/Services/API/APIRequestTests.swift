@@ -23,7 +23,7 @@ class APIRequestTests: QuickSpec {
         let email = Configuration.testAccountEmail
         let variables = ForgotPasswordParameters(email: email)
         let bodyParamsRequest = GraphqlParameters(fileName: "forgot_password", variables: variables)
-        let backgroundQueue = DispatchQueue.global(qos: .background)
+        let backgroundQueue = DispatchQueue(label: "APIRequestTests backgroundQueue", qos: .background)
         let beamHelper = BeamTestsHelper()
 
         beforeEach {

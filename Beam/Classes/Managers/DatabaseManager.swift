@@ -37,7 +37,7 @@ class DatabaseManager {
     private let saveDatabaseQueue = OperationQueue()
     private static var networkRequests: [UUID: APIRequest] = [:]
     private static var networkTasks: [UUID: URLSessionTask] = [:]
-    private let backgroundQueue = DispatchQueue.global(qos: .background)
+    private let backgroundQueue = DispatchQueue(label: "DatabaseManager backgroundQueue", qos: .background)
     private var saveDatabasePromiseCancels: [UUID: () -> Void] = [:]
 
     static var defaultDatabase: DatabaseStruct {
@@ -370,10 +370,7 @@ class DatabaseManager {
         context.performAndWait {
             do {
                 for document in try Document.fetchAll(context, nil, nil, databaseId) {
-                    let beamNote = try BeamNote.instanciateNote(DocumentStruct(document: document),
-                                                                keepInMemory: false,
-                                                                decodeChildren: true)
-                    guard beamNote.isEntireNoteEmpty() else { return false }
+                    guard DocumentStruct(document: document).isEmpty else { return false }
                 }
             } catch { return false }
 

@@ -170,29 +170,49 @@ class DocumentManagerTestsHelper {
     }
 
     private let faker = Faker(locale: "en-US")
-    func createDocumentStruct(_ dataString: String? = nil,
-                              title titleParam: String? = nil,
+    func createDocumentStruct(title titleParam: String? = nil,
                               id: String? = nil) -> DocumentStruct {
         var uuid = UUID()
         if let id = id, let newuuid = UUID(uuidString: id) { uuid = newuuid }
-
+        let title = titleParam ?? String.randomTitle()
         return DocumentStruct(id: uuid,
                               databaseId: DatabaseManager.defaultDatabase.id,
-                              title: titleParam ?? String.randomTitle(),
+                              title: title,
                               createdAt: BeamDate.now,
                               updatedAt: BeamDate.now,
-                              data: (dataString ?? "whatever binary data").asData,
+                              data: defaultDataForDocumentStruct(uuid, title),
                               documentType: .note,
                               version: 0)
     }
 
-    func fillDocumentStruct(_ docStruct: DocumentStruct) -> DocumentStruct {
+    func defaultDataForDocumentStruct(_ id: UUID, _ title: String) -> Data {
+        // TODO: set creationDate and type properly
+        // The bullet ID is hard coded on purpose, as it wouldn't work with Vinyl if random
+        "{ \"id\" : \"\(id)\", \"textStats\" : { \"wordsCount\" : 0 }, \"visitedSearchResults\" : [ ], \"sources\" : { \"sources\" : [ ] }, \"type\" : { \"type\" : \"journal\", \"date\" : \"\" }, \"title\" : \"\(title)\", \"searchQueries\" : [ ], \"open\" : true, \"text\" : { \"ranges\" : [ { \"string\" : \"\" } ] }, \"readOnly\" : false, \"children\" : [ { \"readOnly\" : false, \"score\" : 0, \"id\" : \"0324539D-5AD0-4B8D-AE19-05C1DD97B6FC\", \"creationDate\" : 650476092.56825495, \"open\" : true, \"textStats\" : { \"wordsCount\" : 1 }, \"text\" : { \"ranges\" : [ { \"string\" : \"\" } ] } } ], \"score\" : 0, \"creationDate\" : 650476092.05954194 }".asData
+    }
+
+    func fillDocumentStructWithStaticText(_ docStruct: DocumentStruct) -> DocumentStruct {
+        // TODO: set creationDate and type properly
+        // The bullet ID is hard coded on purpose, as it wouldn't work with Vinyl if random
+        let data = "{ \"id\" : \"\(docStruct.id)\", \"textStats\" : { \"wordsCount\" : 0 }, \"visitedSearchResults\" : [ ], \"sources\" : { \"sources\" : [ ] }, \"type\" : { \"type\" : \"journal\", \"date\" : \"\" }, \"title\" : \"\(docStruct.title)\", \"searchQueries\" : [ ], \"open\" : true, \"text\" : { \"ranges\" : [ { \"string\" : \"\" } ] }, \"readOnly\" : false, \"children\" : [ { \"readOnly\" : false, \"score\" : 0, \"id\" : \"0324539D-5AD0-4B8D-AE19-05C1DD97B6FC\", \"creationDate\" : 650476092.56825495, \"open\" : true, \"textStats\" : { \"wordsCount\" : 1 }, \"text\" : { \"ranges\" : [ { \"string\" : \"whatever binary data\" } ] } } ], \"score\" : 0, \"creationDate\" : 650476092.05954194 }".asData
+        var result = docStruct.copy()
+        result.data = data
+        return result
+    }
+
+    func fillDocumentStructWithRandomText(_ docStruct: DocumentStruct) -> DocumentStruct {
         let fakeNoteGenerator = FakeNoteGenerator(count: 1, journalRatio: 0.0, futureRatio: 0.05)
         fakeNoteGenerator.generateNotes()
         var result = fakeNoteGenerator.notes.first!.documentStruct!
         result.id = docStruct.id
         result.title = docStruct.title
         result.databaseId = docStruct.databaseId
+        return result
+    }
+
+    func fillDocumentStructWithEmptyText(_ docStruct: DocumentStruct) -> DocumentStruct {
+        var result = docStruct.copy()
+        result.data = defaultDataForDocumentStruct(docStruct.id, docStruct.title)
         return result
     }
 
