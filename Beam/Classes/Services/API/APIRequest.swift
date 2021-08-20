@@ -21,7 +21,7 @@ class APIRequest {
     static var callsCount = 0
     private static var uploadedBytes: Int64 = 0
     private static var downloadedBytes: Int64 = 0
-    let backgroundQueue = DispatchQueue.global(qos: .background)
+    let backgroundQueue = DispatchQueue(label: "APIRequest backgroundQueue", qos: .background)
     private(set) var dataTask: URLSessionDataTask?
     private var cancelRequest: Bool = false
 

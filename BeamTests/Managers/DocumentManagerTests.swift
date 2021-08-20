@@ -47,6 +47,12 @@ class DocumentManagerTests: QuickSpec {
                         }
                     }
                     let count = Document.countWithPredicate(mainContext)
+                    if count > 0 {
+                        let documentStructs = try Document.fetchAll(mainContext)
+                        dump(documentStructs)
+
+                        fail("Still have documents: \(documentStructs.compactMap { $0.title })")
+                    }
                     expect(count) == 0
                 }
             }
@@ -61,6 +67,12 @@ class DocumentManagerTests: QuickSpec {
                         }.catch { _ in }
                     }
                     let count = Document.countWithPredicate(mainContext)
+                    if count > 0 {
+                        let documentStructs = try Document.fetchAll(mainContext)
+                        dump(documentStructs)
+
+                        fail("Still have documents: \(documentStructs.compactMap { $0.title })")
+                    }
                     expect(count) == 0
                 }
             }
@@ -75,6 +87,12 @@ class DocumentManagerTests: QuickSpec {
                         }
                     }
                     let count = Document.countWithPredicate(mainContext)
+                    if count > 0 {
+                        let documentStructs = try Document.fetchAll(mainContext)
+                        dump(documentStructs)
+
+                        fail("Still have documents: \(documentStructs.compactMap { $0.title })")
+                    }
                     expect(count) == 0
                 }
             }
@@ -169,13 +187,15 @@ class DocumentManagerTests: QuickSpec {
                 }
 
                 it("saves only the last call on coreData") {
-                    let docStruct = helper.createDocumentStruct()
+                    var docStruct = helper.createDocumentStruct()
 
                     var count = 0
                     let times = 15
                     var error = false
                     for _ in 0..<times {
+                        docStruct.version += 1
                         let promise: PromiseKit.Promise<Bool> = sut.save(docStruct)
+
                         promise
                             .done { _ in count += 1 }
                             .catch(policy: .allErrors) { _ in
@@ -184,6 +204,8 @@ class DocumentManagerTests: QuickSpec {
                     }
 
                     waitUntil(timeout: .seconds(10)) { done in
+                        docStruct.version += 1
+
                         let promise: PromiseKit.Promise<Bool> = sut.save(docStruct)
 
                         promise.done { success in
@@ -259,16 +281,20 @@ class DocumentManagerTests: QuickSpec {
                 }
 
                 it("saves only the last call on coreData") {
-                    let docStruct = helper.createDocumentStruct()
+                    var docStruct = helper.createDocumentStruct()
 
                     var count = 0
                     let times = 15
                     var error = false
                     for _ in 0..<times {
+                        docStruct.version += 1
                         let promise: Promises.Promise<Bool> = sut.save(docStruct)
-                        promise.then { _ in count += 1 }.catch { _ in error = true }
+                        promise.then { _ in count += 1 }.catch { _ in
+                            error = true
+                        }
                     }
 
+                    docStruct.version += 1
                     let promise: Promises.Promise<Bool> = sut.save(docStruct)
 
                     waitUntil(timeout: .seconds(10)) { done in
