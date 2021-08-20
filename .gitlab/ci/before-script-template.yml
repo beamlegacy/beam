@@ -1,5 +1,6 @@
 default:
   before_script:
+    - top -l 1 | grep -E "^CPU|^Phys|^Load|^MemRegions"
     - date
     - echo "${CI_JOB_ID}"
     - echo "Application logs will be at ${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Logs/Beam/*.log"
