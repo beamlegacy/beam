@@ -190,7 +190,7 @@ extension BeamObjectManager {
                                    category: .beamObjectNetwork)
         }
 
-        try beamRequest.fetchAll(updatedAtAfter: lastUpdatedAt) { result in
+        try beamRequest.fetchAll(updatedAtAfter: nil) { result in
             switch result {
             case .failure(let error):
                 Logger.shared.logDebug("fetchAllFromAPI: \(error.localizedDescription)",
@@ -437,7 +437,7 @@ extension BeamObjectManager {
         }
     }
 
-    // swiftlint:disable:next function_body_length
+    // swiftlint:disable:next function_body_length cyclomatic_complexity
     internal func saveToAPIFailureApiErrors<T: BeamObjectProtocol>(_ objects: [T],
                                                                    _ error: Error,
                                                                    _ completion: @escaping ((Swift.Result<[T], Error>) -> Void)) {

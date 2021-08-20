@@ -1,4 +1,5 @@
 import Foundation
+import BeamCore
 
 struct DocumentStruct: BeamObjectProtocol {
     static var beamObjectTypeName: String { "document" }
@@ -32,6 +33,21 @@ struct DocumentStruct: BeamObjectProtocol {
         "\(title) {\(id)} v\(version)"
     }
 
+    var isEmpty: Bool {
+        do {
+            let beamNote = try BeamNote.instanciateNote(self,
+                                                        keepInMemory: false,
+                                                        decodeChildren: true)
+            guard beamNote.isEntireNoteEmpty() else { return false }
+
+            return true
+        } catch {
+            Logger.shared.logError("Can't decode DocumenStruct \(titleAndId)", category: .document)
+        }
+
+        return false
+    }
+
     // Used for encoding this into BeamObject
     enum CodingKeys: String, CodingKey {
         case databaseId
@@ -63,7 +79,8 @@ struct DocumentStruct: BeamObjectProtocol {
                        previousChecksum: previousChecksum,
                        version: version,
                        isPublic: isPublic,
-                       beamObjectPreviousChecksum: beamObjectPreviousChecksum
+                       beamObjectPreviousChecksum: beamObjectPreviousChecksum,
+                       journalDate: journalDate
         )
     }
 }
@@ -106,6 +123,11 @@ extension DocumentStruct: Equatable {
             lhs.databaseId == rhs.databaseId &&
             lhs.createdAt.intValue == rhs.createdAt.intValue &&
             lhs.updatedAt.intValue == rhs.updatedAt.intValue &&
-            lhs.deletedAt?.intValue == rhs.deletedAt?.intValue
+            lhs.deletedAt?.intValue == rhs.deletedAt?.intValue &&
+            lhs.journalDate == rhs.journalDate
     }
+}
+
+extension DocumentStruct: Hashable {
+
 }

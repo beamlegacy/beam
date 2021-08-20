@@ -313,8 +313,7 @@ class Document: NSManagedObject, BeamCoreDataObject {
     }
 
     class func rawFetchOrCreateWithId(_ context: NSManagedObjectContext, _ id: UUID) -> Document {
-        let document = (try? rawFetchFirst(context, NSPredicate(format: "id = %@", id as CVarArg)))
-            ?? create(context)
+        let document = (try? fetchWithId(context, id)) ?? create(context)
         document.id = id
         return document
     }
