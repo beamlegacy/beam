@@ -15,6 +15,7 @@ struct DocumentDetail: View {
                 HStack(alignment: VerticalAlignment.center, spacing: 10.0) {
                     RefreshButton
                     SoftDeleteButton
+                    LocalDeleteButton
                     DeleteButton
                     PublicButton
                     DatabasePicker
@@ -167,8 +168,8 @@ struct DocumentDetail: View {
         }
     }
 
-    private func delete() {
-        documentManager.delete(id: document.id) { _ in }
+    private func delete(_ remoteDelete: Bool = true) {
+        documentManager.delete(id: document.id, remoteDelete) { _ in }
     }
 
     private func softDelete() {
@@ -200,6 +201,14 @@ struct DocumentDetail: View {
             delete()
         }, label: {
             Text("Delete").frame(minWidth: 100)
+        })
+    }
+
+    private var LocalDeleteButton: some View {
+        Button(action: {
+            delete(false)
+        }, label: {
+            Text("Local Delete").frame(minWidth: 100)
         })
     }
 

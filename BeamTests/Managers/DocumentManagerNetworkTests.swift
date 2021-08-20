@@ -64,7 +64,7 @@ class DocumentManagerNetworkTests: QuickSpec {
         describe(".saveAllOnAPI()") {
             var docStruct: DocumentStruct!
             beforeEach {
-                docStruct = self.createStruct("995d94e1-e0df-4eca-93e6-8778984bcd18", helper)
+                docStruct = self.createStruct("Doc 1", "995d94e1-e0df-4eca-93e6-8778984bcd18", helper)
             }
 
             afterEach {
@@ -225,7 +225,7 @@ class DocumentManagerNetworkTests: QuickSpec {
             context("with encryption") {
                 beforeEach {
                     Configuration.encryptionEnabled = true
-                    docStruct = self.createStruct("995d94e1-e0df-4eca-93e6-8778984bcd18", helper)
+                    docStruct = self.createStruct("Doc 1", "995d94e1-e0df-4eca-93e6-8778984bcd18", helper)
                     helper.saveRemotely(docStruct)
                 }
 
@@ -250,7 +250,7 @@ class DocumentManagerNetworkTests: QuickSpec {
 
             context("with encryption and unencrypted content on the API side") {
                 beforeEach {
-                    docStruct = self.createStruct("995d94e1-e0df-4eca-93e6-8778984bcd18", helper)
+                    docStruct = self.createStruct("Doc 1", "995d94e1-e0df-4eca-93e6-8778984bcd18", helper)
                     helper.saveRemotely(docStruct)
                 }
 
@@ -285,7 +285,7 @@ class DocumentManagerNetworkTests: QuickSpec {
             context("when remote has the same updatedAt") {
                 beforeEach {
                     BeamDate.freeze("2021-03-19T12:21:03Z")
-                    docStruct = self.createStruct("995d94e1-e0df-4eca-93e6-8778984bcd18", helper)
+                    docStruct = self.createStruct("Doc 1", "995d94e1-e0df-4eca-93e6-8778984bcd18", helper)
                     helper.saveRemotely(docStruct)
                 }
 
@@ -389,7 +389,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                     var callsOrder: [String] = []
                     var callsIds: [UUID] = []
 
-                    docStruct = helper.fillDocumentStruct(docStruct)
+                    docStruct = helper.fillDocumentStructWithRandomText(docStruct)
                     docStruct = helper.saveLocally(docStruct)
 
                     cancellable = sut.onDocumentChange(docStruct) { updateDocumentStructCallback in
@@ -434,7 +434,7 @@ class DocumentManagerNetworkTests: QuickSpec {
 
             context("when remote document doesn't exist") {
                 beforeEach {
-                    docStruct = self.createStruct("995d94e1-e0df-4eca-93e6-8778984bcd18", helper)
+                    docStruct = self.createStruct("Doc 1", "995d94e1-e0df-4eca-93e6-8778984bcd18", helper)
                 }
 
                 it("flags the local document as deleted") {
@@ -657,7 +657,7 @@ class DocumentManagerNetworkTests: QuickSpec {
             context("when remote has the same updatedAt") {
                 beforeEach {
                     BeamDate.freeze("2021-03-19T12:21:03Z")
-                    docStruct = self.createStruct("995d94e1-e0df-4eca-93e6-8778984bcd18", helper)
+                    docStruct = self.createStruct("Doc 1", "995d94e1-e0df-4eca-93e6-8778984bcd18", helper)
                     helper.saveRemotely(docStruct)
                     networkCalls = APIRequest.callsCount
                 }
@@ -967,7 +967,7 @@ class DocumentManagerNetworkTests: QuickSpec {
 
             context("when remote document doesn't exist") {
                 beforeEach {
-                    docStruct = self.createStruct("995d94e1-e0df-4eca-93e6-8778984bcd18", helper)
+                    docStruct = self.createStruct("Doc 1", "995d94e1-e0df-4eca-93e6-8778984bcd18", helper)
                     networkCalls = APIRequest.callsCount
                 }
 
@@ -1106,7 +1106,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                                 var cancellable: AnyCancellable!
                                 var callsOrder: [String] = []
 
-                                docStruct = helper.fillDocumentStruct(docStruct)
+                                docStruct = helper.fillDocumentStructWithRandomText(docStruct)
                                 docStruct = helper.saveLocally(docStruct)
 
                                 cancellable = sut.onDocumentChange(docStruct) { updateDocumentStructCallback in
@@ -1264,7 +1264,7 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                                 // DocumentManager returns unencrypted data
                                 expect(savedDoc?.id) == docStruct.uuidString
-                                expect(savedDoc?.data?.asData) == docStruct.data
+                                expect(savedDoc?.data?.hasPrefix("{ \"id\" : ")) == true
                             }
 
                             context("with public notes") {
@@ -1285,7 +1285,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                                     _ = try? DocumentRequest().fetchDocument(docStruct.uuidString) { result in
                                         let documentAPIType = try? result.get()
                                         expect(documentAPIType?.encryptedData).to(beNil())
-                                        expect(documentAPIType?.data) == "whatever binary data"
+                                        expect(documentAPIType?.data?.hasPrefix("{ \"id\" : \"995D94E1-E0DF-4ECA-93E6-8778984BCD18")) == true
                                         expect(documentAPIType?.isPublic) == true
 
                                         semaphore.signal()
@@ -1351,9 +1351,10 @@ class DocumentManagerNetworkTests: QuickSpec {
                             for index in 0..<times {
                                 newTitle = "\(title) - \(index)"
                                 docStruct.title = newTitle
+                                docStruct.version += 1
                                 let promise: PromiseKit.Promise<Bool> = sut.saveOnApi(docStruct)
                                 promise.done {
-                                    fail("Should not be called: \($0)")
+                                    fail("Should not be called: \($0) for \(docStruct.titleAndId)")
                                 }.catch { error in
                                     expect(error).to(matchError(DocumentManagerError.operationCancelled))
                                 }
@@ -1362,12 +1363,13 @@ class DocumentManagerNetworkTests: QuickSpec {
                             newTitle = "\(title) - last"
                             waitUntil(timeout: .seconds(10)) { done in
                                 docStruct.title = newTitle
+                                docStruct.version += 1
                                 let promise: PromiseKit.Promise<Bool> = sut.saveOnApi(docStruct)
                                 promise.done { success in
                                     expect(success) == true
                                     done()
                                 }.catch {
-                                    fail("Should not be called: \($0) with title \(newTitle)")
+                                    fail("Should not be called: \($0) for \(docStruct.titleAndId)")
                                     done()
                                 }
                             }
@@ -1408,7 +1410,7 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                                 // DocumentManager returns unencrypted data
                                 expect(savedDoc?.id) == docStruct.uuidString
-                                expect(savedDoc?.data?.asData) == docStruct.data
+                                expect(savedDoc?.data?.hasPrefix("{ \"id\" : ")) == true
                             }
 
                             context("with public notes") {
@@ -1430,7 +1432,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                                         let documentAPIType = try? result.get()
 
                                         expect(documentAPIType?.encryptedData).to(beNil())
-                                        expect(documentAPIType?.data) == "whatever binary data"
+                                        expect(documentAPIType?.data?.hasPrefix("{ \"id\" : \"995D94E1-E0DF-4ECA-93E6-8778984BCD18")) == true
                                         expect(documentAPIType?.isPublic) == true
 
                                         semaphore.signal()
@@ -1496,9 +1498,10 @@ class DocumentManagerNetworkTests: QuickSpec {
                             for index in 0..<times {
                                 newTitle = "\(title) - \(index)"
                                 docStruct.title = newTitle
+                                docStruct.version += 1
                                 let promise: Promises.Promise<Bool> = sut.saveOnApi(docStruct)
                                 promise.then {
-                                    fail("Should not be called: \($0)")
+                                    fail("Should not be called: \($0) for \(docStruct.titleAndId)")
                                 }.catch { error in
                                     expect(error).to(matchError(DocumentManagerError.operationCancelled))
                                 }
@@ -1507,11 +1510,12 @@ class DocumentManagerNetworkTests: QuickSpec {
                             newTitle = "\(title) - last"
                             waitUntil(timeout: .seconds(10)) { done in
                                 docStruct.title = newTitle
+                                docStruct.version += 1
                                 let promise: Promises.Promise<Bool> = sut.saveOnApi(docStruct)
                                 promise.then { success in
                                     expect(success) == true
                                     done()
-                                }.catch { fail("Should not be called: \($0)"); done() }
+                                }.catch { fail("Should not be called: \($0) for \(docStruct.titleAndId)"); done() }
                             }
 
                             expect(APIRequest.callsCount - previousNetworkCall) == 1
@@ -1550,7 +1554,7 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                                 // DocumentManager returns unencrypted data
                                 expect(savedDoc?.id) == docStruct.uuidString
-                                expect(savedDoc?.data?.asData) == docStruct.data
+                                expect(savedDoc?.data?.hasPrefix("{ \"id\" : ")) == true
                             }
 
                             context("with public notes") {
@@ -1572,7 +1576,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                                         let documentAPIType = try? result.get()
 
                                         expect(documentAPIType?.encryptedData).to(beNil())
-                                        expect(documentAPIType?.data) == "whatever binary data"
+                                        expect(documentAPIType?.data?.hasPrefix("{ \"id\" : \"995D94E1-E0DF-4ECA-93E6-8778984BCD18")) == true
                                         expect(documentAPIType?.isPublic) == true
 
                                         semaphore.signal()
@@ -2028,7 +2032,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                                 do {
                                     _ = try result.get()
                                 } catch {
-                                    print("oops")
+                                    fail(error.localizedDescription)
                                 }
                                 done()
                             }
@@ -2102,7 +2106,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                             docStruct2 = helper.createDocumentStruct(title: "Doc 1", id: "995d94e1-e0df-4eca-93e6-8778984bcd39")
                         }
 
-                        it("saves them locally, change the title and save it remotely") {
+                        it("saves the first locally, delete the 2nd, and save it remotely") {
                             let networkCalls = APIRequest.callsCount
 
                             try sut.receivedObjects([docStruct, docStruct2])
@@ -2113,14 +2117,12 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                             expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
 
-                            expect(1) == Document.countWithPredicate(CoreDataManager.shared.mainContext,
-                                                                     NSPredicate(format: "id = %@", docStruct.id as CVarArg))
-                            expect(1) == Document.countWithPredicate(CoreDataManager.shared.mainContext,
-                                                                     NSPredicate(format: "id = %@", docStruct2.id as CVarArg))
+                            expect(Document.countWithPredicate(CoreDataManager.shared.mainContext,
+                                                               NSPredicate(format: "id = %@", docStruct.id as CVarArg))) == 1
+                            expect(Document.countWithPredicate(CoreDataManager.shared.mainContext,
+                                                               NSPredicate(format: "id = %@", docStruct2.id as CVarArg))) == 0
 
                             expect(try? Document.fetchWithId(CoreDataManager.shared.mainContext, docStruct.id)?.title) == docStruct.title
-
-                            docStruct2.title = "\(docStruct2.title) (2)"
 
                             expect(try? Document.fetchWithId(CoreDataManager.shared.mainContext, docStruct2.id)?.title) == docStruct2.title
 
@@ -2128,7 +2130,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                             expect(remoteObject1).to(beNil())
 
                             let remoteObject2: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct2.beamObjectId)
-                            expect(remoteObject2) == docStruct2
+                            expect(remoteObject2?.deletedAt).toNot(beNil())
                         }
                     }
                 }
@@ -2137,6 +2139,9 @@ class DocumentManagerNetworkTests: QuickSpec {
                     beforeEach {
                         docStruct = helper.createDocumentStruct(title: "Doc 1", id: "995d94e1-e0df-4eca-93e6-8778984bcd29")
                         docStruct2 = helper.createDocumentStruct(title: "Doc 2", id: "995d94e1-e0df-4eca-93e6-8778984bcd39")
+
+                        docStruct = helper.fillDocumentStructWithStaticText(docStruct)
+                        docStruct2 = helper.fillDocumentStructWithStaticText(docStruct2)
 
                         _ = helper.saveLocally(docStruct)
                         _ = helper.saveLocally(docStruct2)
@@ -2181,10 +2186,10 @@ class DocumentManagerNetworkTests: QuickSpec {
                             let expectedNetworkCalls = ["update_beam_objects"]
                             expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
 
-                            expect(1) == Document.countWithPredicate(CoreDataManager.shared.mainContext,
-                                                                     NSPredicate(format: "id = %@", docStruct.id as CVarArg))
-                            expect(1) == Document.countWithPredicate(CoreDataManager.shared.mainContext,
-                                                                     NSPredicate(format: "id = %@", docStruct2.id as CVarArg))
+                            expect(Document.countWithPredicate(CoreDataManager.shared.mainContext,
+                                                               NSPredicate(format: "id = %@", docStruct.id as CVarArg))) == 1
+                            expect(Document.countWithPredicate(CoreDataManager.shared.mainContext,
+                                                               NSPredicate(format: "id = %@", docStruct2.id as CVarArg))) == 1
 
                             docStruct2.title = "\(newTitle1) (2)"
 
@@ -2198,17 +2203,85 @@ class DocumentManagerNetworkTests: QuickSpec {
                             expect(remoteObject2) == docStruct2
                         }
                     }
-                }
 
+                    context("with a 3rd non-empty document not locally saved") {
+                        var docStruct3: DocumentStruct!
+                        beforeEach {
+                            docStruct3 = helper.createDocumentStruct(title: docStruct.title, id: "995d94e1-e0df-4eca-93e6-8778984bcd69")
+                            docStruct3 = helper.fillDocumentStructWithStaticText(docStruct3)
+
+                            docStruct = helper.fillDocumentStructWithEmptyText(docStruct)
+                            docStruct.version += 1
+                            _ = helper.saveLocally(docStruct)
+                        }
+
+                        afterEach {
+                            helper.deleteDocumentStruct(docStruct3)
+                        }
+
+                        it("saves to local objects, and delete the local empty document") {
+                            let networkCalls = APIRequest.callsCount
+                            try sut.receivedObjects([docStruct3])
+                            expect(APIRequest.callsCount - networkCalls) == 0
+
+                            expect(Document.countWithPredicate(CoreDataManager.shared.mainContext,
+                                                               NSPredicate(format: "id = %@", docStruct.id as CVarArg))) == 0
+                            expect(Document.countWithPredicate(CoreDataManager.shared.mainContext,
+                                                               NSPredicate(format: "id = %@", docStruct3.id as CVarArg))) == 1
+
+                            expect(try? Document.fetchWithId(CoreDataManager.shared.mainContext, docStruct.id)).to(beNil())
+                            expect(try? Document.fetchWithId(CoreDataManager.shared.mainContext, docStruct3.id)?.title) == docStruct.title
+
+                            let remoteObject1: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct.beamObjectId)
+                            expect(remoteObject1).to(beNil())
+
+                            let remoteObject3: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct3.beamObjectId)
+                            expect(remoteObject3).to(beNil())
+                        }
+                    }
+
+                    context("with a 3rd empty document not locally saved") {
+                        var docStruct3: DocumentStruct!
+                        beforeEach {
+                            docStruct3 = helper.createDocumentStruct(title: docStruct.title, id: "995d94e1-e0df-4eca-93e6-8778984bcd69")
+                        }
+
+                        afterEach {
+                            helper.deleteDocumentStruct(docStruct3)
+                        }
+
+                        it("doesn't save it locally, and flag it deleted remotely") {
+                            expect(docStruct3.isEmpty) == true
+                            let networkCalls = APIRequest.callsCount
+                            try sut.receivedObjects([docStruct3])
+                            expect(APIRequest.callsCount - networkCalls) == 1
+
+                            let expectedNetworkCalls = ["update_beam_objects"]
+                            expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
+
+                            expect(Document.countWithPredicate(CoreDataManager.shared.mainContext,
+                                                               NSPredicate(format: "id = %@", docStruct.id as CVarArg))) == 1
+                            expect(Document.countWithPredicate(CoreDataManager.shared.mainContext,
+                                                               NSPredicate(format: "id = %@", docStruct3.id as CVarArg))) == 0
+
+                            let localDocument = try? Document.fetchWithId(CoreDataManager.shared.mainContext, docStruct.id)
+                            expect(localDocument?.title) == docStruct.title
+                            expect(localDocument?.deleted_at).to(beNil())
+
+                            let remoteObject1: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct.beamObjectId)
+                            expect(remoteObject1).to(beNil())
+
+                            let remoteObject3: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct3.beamObjectId)
+                            expect(remoteObject3?.deletedAt).toNot(beNil())
+                        }
+                    }
+                }
             }
         }
     }
 
-    private func createStruct(_ id: String?, _ helper: DocumentManagerTestsHelper) -> DocumentStruct {
-        var docStruct = helper.createDocumentStruct()
-        if let id = id, let existingDocStructID = UUID(uuidString: id) {
-            docStruct.id = existingDocStructID
-        }
+    private func createStruct(_ title: String?, _ id: String?, _ helper: DocumentManagerTestsHelper) -> DocumentStruct {
+        var docStruct = helper.createDocumentStruct(title: title, id: id)
         docStruct = helper.saveLocally(docStruct)
 
         return docStruct

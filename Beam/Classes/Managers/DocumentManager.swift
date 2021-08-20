@@ -35,7 +35,7 @@ public class DocumentManager: NSObject {
     var coreDataManager: CoreDataManager
     let mainContext: NSManagedObjectContext
     let backgroundContext: NSManagedObjectContext
-    private let backgroundQueue = DispatchQueue.global(qos: .background)
+    private let backgroundQueue = DispatchQueue(label: "DocumentManager backgroundQueue", qos: .background)
 
     private let saveDocumentQueue = OperationQueue()
     private var saveOperations: [UUID: BlockOperation] = [:]
@@ -666,8 +666,7 @@ public class DocumentManager: NSObject {
         if !documents.isEmpty {
             let errString = "Journal Date \(journal_date) for \(document.titleAndId) already used in \(documents.count) other documents"
 
-            Logger.shared.logWarning("\(document.titleAndId) DB: \(document.database_id) is already used",
-                                     category: .document)
+            Logger.shared.logWarning(errString, category: .document)
 
             let userInfo: [String: Any] = [NSLocalizedFailureReasonErrorKey: errString,
                                            NSValidationObjectErrorKey: self,
@@ -690,8 +689,7 @@ public class DocumentManager: NSObject {
         if !documents.isEmpty {
             let errString = "Title \(document.titleAndId) is already used in \(documents.count) other documents"
 
-            Logger.shared.logWarning("\(document.titleAndId) DB: \(document.database_id) is already used",
-                                     category: .document)
+            Logger.shared.logWarning(errString, category: .document)
 
             let userInfo: [String: Any] = [NSLocalizedFailureReasonErrorKey: errString,
                                            NSValidationObjectErrorKey: self,
@@ -1495,13 +1493,8 @@ extension DocumentManager {
     /// If the note we tried saving already has content, we soft delete it to avoid losing content.
     private func deleteOrSoftDelete(_ localDocumentStruct: DocumentStruct,
                                     _ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
-
-        let beamNote = try? BeamNote.instanciateNote(localDocumentStruct,
-                                                     keepInMemory: false,
-                                                     decodeChildren: true)
-
         // This is a new document, we can delete it
-        guard !(beamNote?.isEntireNoteEmpty() ?? true) else {
+        guard !localDocumentStruct.isEmpty else {
             self.delete(id: localDocumentStruct.id) { result in
                 Logger.shared.logDebug("Deleted \(localDocumentStruct.titleAndId)",
                                        category: .document)
@@ -1629,7 +1622,7 @@ extension DocumentManager {
         }
     }
 
-    func delete(id: UUID, completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
+    func delete(id: UUID, _ networkDelete: Bool = true, completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
         Self.cancelPreviousThrottledAPICall(id)
 
         coreDataManager.persistentContainer.performBackgroundTask { context in
@@ -1661,7 +1654,7 @@ extension DocumentManager {
             self.notificationDocumentDelete(documentStruct)
 
             // If not authenticated
-            guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled, networkDelete else {
                 completion(.success(false))
                 return
             }
@@ -1901,20 +1894,20 @@ extension DocumentManager {
         let documentRequest = DocumentRequest()
 
         return documentRequest.fetchDocumentUpdatedAt(documentStruct.uuidString)
-            .then(on: self.backgroundQueue) { documentType -> Promises.Promise<(DocumentAPIType, Bool)> in
+            .then(on: backgroundQueue) { documentType -> Promises.Promise<(DocumentAPIType, Bool)> in
                 if let updatedAt = documentType.updatedAt, updatedAt > documentStruct.updatedAt {
                     return DocumentRequest().fetchDocument(documentStruct.uuidString).then { ($0, true) }
                 }
 
                 return Promise((documentType, false))
-            }.then(on: self.backgroundQueue) { documentType, updated in
+            }.then(on: backgroundQueue) { documentType, updated in
                 if updated { try self.saveRefresh(documentStruct, documentType) }
-            }.recover(on: self.backgroundQueue) { error throws -> Promises.Promise<(DocumentAPIType, Bool)> in
+            }.recover(on: backgroundQueue) { error throws -> Promises.Promise<(DocumentAPIType, Bool)> in
                 if case APIRequestError.notFound = error {
                     try? self.deleteLocalDocumentAndWait(documentStruct.id)
                 }
                 throw error
-            }.then(on: self.backgroundQueue) { _, updated in
+            }.then(on: backgroundQueue) { _, updated in
                 return updated
             }
     }
@@ -1933,7 +1926,7 @@ extension DocumentManager {
     func refreshAllFromAPI(_ delete: Bool = true) -> Promises.Promise<Bool> {
         let documentRequest = DocumentRequest()
         return documentRequest.fetchAll(Persistence.Sync.Documents.updated_at)
-                .then(on: self.backgroundQueue) { documents -> Bool in
+                .then(on: backgroundQueue) { documents -> Bool in
                     if let mostRecentUpdatedAt = documents.compactMap({ $0.updatedAt }).sorted().last {
                         Logger.shared.logDebug("new updatedAt: \(mostRecentUpdatedAt). \(documents.count) documents fetched.",
                                                category: .document)
@@ -1958,7 +1951,7 @@ extension DocumentManager {
         saveDocumentPromiseCancels[documentStruct.id] = cancel
 
         let result = promise
-            .then(on: self.backgroundQueue) { context -> Promises.Promise<Bool>  in
+            .then(on: backgroundQueue) { context -> Promises.Promise<Bool>  in
                 Logger.shared.logDebug("Saving \(documentStruct.titleAndId)", category: .document)
                 Logger.shared.logDebug(documentStruct.data.asString ?? "-", category: .documentDebug)
 
@@ -1978,14 +1971,15 @@ extension DocumentManager {
                     try Self.saveContext(context: context)
 
                     // Ping others about the update
-                    self.notificationDocumentUpdate(DocumentStruct(document: document))
+                    let savedDocumentStruct = DocumentStruct(document: document)
+                    self.notificationDocumentUpdate(savedDocumentStruct)
 
                     guard AuthenticationManager.shared.isAuthenticated,
                           Configuration.networkEnabled else {
                         return Promise(true)
                     }
 
-                    self.saveAndThrottle(documentStruct)
+                    self.saveAndThrottle(savedDocumentStruct)
 
                     return Promise(true)
                 }
@@ -2294,9 +2288,11 @@ extension DocumentManager {
     func save(_ documentStruct: DocumentStruct) -> PromiseKit.Promise<Bool> {
         let promise: PromiseKit.Guarantee<NSManagedObjectContext> = coreDataManager.background()
         var cancelme = false
+        let cancel = { cancelme = true }
 
         // Cancel previous promise
         saveDocumentPromiseCancels[documentStruct.id]?()
+        saveDocumentPromiseCancels[documentStruct.id] = cancel
 
         let result = promise
             .then(on: self.backgroundQueue) { context -> PromiseKit.Promise<Bool> in
@@ -2319,8 +2315,8 @@ extension DocumentManager {
                     try Self.saveContext(context: context)
 
                     // Ping others about the update
-                    let documentStruct = DocumentStruct(document: document)
-                    self.notificationDocumentUpdate(documentStruct)
+                    let savedDocumentStruct = DocumentStruct(document: document)
+                    self.notificationDocumentUpdate(savedDocumentStruct)
 
                     guard AuthenticationManager.shared.isAuthenticated,
                           Configuration.networkEnabled else {
@@ -2335,17 +2331,13 @@ extension DocumentManager {
                      promise version doesn't give any way to receive callbacks for network calls.
                      */
 
-                    self.saveAndThrottle(documentStruct)
+                    self.saveAndThrottle(savedDocumentStruct)
 
                     return .value(true)
                 }
             }.ensure {
                 self.saveDocumentPromiseCancels[documentStruct.id] = nil
             }
-
-        let cancel = { cancelme = true }
-
-        saveDocumentPromiseCancels[documentStruct.id] = cancel
 
         return result
     }
@@ -2596,7 +2588,7 @@ extension DocumentManager: BeamObjectManagerDelegate {
         Logger.shared.logDebug("Received \(documents.count) documents: \(documents.map { $0.beamObjectId.uuidString.lowercased() }.joined(separator: ", "))",
                                category: .documentNetwork)
 
-        var changedDocuments: [DocumentStruct] = []
+        var changedDocuments: Set<DocumentStruct> = Set()
         let localTimer = BeamDate.now
 
         let context = coreDataManager.backgroundContext
@@ -2650,9 +2642,48 @@ extension DocumentManager: BeamObjectManagerDelegate {
                         }
 
                         switch (error as NSError).code {
-                        case 1001:
-                            document.title = "\(originalTitle) (\(index))"
-                            Logger.shared.logWarning("Title is in conflict", category: .documentNetwork)
+                        case 1001, 1004:
+                            let conflictedDocuments = (error as NSError).userInfo["documents"] as? [DocumentStruct]
+
+                            // When receiving empty documents from the API and conflict with existing documents,
+                            // we delete them if they're empty. That happens with today's journal for example
+
+                            // Remote document is empty, we delete it
+                            if document.isEmpty {
+                                document.deletedAt = BeamDate.now
+                                localDocument.deleted_at = document.deletedAt
+                                Logger.shared.logWarning("Title or JournalDate is in conflict but remote document is empty, deleting",
+                                                         category: .documentNetwork)
+
+                                changedDocuments.insert(document)
+                            // Local document is empty, we either delete it if never saved, or soft delete it
+                            } else if let conflictedDocuments = conflictedDocuments,
+                                      !conflictedDocuments.compactMap({ $0.isEmpty }).contains(false) {
+                                // local conflicted documents are empty, deleting them
+                                for localConflictedDocument in conflictedDocuments {
+                                    guard let localConflictedDocumentCD = try? Document.fetchWithId(context, localConflictedDocument.id) else { continue }
+
+                                    // We already saved this document, we must propagate its deletion
+                                    if localConflictedDocumentCD.beam_api_sent_at != nil {
+                                        localConflictedDocumentCD.deleted_at = BeamDate.now
+                                        changedDocuments.insert(DocumentStruct(document: localConflictedDocumentCD))
+                                        Logger.shared.logWarning("Title or JournalDate is in conflict, but local documents are empty, soft deleting",
+                                                                 category: .documentNetwork)
+                                    } else {
+                                        context.delete(localConflictedDocumentCD)
+                                        Logger.shared.logWarning("Title or JournalDate is in conflict, but local documents are empty, deleting",
+                                                                 category: .documentNetwork)
+                                    }
+                                }
+
+                            } else {
+                                document.title = "\(originalTitle) (\(index))"
+                                Logger.shared.logWarning("Title or JournalDate is in conflict, neither local or remote are empty.",
+                                                         category: .documentNetwork)
+                                changedDocuments.insert(document)
+                            }
+
+                            index += 1
                         case 1002:
                             Logger.shared.logWarning("Version \(localDocument.version) is higher than \(document.version)",
                                                      category: .documentNetwork)
@@ -2662,13 +2693,7 @@ extension DocumentManager: BeamObjectManagerDelegate {
 
                         default: break
                         }
-
-                        index += 1
                     }
-                }
-
-                if index > 2 {
-                    changedDocuments.append(document)
                 }
             }
 
@@ -2678,7 +2703,7 @@ extension DocumentManager: BeamObjectManagerDelegate {
         }
 
         if !changedDocuments.isEmpty {
-            try saveOnBeamObjectsAPI(changedDocuments)
+            try saveOnBeamObjectsAPI(Array(changedDocuments))
         }
 
         Logger.shared.logDebug("Received \(documents.count) documents: done. \(changedDocuments.count) remodified.",
