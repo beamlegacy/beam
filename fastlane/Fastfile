@@ -179,7 +179,7 @@ platform :mac do
     git_branch
 
     UI.message "Branch is #{Actions.git_branch}"
-    if Actions.git_branch != "master"
+    unless ["HEAD", "master", "develop", "release"].include?(Actions.git_branch)
       add_badge(dark: true,
                 grayscale: true,
                 glob: "/Beam/Assets/Assets.xcassets/AppIcon.appiconset/*.png")
@@ -239,7 +239,7 @@ platform :mac do
                 build_configurations: ["Release"])
 
     UI.message "Branch is #{Actions.git_branch}"
-    if Actions.git_branch != "master"
+    unless ["HEAD", "master", "develop", "release"].include?(Actions.git_branch)
       add_badge(dark: true,
                 grayscale: true,
                 glob: "/Beam/Assets/Assets.xcassets/AppIcon.appiconset/*.png")
