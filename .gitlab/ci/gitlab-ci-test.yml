@@ -111,6 +111,8 @@ js_test:
   interruptible: true
 
 coverage_check:
+  before_script:
+    - date
   dependencies: []
   stage: build
   needs: [xctests, xctests UI]
