@@ -104,7 +104,9 @@ struct SmallUpdateIndicatorView: View {
                 }
             }
             window?.close()
-        }, history: versionChecker.missedReleases, checker: self.versionChecker, style: beamStyle).cornerRadius(6)
+        }, beforeInstallAction: {
+            window?.close()
+        },history: versionChecker.missedReleases, checker: self.versionChecker, style: beamStyle).cornerRadius(6)
 
         var origin = origin
         origin.x += 7
