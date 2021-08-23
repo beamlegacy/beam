@@ -32,7 +32,7 @@ struct NoteHeaderView: View {
                 BeamTextField(text: $model.titleText,
                               isEditing: $model.isEditingTitle,
                               placeholder: "Card's title",
-                              font: BeamFont.medium(size: 26).nsFont,
+                              font: BeamFont.medium(size: PreferencesManager.editorCardTitleFontSize).nsFont,
                               textColor: textColor.nsColor,
                               placeholderColor: BeamColor.Generic.placeholder.nsColor,
                               selectedRange: model.titleSelectedRange,
@@ -49,7 +49,7 @@ struct NoteHeaderView: View {
             } else {
                 Text(model.titleText)
                     .lineLimit(2)
-                    .font(BeamFont.medium(size: 26).swiftUI)
+                    .font(BeamFont.medium(size: PreferencesManager.editorCardTitleFontSize).swiftUI)
                     .foregroundColor(textColor.swiftUI)
             }
         }

@@ -418,9 +418,9 @@ public class TextNode: ElementNode {
                 if self as? TextRoot == nil {
                     switch elementKind {
                     case .heading(1):
-                        r.size.height += 8
+                        r.size.height += PreferencesManager.editorHeaderOneSize
                     case .heading(2):
-                        r.size.height += 4
+                        r.size.height += PreferencesManager.editorHeaderTwoSize
                     default:
                         r.size.height -= 5
                     }

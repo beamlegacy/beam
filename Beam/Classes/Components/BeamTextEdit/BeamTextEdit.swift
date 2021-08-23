@@ -33,10 +33,6 @@ public extension CALayer {
 
 // swiftlint:disable:next type_body_length
 @objc public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
-
-    static let textWidthMin: CGFloat = 500
-    static let textWidthMax: CGFloat = 700
-
     var data: BeamData?
     var cardTopSpace: CGFloat {
         journalMode ? PreferencesManager.editorJournalTopPadding : PreferencesManager.editorCardTopPadding
@@ -315,7 +311,7 @@ public extension CALayer {
 
     static func textNodeWidth(for containerSize: CGSize) -> CGFloat {
         let ratio = Self.bigThreshold / min(max(containerSize.width, Self.smallTreshold), Self.bigThreshold)
-        return max(Self.textWidthMax / ratio, Self.textWidthMin)
+        return max(PreferencesManager.editorMaxWidth / ratio, PreferencesManager.editorMinWidth)
     }
 
     // This is the root node of what we are editing:
@@ -354,8 +350,8 @@ public extension CALayer {
         cardHeaderLayer.isHidden = !showTitle
 
         cardTitleLayer.foregroundColor = BeamColor.Generic.text.cgColor
-        cardTitleLayer.font = BeamFont.medium(size: 26).nsFont
-        cardTitleLayer.fontSize = 26 // TODO: Change later (isBig ? 30 : 26)
+        cardTitleLayer.font = BeamFont.medium(size: PreferencesManager.editorCardTitleFontSize).nsFont
+        cardTitleLayer.fontSize = PreferencesManager.editorCardTitleFontSize // TODO: Change later (isBig ? 30 : 26)
         cardTitleLayer.string = cardNote.title
 
         if journalMode {
