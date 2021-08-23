@@ -125,7 +125,5 @@ coverage_check:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   script:
     - scripts/code_coverage.sh
-  tags:
-    - macos
   interruptible: true
   allow_failure: true
