@@ -13,7 +13,7 @@ build:macos:
   script:
     - time bundle exec fastlane beta
   tags:
-    - macos
+    - macos-mono
   interruptible: true
   retry:
     max: 2

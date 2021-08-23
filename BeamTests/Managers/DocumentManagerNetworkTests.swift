@@ -225,6 +225,7 @@ class DocumentManagerNetworkTests: QuickSpec {
 
             context("with encryption") {
                 beforeEach {
+                    BeamDate.freeze("2021-03-19T12:21:03Z")
                     Configuration.encryptionEnabled = true
                     docStruct = self.createStruct("Doc 1", "995d94e1-e0df-4eca-93e6-8778984bcd18", helper)
                     helper.saveRemotely(docStruct)
@@ -233,6 +234,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                 afterEach {
                     Configuration.encryptionEnabled = false
                     helper.deleteDocumentStruct(docStruct)
+                    BeamDate.reset()
                 }
 
                 it("refreshes the local document") {
