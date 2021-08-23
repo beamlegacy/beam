@@ -228,8 +228,6 @@ public class ElementNode: Widget {
 
     // MARK: - Setup UI
 
-//    let nodeRootSpacing: CGFloat = 8
-//    let nodeChildrenSpacing: CGFloat = 2
     var idealSpacingSize: CGFloat {
         var spacingHeight: CGFloat = .zero
         var spacing: CGFloat = .zero
@@ -241,7 +239,7 @@ public class ElementNode: Widget {
         if self.open {
             let elementNodeChild = self.children.filter({ $0 as? ElementNode != nil})
             if elementNodeChild.count > 0 {
-                spacingHeight += spacing * CGFloat(elementNodeChild.count - 1)
+                spacingHeight += spacing * CGFloat(elementNodeChild.count)
                 for c in elementNodeChild {
                     if let nodeChild = c as? ElementNode {
                         spacingHeight += nodeChild.idealSpacingSize
