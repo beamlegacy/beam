@@ -37,6 +37,9 @@ include:
   - template: Code-Quality.gitlab-ci.yml
 
 code_quality:
+  before_script:
+    - date
+    - echo "${CI_JOB_ID}"
   rules:
     - if: '$CODE_QUALITY_DISABLED'
       when: never
