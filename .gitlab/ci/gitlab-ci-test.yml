@@ -101,7 +101,8 @@ js_test:
     - develop
     - merge_requests
   script:
-    - make js_test
+    - yarn --cwd ./Beam/Classes/Components/PointAndShoot/Web run build
+    - yarn --cwd ./Beam/Classes/Components/PointAndShoot/Web run test-ci
   coverage: '/All files\s+\|\s+([\d.]+)/'
   artifacts:
     reports:
