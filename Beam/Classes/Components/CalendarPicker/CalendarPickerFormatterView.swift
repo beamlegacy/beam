@@ -15,7 +15,7 @@ private struct CalendarPickerFormatterContainerView: View {
 
     class ViewModel: BaseFormatterViewViewModel, ObservableObject { }
 
-    static let idealSize = CGSize(width: 240, height: 220)
+    static let idealSize = CGSize(width: 240, height: 260)
 
     @ObservedObject var viewModel: ViewModel = ViewModel()
     @Binding var selectedDate: Date
