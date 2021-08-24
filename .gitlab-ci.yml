@@ -10,8 +10,7 @@ variables:
   LC_ALL: "en_US.UTF-8"
   LANG: "en_US.UTF-8"
   GIT_STRATEGY: fetch
-  # We do this manually instead, for private repos
-  # GIT_SUBMODULE_STRATEGY: recursive
+  GIT_SUBMODULE_STRATEGY: recursive
   GIT_BRANCH: "$CI_COMMIT_REF_NAME"
   GIT_DEPTH: 10
   # Need to enable custom_build_dir feature
