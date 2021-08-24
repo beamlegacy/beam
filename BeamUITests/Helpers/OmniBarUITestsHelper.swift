@@ -22,8 +22,10 @@ class OmniBarUITestsHelper : BeamUITestsHelper {
         super.init(app)
     }
 
-    func cleanupDB() {
-        self.tapCommand(.logout)
+    func cleanupDB(logout: Bool) {
+        if logout {
+            self.tapCommand(.logout)
+        }
         self.tapCommand(.destroyDB)
     }
 
