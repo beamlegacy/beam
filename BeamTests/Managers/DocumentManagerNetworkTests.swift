@@ -384,7 +384,55 @@ class DocumentManagerNetworkTests: QuickSpec {
                     expect { documents?.compactMap { $0.id } } == [remoteDocStruct.id]
                 }
 
-                it("soft deletes the local document, fetch the remote document and saves it") {
+                // TODO: Flaky test https://gitlab.com/beamgroup/beam/-/jobs/1529358097
+                /*
+                 [12:28:02]: ▸ BeamTests.DocumentManagerNetworkTests
+                 2714[12:28:02]: ▸   _refreshAllFromAPI____with_existing_local_document__another_document_existing_on_the_API__both_using_same_titles__soft_deletes_the_local_document__fetch_the_remote_document_and_saves_it, failed - expected to equal <[995D94E1-E0DF-4ECA-93E6-8778984BCD18, 00000000-E0DF-4ECA-93E6-8778984BCD18]>, got <[00000000-E0DF-4ECA-93E6-8778984BCD18]>
+                 2715[12:28:02]: ▸   /Users/administrator/builds/r_V1F-kB/0/beamgroup/beam/BeamTests/Managers/DocumentManagerNetworkTests.swift:418
+                 2716[12:28:02]: ▸   ```
+                 2717[12:28:02]: ▸                     // remote one replacing the original
+                 2718[12:28:02]: ▸                     expect(callsIds) == ["995D94E1-E0DF-4ECA-93E6-8778984BCD18".uuid!,
+                 2719[12:28:02]: ▸                                          "00000000-E0DF-4ECA-93E6-8778984BCD18".uuid!]
+                 2720[12:28:02]: ▸   ```
+                 2721[12:28:02]: ▸   _refreshAllFromAPI____with_existing_local_document__another_document_existing_on_the_API__both_using_same_titles__soft_deletes_the_local_document__fetch_the_remote_document_and_saves_it, failed - expected to equal <[onDocumentChange, onDocumentChange, refreshAllFromAPI]>, got <[onDocumentChange, refreshAllFromAPI]>
+                 2722[12:28:02]: ▸   /Users/administrator/builds/r_V1F-kB/0/beamgroup/beam/BeamTests/Managers/DocumentManagerNetworkTests.swift:420
+                 2723[12:28:02]: ▸   ```
+                 2724[12:28:02]: ▸                                          "00000000-E0DF-4ECA-93E6-8778984BCD18".uuid!]
+                 2725[12:28:02]: ▸                     expect(callsOrder) == ["onDocumentChange", "onDocumentChange", "refreshAllFromAPI"]
+                 2726[12:28:02]: ▸                     expect(updateDocumentStruct?.id) == remoteDocStruct.id
+                 2727[12:28:02]: ▸   ```
+                 2728[12:28:02]: ▸   _refreshAllFromAPI____with_existing_local_document__another_document_existing_on_the_API__both_using_same_titles__soft_deletes_the_local_document__fetch_the_remote_document_and_saves_it, failed - expected to equal <[sign_in, delete_all_databases, delete_all_documents, update_document, documents, update_document]>, got <[sign_in, delete_all_databases, delete_all_documents, update_document, documents, delete_document]>
+                 2729[12:28:02]: ▸   /Users/administrator/builds/r_V1F-kB/0/beamgroup/beam/BeamTests/Managers/DocumentManagerNetworkTests.swift:426
+                 2730[12:28:02]: ▸   ```
+                 2731[12:28:02]: ▸                                                 "update_document"]
+                 2732[12:28:02]: ▸                     expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
+                 2733[12:28:02]: ▸                     expect(APIRequest.callsCount - networkCalls) == 2
+                 2734[12:28:02]: ▸   ```
+                 2735[12:28:02]: ▸   _refreshAllFromAPI____with_existing_local_document__another_document_existing_on_the_API__both_using_same_titles__soft_deletes_the_local_document__fetch_the_remote_document_and_saves_it, failed - expected to equal <2>, got <1>
+                 2736[12:28:02]: ▸   /Users/administrator/builds/r_V1F-kB/0/beamgroup/beam/BeamTests/Managers/DocumentManagerNetworkTests.swift:431
+                 2737[12:28:02]: ▸   ```
+                 2738[12:28:02]: ▸                                                                NSPredicate(format: "title = %@", docStruct.title as CVarArg))
+                 2739[12:28:02]: ▸                     expect(count) == 2
+                 2740[12:28:02]: ▸
+                 2741[12:28:02]: ▸   ```
+                 2742[12:28:02]: ▸   _refreshAllFromAPI____with_existing_local_document__another_document_existing_on_the_API__both_using_same_titles__soft_deletes_the_local_document__fetch_the_remote_document_and_saves_it, failed - expected to be close to <2021-08-24 12:27:36.5580> (within 1), got <nil> (use beNil() to match nils)
+                 2743[12:28:02]: ▸   /Users/administrator/builds/r_V1F-kB/0/beamgroup/beam/BeamTests/Managers/DocumentManagerNetworkTests.swift:434
+                 2744[12:28:02]: ▸   ```
+                 2745[12:28:02]: ▸                     let localDocument = try? Document.fetchWithId(CoreDataManager.shared.mainContext, docStruct.id)
+                 2746[12:28:02]: ▸                     expect(localDocument?.deleted_at).to(beCloseTo(BeamDate.now, within: 1.0))
+                 2747[12:28:02]: ▸                 }
+                 2748[12:28:02]: ▸   ```
+                 2749[12:28:02]: ▸   _refreshAllFromAPI____with_existing_local_document__another_document_existing_on_the_API__both_using_same_titles__soft_deletes_the_local_document__fetch_the_remote_document_and_saves_it, failed - Expected network calls is different from current network calls
+                 2750[12:28:02]: ▸   /Users/administrator/builds/r_V1F-kB/0/beamgroup/beam/BeamTests/Helpers/BeamTestsHelper.swift:60
+                 2751[12:28:02]: ▸   ```
+                 2752[12:28:02]: ▸             Logger.shared.logDebug("\nrm BeamTests/Vinyl/\(QuickSpec.current.name.c99ExtendedIdentifier)*", category: .network)
+                 2753[12:28:02]: ▸             fail("Expected network calls is different from current network calls")
+                 2754[12:28:02]: ▸         }
+                 2755[12:28:02]: ▸   ```
+                 2756[12:28:02]: ▸      Executed 629 tests, with 6 failures (0 unexpected) in 33.329 (33.455) seconds
+                 2757
+                 */
+                fit("soft deletes the local document, fetch the remote document and saves it") {
                     let networkCalls = APIRequest.callsCount
 
                     var updateDocumentStruct: DocumentStruct?
