@@ -12,23 +12,36 @@ extension AppDelegate {
     func prepareMenuForTestEnv() {
         let prepareBeam = NSMenuItem()
         prepareBeam.submenu = NSMenu(title: "UITests")
-
-        MenuAvailableCommands.allCases.forEach { item in
+        var groupMenus: [UITestMenuGroup: NSMenu] = [:]
+        UITestMenuAvailableCommands.allCases.forEach { item in
             let value = item.rawValue
+            var menuItem: NSMenuItem
             if value.hasPrefix("separator") {
-                prepareBeam.submenu?.items.append(NSMenuItem.separator())
+                menuItem = NSMenuItem.separator()
             } else {
-                prepareBeam.submenu?.items.append(NSMenuItem(title: item.rawValue,
-                                                             action: #selector(menuCalled),
-                                                             keyEquivalent: ""))
+                menuItem = NSMenuItem(title: item.rawValue,
+                                      action: #selector(menuCalled),
+                                      keyEquivalent: "")
             }
+            var parentMenu = prepareBeam.submenu
+            if let group = item.group {
+                if groupMenus[group] == nil {
+                    let subMenu = NSMenu(title: group.rawValue)
+                    groupMenus[group] = subMenu
+                    let groupItem = NSMenuItem(title: group.rawValue, action: nil, keyEquivalent: "")
+                    prepareBeam.submenu?.addItem(groupItem)
+                    prepareBeam.submenu?.setSubmenu(subMenu, for: groupItem)
+                }
+                parentMenu = groupMenus[group]
+            }
+            parentMenu?.addItem(menuItem)
         }
-
         NSApp.mainMenu?.addItem(prepareBeam)
     }
 
-    @IBAction @objc func menuCalled(sender: NSMenuItem) {
-        MenuAvailableCommands.allCases.forEach {
+    @objc
+    func menuCalled(sender: NSMenuItem) {
+        UITestMenuAvailableCommands.allCases.forEach {
             if $0.rawValue == sender.title {
                 beamUIMenuGenerator.executeCommand($0)
                 return

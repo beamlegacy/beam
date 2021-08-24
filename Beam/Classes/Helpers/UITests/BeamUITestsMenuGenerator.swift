@@ -5,7 +5,7 @@ import AutoUpdate
 
 class BeamUITestsMenuGenerator {
     // swiftlint:disable:next cyclomatic_complexity
-    func executeCommand(_ command: MenuAvailableCommands) {
+    func executeCommand(_ command: UITestMenuAvailableCommands) {
         switch command {
         case .populateDBWithJournal: populateWithJournalNote(count: 10)
         case .destroyDB: destroyDatabase()
@@ -24,6 +24,7 @@ class BeamUITestsMenuGenerator {
         case .insertTextInCurrentNote: insertTextInCurrentNote()
         case .create100Notes: Self.create100Notes()
         case .setAutoUpdateToMock: setAutoUpdateToMock()
+        case .omnibarFillHistory: fillHistory()
         default: break
         }
     }
@@ -123,5 +124,16 @@ class BeamUITestsMenuGenerator {
         appDel.data.versionChecker = checker
 
         checker.checkForUpdates()
+    }
+
+    private func fillHistory(longTitle: Bool = false) {
+        addPageToHistory(url: "https://fr.wikipedia.org/wiki/Hello_world", title: "Hello world", id: 1)
+        addPageToHistory(url: "https://en.wikipedia.org/wiki/Hubert_Blaine_Wolfeschlegelsteinhausenbergerdorff_Sr.",
+                         title: "Hubert Blaine Wolfeschlegelsteinhausenbergerdorff Sr.", id: 2)
+    }
+
+    private func addPageToHistory(url: String, title: String, id: Int) {
+        _ = IndexDocument(source: url, title: title, contents: title)
+        try? GRDBDatabase.shared.insertHistoryUrl(urlId: UInt64(id), url: url, title: title, content: title)
     }
 }
