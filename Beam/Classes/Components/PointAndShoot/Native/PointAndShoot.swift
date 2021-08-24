@@ -410,7 +410,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
         let pendingQuotes = text2Quote(texts, sourceUrl.absoluteString)
         // Adds urlId to current card source
         let urlId = LinkStore.createIdFor(sourceUrl.absoluteString, title: nil)
-        currentNote.sources.add(urlId: urlId, type: .user, sessionId: data.sessionId)
+        currentNote.sources.add(urlId: urlId, noteId: currentNote.id, type: .user, sessionId: data.sessionId, activeSources: data.activeSources)
         // Updates frecency score of destination note
         data.noteFrecencyScorer.update(id: currentNote.id, value: 1.0, eventType: .notePointAndShoot, date: BeamDate.now, paramKey: .note30d0)
         // Add all quotes to source Note
