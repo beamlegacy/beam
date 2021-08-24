@@ -93,7 +93,9 @@ class JavascriptNativeAlertsTests: QuickSpec {
                 let webView = self.app.webViews.containing(.button, identifier: message).element
                 XCTAssert(webView.exists)
 
-                XCTAssertTrue(webView.staticTexts["NO FILE"].exists)
+                let noFileText = webView.staticTexts["NO FILE"].firstMatch
+
+                XCTAssertTrue(noFileText.exists)
 
                 webView.buttons["no file selected"].tap()
 
@@ -118,7 +120,9 @@ class JavascriptNativeAlertsTests: QuickSpec {
                 sleep(2)
                 app.typeKey(.downArrow, modifierFlags: [])
                 ok.tap()
-                XCTAssertFalse(webView.staticTexts["NO FILE"].exists)
+
+                noFileText.waitForNonExistence(timeout: 5, for: self)
+                XCTAssertFalse(noFileText.exists)
             }
         }
     }
