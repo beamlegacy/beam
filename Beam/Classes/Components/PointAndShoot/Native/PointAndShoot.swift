@@ -31,7 +31,14 @@ class PointAndShoot: WebPageHolder, ObservableObject {
     @Published var activeSelectGroup: ShootGroup?
     @Published var activeShootGroup: ShootGroup?
     @Published var collectedGroups: [ShootGroup] = []
-    @Published var dismissedGroups: [ShootGroup] = []
+    @Published var dismissedGroups: [ShootGroup] = [] {
+        didSet {
+            // Stop watching the groups that are dismissed
+            dismissedGroups.forEach({ group in
+                removeTarget(group.id)
+            })
+        }
+    }
     @Published var shootConfirmationGroup: ShootGroup?
     @Published var isAltKeyDown: Bool = false
     @Published var hasActiveSelection: Bool = false
@@ -87,6 +94,8 @@ class PointAndShoot: WebPageHolder, ObservableObject {
            hasActiveSelection {
             // shoot the selection
             self.selectShoot(group)
+            // Clear the activeSelectGroup
+            activeSelectGroup = nil
         }
     }
 
@@ -267,24 +276,28 @@ class PointAndShoot: WebPageHolder, ObservableObject {
     ///   - targets: Set of targets to draw
     ///   - href: Url of frame targets are located in
     func pointShoot(_ groupId: String, _ target: Target, _ href: String) {
-        guard !targetIsDismissed(groupId) else { return }
+        guard !targetIsDismissed(groupId), !hasActiveSelection else { return }
 
         if targetIsCollected(groupId) {
             collect(groupId, [target], href)
             return
         }
 
-        if (isAltKeyDown || activeShootGroup != nil), activePointGroup != nil, activeSelectGroup == nil {
-            // if we have an existing group
-            if activeShootGroup != nil {
+        if (isAltKeyDown || activeShootGroup != nil), activePointGroup != nil {
+            // if we have an existing group matching the id
+            if activeShootGroup != nil, activeShootGroup?.id == groupId {
                 activeShootGroup?.updateTargets(groupId, [target])
-            } else {
-                // only allow creating new a shootGroup when these conditions are met:
-                guard hasGraceRectAndMouseOverlap(target, href, mouseLocation),
+            } else if hasGraceRectAndMouseOverlap(target, href, mouseLocation),
                       !isLargeTargetArea(target),
-                      !isTypingOnWebView else { return }
+                      !isTypingOnWebView,
+                      activeSelectGroup == nil {
 
                 activeShootGroup = ShootGroup(groupId, [target], href)
+            } else {
+                if !isAltKeyDown {
+                    let tempGroup = ShootGroup(groupId, [], href)
+                    dismissedGroups.append(tempGroup)
+                }
             }
         }
     }
@@ -299,30 +312,47 @@ class PointAndShoot: WebPageHolder, ObservableObject {
         guard !isTypingOnWebView else {
             return
         }
-        // first check if the incomming group is already collected
+        // Check if the incomming group is already collected
         if targetIsCollected(groupId) {
             collect(groupId, targets, href)
             return
         }
-
-        // probably always false, but just in case check if the target was previously dismissed
+        // Check if the target was previously dismissed
         if targetIsDismissed(groupId) {
             return
         }
 
-        // if the activeShootGroup and the incomming select group match, update the targets
-        if activeShootGroup != nil {
+        if activeShootGroup != nil, activeShootGroup?.id == groupId {
+            // if we have an existing group matching the id
             activeShootGroup?.updateTargets(groupId, targets)
-        }
-
-        // then only continue if we have an active selection
-        guard hasActiveSelection else {
-            activeSelectGroup = nil
             return
         }
 
-        // If we didn't exit earlier, set the activeSelectGroup
-        activeSelectGroup = ShootGroup(groupId, targets, href)
+        if activeSelectGroup?.id == groupId {
+            // Update selection group
+            activeSelectGroup?.updateTargets(groupId, targets)
+            return
+        } else if hasActiveSelection, activeSelectGroup == nil {
+            // Create a new Selection group
+            activeSelectGroup = ShootGroup(groupId, targets, href)
+            return
+        }
+    }
+
+    /// When selection collapses, check if selection is used, otherwise remove it from tracked Elements
+    /// - Parameter id: id of group to clear
+    func clearSelection(_ id: String) {
+        if activeSelectGroup?.id == id,
+           activeShootGroup?.id == id,
+           targetIsCollected(id),
+           targetIsDismissed(id) {
+            return
+        }
+
+        if let selectionGroup = activeSelectGroup, activeSelectGroup?.id == id {
+            dismissedGroups.append(selectionGroup)
+            activeSelectGroup = nil
+        }
     }
 
     /// Sets selection group as activeShootGroup
@@ -463,5 +493,14 @@ class PointAndShoot: WebPageHolder, ObservableObject {
             dismissedGroups.append(group)
             activeSelectGroup = nil
         }
+    }
+
+    /// Stop JS from sending updated bounds of target element
+    ///
+    /// Calling this is a performance improvement for the main window
+    /// frame context only, we can't rely this gets properly executed within iframes.
+    /// - Parameter id: ID of target to remove
+    func removeTarget(_ id: String) {
+        self.page.executeJS("removeTarget(\"\(id)\")", objectName: "PointAndShoot")
     }
 }

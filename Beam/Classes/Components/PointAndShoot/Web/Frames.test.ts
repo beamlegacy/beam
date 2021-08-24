@@ -98,6 +98,6 @@ test("single iframe point", () => {
     const delta = 50
     iframe1El.scrollY(delta)
     
-    expect(iframe1testUI.eventsCount).toEqual(18)
+    expect(iframe1testUI.eventsCount).toEqual(12) // aka 2 document events
   }
 })

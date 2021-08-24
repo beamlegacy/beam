@@ -1,4 +1,4 @@
-import { BeamElement, BeamRangeGroup, BeamShootGroup } from "./BeamTypes"
+import { BeamRangeGroup, BeamShootGroup } from "./BeamTypes"
 import { PointAndShootUI } from "./PointAndShootUI"
 import { PointAndShootUI_native } from "./PointAndShootUI_native"
 import { PointAndShootUI_web } from "./PointAndShootUI_web"
@@ -14,34 +14,37 @@ export class PointAndShootUI_debug implements PointAndShootUI {
     this.native = native
     this.web = web
   }
-  isTypingOnWebView(isTypingOnWebView: boolean): void {
+  isTypingOnWebView(_isTypingOnWebView: boolean): void {
       throw new Error("Method not implemented.")
   }
-  hasSelection(hasSelection: boolean) {
+  clearSelection(_id: string): void {
     throw new Error("Method not implemented.")
   }
-  setFramesInfo(framesInfo: FrameInfo[]) {
+  hasSelection(_hasSelection: boolean): void {
     throw new Error("Method not implemented.")
   }
-  setScrollInfo(scrollInfo: any) {
+  setFramesInfo(_framesInfo: FrameInfo[]): void {
     throw new Error("Method not implemented.")
   }
-  setResizeInfo(resizeInfo: any) {
+  setScrollInfo(_scrollInfo: unknown): void {
     throw new Error("Method not implemented.")
   }
-  setOnLoadInfo(framesInfo: FrameInfo[]) {
+  setResizeInfo(_resizeInfo: unknown): void {
     throw new Error("Method not implemented.")
   }
-  pinched(pinchInfo: any) {
+  setOnLoadInfo(_framesInfo: FrameInfo[]): void {
     throw new Error("Method not implemented.")
   }
-  pointBounds(pointTarget?: BeamShootGroup) {
+  pinched(_pinchInfo: unknown): void {
     throw new Error("Method not implemented.")
   }
-  shootBounds(shootTargets: BeamShootGroup[]) {
+  pointBounds(_pointTarget?: BeamShootGroup): void {
     throw new Error("Method not implemented.")
   }
-  selectBounds(rangeGroups: BeamRangeGroup[]) {
+  shootBounds(_shootTargets: BeamShootGroup[]): void {
+    throw new Error("Method not implemented.")
+  }
+  selectBounds(_rangeGroups: BeamRangeGroup[]): void {
     throw new Error("Method not implemented.")
   }
 }

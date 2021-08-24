@@ -72,7 +72,7 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
     return parsedElement.outerHTML
   }
 
-  selectBounds(rangeGroups: BeamRangeGroup[]) {
+  selectBounds(rangeGroups: BeamRangeGroup[]): void {
     const {win} = this.native
 
     if (!rangeGroups) {
@@ -137,7 +137,11 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
     }
   }
 
-  hasSelection(hasSelection: boolean) {
+  clearSelection(id: string): void {
+    this.native.sendMessage("clearSelection", { id })
+  }
+
+  hasSelection(hasSelection: boolean): void {
     this.native.sendMessage("hasSelection", { hasSelection })
   }
   

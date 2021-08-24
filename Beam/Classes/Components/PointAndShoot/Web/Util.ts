@@ -93,7 +93,7 @@ export class Util {
   /**
    * Generates a good enough non-compliant UUID.
    */
-  static uuid(win: BeamWindow) {
+  static uuid(win: BeamWindow): string {
     const buf = new Uint32Array(4)
     return win.crypto.getRandomValues(buf).join("-")
   }
