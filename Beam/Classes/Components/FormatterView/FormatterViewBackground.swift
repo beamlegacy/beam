@@ -28,7 +28,6 @@ struct FormatterViewBackground<Content: View>: View {
     private var shadowOffsetY: CGFloat {
         7
     }
-    private let animationDuration = 0.3
 
     var body: some View {
         ZStack {

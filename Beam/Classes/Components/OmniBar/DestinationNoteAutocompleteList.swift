@@ -10,7 +10,7 @@ import BeamCore
 
 struct DestinationNoteAutocompleteList: View {
 
-    @ObservedObject var model: Model
+    @ObservedObject var model = Model()
 
     internal var onSelectAutocompleteResult: (() -> Void)?
     private let itemHeight: CGFloat = 32
@@ -20,8 +20,14 @@ struct DestinationNoteAutocompleteList: View {
     var body: some View {
         VStack(spacing: 0) {
             ForEach(model.results) { i in
-                return AutocompleteItem(item: i, selected: model.isSelected(i), displayIcon: false,
-                                        colorPalette: colorPalette)
+                return AutocompleteItem(
+                    item: i,
+                    selected: model.isSelected(i),
+                    displayIcon: false,
+                    alwaysHighlightCompletingText: true,
+                    colorPalette: colorPalette
+                )
+
                     .frame(height: itemHeight)
                     .transition(.identity)
                     .animation(nil)
@@ -85,7 +91,7 @@ extension DestinationNoteAutocompleteList {
             switch move {
             case .down, .up:
                 NSCursor.setHiddenUntilMouseMoves(true)
-                var newIndex = selectedIndex ?? -1
+                var newIndex = self.selectedIndex ?? -1
                 newIndex += (move == .up ? -1 : 1)
                 newIndex = newIndex.clampInLoop(0, results.count - 1)
                 selectedIndex = newIndex
@@ -112,9 +118,6 @@ extension DestinationNoteAutocompleteList {
         }
 
         let todaysCardReplacementName = "Today"
-        func displayNameForCardName(_ cardName: String) -> String {
-            cardName == data?.todaysName ? todaysCardReplacementName : cardName
-        }
         func realNameForCardName(_ cardName: String) -> String {
             guard let data = data, cardName.lowercased() == todaysCardReplacementName.lowercased() else {
                 return cardName
@@ -141,9 +144,8 @@ extension DestinationNoteAutocompleteList {
             }
             allowCreateCard = allowCreateCard
                     && !items.contains(where: { $0.title.lowercased() == searchText.lowercased() })
-            selectedIndex = 0
             var autocompleteItems = items.map {
-                AutocompleteResult(text: displayNameForCardName($0.title), source: .note, uuid: $0.id)
+                AutocompleteResult(text: $0.title, source: .note, completingText: searchText, uuid: $0.id)
             }
             if allowCreateCard && !searchText.isEmpty {
                 let createItem = AutocompleteResult(text: searchText, source: .createCard, information: "New Card")
@@ -154,6 +156,7 @@ extension DestinationNoteAutocompleteList {
                 }
             }
             results = autocompleteItems
+            self.selectedIndex = 0
         }
     }
 }

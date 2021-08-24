@@ -18,6 +18,7 @@ struct AutocompleteItem: View {
     @State var item: AutocompleteResult
     let selected: Bool
     var displayIcon: Bool = true
+    var alwaysHighlightCompletingText: Bool = false
     var colorPalette: AutocompleteItemColorPalette = defaultColorPalette
     @State private var isTouchDown = false
 
@@ -60,6 +61,10 @@ struct AutocompleteItem: View {
         guard let completingText = item.completingText else {
             return []
         }
+        if alwaysHighlightCompletingText || [.autocomplete, .history, .url, .topDomain].contains(item.source) {
+            return text.ranges(of: completingText, options: .caseInsensitive)
+        }
+
         if [.autocomplete, .history, .url, .topDomain].contains(item.source) {
             return text.ranges(of: completingText, options: .caseInsensitive)
         }
