@@ -25,7 +25,6 @@ import Promises
         if !isFromNoteSearch {
             navigationController?.setLoading()
         }
-        beamNavigationController.isNavigatingFromNote = isFromNoteSearch
         self.url = url
         navigationCount = 0
         if url.isFileURL {
@@ -246,6 +245,7 @@ import Promises
         mediaPlayerController = MediaPlayerController(page: self)
         noteController.note.browsingSessions.append(browsingTree)
         setupObservers()
+        beamNavigationController.isNavigatingFromNote = isFromNoteSearch
     }
 
     required init?(coder: NSCoder) {
@@ -443,7 +443,7 @@ import Promises
         state.setup(webView: newWebView)
         let origin = BrowsingTreeOrigin.browsingNode(id: browsingTree.current.id)
         let newTab = state.addNewTab(origin: origin, setCurrent: setCurrent,
-                                     note: noteController.note, element: noteController.rootElement,
+                                     note: noteController.note, element: beamNavigationController.isNavigatingFromNote ? noteController.element : nil,
                                      url: targetURL, webView: newWebView)
         newTab.browsingTree.current.score.openIndex = navigationCount
         navigationCount += 1
@@ -512,11 +512,17 @@ import Promises
         browsingTree.switchToCard()
     }
 
+    func switchToJournal() {
+        browsingTree.switchToJournal()
+    }
+
     func switchToOtherTab() {
         browsingTree.switchToOtherTab()
     }
 
     func switchToNewSearch() {
+        isFromNoteSearch = false
+        beamNavigationController.isNavigatingFromNote = false
         browsingTree.switchToNewSearch()
     }
 
@@ -545,6 +551,8 @@ import Promises
     }
 
     func closeTab() {
+        isFromNoteSearch = false
+        beamNavigationController.isNavigatingFromNote = false
         passwordOverlayController?.dismiss()
         authenticationViewModel?.cancel()
         browsingTree.closeTab()

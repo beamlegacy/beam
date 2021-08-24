@@ -207,6 +207,7 @@ import BeamCore
     }
 
     func navigateCurrentTab(toURL url: URL) {
+        currentTab?.switchToNewSearch()
         currentTab?.load(url: url)
     }
 
