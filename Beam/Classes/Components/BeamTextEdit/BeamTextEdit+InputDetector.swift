@@ -147,8 +147,8 @@ extension BeamTextEdit {
             if node.cursorPosition <= 3, level > 0 {
                 Logger.shared.logInfo("Make quote", category: .ui)
 
-                node.element.kind = .quote(level, "", "")
-                node.text.removeFirst(level + 1)
+                cmdManager.deleteText(in: node, for: 0..<level + 1)
+                cmdManager.formatText(in: node, for: .quote(level, "", ""), with: nil, for: nil, isActive: false)
                 self.rootNode.cursorPosition = 0
             }
             return nil
@@ -160,15 +160,25 @@ extension BeamTextEdit {
 
             if node.cursorPosition <= 2, isBold {
                 Logger.shared.logInfo("Make Bold", category: .ui)
-                node.text.removeFirst(2)
                 self.rootNode.cursorPosition = 0
+                cmdManager.deleteText(in: node, for: 0..<2)
+
+                if !node.text.isEmpty {
+                    cmdManager.formatText(in: node, for: nil, with: .strong, for: node.text.wholeRange, isActive: false)
+                    return nil
+                }
                 return .strong
             }
 
             if node.cursorPosition <= 3, isItalic {
                 Logger.shared.logInfo("Make Italic", category: .ui)
-                node.text.removeFirst(3)
                 self.rootNode.cursorPosition = 0
+                cmdManager.deleteText(in: node, for: 0..<3)
+
+                if !node.text.isEmpty {
+                    cmdManager.formatText(in: node, for: nil, with: .emphasis, for: node.text.wholeRange, isActive: false)
+                    return nil
+                }
                 return .emphasis
             }
             return nil
@@ -178,19 +188,29 @@ extension BeamTextEdit {
             let isStrikethrough = node.text.prefix(3).text == "~~ "
             if node.cursorPosition <= 3, isStrikethrough {
                 Logger.shared.logInfo("Make Strikethrough", category: .ui)
-                node.text.removeFirst(3)
                 self.rootNode.cursorPosition = 0
+                cmdManager.deleteText(in: node, for: 0..<3)
+
+                if !node.text.isEmpty {
+                    cmdManager.formatText(in: node, for: nil, with: .strikethrough, for: node.text.wholeRange, isActive: false)
+                    return nil
+                }
                 return .strikethrough
             }
             return nil
         }
 
         let makeUnderline = { [unowned self] () -> BeamText.Attribute? in
-            let isUnderline = node.text.prefix(3).text == "_ "
+            let isUnderline = node.text.prefix(2).text == "_ "
             if node.cursorPosition <= 2, isUnderline {
                 Logger.shared.logInfo("Make Underline", category: .ui)
-                node.text.removeFirst(2)
                 self.rootNode.cursorPosition = 0
+                cmdManager.deleteText(in: node, for: 0..<2)
+
+                if !node.text.isEmpty {
+                    cmdManager.formatText(in: node, for: nil, with: .underline, for: node.text.wholeRange, isActive: false)
+                    return nil
+                }
                 return .underline
             }
             return nil
@@ -214,9 +234,8 @@ extension BeamTextEdit {
                     guard !sibbling.isHeader else { return nil }
                     element.addChild(sibbling)
                 }
-
-                element.kind = .heading(level)
-                element.text.removeFirst(level + 1)
+                cmdManager.deleteText(in: node, for: 0..<level + 1)
+                cmdManager.formatText(in: node, for: .heading(level), with: nil, for: nil, isActive: false)
                 self.rootNode.cursorPosition = 0
                 return nil
             }
