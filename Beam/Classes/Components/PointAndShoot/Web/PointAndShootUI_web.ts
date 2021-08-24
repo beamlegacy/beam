@@ -95,26 +95,29 @@ export class PointAndShootUI_web extends WebEventsUI_web implements PointAndShoo
     super(win)
     this.log(`${this.toString()} instantiated`)
   }
-    isTypingOnWebView(isTypingOnWebView: boolean): void {
+  clearSelection(_id: string): void {
+    throw new Error("Method not implemented.")
+  }
+    isTypingOnWebView(_isTypingOnWebView: boolean): void {
         throw new Error("Method not implemented.")
     }
-  pointBounds(pointTarget?: BeamShootGroup): void {
+  pointBounds(_pointTarget?: BeamShootGroup): void {
       throw new Error("Method not implemented.")
   }
-  shootBounds(shootTargets: BeamShootGroup[]): void {
+  shootBounds(_shootTargets: BeamShootGroup[]): void {
       throw new Error("Method not implemented.")
   }
-  selectBounds(rangeGroups: BeamRangeGroup[]): void {
+  selectBounds(_rangeGroups: BeamRangeGroup[]): void {
       throw new Error("Method not implemented.")
   }
-  hasSelection(hasSelection: boolean): void {
+  hasSelection(_hasSelection: boolean): void {
       throw new Error("Method not implemented.")
   }
-  cursor(x: any, y: any) {
+  cursor(_x: any, _y: any) {
     throw new Error("Method not implemented.")
   }
 
-  unselect(selection: any) {
+  unselect(_selection: any) {
     throw new Error("Method not implemented.")
   }
 
@@ -122,7 +125,7 @@ export class PointAndShootUI_web extends WebEventsUI_web implements PointAndShoo
     // not used in web
   }
 
-  point(quoteId: string, el: BeamHTMLElement, x: number, y: number) {
+  point(_quoteId: string, el: BeamHTMLElement, _x: number, _y: number) {
     this.enterSelection()
     el.classList.add(this.pointClass)
   }
@@ -133,7 +136,7 @@ export class PointAndShootUI_web extends WebEventsUI_web implements PointAndShoo
     this.leaveSelection()
   }
 
-  shoot(quoteId: string, el: BeamHTMLElement, x: number, y: number, selectedEls) {
+  shoot(_quoteId: string, el: BeamHTMLElement, x: number, y: number, selectedEls) {
     el.classList.remove(this.pointClass)
     el.classList.add(this.shootClass)
     const count = selectedEls.length > 1 ? `${selectedEls.length}` : ""

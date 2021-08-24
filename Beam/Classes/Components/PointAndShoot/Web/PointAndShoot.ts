@@ -98,11 +98,8 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
     this.ui.hasSelection(this.hasSelection())
     this.ui.isTypingOnWebView(this.isTypingOnWebView)
     // Lastly send positioning bounds
-    // When we have an active selection we don't want to update any other bounds
-    if (!this.hasSelection()) {
-      this.ui.pointBounds(this.pointTarget)
-      this.ui.shootBounds(this.shootTargets)
-    }
+    this.ui.pointBounds(this.pointTarget)
+    this.ui.shootBounds(this.shootTargets)
     this.ui.selectBounds(this.selectionRangeGroups)
   }
 
@@ -132,7 +129,10 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
     // reset the uuid to store a new selection next time
     if (selection.rangeCount == 0) { return }
     if (selection.isCollapsed) {
+      // clear selectionTarget when we have a stored value 
+      this.ui.clearSelection(this.selectionUUID)
       this.selectionUUID = Util.uuid(this.win)
+      return
     }
     // Rangecount is always array of 1, unless programatically modified
     // https://developer.mozilla.org/en-US/docs/Web/API/Selection/rangeCount
@@ -155,6 +155,45 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
     return Boolean(this.win.document.getSelection().toString())
   }
 
+
+  /**
+   * For performance reasons we want to stop listening to element we don't care about
+   * However due to limitations in the Swift to JS bridge in iframes we can't rely
+   * on this happening all the time. For most browsing behaviour we can remove unused targets
+   * resulting in greatly improved performance.
+   *
+   * @param {string} id - id of the target element to stop watching
+   * @memberof PointAndShoot
+   */
+  removeTarget(id: string): void {
+    this.removeSelectRangeGroup(id)
+    this.removeShootTarget(id)
+  }
+
+  /**
+   * Remove target with id from observed elements
+   *
+   * @param {string} id - id of target to remove
+   * @memberof PointAndShoot
+   */
+  removeShootTarget(id: string): void {
+    this.shootTargets.splice(this.shootTargets.findIndex((target) => {
+      return target.id === id
+    }), 1)
+  }
+
+  /**
+   * Remove target with id from observed ranges
+   *
+   * @param {string} id - id of target to remove
+   * @memberof PointAndShoot
+   */
+   removeSelectRangeGroup(id: string): void {
+    this.selectionRangeGroups.splice(this.selectionRangeGroups.findIndex((target) => {
+      return target.id === id
+    }), 1)
+  }
+
   /**
    * ======================================================================
    * Eventlisteners =======================================================
@@ -162,12 +201,11 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    */
 
   onScroll(ev: BeamUIEvent): void {
-    this.sendBounds()
-    if (this.mouseLocation?.x) {
-      if (!this.isPointDisabled(ev)) {
+    if (this.mouseLocation?.x && !this.isPointDisabled(ev)) {
         const target = this.win.document.elementFromPoint(this.mouseLocation.x, this.mouseLocation.y)
         this.point(target)
-      }
+    } else {
+      this.sendBounds()
     }
   }
 
@@ -177,6 +215,8 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
       if (!this.isPointDisabled(ev)) {
         this.point(ev.target)
         this.isTypingOnWebView = false
+      } else {
+        this.sendBounds()
       }
     }
     this.mouseLocation.x = ev.clientX
@@ -191,12 +231,16 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
 
     if (!this.isPointDisabled(ev)) {
       this.shoot(ev.target)
+    } else {
+      this.sendBounds()
     }
   }
 
   onlongtouch(ev: BeamUIEvent): void {
     if (!this.isPointDisabled(ev)) {
       this.shoot(ev.target)
+    } else {
+      this.sendBounds()
     }
   }
 
@@ -214,9 +258,9 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
   }
 
   onKeyDown(ev: BeamMouseEvent): void {
-    this.sendBounds()
     if (this.isPointDisabled(ev)) {
       this.isTypingOnWebView = true
+      this.sendBounds()
     } else {
       const target = this.win.document.elementFromPoint(this.mouseLocation.x, this.mouseLocation.y)
       this.point(target)

@@ -24,8 +24,9 @@ protocol BeamWebViewConfiguration {
     func obfuscate(str: String) -> String
 }
 
+let BeamWebViewConfigurationBaseid: UUID = UUID()
 class BeamWebViewConfigurationBase: WKWebViewConfiguration, BeamWebViewConfiguration {
-    let id: UUID = UUID()
+    let id: UUID = BeamWebViewConfigurationBaseid
 
     var allowsPictureInPicture: Bool {
         #if BEAM_WEBKIT_ENHANCEMENT_ENABLED
