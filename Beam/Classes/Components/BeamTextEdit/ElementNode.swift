@@ -199,9 +199,6 @@ public class ElementNode: Widget {
         }.store(in: &scope)
 
         subscribeToElement(element)
-
-        setAccessibilityLabel("ElementNode")
-        setAccessibilityRole(.textArea)
     }
 
     init(editor: BeamTextEdit, element: BeamElement, nodeProvider: NodeProvider? = nil) {
@@ -221,12 +218,14 @@ public class ElementNode: Widget {
         }.store(in: &scope)
 
         subscribeToElement(element)
-
-        setAccessibilityLabel("ElementNode")
-        setAccessibilityRole(.textArea)
     }
 
     // MARK: - Setup UI
+    override func setupAccessibility() {
+        super.setupAccessibility()
+        setAccessibilityLabel("ElementNode")
+        setAccessibilityRole(.textArea)
+    }
 
     var idealSpacingSize: CGFloat {
         var spacingHeight: CGFloat = .zero

@@ -54,6 +54,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window?.setFrame(windowRect, display: true)
     }
 
+    var isRunningTests: Bool {
+        NSClassFromString("XCTest") != nil
+    }
+
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         LibrariesManager.shared.configure()
         ContentBlockingManager.shared.setup()
@@ -71,7 +75,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
 
-        createWindow(frame: nil, reloadState: Configuration.stateRestorationEnabled)
+        if !isRunningTests {
+            createWindow(frame: nil, reloadState: Configuration.stateRestorationEnabled)
+        }
 
         // So we remember we're not currently using the default api server
         if Configuration.apiHostnameDefault != Configuration.apiHostname {
