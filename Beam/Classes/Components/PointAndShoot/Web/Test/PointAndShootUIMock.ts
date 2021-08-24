@@ -1,21 +1,24 @@
 import { PointAndShootUI } from "../PointAndShootUI"
 import { WebEventsUIMock } from "./WebEventsUIMock"
-import { BeamElement, BeamRange, BeamRangeGroup, BeamShootGroup } from "../BeamTypes"
+import { BeamRangeGroup, BeamShootGroup } from "../BeamTypes"
 
 export class PointAndShootUIMock extends WebEventsUIMock implements PointAndShootUI {
   isTypingOnWebView(isTypingOnWebView: boolean): void {
       this.events.push({name: "isTypingOnWebView", isTypingOnWebView})
   }
-  pointBounds(pointTarget?: BeamShootGroup) {
+  pointBounds(pointTarget?: BeamShootGroup): void {
     this.events.push({name: "pointBounds", pointTarget})
   }
-  selectBounds(rangeGroups: BeamRangeGroup[]) {
+  selectBounds(rangeGroups: BeamRangeGroup[]): void {
     this.events.push({name: "selectBounds", rangeGroups})
   }
-  shootBounds(shootTargets: BeamShootGroup[]) {
+  shootBounds(shootTargets: BeamShootGroup[]): void {
     this.events.push({name: "shootBounds", shootTargets})
   }
-  hasSelection(hasSelection: boolean) {
+  clearSelection(id: string): void {
+    this.events.push({name: "clearSelection", id})
+  }
+  hasSelection(hasSelection: boolean): void {
     this.events.push({name: "hasSelection", hasSelection})
   }
 }

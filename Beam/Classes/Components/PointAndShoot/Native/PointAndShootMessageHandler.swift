@@ -5,6 +5,7 @@ enum PointAndShootMessages: String, CaseIterable {
     case pointAndShoot_pointBounds
     case pointAndShoot_shootBounds
     case pointAndShoot_selectBounds
+    case pointAndShoot_clearSelection
     case pointAndShoot_hasSelection
     case pointAndShoot_isTypingOnWebView
     case pointAndShoot_pinch
@@ -66,6 +67,10 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
                         }
                     }
                 }
+
+            case PointAndShootMessages.pointAndShoot_clearSelection:
+                guard let id = dict["id"] as? String else { throw PointAndShootError("clearSelection payload incomplete") }
+                pointAndShoot.clearSelection(id)
 
             case PointAndShootMessages.pointAndShoot_hasSelection:
                 guard let hasSelection = dict["hasSelection"] as? Bool else { throw PointAndShootError("hasSelection payload incomplete") }
