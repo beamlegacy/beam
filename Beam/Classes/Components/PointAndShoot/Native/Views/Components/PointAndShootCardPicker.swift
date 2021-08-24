@@ -10,9 +10,11 @@ import BeamCore
 import SwiftUI
 
 struct PointAndShootCardPicker: View {
-    static let size = CGSize(width: 300, height: 80)
     private static let rowHeight: CGFloat = 24
+    var completedGroup: PointAndShoot.ShootGroup?
+    @Binding var allowAnimation: Bool
 
+    @EnvironmentObject var state: BeamState
     @EnvironmentObject var data: BeamData
     @EnvironmentObject var browserTabsManager: BrowserTabsManager
 
@@ -28,29 +30,67 @@ struct PointAndShootCardPicker: View {
     @State private var cardSearchField = ""
     @State private var cardSearchFieldSelection: Range<Int>?
     @State private var addNoteField = ""
+    @State private var contentOpacity: Double = 1
 
-    @State private var isVisible = false
+    @State private var shootCompleted: Bool = false
+    @State private var prefixOpacity: Double = 0
+    @State private var iconCollectOpacity: Double = 0
+    @State private var iconEnterOpacity: Double = 1
+    @State private var scale: CGFloat = 1
+
+    private var isTodaysNote: String? {
+        browserTabsManager.currentTab?.noteController.note.isTodaysNote ?? false ? data.todaysName : nil
+    }
+
+    private var placeholderText: String {
+        currentCardName ?? data.todaysName
+    }
+
+    private var textColor: NSColor {
+        currentCardName == nil ? BeamColor.Generic.text.nsColor : BeamColor.Sonic.nsColor
+    }
+
+    private var cursorIsOnCardName: Bool {
+        if let selection = cardSearchFieldSelection {
+            return selection.upperBound <= cardSearchField.count
+        }
+        return false
+    }
+
+    private var selectedRangeColor: NSColor {
+        if cursorIsOnCardName, currentCardName != nil {
+            return BeamColor.Generic.transparent.nsColor
+        }
+
+        return BeamColor.Generic.textSelection.nsColor
+    }
 
     private let searchColorPalette = AutocompleteItemColorPalette(
         selectedBackgroundColor: BeamColor.NotePicker.selected.nsColor,
         touchdownBackgroundColor: BeamColor.NotePicker.active.nsColor)
 
     var body: some View {
-        FormatterViewBackground {
-            VStack(alignment: .leading, spacing: 0) {
-                HStack(spacing: BeamSpacing._40) {
-                    Text("Add to")
-                        .accessibility(identifier: "ShootCardPickerLabel")
-                        .font(BeamFont.medium(size: 13).swiftUI)
-                    BeamTextField(text: $cardSearchField, isEditing: $isEditingCardName,
-                                  placeholder: autocompleteModel.todaysCardReplacementName,
-                                  font: BeamFont.regular(size: 13).nsFont,
-                                  textColor: currentCardName == nil ? BeamColor.Generic.text.nsColor
-                                    : BeamColor.Sonic.nsColor,
-                                  placeholderColor: BeamColor.Generic.placeholder.nsColor,
-                                  selectedRange: cardSearchFieldSelection) { (text) in
+        VStack(alignment: .leading, spacing: 0) {
+            // MARK: - Top Half
+            HStack(spacing: BeamSpacing._40) {
+                // MARK: - Prefix
+                PrefixLabel(completed: shootCompleted, numberOfElements: completedGroup?.numberOfElements)
+
+                // MARK: - TextField
+                if !shootCompleted {
+                    BeamTextField(
+                        text: $cardSearchField,
+                        isEditing: $isEditingCardName,
+                        placeholder: placeholderText,
+                        font: BeamFont.regular(size: 13).nsFont,
+                        textColor: textColor,
+                        placeholderColor: BeamColor.Generic.placeholder.nsColor,
+                        selectedRange: cardSearchFieldSelection,
+                        selectedRangeColor: selectedRangeColor
+                    ) { (text) in
                         onTextDidChange(text)
                     } onCommit: { _ in
+                        enableResizeAnimation()
                         if currentCardName != nil || cardSearchField.isEmpty {
                             onFinishEditing(canceled: false)
                         } else {
@@ -60,49 +100,107 @@ struct PointAndShootCardPicker: View {
                         onFinishEditing(canceled: true)
                     } onTab: {
                         isEditingNote = true
+                        // select note when pressing tab
+                        if currentCardName == nil || !cardSearchField.isEmpty {
+                            selectSearchResult()
+                        }
                     } onCursorMovement: { move -> Bool in
                         autocompleteModel.handleCursorMovement(move)
+                    } onStopEditing: {
+                        cardSearchFieldSelection = nil
+                        enableResizeAnimation()
+                    } onSelectionChanged: { range in
+                        cardSearchFieldSelection = Range(range)
                     }
                     .frame(minHeight: 16)
                     .padding(BeamSpacing._40)
-                    .background(currentCardName == nil ? nil :
-                                    HStack {
-                                        Text(currentCardName ?? "").font(BeamFont.regular(size: 13).swiftUI).hidden()
-                                            .padding(BeamSpacing._40)
-                                            .overlay(BeamColor.Beam.swiftUI.opacity(0.08).cornerRadius(4.0))
-                                        Spacer()
-                                    }
+                    .background(
+                        Placeholder(
+                            text: cardSearchField,
+                            currentCardName: currentCardName,
+                            tokenize: cursorIsOnCardName,
+                            selectedResult: self.autocompleteModel.selectedResult?.text,
+                            completed: shootCompleted
+                        )
                     )
-                    if isEditingCardName && (currentCardName != nil || cardSearchField.isEmpty) {
+                } else {
+                    if let text = currentCardName {
+                        Text(text)
+                            .foregroundColor(BeamColor.Beam.swiftUI)
+                            .font(BeamFont.regular(size: 13).swiftUI)
+                    }
+                }
+
+                Spacer()
+
+                // MARK: - Icon
+                if isEditingCardName && (currentCardName != nil || cardSearchField.isEmpty) {
+                    if !shootCompleted {
                         Icon(name: "editor-format_enter", size: 12, color: BeamColor.Generic.placeholder.swiftUI)
+                            .opacity(iconEnterOpacity)
+                            .onDisappear {
+                                withAnimation(.easeInOut(duration: 0.05)) {
+                                    self.iconEnterOpacity = 0
+                                }
+                            }
                             .onTapGesture {
                                 onFinishEditing(canceled: false)
                             }
+                    } else if let group = completedGroup {
+                        Icon(name: group.isText ? "collect-text" : "collect-generic", size: 16, color: BeamColor.Generic.text.swiftUI)
+                            .onTapGesture {
+                                state.navigateToNote(id: group.noteInfo.id)
+                            }
+                            .opacity(iconCollectOpacity)
+                            .onAppear {
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                                    withAnimation(.easeInOut(duration: 0.05)) {
+                                        self.prefixOpacity = 1
+                                    }
+                                    withAnimation(.easeInOut(duration: 0.15)) {
+                                        self.iconCollectOpacity = 1
+                                    }
+                                }
+                            }
                     }
                 }
-                .padding(.horizontal, BeamSpacing._120)
-                .padding(.vertical, BeamSpacing._80)
+            }
+            .lineLimit(1)
+            .padding(.horizontal, BeamSpacing._120)
+            .padding(.top, BeamSpacing._80)
+            .frame(maxHeight: 42)
 
+            Spacer()
+
+            if !shootCompleted {
+                // MARK: - Autocomplete
                 if isEditingCardName && currentCardName == nil {
                     DestinationNoteAutocompleteList(model: autocompleteModel)
-                        .onSelectAutocompleteResult {
-                            selectSearchResult()
-                        }
+                        .onSelectAutocompleteResult { selectSearchResult() }
                 }
-                Separator(horizontal: true)
-                    .padding(.horizontal, BeamSpacing._120)
+                // MARK: - Bottom Half
+                Separator(horizontal: true).padding(.horizontal, BeamSpacing._120)
                 HStack(spacing: 4) {
-                    BeamTextField(text: $addNoteField, isEditing: $isEditingNote, placeholder: "Add note",
-                                  font: BeamFont.regular(size: 13).nsFont, textColor: BeamColor.Generic.text.nsColor,
-                                  placeholderColor: BeamColor.Generic.placeholder.nsColor) { _ in
+                    // MARK: - TextField
+                    BeamTextField(
+                        text: $addNoteField,
+                        isEditing: $isEditingNote,
+                        placeholder: "Add note",
+                        font: BeamFont.regular(size: 13).nsFont,
+                        textColor: BeamColor.Generic.text.nsColor,
+                        placeholderColor: BeamColor.Generic.placeholder.nsColor
+                    ) { _ in
                     } onCommit: { _ in
                         onFinishEditing(canceled: false)
                     } onEscape: {
                         onFinishEditing(canceled: true)
                     }
                     .frame(minHeight: 16)
+
+                    // MARK: - Icon
                     if isEditingNote {
                         Icon(name: "editor-format_enter", size: 12, color: BeamColor.Generic.placeholder.swiftUI)
+                            .animation(nil)
                             .onTapGesture {
                                 onFinishEditing(canceled: false)
                             }
@@ -112,23 +210,14 @@ struct PointAndShootCardPicker: View {
                 .padding(.vertical, BeamSpacing._100)
             }
         }
-        .frame(width: Self.size.width, height: Self.size.height, alignment: .topLeading)
-        .zIndex(20)
-        .animation(.easeInOut(duration: 0.3))
-        .scaleEffect(isVisible ? 1.0 : 0.98)
-        .offset(x: 0, y: isVisible ? 0.0 : -4.0)
-        .animation(.spring(response: 0.4, dampingFraction: 0.6))
-        .opacity(isVisible ? 1.0 : 0.0)
-        .animation(.easeInOut(duration: 0.3))
         .onAppear {
-            if let currentNote = browserTabsManager.currentTab?.noteController.note, !currentNote.isTodaysNote {
+            self.contentOpacity = 1
+            if let currentNote = browserTabsManager.currentTab?.noteController.note {
                 currentCardName = currentNote.title
                 cardSearchField = currentNote.title
             }
             autocompleteModel.data = data
             autocompleteModel.useRecents = false
-            isVisible = true
-
             if !cardSearchField.isEmpty {
                 let range = cardSearchField.count..<cardSearchField.count
                 cardSearchFieldSelection = range
@@ -140,8 +229,113 @@ struct PointAndShootCardPicker: View {
                 cardSearchFieldSelection = nil
             }
         }
+        .onTapGesture {
+            if let group = completedGroup {
+                state.navigateToNote(id: group.noteInfo.id)
+            }
+        }
+        .onReceive(autocompleteModel.$results) { _ in
+            enableResizeAnimation()
+        }
     }
+}
 
+extension PointAndShootCardPicker {
+    // MARK: - PrefixLabel Component
+    struct PrefixLabel: View {
+        var completed: Bool
+        var numberOfElements: Int?
+        @State private var addToOpacity: Double = 1
+        @State private var addedToOpacity: Double = 0
+
+        private var prefixText: String? {
+            guard let num = numberOfElements else { return nil }
+            return num == 1 ? "Added to " : "\(num) Added to "
+        }
+
+        var body: some View {
+            ZStack {
+                if !completed {
+                    Text("Add to")
+                        // https://sarunw.com/posts/how-to-fix-zstack-transition-animation-in-swiftui/
+                        .zIndex(-1)
+                        .opacity(addToOpacity)
+                        .frame(alignment: .topLeading)
+                        .onDisappear {
+                            withAnimation(.easeInOut(duration: 0.05)) {
+                                self.addToOpacity = 0
+                            }
+                        }
+                } else if let text = prefixText {
+                    Text(text)
+                        .zIndex(1)
+                        .frame(alignment: .topLeading)
+                        .opacity(addedToOpacity)
+                        .onAppear {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                withAnimation(.easeInOut(duration: 0.05)) {
+                                    self.addedToOpacity = 1
+                                }
+                            }
+                        }
+                }
+            }
+            .accessibility(identifier: "ShootCardPickerLabel")
+            .font(BeamFont.medium(size: 13).swiftUI)
+        }
+    }
+    // MARK: - Placeholder Component
+    struct Placeholder: View {
+        var text: String
+        var currentCardName: String?
+        var tokenize: Bool = false
+        var selectedResult: String?
+        var completed: Bool = false
+
+        @ViewBuilder
+        var body: some View {
+            Group {
+                let color = tokenize ? BeamColor.NotePicker.active.swiftUI : BeamColor.NotePicker.selected.swiftUI
+                // MARK: - Current Card Placeholder
+                if let name = currentCardName {
+                    HStack {
+                        Text(name).font(BeamFont.regular(size: 13).swiftUI).hidden()
+                            .padding(BeamSpacing._40)
+                            .overlay(color.cornerRadius(4.0))
+                        Spacer()
+                    }
+                } else if let result = selectedResult {
+                    // MARK: - Autocomplete Placeholder
+                    let autocompleteText = result.replacingOccurrences(of: text, with: "", options: [.anchored, .caseInsensitive])
+                    // only show auto complete inline if we replaced an Occurence the result
+                    if autocompleteText.lowercased() != selectedResult?.lowercased(), autocompleteText.count > 0 {
+                        HStack(spacing: 4) {
+                            Text(text).font(BeamFont.regular(size: 13).swiftUI)
+                                .hidden()
+                                .padding(0)
+                            Text(autocompleteText)
+                                .padding(EdgeInsets(top: BeamSpacing._40, leading: 0, bottom: BeamSpacing._40, trailing: BeamSpacing._40))
+                                .font(BeamFont.regular(size: 13).swiftUI)
+                                .foregroundColor(BeamColor.Beam.swiftUI)
+                                .overlay(
+                                    BeamColor.NotePicker.selected.swiftUI
+                                        .cornerRadius(4.0)
+                                        .animation(.easeInOut(duration: 0.1))
+                                )
+                                .animation(nil)
+
+                            Spacer()
+                        }.animation(nil)
+                    }
+                }
+            }.opacity(!completed ? 1 : 0)
+            .animation(.easeInOut(duration: 0.05), value: completed)
+        }
+    }
+}
+
+extension PointAndShootCardPicker {
+    // MARK: - onTextDidChange
     private func onTextDidChange(_ text: String) {
         var searchText = text
         if let currentCardName = currentCardName, text.count == currentCardName.count - 1 {
@@ -151,7 +345,10 @@ struct PointAndShootCardPicker: View {
         autocompleteModel.searchText = searchText
         currentCardName = nil
     }
+}
 
+extension PointAndShootCardPicker {
+    // MARK: - onFinishEditing
     private func onFinishEditing(canceled: Bool = false) {
         guard !canceled else {
             onComplete?(nil, nil)
@@ -168,10 +365,14 @@ struct PointAndShootCardPicker: View {
         }
 
         if !finalCardName.isEmpty {
+            self.shootCompleted = true
             onComplete?(finalCardName, addNoteField)
         }
     }
+}
 
+extension PointAndShootCardPicker {
+    // MARK: - selectSearchResult
     private func selectSearchResult(withCommand: Bool = false) {
         guard !cardSearchField.isEmpty else { return }
         var finalCardName: String
@@ -190,7 +391,10 @@ struct PointAndShootCardPicker: View {
         cardSearchField = finalCardName
         currentCardName = finalCardName
     }
+}
 
+extension PointAndShootCardPicker {
+    // MARK: - createNote
     @discardableResult
     private func createNote(named name: String) -> BeamNote {
         let note = BeamNote.fetchOrCreate(data.documentManager, title: name)
@@ -200,6 +404,7 @@ struct PointAndShootCardPicker: View {
 }
 
 extension PointAndShootCardPicker {
+    // MARK: - onComplete
     func onComplete(perform action: @escaping (_ cardName: String?, _ note: String?) -> Void ) -> Self {
         var copy = self
         copy.onComplete = action
@@ -207,10 +412,22 @@ extension PointAndShootCardPicker {
     }
 }
 
+extension PointAndShootCardPicker {
+    /// Temporarily allow animation on the parent wrapper
+    func enableResizeAnimation() {
+        self.allowAnimation = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(1)) {
+            self.allowAnimation = false
+        }
+    }
+}
+
 struct ShootCardPicker_Previews: PreviewProvider {
+    // MARK: - ShootCardPicker_Previews
+    @State static var allowAnimation: Bool = false
     static let data = BeamData()
     static var previews: some View {
-        PointAndShootCardPicker()
+        PointAndShootCardPicker(allowAnimation: $allowAnimation)
             .environmentObject(data)
     }
 }

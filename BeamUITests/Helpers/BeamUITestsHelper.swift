@@ -4,6 +4,7 @@ import XCTest
 import Quick
 #endif
 import Fakery
+import BeamCore
 
 extension XCUIElementQuery: Sequence {
     public typealias Iterator = AnyIterator<XCUIElement>
@@ -114,9 +115,13 @@ class BeamUITestsHelper {
         fullScreenshotAttachment.name = name
         QuickSpec.current.add(fullScreenshotAttachment)
     }
+
+    func todayDate() -> String {
+        return BeamDate.journalNoteTitle()
+    }
     
     func addNote(noteTitle: String? = nil) {
-        let notePickerField = self.app.textFields["Today"].firstMatch
+        let notePickerField = self.app.textFields[todayDate()].firstMatch
         notePickerField.tap()
         XCTAssert(notePickerField.waitForExistence(timeout: 4))
         if let title = noteTitle {
