@@ -36,4 +36,33 @@ public extension String {
     func sentences(around indexRange: Range<String.Index>) -> String {
         return tokens(unit: .sentence, for: indexRange)
     }
+
+    var wordRanges: [Range<String.Index>] {
+        return tokenize(.word, options: [.omitWhitespace, .joinContractions, .joinNames, .omitPunctuation])
+    }
+
+    var sentenceRanges: [Range<String.Index>] {
+        return tokenize(.sentence, options: [.omitWhitespace, .joinContractions, .joinNames, .omitPunctuation])
+    }
+
+    func tokenize(_ tokenUnit: NLTokenUnit, options: NLTagger.Options? = nil) -> [Range<String.Index>] {
+        var ranges = [Range<String.Index>]()
+
+        // Use Natural Language's NLTagger to tokenize the input by word.
+        let tagger = NLTagger(tagSchemes: [.tokenType])
+        tagger.string = self
+
+        let options: NLTagger.Options = options ?? [.omitWhitespace, .joinContractions, .joinNames]
+
+        // Find all tokens in the string and append to the array.
+        tagger.enumerateTags(in: self.startIndex..<self.endIndex,
+                             unit: tokenUnit,
+                             scheme: .tokenType,
+                             options: options) { (_, range) -> Bool in
+            ranges.append(range)
+            return true
+        }
+
+        return ranges
+    }
 }

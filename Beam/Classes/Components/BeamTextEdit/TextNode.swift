@@ -172,9 +172,6 @@ public class TextNode: ElementNode {
     override init(parent: Widget, element: BeamElement, nodeProvider: NodeProvider? = nil) {
         super.init(parent: parent, element: element, nodeProvider: nodeProvider)
 
-        setAccessibilityLabel("TextNode")
-        setAccessibilityRole(.textArea)
-
         observeNoteTitles()
     }
 
@@ -186,8 +183,6 @@ public class TextNode: ElementNode {
                 updateTextChildren(elements: elements)
             }.store(in: &scope)
 
-        setAccessibilityLabel("TextNode")
-        setAccessibilityRole(.textArea)
 
         switch elementKind {
         case .check:
@@ -200,6 +195,12 @@ public class TextNode: ElementNode {
     }
 
     // MARK: - Setup UI
+
+    override func setupAccessibility() {
+        super.setupAccessibility()
+        setAccessibilityLabel("TextNode")
+        setAccessibilityRole(.textArea)
+    }
 
     private func observeNoteTitles() {
         AppDelegate.main.data.$renamedNote.dropFirst().sink { [unowned self] (noteId, previousName, newName) in
@@ -1357,4 +1358,127 @@ public class TextNode: ElementNode {
         displayedElement.text.count
     }
 
+    public func textFramesAt(range: Range<Int>) -> [NSRect] {
+        var rects = [NSRect]()
+        let start = range.lowerBound
+        let end = range.upperBound
+        let startLine = lineAt(index: start)!
+        let endLine = lineAt(index: end)!
+        let line1 = textFrame!.lines[startLine]
+        let line2 = textFrame!.lines[endLine]
+        let xStart = offsetAt(index: start)
+        let xEnd = offsetAt(index: end)
+
+        if startLine == endLine {
+            // Selection begins and ends on the same line:
+            let markRect = NSRect(x: xStart, y: line1.frame.minY, width: xEnd - xStart, height: line1.bounds.height)
+            rects.append(markRect)
+        } else {
+            let markRect1 = NSRect(x: xStart, y: line1.frame.minY, width: frame.width - xStart, height: line2.frame.minY - line1.frame.minY )
+            rects.append(markRect1)
+
+            if startLine + 1 != endLine {
+                // bloc doesn't end on the line directly below the start line, so be need to joind the start and end lines with a big rectangle
+                let markRect2 = NSRect(x: 0, y: line1.frame.maxY, width: frame.width, height: line2.frame.minY - line1.frame.maxY)
+                rects.append(markRect2)
+            }
+
+            let markRect3 = NSRect(x: 0, y: line1.frame.maxY, width: xEnd, height: CGFloat(line2.frame.maxY - line1.frame.maxY) + 1)
+            rects.append(markRect3)
+        }
+
+        return rects
+    }
+
+    class AccessibleTextElement: NSAccessibilityElement {
+        var children: [AccessibleTextElement]
+        public override func accessibilityChildren() -> [Any]? {
+            return children.isEmpty ? nil : children
+        }
+
+        init(identifier: String, text: String, frame: NSRect, children: [AccessibleTextElement]) {
+            self.children = children
+            super.init()
+            setAccessibilityRole(.button)
+            setAccessibilityElement(true)
+            setAccessibilityEnabled(true)
+            setAccessibilityValue(text)
+            setAccessibilityLabel(text)
+            setAccessibilityTitle(text)
+            setAccessibilityIdentifier(identifier)
+            setAccessibilityFrameInParentSpace(frame)
+            setAccessibilityActivationPoint(NSPoint(x: frame.width/2, y: frame.height/2))
+            setAccessibilityHidden(false)
+            for child in children {
+                child.setAccessibilityParent(self)
+            }
+        }
+    }
+    var sentences: [AccessibleTextElement] = []
+
+    public override func accessibilityChildren() -> [Any]? {
+        sentences = []
+        let text = self.text.text
+        let mainFrame = accessibilityFrameInParentSpace()
+
+        var words = [AccessibleTextElement]()
+
+        for sentence in text.sentenceRanges {
+            let sentenceString = String(text[sentence])
+            let sentenceRange = text.range(from: sentence)
+            let frames = textFramesAt(range: sentenceRange)
+            var sentenceFrame = frames.first ?? NSRect()
+
+            sentenceFrame.origin.y = mainFrame.height - sentenceFrame.maxY
+
+            // Now fish for words:
+            for word in sentenceString.wordRanges {
+                let wordString = String(sentenceString[word])
+                let wordRange = text.range(from: word)
+                let frames = textFramesAt(range: (sentenceRange.lowerBound + wordRange.lowerBound) ..< (sentenceRange.lowerBound + wordRange.upperBound))
+                var wordFrame = frames.first ?? NSRect()
+                let actualY = contentsFrame.height - wordFrame.maxY
+                wordFrame.origin.y = actualY
+//                wordFrame.origin.y = sentenceFrame.height - wordFrame.maxY
+                let wordElement = AccessibleTextElement(identifier: "word", text: wordString, frame: wordFrame, children: [])
+                words.append(wordElement)
+            }
+
+//            let sentenceElement = AccessibleTextElement(identifier: "sentence", text: sentenceString, frame: sentenceFrame, children: words)
+//            sentenceElement.setAccessibilityParent(self)
+            sentences += words
+        }
+
+        for link in self.text.linkRanges {
+            let linkString = link.string
+            let linkRange = link.position ..< link.position + link.end
+
+            let frames = textFramesAt(range: linkRange)
+            var linkFrame = frames.first ?? NSRect()
+            let actualY = contentsFrame.height - linkFrame.maxY
+            linkFrame.origin.y = actualY
+            let linkElement = AccessibleTextElement(identifier: "link", text: linkString, frame: linkFrame, children: [])
+            sentences.append(linkElement)
+        }
+
+        for link in self.text.internalLinkRanges {
+            let linkString = link.string
+            let linkRange = link.position ..< link.position + link.end
+
+            let frames = textFramesAt(range: linkRange)
+            var linkFrame = frames.first ?? NSRect()
+            let actualY = contentsFrame.height - linkFrame.maxY
+            linkFrame.origin.y = actualY
+            let linkElement = AccessibleTextElement(identifier: "internalLink", text: linkString, frame: linkFrame, children: [])
+            sentences.append(linkElement)
+        }
+
+        return sentences + (super.accessibilityChildren() ?? []).map({ elem in
+            if let e = elem as? NSAccessibilityElement {
+                e.setAccessibilityParent(self)
+            }
+            return elem
+
+        })
+    }
 }

@@ -125,8 +125,8 @@ public extension CALayer {
         self.layer = l
         l.backgroundColor = BeamColor.Generic.background.cgColor
         l.masksToBounds = false
-
-        layer?.delegate = self
+        l.name = Self.mainLayerName
+        l.delegate = self
         // self.wantsLayer = true
 
         timer = Timer.init(timeInterval: 1.0 / 60.0, repeats: true) { [unowned self] _ in
@@ -1620,4 +1620,6 @@ public extension CALayer {
 
         return true
     }
+
+    static public let mainLayerName = "beamTextEditMainLayer"
 }
