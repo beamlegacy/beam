@@ -31,8 +31,8 @@ class BeamUITestsHelper {
         self.app.launch()
     }
 
-    func tapCommand(_ command: MenuAvailableCommands) {
-        MenuAvailableCommands.allCases.forEach {
+    func tapCommand(_ command: UITestMenuAvailableCommands) {
+        UITestMenuAvailableCommands.allCases.forEach {
             if $0 == command {
                 let menu = XCUIApplication().menuItems[$0.rawValue]
                 menu.tap()

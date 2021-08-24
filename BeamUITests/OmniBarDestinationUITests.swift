@@ -27,7 +27,7 @@ class OmniBarDestinationUITests: QuickSpec {
         }
         self.app.launch()
         self.helper = OmniBarUITestsHelper(self.app)
-        self.helper.cleanupDB()
+        self.helper.cleanupDB(logout: true)
         createDestinationNote()
     }
 
