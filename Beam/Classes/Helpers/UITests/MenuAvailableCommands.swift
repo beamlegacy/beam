@@ -1,14 +1,17 @@
 import Foundation
 
-public enum MenuAvailableCommands: String, CaseIterable {
-    case populateDBWithJournal = "Populate Journal"
+public enum UITestMenuAvailableCommands: String, CaseIterable {
+    // Clean up
     case destroyDB = "Destroy Databases"
     case logout = "Logout"
     case deleteLogs = "Delete Logs"
+
     case separatorA
     case resizeWindowLandscape = "Resize Window to Landscape"
     case resizeWindowPortrait = "Resize Window to Portrait"
+
     case separatorB
+    // Load HTML Page
     case loadUITestPage1 = "Load UITests Page 1"
     case loadUITestPage2 = "Load UITests Page 2"
     case loadUITestPage3 = "Load UITests Page 3"
@@ -17,8 +20,31 @@ public enum MenuAvailableCommands: String, CaseIterable {
     case loadUITestPagePlayground = "Load HTML playground"
     case loadUITestPageAlerts = "Load JS/Native alert panels"
     case loadUITestPageMedia = "Load Media test page"
+
     case separatorC
-    case insertTextInCurrentNote = "Insert text in current note"
-    case create100Notes = "Create 100 random notes"
-    case setAutoUpdateToMock = "Set autoupdate to mock"
+    // setup
+    case populateDBWithJournal = "Populate Journal"
+    case insertTextInCurrentNote = "Insert Text in Current Note"
+    case create100Notes = "Create 100 Random Notes"
+    case setAutoUpdateToMock = "Set Autoupdate to Mock"
+
+    // Omnibar setup
+    case omnibarFillHistory = "Fill History with Results"
+
+    var group: UITestMenuGroup? {
+        switch self {
+        case .loadUITestPage1, .loadUITestPage2, .loadUITestPage3, .loadUITestPage4, .loadUITestPageMedia,
+             .loadUITestPageAlerts, .loadUITestPagePassword, .loadUITestPagePlayground:
+            return .loadHTMLPage
+        case .omnibarFillHistory:
+            return .omnibarSetup
+        default:
+            return nil
+        }
+    }
+}
+
+public enum UITestMenuGroup: String, CaseIterable {
+    case loadHTMLPage = "Load UITest HTML Page"
+    case omnibarSetup = "Omnibar Setup"
 }
