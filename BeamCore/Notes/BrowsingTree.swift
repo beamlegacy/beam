@@ -71,6 +71,7 @@ public enum ReadingEventType: String, Codable {
     case exitForward
     case switchToOtherTab
     case switchToCard
+    case switchToJournal
     case switchToNewSearch
     case openLinkInNewTab
     case searchBarNavigation
@@ -87,6 +88,7 @@ let ExitForegroundEventTypes: Set = [
     ReadingEventType.exitBackward,
     ReadingEventType.switchToOtherTab,
     ReadingEventType.switchToCard,
+    ReadingEventType.switchToJournal,
     ReadingEventType.switchToNewSearch,
     ReadingEventType.closeApp
 ]
@@ -441,6 +443,10 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
 
     public func switchToCard() {
         current.addEvent(.switchToCard)
+    }
+
+    public func switchToJournal() {
+        current.addEvent(.switchToJournal)
     }
 
     public func switchToNewSearch() {
