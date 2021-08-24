@@ -10,7 +10,7 @@ import Combine
 import AppKit
 import AVFoundation
 
-class Layer: NSAccessibilityElement, CALayerDelegate, MouseHandler {
+@objc class Layer: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     var name: String {
         didSet {
             layer.name = name
@@ -20,6 +20,7 @@ class Layer: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     var layer: CALayer
     var hovering: Bool = false
     var cursor: NSCursor?
+    weak var widget: Widget?
 
     typealias MouseBlock = (MouseInfo) -> Bool
     var mouseDown: MouseBlock
@@ -62,7 +63,7 @@ class Layer: NSAccessibilityElement, CALayerDelegate, MouseHandler {
             layer.delegate = self
         }
 
-        setAccessibilityRole(.none)
+        setAccessibilityRole(.button)
     }
 
     deinit {
@@ -83,8 +84,19 @@ class Layer: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         }
         set {
             layer.frame = newValue
-            setAccessibilityFrameInParentSpace(newValue)
         }
+    }
+
+    override func accessibilityFrameInParentSpace() -> NSRect {
+        if let parent = layer.superlayer, let widget = widget {
+            let parentRect = parent.frame
+            let rect = layer.convert(bounds, to: parent)
+            let actualY = parentRect.height - rect.maxY
+            let correctedRect = NSRect(origin: CGPoint(x: rect.origin.x - widget.contentsFrame.origin.x, y: actualY - widget.contentsFrame.origin.y), size: rect.size)
+            return correctedRect
+        }
+
+        return frame
     }
 
     var bounds: NSRect {

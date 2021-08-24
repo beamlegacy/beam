@@ -91,6 +91,7 @@ public class TextRoot: TextNode {
         if state.nodeSelection == nil {
             if needLayout {
                 DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: .milliseconds(10))) {
+                    guard self._editor != nil else { return }
                     self.editor.setHotSpotToCursorPosition()
                 }
             } else {
@@ -217,10 +218,6 @@ public class TextRoot: TextNode {
 
         childInset = 0
 
-        setAccessibilityLabel("TextRoot")
-        setAccessibilityRole(.unknown)
-        setAccessibilityParent(editor)
-
         referencesSection?.open = false
 
         if !editor.journalMode {
@@ -232,6 +229,11 @@ public class TextRoot: TextNode {
 
     }
 
+    override func setupAccessibility() {
+        setAccessibilityLabel("TextRoot")
+        setAccessibilityRole(.unknown)
+        setAccessibilityParent(editor)
+    }
     public override func printTree(level: Int = 0) -> String {
         return String.tabs(level) + (note?.title ?? "<???>") + "\n" + children.prefix(children.count).reduce("", { result, child -> String in
             result + child.printTree(level: level + 1)

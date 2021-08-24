@@ -109,4 +109,9 @@ public extension String {
 
         return result
     }
+
+    func range(from r: Range<String.Index>) -> Range<Int> {
+        return position(at: r.lowerBound)..<position(at: r.upperBound)
+    }
+
 }
