@@ -224,7 +224,17 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         }
     }
 
-    public private(set) var editor: BeamTextEdit
+    public private(set) weak var _editor: BeamTextEdit?
+    public private(set) var editor: BeamTextEdit {
+        get {
+            //swiftlint:disable:next force_cast
+            _editor!
+        }
+        set {
+            _editor = newValue
+        }
+    }
+
     internal var computedIdealSize = NSSize()
     private weak var _root: TextRoot?
     public private(set) var needLayout = true
@@ -236,7 +246,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     // MARK: - Initializer
     init(parent: Widget, nodeProvider: NodeProvider? = nil) {
         self.parent = parent
-        self.editor = parent.editor
+        self._editor = parent.editor
         self.nodeProvider = nodeProvider
         layer = CALayer()
         layer.isHidden = true
@@ -248,16 +258,12 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         configureSelectionLayer()
         availableWidth = parent.availableWidth - parent.childInset
 
-        setAccessibilityIdentifier(String(describing: Self.self))
-        setAccessibilityElement(true)
-        setAccessibilityLabel("Widget")
-        setAccessibilityRole(.none)
-        setAccessibilityParent(editor)
+        setupAccessibility()
     }
 
     // this version should only be used by TextRoot
     init(editor: BeamTextEdit, nodeProvider: NodeProvider? = nil) {
-        self.editor = editor
+        self._editor = editor
         self.nodeProvider = nodeProvider
         layer = CALayer()
         layer.isHidden = true
@@ -268,10 +274,14 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         configureLayer()
         configureSelectionLayer()
 
+        setupAccessibility()
+    }
+
+    func setupAccessibility() {
         setAccessibilityIdentifier(String(describing: Self.self))
         setAccessibilityElement(true)
         setAccessibilityLabel("Widget")
-        setAccessibilityRole(.none)
+        setAccessibilityRole(.unknown)
         setAccessibilityParent(editor)
     }
 
@@ -283,7 +293,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         layer.removeFromSuperlayer()
 
         // handle sublayers:
-        for l in layers where l.value.layer.superlayer == editor.layer {
+        for l in layers where l.value.layer.superlayer?.name == BeamTextEdit.mainLayerName {
             l.value.layer.removeFromSuperlayer()
         }
 
@@ -561,6 +571,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
     internal var layers: [String: Layer] = [:]
     func addLayer(_ layer: Layer, origin: CGPoint? = nil, global: Bool = false) {
+        layer.widget = self
         layer.frame = CGRect(origin: origin ?? layer.frame.origin, size: layer.frame.size)
 
         layer.layer.deepContentsScale = self.layer.contentsScale
@@ -980,7 +991,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         let parentRect = editor.frame
         let rect = NSRect(origin: layer.position, size: layer.bounds.size)
         let actualY = parentRect.height - rect.maxY
-        let correctedRect = NSRect(origin: CGPoint(x: rect.minX, y: actualY), size: rect.size)
+        let correctedRect = NSRect(origin: CGPoint(x: rect.origin.x, y: actualY), size: rect.size)
         //        Logger.shared.logDebug("\(Self.self) actualY = \(actualY) - rect \(rect) - parentRect \(parentRect) -> \(correctedRect)")
         return correctedRect
     }

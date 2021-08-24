@@ -92,9 +92,8 @@ class NavigationCollectUITests: QuickSpec {
                 // Get locations of the text
                 let parent = self.app.webViews.containing(.staticText, identifier: linkText).element
                 let textElement = parent.staticTexts[prefix].firstMatch
-                let textElementMiddle = textElement.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
                 // click at middle of element1 to make sure the page has focus
-                textElementMiddle.click()
+                textElement.tapInTheMiddle()
                 // Hold option
                 XCUIElement.perform(withKeyModifiers: .option) {
                     // While holding option
@@ -102,7 +101,7 @@ class NavigationCollectUITests: QuickSpec {
                     let shootSelections = self.app.otherElements.matching(identifier:"PointFrame")
                     expect(shootSelections.count) == 1
                     // Clicking element to trigger shooting mode
-                    textElementMiddle.click()
+                    textElement.tapInTheMiddle()
                     // Release option
                 }
 
@@ -116,8 +115,10 @@ class NavigationCollectUITests: QuickSpec {
                 expect(self.journalChildren.element(boundBy: 0).value as? String) == titles[2]
                 expect((self.journalChildren.element(boundBy: 1).value as? String)?.contains(prefix + linkText)) == true
                 // tap on collected sublink (end of new bullet)
-                let linkCoordinate = self.journalChildren.element(boundBy: 1).coordinate(withNormalizedOffset: CGVector(dx: 0.18, dy: 0.5))
-                linkCoordinate.click()
+                let linkWord = self.journalChildren.element(boundBy: 1).buttons[linkText]
+                expect(linkWord.exists) == true
+                linkWord.tapInTheMiddle()
+
                 // tap on a link in the page, should be added to opened bullet
                 let page2Link = self.app.webViews.staticTexts["I-Beam"].firstMatch
                 expect(page2Link.waitForExistence(timeout: 4)) == true
