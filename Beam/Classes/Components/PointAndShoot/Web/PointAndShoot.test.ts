@@ -184,8 +184,10 @@ test.each(textualInputTypes)(
     expect(pointedElement.tagName).toEqual("input")
     expect(BeamElementHelper.getType(pointedElement)).toEqual(type)
 
-    // expect no event on active text inputs
-    expect(testUI.eventsCount).toEqual(0)
+    // expect events on active text inputs, but no shootTargets added
+    expect(testUI.eventsCount).toEqual(6)
+    expect(pns.shootTargets.length).toEqual(0)
+    expect(pns.selectionRangeGroups.length).toEqual(0)
   }
 )
 
@@ -214,8 +216,10 @@ test("point with mouse move + Option should be prevented on active text inputs",
   expect(pointedElement.tagName).toEqual("input")
   expect(BeamElementHelper.getType(pointedElement)).toEqual("text")
 
-  // expect no event on active text inputs
-  expect(testUI.eventsCount).toEqual(0)
+  // expect events on active text inputs, but no shootTargets added
+  expect(testUI.eventsCount).toEqual(6)
+  expect(pns.shootTargets.length).toEqual(0)
+  expect(pns.selectionRangeGroups.length).toEqual(0)
 })
 
 test("point with mouse move + Option should be prevented on active textarea", () => {
@@ -242,8 +246,10 @@ test("point with mouse move + Option should be prevented on active textarea", ()
   expect(pointedElement.contains(pointedElement)).toEqual(true)
   expect(pointedElement.tagName).toEqual("textarea")
 
-  // expect no event on active text inputs
-  expect(testUI.eventsCount).toEqual(0)
+  // expect events on active text inputs, but no shootTargets added
+  expect(testUI.eventsCount).toEqual(6)
+  expect(pns.shootTargets.length).toEqual(0)
+  expect(pns.selectionRangeGroups.length).toEqual(0)
 })
 
 test("point with mouse move + Option should be prevented on active contentEditable element", () => {
@@ -272,8 +278,10 @@ test("point with mouse move + Option should be prevented on active contentEditab
   expect(BeamElementHelper.getContentEditable(pointedElement)).toEqual("true")
 
 
-  // expect no event on active text inputs
-  expect(testUI.eventsCount).toEqual(0)
+  // expect events on active text inputs, but no shootTargets added
+  expect(testUI.eventsCount).toEqual(6)
+  expect(pns.shootTargets.length).toEqual(0)
+  expect(pns.selectionRangeGroups.length).toEqual(0)
 })
 
 test("point with mouse move + Option should be prevented on elements nested within an active contentEditable element", () => {
@@ -310,8 +318,10 @@ test("point with mouse move + Option should be prevented on elements nested with
 
   expect(BeamElementHelper.getContentEditable(pointedElement.parentElement)).toEqual("true")
   expect(BeamElementHelper.getContentEditable(pointedElement)).toEqual("inherit")
-  // expect no event on active text inputs
-  expect(testUI.eventsCount).toEqual(0)
+  // expect events on active text inputs, but no shootTargets added
+  expect(testUI.eventsCount).toEqual(6)
+  expect(pns.shootTargets.length).toEqual(0)
+  expect(pns.selectionRangeGroups.length).toEqual(0)
 })
 
 test("mouse move + Option then click on an arbitrary input element should not shoot", () => {
@@ -345,8 +355,10 @@ test("mouse move + Option then click on an arbitrary input element should not sh
   pns.onClick(clickEvent)
 
 
-  // expect no event on active text inputs
-  expect(testUI.eventsCount).toEqual(0)
+  // expect events on active text inputs, but no shootTargets added
+  expect(testUI.eventsCount).toEqual(12)
+  expect(pns.shootTargets.length).toEqual(0)
+  expect(pns.selectionRangeGroups.length).toEqual(0)
 })
 
 test("point with Option key down then mouse move", () => {
@@ -373,7 +385,7 @@ test("point with Option key down then mouse move", () => {
   })
   pns.onMouseMove(pointEvent)
 
-  expect(testUI.eventsCount).toEqual(18) // aka 3 document events
+  expect(testUI.eventsCount).toEqual(12) // aka 2 document events
   expect(testUI.findEventByName("hasSelection")).toEqual({ name: "hasSelection", hasSelection: false })
   expect(testUI.findEventByName("selectBounds")).toEqual({ name: "selectBounds", rangeGroups: [] })
   expect(testUI.findEventByName("shootBounds")).toEqual({ name: "shootBounds", shootTargets: [] })

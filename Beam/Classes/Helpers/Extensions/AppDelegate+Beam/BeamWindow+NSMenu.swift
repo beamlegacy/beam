@@ -85,7 +85,7 @@ extension BeamWindow {
     }
 
     @IBAction func reload(_ sender: Any) {
-        state.browserTabsManager.currentTab?.webView.reload()
+        state.browserTabsManager.reloadCurrentTab()
     }
 
     @IBAction func resetZoom(_ sender: Any) {

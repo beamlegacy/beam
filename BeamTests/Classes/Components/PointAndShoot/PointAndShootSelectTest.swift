@@ -84,6 +84,9 @@ class PointAndShootSelectTest: PointAndShootTest {
         XCTAssertNil(self.pns.activeShootGroup)
 
         let group2 = helperCreateRandomGroups()
+        // Before group2 will be accepted we the selection should be collapsed
+        // when the selection collapses it calls
+        self.pns.clearSelection(group.id)
         // calling select for the second time with group2
         self.pns.select(group2.id, group2.targets, group2.href)
         XCTAssertEqual(self.pns.activeSelectGroup?.id, group2.id)
@@ -136,7 +139,7 @@ class PointAndShootSelectTest: PointAndShootTest {
 
         // Select is now set as active ShootGroup
         XCTAssertNil(self.pns.activePointGroup)
-        XCTAssertNotNil(self.pns.activeSelectGroup)
+        XCTAssertNil(self.pns.activeSelectGroup)
         XCTAssertNotNil(self.pns.activeShootGroup)
         // match activeShootGroup with select group
         XCTAssertEqual(self.pns.activeShootGroup?.id, group.id)
