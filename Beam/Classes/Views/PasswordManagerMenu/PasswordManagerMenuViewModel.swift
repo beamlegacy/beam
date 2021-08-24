@@ -40,7 +40,8 @@ class PasswordManagerMenuViewModel: ObservableObject {
     @Published var display: Contents
     @Published var scrollingListHeight: CGFloat?
 
-    private let host: URL
+    let host: URL
+
     private let passwordStore: PasswordStore
     private let userInfoStore: UserInformationsStore
     private var entriesForHost: [PasswordManagerEntry]
@@ -150,6 +151,7 @@ class PasswordGeneratorViewModel: ObservableObject {
     @Published var generatorPassphraseWordCount = 4
     @Published var generatorPasswordLength = 20
 
+    private var isLocked = false
     private var subscribers = Set<AnyCancellable>()
 
     init() {
@@ -167,7 +169,24 @@ class PasswordGeneratorViewModel: ObservableObject {
         }).store(in: &subscribers)
     }
 
-    func generate() {
+    func start() {
+        guard !isLocked else { return }
+        generate()
+        clicked()
+    }
+
+    func usePassword() {
+        isLocked = true
+        dismiss()
+    }
+
+    func dontUsePassword() {
+        isLocked = false
+        emptyPasswordField()
+    }
+
+    private func generate() {
+        isLocked = false
         generate(generatorOption: generatorOption, generatorPassphraseWordCount: generatorPassphraseWordCount, generatorPasswordLength: generatorPasswordLength)
     }
 
@@ -180,16 +199,16 @@ class PasswordGeneratorViewModel: ObservableObject {
         }
     }
 
-    func clicked() {
-        Logger.shared.logDebug("Clicked on generated password: \(suggestion)")
+    private func clicked() {
+        Logger.shared.logDebug("Clicked on generated password", category: .passwordManager)
         delegate?.fillNewPassword(suggestion, dismiss: false)
     }
 
-    func emptyPasswordField() {
+    private func emptyPasswordField() {
         delegate?.emptyPasswordField()
     }
 
-    func dismiss() {
+    private func dismiss() {
         delegate?.dismiss()
     }
 }

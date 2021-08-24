@@ -147,8 +147,13 @@ function beam_setTextFieldValues(fields_json) {
             element.dispatchEvent(event)
             if (field.background) {
                 var styleAttribute = document.createAttribute('style')
-                styleAttribute.value = 'background-color:' + background
+                styleAttribute.value = 'background-color:' + field.background
                 element.setAttributeNode(styleAttribute)
+            } else {
+                let styleAttribute = element.getAttributeNode('style')
+                if (styleAttribute) {
+                    element.removeAttributeNode(styleAttribute)
+                }
             }
         }
     }

@@ -30,6 +30,7 @@ class PasswordOverlayController: WebPageHolder {
     private var lastFocusOutTimestamp: Date = .distantPast
     private var disabledForSubmit = false
     private var valuesOnFocusOut: [String: String]?
+    private var currentPasswordManagerViewModel: PasswordManagerMenuViewModel?
 
     init(passwordStore: PasswordStore, userInfoStore: UserInformationsStore) {
         self.passwordStore = passwordStore
@@ -147,14 +148,29 @@ class PasswordOverlayController: WebPageHolder {
         if passwordMenuWindow != nil {
             dismissPasswordManagerMenu()
         }
-        let viewModel = PasswordManagerMenuViewModel(host: host, passwordStore: passwordStore, userInfoStore: userInfoStore, withPasswordGenerator: passwordGenerator)
-        viewModel.delegate = self
+        let viewModel = passwordManagerViewModel(for: host, withPasswordGenerator: passwordGenerator)
         let passwordManagerMenu = PasswordManagerMenu(width: location.size.width, viewModel: viewModel)
         guard let webView = (page as? BrowserTab)?.webView,
               let passwordWindow = CustomPopoverPresenter.shared.present(view: BeamHostingView(rootView: passwordManagerMenu), from: webView, atPoint: location.origin) else { return }
 //        passwordMenuPosition = bottomLeftOnScreen(for: location) // Not needed atm
         passwordWindow.makeKeyAndOrderFront(nil)
         passwordMenuWindow = passwordWindow
+    }
+
+    private func passwordManagerViewModel(for host: URL, withPasswordGenerator passwordGenerator: Bool) -> PasswordManagerMenuViewModel {
+        if let viewModel = currentPasswordManagerViewModel {
+            let viewModelHasPasswordGenerator = viewModel.passwordGeneratorViewModel != nil
+            if viewModel.host != host || viewModelHasPasswordGenerator != passwordGenerator {
+                currentPasswordManagerViewModel = nil
+            }
+        }
+        if let viewModel = currentPasswordManagerViewModel {
+            return viewModel
+        }
+        let viewModel = PasswordManagerMenuViewModel(host: host, passwordStore: passwordStore, userInfoStore: userInfoStore, withPasswordGenerator: passwordGenerator)
+        viewModel.delegate = self
+        currentPasswordManagerViewModel = viewModel
+        return viewModel
     }
 
     private func dismissPasswordManagerMenu() {
@@ -337,16 +353,17 @@ extension PasswordOverlayController: PasswordManagerMenuDelegate {
                 return
             }
             Logger.shared.logDebug(String(describing: autocompleteGroup.relatedFields), category: .passwordManager)
+            let backgroundColor = BeamColor.Autocomplete.clickedBackground.hexColor
             let autofill = autocompleteGroup.relatedFields.compactMap { field -> WebFieldAutofill? in
                 switch field.role {
                 case .currentUsername:
-                    return WebFieldAutofill(id: field.id, value: entry.username, background: nil)
+                    return WebFieldAutofill(id: field.id, value: entry.username, background: backgroundColor)
                 case .newUsername:
-                    return autocompleteGroup.isAmbiguous ? WebFieldAutofill(id: field.id, value: entry.username, background: nil) : nil
+                    return autocompleteGroup.isAmbiguous ? WebFieldAutofill(id: field.id, value: entry.username, background: backgroundColor) : nil
                 case .currentPassword:
-                    return WebFieldAutofill(id: field.id, value: password, background: nil)
+                    return WebFieldAutofill(id: field.id, value: password, background: backgroundColor)
                 case .newPassword:
-                    return autocompleteGroup.isAmbiguous ? WebFieldAutofill(id: field.id, value: password, background: nil) : nil
+                    return autocompleteGroup.isAmbiguous ? WebFieldAutofill(id: field.id, value: password, background: backgroundColor) : nil
                 default:
                     return nil
                 }
@@ -364,12 +381,13 @@ extension PasswordOverlayController: PasswordManagerMenuDelegate {
             dismissPasswordManagerMenu()
             return
         }
+        let backgroundColor = BeamColor.Autocomplete.clickedBackground.hexColor
         let autofill = autocompleteGroup.relatedFields.compactMap { field -> WebFieldAutofill? in
             switch field.role {
             case .newPassword:
-                return WebFieldAutofill(id: field.id, value: password, background: nil)
+                return WebFieldAutofill(id: field.id, value: password, background: backgroundColor)
             case .currentPassword:
-                return autocompleteGroup.isAmbiguous ? WebFieldAutofill(id: field.id, value: password, background: nil) : nil
+                return autocompleteGroup.isAmbiguous ? WebFieldAutofill(id: field.id, value: password, background: backgroundColor) : nil
             default:
                 return nil
             }
