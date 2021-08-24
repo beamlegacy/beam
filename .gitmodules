@@ -3,7 +3,7 @@
 	url = https://github.com/libgit2/libgit2.git
 [submodule "Extern/AutoUpdate"]
 	path = Extern/AutoUpdate
-	url = git@gitlab.com:beamgroup/autoupdate.git
+	url = ../autoupdate.git
 [submodule "Extern/RadBlock"]
 	path = Extern/RadBlock
-	url = git@gitlab.com:beamgroup/adblock.git
+	url = ../adblock.git
