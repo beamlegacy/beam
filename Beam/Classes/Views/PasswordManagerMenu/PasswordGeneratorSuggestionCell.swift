@@ -22,17 +22,16 @@ struct PasswordGeneratorSuggestionCell: View {
                 HStack {
                     Spacer()
                     ButtonLabel("Don't use", icon: nil, state: .normal, variant: .secondary) {
-                        viewModel.emptyPasswordField()
+                        viewModel.dontUsePassword()
                     }
                     ButtonLabel("Use Password", icon: nil, state: .normal, variant: .primary) {
-                        viewModel.dismiss()
+                        viewModel.usePassword()
                     }
                 }
             }
         }.padding()
         .onAppear {
-            viewModel.generate()
-            viewModel.clicked()
+            viewModel.start()
         }
     }
 }

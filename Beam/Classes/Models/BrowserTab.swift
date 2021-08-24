@@ -545,12 +545,14 @@ import Promises
     }
 
     func closeTab() {
+        passwordOverlayController?.dismiss()
         authenticationViewModel?.cancel()
         browsingTree.closeTab()
         sendTree()
     }
 
     func closeApp() {
+        passwordOverlayController?.dismiss()
         authenticationViewModel?.cancel()
         browsingTree.closeApp()
         sendTree(blocking: true)
