@@ -140,7 +140,7 @@ extension BrowserTabsManager {
             case .note:
                 currentTab?.switchToCard()
             case .today:
-                currentTab?.switchToNewSearch()
+                currentTab?.switchToJournal()
             default:
                 break
             }
