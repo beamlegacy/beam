@@ -107,6 +107,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
         var targets: [Target] = []
         var noteInfo: NoteInfo
         var numberOfElements: Int = 0
+        var isText: Bool = true
         func html() -> String {
             targets.reduce("", {
                 $1.html.count > $0.count ? $1.html : $0
@@ -426,6 +427,9 @@ class PointAndShoot: WebPageHolder, ObservableObject {
                 }
                 // Add to source Note
                 quotes.forEach({ quote in
+                    if quote.imageLink != nil {
+                        shootGroup.isText = false
+                    }
                     source.addChild(quote)
                 })
                 // Complete PNS and clear stored data

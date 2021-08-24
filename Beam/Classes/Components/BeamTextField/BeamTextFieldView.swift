@@ -27,6 +27,7 @@ class BeamTextFieldView: NSTextField {
 
     private var _currentText: String?
     private var _currentColor: NSColor?
+    private var _selectionRangeColor: NSColor = BeamColor.Generic.textSelection.nsColor
     private var _placeholderText: String?
     private var _placeholderIcon: NSImage?
 
@@ -49,7 +50,7 @@ class BeamTextFieldView: NSTextField {
 
     var onPerformKeyEquivalent: (NSEvent) -> Bool = { _ in return false }
     var onFocusChanged: (Bool) -> Void = { _ in }
-    var onSelectionChanged: (() -> Void)?
+    var onSelectionChanged: (NSRange) -> Void = { _ in }
 
     public init() {
         super.init(frame: NSRect())
@@ -124,12 +125,24 @@ class BeamTextFieldView: NSTextField {
         return attrs
     }
 
-    private func updateTextSelectionColor() {
+    func updateTextSelectionColor(_ color: NSColor? = nil) {
+        if let newColor = color,
+           _selectionRangeColor != newColor {
+            _selectionRangeColor = newColor
+        }
         if let textView = currentEditor() as? NSTextView {
             textView.selectedTextAttributes = [
-                .backgroundColor: BeamColor.Generic.textSelection.nsColor
+                .backgroundColor: _selectionRangeColor
             ]
         }
+    }
+
+    var selectedRange: NSRange? {
+        guard let textView = currentEditor() as? NSTextView else {
+            return nil
+        }
+
+        return textView.selectedRange()
     }
 
     @discardableResult
@@ -183,7 +196,10 @@ class BeamTextFieldView: NSTextField {
 
 extension BeamTextFieldView: NSTextViewDelegate {
     func textViewDidChangeSelection(_ notification: Notification) {
-        onSelectionChanged?()
+        if let range = selectedRange {
+            onSelectionChanged(range)
+        }
+        updateTextSelectionColor()
     }
 }
 

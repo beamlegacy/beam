@@ -18,7 +18,9 @@ struct BeamTextField: NSViewRepresentable {
     var font: NSFont?
     var textColor: NSColor?
     var placeholderColor: NSColor?
+
     var selectedRange: Range<Int>?
+    var selectedRangeColor: NSColor?
     var multiline = false
 
     var onTextChanged: (String) -> Void = { _ in }
@@ -32,6 +34,7 @@ struct BeamTextField: NSViewRepresentable {
     var onModifierFlagPressed: ((_ modifierFlag: NSEvent) -> Void)?
     var onStartEditing: () -> Void = { }
     var onStopEditing: () -> Void = { }
+    var onSelectionChanged: (NSRange) -> Void = { _ in }
 
     internal var centered: Bool = false
 
@@ -59,12 +62,19 @@ struct BeamTextField: NSViewRepresentable {
             textField.placeholderColor = placeholderColor
         }
 
+        if let selectedRangeColor = selectedRangeColor {
+            textField.updateTextSelectionColor(selectedRangeColor)
+        }
+
         textField.setText(text, font: font)
         textField.onPerformKeyEquivalent = { [weak coordinator] event in
             coordinator?.performKeyEquivalentHandler(event: event) ?? false
         }
         textField.onFocusChanged = { [weak coordinator] isFocused in
             coordinator?.focusChangedHandler(isFocused: isFocused)
+        }
+        textField.onSelectionChanged = { range in
+            onSelectionChanged(range)
         }
         return textField
     }
@@ -75,6 +85,11 @@ struct BeamTextField: NSViewRepresentable {
         if textField.textColor != textColor {
             textField.textColor = textColor
         }
+
+        if let selectedRangeColor = selectedRangeColor {
+            textField.updateTextSelectionColor(selectedRangeColor)
+        }
+
         textField.setText(text, font: font)
         textField.setPlaceholder(placeholder, font: font)
         textField.shouldUseIntrinsicContentSize = centered
@@ -115,6 +130,9 @@ struct BeamTextField: NSViewRepresentable {
     private func updateSelectedRange(_ textField: Self.NSViewType, range: NSRange) {
         let fieldeditor = textField.currentEditor()
         fieldeditor?.selectedRange = range
+        if let selectedRangeColor = selectedRangeColor {
+            textField.updateTextSelectionColor(selectedRangeColor)
+        }
     }
 
     private func clearSelectionIfNeeded(_ textField: Self.NSViewType, context: Self.Context) {

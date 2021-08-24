@@ -48,7 +48,9 @@ class OmniBarDestinationUITests: QuickSpec {
 
         let noteSearchField = self.app.searchFields["DestinationNoteSearchField"]
         let noteTitleLabel = self.app.staticTexts["DestinationNoteTitle"]
-        let todayName = "Today"
+        var todayName: String {
+            self.helper.todayDate()
+        }
 
         func goToWebMode() {
             self.helper.searchField.typeText(self.helper.randomSearchTerm())
@@ -67,11 +69,11 @@ class OmniBarDestinationUITests: QuickSpec {
 
         describe("Destination Note") {
 
-            it("displays 'today' by default") {
+            it("displays the current date by default") {
                 goToWebMode()
                 let title = noteTitleLabel
                 expect(title.waitForExistence(timeout: 2)).to(beTrue())
-                title.tap()
+                title.tapInTheMiddle()
                 expect(noteSearchField.waitForExistence(timeout: 2)).to(beTrue())
                 expect(self.helper.inputHasFocus(noteSearchField)).to(beTrue())
                 expect(noteSearchField.value as? String).to(equal(""))
@@ -100,7 +102,7 @@ class OmniBarDestinationUITests: QuickSpec {
 
                 let title = noteTitleLabel
                 expect(title.waitForExistence(timeout: 2)).to(beTrue())
-                title.tap()
+                title.tapInTheMiddle()
 
                 expect(noteSearchField.waitForExistence(timeout: 2)).to(beTrue())
                 expect(self.helper.inputHasFocus(noteSearchField)).to(beTrue())
@@ -129,7 +131,7 @@ class OmniBarDestinationUITests: QuickSpec {
                 let title = noteTitleLabel
                 expect(title.waitForExistence(timeout: 1)).to(beTrue())
                 expect(title.value as? String).to(equal(todayName))
-                title.tap()
+                title.tapInTheMiddle()
 
                 noteSearchField.typeText("One")
                 noteSearchField.typeText("\r")
@@ -157,7 +159,7 @@ class OmniBarDestinationUITests: QuickSpec {
                 let title = noteTitleLabel
                 expect(title.waitForExistence(timeout: 1)).to(beTrue())
                 expect(title.value as? String).to(equal(todayName))
-                title.tap()
+                title.tapInTheMiddle()
 
                 noteSearchField.typeText(anotherTitle)
                 let createNoteItem = self.helper.allAutocompleteResults.matching(self.helper.autocompleteCreateCardPredicate).firstMatch

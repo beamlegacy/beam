@@ -9,25 +9,22 @@ import SwiftUI
 
 struct PointAndShootPathFrame: View {
     var group: PointAndShoot.ShootGroup
-    var showLabel: Bool = false
+    var isCollected: Bool = false
     @State private var isHovering = false
 
     var body: some View {
         let rect = group.groupRect
-        let text = (isHovering || showLabel) ? group.noteInfo.title : ""
-
+        let x = rect.minX + (rect.width / 2)
+        let y = rect.minY + (rect.height / 2)
+        let fill = !isCollected || isHovering ? BeamColor.PointShoot.shootBackground.swiftUI : BeamColor.PointShoot.reminiscenceBackground.swiftUI
         ZStack(alignment: .center) {
             Path(group.groupPath)
-                .fill(BeamColor.PointShoot.shootBackground.swiftUI)
+                .fill(fill)
 
-            ZStack {
-                Rectangle().fill(Color.clear) // needed  to enable hover
-                Text(text)
-                    .foregroundColor(BeamColor.PointShoot.shootOutline.swiftUI)
-            }
-            .onHover { isHovering = $0 }
-            .frame(width: rect.width, height: rect.height)
-            .position(x: rect.minX + rect.width / 2, y: rect.minY + rect.height / 2)
+            Rectangle().fill(Color.clear) // needed to enable hover
+                .onHover { isHovering = $0 }
+                .frame(width: rect.width, height: rect.height)
+                .position(x: x, y: y)
         }
         .allowsHitTesting(false)
     }
