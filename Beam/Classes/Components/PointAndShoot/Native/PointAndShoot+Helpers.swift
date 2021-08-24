@@ -10,6 +10,7 @@ import BeamCore
 import Promises
 
 extension PointAndShoot {
+
     /// Dismiss activeShootGroup. Group gets added to dismissedGroups array and activeShootGroup gets cleared.
     func dismissShoot() {
         if let group = activeShootGroup {

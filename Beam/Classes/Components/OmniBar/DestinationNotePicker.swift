@@ -23,10 +23,10 @@ struct DestinationNotePicker: View {
     private let boxHeight: CGFloat = 32
     private let maxBoxWidth: CGFloat = 230
     private var title: String {
-        autocompleteModel.displayNameForCardName(state.destinationCardName)
+        state.destinationCardName
     }
     private var placeholder: String {
-        let currentNote = autocompleteModel.displayNameForCardName(tab.noteController.note.title)
+        let currentNote = tab.noteController.note.title
         return !currentNote.isEmpty ? currentNote : "Destination Card"
     }
 

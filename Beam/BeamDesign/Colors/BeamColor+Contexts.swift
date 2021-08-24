@@ -98,10 +98,18 @@ extension BeamColor {
 extension BeamColor {
     enum PointShoot {
         static let text = BeamColor.From(color: BeamColor.Beam.nsColor)
-        static let pointBackground = BeamColor.From(color: BeamColor.Beam.nsColor.withAlphaComponent(0.5))
-        static let shootOutline = BeamColor.Beam
-        static let shootBackground = BeamColor.From(color: BeamColor.Beam.nsColor.withAlphaComponent(0.5))
-        static let shootTextBackground = BeamColor.From(color: BeamColor.Beam.nsColor.withAlphaComponent(0.15))
+        static let pointBackground = BeamColor.From(color: NSColor(
+            withLightColor: BeamColor.Beam.nsColor.withAlphaComponent(0.14),
+            darkColor: BeamColor.Beam.nsColor.withAlphaComponent(0.20)
+        ))
+        static let shootBackground = BeamColor.From(color: NSColor(
+            withLightColor: BeamColor.Beam.nsColor.withAlphaComponent(0.28),
+            darkColor: BeamColor.Beam.nsColor.withAlphaComponent(0.40)
+        ))
+        static let reminiscenceBackground = BeamColor.From(color: NSColor(
+            withLightColor: BeamColor.Beam.nsColor.withAlphaComponent(0.14),
+            darkColor: BeamColor.Beam.nsColor.withAlphaComponent(0.20)
+        ))
     }
 }
 
@@ -122,8 +130,14 @@ extension BeamColor {
 extension BeamColor {
     enum NotePicker {
         static let border = BeamColor.Mercury
-        static let selected = BeamColor.From(color: BeamColor.Beam.nsColor.withAlphaComponent(0.03))
-        static let active = BeamColor.From(color: BeamColor.Beam.nsColor.withAlphaComponent(0.08))
+        static let selected = BeamColor.From(color: NSColor(
+            withLightColor: BeamColor.Beam.nsColor.withAlphaComponent(0.10),
+            darkColor: BeamColor.Beam.nsColor.withAlphaComponent(0.20)
+        ))
+        static let active = BeamColor.From(color: NSColor(
+            withLightColor: BeamColor.Beam.nsColor.withAlphaComponent(0.20),
+            darkColor: BeamColor.Beam.nsColor.withAlphaComponent(0.30)
+        ))
     }
 }
 
