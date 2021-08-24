@@ -55,11 +55,15 @@ public class NoteSources: Codable {
         return sources[urlId]
     }
 
-    public func add(urlId: UInt64, type: NoteSource.SourceType, date: Date = BeamDate.now, sessionId: UUID) {
+    public func add(urlId: UInt64, noteId: UUID, type: NoteSource.SourceType, date: Date = BeamDate.now, sessionId: UUID, activeSources: ActiveSources? = nil) {
         let sourceToAdd = NoteSource(urlId: urlId, addedAt: date, type: type, sessionId: sessionId)
         switch type {
         case .suggestion: sources[urlId] = sources[urlId] ?? sourceToAdd
-        case .user: sources[urlId] = sourceToAdd
+        case .user:
+            sources[urlId] = sourceToAdd
+            if let activeSources = activeSources {
+                activeSources.addActiveSource(pageId: urlId, noteId: noteId)
+            }
         }
         changed = true
     }
@@ -68,9 +72,15 @@ public class NoteSources: Codable {
     }
 
     // if sessionId is not nil, removes source only if its session id matches
-    public func remove(urlId: UInt64, isUserSourceProtected: Bool = true, sessionId: UUID? = nil) {
+    public func remove(urlId: UInt64, noteId: UUID, isUserSourceProtected: Bool = true, sessionId: UUID? = nil, activeSources: ActiveSources? = nil) {
         guard let source = sources[urlId] else { return }
-        if source.type == .user, isUserSourceProtected { return }
+        if source.type == .user {
+            if isUserSourceProtected {
+                return
+            } else if let activeSources = activeSources {
+                    activeSources.removeActiveSource(pageId: urlId, noteId: noteId)
+            }
+        }
         if let sessionId = sessionId,
            let sourceSessionId = source.sessionId,
            sessionId != sourceSessionId { return }

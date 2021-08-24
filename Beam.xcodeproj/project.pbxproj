@@ -210,6 +210,7 @@
 		41D169AA25DC07260018E5F2 /* Inter-Medium.otf in Resources */ = {isa = PBXBuildFile; fileRef = 41D169A525DC07260018E5F2 /* Inter-Medium.otf */; };
 		41FAD34F25E5742800D78B36 /* CALayer+Animation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41FAD34E25E5742800D78B36 /* CALayer+Animation.swift */; };
 		4E60970F26C554CD00F90260 /* SuggestedSourcesUpdaterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E60970E26C554CD00F90260 /* SuggestedSourcesUpdaterTests.swift */; };
+		4E6097C826CEA93700F90260 /* ActiveSources.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E6097A326CE8A6F00F90260 /* ActiveSources.swift */; };
 		520088B82613265900AED835 /* Database.swift in Sources */ = {isa = PBXBuildFile; fileRef = 520088B72613265900AED835 /* Database.swift */; };
 		520088BC2613266600AED835 /* Database+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 520088BB2613266600AED835 /* Database+CoreDataProperties.swift */; };
 		520088C02613295000AED835 /* DatabaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 520088BF2613295000AED835 /* DatabaseManager.swift */; };
@@ -1147,6 +1148,7 @@
 		41D169A525DC07260018E5F2 /* Inter-Medium.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-Medium.otf"; sourceTree = "<group>"; };
 		41FAD34E25E5742800D78B36 /* CALayer+Animation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CALayer+Animation.swift"; sourceTree = "<group>"; };
 		4E60970E26C554CD00F90260 /* SuggestedSourcesUpdaterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestedSourcesUpdaterTests.swift; sourceTree = "<group>"; };
+		4E6097A326CE8A6F00F90260 /* ActiveSources.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveSources.swift; sourceTree = "<group>"; };
 		520088B72613265900AED835 /* Database.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Database.swift; sourceTree = "<group>"; };
 		520088BB2613266600AED835 /* Database+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Database+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		520088BF2613295000AED835 /* DatabaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseManager.swift; sourceTree = "<group>"; };
@@ -3270,6 +3272,7 @@
 		96319CD926161CBF00D1CF31 /* Notes */ = {
 			isa = PBXGroup;
 			children = (
+				4E6097A326CE8A6F00F90260 /* ActiveSources.swift */,
 				DAA60C182666892600C927E5 /* SessionLinkRanker.swift */,
 				9691E41325AF61BA00A13080 /* BrowsingTree.swift */,
 				96F93617258CFDD2006D8E53 /* BeamText.swift */,
@@ -4474,6 +4477,7 @@
 				96319D5D261626BE00D1CF31 /* Score.swift in Sources */,
 				96319D3A2616233E00D1CF31 /* CommandManager.swift in Sources */,
 				969CE3EA26CB7B01000AEF37 /* BeamNoteType.swift in Sources */,
+				4E6097C826CEA93700F90260 /* ActiveSources.swift in Sources */,
 				DA63D513267CF10800D7C756 /* FrecencyScorer.swift in Sources */,
 				A5208E27261F7419006193AF /* String+Calculations.swift in Sources */,
 				96319D6226162F5C00D1CF31 /* LinkStore.swift in Sources */,

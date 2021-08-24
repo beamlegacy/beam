@@ -27,6 +27,7 @@ class ClusteringManager: ObservableObject {
     var initialiseNotes = true
     var ranker: SessionLinkRanker
     var documentManager: DocumentManager
+    var activeSources: ActiveSources
     @Published var noteToAdd: BeamNote?
     @Published var clusteredTabs: [[TabInformation?]] = [[]]
     @Published var clusteredNotes: [[String?]] = [[]]
@@ -40,11 +41,12 @@ class ClusteringManager: ObservableObject {
     private var scope = Set<AnyCancellable>()
     var suggestedNoteUpdater: SuggestedNoteSourceUpdater
 
-    init(ranker: SessionLinkRanker, documentManager: DocumentManager, candidate: Int, navigation: Double, text: Double, entities: Double, sessionId: UUID) {
+    init(ranker: SessionLinkRanker, documentManager: DocumentManager, candidate: Int, navigation: Double, text: Double, entities: Double, sessionId: UUID, activeSources: ActiveSources) {
         self.selectedTabGroupingCandidate = candidate
         self.weightNavigation = navigation
         self.weightText = text
         self.weightEntities = entities
+        self.activeSources = activeSources
         self.suggestedNoteUpdater = SuggestedNoteSourceUpdater(sessionId: sessionId, documentManager: documentManager)
         self.cluster = Cluster(candidate: candidate, weightNavigation: navigation, weightText: text, weightEntities: entities)
         self.ranker = ranker
@@ -255,7 +257,7 @@ class ClusteringManager: ObservableObject {
     }
 
     private func updateNoteSources() {
-        self.suggestedNoteUpdater.update(urlGroups: self.clusteredPagesId, noteGroups: self.clusteredNotesId)
+        self.suggestedNoteUpdater.update(urlGroups: self.clusteredPagesId, noteGroups: self.clusteredNotesId, activeSources: self.activeSources.activeSources)
     }
 
     private func logForClustering(result: [[UInt64]], changeCandidate: Bool) {
