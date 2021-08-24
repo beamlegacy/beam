@@ -41,6 +41,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var downloadManager: BeamDownloadManager = BeamDownloadManager()
     var sessionLinkRanker = SessionLinkRanker()
     var clusteringManager: ClusteringManager
+    var activeSources = ActiveSources()
     var scope = Set<AnyCancellable>()
     var browsingTreeSender: BrowsingTreeSender?
     let sessionId = UUID()
@@ -96,7 +97,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     //swiftlint:disable:next function_body_length
     override init() {
         documentManager = DocumentManager()
-        clusteringManager = ClusteringManager(ranker: sessionLinkRanker, documentManager: documentManager, candidate: 2, navigation: 0.5, text: 0.8, entities: 0.3, sessionId: sessionId)
+        clusteringManager = ClusteringManager(ranker: sessionLinkRanker, documentManager: documentManager, candidate: 2, navigation: 0.5, text: 0.8, entities: 0.3, sessionId: sessionId, activeSources: activeSources)
         noteAutoSaveService = NoteAutoSaveService()
         linkManager = LinkManager()
         passwordsDB = PasswordsManager().passwordsDB
