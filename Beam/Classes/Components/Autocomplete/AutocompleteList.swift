@@ -22,7 +22,10 @@ struct AutocompleteList: View {
     var body: some View {
         VStack(spacing: 0) {
             ForEach(elements) { i in
-                return AutocompleteItem(item: i, selected: isSelectedItem(i))
+                return AutocompleteItem(item: i, selected: isSelectedItem(i),
+                                        colorPalette: i.source == .createCard ?
+                                            AutocompleteItemColorPalette(informationTextColor: BeamColor.Autocomplete.newCardSubtitle) :
+                                            AutocompleteItem.defaultColorPalette)
                     .frame(height: itemHeight)
                     .simultaneousGesture(
                         TapGesture(count: 1).onEnded {

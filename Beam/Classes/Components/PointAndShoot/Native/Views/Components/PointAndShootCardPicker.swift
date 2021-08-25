@@ -47,7 +47,7 @@ struct PointAndShootCardPicker: View {
     }
 
     private var textColor: NSColor {
-        currentCardName == nil ? BeamColor.Generic.text.nsColor : BeamColor.Sonic.nsColor
+        currentCardName == nil ? BeamColor.Generic.text.nsColor : BeamColor.Beam.nsColor
     }
 
     private var cursorIsOnCardName: Bool {
@@ -64,10 +64,6 @@ struct PointAndShootCardPicker: View {
 
         return BeamColor.Generic.textSelection.nsColor
     }
-
-    private let searchColorPalette = AutocompleteItemColorPalette(
-        selectedBackgroundColor: BeamColor.NotePicker.selected.nsColor,
-        touchdownBackgroundColor: BeamColor.NotePicker.active.nsColor)
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {

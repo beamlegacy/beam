@@ -10,20 +10,38 @@ import BeamCore
 
 struct DestinationNoteAutocompleteList: View {
 
-    @ObservedObject var model = Model()
+    enum DesignVariation {
+        case TextEditor
+        case SearchField
+    }
 
+    @ObservedObject var model = Model()
+    var variation: DesignVariation = .SearchField
     internal var onSelectAutocompleteResult: (() -> Void)?
+
     private let itemHeight: CGFloat = 32
-    private let colorPalette = AutocompleteItemColorPalette(
-            selectedBackgroundColor: BeamColor.NotePicker.selected.nsColor,
-            touchdownBackgroundColor: BeamColor.NotePicker.active.nsColor)
+    private let customColorPalette = AutocompleteItemColorPalette(
+        informationTextColor: BeamColor.LightStoneGray,
+        selectedBackgroundColor: BeamColor.NotePicker.selected,
+        touchdownBackgroundColor: BeamColor.NotePicker.active)
+
+    private let customTextEditorColorPalette = AutocompleteItemColorPalette(
+        textColor: BeamColor.Beam,
+        informationTextColor: BeamColor.LightStoneGray,
+        selectedBackgroundColor: BeamColor.NotePicker.selected,
+        touchdownBackgroundColor: BeamColor.NotePicker.active)
+
+    private var colorPalette: AutocompleteItemColorPalette {
+        guard !model.searchCardContent else { return AutocompleteItem.defaultColorPalette }
+        return variation == .TextEditor ? customTextEditorColorPalette : customColorPalette
+    }
+
     var body: some View {
         VStack(spacing: 0) {
-            let palette = !model.searchCardContent ? colorPalette : AutocompleteItem.defaultColorPalette
             ForEach(model.results) { i in
-                return AutocompleteItem(item: i, selected: model.isSelected(i),
-                                        displayIcon: false, alwaysHighlightCompletingText: true,
-                                        allowCmdEnter: model.allowCmdEnter, colorPalette: palette)
+                return AutocompleteItem(item: i, selected: model.isSelected(i), displayIcon: false,
+                                        alwaysHighlightCompletingText: variation != .TextEditor,
+                                        allowCmdEnter: model.allowCmdEnter, colorPalette: colorPalette)
                     .if(model.searchCardContent) {
                         $0.frame(minHeight: itemHeight).fixedSize(horizontal: false, vertical: true)
                     }

@@ -28,9 +28,6 @@ class FormatterView: NSView {
     var handlesTyping: Bool {
         false
     }
-    var typingAttributes: [BeamText.Attribute]? {
-        nil
-    }
 
     var isMouseInsideView = false
 
@@ -72,6 +69,8 @@ class FormatterView: NSView {
         super.mouseExited(with: event)
         isMouseInsideView = false
     }
+
+    func typingAttributes(for range: Range<Int>) -> (attributes: [BeamText.Attribute], range: Range<Int>)? { nil }
 
     // MARK: - Key Handlers
 
