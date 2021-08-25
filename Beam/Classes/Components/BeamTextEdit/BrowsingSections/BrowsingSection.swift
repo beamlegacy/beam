@@ -90,17 +90,8 @@ class BrowsingSection: Widget {
         }
     }
 
-    override func updateRendering() {
-        contentsFrame = NSRect(x: 0, y: 0, width: availableWidth, height: note.browsingSessions.isEmpty ? 0 : 30)
-
-        computedIdealSize = contentsFrame.size
-        computedIdealSize.width = availableWidth
-
-        if open {
-            for c in children {
-                computedIdealSize.height += c.idealSize.height
-            }
-        }
+    override func updateRendering() -> CGFloat {
+        note.browsingSessions.isEmpty ? 0 : 30
     }
 
     func updateLayerVisibility() {

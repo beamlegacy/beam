@@ -27,7 +27,7 @@ public class TextNode: ElementNode {
             return self.textFrame?.lines.count ?? 0 > 1 ? PreferencesManager.editorLineHeightMultipleLine : PreferencesManager.editorLineHeight
         }
     }
-    var interNodeSpacing = CGFloat(0)
+
     var fontSize: CGFloat {
         switch elementKind {
         case .heading(let level):
@@ -62,7 +62,7 @@ public class TextNode: ElementNode {
                 updateChildren()
                 updateTextFrame()
                 invalidatedRendering = true
-                updateRendering()
+                computeRendering()
             }
         }
     }
@@ -172,26 +172,31 @@ public class TextNode: ElementNode {
     override init(parent: Widget, element: BeamElement, nodeProvider: NodeProvider? = nil) {
         super.init(parent: parent, element: element, nodeProvider: nodeProvider)
 
-        observeNoteTitles()
+        setupTextNode()
     }
 
     override init(editor: BeamTextEdit, element: BeamElement, nodeProvider: NodeProvider? = nil) {
         super.init(editor: editor, element: element, nodeProvider: nodeProvider)
+
+        setupTextNode()
+    }
+
+    func setupTextNode() {
+        setAccessibilityLabel("TextNode")
+        setAccessibilityRole(.textArea)
 
         displayedElement.$children
             .sink { [unowned self] elements in
                 updateTextChildren(elements: elements)
             }.store(in: &scope)
 
-
-        switch elementKind {
-        case .check:
-            textPadding = NSEdgeInsets(top: 0, left: 20, bottom: 0, right: 0)
-        default:
-            textPadding = NSEdgeInsetsZero
-        }
-
+        initTextPadding()
         observeNoteTitles()
+    }
+
+    // MARK: - Setup UI
+    private func initTextPadding() {
+        textPadding = textPadding(elementKind: elementKind)
     }
 
     // MARK: - Setup UI
@@ -211,12 +216,9 @@ public class TextNode: ElementNode {
         }.store(in: &scope)
     }
 
-    override public func draw(in context: CGContext) {
-        updateRendering()
-
-        drawDebug(in: context)
+    override public func draw(_ layer: CALayer, in context: CGContext) {
+        super.draw(layer, in: context)
         updateSelection()
-        updateCursor()
         updateDecorations()
     }
 
@@ -254,9 +256,8 @@ public class TextNode: ElementNode {
         return path
     }
 
-    override func updateChildrenLayout() {
-        super.updateChildrenLayout()
-
+    override func updateLayout() {
+        super.updateLayout()
         // Disable action layer update to avoid motion glitch
         // when the global layer width is changed
         if !editor.isResizing {
@@ -284,7 +285,7 @@ public class TextNode: ElementNode {
     func textPadding(elementKind: ElementKind) -> NSEdgeInsets {
         switch elementKind {
         case .check:
-            return NSEdgeInsets(top: 0, left: 10, bottom: 0, right: 0)
+            return NSEdgeInsets(top: 0, left: 20, bottom: 0, right: 0)
         default:
             return NSEdgeInsetsZero
         }
@@ -294,16 +295,16 @@ public class TextNode: ElementNode {
         if selfVisible {
             emptyTextFrame = nil
             let attrStr = attributedString
-            let width = availableWidth - indent - textPadding.left - textPadding.right
-            let textFrame = TextFrame.create(string: attrStr, atPosition: NSPoint(x: indent + textPadding.left, y: textPadding.top), textWidth: width)
+            let width = contentsWidth - textPadding.left - textPadding.right
+            let textFrame = TextFrame.create(string: attrStr, atPosition: NSPoint(x: textPadding.left, y: textPadding.top), textWidth: width)
             self.textFrame = textFrame
             let layerTree = textFrame.layerTree
             let textLayer = Layer(name: "text", layer: layerTree)
-            addLayer(textLayer)
+            addLayer(textLayer, origin: CGPoint(x: contentsLead, y: 0))
 
             if attrStr.string.isEmpty {
                 let dummyText = buildAttributedString(for: BeamText(text: "Dummy!"))
-                let fakelayout = TextFrame.create(string: dummyText, atPosition: NSPoint(x: indent + textPadding.left, y: textPadding.top), textWidth: width)
+                let fakelayout = TextFrame.create(string: dummyText, atPosition: NSPoint(x: textPadding.left, y: textPadding.top), textWidth: width)
 
                 self.emptyTextFrame = fakelayout
             }
@@ -331,7 +332,7 @@ public class TextNode: ElementNode {
         ]
 
         layer.layer.zPosition = -1
-        layer.layer.position = CGPoint(x: indent, y: 0)
+        layer.layer.position = CGPoint(x: contentsLead, y: 0)
         layer.shapeLayer.fillColor = color.cgColor
         addLayer(layer)
         return layer
@@ -377,11 +378,10 @@ public class TextNode: ElementNode {
             && !isCursorInsideUneditableRange(caretIndex: caretIndex)
 
         let cursorRect = rectAt(caretIndex: caretIndex)
-        let layer = self.cursorLayer
 
-        layer.shapeLayer.fillColor = enabled ? cursorColor.cgColor : disabledColor.cgColor
-        layer.layer.isHidden = !on
-        layer.shapeLayer.path = CGPath(rect: cursorRect, transform: nil)
+        cursorLayer.shapeLayer.fillColor = enabled ? cursorColor.cgColor : disabledColor.cgColor
+        cursorLayer.layer.isHidden = !on
+        cursorLayer.shapeLayer.path = CGPath(rect: cursorRect, transform: nil)
     }
 
     var _decorationLayer: Layer?
@@ -392,7 +392,7 @@ public class TextNode: ElementNode {
 
         let decoLayer = TextLinesDecorationLayer()
         decoLayer.zPosition = -1
-        decoLayer.offset = offsetAt(caretIndex: 0)
+        decoLayer.offset = contentsLead
         let layer = Layer(name: "lineDecoration", layer: decoLayer)
         _decorationLayer = layer
         addLayer(layer)
@@ -400,47 +400,30 @@ public class TextNode: ElementNode {
     }
 
     public func updateDecorations() {
-        let layer = self.decorationLayer
-        guard let decoLayer = layer.layer as? TextLinesDecorationLayer else { return }
+        guard let decoLayer =  decorationLayer.layer as? TextLinesDecorationLayer else { return }
         decoLayer.textLines = textFrame?.lines
     }
 
-    override func updateRendering() {
-        guard availableWidth > 0 else { return }
+    override func updateRendering() -> CGFloat {
+        var r = CGRect.zero
+        if selfVisible {
+            r = textRect
+            r.origin.y += textPadding.top
+            r.origin.x -= textPadding.left
 
-        if invalidatedRendering {
-            var r = CGRect.zero
-
-            if selfVisible {
-                r = textRect
-                r.origin.y += textPadding.top
-                r.origin.x -= textPadding.left
-
-                if self as? TextRoot == nil {
-                    switch elementKind {
-                    case .heading(1):
-                        r.size.height += PreferencesManager.editorHeaderOneSize
-                    case .heading(2):
-                        r.size.height += PreferencesManager.editorHeaderTwoSize
-                    default:
-                        r.size.height -= 5
-                    }
+            if self as? TextRoot == nil {
+                switch elementKind {
+                case .heading(1):
+                    r.size.height += PreferencesManager.editorHeaderOneSize
+                case .heading(2):
+                    r.size.height += PreferencesManager.editorHeaderTwoSize
+                default:
+                    r.size.height -= 5
                 }
             }
-
-            r.size.width = availableWidth - textPadding.left - textPadding.right
-            contentsFrame = r.rounded()
-
-            invalidatedRendering = false
         }
 
-        computedIdealSize = contentsFrame.size
-
-        if open {
-            for c in children {
-                computedIdealSize.height += c.idealSize.height
-            }
-        }
+        return r.height
     }
 
     var useActionLayer = true
@@ -643,6 +626,9 @@ public class TextNode: ElementNode {
         let isMouseInContentFrame = contentsFrame.contains(mouseInfo.position)
         let isMouseInsideFormatter = editor.inlineFormatter?.isMouseInsideView == true
         let mouseHasChangedTextPosition = lastHoverMouseInfo?.position != mouseInfo.position
+        if isFocused {
+        print("isMouseInContentFrame: \(isMouseInContentFrame) isMouseInsideFormatter: \(isMouseInsideFormatter) mouseHasChangedTextPosition: \(mouseHasChangedTextPosition)")
+        }
         if mouseHasChangedTextPosition && isMouseInContentFrame {
             let link = linkAt(point: mouseInfo.position)
             let internalLink = internalLinkRangeAt(point: mouseInfo.position)
@@ -713,7 +699,7 @@ public class TextNode: ElementNode {
 
     public func lineAt(point: NSPoint) -> Int {
         guard let textFrame = textFrame, !textFrame.lines.isEmpty else { return 0 }
-        let point = CGPoint(x: point.x - textPadding.left, y: point.y - textPadding.top)
+        let point = CGPoint(x: point.x, y: point.y - textPadding.top)
         let y = point.y
         if y >= contentsFrame.height {
             let v = textFrame.lines.count - 1
@@ -772,7 +758,7 @@ public class TextNode: ElementNode {
         let line = lineAt(point: point)
         let lines = textFrame.lines
         let l = lines[line]
-        let displayIndex = l.stringIndexFor(position: point)
+        let displayIndex = l.stringIndexFor(position: NSPoint(x: point.x - contentsPadding.left, y: point.y - contentsPadding.top))
         let res = sourceIndexFor(displayIndex: displayIndex)
 
         return res
@@ -804,10 +790,10 @@ public class TextNode: ElementNode {
     public func indexAt(point: NSPoint, limitToTextString: Bool = true) -> Int? {
         guard let textFrame = textFrame else { return nil }
         guard !textFrame.lines.isEmpty else { return nil }
-        let point = CGPoint(x: point.x - textPadding.left, y: point.y - textPadding.top)
         let line = lineAt(point: point)
         guard line >= 0 else { return nil }
         let l = textFrame.lines[line]
+        let point = NSPoint(x: point.x - contentsPadding.left, y: point.y - contentsPadding.top)
         guard l.frame.minX < point.x && l.frame.maxX > point.x else { return nil } // point is outside the line
         let displayIndex = l.stringIndexFor(position: point)
         if !limitToTextString {
@@ -862,22 +848,6 @@ public class TextNode: ElementNode {
         return (caret.offset.x, textLine.frame)
     }
 
-//    override public func positionAbove(_ position: Int) -> Int {
-//        guard let textFrame = textFrame else { return 0 }
-//        guard let l = lineAt(index: position), l > 0 else { return 0 }
-//        let offset = offsetAt(index: position)
-//        let indexAbove = textFrame.lines[l - 1].stringIndexFor(position: NSPoint(x: offset, y: 0))
-//        return sourceIndexFor(displayIndex: indexAbove)
-//    }
-//
-//    override public func positionBelow(_ position: Int) -> Int {
-//        guard let textFrame = textFrame else { return 0 }
-//        guard let l = lineAt(index: position), l < textFrame.lines.count - 1 else { return text.count }
-//        let offset = offsetAt(index: position)
-//        let indexBelow = textFrame.lines[l + 1].stringIndexFor(position: NSPoint(x: offset, y: 0))
-//        return sourceIndexFor(displayIndex: indexBelow)
-//    }
-//
     override public func caretAbove(_ caretIndex: Int) -> Int {
         guard let textFrame = textFrame else { return 0 }
         let currentCaret = textFrame.carets[caretIndex]
@@ -916,7 +886,7 @@ public class TextNode: ElementNode {
     }
 
     public func rectAt(sourcePosition: Int) -> NSRect {
-        updateRendering()
+        computeRendering()
         let textLine: TextLine? = {
             if let emptyLayout = emptyTextFrame {
                 return emptyLayout.lines[0]
@@ -935,7 +905,7 @@ public class TextNode: ElementNode {
     }
 
     override public func rectAt(caretIndex: Int) -> NSRect {
-        updateRendering()
+        computeRendering()
         guard let textFrame = textFrame else { return .zero }
         let caret = caretIndex >= textFrame.carets.count ? initialCaret : textFrame.carets[caretIndex]
         let position = caret.positionInSource
@@ -949,7 +919,7 @@ public class TextNode: ElementNode {
         }()
 
         let x1 = caret.offset.x
-        let cursorRect = NSRect(x: x1 + textPadding.left, y: textLine.frame.minY + textPadding.top, width: position == text.count ? bigCursorWidth : smallCursorWidth, height: textLine.bounds.height)
+        let cursorRect = NSRect(x: x1, y: textLine.frame.minY, width: position == text.count ? bigCursorWidth : smallCursorWidth, height: textLine.bounds.height)
 
         return cursorRect
     }
@@ -958,7 +928,7 @@ public class TextNode: ElementNode {
         guard let lines = textFrame?.lines else { return 0 }
         guard !lines.isEmpty else { return 0 }
         guard let line = lines.last else { return 0 }
-        let displayIndex = line.stringIndexFor(position: NSPoint(x: x, y: 0))
+        let displayIndex = line.stringIndexFor(position: NSPoint(x: x - contentsPadding.left, y: 0))
         if displayIndex == line.range.upperBound {
             return endOfLineFromPosition(displayIndex)
         }
@@ -970,7 +940,7 @@ public class TextNode: ElementNode {
         guard let lines = textFrame?.lines else { return 0 }
         guard !lines.isEmpty else { return 0 }
         guard let line = lines.first else { return 0 }
-        let displayIndex = line.stringIndexFor(position: NSPoint(x: x, y: 0))
+        let displayIndex = line.stringIndexFor(position: NSPoint(x: x - contentsPadding.left, y: 0))
         if displayIndex == line.range.upperBound {
             return endOfLineFromPosition(displayIndex)
         }
@@ -1030,7 +1000,7 @@ public class TextNode: ElementNode {
         let startOffset = offsetAt(index: start)
         let endOffset = offsetAt(index: end)
 
-        let linkFrame = NSRect(x: startOffset, y: l.frame.minY, width: endOffset - startOffset, height: l.frame.height)
+        let linkFrame = NSRect(x: startOffset, y: l.frame.minY, width: endOffset - startOffset, height: l.frame.height).offsetBy(dx: contentsPadding.left, dy: contentsPadding.top)
         return (range, linkFrame)
     }
 
@@ -1047,6 +1017,7 @@ public class TextNode: ElementNode {
         let line = lineAt(point: point)
         guard line >= 0, !textFrame.lines.isEmpty else { return nil }
         let l = textFrame.lines[line]
+        let point = NSPoint(x: point.x - contentsPadding.left, y: point.y - contentsPadding.top)
         guard l.frame.minX <= point.x && l.frame.maxX >= point.x else { return nil } // don't find links outside the line
         let displayIndex = l.stringIndexFor(position: point)
         let pos = min(displayIndex, attributedString.length - 1)
@@ -1146,7 +1117,7 @@ public class TextNode: ElementNode {
     }
 
     internal func actionLayerMousePosition(from mouseInfo: MouseInfo) -> NSPoint {
-        return NSPoint(x: indent + mouseInfo.position.x, y: mouseInfo.position.y)
+        return NSPoint(x: contentsLead + mouseInfo.position.x, y: mouseInfo.position.y)
     }
 
     override func dumpWidgetTree(_ level: Int = 0) {
@@ -1344,7 +1315,7 @@ public class TextNode: ElementNode {
     }
 
     var initialCaret: Caret {
-        Caret(offset: NSPoint(x: indent + textPadding.left, y: textPadding.top), indexInSource: 0, indexOnScreen: 0, edge: .leading, inSource: true, line: 0)
+        Caret(offset: NSPoint(x: textPadding.left, y: textPadding.top), indexInSource: 0, indexOnScreen: 0, edge: .leading, inSource: true, line: 0)
     }
 
     override public var textCount: Int {
@@ -1409,6 +1380,7 @@ public class TextNode: ElementNode {
     }
     var sentences: [AccessibleTextElement] = []
 
+    //swiftlint:disable:next function_body_length
     public override func accessibilityChildren() -> [Any]? {
         sentences = []
         let text = self.text.text

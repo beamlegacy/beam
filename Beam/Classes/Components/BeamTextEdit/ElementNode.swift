@@ -70,8 +70,6 @@ public class ElementNode: Widget {
     var elementText = BeamText()
     var elementKind = ElementKind.bullet
 
-    var indent: CGFloat { selfVisible ? 18 : 0 }
-
     override var parent: Widget? {
         didSet {
             guard parent != nil else { return }
@@ -161,10 +159,6 @@ public class ElementNode: Widget {
 
     private var actionLayerPadding = CGFloat(3.5)
 
-    var elementNodePadding: NSEdgeInsets {
-        return NSEdgeInsetsZero
-    }
-
     public static func == (lhs: ElementNode, rhs: ElementNode) -> Bool {
         return lhs === rhs
     }
@@ -183,9 +177,21 @@ public class ElementNode: Widget {
 
     init(parent: Widget, element: BeamElement, nodeProvider: NodeProvider? = nil) {
         self.element = element
-
         super.init(parent: parent, nodeProvider: nodeProvider)
 
+        setupElementNode()
+    }
+
+    init(editor: BeamTextEdit, element: BeamElement, nodeProvider: NodeProvider? = nil) {
+        self.element = element
+
+        super.init(editor: editor, nodeProvider: nodeProvider)
+
+        setupElementNode()
+    }
+
+    func setupElementNode() {
+        contentsPadding.left = 18
         createElementLayers()
 
         displayedElement.$children
@@ -194,27 +200,8 @@ public class ElementNode: Widget {
                 updateTextChildren(elements: elements)
             }.store(in: &scope)
 
-        PreferencesManager.$alwaysShowBullets.sink { [unowned self] newValue in
-            self.alwaysShowLayers(isOn: newValue)
-        }.store(in: &scope)
-
-        subscribeToElement(element)
-    }
-
-    init(editor: BeamTextEdit, element: BeamElement, nodeProvider: NodeProvider? = nil) {
-        self.element = element
-
-        super.init(editor: editor, nodeProvider: nodeProvider)
-
-        createElementLayers()
-
-        displayedElement.$children
-            .sink { [unowned self] elements in
-                updateTextChildren(elements: elements)
-            }.store(in: &scope)
-
-        PreferencesManager.$alwaysShowBullets.sink { [unowned self] newValue in
-            self.alwaysShowLayers(isOn: newValue)
+        PreferencesManager.$alwaysShowBullets.sink { [unowned self] _ in
+            invalidateLayout()
         }.store(in: &scope)
 
         subscribeToElement(element)
@@ -247,31 +234,6 @@ public class ElementNode: Widget {
             }
         }
         return spacingHeight
-    }
-
-    override func updateChildrenLayout() {
-        updateElementLayers()
-        var pos = NSPoint(x: childInset, y: self.contentsFrame.height)
-        var spacing: CGFloat = .zero
-        if self as? TextRoot != nil {
-            spacing = PreferencesManager.editorParentSpacing
-        } else {
-            spacing = PreferencesManager.editorChildSpacing
-        }
-        let firstNode = children.first
-        for c in children {
-            var childSize = c.idealSize
-            childSize.width = frame.width - childInset
-            if let nodeChild = c as? ElementNode, nodeChild.open {
-                childSize.height += nodeChild.idealSpacingSize
-                if c !== firstNode || self as? TextRoot == nil {
-                    pos.y += spacing
-                }
-            }
-            let childFrame = NSRect(origin: pos, size: childSize)
-            c.setLayout(childFrame)
-            pos.y += childSize.height
-        }
     }
 
     func deepInvalidateText() {
@@ -320,11 +282,10 @@ public class ElementNode: Widget {
 
     // MARK: - Mouse Events
 
-    override func mouseMoved(mouseInfo: MouseInfo) -> Bool {
-        if !PreferencesManager.alwaysShowBullets && children.count > 0 && self != root {
-            handle(hover: localFrame.contains(mouseInfo.position))
+    override var hover: Bool {
+        didSet {
+            updateElementLayers()
         }
-        return false
     }
 
     override func mouseDown(mouseInfo: MouseInfo) -> Bool {
@@ -540,7 +501,7 @@ public class ElementNode: Widget {
         ]
 
         layer.layer.zPosition = 100
-        layer.layer.position = CGPoint(x: indent, y: 0)
+        layer.layer.position = CGPoint(x: contentsLead, y: contentsTop)
         _cursorLayer = layer
         addLayer(layer)
         return layer
@@ -550,9 +511,18 @@ public class ElementNode: Widget {
         updateElementCursor()
     }
 
+    public func layoutCursor(_ cursorRect: NSRect) {
+        let on = editor.hasFocus && isFocused && editor.blinkPhase && (root?.state.nodeSelection?.nodes.isEmpty ?? true)
+
+        let layer = self.cursorLayer
+
+        layer.shapeLayer.fillColor = enabled ? cursorColor.cgColor : disabledColor.cgColor
+        layer.layer.isHidden = !on
+        layer.shapeLayer.path = CGPath(rect: cursorRect, transform: nil)
+    }
     public func updateElementCursor() {
         let on = editor.hasFocus && isFocused && editor.blinkPhase && (root?.state.nodeSelection?.nodes.isEmpty ?? true)
-        let cursorRect = NSRect(x: caretIndex == 0 ? (indent - 5) : (availableWidth - indent + 3), y: 0, width: 2, height: frame.height )//rectAt(caretIndex: caretIndex)
+        let cursorRect = NSRect(x: caretIndex == 0 ? (contentsLead - 5) : (availableWidth - contentsLead + 3), y: 0, width: 2, height: frame.height )//rectAt(caretIndex: caretIndex)
         let layer = self.cursorLayer
 
         layer.shapeLayer.fillColor = enabled ? cursorColor.cgColor : disabledColor.cgColor
@@ -579,19 +549,15 @@ public class ElementNode: Widget {
     var caretIndex: Int { root?.caretIndex ?? 0 }
 
     public func rectAt(caretIndex: Int) -> NSRect {
-        let cursorRect = NSRect(x: indent + CGFloat(caretIndex == 0 ? 0 : contentsFrame.width - indent), y: 0, width: caretIndex == textCount ? bigCursorWidth : smallCursorWidth, height: contentsFrame.height)
+        let cursorRect = NSRect(x: contentsLead + CGFloat(caretIndex == 0 ? 0 : contentsFrame.width - contentsLead), y: 0, width: caretIndex == textCount ? bigCursorWidth : smallCursorWidth, height: contentsFrame.height)
 
         return cursorRect
     }
 
-    override public func draw(in context: CGContext) {
-        context.saveGState()
-        context.translateBy(x: indent, y: 0)
-
-        updateRendering()
+    override public func draw(_ layer: CALayer, in context: CGContext) {
+        super.draw(layer, in: context)
         updateCursor()
-
-        drawDebug(in: context)
+        updateElementLayers()
     }
 
     // MARK: needed for proxied nodes

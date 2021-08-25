@@ -614,7 +614,7 @@ class TextNodeTests: XCTestCase {
         root.focusedWidget = root.children.first?.children.first
         root.cursorPosition = 0
         root.setLayout(frame)
-        root.updateRendering()
+        root.computeRendering()
 
         XCTAssertEqual(root.children.first?.children.count, 2)
         root.deleteBackward()
@@ -658,7 +658,7 @@ class TextNodeTests: XCTestCase {
             root.cursorPosition = node.text.count
         }
         root.setLayout(frame)
-        root.updateRendering()
+        root.computeRendering()
 
         XCTAssertEqual(root.children.first?.children.count, 2)
         root.deleteForward()

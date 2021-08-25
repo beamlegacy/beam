@@ -48,23 +48,18 @@ class DebugSection: Widget {
         updateLayerVisibility()
     }
 
-    override func updateRendering() {
-        contentsFrame = NSRect(x: 0, y: 0, width: availableWidth, height: 30)
-
-        computedIdealSize = contentsFrame.size
-        computedIdealSize.width = availableWidth
-
+    override func updateRendering() -> CGFloat {
         if open {
             guard let nodeIdLayer = layers["noteIdBtn"],
                   let noteDatabaseLayer = layers["noteDatabaseIdBtn"],
                   let defaultDatabaseIdLayer = layers["defaultDatabaseIdBtn"],
-                  let previousChecksumLayer = layers["previousChecksum"] else { return }
-            computedIdealSize.height += nodeIdLayer.bounds.height +
+                  let previousChecksumLayer = layers["previousChecksum"] else { return 30 }
+            return 30 + nodeIdLayer.bounds.height +
                 noteDatabaseLayer.bounds.height +
                 defaultDatabaseIdLayer.bounds.height +
                 previousChecksumLayer.bounds.height
         }
-        updateLayerVisibility()
+        return 30
     }
 
     func updateLayerVisibility() {

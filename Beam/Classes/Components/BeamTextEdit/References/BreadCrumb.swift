@@ -267,11 +267,13 @@ class BreadCrumb: Widget {
         layers["actionLinkLayer"] as? LinkButtonLayer
     }
 
-    override func updateRendering() {
-        contentsFrame = NSRect(x: 14, y: 0, width: availableWidth, height: showCrumbs ? 21 : 2)
+    var crumbsHeight: CGFloat { showCrumbs ? 21 : 2 }
+    override func updateRendering() -> CGFloat {
+        return crumbsHeight
+    }
 
-        computedIdealSize = contentsFrame.size
-
+    override func updateLayout() {
+        super.updateLayout()
         CATransaction.disableAnimations {
             let linkLayerFrameSize = linkLayer.preferredFrameSize()
             if let actionLinkLayer = actionLinkLayer {
@@ -287,12 +289,7 @@ class BreadCrumb: Widget {
         }
 
         if open {
-            var childrenHeight = CGFloat(0)
-            for c in children {
-                childrenHeight += c.idealSize.height
-            }
-
-            computedIdealSize.height += childrenHeight
+            var childrenHeight = childrenIdealSize.height
             if !showCrumbs {
                 childrenHeight -= 25
             }

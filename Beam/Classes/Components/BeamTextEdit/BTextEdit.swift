@@ -57,7 +57,6 @@ public struct BTextEditScrollable: NSViewRepresentable {
             scrollView.contentView.topAnchor.constraint(equalTo: edit.topAnchor)
         ])
 
-        context.coordinator.adjustScrollViewContentAutomatically(scrollView)
         updateHeaderView(scrollView, context: context)
         if focusOnAppear {
             focusEditor(edit)
@@ -95,7 +94,7 @@ public struct BTextEditScrollable: NSViewRepresentable {
         editor.minimumWidth = minimumWidth
         editor.maximumWidth = maximumWidth
         editor.topOffset = topOffset
-        editor.footerHeight = footerHeight + context.coordinator.compensatingBottomInset
+        editor.footerHeight = footerHeight
         editor.leadingPercentage = leadingPercentage
         editor.centerText = centerText
 
@@ -143,114 +142,17 @@ public struct BTextEditScrollable: NSViewRepresentable {
 }
 
 extension BTextEditScrollable {
-    public class BTextEditScrollableCoordinator: NSObject, ScrollViewContentAdjusterDelegate {
+    public class BTextEditScrollableCoordinator: NSObject {
         private let parent: BTextEditScrollable
         fileprivate var onDeinit: () -> Void = {}
-        fileprivate var compensatingBottomInset = CGFloat(0)
         fileprivate var headerHostingView: NSHostingView<AnyView>?
-
-        private var scrollViewContentAdjuster: ScrollViewContentAdjuster?
 
         init(_ edit: BTextEditScrollable) {
             self.parent = edit
         }
 
-        func adjustScrollViewContentAutomatically(_ scrollView: NSScrollView) {
-            scrollViewContentAdjuster = ScrollViewContentAdjuster(with: scrollView)
-            scrollViewContentAdjuster?.delegate = self
-        }
-
         deinit {
             onDeinit()
         }
-
-        func scrollViewNeedOffsetCompensation(of: CGSize) {
-            compensatingBottomInset = of.height
-        }
-
-        func scrollViewDidScroll(to point: CGPoint) {
-            parent.onScroll?(point)
-        }
-    }
-}
-
-/**
- A NSScrollView helper that will adjust behavior when resizing the container or content.
- Currently only support content height becoming smaller.
-*/
-protocol ScrollViewContentAdjusterDelegate: AnyObject {
-    func scrollViewDidScroll(to point: CGPoint)
-    func scrollViewNeedOffsetCompensation(of: CGSize)
-}
-
-@objc class ScrollViewContentAdjuster: NSObject {
-    weak var delegate: ScrollViewContentAdjusterDelegate?
-
-    private var lastContentBounds: NSRect = .zero
-    private var offsetCompensation: CGSize = .zero {
-        didSet {
-            delegate?.scrollViewNeedOffsetCompensation(of: offsetCompensation)
-        }
-    }
-
-    init(with scrollView: NSScrollView) {
-        super.init()
-        let documentView = scrollView.documentView
-        documentView?.postsFrameChangedNotifications = true
-        let contentView = scrollView.contentView
-        contentView.postsBoundsChangedNotifications = true
-
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(contentOffsetDidChange(notification:)),
-                                               name: NSView.boundsDidChangeNotification,
-                                               object: contentView)
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(contentSizeDidChange(notification:)),
-                                               name: NSView.frameDidChangeNotification,
-                                               object: documentView)
-    }
-
-    private func didContentHeightChange(for documentView: NSView) -> Bool {
-        let newContentSize = documentView.bounds
-        return lastContentBounds.size.height != newContentSize.height
-    }
-
-    @objc private func contentOffsetDidChange(notification: Notification) {
-        guard let clipView = notification.object as? NSClipView, let scrollView = clipView.superview as? NSScrollView, let documentView = scrollView.documentView else {
-            return
-        }
-        guard !didContentHeightChange(for: documentView) else {
-            // content offset changed because content size changed
-            // let the didContentSizeChange handler do its job
-            return
-        }
-        lastContentBounds.origin = clipView.bounds.origin
-        delegate?.scrollViewDidScroll(to: clipView.bounds.origin)
-        if offsetCompensation != .zero && documentView.frame.height - clipView.bounds.origin.y - clipView.bounds.height > offsetCompensation.height {
-            // reset compensating height when out of view
-            offsetCompensation = .zero
-        }
-    }
-
-    @objc private func contentSizeDidChange(notification: Notification) {
-        guard let documentView = notification.object as? NSView, let clipView = documentView.superview as? NSClipView, let scrollView = clipView.superview as? NSScrollView  else {
-            return
-        }
-        let containerSize = scrollView.bounds.size
-        let contentSize = documentView.bounds.size
-        let previousContentOffset = lastContentBounds.origin
-        let isNewContentShorterThanViewHeight = contentSize.height - previousContentOffset.y < containerSize.height
-        let willPreviousOffsetBeOutOfBounds = previousContentOffset.y > contentSize.height - (containerSize.height * 0.5)
-        if isNewContentShorterThanViewHeight && !willPreviousOffsetBeOutOfBounds {
-            // Force the content offset to stay the same
-            // even if that means having a white space at the bottom
-            // but no more than 0.5 * the window height
-            let height = previousContentOffset.y - scrollView.contentView.bounds.origin.y
-            offsetCompensation = CGSize(width: 0, height: height)
-            scrollView.scroll(scrollView.contentView, to: previousContentOffset)
-        } else {
-            lastContentBounds.origin = scrollView.contentView.bounds.origin
-        }
-        lastContentBounds.size = contentSize
     }
 }
