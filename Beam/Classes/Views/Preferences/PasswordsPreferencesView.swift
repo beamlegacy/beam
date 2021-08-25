@@ -10,7 +10,7 @@ import Preferences
 import BeamCore
 
 let PasswordsPreferencesViewController: PreferencePane = PreferencesPaneBuilder.build(identifier: .passwords, title: "Passwords", imageName: "preferences-passwords") {
-    PasswordsPreferencesView(passwordsViewModel: PasswordListViewModel(passwordStore: PasswordsManager().passwordsDB))
+    PasswordsPreferencesView(passwordsViewModel: PasswordListViewModel())
 }
 
 struct PasswordsPreferencesView: View {
@@ -35,7 +35,7 @@ struct PasswordsPreferencesView: View {
 
 struct PasswordsPreferencesView_Previews: PreviewProvider {
     static var previews: some View {
-        PasswordsPreferencesView(passwordsViewModel: PasswordListViewModel(passwordStore: MockPasswordStore()))
+        PasswordsPreferencesView(passwordsViewModel: PasswordListViewModel())
     }
 }
 
@@ -127,8 +127,7 @@ struct Passwords: View {
                 return
             }
             do {
-                let passwordStore = PasswordsManager().passwordsDB
-                try PasswordImporter.importPasswords(fromCSV: url, into: passwordStore)
+                try PasswordImporter.importPasswords(fromCSV: url)
                 completion()
             } catch {
                 Logger.shared.logError(String(describing: error), category: .general)
@@ -147,8 +146,7 @@ struct Passwords: View {
                 return
             }
             do {
-                let passwordStore = PasswordsManager().passwordsDB
-                try PasswordImporter.exportPasswords(from: passwordStore, toCSV: url)
+                try PasswordImporter.exportPasswords(toCSV: url)
             } catch {
                 Logger.shared.logError(String(describing: error), category: .general)
 

@@ -4,6 +4,7 @@
 //
 //  Created by Frank Lefebvre on 23/03/2021.
 //
+// swiftlint:disable file_length
 
 import Foundation
 import BeamCore
@@ -17,7 +18,7 @@ struct WebFieldAutofill: Codable {
 }
 
 class PasswordOverlayController: WebPageHolder {
-    private let passwordStore: PasswordStore
+    private let passwordManager: PasswordManager = PasswordManager()
     private let userInfoStore: UserInformationsStore
     private var passwordMenuWindow: NSWindow?
     private var passwordMenuPosition: CGPoint = .zero
@@ -32,12 +33,11 @@ class PasswordOverlayController: WebPageHolder {
     private var valuesOnFocusOut: [String: String]?
     private var currentPasswordManagerViewModel: PasswordManagerMenuViewModel?
 
-    init(passwordStore: PasswordStore, userInfoStore: UserInformationsStore) {
-        self.passwordStore = passwordStore
+    init(userInfoStore: UserInformationsStore) {
         self.userInfoStore = userInfoStore
         encoder = JSONEncoder()
         decoder = JSONDecoder()
-        autocompleteContext = WebAutocompleteContext(passwordStore: passwordStore)
+        autocompleteContext = WebAutocompleteContext()
     }
 
     func detectInputFields() {
@@ -101,10 +101,9 @@ class PasswordOverlayController: WebPageHolder {
         }
         currentlyFocusedElementId = elementId
         if autocompleteGroup.isAmbiguous, let host = page.url?.minimizedHost {
-            passwordStore.entries(for: host, exact: false) { entries in
-                let createAccount = entries.isEmpty
-                self.showPasswordManagerMenu(for: elementId, withPasswordGenerator: createAccount)
-            }
+            let entries = passwordManager.entries(for: host, exact: false)
+            let createAccount = entries.isEmpty
+            self.showPasswordManagerMenu(for: elementId, withPasswordGenerator: createAccount)
         } else {
             switch autocompleteGroup.action {
             case .createAccount:
@@ -152,7 +151,6 @@ class PasswordOverlayController: WebPageHolder {
         let passwordManagerMenu = PasswordManagerMenu(width: location.size.width, viewModel: viewModel)
         guard let webView = (page as? BrowserTab)?.webView,
               let passwordWindow = CustomPopoverPresenter.shared.present(view: BeamHostingView(rootView: passwordManagerMenu), from: webView, atPoint: location.origin) else { return }
-//        passwordMenuPosition = bottomLeftOnScreen(for: location) // Not needed atm
         passwordWindow.makeKeyAndOrderFront(nil)
         passwordMenuWindow = passwordWindow
     }
@@ -167,7 +165,7 @@ class PasswordOverlayController: WebPageHolder {
         if let viewModel = currentPasswordManagerViewModel {
             return viewModel
         }
-        let viewModel = PasswordManagerMenuViewModel(host: host, passwordStore: passwordStore, userInfoStore: userInfoStore, withPasswordGenerator: passwordGenerator)
+        let viewModel = PasswordManagerMenuViewModel(host: host, userInfoStore: userInfoStore, withPasswordGenerator: passwordGenerator)
         viewModel.delegate = self
         currentPasswordManagerViewModel = viewModel
         return viewModel
@@ -241,8 +239,8 @@ class PasswordOverlayController: WebPageHolder {
         guard let host = page.url?.minimizedHost else {
             if let url = page.url?.absoluteString,
                url.starts(with: "file:///"),
-                let localfile = url.split(separator: "/").last,
-                let localfileWithoutQueryparams = localfile.split(separator: "?").first {
+               let localfile = url.split(separator: "/").last,
+               let localfileWithoutQueryparams = localfile.split(separator: "?").first {
                 return String(localfileWithoutQueryparams)
             }
             return nil
@@ -280,21 +278,19 @@ class PasswordOverlayController: WebPageHolder {
             return
         }
         Logger.shared.logDebug("FOUND login: \(login), password: \(password)", category: .passwordManager)
-        passwordStore.password(host: host, username: login) { storedPassword in
-            if let storedPassword = storedPassword {
-                if password != storedPassword && password.count > 2 && login.count > 2 {
-                    if let browserTab = (self.page as? BrowserTab) {
-                        browserTab.passwordManagerToast(saved: false)
-                    }
-                    self.passwordStore.save(host: host, username: login, password: password)
+        if let storedPassword = passwordManager.password(host: host, username: login) {
+            if password != storedPassword && password.count > 2 && login.count > 2 {
+                if let browserTab = (self.page as? BrowserTab) {
+                    browserTab.passwordManagerToast(saved: false)
                 }
-            } else {
-                if password.count > 2 && login.count > 2 {
-                    if let browserTab = (self.page as? BrowserTab) {
-                        browserTab.passwordManagerToast(saved: true)
-                    }
-                    self.passwordStore.save(host: host, username: login, password: password)
+                self.passwordManager.save(host: host, username: login, password: password)
+            }
+        } else {
+            if password.count > 2 && login.count > 2 {
+                if let browserTab = (self.page as? BrowserTab) {
+                    browserTab.passwordManagerToast(saved: true)
                 }
+                self.passwordManager.save(host: host, username: login, password: password)
             }
         }
     }
@@ -337,7 +333,7 @@ class PasswordOverlayController: WebPageHolder {
 extension PasswordOverlayController: PasswordManagerMenuDelegate {
     func deleteCredentials(_ entries: [PasswordManagerEntry]) {
         for entry in entries {
-            passwordStore.delete(host: entry.minimizedHost, username: entry.username)
+            passwordManager.delete(host: entry.minimizedHost, for: entry.username)
         }
     }
 
@@ -347,29 +343,27 @@ extension PasswordOverlayController: PasswordManagerMenuDelegate {
             dismissPasswordManagerMenu()
             return
         }
-        passwordStore.password(host: entry.minimizedHost, username: entry.username) { password in
-            guard let password = password else {
-                Logger.shared.logError("PasswordStore did not provide password for selected entry.", category: .passwordManager)
-                return
-            }
-            Logger.shared.logDebug(String(describing: autocompleteGroup.relatedFields), category: .passwordManager)
-            let backgroundColor = BeamColor.Autocomplete.clickedBackground.hexColor
-            let autofill = autocompleteGroup.relatedFields.compactMap { field -> WebFieldAutofill? in
-                switch field.role {
-                case .currentUsername:
-                    return WebFieldAutofill(id: field.id, value: entry.username, background: backgroundColor)
-                case .newUsername:
-                    return autocompleteGroup.isAmbiguous ? WebFieldAutofill(id: field.id, value: entry.username, background: backgroundColor) : nil
-                case .currentPassword:
-                    return WebFieldAutofill(id: field.id, value: password, background: backgroundColor)
-                case .newPassword:
-                    return autocompleteGroup.isAmbiguous ? WebFieldAutofill(id: field.id, value: password, background: backgroundColor) : nil
-                default:
-                    return nil
-                }
-            }
-            self.fillWebTextFields(autofill)
+        guard let password = passwordManager.password(host: entry.minimizedHost, username: entry.username) else {
+            Logger.shared.logError("PasswordStore did not provide password for selected entry.", category: .passwordManager)
+            return
         }
+        Logger.shared.logDebug(String(describing: autocompleteGroup.relatedFields), category: .passwordManager)
+        let backgroundColor = BeamColor.Autocomplete.clickedBackground.hexColor
+        let autofill = autocompleteGroup.relatedFields.compactMap { field -> WebFieldAutofill? in
+            switch field.role {
+            case .currentUsername:
+                return WebFieldAutofill(id: field.id, value: entry.username, background: backgroundColor)
+            case .newUsername:
+                return autocompleteGroup.isAmbiguous ? WebFieldAutofill(id: field.id, value: entry.username, background: backgroundColor) : nil
+            case .currentPassword:
+                return WebFieldAutofill(id: field.id, value: password, background: backgroundColor)
+            case .newPassword:
+                return autocompleteGroup.isAmbiguous ? WebFieldAutofill(id: field.id, value: password, background: backgroundColor) : nil
+            default:
+                return nil
+            }
+        }
+        self.fillWebTextFields(autofill)
         DispatchQueue.main.async {
             self.dismissPasswordManagerMenu()
         }

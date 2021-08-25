@@ -123,7 +123,7 @@ import Promises
     }
 
     lazy var passwordOverlayController: PasswordOverlayController? = {
-        let controller = PasswordOverlayController(passwordStore: state.data.passwordsDB, userInfoStore: MockUserInformationsStore.shared)
+        let controller = PasswordOverlayController(userInfoStore: MockUserInformationsStore.shared)
         controller.page = self
         return controller
     }()
@@ -174,10 +174,6 @@ import Promises
 
     var fileStorage: BeamFileStorage? {
         state.data.fileDB
-    }
-
-    var passwordDB: PasswordsDB? {
-        state.data.passwordsDB
     }
 
     func setDestinationNote(_ note: BeamNote, rootElement: BeamElement? = nil) {

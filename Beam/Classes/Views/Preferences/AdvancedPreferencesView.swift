@@ -427,8 +427,7 @@ struct AdvancedPreferencesView: View {
                     return
                 }
                 do {
-                    let passwordStore = AppDelegate.main.data.passwordsDB
-                    try PasswordImporter.importPasswords(fromCSV: url, into: passwordStore)
+                    try PasswordImporter.importPasswords(fromCSV: url)
                 } catch {
                     Logger.shared.logError(String(describing: error), category: .general)
                 }
@@ -440,8 +439,7 @@ struct AdvancedPreferencesView: View {
 
     private var PasswordsDBDrop: some View {
         Button(action: {
-            let passwordManager = PasswordsManager()
-            passwordManager.passwordsDB.deleteAll()
+            PasswordManager().deleteAll()
         }, label: {
             Text("Erase Passwords Database")
         })

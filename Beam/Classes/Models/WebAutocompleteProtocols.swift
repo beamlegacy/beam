@@ -29,48 +29,13 @@ extension PasswordManagerEntry: Identifiable {
 }
 
 protocol PasswordStore {
-    func entries(for host: String, completion: @escaping ([PasswordManagerEntry]) -> Void)
-    func entriesWithSubdomains(for host: String, completion: @escaping ([PasswordManagerEntry]) -> Void)
-    func find(_ searchString: String, completion: @escaping ([PasswordManagerEntry]) -> Void)
-    func fetchAll(completion: @escaping ([PasswordManagerEntry]) -> Void)
-    func password(host: String, username: String, completion: @escaping(String?) -> Void)
-    func save(host: String, username: String, password: String)
-    func delete(host: String, username: String)
-}
-
-extension PasswordStore {
-    func entries(for host: String, exact: Bool, completion: @escaping ([PasswordManagerEntry]) -> Void) {
-        guard !exact else {
-            return entries(for: host, completion: completion)
-        }
-        var components = host.components(separatedBy: ".")
-        var parentHosts = [String]()
-        while components.count > 2 {
-            components.removeFirst()
-            parentHosts.append(components.joined(separator: "."))
-        }
-        let dispatchGroup = DispatchGroup()
-        var allEntries = [PasswordManagerEntry]()
-        let queue = DispatchQueue(label: "passwordStore") // serialize appending to allEntries
-        dispatchGroup.enter()
-        entriesWithSubdomains(for: host) { entries in
-            queue.async {
-                allEntries += entries
-                dispatchGroup.leave()
-            }
-        }
-        for parentHost in parentHosts {
-            dispatchGroup.enter()
-            entries(for: parentHost) { entries in
-                queue.async {
-                    allEntries += entries
-                    dispatchGroup.leave()
-                }
-            }
-        }
-        dispatchGroup.wait()
-        completion(allEntries)
-    }
+    func entries(for host: String) throws -> [PasswordRecord]
+    func entriesWithSubdomains(for host: String) throws -> [PasswordRecord]
+    func find(_ searchString: String) throws -> [PasswordRecord]
+    func fetchAll() throws -> [PasswordRecord]
+    func password(host: String, username: String) throws -> String?
+    func save(host: String, username: String, password: String) throws -> PasswordRecord
+    func delete(host: String, username: String) throws -> PasswordRecord
 }
 
 struct UserInformations: Identifiable {

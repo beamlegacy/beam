@@ -9,8 +9,7 @@ import Foundation
 import SwiftUI
 
 final class PasswordListViewModel: ObservableObject {
-    private let passwordStore: PasswordStore
-
+    private var passwordManager: PasswordManager
     private var allPasswordEntries: [PasswordManagerEntry] = []
     private var allPasswordTableViewItems: [PasswordTableViewItem] = []
     private var filteredPasswordEntries: [PasswordManagerEntry] = []
@@ -34,15 +33,9 @@ final class PasswordListViewModel: ObservableObject {
         currentSelection.map { filteredPasswordEntries[$0] }
     }
 
-    init(passwordStore: PasswordStore) {
-        self.passwordStore = passwordStore
-        passwordStore.fetchAll { [weak self] entries in
-            guard let self = self else { return }
-            self.allPasswordEntries = entries
-            self.allPasswordTableViewItems = entries.map(PasswordTableViewItem.init)
-            self.filteredPasswordEntries = self.allPasswordEntries
-            self.filteredPasswordTableViewItems = self.allPasswordTableViewItems
-        }
+    init() {
+        self.passwordManager = PasswordManager()
+        refresh()
     }
 
     func updateSelection(_ idx: IndexSet) {
@@ -55,8 +48,8 @@ final class PasswordListViewModel: ObservableObject {
     }
 
     func refresh() {
-        passwordStore.fetchAll { [weak self] entries in
-            guard let self = self else { return }
+        let entries = passwordManager.fetchAll()
+        if !entries.isEmpty {
             self.allPasswordEntries = entries
             self.allPasswordTableViewItems = entries.map(PasswordTableViewItem.init)
             self.filteredPasswordEntries = self.allPasswordEntries.filtered(by: self.searchString)
