@@ -123,21 +123,4 @@ class JournalStackView: NSView {
     public func getTodaysView() -> BeamTextEdit? {
         return views[0]
     }
-
-    public func updateSideLayer(scrollValue: CGFloat, scrollingDown: Bool, y: CGFloat) {
-        for view in views {
-            let textEditView = view.value
-            let minSideLayerTrigger = textEditView.frame.origin.y + textEditView.cardHeaderLayer.frame.origin.y
-            let maxSideLayerTrigger = minSideLayerTrigger + textEditView.intrinsicContentSize.height - textEditView.cardTopSpace - textEditView.cardTitleLayer.preferredFrameSize().height
-
-            if y > minSideLayerTrigger && y < maxSideLayerTrigger {
-                textEditView.updateSideLayerVisibility(hide: false)
-
-                // Deactivate the update of the side layer position atm
-//                textEditView.updateSideLayerPosition(y: scrollValue, scrollingDown: scrollingDown)
-            } else {
-                textEditView.updateSideLayerVisibility(hide: true)
-            }
-        }
-    }
 }

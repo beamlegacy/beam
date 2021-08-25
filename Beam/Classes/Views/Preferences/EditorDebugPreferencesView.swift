@@ -158,8 +158,8 @@ struct EditorAppearance: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Leading percentage")
                     Text("Default: \(PreferencesManager.editorLeadingPercentageDefault)")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
                 }
                 TextField("", value: $editorLeadingPercentage, formatter: formatter) { _ in
                 } onCommit: {
@@ -176,8 +176,8 @@ struct EditorAppearance: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Header Top Padding")
                     Text("Default: \(PreferencesManager.editorHeaderTopPaddingDefault)")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
                 }
                 TextField("", value: $editorHeaderTopPadding, formatter: formatter) { _ in
                 } onCommit: {
@@ -191,8 +191,8 @@ struct EditorAppearance: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Journal Content Top Padding")
                     Text("Default: \(PreferencesManager.editorJournalTopPaddingDefault)")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
                 }
                 TextField("", value: $editorJournalTopPadding, formatter: formatter) { _ in
                 } onCommit: {
@@ -206,8 +206,8 @@ struct EditorAppearance: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Card Content Top Padding")
                     Text("Default: \(PreferencesManager.editorCardTopPaddingDefault)")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
                 }
                 TextField("", value: $editorCardTopPadding, formatter: formatter) { _ in
                 } onCommit: {
@@ -221,8 +221,8 @@ struct EditorAppearance: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Editor Min Width")
                     Text("Default: \(PreferencesManager.editorMinWidthDefault)")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
                 }
                 TextField("", value: $editorMinWidth, formatter: formatter) { _ in
                 } onCommit: {
@@ -236,8 +236,8 @@ struct EditorAppearance: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Editor Max Width")
                     Text("Default: \(PreferencesManager.editorMaxWidthDefault)")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
                 }
                 TextField("", value: $editorMaxWidth, formatter: formatter) { _ in
                 } onCommit: {
@@ -251,8 +251,8 @@ struct EditorAppearance: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Spacing between parent bullets")
                     Text("Default: \(PreferencesManager.editorParentSpacingDefault)")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
                 }
                 TextField("", value: $editorParentSpacing, formatter: formatter) { _ in
                 } onCommit: {
@@ -266,8 +266,8 @@ struct EditorAppearance: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Spacing between child bullets")
                     Text("Default: \(PreferencesManager.editorChildSpacingDefault)")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
                 }
                 TextField("", value: $editorChildSpacing, formatter: formatter) { _ in
                 } onCommit: {
@@ -299,8 +299,8 @@ struct FontEditorAppearance: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Font Size")
                     Text("Default: \(PreferencesManager.editorFontSizeDefault)")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
                 }
                 TextField("", value: $editorFontSize, formatter: formatter) { _ in
                 } onCommit: {
@@ -314,8 +314,8 @@ struct FontEditorAppearance: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Card Title Font Size")
                     Text("Default: \(PreferencesManager.editorCardTitleFontSize)")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
                 }
                 TextField("", value: $editorCardTitleFontSize, formatter: formatter) { _ in
                 } onCommit: {
@@ -329,8 +329,8 @@ struct FontEditorAppearance: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Heading One Font Size")
                     Text("Default: \(PreferencesManager.editorFontSizeHeadingOneDefault)")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
                 }
                 TextField("", value: $editorFontSizeHeadingOne, formatter: formatter) { _ in
                 } onCommit: {
@@ -344,8 +344,8 @@ struct FontEditorAppearance: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Heading One Space Size")
                     Text("Default: \(PreferencesManager.editorHeaderOneSizeDefault)")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
                 }
                 TextField("", value: $editorHeaderOneSize, formatter: formatter) { _ in
                 } onCommit: {
@@ -359,8 +359,8 @@ struct FontEditorAppearance: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Heading Two Font Size")
                     Text("Default: \(PreferencesManager.editorFontSizeHeadingTwoDefault)")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
                 }
                 TextField("", value: $editorFontSizeHeadingTwo, formatter: formatter) { _ in
                 } onCommit: {
@@ -372,10 +372,10 @@ struct FontEditorAppearance: View {
 
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Heading Two Size")
+                    Text("Heading Two Space Size")
                     Text("Default: \(PreferencesManager.editorHeaderTwoSizeDefault)")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
                 }
                 TextField("", value: $editorHeaderTwoSize, formatter: formatter) { _ in
                 } onCommit: {
@@ -384,36 +384,51 @@ struct FontEditorAppearance: View {
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .frame(width: 50, height: 25, alignment: .center)
             }
-
+            
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Line Height for Multiple Lines")
-                    Text("Default: \(PreferencesManager.editorLineHeightMultipleLineDefault)")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
+                    Text("Line Height for a line")
+                    Text("Default: \(PreferencesManager.editorLineHeightDefault)")
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
+                    TextField("", value: $editorLineHeight, formatter: formatter) { _ in
+                    } onCommit: {
+                        PreferencesManager.editorLineHeight = editorLineHeight
+                    }.disableAutocorrection(true)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .frame(width: 50, height: 25, alignment: .center)
                 }
-                TextField("", value: $editorLineHeightMultipleLine, formatter: formatter) { _ in
-                } onCommit: {
-                    PreferencesManager.editorLineHeightMultipleLine = editorLineHeightMultipleLine
-                }.disableAutocorrection(true)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .frame(width: 50, height: 25, alignment: .center)
             }
+        }
 
-            HStack {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Line Height for Headers")
-                    Text("Default: \(PreferencesManager.editorLineHeightHeadingDefault)")
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Line Height for Multiple Lines")
+                Text("Default: \(PreferencesManager.editorLineHeightMultipleLineDefault)")
                     .font(BeamFont.regular(size: 13).swiftUI)
                     .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
-                }
-                TextField("", value: $editorLineHeightHeading, formatter: formatter) { _ in
-                } onCommit: {
-                    PreferencesManager.editorLineHeightHeading = editorLineHeightHeading
-                }.disableAutocorrection(true)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .frame(width: 50, height: 25, alignment: .center)
             }
+            TextField("", value: $editorLineHeightMultipleLine, formatter: formatter) { _ in
+            } onCommit: {
+                PreferencesManager.editorLineHeightMultipleLine = editorLineHeightMultipleLine
+            }.disableAutocorrection(true)
+            .textFieldStyle(RoundedBorderTextFieldStyle())
+            .frame(width: 50, height: 25, alignment: .center)
+        }
+
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Line Height for Headers")
+                Text("Default: \(PreferencesManager.editorLineHeightHeadingDefault)")
+                    .font(BeamFont.regular(size: 13).swiftUI)
+                    .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
+            }
+            TextField("", value: $editorLineHeightHeading, formatter: formatter) { _ in
+            } onCommit: {
+                PreferencesManager.editorLineHeightHeading = editorLineHeightHeading
+            }.disableAutocorrection(true)
+            .textFieldStyle(RoundedBorderTextFieldStyle())
+            .frame(width: 50, height: 25, alignment: .center)
         }
     }
 }

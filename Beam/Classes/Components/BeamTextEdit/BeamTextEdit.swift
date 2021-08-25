@@ -96,8 +96,6 @@ public extension CALayer {
     let cardHeaderLayer = CALayer()
     let cardSeparatorLayer = CALayer()
     let cardTitleLayer = CATextLayer()
-    let cardSideLayer = CALayer()
-    let cardSideTitleLayer = CATextLayer()
     let cardTimeLayer = CATextLayer()
     let titleUnderLine = CALayer()
 
@@ -138,7 +136,6 @@ public extension CALayer {
 
         initBlinking()
         updateRoot(with: root)
-        setupSideLayer()
 
         registerForDraggedTypes([.fileURL])
         refreshAndHandleDeletionsAsync()
@@ -315,17 +312,11 @@ public extension CALayer {
             CATransaction.disableAnimations {
                 rootNode.availableWidth = textNodeWidth
                 updateCardHearderLayer(rect)
-                if journalMode {
-                    updateSideLayer(rect)
-                }
                 rootNode.setLayout(rect)
             }
         } else {
             rootNode.availableWidth = textNodeWidth
             updateCardHearderLayer(rect)
-            if journalMode {
-                updateSideLayer(rect)
-            }
             rootNode.setLayout(rect)
         }
     }
@@ -400,52 +391,10 @@ public extension CALayer {
         cardTitleLayer.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: NSSize(width: cardTitleLayer.preferredFrameSize().width, height: cardTitleLayer.preferredFrameSize().height))
     }
 
-    func setupSideLayer() {
-        guard let cardNote = note as? BeamNote else { return }
-        cardSideLayer.enableAnimations = true
-
-        cardSideTitleLayer.foregroundColor = BeamColor.Generic.text.cgColor
-        cardSideTitleLayer.font = BeamFont.semibold(size: 0).nsFont
-        cardSideTitleLayer.fontSize = 15 // TODO: Change later (isBig ? 30 : 26)
-        cardSideTitleLayer.string = isBig ? cardNote.title : BeamDate.journalNoteTitle(for: cardNote.type.journalDate ?? cardNote.creationDate, with: .short)
-        cardSideTitleLayer.name = "cardSideTitleLayer"
-
-        cardSideLayer.addSublayer(cardSideTitleLayer)
-        cardSideLayer.opacity = 0
-
-        addToMainLayer(cardSideLayer)
-    }
-
-    func updateSideLayer(_ rect: CGRect) {
-        guard let cardNote = note as? BeamNote else { return }
-        cardSideTitleLayer.string = isBig ? cardNote.title : BeamDate.journalNoteTitle(for: cardNote.type.journalDate ?? cardNote.creationDate, with: .short)
-        let sideLayerPos = CGPoint(x: cardHeaderLayer.frame.origin.x - cardSideTitleLayer.preferredFrameSize().width - 46.5, y: topOffsetActual + cardTopSpace + sideLayerOffset)
-        cardSideLayer.frame = CGRect(origin: sideLayerPos, size: NSSize(width: cardSideLayer.preferredFrameSize().width, height: cardSideLayer.preferredFrameSize().height))
-        cardSideTitleLayer.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: NSSize(width: cardSideTitleLayer.preferredFrameSize().width, height: cardSideTitleLayer.preferredFrameSize().height))
-    }
-
     var sideLayerOffset: CGFloat = .zero {
         didSet {
             invalidateLayout()
         }
-    }
-
-    func updateSideLayerVisibility(hide: Bool) {
-        if !hide && cardSideLayer.opacity == 0 || hide && cardSideLayer.opacity == 1 {
-            let oldValue = cardSideLayer.opacity
-            let newValue: Float = oldValue == 0 ? 1 : 0
-            let opacityAnimation = CABasicAnimation(keyPath: "opacity")
-            opacityAnimation.fromValue = oldValue
-            opacityAnimation.toValue = newValue
-            opacityAnimation.duration = 0.25
-            cardSideLayer.add(opacityAnimation, forKey: "opacity")
-            cardSideLayer.opacity = newValue
-        }
-    }
-
-    func updateSideLayerPosition(y: CGFloat, scrollingDown: Bool) {
-        sideLayerOffset += y
-        sideLayerOffset = sideLayerOffset < 0 ? 0 : sideLayerOffset
     }
 
     var realContentSize: NSSize = .zero
@@ -1063,7 +1012,6 @@ public extension CALayer {
 
         cardTitleLayer.contentsScale = window.backingScaleFactor
         cardTimeLayer.contentsScale = window.backingScaleFactor
-        cardSideTitleLayer.contentsScale = window.backingScaleFactor
     }
 
     var onBlinkTime: Double = 0.7
