@@ -160,7 +160,7 @@ extension BeamTextEdit {
     }
 
     private func insertInternalLink(in node: TextNode, for range: Range<Int>) {
-        node.cmdManager.insertText(BeamText(text: "@", attributes: [Self.formatterPlaceholderAttribute]), in: node, at: range.lowerBound)
+        node.cmdManager.insertText(BeamText(text: "@", attributes: []), in: node, at: range.lowerBound)
         node.cmdManager.focusElement(node, cursorPosition: range.lowerBound + 1)
         showCardReferenceFormatter(atPosition: node.cursorPosition, prefix: 1, suffix: 0)
     }
