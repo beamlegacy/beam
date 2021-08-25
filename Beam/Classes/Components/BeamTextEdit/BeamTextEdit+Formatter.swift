@@ -25,6 +25,14 @@ extension BeamTextEdit {
     private static var formatterPresentDelay: TimeInterval = 0.7
     private static var formatterDismissDelay: TimeInterval = 0.2
 
+    static var formatterPlaceholderAttribute: BeamText.Attribute {
+        let placeholderDecoration: [NSAttributedString.Key: Any] = [
+            .foregroundColor: BeamColor.LightStoneGray.nsColor,
+            .boxBackgroundColor: BeamColor.Mercury.nsColor
+        ]
+        return BeamText.Attribute.decorated(AttributeDecoratedValueAttributedString(attributes: placeholderDecoration))
+    }
+
     // MARK: - UI
 
     internal func initInlineFormatterView(isHyperlinkView: Bool = false) {
@@ -99,11 +107,19 @@ extension BeamTextEdit {
             return
         } else if isKeyEvent && formatterHandlesKeyEvents,
                   let node = formatterTargetNode,
-                  let targetRange = formatterTargetRange,
-                  targetRange.lowerBound <= node.cursorPosition {
-            var text = node.text.text
-            text = text.substring(range: targetRange.lowerBound..<node.cursorPosition)
-            if inlineFormatter?.formatterHandlesInputText(text) != true {
+                  let targetRange = formatterTargetRange {
+            if targetRange.lowerBound <= node.cursorPosition {
+                var text = node.text.text
+                let fullRange = targetRange.lowerBound..<node.cursorPosition
+                text = text.substring(range: targetRange.lowerBound..<node.cursorPosition)
+                if inlineFormatter?.formatterHandlesInputText(text) == true {
+                    if let typingAttributes = inlineFormatter?.typingAttributes {
+                        node.text.setAttributes(typingAttributes, to: fullRange)
+                    }
+                } else {
+                    showOrHideInlineFormatter(isPresent: false, isDragged: isDragged)
+                }
+            } else {
                 showOrHideInlineFormatter(isPresent: false, isDragged: isDragged)
             }
         } else if hasNodeSelection {
@@ -240,18 +256,20 @@ extension BeamTextEdit {
         if removeView {
             view?.removeFromSuperview()
         }
-
+        clearFormatterTypingAttributes(view)
         if view == inlineFormatter {
             CustomPopoverPresenter.shared.dismissMenu()
             isInlineFormatterHidden = true
             inlineFormatter = nil
             formatterTargetRange = nil
             formatterTargetNode = nil
-            if popover == nil {
-                cursorStartPosition = 0
-            }
             clearDebounceTimer()
         }
+    }
+
+    private func clearFormatterTypingAttributes(_ view: FormatterView?) {
+        guard let targetNode = formatterTargetNode, let attributes = view?.typingAttributes else { return }
+        targetNode.text.removeAttributes(attributes, from: targetNode.text.wholeRange)
     }
 
     internal func moveInlineFormatterAtSelection(below: Bool = false) {
@@ -292,12 +310,7 @@ extension BeamTextEdit {
     }
 
     private func handleInternalLinkFormat(in node: TextNode) -> BeamText.Attribute? {
-        let title = node.root?.state.nodeSelection != nil ? node.text.text : selectedText
-        guard !title.isEmpty, let doc = documentManager.loadDocumentByTitle(title: title) else {
-            showBidirectionalPopover(mode: .internalLink, prefix: 0, suffix: 0)
-            return nil
-        }
-        return .internalLink(doc.id)
+        makeInternalLinkForSelectionOrShowFormatter(for: node, applyFormat: false)
     }
 
     // MARK: Private Methods (Text Formatting)

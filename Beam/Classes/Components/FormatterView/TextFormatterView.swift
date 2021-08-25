@@ -21,6 +21,10 @@ private struct FormatterItem: Identifiable {
 }
 
 private class TextFormatterViewModel: BaseFormatterViewViewModel, ObservableObject {
+    override var animationDirection: Edge {
+        get { .top }
+        set { _ = newValue }
+    }
     @Published var formatterItems: [FormatterItem] = []
     var onSelectFormatterItem: ((FormatterItem) -> Void)?
 }
@@ -63,11 +67,7 @@ private struct TextFormatterViewSwiftUI: View {
             isHovering = hovering
         }
         .frame(width: size.width, height: size.height)
-        .scaleEffect(viewModel.visible ? 1.0 : 0.98)
-        .offset(x: 0, y: viewModel.visible ? 0.0 : 4.0)
-        .animation(.spring(response: 0.4, dampingFraction: 0.6))
-        .opacity(viewModel.visible ? 1.0 : 0.0)
-        .animation(viewModel.visible ? .easeInOut(duration: 0.3) : .easeInOut(duration: 0.15))
+        .formatterViewBackgroundAnimation(with: viewModel)
     }
 }
 

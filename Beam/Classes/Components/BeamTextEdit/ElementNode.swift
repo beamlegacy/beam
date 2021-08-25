@@ -361,7 +361,7 @@ public class ElementNode: Widget {
     }
 
     func openExternalLink(link: URL, element: BeamElement) {
-        editor.cancelInternalLink()
+        editor.hideInlineFormatter()
         editor.openURL(link, element)
     }
 

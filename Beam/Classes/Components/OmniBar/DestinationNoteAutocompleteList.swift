@@ -19,16 +19,17 @@ struct DestinationNoteAutocompleteList: View {
             touchdownBackgroundColor: BeamColor.NotePicker.active.nsColor)
     var body: some View {
         VStack(spacing: 0) {
+            let palette = !model.searchCardContent ? colorPalette : AutocompleteItem.defaultColorPalette
             ForEach(model.results) { i in
-                return AutocompleteItem(
-                    item: i,
-                    selected: model.isSelected(i),
-                    displayIcon: false,
-                    alwaysHighlightCompletingText: true,
-                    colorPalette: colorPalette
-                )
-
-                    .frame(height: itemHeight)
+                return AutocompleteItem(item: i, selected: model.isSelected(i),
+                                        displayIcon: false, alwaysHighlightCompletingText: true,
+                                        allowCmdEnter: model.allowCmdEnter, colorPalette: palette)
+                    .if(model.searchCardContent) {
+                        $0.frame(minHeight: itemHeight).fixedSize(horizontal: false, vertical: true)
+                    }
+                    .if(!model.searchCardContent) {
+                        $0.frame(height: itemHeight)
+                    }
                     .transition(.identity)
                     .animation(nil)
                     .simultaneousGesture(
@@ -66,6 +67,8 @@ extension DestinationNoteAutocompleteList {
     class Model: ObservableObject {
         var data: BeamData?
         var useRecents = true
+        var searchCardContent = false
+        var allowCmdEnter = true
         var modifierFlagsPressed: NSEvent.ModifierFlags?
 
         var selectedResult: AutocompleteResult? {
@@ -126,37 +129,59 @@ extension DestinationNoteAutocompleteList {
         }
 
         private func updateSearchResults() {
-            guard let data = data else { return }
+            var autocompleteItems: [AutocompleteResult]
+            if searchCardContent {
+                autocompleteItems = getSearchResultForNoteContent(text: searchText, itemLimit: 6)
+            } else {
+                autocompleteItems = getSearchResultForNoteTitle(text: searchText, itemLimit: 4)
+            }
+            selectedIndex = 0
+            results = autocompleteItems
+        }
+
+        private func getSearchResultForNoteContent(text: String, itemLimit: Int) -> [AutocompleteResult] {
+            var dbResults: [GRDBDatabase.SearchResult]
+            if text.isEmpty {
+                dbResults = GRDBDatabase.shared.search(allWithMaxResults: itemLimit, includeText: true)
+            } else {
+                dbResults = GRDBDatabase.shared.search(matchingAnyTokenIn: text, maxResults: itemLimit, includeText: true)
+            }
+            return dbResults.map { r in
+                AutocompleteResult(text: r.text ?? r.title, source: .note(noteId: r.noteId, elementId: r.uid), uuid: r.uid)
+            }
+        }
+
+        private func getSearchResultForNoteTitle(text: String, itemLimit: Int) -> [AutocompleteResult] {
+            guard let data = data else { return [] }
+            var autocompleteItems: [AutocompleteResult]
             var allowCreateCard = false
             var items = [DocumentStruct]()
-            let itemLimit = 4
-            if !searchText.isEmpty {
+            if !text.isEmpty {
                 allowCreateCard = true
-                items = data.documentManager.documentsWithLimitTitleMatch(title: searchText, limit: itemLimit)
+                items = data.documentManager.documentsWithLimitTitleMatch(title: text, limit: itemLimit)
             } else if useRecents {
                 items = data.documentManager.loadAllWithLimit(itemLimit)
             }
-            if (todaysCardReplacementName.lowercased().contains(searchText.lowercased())
+            if (todaysCardReplacementName.lowercased().contains(text.lowercased())
                     && !items.contains(where: { $0.title == data.todaysName })) {
                 let todaysNotes = data.documentManager.documentsWithLimitTitleMatch(title: data.todaysName, limit: 1)
                 items.insert(contentsOf: todaysNotes, at: 0)
                 items = Array(items.prefix(itemLimit))
             }
             allowCreateCard = allowCreateCard
-                    && !items.contains(where: { $0.title.lowercased() == searchText.lowercased() })
-            var autocompleteItems = items.map {
-                AutocompleteResult(text: $0.title, source: .note, completingText: searchText, uuid: $0.id)
+                && !items.contains(where: { $0.title.lowercased() == text.lowercased() })
+            autocompleteItems = items.map {
+                AutocompleteResult(text: $0.title, source: .note(noteId: $0.id), completingText: searchText, uuid: $0.id)
             }
-            if allowCreateCard && !searchText.isEmpty {
-                let createItem = AutocompleteResult(text: searchText, source: .createCard, information: "New Card")
+            if allowCreateCard && !text.isEmpty {
+                let createItem = AutocompleteResult(text: text, source: .createCard, information: "New Card")
                 if autocompleteItems.count >= itemLimit {
                     autocompleteItems[autocompleteItems.count - 1] = createItem
                 } else {
                     autocompleteItems.append(createItem)
                 }
             }
-            results = autocompleteItems
-            self.selectedIndex = 0
+            return autocompleteItems
         }
     }
 }

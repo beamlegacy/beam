@@ -25,11 +25,7 @@ private struct CalendarPickerFormatterContainerView: View {
             .frame(width: Self.idealSize.width)
             .fixedSize(horizontal: false, vertical: true)
             .frame(height: Self.idealSize.height, alignment: .topLeading)
-            .scaleEffect(viewModel.visible ? 1.0 : 0.98)
-            .offset(x: 0, y: viewModel.visible ? 0.0 : -4.0)
-            .animation(.spring(response: 0.4, dampingFraction: 0.6))
-            .opacity(viewModel.visible ? 1.0 : 0.0)
-            .animation(viewModel.visible ? .easeInOut(duration: 0.3) : .easeInOut(duration: 0.15))
+            .formatterViewBackgroundAnimation(with: viewModel)
     }
 }
 
