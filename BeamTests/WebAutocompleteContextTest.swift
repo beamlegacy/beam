@@ -6,11 +6,10 @@ import Nimble
 @testable import BeamCore
 
 class WebAutocompleteContextTest: XCTestCase {
-    let passwordStoreMock = PasswordStoreMock()
     var webAutocompleteContext: WebAutocompleteContext!
 
     override func setUpWithError() throws {
-        self.webAutocompleteContext = WebAutocompleteContext(passwordStore: passwordStoreMock)
+        self.webAutocompleteContext = WebAutocompleteContext()
     }
 
     func testUpdateWithTaggedFields() throws {

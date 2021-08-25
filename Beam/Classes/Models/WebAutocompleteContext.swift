@@ -203,14 +203,12 @@ extension WebInputField {
  Determines the actions to be taken upon click on an input field.
  */
 final class WebAutocompleteContext {
-    let passwordStore: PasswordStore
 
     private var autocompleteRules: WebAutocompleteRules
     private var autocompleteFields: [WebAutocompleteAction: [WebInputField]]
     var autocompleteGroups: [String: WebAutocompleteGroup] // key = beamId
 
-    init(passwordStore: PasswordStore) {
-        self.passwordStore = passwordStore
+    init() {
         self.autocompleteRules = .default
         self.autocompleteFields = [:]
         self.autocompleteGroups = [:]
