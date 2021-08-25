@@ -76,14 +76,6 @@ extension BeamColor {
 }
 
 extension BeamColor {
-    enum BidirectionalPopover {
-        static let background = BeamColor.Custom(named: "PopoverBackgroudColor")
-        static let backgroundHover = BeamColor.Custom(named: "PopoverBackgroundHoverColor")
-        static let actionText = BeamColor.Custom(named: "PopoverActionTextColor")
-    }
-}
-
-extension BeamColor {
     enum Formatter {
         static let background = BeamColor.From(color: NSColor(withLightColor: NSColor.white.withAlphaComponent(0.98), darkColor: BeamColor.Nero.nsColor.withAlphaComponent(0.98)))
         static let backgroundHover = BeamColor.Custom(named: "FormatterBackgroundHoverColor")

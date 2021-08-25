@@ -370,7 +370,7 @@ extension GRDBDatabase {
     }
     /// Search in notes contents (synchronous)
     private func search(_ db: GRDB.Database,
-                        _ pattern: FTS3Pattern,
+                        _ pattern: FTS3Pattern?,
                         _ maxResults: Int? = nil,
                         _ includeText: Bool = false,
                         frecencyParam: FrecencyParamKey?) throws -> [SearchResult] {
@@ -384,10 +384,10 @@ extension GRDBDatabase {
 
     /// Search in notes content without frecencies (synchronous).
     private func search(_ db: GRDB.Database,
-                        _ pattern: FTS3Pattern,
+                        _ pattern: FTS3Pattern?,
                         _ maxResults: Int? = nil,
                         _ includeText: Bool = false) throws -> [SearchResult] {
-        var query = BeamElementRecord.matching(pattern)
+        var query = pattern != nil ? BeamElementRecord.matching(pattern) : BeamElementRecord.all()
         if let maxResults = maxResults {
             query = query.limit(maxResults)
         }
@@ -410,13 +410,18 @@ extension GRDBDatabase {
 
     /// Search in notes content with frecencies  (synchronous).
     private func search(_ db: GRDB.Database,
-                        _ pattern: FTS3Pattern,
+                        _ pattern: FTS3Pattern?,
                         _ maxResults: Int? = nil,
                         _ includeText: Bool = false,
                         frencencyParam: FrecencyParamKey) throws -> [SearchResult] {
 
         let association = BeamElementRecord.frecency.filter(FrecencyNoteRecord.Columns.frecencyKey == frencencyParam).forKey("frecency")
-        var query = BeamElementRecord.matching(pattern).including(optional: association)
+        var query: QueryInterfaceRequest<BeamElementRecord>
+        if let pattern = pattern {
+            query = BeamElementRecord.matching(pattern).including(optional: association)
+        } else {
+            query = BeamElementRecord.all()
+        }
         if let maxResults = maxResults {
             query = query.limit(maxResults)
         }
@@ -487,6 +492,18 @@ extension GRDBDatabase {
         do {
             return try dbReader.read { db in
                 try search(db, pattern, maxResults, includeText, frecencyParam: frecencyParam)
+            }
+        } catch {
+            return []
+        }
+    }
+
+    func search(allWithMaxResults maxResults: Int? = nil,
+                includeText: Bool = false,
+                frecencyParam: FrecencyParamKey? = nil) -> [SearchResult] {
+        do {
+            return try dbReader.read { db in
+                try search(db, nil, maxResults, includeText, frecencyParam: frecencyParam)
             }
         } catch {
             return []

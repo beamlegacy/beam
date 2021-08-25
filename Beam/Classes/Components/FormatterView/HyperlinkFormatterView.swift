@@ -10,6 +10,10 @@ import SwiftUI
 
 // MARK: - SwiftUI View
 private class HyperlinkEditorViewModel: BaseFormatterViewViewModel, ObservableObject {
+    override var animationDirection: Edge {
+        get { .top }
+        set { _ = newValue }
+    }
     var url: Binding<String> = .constant("")
     var title: Binding<String> = .constant("")
     @Published var shouldFocusOnAppear: Bool = false
@@ -80,11 +84,7 @@ private struct HyperlinkEditorView: View {
             .padding(.horizontal, BeamSpacing._100)
         }
         .frame(width: Self.idealSize.width, height: Self.idealSize.height)
-        .scaleEffect(viewModel.visible ? 1.0 : 0.98)
-        .offset(x: 0, y: viewModel.visible ? 0.0 : 4.0)
-        .animation(.spring(response: 0.4, dampingFraction: 0.6))
-        .opacity(viewModel.visible ? 1.0 : 0.0)
-        .animation(viewModel.visible ? .easeInOut(duration: 0.3) : .easeInOut(duration: 0.15))
+        .formatterViewBackgroundAnimation(with: viewModel)
         .onAppear {
             if viewModel.visible && viewModel.shouldFocusOnAppear {
                 isEditingUrl = true

@@ -103,20 +103,12 @@
 		33DEF48826617E0B00834839 /* CircledButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33DEF48726617E0B00834839 /* CircledButton.swift */; };
 		33F0480426B14C0100855A08 /* CustomPopoverPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33F047FC26B14C0000855A08 /* CustomPopoverPresenter.swift */; };
 		4100D96B25AEFEEA00EF04CB /* BeamTextEdit+Shortcut.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4100D96A25AEFEEA00EF04CB /* BeamTextEdit+Shortcut.swift */; };
-		4105CE2225A5ECA2009AB687 /* BidirectionalPopoverItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4105CE2125A5ECA2009AB687 /* BidirectionalPopoverItem.swift */; };
 		4105CE7525A60681009AB687 /* FormatterTypeButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4105CE7425A60681009AB687 /* FormatterTypeButton.swift */; };
-		41221A362592771F00255197 /* BeamTextEdit+Popover.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41221A352592771F00255197 /* BeamTextEdit+Popover.swift */; };
 		4131F16825BEC48C006473CD /* SpacerWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4131F16725BEC48C006473CD /* SpacerWidget.swift */; };
-		414B987A259DE2E2002E81A3 /* BidirectionalPopoverActionItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414B9878259DE2E2002E81A3 /* BidirectionalPopoverActionItem.swift */; };
-		414B987B259DE2E2002E81A3 /* BidirectionalPopoverActionItem.xib in Resources */ = {isa = PBXBuildFile; fileRef = 414B9879259DE2E2002E81A3 /* BidirectionalPopoverActionItem.xib */; };
 		414B989925A21BB0002E81A3 /* BeamTextEdit+Formatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414B989825A21BB0002E81A3 /* BeamTextEdit+Formatter.swift */; };
 		414B98F025A239F8002E81A3 /* FormatterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414B98EF25A239F8002E81A3 /* FormatterView.swift */; };
 		414B98FA25A23A4F002E81A3 /* NSView+Xib.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414B98F925A23A4F002E81A3 /* NSView+Xib.swift */; };
 		414B98FE25A27930002E81A3 /* FormatterType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414B98FD25A27930002E81A3 /* FormatterType.swift */; };
-		4159E9D4259A1A81005FD355 /* BidirectionalPopover.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159E9D3259A1A81005FD355 /* BidirectionalPopover.swift */; };
-		4159E9E2259A2575005FD355 /* BidirectionalPopover.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4159E9E1259A2575005FD355 /* BidirectionalPopover.xib */; };
-		4159EA0A259A3568005FD355 /* BidirectionalPopoverResultItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159EA08259A3568005FD355 /* BidirectionalPopoverResultItem.swift */; };
-		4159EA0B259A3568005FD355 /* BidirectionalPopoverResultItem.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4159EA09259A3568005FD355 /* BidirectionalPopoverResultItem.xib */; };
 		416C09F3259C919200AF2903 /* CATransaction+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416C09F2259C919200AF2903 /* CATransaction+Beam.swift */; };
 		417628A525B05DFB0082FFDF /* NSBezierPath+CGPath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 417628A425B05DFB0082FFDF /* NSBezierPath+CGPath.swift */; };
 		418170FF2581060A00317ED8 /* Colors.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 418170FE2581060A00317ED8 /* Colors.xcassets */; };
@@ -477,8 +469,6 @@
 		9652A93526A6B27500F0590C /* FakeNoteGeneratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9652A93226A6B13700F0590C /* FakeNoteGeneratorTests.swift */; };
 		965A78292514F147009980D4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965A78282514F147009980D4 /* AppDelegate.swift */; };
 		965A78362514F148009980D4 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 965A78342514F148009980D4 /* Main.storyboard */; };
-		9661A586266980AF00CB56B3 /* BidirectionalPopoverBlockItem.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9661A57D266980AF00CB56B3 /* BidirectionalPopoverBlockItem.xib */; };
-		9661A587266980AF00CB56B3 /* BidirectionalPopoverBlockItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9661A585266980AF00CB56B3 /* BidirectionalPopoverBlockItem.swift */; };
 		9661A589266A289200CB56B3 /* BlockReferenceNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9661A588266A289200CB56B3 /* BlockReferenceNode.swift */; };
 		9661A58B266A70DA00CB56B3 /* NodeProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9661A58A266A70DA00CB56B3 /* NodeProvider.swift */; };
 		9674080625F237B2000AC2B8 /* String+URLTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9674080525F237B2000AC2B8 /* String+URLTests.swift */; };
@@ -678,6 +668,8 @@
 		A5A6152526A808B600193C03 /* AutocompleteManager+Sorting.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A6152426A808B600193C03 /* AutocompleteManager+Sorting.swift */; };
 		A5A6A428267F123C007F1B2F /* CommandManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5109F902670227800304B3A /* CommandManagerTests.swift */; };
 		A5A955CB2695576D00F3FDD2 /* CalendarPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A955CA2695576D00F3FDD2 /* CalendarPickerView.swift */; };
+		A5B1DBEE26CE933100F1F81A /* CardReferenceFormatterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5B1DBED26CE933100F1F81A /* CardReferenceFormatterView.swift */; };
+		A5B1DBFB26CFDC4800F1F81A /* BeamTextEdit+CardReference.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5B1DBFA26CFDC4800F1F81A /* BeamTextEdit+CardReference.swift */; };
 		A5B268A426845549001797ED /* BeamTextAttributedStringBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5B268A326845549001797ED /* BeamTextAttributedStringBuilder.swift */; };
 		A5BF04D32681A4F800CC80EB /* ElementNode+Layers.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BF04D22681A4F800CC80EB /* ElementNode+Layers.swift */; };
 		A5C7F10A267CC9FD002EE550 /* BeamTextEdit+InputDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C7F109267CC9FD002EE550 /* BeamTextEdit+InputDetector.swift */; };
@@ -1024,20 +1016,12 @@
 		33DEF48726617E0B00834839 /* CircledButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircledButton.swift; sourceTree = "<group>"; };
 		33F047FC26B14C0000855A08 /* CustomPopoverPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomPopoverPresenter.swift; sourceTree = "<group>"; };
 		4100D96A25AEFEEA00EF04CB /* BeamTextEdit+Shortcut.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamTextEdit+Shortcut.swift"; sourceTree = "<group>"; };
-		4105CE2125A5ECA2009AB687 /* BidirectionalPopoverItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BidirectionalPopoverItem.swift; sourceTree = "<group>"; };
 		4105CE7425A60681009AB687 /* FormatterTypeButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatterTypeButton.swift; sourceTree = "<group>"; };
-		41221A352592771F00255197 /* BeamTextEdit+Popover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamTextEdit+Popover.swift"; sourceTree = "<group>"; };
 		4131F16725BEC48C006473CD /* SpacerWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpacerWidget.swift; sourceTree = "<group>"; };
-		414B9878259DE2E2002E81A3 /* BidirectionalPopoverActionItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BidirectionalPopoverActionItem.swift; sourceTree = "<group>"; };
-		414B9879259DE2E2002E81A3 /* BidirectionalPopoverActionItem.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BidirectionalPopoverActionItem.xib; sourceTree = "<group>"; };
 		414B989825A21BB0002E81A3 /* BeamTextEdit+Formatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamTextEdit+Formatter.swift"; sourceTree = "<group>"; };
 		414B98EF25A239F8002E81A3 /* FormatterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatterView.swift; sourceTree = "<group>"; };
 		414B98F925A23A4F002E81A3 /* NSView+Xib.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSView+Xib.swift"; sourceTree = "<group>"; };
 		414B98FD25A27930002E81A3 /* FormatterType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatterType.swift; sourceTree = "<group>"; };
-		4159E9D3259A1A81005FD355 /* BidirectionalPopover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BidirectionalPopover.swift; sourceTree = "<group>"; };
-		4159E9E1259A2575005FD355 /* BidirectionalPopover.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BidirectionalPopover.xib; sourceTree = "<group>"; };
-		4159EA08259A3568005FD355 /* BidirectionalPopoverResultItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BidirectionalPopoverResultItem.swift; sourceTree = "<group>"; };
-		4159EA09259A3568005FD355 /* BidirectionalPopoverResultItem.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BidirectionalPopoverResultItem.xib; sourceTree = "<group>"; };
 		416C09F2259C919200AF2903 /* CATransaction+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CATransaction+Beam.swift"; sourceTree = "<group>"; };
 		417628A425B05DFB0082FFDF /* NSBezierPath+CGPath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSBezierPath+CGPath.swift"; sourceTree = "<group>"; };
 		418170FE2581060A00317ED8 /* Colors.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Colors.xcassets; sourceTree = "<group>"; };
@@ -1414,8 +1398,6 @@
 		965A78432514F149009980D4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		965A78482514F149009980D4 /* BeamUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BeamUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		965A784E2514F149009980D4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		9661A57D266980AF00CB56B3 /* BidirectionalPopoverBlockItem.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = BidirectionalPopoverBlockItem.xib; sourceTree = "<group>"; };
-		9661A585266980AF00CB56B3 /* BidirectionalPopoverBlockItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BidirectionalPopoverBlockItem.swift; sourceTree = "<group>"; };
 		9661A588266A289200CB56B3 /* BlockReferenceNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockReferenceNode.swift; sourceTree = "<group>"; };
 		9661A58A266A70DA00CB56B3 /* NodeProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NodeProvider.swift; sourceTree = "<group>"; };
 		9674080525F237B2000AC2B8 /* String+URLTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+URLTests.swift"; sourceTree = "<group>"; };
@@ -1608,6 +1590,8 @@
 		A59D33872655101A002E7E96 /* WiggleEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WiggleEffect.swift; sourceTree = "<group>"; };
 		A5A6152426A808B600193C03 /* AutocompleteManager+Sorting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AutocompleteManager+Sorting.swift"; sourceTree = "<group>"; };
 		A5A955CA2695576D00F3FDD2 /* CalendarPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarPickerView.swift; sourceTree = "<group>"; };
+		A5B1DBED26CE933100F1F81A /* CardReferenceFormatterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardReferenceFormatterView.swift; sourceTree = "<group>"; };
+		A5B1DBFA26CFDC4800F1F81A /* BeamTextEdit+CardReference.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamTextEdit+CardReference.swift"; sourceTree = "<group>"; };
 		A5B268A326845549001797ED /* BeamTextAttributedStringBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamTextAttributedStringBuilder.swift; sourceTree = "<group>"; };
 		A5BF04D22681A4F800CC80EB /* ElementNode+Layers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ElementNode+Layers.swift"; sourceTree = "<group>"; };
 		A5C7F109267CC9FD002EE550 /* BeamTextEdit+InputDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamTextEdit+InputDetector.swift"; sourceTree = "<group>"; };
@@ -2034,22 +2018,6 @@
 			path = FormatterView;
 			sourceTree = "<group>";
 		};
-		4159E9D2259A1A56005FD355 /* BidirectionalPopover */ = {
-			isa = PBXGroup;
-			children = (
-				4159E9D3259A1A81005FD355 /* BidirectionalPopover.swift */,
-				4159E9E1259A2575005FD355 /* BidirectionalPopover.xib */,
-				4105CE2125A5ECA2009AB687 /* BidirectionalPopoverItem.swift */,
-				4159EA08259A3568005FD355 /* BidirectionalPopoverResultItem.swift */,
-				4159EA09259A3568005FD355 /* BidirectionalPopoverResultItem.xib */,
-				9661A585266980AF00CB56B3 /* BidirectionalPopoverBlockItem.swift */,
-				9661A57D266980AF00CB56B3 /* BidirectionalPopoverBlockItem.xib */,
-				414B9878259DE2E2002E81A3 /* BidirectionalPopoverActionItem.swift */,
-				414B9879259DE2E2002E81A3 /* BidirectionalPopoverActionItem.xib */,
-			);
-			path = BidirectionalPopover;
-			sourceTree = "<group>";
-		};
 		41816FD02581046F00317ED8 /* Assets */ = {
 			isa = PBXGroup;
 			children = (
@@ -2371,9 +2339,9 @@
 				418171B82581107C00317ED8 /* TextEditOperations.swift */,
 				96E4CF2F258DFB0800D6DE22 /* BeamText+NSAttributedString.swift */,
 				A5B268A326845549001797ED /* BeamTextAttributedStringBuilder.swift */,
-				41221A352592771F00255197 /* BeamTextEdit+Popover.swift */,
 				96120D4A260CD5E100592546 /* TextEdit+Hyperlink.swift */,
 				A57C745726709C8000840BBA /* BeamTextEdit+SlashMenu.swift */,
+				A5B1DBFA26CFDC4800F1F81A /* BeamTextEdit+CardReference.swift */,
 				414B989825A21BB0002E81A3 /* BeamTextEdit+Formatter.swift */,
 				96F936622590FA59006D8E53 /* BTextEdit.swift */,
 				9691E40125AE5D2C00A13080 /* NodeSelection.swift */,
@@ -2511,7 +2479,6 @@
 				A530D502260A19A600DBD14E /* ContextMenu */,
 				526017DE25AE073800634695 /* Console */,
 				418171AA2581107C00317ED8 /* Autocomplete */,
-				4159E9D2259A1A56005FD355 /* BidirectionalPopover */,
 				414B98EE25A239C6002E81A3 /* FormatterView */,
 				418172A725811A3A00317ED8 /* BeamTextField */,
 				521EEDC725937E7B00BA2485 /* DocumentsList */,
@@ -3597,6 +3564,7 @@
 				33F047FC26B14C0000855A08 /* CustomPopoverPresenter.swift */,
 				A51ED9A62608D0CD00CA99E5 /* ContextMenuFormatterView.swift */,
 				A580D5ED26427BCB00EB2E24 /* ContextMenuView.swift */,
+				A5B1DBED26CE933100F1F81A /* CardReferenceFormatterView.swift */,
 			);
 			path = ContextMenu;
 			sourceTree = "<group>";
@@ -4209,7 +4177,6 @@
 				965A78362514F148009980D4 /* Main.storyboard in Resources */,
 				5204290B25A4B3D300DD677C /* document_updated_at.graphql in Resources */,
 				52E2528426173FA800E54C45 /* databases.graphql in Resources */,
-				9661A586266980AF00CB56B3 /* BidirectionalPopoverBlockItem.xib in Resources */,
 				5224CD4C2685FF8C00D4179E /* delete_beam_object.graphql in Resources */,
 				52F4E4BA264185FC0067B017 /* identities.graphql in Resources */,
 				5206280C25922D6300D7CD9E /* delete_document.graphql in Resources */,
@@ -4218,20 +4185,17 @@
 				A500F93626BAD78A0029D34F /* audio.mp3 in Resources */,
 				5206281025922D6C00D7CD9E /* update_document.graphql in Resources */,
 				56A5BD3725CCAFA400ED7C50 /* english.stopwords in Resources */,
-				4159E9E2259A2575005FD355 /* BidirectionalPopover.xib in Resources */,
 				418171F42581107C00317ED8 /* sign_up.graphql in Resources */,
 				032562AB26051D3B006513E4 /* Info.plist in Resources */,
 				96C5FE44268F4D5700889B5E /* Geolocation.js in Resources */,
 				52F4E4B42641844E0067B017 /* delete_identity.graphql in Resources */,
 				418171F62581107C00317ED8 /* sign_in.graphql in Resources */,
 				41D169A925DC07260018E5F2 /* Inter-Italic.otf in Resources */,
-				4159EA0B259A3568005FD355 /* BidirectionalPopoverResultItem.xib in Resources */,
 				418170FF2581060A00317ED8 /* Colors.xcassets in Resources */,
 				41D169A825DC07260018E5F2 /* Inter-SemiBold.otf in Resources */,
 				8AC2EFD9266F86F500049005 /* WebFactory.ts in Resources */,
 				52F4E49826417EF00067B017 /* create_identity.graphql in Resources */,
 				41D169AA25DC07260018E5F2 /* Inter-Medium.otf in Resources */,
-				414B987B259DE2E2002E81A3 /* BidirectionalPopoverActionItem.xib in Resources */,
 				52F4E4A226417F210067B017 /* sign_in_with_provider.graphql in Resources */,
 				41D169A625DC07260018E5F2 /* Inter-Bold.otf in Resources */,
 				0DC6E2DE26A0527900BD2E2A /* majestic_million_test.csv in Resources */,
@@ -4561,6 +4525,7 @@
 				87F47CC92669415800D01960 /* WebAutocompleteContext.swift in Sources */,
 				4181722E2581107C00317ED8 /* AutocompleteItem.swift in Sources */,
 				A0A84FE126371A4B008F0326 /* OtherPasswordsCell.swift in Sources */,
+				A5B1DBFB26CFDC4800F1F81A /* BeamTextEdit+CardReference.swift in Sources */,
 				A580D5EE26427BCB00EB2E24 /* ContextMenuView.swift in Sources */,
 				87C539BD26162C3400D51877 /* PasswordManagerMenuCell.swift in Sources */,
 				A5D53697264BE2F50011A095 /* RetroCompatibleScrollViewReader.swift in Sources */,
@@ -4698,7 +4663,6 @@
 				418172282581107C00317ED8 /* Range+Beam.swift in Sources */,
 				A0CB7E5D268E733400D15AFD /* PreferencesManager+Browser.swift in Sources */,
 				3330D7CB265E466D008C9E20 /* OmniBarDownloadButton.swift in Sources */,
-				41221A362592771F00255197 /* BeamTextEdit+Popover.swift in Sources */,
 				87F11BD9266533C1003BE98E /* PasswordGenerator.swift in Sources */,
 				5224CD7C2686034200D4179E /* BeamObject.swift in Sources */,
 				A5153EDD260CC4DC00C84902 /* ButtonLabel.swift in Sources */,
@@ -4713,7 +4677,6 @@
 				8AF61F14267BA292006DD5C2 /* RBAllowlistEntry.m in Sources */,
 				521EEDE525937F7F00BA2485 /* DocumentsList.swift in Sources */,
 				DA3E41D42642CC7900BA3952 /* TextSaver.swift in Sources */,
-				4159EA0A259A3568005FD355 /* BidirectionalPopoverResultItem.swift in Sources */,
 				9678217526726005001413EF /* LockButton.swift in Sources */,
 				964FE5B72624813E00966E03 /* RandomAccessCollection+BinarySearch.swift in Sources */,
 				A0E3150525ED1ECB001A5E55 /* FormatText.swift in Sources */,
@@ -4737,7 +4700,6 @@
 				87C539CD2617B36500D51877 /* PasswordGeneratorSettingsCell.swift in Sources */,
 				96EBCE0A262A01160014D923 /* ExportAllBrowsingSessions.swift in Sources */,
 				418172222581107C00317ED8 /* NSView+Beam.swift in Sources */,
-				4159E9D4259A1A81005FD355 /* BidirectionalPopover.swift in Sources */,
 				4181744325812C5F00317ED8 /* NSColor+Beam.swift in Sources */,
 				5298EAFD26272CCC0033862C /* CoreDataMigrator.swift in Sources */,
 				4181721E2581107C00317ED8 /* OSLog+Beam.swift in Sources */,
@@ -4755,6 +4717,7 @@
 				8A96ECAE268F8FD600135838 /* PointAndShoot+Text2Quote.swift in Sources */,
 				418172082581107C00317ED8 /* NSManagedObject+initExtension.swift in Sources */,
 				9691C2A62645F90600F70DA1 /* ImageNode.swift in Sources */,
+				A5B1DBEE26CE933100F1F81A /* CardReferenceFormatterView.swift in Sources */,
 				A07F2438269D8B0D008918B0 /* UserDefaultStorable.swift in Sources */,
 				52F27FCB25B9B404006E09A2 /* ViewModelFetchedResults.swift in Sources */,
 				524CF6DB25F29119007312F0 /* SymmetricKey+Serialize.swift in Sources */,
@@ -4886,13 +4849,11 @@
 				4181721D2581107C00317ED8 /* NSImage+Beam.swift in Sources */,
 				A08DE20D26160DC800F8ABB4 /* BeamTextEdit+CopyPaste.swift in Sources */,
 				A56696B12614CF7F00B814D2 /* TableView.swift in Sources */,
-				414B987A259DE2E2002E81A3 /* BidirectionalPopoverActionItem.swift in Sources */,
 				524299C725A47D2600F4DBF5 /* AppDelegate+Preferences.swift in Sources */,
 				418172452581107C00317ED8 /* SearchBar.swift in Sources */,
 				418172182581107C00317ED8 /* PerformanceDebug.swift in Sources */,
 				A50612D626CC75200053AD37 /* Calendar+Calculations.swift in Sources */,
 				A57BFEB92615B48300CFB646 /* CheckBoxTableCellView.swift in Sources */,
-				4105CE2225A5ECA2009AB687 /* BidirectionalPopoverItem.swift in Sources */,
 				A043B800265A547100E267E5 /* TabGroupingContentView.swift in Sources */,
 				4181722F2581107C00317ED8 /* BeamWindow.swift in Sources */,
 				418172602581107C00317ED8 /* LibrairiesManager.swift in Sources */,
@@ -4921,7 +4882,6 @@
 				A51ED9A72608D0CD00CA99E5 /* ContextMenuFormatterView.swift in Sources */,
 				4105CE7525A60681009AB687 /* FormatterTypeButton.swift in Sources */,
 				961EC58625B7A75A009FA322 /* LinkManager.swift in Sources */,
-				9661A587266980AF00CB56B3 /* BidirectionalPopoverBlockItem.swift in Sources */,
 				032562A626051D3B006513E4 /* RBFilterManager.m in Sources */,
 				418172372581107C00317ED8 /* TextEditOperations.swift in Sources */,
 				A0F558F126BD536A0024C47E /* PreferencesManager+EditorDebug.swift in Sources */,

@@ -15,7 +15,7 @@ extension BeamTextEdit {
         inputDetectorState -= 1
     }
 
-    // Enable detection to show popover
+    // Enable detection
     private func enableInputDetector() {
         inputDetectorState += 1
     }

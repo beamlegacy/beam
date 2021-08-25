@@ -148,14 +148,7 @@ struct ContextMenuView: View {
         .zIndex(1000)
         .fixedSize(horizontal: viewModel.sizeToFit, vertical: viewModel.sizeToFit)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .animation(.easeInOut(duration: 0.15))
-        .scaleEffect(viewModel.visible ? 1.0 : 0.98)
-        .offset(x: 0, y: viewModel.visible ? 0.0 :
-                    (viewModel.animationDirection == .bottom ? -4.0 : 4.0)
-        )
-        .animation(.spring(response: 0.4, dampingFraction: 0.6))
-        .opacity(viewModel.visible ? 1.0 : 0.0)
-        .animation(viewModel.visible ? .easeInOut(duration: 0.3) : .easeInOut(duration: 0.15))
+        .formatterViewBackgroundAnimation(with: viewModel)
         .accessibilityElement(children: .contain)
         .accessibility(identifier: "ContextMenu")
     }

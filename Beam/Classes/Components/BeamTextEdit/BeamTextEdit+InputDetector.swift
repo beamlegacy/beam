@@ -32,31 +32,34 @@ extension BeamTextEdit {
 
         let handlers: [String: () -> Bool] = [
             "@": { [unowned self] in
-                guard popover == nil else { return false }
                 let (pos, left) = inputDetectorGetPositionAndPrecedingChar(in: node)
                 guard left == " " || pos == 0 else { return true }
-                self.showBidirectionalPopover(mode: .internalLink, prefix: 1, suffix: 0)
+                let attribute = Self.formatterPlaceholderAttribute
+                node.cmdManager.formatText(in: node, for: nil, with: attribute, for: pos..<pos, isActive: false)
+                self.showCardReferenceFormatter(atPosition: pos + 1, searchCardContent: false, prefix: 1, suffix: 0)
                 return true
             },
             "[": { [unowned self] in
-                guard popover == nil else { return false }
-
                 let pos = self.selectedTextRange.isEmpty ? rootNode.cursorPosition : self.selectedTextRange.lowerBound
                 let substr = node.text.extract(range: max(0, pos - 1) ..< pos)
                 let left = substr.text // capture the left of the cursor to check for an existing [
 
                 if pos > 0 && left == "[" {
                     if !self.selectedTextRange.isEmpty {
-                        insertPair("[", "]")
-                        node.unproxyElement.makeInternalLink(self.selectedTextRange, createNoteIfNeeded: true)
-                        node.text.remove(count: 2, at: self.selectedTextRange.upperBound)
-                        node.text.remove(count: 2, at: self.selectedTextRange.lowerBound - 2)
-                        self.selectedTextRange = (self.selectedTextRange.lowerBound - 2) ..< (self.selectedTextRange.upperBound - 2)
-                        rootNode.cursorPosition = self.selectedTextRange.upperBound
+                        if makeInternalLinkForSelectionOrShowFormatter(for: node) != nil {
+                            node.text.removeSubrange(pos-1..<pos)
+                            node.text.removeSubrange(self.selectedTextRange.upperBound-1..<self.selectedTextRange.upperBound)
+                            hideInlineFormatter()
+                            node.cmdManager.focusElement(node, cursorPosition: self.selectedTextRange.upperBound-1)
+                            node.cmdManager.cancelSelection(node)
+                        } else {
+                            insertPair("[", "]")
+                        }
                         return false
                     } else {
                         node.text.insert("]", at: pos)
-                        self.showBidirectionalPopover(mode: .internalLink, prefix: 2, suffix: 2)
+                        node.cmdManager.formatText(in: node, for: nil, with: Self.formatterPlaceholderAttribute, for: pos-2..<pos+2, isActive: false)
+                        showCardReferenceFormatter(atPosition: pos + 1)
                         return true
                     }
                 } else if pos == 0 || left != "-" {
@@ -66,7 +69,7 @@ extension BeamTextEdit {
                 return true
             },
             "]": { [unowned self] in
-                guard node.text.count >= 2, popover == nil else { return true }
+                guard node.text.count >= 2 else { return true }
                 let startRange = 0..<2
                 let substr = node.text.extract(range: startRange)
                 if substr.text == "-[" {
@@ -77,19 +80,25 @@ extension BeamTextEdit {
                 return true
             },
             "(": { [unowned self] in
-                guard popover == nil else { return false }
-
                 let (pos, left) = inputDetectorGetPositionAndPrecedingChar(in: node)
                 // capture the left of the cursor to check for an existing (
                 if pos > 0 && left == "(" {
                     let initialText = selectedText
+                    var ignoreInput = true
+                    var atPosition = pos
                     if !self.selectedTextRange.isEmpty {
                         insertPair("(", ")")
+                        let newPosition = selectedTextRange.upperBound
+                        node.focus(position: newPosition)
+                        selectedTextRange = newPosition..<newPosition
+                        atPosition = newPosition
                     } else {
+                        ignoreInput = false
                         node.text.insert(")", at: pos)
+                        atPosition = pos + 1
                     }
-                    self.showBidirectionalPopover(mode: .blockReference, prefix: 2, suffix: 2, initialText: initialText)
-                    return true
+                    self.showCardReferenceFormatter(initialText: initialText, atPosition: atPosition, searchCardContent: true)
+                    return !ignoreInput
                 }
                 insertPair("(", ")")
                 return false
@@ -103,16 +112,13 @@ extension BeamTextEdit {
                 return false
             },
             "/": { [unowned self] in
-                guard popover == nil else { return false }
                 let (pos, left) = inputDetectorGetPositionAndPrecedingChar(in: node)
                 guard left == " " || pos == 0 else { return true }
                 self.showSlashFormatter()
                 return true
             },
             " ": { [unowned self] in
-                guard popover == nil,
-                      self.selectedTextRange.isEmpty
-                else { return true }
+                guard self.selectedTextRange.isEmpty else { return true }
 
                 let (pos, left) = inputDetectorGetPositionAndPrecedingChar(in: node)
                 let range = max(0, pos - 1) ..< pos

@@ -27,6 +27,7 @@ extension BeamTextEdit {
         case underline
         case internalLink
         case date
+        case blockRef
     }
 
     public func showSlashFormatter() {
@@ -79,6 +80,8 @@ extension BeamTextEdit {
             insertInternalLink(in: node, for: range)
         case .date:
             insertDate(in: node, for: range)
+        case .blockRef:
+            insertBlockRef(in: node, for: range)
         default:
             break
         }
@@ -98,6 +101,7 @@ extension BeamTextEdit {
             ContextMenuItem(title: "Todo", subtitle: "-[]", icon: "editor-task", action: { action(.task) }),
             ContextMenuItem(title: "Quote", subtitle: "\"", icon: "editor-format_quote", action: { action(.quote) }),
             ContextMenuItem(title: "Date Picker", subtitle: "", icon: "editor-calendar", action: { action(.date) }),
+            ContextMenuItem(title: "Block Reference", subtitle: "((", icon: "editor-blockref", action: { action(.blockRef) }),
             ContextMenuItem.separator(),
             ContextMenuItem(title: "Bold", subtitle: "*", action: { action(.bold) }),
             ContextMenuItem(title: "Italic", subtitle: "**", action: { action(.italic) }),
@@ -156,23 +160,22 @@ extension BeamTextEdit {
     }
 
     private func insertInternalLink(in node: TextNode, for range: Range<Int>) {
-        node.cmdManager.insertText(BeamText(text: "@", attributes: [.internalLink(UUID.null)]), in: node, at: range.lowerBound)
+        node.cmdManager.insertText(BeamText(text: "@", attributes: [Self.formatterPlaceholderAttribute]), in: node, at: range.lowerBound)
         node.cmdManager.focusElement(node, cursorPosition: range.lowerBound + 1)
-        showBidirectionalPopover(mode: .internalLink, prefix: 1, suffix: 0)
+        showCardReferenceFormatter(atPosition: node.cursorPosition, prefix: 1, suffix: 0)
     }
 
+    private func insertBlockRef(in node: TextNode, for range: Range<Int>) {
+        node.cmdManager.insertText(BeamText(text: "(())", attributes: []), in: node, at: range.lowerBound)
+        node.cmdManager.focusElement(node, cursorPosition: range.lowerBound + 2)
+        showCardReferenceFormatter(atPosition: node.cursorPosition, searchCardContent: true)
+    }
 }
 
 // MARK: - Date Picker
 extension BeamTextEdit {
     private func insertDate(in node: TextNode, for range: Range<Int>) {
-        let placeholderDecoration: [NSAttributedString.Key: Any] = [
-            .foregroundColor: BeamColor.LightStoneGray.nsColor,
-            .boxBackgroundColor: BeamColor.Mercury.nsColor
-        ]
-        let placeholderText = BeamText(text: "@date ", attributes: [
-            BeamText.Attribute.decorated(AttributeDecoratedValueAttributedString(attributes: placeholderDecoration))
-        ])
+        let placeholderText = BeamText(text: "@date ", attributes: [Self.formatterPlaceholderAttribute])
         node.root?.insertText(text: placeholderText, replacementRange: nil)
         var editableRange = range.lowerBound..<range.lowerBound+placeholderText.count
         var selectedDate: Date?

@@ -160,7 +160,7 @@ extension TextRoot {
     // swiftlint:disable:next function_body_length
     public func deleteForward() {
         guard state.nodeSelection == nil else {
-            editor.cancelPopover()
+            editor.hideInlineFormatter()
             eraseNodeSelection(createEmptyNodeInPlace: false)
             return
         }
@@ -243,7 +243,7 @@ extension TextRoot {
     //swiftlint:disable:next cyclomatic_complexity function_body_length
     public func deleteBackward() {
         guard root?.state.nodeSelection == nil else {
-            editor.cancelPopover()
+            editor.hideInlineFormatter()
             eraseNodeSelection(createEmptyNodeInPlace: false)
             return
         }
@@ -506,29 +506,33 @@ extension TextRoot {
             caretIsAfterLink = true
         }
 
+        var finalAttributes: [BeamText.Attribute] = []
         switch ranges.count {
         case 0:
-            state.attributes = []
+            finalAttributes = []
         case 1:
             guard let range = ranges.first else { return }
-            state.attributes = BeamText.removeLinks(from: range.attributes)
+            finalAttributes = BeamText.removeLinks(from: range.attributes)
         case 2:
             guard let range1 = ranges.first, let range2 = ranges.last else { return }
 
             if caretIsAfterLink {
                 // ignore the left part as we are to the right of a link
-                state.attributes = BeamText.removeLinks(from: range2.attributes)
+                finalAttributes = BeamText.removeLinks(from: range2.attributes)
                 return
-            }
-            if !range1.attributes.contains(where: { $0.isLink }) {
-                state.attributes = range1.attributes
-            } else if !range2.attributes.contains(where: { $0.isLink }) {
-                state.attributes = range2.attributes
             } else {
-                // They both contain links, let's take the attributes from the left one and remove the link attributes
-                state.attributes = BeamText.removeLinks(from: range1.attributes)
+                if !range1.attributes.contains(where: { $0.isLink }) {
+                    finalAttributes = range1.attributes
+                } else if !range2.attributes.contains(where: { $0.isLink }) {
+                    finalAttributes = range2.attributes
+                } else {
+                    // They both contain links, let's take the attributes from the left one and remove the link attributes
+                    finalAttributes = BeamText.removeLinks(from: range1.attributes)
+                }
             }
         default: fatalError() // NOPE!
         }
+
+        state.attributes = BeamText.removeAnyDecoration(from: finalAttributes)
     }
 }
