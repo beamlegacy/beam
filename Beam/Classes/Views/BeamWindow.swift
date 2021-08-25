@@ -27,15 +27,14 @@ class BeamWindow: NSWindow, NSDraggingDestination {
     var state: BeamState = BeamState()
     var data: BeamData
 
-    private var trafficLights: [NSButton?]?
-    private var titlebarAccessoryViewHeight = 28
-    private var trafficLightLeftMargin: CGFloat = 20
-
     // This is a hack to prevent a crash with swiftUI being dumb about the initialFirstResponder
     override var initialFirstResponder: NSView? {
         get { nil }
         set { _ = newValue }
     }
+
+    private var trafficLights: [NSButton?]?
+    private var trafficLightLeftMargin: CGFloat = 20
 
     // swiftlint:disable:next function_body_length
     init(contentRect: NSRect, data: BeamData, reloadState: Bool) {
@@ -61,7 +60,7 @@ class BeamWindow: NSWindow, NSDraggingDestination {
         self.tabbingMode = .disallowed
         setFrameAutosaveName("BeamWindow")
 
-        self.setupUI()
+        self.setupWindowButtons()
         self.setTitleBarAccessoryView()
 
         // Create the SwiftUI view and set the context as the value for the managedObjectContext environment keyPath.
@@ -128,44 +127,6 @@ class BeamWindow: NSWindow, NSDraggingDestination {
     override func orderFront(_ sender: Any?) {
         super.orderFront(sender)
         self.setTrafficLightsLayout()
-    }
-
-    // MARK: - Setup UI
-    private func setupUI() {
-        trafficLights = [
-            standardWindowButton(.closeButton),
-            standardWindowButton(.miniaturizeButton),
-            standardWindowButton(.zoomButton)
-        ]
-    }
-
-    private func setTitleBarAccessoryView() {
-        let view = NSView(frame: NSRect(x: 0, y: 0, width: 10, height: titlebarAccessoryViewHeight))
-        let dummyAccessoryViewController = NSTitlebarAccessoryViewController()
-
-        dummyAccessoryViewController.view = view
-        addTitlebarAccessoryViewController(dummyAccessoryViewController)
-        self.setTrafficLightsLayout()
-    }
-
-    private func setTrafficLightsLayout() {
-        guard let trafficLights = trafficLights else { return }
-
-        for (index, trafficLight) in trafficLights.enumerated() {
-            let originY = trafficLight!.superview!.frame.height / 2 - trafficLight!.frame.height / 2
-            var frame = trafficLight!.frame
-
-            frame.origin.y = Constants.runningOnBigSur ? originY + 2 : originY
-            frame.origin.x = trafficLightLeftMargin + CGFloat(index) * (frame.width + 6)
-
-            trafficLight?.frame = frame
-        }
-    }
-
-    private func toggleTitleBarAccessoryView() {
-        guard let titlebarAccessoryView = titlebarAccessoryViewControllers.first else { return }
-        titlebarAccessoryView.isHidden.toggle()
-        self.state.isFullScreen.toggle()
     }
 
     // MARK: - Animations
@@ -288,7 +249,7 @@ extension BeamWindow: NSWindowDelegate {
 
 }
 
-// MARK: Custom Field Editor
+// MARK: - Custom Field Editor
 protocol CustomWindowFieldEditorProvider {
     func fieldEditor(_ createFlag: Bool) -> NSText?
 }
@@ -301,5 +262,53 @@ extension BeamWindow {
             return editor
         }
         return super.fieldEditor(createFlag, for: object)
+    }
+}
+
+// MARK: - Title Bar
+class TitleBarViewControllerWithMouseDown: NSTitlebarAccessoryViewController {
+    override func mouseDown(with event: NSEvent) {
+        super.mouseDown(with: event)
+        // NSTitlebarAccessoryViewController steal mouseDown events
+        // But we need them for the view placed below the title bar
+        // See touch down state of omnibar buttons
+        self.parent?.mouseDown(with: event)
+    }
+}
+
+extension BeamWindow {
+    private func setupWindowButtons() {
+        trafficLights = [
+            standardWindowButton(.closeButton),
+            standardWindowButton(.miniaturizeButton),
+            standardWindowButton(.zoomButton)
+        ]
+    }
+
+    private func setTitleBarAccessoryView() {
+        let dummyAccessoryViewController = TitleBarViewControllerWithMouseDown()
+        dummyAccessoryViewController.view = NSView()
+        addTitlebarAccessoryViewController(dummyAccessoryViewController)
+        self.setTrafficLightsLayout()
+    }
+
+    private func setTrafficLightsLayout() {
+        guard let trafficLights = trafficLights else { return }
+
+        for (index, trafficLight) in trafficLights.enumerated() {
+            let originY = trafficLight!.superview!.frame.height / 2 - trafficLight!.frame.height / 2
+            var frame = trafficLight!.frame
+
+            frame.origin.y = Constants.runningOnBigSur ? originY + 2 : originY
+            frame.origin.x = trafficLightLeftMargin + CGFloat(index) * (frame.width + 6)
+
+            trafficLight?.frame = frame
+        }
+    }
+
+    private func toggleTitleBarAccessoryView() {
+        guard let titlebarAccessoryView = titlebarAccessoryViewControllers.first else { return }
+        titlebarAccessoryView.isHidden.toggle()
+        self.state.isFullScreen.toggle()
     }
 }
