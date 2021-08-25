@@ -83,7 +83,7 @@ class BaseView {
     @discardableResult
     func searchInOmniBar(_ searchText: String, _ typeReturnButton: Bool) -> WebTestView {
         let omniSearchField = searchField(OmniBarLocators.SearchFields.omniSearchField.accessibilityIdentifier)
-        omniSearchField.click()
+        omniSearchField.tapInTheMiddle()
         omniSearchField.clear()
         omniSearchField.typeText(searchText)
         if typeReturnButton {

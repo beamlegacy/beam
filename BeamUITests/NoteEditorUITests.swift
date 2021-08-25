@@ -9,6 +9,7 @@ import Nimble
 import BeamCore
 
 class NoteEditorUITests: QuickSpec {
+
     override func spec() {
         let app = XCUIApplication()
         var journalScrollView: XCUIElement!
@@ -19,13 +20,16 @@ class NoteEditorUITests: QuickSpec {
             guard helper == nil else { return }
             app.launch()
             helper = BeamUITestsHelper(app)
+            helper.tapCommand(.destroyDB)
+            app.launch()
             self.continueAfterFailure = false
         }
 
         beforeEach {
             manualBeforeSuite()
-            journalScrollView = app.windows.scrollViews["journalView"]
+            journalScrollView = app.scrollViews["journalView"]
             firstJournalEntry = journalScrollView.children(matching: .textView).matching(identifier: "TextNode").element(boundBy: 0)
+            firstJournalEntry.tapInTheMiddle()
             firstJournalEntry.clear()
         }
 
@@ -48,6 +52,11 @@ class NoteEditorUITests: QuickSpec {
         describe("Slash Command") {
             let contextMenuItems = app.staticTexts.matching(NSPredicate(format: "identifier CONTAINS 'ContextMenuItem'"))
 
+            beforeEach {
+                // wait for any previous cleaning / formatter to be gone
+                sleep(1)
+            }
+
             it("shows Menu with a slash") {
                 app.typeText("/")
                 expect(contextMenuItems.firstMatch.waitForExistence(timeout: 1)) == true
@@ -66,7 +75,6 @@ class NoteEditorUITests: QuickSpec {
                 contextMenuItems.firstMatch.waitForNonExistence(timeout: 2, for: self)
                 expect(contextMenuItems.count) == 0
                 app.typeText("some bold text")
-                
             }
         }
     }
