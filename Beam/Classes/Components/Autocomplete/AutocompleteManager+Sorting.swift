@@ -16,7 +16,7 @@ extension AutocompleteManager {
             autocompleteResults[someResults.source, default: []].append(contentsOf: someResults.results)
         }
         if let noteResults = autocompleteResults[.note] {
-            autocompleteResults[.note] = self.autocompleteResultsUniqueNotes(sequence: noteResults)
+            autocompleteResults[AutocompleteResult.Source.note] = self.autocompleteResultsUniqueNotes(sequence: noteResults)
         }
         let finalResults = self.sortResults(notesResults: autocompleteResults[.note, default: []],
                                             historyResults: autocompleteResults[.history] ?? [],

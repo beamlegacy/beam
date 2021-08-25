@@ -65,7 +65,7 @@ extension AutocompleteManager {
                     let ids = documentStructs.map { $0.id }
                     let scores = GRDBDatabase.shared.getFrecencyScoreValues(noteIds: ids, paramKey: noteFrecencyParamKey)
                     let autocompleteResults = documentStructs.map {
-                        AutocompleteResult(text: $0.title, source: .note, completingText: query, uuid: $0.id, score: scores[$0.id])
+                        AutocompleteResult(text: $0.title, source: .note(noteId: $0.id), completingText: query, uuid: $0.id, score: scores[$0.id])
                     }
                     promise(.success(autocompleteResults))
                 }
@@ -84,7 +84,7 @@ extension AutocompleteManager {
                     let autocompleteResults = notesContentResults.compactMap { result -> AutocompleteResult? in
                         // Check if the note still exists before proceeding.
                         guard docs?.first(where: { $0.id == result.noteId }) != nil else { return nil }
-                        return AutocompleteResult(text: result.title, source: .note,
+                        return AutocompleteResult(text: result.title, source: .note(noteId: result.noteId, elementId: result.uid),
                                                   completingText: query, uuid: result.uid, score: result.frecency?.frecencySortScore)
                     }
                     promise(.success(autocompleteResults))

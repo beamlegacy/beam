@@ -6,9 +6,9 @@ import Combine
 
 struct AutocompleteResult: Identifiable, Equatable {
 
-    enum Source {
+    enum Source: Equatable, Hashable {
         case history
-        case note
+        case note(noteId: UUID? = nil, elementId: UUID? = nil)
         case autocomplete
         case url
         case createCard
@@ -27,6 +27,9 @@ struct AutocompleteResult: Identifiable, Equatable {
             case .topDomain, .url:
                 return "field-web"
             }
+        }
+        static var note: Source {
+            return Source.note(noteId: nil, elementId: nil)
         }
     }
 

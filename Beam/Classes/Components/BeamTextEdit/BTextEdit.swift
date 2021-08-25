@@ -79,7 +79,7 @@ public struct BTextEditScrollable: NSViewRepresentable {
 
         updateHeaderView(nsView, context: context)
         context.coordinator.onDeinit = { [weak edit] in
-            edit?.hideFloatingView()
+            edit?.hideInlineFormatter()
         }
     }
 

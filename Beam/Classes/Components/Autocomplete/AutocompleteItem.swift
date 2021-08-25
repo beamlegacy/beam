@@ -12,14 +12,17 @@ struct AutocompleteItemColorPalette {
     let touchdownBackgroundColor: NSColor
 }
 
-private let defaultColorPalette = AutocompleteItemColorPalette(selectedBackgroundColor: BeamColor.Autocomplete.selectedBackground.nsColor, touchdownBackgroundColor: BeamColor.Autocomplete.clickedBackground.nsColor)
-
 struct AutocompleteItem: View {
+
     @State var item: AutocompleteResult
     let selected: Bool
     var displayIcon: Bool = true
     var alwaysHighlightCompletingText: Bool = false
-    var colorPalette: AutocompleteItemColorPalette = defaultColorPalette
+    var allowCmdEnter: Bool = true
+
+    var colorPalette: AutocompleteItemColorPalette = Self.defaultColorPalette
+    static let defaultColorPalette = AutocompleteItemColorPalette(selectedBackgroundColor: BeamColor.Autocomplete.selectedBackground.nsColor,
+                                                                  touchdownBackgroundColor: BeamColor.Autocomplete.clickedBackground.nsColor)
     @State private var isTouchDown = false
 
     @State private var favicon: NSImage?
@@ -103,12 +106,11 @@ struct AutocompleteItem: View {
                     .layoutPriority(0)
                 }
             }
-            if item.source == .createCard {
-                Spacer()
+            Spacer(minLength: 0)
+            if item.source == .createCard && allowCmdEnter {
                 Icon(name: "shortcut-cmd+return", size: 12, color: secondaryTextColor)
-            } else if selected {
-                Spacer()
-                Icon(name: "editor-format_enter", size: 12, color: secondaryTextColor)
+            } else {
+                Icon(name: "editor-format_enter", size: 12, color: selected ? secondaryTextColor : .clear)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)

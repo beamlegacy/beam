@@ -7,6 +7,7 @@
 
 import Cocoa
 import SwiftUI
+import BeamCore
 
 // Base Class for any formatting view
 class FormatterView: NSView {
@@ -26,6 +27,9 @@ class FormatterView: NSView {
 
     var handlesTyping: Bool {
         false
+    }
+    var typingAttributes: [BeamText.Attribute]? {
+        nil
     }
 
     var isMouseInsideView = false

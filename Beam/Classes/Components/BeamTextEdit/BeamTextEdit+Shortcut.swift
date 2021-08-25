@@ -13,62 +13,60 @@ extension BeamTextEdit {
     // MARK: - Shortcuts IBAction
 
     @IBAction func toggleHeadingOneAction(_ sender: Any?) {
-        cancelPopover()
+        hideInlineFormatter()
         toggleHeading(1)
     }
 
     @IBAction func toggleHeadingTwoAction(_ sender: Any?) {
-        cancelPopover()
+        hideInlineFormatter()
         toggleHeading(2)
     }
 
     @IBAction func toggleBoldAction(_ sender: Any?) {
-        cancelPopover()
+        hideInlineFormatter()
         toggleBold()
     }
 
     @IBAction func toggleItalicAction(_ sender: Any?) {
-        cancelPopover()
+        hideInlineFormatter()
         toggleEmphasis()
     }
 
     @IBAction func toggleUnderlineAction(_ sender: Any?) {
-        cancelPopover()
+        hideInlineFormatter()
         toggleUnderline()
     }
 
     @IBAction func toggleStrikethroughAction(_ sender: Any?) {
-        cancelPopover()
+        hideInlineFormatter()
         toggleStrikeThrough()
     }
 
     @IBAction func toggleInsertLinkAction(_ sender: Any?) {
-        cancelPopover()
         toggleLink()
     }
 
     @IBAction func toggleBidiLinkAction(_ sender: Any?) {
-        cancelPopover()
         toggleBiDirectionalLink()
     }
 
     @IBAction func toggleListAction(_ sender: Any?) {
-        cancelPopover()
+        hideInlineFormatter()
         toggleUnorderedAndOrderedList()
     }
 
     @IBAction func toggleQuoteAction(_ sender: Any?) {
-        cancelPopover()
+        hideInlineFormatter()
         toggleQuote()
     }
 
     @IBAction func toggleTodoAction(_ sender: Any?) {
-        cancelPopover()
+        hideInlineFormatter()
         toggleTodo()
     }
 
     @IBAction func toggleCodeBlockAction(_ sender: Any?) {
-        cancelPopover()
+        hideInlineFormatter()
         toggleCode()
 
     }
@@ -99,12 +97,8 @@ extension BeamTextEdit {
     }
 
     internal func toggleBiDirectionalLink() {
-        guard popover == nil else {
-            dismissPopoverOrFormatter()
-            return
-        }
-        hideInlineFormatter()
-        showBidirectionalPopover(mode: .internalLink, prefix: 0, suffix: 0)
+        guard let node = focusedWidget as? TextNode else { return }
+        makeInternalLinkForSelectionOrShowFormatter(for: node)
     }
 
     internal func toggleUnorderedAndOrderedList() {

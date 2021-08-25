@@ -54,6 +54,10 @@ public extension BeamText {
         return attributes.compactMap({ $0.isInternalLink ? nil : $0 })
     }
 
+    static func removeAnyDecoration(from attributes: [Attribute]) -> [Attribute] {
+        return attributes.compactMap({ $0.rawValue == BeamText.Attribute.decorated(BeamText.AttributeDecoratedValue()).rawValue ? nil : $0 })
+    }
+
     func hasLinkToNote(id noteId: UUID) -> Bool {
         internalLinkRanges.contains(where: { range in
             range.internalLink == noteId
