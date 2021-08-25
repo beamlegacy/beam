@@ -7,11 +7,6 @@
 
 import SwiftUI
 
-struct AutocompleteItemColorPalette {
-    let selectedBackgroundColor: NSColor
-    let touchdownBackgroundColor: NSColor
-}
-
 struct AutocompleteItem: View {
 
     @State var item: AutocompleteResult
@@ -21,16 +16,15 @@ struct AutocompleteItem: View {
     var allowCmdEnter: Bool = true
 
     var colorPalette: AutocompleteItemColorPalette = Self.defaultColorPalette
-    static let defaultColorPalette = AutocompleteItemColorPalette(selectedBackgroundColor: BeamColor.Autocomplete.selectedBackground.nsColor,
-                                                                  touchdownBackgroundColor: BeamColor.Autocomplete.clickedBackground.nsColor)
+
     @State private var isTouchDown = false
 
     @State private var favicon: NSImage?
     var backgroundColor: Color {
         guard !isTouchDown else {
-            return Color(colorPalette.touchdownBackgroundColor)
+            return colorPalette.touchdownBackgroundColor.swiftUI
         }
-        return Color(colorPalette.selectedBackgroundColor).opacity(selected ? 1.0 : 0.0)
+        return colorPalette.selectedBackgroundColor.swiftUI.opacity(selected ? 1.0 : 0.0)
     }
 
     func iconNameSource(_ source: AutocompleteResult.Source) -> String {
@@ -46,17 +40,17 @@ struct AutocompleteItem: View {
         }
     }
 
-    private let textColor = BeamColor.Generic.text.swiftUI
+    private var textColor: Color {
+        colorPalette.textColor.swiftUI
+    }
     private let secondaryTextColor = BeamColor.Autocomplete.subtitleText.swiftUI
     private let subtitleLinkColor = BeamColor.Autocomplete.link.swiftUI
     private var informationColor: Color {
         switch item.source {
         case .history:
             return subtitleLinkColor
-        case .createCard:
-            return BeamColor.Autocomplete.newCardSubtitle.swiftUI
         default:
-            return secondaryTextColor
+            return colorPalette.informationTextColor.swiftUI
         }
     }
 
@@ -65,10 +59,6 @@ struct AutocompleteItem: View {
             return []
         }
         if alwaysHighlightCompletingText || [.autocomplete, .history, .url, .topDomain].contains(item.source) {
-            return text.ranges(of: completingText, options: .caseInsensitive)
-        }
-
-        if [.autocomplete, .history, .url, .topDomain].contains(item.source) {
             return text.ranges(of: completingText, options: .caseInsensitive)
         }
         if let firstRange = text.range(of: completingText, options: .caseInsensitive), firstRange.lowerBound == text.startIndex {
@@ -130,6 +120,17 @@ struct AutocompleteItem: View {
         .accessibilityElement()
         .accessibility(identifier: "autocompleteResult\(selected ? "-selected":"")-\(item.text)-\(item.source)")
     }
+}
+
+struct AutocompleteItemColorPalette {
+    var textColor = BeamColor.Generic.text
+    var informationTextColor = BeamColor.Autocomplete.subtitleText
+    var selectedBackgroundColor = BeamColor.Autocomplete.selectedBackground
+    var touchdownBackgroundColor = BeamColor.Autocomplete.clickedBackground
+}
+
+extension AutocompleteItem {
+    static let defaultColorPalette = AutocompleteItemColorPalette()
 }
 
 struct AutocompleteItem_Previews: PreviewProvider {

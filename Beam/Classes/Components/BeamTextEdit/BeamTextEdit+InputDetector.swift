@@ -34,8 +34,6 @@ extension BeamTextEdit {
             "@": { [unowned self] in
                 let (pos, left) = inputDetectorGetPositionAndPrecedingChar(in: node)
                 guard left == " " || pos == 0 else { return true }
-                let attribute = Self.formatterPlaceholderAttribute
-                node.cmdManager.formatText(in: node, for: nil, with: attribute, for: pos..<pos, isActive: false)
                 self.showCardReferenceFormatter(atPosition: pos + 1, searchCardContent: false, prefix: 1, suffix: 0)
                 return true
             },
@@ -58,7 +56,7 @@ extension BeamTextEdit {
                         return false
                     } else {
                         node.text.insert("]", at: pos)
-                        node.cmdManager.formatText(in: node, for: nil, with: Self.formatterPlaceholderAttribute, for: pos-2..<pos+2, isActive: false)
+                        node.cmdManager.formatText(in: node, for: nil, with: Self.formatterAutocompletingAttribute, for: pos-2..<pos+2, isActive: false)
                         showCardReferenceFormatter(atPosition: pos + 1)
                         return true
                     }
