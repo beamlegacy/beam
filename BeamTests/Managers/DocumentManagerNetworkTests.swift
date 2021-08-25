@@ -432,7 +432,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                  2756[12:28:02]: ▸      Executed 629 tests, with 6 failures (0 unexpected) in 33.329 (33.455) seconds
                  2757
                  */
-                fit("soft deletes the local document, fetch the remote document and saves it") {
+                it("soft deletes the local document, fetch the remote document and saves it") {
                     let networkCalls = APIRequest.callsCount
 
                     var updateDocumentStruct: DocumentStruct?
