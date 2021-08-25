@@ -113,6 +113,7 @@ js_test:
   interruptible: true
 
 coverage_check:
+  image: registry.gitlab.com/beamgroup/beam/curl-jq
   before_script:
     - date
   dependencies: []
