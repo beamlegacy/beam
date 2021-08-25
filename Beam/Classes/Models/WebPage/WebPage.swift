@@ -25,7 +25,6 @@ protocol WebPage: AnyObject, Scorable {
     var browsingScorer: BrowsingScorer? { get }
     var passwordOverlayController: PasswordOverlayController? { get }
     var mediaPlayerController: MediaPlayerController? { get set }
-    var passwordDB: PasswordsDB? { get }
 
     var pointAndShootAllowed: Bool { get }
     var pointAndShoot: PointAndShoot? { get }

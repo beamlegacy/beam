@@ -9,6 +9,16 @@ import Foundation
 import BeamCore
 import GRDB
 
+enum PasswordDBError: Error {
+    case cantReadDB(errorMsg: String)
+    case cantDecryptPassword(errorMsg: String)
+    case cantSavePassword(errorMsg: String)
+    case cantEncryptPassword
+    case cantDeletePassword(errorMsg: String)
+    case errorFetchingPassword(errorMsg: String)
+    case errorSearchingPassword(errorMsg: String)
+}
+
 struct PasswordRecord {
     internal static let databaseUUIDEncodingStrategy = DatabaseUUIDEncodingStrategy.string
 
@@ -22,6 +32,7 @@ struct PasswordRecord {
     var deletedAt: Date?
     var previousCheckSum: String?
     var checksum: String?
+    var privateKeySignature: String?
 }
 
 extension PasswordRecord: BeamObjectProtocol {
@@ -45,6 +56,7 @@ extension PasswordRecord: BeamObjectProtocol {
         case createdAt
         case updatedAt
         case deletedAt
+        case privateKeySignature
     }
 
     func copy() -> PasswordRecord {
@@ -56,13 +68,14 @@ extension PasswordRecord: BeamObjectProtocol {
                        updatedAt: updatedAt,
                        deletedAt: deletedAt,
                        previousCheckSum: previousCheckSum,
-                       checksum: checksum)
+                       checksum: checksum,
+                       privateKeySignature: privateKeySignature)
     }
 }
 
 extension PasswordRecord: TableRecord {
     enum Columns: String, ColumnExpression {
-        case uuid, entryId, host, name, password, createdAt, updatedAt, deletedAt, previousChecksum
+        case uuid, entryId, host, name, password, createdAt, updatedAt, deletedAt, previousChecksum, privateKeySignature
     }
 }
 
@@ -78,6 +91,7 @@ extension PasswordRecord: FetchableRecord {
         updatedAt = row[Columns.updatedAt]
         deletedAt = row[Columns.deletedAt]
         previousCheckSum = row[Columns.previousChecksum]
+        privateKeySignature = row[Columns.privateKeySignature]
     }
 }
 
@@ -97,6 +111,7 @@ extension PasswordRecord: MutablePersistableRecord {
         container[Columns.updatedAt] = updatedAt
         container[Columns.deletedAt] = deletedAt
         container[Columns.previousChecksum] = previousCheckSum
+        container[Columns.privateKeySignature] = privateKeySignature
     }
 }
 
@@ -104,6 +119,7 @@ class PasswordsDB: PasswordStore {
     static let tableName = "passwordRecord"
     var dbPool: DatabasePool
 
+    //swiftlint:disable:next function_body_length
     init(path: String) throws {
         dbPool = try DatabasePool(path: path, configuration: GRDB.Configuration())
 
@@ -145,6 +161,35 @@ class PasswordsDB: PasswordStore {
                 }
             }
         }
+
+        migrator.registerMigration("addPrivateKey") { db in
+            try db.alter(table: PasswordsDB.tableName) { t in
+                t.add(column: "privateKeySignature", .text)
+            }
+
+            if let storedPasswords = rows {
+                for password in storedPasswords {
+                    var encryptedPassword: String = ""
+                    if let decryptedPassword = try EncryptionManager.shared.decryptString(password["password"]),
+                       let newlyEncryptedPassword = try EncryptionManager.shared.encryptString(decryptedPassword) {
+                        encryptedPassword = newlyEncryptedPassword
+                    }
+
+                    var passwordRecord = PasswordRecord(
+                        uuid: password["uuid"],
+                        entryId: password["entryId"],
+                        host: password["host"],
+                        name: password["name"],
+                        password: encryptedPassword.isEmpty ? password["password"] : encryptedPassword,
+                        createdAt: password["createdAt"],
+                        updatedAt: password["updatedAt"],
+                        deletedAt: password["deletedAt"],
+                        previousCheckSum: password["previousCheckSum"],
+                        privateKeySignature: encryptedPassword.isEmpty ? nil : try EncryptionManager.shared.privateKey().asString().SHA256())
+                    try passwordRecord.insert(db)
+                }
+            }
+        }
         try migrator.migrate(dbPool)
     }
 
@@ -152,98 +197,112 @@ class PasswordsDB: PasswordStore {
         return PasswordManagerEntry(minimizedHost: host, username: username).id
     }
 
-    private func entries(for passwordsRecord: [PasswordRecord]) -> [PasswordManagerEntry] {
-        passwordsRecord.map { PasswordManagerEntry(minimizedHost: $0.host, username: $0.name) }
-    }
-
     private func credentials(for passwordsRecord: [PasswordRecord]) -> [Credential] {
         passwordsRecord.map { Credential(username: $0.name, password: $0.password) }
     }
 
     // PasswordStore
-    func entries(for host: String, completion: @escaping ([PasswordManagerEntry]) -> Void) {
+    func entries(for host: String, exact: Bool) throws -> [PasswordRecord] {
+        guard !exact else {
+            return try entries(for: host)
+        }
+        var components = host.components(separatedBy: ".")
+        var parentHosts = [String]()
+        while components.count > 2 {
+            components.removeFirst()
+            parentHosts.append(components.joined(separator: "."))
+        }
+        var allEntries = [PasswordRecord]()
+        let entries = try entriesWithSubdomains(for: host)
+        allEntries += entries
+        for parentHost in parentHosts {
+            let entries = try self.entries(for: parentHost)
+            allEntries += entries
+        }
+        return allEntries
+    }
+
+    internal func entries(for host: String) throws -> [PasswordRecord] {
         do {
-            try dbPool.read { db in
+            return try dbPool.read { db in
                 let passwords = try PasswordRecord
                     .filter(PasswordRecord.Columns.host == host && PasswordRecord.Columns.deletedAt == nil)
                     .fetchAll(db)
-                completion(entries(for: passwords))
+                return passwords
             }
         } catch let error {
-            Logger.shared.logError("Error while fetching password entries for \(host): \(error)", category: .passwordsDB)
+            throw PasswordDBError.errorFetchingPassword(errorMsg: error.localizedDescription)
         }
     }
 
-    func entriesWithSubdomains(for host: String, completion: @escaping ([PasswordManagerEntry]) -> Void) {
+    func entriesWithSubdomains(for host: String) throws -> [PasswordRecord] {
         do {
-            try dbPool.read { db in
+            return try dbPool.read { db in
                 let passwords = try PasswordRecord
                     .filter(PasswordRecord.Columns.host == host || PasswordRecord.Columns.host.like("%.\(host)"))
                     .filter(PasswordRecord.Columns.deletedAt == nil)
                     .fetchAll(db)
-                completion(entries(for: passwords).sorted(by: { $0.minimizedHost.count < $1.minimizedHost.count }))
+                return passwords
             }
-        } catch let error {
-            Logger.shared.logError("Error while fetching password entries for \(host): \(error)", category: .passwordsDB)
+        } catch {
+            throw PasswordDBError.errorFetchingPassword(errorMsg: error.localizedDescription)
         }
     }
 
-    func find(_ searchString: String, completion: @escaping ([PasswordManagerEntry]) -> Void) {
+    func find(_ searchString: String) throws -> [PasswordRecord] {
         do {
-            try dbPool.read { db in
+            return try dbPool.read { db in
                 let passwords = try PasswordRecord
                     .filter(PasswordRecord.Columns.host.like("%\(searchString)%") && PasswordRecord.Columns.deletedAt == nil)
                     .fetchAll(db)
-                completion(entries(for: passwords))
+                return passwords
             }
-        } catch let error {
-            Logger.shared.logError("Error while searching password for \(searchString): \(error)", category: .passwordsDB)
+        } catch {
+            throw PasswordDBError.errorSearchingPassword(errorMsg: error.localizedDescription)
+
         }
     }
 
-    func fetchAll(completion: @escaping ([PasswordManagerEntry]) -> Void) {
+    func fetchAll() throws -> [PasswordRecord] {
         do {
-            try dbPool.read { db in
+            return try dbPool.read { db in
                 let passwords = try PasswordRecord
                     .filter(PasswordRecord.Columns.deletedAt == nil)
                     .fetchAll(db)
-                completion(entries(for: passwords))
+                return passwords
             }
         } catch {
-            Logger.shared.logError("Error while fetching all passwords: \(error)", category: .passwordsDB)
+            throw PasswordDBError.errorFetchingPassword(errorMsg: error.localizedDescription)
         }
     }
 
-    // TODO: Use Result to return the error
-    func password(host: String, username: String, completion: @escaping (String?) -> Void) {
+    func password(host: String, username: String) throws -> String? {
         do {
-            try dbPool.read { db in
+            return try dbPool.read { db in
                 guard let passwordRecord = try PasswordRecord
                         .filter(PasswordRecord.Columns.entryId == id(for: host, and: username) && PasswordRecord.Columns.deletedAt == nil)
                         .fetchOne(db) else {
-                    completion(nil)
-                    return
+                    return nil
                 }
                 do {
                     let decryptedPassword = try EncryptionManager.shared.decryptString(passwordRecord.password)
-                    completion(decryptedPassword)
-                } catch {
-                    Logger.shared.logError("Error while decrypting password for \(host) - \(username): \(error)", category: .encryption)
+                    return decryptedPassword
+                } catch let error {
+                    throw PasswordDBError.cantDecryptPassword(errorMsg: error.localizedDescription)
                 }
             }
-        } catch {
-            Logger.shared.logError("Error while reading database for \(host) - \(username): \(error)", category: .passwordsDB)
+        } catch let error {
+            throw PasswordDBError.cantReadDB(errorMsg: error.localizedDescription)
         }
     }
 
-    // TODO: add a completion in case of errors.
-    func save(host: String, username: String, password: String) {
+    func save(host: String, username: String, password: String) throws -> PasswordRecord {
         do {
-            try dbPool.write { db in
+            return try dbPool.write { db in
                 guard let encryptedPassword = try? EncryptionManager.shared.encryptString(password) else {
-                    Logger.shared.logError("Error while encrypting password for \(host) - \(username)", category: .encryption)
-                    return
+                    throw PasswordDBError.cantEncryptPassword
                 }
+                let privateKeySignature = try EncryptionManager.shared.privateKey().asString().SHA256()
                 var passwordRecord = PasswordRecord(
                     uuid: UUID(),
                     entryId: id(for: host, and: username),
@@ -253,11 +312,13 @@ class PasswordsDB: PasswordStore {
                     createdAt: BeamDate.now,
                     updatedAt: BeamDate.now,
                     deletedAt: nil,
-                    previousCheckSum: nil)
+                    previousCheckSum: nil,
+                    privateKeySignature: privateKeySignature)
                 try passwordRecord.insert(db)
+                return passwordRecord
             }
         } catch let error {
-            Logger.shared.logError("Error while saving password for \(host): \(error)", category: .passwordsDB)
+            throw PasswordDBError.cantSavePassword(errorMsg: error.localizedDescription)
         }
     }
 
@@ -282,23 +343,39 @@ class PasswordsDB: PasswordStore {
         }
     }
 
-    func delete(host: String, username: String) {
-        try? dbPool.write { db in
-            if var password = try PasswordRecord
-                .filter(PasswordRecord.Columns.entryId == id(for: host, and: username) && PasswordRecord.Columns.deletedAt == nil)
-                .fetchOne(db) {
-                password.deletedAt = BeamDate.now
-                try password.update(db)
+    func delete(host: String, username: String) throws -> PasswordRecord {
+        do {
+            return try dbPool.write { db in
+                if var password = try PasswordRecord
+                    .filter(PasswordRecord.Columns.entryId == id(for: host, and: username) && PasswordRecord.Columns.deletedAt == nil)
+                    .fetchOne(db) {
+                    password.deletedAt = BeamDate.now
+                    try password.update(db)
+                    return password
+                }
+                throw PasswordDBError.cantDeletePassword(errorMsg: "Password not found!")
             }
+        } catch let error {
+            throw PasswordDBError.cantDeletePassword(errorMsg: error.localizedDescription)
         }
     }
 
     // Added only in the purpose of testing maybe will be added in the protocol if needed
-    func deleteAll() {
-        _ = try? dbPool.write { db in
-            try PasswordRecord
-                .filter(Column("deleteAt") == nil)
-                .updateAll(db, Column("deleteAt").set(to: BeamDate.now))
+    func deleteAll() throws -> [PasswordRecord] {
+        do {
+            return try dbPool.write { db in
+                let now = BeamDate.now
+                try PasswordRecord
+                    .filter(Column("deletedAt") == nil)
+                    .updateAll(db, Column("deletedAt").set(to: now))
+
+                let passwords = try PasswordRecord
+                    .filter(PasswordRecord.Columns.deletedAt == now)
+                    .fetchAll(db)
+                return passwords
+            }
+        } catch {
+            throw PasswordDBError.cantDeletePassword(errorMsg: error.localizedDescription)
         }
     }
 

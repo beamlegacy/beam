@@ -24,7 +24,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     @Published var journal: [BeamNote] = []
 
     var fileDB: BeamFileDB
-    var passwordsDB: PasswordsDB
     @Published var noteCount = 0
     @Published var lastChangedElement: BeamElement?
     @Published var showTabStats = false
@@ -41,6 +40,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var downloadManager: BeamDownloadManager = BeamDownloadManager()
     var sessionLinkRanker = SessionLinkRanker()
     var clusteringManager: ClusteringManager
+    let passwordManager: PasswordManager = PasswordManager()
     var activeSources = ActiveSources()
     var scope = Set<AnyCancellable>()
     var browsingTreeSender: BrowsingTreeSender?
@@ -100,7 +100,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         clusteringManager = ClusteringManager(ranker: sessionLinkRanker, documentManager: documentManager, candidate: 2, navigation: 0.5, text: 0.8, entities: 0.3, sessionId: sessionId, activeSources: activeSources)
         noteAutoSaveService = NoteAutoSaveService()
         linkManager = LinkManager()
-        passwordsDB = PasswordsManager().passwordsDB
         let linkCount = LinkStore.shared.loadFromDB(linkManager: linkManager)
         Logger.shared.logInfo("Loaded \(linkCount) links from DB", category: .document)
         do {
