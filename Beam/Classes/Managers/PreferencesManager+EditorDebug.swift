@@ -38,28 +38,28 @@ extension PreferencesManager {
 // MARK: - Default Values
 extension PreferencesManager {
     static let editorIsCenteredDefault = false
-    static let editorLeadingPercentageDefault: CGFloat = 48.7
+    static let editorLeadingPercentageDefault: CGFloat = 45
 
-    static let editorHeaderTopPaddingDefault: CGFloat = 120
-    static let editorJournalTopPaddingDefault: CGFloat = 135
-    static let editorCardTopPaddingDefault: CGFloat = 0
+    static let editorHeaderTopPaddingDefault: CGFloat = 160
+    static let editorJournalTopPaddingDefault: CGFloat = 145
+    static let editorCardTopPaddingDefault: CGFloat = 20
 
-    static let editorMinWidthDefault: CGFloat = 500
-    static let editorMaxWidthDefault: CGFloat = 700
-    static let editorParentSpacingDefault: CGFloat = 8
-    static let editorChildSpacingDefault: CGFloat = 2
+    static let editorMinWidthDefault: CGFloat = 450
+    static let editorMaxWidthDefault: CGFloat = 670
+    static let editorParentSpacingDefault: CGFloat = 2
+    static let editorChildSpacingDefault: CGFloat = 0
 
-    static let editorHeaderOneSizeDefault: CGFloat = 8
-    static let editorHeaderTwoSizeDefault: CGFloat = 4
+    static let editorHeaderOneSizeDefault: CGFloat = 2
+    static let editorHeaderTwoSizeDefault: CGFloat = 2
 
     static let editorLineHeightHeadingDefault: CGFloat = 1.2
     static let editorLineHeightDefault: CGFloat = 1.3
-    static let editorLineHeightMultipleLineDefault: CGFloat = 1.1
+    static let editorLineHeightMultipleLineDefault: CGFloat = 1.2
 
-    static let editorFontSizeDefault: CGFloat = 15
-    static let editorCardTitleFontSizeDefault: CGFloat = 26
-    static let editorFontSizeHeadingOneDefault: CGFloat = 21
-    static let editorFontSizeHeadingTwoDefault: CGFloat = 18
+    static let editorFontSizeDefault: CGFloat = 14
+    static let editorCardTitleFontSizeDefault: CGFloat = 30
+    static let editorFontSizeHeadingOneDefault: CGFloat = 20
+    static let editorFontSizeHeadingTwoDefault: CGFloat = 17
 }
 
 extension PreferencesManager {

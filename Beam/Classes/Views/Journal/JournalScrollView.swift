@@ -174,8 +174,6 @@ class ScrollViewContentWatcher: NSObject {
             let newPosition = bounds.origin.y + documentView.topOffset
             todaysNote.frame.origin.y = max(documentView.topOffset, min(newPosition, documentView.todaysMaxPosition))
         }
-        // Update visibility and position of side title layer
-        documentView.updateSideLayer(scrollValue: diff, scrollingDown: scrollingDown, y: bounds.origin.y)
 
         // Update DataSource when scrollview is close to the end
         if maxContentOffSetY - bounds.origin.y <= 10 {
