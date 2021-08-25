@@ -69,15 +69,8 @@ class RefNoteTitle: Widget {
         layers["chevron"]?.frame = CGRect(origin: CGPoint(x: 0, y: (cardTitleLayer.frame.height / 2) - 7), size: CGSize(width: 20, height: 20))
     }
 
-    override func updateRendering() {
-        contentsFrame = NSRect(x: 0, y: 0, width: availableWidth, height: open ? 24 : 44)
-        computedIdealSize = contentsFrame.size
-
-        if open {
-            for c in children {
-                computedIdealSize.height += c.idealSize.height
-            }
-        }
+    override func updateRendering() -> CGFloat {
+        open ? 24 : 44
     }
 
     func makeLinksToNoteExplicit(forNote title: String) {

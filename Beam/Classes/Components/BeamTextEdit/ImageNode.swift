@@ -11,23 +11,24 @@ import AppKit
 
 class ImageNode: ElementNode {
     var imageSize = CGSize.zero
+    var visibleSize: CGSize {
+        let computedWidth = imageSize.width > contentsWidth ? contentsWidth : imageSize.width
+        let width = computedWidth.isNaN ? 0 : computedWidth
+        let computedHeight = (width / imageSize.width) * imageSize.height
+        let height = computedHeight.isNaN ? 0 : computedHeight
+        return NSSize(width: width, height: height)
+    }
 
     init(parent: Widget, element: BeamElement) {
         super.init(parent: parent, element: element)
 
         setupImage()
-
-        setAccessibilityLabel("ImageNode")
-        setAccessibilityRole(.textArea)
     }
 
     init(editor: BeamTextEdit, element: BeamElement) {
         super.init(editor: editor, element: element)
 
         setupImage()
-
-        setAccessibilityLabel("ImageNode")
-        setAccessibilityRole(.textArea)
     }
 
     func setupImage() {
@@ -46,8 +47,8 @@ class ImageNode: ElementNode {
         }
 
         if let animatedLayer = Layer.animatedImage(named: "image", imageData: imageRecord.data) {
-            animatedLayer.layer.position = CGPoint(x: indent, y: 0)
-            addLayer(animatedLayer, origin: CGPoint(x: indent, y: 0))
+            animatedLayer.layer.position = CGPoint(x: 0, y: 0)
+            addLayer(animatedLayer, origin: CGPoint(x: 0, y: 0))
             imageSize = animatedLayer.bounds.size
             return
         }
@@ -70,54 +71,32 @@ class ImageNode: ElementNode {
         let height = (width / imageSize.width) * imageSize.height
 
         let imageLayer = Layer.image(named: "image", image: image, size: CGSize(width: width, height: height))
-        imageLayer.layer.position = CGPoint(x: indent, y: 0)
-        addLayer(imageLayer, origin: CGPoint(x: indent, y: 0))
+        addLayer(imageLayer, origin: CGPoint(x: 0, y: 0))
+
+        setAccessibilityLabel("ImageNode")
+        setAccessibilityRole(.textArea)
+
+        contentsPadding = NSEdgeInsets(top: 4, left: contentsPadding.left + 4, bottom: 14, right: 4)
     }
 
-    override var elementNodePadding: NSEdgeInsets {
-        NSEdgeInsets(top: 4, left: 0, bottom: 14, right: 0)
+    override func updateRendering() -> CGFloat {
+        updateFocus()
+        return visibleSize.height
     }
 
-    override func updateRendering() {
-        guard availableWidth > 0 else { return }
-
-        if invalidatedRendering {
-            let available = availableWidth - indent
-            let computedWidth = imageSize.width > available ? available : imageSize.width
-            let width = computedWidth.isNaN ? 0 : computedWidth
-            let computedHeight = (width / imageSize.width) * imageSize.height
-            let height = computedHeight.isNaN ? 0 : computedHeight
-
-            contentsFrame = NSRect(x: indent, y: 0, width: width, height: height + elementNodePadding.bottom + elementNodePadding.top)
-
-            if let imageLayer = layers["image"] {
-                imageLayer.layer.position = CGPoint(x: indent + childInset, y: elementNodePadding.top)
-                imageLayer.layer.bounds = CGRect(origin: imageLayer.frame.origin, size: CGSize(width: width, height: height))
-
-                updateFocus()
-            }
-
-            invalidatedRendering = false
-        }
-
-        computedIdealSize = contentsFrame.size
-        computedIdealSize.width = frame.width
-
-        if open && selfVisible {
-            for c in children {
-                computedIdealSize.height += c.idealSize.height
-            }
+    override func updateLayout() {
+        super.updateLayout()
+        if let imageLayer = layers["image"] {
+            imageLayer.layer.position = CGPoint(x: contentsLead, y: contentsTop)
+            imageLayer.layer.bounds = CGRect(origin: .zero, size: visibleSize)
         }
     }
 
     public override func updateElementCursor() {
-        let on = editor.hasFocus && isFocused && editor.blinkPhase && (root?.state.nodeSelection?.nodes.isEmpty ?? true)
-        let cursorRect = NSRect(x: caretIndex == 0 ? (indent - 5) : (contentsFrame.width + indent + 3), y: elementNodePadding.top - focusMargin, width: 2, height: (layers["image"]?.layer.bounds.height ?? 0) + focusMargin * 2)//rectAt(caretIndex: caretIndex)
-        let layer = self.cursorLayer
-
-        layer.shapeLayer.fillColor = enabled ? cursorColor.cgColor : disabledColor.cgColor
-        layer.layer.isHidden = !on
-        layer.shapeLayer.path = CGPath(rect: cursorRect, transform: nil)
+        let imageLayer = layers["image"]?.layer
+        let bounds = imageLayer?.bounds ?? .zero
+        let cursorRect = NSRect(x: caretIndex == 0 ? -4 : (bounds.width + 2), y: -focusMargin, width: 2, height: bounds.height + focusMargin * 2)
+        layoutCursor(cursorRect)
     }
 
     var focusMargin = CGFloat(3)
@@ -146,14 +125,11 @@ class ImageNode: ElementNode {
         borderLayer.strokeColor = selectionColor.cgColor
         borderLayer.fillColor = NSColor.clear.cgColor
         borderLayer.bounds = bounds
-        borderLayer.position = CGPoint(x: indent + childInset + imageLayer.layer.bounds.width / 2, y: imageLayer.layer.bounds.height / 2 + elementNodePadding.top)
+        borderLayer.position = CGPoint(x: imageLayer.layer.bounds.width / 2, y: imageLayer.layer.bounds.height / 2)
         borderLayer.mask = mask
         imageLayer.layer.addSublayer(borderLayer)
     }
 
-    override func setLayout(_ frame: NSRect) {
-        super.setLayout(frame)
-    }
     override func onUnfocus() {
         updateFocus()
     }

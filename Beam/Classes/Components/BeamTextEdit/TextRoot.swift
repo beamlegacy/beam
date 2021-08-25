@@ -102,6 +102,7 @@ public class TextRoot: TextNode {
             focused.updateCursor()
         }
     }
+
     override var caretIndex: Int {
         get {
             return state.caretIndex
@@ -161,27 +162,20 @@ public class TextRoot: TextNode {
 
     weak var mouseHandler: Widget?
 
-    override func invalidateLayout() {
-        guard !needLayout else { return }
-        super.invalidateLayout()
+    override func onLayoutInvalidated() {
         editor.invalidateLayout()
     }
 
     override var offsetInRoot: NSPoint { NSPoint() }
 
-    override func invalidate() {
-        super.invalidate()
+    override func onInvalidated() {
         editor.invalidate()
-    }
-
-    override var idealSize: NSSize {
-        super.updateRendering()
-        computedIdealSize.height += self.idealSpacingSize
-        return computedIdealSize
     }
 
     init(editor: BeamTextEdit, element: BeamElement) {
         super.init(editor: editor, element: element, nodeProvider: NodeProviderImpl(proxy: false))
+
+        childrenSpacing = PreferencesManager.editorParentSpacing
 
         if let note = note {
             if !editor.journalMode {

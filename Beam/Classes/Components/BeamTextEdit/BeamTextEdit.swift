@@ -123,7 +123,7 @@ public extension CALayer {
         l.delegate = self
         // self.wantsLayer = true
 
-        timer = Timer.init(timeInterval: 1.0 / 60.0, repeats: true) { [unowned self] _ in
+        timer = Timer(timeInterval: 1.0 / 60.0, repeats: true) { [unowned self] _ in
             let now = CFAbsoluteTimeGetCurrent()
             if self.blinkTime <= now && self.hasFocus {
                 self.blinkPhase.toggle()
@@ -142,6 +142,33 @@ public extension CALayer {
 
         registerForDraggedTypes([.fileURL])
         refreshAndHandleDeletionsAsync()
+    }
+
+    public override func viewDidMoveToSuperview() {
+        super.viewDidMoveToSuperview()
+        setupInScrollView()
+    }
+
+    func setupInScrollView() {
+        guard !journalMode, let scrollView = enclosingScrollView else { return }
+        let documentView = scrollView.documentView
+        documentView?.postsFrameChangedNotifications = true
+        let contentView = scrollView.contentView
+        contentView.postsBoundsChangedNotifications = true
+
+        NotificationCenter.default.removeObserver(self, name: NSView.boundsDidChangeNotification, object: nil)
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(contentOffsetDidChange(notification:)),
+                                               name: NSView.boundsDidChangeNotification,
+                                               object: contentView)
+    }
+
+    @objc private func contentOffsetDidChange(notification: Notification) {
+        if enclosingScrollView != nil {
+            if visibleRect.maxY > realContentSize.height {
+                invalidateIntrinsicContentSize()
+            }
+        }
     }
 
     func refreshAndHandleDeletionsAsync() {
@@ -269,7 +296,7 @@ public extension CALayer {
     func relayoutRoot() {
         let r = bounds
         let textNodeWidth = Self.textNodeWidth(for: frame.size)
-        var rect = NSRect(x: 0, y: topOffsetActual + cardTopSpace, width: textNodeWidth, height: r.height)
+        var rect = NSRect()
 
         if centerText {
             let x = (frame.width - textNodeWidth) / 2
@@ -421,11 +448,17 @@ public extension CALayer {
         sideLayerOffset = sideLayerOffset < 0 ? 0 : sideLayerOffset
     }
 
+    var realContentSize: NSSize = .zero
     override public var intrinsicContentSize: NSSize {
         let textNodeWidth = Self.textNodeWidth(for: frame.size)
         rootNode.availableWidth = textNodeWidth
         let height = rootNode.idealSize.height + topOffsetActual + footerHeight + cardTopSpace
-        return NSSize(width: textNodeWidth, height: height)
+        realContentSize = NSSize(width: textNodeWidth, height: height)
+        var safeContentSize = realContentSize
+        if enclosingScrollView != nil {
+            safeContentSize.height = max(visibleRect.maxY, safeContentSize.height)
+        }
+        return safeContentSize
     }
 
     private var dragging = false
@@ -979,7 +1012,7 @@ public extension CALayer {
 
     public override func cursorUpdate(with event: NSEvent) {
         let point = convert(event.locationInWindow)
-        let views = rootNode.getWidgetsAt(point, point)
+        let views = rootNode.getWidgetsAt(point, point, ignoreX: true)
         let cursors = views.compactMap { $0.cursor }
         let cursor = cursors.last ?? .arrow
         cursor.set()
@@ -1469,7 +1502,7 @@ public extension CALayer {
         dragIndicator.borderWidth = 0
         dragIndicator.isHidden = false
 
-        dragIndicator.frame = CGRect(x: node.offsetInDocument.x + node.indent, y: node.offsetInDocument.y + node.contentsFrame.maxY, width: node.frame.width - node.indent, height: 1)
+        dragIndicator.frame = CGRect(x: node.offsetInDocument.x + node.contentsLead, y: node.offsetInDocument.y + node.contentsFrame.maxY, width: node.frame.width - node.contentsLead, height: 1)
 
         if point.y < (node.offsetInDocument.y + node.contentsFrame.height / 2) {
             return (node, false)

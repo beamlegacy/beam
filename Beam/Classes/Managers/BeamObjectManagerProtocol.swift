@@ -12,7 +12,7 @@ protocol BeamObjectManagerDelegateProtocol {
     func saveAllOnBeamObjectApi(_ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> APIRequest?
 }
 
-protocol BeamObjectManagerDelegate: class, BeamObjectManagerDelegateProtocol {
+protocol BeamObjectManagerDelegate: AnyObject, BeamObjectManagerDelegateProtocol {
     associatedtype BeamObjectType: BeamObjectProtocol
     func registerOnBeamObjectManager()
 

@@ -4,6 +4,7 @@
 //
 //  Created by Frank Lefebvre on 02/06/2021.
 //
+//swiftlint:disable file_length
 
 import Foundation
 import BeamCore
