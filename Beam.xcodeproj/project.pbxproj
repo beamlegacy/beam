@@ -754,7 +754,6 @@
 		BAA67AB77852A4EE310BF552 /* PointAndShoot+ShootFrameFusionRect.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA674C683DA5DEC733F4746 /* PointAndShoot+ShootFrameFusionRect.swift */; };
 		BAA67ACD35DACF0E03ED520B /* DownloadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67A3C749F22077F5B7194 /* DownloadManager.swift */; };
 		BAA67AF4FC4809A4B37353AD /* ScorerMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA671BF2E38E5B7F5764244 /* ScorerMessageHandler.swift */; };
-		BAA67AFAB13DE4A1378E312B /* PointAndShootRectangleFrame.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA6779A8E69417A47D041B5 /* PointAndShootRectangleFrame.swift */; };
 		BAA67B13B4EBCFF2D7A94F93 /* WebEventsUI_web.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA671D24ED336D3B2A143F1 /* WebEventsUI_web.ts */; };
 		BAA67B51C8D9DBD6FE5327B6 /* mixins.scss in Resources */ = {isa = PBXBuildFile; fileRef = BAA67D2FC7A644FB3E1C05E6 /* mixins.scss */; };
 		BAA67B681D12191FE57E7807 /* PopupUI_web.scss in Resources */ = {isa = PBXBuildFile; fileRef = BAA678F0976FD26A8BF9B2CA /* PopupUI_web.scss */; };
@@ -1679,7 +1678,6 @@
 		BAA676AA87963F568B000616 /* PointAndShootUI_native.test.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = PointAndShootUI_native.test.ts; sourceTree = "<group>"; };
 		BAA67765B4D27F2D4F2B8562 /* BeamWebViewConfiguration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeamWebViewConfiguration.swift; sourceTree = "<group>"; };
 		BAA6777EB9326511BE7FD0DC /* BrowsingTreeScorer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BrowsingTreeScorer.swift; sourceTree = "<group>"; };
-		BAA6779A8E69417A47D041B5 /* PointAndShootRectangleFrame.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PointAndShootRectangleFrame.swift; sourceTree = "<group>"; };
 		BAA677C8DE42140C0F0BD535 /* PointAndShootUI_native.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = PointAndShootUI_native.ts; sourceTree = "<group>"; };
 		BAA67837448460D14C798F73 /* WebNavigationController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebNavigationController.swift; sourceTree = "<group>"; };
 		BAA678DCBD094131A9BC96F2 /* BrowsingSession.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BrowsingSession.swift; sourceTree = "<group>"; };
@@ -3066,7 +3064,6 @@
 			isa = PBXGroup;
 			children = (
 				8A1B8FCD26A9CB31006D849D /* PointAndShootPathFrame.swift */,
-				BAA6779A8E69417A47D041B5 /* PointAndShootRectangleFrame.swift */,
 				BAA670FA9720D0BD2011EC10 /* PointAndShootCardPicker.swift */,
 			);
 			path = Components;
@@ -4955,7 +4952,6 @@
 				BAA67AF4FC4809A4B37353AD /* ScorerMessageHandler.swift in Sources */,
 				A0F462352668D79E0003EAD6 /* RadBlockPreferencesManager.swift in Sources */,
 				BAA670C2CFE33BC83DF12343 /* PointAndShootCardPickerPositioning.swift in Sources */,
-				BAA67AFAB13DE4A1378E312B /* PointAndShootRectangleFrame.swift in Sources */,
 				BAA67AB77852A4EE310BF552 /* PointAndShoot+ShootFrameFusionRect.swift in Sources */,
 				BAA675A0EEE5F4636AECCE5D /* PointAndShootCardPicker.swift in Sources */,
 				BAA679FFB80537CB6DE74025 /* BeamMessageHandler.swift in Sources */,
