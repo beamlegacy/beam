@@ -3927,6 +3927,7 @@
 				521ED51025B9E43F00FBFA99 /* SwiftLint */,
 				965A78212514F147009980D4 /* Sources */,
 				965A78222514F147009980D4 /* Frameworks */,
+				8A0D274726D5338600CE0AC9 /* Build xcfilelist Web */,
 				0274A217261212DC00DA35CE /* Build Web */,
 				965A78232514F147009980D4 /* Resources */,
 				5259C3AA258A7DC300DD67E7 /* Embed Frameworks */,
@@ -4296,6 +4297,7 @@
 			files = (
 			);
 			inputFileListPaths = (
+				"$(SRCROOT)/WebFileList.xcfilelist",
 			);
 			inputPaths = (
 			);
@@ -4303,6 +4305,7 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Beam/Classes/Components/PointAndShoot/Web/index_prod.js",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -4416,6 +4419,26 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "if [ $ENABLE_PREVIEWS == \"NO\" ]\nthen\n    PATH=/opt/homebrew/bin:${PATH}\n    git checkout ${SRCROOT}/BeamCore/Configuration/EnvironmentVariables.swift\nelse\n  echo \"Skipping the script because of SwiftUI preview mode\"\nfi\n\n\n";
+		};
+		8A0D274726D5338600CE0AC9 /* Build xcfilelist Web */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/scripts/build_xcfilelist.sh",
+			);
+			name = "Build xcfilelist Web";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/WebFileList.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ $ENABLE_PREVIEWS == \"NO\" ]\nthen\n    export PATH=\"$PATH:/opt/homebrew/bin\"\n    ./scripts/build_xcfilelist.sh\n \nelse\n    echo \"Skipping the script because of SwiftUI preview mode\"\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
