@@ -626,9 +626,6 @@ public class TextNode: ElementNode {
         let isMouseInContentFrame = contentsFrame.contains(mouseInfo.position)
         let isMouseInsideFormatter = editor.inlineFormatter?.isMouseInsideView == true
         let mouseHasChangedTextPosition = lastHoverMouseInfo?.position != mouseInfo.position
-        if isFocused {
-        print("isMouseInContentFrame: \(isMouseInContentFrame) isMouseInsideFormatter: \(isMouseInsideFormatter) mouseHasChangedTextPosition: \(mouseHasChangedTextPosition)")
-        }
         if mouseHasChangedTextPosition && isMouseInContentFrame {
             let link = linkAt(point: mouseInfo.position)
             let internalLink = internalLinkRangeAt(point: mouseInfo.position)
