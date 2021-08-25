@@ -178,4 +178,11 @@ clean_ci_server:
 	rm -rf ${HOME}/Library/Developer/Xcode/Archives/*
 	rm -rf ${HOME}/Library/Developer/Xcode/DerivedData/*
 
+# IMPORTANT: Only run this from Intel based machines, our CI will run on Intel
+update_curl_jq_image:
+	@echo "Building image"
+	docker build -t registry.gitlab.com/beamgroup/beam/curl-jq registry/curl-jq
+	@echo "Pushing image"
+	docker push registry.gitlab.com/beamgroup/beam/curl-jq
+
 setup: git_checkout install_dependencies install_swiftlint install_cmake install_variable_injector build_libgit2 install_js
