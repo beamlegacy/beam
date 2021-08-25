@@ -7,8 +7,10 @@
 
 import Foundation
 
-class TextLineLayer: CALayer {
+class
+TextLineLayer: CALayer {
     weak var textLine: TextLine?
+    let debug = false
 
     init(_ textLine: TextLine) {
         self.textLine = textLine
@@ -16,6 +18,11 @@ class TextLineLayer: CALayer {
         self.name = "line"
         self.frame = textLine.frame
         self.setNeedsDisplay()
+
+        if debug {
+            borderWidth = 1
+            borderColor = NSColor.green.withAlphaComponent(0.5).cgColor
+        }
     }
 
     required init?(coder: NSCoder) {

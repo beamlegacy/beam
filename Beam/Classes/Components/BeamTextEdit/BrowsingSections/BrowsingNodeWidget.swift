@@ -66,17 +66,8 @@ class BrowsingNodeWidget: Widget {
         }
     }
 
-    override func updateRendering() {
-        contentsFrame = NSRect(x: 0, y: 0, width: availableWidth, height: 30)
-
-        computedIdealSize = contentsFrame.size
-        computedIdealSize.width = availableWidth
-
-        if open {
-            for c in children {
-                computedIdealSize.height += c.idealSize.height
-            }
-        }
+    override func updateRendering() -> CGFloat {
+        30
     }
 }
 
@@ -91,11 +82,8 @@ class BrowsingLinkWidget: Widget {
         addLayer(Layer.text(named: "link", "\(link.score.score) - \(url)", color: NSColor.red))
     }
 
-    override func updateRendering() {
-        contentsFrame = NSRect(x: 0, y: 0, width: availableWidth, height: 30)
-
-        computedIdealSize = contentsFrame.size
-        computedIdealSize.width = availableWidth
+    override func updateRendering() -> CGFloat {
+        30
     }
 
     override var mainLayerName: String {

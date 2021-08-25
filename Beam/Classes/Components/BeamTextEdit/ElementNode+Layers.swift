@@ -9,7 +9,7 @@ import Foundation
 
 extension ElementNode {
 
-    private static var bulletLayerPositionX = CGFloat(14)
+    private static var bulletLayerPositionX = CGFloat(-4)
     @objc var bulletLayerPositionY: CGFloat {
         isHeader ? firstLineBaseline - 8 : firstLineBaseline - 13
     }
@@ -32,8 +32,11 @@ extension ElementNode {
         let indentLayer = CALayer()
         indentLayer.backgroundColor = BeamColor.Editor.indentBackground.cgColor
         indentLayer.enableAnimations = false
+        indentLayer.actions = [
+            "opacity": opacityAnimation
+        ]
         addLayer(Layer(name: LayerName.indentLayer.rawValue, layer: indentLayer))
-        updateIndentLayer(with: PreferencesManager.alwaysShowBullets ? 1 : 0)
+        updateIndentLayer()
     }
 
     private func createDisclosureLayer(at point: NSPoint) {
@@ -41,17 +44,29 @@ extension ElementNode {
             self.open = value
             layers[LayerName.indentLayer.rawValue]?.layer.isHidden = !value
         })
+        disclosureLayer.layer.actions = [
+            "opacity": opacityAnimation
+        ]
         addLayer(disclosureLayer, origin: point)
-        updateDisclosureLayer(alwaysShowBullets: PreferencesManager.alwaysShowBullets, with: PreferencesManager.alwaysShowBullets ? 1 : 0)
+        updateDisclosureLayer()
     }
 
     private func createBulletPointLayer(at point: NSPoint) {
         let bulletLayer = Layer(name: LayerName.bullet.rawValue,
                                 layer: Layer.icon(named: "editor-bullet", color: BeamColor.Editor.bullet.nsColor))
-        bulletLayer.layer.isHidden = true
+        bulletLayer.layer.actions = [
+            "opacity": opacityAnimation
+        ]
+
         addLayer(bulletLayer, origin: point)
+        updateBulletLayer()
     }
 
+    var opacityAnimation: CABasicAnimation {
+        let anim = CABasicAnimation()
+        anim.duration = 0.3
+        return anim
+    }
     @discardableResult
     private func createCheckboxLayer(at point: NSPoint) -> CheckboxLayer? {
         guard let textNode = self as? TextNode else { return nil }
@@ -65,72 +80,31 @@ extension ElementNode {
 
     // MARK: - Update Layers
     func updateElementLayers() {
-        updateBulletLayer(alwaysShowBullets: PreferencesManager.alwaysShowBullets)
-        updateDisclosureLayer(alwaysShowBullets: PreferencesManager.alwaysShowBullets)
-        updateIndentLayer(with: PreferencesManager.alwaysShowBullets ? 1 : 0)
+        updateBulletLayer()
+        updateDisclosureLayer()
+        updateIndentLayer()
         updateCheckboxLayer()
     }
 
-    func alwaysShowLayers(isOn: Bool) {
-        updateBulletLayer(alwaysShowBullets: isOn)
-        updateDisclosureLayer(alwaysShowBullets: isOn, with: isOn ? 1 : 0)
-        updateIndentLayer(with: isOn ? 1 : 0)
-    }
-
-    private func updateBulletLayer(alwaysShowBullets: Bool) {
+    private func updateBulletLayer() {
         guard let bulletLayer = self.layers[LayerName.bullet.rawValue] else { return }
 
-        if showDisclosureButton || !alwaysShowBullets {
-            bulletLayer.layer.isHidden = true
-        } else if alwaysShowBullets {
-            bulletLayer.layer.isHidden = false
-        }
+        bulletLayer.layer.opacity = Float((showDisclosureButton || !PreferencesManager.alwaysShowBullets) ? 0 : 1)
     }
 
-    private func updateDisclosureLayer(alwaysShowBullets: Bool, with opacity: Float? = nil) {
+    private func updateDisclosureLayer() {
         guard let disclosureLayer = self.layers[LayerName.disclosure.rawValue] as? ChevronButton else { return }
 
-        if let opacityValue = opacity {
-            disclosureLayer.layer.opacity = opacityValue
-        }
-        if showDisclosureButton && alwaysShowBullets {
-            disclosureLayer.layer.isHidden = false
-        } else if showDisclosureButton && !alwaysShowBullets {
-            disclosureLayer.layer.isHidden = false
-            disclosureLayer.layer.opacity = open ? 0 : 1
-        } else if !showDisclosureButton {
-            disclosureLayer.layer.isHidden = true
-        }
+        let show = showDisclosureButton && (PreferencesManager.alwaysShowBullets || hover)
+        disclosureLayer.layer.opacity = Float(show ? 1 : 0)
     }
 
-    private func updateIndentLayer(with opacity: Float? = nil) {
+    private func updateIndentLayer() {
         guard let indentLayer = layers[LayerName.indentLayer.rawValue] else { return }
         let y = firstLineHeight + 8
-        indentLayer.frame = NSRect(x: childInset + 4.5, y: y - 5, width: 1, height: frame.height - y - 5)
-        indentLayer.layer.isHidden = children.isEmpty || !open
-        if let opacityValue = opacity {
-            indentLayer.layer.opacity = opacityValue
-        }
-    }
-
-    internal func handle(hover: Bool) {
-        guard let disclosureLayer = layers[LayerName.disclosure.rawValue] else { return }
-        guard let indentLayer = layers[LayerName.indentLayer.rawValue] else { return }
-        if open {
-            if hover && disclosureLayer.layer.opacity == 0 && indentLayer.layer.opacity == 0 ||
-                !hover && disclosureLayer.layer.opacity == 1 && indentLayer.layer.opacity == 1 {
-                let oldValue = disclosureLayer.layer.opacity
-                let newValue: Float = oldValue == 0 ? 1 : 0
-                let opacityAnimation = CABasicAnimation(keyPath: "opacity")
-                opacityAnimation.fromValue = oldValue
-                opacityAnimation.toValue = newValue
-                opacityAnimation.duration = 0.3
-                disclosureLayer.layer.add(opacityAnimation, forKey: "disclosureOpacity")
-                indentLayer.layer.add(opacityAnimation, forKey: "indentOpacity")
-                disclosureLayer.layer.opacity = newValue
-                indentLayer.layer.opacity = newValue
-            }
-        }
+        indentLayer.frame = NSRect(x: 4.5, y: y - 5, width: 1, height: frame.height - y - 5)
+        let show = (showDisclosureButton && (PreferencesManager.alwaysShowBullets || hover))  && self.open
+        indentLayer.layer.opacity = Float(show ? 1 : 0)
     }
 
     private func updateCheckboxLayer() {
@@ -150,7 +124,7 @@ extension ElementNode {
         if layer == nil {
             layer = createCheckboxLayer(at: layers[LayerName.bullet.rawValue]?.frame.origin ?? .zero)
         }
-        layer?.frame = NSRect(x: childInset + 20, y: 3, width: 14, height: 14)
+        layer?.frame = NSRect(x: 20, y: 3, width: 14, height: 14)
         layer?.isChecked = checked
         layer?.layer.isHidden = hidden
     }

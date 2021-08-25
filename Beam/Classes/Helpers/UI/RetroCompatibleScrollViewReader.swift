@@ -73,7 +73,7 @@ struct RetroCompatibleScrollViewProxy: Equatable {
         Self.droppedScrollToPoint = .zero
         if #available(macOS 11.0, *), !forceCustomProxyForDebug {
             guard let proxy = scrollViewProxy as? ScrollViewProxy else { return }
-            proxy.scrollTo(RetroCompatibleScrollViewContentID, anchor: UnitPoint.init(x: point.x, y: point.y))
+            proxy.scrollTo(RetroCompatibleScrollViewContentID, anchor: UnitPoint(x: point.x, y: point.y))
         } else {
             guard let proxy = scrollViewProxy as? CustomScrollingProxy else {
                 Self.droppedScrollToPoint = point

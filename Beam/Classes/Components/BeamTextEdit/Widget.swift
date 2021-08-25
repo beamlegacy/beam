@@ -121,10 +121,11 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         }
     }
 
+    var depth: Int { return allParents.count }
+
     var enabled: Bool { editor.enabled }
     var scope = Set<AnyCancellable>()
 
-    var contentsFrame = NSRect() // The rectangle of our text excluding children
     var localTextFrame: NSRect { // The rectangle of our text excluding children
         return NSRect(x: 0, y: 0, width: contentsFrame.width, height: contentsFrame.height)
     }
@@ -134,7 +135,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
             if availableWidth != oldValue {
                 updateChildren()
                 invalidatedRendering = true
-                updateRendering()
+                computeRendering()
             }
         }
     }
@@ -144,11 +145,40 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         return NSRect(x: 0, y: 0, width: frame.width, height: frame.height)
     }
 
-    var depth: Int { return allParents.count }
+    final var contentsFrame: NSRect { NSRect(x: contentsLead, y: contentsTop, width: idealContentsSize.width, height: idealContentsSize.height) }
+    var idealContentsHeight: CGFloat = 0
+    final var idealContentsSize: NSSize { NSSize(width: contentsWidth.rounded(.awayFromZero), height: idealContentsHeight.rounded(.awayFromZero))}
+    final var paddedContentsSize: NSSize {
+        NSSize(width: (idealContentsSize.width + contentsPadding.left + contentsPadding.right).rounded(.awayFromZero),
+               height: (idealContentsSize.height + contentsPadding.top + contentsPadding.bottom).rounded(.awayFromZero))
+    }
 
-    var idealSize: NSSize {
-        updateRendering()
+    var idealSizeChanged = true
+    final var idealSize: NSSize {
+        if idealSizeChanged {
+            computeRendering()
+            computedIdealSize = NSSize(width: availableWidth.rounded(.awayFromZero), height: (paddedContentsSize.height + idealChildrenSize.height + padding.top + padding.bottom).rounded(.awayFromZero))
+        }
         return computedIdealSize
+    }
+
+    var widgetWidth: CGFloat { (availableWidth - padding.left - padding.right).rounded(.awayFromZero) }
+    var contentsWidth: CGFloat { (widgetWidth - contentsPadding.left - contentsPadding.right).rounded(.awayFromZero) }
+    var childrenWidth: CGFloat { (widgetWidth - childInset - childrenPadding.left - childrenPadding.right).rounded(.awayFromZero) }
+
+    var childrenTop: CGFloat { (padding.top + childrenPadding.top + paddedContentsSize.height).rounded(.awayFromZero) }
+    var childrenLead: CGFloat { (childInset + padding.left + childrenPadding.left).rounded(.awayFromZero) }
+
+    var contentsTop: CGFloat { (padding.top + contentsPadding.top).rounded(.awayFromZero) }
+    var contentsLead: CGFloat { (padding.left + contentsPadding.left).rounded(.awayFromZero) }
+
+    var idealChildrenSize: NSSize {
+        guard open else { return NSSize() }
+        var size = NSSize(width: childrenWidth, height: childrenPadding.top + childrenPadding.bottom + CGFloat(max(0, children.count - 1)) * childrenSpacing)
+        for c in children {
+            size.height += c.idealSize.height
+        }
+        return NSSize(width: size.width.rounded(.awayFromZero), height: size.height.rounded(.awayFromZero))
     }
 
     var offsetInDocument: NSPoint { // the position in the global document
@@ -237,7 +267,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
     internal var computedIdealSize = NSSize()
     private weak var _root: TextRoot?
-    public private(set) var needLayout = true
+    public private(set) var needLayout = false
 
     public static func == (lhs: Widget, rhs: Widget) -> Bool {
         return lhs === rhs
@@ -249,13 +279,9 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         self._editor = parent.editor
         self.nodeProvider = nodeProvider
         layer = CALayer()
-        layer.isHidden = true
         selectionLayer = CALayer()
-        selectionLayer.enableAnimations = false
         super.init()
-        self.nodeProvider?.holder = self
-        configureLayer()
-        configureSelectionLayer()
+        setupWidget()
         availableWidth = parent.availableWidth - parent.childInset
 
         setupAccessibility()
@@ -266,10 +292,12 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         self._editor = editor
         self.nodeProvider = nodeProvider
         layer = CALayer()
-        layer.isHidden = true
         selectionLayer = CALayer()
-        selectionLayer.enableAnimations = false
         super.init()
+        setupWidget()
+    }
+
+    func setupWidget() {
         self.nodeProvider?.holder = self
         configureLayer()
         configureSelectionLayer()
@@ -306,33 +334,30 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
     // MARK: - Setup UI
 
-    public func draw(_ layer: CALayer, in ctx: CGContext) {
-        draw(in: ctx)
-    }
-
-    public func draw(in context: CGContext) {
-        context.saveGState()
-
-        updateRendering()
-
+    public func draw(_ layer: CALayer, in context: CGContext) {
+        computeRendering()
         drawDebug(in: context)
-
-        context.restoreGState()
     }
 
     func updateSubLayersLayout() { }
 
     var initialLayout = true
-    func setLayout(_ frame: NSRect) {
+    final func setLayout(_ frame: NSRect) {
         self.frame = frame
-        needLayout = false
+        defer {
+            needLayout = false
+            initialLayout = false
+        }
 
         if initialLayout {
             CATransaction.begin()
             CATransaction.setDisableActions(true)
         }
         layer.bounds = contentsFrame
-        layer.position = frameInDocument.origin
+        layer.position = CGPoint(x: frameInDocument.origin.x + contentsFrame.origin.x, y: frameInDocument.origin.y + contentsFrame.origin.y)
+
+        layer.backgroundColor = debug ? NSColor.systemPink.withAlphaComponent(0.1).cgColor : nil
+
         selectionLayer.bounds = CGRect(x: selectionInset, y: -2.5, width: selectionLayerWidth - selectionInset, height: contentsFrame.height)
         if selectedAlone {
             selectionLayer.position = CGPoint(x: selectionInset, y: -2.5)
@@ -342,38 +367,48 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
             selectionLayer.bounds.size = CGSize(width: selectionLayerWidth - selectionLayerPosX - selectionInset, height: contentsFrame.height)
         }
         updateSubLayersLayout()
+        updateChildrenLayout()
+        updateLayout()
 
         if self.currentFrameInDocument != frame {
-            updateLayout()
             invalidatedRendering = true
-            updateRendering()
+            computeRendering()
             invalidate() // invalidate before change
             currentFrameInDocument = frame
             invalidate()  // invalidate after the change
         }
-        updateChildrenLayout()
 
         if initialLayout {
             updateLayersVisibility()
             CATransaction.commit()
         }
-        initialLayout = false
     }
 
+    /// updateLayout() is called whenever the frame of this widget is updated. It is a change to change the position of custom layers. You must not relayout children in this method, it is done automatically for you.
     func updateLayout() {
     }
 
-    var childInset: CGFloat = 18
+    var childInset: CGFloat = 18 { didSet { invalidateRendering() } }
 
-    func updateChildrenLayout() {
-        var pos = NSPoint(x: childInset, y: self.contentsFrame.height)
+    var padding: NSEdgeInsets = NSEdgeInsetsZero { didSet { invalidateRendering() } } ///< Padding around the Widget + its children
+    var contentsPadding: NSEdgeInsets = NSEdgeInsetsZero { didSet { invalidateRendering() } } ///< Padding around this widget's contents
+    var childrenPadding: NSEdgeInsets = NSEdgeInsetsZero { didSet { invalidateRendering() } } ///< Padding around this widget's children
+    var childrenSpacing: CGFloat = PreferencesManager.editorChildSpacing { didSet { invalidateRendering() } } ///< Space in between two children
 
+    final func updateChildrenLayout() {
+        guard open else { return }
+        var pos = NSPoint(x: childrenLead, y: childrenTop)
+        var first = true
         for c in children {
-            let childSize = c.idealSize
+            var childSize = c.idealSize
+            childSize.width = childrenWidth
+            if !first {
+                pos.y += childrenSpacing
+            }
             let childFrame = NSRect(origin: pos, size: childSize)
             c.setLayout(childFrame)
-
             pos.y += childSize.height
+            first = false
         }
     }
 
@@ -392,6 +427,9 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     }
 
     func configureLayer() {
+        layer.isHidden = true
+        selectionLayer.enableAnimations = false
+
         let newActions = [
             kCAOnOrderIn: NSNull(),
             kCAOnOrderOut: NSNull(),
@@ -405,31 +443,60 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         layer.backgroundColor = NSColor.clear.cgColor
         layer.delegate = self
         layer.name = mainLayerName
+        layer.masksToBounds = false
     }
 
     var mainLayerName: String {
         String(describing: self)
     }
 
-    func invalidateLayout() {
+    func onLayoutInvalidated() {
+    }
+
+    final func invalidateLayout() {
         invalidate()
-        guard !needLayout else { return }
+        // TODO: fix this optimisation so that we don't go up the tree every time
+//        guard !needLayout else {
+//            checkTreeLayout()
+//            return
+//        }
         needLayout = true
+        idealSizeChanged = true
+        dispatchInvalidateLayout()
+        onLayoutInvalidated()
+    }
+
+    final func checkTreeLayout() {
+        guard inVisibleBranch else {
+            return
+        }
+        guard needLayout else {
+            Logger.shared.logError("checkTreeLayout Error - needLayout is false in \(self)", category: .noteEditor)
+            return
+        }
+        parent?.checkTreeLayout()
+    }
+
+    final func dispatchInvalidateLayout() {
         guard let p = parent else { return }
         p.invalidateLayout()
     }
 
-    func invalidate() {
-        guard !layer.needsDisplay() else { return }
-        layer.setNeedsDisplay()
+    func onInvalidated() {
     }
 
-    func invalidateRendering() {
+    final func invalidate() {
+        guard !layer.needsDisplay() else { return }
+        layer.setNeedsDisplay()
+        onInvalidated()
+    }
+
+    final func invalidateRendering() {
         invalidatedRendering = true
         invalidateLayout()
     }
 
-    func deepInvalidateRendering() {
+    final func deepInvalidateRendering() {
         invalidateRendering()
         for c in children {
             c.deepInvalidateRendering()
@@ -460,8 +527,8 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
                 chevron.open = open
             }
             updateChildrenVisibility(visible && open)
-            invalidateRendering()
             invalidateLayout()
+            invalidateRendering()
         }
     }
 
@@ -471,28 +538,13 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
             guard c.visible != isVisible else { continue }
             c.visible = isVisible
             c.updateChildrenVisibility(isVisible && c.open)
-            invalidateLayout()
         }
     }
 
-    func updateRendering() {
+    final func computeRendering() {
         guard availableWidth > 0 else { return }
-
-        if invalidatedRendering {
-            contentsFrame = NSRect()
-
-            contentsFrame.size.width = availableWidth
-            contentsFrame = contentsFrame.rounded()
-
-            if !selfVisible {
-                contentsFrame.size.height = 0
-            }
-
-            invalidatedRendering = false
-        }
-
-        computedIdealSize = contentsFrame.size
-        computedIdealSize.width = frame.width
+        invalidatedRendering = false
+        idealContentsHeight = updateRendering()
 
         if computedIdealSize.width.isNaN || !computedIdealSize.width.isFinite {
             Logger.shared.logError("computedIdealSize.width is not integral \(computedIdealSize.width)", category: .noteEditor)
@@ -503,10 +555,30 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
             Logger.shared.logError("computedIdealSize.height is not integral \(computedIdealSize.height)", category: .noteEditor)
             computedIdealSize.height = 0
         }
+    }
 
+    /// updateRendering() must be overloaded to update the rendering of a widget and return the new height of its contents. It should not modify any layout information
+    func updateRendering() -> CGFloat {
+        0
+    }
+
+    var childrenIdealSize: NSRect {
+        guard open else { return NSRect() }
+        var rect = NSRect()
+        var firstNode = true
         for c in children {
-            computedIdealSize.height += c.idealSize.height
+            if !firstNode {
+                rect.size.height += childrenSpacing
+            }
+
+            let ideal = c.idealSize
+            rect.size.height += ideal.height
+            rect.size.width = max(rect.width, ideal.width)
+            firstNode = false
         }
+
+        rect.size.height += childrenPadding.top + childrenPadding.bottom
+        return rect
     }
 
     // MARK: - Methods Widget
@@ -682,21 +754,25 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         }
     }
 
-    func getWidgetsAt(_ position: NSPoint, _ globalPosition: NSPoint) -> [MouseHandler] {
+    func getWidgetsAt(_ position: NSPoint, _ globalPosition: NSPoint, ignoreX: Bool = false) -> [MouseHandler] {
         guard inVisibleBranch else { return [] }
-        var handlers: [MouseHandler] = layer.frame.contains(globalPosition) ? [self] : []
-
+        var handlers: [MouseHandler] = {
+            let inside = ignoreX
+            ? layer.frame.minY <= globalPosition.y && globalPosition.y < layer.frame.maxY
+            : layer.frame.contains(globalPosition)
+            return inside ? [self] : []
+        }()
         for c in children {
             var p = position
             p.x -= c.frame.origin.x
             p.y -= c.frame.origin.y
 
-            handlers += c.getWidgetsAt(p, globalPosition)
+            handlers += c.getWidgetsAt(p, globalPosition, ignoreX: ignoreX)
         }
 
         for layer in layers.values where !layer.layer.isHidden {
             let p = MouseInfo.convert(globalPosition: globalPosition, self, layer)
-            if layer.contains(p) {
+            if layer.contains(p, ignoreX: ignoreX) {
                 handlers.append(layer)
             }
         }

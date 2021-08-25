@@ -131,16 +131,17 @@ class LinksSection: Widget {
         // TODO
     }
 
-    override func updateChildrenLayout() {
-        super.updateChildrenLayout()
-        layout(children: children)
-    }
-
-    private func layout(children: [Widget]) {
-        for child in children {
-            child.layer.frame.origin = CGPoint(x: child.layer.frame.origin.x - 8, y: child.frameInDocument.origin.y - 5)
-        }
-    }
+// TODO change what this code does with the new layout engine. Do we want to be able to offset children that way?
+//    override func updateChildrenLayout() {
+//        super.updateChildrenLayout()
+//        layout(children: children)
+//    }
+//
+//    private func layout(children: [Widget]) {
+//        for child in children {
+//            child.layer.frame.origin = CGPoint(x: child.layer.frame.origin.x - 8, y: child.frameInDocument.origin.y - 5)
+//        }
+//    }
 
     func updateHeading(_ count: Int) {
         sectionTitleLayer.string = "link".localizedStringWith(comment: "link section title", count)
@@ -175,17 +176,8 @@ class LinksSection: Widget {
         layers["disclosure"]?.frame = CGRect(origin: CGPoint(x: 0, y: sectionTitleLayer.preferredFrameSize().height / 2 - 9), size: CGSize(width: 20, height: 20))
     }
 
-    override func updateRendering() {
-        contentsFrame = NSRect(x: 0, y: 0, width: availableWidth, height: selfVisible ? 30 : 0)
-
-        computedIdealSize = contentsFrame.size
-        computedIdealSize.width = frame.width
-
-        if open && selfVisible {
-            for c in children {
-                computedIdealSize.height += c.idealSize.height
-            }
-        }
+    override func updateRendering() -> CGFloat {
+        return selfVisible ? 30 : 0
     }
 
     override func updateSubLayersLayout() {
