@@ -32,7 +32,7 @@ struct TextEditCmdReturnAnimator {
             let endRect = node.rectAt(sourcePosition: endOfText)
             var rect = startRect.union(endRect)
             rect.size.width *= 1.03 // faketext font is slighlty larger
-            rect.origin.x += node.offsetAt(index: startOfText)
+            rect.origin.x += node.contentsLead + node.offsetAt(index: startOfText)
 
             guard endOfText <= node.attributedString.length else { return false }
 

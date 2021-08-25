@@ -22,6 +22,11 @@ public class EmbedNode: ElementNode {
     private static var webViewConfiguration = EmbedNodeWebViewConfiguration()
     var webView: BeamWebView?
     private var webPage: EmbedNodeWebPage?
+    var visibleSize: CGSize {
+        let width = contentsWidth
+        let height = (width / embedWidth) * embedHeight
+        return NSSize(width: width, height: height)
+    }
 
     private var embedUrl: URL? {
         guard case .embed(let sourceURL) = element.kind else { return nil }
@@ -32,18 +37,12 @@ public class EmbedNode: ElementNode {
         super.init(parent: parent, element: element)
 
         setupEmbed()
-
-        setAccessibilityLabel("EmbedNode")
-        setAccessibilityRole(.textArea)
     }
 
     init(editor: BeamTextEdit, element: BeamElement) {
         super.init(editor: editor, element: element)
 
         setupEmbed()
-
-        setAccessibilityLabel("EmbedNode")
-        setAccessibilityRole(.textArea)
     }
 
     func setupEmbed() {
@@ -81,10 +80,11 @@ public class EmbedNode: ElementNode {
         }
 
         self.webView = webView
-        let embedLayer = Layer.init(name: "embed", layer: CALayer())
-        embedLayer.layer.position = CGPoint(x: indent, y: 0)
-        addLayer(embedLayer, origin: CGPoint(x: indent, y: 0))
-        layer.zPosition = -1
+
+        setAccessibilityLabel("EmbedNode")
+        setAccessibilityRole(.textArea)
+
+        contentsPadding = NSEdgeInsets(top: 4, left: contentsPadding.left + 4, bottom: 14, right: 4)
     }
 
     deinit {
@@ -109,35 +109,10 @@ public class EmbedNode: ElementNode {
 
     let embedWidth = CGFloat(320)
     let embedHeight = CGFloat(240)
-    override var elementNodePadding: NSEdgeInsets {
-        NSEdgeInsets(top: 4, left: 0, bottom: 14, right: 0)
-    }
 
-    override func updateRendering() {
-        guard availableWidth > 0 else { return }
-
-        if invalidatedRendering {
-            let width = availableWidth - indent
-            let height = (width / embedWidth) * embedHeight
-            contentsFrame = NSRect(x: indent, y: 0, width: width, height: childInset + height + elementNodePadding.bottom + elementNodePadding.top)
-
-            if let embedLayer = layers["embed"] {
-                embedLayer.layer.position = CGPoint(x: indent, y: 0)
-                embedLayer.layer.bounds = CGRect(origin: embedLayer.frame.origin, size: CGSize(width: width - indent, height: contentsFrame.height - elementNodePadding.bottom - elementNodePadding.top))
-                updateFocus()
-            }
-
-            invalidatedRendering = false
-        }
-
-        computedIdealSize = contentsFrame.size
-        computedIdealSize.width = frame.width
-
-        if open && selfVisible {
-            for c in children {
-                computedIdealSize.height += c.idealSize.height
-            }
-        }
+    override func updateRendering() -> CGFloat {
+        updateFocus()
+        return visibleSize.height
     }
 
     override func updateLayersVisibility() {
@@ -145,34 +120,28 @@ public class EmbedNode: ElementNode {
         webView?.isHidden = layer.isHidden
     }
 
-    override func updateChildrenLayout() {
+    override func updateLayout() {
+        super.updateLayout()
         let r = layer.frame
-        webView?.frame = NSRect(x: r.minX + indent, y: r.minY + elementNodePadding.top, width: r.width - indent, height: r.height - elementNodePadding.bottom - elementNodePadding.top )
-        super.updateChildrenLayout()
+        webView?.frame = NSRect(x: r.minX, y: r.minY, width: r.width - contentsLead, height: r.height)
     }
 
     var focusMargin = CGFloat(3)
     public override func updateElementCursor() {
-        let on = editor.hasFocus && isFocused && editor.blinkPhase && (root?.state.nodeSelection?.nodes.isEmpty ?? true)
-        let cursorRect = NSRect(x: caretIndex == 0 ? (indent - 5) : (contentsFrame.width + 3), y: elementNodePadding.top - focusMargin, width: 2, height: layer.frame.height - elementNodePadding.bottom - elementNodePadding.top + focusMargin * 2)
-        let layer = self.cursorLayer
-
-        layer.shapeLayer.fillColor = enabled ? cursorColor.cgColor : disabledColor.cgColor
-        layer.layer.isHidden = !on
-        layer.shapeLayer.path = CGPath(rect: cursorRect, transform: nil)
+        let bounds = webView?.bounds ?? .zero
+        let cursorRect = NSRect(x: caretIndex == 0 ? -4 : (bounds.width + 2), y: -focusMargin, width: 2, height: bounds.height + focusMargin * 2)
+        layoutCursor(cursorRect)
     }
 
+    var focusLayer: CALayer?
     override func updateFocus() {
-        guard let embedLayer = layers["embed"] else { return }
+        focusLayer?.removeFromSuperlayer()
 
-        embedLayer.layer.sublayers?.forEach { l in
-            l.removeFromSuperlayer()
-        }
         guard isFocused else {
-            embedLayer.layer.mask = nil
             return
         }
-        let bounds = embedLayer.bounds.insetBy(dx: -focusMargin, dy: -focusMargin)
+
+        let bounds = (webView?.bounds ?? .zero).insetBy(dx: -focusMargin, dy: -focusMargin)
         let position = CGPoint(x: 0, y: 0)
         let path = NSBezierPath(roundedRect: bounds, xRadius: 2, yRadius: 2)
 
@@ -187,9 +156,10 @@ public class EmbedNode: ElementNode {
         borderLayer.strokeColor = selectionColor.cgColor
         borderLayer.fillColor = NSColor.clear.cgColor
         borderLayer.bounds = bounds
-        borderLayer.position = CGPoint(x: indent + childInset + embedLayer.layer.bounds.width / 2, y: embedLayer.layer.bounds.height / 2 + elementNodePadding.top)
+        borderLayer.position = CGPoint(x: contentsLead - 3 + bounds.width / 2, y: 1 + bounds.height / 2)
         borderLayer.mask = mask
-        embedLayer.layer.addSublayer(borderLayer)
+        layer.addSublayer(borderLayer)
+        focusLayer = borderLayer
     }
 
     override func onUnfocus() {

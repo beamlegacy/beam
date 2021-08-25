@@ -4,6 +4,7 @@
 //
 //  Created by Jean-Louis Darmon on 06/08/2021.
 //
+//swiftlint:disable file_length
 
 import Foundation
 import SwiftUI

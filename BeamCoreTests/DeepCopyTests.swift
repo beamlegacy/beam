@@ -12,7 +12,7 @@ import Nimble
 class DeepCopyTests: XCTestCase {
 
     private func setupTree() -> BeamNote {
-        let note = BeamNote.init(title: "DeepCopytest")
+        let note = BeamNote(title: "DeepCopytest")
 
         let bullet1 = BeamElement("First bullet")
         note.addChild(bullet1)

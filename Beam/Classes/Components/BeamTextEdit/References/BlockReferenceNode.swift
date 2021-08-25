@@ -14,18 +14,19 @@ class BlockReferenceNode: TextNode {
 
     init(parent: Widget, element: BeamElement) {
         super.init(parent: parent, element: element, nodeProvider: NodeProviderImpl(proxy: true))
-        setup()
+
+        setupBlockReference()
     }
 
     init(editor: BeamTextEdit, element: BeamElement) {
         super.init(editor: editor, element: element, nodeProvider: NodeProviderImpl(proxy: true))
 
-        setup()
+        setupBlockReference()
     }
 
     static let lockButtonName = "lock"
 
-    func setup() {
+    func setupBlockReference() {
         readOnly = true
         var refNoteId: UUID
         var refElementId: UUID
@@ -44,7 +45,7 @@ class BlockReferenceNode: TextNode {
         else {
             let errorText = "BlockReferenceNode unable to fetch bloc from note '\(String(describing: refNoteId))'\nid '\(String(describing: refElementId))'"
             Logger.shared.logError(errorText, category: .noteEditor)
-            addLayer(Layer.text(named: "ErrorDisplay", errorText), origin: CGPoint(x: indent + childInset, y: 0), global: false)
+            addLayer(Layer.text(named: "ErrorDisplay", errorText), origin: CGPoint(x: childInset, y: 0), global: false)
             return
         }
 
@@ -104,13 +105,13 @@ class BlockReferenceNode: TextNode {
             super.updateCursor()
         }
     }
-    override func updateChildrenLayout() {
-        super.updateChildrenLayout()
+    override func updateLayout() {
+        super.updateLayout()
         guard let lockButton = layers[Self.lockButtonName] else { return }
         lockButton.frame = NSRect(origin: CGPoint(x: availableWidth + 20, y: 0), size: lockButton.frame.size)
 
         let blockLayer = createBlockLayerIfNeeded()
-        let shift = indent
+        let shift = CGFloat(0) //indent
         var f = contentsFrame.offsetBy(dx: shift, dy: 0)
         f.size.width -= shift
         f.size.height = idealSize.height - 5

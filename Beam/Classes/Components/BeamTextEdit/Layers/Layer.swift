@@ -103,8 +103,11 @@ import AVFoundation
         CGRect(origin: CGPoint(), size: frame.size)
     }
 
-    func contains(_ position: NSPoint) -> Bool {
-        bounds.contains(position)
+    func contains(_ position: NSPoint, ignoreX: Bool = false) -> Bool {
+        if ignoreX {
+            return bounds.minY <= position.y && position.y < bounds.maxY
+        }
+        return bounds.contains(position)
     }
 
     func layoutSublayers(of layer: CALayer) {
