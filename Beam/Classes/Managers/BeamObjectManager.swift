@@ -49,22 +49,6 @@ class BeamObjectManager {
     var conflictPolicyForSave: BeamObjectConflictResolution = .replace
 
     internal func parseObjects(_ beamObjects: [BeamObject]) throws {
-        let lastUpdatedAt = Persistence.Sync.BeamObjects.updated_at
-
-        // If we are doing a delta refreshAll, and 0 document is fetched, we exit early
-        // If not doing a delta sync, we don't as we want to update local document as `deleted`
-        guard lastUpdatedAt == nil || !beamObjects.isEmpty else {
-            Logger.shared.logDebug("0 beam object fetched.", category: .beamObjectNetwork)
-            return
-        }
-
-        if let mostRecentUpdatedAt = beamObjects.compactMap({ $0.updatedAt }).sorted().last {
-            Logger.shared.logDebug("new updatedAt: \(mostRecentUpdatedAt). \(beamObjects.count) beam objects fetched.",
-                                   category: .beamObjectNetwork)
-            Logger.shared.logDebug("objects IDs: \(beamObjects.map { $0.id.uuidString.lowercased() }.joined(separator: ", "))",
-                                   category: .beamObjectNetwork)
-        }
-
         let filteredObjects: [String: [BeamObject]] = beamObjects.reduce(into: [:]) { result, object in
             result[object.beamObjectType] = result[object.beamObjectType] ?? []
             result[object.beamObjectType]?.append(object)
@@ -179,18 +163,17 @@ extension BeamObjectManager {
 
         let beamRequest = BeamObjectRequest()
 
-        let lastUpdatedAt: Date? = Persistence.Sync.BeamObjects.updated_at
-        let timeNow = BeamDate.now
+        let lastReceivedAt: Date? = Persistence.Sync.BeamObjects.last_received_at
 
-        if let lastUpdatedAt = lastUpdatedAt {
-            Logger.shared.logDebug("Using updatedAt for BeamObjects API call: \(lastUpdatedAt)",
+        if let lastReceivedAt = lastReceivedAt {
+            Logger.shared.logDebug("Using lastReceivedAt for BeamObjects API call: \(lastReceivedAt)",
                                    category: .beamObjectNetwork)
         } else {
             Logger.shared.logDebug("No previous updatedAt for BeamObjects API call",
                                    category: .beamObjectNetwork)
         }
 
-        try beamRequest.fetchAll(updatedAtAfter: nil) { result in
+        try beamRequest.fetchAll(receivedAtAfter: lastReceivedAt) { result in
             switch result {
             case .failure(let error):
                 Logger.shared.logDebug("fetchAllFromAPI: \(error.localizedDescription)",
@@ -198,8 +181,23 @@ extension BeamObjectManager {
                 completion(.failure(error))
             case .success(let beamObjects):
                 do {
+                    // If we are doing a delta refreshAll, and 0 document is fetched, we exit early
+                    // If not doing a delta sync, we don't as we want to update local document as `deleted`
+                    guard lastReceivedAt == nil || !beamObjects.isEmpty else {
+                        Logger.shared.logDebug("0 beam object fetched.", category: .beamObjectNetwork)
+                        completion(.success(true))
+                        return
+                    }
+
+                    if let mostRecentReceivedAt = beamObjects.compactMap({ $0.updatedAt }).sorted().last {
+                        Persistence.Sync.BeamObjects.last_received_at = mostRecentReceivedAt
+                        Logger.shared.logDebug("new ReceivedAt: \(mostRecentReceivedAt). \(beamObjects.count) beam objects fetched.",
+                                               category: .beamObjectNetwork)
+                        Logger.shared.logDebug("objects IDs: \(beamObjects.map { $0.id.uuidString.lowercased() }.joined(separator: ", "))",
+                                               category: .beamObjectNetwork)
+                    }
+
                     try self.parseObjects(beamObjects)
-                    Persistence.Sync.BeamObjects.updated_at = timeNow
                     completion(.success(true))
                 } catch {
                     Logger.shared.logError("Error parsing remote beamobjects: \(error.localizedDescription)",

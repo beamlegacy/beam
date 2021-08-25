@@ -1,10 +1,11 @@
-query ($updatedAtAfter: ISO8601DateTime, $ids: [ID!]) {
+query ($receivedAtAfter: ISO8601DateTime, $ids: [ID!]) {
   me {
-    beamObjects(updatedAtAfter: $updatedAtAfter, ids: $ids) {
+    beamObjects(receivedAtAfter: $receivedAtAfter, ids: $ids) {
       id
       createdAt
       updatedAt
       deletedAt
+      receivedAt
       data
       type
       checksum

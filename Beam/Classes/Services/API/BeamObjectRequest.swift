@@ -43,7 +43,7 @@ class BeamObjectRequest: APIRequest {
     }
 
     struct BeamObjectsParameters: Encodable {
-        let updatedAtAfter: Date?
+        let receivedAtAfter: Date?
         let ids: [UUID]?
     }
 
@@ -175,10 +175,10 @@ extension BeamObjectRequest {
     }
 
     @discardableResult
-    func fetchAll(updatedAtAfter: Date? = nil,
+    func fetchAll(receivedAtAfter: Date? = nil,
                   ids: [UUID]? = nil,
                   _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
-        let parameters = BeamObjectsParameters(updatedAtAfter: updatedAtAfter, ids: ids)
+        let parameters = BeamObjectsParameters(receivedAtAfter: receivedAtAfter, ids: ids)
 
         return try fetchAllWithFile("beam_objects", parameters, completion)
     }

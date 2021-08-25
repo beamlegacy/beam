@@ -82,9 +82,9 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                 }
             }
 
-            context("without previous updated_at") {
+            context("without last_received_at") {
                 beforeEach {
-                    Persistence.Sync.BeamObjects.updated_at = nil
+                    Persistence.Sync.BeamObjects.last_received_at = nil
                 }
 
                 it("fetches all objects") {
@@ -102,7 +102,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                     }
 
                     expect(APIRequest.callsCount - networkCalls) == 1
-                    expect(Persistence.Sync.BeamObjects.updated_at).toNot(beNil())
+                    expect(Persistence.Sync.BeamObjects.last_received_at).toNot(beNil())
 
                     expect(MyRemoteObjectManager.receivedMyRemoteObjects).to(haveCount(1))
                     expect(MyRemoteObjectManager.receivedMyRemoteObjects.first) == object

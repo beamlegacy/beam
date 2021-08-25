@@ -61,7 +61,7 @@ class DatabaseManager {
                 if existingDB == nil {
                     Logger.shared.logWarning("Create default database and reset BeamObjects sync last updated",
                                              category: .database)
-                    Persistence.Sync.BeamObjects.updated_at = nil
+                    Persistence.Sync.BeamObjects.last_received_at = nil
                 }
 
                 let database = existingDB ?? Database.fetchOrCreateWithTitle(context, "Default")

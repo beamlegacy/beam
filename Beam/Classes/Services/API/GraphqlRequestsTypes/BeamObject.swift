@@ -31,6 +31,8 @@ class BeamObject: Codable {
     var createdAt: Date?
     var updatedAt: Date?
     var deletedAt: Date?
+    var receivedAt: Date?
+
     var data: Data?
     var dataChecksum: String?
     var previousChecksum: String?
