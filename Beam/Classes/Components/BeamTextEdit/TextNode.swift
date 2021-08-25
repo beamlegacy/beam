@@ -535,7 +535,7 @@ public class TextNode: ElementNode {
     }
 
     private func isHoveringText() -> Bool {
-        let isMouseInsideFormatter = editor.inlineFormatter?.isMouseInsideView == true || editor.popover != nil
+        let isMouseInsideFormatter = editor.inlineFormatter?.isMouseInsideView == true
         return hover && !isMouseInsideFormatter
     }
 
@@ -557,7 +557,6 @@ public class TextNode: ElementNode {
             }
 
             if let link = internalLinkAt(point: mouseInfo.position) {
-                editor.cancelInternalLink()
                 editor.openCard(link, nil)
                 return true
             }
@@ -569,7 +568,7 @@ public class TextNode: ElementNode {
 
                 debounceClickTimer = Timer.scheduledTimer(withTimeInterval: debounceClickInterval, repeats: false, block: { [weak self] (_) in
                     guard let self = self else { return }
-                    self.editor.dismissPopoverOrFormatter()
+                    self.editor.hideInlineFormatter()
                 })
                 return true
             } else if mouseInfo.event.clickCount == 1 && mouseInfo.event.modifierFlags.contains(.shift) {
@@ -586,7 +585,6 @@ public class TextNode: ElementNode {
                 debounceClickTimer?.invalidate()
                 root?.wordSelection(from: clickPos)
                 if !selectedTextRange.isEmpty {
-                    editor.cursorStartPosition = cursorPosition
                     editor.showInlineFormatterOnKeyEventsAndClick()
                 }
                 return true
@@ -622,7 +620,6 @@ public class TextNode: ElementNode {
                 focus(position: clickPos)
                 root?.wordSelection(from: clickPos)
                 if !selectedTextRange.isEmpty {
-                    editor.cursorStartPosition = cursorPosition
                     editor.showInlineFormatterOnKeyEventsAndClick()
                 }
             }
@@ -644,7 +641,7 @@ public class TextNode: ElementNode {
 
     private func handleMouseHoverState(mouseInfo: MouseInfo) {
         let isMouseInContentFrame = contentsFrame.contains(mouseInfo.position)
-        let isMouseInsideFormatter = editor.inlineFormatter?.isMouseInsideView == true || editor.popover != nil
+        let isMouseInsideFormatter = editor.inlineFormatter?.isMouseInsideView == true
         let mouseHasChangedTextPosition = lastHoverMouseInfo?.position != mouseInfo.position
         if mouseHasChangedTextPosition && isMouseInContentFrame {
             let link = linkAt(point: mouseInfo.position)
@@ -703,9 +700,6 @@ public class TextNode: ElementNode {
             } else {
                 updateActionLayerVisibility(hidden: false)
             }
-
-            // Set cursor start position
-            if editor.cursorStartPosition == 0 { editor.cursorStartPosition = cursorPosition }
 
             // Update inline formatter on drag
             if root?.state.nodeSelection == nil { editor.updateInlineFormatterOnDrag(isDragged: true) }
@@ -842,11 +836,11 @@ public class TextNode: ElementNode {
     }
 
     public func offsetAndFrameAt(index: Int) -> (CGFloat, NSRect) {
-        guard let textFrame = textFrame else { return (0, .zero) }
+        guard let textFrame = textFrame else { return (offsetAt(index: index), .zero) }
         let displayIndex = displayIndexFor(sourceIndex: index)
 
         guard !textFrame.lines.isEmpty,
-              let line = lineAt(index: displayIndex) else { return (0, .zero) }
+              let line = lineAt(index: displayIndex) else { return (offsetAt(index: index), .zero) }
 
         let textLine = textFrame.lines[line]
         let positionInLine = displayIndex
@@ -856,12 +850,12 @@ public class TextNode: ElementNode {
     }
 
     public func offsetAndFrameAt(caretIndex: Int) -> (CGFloat, NSRect) {
-        guard let textFrame = textFrame else { return (0, .zero) }
+        guard let textFrame = textFrame else { return (offsetAt(caretIndex: caretIndex), .zero) }
         let caret = textFrame.carets[caretIndex]
         let displayIndex = displayIndexFor(sourceIndex: caret.indexInSource)
 
         guard !textFrame.lines.isEmpty,
-              let line = lineAt(index: displayIndex) else { return (0, .zero) }
+              let line = lineAt(index: displayIndex) else { return (offsetAt(caretIndex: caretIndex), .zero) }
 
         let textLine = textFrame.lines[line]
 
@@ -1066,7 +1060,6 @@ public class TextNode: ElementNode {
     }
 
     public func uneditableRangeAt(index: Int) -> Range<Int>? {
-        guard self.editor.popover == nil else { return nil }
         let anyLinkRange = internalLinkRangeAt(index: index) ?? self.linkRangeAt(index: index)
         if let anyLinkRange = anyLinkRange {
             return anyLinkRange.position ..< anyLinkRange.end
