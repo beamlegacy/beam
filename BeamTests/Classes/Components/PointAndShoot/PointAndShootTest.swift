@@ -120,22 +120,6 @@ class TestWebPage: WebPage {
     func addTextToClusteringManager(_ text: String, url: URL) {}
 }
 
-class PasswordStoreMock: PasswordStore {
-    func entries(for host: String, completion: @escaping ([PasswordManagerEntry]) -> Void) {}
-
-    func entriesWithSubdomains(for host: String, completion: @escaping ([PasswordManagerEntry]) -> Void) {}
-
-    func find(_ searchString: String, completion: @escaping ([PasswordManagerEntry]) -> Void) {}
-
-    func fetchAll(completion: @escaping ([PasswordManagerEntry]) -> Void) {}
-
-    func password(host: String, username: String, completion: @escaping (String?) -> Void) {}
-
-    func save(host: String, username: String, password: String) {}
-
-    func delete(host: String, username: String) {}
-}
-
 class MockUserInformationsStore: UserInformationsStore {
 
     func save(userInfo: UserInformations) {}
@@ -233,9 +217,8 @@ class PointAndShootTest: XCTestCase {
     var pns: PointAndShoot!
 
     func initTestBed() {
-        let testPasswordStore = PasswordStoreMock()
         let userInfoStore = MockUserInformationsStore()
-        let testPasswordOverlayController = PasswordOverlayController(passwordStore: testPasswordStore, userInfoStore: userInfoStore)
+        let testPasswordOverlayController = PasswordOverlayController(userInfoStore: userInfoStore)
         let testBrowsingScorer = BrowsingScorerMock()
 
         let testFileStorage = FileStorageMock()

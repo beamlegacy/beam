@@ -32,8 +32,8 @@ class PasswordManagerMenuViewModel: ObservableObject {
         var userInfo: UserInformations?
     }
 
+    let passwordManager: PasswordManager = PasswordManager()
     weak var delegate: PasswordManagerMenuDelegate?
-
     var otherPasswordsViewModel: PasswordListViewModel
 
     @Published var passwordGeneratorViewModel: PasswordGeneratorViewModel?
@@ -41,8 +41,6 @@ class PasswordManagerMenuViewModel: ObservableObject {
     @Published var scrollingListHeight: CGFloat?
 
     let host: URL
-
-    private let passwordStore: PasswordStore
     private let userInfoStore: UserInformationsStore
     private var entriesForHost: [PasswordManagerEntry]
     private var allEntries: [PasswordManagerEntry]
@@ -50,21 +48,21 @@ class PasswordManagerMenuViewModel: ObservableObject {
     private var revealMoreItemsInList: Bool = false
     private var subscribers = Set<AnyCancellable>()
 
-    init(host: URL, passwordStore: PasswordStore, userInfoStore: UserInformationsStore, withPasswordGenerator passwordGenerator: Bool) {
+    init(host: URL, userInfoStore: UserInformationsStore, withPasswordGenerator passwordGenerator: Bool) {
         self.host = host
-        self.passwordStore = passwordStore
         self.userInfoStore = userInfoStore
         self.entriesForHost = []
         self.allEntries = []
         self.display = Contents(entriesForHost: Array(entriesForHost.prefix(1)), allEntries: allEntries, hasScroll: false, hasMoreThanOneEntry: entriesForHost.count > 1, userInfo: userInfoStore.fetchAll().first ?? nil)
-        self.otherPasswordsViewModel = PasswordListViewModel(passwordStore: passwordStore)
+        self.otherPasswordsViewModel = PasswordListViewModel()
         if passwordGenerator {
             let passwordGeneratorViewModel = PasswordGeneratorViewModel()
             passwordGeneratorViewModel.delegate = self
             self.passwordGeneratorViewModel = passwordGeneratorViewModel
         } else {
-            self.passwordStore.entries(for: host.minimizedHost ?? host.urlStringWithoutScheme, exact: false) {
-                self.entriesForHost = $0
+            let entries = passwordManager.entries(for: host.minimizedHost ?? host.urlStringWithoutScheme, exact: false)
+            if !entries.isEmpty {
+                self.entriesForHost = entries
                 self.updateDisplay()
             }
         }
@@ -97,10 +95,11 @@ class PasswordManagerMenuViewModel: ObservableObject {
     }
 
     private func updateAllEntries() {
-        self.passwordStore.fetchAll(completion: { allEntries in
-            self.allEntries = allEntries
+        let entries = passwordManager.fetchAll()
+        if !entries.isEmpty {
+            self.allEntries = entries
             self.updateDisplay()
-        })
+        }
     }
 
     public func getHostStr() -> String {

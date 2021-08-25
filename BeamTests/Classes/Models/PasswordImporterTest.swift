@@ -11,10 +11,10 @@ import XCTest
 
 class PasswordImporterTest: XCTestCase {
 
-    var passwordStore: PasswordStore!
+    var passwordManager: PasswordManager!
 
     override func setUpWithError() throws {
-        passwordStore = MockPasswordStore()
+        passwordManager = PasswordManager()
     }
 
     override func tearDownWithError() throws {
@@ -27,17 +27,17 @@ class PasswordImporterTest: XCTestCase {
             http://test1.com,user1,pass1
             "http://test2.com","user2","pass2"
             """
-        try PasswordImporter.importPasswords(fromCSV: csv, into: passwordStore)
+        try PasswordImporter.importPasswords(fromCSV: csv)
         let expectation1 = expectation(description: "Expect password request returns.")
-        passwordStore.password(host: "test1.com", username: "user1") { password in
-            XCTAssertEqual(password, "pass1")
-            expectation1.fulfill()
-        }
+        let password = passwordManager.password(host: "test1.com", username: "user1")
+        XCTAssertEqual(password, "pass1")
+        expectation1.fulfill()
+
         let expectation2 = expectation(description: "Expect password request returns.")
-        passwordStore.password(host: "test2.com", username: "user2") { password in
-            XCTAssertEqual(password, "pass2")
-            expectation2.fulfill()
-        }
+        let passwordTwo = passwordManager.password(host: "test2.com", username: "user2")
+        XCTAssertEqual(passwordTwo, "pass2")
+        expectation2.fulfill()
+
         waitForExpectations(timeout: 1) { error in
             XCTAssertNil(error, "Retrieving imported password failed with: \(String(describing: error))")
         }
@@ -49,17 +49,17 @@ class PasswordImporterTest: XCTestCase {
             1,pass1,11,http://test1.com,user1,111
             "2","pass2","22","http://test2.com","user2","222"
             """
-        try PasswordImporter.importPasswords(fromCSV: csv, into: passwordStore)
+        try PasswordImporter.importPasswords(fromCSV: csv)
         let expectation1 = expectation(description: "Expect password request returns.")
-        passwordStore.password(host: "test1.com", username: "user1") { password in
-            XCTAssertEqual(password, "pass1")
-            expectation1.fulfill()
-        }
+        let password = passwordManager.password(host: "test1.com", username: "user1")
+        XCTAssertEqual(password, "pass1")
+        expectation1.fulfill()
+
         let expectation2 = expectation(description: "Expect password request returns.")
-        passwordStore.password(host: "test2.com", username: "user2") { password in
-            XCTAssertEqual(password, "pass2")
-            expectation2.fulfill()
-        }
+        let passwordTwo = passwordManager.password(host: "test2.com", username: "user2")
+        XCTAssertEqual(passwordTwo, "pass2")
+        expectation2.fulfill()
+
         waitForExpectations(timeout: 1) { error in
             XCTAssertNil(error, "Retrieving imported password failed with: \(String(describing: error))")
         }
@@ -71,17 +71,17 @@ class PasswordImporterTest: XCTestCase {
             "http://test1.com","""user1""","pass1"
             "http://test2.com","user2","pass""2"
             """#
-        try PasswordImporter.importPasswords(fromCSV: csv, into: passwordStore)
+        try PasswordImporter.importPasswords(fromCSV: csv)
         let expectation1 = expectation(description: "Expect password request returns.")
-        passwordStore.password(host: "test1.com", username: "\"user1\"") { password in
-            XCTAssertEqual(password, "pass1")
-            expectation1.fulfill()
-        }
+        let password = passwordManager.password(host: "test1.com", username: "\"user1\"")
+        XCTAssertEqual(password, "pass1")
+        expectation1.fulfill()
+
         let expectation2 = expectation(description: "Expect password request returns.")
-        passwordStore.password(host: "test2.com", username: "user2") { password in
-            XCTAssertEqual(password, "pass\"2")
-            expectation2.fulfill()
-        }
+        let passwordTwo = passwordManager.password(host: "test2.com", username: "user2")
+        XCTAssertEqual(passwordTwo, "pass\"2")
+        expectation2.fulfill()
+        
         waitForExpectations(timeout: 1) { error in
             XCTAssertNil(error, "Retrieving imported password failed with: \(String(describing: error))")
         }
@@ -94,7 +94,7 @@ class PasswordImporterTest: XCTestCase {
             "2","22","http://test2.com","user2","222"
             """
         XCTAssertThrowsError(
-            try PasswordImporter.importPasswords(fromCSV: csv, into: passwordStore),
+            try PasswordImporter.importPasswords(fromCSV: csv),
             "A headerNotFound error should have been thrown."
         )
     }

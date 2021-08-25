@@ -59,7 +59,8 @@ enum PasswordImporter {
         }
     }
 
-    static func importPasswords(fromCSV text: String, into store: PasswordStore) throws {
+    static func importPasswords(fromCSV text: String) throws {
+        let passwordManager = PasswordManager()
         let seq = CSVUnescapingSequence(input: text)
         var parser = CSVParser(input: seq)
 
@@ -68,28 +69,25 @@ enum PasswordImporter {
 
         for record in parser {
             if let entry = decoder.decode(record) {
-                store.save(host: entry.host.trimmingCharacters(in: CharacterSet(charactersIn: "/.\\")), username: entry.username, password: entry.password)
+                passwordManager.save(host: entry.host.trimmingCharacters(in: CharacterSet(charactersIn: "/.\\")), username: entry.username, password: entry.password)
             }
         }
     }
 
-    static func exportPasswords(from store: PasswordStore, toCSV file: URL) throws {
+    static func exportPasswords(toCSV file: URL) throws {
+        let passwordManager = PasswordManager()
         let serialQueue = DispatchQueue(label: "exportPasswordsQueue")
         var allEntries: [PasswordManagerEntry] = []
         var csvString = "\("URL"),\("Username"),\("Password")\n"
 
         serialQueue.async {
-            store.fetchAll { entries in
-                allEntries = entries
-            }
+            allEntries = passwordManager.fetchAll() ?? []
         }
         serialQueue.async {
             for entry in allEntries {
-                store.password(host: entry.minimizedHost, username: entry.username) { password in
-                    if let passwordStr = password {
-                        let row = encodeToCSV(entry: entry, password: passwordStr)
-                        csvString.append("\(row)\n")
-                    }
+                if let passwordStr = passwordManager.password(host: entry.minimizedHost, username: entry.username) {
+                    let row = encodeToCSV(entry: entry, password: passwordStr)
+                    csvString.append("\(row)\n")
                 }
             }
         }
@@ -108,9 +106,9 @@ enum PasswordImporter {
             .joined(separator: ",")
     }
 
-    static func importPasswords(fromCSV file: URL, into store: PasswordStore) throws {
+    static func importPasswords(fromCSV file: URL) throws {
         let text = try String(contentsOf: file, encoding: .utf8)
-        try importPasswords(fromCSV: text, into: store)
+        try importPasswords(fromCSV: text)
     }
 }
 
