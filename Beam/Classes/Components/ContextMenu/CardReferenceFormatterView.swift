@@ -27,7 +27,8 @@ private struct CardReferenceFormatterContainerView: View {
         let computedSize = size
         return FormatterViewBackground {
             ScrollView {
-                DestinationNoteAutocompleteList(model: listModel, onSelectAutocompleteResult: onSelectResult)
+                DestinationNoteAutocompleteList(model: listModel, variation: .TextEditor,
+                                                onSelectAutocompleteResult: onSelectResult)
             }.frame(maxHeight: computedSize.height)
         }
         .frame(width: computedSize.width)
@@ -52,9 +53,6 @@ class CardReferenceFormatterView: FormatterView {
     }
 
     override var handlesTyping: Bool { true }
-    override var typingAttributes: [BeamText.Attribute]? {
-        searchCardContent ? nil : [BeamTextEdit.formatterPlaceholderAttribute]
-    }
 
     var typingPrefix = 0
     var typingSuffix = 0
@@ -102,10 +100,16 @@ class CardReferenceFormatterView: FormatterView {
         hostView = hostingView
         self.layer?.masksToBounds = false
         updateItemsForSearchText(initialText ?? "")
+        if searchCardContent {
+            enableTypingAttributes()
+        }
     }
 
     private func updateItemsForSearchText(_ text: String) {
         listModel.searchText = text
+        if _typedAttributes == nil && !text.isEmpty {
+            enableTypingAttributes()
+        }
     }
 
     private func selectNextItem() {
@@ -125,6 +129,15 @@ class CardReferenceFormatterView: FormatterView {
             onSelectCreate?(selectedResult.text)
         }
         return true
+    }
+
+    private var _typedAttributes: [BeamText.Attribute]?
+    private func enableTypingAttributes() {
+        _typedAttributes = [BeamTextEdit.formatterAutocompletingAttribute]
+    }
+    override func typingAttributes(for range: Range<Int>) -> (attributes: [BeamText.Attribute], range: Range<Int>)? {
+        guard let _typedAttributes = _typedAttributes else { return nil }
+        return (_typedAttributes, range.lowerBound - typingPrefix..<range.upperBound + typingSuffix)
     }
 
     // MARK: - keyboard actions

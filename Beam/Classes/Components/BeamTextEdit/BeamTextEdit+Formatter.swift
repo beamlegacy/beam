@@ -33,6 +33,14 @@ extension BeamTextEdit {
         return BeamText.Attribute.decorated(AttributeDecoratedValueAttributedString(attributes: placeholderDecoration))
     }
 
+    static var formatterAutocompletingAttribute: BeamText.Attribute {
+        let decoration: [NSAttributedString.Key: Any] = [
+            .foregroundColor: BeamColor.Niobium.nsColor,
+            .boxBackgroundColor: BeamColor.Mercury.nsColor
+        ]
+        return BeamText.Attribute.decorated(AttributeDecoratedValueAttributedString(attributes: decoration))
+    }
+
     // MARK: - UI
 
     internal func initInlineFormatterView(isHyperlinkView: Bool = false) {
@@ -113,8 +121,8 @@ extension BeamTextEdit {
                 let fullRange = targetRange.lowerBound..<node.cursorPosition
                 text = text.substring(range: targetRange.lowerBound..<node.cursorPosition)
                 if inlineFormatter?.formatterHandlesInputText(text) == true {
-                    if let typingAttributes = inlineFormatter?.typingAttributes {
-                        node.text.setAttributes(typingAttributes, to: fullRange)
+                    if let (typingAttributes, forRange) = inlineFormatter?.typingAttributes(for: fullRange) {
+                        node.text.setAttributes(typingAttributes, to: forRange)
                     }
                 } else {
                     showOrHideInlineFormatter(isPresent: false, isDragged: isDragged)
@@ -268,7 +276,8 @@ extension BeamTextEdit {
     }
 
     private func clearFormatterTypingAttributes(_ view: FormatterView?) {
-        guard let targetNode = formatterTargetNode, let attributes = view?.typingAttributes else { return }
+        guard let targetNode = formatterTargetNode, let targetRange = formatterTargetRange,
+              let (attributes, _) = view?.typingAttributes(for: targetRange) else { return }
         targetNode.text.removeAttributes(attributes, from: targetNode.text.wholeRange)
     }
 
