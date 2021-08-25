@@ -88,7 +88,7 @@ class OmniBarUITests: QuickSpec {
                 self.helper.makeAppScreenShots()
             }
 
-            fit("can toggle web and note") {
+            it("can toggle web and note") {
                 self.helper.focusSearchField()
                 self.helper.searchField.typeText("hello")
                 self.helper.searchField.typeText("\r")
