@@ -13,11 +13,10 @@ struct TouchDownModifier: ViewModifier {
         content
             .contentShape(Rectangle())
             // Combining LongPress & Drag gestures
-            // - LongPress to have a minimumDuration before triggering touch down.
-            //   (a trackpad tap is shorter than 0.01s, as opposed to a real click)
+            // - LongPress to control the minimumDuration before triggering touch down.
             // - Drag to detect touch up.
             .simultaneousGesture(
-                LongPressGesture(minimumDuration: 0.01, maximumDistance: 0)
+                LongPressGesture(minimumDuration: 0, maximumDistance: 0)
                     .onEnded { _ in
                         onTouchDown?(true)
                     }

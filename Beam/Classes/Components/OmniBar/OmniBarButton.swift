@@ -30,6 +30,7 @@ struct OmniBarButton: View {
         }
         .accessibility(identifier: accessibilityId)
         .buttonStyle(RoundRectButtonStyle(size: size))
+        .animation(nil)
         .frame(width: 26, height: 32)
         .contentShape(Rectangle())
         .onTapGesture {
