@@ -21,10 +21,10 @@ public struct NoteSource: Codable {
         case sessionId
     }
 
-    let urlId: UInt64
-    let addedAt: Date
-    let type: SourceType
-    var sessionId: UUID?
+    public let urlId: UInt64
+    public let addedAt: Date
+    public let type: SourceType
+    public var sessionId: UUID?
     var longTermScore: LongTermUrlScore?
 
     var domain: String {
@@ -35,7 +35,7 @@ public struct NoteSource: Codable {
         return components.host ?? "<???>"
     }
     var addedAtDay: Date { Calendar.current.startOfDay(for: addedAt) }
-    var score: Float { longTermScore?.score() ?? 0 }
+    public var score: Float { longTermScore?.score() ?? 0 }
 }
 
 public class NoteSources: Codable {
@@ -48,11 +48,14 @@ public class NoteSources: Codable {
     init() {
         sources = [UInt64: NoteSource]()
     }
-    var count: Int { sources.count }
+    public var count: Int { sources.count }
     public var urlIds: [UInt64] { Array(sources.keys) }
 
     func get(urlId: UInt64) -> NoteSource? {
         return sources[urlId]
+    }
+    public func getAll() -> [NoteSource] {
+        return Array(sources.values)
     }
 
     public func add(urlId: UInt64, noteId: UUID, type: NoteSource.SourceType, date: Date = BeamDate.now, sessionId: UUID, activeSources: ActiveSources? = nil) {
