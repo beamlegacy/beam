@@ -1500,6 +1500,8 @@ class DocumentManagerNetworkTests: QuickSpec {
                         }
 
                         it("saves the document on the API") {
+                            let networkCalls = APIRequest.callsCount
+
                             let promise: Promises.Promise<Bool> = sut.saveOnApi(docStruct)
 
                             waitUntil(timeout: .seconds(10)) { done in
@@ -1508,6 +1510,14 @@ class DocumentManagerNetworkTests: QuickSpec {
                                     done()
                                 }.catch { fail("Should not be called: \($0)"); done() }
                             }
+
+                            let expectedNetworkCalls = ["sign_in",
+                                                        "delete_all_databases",
+                                                        "delete_all_documents",
+                                                        "update_document"]
+
+                            expect(APIRequest.callsCount - networkCalls) == 1
+                            expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
 
                             let remoteStruct = helper.fetchOnAPI(docStruct)
                             expect(remoteStruct?.id) == docStruct.uuidString
