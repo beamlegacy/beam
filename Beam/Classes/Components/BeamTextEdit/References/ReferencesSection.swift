@@ -64,7 +64,7 @@ class ReferencesSection: LinksSection {
             linkContentLayer,
             activated: { [weak self] in
                 guard let self = self,
-                      let rootNote = self.editor.note.note else { return }
+                      let rootNote = self.editor?.note.note else { return }
 
                 if let linkLayer = self.linkLayer, linkLayer.layer.isHidden { return }
 

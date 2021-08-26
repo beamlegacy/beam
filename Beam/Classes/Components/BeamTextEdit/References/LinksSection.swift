@@ -52,7 +52,7 @@ class LinksSection: Widget {
     var links: [BeamNoteReference] { note.links }
 
     func setupSectionMode() {
-        AppDelegate.main.data.$lastChangedElement
+        AppDelegate.main.data.$lastIndexedElement
             .dropFirst()
             .filter({ element in
                 guard let element = element,
@@ -64,9 +64,11 @@ class LinksSection: Widget {
                 let referenced = element.text.hasReferenceToNote(titled: self.note.title)
                 return alreadyPresent || linked || referenced
             })
-            .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
-            .sink { _ in
-                self.updateLinkedReferences(links: self.links)
+//            .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
+            .sink { [weak self] _ in
+                guard let self = self else { return }
+                let updatedLinks = self.links
+                self.updateLinkedReferences(links: updatedLinks)
             }.store(in: &scope)
 
         self.updateLinkedReferences(links: self.links)

@@ -185,8 +185,8 @@ extension TextRoot {
                 newNode.focus(position: newNode.indexOnLastLine(atOffset: offset))
             } else {
                 cursorPosition = 0
-                if !editor.journalMode {
-                    editor.scroll(.zero)
+                if !(editor?.journalMode ?? true) {
+                    editor?.scroll(.zero)
                 }
             }
         } else {
@@ -318,7 +318,7 @@ extension TextRoot {
     public func moveUpAndModifySelection() {
         guard root?.state.nodeSelection == nil else {
             extendNodeSelectionUp()
-            editor.hideInlineFormatter()
+            editor?.hideInlineFormatter()
             return
         }
 
@@ -334,7 +334,7 @@ extension TextRoot {
     public func moveDownAndModifySelection() {
         guard root?.state.nodeSelection == nil else {
             extendNodeSelectionDown()
-            editor.hideInlineFormatter()
+            editor?.hideInlineFormatter()
             return
         }
 
@@ -368,7 +368,7 @@ extension TextRoot {
     func extendNodeSelectionUp() {
         if let selection = root?.state.nodeSelection {
             selection.extendUp()
-            editor.setHotSpotToNode(selection.end)
+            editor?.setHotSpotToNode(selection.end)
         } else {
             _ = startNodeSelection()
         }
@@ -377,7 +377,7 @@ extension TextRoot {
     func extendNodeSelectionDown() {
         if let selection = root?.state.nodeSelection {
             selection.extendDown()
-            editor.setHotSpotToNode(selection.end)
+            editor?.setHotSpotToNode(selection.end)
         } else {
             _ = startNodeSelection()
         }

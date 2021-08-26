@@ -37,7 +37,7 @@ class ProxyTextNode: TextNode, ProxyNode {
 
     // MARK: - Setup UI
     override func isLinkToNote(_ text: BeamText) -> Bool {
-        guard let note = editor.note as? BeamNote else { return false }
+        guard let note = editor?.note as? BeamNote else { return false }
         return text.internalLinks.contains(note.id)
     }
 

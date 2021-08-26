@@ -257,6 +257,7 @@ public class TextNode: ElementNode {
     }
 
     override func updateLayout() {
+        guard let editor = self.editor else { return }
         super.updateLayout()
         // Disable action layer update to avoid motion glitch
         // when the global layer width is changed
@@ -373,6 +374,7 @@ public class TextNode: ElementNode {
     }
 
     public override func updateCursor() {
+        guard let editor = self.editor else { return }
         let on = !readOnly && editor.hasFocus && isFocused && editor.blinkPhase
             && (root?.state.nodeSelection?.nodes.isEmpty ?? true)
             && !isCursorInsideUneditableRange(caretIndex: caretIndex)
@@ -434,7 +436,7 @@ public class TextNode: ElementNode {
         }
 
         let actionLayer = ShortcutLayer(name: Self.cmdEnterLayer, text: "Search", icons: ["editor-cmdreturn"]) { [unowned self] _ in
-            self.editor.startQuery(self, true)
+            self.editor?.startQuery(self, true)
         }
         actionLayer.layer.isHidden = true
         addLayer(actionLayer, origin: CGPoint(x: availableWidth + childInset + actionLayerPadding, y: firstLineBaseline), global: false)
@@ -501,6 +503,7 @@ public class TextNode: ElementNode {
     }
 
     override func onFocus() {
+        guard let editor = self.editor else { return }
         super.onFocus()
         if editor.hasFocus {
             updateActionLayerVisibility(hidden: text.isEmpty)
@@ -518,6 +521,7 @@ public class TextNode: ElementNode {
     }
 
     private func isHoveringText() -> Bool {
+        guard let editor = self.editor else { return false }
         let isMouseInsideFormatter = editor.inlineFormatter?.isMouseInsideView == true
         return hover && !isMouseInsideFormatter
     }
@@ -525,7 +529,7 @@ public class TextNode: ElementNode {
     // MARK: - Mouse Events
     // swiftlint:disable:next function_body_length cyclomatic_complexity
     override func mouseDown(mouseInfo: MouseInfo) -> Bool {
-
+        guard let editor = self.editor else { return false }
         guard !mouseInfo.rightMouse else {
             return handleRightMouseDown(mouseInfo: mouseInfo)
         }
@@ -551,7 +555,7 @@ public class TextNode: ElementNode {
 
                 debounceClickTimer = Timer.scheduledTimer(withTimeInterval: debounceClickInterval, repeats: false, block: { [weak self] (_) in
                     guard let self = self else { return }
-                    self.editor.hideInlineFormatter()
+                    self.editor?.hideInlineFormatter()
                 })
                 return true
             } else if mouseInfo.event.clickCount == 1 && mouseInfo.event.modifierFlags.contains(.shift) {
@@ -586,6 +590,7 @@ public class TextNode: ElementNode {
     }
 
     private func handleRightMouseDown(mouseInfo: MouseInfo) -> Bool {
+        guard let editor = self.editor else { return false }
 
         if contentsFrame.contains(mouseInfo.position) {
             let clickPos = positionAt(point: mouseInfo.position)
@@ -612,6 +617,7 @@ public class TextNode: ElementNode {
     }
 
     override func mouseUp(mouseInfo: MouseInfo) -> Bool {
+        guard let editor = self.editor else { return false }
         editor.detectTextFormatterType()
 
         if mouseIsDragged {
@@ -623,6 +629,7 @@ public class TextNode: ElementNode {
     }
 
     private func handleMouseHoverState(mouseInfo: MouseInfo) {
+        guard let editor = self.editor else { return }
         let isMouseInContentFrame = contentsFrame.contains(mouseInfo.position)
         let isMouseInsideFormatter = editor.inlineFormatter?.isMouseInsideView == true
         let mouseHasChangedTextPosition = lastHoverMouseInfo?.position != mouseInfo.position
@@ -667,6 +674,7 @@ public class TextNode: ElementNode {
     }
 
     override func mouseDragged(mouseInfo: MouseInfo) -> Bool {
+        guard let editor = self.editor else { return false }
         let p = positionAt(point: mouseInfo.position)
         root?.cursorPosition = p
 
@@ -1107,7 +1115,7 @@ public class TextNode: ElementNode {
     }
 
     private func buildAttributedString() -> NSAttributedString {
-        if elementText.isEmpty && !isFocused && !editor.hasFocus {
+        if elementText.isEmpty && !isFocused && !(editor?.hasFocus ?? false) {
             return buildAttributedString(for: placeholder).addAttributes([NSAttributedString.Key.foregroundColor: BeamColor.Generic.placeholder.cgColor, NSAttributedString.Key.font: BeamFont.regular(size: 15).nsFont])
         }
         return buildAttributedString(for: elementText)

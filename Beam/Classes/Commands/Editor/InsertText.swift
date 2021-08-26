@@ -40,7 +40,7 @@ class InsertText: TextEditorCommand {
               let root = context.root,
               context.nodeFor(elementInstance.element) != nil
         else { return true }
-        root.editor.detectTextFormatterType()
+        root.editor?.detectTextFormatterType()
         return true
     }
 
@@ -55,7 +55,7 @@ class InsertText: TextEditorCommand {
               let node = context.nodeFor(elementInstance.element) else { return true }
 
         root.focus(widget: node, position: cursorPosition)
-        root.editor.detectTextFormatterType()
+        root.editor?.detectTextFormatterType()
         return true
     }
 
