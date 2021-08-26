@@ -322,8 +322,8 @@ public class ElementNode: Widget {
     }
 
     func openExternalLink(link: URL, element: BeamElement) {
-        editor.hideInlineFormatter()
-        editor.openURL(link, element)
+        editor?.hideInlineFormatter()
+        editor?.openURL(link, element)
     }
 
     func nextVisibleNode<NodeType: Widget>(_ type: NodeType.Type) -> NodeType? {
@@ -512,6 +512,7 @@ public class ElementNode: Widget {
     }
 
     public func layoutCursor(_ cursorRect: NSRect) {
+        guard let editor = self.editor else { return }
         let on = editor.hasFocus && isFocused && editor.blinkPhase && (root?.state.nodeSelection?.nodes.isEmpty ?? true)
 
         let layer = self.cursorLayer
@@ -520,7 +521,9 @@ public class ElementNode: Widget {
         layer.layer.isHidden = !on
         layer.shapeLayer.path = CGPath(rect: cursorRect, transform: nil)
     }
+
     public func updateElementCursor() {
+        guard let editor = self.editor else { return }
         let on = editor.hasFocus && isFocused && editor.blinkPhase && (root?.state.nodeSelection?.nodes.isEmpty ?? true)
         let cursorRect = NSRect(x: caretIndex == 0 ? (contentsLead - 5) : (availableWidth - contentsLead + 3), y: 0, width: 2, height: frame.height )//rectAt(caretIndex: caretIndex)
         let layer = self.cursorLayer

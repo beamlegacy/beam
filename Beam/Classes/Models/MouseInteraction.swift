@@ -49,7 +49,8 @@ struct MouseInfo {
     }
 
     static func convert(globalPosition: NSPoint, _ node: Widget, _ layer: Layer) -> NSPoint {
-        let globalBounds = layer.layer.convert(layer.layer.bounds, to: node.editor.layer)
+        guard let editor = node.editor else { return .zero }
+        let globalBounds = layer.layer.convert(layer.layer.bounds, to: editor.layer)
         return CGPoint(x: globalPosition.x - globalBounds.minX, y: globalPosition.y - globalBounds.minY)
     }
 }

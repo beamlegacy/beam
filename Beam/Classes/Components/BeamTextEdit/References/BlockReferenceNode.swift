@@ -62,7 +62,7 @@ class BlockReferenceNode: TextNode {
         addLayer(lockButton)
 
         _ = createCustomActionLayer(named: "visitSource", icons: ["field-card"], text: referencingNote.title, at: CGPoint(x: availableWidth + childInset + actionLayerPadding, y: firstLineBaseline)) {
-            self.editor.openCard(referencingNote.id, self.displayedElement.id)
+            self.editor?.openCard(referencingNote.id, self.displayedElement.id)
         }
 
         setAccessibilityLabel("BlockReferenceNode")
@@ -132,7 +132,7 @@ class BlockReferenceNode: TextNode {
             }),
             ContextMenuItem(title: "View Origin", action: {
                 guard let noteid = self.displayedElement.note?.id else { return }
-                self.editor.openCard(noteid, self.displayedElement.id)
+                self.editor?.openCard(noteid, self.displayedElement.id)
             }),
 
             ContextMenuItem(title: "Remove", action: {

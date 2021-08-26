@@ -574,7 +574,7 @@ class TextNodeTests: XCTestCase {
     func testInsertTextAroundInternalLink() {
         defer { reset() }
         let node = createNodeWithInternalLink()
-        let root = node.editor.rootNode!
+        guard let root = node.editor?.rootNode else { XCTFail("RootNode isn't attached to an editor."); return }
         XCTAssertEqual(node.text.text, "before link My Internal Note after link")
         root.cursorPosition = 28
         root.selectedTextRange = 28..<28
@@ -591,7 +591,7 @@ class TextNodeTests: XCTestCase {
     func testInsertTextInsideInternalLink() {
         defer { reset() }
         let node = createNodeWithInternalLink()
-        let root = node.editor.rootNode!
+        guard let root = node.editor?.rootNode else { XCTFail("RootNode isn't attached to an editor."); return }
         XCTAssertEqual(node.text.text, "before link My Internal Note after link")
         root.cursorPosition = 20
         root.selectedTextRange = 20..<20
@@ -608,7 +608,7 @@ class TextNodeTests: XCTestCase {
         let frame = NSRect(x: 0, y: 0, width: 400, height: 500)
         let note = createMiniArborescence(title: "title")
         editor = BeamTextEdit(root: note, journalMode: true)
-        let root = editor.rootNode!
+        guard let root = editor?.rootNode else { XCTFail("RootNode isn't attached to an editor."); return }
         validateRootWithNote(root: root, note: note)
 
         root.focusedWidget = root.children.first?.children.first
@@ -632,7 +632,7 @@ class TextNodeTests: XCTestCase {
     func testDeleteBackwardAfterLink() {
         defer { reset() }
         let node = createNodeWithInternalLink()
-        let root = node.editor.rootNode!
+        guard let root = node.editor?.rootNode else { XCTFail("RootNode isn't attached to an editor."); return }
         root.cursorPosition = 29
         XCTAssertEqual(node.text.text, "before link My Internal Note after link")
         root.deleteBackward()
@@ -676,7 +676,7 @@ class TextNodeTests: XCTestCase {
     func testDeleteForwardBeforeLink() {
         defer { reset() }
         let node = createNodeWithInternalLink()
-        let root = node.editor.rootNode!
+        guard let root = node.editor?.rootNode else { XCTFail("RootNode isn't attached to an editor."); return }
         XCTAssertEqual(node.text.text, "before link My Internal Note after link")
         root.cursorPosition = 11
         root.deleteForward()
