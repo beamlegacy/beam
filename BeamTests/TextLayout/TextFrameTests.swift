@@ -43,9 +43,7 @@ class TextFrameTests: XCTestCase {
     // swiftlint:disable:next function_body_length
     func testLinkLayoutForOneLine() {
         let fontSize = CGFloat(12)
-        let cursorPosition = 10
         let elementKind = ElementKind.bullet
-        let mouseInteraction = MouseInteraction(type: .unknown, range: NSRange())
         let textWidth = CGFloat(400)
 
         var text = BeamText(text: "1")

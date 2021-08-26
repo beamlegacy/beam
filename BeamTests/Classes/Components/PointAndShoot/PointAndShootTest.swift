@@ -92,7 +92,7 @@ class TestWebPage: WebPage {
     }
 
     func logInNote(url: URL, title: String?, reason: NoteElementAddReason) {
-        events.append("logInNote \(url) \(title) \(reason)")
+        events.append("logInNote \(url) \(title ?? "") \(reason)")
     }
 
     func addToNote(allowSearchResult: Bool) -> BeamCore.BeamElement? {

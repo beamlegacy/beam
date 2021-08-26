@@ -10,7 +10,6 @@ class BeamWebkitUIDelegateController: WebPageHolder, WKUIDelegate {
             let menubar = windowFeatures.menuBarVisibility?.boolValue ?? defaultValue
             let statusBar = windowFeatures.statusBarVisibility?.boolValue ?? defaultValue
             let toolBars = windowFeatures.toolbarsVisibility?.boolValue ?? defaultValue
-            let resizing = windowFeatures.allowsResizing?.boolValue ?? defaultValue
             let isNewWindow = !toolBars
             if isNewWindow {
                 let numberOrNil: (NSNumber?) -> String = { $0?.stringValue ?? "nil" }

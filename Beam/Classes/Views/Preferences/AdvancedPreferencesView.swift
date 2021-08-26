@@ -10,7 +10,7 @@ var AdvancedPreferencesViewController: PreferencePane = PreferencesPaneBuilder.b
         .environment(\.managedObjectContext, CoreDataManager.shared.mainContext)
 }
 
-//swiftlint:disable:next function_body_length
+//swiftlint:disable:next function_body_length type_body_length
 struct AdvancedPreferencesView: View {
     @State private var apiHostname: String = Configuration.apiHostname
     @State private var publicHostname: String = Configuration.publicHostname
