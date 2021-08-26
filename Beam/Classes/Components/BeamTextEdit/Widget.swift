@@ -85,7 +85,6 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
     internal var children: [Widget] = [] {
         didSet {
-            guard oldValue != children else { return }
             updateChildren(oldValue)
             invalidateLayout()
         }
