@@ -73,8 +73,8 @@ struct BeamTextField: NSViewRepresentable {
         textField.onFocusChanged = { [weak coordinator] isFocused in
             coordinator?.focusChangedHandler(isFocused: isFocused)
         }
-        textField.onSelectionChanged = { range in
-            onSelectionChanged(range)
+        textField.onSelectionChanged = { [weak coordinator] range in
+            coordinator?.selectionChangedHandler(range)
         }
         return textField
     }
@@ -174,6 +174,10 @@ struct BeamTextField: NSViewRepresentable {
             } else {
                 self.parent.onStopEditing()
             }
+        }
+
+        fileprivate func selectionChangedHandler(_ range: NSRange) {
+            self.parent.onSelectionChanged(range)
         }
 
         fileprivate func performKeyEquivalentHandler(event: NSEvent) -> Bool {
