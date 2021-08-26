@@ -374,9 +374,8 @@ public class Cluster {
     ///   - text: The text from which the dominant language is detected
     /// - Returns: The dominant language.
     func getTextLanguage(text: String) -> NLLanguage? {
-        let recognizer = NLLanguageRecognizer()
-        recognizer.processString(text)
-        return recognizer.dominantLanguage
+        let languageToReturn = NLLanguageRecognizer.dominantLanguage(for: text)
+        return languageToReturn // recognizer.dominantLanguage
     }
 
     /// Compute the cosine similarity of the textual embedding of the current page against
