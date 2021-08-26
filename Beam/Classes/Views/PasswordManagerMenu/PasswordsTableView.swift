@@ -12,8 +12,9 @@ struct PasswordsTableView: View {
     var onSelectionChanged: (IndexSet) -> Void // identifiable --> use id somewhere
 
     static let passwordColumns = [
-        TableViewColumn(key: "hostinfo", title: "Sites", type: TableViewColumn.ColumnType.IconAndText, sortable: true, resizable: false, width: 195, fontSize: 11),
-        TableViewColumn(key: "username", title: "Username", width: 150, fontSize: 11),
+        TableViewColumn(key: "hostinfo", title: "Sites", type: TableViewColumn.ColumnType.IconAndText,
+                        sortableCaseInsensitive: true, resizable: false, width: 195, fontSize: 11),
+        TableViewColumn(key: "username", title: "Username", sortableCaseInsensitive: true, width: 150, fontSize: 11),
         TableViewColumn(key: "password", title: "Passwords", sortable: false, fontSize: 11)
     ]
 
