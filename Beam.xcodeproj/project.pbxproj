@@ -475,6 +475,7 @@
 		9678217526726005001413EF /* LockButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9678217426726005001413EF /* LockButton.swift */; };
 		967B2685255465C5003F40E3 /* Html2MdTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 967B2684255465C5003F40E3 /* Html2MdTests.swift */; };
 		96851B3926D55772008032E4 /* String+NLTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96851B3826D55772008032E4 /* String+NLTests.swift */; };
+		9686B47B26D6B9A400749455 /* NoteIndexingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9686B47A26D6B9A400749455 /* NoteIndexingTests.swift */; };
 		968A2DCA263973540021107F /* TextFrameTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 968A2DC9263973540021107F /* TextFrameTests.swift */; };
 		969084CC25365AAE009D3C96 /* ParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 969084CB25365AAE009D3C96 /* ParserTests.swift */; };
 		9691C2592644948200F70DA1 /* BeamFileDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9691C2582644948200F70DA1 /* BeamFileDB.swift */; };
@@ -1406,6 +1407,7 @@
 		9678217426726005001413EF /* LockButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockButton.swift; sourceTree = "<group>"; };
 		967B2684255465C5003F40E3 /* Html2MdTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Html2MdTests.swift; sourceTree = "<group>"; };
 		96851B3826D55772008032E4 /* String+NLTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+NLTests.swift"; sourceTree = "<group>"; };
+		9686B47A26D6B9A400749455 /* NoteIndexingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteIndexingTests.swift; sourceTree = "<group>"; };
 		968A2DC9263973540021107F /* TextFrameTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextFrameTests.swift; sourceTree = "<group>"; };
 		969084CB25365AAE009D3C96 /* ParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParserTests.swift; sourceTree = "<group>"; };
 		9691C2582644948200F70DA1 /* BeamFileDB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamFileDB.swift; sourceTree = "<group>"; };
@@ -3374,6 +3376,7 @@
 				8AA9EEB62678ACF6009D6B31 /* WebAutocompleteContextTest.swift */,
 				BAA6711C12F68C78C7D44DA5 /* WebNoteControllerTest.swift */,
 				9652A93226A6B13700F0590C /* FakeNoteGeneratorTests.swift */,
+				9686B47A26D6B9A400749455 /* NoteIndexingTests.swift */,
 			);
 			path = BeamTests;
 			sourceTree = "<group>";
@@ -4987,6 +4990,7 @@
 				527524EB26A1A9E100C2F385 /* BeamObjectTestsHelper.swift in Sources */,
 				8AC2EFDB266F8A0800049005 /* PointAndShootPointingTest.swift in Sources */,
 				8AA9EEB72678ACF6009D6B31 /* WebAutocompleteContextTest.swift in Sources */,
+				9686B47B26D6B9A400749455 /* NoteIndexingTests.swift in Sources */,
 				032562CF26051D50006513E4 /* RBZipTests.m in Sources */,
 				529E1EE625D3EDA300F8B500 /* BeamTestsHelper.swift in Sources */,
 				DA69305A268DB375008EF756 /* BrowsingTreeSenderTest.swift in Sources */,

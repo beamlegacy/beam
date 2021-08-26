@@ -55,7 +55,7 @@ public class EmbedNode: ElementNode {
 
         let webviewConfiguration = EmbedNode.webViewConfiguration
         var webView: BeamWebView?
-        if let note = editor.note as? BeamNote {
+        if let note = editor?.note as? BeamNote {
             webView = mediaPlayerManager?.playingWebViewForNote(note: note, elementId: elementId, url: url)
             webPage = webView?.page as? EmbedNodeWebPage
         }
@@ -76,7 +76,7 @@ public class EmbedNode: ElementNode {
         webView?.allowsMagnification = true
         webPage?.delegate = self
         if let webView = webView {
-            editor.addSubview(webView)
+            editor?.addSubview(webView)
         }
 
         self.webView = webView
@@ -100,7 +100,7 @@ public class EmbedNode: ElementNode {
     }
 
     private func clearWebViewAndStopPlaying() {
-        guard let note = editor.note as? BeamNote,
+        guard let note = editor?.note as? BeamNote,
               let url = self.embedUrl else { return }
         mediaPlayerManager?.stopNotePlaying(note: note, elementId: elementId, url: url)
         webView?.page = nil
@@ -177,7 +177,7 @@ extension EmbedNode: EmbedNodeWebPageDelegate {
     }
 
     func embedNodeDidUpdateMediaController(_ controller: MediaPlayerController?) {
-        guard let note = root?.editor.note as? BeamNote,
+        guard let note = root?.editor?.note as? BeamNote,
               let webView = webView,
               let mediaManager = mediaPlayerManager,
               let url = self.embedUrl else { return }

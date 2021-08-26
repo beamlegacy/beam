@@ -23,8 +23,8 @@ public extension BeamElement {
     }
 }
 extension TextRoot {
-    var cmdContext: Widget {
-        editor.focusedWidget ?? editor.rootNode
+    var cmdContext: Widget? {
+        editor?.focusedWidget ?? editor?.rootNode
     }
 
     func increaseNodeIndentation(_ node: ElementNode) -> Bool {
@@ -137,8 +137,8 @@ extension TextRoot {
             cmdManager.insertElement(newElement, inNode: firstParent, afterElement: nil)
             cmdManager.focus(newElement, in: firstParent)
             cmdManager.endGroup()
-            if !editor.journalMode {
-                editor.scroll(.zero)
+            if !(editor?.journalMode ?? false) {
+                editor?.scroll(.zero)
             }
             return newElement
         }
@@ -160,7 +160,7 @@ extension TextRoot {
     // swiftlint:disable:next function_body_length
     public func deleteForward() {
         guard state.nodeSelection == nil else {
-            editor.hideInlineFormatter()
+            editor?.hideInlineFormatter()
             eraseNodeSelection(createEmptyNodeInPlace: false)
             return
         }
@@ -243,7 +243,7 @@ extension TextRoot {
     //swiftlint:disable:next cyclomatic_complexity function_body_length
     public func deleteBackward() {
         guard root?.state.nodeSelection == nil else {
-            editor.hideInlineFormatter()
+            editor?.hideInlineFormatter()
             eraseNodeSelection(createEmptyNodeInPlace: false)
             return
         }

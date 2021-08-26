@@ -123,7 +123,7 @@ extension BeamNote: BeamNoteDocument {
         AppDelegate.main.data.renamedNote = (id, previousTitle, title)
     }
 
-    func indexContents() {
+    public func indexContents() {
         try? GRDBDatabase.shared.append(note: self)
     }
 
@@ -450,7 +450,7 @@ extension BeamNote: BeamNoteDocument {
         AppDelegate.main.data.updateNoteCount()
     }
 
-    var isTodaysNote: Bool { type.isJournal && type.journalDateString == BeamNoteType.iso8601ForDate(BeamDate.now) }
+    public var isTodaysNote: Bool { type.isJournal && type.journalDateString == BeamNoteType.iso8601ForDate(BeamDate.now) }
 
     public static func indexAllNotes() {
         let documentManager = DocumentManager()
