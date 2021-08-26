@@ -81,7 +81,7 @@ enum PasswordImporter {
         var csvString = "\("URL"),\("Username"),\("Password")\n"
 
         serialQueue.async {
-            allEntries = passwordManager.fetchAll() ?? []
+            allEntries = passwordManager.fetchAll()
         }
         serialQueue.async {
             for entry in allEntries {

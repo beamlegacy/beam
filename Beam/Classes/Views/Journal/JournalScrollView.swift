@@ -164,8 +164,6 @@ class ScrollViewContentWatcher: NSObject {
         guard let clipView = notification.object as? NSClipView,
               let scrollView = clipView.superview as? NSScrollView,
               let documentView = scrollView.documentView as? JournalStackView else { return }
-        let scrollingDown = clipView.bounds.origin.y > bounds.origin.y
-        let diff = clipView.bounds.origin.y - bounds.origin.y
         var maxContentOffSetY = documentView.bounds.height - clipView.bounds.height - documentView.topOffset
         maxContentOffSetY = documentView.bottomInsetForToday > 0 ? maxContentOffSetY - documentView.bottomInsetForToday : maxContentOffSetY
         bounds = clipView.bounds

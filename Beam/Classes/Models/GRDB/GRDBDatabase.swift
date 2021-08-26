@@ -298,7 +298,7 @@ extension GRDBDatabase {
     }
 
     func clearElements() throws {
-        try dbWriter.write { db in
+        _ = try dbWriter.write { db in
             try BeamElementRecord.deleteAll(db)
         }
     }
@@ -310,7 +310,7 @@ extension GRDBDatabase {
     }
 
     func countBidirectionalLinks() throws -> Int {
-        try dbWriter.write { db in
+        return try dbWriter.write { db in
             try BidirectionalLink.fetchCount(db)
         }
     }
