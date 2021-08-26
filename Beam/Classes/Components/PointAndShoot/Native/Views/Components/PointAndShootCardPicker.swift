@@ -31,13 +31,8 @@ struct PointAndShootCardPicker: View {
     @State private var cardSearchField = ""
     @State private var cardSearchFieldSelection: Range<Int>?
     @State private var addNoteField = ""
-    @State private var contentOpacity: Double = 1
 
     @State private var shootCompleted: Bool = false
-    @State private var prefixOpacity: Double = 0
-    @State private var iconCollectOpacity: Double = 0
-    @State private var iconEnterOpacity: Double = 1
-    @State private var scale: CGFloat = 1
 
     private var isTodaysNote: String? {
         browserTabsManager.currentTab?.noteController.note.isTodaysNote ?? false ? data.todaysName : nil
@@ -71,60 +66,65 @@ struct PointAndShootCardPicker: View {
             // MARK: - Top Half
             HStack(spacing: BeamSpacing._40) {
                 // MARK: - Prefix
-                PrefixLabel(completed: shootCompleted, numberOfElements: completedGroup?.numberOfElements)
+                PrefixLabel(completed: shootCompleted && completedGroup != nil, numberOfElements: completedGroup?.numberOfElements)
 
                 // MARK: - TextField
-                if !shootCompleted {
-                    BeamTextField(
-                        text: $cardSearchField,
-                        isEditing: $isEditingCardName,
-                        placeholder: placeholderText,
-                        font: BeamFont.regular(size: 13).nsFont,
-                        textColor: textColor,
-                        placeholderColor: BeamColor.Generic.placeholder.nsColor,
-                        selectedRange: cardSearchFieldSelection,
-                        selectedRangeColor: selectedRangeColor
-                    ) { (text) in
-                        onTextDidChange(text)
-                    } onCommit: { _ in
-                        enableResizeAnimation()
-                        if currentCardName != nil || cardSearchField.isEmpty {
-                            onFinishEditing(canceled: false)
-                        } else {
-                            selectSearchResult()
+                ZStack {
+                    if !shootCompleted {
+                        BeamTextField(
+                            text: $cardSearchField,
+                            isEditing: $isEditingCardName,
+                            placeholder: placeholderText,
+                            font: BeamFont.regular(size: 13).nsFont,
+                            textColor: textColor,
+                            placeholderColor: BeamColor.Generic.placeholder.nsColor,
+                            selectedRange: cardSearchFieldSelection,
+                            selectedRangeColor: selectedRangeColor
+                        ) { (text) in
+                            onTextDidChange(text)
+                        } onCommit: { _ in
+                            enableResizeAnimation()
+                            if currentCardName != nil || cardSearchField.isEmpty {
+                                onFinishEditing(canceled: false)
+                            } else {
+                                selectSearchResult()
+                            }
+                        } onEscape: {
+                            onFinishEditing(canceled: true)
+                        } onTab: {
+                            isEditingNote = true
+                            // select note when pressing tab
+                            if currentCardName == nil || !cardSearchField.isEmpty {
+                                selectSearchResult()
+                            }
+                        } onCursorMovement: { move -> Bool in
+                            autocompleteModel.handleCursorMovement(move)
+                        } onStopEditing: {
+                            cardSearchFieldSelection = nil
+                            enableResizeAnimation()
+                        } onSelectionChanged: { range in
+                            guard range.lowerBound != cardSearchFieldSelection?.lowerBound ||
+                                    range.upperBound != cardSearchFieldSelection?.upperBound else { return }
+                            DispatchQueue.main.async {
+                                cardSearchFieldSelection = Range(range)
+                            }
                         }
-                    } onEscape: {
-                        onFinishEditing(canceled: true)
-                    } onTab: {
-                        isEditingNote = true
-                        // select note when pressing tab
-                        if currentCardName == nil || !cardSearchField.isEmpty {
-                            selectSearchResult()
-                        }
-                    } onCursorMovement: { move -> Bool in
-                        autocompleteModel.handleCursorMovement(move)
-                    } onStopEditing: {
-                        cardSearchFieldSelection = nil
-                        enableResizeAnimation()
-                    } onSelectionChanged: { range in
-                        cardSearchFieldSelection = Range(range)
-                    }
-                    .frame(minHeight: 16)
-                    .padding(BeamSpacing._40)
-                    .background(
-                        Placeholder(
-                            text: cardSearchField,
-                            currentCardName: currentCardName,
-                            tokenize: cursorIsOnCardName,
-                            selectedResult: self.autocompleteModel.selectedResult?.text,
-                            completed: shootCompleted
+                        .frame(minHeight: 16)
+                        .padding(BeamSpacing._40)
+                        .background(
+                            Placeholder(
+                                text: cardSearchField,
+                                currentCardName: currentCardName,
+                                tokenize: cursorIsOnCardName,
+                                selectedResult: self.autocompleteModel.selectedResult?.text,
+                                completed: shootCompleted
+                            )
                         )
-                    )
-                } else {
-                    if let text = currentCardName {
+                    } else if let text = currentCardName {
                         Text(text)
                             .foregroundColor(BeamColor.Beam.swiftUI)
                             .font(BeamFont.regular(size: 13).swiftUI)
+                            .animation(.easeInOut(duration: 0.1))
                     }
                 }
 
@@ -134,30 +134,15 @@ struct PointAndShootCardPicker: View {
                 if isEditingCardName && (currentCardName != nil || cardSearchField.isEmpty) {
                     if !shootCompleted {
                         Icon(name: "editor-format_enter", size: 12, color: BeamColor.Generic.placeholder.swiftUI)
-                            .opacity(iconEnterOpacity)
-                            .onDisappear {
-                                withAnimation(.easeInOut(duration: 0.05)) {
-                                    self.iconEnterOpacity = 0
-                                }
-                            }
+                            .transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.15)))
                             .onTapGesture {
                                 onFinishEditing(canceled: false)
                             }
                     } else if let group = completedGroup {
-                        Icon(name: group.isText ? "collect-text" : "collect-generic", size: 16, color: BeamColor.Generic.text.swiftUI)
+                        Icon(name: "collect-generic", size: 16, color: BeamColor.Generic.text.swiftUI)
+                            .transition(AnyTransition.opacity.animation(Animation.easeInOut(duration: 0.15).delay(0.05)))
                             .onTapGesture {
                                 state.navigateToNote(id: group.noteInfo.id)
-                            }
-                            .opacity(iconCollectOpacity)
-                            .onAppear {
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                                    withAnimation(.easeInOut(duration: 0.05)) {
-                                        self.prefixOpacity = 1
-                                    }
-                                    withAnimation(.easeInOut(duration: 0.15)) {
-                                        self.iconCollectOpacity = 1
-                                    }
-                                }
                             }
                     }
                 }
@@ -208,7 +193,6 @@ struct PointAndShootCardPicker: View {
             }
         }
         .onAppear {
-            self.contentOpacity = 1
             if let currentNote = browserTabsManager.currentTab?.noteController.note {
                 currentCardName = currentNote.title
                 cardSearchField = currentNote.title
@@ -223,7 +207,6 @@ struct PointAndShootCardPicker: View {
                 if focusOnAppear {
                     isEditingCardName = true
                 }
-                cardSearchFieldSelection = nil
             }
         }
         .onTapGesture {
@@ -231,7 +214,7 @@ struct PointAndShootCardPicker: View {
                 state.navigateToNote(id: group.noteInfo.id)
             }
         }
-        .onReceive(autocompleteModel.$results) { _ in
+        .onReceive(autocompleteModel.$results.dropFirst()) { _ in
             enableResizeAnimation()
         }
     }
@@ -247,7 +230,7 @@ extension PointAndShootCardPicker {
 
         private var prefixText: String? {
             guard let num = numberOfElements else { return nil }
-            return num == 1 ? "Added to " : "\(num) Added to "
+            return num <= 1 ? "Added to " : "\(num) Added to "
         }
 
         var body: some View {
@@ -256,25 +239,15 @@ extension PointAndShootCardPicker {
                     Text("Add to")
                         // https://sarunw.com/posts/how-to-fix-zstack-transition-animation-in-swiftui/
                         .zIndex(-1)
-                        .opacity(addToOpacity)
                         .frame(alignment: .topLeading)
-                        .onDisappear {
-                            withAnimation(.easeInOut(duration: 0.05)) {
-                                self.addToOpacity = 0
-                            }
-                        }
+                        .transition(AnyTransition.asymmetric(insertion: .identity,
+                                                             removal: AnyTransition.opacity.animation(.easeInOut(duration: 0.05))))
                 } else if let text = prefixText {
                     Text(text)
                         .zIndex(1)
                         .frame(alignment: .topLeading)
-                        .opacity(addedToOpacity)
-                        .onAppear {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                withAnimation(.easeInOut(duration: 0.05)) {
-                                    self.addedToOpacity = 1
-                                }
-                            }
-                        }
+                        .transition(AnyTransition.asymmetric(insertion: AnyTransition.opacity.animation(Animation.easeInOut(duration: 0.05).delay(0.05)),
+                                                             removal: .identity))
                 }
             }
             .accessibility(identifier: "ShootCardPickerLabel")

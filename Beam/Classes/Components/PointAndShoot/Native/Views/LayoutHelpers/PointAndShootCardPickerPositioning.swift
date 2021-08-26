@@ -7,17 +7,6 @@ struct PointAndShootCardPickerPositioning<Content: View>: View {
     var content: () -> Content
     let padding: CGFloat = 5
 
-    @State private var scale: Bool = false
-    @State private var opacity: Bool = false
-
-    private var opacityTransition: AnyTransition {
-        AnyTransition.opacity.animation(.easeInOut(duration: 0.2))
-    }
-
-    private var scaleTransition: AnyTransition {
-        AnyTransition.scale(scale: 0.98).animation(.spring(response: 0.4, dampingFraction: 0.75))
-    }
-
     var body: some View {
         // The Positioning logic does the following:
         //  - Positions the card picker component at the mouse cursor location
@@ -50,15 +39,15 @@ struct PointAndShootCardPickerPositioning<Content: View>: View {
                 let halfHeight = cardPickerSize.height / 2
 
                 // Sum and calculate the X, Y position
-                let x = halfWidth - frameBoundsOffsetWidth
-                let y = halfHeight + frameBoundsOffsetHeight
+                let x = (halfWidth - frameBoundsOffsetWidth).rounded()
+                let y = (halfHeight + frameBoundsOffsetHeight).rounded()
 
             content()
-                .frame(width: cardPickerSize.width, height: cardPickerSize.height, alignment: .topLeading)
+                .frame(width: cardPickerSize.width.rounded(), height: cardPickerSize.height.rounded(), alignment: .topLeading)
                 .animation(.spring(response: 0.4, dampingFraction: 0.58), value: cardPickerSize)
                 .offset(x: x, y: y)
                 .zIndex(20)
-                .position(x: target.mouseLocation.x, y: target.mouseLocation.y)
+                .position(x: target.mouseLocation.x.rounded(), y: target.mouseLocation.y.rounded())
                 .animation(.easeInOut(duration: 0.3), value: frameBoundsOffsetWidth)
                 .animation(.easeInOut(duration: 0.3), value: frameBoundsOffsetHeight)
             }
