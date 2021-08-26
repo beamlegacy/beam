@@ -267,7 +267,7 @@ extension GRDBDatabase {
                     return true
                 }
 
-                return note.updateDate > date.indexedAt
+                return note.updateDate >= date.indexedAt
             })
         } catch {
             Logger.shared.logError("Error trying to find if note [\(note.id)] should be reindexed: \(error)", category: .database)
@@ -299,13 +299,25 @@ extension GRDBDatabase {
 
     func clearElements() throws {
         try dbWriter.write { db in
-            try db.execute(sql: "DELETE FROM BeamElementRecord")
+            try BeamElementRecord.deleteAll(db)
         }
     }
 
     func clearBidirectionalLinks() throws {
         _ = try dbWriter.write { db in
             try BidirectionalLink.deleteAll(db)
+        }
+    }
+
+    func countBidirectionalLinks() throws -> Int {
+        try dbWriter.write { db in
+            try BidirectionalLink.fetchCount(db)
+        }
+    }
+
+    func countIndexedElements() throws -> Int {
+        return try dbWriter.write { db in
+            try BeamElementRecord.fetchCount(db)
         }
     }
 

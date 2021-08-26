@@ -26,6 +26,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var fileDB: BeamFileDB
     @Published var noteCount = 0
     @Published var lastChangedElement: BeamElement?
+    @Published var lastIndexedElement: BeamElement?
     @Published var showTabStats = false
     @Published var isFetching = false
     @Published var newDay: Bool = false
@@ -171,9 +172,10 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
 
     // swiftlint:disable:next function_body_length
     private func setupSubscribers() {
-        $lastChangedElement.sink { element in
-            guard let element = element else { return }
+        $lastChangedElement.sink { [weak self] element in
+            guard let self = self, let element = element else { return }
             try? GRDBDatabase.shared.append(element: element)
+            self.lastIndexedElement = element
             if let note = element.note,
                note.type == .note,
                let changed = note.changed?.1,

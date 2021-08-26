@@ -55,18 +55,23 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     var selfVisible = true {
         didSet {
             invalidateLayout()
+            updateLayersVisibility()
+            invalidateRendering()
         }
     }
 
     var visible = true {
         didSet {
+            updateChildrenVisibility(visible && open)
+            invalidateLayout()
             updateLayersVisibility()
+            invalidateRendering()
         }
     }
 
     func updateLayersVisibility() {
         layer.isHidden = !visible || !selfVisible
-        for l in layers where l.value.layer.superlayer == editor.layer {
+        for l in layers where l.value.layer.superlayer == editor?.layer {
             l.value.layer.isHidden = !visible || !selfVisible
         }
     }
@@ -112,9 +117,9 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
             c.parent = self
             c.availableWidth = availableWidth - childInset
             c.contentsScale = contentsScale
-            editor.addToMainLayer(c.layer)
+            editor?.addToMainLayer(c.layer)
             for l in c.layers where l.value.layer.superlayer == nil {
-                editor.addToMainLayer(l.value.layer)
+                editor?.addToMainLayer(l.value.layer)
             }
 
             c.attachChildrenLayers()
@@ -123,7 +128,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
     var depth: Int { return allParents.count }
 
-    var enabled: Bool { editor.enabled }
+    var enabled: Bool { editor?.enabled ?? false }
     var scope = Set<AnyCancellable>()
 
     var localTextFrame: NSRect { // The rectangle of our text excluding children
@@ -215,7 +220,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     }
 
     var isBig: Bool {
-        editor.isBig
+        editor?.isBig ?? false
     }
 
     var invalidatedRendering = true
@@ -254,16 +259,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         }
     }
 
-    public private(set) weak var _editor: BeamTextEdit?
-    public private(set) var editor: BeamTextEdit {
-        get {
-            //swiftlint:disable:next force_cast
-            _editor!
-        }
-        set {
-            _editor = newValue
-        }
-    }
+    public private(set) weak var editor: BeamTextEdit?
 
     internal var computedIdealSize = NSSize()
     private weak var _root: TextRoot?
@@ -276,7 +272,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     // MARK: - Initializer
     init(parent: Widget, nodeProvider: NodeProvider? = nil) {
         self.parent = parent
-        self._editor = parent.editor
+        self.editor = parent.editor
         self.nodeProvider = nodeProvider
         layer = CALayer()
         selectionLayer = CALayer()
@@ -289,7 +285,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
     // this version should only be used by TextRoot
     init(editor: BeamTextEdit, nodeProvider: NodeProvider? = nil) {
-        self._editor = editor
+        self.editor = editor
         self.nodeProvider = nodeProvider
         layer = CALayer()
         selectionLayer = CALayer()
@@ -535,7 +531,6 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     // TODO: Refactor this in two methods
     func updateChildrenVisibility(_ isVisible: Bool) {
         for c in children {
-            guard c.visible != isVisible else { continue }
             c.visible = isVisible
             c.updateChildrenVisibility(isVisible && c.open)
         }
@@ -649,7 +644,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         layer.layer.deepContentsScale = self.layer.contentsScale
 
         if global {
-            editor.addToMainLayer(layer.layer)
+            editor?.addToMainLayer(layer.layer)
             layer.layer.isHidden = !inVisibleBranch
         } else if layer.layer.superlayer == nil {
             self.layer.addSublayer(layer.layer)
@@ -1064,7 +1059,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
     public override func accessibilityFrameInParentSpace() -> NSRect {
         // We are flipped, but the accessibility framework ignores it so we need to change that by hand:
-        let parentRect = editor.frame
+        let parentRect = editor?.frame ?? .zero
         let rect = NSRect(origin: layer.position, size: layer.bounds.size)
         let actualY = parentRect.height - rect.maxY
         let correctedRect = NSRect(origin: CGPoint(x: rect.origin.x, y: actualY), size: rect.size)
@@ -1094,6 +1089,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
 extension Widget {
     func presentMenu(with items: [ContextMenuItem], at: CGPoint) {
+        guard let editor = self.editor else { return }
         let menuView = ContextMenuFormatterView(items: items, direction: .bottom) {
             CustomPopoverPresenter.shared.dismissMenu()
         }

@@ -250,7 +250,7 @@ class BreadCrumb: Widget {
     }
 
     func updateReferenceSection(_ text: String) {
-        guard let rootNote = editor.note.note else { return }
+        guard let rootNote = editor?.note?.note else { return }
 
         text.ranges(of: rootNote.title).forEach { range in
             let start = text.position(at: range.lowerBound)

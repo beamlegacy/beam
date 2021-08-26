@@ -73,7 +73,7 @@ public class TextRoot: TextNode {
             let caretIndex = n?.caretIndexForSourcePosition(position) ?? 0
             self.caretIndex = caretIndex
             if let n = n {
-                editor.onFocusChanged?(n.elementId, position)
+                editor?.onFocusChanged?(n.elementId, position)
             }
         }
     }
@@ -86,16 +86,18 @@ public class TextRoot: TextNode {
         updateTextAttributesAtCursorPosition()
         n?.invalidateText()
         focusedWidget?.invalidate()
-        editor.reBlink()
+        editor?.reBlink()
         n?.updateCursor()
         if state.nodeSelection == nil {
             if needLayout {
-                DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: .milliseconds(10))) {
-                    guard self._editor != nil else { return }
-                    self.editor.setHotSpotToCursorPosition()
+                DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: .milliseconds(10))) { [weak self] in
+                    guard let self = self,
+                          let editor = self.editor
+                    else { return }
+                    editor.setHotSpotToCursorPosition()
                 }
             } else {
-                self.editor.setHotSpotToCursorPosition()
+                self.editor?.setHotSpotToCursorPosition()
             }
         }
         if let focused = focusedWidget as? ElementNode {
@@ -163,13 +165,13 @@ public class TextRoot: TextNode {
     weak var mouseHandler: Widget?
 
     override func onLayoutInvalidated() {
-        editor.invalidateLayout()
+        editor?.invalidateLayout()
     }
 
     override var offsetInRoot: NSPoint { NSPoint() }
 
     override func onInvalidated() {
-        editor.invalidate()
+        editor?.invalidate()
     }
 
     init(editor: BeamTextEdit, element: BeamElement) {
@@ -268,16 +270,17 @@ public class TextRoot: TextNode {
 
     public override func accessibilityFrameInParentSpace() -> NSRect {
         // We are flipped, but the accessibility framework ignores it so we need to change that by hand:
+        guard let editor = self.editor else { return .zero }
         return NSRect(origin: CGPoint(), size: editor.frame.size)
     }
 
-    private var breadCrumbs: [BeamNoteReference: BreadCrumb] = [:]
+    private var breadCrumbs: [BeamNoteReference: WeakReference<BreadCrumb>] = [:]
     func getBreadCrumb(for noteReference: BeamNoteReference) -> BreadCrumb? {
-        guard let breadCrumb = breadCrumbs[noteReference] else {
+        guard let breadCrumb = breadCrumbs[noteReference]?.ref else {
             guard let referencingNote = BeamNote.fetch(DocumentManager(), id: noteReference.noteID) else { return nil }
             guard let referencingElement = referencingNote.findElement(noteReference.elementID) else { return nil }
             let breadCrumb = BreadCrumb(parent: self, element: referencingElement)
-            breadCrumbs[noteReference] = breadCrumb
+            breadCrumbs[noteReference] = WeakReference(breadCrumb)
             return breadCrumb
         }
         return breadCrumb
