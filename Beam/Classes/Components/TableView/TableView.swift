@@ -100,8 +100,14 @@ struct TableView: NSViewRepresentable {
                 tableColumn.resizingMask = .userResizingMask
             }
             if column.sortable {
-                tableColumn.sortDescriptorPrototype = NSSortDescriptor(key: column.key,
-                                                                       ascending: column.sortableDefaultAscending)
+                var prototype = NSSortDescriptor(key: column.key,
+                                                 ascending: column.sortableDefaultAscending)
+                if column.sortableCaseInsensitive {
+                    prototype = NSSortDescriptor(key: column.key,
+                                                 ascending: column.sortableDefaultAscending,
+                                                 selector: #selector(NSString.caseInsensitiveCompare))
+                }
+                tableColumn.sortDescriptorPrototype = prototype
                 if column.isInitialSortDescriptor {
                     initialSortDescriptor = tableColumn.sortDescriptorPrototype
                 }

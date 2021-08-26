@@ -160,8 +160,8 @@ struct AllCardsPageContentView: View {
     private var columns = [
         TableViewColumn(key: "checkbox", title: "", type: TableViewColumn.ColumnType.CheckBox,
                         sortable: false, resizable: false, width: 16),
-        TableViewColumn(key: "title", title: "Title", editable: true,
-                        isLink: true, sortableDefaultAscending: true, width: 200),
+        TableViewColumn(key: "title", title: "Title", editable: true, isLink: true,
+                        sortableDefaultAscending: true, sortableCaseInsensitive: true, width: 200),
         TableViewColumn(key: "words", title: "Words", width: 50, stringFromKeyValue: Self.loadingIntValueString),
         TableViewColumn(key: "mentions", title: "Mentions", width: 70, stringFromKeyValue: Self.loadingIntValueString),
         TableViewColumn(key: "createdAt", title: "Created", stringFromKeyValue: { value in
