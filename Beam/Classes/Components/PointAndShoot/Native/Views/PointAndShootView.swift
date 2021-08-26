@@ -32,6 +32,12 @@ struct PointAndShootView: View {
             .combined(with: AnyTransition.opacity.animation(Animation.easeInOut(duration: 0.3)))
     }
 
+    var shouldAnimateRect: Bool {
+        pns.activeShootGroup == nil
+    }
+
+    let padding: CGFloat = 4
+
     @State private var scale: CGFloat = 1
     @State private var lastId: String = ""
 
@@ -41,51 +47,45 @@ struct PointAndShootView: View {
             if activeGroup.targets.count == 1,
                let target = activeGroup.targets.first {
                 // MARK: - Pointing
-                let isPointing = (pns.hasGraceRectAndMouseOverlap(target, activeGroup.href, pns.mouseLocation) && pns.isAltKeyDown && !pns.isLargeTargetArea(target) && !pns.isTypingOnWebView) || pns.activeShootGroup != nil
+                /// The JS send it's updates multiple times per milisecond.
+                /// To keep the pointing rectangle performant we shouldn't
+                /// add or remove the view component, but instead animate
+                /// it's properties like opacity.
+                let isRect = (pns.hasGraceRectAndMouseOverlap(target, activeGroup.href, pns.mouseLocation) && pns.isAltKeyDown && !pns.isLargeTargetArea(target) && !pns.isTypingOnWebView) || pns.activeShootGroup != nil
+                let rectangleGroup = isRect ? activeGroup : pns.convertTargetToCircleShootGroup(target, activeGroup.href)
+                let group = pns.translateAndScaleGroup(rectangleGroup)
+                if let target = group.targets.first {
+                    let background = pns.activeShootGroup == nil ? BeamColor.PointShoot.pointBackground.swiftUI : BeamColor.PointShoot.shootBackground.swiftUI
+                    let rect = target.rect.insetBy(dx: -padding, dy: -padding)
+                    let x: CGFloat = (rect.minX + rect.width / 2)
+                    let y: CGFloat = (rect.minY + rect.height / 2)
 
-                let rectangleGroup = isPointing ? activeGroup : pns.convertTargetToCircleShootGroup(target, activeGroup.href)
-
-                if isPointing {
-                    let padding: CGFloat = 4
-                    let group = pns.translateAndScaleGroup(rectangleGroup)
-                    let isRect = isPointing
-                    if let target = group.targets.first {
-                        let background = pns.activeShootGroup == nil ? BeamColor.PointShoot.pointBackground.swiftUI : BeamColor.PointShoot.shootBackground.swiftUI
-                        let rect = target.rect.insetBy(dx: -padding, dy: -padding)
-                        let x: CGFloat = (rect.minX + rect.width / 2)
-                        let y: CGFloat = (rect.minY + rect.height / 2)
-
-                        let shouldAnimate = pns.activeShootGroup == nil && self.scale == 1  && self.lastId != pns.activeShootGroup?.id
-
-                        RoundedRectangle(cornerRadius: isRect ? padding : 20, style: .continuous)
-                            .fill(background)
-                            .animation(.easeInOut(duration: 0.2), value: background)
-                            .scaleEffect(scale)
-                            .animation(.spring(response: 0.2, dampingFraction: 0.5, blendDuration: 0.2), value: scale)
-                            .frame(width: rect.width, height: rect.height)
-                            .position(x: x, y: y)
-                            .animation(shouldAnimate ? .spring(response: 0.2, dampingFraction: 0.88, blendDuration: 0.4) : nil, value: rect)
-                            .onReceive(pns.$activeShootGroup, perform: { shootGroup in
-                                // if nil set to true
-                                // only update value when it should change
-                                if let group = shootGroup, self.scale == 1, self.lastId != group.id {
-                                    self.lastId = group.id
-                                    self.scale = 0.95
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(100)) {
-                                        self.scale = 1
-                                    }
+                    RoundedRectangle(cornerRadius: isRect ? padding : 20, style: .continuous)
+                        .fill(background)
+                        .animation(.easeInOut(duration: 0.2), value: background)
+                        .scaleEffect(scale)
+                        .animation(.spring(response: 0.2, dampingFraction: 0.5, blendDuration: 0.2), value: scale)
+                        .frame(width: rect.width, height: rect.height)
+                        .animation(shouldAnimateRect ? .easeInOut(duration: 0.2) : nil, value: rect)
+                        .opacity(isRect ? 1 : 0)
+                        .position(x: x, y: y)
+                        .animation(shouldAnimateRect ? .easeInOut(duration: 0.2) : nil, value: x)
+                        .animation(shouldAnimateRect ? .easeInOut(duration: 0.2) : nil, value: y)
+                        .onReceive(pns.$activeShootGroup, perform: { shootGroup in
+                            // if nil set to true
+                            // only update value when it should change
+                            if let group = shootGroup, self.scale == 1, self.lastId != group.id {
+                                self.lastId = group.id
+                                self.scale = 0.95
+                                DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(100)) {
+                                    self.scale = 1
                                 }
-                            })
-                            .pointAndShootFrameOffset(pns, target: target)
-                            .allowsHitTesting(false)
-                            .accessibility(identifier: "PointFrame")
-                            .id("rectangle shoot frame")
-                            .zIndex(19) // for animation to work correctly
-                            .transition(.asymmetric(
-                                insertion: .opacity,
-                                removal: transitionOut
-                            ))
-                    }
+                            }
+                        })
+                        .pointAndShootFrameOffset(pns, target: target)
+                        .allowsHitTesting(false)
+                        .accessibility(identifier: "PointFrame")
+                        .id("rectangle shoot frame")
                 }
             } else {
                 // MARK: - Selecting
