@@ -110,6 +110,6 @@ class PointAndShootShootingTest: PointAndShootTest {
 
         XCTAssertEqual(self.testPage?.events.count, 4)
         XCTAssertEqual(self.testPage?.events[2], "addToNote true")
-        XCTAssertEqual(self.testPage?.events[3], "logInNote https://webpage.com Optional(\"PNS MockPage\") pointandshoot")
+        XCTAssertEqual(self.testPage?.events[3], "logInNote https://webpage.com PNS MockPage pointandshoot")
     }
 }

@@ -125,7 +125,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                 beforeEach {
                     try? Document.deleteWithPredicate(CoreDataManager.shared.mainContext)
                     try? Database.deleteWithPredicate(CoreDataManager.shared.mainContext)
-                    try? PasswordsDB(path: BeamData.dataFolder(fileName: "passwords.db")).deleteAll()
+                    let _ = try? PasswordsDB(path: BeamData.dataFolder(fileName: "passwords.db")).deleteAll()
                 }
 
                 it("calls managers but no network calls as it's all empty") {

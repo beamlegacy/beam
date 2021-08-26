@@ -384,7 +384,7 @@ struct FontEditorAppearance: View {
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .frame(width: 50, height: 25, alignment: .center)
             }
-            
+
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Line Height for a line")
