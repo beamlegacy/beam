@@ -23,6 +23,7 @@ struct TableViewColumn {
     var isLink = false
     var sortable = true
     var sortableDefaultAscending = false
+    var sortableCaseInsensitive = false
     var isInitialSortDescriptor = false
     var resizable = true
     var width: CGFloat = 100
