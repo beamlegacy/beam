@@ -52,7 +52,11 @@ class ClusteringTests: XCTestCase {
             cluster.pages.append(page2)
 
             let scores = cluster.scoreTextualEmbedding(textualEmbedding: page2.textEmbedding ?? [0.0], language: NLLanguage.english, index: 1, dataPointType: .page)
-            expect(scores).to(beCloseTo([0.8294351697354525], within: 0.0001))
+            if #available(iOS 14, macOS 11, *) {
+                expect(page1.language) == NLLanguage.english
+                expect(page2.language) == NLLanguage.english
+                expect(scores).to(beCloseTo([0.8294351697354525], within: 0.0001))
+            }
         }
     }
 
@@ -83,9 +87,13 @@ class ClusteringTests: XCTestCase {
                 page3.language = language
                 cluster.pages.append(page3)
             }
-
-            let scores = cluster.scoreTextualEmbedding(textualEmbedding: page3.textEmbedding ?? [0.0], language: NLLanguage.english, index: 2, dataPointType: .page)
-            expect(scores).to(beCloseTo([0.26489349244685784, 1.0], within: 0.0001))
+            if #available(iOS 14, macOS 11, *) {
+                expect(page1.language) == NLLanguage.english
+                expect(page2.language) == NLLanguage.french
+                expect(page3.language) == NLLanguage.english
+                let scores = cluster.scoreTextualEmbedding(textualEmbedding: page3.textEmbedding ?? [0.0], language: NLLanguage.english, index: 2, dataPointType: .page)
+                expect(scores).to(beCloseTo([0.26489349244685784, 1.0], within: 0.0001))
+            }
         }
     }
 
@@ -101,8 +109,8 @@ class ClusteringTests: XCTestCase {
             if let (textEmbedding, language) = cluster.textualEmbeddingComputationWithNLEmbedding(text: content) {
                 page1.textEmbedding = textEmbedding
                 page1.language = language
-                cluster.pages.append(page1)
             }
+            cluster.pages.append(page1)
 
             // Add a second page
             cluster.pages.append(page2)
@@ -112,10 +120,15 @@ class ClusteringTests: XCTestCase {
             cluster.pages.append(page3)
             try cluster.textualSimilarityProcess(index: 2, dataPointType: .page)
 
-            let expectedSimilarityMatrixFlat = [0.0, 0.8294351697354535, 0.26489349244685784,
-                                             0.8294351697354535, 0.0, 0.1927173621278106,
-                                             0.26489349244685784, 0.1927173621278106, 0.0]
-            expect(cluster.textualSimilarityMatrix.matrix.flat).to(beCloseTo(expectedSimilarityMatrixFlat, within: 0.0001))
+            if #available(iOS 14, macOS 11, *) {
+                for page in cluster.pages {
+                    expect(page.language) == NLLanguage.english
+                }
+                let expectedSimilarityMatrixFlat = [0.0, 0.8294351697354535, 0.26489349244685784,
+                                                 0.8294351697354535, 0.0, 0.1927173621278106,
+                                                 0.26489349244685784, 0.1927173621278106, 0.0]
+                expect(cluster.textualSimilarityMatrix.matrix.flat).to(beCloseTo(expectedSimilarityMatrixFlat, within: 0.0001))
+            }
         }
     }
 
@@ -132,18 +145,16 @@ class ClusteringTests: XCTestCase {
         // Add a second page
         cluster.pages.append(page2)
         try cluster.textualSimilarityProcess(index: 1, dataPointType: .page)
-        // Add a second page
-        cluster.pages.append(page2)
-        try cluster.textualSimilarityProcess(index: 1, dataPointType: .page)
-
         // Add a third page
         cluster.pages.append(page3)
         try cluster.textualSimilarityProcess(index: 2, dataPointType: .page)
 
+        if #available(iOS 14, macOS 11, *) {
             let expectedSimilarityMatrixFlat = [0.0, 0.8294351697354535, 1.0,
-                                             0.8294351697354535, 0.0, 1.0,
-                                             1.0, 1.0, 0.0]
-        expect(cluster.textualSimilarityMatrix.matrix.flat).to(beCloseTo(expectedSimilarityMatrixFlat, within: 0.0001))
+                                                 0.8294351697354535, 0.0, 1.0,
+                                                 1.0, 1.0, 0.0]
+            expect(cluster.textualSimilarityMatrix.matrix.flat).to(beCloseTo(expectedSimilarityMatrixFlat, within: 0.0001))
+        }
     }
 
     // Integration test for testing the whole textual similarity pipeline
@@ -219,7 +230,12 @@ class ClusteringTests: XCTestCase {
         })
 
         wait(for: [expectation], timeout: 1)
-        expect(final_result) == [[0, 2, 5], [1, 3, 4]]
+        if #available(iOS 14, macOS 11, *) {
+            for page in cluster.pages {
+                expect(page.language) == NLLanguage.english
+            }
+            expect(final_result) == [[0, 2, 5], [1, 3, 4]]
+        }
     }
 
     // Integration test for testing the whole textual similarity pipeline
@@ -299,18 +315,19 @@ class ClusteringTests: XCTestCase {
             }
         })
 
-        cluster.add(page: page7, ranking: nil, completion: { result in
-            switch result {
-            case .failure(let error):
-                XCTFail(error.localizedDescription)
-            case .success(let result):
-                expect(result.0) == [[0, 2, 5], [1, 3, 4, 6]]
-            }
-            expectation.fulfill()
-        })
+        if #available(iOS 14, macOS 11, *) {
+            cluster.add(page: page7, ranking: nil, completion: { result in
+                switch result {
+                case .failure(let error):
+                    XCTFail(error.localizedDescription)
+                case .success(let result):
+                    expect(result.0) == [[0, 2, 5], [1, 3, 4, 6]]
+                }
+                expectation.fulfill()
+            })
 
-        wait(for: [expectation], timeout: 1)
-
+            wait(for: [expectation], timeout: 1)
+        }
     }
 
     func testClusterize() throws {
@@ -524,6 +541,7 @@ class ClusteringTests: XCTestCase {
         expect(similarity).to(beCloseTo(0.5, within: 0.0001))
     }
 
+    // swiftlint:disable:next function_body_length
     func testAllSimilarityMatrices() throws {
         let cluster = Cluster()
         var _ = [[UInt64]]()
@@ -571,10 +589,14 @@ class ClusteringTests: XCTestCase {
         let expectedTextualMatrix = [0.0, 0.46988745662121795, 0.3628206314147012,
                                     0.46988745662121795, 0.0, 0.19001699954776027,
                                     0.3628206314147012, 0.19001699954776027, 0.0]
-
+        if #available(iOS 14, macOS 11, *) {
+            expect(cluster.pages[0].language) == NLLanguage.english
+            expect(cluster.pages[1].language) == NLLanguage.english
+            expect(cluster.pages[2].language) == NLLanguage.english
+            expect(cluster.textualSimilarityMatrix.matrix.flat).to(beCloseTo(expectedTextualMatrix, within: 0.0001))
+        }
         expect(cluster.entitiesMatrix.matrix.flat).to(beCloseTo(expectedEntitiesMatrix, within: 0.0001))
         expect(cluster.navigationMatrix.matrix.flat).to(beCloseTo(expectedNavigationMatrix, within: 0.0001))
-        expect(cluster.textualSimilarityMatrix.matrix.flat).to(beCloseTo(expectedTextualMatrix, within: 0.0001))
     }
 
     func testEntitySimilarityOverTitles() throws {
@@ -840,6 +862,7 @@ class ClusteringTests: XCTestCase {
         expect(cluster.pages[1].attachedPages) == []
     }
 
+    // swiftlint:disable:next function_body_length
     func testContentChange() throws {
         let cluster = Cluster()
         cluster.candidate = 3
@@ -893,7 +916,12 @@ class ClusteringTests: XCTestCase {
         let expectedMatrix = [0.0, 0.7916, 1.0,
                               0.7916, 0.0, 0.7916,
                                 1.0, 0.7916, 0.0]
-        expect(cluster.textualSimilarityMatrix.matrix.flat).to(beCloseTo(expectedMatrix, within: 0.0001))
+        if #available(iOS 14, macOS 11, *) {
+            expect(cluster.pages[0].language) == NLLanguage.english
+            expect(cluster.pages[1].language) == NLLanguage.english
+            expect(cluster.pages[2].language) == NLLanguage.english
+            expect(cluster.textualSimilarityMatrix.matrix.flat).to(beCloseTo(expectedMatrix, within: 0.0001))
+        }
 
     }
 

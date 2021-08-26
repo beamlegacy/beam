@@ -85,6 +85,9 @@
                   Identifier = "ClusteringTests/testChangeCandidate()">
                </Test>
                <Test
+                  Identifier = "ClusteringTests/testScoreTextualEmbeddingWithNonEnglishContent()">
+               </Test>
+               <Test
                   Identifier = "ClusteringTests/testTextualSimilarityMatrixProcessWithNonEnglishContent()">
                </Test>
                <Test
