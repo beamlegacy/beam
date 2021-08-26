@@ -15,7 +15,7 @@ struct AllowListTableView: View {
     @Binding var creationRowTitle: String?
 
     var allowListColumns = [
-        TableViewColumn(key: "host", title: "Sites", editable: true, resizable: false, width: 334, fontSize: 12),
+        TableViewColumn(key: "host", title: "Sites", editable: true, sortableCaseInsensitive: true, resizable: false, width: 334, fontSize: 12),
         TableViewColumn(key: "addedDate", title: "Date Added", resizable: false, width: 190, fontSize: 12)
     ]
 
