@@ -40,6 +40,7 @@ extension ElementNode {
     }
 
     private func createDisclosureLayer(at point: NSPoint) {
+        guard self as? TextRoot == nil else { return } // no disclosure layer for the root
         let disclosureLayer = ChevronButton(LayerName.disclosure.rawValue, open: open, changed: { [unowned self] value in
             self.open = value
             layers[LayerName.indentLayer.rawValue]?.layer.isHidden = !value

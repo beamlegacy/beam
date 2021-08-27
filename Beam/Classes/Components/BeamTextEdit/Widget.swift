@@ -62,8 +62,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
     var visible = true {
         didSet {
-            updateChildrenVisibility(visible && open)
-            invalidateLayout()
+            updateChildrenVisibility()
             updateLayersVisibility()
             invalidateRendering()
         }
@@ -90,7 +89,9 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         }
     }
 
+    var changingChildren = false
     func updateChildren(_ oldValue: [Widget]? = nil) {
+        guard !changingChildren else { return }
         // First remove all old layers from the editor:
         if let oldValue = oldValue {
             var set = Set<Widget>(oldValue)
@@ -107,7 +108,33 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         }
 
         attachChildrenLayers()
-        updateChildrenVisibility(visible && open)
+        updateChildrenVisibility()
+    }
+
+    func updateAddedChild(child: Widget) {
+        child.parent = self
+        child.availableWidth = availableWidth - childInset
+        child.contentsScale = contentsScale
+        editor?.addToMainLayer(child.layer)
+        for l in child.layers where l.value.layer.superlayer == nil {
+            editor?.addToMainLayer(l.value.layer)
+        }
+
+        child.attachChildrenLayers()
+        let isVisible = visible && open
+        child.visible = isVisible
+        child.updateChildrenVisibility()
+    }
+
+    func updateRemovedChild(child: Widget) {
+        // Remove layers for previous children that haven't been reattached to the editor:
+        if child.parent === self || child.parent == nil {
+            child.removeFromSuperlayer(recursive: true)
+            child.parent = nil
+            for l in child.layers where l.value.layer.superlayer == editor?.layer {
+                l.value.layer.removeFromSuperlayer()
+            }
+        }
     }
 
     func attachChildrenLayers() {
@@ -521,17 +548,18 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
             if let chevron = self.layers["disclosure"] as? ChevronButton {
                 chevron.open = open
             }
-            updateChildrenVisibility(visible && open)
+            updateChildrenVisibility()
             invalidateLayout()
             invalidateRendering()
         }
     }
 
     // TODO: Refactor this in two methods
-    func updateChildrenVisibility(_ isVisible: Bool) {
+    func updateChildrenVisibility() {
+        let isVisible = visible && open
         for c in children {
             c.visible = isVisible
-            c.updateChildrenVisibility(isVisible && c.open)
+            c.updateChildrenVisibility()
         }
     }
 
@@ -579,18 +607,22 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
     func addChild(_ child: Widget) {
         guard !children.contains(child) else { return }
+        changingChildren = true
+        defer { changingChildren = false }
         children.append(child)
-        invalidateLayout()
+        updateAddedChild(child: child)
     }
 
     func removeChild(_ child: Widget) {
         guard children.contains(child) else { return }
+        changingChildren = true
+        defer { changingChildren = false }
         children.removeAll { w -> Bool in
             w === child
         }
         child.removeFromSuperlayer(recursive: true)
 
-        invalidateLayout()
+        updateRemovedChild(child: child)
     }
 
     func clear() {
