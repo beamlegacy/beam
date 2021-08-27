@@ -11,7 +11,7 @@ struct DocumentStruct: BeamObjectProtocol {
     var updatedAt: Date
     var deletedAt: Date?
     var data: Data
-    let documentType: DocumentType
+    var documentType: DocumentType
     var previousData: Data?
     var previousChecksum: String?
     var version: Int64 = 0
@@ -48,7 +48,18 @@ struct DocumentStruct: BeamObjectProtocol {
         return false
     }
 
-    // Used for encoding this into BeamObject
+    mutating func clearPreviousData() {
+        previousData = nil
+        previousChecksum = nil
+    }
+
+    func copy() -> DocumentStruct {
+        DocumentStruct(documentStruct: self)
+    }
+}
+
+extension DocumentStruct {
+    // Used for encoding this into BeamObject. Update `encode` and `init()` when adding values here
     enum CodingKeys: String, CodingKey {
         case databaseId
         case title
@@ -61,27 +72,51 @@ struct DocumentStruct: BeamObjectProtocol {
         case journalDate
     }
 
-    mutating func clearPreviousData() {
-        previousData = nil
-        previousChecksum = nil
+    init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        databaseId = UUID(uuidString: try values.decode(String.self, forKey: .databaseId)) ?? .null
+        title = try values.decode(String.self, forKey: .title)
+        createdAt = try values.decode(Date.self, forKey: .createdAt)
+        updatedAt = try values.decode(Date.self, forKey: .updatedAt)
+        deletedAt = try values.decodeIfPresent(Date.self, forKey: .deletedAt)
+        isPublic = try values.decode(Bool.self, forKey: .isPublic)
+        journalDate = try values.decodeIfPresent(String.self, forKey: .journalDate)
+        data = try values.decode(String.self, forKey: .data).asData
+
+        let documentTypeAsString = try values.decode(String.self, forKey: .documentType)
+        switch documentTypeAsString {
+        case "journal":
+            documentType = .journal
+        case "note":
+            documentType = .note
+        default:
+            documentType = .note
+            Logger.shared.logError("Can't decode \(documentTypeAsString)", category: .document)
+        }
     }
 
-    func copy() -> DocumentStruct {
-        DocumentStruct(id: id,
-                       databaseId: databaseId,
-                       title: title,
-                       createdAt: createdAt,
-                       updatedAt: updatedAt,
-                       deletedAt: deletedAt,
-                       data: data,
-                       documentType: documentType,
-                       previousData: previousData,
-                       previousChecksum: previousChecksum,
-                       version: version,
-                       isPublic: isPublic,
-                       beamObjectPreviousChecksum: beamObjectPreviousChecksum,
-                       journalDate: journalDate
-        )
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(databaseId.uuidString.lowercased(), forKey: .databaseId)
+        try container.encode(title, forKey: .title)
+        try container.encode(createdAt, forKey: .createdAt)
+        try container.encode(updatedAt, forKey: .updatedAt)
+        if deletedAt != nil {
+            try container.encode(deletedAt, forKey: .deletedAt)
+        }
+
+        try container.encode(data.asString, forKey: .data)
+        switch documentType {
+        case .journal:
+            try container.encode("journal", forKey: .documentType)
+        case .note:
+            try container.encode("note", forKey: .documentType)
+        }
+
+        try container.encode(isPublic, forKey: .isPublic)
+        if journalDate != nil {
+            try container.encode(journalDate, forKey: .journalDate)
+        }
     }
 }
 
@@ -101,6 +136,23 @@ extension DocumentStruct {
         self.databaseId = document.database_id
         self.beamObjectPreviousChecksum = document.beam_object_previous_checksum
         self.journalDate = document.journal_date
+    }
+
+    init(documentStruct: DocumentStruct) {
+        self.id = documentStruct.id
+        self.createdAt = documentStruct.createdAt
+        self.updatedAt = documentStruct.updatedAt
+        self.deletedAt = documentStruct.deletedAt
+        self.title = documentStruct.title
+        self.documentType = documentStruct.documentType
+        self.data = documentStruct.data
+        self.previousData = documentStruct.previousData
+        self.previousChecksum = documentStruct.previousChecksum
+        self.version = documentStruct.version
+        self.isPublic = documentStruct.isPublic
+        self.databaseId = documentStruct.databaseId
+        self.beamObjectPreviousChecksum = documentStruct.beamObjectPreviousChecksum
+        self.journalDate = documentStruct.journalDate
     }
 
     func asApiType() -> DocumentAPIType {
