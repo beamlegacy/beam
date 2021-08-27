@@ -15,7 +15,6 @@ class HtmlVisitor {
     var tabs: String { String.tabs(depth) }
     var urlBase: URL
     var keepFormatting: Bool = false
-    var downloadManager: DownloadManager = BeamDownloadManager()
     var data: BeamData?
 
     init(_ urlBase: URL) {
@@ -194,8 +193,8 @@ class HtmlVisitor {
 
             case "img":
                 guard let src = getImageSrc(element),
-                      let url: URL = getUrl(src),
-                      let mdUrl = url.absoluteString.markdownizedURL else { break }
+                      let url: URL = getUrl(src) else { break }
+                let mdUrl = url.absoluteString
                 var title = BeamText(text: mdUrl)
                 title.addAttributes([.link(mdUrl)], to: title.wholeRange)
                 text.append(title)
