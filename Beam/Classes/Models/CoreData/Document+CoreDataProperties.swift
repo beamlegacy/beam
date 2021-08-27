@@ -27,7 +27,6 @@ extension Document {
     @NSManaged public var updated_at: Date
     @NSManaged public var title: String
     @NSManaged public var document_type: Int16
-    @NSManaged public var score: Int16
     @NSManaged public var version: Int64
     @NSManaged public var is_public: Bool
     @NSManaged public var database_id: UUID
