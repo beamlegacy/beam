@@ -261,11 +261,7 @@ public class TextNode: ElementNode {
         super.updateLayout()
         // Disable action layer update to avoid motion glitch
         // when the global layer width is changed
-        if !editor.isResizing {
-            updateActionLayer(animate: true)
-        } else {
-            updateActionLayer(animate: false)
-        }
+        updateActionLayer(animate: !editor.isResizing)
     }
 
     override public func invalidateText() {
