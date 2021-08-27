@@ -31,7 +31,7 @@ extension Document {
     @NSManaged public var version: Int64
     @NSManaged public var is_public: Bool
     @NSManaged public var database_id: UUID
-    @NSManaged public var journal_date: String?
+    @NSManaged public var journal_day: Int64
     //swiftlint:enable identifier_name
 
     public var documentType: DocumentType {

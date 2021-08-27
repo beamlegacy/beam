@@ -129,7 +129,9 @@ class Document: NSManagedObject, BeamCoreDataObject {
         updated_at = BeamDate.now
         deleted_at = documentStruct.deletedAt
         is_public = documentStruct.isPublic
-        journal_date = documentStruct.journalDate
+        if let journalDate = documentStruct.journalDate, !journalDate.isEmpty {
+            journal_day = JournalDateConverter.toInt(from: journalDate)
+        }
     }
 
     class func countWithPredicate(_ context: NSManagedObjectContext,
@@ -328,7 +330,8 @@ class Document: NSManagedObject, BeamCoreDataObject {
     }
 
     class func fetchWithJournalDate(_ context: NSManagedObjectContext, _ date: String) -> Document? {
-        try? fetchFirst(context, NSPredicate(format: "journal_date ==[cd] %@", date as CVarArg))
+        let date = JournalDateConverter.toInt(from: date)
+        return try? fetchFirst(context, NSPredicate(format: "journal_day == \(date)"))
     }
 
     class func fetchAllWithType(_ context: NSManagedObjectContext, _ type: Int16) throws -> [Document] {
@@ -339,9 +342,13 @@ class Document: NSManagedObject, BeamCoreDataObject {
                                      _ type: Int16,
                                      _ limit: Int,
                                      _ fetchOffset: Int) throws -> [Document] {
-        try fetchAllWithLimit(context,
-                              NSPredicate(format: "document_type = \(type)"),
-                              [NSSortDescriptor(key: "journal_date", ascending: false),
+
+        let today = BeamNoteType.titleForDate(BeamDate.now)
+        let todayInt = JournalDateConverter.toInt(from: today)
+
+        return try fetchAllWithLimit(context,
+                              NSPredicate(format: "document_type = \(type) AND journal_day <= \(todayInt)"),
+                              [NSSortDescriptor(key: "journal_day", ascending: false),
                               NSSortDescriptor(key: "created_at", ascending: false)],
                               limit,
                               fetchOffset)

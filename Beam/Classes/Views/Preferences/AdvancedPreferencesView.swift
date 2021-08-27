@@ -206,6 +206,30 @@ struct AdvancedPreferencesView: View {
                     })
                 }
 
+                Preferences.Section(title: "Logs", bottomDivider: true) {
+                    Button(action: {
+                        let savePanel = NSSavePanel()
+                        savePanel.canCreateDirectories = true
+                        savePanel.showsTagField = false
+                        savePanel.nameFieldStringValue = "Logs.txt"
+                        savePanel.begin { (result) in
+                            guard result == .OK, let url = savePanel.url else {
+                                savePanel.close()
+                                return
+                            }
+                            do {
+                                let logs = Logger.shared.logFileString.split(separator: "\n")
+                                let logsStr = logs.joined(separator: "\n")
+                                try logsStr.write(to: url, atomically: true, encoding: .utf8)
+                            } catch {
+                                Logger.shared.logError(String(describing: error), category: .general)
+                            }
+                        }
+                    }, label: {
+                        Text("Get logs").frame(minWidth: 100)
+                    })
+                }
+
                 Preferences.Section(title: "Encryption Enabled") {
                     EncryptionEnabledButton
                 }
