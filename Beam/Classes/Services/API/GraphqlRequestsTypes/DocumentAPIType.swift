@@ -42,7 +42,7 @@ class DocumentAPIType: Codable {
         previousChecksum = document.beam_api_checksum
         data = document.data?.asString
         isPublic = document.is_public
-        journalDate = JournalDateConverter.toString(from: document.journal_day)
+        journalDate = documentType == .journal ? JournalDateConverter.toString(from: document.journal_day) : nil
         let dbDatabase = try? Database.rawFetchWithId(context, document.database_id)
 
         database = DatabaseAPIType(id: document.database_id.uuidString.lowercased())
