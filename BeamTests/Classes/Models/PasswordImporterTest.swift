@@ -11,12 +11,6 @@ import XCTest
 
 class PasswordImporterTest: XCTestCase {
 
-    var passwordManager: PasswordManager!
-
-    override func setUpWithError() throws {
-        passwordManager = PasswordManager()
-    }
-
     override func tearDownWithError() throws {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
@@ -29,12 +23,12 @@ class PasswordImporterTest: XCTestCase {
             """
         try PasswordImporter.importPasswords(fromCSV: csv)
         let expectation1 = expectation(description: "Expect password request returns.")
-        let password = passwordManager.password(host: "test1.com", username: "user1")
+        let password = PasswordManager.shared.password(host: "test1.com", username: "user1")
         XCTAssertEqual(password, "pass1")
         expectation1.fulfill()
 
         let expectation2 = expectation(description: "Expect password request returns.")
-        let passwordTwo = passwordManager.password(host: "test2.com", username: "user2")
+        let passwordTwo = PasswordManager.shared.password(host: "test2.com", username: "user2")
         XCTAssertEqual(passwordTwo, "pass2")
         expectation2.fulfill()
 
@@ -51,12 +45,12 @@ class PasswordImporterTest: XCTestCase {
             """
         try PasswordImporter.importPasswords(fromCSV: csv)
         let expectation1 = expectation(description: "Expect password request returns.")
-        let password = passwordManager.password(host: "test1.com", username: "user1")
+        let password = PasswordManager.shared.password(host: "test1.com", username: "user1")
         XCTAssertEqual(password, "pass1")
         expectation1.fulfill()
 
         let expectation2 = expectation(description: "Expect password request returns.")
-        let passwordTwo = passwordManager.password(host: "test2.com", username: "user2")
+        let passwordTwo = PasswordManager.shared.password(host: "test2.com", username: "user2")
         XCTAssertEqual(passwordTwo, "pass2")
         expectation2.fulfill()
 
@@ -73,12 +67,12 @@ class PasswordImporterTest: XCTestCase {
             """#
         try PasswordImporter.importPasswords(fromCSV: csv)
         let expectation1 = expectation(description: "Expect password request returns.")
-        let password = passwordManager.password(host: "test1.com", username: "\"user1\"")
+        let password = PasswordManager.shared.password(host: "test1.com", username: "\"user1\"")
         XCTAssertEqual(password, "pass1")
         expectation1.fulfill()
 
         let expectation2 = expectation(description: "Expect password request returns.")
-        let passwordTwo = passwordManager.password(host: "test2.com", username: "user2")
+        let passwordTwo = PasswordManager.shared.password(host: "test2.com", username: "user2")
         XCTAssertEqual(passwordTwo, "pass\"2")
         expectation2.fulfill()
         

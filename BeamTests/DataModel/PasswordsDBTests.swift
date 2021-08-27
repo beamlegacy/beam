@@ -16,106 +16,121 @@ class PasswordsDBTests: XCTestCase {
     static let username = "beamdev@beam.co"
     static let password = "BeamRocksss"
 
-    var passwordManager: PasswordManager!
-
     override func setUp() {
         super.setUp()
-        passwordManager = PasswordManager()
     }
 
     func testSavingPassword() {
-        passwordManager.save(host: Self.host.minimizedHost!, username: Self.username, password: Self.password)
+        PasswordManager.shared.save(host: Self.host.minimizedHost!, username: Self.username, password: Self.password)
 
-        let allEntries = passwordManager.fetchAll()
+        let allEntries = PasswordManager.shared.fetchAll()
         XCTAssertTrue(allEntries.count > 0, "FetchAll has no passwords, it should be > 0")
 
-        let entries = passwordManager.entries(for: Self.host.minimizedHost!, exact: true)
+        let entries = PasswordManager.shared.entries(for: Self.host.minimizedHost!, exact: true)
         XCTAssertEqual(entries.count, 1)
         XCTAssertEqual(entries.last?.minimizedHost, Self.host.minimizedHost)
         XCTAssertEqual(entries.last?.username, Self.username)
+
+        PasswordManager.shared.deleteAll()
     }
 
     func testSavingPasswords() {
-        passwordManager.save(host: Self.host.minimizedHost!, username: Self.username, password: Self.password)
-        passwordManager.save(host: Self.subdomain1.minimizedHost!, username: Self.username, password: Self.password)
+        PasswordManager.shared.save(host: Self.host.minimizedHost!, username: Self.username, password: Self.password)
+        PasswordManager.shared.save(host: Self.subdomain1.minimizedHost!, username: Self.username, password: Self.password)
 
-        let allEntries = passwordManager.fetchAll()
+        let allEntries = PasswordManager.shared.fetchAll()
         XCTAssertTrue(allEntries.count >= 2, "FetchAll has no passwords, it should be >= 2")
 
-        let parentEntries = passwordManager.entries(for: Self.host.minimizedHost!, exact: true)
+        let parentEntries = PasswordManager.shared.entries(for: Self.host.minimizedHost!, exact: true)
         XCTAssertEqual(parentEntries.count, 1)
         XCTAssertEqual(parentEntries.last?.minimizedHost, Self.host.minimizedHost)
         XCTAssertEqual(parentEntries.last?.username, Self.username)
 
-        let subdomainEntries = passwordManager.entries(for: Self.subdomain1.minimizedHost!, exact: true)
+        let subdomainEntries = PasswordManager.shared.entries(for: Self.subdomain1.minimizedHost!, exact: true)
         XCTAssertEqual(subdomainEntries.count, 1)
         XCTAssertEqual(subdomainEntries.last?.minimizedHost, Self.subdomain1.minimizedHost)
         XCTAssertEqual(subdomainEntries.last?.username, Self.username)
+
+        PasswordManager.shared.deleteAll()
     }
 
     func testFindEntriesForHost() {
-        passwordManager.save(host: Self.host.minimizedHost!, username: Self.username, password: Self.password)
+        PasswordManager.shared.save(host: Self.host.minimizedHost!, username: Self.username, password: Self.password)
 
-        let entries = passwordManager.entries(for: Self.host.minimizedHost!, exact: true)
+        let entries = PasswordManager.shared.entries(for: Self.host.minimizedHost!, exact: true)
         XCTAssertEqual(entries.count, 1)
         XCTAssertEqual(entries.last?.minimizedHost, Self.host.minimizedHost)
         XCTAssertEqual(entries.last?.username, Self.username)
+
+        PasswordManager.shared.deleteAll()
     }
 
     func testFindEntriesForHostWithParents() {
-        passwordManager.save(host: Self.host.minimizedHost!, username: Self.username, password: Self.password)
-        passwordManager.save(host: Self.subdomain1.minimizedHost!, username: Self.username, password: Self.password)
+        PasswordManager.shared.save(host: Self.host.minimizedHost!, username: Self.username, password: Self.password)
+        PasswordManager.shared.save(host: Self.subdomain1.minimizedHost!, username: Self.username, password: Self.password)
 
-        let entries = passwordManager.entries(for: Self.subdomain1.minimizedHost!, exact: false)
+        let entries = PasswordManager.shared.entries(for: Self.subdomain1.minimizedHost!, exact: false)
         XCTAssertEqual(entries.count, 2)
         XCTAssertEqual(entries.first?.minimizedHost, Self.subdomain1.minimizedHost)
         XCTAssertEqual(entries.first?.username, Self.username)
         XCTAssertEqual(entries.last?.minimizedHost, Self.host.minimizedHost)
         XCTAssertEqual(entries.last?.username, Self.username)
+
+        PasswordManager.shared.deleteAll()
     }
 
     func testFindEntriesForHostWithSubdomains() {
-        passwordManager.save(host: Self.host.minimizedHost!, username: Self.username, password: Self.password)
-        passwordManager.save(host: Self.subdomain1.minimizedHost!, username: Self.username, password: Self.password)
+        PasswordManager.shared.save(host: Self.host.minimizedHost!, username: Self.username, password: Self.password)
+        PasswordManager.shared.save(host: Self.subdomain1.minimizedHost!, username: Self.username, password: Self.password)
 
-        let entries = passwordManager.entries(for: Self.host.minimizedHost!, exact: false)
+        let entries = PasswordManager.shared.entries(for: Self.host.minimizedHost!, exact: false)
         XCTAssertEqual(entries.count, 2)
         XCTAssertEqual(entries.last?.minimizedHost, Self.subdomain1.minimizedHost)
         XCTAssertEqual(entries.last?.username, Self.username)
         XCTAssertEqual(entries.first?.minimizedHost, Self.host.minimizedHost)
         XCTAssertEqual(entries.first?.username, Self.username)
+
+        PasswordManager.shared.deleteAll()
     }
 
     func testSearchEntries() {
-        passwordManager.save(host: Self.host.minimizedHost!, username: Self.username, password: Self.password)
+        PasswordManager.shared.save(host: Self.host.minimizedHost!, username: Self.username, password: Self.password)
 
-        let entries = passwordManager.find("git")
+        let entries = PasswordManager.shared.find("git")
         XCTAssertTrue(entries.count > 0, "Find returns no passwords, should be > 0")
         let found = entries.filter { $0.minimizedHost == Self.host.minimizedHost }
         XCTAssertEqual(found.count, 1)
         XCTAssertEqual(found.last?.username, Self.username)
+
+        PasswordManager.shared.deleteAll()
     }
 
     func testFetchAllEntries() {
-        passwordManager.save(host: Self.host.minimizedHost!, username: Self.username, password: Self.password)
+        PasswordManager.shared.save(host: Self.host.minimizedHost!, username: Self.username, password: Self.password)
 
-        let entries = passwordManager.fetchAll()
+        let entries = PasswordManager.shared.fetchAll()
         XCTAssertTrue(entries.count > 0, "FetchAll has no passwords, it should be > 0")
+
+        PasswordManager.shared.deleteAll()
     }
 
     func testGetPassword() {
-        passwordManager.save(host: Self.host.minimizedHost!, username: Self.username, password: Self.password)
+        PasswordManager.shared.save(host: Self.host.minimizedHost!, username: Self.username, password: Self.password)
 
-        let password = passwordManager.password(host: Self.host.minimizedHost!, username: Self.username)
+        let password = PasswordManager.shared.password(host: Self.host.minimizedHost!, username: Self.username)
         XCTAssertEqual(password, Self.password)
+
+        PasswordManager.shared.deleteAll()
     }
 
     func testDelete() {
-        passwordManager.save(host: Self.host.minimizedHost!, username: Self.username, password: Self.password)
+        PasswordManager.shared.save(host: Self.host.minimizedHost!, username: Self.username, password: Self.password)
 
-        passwordManager.delete(host: Self.host.minimizedHost!, for: Self.username)
+        PasswordManager.shared.delete(host: Self.host.minimizedHost!, for: Self.username)
 
-        let entries = passwordManager.entries(for: Self.host.minimizedHost!, exact: true)
+        let entries = PasswordManager.shared.entries(for: Self.host.minimizedHost!, exact: true)
         XCTAssertEqual(entries.count, 0)
+
+        PasswordManager.shared.deleteAll()
     }
 }
