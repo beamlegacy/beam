@@ -24,10 +24,10 @@ struct DocumentDetail: View {
 
                 HStack {
                     VStack {
-                        if let date = document.journal_date {
+                        if let date = document.journal_day {
                             HStack {
                                 Text("Journal Date:").bold()
-                                Text(date)
+                                Text(JournalDateConverter.toString(from: date))
                                 Spacer()
                             }
                         }

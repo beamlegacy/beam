@@ -546,6 +546,7 @@
 		A07F243A269D9624008918B0 /* PreferencesManager+Privacy.swift in Sources */ = {isa = PBXBuildFile; fileRef = A07F2439269D9624008918B0 /* PreferencesManager+Privacy.swift */; };
 		A08D739426413DEC00A9A604 /* UserProfileMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = A08D739326413DEC00A9A604 /* UserProfileMenu.swift */; };
 		A08DE20D26160DC800F8ABB4 /* BeamTextEdit+CopyPaste.swift in Sources */ = {isa = PBXBuildFile; fileRef = A08DE20C26160DC800F8ABB4 /* BeamTextEdit+CopyPaste.swift */; };
+		A092AF3A26D68E0500D793CB /* Beam5ToBeam6Migration.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = A092AF3926D68E0500D793CB /* Beam5ToBeam6Migration.xcmappingmodel */; };
 		A0A026772696614E00B94227 /* UserInformationsEditModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0A026762696614E00B94227 /* UserInformationsEditModalView.swift */; };
 		A0A0FED1268F05CC0080EAEF /* PreferencesManager+Passwords.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0A0FED0268F05CC0080EAEF /* PreferencesManager+Passwords.swift */; };
 		A0A3BED5266FD1B200566D6C /* BeamStepperButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0A3BED4266FD1B200566D6C /* BeamStepperButton.swift */; };
@@ -567,6 +568,7 @@
 		A0A84FEB26381B64008F0326 /* OtherPasswordsModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0A84FEA26381B64008F0326 /* OtherPasswordsModal.swift */; };
 		A0A84FF1263835D3008F0326 /* PasswordsTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0A84FF0263835D3008F0326 /* PasswordsTableView.swift */; };
 		A0AA693325C41C9B0038F9A3 /* MouseHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0AA693225C41C9B0038F9A3 /* MouseHandler.swift */; };
+		A0B8C44F26D550D300130FC7 /* Beam5ToBeam6MigrationPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0B8C44E26D550D300130FC7 /* Beam5ToBeam6MigrationPolicy.swift */; };
 		A0C0C2A725E5109F00BE34F0 /* InsertElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0C0C2A625E5109F00BE34F0 /* InsertElement.swift */; };
 		A0C58C382640026600FB95D8 /* ToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0C58C372640026600FB95D8 /* ToastView.swift */; };
 		A0C5D85B263C638A00FA6F6E /* CredentialsConfirmationToast.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0C5D85A263C638A00FA6F6E /* CredentialsConfirmationToast.swift */; };
@@ -580,6 +582,7 @@
 		A0CB7E54268E66CD00D15AFD /* View+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0CB7E53268E66CD00D15AFD /* View+Beam.swift */; };
 		A0CB7E5D268E733400D15AFD /* PreferencesManager+Browser.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0CB7E5C268E733400D15AFD /* PreferencesManager+Browser.swift */; };
 		A0CB7E5F268E7E9200D15AFD /* PreferencesManager+Cards.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0CB7E5E268E7E9200D15AFD /* PreferencesManager+Cards.swift */; };
+		A0CFFA4926D9304F004FC8C1 /* JournalDateConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0CFFA4826D9304F004FC8C1 /* JournalDateConverter.swift */; };
 		A0D06CDB260A2D2700264926 /* JournalScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0D06CDA260A2D2700264926 /* JournalScrollView.swift */; };
 		A0D1731425E4FC2D00FDE73C /* ReplaceText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0D1731325E4FC2D00FDE73C /* ReplaceText.swift */; };
 		A0D8B9C926B84FBA007D0748 /* PrivacyPreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0D8B9C126B84FBA007D0748 /* PrivacyPreferencesView.swift */; };
@@ -1481,6 +1484,7 @@
 		A07F2439269D9624008918B0 /* PreferencesManager+Privacy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PreferencesManager+Privacy.swift"; sourceTree = "<group>"; };
 		A08D739326413DEC00A9A604 /* UserProfileMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfileMenu.swift; sourceTree = "<group>"; };
 		A08DE20C26160DC800F8ABB4 /* BeamTextEdit+CopyPaste.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamTextEdit+CopyPaste.swift"; sourceTree = "<group>"; };
+		A092AF3926D68E0500D793CB /* Beam5ToBeam6Migration.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = Beam5ToBeam6Migration.xcmappingmodel; sourceTree = "<group>"; };
 		A0A026762696614E00B94227 /* UserInformationsEditModalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserInformationsEditModalView.swift; sourceTree = "<group>"; };
 		A0A0FED0268F05CC0080EAEF /* PreferencesManager+Passwords.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PreferencesManager+Passwords.swift"; sourceTree = "<group>"; };
 		A0A3BED4266FD1B200566D6C /* BeamStepperButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamStepperButton.swift; sourceTree = "<group>"; };
@@ -1489,6 +1493,8 @@
 		A0A84FEA26381B64008F0326 /* OtherPasswordsModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OtherPasswordsModal.swift; sourceTree = "<group>"; };
 		A0A84FF0263835D3008F0326 /* PasswordsTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordsTableView.swift; sourceTree = "<group>"; };
 		A0AA693225C41C9B0038F9A3 /* MouseHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MouseHandler.swift; sourceTree = "<group>"; };
+		A0B8C44E26D550D300130FC7 /* Beam5ToBeam6MigrationPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Beam5ToBeam6MigrationPolicy.swift; sourceTree = "<group>"; };
+		A0B8C45A26D556A900130FC7 /* Beam6.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Beam6.xcdatamodel; sourceTree = "<group>"; };
 		A0C0C2A625E5109F00BE34F0 /* InsertElement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsertElement.swift; sourceTree = "<group>"; };
 		A0C58C372640026600FB95D8 /* ToastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastView.swift; sourceTree = "<group>"; };
 		A0C5D85A263C638A00FA6F6E /* CredentialsConfirmationToast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialsConfirmationToast.swift; sourceTree = "<group>"; };
@@ -1502,6 +1508,7 @@
 		A0CB7E53268E66CD00D15AFD /* View+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+Beam.swift"; sourceTree = "<group>"; };
 		A0CB7E5C268E733400D15AFD /* PreferencesManager+Browser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PreferencesManager+Browser.swift"; sourceTree = "<group>"; };
 		A0CB7E5E268E7E9200D15AFD /* PreferencesManager+Cards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PreferencesManager+Cards.swift"; sourceTree = "<group>"; };
+		A0CFFA4826D9304F004FC8C1 /* JournalDateConverter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalDateConverter.swift; sourceTree = "<group>"; };
 		A0D06CDA260A2D2700264926 /* JournalScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalScrollView.swift; sourceTree = "<group>"; };
 		A0D1731325E4FC2D00FDE73C /* ReplaceText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplaceText.swift; sourceTree = "<group>"; };
 		A0D8B9C126B84FBA007D0748 /* PrivacyPreferencesView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PrivacyPreferencesView.swift; sourceTree = "<group>"; };
@@ -2208,6 +2215,7 @@
 				520088B72613265900AED835 /* Database.swift */,
 				520088BB2613266600AED835 /* Database+CoreDataProperties.swift */,
 				96F673D125B7207100E8175B /* StoredLink.swift */,
+				A0CFFA4826D9304F004FC8C1 /* JournalDateConverter.swift */,
 			);
 			path = CoreData;
 			sourceTree = "<group>";
@@ -2648,6 +2656,8 @@
 				5285672926275A8D00DDBE45 /* BeamToBeam2Migration.xcmappingmodel */,
 				9623ABBC26B002DC00309E5E /* Beam3ToBeam4MigrationPolicy.swift */,
 				9623ABBE26B0061400309E5E /* Beam3ToBeam4Migration.xcmappingmodel */,
+				A0B8C44E26D550D300130FC7 /* Beam5ToBeam6MigrationPolicy.swift */,
+				A092AF3926D68E0500D793CB /* Beam5ToBeam6Migration.xcmappingmodel */,
 			);
 			path = Migrations;
 			sourceTree = "<group>";
@@ -4799,6 +4809,7 @@
 				96FACC522604B0EE0088DD67 /* DeleteElement.swift in Sources */,
 				4181725E2581107C00317ED8 /* AccountManager.swift in Sources */,
 				032562AF26051D3B006513E4 /* RBFilter.m in Sources */,
+				A0CFFA4926D9304F004FC8C1 /* JournalDateConverter.swift in Sources */,
 				418171FF2581107C00317ED8 /* CoreDataManager.swift in Sources */,
 				8A4801A426A1EB66008F33FE /* PointAndShoot+DrawRules.swift in Sources */,
 				0325629526051D3B006513E4 /* RBContentBlocker.m in Sources */,
@@ -4826,6 +4837,7 @@
 				416C09F3259C919200AF2903 /* CATransaction+Beam.swift in Sources */,
 				418172382581107C00317ED8 /* TextNode.swift in Sources */,
 				418172502581107C00317ED8 /* NoteView.swift in Sources */,
+				A0B8C44F26D550D300130FC7 /* Beam5ToBeam6MigrationPolicy.swift in Sources */,
 				414B989925A21BB0002E81A3 /* BeamTextEdit+Formatter.swift in Sources */,
 				4181725F2581107C00317ED8 /* DocumentManager.swift in Sources */,
 				032562B326051D3B006513E4 /* RBDateRange.m in Sources */,
@@ -4863,6 +4875,7 @@
 				A0A0FED1268F05CC0080EAEF /* PreferencesManager+Passwords.swift in Sources */,
 				A53C8F4E26446C6C003A5DF8 /* SharingBannerInfo.swift in Sources */,
 				330D380E265FB76C00A2536B /* DownloaderView.swift in Sources */,
+				A092AF3A26D68E0500D793CB /* Beam5ToBeam6Migration.xcmappingmodel in Sources */,
 				A0CB5AEC268B241400D1EF02 /* PasswordsPreferencesView.swift in Sources */,
 				A5A955CB2695576D00F3FDD2 /* CalendarPickerView.swift in Sources */,
 				A5F1F6262643EDA600D41505 /* BeamNoteSharingUtils.swift in Sources */,
@@ -5155,19 +5168,15 @@
 		};
 		96D5AE7B264BFD40003AD516 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			productRef = 96D5AE7A264BFD40003AD516 /* DomainParser */;
 		};
 		96D5AE7D264BFD4C003AD516 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			productRef = 96D5AE7C264BFD4C003AD516 /* CocoaLumberjackSwift */;
 		};
 		A0A6F2A125D1B73400EFC4BE /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			productRef = A0A6F2A025D1B73400EFC4BE /* Quick */;
 		};
 		A0A6F2A325D1B73A00EFC4BE /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			productRef = A0A6F2A225D1B73A00EFC4BE /* Nimble */;
 		};
 /* End PBXTargetDependency section */
 
@@ -6035,14 +6044,6 @@
 				minimumVersion = 5.7.4;
 			};
 		};
-		96D5AE61264BF56F003AD516 /* XCRemoteSwiftPackageReference "SwiftDomainParser" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/Dashlane/SwiftDomainParser.git";
-			requirement = {
-				branch = master;
-				kind = branch;
-			};
-		};
 		96D5AE83264C01AD003AD516 /* XCRemoteSwiftPackageReference "TLDExtractSwift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/gumob/TLDExtractSwift";
@@ -6149,30 +6150,10 @@
 			package = 964FE5DF2625D8AA00966E03 /* XCRemoteSwiftPackageReference "GRDB.swift" */;
 			productName = GRDB;
 		};
-		96D5AE7A264BFD40003AD516 /* DomainParser */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 96D5AE61264BF56F003AD516 /* XCRemoteSwiftPackageReference "SwiftDomainParser" */;
-			productName = DomainParser;
-		};
-		96D5AE7C264BFD4C003AD516 /* CocoaLumberjackSwift */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */;
-			productName = CocoaLumberjackSwift;
-		};
 		96D5AE84264C01AD003AD516 /* TLDExtract */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 96D5AE83264C01AD003AD516 /* XCRemoteSwiftPackageReference "TLDExtractSwift" */;
 			productName = TLDExtract;
-		};
-		A0A6F2A025D1B73400EFC4BE /* Quick */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */;
-			productName = Quick;
-		};
-		A0A6F2A225D1B73A00EFC4BE /* Nimble */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */;
-			productName = Nimble;
 		};
 		A0A6F2A425D1B74200EFC4BE /* Quick */ = {
 			isa = XCSwiftPackageProductDependency;
@@ -6205,13 +6186,14 @@
 		528F296826B449EA006857E5 /* Beam.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				A0B8C45A26D556A900130FC7 /* Beam6.xcdatamodel */,
 				528F297226B449FB006857E5 /* Beam5.xcdatamodel */,
 				528F296926B449EA006857E5 /* Beam3.xcdatamodel */,
 				528F296A26B449EA006857E5 /* Beam.xcdatamodel */,
 				528F296B26B449EA006857E5 /* Beam2.xcdatamodel */,
 				528F296C26B449EA006857E5 /* Beam4.xcdatamodel */,
 			);
-			currentVersion = 528F297226B449FB006857E5 /* Beam5.xcdatamodel */;
+			currentVersion = A0B8C45A26D556A900130FC7 /* Beam6.xcdatamodel */;
 			path = Beam.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;
