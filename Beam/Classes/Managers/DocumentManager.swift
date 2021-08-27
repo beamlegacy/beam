@@ -309,7 +309,7 @@ public class DocumentManager: NSObject {
                        previousChecksum: document.beam_api_checksum,
                        version: document.version,
                        isPublic: document.is_public,
-                       journalDate: JournalDateConverter.toString(from: document.journal_day)
+                       journalDate: document.document_type == DocumentType.journal.rawValue ? JournalDateConverter.toString(from: document.journal_day) : nil
         )
     }
 
