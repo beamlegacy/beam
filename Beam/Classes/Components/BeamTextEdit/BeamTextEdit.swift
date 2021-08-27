@@ -162,8 +162,8 @@ public extension CALayer {
 
     @objc private func contentOffsetDidChange(notification: Notification) {
         if enclosingScrollView != nil {
-            if visibleRect.maxY > realContentSize.height {
-                invalidateIntrinsicContentSize()
+            if visibleRect.maxY >= realContentSize.height {
+                invalidateLayout()
             }
         }
     }
@@ -291,6 +291,7 @@ public extension CALayer {
         shouldDisableAnimationAtNextLayout = true
     }
     func relayoutRoot() {
+        layoutInvalidated = false
         let r = bounds
         let textNodeWidth = Self.textNodeWidth(for: frame.size)
         var rect = NSRect()
@@ -398,12 +399,13 @@ public extension CALayer {
     }
 
     var realContentSize: NSSize = .zero
+    var safeContentSize: NSSize = .zero
     override public var intrinsicContentSize: NSSize {
         let textNodeWidth = Self.textNodeWidth(for: frame.size)
         rootNode.availableWidth = textNodeWidth
         let height = rootNode.idealSize.height + topOffsetActual + footerHeight + cardTopSpace
         realContentSize = NSSize(width: textNodeWidth, height: height)
-        var safeContentSize = realContentSize
+        safeContentSize = realContentSize
         if enclosingScrollView != nil {
             safeContentSize.height = max(visibleRect.maxY, safeContentSize.height)
         }
@@ -420,13 +422,24 @@ public extension CALayer {
         _ = scrollToVisible(spot)
     }
 
+    var layoutInvalidated = false
     public func invalidateLayout() {
-        guard !inRelayout else { return }
+        guard !inRelayout, !layoutInvalidated else { return }
+        layoutInvalidated = true
         invalidateIntrinsicContentSize()
+        if realContentSize.height <= safeContentSize.height {
+            // then we are identical, so the system will not call for a relayout
+            DispatchQueue.main.async { [weak self] in
+                self?.relayoutRoot()
+            }
+        }
+
         invalidate()
+
         if let stack = superview as? JournalStackView {
             stack.invalidateLayout()
         }
+
     }
 
     public func invalidate() {
