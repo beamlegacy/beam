@@ -598,6 +598,7 @@
 		A500F93626BAD78A0029D34F /* audio.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = A500F92E26BAD78A0029D34F /* audio.mp3 */; };
 		A500F93A26BAE2850029D34F /* UITests-Media.html in Resources */ = {isa = PBXBuildFile; fileRef = A500F93926BAE2850029D34F /* UITests-Media.html */; };
 		A500F93C26BAEFCA0029D34F /* video.mov in Resources */ = {isa = PBXBuildFile; fileRef = A500F93B26BAEFCA0029D34F /* video.mov */; };
+		A50241D426D8FA6600C93E1E /* GutterItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50241D326D8FA6600C93E1E /* GutterItemView.swift */; };
 		A50612D626CC75200053AD37 /* Calendar+Calculations.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50612D526CC75200053AD37 /* Calendar+Calculations.swift */; };
 		A50612DF26CC75C70053AD37 /* Calendar+CalculationsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50612DE26CC75C70053AD37 /* Calendar+CalculationsTests.swift */; };
 		A50B372425FA180E00E5D34F /* NSApperance+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50B372325FA180E00E5D34F /* NSApperance+Beam.swift */; };
@@ -689,6 +690,9 @@
 		A5E04DEB263BEDA600BFB4C1 /* BrowserTabsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E04DEA263BEDA600BFB4C1 /* BrowserTabsManager.swift */; };
 		A5E112E926BA94E800BAD335 /* BrowserTabUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E112E826BA94E800BAD335 /* BrowserTabUITests.swift */; };
 		A5EA892826A9C08100AB5A16 /* CalendarPickerViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5EA892726A9C08100AB5A16 /* CalendarPickerViewModelTests.swift */; };
+		A5EBF14A26D7BE3100597A1C /* GutterContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5EBF14926D7BE3100597A1C /* GutterContainerView.swift */; };
+		A5EBF15326D7BF8A00597A1C /* BeamTextEdit+Gutter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5EBF15226D7BF8A00597A1C /* BeamTextEdit+Gutter.swift */; };
+		A5EBF15526D8F2FD00597A1C /* VisualEffectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5EBF15426D8F2FD00597A1C /* VisualEffectView.swift */; };
 		A5ECC8FF2679EBB500D8A087 /* HoverVisibleModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5ECC8FE2679EBB500D8A087 /* HoverVisibleModifier.swift */; };
 		A5F1F6262643EDA600D41505 /* BeamNoteSharingUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F1F6252643EDA600D41505 /* BeamNoteSharingUtils.swift */; };
 		A5FE1615264AD64900B7526D /* RecentsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5FE1614264AD64900B7526D /* RecentsListView.swift */; };
@@ -1520,6 +1524,7 @@
 		A500F92E26BAD78A0029D34F /* audio.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = audio.mp3; sourceTree = "<group>"; };
 		A500F93926BAE2850029D34F /* UITests-Media.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "UITests-Media.html"; sourceTree = "<group>"; };
 		A500F93B26BAEFCA0029D34F /* video.mov */ = {isa = PBXFileReference; lastKnownFileType = video.quicktime; path = video.mov; sourceTree = "<group>"; };
+		A50241D326D8FA6600C93E1E /* GutterItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GutterItemView.swift; sourceTree = "<group>"; };
 		A50612D526CC75200053AD37 /* Calendar+Calculations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar+Calculations.swift"; sourceTree = "<group>"; };
 		A50612DE26CC75C70053AD37 /* Calendar+CalculationsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar+CalculationsTests.swift"; sourceTree = "<group>"; };
 		A50B372325FA180E00E5D34F /* NSApperance+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSApperance+Beam.swift"; sourceTree = "<group>"; };
@@ -1612,6 +1617,9 @@
 		A5E04DEA263BEDA600BFB4C1 /* BrowserTabsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserTabsManager.swift; sourceTree = "<group>"; };
 		A5E112E826BA94E800BAD335 /* BrowserTabUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserTabUITests.swift; sourceTree = "<group>"; };
 		A5EA892726A9C08100AB5A16 /* CalendarPickerViewModelTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CalendarPickerViewModelTests.swift; sourceTree = "<group>"; };
+		A5EBF14926D7BE3100597A1C /* GutterContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GutterContainerView.swift; sourceTree = "<group>"; };
+		A5EBF15226D7BF8A00597A1C /* BeamTextEdit+Gutter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamTextEdit+Gutter.swift"; sourceTree = "<group>"; };
+		A5EBF15426D8F2FD00597A1C /* VisualEffectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualEffectView.swift; sourceTree = "<group>"; };
 		A5ECC8FE2679EBB500D8A087 /* HoverVisibleModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HoverVisibleModifier.swift; sourceTree = "<group>"; };
 		A5F1F6252643EDA600D41505 /* BeamNoteSharingUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamNoteSharingUtils.swift; sourceTree = "<group>"; };
 		A5FE1614264AD64900B7526D /* RecentsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentsListView.swift; sourceTree = "<group>"; };
@@ -2331,6 +2339,7 @@
 				9691E42E25B108D200A13080 /* BrowsingSections */,
 				961EC50925B495CA009FA322 /* Layers */,
 				418171BA2581107C00317ED8 /* Markdown */,
+				A50241CB26D8FA5500C93E1E /* Gutter */,
 				96C9AAB82593BB67007D3D98 /* Widget.swift */,
 				418171B92581107C00317ED8 /* TextNode.swift */,
 				9691E3D725AD9F3300A13080 /* TextRoot.swift */,
@@ -2526,6 +2535,7 @@
 				338A669F268DC26000B056EB /* LayerRemoverAnimationDelegate.swift */,
 				333A0A1F268C4EED004B7905 /* KeyEventHandlingView.swift */,
 				33CCBFA526A61C14004B6236 /* AutoDismissingWindow.swift */,
+				A5EBF15426D8F2FD00597A1C /* VisualEffectView.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -3492,6 +3502,16 @@
 				A0DB19EF26829BF900956579 /* AllowListViewModel.swift */,
 			);
 			path = Privacy;
+			sourceTree = "<group>";
+		};
+		A50241CB26D8FA5500C93E1E /* Gutter */ = {
+			isa = PBXGroup;
+			children = (
+				A5EBF15226D7BF8A00597A1C /* BeamTextEdit+Gutter.swift */,
+				A5EBF14926D7BE3100597A1C /* GutterContainerView.swift */,
+				A50241D326D8FA6600C93E1E /* GutterItemView.swift */,
+			);
+			path = Gutter;
 			sourceTree = "<group>";
 		};
 		A5153EDB260CC4AC00C84902 /* UIElements */ = {
@@ -4647,6 +4667,7 @@
 				523FF66125C31D8800B4BD6E /* Data+String.swift in Sources */,
 				A57BFEBD2615B49C00CFB646 /* TableRowView.swift in Sources */,
 				A515597B267786E1006F6D6F /* MediaPlayerMessageHandler.swift in Sources */,
+				A5EBF15326D7BF8A00597A1C /* BeamTextEdit+Gutter.swift in Sources */,
 				418172AA25811A3A00317ED8 /* BeamTextField.swift in Sources */,
 				33B2746A264C103400A318CD /* SmallUpdateIndicatorView.swift in Sources */,
 				0D4EC934268372E800487B75 /* FrecencyScore.swift in Sources */,
@@ -4700,6 +4721,7 @@
 				41855A3A25D1334F00DA49DC /* BeamCollectionView.swift in Sources */,
 				52FB30CA25E3D7B3001BF098 /* String+Title.swift in Sources */,
 				520088C42613297100AED835 /* DatabaseRequest.swift in Sources */,
+				A5EBF15526D8F2FD00597A1C /* VisualEffectView.swift in Sources */,
 				A5CA5DBA2624FF4A004E9D3E /* BeamNSTableView.swift in Sources */,
 				8AF61F14267BA292006DD5C2 /* RBAllowlistEntry.m in Sources */,
 				521EEDE525937F7F00BA2485 /* DocumentsList.swift in Sources */,
@@ -4867,6 +4889,7 @@
 				A5A955CB2695576D00F3FDD2 /* CalendarPickerView.swift in Sources */,
 				A5F1F6262643EDA600D41505 /* BeamNoteSharingUtils.swift in Sources */,
 				A00AE82B265EAE9A00156220 /* BeamSearchField.swift in Sources */,
+				A50241D426D8FA6600C93E1E /* GutterItemView.swift in Sources */,
 				418172202581107C00317ED8 /* Information.swift in Sources */,
 				4181727E258110D100317ED8 /* AppDelegate+URL.swift in Sources */,
 				A5E04DEB263BEDA600BFB4C1 /* BrowserTabsManager.swift in Sources */,
@@ -4942,6 +4965,7 @@
 				BAA677E962485A7EDFAF72AC /* PointAndShoot.swift in Sources */,
 				A07F243A269D9624008918B0 /* PreferencesManager+Privacy.swift in Sources */,
 				9691C28B2645369100F70DA1 /* ElementNode.swift in Sources */,
+				A5EBF14A26D7BE3100597A1C /* GutterContainerView.swift in Sources */,
 				9691C2BC2645F93100F70DA1 /* EmbedNode.swift in Sources */,
 				BAA67DDD4452566DFF99171E /* PasswordOverlayController.swift in Sources */,
 				960A57E4264C84BD0061E8D2 /* ProxyElement.swift in Sources */,
@@ -6032,7 +6056,7 @@
 			repositoryURL = "https://github.com/groue/GRDB.swift.git";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 5.7.4;
+				minimumVersion = 5.9.0;
 			};
 		};
 		96D5AE61264BF56F003AD516 /* XCRemoteSwiftPackageReference "SwiftDomainParser" */ = {
