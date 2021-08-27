@@ -135,7 +135,7 @@ extension DocumentStruct {
         self.isPublic = document.is_public
         self.databaseId = document.database_id
         self.beamObjectPreviousChecksum = document.beam_object_previous_checksum
-        self.journalDate = document.journal_date
+        self.journalDate = JournalDateConverter.toString(from: document.journal_day)
     }
 
     init(documentStruct: DocumentStruct) {

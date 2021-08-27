@@ -309,7 +309,7 @@ public class DocumentManager: NSObject {
                        previousChecksum: document.beam_api_checksum,
                        version: document.version,
                        isPublic: document.is_public,
-                       journalDate: document.journal_date
+                       journalDate: JournalDateConverter.toString(from: document.journal_day)
         )
     }
 
@@ -475,7 +475,7 @@ public class DocumentManager: NSObject {
             document.document_type == documentTypeInt &&
             document.deleted_at?.intValue == documentApiType.deletedAt?.intValue &&
             document.id.uuidString.lowercased() == documentApiType.id &&
-            documentApiType.journalDate == document.journal_date
+            documentApiType.journalDate == JournalDateConverter.toString(from: document.journal_day)
     }
 
     private func isEqual(_ document: Document, to documentStruct: DocumentStruct) -> Bool {
@@ -633,16 +633,16 @@ public class DocumentManager: NSObject {
     // MARK: Validations
     private func checkValidations(_ context: NSManagedObjectContext, _ document: Document) throws {
         Logger.shared.logDebug("checkValidations for \(document.titleAndId)", category: .documentDebug)
-        try checkJournalDate(document)
+        try checkJournalDay(document)
         try checkDuplicateJournalDates(context, document)
         try checkDuplicateTitles(context, document)
     }
 
-    private func checkJournalDate(_ document: Document) throws {
+    private func checkJournalDay(_ document: Document) throws {
         guard document.documentType == .journal else { return }
-        guard document.journal_date == nil else { return }
+        guard String(document.journal_day).count != 8 else {return}
 
-        let errString = "journal_date is nil for \(document.titleAndId)"
+        let errString = "journal_day is \(document.journal_day) for \(document.titleAndId)"
 
         Logger.shared.logError(errString, category: .document)
 
@@ -655,16 +655,16 @@ public class DocumentManager: NSObject {
         // If document is deleted, we don't need to check title uniqueness
         guard document.deleted_at == nil else { return }
         guard document.documentType == .journal else { return }
-        guard let journal_date = document.journal_date else { return }
+        guard String(document.journal_day).count == 8 else {return}
 
-        let predicate = NSPredicate(format: "journal_date = %@ AND id != %@ AND deleted_at == nil AND database_id = %@",
-                                    journal_date,
+        let predicate = NSPredicate(format: "journal_day == %d AND id != %@ AND deleted_at == nil AND database_id = %@",
+                                    document.journal_day,
                                     document.id as CVarArg,
                                     document.database_id as CVarArg)
         let documents = (try? Document.fetchAll(context, predicate).map { DocumentStruct(document: $0) }) ?? []
 
         if !documents.isEmpty {
-            let errString = "Journal Date \(journal_date) for \(document.titleAndId) already used in \(documents.count) other documents"
+            let errString = "Journal Date \(document.journal_day) for \(document.titleAndId) already used in \(documents.count) other documents"
 
             Logger.shared.logWarning(errString, category: .document)
 
@@ -1290,6 +1290,9 @@ extension DocumentManager {
                 document.update(documentStruct)
                 document.data = documentStruct.data
                 document.updated_at = BeamDate.now
+                if let journalDate = documentStruct.journalDate {
+                    document.journal_day = JournalDateConverter.toInt(from: journalDate)
+                }
 
                 do {
                     try self.checkValidations(context, document)
