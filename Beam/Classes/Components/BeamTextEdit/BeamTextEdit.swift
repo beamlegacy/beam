@@ -308,17 +308,19 @@ public extension CALayer {
 
     private func updateLayout(for rect: NSRect) {
         let textNodeWidth = Self.textNodeWidth(for: frame.size)
+        let workBlock = { [unowned self] in
+            self.rootNode.availableWidth = textNodeWidth
+            self.updateCardHearderLayer(rect)
+            self.rootNode.setLayout(rect)
+            self.updateTrailingGutterLayout(textRect: rect)
+        }
         if isResizing || shouldDisableAnimationAtNextLayout {
             shouldDisableAnimationAtNextLayout = false
             CATransaction.disableAnimations {
-                rootNode.availableWidth = textNodeWidth
-                updateCardHearderLayer(rect)
-                rootNode.setLayout(rect)
+                workBlock()
             }
         } else {
-            rootNode.availableWidth = textNodeWidth
-            updateCardHearderLayer(rect)
-            rootNode.setLayout(rect)
+            workBlock()
         }
     }
 

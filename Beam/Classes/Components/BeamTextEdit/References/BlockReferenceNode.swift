@@ -11,6 +11,13 @@ import BeamCore
 
 class BlockReferenceNode: TextNode {
     var blockReference: ProxyTextNode?
+    private var gutterItem: GutterItem?
+
+    override var hover: Bool {
+        didSet {
+            updateLayoutOnHover()
+        }
+    }
 
     init(parent: Widget, element: BeamElement) {
         super.init(parent: parent, element: element, nodeProvider: NodeProviderImpl(proxy: true))
@@ -24,10 +31,22 @@ class BlockReferenceNode: TextNode {
         setupBlockReference()
     }
 
+    override func willBeRemovedFromNote() {
+        super.willBeRemovedFromNote()
+        if let gutterItem = gutterItem {
+            editor?.removeGutterItem(item: gutterItem)
+        }
+    }
+
     static let lockButtonName = "lock"
 
+    private func updateReadOnlyMode(_ readOnly: Bool) {
+        self.readOnly = readOnly
+        self.cursor = readOnly ? .arrow : nil
+    }
+
     func setupBlockReference() {
-        readOnly = true
+        updateReadOnlyMode(true)
         var refNoteId: UUID
         var refElementId: UUID
 
@@ -57,14 +76,17 @@ class BlockReferenceNode: TextNode {
 
         useActionLayer = false
         let lockButton = LockButton(Self.lockButtonName, locked: true, changed: { [unowned self] lock in
-            self.readOnly = lock
+            updateReadOnlyMode(lock)
         })
+        lockButton.cursor = .arrow
+        lockButton.layer.opacity = 0.0
         addLayer(lockButton)
 
-        _ = createCustomActionLayer(named: "visitSource", icons: ["field-card"], text: referencingNote.title, at: CGPoint(x: availableWidth + childInset + actionLayerPadding, y: firstLineBaseline)) {
-            self.editor?.openCard(referencingNote.id, self.displayedElement.id)
+        let item = GutterItem(id: self.elementId, title: referencingNote.title, icon: "field-card") { [weak self] in
+            self?.openReferencedCard()
         }
-
+        editor?.addGutterItem(item: item)
+        gutterItem = item
         setAccessibilityLabel("BlockReferenceNode")
         setAccessibilityRole(.textArea)
 
@@ -76,10 +98,10 @@ class BlockReferenceNode: TextNode {
         guard let l = layers[Self.blockLayerName] else {
             let _blockLayer = CALayer()
             _blockLayer.cornerRadius = 6
-            _blockLayer.backgroundColor = BeamColor.AlphaGray.nsColor.withAlphaComponent(0.2).cgColor
             _blockLayer.zPosition = -1
             let blockLayer = Layer(name: Self.blockLayerName, layer: _blockLayer)
             addLayer(blockLayer)
+            updateBackgroundColor(focused: isFocused, hover: hover)
             return blockLayer
         }
 
@@ -91,11 +113,11 @@ class BlockReferenceNode: TextNode {
     }
 
     override func onFocus() {
-        createBlockLayerIfNeeded().layer.backgroundColor = BeamColor.Bluetiful.nsColor.withAlphaComponent(0.2).cgColor
+        updateBackgroundColor(focused: true, hover: hover)
     }
 
     override func onUnfocus() {
-        createBlockLayerIfNeeded().layer.backgroundColor = BeamColor.AlphaGray.nsColor.withAlphaComponent(0.2).cgColor
+        updateBackgroundColor(focused: false, hover: hover)
     }
 
     override func updateCursor() {
@@ -105,10 +127,9 @@ class BlockReferenceNode: TextNode {
             super.updateCursor()
         }
     }
+
     override func updateLayout() {
         super.updateLayout()
-        guard let lockButton = layers[Self.lockButtonName] else { return }
-        lockButton.frame = NSRect(origin: CGPoint(x: availableWidth + 20, y: 0), size: lockButton.frame.size)
 
         let blockLayer = createBlockLayerIfNeeded()
         let shift = CGFloat(0) //indent
@@ -117,22 +138,46 @@ class BlockReferenceNode: TextNode {
         f.size.height = idealSize.height - 5
         blockLayer.frame = f
 
-        if let actionLayer = layers["visitSource"] {
-            actionLayer.frame = NSRect(origin: CGPoint(x: availableWidth + childInset + actionLayerPadding + 14, y: 0), size: actionLayer.frame.size)
-
+        if let lockButton = layers[Self.lockButtonName] {
+            lockButton.frame = NSRect(origin: CGPoint(x: f.maxX + 10, y: 0), size: lockButton.frame.size)
         }
+        self.gutterItem?.updateFrameFromNode(self)
+    }
+
+    private func updateBackgroundColor(focused: Bool, hover: Bool) {
+        var color: CGColor
+        if focused {
+            color = BeamColor.Bluetiful.nsColor.withAlphaComponent(0.2).cgColor
+        } else if hover {
+            color = BeamColor.Nero.nsColor.add(BeamColor.Niobium.nsColor.withAlphaComponent(0.02)).cgColor
+        } else {
+            color = BeamColor.Nero.cgColor
+        }
+        createBlockLayerIfNeeded().layer.backgroundColor = color
+    }
+
+    private func updateLayoutOnHover() {
+        gutterItem?.updateFrameFromNode(self)
+        if let lockButton = layers[Self.lockButtonName] {
+            lockButton.layer.opacity = hover ? 1.0 : 0.0
+        }
+        updateBackgroundColor(focused: isFocused, hover: hover)
+    }
+
+    private func openReferencedCard() {
+        guard let noteid = self.displayedElement.note?.id else { return }
+        self.editor?.openCard(noteid, self.displayedElement.id)
     }
 
     func showMenu(mouseInfo: MouseInfo) {
         let items = [
             ContextMenuItem(title: readOnly ? "Edit" : "Stop Editing", action: { [unowned self] in
-                self.readOnly.toggle()
+                updateReadOnlyMode(!self.readOnly)
                 guard let lockButton = self.layers[Self.lockButtonName] as? LockButton else { return }
                 lockButton.locked = self.readOnly
             }),
             ContextMenuItem(title: "View Origin", action: {
-                guard let noteid = self.displayedElement.note?.id else { return }
-                self.editor?.openCard(noteid, self.displayedElement.id)
+                self.openReferencedCard()
             }),
 
             ContextMenuItem(title: "Remove", action: {
