@@ -119,6 +119,7 @@ public class BeamNote: BeamElement {
             let date = type.journalDate ?? creationDate
             title = BeamDate.journalNoteTitle(for: date)
         }
+        open = true
         checkHasNote()
     }
 
