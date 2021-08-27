@@ -1229,7 +1229,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                                 expect(remoteStruct?.database?.id) == newDatabase.uuidString
                             }
 
-                            it("cancels previous unfinished saves") {
+                            xit("cancels previous unfinished saves") {
                                 beamHelper.disableNetworkRecording()
                                 helper.deleteAllDatabases()
                                 docStruct = helper.createDocumentStruct()
@@ -1388,7 +1388,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                             expect(remoteStruct?.database?.id) == newDatabase.uuidString
                         }
 
-                        it("cancels previous unfinished saves") {
+                        xit("cancels previous unfinished saves") {
                             beamHelper.disableNetworkRecording()
                             helper.deleteAllDatabases()
                             docStruct = helper.createDocumentStruct()
@@ -1545,7 +1545,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                             expect(remoteStruct?.database?.id) == newDatabase.uuidString
                         }
 
-                        it("cancels previous unfinished saves") {
+                        xit("cancels previous unfinished saves") {
                             beamHelper.disableNetworkRecording()
                             helper.deleteAllDatabases()
                             docStruct = helper.createDocumentStruct()
