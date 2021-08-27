@@ -440,7 +440,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
     private func configureSelectionLayer() {
         selectionLayer.anchorPoint = CGPoint()
-        selectionLayer.frame = NSRect(x: 0, y: 0, width: layer.frame.width, height: layer.frame.height)
+        selectionLayer.frame = NSRect(x: 0, y: 0, width: layer.frame.width, height: layer.frame.height).rounded()
         selectionLayer.setNeedsDisplay()
         selectionLayer.backgroundColor = NSColor(white: 1, alpha: 0).cgColor
         selectionLayer.name = "SelectionLayer"
@@ -670,7 +670,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     internal var layers: [String: Layer] = [:]
     func addLayer(_ layer: Layer, origin: CGPoint? = nil, global: Bool = false) {
         layer.widget = self
-        layer.frame = CGRect(origin: origin ?? layer.frame.origin, size: layer.frame.size)
+        layer.frame = CGRect(origin: origin ?? layer.frame.origin, size: layer.frame.size).rounded()
 
         layer.layer.deepContentsScale = self.layer.contentsScale
 

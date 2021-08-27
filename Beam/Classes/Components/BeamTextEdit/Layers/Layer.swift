@@ -83,7 +83,7 @@ import AVFoundation
             layer.frame
         }
         set {
-            layer.frame = newValue
+            layer.frame = newValue.rounded()
         }
     }
 
@@ -134,7 +134,7 @@ extension Layer {
         maskLayer.contents = image
         iconLayer.mask = maskLayer
         iconLayer.backgroundColor = color.cgColor
-        iconLayer.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: size ?? image?.size ?? CGSize(width: 20, height: 20))
+        iconLayer.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: size ?? image?.size ?? CGSize(width: 20, height: 20)).rounded()
         maskLayer.frame = iconLayer.bounds
         return iconLayer
     }
@@ -144,7 +144,7 @@ extension Layer {
         textLayer.string = label
         textLayer.foregroundColor = color.cgColor
         textLayer.fontSize = size
-        textLayer.frame = CGRect(origin: CGPoint(), size: textLayer.preferredFrameSize())
+        textLayer.frame = CGRect(origin: CGPoint(), size: textLayer.preferredFrameSize()).rounded()
 
         return textLayer
     }
@@ -156,7 +156,7 @@ extension Layer {
     static func image(image: NSImage, size: CGSize? = nil) -> CALayer {
         let imageLayer = CALayer()
         imageLayer.contents = image
-        imageLayer.frame = CGRect(origin: .zero, size: size ?? image.size)
+        imageLayer.frame = CGRect(origin: .zero, size: size ?? image.size).rounded()
         imageLayer.position = .zero
         imageLayer.anchorPoint = .zero
         return imageLayer
@@ -168,7 +168,7 @@ extension Layer {
 
     static func animatedImage(imageData: Data, size: CGSize? = nil) -> CALayer? {
         guard let imageLayer = animationForImageData(with: imageData) else { return nil }
-        imageLayer.frame = CGRect(origin: .zero, size: size ?? imageLayer.bounds.size)
+        imageLayer.frame = CGRect(origin: .zero, size: size ?? imageLayer.bounds.size).rounded()
         imageLayer.position = .zero
         imageLayer.anchorPoint = .zero
         return imageLayer
@@ -201,7 +201,7 @@ extension Layer {
                 // get image size
                 if let imageWidth = (dict[kCGImagePropertyPixelWidth] as? NSNumber)?.floatValue,
                    let imageHeight = (dict[kCGImagePropertyPixelHeight] as? NSNumber)?.floatValue {
-                    layer.frame = NSRect(x: 0, y: 0, width: imageWidth, height: imageHeight)
+                    layer.frame = NSRect(x: 0, y: 0, width: imageWidth, height: imageHeight).rounded()
                 }
                 if let imageDict = dict[kCGImagePropertyGIFDictionary],
                    let value = imageDict[kCGImagePropertyGIFDelayTime] as? NSNumber {
