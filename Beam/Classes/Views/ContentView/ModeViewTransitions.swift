@@ -45,9 +45,9 @@ private struct WebContentTransitionModifier: ViewModifier {
         content
             .scaleEffect(scale)
             .offsetEffect(offset)
-            .animation(isResizing ? nil : Animation.easeInOut(duration: 0.2).delay(delay))
+            .animation(isResizing ? nil : Animation.easeInOut(duration: 0.1).delay(delay))
             .opacity(opacity)
-            .animation(isResizing ? nil : Animation.easeInOut(duration: 0.1).delay(opacityDelay))
+            .animation(isResizing ? nil : Animation.easeInOut(duration: 0.07).delay(opacityDelay))
     }
 }
 
@@ -55,12 +55,12 @@ extension AnyTransition {
     private static func webContentInTransition(_ isResizing: Bool) -> AnyTransition {
         .modifier(
             active: WebContentTransitionModifier(isResizing: isResizing, opacity: 0.0, scale: 0.98, offset: CGSize(width: 0, height: 20)),
-            identity: WebContentTransitionModifier(isResizing: isResizing, delay: 0.05, opacityDelay: 0.05)
+            identity: WebContentTransitionModifier(isResizing: isResizing, delay: 0.03, opacityDelay: 0.03)
         )
     }
     private static func webContentOutTransition(_ isResizing: Bool) -> AnyTransition {
         .modifier(
-            active: WebContentTransitionModifier(isResizing: isResizing, opacity: 0.0, scale: 0.98, delay: 0.0, opacityDelay: 0.1, offset: CGSize(width: 0, height: 20)),
+            active: WebContentTransitionModifier(isResizing: isResizing, opacity: 0.0, scale: 0.98, delay: 0.0, opacityDelay: 0.07, offset: CGSize(width: 0, height: 20)),
             identity: WebContentTransitionModifier(isResizing: isResizing)
         )
     }
@@ -80,13 +80,13 @@ private struct NoteContentTransitionModifier: ViewModifier {
     }
     var delay: Double {
         // animation delayed when transitioning from web
-        transitionModel.previousMode == .web ? 0.1 : 0.0
+        transitionModel.previousMode == .web ? 0.07 : 0.0
     }
     func body(content: Content) -> some View {
         content
             .scaleEffect(scale)
             .offsetEffect(offset)
-            .animation(enableTransition ? Animation.easeInOut(duration: 0.2).delay(delay) : nil)
+            .animation(enableTransition ? Animation.easeInOut(duration: 0.1).delay(delay) : nil)
     }
 }
 
