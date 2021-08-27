@@ -9,6 +9,19 @@ import Foundation
 import BeamCore
 import Promises
 
+enum Text2QuoteError: Error {
+    case imageDownloadFailed
+}
+
+extension Text2QuoteError: LocalizedError {
+    var errorDescription: String? {
+        switch self {
+        case .imageDownloadFailed:
+            return NSLocalizedString("Image download failed", comment: "Image might be empty or invalid")
+        }
+    }
+}
+
 extension PointAndShoot {
     /// Convert BeamText to quote BeamElement. Takes care of converting video links to embeds and converting + downloading image links
     /// - Parameters:
@@ -27,17 +40,19 @@ extension PointAndShoot {
         }
         // If quote is image, download and convert quote to image kind
         if let src = quote.imageLink,
-           let downloadImage = self.page.downloadManager?.downloadImage {
+           let downloadManager = self.page.downloadManager {
             let fileStorage = self.page.fileStorage
             return Promise<BeamElement> { fulfill, reject in
-                downloadImage(src, self.page.url ?? src, { result in
+                return downloadManager.downloadImage(src, pageUrl: self.page.url ?? src, completion: { result in
                     do {
-                        if let (data, mimeType) = result {
-                            let fileId = data.MD5
-                            try fileStorage?.insert(name: src.lastPathComponent, uid: fileId, data: data, type: mimeType)
-                            quote.convertToImage(fileId)
-                            fulfill(quote)
+                        guard let (data, mimeType) = result else {
+                            throw Text2QuoteError.imageDownloadFailed
                         }
+
+                        let fileId = data.MD5
+                        try fileStorage?.insert(name: src.lastPathComponent, uid: fileId, data: data, type: mimeType)
+                        quote.convertToImage(fileId)
+                        fulfill(quote)
                     } catch let error {
                         reject(error)
                     }

@@ -369,6 +369,7 @@
 		87F47CC92669415800D01960 /* WebAutocompleteContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F47CC82669415800D01960 /* WebAutocompleteContext.swift */; };
 		8A14155A267393E2005F2464 /* WebPositionsTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A141559267393E2005F2464 /* WebPositionsTest.swift */; };
 		8A1B8FCE26A9CB31006D849D /* PointAndShootPathFrame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A1B8FCD26A9CB31006D849D /* PointAndShootPathFrame.swift */; };
+		8A23713226D91C2800D8526A /* PointAndShoot+Alert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A23713126D91C2800D8526A /* PointAndShoot+Alert.swift */; };
 		8A3C216D2670FF880029AC1A /* PointAndShootTargetTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A3C216C2670FF880029AC1A /* PointAndShootTargetTest.swift */; };
 		8A4172D626A063FD00F93128 /* NSPoint+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A4172D526A063FD00F93128 /* NSPoint+Beam.swift */; };
 		8A4801A426A1EB66008F33FE /* PointAndShoot+DrawRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A4801A326A1EB66008F33FE /* PointAndShoot+DrawRules.swift */; };
@@ -1316,6 +1317,7 @@
 		8A1B8FCD26A9CB31006D849D /* PointAndShootPathFrame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootPathFrame.swift; sourceTree = "<group>"; };
 		8A1CD07726B9723300226A2A /* logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = logo.png; sourceTree = "<group>"; };
 		8A1CD07F26B9723300226A2A /* UITests-7.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "UITests-7.html"; sourceTree = "<group>"; };
+		8A23713126D91C2800D8526A /* PointAndShoot+Alert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PointAndShoot+Alert.swift"; sourceTree = "<group>"; };
 		8A3C216C2670FF880029AC1A /* PointAndShootTargetTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootTargetTest.swift; sourceTree = "<group>"; };
 		8A4172D526A063FD00F93128 /* NSPoint+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSPoint+Beam.swift"; sourceTree = "<group>"; };
 		8A4801A326A1EB66008F33FE /* PointAndShoot+DrawRules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PointAndShoot+DrawRules.swift"; sourceTree = "<group>"; };
@@ -3100,6 +3102,7 @@
 				8A4801AC26A1EBBF008F33FE /* PointAndShoot+Helpers.swift */,
 				8A4801A326A1EB66008F33FE /* PointAndShoot+DrawRules.swift */,
 				BAA674C683DA5DEC733F4746 /* PointAndShoot+ShootFrameFusionRect.swift */,
+				8A23713126D91C2800D8526A /* PointAndShoot+Alert.swift */,
 				BAA6754D043D1DD6321A8F80 /* Views */,
 			);
 			path = Native;
@@ -4708,6 +4711,7 @@
 				877888D9269C743F00D703F0 /* CSVParser.swift in Sources */,
 				96E4CF30258DFB0800D6DE22 /* BeamText+NSAttributedString.swift in Sources */,
 				41855A3A25D1334F00DA49DC /* BeamCollectionView.swift in Sources */,
+				8A23713226D91C2800D8526A /* PointAndShoot+Alert.swift in Sources */,
 				52FB30CA25E3D7B3001BF098 /* String+Title.swift in Sources */,
 				520088C42613297100AED835 /* DatabaseRequest.swift in Sources */,
 				A5CA5DBA2624FF4A004E9D3E /* BeamNSTableView.swift in Sources */,
