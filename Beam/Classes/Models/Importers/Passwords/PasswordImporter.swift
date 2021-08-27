@@ -60,7 +60,6 @@ enum PasswordImporter {
     }
 
     static func importPasswords(fromCSV text: String) throws {
-        let passwordManager = PasswordManager()
         let seq = CSVUnescapingSequence(input: text)
         var parser = CSVParser(input: seq)
 
@@ -69,23 +68,22 @@ enum PasswordImporter {
 
         for record in parser {
             if let entry = decoder.decode(record) {
-                passwordManager.save(host: entry.host.trimmingCharacters(in: CharacterSet(charactersIn: "/.\\")), username: entry.username, password: entry.password)
+                PasswordManager.shared.save(host: entry.host.trimmingCharacters(in: CharacterSet(charactersIn: "/.\\")), username: entry.username, password: entry.password)
             }
         }
     }
 
     static func exportPasswords(toCSV file: URL) throws {
-        let passwordManager = PasswordManager()
         let serialQueue = DispatchQueue(label: "exportPasswordsQueue")
         var allEntries: [PasswordManagerEntry] = []
         var csvString = "\("URL"),\("Username"),\("Password")\n"
 
         serialQueue.async {
-            allEntries = passwordManager.fetchAll()
+            allEntries = PasswordManager.shared.fetchAll() 
         }
         serialQueue.async {
             for entry in allEntries {
-                if let passwordStr = passwordManager.password(host: entry.minimizedHost, username: entry.username) {
+                if let passwordStr = PasswordManager.shared.password(host: entry.minimizedHost, username: entry.username) {
                     let row = encodeToCSV(entry: entry, password: passwordStr)
                     csvString.append("\(row)\n")
                 }

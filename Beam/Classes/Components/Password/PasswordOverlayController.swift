@@ -18,7 +18,6 @@ struct WebFieldAutofill: Codable {
 }
 
 class PasswordOverlayController: WebPageHolder {
-    private let passwordManager: PasswordManager = PasswordManager()
     private let userInfoStore: UserInformationsStore
     private var passwordMenuWindow: NSWindow?
     private var passwordMenuPosition: CGPoint = .zero
@@ -101,7 +100,7 @@ class PasswordOverlayController: WebPageHolder {
         }
         currentlyFocusedElementId = elementId
         if autocompleteGroup.isAmbiguous, let host = page.url?.minimizedHost {
-            let entries = passwordManager.entries(for: host, exact: false)
+            let entries = PasswordManager.shared.entries(for: host, exact: false)
             let createAccount = entries.isEmpty
             self.showPasswordManagerMenu(for: elementId, withPasswordGenerator: createAccount)
         } else {
@@ -278,19 +277,19 @@ class PasswordOverlayController: WebPageHolder {
             return
         }
         Logger.shared.logDebug("FOUND login: \(login), password: \(password)", category: .passwordManager)
-        if let storedPassword = passwordManager.password(host: host, username: login) {
+        if let storedPassword = PasswordManager.shared.password(host: host, username: login) {
             if password != storedPassword && password.count > 2 && login.count > 2 {
                 if let browserTab = (self.page as? BrowserTab) {
                     browserTab.passwordManagerToast(saved: false)
                 }
-                self.passwordManager.save(host: host, username: login, password: password)
+                PasswordManager.shared.save(host: host, username: login, password: password)
             }
         } else {
             if password.count > 2 && login.count > 2 {
                 if let browserTab = (self.page as? BrowserTab) {
                     browserTab.passwordManagerToast(saved: true)
                 }
-                self.passwordManager.save(host: host, username: login, password: password)
+                PasswordManager.shared.save(host: host, username: login, password: password)
             }
         }
     }
@@ -333,7 +332,7 @@ class PasswordOverlayController: WebPageHolder {
 extension PasswordOverlayController: PasswordManagerMenuDelegate {
     func deleteCredentials(_ entries: [PasswordManagerEntry]) {
         for entry in entries {
-            passwordManager.delete(host: entry.minimizedHost, for: entry.username)
+            PasswordManager.shared.delete(host: entry.minimizedHost, for: entry.username)
         }
     }
 
@@ -343,7 +342,7 @@ extension PasswordOverlayController: PasswordManagerMenuDelegate {
             dismissPasswordManagerMenu()
             return
         }
-        guard let password = passwordManager.password(host: entry.minimizedHost, username: entry.username) else {
+        guard let password = PasswordManager.shared.password(host: entry.minimizedHost, username: entry.username) else {
             Logger.shared.logError("PasswordStore did not provide password for selected entry.", category: .passwordManager)
             return
         }
