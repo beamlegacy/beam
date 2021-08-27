@@ -105,7 +105,7 @@ extension BeamObjectManagerDelegate {
         try self.saveOnBeamObjectsAPI(objects) { result in
             switch result {
             case .failure(let returnedError):
-                Logger.shared.logError(returnedError.localizedDescription, category: .beamObjectNetwork)
+                Logger.shared.logError("Can't save: \(returnedError.localizedDescription)", category: .beamObjectNetwork)
                 error = returnedError
             case .success:
                 Logger.shared.logDebug("Saved \(objects.count) objects", category: .beamObjectNetwork)

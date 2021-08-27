@@ -16,13 +16,7 @@ protocol BeamObjectProtocol: Codable {
     // to store as `BeamObject` and not include `previousChecksum` and `checksum`
     var previousChecksum: String? { get set }
     var checksum: String? { get set }
-}
-
-extension BeamObjectProtocol {
-    func copy() throws -> Self {
-        // TODO: might be slow on big object?
-        try ( try BeamObject(self, Self.beamObjectTypeName)).decodeBeamObject()
-    }
+    func copy() throws -> Self
 }
 
 /// Used to store data on the BeamObject Beam API.
