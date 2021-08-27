@@ -20,6 +20,10 @@ class PasswordsDBTests: XCTestCase {
         super.setUp()
     }
 
+    override func tearDown() {
+        PasswordManager.shared.deleteAll()
+    }
+
     func testSavingPassword() {
         PasswordManager.shared.save(host: Self.host.minimizedHost!, username: Self.username, password: Self.password)
 
@@ -30,8 +34,6 @@ class PasswordsDBTests: XCTestCase {
         XCTAssertEqual(entries.count, 1)
         XCTAssertEqual(entries.last?.minimizedHost, Self.host.minimizedHost)
         XCTAssertEqual(entries.last?.username, Self.username)
-
-        PasswordManager.shared.deleteAll()
     }
 
     func testSavingPasswords() {
@@ -50,8 +52,6 @@ class PasswordsDBTests: XCTestCase {
         XCTAssertEqual(subdomainEntries.count, 1)
         XCTAssertEqual(subdomainEntries.last?.minimizedHost, Self.subdomain1.minimizedHost)
         XCTAssertEqual(subdomainEntries.last?.username, Self.username)
-
-        PasswordManager.shared.deleteAll()
     }
 
     func testFindEntriesForHost() {
@@ -61,8 +61,6 @@ class PasswordsDBTests: XCTestCase {
         XCTAssertEqual(entries.count, 1)
         XCTAssertEqual(entries.last?.minimizedHost, Self.host.minimizedHost)
         XCTAssertEqual(entries.last?.username, Self.username)
-
-        PasswordManager.shared.deleteAll()
     }
 
     func testFindEntriesForHostWithParents() {
@@ -75,8 +73,6 @@ class PasswordsDBTests: XCTestCase {
         XCTAssertEqual(entries.first?.username, Self.username)
         XCTAssertEqual(entries.last?.minimizedHost, Self.host.minimizedHost)
         XCTAssertEqual(entries.last?.username, Self.username)
-
-        PasswordManager.shared.deleteAll()
     }
 
     func testFindEntriesForHostWithSubdomains() {
@@ -89,8 +85,6 @@ class PasswordsDBTests: XCTestCase {
         XCTAssertEqual(entries.last?.username, Self.username)
         XCTAssertEqual(entries.first?.minimizedHost, Self.host.minimizedHost)
         XCTAssertEqual(entries.first?.username, Self.username)
-
-        PasswordManager.shared.deleteAll()
     }
 
     func testSearchEntries() {
@@ -101,8 +95,6 @@ class PasswordsDBTests: XCTestCase {
         let found = entries.filter { $0.minimizedHost == Self.host.minimizedHost }
         XCTAssertEqual(found.count, 1)
         XCTAssertEqual(found.last?.username, Self.username)
-
-        PasswordManager.shared.deleteAll()
     }
 
     func testFetchAllEntries() {
@@ -110,8 +102,6 @@ class PasswordsDBTests: XCTestCase {
 
         let entries = PasswordManager.shared.fetchAll()
         XCTAssertTrue(entries.count > 0, "FetchAll has no passwords, it should be > 0")
-
-        PasswordManager.shared.deleteAll()
     }
 
     func testGetPassword() {
@@ -119,8 +109,6 @@ class PasswordsDBTests: XCTestCase {
 
         let password = PasswordManager.shared.password(host: Self.host.minimizedHost!, username: Self.username)
         XCTAssertEqual(password, Self.password)
-
-        PasswordManager.shared.deleteAll()
     }
 
     func testDelete() {
@@ -130,7 +118,5 @@ class PasswordsDBTests: XCTestCase {
 
         let entries = PasswordManager.shared.entries(for: Self.host.minimizedHost!, exact: true)
         XCTAssertEqual(entries.count, 0)
-
-        PasswordManager.shared.deleteAll()
     }
 }
