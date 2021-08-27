@@ -32,7 +32,6 @@ class PasswordManagerMenuViewModel: ObservableObject {
         var userInfo: UserInformations?
     }
 
-    let passwordManager: PasswordManager = PasswordManager()
     weak var delegate: PasswordManagerMenuDelegate?
     var otherPasswordsViewModel: PasswordListViewModel
 
@@ -60,7 +59,7 @@ class PasswordManagerMenuViewModel: ObservableObject {
             passwordGeneratorViewModel.delegate = self
             self.passwordGeneratorViewModel = passwordGeneratorViewModel
         } else {
-            let entries = passwordManager.entries(for: host.minimizedHost ?? host.urlStringWithoutScheme, exact: false)
+            let entries = PasswordManager.shared.entries(for: host.minimizedHost ?? host.urlStringWithoutScheme, exact: false)
             if !entries.isEmpty {
                 self.entriesForHost = entries
                 self.updateDisplay()
@@ -95,7 +94,7 @@ class PasswordManagerMenuViewModel: ObservableObject {
     }
 
     private func updateAllEntries() {
-        let entries = passwordManager.fetchAll()
+        let entries = PasswordManager.shared.fetchAll()
         if !entries.isEmpty {
             self.allEntries = entries
             self.updateDisplay()

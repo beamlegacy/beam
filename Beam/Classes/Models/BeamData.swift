@@ -41,7 +41,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var downloadManager: BeamDownloadManager = BeamDownloadManager()
     var sessionLinkRanker = SessionLinkRanker()
     var clusteringManager: ClusteringManager
-    let passwordManager: PasswordManager = PasswordManager()
     var activeSources = ActiveSources()
     var scope = Set<AnyCancellable>()
     var browsingTreeSender: BrowsingTreeSender?
