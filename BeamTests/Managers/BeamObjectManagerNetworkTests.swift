@@ -122,16 +122,14 @@ class BeamObjectManagerNetworkTests: QuickSpec {
             }
 
             context("without content") {
-                beforeEach {
-                    try? Document.deleteWithPredicate(CoreDataManager.shared.mainContext)
-                    try? Database.deleteWithPredicate(CoreDataManager.shared.mainContext)
-                    let _ = try? PasswordsDB(path: BeamData.dataFolder(fileName: "passwords.db")).deleteAll()
-                }
-
                 it("calls managers but no network calls as it's all empty") {
                     let networkCalls = APIRequest.callsCount
 
-                    try sut.saveAllToAPI()
+                    do {
+                        try sut.saveAllToAPI()
+                    } catch {
+                        fail(error.localizedDescription)
+                    }
 
                     expect(APIRequest.callsCount - networkCalls) == 0
                 }

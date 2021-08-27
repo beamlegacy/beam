@@ -43,7 +43,7 @@ class BeamObjectManager {
         // Add any manager using BeamObjects here
         DocumentManager().registerOnBeamObjectManager()
         DatabaseManager().registerOnBeamObjectManager()
-        PasswordManager().registerOnBeamObjectManager()
+        PasswordManager.shared.registerOnBeamObjectManager()
     }
 
     var conflictPolicyForSave: BeamObjectConflictResolution = .replace

@@ -9,7 +9,6 @@ import Foundation
 import SwiftUI
 
 final class PasswordListViewModel: ObservableObject {
-    private var passwordManager: PasswordManager
     private var allPasswordEntries: [PasswordManagerEntry] = []
     private var allPasswordTableViewItems: [PasswordTableViewItem] = []
     private var filteredPasswordEntries: [PasswordManagerEntry] = []
@@ -34,7 +33,6 @@ final class PasswordListViewModel: ObservableObject {
     }
 
     init() {
-        self.passwordManager = PasswordManager()
         refresh()
     }
 
@@ -48,7 +46,7 @@ final class PasswordListViewModel: ObservableObject {
     }
 
     func refresh() {
-        let entries = passwordManager.fetchAll()
+        let entries = PasswordManager.shared.fetchAll()
         if !entries.isEmpty {
             self.allPasswordEntries = entries
             self.allPasswordTableViewItems = entries.map(PasswordTableViewItem.init)

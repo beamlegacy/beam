@@ -15,6 +15,7 @@ extension PasswordManagerError: LocalizedError {
 }
 
 class PasswordManager {
+    static let shared = PasswordManager()
     static var passwordsDBPath: String { BeamData.dataFolder(fileName: "passwords.db") }
 
     private var passwordsDB: PasswordsDB
@@ -138,13 +139,11 @@ extension PasswordManager: BeamObjectManagerDelegate {
         Logger.shared.logDebug("Received \(passwords.count) passwords: updating",
                                category: .passwordNetwork)
 
-        let passwordsDB = try PasswordsDB(path: Self.passwordsDBPath)
-        try passwordsDB.save(passwords: passwords)
+        try self.passwordsDB.save(passwords: passwords)
     }
 
     func allObjects() throws -> [PasswordRecord] {
-        let passwordsDB = try PasswordsDB(path: Self.passwordsDBPath)
-        let passwords = try passwordsDB.allRecords()
+        let passwords = try self.passwordsDB.allRecords()
         return passwords
     }
 
@@ -178,17 +177,16 @@ extension PasswordManager: BeamObjectManagerDelegate {
         Logger.shared.logDebug("Saved \(objects.count) passwords on the BeamObject API",
                                category: .passwordNetwork)
 
-        let passwordsDB = try PasswordsDB(path: Self.passwordsDBPath)
         var passwords: [PasswordRecord] = []
         for updateObject in objects {
             // TODO: make faster with a `fetchWithIds(ids: [UUID])`
-            guard var password = try? passwordsDB.fetchWithId(updateObject.beamObjectId) else {
+            guard var password = try? self.passwordsDB.fetchWithId(updateObject.beamObjectId) else {
                 throw PasswordManagerError.localPasswordNotFound
             }
 
             password.previousChecksum = updateObject.previousChecksum
             passwords.append(password)
         }
-        try passwordsDB.save(passwords: passwords)
+        try self.passwordsDB.save(passwords: passwords)
     }
 }

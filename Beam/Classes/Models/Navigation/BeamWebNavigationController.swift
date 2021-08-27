@@ -5,7 +5,6 @@ class BeamWebNavigationController: WebPageHolder, WebNavigationController {
 
     let browsingTree: BrowsingTree
     let noteController: WebNoteController
-    private let passwordManager = PasswordManager()
 
     public var isNavigatingFromNote: Bool = false
     private var isNavigatingFromSearchBar: Bool = false
@@ -150,7 +149,7 @@ extension BeamWebNavigationController: WKNavigationDelegate {
                 let credential = URLCredential(user: username, password: password, persistence: .forSession)
                 completionHandler(.useCredential, credential)
                 if savePassword && (!password.isEmpty || !username.isEmpty) {
-                    self?.passwordManager.save(host: challenge.protectionSpace.host, username: username, password: password)
+                    PasswordManager.shared.save(host: challenge.protectionSpace.host, username: username, password: password)
                 }
                 self?.page.authenticationViewModel = nil
 
@@ -161,7 +160,7 @@ extension BeamWebNavigationController: WKNavigationDelegate {
             })
 
             if challenge.previousFailureCount == 0 {
-                passwordManager.credentials(for: challenge.protectionSpace.host) { credentials in
+                PasswordManager.shared.credentials(for: challenge.protectionSpace.host) { credentials in
                     if let firstCredential = credentials.first,
                        let decrypted = try? EncryptionManager.shared.decryptString(firstCredential.password),
                        !decrypted.isEmpty || !firstCredential.username.isEmpty {
