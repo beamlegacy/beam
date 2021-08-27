@@ -123,7 +123,7 @@ extension BeamObjectManager {
                 let request = try manager.saveAllOnBeamObjectApi { result in
                     switch result {
                     case .failure(let error):
-                        Logger.shared.logError(error.localizedDescription, category: .beamObjectNetwork)
+                        Logger.shared.logError("Can't saveAll: \(error.localizedDescription)", category: .beamObjectNetwork)
                         lock.wait()
                         errors.append(error)
                         lock.signal()
@@ -263,12 +263,12 @@ extension BeamObjectManager {
 
         switch error {
         case APIRequestError.beamObjectInvalidChecksum:
-            Logger.shared.logWarning("beamObjectInvalidChecksum -- could not save \(objects.count) objects",
+            Logger.shared.logWarning("beamObjectInvalidChecksum -- could not save \(objects.count) objects: \(error.localizedDescription)",
                                      category: .beamObject)
             saveToAPIFailureBeamObjectInvalidChecksum(objects, error, completion)
             return
         case APIRequestError.apiErrors:
-            Logger.shared.logWarning("APIRequestError.apiErrors -- could not save \(objects.count) objects",
+            Logger.shared.logWarning("APIRequestError.apiErrors -- could not save \(objects.count) objects: \(error.localizedDescription)",
                                      category: .beamObject)
             saveToAPIFailureApiErrors(objects, error, completion)
             return
