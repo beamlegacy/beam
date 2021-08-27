@@ -78,6 +78,34 @@ class PointAndShootHTMLTest: PointAndShootTest {
         }
     }
 
+    func testImageSrcSet() throws {
+        let html = """
+            <img srcset="https://cdn.vox-cdn.com/thumbor/fkUSjhcz8i5Fc7BaSKlAeQK5sII=/0x0:2040x1360/320x213/filters:focal(857x517:1183x843)/cdn.vox-cdn.com/uploads/chorus_image/image/69769623/acastro_201210_1777_gmail_0001.0.jpg 320w, https://cdn.vox-cdn.com/thumbor/Z08vUctDdB7hR22UHQ134sPSU38=/0x0:2040x1360/620x413/filters:focal(857x517:1183x843)/cdn.vox-cdn.com/uploads/chorus_image/image/69769623/acastro_201210_1777_gmail_0001.0.jpg 620w, https://cdn.vox-cdn.com/thumbor/vg6dXHVGRUgfW0LzAOnqIYRkkqs=/0x0:2040x1360/920x613/filters:focal(857x517:1183x843)/cdn.vox-cdn.com/uploads/chorus_image/image/69769623/acastro_201210_1777_gmail_0001.0.jpg 920w, https://cdn.vox-cdn.com/thumbor/z_I2AchFEUP_m29s9pAmwVU3e10=/0x0:2040x1360/1220x813/filters:focal(857x517:1183x843)/cdn.vox-cdn.com/uploads/chorus_image/image/69769623/acastro_201210_1777_gmail_0001.0.jpg 1220w, https://cdn.vox-cdn.com/thumbor/vJ5jXL0n4PDWRyqZArrxgp02cU8=/0x0:2040x1360/1520x1013/filters:focal(857x517:1183x843)/cdn.vox-cdn.com/uploads/chorus_image/image/69769623/acastro_201210_1777_gmail_0001.0.jpg 1520w, https://cdn.vox-cdn.com/thumbor/9xQkpT5PEHjgPykg92aW9lcssYE=/0x0:2040x1360/1820x1213/filters:focal(857x517:1183x843)/cdn.vox-cdn.com/uploads/chorus_image/image/69769623/acastro_201210_1777_gmail_0001.0.jpg 1820w, https://cdn.vox-cdn.com/thumbor/NTw9Gu8yVby6PYkP9EXPVSxa9U0=/0x0:2040x1360/2120x1413/filters:focal(857x517:1183x843)/cdn.vox-cdn.com/uploads/chorus_image/image/69769623/acastro_201210_1777_gmail_0001.0.jpg 2120w, https://cdn.vox-cdn.com/thumbor/rM2KvNsiMD7kEpVqn8aFQJjc574=/0x0:2040x1360/2420x1613/filters:focal(857x517:1183x843)/cdn.vox-cdn.com/uploads/chorus_image/image/69769623/acastro_201210_1777_gmail_0001.0.jpg 2420w" sizes="(min-width: 1221px) 846px, (min-width: 880px) calc(100vw - 334px), 100vw" alt="" data-upload-width="2040" src="https://cdn.vox-cdn.com/thumbor/lf-bcEeXrJtxojlBOxneFrJItKQ=/0x0:2040x1360/1200x800/filters:focal(857x517:1183x843)/cdn.vox-cdn.com/uploads/chorus_image/image/69769623/acastro_201210_1777_gmail_0001.0.jpg">
+            """
+        let text: [BeamText] = html2Text(url: self.url, html: html)
+
+        waitUntil(timeout: .seconds(5)) { done in
+            let pendingQuotes = self.pns.text2Quote(text, self.url.absoluteString)
+            pendingQuotes.then { quotes in
+                XCTAssertEqual(quotes.count, 1)
+                if let quote = quotes.first {
+                    XCTAssertEqual(quote.kind, ElementKind.image("5289df737df57326fcdd22597afb1fac"))
+                } else {
+                    XCTFail("expected quotes to contain 1 item")
+                }
+                let downloadManager = self.page.downloadManager as? DownloadManagerMock
+                XCTAssertEqual(downloadManager?.events.count, 1)
+
+
+                XCTAssertEqual(downloadManager?.events[0], "downloaded https://cdn.vox-cdn.com/thumbor/lf-bcEeXrJtxojlBOxneFrJItKQ=/0x0:2040x1360/1200x800/filters:focal(857x517:1183x843)/cdn.vox-cdn.com/uploads/chorus_image/image/69769623/acastro_201210_1777_gmail_0001.0.jpg with headers [\"Referer\": \"https://webpage.com\"]")
+                let fileStorage = self.page.fileStorage as? FileStorageMock
+                XCTAssertEqual(fileStorage?.events.count, 1)
+                XCTAssertEqual(fileStorage?.events[0], "inserted acastro_201210_1777_gmail_0001.0.jpg with id 5289df737df57326fcdd22597afb1fac of image/png for 3 bytes")
+                done()
+            }
+        }
+    }
+
     func testImageAnyScheme() throws {
         let html = "<img alt=\"\" src=\"//i.imgur.com/someImage.png\">"
         let text: [BeamText] = html2Text(url: self.url, html: html)

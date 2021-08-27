@@ -116,7 +116,6 @@ class PointAndShoot: WebPageHolder, ObservableObject {
         var targets: [Target] = []
         var noteInfo: NoteInfo
         var numberOfElements: Int = 0
-        var isText: Bool = true
         func html() -> String {
             targets.reduce("", {
                 $1.html.count > $0.count ? $1.html : $0
@@ -395,16 +394,6 @@ class PointAndShoot: WebPageHolder, ObservableObject {
         }
     }
 
-    /// Draws shoot confirmation
-    /// - Parameter group: ShootGroup of targets to draw the confirmation UI
-    private func showShootInfo(group: ShootGroup) {
-        shootConfirmationGroup = group
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
-            guard let self = self else { return }
-            self.shootConfirmationGroup = nil
-        }
-    }
-
     /// Small Utility to create a BeamElement containing noteText
     /// - Parameter noteText: Text of note
     /// - Returns: BeamElement containing noteText without any styling
@@ -457,18 +446,31 @@ class PointAndShoot: WebPageHolder, ObservableObject {
                 }
                 // Add to source Note
                 quotes.forEach({ quote in
-                    if quote.imageLink != nil {
-                        shootGroup.isText = false
-                    }
                     source.addChild(quote)
                 })
                 // Complete PNS and clear stored data
-                shootGroup.setNoteInfo(NoteInfo(id: currentNote.id, title: currentNote.title))
                 shootGroup.numberOfElements = resolvedQuotes.count
+            }).catch({ error in
+                self.showAlert(shootGroup, texts, error.localizedDescription)
+            }).always {
+                if shootGroup.numberOfElements != texts.count || shootGroup.numberOfElements == 0 {
+                    self.showAlert(shootGroup, texts, "numberOfElements and texts.count mismatch")
+                }
+                shootGroup.setNoteInfo(NoteInfo(id: currentNote.id, title: currentNote.title))
                 self.collectedGroups.append(shootGroup)
                 self.showShootInfo(group: shootGroup)
                 self.activeShootGroup = nil
-            })
+            }
+        }
+    }
+
+    /// Draws shoot confirmation
+    /// - Parameter group: ShootGroup of targets to draw the confirmation UI
+    private func showShootInfo(group: ShootGroup) {
+        shootConfirmationGroup = group
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
+            guard let self = self else { return }
+            self.shootConfirmationGroup = nil
         }
     }
 
