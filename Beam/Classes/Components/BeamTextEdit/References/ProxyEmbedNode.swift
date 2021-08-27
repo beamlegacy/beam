@@ -28,7 +28,7 @@ class ProxyEmbedNode: EmbedNode, ProxyNode {
                 })
 
                 self.invalidateRendering()
-                updateChildrenVisibility(visible && open)
+                updateChildrenVisibility()
             }.store(in: &scope)
     }
 
