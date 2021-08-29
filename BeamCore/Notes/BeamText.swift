@@ -173,6 +173,7 @@ public struct BeamText: Codable {
 
         public var position: Int
         public var end: Int { position + string.count }
+        public var range: Swift.Range<Int> { position ..< end }
 
         // swiftlint:disable:next nesting
         enum CodingKeys: String, CodingKey {
