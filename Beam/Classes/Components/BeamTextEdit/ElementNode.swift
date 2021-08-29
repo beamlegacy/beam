@@ -401,13 +401,13 @@ public class ElementNode: Widget {
         return self
     }
 
-    override func dumpWidgetTree(_ level: Int = 0) {
+    override func dumpWidgetTree(_ level: Int = 0) -> [String] {
         let tabs = String.tabs(level)
-        //swiftlint:disable:next print
-        print("\(tabs)\(String(describing: Self.self)) frame(\(frame)) \(layers.count) layers - element id: \(element.id) [\(elementText.text)]\(layer.superlayer == nil ? " DETTACHED" : "") \(needLayout ? "NeedLayout":"")")
+        var strs = ["\(tabs)\(String(describing: Self.self)) frame(\(frame)) \(layers.count) layers - element id: \(element.id) [\(elementText.text)]\(layer.superlayer == nil ? " DETTACHED" : "") \(needLayout ? "NeedLayout":"")"]
         for c in children {
-            c.dumpWidgetTree(level + 1)
+            strs.append(contentsOf: c.dumpWidgetTree(level + 1))
         }
+        return strs
     }
 
     override var mainLayerName: String {

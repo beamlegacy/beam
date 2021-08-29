@@ -170,6 +170,21 @@ public class DocumentManager: NSObject {
         }
     }
 
+    func allDocumentsIds(includeDeletedNotes: Bool) -> [UUID] {
+        let predicate = includeDeletedNotes ? nil : NSPredicate(format: "deleted_at == nil")
+        if Thread.isMainThread {
+            let result = (try? Document.fetchAll(mainContext, predicate)) ?? []
+            return result.map { $0.id }
+        } else {
+            var result: [Document] = []
+            let context = coreDataManager.persistentContainer.newBackgroundContext()
+            context.performAndWait {
+                result = (try? Document.fetchAll(context, predicate)) ?? []
+            }
+            return result.map { $0.id }
+        }
+    }
+
     func loadDocByTitleInBg(title: String) -> DocumentStruct? {
         var result: DocumentStruct?
         let context = coreDataManager.persistentContainer.newBackgroundContext()
