@@ -287,6 +287,12 @@ struct AdvancedPreferencesView: View {
                 Preferences.Section(title: "Reindex notes contents") {
                     ReindexNotesContents
                 }
+                Preferences.Section(title: "Rebuild notes contents") {
+                    RebuildNotesContents
+                }
+                Preferences.Section(title: "Validate notes contents") {
+                    ValidateNotesContents
+                }
                 Preferences.Section(title: "Create 100 random notes") {
                     Create100RandomNotes
                 }
@@ -473,6 +479,18 @@ struct AdvancedPreferencesView: View {
     private var ReindexNotesContents: some View {
         Button(action: { BeamNote.indexAllNotes() }, label: {
             Text("Reindex all notes' contents")
+        })
+    }
+
+    private var RebuildNotesContents: some View {
+        Button(action: { BeamNote.rebuildAllNotes() }, label: {
+            Text("Rebuild all notes' contents")
+        })
+    }
+
+    private var ValidateNotesContents: some View {
+        Button(action: { BeamNote.validateAllNotes() }, label: {
+            Text("Validate all notes' contents")
         })
     }
 

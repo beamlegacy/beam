@@ -304,6 +304,10 @@ public extension CALayer {
             rect = NSRect(x: x, y: topOffsetActual + cardTopSpace, width: textNodeWidth, height: r.height)
         }
         updateLayout(for: rect)
+
+        if let stack = superview as? JournalStackView {
+            stack.invalidateLayout()
+        }
     }
 
     private func updateLayout(for rect: NSRect) {
@@ -437,11 +441,6 @@ public extension CALayer {
         }
 
         invalidate()
-
-        if let stack = superview as? JournalStackView {
-            stack.invalidateLayout()
-        }
-
     }
 
     public func invalidate() {
@@ -646,8 +645,13 @@ public extension CALayer {
                 #if DEBUG
                 case "d":
                     if control, shift {
-                        dumpWidgetTree()
-                        dumpLayers()
+                        let str = [dumpWidgetTree(), dumpLayers()].flatMap { $0 }.joined(separator: "\n")
+                        //swiftlint:disable:next print
+                        print(str)
+                        let pasteboard = NSPasteboard.general
+                        pasteboard.clearContents()
+                        pasteboard.setString(str, forType: .string)
+
                         return
                     }
                 case "i":
@@ -1085,29 +1089,29 @@ public extension CALayer {
         rootNode.selectAllNodesHierarchically()
     }
 
-    func dumpWidgetTree() {
-        rootNode.dumpWidgetTree()
+    func dumpWidgetTree() -> [String] {
+        return rootNode.dumpWidgetTree()
     }
 
-    func dumpSubLayers(_ layer: CALayer, _ level: Int) {
-        // swiftlint:disable print
+    func dumpSubLayers(_ layer: CALayer, _ level: Int) -> [String] {
         let tabs = String.tabs(level)
+        var strs = [String]()
         for (i, l) in (layer.sublayers ?? []).enumerated() {
-            print("\(tabs)\(i) - '\(l.name ?? "unnamed")' - pos \(l.position) - bounds \(l.bounds) \(l.isHidden ? "[HIDDEN]" : "")")
-            dumpSubLayers(l, level + 1)
+            strs.append("\(tabs)\(i) - '\(l.name ?? "unnamed")' - pos \(l.position) - bounds \(l.bounds) \(l.isHidden ? "[HIDDEN]" : "")")
+            strs.append(contentsOf: dumpSubLayers(l, level + 1))
         }
-        // swiftlint:enable print
+        return strs
     }
 
-    func dumpLayers() {
+    func dumpLayers() -> [String] {
         // swiftlint:disable print
-        print("================")
-        print("Dumping editor \(layer?.sublayers?.count ?? 0) layers:")
+        var strs = ["================", "Dumping editor \(layer?.sublayers?.count ?? 0) layers:"]
+
         if let layer = layer {
-            dumpSubLayers(layer, 0)
+            strs.append(contentsOf: dumpSubLayers(layer, 0))
         }
-        print("================")
-        // swiftlint:enable print
+        strs.append("================")
+        return strs
     }
 
     public override func accessibilityChildren() -> [Any]? {
@@ -1545,4 +1549,5 @@ public extension CALayer {
     }
 
     static public let mainLayerName = "beamTextEditMainLayer"
+
 }

@@ -462,4 +462,113 @@ extension BeamNote: BeamNoteDocument {
             }
         }
     }
+
+    public static func rebuildAllNotes() {
+        let documentManager = DocumentManager()
+        var rebuilt = [String]()
+        for id in documentManager.allDocumentsIds(includeDeletedNotes: false) {
+            if let note = BeamNote.fetch(documentManager, id: id) {
+                note.save(documentManager: documentManager)
+                rebuilt.append("rebuilt note '\(note.title)' [\(note.id)]")
+                rebuilt.append(contentsOf: note.validateLinks(fix: true))
+            }
+        }
+
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+        pasteboard.setString(rebuilt.joined(separator: "\n"), forType: .string)
+    }
+
+    public static func validateAllNotes() {
+        let documentManager = DocumentManager()
+        var all = [String]()
+        for id in documentManager.allDocumentsIds(includeDeletedNotes: false) {
+            if let note = BeamNote.fetch(documentManager, id: id) {
+                let str = "validating \(note.title) - [\(note.id)]"
+                all.append(str)
+                //swiftlint:disable:next print
+                print(str)
+                let (success, msgs) = note.validate()
+                if !success {
+                    let str = "\tvalidation failed for note \(note.title) - \(note.id)"
+                    //swiftlint:disable:next print
+                    print(str)
+                    all.append(str)
+                    all.append(contentsOf: msgs)
+                }
+            }
+        }
+
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+        let str = all.joined(separator: "\n")
+        pasteboard.setString(str, forType: .string)
+    }
+
+    public func validate() -> (Bool, [String]) {
+        guard let docStruct = documentStruct else {
+            let str = "\tUnable to be documentStruct for note \(title) - \(id)"
+            //swiftlint:disable:next print
+            print(str)
+            return (false, ["\tUnable to be documentStruct for note \(title) - \(id)"])
+        }
+        var validated = [String]()
+        if docStruct.id != id {
+            validated.append("\tdocumentStruct has wrong id \(docStruct.id)")
+        }
+
+        switch docStruct.documentType {
+        case .journal:
+            if !type.isJournal {
+                validated.append("\tdocumentStruct has wrong type \(docStruct.documentType)")
+            } else {
+                if docStruct.journalDate == nil {
+                    validated.append("\tdocumentStruct should have a journal_date but it hasn't")
+                }
+            }
+
+        case .note:
+            if type.isJournal {
+                validated.append("\tdocumentStruct has wrong type \(docStruct.documentType)")
+            }
+
+            if let date = docStruct.journalDate {
+                validated.append("\tdocumentStruct shouldn't have a journal_date but it has \(date)")
+            }
+        }
+
+        validated.append(contentsOf: validateLinks(fix: false))
+        //swiftlint:disable:next print
+        print(validated.joined(separator: "\n"))
+        return (true, validated)
+    }
+
+    public func validateLinks(fix: Bool) -> [String] {
+        var strs = [String]()
+        let documentManager = DocumentManager()
+        let allDocuments = Set(documentManager.allDocumentsIds(includeDeletedNotes: false))
+
+        for (elementId, text) in allTexts {
+            for linkRange in text.internalLinkRanges {
+                if let link = linkRange.internalLink {
+                    if !allDocuments.contains(link) {
+                        var msg = "Link from note '\(title)' [\(id) / \(elementId)] to '\(linkRange.string)' (\(link)) is invalid"
+                        defer { strs.append(msg) }
+                        if fix {
+                            guard let element = findElement(elementId) else {
+                                strs.append("Error, couldn't find element \(elementId) in note")
+                                continue
+                            }
+                            element.text.removeAttributes([.internalLink(.null)], from: linkRange.range)
+                            msg += " [fixed]"
+                        }
+                    } else {
+                        strs.append("\t\t'\(title)' [\(elementId)] links to '\(linkRange.string)' (\(link))")
+                    }
+                }
+            }
+        }
+
+        return strs
+    }
 }

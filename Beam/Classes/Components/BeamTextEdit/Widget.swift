@@ -1045,13 +1045,15 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         return true
     }
 
-    func dumpWidgetTree(_ level: Int = 0) {
+    func dumpWidgetTree(_ level: Int = 0) -> [String] {
         let tabs = String.tabs(level)
-        //swiftlint:disable:next print
-        print("\(tabs)\(String(describing: Self.self)) frame(\(frame)) \(layers.count) layers")
+        let str = "\(tabs)\(String(describing: Self.self)) frame(\(frame)) \(layers.count) layers"
+        var strs = [str]
         for c in children {
-            c.dumpWidgetTree(level + 1)
+            strs.append(contentsOf: c.dumpWidgetTree(level + 1))
         }
+
+        return strs
     }
 
     func proxyFor(_ element: BeamElement) -> ProxyElement? {
