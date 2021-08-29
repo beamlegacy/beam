@@ -1121,13 +1121,15 @@ public class TextNode: ElementNode {
         return NSPoint(x: contentsLead + mouseInfo.position.x, y: mouseInfo.position.y)
     }
 
-    override func dumpWidgetTree(_ level: Int = 0) {
+    override func dumpWidgetTree(_ level: Int = 0) -> [String] {
         let tabs = String.tabs(level)
-        //swiftlint:disable:next print
-        print("\(tabs)\(String(describing: Self.self)) frame(\(frame)) \(layers.count) layers - element id: \(element.id) [\(elementText.text)]\(layer.superlayer == nil ? " DETTACHED" : "") \(needLayout ? "NeedLayout":"")")
+        let str = "\(tabs)\(String(describing: Self.self)) frame(\(frame)) \(layers.count) layers - element id: \(element.id) [\(elementText.text)]\(layer.superlayer == nil ? " DETTACHED" : "") \(needLayout ? "NeedLayout":"")"
+        var strs = [str]
         for c in children {
-            c.dumpWidgetTree(level + 1)
+            strs.append(contentsOf: c.dumpWidgetTree(level + 1))
         }
+
+        return strs
     }
 
     public override func accessibilityString(for range: NSRange) -> String? {

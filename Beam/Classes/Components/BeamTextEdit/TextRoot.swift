@@ -250,10 +250,8 @@ public class TextRoot: TextNode {
         }
     }
 
-    override func dumpWidgetTree(_ level: Int = 0) {
-        //swiftlint:disable:next print
-        print("==================================================")
-        super.dumpWidgetTree(level)
+    override func dumpWidgetTree(_ level: Int = 0) -> [String] {
+        return [["=================================================="], super.dumpWidgetTree(level)].flatMap { $0 }
     }
 
     override var showDisclosureButton: Bool {
