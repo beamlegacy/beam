@@ -22,7 +22,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
             APIRequest.networkCallFiles = []
 
             sut = BeamObjectManager()
-            sut.clearNetworkCalls()
+            BeamObjectManager.clearNetworkCalls()
             BeamTestsHelper.logout()
 
             beamHelper.beginNetworkRecording()
@@ -42,7 +42,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
         afterEach {
             beamHelper.endNetworkRecording()
 
-            sut.clearNetworkCalls()
+            BeamObjectManager.clearNetworkCalls()
 
             Configuration.beamObjectAPIEnabled = EnvironmentVariables.beamObjectAPIEnabled
 

@@ -236,6 +236,7 @@
 		5224CD7C2686034200D4179E /* BeamObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5224CD7B2686034200D4179E /* BeamObject.swift */; };
 		5224CD822686043600D4179E /* BeamObjectRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5224CD812686043600D4179E /* BeamObjectRequest.swift */; };
 		5224CD8C26860C0900D4179E /* BeamObjectManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5224CD8B26860C0900D4179E /* BeamObjectManager.swift */; };
+		5227B2CF26DD12EF0006FA7D /* ZZZTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5227B2CE26DD12EF0006FA7D /* ZZZTests.swift */; };
 		522969E226669016005067A6 /* APIWebSocketRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 522969E126669016005067A6 /* APIWebSocketRequest.swift */; };
 		522AFB2825CBFAB100F60647 /* DocumentManagerTestsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 522AFB2725CBFAB100F60647 /* DocumentManagerTestsHelper.swift */; };
 		522B17C82684E11E00741F94 /* String+SHA256.swift in Sources */ = {isa = PBXBuildFile; fileRef = 522B17C72684E11E00741F94 /* String+SHA256.swift */; };
@@ -1185,6 +1186,7 @@
 		5224CD7B2686034200D4179E /* BeamObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamObject.swift; sourceTree = "<group>"; };
 		5224CD812686043600D4179E /* BeamObjectRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamObjectRequest.swift; sourceTree = "<group>"; };
 		5224CD8B26860C0900D4179E /* BeamObjectManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamObjectManager.swift; sourceTree = "<group>"; };
+		5227B2CE26DD12EF0006FA7D /* ZZZTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZZZTests.swift; sourceTree = "<group>"; };
 		522969E126669016005067A6 /* APIWebSocketRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIWebSocketRequest.swift; sourceTree = "<group>"; };
 		522AFB2725CBFAB100F60647 /* DocumentManagerTestsHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentManagerTestsHelper.swift; sourceTree = "<group>"; };
 		522B17C72684E11E00741F94 /* String+SHA256.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+SHA256.swift"; sourceTree = "<group>"; };
@@ -3418,6 +3420,7 @@
 				BAA6711C12F68C78C7D44DA5 /* WebNoteControllerTest.swift */,
 				9652A93226A6B13700F0590C /* FakeNoteGeneratorTests.swift */,
 				9686B47A26D6B9A400749455 /* NoteIndexingTests.swift */,
+				5227B2CE26DD12EF0006FA7D /* ZZZTests.swift */,
 			);
 			path = BeamTests;
 			sourceTree = "<group>";
@@ -5068,6 +5071,7 @@
 				8A7F949026A85D7600270A74 /* PointAndShootShootGroupTest.swift in Sources */,
 				52A7DE2826AECFAC003E770E /* MyRemoteObject.swift in Sources */,
 				52E04FED252C814D00AD9F56 /* RoamImporterTests.swift in Sources */,
+				5227B2CF26DD12EF0006FA7D /* ZZZTests.swift in Sources */,
 				52B5EF78252F520100914D52 /* CoreDataTests.swift in Sources */,
 				032562CC26051D4D006513E4 /* RBFilterGroupTests.m in Sources */,
 				520303D9261CAEF10028BC8E /* DatabaseManagerTests.swift in Sources */,
