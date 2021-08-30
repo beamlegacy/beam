@@ -20,18 +20,62 @@ extension BeamTextEdit {
         inputDetectorState += 1
     }
 
+    func buildStringFrom(image source: String) -> NSAttributedString {
+        guard let imageRecord = try? AppDelegate.main.data.fileDB.fetch(uid: source)
+        else {
+            Logger.shared.logError("ImageNode unable to fetch image '\(source)' from FileDB", category: .noteEditor)
+            return NSAttributedString()
+        }
+
+        guard let image = NSImage(data: imageRecord.data)
+        else {
+            Logger.shared.logError("ImageNode unable to decode image '\(source)' from FileDB", category: .noteEditor)
+            return NSAttributedString()
+        }
+
+        let attachmentCell: NSTextAttachmentCell = NSTextAttachmentCell(imageCell: image)
+        let attachment: NSTextAttachment = NSTextAttachment()
+        attachment.attachmentCell = attachmentCell
+        let attrString: NSAttributedString = NSAttributedString(attachment: attachment)
+        return attrString
+
+    }
+
+    func buildStringFrom(node: ElementNode) -> NSAttributedString {
+        let strNode = NSMutableAttributedString()
+        strNode.append(NSAttributedString(string: String.tabs(max(0, node.element.depth - 1))))
+
+        switch node.elementKind {
+        case .bullet, .heading, .quote, .check, .blockReference, .code:
+            let config = BeamTextAttributedStringBuilder.Config(elementKind: node.elementKind,
+                                                                ranges: node.elementText.ranges,
+                                                                fontSize: TextNode.fontSizeFor(kind: node.elementKind),
+                                                                caret: nil,
+                                                                markedRange: .none,
+                                                                selectedRange: .none,
+                                                                mouseInteraction: nil)
+            let builder = BeamTextAttributedStringBuilder()
+            strNode.append(builder.build(config: config))
+
+        case let .image(source):
+            strNode.append(buildStringFrom(image: source))
+
+        case let .embed(source):
+            guard let url = URL(string: source) else { return strNode }
+            strNode.append(NSAttributedString(string: source, attributes: [.link: url]))
+        }
+
+        return strNode
+    }
+
     func buildStringFrom(nodes: [ElementNode]) -> NSAttributedString {
         let strNodes = NSMutableAttributedString()
         for node in nodes {
-            guard let node = node as? TextNode else { continue }
             if nodes.count > 1 {
-                guard !node.text.text.isEmpty else { continue }
-                strNodes.append(NSAttributedString(string: String.tabs(max(0, node.element.depth - 1))))
-                let str = node.text.buildAttributedString(node: node, caret: nil, selectedRange: nil)
-                strNodes.append(str)
+                strNodes.append(buildStringFrom(node: node))
                 strNodes.append(NSAttributedString(string: "\n"))
             } else {
-                strNodes.append(node.attributedString)
+                strNodes.append(buildStringFrom(node: node))
             }
         }
 
