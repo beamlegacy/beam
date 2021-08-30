@@ -28,13 +28,17 @@ public class TextNode: ElementNode {
         }
     }
 
-    var fontSize: CGFloat {
-        switch elementKind {
+    static func fontSizeFor(kind: ElementKind) -> CGFloat {
+        switch kind {
         case .heading(let level):
             return [PreferencesManager.editorFontSizeHeadingOne, PreferencesManager.editorFontSizeHeadingTwo][level - 1]
         default:
             return PreferencesManager.editorFontSize
         }
+    }
+
+    var fontSize: CGFloat {
+        Self.fontSizeFor(kind: elementKind)
     }
 
     private var isCursorInsideUneditableRange = false
