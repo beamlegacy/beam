@@ -4,31 +4,43 @@ import BeamCore
 
 extension AppDelegate {
     @IBAction func deleteLocalDocuments(_ sender: Any) {
-        deleteDocuments(includedRemote: false)
+        deleteDocumentsAndDatabases(includedRemote: false)
     }
 
     @IBAction func resetDatabase(_ sender: Any) {
-        deleteDocuments(includedRemote: true)
+        deleteDocumentsAndDatabases(includedRemote: true)
     }
 
-    private func deleteDocuments(includedRemote: Bool) {
+    private func deleteDocumentsAndDatabases(includedRemote: Bool) {
         documentManager.deleteAll(includedRemote: includedRemote) { result in
-            DispatchQueue.main.async {
-                let alert = NSAlert()
-
-                switch result {
-                case .failure(let error):
-                    // TODO: i18n
+            switch result {
+            case .failure(let error):
+                DispatchQueue.main.async {
+                    let alert = NSAlert()
                     alert.messageText = "Could not delete documents"
                     alert.informativeText = error.localizedDescription
                     alert.alertStyle = .critical
-                case .success:
-                    alert.alertStyle = .informational
-                    // TODO: i18n
-                    alert.messageText = "All documents deleted"
+                    alert.runModal()
                 }
+            case .success:
+                self.databaseManager.deleteAll(includedRemote: includedRemote) { result in
+                    DispatchQueue.main.async {
+                        let alert = NSAlert()
 
-                alert.runModal()
+                        switch result {
+                        case .failure(let error):
+                            // TODO: i18n
+                            alert.messageText = "Could not delete databases"
+                            alert.informativeText = error.localizedDescription
+                            alert.alertStyle = .critical
+                        case .success:
+                            alert.messageText = "All documents and databases deleted"
+                            alert.alertStyle = .informational
+                        }
+
+                        alert.runModal()
+                    }
+                }
             }
         }
     }

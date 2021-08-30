@@ -1,0 +1,19 @@
+subscription ($id: ID!) {
+  documentUpdated(id: $id) {
+    document {
+      id
+      title
+      slug
+      data
+      createdAt
+      updatedAt
+      deletedAt
+      isPublic
+      database {
+        title
+        id
+      }
+      documentType
+    }
+  }
+}

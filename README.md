@@ -43,3 +43,8 @@ export BROWSING_TREE_URL="https://url"
 * Run the tests, then `make copy_vinyl_files`
 
 * Commit just the Vinyl files with `Update Vinyl` as a commit message
+
+### Run the tests
+
+* Create a test account on https://app.beamapp.co, add its credentials in
+	`.envrc.private` with `TEST_ACCOUNT_EMAIL` and `TEST_ACCOUNT_PASSWORD`.
