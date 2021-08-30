@@ -228,11 +228,6 @@ extension PointAndShootCardPicker {
         @State private var addToOpacity: Double = 1
         @State private var addedToOpacity: Double = 0
 
-        private var prefixText: String? {
-            guard let num = numberOfElements else { return nil }
-            return num <= 1 ? "Added to " : "\(num) Added to "
-        }
-
         var body: some View {
             ZStack {
                 if !completed {
@@ -242,8 +237,8 @@ extension PointAndShootCardPicker {
                         .frame(alignment: .topLeading)
                         .transition(AnyTransition.asymmetric(insertion: .identity,
                                                              removal: AnyTransition.opacity.animation(.easeInOut(duration: 0.05))))
-                } else if let text = prefixText {
-                    Text(text)
+                } else {
+                    Text("Added to")
                         .zIndex(1)
                         .frame(alignment: .topLeading)
                         .transition(AnyTransition.asymmetric(insertion: AnyTransition.opacity.animation(Animation.easeInOut(duration: 0.05).delay(0.05)),
