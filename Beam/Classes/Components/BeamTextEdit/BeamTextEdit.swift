@@ -77,6 +77,10 @@ public extension CALayer {
         rootNode = TextRoot(editor: self, element: BeamElement())
         // Remove all subsciptions:
         noteCancellables.removeAll()
+        safeContentSize = .zero
+        realContentSize = .zero
+        scroll(.zero)
+        invalidateIntrinsicContentSize()
     }
 
     private var noteCancellables = [AnyCancellable]()
@@ -334,7 +338,12 @@ public extension CALayer {
     }
 
     // This is the root node of what we are editing:
-    var rootNode: TextRoot!
+    var rootNode: TextRoot! {
+        didSet {
+            guard oldValue != rootNode else { return }
+            invalidateIntrinsicContentSize()
+        }
+    }
     var cmdManager: CommandManager<Widget> {
         rootNode.cmdManager
     }
