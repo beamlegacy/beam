@@ -110,7 +110,7 @@ extension TextRoot {
         for node in sortedNodes.reversed() {
             // reparent children to previous sibbling or existing parent
             let unproxied = node.unproxyElement
-            if let oldIndexInParent = unproxied.indexInParent,
+            if node.open, let oldIndexInParent = unproxied.indexInParent,
                let newParent = unproxied.previousSibbling() ?? unproxied.parent {
                 for child in node.unproxyElement.children {
                     cmdManager.reparentElement(child, to: newParent, atIndex: oldIndexInParent)
