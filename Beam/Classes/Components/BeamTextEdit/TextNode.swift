@@ -24,7 +24,7 @@ public class TextNode: ElementNode {
         case .heading:
             return PreferencesManager.editorLineHeightHeading
         default:
-            return self.textFrame?.lines.count ?? 0 > 1 ? PreferencesManager.editorLineHeightMultipleLine : PreferencesManager.editorLineHeight
+            return PreferencesManager.editorLineHeightMultipleLine
         }
     }
 
@@ -295,17 +295,26 @@ public class TextNode: ElementNode {
     func updateTextFrame() {
         if selfVisible {
             emptyTextFrame = nil
+
+            if debug {
+                Logger.shared.logInfo("Before updateTextFrame() - \(attributedString) / \(self.textFrame?.frame ?? .zero)")
+            }
+
             let attrStr = attributedString
             let width = contentsWidth - textPadding.left - textPadding.right
-            let textFrame = TextFrame.create(string: attrStr, atPosition: NSPoint(x: textPadding.left, y: textPadding.top), textWidth: width)
+            let textFrame = TextFrame.create(string: attrStr, atPosition: NSPoint(x: textPadding.left, y: textPadding.top), textWidth: width, singleLineHeightFactor: PreferencesManager.editorLineHeight)
             self.textFrame = textFrame
             let layerTree = textFrame.layerTree
             let textLayer = Layer(name: "text", layer: layerTree)
             addLayer(textLayer, origin: CGPoint(x: contentsLead, y: 0))
 
+            if debug {
+                Logger.shared.logInfo("After updateTextFrame() - \(attributedString) / \(self.textFrame?.frame ?? .zero)")
+            }
+
             if attrStr.string.isEmpty {
                 let dummyText = buildAttributedString(for: BeamText(text: "Dummy!"))
-                let fakelayout = TextFrame.create(string: dummyText, atPosition: NSPoint(x: textPadding.left, y: textPadding.top), textWidth: width)
+                let fakelayout = TextFrame.create(string: dummyText, atPosition: NSPoint(x: textPadding.left, y: textPadding.top), textWidth: width, singleLineHeightFactor: PreferencesManager.editorLineHeight)
 
                 self.emptyTextFrame = fakelayout
             }
@@ -407,25 +416,23 @@ public class TextNode: ElementNode {
     }
 
     override func updateRendering() -> CGFloat {
-        var r = CGRect.zero
+        var size = CGSize.zero
         if selfVisible {
-            r = textRect
-            r.origin.y += textPadding.top
-            r.origin.x -= textPadding.left
+            size = textRect.size
 
             if self as? TextRoot == nil {
                 switch elementKind {
                 case .heading(1):
-                    r.size.height += PreferencesManager.editorHeaderOneSize
+                    size.height += PreferencesManager.editorHeaderOneSize
                 case .heading(2):
-                    r.size.height += PreferencesManager.editorHeaderTwoSize
+                    size.height += PreferencesManager.editorHeaderTwoSize
                 default:
-                    r.size.height -= 5
+                    size.height -= 5
                 }
             }
         }
 
-        return r.height
+        return size.height
     }
 
     var useActionLayer = true

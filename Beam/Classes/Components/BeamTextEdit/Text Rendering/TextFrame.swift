@@ -8,16 +8,17 @@
 import Foundation
 
 public class TextFrame {
-    private init(ctFrame: CTFrame, position: NSPoint, attributedString: NSAttributedString) {
+    private init(ctFrame: CTFrame, position: NSPoint, attributedString: NSAttributedString, singleLineHeightFactor: CGFloat?) {
         self.ctFrame = ctFrame
         self.position = position
         self.attributedString = attributedString
-
+        self.singleLineHeightFactor = singleLineHeightFactor
         layout()
     }
 
     public var attributedString: NSAttributedString
 
+    public var singleLineHeightFactor: CGFloat?
     public var debug: Bool { lines.count > 1 }
     public var ctFrame: CTFrame
     public var position: NSPoint
@@ -94,6 +95,7 @@ public class TextFrame {
         Y += paragraphSpacingBefore
         var index = 0
 
+        let lineCount = ctLines.count
         lines = ctLines.map {
             let cfRange = CTLineGetStringRange($0)
             let range = NSRange(location: cfRange.location, length: cfRange.length)
@@ -112,7 +114,7 @@ public class TextFrame {
             //}
             sourceOffset = line.carets.last?.positionInSource ?? sourceOffset
             if let paragraphStyle = attributedString.attribute(.paragraphStyle, at: line.range.lowerBound, longestEffectiveRange: nil, in: range) as? NSParagraphStyle {
-                line.interlineFactor = paragraphStyle.lineHeightMultiple
+                line.interlineFactor = lineCount == 1 ? (singleLineHeightFactor ?? paragraphStyle.lineHeightMultiple) : paragraphStyle.lineHeightMultiple
             }
             Y += (line.frame.height * line.interlineFactor).rounded(.up)
 
@@ -168,7 +170,7 @@ public class TextFrame {
         return nextCaret(for: index, in: carets)
     }
 
-    public class func create(string: NSAttributedString, atPosition position: NSPoint, textWidth: CGFloat) -> TextFrame {
+    public class func create(string: NSAttributedString, atPosition position: NSPoint, textWidth: CGFloat, singleLineHeightFactor: CGFloat?) -> TextFrame {
         assert(textWidth != 0)
         var string = string
         if string.string.last == "\n" {
@@ -186,7 +188,7 @@ public class TextFrame {
                                              path,
                                              frameAttributes as CFDictionary)
 
-        let f = TextFrame(ctFrame: frame, position: position, attributedString: string)
+        let f = TextFrame(ctFrame: frame, position: position, attributedString: string, singleLineHeightFactor: singleLineHeightFactor)
 
         return f
     }

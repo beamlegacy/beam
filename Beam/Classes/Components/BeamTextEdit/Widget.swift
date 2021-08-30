@@ -180,15 +180,34 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     var idealContentsHeight: CGFloat = 0
     final var idealContentsSize: NSSize { NSSize(width: contentsWidth.rounded(.awayFromZero), height: idealContentsHeight.rounded(.awayFromZero))}
     final var paddedContentsSize: NSSize {
-        NSSize(width: (idealContentsSize.width + contentsPadding.left + contentsPadding.right).rounded(.awayFromZero),
-               height: (idealContentsSize.height + contentsPadding.top + contentsPadding.bottom).rounded(.awayFromZero))
+        NSSize(width: idealContentsSize.width + contentsPadding.left + contentsPadding.right,
+               height: idealContentsSize.height + contentsPadding.top + contentsPadding.bottom).rounded()
     }
 
     var idealSizeChanged = true
     final var idealSize: NSSize {
         if idealSizeChanged {
+            if debug {
+                Logger.shared.logInfo("compute idealSize \(self) [before: \(computedIdealSize)] - paddedContentsSize: \(paddedContentsSize) - idealChildrenSize: \(idealChildrenSize) - padding: \(padding) (idealContentsSize: \(idealContentsSize))")
+            }
+
+            defer {
+                if debug {
+                    Logger.shared.logInfo("compute idealSize \(self) [after: \(computedIdealSize)] - paddedContentsSize: \(paddedContentsSize) - idealChildrenSize: \(idealChildrenSize) - padding: \(padding) (idealContentsSize: \(idealContentsSize))")
+                }
+            }
             computeRendering()
-            computedIdealSize = NSSize(width: availableWidth.rounded(.awayFromZero), height: (paddedContentsSize.height + idealChildrenSize.height + padding.top + padding.bottom).rounded(.awayFromZero))
+            computedIdealSize = NSSize(width: availableWidth, height: paddedContentsSize.height + idealChildrenSize.height + padding.top + padding.bottom).rounded()
+
+            if computedIdealSize.width.isNaN || !computedIdealSize.width.isFinite {
+                Logger.shared.logError("computedIdealSize.width is not integral \(computedIdealSize.width)", category: .noteEditor)
+                computedIdealSize.width = availableWidth
+            }
+
+            if computedIdealSize.height.isNaN || !computedIdealSize.height.isFinite {
+                Logger.shared.logError("computedIdealSize.height is not integral \(computedIdealSize.height)", category: .noteEditor)
+                computedIdealSize.height = 0
+            }
         }
         return computedIdealSize
     }
@@ -567,16 +586,6 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         guard availableWidth > 0 else { return }
         invalidatedRendering = false
         idealContentsHeight = updateRendering()
-
-        if computedIdealSize.width.isNaN || !computedIdealSize.width.isFinite {
-            Logger.shared.logError("computedIdealSize.width is not integral \(computedIdealSize.width)", category: .noteEditor)
-            computedIdealSize.width = availableWidth
-        }
-
-        if computedIdealSize.height.isNaN || !computedIdealSize.height.isFinite {
-            Logger.shared.logError("computedIdealSize.height is not integral \(computedIdealSize.height)", category: .noteEditor)
-            computedIdealSize.height = 0
-        }
     }
 
     /// updateRendering() must be overloaded to update the rendering of a widget and return the new height of its contents. It should not modify any layout information
