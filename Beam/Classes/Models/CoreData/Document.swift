@@ -55,13 +55,16 @@ class Document: NSManagedObject, BeamCoreDataObject {
     /// Slower than `deleteBatchWithPredicate` but I can't get `deleteBatchWithPredicate`
     /// to properly propagate changes to other contexts :(
     class func deleteWithPredicate(_ context: NSManagedObjectContext, _ predicate: NSPredicate? = nil) throws {
-        let deleteFetch = NSFetchRequest<NSFetchRequestResult>(entityName: "Document")
-        deleteFetch.predicate = predicate
-
         try context.performAndWait {
             for document in try Document.rawFetchAllWithLimit(context, predicate) {
                 context.delete(document)
             }
+        }
+
+        do {
+            try context.save()
+        } catch {
+            Logger.shared.logError(error.localizedDescription, category: .coredata)
         }
     }
 

@@ -39,6 +39,7 @@ public struct EnvironmentVariables {
 
     public struct Account {
         static public private(set) var testPassword = "$(TEST_ACCOUNT_PASSWORD)"
+        static public private(set) var testEmail = "$(TEST_ACCOUNT_EMAIL)"
     }
 
     static public private(set) var beamObjectAPIEnabled = NSString("$(BEAM_OBJECT_API_ENABLED)").boolValue

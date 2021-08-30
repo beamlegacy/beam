@@ -13,7 +13,7 @@ class AccountManager {
     let userSessionRequest = UserSessionRequest()
 }
 
-// Foundation
+// MARK: - Foundation
 extension AccountManager {
     @discardableResult
     func signIn(_ email: String,
@@ -35,6 +35,7 @@ extension AccountManager {
                     // TODO: move this syncData to a manager instead.
                     DispatchQueue.main.async {
                         AppDelegate.main.syncData()
+                        AppDelegate.main.connectWebSockets()
                     }
 
                     completionHandler?(.success(true))
@@ -69,6 +70,7 @@ extension AccountManager {
                     // TODO: move this syncData to a manager instead.
                     DispatchQueue.main.async {
                         AppDelegate.main.syncData()
+                        AppDelegate.main.connectWebSockets()
                     }
 
                     completionHandler?(.success(true))
@@ -126,11 +128,12 @@ extension AccountManager {
 
     static func logout() {
         Persistence.cleanUp()
+        AppDelegate.main.disconnectWebSockets()
         Logger.shared.logDebug("Logged out", category: .general)
     }
 }
 
-// PromiseKit
+// MARK: - PromiseKit
 extension AccountManager {
     func signIn(_ email: String, _ password: String) -> PromiseKit.Promise<Bool> {
         let promise: PromiseKit.Promise<UserSessionRequest.SignIn> = userSessionRequest.signIn(email: email, password: password)
@@ -140,6 +143,10 @@ extension AccountManager {
             Persistence.Authentication.email = email
             Persistence.Authentication.password = password
             LibrariesManager.shared.setSentryUser()
+            // Syncing with remote API, AppDelegate needs to be called in mainthread
+            // TODO: move this syncData to a manager instead.
+            AppDelegate.main.syncData()
+            AppDelegate.main.connectWebSockets()
 
             return .value(true)
         }
@@ -155,6 +162,10 @@ extension AccountManager {
                 Persistence.Authentication.password = nil
             }
             LibrariesManager.shared.setSentryUser()
+            // Syncing with remote API, AppDelegate needs to be called in mainthread
+            // TODO: move this syncData to a manager instead.
+            AppDelegate.main.syncData()
+            AppDelegate.main.connectWebSockets()
 
             return .value(true)
         }
@@ -173,7 +184,7 @@ extension AccountManager {
     }
 }
 
-// Promises
+// MARK: - Promises
 extension AccountManager {
     func signIn(_ email: String, _ password: String) -> Promises.Promise<Bool> {
         let promise: Promises.Promise<UserSessionRequest.SignIn> = userSessionRequest.signIn(email: email, password: password)
@@ -183,6 +194,10 @@ extension AccountManager {
             Persistence.Authentication.email = email
             Persistence.Authentication.password = password
             LibrariesManager.shared.setSentryUser()
+            // TODO: move this syncData to a manager instead.
+            AppDelegate.main.syncData()
+            AppDelegate.main.connectWebSockets()
+            Logger.shared.logInfo("signIn succeeded: \(signIn.accessToken ?? "-")", category: .network)
             return Promise(true)
         }
     }
@@ -197,6 +212,11 @@ extension AccountManager {
                 Persistence.Authentication.password = nil
             }
             LibrariesManager.shared.setSentryUser()
+            // Syncing with remote API, AppDelegate needs to be called in mainthread
+            // TODO: move this syncData to a manager instead.
+            AppDelegate.main.syncData()
+            AppDelegate.main.connectWebSockets()
+            Logger.shared.logInfo("signIn succeeded: \(signIn.accessToken ?? "-")", category: .network)
             return Promise(true)
         }
     }

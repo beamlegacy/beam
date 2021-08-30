@@ -101,8 +101,27 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         prepareMenuForTestEnv()
         #endif
 
-        syncData()
+        // We sync data *after* we potentially connected to websocket, to make sure we don't miss any data
+        if Configuration.beamObjectAPIEnabled {
+            beamObjectManager.liveSync { _ in
+                self.syncData()
+            }
+        } else {
+            syncData()
+        }
         fetchTopDomains()
+    }
+
+    // MARK: - Web sockets
+    func connectWebSockets() {
+        guard AuthenticationManager.shared.isAuthenticated else { return }
+
+        documentManager.liveSync()
+    }
+
+    func disconnectWebSockets() {
+        documentManager.disconnectLiveSync()
+        beamObjectManager.disconnectLiveSync()
     }
 
     // MARK: -

@@ -33,6 +33,7 @@ public enum LogCategory: String {
     case pointAndShoot
     case fileDB
     case oauth
+    case webSocket
     case passwordsDB
     case passwordManager
     case passwordNetwork
