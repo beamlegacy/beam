@@ -76,12 +76,20 @@ class PasswordManager {
         return nil
     }
 
-    func save(host: String, username: String, password: String) {
+    @discardableResult
+    func save(host: String,
+              username: String,
+              password: String,
+              uuid: UUID? = nil,
+              _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) -> PasswordRecord? {
         do {
-            let passwordRecord = try passwordsDB.save(host: host, username: username, password: password)
+            let passwordRecord = try passwordsDB.save(host: host, username: username, password: password, uuid: uuid)
             if AuthenticationManager.shared.isAuthenticated {
-                try? self.save(passwordRecord)
+                try self.saveOnNetwork(passwordRecord, networkCompletion)
+            } else {
+                networkCompletion?(.success(false))
             }
+            return passwordRecord
         } catch PasswordDBError.cantSavePassword(let errorMsg) {
             Logger.shared.logError("Error while saving password for \(host): \(errorMsg)", category: .passwordsDB)
         } catch PasswordDBError.cantEncryptPassword {
@@ -89,6 +97,7 @@ class PasswordManager {
         } catch {
             Logger.shared.logError("Unexpected error: \(error.localizedDescription).", category: .passwordsDB)
         }
+        return nil
     }
 
     func find(_ searchString: String) -> [PasswordManagerEntry] {
@@ -103,11 +112,13 @@ class PasswordManager {
         return []
     }
 
-    func delete(host: String, for username: String) {
+    func delete(host: String, for username: String, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
         do {
             let passwordRecord = try passwordsDB.delete(host: host, username: username)
             if AuthenticationManager.shared.isAuthenticated {
-                try self.save(passwordRecord)
+                try self.saveOnNetwork(passwordRecord, networkCompletion)
+            } else {
+                networkCompletion?(.success(false))
             }
         } catch PasswordDBError.cantDeletePassword(errorMsg: let errorMsg) {
             Logger.shared.logError("Error while deleting password for \(host) - \(username): \(errorMsg)", category: .passwordsDB)
@@ -116,11 +127,13 @@ class PasswordManager {
         }
     }
 
-    func deleteAll() {
+    func deleteAll(_ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
         do {
             let passwordsRecord = try passwordsDB.deleteAll()
             if AuthenticationManager.shared.isAuthenticated {
-                try self.saveAll(passwordsRecord)
+                try self.saveAllOnNetwork(passwordsRecord, networkCompletion)
+            } else {
+                networkCompletion?(.success(false))
             }
         } catch PasswordDBError.cantDeletePassword(errorMsg: let errorMsg) {
             Logger.shared.logError("Error while deleting all passwords: \(errorMsg)", category: .passwordsDB)
@@ -147,28 +160,32 @@ extension PasswordManager: BeamObjectManagerDelegate {
         return passwords
     }
 
-    func saveAll(_ passwords: [PasswordRecord]) throws {
+    func saveAllOnNetwork(_ passwords: [PasswordRecord], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
         try self.saveOnBeamObjectsAPI(passwords) { result in
             switch result {
             case .success:
                 Logger.shared.logDebug("Saved passwords on the BeamObject API",
                                        category: .passwordNetwork)
+                networkCompletion?(.success(true))
             case .failure(let error):
                 Logger.shared.logDebug("Error when saving the passwords on the BeamObject API with error: \(error.localizedDescription)",
                                        category: .passwordNetwork)
+                networkCompletion?(.failure(error))
             }
         }
     }
 
-    private func save(_ password: PasswordRecord) throws {
+    private func saveOnNetwork(_ password: PasswordRecord, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
         try self.saveOnBeamObjectAPI(password) { result in
             switch result {
             case .success:
                 Logger.shared.logDebug("Saved password on the BeamObject API",
                                        category: .passwordNetwork)
+                networkCompletion?(.success(true))
             case .failure(let error):
                 Logger.shared.logDebug("Error when saving the password on the BeamObject API with error: \(error.localizedDescription)",
                                        category: .passwordNetwork)
+                networkCompletion?(.failure(error))
             }
         }
     }
