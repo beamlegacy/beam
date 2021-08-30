@@ -14,7 +14,7 @@ extension PointAndShoot {
     /// - Returns: true if target rect contains mouselocation
     func hasGraceRectAndMouseOverlap(_ target: Target, _ href: String, _ mouse: NSPoint) -> Bool {
         let translatedTarget = translateAndScaleTarget(target, href)
-        let graceDistance: CGFloat = -80
+        let graceDistance: CGFloat = -40
         let graceArea: NSRect = translatedTarget.rect.insetBy(dx: graceDistance, dy: graceDistance)
         return graceArea.contains(mouse)
     }
@@ -24,7 +24,10 @@ extension PointAndShoot {
     /// - Returns: true if target is tall
     func isLargeTargetArea(_ target: Target) -> Bool {
         let yPercent = (100 / page.frame.height) * target.rect.height
-        let yIsLarge = yPercent > 150
-        return yIsLarge
+        let yIsLarge = yPercent > 100
+
+        let xPercent = (100 / page.frame.width) * target.rect.width
+        let xIsLarge = xPercent > 80
+        return yIsLarge || xIsLarge
     }
 }

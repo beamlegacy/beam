@@ -9,7 +9,7 @@ import SwiftUI
 
 struct PointAndShootOffsetWithAnimationView: ViewModifier {
     var offset: NSPoint
-    var animation: Animation
+    var animation: Animation?
 
     func body(content: Content) -> some View {
         content
@@ -26,26 +26,26 @@ extension View {
     /// - Parameters:
     ///   - x: X Coordinate
     ///   - y: Y Coordinate
-    ///   - animation: animation to apply, defaults to .default
+    ///   - animation: animation to apply, defaults to `nil`
     /// - Returns: animated content
-    func pointAndShootOffsetWithAnimation(_ x: CGFloat = 0, _ y: CGFloat = 0, animation: Animation = .default) -> some View {
+    func pointAndShootOffsetWithAnimation(_ x: CGFloat = 0, _ y: CGFloat = 0, animation: Animation? = nil) -> some View {
         return modifier(PointAndShootOffsetWithAnimationView(offset: NSPoint(x: x, y: y), animation: animation))
     }
     /// Animate offset values without leaking the animation transitions to other UI properties like `.position(x, y)`
     /// - Parameters:
     ///   - x: X Coordinate
     ///   - y: Y Coordinate
-    ///   - animation: animation to apply, defaults to `.default`
+    ///   - animation: animation to apply, defaults to `nil`
     /// - Returns: animated content
-    func pointAndShootOffsetWithAnimation(x: CGFloat = 0, y: CGFloat = 0, animation: Animation = .default) -> some View {
+    func pointAndShootOffsetWithAnimation(x: CGFloat = 0, y: CGFloat = 0, animation: Animation? = nil) -> some View {
         return modifier(PointAndShootOffsetWithAnimationView(offset: NSPoint(x: x, y: y), animation: animation))
     }
     /// Animate offset values without leaking the animation transitions to other UI properties like `.position(x, y)`
     /// - Parameters:
     ///   - offset: X, Y Coordinates
-    ///   - animation: animation to apply, defaults to `.default`
+    ///   - animation: animation to apply, defaults to `nil`
     /// - Returns: animated content
-    func pointAndShootOffsetWithAnimation(_ offset: NSPoint, animation: Animation = .default) -> some View {
+    func pointAndShootOffsetWithAnimation(_ offset: NSPoint, animation: Animation? = nil) -> some View {
         return modifier(PointAndShootOffsetWithAnimationView(offset: offset, animation: animation))
     }
 }
