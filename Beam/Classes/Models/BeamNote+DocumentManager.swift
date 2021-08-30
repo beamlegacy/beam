@@ -87,7 +87,7 @@ extension BeamNote: BeamNoteDocument {
     func updateWithDocumentStruct(_ docStruct: DocumentStruct) {
         let decoder = JSONDecoder()
         guard let newSelf = try? decoder.decode(BeamNote.self, from: docStruct.data) else {
-            Logger.shared.logError("Unable to decode new documentStruct \(docStruct.title)",
+            Logger.shared.logError("Unable to decode new documentStruct \(docStruct.title) {\(docStruct.id)}",
                                    category: .document)
             return
         }

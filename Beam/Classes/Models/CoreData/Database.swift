@@ -58,6 +58,21 @@ class Database: NSManagedObject, BeamCoreDataObject {
 
     class func deleteWithPredicate(_ context: NSManagedObjectContext,
                                    _ predicate: NSPredicate? = nil) throws {
+        try context.performAndWait {
+            for database in try Database.rawFetchAllWithLimit(context, predicate) {
+                context.delete(database)
+            }
+        }
+
+        do {
+            try context.save()
+        } catch {
+            Logger.shared.logError(error.localizedDescription, category: .coredata)
+        }
+    }
+
+    class func deleteBatchWithPredicate(_ context: NSManagedObjectContext,
+                                        _ predicate: NSPredicate? = nil) throws {
         // TODO: we should fetch documents for the selected databases, and delete
         // them as well or move them to a default database?
 
@@ -163,7 +178,7 @@ class Database: NSManagedObject, BeamCoreDataObject {
     }
 
     static func rawCountWithPredicate(_ context: NSManagedObjectContext,
-                                      _ predicate: NSPredicate?) -> Int {
+                                      _ predicate: NSPredicate? = nil) -> Int {
         rawCountWithPredicate(context, predicate, onlyNonDeleted: false)
     }
 

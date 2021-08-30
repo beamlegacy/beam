@@ -18,6 +18,7 @@ class BeamObjectManager {
 
     private static var networkRequests: [UUID: APIRequest] = [:]
     private static var networkRequestsWithoutID: [APIRequest] = []
+    private var webSocketRequest = APIWebSocketRequest()
 
     static func register<M: BeamObjectManagerDelegateProtocol, O: BeamObjectProtocol>(_ manager: M, object: O.Type) {
         managerInstances[object.beamObjectTypeName] = manager
@@ -1058,6 +1059,41 @@ extension BeamObjectManager {
 
         result.previousChecksum = remoteObject.dataChecksum
         return result
+    }
+}
+
+// MARK: - For websockets
+extension BeamObjectManager {
+    func liveSync(_ handler: @escaping (Bool) -> Void) {
+        guard AuthenticationManager.shared.isAuthenticated else { return }
+
+        do {
+            try webSocketRequest.connect {
+                self.webSocketRequest.connectBeamObjects { result in
+                    switch result {
+                    case .failure(let error):
+                        Logger.shared.logError(error.localizedDescription, category: .webSocket)
+                    case .success(let beamObject):
+                        do {
+                            try self.parseObjects([beamObject])
+                        } catch {
+                            Logger.shared.logError("Failed parsing beamObject: \(error.localizedDescription)", category: .webSocket)
+                            dump(beamObject)
+                        }
+                    }
+                }
+
+                handler(true)
+            }
+        } catch {
+            handler(false)
+            Logger.shared.logError(error.localizedDescription, category: .webSocket)
+        }
+    }
+
+    func disconnectLiveSync() {
+        webSocketRequest.disconnect()
+        webSocketRequest = APIWebSocketRequest()
     }
 }
 

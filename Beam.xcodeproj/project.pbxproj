@@ -216,6 +216,8 @@
 		5206281825922D8A00D7CD9E /* delete_all_documents.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 5206281725922D8A00D7CD9E /* delete_all_documents.graphql */; };
 		5206282625923B6800D7CD9E /* DocumentRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5206282525923B6800D7CD9E /* DocumentRequest.swift */; };
 		5206283E25923EB500D7CD9E /* DocumentAPIType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5206283D25923EB500D7CD9E /* DocumentAPIType.swift */; };
+		520BC40126D7B02200A82966 /* subscription_beam_objects_updated.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 520BC40026D7B02200A82966 /* subscription_beam_objects_updated.graphql */; };
+		520BC40E26D7B05F00A82966 /* subscription_beam_object_updated.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 520BC40D26D7B05F00A82966 /* subscription_beam_object_updated.graphql */; };
 		521398D82694931C00AC29C1 /* DatabaseStruct.swift in Sources */ = {isa = PBXBuildFile; fileRef = 521398D72694931C00AC29C1 /* DatabaseStruct.swift */; };
 		521EEDDD25937E9200BA2485 /* DocumentsWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 521EEDDC25937E9200BA2485 /* DocumentsWindow.swift */; };
 		521EEDE125937F5B00BA2485 /* DocumentsContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 521EEDE025937F5B00BA2485 /* DocumentsContentView.swift */; };
@@ -234,6 +236,7 @@
 		5224CD7C2686034200D4179E /* BeamObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5224CD7B2686034200D4179E /* BeamObject.swift */; };
 		5224CD822686043600D4179E /* BeamObjectRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5224CD812686043600D4179E /* BeamObjectRequest.swift */; };
 		5224CD8C26860C0900D4179E /* BeamObjectManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5224CD8B26860C0900D4179E /* BeamObjectManager.swift */; };
+		522969E226669016005067A6 /* APIWebSocketRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 522969E126669016005067A6 /* APIWebSocketRequest.swift */; };
 		522AFB2825CBFAB100F60647 /* DocumentManagerTestsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 522AFB2725CBFAB100F60647 /* DocumentManagerTestsHelper.swift */; };
 		522B17C82684E11E00741F94 /* String+SHA256.swift in Sources */ = {isa = PBXBuildFile; fileRef = 522B17C72684E11E00741F94 /* String+SHA256.swift */; };
 		522BC3D726A6EAEE0018B51E /* Date+IntValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 522BC3D626A6EAEE0018B51E /* Date+IntValue.swift */; };
@@ -257,6 +260,8 @@
 		525098E5264E9817002D1548 /* ProxyTextNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C9AA3E259019E3007D3D98 /* ProxyTextNode.swift */; };
 		525098EA264E9824002D1548 /* HyperlinkFormatterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418EA94125D696EA005894AA /* HyperlinkFormatterView.swift */; };
 		525627B126B43CE00047429B /* database.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 525627B026B43CE00047429B /* database.graphql */; };
+		5258F9DC26690C7700A07307 /* subscription_documents_updated.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 5258F9DB26690C7700A07307 /* subscription_documents_updated.graphql */; };
+		5258F9F626690CA700A07307 /* subscription_document_updated.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 5258F9F526690CA700A07307 /* subscription_document_updated.graphql */; };
 		525C233C25BAF8EF001B9625 /* libgit2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 525C233B25BAF8EF001B9625 /* libgit2.a */; };
 		525C235125BAFC6B001B9625 /* Merge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 525C235025BAFC6B001B9625 /* Merge.swift */; };
 		525C235825BAFCAA001B9625 /* MergeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 525C235725BAFCAA001B9625 /* MergeTests.swift */; };
@@ -1157,6 +1162,8 @@
 		5206281725922D8A00D7CD9E /* delete_all_documents.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = delete_all_documents.graphql; sourceTree = "<group>"; };
 		5206282525923B6800D7CD9E /* DocumentRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentRequest.swift; sourceTree = "<group>"; };
 		5206283D25923EB500D7CD9E /* DocumentAPIType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentAPIType.swift; sourceTree = "<group>"; };
+		520BC40026D7B02200A82966 /* subscription_beam_objects_updated.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = subscription_beam_objects_updated.graphql; sourceTree = "<group>"; };
+		520BC40D26D7B05F00A82966 /* subscription_beam_object_updated.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = subscription_beam_object_updated.graphql; sourceTree = "<group>"; };
 		521398D1269486B100AC29C1 /* Beam3ToBeam4MigrationPolicy.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = Beam3ToBeam4MigrationPolicy.xcmappingmodel; sourceTree = "<group>"; };
 		521398D72694931C00AC29C1 /* DatabaseStruct.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseStruct.swift; sourceTree = "<group>"; };
 		521EEDDC25937E9200BA2485 /* DocumentsWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentsWindow.swift; sourceTree = "<group>"; };
@@ -1177,6 +1184,7 @@
 		5224CD7B2686034200D4179E /* BeamObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamObject.swift; sourceTree = "<group>"; };
 		5224CD812686043600D4179E /* BeamObjectRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamObjectRequest.swift; sourceTree = "<group>"; };
 		5224CD8B26860C0900D4179E /* BeamObjectManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamObjectManager.swift; sourceTree = "<group>"; };
+		522969E126669016005067A6 /* APIWebSocketRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIWebSocketRequest.swift; sourceTree = "<group>"; };
 		522AFB2725CBFAB100F60647 /* DocumentManagerTestsHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentManagerTestsHelper.swift; sourceTree = "<group>"; };
 		522B17C72684E11E00741F94 /* String+SHA256.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+SHA256.swift"; sourceTree = "<group>"; };
 		522BC3D626A6EAEE0018B51E /* Date+IntValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+IntValue.swift"; sourceTree = "<group>"; };
@@ -1199,6 +1207,8 @@
 		524CF6D625F28F97007312F0 /* EncryptionManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EncryptionManagerTests.swift; sourceTree = "<group>"; };
 		524CF6DA25F29119007312F0 /* SymmetricKey+Serialize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SymmetricKey+Serialize.swift"; sourceTree = "<group>"; };
 		525627B026B43CE00047429B /* database.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = database.graphql; sourceTree = "<group>"; };
+		5258F9DB26690C7700A07307 /* subscription_documents_updated.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = subscription_documents_updated.graphql; sourceTree = "<group>"; };
+		5258F9F526690CA700A07307 /* subscription_document_updated.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = subscription_document_updated.graphql; sourceTree = "<group>"; };
 		525C233B25BAF8EF001B9625 /* libgit2.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgit2.a; path = Extern/libgit2/build/libgit2.a; sourceTree = "<group>"; };
 		525C235025BAFC6B001B9625 /* Merge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Merge.swift; sourceTree = "<group>"; };
 		525C235725BAFCAA001B9625 /* MergeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MergeTests.swift; sourceTree = "<group>"; };
@@ -2100,6 +2110,7 @@
 				4181715D2581107C00317ED8 /* GraphqlRequestsTypes */,
 				418171662581107C00317ED8 /* GraphqlRequests */,
 				418171642581107C00317ED8 /* APIRequest.swift */,
+				522969E126669016005067A6 /* APIWebSocketRequest.swift */,
 				529E1AD325D45CFA00DD25B8 /* APIRequestError.swift */,
 				418171622581107C00317ED8 /* APIResponse.swift */,
 				5224CD812686043600D4179E /* BeamObjectRequest.swift */,
@@ -2629,6 +2640,8 @@
 				5260172025ADCBE800634695 /* documents.graphql */,
 				5204290A25A4B3D300DD677C /* document_updated_at.graphql */,
 				5206281725922D8A00D7CD9E /* delete_all_documents.graphql */,
+				5258F9DB26690C7700A07307 /* subscription_documents_updated.graphql */,
+				5258F9F526690CA700A07307 /* subscription_document_updated.graphql */,
 				52CA917D26737CCB00DDF388 /* documents_title.graphql */,
 			);
 			path = Documents;
@@ -2657,6 +2670,8 @@
 				5224CD692685FFD100D4179E /* beam_object.graphql */,
 				5224CD6F2685FFDD00D4179E /* beam_objects.graphql */,
 				5224CD752685FFFC00D4179E /* beam_object_updated_at.graphql */,
+				520BC40026D7B02200A82966 /* subscription_beam_objects_updated.graphql */,
+				520BC40D26D7B05F00A82966 /* subscription_beam_object_updated.graphql */,
 			);
 			path = BeamObject;
 			sourceTree = "<group>";
@@ -4235,9 +4250,11 @@
 				41D169AA25DC07260018E5F2 /* Inter-Medium.otf in Resources */,
 				52F4E4A226417F210067B017 /* sign_in_with_provider.graphql in Resources */,
 				41D169A625DC07260018E5F2 /* Inter-Bold.otf in Resources */,
+				520BC40126D7B02200A82966 /* subscription_beam_objects_updated.graphql in Resources */,
 				0DC6E2DE26A0527900BD2E2A /* majestic_million_test.csv in Resources */,
 				032562A826051D3B006513E4 /* blockerList.json in Resources */,
 				418171122581082200317ED8 /* Assets.xcassets in Resources */,
+				5258F9DC26690C7700A07307 /* subscription_documents_updated.graphql in Resources */,
 				56A5BD3125CC680E00ED7C50 /* url.stopwords in Resources */,
 				41B4277B25E52DCA00A8243F /* Localizable.stringsdict in Resources */,
 				52FB84CE263812060085A444 /* update_databases.graphql in Resources */,
@@ -4267,11 +4284,13 @@
 				BAA67958DEBA77F2BE94F617 /* Native.test.ts in Resources */,
 				BAA6792F5CF42C0D8FEC2A9B /* WebEvents.ts in Resources */,
 				52FB84E42638124A0085A444 /* update_documents.graphql in Resources */,
+				5258F9F626690CA700A07307 /* subscription_document_updated.graphql in Resources */,
 				BAA6704409BDC8AB92E95F8D /* WebEventsUI_native.ts in Resources */,
 				337EAE6026A954AD008E4020 /* UITests-Alerts.html in Resources */,
 				52CA917E26737CCB00DDF388 /* documents_title.graphql in Resources */,
 				5224CD602685FFB500D4179E /* delete_all_beam_objects.graphql in Resources */,
 				5224CD6A2685FFD100D4179E /* beam_object.graphql in Resources */,
+				520BC40E26D7B05F00A82966 /* subscription_beam_object_updated.graphql in Resources */,
 				BAA67B13B4EBCFF2D7A94F93 /* WebEventsUI_web.ts in Resources */,
 				BAA67EC2B781F8A78CD5A6B0 /* Beam.scss in Resources */,
 				BAA67A1DD75801D8B25037E9 /* BeamTypes.ts in Resources */,
@@ -4917,6 +4936,7 @@
 				A08DE20D26160DC800F8ABB4 /* BeamTextEdit+CopyPaste.swift in Sources */,
 				A56696B12614CF7F00B814D2 /* TableView.swift in Sources */,
 				524299C725A47D2600F4DBF5 /* AppDelegate+Preferences.swift in Sources */,
+				522969E226669016005067A6 /* APIWebSocketRequest.swift in Sources */,
 				418172452581107C00317ED8 /* SearchBar.swift in Sources */,
 				418172182581107C00317ED8 /* PerformanceDebug.swift in Sources */,
 				A50612D626CC75200053AD37 /* Calendar+Calculations.swift in Sources */,

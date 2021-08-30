@@ -27,7 +27,7 @@ class CoreDataManager {
     let migrator: CoreDataMigratorProtocol
 
     lazy var backgroundContext: NSManagedObjectContext = {
-        let context = self.persistentContainer.newBackgroundContext()
+        let context = persistentContainer.newBackgroundContext()
         context.mergePolicy = NSMergePolicy(merge: NSMergePolicyType.mergeByPropertyObjectTrumpMergePolicyType)
 
         return context
