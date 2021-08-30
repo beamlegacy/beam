@@ -35,6 +35,7 @@ class WebNoteControllerTest: XCTestCase {
 
     func testAdd() throws {
         PreferencesManager.browsingSessionCollectionIsOn = true
+        defer { PreferencesManager.browsingSessionCollectionIsOn = false }
         let note = BeamNote(title: "Sample note")
 
         let controller = WebNoteController(note: note)
