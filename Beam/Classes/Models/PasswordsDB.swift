@@ -73,6 +73,8 @@ extension PasswordRecord: BeamObjectProtocol {
     }
 }
 
+extension PasswordRecord: Equatable { }
+
 extension PasswordRecord: TableRecord {
     enum Columns: String, ColumnExpression {
         case uuid, entryId, host, name, password, createdAt, updatedAt, deletedAt, previousChecksum, privateKeySignature
@@ -297,6 +299,10 @@ class PasswordsDB: PasswordStore {
     }
 
     func save(host: String, username: String, password: String) throws -> PasswordRecord {
+        try save(host: host, username: username, password: password, uuid: nil)
+    }
+
+    func save(host: String, username: String, password: String, uuid: UUID? = nil) throws -> PasswordRecord {
         do {
             return try dbPool.write { db in
                 guard let encryptedPassword = try? EncryptionManager.shared.encryptString(password) else {
@@ -304,7 +310,7 @@ class PasswordsDB: PasswordStore {
                 }
                 let privateKeySignature = try EncryptionManager.shared.privateKey().asString().SHA256()
                 var passwordRecord = PasswordRecord(
-                    uuid: UUID(),
+                    uuid: uuid ?? UUID(),
                     entryId: id(for: host, and: username),
                     host: host,
                     name: username,

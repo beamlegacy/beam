@@ -11,16 +11,18 @@ import Vinyl
 
 class BeamTestsHelper {
     var turntable: Turntable?
+    var testName: String = "no_test_name"
 
-    func beginNetworkRecording() {
+    func beginNetworkRecording(test: XCTestCase? = nil) {
         guard Configuration.networkStubs else { return }
+
+        testName = test?.name ?? QuickSpec.current.name // ?? testName
 
         // Cancel today's journal throttled document save. Else we get random network calls where not expecting any,
         // and this fails with Vinyl
-        DocumentManager.cancelAllPreviousThrottledAPICall()
 
         let recordingPath = NSSearchPathForDirectoriesInDomains(.libraryDirectory, .userDomainMask, true).first!
-        var filename = QuickSpec.current.name.c99ExtendedIdentifier
+        var filename = testName.c99ExtendedIdentifier
         do {
             filename = try filename.SHA256()
         } catch {
@@ -70,7 +72,7 @@ class BeamTestsHelper {
     static let decoder = JSONDecoder()
     private func saveAPIRequestsFilename() -> URL {
         let recordingPath = NSSearchPathForDirectoriesInDomains(.libraryDirectory, .userDomainMask, true).first!
-        var filename = QuickSpec.current.name.c99ExtendedIdentifier
+        var filename = testName.c99ExtendedIdentifier
         do {
             filename = try filename.SHA256()
         } catch {
@@ -134,15 +136,23 @@ class BeamTestsHelper {
             }
         }
 
-        let before = QuickSpec.current.continueAfterFailure
-        QuickSpec.current.continueAfterFailure = false
-        defer { QuickSpec.current.continueAfterFailure = before }
-        if !AuthenticationManager.shared.isAuthenticated {
-            fail("Not authenticated")
+        if let current = QuickSpec.current {
+            let before = current.continueAfterFailure
+            current.continueAfterFailure = false
+            defer { current.continueAfterFailure = before }
+
+            if !AuthenticationManager.shared.isAuthenticated {
+                fail("Not authenticated")
+            }
+        } else {
+            if !AuthenticationManager.shared.isAuthenticated {
+                fail("Not authenticated")
+            }
         }
     }
 
     static func logout() {
+        BeamObjectManager.clearNetworkCalls()
         guard AuthenticationManager.shared.isAuthenticated else { return }
         AccountManager.logout()
     }
