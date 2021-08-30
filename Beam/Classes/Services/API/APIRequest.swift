@@ -15,7 +15,7 @@ class BeamURLSession {
 }
 
 // swiftlint:disable:next type_body_length
-class APIRequest {
+class APIRequest: NSObject {
     var route: String { "\(Configuration.apiHostname)/graphql" }
     var authenticatedAPICall = true
     static var callsCount = 0
@@ -25,6 +25,8 @@ class APIRequest {
     private(set) var dataTask: URLSessionDataTask?
     private var cancelRequest: Bool = false
 
+    static var deviceId = UUID() // TODO: Persist this in Persistence
+
     var isCancelled: Bool {
         cancelRequest
     }
@@ -33,6 +35,7 @@ class APIRequest {
         guard let url = URL(string: route) else { fatalError("Can't get URL: \(route)") }
         var request = URLRequest(url: url)
         let headers: [String: String] = [
+            "Device": Self.deviceId.uuidString.lowercased(),
             "User-Agent": "Beam client, \(Information.appVersionAndBuild)",
             "Accept": "application/json",
             "Content-Type": "application/json",

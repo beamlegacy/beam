@@ -45,6 +45,8 @@ public class DocumentManager: NSObject {
     private static var networkTasks: [UUID: (DispatchWorkItem, ((Swift.Result<Bool, Error>) -> Void)?)] = [:]
     private static var networkTasksSemaphore = DispatchSemaphore(value: 1)
 
+    private var webSocketRequest = APIWebSocketRequest()
+
     init(coreDataManager: CoreDataManager? = nil) {
         self.coreDataManager = coreDataManager ?? CoreDataManager.shared
         self.mainContext = self.coreDataManager.mainContext
@@ -978,6 +980,52 @@ extension DocumentManager {
 
     // MARK: -
     // MARK: Refresh
+
+    // Connect over web sockets
+    func liveSync() {
+        guard AuthenticationManager.shared.isAuthenticated else { return }
+
+        do {
+            try webSocketRequest.connect {
+                self.webSocketRequest.connectDocuments { result in
+                    switch result {
+                    case .failure(let error):
+                        Logger.shared.logError(error.localizedDescription, category: .webSocket)
+                    case .success(let document):
+                        guard let documentId = document.id,
+                              let documentTitle = document.title,
+                              let documentUUID = UUID(uuidString: documentId) else {
+                            return
+                        }
+
+                        self.fetchDocumentFromAPISuccess(documentUUID, document) { result in
+                            switch result {
+                            case .failure(let error):
+                                if case DocumentManagerError.unresolvedConflict = error {
+                                    // TODO: Since we received a web socket update, we should probably overwrite or
+                                    // ask the user
+                                    Logger.shared.logError("Conflict for \(documentId): \(error.localizedDescription)", category: .webSocket)
+                                } else {
+                                    Logger.shared.logError("connectDocument: \(error.localizedDescription) for \(documentTitle) {\(documentId)}",
+                                                           category: .webSocket)
+                                }
+                            case .success(let success):
+                                Logger.shared.logDebug("Saved document \(documentId): \(success)", category: .webSocket)
+                            }
+                        }
+                    }
+                }
+            }
+        } catch {
+            // TODO: show user error
+            Logger.shared.logError(error.localizedDescription, category: .webSocket)
+        }
+    }
+
+    func disconnectLiveSync() {
+        webSocketRequest.disconnect()
+        webSocketRequest = APIWebSocketRequest()
+    }
 
     /// When we sync all documents, we don't want to flag local documents not available remotely as deleted,
     /// as we might create document in the mean time (the UI does create a journal for today
