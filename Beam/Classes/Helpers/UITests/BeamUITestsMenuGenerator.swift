@@ -13,6 +13,8 @@ class BeamUITestsMenuGenerator {
         case .deleteLogs: deleteLogs()
         case .resizeWindowLandscape: resizeWindowLandscape()
         case .resizeWindowPortrait: resizeWindowPortrait()
+        case .enableBrowsingSessionCollection: setBrowsingSessionCollection(true)
+        case .disableBrowsingSessionCollection: setBrowsingSessionCollection(false)
         case .loadUITestPage1: loadUITestsPage(identifier: "1")
         case .loadUITestPage2: loadUITestsPage(identifier: "2")
         case .loadUITestPage3: loadUITestsPage(identifier: "3")
@@ -45,6 +47,10 @@ class BeamUITestsMenuGenerator {
 
     private func resizeWindowLandscape() {
         AppDelegate.main.resizeWindow(width: 1200)
+    }
+
+    private func setBrowsingSessionCollection(_ value: Bool) {
+        PreferencesManager.browsingSessionCollectionIsOn = value
     }
 
     private func insertTextInCurrentNote() {
