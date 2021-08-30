@@ -23,27 +23,10 @@ struct PointAndShootFrameOffsetView: ViewModifier {
         return content
             .pointAndShootOffsetWithAnimation(computedOffset, animation: .timingCurve(0.165, 0.84, 0.44, 1, duration: 0.4))
             .onReceive(pns.$mouseLocation, perform: { location in
-                if lastID != target.id {
-                    lastID = target.id
-                    self.startTimer()
-                }
-
-                let x = calculateDistance(coordinate: location.x, areaCoord: target.rect.minX, areaSize: target.rect.width) / 2
+                let x = calculateDistance(coordinate: location.x, areaCoord: target.rect.minX, areaSize: target.rect.width)
                 let y = calculateDistance(coordinate: location.y, areaCoord: target.rect.minY, areaSize: target.rect.height)
                 self.offset = NSPoint(x: x, y: y)
             })
-    }
-
-    /// Start the animating the rectangle offset to (x: 0, y: 0)
-    func startTimer() {
-        // set inital values
-        self.ignoreOffset = false
-        self.timer?.invalidate()
-
-        // Assign the timer
-        self.timer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false, block: { _ in
-            self.ignoreOffset = true
-        })
     }
 
     /// Distance from mouselocation to center of rect for one axis

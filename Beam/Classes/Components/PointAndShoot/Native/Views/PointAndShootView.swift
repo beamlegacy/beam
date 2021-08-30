@@ -51,14 +51,14 @@ struct PointAndShootView: View {
                 /// To keep the pointing rectangle performant we shouldn't
                 /// add or remove the view component, but instead animate
                 /// it's properties like opacity.
-                let isRect = (pns.hasGraceRectAndMouseOverlap(target, activeGroup.href, pns.mouseLocation) && pns.isAltKeyDown && !pns.isLargeTargetArea(target) && !pns.isTypingOnWebView) || pns.activeShootGroup != nil
+                let isRect = (!pns.isLargeTargetArea(target) && pns.hasGraceRectAndMouseOverlap(target, activeGroup.href, pns.mouseLocation) && pns.isAltKeyDown && !pns.isTypingOnWebView) || pns.activeShootGroup != nil
                 let rectangleGroup = isRect ? activeGroup : pns.convertTargetToCircleShootGroup(target, activeGroup.href)
-                let group = pns.translateAndScaleGroup(rectangleGroup)
-                if let target = group.targets.first {
+                if let target = pns.translateAndScaleGroup(rectangleGroup).targets.first {
                     let background = pns.activeShootGroup == nil ? BeamColor.PointShoot.pointBackground.swiftUI : BeamColor.PointShoot.shootBackground.swiftUI
                     let rect = target.rect.insetBy(dx: -padding, dy: -padding)
                     let x: CGFloat = (rect.minX + rect.width / 2)
                     let y: CGFloat = (rect.minY + rect.height / 2)
+                    let opacity: Double = isRect ? 1 : 0
 
                     RoundedRectangle(cornerRadius: isRect ? padding : 20, style: .continuous)
                         .fill(background)
@@ -66,11 +66,13 @@ struct PointAndShootView: View {
                         .scaleEffect(scale)
                         .animation(.spring(response: 0.2, dampingFraction: 0.5, blendDuration: 0.2), value: scale)
                         .frame(width: rect.width, height: rect.height)
-                        .animation(shouldAnimateRect ? .easeInOut(duration: 0.2) : nil, value: rect)
-                        .opacity(isRect ? 1 : 0)
+                        .animation(shouldAnimateRect ? .timingCurve(0.165, 0.84, 0.44, 1, duration: 0.4) : nil, value: rect.width)
+                        .animation(shouldAnimateRect ? .timingCurve(0.165, 0.84, 0.44, 1, duration: 0.4) : nil, value: rect.height)
+                        .opacity(opacity)
+                        .animation(shouldAnimateRect ? .timingCurve(0.165, 0.84, 0.44, 1, duration: 0.2) : nil, value: isRect)
                         .position(x: x, y: y)
-                        .animation(shouldAnimateRect ? .easeInOut(duration: 0.2) : nil, value: x)
-                        .animation(shouldAnimateRect ? .easeInOut(duration: 0.2) : nil, value: y)
+                        .animation(nil)
+                        .id("rectangle shoot frame")
                         .onReceive(pns.$activeShootGroup, perform: { shootGroup in
                             // if nil set to true
                             // only update value when it should change
@@ -85,7 +87,6 @@ struct PointAndShootView: View {
                         .pointAndShootFrameOffset(pns, target: target)
                         .allowsHitTesting(false)
                         .accessibility(identifier: "PointFrame")
-                        .id("rectangle shoot frame")
                 }
             } else {
                 // MARK: - Selecting

@@ -226,15 +226,15 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
     const childElementTreeCount = el.querySelectorAll("*").length
     // For performance reasons, if an element contains a large DOM
     // return early with the simple element rect
-    // check if the whole tree contains more than 50 html elements
-    if (childElementTreeCount > 50) {
+    // check if the whole tree contains more than 150 html elements
+    if (childElementTreeCount > 150) {
       const area = el.getBoundingClientRect()
       return this.setArea(area, area, clippingArea)
     }
-    // check if the direct childNodes (this includes text nodes) are more than 50
+    // check if the direct childNodes (this includes text nodes) are more than 150
     const childNodes = PointAndShootHelper.getMeaningfulChildNodes(el, win)
     // Filter useful childNodes
-    if (childNodes.length > 50) {
+    if (childNodes.length > 150) {
       const area = el.getBoundingClientRect()
       return this.setArea(area, area, clippingArea)
     }
