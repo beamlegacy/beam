@@ -15,12 +15,20 @@ class PasswordsDBTests: XCTestCase {
     static let subdomain1 = URL(string: "http://subdomain.github.com/signin")!
     static let username = "beamdev@beam.co"
     static let password = "BeamRocksss"
+    let beamHelper = BeamTestsHelper()
+    let beamObjectHelper = BeamObjectTestsHelper()
 
     override func setUp() {
         super.setUp()
+
+        BeamTestsHelper.logout()
+
+        try? EncryptionManager.shared.replacePrivateKey(Configuration.testPrivateKey)
     }
 
     override func tearDown() {
+        super.tearDown()
+
         PasswordManager.shared.deleteAll()
     }
 
@@ -34,6 +42,38 @@ class PasswordsDBTests: XCTestCase {
         XCTAssertEqual(entries.count, 1)
         XCTAssertEqual(entries.last?.minimizedHost, Self.host.minimizedHost)
         XCTAssertEqual(entries.last?.username, Self.username)
+    }
+
+    func testSavingPasswordOnBeamObjects() {
+        beforeNetworkTests()
+
+        let expectation = self.expectation(description: "save password")
+        let newPassword = PasswordManager.shared.save(host: Self.host.minimizedHost!,
+                                                      username: Self.username,
+                                                      password: Self.password,
+                                                      uuid: UUID(uuidString: "20D1B800-4436-4D25-8919-E23EF58FA13A")) { _ in
+            expectation.fulfill()
+        }
+        wait(for: [expectation], timeout: 10.0)
+
+        guard var newPasswordUnwrapped = newPassword else {
+            XCTFail("Password wasn't saved")
+            return
+        }
+
+        do {
+            var remotePassword: PasswordRecord? = try beamObjectHelper.fetchOnAPI(newPasswordUnwrapped.beamObjectId)
+            remotePassword?.checksum = nil // we don't care if those are different
+            // We need to decrypt passwords as both, even equal, will give different encrypted strings
+            let decryptedPassword = try EncryptionManager.shared.decryptString(remotePassword?.password ?? "") ?? "1"
+            remotePassword?.password = decryptedPassword
+            newPasswordUnwrapped.password = try EncryptionManager.shared.decryptString(newPasswordUnwrapped.password) ?? "2"
+
+            XCTAssertEqual(newPasswordUnwrapped, remotePassword)
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+        stopNetworkTests()
     }
 
     func testSavingPasswords() {
@@ -112,11 +152,43 @@ class PasswordsDBTests: XCTestCase {
     }
 
     func testDelete() {
-        PasswordManager.shared.save(host: Self.host.minimizedHost!, username: Self.username, password: Self.password)
+        beforeNetworkTests()
 
-        PasswordManager.shared.delete(host: Self.host.minimizedHost!, for: Self.username)
+        var expectation = self.expectation(description: "save password")
+        PasswordManager.shared.save(host: Self.host.minimizedHost!,
+                                    username: Self.username,
+                                    password: Self.password,
+                                    uuid: UUID(uuidString: "20D1B800-4436-4D25-8919-E23EF58FA13A")) { _ in
+            expectation.fulfill()
+        }
+        wait(for: [expectation], timeout: 10.0)
+
+        expectation = self.expectation(description: "delete password")
+
+        PasswordManager.shared.delete(host: Self.host.minimizedHost!, for: Self.username) { _ in
+            expectation.fulfill()
+        }
+        wait(for: [expectation], timeout: 10.0)
 
         let entries = PasswordManager.shared.entries(for: Self.host.minimizedHost!, exact: true)
         XCTAssertEqual(entries.count, 0)
+
+        stopNetworkTests()
+    }
+
+    private func beforeNetworkTests() {
+        // Need to freeze date to compare objects, as `createdAt` would be different from the network stubs we get
+        // back from Vinyl.
+        BeamDate.freeze("2021-03-19T12:21:03Z")
+
+        BeamTestsHelper.logout()
+
+        beamHelper.beginNetworkRecording(test: self)
+        BeamTestsHelper.login()
+    }
+
+    private func stopNetworkTests() {
+        beamHelper.endNetworkRecording()
+        BeamObjectTestsHelper().deleteAll()
     }
 }

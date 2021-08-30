@@ -1099,7 +1099,7 @@ extension BeamObjectManager {
 
 // MARK: - For tests
 extension BeamObjectManager {
-    func clearNetworkCalls() {
+    static func clearNetworkCalls() {
         for (_, request) in Self.networkRequests {
             request.cancel()
         }
@@ -1113,7 +1113,7 @@ extension BeamObjectManager {
      Wrote this for our tests, and detect when we have still running network tasks on test ends. Sadly, this seems to
      not work when used with Vinyl, which doesn't implement `cancel()`.
      */
-    func isAllNetworkCallsCompleted() -> Bool {
+    static func isAllNetworkCallsCompleted() -> Bool {
         for request in Self.networkRequestsWithoutID {
             if [URLSessionTask.State.suspended, .running].contains(request.dataTask?.state) {
                 return false
