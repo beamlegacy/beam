@@ -22,7 +22,6 @@ struct AdvancedPreferencesView: View {
     @State private var loggedIn: Bool = AccountManager().loggedIn
     @State private var networkEnabled: Bool = Configuration.networkEnabled
     @State private var encryptionEnabled = Configuration.encryptionEnabled
-    @State private var beamObjectAPIEnabled = Configuration.beamObjectAPIEnabled
     @State private var privateKey = EncryptionManager.shared.privateKey().asString()
     @State private var stateRestorationEnabled = Configuration.stateRestorationEnabled
 
@@ -89,9 +88,6 @@ struct AdvancedPreferencesView: View {
                 }
                 Preferences.Section(title: "Network Enabled") {
                     NetworkEnabledButton
-                }
-                Preferences.Section(title: "Beam Object API Enabled") {
-                    BeamObjectAPIEnabledButton
                 }
                 Preferences.Section(title: "", bottomDivider: true) {
                     Button(action: {
@@ -355,15 +351,6 @@ struct AdvancedPreferencesView: View {
             encryptionEnabled = Configuration.encryptionEnabled
         }, label: {
             Text(String(describing: encryptionEnabled)).frame(minWidth: 100)
-        })
-    }
-
-    private var BeamObjectAPIEnabledButton: some View {
-        Button(action: {
-            Configuration.beamObjectAPIEnabled = !Configuration.beamObjectAPIEnabled
-            beamObjectAPIEnabled = Configuration.beamObjectAPIEnabled
-        }, label: {
-            Text(String(describing: beamObjectAPIEnabled)).frame(minWidth: 100)
         })
     }
 

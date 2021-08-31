@@ -26,11 +26,6 @@ class Database: NSManagedObject, BeamCoreDataObject {
         "\(title) {\(id)}"
     }
 
-    func asApiType() -> DatabaseAPIType {
-        let result = DatabaseAPIType(database: self)
-        return result
-    }
-
     func update(_ databaseStruct: DatabaseStruct) {
         title = databaseStruct.title
         created_at = databaseStruct.createdAt

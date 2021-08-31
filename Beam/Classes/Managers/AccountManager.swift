@@ -34,8 +34,10 @@ extension AccountManager {
                     // Syncing with remote API, AppDelegate needs to be called in mainthread
                     // TODO: move this syncData to a manager instead.
                     DispatchQueue.main.async {
-                        AppDelegate.main.syncData()
-                        AppDelegate.main.connectWebSockets()
+                        // We sync data *after* we potentially connected to websocket, to make sure we don't miss any data
+                        AppDelegate.main.beamObjectManager.liveSync { _ in
+                            AppDelegate.main.syncData()
+                        }
                     }
 
                     completionHandler?(.success(true))
@@ -69,8 +71,10 @@ extension AccountManager {
                     // Syncing with remote API, AppDelegate needs to be called in mainthread
                     // TODO: move this syncData to a manager instead.
                     DispatchQueue.main.async {
-                        AppDelegate.main.syncData()
-                        AppDelegate.main.connectWebSockets()
+                        // We sync data *after* we potentially connected to websocket, to make sure we don't miss any data
+                        AppDelegate.main.beamObjectManager.liveSync { _ in
+                            AppDelegate.main.syncData()
+                        }
                     }
 
                     completionHandler?(.success(true))
@@ -145,8 +149,10 @@ extension AccountManager {
             LibrariesManager.shared.setSentryUser()
             // Syncing with remote API, AppDelegate needs to be called in mainthread
             // TODO: move this syncData to a manager instead.
-            AppDelegate.main.syncData()
-            AppDelegate.main.connectWebSockets()
+            // We sync data *after* we potentially connected to websocket, to make sure we don't miss any data
+            AppDelegate.main.beamObjectManager.liveSync { _ in
+                AppDelegate.main.syncData()
+            }
 
             return .value(true)
         }
@@ -164,8 +170,10 @@ extension AccountManager {
             LibrariesManager.shared.setSentryUser()
             // Syncing with remote API, AppDelegate needs to be called in mainthread
             // TODO: move this syncData to a manager instead.
-            AppDelegate.main.syncData()
-            AppDelegate.main.connectWebSockets()
+            // We sync data *after* we potentially connected to websocket, to make sure we don't miss any data
+            AppDelegate.main.beamObjectManager.liveSync { _ in
+                AppDelegate.main.syncData()
+            }
 
             return .value(true)
         }
@@ -195,8 +203,10 @@ extension AccountManager {
             Persistence.Authentication.password = password
             LibrariesManager.shared.setSentryUser()
             // TODO: move this syncData to a manager instead.
-            AppDelegate.main.syncData()
-            AppDelegate.main.connectWebSockets()
+            // We sync data *after* we potentially connected to websocket, to make sure we don't miss any data
+            AppDelegate.main.beamObjectManager.liveSync { _ in
+                AppDelegate.main.syncData()
+            }
             Logger.shared.logInfo("signIn succeeded: \(signIn.accessToken ?? "-")", category: .network)
             return Promise(true)
         }
@@ -214,8 +224,10 @@ extension AccountManager {
             LibrariesManager.shared.setSentryUser()
             // Syncing with remote API, AppDelegate needs to be called in mainthread
             // TODO: move this syncData to a manager instead.
-            AppDelegate.main.syncData()
-            AppDelegate.main.connectWebSockets()
+            // We sync data *after* we potentially connected to websocket, to make sure we don't miss any data
+            AppDelegate.main.beamObjectManager.liveSync { _ in
+                AppDelegate.main.syncData()
+            }
             Logger.shared.logInfo("signIn succeeded: \(signIn.accessToken ?? "-")", category: .network)
             return Promise(true)
         }
