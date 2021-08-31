@@ -11,6 +11,7 @@ struct NoteEditFocusedState {
     var elementId: UUID
     var cursorPosition: Int
     var highlight: Bool = false
+    var unfold: Bool = false
 }
 
 class NoteEditFocusedStateStorage: ObservableObject {

@@ -147,15 +147,15 @@ import BeamCore
         return navigateToNote(note, elementId: elementId)
     }
 
-    @discardableResult func navigateToNote(id: UUID, elementId: UUID? = nil) -> Bool {
+    @discardableResult func navigateToNote(id: UUID, elementId: UUID? = nil, unfold: Bool = false) -> Bool {
         //Logger.shared.logDebug("load note named \(named)")
         guard let note = BeamNote.fetch(data.documentManager, id: id) else {
             return false
         }
-        return navigateToNote(note, elementId: elementId)
+        return navigateToNote(note, elementId: elementId, unfold: unfold)
     }
 
-    @discardableResult func navigateToNote(_ note: BeamNote, elementId: UUID? = nil) -> Bool {
+    @discardableResult func navigateToNote(_ note: BeamNote, elementId: UUID? = nil, unfold: Bool = false) -> Bool {
         mode = .note
 
         guard note != currentNote else { return true }
@@ -165,7 +165,7 @@ import BeamCore
         currentPage = nil
         currentNote = note
         if let elementId = elementId {
-            notesFocusedStates.currentFocusedState = NoteEditFocusedState(elementId: elementId, cursorPosition: 0, highlight: true)
+            notesFocusedStates.currentFocusedState = NoteEditFocusedState(elementId: elementId, cursorPosition: 0, highlight: true, unfold: unfold)
         } else {
             notesFocusedStates.currentFocusedState = notesFocusedStates.getSavedNoteFocusedState(noteId: note.id)
         }
