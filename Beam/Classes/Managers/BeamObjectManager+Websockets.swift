@@ -21,7 +21,9 @@ extension BeamObjectManager {
                     }
                 }
 
-                handler(true)
+                DispatchQueue.main.async {
+                    handler(true)
+                }
             }
         } catch {
             handler(false)

@@ -276,6 +276,22 @@ extension BeamObjectManager {
         }
     }
 
+    /// Fetch all remote objects
+    @discardableResult
+    func fetchAllObjects<T: BeamObjectProtocol>(_ completion: @escaping (Result<[T], Error>) -> Void) throws -> APIRequest {
+        try fetchBeamObjects(T.beamObjectTypeName) { fetchResult in
+            switch fetchResult {
+            case .failure(let error): completion(.failure(error))
+            case .success(let remoteBeamObjects):
+                do {
+                    completion(.success(try self.beamObjectsToObjects(remoteBeamObjects)))
+                } catch {
+                    completion(.failure(error))
+                }
+            }
+        }
+    }
+
     // swiftlint:disable:next function_body_length cyclomatic_complexity
     internal func saveToAPIFailureApiErrors<T: BeamObjectProtocol>(_ objects: [T],
                                                                    _ error: Error,
@@ -803,6 +819,14 @@ extension BeamObjectManager {
                                    _ completion: @escaping (Result<[BeamObject], Error>) -> Void) throws -> APIRequest {
         let request = BeamObjectRequest()
         try request.fetchAll(ids: ids, completion)
+        return request
+    }
+
+    @discardableResult
+    internal func fetchBeamObjects(_ beamObjectType: String,
+                                   _ completion: @escaping (Result<[BeamObject], Error>) -> Void) throws -> APIRequest {
+        let request = BeamObjectRequest()
+        try request.fetchAll(beamObjectType: beamObjectType, completion)
         return request
     }
 

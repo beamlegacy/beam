@@ -80,4 +80,93 @@ extension DocumentManager {
 
         return result
     }
+
+    func deleteAll(includedRemote: Bool = true) -> Promise<Bool> {
+        do {
+            try Document.deleteWithPredicate(CoreDataManager.shared.mainContext)
+            try Self.saveContext(context: CoreDataManager.shared.mainContext)
+        } catch {
+            Logger.shared.logError(error.localizedDescription, category: .coredata)
+        }
+
+        guard includedRemote else {
+            return Promise(true)
+        }
+
+        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            return Promise(false)
+        }
+        Self.cancelAllPreviousThrottledAPICall()
+
+        return deleteAllFromBeamObjectAPI()
+    }
+
+    func delete(id: UUID, _ networkDelete: Bool = true) -> Promise<Bool> {
+        Self.cancelPreviousThrottledAPICall(id)
+
+        return coreDataManager.background()
+            .then(on: backgroundQueue) { context -> Promise<Bool> in
+                guard let document = try? Document.fetchWithId(context, id) else {
+                    throw DocumentManagerError.idNotFound
+                }
+
+                if let database = try? Database.rawFetchWithId(context, document.database_id) {
+                    database.updated_at = BeamDate.now
+                } else {
+                    // We should always have a connected database
+                    Logger.shared.logError("No connected database", category: .document)
+                }
+
+                let documentStruct = DocumentStruct(document: document)
+                document.delete(context)
+
+                try Self.saveContext(context: context)
+
+                self.notificationDocumentDelete(documentStruct)
+
+                guard AuthenticationManager.shared.isAuthenticated,
+                      Configuration.networkEnabled,
+                      networkDelete else {
+                    return Promise(false)
+                }
+
+                return self.deleteFromBeamObjectAPI(id)
+            }
+    }
+
+    func saveAllOnAPI() -> Promise<Bool> {
+        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            return Promise(false)
+        }
+
+        let promise: Promise<NSManagedObjectContext> = coreDataManager.background()
+
+        return promise.then(on: backgroundQueue) { context -> Promise<Bool> in
+            let documents = try Document.rawFetchAll(context)
+            Logger.shared.logDebug("Uploading \(documents.count) documents", category: .documentNetwork)
+            if documents.isEmpty {
+                return Promise(true)
+            }
+
+            let documentStructs = documents.map { DocumentStruct(document: $0) }
+            let savePromise: Promise<[DocumentStruct]> = self.saveOnBeamObjectsAPI(documentStructs)
+
+            return savePromise.then(on: self.backgroundQueue) { savedDocumentStructs -> Promise<Bool> in
+                guard savedDocumentStructs.count == documents.count else {
+                    return Promise(false)
+                }
+                return Promise(true)
+            }
+        }
+    }
+
+    @discardableResult
+    func saveOnApi(_ documentStruct: DocumentStruct) -> Promise<Bool> {
+        var documentStruct = documentStruct.copy()
+        documentStruct.previousChecksum = documentStruct.beamObjectPreviousChecksum
+        let promise: Promise<DocumentStruct> = self.saveOnBeamObjectAPI(documentStruct)
+        return promise.then(on: backgroundQueue) { _ -> Promise<Bool> in
+            return Promise(true)
+        }
+    }
 }

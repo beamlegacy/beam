@@ -3,6 +3,57 @@ import BeamCore
 import PromiseKit
 
 extension DatabaseManager {
+    func syncAll() -> Promise<Bool> {
+        let promise: Promise<Bool> = saveAllOnApi()
+
+        return promise.then { result -> Promise<Bool> in
+            guard result == true else { return .value(result) }
+
+            return self.fetchAllOnApi()
+        }
+    }
+
+    func saveAllOnApi() -> Promise<Bool> {
+        guard AuthenticationManager.shared.isAuthenticated,
+              Configuration.networkEnabled else {
+            return .value(false)
+        }
+
+        let promise: Guarantee<NSManagedObjectContext> = coreDataManager.background()
+
+        return promise.then(on: backgroundQueue) { context -> Promise<Bool> in
+            let databases = try Database.rawFetchAll(context)
+            Logger.shared.logDebug("Uploading \(databases.count) databases", category: .databaseNetwork)
+            if databases.isEmpty {
+                return .value(true)
+            }
+
+            let databaseStructs = databases.map { DatabaseStruct(database: $0) }
+            let savePromise: Promise<[DatabaseStruct]> = self.saveOnBeamObjectsAPI(databaseStructs)
+
+            return savePromise.then(on: self.backgroundQueue) { savedDatabaseStructs -> Promise<Bool> in
+                guard savedDatabaseStructs.count == databases.count else {
+                    return .value(false)
+                }
+                return .value(true)
+            }
+        }
+    }
+
+    func fetchAllOnApi() -> Promise<Bool> {
+        guard AuthenticationManager.shared.isAuthenticated,
+              Configuration.networkEnabled else {
+            return .value(false)
+        }
+
+        let promise: Promise<[DatabaseStruct]> = self.fetchAllFromBeamObjectAPI()
+
+        return promise.then(on: backgroundQueue) { databases -> Promise<Bool> in
+            try self.receivedObjects(databases)
+            return .value(true)
+        }
+    }
+
     // MARK: -
     // MARK: Deletes
     func delete(_ database: DatabaseStruct, includedRemote: Bool = true) -> Promise<Bool> {

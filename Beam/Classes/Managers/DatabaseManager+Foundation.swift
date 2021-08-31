@@ -2,8 +2,76 @@ import Foundation
 import BeamCore
 
 extension DatabaseManager {
-    // MARK: -
-    // MARK: Deletes
+    func syncAll(completion: ((Result<Bool, Error>) -> Void)? = nil) {
+        saveAllOnApi { result in
+            if case .success(let success) = result, success == true {
+                do {
+                    try self.fetchAllOnApi(completion)
+                } catch {
+                    completion?(.failure(error))
+                }
+                return
+            }
+
+            completion?(result)
+        }
+    }
+
+    func saveAllOnApi(_ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
+        guard AuthenticationManager.shared.isAuthenticated,
+              Configuration.networkEnabled else {
+            completion?(.success(false))
+            return
+        }
+
+        CoreDataManager.shared.persistentContainer.performBackgroundTask { context in
+            do {
+                let databases = try Database.rawFetchAll(context)
+                Logger.shared.logDebug("Uploading \(databases.count) databases", category: .databaseNetwork)
+                if databases.isEmpty {
+                    completion?(.success(true))
+                    return
+                }
+
+                let databaseStructs = databases.map { DatabaseStruct(database: $0) }
+                try self.saveOnBeamObjectsAPI(databaseStructs) { result in
+                    switch result {
+                    case .failure(let error):
+                        completion?(.failure(error))
+                    case .success(let savedDatabases):
+                        guard savedDatabases.count == databases.count else {
+                            completion?(.success(false))
+                            return
+                        }
+                        completion?(.success(true))
+                    }
+                }
+            } catch {
+                completion?(.failure(error))
+            }
+        }
+    }
+
+    func fetchAllOnApi(_ completion: ((Result<Bool, Error>) -> Void)? = nil) throws {
+        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            completion?(.success(false))
+            return
+        }
+
+        try self.fetchAllFromBeamObjectAPI { result in
+            switch result {
+            case .failure(let error):
+                completion?(.failure(error))
+            case .success(let databases):
+                do {
+                    try self.receivedObjects(databases)
+                    completion?(.success(true))
+                } catch {
+                    completion?(.failure(error))
+                }
+            }
+        }
+    }
 
     func deleteAll(includedRemote: Bool = true,
                    completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {

@@ -160,11 +160,6 @@ extension DocumentManager {
     func refresh(_ documentStruct: DocumentStruct,
                  _ forced: Bool = false,
                  completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) throws {
-        // If not authenticated
-        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-            throw APIRequestError.notAuthenticated
-        }
-
         try refreshFromBeamObjectAPIAndSaveLocally(documentStruct, forced, completion)
     }
 
@@ -404,6 +399,31 @@ extension DocumentManager {
         }
     }
 
+    @discardableResult
+    func saveOnApi(_ documentStruct: DocumentStruct,
+                   _ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) -> APIRequest? {
+        do {
+            var documentStruct = documentStruct.copy()
+
+            documentStruct.previousChecksum = documentStruct.beamObjectPreviousChecksum
+            let document_id = documentStruct.id
+
+            return try self.saveOnBeamObjectAPI(documentStruct) { result in
+                Self.networkTasksSemaphore.wait()
+                Self.networkTasks.removeValue(forKey: document_id)
+                Self.networkTasksSemaphore.signal()
+
+                switch result {
+                case .failure(let error): completion?(.failure(error))
+                case .success: completion?(.success(true))
+                }
+            }
+        } catch {
+            completion?(.failure(error))
+            return nil
+        }
+    }
+
     /// If the note we tried saving on the API is new and empty, we can safely delete it.
     /// If the note we tried saving already has content, we soft delete it to avoid losing content.
     private func deleteOrSoftDelete(_ localDocumentStruct: DocumentStruct,
@@ -560,6 +580,26 @@ extension DocumentManager {
 
     // MARK: -
     // MARK: Bulk calls
+    func fetchAllOnApi(_ completion: ((Result<Bool, Error>) -> Void)? = nil) throws {
+        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            completion?(.success(false))
+            return
+        }
+
+        try self.fetchAllFromBeamObjectAPI { result in
+            switch result {
+            case .failure(let error):
+                completion?(.failure(error))
+            case .success(let databases):
+                do {
+                    try self.receivedObjects(databases)
+                    completion?(.success(true))
+                } catch {
+                    completion?(.failure(error))
+                }
+            }
+        }
+    }
 
     func saveAllOnAPI(_ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
@@ -569,8 +609,7 @@ extension DocumentManager {
 
         CoreDataManager.shared.persistentContainer.performBackgroundTask { context in
             do {
-                let sent_all_at = BeamDate.now
-                let documents = (try? Document.rawFetchAll(context, self.predicateForSaveAll())) ?? []
+                let documents = (try? Document.rawFetchAll(context)) ?? []
 
                 Logger.shared.logDebug("Uploading \(documents.count) documents", category: .documentNetwork)
                 if documents.count == 0 {
@@ -588,13 +627,6 @@ extension DocumentManager {
                         Logger.shared.logError(error.localizedDescription, category: .documentNetwork)
                         completion?(.failure(error))
                     case .success:
-                        Logger.shared.logDebug("Documents uploaded", category: .documentNetwork)
-                        Persistence.Sync.Documents.sent_all_at = sent_all_at
-                        context.performAndWait {
-                            // TODO: do this with `NSBatchUpdateRequest` for performance
-                            for document in documents { document.beam_api_sent_at = sent_all_at }
-                            try? CoreDataManager.save(context)
-                        }
                         completion?(.success(true))
                     }
                 }

@@ -26,8 +26,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
             BeamTestsHelper.login()
 
-            Configuration.beamObjectAPIEnabled = true
-
             BeamObjectManager.unregisterAll()
             sut.registerOnBeamObjectManager()
 
@@ -38,8 +36,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
         afterEach {
             beamHelper.endNetworkRecording()
-
-            Configuration.beamObjectAPIEnabled = EnvironmentVariables.beamObjectAPIEnabled
 
             BeamDate.reset()
         }

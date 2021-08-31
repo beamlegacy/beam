@@ -15,7 +15,6 @@ struct Configuration {
     static private(set) var updateFeedURL: String = Configuration.value(for: "SUFeedURL")
     static private(set) var sentryEnabled = EnvironmentVariables.sentryEnabled
     static private(set) var networkEnabledDefault = EnvironmentVariables.networkEnabled
-    static var encryptionEnabledDefault = EnvironmentVariables.encryptionEnabled
     static private(set) var topDomainDBMaxSize = 10000
 
     static private(set) var sentryDsn = "https://\(sentryKey)@\(sentryHostname)/\(sentryProject)"
@@ -60,22 +59,6 @@ struct Configuration {
     }
 
     static var topDomainUrl: URL = URL(string: "http://downloads.majestic.com/majestic_million.csv")!
-
-    static private var encryptionEnabledKey = "encryptionEnabled"
-    static var encryptionEnabled: Bool {
-        get {
-            if UserDefaults.standard.object(forKey: encryptionEnabledKey) != nil {
-                return UserDefaults.standard.bool(forKey: encryptionEnabledKey)
-            }
-
-            return encryptionEnabledDefault
-        }
-        set {
-            if newValue != encryptionEnabled {
-                UserDefaults.standard.set(newValue, forKey: encryptionEnabledKey)
-            }
-        }
-    }
 
     static private var publicHostnameKey = "publicHostname"
     static var publicHostname: String {

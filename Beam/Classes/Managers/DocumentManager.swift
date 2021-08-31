@@ -592,18 +592,6 @@ public class DocumentManager: NSObject {
     }
 
     // MARK: Shared
-    func predicateForSaveAll() -> NSPredicate? {
-        var result: NSPredicate?
-
-        // We only upload the documents we didn't yet send
-        if let last_sent_at = Persistence.Sync.Documents.sent_all_at {
-            result = NSPredicate(format: "(updated_at > %@ AND beam_api_sent_at < %@) OR updated_at > beam_api_sent_at",
-                                 last_sent_at as NSDate,
-                                 last_sent_at as NSDate)
-        }
-        return result
-    }
-
     func saveAndThrottle(_ documentStruct: DocumentStruct,
                          _ delay: Double = 1.0,
                          _ networkCompletion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {

@@ -109,6 +109,16 @@ extension BeamObjectManagerDelegate {
         }
     }
 
+    func fetchAllFromBeamObjectAPI() -> Promise<[BeamObjectType]> {
+        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            return Promise(APIRequestError.notAuthenticated)
+        }
+
+        let objectManager = BeamObjectManager()
+
+        return objectManager.fetchAllObjects()
+    }
+
     func saveOnBeamObjectAPI(_ object: BeamObjectType) -> Promise<BeamObjectType> {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             return Promise(APIRequestError.notAuthenticated)

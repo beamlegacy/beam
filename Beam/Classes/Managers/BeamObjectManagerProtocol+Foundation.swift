@@ -2,7 +2,7 @@ import Foundation
 import BeamCore
 
 extension BeamObjectManagerDelegate {
-    func saveAllOnBeamObjectApi(_ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> APIRequest? {
+    func saveAllOnBeamObjectApi(_ completion: @escaping ((Result<Bool, Error>) -> Void)) throws -> APIRequest? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw APIRequestError.notAuthenticated
         }
@@ -20,7 +20,7 @@ extension BeamObjectManagerDelegate {
 
     @discardableResult
     func saveOnBeamObjectsAPI(_ objects: [BeamObjectType],
-                              _ completion: @escaping ((Swift.Result<[BeamObjectType], Error>) -> Void)) throws -> APIRequest? {
+                              _ completion: @escaping ((Result<[BeamObjectType], Error>) -> Void)) throws -> APIRequest? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw APIRequestError.notAuthenticated
         }
@@ -67,7 +67,7 @@ extension BeamObjectManagerDelegate {
 
     @discardableResult
     func deleteFromBeamObjectAPI(_ id: UUID,
-                                 _ completion: @escaping (Swift.Result<Bool, Error>) -> Void) throws -> APIRequest {
+                                 _ completion: @escaping (Result<Bool, Error>) -> Void) throws -> APIRequest {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw APIRequestError.notAuthenticated
         }
@@ -83,7 +83,7 @@ extension BeamObjectManagerDelegate {
     }
 
     func deleteFromBeamObjectAPI(_ ids: [UUID],
-                                 _ completion: @escaping (Swift.Result<Bool, Error>) -> Void) throws {
+                                 _ completion: @escaping (Result<Bool, Error>) -> Void) throws {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw APIRequestError.notAuthenticated
         }
@@ -120,7 +120,7 @@ extension BeamObjectManagerDelegate {
     }
 
     @discardableResult
-    func deleteAllFromBeamObjectAPI(_ completion: @escaping (Swift.Result<Bool, Error>) -> Void) throws -> APIRequest {
+    func deleteAllFromBeamObjectAPI(_ completion: @escaping (Result<Bool, Error>) -> Void) throws -> APIRequest {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw APIRequestError.notAuthenticated
         }
@@ -139,7 +139,7 @@ extension BeamObjectManagerDelegate {
     // swiftlint:disable:next cyclomatic_complexity
     func refreshFromBeamObjectAPI(_ object: BeamObjectType,
                                   _ forced: Bool = false,
-                                  _ completion: @escaping ((Swift.Result<BeamObjectType?, Error>) -> Void)) throws -> APIRequest {
+                                  _ completion: @escaping ((Result<BeamObjectType?, Error>) -> Void)) throws -> APIRequest {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw APIRequestError.notAuthenticated
         }
@@ -191,8 +191,19 @@ extension BeamObjectManagerDelegate {
     }
 
     @discardableResult
+    func fetchAllFromBeamObjectAPI(_ completion: @escaping ((Result<[BeamObjectType], Error>) -> Void)) throws -> APIRequest {
+        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            throw APIRequestError.notAuthenticated
+        }
+
+        let objectManager = BeamObjectManager()
+
+        return try objectManager.fetchAllObjects(completion)
+    }
+
+    @discardableResult
     func saveOnBeamObjectAPI(_ object: BeamObjectType,
-                             _ completion: @escaping ((Swift.Result<BeamObjectType, Error>) -> Void)) throws -> APIRequest {
+                             _ completion: @escaping ((Result<BeamObjectType, Error>) -> Void)) throws -> APIRequest {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw APIRequestError.notAuthenticated
         }
@@ -239,7 +250,7 @@ extension BeamObjectManagerDelegate {
     }
 
     func manageInvalidChecksum(_ error: Error,
-                               _ completion: @escaping ((Swift.Result<[BeamObjectType], Error>) -> Void)) {
+                               _ completion: @escaping ((Result<[BeamObjectType], Error>) -> Void)) {
         // Early return except for checksum issues.
         guard case BeamObjectManagerObjectError<BeamObjectType>.invalidChecksum(let conflictedObjects,
                                                                                 let goodObjects,
@@ -292,7 +303,7 @@ extension BeamObjectManagerDelegate {
     // swiftlint:disable:next cyclomatic_complexity function_body_length
     func manageMultipleErrors(_ objects: [BeamObjectType],
                               _ errors: [Error],
-                              _ completion: @escaping ((Swift.Result<[BeamObjectType], Error>) -> Void)) {
+                              _ completion: @escaping ((Result<[BeamObjectType], Error>) -> Void)) {
 
         var newObjects: [BeamObjectType] = []
         var goodObjects: [BeamObjectType] = []

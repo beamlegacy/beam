@@ -21,7 +21,6 @@ struct AdvancedPreferencesView: View {
     @State private var sentryEnabled = Configuration.sentryEnabled
     @State private var loggedIn: Bool = AccountManager().loggedIn
     @State private var networkEnabled: Bool = Configuration.networkEnabled
-    @State private var encryptionEnabled = Configuration.encryptionEnabled
     @State private var privateKey = EncryptionManager.shared.privateKey().asString()
     @State private var stateRestorationEnabled = Configuration.stateRestorationEnabled
 
@@ -226,9 +225,6 @@ struct AdvancedPreferencesView: View {
                     })
                 }
 
-                Preferences.Section(title: "Encryption Enabled") {
-                    EncryptionEnabledButton
-                }
                 Preferences.Section(title: "Encryption key", bottomDivider: true) {
                     TextField("Private Key", text: privateKeyBinding)
                         .textFieldStyle(RoundedBorderTextFieldStyle()).frame(maxWidth: 400)
@@ -345,15 +341,6 @@ struct AdvancedPreferencesView: View {
         }
     }
 
-    private var EncryptionEnabledButton: some View {
-        Button(action: {
-            Configuration.encryptionEnabled = !Configuration.encryptionEnabled
-            encryptionEnabled = Configuration.encryptionEnabled
-        }, label: {
-            Text(String(describing: encryptionEnabled)).frame(minWidth: 100)
-        })
-    }
-
     private var ResetAPIEndpointsButton: some View {
         Button(action: {
             Configuration.reset()
@@ -393,7 +380,7 @@ struct AdvancedPreferencesView: View {
         }, label: {
             // TODO: loc
             Text("Reset Private Key").frame(minWidth: 100)
-        }).disabled(!Configuration.encryptionEnabled)
+        })
     }
 
     private var StateRestorationEnabledButton: some View {

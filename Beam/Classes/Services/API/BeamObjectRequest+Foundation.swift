@@ -105,8 +105,11 @@ extension BeamObjectRequest {
     @discardableResult
     func fetchAll(receivedAtAfter: Date? = nil,
                   ids: [UUID]? = nil,
+                  beamObjectType: String? = nil,
                   _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
-        let parameters = BeamObjectsParameters(receivedAtAfter: receivedAtAfter, ids: ids)
+        let parameters = BeamObjectsParameters(receivedAtAfter: receivedAtAfter,
+                                               ids: ids,
+                                               beamObjectType: beamObjectType)
 
         return try fetchAllWithFile("beam_objects", parameters, completion)
     }

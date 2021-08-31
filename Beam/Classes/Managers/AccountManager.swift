@@ -150,8 +150,10 @@ extension AccountManager {
             // Syncing with remote API, AppDelegate needs to be called in mainthread
             // TODO: move this syncData to a manager instead.
             // We sync data *after* we potentially connected to websocket, to make sure we don't miss any data
-            AppDelegate.main.beamObjectManager.liveSync { _ in
-                AppDelegate.main.syncData()
+            DispatchQueue.main.async {
+                AppDelegate.main.beamObjectManager.liveSync { _ in
+                    AppDelegate.main.syncData()
+                }
             }
 
             return .value(true)
@@ -171,8 +173,10 @@ extension AccountManager {
             // Syncing with remote API, AppDelegate needs to be called in mainthread
             // TODO: move this syncData to a manager instead.
             // We sync data *after* we potentially connected to websocket, to make sure we don't miss any data
-            AppDelegate.main.beamObjectManager.liveSync { _ in
-                AppDelegate.main.syncData()
+            DispatchQueue.main.async {
+                AppDelegate.main.beamObjectManager.liveSync { _ in
+                    AppDelegate.main.syncData()
+                }
             }
 
             return .value(true)
@@ -204,8 +208,10 @@ extension AccountManager {
             LibrariesManager.shared.setSentryUser()
             // TODO: move this syncData to a manager instead.
             // We sync data *after* we potentially connected to websocket, to make sure we don't miss any data
-            AppDelegate.main.beamObjectManager.liveSync { _ in
-                AppDelegate.main.syncData()
+            DispatchQueue.main.async {
+                AppDelegate.main.beamObjectManager.liveSync { _ in
+                    AppDelegate.main.syncData()
+                }
             }
             Logger.shared.logInfo("signIn succeeded: \(signIn.accessToken ?? "-")", category: .network)
             return Promise(true)
@@ -225,8 +231,10 @@ extension AccountManager {
             // Syncing with remote API, AppDelegate needs to be called in mainthread
             // TODO: move this syncData to a manager instead.
             // We sync data *after* we potentially connected to websocket, to make sure we don't miss any data
-            AppDelegate.main.beamObjectManager.liveSync { _ in
-                AppDelegate.main.syncData()
+            DispatchQueue.main.async {
+                AppDelegate.main.beamObjectManager.liveSync { _ in
+                    AppDelegate.main.syncData()
+                }
             }
             Logger.shared.logInfo("signIn succeeded: \(signIn.accessToken ?? "-")", category: .network)
             return Promise(true)
