@@ -137,6 +137,16 @@ class ImageNode: ElementNode {
     override func onFocus() {
         updateFocus()
     }
+
+    override func mouseDown(mouseInfo: MouseInfo) -> Bool {
+        if mouseInfo.position.x < imageSize.width / 2 {
+            focus(position: 0)
+        } else {
+            focus(position: 1)
+        }
+        dragMode = .select(0)
+        return true
+    }
 }
 
 // MARK: - ImageNode + Layer
