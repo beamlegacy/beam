@@ -207,6 +207,9 @@
 		520088BC2613266600AED835 /* Database+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 520088BB2613266600AED835 /* Database+CoreDataProperties.swift */; };
 		520088C02613295000AED835 /* DatabaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 520088BF2613295000AED835 /* DatabaseManager.swift */; };
 		520088C42613297100AED835 /* DatabaseRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 520088C32613297100AED835 /* DatabaseRequest.swift */; };
+		52019A5626DE2AB0005E8278 /* BeamObjectRequest+Foundation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52019A5526DE2AB0005E8278 /* BeamObjectRequest+Foundation.swift */; };
+		52019A5F26DE2AC2005E8278 /* BeamObjectRequest+PromiseKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52019A5E26DE2AC2005E8278 /* BeamObjectRequest+PromiseKit.swift */; };
+		52019A6126DE2ACB005E8278 /* BeamObjectRequest+Promises.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52019A6026DE2ACB005E8278 /* BeamObjectRequest+Promises.swift */; };
 		520303D9261CAEF10028BC8E /* DatabaseManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 520303D8261CAEF10028BC8E /* DatabaseManagerTests.swift */; };
 		5204290B25A4B3D300DD677C /* document_updated_at.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 5204290A25A4B3D300DD677C /* document_updated_at.graphql */; };
 		5204FE3B25F128BD00FD22F8 /* DocumentStruct.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5204FE3A25F128BD00FD22F8 /* DocumentStruct.swift */; };
@@ -1155,6 +1158,9 @@
 		520088BB2613266600AED835 /* Database+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Database+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		520088BF2613295000AED835 /* DatabaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseManager.swift; sourceTree = "<group>"; };
 		520088C32613297100AED835 /* DatabaseRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseRequest.swift; sourceTree = "<group>"; };
+		52019A5526DE2AB0005E8278 /* BeamObjectRequest+Foundation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamObjectRequest+Foundation.swift"; sourceTree = "<group>"; };
+		52019A5E26DE2AC2005E8278 /* BeamObjectRequest+PromiseKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamObjectRequest+PromiseKit.swift"; sourceTree = "<group>"; };
+		52019A6026DE2ACB005E8278 /* BeamObjectRequest+Promises.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamObjectRequest+Promises.swift"; sourceTree = "<group>"; };
 		520303D8261CAEF10028BC8E /* DatabaseManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseManagerTests.swift; sourceTree = "<group>"; };
 		5204290A25A4B3D300DD677C /* document_updated_at.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = document_updated_at.graphql; sourceTree = "<group>"; };
 		5204FE3A25F128BD00FD22F8 /* DocumentStruct.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentStruct.swift; sourceTree = "<group>"; };
@@ -2118,6 +2124,9 @@
 				529E1AD325D45CFA00DD25B8 /* APIRequestError.swift */,
 				418171622581107C00317ED8 /* APIResponse.swift */,
 				5224CD812686043600D4179E /* BeamObjectRequest.swift */,
+				52019A5526DE2AB0005E8278 /* BeamObjectRequest+Foundation.swift */,
+				52019A5E26DE2AC2005E8278 /* BeamObjectRequest+PromiseKit.swift */,
+				52019A6026DE2ACB005E8278 /* BeamObjectRequest+Promises.swift */,
 				520088C32613297100AED835 /* DatabaseRequest.swift */,
 				5206282525923B6800D7CD9E /* DocumentRequest.swift */,
 				52F4E4AD264182E00067B017 /* IdentityRequest.swift */,
@@ -4610,6 +4619,7 @@
 				4181722E2581107C00317ED8 /* AutocompleteItem.swift in Sources */,
 				A0A84FE126371A4B008F0326 /* OtherPasswordsCell.swift in Sources */,
 				A5B1DBFB26CFDC4800F1F81A /* BeamTextEdit+CardReference.swift in Sources */,
+				52019A5F26DE2AC2005E8278 /* BeamObjectRequest+PromiseKit.swift in Sources */,
 				A580D5EE26427BCB00EB2E24 /* ContextMenuView.swift in Sources */,
 				87C539BD26162C3400D51877 /* PasswordManagerMenuCell.swift in Sources */,
 				A5D53697264BE2F50011A095 /* RetroCompatibleScrollViewReader.swift in Sources */,
@@ -4671,6 +4681,7 @@
 				521EEDDD25937E9200BA2485 /* DocumentsWindow.swift in Sources */,
 				418172122581107C00317ED8 /* EventsTracker.swift in Sources */,
 				A0CB7E54268E66CD00D15AFD /* View+Beam.swift in Sources */,
+				52019A5626DE2AB0005E8278 /* BeamObjectRequest+Foundation.swift in Sources */,
 				414B98FE25A27930002E81A3 /* FormatterType.swift in Sources */,
 				5273C66D25DA857400B00EC3 /* BeamUITestsMenuGenerator.swift in Sources */,
 				DA3239DE269DE06F00A1F4C3 /* LongTermUrlScore+GRDB.swift in Sources */,
@@ -4735,6 +4746,7 @@
 				8726448F26199B8F0070E83D /* OptionSelector.swift in Sources */,
 				87B7394426BD640C005D2DD6 /* PasswordListViewModel.swift in Sources */,
 				5284895426C5650A0064878B /* Error+NotFound.swift in Sources */,
+				52019A6126DE2ACB005E8278 /* BeamObjectRequest+Promises.swift in Sources */,
 				418172112581107C00317ED8 /* Readability.swift in Sources */,
 				A5208D80261D231B006193AF /* BeamColor+Contexts.swift in Sources */,
 				418171F12581107C00317ED8 /* UserSessionRequest.swift in Sources */,

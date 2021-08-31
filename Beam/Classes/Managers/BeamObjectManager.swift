@@ -1,5 +1,7 @@
 import Foundation
 import BeamCore
+import Promises
+import PromiseKit
 
 // swiftlint:disable file_length
 
@@ -359,7 +361,7 @@ extension BeamObjectManager {
     /// Fetch remote objects
     @discardableResult
     func fetchObjects<T: BeamObjectProtocol>(_ objects: [T],
-                                             _ completion: @escaping (Result<[T], Error>) -> Void) throws -> APIRequest {
+                                             _ completion: @escaping (Swift.Result<[T], Error>) -> Void) throws -> APIRequest {
         try fetchBeamObjects(objects.map { $0.beamObjectId }) { fetchResult in
             switch fetchResult {
             case .failure(let error): completion(.failure(error))
@@ -618,7 +620,7 @@ extension BeamObjectManager {
     /// Fetch remote object
     @discardableResult
     func fetchObject<T: BeamObjectProtocol>(_ object: T,
-                                            _ completion: @escaping (Result<T, Error>) -> Void) throws -> APIRequest {
+                                            _ completion: @escaping (Swift.Result<T, Error>) -> Void) throws -> APIRequest {
         try fetchBeamObject(object.beamObjectId) { fetchResult in
             switch fetchResult {
             case .failure(let error): completion(.failure(error))
@@ -640,7 +642,7 @@ extension BeamObjectManager {
     }
 
     func fetchObjectUpdatedAt<T: BeamObjectProtocol>(_ object: T,
-                                                     _ completion: @escaping (Result<Date?, Error>) -> Void) throws -> APIRequest {
+                                                     _ completion: @escaping (Swift.Result<Date?, Error>) -> Void) throws -> APIRequest {
         try fetchMinimalBeamObject(object.beamObjectId) { fetchResult in
             switch fetchResult {
             case .failure(let error): completion(.failure(error))
@@ -657,7 +659,7 @@ extension BeamObjectManager {
     }
 
     func fetchObjectChecksum<T: BeamObjectProtocol>(_ object: T,
-                                                    _ completion: @escaping (Result<String?, Error>) -> Void) throws -> APIRequest {
+                                                    _ completion: @escaping (Swift.Result<String?, Error>) -> Void) throws -> APIRequest {
         try fetchMinimalBeamObject(object.beamObjectId) { fetchResult in
             switch fetchResult {
             case .failure(let error): completion(.failure(error))
@@ -685,6 +687,53 @@ extension BeamObjectManager {
         return result
     }
 }
+
+// MARK: PromiseKit BeamObjectProtocol
+extension BeamObjectManager {
+    func saveToAPI<T: BeamObjectProtocol>(_ objects: [T]) -> PromiseKit.Promise<[T]> {
+        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            throw BeamObjectManagerError.notAuthenticated
+        }
+
+        let request = BeamObjectRequest()
+        let beamObjects = try objects.map {
+            try BeamObject($0, T.beamObjectTypeName)
+        }
+
+        try request.saveAll(beamObjects) { result in
+            switch result {
+            case .failure(let error):
+                self.saveToAPIFailure(objects, error, completion)
+            case .success(let remoteBeamObjects):
+                // Note: we can't decode the remote `BeamObject` as that would require to fetch all details back from
+                // the API when saving (it needs `data`). Instead we use the objects passed within the method attribute,
+                // and set their `previousChecksum`
+                // We'll use `copy()` when it's faster and doesn't encode/decode
+
+                do {
+                    // Caller will need to store those previousCheckum into its data storage, we must return it
+                    let savedObjects: [T] = try beamObjects.map {
+                        var remoteObject: T = try $0.decodeBeamObject()
+                        remoteObject.previousChecksum = remoteBeamObjects.first(where: {
+                            $0.id == remoteObject.beamObjectId
+                        })?.dataChecksum
+
+                        return remoteObject
+                    }
+
+                    completion(.success(savedObjects))
+                } catch {
+                    completion(.failure(error))
+                }
+            }
+        }
+
+        Self.networkRequestsWithoutID.append(request)
+        return request
+    }
+}
+
+
 
 // MARK: - Foundation BeamObject
 extension BeamObjectManager {
@@ -921,7 +970,7 @@ extension BeamObjectManager {
 
     /// Fetch remote object, and based on policy will either return the object with remote checksum, or return and error containing the remote object
     internal func fetchAndReturnErrorBasedOnConflictPolicy(_ beamObject: BeamObject,
-                                                           _ completion: @escaping (Result<BeamObject, Error>) -> Void) throws {
+                                                           _ completion: @escaping (Swift.Result<BeamObject, Error>) -> Void) throws {
         try fetchBeamObject(beamObject) { fetchResult in
             switch fetchResult {
             case .failure(let error):
@@ -964,7 +1013,7 @@ extension BeamObjectManager {
 
     @discardableResult
     internal func fetchBeamObjects(_ beamObjects: [BeamObject],
-                                   _ completion: @escaping (Result<[BeamObject], Error>) -> Void) throws -> APIRequest {
+                                   _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> APIRequest {
         let request = BeamObjectRequest()
         try request.fetchAll(ids: beamObjects.map { $0.id }, completion)
         return request
@@ -972,7 +1021,7 @@ extension BeamObjectManager {
 
     @discardableResult
     internal func fetchBeamObjects(_ ids: [UUID],
-                                   _ completion: @escaping (Result<[BeamObject], Error>) -> Void) throws -> APIRequest {
+                                   _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> APIRequest {
         let request = BeamObjectRequest()
         try request.fetchAll(ids: ids, completion)
         return request
@@ -980,7 +1029,7 @@ extension BeamObjectManager {
 
     @discardableResult
     internal func fetchBeamObject(_ beamObject: BeamObject,
-                                  _ completion: @escaping (Result<BeamObject, Error>) -> Void) throws -> APIRequest {
+                                  _ completion: @escaping (Swift.Result<BeamObject, Error>) -> Void) throws -> APIRequest {
         let request = BeamObjectRequest()
         try request.fetch(beamObject.id, completion)
         return request
@@ -988,7 +1037,7 @@ extension BeamObjectManager {
 
     @discardableResult
     internal func fetchBeamObject(_ id: UUID,
-                                  _ completion: @escaping (Result<BeamObject, Error>) -> Void) throws -> APIRequest {
+                                  _ completion: @escaping (Swift.Result<BeamObject, Error>) -> Void) throws -> APIRequest {
         let request = BeamObjectRequest()
         try request.fetch(id, completion)
         return request
@@ -996,7 +1045,7 @@ extension BeamObjectManager {
 
     @discardableResult
     internal func fetchMinimalBeamObject(_ id: UUID,
-                                         _ completion: @escaping (Result<BeamObject, Error>) -> Void) throws -> APIRequest {
+                                         _ completion: @escaping (Swift.Result<BeamObject, Error>) -> Void) throws -> APIRequest {
         let request = BeamObjectRequest()
         try request.fetchMinimalBeamObject(id, completion)
         return request
