@@ -270,9 +270,12 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
         }
     }
 
-    private func removeUnselectedElementsFromTree(selectedElements: [BeamElement]) {
+    private func removeUnselectedElementsFromTree(selectedElements: [BeamElement], keepFoldedChildren: Bool) {
+        if keepFoldedChildren && !open {
+            return
+        }
         for child in children {
-            child.removeUnselectedElementsFromTree(selectedElements: selectedElements)
+            child.removeUnselectedElementsFromTree(selectedElements: selectedElements, keepFoldedChildren: keepFoldedChildren)
             if !selectedElements.contains(child) {
                 removeChild(child)
                 for subChild in child.children {
@@ -293,7 +296,7 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
         }
     }
 
-    public func deepCopy(withNewId: Bool, selectedElements: [BeamElement]?) -> BeamElement? {
+    public func deepCopy(withNewId: Bool, selectedElements: [BeamElement]?, includeFoldedChildren: Bool) -> BeamElement? {
         let encoder = JSONEncoder()
         guard let data = try? encoder.encode(self) else {
             Logger.shared.logError("DeepCopy Error while encoding \(self)", category: .document)
@@ -306,7 +309,7 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
         }
 
         if let selectedElements = selectedElements {
-            newElement.removeUnselectedElementsFromTree(selectedElements: selectedElements)
+            newElement.removeUnselectedElementsFromTree(selectedElements: selectedElements, keepFoldedChildren: includeFoldedChildren)
         }
 
         if withNewId {
