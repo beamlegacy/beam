@@ -1,5 +1,6 @@
 import Foundation
 import BeamCore
+import Combine
 
 extension DocumentManager {
     /// Use this to have updates when the underlaying CD object `Document` changes
@@ -153,6 +154,19 @@ extension DocumentManager {
 
     // MARK: -
     // MARK: Refresh
+
+    /// Fetch most recent document from API
+    /// First we fetch the remote updated_at, if it's more recent we fetch all details
+    func refresh(_ documentStruct: DocumentStruct,
+                 _ forced: Bool = false,
+                 completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) throws {
+        // If not authenticated
+        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            throw APIRequestError.notAuthenticated
+        }
+
+        try refreshFromBeamObjectAPIAndSaveLocally(documentStruct, forced, completion)
+    }
 
     func refreshFromBeamObjectAPIAndSaveLocally(_ documentStruct: DocumentStruct,
                                                 _ forced: Bool = false,

@@ -53,8 +53,7 @@ extension DatabaseManager {
             return .value(false)
         }
 
-        let promise = self.deleteAll()
-        return promise
+        return self.deleteAllFromBeamObjectAPI()
     }
 
     func save(_ databaseStruct: DatabaseStruct) -> Promise<Bool> {
