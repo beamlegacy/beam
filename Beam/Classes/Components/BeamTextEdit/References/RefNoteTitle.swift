@@ -50,7 +50,7 @@ class RefNoteTitle: Widget {
         cardTitleLayer = ButtonLayer("cardTitleLayer", titleLayer, activated: {[weak self] in
             guard let self = self, self.titleLayer.string as? String != nil else { return }
 
-            self.editor?.openCard(noteId, nil)
+            self.editor?.openCard(noteId, nil, nil)
         })
         cardTitleLayer?.cursor = .pointingHand
         cardTitleLayer?.hovered = { [weak self] hover in

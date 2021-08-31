@@ -109,6 +109,10 @@ extension BeamTextEdit {
         if rootNode.cursorPosition == 0 {
             cmdManager.deleteElement(for: node)
         }
+        cmdManager.focus(blockElement, in: parent)
+        if let focusedElement = focusedWidget as? ElementNode {
+            cmdManager.focusElement(focusedElement, cursorPosition: focusedElement.textCount)
+        }
     }
 
 }

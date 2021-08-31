@@ -551,7 +551,7 @@ public class TextNode: ElementNode {
             }
 
             if let link = internalLinkAt(point: mouseInfo.position) {
-                editor.openCard(link, nil)
+                editor.openCard(link, nil, nil)
                 return true
             }
 

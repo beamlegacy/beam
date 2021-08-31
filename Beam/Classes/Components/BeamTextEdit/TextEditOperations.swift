@@ -256,7 +256,8 @@ extension TextRoot {
 
         // We can't remove the root of a link & ref proxy node:
         if let ref = node as? ProxyTextNode,
-           nil == ref.parent as? BreadCrumb,
+           !(ref.parent is BreadCrumb),
+           !(ref.parent is BlockReferenceNode),
            cursorPosition == 0 {
             return
         }
@@ -266,9 +267,10 @@ extension TextRoot {
             cmdManager.endGroup()
         }
 
-        if let textNode = node as? TextNode {
+        if let textNode = node as? TextNode, !textNode.readOnly {
             if cursorPosition == 0 && state.selectedTextRange.isEmpty {
-                guard let prevNode = node.previousVisibleNode(ElementNode.self) else {
+                guard let prevNode = node.previousVisibleNode(ElementNode.self),
+                      !(node is BlockReferenceNode) else {
                     return
                 }
 
@@ -285,13 +287,12 @@ extension TextRoot {
                 // Complex case: the previous node contains an embed or an image
                 cmdManager.focusElement(prevNode, cursorPosition: prevNode.textCount)
                 deleteBackward()
-                return
             } else {
                 // Standard text deletion
                 cmdManager.deleteText(in: textNode, for: rangeToDeleteText(in: textNode, cursorAt: cursorPosition, forward: false))
             }
         } else {
-            // we are not in a text node
+            // we are not in an editable text node
             if cursorPosition == 0 {
                 // We must delete whatever is behind us, unless it's not an element node
                 guard let prevNode = node.previousVisibleNode(ElementNode.self) else { return }
@@ -300,8 +301,6 @@ extension TextRoot {
                 if let prevTextNode = prevNode as? TextNode {
                     cmdManager.focusElement(prevTextNode, cursorPosition: prevTextNode.textCount)
                     deleteBackward()
-
-                    return
                 } else {
                     // If the previous node is not a text node then we must remove the node altogether and leave the cursor where it is
                     cmdManager.focusElement(prevNode, cursorPosition: prevNode.textCount)
@@ -317,7 +316,7 @@ extension TextRoot {
                     return nodeFor(newPrevElement, withParent: nodeParent)
                 }()
                 moveChildrenOf(node, to: prevNode)
-                cmdManager.deleteElement(for: node)
+                cmdManager.deleteElement(for: node.element)
                 cmdManager.focusElement(prevNode, cursorPosition: prevNode.textCount)
             }
         }
