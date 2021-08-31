@@ -4,6 +4,43 @@ import BeamCore
 extension DatabaseManager {
     // MARK: -
     // MARK: Deletes
+
+    func deleteAll(includedRemote: Bool = true,
+                   completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
+        do {
+            try Database.deleteWithPredicate(CoreDataManager.shared.mainContext)
+            try Self.saveContext(context: CoreDataManager.shared.mainContext)
+        } catch {
+            Logger.shared.logError(error.localizedDescription, category: .coredata)
+        }
+
+        guard includedRemote else {
+            completion?(.success(true))
+            return
+        }
+
+        guard AuthenticationManager.shared.isAuthenticated,
+              Configuration.networkEnabled else {
+            completion?(.success(false))
+            return
+        }
+
+        do {
+            try self.deleteAllFromBeamObjectAPI { result in
+                switch result {
+                case .failure(let error):
+                    Logger.shared.logError(error.localizedDescription, category: .database)
+                    completion?(.failure(error))
+                case .success:
+                    completion?(.success(true))
+                }
+            }
+        } catch {
+            Logger.shared.logError(error.localizedDescription, category: .database)
+            completion?(.failure(error))
+        }
+    }
+
     func delete(id: UUID,
                 includedRemote: Bool = true,
                 completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {

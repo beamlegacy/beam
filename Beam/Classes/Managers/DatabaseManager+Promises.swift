@@ -70,14 +70,14 @@ extension DatabaseManager {
             .then(on: self.backgroundQueue) { context -> Promise<Bool> in
                 Logger.shared.logDebug("Saving database \(databaseStruct.title)", category: .database)
 
-                guard !cancelme else { throw PMKError.cancelled }
+                guard !cancelme else { throw DatabaseManagerError.operationCancelled }
 
                 return try context.performAndWait {
                     let database = Database.fetchOrCreateWithId(context, databaseStruct.id)
                     database.update(databaseStruct)
                     database.updated_at = BeamDate.now
 
-                    guard !cancelme else { throw PMKError.cancelled }
+                    guard !cancelme else { throw DatabaseManagerError.operationCancelled }
                     try Self.saveContext(context: context)
 
                     guard AuthenticationManager.shared.isAuthenticated,
@@ -88,7 +88,9 @@ extension DatabaseManager {
                     context.refresh(database, mergeChanges: false)
 
                     let updatedDatabaseStruct = DatabaseStruct(database: database)
-                    return self.saveOnBeamObjectAPI(updatedDatabaseStruct)
+                    return self.saveOnBeamObjectAPI(updatedDatabaseStruct).then(on: self.backgroundQueue) { _ in
+                        true
+                    }
                 }
             }.always {
                 self.saveDatabasePromiseCancels[databaseStruct.id] = nil
