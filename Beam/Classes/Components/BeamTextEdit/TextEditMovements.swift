@@ -207,12 +207,11 @@ extension TextRoot {
         guard let node = focusedWidget as? ElementNode else { return }
         if node.isOnLastLine(cursorPosition) {
             if !moveToNextNodeIfPossible(fromNode: node, cursor: cursorPosition) {
-                guard let node = focusedWidget as? TextNode else { return }
-                cursorPosition = node.text.count
+                cursorPosition = node.textCount
             }
         } else {
             var _caretIndex = node.caretBelow(caretIndex)
-            if let node = focusedWidget as? TextNode,
+            if let node = focusedWidget as? ElementNode,
                let updatedCaretIndex = node.caretIndexAvoidingUneditableRange(_caretIndex, after: true) {
                 _caretIndex = updatedCaretIndex
             }
@@ -323,7 +322,7 @@ extension TextRoot {
             return
         }
 
-        guard let node = focusedWidget as? TextNode else { return }
+        guard let node = focusedWidget as? ElementNode else { return }
         if cursorPosition == 0 {
             extendNodeSelectionUp()
         } else {
@@ -339,8 +338,8 @@ extension TextRoot {
             return
         }
 
-        guard let node = focusedWidget as? TextNode else { return }
-        if cursorPosition == node.text.text.count {
+        guard let node = focusedWidget as? ElementNode else { return }
+        if cursorPosition == node.textCount {
             extendNodeSelectionDown()
         } else {
             extendSelection(to: node.positionForCaretIndex(node.caretBelow(caretIndex)))

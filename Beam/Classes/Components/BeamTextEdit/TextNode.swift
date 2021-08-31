@@ -384,7 +384,7 @@ public class TextNode: ElementNode {
 
     public override func updateCursor() {
         guard let editor = self.editor else { return }
-        let on = !readOnly && editor.hasFocus && isFocused && editor.blinkPhase
+        let on = AppDelegate.main.isActive && !readOnly && editor.hasFocus && isFocused && editor.blinkPhase
             && (root?.state.nodeSelection?.nodes.isEmpty ?? true)
             && !isCursorInsideUneditableRange(caretIndex: caretIndex)
 
@@ -541,7 +541,7 @@ public class TextNode: ElementNode {
             return handleRightMouseDown(mouseInfo: mouseInfo)
         }
 
-        if contentsFrame.contains(mouseInfo.position) {
+        if contentsFrame.containsY(mouseInfo.position) {
 
             let clickPos = positionAt(point: mouseInfo.position)
 
@@ -776,7 +776,7 @@ public class TextNode: ElementNode {
         return res
     }
 
-    public func caretIndexAvoidingUneditableRange(_ caretIndex: Int, after: Bool) -> Int? {
+    override public func caretIndexAvoidingUneditableRange(_ caretIndex: Int, after: Bool) -> Int? {
         let caret = self.caretAtIndex(caretIndex)
         let sourceIndex = caret.indexInSource
         guard let sourceRange = uneditableRangeAt(index: sourceIndex) else { return nil }
