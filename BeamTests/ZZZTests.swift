@@ -15,12 +15,10 @@ class ZZZTests: QuickSpec {
             beamHelper.beginNetworkRecording()
             BeamTestsHelper.login()
 
-            Configuration.beamObjectAPIEnabled = true
             try? EncryptionManager.shared.replacePrivateKey(Configuration.testPrivateKey)
         }
 
         afterEach {
-            Configuration.beamObjectAPIEnabled = EnvironmentVariables.beamObjectAPIEnabled
             beamHelper.endNetworkRecording()
         }
 

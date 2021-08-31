@@ -108,17 +108,27 @@ extension BeamObjectManager {
         }
     }
 
-    @discardableResult
+    /// Fetch all remote objects
+    func fetchAllObjects<T: BeamObjectProtocol>() -> Promise<[T]> {
+        fetchBeamObjects(T.beamObjectTypeName).map(on: backgroundQueue) { remoteBeamObjects in
+            try self.beamObjectsToObjects(remoteBeamObjects)
+        }
+    }
+
     internal func fetchBeamObjects(_ beamObjects: [BeamObject]) -> Promise<[BeamObject]> {
         let request = BeamObjectRequest()
 
         return request.fetchAll(ids: beamObjects.map { $0.id })
     }
 
-    @discardableResult
     internal func fetchBeamObjects(_ ids: [UUID]) -> Promise<[BeamObject]> {
         let request = BeamObjectRequest()
         return request.fetchAll(ids: ids)
+    }
+
+    internal func fetchBeamObjects(_ beamObjectType: String) -> Promise<[BeamObject]> {
+        let request = BeamObjectRequest()
+        return request.fetchAll(beamObjectType: beamObjectType)
     }
 
     func saveToAPI<T: BeamObjectProtocol>(_ object: T) -> Promise<T> {

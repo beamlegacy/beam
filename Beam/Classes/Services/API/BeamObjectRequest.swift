@@ -43,6 +43,7 @@ class BeamObjectRequest: APIRequest {
     struct BeamObjectsParameters: Encodable {
         let receivedAtAfter: Date?
         let ids: [UUID]?
+        let beamObjectType: String?
     }
 
     internal func saveBeamObjectParameters(_ beamObject: BeamObject) throws -> UpdateBeamObject {

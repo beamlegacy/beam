@@ -3,20 +3,20 @@ import Promises
 import BeamCore
 
 extension BeamObjectManager {
-    func syncAllFromAPI(delete: Bool = true) -> Promise<Bool> {
-        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-            return Promise(BeamObjectManagerError.notAuthenticated)
-        }
-
-        let promise: Promise = fetchAllFromAPI()
-
-        return promise
-
-//        return promise.then(on: backgroundQueue) { _ in
-//            // try self.saveAllToAPI()
-//            return true
+//    func syncAllFromAPI(delete: Bool = true) -> Promise<Bool> {
+//        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+//            return Promise(BeamObjectManagerError.notAuthenticated)
 //        }
-    }
+//
+//        let promise: Promise = fetchAllFromAPI()
+//
+//        return promise
+//
+////        return promise.then(on: backgroundQueue) { _ in
+////            // try self.saveAllToAPI()
+////            return true
+////        }
+//    }
 
     /// Will fetch all updates from the API and call each managers based on object's type
     func fetchAllFromAPI() -> Promise<Bool> {
@@ -108,17 +108,20 @@ extension BeamObjectManager {
         }
     }
 
-    @discardableResult
     internal func fetchBeamObjects(_ beamObjects: [BeamObject]) -> Promise<[BeamObject]> {
         let request = BeamObjectRequest()
 
         return request.fetchAll(ids: beamObjects.map { $0.id })
     }
 
-    @discardableResult
     internal func fetchBeamObjects(_ ids: [UUID]) -> Promise<[BeamObject]> {
         let request = BeamObjectRequest()
         return request.fetchAll(ids: ids)
+    }
+
+    internal func fetchBeamObjects(_ beamObjectType: String) -> Promise<[BeamObject]> {
+        let request = BeamObjectRequest()
+        return request.fetchAll(beamObjectType: beamObjectType)
     }
 
     func saveToAPI<T: BeamObjectProtocol>(_ object: T) -> Promise<T> {
@@ -216,6 +219,12 @@ extension BeamObjectManager {
             let savedBeamObject = updateBeamObject.copy()
             savedBeamObject.previousChecksum = updateBeamObject.dataChecksum
             return Promise(savedBeamObject)
+        }
+    }
+
+    func fetchAllObjects<T: BeamObjectProtocol>() -> Promise<[T]> {
+        fetchBeamObjects(T.beamObjectTypeName).then(on: backgroundQueue) { remoteBeamObjects in
+            try self.beamObjectsToObjects(remoteBeamObjects)
         }
     }
 

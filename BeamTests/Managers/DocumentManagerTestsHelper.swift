@@ -87,7 +87,7 @@ class DocumentManagerTestsHelper {
 
     func saveDatabaseRemotely(_ dbStruct: DatabaseStruct) {
         waitUntil(timeout: .seconds(10)) { done in
-            self.databaseManager.saveDatabaseStructOnAPI(dbStruct) { result in
+            _ = try? self.databaseManager.saveOnBeamObjectAPI(dbStruct) { result in
                 expect { try result.get() }.toNot(throwError())
                 done()
             }
@@ -95,57 +95,46 @@ class DocumentManagerTestsHelper {
     }
 
     func saveRemotelyOnly(_ docStruct: DocumentStruct) {
-        let documentRequest = DocumentRequest()
-
         waitUntil(timeout: .seconds(10)) { done in
-            _ = try? documentRequest.save(docStruct.asApiType()) { result in
+            _ = try? self.documentManager.saveOnBeamObjectAPI(docStruct) { result in
                 expect { try result.get() }.toNot(throwError())
                 done()
             }
         }
     }
 
-    func fetchOnAPI(_ docStruct: DocumentStruct) -> DocumentAPIType? {
-        var documentAPIType: DocumentAPIType?
-        let documentRequest = DocumentRequest()
+    func fetchOnAPI(_ docStruct: DocumentStruct) -> DocumentStruct? {
+        var fetchedDocStruct: DocumentStruct?
 
         let semaphore = DispatchSemaphore(value: 0)
-        _ = try? documentRequest.fetchDocument(docStruct.uuidString) { result in
-            documentAPIType = try? result.get()
+        _ = try? documentManager.refreshFromBeamObjectAPI(docStruct, true) { result in
+            fetchedDocStruct = try? result.get()
             semaphore.signal()
         }
         _ = semaphore.wait(timeout: DispatchTime.now() + .seconds(5))
 
-        return documentAPIType
+        return fetchedDocStruct
     }
 
-    func fetchDatabaseOnAPI(_ dbStruct: DatabaseStruct) -> DatabaseAPIType? {
-        var dbAPIType: DatabaseAPIType?
-        let databaseRequest = DatabaseRequest()
+    func fetchDatabaseOnAPI(_ dbStruct: DatabaseStruct) -> DatabaseStruct? {
+        var fetchedDbStruct: DatabaseStruct?
 
         let semaphore = DispatchSemaphore(value: 0)
         // TODO: Add a `fetchDatabase` request for faster GET
-        _ = try? databaseRequest.fetchAll { result in
-            if let databaseAPITypes = try? result.get() {
-                for databaseAPIType in databaseAPITypes {
-                    if databaseAPIType.id == dbStruct.uuidString {
-                        dbAPIType = databaseAPIType
-                        break
-                    }
-                }
-            }
+        _ = try? databaseManager.refreshFromBeamObjectAPI(dbStruct, true) { result in
+            fetchedDbStruct = try? result.get()
             semaphore.signal()
         }
         _ = semaphore.wait(timeout: DispatchTime.now() + .seconds(5))
 
-        return dbAPIType
+        return fetchedDbStruct
     }
 
     func fetchOnAPIWithLatency(_ docStruct: DocumentStruct, _ newLocal: String) -> Bool {
         for _ in 0...10 {
             let remoteStruct = fetchOnAPI(docStruct)
-            expect(remoteStruct?.id).to(equal(docStruct.uuidString))
-            if remoteStruct?.data == newLocal {
+            expect(remoteStruct?.id).to(equal(docStruct.id))
+            if remoteStruct?.data == newLocal.asData {
                 return true
             }
             usleep(50)
@@ -284,9 +273,9 @@ class DocumentManagerTestsHelper {
     }
 
     // MARK: Database
-    func createDatabaseStruct(_ id: String? = nil, _ title: String? = "Foobar DB") -> DatabaseStruct {
+    func createDatabaseStruct(_ id: String? = nil, _ title: String = "DB666") -> DatabaseStruct {
         var databaseStruct = DatabaseStruct(id: UUID(),
-                                            title: title ?? String.randomTitle(),
+                                            title: title,
                                             createdAt: BeamDate.now,
                                             updatedAt: BeamDate.now)
 
@@ -303,6 +292,9 @@ class DocumentManagerTestsHelper {
                 expect { try result.get() }.toNot(throwError())
                 if case .failure(let error) = result {
                     fail(error.localizedDescription)
+                }
+                if case .success(let success) = result, success != true {
+                    fail("saveDatabaseLocally wasn't true")
                 }
                 done()
             })
