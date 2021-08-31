@@ -282,6 +282,13 @@ extension TextRoot {
                     return
                 }
 
+                if node.textCount == 0 {
+                    // we are in an empty text node: delete it
+                    cmdManager.focusElement(prevNode, cursorPosition: prevNode.textCount)
+                    cmdManager.deleteElement(for: textNode)
+                    return
+                }
+
                 // Complex case: the previous node contains an embed or an image
                 cmdManager.focusElement(prevNode, cursorPosition: prevNode.textCount)
                 deleteBackward()
