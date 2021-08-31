@@ -61,7 +61,7 @@ class BeamUITestsMenuGenerator {
         }
         Logger.shared.logDebug("Inserting text in current note", category: .documentDebug)
 
-        guard let newNote = currentNote.deepCopy(withNewId: false, selectedElements: nil) else {
+        guard let newNote = currentNote.deepCopy(withNewId: false, selectedElements: nil, includeFoldedChildren: false) else {
             Logger.shared.logError("Unable to create deep copy of note \(currentNote)", category: .document)
             return
         }
