@@ -203,6 +203,7 @@ extension TextRoot {
 
     func moveDown() {
         cancelNodeSelection()
+
         guard let node = focusedWidget as? ElementNode else { return }
         if node.isOnLastLine(cursorPosition) {
             if !moveToNextNodeIfPossible(fromNode: node, cursor: cursorPosition) {
