@@ -37,7 +37,7 @@ class DeepCopyTests: XCTestCase {
 
     func testDeepCopy() {
         let note = setupTree()
-        guard let noteDuplicated = note.deepCopy(withNewId: false, selectedElements: nil) else { return }
+        guard let noteDuplicated = note.deepCopy(withNewId: false, selectedElements: nil, includeFoldedChildren: false) else { return }
         expect(note).to(equal(noteDuplicated))
         expect(note.id).to(equal(noteDuplicated.id))
         expect(note.children.count).to(equal(noteDuplicated.children.count))
@@ -46,7 +46,7 @@ class DeepCopyTests: XCTestCase {
 
     func testDeepCopyWithNewId() {
         let note = setupTree()
-        guard let noteDuplicated = note.deepCopy(withNewId: true, selectedElements: nil) else { return }
+        guard let noteDuplicated = note.deepCopy(withNewId: true, selectedElements: nil, includeFoldedChildren: false) else { return }
         expect(note).toNot(equal(noteDuplicated))
         expect(note.id).toNot(equal(noteDuplicated.id))
         expect(note.children.count).to(equal(noteDuplicated.children.count))
@@ -58,7 +58,7 @@ class DeepCopyTests: XCTestCase {
         guard let firstChild = note.children.first,
               let lastChild = note.children.last else { return }
         let selectedElements = [firstChild, lastChild]
-        guard let noteDuplicated = note.deepCopy(withNewId: true, selectedElements: selectedElements) else { return }
+        guard let noteDuplicated = note.deepCopy(withNewId: true, selectedElements: selectedElements, includeFoldedChildren: false) else { return }
         expect(note).toNot(equal(noteDuplicated))
         expect(note.id).toNot(equal(noteDuplicated.id))
         expect(note.children.count).toNot(equal(noteDuplicated.children.count))
