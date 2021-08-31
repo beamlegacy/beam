@@ -210,6 +210,11 @@
 		52019A5626DE2AB0005E8278 /* BeamObjectRequest+Foundation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52019A5526DE2AB0005E8278 /* BeamObjectRequest+Foundation.swift */; };
 		52019A5F26DE2AC2005E8278 /* BeamObjectRequest+PromiseKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52019A5E26DE2AC2005E8278 /* BeamObjectRequest+PromiseKit.swift */; };
 		52019A6126DE2ACB005E8278 /* BeamObjectRequest+Promises.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52019A6026DE2ACB005E8278 /* BeamObjectRequest+Promises.swift */; };
+		52019A6326DE2CC9005E8278 /* BeamObjectManager+Foundation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52019A6226DE2CC9005E8278 /* BeamObjectManager+Foundation.swift */; };
+		52019A6526DE2ECD005E8278 /* BeamObjectManager+Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52019A6426DE2ECD005E8278 /* BeamObjectManager+Tests.swift */; };
+		52019A6726DE2F65005E8278 /* BeamObjectManager+Websockets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52019A6626DE2F65005E8278 /* BeamObjectManager+Websockets.swift */; };
+		52019A6926DE2F8F005E8278 /* BeamObjectManager+PromiseKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52019A6826DE2F8F005E8278 /* BeamObjectManager+PromiseKit.swift */; };
+		52019A6B26DE2F96005E8278 /* BeamObjectManager+Promises.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52019A6A26DE2F96005E8278 /* BeamObjectManager+Promises.swift */; };
 		520303D9261CAEF10028BC8E /* DatabaseManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 520303D8261CAEF10028BC8E /* DatabaseManagerTests.swift */; };
 		5204290B25A4B3D300DD677C /* document_updated_at.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 5204290A25A4B3D300DD677C /* document_updated_at.graphql */; };
 		5204FE3B25F128BD00FD22F8 /* DocumentStruct.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5204FE3A25F128BD00FD22F8 /* DocumentStruct.swift */; };
@@ -1161,6 +1166,11 @@
 		52019A5526DE2AB0005E8278 /* BeamObjectRequest+Foundation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamObjectRequest+Foundation.swift"; sourceTree = "<group>"; };
 		52019A5E26DE2AC2005E8278 /* BeamObjectRequest+PromiseKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamObjectRequest+PromiseKit.swift"; sourceTree = "<group>"; };
 		52019A6026DE2ACB005E8278 /* BeamObjectRequest+Promises.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamObjectRequest+Promises.swift"; sourceTree = "<group>"; };
+		52019A6226DE2CC9005E8278 /* BeamObjectManager+Foundation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamObjectManager+Foundation.swift"; sourceTree = "<group>"; };
+		52019A6426DE2ECD005E8278 /* BeamObjectManager+Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamObjectManager+Tests.swift"; sourceTree = "<group>"; };
+		52019A6626DE2F65005E8278 /* BeamObjectManager+Websockets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamObjectManager+Websockets.swift"; sourceTree = "<group>"; };
+		52019A6826DE2F8F005E8278 /* BeamObjectManager+PromiseKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamObjectManager+PromiseKit.swift"; sourceTree = "<group>"; };
+		52019A6A26DE2F96005E8278 /* BeamObjectManager+Promises.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamObjectManager+Promises.swift"; sourceTree = "<group>"; };
 		520303D8261CAEF10028BC8E /* DatabaseManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseManagerTests.swift; sourceTree = "<group>"; };
 		5204290A25A4B3D300DD677C /* document_updated_at.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = document_updated_at.graphql; sourceTree = "<group>"; };
 		5204FE3A25F128BD00FD22F8 /* DocumentStruct.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentStruct.swift; sourceTree = "<group>"; };
@@ -2468,6 +2478,11 @@
 				418171E72581107C00317ED8 /* AuthenticationManager.swift */,
 				418171E82581107C00317ED8 /* AccountManager.swift */,
 				5224CD8B26860C0900D4179E /* BeamObjectManager.swift */,
+				52019A6626DE2F65005E8278 /* BeamObjectManager+Websockets.swift */,
+				52019A6226DE2CC9005E8278 /* BeamObjectManager+Foundation.swift */,
+				52019A6826DE2F8F005E8278 /* BeamObjectManager+PromiseKit.swift */,
+				52019A6A26DE2F96005E8278 /* BeamObjectManager+Promises.swift */,
+				52019A6426DE2ECD005E8278 /* BeamObjectManager+Tests.swift */,
 				522BC3F426A872740018B51E /* BeamObjectManagerError.swift */,
 				522BC3E726A8724B0018B51E /* BeamObjectManagerProtocol.swift */,
 				03CA9A9625CC61BF00E7CFA2 /* ContentBlockingManager.swift */,
@@ -4592,6 +4607,7 @@
 				96FD761B25B1C43500B04ED3 /* BrowsingNodeWidget.swift in Sources */,
 				521EEDFB2593927100BA2485 /* Int+ByteSize.swift in Sources */,
 				33AC9D8E26AF482E004E7EF4 /* EnhancedWebView.swift in Sources */,
+				52019A6B26DE2F96005E8278 /* BeamObjectManager+Promises.swift in Sources */,
 				9652A93426A6B24E00F0590C /* FakeNoteGenerator.swift in Sources */,
 				A05ADF6E264D8C59002DF91A /* OverlayViewCenterViewModel.swift in Sources */,
 				5298268C2641A37500E9448C /* GithubButton.swift in Sources */,
@@ -4678,6 +4694,7 @@
 				418171EE2581107C00317ED8 /* GraphqlParametersProtocol.swift in Sources */,
 				87C539A12616295300D51877 /* ViewMorePasswordsCell.swift in Sources */,
 				524CF6CE25F27609007312F0 /* KeychainStorable.swift in Sources */,
+				52019A6326DE2CC9005E8278 /* BeamObjectManager+Foundation.swift in Sources */,
 				521EEDDD25937E9200BA2485 /* DocumentsWindow.swift in Sources */,
 				418172122581107C00317ED8 /* EventsTracker.swift in Sources */,
 				A0CB7E54268E66CD00D15AFD /* View+Beam.swift in Sources */,
@@ -4808,6 +4825,7 @@
 				A57C745826709C8000840BBA /* BeamTextEdit+SlashMenu.swift in Sources */,
 				A53C9873267B4B6400D4AE90 /* AnimatableOffsetEffect.swift in Sources */,
 				52B17ABE2624445200CB4728 /* DatabaseRow.swift in Sources */,
+				52019A6726DE2F65005E8278 /* BeamObjectManager+Websockets.swift in Sources */,
 				A572370D2655654900AE6BFC /* CoreDataContextObserver.swift in Sources */,
 				33F0480426B14C0100855A08 /* CustomPopoverPresenter.swift in Sources */,
 				523416A22629D465001F306F /* BeamCoreDataObject.swift in Sources */,
@@ -4892,6 +4910,7 @@
 				DA69304D268B4DD9008EF756 /* BrowsingTreeSender.swift in Sources */,
 				032562AC26051D3B006513E4 /* punycode.c in Sources */,
 				96120D4B260CD5E100592546 /* TextEdit+Hyperlink.swift in Sources */,
+				52019A6526DE2ECD005E8278 /* BeamObjectManager+Tests.swift in Sources */,
 				9634DD91264B203E0065383E /* ShapeLayer.swift in Sources */,
 				9611995E25A27A17005BEC82 /* BeamObjCBridge.m in Sources */,
 				DAA60C2C2666899A00C927E5 /* BeamState.swift in Sources */,
@@ -5003,6 +5022,7 @@
 				A52393A826541A06008D4C85 /* ModeViewTransitions.swift in Sources */,
 				5298EAF926272CA90033862C /* CoreDataMigrationStep.swift in Sources */,
 				960A57E6264C851E0061E8D2 /* ProxyImageNode.swift in Sources */,
+				52019A6926DE2F8F005E8278 /* BeamObjectManager+PromiseKit.swift in Sources */,
 				A5FE96CD2612469C002A2B73 /* AutocompleteManager.swift in Sources */,
 				52B17AB0262441D600CB4728 /* DatabasesWindow.swift in Sources */,
 				BAA67192B5EB78981741C311 /* WebPage.swift in Sources */,
