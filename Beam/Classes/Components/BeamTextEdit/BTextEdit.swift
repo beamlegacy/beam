@@ -17,7 +17,7 @@ public struct BTextEditScrollable: NSViewRepresentable {
     var note: BeamNote
     var data: BeamData
     var openURL: (URL, BeamElement) -> Void
-    var openCard: (UUID, UUID?) -> Void
+    var openCard: (_ noteId: UUID, _ elementId: UUID?, _ unfold: Bool?) -> Void
     var startQuery: (TextNode, Bool) -> Void = { _, _ in }
 
     var onStartEditing: () -> Void = { }
@@ -102,10 +102,11 @@ public struct BTextEditScrollable: NSViewRepresentable {
     }
 
     private func focusEditor(_ editor: BeamTextEdit) {
-        if let fs = initialFocusedState {
-            editor.focusElement(withId: fs.elementId, atCursorPosition: fs.cursorPosition, highlight: fs.highlight)
-        }
+        editor.scroll(.zero)
         DispatchQueue.main.async {
+            if let fs = initialFocusedState {
+                editor.focusElement(withId: fs.elementId, atCursorPosition: fs.cursorPosition, highlight: fs.highlight, unfold: fs.unfold)
+            }
             editor.window?.makeFirstResponder(editor)
         }
     }

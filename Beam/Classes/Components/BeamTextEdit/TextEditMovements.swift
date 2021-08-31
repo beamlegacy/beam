@@ -234,8 +234,10 @@ extension TextRoot {
     }
 
     private func canMove(from currentNode: ElementNode, to newNode: ElementNode) -> Bool {
-        if (newNode as? ProxyNode == nil && currentNode as? ProxyNode == nil) ||
-            (newNode as? ProxyNode != nil && currentNode as? ProxyNode != nil) {
+        if !(newNode is ProxyNode) && !(currentNode is ProxyNode) ||
+            (newNode is ProxyNode) && (currentNode is ProxyNode) {
+            return true
+        } else if newNode.parent == currentNode || currentNode.parent == newNode {
             return true
         }
         return false
