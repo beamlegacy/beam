@@ -706,11 +706,12 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     }
 
     func dispatchHover(_ widgets: Set<Widget>) {
-        hover = widgets.contains(self)
-
+        var isHovering = widgets.contains(self)
         for c in children {
             c.dispatchHover(widgets)
+            isHovering = isHovering || c.hover
         }
+        hover = isHovering
     }
 
     func dispatchMouseDown(mouseInfo: MouseInfo) -> Widget? {
@@ -1154,6 +1155,9 @@ extension Widget {
         animation.keyTimes = [0, 0.66, 1]
         animation.duration = 3
         layer.add(animation, forKey: "backgroundColor")
+        children.forEach { c in
+            c.highlight()
+        }
     }
 }
 // swiftlint:enable type_body_length

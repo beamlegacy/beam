@@ -243,7 +243,7 @@ public extension CALayer {
     public var useFocusRing = false
 
     public var openURL: (URL, BeamElement) -> Void = { _, _ in }
-    public var openCard: (UUID, UUID?) -> Void = { _, _ in }
+    public var openCard: (_ noteId: UUID, _ elementId: UUID?, _ unfold: Bool?) -> Void = { _, _, _ in }
     public var startQuery: (TextNode, Bool) -> Void = { _, _ in }
 
     public var onStartEditing: (() -> Void)?
@@ -425,7 +425,9 @@ public extension CALayer {
     public func setHotSpot(_ spot: NSRect) {
         guard !dragging else { return }
         guard !self.visibleRect.contains(spot) else { return }
-        _ = scrollToVisible(spot)
+        var centeredSpot = spot
+        centeredSpot.size.height = max(centeredSpot.size.height, self.visibleRect.height / 2)
+        _ = scrollToVisible(centeredSpot)
     }
 
     var layoutInvalidated = false
@@ -503,13 +505,17 @@ public extension CALayer {
         return true
     }
 
-    func focusElement(withId elementId: UUID?, atCursorPosition: Int?, highlight: Bool = false) {
+    func focusElement(withId elementId: UUID?, atCursorPosition: Int?, highlight: Bool = false, unfold: Bool = false) {
         guard let id = elementId,
               let element = note.findElement(id),
               let node = rootNode.nodeFor(element)
         else {
             self.scroll(.zero)
             return
+        }
+        if unfold {
+            node.allParents.forEach { ($0 as? ElementNode)?.unfold() }
+            node.unfold()
         }
         self.setHotSpot(node.frameInDocument)
         self.focusedWidget = node
@@ -535,7 +541,7 @@ public extension CALayer {
                 cmdManager.endGroup()
             }
 
-            guard let node = node as? TextNode, (node as? BlockReferenceNode) == nil else {
+            guard let node = node as? TextNode, !node.readOnly else {
                 rootNode.insertElementNearNonTextElement()
                 return
             }
@@ -600,7 +606,11 @@ public extension CALayer {
             switch event.keyCode {
             case KeyCode.escape.rawValue:
                 rootNode.cancelSelection()
-                hideInlineFormatter()
+                if inlineFormatter != nil {
+                    hideInlineFormatter()
+                } else if let node = rootNode.focusedWidget as? ElementNode {
+                    cancelBlockRefEditing(node)
+                }
                 return
             case KeyCode.enter.rawValue:
                 if command && rootNode.state.nodeSelection == nil, inlineFormatter == nil,
@@ -684,6 +694,14 @@ public extension CALayer {
     private func toggleOpen(_ node: ElementNode) {
         hideInlineFormatter()
         node.open.toggle()
+    }
+
+    private func cancelBlockRefEditing(_ node: ElementNode) {
+        var blockRefNode = node as? BlockReferenceNode
+        if node is ProxyNode {
+            blockRefNode = node.allParents.first(where: { $0 is BlockReferenceNode }) as? BlockReferenceNode
+        }
+        blockRefNode?.readOnly = true
     }
 
     /// - Returns: true if action is possible
@@ -999,7 +1017,7 @@ public extension CALayer {
             let titleCoord = cardTitleLayer.convert(event.locationInWindow, from: nil)
             if cardTitleLayer.contains(titleCoord) {
                 guard let cardNote = note as? BeamNote else { return }
-                self.openCard(cardNote.id, nil)
+                self.openCard(cardNote.id, nil, nil)
                 return
             }
         }

@@ -19,6 +19,22 @@ class BlockReferenceNode: TextNode {
         }
     }
 
+    override var isFocused: Bool {
+        super.isFocused || (readOnly && isAChildProxyNodeFocused)
+    }
+
+    private var isAChildProxyNodeFocused: Bool {
+        (root?.focusedWidget as? ProxyNode)?.allParents.contains(self) == true
+    }
+
+    override var readOnly: Bool {
+        get { super.readOnly }
+        set {
+            super.readOnly = newValue
+            onReadOnlyChanged(newValue)
+        }
+    }
+
     init(parent: Widget, element: BeamElement) {
         super.init(parent: parent, element: element, nodeProvider: NodeProviderImpl(proxy: true))
 
@@ -31,8 +47,7 @@ class BlockReferenceNode: TextNode {
         setupBlockReference()
     }
 
-    override func willBeRemovedFromNote() {
-        super.willBeRemovedFromNote()
+    deinit {
         if let gutterItem = gutterItem {
             editor?.removeGutterItem(item: gutterItem)
         }
@@ -40,13 +55,19 @@ class BlockReferenceNode: TextNode {
 
     static let lockButtonName = "lock"
 
-    private func updateReadOnlyMode(_ readOnly: Bool) {
-        self.readOnly = readOnly
+    private func onReadOnlyChanged(_ readOnly: Bool) {
         self.cursor = readOnly ? .arrow : nil
+        if let lockButton = self.layers[Self.lockButtonName] as? LockButton {
+            lockButton.locked = readOnly
+        }
     }
 
     func setupBlockReference() {
-        updateReadOnlyMode(true)
+        self.readOnly = true
+        var updatedPadding = contentsPadding
+        updatedPadding.left -= 6
+        contentsPadding = updatedPadding
+
         var refNoteId: UUID
         var refElementId: UUID
 
@@ -70,13 +91,14 @@ class BlockReferenceNode: TextNode {
 
         displayedElement = referencingElement
         referencingElement.$children
-            .sink { elements in
-                super.updateTextChildren(elements: elements)
+            .sink { [weak self] elements in
+                guard self?.editor != nil else { return }
+                self?.updateTextChildren(elements: elements)
             }.store(in: &scope)
 
         useActionLayer = false
         let lockButton = LockButton(Self.lockButtonName, locked: true, changed: { [unowned self] lock in
-            updateReadOnlyMode(lock)
+            self.readOnly = lock
         })
         lockButton.cursor = .arrow
         lockButton.layer.opacity = 0.0
@@ -101,7 +123,7 @@ class BlockReferenceNode: TextNode {
             _blockLayer.zPosition = -1
             let blockLayer = Layer(name: Self.blockLayerName, layer: _blockLayer)
             addLayer(blockLayer)
-            updateBackgroundColor(focused: isFocused, hover: hover)
+            updateBackgroundColor(hover: hover)
             return blockLayer
         }
 
@@ -113,11 +135,11 @@ class BlockReferenceNode: TextNode {
     }
 
     override func onFocus() {
-        updateBackgroundColor(focused: true, hover: hover)
+        updateBackgroundColor(hover: hover)
     }
 
     override func onUnfocus() {
-        updateBackgroundColor(focused: false, hover: hover)
+        updateBackgroundColor(hover: hover)
     }
 
     override func updateCursor() {
@@ -144,9 +166,9 @@ class BlockReferenceNode: TextNode {
         self.gutterItem?.updateFrameFromNode(self)
     }
 
-    private func updateBackgroundColor(focused: Bool, hover: Bool) {
+    private func updateBackgroundColor(hover: Bool) {
         var color: CGColor
-        if focused {
+        if isFocused || isAChildProxyNodeFocused {
             color = BeamColor.Bluetiful.nsColor.withAlphaComponent(0.2).cgColor
         } else if hover {
             color = BeamColor.Nero.nsColor.add(BeamColor.Niobium.nsColor.withAlphaComponent(0.02)).cgColor
@@ -161,20 +183,18 @@ class BlockReferenceNode: TextNode {
         if let lockButton = layers[Self.lockButtonName] {
             lockButton.layer.opacity = hover ? 1.0 : 0.0
         }
-        updateBackgroundColor(focused: isFocused, hover: hover)
+        updateBackgroundColor(hover: hover)
     }
 
     private func openReferencedCard() {
         guard let noteid = self.displayedElement.note?.id else { return }
-        self.editor?.openCard(noteid, self.displayedElement.id)
+        self.editor?.openCard(noteid, self.displayedElement.id, self.open)
     }
 
     func showMenu(mouseInfo: MouseInfo) {
         let items = [
             ContextMenuItem(title: readOnly ? "Edit" : "Stop Editing", action: { [unowned self] in
-                updateReadOnlyMode(!self.readOnly)
-                guard let lockButton = self.layers[Self.lockButtonName] as? LockButton else { return }
-                lockButton.locked = self.readOnly
+                self.readOnly.toggle()
             }),
             ContextMenuItem(title: "View Origin", action: {
                 self.openReferencedCard()
