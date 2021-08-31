@@ -147,10 +147,8 @@ extension BeamObjectManager {
         }
     }
 
-    /// Fetch remote object
-    @discardableResult
     func fetchObject<T: BeamObjectProtocol>(_ object: T) -> Promise<T> {
-        let promise = fetchBeamObject(object.beamObjectId)
+        let promise: Promise = fetchBeamObject(object.beamObjectId)
 
         return promise.map(on: backgroundQueue) { remoteBeamObject in
             // Check if you have the same IDs for 2 different object types
@@ -251,4 +249,3 @@ extension BeamObjectManager {
         return request.deleteAll(beamObjectType: beamObjectType)
     }
 }
-

@@ -59,11 +59,6 @@ extension DatabaseStruct {
         self.updatedAt = BeamDate.now
     }
 
-    func asApiType() -> DatabaseAPIType {
-        let result = DatabaseAPIType(database: self)
-        return result
-    }
-
     var titleAndId: String {
         "\(title) {\(id)}"
     }

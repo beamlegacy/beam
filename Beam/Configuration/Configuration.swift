@@ -77,23 +77,6 @@ struct Configuration {
         }
     }
 
-    static private var beamObjectAPIEnabledKey = "beamObjectAPIEnabled"
-    static var beamObjectAPIEnabled: Bool {
-        get {
-            if UserDefaults.standard.object(forKey: beamObjectAPIEnabledKey) != nil {
-                return UserDefaults.standard.bool(forKey: beamObjectAPIEnabledKey)
-            }
-
-            return EnvironmentVariables.beamObjectAPIEnabled
-        }
-        set {
-            if newValue != beamObjectAPIEnabled {
-                UserDefaults.standard.set(newValue, forKey: beamObjectAPIEnabledKey)
-                AppDelegate.main.syncData()
-            }
-        }
-    }
-
     static private var publicHostnameKey = "publicHostname"
     static var publicHostname: String {
         get {

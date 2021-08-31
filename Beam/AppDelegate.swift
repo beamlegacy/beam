@@ -102,25 +102,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         #endif
 
         // We sync data *after* we potentially connected to websocket, to make sure we don't miss any data
-        if Configuration.beamObjectAPIEnabled {
-            beamObjectManager.liveSync { _ in
-                self.syncData()
-            }
-        } else {
-            syncData()
+        beamObjectManager.liveSync { _ in
+            self.syncData()
         }
         fetchTopDomains()
     }
 
     // MARK: - Web sockets
-    func connectWebSockets() {
-        guard AuthenticationManager.shared.isAuthenticated else { return }
-
-        documentManager.liveSync()
-    }
-
     func disconnectWebSockets() {
-        documentManager.disconnectLiveSync()
         beamObjectManager.disconnectLiveSync()
     }
 
@@ -153,16 +142,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // My feeling is we should sync + trigger notification and only start network calls when
         // this sync has finished.
 
-        if Configuration.beamObjectAPIEnabled {
-            syncDataWithBeamObject()
-        } else {
-            syncDataWithOldAPI()
-        }
+        syncDataWithBeamObject()
     }
 
     private func syncDataWithBeamObject() {
-        guard Configuration.beamObjectAPIEnabled else { return }
-
         let localTimer = BeamDate.now
 
         let previousDefaultDatabase = DatabaseManager.defaultDatabase
@@ -197,35 +180,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             Logger.shared.logError("Couldn't sync beam objects: \(error.localizedDescription)",
                                    category: .document,
                                    localTimer: localTimer)
-        }
-    }
-
-    private func syncDataWithOldAPI() {
-        databaseManager.syncAll { result in
-            switch result {
-            case .failure(let error):
-                Logger.shared.logError("Couldn't sync databases: \(error.localizedDescription)",
-                                       category: .database)
-            case .success(let success):
-                guard success == true else {
-                    Logger.shared.logError("Couldn't sync databases but no error",
-                                           category: .database)
-                    return
-                }
-
-                self.documentManager.syncAll { result in
-                    switch result {
-                    case .failure(let error):
-                        Logger.shared.logError("Couldn't sync documents: \(error.localizedDescription)",
-                                               category: .document)
-                    case .success(let success):
-                        if !success {
-                            Logger.shared.logError("Couldn't sync documents but no error",
-                                                   category: .document)
-                        }
-                    }
-                }
-            }
         }
     }
 

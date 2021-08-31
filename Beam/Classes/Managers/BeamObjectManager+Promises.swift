@@ -253,4 +253,3 @@ extension BeamObjectManager {
         return request.deleteAll(beamObjectType: beamObjectType)
     }
 }
-
