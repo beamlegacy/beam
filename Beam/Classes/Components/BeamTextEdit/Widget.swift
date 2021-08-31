@@ -728,7 +728,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         }
 
         let rect = NSRect(origin: CGPoint(), size: frame.size)
-        guard rect.contains(mouseInfo.position) else {
+        guard rect.containsY(mouseInfo.position) else {
             return nil
         }
 

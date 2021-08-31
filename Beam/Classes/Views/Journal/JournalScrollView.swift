@@ -10,7 +10,7 @@ import SwiftUI
 import BeamCore
 
 struct JournalScrollView: NSViewRepresentable {
-    typealias NSViewType = NSScrollView
+    typealias NSViewType = NSJournalScrollView
 
     var axes: Axis.Set
     var showsIndicators: Bool
@@ -24,8 +24,8 @@ struct JournalScrollView: NSViewRepresentable {
         return JournalScrollViewCoordinator(scrollView: self, data: state.data, dataSource: state.data.journal)
     }
 
-    func makeNSView(context: Context) -> NSScrollView {
-        let scrollView = NSScrollView()
+    func makeNSView(context: Context) -> NSJournalScrollView {
+        let scrollView = NSJournalScrollView()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.automaticallyAdjustsContentInsets = false
         scrollView.hasVerticalScroller = axes.contains(.vertical)
@@ -54,7 +54,7 @@ struct JournalScrollView: NSViewRepresentable {
 
     }
 
-    func updateNSView(_ nsView: NSScrollView, context: Context) {
+    func updateNSView(_ nsView: NSJournalScrollView, context: Context) {
         guard let journalStackView = nsView.documentView as? JournalStackView else { return }
         journalStackView.invalidateLayout()
         if state.data.newDay {
@@ -188,5 +188,14 @@ class ScrollViewContentWatcher: NSObject {
         }
         // Imo we shouldn't have a case were totalJournal == 0, but alway >= 1
         data.isFetching = totalJournal != data.journal.count && totalJournal != 0
+    }
+}
+
+class NSJournalScrollView: NSScrollView {
+    override func mouseDown(with event: NSEvent) {
+        // Find the first editor:
+        let newResponder = contentView.subviews.first { $0 as? JournalStackView != nil }?.subviews.first { $0 as? BeamTextEdit != nil }
+        window?.makeFirstResponder(newResponder)
+        super.mouseDown(with: event)
     }
 }

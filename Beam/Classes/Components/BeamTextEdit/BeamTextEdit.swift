@@ -480,6 +480,12 @@ public extension CALayer {
         blinkPhase = true
         hasFocus = true
         invalidate()
+        if focusedWidget == nil {
+            focusedWidget = rootNode.children.first(where: { widget in
+                widget as? ElementNode != nil
+            })
+            focusedWidget?.invalidate()
+        }
         onStartEditing?()
         return true
     }
