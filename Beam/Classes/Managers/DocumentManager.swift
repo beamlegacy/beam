@@ -42,6 +42,8 @@ public class DocumentManager: NSObject {
     private var saveDocumentPromiseCancels: [UUID: () -> Void] = [:]
 
     private static var networkRequests: [UUID: APIRequest] = [:]
+    private static var networkRequestsSemaphore = DispatchSemaphore(value: 1)
+
     private static var networkTasks: [UUID: (DispatchWorkItem, ((Swift.Result<Bool, Error>) -> Void)?)] = [:]
     private static var networkTasksSemaphore = DispatchSemaphore(value: 1)
 
@@ -114,6 +116,9 @@ public class DocumentManager: NSObject {
     }
 
     func clearNetworkCalls() {
+        Self.networkRequestsSemaphore.wait()
+        defer { Self.networkRequestsSemaphore.signal() }
+
         for (_, request) in Self.networkRequests {
             request.cancel()
         }
@@ -1443,6 +1448,9 @@ extension DocumentManager {
             }
         }
 
+        Self.networkRequestsSemaphore.wait()
+        defer { Self.networkRequestsSemaphore.signal() }
+
         Self.networkRequests[documentStruct.id]?.cancel()
         let documentRequest = DocumentRequest()
         Self.networkRequests[documentStruct.id] = documentRequest
@@ -1732,7 +1740,10 @@ extension DocumentManager {
                     completion(.failure(error))
                 }
             } else {
-            Self.networkRequests[id]?.cancel()
+                Self.networkRequestsSemaphore.wait()
+                defer { Self.networkRequestsSemaphore.signal() }
+
+                Self.networkRequests[id]?.cancel()
                 let documentRequest = DocumentRequest()
                 Self.networkRequests[id] = documentRequest
 
@@ -2061,6 +2072,9 @@ extension DocumentManager {
             return Promise(true)
         }
 
+        Self.networkRequestsSemaphore.wait()
+        defer { Self.networkRequestsSemaphore.signal() }
+
         Self.networkRequests[documentStruct.id]?.cancel()
         let documentRequest = DocumentRequest()
         Self.networkRequests[documentStruct.id] = documentRequest
@@ -2195,6 +2209,9 @@ extension DocumentManager {
                 }
 
                 let promises: [Promises.Promise<DocumentAPIType?>] = ids.map { (id) in
+                    Self.networkRequestsSemaphore.wait()
+                    defer { Self.networkRequestsSemaphore.signal() }
+
                     Self.networkRequests[id]?.cancel()
                     let documentRequest = DocumentRequest()
                     Self.networkRequests[id] = documentRequest
@@ -2412,6 +2429,9 @@ extension DocumentManager {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             return .value(true)
         }
+
+        Self.networkRequestsSemaphore.wait()
+        defer { Self.networkRequestsSemaphore.signal() }
 
         Self.networkRequests[documentStruct.id]?.cancel()
         let documentRequest = DocumentRequest()
