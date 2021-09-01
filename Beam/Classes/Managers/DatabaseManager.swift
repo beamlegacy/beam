@@ -461,7 +461,16 @@ extension DatabaseManager: BeamObjectManagerDelegate {
         }
 
         if !changedDatabases.isEmpty {
-            try saveOnBeamObjectsAPI(changedDatabases) { _ in }
+            let semaphore = DispatchSemaphore(value: 0)
+            try saveOnBeamObjectsAPI(Array(changedDatabases)) { _ in
+                semaphore.signal()
+
+            }
+
+            let semaphoreResult = semaphore.wait(timeout: DispatchTime.now() + .seconds(10))
+            if case .timedOut = semaphoreResult {
+                Logger.shared.logError("Semaphore timedout", category: .documentNetwork)
+            }
         }
 
         Logger.shared.logDebug("Received \(databases.count) databases: done. \(changedDatabases.count) remodified",

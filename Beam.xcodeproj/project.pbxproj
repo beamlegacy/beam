@@ -337,6 +337,7 @@
 		52BB69A925CD5A49007A1173 /* OmniBarUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52BB69A825CD5A49007A1173 /* OmniBarUITests.swift */; };
 		52C3078225C311B00027C4B1 /* BeamDateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C3078125C311B00027C4B1 /* BeamDateTests.swift */; };
 		52C3294225AC7A8E00EF11E7 /* DocumentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C3294125AC7A8E00EF11E7 /* DocumentTests.swift */; };
+		52C5A40926DFAB2D00CD559F /* DocumentStruct+Debug.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C5A40826DFAB2D00CD559F /* DocumentStruct+Debug.swift */; };
 		52CA917E26737CCB00DDF388 /* documents_title.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 52CA917D26737CCB00DDF388 /* documents_title.graphql */; };
 		52DD53F125F1122F004F7EC8 /* BeamExport.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 52DD53DC25F1122F004F7EC8 /* BeamExport.sqlite */; };
 		52DEF1CA252B259700561493 /* CoreDataManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52DEF1C9252B259700561493 /* CoreDataManagerTests.swift */; };
@@ -1304,6 +1305,7 @@
 		52C3077A25C311950027C4B1 /* BeamDate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamDate.swift; sourceTree = "<group>"; };
 		52C3078125C311B00027C4B1 /* BeamDateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamDateTests.swift; sourceTree = "<group>"; };
 		52C3294125AC7A8E00EF11E7 /* DocumentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentTests.swift; sourceTree = "<group>"; };
+		52C5A40826DFAB2D00CD559F /* DocumentStruct+Debug.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DocumentStruct+Debug.swift"; sourceTree = "<group>"; };
 		52CA917D26737CCB00DDF388 /* documents_title.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = documents_title.graphql; sourceTree = "<group>"; };
 		52DD53DC25F1122F004F7EC8 /* BeamExport.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = BeamExport.sqlite; sourceTree = "<group>"; };
 		52DEF1C9252B259700561493 /* CoreDataManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataManagerTests.swift; sourceTree = "<group>"; };
@@ -2499,6 +2501,7 @@
 				52019A6C26DE42C9005E8278 /* DocumentManager+PromiseKit.swift */,
 				52019A7026DE4718005E8278 /* DocumentManager+Promises.swift */,
 				5204FE3A25F128BD00FD22F8 /* DocumentStruct.swift */,
+				52C5A40826DFAB2D00CD559F /* DocumentStruct+Debug.swift */,
 				524CF6C925F2735D007312F0 /* EncryptionManager.swift */,
 				418171EA2581107C00317ED8 /* LibrairiesManager.swift */,
 				961EC58525B7A75A009FA322 /* LinkManager.swift */,
@@ -4623,6 +4626,7 @@
 				418172592581107C00317ED8 /* ContentView.swift in Sources */,
 				52B17AC7262449DA00CB4728 /* DatabaseDetail.swift in Sources */,
 				525C5472261F619D00378FAA /* Binding+onChange.swift in Sources */,
+				52C5A40926DFAB2D00CD559F /* DocumentStruct+Debug.swift in Sources */,
 				0D3DD8F32681CBA4009F2DF0 /* IndexDocument.swift in Sources */,
 				418173B6258124D500317ED8 /* NSAttributedString+Beam.swift in Sources */,
 				96E4505825995CA200BFF36F /* BreadCrumb.swift in Sources */,

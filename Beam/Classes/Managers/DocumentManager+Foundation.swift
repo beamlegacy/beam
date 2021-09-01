@@ -309,10 +309,8 @@ extension DocumentManager {
                 let document = Document.rawFetchOrCreateWithId(context, documentStruct.id)
                 document.update(documentStruct)
                 document.data = documentStruct.data
+                document.beam_api_data = documentStruct.previousData ?? document.beam_api_data
                 document.updated_at = BeamDate.now
-                if let journalDate = documentStruct.journalDate {
-                    document.journal_day = JournalDateConverter.toInt(from: journalDate)
-                }
 
                 do {
                     try self.checkValidations(context, document)
