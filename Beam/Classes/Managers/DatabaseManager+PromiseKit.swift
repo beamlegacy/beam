@@ -4,6 +4,11 @@ import PromiseKit
 
 extension DatabaseManager {
     func syncAll() -> Promise<Bool> {
+        guard AuthenticationManager.shared.isAuthenticated,
+              Configuration.networkEnabled else {
+            return .value(false)
+        }
+        
         let promise: Promise<Bool> = saveAllOnApi()
 
         return promise.then { result -> Promise<Bool> in

@@ -152,7 +152,7 @@ class DocumentManagerTestsHelper {
 
     func deleteDatabaseStruct(_ dbStruct: DatabaseStruct, includedRemote: Bool = true) {
         waitUntil(timeout: .seconds(10)) { done in
-            self.databaseManager.delete(id: dbStruct.id, includedRemote: includedRemote) { result in
+            self.databaseManager.delete(dbStruct, includedRemote: includedRemote) { result in
                 done()
             }
         }
@@ -298,6 +298,12 @@ class DocumentManagerTestsHelper {
                 }
                 done()
             })
+        }
+
+        let count = Database.countWithPredicate(CoreDataManager.shared.mainContext,
+                                                NSPredicate(format: "id = %@", dbStruct.id as CVarArg))
+        if count != 1 {
+            fail("dbStruct wasn't saved!")
         }
     }
 }

@@ -124,7 +124,7 @@ class DatabaseManagerTests: QuickSpec {
             context("with Foundation") {
                 it("deletes database") {
                     waitUntil(timeout: .seconds(10)) { done in
-                        sut.delete(id: dbStruct.id) { result in
+                        sut.delete(dbStruct) { result in
                             expect { try result.get() }.toNot(throwError())
                             expect { try result.get() } == false
                             done()

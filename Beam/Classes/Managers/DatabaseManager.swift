@@ -379,7 +379,7 @@ class DatabaseManager {
                 guard Self.isDatabaseEmpty(context, database.id) else { continue }
 
                 group.enter()
-                self.delete(id: database.id) { result in
+                self.delete(DatabaseStruct(database: database)) { result in
                     do { _ = try result.get() } catch { errors.append(error) }
                     group.leave()
                 }
@@ -411,7 +411,9 @@ extension DatabaseManager: BeamObjectManagerDelegate {
         let localTimer = BeamDate.now
         var changedDatabases: [DatabaseStruct] = []
 
-        try deleteCurrentDatabaseIfEmpty(databases, context)
+        if Configuration.shouldDeleteEmptyDatabase {
+            try deleteCurrentDatabaseIfEmpty(databases, context)
+        }
 
         try context.performAndWait {
             var changed = false
@@ -474,7 +476,8 @@ extension DatabaseManager: BeamObjectManagerDelegate {
         guard Persistence.Database.currentDatabaseId == nil else { return }
 
         // TODO: should memoize `Self.defaultDatabase.id` or have a version without CD call
-        let defaultDatabaseId = Self.defaultDatabase.id
+        let defaultDatabase = Self.defaultDatabase
+        let defaultDatabaseId = defaultDatabase.id
 
         let databasesWithoutDefault = databases.map { $0.id }.filter { $0 != defaultDatabaseId }
         guard !databasesWithoutDefault.isEmpty else { return }
@@ -487,7 +490,7 @@ extension DatabaseManager: BeamObjectManagerDelegate {
         let semaphore = DispatchSemaphore(value: 0)
         var error: Error?
 
-        delete(id: defaultDatabaseId) { result in
+        delete(defaultDatabase) { result in
             switch result {
             case .failure(let deleteError): error = deleteError
             case .success: break

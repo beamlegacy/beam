@@ -290,7 +290,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                 }
             }
 
-            context("when remote document doesn't exist") {
+            context("when remote beam object doesn't exist") {
                 beforeEach {
                     docStruct = self.createStruct("Doc 1", "995d94e1-e0df-4eca-93e6-8778984bcd18", helper)
                     networkCalls = APIRequest.callsCount
@@ -300,9 +300,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                     it("doesn't refresh the local document") {
                         waitUntil(timeout: .seconds(10)) { done in
                             try? sut.refresh(docStruct) { result in
-                                expect { try result.get() }.to(throwError { error in
-                                    expect(error).to(matchError(APIRequestError.notFound))
-                                })
+                                expect { try result.get() } == false
                                 done()
                             }
                         }
@@ -311,7 +309,10 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                         let newDocStruct = sut.loadById(id: docStruct.id)
                         expect(newDocStruct).toNot(beNil())
-                        expect(newDocStruct?.deletedAt).toNot(beNil())
+
+                        // TODO: should a refresh returning false (no object on the API side) set the local object
+                        // as deleted?
+                        expect(newDocStruct?.deletedAt).to(beNil())
                     }
                 }
             }
