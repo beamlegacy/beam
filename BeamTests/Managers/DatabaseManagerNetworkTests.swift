@@ -15,16 +15,22 @@ import PMKFoundation
 
 class DatabaseManagerNetworkTests: QuickSpec {
     override func spec() {
+        var coreDataManager: CoreDataManager!
         var sut: DatabaseManager!
         var helper: DocumentManagerTestsHelper!
         let beamHelper = BeamTestsHelper()
 
         beforeEach {
-            sut = DatabaseManager()
+            coreDataManager = CoreDataManager()
+            // Setup CoreData
+            coreDataManager.setup()
+            CoreDataManager.shared = coreDataManager
+            sut = DatabaseManager(coreDataManager: coreDataManager)
+
             BeamTestsHelper.logout()
             sut.deleteAll(includedRemote: false) { _ in }
 
-//            beamHelper.beginNetworkRecording()
+            beamHelper.beginNetworkRecording()
 
             helper = DocumentManagerTestsHelper(documentManager: DocumentManager(),
                                                 coreDataManager: CoreDataManager.shared)
@@ -37,46 +43,27 @@ class DatabaseManagerNetworkTests: QuickSpec {
         }
 
         afterEach {
-//            beamHelper.endNetworkRecording()
+            beamHelper.endNetworkRecording()
         }
 
         describe(".syncAll()") {
             var dbStruct: DatabaseStruct!
             beforeEach {
-//                dbStruct = helper.createDatabaseStruct("995d94e1-e0df-4eca-93e6-8778984bcd29")
+                BeamDate.freeze("2021-03-19T12:21:03Z")
+                dbStruct = helper.createDatabaseStruct("995d94e1-e0df-4eca-93e6-8778984bcd29")
             }
             
             describe("when remote database doesn't exist") {
                 beforeEach {
-//                    helper.saveDatabaseLocally(dbStruct)
-//
-//                    let count = Database.countWithPredicate(CoreDataManager.shared.mainContext)
-//                    expect(count) == 1
+                    helper.saveDatabaseLocally(dbStruct)
                 }
 
                 afterEach {
-                    let count = Database.countWithPredicate(CoreDataManager.shared.mainContext)
-                    expect(count) == 1
                     helper.deleteDatabaseStruct(dbStruct)
-
-                    let databases: [Database] = (try? Database.fetchAll(CoreDataManager.shared.mainContext)) ?? []
-                    expect(databases).to(haveCount(0))
-                    if !databases.isEmpty {
-                        dump(dbStruct)
-                        dump(databases)
-                        dump(databases.map { $0.id })
-                    }
                 }
 
                 context("with Foundation") {
-                    beforeEach {
-                        dbStruct = helper.createDatabaseStruct("995d94e1-e0df-4eca-93e6-8778984bcd29", "DB2")
-                        helper.saveDatabaseLocally(dbStruct)
-                        let count = Database.countWithPredicate(CoreDataManager.shared.mainContext)
-                        expect(count) == 1
-                    }
-
-                    fit("creates remote database") {
+                    it("creates remote database") {
                         let networkCalls = APIRequest.callsCount
 
                         waitUntil(timeout: .seconds(10)) { done in
@@ -92,19 +79,12 @@ class DatabaseManagerNetworkTests: QuickSpec {
                         expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
 
                         let remoteStruct = helper.fetchDatabaseOnAPI(dbStruct)
-                        expect(remoteStruct?.id) == dbStruct.id
+                        expect(remoteStruct) == dbStruct
                     }
                 }
 
                 context("with PromiseKit") {
-                    beforeEach {
-                        dbStruct = helper.createDatabaseStruct("995d94e1-e0df-4eca-93e6-8778984bcd29", "DB2")
-                        helper.saveDatabaseLocally(dbStruct)
-                        let count = Database.countWithPredicate(CoreDataManager.shared.mainContext)
-                        expect(count) == 1
-                    }
-
-                    fit("creates remote database") {
+                    it("creates remote database") {
                         let networkCalls = APIRequest.callsCount
 
                         let promise: PromiseKit.Promise<Bool> = sut.syncAll()
@@ -126,14 +106,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
                 }
 
                 context("with Promises") {
-                    beforeEach {
-                        dbStruct = helper.createDatabaseStruct("995d94e1-e0df-4eca-93e6-8778984bcd19", "DB1")
-                        helper.saveDatabaseLocally(dbStruct)
-                        let count = Database.countWithPredicate(CoreDataManager.shared.mainContext)
-                        expect(count) == 1
-                    }
-
-                    fit("creates remote database") {
+                    it("creates remote database") {
                         let networkCalls = APIRequest.callsCount
 
                         let promise: Promises.Promise<Bool> = sut.syncAll()
@@ -317,7 +290,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
             context("with Foundation") {
                 it("deletes database") {
                     waitUntil(timeout: .seconds(10)) { done in
-                        sut.delete(id: dbStruct.id) { result in
+                        sut.delete(dbStruct) { result in
                             expect { try result.get() }.toNot(throwError())
                             expect { try result.get() } == true
                             done()
@@ -511,6 +484,10 @@ class DatabaseManagerNetworkTests: QuickSpec {
         describe(".fetchAllOnApi()") {
             var dbStruct: DatabaseStruct!
             beforeEach {
+                // This will delete the default database created, and switch the new we received to the default one. It
+                // will generate networks calls (delete the default on the server side) which makes harder to test
+                Configuration.shouldDeleteEmptyDatabase = false
+
                 dbStruct = helper.createDatabaseStruct("995d94e1-e0df-4eca-93e6-8778984bcd29")
                 helper.saveDatabaseLocally(dbStruct)
                 helper.saveDatabaseRemotely(dbStruct)
@@ -519,6 +496,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
 
             afterEach {
                 helper.deleteDatabaseStruct(dbStruct)
+                Configuration.shouldDeleteEmptyDatabase = true
             }
 
             context("with Foundation") {
@@ -537,7 +515,11 @@ class DatabaseManagerNetworkTests: QuickSpec {
                             done()
                         }
                     }
-                    expect(APIRequest.callsCount - networkCalls) == 1
+
+                    let expectedNetworkCalls = ["beam_objects"]
+                    expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
+                    expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
+
                     let count = Database.countWithPredicate(CoreDataManager.shared.mainContext,
                                                             NSPredicate(format: "id = %@", dbStruct.id as CVarArg))
                     expect(count) == 1
@@ -555,7 +537,11 @@ class DatabaseManagerNetworkTests: QuickSpec {
                             done()
                         }.catch { fail("Should not be called: \($0)"); done() }
                     }
-                    expect(APIRequest.callsCount - networkCalls) == 1
+
+                    let expectedNetworkCalls = ["beam_objects"]
+                    expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
+                    expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
+
                     let count = Database.countWithPredicate(CoreDataManager.shared.mainContext,
                                                             NSPredicate(format: "id = %@", dbStruct.id as CVarArg))
                     expect(count) == 1
@@ -573,7 +559,11 @@ class DatabaseManagerNetworkTests: QuickSpec {
                             done()
                         }.catch { fail("Should not be called: \($0)"); done() }
                     }
-                    expect(APIRequest.callsCount - networkCalls) == 1
+
+                    let expectedNetworkCalls = ["beam_objects"]
+                    expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
+                    expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
+
                     let count = Database.countWithPredicate(CoreDataManager.shared.mainContext,
                                                             NSPredicate(format: "id = %@", dbStruct.id as CVarArg))
                     expect(count) == 1
@@ -865,6 +855,11 @@ class DatabaseManagerNetworkTests: QuickSpec {
                             let networkCalls = APIRequest.callsCount
 
                             try sut.receivedObjects([dbStruct, dbStruct2])
+
+                            // `receivedObjects` will trigger network calls, those are async and we can only wait a little
+                            // bit for now. The fix would be to have `receivedObjects` take a completion handler, called
+                            // when all async calls inside it are finished.
+                            usleep(500000) // 0.5sec
 
                             expect(APIRequest.callsCount - networkCalls) == 1
 

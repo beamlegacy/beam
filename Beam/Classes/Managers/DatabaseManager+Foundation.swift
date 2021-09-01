@@ -109,9 +109,12 @@ extension DatabaseManager {
         }
     }
 
-    func delete(id: UUID,
+    func delete(_ databaseStruct: DatabaseStruct,
                 includedRemote: Bool = true,
                 completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
+        Logger.shared.logDebug("Deleting database \(databaseStruct.titleAndId)", category: .database)
+        let id = databaseStruct.id
+
         let context = CoreDataManager.shared.mainContext
         guard let coredataDb = try? Database.fetchWithId(context, id) else {
             completion(.failure(DatabaseManagerError.localDatabaseNotFound))

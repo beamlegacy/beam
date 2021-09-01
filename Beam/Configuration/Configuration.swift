@@ -21,6 +21,8 @@ struct Configuration {
 
     static private(set) var testPrivateKey = "j6tifPZTjUtGoz+1RJkO8dOMlu48MUUSlwACw/fCBw0="
 
+    static var shouldDeleteEmptyDatabase = true
+
     // Runtime configuration
     // Set to "http://api.beam.lvh.me:5000" for running on a local API instance
     static private(set) var apiHostnameDefault = "https://api.beamapp.co"
