@@ -856,11 +856,6 @@ class DatabaseManagerNetworkTests: QuickSpec {
 
                             try sut.receivedObjects([dbStruct, dbStruct2])
 
-                            // `receivedObjects` will trigger network calls, those are async and we can only wait a little
-                            // bit for now. The fix would be to have `receivedObjects` take a completion handler, called
-                            // when all async calls inside it are finished.
-                            usleep(500000) // 0.5sec
-
                             expect(APIRequest.callsCount - networkCalls) == 1
 
                             let expectedNetworkCalls = ["update_beam_objects"]

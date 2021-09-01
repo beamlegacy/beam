@@ -289,6 +289,26 @@ extension BeamNote: BeamNoteDocument {
         return note
     }
 
+    static func instanciateNoteWithPreviousData(_ documentStruct: DocumentStruct,
+                                                decodeChildren: Bool = true) throws -> BeamNote? {
+        let decoder = JSONDecoder()
+        if decodeChildren == false {
+            decoder.userInfo[BeamElement.recursiveCoding] = false
+        }
+        if let previousData = documentStruct.previousData {
+            let note = try decoder.decode(BeamNote.self, from: previousData)
+            note.version = documentStruct.version
+            note.databaseId = documentStruct.databaseId
+            note.savedVersion = note.version
+            note.updateDate = documentStruct.updatedAt
+            note.isPublic = documentStruct.isPublic
+            note.deleted = documentStruct.deletedAt != nil
+
+            return note
+        }
+        return nil
+    }
+
     public static func fetch(_ documentManager: DocumentManager,
                              title: String,
                              keepInMemory: Bool = true,

@@ -127,6 +127,12 @@ class Document: NSManagedObject, BeamCoreDataObject {
         updated_at = BeamDate.now
         deleted_at = documentStruct.deletedAt
         is_public = documentStruct.isPublic
+
+        // For testing when we overwrite the old object to DB to cover up the previous network save we did
+        beam_object_previous_checksum = documentStruct.beamObjectPreviousChecksum
+        beam_api_checksum = documentStruct.previousChecksum
+        beam_api_data = documentStruct.previousData
+
         if let journalDate = documentStruct.journalDate, !journalDate.isEmpty {
             journal_day = JournalDateConverter.toInt(from: journalDate)
         }

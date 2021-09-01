@@ -324,6 +324,7 @@ public class DocumentManager: NSObject {
                        previousChecksum: document.beam_api_checksum,
                        version: document.version,
                        isPublic: document.is_public,
+                       beamObjectPreviousChecksum: document.beam_object_previous_checksum,
                        journalDate: document.document_type == DocumentType.journal.rawValue ? JournalDateConverter.toString(from: document.journal_day) : nil
         )
     }
@@ -815,7 +816,16 @@ extension DocumentManager: BeamObjectManagerDelegate {
         }
 
         if !changedDocuments.isEmpty {
-            try saveOnBeamObjectsAPI(Array(changedDocuments)) { _ in }
+            let semaphore = DispatchSemaphore(value: 0)
+            try saveOnBeamObjectsAPI(Array(changedDocuments)) { _ in
+                semaphore.signal()
+
+            }
+
+            let semaphoreResult = semaphore.wait(timeout: DispatchTime.now() + .seconds(10))
+            if case .timedOut = semaphoreResult {
+                Logger.shared.logError("Semaphore timedout", category: .documentNetwork)
+            }
         }
 
         Logger.shared.logDebug("Received \(documents.count) documents: done. \(changedDocuments.count) remodified.",

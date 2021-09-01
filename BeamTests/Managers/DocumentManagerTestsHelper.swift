@@ -40,7 +40,7 @@ class DocumentManagerTestsHelper {
         semaphore.wait()
     }
 
-    func saveLocallyAndRemotely(_ docStruct: DocumentStruct) -> DocumentStruct {
+    func saveLocallyAndRemotely(_ docStruct: DocumentStruct) throws -> DocumentStruct {
         var result = docStruct.copy()
 
         // The call to `saveDocumentStructOnAPI` expect the document to be already saved locally
@@ -53,7 +53,14 @@ class DocumentManagerTestsHelper {
             }
         }
 
-        return result
+        // saveThenSaveOnAPI() saved on network, which then called `persistChecksum`, to be "up to date" we must reload
+        // the documentStruct from the DB
+
+        guard let savedDocumentStruct = documentManager.loadById(id: docStruct.id) else {
+            throw DocumentManagerError.localDocumentNotFound
+        }
+
+        return savedDocumentStruct
     }
 
     func saveLocally(_ docStruct: DocumentStruct) -> DocumentStruct {
@@ -96,7 +103,9 @@ class DocumentManagerTestsHelper {
 
     func saveRemotelyOnly(_ docStruct: DocumentStruct) {
         waitUntil(timeout: .seconds(10)) { done in
-            _ = try? self.documentManager.saveOnBeamObjectAPI(docStruct) { result in
+            var sendDocStruct = docStruct.copy()
+            sendDocStruct.previousChecksum = docStruct.beamObjectPreviousChecksum
+            _ = try? self.documentManager.saveOnBeamObjectAPI(sendDocStruct) { result in
                 expect { try result.get() }.toNot(throwError())
                 done()
             }
@@ -180,13 +189,25 @@ class DocumentManagerTestsHelper {
         "{ \"id\" : \"\(id)\", \"textStats\" : { \"wordsCount\" : 0 }, \"visitedSearchResults\" : [ ], \"sources\" : { \"sources\" : [ ] }, \"type\" : { \"type\" : \"journal\", \"date\" : \"\" }, \"title\" : \"\(title)\", \"searchQueries\" : [ ], \"open\" : true, \"text\" : { \"ranges\" : [ { \"string\" : \"\" } ] }, \"readOnly\" : false, \"children\" : [ { \"readOnly\" : false, \"score\" : 0, \"id\" : \"0324539D-5AD0-4B8D-AE19-05C1DD97B6FC\", \"creationDate\" : 650476092.56825495, \"open\" : true, \"textStats\" : { \"wordsCount\" : 1 }, \"text\" : { \"ranges\" : [ { \"string\" : \"\" } ] } } ], \"score\" : 0, \"creationDate\" : 650476092.05954194 }".asData
     }
 
-    func fillDocumentStructWithStaticText(_ docStruct: DocumentStruct) -> DocumentStruct {
+    func fillDocumentStructWithStaticText(_ docStruct: DocumentStruct, _ text: String = "whatever binary data") -> DocumentStruct {
+        var result = docStruct.copy()
+        result.data = (try? documentDataWithStaticText(docStruct, text)) ?? Data()
+        return result
+    }
+
+    func documentDataWithStaticText(_ docStruct: DocumentStruct, _ text: String = "whatever binary data") throws -> Data {
+        let id = docStruct.id
+        let title = docStruct.title
+
+        let encoder = JSONEncoder()
+        let textString: String = (try encoder.encode(text)).asString ?? ""
+        let titleString: String = (try encoder.encode(title)).asString ?? ""
+
         // TODO: set creationDate and type properly
         // The bullet ID is hard coded on purpose, as it wouldn't work with Vinyl if random
-        let data = "{ \"id\" : \"\(docStruct.id)\", \"textStats\" : { \"wordsCount\" : 0 }, \"visitedSearchResults\" : [ ], \"sources\" : { \"sources\" : [ ] }, \"type\" : { \"type\" : \"journal\", \"date\" : \"\" }, \"title\" : \"\(docStruct.title)\", \"searchQueries\" : [ ], \"open\" : true, \"text\" : { \"ranges\" : [ { \"string\" : \"\" } ] }, \"readOnly\" : false, \"children\" : [ { \"readOnly\" : false, \"score\" : 0, \"id\" : \"0324539D-5AD0-4B8D-AE19-05C1DD97B6FC\", \"creationDate\" : 650476092.56825495, \"open\" : true, \"textStats\" : { \"wordsCount\" : 1 }, \"text\" : { \"ranges\" : [ { \"string\" : \"whatever binary data\" } ] } } ], \"score\" : 0, \"creationDate\" : 650476092.05954194 }".asData
-        var result = docStruct.copy()
-        result.data = data
-        return result
+        // Note: I add two `\n` to make our 'git merge' working. This is supposed to be stored in pretty json to improve that
+        let data = "{ \"id\" : \"\(id)\", \"textStats\" : { \"wordsCount\" : 0 }, \"visitedSearchResults\" : [ ], \"sources\" : { \"sources\" : [ ] }, \"type\" : { \"type\" : \"note\", \"date\" : \"\" }, \"title\" : \(titleString), \"searchQueries\" : [ ], \"open\" : true, \"text\" : { \"ranges\" : [ { \"string\" : \"\" } ] }, \"readOnly\" : false, \"children\" : [ { \"readOnly\" : false, \"score\" : 0, \"id\" : \"0324539D-5AD0-4B8D-AE19-05C1DD97B6FC\", \"creationDate\" : 650476092.56825495, \"open\" : true, \"textStats\" : { \"wordsCount\" : 1 }, \"text\" : { \"ranges\" : [ { \"string\" : \n \(textString) \n } ] } } ], \"score\" : 0, \"creationDate\" : 650476092.05954194 }".asData
+        return data
     }
 
     func fillDocumentStructWithRandomText(_ docStruct: DocumentStruct) -> DocumentStruct {
@@ -215,6 +236,7 @@ class DocumentManagerTestsHelper {
         }
     }
 
+    /// Simulate storing ancestor as common ancestor, newRemote only on the API side, and newLocal only locally
     func createLocalAndRemoteVersions(_ ancestor: String,
                                       newLocal: String? = nil,
                                       newRemote: String? = nil,
@@ -227,35 +249,48 @@ class DocumentManagerTestsHelper {
         }
 
         docStruct.title = title ?? docStruct.title
-        docStruct.data = ancestor.asData
-        docStruct = saveLocallyAndRemotely(docStruct)
+        docStruct.data = (try? documentDataWithStaticText(docStruct, ancestor)) ?? Data()
+        docStruct = try saveLocallyAndRemotely(docStruct)
 
-        // We'll use saveDocumentOnAPI() later, I need to update the result
-        // DocumentStruct to add its previousChecksum
-        guard let localDocument = try? Document.fetchWithId(mainContext, docStruct.id) else {
-            throw DocumentManagerError.localDocumentNotFound
+        let localStruct = docStruct.copy()
+
+        var localDocStruct = documentManager.loadById(id: docStruct.id)
+        expect(try? localDocStruct?.textDescription()) == ancestor
+        expect(try? localDocStruct?.previousTextDescription()) == ancestor
+
+        if let newRemote = newRemote {
+            // Generates a new version on the API side only. move date because it must be more recent
+            BeamDate.travel(20)
+            var newDocStruct = docStruct.copy()
+            newDocStruct.updatedAt = BeamDate.now
+            newDocStruct.data = (try? documentDataWithStaticText(docStruct, newRemote)) ?? Data()
+            self.saveRemotelyOnly(newDocStruct)
+            BeamDate.travel(-20)
+
+            dump(newDocStruct.updatedAt)
+
+            // savingRemotely changed previousData and checksum but we want to "simulate" that remote saves from another
+            // device, needing to rewrite the local version we had before
+            docStruct = saveLocally(localStruct)
         }
-        docStruct.previousChecksum = localDocument.beam_api_checksum
-        //
 
+        localDocStruct = documentManager.loadById(id: docStruct.id)
+        expect(try? localDocStruct?.textDescription()) == ancestor
+        expect(try? localDocStruct?.previousTextDescription()) == ancestor
 
         if let newLocal = newLocal {
             // Force to locally save an older version of the document
             BeamDate.travel(2)
             docStruct.updatedAt = BeamDate.now
-            docStruct.data = newLocal.asData
-            docStruct.previousData = ancestor.asData
+            docStruct.data = (try? documentDataWithStaticText(docStruct, newLocal)) ?? Data()
             docStruct = self.saveLocally(docStruct)
         }
 
-        if let newRemote = newRemote {
-            // Generates a new version on the API side only
-            BeamDate.travel(2)
-            var newDocStruct = docStruct.copy()
-            newDocStruct.data = newRemote.asData
-            newDocStruct.updatedAt.addTimeInterval(2)
-            self.saveRemotelyOnly(newDocStruct)
-        }
+        localDocStruct = documentManager.loadById(id: docStruct.id)
+        expect(try? localDocStruct?.textDescription()) == newLocal
+        expect(try? localDocStruct?.previousTextDescription()) == ancestor
+
+        dump(localDocStruct?.updatedAt)
 
         return docStruct
     }

@@ -26,6 +26,8 @@ class DocumentManagerNetworkTests: QuickSpec {
         beforeEach {
             Configuration.reset()
 
+            Configuration.apiHostname = "http://api.beam.lvh.me:5000"
+
             coreDataManager = CoreDataManager()
             // Setup CoreData
             coreDataManager.setup()
@@ -251,9 +253,9 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                 context("with conflict") {
                     let ancestor = "1\n2\n3"
-                    let newRemote = "1\n2\n3\n4\n"
+                    let newRemote = "1\n2\n3\n4"
                     let newLocal = "0\n1\n2\n3"
-                    let merged = "0\n1\n2\n3\n4\n"
+                    let merged = "0\n1\n2\n3\n4"
 
                     beforeEach {
                         BeamDate.freeze("2021-03-19T12:21:03Z")
@@ -262,6 +264,15 @@ class DocumentManagerNetworkTests: QuickSpec {
                                                                              newLocal: newLocal,
                                                                              newRemote: newRemote,
                                                                              "995d94e1-e0df-4eca-93e6-8778984bcd18")
+
+                        expect(try? docStruct.textDescription()) == newLocal
+
+                        let remoteStruct = helper.fetchOnAPI(docStruct)
+                        expect(try? remoteStruct?.textDescription()) == newRemote
+
+                        let localDocStruct = sut.loadById(id: docStruct.id)
+                        expect(try? localDocStruct?.textDescription()) == newLocal
+                        expect(try? localDocStruct?.previousTextDescription()) == ancestor
                     }
 
                     afterEach {
@@ -270,10 +281,10 @@ class DocumentManagerNetworkTests: QuickSpec {
                     }
 
                     context("with Foundation") {
-                        it("refreshes the local document") {
+                        fit("refreshes the local document") {
                             let networkCalls = APIRequest.callsCount
 
-                            waitUntil(timeout: .seconds(10)) { done in
+                            waitUntil(timeout: .seconds(1200)) { done in
                                 try? sut.refresh(docStruct) { result in
                                     expect { try result.get() }.toNot(throwError())
                                     expect { try result.get() } == true
@@ -284,7 +295,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                             expect([2, 5]).to(contain(APIRequest.callsCount - networkCalls))
 
                             let newDocStruct = sut.loadById(id: docStruct.id)
-                            expect(newDocStruct?.data.asString) == merged
+                            expect(try? newDocStruct?.textDescription()) == merged
                         }
                     }
                 }
