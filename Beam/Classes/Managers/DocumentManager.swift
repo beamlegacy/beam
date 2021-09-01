@@ -35,7 +35,7 @@ public class DocumentManager: NSObject {
     var coreDataManager: CoreDataManager
     let mainContext: NSManagedObjectContext
     let backgroundContext: NSManagedObjectContext
-    private let backgroundQueue = DispatchQueue(label: "DocumentManager backgroundQueue", qos: .background)
+    private let backgroundQueue = DispatchQueue(label: "DocumentManager backgroundQueue", qos: .default)
 
     private let saveDocumentQueue = OperationQueue()
     private var saveOperations: [UUID: BlockOperation] = [:]
