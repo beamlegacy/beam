@@ -21,7 +21,7 @@ class APIRequest: NSObject {
     static var callsCount = 0
     private static var uploadedBytes: Int64 = 0
     private static var downloadedBytes: Int64 = 0
-    let backgroundQueue = DispatchQueue(label: "APIRequest backgroundQueue", qos: .background)
+    let backgroundQueue = DispatchQueue(label: "APIRequest backgroundQueue", qos: .userInitiated)
     private(set) var dataTask: URLSessionDataTask?
     private var cancelRequest: Bool = false
 
@@ -309,16 +309,27 @@ extension APIRequest {
                 }
                 return
             }
+            
+            var countOfBytesReceived: Int64 = 0
+            var countOfBytesSent: Int64 = 0
+            
+            if dataTask.responds(to: Selector("countOfBytesReceived")) {
+                countOfBytesReceived = dataTask.countOfBytesReceived
+            }
+            
+            if dataTask.responds(to: Selector("countOfBytesSent")) {
+                countOfBytesSent = dataTask.countOfBytesSent
+            }
 
-            Self.downloadedBytes += dataTask.countOfBytesReceived
-            Self.uploadedBytes += dataTask.countOfBytesSent
+            Self.downloadedBytes += countOfBytesReceived
+            Self.uploadedBytes += countOfBytesSent
 
             self.logRequest(filename,
                             response,
                             localTimer,
                             callsCount,
-                            dataTask.countOfBytesSent,
-                            dataTask.countOfBytesReceived,
+                            countOfBytesSent,
+                            countOfBytesReceived,
                             authenticatedCall ?? self.authenticatedAPICall)
 
             Self.callsCount += 1

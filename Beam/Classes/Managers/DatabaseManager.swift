@@ -37,7 +37,7 @@ class DatabaseManager {
     private let saveDatabaseQueue = OperationQueue()
     private static var networkRequests: [UUID: APIRequest] = [:]
     private static var networkTasks: [UUID: URLSessionTask] = [:]
-    private let backgroundQueue = DispatchQueue(label: "DatabaseManager backgroundQueue", qos: .background)
+    private let backgroundQueue = DispatchQueue(label: "DatabaseManager backgroundQueue", qos: .default)
     private var saveDatabasePromiseCancels: [UUID: () -> Void] = [:]
 
     static var defaultDatabase: DatabaseStruct {
