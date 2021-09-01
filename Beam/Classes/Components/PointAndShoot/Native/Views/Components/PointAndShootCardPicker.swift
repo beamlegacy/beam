@@ -32,6 +32,7 @@ struct PointAndShootCardPicker: View {
     @State private var cardSearchFieldSelection: Range<Int>?
     @State private var addNoteField = ""
 
+    @State private var lastTextChangeWasAddition = false
     @State private var shootCompleted: Bool = false
 
     private var isTodaysNote: String? {
@@ -116,7 +117,7 @@ struct PointAndShootCardPicker: View {
                                 text: cardSearchField,
                                 currentCardName: currentCardName,
                                 tokenize: cursorIsOnCardName,
-                                selectedResult: self.autocompleteModel.selectedResult?.text,
+                                selectedResult: lastTextChangeWasAddition ? autocompleteModel.selectedResult?.text : nil,
                                 completed: shootCompleted
                             )
                         )
@@ -307,6 +308,7 @@ extension PointAndShootCardPicker {
             cardSearchField = ""
             searchText = ""
         }
+        lastTextChangeWasAddition = searchText.count > autocompleteModel.searchText.count
         autocompleteModel.searchText = searchText
         currentCardName = nil
     }
