@@ -278,6 +278,9 @@ extension TextRoot {
                 if let prevTextNode = prevNode as? TextNode {
                     let pos = prevTextNode.textCount
                     cmdManager.insertText(textNode.elementText, in: prevTextNode, at: pos)
+                    if prevTextNode.displayedElement.children.isEmpty {
+                        prevTextNode.open = textNode.open
+                    }
                     moveChildrenOf(textNode, to: prevTextNode)
                     cmdManager.focusElement(prevTextNode, cursorPosition: pos)
                     cmdManager.deleteElement(for: textNode)
@@ -322,6 +325,9 @@ extension TextRoot {
                     cmdManager.insertElement(newPrevElement, inNode: nodeParent, afterNode: node)
                     return nodeFor(newPrevElement, withParent: nodeParent)
                 }()
+                if prevNode.displayedElement.children.isEmpty {
+                    prevNode.open = node.open
+                }
                 moveChildrenOf(node, to: prevNode)
                 cmdManager.deleteElement(for: node.element)
                 cmdManager.focusElement(prevNode, cursorPosition: prevNode.textCount)

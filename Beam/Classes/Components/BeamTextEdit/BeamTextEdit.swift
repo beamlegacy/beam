@@ -593,7 +593,7 @@ public extension CALayer {
 
                 cmdManager.insertElement(newElement, inNode: parent, afterNode: node)
                 guard let newElement = node.nodeFor(newElement)?.element else { return }
-
+                newElement.open = node.open
                 // reparent all children of node to newElement
                 if isOpenWithChildren || !node.open && children.count > 0 && rootNode.cursorPosition == 0 {
                     for child in children {
