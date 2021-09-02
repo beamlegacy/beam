@@ -530,7 +530,7 @@ extension BeamObjectManager {
             Logger.shared.logWarning("Invalid Checksum. Local previous checksum: \(beamObject.previousChecksum ?? "-")",
                                      category: .beamObjectNetwork)
 
-            let result = self.fetchAndReturnErrorBasedOnConflictPolicy(beamObject)
+            let result: Promise<BeamObject> = self.fetchAndReturnErrorBasedOnConflictPolicy(beamObject)
 
             return result.then(on: self.backgroundQueue) { newBeamObject -> Promise<BeamObject> in
                 Logger.shared.logWarning("Remote object checksum: \(newBeamObject.dataChecksum ?? "-")",
