@@ -26,8 +26,6 @@ class DocumentManagerNetworkTests: QuickSpec {
         beforeEach {
             Configuration.reset()
 
-            Configuration.apiHostname = "http://api.beam.lvh.me:5000"
-
             coreDataManager = CoreDataManager()
             // Setup CoreData
             coreDataManager.setup()
