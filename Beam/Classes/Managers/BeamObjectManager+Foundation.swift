@@ -1,6 +1,8 @@
 import Foundation
 import BeamCore
 
+// swiftlint:disable file_length
+
 extension BeamObjectManager {
     func syncAllFromAPI(delete: Bool = true, _ completion: ((Result<Bool, Error>) -> Void)? = nil) throws {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
@@ -419,9 +421,9 @@ extension BeamObjectManager {
         return request
     }
 
-    func saveToAPIFailure<T: BeamObjectProtocol>(_ object: T,
-                                                 _ error: Error,
-                                                 _ completion: @escaping ((Result<T, Error>) -> Void)) {
+    internal func saveToAPIFailure<T: BeamObjectProtocol>(_ object: T,
+                                                          _ error: Error,
+                                                          _ completion: @escaping ((Result<T, Error>) -> Void)) {
         Logger.shared.logError("Could not save \(object): \(error.localizedDescription)",
                                category: .beamObjectNetwork)
 

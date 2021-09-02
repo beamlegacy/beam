@@ -2,7 +2,12 @@ import Foundation
 import BeamCore
 import Promises
 
-// MARK: Promises
+/*
+ WARNING
+
+ This has not been tested as much as the Foundation/callback handler code.
+ */
+
 extension DocumentManager {
     func create(title: String) -> Promises.Promise<DocumentStruct> {
         coreDataManager.background()
@@ -59,6 +64,14 @@ extension DocumentManager {
 
                     guard !cancelme else { throw DocumentManagerError.operationCancelled }
 
+                    document.version = documentStruct.version
+
+                    if let database = try? Database.rawFetchWithId(context, document.database_id) {
+                        database.updated_at = BeamDate.now
+                    } else {
+                        // We should always have a connected database
+                        Logger.shared.logError("Didn't find database \(document.database_id)", category: .document)
+                    }
                     try Self.saveContext(context: context)
 
                     // Ping others about the update
@@ -69,6 +82,14 @@ extension DocumentManager {
                           Configuration.networkEnabled else {
                         return Promise(true)
                     }
+
+                    /*
+                     Something is broken around here, but I'll leave it as it is for now since promises are not used for
+                     saving documents yet.
+
+                     The completionHandler save() allows to get 2 handlers: one for saving, one for network call. The
+                     promise version doesn't give any way to receive callbacks for network calls.
+                     */
 
                     self.saveAndThrottle(savedDocumentStruct)
 
@@ -148,6 +169,9 @@ extension DocumentManager {
                 return Promise(true)
             }
 
+            // Cancel previous saves as we're saving all of the objects anyway
+            Self.cancelAllPreviousThrottledAPICall()
+
             let documentStructs = documents.map { DocumentStruct(document: $0) }
             let savePromise: Promise<[DocumentStruct]> = self.saveOnBeamObjectsAPI(documentStructs)
 
@@ -160,12 +184,16 @@ extension DocumentManager {
         }
     }
 
-    @discardableResult
     func saveOnApi(_ documentStruct: DocumentStruct) -> Promise<Bool> {
         var documentStruct = documentStruct.copy()
         documentStruct.previousChecksum = documentStruct.beamObjectPreviousChecksum
+        let document_id = documentStruct.id
         let promise: Promise<DocumentStruct> = self.saveOnBeamObjectAPI(documentStruct)
         return promise.then(on: backgroundQueue) { _ -> Promise<Bool> in
+            Self.networkTasksSemaphore.wait()
+            Self.networkTasks.removeValue(forKey: document_id)
+            Self.networkTasksSemaphore.signal()
+
             return Promise(true)
         }
     }

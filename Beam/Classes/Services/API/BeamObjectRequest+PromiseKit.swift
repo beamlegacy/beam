@@ -2,8 +2,13 @@ import Foundation
 import PromiseKit
 import BeamCore
 
+/*
+ WARNING
+
+ This has not been tested as much as the Foundation/callback handler code.
+ */
+
 extension BeamObjectRequest {
-    @discardableResult
     // return multiple errors, as the API might return more than one.
     func save(_ beamObject: BeamObject) -> Promise<BeamObject> {
         let saveObject = beamObject.copy()
@@ -19,12 +24,12 @@ extension BeamObjectRequest {
                                                                 authenticatedCall: true)
 
         return promise.map(on: self.backgroundQueue) {
-            if let beamObject = $0.beamObject {
-                beamObject.previousChecksum = beamObject.dataChecksum
-                return beamObject
+            guard let beamObject = $0.beamObject else {
+                throw APIRequestError.parserError
             }
 
-            throw APIRequestError.parserError
+            beamObject.previousChecksum = beamObject.dataChecksum
+            return beamObject
         }
     }
 
@@ -47,15 +52,15 @@ extension BeamObjectRequest {
                                                                  authenticatedCall: true)
 
         return promise.map(on: self.backgroundQueue) {
-            if let beamObjects = $0.beamObjects {
-                return beamObjects
+            guard let beamObjects = $0.beamObjects else {
+                throw APIRequestError.parserError
             }
 
-            throw APIRequestError.parserError
+            return beamObjects
         }
     }
 
-    func delete(_ id: UUID) -> Promise<BeamObject> {
+    func delete(_ id: UUID) -> Promise<BeamObject?> {
         let parameters = BeamObjectIdParameters(id: id)
         let bodyParamsRequest = GraphqlParameters(fileName: "delete_beam_object", variables: parameters)
 
@@ -63,12 +68,12 @@ extension BeamObjectRequest {
                                                                 authenticatedCall: true)
 
         return promise.map(on: self.backgroundQueue) {
-            if let beamObject = $0.beamObject {
-                try? beamObject.decrypt()
-                return beamObject
+            guard let beamObject = $0.beamObject else {
+                throw APIRequestError.parserError
             }
 
-            throw APIRequestError.parserError
+            try? beamObject.decrypt()
+            return beamObject
         }
     }
 
@@ -80,11 +85,12 @@ extension BeamObjectRequest {
                                                                     authenticatedCall: true)
 
         return promise.map(on: self.backgroundQueue) {
-            if $0.success == true {
-                return true
+            guard $0.success == true else {
+                throw APIRequestError.parserError
+
             }
 
-            throw APIRequestError.parserError
+            return true
         }
     }
 
