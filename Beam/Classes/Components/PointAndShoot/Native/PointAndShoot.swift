@@ -291,22 +291,27 @@ class PointAndShoot: WebPageHolder, ObservableObject {
             }).catch({ error in
                 self.showAlert(shootGroup, texts, error.localizedDescription)
             }).always {
+                shootGroup.setNoteInfo(NoteInfo(id: currentNote.id, title: currentNote.title))
+
                 if shootGroup.numberOfElements != texts.count || shootGroup.numberOfElements == 0 {
                     self.showAlert(shootGroup, texts, "numberOfElements and texts.count mismatch")
+                    shootGroup.setConfirmation(.failure)
+                } else {
+                    shootGroup.setConfirmation(.success)
                 }
-                shootGroup.setNoteInfo(NoteInfo(id: currentNote.id, title: currentNote.title))
+
                 self.collectedGroups.append(shootGroup)
-                self.showShootInfo(group: shootGroup)
                 self.activeShootGroup = nil
+                self.showShootConfirmation(group: shootGroup)
             }
         }
     }
 
     /// Draws shoot confirmation
     /// - Parameter group: ShootGroup of targets to draw the confirmation UI
-    private func showShootInfo(group: ShootGroup) {
+    private func showShootConfirmation(group: ShootGroup) {
         shootConfirmationGroup = group
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
             guard let self = self else { return }
             self.shootConfirmationGroup = nil
         }

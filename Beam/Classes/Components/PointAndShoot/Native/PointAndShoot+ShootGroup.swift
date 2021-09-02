@@ -9,6 +9,11 @@ import Foundation
 
 extension PointAndShoot {
     /// A group of blocks that can be associated to a Note as a whole and at once.
+    enum ShootConfirmation: String {
+        case success
+        case failure
+    }
+
     struct ShootGroup {
         init(_ id: String, _ targets: [Target], _ href: String, _ noteInfo: NoteInfo = NoteInfo(title: "")) {
             self.id = id
@@ -23,6 +28,7 @@ extension PointAndShoot {
         var targets: [Target] = []
         var noteInfo: NoteInfo
         var numberOfElements: Int = 0
+        var confirmation: ShootConfirmation?
         func html() -> String {
             targets.reduce("", {
                 $1.html.count > $0.count ? $1.html : $0
@@ -32,6 +38,9 @@ extension PointAndShoot {
         private(set) var groupRect: CGRect = .zero
         private let groupPadding: CGFloat = 4
         private let groupRadius: CGFloat = 4
+        mutating func setConfirmation(_ state: ShootConfirmation) {
+            confirmation = state
+        }
         mutating func setNoteInfo(_ note: NoteInfo) {
             noteInfo = note
         }
