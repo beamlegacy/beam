@@ -10,14 +10,21 @@
 import Foundation
 import Combine
 
-public enum BrowsingTreeOrigin: Codable {
+public indirect enum BrowsingTreeOrigin: Codable, Equatable {
     case searchBar(query: String)
     case searchFromNode(nodeText: String)
     case linkFromNote(noteName: String)
-    case browsingNode(id: UUID)
+    case browsingNode(id: UUID, pageLoadId: UUID?, rootOrigin: BrowsingTreeOrigin?) //following a cmd + click on link
+
+    public var rootOrigin: BrowsingTreeOrigin? {
+        switch self {
+        case let .browsingNode(_, _, origin): return origin
+        default: return self
+        }
+    }
 
     enum CodingKeys: CodingKey {
-        case type, value
+        case type, value, rootOrigin, pageLoadId
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -32,9 +39,15 @@ public enum BrowsingTreeOrigin: Codable {
         case .linkFromNote(let noteName):
             try container.encode("linkFromNote", forKey: .type)
             try container.encode(noteName, forKey: .value)
-        case .browsingNode(let id):
+        case .browsingNode(let id, let pageLoadId, let rootOrigin):
             try container.encode("browsingNode", forKey: .type)
+            if let pageLoadId = pageLoadId {
+                try container.encode(pageLoadId, forKey: .pageLoadId)
+            }
             try container.encode(id, forKey: .value)
+            if let rootOrigin = rootOrigin {
+                try container.encode(rootOrigin, forKey: .rootOrigin)
+            }
         }
     }
 
@@ -49,7 +62,10 @@ public enum BrowsingTreeOrigin: Codable {
         case "linkFromNote":
             self = .linkFromNote(noteName: try container.decode(String.self, forKey: .value))
         case "browsingNode":
-            self = .browsingNode(id: try container.decode(UUID.self, forKey: .value))
+            self = .browsingNode(
+                id: try container.decode(UUID.self, forKey: .value),
+                pageLoadId: try? container.decode(UUID.self, forKey: .pageLoadId),
+                rootOrigin: try? container.decode(BrowsingTreeOrigin.self, forKey: .rootOrigin))
         default:
             throw DecodingError.dataCorrupted(
                         DecodingError.Context(
@@ -102,8 +118,11 @@ let ClosingEventTypes: Set = [
 ]
 
 public struct ReadingEvent: Codable {
+    public var id: UUID? = UUID()
     public var type: ReadingEventType
     public var date: Date
+    public var webSessionId: UUID?
+    public var pageLoadId: UUID? = UUID() //Id renewing each time a browsing node is revisited when forward/backward navigating
 
     public var isForegroundExiting: Bool {
         ExitForegroundEventTypes.contains(type)
@@ -145,7 +164,7 @@ public class BrowsingNode: ObservableObject, Codable {
             }
         }
     }
-    @Published public var events = [ReadingEvent(type: .creation, date: BeamDate.now)]
+    @Published public var events = [ReadingEvent(type: .creation, date: BeamDate.now, webSessionId: WebSessionnizer.shared.sessionId, pageLoadId: UUID())]
     @Published public var children = [BrowsingNode]()
     public var score: Score { tree.scoreFor(link: link) }
     public func longTermScoreApply(changes: (LongTermUrlScore) -> Void) {
@@ -165,12 +184,16 @@ public class BrowsingNode: ObservableObject, Codable {
         guard let lastEvent = events.last else { return 0 }
         return lastEvent.readingTime(isForeground: isForeground, toDate: date)
     }
+    private var pageLoadId: UUID {
+        guard let lastEvent = events.last else { return UUID() }
+        return lastEvent.isClosing ? UUID() : (lastEvent.pageLoadId ?? UUID())
+    }
 
-    public func addEvent(_ type: ReadingEventType, date: Date = BeamDate.now) {
+    public func addEvent(_ type: ReadingEventType, date: Date = BeamDate.now, webSessionId: UUID = WebSessionnizer.shared.sessionId) {
         let incrementalReadingTime = readingTimeSinceLastEvent(date: date)
         score.readingTimeToLastEvent += incrementalReadingTime
         longTermScoreApply { $0.readingTimeToLastEvent += incrementalReadingTime }
-        let event = ReadingEvent(type: type, date: date)
+        let event = ReadingEvent(type: type, date: date, webSessionId: webSessionId, pageLoadId: pageLoadId)
         events.append(event)
         score.lastEvent = event
         if event.isForegroundEntering {
@@ -473,6 +496,13 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
         }
 
         return set
+    }
+    public var idUrlMapping: [UInt64: String] {
+        var mapping = [UInt64: String]()
+        links.forEach {
+            if let url = LinkStore.linkFor($0)?.url {mapping[$0] = url}
+        }
+        return mapping
     }
 
     public var scoredLinks: Set<ScoredLink> {
