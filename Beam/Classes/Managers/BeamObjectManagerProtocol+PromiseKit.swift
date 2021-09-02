@@ -2,8 +2,13 @@ import Foundation
 import PromiseKit
 
 /*
- Those are not yet ready to be used
+ WARNING
+
+ This has not been tested as much as the Foundation/callback handler code.
+
+ THIS IS NOT READY TO BE USED YET
  */
+
 extension BeamObjectManagerDelegate {
     func saveAllOnBeamObjectApi() -> Promise<Bool> {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
@@ -11,6 +16,7 @@ extension BeamObjectManagerDelegate {
         }
 
         self.willSaveAllOnBeamObjectApi()
+
         var objects: [BeamObjectType]
         do {
             objects = try allObjects()
@@ -19,7 +25,8 @@ extension BeamObjectManagerDelegate {
         }
 
         let backgroundQueue = DispatchQueue.global(qos: .userInitiated)
-        return saveOnBeamObjectsAPI(objects).map(on: backgroundQueue) { _ in
+        let promise: Promise<[BeamObjectType]> = saveOnBeamObjectsAPI(objects)
+        return promise.map(on: backgroundQueue) { _ in
             true
         }
     }

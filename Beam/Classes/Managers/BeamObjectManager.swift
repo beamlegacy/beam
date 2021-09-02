@@ -1,8 +1,6 @@
 import Foundation
 import BeamCore
 
-// swiftlint:disable file_length
-
 /// How do you want to resolve checksum conflicts
 enum BeamObjectConflictResolution {
     /// Overwrite remote object with values from local object

@@ -2,11 +2,15 @@ import Foundation
 import BeamCore
 import PromiseKit
 
-// MARK: PromiseKit
+/*
+ WARNING
+
+ This has not been tested as much as the Foundation/callback handler code.
+ */
+
 extension DocumentManager {
     func create(title: String) -> Promise<DocumentStruct> {
-        let promise: PromiseKit.Guarantee<NSManagedObjectContext> = coreDataManager.background()
-        return promise
+        coreDataManager.background()
             .then(on: backgroundQueue) { context -> Promise<DocumentStruct> in
                 try context.performAndWait {
                     let document = Document.create(context, title: title)
@@ -14,13 +18,13 @@ extension DocumentManager {
                     try self.checkValidations(context, document)
                     try Self.saveContext(context: context)
 
-                return .value(self.parseDocumentBody(document))
+                    return .value(self.parseDocumentBody(document))
                 }
             }
     }
 
     func fetchOrCreate(title: String) -> Promise<DocumentStruct> {
-        return coreDataManager.background()
+        coreDataManager.background()
             .then(on: backgroundQueue) { context -> Promise<DocumentStruct> in
                 try context.performAndWait {
                     let document = Document.fetchOrCreateWithTitle(context, title)
@@ -59,6 +63,15 @@ extension DocumentManager {
                     try self.checkValidations(context, document)
 
                     guard !cancelme else { throw PMKError.cancelled }
+
+                    document.version = documentStruct.version
+
+                    if let database = try? Database.rawFetchWithId(context, document.database_id) {
+                        database.updated_at = BeamDate.now
+                    } else {
+                        // We should always have a connected database
+                        Logger.shared.logError("Didn't find database \(document.database_id)", category: .document)
+                    }
 
                     try Self.saveContext(context: context)
 
@@ -157,6 +170,9 @@ extension DocumentManager {
                 return .value(true)
             }
 
+            // Cancel previous saves as we're saving all of the objects anyway
+            Self.cancelAllPreviousThrottledAPICall()
+
             let documentStructs = documents.map { DocumentStruct(document: $0) }
             let savePromise: Promise<[DocumentStruct]> = self.saveOnBeamObjectsAPI(documentStructs)
 
@@ -169,12 +185,16 @@ extension DocumentManager {
         }
     }
 
-    @discardableResult
     func saveOnApi(_ documentStruct: DocumentStruct) -> Promise<Bool> {
         var documentStruct = documentStruct.copy()
         documentStruct.previousChecksum = documentStruct.beamObjectPreviousChecksum
+        let document_id = documentStruct.id
         let promise: Promise<DocumentStruct> = self.saveOnBeamObjectAPI(documentStruct)
         return promise.then(on: backgroundQueue) { _ -> Promise<Bool> in
+            Self.networkTasksSemaphore.wait()
+            Self.networkTasks.removeValue(forKey: document_id)
+            Self.networkTasksSemaphore.signal()
+
             return .value(true)
         }
     }

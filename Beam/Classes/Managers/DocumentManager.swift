@@ -958,9 +958,132 @@ extension DocumentManager: BeamObjectManagerDelegate {
 
         return result
     }
+
+    func create(title: String) -> DocumentStruct? {
+        let semaphore = DispatchSemaphore(value: 0)
+        var result: DocumentStruct?
+
+        coreDataManager.persistentContainer.performBackgroundTask { [unowned self] context in
+            let document = Document.create(context, title: title)
+
+            do {
+                try self.checkValidations(context, document)
+
+                result = self.parseDocumentBody(document)
+                try Self.saveContext(context: context)
+            } catch {
+                Logger.shared.logError(error.localizedDescription, category: .coredata)
+            }
+
+            semaphore.signal()
+        }
+
+        semaphore.wait()
+
+        return result
+    }
 }
 
 extension DocumentManager {
     public override var description: String { "Beam.DocumentManager" }
 }
 // swiftlint:enable file_length
+
+// MARK: - updates
+extension DocumentManager {
+    /// Use this to have updates when the underlaying CD object `Document` changes
+    func onDocumentChange(_ documentStruct: DocumentStruct,
+                          completionHandler: @escaping (DocumentStruct) -> Void) -> AnyCancellable {
+        Logger.shared.logDebug("onDocumentChange called for \(documentStruct.titleAndId)", category: .documentDebug)
+
+        var documentId = documentStruct.id
+        let cancellable = NotificationCenter.default
+            .publisher(for: .documentUpdate)
+            .sink { notification in
+                guard let updatedDocuments = notification.userInfo?["updatedDocuments"] as? [DocumentStruct] else {
+                    return
+                }
+
+                for document in updatedDocuments {
+
+                    /*
+                     I used to prevent calling `completionHandler` when that condition was true:
+
+                     `if let documentManager = notification.object as? DocumentManager, documentManager == self { return }`
+
+                     to avoid the same DocumentManager to return its own saved update.
+
+                     But we have legit scenarios when such is happening, for example when there is an API conflict,
+                     and the manager fetch, merge and resave that merged object.
+
+                     We need the UI to be updated about such to reflect the merge.
+                     */
+
+                    if document.title == documentStruct.title &&
+                        document.databaseId == documentStruct.databaseId &&
+                        document.id != documentId {
+
+                        /*
+                         When a document is deleted and overwritten because of a title conflict, we want to let
+                         the editor know to update the editor UI with the new document.
+
+                         However when going on the "see all notes" debug window, and forcing a document refresh,
+                         we don't want the editor UI to change.
+                         */
+
+                        let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
+                        context.performAndWait {
+                            guard let coreDataDocument = try? Document.fetchWithId(context, documentId) else {
+                                Logger.shared.logDebug("notification for \(document.titleAndId) (new id)",
+                                                       category: .documentNotification)
+                                documentId = document.id
+                                completionHandler(document)
+                                return
+                            }
+
+                            if documentStruct.deletedAt == nil, coreDataDocument.deleted_at != documentStruct.deletedAt {
+                                Logger.shared.logDebug("notification for \(document.titleAndId) (new id)",
+                                                       category: .documentNotification)
+                                documentId = document.id
+                                completionHandler(document)
+                            } else {
+                                Logger.shared.logDebug("No notification for \(document.titleAndId) (new id)",
+                                                       category: .documentNotification)
+                            }
+                        }
+                    } else if document.id == documentId {
+                        Logger.shared.logDebug("notification for \(document.titleAndId)",
+                                               category: .documentNotification)
+                        completionHandler(document)
+                    } else if document.title == documentStruct.title {
+                        Logger.shared.logDebug("notification for \(document.titleAndId) but not detected. onDocumentChange() called with \(documentStruct.titleAndId), {\(documentId)}",
+                                               category: .documentNotification)
+                    }
+                }
+            }
+        return cancellable
+    }
+
+    func onDocumentDelete(_ documentStruct: DocumentStruct,
+                          completionHandler: @escaping (DocumentStruct) -> Void) -> AnyCancellable {
+        Logger.shared.logDebug("onDocumentDelete called for \(documentStruct.titleAndId)", category: .documentDebug)
+
+        let cancellable = NotificationCenter.default
+            .publisher(for: .documentUpdate)
+            .sink { notification in
+                // Skip notification coming from this manager
+                if let documentManager = notification.object as? DocumentManager, documentManager == self {
+                    return
+                }
+
+                if let deletedDocuments = notification.userInfo?["deletedDocuments"] as? [DocumentStruct] {
+                    for document in deletedDocuments where document.id == documentStruct.id {
+                        Logger.shared.logDebug("notification for \(document.titleAndId)", category: .document)
+                        try? GRDBDatabase.shared.remove(noteTitled: document.title)
+                        completionHandler(document)
+                    }
+                }
+            }
+        return cancellable
+    }
+}

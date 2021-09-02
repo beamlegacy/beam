@@ -2,8 +2,13 @@ import Foundation
 import Promises
 import BeamCore
 
+/*
+ WARNING
+
+ This has not been tested as much as the Foundation/callback handler code.
+ */
+
 extension BeamObjectRequest {
-    @discardableResult
     // return multiple errors, as the API might return more than one.
     func save(_ beamObject: BeamObject) -> Promise<BeamObject> {
         let saveObject = beamObject.copy()
@@ -19,12 +24,12 @@ extension BeamObjectRequest {
                                                                 authenticatedCall: true)
 
         return promise.then(on: self.backgroundQueue) {
-            if let beamObject = $0.beamObject {
-                beamObject.previousChecksum = beamObject.dataChecksum
-                return Promise(beamObject)
+            guard let beamObject = $0.beamObject else {
+                throw APIRequestError.parserError
             }
 
-            throw APIRequestError.parserError
+            beamObject.previousChecksum = beamObject.dataChecksum
+            return Promise(beamObject)
         }
     }
 
@@ -47,11 +52,11 @@ extension BeamObjectRequest {
                                                                  authenticatedCall: true)
 
         return promise.then(on: self.backgroundQueue) {
-            if let beamObjects = $0.beamObjects {
-                return Promise(beamObjects)
+            guard let beamObjects = $0.beamObjects else {
+                throw APIRequestError.parserError
             }
 
-            throw APIRequestError.parserError
+            return Promise(beamObjects)
         }
     }
 
@@ -63,12 +68,12 @@ extension BeamObjectRequest {
                                                                 authenticatedCall: true)
 
         return promise.then(on: self.backgroundQueue) {
-            if let beamObject = $0.beamObject {
-                try? beamObject.decrypt()
-                return Promise(beamObject)
+            guard let beamObject = $0.beamObject else {
+                throw APIRequestError.parserError
             }
 
-            throw APIRequestError.parserError
+            try? beamObject.decrypt()
+            return Promise(beamObject)
         }
     }
 
@@ -80,11 +85,12 @@ extension BeamObjectRequest {
                                                                     authenticatedCall: true)
 
         return promise.then(on: self.backgroundQueue) {
-            if $0.success == true {
-                return Promise(true)
+            guard $0.success == true else {
+                throw APIRequestError.parserError
+
             }
 
-            throw APIRequestError.parserError
+            return Promise(true)
         }
     }
 
