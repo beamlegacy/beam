@@ -168,11 +168,11 @@ class DocumentManagerTestsHelper {
     }
 
     private let faker = Faker(locale: "en-US")
-    func createDocumentStruct(title titleParam: String? = nil,
+    func createDocumentStruct(title titleParam: String = "Title Document",
                               id: String? = nil) -> DocumentStruct {
         var uuid = UUID()
         if let id = id, let newuuid = UUID(uuidString: id) { uuid = newuuid }
-        let title = titleParam ?? String.randomTitle()
+        let title = titleParam
         return DocumentStruct(id: uuid,
                               databaseId: DatabaseManager.defaultDatabase.id,
                               title: title,
@@ -237,37 +237,34 @@ class DocumentManagerTestsHelper {
     }
 
     /// Simulate storing ancestor as common ancestor, newRemote only on the API side, and newLocal only locally
-    func createLocalAndRemoteVersions(_ ancestor: String,
-                                      newLocal: String? = nil,
-                                      newRemote: String? = nil,
-                                      _ id: String? = nil,
-                                      _ title: String? = nil) throws -> DocumentStruct {
+    func createLocalAndRemoteVersionsWithData(_ ancestor: String,
+                                              newLocal: String? = nil,
+                                              newRemote: String? = nil,
+                                              _ id: String? = nil,
+                                              _ title: String) throws -> DocumentStruct {
         BeamDate.travel(-600)
-        var docStruct = self.createDocumentStruct()
+        var docStruct = self.createDocumentStruct(title: title)
         if let id = id, let uuid = UUID(uuidString: id) {
             docStruct.id = uuid
         }
 
-        docStruct.title = title ?? docStruct.title
-        docStruct.data = (try? documentDataWithStaticText(docStruct, ancestor)) ?? Data()
+        docStruct.data = ancestor.asData
         docStruct = try saveLocallyAndRemotely(docStruct)
 
         let localStruct = docStruct.copy()
 
         var localDocStruct = documentManager.loadById(id: docStruct.id)
-        expect(try? localDocStruct?.textDescription()) == ancestor
-        expect(try? localDocStruct?.previousTextDescription()) == ancestor
+        expect(localDocStruct?.data) == ancestor.asData
+        expect(localDocStruct?.previousData) == ancestor.asData
 
         if let newRemote = newRemote {
             // Generates a new version on the API side only. move date because it must be more recent
             BeamDate.travel(20)
             var newDocStruct = docStruct.copy()
             newDocStruct.updatedAt = BeamDate.now
-            newDocStruct.data = (try? documentDataWithStaticText(docStruct, newRemote)) ?? Data()
+            newDocStruct.data = newRemote.asData
             self.saveRemotelyOnly(newDocStruct)
             BeamDate.travel(-20)
-
-            dump(newDocStruct.updatedAt)
 
             // savingRemotely changed previousData and checksum but we want to "simulate" that remote saves from another
             // device, needing to rewrite the local version we had before
@@ -275,22 +272,22 @@ class DocumentManagerTestsHelper {
         }
 
         localDocStruct = documentManager.loadById(id: docStruct.id)
-        expect(try? localDocStruct?.textDescription()) == ancestor
-        expect(try? localDocStruct?.previousTextDescription()) == ancestor
+        expect(localDocStruct?.data) == ancestor.asData
+        expect(localDocStruct?.previousData) == ancestor.asData
 
         if let newLocal = newLocal {
             // Force to locally save an older version of the document
             BeamDate.travel(2)
             docStruct.updatedAt = BeamDate.now
-            docStruct.data = (try? documentDataWithStaticText(docStruct, newLocal)) ?? Data()
+            docStruct.data = newLocal.asData
             docStruct = self.saveLocally(docStruct)
+
+            localDocStruct = documentManager.loadById(id: docStruct.id)
+            expect(localDocStruct?.data) == newLocal.asData
         }
 
         localDocStruct = documentManager.loadById(id: docStruct.id)
-        expect(try? localDocStruct?.textDescription()) == newLocal
-        expect(try? localDocStruct?.previousTextDescription()) == ancestor
-
-        dump(localDocStruct?.updatedAt)
+        expect(localDocStruct?.previousData) == ancestor.asData
 
         return docStruct
     }
