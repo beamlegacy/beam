@@ -19,7 +19,11 @@ protocol NodeProvider: AnyObject {
 }
 
 class NodeProviderImpl: NodeProvider {
-    weak var holder: Widget?
+    weak var holder: Widget? {
+        didSet {
+            assert(holder?.editor != nil)
+        }
+    }
     var proxy: Bool
 
     init(proxy: Bool) {

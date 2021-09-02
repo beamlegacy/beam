@@ -151,8 +151,8 @@ extension BeamTextEdit {
             if node.cursorPosition <= 3, level > 0 {
                 Logger.shared.logInfo("Make quote", category: .ui)
 
-                cmdManager.deleteText(in: node, for: 0..<level + 1)
-                cmdManager.formatText(in: node, for: .quote(level, "", ""), with: nil, for: nil, isActive: false)
+                node.cmdManager.deleteText(in: node, for: 0..<level + 1)
+                node.cmdManager.formatText(in: node, for: .quote(level, "", ""), with: nil, for: nil, isActive: false)
                 self.rootNode.cursorPosition = 0
             }
             return nil
@@ -165,10 +165,10 @@ extension BeamTextEdit {
             if node.cursorPosition <= 2, isBold {
                 Logger.shared.logInfo("Make Bold", category: .ui)
                 self.rootNode.cursorPosition = 0
-                cmdManager.deleteText(in: node, for: 0..<2)
+                node.cmdManager.deleteText(in: node, for: 0..<2)
 
                 if !node.text.isEmpty {
-                    cmdManager.formatText(in: node, for: nil, with: .strong, for: node.text.wholeRange, isActive: false)
+                    node.cmdManager.formatText(in: node, for: nil, with: .strong, for: node.text.wholeRange, isActive: false)
                     return nil
                 }
                 return .strong
@@ -177,10 +177,10 @@ extension BeamTextEdit {
             if node.cursorPosition <= 3, isItalic {
                 Logger.shared.logInfo("Make Italic", category: .ui)
                 self.rootNode.cursorPosition = 0
-                cmdManager.deleteText(in: node, for: 0..<3)
+                node.cmdManager.deleteText(in: node, for: 0..<3)
 
                 if !node.text.isEmpty {
-                    cmdManager.formatText(in: node, for: nil, with: .emphasis, for: node.text.wholeRange, isActive: false)
+                    node.cmdManager.formatText(in: node, for: nil, with: .emphasis, for: node.text.wholeRange, isActive: false)
                     return nil
                 }
                 return .emphasis
@@ -193,10 +193,10 @@ extension BeamTextEdit {
             if node.cursorPosition <= 3, isStrikethrough {
                 Logger.shared.logInfo("Make Strikethrough", category: .ui)
                 self.rootNode.cursorPosition = 0
-                cmdManager.deleteText(in: node, for: 0..<3)
+                node.cmdManager.deleteText(in: node, for: 0..<3)
 
                 if !node.text.isEmpty {
-                    cmdManager.formatText(in: node, for: nil, with: .strikethrough, for: node.text.wholeRange, isActive: false)
+                    node.cmdManager.formatText(in: node, for: nil, with: .strikethrough, for: node.text.wholeRange, isActive: false)
                     return nil
                 }
                 return .strikethrough
@@ -209,10 +209,10 @@ extension BeamTextEdit {
             if node.cursorPosition <= 2, isUnderline {
                 Logger.shared.logInfo("Make Underline", category: .ui)
                 self.rootNode.cursorPosition = 0
-                cmdManager.deleteText(in: node, for: 0..<2)
+                node.cmdManager.deleteText(in: node, for: 0..<2)
 
                 if !node.text.isEmpty {
-                    cmdManager.formatText(in: node, for: nil, with: .underline, for: node.text.wholeRange, isActive: false)
+                    node.cmdManager.formatText(in: node, for: nil, with: .underline, for: node.text.wholeRange, isActive: false)
                     return nil
                 }
                 return .underline
@@ -238,8 +238,8 @@ extension BeamTextEdit {
                     guard !sibbling.isHeader else { return nil }
                     element.addChild(sibbling)
                 }
-                cmdManager.deleteText(in: node, for: 0..<level + 1)
-                cmdManager.formatText(in: node, for: .heading(level), with: nil, for: nil, isActive: false)
+                node.cmdManager.deleteText(in: node, for: 0..<level + 1)
+                node.cmdManager.formatText(in: node, for: .heading(level), with: nil, for: nil, isActive: false)
                 self.rootNode.cursorPosition = 0
                 return nil
             }
