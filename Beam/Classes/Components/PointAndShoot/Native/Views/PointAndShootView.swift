@@ -109,7 +109,7 @@ struct PointAndShootView: View {
         }
 
         // MARK: - ShootConfirmation
-        if let group = pns.shootConfirmationGroup ?? pns.activeShootGroup {
+        if let group = pns.activeShootGroup ?? pns.shootConfirmationGroup {
             let size =  pns.shootConfirmationGroup == nil ? CGSize(width: 300, height: 80) : CGSize(width: 300, height: 42)
             PointAndShootCardPickerPositioning(group: pns.translateAndScaleGroup(group), cardPickerSize: size) {
                 FormatterViewBackground {

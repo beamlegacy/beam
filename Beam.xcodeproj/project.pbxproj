@@ -394,6 +394,8 @@
 		8A7F949826A8694600270A74 /* PointAndShootSelectTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A7F949726A8694600270A74 /* PointAndShootSelectTest.swift */; };
 		8A7F949A26A8750A00270A74 /* PointAndShootCreateTargetTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A7F949926A8750A00270A74 /* PointAndShootCreateTargetTest.swift */; };
 		8A96ECAE268F8FD600135838 /* PointAndShoot+Text2Quote.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A96ECAD268F8FD600135838 /* PointAndShoot+Text2Quote.swift */; };
+		8A9B1A9626DD321E00B3B5FA /* PointAndShoot+ShootGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A9B1A9526DD321E00B3B5FA /* PointAndShoot+ShootGroup.swift */; };
+		8A9B1A9F26DD33EA00B3B5FA /* PointAndShoot+Target.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A9B1A9E26DD33EA00B3B5FA /* PointAndShoot+Target.swift */; };
 		8AA9EEB72678ACF6009D6B31 /* WebAutocompleteContextTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AA9EEB62678ACF6009D6B31 /* WebAutocompleteContextTest.swift */; };
 		8AB44A9B267C9BE400D18B65 /* PointAndShootMessageHandlerOnLoadTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB44A9A267C9BE400D18B65 /* PointAndShootMessageHandlerOnLoadTest.swift */; };
 		8AB44AAC267CD3AB00D18B65 /* String+Slice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB44AAB267CD3AB00D18B65 /* String+Slice.swift */; };
@@ -1352,6 +1354,8 @@
 		8A7F949726A8694600270A74 /* PointAndShootSelectTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootSelectTest.swift; sourceTree = "<group>"; };
 		8A7F949926A8750A00270A74 /* PointAndShootCreateTargetTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootCreateTargetTest.swift; sourceTree = "<group>"; };
 		8A96ECAD268F8FD600135838 /* PointAndShoot+Text2Quote.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PointAndShoot+Text2Quote.swift"; sourceTree = "<group>"; };
+		8A9B1A9526DD321E00B3B5FA /* PointAndShoot+ShootGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PointAndShoot+ShootGroup.swift"; sourceTree = "<group>"; };
+		8A9B1A9E26DD33EA00B3B5FA /* PointAndShoot+Target.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PointAndShoot+Target.swift"; sourceTree = "<group>"; };
 		8AA712942684F57D0081C126 /* index_prod.js.map */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.module-map"; path = index_prod.js.map; sourceTree = "<group>"; };
 		8AA9EEB62678ACF6009D6B31 /* WebAutocompleteContextTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebAutocompleteContextTest.swift; sourceTree = "<group>"; };
 		8AB44A9A267C9BE400D18B65 /* PointAndShootMessageHandlerOnLoadTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootMessageHandlerOnLoadTest.swift; sourceTree = "<group>"; };
@@ -3130,6 +3134,8 @@
 			children = (
 				BAA67B138DFC6DBC31D184E0 /* PointAndShootMessageHandler.swift */,
 				BAA67E198CBE7B676642992F /* PointAndShoot.swift */,
+				8A9B1A9E26DD33EA00B3B5FA /* PointAndShoot+Target.swift */,
+				8A9B1A9526DD321E00B3B5FA /* PointAndShoot+ShootGroup.swift */,
 				8A96ECAD268F8FD600135838 /* PointAndShoot+Text2Quote.swift */,
 				8A4801AC26A1EBBF008F33FE /* PointAndShoot+Helpers.swift */,
 				8A4801A326A1EB66008F33FE /* PointAndShoot+DrawRules.swift */,
@@ -4651,6 +4657,7 @@
 				A5D6250A26034B1C00A3E676 /* FormatterViewBackground.swift in Sources */,
 				A5DE143226496F250023F753 /* NoteHeaderView.swift in Sources */,
 				418172272581107C00317ED8 /* NSMutableAttributedString+Range.swift in Sources */,
+				8A9B1A9F26DD33EA00B3B5FA /* PointAndShoot+Target.swift in Sources */,
 				9691C2592644948200F70DA1 /* BeamFileDB.swift in Sources */,
 				A5FE1615264AD64900B7526D /* RecentsListView.swift in Sources */,
 				4131F16825BEC48C006473CD /* SpacerWidget.swift in Sources */,
@@ -4996,6 +5003,7 @@
 				A5FE96CD2612469C002A2B73 /* AutocompleteManager.swift in Sources */,
 				52B17AB0262441D600CB4728 /* DatabasesWindow.swift in Sources */,
 				BAA67192B5EB78981741C311 /* WebPage.swift in Sources */,
+				8A9B1A9626DD321E00B3B5FA /* PointAndShoot+ShootGroup.swift in Sources */,
 				A032BD33261F4677009A3576 /* ShortcutLayer.swift in Sources */,
 				A5BF04D32681A4F800CC80EB /* ElementNode+Layers.swift in Sources */,
 				A5208D8F261D25F1006193AF /* BeamSpacing.swift in Sources */,
