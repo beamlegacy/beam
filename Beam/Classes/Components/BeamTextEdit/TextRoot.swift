@@ -291,18 +291,22 @@ public class TextRoot: TextNode {
         return note.cmdManager
     }
 
+    var focusedCmdManager: CommandManager<Widget> {
+        return focusedWidget?.cmdManager ?? cmdManager
+    }
+
     func insertElementNearNonTextElement(_ string: String = "") {
         insertElementNearNonTextElement(BeamText(text: string))
     }
 
     func insertElementNearNonTextElement(_ string: BeamText) {
-        cmdManager.beginGroup(with: "Insert Element")
-        defer { cmdManager.endGroup() }
         guard let node = focusedWidget as? ElementNode else { return }
+        node.cmdManager.beginGroup(with: "Insert Element")
+        defer { node.cmdManager.endGroup() }
         let newElement = BeamElement(string)
         let parent = node.parent as? ElementNode ?? node
         let previous = node.previousSibbling() as? ElementNode
-        cmdManager.insertElement(newElement, inElement: parent.unproxyElement, afterElement: (caretIndex == 0 ? previous : node)?.unproxyElement)
-        cmdManager.focus(newElement, in: node)
+        node.cmdManager.insertElement(newElement, inElement: parent.unproxyElement, afterElement: (caretIndex == 0 ? previous : node)?.unproxyElement)
+        node.cmdManager.focus(newElement, in: node)
     }
 }

@@ -613,4 +613,9 @@ public class ElementNode: Widget {
     public func caretIndexAvoidingUneditableRange(_ caretIndex: Int, after: Bool) -> Int? {
         after ? min(1, caretIndex + 1) : caretIndex
     }
+
+    override var cmdManager: CommandManager<Widget> {
+        return displayedElement.note?.cmdManager ?? super.cmdManager
+    }
+
 }

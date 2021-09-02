@@ -127,6 +127,22 @@ class LinksSection: Widget {
         }
 
         updateHeading(validRefs)
+
+        sortChildren()
+    }
+
+    func sortChildren() {
+        children.sort { left, right in
+            guard let left = left as? BreadCrumb,
+                  let right = right as? BreadCrumb,
+                  let leftDate = left.proxy.proxy.note?.creationDate,
+                  let rightDate = right.proxy.proxy.note?.creationDate
+            else {
+                return false
+            }
+
+            return leftDate > rightDate
+        }
     }
 
     func linkAllReferencesFromNote(withId noteId: UUID) {

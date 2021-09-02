@@ -89,7 +89,7 @@ extension BeamTextEdit {
             rootNode.eraseNodeSelection(createEmptyNodeInPlace: nodes.count == rootNode.element.children.count)
         } else {
             guard let node = rootNode.focusedWidget as? TextNode else { return }
-            cmdManager.deleteText(in: node, for: rootNode.selectedTextRange)
+            node.cmdManager.deleteText(in: node, for: rootNode.selectedTextRange)
         }
     }
 
@@ -180,17 +180,21 @@ extension BeamTextEdit {
         }
     }
 
+    // swiftlint:disable:next cyclomatic_complexity
     private func paste(elementHolder: BeamNoteDataHolder) {
         do {
-
-            cmdManager.beginGroup(with: "PasteElementContent")
-            defer { cmdManager.endGroup() }
+            guard let mngrNode = focusedWidget else {
+                Logger.shared.logError("Cannot paste contents in an editor without a focused bullet", category: .noteEditor)
+                return
+            }
+            mngrNode.cmdManager.beginGroup(with: "PasteElementContent")
+            defer { mngrNode.cmdManager.endGroup() }
 
             if rootNode.state.nodeSelection != nil {
                 rootNode.eraseNodeSelection(createEmptyNodeInPlace: true, createNodeInEmptyParent: false)
             } else if !rootNode.state.selectedTextRange.isEmpty {
                 guard let node = focusedWidget as? TextNode else { return }
-                cmdManager.deleteText(in: node, for: rootNode.rangeToDeleteText(in: node, cursorAt: rootNode.cursorPosition, forward: false))
+                node.cmdManager.deleteText(in: node, for: rootNode.rangeToDeleteText(in: node, cursorAt: rootNode.cursorPosition, forward: false))
             }
             guard let firstNode = focusedWidget as? TextNode else { return }
             let previousBullet = firstNode.element
@@ -210,11 +214,11 @@ extension BeamTextEdit {
                 guard let node = focusedWidget as? ElementNode else {
                     return
                 }
-                cmdManager.insertElement(newElement, inNode: parent, afterElement: node.element)
-                cmdManager.focus(newElement, in: node)
+                node.cmdManager.insertElement(newElement, inNode: parent, afterElement: node.element)
+                node.cmdManager.focus(newElement, in: node)
             }
             if previousBullet.children.isEmpty, previousBullet.text.isEmpty {
-                cmdManager.deleteElement(for: previousBullet)
+                node.cmdManager.deleteElement(for: previousBullet)
             }
         } catch {
             Logger.shared.logError("Can't encode Cloned Note", category: .general)
@@ -222,7 +226,11 @@ extension BeamTextEdit {
     }
 
     private func paste(attributedStrings: [NSAttributedString]) {
-        cmdManager.beginGroup(with: "PasteAttributedContent")
+        guard let mngrNode = focusedWidget else {
+            Logger.shared.logError("Cannot paste contents in an editor without a focused bullet", category: .noteEditor)
+            return
+        }
+        mngrNode.cmdManager.beginGroup(with: "PasteAttributedContent")
         guard let node = focusedWidget as? TextNode else { return }
         var lastInserted: ElementNode? = node
         let parent = node.parent as? ElementNode ?? node
@@ -236,12 +244,12 @@ extension BeamTextEdit {
                 enableInputDetector()
             } else {
                 let element = BeamElement(beamText)
-                cmdManager.insertElement(element, inNode: parent, afterNode: lastInserted)
-                cmdManager.focus(element, in: node)
+                parent.cmdManager.insertElement(element, inNode: parent, afterNode: lastInserted)
+                parent.cmdManager.focus(element, in: node)
                 lastInserted = focusedWidget as? ElementNode
             }
         }
-        cmdManager.endGroup()
+        mngrNode.cmdManager.endGroup()
 
         if lastInserted?.elementText.linkRanges.count == 1, let linkRange = lastInserted?.elementText.linkRanges.first {
             showLinkPasteMenu(for: linkRange)
