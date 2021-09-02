@@ -129,9 +129,7 @@ struct BeamTextAttributedStringBuilder {
         stringAttributes[.font] = font(fontSize: config.fontSize, strong: strong, emphasis: emphasis, elementKind: config.elementKind)
         stringAttributes[.foregroundColor] = BeamColor.Generic.text.nsColor
         if let link = webLink {
-            if let url = URL(string: link) {
-                stringAttributes[.link] = url as NSURL
-            } else if let url = URL(string: link.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)!) {
+            if let url = URL(string: link) ?? link.toEncodedURL {
                 stringAttributes[.link] = url as NSURL
             }
             if isCursorCloseToRange {

@@ -258,13 +258,11 @@ import BeamCore
     }
 
     private func urlFor(query: String) -> URL? {
-        //TODO make a better url detector and rewritter to transform xxx.com in https://xxx.com with less corner cases and clearer code path:
-        let csCopy = CharacterSet(bitmapRepresentation: CharacterSet.urlPathAllowed.bitmapRepresentation)
-        guard query.mayBeURL, let u = URL(string: query.addingPercentEncoding(withAllowedCharacters: csCopy) ?? query) else {
+        guard let url = query.toEncodedURL else {
             searchEngine.query = query
             return URL(string: searchEngine.searchUrl)
         }
-        return u.urlWithScheme
+        return url.urlWithScheme
     }
 
     func startQuery(_ node: TextNode, animated: Bool) {
