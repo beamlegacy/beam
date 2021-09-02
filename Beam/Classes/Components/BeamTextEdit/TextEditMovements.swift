@@ -211,12 +211,14 @@ extension TextRoot {
             }
         } else {
             var _caretIndex = node.caretBelow(caretIndex)
-            if let node = focusedWidget as? ElementNode,
-               let updatedCaretIndex = node.caretIndexAvoidingUneditableRange(_caretIndex, after: true) {
+            if let updatedCaretIndex = node.caretIndexAvoidingUneditableRange(_caretIndex, after: true) {
                 _caretIndex = updatedCaretIndex
-            }
-            let isLastCaret = _caretIndex == node.caretIndexForSourcePosition(node.textCount)
-            if !isLastCaret || !moveToNextNodeIfPossible(fromNode: node, cursor: cursorPosition) {
+
+                let isLastCaret = _caretIndex == node.caretIndexForSourcePosition(node.textCount)
+                if !isLastCaret || !moveToNextNodeIfPossible(fromNode: node, cursor: cursorPosition) {
+                    self.caretIndex = _caretIndex
+                }
+            } else {
                 self.caretIndex = _caretIndex
             }
         }

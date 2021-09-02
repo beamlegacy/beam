@@ -866,20 +866,22 @@ public class TextNode: ElementNode {
         let lineAbove = currentCaret.line - 1
         guard lineAbove >= 0 else { return 0 }
         let offset = currentCaret.offset
-        return textFrame.carets.firstIndex { caret in
-            caret.line == lineAbove && caret.offset.x >= offset.x
-        } ?? 0
+        return
+            textFrame.carets.firstIndex { $0.line == lineAbove && $0.offset.x >= offset.x }
+            ?? textFrame.carets.lastIndex { $0.line == lineAbove }
+            ?? 0
     }
 
     override public func caretBelow(_ caretIndex: Int) -> Int {
         guard let textFrame = textFrame else { return 0 }
         let currentCaret = textFrame.carets[caretIndex]
-        let lineAbove = currentCaret.line + 1
-        guard lineAbove < textFrame.lines.count else { return textFrame.carets.count - 1 }
+        let lineBelow = currentCaret.line + 1
+        guard lineBelow < textFrame.lines.count else { return textFrame.carets.count - 1 }
         let offset = currentCaret.offset
-        return textFrame.carets.firstIndex { caret in
-            caret.line == lineAbove && caret.offset.x >= offset.x
-        } ?? textFrame.carets.count - 1
+        return
+            textFrame.carets.firstIndex { $0.line == lineBelow && $0.offset.x >= offset.x }
+            ?? textFrame.carets.lastIndex { $0.line == lineBelow }
+            ?? textFrame.carets.count - 1
     }
 
     override public func positionForCaretIndex(_ caretIndex: Int) -> Int {
