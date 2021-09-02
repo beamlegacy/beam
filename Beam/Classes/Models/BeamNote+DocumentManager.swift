@@ -454,13 +454,23 @@ extension BeamNote: BeamNoteDocument {
 
     public static func indexAllNotes() {
         let documentManager = DocumentManager()
+        var log = [String]()
+        log.append("Before reindexing, DB contains \((try? GRDBDatabase.shared.countBidirectionalLinks()) ?? -1) bidirectional links from \((try? GRDBDatabase.shared.countIndexedElements()) ?? -1) indexed elements")
         try? GRDBDatabase.shared.clearElements()
         try? GRDBDatabase.shared.clearBidirectionalLinks()
-        for title in documentManager.allDocumentsTitles(includeDeletedNotes: false) {
+        try? GRDBDatabase.shared.clearNoteIndexingRecord()
+        let allTitles = documentManager.allDocumentsTitles(includeDeletedNotes: false)
+        for title in allTitles {
             if let note = BeamNote.fetch(documentManager, title: title) {
                 note.indexContents()
             }
         }
+
+        log.append("After reindexing \(allTitles.count) notes, DB contains \((try? GRDBDatabase.shared.countBidirectionalLinks()) ?? -1) bidirectional links from \((try? GRDBDatabase.shared.countIndexedElements()) ?? -1) indexed elements")
+
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+        pasteboard.setString(log.joined(separator: "\n"), forType: .string)
     }
 
     public static func rebuildAllNotes() {
