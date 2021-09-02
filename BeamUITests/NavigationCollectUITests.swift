@@ -55,8 +55,11 @@ class NavigationCollectUITests: QuickSpec {
                     .matching(identifier: "TextNode")
             }
 
-            it("add links to journal in order") {
+            it("enables browsing collect") {
                 self.helper.tapCommand(.enableBrowsingSessionCollection)
+            }
+
+            it("add links to journal in order") {
                 self.helper.openTestPage(page: .page1)
                 let title0 = titles[0]
                 let staticText0 = self.app.staticTexts[title0]
@@ -82,11 +85,9 @@ class NavigationCollectUITests: QuickSpec {
                 expect(self.journalChildren.element(boundBy: 0).value as? String) == title0
                 expect(self.journalChildren.element(boundBy: 1).value as? String) == title1
                 expect(self.journalChildren.element(boundBy: 2).value as? String) == title2
-                self.helper.tapCommand(.disableBrowsingSessionCollection)
             }
 
             it("can navigate links in collected text") {
-                self.helper.tapCommand(.enableBrowsingSessionCollection)
                 self.helper.openTestPage(page: .page3)
 
                 let prefix = "Go to "
@@ -131,14 +132,12 @@ class NavigationCollectUITests: QuickSpec {
                 expect(self.journalChildren.element(matching: title2Predicate).waitForExistence(timeout: 4)) == true
                 expect(self.journalChildren.count) == 3
                 expect(self.journalChildren.element(boundBy: 2).value as? String) == titles[1]
-                self.helper.tapCommand(.disableBrowsingSessionCollection)
             }
         }
 
         describe("PointAndShoot") {
             context("with PointAndShoot enabled") {
-                it("Point and Shoot on click should open ShootCardPicker and not navigate the page") {
-                    self.helper.tapCommand(.enableBrowsingSessionCollection)
+                it("opens ShootCardPicker and not navigate the page") {
                     self.helper.openTestPage(page: .page1)
                     // Press option once to enable pointing mode
                     XCUIElement.perform(withKeyModifiers: .option) {
@@ -152,6 +151,9 @@ class NavigationCollectUITests: QuickSpec {
                         // compare with url after clicking
                         expect(self.omnibarHelper.searchField.value as? String).to(equal(beforeUrl))
                     }
+                }
+
+                it("disables browsing collect") {
                     self.helper.tapCommand(.disableBrowsingSessionCollection)
                 }
             }
