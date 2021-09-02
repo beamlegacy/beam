@@ -317,6 +317,7 @@ extension PointAndShootCardPicker {
 extension PointAndShootCardPicker {
     // MARK: - onFinishEditing
     private func onFinishEditing(canceled: Bool = false) {
+        guard !shootCompleted else { return }
         guard !canceled else {
             onComplete?(nil, nil)
             return
@@ -332,7 +333,7 @@ extension PointAndShootCardPicker {
         }
 
         if !finalCardName.isEmpty {
-            self.shootCompleted = true
+            shootCompleted = true
             onComplete?(finalCardName, addNoteField)
         }
     }
