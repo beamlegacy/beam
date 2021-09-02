@@ -354,7 +354,7 @@ class DocumentManagerNetworkTests: QuickSpec {
             var docStruct: DocumentStruct!
             beforeEach {
                 BeamDate.freeze("2021-03-19T12:21:03Z")
-                docStruct = helper.createDocumentStruct(id: "995d94e1-e0df-4eca-93e6-8778984bcd18")
+                docStruct = helper.createDocumentStruct(title: "Document Title", id: "995d94e1-e0df-4eca-93e6-8778984bcd18")
             }
             afterEach {
                 helper.deleteDocumentStruct(docStruct)
