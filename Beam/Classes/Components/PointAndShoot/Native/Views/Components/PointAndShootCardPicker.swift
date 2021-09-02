@@ -32,7 +32,7 @@ struct PointAndShootCardPicker: View {
     @State private var cardSearchFieldSelection: Range<Int>?
     @State private var addNoteField = ""
 
-    @State private var lastTextChangeWasAddition = false
+    @State private var shouldHighlightTextCompletion = false
     @State private var shootCompleted: Bool = false
 
     private var isTodaysNote: String? {
@@ -117,7 +117,7 @@ struct PointAndShootCardPicker: View {
                                 text: cardSearchField,
                                 currentCardName: currentCardName,
                                 tokenize: cursorIsOnCardName,
-                                selectedResult: lastTextChangeWasAddition ? autocompleteModel.selectedResult?.text : nil,
+                                selectedResult: shouldHighlightTextCompletion ? autocompleteModel.selectedResult?.text : nil,
                                 completed: shootCompleted
                             )
                         )
@@ -160,6 +160,10 @@ struct PointAndShootCardPicker: View {
                 if isEditingCardName && currentCardName == nil {
                     DestinationNoteAutocompleteList(model: autocompleteModel)
                         .onSelectAutocompleteResult { selectSearchResult() }
+                        .onReceive(autocompleteModel.$selectedIndex) { _ in
+                            // selected item changed from hover or arrows. let's not highlight anymore.
+                            shouldHighlightTextCompletion = false
+                        }
                 }
                 // MARK: - Bottom Half
                 Separator(horizontal: true).padding(.horizontal, BeamSpacing._120)
@@ -308,8 +312,9 @@ extension PointAndShootCardPicker {
             cardSearchField = ""
             searchText = ""
         }
-        lastTextChangeWasAddition = searchText.count > autocompleteModel.searchText.count
+        let textWasAdded = searchText.count > autocompleteModel.searchText.count
         autocompleteModel.searchText = searchText
+        shouldHighlightTextCompletion = textWasAdded
         currentCardName = nil
     }
 }
