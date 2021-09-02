@@ -18,8 +18,8 @@ install_certificates:
 	# security import certificates/dev_keys.p12 -k ~/Library/Keychains/login.keychain -P "${PRIVATE_KEY_PASSWORD}"
 
 install_gitlab_runner:
-	install_direnv
-	install_xcode
+	make install_direnv
+	make install_xcode
 
 	# Rubygems
 	bundle
@@ -27,17 +27,14 @@ install_gitlab_runner:
 	# Fastlane
 	sudo gem install fastlane -N
 
-	install_swiftlint
-	install_variable_injector
+	make install_swiftlint
+	make install_variable_injector
 
 	# DMG
 	brew install create-dmg
 
 	# AWS
 	brew install awscli
-
-	# Docker, M1 must install manually and beta version
-	brew install --cask docker
 
 	# jq for scripts
 	brew install jq
@@ -69,8 +66,6 @@ install_gitlab_runner:
 
 	# Shell
 	gitlab-runner register --non-interactive --custom_build_dir-enabled=true --name=`hostname | sed -e s/\.local//` --url=https://gitlab.com/ --executor="shell" --shell="bash" --tag-list="macos" --registration-token=${GITLAB_TOKEN}
-	# Docker
-	gitlab-runner register --non-interactive --name=`hostname | sed -e s/\.local//`-docker --url=https://gitlab.com/ --executor="docker" --docker-image="ruby:2.6" --tag-list="docker" --registration-token=${GITLAB_TOKEN}
 	# Mono
 	gitlab-runner register --non-interactive --custom_build_dir-enabled=true --name=`hostname | sed -e s/\.local//`-mono --limit=1 --url=https://gitlab.com/ --executor="shell" --shell="bash" --tag-list="macos-mono" --registration-token=${GITLAB_TOKEN}
 
@@ -103,9 +98,10 @@ lint:
 	yarn --cwd ./Beam/Classes/Components/PointAndShoot/Web run lint
 
 install_variable_injector:
+	rm -rf variable-injector
 	git clone --depth 1 https://github.com/penso/variable-injector.git
 	(cd variable-injector && make install)
-	rm -r variable-injector
+	rm -rf variable-injector
 
 install_direnv:
 	brew install direnv
