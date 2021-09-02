@@ -67,7 +67,7 @@ struct PointAndShootCardPicker: View {
             // MARK: - Top Half
             HStack(spacing: BeamSpacing._40) {
                 // MARK: - Prefix
-                PrefixLabel(completed: shootCompleted && completedGroup != nil, numberOfElements: completedGroup?.numberOfElements)
+                PrefixLabel(completed: shootCompleted && completedGroup != nil, confirmation: completedGroup?.confirmation)
 
                 // MARK: - TextField
                 ZStack {
@@ -121,7 +121,7 @@ struct PointAndShootCardPicker: View {
                                 completed: shootCompleted
                             )
                         )
-                    } else if let text = currentCardName {
+                    } else if let text = currentCardName, completedGroup?.confirmation == .success {
                         Text(text)
                             .foregroundColor(BeamColor.Beam.swiftUI)
                             .font(BeamFont.regular(size: 13).swiftUI)
@@ -140,7 +140,8 @@ struct PointAndShootCardPicker: View {
                                 onFinishEditing(canceled: false)
                             }
                     } else if let group = completedGroup {
-                        Icon(name: "collect-generic", size: 16, color: BeamColor.Generic.text.swiftUI)
+                        let confirmationIcon = group.confirmation == .success ? "collect-generic" : "tabs-close"
+                        Icon(name: confirmationIcon, size: 16, color: BeamColor.Generic.text.swiftUI)
                             .transition(AnyTransition.opacity.animation(Animation.easeInOut(duration: 0.15).delay(0.05)))
                             .onTapGesture {
                                 state.navigateToNote(id: group.noteInfo.id)
@@ -229,9 +230,14 @@ extension PointAndShootCardPicker {
     // MARK: - PrefixLabel Component
     struct PrefixLabel: View {
         var completed: Bool
-        var numberOfElements: Int?
+        var confirmation: PointAndShoot.ShootConfirmation?
+
         @State private var addToOpacity: Double = 1
         @State private var addedToOpacity: Double = 0
+
+        var confirmationLabel: String {
+            confirmation == .success ? "Added to" : "Failed to collect"
+        }
 
         var body: some View {
             ZStack {
@@ -243,7 +249,7 @@ extension PointAndShootCardPicker {
                         .transition(AnyTransition.asymmetric(insertion: .identity,
                                                              removal: AnyTransition.opacity.animation(.easeInOut(duration: 0.05))))
                 } else {
-                    Text("Added to")
+                    Text(confirmationLabel)
                         .zIndex(1)
                         .frame(alignment: .topLeading)
                         .transition(AnyTransition.asymmetric(insertion: AnyTransition.opacity.animation(Animation.easeInOut(duration: 0.05).delay(0.05)),
