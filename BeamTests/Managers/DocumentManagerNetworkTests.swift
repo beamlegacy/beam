@@ -66,11 +66,13 @@ class DocumentManagerNetworkTests: QuickSpec {
         describe(".saveAllOnAPI()") {
             var docStruct: DocumentStruct!
             beforeEach {
+                BeamDate.freeze("2021-03-19T12:21:03Z")
                 docStruct = self.createStruct("Doc 1", "995d94e1-e0df-4eca-93e6-8778984bcd18", helper)
             }
 
             afterEach {
                 helper.deleteDocumentStruct(docStruct)
+                BeamDate.reset()
             }
 
             context("with Foundation") {
@@ -217,14 +219,22 @@ class DocumentManagerNetworkTests: QuickSpec {
 
             context("when remote has a more recent updatedAt") {
                 context("without conflict") {
-                    let ancestor = "1\n2\n3"
-                    let newRemote = "1\n2\n3\n4"
+                    /*
+                     Generated those with the app, and looked at the website https://app.beamapp.co
+                     for the exact content of `data`.
+                     */
+
+                    // 1\n2\n3
+                    let ancestor = "{\n \"id\" : \"6E38CEAB-8736-4D29-9A5C-C977AB348D99\",\n \"textStats\" : {\n \"wordsCount\" : 3\n },\n \"visitedSearchResults\" : [\n\n ],\n \"sources\" : {\n \"sources\" : [\n\n ]\n },\n \"type\" : {\n \"type\" : \"note\"\n },\n \"title\" : \"foobar\",\n \"searchQueries\" : [\n\n ],\n \"open\" : true,\n \"text\" : {\n \"ranges\" : [\n {\n \"string\" : \"\"\n }\n ]\n },\n \"readOnly\" : false,\n \"children\" : [\n {\n \"readOnly\" : false,\n \"score\" : 0,\n \"id\" : \"13100D1A-DB4E-4B6B-9F19-21E42771ED89\",\n \"creationDate\" : 652264320.13673794,\n \"open\" : true,\n \"textStats\" : {\n \"wordsCount\" : 1\n },\n \"text\" : {\n \"ranges\" : [\n {\n \"string\" : \"1\"\n }\n ]\n }\n },\n {\n \"readOnly\" : false,\n \"score\" : 0,\n \"id\" : \"E1F40F11-7B40-42EA-B684-FF7693A7BD61\",\n \"creationDate\" : 652264320.85678303,\n \"open\" : true,\n \"textStats\" : {\n \"wordsCount\" : 1\n },\n \"text\" : {\n \"ranges\" : [\n {\n \"string\" : \"2\"\n }\n ]\n }\n },\n {\n \"readOnly\" : false,\n \"score\" : 0,\n \"id\" : \"C2B93826-5141-4F25-8355-009DAB90C99E\",\n \"creationDate\" : 652264321.33729601,\n \"open\" : true,\n \"textStats\" : {\n \"wordsCount\" : 1\n },\n \"text\" : {\n \"ranges\" : [\n {\n \"string\" : \"3\"\n }\n ]\n }\n }\n ],\n \"score\" : 0.20000000298023224,\n \"creationDate\" : 652263910.29682195\n}"
+                    // 1\n2\3\n4
+                    let newRemote = "{\n \"id\" : \"6E38CEAB-8736-4D29-9A5C-C977AB348D99\",\n \"textStats\" : {\n \"wordsCount\" : 4\n },\n \"visitedSearchResults\" : [\n\n ],\n \"sources\" : {\n \"sources\" : [\n\n ]\n },\n \"type\" : {\n \"type\" : \"note\"\n },\n \"title\" : \"foobar\",\n \"searchQueries\" : [\n\n ],\n \"open\" : true,\n \"text\" : {\n \"ranges\" : [\n {\n \"string\" : \"\"\n }\n ]\n },\n \"readOnly\" : false,\n \"children\" : [\n {\n \"readOnly\" : false,\n \"score\" : 0,\n \"id\" : \"13100D1A-DB4E-4B6B-9F19-21E42771ED89\",\n \"creationDate\" : 652264320.13673794,\n \"open\" : true,\n \"textStats\" : {\n \"wordsCount\" : 1\n },\n \"text\" : {\n \"ranges\" : [\n {\n \"string\" : \"1\"\n }\n ]\n }\n },\n {\n \"readOnly\" : false,\n \"score\" : 0,\n \"id\" : \"E1F40F11-7B40-42EA-B684-FF7693A7BD61\",\n \"creationDate\" : 652264320.85678303,\n \"open\" : true,\n \"textStats\" : {\n \"wordsCount\" : 1\n },\n \"text\" : {\n \"ranges\" : [\n {\n \"string\" : \"2\"\n }\n ]\n }\n },\n {\n \"readOnly\" : false,\n \"score\" : 0,\n \"id\" : \"C2B93826-5141-4F25-8355-009DAB90C99E\",\n \"creationDate\" : 652264321.33729601,\n \"open\" : true,\n \"textStats\" : {\n \"wordsCount\" : 1\n },\n \"text\" : {\n \"ranges\" : [\n {\n \"string\" : \"3\"\n }\n ]\n }\n },\n {\n \"readOnly\" : false,\n \"score\" : 0,\n \"id\" : \"3A79B086-AF4A-42C5-A17B-4F5487FD6737\",\n \"creationDate\" : 652264356.52260804,\n \"open\" : true,\n \"textStats\" : {\n \"wordsCount\" : 1\n },\n \"text\" : {\n \"ranges\" : [\n {\n \"string\" : \"4\"\n }\n ]\n }\n }\n ],\n \"score\" : 0.20000000298023224,\n \"creationDate\" : 652263910.29682195\n}"
 
                     beforeEach {
                         BeamDate.freeze("2021-03-19T12:21:03Z")
-                        docStruct = try? helper.createLocalAndRemoteVersions(ancestor,
-                                                                             newRemote: newRemote,
-                                                                             "995d94e1-e0df-4eca-93e6-8778984bcd18")
+                        docStruct = try? helper.createLocalAndRemoteVersionsWithData(ancestor,
+                                                                                     newRemote: newRemote,
+                                                                                     "6E38CEAB-8736-4D29-9A5C-C977AB348D99",
+                                                                                     "Document Title")
                         networkCalls = APIRequest.callsCount
                     }
 
@@ -252,27 +262,38 @@ class DocumentManagerNetworkTests: QuickSpec {
                 }
 
                 context("with conflict") {
-                    let ancestor = "1\n2\n3"
-                    let newRemote = "1\n2\n3\n4"
-                    let newLocal = "0\n1\n2\n3"
+
+                    /*
+                     Generated those with the app, and looked at the website https://app.beamapp.co
+                     for the exact content of `data`.
+                     */
+
+                    // 1\n2\n3
+                    let ancestor = "{\n \"id\" : \"6E38CEAB-8736-4D29-9A5C-C977AB348D99\",\n \"textStats\" : {\n \"wordsCount\" : 3\n },\n \"visitedSearchResults\" : [\n\n ],\n \"sources\" : {\n \"sources\" : [\n\n ]\n },\n \"type\" : {\n \"type\" : \"note\"\n },\n \"title\" : \"foobar\",\n \"searchQueries\" : [\n\n ],\n \"open\" : true,\n \"text\" : {\n \"ranges\" : [\n {\n \"string\" : \"\"\n }\n ]\n },\n \"readOnly\" : false,\n \"children\" : [\n {\n \"readOnly\" : false,\n \"score\" : 0,\n \"id\" : \"13100D1A-DB4E-4B6B-9F19-21E42771ED89\",\n \"creationDate\" : 652264320.13673794,\n \"open\" : true,\n \"textStats\" : {\n \"wordsCount\" : 1\n },\n \"text\" : {\n \"ranges\" : [\n {\n \"string\" : \"1\"\n }\n ]\n }\n },\n {\n \"readOnly\" : false,\n \"score\" : 0,\n \"id\" : \"E1F40F11-7B40-42EA-B684-FF7693A7BD61\",\n \"creationDate\" : 652264320.85678303,\n \"open\" : true,\n \"textStats\" : {\n \"wordsCount\" : 1\n },\n \"text\" : {\n \"ranges\" : [\n {\n \"string\" : \"2\"\n }\n ]\n }\n },\n {\n \"readOnly\" : false,\n \"score\" : 0,\n \"id\" : \"C2B93826-5141-4F25-8355-009DAB90C99E\",\n \"creationDate\" : 652264321.33729601,\n \"open\" : true,\n \"textStats\" : {\n \"wordsCount\" : 1\n },\n \"text\" : {\n \"ranges\" : [\n {\n \"string\" : \"3\"\n }\n ]\n }\n }\n ],\n \"score\" : 0.20000000298023224,\n \"creationDate\" : 652263910.29682195\n}"
+                    // 1\n2\3\n4
+                    let newRemote = "{\n \"id\" : \"6E38CEAB-8736-4D29-9A5C-C977AB348D99\",\n \"textStats\" : {\n \"wordsCount\" : 4\n },\n \"visitedSearchResults\" : [\n\n ],\n \"sources\" : {\n \"sources\" : [\n\n ]\n },\n \"type\" : {\n \"type\" : \"note\"\n },\n \"title\" : \"foobar\",\n \"searchQueries\" : [\n\n ],\n \"open\" : true,\n \"text\" : {\n \"ranges\" : [\n {\n \"string\" : \"\"\n }\n ]\n },\n \"readOnly\" : false,\n \"children\" : [\n {\n \"readOnly\" : false,\n \"score\" : 0,\n \"id\" : \"13100D1A-DB4E-4B6B-9F19-21E42771ED89\",\n \"creationDate\" : 652264320.13673794,\n \"open\" : true,\n \"textStats\" : {\n \"wordsCount\" : 1\n },\n \"text\" : {\n \"ranges\" : [\n {\n \"string\" : \"1\"\n }\n ]\n }\n },\n {\n \"readOnly\" : false,\n \"score\" : 0,\n \"id\" : \"E1F40F11-7B40-42EA-B684-FF7693A7BD61\",\n \"creationDate\" : 652264320.85678303,\n \"open\" : true,\n \"textStats\" : {\n \"wordsCount\" : 1\n },\n \"text\" : {\n \"ranges\" : [\n {\n \"string\" : \"2\"\n }\n ]\n }\n },\n {\n \"readOnly\" : false,\n \"score\" : 0,\n \"id\" : \"C2B93826-5141-4F25-8355-009DAB90C99E\",\n \"creationDate\" : 652264321.33729601,\n \"open\" : true,\n \"textStats\" : {\n \"wordsCount\" : 1\n },\n \"text\" : {\n \"ranges\" : [\n {\n \"string\" : \"3\"\n }\n ]\n }\n },\n {\n \"readOnly\" : false,\n \"score\" : 0,\n \"id\" : \"3A79B086-AF4A-42C5-A17B-4F5487FD6737\",\n \"creationDate\" : 652264356.52260804,\n \"open\" : true,\n \"textStats\" : {\n \"wordsCount\" : 1\n },\n \"text\" : {\n \"ranges\" : [\n {\n \"string\" : \"4\"\n }\n ]\n }\n }\n ],\n \"score\" : 0.20000000298023224,\n \"creationDate\" : 652263910.29682195\n}"
+                    // 0\n1\n2\n3
+                    let newLocal = "{\n \"id\" : \"6E38CEAB-8736-4D29-9A5C-C977AB348D99\",\n \"textStats\" : {\n \"wordsCount\" : 4\n },\n \"visitedSearchResults\" : [\n\n ],\n \"sources\" : {\n \"sources\" : [\n\n ]\n },\n \"type\" : {\n \"type\" : \"note\"\n },\n \"title\" : \"foobar\",\n \"searchQueries\" : [\n\n ],\n \"open\" : true,\n \"text\" : {\n \"ranges\" : [\n {\n \"string\" : \"\"\n }\n ]\n },\n \"readOnly\" : false,\n \"children\" : [\n {\n \"readOnly\" : false,\n \"score\" : 0,\n \"id\" : \"13100D1A-DB4E-4B6B-9F19-21E42771ED89\",\n \"creationDate\" : 652264320.13673794,\n \"open\" : true,\n \"textStats\" : {\n \"wordsCount\" : 1\n },\n \"text\" : {\n \"ranges\" : [\n {\n \"string\" : \"0\"\n }\n ]\n }\n },\n {\n \"readOnly\" : false,\n \"score\" : 0,\n \"id\" : \"33D246F8-706B-485B-95A5-E7C07C22C804\",\n \"creationDate\" : 652264380.09525394,\n \"open\" : true,\n \"textStats\" : {\n \"wordsCount\" : 1\n },\n \"text\" : {\n \"ranges\" : [\n {\n \"string\" : \"1\"\n }\n ]\n }\n },\n {\n \"readOnly\" : false,\n \"score\" : 0,\n \"id\" : \"E1F40F11-7B40-42EA-B684-FF7693A7BD61\",\n \"creationDate\" : 652264320.85678303,\n \"open\" : true,\n \"textStats\" : {\n \"wordsCount\" : 1\n },\n \"text\" : {\n \"ranges\" : [\n {\n \"string\" : \"2\"\n }\n ]\n }\n },\n {\n \"readOnly\" : false,\n \"score\" : 0,\n \"id\" : \"C2B93826-5141-4F25-8355-009DAB90C99E\",\n \"creationDate\" : 652264321.33729601,\n \"open\" : true,\n \"textStats\" : {\n \"wordsCount\" : 1\n },\n \"text\" : {\n \"ranges\" : [\n {\n \"string\" : \"3\"\n }\n ]\n }\n }\n ],\n \"score\" : 0.20000000298023224,\n \"creationDate\" : 652263910.29682195\n}"
+
                     let merged = "0\n1\n2\n3\n4"
 
                     beforeEach {
                         BeamDate.freeze("2021-03-19T12:21:03Z")
 
-                        docStruct = try! helper.createLocalAndRemoteVersions(ancestor,
-                                                                             newLocal: newLocal,
-                                                                             newRemote: newRemote,
-                                                                             "995d94e1-e0df-4eca-93e6-8778984bcd18")
+                        docStruct = try! helper.createLocalAndRemoteVersionsWithData(ancestor,
+                                                                                     newLocal: newLocal,
+                                                                                     newRemote: newRemote,
+                                                                                     "6E38CEAB-8736-4D29-9A5C-C977AB348D99",
+                                                                                     "Document Title")
 
-                        expect(try? docStruct.textDescription()) == newLocal
+                        expect(docStruct.data) == newLocal.asData
 
                         let remoteStruct = helper.fetchOnAPI(docStruct)
-                        expect(try? remoteStruct?.textDescription()) == newRemote
+                        expect(remoteStruct?.data) == newRemote.asData
 
                         let localDocStruct = sut.loadById(id: docStruct.id)
-                        expect(try? localDocStruct?.textDescription()) == newLocal
-                        expect(try? localDocStruct?.previousTextDescription()) == ancestor
+                        expect(localDocStruct?.data) == newLocal.asData
+                        expect(localDocStruct?.previousData) == ancestor.asData
                     }
 
                     afterEach {
@@ -281,7 +302,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                     }
 
                     context("with Foundation") {
-                        fit("refreshes the local document") {
+                        it("refreshes the local document") {
                             let networkCalls = APIRequest.callsCount
 
                             waitUntil(timeout: .seconds(1200)) { done in
@@ -332,10 +353,12 @@ class DocumentManagerNetworkTests: QuickSpec {
         describe(".save()") {
             var docStruct: DocumentStruct!
             beforeEach {
+                BeamDate.freeze("2021-03-19T12:21:03Z")
                 docStruct = helper.createDocumentStruct(id: "995d94e1-e0df-4eca-93e6-8778984bcd18")
             }
             afterEach {
                 helper.deleteDocumentStruct(docStruct)
+                BeamDate.reset()
             }
 
             context("with network") {
@@ -437,7 +460,6 @@ class DocumentManagerNetworkTests: QuickSpec {
                         beforeEach {
                             docStruct = helper.saveLocally(docStruct)
                         }
-
                         it("saves the document on the API") {
                             let promise: PromiseKit.Promise<Bool> = sut.saveOnApi(docStruct)
 
@@ -514,9 +536,9 @@ class DocumentManagerNetworkTests: QuickSpec {
                             }
 
                             let expectedNetworkCalls = ["sign_in",
-                                                        "delete_all_databases",
-                                                        "delete_all_documents",
-                                                        "update_document"]
+                                                        "delete_all_beam_objects",
+                                                        "delete_all_beam_objects",
+                                                        "update_beam_object"]
 
                             expect(APIRequest.callsCount - networkCalls) == 1
                             expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
@@ -923,7 +945,7 @@ class DocumentManagerNetworkTests: QuickSpec {
         }
     }
 
-    private func createStruct(_ title: String?, _ id: String?, _ helper: DocumentManagerTestsHelper) -> DocumentStruct {
+    private func createStruct(_ title: String = "Document Title", _ id: String?, _ helper: DocumentManagerTestsHelper) -> DocumentStruct {
         var docStruct = helper.createDocumentStruct(title: title, id: id)
         docStruct = helper.saveLocally(docStruct)
 
