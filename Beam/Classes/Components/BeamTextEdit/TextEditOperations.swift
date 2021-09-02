@@ -164,10 +164,9 @@ extension TextRoot {
         }
 
         guard let node = focusedWidget as? ElementNode,
-              let nodeParent = node.parent as? ElementNode
-        else {
-            return
-        }
+              let parentElement = node.displayedElement.parent,
+              let nodeParent = node.parent
+        else { return }
 
         focusedCmdManager.beginGroup(with: "Delete forward")
         defer {
@@ -218,13 +217,13 @@ extension TextRoot {
                 // we are at the start of the element node, we can just delete it and move all its children to the previous node
                 guard let nextNode = node.nextVisibleNode(ElementNode.self) else {
                     let newNextElement = BeamElement()
-                    focusedCmdManager.insertElement(newNextElement, inNode: nodeParent, afterNode: node)
+                    focusedCmdManager.insertElement(newNextElement, inElement: parentElement, afterElement: node.displayedElement)
                     let newNode = nodeFor(newNextElement, withParent: nodeParent)
                     focusedCmdManager.focusElement(newNode, cursorPosition: 0)
                     focusedCmdManager.deleteElement(for: node)
                     return
                 }
-                moveChildrenOf(node, to: nodeParent, atOffset: node.displayedElement.indexInParent)
+                moveChildrenOf(node.displayedElement, to: parentElement, atOffset: node.displayedElement.indexInParent)
                 focusedCmdManager.focusElement(nextNode, cursorPosition: 0)
                 focusedCmdManager.deleteElement(for: node)
             }
@@ -238,6 +237,13 @@ extension TextRoot {
         }
     }
 
+    func moveChildrenOf(_ element: BeamElement, to newParent: BeamElement, atOffset: Int? = nil) {
+        let offset = atOffset ?? newParent.children.count
+        for (i, child) in element.children.enumerated() {
+            focusedCmdManager.reparentElement(child, to: newParent, atIndex: offset + i)
+        }
+    }
+
     //swiftlint:disable:next cyclomatic_complexity function_body_length
     public func deleteBackward() {
         guard root?.state.nodeSelection == nil else {
@@ -247,10 +253,9 @@ extension TextRoot {
         }
 
         guard let node = focusedWidget as? ElementNode,
-              let nodeParent = node.parent as? ElementNode
-        else {
-            return
-        }
+              let parentElement = node.displayedElement.parent,
+              let nodeParent = node.parent
+        else { return }
 
         focusedCmdManager.beginGroup(with: "Delete backward")
         defer {
@@ -323,7 +328,7 @@ extension TextRoot {
                 // but if the node is the first node then we must replace it with an empty text node
                 let prevNode = node.previousVisibleNode(ElementNode.self) ?? {
                     let newPrevElement = BeamElement()
-                    focusedCmdManager.insertElement(newPrevElement, inNode: nodeParent, afterNode: node)
+                    focusedCmdManager.insertElement(newPrevElement, inElement: parentElement, afterElement: node.displayedElement)
                     return nodeFor(newPrevElement, withParent: nodeParent)
                 }()
                 if prevNode.displayedElement.children.isEmpty {
