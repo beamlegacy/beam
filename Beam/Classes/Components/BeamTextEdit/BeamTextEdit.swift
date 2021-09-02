@@ -344,9 +344,6 @@ public extension CALayer {
             invalidateIntrinsicContentSize()
         }
     }
-    var cmdManager: CommandManager<Widget> {
-        rootNode.cmdManager
-    }
 
     // This is the node that the user is currently editing. It can be any node in the rootNode tree
     var focusedWidget: Widget? {
@@ -548,12 +545,12 @@ public extension CALayer {
             rootNode.insertNewline()
             hideInlineFormatter()
         } else if ctrl, let textNode = node as? TextNode, case let .check(checked) = node.elementKind {
-            cmdManager.formatText(in: textNode, for: .check(!checked), with: nil, for: nil, isActive: false)
+            node.cmdManager.formatText(in: textNode, for: .check(!checked), with: nil, for: nil, isActive: false)
         } else if inlineFormatter?.formatterHandlesEnter() != true {
             hideInlineFormatter()
-            cmdManager.beginGroup(with: "Insert line")
+            node.cmdManager.beginGroup(with: "Insert line")
             defer {
-                cmdManager.endGroup()
+                node.cmdManager.endGroup()
             }
 
             guard let node = node as? TextNode, !node.readOnly else {
@@ -575,35 +572,35 @@ public extension CALayer {
             let range = rootNode.cursorPosition ..< node.text.count
             let str = node.text.extract(range: range)
             if !range.isEmpty {
-                cmdManager.deleteText(in: node, for: range)
+                node.cmdManager.deleteText(in: node, for: range)
             }
 
             let newElement = BeamElement(str)
             if insertAsChild {
                 if let parent = node._displayedElement {
                     parent.open = true
-                    cmdManager.insertElement(newElement, inElement: parent, afterElement: nil)
+                    node.cmdManager.insertElement(newElement, inElement: parent, afterElement: nil)
                 } else {
                     node.open = true
-                    cmdManager.insertElement(newElement, inNode: node, afterElement: nil)
+                    node.cmdManager.insertElement(newElement, inNode: node, afterElement: nil)
                 }
             } else {
                 guard let parent = node.parent as? ElementNode else { return }
                 let children = node.element.children
 
-                cmdManager.insertElement(newElement, inNode: parent, afterNode: node)
+                parent.cmdManager.insertElement(newElement, inNode: parent, afterNode: node)
                 guard let newElement = node.nodeFor(newElement)?.element else { return }
                 newElement.open = node.open
                 // reparent all children of node to newElement
                 if isOpenWithChildren || !node.open && children.count > 0 && rootNode.cursorPosition == 0 {
                     for child in children {
-                        cmdManager.reparentElement(child, to: newElement, atIndex: newElement.children.count)
+                        node.cmdManager.reparentElement(child, to: newElement, atIndex: newElement.children.count)
                     }
                 }
             }
 
             if let toFocus = node.nodeFor(newElement) {
-                cmdManager.focusElement(toFocus, cursorPosition: 0)
+                toFocus.cmdManager.focusElement(toFocus, cursorPosition: 0)
             }
         }
     }
@@ -842,7 +839,7 @@ public extension CALayer {
             undoManager.undo()
             return
         }
-        _ = rootNode.note?.cmdManager.undo(context: rootNode.cmdContext)
+        _ = rootNode.focusedCmdManager.undo(context: rootNode.cmdContext)
     }
 
     @IBAction func redo(_ sender: Any) {
@@ -850,7 +847,7 @@ public extension CALayer {
             undoManager.redo()
             return
         }
-        _ = rootNode.note?.cmdManager.redo(context: rootNode.cmdContext)
+        _ = rootNode.focusedCmdManager.redo(context: rootNode.cmdContext)
     }
 
     // MARK: Input detector properties
