@@ -141,7 +141,7 @@ class LinksSection: Widget {
                 return false
             }
 
-            return leftDate > rightDate
+            return leftDate < rightDate
         }
     }
 
