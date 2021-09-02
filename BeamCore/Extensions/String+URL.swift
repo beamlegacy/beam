@@ -13,9 +13,11 @@ public extension String {
         return self.addingPercentEncoding(withAllowedCharacters: CharacterSet(charactersIn: "()").inverted)
     }
 
-    var urlString: URL? {
-        guard mayBeURL else { return nil }
-        guard let url = URL(string: self) ?? URL(string: "https://" + self) else { return nil }
+    var toEncodedURL: URL? {
+        guard mayBeURL,
+              let encodedString = self.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
+              let url = URL(string: encodedString) ?? URL(string: self)
+        else { return nil }
         return url
     }
 
