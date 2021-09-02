@@ -43,8 +43,8 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var clusteringManager: ClusteringManager
     var activeSources = ActiveSources()
     var scope = Set<AnyCancellable>()
-    var browsingTreeSender: BrowsingTreeSender?
     let sessionId = UUID()
+    var browsingTreeSender: BrowsingTreeSender?
     var noteFrecencyScorer: FrecencyScorer = ExponentialFrecencyScorer(storage: GRDBNoteFrecencyStorage())
     var versionChecker: VersionChecker
 
@@ -129,7 +129,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
             dataStoreUrl: EnvironmentVariables.BrowsingTree.url,
             dataStoreApiToken: EnvironmentVariables.BrowsingTree.accessToken
         )
-        browsingTreeSender = BrowsingTreeSender(config: treeConfig)
+        browsingTreeSender = BrowsingTreeSender(config: treeConfig, appSessionId: sessionId)
 
         super.init()
 

@@ -85,48 +85,6 @@ class BrowsingTreeScoreTests: XCTestCase {
         score0.lastEvent = ReadingEvent(type: .switchToBackground, date: BeamDate.now)
         XCTAssert(score1.clusteringRemovalLessThan(score0, date: BeamDate.now))
     }
-    func testDeserialization() {
-
-        let jsonTree = """
-        {"origin": {"type": "searchBar", "value": "patrick dewaere"},
-         "root": {"children": [{"events": [{"date": 643295386.78019,
-                                            "type": "creation"},
-                                           {"date": 643295386.780228,
-                                            "type": "startReading"},
-                                           {"date": 643295391.950899,
-                                            "type": "navigateToLink"},
-                                           {"date": 643295421.472989,
-                                            "type": "startReading"},
-                                           {"date": 643295439.820442,
-                                            "type": "navigateToLink"},
-                                           {"date": 643295446.507388,
-                                            "type": "startReading"}],
-                                "id": "4045225C-5E34-4520-9C46-BC7450837F6F",
-                                "link": 218}],
-                  "events": [{"date": 643295384.698409, "type": "creation"},
-                             {"date": 643295385.234729, "type": "startReading"},
-                             {"date": 643295386.780153, "type": "searchBarNavigation"}],
-                  "id": "313D8A29-1C6D-4A0A-9970-12293C1CCA2B",
-                  "link": 78},
-         "scores": [218,
-                    {"area": 3747357,
-                     "inbounds": 0,
-                     "openIndex": 0,
-                     "outbounds": 0,
-                     "readingTime": 0,
-                     "scrollRatioX": 0,
-                     "scrollRatioY": 0.34304097294807434,
-                     "textAmount": 1594,
-                     "textSelections": 0,
-                     "videoReadingDuration": 0,
-                     "videoTotalDuration": 0}]}
-        """.data(using: .utf8)!
-
-        let decoder = JSONDecoder()
-        do {
-            _ = try decoder.decode(BrowsingTree.self, from: jsonTree)
-        } catch { XCTFail("Error: \(error)") }
-    }
 
     func testNodeVisitType() {
         // First case: root node
@@ -143,7 +101,7 @@ class BrowsingTreeScoreTests: XCTestCase {
         testRootChildVisitType(origin: BrowsingTreeOrigin.searchBar(query: "beam"), expected: FrecencyEventType.webSearchBar)
         testRootChildVisitType(origin: BrowsingTreeOrigin.searchFromNode(nodeText: "beam"), expected: FrecencyEventType.webFromNote)
         testRootChildVisitType(origin: BrowsingTreeOrigin.linkFromNote(noteName: "beam beam"), expected: FrecencyEventType.webFromNote)
-        testRootChildVisitType(origin: BrowsingTreeOrigin.browsingNode(id: UUID()), expected: FrecencyEventType.webLinkActivation)
+        testRootChildVisitType(origin: BrowsingTreeOrigin.browsingNode(id: UUID(), pageLoadId: nil, rootOrigin: nil), expected: FrecencyEventType.webLinkActivation)
 
         //controls visitType value of a root grand child node
         func testAnyOtherNodeVisitType(isLinkActivation: Bool, expected visitType: FrecencyEventType) {

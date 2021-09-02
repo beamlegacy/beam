@@ -790,6 +790,7 @@
 		BAA67FA1EA0AEC590CEE0AB8 /* WebNavigationContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67226F0A10301D829E071 /* WebNavigationContext.swift */; };
 		BAA67FC2BABDCB5F962CDE22 /* Frames.test.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA678F7FE18AF760346FB0B /* Frames.test.ts */; };
 		DA0EA7172698400400BD5D2F /* LongTermUrlScoreStoreTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0EA7162698400400BD5D2F /* LongTermUrlScoreStoreTest.swift */; };
+		DA1EB2A126CD33D5006AEB86 /* WebSessionizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1EB2A026CD33D5006AEB86 /* WebSessionizer.swift */; };
 		DA3239D8269DDE2F00A1F4C3 /* LongTermUrlScore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3239D7269DDE2F00A1F4C3 /* LongTermUrlScore.swift */; };
 		DA3239DE269DE06F00A1F4C3 /* LongTermUrlScore+GRDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3239DD269DE06F00A1F4C3 /* LongTermUrlScore+GRDB.swift */; };
 		DA3E41D42642CC7900BA3952 /* TextSaver.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3E41BF2642CC7900BA3952 /* TextSaver.swift */; };
@@ -809,6 +810,7 @@
 		DAEEA73B26A5C4A600AE72DE /* NoteSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEEA73A26A5C4A600AE72DE /* NoteSource.swift */; };
 		DAEEA74826A6B96A00AE72DE /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEEA74726A6B96A00AE72DE /* Utilities.swift */; };
 		DAEEA77C26A701CC00AE72DE /* NoteSourceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEEA77B26A701CC00AE72DE /* NoteSourceTests.swift */; };
+		DAF51C4F26CE63DE007BB121 /* BrowsingTreeTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF51C4E26CE63DE007BB121 /* BrowsingTreeTest.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -1756,6 +1758,7 @@
 		BAA67F65A4275DE0B884B933 /* index_native.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = index_native.js; sourceTree = "<group>"; };
 		BAA67FFE49752420EA6C9833 /* Native.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = Native.ts; sourceTree = "<group>"; };
 		DA0EA7162698400400BD5D2F /* LongTermUrlScoreStoreTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LongTermUrlScoreStoreTest.swift; sourceTree = "<group>"; };
+		DA1EB2A026CD33D5006AEB86 /* WebSessionizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSessionizer.swift; sourceTree = "<group>"; };
 		DA3239D7269DDE2F00A1F4C3 /* LongTermUrlScore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LongTermUrlScore.swift; sourceTree = "<group>"; };
 		DA3239DD269DE06F00A1F4C3 /* LongTermUrlScore+GRDB.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "LongTermUrlScore+GRDB.swift"; sourceTree = "<group>"; };
 		DA3E41BF2642CC7900BA3952 /* TextSaver.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextSaver.swift; sourceTree = "<group>"; };
@@ -1774,6 +1777,7 @@
 		DAEEA73A26A5C4A600AE72DE /* NoteSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteSource.swift; sourceTree = "<group>"; };
 		DAEEA74726A6B96A00AE72DE /* Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
 		DAEEA77B26A701CC00AE72DE /* NoteSourceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteSourceTests.swift; sourceTree = "<group>"; };
+		DAF51C4E26CE63DE007BB121 /* BrowsingTreeTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowsingTreeTest.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -3255,6 +3259,7 @@
 		96319C9C261614CB00D1CF31 /* BeamCore */ = {
 			isa = PBXGroup;
 			children = (
+				DA1EB29826CD3312006AEB86 /* Browsing */,
 				DA0EA6FB269836B600BD5D2F /* Score */,
 				523A32C72677648700606768 /* Configuration */,
 				96319C91261614C000D1CF31 /* BeamCore.h */,
@@ -3298,18 +3303,14 @@
 			isa = PBXGroup;
 			children = (
 				4E6097A326CE8A6F00F90260 /* ActiveSources.swift */,
-				DAA60C182666892600C927E5 /* SessionLinkRanker.swift */,
-				9691E41325AF61BA00A13080 /* BrowsingTree.swift */,
 				96F93617258CFDD2006D8E53 /* BeamText.swift */,
 				418171702581107C00317ED8 /* BeamElement.swift */,
 				418171842581107C00317ED8 /* BeamNote.swift */,
 				527F370C26C6C42000BA9A25 /* BeamNote+Debug.swift */,
 				96319CB22616155300D1CF31 /* BeamText+String.swift */,
 				96319CC8261616B300D1CF31 /* BeamText+Links.swift */,
-				4181716D2581107C00317ED8 /* Score.swift */,
 				96C1D7EA2624C0ED0085FD23 /* BeamElement+Text.swift */,
 				A0EDF5DA266EE08C0079803E /* BeamPlaceholder.swift */,
-				BAA678DCBD094131A9BC96F2 /* BrowsingSession.swift */,
 				DAEEA73A26A5C4A600AE72DE /* NoteSource.swift */,
 				969CE3E926CB7B01000AEF37 /* BeamNoteType.swift */,
 			);
@@ -3339,6 +3340,7 @@
 		96319D1D2616232700D1CF31 /* BeamCoreTests */ = {
 			isa = PBXGroup;
 			children = (
+				DAF51C4E26CE63DE007BB121 /* BrowsingTreeTest.swift */,
 				DA63D518267CF28800D7C756 /* FrecencyScorerTest.swift */,
 				DA76129726614E5A00349F2C /* BrowsingTreeScoreTests.swift */,
 				A5CA5DF42625C15D004E9D3E /* BeamElementTextStatsTests.swift */,
@@ -3919,6 +3921,18 @@
 				DAEEA74726A6B96A00AE72DE /* Utilities.swift */,
 			);
 			path = Score;
+			sourceTree = "<group>";
+		};
+		DA1EB29826CD3312006AEB86 /* Browsing */ = {
+			isa = PBXGroup;
+			children = (
+				4181716D2581107C00317ED8 /* Score.swift */,
+				BAA678DCBD094131A9BC96F2 /* BrowsingSession.swift */,
+				9691E41325AF61BA00A13080 /* BrowsingTree.swift */,
+				DA1EB2A026CD33D5006AEB86 /* WebSessionizer.swift */,
+				DAA60C182666892600C927E5 /* SessionLinkRanker.swift */,
+			);
+			path = Browsing;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -4533,6 +4547,7 @@
 				96319D3D2616233E00D1CF31 /* BeamText+String.swift in Sources */,
 				96319D372616233E00D1CF31 /* String+LoremIpsum.swift in Sources */,
 				8AB44AAC267CD3AB00D18B65 /* String+Slice.swift in Sources */,
+				DA1EB2A126CD33D5006AEB86 /* WebSessionizer.swift in Sources */,
 				964FE64D262D8ED300966E03 /* Dictionary+valuesMatchingKeys.swift in Sources */,
 				DAEEA73B26A5C4A600AE72DE /* NoteSource.swift in Sources */,
 				96319D3E2616233E00D1CF31 /* String+c99.swift in Sources */,
@@ -4573,6 +4588,7 @@
 				0D45BA382694A1FE00D4E8A5 /* DispatchTime+ChronoTests.swift in Sources */,
 				DA76129826614E5A00349F2C /* BrowsingTreeScoreTests.swift in Sources */,
 				DA63D519267CF28800D7C756 /* FrecencyScorerTest.swift in Sources */,
+				DAF51C4F26CE63DE007BB121 /* BrowsingTreeTest.swift in Sources */,
 				A5CA5DF52625C15D004E9D3E /* BeamElementTextStatsTests.swift in Sources */,
 				963DBB3B2698605600080928 /* BeamTextLinksTests.swift in Sources */,
 				A5A6A428267F123C007F1B2F /* CommandManagerTests.swift in Sources */,
