@@ -13,6 +13,7 @@ struct PointAndShootView: View {
     @State private var isConfirmation: Bool = false
     @State private var offset: CGFloat = 0
     @State private var allowAnimation: Bool = false
+    @State private var wiggleValue: CGFloat = 0
 
     var point: UnitPoint {
         UnitPoint(
@@ -128,6 +129,8 @@ struct PointAndShootView: View {
                         }
                 }
             }
+            .wiggleEffect(animatableValue: wiggleValue)
+            .animation(.spring(response: 0.4, dampingFraction: 0.58), value: wiggleValue)
             .animation(allowAnimation ? .spring(response: 0.4, dampingFraction: 0.58) : nil)
             .zIndex(21) // for animation to work correctly
             .transition(.asymmetric(
@@ -136,6 +139,15 @@ struct PointAndShootView: View {
             ))
             .pointAndShootOffsetWithAnimation(y: offset, animation: .spring(response: 0.2, dampingFraction: 0.58))
             .id(group.id)
+            .onReceive(pns.$shootConfirmationGroup, perform: { group in
+                if group?.confirmation == .failure {
+                    self.wiggleValue = 3
+
+                    DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(100)) {
+                        self.wiggleValue = 0
+                    }
+                }
+            })
         }
     }
 }
