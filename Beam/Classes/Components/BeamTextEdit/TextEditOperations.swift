@@ -264,8 +264,7 @@ extension TextRoot {
 
         // We can't remove the root of a link & ref proxy node:
         if let ref = node as? ProxyTextNode,
-           !(ref.parent is BreadCrumb),
-           !(ref.parent is BlockReferenceNode),
+           (ref.parent is BreadCrumb) || (ref.parent is BlockReferenceNode),
            cursorPosition == 0 {
             if !state.selectedTextRange.isEmpty {
                 cmdManager.deleteText(in: ref, for: rangeToDeleteText(in: ref, cursorAt: cursorPosition, forward: false))
