@@ -168,7 +168,7 @@ class DocumentManagerTestsHelper {
     }
 
     private let faker = Faker(locale: "en-US")
-    func createDocumentStruct(title titleParam: String = "Title Document",
+    func createDocumentStruct(title titleParam: String = String.randomTitle(),
                               id: String? = nil) -> DocumentStruct {
         var uuid = UUID()
         if let id = id, let newuuid = UUID(uuidString: id) { uuid = newuuid }
