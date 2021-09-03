@@ -6,6 +6,22 @@ extension DocumentManager: BeamObjectManagerDelegate {
         Self.cancelAllPreviousThrottledAPICall()
     }
 
+    func saveObjectsAfterConflict(_ objects: [DocumentStruct]) throws {
+        let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
+
+        try context.performAndWait {
+            for updateObject in objects {
+                guard let documentCoreData = try? Document.fetchWithId(context, updateObject.id) else {
+                    throw DocumentManagerError.localDocumentNotFound
+                }
+                documentCoreData.data = updateObject.data
+                documentCoreData.beam_object_previous_checksum = updateObject.previousChecksum
+                documentCoreData.beam_api_data = updateObject.data
+            }
+            try Self.saveContext(context: context)
+        }
+    }
+
     static var conflictPolicy: BeamObjectConflictResolution = .fetchRemoteAndError
 
     func persistChecksum(_ objects: [DocumentStruct]) throws {
