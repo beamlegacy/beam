@@ -22,11 +22,15 @@ xctests:
     - time bundle exec fastlane tests
   after_script:
     - rm "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/Beam-test-${CI_JOB_ID}"*
+    - rm "${HOME}/Library/Containers/co.beamapp.macos.dev/Data/Library/Application Support/Beam/Beam-test-${CI_JOB_ID}"*
     - mkdir -p logs
     - mv ${HOME}/Library/Logs/scan/*.log logs
     - mv ${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Logs/Beam/*.log logs
+    - mv ${HOME}/Library/Containers/co.beamapp.macos.dev/Data/Library/Logs/Beam/*.log logs
     - rm -r "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Logs/Beam/Vinyl/${CI_JOB_ID}"
     - rm -r "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/BeamData-test-${CI_JOB_ID}"
+    - rm -r "${HOME}/Library/Containers/co.beamapp.macos.dev/Data/Library/Logs/Beam/Vinyl/${CI_JOB_ID}"
+    - rm -r "${HOME}/Library/Containers/co.beamapp.macos.dev/Data/Library/Application Support/Beam/BeamData-test-${CI_JOB_ID}"
   tags:
     - macos-mono
   interruptible: true
