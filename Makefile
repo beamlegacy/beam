@@ -150,7 +150,7 @@ delete_db_files:
 	rm -f ${HOME}/Library/Containers/co.beamapp.macos.dev/Data/Library/Application\ Support/Beam/Beam-*.sqlite*
 
 copy_vinyl_files:
-	tar -a -cf BeamTests/Vinyl.tar.bz2 -C ${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Logs/Beam/Vinyl/ .
+	tar -a -cf BeamTests/Vinyl.tar.bz2 -C ${HOME}/Library/Containers/co.beamapp.macos.dev/Data/Library/Logs/Beam/Vinyl/ .
 
 reset_vinyl_files:
 	rm -rf ${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Logs/Beam/Vinyl/*.json
@@ -158,6 +158,7 @@ reset_vinyl_files:
 
 extract_vinyl_files:
 	tar -xf BeamTests/Vinyl.tar.bz2 -C ${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Logs/Beam/Vinyl/
+	tar -xf BeamTests/Vinyl.tar.bz2 -C ${HOME}/Library/Containers/co.beamapp.macos.dev/Data/Library/Logs/Beam/Vinyl/
 
 js_test:
 	yarn --cwd ./Beam/Classes/Components/PointAndShoot/Web run build
