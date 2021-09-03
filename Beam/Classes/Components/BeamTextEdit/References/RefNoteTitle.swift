@@ -20,7 +20,6 @@ enum RefNoteTitleError: Error {
 class RefNoteTitle: Widget {
     // MARK: - Properties
     var cardTitleLayer: Layer?
-    var titleUnderLine = CALayer()
     var action: () -> Void
 
     private let titleLayer = CATextLayer()
@@ -37,15 +36,12 @@ class RefNoteTitle: Widget {
         self.noteTitle = title
         super.init(parent: parent)
 
-        titleLayer.string = noteTitle.capitalized
-        titleLayer.font = BeamFont.medium(size: 0).nsFont
-        titleLayer.fontSize = 15
-        titleLayer.foregroundColor = BeamColor.LinkedSection.title.cgColor
-
-        titleUnderLine.frame = NSRect(x: 0, y: titleLayer.preferredFrameSize().height, width: titleLayer.preferredFrameSize().width, height: 2)
-        titleUnderLine.backgroundColor = BeamColor.LinkedSection.title.cgColor
-        titleUnderLine.isHidden = true
-        titleLayer.addSublayer(titleUnderLine)
+        titleLayer.string = NSAttributedString(string: noteTitle.capitalized, attributes: [
+            .font: BeamFont.medium(size: 15).nsFont,
+            .foregroundColor: BeamColor.LinkedSection.title.nsColor,
+            .underlineStyle: NSUnderlineStyle.single.rawValue,
+            .underlineColor: BeamColor.Generic.transparent.nsColor
+        ])
 
         cardTitleLayer = ButtonLayer("cardTitleLayer", titleLayer, activated: {[weak self] in
             guard let self = self, self.titleLayer.string as? String != nil else { return }
@@ -54,7 +50,7 @@ class RefNoteTitle: Widget {
         })
         cardTitleLayer?.cursor = .pointingHand
         cardTitleLayer?.hovered = { [weak self] hover in
-            self?.titleUnderLine.isHidden = !hover
+            self?.updateTitleForHover(hover)
         }
 
         addLayer(ChevronButton("chevron", open: open, changed: { [unowned self] value in
@@ -71,6 +67,15 @@ class RefNoteTitle: Widget {
 
     override func updateRendering() -> CGFloat {
         open ? 24 : 44
+    }
+
+    private func updateTitleForHover(_ hover: Bool) {
+        if let attributedString = (titleLayer.string as AnyObject).mutableCopy() as? NSMutableAttributedString {
+            let underlineColor = hover ? BeamColor.LinkedSection.title.nsColor : BeamColor.Generic.transparent.nsColor
+            attributedString.removeAttribute(.underlineColor, range: attributedString.wholeRange)
+            attributedString.addAttributes([.underlineColor: underlineColor], range: attributedString.wholeRange)
+            titleLayer.string = attributedString
+        }
     }
 
     func makeLinksToNoteExplicit(forNote title: String) {
