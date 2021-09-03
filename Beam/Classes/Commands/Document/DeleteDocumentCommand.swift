@@ -32,7 +32,7 @@ class DeleteDocument: DocumentCommand {
 
         if allDocuments {
             documents = context?.loadAll() ?? []
-            context?.deleteAll { result in
+            context?.deleteAll { _ in
                 callback()
                 completion?(true)
             }

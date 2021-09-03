@@ -8,7 +8,7 @@ extension DatabaseManager {
               Configuration.networkEnabled else {
             return .value(false)
         }
-        
+
         let promise: Promise<Bool> = saveAllOnApi()
 
         return promise.then { result -> Promise<Bool> in

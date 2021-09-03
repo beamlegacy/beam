@@ -1,10 +1,11 @@
+// swiftlint:disable file_length
+
 import Foundation
 import CoreData
 import Combine
 import PMKFoundation
 import BeamCore
 
-// swiftlint:disable file_length
 
 enum DocumentManagerError: Error, Equatable {
     case unresolvedConflict
