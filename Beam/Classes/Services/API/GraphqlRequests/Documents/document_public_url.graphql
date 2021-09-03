@@ -1,5 +1,0 @@
-query document($id: ID!) {
-  document(id: $id) {
-    publicUrl
-  }
-}
