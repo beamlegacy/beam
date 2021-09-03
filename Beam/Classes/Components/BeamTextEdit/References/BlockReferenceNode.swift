@@ -193,7 +193,7 @@ class BlockReferenceNode: TextNode {
 
     func showMenu(mouseInfo: MouseInfo) {
         let items = [
-            ContextMenuItem(title: readOnly ? "Edit" : "Stop Editing", action: { [unowned self] in
+            ContextMenuItem(title: readOnly ? "Unlock" : "Lock", action: { [unowned self] in
                 self.readOnly.toggle()
             }),
             ContextMenuItem(title: "View Origin", action: {
