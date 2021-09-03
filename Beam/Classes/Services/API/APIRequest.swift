@@ -309,15 +309,15 @@ extension APIRequest {
                 }
                 return
             }
-            
+
             var countOfBytesReceived: Int64 = 0
             var countOfBytesSent: Int64 = 0
-            
-            if dataTask.responds(to: Selector("countOfBytesReceived")) {
+
+            if dataTask.responds(to: Selector(("countOfBytesReceived"))) {
                 countOfBytesReceived = dataTask.countOfBytesReceived
             }
-            
-            if dataTask.responds(to: Selector("countOfBytesSent")) {
+
+            if dataTask.responds(to: Selector(("countOfBytesSent"))) {
                 countOfBytesSent = dataTask.countOfBytesSent
             }
 
