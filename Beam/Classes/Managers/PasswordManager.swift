@@ -97,6 +97,7 @@ class PasswordManager {
         } catch {
             Logger.shared.logError("Unexpected error: \(error.localizedDescription).", category: .passwordsDB)
         }
+        networkCompletion?(.success(false))
         return nil
     }
 
@@ -120,11 +121,13 @@ class PasswordManager {
             } else {
                 networkCompletion?(.success(false))
             }
+            return
         } catch PasswordDBError.cantDeletePassword(errorMsg: let errorMsg) {
             Logger.shared.logError("Error while deleting password for \(host) - \(username): \(errorMsg)", category: .passwordsDB)
         } catch {
             Logger.shared.logError("Unexpected error: \(error.localizedDescription).", category: .passwordsDB)
         }
+        networkCompletion?(.success(false))
     }
 
     func deleteAll(_ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
@@ -135,11 +138,13 @@ class PasswordManager {
             } else {
                 networkCompletion?(.success(false))
             }
+            return
         } catch PasswordDBError.cantDeletePassword(errorMsg: let errorMsg) {
             Logger.shared.logError("Error while deleting all passwords: \(errorMsg)", category: .passwordsDB)
         } catch {
             Logger.shared.logError("Unexpected error: \(error.localizedDescription).", category: .passwordsDB)
         }
+        networkCompletion?(.success(false))
     }
 
     func realDeleteAll(_ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
@@ -152,11 +157,13 @@ class PasswordManager {
             } else {
                 networkCompletion?(.success(false))
             }
+            return
         } catch PasswordDBError.cantDeletePassword(errorMsg: let errorMsg) {
             Logger.shared.logError("Error while deleting all passwords: \(errorMsg)", category: .passwordsDB)
         } catch {
             Logger.shared.logError("Unexpected error: \(error.localizedDescription).", category: .passwordsDB)
         }
+        networkCompletion?(.success(false))
     }
 }
 
