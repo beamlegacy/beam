@@ -211,7 +211,7 @@ import BeamCore
         currentTab?.load(url: url)
     }
 
-    func addNewTab(origin: BrowsingTreeOrigin?, setCurrent: Bool = true, note: BeamNote?, element: BeamElement? = nil, url: URL? = nil, webView: BeamWebView? = nil) -> BrowserTab {
+    func addNewTab(origin: BrowsingTreeOrigin?, setCurrent: Bool = true, note: BeamNote? = nil, element: BeamElement? = nil, url: URL? = nil, webView: BeamWebView? = nil) -> BrowserTab {
         let tab = BrowserTab(state: self, browsingTreeOrigin: origin, originMode: mode, note: note, rootElement: element, webView: webView)
         browserTabsManager.addNewTab(tab, setCurrent: setCurrent, withURL: url)
         mode = .web
@@ -229,7 +229,7 @@ import BeamCore
     }
 
     func createEmptyTab() {
-        _ = addNewTab(origin: nil, note: data.todaysNote)
+        _ = addNewTab(origin: nil)
     }
 
     func createEmptyTabWithCurrentDestinationCard() {
