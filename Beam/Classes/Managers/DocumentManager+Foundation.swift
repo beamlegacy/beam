@@ -336,31 +336,6 @@ extension DocumentManager {
         }
     }
 
-    private func saveDocumentStructOnAPISuccess(_ documentStruct: DocumentStruct,
-                                                _ beam_api_sent_at: Date,
-                                                _ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
-        coreDataManager.persistentContainer.performBackgroundTask { context in
-            guard let documentCoreData = try? Document.fetchWithId(context, documentStruct.id) else {
-                completion?(.failure(DocumentManagerError.localDocumentNotFound))
-                return
-            }
-
-            // We save the remote stored version of the document, to know if we have local changes later
-            // `beam_api_data` stores the last version we sent to the API
-            // `beam_api_checksum` stores the checksum we sent to the API
-            documentCoreData.beam_api_data = documentStruct.data
-            documentCoreData.beam_api_checksum = documentStruct.previousChecksum
-            documentCoreData.beam_api_sent_at = beam_api_sent_at
-
-            do {
-                let success = try Self.saveContext(context: context)
-                completion?(.success(success))
-            } catch {
-                completion?(.failure(error))
-            }
-        }
-    }
-
     // MARK: -
     // MARK: Delete
     func delete(_ ids: [UUID]) throws {

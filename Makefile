@@ -153,6 +153,7 @@ copy_vinyl_files:
 	tar -a -cf BeamTests/Vinyl.tar.bz2 -C ${HOME}/Library/Containers/co.beamapp.macos.dev/Data/Library/Logs/Beam/Vinyl/ .
 
 reset_vinyl_files:
+	rm -rf ${HOME}/Library/Containers/co.beamapp.macos.dev/Data/Library/Logs/Beam/Vinyl/*.json
 	rm -rf ${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Logs/Beam/Vinyl/*.json
 	rm -f BeamTests/Vinyl.tar.bz2
 

@@ -246,34 +246,6 @@ extension DocumentManager: BeamObjectManagerDelegate {
         }
     }
 
-    func saveObjectsAfterConflict(_ objects: [DocumentStruct]) throws {
-        let context = coreDataManager.backgroundContext
-        try context.performAndWait {
-            for document in objects {
-                let localDocument = Document.rawFetchOrCreateWithId(context, document.id)
-
-                if self.isEqual(localDocument, to: document) {
-                    Logger.shared.logDebug("\(document.title) {\(document.id)}: remote is equal to struct version, skip",
-                                           category: .documentNetwork)
-                    continue
-                }
-
-                localDocument.update(document)
-                localDocument.data = document.data
-
-                Logger.shared.logDebug("Saved after conflict \(document.title) {\(document.id)}, set previous checksum \(document.checksum ?? "-")",
-                                       category: .documentNetwork)
-
-                localDocument.beam_object_previous_checksum = document.checksum
-                localDocument.version += 1
-
-                try checkValidations(context, localDocument)
-                self.notificationDocumentUpdate(DocumentStruct(document: localDocument))
-            }
-            try Self.saveContext(context: context)
-        }
-    }
-
     func manageConflict(_ documentStruct: DocumentStruct,
                         _ remoteDocumentStruct: DocumentStruct) throws -> DocumentStruct {
         Logger.shared.logWarning("Could not save \(documentStruct.titleAndId) because of conflict", category: .documentNetwork)

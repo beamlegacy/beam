@@ -265,10 +265,19 @@ class DocumentManagerTestsHelper {
             newDocStruct.data = newRemote.asData
             self.saveRemotelyOnly(newDocStruct)
             BeamDate.travel(-20)
-
+            
             // savingRemotely changed previousData and checksum but we want to "simulate" that remote saves from another
             // device, needing to rewrite the local version we had before
-            docStruct = saveLocally(localStruct)
+            // docStruct = saveLocally(localStruct)
+            guard let document = try? Document.fetchWithId(CoreDataManager.shared.mainContext, docStruct.id) else {
+                fail("Couldn't fetch document")
+                return docStruct
+            }
+
+            document.beam_api_data = localStruct.previousData
+            document.beam_object_previous_checksum = localStruct.beamObjectPreviousChecksum
+            document.beam_api_checksum = localStruct.previousChecksum
+            _ = try? DocumentManager.saveContext(context: CoreDataManager.shared.mainContext)
         }
 
         localDocStruct = documentManager.loadById(id: docStruct.id)
