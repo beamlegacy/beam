@@ -249,8 +249,8 @@ extension BeamObjectManagerDelegate {
         return networkTask
     }
 
-    func manageInvalidChecksum(_ error: Error,
-                               _ completion: @escaping ((Result<[BeamObjectType], Error>) -> Void)) {
+    internal func manageInvalidChecksum(_ error: Error,
+                                        _ completion: @escaping ((Result<[BeamObjectType], Error>) -> Void)) {
         // Early return except for checksum issues.
         guard case BeamObjectManagerObjectError<BeamObjectType>.invalidChecksum(let conflictedObjects,
                                                                                 let goodObjects,
@@ -301,9 +301,9 @@ extension BeamObjectManagerDelegate {
     }
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
-    func manageMultipleErrors(_ objects: [BeamObjectType],
-                              _ errors: [Error],
-                              _ completion: @escaping ((Result<[BeamObjectType], Error>) -> Void)) {
+    internal func manageMultipleErrors(_ objects: [BeamObjectType],
+                                       _ errors: [Error],
+                                       _ completion: @escaping ((Result<[BeamObjectType], Error>) -> Void)) {
 
         var newObjects: [BeamObjectType] = []
         var goodObjects: [BeamObjectType] = []
