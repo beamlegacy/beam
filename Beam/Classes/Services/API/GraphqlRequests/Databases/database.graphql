@@ -1,9 +1,0 @@
-query($id: ID!) {
-  database(id: $id) {
-    id
-    title
-    createdAt
-    updatedAt
-    deletedAt
-  }
-}

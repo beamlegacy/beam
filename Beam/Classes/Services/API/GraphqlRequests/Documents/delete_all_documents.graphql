@@ -1,9 +1,0 @@
-mutation DeleteAllDocuments {
-  deleteAllDocuments(input: {}) {
-    success
-    errors {
-      path
-      message
-    }
-  }
-}
