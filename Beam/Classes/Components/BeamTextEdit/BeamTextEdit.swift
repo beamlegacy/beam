@@ -101,7 +101,6 @@ public extension CALayer {
     let cardSeparatorLayer = CALayer()
     let cardTitleLayer = CATextLayer()
     let cardTimeLayer = CATextLayer()
-    let titleUnderLine = CALayer()
 
     private (set) var isResizing = false
     public private (set) var journalMode: Bool
@@ -374,20 +373,23 @@ public extension CALayer {
         cardHeaderLayer.enableAnimations = false
         cardHeaderLayer.isHidden = !showTitle
 
-        cardTitleLayer.foregroundColor = BeamColor.Generic.text.cgColor
-        cardTitleLayer.font = BeamFont.medium(size: PreferencesManager.editorCardTitleFontSize).nsFont
-        cardTitleLayer.fontSize = PreferencesManager.editorCardTitleFontSize // TODO: Change later (isBig ? 30 : 26)
-        cardTitleLayer.string = cardNote.title
-
-        if journalMode {
-            titleUnderLine.frame = NSRect(x: 0, y: cardTitleLayer.preferredFrameSize().height, width: cardTitleLayer.preferredFrameSize().width, height: 2)
-            titleUnderLine.backgroundColor = BeamColor.AlphaGray.cgColor
-            titleUnderLine.isHidden = true
-            cardTitleLayer.addSublayer(titleUnderLine)
-        }
-
+        cardTitleLayer.string = NSAttributedString(string: cardNote.title, attributes: [
+            .font: BeamFont.medium(size: PreferencesManager.editorCardTitleFontSize).nsFont,
+            .foregroundColor: BeamColor.Generic.text.nsColor,
+            .underlineStyle: NSUnderlineStyle.single.rawValue,
+            .underlineColor: BeamColor.Generic.transparent.nsColor
+        ])
         cardHeaderLayer.addSublayer(cardTitleLayer)
         addToMainLayer(cardHeaderLayer)
+    }
+
+    private func updateCardTitleForHover(_ hover: Bool) {
+        if let attributedString = (cardTitleLayer.string as AnyObject).mutableCopy() as? NSMutableAttributedString {
+            let underlineColor = hover ? BeamColor.Generic.text.nsColor : BeamColor.Generic.transparent.nsColor
+            attributedString.removeAttribute(.underlineColor, range: attributedString.wholeRange)
+            attributedString.addAttributes([.underlineColor: underlineColor], range: attributedString.wholeRange)
+            cardTitleLayer.string = attributedString
+        }
     }
 
     private var cardHeaderPosY: CGFloat {
@@ -951,12 +953,12 @@ public extension CALayer {
     }
 
     override public func mouseMoved(with event: NSEvent) {
-        if journalMode {
+        if showTitle {
             let titleCoord = cardTitleLayer.convert(event.locationInWindow, from: nil)
-            titleUnderLine.isHidden = !cardTitleLayer.contains(titleCoord)
-            if cardTitleLayer.contains(titleCoord) {
-                let cursor: NSCursor = .pointingHand
-                cursor.set()
+            let hoversCardTitle = cardTitleLayer.contains(titleCoord)
+            updateCardTitleForHover(hoversCardTitle)
+            if hoversCardTitle {
+                NSCursor.pointingHand.set()
                 return
             }
         }
@@ -1025,7 +1027,7 @@ public extension CALayer {
         guard !(inputContext?.handleEvent(event) ?? false) else { return }
         stopSelectionDrag()
 
-        if journalMode {
+        if showTitle {
             let titleCoord = cardTitleLayer.convert(event.locationInWindow, from: nil)
             if cardTitleLayer.contains(titleCoord) {
                 guard let cardNote = note as? BeamNote else { return }
