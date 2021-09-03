@@ -392,9 +392,7 @@ class PasswordsDB: PasswordStore {
         do {
             return try dbPool.write { db in
                 let passwords = try PasswordRecord.fetchAll(db)
-                try PasswordRecord
-                    .filter(Column("deletedAt") == nil)
-                    .deleteAll(db)
+                try PasswordRecord.deleteAll(db)
                 return passwords
             }
         } catch {
