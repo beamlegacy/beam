@@ -100,13 +100,13 @@ extension AutocompleteManager {
                 case .failure(let error): promise(.failure(error))
                 case .success(let historyResults):
                     let autocompleteResults = historyResults.map { result -> AutocompleteResult in
-                        var urlString = result.url
-                        let url = URL(string: urlString)
+                        var information: String? = result.url
+                        let url = URL(string: result.url)
                         if let url = url {
-                            urlString = url.urlStringWithoutScheme
+                            information = url.urlStringWithoutScheme.removingPercentEncoding
                         }
                         return AutocompleteResult(text: result.title, source: .history,
-                                                  url: url, information: urlString, completingText: query, score: result.frecency?.frecencySortScore)
+                                                  url: url, information: information, completingText: query, score: result.frecency?.frecencySortScore)
                     }
                     promise(.success(autocompleteResults))
                 }
@@ -118,7 +118,7 @@ extension AutocompleteManager {
         Future { promise in
             let results = LinkStore.shared.getLinks(matchingUrl: query).map { result -> AutocompleteResult in
                 let url = URL(string: result.url)
-                let text = url?.urlStringWithoutScheme ?? result.url
+                let text = url?.urlStringWithoutScheme.removingPercentEncoding ?? result.url
                 return AutocompleteResult(text: text, source: .url, url: url,
                                           information: result.title, completingText: query)
             }
