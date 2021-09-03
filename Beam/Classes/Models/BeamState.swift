@@ -310,8 +310,8 @@ import BeamCore
             }
             mode = .web
 
-        case .note:
-            navigateToNote(id: result.uuid)
+        case .note(let noteId, _):
+            navigateToNote(id: noteId ?? result.uuid)
 
         case .createCard:
             navigateToNote(createNoteForQuery(result.text))
