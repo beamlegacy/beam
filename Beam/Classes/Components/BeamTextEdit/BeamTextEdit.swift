@@ -77,6 +77,10 @@ public extension CALayer {
         rootNode = TextRoot(editor: self, element: BeamElement())
         // Remove all subsciptions:
         noteCancellables.removeAll()
+        safeContentSize = .zero
+        realContentSize = .zero
+        scroll(.zero)
+        invalidateIntrinsicContentSize()
     }
 
     private var noteCancellables = [AnyCancellable]()
@@ -243,7 +247,7 @@ public extension CALayer {
     public var useFocusRing = false
 
     public var openURL: (URL, BeamElement) -> Void = { _, _ in }
-    public var openCard: (UUID, UUID?) -> Void = { _, _ in }
+    public var openCard: (_ noteId: UUID, _ elementId: UUID?, _ unfold: Bool?) -> Void = { _, _, _ in }
     public var startQuery: (TextNode, Bool) -> Void = { _, _ in }
 
     public var onStartEditing: (() -> Void)?
@@ -334,9 +338,11 @@ public extension CALayer {
     }
 
     // This is the root node of what we are editing:
-    var rootNode: TextRoot!
-    var cmdManager: CommandManager<Widget> {
-        rootNode.cmdManager
+    var rootNode: TextRoot! {
+        didSet {
+            guard oldValue != rootNode else { return }
+            invalidateIntrinsicContentSize()
+        }
     }
 
     // This is the node that the user is currently editing. It can be any node in the rootNode tree
@@ -425,7 +431,9 @@ public extension CALayer {
     public func setHotSpot(_ spot: NSRect) {
         guard !dragging else { return }
         guard !self.visibleRect.contains(spot) else { return }
-        _ = scrollToVisible(spot)
+        var centeredSpot = spot
+        centeredSpot.size.height = max(centeredSpot.size.height, self.visibleRect.height / 2)
+        _ = scrollToVisible(centeredSpot)
     }
 
     var layoutInvalidated = false
@@ -480,6 +488,12 @@ public extension CALayer {
         blinkPhase = true
         hasFocus = true
         invalidate()
+        if focusedWidget == nil {
+            focusedWidget = rootNode.children.first(where: { widget in
+                widget as? ElementNode != nil
+            })
+            focusedWidget?.invalidate()
+        }
         onStartEditing?()
         return true
     }
@@ -503,13 +517,17 @@ public extension CALayer {
         return true
     }
 
-    func focusElement(withId elementId: UUID?, atCursorPosition: Int?, highlight: Bool = false) {
+    func focusElement(withId elementId: UUID?, atCursorPosition: Int?, highlight: Bool = false, unfold: Bool = false) {
         guard let id = elementId,
               let element = note.findElement(id),
               let node = rootNode.nodeFor(element)
         else {
             self.scroll(.zero)
             return
+        }
+        if unfold {
+            node.allParents.forEach { ($0 as? ElementNode)?.unfold() }
+            node.unfold()
         }
         self.setHotSpot(node.frameInDocument)
         self.focusedWidget = node
@@ -527,15 +545,15 @@ public extension CALayer {
             rootNode.insertNewline()
             hideInlineFormatter()
         } else if ctrl, let textNode = node as? TextNode, case let .check(checked) = node.elementKind {
-            cmdManager.formatText(in: textNode, for: .check(!checked), with: nil, for: nil, isActive: false)
+            node.cmdManager.formatText(in: textNode, for: .check(!checked), with: nil, for: nil, isActive: false)
         } else if inlineFormatter?.formatterHandlesEnter() != true {
             hideInlineFormatter()
-            cmdManager.beginGroup(with: "Insert line")
+            node.cmdManager.beginGroup(with: "Insert line")
             defer {
-                cmdManager.endGroup()
+                node.cmdManager.endGroup()
             }
 
-            guard let node = node as? TextNode, (node as? BlockReferenceNode) == nil else {
+            guard let node = node as? TextNode, !node.readOnly else {
                 rootNode.insertElementNearNonTextElement()
                 return
             }
@@ -554,35 +572,35 @@ public extension CALayer {
             let range = rootNode.cursorPosition ..< node.text.count
             let str = node.text.extract(range: range)
             if !range.isEmpty {
-                cmdManager.deleteText(in: node, for: range)
+                node.cmdManager.deleteText(in: node, for: range)
             }
 
             let newElement = BeamElement(str)
             if insertAsChild {
                 if let parent = node._displayedElement {
                     parent.open = true
-                    cmdManager.insertElement(newElement, inElement: parent, afterElement: nil)
+                    node.cmdManager.insertElement(newElement, inElement: parent, afterElement: nil)
                 } else {
                     node.open = true
-                    cmdManager.insertElement(newElement, inNode: node, afterElement: nil)
+                    node.cmdManager.insertElement(newElement, inNode: node, afterElement: nil)
                 }
             } else {
                 guard let parent = node.parent as? ElementNode else { return }
                 let children = node.element.children
 
-                cmdManager.insertElement(newElement, inNode: parent, afterNode: node)
+                parent.cmdManager.insertElement(newElement, inNode: parent, afterNode: node)
                 guard let newElement = node.nodeFor(newElement)?.element else { return }
-
+                newElement.open = node.open
                 // reparent all children of node to newElement
                 if isOpenWithChildren || !node.open && children.count > 0 && rootNode.cursorPosition == 0 {
                     for child in children {
-                        cmdManager.reparentElement(child, to: newElement, atIndex: newElement.children.count)
+                        node.cmdManager.reparentElement(child, to: newElement, atIndex: newElement.children.count)
                     }
                 }
             }
 
             if let toFocus = node.nodeFor(newElement) {
-                cmdManager.focusElement(toFocus, cursorPosition: 0)
+                toFocus.cmdManager.focusElement(toFocus, cursorPosition: 0)
             }
         }
     }
@@ -600,7 +618,11 @@ public extension CALayer {
             switch event.keyCode {
             case KeyCode.escape.rawValue:
                 rootNode.cancelSelection()
-                hideInlineFormatter()
+                if inlineFormatter != nil {
+                    hideInlineFormatter()
+                } else if let node = rootNode.focusedWidget as? ElementNode {
+                    cancelBlockRefEditing(node)
+                }
                 return
             case KeyCode.enter.rawValue:
                 if command && rootNode.state.nodeSelection == nil, inlineFormatter == nil,
@@ -684,6 +706,14 @@ public extension CALayer {
     private func toggleOpen(_ node: ElementNode) {
         hideInlineFormatter()
         node.open.toggle()
+    }
+
+    private func cancelBlockRefEditing(_ node: ElementNode) {
+        var blockRefNode = node as? BlockReferenceNode
+        if node is ProxyNode {
+            blockRefNode = node.allParents.first(where: { $0 is BlockReferenceNode }) as? BlockReferenceNode
+        }
+        blockRefNode?.readOnly = true
     }
 
     /// - Returns: true if action is possible
@@ -809,7 +839,7 @@ public extension CALayer {
             undoManager.undo()
             return
         }
-        _ = rootNode.note?.cmdManager.undo(context: rootNode.cmdContext)
+        _ = rootNode.focusedCmdManager.undo(context: rootNode.cmdContext)
     }
 
     @IBAction func redo(_ sender: Any) {
@@ -817,7 +847,7 @@ public extension CALayer {
             undoManager.redo()
             return
         }
-        _ = rootNode.note?.cmdManager.redo(context: rootNode.cmdContext)
+        _ = rootNode.focusedCmdManager.redo(context: rootNode.cmdContext)
     }
 
     // MARK: Input detector properties
@@ -999,7 +1029,7 @@ public extension CALayer {
             let titleCoord = cardTitleLayer.convert(event.locationInWindow, from: nil)
             if cardTitleLayer.contains(titleCoord) {
                 guard let cardNote = note as? BeamNote else { return }
-                self.openCard(cardNote.id, nil)
+                self.openCard(cardNote.id, nil, nil)
                 return
             }
         }

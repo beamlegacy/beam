@@ -384,7 +384,7 @@ public class TextNode: ElementNode {
 
     public override func updateCursor() {
         guard let editor = self.editor else { return }
-        let on = !readOnly && editor.hasFocus && isFocused && editor.blinkPhase
+        let on = AppDelegate.main.isActive && !readOnly && editor.hasFocus && isFocused && editor.blinkPhase
             && (root?.state.nodeSelection?.nodes.isEmpty ?? true)
             && !isCursorInsideUneditableRange(caretIndex: caretIndex)
 
@@ -541,7 +541,7 @@ public class TextNode: ElementNode {
             return handleRightMouseDown(mouseInfo: mouseInfo)
         }
 
-        if contentsFrame.contains(mouseInfo.position) {
+        if contentsFrame.containsY(mouseInfo.position) {
 
             let clickPos = positionAt(point: mouseInfo.position)
 
@@ -551,7 +551,7 @@ public class TextNode: ElementNode {
             }
 
             if let link = internalLinkAt(point: mouseInfo.position) {
-                editor.openCard(link, nil)
+                editor.openCard(link, nil, nil)
                 return true
             }
 
@@ -776,7 +776,7 @@ public class TextNode: ElementNode {
         return res
     }
 
-    public func caretIndexAvoidingUneditableRange(_ caretIndex: Int, after: Bool) -> Int? {
+    override public func caretIndexAvoidingUneditableRange(_ caretIndex: Int, after: Bool) -> Int? {
         let caret = self.caretAtIndex(caretIndex)
         let sourceIndex = caret.indexInSource
         guard let sourceRange = uneditableRangeAt(index: sourceIndex) else { return nil }
@@ -866,20 +866,22 @@ public class TextNode: ElementNode {
         let lineAbove = currentCaret.line - 1
         guard lineAbove >= 0 else { return 0 }
         let offset = currentCaret.offset
-        return textFrame.carets.firstIndex { caret in
-            caret.line == lineAbove && caret.offset.x >= offset.x
-        } ?? 0
+        return
+            textFrame.carets.firstIndex { $0.line == lineAbove && $0.offset.x >= offset.x }
+            ?? textFrame.carets.lastIndex { $0.line == lineAbove }
+            ?? 0
     }
 
     override public func caretBelow(_ caretIndex: Int) -> Int {
         guard let textFrame = textFrame else { return 0 }
         let currentCaret = textFrame.carets[caretIndex]
-        let lineAbove = currentCaret.line + 1
-        guard lineAbove < textFrame.lines.count else { return textFrame.carets.count - 1 }
+        let lineBelow = currentCaret.line + 1
+        guard lineBelow < textFrame.lines.count else { return textFrame.carets.count - 1 }
         let offset = currentCaret.offset
-        return textFrame.carets.firstIndex { caret in
-            caret.line == lineAbove && caret.offset.x >= offset.x
-        } ?? textFrame.carets.count - 1
+        return
+            textFrame.carets.firstIndex { $0.line == lineBelow && $0.offset.x >= offset.x }
+            ?? textFrame.carets.lastIndex { $0.line == lineBelow }
+            ?? textFrame.carets.count - 1
     }
 
     override public func positionForCaretIndex(_ caretIndex: Int) -> Int {

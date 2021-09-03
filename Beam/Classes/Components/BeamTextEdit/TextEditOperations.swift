@@ -5,8 +5,6 @@
 //  Created by Sebastien Metrot on 26/10/2020.
 //
 
-//TODO: [Seb] create an abstraction for UndoManager to be able to handle faillures and not register empty undo operations. Then replace all _ with the real test
-
 import Foundation
 import BeamCore
 
@@ -33,7 +31,7 @@ extension TextRoot {
               !(node.parent?.isTreeBoundary ?? false),
               let newParent = node.previousSibbling() as? ElementNode
         else { return false }
-        return cmdManager.reparentElement(node, to: newParent, atIndex: newParent.element.children.count)
+        return focusedCmdManager.reparentElement(node, to: newParent, atIndex: newParent.element.children.count)
     }
 
     func decreaseNodeIndentation(_ node: ElementNode) -> Bool {
@@ -45,27 +43,27 @@ extension TextRoot {
               let parentIndexInParent = newParent.id == node.elementId ? node.displayedElement.children.count : prevParent.indexInParent
         else { return false }
 
-        return cmdManager.reparentElement(node.element, to: newParent, atIndex: parentIndexInParent + 1)
+        return focusedCmdManager.reparentElement(node.element, to: newParent, atIndex: parentIndexInParent + 1)
     }
 
     func increaseNodeSelectionIndentation() {
         guard let selection = root?.state.nodeSelection else { return }
 
-        root?.note?.cmdManager.beginGroup(with: "IncreaseIndentationGroup")
+        focusedCmdManager.beginGroup(with: "IncreaseIndentationGroup")
         for node in selection.sortedRoots {
             _ = increaseNodeIndentation(node)
         }
-        root?.note?.cmdManager.endGroup()
+        focusedCmdManager.endGroup()
     }
 
     func decreaseNodeSelectionIndentation() {
         guard let selection = root?.state.nodeSelection else { return }
 
-        root?.note?.cmdManager.beginGroup(with: "DecreaseIndentationGroup")
+        focusedCmdManager.beginGroup(with: "DecreaseIndentationGroup")
         for node in selection.sortedRoots.reversed() {
             _ = decreaseNodeIndentation(node)
         }
-        root?.note?.cmdManager.endGroup()
+        focusedCmdManager.endGroup()
     }
 
     func increaseIndentation() {
@@ -96,14 +94,14 @@ extension TextRoot {
 
         cancelNodeSelection()
 
-        root?.note?.cmdManager.beginGroup(with: "Delete selected nodes")
-        defer { root?.note?.cmdManager.endGroup() }
+        focusedCmdManager.beginGroup(with: "Delete selected nodes")
+        defer { focusedCmdManager.endGroup() }
 
         if let prevWidget = sortedNodes.first?.previousVisibleNode(ElementNode.self) {
-            cmdManager.focusElement(prevWidget, cursorPosition: prevWidget.textCount)
+            focusedCmdManager.focusElement(prevWidget, cursorPosition: prevWidget.textCount)
         } else if let nextVisibleNode = sortedNodes.last?.nextVisibleNode(ElementNode.self) {
             if (nextVisibleNode as? ProxyTextNode) == nil {
-                cmdManager.focusElement(nextVisibleNode, cursorPosition: 0)
+                focusedCmdManager.focusElement(nextVisibleNode, cursorPosition: 0)
             }
         }
 
@@ -113,12 +111,12 @@ extension TextRoot {
             if node.open, let oldIndexInParent = unproxied.indexInParent,
                let newParent = unproxied.previousSibbling() ?? unproxied.parent {
                 for child in node.unproxyElement.children {
-                    cmdManager.reparentElement(child, to: newParent, atIndex: oldIndexInParent)
+                    focusedCmdManager.reparentElement(child, to: newParent, atIndex: oldIndexInParent)
                 }
             }
 
             // Delete Selected Element:
-            cmdManager.deleteElement(for: node.unproxyElement)
+            focusedCmdManager.deleteElement(for: node.unproxyElement)
 
             // Yeah, this sucks, I know
             if let ref = node as? ProxyTextNode,
@@ -132,11 +130,11 @@ extension TextRoot {
         }
 
         if createEmptyNodeInPlace || (createNodeInEmptyParent && root?.element.children.isEmpty == true) {
-            cmdManager.beginGroup(with: "Insert empty element")
+            focusedCmdManager.beginGroup(with: "Insert empty element")
             let newElement = BeamElement()
-            cmdManager.insertElement(newElement, inNode: firstParent, afterElement: nil)
-            cmdManager.focus(newElement, in: firstParent)
-            cmdManager.endGroup()
+            focusedCmdManager.insertElement(newElement, inNode: firstParent, afterElement: nil)
+            focusedCmdManager.focus(newElement, in: firstParent)
+            focusedCmdManager.endGroup()
             if !(editor?.journalMode ?? false) {
                 editor?.scroll(.zero)
             }
@@ -150,11 +148,11 @@ extension TextRoot {
         else { return }
 
         let bText = BeamText(text: str, attributes: root?.state.attributes ?? [])
-        cmdManager.beginGroup(with: "Erase selection")
-        defer { cmdManager.endGroup() }
-        cmdManager.replaceText(in: node, for: selectedTextRange, with: bText)
-        cmdManager.cancelSelection(node)
-        cmdManager.focusElement(node, cursorPosition: selectedTextRange.lowerBound + bText.count)
+        focusedCmdManager.beginGroup(with: "Erase selection")
+        defer { focusedCmdManager.endGroup() }
+        focusedCmdManager.replaceText(in: node, for: selectedTextRange, with: bText)
+        focusedCmdManager.cancelSelection(node)
+        focusedCmdManager.focusElement(node, cursorPosition: selectedTextRange.lowerBound + bText.count)
     }
 
     // swiftlint:disable:next function_body_length
@@ -166,14 +164,13 @@ extension TextRoot {
         }
 
         guard let node = focusedWidget as? ElementNode,
-              let nodeParent = node.parent as? ElementNode
-        else {
-            return
-        }
+              let parentElement = node.displayedElement.parent,
+              let nodeParent = node.parent
+        else { return }
 
-        cmdManager.beginGroup(with: "Delete forward")
+        focusedCmdManager.beginGroup(with: "Delete forward")
         defer {
-            cmdManager.endGroup()
+            focusedCmdManager.endGroup()
         }
 
         if let textNode = node as? TextNode {
@@ -185,19 +182,19 @@ extension TextRoot {
                 // Simple case: the next node contains text:
                 if let nextTextNode = nextNode as? TextNode {
                     let pos = textNode.textCount
-                    cmdManager.insertText(nextTextNode.elementText, in: textNode, at: pos)
+                    focusedCmdManager.insertText(nextTextNode.elementText, in: textNode, at: pos)
                     moveChildrenOf(nextTextNode, to: textNode)
-                    cmdManager.deleteElement(for: nextTextNode)
+                    focusedCmdManager.deleteElement(for: nextTextNode)
                     return
                 }
 
                 // Complex case: the next node contains an embed or an image
-                cmdManager.focusElement(nextNode, cursorPosition: 0)
+                focusedCmdManager.focusElement(nextNode, cursorPosition: 0)
                 deleteForward()
                 return
             } else {
                 // Standard text deletion
-                cmdManager.deleteText(in: textNode, for: rangeToDeleteText(in: textNode, cursorAt: cursorPosition, forward: true))
+                focusedCmdManager.deleteText(in: textNode, for: rangeToDeleteText(in: textNode, cursorAt: cursorPosition, forward: true))
             }
         } else {
             // we are not in a text node
@@ -207,28 +204,28 @@ extension TextRoot {
 
                 // If it's a text node then we must remove the first character from the text node and leave the cursor there
                 if let nextTextNode = nextNode as? TextNode {
-                    cmdManager.focusElement(nextTextNode, cursorPosition: 0)
+                    focusedCmdManager.focusElement(nextTextNode, cursorPosition: 0)
                     deleteForward()
                     return
                 } else {
                     // If the next node is not a text node then we must remove the node altogether and leave the cursor where it is
-                    cmdManager.focusElement(nextNode, cursorPosition: 0)
+                    focusedCmdManager.focusElement(nextNode, cursorPosition: 0)
                     deleteForward()
-                    cmdManager.focusElement(node, cursorPosition: node.textCount)
+                    focusedCmdManager.focusElement(node, cursorPosition: node.textCount)
                 }
             } else {
                 // we are at the start of the element node, we can just delete it and move all its children to the previous node
                 guard let nextNode = node.nextVisibleNode(ElementNode.self) else {
                     let newNextElement = BeamElement()
-                    cmdManager.insertElement(newNextElement, inNode: nodeParent, afterNode: node)
+                    focusedCmdManager.insertElement(newNextElement, inElement: parentElement, afterElement: node.displayedElement)
                     let newNode = nodeFor(newNextElement, withParent: nodeParent)
-                    cmdManager.focusElement(newNode, cursorPosition: 0)
-                    cmdManager.deleteElement(for: node)
+                    focusedCmdManager.focusElement(newNode, cursorPosition: 0)
+                    focusedCmdManager.deleteElement(for: node)
                     return
                 }
-                moveChildrenOf(node, to: nodeParent, atOffset: node.displayedElement.indexInParent)
-                cmdManager.focusElement(nextNode, cursorPosition: 0)
-                cmdManager.deleteElement(for: node)
+                moveChildrenOf(node.displayedElement, to: parentElement, atOffset: node.displayedElement.indexInParent)
+                focusedCmdManager.focusElement(nextNode, cursorPosition: 0)
+                focusedCmdManager.deleteElement(for: node)
             }
         }
     }
@@ -236,7 +233,14 @@ extension TextRoot {
     func moveChildrenOf(_ node: ElementNode, to newParent: ElementNode, atOffset: Int? = nil) {
         let offset = atOffset ?? newParent.children.count
         for (i, child) in node.displayedElement.children.enumerated() {
-            cmdManager.reparentElement(child, to: newParent.displayedElement, atIndex: offset + i)
+            focusedCmdManager.reparentElement(child, to: newParent.displayedElement, atIndex: offset + i)
+        }
+    }
+
+    func moveChildrenOf(_ element: BeamElement, to newParent: BeamElement, atOffset: Int? = nil) {
+        let offset = atOffset ?? newParent.children.count
+        for (i, child) in element.children.enumerated() {
+            focusedCmdManager.reparentElement(child, to: newParent, atIndex: offset + i)
         }
     }
 
@@ -249,76 +253,89 @@ extension TextRoot {
         }
 
         guard let node = focusedWidget as? ElementNode,
-              let nodeParent = node.parent as? ElementNode
-        else {
-            return
+              let parentElement = node.displayedElement.parent,
+              let nodeParent = node.parent
+        else { return }
+
+        focusedCmdManager.beginGroup(with: "Delete backward")
+        defer {
+            focusedCmdManager.endGroup()
         }
 
         // We can't remove the root of a link & ref proxy node:
         if let ref = node as? ProxyTextNode,
-           nil == ref.parent as? BreadCrumb,
+           (ref.parent is BreadCrumb) || (ref.parent is BlockReferenceNode),
            cursorPosition == 0 {
+            if !state.selectedTextRange.isEmpty {
+                cmdManager.deleteText(in: ref, for: rangeToDeleteText(in: ref, cursorAt: cursorPosition, forward: false))
+            }
             return
         }
 
-        cmdManager.beginGroup(with: "Delete backward")
-        defer {
-            cmdManager.endGroup()
-        }
-
-        if let textNode = node as? TextNode {
+        if let textNode = node as? TextNode, !textNode.readOnly {
             if cursorPosition == 0 && state.selectedTextRange.isEmpty {
-                guard let prevNode = node.previousVisibleNode(ElementNode.self) else {
+                guard let prevNode = node.previousVisibleNode(ElementNode.self),
+                      !(node is BlockReferenceNode) else {
                     return
                 }
 
                 // Simple case: the previous node contains text:
                 if let prevTextNode = prevNode as? TextNode {
                     let pos = prevTextNode.textCount
-                    cmdManager.insertText(textNode.elementText, in: prevTextNode, at: pos)
+                    focusedCmdManager.insertText(textNode.elementText, in: prevTextNode, at: pos)
+                    if prevTextNode.displayedElement.children.isEmpty {
+                        prevTextNode.open = textNode.open
+                    }
                     moveChildrenOf(textNode, to: prevTextNode)
-                    cmdManager.focusElement(prevTextNode, cursorPosition: pos)
+                    focusedCmdManager.focusElement(prevTextNode, cursorPosition: pos)
+                    focusedCmdManager.deleteElement(for: textNode)
+                    return
+                }
+
+                if node.textCount == 0 {
+                    // we are in an empty text node: delete it
+                    cmdManager.focusElement(prevNode, cursorPosition: prevNode.textCount)
                     cmdManager.deleteElement(for: textNode)
                     return
                 }
 
                 // Complex case: the previous node contains an embed or an image
-                cmdManager.focusElement(prevNode, cursorPosition: prevNode.textCount)
+                focusedCmdManager.focusElement(prevNode, cursorPosition: prevNode.textCount)
                 deleteBackward()
-                return
             } else {
                 // Standard text deletion
-                cmdManager.deleteText(in: textNode, for: rangeToDeleteText(in: textNode, cursorAt: cursorPosition, forward: false))
+                focusedCmdManager.deleteText(in: textNode, for: rangeToDeleteText(in: textNode, cursorAt: cursorPosition, forward: false))
             }
         } else {
-            // we are not in a text node
+            // we are not in an editable text node
             if cursorPosition == 0 {
                 // We must delete whatever is behind us, unless it's not an element node
                 guard let prevNode = node.previousVisibleNode(ElementNode.self) else { return }
 
                 // If it's a text node then we must remove the last character from the text node and leave the cursor there
                 if let prevTextNode = prevNode as? TextNode {
-                    cmdManager.focusElement(prevTextNode, cursorPosition: prevTextNode.textCount)
+                    focusedCmdManager.focusElement(prevTextNode, cursorPosition: prevTextNode.textCount)
                     deleteBackward()
-
-                    return
                 } else {
                     // If the previous node is not a text node then we must remove the node altogether and leave the cursor where it is
-                    cmdManager.focusElement(prevNode, cursorPosition: prevNode.textCount)
+                    focusedCmdManager.focusElement(prevNode, cursorPosition: prevNode.textCount)
                     deleteBackward()
-                    cmdManager.focusElement(node, cursorPosition: 0)
+                    focusedCmdManager.focusElement(node, cursorPosition: 0)
                 }
             } else {
                 // we are at the end of the element node, we can just delete it and move all its children to the previous node
                 // but if the node is the first node then we must replace it with an empty text node
                 let prevNode = node.previousVisibleNode(ElementNode.self) ?? {
                     let newPrevElement = BeamElement()
-                    cmdManager.insertElement(newPrevElement, inNode: nodeParent, afterNode: node)
+                    focusedCmdManager.insertElement(newPrevElement, inElement: parentElement, afterElement: node.displayedElement)
                     return nodeFor(newPrevElement, withParent: nodeParent)
                 }()
+                if prevNode.displayedElement.children.isEmpty {
+                    prevNode.open = node.open
+                }
                 moveChildrenOf(node, to: prevNode)
-                cmdManager.deleteElement(for: node)
-                cmdManager.focusElement(prevNode, cursorPosition: prevNode.textCount)
+                focusedCmdManager.deleteElement(for: node.element)
+                focusedCmdManager.focusElement(prevNode, cursorPosition: prevNode.textCount)
             }
         }
     }
@@ -358,11 +375,11 @@ extension TextRoot {
 
         if !node.element.text.isEmpty {
             if !selectedTextRange.isEmpty {
-                cmdManager.deleteText(in: node, for: selectedTextRange)
+                focusedCmdManager.deleteText(in: node, for: selectedTextRange)
             }
 
             let bText = BeamText(text: "\n", attributes: [])
-            cmdManager.inputText(bText, in: node, at: cursorPosition)
+            focusedCmdManager.inputText(bText, in: node, at: cursorPosition)
         }
     }
 
@@ -436,14 +453,14 @@ extension TextRoot {
         var hasCmdGroup = false
         if !range.isEmpty {
             hasCmdGroup = true
-            cmdManager.beginGroup(with: "Insert replacing")
-            cmdManager.deleteText(in: node, for: range)
+            focusedCmdManager.beginGroup(with: "Insert replacing")
+            focusedCmdManager.deleteText(in: node, for: range)
         }
 
         let bText = BeamText(text: string, attributes: root?.state.attributes ?? [])
-        cmdManager.inputText(bText, in: node, at: cursorPosition)
+        focusedCmdManager.inputText(bText, in: node, at: cursorPosition)
         if hasCmdGroup {
-            cmdManager.endGroup()
+            focusedCmdManager.endGroup()
         }
         cancelSelection()
         unmarkText()
@@ -477,13 +494,13 @@ extension TextRoot {
         var hasCmdGroup = false
         if !range.isEmpty {
             hasCmdGroup = true
-            cmdManager.beginGroup(with: "Insert replacing")
-            cmdManager.deleteText(in: node, for: range)
+            focusedCmdManager.beginGroup(with: "Insert replacing")
+            focusedCmdManager.deleteText(in: node, for: range)
         }
 
-        cmdManager.inputText(text, in: node, at: cursorPosition)
+        focusedCmdManager.inputText(text, in: node, at: cursorPosition)
         if hasCmdGroup {
-            cmdManager.endGroup()
+            focusedCmdManager.endGroup()
         }
         unmarkText()
     }

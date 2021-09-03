@@ -233,7 +233,10 @@ public struct BeamText: Codable {
     /// - Returns: true is something was actually updated
     public mutating func resolveNotesNames() -> Bool {
         if !internalLinks.isEmpty {
-            ranges = ranges.map({ $0.resolved() })
+            let newRanges = ranges.map({ $0.resolved() })
+            if newRanges != ranges {
+                ranges = newRanges
+            }
             return true
         }
         return false

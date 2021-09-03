@@ -43,8 +43,8 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var clusteringManager: ClusteringManager
     var activeSources = ActiveSources()
     var scope = Set<AnyCancellable>()
-    var browsingTreeSender: BrowsingTreeSender?
     let sessionId = UUID()
+    var browsingTreeSender: BrowsingTreeSender?
     var noteFrecencyScorer: FrecencyScorer = ExponentialFrecencyScorer(storage: GRDBNoteFrecencyStorage())
     var versionChecker: VersionChecker
 
@@ -97,7 +97,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     //swiftlint:disable:next function_body_length
     override init() {
         documentManager = DocumentManager()
-        clusteringManager = ClusteringManager(ranker: sessionLinkRanker, documentManager: documentManager, candidate: 2, navigation: 0.5, text: 0.8, entities: 0.3, sessionId: sessionId, activeSources: activeSources)
+        clusteringManager = ClusteringManager(ranker: sessionLinkRanker, documentManager: documentManager, candidate: 2, navigation: 0.5, text: 0.8, entities: 0.5, sessionId: sessionId, activeSources: activeSources)
         noteAutoSaveService = NoteAutoSaveService()
         linkManager = LinkManager()
         let linkCount = LinkStore.shared.loadFromDB(linkManager: linkManager)
@@ -129,7 +129,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
             dataStoreUrl: EnvironmentVariables.BrowsingTree.url,
             dataStoreApiToken: EnvironmentVariables.BrowsingTree.accessToken
         )
-        browsingTreeSender = BrowsingTreeSender(config: treeConfig)
+        browsingTreeSender = BrowsingTreeSender(config: treeConfig, appSessionId: sessionId)
 
         super.init()
 

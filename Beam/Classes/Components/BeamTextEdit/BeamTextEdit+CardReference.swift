@@ -88,26 +88,30 @@ extension BeamTextEdit {
               let parent = node.parent as? ElementNode
         else { return }
 
-        cmdManager.beginGroup(with: "Insert Block Reference")
-        defer { cmdManager.endGroup() }
+        node.cmdManager.beginGroup(with: "Insert Block Reference")
+        defer { node.cmdManager.endGroup() }
 
         let replacementStart = range.lowerBound - prefix
         let replacementEnd = rootNode.cursorPosition + suffix
         // When the cursor is moved to left, the link should be split in 2 (Bi-di + Plain text)
 
-        cmdManager.insertElement(blockElement, inNode: parent, afterNode: node)
-        cmdManager.deleteText(in: node, for: replacementStart..<replacementEnd)
+        node.cmdManager.insertElement(blockElement, inNode: parent, afterNode: node)
+        node.cmdManager.deleteText(in: node, for: replacementStart..<replacementEnd)
 
         let trailingText: BeamText = node.text.suffix(node.text.count - rootNode.cursorPosition)
 
         if !trailingText.isEmpty {
-            cmdManager.deleteText(in: node, for: rootNode.cursorPosition..<node.text.count)
+            node.cmdManager.deleteText(in: node, for: rootNode.cursorPosition..<node.text.count)
             let trailingBlock = BeamElement(trailingText)
-            cmdManager.insertElement(trailingBlock, inNode: parent, afterElement: blockElement)
+            node.cmdManager.insertElement(trailingBlock, inNode: parent, afterElement: blockElement)
         }
 
         if rootNode.cursorPosition == 0 {
-            cmdManager.deleteElement(for: node)
+            node.cmdManager.deleteElement(for: node)
+        }
+        node.cmdManager.focus(blockElement, in: parent)
+        if let focusedElement = focusedWidget as? ElementNode {
+            node.cmdManager.focusElement(focusedElement, cursorPosition: focusedElement.textCount)
         }
     }
 

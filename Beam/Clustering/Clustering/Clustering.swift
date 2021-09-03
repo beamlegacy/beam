@@ -659,7 +659,7 @@ public class Cluster {
         case .fixedPagesTestNotes:
             let navigationSigmoidMatrix = self.performSigmoidOn(matrix: self.navigationMatrix.matrix, middle: 0.5, beta: self.beta)
             let textSigmoidMatrix = self.performSigmoidOn(matrix: self.textualSimilarityMatrix.matrix, middle: 0.8, beta: self.beta)
-            let entitySigmoidMatrix = self.performSigmoidOn(matrix: self.entitiesMatrix.matrix, middle: 0.3, beta: self.beta)
+            let entitySigmoidMatrix = self.performSigmoidOn(matrix: self.entitiesMatrix.matrix, middle: 0.5, beta: self.beta)
             let adjacencyForPages = textSigmoidMatrix .* navigationSigmoidMatrix + entitySigmoidMatrix
             self.adjacencyMatrix = adjacencyForPages
         }
@@ -689,10 +689,9 @@ public class Cluster {
         while pagesRemoved < 3 {
             if let pageToRemove = ranking.first {
                 if let pageIndexToRemove = self.findPageInPages(pageID: pageToRemove) {
-                    let adjacencyVector = self.adjacencyMatrix[row: pageIndexToRemove + self.notes.count]
-                    if var pageIndexToAttach = adjacencyVector.firstIndex(of: max(adjacencyVector)) {
-                        // TODO: Make sure that it can't be a note. Or the opposite - attach to a note!
-                        pageIndexToAttach -= self.notes.count
+                    var adjacencyVector = self.adjacencyMatrix[row: pageIndexToRemove + self.notes.count]
+                    adjacencyVector.removeFirst(self.notes.count)
+                    if let pageIndexToAttach = adjacencyVector.firstIndex(of: max(adjacencyVector)) {
                         pages[pageIndexToAttach].attachedPages.append(pageToRemove)
                         pages[pageIndexToAttach].attachedPages += pages[pageIndexToRemove].attachedPages
                     }

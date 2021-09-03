@@ -33,6 +33,7 @@ class BrowsingTreeSenderTest: XCTestCase {
 
     var subject: BrowsingTreeSender!
     var session: MockURLSession!
+    var appSessionId: UUID!
 
     override func setUpWithError() throws {
         super.setUp()
@@ -42,7 +43,8 @@ class BrowsingTreeSenderTest: XCTestCase {
             dataStoreUrl: "http://url.fr",
             dataStoreApiToken: "abc"
         )
-        subject = BrowsingTreeSender(session: session, config: testConfig)
+        appSessionId = UUID()
+        subject = BrowsingTreeSender(session: session, config: testConfig, appSessionId: appSessionId)
     }
     override func tearDownWithError() throws {
         PreferencesManager.isPrivacyFilterEnabled = PreferencesManager.privacyFilterDefault
@@ -57,6 +59,7 @@ class BrowsingTreeSenderTest: XCTestCase {
 
         let decoder = JSONDecoder()
         let tree = BrowsingTree(nil)
+        let expectedMapping = [tree.root!.link: "<???>"]
         subject.send(browsingTree: tree)
         let unwrappedData = try sentData(session: session)
 
@@ -64,6 +67,8 @@ class BrowsingTreeSenderTest: XCTestCase {
         XCTAssertEqual(unwrappedData.rootId, tree.root.id)
         XCTAssertEqual(unwrappedData.data.root.id, tree.root.id)
         XCTAssertEqual(unwrappedData.data.current.id, tree.current.id)
+        XCTAssertEqual(unwrappedData.appSessionId, appSessionId)
+        XCTAssertEqual(unwrappedData.idUrlMapping, expectedMapping)
 
         let anotherTree = BrowsingTree(nil)
         subject.send(browsingTree: anotherTree)
@@ -73,7 +78,10 @@ class BrowsingTreeSenderTest: XCTestCase {
         XCTAssertEqual(otherUnwrappedData.rootId, anotherTree.root.id)
         XCTAssertEqual(otherUnwrappedData.data.root.id, anotherTree.root.id)
         XCTAssertEqual(otherUnwrappedData.data.current.id, anotherTree.current.id)
+        XCTAssertEqual(otherUnwrappedData.idUrlMapping, expectedMapping)
         XCTAssertEqual(unwrappedData.userId, otherUnwrappedData.userId)
+        XCTAssertEqual(unwrappedData.appSessionId, otherUnwrappedData.appSessionId)
+
     }
 
     func testCompletionCallOnError() throws {
@@ -119,14 +127,14 @@ class BrowsingTreeSenderTest: XCTestCase {
             dataStoreUrl: "$(BROWSING_TREE_URL)",
             dataStoreApiToken: "abc"
         )
-        var sender = BrowsingTreeSender(session: session, config: missingUrlConfig)
+        var sender = BrowsingTreeSender(session: session, config: missingUrlConfig, appSessionId: appSessionId)
         XCTAssertNil(sender)
 
         let missingTokenConfig = BrowsingTreeSenderConfig(
             dataStoreUrl: "http://url.fr",
             dataStoreApiToken: "$(BROWSING_TREE_ACCESS_TOKEN)"
         )
-        sender = BrowsingTreeSender(session: session, config: missingTokenConfig)
+        sender = BrowsingTreeSender(session: session, config: missingTokenConfig, appSessionId: appSessionId)
         XCTAssertNil(sender)
     }
 }

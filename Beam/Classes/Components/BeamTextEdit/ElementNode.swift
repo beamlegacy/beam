@@ -289,8 +289,11 @@ public class ElementNode: Widget {
     }
 
     override func mouseDown(mouseInfo: MouseInfo) -> Bool {
-        guard contentsFrame.contains(mouseInfo.position) else { return false }
-        focus(position: 0)
+        if mouseInfo.position.x < contentsFrame.width / 2 {
+            focus(position: 0)
+        } else {
+            focus(position: 1)
+        }
         dragMode = .select(0)
         return true
     }
@@ -513,7 +516,7 @@ public class ElementNode: Widget {
 
     public func layoutCursor(_ cursorRect: NSRect) {
         guard let editor = self.editor else { return }
-        let on = editor.hasFocus && isFocused && editor.blinkPhase && (root?.state.nodeSelection?.nodes.isEmpty ?? true)
+        let on = AppDelegate.main.isActive && editor.hasFocus && isFocused && editor.blinkPhase && (root?.state.nodeSelection?.nodes.isEmpty ?? true)
 
         let layer = self.cursorLayer
 
@@ -606,4 +609,13 @@ public class ElementNode: Widget {
     public func positionForCaretIndex(_ caretIndex: Int) -> Int {
         caretIndex
     }
+
+    public func caretIndexAvoidingUneditableRange(_ caretIndex: Int, after: Bool) -> Int? {
+        after ? min(1, caretIndex + 1) : caretIndex
+    }
+
+    override var cmdManager: CommandManager<Widget> {
+        return displayedElement.note?.cmdManager ?? super.cmdManager
+    }
+
 }

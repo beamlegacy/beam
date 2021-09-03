@@ -147,15 +147,15 @@ import BeamCore
         return navigateToNote(note, elementId: elementId)
     }
 
-    @discardableResult func navigateToNote(id: UUID, elementId: UUID? = nil) -> Bool {
+    @discardableResult func navigateToNote(id: UUID, elementId: UUID? = nil, unfold: Bool = false) -> Bool {
         //Logger.shared.logDebug("load note named \(named)")
         guard let note = BeamNote.fetch(data.documentManager, id: id) else {
             return false
         }
-        return navigateToNote(note, elementId: elementId)
+        return navigateToNote(note, elementId: elementId, unfold: unfold)
     }
 
-    @discardableResult func navigateToNote(_ note: BeamNote, elementId: UUID? = nil) -> Bool {
+    @discardableResult func navigateToNote(_ note: BeamNote, elementId: UUID? = nil, unfold: Bool = false) -> Bool {
         mode = .note
 
         guard note != currentNote else { return true }
@@ -165,7 +165,7 @@ import BeamCore
         currentPage = nil
         currentNote = note
         if let elementId = elementId {
-            notesFocusedStates.currentFocusedState = NoteEditFocusedState(elementId: elementId, cursorPosition: 0, highlight: true)
+            notesFocusedStates.currentFocusedState = NoteEditFocusedState(elementId: elementId, cursorPosition: 0, highlight: true, unfold: unfold)
         } else {
             notesFocusedStates.currentFocusedState = notesFocusedStates.getSavedNoteFocusedState(noteId: note.id)
         }
@@ -211,7 +211,7 @@ import BeamCore
         currentTab?.load(url: url)
     }
 
-    func addNewTab(origin: BrowsingTreeOrigin?, setCurrent: Bool = true, note: BeamNote?, element: BeamElement? = nil, url: URL? = nil, webView: BeamWebView? = nil) -> BrowserTab {
+    func addNewTab(origin: BrowsingTreeOrigin?, setCurrent: Bool = true, note: BeamNote? = nil, element: BeamElement? = nil, url: URL? = nil, webView: BeamWebView? = nil) -> BrowserTab {
         let tab = BrowserTab(state: self, browsingTreeOrigin: origin, originMode: mode, note: note, rootElement: element, webView: webView)
         browserTabsManager.addNewTab(tab, setCurrent: setCurrent, withURL: url)
         mode = .web
@@ -229,7 +229,7 @@ import BeamCore
     }
 
     func createEmptyTab() {
-        _ = addNewTab(origin: nil, note: data.todaysNote)
+        _ = addNewTab(origin: nil)
     }
 
     func createEmptyTabWithCurrentDestinationCard() {
@@ -258,13 +258,11 @@ import BeamCore
     }
 
     private func urlFor(query: String) -> URL? {
-        //TODO make a better url detector and rewritter to transform xxx.com in https://xxx.com with less corner cases and clearer code path:
-        let csCopy = CharacterSet(bitmapRepresentation: CharacterSet.urlPathAllowed.bitmapRepresentation)
-        guard query.mayBeURL, let u = URL(string: query.addingPercentEncoding(withAllowedCharacters: csCopy) ?? query) else {
+        guard let url = query.toEncodedURL else {
             searchEngine.query = query
             return URL(string: searchEngine.searchUrl)
         }
-        return u.urlWithScheme
+        return url.urlWithScheme
     }
 
     func startQuery(_ node: TextNode, animated: Bool) {

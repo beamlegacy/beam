@@ -947,5 +947,36 @@ class ClusteringTests: XCTestCase {
 
     }
 
+    func testRemovingPageWithSimilarNote() throws {
+        let cluster = Cluster()
+        cluster.candidate = 3
+        try cluster.performCandidateChange()
+        for i in 0...5 {
+            let myPage = Page(id: UInt64(i), parentId: nil, title: nil, content: "Here's some text for you")
+            // The pages themselves don't matter as we will later force the similarity matrix
+            cluster.pages.append(myPage)
+        }
+        for _ in 0...2 {
+            let myNote = ClusteringNote(id: UUID(), title: "My note", content: "This is my note")
+            cluster.notes.append(myNote)
+        }
+        cluster.adjacencyMatrix = Matrix([[0, 0, 0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4],
+                                   [0, 0, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6],
+                                   [0, 0, 0, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3],
+                                   [0.9, 0.1, 0.3, 0, 0.5, 0.5, 0.5, 0.5, 0.5],
+                                   [0.8, 0.2, 0.3, 0.5, 0, 0.7, 0.2, 0.1, 0.1],
+                                   [0.7, 0.3, 0.3, 0.5, 0.7, 0, 0.6, 0.2, 0.1],
+                                   [0.6, 0.4, 0.3, 0.5, 0.2, 0.6, 0, 0.9, 0.3],
+                                   [0.5, 0.5, 0.3, 0.5, 0.1, 0.2, 0.9, 0, 0.4],
+                                   [0.4, 0.6, 0.3, 0.5, 0.1, 0.1, 0.3, 0.4, 0]])
+        cluster.navigationMatrix.matrix = zeros(9, 9)
+        cluster.textualSimilarityMatrix.matrix = zeros(9, 9)
+        cluster.entitiesMatrix.matrix = zeros(9, 9)
+
+        try cluster.remove(ranking: [0])
+        expect(cluster.pages[0].id) == UInt64(1)
+        expect(cluster.pages[0].attachedPages) == [0]
+    }
+
     // swiftlint:disable:next file_length
 }

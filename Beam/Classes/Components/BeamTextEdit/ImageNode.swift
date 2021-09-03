@@ -10,7 +10,11 @@ import BeamCore
 import AppKit
 
 class ImageNode: ElementNode {
-    var imageSize = CGSize.zero
+
+    private let focusMargin = CGFloat(3)
+    private let cornerRadius = CGFloat(3)
+    private var imageSize = CGSize.zero
+
     var visibleSize: CGSize {
         let computedWidth = imageSize.width > contentsWidth ? contentsWidth : imageSize.width
         let width = computedWidth.isNaN ? 0 : computedWidth
@@ -21,17 +25,15 @@ class ImageNode: ElementNode {
 
     init(parent: Widget, element: BeamElement) {
         super.init(parent: parent, element: element)
-
         setupImage()
     }
 
     init(editor: BeamTextEdit, element: BeamElement) {
         super.init(editor: editor, element: element)
-
         setupImage()
     }
 
-    func setupImage() {
+    private func setupImage() {
         var uid = ""
         switch element.kind {
         case .image(let id):
@@ -46,37 +48,52 @@ class ImageNode: ElementNode {
             return
         }
 
-        if let animatedLayer = Layer.animatedImage(named: "image", imageData: imageRecord.data) {
-            animatedLayer.layer.position = CGPoint(x: 0, y: 0)
-            addLayer(animatedLayer, origin: CGPoint(x: 0, y: 0))
-            imageSize = animatedLayer.bounds.size
-            return
+        var imageLayer: Layer
+        if let animatedImageLayer = Layer.animatedImage(named: "image", imageData: imageRecord.data) {
+            animatedImageLayer.layer.position = .zero
+            imageLayer = animatedImageLayer
+            imageSize = animatedImageLayer.bounds.size
+        } else {
+            guard let image = NSImage(data: imageRecord.data) else {
+                Logger.shared.logError("ImageNode unable to decode image '\(uid)' from FileDB", category: .noteEditor)
+                return
+            }
+
+            imageSize = image.size
+            guard imageSize.width > 0, imageSize.width.isFinite,
+                  imageSize.height > 0, imageSize.height.isFinite else {
+                Logger.shared.logError("Loaded Image '\(uid)' has invalid size \(imageSize)", category: .noteEditor)
+                return
+            }
+            let width = availableWidth - childInset
+            let height = (width / imageSize.width) * imageSize.height
+            imageLayer = Layer.image(named: "image", image: image, size: CGSize(width: width, height: height))
         }
 
-        guard let image = NSImage(data: imageRecord.data)
-        else {
-            Logger.shared.logError("ImageNode unable to decode image '\(uid)' from FileDB", category: .noteEditor)
-            return
-        }
-
-        imageSize = image.size
-        guard imageSize.width > 0,
-              imageSize.width.isFinite,
-              imageSize.height > 0,
-              imageSize.height.isFinite else {
-            Logger.shared.logError("Loaded Image '\(uid)' has invalid size \(imageSize)", category: .noteEditor)
-            return
-        }
-        let width = availableWidth - childInset
-        let height = (width / imageSize.width) * imageSize.height
-
-        let imageLayer = Layer.image(named: "image", image: image, size: CGSize(width: width, height: height))
-        addLayer(imageLayer, origin: CGPoint(x: 0, y: 0))
+        imageLayer.layer.cornerRadius = cornerRadius
+        imageLayer.layer.masksToBounds = true
+        imageLayer.layer.zPosition = 1
+        addLayer(imageLayer, origin: .zero)
 
         setAccessibilityLabel("ImageNode")
         setAccessibilityRole(.textArea)
 
         contentsPadding = NSEdgeInsets(top: 4, left: contentsPadding.left + 4, bottom: 14, right: 4)
+
+        setupFocusLayer()
+    }
+
+    private func setupFocusLayer() {
+        let bounds = CGRect.zero
+        let borderLayer = CAShapeLayer()
+        borderLayer.lineWidth = 5
+        borderLayer.strokeColor = selectionColor.cgColor
+        borderLayer.fillColor = NSColor.clear.cgColor
+        borderLayer.bounds = bounds
+        borderLayer.position = .zero
+        borderLayer.zPosition = 0
+        let focusLayer = Layer(name: "focus", layer: borderLayer)
+        addLayer(focusLayer, origin: .zero)
     }
 
     override func updateRendering() -> CGFloat {
@@ -87,47 +104,32 @@ class ImageNode: ElementNode {
     override func updateLayout() {
         super.updateLayout()
         if let imageLayer = layers["image"] {
-            imageLayer.layer.position = CGPoint(x: contentsLead, y: contentsTop)
-            imageLayer.layer.bounds = CGRect(origin: .zero, size: visibleSize)
+            let position = CGPoint(x: contentsLead, y: contentsTop)
+            let bounds = CGRect(origin: .zero, size: visibleSize)
+            guard bounds != imageLayer.layer.bounds || position != imageLayer.layer.position else { return }
+            imageLayer.layer.position = position
+            imageLayer.layer.bounds = bounds
+
+            if let focusLayer = layers["focus"], let borderLayer = focusLayer.layer as? CAShapeLayer {
+                let focusBounds = bounds.insetBy(dx: -focusMargin / 2, dy: -focusMargin / 2)
+                let borderPath = NSBezierPath(roundedRect: focusBounds, xRadius: cornerRadius, yRadius: cornerRadius)
+                borderLayer.path = borderPath.cgPath
+                borderLayer.position = CGPoint(x: position.x + bounds.size.width / 2, y: position.y + bounds.size.height / 2)
+                borderLayer.bounds = focusBounds
+            }
         }
     }
 
     public override func updateElementCursor() {
-        let imageLayer = layers["image"]?.layer
-        let bounds = imageLayer?.bounds ?? .zero
+        let containerLayer = layers["image"]?.layer
+        let bounds = containerLayer?.bounds ?? .zero
         let cursorRect = NSRect(x: caretIndex == 0 ? -4 : (bounds.width + 2), y: -focusMargin, width: 2, height: bounds.height + focusMargin * 2)
         layoutCursor(cursorRect)
     }
 
-    var focusMargin = CGFloat(3)
     override func updateFocus() {
-        guard let imageLayer = layers["image"] else { return }
-
-        imageLayer.layer.sublayers?.forEach { l in
-            l.removeFromSuperlayer()
-        }
-        guard isFocused else {
-            imageLayer.layer.mask = nil
-            return
-        }
-        let bounds = imageLayer.bounds.insetBy(dx: -focusMargin, dy: -focusMargin)
-        let position = CGPoint(x: 0, y: 0)
-        let path = NSBezierPath(roundedRect: bounds, xRadius: 2, yRadius: 2)
-
-        let mask = CAShapeLayer()
-        mask.path = path.cgPath
-        mask.position = position
-
-        let borderPath = NSBezierPath(roundedRect: bounds, xRadius: 2, yRadius: 2)
-        let borderLayer = CAShapeLayer()
-        borderLayer.path = borderPath.cgPath
-        borderLayer.lineWidth = 5
-        borderLayer.strokeColor = selectionColor.cgColor
-        borderLayer.fillColor = NSColor.clear.cgColor
-        borderLayer.bounds = bounds
-        borderLayer.position = CGPoint(x: imageLayer.layer.bounds.width / 2, y: imageLayer.layer.bounds.height / 2)
-        borderLayer.mask = mask
-        imageLayer.layer.addSublayer(borderLayer)
+        guard let focusLayer = layers["focus"] else { return }
+        focusLayer.layer.opacity = isFocused ? 1 : 0
     }
 
     override func onUnfocus() {
@@ -136,6 +138,16 @@ class ImageNode: ElementNode {
 
     override func onFocus() {
         updateFocus()
+    }
+
+    override func mouseDown(mouseInfo: MouseInfo) -> Bool {
+        if mouseInfo.position.x < imageSize.width / 2 {
+            focus(position: 0)
+        } else {
+            focus(position: 1)
+        }
+        dragMode = .select(0)
+        return true
     }
 }
 

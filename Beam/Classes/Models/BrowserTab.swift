@@ -437,7 +437,11 @@ import Promises
         newWebView.allowsMagnification = true
 
         state.setup(webView: newWebView)
-        let origin = BrowsingTreeOrigin.browsingNode(id: browsingTree.current.id)
+        let origin = BrowsingTreeOrigin.browsingNode(
+            id: browsingTree.current.id,
+            pageLoadId: browsingTree.current.events.last?.pageLoadId,
+            rootOrigin: browsingTree.origin.rootOrigin
+        )
         let newTab = state.addNewTab(origin: origin, setCurrent: setCurrent,
                                      note: noteController.note, element: beamNavigationController.isNavigatingFromNote ? noteController.element : nil,
                                      url: targetURL, webView: newWebView)

@@ -344,13 +344,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    public var isActive = false
+
     func applicationDidBecomeActive(_ notification: Notification) {
+        isActive = true
         for window in windows where window.isMainWindow {
             window.state.browserTabsManager.currentTab?.startReading()
         }
     }
 
     func applicationWillResignActive(_ notification: Notification) {
+        isActive = false
         for window in windows {
             window.state.browserTabsManager.currentTab?.switchToBackground()
         }

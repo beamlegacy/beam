@@ -127,6 +127,23 @@ class LinksSection: Widget {
         }
 
         updateHeading(validRefs)
+
+        sortChildren()
+    }
+
+    func sortChildren() {
+        children.sort { left, right in
+            guard let left = left.children.first as? BreadCrumb,
+                  let right = right.children.first as? BreadCrumb,
+                  let leftDate = left.proxy.proxy.note?.creationDate,
+                  let rightDate = right.proxy.proxy.note?.creationDate
+            else {
+                Logger.shared.logError("LinksSection - Trying to compared notes that have no date", category: .noteEditor)
+                return false
+            }
+
+            return leftDate > rightDate
+        }
     }
 
     func linkAllReferencesFromNote(withId noteId: UUID) {
