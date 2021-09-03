@@ -61,8 +61,8 @@ struct NoteView: View {
                         }
                     }
                 },
-                openCard: { cardId, elementId in
-                    state.navigateToNote(id: cardId, elementId: elementId)
+                openCard: { cardId, elementId, unfold in
+                    state.navigateToNote(id: cardId, elementId: elementId, unfold: unfold ?? false)
                 },
                 startQuery: { textNode, animated in
                     state.startQuery(textNode, animated: animated)

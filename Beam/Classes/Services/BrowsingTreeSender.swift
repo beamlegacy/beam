@@ -12,13 +12,17 @@ struct BrowsingTreeSendData: Codable {
     let rootCreatedAt: Double //seconds since 1970
     let rootId: UUID
     let userId: UUID
+    let appSessionId: UUID
+    let idUrlMapping: [UInt64: String]
     let data: BrowsingTree
 
     enum CodingKeys: String, CodingKey {
             case rootCreatedAt = "root_created_at"
             case rootId = "root_id"
             case userId = "user_id"
+            case appSessionId = "app_session_id"
             case data = "data"
+            case idUrlMapping = "id_url_mapping"
         }
 }
 
@@ -49,8 +53,9 @@ class BrowsingTreeSender {
     var encoder: JSONEncoder
     var url: URL
     private let config: BrowsingTreeSenderConfig
+    let appSessionId: UUID
 
-    init?(session: URLSessionProtocol = URLSession.shared, config: BrowsingTreeSenderConfig) {
+    init?(session: URLSessionProtocol = URLSession.shared, config: BrowsingTreeSenderConfig, appSessionId: UUID) {
         guard config.dataStoreApiToken != "$(BROWSING_TREE_ACCESS_TOKEN)",
               config.dataStoreUrl != "$(BROWSING_TREE_URL)",
               let url = URL(string: config.dataStoreUrl)
@@ -61,6 +66,7 @@ class BrowsingTreeSender {
         self.config = config
         self.url = url
         self.session = session
+        self.appSessionId = appSessionId
         encoder = JSONEncoder()
         Logger.shared.logDebug("Sender successful instanciation", category: .browsingTreeSender)
     }
@@ -87,13 +93,15 @@ class BrowsingTreeSender {
         guard let rootFirstEvent = browsingTree.root.events.first else {
             return nil
         }
-        let data = BrowsingTreeSendData(
+        let dataToSend = BrowsingTreeSendData(
             rootCreatedAt: rootFirstEvent.date.timeIntervalSince1970,
             rootId: browsingTree.root.id,
             userId: userId,
+            appSessionId: appSessionId,
+            idUrlMapping: browsingTree.idUrlMapping,
             data: browsingTree
         )
-        return try? encoder.encode(data)
+        return try? encoder.encode(dataToSend)
     }
 
     func blockingSend(browsingTree: BrowsingTree) {

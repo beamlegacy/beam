@@ -32,6 +32,7 @@ public class Score: Codable {
         case inbounds
         case videoTotalDuration
         case videoReadingDuration
+        case id
     }
     public var score: Float {
             readingTimeScore()
@@ -42,6 +43,7 @@ public class Score: Codable {
             + densityScore
     }
 
+    public var id: UUID? = UUID()
     public var readingTimeToLastEvent: CFTimeInterval = 0 //< how long did the user spent reading this page
     public var textSelections: Int = 0 //< how many chunks of text were selected by the user
     public var scrollRatioX: Float = 0 //< how much of the page was seen by the user ([0, 1])

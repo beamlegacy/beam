@@ -13,20 +13,24 @@ import XCTest
 
 class String_URLTests: XCTestCase {
     func testMarkdownizedURL() {
-        XCTAssertEqual(String("http://lemonde.fr/test()someUrl").markdownizedURL, "http://lemonde.fr/test%28%29someUrl")
+        XCTAssertEqual(String("http://wikipedia.org/test()someUrl").markdownizedURL, "http://wikipedia.org/test%28%29someUrl")
     }
 
-    func testUrlString() {
-        XCTAssertNil("prout".urlString)
-        XCTAssertNil("".urlString)
-        XCTAssertNil("some garbage".urlString)
+    func testToEncodedURL() {
+        XCTAssertNil("prout".toEncodedURL)
+        XCTAssertNil("".toEncodedURL)
+        XCTAssertNil("some garbage".toEncodedURL)
 
-        XCTAssertEqual("lemonde.fr".urlString, URL(string: "lemonde.fr"))
-        XCTAssertEqual("lemonde.fr/truc".urlString, URL(string: "lemonde.fr/truc"))
-        XCTAssertEqual("http://lemonde.fr".urlString, URL(string: "http://lemonde.fr"))
-        XCTAssertEqual("http://lemonde.fr/truc".urlString, URL(string: "http://lemonde.fr/truc"))
-        XCTAssertEqual("https://lemonde.fr".urlString, URL(string: "https://lemonde.fr"))
-        XCTAssertEqual("https://lemonde.fr/truc".urlString, URL(string: "https://lemonde.fr/truc"))
+        XCTAssertEqual("wikipedia.org".toEncodedURL, URL(string: "wikipedia.org"))
+        XCTAssertEqual("wikipedia.org/truc".toEncodedURL, URL(string: "wikipedia.org/truc"))
+        XCTAssertEqual("http://wikipedia.org".toEncodedURL, URL(string: "http://wikipedia.org"))
+        XCTAssertEqual("http://wikipedia.org/truc".toEncodedURL, URL(string: "http://wikipedia.org/truc"))
+        XCTAssertEqual("https://wikipedia.org".toEncodedURL, URL(string: "https://wikipedia.org"))
+        XCTAssertEqual("https://wikipedia.org/truc".toEncodedURL, URL(string: "https://wikipedia.org/truc"))
+        XCTAssertEqual("https://wikipedia.org/truc?param=one&other=2".toEncodedURL, URL(string: "https://wikipedia.org/truc?param=one&other=2"))
+        XCTAssertEqual("https://he.wikipedia.org/wiki/רפאל_נדאל".toEncodedURL, URL(string: "https://he.wikipedia.org/wiki/%D7%A8%D7%A4%D7%90%D7%9C_%D7%A0%D7%93%D7%90%D7%9C"))
+        XCTAssertEqual("https://ru.wikipedia.org/wiki/Надаль,_Рафаэль".toEncodedURL, URL(string: "https://ru.wikipedia.org/wiki/%D0%9D%D0%B0%D0%B4%D0%B0%D0%BB%D1%8C,_%D0%A0%D0%B0%D1%84%D0%B0%D1%8D%D0%BB%D1%8C"))
+        XCTAssertEqual("https://ary.wikipedia.org/wiki/رافاييل_نادال".toEncodedURL, URL(string: "https://ary.wikipedia.org/wiki/%D8%B1%D8%A7%D9%81%D8%A7%D9%8A%D9%8A%D9%84_%D9%86%D8%A7%D8%AF%D8%A7%D9%84"))
     }
 
     func testUrlRangesInside() {

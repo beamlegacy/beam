@@ -32,13 +32,14 @@ public class DocumentManager: NSObject {
     var coreDataManager: CoreDataManager
     let mainContext: NSManagedObjectContext
     let backgroundContext: NSManagedObjectContext
-    let backgroundQueue = DispatchQueue(label: "DocumentManager backgroundQueue", qos: .background)
+    let backgroundQueue = DispatchQueue(label: "DocumentManager backgroundQueue", qos: .default)
 
     let saveDocumentQueue = OperationQueue()
     var saveOperations: [UUID: BlockOperation] = [:]
     var saveDocumentPromiseCancels: [UUID: () -> Void] = [:]
 
     static var networkRequests: [UUID: APIRequest] = [:]
+    static var networkRequestsSemaphore = DispatchSemaphore(value: 1)
     static var networkTasks: [UUID: (DispatchWorkItem, ((Swift.Result<Bool, Error>) -> Void)?)] = [:]
     static var networkTasksSemaphore = DispatchSemaphore(value: 1)
 
@@ -111,6 +112,9 @@ public class DocumentManager: NSObject {
     }
 
     func clearNetworkCalls() {
+        Self.networkRequestsSemaphore.wait()
+        defer { Self.networkRequestsSemaphore.signal() }
+
         for (_, request) in Self.networkRequests {
             request.cancel()
         }

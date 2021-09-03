@@ -32,6 +32,7 @@ struct PointAndShootCardPicker: View {
     @State private var cardSearchFieldSelection: Range<Int>?
     @State private var addNoteField = ""
 
+    @State private var shouldHighlightTextCompletion = false
     @State private var shootCompleted: Bool = false
 
     private var isTodaysNote: String? {
@@ -66,7 +67,7 @@ struct PointAndShootCardPicker: View {
             // MARK: - Top Half
             HStack(spacing: BeamSpacing._40) {
                 // MARK: - Prefix
-                PrefixLabel(completed: shootCompleted && completedGroup != nil, numberOfElements: completedGroup?.numberOfElements)
+                PrefixLabel(completed: shootCompleted && completedGroup != nil, confirmation: completedGroup?.confirmation)
 
                 // MARK: - TextField
                 ZStack {
@@ -116,11 +117,11 @@ struct PointAndShootCardPicker: View {
                                 text: cardSearchField,
                                 currentCardName: currentCardName,
                                 tokenize: cursorIsOnCardName,
-                                selectedResult: self.autocompleteModel.selectedResult?.text,
+                                selectedResult: shouldHighlightTextCompletion ? autocompleteModel.selectedResult?.text : nil,
                                 completed: shootCompleted
                             )
                         )
-                    } else if let text = currentCardName {
+                    } else if let text = currentCardName, completedGroup?.confirmation == .success {
                         Text(text)
                             .foregroundColor(BeamColor.Beam.swiftUI)
                             .font(BeamFont.regular(size: 13).swiftUI)
@@ -139,7 +140,8 @@ struct PointAndShootCardPicker: View {
                                 onFinishEditing(canceled: false)
                             }
                     } else if let group = completedGroup {
-                        Icon(name: "collect-generic", size: 16, color: BeamColor.Generic.text.swiftUI)
+                        let confirmationIcon = group.confirmation == .success ? "collect-generic" : "tabs-close"
+                        Icon(name: confirmationIcon, size: 16, color: BeamColor.Generic.text.swiftUI)
                             .transition(AnyTransition.opacity.animation(Animation.easeInOut(duration: 0.15).delay(0.05)))
                             .onTapGesture {
                                 state.navigateToNote(id: group.noteInfo.id)
@@ -159,6 +161,10 @@ struct PointAndShootCardPicker: View {
                 if isEditingCardName && currentCardName == nil {
                     DestinationNoteAutocompleteList(model: autocompleteModel)
                         .onSelectAutocompleteResult { selectSearchResult() }
+                        .onReceive(autocompleteModel.$selectedIndex) { _ in
+                            // selected item changed from hover or arrows. let's not highlight anymore.
+                            shouldHighlightTextCompletion = false
+                        }
                 }
                 // MARK: - Bottom Half
                 Separator(horizontal: true).padding(.horizontal, BeamSpacing._120)
@@ -224,9 +230,14 @@ extension PointAndShootCardPicker {
     // MARK: - PrefixLabel Component
     struct PrefixLabel: View {
         var completed: Bool
-        var numberOfElements: Int?
+        var confirmation: PointAndShoot.ShootConfirmation?
+
         @State private var addToOpacity: Double = 1
         @State private var addedToOpacity: Double = 0
+
+        var confirmationLabel: String {
+            confirmation == .success ? "Added to" : "Failed to collect"
+        }
 
         var body: some View {
             ZStack {
@@ -238,7 +249,7 @@ extension PointAndShootCardPicker {
                         .transition(AnyTransition.asymmetric(insertion: .identity,
                                                              removal: AnyTransition.opacity.animation(.easeInOut(duration: 0.05))))
                 } else {
-                    Text("Added to")
+                    Text(confirmationLabel)
                         .zIndex(1)
                         .frame(alignment: .topLeading)
                         .transition(AnyTransition.asymmetric(insertion: AnyTransition.opacity.animation(Animation.easeInOut(duration: 0.05).delay(0.05)),
@@ -307,7 +318,9 @@ extension PointAndShootCardPicker {
             cardSearchField = ""
             searchText = ""
         }
+        let textWasAdded = searchText.count > autocompleteModel.searchText.count
         autocompleteModel.searchText = searchText
+        shouldHighlightTextCompletion = textWasAdded
         currentCardName = nil
     }
 }
@@ -315,6 +328,7 @@ extension PointAndShootCardPicker {
 extension PointAndShootCardPicker {
     // MARK: - onFinishEditing
     private func onFinishEditing(canceled: Bool = false) {
+        guard !shootCompleted else { return }
         guard !canceled else {
             onComplete?(nil, nil)
             return
@@ -330,7 +344,7 @@ extension PointAndShootCardPicker {
         }
 
         if !finalCardName.isEmpty {
-            self.shootCompleted = true
+            shootCompleted = true
             onComplete?(finalCardName, addNoteField)
         }
     }

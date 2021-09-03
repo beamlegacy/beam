@@ -137,8 +137,8 @@ public class BeamNote: BeamElement {
         try super.encode(to: encoder)
     }
 
-    public override func deepCopy(withNewId: Bool, selectedElements: [BeamElement]?) -> BeamNote? {
-        guard let newNote = super.deepCopy(withNewId: withNewId, selectedElements: selectedElements) as? BeamNote else {
+    public override func deepCopy(withNewId: Bool, selectedElements: [BeamElement]?, includeFoldedChildren: Bool) -> BeamNote? {
+        guard let newNote = super.deepCopy(withNewId: withNewId, selectedElements: selectedElements, includeFoldedChildren: includeFoldedChildren) as? BeamNote else {
             return nil
         }
 

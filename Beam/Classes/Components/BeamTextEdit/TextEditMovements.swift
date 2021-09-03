@@ -203,20 +203,22 @@ extension TextRoot {
 
     func moveDown() {
         cancelNodeSelection()
+
         guard let node = focusedWidget as? ElementNode else { return }
         if node.isOnLastLine(cursorPosition) {
             if !moveToNextNodeIfPossible(fromNode: node, cursor: cursorPosition) {
-                guard let node = focusedWidget as? TextNode else { return }
-                cursorPosition = node.text.count
+                cursorPosition = node.textCount
             }
         } else {
             var _caretIndex = node.caretBelow(caretIndex)
-            if let node = focusedWidget as? TextNode,
-               let updatedCaretIndex = node.caretIndexAvoidingUneditableRange(_caretIndex, after: true) {
+            if let updatedCaretIndex = node.caretIndexAvoidingUneditableRange(_caretIndex, after: true) {
                 _caretIndex = updatedCaretIndex
-            }
-            let isLastCaret = _caretIndex == node.caretIndexForSourcePosition(node.textCount)
-            if !isLastCaret || !moveToNextNodeIfPossible(fromNode: node, cursor: cursorPosition) {
+
+                let isLastCaret = _caretIndex == node.caretIndexForSourcePosition(node.textCount)
+                if !isLastCaret || !moveToNextNodeIfPossible(fromNode: node, cursor: cursorPosition) {
+                    self.caretIndex = _caretIndex
+                }
+            } else {
                 self.caretIndex = _caretIndex
             }
         }
@@ -234,8 +236,10 @@ extension TextRoot {
     }
 
     private func canMove(from currentNode: ElementNode, to newNode: ElementNode) -> Bool {
-        if (newNode as? ProxyNode == nil && currentNode as? ProxyNode == nil) ||
-            (newNode as? ProxyNode != nil && currentNode as? ProxyNode != nil) {
+        if !(newNode is ProxyNode) && !(currentNode is ProxyNode) ||
+            (newNode is ProxyNode) && (currentNode is ProxyNode) {
+            return true
+        } else if newNode.parent == currentNode || currentNode.parent == newNode {
             return true
         }
         return false
@@ -322,7 +326,7 @@ extension TextRoot {
             return
         }
 
-        guard let node = focusedWidget as? TextNode else { return }
+        guard let node = focusedWidget as? ElementNode else { return }
         if cursorPosition == 0 {
             extendNodeSelectionUp()
         } else {
@@ -338,8 +342,8 @@ extension TextRoot {
             return
         }
 
-        guard let node = focusedWidget as? TextNode else { return }
-        if cursorPosition == node.text.text.count {
+        guard let node = focusedWidget as? ElementNode else { return }
+        if cursorPosition == node.textCount {
             extendNodeSelectionDown()
         } else {
             extendSelection(to: node.positionForCaretIndex(node.caretBelow(caretIndex)))

@@ -22,4 +22,9 @@ public extension NSRect {
 
         return NSRect(x: left, y: top, width: right - left, height: bottom - top)
     }
+
+    func containsY(_ point: CGPoint) -> Bool {
+        minY <= point.y && point.y < maxY 
+    }
+
 }

@@ -291,6 +291,8 @@ extension GRDBDatabase {
     func clear() throws {
         try dbWriter.write { db in
             try BeamElementRecord.deleteAll(db)
+            try BeamNoteIndexingRecord.deleteAll(db)
+            try BidirectionalLink.deleteAll(db)
             try HistoryUrlRecord.deleteAll(db)
             try db.execute(sql: "DELETE FROM HistoryUrlContent")
             try db.dropFTS4SynchronizationTriggers(forTable: "HistoryUrlRecord")
@@ -307,6 +309,12 @@ extension GRDBDatabase {
         _ = try dbWriter.write { db in
             try BidirectionalLink.deleteAll(db)
         }
+    }
+
+    func clearNoteIndexingRecord() throws {
+        _ = try dbWriter.write({ db in
+            try BeamNoteIndexingRecord.deleteAll(db)
+        })
     }
 
     func countBidirectionalLinks() throws -> Int {
