@@ -595,21 +595,53 @@ class DatabaseManagerNetworkTests: QuickSpec {
                     beamObjectHelper.delete(dbStruct.id)
                 }
 
-                it("saves as beamObject") {
-                    waitUntil(timeout: .seconds(10)) { done in
-                        do {
-                            try sut.saveOnBeamObjectAPI(dbStruct) { result in
-                                expect { try result.get() }.toNot(throwError())
-                                expect { try result.get() } == dbStruct
-                                done()
+                context("Foundation") {
+                    it("saves as beamObject") {
+                        waitUntil(timeout: .seconds(10)) { done in
+                            do {
+                                try sut.saveOnBeamObjectAPI(dbStruct) { result in
+                                    expect { try result.get() }.toNot(throwError())
+                                    expect { try result.get() } == dbStruct
+                                    done()
+                                }
+                            } catch {
+                                fail(error.localizedDescription)
                             }
-                        } catch {
-                            fail(error.localizedDescription)
                         }
-                    }
 
-                    let remoteObject: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct.beamObjectId)
-                    expect(remoteObject) == dbStruct
+                        let remoteObject: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct.beamObjectId)
+                        expect(remoteObject) == dbStruct
+                    }
+                }
+                context("PromiseKit") {
+                    it("saves as beamObject") {
+                        let promise: PromiseKit.Promise<DatabaseStruct> = sut.saveOnBeamObjectAPI(dbStruct)
+
+                        waitUntil(timeout: .seconds(10)) { done in
+                            promise.done { receivedDbStruct in
+                                expect(receivedDbStruct) == dbStruct
+                                done()
+                            }.catch { fail("Should not be called: \($0)"); done() }
+                        }
+
+                        let remoteObject: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct.beamObjectId)
+                        expect(remoteObject) == dbStruct
+                    }
+                }
+                context("Promises") {
+                    it("saves as beamObject") {
+                        let promise: Promises.Promise<DatabaseStruct> = sut.saveOnBeamObjectAPI(dbStruct)
+
+                        waitUntil(timeout: .seconds(10)) { done in
+                            promise.then { receivedDbStruct in
+                                expect(receivedDbStruct) == dbStruct
+                                done()
+                            }.catch { fail("Should not be called: \($0)"); done() }
+                        }
+
+                        let remoteObject: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct.beamObjectId)
+                        expect(remoteObject) == dbStruct
+                    }
                 }
             }
 
@@ -629,26 +661,66 @@ class DatabaseManagerNetworkTests: QuickSpec {
                     beamObjectHelper.delete(dbStruct2.id)
                 }
 
-                it("saves as beamObjects") {
-                    waitUntil(timeout: .seconds(10)) { done in
-                        do {
-                            let objects: [DatabaseStruct] = [dbStruct, dbStruct2]
+                context("Foundation") {
+                    it("saves as beamObjects") {
+                        waitUntil(timeout: .seconds(10)) { done in
+                            do {
+                                let objects: [DatabaseStruct] = [dbStruct, dbStruct2]
 
-                            _ = try sut.saveOnBeamObjectsAPI(objects) { result in
-                                expect { try result.get() }.toNot(throwError())
-                                expect { try result.get() } == objects
-                                done()
+                                _ = try sut.saveOnBeamObjectsAPI(objects) { result in
+                                    expect { try result.get() }.toNot(throwError())
+                                    expect { try result.get() } == objects
+                                    done()
+                                }
+                            } catch {
+                                fail(error.localizedDescription)
                             }
-                        } catch {
-                            fail(error.localizedDescription)
                         }
+
+                        let remoteObject1: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct.beamObjectId)
+                        expect(remoteObject1) == dbStruct
+
+                        let remoteObject2: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct2.beamObjectId)
+                        expect(remoteObject2) == dbStruct2
                     }
+                }
+                context("PromiseKit") {
+                    it("saves as beamObjects") {
+                        let objects: [DatabaseStruct] = [dbStruct, dbStruct2]
+                        let promise: PromiseKit.Promise<[DatabaseStruct]> = sut.saveOnBeamObjectsAPI(objects)
 
-                    let remoteObject1: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct.beamObjectId)
-                    expect(remoteObject1) == dbStruct
+                        waitUntil(timeout: .seconds(10)) { done in
+                            promise.done { receivedObjects in
+                                expect(receivedObjects) == objects
+                                done()
+                            }.catch { fail("Should not be called: \($0)"); done() }
+                        }
 
-                    let remoteObject2: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct2.beamObjectId)
-                    expect(remoteObject2) == dbStruct2
+                        let remoteObject1: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct.beamObjectId)
+                        expect(remoteObject1) == dbStruct
+
+                        let remoteObject2: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct2.beamObjectId)
+                        expect(remoteObject2) == dbStruct2
+                    }
+                }
+                context("Promises") {
+                    it("saves as beamObjects") {
+                        let objects: [DatabaseStruct] = [dbStruct, dbStruct2]
+                        let promise: Promises.Promise<[DatabaseStruct]> = sut.saveOnBeamObjectsAPI(objects)
+
+                        waitUntil(timeout: .seconds(10)) { done in
+                            promise.then { receivedObjects in
+                                expect(receivedObjects) == objects
+                                done()
+                            }.catch { fail("Should not be called: \($0)"); done() }
+                        }
+
+                        let remoteObject1: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct.beamObjectId)
+                        expect(remoteObject1) == dbStruct
+
+                        let remoteObject2: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct2.beamObjectId)
+                        expect(remoteObject2) == dbStruct2
+                    }
                 }
             }
 
@@ -668,24 +740,62 @@ class DatabaseManagerNetworkTests: QuickSpec {
                     beamObjectHelper.delete(dbStruct2.id)
                 }
 
-                it("saves as beamObjects") {
-                    waitUntil(timeout: .seconds(10)) { done in
-                        do {
-                            _ = try sut.saveAllOnBeamObjectApi { result in
-                                expect { try result.get() }.toNot(throwError())
-                                expect { try result.get() } == true
-                                done()
+                context("Foundation") {
+                    it("saves as beamObjects") {
+                        waitUntil(timeout: .seconds(10)) { done in
+                            do {
+                                _ = try sut.saveAllOnBeamObjectApi { result in
+                                    expect { try result.get() }.toNot(throwError())
+                                    expect { try result.get() } == true
+                                    done()
+                                }
+                            } catch {
+                                fail(error.localizedDescription)
                             }
-                        } catch {
-                            fail(error.localizedDescription)
                         }
+
+                        let remoteObject1: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct.beamObjectId)
+                        expect(remoteObject1) == dbStruct
+
+                        let remoteObject2: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct2.beamObjectId)
+                        expect(remoteObject2) == dbStruct2
                     }
+                }
+                context("PromiseKit") {
+                    it("saves as beamObjects") {
+                        let promise: PromiseKit.Promise<Bool> = sut.saveAllOnBeamObjectApi()
 
-                    let remoteObject1: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct.beamObjectId)
-                    expect(remoteObject1) == dbStruct
+                        waitUntil(timeout: .seconds(10)) { done in
+                            promise.done { success in
+                                expect(success) == true
+                                done()
+                            }.catch { fail("Should not be called: \($0)"); done() }
+                        }
 
-                    let remoteObject2: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct2.beamObjectId)
-                    expect(remoteObject2) == dbStruct2
+                        let remoteObject1: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct.beamObjectId)
+                        expect(remoteObject1) == dbStruct
+
+                        let remoteObject2: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct2.beamObjectId)
+                        expect(remoteObject2) == dbStruct2
+                    }
+                }
+                context("Promises") {
+                    it("saves as beamObjects") {
+                        let promise: Promises.Promise<Bool> = sut.saveAllOnBeamObjectApi()
+
+                        waitUntil(timeout: .seconds(10)) { done in
+                            promise.then { success in
+                                expect(success) == true
+                                done()
+                            }.catch { fail("Should not be called: \($0)"); done() }
+                        }
+
+                        let remoteObject1: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct.beamObjectId)
+                        expect(remoteObject1) == dbStruct
+
+                        let remoteObject2: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct2.beamObjectId)
+                        expect(remoteObject2) == dbStruct2
+                    }
                 }
             }
 
