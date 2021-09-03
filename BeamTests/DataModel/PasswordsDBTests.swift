@@ -29,7 +29,7 @@ class PasswordsDBTests: XCTestCase {
     override func tearDown() {
         super.tearDown()
 
-        PasswordManager.shared.deleteAll()
+        PasswordManager.shared.realDeleteAll()
     }
 
     func testSavingPassword() {

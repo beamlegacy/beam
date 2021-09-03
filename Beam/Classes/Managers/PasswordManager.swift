@@ -141,6 +141,23 @@ class PasswordManager {
             Logger.shared.logError("Unexpected error: \(error.localizedDescription).", category: .passwordsDB)
         }
     }
+
+    func realDeleteAll(_ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
+        do {
+            try passwordsDB.realDeleteAll()
+            if AuthenticationManager.shared.isAuthenticated {
+                try self.deleteAllFromBeamObjectAPI { result in
+                    networkCompletion?(result)
+                }
+            } else {
+                networkCompletion?(.success(false))
+            }
+        } catch PasswordDBError.cantDeletePassword(errorMsg: let errorMsg) {
+            Logger.shared.logError("Error while deleting all passwords: \(errorMsg)", category: .passwordsDB)
+        } catch {
+            Logger.shared.logError("Unexpected error: \(error.localizedDescription).", category: .passwordsDB)
+        }
+    }
 }
 
 extension PasswordManager: BeamObjectManagerDelegate {
