@@ -22,23 +22,27 @@ class DeleteDocument: DocumentCommand {
     }
 
     override func run(context: DocumentManager?, completion: ((Bool) -> Void)?) {
-        var promise: Promise<Bool>?
         var noteLinks: [BeamNoteReference]?
 
-        if allDocuments {
-            documents = context?.loadAll() ?? []
-            promise = context?.deleteAll()
-        } else {
-            documents = documentIds.compactMap { context?.loadById(id: $0) }
-            noteLinks = saveDocumentsLinks(context: context)
-            promise = context?.delete(ids: documentIds)
-        }
-
-        promise?.then { done in
+        let callback = {
             noteLinks?.forEach { ref in
                 ref.note?.updateNoteNamesInInternalLinks(recursive: true)
             }
-            completion?(done)
+        }
+
+        if allDocuments {
+            documents = context?.loadAll() ?? []
+            context?.deleteAll { _ in
+                callback()
+                completion?(true)
+            }
+        } else {
+            documents = documentIds.compactMap { context?.loadById(id: $0) }
+            noteLinks = saveDocumentsLinks(context: context)
+
+            try? context?.delete(documentIds)
+            callback()
+            completion?(true)
         }
     }
 

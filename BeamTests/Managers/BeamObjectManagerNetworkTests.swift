@@ -29,8 +29,6 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
             BeamTestsHelper.login()
 
-            Configuration.beamObjectAPIEnabled = true
-
             BeamObjectManager.unregisterAll()
             MyRemoteObjectManager().registerOnBeamObjectManager()
 
@@ -43,8 +41,6 @@ class BeamObjectManagerNetworkTests: QuickSpec {
             beamHelper.endNetworkRecording()
 
             BeamObjectManager.clearNetworkCalls()
-
-            Configuration.beamObjectAPIEnabled = EnvironmentVariables.beamObjectAPIEnabled
 
             BeamDate.reset()
             // Sad: this is broken when using Vinyl

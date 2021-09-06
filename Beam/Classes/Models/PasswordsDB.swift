@@ -4,6 +4,7 @@
 //
 //  Created by Jean-Louis Darmon on 13/05/2021.
 //
+// swiftlint:disable file_length
 
 import Foundation
 import BeamCore
@@ -349,6 +350,7 @@ class PasswordsDB: PasswordStore {
         }
     }
 
+    @discardableResult
     func delete(host: String, username: String) throws -> PasswordRecord {
         do {
             return try dbPool.write { db in
@@ -366,7 +368,7 @@ class PasswordsDB: PasswordStore {
         }
     }
 
-    // Added only in the purpose of testing maybe will be added in the protocol if needed
+    @discardableResult
     func deleteAll() throws -> [PasswordRecord] {
         do {
             return try dbPool.write { db in
@@ -378,6 +380,19 @@ class PasswordsDB: PasswordStore {
                 let passwords = try PasswordRecord
                     .filter(PasswordRecord.Columns.deletedAt == now)
                     .fetchAll(db)
+                return passwords
+            }
+        } catch {
+            throw PasswordDBError.cantDeletePassword(errorMsg: error.localizedDescription)
+        }
+    }
+
+    @discardableResult
+    func realDeleteAll() throws -> [PasswordRecord] {
+        do {
+            return try dbPool.write { db in
+                let passwords = try PasswordRecord.fetchAll(db)
+                try PasswordRecord.deleteAll(db)
                 return passwords
             }
         } catch {

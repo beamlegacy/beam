@@ -154,11 +154,6 @@ extension DocumentStruct {
         self.beamObjectPreviousChecksum = documentStruct.beamObjectPreviousChecksum
         self.journalDate = documentStruct.journalDate
     }
-
-    func asApiType() -> DocumentAPIType {
-        let result = DocumentAPIType(document: self)
-        return result
-    }
 }
 
 extension DocumentStruct: Equatable {
