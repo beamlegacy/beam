@@ -68,17 +68,17 @@ class CGPath_UnionTest: PointAndShootTest {
         XCTAssertNotEqual(beforeGroupPath, group.groupPath)
     }
 
-//    func testCreate400() throws {
-//        let targets = self.helperCreateFakeTargets(400)
-//        let newTargets = self.helperCreateFakeTargets(400)
-//        let id = UUID().uuidString
-//        var group = PointAndShoot.ShootGroup(id, targets, faker.internet.url())
-//        let beforeGroupPath = group.groupPath
-//        self.measure {
-//            group.updateTargets(id, newTargets)
-//        }
-//        // Assert the groupPath is updated
-//        XCTAssertNotEqual(beforeGroupPath, group.groupPath)
-//    }
+    func testCreate400() throws {
+        let targets = self.helperCreateFakeTargets(400)
+        let newTargets = self.helperCreateFakeTargets(400)
+        let id = UUID().uuidString
+        var group = PointAndShoot.ShootGroup(id, targets, faker.internet.url())
+        let beforeGroupPath = group.groupPath
+        self.measure {
+            group.updateTargets(id, newTargets)
+        }
+        // Assert the groupPath is updated
+        XCTAssertNotEqual(beforeGroupPath, group.groupPath)
+    }
 
 }
