@@ -19,6 +19,7 @@ private struct CardReferenceFormatterContainerView: View {
 
     @ObservedObject var viewModel: ViewModel = ViewModel()
     @ObservedObject var listModel: DestinationNoteAutocompleteList.Model
+    var leadingPadding: CGFloat
     var onSelectResult: (() -> Void)?
     private var size: CGSize {
         Self.idealSize(searchCardContent: listModel.searchCardContent)
@@ -26,10 +27,9 @@ private struct CardReferenceFormatterContainerView: View {
     var body: some View {
         let computedSize = size
         return FormatterViewBackground {
-            ScrollView {
-                DestinationNoteAutocompleteList(model: listModel, variation: .TextEditor,
-                                                onSelectAutocompleteResult: onSelectResult)
-            }.frame(maxHeight: computedSize.height)
+            DestinationNoteAutocompleteList(model: listModel, variation: .TextEditor(leadingPadding: leadingPadding),
+                                            allowScroll: true, onSelectAutocompleteResult: onSelectResult)
+                .frame(maxHeight: computedSize.height)
         }
         .frame(width: computedSize.width)
         .fixedSize(horizontal: false, vertical: true)
@@ -54,13 +54,16 @@ class CardReferenceFormatterView: FormatterView {
 
     override var handlesTyping: Bool { true }
 
-    var typingPrefix = 0
-    var typingSuffix = 0
+    private var typingPrefix = 0
+    private var typingSuffix = 0
 
     convenience init(initialText: String?, searchCardContent: Bool = false,
+                     typingPrefix: Int = 0, typingSuffix: Int = 0,
                      onSelectNoteHandler: ((_ noteId: UUID, _ elementId: UUID?) -> Void)? = nil,
                      onCreateNoteHandler: ((_ title: String) -> Void)? = nil) {
         self.init(frame: CGRect.zero)
+        self.typingPrefix = typingPrefix
+        self.typingSuffix = typingSuffix
         self.searchCardContent = searchCardContent
         self.onSelectNote = onSelectNoteHandler
         self.onSelectCreate = onCreateNoteHandler
@@ -90,7 +93,11 @@ class CardReferenceFormatterView: FormatterView {
         listModel.searchCardContent = searchCardContent
         listModel.allowCmdEnter = false
 
-        let rootView = CardReferenceFormatterContainerView(viewModel: subviewModel, listModel: listModel) { [weak self] in
+        var leadingPadding: CGFloat = CGFloat(typingPrefix)
+        if !searchCardContent && typingPrefix == 1 {
+            leadingPadding = 5
+        }
+        let rootView = CardReferenceFormatterContainerView(viewModel: subviewModel, listModel: listModel, leadingPadding: leadingPadding) { [weak self] in
             self?.validateSelectedResult()
         }
         let hostingView = NSHostingView(rootView: rootView)
@@ -99,10 +106,10 @@ class CardReferenceFormatterView: FormatterView {
         self.addSubview(hostingView)
         hostView = hostingView
         self.layer?.masksToBounds = false
-        updateItemsForSearchText(initialText ?? "")
-        if searchCardContent {
+        if searchCardContent || initialText != nil {
             enableTypingAttributes()
         }
+        updateItemsForSearchText(initialText ?? "")
     }
 
     private func updateItemsForSearchText(_ text: String) {

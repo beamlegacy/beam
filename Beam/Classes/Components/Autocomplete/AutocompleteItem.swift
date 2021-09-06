@@ -16,6 +16,7 @@ struct AutocompleteItem: View {
     var allowCmdEnter: Bool = true
 
     var colorPalette: AutocompleteItemColorPalette = Self.defaultColorPalette
+    var additionalLeadingPadding: CGFloat = 0
 
     @State private var isTouchDown = false
 
@@ -106,6 +107,7 @@ struct AutocompleteItem: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.vertical, BeamSpacing._80)
         .padding(.horizontal, BeamSpacing._120)
+        .padding(.leading, additionalLeadingPadding)
         .background(backgroundColor)
         .onTouchDown { t in
             isTouchDown = t
