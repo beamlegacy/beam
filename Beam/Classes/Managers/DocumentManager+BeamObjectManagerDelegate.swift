@@ -11,12 +11,17 @@ extension DocumentManager: BeamObjectManagerDelegate {
 
         try context.performAndWait {
             for updateObject in objects {
-                guard let documentCoreData = try? Document.fetchWithId(context, updateObject.id) else {
+                guard let documentCoreData = try Document.fetchWithId(context, updateObject.id) else {
                     throw DocumentManagerError.localDocumentNotFound
                 }
                 documentCoreData.data = updateObject.data
                 documentCoreData.beam_object_previous_checksum = updateObject.previousChecksum
                 documentCoreData.beam_api_data = updateObject.data
+                documentCoreData.version += 1
+
+                let savedDoc = DocumentStruct(document: documentCoreData)
+                self.notificationDocumentUpdate(savedDoc)
+                indexDocument(savedDoc)
             }
             try Self.saveContext(context: context)
         }

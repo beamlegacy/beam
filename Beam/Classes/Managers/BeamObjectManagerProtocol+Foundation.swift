@@ -278,8 +278,6 @@ extension BeamObjectManagerDelegate {
                 }
             }
 
-            try self.saveObjectsAfterConflict(mergedObjects)
-
             try self.saveOnBeamObjectsAPI(mergedObjects) { result in
                 switch result {
                 case .failure(let error):
@@ -292,7 +290,12 @@ extension BeamObjectManagerDelegate {
                     allObjects.append(contentsOf: goodObjects)
                     allObjects.append(contentsOf: remoteObjects)
 
-                    completion(.success(allObjects))
+                    do {
+                        try self.saveObjectsAfterConflict(remoteObjects)
+                        completion(.success(allObjects))
+                    } catch {
+                        completion(.failure(error))
+                    }
                 }
             }
         } catch {
@@ -348,7 +351,6 @@ extension BeamObjectManagerDelegate {
                 case .success(let newObjectsSaved):
                     do {
                         try self.saveObjectsAfterConflict(newObjectsSaved)
-
                         completion(.success(goodObjects + newObjectsSaved))
                     } catch {
                         completion(.failure(error))
