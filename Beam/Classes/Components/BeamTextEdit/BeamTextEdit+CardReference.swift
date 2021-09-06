@@ -75,14 +75,14 @@ extension BeamTextEdit {
         let replacementEnd = rootNode.cursorPosition + suffix
         let linkEnd = replacementStart + title.count
 
-        node.text.replaceSubrange(replacementStart..<replacementEnd, with: title)
+        node.cmdManager.replaceText(in: node, for: replacementStart..<replacementEnd, with: BeamText(text: title, attributes: []))
 
         let (_, linkedNoteId) = node.unproxyElement.makeInternalLink(replacementStart..<linkEnd, createNoteIfNeeded: true)
         if let linkedNoteId = linkedNoteId {
             data?.noteFrecencyScorer.update(id: linkedNoteId, value: 1.0, eventType: .noteBiDiLink, date: BeamDate.now, paramKey: .note30d0)
         }
-
-        rootNode.cursorPosition = linkEnd
+        node.cmdManager.insertText(BeamText(text: " "), in: node, at: linkEnd)
+        rootNode.cursorPosition = linkEnd + 1
     }
 
     private func onFinishSelectingBlockRef(in node: TextNode, noteId: UUID, elementId: UUID, range: Range<Int>, prefix: Int, suffix: Int) {

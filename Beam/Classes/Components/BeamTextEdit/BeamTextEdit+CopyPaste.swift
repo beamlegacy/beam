@@ -249,10 +249,17 @@ extension BeamTextEdit {
                 lastInserted = focusedWidget as? ElementNode
             }
         }
-        mngrNode.cmdManager.endGroup()
 
-        if lastInserted?.elementText.linkRanges.count == 1, let linkRange = lastInserted?.elementText.linkRanges.first {
-            showLinkPasteMenu(for: linkRange)
+        if let lastInsertedNode = lastInserted as? TextNode,
+           let linkRanges = lastInserted?.elementText.linkRanges, linkRanges.count == 1,
+           let linkRange = linkRanges.first {
+
+            let embedable = showLinkEmbedPasteMenu(for: linkRange)
+            if !embedable {
+                mngrNode.cmdManager.insertText(BeamText(text: " ", attributes: []), in: lastInsertedNode, at: linkRange.end)
+                mngrNode.cmdManager.focusElement(lastInsertedNode, cursorPosition: linkRange.end + 1)
+            }
         }
+        mngrNode.cmdManager.endGroup()
     }
 }
