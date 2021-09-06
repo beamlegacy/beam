@@ -7,16 +7,18 @@
 
 import SwiftUI
 import BeamCore
+import Combine
 
 struct DestinationNoteAutocompleteList: View {
 
     enum DesignVariation {
-        case TextEditor
+        case TextEditor(leadingPadding: CGFloat)
         case SearchField
     }
 
     @ObservedObject var model = Model()
     var variation: DesignVariation = .SearchField
+    var allowScroll: Bool = false
     internal var onSelectAutocompleteResult: (() -> Void)?
 
     private let itemHeight: CGFloat = 32
@@ -33,21 +35,52 @@ struct DestinationNoteAutocompleteList: View {
 
     private var colorPalette: AutocompleteItemColorPalette {
         guard !model.searchCardContent else { return AutocompleteItem.defaultColorPalette }
-        return variation == .TextEditor ? customTextEditorColorPalette : customColorPalette
+        if case .TextEditor = variation { return customTextEditorColorPalette}
+        return customColorPalette
+    }
+
+    private var additionLeadingPadding: CGFloat {
+        guard case .TextEditor(let leadingPadding) = variation else { return 0 }
+        return leadingPadding
+    }
+
+    private var alwaysHighlightCompletingText: Bool {
+        if case .TextEditor = variation { return false }
+        return true
     }
 
     var body: some View {
+        Group {
+            if allowScroll {
+                ScrollView {
+                    RetroCompatibleScrollViewReader { retroProxy in
+                        list .onReceive(Just(retroProxy)) { p in
+                            if p != model.scrollViewProxy {
+                                model.scrollViewProxy = p
+                            }
+                        }
+                    }
+                }
+            } else {
+                list
+            }
+        }
+    }
+
+    var list: some View {
         VStack(spacing: 0) {
-            ForEach(model.results) { i in
+            ForEach(model.results, id: \.id) { i in
                 return AutocompleteItem(item: i, selected: model.isSelected(i), displayIcon: false,
-                                        alwaysHighlightCompletingText: variation != .TextEditor,
-                                        allowCmdEnter: model.allowCmdEnter, colorPalette: colorPalette)
+                                        alwaysHighlightCompletingText: alwaysHighlightCompletingText,
+                                        allowCmdEnter: model.allowCmdEnter, colorPalette: colorPalette,
+                                        additionalLeadingPadding: additionLeadingPadding)
                     .if(model.searchCardContent) {
                         $0.frame(minHeight: itemHeight).fixedSize(horizontal: false, vertical: true)
                     }
                     .if(!model.searchCardContent) {
                         $0.frame(height: itemHeight)
                     }
+                    .retroCompatibleScrollId(i.id)
                     .transition(.identity)
                     .animation(nil)
                     .simultaneousGesture(
@@ -57,14 +90,14 @@ struct DestinationNoteAutocompleteList: View {
                         }
                     )
                     .onHover { hovering in
-                        if hovering {
+                        if hovering && !model.disableHoverSelection {
                             model.select(result: i)
                         }
                     }
             }
         }
         .onHover { hovering in
-            if !hovering {
+            if !hovering && !model.disableHoverSelection {
                 model.selectedIndex = 0
             }
         }
@@ -96,6 +129,8 @@ extension DestinationNoteAutocompleteList {
             return results[index]
         }
 
+        fileprivate var scrollViewProxy: RetroCompatibleScrollViewProxy?
+        fileprivate var disableHoverSelection = false
         @Published var selectedIndex: Int?
         @Published var results: [AutocompleteResult] = []
         @Published var searchText: String = "" {
@@ -116,6 +151,14 @@ extension DestinationNoteAutocompleteList {
                 newIndex += (move == .up ? -1 : 1)
                 newIndex = newIndex.clampInLoop(0, results.count - 1)
                 selectedIndex = newIndex
+                if let item = selectedResult {
+                    disableHoverSelection = true
+                    scrollViewProxy?.scrollTo(item.id)
+                    DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: .milliseconds(100))) { [weak self] in
+                        guard self?.selectedIndex == newIndex else { return }
+                        self?.disableHoverSelection = false
+                    }
+                }
                 return true
             default:
                 return false

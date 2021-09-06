@@ -228,25 +228,20 @@ extension BeamTextEdit {
     internal func selectFormatterAction(_ type: TextFormatterType, _ isActive: Bool) {
         guard let node = focusedWidget as? TextNode else { return }
         var (newElementKind, newAttribute) = elementAndAttribute(for: type, in: node)
-        var dismissFormatter = false
         var cancelSelection = false
         switch type {
         case .link:
             showLinkFormatterForSelection()
             moveInlineFormatterAtSelection()
         case .internalLink:
-            dismissFormatter = true
+            cancelSelection = true
             if let linkAttr = handleInternalLinkFormat(in: node) {
-                cancelSelection = true
                 newAttribute = linkAttr
             }
         default:
             break
         }
 
-        if dismissFormatter {
-            dismissFormatterView(inlineFormatter)
-        }
         if let newAttribute = newAttribute {
             updateAttributeState(with: node, attribute: newAttribute, isActive: isActive)
         }
@@ -319,7 +314,8 @@ extension BeamTextEdit {
     }
 
     private func handleInternalLinkFormat(in node: TextNode) -> BeamText.Attribute? {
-        makeInternalLinkForSelectionOrShowFormatter(for: node, applyFormat: false)
+        hideInlineFormatter()
+        return makeInternalLinkForSelectionOrShowFormatter(for: node, applyFormat: false)
     }
 
     // MARK: Private Methods (Text Formatting)

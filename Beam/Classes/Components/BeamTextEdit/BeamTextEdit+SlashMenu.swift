@@ -46,8 +46,8 @@ extension BeamTextEdit {
         if rect.size.height == .zero {
             rect.size.height = node.firstLineHeight
         }
-        let atPoint = CGPoint(x: offset + node.offsetInDocument.x,
-                              y: rect.maxY + node.offsetInDocument.y + 10)
+        let atPoint = CGPoint(x: offset + node.offsetInDocument.x + node.contentsLead,
+                              y: rect.maxY + node.offsetInDocument.y + 8)
 
         let items = getSlashMenuItems()
         let menuView = ContextMenuFormatterView(items: items, handlesTyping: true)
