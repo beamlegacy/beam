@@ -164,6 +164,7 @@ struct AdvancedPreferencesView: View {
                                 .padding()
 
                             Button(action: {
+                                let beforeDb = DatabaseManager.defaultDatabase
                                 if !newDatabaseTitle.isEmpty {
                                     let database = DatabaseStruct(title: newDatabaseTitle)
                                     databaseManager.save(database, completion: { result in
@@ -173,6 +174,8 @@ struct AdvancedPreferencesView: View {
                                                 DatabaseManager.defaultDatabase = DatabaseStruct(database: database)
                                                 selectedDatabase = database
                                                 try? CoreDataManager.shared.save()
+                                                DatabaseManager.showRestartAlert(beforeDb,
+                                                                                 DatabaseManager.defaultDatabase)
                                             }
                                         }
                                         showNewDatabase = false
