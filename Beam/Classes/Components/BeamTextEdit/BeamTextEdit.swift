@@ -1402,7 +1402,6 @@ public extension CALayer {
         rootNode.deleteBackward()
 
         updateInlineFormatterView(isKeyEvent: true)
-        if rootNode.cursorPosition == formatterTargetRange?.lowerBound { hideInlineFormatter() }
 //        guard let node = focusedWidget as? TextNode else { return }
 //        if node.text.isEmpty || !rootNode.textIsSelected { hideInlineFormatter() }
         detectTextFormatterType()

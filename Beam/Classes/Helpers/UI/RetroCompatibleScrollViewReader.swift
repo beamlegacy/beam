@@ -28,6 +28,19 @@ struct RetroCompatibleScrollViewReader<Content: View>: View {
         } else {
             content(scrollViewProxy)
                 .background(CustomScrollingHelper(proxy: customScrollingProxy))
+                .transformPreference(RetroScrollViewProxyPreferenceKey.self) { preferences in
+                    let prefs = preferences
+                    DispatchQueue.main.async {
+                        var frames = [AnyHashable: CGRect]()
+                        prefs.forEach { p in
+                            frames[p.id] = p.geometry.frame(in: .global)
+                        }
+                        (scrollViewProxy.scrollViewProxy as? CustomScrollingProxy)?.storedFrames = frames
+                    }
+                }
+                .onPreferenceChange(RetroScrollViewProxyPreferenceKey.self, perform: { _ in
+                    // Somehow needed for .transformPreference to be called
+                })
                 .onAppear {
                     DispatchQueue.main.async {
                         let newProxy = CustomScrollingProxy()
@@ -52,8 +65,8 @@ struct RetroCompatibleScrollViewProxy: Equatable {
     }
     fileprivate var id = UUID().uuidString
 
-    // Either native SwiftUI 2 (macOS 11) ScrollViewProxy or our implementation for < 11.0
-    private var scrollViewProxy: Any?
+    /// Either native SwiftUI 2 (macOS 11) ScrollViewProxy or our implementation for < 11.0
+    fileprivate var scrollViewProxy: Any?
 
     @available(macOS 11.0, *)
     fileprivate init(withScrollViewProxy proxy: ScrollViewProxy) {
@@ -68,6 +81,23 @@ struct RetroCompatibleScrollViewProxy: Equatable {
     fileprivate static var droppedScrollToPoint: CGPoint = .zero
 
     fileprivate init() { self.id = "emptyProxy" }
+
+    func scrollTo<ID: Hashable>(_ id: ID) {
+        Self.droppedScrollToPoint = .zero
+        if #available(macOS 11.0, *), !forceCustomProxyForDebug {
+            guard let proxy = scrollViewProxy as? ScrollViewProxy else { return }
+            proxy.scrollTo(id, anchor: .center)
+        } else {
+            guard let proxy = scrollViewProxy as? CustomScrollingProxy,
+                  let clipView = proxy.clipView,
+                  var frame = proxy.storedFrames[id] else { return }
+
+            let y = clipView.convert(frame.origin, to: nil).y - frame.height
+            frame.size.width = 0
+            frame.origin = CGPoint(x: 0, y: y)
+            proxy.scrollTo(.rect(frame))
+        }
+    }
 
     func scrollTo(_ point: CGPoint) {
         Self.droppedScrollToPoint = .zero
@@ -112,7 +142,10 @@ private class CustomScrollingProxy {
 
     var lastScrollPoint: CGPoint = .zero
 
-    private var clipView: NSClipView?
+    /// used for macOS 10.15 scrollTo(id)
+    fileprivate var storedFrames = [AnyHashable: CGRect]()
+
+    fileprivate var clipView: NSClipView?
 
     func catchScrollView(for view: NSView) {
         guard clipView == nil else { return }
@@ -159,5 +192,52 @@ private extension NSView {
             }
         } while next != nil
         return nil
+    }
+}
+
+// MARK: - Support for scrollTo(id) for macOS <= Catalina(10.15)
+// Storing frames for given ids in preferences.
+// Credit to https://github.com/Amzd/ScrollViewProxy/blob/master/Sources/ScrollViewProxy/ScrollViewProxy.swift
+
+extension View {
+    /// Adds an ID to this view so you can scroll to it with `CustomScrollViewProxy.scrollTo(id)`
+    public func retroCompatibleScrollId<ID: Hashable>(_ id: ID) -> some View {
+        Group {
+            if #available(macOS 11.0, *), !forceCustomProxyForDebug {
+                self
+            } else {
+                modifier(RetroScrollViewProxyPreferenceModifier(id: id))
+            }
+        }
+    }
+}
+@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+struct RetroScrollViewProxyPreferenceData: Equatable {
+    static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.id == rhs.id
+    }
+
+    var geometry: GeometryProxy
+    var id: AnyHashable
+}
+
+@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+struct RetroScrollViewProxyPreferenceKey: PreferenceKey {
+    static var defaultValue: [RetroScrollViewProxyPreferenceData] { [] }
+    static func reduce(value: inout Value, nextValue: () -> Value) {
+        value.append(contentsOf: nextValue())
+    }
+}
+
+@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+struct RetroScrollViewProxyPreferenceModifier: ViewModifier {
+    let id: AnyHashable
+    func body(content: Content) -> some View {
+        content.background(GeometryReader { geometry in
+            Color.clear.preference(
+                key: RetroScrollViewProxyPreferenceKey.self,
+                value: [.init(geometry: geometry, id: self.id)]
+            )
+        })
     }
 }
