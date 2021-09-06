@@ -49,12 +49,13 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
         }
     }
 
-    public func showLinkPasteMenu(for linkRange: BeamText.Range) {
-        guard let node = focusedWidget as? TextNode else { return }
+    /// - Returns: `true` if link can be embed, and therefore was changed or a menu was presented
+    public func showLinkEmbedPasteMenu(for linkRange: BeamText.Range) -> Bool {
+        guard let node = focusedWidget as? TextNode else { return false }
         var (_, rect) = node.offsetAndFrameAt(index: node.cursorPosition)
         rect.origin.x = rect.maxX
         guard let link = node.linkAt(index: node.cursorPosition),
-              linkCanBeEmbed(link) else { return }
+              linkCanBeEmbed(link) else { return false }
         dismissFormatterView(inlineFormatter)
         let targetRange = linkRange.position..<linkRange.end
         if PreferencesManager.embedContentPreference == EmbedContent.always.id {
@@ -62,6 +63,7 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
         } else if PreferencesManager.embedContentPreference == EmbedContent.only.id {
             showHyperlinkContextMenu(for: node, targetRange: targetRange, frame: rect, url: link, linkTitle: selectedText, fromPaste: true)
         }
+        return true
     }
 
     public func linkStartedHovering(for currentNode: TextNode?, targetRange: Range<Int>, frame: NSRect?, url: URL?, linkTitle: String?) {
