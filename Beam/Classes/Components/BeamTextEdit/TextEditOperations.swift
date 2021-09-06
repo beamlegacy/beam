@@ -40,10 +40,10 @@ extension TextRoot {
               !(node.parent?.parent?.isTreeBoundary ?? false),
               let prevParent = node.displayedElement.parent,
               let newParent = prevParent.parent,
-              let parentIndexInParent = newParent.id == node.elementId ? node.displayedElement.children.count : prevParent.indexInParent
+              let parentIndexInParent = newParent.id == node.displayedElementId ? node.displayedElement.children.count : prevParent.indexInParent
         else { return false }
 
-        return focusedCmdManager.reparentElement(node.element, to: newParent, atIndex: parentIndexInParent + 1)
+        return focusedCmdManager.reparentElement(node.displayedElement, to: newParent, atIndex: parentIndexInParent + 1)
     }
 
     func increaseNodeSelectionIndentation() {
