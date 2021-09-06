@@ -14,7 +14,12 @@ extension BeamTextEdit {
     public func makeInternalLinkForSelectionOrShowFormatter(for node: TextNode, applyFormat: Bool = true) -> BeamText.Attribute? {
         let title = node.root?.state.nodeSelection != nil ? node.text.text : selectedText
         guard !title.isEmpty, let doc = documentManager.loadDocumentByTitle(title: title) else {
-            showCardReferenceFormatter(initialText: selectedText, atPosition: node.cursorPosition, prefix: 0, suffix: 0)
+            let text = selectedText
+            let pos = selectedTextRange.lowerBound
+            node.cmdManager.formatText(in: node, for: nil, with: Self.formatterAutocompletingAttribute, for: selectedTextRange, isActive: false)
+            node.focus(position: selectedTextRange.upperBound)
+            node.root?.cancelSelection()
+            showCardReferenceFormatter(initialText: text, atPosition: pos, prefix: 0, suffix: 0)
             return nil
         }
         let attribute = BeamText.Attribute.internalLink(doc.id)
@@ -35,13 +40,15 @@ extension BeamTextEdit {
         if rect.size.height == .zero {
             rect.size.height = node.firstLineHeight
         }
-        let atPoint = CGPoint(x: offset + node.offsetInDocument.x - 4,
-                              y: rect.maxY + node.offsetInDocument.y + 4)
+        let atPoint = CGPoint(x: offset + node.offsetInDocument.x + node.contentsLead - 4,
+                              y: rect.maxY + node.offsetInDocument.y + 8)
         var targetRange = atPosition..<atPosition
         if let text = initialText {
             targetRange = max(0, targetRange.lowerBound - text.count)..<targetRange.upperBound
         }
-        let menuView = CardReferenceFormatterView(initialText: initialText, searchCardContent: searchCardContent, onSelectNoteHandler: { [weak self, weak node] noteId, elementId in
+        let menuView = CardReferenceFormatterView(initialText: initialText, searchCardContent: searchCardContent,
+                                                  typingPrefix: prefix, typingSuffix: suffix,
+                                                  onSelectNoteHandler: { [weak self, weak node] noteId, elementId in
             guard let self = self, let node = node else { return }
             if searchCardContent, let elementId = elementId {
                 self.onFinishSelectingBlockRef(in: node, noteId: noteId, elementId: elementId, range: targetRange, prefix: prefix, suffix: suffix)
@@ -52,8 +59,6 @@ extension BeamTextEdit {
             self?.onFinishSelectingLinkRef(in: node, title: title,
                                            range: targetRange, prefix: prefix, suffix: suffix)
         })
-        menuView.typingPrefix = prefix
-        menuView.typingSuffix = suffix
         formatterTargetRange = targetRange
         formatterTargetNode = node
         inlineFormatter = menuView
