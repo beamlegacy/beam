@@ -172,6 +172,15 @@ extension PasswordManager: BeamObjectManagerDelegate {
 
     func willSaveAllOnBeamObjectApi() {}
 
+    func saveObjectsAfterConflict(_ passwords: [PasswordRecord]) throws {
+        try self.passwordsDB.save(passwords: passwords)
+    }
+
+    func manageConflict(_ dbStruct: PasswordRecord,
+                        _ remoteDbStruct: PasswordRecord) throws -> PasswordRecord {
+        fatalError("Managed by BeamObjectManager")
+    }
+
     func receivedObjects(_ passwords: [PasswordRecord]) throws {
         Logger.shared.logDebug("Received \(passwords.count) passwords: updating",
                                category: .passwordNetwork)

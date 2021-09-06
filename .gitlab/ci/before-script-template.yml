@@ -16,4 +16,3 @@ default:
     # - git config --global url."https://${GITLAB_USERNAME}:${GITLAB_ACCESS_TOKEN}@gitlab.com/".insteadOf "git@gitlab.com:"
     - scripts/move_libgit2_step1.sh
     - scripts/move_libgit2_step2.sh
-    - echo "${TEST_ACCOUNT_EMAIL}"

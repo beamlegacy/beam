@@ -30,10 +30,12 @@ protocol BeamObjectManagerDelegate: AnyObject, BeamObjectManagerDelegateProtocol
     /// When doing manual conflict management. `object` and `remoteObject` can be the same if the conflict was only
     /// because of a checksum issue, when we locally have stored previousChecksum but it's been deleted on the server
     /// side
+    /// You only need to use this when you have manual conflict management, see `DocumentManager` for an example of how to implement it, and
+    /// `DatabaseManager` if you don't handle conflict manually
     func manageConflict(_ object: BeamObjectType,
                         _ remoteObject: BeamObjectType) throws -> BeamObjectType
 
-    /// When a conflict happens, we will resend a potentially updated version and should store its result
+    /// When a conflict happens, we will resend a potentially updated version and should store its result without trying to merge in a smart way
     func saveObjectsAfterConflict(_ objects: [BeamObjectType]) throws
 }
 
@@ -61,15 +63,6 @@ extension BeamObjectManagerDelegate {
         }
 
         try receivedObjects(parsedObjects)
-    }
-
-    func manageConflict(_ object: BeamObjectType,
-                        _ remoteObject: BeamObjectType) throws -> BeamObjectType {
-        fatalError("manageConflict must be implemented by \(BeamObjectType.beamObjectTypeName) manager")
-    }
-
-    func saveObjectsAfterConflict(_ objects: [BeamObjectType]) throws {
-        fatalError("saveObjectsAfterConflict must be implemented by \(BeamObjectType.beamObjectTypeName) manager")
     }
 
     func updatedObjectsOnly(_ objects: [BeamObjectType]) -> [BeamObjectType] {

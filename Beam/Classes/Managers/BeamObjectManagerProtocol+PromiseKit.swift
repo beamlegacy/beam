@@ -88,8 +88,6 @@ extension BeamObjectManagerDelegate {
                 }
             }
 
-            try self.saveObjectsAfterConflict(mergedObjects)
-
             let promise: Promise<[BeamObjectType]> = self.saveOnBeamObjectsAPI(mergedObjects)
             let backgroundQueue = DispatchQueue.global(qos: .userInitiated)
 
@@ -97,6 +95,8 @@ extension BeamObjectManagerDelegate {
                 var allObjects: [BeamObjectType] = []
                 allObjects.append(contentsOf: goodObjects)
                 allObjects.append(contentsOf: remoteObjects)
+
+                try self.saveObjectsAfterConflict(remoteObjects)
 
                 return allObjects
             }.recover(on: backgroundQueue) { error -> Promise<[BeamObjectType]> in

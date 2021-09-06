@@ -6,6 +6,28 @@ extension DatabaseManager: BeamObjectManagerDelegate {
 
     func willSaveAllOnBeamObjectApi() {}
 
+    func saveObjectsAfterConflict(_ objects: [DatabaseStruct]) throws {
+        let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
+
+        try context.performAndWait {
+            for updateObject in objects {
+                guard let localDatabase = try Database.fetchWithId(context, updateObject.id) else {
+                    throw DatabaseManagerError.localDatabaseNotFound
+                }
+
+                localDatabase.update(updateObject)
+                localDatabase.beam_object_previous_checksum = updateObject.checksum
+                try checkValidations(context, localDatabase)
+            }
+            try Self.saveContext(context: context)
+        }
+    }
+
+    func manageConflict(_ dbStruct: DatabaseStruct,
+                        _ remoteDbStruct: DatabaseStruct) throws -> DatabaseStruct {
+        fatalError("Managed by BeamObjectManager")
+    }
+
     //swiftlint:disable:next function_body_length
     func receivedObjects(_ databases: [DatabaseStruct]) throws {
         Logger.shared.logDebug("Received \(databases.count) databases",
