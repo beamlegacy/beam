@@ -153,66 +153,6 @@ class APIWebSocketRequest: APIRequest {
         }
     }
 
-    /// Ask API for any document changes, completionHandler will be call once per update received until this channel has been unsubscribed.
-    /// - Parameter completionHandler: the document update
-    /// - Returns: The channelId used for calling `unsubscribe()`
-    @discardableResult
-    func connectDocuments(_ completionHandler: @escaping (Swift.Result<DocumentAPIType, Error>) -> Void) -> UUID? {
-        guard connected else {
-            Logger.shared.logError("Socket isn't connected", category: .webSocket)
-            completionHandler(.failure(APIWebSocketRequestError.socket_not_connected))
-            return nil
-        }
-
-        guard let query = loadFile(fileName: "subscription_documents_updated") else {
-            fatalError("File not found")
-        }
-
-        /*
-         Very async code, will in order:
-         1. Subscribe and add a new ActionCable channel.
-         2. Once subscribed, send the GraphQL query to track all document changes within this new channel
-         3. For every query data back from the API, will call the completionHandler once with the updated document
-
-         As long as `unsubscribe(channelId)` isn't called, the completionHandler will keep being called.
-         */
-
-        logDebug("connectDocuments called")
-
-        return subscribe { [weak self] result in
-            switch result {
-            case .failure(let error):
-                completionHandler(.failure(error))
-            case .success(let channelId):
-                self?.queryCommand(channelId: channelId, query: query) { result in
-                    switch result {
-                    case .failure(let error):
-                        completionHandler(.failure(error))
-                    case .success(let message):
-                        guard let inputMessage = try? self?.defaultDecoder().decode(WebSocketInputReceivedMessage.self,
-                                                                                    from: message.asData),
-                              let inputResult = inputMessage.message?.result else {
-                            self?.logDebug("[\(channelId)] connectDocuments: \(message)")
-                            return
-                        }
-
-                        guard let document = inputResult.data?.documentsUpdated?.document else {
-                            return
-                        }
-
-                        do {
-                            try document.decrypt()
-
-                            completionHandler(.success(document))
-                        } catch {
-                            completionHandler(.failure(error))
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     /// Requirement for parsing data received from the API
     private func receive_messages() {
         webSocketTask?.receive { [weak self] result in
@@ -549,18 +489,11 @@ extension APIWebSocketRequest {
     // Subscription names will be included in the response
     struct WebSocketData: Decodable {
         // swiftlint:disable:next nesting
-        struct WebSocketDataDocument: Decodable {
-            let document: DocumentAPIType?
-        }
-
-        // swiftlint:disable:next nesting
         struct WebSocketDataBeamObject: Decodable {
             let beamObject: BeamObject?
         }
 
         // We should add all subscription here
-        let documentsUpdated: WebSocketDataDocument?
-        let documentUpdated: WebSocketDataDocument?
         let beamObjectsUpdated: WebSocketDataBeamObject?
         let beamObjectUpdated: WebSocketDataBeamObject?
     }

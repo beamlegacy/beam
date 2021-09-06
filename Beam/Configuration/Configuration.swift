@@ -15,12 +15,13 @@ struct Configuration {
     static private(set) var updateFeedURL: String = Configuration.value(for: "SUFeedURL")
     static private(set) var sentryEnabled = EnvironmentVariables.sentryEnabled
     static private(set) var networkEnabledDefault = EnvironmentVariables.networkEnabled
-    static var encryptionEnabledDefault = EnvironmentVariables.encryptionEnabled
     static private(set) var topDomainDBMaxSize = 10000
 
     static private(set) var sentryDsn = "https://\(sentryKey)@\(sentryHostname)/\(sentryProject)"
 
     static private(set) var testPrivateKey = "j6tifPZTjUtGoz+1RJkO8dOMlu48MUUSlwACw/fCBw0="
+
+    static var shouldDeleteEmptyDatabase = true
 
     // Runtime configuration
     // Set to "http://api.beam.lvh.me:5000" for running on a local API instance
@@ -60,39 +61,6 @@ struct Configuration {
     }
 
     static var topDomainUrl: URL = URL(string: "http://downloads.majestic.com/majestic_million.csv")!
-
-    static private var encryptionEnabledKey = "encryptionEnabled"
-    static var encryptionEnabled: Bool {
-        get {
-            if UserDefaults.standard.object(forKey: encryptionEnabledKey) != nil {
-                return UserDefaults.standard.bool(forKey: encryptionEnabledKey)
-            }
-
-            return encryptionEnabledDefault
-        }
-        set {
-            if newValue != encryptionEnabled {
-                UserDefaults.standard.set(newValue, forKey: encryptionEnabledKey)
-            }
-        }
-    }
-
-    static private var beamObjectAPIEnabledKey = "beamObjectAPIEnabled"
-    static var beamObjectAPIEnabled: Bool {
-        get {
-            if UserDefaults.standard.object(forKey: beamObjectAPIEnabledKey) != nil {
-                return UserDefaults.standard.bool(forKey: beamObjectAPIEnabledKey)
-            }
-
-            return EnvironmentVariables.beamObjectAPIEnabled
-        }
-        set {
-            if newValue != beamObjectAPIEnabled {
-                UserDefaults.standard.set(newValue, forKey: beamObjectAPIEnabledKey)
-                AppDelegate.main.syncData()
-            }
-        }
-    }
 
     static private var publicHostnameKey = "publicHostname"
     static var publicHostname: String {

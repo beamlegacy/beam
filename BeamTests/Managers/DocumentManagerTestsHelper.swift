@@ -40,7 +40,7 @@ class DocumentManagerTestsHelper {
         semaphore.wait()
     }
 
-    func saveLocallyAndRemotely(_ docStruct: DocumentStruct) -> DocumentStruct {
+    func saveLocallyAndRemotely(_ docStruct: DocumentStruct) throws -> DocumentStruct {
         var result = docStruct.copy()
 
         // The call to `saveDocumentStructOnAPI` expect the document to be already saved locally
@@ -53,7 +53,14 @@ class DocumentManagerTestsHelper {
             }
         }
 
-        return result
+        // saveThenSaveOnAPI() saved on network, which then called `persistChecksum`, to be "up to date" we must reload
+        // the documentStruct from the DB
+
+        guard let savedDocumentStruct = documentManager.loadById(id: docStruct.id) else {
+            throw DocumentManagerError.localDocumentNotFound
+        }
+
+        return savedDocumentStruct
     }
 
     func saveLocally(_ docStruct: DocumentStruct) -> DocumentStruct {
@@ -87,7 +94,7 @@ class DocumentManagerTestsHelper {
 
     func saveDatabaseRemotely(_ dbStruct: DatabaseStruct) {
         waitUntil(timeout: .seconds(10)) { done in
-            self.databaseManager.saveDatabaseStructOnAPI(dbStruct) { result in
+            _ = try? self.databaseManager.saveOnBeamObjectAPI(dbStruct) { result in
                 expect { try result.get() }.toNot(throwError())
                 done()
             }
@@ -95,57 +102,48 @@ class DocumentManagerTestsHelper {
     }
 
     func saveRemotelyOnly(_ docStruct: DocumentStruct) {
-        let documentRequest = DocumentRequest()
-
         waitUntil(timeout: .seconds(10)) { done in
-            _ = try? documentRequest.save(docStruct.asApiType()) { result in
+            var sendDocStruct = docStruct.copy()
+            sendDocStruct.previousChecksum = docStruct.beamObjectPreviousChecksum
+            _ = try? self.documentManager.saveOnBeamObjectAPI(sendDocStruct) { result in
                 expect { try result.get() }.toNot(throwError())
                 done()
             }
         }
     }
 
-    func fetchOnAPI(_ docStruct: DocumentStruct) -> DocumentAPIType? {
-        var documentAPIType: DocumentAPIType?
-        let documentRequest = DocumentRequest()
+    func fetchOnAPI(_ docStruct: DocumentStruct) -> DocumentStruct? {
+        var fetchedDocStruct: DocumentStruct?
 
         let semaphore = DispatchSemaphore(value: 0)
-        _ = try? documentRequest.fetchDocument(docStruct.uuidString) { result in
-            documentAPIType = try? result.get()
+        _ = try? documentManager.refreshFromBeamObjectAPI(docStruct, true) { result in
+            fetchedDocStruct = try? result.get()
             semaphore.signal()
         }
         _ = semaphore.wait(timeout: DispatchTime.now() + .seconds(5))
 
-        return documentAPIType
+        return fetchedDocStruct
     }
 
-    func fetchDatabaseOnAPI(_ dbStruct: DatabaseStruct) -> DatabaseAPIType? {
-        var dbAPIType: DatabaseAPIType?
-        let databaseRequest = DatabaseRequest()
+    func fetchDatabaseOnAPI(_ dbStruct: DatabaseStruct) -> DatabaseStruct? {
+        var fetchedDbStruct: DatabaseStruct?
 
         let semaphore = DispatchSemaphore(value: 0)
         // TODO: Add a `fetchDatabase` request for faster GET
-        _ = try? databaseRequest.fetchAll { result in
-            if let databaseAPITypes = try? result.get() {
-                for databaseAPIType in databaseAPITypes {
-                    if databaseAPIType.id == dbStruct.uuidString {
-                        dbAPIType = databaseAPIType
-                        break
-                    }
-                }
-            }
+        _ = try? databaseManager.refreshFromBeamObjectAPI(dbStruct, true) { result in
+            fetchedDbStruct = try? result.get()
             semaphore.signal()
         }
         _ = semaphore.wait(timeout: DispatchTime.now() + .seconds(5))
 
-        return dbAPIType
+        return fetchedDbStruct
     }
 
     func fetchOnAPIWithLatency(_ docStruct: DocumentStruct, _ newLocal: String) -> Bool {
         for _ in 0...10 {
             let remoteStruct = fetchOnAPI(docStruct)
-            expect(remoteStruct?.id).to(equal(docStruct.uuidString))
-            if remoteStruct?.data == newLocal {
+            expect(remoteStruct?.id).to(equal(docStruct.id))
+            if remoteStruct?.data == newLocal.asData {
                 return true
             }
             usleep(50)
@@ -163,18 +161,18 @@ class DocumentManagerTestsHelper {
 
     func deleteDatabaseStruct(_ dbStruct: DatabaseStruct, includedRemote: Bool = true) {
         waitUntil(timeout: .seconds(10)) { done in
-            self.databaseManager.delete(id: dbStruct.id, includedRemote: includedRemote) { result in
+            self.databaseManager.delete(dbStruct, includedRemote: includedRemote) { result in
                 done()
             }
         }
     }
 
     private let faker = Faker(locale: "en-US")
-    func createDocumentStruct(title titleParam: String? = nil,
+    func createDocumentStruct(title titleParam: String = String.randomTitle(),
                               id: String? = nil) -> DocumentStruct {
         var uuid = UUID()
         if let id = id, let newuuid = UUID(uuidString: id) { uuid = newuuid }
-        let title = titleParam ?? String.randomTitle()
+        let title = titleParam
         return DocumentStruct(id: uuid,
                               databaseId: DatabaseManager.defaultDatabase.id,
                               title: title,
@@ -191,13 +189,25 @@ class DocumentManagerTestsHelper {
         "{ \"id\" : \"\(id)\", \"textStats\" : { \"wordsCount\" : 0 }, \"visitedSearchResults\" : [ ], \"sources\" : { \"sources\" : [ ] }, \"type\" : { \"type\" : \"journal\", \"date\" : \"\" }, \"title\" : \"\(title)\", \"searchQueries\" : [ ], \"open\" : true, \"text\" : { \"ranges\" : [ { \"string\" : \"\" } ] }, \"readOnly\" : false, \"children\" : [ { \"readOnly\" : false, \"score\" : 0, \"id\" : \"0324539D-5AD0-4B8D-AE19-05C1DD97B6FC\", \"creationDate\" : 650476092.56825495, \"open\" : true, \"textStats\" : { \"wordsCount\" : 1 }, \"text\" : { \"ranges\" : [ { \"string\" : \"\" } ] } } ], \"score\" : 0, \"creationDate\" : 650476092.05954194 }".asData
     }
 
-    func fillDocumentStructWithStaticText(_ docStruct: DocumentStruct) -> DocumentStruct {
+    func fillDocumentStructWithStaticText(_ docStruct: DocumentStruct, _ text: String = "whatever binary data") -> DocumentStruct {
+        var result = docStruct.copy()
+        result.data = (try? documentDataWithStaticText(docStruct, text)) ?? Data()
+        return result
+    }
+
+    func documentDataWithStaticText(_ docStruct: DocumentStruct, _ text: String = "whatever binary data") throws -> Data {
+        let id = docStruct.id
+        let title = docStruct.title
+
+        let encoder = JSONEncoder()
+        let textString: String = (try encoder.encode(text)).asString ?? ""
+        let titleString: String = (try encoder.encode(title)).asString ?? ""
+
         // TODO: set creationDate and type properly
         // The bullet ID is hard coded on purpose, as it wouldn't work with Vinyl if random
-        let data = "{ \"id\" : \"\(docStruct.id)\", \"textStats\" : { \"wordsCount\" : 0 }, \"visitedSearchResults\" : [ ], \"sources\" : { \"sources\" : [ ] }, \"type\" : { \"type\" : \"journal\", \"date\" : \"\" }, \"title\" : \"\(docStruct.title)\", \"searchQueries\" : [ ], \"open\" : true, \"text\" : { \"ranges\" : [ { \"string\" : \"\" } ] }, \"readOnly\" : false, \"children\" : [ { \"readOnly\" : false, \"score\" : 0, \"id\" : \"0324539D-5AD0-4B8D-AE19-05C1DD97B6FC\", \"creationDate\" : 650476092.56825495, \"open\" : true, \"textStats\" : { \"wordsCount\" : 1 }, \"text\" : { \"ranges\" : [ { \"string\" : \"whatever binary data\" } ] } } ], \"score\" : 0, \"creationDate\" : 650476092.05954194 }".asData
-        var result = docStruct.copy()
-        result.data = data
-        return result
+        // Note: I add two `\n` to make our 'git merge' working. This is supposed to be stored in pretty json to improve that
+        let data = "{ \"id\" : \"\(id)\", \"textStats\" : { \"wordsCount\" : 0 }, \"visitedSearchResults\" : [ ], \"sources\" : { \"sources\" : [ ] }, \"type\" : { \"type\" : \"note\", \"date\" : \"\" }, \"title\" : \(titleString), \"searchQueries\" : [ ], \"open\" : true, \"text\" : { \"ranges\" : [ { \"string\" : \"\" } ] }, \"readOnly\" : false, \"children\" : [ { \"readOnly\" : false, \"score\" : 0, \"id\" : \"0324539D-5AD0-4B8D-AE19-05C1DD97B6FC\", \"creationDate\" : 650476092.56825495, \"open\" : true, \"textStats\" : { \"wordsCount\" : 1 }, \"text\" : { \"ranges\" : [ { \"string\" : \n \(textString) \n } ] } } ], \"score\" : 0, \"creationDate\" : 650476092.05954194 }".asData
+        return data
     }
 
     func fillDocumentStructWithRandomText(_ docStruct: DocumentStruct) -> DocumentStruct {
@@ -226,47 +236,67 @@ class DocumentManagerTestsHelper {
         }
     }
 
-    func createLocalAndRemoteVersions(_ ancestor: String,
-                                      newLocal: String? = nil,
-                                      newRemote: String? = nil,
-                                      _ id: String? = nil,
-                                      _ title: String? = nil) throws -> DocumentStruct {
+    /// Simulate storing ancestor as common ancestor, newRemote only on the API side, and newLocal only locally
+    func createLocalAndRemoteVersionsWithData(_ ancestor: String,
+                                              newLocal: String? = nil,
+                                              newRemote: String? = nil,
+                                              _ id: String? = nil,
+                                              _ title: String) throws -> DocumentStruct {
         BeamDate.travel(-600)
-        var docStruct = self.createDocumentStruct()
+        var docStruct = self.createDocumentStruct(title: title)
         if let id = id, let uuid = UUID(uuidString: id) {
             docStruct.id = uuid
         }
 
-        docStruct.title = title ?? docStruct.title
         docStruct.data = ancestor.asData
-        docStruct = saveLocallyAndRemotely(docStruct)
+        docStruct = try saveLocallyAndRemotely(docStruct)
 
-        // We'll use saveDocumentOnAPI() later, I need to update the result
-        // DocumentStruct to add its previousChecksum
-        guard let localDocument = try? Document.fetchWithId(mainContext, docStruct.id) else {
-            throw DocumentManagerError.localDocumentNotFound
+        let localStruct = docStruct.copy()
+
+        var localDocStruct = documentManager.loadById(id: docStruct.id)
+        expect(localDocStruct?.data) == ancestor.asData
+        expect(localDocStruct?.previousData) == ancestor.asData
+
+        if let newRemote = newRemote {
+            // Generates a new version on the API side only. move date because it must be more recent
+            BeamDate.travel(20)
+            var newDocStruct = docStruct.copy()
+            newDocStruct.updatedAt = BeamDate.now
+            newDocStruct.data = newRemote.asData
+            self.saveRemotelyOnly(newDocStruct)
+            BeamDate.travel(-20)
+            
+            // savingRemotely changed previousData and checksum but we want to "simulate" that remote saves from another
+            // device, needing to rewrite the local version we had before
+            // docStruct = saveLocally(localStruct)
+            guard let document = try? Document.fetchWithId(CoreDataManager.shared.mainContext, docStruct.id) else {
+                fail("Couldn't fetch document")
+                return docStruct
+            }
+
+            document.beam_api_data = localStruct.previousData
+            document.beam_object_previous_checksum = localStruct.beamObjectPreviousChecksum
+            document.beam_api_checksum = localStruct.previousChecksum
+            _ = try? DocumentManager.saveContext(context: CoreDataManager.shared.mainContext)
         }
-        docStruct.previousChecksum = localDocument.beam_api_checksum
-        //
 
+        localDocStruct = documentManager.loadById(id: docStruct.id)
+        expect(localDocStruct?.data) == ancestor.asData
+        expect(localDocStruct?.previousData) == ancestor.asData
 
         if let newLocal = newLocal {
             // Force to locally save an older version of the document
             BeamDate.travel(2)
             docStruct.updatedAt = BeamDate.now
             docStruct.data = newLocal.asData
-            docStruct.previousData = ancestor.asData
             docStruct = self.saveLocally(docStruct)
+
+            localDocStruct = documentManager.loadById(id: docStruct.id)
+            expect(localDocStruct?.data) == newLocal.asData
         }
 
-        if let newRemote = newRemote {
-            // Generates a new version on the API side only
-            BeamDate.travel(2)
-            var newDocStruct = docStruct.copy()
-            newDocStruct.data = newRemote.asData
-            newDocStruct.updatedAt.addTimeInterval(2)
-            self.saveRemotelyOnly(newDocStruct)
-        }
+        localDocStruct = documentManager.loadById(id: docStruct.id)
+        expect(localDocStruct?.previousData) == ancestor.asData
 
         return docStruct
     }
@@ -284,9 +314,9 @@ class DocumentManagerTestsHelper {
     }
 
     // MARK: Database
-    func createDatabaseStruct(_ id: String? = nil, _ title: String? = "Foobar DB") -> DatabaseStruct {
+    func createDatabaseStruct(_ id: String? = nil, _ title: String = "DB666") -> DatabaseStruct {
         var databaseStruct = DatabaseStruct(id: UUID(),
-                                            title: title ?? String.randomTitle(),
+                                            title: title,
                                             createdAt: BeamDate.now,
                                             updatedAt: BeamDate.now)
 
@@ -304,8 +334,17 @@ class DocumentManagerTestsHelper {
                 if case .failure(let error) = result {
                     fail(error.localizedDescription)
                 }
+                if case .success(let success) = result, success != true {
+                    fail("saveDatabaseLocally wasn't true")
+                }
                 done()
             })
+        }
+
+        let count = Database.countWithPredicate(CoreDataManager.shared.mainContext,
+                                                NSPredicate(format: "id = %@", dbStruct.id as CVarArg))
+        if count != 1 {
+            fail("dbStruct wasn't saved!")
         }
     }
 }

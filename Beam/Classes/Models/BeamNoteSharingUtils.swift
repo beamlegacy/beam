@@ -25,13 +25,7 @@ class BeamNoteSharingUtils {
     }
 
     func getPublicLink(completion: @escaping ((Result<String, Error>) -> Void)) {
-        let documentRequest = DocumentRequest()
-
-        do {
-            try documentRequest.publicUrl(note.id.uuidString.lowercased(), completion)
-        } catch {
-            completion(.failure(error))
-        }
+        completion(.success("the public link has not been implemented yet"))
     }
 
     func copyLinkToClipboard(completion: ((Result<Bool, Error>) -> Void)? = nil) {

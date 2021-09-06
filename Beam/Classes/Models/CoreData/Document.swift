@@ -34,11 +34,6 @@ class Document: NSManagedObject, BeamCoreDataObject {
         return beam_api_data != data
     }
 
-    func asApiType(_ context: NSManagedObjectContext = CoreDataManager.shared.mainContext) -> DocumentAPIType {
-        let result = DocumentAPIType(document: self, context: context)
-        return result
-    }
-
     func delete(_ context: NSManagedObjectContext = CoreDataManager.shared.mainContext) {
         context.delete(self)
         do {
@@ -132,6 +127,7 @@ class Document: NSManagedObject, BeamCoreDataObject {
         updated_at = BeamDate.now
         deleted_at = documentStruct.deletedAt
         is_public = documentStruct.isPublic
+
         if let journalDate = documentStruct.journalDate, !journalDate.isEmpty {
             journal_day = JournalDateConverter.toInt(from: journalDate)
         }

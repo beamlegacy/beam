@@ -80,7 +80,7 @@ struct DatabaseDetail: View {
     }
 
     private func delete() {
-        databaseManager.delete(id: database.id) { _ in }
+        databaseManager.delete(DatabaseStruct(database: database)) { _ in }
     }
 
     private func softDelete() {
