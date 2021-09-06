@@ -191,6 +191,7 @@ public class TextNode: ElementNode {
 
         displayedElement.$children
             .sink { [unowned self] elements in
+                guard self.editor != nil else { return }
                 updateTextChildren(elements: elements)
             }.store(in: &scope)
 
