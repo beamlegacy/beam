@@ -115,42 +115,45 @@ extension DatabaseManager {
         Logger.shared.logDebug("Deleting database \(databaseStruct.titleAndId)", category: .database)
         let id = databaseStruct.id
 
-        let context = CoreDataManager.shared.mainContext
-        guard let coredataDb = try? Database.fetchWithId(context, id) else {
-            completion(.failure(DatabaseManagerError.localDatabaseNotFound))
-            return
-        }
+        let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
 
-        do {
-            let documentIds = try Document.fetchAll(context, NSPredicate(format: "database_id = %@", id as CVarArg)).map { $0.id }
-
-            try Document.deleteWithPredicate(context, NSPredicate(format: "database_id = %@", id as CVarArg))
-            coredataDb.delete(context)
-
-            try Self.saveContext(context: context)
-
-            // Trigger updates for Advanced Settings, will force update for the Picker listing all DBs
-            // Important: Don't use `DatabaseManager.defaultDatabase` here as object, as it recreates a default DB.
-            DispatchQueue.main.async {
-                NotificationCenter.default.post(name: .defaultDatabaseUpdate,
-                                                object: nil)
-            }
-
-            guard includedRemote else {
-                completion(.success(true))
+        context.perform {
+            guard let coredataDb = try? Database.fetchWithId(context, id) else {
+                completion(.failure(DatabaseManagerError.localDatabaseNotFound))
                 return
             }
 
-            guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-                completion(.success(false))
+            do {
+                let documentIds = try Document.fetchAll(context, NSPredicate(format: "database_id = %@", id as CVarArg)).map { $0.id }
+
+                try Document.deleteWithPredicate(context, NSPredicate(format: "database_id = %@", id as CVarArg))
+                coredataDb.delete(context)
+
+                try Self.saveContext(context: context)
+
+                // Trigger updates for Advanced Settings, will force update for the Picker listing all DBs
+                // Important: Don't use `DatabaseManager.defaultDatabase` here as object, as it recreates a default DB.
+                DispatchQueue.main.async {
+                    NotificationCenter.default.post(name: .defaultDatabaseUpdate,
+                                                    object: nil)
+                }
+
+                guard includedRemote else {
+                    completion(.success(true))
+                    return
+                }
+
+                guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+                    completion(.success(false))
+                    return
+                }
+
+                self.deleteWithBeamObjectAPI(id, documentIds, completion)
+            } catch {
+                Logger.shared.logError(error.localizedDescription, category: .database)
+                completion(.failure(error))
                 return
             }
-
-            deleteWithBeamObjectAPI(id, documentIds, completion)
-        } catch {
-            Logger.shared.logError(error.localizedDescription, category: .database)
-            completion(.failure(error))
-            return
         }
     }
 
