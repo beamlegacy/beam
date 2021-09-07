@@ -24,6 +24,7 @@ class ProxyTextNode: TextNode, ProxyNode {
         element.$children
             .receive(on: DispatchQueue.main)
             .sink { [unowned self] newChildren in
+                guard self.editor != nil else { return }
                 self.children = newChildren.compactMap({ e -> ProxyTextNode? in
                     let ref = nodeFor(e, withParent: self)
                     ref.parent = self
