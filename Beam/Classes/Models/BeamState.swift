@@ -119,7 +119,7 @@ import BeamCore
             let noteController = currentTab?.noteController
             if currentTab?.originMode == .today, let note = noteController?.note, note.type.isJournal {
                 navigateToJournal(note: note)
-            } else if let note = noteController?.hasSetNote == true ? noteController?.note : currentNote {
+            } else if let note = noteController?.note ?? currentNote {
                 navigateToNote(note)
             } else {
                 navigateToJournal(note: nil)
@@ -440,7 +440,7 @@ import BeamCore
     }
 
     func resetDestinationCard() {
-        destinationCardName = currentTab?.noteController.note.title ?? data.todaysName
+        destinationCardName = currentTab?.noteController.noteOrDefault.title ?? data.todaysName
         destinationCardNameSelectedRange = nil
         destinationCardIsFocused = false
     }

@@ -117,7 +117,8 @@ import Promises
     }
 
     private func updateFocusedStateToElement(_ element: BeamElement) {
-        state.updateNoteFocusedState(note: noteController.note,
+        guard let note = element.note ?? noteController.note else { return }
+        state.updateNoteFocusedState(note: note,
                                      focusedElement: element.id,
                                      cursorPosition: element.text.wholeRange.upperBound)
     }
@@ -239,7 +240,7 @@ import Promises
         self.webView.page = self
         uiDelegateController.page = self
         mediaPlayerController = MediaPlayerController(page: self)
-        noteController.note.browsingSessions.append(browsingTree)
+        noteController.noteOrDefault.browsingSessions.append(browsingTree)
         setupObservers()
         beamNavigationController.isNavigatingFromNote = isFromNoteSearch
     }
@@ -278,7 +279,7 @@ import Promises
 
         originMode = .today
         super.init()
-        noteController.note.browsingSessions.append(tree)
+        noteController.noteOrDefault.browsingSessions.append(tree)
     }
 
     func postLoadSetup(state: BeamState) {
