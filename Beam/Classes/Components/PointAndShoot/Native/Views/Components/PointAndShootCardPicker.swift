@@ -36,7 +36,7 @@ struct PointAndShootCardPicker: View {
     @State private var shootCompleted: Bool = false
 
     private var isTodaysNote: String? {
-        browserTabsManager.currentTab?.noteController.note.isTodaysNote ?? false ? data.todaysName : nil
+        browserTabsManager.currentTab?.noteController.noteOrDefault.isTodaysNote ?? false ? data.todaysName : nil
     }
 
     private var placeholderText: String {

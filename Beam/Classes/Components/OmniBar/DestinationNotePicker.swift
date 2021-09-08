@@ -26,7 +26,7 @@ struct DestinationNotePicker: View {
         state.destinationCardName
     }
     private var placeholder: String {
-        let currentNote = tab.noteController.note.title
+        let currentNote = tab.noteController.noteOrDefault.title
         return !currentNote.isEmpty ? currentNote : "Destination Card"
     }
 
@@ -104,7 +104,7 @@ struct DestinationNotePicker: View {
                             autocompleteModel.handleCursorMovement(move)
                         } onStartEditing: {
                             Logger.shared.logInfo("[DestinationNotePicker] Start Editing", category: .ui)
-                            if tab.noteController.isTodaysNote {
+                            if tab.noteController.note == nil {
                                 state.destinationCardName = ""
                                 state.destinationCardNameSelectedRange = nil
                             } else {
@@ -122,8 +122,8 @@ struct DestinationNotePicker: View {
                     .onAppear(perform: {
                         autocompleteModel.data = state.data
                         _internalDisableAnimation = true
-                        state.destinationCardName = tab.noteController.note.title
-                        autocompleteModel.searchText = tab.noteController.isTodaysNote ? "" : state.destinationCardName
+                        state.destinationCardName = tab.noteController.noteOrDefault.title
+                        autocompleteModel.searchText = tab.noteController.note != nil ? state.destinationCardName : ""
                         DispatchQueue.main.async {
                             _internalDisableAnimation = false
                         }

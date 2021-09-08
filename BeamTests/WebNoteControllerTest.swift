@@ -43,7 +43,7 @@ class WebNoteControllerTest: XCTestCase {
         let someTitle = "Some website"
         let someUrl = "https://www.website.com"
         let added = controller.add(url: URL(string: someUrl)!, text: someTitle, reason: .navigation)
-        let noteChildren = controller.note.children
+        let noteChildren = controller.note?.children ?? []
         XCTAssertEqual(noteChildren.count, 1)
         XCTAssertEqual(noteChildren[0], added)
         XCTAssertEqual(controller.element, added)
