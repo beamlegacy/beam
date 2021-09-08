@@ -29,10 +29,22 @@ class WebNoteController: Encodable, Decodable {
         case element
     }
 
-    public private(set) var note: BeamNote
-    public private(set) var rootElement: BeamElement
+    public private(set) var note: BeamNote?
+    public var noteOrDefault: BeamNote {
+        note ?? Self.defaultNote
+    }
 
-    public private(set) var element: BeamElement
+    private var _rootElement: BeamElement?
+    public private(set) var rootElement: BeamElement {
+        get { _rootElement ?? noteOrDefault }
+        set { _rootElement = newValue }
+    }
+
+    private var _element: BeamElement?
+    public private(set) var element: BeamElement {
+        get { _element ?? rootElement }
+        set { _element = newValue }
+    }
 
     var nested: Bool = false
 
@@ -40,11 +52,6 @@ class WebNoteController: Encodable, Decodable {
         get { element.score }
         set { element.score = newValue }
     }
-
-    public var isTodaysNote: Bool {
-        note.isTodaysNote
-    }
-    public var hasSetNote: Bool
 
     static private var defaultNote: BeamNote {
         AppDelegate.main.data.todaysNote
@@ -75,17 +82,14 @@ class WebNoteController: Encodable, Decodable {
     }
 
     init(note: BeamNote?, rootElement from: BeamElement? = nil) {
-        let notetoUse = note ?? Self.defaultNote
-        self.note = notetoUse
-        hasSetNote = note != nil
-        rootElement = from ?? notetoUse
-        element = rootElement
+        self.note = note
+        _rootElement = from
+        _element = _rootElement
     }
 
     func setDestination(note: BeamNote, rootElement: BeamElement? = nil) {
         self.note = note
         self.rootElement = rootElement ?? note
-        hasSetNote = true
     }
 
     /// Add the current page to the current note based on the browsing session collection preference.
@@ -119,36 +123,38 @@ class WebNoteController: Encodable, Decodable {
     /// - Returns: BeamElement with added url
     func addContent(url: URL, text: String?, reason: NoteElementAddReason) -> BeamElement {
         let linkString = url.absoluteString
-        let existingLink = note.elementContainingLink(to: linkString)
-        let existingText = (text != nil && !text!.isEmpty ? note.elementContainingText(someText: text!) : nil)
+        let noteToUse = noteOrDefault
+        let existingLink = noteToUse.elementContainingLink(to: linkString)
+        let existingText = (text != nil && !text!.isEmpty ? noteToUse.elementContainingText(someText: text!) : nil)
         element = existingLink ?? existingText ?? targetElement(reason: reason)
         setContents(url: url, text: text)
-        Logger.shared.logDebug("add current page '\(text ?? "nil")' with url \(url) to note '\(note.title)'", category: .web)
+        Logger.shared.logDebug("add current page '\(text ?? "nil")' with url \(url) to note '\(noteToUse.title)'", category: .web)
         return element
     }
 
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        let noteTitle = try container.decode(String.self, forKey: .note)
-        let fetchedNote = BeamNote.fetch(AppDelegate.main.documentManager, title: noteTitle)
-        let noteToUse = fetchedNote ?? Self.defaultNote
-        let rootId = try? container.decode(UUID.self, forKey: .rootElement)
-        rootElement = noteToUse.findElement(rootId ?? noteToUse.id) ?? noteToUse.children.first!
-        if let elementId = try? container.decode(UUID.self, forKey: .element) {
-            guard let foundElement = noteToUse.findElement(elementId) else {
-                fatalError("Should have found referenced element \(elementId)")
+        let noteId = try container.decode(UUID.self, forKey: .note)
+        if let fetchedNote = BeamNote.fetch(AppDelegate.main.documentManager, id: noteId) {
+            note = fetchedNote
+            let rootId = try? container.decode(UUID.self, forKey: .rootElement)
+            _rootElement = fetchedNote.findElement(rootId ?? fetchedNote.id) ?? fetchedNote.children.first!
+            if let elementId = try? container.decode(UUID.self, forKey: .element) {
+                guard let foundElement = fetchedNote.findElement(elementId) else {
+                    fatalError("Should have found referenced element \(elementId)")
+                }
+                _element = foundElement
+            } else {
+                fatalError("Should have found referenced element id")
             }
-            element = foundElement
-        } else {
-            fatalError("Should have found referenced element id")
         }
-        note = noteToUse
-        hasSetNote = fetchedNote != nil
     }
 
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(note.title, forKey: .note)
+        if let note = note {
+            try container.encode(note.id, forKey: .note)
+        }
         try container.encode(rootElement.id, forKey: .rootElement)
         try container.encode(element.id, forKey: .element)
     }
