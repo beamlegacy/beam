@@ -30,6 +30,10 @@ class FormatText: TextEditorCommand {
         saveOldKind()
     }
 
+    required init(from decoder: Decoder) throws {
+        fatalError("init(from:) has not been implemented")
+    }
+
     private func saveOldKind() {
         guard newKind != nil,
               let elementInstance = getElement(for: noteId, and: elementId) else { return }

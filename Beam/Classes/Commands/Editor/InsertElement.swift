@@ -26,6 +26,10 @@ class InsertElement: TextEditorCommand {
         data = encode(element: element)
     }
 
+    required init(from decoder: Decoder) throws {
+        fatalError("init(from:) has not been implemented")
+    }
+
     override func run(context: Widget?) -> Bool {
         guard let elementInstance = getElement(for: noteId, and: parentElementId) else { return false }
         guard let element = decode(data: data) else { return false }

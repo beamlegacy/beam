@@ -147,11 +147,15 @@ extension BrowserTabsManager {
         }
     }
 
-    func addNewTab(_ tab: BrowserTab, setCurrent: Bool = true, withURL url: URL? = nil) {
+    func addNewTab(_ tab: BrowserTab, setCurrent: Bool = true, withURL url: URL? = nil, at index: Int? = nil) {
         if let url = url {
             tab.load(url: url)
         }
-        tabs.append(tab)
+        if let tabIndex = index, tabs.count > tabIndex, !setCurrent {
+            tabs.insert(tab, at: tabIndex)
+        } else {
+            tabs.append(tab)
+        }
         if setCurrent {
             currentTab = tab
         }
@@ -174,29 +178,6 @@ extension BrowserTabsManager {
         currentTab = tabs[index]
     }
 
-    func closeCurrentTab() -> Bool {
-        guard tabsAreVisible, let tab = currentTab else { return false }
-
-        let encoder = JSONEncoder()
-        guard let data = try? encoder.encode(tab) else { return false }
-        tabHistory.append(data)
-
-        tab.closeTab()
-        tab.cancelObservers()
-        if let i = tabs.firstIndex(of: tab) {
-            tabs.remove(at: i)
-            let nextTabIndex = min(i, tabs.count - 1)
-            if nextTabIndex >= 0 {
-                currentTab = tabs[nextTabIndex]
-            } else {
-                currentTab = nil
-            }
-            resetFirstResponderAfterClosingTab()
-            return true
-        }
-        return false
-    }
-
     func reOpenedClosedTabFromHistory() -> Bool {
         if !tabHistory.isEmpty {
             let decoder = JSONDecoder()
@@ -214,18 +195,7 @@ extension BrowserTabsManager {
         currentTab?.webView.reload()
     }
 
-    @discardableResult
-    func removeTab(_ index: Int) -> Bool {
-        let tab = tabs[index]
-        guard currentTab !== tab else { return closeCurrentTab() }
-
-        tab.cancelObservers()
-        tabs.remove(at: index)
-        resetFirstResponderAfterClosingTab()
-        return true
-    }
-
-    private func resetFirstResponderAfterClosingTab() {
+    func resetFirstResponderAfterClosingTab() {
         // This make sure any webview is not retained by the first responder chain
         AppDelegate.main.window?.makeFirstResponder(nil)
         if let currentTab = currentTab {

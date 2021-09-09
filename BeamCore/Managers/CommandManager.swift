@@ -7,14 +7,28 @@
 
 import Foundation
 
-open class Command<Context> {
+open class Command<Context>: Codable {
     open var name: String
     open func run(context: Context?) -> Bool { return false }
     open func undo(context: Context?) -> Bool { return false }
     open func coalesce(command: Command<Context>) -> Bool { return false }
 
+    enum CodingKeys: String, CodingKey {
+        case name
+    }
+
     public init(name: String) {
         self.name = name
+    }
+
+    required public init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        name = try values.decode(String.self, forKey: .name)
+    }
+
+    open func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(name, forKey: .name)
     }
 }
 
@@ -30,6 +44,10 @@ public class BlockCommand<Context>: Command<Context> {
         super.init(name: name)
     }
 
+    required public init(from decoder: Decoder) throws {
+        fatalError("init(from:) has not been implemented")
+    }
+
     public override func run(context: Context?) -> Bool {
         return _run(context)
     }
@@ -43,8 +61,27 @@ public class BlockCommand<Context>: Command<Context> {
     }
 }
 
-public class GroupCommand<Context>: Command<Context> {
-    var commands: [Command<Context>] = []
+open class GroupCommand<Context>: Command<Context> {
+    public var commands: [Command<Context>] = []
+
+    public enum CodingKeys: String, CodingKey {
+        case commands
+    }
+
+    public override init(name: String) {
+        super.init(name: name)
+    }
+
+    required public init(from decoder: Decoder) throws {
+        try super.init(from: decoder)
+    }
+
+    public override func encode(to encoder: Encoder) throws {
+        try super.encode(to: encoder)
+
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(commands, forKey: .commands)
+    }
 
     func append(command: Command<Context>) {
         guard let lastCommand = commands.last,
@@ -90,7 +127,7 @@ public class CommandManager<Context> {
         self.run(command: BlockCommand(name: name, run: run, undo: undo, coalesce: coalesce), on: context)
     }
 
-    fileprivate func appendToDone(command: Command<Context>) {
+    public func appendToDone(command: Command<Context>) {
         guard let lastGroup = groupCmd.last else {
             guard let lastCmd = doneQueue.last, lastCmd.coalesce(command: command) else {
                 doneQueue.append(command)
@@ -195,6 +232,13 @@ public class CommandManager<Context> {
 
     public var isEmpty: Bool {
         !canUndo && !canRedo
+    }
+
+    public var lastCmd: Command<Context>? {
+        if canUndo {
+            return doneQueue.last
+        }
+        return nil
     }
 }
 

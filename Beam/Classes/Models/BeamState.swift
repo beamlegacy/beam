@@ -4,7 +4,7 @@
 //
 //  Created by Sebastien Metrot on 21/09/2020.
 //
-// swiftlint:disable file_length
+// swiftlint:disable file_length type_body_length
 
 import Foundation
 import Combine
@@ -70,6 +70,7 @@ import BeamCore
     weak var downloaderWindow: AutoDismissingWindow?
 
     private var scope = Set<AnyCancellable>()
+    let cmdManager = CommandManager<BeamState>()
 
     func goBack() {
         guard canGoBack else { return }
@@ -241,6 +242,16 @@ import BeamCore
         guard let note = node.root?.note else { return }
         let origin = BrowsingTreeOrigin.searchFromNode(nodeText: node.strippedText)
         _ = addNewTab(origin: origin, note: note, element: node.element, url: url)
+    }
+
+    func closedTab(_ index: Int) {
+        let tab = self.browserTabsManager.tabs[index]
+        cmdManager.run(command: CloseTab(tab: tab), on: self)
+    }
+
+    func closeCurrentTab() -> Bool {
+        guard let currentTab = self.browserTabsManager.currentTab else { return false }
+        return cmdManager.run(command: CloseTab(tab: currentTab), on: self)
     }
 
     func createNoteForQuery(_ query: String) -> BeamNote {
