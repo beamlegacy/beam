@@ -59,16 +59,47 @@ struct BrowserTabView: View {
 
     // MARK: Subviews
     private var iconView: some View {
-        Group {
-            if let icon = tab.favIcon {
-                Image(nsImage: icon)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 16, height: 16)
-            } else {
-                Icon(name: "field-web", size: 16, color: foregroundColor)
+        ZStack {
+            if tab.isLoading {
+                loadingIndicator
+                    .transition(.scale)
             }
+            Group {
+                if let icon = tab.favIcon {
+                    let iconSize: CGFloat = tab.isLoading ? 10 : 16
+                    Image(nsImage: icon)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: iconSize, height: iconSize)
+                        .if(tab.isLoading) { $0.clipShape(Circle()) }
+                } else {
+                    let iconSize: CGFloat = tab.isLoading ? 12 : 16
+                    Icon(name: "field-web", size: iconSize, color: foregroundColor)
+                }
+            }
+            .transition(.scale)
         }
+        .animation(.easeInOut(duration: 0.15), value: tab.isLoading)
+    }
+
+    @State private var loadingIndicatorAnimatedFlag = false
+    private var loadingForeverAnimation: Animation {
+        Animation.linear(duration: 1.0)
+            .repeatForever(autoreverses: false)
+    }
+
+    private var loadingIndicator: some View {
+        Circle()
+            .trim(from: 0.0, to: CGFloat(tab.estimatedLoadingProgress))
+            .stroke(style: StrokeStyle(lineWidth: 1.5, lineCap: .round, lineJoin: .round))
+            .frame(width: 16, height: 16)
+            .foregroundColor(BeamColor.LightStoneGray.swiftUI)
+            .rotationEffect(Angle(degrees: self.loadingIndicatorAnimatedFlag ? 360.0 : 0.0))
+            .animation(loadingForeverAnimation, value: self.loadingIndicatorAnimatedFlag)
+            .animation(.easeInOut(duration: 0.15), value: tab.estimatedLoadingProgress)
+            .onReceive(tab.$isLoading, perform: { _ in
+                self.loadingIndicatorAnimatedFlag.toggle()
+            })
     }
 
     private var titleView: some View {
