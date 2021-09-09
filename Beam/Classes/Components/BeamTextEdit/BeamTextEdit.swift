@@ -74,6 +74,7 @@ public extension CALayer {
         }
 
         rootNode?.clearMapping() // Clear all previous references in the node tree
+        rootNode?.editor = nil
         rootNode = TextRoot(editor: self, element: BeamElement())
         // Remove all subsciptions:
         noteCancellables.removeAll()
