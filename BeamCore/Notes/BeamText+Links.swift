@@ -29,6 +29,13 @@ public extension BeamText {
           }
         }
     }
+    var noteSourceEligibleLinkRanges: [Range] {
+        ranges.filter { range in
+            range.attributes.contains { attr in
+                if case let .link(url) = attr, url == range.string { return true } else { return false }
+                }
+            }
+        }
 
     var links: [String] {
         var links = [String]()
