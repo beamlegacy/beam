@@ -8,20 +8,26 @@
 import Foundation
 import BeamCore
 import GRDB
+import UUIDKit
 
 struct BeamFileRecord {
-    var id: Int64?
     var name: String
     var uid: String
     var data: Data
     var type: String
+
+    var createdAt: Date = BeamDate.now
+    var updatedAt: Date = BeamDate.now
+    var deletedAt: Date?
+    var previousChecksum: String?
+    var checksum: String?
 }
 
 // SQL generation
 extension BeamFileRecord: TableRecord {
     /// The table columns
     enum Columns: String, ColumnExpression {
-        case id, name, uid, data, type
+        case name, uid, data, type
     }
 }
 
@@ -29,7 +35,6 @@ extension BeamFileRecord: TableRecord {
 extension BeamFileRecord: FetchableRecord {
     /// Creates a record from a database row
     init(row: Row) {
-        id = row[Columns.id]
         name = row[Columns.name]
         uid = row[Columns.uid]
         data = row[Columns.data]
@@ -45,16 +50,40 @@ extension BeamFileRecord: MutablePersistableRecord {
             update: .replace)
 
     func encode(to container: inout PersistenceContainer) {
-        container[Columns.id] = id
         container[Columns.name] = name
         container[Columns.uid] = uid
         container[Columns.data] = data
         container[Columns.type] = type
     }
+}
 
-    // Update auto-incremented id upon successful insertion
-    mutating func didInsert(with rowID: Int64, for column: String?) {
-        id = rowID
+extension BeamFileRecord: BeamObjectProtocol {
+    static var beamObjectTypeName: String = "file"
+
+    var beamObjectId: UUID {
+        get {
+            UUID.v3(name: uid, namespace: .dns)
+        }
+        set {
+            // we don't store the beam object id as it's built from the contents of the data, but let's check that it's correct at least in debug builds:
+            assert(uid.isEmpty || UUID.v3(name: uid, namespace: .dns) == newValue)
+        }
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case name
+        case uid
+        case type
+
+        case createdAt
+        case updatedAt
+        case deletedAt
+
+        case data
+    }
+
+    func copy() throws -> BeamFileRecord {
+        BeamFileRecord(name: name, uid: uid, data: data, type: type, createdAt: createdAt, updatedAt: updatedAt, deletedAt: deletedAt, previousChecksum: previousChecksum, checksum: checksum)
     }
 }
 
@@ -66,33 +95,70 @@ protocol BeamFileStorage {
 }
 
 class BeamFileDB: BeamFileStorage {
-    var dbQueue: DatabasePool
+    static let tableName = "beamFileRecord"
+    var dbPool: DatabasePool
 
     init(path: String) throws {
         let configuration = GRDB.Configuration()
 
-        dbQueue = try DatabasePool(path: path, configuration: configuration)
-        try dbQueue.write { db in
-            try db.create(table: "BeamFileRecord", ifNotExists: true) { t in
-                t.column("id", .integer)
-                t.column("name", .text).notNull().collate(.localizedCaseInsensitiveCompare)
-                t.column("uid", .text).notNull().collate(.caseInsensitiveCompare).primaryKey()
-                t.column("data", .blob)
-                t.column("type", .text)
+        dbPool = try DatabasePool(path: path, configuration: configuration)
+
+        var migrator = DatabaseMigrator()
+
+        var rows: [Row]?
+        migrator.registerMigration("saveOldData") { db in
+            rows = try? Row.fetchAll(db, sql: "SELECT id, name, uid, data, type FROM BeamFileRecord")
+        }
+
+        migrator.registerMigration("beamFileTableCreation") { db in
+            try db.create(table: BeamFileDB.tableName, ifNotExists: true) { table in
+                table.column("name", .text).notNull().collate(.localizedCaseInsensitiveCompare)
+                table.column("uid", .text).notNull().collate(.caseInsensitiveCompare).primaryKey()
+                table.column("data", .blob)
+                table.column("type", .text)
+                table.column("createdAt", .datetime).notNull().defaults(sql: "CURRENT_TIMESTAMP")
+                table.column("updatedAt", .datetime).notNull().defaults(sql: "CURRENT_TIMESTAMP")
+                table.column("deletedAt", .datetime)
+                table.column("previousChecksum", .text)
             }
         }
+
+        migrator.registerMigration("migrateOldData") { db in
+            if let storedFiles = rows {
+                for file in storedFiles {
+                    var fileRecord = BeamFileRecord(
+                        name: file["name"],
+                        uid: file["uid"],
+                        data: file["data"],
+                        type: file["type"],
+                        createdAt: BeamDate.now,
+                        updatedAt: BeamDate.now,
+                        deletedAt: nil,
+                        previousChecksum: nil)
+                    try fileRecord.insert(db)
+                }
+            }
+        }
+
+        try migrator.migrate(dbPool)
     }
 
     func fetch(uid: String) throws -> BeamFileRecord? {
-        try dbQueue.read({ db in
+        try dbPool.read({ db in
             try? BeamFileRecord.fetchOne(db, key: uid)
+        })
+    }
+
+    func fetchWithBeamObjectId(id: UUID) throws -> BeamFileRecord? {
+        try dbPool.read({ db in
+            try? BeamFileRecord.filter(Column("beamObjectId") == id).fetchOne(db)
         })
     }
 
     func insert(name: String, uid: String, data: Data, type: String) throws {
         do {
-            try dbQueue.write { db in
-                var f = BeamFileRecord(id: nil, name: name, uid: uid, data: data, type: type)
+            try dbPool.write { db in
+                var f = BeamFileRecord(name: name, uid: uid, data: data, type: type)
                 try f.insert(db)
             }
         } catch let error {
@@ -101,15 +167,149 @@ class BeamFileDB: BeamFileStorage {
         }
     }
 
+    func insert(files: [BeamFileRecord]) throws {
+        do {
+            try dbPool.write { db in
+                for file in files {
+                    var fileToInsert = file
+                    try fileToInsert.insert(db)
+                }
+            }
+        } catch let error {
+            Logger.shared.logError("Error while inserting files \(files): \(error)", category: .fileDB)
+            throw error
+        }
+    }
+
     func remove(uid: String) throws {
-        _ = try dbQueue.write { db in
+        _ = try dbPool.write { db in
             try BeamFileRecord.deleteOne(db, key: ["uid": uid])
         }
     }
 
     func clear() throws {
-        _ = try dbQueue.write { db in
+        _ = try dbPool.write { db in
             try BeamFileRecord.deleteAll(db)
         }
     }
+
+    func allRecords() throws -> [BeamFileRecord] {
+        try dbPool.read({ db in
+            try BeamFileRecord.fetchAll(db)
+        })
+    }
+}
+
+class BeamFileDBManager: BeamFileStorage {
+    static let shared = BeamFileDBManager()
+    var fileDB: BeamFileDB
+
+    func insert(name: String, uid: String, data: Data, type: String) {
+        do {
+            let file = BeamFileRecord(name: name, uid: uid, data: data, type: type)
+            try fileDB.insert(files: [file])
+            try self.saveOnNetwork(file)
+        } catch {
+            Logger.shared.logError("Error inserting a new file in DB: \(error)", category: .fileDB)
+        }
+    }
+
+    func fetch(uid: String) throws -> BeamFileRecord? {
+        try fileDB.fetch(uid: uid)
+    }
+
+    func remove(uid: String) throws {
+        try fileDB.remove(uid: uid)
+    }
+
+    func clear() throws {
+        try fileDB.clear()
+    }
+
+    init() {
+        do {
+            fileDB = try BeamFileDB(path: BeamData.fileDBPath)
+        } catch let error {
+            Logger.shared.logError("Error while creating the File Database [\(error)]", category: .fileDB)
+            fatalError()
+        }
+    }
+}
+
+enum BeamFileDBManagerError: Error, Equatable {
+    case localFileNotFound
+}
+
+extension BeamFileDBManager: BeamObjectManagerDelegate {
+    static var conflictPolicy: BeamObjectConflictResolution = .replace
+
+    func willSaveAllOnBeamObjectApi() {}
+
+    func receivedObjects(_ files: [BeamFileRecord]) throws {
+        Logger.shared.logDebug("Received \(files.count) files: updating",
+                               category: .fileNetwork)
+
+        try fileDB.insert(files: files)
+    }
+
+    func allObjects() throws -> [BeamFileRecord] {
+        try fileDB.allRecords()
+    }
+
+    func saveAllOnNetwork(_ files: [BeamFileRecord], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
+        try self.saveOnBeamObjectsAPI(files) { result in
+            switch result {
+            case .success:
+                Logger.shared.logDebug("Saved files on the BeamObject API",
+                                       category: .fileNetwork)
+                networkCompletion?(.success(true))
+            case .failure(let error):
+                Logger.shared.logDebug("Error when saving the files on the BeamObject API with error: \(error.localizedDescription)",
+                                       category: .fileNetwork)
+                networkCompletion?(.failure(error))
+            }
+        }
+    }
+
+    private func saveOnNetwork(_ file: BeamFileRecord, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
+        try self.saveOnBeamObjectAPI(file) { result in
+            switch result {
+            case .success:
+                Logger.shared.logDebug("Saved file on the BeamObject API",
+                                       category: .fileNetwork)
+                networkCompletion?(.success(true))
+            case .failure(let error):
+                Logger.shared.logDebug("Error when saving the file on the BeamObject API with error: \(error.localizedDescription)",
+                                       category: .fileNetwork)
+                networkCompletion?(.failure(error))
+            }
+        }
+    }
+
+    func persistChecksum(_ objects: [BeamFileRecord]) throws {
+        Logger.shared.logDebug("Saved \(objects.count) files on the BeamObject API",
+                               category: .fileNetwork)
+
+        var files: [BeamFileRecord] = []
+        for updateObject in objects {
+            // TODO: make faster with a `fetchWithIds(ids: [UUID])`
+            guard var file = try? fileDB.fetchWithBeamObjectId(id: updateObject.beamObjectId) else {
+                throw BeamFileDBManagerError.localFileNotFound
+            }
+
+            file.previousChecksum = updateObject.previousChecksum
+            files.append(file)
+        }
+        try fileDB.insert(files: files)
+    }
+
+    func manageConflict(_ object: BeamFileRecord,
+                        _ remoteObject: BeamFileRecord) throws -> BeamFileRecord {
+        fatalError("Managed by BeamObjectManager")
+    }
+
+    func saveObjectsAfterConflict(_ objects: [BeamFileRecord]) throws {
+        try fileDB.insert(files: objects)
+    }
+
 }
