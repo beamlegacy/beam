@@ -352,7 +352,7 @@ extension TextRoot {
     }
 
     public func extendSelection(to newCursorPosition: Int) {
-        guard let node = focusedWidget as? TextNode else { return }
+        guard let node = focusedWidget as? ElementNode else { return }
         var r1 = selectedTextRange.lowerBound
         var r2 = selectedTextRange.upperBound
         if cursorPosition == r2 {
@@ -361,9 +361,9 @@ extension TextRoot {
             r1 = newCursorPosition
         }
         if r1 < r2 {
-            selectedTextRange = node.text.clamp(r1..<r2)
+            selectedTextRange = node.clampTextRange(r1..<r2)
         } else {
-            selectedTextRange = node.text.clamp(r2..<r1)
+            selectedTextRange = node.clampTextRange(r2..<r1)
         }
         cursorPosition = newCursorPosition
         node.invalidate()
@@ -391,9 +391,11 @@ extension TextRoot {
         if let selection = root?.state.nodeSelection {
             return selection
         }
-        guard let node = focusedWidget as? TextNode,
-              node.placeholder.isEmpty || !node.text.isEmpty else { return nil }
-        node.updateActionLayerVisibility(hidden: true)
+        guard let node = focusedWidget as? ElementNode else { return nil }
+        if let textNode = node as? TextNode {
+            textNode.updateActionLayerVisibility(hidden: true)
+        }
+
         let selection = NodeSelection(start: node, end: node)
         root?.state.nodeSelection = selection
         cancelSelection()
