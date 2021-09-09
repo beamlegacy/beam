@@ -103,7 +103,7 @@ class LinksSection: Widget {
             // Prepare title children:
             guard let refTitleWidget = try? titles[noteID]
                     ?? newrefs[noteID]
-                    ?? RefNoteTitle(parent: self, noteId: noteID, actionTitle: "Link", action: { self.linkAllReferencesFromNote(withId: noteID) })
+                    ?? RefNoteTitle(parent: self, noteId: noteID)
             else { continue }
             newrefs[noteID] = refTitleWidget
             toRemove.remove(refTitleWidget)
@@ -152,10 +152,6 @@ class LinksSection: Widget {
         }
     }
 
-    func linkAllReferencesFromNote(withId noteId: UUID) {
-        // TODO
-    }
-
 // TODO change what this code does with the new layout engine. Do we want to be able to offset children that way?
 //    override func updateChildrenLayout() {
 //        super.updateChildrenLayout()
@@ -188,12 +184,12 @@ class LinksSection: Widget {
         }
     }
 
-    var layerFrameXPad = CGFloat(25)
     func setupLayerFrame() {
+        let linkAllLayer = layers["linkAllLayer"]
         sectionTitleLayer.frame = CGRect(
             origin: CGPoint(x: 22, y: 0),
             size: CGSize(
-                width: availableWidth + layerFrameXPad,
+                width: linkAllLayer?.frame.minX ?? availableWidth,
                 height: sectionTitleLayer.preferredFrameSize().height
             )
         )

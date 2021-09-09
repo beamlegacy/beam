@@ -20,7 +20,6 @@ enum RefNoteTitleError: Error {
 class RefNoteTitle: Widget {
     // MARK: - Properties
     var cardTitleLayer: Layer?
-    var action: () -> Void
 
     private let titleLayer = CATextLayer()
     private let titleLayerXPosition: CGFloat = 22
@@ -36,8 +35,7 @@ class RefNoteTitle: Widget {
         }
     }
 
-    init(parent: Widget, noteId: UUID, actionTitle: String, action: @escaping () -> Void) throws {
-        self.action = action
+    init(parent: Widget, noteId: UUID) throws {
         self.noteId = noteId
         let title = BeamNote.titleForNoteId(noteId, false) ?? "<note not found>"
         self.noteTitle = title
