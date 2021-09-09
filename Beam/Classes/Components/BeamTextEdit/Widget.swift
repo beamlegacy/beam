@@ -304,7 +304,13 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         }
     }
 
-    public private(set) weak var editor: BeamTextEdit?
+    public weak var editor: BeamTextEdit? {
+        didSet {
+            for child in children {
+                child.editor = editor
+            }
+        }
+    }
 
     internal var computedIdealSize = NSSize()
     private weak var _root: TextRoot?
