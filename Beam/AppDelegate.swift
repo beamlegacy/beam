@@ -224,7 +224,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 let closeTabCmd = CloseTab(tab: tab, appIsClosing: true)
                 window.state.cmdManager.run(command: closeTabCmd, on: window.state)
             }
-            window.state.cmdManager.endGroup()
+            window.state.cmdManager.endGroup(forceGroup: true)
 
             if let lastCmd = window.state.cmdManager.lastCmd {
                 windowForTabsCmd[windowCount] = lastCmd
