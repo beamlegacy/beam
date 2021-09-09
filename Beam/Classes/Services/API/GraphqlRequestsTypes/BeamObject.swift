@@ -84,7 +84,7 @@ class BeamObject: Codable {
     static var encoder: JSONEncoder {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
-        encoder.outputFormatting = .sortedKeys
+        encoder.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
         encoder.keyEncodingStrategy = .convertToSnakeCase
         return encoder
     }
