@@ -77,7 +77,7 @@ extension BeamText {
     }
 
     mutating func makeLinksToNoteExplicit(forNote title: String) {
-        text.ranges(of: title).forEach { range in
+        text.ranges(of: title, options: .caseInsensitive).forEach { range in
             let start = text.position(at: range.lowerBound)
             let end = text.position(at: range.upperBound)
             makeInternalLink(start..<end, createNoteIfNeeded: true)

@@ -16,8 +16,6 @@ class ReferencesSection: LinksSection {
     }
 
     override func setupUI(openChildren: Bool) {
-        layerFrameXPad = CGFloat(30)
-
         super.setupUI(openChildren: openChildren)
 
         linkActionLayer.font = BeamFont.medium(size: 0).nsFont
