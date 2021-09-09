@@ -59,7 +59,7 @@ import Promises
     @Published var originalQuery: String?
     @Published var url: URL?
     @Published var isLoading: Bool = false
-    @Published var estimatedProgress: Double = 0
+    @Published var estimatedLoadingProgress: Double = 0
     @Published var hasOnlySecureContent: Bool = false
 
     @Published var serverTrust: SecTrust?
@@ -395,20 +395,21 @@ import Promises
             .sink { [unowned self] value in
             self.receivedWebviewTitle(value)
         }.store(in: &scope)
-        webView.publisher(for: \.url).sink { [unowned self] value in
-            url = value
+        webView.publisher(for: \.url).sink { [unowned self] webviewUrl in
+            guard webviewUrl != nil else {
+                return // webview probably failed to load
+            }
+            url = webviewUrl
             leave()
-            if value?.absoluteString != nil {
+            if webviewUrl?.absoluteString != nil {
                 updateFavIcon()
                 // self.browsingTree.current.score.openIndex = self.navigationCount
                 // self.updateScore()
                 // self.navigationCount = 0
             }
         }.store(in: &scope)
-        webView.publisher(for: \.isLoading).sink { [unowned self] value in withAnimation { isLoading = value } }.store(in: &scope)
-        webView.publisher(for: \.estimatedProgress).sink { [unowned self] value in
-            withAnimation { estimatedProgress = value }
-        }.store(in: &scope)
+        webView.publisher(for: \.isLoading).sink { [unowned self] value in isLoading = value }.store(in: &scope)
+        webView.publisher(for: \.estimatedProgress).sink { [unowned self] value in estimatedLoadingProgress = value }.store(in: &scope)
         webView.publisher(for: \.hasOnlySecureContent)
             .sink { [unowned self] value in hasOnlySecureContent = value }.store(in: &scope)
         webView.publisher(for: \.serverTrust).sink { [unowned self] value in serverTrust = value }.store(in: &scope)
@@ -429,6 +430,19 @@ import Promises
     private func encodeStringTo64(fromString: String) -> String? {
         let plainData = fromString.data(using: .utf8)
         return plainData?.base64EncodedString(options: [])
+    }
+
+    func reload() {
+        leave()
+        if webView.url == nil, let url = url {
+            load(url: url)
+        } else {
+            webView.reload()
+        }
+    }
+
+    func stopLoad() {
+        webView.stopLoading()
     }
 
     func createNewTab(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, setCurrent: Bool, state: BeamState) -> WebPage {
