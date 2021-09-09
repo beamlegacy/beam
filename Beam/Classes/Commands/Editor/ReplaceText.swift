@@ -26,6 +26,10 @@ class ReplaceText: TextEditorCommand {
         saveOldText()
     }
 
+    required init(from decoder: Decoder) throws {
+        fatalError("init(from:) has not been implemented")
+    }
+
     private func saveOldText() {
         guard let elementInstance = getElement(for: noteId, and: elementId) else { return }
         self.oldText = elementInstance.element.text

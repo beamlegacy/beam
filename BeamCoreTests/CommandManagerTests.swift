@@ -29,6 +29,10 @@ class Calculator: Command<Any?> {
         self.opRes = opRes
         super.init(name: Calculator.name)
     }
+
+    required init(from decoder: Decoder) throws {
+        fatalError("init(from:) has not been implemented")
+    }
     override func run(context: Any??) -> Bool {
         switch operand {
         case "+":
@@ -194,6 +198,10 @@ class AsyncCalculator: CommandAsync<Any?> {
         self.number = right
         self.opRes = opRes
         super.init(name: AsyncCalculator.name)
+    }
+
+    required init(from decoder: Decoder) throws {
+        fatalError("init(from:) has not been implemented")
     }
 
     override func run(context: Any??, completion: ((Bool) -> Void)?) {

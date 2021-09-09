@@ -19,6 +19,10 @@ class SetSelection: TextEditorCommand {
         super.init(name: Self.name)
     }
 
+    required init(from decoder: Decoder) throws {
+        fatalError("init(from:) has not been implemented")
+    }
+
     override func run(context: Widget?) -> Bool {
         oldSelection = context?.root?.selectedTextRange
         context?.root?.selectedTextRange = selection
@@ -48,6 +52,10 @@ class CancelSelection: TextEditorCommand {
 
     init() {
         super.init(name: Self.name)
+    }
+
+    required init(from decoder: Decoder) throws {
+        fatalError("init(from:) has not been implemented")
     }
 
     override func run(context: Widget?) -> Bool {

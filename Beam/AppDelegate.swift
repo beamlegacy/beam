@@ -84,7 +84,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             exit(0)
         }
         if !isRunningTests {
-            createWindow(frame: nil, reloadState: Configuration.stateRestorationEnabled)
+            createWindow(frame: nil)
         }
 
         // So we remember we're not currently using the default api server
@@ -184,15 +184,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @IBAction func newWindow(_ sender: Any?) {
-        self.createWindow(frame: nil, reloadState: false)
+        self.createWindow(frame: nil)
     }
 
     @discardableResult
-    func createWindow(frame: NSRect?, reloadState: Bool) -> BeamWindow {
+    func createWindow(frame: NSRect?) -> BeamWindow {
         // Create the window and set the content view.
         let window = BeamWindow(contentRect: frame ?? NSRect(x: 0, y: 0, width: 800, height: 600),
-                            data: data,
-                            reloadState: reloadState)
+                            data: data)
         if frame == nil && windows.count == 0 {
             window.center()
         } else {
@@ -208,21 +207,38 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return window
     }
 
+    static let closeTabCmdGrp = "CloseTabCmdGrp"
     func applicationWillTerminate(_ aNotification: Notification) {
         // Insert code here to tear down your application
-        for window in windows {
+        saveCloseTabsCmd()
+    }
+
+    private func saveCloseTabsCmd() {
+        var windowForTabsCmd = [Int: Command<BeamState>]()
+        var windowCount = 0
+
+        for window in windows where window.state.browserTabsManager.tabs.count > 0 {
+            window.state.cmdManager.beginGroup(with: AppDelegate.closeTabCmdGrp)
+
             for tab in window.state.browserTabsManager.tabs {
-                tab.closeApp()
+                let closeTabCmd = CloseTab(tab: tab, appIsClosing: true)
+                window.state.cmdManager.run(command: closeTabCmd, on: window.state)
+            }
+            window.state.cmdManager.endGroup()
+
+            if let lastCmd = window.state.cmdManager.lastCmd {
+                windowForTabsCmd[windowCount] = lastCmd
+                windowCount += 1
             }
         }
-        if let beamWindow = windows.first {
-            beamWindow.saveDefaults()
-        }
+        let encoder = JSONEncoder()
+        guard let data = try? encoder.encode(windowForTabsCmd) else { return }
+        UserDefaults.standard.set(data, forKey: BeamWindow.savedCloseTabCmdsKey)
     }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         if !flag {
-            createWindow(frame: nil, reloadState: Configuration.stateRestorationEnabled)
+            createWindow(frame: nil)
         }
 
         return true
