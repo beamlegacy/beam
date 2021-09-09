@@ -30,6 +30,8 @@ class ProxyEmbedNode: EmbedNode, ProxyNode {
                 self.invalidateRendering()
                 updateChildrenVisibility()
             }.store(in: &scope)
+        self.contentsPadding = NSEdgeInsets(top: 0, left: 0, bottom: 10, right: 0)
+
     }
 
     // MARK: - Setup UI

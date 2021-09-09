@@ -21,9 +21,6 @@ class BreadCrumb: Widget {
     var container: Layer?
 
     var proxyTextNode: ProxyTextNode!
-    var hasLink: Bool {
-        isLink ? isLink : proxyTextNode.childrenIsLink()
-    }
 
     override var open: Bool {
         didSet {
@@ -33,7 +30,7 @@ class BreadCrumb: Widget {
 
     override var contentsScale: CGFloat {
         didSet {
-            linkLayer.contentsScale = contentsScale
+            actionLayer?.contentsScale = contentsScale
             containerLayer.contentsScale = contentsScale
         }
     }
@@ -44,14 +41,12 @@ class BreadCrumb: Widget {
     private var breadcrumbPlaceholder = "..."
 
     private let containerLayer = CALayer()
+    private var actionLayer: ButtonLayer?
     private let linkLayer = CATextLayer()
 
     private let maxBreadCrumbWidth: CGFloat = 100
     private let breadCrumbYPosition: CGFloat = 1
     private let spaceBreadcrumbIcon: CGFloat = 3
-    private let containerPadding: CGFloat = 23
-    private let containerLinkSize: CGFloat = 538
-    private let containerRefSize: CGFloat = 492
 
     init(parent: Widget, element: BeamElement) {
         self.proxy = ProxyElement(for: element)
@@ -71,10 +66,12 @@ class BreadCrumb: Widget {
 
         setupLayers(with: note)
         selectCrumb(crumbChain.count - 1)
+        self.contentsPadding = NSEdgeInsets(top: 0, left: 0, bottom: crumbChain.count > 1 ? 1 : 2, right: 0)
+        self.childrenPadding = NSEdgeInsets(top: 0, left: 7, bottom: crumbChain.count > 1 ? 3 : 0, right: 0)
     }
 
     func setupLayers(with note: BeamNote) {
-        containerLayer.cornerRadius = 4
+        containerLayer.cornerRadius = 3
         containerLayer.backgroundColor = BeamColor.LinkedSection.container.cgColor
         container = Layer(name: "containerLayer", layer: containerLayer, hovered: { _ in })
 
@@ -86,11 +83,11 @@ class BreadCrumb: Widget {
 
         let linkContentLayer = CALayer()
         linkContentLayer.frame = CGRect(
-                origin: CGPoint(x: availableWidth, y: 0),
+                origin: CGPoint(x: availableWidth, y: actionLinkLayerheight),
                 size: NSSize(width: 36, height: 21))
         linkContentLayer.addSublayer(linkLayer)
 
-        let actionLayer = LinkButtonLayer(
+        actionLayer = LinkButtonLayer(
                 "actionLinkLayer",
             linkContentLayer,
                 activated: {[weak self] in
@@ -103,6 +100,7 @@ class BreadCrumb: Widget {
                 }
             )
         updateLinkLayerState()
+        guard let actionLayer = actionLayer else { return }
         addLayer(actionLayer)
 
         createCrumbLayers()
@@ -267,18 +265,19 @@ class BreadCrumb: Widget {
         layers["actionLinkLayer"] as? LinkButtonLayer
     }
 
-    var crumbsHeight: CGFloat { showCrumbs ? 21 : 2 }
+    var crumbsHeight: CGFloat { showCrumbs ? 21 : 1 }
     override func updateRendering() -> CGFloat {
         return crumbsHeight
     }
 
+    var actionLinkLayerheight: CGFloat { crumbsHeight + self.contentsPadding.bottom - 1 }
     override func updateLayout() {
         super.updateLayout()
         CATransaction.disableAnimations {
             let linkLayerFrameSize = linkLayer.preferredFrameSize()
             if let actionLinkLayer = actionLinkLayer {
                 actionLinkLayer.frame = CGRect(
-                    origin: CGPoint(x: availableWidth - linkLayerFrameSize.width / 2, y: -2),
+                    origin: CGPoint(x: availableWidth - 36 - 10, y: actionLinkLayerheight),
                     size: NSSize(width: 36, height: 21)
                 )
                 let linkLayerXPosition = actionLinkLayer.bounds.width / 2 - linkLayerFrameSize.width / 2
@@ -289,14 +288,10 @@ class BreadCrumb: Widget {
         }
 
         if open {
-            var childrenHeight = childrenIdealSize.height
-            if !showCrumbs {
-                childrenHeight -= 25
-            }
+            let childrenHeight = childrenIdealSize.size.height + crumbsHeight - childrenPadding.bottom - childrenPadding.top - contentsPadding.bottom - contentsPadding.top
             CATransaction.disableAnimations {
                 guard let container = container else { return }
-                let containerWidth: CGFloat = hasLink ? containerLinkSize : containerRefSize
-                container.frame = NSRect(x: 0, y: -2, width: containerWidth, height: childrenHeight + containerPadding)
+                container.frame = NSRect(x: 0, y: -2, width: availableWidth, height: childrenHeight)
             }
         }
     }
