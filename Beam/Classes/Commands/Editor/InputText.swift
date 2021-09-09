@@ -22,6 +22,10 @@ class InputText: TextEditorCommand {
         super.init(name: Self.name)
     }
 
+    required init(from decoder: Decoder) throws {
+        fatalError("init(from:) has not been implemented")
+    }
+
     override func run(context: Widget?) -> Bool {
         let res = insertText.run(context: context)
         _ = cancelSelection.run(context: context)

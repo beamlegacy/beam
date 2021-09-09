@@ -34,9 +34,49 @@ extension BeamWindow {
     }
 
     @IBAction func reOpenClosedTab(_ sender: Any?) {
-        if state.browserTabsManager.reOpenedClosedTabFromHistory() {
-            guard let currentTab = state.browserTabsManager.currentTab else { return }
-            currentTab.postLoadSetup(state: state)
+
+        if let data = UserDefaults.standard.data(forKey: Self.savedCloseTabCmdsKey) {
+            let decoder = JSONDecoder()
+            guard let windowCommands = try? decoder.decode([Int: GroupWebCommand].self, from: data) else { return }
+            for windowCommand in windowCommands.keys {
+                let newBeamWindow = AppDelegate.main.createWindow(frame: nil)
+                guard let command = windowCommands[windowCommand] else { continue }
+                newBeamWindow.state.cmdManager.appendToDone(command: command)
+
+                if newBeamWindow.state.cmdManager.canUndo {
+                    _ = newBeamWindow.state.cmdManager.undo(context: newBeamWindow.state)
+                }
+
+                if let currentTab = newBeamWindow.state.browserTabsManager.currentTab,
+                   newBeamWindow.state.mode != .web {
+                    currentTab.postLoadSetup(state: newBeamWindow.state)
+                    newBeamWindow.state.mode = .web
+                }
+
+            }
+            UserDefaults.standard.removeObject(forKey: Self.savedCloseTabCmdsKey)
+        }
+    }
+
+    @IBAction func undo(_ sender: Any) {
+        if let firstResponder = self.firstResponder,
+           let undoManager = firstResponder.undoManager, undoManager.canUndo {
+            undoManager.undo()
+            return
+        }
+        if state.mode == .web && state.cmdManager.canUndo {
+            _ = state.cmdManager.undo(context: state)
+        }
+    }
+
+    @IBAction func redo(_ sender: Any) {
+        if let firstResponder = self.firstResponder,
+           let undoManager = firstResponder.undoManager, undoManager.canRedo {
+            undoManager.redo()
+            return
+        }
+        if state.mode == .web && state.cmdManager.canRedo {
+            _ = state.cmdManager.redo(context: state)
         }
     }
 

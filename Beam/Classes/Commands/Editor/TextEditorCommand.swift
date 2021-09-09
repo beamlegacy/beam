@@ -19,6 +19,10 @@ class TextEditorCommand: Command<Widget> {
         super.init(name: name)
     }
 
+    required init(from decoder: Decoder) throws {
+        fatalError("init(from:) has not been implemented")
+    }
+
     func getElement(for noteId: UUID, and id: UUID) -> BeamElementInstance? {
         guard let note = BeamNote.fetch(AppDelegate.main.documentManager, id: noteId),
               let element = note.findElement(id) else { return nil }

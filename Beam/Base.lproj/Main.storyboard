@@ -85,7 +85,7 @@
                                                 <action selector="createEmptyTabWithCurrentNote:" target="Ady-hI-5gd" id="4Wf-w8-oWg"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Re-Open Closed Tab" tag="4" keyEquivalent="T" id="11s-ye-snn" userLabel="Re-Open Closed Tab">
+                                        <menuItem title="Re-Open Closed Tab" keyEquivalent="T" id="11s-ye-snn" userLabel="Re-Open Closed Tab">
                                             <connections>
                                                 <action selector="reOpenClosedTab:" target="Ady-hI-5gd" id="f8F-r4-bRg"/>
                                             </connections>

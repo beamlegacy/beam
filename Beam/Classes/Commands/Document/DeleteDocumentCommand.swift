@@ -21,6 +21,10 @@ class DeleteDocument: DocumentCommand {
         self.documentIds = documentIds
     }
 
+    required init(from decoder: Decoder) throws {
+        fatalError("init(from:) has not been implemented")
+    }
+
     override func run(context: DocumentManager?, completion: ((Bool) -> Void)?) {
         var noteLinks: [BeamNoteReference]?
 

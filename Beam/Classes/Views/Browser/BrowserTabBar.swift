@@ -252,7 +252,7 @@ struct BrowserTabBar: View {
 
     private func onTabClose(_ tab: BrowserTab) {
         let tabIndex = position(of: tab)
-        state.browserTabsManager.removeTab(tabIndex)
+        state.closedTab(tabIndex)
     }
 
     private func isSelected(_ tab: BrowserTab) -> Bool {
