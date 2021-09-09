@@ -36,6 +36,15 @@ class ProxyTextNode: TextNode, ProxyNode {
         }.store(in: &scope)
     }
 
+    override func textPadding(elementKind: ElementKind) -> NSEdgeInsets {
+        switch elementKind {
+        case .check:
+            return NSEdgeInsets(top: 0, left: 20, bottom: 0, right: isLink ? 10 : 50)
+        default:
+            return NSEdgeInsets(top: 0, left: 0, bottom: 0, right: isLink ? 10 : 50)
+        }
+    }
+
     // MARK: - Setup UI
     override func isLinkToNote(_ text: BeamText) -> Bool {
         guard let note = editor?.note as? BeamNote else { return false }
