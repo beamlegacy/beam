@@ -618,4 +618,8 @@ public class ElementNode: Widget {
         return displayedElement.note?.cmdManager ?? super.cmdManager
     }
 
+    public func clampTextRange(_ range: Range<Int>) -> Range<Int> {
+        max(0, range.lowerBound)..<min(textCount, range.upperBound)
+    }
+
 }
