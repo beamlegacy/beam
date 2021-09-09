@@ -29,6 +29,13 @@ class RefNoteTitle: Widget {
     private var noteId: UUID
     private var noteTitle: String
 
+    override var open: Bool {
+        didSet {
+            self.contentsPadding = NSEdgeInsets(top: 0, left: 0, bottom: open ? 4 : 2, right: 0)
+            super.open = open
+        }
+    }
+
     init(parent: Widget, noteId: UUID, actionTitle: String, action: @escaping () -> Void) throws {
         self.action = action
         self.noteId = noteId
@@ -63,10 +70,11 @@ class RefNoteTitle: Widget {
 
         cardTitleLayer.frame = CGRect(origin: CGPoint(x: titleLayerXPosition, y: titleLayerYPosition), size: titleLayer.preferredFrameSize())
         layers["chevron"]?.frame = CGRect(origin: CGPoint(x: 0, y: (cardTitleLayer.frame.height / 2) - 7), size: CGSize(width: 20, height: 20))
+        childInset = 11
     }
 
     override func updateRendering() -> CGFloat {
-        open ? 24 : 44
+        24
     }
 
     private func updateTitleForHover(_ hover: Bool) {
