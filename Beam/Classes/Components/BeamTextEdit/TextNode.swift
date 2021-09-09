@@ -293,6 +293,15 @@ public class TextNode: ElementNode {
         }
     }
 
+    override var bulletLayerPositionY: CGFloat {
+        switch elementKind {
+        case .heading(let level):
+            return level == 1 ? firstLineBaseline - 15 : firstLineBaseline - 14
+        default:
+            return super.bulletLayerPositionY
+        }
+    }
+
     func updateTextFrame() {
         if selfVisible {
             emptyTextFrame = nil
