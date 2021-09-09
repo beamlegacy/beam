@@ -21,7 +21,7 @@ extension BeamTextEdit {
     }
 
     func buildStringFrom(image source: String) -> NSAttributedString {
-        guard let imageRecord = try? AppDelegate.main.data.fileDB.fetch(uid: source)
+        guard let imageRecord = try? BeamFileDBManager.shared.fetch(uid: source)
         else {
             Logger.shared.logError("ImageNode unable to fetch image '\(source)' from FileDB", category: .noteEditor)
             return NSAttributedString()

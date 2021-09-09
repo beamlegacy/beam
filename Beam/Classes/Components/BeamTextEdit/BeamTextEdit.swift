@@ -1558,7 +1558,8 @@ public extension CALayer {
 
             let uid = data.MD5
             do {
-                try self.data?.fileDB.insert(name: url.lastPathComponent, uid: uid, data: data, type: "")
+                let fileManager = BeamFileDBManager()
+                fileManager.insert(name: url.lastPathComponent, uid: uid, data: data, type: "")
             } catch let error {
                 Logger.shared.logError("Error while inserting file in database \(error)", category: .noteEditor)
             }
