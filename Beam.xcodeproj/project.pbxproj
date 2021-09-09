@@ -807,6 +807,7 @@
 		DAEEA74826A6B96A00AE72DE /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEEA74726A6B96A00AE72DE /* Utilities.swift */; };
 		DAEEA77C26A701CC00AE72DE /* NoteSourceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEEA77B26A701CC00AE72DE /* NoteSourceTests.swift */; };
 		DAF51C4F26CE63DE007BB121 /* BrowsingTreeTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF51C4E26CE63DE007BB121 /* BrowsingTreeTest.swift */; };
+		DAF9C18926E61FCA00C350B5 /* BeamTextEditTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF9C18826E61FCA00C350B5 /* BeamTextEditTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -1770,6 +1771,7 @@
 		DAEEA74726A6B96A00AE72DE /* Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
 		DAEEA77B26A701CC00AE72DE /* NoteSourceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteSourceTests.swift; sourceTree = "<group>"; };
 		DAF51C4E26CE63DE007BB121 /* BrowsingTreeTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowsingTreeTest.swift; sourceTree = "<group>"; };
+		DAF9C18826E61FCA00C350B5 /* BeamTextEditTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamTextEditTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -3050,6 +3052,7 @@
 		8A7F949B26A8772E00270A74 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				DAF9C18826E61FCA00C350B5 /* BeamTextEditTests.swift */,
 				8A7F949C26A8773500270A74 /* PointAndShoot */,
 				A5EA892726A9C08100AB5A16 /* CalendarPickerViewModelTests.swift */,
 			);
@@ -5043,6 +5046,7 @@
 				525C235825BAFCAA001B9625 /* MergeTests.swift in Sources */,
 				032562BB26051D45006513E4 /* RBFilterManagerTests.m in Sources */,
 				A50612DF26CC75C70053AD37 /* Calendar+CalculationsTests.swift in Sources */,
+				DAF9C18926E61FCA00C350B5 /* BeamTextEditTests.swift in Sources */,
 				8AC2EFCE266F82D900049005 /* PointAndShootHTMLTest.swift in Sources */,
 				527524EB26A1A9E100C2F385 /* BeamObjectTestsHelper.swift in Sources */,
 				8AC2EFDB266F8A0800049005 /* PointAndShootPointingTest.swift in Sources */,

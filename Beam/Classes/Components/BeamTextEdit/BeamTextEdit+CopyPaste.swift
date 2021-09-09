@@ -167,7 +167,7 @@ extension BeamTextEdit {
             if let elementHolder: BeamNoteDataHolder = objects?.first as? BeamNoteDataHolder {
                 paste(elementHolder: elementHolder)
             } else if let bTextHolder: BeamTextHolder = objects?.first as? BeamTextHolder {
-                rootNode.insertText(text: bTextHolder.bText, replacementRange: nil)
+                paste(beamTextHolder: bTextHolder)
             } else if let attributedStr = objects?.first as? NSAttributedString {
                 paste(attributedStrings: attributedStr.split(seperateBy: "\n"))
             } else if let pastedStr: String = objects?.first as? String {
@@ -178,6 +178,10 @@ extension BeamTextEdit {
                 paste(attributedStrings: lines)
             }
         }
+    }
+    private func paste(beamTextHolder: BeamTextHolder) {
+        rootNode.insertText(text: beamTextHolder.bText, replacementRange: nil)
+        addNoteSourceFrom(text: beamTextHolder.bText)
     }
 
     // swiftlint:disable:next cyclomatic_complexity
@@ -216,6 +220,7 @@ extension BeamTextEdit {
                 }
                 node.cmdManager.insertElement(newElement, inNode: parent, afterElement: node.element)
                 node.cmdManager.focus(newElement, in: node)
+                addNoteSourceFrom(text: element.text)
             }
             if previousBullet.children.isEmpty, previousBullet.text.isEmpty {
                 node.cmdManager.deleteElement(for: previousBullet)
@@ -248,6 +253,7 @@ extension BeamTextEdit {
                 parent.cmdManager.focus(element, in: node)
                 lastInserted = focusedWidget as? ElementNode
             }
+            addNoteSourceFrom(text: beamText)
         }
 
         if let lastInsertedNode = lastInserted as? TextNode,
@@ -261,5 +267,13 @@ extension BeamTextEdit {
             }
         }
         mngrNode.cmdManager.endGroup()
+    }
+
+    private func addNoteSourceFrom(text: BeamText) {
+        guard let note = note as? BeamNote, let data = data else { return }
+        for range in text.noteSourceEligibleLinkRanges {
+            let urlId = LinkStore.createIdFor(range.string, title: nil)
+            note.sources.add(urlId: urlId, noteId: note.id, type: .user, sessionId: data.sessionId, activeSources: data.activeSources)
+        }
     }
 }

@@ -40,4 +40,18 @@ class BeamTextLinksTests: XCTestCase {
         XCTAssertTrue(text.hasLinkToNote(id: id2))
         XCTAssertFalse(text.hasLinkToNote(id: id3))
     }
+
+    func testNoteSourceEligibleLinks() {
+        let rawContent = "abc http://www.ping.com pong efg"
+        var text = BeamText(text: rawContent)
+        text.addAttributes([.link("http://www.ping.com")], to: 4..<23)
+        text.addAttributes([.link("http://www.pong.fr")], to: 24..<28)
+        let eligibleRanges = text.noteSourceEligibleLinkRanges
+        if eligibleRanges.count != 1 {
+            XCTFail("http://www.ping.com should be an eligible url")
+        } else {
+            let eligibleRange = eligibleRanges[0]
+            XCTAssertEqual(eligibleRange.string, "http://www.ping.com")
+        }
+    }
 }
