@@ -42,7 +42,7 @@ extension BeamColor {
         static let linkActiveHighlightedBackground = BeamColor.From(color: BeamColor.Bluetiful.nsColor.withAlphaComponent(0.24))
         static var linkDecoration = BeamColor.Combining(lightColor: BeamColor.AlphaGray, darkColor: BeamColor.LightStoneGray)
         static let syntax = BeamColor.Custom(named: "EditorSyntaxColor")
-        static let indentBackground = BeamColor.Mercury
+        static let indentBackground = BeamColor.From(color: NSColor(withLightColor: BeamColor.Mercury.nsColor.withAlphaComponent(0.5), darkColor: BeamColor.Mercury.nsColor))
         static let underlineAndStrikethrough = BeamColor.Niobium
     }
 }
