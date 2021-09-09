@@ -125,6 +125,10 @@ function beam_sendTextFields() {
     window.webkit.messageHandlers.password_textInputFields.postMessage(JSON.stringify(textFields))
 }
 
+function beam_getFocusedField() {
+    return document.activeElement?.getAttribute('data-beam-id')
+}
+
 function beam_getElementRects(ids_json) {
     let ids = JSON.parse(ids_json)
     let rects = ids.map(id => beam_getElementById(id)?.getBoundingClientRect())
