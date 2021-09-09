@@ -142,8 +142,8 @@ struct OmniBar: View {
                     OmniBarButton(icon: "nav-journal", accessibilityId: "journal", action: goToJournal)
                 }
                 Chevrons()
-                if state.mode == .web {
-                    OmniBarButton(icon: "nav-refresh", accessibilityId: "refresh", action: refreshWeb)
+                if state.mode == .web, let currentTab = browserTabsManager.currentTab {
+                    OmniBarReloadButton(currentTab: currentTab, action: toggleReloadWeb)
                 }
             }
         }
@@ -245,12 +245,29 @@ struct OmniBar: View {
         state.navigateToJournal(note: nil, clearNavigation: true)
     }
 
-    func refreshWeb() {
-        browserTabsManager.reloadCurrentTab()
+    func toggleReloadWeb() {
+        let browserTabsManager = state.browserTabsManager
+        if browserTabsManager.currentTab?.isLoading == true {
+            browserTabsManager.stopLoadingCurrentTab()
+        } else {
+            browserTabsManager.reloadCurrentTab()
+        }
     }
 
     func toggleMode() {
         state.toggleBetweenWebAndNote()
+    }
+}
+
+private struct OmniBarReloadButton: View {
+    @ObservedObject var currentTab: BrowserTab
+    var action: () -> Void
+    var body: some View {
+        if currentTab.isLoading == true {
+           return OmniBarButton(icon: "nav-refresh_stop", accessibilityId: "stopLoading", action: action)
+        } else {
+            return OmniBarButton(icon: "nav-refresh", accessibilityId: "refresh", action: action)
+        }
     }
 }
 
