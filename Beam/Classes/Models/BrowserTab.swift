@@ -474,7 +474,7 @@ import Promises
         var newWindow: NSWindow
         if menubar && statusBar && toolBars && resizing {
             // we are being asked for the full browser experience, give it to them...
-            let newBeamWindow = AppDelegate.main.createWindow(frame: windowFrame, reloadState: false)
+            let newBeamWindow = AppDelegate.main.createWindow(frame: windowFrame)
             let tab = createNewTab(targetURL, configuration, setCurrent: setCurrent, state: newBeamWindow.state)
             newWindow = newBeamWindow
             newWebView = tab.webView

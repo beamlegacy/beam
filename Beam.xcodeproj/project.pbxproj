@@ -523,6 +523,8 @@
 		A00AE82B265EAE9A00156220 /* BeamSearchField.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00AE82A265EAE9A00156220 /* BeamSearchField.swift */; };
 		A00F5A262656965900D338E1 /* PasswordsDBTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00F5A252656965900D338E1 /* PasswordsDBTests.swift */; };
 		A01030AA25F149EA00D740C5 /* TextEditorCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = A01030A925F149EA00D740C5 /* TextEditorCommand.swift */; };
+		A0125A0426DE333500590CB5 /* CloseTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0125A0326DE333500590CB5 /* CloseTab.swift */; };
+		A0125A0626DE8AF300590CB5 /* WebCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0125A0526DE8AF300590CB5 /* WebCommand.swift */; };
 		A0184F7126AF56AB00993C32 /* PreferencesManager+Advanced.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0184F7026AF56AB00993C32 /* PreferencesManager+Advanced.swift */; };
 		A0208F8225D6BB1C00CA054C /* AppDelegate+BeamTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0208F8125D6BB1C00CA054C /* AppDelegate+BeamTests.swift */; };
 		A02FD6FE266519C300EBE17E /* Clustering.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A02FD6E72665180C00EBE17E /* Clustering.framework */; };
@@ -1473,6 +1475,8 @@
 		A00AE82A265EAE9A00156220 /* BeamSearchField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamSearchField.swift; sourceTree = "<group>"; };
 		A00F5A252656965900D338E1 /* PasswordsDBTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordsDBTests.swift; sourceTree = "<group>"; };
 		A01030A925F149EA00D740C5 /* TextEditorCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditorCommand.swift; sourceTree = "<group>"; };
+		A0125A0326DE333500590CB5 /* CloseTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloseTab.swift; sourceTree = "<group>"; };
+		A0125A0526DE8AF300590CB5 /* WebCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebCommand.swift; sourceTree = "<group>"; };
 		A0137B3425B6DFE100E65208 /* CommandManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandManager.swift; sourceTree = "<group>"; usesTabs = 0; };
 		A0184F7026AF56AB00993C32 /* PreferencesManager+Advanced.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PreferencesManager+Advanced.swift"; sourceTree = "<group>"; };
 		A0208F8125D6BB1C00CA054C /* AppDelegate+BeamTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+BeamTests.swift"; sourceTree = "<group>"; };
@@ -3462,6 +3466,15 @@
 			path = Geolocation;
 			sourceTree = "<group>";
 		};
+		A01259FB26DE332A00590CB5 /* Web */ = {
+			isa = PBXGroup;
+			children = (
+				A0125A0326DE333500590CB5 /* CloseTab.swift */,
+				A0125A0526DE8AF300590CB5 /* WebCommand.swift */,
+			);
+			path = Web;
+			sourceTree = "<group>";
+		};
 		A02FD6E22665180C00EBE17E /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -3485,6 +3498,7 @@
 		A04E849325DD1CDD0066CD44 /* Commands */ = {
 			isa = PBXGroup;
 			children = (
+				A01259FB26DE332A00590CB5 /* Web */,
 				A59467ED265CE5510044A892 /* Document */,
 				A5946802265CE5940044A892 /* Editor */,
 			);
@@ -4678,6 +4692,7 @@
 				A01030AA25F149EA00D740C5 /* TextEditorCommand.swift in Sources */,
 				5298EB0526272D400033862C /* NSManagedObjectModel+Extension.swift in Sources */,
 				418172042581107C00317ED8 /* TemporaryFile.swift in Sources */,
+				A0125A0426DE333500590CB5 /* CloseTab.swift in Sources */,
 				9623ABBD26B002DC00309E5E /* Beam3ToBeam4MigrationPolicy.swift in Sources */,
 				523FF66125C31D8800B4BD6E /* Data+String.swift in Sources */,
 				A57BFEBD2615B49C00CFB646 /* TableRowView.swift in Sources */,
@@ -4920,6 +4935,7 @@
 				A5E04DEB263BEDA600BFB4C1 /* BrowserTabsManager.swift in Sources */,
 				52019A7B26DE49CD005E8278 /* BeamObjectManagerProtocol+PromiseKit.swift in Sources */,
 				4181724D2581107C00317ED8 /* BrowserTabBar.swift in Sources */,
+				A0125A0626DE8AF300590CB5 /* WebCommand.swift in Sources */,
 				961EC50B25B495DB009FA322 /* ButtonLayer.swift in Sources */,
 				418172542581107C00317ED8 /* OmniBar.swift in Sources */,
 				4181721D2581107C00317ED8 /* NSImage+Beam.swift in Sources */,

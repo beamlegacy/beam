@@ -37,14 +37,8 @@ class BeamWindow: NSWindow, NSDraggingDestination {
     private var trafficLightLeftMargin: CGFloat = 20
 
     // swiftlint:disable:next function_body_length
-    init(contentRect: NSRect, data: BeamData, reloadState: Bool) {
+    init(contentRect: NSRect, data: BeamData) {
         self.data = data
-
-        if reloadState && !NSEvent.modifierFlags.contains(.option) && Configuration.env != "test",
-           let savedData = UserDefaults.standard.data(forKey: Self.savedTabsKey),
-           let state = try? JSONDecoder().decode(BeamState.self, from: savedData) {
-            self.state = state
-        }
 
         data.setupJournal()
 
@@ -97,7 +91,8 @@ class BeamWindow: NSWindow, NSDraggingDestination {
             state.mode = .web
             return
         }
-        if state.browserTabsManager.closeCurrentTab() { return }
+        if state.closeCurrentTab() { return }
+
         super.performClose(sender)
     }
 
@@ -152,12 +147,15 @@ class BeamWindow: NSWindow, NSDraggingDestination {
         animationLayer.opacity = 0.0
     }
 
-    static let savedTabsKey = "savedTabs"
+    static let savedCloseTabCmdsKey = "savedClosedTabCmds"
 
-    func saveDefaults() {
-        let encoder = JSONEncoder()
-        guard let data = try? encoder.encode(state) else { return }
-        UserDefaults.standard.set(data, forKey: Self.savedTabsKey)
+    private func restablishedLastCommands() {
+        if let data = UserDefaults.standard.data(forKey: Self.savedCloseTabCmdsKey) {
+            let decoder = JSONDecoder()
+            guard let closedTabsGroupCmd = try? decoder.decode(GroupWebCommand.self, from: data) else { return }
+            state.cmdManager.appendToDone(command: closedTabsGroupCmd)
+            UserDefaults.standard.removeObject(forKey: Self.savedCloseTabCmdsKey)
+        }
     }
 
     // Drag and drop:

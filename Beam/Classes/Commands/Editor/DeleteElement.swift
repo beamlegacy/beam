@@ -23,6 +23,10 @@ class DeleteElement: TextEditorCommand {
         super.init(name: Self.name)
     }
 
+    required init(from decoder: Decoder) throws {
+        fatalError("init(from:) has not been implemented")
+    }
+
     override func run(context: Widget?) -> Bool {
         guard let elementInstance = getElement(for: noteId, and: elementId),
               let parent = elementInstance.element.parent,
