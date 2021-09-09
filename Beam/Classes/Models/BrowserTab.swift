@@ -174,7 +174,7 @@ import Promises
     }
 
     var fileStorage: BeamFileStorage? {
-        state.data.fileDB
+        BeamFileDBManager.shared
     }
 
     func setDestinationNote(_ note: BeamNote, rootElement: BeamElement? = nil) {

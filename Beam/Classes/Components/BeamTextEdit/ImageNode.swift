@@ -42,7 +42,7 @@ class ImageNode: ElementNode {
             Logger.shared.logError("ImageNode can only handle image elements, not \(element.kind)", category: .noteEditor)
             return
         }
-        guard let imageRecord = try? AppDelegate.main.data.fileDB.fetch(uid: uid)
+        guard let imageRecord = try? BeamFileDBManager.shared.fetch(uid: uid)
         else {
             Logger.shared.logError("ImageNode unable to fetch image '\(uid)' from FileDB", category: .noteEditor)
             return

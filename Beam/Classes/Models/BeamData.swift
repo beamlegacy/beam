@@ -23,7 +23,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     }
     @Published var journal: [BeamNote] = []
 
-    var fileDB: BeamFileDB
     @Published var noteCount = 0
     @Published var lastChangedElement: BeamElement?
     @Published var lastIndexedElement: BeamElement?
@@ -106,13 +105,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
             try LinkStore.loadFrom(Self.linkStorePath)
         } catch {
             Logger.shared.logError("Unable to load link store from \(Self.linkStorePath)", category: .search)
-        }
-
-        do {
-            fileDB = try BeamFileDB(path: Self.fileDBPath)
-        } catch let error {
-            Logger.shared.logError("Error while creating the File Database [\(error)]", category: .fileDB)
-            fatalError()
         }
 
         cookies = HTTPCookieStorage()

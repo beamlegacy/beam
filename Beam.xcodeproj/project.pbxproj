@@ -494,6 +494,7 @@
 		96988C8325BB0AF2000223A3 /* DestinationNotePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96988C8225BB0AF2000223A3 /* DestinationNotePicker.swift */; };
 		969CE3EA26CB7B01000AEF37 /* BeamNoteType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 969CE3E926CB7B01000AEF37 /* BeamNoteType.swift */; };
 		96A3067C25F698FB0078A453 /* RefNoteTitle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96A3067B25F698FB0078A453 /* RefNoteTitle.swift */; };
+		96AC99F826E65CFB0016E941 /* UUIDKit in Frameworks */ = {isa = PBXBuildFile; productRef = 96AC99F726E65CFB0016E941 /* UUIDKit */; };
 		96BBA79F25FBA573008276FC /* ReparentElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96BBA78A25FBA573008276FC /* ReparentElement.swift */; };
 		96BDCBE926DD043800EBCB6B /* NSSize+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96BDCBE826DD043800EBCB6B /* NSSize+Beam.swift */; };
 		96C1D7EB2624C0ED0085FD23 /* BeamElement+Text.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C1D7EA2624C0ED0085FD23 /* BeamElement+Text.swift */; };
@@ -1805,6 +1806,7 @@
 				A02FD6FE266519C300EBE17E /* Clustering.framework in Frameworks */,
 				33B27467264C0F7100A318CD /* AutoUpdate.framework in Frameworks */,
 				525C233C25BAF8EF001B9625 /* libgit2.a in Frameworks */,
+				96AC99F826E65CFB0016E941 /* UUIDKit in Frameworks */,
 				33F0F1C826DE87E000FF8B48 /* Vinyl in Frameworks */,
 				A0A84FB92636FA99008F0326 /* PromiseKit in Frameworks */,
 				A0A84FB72636FA99008F0326 /* JWTDecode in Frameworks */,
@@ -4016,6 +4018,7 @@
 				52CA277B26401D7000146A00 /* OAuthSwift */,
 				33088D6226B06677004FAE99 /* ZIPFoundation */,
 				33F0F1C726DE87E000FF8B48 /* Vinyl */,
+				96AC99F726E65CFB0016E941 /* UUIDKit */,
 			);
 			productName = Beam;
 			productReference = 965A78252514F147009980D4 /* Beam.app */;
@@ -4130,6 +4133,7 @@
 				96D5AE83264C01AD003AD516 /* XCRemoteSwiftPackageReference "TLDExtractSwift" */,
 				33088D6126B06677004FAE99 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
 				33F0F1C626DE87E000FF8B48 /* XCRemoteSwiftPackageReference "Vinyl" */,
+				96AC99F626E65CFB0016E941 /* XCRemoteSwiftPackageReference "uuid-kit" */,
 			);
 			productRefGroup = 965A78262514F147009980D4 /* Products */;
 			projectDirPath = "";
@@ -6336,6 +6340,14 @@
 				minimumVersion = 5.9.0;
 			};
 		};
+		96AC99F626E65CFB0016E941 /* XCRemoteSwiftPackageReference "uuid-kit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/baarde/uuid-kit";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.1.0;
+			};
+		};
 		96D5AE83264C01AD003AD516 /* XCRemoteSwiftPackageReference "TLDExtractSwift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/gumob/TLDExtractSwift";
@@ -6441,6 +6453,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 964FE5DF2625D8AA00966E03 /* XCRemoteSwiftPackageReference "GRDB.swift" */;
 			productName = GRDB;
+		};
+		96AC99F726E65CFB0016E941 /* UUIDKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 96AC99F626E65CFB0016E941 /* XCRemoteSwiftPackageReference "uuid-kit" */;
+			productName = UUIDKit;
 		};
 		96D5AE84264C01AD003AD516 /* TLDExtract */ = {
 			isa = XCSwiftPackageProductDependency;
