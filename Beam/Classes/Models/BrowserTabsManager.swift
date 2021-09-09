@@ -210,8 +210,11 @@ extension BrowserTabsManager {
     }
 
     func reloadCurrentTab() {
-        currentTab?.leave()
-        currentTab?.webView.reload()
+        currentTab?.reload()
+    }
+
+    func stopLoadingCurrentTab() {
+        currentTab?.stopLoad()
     }
 
     @discardableResult
