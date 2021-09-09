@@ -718,7 +718,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         guard inVisibleBranch else { return nil }
 
         clickedLayer = nil
-        for layer in layers.values where !layer.layer.isHidden {
+        for layer in layers.values.reversed() where !layer.layer.isHidden {
             let info = MouseInfo(self, layer, mouseInfo)
             if layer.contains(info.position) {
                 if layer.mouseDown(info) {
@@ -806,7 +806,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
             handlers += c.getWidgetsAt(p, globalPosition, ignoreX: ignoreX)
         }
 
-        for layer in layers.values where !layer.layer.isHidden {
+        for layer in layers.values.reversed() where !layer.layer.isHidden {
             let p = MouseInfo.convert(globalPosition: globalPosition, self, layer)
             if layer.contains(p, ignoreX: ignoreX) {
                 handlers.append(layer)

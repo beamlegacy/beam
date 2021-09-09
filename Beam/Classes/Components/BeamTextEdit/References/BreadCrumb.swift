@@ -92,7 +92,7 @@ class BreadCrumb: Widget {
             linkContentLayer,
                 activated: {[weak self] in
                     guard let self = self else { return }
-                    self.updateReferenceSection(self.proxy.text.text)
+                    self.converReferenceToLink(self.proxy.text.text)
                 },
                 hovered: { [weak self] isHover in
                     guard let self = self else { return }
@@ -247,10 +247,10 @@ class BreadCrumb: Widget {
         crumbArrowLayers.append(chevron.layer)
     }
 
-    func updateReferenceSection(_ text: String) {
+    func converReferenceToLink(_ text: String) {
         guard let rootNote = editor?.note?.note else { return }
 
-        text.ranges(of: rootNote.title).forEach { range in
+        text.ranges(of: rootNote.title, options: .caseInsensitive).forEach { range in
             let start = text.position(at: range.lowerBound)
             let end = text.position(at: range.upperBound)
             self.proxy.makeInternalLink(start..<end, createNoteIfNeeded: true)
