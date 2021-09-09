@@ -200,13 +200,13 @@ public class CommandManager<Context> {
         groupCmd.append(GroupCommand(name: name))
     }
 
-    public func endGroup() {
+    public func endGroup(forceGroup: Bool = false) {
         guard let lastGrp = groupCmd.last else { return }
         groupCmd.removeLast()
         // Prune empty group commands:
         guard !lastGrp.isEmpty else { return }
         // Skip command group if it only contains one command and directly add it
-        if lastGrp.commands.count == 1, let cmd = lastGrp.commands.first {
+        if lastGrp.commands.count == 1, let cmd = lastGrp.commands.first, !forceGroup {
             appendToDone(command: cmd)
             return
         }
