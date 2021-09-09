@@ -180,9 +180,7 @@ public class TextRoot: TextNode {
         childrenSpacing = PreferencesManager.editorParentSpacing
 
         if let note = note {
-            if !editor.journalMode {
-                topSpacerWidget = SpacerWidget(parent: self, spacerType: .top)
-            }
+            topSpacerWidget = SpacerWidget(parent: self, spacerType: .top)
             linksSection = LinksSection(parent: self, note: note)
             middleSpacerWidget = SpacerWidget(parent: self, spacerType: .middle)
             referencesSection = ReferencesSection(parent: self, note: note)
@@ -221,8 +219,6 @@ public class TextRoot: TextNode {
             focusedWidget = nodeFor(element.children.first ?? element, withParent: self)
             focusedWidget?.onFocus()
         }
-        self.layer.backgroundColor = NSColor(red: .random(in: 0...1), green: .random(in: 0...1), blue: .random(in: 0...1), alpha: 1.0).cgColor
-
     }
 
     override func setupAccessibility() {

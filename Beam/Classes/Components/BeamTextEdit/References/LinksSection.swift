@@ -21,6 +21,12 @@ class LinksSection: Widget {
 
     var openChildrenDefault: Bool { true }
 
+    override var open: Bool {
+        didSet {
+            self.contentsPadding = NSEdgeInsets(top: 0, left: 0, bottom: open ? 5 : 0, right: 0)
+        }
+    }
+
     init(parent: Widget, note: BeamNote) {
         self.note = note
         super.init(parent: parent)
@@ -44,9 +50,9 @@ class LinksSection: Widget {
             self.open.toggle()
             chevron.open = self.open
         }))
-
         separatorLayer.backgroundColor = BeamColor.LinkedSection.separator.cgColor
         self.layer.addSublayer(separatorLayer)
+        childInset = 9
     }
 
     var links: [BeamNoteReference] { note.links }
@@ -196,13 +202,13 @@ class LinksSection: Widget {
     }
 
     override func updateRendering() -> CGFloat {
-        return selfVisible ? 30 : 0
+        return selfVisible ? 21 : 0
     }
 
     override func updateSubLayersLayout() {
         CATransaction.disableAnimations {
             setupLayerFrame()
-            separatorLayer.frame = CGRect(x: 0, y: sectionTitleLayer.frame.maxY + 4, width: 560, height: 1)
+            separatorLayer.frame = CGRect(x: 0, y: sectionTitleLayer.frame.maxY + 4, width: availableWidth, height: 1)
         }
     }
 
