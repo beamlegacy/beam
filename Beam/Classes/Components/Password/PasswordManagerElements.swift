@@ -35,6 +35,12 @@ struct DOMInputElement: Codable, Equatable, Hashable {
     }
 }
 
+extension DOMInputElement {
+    var debugDescription: String {
+        "Input: \(type?.rawValue ?? "(undefined/unknown)"), beamId: \(beamId), autocomplete: \(autocomplete ?? "(undefined)"), autofocus: \(autofocus ?? "(undefined)"), name: \(name ?? "(undefined)"), class: \(elementClass ?? "(undefined)"), required: \(required ?? "(undefined)")"
+    }
+}
+
 enum DOMInputAutocomplete: String, Codable {
     case off = "off"
     case on = "on"
@@ -42,6 +48,7 @@ enum DOMInputAutocomplete: String, Codable {
     case username = "username"
     case newPassword = "new-password"
     case currentPassword = "current-password"
+    case tel = "tel"
 }
 
 struct DOMRect: Codable {
