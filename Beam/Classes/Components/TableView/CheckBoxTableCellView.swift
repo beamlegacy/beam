@@ -49,7 +49,7 @@ class CheckBoxTableCellView: NSTableCellView {
     }
 }
 
-class CheckBoxTableHeaderCell: NSTableHeaderCell {
+class CheckBoxTableHeaderCell: TableHeaderCell {
     private var checkBox: CheckBoxButton!
     var checked: Bool {
         get { checkBox.checked }
@@ -60,18 +60,20 @@ class CheckBoxTableHeaderCell: NSTableHeaderCell {
         checkBox = CheckBoxButton(checkboxWithTitle: "", target: self, action: #selector(onCheck(_:)))
         checkBox.isEnabled = true
         checkBox.checked = false
+
+        drawsBottomBorder = false
+        drawsTrailingBorder = false
     }
 
     override func drawInterior(withFrame cellFrame: NSRect, in controlView: NSView) {
-//        let x = (cellFrame.maxX - 14) / 2
-//        let rect = CGRect(x: x, y: 0, width: 14, height: 14)
-//        checkBox.draw(cellFrame)
+        // we don't need anything drawn
     }
+
     required init(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
     @objc private func onCheck(_ sender: CheckBoxButton) {
-
+        // check toggle will be handled by TableView's mouseDownInHeaderOf
     }
 }

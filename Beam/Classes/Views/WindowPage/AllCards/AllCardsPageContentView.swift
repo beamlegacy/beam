@@ -157,22 +157,26 @@ struct AllCardsPageContentView: View {
         return intValue >= 0 ? "\(intValue)" : "--"
     }
 
+    static private let secondaryCellFont = BeamFont.medium(size: 10).nsFont
+    static private let secondaryCellFontColor = BeamColor.LightStoneGray.nsColor
     private var columns = [
         TableViewColumn(key: "checkbox", title: "", type: TableViewColumn.ColumnType.CheckBox,
-                        sortable: false, resizable: false, width: 16),
+                        sortable: false, resizable: false, width: 16, visibleOnlyOnRowHoverOrSelected: true),
         TableViewColumn(key: "title", title: "Title", editable: true, isLink: true,
                         sortableDefaultAscending: true, sortableCaseInsensitive: true, width: 200),
-        TableViewColumn(key: "words", title: "Words", width: 50, stringFromKeyValue: Self.loadingIntValueString),
-        TableViewColumn(key: "mentions", title: "Mentions", width: 70, stringFromKeyValue: Self.loadingIntValueString),
-        TableViewColumn(key: "createdAt", title: "Created", stringFromKeyValue: { value in
+        TableViewColumn(key: "words", title: "Words", width: 50, font: secondaryCellFont,
+                        fontColor: Self.secondaryCellFontColor, stringFromKeyValue: Self.loadingIntValueString),
+        TableViewColumn(key: "mentions", title: "Mentions", width: 70, font: secondaryCellFont,
+                        fontColor: Self.secondaryCellFontColor, stringFromKeyValue: Self.loadingIntValueString),
+        TableViewColumn(key: "createdAt", title: "Created", font: secondaryCellFont,
+                        fontColor: Self.secondaryCellFontColor, stringFromKeyValue: { value in
             if let date = value as? Date {
                 return AllCardsPageContentView.dateFormatter.string(from: date)
             }
             return ""
         }),
-        TableViewColumn(key: "updatedAt",
-                        title: "Updated",
-                        isInitialSortDescriptor: true,
+        TableViewColumn(key: "updatedAt", title: "Updated", isInitialSortDescriptor: true,
+                        font: secondaryCellFont, fontColor: Self.secondaryCellFontColor,
                         stringFromKeyValue: { value in
             if let date = value as? Date {
                 return AllCardsPageContentView.dateFormatter.string(from: date)
@@ -191,6 +195,15 @@ struct AllCardsPageContentView: View {
     var body: some View {
         VStack(spacing: 20) {
             HStack(alignment: .center, spacing: BeamSpacing._20) {
+                HStack(spacing: BeamSpacing._20) {
+                    Text("Personal")
+                        .font(BeamFont.regular(size: 20).swiftUI)
+                        .padding(.leading, 35)
+                    Icon(name: "editor-breadcrumb_down", size: 8, color: BeamColor.LightStoneGray.swiftUI)
+                }
+                .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .global).onEnded({ v in
+                    showGlobalContextualMenu(at: v.location, allowImports: true)
+                }))
                 Spacer()
                 ButtonLabel("All (\(model.allNotesItems.count))", state: listType == .allNotes ? .active : .normal) {
                     listType = .allNotes
@@ -204,19 +217,10 @@ struct AllCardsPageContentView: View {
                             state: listType == .privateNotes ? .active : .normal) {
                     listType = .privateNotes
                 }
-                GeometryReader { geo in
-                    ButtonLabel(icon: "editor-options") {
-                        showGlobalContextualMenu(at: geo.frame(in: .global).offsetBy(dx: -BeamSpacing._80, dy: -BeamSpacing._80).origin, allowImports: true)
-                    }
-                    .frame(width: 16)
-                }
-                .padding(.trailing, 3)
-                .frame(width: 22)
-                .padding(.leading, BeamSpacing._80)
             }
             .frame(height: 22)
             .padding(.vertical, 3)
-            TableView(items: currentNotesList, columns: columns,
+            TableView(hasSeparator: false, items: currentNotesList, columns: columns,
                       creationRowTitle: listType == .publicNotes ? "New Public Card" : "New Private Card",
                       shouldReloadData: $model.shouldReloadData) { (newText, row) in
                 onEditingText(newText, row: row, in: currentNotesList)
@@ -227,7 +231,12 @@ struct AllCardsPageContentView: View {
                 }
             } onHover: { (hoveredIndex, frame) in
                 let notesList = currentNotesList
-                hoveredRowIndex = (hoveredIndex ?? notesList.count) >= notesList.count ? nil : hoveredIndex
+                guard let hoveredIndex = hoveredIndex, hoveredIndex < notesList.count else {
+                    hoveredRowIndex = nil
+                    hoveredRowFrame = nil
+                    return
+                }
+                hoveredRowIndex = hoveredIndex
                 hoveredRowFrame = frame
             } onMouseDown: { (rowIndex, column) in
                 handleMouseDown(for: rowIndex, column: column)
@@ -245,6 +254,11 @@ struct AllCardsPageContentView: View {
                 }
             )
             .frame(maxHeight: .infinity)
+            .onHover { hovering in
+                if !hovering {
+                    hoveredRowIndex = nil
+                }
+            }
         }
         .frame(maxWidth: .infinity)
         .onAppear {

@@ -76,9 +76,9 @@ struct CreditCardsTableView: View {
 
     @State var allCreditCardsItem = [CreditCardTableViewItem]()
     var creditCardsColumns = [
-        TableViewColumn(key: "cardDescription", title: "Card Description", type: TableViewColumn.ColumnType.IconAndText, editable: true, sortable: false, resizable: false, width: 200, fontSize: 11, fontColor: BeamColor.Generic.text.nsColor),
-        TableViewColumn(key: "cardInformations", title: "Card Informations", type: TableViewColumn.ColumnType.TwoTextField, editable: true, sortable: false, resizable: false, width: 200, fontSize: 11, fontColor: BeamColor.Generic.text.nsColor),
-        TableViewColumn(key: "cardDate", title: "Card Date", type: TableViewColumn.ColumnType.Text, editable: true, sortable: false, resizable: false, width: 70, fontSize: 11, fontColor: BeamColor.Generic.text.nsColor)
+        TableViewColumn(key: "cardDescription", title: "Card Description", type: TableViewColumn.ColumnType.IconAndText, editable: true, sortable: false, resizable: false, width: 200, fontSize: 11),
+        TableViewColumn(key: "cardInformations", title: "Card Informations", type: TableViewColumn.ColumnType.TwoTextField, editable: true, sortable: false, resizable: false, width: 200, fontSize: 11),
+        TableViewColumn(key: "cardDate", title: "Card Date", type: TableViewColumn.ColumnType.Text, editable: true, sortable: false, resizable: false, width: 70, fontSize: 11)
     ]
 
     var body: some View {
