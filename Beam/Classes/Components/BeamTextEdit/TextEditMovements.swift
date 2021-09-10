@@ -307,8 +307,9 @@ extension TextRoot {
             _ = selectAllNodes()
             return
         }
-        guard let node = focusedWidget as? TextNode else { return }
-        guard selectedTextRange != node.text.wholeRange else {
+        guard let node = focusedWidget as? TextNode,
+              selectedTextRange != node.text.wholeRange
+        else {
             _ = selectAllNodes()
             return
         }
