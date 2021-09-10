@@ -91,9 +91,13 @@ struct TableView: NSViewRepresentable {
 
     private func setupColumns(in tableView: NSTableView, context: Self.Context) {
         var initialSortDescriptor: NSSortDescriptor?
-        columns.forEach { (column) in
+        columns.enumerated().forEach { (index, column) in
             let tableColumn = NSTableColumn(identifier: NSUserInterfaceItemIdentifier(column.key))
-            tableColumn.headerCell.title = column.title
+            let customHeaderCell = TableHeaderCell(textCell: column.title)
+            customHeaderCell.drawsTrailingBorder = index < columns.count - 1
+            customHeaderCell.font = BeamFont.medium(size: 12).nsFont
+            customHeaderCell.textColor = BeamColor.AlphaGray.nsColor
+            tableColumn.headerCell = customHeaderCell
             tableColumn.minWidth = column.width
             tableColumn.width = column.width
             if !column.resizable {
@@ -242,16 +246,31 @@ extension TableViewCoordinator: NSTableViewDataSource {
         if isRowCreationRow(row) {
             rowView.highlightOnSelection = false
         }
-        rowView.onHover = { hovering in
-            guard rowView.frame.origin.y >= tableView.visibleRect.origin.y else { return }
+        rowView.onHover = { [weak self, weak tableView] hovering in
+            guard let self = self, let tableView = tableView,
+                  rowView.frame.origin.y >= tableView.visibleRect.origin.y else { return }
             let rowFrame = tableView.convert(rowView.frame, to: nil)
             self.hoveredRow = hovering ? row : nil
+            self.updateCellsVisibility(for: row, in: tableView,
+                                       hovering: hovering, selected: self.currentSelectedIndexes?.contains(row) == true)
             if let hoveredRow = self.hoveredRow,
                let originalDataRowIndex = self.getOriginalDataIndexes(for: [hoveredRow]).first {
                 self.parent.onHover?(originalDataRowIndex, hovering ? rowFrame : nil)
             }
         }
         return rowView
+    }
+
+    private func updateCellsVisibility(for rowIndex: Int, in tableView: NSTableView, hovering: Bool, selected: Bool) {
+        guard !isRowCreationRow(rowIndex) else { return }
+        if let row = tableView.rowView(atRow: rowIndex, makeIfNecessary: false) {
+            parent.columns.enumerated().forEach { index, column in
+                guard column.visibleOnlyOnRowHoverOrSelected,
+                      let cell = row.view(atColumn: index) as? NSTableCellView
+                      else { return }
+                cell.alphaValue = hovering || selected ? 1 : 0
+            }
+        }
     }
 
     func tableView(_ tableView: NSTableView, sortDescriptorsDidChange oldDescriptors: [NSSortDescriptor]) {
@@ -317,7 +336,7 @@ extension TableViewCoordinator: NSTableViewDelegate {
         }
         switch column.type {
         case .CheckBox:
-            return setupCheckBoxCell(tableView, at: row)
+            return setupCheckBoxCell(tableView, at: row, column: column)
         case .Text:
             return setupTextCell(tableView, at: row, column: column)
         case .IconAndText:
@@ -335,17 +354,15 @@ extension TableViewCoordinator: NSTableViewDelegate {
         let editable = column.editable && !column.isLink
         textCell.textField?.stringValue = text
         textCell.textField?.isEditable = editable
-        textCell.textField?.font = BeamFont.regular(size: column.fontSize).nsFont
+        textCell.textField?.font = column.font ?? BeamFont.regular(size: column.fontSize).nsFont
+        textCell.textField?.textColor = column.fontColor
         textCell.textField?.setAccessibilityIdentifier("\(column.title)")
-        if let textColor = column.fontColor {
-            textCell.textField?.textColor = textColor
-        }
         textCell.isLink = column.isLink
         textCell.textField?.delegate = self
         return textCell
     }
 
-    private func setupCheckBoxCell(_ tableView: NSTableView, at row: Int) -> CheckBoxTableCellView {
+    private func setupCheckBoxCell(_ tableView: NSTableView, at row: Int, column: TableViewColumn) -> CheckBoxTableCellView {
         let checkCell = CheckBoxTableCellView()
         checkCell.checked = tableView.selectedRowIndexes.contains(row)
         checkCell.onCheckChange = { selected in
@@ -355,6 +372,7 @@ extension TableViewCoordinator: NSTableViewDelegate {
                 tableView.deselectRow(row)
             }
         }
+        checkCell.alphaValue = column.visibleOnlyOnRowHoverOrSelected ? 0 : 1
         return checkCell
     }
 
@@ -366,10 +384,8 @@ extension TableViewCoordinator: NSTableViewDelegate {
         let editable = column.editable && !column.isLink
         iconAndTextCell.textField?.stringValue = item?.text ?? ""
         iconAndTextCell.textField?.isEditable = editable
-        iconAndTextCell.textField?.font = BeamFont.regular(size: column.fontSize).nsFont
-        if let textColor = column.fontColor {
-            iconAndTextCell.textField?.textColor = textColor
-        }
+        iconAndTextCell.textField?.font = column.font ?? BeamFont.regular(size: column.fontSize).nsFont
+        iconAndTextCell.textField?.textColor = column.fontColor
         iconAndTextCell.textField?.delegate = self
         return iconAndTextCell
     }
@@ -386,12 +402,11 @@ extension TableViewCoordinator: NSTableViewDelegate {
 
         twoTextFieldViewCell.topTextField.isEditable = editable
         twoTextFieldViewCell.botTextField.isEditable = editable
-        twoTextFieldViewCell.topTextField.font = BeamFont.regular(size: column.fontSize).nsFont
-        twoTextFieldViewCell.botTextField.font = BeamFont.regular(size: column.fontSize).nsFont
-        if let textColor = column.fontColor {
-            twoTextFieldViewCell.topTextField.textColor = textColor
-            twoTextFieldViewCell.botTextField.textColor = textColor
-        }
+        let font = column.font ?? BeamFont.regular(size: column.fontSize).nsFont
+        twoTextFieldViewCell.topTextField.font = font
+        twoTextFieldViewCell.botTextField.font = font
+        twoTextFieldViewCell.topTextField.textColor = column.fontColor
+        twoTextFieldViewCell.botTextField.textColor = column.fontColor
         return twoTextFieldViewCell
     }
 
@@ -419,10 +434,14 @@ extension TableViewCoordinator: NSTableViewDelegate {
             parent.onSelectionChanged?(getOriginalDataIndexes(for: selectedIndexes))
             if let toUnchecked = currentSelectedIndexes?.subtracting(selectedIndexes) {
                 setChecked(false, for: toUnchecked, in: tableView)
+                toUnchecked.forEach { updateCellsVisibility(for: $0, in: tableView,
+                                                            hovering: hoveredRow == $0, selected: false) }
             }
             setChecked(true, for: selectedIndexes, in: tableView)
             currentSelectedIndexes = selectedIndexes
             updateSelectAllCheckBox()
+            selectedIndexes.forEach { updateCellsVisibility(for: $0, in: tableView,
+                                                            hovering: hoveredRow == $0, selected: true) }
         }
     }
 

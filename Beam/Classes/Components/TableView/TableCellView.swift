@@ -82,7 +82,6 @@ class BeamTableCellIconView: NSTableCellView {
 
         _iconView.translatesAutoresizingMaskIntoConstraints = false
         _iconView.isEnabled = true
-        _iconView.appearance = NSAppearance(named: .vibrantDark)
         self.addSubview(_iconView)
         self.addConstraints([
             centerXAnchor.constraint(equalTo: _iconView.centerXAnchor),

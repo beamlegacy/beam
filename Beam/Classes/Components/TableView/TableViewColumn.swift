@@ -27,8 +27,10 @@ struct TableViewColumn {
     var isInitialSortDescriptor = false
     var resizable = true
     var width: CGFloat = 100
+    var font: NSFont?
     var fontSize: CGFloat = 13
-    var fontColor: NSColor?
+    var fontColor: NSColor = BeamColor.Generic.text.nsColor
+    var visibleOnlyOnRowHoverOrSelected = false
     var stringFromKeyValue: ((Any?) -> String) = { value in
         return value as? String ?? ""
     }

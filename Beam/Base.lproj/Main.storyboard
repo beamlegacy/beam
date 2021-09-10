@@ -827,7 +827,7 @@
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="Hyi-3c-HLP"/>
-                                        <menuItem title="Journal" keyEquivalent="H" id="VIl-9f-vjQ" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
+                                        <menuItem title="Journal" keyEquivalent="J" id="VIl-9f-vjQ" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
                                             <connections>
                                                 <action selector="showJournal:" target="Ady-hI-5gd" id="mle-Tg-ab1"/>
                                             </connections>
@@ -835,6 +835,11 @@
                                         <menuItem title="Card / Web" tag="1001" keyEquivalent="d" id="wze-af-ouN">
                                             <connections>
                                                 <action selector="toggleBetweenWebAndNote:" target="Ady-hI-5gd" id="tM1-6e-6lt"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="All Cards" keyEquivalent="H" id="Xzm-W0-MtQ" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
+                                            <connections>
+                                                <action selector="showAllCards:" target="Ady-hI-5gd" id="A1i-VO-PNl"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="eqG-OD-aZE"/>
