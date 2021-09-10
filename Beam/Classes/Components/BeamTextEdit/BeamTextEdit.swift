@@ -842,6 +842,7 @@ public extension CALayer {
             undoManager.undo()
             return
         }
+        hideInlineFormatter()
         _ = rootNode.focusedCmdManager.undo(context: rootNode.cmdContext)
     }
 
@@ -850,6 +851,7 @@ public extension CALayer {
             undoManager.redo()
             return
         }
+        hideInlineFormatter()
         _ = rootNode.focusedCmdManager.redo(context: rootNode.cmdContext)
     }
 
