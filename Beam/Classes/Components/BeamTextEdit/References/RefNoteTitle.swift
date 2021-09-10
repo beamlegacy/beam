@@ -49,7 +49,7 @@ class RefNoteTitle: Widget {
         ])
 
         cardTitleLayer = ButtonLayer("cardTitleLayer", titleLayer, activated: {[weak self] in
-            guard let self = self, self.titleLayer.string as? String != nil else { return }
+            guard let self = self else { return }
 
             self.editor?.openCard(noteId, nil, nil)
         })
