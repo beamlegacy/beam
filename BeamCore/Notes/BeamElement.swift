@@ -407,7 +407,8 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
         return hasher.combine(id)
     }
 
-    @Published open var changed: (BeamElement, ChangeType)?
+    public let changed = PassthroughSubject<(BeamElement, ChangeType), Never>()
+    public private(set) var lastChangeType: ChangeType?
     open var changePropagationEnabled = true
     public enum ChangeType {
         case text, meta, tree
@@ -415,7 +416,8 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
     open func change(_ type: ChangeType) {
         guard changePropagationEnabled else { return }
         updateDate = BeamDate.now
-        changed = (self, type)
+        lastChangeType = type
+        changed.send((self, type))
 
         if type == .text || type == .tree {
             updateTextStats()
@@ -426,7 +428,8 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
     open func childChanged(_ child: BeamElement, _ type: ChangeType) {
         guard changePropagationEnabled else { return }
         updateDate = BeamDate.now
-        changed = (child, type)
+        lastChangeType = type
+        changed.send((child, type))
         if type == .text || type == .tree {
             updateTextStats()
         }

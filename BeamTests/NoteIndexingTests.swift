@@ -8,6 +8,7 @@
 import XCTest
 import Nimble
 import Foundation
+import Combine
 @testable import BeamCore
 @testable import Beam
 
@@ -36,14 +37,24 @@ class noteIndexingTests: XCTestCase {
 
     func save(note: BeamNote) {
         let expectation = self.expectation(description: "save note \(note.title)")
-        note.save(documentManager: documentManager)  { result in
+
+        var completion: ((Result<Bool, Error>) -> Void) = { _ in }
+
+        completion = { result in
             switch result {
             case .failure(let error):
-                XCTFail(error.localizedDescription)
+                if  note.version != note.savedVersion {
+                    DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: .milliseconds(100))) {
+                        note.save(documentManager: self.documentManager, completion: completion)
+                    }
+                } else {
+                    XCTFail(error.localizedDescription)
+                }
             case .success:
                 expectation.fulfill()
             }
         }
+        note.save(documentManager: documentManager, completion: completion)
         wait(for: [expectation], timeout: 0.5)
     }
 
@@ -54,8 +65,6 @@ class noteIndexingTests: XCTestCase {
         let documentManager = DocumentManager()
         let note1 = BeamNote.fetchOrCreate(documentManager, title: title1)
         let note2 = BeamNote.fetchOrCreate(documentManager, title: title2)
-        save(note: note1)
-        save(note: note2)
 
         // Now we have two notes that should be ok to tinker with
         expect(try GRDBDatabase.shared.countBidirectionalLinks()) == 0
