@@ -104,7 +104,7 @@ struct OmniBar: View {
                     }
                     .padding(.leading, !isEditing && state.mode == .web ? 8 : 7)
                 }
-                .animation(defaultAnimation)
+                .animation(enableAnimations ? .easeInOut(duration: isEditing ? 0.1 : 0.3) : nil)
                 .padding(.leading, BeamSpacing._50)
                 .padding(.trailing, BeamSpacing._120)
                 .frame(height: boxHeight)
@@ -142,6 +142,7 @@ struct OmniBar: View {
                     OmniBarButton(icon: "nav-journal", accessibilityId: "journal", action: goToJournal)
                 }
                 Chevrons()
+                    .animation(nil)
                 if state.mode == .web, let currentTab = browserTabsManager.currentTab {
                     OmniBarReloadButton(currentTab: currentTab, action: toggleReloadWeb)
                 }
