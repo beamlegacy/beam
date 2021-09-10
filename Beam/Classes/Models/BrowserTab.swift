@@ -578,13 +578,13 @@ import Promises
         passwordOverlayController?.dismiss()
         authenticationViewModel?.cancel()
         browsingTree.closeApp()
-        sendTree(blocking: true)
+        sendTree(grouped: true)
     }
 
-    private func sendTree(blocking: Bool = false) {
+    private func sendTree(grouped: Bool = false) {
         guard let sender = state.data.browsingTreeSender else { return }
-        if blocking {
-            sender.blockingSend(browsingTree: browsingTree)
+        if grouped {
+            sender.groupSend(browsingTree: browsingTree)
         } else {
             sender.send(browsingTree: browsingTree)
         }
