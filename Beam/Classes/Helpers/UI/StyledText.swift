@@ -25,8 +25,8 @@ public extension TextStyle {
         TextStyle(key: .init("TextStyleForegroundColor"), apply: { $0.foregroundColor(color) })
     }
 
-    static func semibold() -> TextStyle {
-        TextStyle(key: .init("TextStyleSemiBold"), apply: { $0.fontWeight(.semibold) })
+    static func font(_ font: Font) -> TextStyle {
+        TextStyle(key: .init("TextStyleFont"), apply: { $0.font(font) })
     }
 }
 

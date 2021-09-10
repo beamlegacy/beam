@@ -20,7 +20,6 @@ struct Chevrons: View {
                 OmniBarButton(icon: "nav-forward", accessibilityId: "goForward", action: goForward)
             }
         }
-        .animation(.easeInOut)
     }
 
     func goBack() {
