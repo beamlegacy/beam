@@ -234,6 +234,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let encoder = JSONEncoder()
         guard let data = try? encoder.encode(windowForTabsCmd) else { return }
         UserDefaults.standard.set(data, forKey: BeamWindow.savedCloseTabCmdsKey)
+        _ = self.data.browsingTreeSender?.groupWait()
     }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {

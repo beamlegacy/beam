@@ -41,7 +41,8 @@ class BrowsingTreeSenderTest: XCTestCase {
         session = MockURLSession()
         let testConfig = BrowsingTreeSenderConfig(
             dataStoreUrl: "http://url.fr",
-            dataStoreApiToken: "abc"
+            dataStoreApiToken: "abc",
+            waitTimeOut: 2.0
         )
         appSessionId = UUID()
         subject = BrowsingTreeSender(session: session, config: testConfig, appSessionId: appSessionId)
@@ -125,14 +126,16 @@ class BrowsingTreeSenderTest: XCTestCase {
     func testFaultyConfig() throws {
         let missingUrlConfig = BrowsingTreeSenderConfig(
             dataStoreUrl: "$(BROWSING_TREE_URL)",
-            dataStoreApiToken: "abc"
+            dataStoreApiToken: "abc",
+            waitTimeOut: 2.0
         )
         var sender = BrowsingTreeSender(session: session, config: missingUrlConfig, appSessionId: appSessionId)
         XCTAssertNil(sender)
 
         let missingTokenConfig = BrowsingTreeSenderConfig(
             dataStoreUrl: "http://url.fr",
-            dataStoreApiToken: "$(BROWSING_TREE_ACCESS_TOKEN)"
+            dataStoreApiToken: "$(BROWSING_TREE_ACCESS_TOKEN)",
+            waitTimeOut: 2.0
         )
         sender = BrowsingTreeSender(session: session, config: missingTokenConfig, appSessionId: appSessionId)
         XCTAssertNil(sender)
