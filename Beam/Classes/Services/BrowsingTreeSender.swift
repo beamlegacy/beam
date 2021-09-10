@@ -46,6 +46,7 @@ extension URLSession: URLSessionProtocol {
 struct BrowsingTreeSenderConfig {
     let dataStoreUrl: String
     let dataStoreApiToken: String
+    let waitTimeOut: Double
 }
 
 class BrowsingTreeSender {
@@ -54,6 +55,7 @@ class BrowsingTreeSender {
     var url: URL
     private let config: BrowsingTreeSenderConfig
     let appSessionId: UUID
+    public let group = DispatchGroup()
 
     init?(session: URLSessionProtocol = URLSession.shared, config: BrowsingTreeSenderConfig, appSessionId: UUID) {
         guard config.dataStoreApiToken != "$(BROWSING_TREE_ACCESS_TOKEN)",
@@ -104,10 +106,18 @@ class BrowsingTreeSender {
         return try? encoder.encode(dataToSend)
     }
 
-    func blockingSend(browsingTree: BrowsingTree) {
-        let sem = DispatchSemaphore(value: 0)
-        send(browsingTree: browsingTree) {sem.signal()}
-        sem.wait()
+    func groupSend(browsingTree: BrowsingTree) {
+        group.enter()
+        send(browsingTree: browsingTree) { [weak self] in self?.group.leave() }
+    }
+
+    func groupWait() -> DispatchTimeoutResult {
+        let result = group.wait(timeout: .now() + config.waitTimeOut)
+        switch result {
+        case .timedOut: Logger.shared.logWarning("Some browsing trees may not have been transmitted before timeout", category: .browsingTreeSender)
+        case .success: Logger.shared.logInfo("All browsing trees transmitted before timeout", category: .browsingTreeSender)
+        }
+        return result
     }
 
     func send(browsingTree: BrowsingTree, completion:  @escaping () -> Void = {}) {
