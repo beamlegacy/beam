@@ -16,22 +16,28 @@ class BeamTableRowView: NSTableRowView {
     private var isHovering: Bool = false
     private var extraLeftHover: CGFloat = 32
 
+    private func drawHighlightBackground(selected: Bool, hovering: Bool) {
+        guard selected || hovering else { return }
+        let selectionRect = bounds
+        if selected {
+            BeamColor.Bluetiful.nsColor.withAlphaComponent(0.14).setFill()
+        } else if hovering {
+            BeamColor.Bluetiful.nsColor.withAlphaComponent(0.1).setFill()
+        }
+        let selectionPath = NSBezierPath(roundedRect: selectionRect, xRadius: 3, yRadius: 3)
+        selectionPath.fill()
+    }
+
     override func drawSelection(in dirtyRect: NSRect) {
         if highlightOnSelection && selectionHighlightStyle != .none {
-            let selectionRect = bounds
-            BeamColor.Bluetiful.nsColor.withAlphaComponent(0.1).setFill()
-            let selectionPath = NSBezierPath(rect: selectionRect)
-            selectionPath.fill()
+            self.drawHighlightBackground(selected: true, hovering: isHovering)
         }
     }
 
     override func drawBackground(in dirtyRect: NSRect) {
         super.drawBackground(in: dirtyRect)
-        if isHovering && !isSelected {
-            let selectionRect = bounds
-            BeamColor.Bluetiful.nsColor.withAlphaComponent(0.05).setFill()
-            let selectionPath = NSBezierPath(rect: selectionRect)
-            selectionPath.fill()
+        if !isSelected {
+            self.drawHighlightBackground(selected: false, hovering: isHovering)
         }
         if hasSeparator {
             BeamColor.Generic.separator.nsColor.setFill()

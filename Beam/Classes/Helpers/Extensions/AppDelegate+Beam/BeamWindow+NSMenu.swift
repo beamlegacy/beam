@@ -21,6 +21,10 @@ extension BeamWindow {
         state.navigateToJournal(note: nil, clearNavigation: true)
     }
 
+    @IBAction func showAllCards(_ sender: Any?) {
+        state.navigateToPage(.allCardsWindowPage)
+    }
+
     @IBAction func toggleScoreCard(_ sender: Any?) {
         state.data.showTabStats.toggle()
     }
