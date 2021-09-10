@@ -542,8 +542,6 @@ class TextNodeTests: XCTestCase {
 
         // Undo the text insertion:
         editor.undo(String("Undo"))
-        // Undo selection deletion (insertText does both in two operations)
-        editor.undo(String("Undo"))
 
         let str2 = """
         title
