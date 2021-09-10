@@ -211,7 +211,7 @@ public class BeamNote: BeamElement {
         fetchedNotesCancellables.removeValue(forKey: cancellableKey)
 
         fetchedNotesCancellables[cancellableKey] =
-            note.$changed
+            note.changed
             .dropFirst(1)
             .receive(on: DispatchQueue.main)
             .sink { [weak note] _ in

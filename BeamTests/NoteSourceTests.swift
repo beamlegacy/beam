@@ -204,28 +204,24 @@ class NoteSourceTests: XCTestCase {
         }
 
     func testNoteChangeTrigger() throws {
-        XCTAssertNil(note.changed)
         let updateDate = note.updateDate
 
         //adding a note source will trigger a note save
         note.sources.add(urlId: 0, noteId: note.id, type: .user, sessionId: UUID())
-        let noteChangedSourceCreate = try XCTUnwrap(note.changed)
         let updateDateSourceCreate = note.updateDate
-        XCTAssertEqual(noteChangedSourceCreate.1, .meta)
+        XCTAssertEqual(note.lastChangeType, .meta)
         XCTAssert(updateDateSourceCreate.timeIntervalSince(updateDate) > 0)
 
         //updating a note source will trigger a note save
         note.sources.add(urlId: 0, noteId: note.id, type: .user, sessionId: UUID())
-        let noteChangedSourceUpdate = try XCTUnwrap(note.changed)
         let updateDateSourceUpdate = note.updateDate
-        XCTAssertEqual(noteChangedSourceUpdate.1, .meta)
+        XCTAssertEqual(note.lastChangeType, .meta)
         XCTAssert(updateDateSourceUpdate.timeIntervalSince(updateDateSourceCreate) > 0)
 
         //deleting a note source will trigger a note save
         note.sources.remove(urlId: 0, noteId: note.id, isUserSourceProtected: false)
-        let noteChangedSourceDelete = try XCTUnwrap(note.changed)
         let updateDateSourceDelete = note.updateDate
-        XCTAssertEqual(noteChangedSourceDelete.1, .meta)
+        XCTAssertEqual(note.lastChangeType, .meta)
         XCTAssert(updateDateSourceDelete.timeIntervalSince(updateDateSourceUpdate) > 0)
     }
 }
