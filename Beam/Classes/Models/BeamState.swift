@@ -517,3 +517,20 @@ extension BeamState {
         notesFocusedStates.saveNoteFocusedState(noteId: note.id, focusedElement: focusedElement, cursorPosition: cursorPosition)
     }
 }
+
+// MARK: - Search
+extension BeamState {
+
+    func search() {
+        switch mode {
+        case .today:
+            break
+        case .note:
+            break
+        case .web:
+            browserTabsManager.currentTab?.searchInTab()
+        case .page:
+            break
+        }
+    }
+}

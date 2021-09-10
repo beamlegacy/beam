@@ -34,6 +34,7 @@ class TestWebPage: WebPage {
         storage
     }
     var authenticationViewModel: AuthenticationViewModel?
+    var searchViewModel: SearchViewModel?
 
     init(browsingScorer: BrowsingScorer?, passwordOverlayController: PasswordOverlayController?, pns: PointAndShoot?,
          fileStorage: BeamFileStorage?, downloadManager: DownloadManager?, navigationController: WebNavigationController?) {

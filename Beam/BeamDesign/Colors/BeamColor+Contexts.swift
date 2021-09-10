@@ -154,6 +154,15 @@ extension BeamColor {
     }
 }
 
+extension BeamColor {
+    enum Search {
+        static let foundElement = BeamColor.Custom(named: "SearchResult")
+        static let foundElementHover = BeamColor.Custom(named: "SearchResultHover")
+        static let currentElement = BeamColor.Custom(named: "CurrentSearchResult")
+        static let currentElementHover = BeamColor.Custom(named: "CurrentSearchResultHover")
+    }
+}
+
 // MARK: - Cursor & Selection
 extension BeamColor.Generic {
     static private let possibleCursorColors = [
