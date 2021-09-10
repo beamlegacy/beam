@@ -412,9 +412,9 @@ extension BeamNote: BeamNoteDocument {
         let note = BeamNote(title: title)
         note.databaseId = DatabaseManager.defaultDatabase.id
 
-        // TODO: should force a first quick save to trigger any title conflicts with the API asap
         appendToFetchedNotes(note)
         updateNoteCount()
+        note.save(documentManager: documentManager)
         return note
     }
 
