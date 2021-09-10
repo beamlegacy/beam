@@ -70,6 +70,13 @@ class PasswordOverlayController: WebPageHolder {
             page.executeJS("beam_installSubmitHandler()", objectName: nil).then { _ in
                 self.installFocusHandlers(addedIds: addedIds)
             }
+            page.executeJS("beam_getFocusedField()", objectName: nil).then { result in
+                if let focusedId = result as? String {
+                    DispatchQueue.main.async {
+                        self.inputFieldDidGainFocus(focusedId)
+                    }
+                }
+            }
         }
         disabledForSubmit = false
     }
