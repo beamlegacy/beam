@@ -83,6 +83,7 @@ class FrecencyNoteTriggerTests: XCTestCase {
         var appendToIndexer: ((URL, Readability) -> Void)?
         var score: Float = 0
         var authenticationViewModel: AuthenticationViewModel?
+        var searchViewModel: SearchViewModel?
 
         func getNote(fromTitle: String) -> BeamNote? {
             if fromTitle == pnsNoteTitle {

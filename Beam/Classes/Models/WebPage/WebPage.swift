@@ -54,6 +54,8 @@ protocol WebPage: AnyObject, Scorable {
     func addTextToClusteringManager(_ text: String, url: URL)
 
     var authenticationViewModel: AuthenticationViewModel? { get set }
+    var searchViewModel: SearchViewModel? { get set }
+
 }
 
 protocol WebPageRelated {

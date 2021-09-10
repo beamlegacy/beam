@@ -12,6 +12,7 @@ class BrowserTabConfiguration: BeamWebViewConfigurationBase {
         WebNavigationMessageHandler(config: self).register(to: self)
         MediaPlayerMessageHandler(config: self).register(to: self)
         GeolocationMessageHandler(config: self).register(to: self)
+        WebSearchMessageHandler(config: self).register(to: self)
     }
 
 }

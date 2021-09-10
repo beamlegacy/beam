@@ -13,6 +13,7 @@ import XCTest
 class BaseTest: XCTestCase {
 
     let implicitWaitTimeout = TimeInterval(10)
+    let minimumWaitTimeout = TimeInterval(2)
     
     override func setUpWithError() throws {
         try super.setUpWithError()
