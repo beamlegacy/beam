@@ -15,9 +15,7 @@ struct AutocompleteList: View {
     var modifierFlagsPressed: NSEvent.ModifierFlags?
 
     private let itemHeight: CGFloat = 32
-
-    // on macOS < 11.0, onHover(false) is called on items that were not hovered before
-    @State private var lastItemHovered: AutocompleteResult?
+    @State private var hoveredItemIndex: Int?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -34,11 +32,11 @@ struct AutocompleteList: View {
                         }
                     )
                     .onHoverOnceVisible { hovering in
+                        let index = indexFor(item: i)
                         if hovering {
-                            selectedIndex = indexFor(item: i)
-                            lastItemHovered = i
-                        } else if isSelectedItem(i) && lastItemHovered == i {
-                            selectedIndex = nil
+                            hoveredItemIndex = index
+                        } else if hoveredItemIndex == index {
+                            hoveredItemIndex = nil
                         }
                     }
             }
@@ -50,8 +48,10 @@ struct AutocompleteList: View {
     func isSelectedItem(_ item: AutocompleteResult) -> Bool {
         if modifierFlagsPressed?.contains(.command) == true {
             return item.source == .createCard
-        } else if let i = selectedIndex, i < elements.count {
-            return elements[i] == item
+        } else if let i = selectedIndex, i < elements.count, elements[i] == item {
+            return true
+        } else if let i = hoveredItemIndex, i < elements.count, elements[i] == item {
+            return true
         }
         return false
     }
