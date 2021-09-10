@@ -23,6 +23,7 @@ struct WebInputField {
         case currentPassword
         case newPassword
         case email
+        case tel
     }
 
     let id: String // beamId
@@ -36,11 +37,17 @@ struct WebAutocompleteGroup {
 }
 
 struct WebAutocompleteRules {
-    let ignoreTextAutocompleteOff: Bool
-    let ignoreEmailAutocompleteOff: Bool
-    let ignorePasswordAutocompleteOff: Bool
+    enum Condition {
+        case never
+        case always
+        case whenPasswordField
+    }
 
-    init(ignoreTextAutocompleteOff: Bool = false, ignoreEmailAutocompleteOff: Bool = false, ignorePasswordAutocompleteOff: Bool = false) {
+    let ignoreTextAutocompleteOff: Condition
+    let ignoreEmailAutocompleteOff: Condition
+    let ignorePasswordAutocompleteOff: Condition
+
+    init(ignoreTextAutocompleteOff: Condition = .whenPasswordField, ignoreEmailAutocompleteOff: Condition = .whenPasswordField, ignorePasswordAutocompleteOff: Condition = .always) {
         self.ignoreTextAutocompleteOff = ignoreTextAutocompleteOff
         self.ignoreEmailAutocompleteOff = ignoreEmailAutocompleteOff
         self.ignorePasswordAutocompleteOff = ignorePasswordAutocompleteOff
@@ -48,18 +55,29 @@ struct WebAutocompleteRules {
 
     static let `default` = Self()
 
-    func allowUntaggedField(_ field: DOMInputElement) -> Bool {
+    private func apply(condition: Condition, inPageContainingPasswordField pageContainsPasswordField: Bool) -> Bool {
+        switch condition {
+        case .never:
+            return false
+        case .always:
+            return true
+        case .whenPasswordField:
+            return pageContainsPasswordField
+        }
+    }
+
+    func allowUntaggedField(_ field: DOMInputElement, inPageContainingPasswordField pageContainsPasswordField: Bool) -> Bool {
         switch field.decodedAutocomplete {
         case nil:
             return true
         case .off:
             switch field.type {
             case .text:
-                return ignoreTextAutocompleteOff
+                return apply(condition: ignoreTextAutocompleteOff, inPageContainingPasswordField: pageContainsPasswordField)
             case .email:
-                return ignoreEmailAutocompleteOff
+                return apply(condition: ignoreEmailAutocompleteOff, inPageContainingPasswordField: pageContainsPasswordField)
             case .password:
-                return ignorePasswordAutocompleteOff
+                return apply(condition: ignorePasswordAutocompleteOff, inPageContainingPasswordField: pageContainsPasswordField)
             default:
                 return false
             }
@@ -68,18 +86,18 @@ struct WebAutocompleteRules {
         }
     }
 
-    func allowTaggedField(_ field: DOMInputElement) -> Bool {
+    func allowTaggedField(_ field: DOMInputElement, inPageContainingPasswordField pageContainsPasswordField: Bool) -> Bool {
         switch field.decodedAutocomplete {
         case nil:
             return field.type == .email
         case .off:
             switch field.type {
             case .text:
-                return ignoreTextAutocompleteOff
+                return apply(condition: ignoreTextAutocompleteOff, inPageContainingPasswordField: pageContainsPasswordField)
             case .email:
-                return ignoreEmailAutocompleteOff
+                return apply(condition: ignoreEmailAutocompleteOff, inPageContainingPasswordField: pageContainsPasswordField)
             case .password:
-                return ignorePasswordAutocompleteOff
+                return apply(condition: ignorePasswordAutocompleteOff, inPageContainingPasswordField: pageContainsPasswordField)
             default:
                 return false
             }
@@ -102,30 +120,30 @@ extension DOMInputElement {
         return DOMInputAutocomplete.off
     }
 
-    var isUsedForLogin: Bool {
+    func isUsedForLogin(bestUsernameAutocomplete: DOMInputAutocomplete?) -> Bool {
         switch decodedAutocomplete {
-        case .email:
-            return true
-        case .username:
-            return true
         case .currentPassword:
             return true
+        case .username, .email, .tel, .on, .off:
+            return bestUsernameAutocomplete == decodedAutocomplete
         default:
-            return type == .email
+            return type == .email && bestUsernameAutocomplete != .username
         }
     }
 
-    var isUsedForAccountCreation: Bool {
+    func isUsedForAccountCreation(bestUsernameAutocomplete: DOMInputAutocomplete?) -> Bool {
         switch decodedAutocomplete {
-        case .email:
-            return true
-        case .username:
-            return true
         case .newPassword:
             return true
+        case .username, .email, .tel, .on, .off:
+            return bestUsernameAutocomplete == decodedAutocomplete
         default:
-            return type == .email
+            return type == .email && bestUsernameAutocomplete != .username
         }
+    }
+
+    var isUntaggedLoginField: Bool {
+        decodedAutocomplete == nil && type != .password
     }
 
     var isAutocompleteOnField: Bool {
@@ -158,6 +176,8 @@ extension DOMInputElement {
     var isPersonalInfoField: Bool {
         switch decodedAutocomplete {
         case .email:
+            return true
+        case .tel:
             return true
         default:
             return false
@@ -226,14 +246,21 @@ final class WebAutocompleteContext {
         var personalInfoFields: [WebInputField] = []
         var paymentFields: [WebInputField] = []
 
-        let containsCurrentPasswordField = fields.contains { $0.isCurrentPasswordField }
-        let containsNewPasswordField = fields.contains { $0.isNewPasswordField }
+        let passwordFields = fields.filter { $0.type == .password }
+        let containsCurrentPasswordField = passwordFields.contains { $0.isCurrentPasswordField } || (!passwordFields.isEmpty && !passwordFields.contains { $0.isNewPasswordField })
+        let containsNewPasswordField = passwordFields.contains { $0.isNewPasswordField } || (!passwordFields.isEmpty && !passwordFields.contains { $0.isCurrentPasswordField })
+        let containsUsernameField = fields.contains(where: { $0.decodedAutocomplete == .username })
+        let containsEmailField = fields.contains(where: { $0.decodedAutocomplete == .email })
+        let containsTelephoneField = fields.contains(where: { $0.decodedAutocomplete == .tel })
+        let containsAutocompleteOnField = fields.contains(where: { $0.decodedAutocomplete == .on })
+        let containsUntaggedLoginField = fields.contains(where: { $0.isUntaggedLoginField })
+        let bestUsernameAutocomplete: DOMInputAutocomplete? = containsUsernameField ? .username : containsEmailField ? .email : containsTelephoneField ? .tel : containsAutocompleteOnField ? .on : containsUntaggedLoginField ? nil : .off
 
         for field in fields {
-            if (field.isUsedForLogin || field.isAutocompleteOnField) && containsCurrentPasswordField {
+            if (field.isUsedForLogin(bestUsernameAutocomplete: bestUsernameAutocomplete)) && containsCurrentPasswordField {
                 loginFields.append(WebInputField(field, action: .login))
             }
-            if (field.isUsedForAccountCreation || field.isAutocompleteOnField) && containsNewPasswordField {
+            if (field.isUsedForAccountCreation(bestUsernameAutocomplete: bestUsernameAutocomplete)) && containsNewPasswordField {
                 createAccountFields.append(WebInputField(field, action: .createAccount))
             }
             if field.isPersonalInfoField {
@@ -242,6 +269,12 @@ final class WebAutocompleteContext {
             if field.isPaymentInfoField {
                 paymentFields.append(WebInputField(field))
             }
+        }
+
+        if loginFields.isEmpty && createAccountFields.isEmpty && containsUsernameField {
+            let usernameFields = fields.filter { $0.decodedAutocomplete == .username }
+            loginFields = usernameFields.map { WebInputField($0, action: .login) }
+            createAccountFields = usernameFields.map { WebInputField($0, action: .createAccount) }
         }
 
         return [
@@ -320,29 +353,26 @@ final class WebAutocompleteContext {
     // Minimal implementation for now.
     // If more special cases arise it could make sense to define rules in a plist file and create a separate class.
     private func autocompleteRules(for host: String?) -> WebAutocompleteRules {
-        guard let host = host else {
-            return .default
-        }
-        switch host {
-        case "accounts.spotify.com":
-            return WebAutocompleteRules(ignoreTextAutocompleteOff: true, ignorePasswordAutocompleteOff: true)
-        case "metallica.com":
-            return WebAutocompleteRules(ignorePasswordAutocompleteOff: true)
-        default:
-            return .default
-        }
+        return .default
     }
 
     func update(with fields: [DOMInputElement], on host: String?) -> [String] {
         autocompleteRules = autocompleteRules(for: host)
+        let pageContainsPasswordField = fields.contains { $0.type == .password }
         let fieldsWithAutocompleteAttribute = fields.filter { $0.decodedAutocomplete != nil && $0.decodedAutocomplete != .off }
+        let fieldIds: [String]
         if fieldsWithAutocompleteAttribute.count == 0 {
-            let untaggedFields = fields.filter { autocompleteRules.allowUntaggedField($0) }
-            return update(withUntagged: untaggedFields)
+            let untaggedFields = fields.filter { autocompleteRules.allowUntaggedField($0, inPageContainingPasswordField: pageContainsPasswordField) }
+            Logger.shared.logDebug("Untagged candidates: \(untaggedFields.map { $0.debugDescription })", category: .passwordManager)
+            fieldIds = update(withUntagged: untaggedFields)
+        } else {
+            // If any field has a known autocomplete attribute, we can NOT safely assume all fields participating in autocomplete do.
+            let candidateFields = fields.filter { autocompleteRules.allowTaggedField($0, inPageContainingPasswordField: pageContainsPasswordField) }
+            Logger.shared.logDebug("Tagged candidates: \(candidateFields.map { $0.debugDescription })", category: .passwordManager)
+            fieldIds = update(withTagged: candidateFields)
         }
-        // If any field has a known autocomplete attribute, we can NOT safely assume all fields participating in autocomplete do.
-        let candidateFields = fields.filter { autocompleteRules.allowTaggedField($0) }
-        return update(withTagged: candidateFields)
+        Logger.shared.logDebug("Autocomplete groups: \(autocompleteGroups)", category: .passwordManager)
+        return fieldIds
     }
 
     private func update(withUntagged fields: [DOMInputElement]) -> [String] {
@@ -366,7 +396,10 @@ final class WebAutocompleteContext {
         // If any field is a password entry field, the login field is probably right before it.
         // We build an ordered list of candidate username fields by taking all (obviously non-password) fields before the first password field in reversed order,
         // followed by all non-password fields after the first password field in natural order.
-        let usernameFields = fields[0..<passwordIndex].reversed() + fields[passwordIndex...].filter { $0.type != .password }
+        var usernameFields = fields[0..<passwordIndex].reversed() + fields[passwordIndex...].filter { $0.type != .password }
+        if usernameFields.contains(where: { $0.decodedAutocomplete == nil}) {
+            usernameFields.removeAll(where: { $0.decodedAutocomplete == .off })
+        }
         let passwordFields = fields.filter { $0.type == .password }
         let autocompleteUsernamePasswordFields = usernameFields.map { WebInputField($0, role: action == .createAccount ? .newUsername : .currentUsername) } + passwordFields.map { WebInputField($0, role: action == .createAccount ? .newPassword : .currentPassword) }
         autocompleteFields = [action: autocompleteUsernamePasswordFields]

@@ -59,7 +59,7 @@ class PasswordOverlayController: WebPageHolder {
                 }
             }
             elements = deduplicated
-            Logger.shared.logDebug("Detected fields: \(elements)", category: .passwordManager)
+            Logger.shared.logDebug("Detected fields: \(elements.map { $0.debugDescription })", category: .passwordManager)
         } catch {
             Logger.shared.logError(String(describing: error), category: .passwordManager)
             return
