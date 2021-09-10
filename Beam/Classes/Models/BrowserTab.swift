@@ -72,6 +72,7 @@ import Promises
     @Published var privateMode = false
 
     @Published var authenticationViewModel: AuthenticationViewModel?
+    @Published var searchViewModel: SearchViewModel?
 
     var backForwardUrlList: [URL]?
 
@@ -91,6 +92,7 @@ import Promises
 
     func leave() {
         pointAndShoot?.leavePage()
+        cancelSearch()
     }
 
     func navigatedTo(url: URL, title: String?, reason: NoteElementAddReason) {
@@ -589,5 +591,41 @@ import Promises
             sender.send(browsingTree: browsingTree)
         }
     }
+}
+
+extension BrowserTab {
+
+    func searchInTab() {
+        guard self.searchViewModel == nil else {
+            cancelSearch()
+            return
+        }
+
+        let viewModel = SearchViewModel(context: .web) { [weak self] search in
+            self?.find(search, using: "find")
+        } onLocationIndicatorTap: { position in
+            _ = self.executeJS("window.scrollTo(0, \(position));", objectName: nil)
+        } next: { [weak self] search in
+            self?.find(search, using: "findNext")
+        } previous: { [weak self] search in
+            self?.find(search, using: "findPrevious")
+        } done: { [weak self] in
+            self?.webView.evaluateJavaScript("findDone()")
+            self?.searchViewModel = nil
+        }
+
+        self.searchViewModel = viewModel
+    }
+
+    private func cancelSearch() {
+        self.webView.evaluateJavaScript("findDone()")
+        self.searchViewModel = nil
+    }
+
+    private func find(_ search: String, using function: String) {
+        let escaped = search.replacingOccurrences(of: "//", with: "///").replacingOccurrences(of: "\"", with: "\\\"")
+        self.webView.evaluateJavaScript("\(function)(\"\(escaped)\")")
+    }
+
     // swiftlint:disable:next file_length
 }

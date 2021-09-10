@@ -42,4 +42,6 @@ class WebPageBaseImpl: WebPage {
     var score: Float = 0
 
     var authenticationViewModel: AuthenticationViewModel?
+    var searchViewModel: SearchViewModel?
+
 }

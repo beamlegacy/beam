@@ -13,20 +13,36 @@ struct EnhancedWebView: View {
     @EnvironmentObject var data: BeamData
 
     var body: some View {
-        ZStack {
-            WebView(webView: tab.webView)
-            if let pns = tab.pointAndShoot, PreferencesManager.showPNSview == true {
-                PointAndShootView(pns: pns)
-            }
-            if data.showTabStats, let score = tab.browsingTree.current.score {
-                TabStats(score: score)
-            }
-            if let viewModel = tab.authenticationViewModel {
-                ZStack {
-                    BeamColor.AlphaGray.swiftUI.opacity(0.5)
+        GeometryReader { proxy in
+            ZStack {
+                WebView(webView: tab.webView)
+                if let pns = tab.pointAndShoot, PreferencesManager.showPNSview == true {
+                    PointAndShootView(pns: pns)
+                }
+                if data.showTabStats, let score = tab.browsingTree.current.score {
+                    TabStats(score: score)
+                }
+                if let viewModel = tab.authenticationViewModel {
+                    ZStack {
+                        BeamColor.AlphaGray.swiftUI.opacity(0.5)
+                        VStack {
+                            AuthenticationView(viewModel: viewModel)
+                                .padding()
+                            Spacer()
+                        }
+                    }
+                }
+                if let search = tab.searchViewModel {
                     VStack {
-                        AuthenticationView(viewModel: viewModel)
-                            .padding()
+                        HStack(alignment: .top) {
+                            Spacer()
+                            SearchInContentView(viewModel: search)
+                                .padding(.trailing, 13)
+                                .padding(.top, 10)
+                            SearchLocationView(viewModel: search, height: proxy.size.height)
+                                .frame(width: 14)
+                                .padding(.trailing, 10)
+                        }
                         Spacer()
                     }
                 }
