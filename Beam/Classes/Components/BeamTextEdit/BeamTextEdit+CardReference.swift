@@ -16,9 +16,13 @@ extension BeamTextEdit {
         guard !title.isEmpty, let doc = documentManager.loadDocumentByTitle(title: title) else {
             let text = selectedText
             let pos = selectedTextRange.lowerBound
-            node.cmdManager.formatText(in: node, for: nil, with: Self.formatterAutocompletingAttribute, for: selectedTextRange, isActive: false)
-            node.focus(position: selectedTextRange.upperBound)
-            node.root?.cancelSelection()
+            let previousSelectedRange = selectedTextRange
+            let cmdManager = rootNode.focusedCmdManager
+            cmdManager.beginGroup(with: "Prepare Internal Link Search")
+            cmdManager.cancelSelection(node)
+            cmdManager.focusElement(node, cursorPosition: previousSelectedRange.upperBound)
+            cmdManager.formatText(in: node, for: nil, with: Self.formatterAutocompletingAttribute, for: previousSelectedRange, isActive: false)
+            cmdManager.endGroup()
             showCardReferenceFormatter(initialText: text, atPosition: pos, prefix: 0, suffix: 0)
             return nil
         }
@@ -74,14 +78,16 @@ extension BeamTextEdit {
         let replacementStart = range.lowerBound - prefix
         let replacementEnd = rootNode.cursorPosition + suffix
         let linkEnd = replacementStart + title.count
-
-        node.cmdManager.replaceText(in: node, for: replacementStart..<replacementEnd, with: BeamText(text: title, attributes: []))
+        let cmdManager = rootNode.focusedCmdManager
+        cmdManager.beginGroup(with: "Card Link Insert")
+        defer { cmdManager.endGroup() }
+        cmdManager.replaceText(in: node, for: replacementStart..<replacementEnd, with: BeamText(text: title, attributes: []))
 
         let (_, linkedNoteId) = node.unproxyElement.makeInternalLink(replacementStart..<linkEnd, createNoteIfNeeded: true)
         if let linkedNoteId = linkedNoteId {
             data?.noteFrecencyScorer.update(id: linkedNoteId, value: 1.0, eventType: .noteBiDiLink, date: BeamDate.now, paramKey: .note30d0)
         }
-        node.cmdManager.insertText(BeamText(text: " "), in: node, at: linkEnd)
+        cmdManager.insertText(BeamText(text: " "), in: node, at: linkEnd)
         rootNode.cursorPosition = linkEnd + 1
     }
 
@@ -93,30 +99,31 @@ extension BeamTextEdit {
               let parent = node.parent as? ElementNode
         else { return }
 
-        node.cmdManager.beginGroup(with: "Insert Block Reference")
+        let cmdManager = rootNode.focusedCmdManager
+        cmdManager.beginGroup(with: "Block Reference Insert")
         defer { node.cmdManager.endGroup() }
 
         let replacementStart = range.lowerBound - prefix
         let replacementEnd = rootNode.cursorPosition + suffix
         // When the cursor is moved to left, the link should be split in 2 (Bi-di + Plain text)
 
-        node.cmdManager.insertElement(blockElement, inNode: parent, afterNode: node)
-        node.cmdManager.deleteText(in: node, for: replacementStart..<replacementEnd)
+        cmdManager.insertElement(blockElement, inNode: parent, afterNode: node)
+        cmdManager.deleteText(in: node, for: replacementStart..<replacementEnd)
 
         let trailingText: BeamText = node.text.suffix(node.text.count - rootNode.cursorPosition)
 
         if !trailingText.isEmpty {
-            node.cmdManager.deleteText(in: node, for: rootNode.cursorPosition..<node.text.count)
+            cmdManager.deleteText(in: node, for: rootNode.cursorPosition..<node.text.count)
             let trailingBlock = BeamElement(trailingText)
-            node.cmdManager.insertElement(trailingBlock, inNode: parent, afterElement: blockElement)
+            cmdManager.insertElement(trailingBlock, inNode: parent, afterElement: blockElement)
         }
 
         if rootNode.cursorPosition == 0 {
-            node.cmdManager.deleteElement(for: node)
+            cmdManager.deleteElement(for: node)
         }
-        node.cmdManager.focus(blockElement, in: parent)
+        cmdManager.focus(blockElement, in: parent)
         if let focusedElement = focusedWidget as? ElementNode {
-            node.cmdManager.focusElement(focusedElement, cursorPosition: focusedElement.textCount)
+            cmdManager.focusElement(focusedElement, cursorPosition: focusedElement.textCount)
         }
     }
 

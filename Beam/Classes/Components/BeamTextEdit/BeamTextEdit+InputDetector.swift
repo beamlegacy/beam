@@ -24,10 +24,14 @@ extension BeamTextEdit {
         defer { inputDetectorLastInput = input }
 
         let insertPair = { [unowned self] (left: String, right: String) in
-            node.text.insert(right, at: selectedTextRange.upperBound)
-            node.text.insert(left, at: selectedTextRange.lowerBound)
-            rootNode.cursorPosition += 1
-            selectedTextRange = selectedTextRange.lowerBound + 1 ..< selectedTextRange.upperBound + 1
+            let cmdManager = rootNode.focusedCmdManager
+            let selectedRange = selectedTextRange
+            cmdManager.beginGroup(with: "Insert Pair")
+            cmdManager.insertText(BeamText(text: right), in: node, at: selectedRange.upperBound)
+            cmdManager.insertText(BeamText(text: left), in: node, at: selectedRange.lowerBound)
+            cmdManager.focusElement(node, cursorPosition: rootNode.cursorPosition + 1)
+            cmdManager.setSelection(node, selectedRange.lowerBound + 1 ..< selectedRange.upperBound + 1)
+            cmdManager.endGroup()
         }
 
         let handlers: [String: () -> Bool] = [
@@ -38,6 +42,7 @@ extension BeamTextEdit {
                 return true
             },
             "[": { [unowned self] in
+                let cmdManager = rootNode.focusedCmdManager
                 let pos = self.selectedTextRange.isEmpty ? rootNode.cursorPosition : self.selectedTextRange.lowerBound
                 let substr = node.text.extract(range: max(0, pos - 1) ..< pos)
                 let left = substr.text // capture the left of the cursor to check for an existing [
@@ -45,18 +50,23 @@ extension BeamTextEdit {
                 if pos > 0 && left == "[" {
                     if !self.selectedTextRange.isEmpty {
                         if makeInternalLinkForSelectionOrShowFormatter(for: node) != nil {
-                            node.text.removeSubrange(pos-1..<pos)
-                            node.text.removeSubrange(self.selectedTextRange.upperBound-1..<self.selectedTextRange.upperBound)
+                            cmdManager.beginGroup(with: "Internal Link Clear")
+                            let selectedRangeBefore = selectedTextRange
+                            cmdManager.deleteText(in: node, for: pos-1..<pos)
+                            cmdManager.deleteText(in: node, for: selectedRangeBefore.upperBound-1..<selectedRangeBefore.upperBound)
                             hideInlineFormatter()
-                            node.cmdManager.focusElement(node, cursorPosition: self.selectedTextRange.upperBound-1)
-                            node.cmdManager.cancelSelection(node)
+                            cmdManager.focusElement(node, cursorPosition: self.selectedTextRange.upperBound-1)
+                            cmdManager.cancelSelection(node)
+                            cmdManager.endGroup()
                         } else {
                             insertPair("[", "]")
                         }
                         return false
                     } else {
-                        node.text.insert("]", at: pos)
-                        node.cmdManager.formatText(in: node, for: nil, with: Self.formatterAutocompletingAttribute, for: pos-2..<pos+2, isActive: false)
+                        cmdManager.beginGroup(with: "Internal Link Prepare")
+                        cmdManager.insertText(BeamText(text: "]"), in: node, at: pos)
+                        cmdManager.formatText(in: node, for: nil, with: Self.formatterAutocompletingAttribute, for: pos-2..<pos+2, isActive: false)
+                        cmdManager.endGroup()
                         showCardReferenceFormatter(atPosition: pos + 1)
                         return true
                     }
@@ -68,16 +78,18 @@ extension BeamTextEdit {
             },
             "]": { [unowned self] in
                 guard node.text.count >= 2 else { return true }
+                let cmdManager = rootNode.focusedCmdManager
                 let startRange = 0..<2
                 let substr = node.text.extract(range: startRange)
                 if substr.text == "-[" {
-                    rootNode.cmdManager.deleteText(in: node, for: startRange)
-                    rootNode.cmdManager.formatText(in: node, for: .check(false), with: nil, for: nil, isActive: false)
+                    cmdManager.deleteText(in: node, for: startRange)
+                    cmdManager.formatText(in: node, for: .check(false), with: nil, for: nil, isActive: false)
                     return false
                 }
                 return true
             },
             "(": { [unowned self] in
+                let cmdManager = rootNode.focusedCmdManager
                 let (pos, left) = inputDetectorGetPositionAndPrecedingChar(in: node)
                 // capture the left of the cursor to check for an existing (
                 if pos > 0 && left == "(" {
@@ -87,12 +99,12 @@ extension BeamTextEdit {
                     if !self.selectedTextRange.isEmpty {
                         insertPair("(", ")")
                         let newPosition = selectedTextRange.upperBound
-                        node.focus(position: newPosition)
-                        selectedTextRange = newPosition..<newPosition
+                        cmdManager.focusElement(node, cursorPosition: newPosition)
+                        cmdManager.cancelSelection(node)
                         atPosition = newPosition
                     } else {
                         ignoreInput = false
-                        node.text.insert(")", at: pos)
+                        cmdManager.insertText(BeamText(text: ")"), in: node, at: pos)
                         atPosition = pos + 1
                     }
                     self.showCardReferenceFormatter(initialText: initialText, atPosition: atPosition, searchCardContent: true)
