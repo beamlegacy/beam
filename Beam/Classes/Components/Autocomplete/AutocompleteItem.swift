@@ -55,7 +55,7 @@ struct AutocompleteItem: View {
         }
     }
 
-    private func boldTextRanges(in text: String) -> [Range<String.Index>] {
+    private func highlightedTextRanges(in text: String) -> [Range<String.Index>] {
         guard let completingText = item.completingText else {
             return []
         }
@@ -67,6 +67,17 @@ struct AutocompleteItem: View {
         }
         return []
     }
+
+    var mainText: String {
+        guard item.source == .url, let information = item.information else {
+            return item.text
+        }
+        return information
+    }
+    var secondaryText: String? {
+        item.source == .url ? item.text : item.information
+    }
+
     var body: some View {
         HStack(spacing: 8) {
             if displayIcon {
@@ -81,16 +92,16 @@ struct AutocompleteItem: View {
             }
             HStack(alignment: .firstTextBaseline, spacing: 0) {
                 ZStack {
-                    StyledText(verbatim: item.text)
-                        .style(.semibold(), ranges: boldTextRanges)
+                    StyledText(verbatim: mainText)
+                        .style(.font(BeamFont.medium(size: 13).swiftUI), ranges: highlightedTextRanges)
                         .font(BeamFont.regular(size: 13).swiftUI)
                         .foregroundColor([.url, .topDomain].contains(item.source) ? subtitleLinkColor : textColor)
                 }
                 .layoutPriority(10)
-                if let info = item.information {
+                if let info = secondaryText {
                     HStack {
                         StyledText(verbatim: " – \(info)")
-                            .style(.semibold(), ranges: boldTextRanges)
+                            .style(.font(BeamFont.medium(size: 13).swiftUI), ranges: highlightedTextRanges)
                             .font(BeamFont.regular(size: 13).swiftUI)
                             .foregroundColor(informationColor)
                     }

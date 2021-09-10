@@ -231,8 +231,8 @@
         "repositoryURL": "https://github.com/getsentry/sentry-cocoa.git",
         "state": {
           "branch": null,
-          "revision": "800dfdf2bc78c8d956d5400a8ca6bb723cfb0ae4",
-          "version": "7.2.3"
+          "revision": "eb09cfa3ebcb96ca4a7f8f8de6c5d7aff4c48c0e",
+          "version": "7.2.7"
         }
       },
       {
@@ -242,15 +242,6 @@
           "branch": null,
           "revision": "83b23d940471b313427da226196661856f6ba3e0",
           "version": "0.4.4"
-        }
-      },
-      {
-        "package": "swift-crypto",
-        "repositoryURL": "https://github.com/apple/swift-crypto.git",
-        "state": {
-          "branch": null,
-          "revision": "3bea268b223651c4ab7b7b9ad62ef9b2d4143eb6",
-          "version": "1.1.6"
         }
       },
       {
@@ -296,15 +287,6 @@
           "branch": "master",
           "revision": "8c051b60df00a3fd5c568bab657534857eb4287f",
           "version": null
-        }
-      },
-      {
-        "package": "UUIDKit",
-        "repositoryURL": "https://github.com/baarde/uuid-kit",
-        "state": {
-          "branch": null,
-          "revision": "ea3de6264da9b4cdb41370cc594e9626b467f907",
-          "version": "0.1.0"
         }
       },
       {
