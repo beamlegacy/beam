@@ -13,11 +13,13 @@ struct WindowPageView: View {
     var body: some View {
         VStack(spacing: BeamSpacing._400) {
             HStack {
-                Text(page.title)
-                    .font(BeamFont.semibold(size: 26).swiftUI)
+                if let title = page.title {
+                    Text(title)
+                        .font(BeamFont.semibold(size: 26).swiftUI)
+                }
                 Spacer()
             }
-            .padding(.top, BeamSpacing._600)
+            .padding(.top, 85)
             page.contentView()
         }
         .padding(.horizontal, 140)

@@ -82,7 +82,7 @@ class BeamUITestsHelper {
     }
 
     func showJournal() {
-        self.app.typeKey("H", modifierFlags: [.command, .shift])
+        self.app.typeKey("J", modifierFlags: [.command, .shift])
     }
 
     // Doesn't work 
