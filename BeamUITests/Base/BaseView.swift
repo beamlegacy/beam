@@ -91,4 +91,9 @@ class BaseView {
         }
         return WebTestView()
     }
+    
+    func copyText(_ textToCopy: String) {
+        self.staticText(textToCopy).doubleClick()
+        
+    }
 }
