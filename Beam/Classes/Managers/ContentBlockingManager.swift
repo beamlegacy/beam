@@ -28,11 +28,6 @@ class ContentBlockingManager {
     }
 
     func setup() {
-        // Setup Hush
-        if let hushURL = Bundle.main.url(forResource: "hush", withExtension: "json") {
-            loadRules("hush", hushURL)
-        }
-
         // Setup RadBlock
         synchronize()
     }

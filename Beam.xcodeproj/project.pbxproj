@@ -611,7 +611,6 @@
 		A0F558E626BD51A70024C47E /* EditorDebugPreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0F558E526BD51A70024C47E /* EditorDebugPreferencesView.swift */; };
 		A0F558F126BD536A0024C47E /* PreferencesManager+EditorDebug.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0F558F026BD536A0024C47E /* PreferencesManager+EditorDebug.swift */; };
 		A0F558F526BD8F260024C47E /* DebugSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0F558F426BD8F260024C47E /* DebugSection.swift */; };
-		A0F8DC87268488C900654046 /* hush.json in Resources */ = {isa = PBXBuildFile; fileRef = A0F8DC86268488C900654046 /* hush.json */; };
 		A500F93626BAD78A0029D34F /* audio.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = A500F92E26BAD78A0029D34F /* audio.mp3 */; };
 		A500F93A26BAE2850029D34F /* UITests-Media.html in Resources */ = {isa = PBXBuildFile; fileRef = A500F93926BAE2850029D34F /* UITests-Media.html */; };
 		A500F93C26BAEFCA0029D34F /* video.mov in Resources */ = {isa = PBXBuildFile; fileRef = A500F93B26BAEFCA0029D34F /* video.mov */; };
@@ -1561,7 +1560,6 @@
 		A0F558E526BD51A70024C47E /* EditorDebugPreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorDebugPreferencesView.swift; sourceTree = "<group>"; };
 		A0F558F026BD536A0024C47E /* PreferencesManager+EditorDebug.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PreferencesManager+EditorDebug.swift"; sourceTree = "<group>"; };
 		A0F558F426BD8F260024C47E /* DebugSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugSection.swift; sourceTree = "<group>"; };
-		A0F8DC86268488C900654046 /* hush.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = hush.json; sourceTree = "<group>"; };
 		A500F92E26BAD78A0029D34F /* audio.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = audio.mp3; sourceTree = "<group>"; };
 		A500F93926BAE2850029D34F /* UITests-Media.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "UITests-Media.html"; sourceTree = "<group>"; };
 		A500F93B26BAEFCA0029D34F /* video.mov */ = {isa = PBXFileReference; lastKnownFileType = video.quicktime; path = video.mov; sourceTree = "<group>"; };
@@ -1940,7 +1938,6 @@
 		0353852926051A6600691BB4 /* Ad blocker */ = {
 			isa = PBXGroup;
 			children = (
-				A0F8DC86268488C900654046 /* hush.json */,
 				0325627026051D3A006513E4 /* blockerList.json */,
 				0325627626051D3A006513E4 /* Info.plist */,
 				0325627C26051D3B006513E4 /* Models */,
@@ -4272,7 +4269,6 @@
 			files = (
 				5224CD462685FF7E00D4179E /* update_beam_objects.graphql in Resources */,
 				02C07A9B2670D98600894C5D /* Navigation.js in Resources */,
-				A0F8DC87268488C900654046 /* hush.json in Resources */,
 				02A2B285263190F100D581A5 /* Scorer.js in Resources */,
 				027CB665263163AC001311A0 /* PasswordManager.js in Resources */,
 				8AF53BAE266A241C00C3CB2E /* UITests-2.html in Resources */,
