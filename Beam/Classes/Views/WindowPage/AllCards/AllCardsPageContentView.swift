@@ -254,11 +254,14 @@ struct AllCardsPageContentView: View {
                 }
             )
             .frame(maxHeight: .infinity)
-            .onHover { hovering in
-                if !hovering {
-                    hoveredRowIndex = nil
-                }
-            }
+            .background(Color.clear
+                    .onHover { hovering in
+                        if !hovering {
+                            hoveredRowIndex = nil
+                        }
+                    }
+                    .padding(.leading, -32) // shifted for hover options menu 
+            )
         }
         .frame(maxWidth: .infinity)
         .onAppear {
