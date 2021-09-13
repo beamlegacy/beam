@@ -6,11 +6,12 @@ struct SearchBar: View {
 
     var body: some View {
         HStack {
+            Spacer()
+
             TextField("Search ...", text: $text)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
-                .onTapGesture {
-                    self.isEditing = true
-                }
+
+            Spacer()
 
             if isEditing {
                 Button(action: {
@@ -24,6 +25,9 @@ struct SearchBar: View {
                 .animation(.default)
             }
         }
+        .onTapGesture {
+            self.isEditing = true
+        }
     }
 
     public struct CustomTFStyle: TextFieldStyle {
@@ -35,7 +39,6 @@ struct SearchBar: View {
                 .cornerRadius(8)
                 .foregroundColor(.black)
         }
-        // swiftlint:disable identifier_name
     }
 }
 
