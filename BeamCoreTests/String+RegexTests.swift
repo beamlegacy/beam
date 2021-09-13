@@ -11,9 +11,11 @@ class StringRegexTests: XCTestCase {
 
     let validWebURLs = ["swift.fr", "http://swift.fr", "http://SwIft.Fr"]
     let validFileURLs = ["file:///swift.beamappfile", "file:///path/to/swift.html"]
+    let validEmails = ["swift@beamapp.co", "s@b.co"]
 
     let invalidWebURLs = ["http://swift", "swift"]
     let invalidFileURLs = ["file://swift.html", "file://path/swift.html", "file"]
+    let invalidEmails = ["swift", "https://swift", "@swift.co", "mailto:swift@beamapp.co", "swift@beamapp.co:wrong"]
 
     func testMayBeURL() {
         XCTAssertTrue(validWebURLs[0].mayBeURL)
@@ -45,6 +47,17 @@ class StringRegexTests: XCTestCase {
         XCTAssertFalse(invalidFileURLs[0].mayBeFileURL)
         XCTAssertFalse(invalidFileURLs[1].mayBeFileURL)
         XCTAssertFalse(invalidFileURLs[2].mayBeFileURL)
+    }
+
+    func testMayBeEmail() {
+        XCTAssertTrue(validEmails[0].mayBeEmail)
+        XCTAssertTrue(validEmails[1].mayBeEmail)
+
+        XCTAssertFalse(invalidEmails[0].mayBeEmail)
+        XCTAssertFalse(invalidEmails[1].mayBeEmail)
+        XCTAssertFalse(invalidEmails[2].mayBeEmail)
+        XCTAssertFalse(invalidEmails[3].mayBeEmail)
+        XCTAssertFalse(invalidEmails[4].mayBeEmail)
     }
 
 }

@@ -53,13 +53,7 @@ struct NoteView: View {
                 note: note,
                 data: state.data,
                 openURL: { url, element in
-                    if URL.urlSchemes.contains(url.scheme) {
-                        state.createTabFromNote(note, element: element, withURL: url)
-                    } else {
-                        if let noteTitle = url.absoluteString.removingPercentEncoding {
-                            state.navigateToNote(named: noteTitle)
-                        }
-                    }
+                    state.handleOpenUrl(url, note: note, element: element)
                 },
                 openCard: { cardId, elementId, unfold in
                     state.navigateToNote(id: cardId, elementId: elementId, unfold: unfold ?? false)
