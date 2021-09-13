@@ -9,7 +9,7 @@ import SwiftUI
 import BeamCore
 import Combine
 
-class AllCardsViewModel: ObservableObject {
+class AllCardsViewModel: ObservableObject, Identifiable {
 
     fileprivate var data: BeamData?
     @Published fileprivate var allNotes = [DocumentStruct]() {
@@ -261,6 +261,7 @@ struct AllCardsPageContentView: View {
             }
         }
         .frame(maxWidth: .infinity)
+        .id(model.id)
         .onAppear {
             model.data = data
             model.refreshAllNotes()
