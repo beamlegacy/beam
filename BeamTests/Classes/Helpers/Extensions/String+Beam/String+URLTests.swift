@@ -52,11 +52,19 @@ class String_URLTests: XCTestCase {
 
         let (res2, url2) = "apple.com".validUrl()
         XCTAssertTrue(res2)
-        XCTAssertEqual(url2, "http://apple.com")
+        XCTAssertEqual(url2, "https://apple.com")
 
         let (res3, url3) = "apple".validUrl()
         XCTAssertFalse(res3)
         XCTAssertEqual(url3, "")
+
+        let (res4, url4) = "mailto:tim@apple.com".validUrl()
+        XCTAssertTrue(res4)
+        XCTAssertEqual(url4, "mailto:tim@apple.com")
+
+        let (res5, url5) = "tim@apple.com".validUrl()
+        XCTAssertTrue(res5)
+        XCTAssertEqual(url5, "mailto:tim@apple.com")
     }
 
     func testURLMinimizeHost() {
