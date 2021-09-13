@@ -105,6 +105,11 @@ class PointAndShoot: WebPageHolder, ObservableObject {
         guard !isTypingOnWebView else { return }
 
         activePointGroup = ShootGroup("point-uuid", [target], href)
+
+        if isAltKeyDown {
+            let performer = NSHapticFeedbackManager.defaultPerformer
+            performer.perform(.alignment, performanceTime: .default)
+        }
     }
 
     /// Set targets as activeShootGroup
@@ -130,6 +135,8 @@ class PointAndShoot: WebPageHolder, ObservableObject {
                       activeSelectGroup == nil {
 
                 activeShootGroup = ShootGroup(groupId, [target], href)
+                let performer = NSHapticFeedbackManager.defaultPerformer
+                performer.perform(.generic, performanceTime: .default)
             } else {
                 if !isAltKeyDown {
                     let tempGroup = ShootGroup(groupId, [], href)
