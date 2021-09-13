@@ -57,7 +57,7 @@ class BeamTextEditTests: XCTestCase {
 
         //Pasting BeamTextHolder
         url = urls[2]
-        let bTextHolder = BeamTextHolder(bText: BeamText(NSAttributedString(string: "abc \n\(url) efg")))
+        let bTextHolder = BeamTextHolder(bText: BeamText(attributedString: NSAttributedString(string: "abc \n\(url) efg")))
         let beamTextData = try PropertyListEncoder().encode(bTextHolder)
         pasteboard.setData(beamTextData, forType: .bTextHolder)
         try pasteAndCheckNoteSourceFor(url: url)
@@ -65,7 +65,7 @@ class BeamTextEditTests: XCTestCase {
         //Pasting BeamElements
         url = urls[3]
         let fromNote = BeamNote(title: "note to copy")
-        fromNote.addChild(BeamElement(BeamText(NSAttributedString(string: "abc \n\(url) efg"))))
+        fromNote.addChild(BeamElement(BeamText(attributedString: NSAttributedString(string: "abc \n\(url) efg"))))
         let noteData = try JSONEncoder().encode(fromNote)
         let elementHolder = BeamNoteDataHolder(noteData: noteData)
         let elementHolderData = try PropertyListEncoder().encode(elementHolder)

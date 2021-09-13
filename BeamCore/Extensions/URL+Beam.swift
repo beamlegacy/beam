@@ -27,7 +27,7 @@ public extension URL {
         return URL(string: "https://\(absoluteString)") ?? self
     }
 
-    static var urlSchemes: [String?] {
+    static var browserSchemes: [String?] {
         ["http", "https", "file"]
     }
 

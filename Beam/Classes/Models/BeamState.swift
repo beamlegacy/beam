@@ -268,6 +268,21 @@ import BeamCore
         return n
     }
 
+    func handleOpenUrl(_ url: URL, note: BeamNote?, element: BeamElement?) {
+        if URL.browserSchemes.contains(url.scheme) {
+            if let note = note, let element = element {
+                createTabFromNote(note, element: element, withURL: url)
+            } else {
+                _ = createTab(withURL: url, originalQuery: nil)
+            }
+        } else if url.scheme != nil {
+            NSWorkspace.shared.open(url)
+        } else {
+            // if this is an unknow string, for now we do nothing.
+            // we could potentially trigger a web search, but it's not really expected.
+        }
+    }
+
     private func urlFor(query: String) -> URL? {
         guard let url = query.toEncodedURL else {
             searchEngine.query = query

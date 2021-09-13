@@ -33,10 +33,11 @@ public extension String {
     func validUrl() -> (isValid: Bool, url: String) {
         guard let url = URL(string: self) else { return (false, "") }
 
-        let isContainsScheme = URL.urlSchemes.contains(url.scheme)
-
-        if !url.pathExtension.isEmpty || isContainsScheme {
-            return (true, isContainsScheme ? self : "http://\(url)")
+        if self.mayBeEmail {
+            return (true, "mailto:\(self)")
+        }
+        if !url.pathExtension.isEmpty || url.scheme != nil {
+            return (true, url.scheme != nil ? self : "https://\(url)")
         }
 
         return (false, "")
