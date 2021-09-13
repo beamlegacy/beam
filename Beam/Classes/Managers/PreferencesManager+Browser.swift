@@ -38,7 +38,39 @@ enum DownloadFolder: Int, CaseIterable, Identifiable {
         case .downloads: return "Downloads"
         case .documents: return "Documents"
         case .desktop: return "Desktop"
-        case .custom: return "Other.."
+        case .custom: return "Other…"
+        }
+    }
+
+    var rawUrl: URL? {
+        let fileManager = FileManager.default
+        switch self {
+        case .downloads:
+            return fileManager.urls(for: .downloadsDirectory, in: .userDomainMask).first
+        case .documents:
+            return fileManager.urls(for: .documentDirectory, in: .userDomainMask).first
+        case .desktop:
+            return fileManager.urls(for: .desktopDirectory, in: .userDomainMask).first
+        case .custom:
+            guard let securityData = PreferencesManager.customDownloadFolder else { return nil }
+            var isStale = false
+            return try? URL(resolvingBookmarkData: securityData, options: .withSecurityScope, relativeTo: nil, bookmarkDataIsStale: &isStale)
+        }
+    }
+
+    var sandboxAccessibleUrl: URL? {
+        let fileManager = FileManager.default
+        switch self {
+        case .downloads:
+            return fileManager.urls(for: .downloadsDirectory, in: .userDomainMask).first
+        default:
+            guard let securityData = PreferencesManager.customDownloadFolder else { return nil }
+            var isStale = false
+            let url = try? URL(resolvingBookmarkData: securityData, options: .withSecurityScope, relativeTo: nil, bookmarkDataIsStale: &isStale)
+            if isStale {
+                PreferencesManager.customDownloadFolder = try? url?.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
+            }
+            return url
         }
     }
 }
@@ -49,6 +81,7 @@ extension PreferencesManager {
     static let selectedDefaultSearchEngineKey = "selectedDefaultSearchEngine"
     static let searchEngineSuggestionKey = "searchEngineSuggestion"
     static let selectedDownloadFolderKey = "selectedDownloadFolder"
+    static let customDownloadFolderKey = "customDownloadFolder"
     static let openSafeFileAfterDownloadKey = "openSafeFileAfterDownload"
     static let cmdClickOpenTabKey = "cmdClickOpenTab"
     static let newTabWindowMakeActiveKey = "newTabWindowMakeActive"
@@ -62,6 +95,7 @@ extension PreferencesManager {
     static let defaultSearchEngine = 0
     static let includeSearchEngineSuggestionDefault = true
     static var defaultDownloadFolder = 0
+    static var defaultCustomDownloadFolder: Data? = nil
     static let openSafeFileAfterDownloadDefault = true
     static let cmdClickOpenTabDefault = true
     static let newTabWindowMakeActiveDefault = true
@@ -81,6 +115,9 @@ extension PreferencesManager {
 
     @UserDefault(key: selectedDownloadFolderKey, defaultValue: defaultDownloadFolder, container: browserPreferencesContainer)
     static var selectedDownloadFolder: Int
+
+    @UserDefault(key: customDownloadFolderKey, defaultValue: defaultCustomDownloadFolder, container: browserPreferencesContainer)
+    static var customDownloadFolder: Data?
 
     @UserDefault(key: openSafeFileAfterDownloadKey, defaultValue: openSafeFileAfterDownloadDefault, container: browserPreferencesContainer)
     static var openSafeFileAfterDownload: Bool

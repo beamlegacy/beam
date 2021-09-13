@@ -20,7 +20,11 @@ struct UserDefault<Value> {
             return container.object(forKey: key) as? Value ?? defaultValue
         }
         set {
-            container.set(newValue, forKey: key)
+            if case Optional<Any>.none = newValue as Any {
+                container.removeObject(forKey: key)
+                } else {
+                    container.set(newValue, forKey: key)
+                }
             publisher.send(newValue)
         }
     }
