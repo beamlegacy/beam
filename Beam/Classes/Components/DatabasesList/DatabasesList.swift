@@ -7,6 +7,7 @@ struct DatabasesList: View {
     @FetchRequest(entity: Database.entity(),
                   sortDescriptors: [NSSortDescriptor(keyPath: \Database.title, ascending: true)])
     var databases: FetchedResults<Database>
+    @State private var searchText: String = ""
     let databaseManager = DatabaseManager()
 
     var body: some View {
@@ -14,8 +15,11 @@ struct DatabasesList: View {
             VStack {
                 newDatabaseButton
                     .frame(maxWidth: .infinity, alignment: .center)
-
-                List(databases, selection: $selectedDatabase) { database in
+                SearchBar(text: $searchText)
+                List(databases.filter({
+                    searchText.isEmpty ? true :
+                        ($0.title.range(of: searchText, options: .caseInsensitive) != nil)
+                }), selection: $selectedDatabase) { database in
                     NavigationLink(destination: DatabaseDetail(database: database).background(Color.white)) {
                         DatabaseRow(database: database)
                             .environment(\.managedObjectContext, self.moc)
@@ -28,8 +32,6 @@ struct DatabasesList: View {
             if let selectedDatabase = selectedDatabase {
                 DatabaseDetail(database: selectedDatabase)
             }
-        }.onAppear {
-            selectedDatabase = try? Database.fetchWithId(moc, DatabaseManager.defaultDatabase.id)
         }
     }
 
