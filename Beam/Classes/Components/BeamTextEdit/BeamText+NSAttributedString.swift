@@ -24,7 +24,7 @@ class AttributeDecoratedValueAttributedString: BeamText.AttributeDecoratedValue 
 }
 
 extension BeamText {
-    init(_ attributedString: NSAttributedString) {
+    init(attributedString: NSAttributedString) {
         self.init()
         append(attributedString.string)
 
@@ -32,7 +32,10 @@ extension BeamText {
             ranges.forEach { range in
                 let r = range.lowerBound..<range.upperBound
                 let linkStr: String = self.extract(range: r).text
-                self.addAttributes([.link(linkStr)], to: r)
+                let (isValid, url) = linkStr.validUrl()
+                if isValid {
+                    self.addAttributes([.link(url)], to: r)
+                }
             }
         }
         let boldRanges = attributedString.getRangesOfFont(for: .bold)
@@ -50,7 +53,10 @@ extension BeamText {
         for linkRange in linkRanges {
             let range = linkRange.value
             let r = range.lowerBound..<range.upperBound
-            self.addAttributes([.link(linkRange.key)], to: r)
+            let (isValid, url) = linkRange.key.validUrl()
+            if isValid {
+                self.addAttributes([.link(url)], to: r)
+            }
         }
     }
 

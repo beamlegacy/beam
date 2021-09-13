@@ -242,7 +242,7 @@ extension BeamTextEdit {
         for (idx, attributedString) in attributedStrings.enumerated() {
             guard !attributedString.string.isEmpty else { continue }
             let cleanedText = attributedString.clean(with: "\\s\u{2022}\\s", in: NSRange(0..<3))
-            let beamText = BeamText(cleanedText)
+            let beamText = BeamText(attributedString: cleanedText)
             if idx == 0 {
                 disableInputDetector()
                 rootNode.insertText(text: beamText, replacementRange: selectedTextRange)

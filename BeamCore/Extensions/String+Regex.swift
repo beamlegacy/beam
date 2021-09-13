@@ -68,6 +68,10 @@ public extension String {
         self.matches(withRegex: "^(http:\\/\\/|https:\\/\\/)?(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}", options: .caseInsensitive)
     }
 
+    var mayBeEmail: Bool {
+        self.matches(withRegex: "^[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}$", options: .caseInsensitive)
+    }
+
     var isLocalhost: Bool {
         self.matches(withRegex: "^(http:\\/\\/|https:\\/\\/)(localhost)", options: .caseInsensitive)
     }

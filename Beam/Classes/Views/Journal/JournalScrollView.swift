@@ -86,23 +86,17 @@ struct JournalScrollView: NSViewRepresentable {
         textEditView.onStartEditing = {
             self.isEditing = true
         }
-        textEditView.openURL = { url, element in
-            if URL.urlSchemes.contains(url.scheme) {
-                self.state.createTabFromNote(note, element: element, withURL: url)
-            } else {
-                if let noteTitle = url.absoluteString.removingPercentEncoding {
-                    self.state.navigateToNote(named: noteTitle)
-                }
-            }
+        textEditView.openURL = { [weak state] url, element in
+            state?.handleOpenUrl(url, note: element.note, element: element)
         }
-        textEditView.openCard = { cardId, elementId, unfold in
-            self.state.navigateToNote(id: cardId, elementId: elementId, unfold: unfold ?? false)
+        textEditView.openCard = { [weak state] cardId, elementId, unfold in
+            state?.navigateToNote(id: cardId, elementId: elementId, unfold: unfold ?? false)
         }
-        textEditView.startQuery = { textNode, animated in
-            self.state.startQuery(textNode, animated: animated)
+        textEditView.startQuery = { [weak state] textNode, animated in
+            state?.startQuery(textNode, animated: animated)
         }
-        textEditView.onFocusChanged = { elementId, cursorPosition in
-            self.state.updateNoteFocusedState(note: note, focusedElement: elementId, cursorPosition: cursorPosition)
+        textEditView.onFocusChanged = { [weak state] elementId, cursorPosition in
+            state?.updateNoteFocusedState(note: note, focusedElement: elementId, cursorPosition: cursorPosition)
         }
         textEditView.minimumWidth = 800
         textEditView.maximumWidth = 1024
