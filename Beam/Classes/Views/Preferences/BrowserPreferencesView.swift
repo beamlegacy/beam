@@ -140,11 +140,16 @@ struct BookmarksSection: View {
 
 struct DownloadSection: View {
     @State private var selectedDownloadFolder = PreferencesManager.selectedDownloadFolder
+    @State private var latestSelectedFolder: String?
+    @State private var loaded = false
+    @State private var pathToCustomDownloadHover = false
+
+    var folders = [DownloadFolder.downloads, .custom]
 
     var body: some View {
         VStack(alignment: .leading) {
             Picker("", selection: $selectedDownloadFolder) {
-                ForEach(DownloadFolder.allCases) { folder in
+                ForEach(folders) { folder in
                     HStack {
                         Image("preferences-folder-icon")
                         Text(folder.name)
@@ -152,23 +157,66 @@ struct DownloadSection: View {
                 }
             }.labelsHidden()
             .frame(width: 180, height: 20)
-            .onReceive([self.selectedDownloadFolder].publisher.first()) { value in
-                PreferencesManager.selectedDownloadFolder = value
-                if PreferencesManager.defaultDownloadFolder == DownloadFolder.custom.rawValue {
-                    let openPanel = NSOpenPanel()
-                    openPanel.canChooseFiles = false
-                    openPanel.canChooseDirectories = true
-                    openPanel.canDownloadUbiquitousContents = false
-                    openPanel.allowsMultipleSelection = false
-                    openPanel.begin { _ in
-                        // TODO: Implement the download folder setting
-                    }
-                }
-            }
-            Checkbox(checkState: PreferencesManager.openSafeFileAfterDownload, text: "Open “safe” files after downloading", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
-                PreferencesManager.openSafeFileAfterDownload = activated
+            .onAppear(perform: {
+                loaded = true
+            })
+            .onReceive([self.selectedDownloadFolder].publisher, perform: handleOnReceive)
+            if self.selectedDownloadFolder == DownloadFolder.custom.rawValue {
+                pathToCustomDownloadFolderButton
             }
         }
+    }
+
+    private func handleOnReceive(value: Int) {
+        guard loaded else { return }
+        guard let folder = DownloadFolder(rawValue: value) else { return }
+        if folder != .downloads {
+            let panel = NSOpenPanel()
+            panel.canChooseDirectories = true
+            panel.canChooseFiles = false
+            panel.directoryURL = DownloadFolder(rawValue: value)?.rawUrl
+            panel.prompt = "Select"
+            panel.runModal()
+
+            let choosedFolder = panel.url
+
+            guard let bookmark = try? choosedFolder?.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil) else {
+                return
+            }
+            PreferencesManager.customDownloadFolder = bookmark
+            PreferencesManager.selectedDownloadFolder = value
+            self.loaded = false
+            self.selectedDownloadFolder = value
+            self.latestSelectedFolder = choosedFolder?.url?.path
+            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(500)) {
+                self.loaded = true
+            }
+        } else {
+            PreferencesManager.selectedDownloadFolder = value
+            PreferencesManager.customDownloadFolder = nil
+        }
+    }
+
+    @ViewBuilder private var pathToCustomDownloadFolderButton: some View {
+        ButtonLabel(pathToCustomDownload, customStyle: ButtonLabelStyle(font: BeamFont.regular(size: 11).swiftUI, foregroundColor: BeamColor.Corduroy.swiftUI, activeForegroundColor: BeamColor.Niobium.swiftUI, activeBackgroundColor: BeamColor.AlphaGray.swiftUI)) {
+            guard let folder = DownloadFolder.custom.rawUrl else { return }
+            NSWorkspace.shared.activateFileViewerSelecting([folder])
+        }
+        .onHover(perform: { hovering in
+            self.pathToCustomDownloadHover = hovering
+        })
+        .foregroundColor(BeamColor.Corduroy.swiftUI)
+        .lineLimit(nil)
+        .multilineTextAlignment(.leading)
+    }
+
+    private var pathToCustomDownload: String {
+        if let selection = self.latestSelectedFolder {
+            return selection
+        } else if self.selectedDownloadFolder == DownloadFolder.custom.rawValue {
+            return DownloadFolder.custom.rawUrl?.path ?? ""
+        }
+        return ""
     }
 }
 

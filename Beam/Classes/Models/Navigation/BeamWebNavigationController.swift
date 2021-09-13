@@ -112,7 +112,7 @@ extension BeamWebNavigationController: WKNavigationDelegate {
             if let sourceURL = webView.url {
                 headers["Referer"] = sourceURL.absoluteString
             }
-            page.downloadManager?.downloadFile(at: url, headers: headers, suggestedFileName: response.suggestedFilename, destinationFoldedURL: nil)
+            page.downloadManager?.downloadFile(at: url, headers: headers, suggestedFileName: response.suggestedFilename, destinationFoldedURL: DownloadFolder(rawValue: PreferencesManager.selectedDownloadFolder)?.sandboxAccessibleUrl)
         } else {
             decisionHandler(.allow)
         }
