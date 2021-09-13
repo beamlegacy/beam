@@ -11,7 +11,7 @@ import BeamCore
 // High level manipulation:
 extension BeamText {
     //swiftlint:disable:next function_body_length
-    @discardableResult mutating func makeInternalLink(_ range: Swift.Range<Int>, createNoteIfNeeded: Bool) -> UUID? {
+    @discardableResult mutating func makeInternalLink(_ range: Swift.Range<Int>) -> UUID? {
         let text = self.extract(range: range)
         let t = text.text
 
@@ -45,33 +45,23 @@ extension BeamText {
             return nil
         }
 
-        var _linkID = BeamNote.idForNoteNamed(link, false)
-        if _linkID == nil && createNoteIfNeeded {
-            let note = BeamNote.create(AppDelegate.main.data.documentManager, title: link)
-            note.addChild(BeamElement())
-            _linkID = note.id
-            note.save(documentManager: AppDelegate.main.data.documentManager)
+        let linkedNote = BeamNote.fetchOrCreate(AppDelegate.main.data.documentManager, title: link)
+        if linkedNote.children.isEmpty {
+            linkedNote.addChild(BeamElement())
         }
-        guard let linkID = _linkID else { return nil }
-        let linkText = BeamText(text: link, attributes: [.internalLink(linkID)])
+        let linkText = BeamText(text: link, attributes: [.internalLink(linkedNote.id)])
         let actualRange = range.lowerBound + start ..< range.lowerBound + end
         Logger.shared.logInfo("makeInternalLink for range: \(range) | actual: \(actualRange)", category: .document)
         replaceSubrange(actualRange, with: linkText)
 
         // Notes that are created by makeInternalLink shouldn't have a score of 0 as they are explicit
-        let linkedNote = BeamNote.fetchOrCreate(AppDelegate.main.data.documentManager, title: link)
-        let created = linkedNote.score == 0
-        if created {
+        if linkedNote.score == 0 {
             // this note has just been created
             linkedNote.createdByUser()
         }
 
         linkedNote.referencedByUser()
-
-        if created {
-            // make sure it's saved at least once
-            linkedNote.save(documentManager: AppDelegate.main.data.documentManager)
-        }
+        linkedNote.save(documentManager: AppDelegate.main.data.documentManager)
 
         return linkedNote.id
     }
@@ -80,7 +70,7 @@ extension BeamText {
         text.ranges(of: title, options: .caseInsensitive).forEach { range in
             let start = text.position(at: range.lowerBound)
             let end = text.position(at: range.upperBound)
-            makeInternalLink(start..<end, createNoteIfNeeded: true)
+            makeInternalLink(start..<end)
         }
     }
 
@@ -111,7 +101,7 @@ extension BeamText {
 }
 
 public extension BeamElement {
-    @discardableResult func makeInternalLink(_ range: Swift.Range<Int>, createNoteIfNeeded: Bool) -> (UUID?, UUID?) {
-        return (note?.id, text.makeInternalLink(range, createNoteIfNeeded: createNoteIfNeeded))
+    @discardableResult func makeInternalLink(_ range: Swift.Range<Int>) -> (UUID?, UUID?) {
+        return (note?.id, text.makeInternalLink(range))
     }
 }
