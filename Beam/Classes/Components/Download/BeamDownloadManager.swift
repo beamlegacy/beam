@@ -141,11 +141,13 @@ public class BeamDownloadManager: NSObject, DownloadManager, ObservableObject {
 
         objectWillChange.send()
 
+        _ = destinationFolder.startAccessingSecurityScopedResource()
         let task = fileDownloadSession.downloadTask(with: request)
         let newDownload = Download(downloadURL: url, fileSystemURL: fileInDownloadURL, suggestedFileName: downloadedFileName, downloadTask: task)
         downloads.insert(newDownload, at: 0)
 
         configure(downloadTask: task, for: newDownload)
+        destinationFolder.stopAccessingSecurityScopedResource()
 
             // We dispatch after to make sure the UI have been updated and that thez download button have been displayed and it's coordinates acquired.
         DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(16)) {
@@ -234,6 +236,10 @@ public class BeamDownloadManager: NSObject, DownloadManager, ObservableObject {
     // MARK: - File downloads private funcs
 
     private func downloadDirectoryURL() throws -> URL {
+
+        if let folder = DownloadFolder(rawValue: PreferencesManager.selectedDownloadFolder)?.sandboxAccessibleUrl {
+            return folder
+        }
         guard let downloadFolder = fileManager.urls(for: .downloadsDirectory, in: .userDomainMask).first else {
             throw DownloadManagerError.fileError
         }
@@ -346,7 +352,9 @@ extension BeamDownloadManager: URLSessionDelegate, URLSessionDownloadDelegate {
         if let error = error {
             download.setErrorMessage(error.localizedDescription)
         } else {
+            _ = try? downloadDirectoryURL().startAccessingSecurityScopedResource()
             try? fileManager.removeItem(at: download.downloadDocumentFileURL)
+            try? downloadDirectoryURL().stopAccessingSecurityScopedResource()
             download.downloadDocument = nil
         }
     }
@@ -360,7 +368,9 @@ extension BeamDownloadManager: URLSessionDelegate, URLSessionDownloadDelegate {
         guard let download = taskDownloadAssociation[downloadTask] else { return }
         guard let downloadDirectory = try? downloadDirectoryURL() else { return }
 
+        _ = downloadDirectory.startAccessingSecurityScopedResource()
         moveFile(sourceDownload: download, from: location, to: downloadDirectory)
+        downloadDirectory.stopAccessingSecurityScopedResource()
 
         //At the end of the download, re-set the total size of the download.
         //This is to avoid missing size for very small and fast downloads
