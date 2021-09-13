@@ -83,7 +83,7 @@ extension BeamTextEdit {
         defer { cmdManager.endGroup() }
         cmdManager.replaceText(in: node, for: replacementStart..<replacementEnd, with: BeamText(text: title, attributes: []))
 
-        let (_, linkedNoteId) = node.unproxyElement.makeInternalLink(replacementStart..<linkEnd, createNoteIfNeeded: true)
+        let (_, linkedNoteId) = node.unproxyElement.makeInternalLink(replacementStart..<linkEnd)
         if let linkedNoteId = linkedNoteId {
             data?.noteFrecencyScorer.update(id: linkedNoteId, value: 1.0, eventType: .noteBiDiLink, date: BeamDate.now, paramKey: .note30d0)
         }
