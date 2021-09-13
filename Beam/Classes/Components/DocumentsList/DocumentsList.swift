@@ -15,7 +15,12 @@ struct DocumentsList: View {
     var body: some View {
         NavigationView {
             VStack {
-                List(documents, selection: $selectedDocument) { document in
+                SearchBar(text: $searchText)
+                List(documents.filter({
+                    searchText.isEmpty ? true :
+                        ($0.title.range(of: searchText, options: .caseInsensitive) != nil) ||
+                        ($0.data?.asString?.range(of: searchText, options: .caseInsensitive) != nil)
+                })) { document in
                     NavigationLink(destination: DocumentDetail(document: document).background(Color.white)) {
                         DocumentRow(document: document)
                     }
