@@ -55,8 +55,8 @@ public extension URL {
         return nil
     }
 
-    var isImage: Bool {
-        let imageExtensions = ["png", "jpg", "jepg", "gif"]
+    var isImageURL: Bool {
+        let imageExtensions = ["png", "jpg", "jpeg", "gif"]
         return imageExtensions.contains(self.pathExtension)
     }
 

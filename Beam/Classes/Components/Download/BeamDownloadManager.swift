@@ -109,13 +109,37 @@ public class BeamDownloadManager: NSObject, DownloadManager, ObservableObject {
             if let result = results.first {
                 guard case .binary(let data, let mimeType, _) = result,
                       data.count > 0 else {
-                    Logger.shared.logError("Failed downloading Image from \(src)", category: .pointAndShoot)
                     completion(nil)
                     return
                 }
                 completion((data, mimeType))
             }
         }
+    }
+
+    /// Downloads base64 image string
+    /// `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAoGCBYTExcVFRUYGBcZGxsaGhoaG`
+    /// - Parameters:
+    ///   - base64String: String including the type
+    ///   - pageUrl: url of source page
+    func downloadBase64(_ base64String: String, pageUrl: URL) -> (Data, String)? {
+        let array = base64String.split(separator: ",")
+
+        guard array.count >= 2 else {
+            // only continue with 2 array parts
+            return nil
+        }
+
+        let mimeType = array[0].replacingOccurrences(of: "data:", with: "", options: [.anchored])
+        let base64 = String(array[1])
+
+        guard let data = Data(base64Encoded: base64),
+              data.count > 0 else {
+            // return if we have no data
+            return nil
+        }
+
+        return (data, mimeType)
     }
 
     // MARK: - File downloads control
