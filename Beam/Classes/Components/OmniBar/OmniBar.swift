@@ -83,12 +83,14 @@ struct OmniBar: View {
 
     // MARK: Views
     private func fieldView(containerGeometry: GeometryProxy) -> some View {
-        OmniBarFieldBackground(isEditing: isEditing,
-                               isPressingCharacter: showPressedState,
-                               enableAnimations: enableAnimations) {
+        OmniBarFieldBackground(isEditing: isEditing, isPressingCharacter: showPressedState, enableAnimations: enableAnimations) {
             VStack(spacing: 0) {
                 HStack(spacing: 4) {
-                    leftFieldActions
+                    HStack(spacing: 4) {
+                        leftFieldActions
+                    }
+                    .animation(enableAnimations ? .easeInOut(duration: isEditing ? 0.1 : 0.3) : nil, value: isEditing)
+                    .animation(nil)
                     GlobalCenteringContainer(enabled: !isEditing && state.mode != .web, containerGeometry: containerGeometry) {
                             OmniBarSearchField(isEditing: Binding<Bool>(get: {
                                 isEditing
@@ -104,7 +106,6 @@ struct OmniBar: View {
                     }
                     .padding(.leading, !isEditing && state.mode == .web ? 8 : 7)
                 }
-                .animation(enableAnimations ? .easeInOut(duration: isEditing ? 0.1 : 0.3) : nil)
                 .padding(.leading, BeamSpacing._50)
                 .padding(.trailing, BeamSpacing._120)
                 .frame(height: boxHeight)
@@ -140,11 +141,13 @@ struct OmniBar: View {
             if !isEditing {
                 if state.mode != .today {
                     OmniBarButton(icon: "nav-journal", accessibilityId: "journal", action: goToJournal)
+                        .animation(nil)
                 }
                 Chevrons()
                     .animation(nil)
                 if state.mode == .web, let currentTab = browserTabsManager.currentTab {
                     OmniBarReloadButton(currentTab: currentTab, action: toggleReloadWeb)
+                        .animation(nil)
                 }
             }
         }
