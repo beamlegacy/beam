@@ -347,8 +347,18 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
         return parent?.indexOfChild(self)
     }
 
+    /// Append child to end of BeamElement children array
+    /// - Parameter child: BeamElement to add
     open func addChild(_ child: BeamElement) {
         insert(child, after: children.last) // append
+    }
+
+    /// Add array of BeamElements as children to BeamElement
+    /// - Parameter children: Array of BeamElements
+    open func addChildren(_ children: [BeamElement]) {
+        for child in children {
+            addChild(child)
+        }
     }
 
     open func insert(_ child: BeamElement, after: BeamElement?) {
@@ -630,7 +640,7 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
     /// Contains image url when a BeamElement's text contains a single image link
     open var imageLink: URL? {
         let imageLinks = text.links.compactMap({ link -> URL? in
-            if let url = URL(string: link), url.isImage {
+            if let url = URL(string: link), url.isImageURL {
                 return url
             }
             return nil
