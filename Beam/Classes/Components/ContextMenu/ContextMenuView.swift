@@ -157,11 +157,11 @@ struct ContextMenuView: View {
 struct ContextMenuView_Previews: PreviewProvider {
 
     private static var items = [
-        ContextMenuItem(title: "Open Link", action: nil),
+        ContextMenuItem(title: "Open Link", action: { }),
         ContextMenuItem.separator(),
-        ContextMenuItem(title: "Copy Link", action: nil),
+        ContextMenuItem(title: "Copy Link", action: { }),
         ContextMenuItem(title: "Edit Link...", action: nil),
-        ContextMenuItem(title: "Remove Link", action: nil)
+        ContextMenuItem(title: "Remove Link", action: { })
     ]
     private static var model: ContextMenuViewModel {
         let model = ContextMenuViewModel()
