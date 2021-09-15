@@ -115,3 +115,35 @@ public extension String {
     }
 
 }
+
+public extension String {
+    /// Returns the start index of the group of characters that contains the given index
+    func indexForCharactersGroup(before: Int) -> Int? {
+        let textString = self
+        var index: Int = 0
+        let separator = CharacterSet.whitespaces
+        textString.enumerateSubstrings(in: textString.startIndex..<textString.index(at: before),
+                                       options: [.byComposedCharacterSequences, .reverse]) { (c, r1, _, stop) in
+            if c?.rangeOfCharacter(from: separator) != nil {
+                index = textString.position(at: r1.upperBound)
+                stop = true
+            }
+        }
+        return index
+    }
+
+    /// Returns the end index of the group of characters that contains the given index
+    func indexForCharactersGroup(after: Int) -> Int? {
+        let textString = self
+        var index: Int = textString.wholeRange.upperBound
+        let separator = CharacterSet.whitespaces
+        textString.enumerateSubstrings(in: textString.index(at: after)..<textString.endIndex,
+                                       options: .byComposedCharacterSequences) { (c, r1, _, stop) in
+            if c?.rangeOfCharacter(from: separator) != nil {
+                index = textString.position(at: r1.lowerBound)
+                stop = true
+            }
+        }
+        return index
+    }
+}

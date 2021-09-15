@@ -82,4 +82,20 @@ class BeamTextEditTests: XCTestCase {
         let expectedSources = urls.compactMap(LinkStore.getIdFor)
         XCTAssertEqual(Set(pastedNoteSources), Set(expectedSources))
     }
+
+    func testLinkStringForPrecedingCharacters() {
+        let note = BeamNote(title: "BeamTextEditTests")
+        let editor = BeamTextEdit(root: note, journalMode: false)
+        let root = editor.rootNode!
+
+        let bullet = BeamElement("Some text and a link.com")
+        let node = TextNode(parent: root, element: bullet)
+
+        XCTAssertNil(editor.linkStringForPrecedingCharacters(atIndex: 10, in: node))
+
+        let result = editor.linkStringForPrecedingCharacters(atIndex: node.textCount, in: node)
+        XCTAssertNotNil(result)
+        XCTAssertEqual(result?.0, "https://link.com")
+        XCTAssertEqual(result?.1, node.textCount-8 ..< node.textCount)
+    }
 }
