@@ -43,14 +43,9 @@ public extension URL {
     }
 
     var embed: URL? {
-        guard let scheme = scheme,
-              let host = host else {
-            return nil
-        }
-
         // TODO: remove this when we can rely on oembed for url conversion
         if let youtubeID = extractYouTubeId() {
-            return URL(string: "\(scheme)://\(host)/embed/\(youtubeID)")
+            return URL(string: "https://www.youtube.com/embed/\(youtubeID)")
         }
 
         if path.contains("/embed/") {

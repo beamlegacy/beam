@@ -245,6 +245,15 @@
         }
       },
       {
+        "package": "swift-crypto",
+        "repositoryURL": "https://github.com/apple/swift-crypto.git",
+        "state": {
+          "branch": null,
+          "revision": "3bea268b223651c4ab7b7b9ad62ef9b2d4143eb6",
+          "version": "1.1.6"
+        }
+      },
+      {
         "package": "swift-log",
         "repositoryURL": "https://github.com/apple/swift-log.git",
         "state": {
@@ -287,6 +296,15 @@
           "branch": "master",
           "revision": "8c051b60df00a3fd5c568bab657534857eb4287f",
           "version": null
+        }
+      },
+      {
+        "package": "UUIDKit",
+        "repositoryURL": "https://github.com/baarde/uuid-kit",
+        "state": {
+          "branch": null,
+          "revision": "ea3de6264da9b4cdb41370cc594e9626b467f907",
+          "version": "0.1.0"
         }
       },
       {
