@@ -616,7 +616,7 @@ public extension CALayer {
     //swiftlint:disable:next cyclomatic_complexity function_body_length
     override open func keyDown(with event: NSEvent) {
         if self.hasFocus {
-            NSCursor.setHiddenUntilMouseMoves(true)
+            hideMouseForEditing()
 
             switch event.keyCode {
             case KeyCode.escape.rawValue:
@@ -704,6 +704,16 @@ public extension CALayer {
         }
 
         inputContext?.handleEvent(event)
+    }
+
+    func hideMouseForEditing() {
+        NSCursor.setHiddenUntilMouseMoves(true)
+        // dispatch hidden mouse events manually
+        dispatchHover(Set<Widget>())
+        if let lastAppEvent = NSApp.currentEvent {
+            let mouseInfo = MouseInfo(rootNode, CGPoint.zero, lastAppEvent)
+            rootNode.dispatchMouseMoved(mouseInfo: mouseInfo)
+        }
     }
 
     private func toggleOpen(_ node: ElementNode) {
@@ -970,6 +980,8 @@ public extension CALayer {
             super.mouseMoved(with: event)
             return
         }
+        guard inlineFormatter?.isMouseInsideView != true else { return }
+
         let point = convert(event.locationInWindow)
         let mouseInfo = MouseInfo(rootNode, point, event)
         rootNode.dispatchMouseMoved(mouseInfo: mouseInfo)
@@ -1014,6 +1026,7 @@ public extension CALayer {
     }
 
     public override func cursorUpdate(with event: NSEvent) {
+        guard inlineFormatter?.isMouseInsideView != true else { return }
         let point = convert(event.locationInWindow)
         let views = rootNode.getWidgetsAt(point, point, ignoreX: true)
         let cursors = views.compactMap { $0.cursor }
