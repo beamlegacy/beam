@@ -191,7 +191,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func createWindow(frame: NSRect?) -> BeamWindow {
         // Create the window and set the content view.
         let window = BeamWindow(contentRect: frame ?? NSRect(x: 0, y: 0, width: 800, height: 600),
-                            data: data)
+                                data: data)
         if frame == nil && windows.count == 0 {
             window.center()
         } else {
