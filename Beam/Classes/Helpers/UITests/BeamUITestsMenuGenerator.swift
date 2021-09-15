@@ -26,6 +26,7 @@ class BeamUITestsMenuGenerator {
         case .insertTextInCurrentNote: insertTextInCurrentNote()
         case .create100Notes: Self.create100Notes()
         case .setAutoUpdateToMock: setAutoUpdateToMock()
+        case .cleanDownloads: cleanDownloadFolder()
         case .omnibarFillHistory: fillHistory()
         default: break
         }
@@ -130,6 +131,15 @@ class BeamUITestsMenuGenerator {
         appDel.data.versionChecker = checker
 
         checker.checkForUpdates()
+    }
+
+    private func cleanDownloadFolder() {
+        guard let downloadUrl = DownloadFolder(rawValue: PreferencesManager.selectedDownloadFolder)?.sandboxAccessibleUrl else { return }
+        let fileManager = FileManager.default
+        guard let content = try? fileManager.contentsOfDirectory(atPath: downloadUrl.path) else { return }
+
+        let elementToDelete = content.filter { $0.hasSuffix("SF-Symbols-3.dmg") || $0.hasSuffix("SF-Symbols-3.dmg.beamdownload") }
+        elementToDelete.forEach { try? fileManager.removeItem(at: downloadUrl.appendingPathComponent($0)) }
     }
 
     private func fillHistory(longTitle: Bool = false) {
