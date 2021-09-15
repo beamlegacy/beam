@@ -20,6 +20,15 @@
         }
       },
       {
+        "package": "Clustering",
+        "repositoryURL": "git@gitlab.com:beamgroup/clustering.git",
+        "state": {
+          "branch": "main",
+          "revision": "484a99e8f9a92a0d7829924ed20e5ce20db40c1b",
+          "version": null
+        }
+      },
+      {
         "package": "CocoaLumberjack",
         "repositoryURL": "https://github.com/CocoaLumberjack/CocoaLumberjack.git",
         "state": {
@@ -147,7 +156,7 @@
       },
       {
         "package": "LASwift",
-        "repositoryURL": "https://github.com/AlexanderTar/LASwift.git",
+        "repositoryURL": "https://github.com/alexandertar/LASwift",
         "state": {
           "branch": "master",
           "revision": "4b464f8a11b10f616b73a24bfc47c61c322ee542",
