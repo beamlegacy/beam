@@ -16,4 +16,9 @@ class UITestsMenuBar: BaseMenuBar {
         menuBarItems(menuBarTitle).click()
         menuItems("Destroy Databases").click()
     }
+
+    func deleteSFSymbolsFromDownloadFolder() {
+        menuBarItems(menuBarTitle).click()
+        menuItems("Clean SF-Symbols-3.dmg from Downloads").click()
+    }
 }
