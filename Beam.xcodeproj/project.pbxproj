@@ -209,6 +209,7 @@
 		41FAD34F25E5742800D78B36 /* CALayer+Animation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41FAD34E25E5742800D78B36 /* CALayer+Animation.swift */; };
 		4E60970F26C554CD00F90260 /* SuggestedSourcesUpdaterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E60970E26C554CD00F90260 /* SuggestedSourcesUpdaterTests.swift */; };
 		4E6097C826CEA93700F90260 /* ActiveSources.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E6097A326CE8A6F00F90260 /* ActiveSources.swift */; };
+		4E83D3E226F21C4F00796836 /* Clustering in Frameworks */ = {isa = PBXBuildFile; productRef = 4E83D3E126F21C4F00796836 /* Clustering */; };
 		520088B82613265900AED835 /* Database.swift in Sources */ = {isa = PBXBuildFile; fileRef = 520088B72613265900AED835 /* Database.swift */; };
 		520088BC2613266600AED835 /* Database+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 520088BB2613266600AED835 /* Database+CoreDataProperties.swift */; };
 		520088C02613295000AED835 /* DatabaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 520088BF2613295000AED835 /* DatabaseManager.swift */; };
@@ -534,8 +535,6 @@
 		A0125A0626DE8AF300590CB5 /* WebCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0125A0526DE8AF300590CB5 /* WebCommand.swift */; };
 		A0184F7126AF56AB00993C32 /* PreferencesManager+Advanced.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0184F7026AF56AB00993C32 /* PreferencesManager+Advanced.swift */; };
 		A0208F8225D6BB1C00CA054C /* AppDelegate+BeamTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0208F8125D6BB1C00CA054C /* AppDelegate+BeamTests.swift */; };
-		A02FD6FE266519C300EBE17E /* Clustering.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A02FD6E72665180C00EBE17E /* Clustering.framework */; };
-		A02FD6FF266519C300EBE17E /* Clustering.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A02FD6E72665180C00EBE17E /* Clustering.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		A032BD33261F4677009A3576 /* ShortcutLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A032BD32261F4677009A3576 /* ShortcutLayer.swift */; };
 		A0379C43266E6C5B00D75D6B /* AllowListTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0379C42266E6C5B00D75D6B /* AllowListTableView.swift */; };
 		A039B14D26960F21008A2E0B /* UserInformationsModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A039B14C26960F21008A2E0B /* UserInformationsModalView.swift */; };
@@ -885,20 +884,6 @@
 			remoteGlobalIDString = 965A78242514F147009980D4;
 			remoteInfo = Beam;
 		};
-		A02FD6E62665180C00EBE17E /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = A02FD6E12665180C00EBE17E /* Clustering.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 4EEEAF4F2652AC4A0082D77E;
-			remoteInfo = Clustering;
-		};
-		A02FD6E82665180C00EBE17E /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = A02FD6E12665180C00EBE17E /* Clustering.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 4EEEAF582652AC4A0082D77E;
-			remoteInfo = ClusteringTests;
-		};
 		A0F558FB26BD8F260024C47E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 33B27441264C0CDB00A318CD /* AutoUpdate.xcodeproj */;
@@ -917,7 +902,6 @@
 			files = (
 				96319D252616232700D1CF31 /* BeamCore.framework in Embed Frameworks */,
 				33B27468264C0F7100A318CD /* AutoUpdate.framework in Embed Frameworks */,
-				A02FD6FF266519C300EBE17E /* Clustering.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1495,7 +1479,6 @@
 		A0137B3425B6DFE100E65208 /* CommandManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandManager.swift; sourceTree = "<group>"; usesTabs = 0; };
 		A0184F7026AF56AB00993C32 /* PreferencesManager+Advanced.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PreferencesManager+Advanced.swift"; sourceTree = "<group>"; };
 		A0208F8125D6BB1C00CA054C /* AppDelegate+BeamTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+BeamTests.swift"; sourceTree = "<group>"; };
-		A02FD6E12665180C00EBE17E /* Clustering.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Clustering.xcodeproj; path = Beam/Clustering/Clustering.xcodeproj; sourceTree = "<group>"; };
 		A032BD32261F4677009A3576 /* ShortcutLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutLayer.swift; sourceTree = "<group>"; };
 		A0379C42266E6C5B00D75D6B /* AllowListTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllowListTableView.swift; sourceTree = "<group>"; };
 		A039B14C26960F21008A2E0B /* UserInformationsModalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserInformationsModalView.swift; sourceTree = "<group>"; };
@@ -1819,7 +1802,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A02FD6FE266519C300EBE17E /* Clustering.framework in Frameworks */,
 				33B27467264C0F7100A318CD /* AutoUpdate.framework in Frameworks */,
 				525C233C25BAF8EF001B9625 /* libgit2.a in Frameworks */,
 				96AC99F826E65CFB0016E941 /* UUIDKit in Frameworks */,
@@ -1840,6 +1822,7 @@
 				3315DC962667859A002A47CF /* OAuthSwift in Frameworks */,
 				33793AD1265CFEC50041E1B8 /* SwiftSoup in Frameworks */,
 				33088D6326B06677004FAE99 /* ZIPFoundation in Frameworks */,
+				4E83D3E226F21C4F00796836 /* Clustering in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2026,7 +2009,6 @@
 		24EFBA757ACC5310A2D800B2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				A02FD6E12665180C00EBE17E /* Clustering.xcodeproj */,
 				33B27441264C0CDB00A318CD /* AutoUpdate.xcodeproj */,
 				525C233B25BAF8EF001B9625 /* libgit2.a */,
 				9645489F2523B3550064D062 /* CloudKit.framework */,
@@ -3516,15 +3498,6 @@
 			path = Web;
 			sourceTree = "<group>";
 		};
-		A02FD6E22665180C00EBE17E /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				A02FD6E72665180C00EBE17E /* Clustering.framework */,
-				A02FD6E92665180C00EBE17E /* ClusteringTests.xctest */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		A043B7FC26593A4800E267E5 /* TabGrouping */ = {
 			isa = PBXGroup;
 			children = (
@@ -4067,6 +4040,7 @@
 				33088D6226B06677004FAE99 /* ZIPFoundation */,
 				33F0F1C726DE87E000FF8B48 /* Vinyl */,
 				96AC99F726E65CFB0016E941 /* UUIDKit */,
+				4E83D3E126F21C4F00796836 /* Clustering */,
 			);
 			productName = Beam;
 			productReference = 965A78252514F147009980D4 /* Beam.app */;
@@ -4182,6 +4156,7 @@
 				33088D6126B06677004FAE99 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
 				33F0F1C626DE87E000FF8B48 /* XCRemoteSwiftPackageReference "Vinyl" */,
 				96AC99F626E65CFB0016E941 /* XCRemoteSwiftPackageReference "uuid-kit" */,
+				4E83D3E026F21C4F00796836 /* XCRemoteSwiftPackageReference "clustering" */,
 			);
 			productRefGroup = 965A78262514F147009980D4 /* Products */;
 			projectDirPath = "";
@@ -4189,10 +4164,6 @@
 				{
 					ProductGroup = 33B27442264C0CDB00A318CD /* Products */;
 					ProjectRef = 33B27441264C0CDB00A318CD /* AutoUpdate.xcodeproj */;
-				},
-				{
-					ProductGroup = A02FD6E22665180C00EBE17E /* Products */;
-					ProjectRef = A02FD6E12665180C00EBE17E /* Clustering.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -4233,20 +4204,6 @@
 			fileType = "compiled.mach-o.executable";
 			path = AppFeedBuilder;
 			remoteRef = 33B27451264C0CDC00A318CD /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		A02FD6E72665180C00EBE17E /* Clustering.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = Clustering.framework;
-			remoteRef = A02FD6E62665180C00EBE17E /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		A02FD6E92665180C00EBE17E /* ClusteringTests.xctest */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = ClusteringTests.xctest;
-			remoteRef = A02FD6E82665180C00EBE17E /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		A0F558FC26BD8F260024C47E /* AutoUpdateFrameworkTests.xctest */ = {
@@ -6049,6 +6006,14 @@
 				minimumVersion = 0.10.5;
 			};
 		};
+		4E83D3E026F21C4F00796836 /* XCRemoteSwiftPackageReference "clustering" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "git@gitlab.com:beamgroup/clustering.git";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
 		5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Quick/Nimble.git";
@@ -6197,6 +6162,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 33F0F1C626DE87E000FF8B48 /* XCRemoteSwiftPackageReference "Vinyl" */;
 			productName = Vinyl;
+		};
+		4E83D3E126F21C4F00796836 /* Clustering */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4E83D3E026F21C4F00796836 /* XCRemoteSwiftPackageReference "clustering" */;
+			productName = Clustering;
 		};
 		5239C11525C2C4AE009C51E1 /* Nimble */ = {
 			isa = XCSwiftPackageProductDependency;

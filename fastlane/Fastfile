@@ -109,6 +109,7 @@ platform :mac do
       skip_testing: "BeamUITests",
       output_types: "junit",
       output_files: "tests.xml",
+      use_system_scm: true
     )
     # For Gitlab artifacts
     slather(
@@ -151,6 +152,7 @@ platform :mac do
       output_types: "junit",
       output_files: "tests.xml",
       result_bundle: true,
+      use_system_scm: true
     )
     # For Gitlab artifacts
     slather(
@@ -199,7 +201,8 @@ platform :mac do
       export_method: "development", # Valid values are: app-store, ad-hoc, package, enterprise, development, developer-id
       export_options: "./ExportOptions.plist",
       # Found this at https://github.com/fastlane/fastlane/issues/15963 or we have archive failed
-      skip_package_pkg: true
+      skip_package_pkg: true,
+      use_system_scm: true
     )
   end
 
