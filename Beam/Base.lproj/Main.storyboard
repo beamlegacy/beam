@@ -79,8 +79,8 @@
                                                 <action selector="newSearch:" target="Ady-hI-5gd" id="A5z-dM-XS8"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="New Tab with Current Note" tag="4" keyEquivalent="T" id="3vf-wY-DiQ">
-                                            <modifierMask key="keyEquivalentModifierMask" option="YES"/>
+                                        <menuItem title="New Tab with Current Note" tag="4" enabled="NO" id="3vf-wY-DiQ">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
                                                 <action selector="createEmptyTabWithCurrentNote:" target="Ady-hI-5gd" id="4Wf-w8-oWg"/>
                                             </connections>
@@ -806,24 +806,14 @@
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Go" id="cCx-1g-tLY">
                                     <items>
-                                        <menuItem title="Back" tag="4" keyEquivalent="[" id="vfj-M7-Iu5" userLabel="Back" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
+                                        <menuItem title="Back" keyEquivalent="[" id="vfj-M7-Iu5" userLabel="Back" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
                                             <connections>
                                                 <action selector="goBack:" target="Ady-hI-5gd" id="dp8-wy-cmJ"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Go Back" tag="-4" keyEquivalent="" id="JJG-Tc-9sk" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
-                                            <connections>
-                                                <action selector="showPreviousTabInNewTab:" target="Ady-hI-5gd" id="Lf0-wb-GhI"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="Forward" tag="4" keyEquivalent="]" id="jIn-Gg-R6F" userLabel="Forward" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
+                                        <menuItem title="Forward" keyEquivalent="]" id="jIn-Gg-R6F" userLabel="Forward" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
                                             <connections>
                                                 <action selector="goForward:" target="Ady-hI-5gd" id="YCt-1o-xMT"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="Go Forward" tag="-4" keyEquivalent="" id="68V-0m-mxt" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
-                                            <connections>
-                                                <action selector="showNextTabInNewTab:" target="Ady-hI-5gd" id="0s2-BC-Ir1"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="Hyi-3c-HLP"/>
@@ -859,7 +849,6 @@
                                                 <action selector="showCardSelector:" target="Ady-hI-5gd" id="FiE-9C-fLE"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Re-open Closed Tab" tag="4" keyEquivalent="T" id="g8X-sC-Ejj" userLabel="Re-open Closed Tab" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target"/>
                                     </items>
                                 </menu>
                             </menuItem>
@@ -879,32 +868,26 @@
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="eu3-7i-yIM"/>
-                                        <menuItem title="Show previous tab" tag="4" id="TK0-jr-lkZ" userLabel="Show Previous Tab">
-                                            <string key="keyEquivalent" base64-UTF8="YES">
-GQ
-</string>
-                                            <modifierMask key="keyEquivalentModifierMask" shift="YES" control="YES"/>
+                                        <menuItem title="Show previous tab" tag="4" keyEquivalent="[" id="TK0-jr-lkZ" userLabel="Show Previous Tab">
+                                            <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
                                             <connections>
                                                 <action selector="showPreviousTab:" target="Ady-hI-5gd" id="QFs-kq-p2g"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Show Previous Tab" tag="-4" keyEquivalent="" id="oAb-PD-njU" userLabel="Show Previous Tab">
-                                            <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
+                                        <menuItem title="Show Previous Tab" tag="-4" enabled="NO" id="oAb-PD-njU" userLabel="Show Previous Tab">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
                                                 <action selector="showPreviousTab:" target="Ady-hI-5gd" id="cP6-aq-98d"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Show Next Tab" tag="4" id="ALY-z5-5pM" userLabel="Show Next Tab">
-                                            <string key="keyEquivalent" base64-UTF8="YES">
-CQ
-</string>
-                                            <modifierMask key="keyEquivalentModifierMask" control="YES"/>
+                                        <menuItem title="Show Next Tab" tag="4" keyEquivalent="]" id="ALY-z5-5pM" userLabel="Show Next Tab">
+                                            <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
                                             <connections>
                                                 <action selector="showNextTab:" target="Ady-hI-5gd" id="NFT-aq-DrR"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Show Next Tab" tag="-4" keyEquivalent="" id="KJE-FH-Z16" userLabel="Show Next Tab">
-                                            <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
+                                        <menuItem title="Show Next Tab" tag="-4" enabled="NO" id="KJE-FH-Z16" userLabel="Show Next Tab">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
                                                 <action selector="showNextTab:" target="Ady-hI-5gd" id="q1N-Nw-YOb"/>
                                             </connections>

@@ -68,7 +68,6 @@ extension BeamTextEdit {
     @IBAction func toggleCodeBlockAction(_ sender: Any?) {
         hideInlineFormatter()
         toggleCode()
-
     }
 
     // MARK: - Shortcuts Functional
@@ -117,5 +116,4 @@ extension BeamTextEdit {
     internal func toggleCode() {
         Logger.shared.logDebug("code")
     }
-
 }
