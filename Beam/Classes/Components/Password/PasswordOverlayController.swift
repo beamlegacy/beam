@@ -353,7 +353,7 @@ extension PasswordOverlayController: PasswordManagerMenuDelegate {
             Logger.shared.logError("PasswordStore did not provide password for selected entry.", category: .passwordManager)
             return
         }
-        Logger.shared.logDebug(String(describing: autocompleteGroup.relatedFields), category: .passwordManager)
+        Logger.shared.logDebug("Filling fields: \(String(describing: autocompleteGroup.relatedFields))", category: .passwordManager)
         let backgroundColor = BeamColor.Autocomplete.clickedBackground.hexColor
         let autofill = autocompleteGroup.relatedFields.compactMap { field -> WebFieldAutofill? in
             switch field.role {

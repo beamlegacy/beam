@@ -42,8 +42,10 @@ import Promises
 
             webView.load(URLRequest(url: url))
         }
+        Logger.shared.logDebug("BrowserTab load \(url.absoluteString)", category: .passwordManager)
         $isLoading.sink { [unowned passwordOverlayController] loading in
             if !loading {
+                Logger.shared.logDebug("BrowserTab loading \(url.absoluteString)", category: .passwordManager)
                 passwordOverlayController?.detectInputFields()
             }
         }.store(in: &scope)
