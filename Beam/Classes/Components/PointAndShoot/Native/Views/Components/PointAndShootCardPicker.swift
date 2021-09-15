@@ -223,6 +223,7 @@ struct PointAndShootCardPicker: View {
         .onReceive(autocompleteModel.$results.dropFirst()) { _ in
             enableResizeAnimation()
         }
+        .accessibility(identifier: "ShootCardPicker")
     }
 }
 
