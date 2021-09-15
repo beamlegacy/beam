@@ -572,6 +572,10 @@ public extension CALayer {
                 rootNode.cmdManager.deleteText(in: node, for: rootNode.selectedTextRange)
             }
 
+            if let (linkString, linkRange) = linkStringForPrecedingCharacters(atIndex: rootNode.cursorPosition, in: node) {
+                node.cmdManager.formatText(in: node, for: nil, with: .link(linkString), for: linkRange, isActive: false)
+            }
+
             let range = rootNode.cursorPosition ..< node.text.count
             let str = node.text.extract(range: range)
             if !range.isEmpty {
