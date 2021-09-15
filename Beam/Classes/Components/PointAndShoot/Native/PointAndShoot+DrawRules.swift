@@ -27,7 +27,7 @@ extension PointAndShoot {
         let yIsLarge = yPercent > 100
 
         let xPercent = (100 / page.frame.width) * target.rect.width
-        let xIsLarge = xPercent > 80
+        let xIsLarge = xPercent > 110
         return yIsLarge || xIsLarge
     }
 }

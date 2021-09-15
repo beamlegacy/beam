@@ -27,6 +27,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
     var webPositions: WebPositions = WebPositions()
     var data: BeamData = AppDelegate.main.data
     private let scorer: BrowsingScorer
+
     @Published var activePointGroup: ShootGroup?
     @Published var activeSelectGroup: ShootGroup?
     @Published var activeShootGroup: ShootGroup?
@@ -264,15 +265,26 @@ class PointAndShoot: WebPageHolder, ObservableObject {
         page.setDestinationNote(currentNote, rootElement: currentNote)
         scorer.addTextSelection()
         // Convert html to BeamText
-        let texts: [BeamText] = html2Text(url: sourceUrl, html: shootGroup.html())
+        let htmlNoteAdapter = HtmlNoteAdapter(sourceUrl, self.page.downloadManager, self.page.fileStorage)
+        let beamElements: [BeamElement] = htmlNoteAdapter.convert(html: shootGroup.html())
+        let elements = beamElements.map({ element -> BeamElement in
+            element.query = self.page.originalQuery
+
+            guard element.kind == .bullet else {
+                return element
+            }
+
+            element.kind = .quote(1, sourceUrl.absoluteString, group.href)
+            return element
+        })
         // Reduce array of texts to a single string
+        let texts = elements.map({ $0.text })
         let clusteringText = texts.reduce(String()) { (string, beamText) -> String in
             string + " " + beamText.text
         }
         // Send this string to the ClusteringManager
         self.page.addTextToClusteringManager(clusteringText, url: sourceUrl)
-        // Convert BeamText to BeamElement of quote type
-        let pendingQuotes = text2Quote(texts, sourceUrl.absoluteString)
+        // TODO: Convert BeamText to BeamElement of quote type
         // Adds urlId to current card source
         let urlId = LinkStore.createIdFor(sourceUrl.absoluteString, title: nil)
         currentNote.sources.add(urlId: urlId, noteId: currentNote.id, type: .user, sessionId: data.sessionId, activeSources: data.activeSources)
@@ -280,37 +292,31 @@ class PointAndShoot: WebPageHolder, ObservableObject {
         data.noteFrecencyScorer.update(id: currentNote.id, value: 1.0, eventType: .notePointAndShoot, date: BeamDate.now, paramKey: .note30d0)
         // Add all quotes to source Note
         if let source = self.page.addToNote(allowSearchResult: true) {
-            pendingQuotes.then({ resolvedQuotes in
-                var quotes = resolvedQuotes
-                if let noteText = noteText, !noteText.isEmpty,
-                   let lastQuote = quotes.popLast() {
-                    // Append NoteText last quote
-                    let note = self.createNote(noteText)
-                    lastQuote.addChild(note)
-                    quotes.append(lastQuote)
-                }
-                // Add to source Note
-                quotes.forEach({ quote in
-                    source.addChild(quote)
-                })
-                // Complete PNS and clear stored data
-                shootGroup.numberOfElements = resolvedQuotes.count
-            }).catch({ error in
-                self.showAlert(shootGroup, texts, error.localizedDescription)
-            }).always {
-                shootGroup.setNoteInfo(NoteInfo(id: currentNote.id, title: currentNote.title))
-
-                if shootGroup.numberOfElements != texts.count || shootGroup.numberOfElements == 0 {
-                    self.showAlert(shootGroup, texts, "numberOfElements and texts.count mismatch")
-                    shootGroup.setConfirmation(.failure)
-                } else {
-                    shootGroup.setConfirmation(.success)
-                }
-
-                self.collectedGroups.append(shootGroup)
-                self.activeShootGroup = nil
-                self.showShootConfirmation(group: shootGroup)
+            if let noteText = noteText, !noteText.isEmpty,
+               let lastQuote = elements.last {
+                // Append NoteText last quote
+                let note = self.createNote(noteText)
+                lastQuote.addChild(note)
             }
+            // Add to source Note
+            elements.forEach({ quote in
+                source.addChild(quote)
+            })
+            // Complete PNS and clear stored data
+            shootGroup.numberOfElements = elements.count
+
+            shootGroup.setNoteInfo(NoteInfo(id: currentNote.id, title: currentNote.title))
+
+            if shootGroup.numberOfElements != texts.count || shootGroup.numberOfElements == 0 {
+                self.showAlert(shootGroup, texts, "numberOfElements and texts.count mismatch")
+                shootGroup.setConfirmation(.failure)
+            } else {
+                shootGroup.setConfirmation(.success)
+            }
+
+            self.collectedGroups.append(shootGroup)
+            self.activeShootGroup = nil
+            self.showShootConfirmation(group: shootGroup)
         }
     }
 

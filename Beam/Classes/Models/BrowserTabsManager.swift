@@ -103,9 +103,9 @@ class BrowserTabsManager: ObservableObject {
                 let currentTabTree = currentTab?.browsingTree.deepCopy()
 
                 self.indexingQueue.async { [unowned self] in
-                    guard let doc = try? SwiftSoup.parse(read.content, url.absoluteString) else { return }
-                    text = html2Text(url: url, doc: doc)
-                    textForClustering = html2TextForClustering(doc: doc)
+                    let htmlNoteAdapter = HtmlNoteAdapter(url)
+                    text = htmlNoteAdapter.convert(html: read.content)
+                    textForClustering = htmlNoteAdapter.convertForClustering(html: read.content)
 
                     DispatchQueue.main.async { [weak self] in
                         guard let self = self else { return }
