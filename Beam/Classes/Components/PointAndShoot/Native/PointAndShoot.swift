@@ -153,7 +153,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
     ///   - targets: Target rects to draw
     ///   - href: href of frame
     func select(_ groupId: String, _ targets: [Target], _ href: String) {
-        guard !isTypingOnWebView else {
+        guard !isTypingOnWebView, !targets.isEmpty else {
             return
         }
         // Check if the incomming group is already collected
