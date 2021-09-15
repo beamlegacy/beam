@@ -12,25 +12,19 @@ import Nimble
 @testable import BeamCore
 
 class PointAndShootPersistToJournalTest: PointAndShootTest {
-    var url: URL!
     var page: TestWebPage!
 
     override func setUpWithError() throws {
         initTestBed()
 
         self.pns.mouseLocation = NSPoint(x: 201, y: 202)
-
-        if let page = self.testPage,
-           let url = page.url {
-            self.page = page
-            XCTAssertEqual(url.absoluteString, "https://webpage.com")
-            self.url = url
-        } else {
-            XCTFail("no page url available")
-        }
     }
 
     func testSingleShootToNote() throws {
+        guard let page = self.testPage else {
+            XCTFail("test page not found")
+            return
+        }
         let paragraphTarget: PointAndShoot.Target = PointAndShoot.Target(
             id: UUID().uuidString,
             rect: NSRect(x: 101, y: 102, width: 301, height: 302),
@@ -47,21 +41,8 @@ class PointAndShootPersistToJournalTest: PointAndShootTest {
         XCTAssertNotNil(self.pns.activeShootGroup)
 
         // Add shoot to note
-        let text: [BeamText] = html2Text(url: self.url, html: paragraphTarget.html)
-        waitUntil(timeout: .seconds(5)) { done in
-            let pendingQuotes = self.pns.text2Quote(text, self.url.absoluteString)
-            pendingQuotes.then { quotes in
-                XCTAssertEqual(quotes.count, 1)
-                if quotes.first != nil,
-                   let group = self.pns.activeShootGroup {
-                    self.pns.collectedGroups.append(group)
-                    self.pns.activeShootGroup = nil
-                    done()
-                } else {
-                    XCTFail("expected quotes to contain 1 item")
-                }
-            }
-        }
+        let group2 = PointAndShoot.ShootGroup("id", [paragraphTarget], page.url!.absoluteString)
+        self.pns.addShootToNote(noteTitle: page.activeNote, group: group2)
 
         XCTAssertEqual(self.pns.collectedGroups.count, 1)
         XCTAssertEqual(self.pns.collectedGroups.first?.targets.count, 1)
@@ -70,6 +51,10 @@ class PointAndShootPersistToJournalTest: PointAndShootTest {
 
     // swiftlint:disable:next function_body_length
     func testTwoShootsToTwoDifferentCards() throws {
+        guard let page = self.testPage else {
+            XCTFail("test page not found")
+            return
+        }
         // Add Paragraph 1 to Card 1
         let paragraphTarget: PointAndShoot.Target = PointAndShoot.Target(
             id: UUID().uuidString,
@@ -87,21 +72,8 @@ class PointAndShootPersistToJournalTest: PointAndShootTest {
         XCTAssertNotNil(self.pns.activeShootGroup)
 
         // Add shoot to note
-        let text: [BeamText] = html2Text(url: self.url, html: paragraphTarget.html)
-        waitUntil(timeout: .seconds(5)) { done in
-            let pendingQuotes = self.pns.text2Quote(text, self.url.absoluteString)
-            pendingQuotes.then { quotes in
-                XCTAssertEqual(quotes.count, 1)
-                if quotes.first != nil,
-                   let group = self.pns.activeShootGroup {
-                    self.pns.collectedGroups.append(group)
-                    self.pns.activeShootGroup = nil
-                    done()
-                } else {
-                    XCTFail("expected quotes to contain 1 item")
-                }
-            }
-        }
+        let group = PointAndShoot.ShootGroup("id", [paragraphTarget], page.url!.absoluteString)
+        self.pns.addShootToNote(noteTitle: page.activeNote, group: group)
 
         XCTAssertEqual(self.pns.collectedGroups.count, 1)
 
@@ -122,21 +94,8 @@ class PointAndShootPersistToJournalTest: PointAndShootTest {
         XCTAssertNotNil(self.pns.activeShootGroup)
 
         // Add shoot to note
-        let text2: [BeamText] = html2Text(url: self.url, html: paragraphTarget2.html)
-        waitUntil(timeout: .seconds(5)) { done in
-            let pendingQuotes = self.pns.text2Quote(text2, self.url.absoluteString)
-            pendingQuotes.then { quotes in
-                XCTAssertEqual(quotes.count, 1)
-                if quotes.first != nil,
-                   let group = self.pns.activeShootGroup {
-                    self.pns.collectedGroups.append(group)
-                    self.pns.activeShootGroup = nil
-                    done()
-                } else {
-                    XCTFail("expected quotes to contain 1 item")
-                }
-            }
-        }
+        let group2 = PointAndShoot.ShootGroup("id", [paragraphTarget2], page.url!.absoluteString)
+        self.pns.addShootToNote(noteTitle: page.activeNote, group: group2)
 
         XCTAssertEqual(self.pns.collectedGroups.count, 2)
     }

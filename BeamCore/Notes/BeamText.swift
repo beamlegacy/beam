@@ -500,6 +500,12 @@ public struct BeamText: Codable {
         }
     }
 
+    public mutating func append(contentsOf: [BeamText]) {
+        for text in contentsOf {
+            append(text)
+        }
+    }
+
     public func extract(range: Swift.Range<Int>) -> BeamText {
         var newText = self
         let endLength = text.count - range.upperBound
