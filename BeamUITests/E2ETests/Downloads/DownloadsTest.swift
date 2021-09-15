@@ -11,7 +11,7 @@ import XCTest
 class DownloadsTest: BaseTest {
     
     let downloadLink = "devimages-cdn.apple.com/design/resources/download/SF-Symbols-3.dmg"
-    
+
     func testDownloadView() throws {
         try XCTSkipIf(true, "Temp solution to fix the false failure to be found")
         let journalView = launchApp()
