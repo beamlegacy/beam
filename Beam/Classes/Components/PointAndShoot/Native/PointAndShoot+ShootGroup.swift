@@ -70,7 +70,8 @@ extension PointAndShoot {
 
         mutating func updateTargets(_ groupId: String, _ newTargets: [Target]) {
             guard id == groupId,
-                  var lastTarget = targets.last else {
+                  var lastTarget = targets.last,
+                  !newTargets.isEmpty else {
                 return
             }
 
