@@ -68,4 +68,17 @@ public extension URL {
     var tld: String? {
         host?.tld
     }
+
+    /// Cleans up the non necessary characters in a url string.
+    ///
+    /// Exemple: `https://wikipedia.org` and `wikipedia.org/` are pointing to the same page.
+    /// This method could be improved with more unnecessary strings to remove, like `index.html` , etc.
+    var urlStringByRemovingUnnecessaryCharacters: String {
+        var str = self.urlStringWithoutScheme.lowercased()
+        let last = str.last
+        if ["/", "?"].contains(last) {
+            str = String(str.dropLast())
+        }
+        return str
+    }
 }

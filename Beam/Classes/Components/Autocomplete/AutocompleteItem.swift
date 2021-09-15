@@ -41,14 +41,25 @@ struct AutocompleteItem: View {
         }
     }
 
+    private var isUrlWithTitle: Bool {
+        item.source == .url && item.information != nil
+    }
+
     private var textColor: Color {
         colorPalette.textColor.swiftUI
     }
     private let secondaryTextColor = BeamColor.Autocomplete.subtitleText.swiftUI
     private let subtitleLinkColor = BeamColor.Autocomplete.link.swiftUI
+    private var mainTextColor: Color {
+        if item.source == .topDomain ||
+            (item.source == .url && !isUrlWithTitle) {
+            return subtitleLinkColor
+        }
+        return textColor
+    }
     private var informationColor: Color {
         switch item.source {
-        case .history:
+        case .history, .url:
             return subtitleLinkColor
         default:
             return colorPalette.informationTextColor.swiftUI
@@ -69,13 +80,14 @@ struct AutocompleteItem: View {
     }
 
     var mainText: String {
-        guard item.source == .url, let information = item.information else {
-            return item.text
+        if isUrlWithTitle, let information = item.information {
+            return information
         }
-        return information
+        return item.text
     }
+
     var secondaryText: String? {
-        item.source == .url ? item.text : item.information
+        isUrlWithTitle ? item.text : item.information
     }
 
     var body: some View {
@@ -93,15 +105,15 @@ struct AutocompleteItem: View {
             HStack(alignment: .firstTextBaseline, spacing: 0) {
                 ZStack {
                     StyledText(verbatim: mainText)
-                        .style(.font(BeamFont.medium(size: 13).swiftUI), ranges: highlightedTextRanges)
+                        .style(.font(BeamFont.semibold(size: 13).swiftUI), ranges: highlightedTextRanges)
                         .font(BeamFont.regular(size: 13).swiftUI)
-                        .foregroundColor([.url, .topDomain].contains(item.source) ? subtitleLinkColor : textColor)
+                        .foregroundColor(mainTextColor)
                 }
                 .layoutPriority(10)
                 if let info = secondaryText {
                     HStack {
                         StyledText(verbatim: " – \(info)")
-                            .style(.font(BeamFont.medium(size: 13).swiftUI), ranges: highlightedTextRanges)
+                            .style(.font(BeamFont.semibold(size: 13).swiftUI), ranges: highlightedTextRanges)
                             .font(BeamFont.regular(size: 13).swiftUI)
                             .foregroundColor(informationColor)
                     }
