@@ -128,17 +128,7 @@ extension BeamTextEdit {
                 return true
             },
             " ": { [unowned self] in
-                guard self.selectedTextRange.isEmpty else { return true }
-
-                let (pos, left) = inputDetectorGetPositionAndPrecedingChar(in: node)
-                let range = max(0, pos - 1) ..< pos
-                let substr = node.text.extract(range: range)
-                if pos > 0 && left == " " && !substr.links.isEmpty {
-                    rootNode.state.attributes = BeamText.removeLinks(from: rootNode.state.attributes)
-                    rootNode.cmdManager.replaceText(in: node, for: range, with: BeamText(text: " ", attributes: rootNode.state.attributes))
-                    return false
-                }
-                return true
+                return preInputHandleSpace(node: node)
             }
         ]
 
@@ -284,6 +274,37 @@ extension BeamTextEdit {
             return handler()
         } else if let handler = handlers[inputDetectorLastInput + input] {
             return handler()
+        }
+        return nil
+    }
+
+    // MARK: - Handlers
+    private func preInputHandleSpace(node: TextNode) -> Bool {
+        guard self.selectedTextRange.isEmpty else { return true }
+
+        let (pos, _) = inputDetectorGetPositionAndPrecedingChar(in: node)
+        if let (linkString, range) = linkStringForPrecedingCharacters(atIndex: pos, in: node) {
+            let cmdManager = rootNode.focusedCmdManager
+            cmdManager.insertText(BeamText(text: " "), in: node, at: range.upperBound)
+            cmdManager.beginGroup(with: "Automatically format typed link")
+            cmdManager.formatText(in: node, for: nil, with: .link(linkString), for: range, isActive: false)
+            cmdManager.focusElement(node, cursorPosition: range.upperBound + 1)
+            cmdManager.endGroup()
+            return false
+        }
+        return true
+    }
+
+    func linkStringForPrecedingCharacters(atIndex index: Int, in node: TextNode) -> (String, Range<Int>)? {
+        if let precedingWordIndex = node.text.text.indexForCharactersGroup(before: index), precedingWordIndex < index {
+            let wordRange = precedingWordIndex..<index
+            let precedingText = node.text.extract(range: wordRange)
+            let precedingTextString = precedingText.text
+            // Automatic Link Detection
+            if precedingText.links.isEmpty && (precedingTextString.mayBeURL || precedingTextString.mayBeEmail) {
+                let (isValid, validUrlString) = precedingTextString.validUrl()
+                return isValid ? (validUrlString, wordRange) : nil
+            }
         }
         return nil
     }
