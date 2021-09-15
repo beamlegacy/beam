@@ -76,6 +76,10 @@ extension AppDelegate {
     /// - Returns: `true` if it was handled by the app
     @discardableResult
     func processWebURL(components: NSURLComponents) -> Bool {
+        if windows.isEmpty && isActive {
+            createWindow(frame: nil)
+        }
+
         guard let window = window ?? windows.first else {
             Logger.shared.logDebug("Window not ready to open url. Waiting for it", category: .general)
             waitForWindowToProcessURL(components)
