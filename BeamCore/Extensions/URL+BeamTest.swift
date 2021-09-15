@@ -108,4 +108,12 @@ class URLBeamTest: XCTestCase {
             XCTAssertNil(url.extractYouTubeId(), "failed: \(string)")
         }
     }
+
+    func testUrlStringByRemovingUnnecessaryCharacters() throws {
+        let expectedWikipedia = "wikipedia.org"
+        XCTAssertEqual(URL(string: "wikipedia.org/")?.urlStringByRemovingUnnecessaryCharacters, expectedWikipedia)
+        XCTAssertEqual(URL(string: "https://wikipedia.org/")?.urlStringByRemovingUnnecessaryCharacters, expectedWikipedia)
+        XCTAssertEqual(URL(string: "http://wikipedia.ORG?")?.urlStringByRemovingUnnecessaryCharacters, expectedWikipedia)
+        XCTAssertEqual(URL(string: "https://en.wikipedia.org/post/1?lang=en")?.urlStringByRemovingUnnecessaryCharacters, "en.wikipedia.org/post/1?lang=en")
+    }
 }
