@@ -145,9 +145,11 @@ function beam_setTextFieldValues(fields_json) {
     let fields = JSON.parse(fields_json)
     for (let field of fields) {
         let element = beam_getElementById(field.id)
-        if (element) {
-            element.value = field.value
-            let event = new Event('input')
+        if (element?.tagName == 'INPUT') {
+            const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set
+            nativeInputValueSetter.call(element, field.value)
+            var event = new Event('input', {bubbles: true})
+            event.simulated = true
             element.dispatchEvent(event)
             if (field.background) {
                 var styleAttribute = document.createAttribute('style')

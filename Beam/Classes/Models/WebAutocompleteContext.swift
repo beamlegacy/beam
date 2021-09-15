@@ -207,8 +207,8 @@ extension WebInputField {
                 self.role = .currentPassword
             case .newPassword:
                 self.role = .newPassword
-            case .email:
-                self.role = .email
+            case .email, .tel:
+                self.role = action == .createAccount ? .newUsername : action == .login ? .currentUsername : .email
             default:
                 if action == .createAccount {
                     self.role = inputField.type == .password ? .newPassword : .newUsername
