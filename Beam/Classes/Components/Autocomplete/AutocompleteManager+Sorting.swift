@@ -85,6 +85,6 @@ extension AutocompleteManager {
 
     private func autocompleteResultsUniqueUrls(sequence: [AutocompleteResult]) -> [AutocompleteResult] {
         var seenUrl = Set<String>()
-        return sequence.filter { seenUrl.update(with: $0.url?.absoluteString ?? $0.text) == nil }
+        return sequence.filter { seenUrl.update(with: $0.url?.urlStringByRemovingUnnecessaryCharacters ?? $0.text) == nil }
     }
 }
