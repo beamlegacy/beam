@@ -1574,21 +1574,21 @@ public extension CALayer {
             guard let url = url as? URL,
                   let data = try? Data(contentsOf: url)
             else { continue }
-            //Logger.shared.logInfo("File dropped: \(url) - \(data) - \(data.MD5)")
-
-            let uid = data.MD5
-            do {
-                let fileManager = BeamFileDBManager()
-                fileManager.insert(name: url.lastPathComponent, uid: uid, data: data, type: "")
-            } catch let error {
-                Logger.shared.logError("Error while inserting file in database \(error)", category: .noteEditor)
-            }
+            //Logger.shared.logInfo("File dropped: \(url) - \(data) - \(data.SHA256)")
 
             guard let image = NSImage(contentsOf: url)
             else {
                 Logger.shared.logError("Unable to load image from url \(url)", category: .noteEditor)
                 return false
             }
+
+            let uid = data.SHA256
+            let fileManager = BeamFileDBManager()
+            let utTypeCF = image.cgImage.utType
+            let utType = utTypeCF as String? ?? ""
+            let mimeType = UTTypeCopyPreferredTagWithClass(utType as CFString, kUTTagClassMIMEType)?.takeRetainedValue() as String?
+
+            fileManager.insert(name: url.lastPathComponent, uid: uid, data: data, type: mimeType ?? "application/octet-stream")
 
             // swiftlint:disable:next print
             let newElement = BeamElement()
