@@ -13,12 +13,12 @@ class UITestsMenuBar: BaseMenuBar {
     let menuBarTitle = "UITests"
     
     func destroyDB() {
-        menuBarItems(menuBarTitle).click()
-        menuItems("Destroy Databases").click()
+        menuBarItem(menuBarTitle).click()
+        menuItem("Destroy Databases").click()
     }
 
     func deleteSFSymbolsFromDownloadFolder() {
-        menuBarItems(menuBarTitle).click()
-        menuItems("Clean SF-Symbols-3.dmg from Downloads").click()
+        menuBarItem(menuBarTitle).click()
+        menuItem("Clean SF-Symbols-3.dmg from Downloads").click()
     }
 }

@@ -17,11 +17,11 @@ class BaseMenuBar {
     let implicitWaitTimeout = TimeInterval(10)
     let defaultPressDurationSeconds = 1.5
     
-    func menuBarItems(_ element: String) -> XCUIElement {
+    func menuBarItem(_ element: String) -> XCUIElement {
         return app.menuBars.menuBarItems[element]
     }
     
-    func menuItems(_ element: String) -> XCUIElement {
+    func menuItem(_ element: String) -> XCUIElement {
         return app.menuBars.menuItems[element]
     }
 }

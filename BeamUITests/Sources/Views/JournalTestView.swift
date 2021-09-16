@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import XCTest
 
 class JournalTestView: BaseView {
     
@@ -27,5 +28,19 @@ class JournalTestView: BaseView {
     @discardableResult
     func createCardViaOmnibarSearch(_ cardNameToBeCreated: String) -> CardTestView {
         return self.searchInOmniBar(cardNameToBeCreated, false).selectCreateCard(cardNameToBeCreated)
+    }
+    
+    @discardableResult
+    func scroll(_ numberOfScrolls: Int) -> JournalTestView {
+        for _ in 0...numberOfScrolls {
+            scrollView(JournalViewLocators.ScrollViews.journalScrollView.accessibilityIdentifier).scroll(byDeltaX: 0, deltaY: -1000)
+        }
+        return self
+    }
+    
+    @discardableResult
+    func getNoteByIndex(_ i: Int) -> XCUIElement {
+        let index = i - 1
+        return scrollView(JournalViewLocators.ScrollViews.journalScrollView.accessibilityIdentifier).children(matching: .textView).matching(identifier: CardViewLocators.TextFields.noteField.accessibilityIdentifier).element(boundBy: index)
     }
 }

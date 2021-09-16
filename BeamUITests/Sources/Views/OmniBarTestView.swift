@@ -6,8 +6,21 @@
 //
 
 import Foundation
+import XCTest
 
 class OmniBarTestView: BaseView {
+    
+    func getOmniBarSearchField() -> XCUIElement {
+        return searchField(OmniBarLocators.SearchFields.omniSearchField.accessibilityIdentifier)
+    }
+    
+    func getAutocompleteResults() -> XCUIElementQuery {
+        return app.otherElements.matching(NSPredicate(format: "identifier CONTAINS '\(WebViewLocators.Other.autocompleteResult.accessibilityIdentifier)'"))
+    }
+    
+    func getSearchFieldValue() -> String {
+        return self.getOmniBarSearchField().value as? String ?? ""
+    }
     
     func clickRefreshButton() {
         button(OmniBarLocators.Buttons.refreshButton.accessibilityIdentifier).click()
@@ -25,18 +38,37 @@ class OmniBarTestView: BaseView {
         button(OmniBarLocators.Buttons.homeButton.accessibilityIdentifier).click()
     }
     
-    func navigateToJournalViaPivotButton() {
+    func navigateToCardViaPivotButton() -> CardTestView {
         button(OmniBarLocators.Buttons.openCardButton.accessibilityIdentifier).click()
+        return CardTestView()
     }
     
     func navigateToWebView() {
         button(OmniBarLocators.Buttons.openWebButton.accessibilityIdentifier).click()
     }
     
+    func inputHasFocus(_ input: XCUIElement) -> Bool {
+        return input.value(forKey: "hasKeyboardFocus") as? Bool ?? false
+    }
+    
     @discardableResult
     func openDownloadsView() -> DownloadTestView {
-        _ = button(OmniBarLocators.Buttons.downloadsButton.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout)
-        button(OmniBarLocators.Buttons.downloadsButton.accessibilityIdentifier).click()
+        let downloadViewButton = button(OmniBarLocators.Buttons.downloadsButton.accessibilityIdentifier)
+        _ = downloadViewButton.waitForExistence(timeout: minimumWaitTimeout)
+        WaitHelper().waitFor(WaitHelper.PredicateFormat.isHittable.rawValue, downloadViewButton, minimumWaitTimeout)
+        downloadViewButton.tapInTheMiddle()
+        if !staticText(DownloadViewLocators.Labels.downloadsLabel.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout) {
+            downloadViewButton.tapInTheMiddle()
+        }
         return DownloadTestView()
+    }
+    
+    func waitForAutocompleteResultsLoad(timeout: TimeInterval, expectedNumber: Int) -> Bool {
+        var count: TimeInterval = 0
+        while getAutocompleteResults().count != expectedNumber && count < timeout {
+            sleep(1)
+            count += 1
+        }
+        return count < timeout
     }
 }
