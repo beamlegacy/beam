@@ -48,8 +48,30 @@ extension TextRoot {
         guard root?.state.nodeSelection == nil,
               let node = focusedWidget as? TextNode,
               cursorPosition != 0
-        else { return }
+        else {
+            extendNodeSelectionUp()
+            editor?.hideInlineFormatter()
+            return
+        }
+
         let newCaretIndex = node.position(before: caretIndex, avoidUneditableRange: true)
+        let newCursorPosition = node.caretAtIndex(newCaretIndex).positionInSource
+        extendSelection(to: newCursorPosition)
+        caretIndex = newCaretIndex
+        node.invalidateText()
+    }
+
+    func moveRightAndModifySelection() {
+        guard root?.state.nodeSelection == nil,
+              let node = focusedWidget as? TextNode,
+              cursorPosition != node.textCount
+        else {
+            extendNodeSelectionDown()
+            editor?.hideInlineFormatter()
+            return
+        }
+
+        let newCaretIndex = node.position(after: caretIndex, avoidUneditableRange: true)
         let newCursorPosition = node.caretAtIndex(newCaretIndex).positionInSource
         extendSelection(to: newCursorPosition)
         caretIndex = newCaretIndex
@@ -58,7 +80,14 @@ extension TextRoot {
 
     func moveWordRight() {
         cancelNodeSelection()
-        guard let node = focusedWidget as? TextNode else { return }
+        guard let node = focusedWidget as? TextNode,
+              node.textCount != cursorPosition
+        else {
+            if focusedWidget as? ElementNode != nil {
+                moveRight()
+            }
+            return
+        }
         var pos = cursorPosition
         node.text.text.enumerateSubstrings(in: node.text.index(at: cursorPosition)..<node.text.text.endIndex, options: .byWords) { (_, r1, _, stop) in
             pos = node.position(at: r1.upperBound)
@@ -75,7 +104,14 @@ extension TextRoot {
 
     func moveWordLeft() {
         cancelNodeSelection()
-        guard let node = focusedWidget as? TextNode else { return }
+        guard let node = focusedWidget as? TextNode,
+              cursorPosition != 0
+        else {
+            if focusedWidget as? ElementNode != nil {
+                moveLeft()
+            }
+            return
+        }
         var range = node.text.text.startIndex ..< node.text.text.endIndex
         node.text.text.enumerateSubstrings(in: node.text.text.startIndex..<node.text.text.index(at: cursorPosition), options: .byWords) { (_, r1, _, _) in
             range = r1
@@ -121,18 +157,6 @@ extension TextRoot {
         }
         let newCursorPosition = pos == cursorPosition ? 0 : pos
         extendSelection(to: newCursorPosition)
-        node.invalidateText()
-    }
-
-    func moveRightAndModifySelection() {
-        guard root?.state.nodeSelection == nil,
-              let node = focusedWidget as? TextNode,
-              cursorPosition != node.text.count
-        else { return }
-        let newCaretIndex = node.position(after: caretIndex, avoidUneditableRange: true)
-        let newCursorPosition = node.caretAtIndex(newCaretIndex).positionInSource
-        extendSelection(to: newCursorPosition)
-        caretIndex = newCaretIndex
         node.invalidateText()
     }
 

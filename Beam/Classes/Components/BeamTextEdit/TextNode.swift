@@ -1321,7 +1321,7 @@ public class TextNode: ElementNode {
         elementKind = element.kind
     }
 
-    func caretAtIndex(_ index: Int) -> Caret {
+    public override func caretAtIndex(_ index: Int) -> Caret {
         guard let textFrame = textFrame else {
             return initialCaret
         }
