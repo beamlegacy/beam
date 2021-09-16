@@ -180,6 +180,13 @@ struct DestinationNotePicker: View {
         return note
     }
 
+    @discardableResult
+    func createJournalNote(date: Date) -> BeamNote {
+        let note = BeamNote.fetchOrCreateJournalNote(state.data.documentManager, date: date)
+        note.save(documentManager: state.data.documentManager)
+        return note
+    }
+
     func selectedCurrentAutocompleteResult(withCommand: Bool = false) {
         let noteName: String
         var note: BeamNote?
@@ -190,10 +197,13 @@ struct DestinationNotePicker: View {
             guard let result = autocompleteModel.selectedResult else {
                 return
             }
+            let finalCardName = autocompleteModel.realNameForCardName(result.text)
             if result.source == .createCard {
                 note = createNote(named: result.text)
+            } else if result.source == .autocomplete && result.text != finalCardName {
+                note = createJournalNote(date: autocompleteModel.getDateForCardReplacementJournalNote(result.text))
             }
-            noteName = result.text
+            noteName = finalCardName
         }
         changeDestinationCard(to: noteName, note: note)
         DispatchQueue.main.async {

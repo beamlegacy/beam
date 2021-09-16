@@ -363,10 +363,12 @@ extension PointAndShootCardPicker {
             guard let result = autocompleteModel.selectedResult else {
                 return
             }
+            finalCardName = autocompleteModel.realNameForCardName(result.text)
             if result.source == .createCard {
                 createNote(named: result.text)
+            } else if result.source == .autocomplete && finalCardName != cardSearchField {
+                createJournalNote(date: autocompleteModel.getDateForCardReplacementJournalNote(cardSearchField))
             }
-            finalCardName = result.text
         }
         cardSearchField = finalCardName
         currentCardName = finalCardName
@@ -378,6 +380,15 @@ extension PointAndShootCardPicker {
     @discardableResult
     private func createNote(named name: String) -> BeamNote {
         let note = BeamNote.fetchOrCreate(data.documentManager, title: name)
+        note.save(documentManager: data.documentManager)
+        return note
+    }
+
+    // MARK: - createJournalNote
+    @discardableResult
+    private func createJournalNote(date: Date) -> BeamNote {
+        let note = BeamNote.fetchOrCreateJournalNote(data.documentManager,
+                                                     date: date)
         note.save(documentManager: data.documentManager)
         return note
     }
