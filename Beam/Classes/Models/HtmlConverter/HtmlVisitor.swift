@@ -220,7 +220,7 @@ extension HtmlVisitor {
 
     static fileprivate func storeImageData(_ data: Data, _ mimeType: String, _ name: String, _ fileStorage: BeamFileStorage) -> String? {
         do {
-            let fileId = data.MD5
+            let fileId = data.SHA256
             try fileStorage.insert(name: name, uid: fileId, data: data, type: mimeType)
             return fileId
         } catch let error {
