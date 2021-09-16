@@ -181,12 +181,75 @@ extension DestinationNoteAutocompleteList {
             return nil
         }
 
-        let todaysCardReplacementName = "Today"
+        // swiftlint:disable:next nesting
+        enum CardReplacementKeyword: String, CaseIterable {
+            case yesterday = "Yesterday"
+            case today = "Today"
+            case tomorrow = "Tomorrow"
+        }
+
         func realNameForCardName(_ cardName: String) -> String {
-            guard let data = data, cardName.lowercased() == todaysCardReplacementName.lowercased() else {
+            guard let data = data else {
                 return cardName
             }
-            return data.todaysName
+
+            var realCardName = cardName
+            CardReplacementKeyword.allCases.forEach { replacement in
+                if replacement.rawValue.lowercased().contains(cardName.lowercased()) {
+                    switch replacement {
+                    case .today:
+                        realCardName = data.todaysName
+                    case .tomorrow:
+                        guard let date = BeamNoteType.nextJournal().journalDate else { break }
+                        realCardName = BeamDate.journalNoteTitle(for: date, with: .long)
+                    case .yesterday:
+                        guard let date = BeamNoteType.previousJournal().journalDate else { break }
+                        realCardName = BeamDate.journalNoteTitle(for: date, with: .long)
+                    }
+                }
+            }
+            return realCardName
+        }
+
+        func getDateForCardReplacementJournalNote(_ cardName: String) -> Date {
+            var journalDate = BeamDate.now
+            CardReplacementKeyword.allCases.forEach { replacement in
+                if replacement.rawValue.lowercased().contains(cardName.lowercased()) {
+                    switch replacement {
+                    case .today:
+                        guard let date = BeamNoteType.todaysJournal.journalDate else { break }
+                        journalDate = date
+                    case .tomorrow:
+                        guard let date = BeamNoteType.nextJournal().journalDate else { break }
+                        journalDate = date
+                    case .yesterday:
+                        guard let date = BeamNoteType.previousJournal().journalDate else { break }
+                        journalDate = date
+                    }
+                }
+            }
+            return journalDate
+        }
+
+        private func getAutoCompleteResutsForCardReplacement(_ text: String) -> [AutocompleteResult] {
+            var autoCompleteResults = [AutocompleteResult]()
+
+            CardReplacementKeyword.allCases.forEach { replacement in
+                if replacement.rawValue.lowercased().contains(text.lowercased()) {
+                    switch replacement {
+                    case .today:
+                        autoCompleteResults.append(AutocompleteResult(text: CardReplacementKeyword.today.rawValue,
+                                                                      source: .autocomplete))
+                    case .tomorrow:
+                        autoCompleteResults.append(AutocompleteResult(text: CardReplacementKeyword.tomorrow.rawValue,
+                                                                      source: .autocomplete))
+                    case .yesterday:
+                        autoCompleteResults.append(AutocompleteResult(text: CardReplacementKeyword.yesterday.rawValue,
+                                                                      source: .autocomplete))
+                    }
+                }
+            }
+            return autoCompleteResults
         }
 
         private func updateSearchResults() {
@@ -212,6 +275,7 @@ extension DestinationNoteAutocompleteList {
             }
         }
 
+
         private func getSearchResultForNoteTitle(text: String, itemLimit: Int) -> [AutocompleteResult] {
             guard let data = data else { return [] }
             var autocompleteItems: [AutocompleteResult]
@@ -223,17 +287,17 @@ extension DestinationNoteAutocompleteList {
             } else if useRecents {
                 items = data.documentManager.loadAllWithLimit(itemLimit)
             }
-            if (todaysCardReplacementName.lowercased().contains(text.lowercased())
-                    && !items.contains(where: { $0.title == data.todaysName })) {
-                let todaysNotes = data.documentManager.documentsWithLimitTitleMatch(title: data.todaysName, limit: 1)
-                items.insert(contentsOf: todaysNotes, at: 0)
-                items = Array(items.prefix(itemLimit))
-            }
-            allowCreateCard = allowCreateCard
-                && !items.contains(where: { $0.title.lowercased() == text.lowercased() })
+            items = Array(items.prefix(itemLimit))
             autocompleteItems = items.map {
                 AutocompleteResult(text: $0.title, source: .note(noteId: $0.id), completingText: searchText, uuid: $0.id)
             }
+            let cardReplacementResults = getAutoCompleteResutsForCardReplacement(text)
+            if !cardReplacementResults.isEmpty {
+                autocompleteItems.insert(contentsOf: cardReplacementResults, at: 0)
+                autocompleteItems = Array(autocompleteItems.prefix(itemLimit))
+            }
+            allowCreateCard = allowCreateCard
+                && !items.contains(where: { $0.title.lowercased() == text.lowercased() })
             if allowCreateCard && !text.isEmpty {
                 let createItem = AutocompleteResult(text: text, source: .createCard, information: "New Card")
                 if autocompleteItems.count >= itemLimit {

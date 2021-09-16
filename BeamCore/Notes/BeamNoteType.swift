@@ -60,6 +60,18 @@ public enum BeamNoteType: Codable, Equatable {
         }
     }
 
+    public static func previousJournal() -> BeamNoteType {
+        let calendar = Calendar(identifier: .iso8601)
+        let previousJournalDate = calendar.date(byAdding: .day, value: -1, to: BeamDate.now) ?? BeamDate.now
+        return .journal(titleForDate(previousJournalDate))
+    }
+
+    public static func nextJournal() -> BeamNoteType {
+        let calendar = Calendar(identifier: .iso8601)
+        let nextJournalDate = calendar.date(byAdding: .day, value: 1, to: BeamDate.now) ?? BeamDate.now
+        return .journal(titleForDate(nextJournalDate))
+    }
+
     public static var todaysJournal: BeamNoteType {
         return Self.journalForDate(BeamDate.now)
     }
