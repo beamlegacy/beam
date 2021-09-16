@@ -32,6 +32,7 @@ class BaseTest: XCTestCase {
         add(attachment)
     }
     
+    @discardableResult
     func launchApp() -> JournalTestView {
         XCUIApplication().launch()
         return JournalTestView()
@@ -42,4 +43,12 @@ class BaseTest: XCTestCase {
         app.launchArguments = [argument]
         app.launch()
     }
+    
+    func assertElementProperties(_ element: XCUIElement, _ isSelectedExpected: Bool, _ isEnabledExpected: Bool, _ isHittableExpected: Bool) {
+        XCTAssertEqual(isSelectedExpected, element.isSelected)
+        XCTAssertEqual(isEnabledExpected, element.isEnabled)
+        XCTAssertEqual(isHittableExpected, element.isHittable)
+    }
+    
+    func testRailPrint(_ text: String) { print(text) }
 }

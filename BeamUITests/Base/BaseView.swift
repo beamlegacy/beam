@@ -13,6 +13,7 @@ class BaseView {
     
     var app: XCUIApplication { XCUIApplication() }
     let implicitWaitTimeout = TimeInterval(10)
+    let minimumWaitTimeout = TimeInterval(2)
     let defaultPressDurationSeconds = 1.5
     
     //Wrapper over the elements
@@ -36,8 +37,20 @@ class BaseView {
         return app.windows.searchFields[element]
     }
     
+    func secureTextField(_ element: String) -> XCUIElement {
+        return app.windows.secureTextFields[element]
+    }
+    
+    func checkBox(_ element: String) -> XCUIElement {
+        return app.windows.checkBoxes[element]
+    }
+    
     func button(_ element: String) -> XCUIElement {
         return app.windows.buttons[element]
+    }
+    
+    func group(_ element: String) -> XCUIElement {
+        return app.windows.groups[element]
     }
     
     func image(_ element: String) -> XCUIElement {
@@ -75,9 +88,11 @@ class BaseView {
     }
     
     //Omni bar search field is accessible from any view
-    
-    func clickOmniBarSearchField() {
-        otherElement(OmniBarLocators.SearchFields.omniSearchField.accessibilityIdentifier).click()
+    @discardableResult
+    func clickOmniBarSearchField() -> OmniBarTestView {
+        let omnibarView = OmniBarTestView()
+        omnibarView.getOmniBarSearchField().click()
+        return omnibarView
     }
     
     @discardableResult
@@ -88,6 +103,7 @@ class BaseView {
         omniSearchField.typeText(searchText)
         if typeReturnButton {
             typeKeyboardKey(.enter)
+            _ = button(OmniBarLocators.Buttons.openCardButton.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout)
         }
         return WebTestView()
     }
