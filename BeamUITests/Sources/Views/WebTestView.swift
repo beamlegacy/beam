@@ -35,4 +35,29 @@ class WebTestView: BaseView {
         return CardTestView()
         }
     }
+    
+    @discardableResult
+    func openDestinationCard() -> CardTestView {
+        WaitHelper().waitFor(WaitHelper.PredicateFormat.isHittable.rawValue,  button(OmniBarLocators.Buttons.openCardButton.accessibilityIdentifier))
+        button(OmniBarLocators.Buttons.openCardButton.accessibilityIdentifier).click()
+        return CardTestView()
+    }
+    
+    func getNumberOfTabs() -> Int {
+        _ = group(WebViewLocators.Images.browserTabBar.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout)
+        return app.groups.matching(identifier:WebViewLocators.Images.browserTabBar.accessibilityIdentifier).count
+    }
+    
+    @discardableResult
+    func openTab() -> WebTestView {
+        image(WebViewLocators.Buttons.newTabButton.accessibilityIdentifier).click()
+        return self
+    }
+    
+    @discardableResult
+    func closeTab() -> WebTestView {
+        app.groups.matching(identifier:WebViewLocators.Images.browserTabBar.accessibilityIdentifier).firstMatch.hover()
+        app.images.matching(identifier: WebViewLocators.Buttons.closeTabButton.accessibilityIdentifier).firstMatch.click()
+        return self
+    }
 }
