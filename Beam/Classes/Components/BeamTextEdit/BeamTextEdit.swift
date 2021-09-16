@@ -1230,8 +1230,8 @@ public extension CALayer {
     }
 
     override public func moveRightAndModifySelection(_ sender: Any?) {
-        guard let node = focusedWidget as? TextNode else { return }
-        let showFormatter = rootNode.cursorPosition != node.text.count
+        guard let node = focusedWidget as? ElementNode else { return }
+        let showFormatter = rootNode.cursorPosition != node.textCount
         rootNode.moveRightAndModifySelection()
         if showFormatter {
             showInlineFormatterOnKeyEventsAndClick(isKeyEvent: true)

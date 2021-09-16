@@ -614,6 +614,14 @@ public class ElementNode: Widget {
         after ? min(1, caretIndex + 1) : caretIndex
     }
 
+    public func caretAtIndex(_ index: Int) -> Caret {
+        let actualIndex = index.clamp(0, textCount)
+        let point = NSPoint(x: contentsLead + CGFloat(caretIndex == 0 ? 0 : contentsFrame.width - contentsLead), y: 0)
+
+        return Caret(offset: point, indexInSource: actualIndex, indexOnScreen: actualIndex, edge: actualIndex == 0 ? .leading : .trailing, inSource: true, line: 0)
+    }
+
+
     override var cmdManager: CommandManager<Widget> {
         return displayedElement.note?.cmdManager ?? super.cmdManager
     }
