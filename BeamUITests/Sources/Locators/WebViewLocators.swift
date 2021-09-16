@@ -11,11 +11,20 @@ enum WebViewLocators {
     
     enum Buttons: String, CaseIterable, UIElement {
         case newTabButton = "tabs-new"
+        case closeTabButton = "tabs-close_xs"
         case destinationCard = "DestinationNoteTitle"
     }
     
     enum SearchFields: String, CaseIterable, UIElement {
         case destinationCardSearchField = "DestinationNoteSearchField"
+    }
+    
+    enum Images: String, CaseIterable, UIElement {
+        case browserTabBar = "browserTabBarView"
+    }
+    
+    enum Other: String, CaseIterable, UIElement {
+        case autocompleteResult = "autocompleteResult"
     }
     
 }

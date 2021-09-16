@@ -16,25 +16,25 @@ class CardViewTests: BaseTest {
         let defaultNumberOfCardsAtFreshInstallation = 1
         let journalView = launchApp()
         
-        print("Given I open All Cards view")
+        testRailPrint("Given I open All Cards view")
         let allCardsView = journalView.openAllCardsMenu()
-        print("Then number of cards available by default is \(defaultNumberOfCardsAtFreshInstallation)")
+        testRailPrint("Then number of cards available by default is \(defaultNumberOfCardsAtFreshInstallation)")
         XCTAssertEqual(defaultNumberOfCardsAtFreshInstallation, allCardsView.getNumberOfCards())
         
         let todaysDateInCardTitleFormat = DateHelper().getTodaysDateString(DateHelper.DateFormats.cardViewTitle.rawValue)
         let todaysDateInCardCreationDateFormat = DateHelper().getTodaysDateString(DateHelper.DateFormats.cardViewCreation.rawValue)
-        print("When I open \(todaysDateInCardTitleFormat) from Journal view view")
+        testRailPrint("When I open \(todaysDateInCardTitleFormat) from Journal view view")
         let cardView = allCardsView.openJournal()
                                     .openRecentCardByName(todaysDateInCardTitleFormat)
         
-        print("Then the title of the card is \(todaysDateInCardTitleFormat) and its creation date is \(todaysDateInCardCreationDateFormat)")
+        testRailPrint("Then the title of the card is \(todaysDateInCardTitleFormat) and its creation date is \(todaysDateInCardCreationDateFormat)")
         XCTAssertTrue(cardView.staticText(CardViewLocators.StaticTexts.privateLabel.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
         XCTAssertTrue(cardView.staticText(todaysDateInCardCreationDateFormat).exists)
         XCTAssertTrue(cardView.image(CardViewLocators.Buttons.editorOptions.accessibilityIdentifier).exists)
         XCTAssertTrue(cardView.staticText(todaysDateInCardTitleFormat).exists)
         
         let defaultNotesCount = 1
-        print("Then number of notes available by default is \(defaultNotesCount) and it is empty")
+        testRailPrint("Then number of notes available by default is \(defaultNotesCount) and it is empty")
         let notes = cardView.getCardNotesForVisiblePart()
         XCTAssertEqual(notes.count, defaultNotesCount)
         XCTAssertEqual(notes.first?.value as! String, "")
