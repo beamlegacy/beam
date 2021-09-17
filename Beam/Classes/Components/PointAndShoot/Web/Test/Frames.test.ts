@@ -1,8 +1,8 @@
-import {PointAndShoot} from "./PointAndShoot"
-import {BeamDocumentMock, BeamHTMLIFrameElementMock, BeamMouseEvent, BeamNamedNodeMap} from "./Test/BeamMocks"
-import {BeamWindowMock} from "./Test/BeamWindowMock"
-import {PointAndShootUIMock} from "./Test/PointAndShootUIMock"
-import {BeamWebFactoryMock} from "./Test/BeamWebFactoryMock"
+import {PointAndShoot} from "../PointAndShoot"
+import {BeamDocumentMock, BeamHTMLIFrameElementMock, BeamMouseEvent, BeamNamedNodeMap} from "./BeamMocks"
+import {BeamWindowMock} from "./BeamWindowMock"
+import {PointAndShootUIMock} from "./PointAndShootUIMock"
+import {BeamWebFactoryMock} from "./BeamWebFactoryMock"
 
 /**
  * @param frameEls {BeamHTMLElement[]}

@@ -1,6 +1,6 @@
-import {Native} from "./Native"
-import {BeamDocumentMock, BeamHTMLIFrameElementMock, BeamLocationMock} from "./Test/BeamMocks"
-import {BeamWindowMock} from "./Test/BeamWindowMock"
+import {Native} from "../Native"
+import {BeamDocumentMock, BeamHTMLIFrameElementMock, BeamLocationMock} from "./BeamMocks"
+import {BeamWindowMock} from "./BeamWindowMock"
 
 /**
  *
