@@ -96,12 +96,17 @@ xctests UI:
   interruptible: true
 
 js_test:
+  variables:
+    RUN_BENCHMARK: "true"
   stage: test
   image: node:16-alpine
+  before_script:
+    - date
   cache:
     key: .yarn-cache
-  before_script:
-    - yarn install
+    paths:
+    - ./Beam/Classes/Components/PointAndShoot/Web/node_modules/
+    - .yarn
   only:
     - master
     - develop
@@ -109,8 +114,10 @@ js_test:
   script:
     - yarn --cwd ./Beam/Classes/Components/PointAndShoot/Web run build
     - yarn --cwd ./Beam/Classes/Components/PointAndShoot/Web run test-ci
+    - yarn --cwd ./Beam/Classes/Components/PointAndShoot/Web run benchmark-show
   coverage: '/All files\s+\|\s+([\d.]+)/'
   artifacts:
+    when: always
     reports:
       junit: ./Beam/Classes/Components/PointAndShoot/Web/junit.xml
       codequality: gl-codequality.json

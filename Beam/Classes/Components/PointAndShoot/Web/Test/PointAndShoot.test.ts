@@ -1,5 +1,5 @@
-import { BeamRange } from "./BeamTypes"
-import { PointAndShoot } from "./PointAndShoot"
+import { BeamRange } from "../BeamTypes"
+import { PointAndShoot } from "../PointAndShoot"
 import {
   BeamDocumentMock,
   BeamHTMLElementMock, BeamHTMLInputElementMock, BeamHTMLTextAreaElementMock,
@@ -7,11 +7,11 @@ import {
   BeamMouseEvent,
   BeamRangeMock,
   BeamSelectionMock
-} from "./Test/BeamMocks"
-import { BeamWindowMock } from "./Test/BeamWindowMock"
-import { PointAndShootUIMock } from "./Test/PointAndShootUIMock"
-import { BeamWebFactoryMock } from "./Test/BeamWebFactoryMock"
-import { BeamElementHelper } from "./BeamElementHelper"
+} from "./BeamMocks"
+import { BeamWindowMock } from "./BeamWindowMock"
+import { PointAndShootUIMock } from "./PointAndShootUIMock"
+import { BeamWebFactoryMock } from "./BeamWebFactoryMock"
+import { BeamElementHelper } from "../BeamElementHelper"
 
 /**
  * @param frameEls {BeamHTMLElement[]}

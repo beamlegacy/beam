@@ -89,7 +89,6 @@
 		33793AD1265CFEC50041E1B8 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 9631C746251CE997009B40C4 /* SwiftSoup */; };
 		33793AD2265CFEC50041E1B8 /* FavIcon in Frameworks */ = {isa = PBXBuildFile; productRef = 96474E3E254D9ADB00A920B3 /* FavIcon */; };
 		33793AD7265CFEC50041E1B8 /* KeychainAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 524CF6D225F276D1007312F0 /* KeychainAccess */; };
-		337EAE6026A954AD008E4020 /* UITests-Alerts.html in Resources */ = {isa = PBXBuildFile; fileRef = 337EAE5F26A954AD008E4020 /* UITests-Alerts.html */; };
 		338A66A0268DC26000B056EB /* LayerRemoverAnimationDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 338A669F268DC26000B056EB /* LayerRemoverAnimationDelegate.swift */; };
 		338A66C2268E053C00B056EB /* BeamDownloadDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 338A66C1268E053C00B056EB /* BeamDownloadDocument.swift */; };
 		3392E56D269D82FE000FA401 /* ClickCatchingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3392E56C269D82FE000FA401 /* ClickCatchingView.swift */; };
@@ -407,21 +406,41 @@
 		8AC2EFDB266F8A0800049005 /* PointAndShootPointingTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AC2EFDA266F8A0800049005 /* PointAndShootPointingTest.swift */; };
 		8AC2EFDD266F8A1400049005 /* PointAndShootShootingTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AC2EFDC266F8A1400049005 /* PointAndShootShootingTest.swift */; };
 		8AC2EFDF266F8A6F00049005 /* PointAndShootPersistToJournalTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AC2EFDE266F8A6F00049005 /* PointAndShootPersistToJournalTest.swift */; };
-		8AC91AA226C12E3D003C14EB /* UITests-4.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AC91AA026C12E3D003C14EB /* UITests-4.html */; };
-		8AC91AA926C12EFF003C14EB /* beam-logo-test.png in Resources */ = {isa = PBXBuildFile; fileRef = 8AC91AA826C12EFF003C14EB /* beam-logo-test.png */; };
 		8AD2632326F485190074D673 /* HtmlVisitorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD2632226F485190074D673 /* HtmlVisitorTests.swift */; };
 		8AD2632A26F489160074D673 /* HtmlNoteAdapterPerformanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD2632926F489160074D673 /* HtmlNoteAdapterPerformanceTests.swift */; };
 		8AD2632C26F48C9A0074D673 /* HtmlNoteAdapterLargeDOMPerformanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD2632B26F48C9A0074D673 /* HtmlNoteAdapterLargeDOMPerformanceTests.swift */; };
+		8AD2635B26F4A0480074D673 /* Native.test.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2633D26F4A0480074D673 /* Native.test.ts */; };
+		8AD2635C26F4A0480074D673 /* BeamNode.test.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2633E26F4A0480074D673 /* BeamNode.test.ts */; };
+		8AD2635D26F4A0480074D673 /* WebEventsUIMock.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2633F26F4A0480074D673 /* WebEventsUIMock.ts */; };
+		8AD2635E26F4A0480074D673 /* PointAndShootUI_native.test.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2634026F4A0480074D673 /* PointAndShootUI_native.test.ts */; };
+		8AD2635F26F4A0480074D673 /* EventsMock.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2634126F4A0480074D673 /* EventsMock.ts */; };
+		8AD2636026F4A0480074D673 /* BeamMocks.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2634226F4A0480074D673 /* BeamMocks.ts */; };
+		8AD2636126F4A0480074D673 /* BeamEventTargetMock.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2634326F4A0480074D673 /* BeamEventTargetMock.ts */; };
+		8AD2636226F4A0480074D673 /* PointAndShootUIMock.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2634426F4A0480074D673 /* PointAndShootUIMock.ts */; };
+		8AD2636326F4A0480074D673 /* PointAndShoot.test.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2634526F4A0480074D673 /* PointAndShoot.test.ts */; };
+		8AD2636426F4A0480074D673 /* NativeMock.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2634626F4A0480074D673 /* NativeMock.ts */; };
+		8AD2636526F4A0480074D673 /* PointAndShootUI_native-Benchmark.test.bench in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2634826F4A0480074D673 /* PointAndShootUI_native-Benchmark.test.bench */; };
+		8AD2636626F4A0480074D673 /* BeamWindowDecorator.js in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2634926F4A0480074D673 /* BeamWindowDecorator.js */; };
+		8AD2636726F4A0480074D673 /* PointAndShootUI_native-Benchmark.test.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2634A26F4A0480074D673 /* PointAndShootUI_native-Benchmark.test.ts */; };
+		8AD2636826F4A0480074D673 /* UITests-Alerts.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2634C26F4A0480074D673 /* UITests-Alerts.html */; };
+		8AD2636926F4A0480074D673 /* UITests-2.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2634D26F4A0480074D673 /* UITests-2.html */; };
+		8AD2636A26F4A0480074D673 /* UITests-3.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2634E26F4A0480074D673 /* UITests-3.html */; };
+		8AD2636B26F4A0480074D673 /* video.mov in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2634F26F4A0480074D673 /* video.mov */; };
+		8AD2636C26F4A0480074D673 /* UITests-4.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2635026F4A0480074D673 /* UITests-4.html */; };
+		8AD2636D26F4A0480074D673 /* UITests-Password.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2635126F4A0480074D673 /* UITests-Password.html */; };
+		8AD2636E26F4A0480074D673 /* UITests-Media.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2635226F4A0480074D673 /* UITests-Media.html */; };
+		8AD2636F26F4A0480074D673 /* audio.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2635326F4A0480074D673 /* audio.mp3 */; };
+		8AD2637026F4A0480074D673 /* Beam.css in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2635426F4A0480074D673 /* Beam.css */; };
+		8AD2637126F4A0480074D673 /* UITests-Playground.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2635526F4A0480074D673 /* UITests-Playground.html */; };
+		8AD2637226F4A0480074D673 /* beam-logo-test.png in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2635626F4A0480074D673 /* beam-logo-test.png */; };
+		8AD2637326F4A0480074D673 /* UITests-1.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2635726F4A0480074D673 /* UITests-1.html */; };
+		8AD2637426F4A0480074D673 /* Frames.test.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2635826F4A0480074D673 /* Frames.test.ts */; };
+		8AD2637526F4A0480074D673 /* BeamWindowMock.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2635926F4A0480074D673 /* BeamWindowMock.ts */; };
+		8AD2637626F4A0480074D673 /* BeamWebFactoryMock.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2635A26F4A0480074D673 /* BeamWebFactoryMock.ts */; };
 		8AD9DEBE26C6ACF00015B559 /* PointAndShootOffsetWithAnimation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD9DEBD26C6ACF00015B559 /* PointAndShootOffsetWithAnimation.swift */; };
-		8AEADBD126776BC500E36BAC /* UITests-Password.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AEADBC926776BC500E36BAC /* UITests-Password.html */; };
 		8AED4FF026C2A3AA00E29DB7 /* PointAndShootFrameOffset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AED4FEF26C2A3AA00E29DB7 /* PointAndShootFrameOffset.swift */; };
 		8AF0E33D268F30E0007C75D8 /* index_prod.js in Resources */ = {isa = PBXBuildFile; fileRef = 8AF0E335268F30E0007C75D8 /* index_prod.js */; };
-		8AF53BAA266A1BFA00C3CB2E /* Beam.css in Resources */ = {isa = PBXBuildFile; fileRef = 8AF53BA2266A1BFA00C3CB2E /* Beam.css */; };
-		8AF53BAC266A241700C3CB2E /* UITests-1.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AF53BAB266A241700C3CB2E /* UITests-1.html */; };
-		8AF53BAE266A241C00C3CB2E /* UITests-2.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AF53BAD266A241C00C3CB2E /* UITests-2.html */; };
 		8AF61F14267BA292006DD5C2 /* RBAllowlistEntry.m in Sources */ = {isa = PBXBuildFile; fileRef = 8AF61F13267BA292006DD5C2 /* RBAllowlistEntry.m */; };
-		8AFA9D50266924EE00AA59EE /* UITests-3.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AFA9D48266924EE00AA59EE /* UITests-3.html */; };
-		8AFD64882693394800166DC0 /* UITests-Playground.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AFD64802693394800166DC0 /* UITests-Playground.html */; };
 		9609AF502617159B00322141 /* URL+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418173BD2581251600317ED8 /* URL+Beam.swift */; };
 		960A57E4264C84BD0061E8D2 /* ProxyElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 960A57E3264C84BD0061E8D2 /* ProxyElement.swift */; };
 		960A57E6264C851E0061E8D2 /* ProxyImageNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 960A57E5264C851E0061E8D2 /* ProxyImageNode.swift */; };
@@ -609,9 +628,6 @@
 		A0F558E626BD51A70024C47E /* EditorDebugPreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0F558E526BD51A70024C47E /* EditorDebugPreferencesView.swift */; };
 		A0F558F126BD536A0024C47E /* PreferencesManager+EditorDebug.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0F558F026BD536A0024C47E /* PreferencesManager+EditorDebug.swift */; };
 		A0F558F526BD8F260024C47E /* DebugSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0F558F426BD8F260024C47E /* DebugSection.swift */; };
-		A500F93626BAD78A0029D34F /* audio.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = A500F92E26BAD78A0029D34F /* audio.mp3 */; };
-		A500F93A26BAE2850029D34F /* UITests-Media.html in Resources */ = {isa = PBXBuildFile; fileRef = A500F93926BAE2850029D34F /* UITests-Media.html */; };
-		A500F93C26BAEFCA0029D34F /* video.mov in Resources */ = {isa = PBXBuildFile; fileRef = A500F93B26BAEFCA0029D34F /* video.mov */; };
 		A50241D426D8FA6600C93E1E /* GutterItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50241D326D8FA6600C93E1E /* GutterItemView.swift */; };
 		A50612D626CC75200053AD37 /* Calendar+Calculations.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50612D526CC75200053AD37 /* Calendar+Calculations.swift */; };
 		A50612DF26CC75C70053AD37 /* Calendar+CalculationsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50612DE26CC75C70053AD37 /* Calendar+CalculationsTests.swift */; };
@@ -754,39 +770,28 @@
 		B5EB9A7826C2A887004C798A /* OmnibarAutocompleteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5EB9A7726C2A887004C798A /* OmnibarAutocompleteTests.swift */; };
 		BAA6703B2414F077ED3A09D8 /* PasswordMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA675B80B855A4B2886805B /* PasswordMessageHandler.swift */; };
 		BAA6704409BDC8AB92E95F8D /* WebEventsUI_native.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA67EEADE1294572893B487 /* WebEventsUI_native.ts */; };
-		BAA6704CFB6AE4C1D090F4E4 /* BeamWebFactoryMock.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA67E0D441DE56B0908A8ED /* BeamWebFactoryMock.ts */; };
 		BAA670C2CFE33BC83DF12343 /* PointAndShootCardPickerPositioning.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA6719DA7B5A8574E64AE71 /* PointAndShootCardPickerPositioning.swift */; };
 		BAA67192B5EB78981741C311 /* WebPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67CEFFAFA38F29CF1C84F /* WebPage.swift */; };
 		BAA671B36B54CF95A2D162CB /* BrowserTabConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67F4FA344471FF8691E1A /* BrowserTabConfiguration.swift */; };
 		BAA67259A3927FBE4C92280B /* BrowsingTreeScorer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA6777EB9326511BE7FD0DC /* BrowsingTreeScorer.swift */; };
-		BAA672E9AF7741DB2798866B /* BeamNode.test.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA674383059F4C483992235 /* BeamNode.test.ts */; };
 		BAA6734B9E1478E3084B0A3A /* WebNoteControllerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA6711C12F68C78C7D44DA5 /* WebNoteControllerTest.swift */; };
 		BAA67380A92BBC1FB039AA3F /* WebEventsUI.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA67032568FA8B5DDE5841B /* WebEventsUI.ts */; };
 		BAA673C9223F304A166B92D5 /* WebNoteController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67971FD6352F46D77E3BE /* WebNoteController.swift */; };
 		BAA674265355DDF432FE4B7A /* WebNavigationMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67F5672D6E4512AF90CAC /* WebNavigationMessageHandler.swift */; };
-		BAA67473B64126D0D6C05B40 /* BeamWindowMock.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA67641C3624DA503CB21CF /* BeamWindowMock.ts */; };
 		BAA6750B78E3812C7DA5DF7C /* tsconfig.json in Resources */ = {isa = PBXBuildFile; fileRef = BAA6738E9DD9D41F95BB1602 /* tsconfig.json */; };
 		BAA675A0EEE5F4636AECCE5D /* PointAndShootCardPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA670FA9720D0BD2011EC10 /* PointAndShootCardPicker.swift */; };
 		BAA675AE9C103046AC022CBA /* .sassrc in Resources */ = {isa = PBXBuildFile; fileRef = BAA679E2DF3556E0E444844D /* .sassrc */; };
-		BAA675D3496DCF90EB35C8AD /* BeamEventTargetMock.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA67A2E806033B585ED355B /* BeamEventTargetMock.ts */; };
-		BAA6760269415BA47D933E97 /* PointAndShootUI_native.test.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA676AA87963F568B000616 /* PointAndShootUI_native.test.ts */; };
 		BAA676DF0484BA2E4D6CECDF /* BeamWebNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA670E1903659A32C562E3E /* BeamWebNavigationController.swift */; };
 		BAA676F2C83EBA770CB34F36 /* Scorable.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA6755F00C445E4C93AF3AA /* Scorable.swift */; };
 		BAA677E962485A7EDFAF72AC /* PointAndShoot.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67E198CBE7B676642992F /* PointAndShoot.swift */; };
-		BAA678915DE6AEEE71A1BC1E /* PointAndShootUIMock.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA67425D94953DB6EED0FB3 /* PointAndShootUIMock.ts */; };
 		BAA6792F5CF42C0D8FEC2A9B /* WebEvents.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA674235D786C984B68A49A /* WebEvents.ts */; };
-		BAA67958DEBA77F2BE94F617 /* Native.test.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA6768EED1949F79C1C7B3C /* Native.test.ts */; };
 		BAA679844CE644AE293FDA04 /* BrowsingSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA678DCBD094131A9BC96F2 /* BrowsingSession.swift */; };
 		BAA679A5A0853E5E53ACD3F1 /* BeamDownloadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA678E5952B4D5130248886 /* BeamDownloadManager.swift */; };
-		BAA679F30E3171511E32341B /* WebEventsUIMock.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA673EAA75F31F568CEFEE0 /* WebEventsUIMock.ts */; };
 		BAA679FFB80537CB6DE74025 /* BeamMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67A4B26FC61E9505EF7DB /* BeamMessageHandler.swift */; };
 		BAA67A0791B680C684C00DFD /* BeamWebkitUIDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67CB267E1C45A009AC2D9 /* BeamWebkitUIDelegate.swift */; };
 		BAA67A1DD75801D8B25037E9 /* BeamTypes.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA67429E31F093002EE2693 /* BeamTypes.ts */; };
-		BAA67A54C1D488CD065A7688 /* BeamMocks.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA670B42D1D6F585D0EF013 /* BeamMocks.ts */; };
 		BAA67A6498E4E69779855E19 /* DownloadManagerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67555219BDD4CBD252C60 /* DownloadManagerTest.swift */; };
 		BAA67A72C76AE25BF2FC60BD /* BrowsingScorer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67D3D273F24009F3AE570 /* BrowsingScorer.swift */; };
-		BAA67A80187509C17C3BE040 /* EventsMock.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA67218A94BBEE8A4B055AD /* EventsMock.ts */; };
-		BAA67AA1FFC6C586C8811D22 /* NativeMock.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA672ED83D75722F6988D7B /* NativeMock.ts */; };
 		BAA67AB22C0A91EBCA6D7BB7 /* WebNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67837448460D14C798F73 /* WebNavigationController.swift */; };
 		BAA67AB77852A4EE310BF552 /* PointAndShoot+ShootFrameFusionRect.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA674C683DA5DEC733F4746 /* PointAndShoot+ShootFrameFusionRect.swift */; };
 		BAA67ACD35DACF0E03ED520B /* DownloadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67A3C749F22077F5B7194 /* DownloadManager.swift */; };
@@ -807,7 +812,6 @@
 		BAA67EC2B781F8A78CD5A6B0 /* Beam.scss in Resources */ = {isa = PBXBuildFile; fileRef = BAA67EA80CD97EDF95F98D66 /* Beam.scss */; };
 		BAA67F0398B7B9D2CA9ADE25 /* ContentTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA674174D9C44BC3C8FF465 /* ContentTypes.swift */; };
 		BAA67FA1EA0AEC590CEE0AB8 /* WebNavigationContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67226F0A10301D829E071 /* WebNavigationContext.swift */; };
-		BAA67FC2BABDCB5F962CDE22 /* Frames.test.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA678F7FE18AF760346FB0B /* Frames.test.ts */; };
 		DA0EA7172698400400BD5D2F /* LongTermUrlScoreStoreTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0EA7162698400400BD5D2F /* LongTermUrlScoreStoreTest.swift */; };
 		DA1EB2A126CD33D5006AEB86 /* WebSessionizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1EB2A026CD33D5006AEB86 /* WebSessionizer.swift */; };
 		DA3239D8269DDE2F00A1F4C3 /* LongTermUrlScore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3239D7269DDE2F00A1F4C3 /* LongTermUrlScore.swift */; };
@@ -1027,7 +1031,6 @@
 		3355997326CBDDC900F52C23 /* SearchInContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchInContentView.swift; sourceTree = "<group>"; };
 		3355997526CBE0AE00F52C23 /* SearchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchViewModel.swift; sourceTree = "<group>"; };
 		3355999526CBF11E00F52C23 /* SearchWebPage.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = SearchWebPage.js; sourceTree = "<group>"; };
-		337EAE5F26A954AD008E4020 /* UITests-Alerts.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = "UITests-Alerts.html"; sourceTree = "<group>"; };
 		338A669F268DC26000B056EB /* LayerRemoverAnimationDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerRemoverAnimationDelegate.swift; sourceTree = "<group>"; };
 		338A66C1268E053C00B056EB /* BeamDownloadDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamDownloadDocument.swift; sourceTree = "<group>"; };
 		338F276D26DD14B900D4AC97 /* Test.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Test.xcconfig; sourceTree = "<group>"; };
@@ -1361,7 +1364,6 @@
 		8A9B1A9E26DD33EA00B3B5FA /* PointAndShoot+Target.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PointAndShoot+Target.swift"; sourceTree = "<group>"; };
 		8AA2431526E63A5F002A553A /* SwiftSoup+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SwiftSoup+Beam.swift"; sourceTree = "<group>"; };
 		8AA2431726E63C0D002A553A /* HtmlVisitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HtmlVisitor.swift; sourceTree = "<group>"; };
-		8AA712942684F57D0081C126 /* index_prod.js.map */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.module-map"; path = index_prod.js.map; sourceTree = "<group>"; };
 		8AA9EEB62678ACF6009D6B31 /* WebAutocompleteContextTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebAutocompleteContextTest.swift; sourceTree = "<group>"; };
 		8AB44A9A267C9BE400D18B65 /* PointAndShootMessageHandlerOnLoadTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootMessageHandlerOnLoadTest.swift; sourceTree = "<group>"; };
 		8AB44AAB267CD3AB00D18B65 /* String+Slice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Slice.swift"; sourceTree = "<group>"; };
@@ -1372,23 +1374,43 @@
 		8AC2EFDA266F8A0800049005 /* PointAndShootPointingTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootPointingTest.swift; sourceTree = "<group>"; };
 		8AC2EFDC266F8A1400049005 /* PointAndShootShootingTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootShootingTest.swift; sourceTree = "<group>"; };
 		8AC2EFDE266F8A6F00049005 /* PointAndShootPersistToJournalTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootPersistToJournalTest.swift; sourceTree = "<group>"; };
-		8AC91AA026C12E3D003C14EB /* UITests-4.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "UITests-4.html"; sourceTree = "<group>"; };
-		8AC91AA826C12EFF003C14EB /* beam-logo-test.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "beam-logo-test.png"; sourceTree = "<group>"; };
 		8AD2632226F485190074D673 /* HtmlVisitorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HtmlVisitorTests.swift; sourceTree = "<group>"; };
 		8AD2632926F489160074D673 /* HtmlNoteAdapterPerformanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HtmlNoteAdapterPerformanceTests.swift; sourceTree = "<group>"; };
 		8AD2632B26F48C9A0074D673 /* HtmlNoteAdapterLargeDOMPerformanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HtmlNoteAdapterLargeDOMPerformanceTests.swift; sourceTree = SOURCE_ROOT; };
+		8AD2633D26F4A0480074D673 /* Native.test.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Native.test.ts; sourceTree = "<group>"; };
+		8AD2633E26F4A0480074D673 /* BeamNode.test.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = BeamNode.test.ts; sourceTree = "<group>"; };
+		8AD2633F26F4A0480074D673 /* WebEventsUIMock.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = WebEventsUIMock.ts; sourceTree = "<group>"; };
+		8AD2634026F4A0480074D673 /* PointAndShootUI_native.test.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = PointAndShootUI_native.test.ts; sourceTree = "<group>"; };
+		8AD2634126F4A0480074D673 /* EventsMock.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = EventsMock.ts; sourceTree = "<group>"; };
+		8AD2634226F4A0480074D673 /* BeamMocks.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = BeamMocks.ts; sourceTree = "<group>"; };
+		8AD2634326F4A0480074D673 /* BeamEventTargetMock.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = BeamEventTargetMock.ts; sourceTree = "<group>"; };
+		8AD2634426F4A0480074D673 /* PointAndShootUIMock.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = PointAndShootUIMock.ts; sourceTree = "<group>"; };
+		8AD2634526F4A0480074D673 /* PointAndShoot.test.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = PointAndShoot.test.ts; sourceTree = "<group>"; };
+		8AD2634626F4A0480074D673 /* NativeMock.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = NativeMock.ts; sourceTree = "<group>"; };
+		8AD2634826F4A0480074D673 /* PointAndShootUI_native-Benchmark.test.bench */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "PointAndShootUI_native-Benchmark.test.bench"; sourceTree = "<group>"; };
+		8AD2634926F4A0480074D673 /* BeamWindowDecorator.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = BeamWindowDecorator.js; sourceTree = "<group>"; };
+		8AD2634A26F4A0480074D673 /* PointAndShootUI_native-Benchmark.test.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "PointAndShootUI_native-Benchmark.test.ts"; sourceTree = "<group>"; };
+		8AD2634C26F4A0480074D673 /* UITests-Alerts.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "UITests-Alerts.html"; sourceTree = "<group>"; };
+		8AD2634D26F4A0480074D673 /* UITests-2.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "UITests-2.html"; sourceTree = "<group>"; };
+		8AD2634E26F4A0480074D673 /* UITests-3.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "UITests-3.html"; sourceTree = "<group>"; };
+		8AD2634F26F4A0480074D673 /* video.mov */ = {isa = PBXFileReference; lastKnownFileType = video.quicktime; path = video.mov; sourceTree = "<group>"; };
+		8AD2635026F4A0480074D673 /* UITests-4.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "UITests-4.html"; sourceTree = "<group>"; };
+		8AD2635126F4A0480074D673 /* UITests-Password.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "UITests-Password.html"; sourceTree = "<group>"; };
+		8AD2635226F4A0480074D673 /* UITests-Media.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "UITests-Media.html"; sourceTree = "<group>"; };
+		8AD2635326F4A0480074D673 /* audio.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = audio.mp3; sourceTree = "<group>"; };
+		8AD2635426F4A0480074D673 /* Beam.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; path = Beam.css; sourceTree = "<group>"; };
+		8AD2635526F4A0480074D673 /* UITests-Playground.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "UITests-Playground.html"; sourceTree = "<group>"; };
+		8AD2635626F4A0480074D673 /* beam-logo-test.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "beam-logo-test.png"; sourceTree = "<group>"; };
+		8AD2635726F4A0480074D673 /* UITests-1.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "UITests-1.html"; sourceTree = "<group>"; };
+		8AD2635826F4A0480074D673 /* Frames.test.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Frames.test.ts; sourceTree = "<group>"; };
+		8AD2635926F4A0480074D673 /* BeamWindowMock.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = BeamWindowMock.ts; sourceTree = "<group>"; };
+		8AD2635A26F4A0480074D673 /* BeamWebFactoryMock.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = BeamWebFactoryMock.ts; sourceTree = "<group>"; };
 		8AD9DEBD26C6ACF00015B559 /* PointAndShootOffsetWithAnimation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootOffsetWithAnimation.swift; sourceTree = "<group>"; };
-		8AEADBC926776BC500E36BAC /* UITests-Password.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "UITests-Password.html"; sourceTree = "<group>"; };
 		8AED4FEF26C2A3AA00E29DB7 /* PointAndShootFrameOffset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootFrameOffset.swift; sourceTree = "<group>"; };
 		8AF0E335268F30E0007C75D8 /* index_prod.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = index_prod.js; sourceTree = "<group>"; };
-		8AF53BA2266A1BFA00C3CB2E /* Beam.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; path = Beam.css; sourceTree = "<group>"; };
-		8AF53BAB266A241700C3CB2E /* UITests-1.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "UITests-1.html"; sourceTree = "<group>"; };
-		8AF53BAD266A241C00C3CB2E /* UITests-2.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "UITests-2.html"; sourceTree = "<group>"; };
 		8AF61F11267BA292006DD5C2 /* RBAllowlistEntry-Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "RBAllowlistEntry-Private.h"; sourceTree = "<group>"; };
 		8AF61F12267BA292006DD5C2 /* RBAllowlistEntry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RBAllowlistEntry.h; sourceTree = "<group>"; };
 		8AF61F13267BA292006DD5C2 /* RBAllowlistEntry.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RBAllowlistEntry.m; sourceTree = "<group>"; };
-		8AFA9D48266924EE00AA59EE /* UITests-3.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "UITests-3.html"; sourceTree = "<group>"; };
-		8AFD64802693394800166DC0 /* UITests-Playground.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "UITests-Playground.html"; sourceTree = "<group>"; };
 		960A57E3264C84BD0061E8D2 /* ProxyElement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProxyElement.swift; sourceTree = "<group>"; };
 		960A57E5264C851E0061E8D2 /* ProxyImageNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProxyImageNode.swift; sourceTree = "<group>"; };
 		960A57E7264C88920061E8D2 /* ProxyEmbedNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProxyEmbedNode.swift; sourceTree = "<group>"; };
@@ -1554,9 +1576,6 @@
 		A0F558E526BD51A70024C47E /* EditorDebugPreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorDebugPreferencesView.swift; sourceTree = "<group>"; };
 		A0F558F026BD536A0024C47E /* PreferencesManager+EditorDebug.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PreferencesManager+EditorDebug.swift"; sourceTree = "<group>"; };
 		A0F558F426BD8F260024C47E /* DebugSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugSection.swift; sourceTree = "<group>"; };
-		A500F92E26BAD78A0029D34F /* audio.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = audio.mp3; sourceTree = "<group>"; };
-		A500F93926BAE2850029D34F /* UITests-Media.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "UITests-Media.html"; sourceTree = "<group>"; };
-		A500F93B26BAEFCA0029D34F /* video.mov */ = {isa = PBXFileReference; lastKnownFileType = video.quicktime; path = video.mov; sourceTree = "<group>"; };
 		A50241D326D8FA6600C93E1E /* GutterItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GutterItemView.swift; sourceTree = "<group>"; };
 		A50612D526CC75200053AD37 /* Calendar+Calculations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar+Calculations.swift"; sourceTree = "<group>"; };
 		A50612DE26CC75C70053AD37 /* Calendar+CalculationsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar+CalculationsTests.swift"; sourceTree = "<group>"; };
@@ -1701,7 +1720,6 @@
 		BAA67032568FA8B5DDE5841B /* WebEventsUI.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = WebEventsUI.ts; sourceTree = "<group>"; };
 		BAA6705B2A0906FB4C068502 /* Scorer.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = Scorer.js; sourceTree = "<group>"; };
 		BAA670958C9BAC6322CDA80A /* PasswordOverlayController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PasswordOverlayController.swift; sourceTree = "<group>"; };
-		BAA670B42D1D6F585D0EF013 /* BeamMocks.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = BeamMocks.ts; sourceTree = "<group>"; };
 		BAA670D131DF7CAE7FA6664E /* BeamWebView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeamWebView.swift; sourceTree = "<group>"; };
 		BAA670D8E6A58A6836DA2794 /* PointAndShootTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PointAndShootTest.swift; sourceTree = "<group>"; };
 		BAA670DDAA16ED17F69AA6C4 /* jest.config.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = jest.config.js; sourceTree = "<group>"; };
@@ -1712,31 +1730,21 @@
 		BAA6719ECB481D659C210913 /* index_native.scss */ = {isa = PBXFileReference; lastKnownFileType = text; path = index_native.scss; sourceTree = "<group>"; };
 		BAA671BF2E38E5B7F5764244 /* ScorerMessageHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScorerMessageHandler.swift; sourceTree = "<group>"; };
 		BAA671D24ED336D3B2A143F1 /* WebEventsUI_web.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = WebEventsUI_web.ts; sourceTree = "<group>"; };
-		BAA67218A94BBEE8A4B055AD /* EventsMock.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = EventsMock.ts; sourceTree = "<group>"; };
 		BAA6721A918F405B16F39D59 /* PointAndShootUI_debug.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = PointAndShootUI_debug.ts; sourceTree = "<group>"; };
 		BAA67226F0A10301D829E071 /* WebNavigationContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebNavigationContext.swift; sourceTree = "<group>"; };
 		BAA672B83C933052676D43C2 /* index_web.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = index_web.js; sourceTree = "<group>"; };
 		BAA672D65AB9D06DFEBA3EF2 /* index_web.scss */ = {isa = PBXFileReference; lastKnownFileType = text; path = index_web.scss; sourceTree = "<group>"; };
-		BAA672ED83D75722F6988D7B /* NativeMock.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = NativeMock.ts; sourceTree = "<group>"; };
 		BAA6738E9DD9D41F95BB1602 /* tsconfig.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = tsconfig.json; sourceTree = "<group>"; };
-		BAA673EAA75F31F568CEFEE0 /* WebEventsUIMock.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = WebEventsUIMock.ts; sourceTree = "<group>"; };
 		BAA6740CED2A340CD3002907 /* build_js.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = build_js.sh; path = scripts/build_js.sh; sourceTree = "<group>"; };
 		BAA674174D9C44BC3C8FF465 /* ContentTypes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentTypes.swift; sourceTree = "<group>"; };
 		BAA674235D786C984B68A49A /* WebEvents.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = WebEvents.ts; sourceTree = "<group>"; };
-		BAA67425D94953DB6EED0FB3 /* PointAndShootUIMock.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = PointAndShootUIMock.ts; sourceTree = "<group>"; };
 		BAA67429E31F093002EE2693 /* BeamTypes.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = BeamTypes.ts; sourceTree = "<group>"; };
-		BAA674383059F4C483992235 /* BeamNode.test.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = BeamNode.test.ts; sourceTree = "<group>"; };
-		BAA6744080689FD1BE1789B1 /* BeamWindowDecorator.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = BeamWindowDecorator.js; sourceTree = "<group>"; };
 		BAA67494A353CE9F59952C32 /* PointAndShootUI_web.scss */ = {isa = PBXFileReference; lastKnownFileType = text; path = PointAndShootUI_web.scss; sourceTree = "<group>"; };
-		BAA6749F641AF1F1CF80FC5F /* PointAndShoot.test.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = PointAndShoot.test.ts; sourceTree = "<group>"; };
 		BAA674C683DA5DEC733F4746 /* PointAndShoot+ShootFrameFusionRect.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "PointAndShoot+ShootFrameFusionRect.swift"; sourceTree = "<group>"; };
 		BAA67555219BDD4CBD252C60 /* DownloadManagerTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DownloadManagerTest.swift; sourceTree = "<group>"; };
 		BAA6755F00C445E4C93AF3AA /* Scorable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Scorable.swift; sourceTree = "<group>"; };
 		BAA675B80B855A4B2886805B /* PasswordMessageHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PasswordMessageHandler.swift; sourceTree = "<group>"; };
-		BAA67641C3624DA503CB21CF /* BeamWindowMock.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = BeamWindowMock.ts; sourceTree = "<group>"; };
-		BAA6768EED1949F79C1C7B3C /* Native.test.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = Native.test.ts; sourceTree = "<group>"; };
 		BAA676A6408390EB6F10B7D6 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
-		BAA676AA87963F568B000616 /* PointAndShootUI_native.test.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = PointAndShootUI_native.test.ts; sourceTree = "<group>"; };
 		BAA67765B4D27F2D4F2B8562 /* BeamWebViewConfiguration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeamWebViewConfiguration.swift; sourceTree = "<group>"; };
 		BAA6777EB9326511BE7FD0DC /* BrowsingTreeScorer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BrowsingTreeScorer.swift; sourceTree = "<group>"; };
 		BAA677C8DE42140C0F0BD535 /* PointAndShootUI_native.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = PointAndShootUI_native.ts; sourceTree = "<group>"; };
@@ -1745,12 +1753,10 @@
 		BAA678E2B362F5D8A1A801D4 /* PasswordManagerElements.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PasswordManagerElements.swift; sourceTree = "<group>"; };
 		BAA678E5952B4D5130248886 /* BeamDownloadManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeamDownloadManager.swift; sourceTree = "<group>"; };
 		BAA678F0976FD26A8BF9B2CA /* PopupUI_web.scss */ = {isa = PBXFileReference; lastKnownFileType = text; path = PopupUI_web.scss; sourceTree = "<group>"; };
-		BAA678F7FE18AF760346FB0B /* Frames.test.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = Frames.test.ts; sourceTree = "<group>"; };
 		BAA679370284CA3AB35EC0FD /* index_debug.scss */ = {isa = PBXFileReference; lastKnownFileType = text; path = index_debug.scss; sourceTree = "<group>"; };
 		BAA67971FD6352F46D77E3BE /* WebNoteController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebNoteController.swift; sourceTree = "<group>"; };
 		BAA679D78927DFBF9EB1B0E5 /* PopupUI_web.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = PopupUI_web.js; sourceTree = "<group>"; };
 		BAA679E2DF3556E0E444844D /* .sassrc */ = {isa = PBXFileReference; lastKnownFileType = text; path = .sassrc; sourceTree = "<group>"; };
-		BAA67A2E806033B585ED355B /* BeamEventTargetMock.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = BeamEventTargetMock.ts; sourceTree = "<group>"; };
 		BAA67A3C749F22077F5B7194 /* DownloadManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DownloadManager.swift; sourceTree = "<group>"; };
 		BAA67A4B26FC61E9505EF7DB /* BeamMessageHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeamMessageHandler.swift; sourceTree = "<group>"; };
 		BAA67AD6C73B8B9546778E72 /* PasswordManager.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = PasswordManager.js; sourceTree = "<group>"; };
@@ -1765,7 +1771,6 @@
 		BAA67D3D273F24009F3AE570 /* BrowsingScorer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BrowsingScorer.swift; sourceTree = "<group>"; };
 		BAA67D4F02B489A221B47CBB /* index_debug.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = index_debug.js; sourceTree = "<group>"; };
 		BAA67DD5764226E47DFA6F9E /* WebPositions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebPositions.swift; sourceTree = "<group>"; };
-		BAA67E0D441DE56B0908A8ED /* BeamWebFactoryMock.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = BeamWebFactoryMock.ts; sourceTree = "<group>"; };
 		BAA67E198CBE7B676642992F /* PointAndShoot.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PointAndShoot.swift; sourceTree = "<group>"; };
 		BAA67E555FFA88F96CBBEC3A /* PointAndShoot.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = PointAndShoot.ts; sourceTree = "<group>"; };
 		BAA67E65CFE073BC56B23C55 /* PointAndShootUI.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = PointAndShootUI.ts; sourceTree = "<group>"; };
@@ -3167,8 +3172,8 @@
 		8AC2EFD0266F840D00049005 /* Web */ = {
 			isa = PBXGroup;
 			children = (
+				8AD2633C26F4A0480074D673 /* Test */,
 				8AF0E335268F30E0007C75D8 /* index_prod.js */,
-				8AA712942684F57D0081C126 /* index_prod.js.map */,
 				8AC2EFD5266F86F500049005 /* WebFactory.ts */,
 				8AC2EFD4266F86F500049005 /* webpack.config.js */,
 				8AC2EFD1266F86F500049005 /* yarn.lock */,
@@ -3177,12 +3182,10 @@
 				BAA6721A918F405B16F39D59 /* PointAndShootUI_debug.ts */,
 				BAA676A6408390EB6F10B7D6 /* README.md */,
 				BAA672B83C933052676D43C2 /* index_web.js */,
-				BAA6749F641AF1F1CF80FC5F /* PointAndShoot.test.ts */,
 				BAA67B92B9B5D6708301C481 /* package.json */,
 				BAA677C8DE42140C0F0BD535 /* PointAndShootUI_native.ts */,
 				BAA6719ECB481D659C210913 /* index_native.scss */,
 				BAA67EF0075AA8C7D276DEDC /* Util.ts */,
-				BAA6768EED1949F79C1C7B3C /* Native.test.ts */,
 				BAA679370284CA3AB35EC0FD /* index_debug.scss */,
 				BAA674235D786C984B68A49A /* WebEvents.ts */,
 				BAA67F65A4275DE0B884B933 /* index_native.js */,
@@ -3194,9 +3197,7 @@
 				BAA67E555FFA88F96CBBEC3A /* PointAndShoot.ts */,
 				BAA67FFE49752420EA6C9833 /* Native.ts */,
 				BAA67B6D4C4A10AA8B362C0B /* TextSelectorUI.scss */,
-				BAA678F7FE18AF760346FB0B /* Frames.test.ts */,
 				BAA67E899E0DEB27DFE32C9E /* PointAndShootUI_web.ts */,
-				BAA67B0CD72063A53851CE52 /* Test */,
 				BAA67EA80CD97EDF95F98D66 /* Beam.scss */,
 				BAA67429E31F093002EE2693 /* BeamTypes.ts */,
 				BAA67D2FC7A644FB3E1C05E6 /* mixins.scss */,
@@ -3206,7 +3207,6 @@
 				BAA6738E9DD9D41F95BB1602 /* tsconfig.json */,
 				BAA679D78927DFBF9EB1B0E5 /* PopupUI_web.js */,
 				BAA678F0976FD26A8BF9B2CA /* PopupUI_web.scss */,
-				BAA676AA87963F568B000616 /* PointAndShootUI_native.test.ts */,
 				1A560CE45CC5BF86DC9F5778 /* BeamElementHelper.ts */,
 				1A5608C8E6F139D545DA110A /* BeamRectHelper.ts */,
 				1A5601F85613AA978F874B3E /* PointAndShootHelper.ts */,
@@ -3214,21 +3214,53 @@
 			path = Web;
 			sourceTree = "<group>";
 		};
-		8AFA9D47266924EE00AA59EE /* Fixtures */ = {
+		8AD2633C26F4A0480074D673 /* Test */ = {
 			isa = PBXGroup;
 			children = (
-				8AC91AA826C12EFF003C14EB /* beam-logo-test.png */,
-				8AF53BAB266A241700C3CB2E /* UITests-1.html */,
-				8AF53BAD266A241C00C3CB2E /* UITests-2.html */,
-				8AFA9D48266924EE00AA59EE /* UITests-3.html */,
-				8AC91AA026C12E3D003C14EB /* UITests-4.html */,
-				8AEADBC926776BC500E36BAC /* UITests-Password.html */,
-				8AFD64802693394800166DC0 /* UITests-Playground.html */,
-				337EAE5F26A954AD008E4020 /* UITests-Alerts.html */,
-				A500F93926BAE2850029D34F /* UITests-Media.html */,
-				8AF53BA2266A1BFA00C3CB2E /* Beam.css */,
-				A500F92E26BAD78A0029D34F /* audio.mp3 */,
-				A500F93B26BAEFCA0029D34F /* video.mov */,
+				8AD2633D26F4A0480074D673 /* Native.test.ts */,
+				8AD2633E26F4A0480074D673 /* BeamNode.test.ts */,
+				8AD2633F26F4A0480074D673 /* WebEventsUIMock.ts */,
+				8AD2634026F4A0480074D673 /* PointAndShootUI_native.test.ts */,
+				8AD2634126F4A0480074D673 /* EventsMock.ts */,
+				8AD2634226F4A0480074D673 /* BeamMocks.ts */,
+				8AD2634326F4A0480074D673 /* BeamEventTargetMock.ts */,
+				8AD2634426F4A0480074D673 /* PointAndShootUIMock.ts */,
+				8AD2634526F4A0480074D673 /* PointAndShoot.test.ts */,
+				8AD2634626F4A0480074D673 /* NativeMock.ts */,
+				8AD2634726F4A0480074D673 /* __benchmark__ */,
+				8AD2634926F4A0480074D673 /* BeamWindowDecorator.js */,
+				8AD2634A26F4A0480074D673 /* PointAndShootUI_native-Benchmark.test.ts */,
+				8AD2634B26F4A0480074D673 /* Fixtures */,
+				8AD2635826F4A0480074D673 /* Frames.test.ts */,
+				8AD2635926F4A0480074D673 /* BeamWindowMock.ts */,
+				8AD2635A26F4A0480074D673 /* BeamWebFactoryMock.ts */,
+			);
+			path = Test;
+			sourceTree = "<group>";
+		};
+		8AD2634726F4A0480074D673 /* __benchmark__ */ = {
+			isa = PBXGroup;
+			children = (
+				8AD2634826F4A0480074D673 /* PointAndShootUI_native-Benchmark.test.bench */,
+			);
+			path = __benchmark__;
+			sourceTree = "<group>";
+		};
+		8AD2634B26F4A0480074D673 /* Fixtures */ = {
+			isa = PBXGroup;
+			children = (
+				8AD2634C26F4A0480074D673 /* UITests-Alerts.html */,
+				8AD2634D26F4A0480074D673 /* UITests-2.html */,
+				8AD2634E26F4A0480074D673 /* UITests-3.html */,
+				8AD2634F26F4A0480074D673 /* video.mov */,
+				8AD2635026F4A0480074D673 /* UITests-4.html */,
+				8AD2635126F4A0480074D673 /* UITests-Password.html */,
+				8AD2635226F4A0480074D673 /* UITests-Media.html */,
+				8AD2635326F4A0480074D673 /* audio.mp3 */,
+				8AD2635426F4A0480074D673 /* Beam.css */,
+				8AD2635526F4A0480074D673 /* UITests-Playground.html */,
+				8AD2635626F4A0480074D673 /* beam-logo-test.png */,
+				8AD2635726F4A0480074D673 /* UITests-1.html */,
 			);
 			path = Fixtures;
 			sourceTree = "<group>";
@@ -3999,24 +4031,6 @@
 			path = PointAndShoot;
 			sourceTree = "<group>";
 		};
-		BAA67B0CD72063A53851CE52 /* Test */ = {
-			isa = PBXGroup;
-			children = (
-				8AFA9D47266924EE00AA59EE /* Fixtures */,
-				BAA670B42D1D6F585D0EF013 /* BeamMocks.ts */,
-				BAA67641C3624DA503CB21CF /* BeamWindowMock.ts */,
-				BAA67425D94953DB6EED0FB3 /* PointAndShootUIMock.ts */,
-				BAA6744080689FD1BE1789B1 /* BeamWindowDecorator.js */,
-				BAA673EAA75F31F568CEFEE0 /* WebEventsUIMock.ts */,
-				BAA67218A94BBEE8A4B055AD /* EventsMock.ts */,
-				BAA672ED83D75722F6988D7B /* NativeMock.ts */,
-				BAA674383059F4C483992235 /* BeamNode.test.ts */,
-				BAA67A2E806033B585ED355B /* BeamEventTargetMock.ts */,
-				BAA67E0D441DE56B0908A8ED /* BeamWebFactoryMock.ts */,
-			);
-			path = Test;
-			sourceTree = "<group>";
-		};
 		DA0EA6FB269836B600BD5D2F /* Score */ = {
 			isa = PBXGroup;
 			children = (
@@ -4335,76 +4349,89 @@
 			buildActionMask = 2147483647;
 			files = (
 				5224CD462685FF7E00D4179E /* update_beam_objects.graphql in Resources */,
+				8AD2636B26F4A0480074D673 /* video.mov in Resources */,
 				02C07A9B2670D98600894C5D /* Navigation.js in Resources */,
 				02A2B285263190F100D581A5 /* Scorer.js in Resources */,
 				027CB665263163AC001311A0 /* PasswordManager.js in Resources */,
-				8AF53BAE266A241C00C3CB2E /* UITests-2.html in Resources */,
-				8AFD64882693394800166DC0 /* UITests-Playground.html in Resources */,
+				8AD2636E26F4A0480074D673 /* UITests-Media.html in Resources */,
 				022843362617C4C3001C062E /* Readability.js in Resources */,
 				022843372617C4C3001C062E /* OverrideConsole.js in Resources */,
 				965A78362514F148009980D4 /* Main.storyboard in Resources */,
 				5224CD4C2685FF8C00D4179E /* delete_beam_object.graphql in Resources */,
+				8AD2636D26F4A0480074D673 /* UITests-Password.html in Resources */,
 				52F4E4BA264185FC0067B017 /* identities.graphql in Resources */,
 				41D169A725DC07260018E5F2 /* Inter-Regular.otf in Resources */,
-				A500F93626BAD78A0029D34F /* audio.mp3 in Resources */,
+				8AD2637626F4A0480074D673 /* BeamWebFactoryMock.ts in Resources */,
+				8AD2636526F4A0480074D673 /* PointAndShootUI_native-Benchmark.test.bench in Resources */,
 				56A5BD3725CCAFA400ED7C50 /* english.stopwords in Resources */,
 				418171F42581107C00317ED8 /* sign_up.graphql in Resources */,
+				8AD2636026F4A0480074D673 /* BeamMocks.ts in Resources */,
 				032562AB26051D3B006513E4 /* Info.plist in Resources */,
+				8AD2636326F4A0480074D673 /* PointAndShoot.test.ts in Resources */,
 				96C5FE44268F4D5700889B5E /* Geolocation.js in Resources */,
+				8AD2636426F4A0480074D673 /* NativeMock.ts in Resources */,
 				52F4E4B42641844E0067B017 /* delete_identity.graphql in Resources */,
 				418171F62581107C00317ED8 /* sign_in.graphql in Resources */,
 				41D169A925DC07260018E5F2 /* Inter-Italic.otf in Resources */,
 				418170FF2581060A00317ED8 /* Colors.xcassets in Resources */,
+				8AD2636626F4A0480074D673 /* BeamWindowDecorator.js in Resources */,
 				41D169A825DC07260018E5F2 /* Inter-SemiBold.otf in Resources */,
 				8AC2EFD9266F86F500049005 /* WebFactory.ts in Resources */,
 				52F4E49826417EF00067B017 /* create_identity.graphql in Resources */,
+				8AD2636F26F4A0480074D673 /* audio.mp3 in Resources */,
 				41D169AA25DC07260018E5F2 /* Inter-Medium.otf in Resources */,
 				52F4E4A226417F210067B017 /* sign_in_with_provider.graphql in Resources */,
 				41D169A625DC07260018E5F2 /* Inter-Bold.otf in Resources */,
 				520BC40126D7B02200A82966 /* subscription_beam_objects_updated.graphql in Resources */,
+				8AD2637326F4A0480074D673 /* UITests-1.html in Resources */,
 				0DC6E2DE26A0527900BD2E2A /* majestic_million_test.csv in Resources */,
 				032562A826051D3B006513E4 /* blockerList.json in Resources */,
+				8AD2635C26F4A0480074D673 /* BeamNode.test.ts in Resources */,
 				418171122581082200317ED8 /* Assets.xcassets in Resources */,
+				8AD2636926F4A0480074D673 /* UITests-2.html in Resources */,
 				56A5BD3125CC680E00ED7C50 /* url.stopwords in Resources */,
 				41B4277B25E52DCA00A8243F /* Localizable.stringsdict in Resources */,
 				8AC2EFD8266F86F500049005 /* webpack.config.js in Resources */,
-				8AF53BAC266A241700C3CB2E /* UITests-1.html in Resources */,
+				8AD2637426F4A0480074D673 /* Frames.test.ts in Resources */,
 				5224CD762685FFFC00D4179E /* beam_object_updated_at.graphql in Resources */,
-				8AC91AA226C12E3D003C14EB /* UITests-4.html in Resources */,
-				8AC91AA926C12EFF003C14EB /* beam-logo-test.png in Resources */,
+				8AD2635B26F4A0480074D673 /* Native.test.ts in Resources */,
+				8AD2637526F4A0480074D673 /* BeamWindowMock.ts in Resources */,
+				8AD2637126F4A0480074D673 /* UITests-Playground.html in Resources */,
 				A515597A267786E1006F6D6F /* MediaPlayer.js in Resources */,
 				418172412581107C00317ED8 /* ScrollableTextView.xib in Resources */,
 				8AC2EFD6266F86F500049005 /* yarn.lock in Resources */,
 				5224CD702685FFDD00D4179E /* beam_objects.graphql in Resources */,
-				8AEADBD126776BC500E36BAC /* UITests-Password.html in Resources */,
 				418171F52581107C00317ED8 /* forgot_password.graphql in Resources */,
+				8AD2636826F4A0480074D673 /* UITests-Alerts.html in Resources */,
 				BAA67DC79E1BCAF3869F3DBB /* build_js.sh in Resources */,
 				8AF0E33D268F30E0007C75D8 /* index_prod.js in Resources */,
-				8AF53BAA266A1BFA00C3CB2E /* Beam.css in Resources */,
 				BAA67380A92BBC1FB039AA3F /* WebEventsUI.ts in Resources */,
-				A500F93A26BAE2850029D34F /* UITests-Media.html in Resources */,
-				8AFA9D50266924EE00AA59EE /* UITests-3.html in Resources */,
-				BAA67958DEBA77F2BE94F617 /* Native.test.ts in Resources */,
+				8AD2637226F4A0480074D673 /* beam-logo-test.png in Resources */,
 				BAA6792F5CF42C0D8FEC2A9B /* WebEvents.ts in Resources */,
 				3355999D26CBF11E00F52C23 /* SearchWebPage.js in Resources */,
 				BAA6704409BDC8AB92E95F8D /* WebEventsUI_native.ts in Resources */,
-				337EAE6026A954AD008E4020 /* UITests-Alerts.html in Resources */,
 				5224CD602685FFB500D4179E /* delete_all_beam_objects.graphql in Resources */,
+				8AD2636126F4A0480074D673 /* BeamEventTargetMock.ts in Resources */,
+				8AD2636226F4A0480074D673 /* PointAndShootUIMock.ts in Resources */,
+				8AD2636A26F4A0480074D673 /* UITests-3.html in Resources */,
 				5224CD6A2685FFD100D4179E /* beam_object.graphql in Resources */,
+				8AD2637026F4A0480074D673 /* Beam.css in Resources */,
 				520BC40E26D7B05F00A82966 /* subscription_beam_object_updated.graphql in Resources */,
+				8AD2635E26F4A0480074D673 /* PointAndShootUI_native.test.ts in Resources */,
 				BAA67B13B4EBCFF2D7A94F93 /* WebEventsUI_web.ts in Resources */,
 				BAA67EC2B781F8A78CD5A6B0 /* Beam.scss in Resources */,
 				BAA67A1DD75801D8B25037E9 /* BeamTypes.ts in Resources */,
 				BAA67B51C8D9DBD6FE5327B6 /* mixins.scss in Resources */,
-				A500F93C26BAEFCA0029D34F /* video.mov in Resources */,
+				8AD2636C26F4A0480074D673 /* UITests-4.html in Resources */,
 				BAA675AE9C103046AC022CBA /* .sassrc in Resources */,
 				BAA6750B78E3812C7DA5DF7C /* tsconfig.json in Resources */,
 				5224CD522685FF9B00D4179E /* update_beam_object.graphql in Resources */,
 				BAA67B681D12191FE57E7807 /* PopupUI_web.scss in Resources */,
-				BAA675D3496DCF90EB35C8AD /* BeamEventTargetMock.ts in Resources */,
-				BAA6704CFB6AE4C1D090F4E4 /* BeamWebFactoryMock.ts in Resources */,
+				8AD2636726F4A0480074D673 /* PointAndShootUI_native-Benchmark.test.ts in Resources */,
+				8AD2635F26F4A0480074D673 /* EventsMock.ts in Resources */,
 				1A560E42AC5ED28BCC29054A /* BeamElementHelper.ts in Resources */,
 				1A560C30E74FFFB97685C043 /* PointAndShootHelper.ts in Resources */,
+				8AD2635D26F4A0480074D673 /* WebEventsUIMock.ts in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4425,15 +4452,6 @@
 				5281B07C25C9989300DF66D9 /* 1_local.json in Resources */,
 				52E04FD6252C7A4600AD9F56 /* writing_space.json in Resources */,
 				032562EE26051D62006513E4 /* Info.plist in Resources */,
-				BAA67FC2BABDCB5F962CDE22 /* Frames.test.ts in Resources */,
-				BAA67A54C1D488CD065A7688 /* BeamMocks.ts in Resources */,
-				BAA67473B64126D0D6C05B40 /* BeamWindowMock.ts in Resources */,
-				BAA678915DE6AEEE71A1BC1E /* PointAndShootUIMock.ts in Resources */,
-				BAA679F30E3171511E32341B /* WebEventsUIMock.ts in Resources */,
-				BAA67A80187509C17C3BE040 /* EventsMock.ts in Resources */,
-				BAA67AA1FFC6C586C8811D22 /* NativeMock.ts in Resources */,
-				BAA672E9AF7741DB2798866B /* BeamNode.test.ts in Resources */,
-				BAA6760269415BA47D933E97 /* PointAndShootUI_native.test.ts in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
