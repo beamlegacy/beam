@@ -6,8 +6,8 @@
     "sourceMap": true,
     "typeRoots": ["node_modules/@types"],
     "moduleResolution": "node",
-    "lib": ["ES2019", "DOM"]
+    "lib": ["ES2019", "DOM"],
+    "esModuleInterop": true
   },
-  "types": ["jest"],
-  "exclude": ["**/*.test.ts"]
+  "types": ["jest"]
 }

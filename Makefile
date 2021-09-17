@@ -163,7 +163,8 @@ extract_vinyl_files:
 
 js_test:
 	yarn --cwd ./Beam/Classes/Components/PointAndShoot/Web run build
-	yarn --cwd ./Beam/Classes/Components/PointAndShoot/Web run test-ci
+	RUN_BENCHMARK=true yarn --cwd ./Beam/Classes/Components/PointAndShoot/Web run test-ci
+	yarn --cwd ./Beam/Classes/Components/PointAndShoot/Web run benchmark-show
 
 clean_app_files:
 	rm -rf "${HOME}/Library/Containers/co.beamapp.macos.dev/Data/Library/Application Support/"*
