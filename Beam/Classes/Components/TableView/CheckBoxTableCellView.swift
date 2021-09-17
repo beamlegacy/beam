@@ -7,73 +7,106 @@
 
 import Foundation
 
-class CheckBoxButton: NSButton {
-    var checked: Bool {
-        get { return state == .on }
-        set { state = newValue ? .on : .off }
-    }
-
-    var mixedState: Bool {
-        get { return state == .mixed }
-        set { state = newValue ? .mixed : .off }
-    }
-}
-
 class CheckBoxTableCellView: NSTableCellView {
-    private var checkBox: CheckBoxButton!
+    private var checkBoxLayer: BeamCheckboxCALayer
+    private var isHovering = false {
+        didSet {
+            checkBoxLayer.isHovering = isHovering
+        }
+    }
     var checked: Bool {
-        get { checkBox.checked }
-        set { checkBox.checked = newValue }
+        get { checkBoxLayer.isChecked }
+        set { checkBoxLayer.isChecked = newValue }
     }
     var onCheckChange: ((Bool) -> Void)?
 
     override init(frame frameRect: NSRect) {
+        checkBoxLayer = BeamCheckboxCALayer()
         super.init(frame: frameRect)
-        checkBox = CheckBoxButton(checkboxWithTitle: "", target: self, action: #selector(onCheck(_:)))
-        checkBox.translatesAutoresizingMaskIntoConstraints = false
-        self.addSubview(checkBox)
-        self.addConstraints([
-            leadingAnchor.constraint(equalTo: checkBox.leadingAnchor),
-            trailingAnchor.constraint(equalTo: checkBox.trailingAnchor),
-            topAnchor.constraint(equalTo: checkBox.topAnchor),
-            bottomAnchor.constraint(equalTo: checkBox.bottomAnchor)
-        ])
+        self.wantsLayer = true
+        self.layer?.addSublayer(checkBoxLayer)
+    }
+
+    override func updateLayer() {
+        super.updateLayer()
+        var frame = checkBoxLayer.bounds
+        frame.origin = CGPoint(x: (bounds.width - frame.width) / 2, y: (bounds.height - frame.height) / 2)
+        checkBoxLayer.frame = frame
+        if self.effectiveAppearance.isDarkMode {
+            checkBoxLayer.compositingFilter = nil
+        } else {
+            checkBoxLayer.compositingFilter = "multiplyBlendMode"
+        }
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
-    @objc private func onCheck(_ sender: CheckBoxButton) {
-        onCheckChange?(sender.checked)
+    private func onCheck(value: Bool) {
+        onCheckChange?(value)
+    }
+
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        self.trackingAreas.forEach { self.removeTrackingArea($0) }
+        let newArea = NSTrackingArea(
+            rect: bounds,
+            options: [.activeAlways, .mouseEnteredAndExited],
+            owner: self, userInfo: nil
+        )
+        self.addTrackingArea(newArea)
+    }
+
+    override func mouseEntered(with event: NSEvent) {
+        super.mouseEntered(with: event)
+        isHovering = true
+        checkBoxLayer.setNeedsLayout()
+    }
+
+    override func mouseExited(with event: NSEvent) {
+        super.mouseExited(with: event)
+        isHovering = false
+        checkBoxLayer.setNeedsLayout()
     }
 }
 
 class CheckBoxTableHeaderCell: TableHeaderCell {
-    private var checkBox: CheckBoxButton!
     var checked: Bool {
-        get { checkBox.checked }
-        set { checkBox.checked = newValue }
+        get { checkBoxLayer.isChecked }
+        set { checkBoxLayer.isChecked = newValue }
     }
+    var mixedState: Bool {
+        get { checkBoxLayer.isMixedState }
+        set { checkBoxLayer.isMixedState = newValue }
+    }
+    private var checkBoxLayer: BeamCheckboxCALayer
+
+    override var isHovering: Bool {
+        didSet {
+            checkBoxLayer.isHovering = isHovering
+            checkBoxLayer.setNeedsLayout()
+        }
+    }
+
     override init(textCell: String) {
+        checkBoxLayer = BeamCheckboxCALayer()
         super.init(textCell: textCell)
-        checkBox = CheckBoxButton(checkboxWithTitle: "", target: self, action: #selector(onCheck(_:)))
-        checkBox.isEnabled = true
-        checkBox.checked = false
 
         drawsBottomBorder = false
         drawsTrailingBorder = false
-    }
-
-    override func drawInterior(withFrame cellFrame: NSRect, in controlView: NSView) {
-        // we don't need anything drawn
+        contentLeadingInset = 5.5
     }
 
     required init(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
-    @objc private func onCheck(_ sender: CheckBoxButton) {
-        // check toggle will be handled by TableView's mouseDownInHeaderOf
+    override func drawInterior(withFrame cellFrame: NSRect, in controlView: NSView) {
+        if checkBoxLayer.superlayer != controlView.layer {
+            controlView.layer?.addSublayer(checkBoxLayer)
+        }
+        let checkFrame = cellFrame.insetBy(dx: 0, dy: 0.5)
+        checkBoxLayer.frame = checkFrame
     }
 }

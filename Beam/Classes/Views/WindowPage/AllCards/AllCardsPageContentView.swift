@@ -157,26 +157,30 @@ struct AllCardsPageContentView: View {
         return intValue >= 0 ? "\(intValue)" : "--"
     }
 
-    static private let secondaryCellFont = BeamFont.medium(size: 10).nsFont
-    static private let secondaryCellFontColor = BeamColor.LightStoneGray.nsColor
+    static private let secondaryCellFont = BeamFont.regular(size: 10).nsFont
+    static private let secondaryCellTextColor = BeamColor.AlphaGray.nsColor
+    static private let secondaryCellSelectedColor = NSColor(withLightColor: BeamColor.AlphaGray.nsColor, darkColor: BeamColor.LightStoneGray.nsColor)
     private var columns = [
         TableViewColumn(key: "checkbox", title: "", type: TableViewColumn.ColumnType.CheckBox,
-                        sortable: false, resizable: false, width: 16, visibleOnlyOnRowHoverOrSelected: true),
+                        sortable: false, resizable: false, width: 25, visibleOnlyOnRowHoverOrSelected: true),
         TableViewColumn(key: "title", title: "Title", editable: true, isLink: true,
                         sortableDefaultAscending: true, sortableCaseInsensitive: true, width: 200),
-        TableViewColumn(key: "words", title: "Words", width: 50, font: secondaryCellFont,
-                        fontColor: Self.secondaryCellFontColor, stringFromKeyValue: Self.loadingIntValueString),
-        TableViewColumn(key: "mentions", title: "Mentions", width: 70, font: secondaryCellFont,
-                        fontColor: Self.secondaryCellFontColor, stringFromKeyValue: Self.loadingIntValueString),
+        TableViewColumn(key: "words", title: "Words", width: 70, font: secondaryCellFont,
+                        foregroundColor: Self.secondaryCellTextColor, selectedForegroundColor: Self.secondaryCellSelectedColor,
+                        stringFromKeyValue: Self.loadingIntValueString),
+        TableViewColumn(key: "mentions", title: "Mentions", width: 80, font: secondaryCellFont,
+                        foregroundColor: Self.secondaryCellTextColor, selectedForegroundColor: Self.secondaryCellSelectedColor,
+                        stringFromKeyValue: Self.loadingIntValueString),
         TableViewColumn(key: "createdAt", title: "Created", font: secondaryCellFont,
-                        fontColor: Self.secondaryCellFontColor, stringFromKeyValue: { value in
+                        foregroundColor: Self.secondaryCellTextColor, selectedForegroundColor: Self.secondaryCellSelectedColor,
+                        stringFromKeyValue: { value in
             if let date = value as? Date {
                 return AllCardsPageContentView.dateFormatter.string(from: date)
             }
             return ""
         }),
-        TableViewColumn(key: "updatedAt", title: "Updated", isInitialSortDescriptor: true,
-                        font: secondaryCellFont, fontColor: Self.secondaryCellFontColor,
+        TableViewColumn(key: "updatedAt", title: "Updated", isInitialSortDescriptor: true, font: secondaryCellFont,
+                        foregroundColor: Self.secondaryCellTextColor, selectedForegroundColor: Self.secondaryCellSelectedColor,
                         stringFromKeyValue: { value in
             if let date = value as? Date {
                 return AllCardsPageContentView.dateFormatter.string(from: date)
@@ -198,6 +202,7 @@ struct AllCardsPageContentView: View {
                 HStack(spacing: BeamSpacing._20) {
                     Text("Personal")
                         .font(BeamFont.regular(size: 20).swiftUI)
+                        .foregroundColor(BeamColor.Niobium.swiftUI)
                         .padding(.leading, 35)
                     Icon(name: "editor-breadcrumb_down", size: 8, color: BeamColor.LightStoneGray.swiftUI)
                 }
@@ -209,19 +214,22 @@ struct AllCardsPageContentView: View {
                     listType = .allNotes
                 }
                 Separator()
-                ButtonLabel("Public (\(model.publicNotesItems.count))", state: listType == .publicNotes ? .active : .normal) {
+                    .frame(height: 16)
+                ButtonLabel("Published (\(model.publicNotesItems.count))", state: listType == .publicNotes ? .active : .normal) {
                     listType = .publicNotes
                 }
                 Separator()
+                    .frame(height: 16)
                 ButtonLabel("Private (\(model.privateNotesItems.count))",
                             state: listType == .privateNotes ? .active : .normal) {
                     listType = .privateNotes
                 }
             }
             .frame(height: 22)
-            .padding(.vertical, 3)
+            .padding(.top, 85)
+            .padding(.trailing, 20)
             TableView(hasSeparator: false, items: currentNotesList, columns: columns,
-                      creationRowTitle: listType == .publicNotes ? "New Public Card" : "New Private Card",
+                      creationRowTitle: listType == .publicNotes ? "New Published Card" : "New Private Card",
                       shouldReloadData: $model.shouldReloadData) { (newText, row) in
                 onEditingText(newText, row: row, in: currentNotesList)
             } onSelectionChanged: { (selectedIndexes) in
@@ -250,7 +258,7 @@ struct AllCardsPageContentView: View {
                         showContextualMenuForHoveredRow(tableViewGeometry: geo)
                     }
                     .opacity(selectedRowsIndexes.count <= 1 && hoveredRowIndex != nil && hoveredRowFrame != nil ? 1.0 : 0.0)
-                    .offset(x: -TableView.rowHeight, y: geo.frame(in: .global).maxY - (hoveredRowFrame?.maxY ?? 0) + 5)
+                    .offset(x: -32, y: geo.frame(in: .global).maxY - (hoveredRowFrame?.maxY ?? 0) + 3)
                 }
             )
             .frame(maxHeight: .infinity)

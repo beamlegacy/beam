@@ -19,6 +19,8 @@ class TableHeaderCell: NSTableHeaderCell {
 
     var drawsTrailingBorder = true
     var drawsBottomBorder = true
+    var contentLeadingInset: CGFloat = 8
+    var isHovering = false
 
     private var textSize: CGSize?
 
@@ -29,10 +31,12 @@ class TableHeaderCell: NSTableHeaderCell {
     }
 
     override func drawInterior(withFrame cellFrame: NSRect, in controlView: NSView) {
-        super.drawInterior(withFrame: cellFrame, in: controlView)
-        var textRect = titleRect(forBounds: cellFrame)
+        var interiorFrame = cellFrame
+        interiorFrame.size.width += 20 // we manually handle the sort indicator, let's give more space to the text then.
+        super.drawInterior(withFrame: interiorFrame, in: controlView)
+        var textRect = titleRect(forBounds: interiorFrame)
         textRect.size = textSize ?? .zero
-        textRect.origin.x += 2
+        textRect.origin.x += 4
         if let indicator = shouldDrawSortIndicator {
             let imageRect = CGRect(x: textRect.maxX, y: 8, width: 8, height: 8)
             let image = indicator.ascending ? Self.flippedSortedIndicatorImage : Self.sortedIndicatorImage
@@ -43,16 +47,16 @@ class TableHeaderCell: NSTableHeaderCell {
 
     func drawBottomBorder(withFrame cellFrame: NSRect) {
         guard drawsBottomBorder else { return }
-        BeamColor.Mercury.nsColor.setFill()
+        BeamColor.Mercury.nsColor.withAlphaComponent(0.5).setFill()
         let borderRect = CGRect(x: cellFrame.minX, y: cellFrame.maxY - 1, width: cellFrame.width, height: 1)
         let linePath = NSBezierPath(rect: borderRect)
         linePath.fill()
     }
 
-    func drawTrailingBorder(withFrame cellFrame: NSRect) {
+    func drawTrailingBorder(withFrame interiorFrame: NSRect) {
         guard drawsTrailingBorder else { return }
-        BeamColor.Mercury.nsColor.setFill()
-        let borderRect = CGRect(x: cellFrame.maxX - 1, y: 5, width: 1, height: cellFrame.height - 10)
+        BeamColor.Mercury.nsColor.withAlphaComponent(0.5).setFill()
+        let borderRect = CGRect(x: interiorFrame.maxX - 1, y: interiorFrame.minY, width: 1, height: interiorFrame.height)
         let linePath = NSBezierPath(rect: borderRect)
         linePath.fill()
     }
@@ -66,9 +70,11 @@ class TableHeaderCell: NSTableHeaderCell {
         BeamColor.Generic.background.nsColor.setFill()
         NSBezierPath(rect: cellFrame).fill()
         drawBottomBorder(withFrame: cellFrame)
-        drawTrailingBorder(withFrame: cellFrame)
         var interiorFrame = cellFrame.insetBy(dx: 0, dy: 5)
-        interiorFrame.origin.x += 8
+        interiorFrame.size.height -= 3
+        interiorFrame.origin.x += contentLeadingInset
+        interiorFrame.size.width -= contentLeadingInset
+        drawTrailingBorder(withFrame: interiorFrame)
         drawInterior(withFrame: interiorFrame, in: controlView)
     }
 }
