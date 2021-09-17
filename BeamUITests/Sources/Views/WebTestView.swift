@@ -18,11 +18,16 @@ class WebTestView: BaseView {
     
     func searchForCardByTitle(_ title: String) {
         XCTContext.runActivity(named: "Search for '\(title)' card in cards search drop-down") {_ in
-        staticText(WebViewLocators.Buttons.destinationCard.accessibilityIdentifier).click()
+        staticText(WebViewLocators.Buttons.destinationCard.accessibilityIdentifier).clickOnHittable()
         searchField(WebViewLocators.SearchFields.destinationCardSearchField.accessibilityIdentifier).typeText(title)
         let predicate = NSPredicate(format: "identifier BEGINSWITH 'autocompleteResult-selected-'")
         app.otherElements.matching(predicate).firstMatch.click()
         }
+    }
+    
+    func openDestinationCardSearch() -> XCUIElement {
+        staticText(WebViewLocators.Buttons.destinationCard.accessibilityIdentifier).clickOnHittable()
+        return staticText(WebViewLocators.Buttons.destinationCard.accessibilityIdentifier)
     }
     
     @discardableResult
@@ -38,14 +43,21 @@ class WebTestView: BaseView {
     
     @discardableResult
     func openDestinationCard() -> CardTestView {
-        WaitHelper().waitFor(WaitHelper.PredicateFormat.isHittable.rawValue,  button(OmniBarLocators.Buttons.openCardButton.accessibilityIdentifier))
-        button(OmniBarLocators.Buttons.openCardButton.accessibilityIdentifier).click()
+        button(OmniBarLocators.Buttons.openCardButton.accessibilityIdentifier).clickOnHittable()
         return CardTestView()
     }
     
     func getNumberOfTabs() -> Int {
+        return getTabs().count
+    }
+    
+    func getTab(number: Int) -> XCUIElement {
+        getTabs().element(boundBy: number - 1)
+    }
+    
+    func getTabs() -> XCUIElementQuery {
         _ = group(WebViewLocators.Images.browserTabBar.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout)
-        return app.groups.matching(identifier:WebViewLocators.Images.browserTabBar.accessibilityIdentifier).count
+        return app.groups.matching(identifier:WebViewLocators.Images.browserTabBar.accessibilityIdentifier)
     }
     
     @discardableResult
