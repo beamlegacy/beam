@@ -615,6 +615,7 @@
 		A50612D626CC75200053AD37 /* Calendar+Calculations.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50612D526CC75200053AD37 /* Calendar+Calculations.swift */; };
 		A50612DF26CC75C70053AD37 /* Calendar+CalculationsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50612DE26CC75C70053AD37 /* Calendar+CalculationsTests.swift */; };
 		A50B372425FA180E00E5D34F /* NSApperance+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50B372325FA180E00E5D34F /* NSApperance+Beam.swift */; };
+		A5105ADF26F3863B00E9A0BA /* TableHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5105ADE26F3863B00E9A0BA /* TableHeaderView.swift */; };
 		A5144001263803600021DD56 /* TrackableScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5144000263803600021DD56 /* TrackableScrollView.swift */; };
 		A514401B2638038C0021DD56 /* BrowserNewTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A514401A2638038C0021DD56 /* BrowserNewTabView.swift */; };
 		A5153EDD260CC4DC00C84902 /* ButtonLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5153EDC260CC4DC00C84902 /* ButtonLabel.swift */; };
@@ -1560,6 +1561,7 @@
 		A50612D526CC75200053AD37 /* Calendar+Calculations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar+Calculations.swift"; sourceTree = "<group>"; };
 		A50612DE26CC75C70053AD37 /* Calendar+CalculationsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar+CalculationsTests.swift"; sourceTree = "<group>"; };
 		A50B372325FA180E00E5D34F /* NSApperance+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSApperance+Beam.swift"; sourceTree = "<group>"; };
+		A5105ADE26F3863B00E9A0BA /* TableHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableHeaderView.swift; sourceTree = "<group>"; };
 		A5109F902670227800304B3A /* CommandManagerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandManagerTests.swift; sourceTree = "<group>"; };
 		A5144000263803600021DD56 /* TrackableScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackableScrollView.swift; sourceTree = "<group>"; };
 		A514401A2638038C0021DD56 /* BrowserNewTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserNewTabView.swift; sourceTree = "<group>"; };
@@ -3668,6 +3670,7 @@
 				A5CA5DB92624FF4A004E9D3E /* BeamNSTableView.swift */,
 				A57BFEB82615B48300CFB646 /* CheckBoxTableCellView.swift */,
 				A57F9CB026E8F82000D266BA /* TableHeaderCell.swift */,
+				A5105ADE26F3863B00E9A0BA /* TableHeaderView.swift */,
 			);
 			path = TableView;
 			sourceTree = "<group>";
@@ -5112,6 +5115,7 @@
 				BAA67192B5EB78981741C311 /* WebPage.swift in Sources */,
 				8A9B1A9626DD321E00B3B5FA /* PointAndShoot+ShootGroup.swift in Sources */,
 				A032BD33261F4677009A3576 /* ShortcutLayer.swift in Sources */,
+				A5105ADF26F3863B00E9A0BA /* TableHeaderView.swift in Sources */,
 				A5BF04D32681A4F800CC80EB /* ElementNode+Layers.swift in Sources */,
 				A5208D8F261D25F1006193AF /* BeamSpacing.swift in Sources */,
 				A0A3BED5266FD1B200566D6C /* BeamStepperButton.swift in Sources */,
