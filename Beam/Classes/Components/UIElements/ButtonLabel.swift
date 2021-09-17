@@ -22,7 +22,7 @@ enum ButtonLabelVariant {
 }
 
 struct ButtonLabelStyle {
-    var font = BeamFont.medium(size: 12).swiftUI
+    var font = BeamFont.regular(size: 12).swiftUI
     var horizontalPadding: CGFloat = 6
     var verticalPadding: CGFloat = 3
     var iconSize: CGFloat = 16

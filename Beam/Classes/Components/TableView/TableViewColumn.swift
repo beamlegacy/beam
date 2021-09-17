@@ -29,7 +29,8 @@ struct TableViewColumn {
     var width: CGFloat = 100
     var font: NSFont?
     var fontSize: CGFloat = 13
-    var fontColor: NSColor = BeamColor.Generic.text.nsColor
+    var foregroundColor: NSColor = BeamColor.Generic.text.nsColor
+    var selectedForegroundColor: NSColor?
     var visibleOnlyOnRowHoverOrSelected = false
     var stringFromKeyValue: ((Any?) -> String) = { value in
         return value as? String ?? ""
