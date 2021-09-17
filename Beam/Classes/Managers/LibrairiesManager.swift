@@ -33,9 +33,11 @@ extension LibrariesManager {
     }
 
     func setupSentryScope() {
+        let currentHost = Host.current().name ?? ""
         SentrySDK.configureScope { scope in
             scope.setEnvironment(Configuration.env)
             scope.setDist(Information.appBuild)
+            scope.setTag(value: "hostname", key: currentHost)
         }
     }
 
