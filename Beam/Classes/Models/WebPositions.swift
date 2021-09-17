@@ -52,10 +52,13 @@ class WebPositions: ObservableObject {
         // reassign allPositions to mutable value
         var positions: [CGFloat] = allPositions
         // get full frameInfo from framesInfo dict
-        if framesInfo[href] == nil {
-            return positions
+        guard let frame = framesInfo[href] else {
+            if positions.count > 0 {
+                return positions
+            } else {
+                return [0.0]
+            }
         }
-        let frame = framesInfo[href]!
         switch prop {
         case .x:
             positions.append(frame.x)
@@ -81,10 +84,11 @@ class WebPositions: ObservableObject {
     ///   - prop: position property to calculate
     /// - Returns: position based on parent frame positions
     func viewportPosition(_ href: HREF, prop: FramePosition) -> [CGFloat] {
-        if framesInfo.count > 0 {
-            return calculateViewportPosition(href: href, prop: prop)
+        guard framesInfo.count > 0 else {
+            return [0.0]
         }
-        return [0.0]
+
+        return calculateViewportPosition(href: href, prop: prop)
     }
 
     /// Sets frameInfo to stored dict. Will only set frameInfo when the provided frame is a child frame, or isn't registered yet.
