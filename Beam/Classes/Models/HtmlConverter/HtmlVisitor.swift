@@ -292,12 +292,14 @@ extension HtmlVisitor {
     /// - Returns: returns base64 string and mimeType, returns nil if data can't be parsed correctly
     func getBase64(_ src: String) -> (base64: Data, mimeType: String)? {
         let array = src.split(separator: ",").map(String.init)
-        let mimeType = array[0].replacingOccurrences(of: "data:", with: "", options: [.anchored])
-        guard array.count >= 2,
-              let base64 = Data(base64Encoded: array[1]) else {
+        guard array.count == 2,
+              let firstItem = array.first,
+              let secondItem = array.last,
+              let base64 = Data(base64Encoded: secondItem) else {
             return nil
         }
 
+        let mimeType = firstItem.replacingOccurrences(of: "data:", with: "", options: [.anchored])
         return (base64, mimeType)
     }
 

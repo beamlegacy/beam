@@ -264,4 +264,15 @@ class HtmlNoteAdapterTests: XCTestCase {
             XCTFail("expected atleast one element")
         }
     }
+
+    func testImageWithEmptySrc() throws {
+        let html = "<img src=\"\" />"
+
+        let testFileStorage = FileStorageMock()
+        let testDownloadManager = DownloadManagerMock()
+        let url = URL(string: "https://www.w3docs.com/snippets/html/how-to-display-base64-images-in-html.html")!
+        let htmlNoteAdapter = HtmlNoteAdapter(url, testDownloadManager, testFileStorage)
+        let results: [BeamElement] = htmlNoteAdapter.convert(html: html)
+        XCTAssertEqual(results.count, 0)
+    }
 }
