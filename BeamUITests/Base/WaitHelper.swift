@@ -13,6 +13,7 @@ import XCTest
 class WaitHelper: XCTestCase {
     
     let implicitWaitTimeout = BaseTest().implicitWaitTimeout
+    let minimumWaitTimeout = BaseTest().minimumWaitTimeout
     
     @discardableResult
     func waitFor(_ predicateFormat: String, _ element: XCUIElement) -> Bool {
@@ -49,6 +50,12 @@ class WaitHelper: XCTestCase {
     func waitForDoesntExist(_ element: XCUIElement) -> Bool {
         return waitFor(PredicateFormat.notExists.rawValue, element)
     }
+    
+    @discardableResult
+    func waitForIsHittable(_ element: XCUIElement) -> Bool {
+        return waitFor(PredicateFormat.isHittable.rawValue, element)
+    }
+    
     
     enum PredicateFormat: String {
         case isHittable = "isHittable == true"

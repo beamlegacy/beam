@@ -80,7 +80,7 @@ class OmnibarDestinationTests: BaseTest {
         
         testRailPrint("When I switch to card view and back to web")
         let cardView = omnibarView.navigateToCardViaPivotButton()
-        cardView.button(OmniBarLocators.Buttons.openWebButton.accessibilityIdentifier).click()
+        cardView.navigateToWebView()
         
         testRailPrint("Then I see \(cardNameToBeCreated) as destination card")
         XCTAssertEqual(destinationCardTitle.value as? String, cardNameToBeCreated)

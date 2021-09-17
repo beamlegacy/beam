@@ -44,4 +44,8 @@ class CardTestView: BaseView {
     func getCardNotesForVisiblePart() -> [XCUIElement] {
         return app.windows.textViews.matching(identifier: CardViewLocators.TextFields.noteField.accessibilityIdentifier).allElementsBoundByIndex
     }
+    
+    func navigateToWebView() {
+        button(OmniBarLocators.Buttons.openWebButton.accessibilityIdentifier).click()
+    }
 }

@@ -101,6 +101,7 @@ class BaseView {
         omniSearchField.tapInTheMiddle()
         omniSearchField.clear()
         omniSearchField.typeText(searchText)
+        WaitHelper().waitForStringValueEqual(searchText, OmniBarTestView().getOmniBarSearchField())
         if typeReturnButton {
             typeKeyboardKey(.enter)
             _ = button(OmniBarLocators.Buttons.openCardButton.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout)

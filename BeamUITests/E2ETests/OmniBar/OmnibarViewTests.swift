@@ -46,35 +46,31 @@ class OmnibarViewTests: BaseTest {
     
     func testOmnibarPivotButtonClicking() {
         let journalView = launchApp()
-        let textToSearch = "Hello"
         
-        testRailPrint("Given in Omnibar search field I search for \(textToSearch)")
+        testRailPrint("Given I open test page")
         let omnibarView = OmniBarTestView()
-        let omnibarSearchField = omnibarView.searchField(OmniBarLocators.SearchFields.omniSearchField.accessibilityIdentifier)
-        omnibarSearchField.click()
-        omnibarSearchField.typeText(textToSearch)
-        omnibarSearchField.typeText("\r")
+        BeamUITestsHelper(journalView.app).openTestPage(page: BeamUITestsHelper.UITestsPageCommand.page1)
         
         testRailPrint("Then Webview is opened and Omnibar has additional buttons")
         XCTAssertTrue(journalView.group(WebViewLocators.Images.browserTabBar.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
         XCTAssertEqual(omnibarView.getAutocompleteResults().count, 0)
-        assertElementProperties(omnibarView.button(OmniBarLocators.Buttons.homeButton.accessibilityIdentifier), false, true, true)
-        assertElementProperties(omnibarView.button(OmniBarLocators.Buttons.refreshButton.accessibilityIdentifier), false, true, true)
-        assertElementProperties(omnibarView.button(OmniBarLocators.Buttons.openCardButton.accessibilityIdentifier), false, true, true)
+        XCTAssertTrue(omnibarView.button(OmniBarLocators.Buttons.homeButton.accessibilityIdentifier).exists)
+        XCTAssertTrue(omnibarView.button(OmniBarLocators.Buttons.refreshButton.accessibilityIdentifier).exists)
+        XCTAssertTrue(omnibarView.button(OmniBarLocators.Buttons.openCardButton.accessibilityIdentifier).exists)
 
         testRailPrint("When I click on pivot button")
-        omnibarView.button(OmniBarLocators.Buttons.openCardButton.accessibilityIdentifier).click()
+        WebTestView().openDestinationCard()
         
         testRailPrint("Then journal view is opened and Omnibar additional buttons are not displayed")
-        XCTAssertTrue(journalView.scrollView(JournalViewLocators.ScrollViews.journalScrollView.accessibilityIdentifier).exists)
+        XCTAssertTrue(journalView.scrollView(JournalViewLocators.ScrollViews.journalScrollView.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
         XCTAssertFalse(omnibarView.button(OmniBarLocators.Buttons.refreshButton.accessibilityIdentifier).exists)
         
-        testRailPrint("When I click on pivot button")
-        omnibarView.button(OmniBarLocators.Buttons.openWebButton.accessibilityIdentifier).click()
+        testRailPrint("When I open web view")
+        CardTestView().navigateToWebView()
         
-        testRailPrint("Then Webview is opened and Omnibar has additional buttons")
-        XCTAssertTrue(journalView.group(WebViewLocators.Images.browserTabBar.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
-        XCTAssertFalse(journalView.scrollView(JournalViewLocators.ScrollViews.journalScrollView.accessibilityIdentifier).exists)
+        testRailPrint("Then Webview is opened and Journal is closed")
+        XCTAssertTrue(omnibarView.group(WebViewLocators.Images.browserTabBar.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
         XCTAssertTrue(omnibarView.button(OmniBarLocators.Buttons.refreshButton.accessibilityIdentifier).exists)
+        XCTAssertFalse(journalView.scrollView(JournalViewLocators.ScrollViews.journalScrollView.accessibilityIdentifier).exists)
     }
 }

@@ -94,8 +94,6 @@ class SearchOnWebTests: BaseTest {
     
     func testScrollDownUpToSearchedWord() throws {
         try XCTSkipIf(true, "WIP")
-        let helper = BeamUITestsHelper(launchApp().app)
-        let searchView = SearchTestView()
     }
     
     func testTriggerSearchFieldFromSelectedText() throws {
