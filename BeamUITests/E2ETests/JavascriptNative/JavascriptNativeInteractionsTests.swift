@@ -21,7 +21,7 @@ class JavascriptNativeInteractionsTests: BaseTest {
         
         let webViewElement = journalView.app.webViews.containing(.button, identifier: buttonTitle).element
         let button = webViewElement.buttons[buttonTitle].firstMatch
-        button.tap()
+        button.clickOnHittable()
         testRailPrint("When \(buttonTitle) is invoked")
         let alert = journalView.app.dialogs.firstMatch
         XCTAssert(alert.waitForExistence(timeout: implicitWaitTimeout))

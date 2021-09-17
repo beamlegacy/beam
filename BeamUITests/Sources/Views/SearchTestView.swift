@@ -11,7 +11,7 @@ import XCTest
 class SearchTestView: BaseView {
     
     func getSearchField() -> XCUIElement {
-        self.textField(SearchViewLocators.TextFields.searchField.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout)
+        _ = self.textField(SearchViewLocators.TextFields.searchField.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout)
         return self.textField(SearchViewLocators.TextFields.searchField.accessibilityIdentifier)
     }
     
