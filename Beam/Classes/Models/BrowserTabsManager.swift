@@ -97,19 +97,17 @@ class BrowserTabsManager: ObservableObject {
             }
 
             tab.appendToIndexer = { [unowned self, weak tab] url, read in
-                var text = ""
                 var textForClustering = ""
                 let tabTree = tab?.browsingTree.deepCopy()
                 let currentTabTree = currentTab?.browsingTree.deepCopy()
 
                 self.indexingQueue.async { [unowned self] in
                     let htmlNoteAdapter = HtmlNoteAdapter(url)
-                    text = htmlNoteAdapter.convert(html: read.content)
                     textForClustering = htmlNoteAdapter.convertForClustering(html: read.content)
 
                     DispatchQueue.main.async { [weak self] in
                         guard let self = self else { return }
-                        let indexDocument = IndexDocument(source: url.absoluteString, title: read.title, contents: text)
+                        let indexDocument = IndexDocument(source: url.absoluteString, title: read.title, contents: read.textContent)
 
                         let tabInformation: TabInformation? = TabInformation(url: url,
                                                                              tabTree: tabTree,
@@ -117,7 +115,7 @@ class BrowserTabsManager: ObservableObject {
                                                                              parentBrowsingNode: tabTree?.current.parent,
                                                                              previousTabTree: self.latestCurrentTab,
                                                                              document: indexDocument,
-                                                                             textContent: text,
+                                                                             textContent: read.textContent,
                                                                              cleanedTextContentForClustering: textForClustering)
                         self.data.tabToIndex = tabInformation
                         self.latestCurrentTab = nil
