@@ -696,6 +696,9 @@ public extension CALayer {
                             if let str = String(data: data, encoding: .utf8) {
                                 //swiftlint:disable:next print
                                 print("JSON Dump of the current note:\n\n\(str)\n")
+                                let pasteboard = NSPasteboard.general
+                                pasteboard.clearContents()
+                                pasteboard.setString(str, forType: .string)
                             }
                         }
                         return
