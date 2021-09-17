@@ -128,15 +128,17 @@ public class SuggestedNoteSourceUpdater {
     private func addAndRemoveFromNotes(sourcesToAdd: UpdateSources, sourcesToRemove: UpdateSources) {
         let allNotes = Array(Set(sourcesToRemove.keys).union(Set(sourcesToAdd.keys)))
         for noteId in allNotes {
-            if let note = BeamNote.fetch(self.documentManager, id: noteId) {
-                if let addPagesToNote = sourcesToAdd[noteId] {
-                    for pageId in addPagesToNote {
-                        note.sources.add(urlId: pageId, noteId: noteId, type: .suggestion, sessionId: self.sessionId)
+            DispatchQueue.main.async {
+                if let note = BeamNote.fetch(self.documentManager, id: noteId) {
+                    if let addPagesToNote = sourcesToAdd[noteId] {
+                        for pageId in addPagesToNote {
+                            note.sources.add(urlId: pageId, noteId: noteId, type: .suggestion, sessionId: self.sessionId)
+                        }
                     }
-                }
-                if let removePagesFromNote = sourcesToRemove[noteId] {
-                    for pageId in removePagesFromNote {
-                        note.sources.remove(urlId: pageId, noteId: noteId, sessionId: self.sessionId)
+                    if let removePagesFromNote = sourcesToRemove[noteId] {
+                        for pageId in removePagesFromNote {
+                            note.sources.remove(urlId: pageId, noteId: noteId, sessionId: self.sessionId)
+                        }
                     }
                 }
             }
