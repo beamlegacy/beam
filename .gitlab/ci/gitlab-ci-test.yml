@@ -69,6 +69,7 @@ xctests UI:
     paths:
       - cobertura.xml
       - fastlane/test_output/tests.xml
+      - fastlane/test_output
       - screenshots
       - logs
     reports:
