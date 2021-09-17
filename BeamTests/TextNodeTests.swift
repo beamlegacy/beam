@@ -112,13 +112,13 @@ class TextNodeTests: XCTestCase {
 
         let str1 = """
         title
-            v - bullet1
-                - bullet11
-                - bullet12
-            v - bullet2
-                - bullet21
-                - bullet22
-                - bullet23
+        \(String.tabs(1))v - bullet1
+        \(String.tabs(2))- bullet11
+        \(String.tabs(2))- bullet12
+        \(String.tabs(1))v - bullet2
+        \(String.tabs(2))- bullet21
+        \(String.tabs(2))- bullet22
+        \(String.tabs(2))- bullet23
 
         """
 
@@ -138,11 +138,11 @@ class TextNodeTests: XCTestCase {
         node?.open.toggle()
         let str1 = """
         title
-            > - bullet1
-            v - bullet2
-                - bullet21
-                - bullet22
-                - bullet23
+        \(String.tabs(1))> - bullet1
+        \(String.tabs(1))v - bullet2
+        \(String.tabs(2))- bullet21
+        \(String.tabs(2))- bullet22
+        \(String.tabs(2))- bullet23
 
         """
 
@@ -162,10 +162,10 @@ class TextNodeTests: XCTestCase {
 
         let str1 = """
         title
-            v - bullet2
-                - bullet21
-                - bullet22
-                - bullet23
+        \(String.tabs(1))v - bullet2
+        \(String.tabs(2))- bullet21
+        \(String.tabs(2))- bullet22
+        \(String.tabs(2))- bullet23
 
         """
 
@@ -186,14 +186,14 @@ class TextNodeTests: XCTestCase {
 
         let str1 = """
         title
-            v - bullet1
-                - bullet11
-                - bullet12
-            v - bullet2
-                - bullet21
-                - bullet22
-                - bullet23
-            - bullet3
+        \(String.tabs(1))v - bullet1
+        \(String.tabs(2))- bullet11
+        \(String.tabs(2))- bullet12
+        \(String.tabs(1))v - bullet2
+        \(String.tabs(2))- bullet21
+        \(String.tabs(2))- bullet22
+        \(String.tabs(2))- bullet23
+        \(String.tabs(1))- bullet3
 
         """
 
@@ -214,14 +214,14 @@ class TextNodeTests: XCTestCase {
 
         let str1 = """
         title
-            v - bullet1
-                - bullet11
-                - bullet12
-            - bullet3
-            v - bullet2
-                - bullet21
-                - bullet22
-                - bullet23
+        \(String.tabs(1))v - bullet1
+        \(String.tabs(2))- bullet11
+        \(String.tabs(2))- bullet12
+        \(String.tabs(1))- bullet3
+        \(String.tabs(1))v - bullet2
+        \(String.tabs(2))- bullet21
+        \(String.tabs(2))- bullet22
+        \(String.tabs(2))- bullet23
 
         """
 
@@ -241,14 +241,14 @@ class TextNodeTests: XCTestCase {
 
         let str1 = """
         title
-            v - bullet1
-                - bullet11
-                - bullet12
-                - bullet13
-            v - bullet2
-                - bullet21
-                - bullet22
-                - bullet23
+        \(String.tabs(1))v - bullet1
+        \(String.tabs(2))- bullet11
+        \(String.tabs(2))- bullet12
+        \(String.tabs(2))- bullet13
+        \(String.tabs(1))v - bullet2
+        \(String.tabs(2))- bullet21
+        \(String.tabs(2))- bullet22
+        \(String.tabs(2))- bullet23
 
         """
 
@@ -269,14 +269,14 @@ class TextNodeTests: XCTestCase {
 
         let str1 = """
         title
-            v - bullet1
-                - bullet11
-                - bullet3
-                - bullet12
-            v - bullet2
-                - bullet21
-                - bullet22
-                - bullet23
+        \(String.tabs(1))v - bullet1
+        \(String.tabs(2))- bullet11
+        \(String.tabs(2))- bullet3
+        \(String.tabs(2))- bullet12
+        \(String.tabs(1))v - bullet2
+        \(String.tabs(2))- bullet21
+        \(String.tabs(2))- bullet22
+        \(String.tabs(2))- bullet23
 
         """
 
@@ -299,15 +299,15 @@ class TextNodeTests: XCTestCase {
 
         let str1 = """
         title
-            v - bullet1
-                - bullet11
-                - bullet12
-                v - bullet13
-                    - bullet131
-            v - bullet2
-                - bullet21
-                - bullet22
-                - bullet23
+        \(String.tabs(1))v - bullet1
+        \(String.tabs(2))- bullet11
+        \(String.tabs(2))- bullet12
+        \(String.tabs(2))v - bullet13
+        \(String.tabs(3))- bullet131
+        \(String.tabs(1))v - bullet2
+        \(String.tabs(2))- bullet21
+        \(String.tabs(2))- bullet22
+        \(String.tabs(2))- bullet23
 
         """
 
@@ -330,15 +330,15 @@ class TextNodeTests: XCTestCase {
 
         let str1 = """
         title
-            v - bullet1
-                - bullet11
-                v - bullet13
-                    - bullet131
-                - bullet12
-            v - bullet2
-                - bullet21
-                - bullet22
-                - bullet23
+        \(String.tabs(1))v - bullet1
+        \(String.tabs(2))- bullet11
+        \(String.tabs(2))v - bullet13
+        \(String.tabs(3))- bullet131
+        \(String.tabs(2))- bullet12
+        \(String.tabs(1))v - bullet2
+        \(String.tabs(2))- bullet21
+        \(String.tabs(2))- bullet22
+        \(String.tabs(2))- bullet23
 
         """
 
@@ -359,10 +359,10 @@ class TextNodeTests: XCTestCase {
         root.element.removeChild(first!.element)
         let str1 = """
         title
-            v - bullet2
-                - bullet21
-                - bullet22
-                - bullet23
+        \(String.tabs(1))v - bullet2
+        \(String.tabs(2))- bullet21
+        \(String.tabs(2))- bullet22
+        \(String.tabs(2))- bullet23
 
         """
 
@@ -383,12 +383,12 @@ class TextNodeTests: XCTestCase {
         first?.element.removeChild(first!.element.children.first!)
         let str1 = """
         title
-            v - bullet1
-                - bullet12
-            v - bullet2
-                - bullet21
-                - bullet22
-                - bullet23
+        \(String.tabs(1))v - bullet1
+        \(String.tabs(2))- bullet12
+        \(String.tabs(1))v - bullet2
+        \(String.tabs(2))- bullet21
+        \(String.tabs(2))- bullet22
+        \(String.tabs(2))- bullet23
 
         """
 
@@ -412,13 +412,13 @@ class TextNodeTests: XCTestCase {
         root.insertText(string: "test", replacementRange: root.selectedTextRange)
         let str1 = """
         title
-            v - testbullet1
-                - bullet11
-                - bullet12
-            v - bullet2
-                - bullet21
-                - bullet22
-                - bullet23
+        \(String.tabs(1))v - testbullet1
+        \(String.tabs(2))- bullet11
+        \(String.tabs(2))- bullet12
+        \(String.tabs(1))v - bullet2
+        \(String.tabs(2))- bullet21
+        \(String.tabs(2))- bullet22
+        \(String.tabs(2))- bullet23
 
         """
 
@@ -431,13 +431,13 @@ class TextNodeTests: XCTestCase {
 
         let str2 = """
         title
-            v - bullet1
-                - bullet11
-                - bullet12
-            v - bullet2
-                - bullet21
-                - bullet22
-                - bullet23
+        \(String.tabs(1))v - bullet1
+        \(String.tabs(2))- bullet11
+        \(String.tabs(2))- bullet12
+        \(String.tabs(1))v - bullet2
+        \(String.tabs(2))- bullet21
+        \(String.tabs(2))- bullet22
+        \(String.tabs(2))- bullet23
 
         """
         XCTAssertEqual(str2, root.printTree())
@@ -469,13 +469,13 @@ class TextNodeTests: XCTestCase {
         root.insertText(string: "test", replacementRange: root.selectedTextRange)
         let str1 = """
         title
-            v - bultestlet1
-                - bullet11
-                - bullet12
-            v - bullet2
-                - bullet21
-                - bullet22
-                - bullet23
+        \(String.tabs(1))v - bultestlet1
+        \(String.tabs(2))- bullet11
+        \(String.tabs(2))- bullet12
+        \(String.tabs(1))v - bullet2
+        \(String.tabs(2))- bullet21
+        \(String.tabs(2))- bullet22
+        \(String.tabs(2))- bullet23
 
         """
 
@@ -488,13 +488,13 @@ class TextNodeTests: XCTestCase {
 
         let str2 = """
         title
-            v - bullet1
-                - bullet11
-                - bullet12
-            v - bullet2
-                - bullet21
-                - bullet22
-                - bullet23
+        \(String.tabs(1))v - bullet1
+        \(String.tabs(2))- bullet11
+        \(String.tabs(2))- bullet12
+        \(String.tabs(1))v - bullet2
+        \(String.tabs(2))- bullet21
+        \(String.tabs(2))- bullet22
+        \(String.tabs(2))- bullet23
 
         """
         XCTAssertEqual(str2, root.printTree())
@@ -526,13 +526,13 @@ class TextNodeTests: XCTestCase {
         root.insertText(string: "test", replacementRange: root.selectedTextRange)
         let str1 = """
         title
-            v - bultest
-                - bullet11
-                - bullet12
-            v - bullet2
-                - bullet21
-                - bullet22
-                - bullet23
+        \(String.tabs(1))v - bultest
+        \(String.tabs(2))- bullet11
+        \(String.tabs(2))- bullet12
+        \(String.tabs(1))v - bullet2
+        \(String.tabs(2))- bullet21
+        \(String.tabs(2))- bullet22
+        \(String.tabs(2))- bullet23
 
         """
 
@@ -545,13 +545,13 @@ class TextNodeTests: XCTestCase {
 
         let str2 = """
         title
-            v - bullet1
-                - bullet11
-                - bullet12
-            v - bullet2
-                - bullet21
-                - bullet22
-                - bullet23
+        \(String.tabs(1))v - bullet1
+        \(String.tabs(2))- bullet11
+        \(String.tabs(2))- bullet12
+        \(String.tabs(1))v - bullet2
+        \(String.tabs(2))- bullet21
+        \(String.tabs(2))- bullet22
+        \(String.tabs(2))- bullet23
 
         """
         XCTAssertEqual(str2, root.printTree())

@@ -29,8 +29,8 @@ class CommandNodeTests: QuickSpec {
 
             let tree = """
             TestCommands
-                - First bullet
-                - Second bullet
+            \(String.tabs(1))- First bullet
+            \(String.tabs(1))- Second bullet
 
             """
 
@@ -50,8 +50,8 @@ class CommandNodeTests: QuickSpec {
 
                 tree = """
                 TestCommands
-                    v - First bullet
-                        - Second bullet
+                \(String.tabs(1))v - First bullet
+                \(String.tabs(2))- Second bullet
 
                 """
 
@@ -69,8 +69,8 @@ class CommandNodeTests: QuickSpec {
 
                     let decreasedTree = """
                     TestCommands
-                        - First bullet
-                        - Second bullet
+                    \(String.tabs(1))- First bullet
+                    \(String.tabs(1))- Second bullet
 
                     """
                     expect(rootNode.printTree()).to(equal(decreasedTree))
@@ -92,8 +92,8 @@ class CommandNodeTests: QuickSpec {
 
                 tree = """
                 TestCommands
-                    - First bullet
-                    - Second bullet
+                \(String.tabs(1))- First bullet
+                \(String.tabs(1))- Second bullet
 
                 """
 
@@ -110,8 +110,8 @@ class CommandNodeTests: QuickSpec {
 
                     let increasedTree = """
                     TestCommands
-                        v - First bullet
-                            - Second bullet
+                    \(String.tabs(1))v - First bullet
+                    \(String.tabs(2))- Second bullet
 
                     """
                     expect(rootNode.printTree()).to(equal(increasedTree))
@@ -129,9 +129,9 @@ class CommandNodeTests: QuickSpec {
 
                     var insertedTree = """
                     TestCommands
-                        - First bullet
-                        - Coucou
-                        - Second bullet
+                    \(String.tabs(1))- First bullet
+                    \(String.tabs(1))- Coucou
+                    \(String.tabs(1))- Second bullet
 
                     """
                     expect(rootNode.printTree()).to(equal(insertedTree))
@@ -145,9 +145,9 @@ class CommandNodeTests: QuickSpec {
 
                     insertedTree = """
                     TestCommands
-                        - First bullet
-                        - Second
-                        -  bullet
+                    \(String.tabs(1))- First bullet
+                    \(String.tabs(1))- Second
+                    \(String.tabs(1))-  bullet
 
                     """
                     expect(rootNode.printTree()).to(equal(insertedTree))
@@ -162,9 +162,9 @@ class CommandNodeTests: QuickSpec {
 
                     insertedTree = """
                     TestCommands
-                        - First bullet
-                        - Second bullet
-                        - Coucou
+                    \(String.tabs(1))- First bullet
+                    \(String.tabs(1))- Second bullet
+                    \(String.tabs(1))- Coucou
 
                     """
 
@@ -187,8 +187,8 @@ class CommandNodeTests: QuickSpec {
 
                 tree = """
                 TestCommands
-                    - First bullet
-                    - Second bullet
+                \(String.tabs(1))- First bullet
+                \(String.tabs(1))- Second bullet
 
                 """
 
@@ -205,7 +205,7 @@ class CommandNodeTests: QuickSpec {
 
                     let deletedBackwardTree = """
                     TestCommands
-                        - First bulletSecond bullet
+                    \(String.tabs(1))- First bulletSecond bullet
 
                     """
                     expect(rootNode.printTree()).to(equal(deletedBackwardTree))
@@ -219,7 +219,7 @@ class CommandNodeTests: QuickSpec {
 
                     let deletedForwardTree = """
                     TestCommands
-                        - First bulletSecond bullet
+                    \(String.tabs(1))- First bulletSecond bullet
 
                     """
                     expect(rootNode.printTree()).to(equal(deletedForwardTree))
@@ -238,7 +238,7 @@ class CommandNodeTests: QuickSpec {
 
                     let deletedTree = """
                     TestCommands
-                        - Coucou
+                    \(String.tabs(1))- Coucou
 
                     """
                     expect(rootNode.printTree()).to(equal(deletedTree))

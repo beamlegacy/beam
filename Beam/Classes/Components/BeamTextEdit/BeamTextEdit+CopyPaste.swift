@@ -43,7 +43,7 @@ extension BeamTextEdit {
 
     func buildStringFrom(node: ElementNode) -> NSAttributedString {
         let strNode = NSMutableAttributedString()
-        strNode.append(NSAttributedString(string: String.tabs(max(0, node.element.depth - 1))))
+        strNode.append(NSAttributedString(string: String.tabs(max(0, node.element.depth - 1)) + String.bullet() + String.spaces(1)))
 
         switch node.elementKind {
         case .bullet, .heading, .quote, .check, .blockReference, .code:
@@ -71,6 +71,7 @@ extension BeamTextEdit {
     func buildStringFrom(nodes: [ElementNode]) -> NSAttributedString {
         let strNodes = NSMutableAttributedString()
         for node in nodes {
+            guard (node as? TextRoot) == nil else { continue }
             if nodes.count > 1 {
                 strNodes.append(buildStringFrom(node: node))
                 strNodes.append(NSAttributedString(string: "\n"))
