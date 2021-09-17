@@ -35,6 +35,19 @@ struct PointAndShootCardPicker: View {
     @State private var shouldHighlightTextCompletion = false
     @State private var shootCompleted: Bool = false
 
+    private var finalCardName: String {
+        var finalCardName = cardSearchField
+        if !finalCardName.isEmpty {
+            selectSearchResult()
+            finalCardName = autocompleteModel.realNameForCardName(cardSearchField)
+        } else if let currentCardName = currentCardName {
+            finalCardName = currentCardName
+        } else {
+            finalCardName = data.todaysName
+        }
+        return finalCardName
+    }
+
     private var isTodaysNote: String? {
         browserTabsManager.currentTab?.noteController.noteOrDefault.isTodaysNote ?? false ? data.todaysName : nil
     }
@@ -121,8 +134,8 @@ struct PointAndShootCardPicker: View {
                                 completed: shootCompleted
                             )
                         )
-                    } else if let text = currentCardName, completedGroup?.confirmation == .success {
-                        Text(text)
+                    } else if completedGroup?.confirmation == .success {
+                        Text(finalCardName)
                             .foregroundColor(BeamColor.Beam.swiftUI)
                             .font(BeamFont.regular(size: 13).swiftUI)
                             .animation(.easeInOut(duration: 0.1))
@@ -334,16 +347,6 @@ extension PointAndShootCardPicker {
             onComplete?(nil, nil)
             return
         }
-        var finalCardName = cardSearchField
-        if !finalCardName.isEmpty {
-            selectSearchResult()
-            finalCardName = autocompleteModel.realNameForCardName(cardSearchField)
-        } else if let currentCardName = currentCardName {
-            finalCardName = currentCardName
-        } else {
-            finalCardName = data.todaysName
-        }
-
         if !finalCardName.isEmpty {
             shootCompleted = true
             onComplete?(finalCardName, addNoteField)
