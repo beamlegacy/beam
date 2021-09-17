@@ -41,6 +41,7 @@ extension BeamNote: BeamNoteDocument {
     }
 
     public func observeDocumentChange(documentManager: DocumentManager) {
+        beamCheckMainThread()
         guard activeDocumentCancellables.isEmpty else {
             Logger.shared.logError("BeamNote already has change observer", category: .document)
             return
@@ -85,6 +86,7 @@ extension BeamNote: BeamNoteDocument {
     }
 
     func updateWithDocumentStruct(_ docStruct: DocumentStruct) {
+        beamCheckMainThread()
         let decoder = JSONDecoder()
         guard let newSelf = try? decoder.decode(BeamNote.self, from: docStruct.data) else {
             Logger.shared.logError("Unable to decode new documentStruct \(docStruct.title) {\(docStruct.id)}",
@@ -114,6 +116,7 @@ extension BeamNote: BeamNoteDocument {
     }
 
     public func updateTitle(_ newTitle: String, documentManager: DocumentManager) {
+        beamCheckMainThread()
         let previousTitle = self.title
         try? GRDBDatabase.shared.remove(note: self)
         self.title = newTitle
@@ -124,11 +127,13 @@ extension BeamNote: BeamNoteDocument {
     }
 
     public func indexContents() {
+        beamCheckMainThread()
         try? GRDBDatabase.shared.append(note: self)
     }
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
     public func save(documentManager: DocumentManager, completion: ((Result<Bool, Error>) -> Void)? = nil) {
+        beamCheckMainThread()
         guard version == savedVersion else {
             Logger.shared.logWarning("Waiting for last save: \(title) {\(id)} - saved version \(savedVersion) / current \(version)",
                                      category: .document)
@@ -313,6 +318,7 @@ extension BeamNote: BeamNoteDocument {
                              title: String,
                              keepInMemory: Bool = true,
                              decodeChildren: Bool = true) -> BeamNote? {
+        beamCheckMainThread()
         // Is the note in the cache?
         if let note = getFetchedNote(title) {
             return note
@@ -336,6 +342,7 @@ extension BeamNote: BeamNoteDocument {
                              journalDate: Date,
                              keepInMemory: Bool = true,
                              decodeChildren: Bool = true) -> BeamNote? {
+        beamCheckMainThread()
         // Is the note in the cache?
         let title = BeamDate.journalNoteTitle(for: journalDate)
         if let note = getFetchedNote(title) {
@@ -373,9 +380,12 @@ extension BeamNote: BeamNoteDocument {
                              id: UUID,
                              keepInMemory: Bool = true,
                              decodeChildren: Bool = true) -> BeamNote? {
-        // Is the note in the cache?
-        if let note = getFetchedNote(id) {
-            return note
+        if keepInMemory {
+            beamCheckMainThread()
+            // Is the note in the cache?
+            if let note = getFetchedNote(id) {
+                return note
+            }
         }
 
         // Is the note in the document store?
@@ -393,6 +403,7 @@ extension BeamNote: BeamNoteDocument {
     }
 
     public static func fetchNotesWithType(_ documentManager: DocumentManager, type: DocumentType, _ limit: Int, _ fetchOffset: Int) -> [BeamNote] {
+        beamCheckMainThread()
         return documentManager.loadDocumentsWithType(type: type, limit, fetchOffset).compactMap { doc -> BeamNote? in
             if let note = getFetchedNote(doc.title) {
                 return note
@@ -408,6 +419,7 @@ extension BeamNote: BeamNoteDocument {
 
     // Beware that this function crashes whatever note with that title in the cache
     public static func create(_ documentManager: DocumentManager, title: String) -> BeamNote {
+        beamCheckMainThread()
         assert(getFetchedNote(title) == nil)
         let note = BeamNote(title: title)
         note.databaseId = DatabaseManager.defaultDatabase.id
@@ -419,6 +431,7 @@ extension BeamNote: BeamNoteDocument {
     }
 
     public static func create(_ documentManager: DocumentManager, journalDate: Date) -> BeamNote {
+        beamCheckMainThread()
         let note = BeamNote(journalDate: journalDate)
         note.databaseId = DatabaseManager.defaultDatabase.id
 
@@ -430,14 +443,17 @@ extension BeamNote: BeamNoteDocument {
     }
 
     public func observeDocumentChange() {
+        beamCheckMainThread()
         observeDocumentChange(documentManager: AppDelegate.main.data.documentManager)
     }
 
     public func autoSave() {
+        beamCheckMainThread()
         AppDelegate.main.data.noteAutoSaveService.addNoteToSave(self)
     }
 
     public static func fetchOrCreate(_ documentManager: DocumentManager, title: String) -> BeamNote {
+        beamCheckMainThread()
         // Is the note in the cache?
         if let note = fetch(documentManager, title: title) {
             return note
@@ -448,6 +464,7 @@ extension BeamNote: BeamNoteDocument {
     }
 
     public static func fetchOrCreateJournalNote(_ documentManager: DocumentManager, date: Date) -> BeamNote {
+        beamCheckMainThread()
         // Is the note in the cache?
         if let note = fetch(documentManager, journalDate: date) {
             return note
@@ -473,6 +490,7 @@ extension BeamNote: BeamNoteDocument {
     public var isTodaysNote: Bool { type.isJournal && type.journalDateString == BeamNoteType.iso8601ForDate(BeamDate.now) }
 
     public static func indexAllNotes() {
+        beamCheckMainThread()
         let documentManager = DocumentManager()
         var log = [String]()
         log.append("Before reindexing, DB contains \((try? GRDBDatabase.shared.countBidirectionalLinks()) ?? -1) bidirectional links from \((try? GRDBDatabase.shared.countIndexedElements()) ?? -1) indexed elements")
@@ -494,6 +512,7 @@ extension BeamNote: BeamNoteDocument {
     }
 
     public static func rebuildAllNotes() {
+        beamCheckMainThread()
         let documentManager = DocumentManager()
         var rebuilt = [String]()
         for id in documentManager.allDocumentsIds(includeDeletedNotes: false) {
@@ -510,6 +529,7 @@ extension BeamNote: BeamNoteDocument {
     }
 
     public static func validateAllNotes() {
+        beamCheckMainThread()
         let documentManager = DocumentManager()
         var all = [String]()
         for id in documentManager.allDocumentsIds(includeDeletedNotes: false) {
@@ -536,6 +556,7 @@ extension BeamNote: BeamNoteDocument {
     }
 
     public func validate() -> (Bool, [String]) {
+        beamCheckMainThread()
         guard let docStruct = documentStruct else {
             let str = "\tUnable to be documentStruct for note \(title) - \(id)"
             //swiftlint:disable:next print
@@ -574,6 +595,7 @@ extension BeamNote: BeamNoteDocument {
     }
 
     public func validateLinks(fix: Bool) -> [String] {
+        beamCheckMainThread()
         var strs = [String]()
         let documentManager = DocumentManager()
         let allDocuments = Set(documentManager.allDocumentsIds(includeDeletedNotes: false))
