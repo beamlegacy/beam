@@ -16,8 +16,8 @@ class ConfigurationTests: QuickSpec {
             expect(Configuration.autoUpdate).to(beFalse())
         }
 
-        it("doesn't have sentry") {
-            expect(Configuration.sentryEnabled).to(beFalse())
+        it("does have sentry") {
+            expect(Configuration.sentryEnabled).to(beTrue())
         }
     }
 }
