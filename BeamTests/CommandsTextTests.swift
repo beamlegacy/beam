@@ -29,8 +29,8 @@ class CommandsTextTests: QuickSpec {
 
             tree = """
             TestEditCommands
-                - First bullet
-                - Second bullet
+            \(String.tabs(1))- First bullet
+            \(String.tabs(1))- Second bullet
 
             """
             expect(rootNode.printTree()).to(equal(tree))
@@ -47,8 +47,8 @@ class CommandsTextTests: QuickSpec {
 
                 tree = """
                 TestEditCommands
-                    - First bullet
-                    - Second bullet
+                \(String.tabs(1))- First bullet
+                \(String.tabs(1))- Second bullet
 
                 """
                 expect(rootNode.printTree()).to(equal(tree))
@@ -63,8 +63,8 @@ class CommandsTextTests: QuickSpec {
 
                     let editedTree = """
                     TestEditCommands
-                        - First bullet Hello beam !
-                        - Second bullet
+                    \(String.tabs(1))- First bullet Hello beam !
+                    \(String.tabs(1))- Second bullet
 
                     """
                     expect(rootNode.printTree()).to(equal(editedTree))
@@ -84,9 +84,9 @@ class CommandsTextTests: QuickSpec {
 
                     let newEditedTree = """
                     TestEditCommands
-                        - First bullet
+                    \(String.tabs(1))- First bullet
                     Hello beam !
-                        - Second bullet
+                    \(String.tabs(1))- Second bullet
 
                     """
 
@@ -117,8 +117,8 @@ class CommandsTextTests: QuickSpec {
 
                     let editedTree = """
                     TestEditCommands
-                        - First b
-                        - Second bullet
+                    \(String.tabs(1))- First b
+                    \(String.tabs(1))- Second bullet
 
                     """
                     expect(rootNode.printTree()).to(equal(editedTree))
@@ -141,8 +141,8 @@ class CommandsTextTests: QuickSpec {
 
                     let editedTree = """
                     TestEditCommands
-                        - First
-                        - Second bullet
+                    \(String.tabs(1))- First
+                    \(String.tabs(1))- Second bullet
 
                     """
                     expect(rootNode.printTree()).to(equal(editedTree))
@@ -167,8 +167,8 @@ class CommandsTextTests: QuickSpec {
                     rootNode.insertText(string: " Hemm", replacementRange: rootNode.selectedTextRange)
                     let editedTree = """
                     TestEditCommands
-                        - First bullet Hemm
-                        - Second bullet
+                    \(String.tabs(1))- First bullet Hemm
+                    \(String.tabs(1))- Second bullet
 
                     """
                     expect(rootNode.printTree()).to(equal(editedTree))
@@ -179,8 +179,8 @@ class CommandsTextTests: QuickSpec {
                     }
                     let deletedEditedTree = """
                     TestEditCommands
-                        - First bullet He
-                        - Second bullet
+                    \(String.tabs(1))- First bullet He
+                    \(String.tabs(1))- Second bullet
 
                     """
                     expect(rootNode.printTree()).to(equal(deletedEditedTree))
@@ -189,8 +189,8 @@ class CommandsTextTests: QuickSpec {
                     rootNode.insertText(string: "llo", replacementRange: rootNode.selectedTextRange)
                     let insertedEditedTree = """
                     TestEditCommands
-                        - First bullet Hello
-                        - Second bullet
+                    \(String.tabs(1))- First bullet Hello
+                    \(String.tabs(1))- Second bullet
 
                     """
                     expect(rootNode.printTree()).to(equal(insertedEditedTree))

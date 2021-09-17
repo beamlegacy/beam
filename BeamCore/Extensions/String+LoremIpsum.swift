@@ -37,8 +37,16 @@ Lorem **ipsum dolor** sit amet, *consectetur* adipiscing elit, sed do eiusmod te
         return str
     }
 
+    static func bullet() -> String {
+        return "\u{2022}"
+    }
+
     static func tabs(_ count: Int) -> String {
-        return "    ".duplicate(count)
+        return "\t".duplicate(count)
+    }
+
+    static func spaces(_ count: Int) -> String {
+        return " ".duplicate(count)
     }
 
     static func random(length: Int) -> String {
