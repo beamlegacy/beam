@@ -34,8 +34,8 @@ class TwoTextFieldViewItem: IconAndTextTableViewItem {
 
 struct TableView: NSViewRepresentable {
 
-    static let rowHeight: CGFloat = 32.0
-    static let headerHeight: CGFloat = 32.0
+    static let rowHeight: CGFloat = 28.0
+    static let headerHeight: CGFloat = 28.0
 
     var customRowHeight: CGFloat?
     var hasSeparator: Bool = true
@@ -67,6 +67,7 @@ struct TableView: NSViewRepresentable {
         view.allowsMultipleSelection = allowsMultipleSelection
         view.allowsColumnReordering = false
         view.columnAutoresizingStyle = .reverseSequentialColumnAutoresizingStyle
+        view.intercellSpacing = .zero
         if #available(OSX 11.0, *) {
             view.style = .plain
         }
@@ -78,6 +79,16 @@ struct TableView: NSViewRepresentable {
         setupColumns(in: view, context: context)
         if !hasHeader {
             view.headerView = nil
+        } else {
+            var headerFrame = view.headerView?.frame ?? .zero
+            headerFrame.size.height = TableView.headerHeight
+            let headerView = TableHeaderView()
+            let coordinator = context.coordinator
+            headerView.onHoverColumn = { [weak coordinator] column, hovering in
+                coordinator?.headerViewHoveredColumn(column: column, hovering: hovering)
+            }
+            view.headerView = headerView
+            view.headerView?.frame = headerFrame
         }
         scrollView.horizontalScrollElasticity = .none
         scrollView.contentView.drawsBackground = false
@@ -95,7 +106,7 @@ struct TableView: NSViewRepresentable {
             let tableColumn = NSTableColumn(identifier: NSUserInterfaceItemIdentifier(column.key))
             let customHeaderCell = TableHeaderCell(textCell: column.title)
             customHeaderCell.drawsTrailingBorder = index < columns.count - 1
-            customHeaderCell.font = BeamFont.medium(size: 12).nsFont
+            customHeaderCell.font = BeamFont.regular(size: 12).nsFont
             customHeaderCell.textColor = BeamColor.AlphaGray.nsColor
             tableColumn.headerCell = customHeaderCell
             tableColumn.minWidth = column.width
@@ -119,11 +130,11 @@ struct TableView: NSViewRepresentable {
             if column.type == .CheckBox {
                 let headerCell = CheckBoxTableHeaderCell(textCell: tableColumn.headerCell.title)
                 tableColumn.headerCell = headerCell
-                context.coordinator.setupSelectAllCheckBox()
+                context.coordinator.selectAllCheckBoxHeaderCell = headerCell
             } else {
                 let attrs = NSAttributedString(string: tableColumn.headerCell.title, attributes: [
                     NSAttributedString.Key.foregroundColor: BeamColor.Generic.placeholder.nsColor,
-                    NSAttributedString.Key.font: BeamFont.medium(size: 12).nsFont
+                    NSAttributedString.Key.font: BeamFont.regular(size: 12).nsFont
                 ])
                 tableColumn.headerCell.attributedStringValue = attrs
             }
@@ -147,7 +158,8 @@ struct TableView: NSViewRepresentable {
 class TableViewCoordinator: NSObject {
 
     weak var tableView: NSTableView?
-    var selectAllCheckBox: CheckBoxButton?
+    var selectAllCheckBoxHeaderCell: CheckBoxTableHeaderCell?
+
     var originalData = [TableViewItem]() {
         didSet {
             if originalData != oldValue {
@@ -204,22 +216,17 @@ class TableViewCoordinator: NSObject {
         updateSelectAllCheckBox()
     }
 
-    func setupSelectAllCheckBox() {
-        let box = CheckBoxButton(checkboxWithTitle: "", target: self, action: #selector(toggleSelectAllRows))
-        box.frame.origin = CGPoint(x: 6, y: 5)
-        selectAllCheckBox = box
-        selectAllCheckBox?.allowsMixedState = true
-        tableView?.headerView?.addSubview(box)
-    }
-
     func updateSelectAllCheckBox() {
         let indexesCount = currentSelectedIndexes?.count ?? 0
         if indexesCount == sortedData.count, sortedData.count > 0 {
-            selectAllCheckBox?.checked = true
+            selectAllCheckBoxHeaderCell?.checked = true
+            selectAllCheckBoxHeaderCell?.mixedState = false
         } else if indexesCount > 0 && (indexesCount != 1 || !isRowCreationRow(currentSelectedIndexes?.first ?? -1) ) {
-            selectAllCheckBox?.mixedState = true
+            selectAllCheckBoxHeaderCell?.checked = false
+            selectAllCheckBoxHeaderCell?.mixedState = true
         } else {
-            selectAllCheckBox?.checked = false
+            selectAllCheckBoxHeaderCell?.checked = false
+            selectAllCheckBoxHeaderCell?.mixedState = false
         }
     }
 
@@ -230,6 +237,15 @@ class TableViewCoordinator: NSObject {
             parent.onHover?(nil, nil)
         }
         hoveredRow = nil
+    }
+
+    func headerViewHoveredColumn(column: Int, hovering: Bool) {
+        guard column < tableView?.tableColumns.count ?? 0 else { return }
+        let tableColumn = tableView?.tableColumns[column]
+        if let headerCell = tableColumn?.headerCell as? TableHeaderCell {
+            headerCell.isHovering = hovering
+        }
+        parent.onHover?(nil, nil)
     }
 }
 
@@ -256,6 +272,8 @@ extension TableViewCoordinator: NSTableViewDataSource {
             if let hoveredRow = self.hoveredRow,
                let originalDataRowIndex = self.getOriginalDataIndexes(for: [hoveredRow]).first {
                 self.parent.onHover?(originalDataRowIndex, hovering ? rowFrame : nil)
+            } else if hovering {
+                self.parent.onHover?(nil, nil)
             }
         }
         return rowView
@@ -265,10 +283,14 @@ extension TableViewCoordinator: NSTableViewDataSource {
         guard !isRowCreationRow(rowIndex) else { return }
         if let row = tableView.rowView(atRow: rowIndex, makeIfNecessary: false) {
             parent.columns.enumerated().forEach { index, column in
-                guard column.visibleOnlyOnRowHoverOrSelected,
-                      let cell = row.view(atColumn: index) as? NSTableCellView
+                guard let cell = row.view(atColumn: index) as? NSTableCellView
                       else { return }
-                cell.alphaValue = hovering || selected ? 1 : 0
+                if column.visibleOnlyOnRowHoverOrSelected {
+                    cell.alphaValue = hovering || selected ? 1 : 0
+                }
+                if var selectableCell = cell as? SelectableTableCellView {
+                    selectableCell.isSelected = selected
+                }
             }
         }
     }
@@ -326,7 +348,7 @@ extension TableViewCoordinator: NSTableViewDelegate {
                 let textCell = BeamTableCellView()
                 textCell.textField?.isEditable = false
                 if column.editable {
-                    textCell.textField?.placeholderAttributedString = NSAttributedString(string: creationRowTitle ?? "", attributes: [.foregroundColor: BeamColor.Generic.placeholder.nsColor, .font: BeamFont.medium(size: 13).nsFont])
+                    textCell.textField?.placeholderAttributedString = NSAttributedString(string: creationRowTitle ?? "", attributes: [.foregroundColor: BeamColor.Generic.placeholder.nsColor, .font: BeamFont.regular(size: 13).nsFont])
                     textCell.textField?.isEditable = true
                     creationgRowTextField = textCell.textField
                     textCell.textField?.delegate = self
@@ -355,10 +377,12 @@ extension TableViewCoordinator: NSTableViewDelegate {
         textCell.textField?.stringValue = text
         textCell.textField?.isEditable = editable
         textCell.textField?.font = column.font ?? BeamFont.regular(size: column.fontSize).nsFont
-        textCell.textField?.textColor = column.fontColor
         textCell.textField?.setAccessibilityIdentifier("\(column.title)")
         textCell.isLink = column.isLink
         textCell.textField?.delegate = self
+        textCell.foregroundColor = column.foregroundColor
+        textCell.selectedForegroundColor = column.selectedForegroundColor
+        textCell.isSelected = currentSelectedIndexes?.contains(row) == true
         return textCell
     }
 
@@ -372,7 +396,8 @@ extension TableViewCoordinator: NSTableViewDelegate {
                 tableView.deselectRow(row)
             }
         }
-        checkCell.alphaValue = column.visibleOnlyOnRowHoverOrSelected ? 0 : 1
+        let isSelected = currentSelectedIndexes?.contains(row) == true
+        checkCell.alphaValue = column.visibleOnlyOnRowHoverOrSelected && !isSelected ? 0 : 1
         return checkCell
     }
 
@@ -385,7 +410,7 @@ extension TableViewCoordinator: NSTableViewDelegate {
         iconAndTextCell.textField?.stringValue = item?.text ?? ""
         iconAndTextCell.textField?.isEditable = editable
         iconAndTextCell.textField?.font = column.font ?? BeamFont.regular(size: column.fontSize).nsFont
-        iconAndTextCell.textField?.textColor = column.fontColor
+        iconAndTextCell.textField?.textColor = column.foregroundColor
         iconAndTextCell.textField?.delegate = self
         return iconAndTextCell
     }
@@ -405,8 +430,8 @@ extension TableViewCoordinator: NSTableViewDelegate {
         let font = column.font ?? BeamFont.regular(size: column.fontSize).nsFont
         twoTextFieldViewCell.topTextField.font = font
         twoTextFieldViewCell.botTextField.font = font
-        twoTextFieldViewCell.topTextField.textColor = column.fontColor
-        twoTextFieldViewCell.botTextField.textColor = column.fontColor
+        twoTextFieldViewCell.topTextField.textColor = column.foregroundColor
+        twoTextFieldViewCell.botTextField.textColor = column.foregroundColor
         return twoTextFieldViewCell
     }
 
@@ -480,6 +505,10 @@ extension TableViewCoordinator: NSTextFieldDelegate {
 }
 
 extension TableViewCoordinator: BeamNSTableViewDelegate {
+
+    func tableViewDidChangeEffectiveAppearance(_ tableView: BeamNSTableView) {
+        self.reloadData(soft: true)
+    }
 
     func tableView(_ tableView: BeamNSTableView, mouseDownFor row: Int, column: Int, locationInWindow: NSPoint) -> Bool {
         let view = tableView.view(atColumn: column, row: row, makeIfNecessary: false)

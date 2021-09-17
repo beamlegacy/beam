@@ -8,6 +8,7 @@
 import Foundation
 
 protocol BeamNSTableViewDelegate: AnyObject {
+    func tableViewDidChangeEffectiveAppearance(_ tableView: BeamNSTableView)
     func tableView(_ tableView: BeamNSTableView, mouseDownFor row: Int, column: Int, locationInWindow: NSPoint) -> Bool
     func tableView(_ tableView: BeamNSTableView, rightMouseDownFor row: Int, column: Int, locationInWindow: NSPoint)
 }
@@ -15,6 +16,11 @@ protocol BeamNSTableViewDelegate: AnyObject {
 class BeamNSTableView: NSTableView {
 
     weak var additionalDelegate: BeamNSTableViewDelegate?
+
+    override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
+        additionalDelegate?.tableViewDidChangeEffectiveAppearance(self)
+    }
 
     private func rowAndColumngForWindowLocation(_ locationInWindow: NSPoint) -> (Int, Int)? {
         let localLocation = convert(locationInWindow, from: nil)
