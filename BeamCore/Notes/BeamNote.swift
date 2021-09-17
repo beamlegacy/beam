@@ -186,26 +186,31 @@ public class BeamNote: BeamElement {
     }
 
     public static func getFetchedNote(_ id: UUID) -> BeamNote? {
+        beamCheckMainThread()
         return Self.fetchedNotes.first(where: { (_, value: WeakReference<BeamNote>) in
             value.ref?.id == id
         })?.value.ref
     }
 
     public func getFetchedNote(_ title: String) -> BeamNote? {
+        beamCheckMainThread()
         return Self.getFetchedNote(title)
     }
 
     public static func getFetchedNote(_ title: String) -> BeamNote? {
+        beamCheckMainThread()
         return Self.fetchedNotes[cacheKeyFromTitle(title)]?.ref
     }
 
     public func getFetchedNote(_ id: UUID) -> BeamNote? {
+        beamCheckMainThread()
         return Self.getFetchedNote(id)
     }
 
     public var pendingSave: Int = 0
 
     public static func appendToFetchedNotes(_ note: BeamNote) {
+        beamCheckMainThread()
         fetchedNotes[cacheKeyFromTitle(note.title)] = WeakReference<BeamNote>(note)
         let cancellableKey = cancellableKeyFromNote(note)
         fetchedNotesCancellables.removeValue(forKey: cancellableKey)
@@ -238,11 +243,13 @@ public class BeamNote: BeamElement {
     }
 
     public static func unload(note: BeamNote) {
+        beamCheckMainThread()
         fetchedNotesCancellables.removeValue(forKey: cancellableKeyFromNote(note))
         fetchedNotes.removeValue(forKey: cacheKeyFromTitle(note.title))
     }
 
     public static func reloadAfterRename(previousTitle: String, note: BeamNote) {
+        beamCheckMainThread()
         fetchedNotes.removeValue(forKey: cacheKeyFromTitle(previousTitle))
         fetchedNotes[cacheKeyFromTitle(note.title)] = WeakReference(note)
     }
@@ -317,6 +324,14 @@ public class BeamNote: BeamElement {
             .dropFirst(1)
             .sink { [weak self] _ in self?.change(.meta) }
     }
+}
+
+public func beamCheckMainThread() {
+    #if DEBUG
+    if !Thread.isMainThread {
+        fatalError()
+    }
+    #endif
 }
 
 // swiftlint:enable file_length
