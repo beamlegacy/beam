@@ -272,7 +272,7 @@ class PasswordOverlayController: WebPageHolder {
     }
 
     private func updateStoredValues(with values: [String: String]) {
-        guard let host = getPageHost() else { return }
+        guard let hostname = getPageHost() else { return }
         guard let (loginFieldIds, passwordFieldIds) = passwordFieldIdsForStorage() else {
             Logger.shared.logDebug("Login/password fields not found", category: .passwordManager)
             return
@@ -284,19 +284,19 @@ class PasswordOverlayController: WebPageHolder {
             return
         }
         Logger.shared.logDebug("FOUND login: \(login), password: \(password)", category: .passwordManager)
-        if let storedPassword = PasswordManager.shared.password(host: host, username: login) {
+        if let storedPassword = PasswordManager.shared.password(hostname: hostname, username: login) {
             if password != storedPassword && password.count > 2 && login.count > 2 {
                 if let browserTab = (self.page as? BrowserTab) {
                     browserTab.passwordManagerToast(saved: false)
                 }
-                PasswordManager.shared.save(host: host, username: login, password: password)
+                PasswordManager.shared.save(hostname: hostname, username: login, password: password)
             }
         } else {
             if password.count > 2 && login.count > 2 {
                 if let browserTab = (self.page as? BrowserTab) {
                     browserTab.passwordManagerToast(saved: true)
                 }
-                PasswordManager.shared.save(host: host, username: login, password: password)
+                PasswordManager.shared.save(hostname: hostname, username: login, password: password)
             }
         }
     }
@@ -339,7 +339,7 @@ class PasswordOverlayController: WebPageHolder {
 extension PasswordOverlayController: PasswordManagerMenuDelegate {
     func deleteCredentials(_ entries: [PasswordManagerEntry]) {
         for entry in entries {
-            PasswordManager.shared.delete(host: entry.minimizedHost, for: entry.username)
+            PasswordManager.shared.delete(hostname: entry.minimizedHost, for: entry.username)
         }
     }
 
@@ -349,7 +349,7 @@ extension PasswordOverlayController: PasswordManagerMenuDelegate {
             dismissPasswordManagerMenu()
             return
         }
-        guard let password = PasswordManager.shared.password(host: entry.minimizedHost, username: entry.username) else {
+        guard let password = PasswordManager.shared.password(hostname: entry.minimizedHost, username: entry.username) else {
             Logger.shared.logError("PasswordStore did not provide password for selected entry.", category: .passwordManager)
             return
         }

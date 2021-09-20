@@ -29,7 +29,7 @@ class PasswordManager {
     }
 
     private func managerEntries(for passwordsRecord: [PasswordRecord]) -> [PasswordManagerEntry] {
-        passwordsRecord.map { PasswordManagerEntry(minimizedHost: $0.host, username: $0.name) }
+        passwordsRecord.map { PasswordManagerEntry(minimizedHost: $0.hostname, username: $0.username) }
     }
 
     func fetchAll() -> [PasswordManagerEntry] {
@@ -62,14 +62,14 @@ class PasswordManager {
         }
     }
 
-    func password(host: String, username: String ) -> String? {
+    func password(hostname: String, username: String ) -> String? {
         do {
-            let password = try passwordsDB.password(host: host, username: username)
+            let password = try passwordsDB.password(hostname: hostname, username: username)
             return password
         } catch PasswordDBError.cantDecryptPassword(let errorMsg) {
-            Logger.shared.logError("Error while decrypting password for \(host) - \(username): \(errorMsg)", category: .encryption)
+            Logger.shared.logError("Error while decrypting password for \(hostname) - \(username): \(errorMsg)", category: .encryption)
         } catch PasswordDBError.cantReadDB(let errorMsg) {
-            Logger.shared.logError("Error while reading database for \(host) - \(username): \(errorMsg)", category: .passwordsDB)
+            Logger.shared.logError("Error while reading database for \(hostname) - \(username): \(errorMsg)", category: .passwordsDB)
         } catch {
             Logger.shared.logError("Unexpected error: \(error.localizedDescription).", category: .passwordsDB)
         }
@@ -77,13 +77,13 @@ class PasswordManager {
     }
 
     @discardableResult
-    func save(host: String,
+    func save(hostname: String,
               username: String,
               password: String,
               uuid: UUID? = nil,
               _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) -> PasswordRecord? {
         do {
-            let passwordRecord = try passwordsDB.save(host: host, username: username, password: password, uuid: uuid)
+            let passwordRecord = try passwordsDB.save(hostname: hostname, username: username, password: password, uuid: uuid)
             if AuthenticationManager.shared.isAuthenticated {
                 try self.saveOnNetwork(passwordRecord, networkCompletion)
             } else {
@@ -91,9 +91,9 @@ class PasswordManager {
             }
             return passwordRecord
         } catch PasswordDBError.cantSavePassword(let errorMsg) {
-            Logger.shared.logError("Error while saving password for \(host): \(errorMsg)", category: .passwordsDB)
+            Logger.shared.logError("Error while saving password for \(hostname): \(errorMsg)", category: .passwordsDB)
         } catch PasswordDBError.cantEncryptPassword {
-            Logger.shared.logError("Error while encrypting password for \(host) - \(username)", category: .encryption)
+            Logger.shared.logError("Error while encrypting password for \(hostname) - \(username)", category: .encryption)
         } catch {
             Logger.shared.logError("Unexpected error: \(error.localizedDescription).", category: .passwordsDB)
         }
@@ -113,9 +113,9 @@ class PasswordManager {
         return []
     }
 
-    func delete(host: String, for username: String, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
+    func delete(hostname: String, for username: String, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
         do {
-            let passwordRecord = try passwordsDB.delete(host: host, username: username)
+            let passwordRecord = try passwordsDB.delete(hostname: hostname, username: username)
             if AuthenticationManager.shared.isAuthenticated {
                 try self.saveOnNetwork(passwordRecord, networkCompletion)
             } else {
@@ -123,7 +123,7 @@ class PasswordManager {
             }
             return
         } catch PasswordDBError.cantDeletePassword(errorMsg: let errorMsg) {
-            Logger.shared.logError("Error while deleting password for \(host) - \(username): \(errorMsg)", category: .passwordsDB)
+            Logger.shared.logError("Error while deleting password for \(hostname) - \(username): \(errorMsg)", category: .passwordsDB)
         } catch {
             Logger.shared.logError("Unexpected error: \(error.localizedDescription).", category: .passwordsDB)
         }
