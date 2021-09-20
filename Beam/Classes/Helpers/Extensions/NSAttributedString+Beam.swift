@@ -64,6 +64,27 @@ extension NSAttributedString {
         matches?.reversed().forEach { cleanAttributedStr.replaceCharacters(in: $0.range, with: "") }
         return cleanAttributedStr
     }
+
+    func image(foregroundColor: NSColor? = nil, font: NSFont? = nil) -> NSImage {
+        let mutableStr = NSMutableAttributedString(attributedString: self)
+        if let foregroundColor = foregroundColor {
+            mutableStr.addAttributes([.foregroundColor: foregroundColor],
+                                     range: .init(location: 0, length: length))
+        }
+        if let font = font {
+            mutableStr.addAttributes([.font: font],
+                                     range: .init(location: 0, length: length))
+        }
+
+        let size = mutableStr.size()
+        let ceiledSize = NSSize(width: ceil(size.width), height: ceil(size.height))
+
+        let image = NSImage(size: ceiledSize)
+        image.lockFocus()
+        mutableStr.draw(with: .init(origin: .zero, size: ceiledSize), options: [.usesDeviceMetrics, .usesLineFragmentOrigin])
+        image.unlockFocus()
+        return image
+    }
 }
 
 extension NSMutableAttributedString {

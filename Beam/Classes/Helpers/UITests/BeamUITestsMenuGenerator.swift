@@ -13,6 +13,7 @@ class BeamUITestsMenuGenerator {
         case .deleteLogs: deleteLogs()
         case .resizeWindowLandscape: resizeWindowLandscape()
         case .resizeWindowPortrait: resizeWindowPortrait()
+        case .resizeSquare1000: resizeSquare1000()
         case .enableBrowsingSessionCollection: setBrowsingSessionCollection(true)
         case .disableBrowsingSessionCollection: setBrowsingSessionCollection(false)
         case .loadUITestPage1: loadUITestsPage(identifier: "1")
@@ -48,6 +49,10 @@ class BeamUITestsMenuGenerator {
 
     private func resizeWindowLandscape() {
         AppDelegate.main.resizeWindow(width: 1200)
+    }
+
+    private func resizeSquare1000() {
+        AppDelegate.main.resizeWindow(width: 1000, height: 1000)
     }
 
     private func setBrowsingSessionCollection(_ value: Bool) {

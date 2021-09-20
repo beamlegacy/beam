@@ -28,20 +28,29 @@ class WindowPage {
 
     static func pageForId(_ id: WindowPageID) -> WindowPage? {
         switch id {
-        case .AllCards:
+        case .allCards:
             return allCardsWindowPage
+        case .shortcuts:
+            return shortcutsWindowPage
         }
     }
 }
 
 enum WindowPageID: String {
-    case AllCards
+    case allCards
+    case shortcuts
 }
 
 extension WindowPage {
     static var allCardsWindowPage: WindowPage {
-        return WindowPage(id: .AllCards) {
+        return WindowPage(id: .allCards) {
             AnyView(AllCardsPageContentView())
+        }
+    }
+
+    static var shortcutsWindowPage: WindowPage {
+        return WindowPage(id: .shortcuts) {
+            AnyView(DiscoverShortcutsView())
         }
     }
 }

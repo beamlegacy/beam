@@ -13,8 +13,8 @@ class SearchOnWebTests: BaseTest {
     func testSearchViewAppearance() {
         let helper = BeamUITestsHelper(launchApp().app)
         let searchView = SearchTestView()
-        
         print("Given I open a test page")
+        
         helper.openTestPage(page: .page2)
         print("Then by default search field is unavailable")
         XCTAssertFalse(searchView.textField(SearchViewLocators.TextFields.searchField.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout))

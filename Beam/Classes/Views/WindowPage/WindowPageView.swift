@@ -29,7 +29,7 @@ struct WindowPageView: View {
 
 struct WindowPageView_Previews: PreviewProvider {
     static var previews: some View {
-        WindowPageView(page: WindowPage(id: .AllCards, title: "Preview Page") {
+        WindowPageView(page: WindowPage(id: .allCards, title: "Preview Page") {
             AnyView(Rectangle())
         })
     }
