@@ -85,7 +85,7 @@ class ContentBlockingManager {
     }
 
     private func register(ruleList: WKContentRuleList?, identifier: String) {
-        if let ruleList = ruleList, (identifier == "hush" || identifier == "regional") {
+        if let ruleList = ruleList, identifier == "regional" {
             add(ruleList: ruleList, identifier: identifier)
         }
         if PreferencesManager.isAdsFilterEnabled && identifier == "ads" {

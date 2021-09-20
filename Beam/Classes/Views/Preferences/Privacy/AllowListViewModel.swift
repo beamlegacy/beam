@@ -48,7 +48,7 @@ class AllowListViewModel: ObservableObject {
 
     func save() {
         for item in recentlyAddedItems {
-            ContentBlockingManager.shared.radBlockPreferences.add(domain: item.host) {}
+            ContentBlockingManager.shared.radBlockPreferences.add(domain: item.host)
         }
         self.recentlyAddedItems = []
         refreshAllAllowListItems()
