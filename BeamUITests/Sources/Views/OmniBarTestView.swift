@@ -38,6 +38,7 @@ class OmniBarTestView: BaseView {
         button(OmniBarLocators.Buttons.homeButton.accessibilityIdentifier).click()
     }
     
+    @discardableResult
     func navigateToCardViaPivotButton() -> CardTestView {
         button(OmniBarLocators.Buttons.openCardButton.accessibilityIdentifier).click()
         return CardTestView()

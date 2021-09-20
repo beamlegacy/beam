@@ -148,6 +148,30 @@ extension BeamColor {
 }
 
 extension BeamColor {
+    enum ActionableButtonBlue {
+        static let background = BeamColor.From(color: BeamColor.Bluetiful.nsColor.withAlphaComponent(0.1))
+        static let backgroundHovered = BeamColor.From(color: BeamColor.Bluetiful.nsColor.withAlphaComponent(0.16))
+        static let backgroundClicked = BeamColor.From(color: BeamColor.Bluetiful.nsColor.withAlphaComponent(0.28))
+        static let foreground = BeamColor.Bluetiful
+    }
+
+    enum ActionableButtonPurple {
+        static let background = BeamColor.From(color: BeamColor.Beam.nsColor.withAlphaComponent(0.1))
+        static let backgroundHovered = BeamColor.From(color: BeamColor.Beam.nsColor.withAlphaComponent(0.16))
+        static let backgroundClicked = BeamColor.From(color: BeamColor.Beam.nsColor.withAlphaComponent(0.28))
+        static let foreground = BeamColor.Beam
+    }
+
+    enum ActionableButtonSecondary {
+        static let background = BeamColor.Combining(lightColor: .Nero, darkColor: .Mercury)
+        static let backgroundHovered = BeamColor.Combining(lightColor: .Mercury, darkColor: .AlphaGray)
+        static let backgroundClicked = BeamColor.Combining(lightColor: .AlphaGray, darkColor: .LightStoneGray)
+        static let foreground = BeamColor.Corduroy
+        static let activeForeground = BeamColor.Niobium
+    }
+}
+
+extension BeamColor {
     enum Passwords {
         static let hoverBackground = BeamColor.From(color: BeamColor.Bluetiful.nsColor.withAlphaComponent(0.10))
         static let activeBackground = BeamColor.From(color: BeamColor.Bluetiful.nsColor.withAlphaComponent(0.14))
