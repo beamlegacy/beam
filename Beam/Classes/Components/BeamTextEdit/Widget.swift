@@ -32,6 +32,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
     var selected: Bool = false {
         didSet {
+            selectionLayer.removeAllAnimations()
             selectionLayer.backgroundColor = selected ?
                 BeamColor.Generic.textSelection.cgColor :
                 NSColor(white: 1, alpha: 0).cgColor
@@ -1158,9 +1159,9 @@ extension Widget {
         animation.values = [colr,
                             colr,
                             sanskrit.withAlphaComponent(0).cgColor]
-        animation.keyTimes = [0, 0.66, 1]
-        animation.duration = 3
-        layer.add(animation, forKey: "backgroundColor")
+        animation.keyTimes = [0, 0.86, 1]
+        animation.duration = 2.3
+        selectionLayer.add(animation, forKey: "highlightBackgroundColor")
         children.forEach { c in
             c.highlight()
         }

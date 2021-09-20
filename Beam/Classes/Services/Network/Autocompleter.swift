@@ -38,6 +38,7 @@ struct AutocompleteResult: Identifiable, Equatable {
     }
     var text: String
     var source: Source
+    var disabled: Bool = false
     var url: URL?
     var information: String?
     var completingText: String?

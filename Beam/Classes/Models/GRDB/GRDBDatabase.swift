@@ -376,12 +376,13 @@ extension GRDBDatabase {
     private func search(_ pattern: FTS3Pattern,
                         _ maxResults: Int? = nil,
                         _ includeText: Bool = false,
+                        _ filter: SQLSpecificExpressible?,
                         _ frecencyParam: FrecencyParamKey? = nil,
                         _ completion: @escaping CompletionSearch) {
         dbReader.asyncRead { (dbResult: Result<GRDB.Database, Error>) in
             do {
                 let db = try dbResult.get()
-                let results = try search(db, pattern, maxResults, includeText, frecencyParam: frecencyParam)
+                let results = try search(db, pattern, maxResults, includeText, filter: filter, frecencyParam: frecencyParam)
                 completion(.success(results))
             } catch {
                 completion(.failure(error))
@@ -393,11 +394,12 @@ extension GRDBDatabase {
                         _ pattern: FTS3Pattern?,
                         _ maxResults: Int? = nil,
                         _ includeText: Bool = false,
+                        filter: SQLSpecificExpressible?,
                         frecencyParam: FrecencyParamKey?) throws -> [SearchResult] {
         if let frecencyParam = frecencyParam {
-            return try search(db, pattern, maxResults, includeText, frencencyParam: frecencyParam)
+            return try search(db, pattern, maxResults, includeText, filter: filter, frencencyParam: frecencyParam)
         } else {
-            return try search(db, pattern, maxResults, includeText)
+            return try search(db, pattern, maxResults, includeText, filter: filter)
         }
 
     }
@@ -406,10 +408,14 @@ extension GRDBDatabase {
     private func search(_ db: GRDB.Database,
                         _ pattern: FTS3Pattern?,
                         _ maxResults: Int? = nil,
-                        _ includeText: Bool = false) throws -> [SearchResult] {
+                        _ includeText: Bool = false,
+                        filter: SQLSpecificExpressible? = nil) throws -> [SearchResult] {
         var query = pattern != nil ? BeamElementRecord.matching(pattern) : BeamElementRecord.all()
         if let maxResults = maxResults {
             query = query.limit(maxResults)
+        }
+        if let filter = filter {
+            query = query.filter(filter)
         }
         return try query.fetchAll(db).compactMap { record in
             guard let noteId = record.noteId.uuid,
@@ -433,6 +439,7 @@ extension GRDBDatabase {
                         _ pattern: FTS3Pattern?,
                         _ maxResults: Int? = nil,
                         _ includeText: Bool = false,
+                        filter: SQLSpecificExpressible? = nil,
                         frencencyParam: FrecencyParamKey) throws -> [SearchResult] {
 
         let association = BeamElementRecord.frecency.filter(FrecencyNoteRecord.Columns.frecencyKey == frencencyParam).forKey("frecency")
@@ -444,6 +451,9 @@ extension GRDBDatabase {
         }
         if let maxResults = maxResults {
             query = query.limit(maxResults)
+        }
+        if let filter = filter {
+            query = query.filter(filter)
         }
         return try SearchResultWithFrecencies.fetchAll(db, query).compactMap { record in
             let beamElement = record.beamElement
@@ -461,7 +471,7 @@ extension GRDBDatabase {
         guard let pattern = FTS3Pattern(matchingAllTokensIn: string) else {
             return completion(.failure(ReadError.invalidFTSPattern))
         }
-        search(pattern, maxResults, includeText, frecencyParam, completion)
+        search(pattern, maxResults, includeText, nil, frecencyParam, completion)
     }
 
     func search(matchingAnyTokenIn string: String,
@@ -472,7 +482,7 @@ extension GRDBDatabase {
         guard let pattern = FTS3Pattern(matchingAnyTokenIn: string) else {
             return completion(.failure(ReadError.invalidFTSPattern))
         }
-        search(pattern, maxResults, includeText, frecencyParam, completion)
+        search(pattern, maxResults, includeText, nil, frecencyParam, completion)
     }
 
     func search(matchingPhrase string: String,
@@ -483,19 +493,24 @@ extension GRDBDatabase {
         guard let pattern = FTS3Pattern(matchingPhrase: string) else {
             return completion(.failure(ReadError.invalidFTSPattern))
         }
-        search(pattern, maxResults, includeText, frecencyParam, completion)
+        search(pattern, maxResults, includeText, nil, frecencyParam, completion)
     }
 
     func search(matchingAllTokensIn string: String,
                 maxResults: Int? = nil,
                 includeText: Bool = false,
+                excludeElements: [UUID]? = nil,
                 frecencyParam: FrecencyParamKey? = nil) -> [SearchResult] {
         guard let pattern = FTS3Pattern(matchingAllTokensIn: string) else {
             return []
         }
+        var filter: SQLSpecificExpressible?
+        if let excludeElements = excludeElements {
+            filter = !excludeElements.map { $0.uuidString }.contains(Column("uid"))
+        }
         do {
             return try dbReader.read { db in
-                try search(db, pattern, maxResults, includeText, frecencyParam: frecencyParam)
+                try search(db, pattern, maxResults, includeText, filter: filter, frecencyParam: frecencyParam)
             }
         } catch {
             return []
@@ -505,13 +520,18 @@ extension GRDBDatabase {
     func search(matchingAnyTokenIn string: String,
                 maxResults: Int? = nil,
                 includeText: Bool = false,
+                excludeElements: [UUID]? = nil,
                 frecencyParam: FrecencyParamKey? = nil) -> [SearchResult] {
         guard let pattern = FTS3Pattern(matchingAnyTokenIn: string) else {
             return []
         }
+        var filter: SQLSpecificExpressible?
+        if let excludeElements = excludeElements {
+            filter = !excludeElements.map { $0.uuidString }.contains(Column("uid"))
+        }
         do {
             return try dbReader.read { db in
-                try search(db, pattern, maxResults, includeText, frecencyParam: frecencyParam)
+                try search(db, pattern, maxResults, includeText, filter: filter, frecencyParam: frecencyParam)
             }
         } catch {
             return []
@@ -523,7 +543,7 @@ extension GRDBDatabase {
                 frecencyParam: FrecencyParamKey? = nil) -> [SearchResult] {
         do {
             return try dbReader.read { db in
-                try search(db, nil, maxResults, includeText, frecencyParam: frecencyParam)
+                try search(db, nil, maxResults, includeText, filter: nil, frecencyParam: frecencyParam)
             }
         } catch {
             return []
@@ -539,7 +559,7 @@ extension GRDBDatabase {
         }
         do {
             return try dbReader.read { db in
-                try search(db, pattern, maxResults, includeText, frecencyParam: frecencyParam)
+                try search(db, pattern, maxResults, includeText, filter: nil, frecencyParam: frecencyParam)
             }
         } catch {
             return []

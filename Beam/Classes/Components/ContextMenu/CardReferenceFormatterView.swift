@@ -45,6 +45,7 @@ class CardReferenceFormatterView: FormatterView {
     private var listModel = DestinationNoteAutocompleteList.Model()
     private var initialText: String?
     private var searchCardContent: Bool = false
+    private var excludeElements: [UUID] = []
     private var onSelectNote: ((_ noteId: UUID, _ elementId: UUID?) -> Void)?
     private var onSelectCreate: ((_ title: String) -> Void)?
 
@@ -59,6 +60,7 @@ class CardReferenceFormatterView: FormatterView {
 
     convenience init(initialText: String?, searchCardContent: Bool = false,
                      typingPrefix: Int = 0, typingSuffix: Int = 0,
+                     excludingElements: [UUID] = [],
                      onSelectNoteHandler: ((_ noteId: UUID, _ elementId: UUID?) -> Void)? = nil,
                      onCreateNoteHandler: ((_ title: String) -> Void)? = nil) {
         self.init(frame: CGRect.zero)
@@ -68,6 +70,7 @@ class CardReferenceFormatterView: FormatterView {
         self.onSelectNote = onSelectNoteHandler
         self.onSelectCreate = onCreateNoteHandler
         self.initialText = initialText
+        self.excludeElements = excludingElements
         setupUI()
     }
 
@@ -89,6 +92,7 @@ class CardReferenceFormatterView: FormatterView {
 
     override func setupUI() {
         super.setupUI()
+        listModel.excludeElements = excludeElements
         listModel.data = AppDelegate.main.data
         listModel.searchCardContent = searchCardContent
         listModel.allowCmdEnter = false
@@ -141,12 +145,24 @@ class CardReferenceFormatterView: FormatterView {
     }
 
     private var _typedAttributes: [BeamText.Attribute]?
+    private var _parenthesisAttributes: [BeamText.Attribute]?
     private func enableTypingAttributes() {
         _typedAttributes = [BeamTextEdit.formatterAutocompletingAttribute]
+        let parenthesisDecoration = AttributeDecoratedValueAttributedString(attributes: [
+            .foregroundColor: BeamColor.LightStoneGray.nsColor
+        ])
+        _parenthesisAttributes = [BeamText.Attribute.decorated(parenthesisDecoration)]
     }
-    override func typingAttributes(for range: Range<Int>) -> (attributes: [BeamText.Attribute], range: Range<Int>)? {
+    override func typingAttributes(for range: Range<Int>) -> [(attributes: [BeamText.Attribute], range: Range<Int>)]? {
         guard let _typedAttributes = _typedAttributes else { return nil }
-        return (_typedAttributes, range.lowerBound - typingPrefix..<range.upperBound + typingSuffix)
+        if searchCardContent, let parenthesisAttributes = _parenthesisAttributes {
+                        return [
+                (parenthesisAttributes, range.lowerBound - typingPrefix..<range.lowerBound),
+                (parenthesisAttributes, range.upperBound..<range.upperBound + typingSuffix)
+            ]
+        } else {
+            return [(_typedAttributes, range.lowerBound - typingPrefix..<range.upperBound + typingSuffix)]
+        }
     }
 
     // MARK: - keyboard actions

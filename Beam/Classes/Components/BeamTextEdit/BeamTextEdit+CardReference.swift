@@ -51,7 +51,7 @@ extension BeamTextEdit {
             targetRange = max(0, targetRange.lowerBound - text.count)..<targetRange.upperBound
         }
         let menuView = CardReferenceFormatterView(initialText: initialText, searchCardContent: searchCardContent,
-                                                  typingPrefix: prefix, typingSuffix: suffix,
+                                                  typingPrefix: prefix, typingSuffix: suffix, excludingElements: [node.elementId],
                                                   onSelectNoteHandler: { [weak self, weak node] noteId, elementId in
             guard let self = self, let node = node else { return }
             if searchCardContent, let elementId = elementId {

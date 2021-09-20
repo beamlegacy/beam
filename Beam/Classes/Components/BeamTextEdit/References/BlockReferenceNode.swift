@@ -119,7 +119,7 @@ class BlockReferenceNode: TextNode {
     func createBlockLayerIfNeeded() -> Layer {
         guard let l = layers[Self.blockLayerName] else {
             let _blockLayer = CALayer()
-            _blockLayer.cornerRadius = 6
+            _blockLayer.cornerRadius = 3
             _blockLayer.zPosition = -1
             let blockLayer = Layer(name: Self.blockLayerName, layer: _blockLayer)
             addLayer(blockLayer)
@@ -154,10 +154,9 @@ class BlockReferenceNode: TextNode {
         super.updateLayout()
 
         let blockLayer = createBlockLayerIfNeeded()
-        let shift = CGFloat(0) //indent
-        var f = contentsFrame.offsetBy(dx: shift, dy: 0)
-        f.size.width -= shift
-        f.size.height = idealSize.height - 5
+        var f = contentsFrame
+        f.origin.y -= 5
+        f.size.height = idealSize.height
         blockLayer.frame = f
 
         if let lockButton = layers[Self.lockButtonName] {
@@ -168,7 +167,7 @@ class BlockReferenceNode: TextNode {
 
     private func updateBackgroundColor(hover: Bool) {
         var color: CGColor
-        if isFocused || isAChildProxyNodeFocused {
+        if readOnly && (isFocused || isAChildProxyNodeFocused) {
             color = BeamColor.Bluetiful.nsColor.withAlphaComponent(0.2).cgColor
         } else if hover {
             color = BeamColor.Nero.nsColor.add(BeamColor.Niobium.nsColor.withAlphaComponent(0.02)).cgColor

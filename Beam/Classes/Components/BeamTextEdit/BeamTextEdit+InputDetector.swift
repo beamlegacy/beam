@@ -17,22 +17,22 @@ extension BeamTextEdit {
         return (pos, left)
     }
 
+    private func insertPair(node: TextNode, _ left: String, _ right: String) {
+        let cmdManager = rootNode.focusedCmdManager
+        let selectedRange = selectedTextRange
+        cmdManager.beginGroup(with: "Insert Pair")
+        cmdManager.insertText(BeamText(text: right), in: node, at: selectedRange.upperBound)
+        cmdManager.insertText(BeamText(text: left), in: node, at: selectedRange.lowerBound)
+        cmdManager.focusElement(node, cursorPosition: rootNode.cursorPosition + 1)
+        cmdManager.setSelection(node, selectedRange.lowerBound + 1 ..< selectedRange.upperBound + 1)
+        cmdManager.endGroup()
+    }
+
     // swiftlint:disable:next function_body_length cyclomatic_complexity
     func preDetectInput(_ input: String) -> Bool {
         guard inputDetectorEnabled else { return true }
         guard let node = focusedWidget as? TextNode else { return true }
         defer { inputDetectorLastInput = input }
-
-        let insertPair = { [unowned self] (left: String, right: String) in
-            let cmdManager = rootNode.focusedCmdManager
-            let selectedRange = selectedTextRange
-            cmdManager.beginGroup(with: "Insert Pair")
-            cmdManager.insertText(BeamText(text: right), in: node, at: selectedRange.upperBound)
-            cmdManager.insertText(BeamText(text: left), in: node, at: selectedRange.lowerBound)
-            cmdManager.focusElement(node, cursorPosition: rootNode.cursorPosition + 1)
-            cmdManager.setSelection(node, selectedRange.lowerBound + 1 ..< selectedRange.upperBound + 1)
-            cmdManager.endGroup()
-        }
 
         let handlers: [String: () -> Bool] = [
             "@": { [unowned self] in
@@ -59,7 +59,7 @@ extension BeamTextEdit {
                             cmdManager.cancelSelection(node)
                             cmdManager.endGroup()
                         } else {
-                            insertPair("[", "]")
+                            insertPair(node: node, "[", "]")
                         }
                         return false
                     } else {
@@ -71,7 +71,7 @@ extension BeamTextEdit {
                         return true
                     }
                 } else if pos == 0 || left != "-" {
-                    insertPair("[", "]")
+                    insertPair(node: node, "[", "]")
                     return false
                 }
                 return true
@@ -89,36 +89,14 @@ extension BeamTextEdit {
                 return true
             },
             "(": { [unowned self] in
-                let cmdManager = rootNode.focusedCmdManager
-                let (pos, left) = inputDetectorGetPositionAndPrecedingChar(in: node)
-                // capture the left of the cursor to check for an existing (
-                if pos > 0 && left == "(" {
-                    let initialText = selectedText
-                    var ignoreInput = true
-                    var atPosition = pos
-                    if !self.selectedTextRange.isEmpty {
-                        insertPair("(", ")")
-                        let newPosition = selectedTextRange.upperBound
-                        cmdManager.focusElement(node, cursorPosition: newPosition)
-                        cmdManager.cancelSelection(node)
-                        atPosition = newPosition
-                    } else {
-                        ignoreInput = false
-                        cmdManager.insertText(BeamText(text: ")"), in: node, at: pos)
-                        atPosition = pos + 1
-                    }
-                    self.showCardReferenceFormatter(initialText: initialText, atPosition: atPosition, searchCardContent: true)
-                    return !ignoreInput
-                }
-                insertPair("(", ")")
+                return preInputHandleParenthesis(node: node)
+            },
+            "{": { [unowned self] in
+                insertPair(node: node, "{", "}")
                 return false
             },
-            "{": {
-                insertPair("{", "}")
-                return false
-            },
-            "\"": {
-                insertPair("\"", "\"")
+            "\"": { [unowned self] in
+                insertPair(node: node, "\"", "\"")
                 return false
             },
             "/": { [unowned self] in
@@ -279,6 +257,7 @@ extension BeamTextEdit {
     }
 
     // MARK: - Handlers
+    // MARK: "space"
     private func preInputHandleSpace(node: TextNode) -> Bool {
         guard self.selectedTextRange.isEmpty else { return true }
 
@@ -309,4 +288,33 @@ extension BeamTextEdit {
         return nil
     }
 
+    // MARK: "("
+    private func preInputHandleParenthesis(node: TextNode) -> Bool {
+        let cmdManager = rootNode.focusedCmdManager
+        let (pos, left) = inputDetectorGetPositionAndPrecedingChar(in: node)
+        // capture the left of the cursor to check for an existing (
+        if pos > 0 && left == "(" {
+            let initialText = selectedText
+            var ignoreInput = true
+            var atPosition = pos
+            if !self.selectedTextRange.isEmpty {
+                insertPair(node: node, "(", ")")
+                cmdManager.beginGroup(with: "Block Ref Prepare")
+                let newPosition = selectedTextRange.upperBound
+                cmdManager.focusElement(node, cursorPosition: newPosition)
+                cmdManager.cancelSelection(node)
+                atPosition = newPosition
+            } else {
+                cmdManager.beginGroup(with: "Block Ref Prepare")
+                ignoreInput = false
+                cmdManager.insertText(BeamText(text: ")"), in: node, at: pos)
+                atPosition = pos + 1
+            }
+            cmdManager.endGroup()
+            self.showCardReferenceFormatter(initialText: initialText, atPosition: atPosition, searchCardContent: true)
+            return !ignoreInput
+        }
+        insertPair(node: node, "(", ")")
+        return false
+    }
 }

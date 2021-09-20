@@ -11,6 +11,7 @@ struct AutocompleteItem: View {
 
     @State var item: AutocompleteResult
     let selected: Bool
+    var disabled: Bool = false
     var displayIcon: Bool = true
     var alwaysHighlightCompletingText: Bool = false
     var allowCmdEnter: Bool = true
@@ -46,7 +47,7 @@ struct AutocompleteItem: View {
     }
 
     private var textColor: Color {
-        colorPalette.textColor.swiftUI
+        disabled ? BeamColor.LightStoneGray.swiftUI : colorPalette.textColor.swiftUI
     }
     private let secondaryTextColor = BeamColor.Autocomplete.subtitleText.swiftUI
     private let subtitleLinkColor = BeamColor.Autocomplete.link.swiftUI
@@ -133,7 +134,7 @@ struct AutocompleteItem: View {
         .padding(.leading, additionalLeadingPadding)
         .background(backgroundColor)
         .onTouchDown { t in
-            isTouchDown = t
+            isTouchDown = t && !disabled
         }
         .onAppear {
             if let url = item.url {
