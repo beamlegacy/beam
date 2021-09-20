@@ -199,11 +199,13 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
         do {
             text = try container.decode(BeamText.self, forKey: .text)
         } catch {
-            let _text = try container.decode(String.self, forKey: .text)
+            let _text = (try? container.decode(String.self, forKey: .text)) ?? ""
             text = BeamText(text: _text, attributes: [])
         }
-        open = try container.decode(Bool.self, forKey: .open)
-        readOnly = try container.decode(Bool.self, forKey: .readOnly)
+        open = (try? container.decode(Bool.self, forKey: .open)) ?? true
+        if container.contains(.readOnly) {
+            readOnly = try container.decode(Bool.self, forKey: .readOnly)
+        }
 
         if container.contains(.score) {
             score = try container.decode(Float.self, forKey: .score)
@@ -244,12 +246,23 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
         let recursive = encoder.userInfo[Self.recursiveCoding] as? Bool ?? true
 
         try container.encode(id, forKey: .id)
-        try container.encode(text, forKey: .text)
-        try container.encode(open, forKey: .open)
-        try container.encode(readOnly, forKey: .readOnly)
-        try container.encode(score, forKey: .score)
+        if !text.isEmpty {
+            try container.encode(text, forKey: .text)
+        }
+        if !open {
+            try container.encode(open, forKey: .open)
+        }
+        if readOnly {
+            try container.encode(readOnly, forKey: .readOnly)
+        }
+
+        if score != 0 {
+            try container.encode(score, forKey: .score)
+        }
         try container.encode(creationDate, forKey: .creationDate)
-        try container.encode(textStats, forKey: .textStats)
+        if textStats.wordsCount != 0 {
+            try container.encode(textStats, forKey: .textStats)
+        }
         if recursive, !children.isEmpty {
             try container.encode(children, forKey: .children)
         }
