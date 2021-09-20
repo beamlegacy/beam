@@ -257,7 +257,7 @@ struct AllCardsPageContentView: View {
                     ButtonLabel(icon: "editor-options") {
                         showContextualMenuForHoveredRow(tableViewGeometry: geo)
                     }
-                    .opacity(selectedRowsIndexes.count <= 1 && hoveredRowIndex != nil && hoveredRowFrame != nil ? 1.0 : 0.0)
+                    .opacity(hoveredRowIndex != nil && hoveredRowFrame != nil ? 1.0 : 0.0)
                     .offset(x: -32, y: geo.frame(in: .global).maxY - (hoveredRowFrame?.maxY ?? 0) + 3)
                 }
             )
@@ -292,7 +292,8 @@ struct AllCardsPageContentView: View {
     func showContextualMenuForHoveredRow(tableViewGeometry: GeometryProxy) {
         let tableViewFrame = tableViewGeometry.frame(in: .global)
         let point = CGPoint(x: tableViewFrame.minX - TableView.rowHeight, y: (hoveredRowFrame?.maxY ?? 0) - TableView.rowHeight - BeamSpacing._40)
-        showGlobalContextualMenu(at: point, for: hoveredRowIndex)
+        let forRow = selectedRowsIndexes.contains(hoveredRowIndex ?? -1) ? nil : hoveredRowIndex
+        showGlobalContextualMenu(at: point, for: forRow)
     }
 
     func showGlobalContextualMenu(at: NSPoint, for row: Int? = nil, allowImports: Bool = false) {
