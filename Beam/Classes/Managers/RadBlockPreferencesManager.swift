@@ -79,20 +79,20 @@ class RadBlockPreferencesManager {
 
     // MARK: - Whitelist
 
-    func add(domain: String, completion: @escaping () -> Void) {
-        if domain.validUrl().isValid {
-            RadBlockDatabase.shared.writeAllowlistEntry(forDomain: domain.validUrl().url) { entry, _ in
-                entry.groupNames = FilterManager.State.shared.filterGroups.map({ $0.name })
-            } completionHandler: { _, error in
-                if let error = error {
-                    Logger.shared.logError("Add entry in whitelist error: \(error.localizedDescription)", category: .contentBlocking)
-                }
-            }
-            ContentBlockingManager.shared.synchronize()
-            completion()
-        } else {
+    func add(domain: String) {
+        guard let hostname = domain.validUrl().url.hostname else {
             Logger.shared.logError("Domain: \(domain) is a not valid", category: .contentBlocking)
-            completion()
+            return
+        }
+
+        RadBlockDatabase.shared.writeAllowlistEntry(forDomain: hostname) { entry, _ in
+            entry.groupNames = FilterManager.State.shared.filterGroups.map({ $0.name })
+        } completionHandler: { _, error in
+            if let error = error {
+                Logger.shared.logError("Add entry in whitelist error: \(error.localizedDescription)", category: .contentBlocking)
+            } else {
+                ContentBlockingManager.shared.synchronize()
+            }
         }
     }
 
