@@ -276,6 +276,16 @@ extension TextRoot {
 
         if let textNode = node as? TextNode, !textNode.readOnly {
             if cursorPosition == 0 && state.selectedTextRange.isEmpty {
+                if node.previousNodeIsRoot && node.textCount == 0 {
+                    switch node.elementKind {
+                    case .heading:
+                        node.cmdManager.formatText(in: textNode, for: .bullet, with: nil, for: nil, isActive: false)
+                        return
+                    default:
+                        return
+                    }
+                }
+
                 guard let prevNode = node.previousVisibleNode(ElementNode.self),
                       !(node is BlockReferenceNode) else {
                     return
