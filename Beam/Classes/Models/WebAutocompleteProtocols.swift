@@ -29,13 +29,13 @@ extension PasswordManagerEntry: Identifiable {
 }
 
 protocol PasswordStore {
-    func entries(for host: String) throws -> [PasswordRecord]
-    func entriesWithSubdomains(for host: String) throws -> [PasswordRecord]
+    func entries(for hostname: String) throws -> [PasswordRecord]
+    func entriesWithSubdomains(for hostname: String) throws -> [PasswordRecord]
     func find(_ searchString: String) throws -> [PasswordRecord]
     func fetchAll() throws -> [PasswordRecord]
-    func password(host: String, username: String) throws -> String?
-    func save(host: String, username: String, password: String) throws -> PasswordRecord
-    func delete(host: String, username: String) throws -> PasswordRecord
+    func password(hostname: String, username: String) throws -> String?
+    func save(hostname: String, username: String, password: String) throws -> PasswordRecord
+    func delete(hostname: String, username: String) throws -> PasswordRecord
 }
 
 struct UserInformations: Identifiable {
