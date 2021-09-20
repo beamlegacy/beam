@@ -101,7 +101,7 @@ fileprivate extension Sequence where Element == (offset: Int, element: PasswordT
             return Array(self)
         }
         return filter { (_, item) in
-            item.username.contains(searchStr) || item.host.contains(searchStr)
+            item.username.contains(searchStr) || item.hostname.contains(searchStr)
         }
     }
 }

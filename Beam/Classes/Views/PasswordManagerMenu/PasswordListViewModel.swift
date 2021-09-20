@@ -73,7 +73,7 @@ fileprivate extension Sequence where Element == PasswordTableViewItem {
             return Array(self)
         }
         return filter { item in
-            item.username.contains(searchString) || item.host.contains(searchString)
+            item.username.contains(searchString) || item.hostname.contains(searchString)
         }
     }
 }
