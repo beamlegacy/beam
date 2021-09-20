@@ -214,6 +214,37 @@ public class ElementNode: Widget {
         setAccessibilityRole(.textArea)
     }
 
+    override func updateSubLayersLayout() {
+        super.updateSubLayersLayout()
+        updateSelectionLayer()
+    }
+
+    func updateSelectionLayer() {
+        guard selected else { return }
+
+        let selectionLayerPos = CGPoint(x: Self.indentLayerPosX - contentsPadding.left, y: -2.5)
+
+        if selectedAlone {
+            selectionLayer.position = selectionLayerPos
+            selectionLayer.bounds.size = CGSize(width: selectionLayerWidth,
+                                                height: selectionLayerHeight)
+        } else {
+            var spacing: CGFloat = .zero
+            if self.parent as? TextRoot != nil {
+                spacing = PreferencesManager.editorParentSpacing
+                selectionLayer.position = selectionLayerPos
+                selectionLayer.position.x += selectionLayerPosX
+                selectionLayer.position.y -= spacing
+            } else {
+                spacing = PreferencesManager.editorChildSpacing
+                selectionLayer.position = selectionLayerPos
+                selectionLayer.position.x += selectionLayerPosX
+            }
+            selectionLayer.bounds.size = CGSize(width: selectionLayerWidth - selectionLayerPosX,
+                                                height: selectionLayerHeight + spacing)
+        }
+    }
+
     var idealSpacingSize: CGFloat {
         var spacingHeight: CGFloat = .zero
         var spacing: CGFloat = .zero
