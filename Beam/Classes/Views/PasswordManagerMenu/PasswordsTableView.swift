@@ -12,7 +12,7 @@ struct PasswordsTableView: View {
     var onSelectionChanged: (IndexSet) -> Void // identifiable --> use id somewhere
 
     static let passwordColumns = [
-        TableViewColumn(key: "hostinfo", title: "Sites", type: TableViewColumn.ColumnType.IconAndText,
+        TableViewColumn(key: "hostname", title: "Sites", type: TableViewColumn.ColumnType.IconAndText,
                         sortableCaseInsensitive: true, resizable: false, width: 195, fontSize: 11),
         TableViewColumn(key: "username", title: "Username", sortableCaseInsensitive: true, width: 150, fontSize: 11),
         TableViewColumn(key: "password", title: "Passwords", sortable: false, fontSize: 11)
@@ -31,16 +31,16 @@ struct PasswordsTableView: View {
 class PasswordTableViewItem: IconAndTextTableViewItem {
     var username: String
     var password: String
-    var host: String
+    var hostname: String
 
-    init(host: String, username: String, password: String) {
+    init(hostname: String, username: String, password: String) {
         self.username = username
         self.password = password
-        self.host = host
+        self.hostname = hostname
         super.init()
         self.favIcon = NSImage(named: "field-web")
-        self.text = host
-        guard let hostURL = URL(string: "https://\(host)") else { return }
+        self.text = hostname
+        guard let hostURL = URL(string: "https://\(hostname)") else { return }
         FaviconProvider.shared.imageForUrl(hostURL) { [weak self] (image) in
             guard let self = self else { return }
             self.favIcon = image // TODO: refresh table view
@@ -50,7 +50,7 @@ class PasswordTableViewItem: IconAndTextTableViewItem {
 
 extension PasswordTableViewItem {
     convenience init(_ entry: PasswordManagerEntry) {
-        self.init(host: entry.minimizedHost, username: entry.username, password: "••••••••")
+        self.init(hostname: entry.minimizedHost, username: entry.username, password: "••••••••")
     }
 }
 
