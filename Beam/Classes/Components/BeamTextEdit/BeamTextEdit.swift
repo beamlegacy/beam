@@ -738,7 +738,8 @@ public extension CALayer {
 
     /// - Returns: true if action is possible
     private func triggerCmdReturn(from node: TextNode) -> Bool {
-        guard node.text.count > 0 else { return false }
+        guard node.text.count > 0, !(node is BlockReferenceNode), !(node is ProxyNode)
+        else { return false }
 
         let animator = TextEditCmdReturnAnimator(node: node, editorLayer: self.layer)
         let canAnimate = animator.startAnimation { [unowned self] in
