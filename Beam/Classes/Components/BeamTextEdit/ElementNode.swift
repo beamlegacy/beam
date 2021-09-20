@@ -400,6 +400,10 @@ public class ElementNode: Widget {
         return nil
     }
 
+    var previousNodeIsRoot: Bool {
+        ((self.previousWidget() as? TextRoot) != nil)
+    }
+
     func isAbove(node: ElementNode) -> Bool {
         guard !(node == self) else { return false }
         let allParents1 = [Widget](allParents.reversed()) + [self]
