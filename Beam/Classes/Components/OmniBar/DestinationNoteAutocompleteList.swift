@@ -70,7 +70,7 @@ struct DestinationNoteAutocompleteList: View {
     var list: some View {
         VStack(spacing: 0) {
             ForEach(model.results, id: \.id) { i in
-                return AutocompleteItem(item: i, selected: model.isSelected(i), displayIcon: false,
+                return AutocompleteItem(item: i, selected: model.isSelected(i), disabled: i.disabled, displayIcon: false,
                                         alwaysHighlightCompletingText: alwaysHighlightCompletingText,
                                         allowCmdEnter: model.allowCmdEnter, colorPalette: colorPalette,
                                         additionalLeadingPadding: additionLeadingPadding)
@@ -120,6 +120,7 @@ extension DestinationNoteAutocompleteList {
         var useRecents = true
         var searchCardContent = false
         var allowCmdEnter = true
+        var excludeElements: [UUID] = []
         var modifierFlagsPressed: NSEvent.ModifierFlags?
 
         var selectedResult: AutocompleteResult? {
@@ -166,6 +167,7 @@ extension DestinationNoteAutocompleteList {
         }
 
         func isSelected(_ result: AutocompleteResult) -> Bool {
+            guard !result.disabled else { return false }
             if let i = selectedIndex {
                 return results[i].id == result.id
             } else if result.source == .createCard && modifierFlagsPressed?.contains(.command) == true {
@@ -264,17 +266,21 @@ extension DestinationNoteAutocompleteList {
         }
 
         private func getSearchResultForNoteContent(text: String, itemLimit: Int) -> [AutocompleteResult] {
-            var dbResults: [GRDBDatabase.SearchResult]
-            if text.isEmpty {
-                dbResults = GRDBDatabase.shared.search(allWithMaxResults: itemLimit, includeText: true)
-            } else {
-                dbResults = GRDBDatabase.shared.search(matchingAnyTokenIn: text, maxResults: itemLimit, includeText: true)
+            var dbResults = [GRDBDatabase.SearchResult]()
+            if !text.isEmpty {
+                dbResults = GRDBDatabase.shared.search(matchingAnyTokenIn: text, maxResults: itemLimit, includeText: true, excludeElements: excludeElements)
             }
-            return dbResults.map { r in
-                AutocompleteResult(text: r.text ?? r.title, source: .note(noteId: r.noteId, elementId: r.uid), uuid: r.uid)
+            var results: [AutocompleteResult] = dbResults.compactMap { r in
+                let elementId = r.uid
+                guard elementId != r.noteId, let text = r.text, !text.isEmpty else { return nil }
+                return AutocompleteResult(text: text, source: .note(noteId: r.noteId, elementId: elementId), uuid: elementId)
             }
+            if results.isEmpty {
+                let placeholderText = text.isEmpty ? "Search for a Block" : "No Results Found"
+                results.append(AutocompleteResult(text: placeholderText, source: .note, disabled: true))
+            }
+            return results
         }
-
 
         private func getSearchResultForNoteTitle(text: String, itemLimit: Int) -> [AutocompleteResult] {
             guard let data = data else { return [] }

@@ -325,11 +325,12 @@ extension TextRoot {
                 guard let prevNode = node.previousVisibleNode(ElementNode.self) else { return }
 
                 // If it's a text node then we must remove the last character from the text node and leave the cursor there
-                if let prevTextNode = prevNode as? TextNode {
+                if let prevTextNode = prevNode as? TextNode, prevTextNode.textCount > 0 {
                     focusedCmdManager.focusElement(prevTextNode, cursorPosition: prevTextNode.textCount)
                     deleteBackward()
                 } else {
-                    // If the previous node is not a text node then we must remove the node altogether and leave the cursor where it is
+                    // If the previous node is not a text node with text
+                    // then we must remove the node altogether and leave the cursor where it is
                     focusedCmdManager.focusElement(prevNode, cursorPosition: prevNode.textCount)
                     deleteBackward()
                     focusedCmdManager.focusElement(node, cursorPosition: 0)

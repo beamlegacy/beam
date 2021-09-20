@@ -70,7 +70,7 @@ class FormatterView: NSView {
         isMouseInsideView = false
     }
 
-    func typingAttributes(for range: Range<Int>) -> (attributes: [BeamText.Attribute], range: Range<Int>)? { nil }
+    func typingAttributes(for range: Range<Int>) -> [(attributes: [BeamText.Attribute], range: Range<Int>)]? { nil }
 
     // MARK: - Key Handlers
 
