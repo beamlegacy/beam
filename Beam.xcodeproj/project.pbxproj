@@ -375,6 +375,7 @@
 		8A14155A267393E2005F2464 /* WebPositionsTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A141559267393E2005F2464 /* WebPositionsTest.swift */; };
 		8A1B8FCE26A9CB31006D849D /* PointAndShootPathFrame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A1B8FCD26A9CB31006D849D /* PointAndShootPathFrame.swift */; };
 		8A23713226D91C2800D8526A /* PointAndShoot+Alert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A23713126D91C2800D8526A /* PointAndShoot+Alert.swift */; };
+		8A2A398726F24F9E0084A073 /* Debounce.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A2A398626F24F9E0084A073 /* Debounce.swift */; };
 		8A3C216D2670FF880029AC1A /* PointAndShootTargetTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A3C216C2670FF880029AC1A /* PointAndShootTargetTest.swift */; };
 		8A4172D626A063FD00F93128 /* NSPoint+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A4172D526A063FD00F93128 /* NSPoint+Beam.swift */; };
 		8A4801A426A1EB66008F33FE /* PointAndShoot+DrawRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A4801A326A1EB66008F33FE /* PointAndShoot+DrawRules.swift */; };
@@ -406,6 +407,8 @@
 		8AC2EFDB266F8A0800049005 /* PointAndShootPointingTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AC2EFDA266F8A0800049005 /* PointAndShootPointingTest.swift */; };
 		8AC2EFDD266F8A1400049005 /* PointAndShootShootingTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AC2EFDC266F8A1400049005 /* PointAndShootShootingTest.swift */; };
 		8AC2EFDF266F8A6F00049005 /* PointAndShootPersistToJournalTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AC2EFDE266F8A6F00049005 /* PointAndShootPersistToJournalTest.swift */; };
+		8AD2631526F3A8730074D673 /* Throttle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD2631426F3A8730074D673 /* Throttle.swift */; };
+		8AD2631726F3A8C50074D673 /* TimeInterval+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD2631626F3A8C50074D673 /* TimeInterval+Beam.swift */; };
 		8AD2632326F485190074D673 /* HtmlVisitorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD2632226F485190074D673 /* HtmlVisitorTests.swift */; };
 		8AD2632A26F489160074D673 /* HtmlNoteAdapterPerformanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD2632926F489160074D673 /* HtmlNoteAdapterPerformanceTests.swift */; };
 		8AD2632C26F48C9A0074D673 /* HtmlNoteAdapterLargeDOMPerformanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD2632B26F48C9A0074D673 /* HtmlNoteAdapterLargeDOMPerformanceTests.swift */; };
@@ -1345,6 +1348,7 @@
 		8A1CD07726B9723300226A2A /* logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = logo.png; sourceTree = "<group>"; };
 		8A1CD07F26B9723300226A2A /* UITests-7.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "UITests-7.html"; sourceTree = "<group>"; };
 		8A23713126D91C2800D8526A /* PointAndShoot+Alert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PointAndShoot+Alert.swift"; sourceTree = "<group>"; };
+		8A2A398626F24F9E0084A073 /* Debounce.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Debounce.swift; sourceTree = "<group>"; };
 		8A3C216C2670FF880029AC1A /* PointAndShootTargetTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootTargetTest.swift; sourceTree = "<group>"; };
 		8A4172D526A063FD00F93128 /* NSPoint+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSPoint+Beam.swift"; sourceTree = "<group>"; };
 		8A4801A326A1EB66008F33FE /* PointAndShoot+DrawRules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PointAndShoot+DrawRules.swift"; sourceTree = "<group>"; };
@@ -1375,6 +1379,8 @@
 		8AC2EFDA266F8A0800049005 /* PointAndShootPointingTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootPointingTest.swift; sourceTree = "<group>"; };
 		8AC2EFDC266F8A1400049005 /* PointAndShootShootingTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootShootingTest.swift; sourceTree = "<group>"; };
 		8AC2EFDE266F8A6F00049005 /* PointAndShootPersistToJournalTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootPersistToJournalTest.swift; sourceTree = "<group>"; };
+		8AD2631426F3A8730074D673 /* Throttle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Throttle.swift; sourceTree = "<group>"; };
+		8AD2631626F3A8C50074D673 /* TimeInterval+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TimeInterval+Beam.swift"; sourceTree = "<group>"; };
 		8AD2632226F485190074D673 /* HtmlVisitorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HtmlVisitorTests.swift; sourceTree = "<group>"; };
 		8AD2632926F489160074D673 /* HtmlNoteAdapterPerformanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HtmlNoteAdapterPerformanceTests.swift; sourceTree = "<group>"; };
 		8AD2632B26F48C9A0074D673 /* HtmlNoteAdapterLargeDOMPerformanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HtmlNoteAdapterLargeDOMPerformanceTests.swift; sourceTree = SOURCE_ROOT; };
@@ -2312,6 +2318,8 @@
 				418172FC25811DB200317ED8 /* Web */,
 				4181718B2581107C00317ED8 /* Readability.swift */,
 				4181718C2581107C00317ED8 /* EventsTracker.swift */,
+				8A2A398626F24F9E0084A073 /* Debounce.swift */,
+				8AD2631426F3A8730074D673 /* Throttle.swift */,
 				4181718F2581107C00317ED8 /* NSContainerView.swift */,
 				4181732C25811E9800317ED8 /* Icon.swift */,
 				418171922581107C00317ED8 /* PerformanceDebug.swift */,
@@ -2370,6 +2378,7 @@
 				A5DE141B26491F840023F753 /* WKWebview+Zoom.swift */,
 				8A4172D526A063FD00F93128 /* NSPoint+Beam.swift */,
 				8AA2431526E63A5F002A553A /* SwiftSoup+Beam.swift */,
+				8AD2631626F3A8C50074D673 /* TimeInterval+Beam.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -4726,6 +4735,7 @@
 				418173B6258124D500317ED8 /* NSAttributedString+Beam.swift in Sources */,
 				96E4505825995CA200BFF36F /* BreadCrumb.swift in Sources */,
 				418171EF2581107C00317ED8 /* User.swift in Sources */,
+				8A2A398726F24F9E0084A073 /* Debounce.swift in Sources */,
 				A5153EE3260DD58A00C84902 /* RecentsManager.swift in Sources */,
 				4181732D25811E9800317ED8 /* Icon.swift in Sources */,
 				87F47CC92669415800D01960 /* WebAutocompleteContext.swift in Sources */,
@@ -5037,6 +5047,7 @@
 				5284894E26C54C460064878B /* String+TitleConflict.swift in Sources */,
 				8AA2431826E63C0D002A553A /* HtmlVisitor.swift in Sources */,
 				524299E725A480A300F4DBF5 /* AccountsView.swift in Sources */,
+				8AD2631526F3A8730074D673 /* Throttle.swift in Sources */,
 				87F11BDB26655170003BE98E /* MockAutocompleteStores.swift in Sources */,
 				032562AE26051D3B006513E4 /* RBFilterGroup.m in Sources */,
 				5298EB0126272D230033862C /* NSPersistentStoreCoordinator+Extension.swift in Sources */,
@@ -5099,6 +5110,7 @@
 				3330D7B5265E4441008C9E20 /* Download.swift in Sources */,
 				96A3067C25F698FB0078A453 /* RefNoteTitle.swift in Sources */,
 				0D65977126975FD500AC9822 /* TopDomainDatabase.swift in Sources */,
+				8AD2631726F3A8C50074D673 /* TimeInterval+Beam.swift in Sources */,
 				9691E3D825AD9F3300A13080 /* TextRoot.swift in Sources */,
 				A5651A7726035D3A0035F12B /* AppDelegate+NSMenu.swift in Sources */,
 				33D3248E26CEA5A300B44281 /* WebSearchMessageHandler.swift in Sources */,
