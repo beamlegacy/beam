@@ -74,7 +74,7 @@ struct DownloadCell: View {
         .padding(.horizontal, 8)
         .animation(.easeInOut(duration: 0.3), value: hoverState)
         .frame(height: 53)
-        .background(KeyEventHandlingView(onKeyDown: onKeyDown(event:), handledKeyCodes: [.space, .enter, .backspace, .delete]))
+        .background(KeyEventHandlingView(handledKeyCodes: [.space, .enter, .backspace, .delete], onKeyDown: onKeyDown(event:)))
         .background(backgroundColor.cornerRadius(6))
     }
 

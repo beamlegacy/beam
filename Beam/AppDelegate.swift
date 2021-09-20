@@ -48,9 +48,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var beamUIMenuGenerator: BeamUITestsMenuGenerator!
     #endif
 
-    func resizeWindow(width: CGFloat) {
-        var windowRect = window?.frame ?? NSRect(origin: .zero, size: CGSize(width: width, height: 600))
+    func resizeWindow(width: CGFloat, height: CGFloat? = nil) {
+        var windowRect = window?.frame ?? NSRect(origin: .zero, size: CGSize(width: width, height: height ?? 600))
         windowRect.size.width = width
+        windowRect.size.height = height ?? windowRect.size.height
         window?.setFrame(windowRect, display: true)
     }
 

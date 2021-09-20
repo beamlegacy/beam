@@ -12,12 +12,16 @@ struct KeyEventHandlingView: NSViewRepresentable {
 
         var onKeyDown: ((NSEvent) -> Void)?
         var handledKeyCodes: [KeyCode]
+        var firstResponder: Bool
+
+        private var firstResponderSet = false
 
         override var acceptsFirstResponder: Bool { true }
 
         override init(frame frameRect: NSRect) {
             self.onKeyDown = nil
             self.handledKeyCodes = []
+            self.firstResponder = false
             super.init(frame: frameRect)
         }
 
@@ -36,21 +40,45 @@ struct KeyEventHandlingView: NSViewRepresentable {
         override func mouseDown(with event: NSEvent) {
             self.window?.makeFirstResponder(self)
         }
-    }
 
-    let onKeyDown: ((NSEvent) -> Void)
+        func askForFirstResponder() {
+            guard let window = self.window else { return }
+            if !firstResponderSet {
+                firstResponderSet = window.makeFirstResponder(self)
+            }
+        }
+    }
 
     /// Provide handled keycodes to prevent the the super call.
     /// onKeyDown will only be called for the handled keys
     let handledKeyCodes: [KeyCode]
 
+    ///Make the view firstResponder on init
+    var firstResponder: Bool
+
+    ///Handle the keyDown for provided keyCodes
+    let onKeyDown: ((NSEvent) -> Void)
+
+    init(handledKeyCodes: [KeyCode], firstResponder: Bool = false, onKeyDown: (@escaping (NSEvent) -> Void)) {
+        self.handledKeyCodes = handledKeyCodes
+        self.firstResponder = firstResponder
+        self.onKeyDown = onKeyDown
+    }
+
     func makeNSView(context: Context) -> NSView {
         let view = KeyView()
         view.onKeyDown = onKeyDown
         view.handledKeyCodes = handledKeyCodes
+        view.firstResponder = firstResponder
+
         return view
     }
 
     func updateNSView(_ nsView: NSView, context: Context) {
+        if firstResponder {
+            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(500)) {
+                (nsView as? KeyView)?.askForFirstResponder()
+            }
+        }
     }
 }

@@ -89,7 +89,20 @@ private struct BottomToolBarTrailingIconView: View {
                 })
                 .padding(.trailing, BeamSpacing._50)
             } else {
-                ButtonLabel("?", customStyle: ButtonLabelStyle(font: BeamFont.medium(size: 11).swiftUI, horizontalPadding: 5, verticalPadding: 2))
+                GeometryReader { proxy in
+                    ButtonLabel("?", customStyle: ButtonLabelStyle(font: BeamFont.medium(size: 11).swiftUI, horizontalPadding: 5, verticalPadding: 2)) {
+                        let buttonFrame = proxy.frame(in: .global)
+                        let y = buttonFrame.origin.y + buttonFrame.height + 7
+                        let x = buttonFrame.origin.x - HelpAndFeedbackMenuView.menuWidth + 16
+
+                        let window = CustomPopoverPresenter.shared.presentAutoDismissingChildWindow()
+                        let view = HelpAndFeedbackMenuView(window: window)
+                            .environmentObject(state)
+                        window?.setView(with: view, at: NSPoint(x: x, y: y))
+                        window?.isMovable = false
+                        window?.makeKey()
+                    }
+                    .accessibility(identifier: "HelpButton")
                     .overlay(
                         Circle().stroke(BeamColor.Button.activeBackground.swiftUI, lineWidth: 1)
                             .frame(width: 16, height: 16)
@@ -97,6 +110,7 @@ private struct BottomToolBarTrailingIconView: View {
                     )
                     .frame(width: 18, height: 18)
                     .cornerRadius(9)
+                }.frame(width: 18, height: 18)
             }
         }
     }

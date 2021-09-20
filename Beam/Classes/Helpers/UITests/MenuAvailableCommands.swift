@@ -9,6 +9,7 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
     case separatorA
     case resizeWindowLandscape = "Resize Window to Landscape"
     case resizeWindowPortrait = "Resize Window to Portrait"
+    case resizeSquare1000 = "Resize Window Square"
     case enableBrowsingSessionCollection = "Enable BrowsingSession Collect"
     case disableBrowsingSessionCollection = "Disable BrowsingSession Collect"
 
