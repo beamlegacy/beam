@@ -150,6 +150,19 @@
                                                             <action selector="importRoam:" target="Voe-Tx-rLC" id="8Ni-tq-Xk9"/>
                                                         </connections>
                                                     </menuItem>
+                                                    <menuItem isSeparatorItem="YES" id="o5q-Jj-gQl"/>
+                                                    <menuItem title="Import notes from JSON files" id="FI2-89-hxd">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="importJSONFiles:" target="Voe-Tx-rLC" id="TAT-1g-YMg"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                    <menuItem title="Export all notes to JSON files" id="5Hb-MJ-akg">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="exportAllNotesToJSON:" target="Voe-Tx-rLC" id="xv1-5n-Ltx"/>
+                                                        </connections>
+                                                    </menuItem>
                                                     <menuItem isSeparatorItem="YES" id="p48-Cr-YKh"/>
                                                     <menuItem title="Send all notes to API" id="hvj-Zt-QCz">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
