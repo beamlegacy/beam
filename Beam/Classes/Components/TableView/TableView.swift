@@ -232,8 +232,10 @@ class TableViewCoordinator: NSObject {
 
     @objc func contentOffsetDidChange(notification: Notification) {
         if let hovered = hoveredRow,
-           let rowView = tableView?.rowView(atRow: hovered, makeIfNecessary: false) as? BeamTableRowView {
+           let tableView = tableView,
+           let rowView = tableView.rowView(atRow: hovered, makeIfNecessary: false) as? BeamTableRowView {
             rowView.offsetChanged()
+            updateCellsVisibility(for: hovered, in: tableView, hovering: false, selected: currentSelectedIndexes?.contains(hovered) == true)
             parent.onHover?(nil, nil)
         }
         hoveredRow = nil
