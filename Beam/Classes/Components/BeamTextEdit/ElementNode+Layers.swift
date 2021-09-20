@@ -13,6 +13,8 @@ extension ElementNode {
     @objc var bulletLayerPositionY: CGFloat {
         firstLineBaseline - 13
     }
+    static var indentLayerPosX: CGFloat = 4.5
+
     private enum LayerName: String {
         case indentLayer
         case bullet
@@ -107,8 +109,8 @@ extension ElementNode {
 
     private func updateIndentLayer() {
         guard let indentLayer = layers[LayerName.indentLayer.rawValue] else { return }
-        let y = firstLineHeight + 8
-        indentLayer.frame = NSRect(x: 4.5, y: y - 5, width: 0.5, height: frame.height - y - 5)
+        let y = firstLineHeight + 3
+        indentLayer.frame = NSRect(x: Self.indentLayerPosX, y: y, width: 0.5, height: frame.height - y)
         let show = (showDisclosureButton && (PreferencesManager.alwaysShowBullets || hover))  && self.open
         indentLayer.layer.opacity = Float(show ? 1 : 0)
     }

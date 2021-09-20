@@ -47,6 +47,7 @@ class BreadCrumb: Widget {
     private let maxBreadCrumbWidth: CGFloat = 100
     private let breadCrumbYPosition: CGFloat = 1
     private let spaceBreadcrumbIcon: CGFloat = 3
+    private var containerPadding: CGFloat = 8
 
     init(parent: Widget, element: BeamElement) {
         self.proxy = ProxyElement(for: element)
@@ -67,7 +68,7 @@ class BreadCrumb: Widget {
         setupLayers(with: note)
         selectCrumb(crumbChain.count - 1)
         self.contentsPadding = NSEdgeInsets(top: 0, left: 0, bottom: crumbChain.count > 1 ? 1 : 2, right: 0)
-        self.childrenPadding = NSEdgeInsets(top: 0, left: 7, bottom: crumbChain.count > 1 ? 3 : 0, right: 0)
+        self.childrenPadding = NSEdgeInsets(top: 2, left: 7, bottom: 3 + containerPadding, right: 0)
     }
 
     func setupLayers(with note: BeamNote) {
@@ -291,7 +292,7 @@ class BreadCrumb: Widget {
             let childrenHeight = childrenIdealSize.size.height + crumbsHeight - childrenPadding.bottom - childrenPadding.top - contentsPadding.bottom - contentsPadding.top
             CATransaction.disableAnimations {
                 guard let container = container else { return }
-                container.frame = NSRect(x: 0, y: -2, width: availableWidth, height: childrenHeight)
+                container.frame = NSRect(x: 0, y: -2, width: availableWidth + containerPadding, height: childrenHeight + containerPadding)
             }
         }
     }
