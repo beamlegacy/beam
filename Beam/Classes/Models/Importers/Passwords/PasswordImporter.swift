@@ -68,7 +68,7 @@ enum PasswordImporter {
 
         for record in parser {
             if let entry = decoder.decode(record) {
-                PasswordManager.shared.save(host: entry.host.trimmingCharacters(in: CharacterSet(charactersIn: "/.\\")), username: entry.username, password: entry.password)
+                PasswordManager.shared.save(hostname: entry.host.trimmingCharacters(in: CharacterSet(charactersIn: "/.\\")), username: entry.username, password: entry.password)
             }
         }
     }
@@ -83,7 +83,7 @@ enum PasswordImporter {
         }
         serialQueue.async {
             for entry in allEntries {
-                if let passwordStr = PasswordManager.shared.password(host: entry.minimizedHost, username: entry.username) {
+                if let passwordStr = PasswordManager.shared.password(hostname: entry.minimizedHost, username: entry.username) {
                     let row = encodeToCSV(entry: entry, password: passwordStr)
                     csvString.append("\(row)\n")
                 }
