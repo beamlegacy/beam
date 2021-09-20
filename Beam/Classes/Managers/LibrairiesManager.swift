@@ -37,7 +37,7 @@ extension LibrariesManager {
         SentrySDK.configureScope { scope in
             scope.setEnvironment(Configuration.env)
             scope.setDist(Information.appBuild)
-            scope.setTag(value: "hostname", key: currentHost)
+            scope.setTag(value: currentHost, key: "hostname")
         }
     }
 
