@@ -33,7 +33,7 @@ class PasswordsDBTests: XCTestCase {
     }
 
     func testSavingPassword() {
-        PasswordManager.shared.save(host: Self.host.minimizedHost!, username: Self.username, password: Self.password)
+        PasswordManager.shared.save(hostname: Self.host.minimizedHost!, username: Self.username, password: Self.password)
 
         let allEntries = PasswordManager.shared.fetchAll()
         XCTAssertTrue(allEntries.count > 0, "FetchAll has no passwords, it should be > 0")
@@ -48,7 +48,7 @@ class PasswordsDBTests: XCTestCase {
         beforeNetworkTests()
 
         let expectation = self.expectation(description: "save password")
-        let newPassword = PasswordManager.shared.save(host: Self.host.minimizedHost!,
+        let newPassword = PasswordManager.shared.save(hostname: Self.host.minimizedHost!,
                                                       username: Self.username,
                                                       password: Self.password,
                                                       uuid: UUID(uuidString: "20D1B800-4436-4D25-8919-E23EF58FA13A")) { _ in
@@ -62,14 +62,17 @@ class PasswordsDBTests: XCTestCase {
         }
 
         do {
-            var remotePassword: PasswordRecord? = try beamObjectHelper.fetchOnAPI(newPasswordUnwrapped.beamObjectId)
-            remotePassword?.checksum = nil // we don't care if those are different
-            // We need to decrypt passwords as both, even equal, will give different encrypted strings
-            let decryptedPassword = try EncryptionManager.shared.decryptString(remotePassword?.password ?? "") ?? "1"
-            remotePassword?.password = decryptedPassword
-            newPasswordUnwrapped.password = try EncryptionManager.shared.decryptString(newPasswordUnwrapped.password) ?? "2"
+            let remotePassword: PasswordRecord? = try beamObjectHelper.fetchOnAPI(newPasswordUnwrapped.beamObjectId)
+            XCTAssertNotNil(remotePassword, "Object doesn't exist on the API side?")
 
-            XCTAssertEqual(newPasswordUnwrapped, remotePassword)
+            if var remotePassword = remotePassword {
+                remotePassword.checksum = nil // we don't care if those are different
+                // We need to decrypt passwords as both, even equal, will give different encrypted strings
+                let decryptedPassword = try EncryptionManager.shared.decryptString(remotePassword.password) ?? "1"
+                remotePassword.password = decryptedPassword
+                newPasswordUnwrapped.password = try EncryptionManager.shared.decryptString(newPasswordUnwrapped.password) ?? "2"
+                XCTAssertEqual(newPasswordUnwrapped, remotePassword)
+            }
         } catch {
             XCTFail(error.localizedDescription)
         }
@@ -77,8 +80,8 @@ class PasswordsDBTests: XCTestCase {
     }
 
     func testSavingPasswords() {
-        PasswordManager.shared.save(host: Self.host.minimizedHost!, username: Self.username, password: Self.password)
-        PasswordManager.shared.save(host: Self.subdomain1.minimizedHost!, username: Self.username, password: Self.password)
+        PasswordManager.shared.save(hostname: Self.host.minimizedHost!, username: Self.username, password: Self.password)
+        PasswordManager.shared.save(hostname: Self.subdomain1.minimizedHost!, username: Self.username, password: Self.password)
 
         let allEntries = PasswordManager.shared.fetchAll()
         XCTAssertTrue(allEntries.count >= 2, "FetchAll has no passwords, it should be >= 2")
@@ -95,7 +98,7 @@ class PasswordsDBTests: XCTestCase {
     }
 
     func testFindEntriesForHost() {
-        PasswordManager.shared.save(host: Self.host.minimizedHost!, username: Self.username, password: Self.password)
+        PasswordManager.shared.save(hostname: Self.host.minimizedHost!, username: Self.username, password: Self.password)
 
         let entries = PasswordManager.shared.entries(for: Self.host.minimizedHost!, exact: true)
         XCTAssertEqual(entries.count, 1)
@@ -104,8 +107,8 @@ class PasswordsDBTests: XCTestCase {
     }
 
     func testFindEntriesForHostWithParents() {
-        PasswordManager.shared.save(host: Self.host.minimizedHost!, username: Self.username, password: Self.password)
-        PasswordManager.shared.save(host: Self.subdomain1.minimizedHost!, username: Self.username, password: Self.password)
+        PasswordManager.shared.save(hostname: Self.host.minimizedHost!, username: Self.username, password: Self.password)
+        PasswordManager.shared.save(hostname: Self.subdomain1.minimizedHost!, username: Self.username, password: Self.password)
 
         let entries = PasswordManager.shared.entries(for: Self.subdomain1.minimizedHost!, exact: false)
         XCTAssertEqual(entries.count, 2)
@@ -116,8 +119,8 @@ class PasswordsDBTests: XCTestCase {
     }
 
     func testFindEntriesForHostWithSubdomains() {
-        PasswordManager.shared.save(host: Self.host.minimizedHost!, username: Self.username, password: Self.password)
-        PasswordManager.shared.save(host: Self.subdomain1.minimizedHost!, username: Self.username, password: Self.password)
+        PasswordManager.shared.save(hostname: Self.host.minimizedHost!, username: Self.username, password: Self.password)
+        PasswordManager.shared.save(hostname: Self.subdomain1.minimizedHost!, username: Self.username, password: Self.password)
 
         let entries = PasswordManager.shared.entries(for: Self.host.minimizedHost!, exact: false)
         XCTAssertEqual(entries.count, 2)
@@ -128,7 +131,7 @@ class PasswordsDBTests: XCTestCase {
     }
 
     func testSearchEntries() {
-        PasswordManager.shared.save(host: Self.host.minimizedHost!, username: Self.username, password: Self.password)
+        PasswordManager.shared.save(hostname: Self.host.minimizedHost!, username: Self.username, password: Self.password)
 
         let entries = PasswordManager.shared.find("git")
         XCTAssertTrue(entries.count > 0, "Find returns no passwords, should be > 0")
@@ -138,16 +141,16 @@ class PasswordsDBTests: XCTestCase {
     }
 
     func testFetchAllEntries() {
-        PasswordManager.shared.save(host: Self.host.minimizedHost!, username: Self.username, password: Self.password)
+        PasswordManager.shared.save(hostname: Self.host.minimizedHost!, username: Self.username, password: Self.password)
 
         let entries = PasswordManager.shared.fetchAll()
         XCTAssertTrue(entries.count > 0, "FetchAll has no passwords, it should be > 0")
     }
 
     func testGetPassword() {
-        PasswordManager.shared.save(host: Self.host.minimizedHost!, username: Self.username, password: Self.password)
+        PasswordManager.shared.save(hostname: Self.host.minimizedHost!, username: Self.username, password: Self.password)
 
-        let password = PasswordManager.shared.password(host: Self.host.minimizedHost!, username: Self.username)
+        let password = PasswordManager.shared.password(hostname: Self.host.minimizedHost!, username: Self.username)
         XCTAssertEqual(password, Self.password)
     }
 
@@ -155,7 +158,7 @@ class PasswordsDBTests: XCTestCase {
         beforeNetworkTests()
 
         var expectation = self.expectation(description: "save password")
-        PasswordManager.shared.save(host: Self.host.minimizedHost!,
+        PasswordManager.shared.save(hostname: Self.host.minimizedHost!,
                                     username: Self.username,
                                     password: Self.password,
                                     uuid: UUID(uuidString: "20D1B800-4436-4D25-8919-E23EF58FA13A")) { _ in
@@ -165,7 +168,7 @@ class PasswordsDBTests: XCTestCase {
 
         expectation = self.expectation(description: "delete password")
 
-        PasswordManager.shared.delete(host: Self.host.minimizedHost!, for: Self.username) { _ in
+        PasswordManager.shared.delete(hostname: Self.host.minimizedHost!, for: Self.username) { _ in
             expectation.fulfill()
         }
         wait(for: [expectation], timeout: 10.0)

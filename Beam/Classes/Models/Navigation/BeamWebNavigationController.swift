@@ -149,7 +149,7 @@ extension BeamWebNavigationController: WKNavigationDelegate {
                 let credential = URLCredential(user: username, password: password, persistence: .forSession)
                 completionHandler(.useCredential, credential)
                 if savePassword && (!password.isEmpty || !username.isEmpty) {
-                    PasswordManager.shared.save(host: challenge.protectionSpace.host, username: username, password: password)
+                    PasswordManager.shared.save(hostname: challenge.protectionSpace.host, username: username, password: password)
                 }
                 self?.page.authenticationViewModel = nil
 

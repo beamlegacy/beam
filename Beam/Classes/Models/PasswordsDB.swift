@@ -25,8 +25,8 @@ struct PasswordRecord {
 
     var uuid: UUID
     var entryId: String
-    var host: String
-    var name: String
+    var hostname: String
+    var username: String
     var password: String
     var createdAt: Date
     var updatedAt: Date
@@ -51,8 +51,8 @@ extension PasswordRecord: BeamObjectProtocol {
     enum CodingKeys: String, CodingKey {
         case uuid
         case entryId
-        case host
-        case name
+        case hostname
+        case username
         case password
         case createdAt
         case updatedAt
@@ -63,7 +63,7 @@ extension PasswordRecord: BeamObjectProtocol {
     func copy() -> PasswordRecord {
         PasswordRecord(uuid: uuid,
                        entryId: entryId,
-                       host: host, name: name,
+                       hostname: hostname, username: username,
                        password: password,
                        createdAt: createdAt,
                        updatedAt: updatedAt,
@@ -78,7 +78,7 @@ extension PasswordRecord: Equatable { }
 
 extension PasswordRecord: TableRecord {
     enum Columns: String, ColumnExpression {
-        case uuid, entryId, host, name, password, createdAt, updatedAt, deletedAt, previousChecksum, privateKeySignature
+        case uuid, entryId, hostname, username, password, createdAt, updatedAt, deletedAt, previousChecksum, privateKeySignature
     }
 }
 
@@ -87,8 +87,8 @@ extension PasswordRecord: FetchableRecord {
     init(row: Row) {
         uuid = row[Columns.uuid]
         entryId = row[Columns.entryId]
-        host = row[Columns.host]
-        name = row[Columns.name]
+        hostname = row[Columns.hostname]
+        username = row[Columns.username]
         password = row[Columns.password]
         createdAt = row[Columns.createdAt]
         updatedAt = row[Columns.updatedAt]
@@ -107,8 +107,8 @@ extension PasswordRecord: MutablePersistableRecord {
     func encode(to container: inout PersistenceContainer) {
         container[Columns.uuid] = uuid
         container[Columns.entryId] = entryId
-        container[Columns.host] = host
-        container[Columns.name] = name
+        container[Columns.hostname] = hostname
+        container[Columns.username] = username
         container[Columns.password] = password
         container[Columns.createdAt] = createdAt
         container[Columns.updatedAt] = updatedAt
@@ -153,8 +153,8 @@ class PasswordsDB: PasswordStore {
                     var passwordRecord = PasswordRecord(
                         uuid: UUID(),
                         entryId: self.id(for: password["host"], and: password["name"]),
-                        host: password["host"],
-                        name: password["name"],
+                        hostname: password["host"],
+                        username: password["name"],
                         password: password["password"],
                         createdAt: BeamDate.now,
                         updatedAt: BeamDate.now,
@@ -181,8 +181,8 @@ class PasswordsDB: PasswordStore {
                     var passwordRecord = PasswordRecord(
                         uuid: password["uuid"],
                         entryId: password["entryId"],
-                        host: password["host"],
-                        name: password["name"],
+                        hostname: password["host"],
+                        username: password["name"],
                         password: encryptedPassword.isEmpty ? password["password"] : encryptedPassword,
                         createdAt: password["createdAt"],
                         updatedAt: password["updatedAt"],
@@ -193,15 +193,34 @@ class PasswordsDB: PasswordStore {
                 }
             }
         }
+
+        migrator.registerMigration("renameColumns") { db in
+            try db.alter(table: PasswordsDB.tableName, body: { tb in
+                tb.rename(column: "name", to: "username")
+                tb.rename(column: "host", to: "hostname")
+            })
+        }
+
+        migrator.registerMigration("saveAllPasswords") { db in
+            if let rows = try? Row.fetchAll(db, sql: "SELECT * FROM \(PasswordsDB.tableName)") {
+                var passwordRecords = [PasswordRecord]()
+                for row in rows {
+                    passwordRecords.append(PasswordRecord(row: row))
+                }
+                let beamObjectManager = BeamObjectManager()
+                _ = try? beamObjectManager.saveToAPI(passwordRecords) { _ in }
+            }
+        }
+
         try migrator.migrate(dbPool)
     }
 
-    private func id(for host: String, and username: String) -> String {
-        return PasswordManagerEntry(minimizedHost: host, username: username).id
+    private func id(for hostname: String, and username: String) -> String {
+        return PasswordManagerEntry(minimizedHost: hostname, username: username).id
     }
 
     private func credentials(for passwordsRecord: [PasswordRecord]) -> [Credential] {
-        passwordsRecord.map { Credential(username: $0.name, password: $0.password) }
+        passwordsRecord.map { Credential(username: $0.username, password: $0.password) }
     }
 
     // PasswordStore
@@ -225,11 +244,11 @@ class PasswordsDB: PasswordStore {
         return allEntries
     }
 
-    internal func entries(for host: String) throws -> [PasswordRecord] {
+    internal func entries(for hostname: String) throws -> [PasswordRecord] {
         do {
             return try dbPool.read { db in
                 let passwords = try PasswordRecord
-                    .filter(PasswordRecord.Columns.host == host && PasswordRecord.Columns.deletedAt == nil)
+                    .filter(PasswordRecord.Columns.hostname == hostname && PasswordRecord.Columns.deletedAt == nil)
                     .fetchAll(db)
                 return passwords
             }
@@ -238,11 +257,11 @@ class PasswordsDB: PasswordStore {
         }
     }
 
-    func entriesWithSubdomains(for host: String) throws -> [PasswordRecord] {
+    func entriesWithSubdomains(for hostname: String) throws -> [PasswordRecord] {
         do {
             return try dbPool.read { db in
                 let passwords = try PasswordRecord
-                    .filter(PasswordRecord.Columns.host == host || PasswordRecord.Columns.host.like("%.\(host)"))
+                    .filter(PasswordRecord.Columns.hostname == hostname || PasswordRecord.Columns.hostname.like("%.\(hostname)"))
                     .filter(PasswordRecord.Columns.deletedAt == nil)
                     .fetchAll(db)
                 return passwords
@@ -256,7 +275,7 @@ class PasswordsDB: PasswordStore {
         do {
             return try dbPool.read { db in
                 let passwords = try PasswordRecord
-                    .filter(PasswordRecord.Columns.host.like("%\(searchString)%") && PasswordRecord.Columns.deletedAt == nil)
+                    .filter(PasswordRecord.Columns.hostname.like("%\(searchString)%") && PasswordRecord.Columns.deletedAt == nil)
                     .fetchAll(db)
                 return passwords
             }
@@ -279,11 +298,11 @@ class PasswordsDB: PasswordStore {
         }
     }
 
-    func password(host: String, username: String) throws -> String? {
+    func password(hostname: String, username: String) throws -> String? {
         do {
             return try dbPool.read { db in
                 guard let passwordRecord = try PasswordRecord
-                        .filter(PasswordRecord.Columns.entryId == id(for: host, and: username) && PasswordRecord.Columns.deletedAt == nil)
+                        .filter(PasswordRecord.Columns.entryId == id(for: hostname, and: username) && PasswordRecord.Columns.deletedAt == nil)
                         .fetchOne(db) else {
                     return nil
                 }
@@ -299,11 +318,11 @@ class PasswordsDB: PasswordStore {
         }
     }
 
-    func save(host: String, username: String, password: String) throws -> PasswordRecord {
-        try save(host: host, username: username, password: password, uuid: nil)
+    func save(hostname: String, username: String, password: String) throws -> PasswordRecord {
+        try save(hostname: hostname, username: username, password: password, uuid: nil)
     }
 
-    func save(host: String, username: String, password: String, uuid: UUID? = nil) throws -> PasswordRecord {
+    func save(hostname: String, username: String, password: String, uuid: UUID? = nil) throws -> PasswordRecord {
         do {
             return try dbPool.write { db in
                 guard let encryptedPassword = try? EncryptionManager.shared.encryptString(password) else {
@@ -312,9 +331,9 @@ class PasswordsDB: PasswordStore {
                 let privateKeySignature = try EncryptionManager.shared.privateKey().asString().SHA256()
                 var passwordRecord = PasswordRecord(
                     uuid: uuid ?? UUID(),
-                    entryId: id(for: host, and: username),
-                    host: host,
-                    name: username,
+                    entryId: id(for: hostname, and: username),
+                    hostname: hostname,
+                    username: username,
                     password: encryptedPassword,
                     createdAt: BeamDate.now,
                     updatedAt: BeamDate.now,
@@ -351,11 +370,11 @@ class PasswordsDB: PasswordStore {
     }
 
     @discardableResult
-    func delete(host: String, username: String) throws -> PasswordRecord {
+    func delete(hostname: String, username: String) throws -> PasswordRecord {
         do {
             return try dbPool.write { db in
                 if var password = try PasswordRecord
-                    .filter(PasswordRecord.Columns.entryId == id(for: host, and: username) && PasswordRecord.Columns.deletedAt == nil)
+                    .filter(PasswordRecord.Columns.entryId == id(for: hostname, and: username) && PasswordRecord.Columns.deletedAt == nil)
                     .fetchOne(db) {
                     password.deletedAt = BeamDate.now
                     try password.update(db)
@@ -401,16 +420,16 @@ class PasswordsDB: PasswordStore {
     }
 
     // Added for getting the credential for HTTP Basic / Digest auth. Not in the protocol for now…
-    func credentials(for host: String, completion: @escaping ([Credential]) -> Void) {
+    func credentials(for hostname: String, completion: @escaping ([Credential]) -> Void) {
         do {
             try dbPool.read { db in
                 let passwords = try PasswordRecord
-                    .filter(PasswordRecord.Columns.host == host && PasswordRecord.Columns.deletedAt == nil)
+                    .filter(PasswordRecord.Columns.hostname == hostname && PasswordRecord.Columns.deletedAt == nil)
                     .fetchAll(db)
                 completion(credentials(for: passwords))
             }
         } catch let error {
-            Logger.shared.logError("Error while fetching password entries for \(host): \(error)", category: .passwordsDB)
+            Logger.shared.logError("Error while fetching password entries for \(hostname): \(error)", category: .passwordsDB)
         }
     }
 }
