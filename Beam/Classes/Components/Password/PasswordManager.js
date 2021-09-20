@@ -6,6 +6,16 @@ function beam_isTextField(element) {
     return elementType === 'text' || elementType === 'password' || elementType === 'email' || elementType === '' || elementType === null
 }
 
+function beam_isEnabled(element) {
+    if (element === null) {
+        return false
+    }
+    if ('disabled' in element.attributes) {
+        return !element.disabled
+    }
+    return true
+}
+
 var lastId = 0
 function beam_makeBeamId(element) {
     if (element.id.length != 0) {
@@ -42,7 +52,7 @@ function beam_getTextFieldsInDocument(_doc, _frame) {
         let inputElements = document.getElementsByTagName(tagName)
         for (let e = 0; e < inputElements.length; e++) {
             let element = inputElements.item(e)
-            if (beam_isTextField(element)) {
+            if (beam_isTextField(element) && beam_isEnabled(element)) {
                 beam_getOrCreateBeamId(element)
                 let attributes = element.attributes
                 const textField = {}
@@ -184,9 +194,9 @@ function beam_installFocusHandlers(ids_json) {
         // install handlers to all inputs
         beam_getElementById(id)?.addEventListener('focus', password_elementDidGainFocus, false)
         beam_getElementById(id)?.addEventListener('focusout', password_elementDidLoseFocus, false)
-        window.addEventListener("resize", password_resize)
-        window.addEventListener("scroll", password_scroll)
     }
+    window.addEventListener("resize", password_resize)
+    window.addEventListener("scroll", password_scroll)
 }
 
 function beam_installSubmitHandler() {
