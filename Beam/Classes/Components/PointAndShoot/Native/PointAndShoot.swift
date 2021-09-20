@@ -100,17 +100,27 @@ class PointAndShoot: WebPageHolder, ObservableObject {
         }
     }
 
+    let throttledHaptic = throttle(delay: 0.1, action: {
+        // bump trackpad haptic
+        let performer = NSHapticFeedbackManager.defaultPerformer
+        performer.perform(.alignment, performanceTime: .default)
+    })
+
     /// Set activePointGroup with target. Updating the activePointGroup will update the UI directly.
     func point(_ target: Target, _ href: String) {
         guard activeShootGroup == nil else { return }
         guard !isTypingOnWebView else { return }
 
+        if isAltKeyDown {
+            if let group = activePointGroup,
+               let pointTarget = group.targets.first,
+               pointTarget.rect != target.rect {
+                throttledHaptic()
+            }
+        }
+
         activePointGroup = ShootGroup("point-uuid", [target], href)
 
-        if isAltKeyDown {
-            let performer = NSHapticFeedbackManager.defaultPerformer
-            performer.perform(.alignment, performanceTime: .default)
-        }
     }
 
     /// Set targets as activeShootGroup
@@ -136,8 +146,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
                       activeSelectGroup == nil {
 
                 activeShootGroup = ShootGroup(groupId, [target], href)
-                let performer = NSHapticFeedbackManager.defaultPerformer
-                performer.perform(.generic, performanceTime: .default)
+                throttledHaptic()
             } else {
                 if !isAltKeyDown {
                     let tempGroup = ShootGroup(groupId, [], href)
