@@ -169,6 +169,7 @@ extension BeamTextEdit {
         node.cmdManager.insertText(BeamText(text: "(())", attributes: []), in: node, at: range.lowerBound)
         node.cmdManager.focusElement(node, cursorPosition: range.lowerBound + 2)
         showCardReferenceFormatter(atPosition: node.cursorPosition, searchCardContent: true)
+        updateInlineFormatterView(isDragged: false, isKeyEvent: true)
     }
 }
 

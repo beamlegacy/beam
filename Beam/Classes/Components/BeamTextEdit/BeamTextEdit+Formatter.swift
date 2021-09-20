@@ -121,7 +121,7 @@ extension BeamTextEdit {
                 let fullRange = targetRange.lowerBound..<node.cursorPosition
                 text = text.substring(range: targetRange.lowerBound..<node.cursorPosition)
                 if inlineFormatter?.formatterHandlesInputText(text) == true {
-                    if let (typingAttributes, forRange) = inlineFormatter?.typingAttributes(for: fullRange) {
+                    inlineFormatter?.typingAttributes(for: fullRange)?.forEach { (typingAttributes, forRange) in
                         node.text.setAttributes(typingAttributes, to: forRange)
                     }
                 } else {
@@ -271,9 +271,10 @@ extension BeamTextEdit {
     }
 
     private func clearFormatterTypingAttributes(_ view: FormatterView?) {
-        guard let targetNode = formatterTargetNode, let targetRange = formatterTargetRange,
-              let (attributes, _) = view?.typingAttributes(for: targetRange) else { return }
-        targetNode.text.removeAttributes(attributes, from: targetNode.text.wholeRange)
+        guard let targetNode = formatterTargetNode, let targetRange = formatterTargetRange else { return }
+        view?.typingAttributes(for: targetRange)?.forEach { (attributes, _) in
+            targetNode.text.removeAttributes(attributes, from: targetNode.text.wholeRange)
+        }
     }
 
     internal func moveInlineFormatterAtSelection(below: Bool = false) {
