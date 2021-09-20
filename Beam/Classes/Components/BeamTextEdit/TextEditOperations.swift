@@ -106,6 +106,8 @@ extension TextRoot {
         }
 
         for node in sortedNodes.reversed() {
+            guard node.element as? BeamNote == nil else { continue }
+            
             // reparent children to previous sibbling or existing parent
             let unproxied = node.unproxyElement
             if node.open, let oldIndexInParent = unproxied.indexInParent,
