@@ -82,6 +82,16 @@
 		3330D7B5265E4441008C9E20 /* Download.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3330D7B4265E4441008C9E20 /* Download.swift */; };
 		3330D7CB265E466D008C9E20 /* OmniBarDownloadButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3330D7CA265E466D008C9E20 /* OmniBarDownloadButton.swift */; };
 		3330D7CD265E95E0008C9E20 /* LinearProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3330D7CC265E95E0008C9E20 /* LinearProgressView.swift */; };
+		33353EBC26F0EAA300063078 /* HelpAndFeedbackMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33353EBB26F0EAA300063078 /* HelpAndFeedbackMenuView.swift */; };
+		33353ECA26F3360800063078 /* DiscoverShortcutsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33353EC926F3360800063078 /* DiscoverShortcutsView.swift */; };
+		33353ED426F3672F00063078 /* ShortcutModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33353ED326F3672F00063078 /* ShortcutModifier.swift */; };
+		33353ED626F3675000063078 /* ShortcutKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33353ED526F3675000063078 /* ShortcutKey.swift */; };
+		33353ED826F367FF00063078 /* ShortcutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33353ED726F367FF00063078 /* ShortcutView.swift */; };
+		33353EDA26F369AD00063078 /* KeyboardFeatureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33353ED926F369AD00063078 /* KeyboardFeatureView.swift */; };
+		33353EDC26F36B4300063078 /* Shortcut.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33353EDB26F36B4300063078 /* Shortcut.swift */; };
+		33353EDE26F372D700063078 /* KeyboardFeature.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33353EDD26F372D700063078 /* KeyboardFeature.swift */; };
+		33353EE026F374B400063078 /* SectionFeaturesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33353EDF26F374B400063078 /* SectionFeaturesView.swift */; };
+		33353EE226F3D0BA00063078 /* ActionableButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33353EE126F3D0BA00063078 /* ActionableButton.swift */; };
 		333A0A20268C4EED004B7905 /* KeyEventHandlingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 333A0A1F268C4EED004B7905 /* KeyEventHandlingView.swift */; };
 		3355997426CBDDC900F52C23 /* SearchInContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3355997326CBDDC900F52C23 /* SearchInContentView.swift */; };
 		3355997626CBE0AE00F52C23 /* SearchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3355997526CBE0AE00F52C23 /* SearchViewModel.swift */; };
@@ -732,6 +742,9 @@
 		A5F1F6262643EDA600D41505 /* BeamNoteSharingUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F1F6252643EDA600D41505 /* BeamNoteSharingUtils.swift */; };
 		A5FE1615264AD64900B7526D /* RecentsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5FE1614264AD64900B7526D /* RecentsListView.swift */; };
 		A5FE96CD2612469C002A2B73 /* AutocompleteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5FE96CC2612469C002A2B73 /* AutocompleteManager.swift */; };
+		B5056A8D26F88A0700FFD2A2 /* HelpAndFeedbackTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5056A8C26F88A0700FFD2A2 /* HelpAndFeedbackTests.swift */; };
+		B5056A8F26F88AB000FFD2A2 /* HelpTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5056A8E26F88AB000FFD2A2 /* HelpTestView.swift */; };
+		B5056A9126F88CFD00FFD2A2 /* HelpViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5056A9026F88CFD00FFD2A2 /* HelpViewLocators.swift */; };
 		B54D934726CA6A07006BBDEE /* BrowserTabViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54D934626CA6A07006BBDEE /* BrowserTabViewTests.swift */; };
 		B551F3BF26BD0EBF00B72D27 /* WebsiteAuthTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = B551F3BE26BD0EBF00B72D27 /* WebsiteAuthTest.swift */; };
 		B551F3C126BD0FE800B72D27 /* WebsiteAuthPopupTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B551F3C026BD0FE800B72D27 /* WebsiteAuthPopupTestView.swift */; };
@@ -1032,6 +1045,16 @@
 		3330D7B4265E4441008C9E20 /* Download.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Download.swift; sourceTree = "<group>"; };
 		3330D7CA265E466D008C9E20 /* OmniBarDownloadButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniBarDownloadButton.swift; sourceTree = "<group>"; };
 		3330D7CC265E95E0008C9E20 /* LinearProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinearProgressView.swift; sourceTree = "<group>"; };
+		33353EBB26F0EAA300063078 /* HelpAndFeedbackMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpAndFeedbackMenuView.swift; sourceTree = "<group>"; };
+		33353EC926F3360800063078 /* DiscoverShortcutsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoverShortcutsView.swift; sourceTree = "<group>"; };
+		33353ED326F3672F00063078 /* ShortcutModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutModifier.swift; sourceTree = "<group>"; };
+		33353ED526F3675000063078 /* ShortcutKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutKey.swift; sourceTree = "<group>"; };
+		33353ED726F367FF00063078 /* ShortcutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutView.swift; sourceTree = "<group>"; };
+		33353ED926F369AD00063078 /* KeyboardFeatureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardFeatureView.swift; sourceTree = "<group>"; };
+		33353EDB26F36B4300063078 /* Shortcut.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shortcut.swift; sourceTree = "<group>"; };
+		33353EDD26F372D700063078 /* KeyboardFeature.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardFeature.swift; sourceTree = "<group>"; };
+		33353EDF26F374B400063078 /* SectionFeaturesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SectionFeaturesView.swift; sourceTree = "<group>"; };
+		33353EE126F3D0BA00063078 /* ActionableButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionableButton.swift; sourceTree = "<group>"; };
 		333A0A1F268C4EED004B7905 /* KeyEventHandlingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyEventHandlingView.swift; sourceTree = "<group>"; };
 		3355997326CBDDC900F52C23 /* SearchInContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchInContentView.swift; sourceTree = "<group>"; };
 		3355997526CBE0AE00F52C23 /* SearchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchViewModel.swift; sourceTree = "<group>"; };
@@ -1686,6 +1709,9 @@
 		A5F1F6252643EDA600D41505 /* BeamNoteSharingUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamNoteSharingUtils.swift; sourceTree = "<group>"; };
 		A5FE1614264AD64900B7526D /* RecentsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentsListView.swift; sourceTree = "<group>"; };
 		A5FE96CC2612469C002A2B73 /* AutocompleteManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutocompleteManager.swift; sourceTree = "<group>"; };
+		B5056A8C26F88A0700FFD2A2 /* HelpAndFeedbackTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpAndFeedbackTests.swift; sourceTree = "<group>"; };
+		B5056A8E26F88AB000FFD2A2 /* HelpTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpTestView.swift; sourceTree = "<group>"; };
+		B5056A9026F88CFD00FFD2A2 /* HelpViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpViewLocators.swift; sourceTree = "<group>"; };
 		B54D934626CA6A07006BBDEE /* BrowserTabViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserTabViewTests.swift; sourceTree = "<group>"; };
 		B551F3BE26BD0EBF00B72D27 /* WebsiteAuthTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebsiteAuthTest.swift; sourceTree = "<group>"; };
 		B551F3C026BD0FE800B72D27 /* WebsiteAuthPopupTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebsiteAuthPopupTestView.swift; sourceTree = "<group>"; };
@@ -2054,6 +2080,30 @@
 				BAA6740CED2A340CD3002907 /* build_js.sh */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		33353EB326F0EA6B00063078 /* Help and Feedback */ = {
+			isa = PBXGroup;
+			children = (
+				33353ED226F3670300063078 /* Keyboard Shortcuts */,
+				33353EBB26F0EAA300063078 /* HelpAndFeedbackMenuView.swift */,
+			);
+			path = "Help and Feedback";
+			sourceTree = "<group>";
+		};
+		33353ED226F3670300063078 /* Keyboard Shortcuts */ = {
+			isa = PBXGroup;
+			children = (
+				33353ED326F3672F00063078 /* ShortcutModifier.swift */,
+				33353ED526F3675000063078 /* ShortcutKey.swift */,
+				33353EDB26F36B4300063078 /* Shortcut.swift */,
+				33353ED726F367FF00063078 /* ShortcutView.swift */,
+				33353ED926F369AD00063078 /* KeyboardFeatureView.swift */,
+				33353EDD26F372D700063078 /* KeyboardFeature.swift */,
+				33353EDF26F374B400063078 /* SectionFeaturesView.swift */,
+				33353EC926F3360800063078 /* DiscoverShortcutsView.swift */,
+			);
+			path = "Keyboard Shortcuts";
 			sourceTree = "<group>";
 		};
 		3355996B26CBD90A00F52C23 /* Search */ = {
@@ -2583,6 +2633,7 @@
 		418172A625811A3A00317ED8 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				33353EB326F0EA6B00063078 /* Help and Feedback */,
 				33AC9D9626AFF43E004E7EF4 /* FocusableTextField */,
 				339D193026AED9B2006DE745 /* Authentication */,
 				A5A955C22695575900F3FDD2 /* CalendarPicker */,
@@ -3628,6 +3679,7 @@
 				3330D7CC265E95E0008C9E20 /* LinearProgressView.swift */,
 				33DEF48726617E0B00834839 /* CircledButton.swift */,
 				33D5F8592697478E002C4F25 /* PopupView.swift */,
+				33353EE126F3D0BA00063078 /* ActionableButton.swift */,
 			);
 			path = UIElements;
 			sourceTree = "<group>";
@@ -3825,6 +3877,14 @@
 			name = "Recovered References";
 			sourceTree = "<group>";
 		};
+		B5056A8626F889F300FFD2A2 /* Help */ = {
+			isa = PBXGroup;
+			children = (
+				B5056A8C26F88A0700FFD2A2 /* HelpAndFeedbackTests.swift */,
+			);
+			path = Help;
+			sourceTree = "<group>";
+		};
 		B54D934526CA69DD006BBDEE /* Browser */ = {
 			isa = PBXGroup;
 			children = (
@@ -3919,6 +3979,7 @@
 				B551F3C626BD10C300B72D27 /* AppWebsiteViewLocators.swift */,
 				B57535F326BD6FFC0053CE2D /* NoteViewLocators.swift */,
 				B5E38D5926EA244300236FBD /* SearchViewLocators.swift */,
+				B5056A9026F88CFD00FFD2A2 /* HelpViewLocators.swift */,
 			);
 			path = Locators;
 			sourceTree = "<group>";
@@ -3935,6 +3996,7 @@
 				B551F3C026BD0FE800B72D27 /* WebsiteAuthPopupTestView.swift */,
 				B551F3C426BD10AD00B72D27 /* AppWebsiteTestView.swift */,
 				B5E38D5726EA23D900236FBD /* SearchTestView.swift */,
+				B5056A8E26F88AB000FFD2A2 /* HelpTestView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -3942,6 +4004,7 @@
 		B57A9B3E26AB091A002C954D /* E2ETests */ = {
 			isa = PBXGroup;
 			children = (
+				B5056A8626F889F300FFD2A2 /* Help */,
 				B54D934526CA69DD006BBDEE /* Browser */,
 				B5EB9A7226C27583004C798A /* Update */,
 				B575360826C0F0A90053CE2D /* JavascriptNative */,
@@ -4763,6 +4826,7 @@
 				A5C7F10A267CC9FD002EE550 /* BeamTextEdit+InputDetector.swift in Sources */,
 				87F11BC3266524B2003BE98E /* WebAutocompleteProtocols.swift in Sources */,
 				521EEDF72593824100BA2485 /* AppDelegate+Document.swift in Sources */,
+				33353EE226F3D0BA00063078 /* ActionableButton.swift in Sources */,
 				418172532581107C00317ED8 /* Chevrons.swift in Sources */,
 				33AC9D9A26B01A60004E7EF4 /* AuthenticationViewModel.swift in Sources */,
 				A536DE0F269C6ABD003FAAF4 /* ToastTextIconView.swift in Sources */,
@@ -4806,9 +4870,11 @@
 				A54936C6260B721600EF7622 /* WindowBottomToolBar.swift in Sources */,
 				418171EE2581107C00317ED8 /* GraphqlParametersProtocol.swift in Sources */,
 				87C539A12616295300D51877 /* ViewMorePasswordsCell.swift in Sources */,
+				33353ED626F3675000063078 /* ShortcutKey.swift in Sources */,
 				524CF6CE25F27609007312F0 /* KeychainStorable.swift in Sources */,
 				52019A6326DE2CC9005E8278 /* BeamObjectManager+Foundation.swift in Sources */,
 				521EEDDD25937E9200BA2485 /* DocumentsWindow.swift in Sources */,
+				33353EE026F374B400063078 /* SectionFeaturesView.swift in Sources */,
 				418172122581107C00317ED8 /* EventsTracker.swift in Sources */,
 				A0CB7E54268E66CD00D15AFD /* View+Beam.swift in Sources */,
 				52019A5626DE2AB0005E8278 /* BeamObjectRequest+Foundation.swift in Sources */,
@@ -4817,6 +4883,7 @@
 				DA3239DE269DE06F00A1F4C3 /* LongTermUrlScore+GRDB.swift in Sources */,
 				4181720A2581107C00317ED8 /* BrowserTab.swift in Sources */,
 				032562A926051D3B006513E4 /* RBDatabase.m in Sources */,
+				33353EDE26F372D700063078 /* KeyboardFeature.swift in Sources */,
 				A53B43F326B0946B0043D37A /* NoteListMetadataCache.swift in Sources */,
 				418172D625811B8700317ED8 /* RoundRectButtonStyle.swift in Sources */,
 				A0C58C382640026600FB95D8 /* ToastView.swift in Sources */,
@@ -4828,6 +4895,7 @@
 				96FACC6C2604F2650088DD67 /* FocusElement.swift in Sources */,
 				A0F558F526BD8F260024C47E /* DebugSection.swift in Sources */,
 				418171F92581107C00317ED8 /* SearchEngine.swift in Sources */,
+				33353ED426F3672F00063078 /* ShortcutModifier.swift in Sources */,
 				8775C5F32613212C00A26CAC /* StoredPasswordCell.swift in Sources */,
 				A5B268A426845549001797ED /* BeamTextAttributedStringBuilder.swift in Sources */,
 				52FC002325E4244200ABECB0 /* MenuAvailableCommands.swift in Sources */,
@@ -4858,6 +4926,7 @@
 				418172152581107C00317ED8 /* NSContainerView.swift in Sources */,
 				A0CB7E5F268E7E9200D15AFD /* PreferencesManager+Cards.swift in Sources */,
 				339D193926AED9E1006DE745 /* AuthenticationView.swift in Sources */,
+				33353EBC26F0EAA300063078 /* HelpAndFeedbackMenuView.swift in Sources */,
 				A5144001263803600021DD56 /* TrackableScrollView.swift in Sources */,
 				8AB7DFA526AAEDB30033C747 /* PointAndShootView.swift in Sources */,
 				A07A90E5268E1804000C502C /* PreferencesManager.swift in Sources */,
@@ -5001,6 +5070,7 @@
 				8AED4FF026C2A3AA00E29DB7 /* PointAndShootFrameOffset.swift in Sources */,
 				A043B7E7265937DA00E267E5 /* AppDelegate+TabGrouping.swift in Sources */,
 				DA6A53B726C2BEDC00B87B0C /* SuggestedNoteSourcesUpdater.swift in Sources */,
+				33353EDA26F369AD00063078 /* KeyboardFeatureView.swift in Sources */,
 				96FACC522604B0EE0088DD67 /* DeleteElement.swift in Sources */,
 				4181725E2581107C00317ED8 /* AccountManager.swift in Sources */,
 				032562AF26051D3B006513E4 /* RBFilter.m in Sources */,
@@ -5073,6 +5143,7 @@
 				41A969FF2581394300E6594B /* Configuration.swift in Sources */,
 				4181723C2581107C00317ED8 /* TextEditMovements.swift in Sources */,
 				A52BFE63260901980028D3F3 /* Separator.swift in Sources */,
+				33353ECA26F3360800063078 /* DiscoverShortcutsView.swift in Sources */,
 				A0A0FED1268F05CC0080EAEF /* PreferencesManager+Passwords.swift in Sources */,
 				A53C8F4E26446C6C003A5DF8 /* SharingBannerInfo.swift in Sources */,
 				330D380E265FB76C00A2536B /* DownloaderView.swift in Sources */,
@@ -5098,12 +5169,14 @@
 				418172452581107C00317ED8 /* SearchBar.swift in Sources */,
 				418172182581107C00317ED8 /* PerformanceDebug.swift in Sources */,
 				A50612D626CC75200053AD37 /* Calendar+Calculations.swift in Sources */,
+				33353EDC26F36B4300063078 /* Shortcut.swift in Sources */,
 				A57BFEB92615B48300CFB646 /* CheckBoxTableCellView.swift in Sources */,
 				A043B800265A547100E267E5 /* TabGroupingContentView.swift in Sources */,
 				4181722F2581107C00317ED8 /* BeamWindow.swift in Sources */,
 				418172602581107C00317ED8 /* LibrairiesManager.swift in Sources */,
 				032562B126051D3B006513E4 /* RBStat.m in Sources */,
 				0325629026051D3B006513E4 /* RBCodeSignature.m in Sources */,
+				33353ED826F367FF00063078 /* ShortcutView.swift in Sources */,
 				52019A7326DE47C1005E8278 /* DatabaseManager+Foundation.swift in Sources */,
 				338A66A0268DC26000B056EB /* LayerRemoverAnimationDelegate.swift in Sources */,
 				A5D21FD926974C0200250A6A /* CalendarMonthView.swift in Sources */,
@@ -5327,6 +5400,8 @@
 				52DF49A625E42110009A651E /* BeamUITestsHelper.swift in Sources */,
 				B5E8010E26AEA63300C8BD61 /* WebTestView.swift in Sources */,
 				B5DC1FC226B9608D00A4C94B /* DownloadTestView.swift in Sources */,
+				B5056A8F26F88AB000FFD2A2 /* HelpTestView.swift in Sources */,
+				B5056A8D26F88A0700FFD2A2 /* HelpAndFeedbackTests.swift in Sources */,
 				B5EB9A7826C2A887004C798A /* OmnibarAutocompleteTests.swift in Sources */,
 				B5E38D5626EA20E700236FBD /* SearchOnWebTests.swift in Sources */,
 				B5DC1FC026B9607900A4C94B /* DownloadViewLocators.swift in Sources */,
@@ -5344,6 +5419,7 @@
 				B551F3C326BD100300B72D27 /* WebsiteAuthPopupViewLocators.swift in Sources */,
 				B5DC1F8A26B19C8700A4C94B /* OmniBarTestView.swift in Sources */,
 				A53C8F532644B22B003A5DF8 /* OmniBarUITestsHelper.swift in Sources */,
+				B5056A9126F88CFD00FFD2A2 /* HelpViewLocators.swift in Sources */,
 				B57535F026BD5F690053CE2D /* NoteEditorTests.swift in Sources */,
 				B57A9B4126AB0947002C954D /* CardCreationTests.swift in Sources */,
 				B55B4E3F26C108B900604850 /* OmnibarViewTests.swift in Sources */,

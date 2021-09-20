@@ -58,6 +58,10 @@ class AutoDismissingWindow: NSWindow {
     }
 
     override func resignKey() {
+        if !didMove {
+            self.close()
+            NotificationCenter.default.removeObserver(self, name: .init("NSWindowDidMoveNotification"), object: nil)
+        }
         super.resignKey()
     }
 

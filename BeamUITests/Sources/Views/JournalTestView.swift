@@ -10,6 +10,10 @@ import XCTest
 
 class JournalTestView: BaseView {
     
+    func getHelpButton() -> XCUIElement {
+        return staticText("HelpButton")
+    }
+    
     @discardableResult
     func openAllCardsMenu() -> AllCardsTestView {
         let allCardsMenuButton = staticText(JournalViewLocators.Buttons.allCardsMenuButton.accessibilityIdentifier)
@@ -23,6 +27,12 @@ class JournalTestView: BaseView {
         _ = staticText(cardName).waitForExistence(timeout: implicitWaitTimeout)
         staticText(cardName).click()
         return CardTestView()
+    }
+    
+    @discardableResult
+    func openHelpMenu() -> HelpTestView {
+        getHelpButton().click()
+        return HelpTestView()
     }
     
     @discardableResult
