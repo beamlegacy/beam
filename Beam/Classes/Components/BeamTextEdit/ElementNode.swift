@@ -652,7 +652,6 @@ public class ElementNode: Widget {
         return Caret(offset: point, indexInSource: actualIndex, indexOnScreen: actualIndex, edge: actualIndex == 0 ? .leading : .trailing, inSource: true, line: 0)
     }
 
-
     override var cmdManager: CommandManager<Widget> {
         return displayedElement.note?.cmdManager ?? super.cmdManager
     }
