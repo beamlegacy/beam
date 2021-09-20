@@ -94,8 +94,8 @@ class AllCardsContextualMenu {
             keyEquivalent: ""
         ))
         let importItem = NSMenuItem(
-            title: "Import",
-            action: nil,
+            title: "JSON...",
+            action: #selector(importFromJSON),
             keyEquivalent: ""
         )
         menu.addItem(importItem)
@@ -106,7 +106,7 @@ class AllCardsContextualMenu {
         let exportMenu = NSMenu()
         exportMenu.addItem(NSMenuItem(
             title: "JSON...",
-            action: nil,
+            action: #selector(exportNotesToJSON),
             keyEquivalent: ""
         ))
         exportMenu.addItem(NSMenuItem(
@@ -150,6 +150,21 @@ class AllCardsContextualMenu {
     @objc private func databaseExport() {
 //        only support export all notes for now
         AppDelegate.main.exportNotes(self)
+    }
+
+    @objc private func importFromJSON() {
+        AppDelegate.main.importJSONFiles(self)
+    }
+
+    @objc private func exportNotesToJSON() {
+        if selectedNotes.count == 1 {
+            guard let note = selectedNotes.first else { return }
+            AppDelegate.main.exportOneNoteToJSON(note: note)
+        } else if selectedNotes.count != documentManager.allDocumentsIds(includeDeletedNotes: false).count {
+            AppDelegate.main.exportNotesToJSON(selectedNotes)
+        } else {
+            AppDelegate.main.exportAllNotesToJSON(self)
+        }
     }
 
     @objc private func invite() {
