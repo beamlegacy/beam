@@ -205,7 +205,8 @@ public class TextRoot: TextNode {
             element.addChild(BeamElement())
         }
 
-        if let isTodaysNote = note?.isTodaysNote, isTodaysNote && element.children.count == 1 && element.children.first?.text.isEmpty ?? false {
+        if let note = self.note, note.references.isEmpty && note.links.isEmpty,
+           note.isTodaysNote && element.children.count == 1 && element.children.first?.text.isEmpty ?? false {
             let first = children.first as? TextNode
             first?.placeholder = BeamText(text: BeamPlaceholder.allPlaceholders.randomElement() ?? "Hello World !")
         }
