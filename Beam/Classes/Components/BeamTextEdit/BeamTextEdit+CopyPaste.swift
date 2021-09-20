@@ -170,10 +170,13 @@ extension BeamTextEdit {
             } else if let bTextHolder: BeamTextHolder = objects?.first as? BeamTextHolder {
                 paste(beamTextHolder: bTextHolder)
             } else if let attributedStr = objects?.first as? NSAttributedString {
-                paste(attributedString: attributedStr)
+                paste(attributedStrings: attributedStr.split(seperateBy: "\n"))
             } else if let pastedStr: String = objects?.first as? String {
-                let attributedString = NSAttributedString(string: pastedStr)
-                paste(attributedString: attributedString)
+                var lines = [NSAttributedString]()
+                pastedStr.enumerateLines { line, _ in
+                    lines.append(NSAttributedString(string: line))
+                }
+                paste(attributedStrings: lines)
             }
         }
     }
@@ -228,26 +231,40 @@ extension BeamTextEdit {
         }
     }
 
-    private func paste(attributedString: NSAttributedString) {
+    private func paste(attributedStrings: [NSAttributedString]) {
         guard let mngrNode = focusedWidget else {
             Logger.shared.logError("Cannot paste contents in an editor without a focused bullet", category: .noteEditor)
             return
         }
         mngrNode.cmdManager.beginGroup(with: "PasteAttributedContent")
         guard let node = focusedWidget as? TextNode else { return }
-        guard !attributedString.string.isEmpty else { return }
-        let cleanedText = attributedString.clean(with: "\\s\u{2022}\\s", in: NSRange(0..<3))
-        let beamText = BeamText(attributedString: cleanedText)
-        disableInputDetector()
-        rootNode.insertText(text: beamText, replacementRange: selectedTextRange)
-        enableInputDetector()
-        addNoteSourceFrom(text: beamText)
+        var lastInserted: ElementNode? = node
+        let parent = node.parent as? ElementNode ?? node
+        for (idx, attributedString) in attributedStrings.enumerated() {
+            guard !attributedString.string.isEmpty else { continue }
+            let cleanedText = attributedString.clean(with: "\\s\u{2022}\\s", in: NSRange(0..<3))
+            let beamText = BeamText(attributedString: cleanedText)
+            if idx == 0 {
+                disableInputDetector()
+                rootNode.insertText(text: beamText, replacementRange: selectedTextRange)
+                enableInputDetector()
+            } else {
+                let element = BeamElement(beamText)
+                parent.cmdManager.insertElement(element, inNode: parent, afterNode: lastInserted)
+                parent.cmdManager.focus(element, in: node)
+                lastInserted = focusedWidget as? ElementNode
+            }
+            addNoteSourceFrom(text: beamText)
+        }
 
-        if let linkRange = node.elementText.linkRanges.first, node.elementText.linkRanges.count == 1 {
+        if let lastInsertedNode = lastInserted as? TextNode,
+           let linkRanges = lastInserted?.elementText.linkRanges, linkRanges.count == 1,
+           let linkRange = linkRanges.first {
+
             let embedable = showLinkEmbedPasteMenu(for: linkRange)
             if !embedable {
-                mngrNode.cmdManager.insertText(BeamText(text: " ", attributes: []), in: node, at: linkRange.end)
-                mngrNode.cmdManager.focusElement(node, cursorPosition: linkRange.end + 1)
+                mngrNode.cmdManager.insertText(BeamText(text: " ", attributes: []), in: lastInsertedNode, at: linkRange.end)
+                mngrNode.cmdManager.focusElement(lastInsertedNode, cursorPosition: linkRange.end + 1)
             }
         }
         mngrNode.cmdManager.endGroup()
