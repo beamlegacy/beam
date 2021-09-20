@@ -21,19 +21,22 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     var isTreeBoundary: Bool { nodeProvider != nil }
 
     var isEmpty: Bool { children.isEmpty }
-    private let selectionInset: CGFloat = 5
+    let selectionInset: CGFloat = 5
     var selectionLayerPosX: CGFloat = 0
     var selectedAlone: Bool = true {
         didSet {
+            invalidate()
             invalidateLayout()
         }
     }
+
     var selected: Bool = false {
         didSet {
             selectionLayer.backgroundColor = selected ?
                 BeamColor.Generic.textSelection.cgColor :
                 NSColor(white: 1, alpha: 0).cgColor
             invalidate()
+            invalidateLayout()
         }
     }
 
@@ -405,14 +408,6 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
         layer.backgroundColor = debug ? NSColor.systemPink.withAlphaComponent(0.1).cgColor : nil
 
-        selectionLayer.bounds = CGRect(x: selectionInset, y: -2.5, width: selectionLayerWidth - selectionInset, height: contentsFrame.height)
-        if selectedAlone {
-            selectionLayer.position = CGPoint(x: selectionInset, y: -2.5)
-            selectionLayer.bounds.size = CGSize(width: selectionLayerWidth - offsetInRoot.x - selectionInset, height: contentsFrame.height)
-        } else {
-            selectionLayer.position = CGPoint(x: selectionLayerPosX + selectionInset, y: -2.5)
-            selectionLayer.bounds.size = CGSize(width: selectionLayerWidth - selectionLayerPosX - selectionInset, height: contentsFrame.height)
-        }
         updateSubLayersLayout()
         updateChildrenLayout()
         updateLayout()
@@ -460,11 +455,16 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     }
 
     var selectionLayerWidth: CGFloat {
-        return frame.width + 20
+        availableWidth + 20
+    }
+
+    var selectionLayerHeight: CGFloat {
+        contentsFrame.height + contentsPadding.top + contentsPadding.bottom
     }
 
     private func configureSelectionLayer() {
         selectionLayer.anchorPoint = CGPoint()
+        selectionLayer.cornerRadius = 2
         selectionLayer.frame = NSRect(x: 0, y: 0, width: layer.frame.width, height: layer.frame.height).rounded()
         selectionLayer.setNeedsDisplay()
         selectionLayer.backgroundColor = NSColor(white: 1, alpha: 0).cgColor

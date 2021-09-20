@@ -46,6 +46,12 @@ class ProxyTextNode: TextNode, ProxyNode {
     }
 
     // MARK: - Setup UI
+
+    override func updateSelectionLayer() {
+        super.updateSelectionLayer()
+        selectionLayer.bounds.size.width -= 20
+    }
+
     override func isLinkToNote(_ text: BeamText) -> Bool {
         guard let note = editor?.note as? BeamNote else { return false }
         return text.internalLinks.contains(note.id)
