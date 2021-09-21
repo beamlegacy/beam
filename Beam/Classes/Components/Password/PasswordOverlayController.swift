@@ -180,6 +180,7 @@ class PasswordOverlayController: WebPageHolder {
     private func dismissPasswordManagerMenu() {
         CustomPopoverPresenter.shared.dismissMenu()
         passwordMenuWindow = nil
+        currentPasswordManagerViewModel = nil
     }
 
     func updateScrollPosition(x: CGFloat, y: CGFloat, width: CGFloat, height: CGFloat) {

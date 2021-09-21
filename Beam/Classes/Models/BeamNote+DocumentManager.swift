@@ -50,15 +50,15 @@ extension BeamNote: BeamNoteDocument {
 
         Logger.shared.logInfo("Observe changes for note \(titleAndId)", category: .document)
         activeDocumentCancellables = []
-        activeDocumentCancellables.append(documentManager.onDocumentChange(docStruct) { [unowned self] docStruct in
+        activeDocumentCancellables.append(documentManager.onDocumentChange(docStruct) { [unowned self] doc in
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
 
                 /*
                  When receiving updates for a new document, we don't check the version
                  */
-                if self.version >= docStruct.version, self.id == docStruct.id {
-                    Logger.shared.logDebug("BeamNote \(self.titleAndId) observer skipped \(docStruct.titleAndId) (must be greater than current \(self.version))")
+                if self.version >= doc.version, self.id == doc.id {
+                    Logger.shared.logDebug("BeamNote \(self.titleAndId) observer skipped \(doc.titleAndId) (must be greater than current \(self.version))")
                     return
                 }
 
@@ -67,7 +67,7 @@ extension BeamNote: BeamNoteDocument {
                     changePropagationEnabled = true
                 }
 
-                updateWithDocumentStruct(docStruct)
+                updateWithDocumentStruct(doc)
             }
         })
 
