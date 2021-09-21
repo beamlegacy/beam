@@ -28,7 +28,6 @@ struct DestinationNoteAutocompleteList: View {
         touchdownBackgroundColor: BeamColor.NotePicker.active)
 
     private let customTextEditorColorPalette = AutocompleteItemColorPalette(
-        textColor: BeamColor.Beam,
         informationTextColor: BeamColor.LightStoneGray,
         selectedBackgroundColor: BeamColor.NotePicker.selected,
         touchdownBackgroundColor: BeamColor.NotePicker.active)
