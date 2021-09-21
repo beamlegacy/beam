@@ -93,6 +93,6 @@ struct PasswordManagerMenu: View {
 struct PasswordManagerMenu_Previews: PreviewProvider {
     static var userInfoStore = MockUserInformationsStore()
     static var previews: some View {
-        PasswordManagerMenu(width: 300, viewModel: PasswordManagerMenuViewModel(host: URL(string: "http://mock1.beam")!, userInfoStore: userInfoStore, withPasswordGenerator: false))
+        PasswordManagerMenu(width: 300, viewModel: PasswordManagerMenuViewModel(host: URL(string: "http://mock1.beam")!, credentialsBuilder: PasswordManagerCredentialsBuilder(), userInfoStore: userInfoStore, withPasswordGenerator: false))
     }
 }

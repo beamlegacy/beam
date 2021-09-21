@@ -19,6 +19,7 @@ struct WebFieldAutofill: Codable {
 
 class PasswordOverlayController: WebPageHolder {
     private let userInfoStore: UserInformationsStore
+    private let credentialsBuilder: PasswordManagerCredentialsBuilder
     private var passwordMenuWindow: NSWindow?
     private var passwordMenuPosition: CGPoint = .zero
     private var webViewScrollPosition: CGPoint = .zero
@@ -34,12 +35,14 @@ class PasswordOverlayController: WebPageHolder {
 
     init(userInfoStore: UserInformationsStore) {
         self.userInfoStore = userInfoStore
+        credentialsBuilder = PasswordManagerCredentialsBuilder()
         encoder = JSONEncoder()
         decoder = JSONDecoder()
         autocompleteContext = WebAutocompleteContext()
     }
 
     func detectInputFields() {
+        credentialsBuilder.enterPage(url: page.url)
         autocompleteContext.clear()
         dismissPasswordManagerMenu()
         page.executeJS("beam_sendTextFields()", objectName: nil)
@@ -171,7 +174,7 @@ class PasswordOverlayController: WebPageHolder {
         if let viewModel = currentPasswordManagerViewModel {
             return viewModel
         }
-        let viewModel = PasswordManagerMenuViewModel(host: host, userInfoStore: userInfoStore, withPasswordGenerator: passwordGenerator)
+        let viewModel = PasswordManagerMenuViewModel(host: host, credentialsBuilder: credentialsBuilder, userInfoStore: userInfoStore, withPasswordGenerator: passwordGenerator)
         viewModel.delegate = self
         currentPasswordManagerViewModel = viewModel
         return viewModel
@@ -280,11 +283,11 @@ class PasswordOverlayController: WebPageHolder {
         }
         let firstNonEmptyLogin = values.valuesMatchingKeys(in: loginFieldIds).first { !$0.isEmpty }
         let firstNonEmptyPassword = values.valuesMatchingKeys(in: passwordFieldIds).first { !$0.isEmpty }
-        guard let login = firstNonEmptyLogin, let password = firstNonEmptyPassword else {
+        guard let login = credentialsBuilder.updatedUsername(firstNonEmptyLogin), let password = firstNonEmptyPassword else {
             Logger.shared.logDebug("No field match for submitted values in \(values)", category: .passwordManager)
             return
         }
-        Logger.shared.logDebug("FOUND login: \(login), password: \(password)", category: .passwordManager)
+        Logger.shared.logDebug("FOUND login: \(login), password: (redacted)", category: .passwordManager)
         if let storedPassword = PasswordManager.shared.password(hostname: hostname, username: login) {
             if password != storedPassword && password.count > 2 && login.count > 2 {
                 if let browserTab = (self.page as? BrowserTab) {
@@ -354,6 +357,8 @@ extension PasswordOverlayController: PasswordManagerMenuDelegate {
             Logger.shared.logError("PasswordStore did not provide password for selected entry.", category: .passwordManager)
             return
         }
+        currentPasswordManagerViewModel?.revertToFirstItem()
+        credentialsBuilder.selectCredentials(entry)
         Logger.shared.logDebug("Filling fields: \(String(describing: autocompleteGroup.relatedFields))", category: .passwordManager)
         let backgroundColor = BeamColor.Autocomplete.clickedBackground.hexColor
         let autofill = autocompleteGroup.relatedFields.compactMap { field -> WebFieldAutofill? in
