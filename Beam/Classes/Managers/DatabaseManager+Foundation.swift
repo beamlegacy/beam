@@ -298,9 +298,11 @@ extension DatabaseManager {
               _ networkCompletion: ((Swift.Result<Bool, Error>) -> Void)? = nil,
               completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
         Logger.shared.logDebug("Saving \(databaseStruct.titleAndId)", category: .database)
-        var blockOperation: BlockOperation!
-        blockOperation = BlockOperation { [weak self] in
-            guard let self = self else { return }
+        let blockOperation = BlockOperation()
+        blockOperation.addExecutionBlock { [weak blockOperation, weak self] in
+            guard let self = self,
+                  let blockOperation = blockOperation
+            else { return }
 
             // In case the operationqueue was cancelled way before this started
             if blockOperation.isCancelled {
