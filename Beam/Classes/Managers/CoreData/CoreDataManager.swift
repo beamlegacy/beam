@@ -150,8 +150,8 @@ class CoreDataManager {
 
         // TODO: Check memory management (blockOperation create retain cycles)
 
-        var blockOperation: BlockOperation?
-        blockOperation = BlockOperation { [weak self] in
+        let blockOperation = BlockOperation()
+        blockOperation.addExecutionBlock { [weak blockOperation, weak self] in
             guard let blockOperation = blockOperation, let self = self else { return }
 
             perf.debug("Executing BlockOperation")
@@ -187,7 +187,7 @@ class CoreDataManager {
             perf.debug("Finished Executing BlockOperation")
         }
 
-        persistentContainerQueue.addOperation(blockOperation!)
+        persistentContainerQueue.addOperation(blockOperation)
     }
 
     static func storeURLFromEnv() -> URL? {
