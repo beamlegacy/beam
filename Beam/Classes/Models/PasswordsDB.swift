@@ -26,6 +26,8 @@ struct PasswordRecord {
     var uuid: UUID
     var entryId: String
     var hostname: String
+    var host: String? // TODO: Remove the support of old keys
+    var name: String? // TODO: Remove the support of old keys
     var username: String
     var password: String
     var createdAt: Date
@@ -52,7 +54,9 @@ extension PasswordRecord: BeamObjectProtocol {
         case uuid
         case entryId
         case hostname
+        case host // TODO: Remove the support of old keys
         case username
+        case name // TODO: Remove the support of old keys
         case password
         case createdAt
         case updatedAt
@@ -71,6 +75,23 @@ extension PasswordRecord: BeamObjectProtocol {
                        previousCheckSum: previousCheckSum,
                        checksum: checksum,
                        privateKeySignature: privateKeySignature)
+    }
+
+    // TODO: Remove the support of old keys
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        uuid = try container.decode(UUID.self, forKey: .uuid)
+        entryId = try container.decode(String.self, forKey: .entryId)
+
+        hostname = try (try? container.decode(String.self, forKey: .hostname)) ?? (try container.decode(String.self, forKey: .host))
+        username = try (try? container.decode(String.self, forKey: .username)) ?? (try container.decode(String.self, forKey: .name))
+
+        password = try container.decode(String.self, forKey: .password)
+        createdAt = try container.decode(Date.self, forKey: .createdAt)
+        updatedAt = try container.decode(Date.self, forKey: .updatedAt)
+        deletedAt = try? container.decode(Date.self, forKey: .deletedAt)
+        privateKeySignature = try? container.decode(String.self, forKey: .privateKeySignature)
     }
 }
 
