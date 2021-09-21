@@ -1407,7 +1407,7 @@
 		8AD2631626F3A8C50074D673 /* TimeInterval+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TimeInterval+Beam.swift"; sourceTree = "<group>"; };
 		8AD2632226F485190074D673 /* HtmlVisitorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HtmlVisitorTests.swift; sourceTree = "<group>"; };
 		8AD2632926F489160074D673 /* HtmlNoteAdapterPerformanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HtmlNoteAdapterPerformanceTests.swift; sourceTree = "<group>"; };
-		8AD2632B26F48C9A0074D673 /* HtmlNoteAdapterLargeDOMPerformanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HtmlNoteAdapterLargeDOMPerformanceTests.swift; sourceTree = SOURCE_ROOT; };
+		8AD2632B26F48C9A0074D673 /* HtmlNoteAdapterLargeDOMPerformanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HtmlNoteAdapterLargeDOMPerformanceTests.swift; path = BeamTests/HtmlNoteAdapterLargeDOMPerformanceTests.swift; sourceTree = SOURCE_ROOT; };
 		8AD2633D26F4A0480074D673 /* Native.test.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Native.test.ts; sourceTree = "<group>"; };
 		8AD2633E26F4A0480074D673 /* BeamNode.test.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = BeamNode.test.ts; sourceTree = "<group>"; };
 		8AD2633F26F4A0480074D673 /* WebEventsUIMock.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = WebEventsUIMock.ts; sourceTree = "<group>"; };
