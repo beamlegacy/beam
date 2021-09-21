@@ -22,7 +22,6 @@ struct WindowPageView: View {
             }
             page.contentView()
         }
-        .padding(.horizontal, 140)
         .frame(maxHeight: .infinity, alignment: .top)
     }
 }

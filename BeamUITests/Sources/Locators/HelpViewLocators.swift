@@ -18,7 +18,7 @@ enum HelpViewLocators {
     }
 
     enum Images: String, CaseIterable, UIElement  {
-        case closeHelp = "tabs-close_xs"
+        case closeHelp = "tabs-close"
         case cmdLabel = "kb-cmd"
     }
 }

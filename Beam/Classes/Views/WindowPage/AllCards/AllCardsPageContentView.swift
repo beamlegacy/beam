@@ -271,6 +271,7 @@ struct AllCardsPageContentView: View {
                     .padding(.leading, -32) // shifted for hover options menu 
             )
         }
+        .padding(.horizontal, 140)
         .frame(maxWidth: .infinity)
         .id(model.id)
         .onAppear {
