@@ -232,4 +232,31 @@ extension Layer {
         layer.add(animation, forKey: "contents")
         return layer
     }
+
+    func accessibilityTitle(for layer: CALayer) -> String? {
+        guard let textLayer = layer as? CATextLayer else { return nil }
+        if let attrString = textLayer.string as? NSAttributedString {
+            return attrString.string
+        } else if let string = textLayer.string as? String {
+            return string
+        }
+
+        return nil
+    }
+
+    func sublayersAccessibilityTitle() -> String? {
+        if let sublayers = layer.sublayers {
+            for layer in sublayers where layer is CATextLayer {
+                if let label = accessibilityTitle(for: layer) {
+                    return label
+                }
+            }
+        }
+
+        return nil
+    }
+
+    override func accessibilityTitle() -> String? {
+        return  accessibilityTitle(for: layer) ?? sublayersAccessibilityTitle() ?? super.accessibilityTitle()
+    }
 }
