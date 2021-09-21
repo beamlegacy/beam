@@ -45,7 +45,7 @@ enum SectionShortcuts: String {
                     KeyboardFeature(name: "Go to Web", shortcuts: [Shortcut(modifiers: [.command], keys: [.string("D")])]),
                     KeyboardFeature(name: "Indent", shortcuts: [Shortcut(modifiers: [], keys: [.tab])]),
                     KeyboardFeature(name: "Unindent", shortcuts: [Shortcut(modifiers: [.shift], keys: [.tab])]),
-                    KeyboardFeature(name: "Flod / Unfold Bullet", shortcuts: [Shortcut(modifiers: [.command], keys: [.up]),
+                    KeyboardFeature(name: "Fold / Unfold Bullet", shortcuts: [Shortcut(modifiers: [.command], keys: [.up]),
                                                                               Shortcut(modifiers: [.command], keys: [.down])], separationString: "and"),
                     KeyboardFeature(name: "Command Menu", shortcuts: [Shortcut(modifiers: [], keys: [.string("/")])]),
                     KeyboardFeature(name: "Headings 1 & 2", shortcuts: [Shortcut(modifiers: [], keys: [.string("#")]),
