@@ -38,7 +38,10 @@ extension BeamWindow {
     }
 
     @IBAction func reOpenClosedTab(_ sender: Any?) {
-        if state.mode == .web && state.cmdManager.canUndo {
+        if state.cmdManager.canUndo {
+            if state.mode != .web {
+                state.mode = .web
+            }
             _ = state.cmdManager.undo(context: state)
         } else if let data = UserDefaults.standard.data(forKey: Self.savedCloseTabCmdsKey) {
             let decoder = JSONDecoder()
