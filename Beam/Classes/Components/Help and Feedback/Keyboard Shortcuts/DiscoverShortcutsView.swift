@@ -14,24 +14,39 @@ struct DiscoverShortcutsView: View {
     let sections: [SectionShortcuts] = [.browser, .editor]
 
     var body: some View {
-        VStack(spacing: 40) {
-            HStack(alignment: .top, spacing: 60.0) {
+        VStack(alignment: .trailing, spacing: compactHeight ? 20 : 40) {
+            if !compactHeight {
+                Spacer()
+            }
+            HStack(alignment: .top, spacing: compactWidth ? 40 : 60) {
                 ForEach(sections, id: \.self) {
                     SectionFeaturesView(section: $0)
                 }
             }
-            HStack {
-                Spacer()
-                ActionableButton(text: "Done", defaultState: .normal, variant: .primaryBlue) {
-                    navigateToJournal()
-                }
-                .frame(width: 89)
+            ActionableButton(text: "Done", defaultState: .normal, variant: .primaryBlue) {
+                navigateToJournal()
             }
+            Spacer()
         }
-        .padding(.top, 60)
+        .animation(.default, value: compactHeight)
+        .animation(.default, value: compactWidth)
         .background(KeyEventHandlingView(handledKeyCodes: [.enter, .escape], firstResponder: true, onKeyDown: { _ in
             navigateToJournal()
         }))
+    }
+
+    private var compactHeight: Bool {
+        if state.windowFrame.size.height < 720 {
+            return true
+        }
+        return false
+    }
+
+    private var compactWidth: Bool {
+        if state.windowFrame.size.width < 810 {
+            return true
+        }
+        return false
     }
 
     private func navigateToJournal() {

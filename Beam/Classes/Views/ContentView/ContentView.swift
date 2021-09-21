@@ -23,7 +23,7 @@ struct ContentView: View {
                         .environmentObject(state.autocompleteManager)
                         .zIndex(10)
                     ModeView(containerGeometry: geometry, contentIsScrolled: $contentIsScrolled)
-                    if state.mode != .web {
+                    if shouldDisplayBottomBar {
                         WindowBottomToolBar()
                             .transition(AnyTransition.opacity.animation(Animation.easeInOut(duration: 0.2)))
                     }
@@ -36,6 +36,18 @@ struct ContentView: View {
                 .zIndex(0)
             OverlayViewCenter(viewModel: state.overlayViewModel)
                 .zIndex(1)
+        }
+    }
+
+    var shouldDisplayBottomBar: Bool {
+        switch state.mode {
+        case .web:
+            return false
+        case .page:
+            guard let page = state.currentPage, page.id != WindowPage.shortcutsWindowPage.id else { return false }
+            return true
+        default:
+            return true
         }
     }
 }

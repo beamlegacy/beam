@@ -43,7 +43,6 @@ struct HelpAndFeedbackMenuView: View {
 
     @State private var hoveredSection: HelpMenuSection?
     @EnvironmentObject var state: BeamState
-    
     @Environment(\.colorScheme) var colorScheme
     weak var window: AutoDismissingWindow?
 
@@ -53,9 +52,9 @@ struct HelpAndFeedbackMenuView: View {
         VStack(spacing: 0) {
             HStack {
                 Text("Help & Feedback")
-                    .font(BeamFont.medium(size: 13).swiftUI)
+                    .font(BeamFont.regular(size: 13).swiftUI)
                 Spacer()
-                ButtonLabel(icon: "tabs-close_xs", customStyle: ButtonLabelStyle(activeBackgroundColor: Color.clear)) {
+                ButtonLabel(icon: "tabs-close", customStyle: ButtonLabelStyle(horizontalPadding: -2, activeBackgroundColor: Color.clear)) {
                     window?.close()
                 }
             }.padding(.horizontal, 12)
