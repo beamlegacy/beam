@@ -10,9 +10,17 @@ import XCTest
 @testable import BeamCore
 
 class BeamTextEditTests: XCTestCase {
+    var note: BeamNote!
+    var data: BeamData!
+    var editor: BeamTextEdit!
 
     override func setUpWithError() throws {
+        try super.setUpWithError()
         // Put setup code here. This method is called before the invocation of each test method in the class.
+        note = BeamNote(title: "BeamTextEditTests")
+        data = BeamData()
+        editor = BeamTextEdit(root: note, journalMode: false)
+        editor.data = data
     }
 
     override func tearDownWithError() throws {
@@ -26,12 +34,6 @@ class BeamTextEditTests: XCTestCase {
             XCTAssertNotNil(note.sources.get(urlId: urlId))
             pasteboard.clearContents()
         }
-
-
-        let note = BeamNote(title: "A few interesting urls")
-        let data = BeamData()
-        let editor = BeamTextEdit(root: note, journalMode: false)
-        editor.data = data
         let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
         XCTAssertEqual(note.sources.count, 0)
@@ -84,8 +86,6 @@ class BeamTextEditTests: XCTestCase {
     }
 
     func testLinkStringForPrecedingCharacters() {
-        let note = BeamNote(title: "BeamTextEditTests")
-        let editor = BeamTextEdit(root: note, journalMode: false)
         let root = editor.rootNode!
 
         let bullet = BeamElement("Some text and a link.com")
@@ -97,5 +97,39 @@ class BeamTextEditTests: XCTestCase {
         XCTAssertNotNil(result)
         XCTAssertEqual(result?.0, "https://link.com")
         XCTAssertEqual(result?.1, node.textCount-8 ..< node.textCount)
+    }
+
+    func testLinkDetectionAndNoteSource() throws {
+        let root = editor.rootNode!
+        
+        let urls = [
+            "https://link.com",
+            "https://anotherlink.com"
+        ]
+        //adding a note source in the case of a url detected after pressing enter
+        let bullet = BeamElement("Some text and a link.com")
+        let node = TextNode(parent: root, element: bullet)
+        editor.focusedWidget = node
+        root.cursorPosition = node.textCount
+        editor.pressEnter(false, false, false, false)
+        let urlId = try XCTUnwrap(LinkStore.getIdFor(urls[0]))
+        XCTAssertNotNil(note.sources.get(urlId: urlId))
+
+        //adding a note source in the case of a url detected after inserting a space
+        let anotherBullet = BeamElement("Some other text and a anotherlink.com")
+        let anotherNode = TextNode(parent: root, element: anotherBullet)
+        editor.focusedWidget = anotherNode
+        root.cursorPosition = anotherNode.textCount
+        editor.insertText(string: " ", replacementRange: nil)
+        let anotherUrlId  = try XCTUnwrap(LinkStore.getIdFor(urls[1]))
+        XCTAssertNotNil(note.sources.get(urlId: anotherUrlId))
+
+        //Checking that urls have been added active notesources
+        let activeSources = data.activeSources.activeSources
+        XCTAssertEqual(activeSources.count, 1)
+        let detectedNoteSources = try XCTUnwrap(activeSources[note.id])
+        XCTAssertEqual(detectedNoteSources.count, 2)
+        let expectedSources = urls.compactMap(LinkStore.getIdFor)
+        XCTAssertEqual(Set(detectedNoteSources), Set(expectedSources))
     }
 }

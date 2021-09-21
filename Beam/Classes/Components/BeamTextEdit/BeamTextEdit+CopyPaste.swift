@@ -269,12 +269,4 @@ extension BeamTextEdit {
         }
         mngrNode.cmdManager.endGroup()
     }
-
-    private func addNoteSourceFrom(text: BeamText) {
-        guard let note = note as? BeamNote, let data = data else { return }
-        for range in text.noteSourceEligibleLinkRanges {
-            let urlId = LinkStore.createIdFor(range.string, title: nil)
-            note.sources.add(urlId: urlId, noteId: note.id, type: .user, sessionId: data.sessionId, activeSources: data.activeSources)
-        }
-    }
 }

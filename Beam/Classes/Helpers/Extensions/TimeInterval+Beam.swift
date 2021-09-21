@@ -8,7 +8,6 @@
 import Foundation
 import BeamCore
 
-
 extension TimeInterval {
     /**
      Checks if `since` has passed since `self`.
