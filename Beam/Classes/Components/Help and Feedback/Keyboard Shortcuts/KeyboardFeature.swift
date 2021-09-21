@@ -26,7 +26,7 @@ struct KeyboardFeature: Hashable {
          KeyboardFeature(name: "Reopen Last Closed tab", shortcuts: [.init(modifiers: [.command], keys: [.string("Z")]),
                                                                      .init(modifiers: [.shift, .command], keys: [.string("T")])], separationString: "and"),
          KeyboardFeature(name: "Jump to Specific Tab", shortcuts: [.init(modifiers: [.command], keys: [.string("1")]),
-                                                                   .init(modifiers: [.command], keys: [.string("8")])], separationString: "to"),
+                                                                   .init(modifiers: [.command], keys: [.string("8")])], separationString: "to")
         ]
     }
 }

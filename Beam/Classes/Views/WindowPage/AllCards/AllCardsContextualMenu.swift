@@ -235,8 +235,10 @@ class AllCardsContextualMenu {
             onLoadBlock?(true)
             self.delegate?.contextualMenuWillDeleteDocuments(ids: [], all: true)
             cmdManager.deleteAllDocuments(in: documentManager) { _ in
-                self.registerUndo(actionName: "Delete All Cards")
-                self.onFinishBlock?(true)
+                DispatchQueue.main.async {
+                    self.registerUndo(actionName: "Delete All Cards")
+                    self.onFinishBlock?(true)
+                }
             }
             return
         }
@@ -244,9 +246,11 @@ class AllCardsContextualMenu {
         let ids = selectedNotes.map { $0.id }
         self.delegate?.contextualMenuWillDeleteDocuments(ids: ids, all: false)
         cmdManager.deleteDocuments(ids: ids, in: documentManager) { _ in
-            let count = ids.count
-            self.registerUndo(actionName: "Delete \(count) Card\(count > 1 ? "s" : "")")
-            self.onFinishBlock?(true)
+            DispatchQueue.main.async {
+                let count = ids.count
+                self.registerUndo(actionName: "Delete \(count) Card\(count > 1 ? "s" : "")")
+                self.onFinishBlock?(true)
+            }
         }
     }
 

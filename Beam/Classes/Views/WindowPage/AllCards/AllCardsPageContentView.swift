@@ -10,7 +10,6 @@ import BeamCore
 import Combine
 
 class AllCardsViewModel: ObservableObject, Identifiable {
-
     fileprivate var data: BeamData?
     @Published fileprivate var allNotes = [DocumentStruct]() {
         didSet {
@@ -358,21 +357,14 @@ private enum ColumnIdentifiers {
     static let CreatedColumn = NSUserInterfaceItemIdentifier("createdAt")
     static let UpdatedColumn = NSUserInterfaceItemIdentifier("updatedAt")
 }
-
 private enum CellIdentifiers {
     static let DefaultCell = NSUserInterfaceItemIdentifier("DefaultCellID")
 }
 
 @objcMembers
 private class NoteTableViewItem: TableViewItem {
-    var id: UUID {
-        note?.id ?? document.id
-    }
-
-    var isPublic: Bool {
-        note?.isPublic ?? document.isPublic
-    }
-
+    var id: UUID { note?.id ?? document.id }
+    var isPublic: Bool { note?.isPublic ?? document.isPublic }
     var note: BeamNote? {
         didSet {
             words = note?.textStats.wordsCount ?? words
@@ -400,9 +392,7 @@ private class NoteTableViewItem: TableViewItem {
     }
 
     override func isEqual(_ object: Any?) -> Bool {
-        guard let otherNote = object as? NoteTableViewItem else {
-            return false
-        }
+        guard let otherNote = object as? NoteTableViewItem else { return false }
         return note?.id == otherNote.note?.id
     }
 }

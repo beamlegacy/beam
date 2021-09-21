@@ -31,4 +31,3 @@ func throttle(delay: TimeInterval, queue: DispatchQueue = .main, action: @escapi
         delay.hasPassed(since: lastFire) ? queue.async(execute: currentWorkItem!) : queue.asyncAfter(deadline: .now() + delay, execute: currentWorkItem!)
     }
 }
-
