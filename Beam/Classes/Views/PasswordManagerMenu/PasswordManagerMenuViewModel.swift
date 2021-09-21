@@ -40,6 +40,7 @@ class PasswordManagerMenuViewModel: ObservableObject {
     @Published var scrollingListHeight: CGFloat?
 
     let host: URL
+    let credentialsBuilder: PasswordManagerCredentialsBuilder
     private let userInfoStore: UserInformationsStore
     private var entriesForHost: [PasswordManagerEntry]
     private var allEntries: [PasswordManagerEntry]
@@ -47,8 +48,9 @@ class PasswordManagerMenuViewModel: ObservableObject {
     private var revealMoreItemsInList: Bool = false
     private var subscribers = Set<AnyCancellable>()
 
-    init(host: URL, userInfoStore: UserInformationsStore, withPasswordGenerator passwordGenerator: Bool) {
+    init(host: URL, credentialsBuilder: PasswordManagerCredentialsBuilder, userInfoStore: UserInformationsStore, withPasswordGenerator passwordGenerator: Bool) {
         self.host = host
+        self.credentialsBuilder = credentialsBuilder
         self.userInfoStore = userInfoStore
         self.entriesForHost = []
         self.allEntries = []
@@ -69,6 +71,10 @@ class PasswordManagerMenuViewModel: ObservableObject {
 
     func resetItems() {
         guard revealFullList else { return }
+        revertToFirstItem()
+    }
+
+    func revertToFirstItem() {
         revealFullList = false
         revealMoreItemsInList = false
         updateDisplay()
@@ -87,8 +93,16 @@ class PasswordManagerMenuViewModel: ObservableObject {
     }
 
     private func updateDisplay() {
-        var visibleEntries = Array(entriesForHost.prefix(1))
-        visibleEntries = revealMoreItemsInList ? Array(entriesForHost.prefix(3)) : visibleEntries
+        var visibleEntries: [PasswordManagerEntry]
+        if revealMoreItemsInList {
+            visibleEntries = Array(entriesForHost.prefix(3))
+        } else {
+            if !credentialsBuilder.hasManualInput, let bestEntry = credentialsBuilder.suggestedEntry() ?? entriesForHost.first {
+                visibleEntries = [bestEntry]
+            } else {
+                visibleEntries = []
+            }
+        }
         let hasScroll = entriesForHost.count == 3
         display = Contents(entriesForHost: visibleEntries, allEntries: allEntries, hasScroll: hasScroll, hasMoreThanOneEntry: entriesForHost.count > 1, userInfo: display.userInfo)
     }

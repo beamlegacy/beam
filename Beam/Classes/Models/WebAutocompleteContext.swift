@@ -46,11 +46,13 @@ struct WebAutocompleteRules {
     let ignoreTextAutocompleteOff: Condition
     let ignoreEmailAutocompleteOff: Condition
     let ignorePasswordAutocompleteOff: Condition
+    let discardAutocompleteAttribute: Condition
 
-    init(ignoreTextAutocompleteOff: Condition = .whenPasswordField, ignoreEmailAutocompleteOff: Condition = .whenPasswordField, ignorePasswordAutocompleteOff: Condition = .always) {
+    init(ignoreTextAutocompleteOff: Condition = .whenPasswordField, ignoreEmailAutocompleteOff: Condition = .whenPasswordField, ignorePasswordAutocompleteOff: Condition = .always, discardAutocompleteAttribute: Condition = .never) {
         self.ignoreTextAutocompleteOff = ignoreTextAutocompleteOff
         self.ignoreEmailAutocompleteOff = ignoreEmailAutocompleteOff
         self.ignorePasswordAutocompleteOff = ignorePasswordAutocompleteOff
+        self.discardAutocompleteAttribute = discardAutocompleteAttribute
     }
 
     static let `default` = Self()
@@ -104,6 +106,15 @@ struct WebAutocompleteRules {
         default:
             return true
         }
+    }
+
+    func transformField(_ field: DOMInputElement, inPageContainingPasswordField pageContainsPasswordField: Bool) -> DOMInputElement {
+        var transformedField = field
+        let ignoreAutocomplete = apply(condition: discardAutocompleteAttribute, inPageContainingPasswordField: pageContainsPasswordField)
+        if ignoreAutocomplete {
+            transformedField.autocomplete = nil
+        }
+        return transformedField
     }
 }
 
@@ -301,7 +312,7 @@ final class WebAutocompleteContext {
     fileprivate func getCreateAccountGroups() -> [String: WebAutocompleteGroup] {
         guard let createAccountFields = autocompleteFields[.createAccount] else { return [:] }
         let createAccountGroup = WebAutocompleteGroup(action: .createAccount, relatedFields: createAccountFields)
-        let createAccountIds = createAccountFields.filter { $0.role == .newPassword }.map(\.id)
+        let createAccountIds = createAccountFields.filter { $0.role == .newPassword }.map(\.id) // don't suggest new password when clicking on login field
         return createAccountIds.reduce(into: [:]) { dict, id in
             dict[id] = createAccountGroup
         }
@@ -353,12 +364,18 @@ final class WebAutocompleteContext {
     // Minimal implementation for now.
     // If more special cases arise it could make sense to define rules in a plist file and create a separate class.
     private func autocompleteRules(for host: String?) -> WebAutocompleteRules {
-        return .default
+        switch host {
+        case "pinterest.com":
+            return WebAutocompleteRules(discardAutocompleteAttribute: .whenPasswordField)
+        default:
+            return .default
+        }
     }
 
-    func update(with fields: [DOMInputElement], on host: String?) -> [String] {
+    func update(with rawFields: [DOMInputElement], on host: String?) -> [String] {
         autocompleteRules = autocompleteRules(for: host)
-        let pageContainsPasswordField = fields.contains { $0.type == .password }
+        let pageContainsPasswordField = rawFields.contains { $0.type == .password }
+        let fields = rawFields.map { autocompleteRules.transformField($0, inPageContainingPasswordField: pageContainsPasswordField) }
         let fieldsWithAutocompleteAttribute = fields.filter { $0.decodedAutocomplete != nil && $0.decodedAutocomplete != .off }
         let fieldIds: [String]
         if fieldsWithAutocompleteAttribute.count == 0 {
@@ -414,7 +431,8 @@ final class WebAutocompleteContext {
 
     private func update(withTagged fields: [DOMInputElement]) -> [String] {
         autocompleteFields = getAutocompleteFields(fields)
-        let fieldGroups = getAutocompleteGroups(fields)
+        Logger.shared.logDebug("Autocomplete Fields: \(autocompleteFields)", category: .passwordManager)
+        let fieldGroups = getAutocompleteGroups(fields) // FIXME: for some strange reason getAutocompleteGroups() ignores fields, and used autocompleteFields
         let addedIds = fieldGroups.keys.filter { autocompleteGroups[$0] == nil }
         autocompleteGroups = fieldGroups
         return addedIds
