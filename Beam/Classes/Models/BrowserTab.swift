@@ -528,14 +528,17 @@ import Promises
     }
 
     func switchToCard() {
+        passwordOverlayController?.dismiss()
         browsingTree.switchToCard()
     }
 
     func switchToJournal() {
+        passwordOverlayController?.dismiss()
         browsingTree.switchToJournal()
     }
 
     func switchToOtherTab() {
+        passwordOverlayController?.dismiss()
         browsingTree.switchToOtherTab()
     }
 
