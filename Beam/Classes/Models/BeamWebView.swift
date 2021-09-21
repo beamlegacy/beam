@@ -42,8 +42,10 @@ class BeamWebView: WKWebView {
     private let automaticallyResignResponder = true
 
     var monitor: Any?
+    var currentConfiguration: WKWebViewConfiguration
 
     override init(frame: CGRect, configuration: WKWebViewConfiguration) {
+        currentConfiguration = configuration
         super.init(frame: frame, configuration: configuration)
         allowsBackForwardNavigationGestures = true
         allowsLinkPreview = true
@@ -61,7 +63,7 @@ class BeamWebView: WKWebView {
     }
 
     required init?(coder: NSCoder) {
-        super.init(coder: coder)
+        fatalError()
     }
 
     override func viewDidMoveToSuperview() {

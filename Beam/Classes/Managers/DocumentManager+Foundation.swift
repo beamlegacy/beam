@@ -168,10 +168,14 @@ extension DocumentManager {
         Logger.shared.logDebug("Saving \(documentStruct.titleAndId)", category: .document)
         Logger.shared.logDebug(documentStruct.data.asString ?? "-", category: .documentDebug)
 
-        var blockOperation: BlockOperation!
+        let blockOperation = BlockOperation()
+        saveOperations[documentStruct.id]?.cancel()
+        saveOperations[documentStruct.id] = blockOperation
 
-        blockOperation = BlockOperation { [weak self] in
-            guard let self = self else { return }
+        blockOperation.addExecutionBlock { [weak blockOperation, weak self] in
+            guard let self = self,
+                  let blockOperation = blockOperation
+            else { return }
 
             // In case the operationqueue was cancelled way before this started
             if blockOperation.isCancelled {
@@ -239,11 +243,14 @@ extension DocumentManager {
                 } else {
                     networkCompletion?(.failure(APIRequestError.notAuthenticated))
                 }
+
+                DispatchQueue.main.async {
+                    guard self.saveOperations[documentStruct.id] === blockOperation else { return }
+                    self.saveOperations.removeValue(forKey: documentStruct.id)
+                }
             }
         }
 
-        saveOperations[documentStruct.id]?.cancel()
-        saveOperations[documentStruct.id] = blockOperation
         saveDocumentQueue.addOperation(blockOperation)
     }
 
