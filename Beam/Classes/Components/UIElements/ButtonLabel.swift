@@ -32,11 +32,12 @@ struct ButtonLabelStyle {
     var backgroundColor: Color?
     var hoveredBackgroundColor: Color?
     var activeBackgroundColor: Color = BeamColor.Button.activeBackground.swiftUI
+    var animation: Animation? = nil
 }
 
 struct ButtonLabel: View {
-    let text: String?
-    let iconName: String?
+    var text: String?
+    var iconName: String?
     let defaultState: ButtonLabelState
     let variant: ButtonLabelVariant
     // TODO replace style by a custom modifier like .buttonLabelStyle()
@@ -44,12 +45,25 @@ struct ButtonLabel: View {
 
     let action: (() -> Void)?
 
+    private var customView: ((_ hovered: Bool, _ clicked: Bool) -> AnyView)?
+
     @State private var isHovering = false
     @State private var isTouching = false
 
-    init(_ text: String? = nil, icon: String? = nil, state: ButtonLabelState = .normal, variant: ButtonLabelVariant = .secondary, customStyle: ButtonLabelStyle = ButtonLabelStyle(), action: (() -> Void)? = nil) {
+    init(_ text: String? = nil, icon: String? = nil, state: ButtonLabelState = .normal, variant: ButtonLabelVariant = .secondary,
+         customStyle: ButtonLabelStyle = ButtonLabelStyle(), action: (() -> Void)? = nil) {
         self.text = text
         self.iconName = icon
+        self.defaultState = state
+        self.variant = variant
+        self.style = customStyle
+        self.action = action
+    }
+
+    init(@ViewBuilder customView: @escaping (_ hovered: Bool, _ clicked: Bool) -> AnyView,
+         state: ButtonLabelState = .normal, variant: ButtonLabelVariant = .secondary,
+         customStyle: ButtonLabelStyle = ButtonLabelStyle(), action: (() -> Void)? = nil) {
+        self.customView = customView
         self.defaultState = state
         self.variant = variant
         self.style = customStyle
@@ -76,23 +90,27 @@ struct ButtonLabel: View {
 
     var body: some View {
         HStack(spacing: style.spacing) {
-            if let icon = iconName {
-                Icon(name: icon, size: style.iconSize, color: foregroundColor)
-            }
-            if let text = text {
-                Text(text)
-                    .foregroundColor(foregroundColor)
-                    .font(style.font)
-                    .underline(variant == .primary, color: foregroundColor)
-            }
-            if variant == .dropdown {
-                Icon(name: "editor-breadcrumb_down", size: 8, color: foregroundColor)
+            if let customViewBuilder = customView {
+                customViewBuilder(isHovering, isTouching)
+            } else {
+                if let icon = iconName {
+                    Icon(name: icon, size: style.iconSize, color: foregroundColor)
+                }
+                if let text = text {
+                    Text(text)
+                        .foregroundColor(foregroundColor)
+                        .font(style.font)
+                        .underline(variant == .primary, color: foregroundColor)
+                }
+                if variant == .dropdown {
+                    Icon(name: "editor-breadcrumb_down", size: 8, color: foregroundColor)
+                }
             }
         }
         .padding(.horizontal, style.horizontalPadding)
         .padding(.vertical, style.verticalPadding)
         .background(backgroundColor)
-        .animation(nil)
+        .animation(style.animation)
         .cornerRadius(3)
         .onHover { hovering in
             guard defaultState != .disabled else { return }

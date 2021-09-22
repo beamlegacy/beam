@@ -212,14 +212,7 @@ class AllCardsContextualMenu {
         alert.addButton(withTitle: "Delete...")
         alert.addButton(withTitle: "Cancel")
         alert.alertStyle = .warning
-        guard let window = AppDelegate.main.window else {
-            if alert.runModal() == .alertFirstButtonReturn {
-                self.confirmedDeleteSelectedNotes()
-            } else {
-                self.onFinishBlock?(false)
-            }
-            return
-        }
+        guard let window = AppDelegate.main.window else { return }
         alert.beginSheetModal(for: window) { (response) in
             if response == .alertFirstButtonReturn {
                 self.confirmedDeleteSelectedNotes()
@@ -227,7 +220,6 @@ class AllCardsContextualMenu {
                 self.onFinishBlock?(false)
             }
         }
-
     }
 
     private func confirmedDeleteSelectedNotes() {

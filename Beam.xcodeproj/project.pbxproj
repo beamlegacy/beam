@@ -673,7 +673,6 @@
 		A5316A192667B9110039ED9C /* Range+BeamTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5316A182667B9110039ED9C /* Range+BeamTests.swift */; };
 		A536DE0F269C6ABD003FAAF4 /* ToastTextIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A536DE0E269C6ABD003FAAF4 /* ToastTextIconView.swift */; };
 		A53B43F326B0946B0043D37A /* NoteListMetadataCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53B43F226B0946B0043D37A /* NoteListMetadataCache.swift */; };
-		A53C8F38264440E4003A5DF8 /* SharingStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53C8F37264440E4003A5DF8 /* SharingStatusView.swift */; };
 		A53C8F4E26446C6C003A5DF8 /* SharingBannerInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53C8F4D26446C6C003A5DF8 /* SharingBannerInfo.swift */; };
 		A53C8F532644B22B003A5DF8 /* OmniBarUITestsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53C8F522644B22B003A5DF8 /* OmniBarUITestsHelper.swift */; };
 		A53C9873267B4B6400D4AE90 /* AnimatableOffsetEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53C9872267B4B6400D4AE90 /* AnimatableOffsetEffect.swift */; };
@@ -701,6 +700,8 @@
 		A57C745826709C8000840BBA /* BeamTextEdit+SlashMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57C745726709C8000840BBA /* BeamTextEdit+SlashMenu.swift */; };
 		A57F9CB126E8F82000D266BA /* TableHeaderCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57F9CB026E8F82000D266BA /* TableHeaderCell.swift */; };
 		A580D5EE26427BCB00EB2E24 /* ContextMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A580D5ED26427BCB00EB2E24 /* ContextMenuView.swift */; };
+		A58768FD26F9D3F000E8CC93 /* BeamAnimation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58768FC26F9D3F000E8CC93 /* BeamAnimation.swift */; };
+		A587690426FA0E8200E8CC93 /* NoteHeaderPublishButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A587690326FA0E8200E8CC93 /* NoteHeaderPublishButton.swift */; };
 		A58BD800266510390040A8C4 /* String+RegexTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58BD7FF266510390040A8C4 /* String+RegexTests.swift */; };
 		A5919F4B268BDDBA009015C5 /* NoteMediaPlayerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5919F4A268BDDBA009015C5 /* NoteMediaPlayerManager.swift */; };
 		A5919F54268BE208009015C5 /* NoteMediaPlayingButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5919F53268BE208009015C5 /* NoteMediaPlayingButton.swift */; };
@@ -742,6 +743,11 @@
 		A5EBF15526D8F2FD00597A1C /* VisualEffectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5EBF15426D8F2FD00597A1C /* VisualEffectView.swift */; };
 		A5ECC8FF2679EBB500D8A087 /* HoverVisibleModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5ECC8FE2679EBB500D8A087 /* HoverVisibleModifier.swift */; };
 		A5F1F6262643EDA600D41505 /* BeamNoteSharingUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F1F6252643EDA600D41505 /* BeamNoteSharingUtils.swift */; };
+		A5F47EBB26F8AEB2004B7CDE /* Tooltip.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F47EBA26F8AEB2004B7CDE /* Tooltip.swift */; };
+		A5F47EC326F8D633004B7CDE /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = A5F47EC226F8D633004B7CDE /* Lottie */; };
+		A5F47EC526F8D6A9004B7CDE /* LottieView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F47EC426F8D6A9004B7CDE /* LottieView.swift */; };
+		A5F47EC826F8D718004B7CDE /* editor-publish.json in Resources */ = {isa = PBXBuildFile; fileRef = A5F47EC726F8D718004B7CDE /* editor-publish.json */; };
+		A5F47ECA26F8D71C004B7CDE /* editor-unpublish.json in Resources */ = {isa = PBXBuildFile; fileRef = A5F47EC926F8D71C004B7CDE /* editor-unpublish.json */; };
 		A5FE1615264AD64900B7526D /* RecentsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5FE1614264AD64900B7526D /* RecentsListView.swift */; };
 		A5FE96CD2612469C002A2B73 /* AutocompleteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5FE96CC2612469C002A2B73 /* AutocompleteManager.swift */; };
 		B5056A8D26F88A0700FFD2A2 /* HelpAndFeedbackTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5056A8C26F88A0700FFD2A2 /* HelpAndFeedbackTests.swift */; };
@@ -1644,7 +1650,6 @@
 		A5316A182667B9110039ED9C /* Range+BeamTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Range+BeamTests.swift"; sourceTree = "<group>"; };
 		A536DE0E269C6ABD003FAAF4 /* ToastTextIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastTextIconView.swift; sourceTree = "<group>"; };
 		A53B43F226B0946B0043D37A /* NoteListMetadataCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteListMetadataCache.swift; sourceTree = "<group>"; };
-		A53C8F37264440E4003A5DF8 /* SharingStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharingStatusView.swift; sourceTree = "<group>"; };
 		A53C8F4D26446C6C003A5DF8 /* SharingBannerInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharingBannerInfo.swift; sourceTree = "<group>"; };
 		A53C8F522644B22B003A5DF8 /* OmniBarUITestsHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniBarUITestsHelper.swift; sourceTree = "<group>"; };
 		A53C9872267B4B6400D4AE90 /* AnimatableOffsetEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimatableOffsetEffect.swift; sourceTree = "<group>"; };
@@ -1673,6 +1678,8 @@
 		A57C745726709C8000840BBA /* BeamTextEdit+SlashMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamTextEdit+SlashMenu.swift"; sourceTree = "<group>"; };
 		A57F9CB026E8F82000D266BA /* TableHeaderCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableHeaderCell.swift; sourceTree = "<group>"; };
 		A580D5ED26427BCB00EB2E24 /* ContextMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextMenuView.swift; sourceTree = "<group>"; };
+		A58768FC26F9D3F000E8CC93 /* BeamAnimation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamAnimation.swift; sourceTree = "<group>"; };
+		A587690326FA0E8200E8CC93 /* NoteHeaderPublishButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteHeaderPublishButton.swift; sourceTree = "<group>"; };
 		A58BD7FF266510390040A8C4 /* String+RegexTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+RegexTests.swift"; sourceTree = "<group>"; };
 		A5919F4A268BDDBA009015C5 /* NoteMediaPlayerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteMediaPlayerManager.swift; sourceTree = "<group>"; };
 		A5919F53268BE208009015C5 /* NoteMediaPlayingButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteMediaPlayingButton.swift; sourceTree = "<group>"; };
@@ -1712,6 +1719,10 @@
 		A5EBF15426D8F2FD00597A1C /* VisualEffectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualEffectView.swift; sourceTree = "<group>"; };
 		A5ECC8FE2679EBB500D8A087 /* HoverVisibleModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HoverVisibleModifier.swift; sourceTree = "<group>"; };
 		A5F1F6252643EDA600D41505 /* BeamNoteSharingUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamNoteSharingUtils.swift; sourceTree = "<group>"; };
+		A5F47EBA26F8AEB2004B7CDE /* Tooltip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tooltip.swift; sourceTree = "<group>"; };
+		A5F47EC426F8D6A9004B7CDE /* LottieView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LottieView.swift; sourceTree = "<group>"; };
+		A5F47EC726F8D718004B7CDE /* editor-publish.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "editor-publish.json"; sourceTree = "<group>"; };
+		A5F47EC926F8D71C004B7CDE /* editor-unpublish.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "editor-unpublish.json"; sourceTree = "<group>"; };
 		A5FE1614264AD64900B7526D /* RecentsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentsListView.swift; sourceTree = "<group>"; };
 		A5FE96CC2612469C002A2B73 /* AutocompleteManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutocompleteManager.swift; sourceTree = "<group>"; };
 		B5056A8C26F88A0700FFD2A2 /* HelpAndFeedbackTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpAndFeedbackTests.swift; sourceTree = "<group>"; };
@@ -1889,6 +1900,7 @@
 				3315DC942667859A002A47CF /* PromisesTestHelpers in Frameworks */,
 				A0A84FB62636FA99008F0326 /* Sentry in Frameworks */,
 				964548A02523B3550064D062 /* CloudKit.framework in Frameworks */,
+				A5F47EC326F8D633004B7CDE /* Lottie in Frameworks */,
 				3315DC962667859A002A47CF /* OAuthSwift in Frameworks */,
 				33793AD1265CFEC50041E1B8 /* SwiftSoup in Frameworks */,
 				33088D6326B06677004FAE99 /* ZIPFoundation in Frameworks */,
@@ -2166,6 +2178,7 @@
 		41816FD02581046F00317ED8 /* Assets */ = {
 			isa = PBXGroup;
 			children = (
+				A5F47EC626F8D70F004B7CDE /* Lotties */,
 				56A5BD1A25CC590500ED7C50 /* NaturalLanguage */,
 				418171112581082200317ED8 /* Assets.xcassets */,
 			);
@@ -2548,6 +2561,7 @@
 			children = (
 				418171D52581107C00317ED8 /* NoteView.swift */,
 				A5DE143126496F250023F753 /* NoteHeaderView.swift */,
+				A587690326FA0E8200E8CC93 /* NoteHeaderPublishButton.swift */,
 			);
 			path = Notes;
 			sourceTree = "<group>";
@@ -2695,6 +2709,7 @@
 				333A0A1F268C4EED004B7905 /* KeyEventHandlingView.swift */,
 				33CCBFA526A61C14004B6236 /* AutoDismissingWindow.swift */,
 				A5EBF15426D8F2FD00597A1C /* VisualEffectView.swift */,
+				A5F47EC426F8D6A9004B7CDE /* LottieView.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -3687,6 +3702,7 @@
 				33DEF48726617E0B00834839 /* CircledButton.swift */,
 				33D5F8592697478E002C4F25 /* PopupView.swift */,
 				33353EE126F3D0BA00063078 /* ActionableButton.swift */,
+				A5F47EBA26F8AEB2004B7CDE /* Tooltip.swift */,
 			);
 			path = UIElements;
 			sourceTree = "<group>";
@@ -3708,6 +3724,7 @@
 				A5208D85261D25BC006193AF /* Colors */,
 				41D1698625DBFDBB0018E5F2 /* Fonts */,
 				A5208D8E261D25F1006193AF /* BeamSpacing.swift */,
+				A58768FC26F9D3F000E8CC93 /* BeamAnimation.swift */,
 			);
 			path = BeamDesign;
 			sourceTree = "<group>";
@@ -3760,7 +3777,6 @@
 				A54936C5260B721600EF7622 /* WindowBottomToolBar.swift */,
 				33B27469264C103400A318CD /* SmallUpdateIndicatorView.swift */,
 				A5FE1614264AD64900B7526D /* RecentsListView.swift */,
-				A53C8F37264440E4003A5DF8 /* SharingStatusView.swift */,
 				A53C8F4D26446C6C003A5DF8 /* SharingBannerInfo.swift */,
 				A5919F53268BE208009015C5 /* NoteMediaPlayingButton.swift */,
 			);
@@ -3882,6 +3898,15 @@
 				8A1CD07F26B9723300226A2A /* UITests-7.html */,
 			);
 			name = "Recovered References";
+			sourceTree = "<group>";
+		};
+		A5F47EC626F8D70F004B7CDE /* Lotties */ = {
+			isa = PBXGroup;
+			children = (
+				A5F47EC726F8D718004B7CDE /* editor-publish.json */,
+				A5F47EC926F8D71C004B7CDE /* editor-unpublish.json */,
+			);
+			path = Lotties;
 			sourceTree = "<group>";
 		};
 		B5056A8626F889F300FFD2A2 /* Help */ = {
@@ -4240,6 +4265,7 @@
 				33F0F1C726DE87E000FF8B48 /* Vinyl */,
 				96AC99F726E65CFB0016E941 /* UUIDKit */,
 				4E83D3E126F21C4F00796836 /* Clustering */,
+				A5F47EC226F8D633004B7CDE /* Lottie */,
 			);
 			productName = Beam;
 			productReference = 965A78252514F147009980D4 /* Beam.app */;
@@ -4356,6 +4382,7 @@
 				33F0F1C626DE87E000FF8B48 /* XCRemoteSwiftPackageReference "Vinyl" */,
 				96AC99F626E65CFB0016E941 /* XCRemoteSwiftPackageReference "uuid-kit" */,
 				4E83D3E026F21C4F00796836 /* XCRemoteSwiftPackageReference "clustering" */,
+				A5F47EC126F8D633004B7CDE /* XCRemoteSwiftPackageReference "lottie-ios" */,
 			);
 			productRefGroup = 965A78262514F147009980D4 /* Products */;
 			projectDirPath = "";
@@ -4477,6 +4504,7 @@
 				56A5BD3125CC680E00ED7C50 /* url.stopwords in Resources */,
 				41B4277B25E52DCA00A8243F /* Localizable.stringsdict in Resources */,
 				8AC2EFD8266F86F500049005 /* webpack.config.js in Resources */,
+				A5F47EC826F8D718004B7CDE /* editor-publish.json in Resources */,
 				8AD2637426F4A0480074D673 /* Frames.test.ts in Resources */,
 				5224CD762685FFFC00D4179E /* beam_object_updated_at.graphql in Resources */,
 				8AD2635B26F4A0480074D673 /* Native.test.ts in Resources */,
@@ -4495,6 +4523,7 @@
 				BAA6792F5CF42C0D8FEC2A9B /* WebEvents.ts in Resources */,
 				3355999D26CBF11E00F52C23 /* SearchWebPage.js in Resources */,
 				BAA6704409BDC8AB92E95F8D /* WebEventsUI_native.ts in Resources */,
+				A5F47ECA26F8D71C004B7CDE /* editor-unpublish.json in Resources */,
 				5224CD602685FFB500D4179E /* delete_all_beam_objects.graphql in Resources */,
 				8AD2636126F4A0480074D673 /* BeamEventTargetMock.ts in Resources */,
 				8AD2636226F4A0480074D673 /* PointAndShootUIMock.ts in Resources */,
@@ -4820,6 +4849,7 @@
 				87C539BD26162C3400D51877 /* PasswordManagerMenuCell.swift in Sources */,
 				A5D53697264BE2F50011A095 /* RetroCompatibleScrollViewReader.swift in Sources */,
 				872644772619903B0070E83D /* StepperControl.swift in Sources */,
+				A58768FD26F9D3F000E8CC93 /* BeamAnimation.swift in Sources */,
 				33FE719826D38A0400E63849 /* SearchLocationView.swift in Sources */,
 				A05ADF3F264D67D3002DF91A /* PasswordsDB.swift in Sources */,
 				4181721A2581107C00317ED8 /* StandardStorable.swift in Sources */,
@@ -4867,6 +4897,7 @@
 				A0C5D85B263C638A00FA6F6E /* CredentialsConfirmationToast.swift in Sources */,
 				A5208D76261D07E9006193AF /* BeamColor.swift in Sources */,
 				4181724A2581107C00317ED8 /* TextView.swift in Sources */,
+				A587690426FA0E8200E8CC93 /* NoteHeaderPublishButton.swift in Sources */,
 				526017FC25AE081E00634695 /* AppDelegate+Console.swift in Sources */,
 				0325628F26051D3B006513E4 /* RBSQLite.m in Sources */,
 				A56BAF5826B937CE0006F8D5 /* NoteEditFocusedState.swift in Sources */,
@@ -5049,6 +5080,7 @@
 				418172AB25811A3A00317ED8 /* BeamTextFieldView.swift in Sources */,
 				965A78292514F147009980D4 /* AppDelegate.swift in Sources */,
 				96F2BF0F263B208500F02F16 /* Caret.swift in Sources */,
+				A5F47EBB26F8AEB2004B7CDE /* Tooltip.swift in Sources */,
 				87C539C92617B35000D51877 /* PasswordGeneratorSuggestionCell.swift in Sources */,
 				418172092581107C00317ED8 /* CoreDataManager+backupExtension.swift in Sources */,
 				A0CB5ADE268B1FF500D1EF02 /* GeneralPreferencesView.swift in Sources */,
@@ -5067,7 +5099,6 @@
 				96F936632590FA59006D8E53 /* BTextEdit.swift in Sources */,
 				521EEDED2593803F00BA2485 /* DocumentDetail.swift in Sources */,
 				A05ADF6C264D8C34002DF91A /* OverlayViewCenter.swift in Sources */,
-				A53C8F38264440E4003A5DF8 /* SharingStatusView.swift in Sources */,
 				A520D8DF25F8DF8D00400720 /* TouchDownModifier.swift in Sources */,
 				418171ED2581107C00317ED8 /* Session.swift in Sources */,
 				A5C9F00A261364F50096380F /* WindowPageView.swift in Sources */,
@@ -5113,6 +5144,7 @@
 				52019A7726DE47D1005E8278 /* DatabaseManager+Promises.swift in Sources */,
 				418172382581107C00317ED8 /* TextNode.swift in Sources */,
 				418172502581107C00317ED8 /* NoteView.swift in Sources */,
+				A5F47EC526F8D6A9004B7CDE /* LottieView.swift in Sources */,
 				A0B8C44F26D550D300130FC7 /* Beam5ToBeam6MigrationPolicy.swift in Sources */,
 				414B989925A21BB0002E81A3 /* BeamTextEdit+Formatter.swift in Sources */,
 				4181725F2581107C00317ED8 /* DocumentManager.swift in Sources */,
@@ -6386,6 +6418,14 @@
 				kind = branch;
 			};
 		};
+		A5F47EC126F8D633004B7CDE /* XCRemoteSwiftPackageReference "lottie-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/airbnb/lottie-ios";
+			requirement = {
+				branch = "lottie/macos-spm";
+				kind = branch;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -6523,6 +6563,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */;
 			productName = Nimble;
+		};
+		A5F47EC226F8D633004B7CDE /* Lottie */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A5F47EC126F8D633004B7CDE /* XCRemoteSwiftPackageReference "lottie-ios" */;
+			productName = Lottie;
 		};
 /* End XCSwiftPackageProductDependency section */
 
