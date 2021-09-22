@@ -66,21 +66,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         data = BeamData()
 
-        for arg in ProcessInfo.processInfo.arguments {
-            switch arg {
-            case "--export-all-browsing-sessions":
-                export_all_browsing_sessions()
-            default:
-                continue
-            }
-        }
-
-        let exitingArguments = [
-            "--export-all-browsing-sessions"
-        ]
-        if Set(ProcessInfo.processInfo.arguments).intersection(exitingArguments).count > 0 {
-            exit(0)
-        }
         if !isRunningTests {
             createWindow(frame: nil)
         }
