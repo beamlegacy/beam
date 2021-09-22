@@ -64,6 +64,7 @@ import AVFoundation
         }
 
         setAccessibilityRole(.button)
+        setAccessibilityLabel(name)
     }
 
     deinit {

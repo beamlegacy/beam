@@ -56,6 +56,16 @@ class WaitHelper: XCTestCase {
         return waitFor(PredicateFormat.isHittable.rawValue, element)
     }
     
+    @discardableResult
+    func waitForKeyboardFocus(_ element: XCUIElement) -> Bool {
+        return waitFor(PredicateFormat.hasKeyboardFocus.rawValue, element)
+    }
+    
+    @discardableResult
+    func waitForKeyboardUnfocus(_ element: XCUIElement) -> Bool {
+        return waitFor(PredicateFormat.doesntHaveKeyboardFocus.rawValue, element)
+    }
+    
     
     enum PredicateFormat: String {
         case isHittable = "isHittable == true"
@@ -64,5 +74,7 @@ class WaitHelper: XCTestCase {
         case notExists = "exists == false"
         case identifierEquals = "identifier == "
         case valueEquals = "value == "
+        case hasKeyboardFocus = "hasKeyboardFocus == true"
+        case doesntHaveKeyboardFocus = "hasKeyboardFocus == false"
     }
 }

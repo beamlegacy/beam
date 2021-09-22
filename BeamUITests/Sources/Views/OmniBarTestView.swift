@@ -34,8 +34,10 @@ class OmniBarTestView: BaseView {
         button(OmniBarLocators.Buttons.forwardButton.accessibilityIdentifier).click()
     }
     
-    func navigateToJournalViaHomeButton() {
+    @discardableResult
+    func navigateToJournalViaHomeButton() -> JournalTestView {
         button(OmniBarLocators.Buttons.homeButton.accessibilityIdentifier).click()
+        return JournalTestView()
     }
     
     @discardableResult
