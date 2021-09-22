@@ -10,8 +10,43 @@ import XCTest
 
 class AllCardsTestView: BaseView {
     
+    @discardableResult
+    func deleteAllCards() -> AllCardsTestView {
+        triggerAllCardsMenuOptionAction(.deleteNotes)
+        button(AllCardsViewLocators.Buttons.alertDeleteButton.accessibilityIdentifier).clickOnExistence()
+        WaitHelper().waitForDoesntExist(button(AllCardsViewLocators.Buttons.alertDeleteButton.accessibilityIdentifier))
+        return self
+    }
+    
+    @discardableResult
+    func deleteCardByIndex(_ index: Int) -> AllCardsTestView {
+        getCardsNames()[index].hover()
+        triggerSingleCardMenuOptionAction(.deleteNotes)
+        button(AllCardsViewLocators.Buttons.alertDeleteButton.accessibilityIdentifier).clickOnExistence()
+        WaitHelper().waitForDoesntExist(button(AllCardsViewLocators.Buttons.alertDeleteButton.accessibilityIdentifier))
+        return self
+    }
+    
+    @discardableResult
+    func triggerAllCardsMenuOptionAction(_ action: AllCardsViewLocators.MenuItems) -> AllCardsTestView {
+        image(AllCardsViewLocators.Images.allCardsEditor.accessibilityIdentifier).clickOnExistence()
+        menuItem(action.accessibilityIdentifier).clickOnExistence()
+        return self
+    }
+    
+    @discardableResult
+    func triggerSingleCardMenuOptionAction(_ action: AllCardsViewLocators.MenuItems) -> AllCardsTestView {
+        image(AllCardsViewLocators.Images.singleCardEditor.accessibilityIdentifier).clickOnExistence()
+        menuItem(action.accessibilityIdentifier).clickOnExistence()
+        return self
+    }
+    
     func getCardsNames() -> [XCUIElement]{
         return app.windows.staticTexts.matching(identifier: AllCardsViewLocators.ColumnCells.cardTitleColumnCell.accessibilityIdentifier).allElementsBoundByIndex
+    }
+    
+    func getCardNameValueByIndex(_ index: Int) -> String {
+        return getCardsNames()[index].value as? String ?? errorFetchStringValue
     }
     
     func getNumberOfCards() -> Int {

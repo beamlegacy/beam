@@ -15,7 +15,7 @@ class BaseView {
     let implicitWaitTimeout = TimeInterval(10)
     let minimumWaitTimeout = TimeInterval(2)
     let defaultPressDurationSeconds = 1.5
-    
+    let errorFetchStringValue = "ERROR:failed to fetch value"
     //Wrapper over the elements
     func label(_ element: String) -> XCUIElement {
         return app.windows.staticTexts[element]
@@ -79,6 +79,10 @@ class BaseView {
     
     func tableImage(_ element: String) -> XCUIElement {
         return app.windows.tables.images[element]
+    }
+    
+    func menuItem(_ element: String) -> XCUIElement {
+        return app.windows.menuItems[element]
     }
     
     func typeKeyboardKey(_ key: XCUIKeyboardKey, _ numberOfTimes: Int = 1) {

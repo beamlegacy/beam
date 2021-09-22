@@ -17,4 +17,8 @@ enum JournalViewLocators {
         case journalScrollView = "journalView"
     }
     
+    enum StaticTexts: String, CaseIterable, UIElement {
+        case updateNowButton = "Update now"
+    }
+    
 }

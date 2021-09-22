@@ -12,6 +12,8 @@ enum AllCardsViewLocators {
     enum Buttons: String, CaseIterable, UIElement {
         case newCardButton = "tabs new"
         case journalButton = "journal"
+        case alertDeleteButton = "Delete..."
+        case alertCancelButton = "Cancel"
     }
     
     enum TextFields: String, CaseIterable, UIElement {
@@ -20,5 +22,19 @@ enum AllCardsViewLocators {
     
     enum ColumnCells: String, CaseIterable, UIElement {
         case cardTitleColumnCell = "Title"
+    }
+    
+    enum Images: String, CaseIterable, UIElement {
+        case singleCardEditor = "editor-options"
+        case allCardsEditor = "editor-breadcrumb_down"
+    }
+    
+    enum MenuItems: String, CaseIterable, UIElement {
+        case deleteNotes = "deleteNotes"
+    }
+    
+    enum Others: String, CaseIterable, UIElement {
+        case referenceSection = "ReferencesSection"
+        case disclosureTriangle = "disclosure triangle"
     }
 }
