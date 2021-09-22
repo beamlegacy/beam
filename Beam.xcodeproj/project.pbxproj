@@ -544,6 +544,7 @@
 		96C9AA5725901AA9007D3D98 /* LinksSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C9AA5625901AA9007D3D98 /* LinksSection.swift */; };
 		96C9AAB92593BB67007D3D98 /* Widget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C9AAB82593BB67007D3D98 /* Widget.swift */; };
 		96C9CC3E2535CE2C00D70AA6 /* LexerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C9CC3D2535CE2C00D70AA6 /* LexerTests.swift */; };
+		96D0EF5826FB6F2300B967B8 /* UUIDKit in Frameworks */ = {isa = PBXBuildFile; productRef = 96D0EF5726FB6F2300B967B8 /* UUIDKit */; };
 		96D5AE85264C01AD003AD516 /* TLDExtract in Frameworks */ = {isa = PBXBuildFile; productRef = 96D5AE84264C01AD003AD516 /* TLDExtract */; };
 		96DDF54B26823A4200FF8CCE /* BidirectionalLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96DDF54A26823A4200FF8CCE /* BidirectionalLink.swift */; };
 		96E1356F2546F03900133A24 /* TextNodeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E1356E2546F03900133A24 /* TextNodeTests.swift */; };
@@ -1529,6 +1530,7 @@
 		96C9AA5625901AA9007D3D98 /* LinksSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinksSection.swift; sourceTree = "<group>"; };
 		96C9AAB82593BB67007D3D98 /* Widget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Widget.swift; sourceTree = "<group>"; };
 		96C9CC3D2535CE2C00D70AA6 /* LexerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LexerTests.swift; sourceTree = "<group>"; };
+		96D0EF5E26FB75EC00B967B8 /* CryptoKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CryptoKit.framework; path = System/Library/Frameworks/CryptoKit.framework; sourceTree = SDKROOT; };
 		96DDF54A26823A4200FF8CCE /* BidirectionalLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BidirectionalLink.swift; sourceTree = "<group>"; };
 		96E1356E2546F03900133A24 /* TextNodeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextNodeTests.swift; sourceTree = "<group>"; };
 		96E4505725995CA200BFF36F /* BreadCrumb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BreadCrumb.swift; sourceTree = "<group>"; };
@@ -1864,6 +1866,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				96D0EF5826FB6F2300B967B8 /* UUIDKit in Frameworks */,
 				A0A84FC02636FA99008F0326 /* CocoaLumberjackSwift in Frameworks */,
 				96D5AE85264C01AD003AD516 /* TLDExtract in Frameworks */,
 			);
@@ -2091,6 +2094,7 @@
 		24EFBA757ACC5310A2D800B2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				96D0EF5E26FB75EC00B967B8 /* CryptoKit.framework */,
 				33B27441264C0CDB00A318CD /* AutoUpdate.xcodeproj */,
 				525C233B25BAF8EF001B9625 /* libgit2.a */,
 				9645489F2523B3550064D062 /* CloudKit.framework */,
@@ -4191,13 +4195,13 @@
 			buildRules = (
 			);
 			dependencies = (
-				96D5AE7D264BFD4C003AD516 /* PBXTargetDependency */,
 				96D5AE7B264BFD40003AD516 /* PBXTargetDependency */,
 			);
 			name = BeamCore;
 			packageProductDependencies = (
 				96319D52261623BB00D1CF31 /* CocoaLumberjackSwift */,
 				96D5AE84264C01AD003AD516 /* TLDExtract */,
+				96D0EF5726FB6F2300B967B8 /* UUIDKit */,
 			);
 			productName = BeamCore;
 			productReference = 96319D0F2616232600D1CF31 /* BeamCore.framework */;
@@ -5516,9 +5520,6 @@
 		96D5AE7B264BFD40003AD516 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 		};
-		96D5AE7D264BFD4C003AD516 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-		};
 		A0A6F2A125D1B73400EFC4BE /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 		};
@@ -6530,6 +6531,11 @@
 			productName = GRDB;
 		};
 		96AC99F726E65CFB0016E941 /* UUIDKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 96AC99F626E65CFB0016E941 /* XCRemoteSwiftPackageReference "uuid-kit" */;
+			productName = UUIDKit;
+		};
+		96D0EF5726FB6F2300B967B8 /* UUIDKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 96AC99F626E65CFB0016E941 /* XCRemoteSwiftPackageReference "uuid-kit" */;
 			productName = UUIDKit;

@@ -1587,7 +1587,7 @@ public extension CALayer {
                 return false
             }
 
-            let uid = data.SHA256
+            let uid = UUID.v5(name: data.SHA256, namespace: .url)
             let fileManager = BeamFileDBManager()
             let utTypeCF = image.cgImage.utType
             let utType = utTypeCF as String? ?? ""

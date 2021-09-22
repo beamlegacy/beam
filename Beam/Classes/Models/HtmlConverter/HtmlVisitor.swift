@@ -116,7 +116,6 @@ class HtmlVisitor {
                     let mdUrl = url.absoluteString
                     let imgElement = BeamElement(mdUrl)
                     let fileName = url.lastPathComponent
-                    imgElement.kind = .image(mdUrl)
 
                     // By defining the Closure outside the `visit()` func we keep the reference to the imgElement
                     // With this in memory reference we can close the closure without having to wrap
@@ -142,7 +141,7 @@ class HtmlVisitor {
                     let fileName = UUID().uuidString
                     if let fileStorage = fileStorage,
                        let fileId = HtmlVisitor.storeImageData(base64, mimeType, fileName, fileStorage) {
-                        let imgElement = BeamElement(fileId)
+                        let imgElement = BeamElement()
                         imgElement.kind = .image(fileId)
                         text.append(imgElement)
                     }
@@ -218,9 +217,9 @@ extension HtmlVisitor {
         case imageDownloadFailed
     }
 
-    static fileprivate func storeImageData(_ data: Data, _ mimeType: String, _ name: String, _ fileStorage: BeamFileStorage) -> String? {
+    static fileprivate func storeImageData(_ data: Data, _ mimeType: String, _ name: String, _ fileStorage: BeamFileStorage) -> UUID? {
         do {
-            let fileId = data.SHA256
+            let fileId = UUID.v5(name: data.SHA256, namespace: .url)
             try fileStorage.insert(name: name, uid: fileId, data: data, type: mimeType)
             return fileId
         } catch let error {
