@@ -36,7 +36,7 @@ extension AccountManager {
                     DispatchQueue.main.async {
                         // We sync data *after* we potentially connected to websocket, to make sure we don't miss any data
                         AppDelegate.main.beamObjectManager.liveSync { _ in
-                            AppDelegate.main.syncData()
+                            AppDelegate.main.syncDataWithBeamObject()
                         }
                     }
 
@@ -73,7 +73,7 @@ extension AccountManager {
                     DispatchQueue.main.async {
                         // We sync data *after* we potentially connected to websocket, to make sure we don't miss any data
                         AppDelegate.main.beamObjectManager.liveSync { _ in
-                            AppDelegate.main.syncData()
+                            AppDelegate.main.syncDataWithBeamObject()
                         }
                     }
 
@@ -152,7 +152,7 @@ extension AccountManager {
             // We sync data *after* we potentially connected to websocket, to make sure we don't miss any data
             DispatchQueue.main.async {
                 AppDelegate.main.beamObjectManager.liveSync { _ in
-                    AppDelegate.main.syncData()
+                    AppDelegate.main.syncDataWithBeamObject()
                 }
             }
 
@@ -175,7 +175,7 @@ extension AccountManager {
             // We sync data *after* we potentially connected to websocket, to make sure we don't miss any data
             DispatchQueue.main.async {
                 AppDelegate.main.beamObjectManager.liveSync { _ in
-                    AppDelegate.main.syncData()
+                    AppDelegate.main.syncDataWithBeamObject()
                 }
             }
 
@@ -210,7 +210,7 @@ extension AccountManager {
             // We sync data *after* we potentially connected to websocket, to make sure we don't miss any data
             DispatchQueue.main.async {
                 AppDelegate.main.beamObjectManager.liveSync { _ in
-                    AppDelegate.main.syncData()
+                    AppDelegate.main.syncDataWithBeamObject()
                 }
             }
             Logger.shared.logInfo("signIn succeeded: \(signIn.accessToken ?? "-")", category: .network)
@@ -233,7 +233,7 @@ extension AccountManager {
             // We sync data *after* we potentially connected to websocket, to make sure we don't miss any data
             DispatchQueue.main.async {
                 AppDelegate.main.beamObjectManager.liveSync { _ in
-                    AppDelegate.main.syncData()
+                    AppDelegate.main.syncDataWithBeamObject()
                 }
             }
             Logger.shared.logInfo("signIn succeeded: \(signIn.accessToken ?? "-")", category: .network)
