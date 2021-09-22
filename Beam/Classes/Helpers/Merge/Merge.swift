@@ -42,6 +42,12 @@ class Merge {
         }
 
         let options = UnsafeMutablePointer<git_merge_file_options>.allocate(capacity: 1)
+        defer {
+            ancestorFile.deallocate()
+            inputFile1.deallocate()
+            inputFile2.deallocate()
+        }
+
         guard git_merge_file_options_init(options, UInt32(GIT_MERGE_OPTIONS_VERSION)) == 0 else {
             Logger.shared.logDebug("Could not merge", category: .documentMerge)
             return nil
@@ -52,11 +58,8 @@ class Merge {
         git_merge_file(resultFile, ancestorFile, inputFile1, inputFile2, options)
 
         defer {
-            ancestorFile.deallocate()
-            inputFile1.deallocate()
-            inputFile2.deallocate()
-            resultFile.deallocate()
             git_merge_file_result_free(resultFile)
+            resultFile.deallocate()
         }
 
         let fileResult = resultFile.move()
