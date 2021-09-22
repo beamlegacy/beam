@@ -8,7 +8,9 @@
 import Foundation
 import BeamCore
 
-func export_all_browsing_sessions() {
+func export_all_browsing_sessions(to url: URL?) {
+    guard let url = url else { return }
+
     let docManager = DocumentManager()
     let sessions = docManager.allDocumentsTitles(includeDeletedNotes: true).compactMap({ title -> [BrowsingTree]? in
         guard let note = BeamNote.fetch(docManager, title: title, keepInMemory: false) else { return nil }
@@ -19,13 +21,8 @@ func export_all_browsing_sessions() {
 
     let encoder = JSONEncoder()
 
-    let fileManager = FileManager.default
-    guard let documentDirectory = try? fileManager.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false) else {
-        Logger.shared.logError("Unable to get document direction", category: .web)
-        return
-    }
-    let sessionsFileURL = documentDirectory.appendingPathComponent("beam_all_browsing_sessions \(BeamDate.now).json")
-    let linksFileURL = documentDirectory.appendingPathComponent("beam_all_links \(BeamDate.now).json")
+    let sessionsFileURL = url.appendingPathComponent("beam_all_browsing_sessions \(BeamDate.now).json")
+    let linksFileURL = url.appendingPathComponent("beam_all_links \(BeamDate.now).json")
 
     // MARK: Browsing sessions
     guard let sessionsData = try? encoder.encode(sessions)
