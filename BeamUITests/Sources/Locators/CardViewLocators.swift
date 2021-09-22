@@ -19,6 +19,10 @@ enum CardViewLocators {
         case privateLock = "status-private"
         case editorButton = "editor-breadcrumb_down"
         case copyLinkButton = "editor-url_link"
+        case linksSection = "LinksSection"
+        case referencesSection = "ReferencesSection"
+        case linkButton = "link"
+        case linkAllButton = "linkAllLayer"
     }
     
     enum TextFields: String, CaseIterable, UIElement {
@@ -33,6 +37,17 @@ enum CardViewLocators {
         case unpublishLabel = "ContextMenuItem-unpublish"
         case copyLinkLabel = "ContextMenuItem-copy link"
         case inviteLabel = "ContextMenuItem-invite..."
+        case blockRefLock = "ContextMenuItem-lock"
+        case blockRefUnlock = "ContextMenuItem-unlock"
+        case blockRefRemove = "ContextMenuItem-remove"
+        case blockRefOrigin = "ContextMenuItem-view origin"
+    }
+    
+    enum TextViews: String, CaseIterable, UIElement {
+        case linksRefsLabel = "ProxyTextNode"
+        case linksRefsTitle = "RefNoteTitle"
+        case blockReference = "BlockReferenceNode"
+        
     }
     
 }
