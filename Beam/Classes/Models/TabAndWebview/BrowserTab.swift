@@ -525,6 +525,12 @@ import Promises
     func startReading() {
         lastViewDate = BeamDate.now
         browsingTree.startReading()
+        guard !isLoading else { return }
+        // bring back the focus to where it was
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: .milliseconds(200))) {
+            self.webView.window?.makeFirstResponder(self.webView)
+            self.webView.page?.executeJS("refocusLastElement()", objectName: "FocusHandling")
+        }
     }
 
     func switchToCard() {
