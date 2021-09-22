@@ -242,6 +242,23 @@ struct AdvancedPreferencesView: View {
                     }, label: {
                         Text("Note Sources").frame(minWidth: 100)
                     })
+
+                    Button(action: {
+                        let openPanel = NSOpenPanel()
+                        openPanel.canChooseDirectories = true
+                        openPanel.canCreateDirectories = true
+                        openPanel.canChooseFiles = false
+                        openPanel.showsTagField = false
+                        openPanel.begin { (result) in
+                            guard result == .OK, let url = openPanel.url else {
+                                openPanel.close()
+                                return
+                            }
+                            export_all_browsing_sessions(to: url)
+                        }
+                    }, label: {
+                        Text("Browsing Sessions").frame(minWidth: 100)
+                    })
                 }
 
                 Preferences.Section(title: "Encryption key", bottomDivider: true) {
