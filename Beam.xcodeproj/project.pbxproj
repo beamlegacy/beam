@@ -702,6 +702,8 @@
 		A580D5EE26427BCB00EB2E24 /* ContextMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A580D5ED26427BCB00EB2E24 /* ContextMenuView.swift */; };
 		A58768FD26F9D3F000E8CC93 /* BeamAnimation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58768FC26F9D3F000E8CC93 /* BeamAnimation.swift */; };
 		A587690426FA0E8200E8CC93 /* NoteHeaderPublishButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A587690326FA0E8200E8CC93 /* NoteHeaderPublishButton.swift */; };
+		A58645E426FB116E00D7FF86 /* WebViewFocusMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58645E326FB116E00D7FF86 /* WebViewFocusMessageHandler.swift */; };
+		A58645E626FB12DC00D7FF86 /* WebViewFocusHandling.js in Resources */ = {isa = PBXBuildFile; fileRef = A58645E526FB12DC00D7FF86 /* WebViewFocusHandling.js */; };
 		A58BD800266510390040A8C4 /* String+RegexTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58BD7FF266510390040A8C4 /* String+RegexTests.swift */; };
 		A5919F4B268BDDBA009015C5 /* NoteMediaPlayerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5919F4A268BDDBA009015C5 /* NoteMediaPlayerManager.swift */; };
 		A5919F54268BE208009015C5 /* NoteMediaPlayingButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5919F53268BE208009015C5 /* NoteMediaPlayingButton.swift */; };
@@ -1680,6 +1682,8 @@
 		A580D5ED26427BCB00EB2E24 /* ContextMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextMenuView.swift; sourceTree = "<group>"; };
 		A58768FC26F9D3F000E8CC93 /* BeamAnimation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamAnimation.swift; sourceTree = "<group>"; };
 		A587690326FA0E8200E8CC93 /* NoteHeaderPublishButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteHeaderPublishButton.swift; sourceTree = "<group>"; };
+		A58645E326FB116E00D7FF86 /* WebViewFocusMessageHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewFocusMessageHandler.swift; sourceTree = "<group>"; };
+		A58645E526FB12DC00D7FF86 /* WebViewFocusHandling.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = WebViewFocusHandling.js; sourceTree = "<group>"; };
 		A58BD7FF266510390040A8C4 /* String+RegexTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+RegexTests.swift"; sourceTree = "<group>"; };
 		A5919F4A268BDDBA009015C5 /* NoteMediaPlayerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteMediaPlayerManager.swift; sourceTree = "<group>"; };
 		A5919F53268BE208009015C5 /* NoteMediaPlayingButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteMediaPlayingButton.swift; sourceTree = "<group>"; };
@@ -2289,19 +2293,18 @@
 		4181716B2581107C00317ED8 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				A58645DD26FB10BD00D7FF86 /* TabAndWebview */,
 				96C5FE3B268F4CF300889B5E /* Geolocation */,
 				0DD0DAC22681C6EB0005339A /* GRDB */,
 				418171712581107C00317ED8 /* Importers */,
 				418171762581107C00317ED8 /* CoreData */,
 				BAA67051B37A3398BDF678AB /* Navigation */,
 				A5919F6B268EA066009015C5 /* WebPage */,
+				8AA2430B26E638A9002A553A /* HtmlConverter */,
 				4181716C2581107C00317ED8 /* BeamData.swift */,
 				4181734D2581204900317ED8 /* BeamState.swift */,
 				A05ADF6D264D8C59002DF91A /* OverlayViewCenterViewModel.swift */,
-				A5E04DEA263BEDA600BFB4C1 /* BrowserTabsManager.swift */,
 				4181716E2581107C00317ED8 /* SearchEngine.swift */,
-				8AA2430B26E638A9002A553A /* HtmlConverter */,
-				418171822581107C00317ED8 /* BrowserTab.swift */,
 				A5C9F004261353420096380F /* WindowPage.swift */,
 				524520A325C8234500AC0007 /* BeamElement+Merge.swift */,
 				A03CE0EB25F954CB00D767B0 /* BeamNoteDataHolder.swift */,
@@ -2316,12 +2319,7 @@
 				A572629725FFADC5004416C0 /* MouseInteraction.swift */,
 				BAA67DD5764226E47DFA6F9E /* WebPositions.swift */,
 				8A141559267393E2005F2464 /* WebPositionsTest.swift */,
-				BAA67CDE485E5E7774A978D2 /* LoggingMessageHandler.swift */,
 				9691C2582644948200F70DA1 /* BeamFileDB.swift */,
-				BAA67A4B26FC61E9505EF7DB /* BeamMessageHandler.swift */,
-				BAA67F4FA344471FF8691E1A /* BrowserTabConfiguration.swift */,
-				BAA67765B4D27F2D4F2B8562 /* BeamWebViewConfiguration.swift */,
-				BAA670D131DF7CAE7FA6664E /* BeamWebView.swift */,
 				A05ADF3E264D67D3002DF91A /* PasswordsDB.swift */,
 				87F11BC2266524B2003BE98E /* WebAutocompleteProtocols.swift */,
 				87F47CC82669415800D01960 /* WebAutocompleteContext.swift */,
@@ -2329,7 +2327,6 @@
 				87F11BDA26655170003BE98E /* MockAutocompleteStores.swift */,
 				87F11BD8266533C1003BE98E /* PasswordGenerator.swift */,
 				BAA67971FD6352F46D77E3BE /* WebNoteController.swift */,
-				BAA67CB267E1C45A009AC2D9 /* BeamWebkitUIDelegate.swift */,
 				DA9E5B9C26A843520040F09B /* NoteSources+LongTermUrlScoreStore.swift */,
 				DA6A53B626C2BEDC00B87B0C /* SuggestedNoteSourcesUpdater.swift */,
 			);
@@ -2719,6 +2716,7 @@
 			children = (
 				418172FD25811DB200317ED8 /* Readability.js */,
 				418171912581107C00317ED8 /* OverrideConsole.js */,
+				A58645E526FB12DC00D7FF86 /* WebViewFocusHandling.js */,
 			);
 			path = Web;
 			sourceTree = "<group>";
@@ -3798,6 +3796,22 @@
 			path = TableView;
 			sourceTree = "<group>";
 		};
+		A58645DD26FB10BD00D7FF86 /* TabAndWebview */ = {
+			isa = PBXGroup;
+			children = (
+				A5E04DEA263BEDA600BFB4C1 /* BrowserTabsManager.swift */,
+				418171822581107C00317ED8 /* BrowserTab.swift */,
+				BAA67F4FA344471FF8691E1A /* BrowserTabConfiguration.swift */,
+				BAA670D131DF7CAE7FA6664E /* BeamWebView.swift */,
+				BAA67CB267E1C45A009AC2D9 /* BeamWebkitUIDelegate.swift */,
+				BAA67765B4D27F2D4F2B8562 /* BeamWebViewConfiguration.swift */,
+				BAA67A4B26FC61E9505EF7DB /* BeamMessageHandler.swift */,
+				BAA67CDE485E5E7774A978D2 /* LoggingMessageHandler.swift */,
+				A58645E326FB116E00D7FF86 /* WebViewFocusMessageHandler.swift */,
+			);
+			path = TabAndWebview;
+			sourceTree = "<group>";
+		};
 		A5919F63268EA024009015C5 /* EmbedNode */ = {
 			isa = PBXGroup;
 			children = (
@@ -4495,6 +4509,7 @@
 				52F4E4A226417F210067B017 /* sign_in_with_provider.graphql in Resources */,
 				41D169A625DC07260018E5F2 /* Inter-Bold.otf in Resources */,
 				520BC40126D7B02200A82966 /* subscription_beam_objects_updated.graphql in Resources */,
+				A58645E626FB12DC00D7FF86 /* WebViewFocusHandling.js in Resources */,
 				8AD2637326F4A0480074D673 /* UITests-1.html in Resources */,
 				0DC6E2DE26A0527900BD2E2A /* majestic_million_test.csv in Resources */,
 				032562A826051D3B006513E4 /* blockerList.json in Resources */,
@@ -5237,6 +5252,7 @@
 				A0C77A2226694D2300DCC85C /* AllowListModalView.swift in Sources */,
 				032562AA26051D3B006513E4 /* RBClient.m in Sources */,
 				A545D2FB25F7B1D800E68F94 /* DestinationNoteAutocompleteList.swift in Sources */,
+				A58645E426FB116E00D7FF86 /* WebViewFocusMessageHandler.swift in Sources */,
 				5285672A26275A8D00DDBE45 /* BeamToBeam2Migration.xcmappingmodel in Sources */,
 				8A4172D626A063FD00F93128 /* NSPoint+Beam.swift in Sources */,
 				96C5FE2F268E80BA00889B5E /* Geolocation.swift in Sources */,

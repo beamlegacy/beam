@@ -42,7 +42,7 @@ class BeamWebView: WKWebView {
     private let automaticallyResignResponder = true
 
     var monitor: Any?
-    var currentConfiguration: WKWebViewConfiguration
+    fileprivate var currentConfiguration: WKWebViewConfiguration
 
     override init(frame: CGRect, configuration: WKWebViewConfiguration) {
         currentConfiguration = configuration
@@ -152,5 +152,15 @@ class BeamWebView: WKWebView {
     public override func mouseDragged(with theEvent: NSEvent) {
         super.mouseDragged(with: theEvent)
         mouseMoveTriggeredChange(convert(theEvent.locationInWindow, from: nil), theEvent.modifierFlags)
+    }
+}
+
+extension WKWebView {
+    /// Works only for a BeamWebView.
+    ///
+    /// WKWebView's `configuration` is marked with @NSCopying.
+    /// So everytime you try to access it, it creates a copy of it, which is most likely not what we want.
+    var configurationWithoutMakingCopy: WKWebViewConfiguration {
+        (self as? BeamWebView)?.currentConfiguration ?? configuration
     }
 }
