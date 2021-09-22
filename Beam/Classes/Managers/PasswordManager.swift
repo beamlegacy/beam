@@ -83,7 +83,12 @@ class PasswordManager {
               uuid: UUID? = nil,
               _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) -> PasswordRecord? {
         do {
-            let passwordRecord = try passwordsDB.save(hostname: hostname, username: username, password: password, uuid: uuid)
+            let passwordRecord: PasswordRecord
+            if let previousRecord = try? passwordsDB.passwordRecord(hostname: hostname, username: username) {
+                passwordRecord = try passwordsDB.update(record: previousRecord, password: password, uuid: uuid)
+            } else {
+                passwordRecord = try passwordsDB.save(hostname: hostname, username: username, password: password, uuid: uuid)
+            }
             if AuthenticationManager.shared.isAuthenticated {
                 try self.saveOnNetwork(passwordRecord, networkCompletion)
             } else {
