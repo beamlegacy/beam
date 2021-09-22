@@ -53,4 +53,9 @@ class JournalTestView: BaseView {
         let index = i - 1
         return scrollView(JournalViewLocators.ScrollViews.journalScrollView.accessibilityIdentifier).children(matching: .textView).matching(identifier: CardViewLocators.TextFields.noteField.accessibilityIdentifier).element(boundBy: index)
     }
+    
+    func clickUpdateNow() -> UpdateTestView {
+        self.staticText(JournalViewLocators.StaticTexts.updateNowButton.accessibilityIdentifier).clickOnExistence()
+        return UpdateTestView()
+    }
 }
