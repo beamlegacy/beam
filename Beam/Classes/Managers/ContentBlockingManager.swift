@@ -53,9 +53,10 @@ class ContentBlockingManager {
     }
 
     func configure(webView: WKWebView) {
-        let configuration = webView.configuration.userContentController
-        configuration.removeAllContentRuleLists()
-        ruleLists.values.forEach(configuration.add)
+        let configuration = webView.configurationWithoutMakingCopy
+        let userContentController = configuration.userContentController
+        userContentController.removeAllContentRuleLists()
+        ruleLists.values.forEach(userContentController.add)
         Logger.shared.logInfo("Added \(ruleLists.count) rule lists", category: .contentBlocking)
     }
 
