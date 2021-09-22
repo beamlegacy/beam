@@ -34,4 +34,10 @@ extension XCUIElement {
         _ = self.waitForExistence(timeout: WaitHelper().minimumWaitTimeout)
         self.click()
     }
+    
+    public func focusAndTypeTextOnExistence(_ text: String) {
+        _ = self.waitForExistence(timeout: WaitHelper().minimumWaitTimeout)
+        self.tapInTheMiddle()
+        self.typeText(text)
+    }
 }

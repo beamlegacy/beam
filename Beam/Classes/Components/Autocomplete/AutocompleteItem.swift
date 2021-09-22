@@ -149,7 +149,7 @@ struct AutocompleteItem: View {
 }
 
 struct AutocompleteItemColorPalette {
-    var textColor = BeamColor.Beam
+    var textColor = BeamColor.Generic.text
     var informationTextColor = BeamColor.Autocomplete.subtitleText
     var selectedBackgroundColor = BeamColor.Autocomplete.selectedBackground
     var touchdownBackgroundColor = BeamColor.Autocomplete.clickedBackground

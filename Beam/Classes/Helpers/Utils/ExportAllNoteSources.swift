@@ -73,7 +73,9 @@ private struct NoteAndSourcesRow {
     }
 }
 
-func export_all_note_sources() {
+func export_all_note_sources(to url: URL?) {
+    guard let url = url else { return }
+
     let docManager = DocumentManager()
     let notesAndSources = docManager.allDocumentsTitles(includeDeletedNotes: true)
         .compactMap { title -> [NoteAndSourcesRow]? in
@@ -100,19 +102,12 @@ func export_all_note_sources() {
             }
     }.joined()
 
-    let fileManager = FileManager.default
-    guard let documentDirectory = try? fileManager.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false) else {
-        Logger.shared.logError("Unable to get document direction", category: .web)
-        return
-    }
-    let noteSourcesFileURL = documentDirectory.appendingPathComponent("beam_all_note_sources \(BeamDate.now).csv")
-
     let noteSourcesCSV = NoteAndSourcesRow.csvHeader + notesAndSources.map {$0.csvRow} .joined()
     do {
-        try noteSourcesCSV.write(to: noteSourcesFileURL, atomically: true, encoding: .utf8)
+        try noteSourcesCSV.write(to: url, atomically: true, encoding: .utf8)
     } catch {
-        Logger.shared.logError("Unable to save note sources to \(noteSourcesFileURL)", category: .web)
+        Logger.shared.logError("Unable to save note sources to \(url)", category: .web)
     }
     //swiftlint:disable:next print
-    print("All note sources saved to file \(noteSourcesFileURL)")
+    print("All note sources saved to file \(url)")
 }
