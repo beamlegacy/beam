@@ -27,12 +27,14 @@ class ClusteringManagerTests: XCTestCase {
         documents = [
             IndexDocument(id: 0, title: "Roger Federer"),
             IndexDocument(id: 1, title: "Rafael Nadal"),
-            IndexDocument(id: 2, title: "Novak Djokovic")
+            IndexDocument(id: 2, title: "Novak Djokovic"),
+            IndexDocument(id: 3, title: "Richard Gasquet")
         ]
         informations = [
             TabInformation(url: URL(string: "http://www.rogerfederer.com")!, document: documents[0], textContent: "Roger Federer is the best tennis player ever", cleanedTextContentForClustering: "Roger Federer is the best tennis player ever"),
             TabInformation(url: URL(string: "https://rafaelnadal.com/en/")!, document: documents[1], textContent: "Rafael Nadal is also pretty good", cleanedTextContentForClustering: "Rafael Nadal is also pretty good"),
-            TabInformation(url: URL(string: "https://novakdjokovic.com/en/")!, document: documents[2], textContent: "Not you", cleanedTextContentForClustering: "Not you")
+            TabInformation(url: URL(string: "https://novakdjokovic.com/en/")!, document: documents[2], textContent: "Not you", cleanedTextContentForClustering: "Not you"),
+            TabInformation(url: URL(string: "http://www.richardgasquet.net")!, document: documents[3], textContent: "Richard Gasquet has a wonderful one-handed backhand", cleanedTextContentForClustering: "Not you")
         ]
         notes = [
             BeamNote(title: "Tennis"),
@@ -60,6 +62,7 @@ class ClusteringManagerTests: XCTestCase {
         expect(self.clusteringManager.clusteredPagesId).toEventually(contain([0, 1, 2]) || contain([2]) || contain([0, 2]) || contain([1, 2]))
     }
 
+    /// Test that adding notes and then pages works correctly
     func testAddNotesThenPages() throws {
         clusteringManager.addNote(note: notes[0])
         expect(self.clusteringManager.clusteredNotesId).toEventually(contain([notes[0].id]))
@@ -77,5 +80,49 @@ class ClusteringManagerTests: XCTestCase {
         if !self.clusteringManager.clusteredNotesId.contains([notes[0].id, notes[1].id, notes[2].id]) {
             expect(self.clusteringManager.clusteredNotesId).toEventually(contain([notes[2].id]) || contain([notes[0].id, notes[2].id]) || contain([notes[1].id, notes[2].id]))
         }
+    }
+
+    /// Test that the clusteringManager knows how to extract id-s and parenting relations correctly
+    func testGetIdAndParent() throws {
+        // Start a new browsing tree
+        let tree = BrowsingTree(nil)
+        var nodes = [tree.current]
+
+        // Navigate to first page, no parent
+        tree.navigateTo(url: informations[0].url.string, title: nil, startReading: false, isLinkActivation: false, readCount: 400)
+        nodes.append(tree.current)
+        informations[0].currentTabTree = tree
+        informations[0].parentBrowsingNode = nodes[0]
+        expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[0]).0) == nodes[1]?.link
+        expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[0]).1).to(beNil())
+
+        // Navigate to second page from first page
+        tree.navigateTo(url: informations[1].url.string, title: nil, startReading: false, isLinkActivation: true, readCount: 400)
+        nodes.append(tree.current)
+        informations[1].currentTabTree = tree
+        informations[1].parentBrowsingNode = nodes[1]
+        expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[1]).0) == nodes[2]?.link
+        expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[1]).1) == nodes[1]?.link
+
+        // Navigate to third page in a new tab
+        tree.openLinkInNewTab()
+        let newTabTree = BrowsingTree(nil)
+        newTabTree.navigateTo(url: informations[2].url.string, title: nil, startReading: false, isLinkActivation: true, readCount: 400)
+        nodes.append(newTabTree.current)
+        informations[2].currentTabTree = newTabTree
+        informations[2].parentBrowsingNode = nodes[2]
+        expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[2]).0) == nodes[3]?.link
+        expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[2]).1) == nodes[2]?.link
+
+        // Go back on the original tree, then open a new page
+        tree.goBack()
+        tree.openLinkInNewTab()
+        let anotherNewTabTree = BrowsingTree(nil)
+        anotherNewTabTree.navigateTo(url: informations[3].url.string, title: nil, startReading: false, isLinkActivation: true, readCount: 400)
+        nodes.append(anotherNewTabTree.current)
+        informations[3].currentTabTree = anotherNewTabTree
+        informations[3].parentBrowsingNode = nodes[1]
+        expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[3]).0) == nodes[4]?.link
+        expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[3]).1) == nodes[1]?.link
     }
 }
