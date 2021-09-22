@@ -104,7 +104,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         // We sync data *after* we potentially connected to websocket, to make sure we don't miss any data
         beamObjectManager.liveSync { _ in
-            self.syncData()
+            self.syncDataWithBeamObject()
         }
         fetchTopDomains()
     }
@@ -132,10 +132,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return oauthWindow
     }
 
-    func syncData() {
+    func syncDataWithBeamObject(_ completionHandler: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
         guard Configuration.env != "test",
               AuthenticationManager.shared.isAuthenticated,
-              Configuration.networkEnabled else { return }
+              Configuration.networkEnabled else {
+            completionHandler?(.success(false))
+            return
+        }
 
         // With Vinyl and Network test recording, and this executing, it generates async network
         // calls and randomly fails.
@@ -143,10 +146,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // My feeling is we should sync + trigger notification and only start network calls when
         // this sync has finished.
 
-        syncDataWithBeamObject()
-    }
-
-    private func syncDataWithBeamObject() {
         let localTimer = BeamDate.now
 
         let previousDefaultDatabase = DatabaseManager.defaultDatabase
@@ -164,6 +163,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                             Logger.shared.logError("Error deleting empty databases: \(error.localizedDescription)",
                                                    category: .database,
                                                    localTimer: localTimer)
+                            completionHandler?(.failure(error))
                         case .success:
                             if previousDefaultDatabase.id != DatabaseManager.defaultDatabase.id {
                                 Logger.shared.logWarning("Default database changed, showing alert",
@@ -172,15 +172,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                                 DatabaseManager.showRestartAlert(previousDefaultDatabase,
                                                                  DatabaseManager.defaultDatabase)
                             }
+                            completionHandler?(.success(true))
                         }
                     }
-                case .failure: break
+                case .failure(let error):
+                    completionHandler?(.failure(error))
                 }
             }
         } catch {
             Logger.shared.logError("Couldn't sync beam objects: \(error.localizedDescription)",
                                    category: .document,
                                    localTimer: localTimer)
+            completionHandler?(.failure(error))
         }
     }
 
@@ -287,12 +290,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let context = CoreDataManager.shared.mainContext
 
         if !context.commitEditing() {
-            NSLog("\(NSStringFromClass(type(of: self))) unable to commit editing to terminate")
+            Logger.shared.logDebug("\(NSStringFromClass(type(of: self))) unable to commit editing to terminate")
             return .terminateCancel
-        }
-
-        if !context.hasChanges {
-            return .terminateNow
         }
 
         do {
@@ -321,8 +320,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 return .terminateCancel
             }
         }
-        // If we got here, it is time to quit.
-        return .terminateNow
+
+        syncDataWithBeamObject { _ in
+            DispatchQueue.main.async {
+                NSApplication.shared.reply(toApplicationShouldTerminate: true)
+            }
+        }
+
+        return .terminateLater
     }
 
     // MARK: -

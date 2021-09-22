@@ -54,7 +54,7 @@ struct Configuration {
             if newValue != networkEnabled {
                 UserDefaults.standard.set(newValue, forKey: networkEnabledKey)
                 if newValue {
-                    AppDelegate.main.syncData()
+                    AppDelegate.main.syncDataWithBeamObject()
                 }
             }
         }
