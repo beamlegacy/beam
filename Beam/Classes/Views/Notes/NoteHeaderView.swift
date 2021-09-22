@@ -7,6 +7,7 @@
 
 import SwiftUI
 import BeamCore
+import Combine
 
 struct NoteHeaderView: View {
 
@@ -14,15 +15,38 @@ struct NoteHeaderView: View {
     static let topPadding: CGFloat = PreferencesManager.editorHeaderTopPadding
     @ObservedObject var model: NoteHeaderView.ViewModel
 
+    var topPadding: CGFloat = Self.topPadding
     private let errorColor = BeamColor.Shiraz
     private var textColor: BeamColor {
         model.isTitleTaken ? errorColor : BeamColor.Generic.text
     }
-    private static var dateFormatter: DateFormatter = {
-        let fmt = DateFormatter()
-        fmt.dateFormat = "MMMM dd, yyyy"
-        return fmt
-    }()
+
+    @State private var publishShowError = false
+    @State private var hoveringLinkButton = false
+
+    private var copyLinkView: some View {
+        let justCopiedLink = model.justCopiedLinkFrom == .fromLinkIcon
+        let transition = AnyTransition.asymmetric(insertion: AnyTransition.opacity.animation(BeamAnimation.easeInOut(duration: 0.2)),
+                                                  removal: AnyTransition.opacity.animation(BeamAnimation.easeInOut(duration: 0.05)))
+        return ButtonLabel(icon: "editor-url_link", customStyle: .tinyIconStyle) {
+            model.copyLink(source: .fromLinkIcon)
+        }
+        .overlay(
+            ZStack {
+                if justCopiedLink {
+                    Tooltip(title: "Link Copied")
+                        .fixedSize().offset(x: -18, y: 0)
+                        .transition(transition)
+                } else if hoveringLinkButton {
+                    Tooltip(title: "Copy Link")
+                        .fixedSize().offset(x: -18, y: 0)
+                        .transition(transition)
+                }
+            }, alignment: .trailing)
+        .onHover { hoveringLinkButton = $0 }
+        .transition(AnyTransition.opacity.animation(BeamAnimation.easeInOut(duration: 0.15)))
+        .offset(x: -20, y: 0)
+    }
 
     private var titleView: some View {
         ZStack(alignment: .leading) {
@@ -58,7 +82,7 @@ struct NoteHeaderView: View {
         .simultaneousGesture(TapGesture(count: 2).onEnded(model.onDoubleTap))
         .animation(nil)
         .wiggleEffect(animatableValue: model.wiggleValue)
-        .animation(model.wiggleValue > 0 ? .easeInOut(duration: 0.3) : nil)
+        .animation(model.wiggleValue > 0 ? BeamAnimation.easeInOut(duration: 0.3) : nil)
         // force reloading the view on note change to clean up text states
         // and enables appear/disappear events between notes
         .id(model.note)
@@ -79,13 +103,35 @@ struct NoteHeaderView: View {
         }
         .font(BeamFont.medium(size: 10).swiftUI)
         .foregroundColor(BeamColor.Generic.placeholder.swiftUI)
-        .transition(AnyTransition.opacity.animation(Animation.easeInOut(duration: 0.15)))
+        .transition(AnyTransition.opacity.animation(BeamAnimation.easeInOut(duration: 0.15)))
     }
 
     private var dateView: some View {
         Text("\(BeamDate.journalNoteTitle(for: model.note.creationDate))")
             .font(BeamFont.medium(size: 12).swiftUI)
             .foregroundColor(BeamColor.Generic.placeholder.swiftUI)
+    }
+
+    private var actionsView: some View {
+        HStack(spacing: BeamSpacing._100) {
+            NoteHeaderPublishButton(publishState: model.publishState,
+                                    justCopiedLink: model.justCopiedLinkFrom == .fromPublishButton,
+                                    showError: publishShowError,
+                                    action: {
+                                        let canPerform = model.togglePublish()
+                                        if !canPerform {
+                                            publishShowError = true
+                                            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: .seconds(2))) {
+                                                publishShowError = false
+                                            }
+                                        }
+                                    })
+
+//            Feature not available yet.
+//            ButtonLabel(icon: "editor-sources", state: .disabled)
+
+            ButtonLabel(icon: "editor-delete", action: model.promptConfirmDelete)
+        }
     }
 
     var body: some View {
@@ -96,34 +142,41 @@ struct NoteHeaderView: View {
                     .offset(x: 1, y: 0) // compensate for different font size leading alignment
                 HStack {
                     titleView
+                        .overlay(model.publishState != .isPublic ? nil : copyLinkView, alignment: .leading)
                     Spacer()
-                    GeometryReader { geometry in
-                        ButtonLabel(icon: "editor-options") {
-                            let frame = geometry.frame(in: .global)
-                            model.showContextualMenu(at: CGPoint(x: frame.maxX - 26, y: frame.maxY - 26))
-                        }
-                    }
-                    .frame(width: 26, height: 26)
+                    actionsView
                 }
                 subtitleInfoView
             }
         }
-        .padding(.top, Self.topPadding)
+        .padding(.top, self.topPadding)
         .padding(.leading, Self.leadingPadding)
     }
 }
 
 extension NoteHeaderView {
+    fileprivate enum CopyLinkSource {
+        case fromLinkIcon
+        case fromPublishButton
+    }
+
     class ViewModel: ObservableObject {
         @Published var note: BeamNote
         private weak var state: BeamState?
 
+        // title editing
         @Published fileprivate var titleText: String
         @Published fileprivate var titleSelectedRange: Range<Int>?
-
         @Published fileprivate var isEditingTitle = false
         @Published fileprivate var isTitleTaken = false
         @Published fileprivate var wiggleValue = CGFloat(0)
+
+        // publishing
+        @Published fileprivate var publishState: NoteHeaderPublishButton.PublishButtonState = .isPrivate
+        @Published fileprivate var justCopiedLinkFrom: NoteHeaderView.CopyLinkSource?
+        private var publishingDispatchItem: DispatchWorkItem?
+        private var copyLinkDispatchItem: DispatchWorkItem?
+        private var noteObserver: AnyCancellable?
 
         private var documentManager: DocumentManager
         fileprivate var canEditTitle: Bool {
@@ -135,6 +188,11 @@ extension NoteHeaderView {
             self.state = state
             self.documentManager = documentManager
             self.titleText = note.title
+            self.publishState = note.isPublic ? .isPublic : .isPrivate
+            self.noteObserver = note.$isPublic.dropFirst().removeDuplicates().sink { [weak self] newValue in
+                guard self?.publishState == .isPublic || self?.publishState == .isPrivate else { return }
+                self?.publishState = newValue ? .isPublic : .isPrivate
+            }
         }
 
         func textFieldDidChange(_ text: String) {
@@ -174,33 +232,6 @@ extension NoteHeaderView {
             isEditingTitle = true
         }
 
-        func showContextualMenu(at: CGPoint) {
-            var items: [ContextMenuItem] = []
-            let isNotePublic = note.isPublic
-            if isNotePublic {
-                items.append(contentsOf: [
-                    ContextMenuItem(title: "Copy Link", action: copyLink),
-                    ContextMenuItem(title: "Invite...", action: nil),
-                    ContextMenuItem.separator()
-                ])
-            }
-            items.append(contentsOf: [
-                ContextMenuItem(title: isNotePublic ? "Unpublish" : "Publish", action: togglePublish),
-                ContextMenuItem.separator()
-            ])
-            items.append(ContextMenuItem(title: "Rename", action: canEditTitle ? focusTitle : nil))
-
-            items.append(contentsOf: [
-                ContextMenuItem.separator(),
-                ContextMenuItem(title: "Delete", action: onDelete)
-            ])
-
-            let menuView = ContextMenuFormatterView(items: items, direction: .bottom) {
-                CustomPopoverPresenter.shared.dismissMenu()
-            }
-            CustomPopoverPresenter.shared.presentMenu(menuView, atPoint: at)
-        }
-
         func onTap() {
             guard canEditTitle else { return }
             titleSelectedRange = nil
@@ -217,28 +248,83 @@ extension NoteHeaderView {
             isEditingTitle = true
         }
 
-        private func copyLink() {
+        // MARK: Link
+        fileprivate func copyLink(source: NoteHeaderView.CopyLinkSource) {
             let sharingUtils = BeamNoteSharingUtils(note: note)
             sharingUtils.copyLinkToClipboard { [weak self] _ in
-                self?.state?.overlayViewModel.present(text: "Link Copied", icon: "tooltip-mark", alignment: .bottomLeading)
+                self?.justCopiedLinkFrom = source
+                self?.copyLinkDispatchItem?.cancel()
+                let workItem = DispatchWorkItem { [weak self] in
+                    self?.justCopiedLinkFrom = nil
+                }
+                self?.copyLinkDispatchItem = workItem
+                DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: .seconds(2)), execute: workItem)
             }
         }
 
-        private func togglePublish() {
+        // MARK: Publishing
+
+        /// returns true if user is allowed to perform the action
+        func togglePublish() -> Bool {
+            guard ![.publishing, .unpublishing].contains(publishState) else { return true }
             let sharingUtils = BeamNoteSharingUtils(note: note)
             let isPublic = note.isPublic
             guard isPublic || sharingUtils.canMakePublic else {
-                state?.overlayViewModel.present(text: "You need to be logged in", icon: "status-private", alignment: .bottomLeading)
-                return
+                return false
             }
-            sharingUtils.makeNotePublic(!isPublic, documentManager: documentManager) { [weak self] _ in
-                if self?.note.isPublic == true {
-                    self?.copyLink()
+            if !isPublic {
+                publishState = .publishing
+                sharingUtils.makeNotePublic(true, documentManager: documentManager) { [weak self] _ in
+                    DispatchQueue.main.async {
+                        self?.noteBecamePublic(true)
+                        self?.copyLink(source: .fromPublishButton)
+                    }
+                }
+            } else {
+                publishState = .unpublishing
+                promptConfirmUnpublish()
+            }
+            return true
+        }
+
+        private func noteBecamePublic(_ value: Bool, debounce: Bool = true) {
+            publishingDispatchItem?.cancel()
+            if debounce {
+                publishState = value ? .justPublished : .justUnpublished
+                let workItem = DispatchWorkItem { [weak self] in
+                    self?.publishState = value ? .isPublic : .isPrivate
+                }
+                publishingDispatchItem = workItem
+                DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: .seconds(2)), execute: workItem)
+            } else {
+                publishState = value ? .isPublic : .isPrivate
+            }
+        }
+
+        private func promptConfirmUnpublish() {
+            let alert = NSAlert()
+            alert.messageText = "Are you sure you want to unpublish the card \"\(note.title)\"?"
+            alert.informativeText = "Others will no longer have access to this card."
+            alert.addButton(withTitle: "Unpublish")
+            alert.addButton(withTitle: "Cancel")
+            alert.alertStyle = .warning
+            guard let window = AppDelegate.main.window else { return }
+            alert.beginSheetModal(for: window) { [weak self] response in
+                guard let self = self else { return }
+                guard response == .alertFirstButtonReturn else {
+                    self.publishState = self.note.isPublic == true ? .isPublic : .isPrivate
+                    return
+                }
+                BeamNoteSharingUtils(note: self.note).makeNotePublic(false, documentManager: self.documentManager) { [weak self] _ in
+                    DispatchQueue.main.async {
+                        self?.noteBecamePublic(false)
+                    }
                 }
             }
         }
 
-        private func onDelete() {
+        // MARK: Delete
+        private func confirmedDelete() {
             let cmdManager = CommandManagerAsync<DocumentManager>()
             cmdManager.deleteDocuments(ids: [note.id], in: documentManager)
             guard let state = state else { return }
@@ -250,6 +336,20 @@ extension NoteHeaderView {
                 }
                 state.backForwardList.clearForward()
                 state.updateCanGoBackForward()
+            }
+        }
+
+        func promptConfirmDelete() {
+            let alert = NSAlert()
+            alert.messageText = "Are you sure you want to delete the card \"\(note.title)\"?"
+            alert.informativeText = "This cannot be undone."
+            alert.addButton(withTitle: "Delete...")
+            alert.addButton(withTitle: "Cancel")
+            alert.alertStyle = .warning
+            guard let window = AppDelegate.main.window else { return }
+            alert.beginSheetModal(for: window) { [weak self] response in
+                guard response == .alertFirstButtonReturn, let self = self else { return }
+                self.confirmedDelete()
             }
         }
     }
@@ -267,10 +367,13 @@ struct NoteHeaderView_Previews: PreviewProvider {
     }
     static var previews: some View {
         VStack {
-            NoteHeaderView(model: classicModel)
-            NoteHeaderView(model: titleTakenModel)
+            NoteHeaderView(model: classicModel, topPadding: 20)
+            NoteHeaderView(model: titleTakenModel, topPadding: 60)
         }
-        .padding()
+        .border(Color.green)
+        .padding(.vertical)
+        .padding(.horizontal, 100)
+        .border(Color.red)
         .background(BeamColor.Generic.background.swiftUI)
     }
 }
