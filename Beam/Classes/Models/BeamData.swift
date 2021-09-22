@@ -286,11 +286,12 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     }
 
     func setup(webView: WKWebView) {
+        let configuration = webView.configurationWithoutMakingCopy
         for cookie in cookies.cookies ?? [] {
-            webView.configuration.websiteDataStore.httpCookieStore.setCookie(cookie)
+            configuration.websiteDataStore.httpCookieStore.setCookie(cookie)
         }
 
-        webView.configuration.websiteDataStore.httpCookieStore.add(self)
+        configuration.websiteDataStore.httpCookieStore.add(self)
     }
 
     ///Create a .zip backup of all the content of the BeamData folder in Beam sandbox
