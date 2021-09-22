@@ -70,16 +70,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             switch arg {
             case "--export-all-browsing-sessions":
                 export_all_browsing_sessions()
-            case "--export-all-note-sources":
-                export_all_note_sources()
             default:
                 continue
             }
         }
 
         let exitingArguments = [
-            "--export-all-browsing-sessions",
-            "--export-all-note-sources"
+            "--export-all-browsing-sessions"
         ]
         if Set(ProcessInfo.processInfo.arguments).intersection(exitingArguments).count > 0 {
             exit(0)
