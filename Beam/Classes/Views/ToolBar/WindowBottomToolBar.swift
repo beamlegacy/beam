@@ -34,13 +34,7 @@ struct WindowBottomToolBar: View {
     var body: some View {
         GeometryReader { geo in
             HStack {
-                if let note = currentNote, state.mode == .note {
-                    SharingStatusView(model: SharingStatusViewModel(note: note,
-                                                                    state: state,
-                                                                    documentManager: state.data.documentManager))
-                } else {
-                    SmallUpdateIndicatorView(versionChecker: state.data.versionChecker)
-                }
+                SmallUpdateIndicatorView(versionChecker: state.data.versionChecker)
                 Spacer(minLength: 20)
                 if [.today, .note].contains(state.mode) {
                     recentsStack(containerGeometry: geo)
