@@ -31,6 +31,7 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
     case create100Notes = "Create 100 Random Notes"
     case setAutoUpdateToMock = "Set Autoupdate to Mock"
     case cleanDownloads = "Clean SF-Symbols-3.dmg from Downloads"
+    case populatePasswordsDB = "Populate Passwords Database"
 
     // Omnibar setup
     case omnibarFillHistory = "Fill History with Results"

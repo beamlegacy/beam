@@ -8,6 +8,7 @@ class BeamUITestsMenuGenerator {
     func executeCommand(_ command: UITestMenuAvailableCommands) {
         switch command {
         case .populateDBWithJournal: populateWithJournalNote(count: 10)
+        case .populatePasswordsDB: populatePasswordsDB()
         case .destroyDB: destroyDatabase()
         case .logout: logout()
         case .deleteLogs: deleteLogs()
@@ -110,6 +111,18 @@ class BeamUITestsMenuGenerator {
         generator.generateNotes()
         for note in generator.notes {
             note.save(documentManager: documentManager)
+        }
+    }
+
+    private func populatePasswordsDB() {
+        guard let url = Bundle.main.url(forResource: "UITests-Passwords", withExtension: "csv") else {
+            Logger.shared.logError("Passwords.csv file not found in E2ETests/PasswordManager", category: .general)
+            return
+        }
+        do {
+            try PasswordImporter.importPasswords(fromCSV: url)
+        } catch {
+            Logger.shared.logError(error.localizedDescription, category: .passwordManager)
         }
     }
 

@@ -368,6 +368,7 @@
 		8726448F26199B8F0070E83D /* OptionSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8726448E26199B8F0070E83D /* OptionSelector.swift */; };
 		872644C3261B29620070E83D /* PasswordManagerMenuViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 872644C1261B29620070E83D /* PasswordManagerMenuViewModel.swift */; };
 		8746CCA6266DFDCD00F44D41 /* PasswordImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8746CCA5266DFDCD00F44D41 /* PasswordImporter.swift */; };
+		8759678526FB903C0097C3CC /* UITests-Passwords.csv in Resources */ = {isa = PBXBuildFile; fileRef = 8759677E26FB8BDA0097C3CC /* UITests-Passwords.csv */; };
 		8760F45926F1DCA700864D9B /* PasswordManagerCredentialsBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8760F45826F1DCA700864D9B /* PasswordManagerCredentialsBuilder.swift */; };
 		8775C5F32613212C00A26CAC /* StoredPasswordCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8775C5F22613212C00A26CAC /* StoredPasswordCell.swift */; };
 		8775C5FB261323EC00A26CAC /* PasswordManagerMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8775C5FA261323EC00A26CAC /* PasswordManagerMenu.swift */; };
@@ -1370,6 +1371,7 @@
 		8726448E26199B8F0070E83D /* OptionSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OptionSelector.swift; sourceTree = "<group>"; };
 		872644C1261B29620070E83D /* PasswordManagerMenuViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PasswordManagerMenuViewModel.swift; sourceTree = "<group>"; };
 		8746CCA5266DFDCD00F44D41 /* PasswordImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordImporter.swift; sourceTree = "<group>"; };
+		8759677E26FB8BDA0097C3CC /* UITests-Passwords.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = "UITests-Passwords.csv"; sourceTree = "<group>"; };
 		8760F45826F1DCA700864D9B /* PasswordManagerCredentialsBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordManagerCredentialsBuilder.swift; sourceTree = "<group>"; };
 		8775C5F22613212C00A26CAC /* StoredPasswordCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoredPasswordCell.swift; sourceTree = "<group>"; };
 		8775C5FA261323EC00A26CAC /* PasswordManagerMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordManagerMenu.swift; sourceTree = "<group>"; };
@@ -3996,6 +3998,7 @@
 			isa = PBXGroup;
 			children = (
 				B575360426BDA6260053CE2D /* LoginTest.swift */,
+				8759677E26FB8BDA0097C3CC /* UITests-Passwords.csv */,
 			);
 			path = PasswordManager;
 			sourceTree = "<group>";
@@ -4547,6 +4550,7 @@
 				A5F47EC826F8D718004B7CDE /* editor-publish.json in Resources */,
 				8AD2637426F4A0480074D673 /* Frames.test.ts in Resources */,
 				5224CD762685FFFC00D4179E /* beam_object_updated_at.graphql in Resources */,
+				8759678526FB903C0097C3CC /* UITests-Passwords.csv in Resources */,
 				8AD2635B26F4A0480074D673 /* Native.test.ts in Resources */,
 				8AD2637526F4A0480074D673 /* BeamWindowMock.ts in Resources */,
 				8AD2637126F4A0480074D673 /* UITests-Playground.html in Resources */,
