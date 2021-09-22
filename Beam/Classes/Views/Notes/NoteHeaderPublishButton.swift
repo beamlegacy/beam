@@ -1,0 +1,93 @@
+//
+//  NoteHeaderPublishButton.swift
+//  Beam
+//
+//  Created by Remi Santos on 21/09/2021.
+//
+
+import SwiftUI
+
+struct NoteHeaderPublishButton: View {
+
+    enum PublishButtonState {
+        case isPublic
+        case isPrivate
+        case publishing
+        case unpublishing
+        case justPublished
+        case justUnpublished
+    }
+
+    var publishState: PublishButtonState
+    var justCopiedLink = false
+    var showError: Bool
+    var action: () -> Void
+
+    @State private var hovering = false
+    @State private var title: String?
+
+    private let customButtonLabelStyle = ButtonLabelStyle(animation: BeamAnimation.easeInOut(duration: 0.15))
+    var isWaitingChanges: Bool {
+        [.publishing, .unpublishing].contains(publishState)
+    }
+    var body: some View {
+        let displayTitle = justCopiedLink || hovering || isWaitingChanges
+        var publishTitle: String?
+        var displayCheckIcon = false
+        let isPublic = publishState == .isPublic || publishState == .unpublishing
+        let animateLottie = hovering && !isWaitingChanges
+        if displayTitle {
+            if publishState == .justPublished || justCopiedLink {
+                publishTitle = "Published"
+                displayCheckIcon = true
+            } else {
+                publishTitle = isPublic ? "Unpublish" : "Publish"
+            }
+        }
+
+        return HStack(spacing: BeamSpacing._100) {
+            ButtonLabel(customView: { _, _ in
+                AnyView(
+                    HStack(spacing: BeamSpacing._20) {
+                        ZStack {
+                            // Using a ZStack with opacity to better animate alongside the spring text
+                            Icon(name: "collect-generic", size: 16, color: BeamColor.Niobium.swiftUI)
+                                .opacity(displayCheckIcon ? 1 : 0)
+                            LottieView(name: "editor-publish", playing: animateLottie,
+                                       color: displayTitle ? BeamColor.Niobium.nsColor : BeamColor.LightStoneGray.nsColor,
+                                       loopMode: .loop, speed: 2)
+                                .opacity(displayCheckIcon || isPublic ? 0 : 1)
+                            LottieView(name: "editor-unpublish", playing: animateLottie,
+                                       color: displayTitle ? BeamColor.Niobium.nsColor : BeamColor.LightStoneGray.nsColor,
+                                       loopMode: .loop, speed: 2)
+                                .opacity(displayCheckIcon || !isPublic ? 0 : 1)
+                        }
+                        .frame(width: 16, height: 16)
+                        if let title = publishTitle {
+                            Text(title)
+                                .font(BeamFont.regular(size: 12).swiftUI)
+                                .foregroundColor(BeamColor.Niobium.swiftUI)
+                                .transition(.asymmetric(insertion: AnyTransition.opacity.combined(with: .move(edge: .trailing)),
+                                                        removal: AnyTransition.opacity.combined(with: .move(edge: .trailing)).animation(BeamAnimation.easeInOut(duration: 0.05))
+                                ))
+                        }
+                    }
+                    .animation(BeamAnimation.spring(stiffness: 480, damping: 30))
+                )
+            }, state: displayTitle ? .clicked : .normal, customStyle: customButtonLabelStyle, action: action)
+            .animation(BeamAnimation.easeInOut(duration: 0.15))
+            .onHover { h in
+                hovering = h
+            }
+            .overlay(!justCopiedLink ? nil :
+                        Tooltip(title: "Link Copied")
+                        .fixedSize().offset(x: 0, y: -25)
+                        .transition(AnyTransition.opacity.animation(BeamAnimation.defaultiOSEasing(duration: 0.3))), alignment: .top)
+
+            .overlay(showError != true ? nil :
+                        Tooltip(title: "You need to be logged in", icon: "status-private")
+                        .fixedSize().offset(x: 0, y: -25)
+                        .transition(AnyTransition.opacity.animation(BeamAnimation.defaultiOSEasing(duration: 0.3))), alignment: .top)
+        }
+    }
+}
