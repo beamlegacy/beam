@@ -88,7 +88,7 @@ extension BeamText {
         var font = BeamFont.regular(size: fontSize).nsFont
 
         switch elementKind {
-        case .bullet, .code, .quote, .check:
+        case .bullet, .code, .quote, .check, .divider:
             break
         case .heading:
             font = BeamFont.medium(size: fontSize).nsFont

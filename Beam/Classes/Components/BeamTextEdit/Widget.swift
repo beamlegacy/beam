@@ -463,6 +463,10 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         contentsFrame.height + contentsPadding.top + contentsPadding.bottom
     }
 
+    var selectionLayerPosY: CGFloat {
+        -2.5
+    }
+
     private func configureSelectionLayer() {
         selectionLayer.anchorPoint = CGPoint()
         selectionLayer.cornerRadius = 2

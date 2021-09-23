@@ -232,6 +232,7 @@ extension BeamTextEdit {
             "*": makeBoldOrItalic,
             "~": makeStrikethrough,
             "_": makeUnderline,
+            "-": { self.postInputHandleDash(node: node) },
             " ": {
                 if let res = makeHeader() {
                     return res
@@ -317,5 +318,27 @@ extension BeamTextEdit {
         }
         insertPair(node: node, "(", ")")
         return false
+    }
+
+    // MARK: "-"
+    func postInputHandleDash(node: TextNode) -> BeamText.Attribute? {
+        guard node.textCount == 3, node.cursorPosition == 3 else { return nil }
+
+        let isTripleDash = node.text.prefix(3).text == "---"
+        if isTripleDash {
+            let cmdManager = rootNode.focusedCmdManager
+            cmdManager.beginGroup(with: "Insert Divider")
+            let divider = BeamElement()
+            divider.kind = .divider
+            if let parentNode = node.parent as? ElementNode {
+                cmdManager.insertElement(divider, inNode: parentNode, afterNode: node)
+                cmdManager.deleteElement(for: node)
+                let newTextElement = BeamElement("")
+                cmdManager.insertElement(newTextElement, inNode: parentNode, afterElement: divider)
+                cmdManager.focus(newTextElement, in: parentNode)
+            }
+            cmdManager.endGroup()
+        }
+        return nil
     }
 }
