@@ -5,346 +5,355 @@
 
 "use strict";
 
-const MAXIMUM_HIGHLIGHT_COUNT = 999;
-const SCROLL_OFFSET_Y = 40;
-const SCROLL_DURATION = 100;
-
-const HIGHLIGHT_CLASS_NAME = "__ID__find-highlight";
-const HIGHLIGHT_CLASS_NAME_ACTIVE = "__ID__find-highlight-active";
-
-const HIGHLIGHT_COLOR = "#FFD600";
-const HIGHLIGHT_COLOR_ACTIVE = "#FF9900";
-
-const HIGHLIGHT_CSS =
-`.${HIGHLIGHT_CLASS_NAME} {
-  color: #000;
-  background-color: ${HIGHLIGHT_COLOR};
-  box-shadow: 0 0 0 2px ${HIGHLIGHT_COLOR};
-  transition: all ${SCROLL_DURATION}ms ease ${SCROLL_DURATION}ms;
+if (!window.beam) {
+  window.beam = {};
 }
-.${HIGHLIGHT_CLASS_NAME}.${HIGHLIGHT_CLASS_NAME_ACTIVE} {
-  background-color: ${HIGHLIGHT_COLOR_ACTIVE};
-  box-shadow: 0 0 0 4px ${HIGHLIGHT_COLOR_ACTIVE},0 1px 3px 3px rgba(0,0,0,.75);
-}`;
+window.beam.__ID__SearchWebPage = {
 
-var lastEscapedQuery = "";
-var lastFindOperation = null;
-var lastReplacements = null;
-var lastHighlights = null;
-var activeHighlightIndex = -1;
-var height = 1;
+    lastEscapedQuery: "",
+    lastFindOperation: null,
+    lastReplacements: null,
+    lastHighlights: null,
+    activeHighlightIndex: -1,
+    height: 1,
 
-var highlightSpan = document.createElement("span");
-highlightSpan.className = HIGHLIGHT_CLASS_NAME;
+    highlightSpan: null,
+    styleElement: null,
 
-var styleElement = document.createElement("style");
-styleElement.innerHTML = HIGHLIGHT_CSS;
+    constants: {
+      MAXIMUM_HIGHLIGHT_COUNT: 999,
+      SCROLL_OFFSET_Y: 40,
+      SCROLL_DURATION: 100,
 
-function find(query) {
-  let trimmedQuery = query.trim();
+      HIGHLIGHT_CLASS_NAME: "__ID__find-highlight",
+      HIGHLIGHT_CLASS_NAME_ACTIVE: "__ID__find-highlight-active",
 
-  // If the trimmed query is empty, use it instead of the escaped
-  // query to prevent searching for nothing but whitepsace.
-  let escapedQuery = !trimmedQuery ? trimmedQuery : query.replace(/([.?*+^$[\]\\(){}|-])/g, "\\$1");
-  if (escapedQuery === lastEscapedQuery) {
-    return;
-  }
+      HIGHLIGHT_COLOR: "#FFD600",
+      HIGHLIGHT_COLOR_ACTIVE: "#FF9900",
+    },
 
-  if (lastFindOperation) {
-    lastFindOperation.cancel();
-  }
+    buildCSS: function () {
+      return `.${this.constants.HIGHLIGHT_CLASS_NAME} {
+        color: #000;
+        background-color: ${this.constants.HIGHLIGHT_COLOR};
+        box-shadow: 0 0 0 2px ${this.constants.HIGHLIGHT_COLOR};
+        transition: all ${this.constants.SCROLL_DURATION}ms ease ${this.constants.SCROLL_DURATION}ms;
+      }
+      .${this.constants.HIGHLIGHT_CLASS_NAME}.${this.constants.HIGHLIGHT_CLASS_NAME_ACTIVE} {
+        background-color: ${this.constants.HIGHLIGHT_COLOR_ACTIVE};
+        box-shadow: 0 0 0 4px ${this.constants.HIGHLIGHT_COLOR_ACTIVE},0 1px 3px 3px rgba(0,0,0,.75);
+      }`;
+    },
 
-  clear();
+    setupElements: function () {
+      this.highlightSpan = document.createElement("span");
+      this.highlightSpan.className = this.constants.HIGHLIGHT_CLASS_NAME;
 
-    var body = document.body,
-        html = document.documentElement;
+      this.styleElement = document.createElement("style");
+      this.styleElement.innerHTML = this.buildCSS();
+    },
 
-    height = Math.max(body.scrollHeight, body.offsetHeight,
-                          html.clientHeight, html.scrollHeight, html.offsetHeight);
+    find: function (query) {
+      let trimmedQuery = query.trim();
 
-  lastEscapedQuery = escapedQuery;
+      // If the trimmed query is empty, use it instead of the escaped
+      // query to prevent searching for nothing but whitepsace.
+      let escapedQuery = !trimmedQuery ? trimmedQuery : query.replace(/([.?*+^$[\]\\(){}|-])/g, "\\$1");
+      if (escapedQuery === this.lastEscapedQuery) {
+        return;
+      }
 
-  if (!escapedQuery) {
-    webkit.messageHandlers.webPageSearch.postMessage({ currentResult: 0, totalResults: 0, positions: [], height: height, incompleteSearch: false  });
-    return;
-  }
+      if (this.lastFindOperation) {
+        this.lastFindOperation.cancel();
+      }
 
-  let queryRegExp = new RegExp("(" + escapedQuery + ")", "gi");
+      this.clear();
 
-  lastFindOperation = getMatchingNodeReplacements(queryRegExp, function(replacements, highlights, isMaximumHighlightCount) {
-    let replacement;
-      for (let i = 0, length = replacements.length; i < length; i++) {
-      replacement = replacements[i];
+      var body = document.body,
+          html = document.documentElement;
 
-      replacement.originalNode.replaceWith(replacement.replacementFragment);
-    }
+      this.height = Math.max(body.scrollHeight, body.offsetHeight,
+                            html.clientHeight, html.scrollHeight, html.offsetHeight);
+
+      this.lastEscapedQuery = escapedQuery;
+
+      if (!escapedQuery) {
+        window.webkit.messageHandlers.webPageSearch.postMessage({ currentResult: 0, totalResults: 0, positions: [], height: this.height, incompleteSearch: false  });
+        return;
+      }
+
+      let queryRegExp = new RegExp("(" + escapedQuery + ")", "gi");
+      this.lastFindOperation = this.getMatchingNodeReplacements(queryRegExp, (replacements, highlights, isMaximumHighlightCount) => {
+        let replacement;
+        for (let i = 0, length = replacements.length; i < length; i++) {
+          replacement = replacements[i];
+          replacement.originalNode.replaceWith(replacement.replacementFragment);
+        }
 
         let positions = []
-      for (let i = 0, length = highlights.length; i < length; i++) {
-        let hightlight = highlights[i];
+        for (let i = 0, length = highlights.length; i < length; i++) {
+          let hightlight = highlights[i];
 
           let pos = hightlight.getBoundingClientRect();
           positions.push(pos.top + window.scrollY);
-      }
+        }
 
-    lastFindOperation = null;
-    lastReplacements = replacements;
-    lastHighlights = highlights;
-    activeHighlightIndex = -1;
+        this.lastFindOperation = null;
+        this.lastReplacements = replacements;
+        this.lastHighlights = highlights;
+        this.activeHighlightIndex = -1;
 
-    let totalResults = highlights.length;
-    webkit.messageHandlers.webPageSearch.postMessage({ totalResults: totalResults, positions: positions, height: height, incompleteSearch: isMaximumHighlightCount });
+        let totalResults = highlights.length;
+        window.webkit.messageHandlers.webPageSearch.postMessage({ totalResults: totalResults, positions: positions, height: this.height, incompleteSearch: isMaximumHighlightCount });
 
-    findNext();
-  });
-}
-
-function findNext() {
-  if (lastHighlights) {
-    activeHighlightIndex = (activeHighlightIndex + lastHighlights.length + 1) % lastHighlights.length;
-    updateActiveHighlight();
-  }
-}
-
-function findPrevious() {
-  if (lastHighlights) {
-    activeHighlightIndex = (activeHighlightIndex + lastHighlights.length - 1) % lastHighlights.length;
-    updateActiveHighlight();
-  }
-}
-
-function findDone() {
-  styleElement.remove();
-  clear();
-
-  lastEscapedQuery = "";
-}
-
-function clear() {
-  if (!lastHighlights) {
-    return;
-  }
-
-  let replacements = lastReplacements;
-  let highlights = lastHighlights;
-
-  let highlight;
-  for (let i = 0, length = highlights.length; i < length; i++) {
-    highlight = highlights[i];
-
-    removeHighlight(highlight);
-  }
-
-  lastReplacements = null;
-  lastHighlights = null;
-  activeHighlightIndex = -1;
-}
-
-function updateActiveHighlight() {
-  if (!styleElement.parentNode) {
-    document.body.appendChild(styleElement);
-  }
-
-  let lastActiveHighlight = document.querySelector("." + HIGHLIGHT_CLASS_NAME_ACTIVE);
-  if (lastActiveHighlight) {
-    lastActiveHighlight.className = HIGHLIGHT_CLASS_NAME;
-  }
-
-  if (!lastHighlights) {
-    return;
-  }
-
-  let activeHighlight = lastHighlights[activeHighlightIndex];
-  if (activeHighlight) {
-    activeHighlight.className = HIGHLIGHT_CLASS_NAME + " " + HIGHLIGHT_CLASS_NAME_ACTIVE;
-    scrollToElement(activeHighlight, SCROLL_DURATION);
-    
-    let selected = activeHighlight.getBoundingClientRect().top + window.scrollY;
-
-    webkit.messageHandlers.webPageSearch.postMessage({ currentResult: activeHighlightIndex + 1, currentSelected: selected, height: height });
-  } else {
-    webkit.messageHandlers.webPageSearch.postMessage({ currentResult: 0 });
-  }
-}
-
-function removeHighlight(highlight) {
-  let parent = highlight.parentNode;
-  if (parent) {
-    while (highlight.firstChild) {
-      parent.insertBefore(highlight.firstChild, highlight);
-    }
-
-    highlight.remove();
-    parent.normalize();
-  }
-}
-
-function asyncTextNodeWalker(iterator) {
-  let operation = new Operation();
-  let walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
-
-  let timeout = setTimeout(function() {
-    chunkedLoop(function() { return walker.nextNode(); }, function(node) {
-      if (operation.cancelled) {
-        return false;
-      }
-
-      iterator(node);
-      return true;
-    }, 100).then(function() {
-      operation.complete();
-    });
-  }, 50);
-
-  operation.oncancelled = function() {
-    clearTimeout(timeout);
-  };
-
-  return operation;
-}
-
-function getMatchingNodeReplacements(regExp, callback) {
-  let replacements = [];
-  let highlights = [];
-  let isMaximumHighlightCount = false;
-
-  let operation = asyncTextNodeWalker(function(originalNode) {
-    if (!isTextNodeVisible(originalNode) || originalNode.parentElement.nodeName === "IFRAME") {
-      return;
-    }
-
-    let originalTextContent = originalNode.textContent;
-    let lastIndex = 0;
-    let replacementFragment = document.createDocumentFragment();
-    let hasReplacement = false;
-    let match;
-
-    while ((match = regExp.exec(originalTextContent))) {
-      let matchTextContent = match[0];
-
-      // Add any text before this match.
-      if (match.index > 0) {
-        let leadingSubstring = originalTextContent.substring(lastIndex, match.index);
-        replacementFragment.appendChild(document.createTextNode(leadingSubstring));
-      }
-
-      // Add element for this match.
-      let element = highlightSpan.cloneNode(false);
-      element.textContent = matchTextContent;
-      replacementFragment.appendChild(element);
-      highlights.push(element);
-
-      lastIndex = regExp.lastIndex;
-      hasReplacement = true;
-
-      if (highlights.length > MAXIMUM_HIGHLIGHT_COUNT) {
-        isMaximumHighlightCount = true;
-        break;
-      }
-    }
-
-    if (hasReplacement) {
-      // Add any text after the matches.
-      if (lastIndex < originalTextContent.length) {
-        let trailingSubstring = originalTextContent.substring(lastIndex, originalTextContent.length);
-        replacementFragment.appendChild(document.createTextNode(trailingSubstring));
-      }
-
-      replacements.push({
-        originalNode: originalNode,
-        replacementFragment: replacementFragment
+        this.findNext();
       });
-    }
+    },
 
-    if (isMaximumHighlightCount) {
-      operation.cancel();
-      callback(replacements, highlights, isMaximumHighlightCount);
-    }
-  });
+    findNext: function () {
+      if (this.lastHighlights) {
+        this.activeHighlightIndex = (this.activeHighlightIndex + this.lastHighlights.length + 1) % this.lastHighlights.length;
+        this.updateActiveHighlight();
+      }
+    },
 
-  // Callback for if/when the text node loop completes (should
-  // happen unless the maximum highlight count is reached).
-  operation.oncompleted = function() {
-    callback(replacements, highlights, isMaximumHighlightCount);
-  };
+    findPrevious: function () {
+      if (this.lastHighlights) {
+        this.activeHighlightIndex = (this.activeHighlightIndex + this.lastHighlights.length - 1) % this.lastHighlights.length;
+        this.updateActiveHighlight();
+      }
+    },
 
-  return operation;
-}
+    findDone: function () {
+      this.styleElement.remove();
+      this.clear();
 
-function chunkedLoop(condition, iterator, chunkSize) {
-  return new Promise(function(resolve, reject) {
-    setTimeout(doChunk, 0);
+      this.lastEscapedQuery = "";
+    },
 
-    function doChunk() {
-      let argument;
-      for (let i = 0; i < chunkSize; i++) {
-        argument = condition();
-        if (!argument || iterator(argument) === false) {
-          resolve();
+    clear: function () {
+      if (!this.lastHighlights) {
+        return;
+      }
+
+      let replacements = this.lastReplacements;
+      let highlights = this.lastHighlights;
+
+      let highlight;
+      for (let i = 0, length = highlights.length; i < length; i++) {
+        highlight = highlights[i];
+
+        this.removeHighlight(highlight);
+      }
+
+      this.lastReplacements = null;
+      this.lastHighlights = null;
+      this.activeHighlightIndex = -1;
+    },
+
+    updateActiveHighlight: function () {
+      if (!this.styleElement.parentNode) {
+        document.body.appendChild(this.styleElement);
+      }
+
+      let lastActiveHighlight = document.querySelector("." + this.constants.HIGHLIGHT_CLASS_NAME_ACTIVE);
+      if (lastActiveHighlight) {
+        lastActiveHighlight.className = this.constants.HIGHLIGHT_CLASS_NAME;
+      }
+
+      if (!this.lastHighlights) {
+        return;
+      }
+
+      let activeHighlight = this.lastHighlights[this.activeHighlightIndex];
+      if (activeHighlight) {
+        activeHighlight.className = this.constants.HIGHLIGHT_CLASS_NAME + " " + this.constants.HIGHLIGHT_CLASS_NAME_ACTIVE;
+        this.scrollToElement(activeHighlight, this.constants.SCROLL_DURATION);
+
+        let selected = activeHighlight.getBoundingClientRect().top + window.scrollY;
+
+        window.webkit.messageHandlers.webPageSearch.postMessage({ currentResult: this.activeHighlightIndex + 1, currentSelected: selected, height: this.height });
+      } else {
+        window.webkit.messageHandlers.webPageSearch.postMessage({ currentResult: 0 });
+      }
+    },
+
+    removeHighlight: function (highlight) {
+      let parent = highlight.parentNode;
+      if (parent) {
+        while (highlight.firstChild) {
+          parent.insertBefore(highlight.firstChild, highlight);
+        }
+
+        highlight.remove();
+        parent.normalize();
+      }
+    },
+
+    chunkedLoop: function (condition, iterator, chunkSize) {
+      return new Promise((resolve, reject) => {
+        setTimeout(doChunk, 0);
+        function doChunk() {
+          let argument;
+          for (let i = 0; i < chunkSize; i++) {
+            argument = condition();
+            if (!argument || iterator(argument) === false) {
+              resolve();
+              return;
+            }
+          }
+          setTimeout(doChunk, 0);
+        }
+      });
+    },
+
+    asyncTextNodeWalker: function (iterator) {
+      let operation = new __ID__SWPOperation();
+      let walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
+
+      let timeout = setTimeout(() => {
+        this.chunkedLoop(() => { 
+          return walker.nextNode(); 
+        }, (node) => {
+          if (operation.cancelled) {
+            return false;
+          }
+
+          iterator(node);
+          return true;
+        }, 100).then(() => {
+          operation.complete();
+        });
+      }, 50);
+
+      operation.oncancelled = () => {
+        clearTimeout(timeout);
+      };
+
+      return operation;
+    },
+
+    getMatchingNodeReplacements: function (regExp, callback) {
+      let replacements = [];
+      let highlights = [];
+      let isMaximumHighlightCount = false;
+      let operation = this.asyncTextNodeWalker((originalNode) => {
+        if (!this.isTextNodeVisible(originalNode) || originalNode.parentElement.nodeName === "IFRAME") {
           return;
+        }
+        let originalTextContent = originalNode.textContent;
+        let lastIndex = 0;
+        let replacementFragment = document.createDocumentFragment();
+        let hasReplacement = false;
+        let match;
+
+        while ((match = regExp.exec(originalTextContent))) {
+          let matchTextContent = match[0];
+
+          // Add any text before this match.
+          if (match.index > 0) {
+            let leadingSubstring = originalTextContent.substring(lastIndex, match.index);
+            replacementFragment.appendChild(document.createTextNode(leadingSubstring));
+          }
+
+          // Add element for this match.
+          let element = this.highlightSpan.cloneNode(false);
+          element.textContent = matchTextContent;
+          replacementFragment.appendChild(element);
+          highlights.push(element);
+
+          lastIndex = regExp.lastIndex;
+          hasReplacement = true;
+
+          if (highlights.length > this.constants.MAXIMUM_HIGHLIGHT_COUNT) {
+            isMaximumHighlightCount = true;
+            break;
+          }
+        }
+        if (hasReplacement) {
+          // Add any text after the matches.
+          if (lastIndex < originalTextContent.length) {
+            let trailingSubstring = originalTextContent.substring(lastIndex, originalTextContent.length);
+            replacementFragment.appendChild(document.createTextNode(trailingSubstring));
+          }
+
+          replacements.push({
+            originalNode: originalNode,
+            replacementFragment: replacementFragment
+          });
+        }
+        if (isMaximumHighlightCount) {
+          operation.cancel();
+          callback(replacements, highlights, isMaximumHighlightCount);
+        }
+      });
+
+      // Callback for if/when the text node loop completes (should
+      // happen unless the maximum highlight count is reached).
+      operation.oncompleted = () => {
+        callback(replacements, highlights, isMaximumHighlightCount);
+      };
+      return operation;
+    },    
+
+    scrollToElement: function (element, duration) {
+      let rect = element.getBoundingClientRect();
+
+      let targetX = this.clamp(rect.left + window.scrollX - window.innerWidth / 2, 0, document.body.scrollWidth);
+      let targetY = this.clamp(this.constants.SCROLL_OFFSET_Y + rect.top + window.scrollY - window.innerHeight / 2 + 100, 0, document.body.scrollHeight);
+
+      let startX = window.scrollX;
+      let startY = window.scrollY;
+
+      let deltaX = targetX - startX;
+      let deltaY = targetY - startY;
+
+      let startTimestamp;
+
+      function step(timestamp) {
+        if (!startTimestamp) {
+          startTimestamp = timestamp;
+        }
+
+        let time = timestamp - startTimestamp;
+        let percent = Math.min(time / duration, 1);
+
+        let x = startX + deltaX * percent;
+        let y = startY + deltaY * percent;
+
+        window.scrollTo(x, y);
+
+        if (time < duration) {
+          requestAnimationFrame(step);
         }
       }
 
-      setTimeout(doChunk, 0);
-    }
-  });
-}
-
-function scrollToElement(element, duration) {
-  let rect = element.getBoundingClientRect();
-
-  let targetX = clamp(rect.left + window.scrollX - window.innerWidth / 2, 0, document.body.scrollWidth);
-  let targetY = clamp(SCROLL_OFFSET_Y + rect.top + window.scrollY - window.innerHeight / 2 + 100, 0, document.body.scrollHeight);
-
-  let startX = window.scrollX;
-  let startY = window.scrollY;
-
-  let deltaX = targetX - startX;
-  let deltaY = targetY - startY;
-
-  let startTimestamp;
-
-  function step(timestamp) {
-    if (!startTimestamp) {
-      startTimestamp = timestamp;
-    }
-
-    let time = timestamp - startTimestamp;
-    let percent = Math.min(time / duration, 1);
-
-    let x = startX + deltaX * percent;
-    let y = startY + deltaY * percent;
-
-    window.scrollTo(x, y);
-
-    if (time < duration) {
       requestAnimationFrame(step);
+    },
+
+    isTextNodeVisible: function (textNode) {
+      let element = textNode.parentElement;
+      if (!element) {
+        return false;
+      }
+      return !!(element.offsetWidth || element.offsetHeight || element.getClientRects().length);
+    },
+
+    clamp: function (value, min, max) {
+      return Math.max(min, Math.min(value, max));
     }
-  }
-
-  requestAnimationFrame(step);
 }
 
-function isTextNodeVisible(textNode) {
-  let element = textNode.parentElement;
-  if (!element) {
-    return false;
-  }
-  return !!(element.offsetWidth || element.offsetHeight || element.getClientRects().length);
-}
+window.beam.__ID__SearchWebPage.setupElements();
 
-function clamp(value, min, max) {
-  return Math.max(min, Math.min(value, max));
-}
-
-function Operation() {
+function __ID__SWPOperation() {
   this.cancelled = false;
   this.completed = false;
 }
 
-Operation.prototype.constructor = Operation;
+__ID__SWPOperation.prototype.constructor = __ID__SWPOperation;
 
-Operation.prototype.cancel = function() {
+__ID__SWPOperation.prototype.cancel = function() {
   this.cancelled = true;
 
   if (typeof this.oncancelled === "function") {
@@ -352,7 +361,7 @@ Operation.prototype.cancel = function() {
   }
 };
 
-Operation.prototype.complete = function() {
+__ID__SWPOperation.prototype.complete = function() {
   this.completed = true;
 
   if (typeof this.oncompleted === "function") {
@@ -361,33 +370,3 @@ Operation.prototype.complete = function() {
     }
   }
 };
-
-window.__ID__ = {}
-
-Object.defineProperty(window.__ID__, "find", {
-  enumerable: false,
-  configurable: false,
-  writable: false,
-  value: find
-});
-
-Object.defineProperty(window.__ID__, "findNext", {
-  enumerable: false,
-  configurable: false,
-  writable: false,
-  value: findNext
-});
-
-Object.defineProperty(window.__ID__, "findPrevious", {
-  enumerable: false,
-  configurable: false,
-  writable: false,
-  value: findPrevious
-});
-
-Object.defineProperty(window.__ID__, "findDone", {
-  enumerable: false,
-  configurable: false,
-  writable: false,
-  value: findDone
-});
