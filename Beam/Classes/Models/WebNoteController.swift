@@ -87,9 +87,13 @@ class WebNoteController: Encodable, Decodable {
         _element = _rootElement
     }
 
-    func setDestination(note: BeamNote, rootElement: BeamElement? = nil) {
+    func setDestination(note: BeamNote?, rootElement: BeamElement? = nil) {
         self.note = note
-        self.rootElement = rootElement ?? note
+        if let rootElement = rootElement ?? note {
+            self.rootElement = rootElement
+        } else {
+            _rootElement = nil
+        }
     }
 
     /// Add the current page to the current note based on the browsing session collection preference.

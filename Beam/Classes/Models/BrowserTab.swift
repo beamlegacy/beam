@@ -181,8 +181,13 @@ import Promises
         BeamFileDBManager.shared
     }
 
+    private func resetDestinationNote() {
+        noteController.setDestination(note: nil)
+        state.resetDestinationCard()
+    }
+
     func setDestinationNote(_ note: BeamNote, rootElement: BeamElement? = nil) {
-        noteController.setDestination(note: note)
+        noteController.setDestination(note: note, rootElement: rootElement)
         state.destinationCardName = note.title
         browsingTree.destinationNoteChange()
     }
@@ -542,10 +547,13 @@ import Promises
         browsingTree.switchToOtherTab()
     }
 
-    func switchToNewSearch() {
+    func willSwitchToNewUrl(url: URL) {
         isFromNoteSearch = false
         beamNavigationController.isNavigatingFromNote = false
         browsingTree.switchToNewSearch()
+        if self.url != nil && url.host != self.url?.host {
+            resetDestinationNote()
+        }
     }
 
     func goBack() {
