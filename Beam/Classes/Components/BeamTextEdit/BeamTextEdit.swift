@@ -1585,16 +1585,16 @@ public extension CALayer {
             }
 
             let fileManager = BeamFileDBManager()
-            guard let uid = try? fileManager.insert(name: url.lastPathComponent, data: data) else {
-                Logger.shared.logError("Unable to insert image in FileDB", category: .fileDB)
+            do {
+                let uid = try fileManager.insert(name: url.lastPathComponent, data: data)
+                let newElement = BeamElement()
+                newElement.kind = .image(uid)
+                rootNode.cmdManager.insertElement(newElement, inNode: newParent, afterNode: afterNode)
+                Logger.shared.logInfo("Added Image to note \(String(describing: rootNode.element.note)) with uid \(uid) from dropped file (\(image))", category: .noteEditor)
+            } catch {
+                Logger.shared.logError("Unable to insert image in FileDB \(error)", category: .fileDB)
                 return false
             }
-
-            // swiftlint:disable:next print
-            let newElement = BeamElement()
-            newElement.kind = .image(uid)
-            rootNode.cmdManager.insertElement(newElement, inNode: newParent, afterNode: afterNode)
-            Logger.shared.logInfo("Added Image to note \(String(describing: rootNode.element.note)) with uid \(uid) from dropped file (\(image))", category: .noteEditor)
         }
 
         return true
