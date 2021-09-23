@@ -213,7 +213,7 @@ class BeamFileDB: BeamFileStorage {
 
     func insert(name: String, data: Data, type: String?) throws -> UUID {
         let uid = UUID.v5(name: data.SHA256, namespace: .url)
-        let mimeType = Swime.mimeType(data: data)?.mime ?? "application/octet-stream"
+        let mimeType = type ?? Swime.mimeType(data: data)?.mime ?? "application/octet-stream"
 
         return try dbPool.write { db -> UUID in
             var f = BeamFileRecord(name: name, uid: uid, data: data, type: mimeType)
@@ -261,11 +261,12 @@ class BeamFileDBManager: BeamFileStorage {
 
     func insert(name: String, data: Data, type: String? = nil) throws -> UUID {
         let uid = UUID.v5(name: data.SHA256, namespace: .url)
-        let mimeType = Swime.mimeType(data: data)?.mime ?? "application/octet-stream"
+        let mimeType = type ?? Swime.mimeType(data: data)?.mime ?? "application/octet-stream"
         let file = BeamFileRecord(name: name, uid: uid, data: data, type: mimeType)
         try fileDB.insert(files: [file])
-        try self.saveOnNetwork(file)
-
+        if AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled {
+            try self.saveOnNetwork(file)
+        }
         return uid
     }
 
