@@ -89,7 +89,7 @@ extension WebPage {
     func executeJS(_ jsCode: String, objectName: String?) -> Promise<Any?> {
         Promise<Any?> { [unowned self] fulfill, reject in
             var command = jsCode
-            if let configuration = webView.currentConfiguration as? BeamWebViewConfiguration {
+            if let configuration = webView.configurationWithoutMakingCopy as? BeamWebViewConfiguration {
                 let parameterized = objectName != nil ? "beam.__ID__\(objectName!)." + jsCode : jsCode
                 command = configuration.obfuscate(str: parameterized)
             }

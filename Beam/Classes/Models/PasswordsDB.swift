@@ -319,23 +319,27 @@ class PasswordsDB: PasswordStore {
         }
     }
 
-    func password(hostname: String, username: String) throws -> String? {
+    func passwordRecord(hostname: String, username: String) throws -> PasswordRecord? {
         do {
             return try dbPool.read { db in
-                guard let passwordRecord = try PasswordRecord
-                        .filter(PasswordRecord.Columns.entryId == id(for: hostname, and: username) && PasswordRecord.Columns.deletedAt == nil)
-                        .fetchOne(db) else {
-                    return nil
-                }
-                do {
-                    let decryptedPassword = try EncryptionManager.shared.decryptString(passwordRecord.password)
-                    return decryptedPassword
-                } catch let error {
-                    throw PasswordDBError.cantDecryptPassword(errorMsg: error.localizedDescription)
-                }
+                try PasswordRecord
+                    .filter(PasswordRecord.Columns.entryId == id(for: hostname, and: username) && PasswordRecord.Columns.deletedAt == nil)
+                    .fetchOne(db)
             }
         } catch let error {
             throw PasswordDBError.cantReadDB(errorMsg: error.localizedDescription)
+        }
+    }
+
+    func password(hostname: String, username: String) throws -> String? {
+        guard let passwordRecord = try passwordRecord(hostname: hostname, username: username) else {
+            return nil
+        }
+        do {
+            let decryptedPassword = try EncryptionManager.shared.decryptString(passwordRecord.password)
+            return decryptedPassword
+        } catch let error {
+            throw PasswordDBError.cantDecryptPassword(errorMsg: error.localizedDescription)
         }
     }
 
@@ -375,6 +379,28 @@ class PasswordsDB: PasswordStore {
                 var pass = password.copy()
                 try pass.insert(db)
             }
+        }
+    }
+
+    func update(record: PasswordRecord, password: String, uuid: UUID? = nil) throws -> PasswordRecord {
+        do {
+            return try dbPool.write { db in
+                guard let encryptedPassword = try? EncryptionManager.shared.encryptString(password) else {
+                    throw PasswordDBError.cantEncryptPassword
+                }
+                let privateKeySignature = try EncryptionManager.shared.privateKey().asString().SHA256()
+                var updatedRecord = record
+                if let uuid = uuid {
+                    updatedRecord.uuid = uuid
+                }
+                updatedRecord.password = encryptedPassword
+                updatedRecord.updatedAt = BeamDate.now
+                updatedRecord.privateKeySignature = privateKeySignature
+                try updatedRecord.save(db)
+                return updatedRecord
+            }
+        } catch let error {
+            throw PasswordDBError.cantSavePassword(errorMsg: error.localizedDescription)
         }
     }
 

@@ -57,6 +57,14 @@ class CardTestView: BaseView {
         button(OmniBarLocators.Buttons.openWebButton.accessibilityIdentifier).click()
     }
     
+    func getNumberOfImageNotes() -> Int {
+        return getImageNotes().count
+    }
+    
+    func getImageNotes() -> XCUIElementQuery {
+        return app.windows.textViews.matching(identifier:  CardViewLocators.TextFields.imageNote.accessibilityIdentifier)
+    }
+    
     func getLinksNames() -> [XCUIElement] {
         return app.windows.buttons.matching(identifier: "cardTitleLayer").allElementsBoundByIndex
     }

@@ -20,6 +20,7 @@ public enum ElementKind: Codable, Equatable {
     case quote(Int, String, String)
     case check(Bool)
     case code
+    case divider
     case image(UUID)
     case embed(String)
     case blockReference(UUID, UUID)
@@ -59,6 +60,8 @@ public enum ElementKind: Codable, Equatable {
             return "check \(checked)"
         case .code:
             return "code"
+        case .divider:
+            return "divider"
         case .image(let source):
             return "image '\(source)'"
         case .embed(let source):
@@ -85,7 +88,8 @@ public enum ElementKind: Codable, Equatable {
             self = .check(try container.decode(Bool.self, forKey: .value))
         case "code":
             self = .code
-
+        case "divider":
+            self = .divider
         case "image":
             let id = try (try? container.decode(UUID.self, forKey: .source)) ??
             UUID.v5(name: try container.decode(String.self, forKey: .source), namespace: .url)
@@ -121,6 +125,8 @@ public enum ElementKind: Codable, Equatable {
             try container.encode(checked, forKey: .value)
         case .code:
             try container.encode("code", forKey: .type)
+        case .divider:
+            try container.encode("divider", forKey: .type)
         case let .image(source):
             try container.encode("image", forKey: .type)
             try container.encode(source, forKey: .source)

@@ -268,4 +268,8 @@ class ClusteringManager: ObservableObject {
         }
 
     }
+
+    public func saveOrphanedUrls() {
+        suggestedNoteUpdater.saveOrphanedUrls(urlGroups: clusteredPagesId, noteGroups: clusteredNotesId, activeSources: activeSources)
+    }
 }

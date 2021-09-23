@@ -60,6 +60,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
+        setAppearance(BeamAppearance(rawValue: PreferencesManager.beamAppearancePreference))
+        DistributedNotificationCenter.default.addObserver(self, selector: #selector(interfaceModeChanged(sender:)), name: NSNotification.Name(rawValue: "AppleInterfaceThemeChangedNotification"), object: nil)
+
         LibrariesManager.shared.configure()
         ContentBlockingManager.shared.setup()
         BeamObjectManager.setup()
@@ -197,6 +200,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationWillTerminate(_ aNotification: Notification) {
         // Insert code here to tear down your application
         saveCloseTabsCmd()
+        data.clusteringManager.saveOrphanedUrls()
     }
 
     private func saveCloseTabsCmd() {
@@ -383,5 +387,30 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
         return true
+    }
+
+    // MARK: - NSAppearance
+    @objc
+    func interfaceModeChanged(sender: NSNotification) {
+        if BeamAppearance(rawValue: PreferencesManager.beamAppearancePreference) == BeamAppearance.system {
+            setAppearance(getSystemAppearance())
+        }
+    }
+
+    func getSystemAppearance() -> BeamAppearance {
+        let mode = UserDefaults.standard.string(forKey: "AppleInterfaceStyle")
+        return mode == "Dark" ? BeamAppearance.dark : BeamAppearance.light
+    }
+
+    func setAppearance(_ appearance: BeamAppearance?) {
+        guard let appearance = appearance else { return }
+        switch appearance {
+        case .dark:
+            NSApp.appearance = NSAppearance(named: .darkAqua)
+        case .light:
+            NSApp.appearance = NSAppearance(named: .aqua)
+        case .system:
+            setAppearance(getSystemAppearance())
+        }
     }
 }

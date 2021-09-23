@@ -136,6 +136,7 @@ class BeamCheckboxCALayer: CALayer {
             squareLayer?.fillColor = fillColor
             innerStrokeLayer?.strokeColor = innerStrokeColor
             mixedLayer?.fillColor = BeamColor.Niobium.cgColor
+            checkLayer?.backgroundColor = BeamColor.Niobium.cgColor
         }
     }
 }

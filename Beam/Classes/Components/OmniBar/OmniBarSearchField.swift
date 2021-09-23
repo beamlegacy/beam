@@ -22,7 +22,7 @@ struct OmniBarSearchField: View {
     @Binding var modifierFlagsPressed: NSEvent.ModifierFlags?
     var enableAnimations: Bool = true
 
-    @State private var shouldCenter: Bool = false
+    @State private var shouldCenter: Bool = true
     @State private var currentDisplayMode: Mode = .today
 
     private var shouldShowWebHost: Bool {

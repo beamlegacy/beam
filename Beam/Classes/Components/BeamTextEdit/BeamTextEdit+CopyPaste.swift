@@ -57,6 +57,9 @@ extension BeamTextEdit {
             let builder = BeamTextAttributedStringBuilder()
             strNode.append(builder.build(config: config))
 
+        case .divider:
+            strNode.append(NSAttributedString(string: "\n---\n"))
+
         case let .image(source):
             strNode.append(buildStringFrom(image: source))
 
