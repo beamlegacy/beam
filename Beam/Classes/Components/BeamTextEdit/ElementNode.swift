@@ -222,7 +222,7 @@ public class ElementNode: Widget {
     func updateSelectionLayer() {
         guard selected else { return }
 
-        let selectionLayerPos = CGPoint(x: Self.indentLayerPosX - contentsPadding.left, y: -2.5)
+        let selectionLayerPos = CGPoint(x: Self.indentLayerPosX - contentsPadding.left, y: selectionLayerPosY)
 
         if selectedAlone {
             selectionLayer.position = selectionLayerPos

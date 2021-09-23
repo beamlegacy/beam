@@ -148,7 +148,8 @@ extension BeamTextEdit {
 
     private func insertDivider(in node: TextNode) {
         // Divider node coming soon https://linear.app/beamapp/issue/BE-916/menu-divider
-        let divider = BeamElement("--------------------")
+        let divider = BeamElement()
+        divider.kind = .divider
         let parent = node.parent as? ElementNode ?? node
         node.cmdManager.insertElement(divider, inNode: parent, afterNode: node)
         let dividerNode = parent.nodeFor(divider)
