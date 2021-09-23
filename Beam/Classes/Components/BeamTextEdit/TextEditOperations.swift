@@ -320,11 +320,11 @@ extension TextRoot {
             }
         } else {
             // we are not in an editable text node
-            if cursorPosition == 0 {
+            if cursorPosition == 0 && node.textCount > 0 {
                 // We must delete whatever is behind us, unless it's not an element node
                 guard let prevNode = node.previousVisibleNode(ElementNode.self) else { return }
 
-                // If it's a text node then we must remove the last character from the text node and leave the cursor there
+                // If prev node's a text node then we must remove the last character from the text node and leave the cursor there
                 if let prevTextNode = prevNode as? TextNode, prevTextNode.textCount > 0 {
                     focusedCmdManager.focusElement(prevTextNode, cursorPosition: prevTextNode.textCount)
                     deleteBackward()
