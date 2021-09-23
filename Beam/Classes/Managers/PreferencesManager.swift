@@ -20,6 +20,7 @@ class PreferencesManager {
         beamAppearance = BeamAppearance(rawValue: PreferencesManager.beamAppearancePreference) ?? .system
 
         $beamAppearance.sink { newValue in
+            AppDelegate.main.setAppearance(newValue)
             PreferencesManager.beamAppearancePreference = newValue.rawValue
         }.store(in: &scope)
 
