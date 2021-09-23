@@ -39,6 +39,7 @@ private struct NoteAndSourcesRow {
     var sourceScore: Float?
     var sourceType: Int?
     var sourceSessionId: UUID?
+    var sourceOrphanedGroupId: Int?
 
     private var sourceAddedAtString: String {
         guard let sourceAddedAt = sourceAddedAt else { return "<???>" }
@@ -57,7 +58,9 @@ private struct NoteAndSourcesRow {
                                             "sourceAddedAt",
                                             "sourceSessionId",
                                             "sourceScore",
-                                            "sourceType"])
+                                            "sourceType",
+                                            "sourceOrphanedGroupId"
+    ])
     var csvRow: String {
         let columns: [String] = [
             noteTitle,
@@ -67,7 +70,8 @@ private struct NoteAndSourcesRow {
             sourceAddedAtString,
             sourceSessionIdString,
             optionalToString(sourceScore),
-            optionalToString(sourceType)
+            optionalToString(sourceType),
+            optionalToString(sourceOrphanedGroupId)
         ]
         return toCsv(columns: columns)
     }
@@ -94,7 +98,8 @@ func export_all_note_sources(to url: URL?) {
                         sourceAddedAt: s.addedAt,
                         sourceScore: s.score,
                         sourceType: s.type.rawValue,
-                        sourceSessionId: s.sessionId
+                        sourceSessionId: s.sessionId,
+                        sourceOrphanedGroupId: s.groupId
                     )
             }
             } else {

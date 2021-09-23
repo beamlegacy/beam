@@ -164,4 +164,23 @@ public class SuggestedNoteSourceUpdater {
             }
         }
     }
+
+    public func getOrphanedUrlGroups(urlGroups: [[UInt64]], noteGroups: [[UUID]], activeSources: ActiveSources) -> [[UInt64]] {
+        let activeSourcesUrls = Set(activeSources.urls)
+        return zip(urlGroups, noteGroups)
+            .filter { _, noteGroup in return noteGroup.count == 0 } //not suggested via direct grouping
+            .filter { urlGroup, _ in return activeSourcesUrls.intersection(urlGroup).count == 0 } //not suggested via active source grouping
+            .map { urlGroup, _ in return urlGroup }
+    }
+
+    public func saveOrphanedUrls(urlGroups: [[UInt64]], noteGroups: [[UUID]], activeSources: ActiveSources) {
+        let orphanedPagesNoteName = "__DEBUG_CLUSTERING_ORPHANED_PAGES"
+        let destinationNote = BeamNote.fetchOrCreate(documentManager, title: orphanedPagesNoteName)
+        let orphanedUrlGroups = getOrphanedUrlGroups(urlGroups: urlGroups, noteGroups: noteGroups, activeSources: activeSources)
+        for (id, group) in orphanedUrlGroups.enumerated() {
+            for urlId in group {
+                destinationNote.sources.add(urlId: urlId, noteId: destinationNote.id, type: .suggestion, sessionId: sessionId, groupId: id)
+            }
+        }
+    }
 }
