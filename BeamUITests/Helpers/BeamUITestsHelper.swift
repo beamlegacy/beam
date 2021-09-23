@@ -51,6 +51,7 @@ class BeamUITestsHelper {
         case page1
         case page2
         case page3
+        case page4
         case password
         case alerts
         case media
@@ -64,6 +65,8 @@ class BeamUITestsHelper {
             tapCommand(.loadUITestPage2)
         case .page3:
             tapCommand(.loadUITestPage3)
+        case .page4:
+            tapCommand(.loadUITestPage4)
         case .password:
             tapCommand(.loadUITestPagePassword)
         case .alerts:
