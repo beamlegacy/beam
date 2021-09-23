@@ -116,6 +116,9 @@ class HtmlVisitor {
                     let mdUrl = url.absoluteString
                     let imgElement = BeamElement(mdUrl)
                     let fileName = url.lastPathComponent
+                    // BeamElements default to bullets, if we don't create an image kind here the closure
+                    // will lose it's reference because it will be executed after joining BeamElement together
+                    imgElement.kind = .image(UUID())
 
                     // By defining the Closure outside the `visit()` func we keep the reference to the imgElement
                     // With this in memory reference we can close the closure without having to wrap
