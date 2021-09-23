@@ -65,4 +65,16 @@ class SuggestedNoteSourceUpdaterTests: XCTestCase {
             expect(sourcesToRemove[noteId3]) == [2]
         } else { fail("sourcesToAdd and sourcesToRemove not created") }
     }
+
+    func testOrphanedUrls() throws {
+        let noteId = UUID()
+        let noteGroups = [[noteId], [], []]
+        let urlGroups: [[UInt64]] = [
+            [0], //this page is in the same cluster as noteId note
+            [1, 2], //this cluster contains noteId's note active source
+            [3]] //this cluster can't be linked to any note
+        let activeSources = ActiveSources()
+        activeSources.activeSources = [noteId: [2]]
+        expect(self.updater.getOrphanedUrlGroups(urlGroups: urlGroups, noteGroups: noteGroups, activeSources: activeSources)) == [[3]]
+    }
 }

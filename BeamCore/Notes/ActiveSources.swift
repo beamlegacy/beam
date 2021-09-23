@@ -26,4 +26,5 @@ public class ActiveSources {
             self.activeSources[noteId] = pages
         }
     }
+    public var urls: [UInt64] { activeSources.values.flatMap { $0 } }
 }
