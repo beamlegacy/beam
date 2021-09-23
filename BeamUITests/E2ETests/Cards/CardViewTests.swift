@@ -21,8 +21,8 @@ class CardViewTests: BaseTest {
         testRailPrint("Then number of cards available by default is \(defaultNumberOfCardsAtFreshInstallation)")
         XCTAssertEqual(defaultNumberOfCardsAtFreshInstallation, allCardsView.getNumberOfCards())
         
-        let todaysDateInCardTitleFormat = DateHelper().getTodaysDateString(DateHelper.DateFormats.cardViewTitle.rawValue)
-        let todaysDateInCardCreationDateFormat = DateHelper().getTodaysDateString(DateHelper.DateFormats.cardViewCreation.rawValue)
+        let todaysDateInCardTitleFormat = DateHelper().getTodaysDateString(.cardViewTitle)
+        let todaysDateInCardCreationDateFormat = DateHelper().getTodaysDateString(.cardViewCreation)
         testRailPrint("When I open \(todaysDateInCardTitleFormat) from Journal view view")
         let cardView = allCardsView.openJournal()
                                     .openRecentCardByName(todaysDateInCardTitleFormat)

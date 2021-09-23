@@ -15,18 +15,25 @@ enum PasswordImporter {
     }
 
     private struct Entry {
-        var host: String
+        var hostname: String
         var username: String
         var password: String
 
         init?(url: String, username: String, password: String) {
-            let host: String
-            if let separator = url.range(of: "://") {
-                host = String(url.suffix(from: separator.upperBound))
-            } else {
-                host = url
+            var host = url
+            if let separator = host.range(of: "://") {
+                host = String(host.suffix(from: separator.upperBound))
             }
-            self.host = host
+            if host.hasPrefix("www.") {
+                host = String(host.dropFirst("www.".count))
+            }
+            if let separator = host.range(of: "/") {
+                host = String(host.prefix(upTo: separator.lowerBound))
+            }
+            if let separator = host.range(of: "?") {
+                host = String(host.prefix(upTo: separator.lowerBound))
+            }
+            self.hostname = host.trimmingCharacters(in: CharacterSet(charactersIn: ".\\"))
             self.username = username
             self.password = password
         }
@@ -68,7 +75,7 @@ enum PasswordImporter {
 
         for record in parser {
             if let entry = decoder.decode(record) {
-                PasswordManager.shared.save(hostname: entry.host.trimmingCharacters(in: CharacterSet(charactersIn: "/.\\")), username: entry.username, password: entry.password)
+                PasswordManager.shared.save(hostname: entry.hostname, username: entry.username, password: entry.password)
             }
         }
     }

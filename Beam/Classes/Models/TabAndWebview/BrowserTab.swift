@@ -181,8 +181,13 @@ import Promises
         BeamFileDBManager.shared
     }
 
+    private func resetDestinationNote() {
+        noteController.setDestination(note: nil)
+        state.resetDestinationCard()
+    }
+
     func setDestinationNote(_ note: BeamNote, rootElement: BeamElement? = nil) {
-        noteController.setDestination(note: note)
+        noteController.setDestination(note: note, rootElement: rootElement)
         state.destinationCardName = note.title
         browsingTree.destinationNoteChange()
     }
@@ -525,6 +530,12 @@ import Promises
     func startReading() {
         lastViewDate = BeamDate.now
         browsingTree.startReading()
+        guard !isLoading && url != nil && !state.focusOmniBox else { return }
+        // bring back the focus to where it was
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: .milliseconds(200))) {
+            self.webView.window?.makeFirstResponder(self.webView)
+            self.webView.page?.executeJS("refocusLastElement()", objectName: "FocusHandling")
+        }
     }
 
     func switchToCard() {
@@ -542,10 +553,13 @@ import Promises
         browsingTree.switchToOtherTab()
     }
 
-    func switchToNewSearch() {
+    func willSwitchToNewUrl(url: URL) {
         isFromNoteSearch = false
         beamNavigationController.isNavigatingFromNote = false
         browsingTree.switchToNewSearch()
+        if self.url != nil && url.host != self.url?.host {
+            resetDestinationNote()
+        }
     }
 
     func goBack() {
@@ -615,7 +629,7 @@ extension BrowserTab {
         } previous: { [weak self] search in
             self?.find(search, using: "findPrevious")
         } done: { [weak self] in
-            self?.webView.evaluateJavaScript("findDone()")
+            self?.webView.page?.executeJS("findDone()", objectName: "SearchWebPage")
             self?.searchViewModel = nil
         }
 
@@ -623,13 +637,13 @@ extension BrowserTab {
     }
 
     private func cancelSearch() {
-        self.webView.evaluateJavaScript("findDone()")
-        self.searchViewModel = nil
+        guard let searchViewModel = self.searchViewModel else { return }
+        searchViewModel.done?()
     }
 
     private func find(_ search: String, using function: String) {
         let escaped = search.replacingOccurrences(of: "//", with: "///").replacingOccurrences(of: "\"", with: "\\\"")
-        self.webView.evaluateJavaScript("\(function)(\"\(escaped)\")")
+        self.webView.page?.executeJS("\(function)(\"\(escaped)\")", objectName: "SearchWebPage")
     }
 
     // swiftlint:disable:next file_length

@@ -208,7 +208,7 @@ import BeamCore
     }
 
     func navigateCurrentTab(toURL url: URL) {
-        currentTab?.switchToNewSearch()
+        currentTab?.willSwitchToNewUrl(url: url)
         currentTab?.load(url: url)
     }
 
@@ -329,7 +329,7 @@ import BeamCore
                 Logger.shared.logError("autocomplete result without correct url \(result.text)", category: .search)
                 return
             }
-            if  mode == .web && currentTab != nil && currentTab?.url == nil {
+            if  mode == .web && currentTab != nil {
                 navigateCurrentTab(toURL: url)
             } else {
                 _ = createTab(withURL: url, originalQuery: result.text)

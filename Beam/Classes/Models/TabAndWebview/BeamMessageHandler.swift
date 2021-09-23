@@ -39,8 +39,9 @@ class BeamMessageHandler<T: RawRepresentable & CaseIterable> : NSObject, WKScrip
     }
 
     func unregister(from webView: WKWebView) {
+        let configuration = webView.configurationWithoutMakingCopy
         messages.allCases.forEach {
-            webView.configuration.userContentController.removeScriptMessageHandler(forName: $0.rawValue)
+            configuration.userContentController.removeScriptMessageHandler(forName: $0.rawValue)
         }
     }
 
