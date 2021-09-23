@@ -9,6 +9,7 @@ import Foundation
 import BeamCore
 import GRDB
 import UUIDKit
+import Swime
 
 struct BeamFileRecordOld {
     var name: String
@@ -124,7 +125,7 @@ extension BeamFileRecord: BeamObjectProtocol {
 
 protocol BeamFileStorage {
     func fetch(uid: UUID) throws -> BeamFileRecord?
-    func insert(name: String, uid: UUID, data: Data, type: String) throws
+    func insert(name: String, data: Data, type: String?) throws -> UUID
     func remove(uid: UUID) throws
     func clear() throws
 }
@@ -210,15 +211,14 @@ class BeamFileDB: BeamFileStorage {
         })
     }
 
-    func insert(name: String, uid: UUID, data: Data, type: String) throws {
-        do {
-            try dbPool.write { db in
-                var f = BeamFileRecord(name: name, uid: uid, data: data, type: type)
-                try f.insert(db)
-            }
-        } catch let error {
-            Logger.shared.logError("Error while inserting file \(name) - \(uid): \(error)", category: .fileDB)
-            throw error
+    func insert(name: String, data: Data, type: String?) throws -> UUID {
+        let uid = UUID.v5(name: data.SHA256, namespace: .url)
+        let mimeType = Swime.mimeType(data: data)?.mime ?? "application/octet-stream"
+
+        return try dbPool.write { db -> UUID in
+            var f = BeamFileRecord(name: name, uid: uid, data: data, type: mimeType)
+            try f.insert(db)
+            return uid
         }
     }
 
@@ -259,14 +259,14 @@ class BeamFileDBManager: BeamFileStorage {
     static let shared = BeamFileDBManager()
     var fileDB: BeamFileDB
 
-    func insert(name: String, uid: UUID, data: Data, type: String) {
-        do {
-            let file = BeamFileRecord(name: name, uid: uid, data: data, type: type)
-            try fileDB.insert(files: [file])
-            try self.saveOnNetwork(file)
-        } catch {
-            Logger.shared.logError("Error inserting a new file in DB: \(error)", category: .fileDB)
-        }
+    func insert(name: String, data: Data, type: String? = nil) throws -> UUID {
+        let uid = UUID.v5(name: data.SHA256, namespace: .url)
+        let mimeType = Swime.mimeType(data: data)?.mime ?? "application/octet-stream"
+        let file = BeamFileRecord(name: name, uid: uid, data: data, type: mimeType)
+        try fileDB.insert(files: [file])
+        try self.saveOnNetwork(file)
+
+        return uid
     }
 
     func fetch(uid: UUID) throws -> BeamFileRecord? {
