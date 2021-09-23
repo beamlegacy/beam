@@ -11,6 +11,7 @@ import Foundation
 import AppKit
 import Combine
 import BeamCore
+import Swime
 
 public extension CALayer {
     var superlayers: [CALayer] {
@@ -1583,13 +1584,11 @@ public extension CALayer {
                 return false
             }
 
-            let uid = UUID.v5(name: data.SHA256, namespace: .url)
             let fileManager = BeamFileDBManager()
-            let utTypeCF = image.cgImage.utType
-            let utType = utTypeCF as String? ?? ""
-            let mimeType = UTTypeCopyPreferredTagWithClass(utType as CFString, kUTTagClassMIMEType)?.takeRetainedValue() as String?
-
-            fileManager.insert(name: url.lastPathComponent, uid: uid, data: data, type: mimeType ?? "application/octet-stream")
+            guard let uid = try? fileManager.insert(name: url.lastPathComponent, data: data) else {
+                Logger.shared.logError("Unable to insert image in FileDB", category: .fileDB)
+                return false
+            }
 
             // swiftlint:disable:next print
             let newElement = BeamElement()

@@ -220,15 +220,7 @@ extension HtmlVisitor {
     }
 
     static fileprivate func storeImageData(_ data: Data, _ mimeType: String, _ name: String, _ fileStorage: BeamFileStorage) -> UUID? {
-        do {
-            let fileId = UUID.v5(name: data.SHA256, namespace: .url)
-            try fileStorage.insert(name: name, uid: fileId, data: data, type: mimeType)
-            return fileId
-        } catch let error {
-            Logger.shared.logError("Error while downloading image: \(error)", category: .document)
-        }
-
-        return nil
+        return try? fileStorage.insert(name: name, data: data, type: mimeType)
     }
 
     /// Check if element is a default block level element.
