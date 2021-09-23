@@ -78,6 +78,8 @@ class NodeProviderImpl: NodeProvider {
                         return ProxyEmbedNode(parent: withParent, element: element)
                     case .blockReference:
                         return BlockReferenceNode(parent: withParent, element: element)
+                    case .divider:
+                        return DividerNode(parent: withParent, element: element)
                     default:
                         return ProxyTextNode(parent: withParent, element: element)
                     }
@@ -98,6 +100,8 @@ class NodeProviderImpl: NodeProvider {
                         return EmbedNode(parent: withParent, element: element)
                     case .blockReference:
                         return BlockReferenceNode(parent: withParent, element: element)
+                    case .divider:
+                        return DividerNode(parent: withParent, element: element)
                     default:
                         return TextNode(parent: withParent, element: element)
                     }

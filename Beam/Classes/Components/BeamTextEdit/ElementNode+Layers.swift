@@ -9,11 +9,15 @@ import Foundation
 
 extension ElementNode {
 
+    static var indentLayerPosX: CGFloat = 4.5
+
+    @objc var shouldDisplayBullet: Bool {
+        true
+    }
     private static var bulletLayerPositionX = CGFloat(-4)
     @objc var bulletLayerPositionY: CGFloat {
         firstLineBaseline - 13
     }
-    static var indentLayerPosX: CGFloat = 4.5
 
     private enum LayerName: String {
         case indentLayer
@@ -55,6 +59,7 @@ extension ElementNode {
     }
 
     private func createBulletPointLayer(at point: NSPoint) {
+        guard shouldDisplayBullet else { return }
         let bulletLayer = Layer(name: LayerName.bullet.rawValue,
                                 layer: Layer.icon(named: "editor-bullet", color: BeamColor.Editor.bullet.nsColor))
         bulletLayer.layer.actions = [
