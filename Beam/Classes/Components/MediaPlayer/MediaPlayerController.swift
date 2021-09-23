@@ -9,6 +9,7 @@ import Foundation
 
 struct MediaPlayerController: WebPageRelated {
 
+    private let JSObjectName = "MDPLR"
     private weak var _page: WebPage?
     var page: WebPage {
         get {
@@ -36,12 +37,12 @@ struct MediaPlayerController: WebPageRelated {
     mutating func setMuted(_ muted: Bool) {
         if isMuted != muted {
             isMuted = muted
-            page.executeJS("beam_media_toggleMute()", objectName: nil)
+            page.executeJS("media_toggleMute()", objectName: JSObjectName)
         }
     }
 
     mutating func togglePiP() {
         isInPiP = !isInPiP
-        page.executeJS("beam_media_togglePictureInPicture()", objectName: nil)
+        page.executeJS("media_togglePictureInPicture()", objectName: JSObjectName)
     }
 }

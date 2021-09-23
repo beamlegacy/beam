@@ -32,6 +32,7 @@ class PasswordOverlayController: WebPageHolder {
     private var disabledForSubmit = false
     private var valuesOnFocusOut: [String: String]?
     private var currentPasswordManagerViewModel: PasswordManagerMenuViewModel?
+    private let JSObjectName = "PMng"
 
     init(userInfoStore: UserInformationsStore) {
         self.userInfoStore = userInfoStore
@@ -45,7 +46,7 @@ class PasswordOverlayController: WebPageHolder {
         credentialsBuilder.enterPage(url: page.url)
         autocompleteContext.clear()
         dismissPasswordManagerMenu()
-        page.executeJS("beam_sendTextFields()", objectName: nil)
+        page.executeJS("beam_sendTextFields()", objectName: JSObjectName)
     }
 
     func updateInputFields(with jsResult: String) {
@@ -70,10 +71,10 @@ class PasswordOverlayController: WebPageHolder {
 
         let addedIds = autocompleteContext.update(with: elements, on: getPageHost())
         if !addedIds.isEmpty {
-            page.executeJS("beam_installSubmitHandler()", objectName: nil).then { _ in
+            page.executeJS("beam_installSubmitHandler()", objectName: JSObjectName).then { _ in
                 self.installFocusHandlers(addedIds: addedIds)
             }
-            page.executeJS("beam_getFocusedField()", objectName: nil).then { result in
+            page.executeJS("beam_getFocusedField()", objectName: JSObjectName).then { result in
                 if let focusedId = result as? String {
                     DispatchQueue.main.async {
                         self.inputFieldDidGainFocus(focusedId)
@@ -87,7 +88,7 @@ class PasswordOverlayController: WebPageHolder {
     private func installFocusHandlers(addedIds: [String]) {
         let formattedList = addedIds.map { "\"\($0)\"" }.joined(separator: ",")
         let focusScript = "beam_installFocusHandlers('[\(formattedList)]')"
-        page.executeJS(focusScript, objectName: nil)
+        page.executeJS(focusScript, objectName: JSObjectName)
     }
 
     func inputFieldDidGainFocus(_ elementId: String) {
@@ -216,7 +217,7 @@ class PasswordOverlayController: WebPageHolder {
 
     private func requestWebFieldFrame(elementId: String, completion: @escaping (CGRect?) -> Void) {
         let script = "beam_getElementRects('[\"\(elementId)\"]')"
-        page.executeJS(script, objectName: nil).then { jsResult in
+        page.executeJS(script, objectName: JSObjectName).then { jsResult in
             if let jsonString = jsResult as? String, let jsonData = jsonString.data(using: .utf8), let rects = try? self.decoder.decode([DOMRect?].self, from: jsonData), let rect = rects.first??.rect {
                 let frame = CGRect(x: rect.minX, y: rect.minY + rect.height, width: rect.width, height: rect.height)
                 completion(frame)
@@ -262,7 +263,7 @@ class PasswordOverlayController: WebPageHolder {
         let ids = autocompleteContext.allInputFieldIds
         let formattedList = ids.map { "\"\($0)\"" }.joined(separator: ",")
         let script = "beam_getTextFieldValues('[\(formattedList)]')"
-        page.executeJS(script, objectName: nil).then { jsResult in
+        page.executeJS(script, objectName: JSObjectName).then { jsResult in
             if let jsonString = jsResult as? String,
                let jsonData = jsonString.data(using: .utf8),
                let values = try? self.decoder.decode([String].self, from: jsonData) {
@@ -438,7 +439,7 @@ extension PasswordOverlayController: PasswordManagerMenuDelegate {
             let data = try encoder.encode(params)
             guard let jsonString = String(data: data, encoding: .utf8) else { return }
             let script = "beam_setTextFieldValues('\(jsonString)')"
-            page.executeJS(script, objectName: nil).then { _ in
+            page.executeJS(script, objectName: JSObjectName).then { _ in
                 Logger.shared.logDebug("passwordOverlay text fields set.", category: .passwordManager)
             }
         } catch {
@@ -454,7 +455,7 @@ extension PasswordOverlayController: PasswordManagerMenuDelegate {
             let data = try encoder.encode(passwordParams)
             guard let jsonString = String(data: data, encoding: .utf8) else { return }
             let script = "beam_togglePasswordFieldVisibility('\(jsonString)', '\(visibility.description)')"
-            page.executeJS(script, objectName: nil)
+            page.executeJS(script, objectName: JSObjectName)
         } catch {
             Logger.shared.logError("JSON encoding failure: \(error.localizedDescription))", category: .general)
         }
