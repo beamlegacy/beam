@@ -43,7 +43,7 @@ class HtmlVisitor {
     /// visit and parse DOM Node and it's children.
     /// - Parameter document: SwiftSoup HTML node
     /// - Returns: Array of BeamElements
-    func parse(_ document: SwiftSoup.Node) -> [BeamElement] {
+    func parse(_ document: SwiftSoup.Node, completion: @escaping ([BeamElement]) -> Void) {
         let elements: [BeamElement] = visit(document)
         DispatchQueue.global(qos: .userInteractive).async { [self] in
             // Call closure to download
@@ -53,9 +53,8 @@ class HtmlVisitor {
                 }
             }
             delayedClosures.removeAll()
+            completion(elements)
         }
-
-        return elements
     }
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
