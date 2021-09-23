@@ -366,31 +366,27 @@ public extension CALayer {
     }
 
     func setupCardHeader() {
-        guard let cardNote = note as? BeamNote else { return }
-
+        cardHeaderLayer.name = "cardHeaderLayer"
         cardTitleLayer.name = "cardTitleLayer"
         cardTitleLayer.enableAnimations = false
         cardTimeLayer.enableAnimations = false
         cardHeaderLayer.enableAnimations = false
         cardHeaderLayer.isHidden = !showTitle
 
-        cardTitleLayer.string = NSAttributedString(string: cardNote.title, attributes: [
-            .font: BeamFont.medium(size: PreferencesManager.editorCardTitleFontSize).nsFont,
-            .foregroundColor: BeamColor.Generic.text.nsColor,
-            .underlineStyle: NSUnderlineStyle.single.rawValue,
-            .underlineColor: BeamColor.Generic.transparent.nsColor
-        ])
+        updateCardTitleForHover(false)
         cardHeaderLayer.addSublayer(cardTitleLayer)
         addToMainLayer(cardHeaderLayer)
     }
 
     private func updateCardTitleForHover(_ hover: Bool) {
-        if let attributedString = (cardTitleLayer.string as AnyObject).mutableCopy() as? NSMutableAttributedString {
-            let underlineColor = hover ? BeamColor.Generic.text.nsColor : BeamColor.Generic.transparent.nsColor
-            attributedString.removeAttribute(.underlineColor, range: attributedString.wholeRange)
-            attributedString.addAttributes([.underlineColor: underlineColor], range: attributedString.wholeRange)
-            cardTitleLayer.string = attributedString
-        }
+        guard let cardNote = note as? BeamNote else { return }
+
+        cardTitleLayer.string = NSAttributedString(string: cardNote.title, attributes: [
+            .font: BeamFont.medium(size: PreferencesManager.editorCardTitleFontSize).nsFont,
+            .foregroundColor: BeamColor.Generic.text.nsColor,
+            .underlineStyle: NSUnderlineStyle.single.rawValue,
+            .underlineColor: hover ? BeamColor.Generic.text.nsColor : BeamColor.Generic.transparent.nsColor
+        ])
     }
 
     private var cardHeaderPosY: CGFloat {
