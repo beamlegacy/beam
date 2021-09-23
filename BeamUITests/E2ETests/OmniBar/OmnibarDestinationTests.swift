@@ -11,8 +11,8 @@ import XCTest
 class OmnibarDestinationTests: BaseTest {
     
     //Workaround for https://linear.app/beamapp/issue/BE-1900/default-card-name-format-is-flexible-depending-on-users-locationdate
-    let todayCardNameCreationViewFormat = DateHelper().getTodaysDateString(DateHelper.DateFormats.cardViewCreation.rawValue)
-    let todayCardNameTitleViewFormat = DateHelper().getTodaysDateString(DateHelper.DateFormats.cardViewTitle.rawValue)
+    let todayCardNameCreationViewFormat = DateHelper().getTodaysDateString(.cardViewCreation)
+    let todayCardNameTitleViewFormat = DateHelper().getTodaysDateString(.cardViewTitle)
     let cardNameToBeCreated = "One Destination"
     let partialSearchKeyword = "One"
     let expectedNumberOfAutocompletedCards = 1

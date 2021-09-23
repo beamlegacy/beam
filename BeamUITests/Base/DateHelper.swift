@@ -10,9 +10,9 @@ import BeamCore
 
 class DateHelper {
     
-    func getTodaysDateString(_ format: String) -> String {
+    func getTodaysDateString(_ format: DateFormats) -> String {
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = format
+        dateFormatter.dateFormat = format.rawValue
         return dateFormatter.string(from: BeamDate.now)
     }
     

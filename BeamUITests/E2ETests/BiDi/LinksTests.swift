@@ -12,8 +12,8 @@ class LinksTests: BaseTest {
     
     let cardName1 = "Card Link 1"
     let cardName2 = "Card Link 2"
-    let todayCardNameCreationViewFormat = DateHelper().getTodaysDateString(DateHelper.DateFormats.cardViewCreation.rawValue)
-    let todayCardNameTitleViewFormat = DateHelper().getTodaysDateString(DateHelper.DateFormats.cardViewTitle.rawValue)
+    let todayCardNameCreationViewFormat = DateHelper().getTodaysDateString(.cardViewCreation)
+    let todayCardNameTitleViewFormat = DateHelper().getTodaysDateString(.cardViewTitle)
     
     func testCreateCardLink()  {
         let journalView = launchApp()
