@@ -131,13 +131,17 @@ class FrecencyNoteTriggerTests: XCTestCase {
         XCTAssertEqual(scorer.updateCalls.count, 0)
         XCTAssertNotNil(pns.activeShootGroup)
         if let group = pns.activeShootGroup {
-            pns.addShootToNote(noteTitle: pnsNoteTitle, group: group)
+            let expectation = XCTestExpectation(description: "point and shoot addShootToNote")
+            pns.addShootToNote(noteTitle: pnsNoteTitle, group: group, completion: { [self] in
+                XCTAssertEqual(scorer.updateCalls.count, 1)
+                let call = scorer.updateCalls[0]
+                XCTAssertEqual(call.id, pnsNote.id)
+                XCTAssertEqual(call.scoreValue, 1.0)
+                XCTAssertEqual(call.eventType, FrecencyEventType.notePointAndShoot)
+                XCTAssertEqual(call.paramKey, FrecencyParamKey.note30d0)
+                expectation.fulfill()
+            })
+            wait(for: [expectation], timeout: 10.0)
         }
-        XCTAssertEqual(scorer.updateCalls.count, 1)
-        let call = scorer.updateCalls[0]
-        XCTAssertEqual(call.id, pnsNote.id)
-        XCTAssertEqual(call.scoreValue, 1.0)
-        XCTAssertEqual(call.eventType, FrecencyEventType.notePointAndShoot)
-        XCTAssertEqual(call.paramKey, FrecencyParamKey.note30d0)
     }
 }
