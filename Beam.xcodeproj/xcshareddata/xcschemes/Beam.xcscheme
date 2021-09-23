@@ -20,6 +20,20 @@
                ReferencedContainer = "container:Beam.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "NO"
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "965A78472514F149009980D4"
+               BuildableName = "BeamUITests.xctest"
+               BlueprintName = "BeamUITests"
+               ReferencedContainer = "container:Beam.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction
@@ -48,16 +62,6 @@
                BlueprintIdentifier = "965A783C2514F149009980D4"
                BuildableName = "BeamTests.xctest"
                BlueprintName = "BeamTests"
-               ReferencedContainer = "container:Beam.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "965A78472514F149009980D4"
-               BuildableName = "BeamUITests.xctest"
-               BlueprintName = "BeamUITests"
                ReferencedContainer = "container:Beam.xcodeproj">
             </BuildableReference>
          </TestableReference>
