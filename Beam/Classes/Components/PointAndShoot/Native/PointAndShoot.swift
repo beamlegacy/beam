@@ -275,58 +275,59 @@ class PointAndShoot: WebPageHolder, ObservableObject {
         scorer.addTextSelection()
         // Convert html to BeamText
         let htmlNoteAdapter = HtmlNoteAdapter(sourceUrl, self.page.downloadManager, self.page.fileStorage)
-        let beamElements: [BeamElement] = htmlNoteAdapter.convert(html: shootGroup.html())
-        let elements = beamElements.map({ element -> BeamElement in
-            element.query = self.page.originalQuery
+        htmlNoteAdapter.convert(html: shootGroup.html(), completion: { [self] (beamElements: [BeamElement]) in
+            let elements = beamElements.map({ element -> BeamElement in
+                element.query = self.page.originalQuery
 
-            guard element.kind == .bullet else {
+                guard element.kind == .bullet else {
+                    return element
+                }
+
+                element.kind = .quote(1, sourceUrl.absoluteString, group.href)
                 return element
-            }
-
-            element.kind = .quote(1, sourceUrl.absoluteString, group.href)
-            return element
-        })
-        // Reduce array of texts to a single string
-        let texts = elements.map({ $0.text })
-        let clusteringText = texts.reduce(String()) { (string, beamText) -> String in
-            string + " " + beamText.text
-        }
-        // Send this string to the ClusteringManager
-        self.page.addTextToClusteringManager(clusteringText, url: sourceUrl)
-        // TODO: Convert BeamText to BeamElement of quote type
-        // Adds urlId to current card source
-        let urlId = LinkStore.createIdFor(sourceUrl.absoluteString, title: nil)
-        currentNote.sources.add(urlId: urlId, noteId: currentNote.id, type: .user, sessionId: data.sessionId, activeSources: data.activeSources)
-        // Updates frecency score of destination note
-        data.noteFrecencyScorer.update(id: currentNote.id, value: 1.0, eventType: .notePointAndShoot, date: BeamDate.now, paramKey: .note30d0)
-        // Add all quotes to source Note
-        if let source = self.page.addToNote(allowSearchResult: true) {
-            if let noteText = noteText, !noteText.isEmpty,
-               let lastQuote = elements.last {
-                // Append NoteText last quote
-                let note = self.createNote(noteText)
-                lastQuote.addChild(note)
-            }
-            // Add to source Note
-            elements.forEach({ quote in
-                source.addChild(quote)
             })
-            // Complete PNS and clear stored data
-            shootGroup.numberOfElements = elements.count
-
-            shootGroup.setNoteInfo(NoteInfo(id: currentNote.id, title: currentNote.title))
-
-            if shootGroup.numberOfElements != texts.count || shootGroup.numberOfElements == 0 {
-                self.showAlert(shootGroup, texts, "numberOfElements and texts.count mismatch")
-                shootGroup.setConfirmation(.failure)
-            } else {
-                shootGroup.setConfirmation(.success)
+            // Reduce array of texts to a single string
+            let texts = elements.map({ $0.text })
+            let clusteringText = texts.reduce(String()) { (string, beamText) -> String in
+                string + " " + beamText.text
             }
+            // Send this string to the ClusteringManager
+            self.page.addTextToClusteringManager(clusteringText, url: sourceUrl)
+            // TODO: Convert BeamText to BeamElement of quote type
+            // Adds urlId to current card source
+            let urlId = LinkStore.createIdFor(sourceUrl.absoluteString, title: nil)
+            currentNote.sources.add(urlId: urlId, noteId: currentNote.id, type: .user, sessionId: self.data.sessionId, activeSources: data.activeSources)
+            // Updates frecency score of destination note
+            self.data.noteFrecencyScorer.update(id: currentNote.id, value: 1.0, eventType: .notePointAndShoot, date: BeamDate.now, paramKey: .note30d0)
+            // Add all quotes to source Note
+            if let source = self.page.addToNote(allowSearchResult: true) {
+                if let noteText = noteText, !noteText.isEmpty,
+                   let lastQuote = elements.last {
+                    // Append NoteText last quote
+                    let note = self.createNote(noteText)
+                    lastQuote.addChild(note)
+                }
+                // Add to source Note
+                elements.forEach({ quote in
+                    source.addChild(quote)
+                })
+                // Complete PNS and clear stored data
+                shootGroup.numberOfElements = elements.count
 
-            self.collectedGroups.append(shootGroup)
-            self.activeShootGroup = nil
-            self.showShootConfirmation(group: shootGroup)
-        }
+                shootGroup.setNoteInfo(NoteInfo(id: currentNote.id, title: currentNote.title))
+
+                if shootGroup.numberOfElements != texts.count || shootGroup.numberOfElements == 0 {
+                    self.showAlert(shootGroup, texts, "numberOfElements and texts.count mismatch")
+                    shootGroup.setConfirmation(.failure)
+                } else {
+                    shootGroup.setConfirmation(.success)
+                }
+
+                self.collectedGroups.append(shootGroup)
+                self.activeShootGroup = nil
+                self.showShootConfirmation(group: shootGroup)
+            }
+        })
     }
 
     /// Draws shoot confirmation
