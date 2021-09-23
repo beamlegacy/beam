@@ -45,16 +45,14 @@ class HtmlVisitor {
     /// - Returns: Array of BeamElements
     func parse(_ document: SwiftSoup.Node, completion: @escaping ([BeamElement]) -> Void) {
         let elements: [BeamElement] = visit(document)
-        DispatchQueue.global(qos: .userInteractive).async { [self] in
-            // Call closure to download
-            for delayedClosure in delayedClosures {
-                if let downloadManager = downloadManager {
-                    downloadManager.downloadImage(delayedClosure.url, pageUrl: urlBase, completion: delayedClosure.closure)
-                }
+        // Call closure to download
+        for delayedClosure in delayedClosures {
+            if let downloadManager = downloadManager {
+                downloadManager.downloadImage(delayedClosure.url, pageUrl: urlBase, completion: delayedClosure.closure)
             }
-            delayedClosures.removeAll()
-            completion(elements)
         }
+        delayedClosures.removeAll()
+        completion(elements)
     }
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length

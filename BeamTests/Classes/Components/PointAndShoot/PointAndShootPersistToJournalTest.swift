@@ -42,11 +42,14 @@ class PointAndShootPersistToJournalTest: PointAndShootTest {
 
         // Add shoot to note
         let group2 = PointAndShoot.ShootGroup("id", [paragraphTarget], page.url!.absoluteString)
-        self.pns.addShootToNote(noteTitle: page.activeNote, group: group2)
-
-        XCTAssertEqual(self.pns.collectedGroups.count, 1)
-        XCTAssertEqual(self.pns.collectedGroups.first?.targets.count, 1)
-        XCTAssertEqual(self.pns.collectedGroups.first?.targets.first?.html, paragraphTarget.html)
+        let expectation = XCTestExpectation(description: "point and shoot addShootToNote")
+        self.pns.addShootToNote(noteTitle: page.activeNote, group: group2, completion: {
+            XCTAssertEqual(self.pns.collectedGroups.count, 1)
+            XCTAssertEqual(self.pns.collectedGroups.first?.targets.count, 1)
+            XCTAssertEqual(self.pns.collectedGroups.first?.targets.first?.html, paragraphTarget.html)
+            expectation.fulfill()
+        })
+        wait(for: [expectation], timeout: 10.0)
     }
 
     // swiftlint:disable:next function_body_length
@@ -73,9 +76,12 @@ class PointAndShootPersistToJournalTest: PointAndShootTest {
 
         // Add shoot to note
         let group = PointAndShoot.ShootGroup("id", [paragraphTarget], page.url!.absoluteString)
-        self.pns.addShootToNote(noteTitle: page.activeNote, group: group)
-
-        XCTAssertEqual(self.pns.collectedGroups.count, 1)
+        let expectation = XCTestExpectation(description: "point and shoot addShootToNote")
+        self.pns.addShootToNote(noteTitle: page.activeNote, group: group, completion: {
+            XCTAssertEqual(self.pns.collectedGroups.count, 1)
+            expectation.fulfill()
+        })
+        wait(for: [expectation], timeout: 10.0)
 
         // Add Paragraph 2 to Card 2
         let paragraphTarget2: PointAndShoot.Target = PointAndShoot.Target(
@@ -95,8 +101,11 @@ class PointAndShootPersistToJournalTest: PointAndShootTest {
 
         // Add shoot to note
         let group2 = PointAndShoot.ShootGroup("id", [paragraphTarget2], page.url!.absoluteString)
-        self.pns.addShootToNote(noteTitle: page.activeNote, group: group2)
-
-        XCTAssertEqual(self.pns.collectedGroups.count, 2)
+        let expectation2 = XCTestExpectation(description: "point and shoot addShootToNote")
+        self.pns.addShootToNote(noteTitle: page.activeNote, group: group2, completion: {
+            XCTAssertEqual(self.pns.collectedGroups.count, 2)
+            expectation2.fulfill()
+        })
+        wait(for: [expectation2], timeout: 10.0)
     }
 }

@@ -262,7 +262,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
     /// - Parameters:
     ///   - noteTitle: title of note to assign to.
     ///   - noteText: optional text to add underneath the shoot quote
-    func addShootToNote(noteTitle: String, withNote noteText: String? = nil, group: ShootGroup) {
+    func addShootToNote(noteTitle: String, withNote noteText: String? = nil, group: ShootGroup, completion: @escaping () -> Void) {
         guard let sourceUrl = page.url,
               let currentNote = page.getNote(fromTitle: noteTitle) else {
             fatalError("Could not find note to update with title \(noteTitle)")
@@ -326,6 +326,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
                 self.collectedGroups.append(shootGroup)
                 self.activeShootGroup = nil
                 self.showShootConfirmation(group: shootGroup)
+                completion()
             }
         })
     }
