@@ -35,8 +35,8 @@ class WebTestView: BaseView {
         XCTContext.runActivity(named: "Click on proposed New card option for '\(searchText)' search keyword") {_ in
         let predicate = NSPredicate(format: "identifier BEGINSWITH 'autocompleteResult-" + searchText + "-createCard'")
         let cardCreationElement = app.otherElements.matching(predicate).firstMatch
-        WaitHelper().waitFor(WaitHelper.PredicateFormat.isHittable.rawValue, cardCreationElement)
-        cardCreationElement.click()
+        XCTAssertTrue(cardCreationElement.waitForExistence(timeout: minimumWaitTimeout), "\(searchText) is NOT in the create card autocomplete result")
+        cardCreationElement.clickOnHittable()
         return CardTestView()
         }
     }

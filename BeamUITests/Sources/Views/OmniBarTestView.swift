@@ -46,6 +46,12 @@ class OmniBarTestView: BaseView {
         return CardTestView()
     }
     
+    @discardableResult
+    func navigateToWebView()  -> WebTestView {
+        button(OmniBarLocators.Buttons.openWebButton.accessibilityIdentifier).click()
+        return WebTestView()
+    }
+    
     func inputHasFocus(_ input: XCUIElement) -> Bool {
         return input.value(forKey: "hasKeyboardFocus") as? Bool ?? false
     }

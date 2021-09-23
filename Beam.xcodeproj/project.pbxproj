@@ -453,6 +453,7 @@
 		8AD2637526F4A0480074D673 /* BeamWindowMock.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2635926F4A0480074D673 /* BeamWindowMock.ts */; };
 		8AD2637626F4A0480074D673 /* BeamWebFactoryMock.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2635A26F4A0480074D673 /* BeamWebFactoryMock.ts */; };
 		8AD9DEBE26C6ACF00015B559 /* PointAndShootOffsetWithAnimation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD9DEBD26C6ACF00015B559 /* PointAndShootOffsetWithAnimation.swift */; };
+		8AEADBD126776BC500E36BAC /* UITests-Password.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AEADBC926776BC500E36BAC /* UITests-Password.html */; };
 		8AED4FF026C2A3AA00E29DB7 /* PointAndShootFrameOffset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AED4FEF26C2A3AA00E29DB7 /* PointAndShootFrameOffset.swift */; };
 		8AF0E33D268F30E0007C75D8 /* index_prod.js in Resources */ = {isa = PBXBuildFile; fileRef = 8AF0E335268F30E0007C75D8 /* index_prod.js */; };
 		8AF61F14267BA292006DD5C2 /* RBAllowlistEntry.m in Sources */ = {isa = PBXBuildFile; fileRef = 8AF61F13267BA292006DD5C2 /* RBAllowlistEntry.m */; };
@@ -753,6 +754,9 @@
 		A5F47ECA26F8D71C004B7CDE /* editor-unpublish.json in Resources */ = {isa = PBXBuildFile; fileRef = A5F47EC926F8D71C004B7CDE /* editor-unpublish.json */; };
 		A5FE1615264AD64900B7526D /* RecentsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5FE1614264AD64900B7526D /* RecentsListView.swift */; };
 		A5FE96CD2612469C002A2B73 /* AutocompleteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5FE96CC2612469C002A2B73 /* AutocompleteManager.swift */; };
+		B51DC76C26F44F990074ACCA /* PnSAddToCardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51DC76B26F44F990074ACCA /* PnSAddToCardTests.swift */; };
+		B51DC76E26F44FE00074ACCA /* PnSViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51DC76D26F44FE00074ACCA /* PnSViewLocators.swift */; };
+		B51DC77026F4501E0074ACCA /* PnSTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51DC76F26F4501E0074ACCA /* PnSTestView.swift */; };
 		B5056A8D26F88A0700FFD2A2 /* HelpAndFeedbackTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5056A8C26F88A0700FFD2A2 /* HelpAndFeedbackTests.swift */; };
 		B5056A8F26F88AB000FFD2A2 /* HelpTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5056A8E26F88AB000FFD2A2 /* HelpTestView.swift */; };
 		B5056A9126F88CFD00FFD2A2 /* HelpViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5056A9026F88CFD00FFD2A2 /* HelpViewLocators.swift */; };
@@ -1079,6 +1083,7 @@
 		3355997326CBDDC900F52C23 /* SearchInContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchInContentView.swift; sourceTree = "<group>"; };
 		3355997526CBE0AE00F52C23 /* SearchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchViewModel.swift; sourceTree = "<group>"; };
 		3355999526CBF11E00F52C23 /* SearchWebPage.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = SearchWebPage.js; sourceTree = "<group>"; };
+		337EAE5F26A954AD008E4020 /* UITests-Alerts.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = "UITests-Alerts.html"; sourceTree = "<group>"; };
 		338A669F268DC26000B056EB /* LayerRemoverAnimationDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerRemoverAnimationDelegate.swift; sourceTree = "<group>"; };
 		338A66C1268E053C00B056EB /* BeamDownloadDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamDownloadDocument.swift; sourceTree = "<group>"; };
 		338F276D26DD14B900D4AC97 /* Test.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Test.xcconfig; sourceTree = "<group>"; };
@@ -1459,6 +1464,7 @@
 		8AD2635926F4A0480074D673 /* BeamWindowMock.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = BeamWindowMock.ts; sourceTree = "<group>"; };
 		8AD2635A26F4A0480074D673 /* BeamWebFactoryMock.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = BeamWebFactoryMock.ts; sourceTree = "<group>"; };
 		8AD9DEBD26C6ACF00015B559 /* PointAndShootOffsetWithAnimation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootOffsetWithAnimation.swift; sourceTree = "<group>"; };
+		8AEADBC926776BC500E36BAC /* UITests-Password.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "UITests-Password.html"; sourceTree = "<group>"; };
 		8AED4FEF26C2A3AA00E29DB7 /* PointAndShootFrameOffset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootFrameOffset.swift; sourceTree = "<group>"; };
 		8AF0E335268F30E0007C75D8 /* index_prod.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = index_prod.js; sourceTree = "<group>"; };
 		8AF61F11267BA292006DD5C2 /* RBAllowlistEntry-Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "RBAllowlistEntry-Private.h"; sourceTree = "<group>"; };
@@ -1739,6 +1745,9 @@
 		A5F47EC926F8D71C004B7CDE /* editor-unpublish.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "editor-unpublish.json"; sourceTree = "<group>"; };
 		A5FE1614264AD64900B7526D /* RecentsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentsListView.swift; sourceTree = "<group>"; };
 		A5FE96CC2612469C002A2B73 /* AutocompleteManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutocompleteManager.swift; sourceTree = "<group>"; };
+		B51DC76B26F44F990074ACCA /* PnSAddToCardTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PnSAddToCardTests.swift; sourceTree = "<group>"; };
+		B51DC76D26F44FE00074ACCA /* PnSViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PnSViewLocators.swift; sourceTree = "<group>"; };
+		B51DC76F26F4501E0074ACCA /* PnSTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PnSTestView.swift; sourceTree = "<group>"; };
 		B5056A8C26F88A0700FFD2A2 /* HelpAndFeedbackTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpAndFeedbackTests.swift; sourceTree = "<group>"; };
 		B5056A8E26F88AB000FFD2A2 /* HelpTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpTestView.swift; sourceTree = "<group>"; };
 		B5056A9026F88CFD00FFD2A2 /* HelpViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpViewLocators.swift; sourceTree = "<group>"; };
@@ -3933,6 +3942,14 @@
 			name = "Recovered References";
 			sourceTree = "<group>";
 		};
+		B51DC76526F44F5D0074ACCA /* PoinAndShoot */ = {
+			isa = PBXGroup;
+			children = (
+				B51DC76B26F44F990074ACCA /* PnSAddToCardTests.swift */,
+			);
+			path = PoinAndShoot;
+			sourceTree = "<group>";
+		};
 		A5F47EC626F8D70F004B7CDE /* Lotties */ = {
 			isa = PBXGroup;
 			children = (
@@ -4061,6 +4078,7 @@
 				B551F3C626BD10C300B72D27 /* AppWebsiteViewLocators.swift */,
 				B57535F326BD6FFC0053CE2D /* NoteViewLocators.swift */,
 				B5E38D5926EA244300236FBD /* SearchViewLocators.swift */,
+				B51DC76D26F44FE00074ACCA /* PnSViewLocators.swift */,
 				B5056A9026F88CFD00FFD2A2 /* HelpViewLocators.swift */,
 				B557155926FA259000F6C9D4 /* UpdateViewLocators.swift */,
 			);
@@ -4079,6 +4097,7 @@
 				B551F3C026BD0FE800B72D27 /* WebsiteAuthPopupTestView.swift */,
 				B551F3C426BD10AD00B72D27 /* AppWebsiteTestView.swift */,
 				B5E38D5726EA23D900236FBD /* SearchTestView.swift */,
+				B51DC76F26F4501E0074ACCA /* PnSTestView.swift */,
 				B5056A8E26F88AB000FFD2A2 /* HelpTestView.swift */,
 				B557155626FA257700F6C9D4 /* UpdateTestView.swift */,
 			);
@@ -4088,6 +4107,7 @@
 		B57A9B3E26AB091A002C954D /* E2ETests */ = {
 			isa = PBXGroup;
 			children = (
+				B51DC76526F44F5D0074ACCA /* PoinAndShoot */,
 				B557155C26FAF15B00F6C9D4 /* AllCardsMenu */,
 				B557155326FA24F400F6C9D4 /* Update */,
 				B5F845DA26F8CC8900B15209 /* BiDi */,
@@ -5510,6 +5530,7 @@
 				B5DC1FC026B9607900A4C94B /* DownloadViewLocators.swift in Sources */,
 				B5F845E326F8CCA700B15209 /* LinksTests.swift in Sources */,
 				B5DC1FB526B928CA00A4C94B /* DateHelper.swift in Sources */,
+				B51DC76C26F44F990074ACCA /* PnSAddToCardTests.swift in Sources */,
 				B557155A26FA259000F6C9D4 /* UpdateViewLocators.swift in Sources */,
 				B551F3C126BD0FE800B72D27 /* WebsiteAuthPopupTestView.swift in Sources */,
 				B5DC1FBE26B92A8800A4C94B /* CardViewTests.swift in Sources */,
@@ -5517,6 +5538,7 @@
 				B5DC1F8126B1975900A4C94B /* OmniBarLocators.swift in Sources */,
 				B5F845E526F8CCB500B15209 /* BlockReferenceTests.swift in Sources */,
 				B5E8010A26AEA1E100C8BD61 /* JournalTestView.swift in Sources */,
+				B51DC76E26F44FE00074ACCA /* PnSViewLocators.swift in Sources */,
 				B57A9B3B26AB08A5002C954D /* AllCardsViewLocators.swift in Sources */,
 				B5EB9A7626C28192004C798A /* GoMenu.swift in Sources */,
 				B57A9B3626AB07B8002C954D /* UIElement.swift in Sources */,
@@ -5536,6 +5558,7 @@
 				B557156326FAF18200F6C9D4 /* AllCardsViewTests.swift in Sources */,
 				B5BA078B26AF3EDF00D31FED /* BaseMenuBar.swift in Sources */,
 				B5E8011026AEA64E00C8BD61 /* WebViewLocators.swift in Sources */,
+				B51DC77026F4501E0074ACCA /* PnSTestView.swift in Sources */,
 				52A94E3C25E90094004BAC93 /* XCUIElement+Beam.swift in Sources */,
 				B5E38D5826EA23D900236FBD /* SearchTestView.swift in Sources */,
 				B557155726FA257700F6C9D4 /* UpdateTestView.swift in Sources */,
