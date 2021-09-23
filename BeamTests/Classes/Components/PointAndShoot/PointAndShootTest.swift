@@ -155,8 +155,10 @@ class FileStorageMock: BeamFileStorage {
 
     func fetch(uid: UUID) throws -> BeamFileRecord? { fatalError("fetch(uid:) has not been implemented") }
 
-    func insert(name: String, uid: UUID, data: Data, type: String) throws {
-        events.append("inserted \(name) with id \(uid) of \(type) for \(data.count) bytes")
+    func insert(name: String, data: Data, type: String?) throws -> UUID {
+        let uid = UUID.v5(name: data.SHA256, namespace: .url)
+        events.append("inserted \(name) with id \(uid) of \(String(describing: type)) for \(data.count) bytes")
+        return uid
     }
 
     func remove(uid: UUID) throws {}

@@ -9,10 +9,11 @@ import XCTest
 @testable import Beam
 @testable import BeamCore
 
-private var pnsNoteTitle = "Grocery list"
-private var pnsNote = BeamNote(title: pnsNoteTitle)
 
 class FrecencyNoteTriggerTests: XCTestCase {
+
+    static let pnsNoteTitle = "Grocery list"
+    static let pnsNote = BeamNote(title: pnsNoteTitle)
 
     var scorer: FakeFrecencyScorer!
     var data: BeamData!
@@ -86,10 +87,26 @@ class FrecencyNoteTriggerTests: XCTestCase {
         var searchViewModel: SearchViewModel?
 
         func getNote(fromTitle: String) -> BeamNote? {
-            if fromTitle == pnsNoteTitle {
-                return pnsNote
+            if fromTitle == FrecencyNoteTriggerTests.pnsNoteTitle {
+                return FrecencyNoteTriggerTests.pnsNote
             }
             return nil
+        }
+
+        func addToNote(allowSearchResult: Bool) -> BeamElement? {
+            guard let url = url else {
+                Logger.shared.logError("Cannot get current URL", category: .general)
+                return nil
+            }
+            guard allowSearchResult || SearchEngines.get(url) != nil else {
+                Logger.shared.logWarning("Adding search results is not allowed", category: .web)
+                return nil
+            } // Don't automatically add search results
+
+            let element = BeamElement("url: \(url) text: \(title)")
+            FrecencyNoteTriggerTests.pnsNote.addChild(element)
+            return element
+
         }
 
     }
@@ -132,10 +149,10 @@ class FrecencyNoteTriggerTests: XCTestCase {
         XCTAssertNotNil(pns.activeShootGroup)
         if let group = pns.activeShootGroup {
             let expectation = XCTestExpectation(description: "point and shoot addShootToNote")
-            pns.addShootToNote(noteTitle: pnsNoteTitle, group: group, completion: { [self] in
+            pns.addShootToNote(noteTitle: FrecencyNoteTriggerTests.pnsNoteTitle, group: group, completion: { [self] in
                 XCTAssertEqual(scorer.updateCalls.count, 1)
                 let call = scorer.updateCalls[0]
-                XCTAssertEqual(call.id, pnsNote.id)
+                XCTAssertEqual(call.id, FrecencyNoteTriggerTests.pnsNote.id)
                 XCTAssertEqual(call.scoreValue, 1.0)
                 XCTAssertEqual(call.eventType, FrecencyEventType.notePointAndShoot)
                 XCTAssertEqual(call.paramKey, FrecencyParamKey.note30d0)
