@@ -530,6 +530,7 @@
 		9691E3D825AD9F3300A13080 /* TextRoot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9691E3D725AD9F3300A13080 /* TextRoot.swift */; };
 		9691E40225AE5D2C00A13080 /* NodeSelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9691E40125AE5D2C00A13080 /* NodeSelection.swift */; };
 		9691E44425B1091300A13080 /* BrowsingSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9691E44325B1091300A13080 /* BrowsingSection.swift */; };
+		9694B28F26FDD59C008AD52B /* BeamCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96319D0F2616232600D1CF31 /* BeamCore.framework */; };
 		96988C8325BB0AF2000223A3 /* DestinationNotePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96988C8225BB0AF2000223A3 /* DestinationNotePicker.swift */; };
 		969CE3EA26CB7B01000AEF37 /* BeamNoteType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 969CE3E926CB7B01000AEF37 /* BeamNoteType.swift */; };
 		96A1C67626F8ABBF006AFF88 /* AppDelegate+JsonImportExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96A1C67526F8ABBF006AFF88 /* AppDelegate+JsonImportExport.swift */; };
@@ -1937,6 +1938,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9694B28F26FDD59C008AD52B /* BeamCore.framework in Frameworks */,
 				A0A84FC22636FA99008F0326 /* Quick in Frameworks */,
 				A0A84FC12636FA99008F0326 /* Nimble in Frameworks */,
 			);
