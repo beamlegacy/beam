@@ -104,12 +104,17 @@ class PointAndShootShootingTest: PointAndShootTest {
         self.pns.pointShoot(target.id, target, "https://pnsTest.co")
         XCTAssertNotNil(self.pns.activeShootGroup)
 
+        guard let testPage = self.testPage else {
+            XCTFail("testpage required for shoot test")
+            return
+        }
+
         if let group = self.pns.activeShootGroup {
             let expectation = XCTestExpectation(description: "point and shoot addShootToNote")
-            self.pns.addShootToNote(noteTitle: "Card A", group: group, completion: {
-                XCTAssertEqual(self.testPage?.events.count, 4)
-                XCTAssertEqual(self.testPage?.events[2], "addToNote true")
-                XCTAssertEqual(self.testPage?.events[3], "logInNote https://webpage.com PNS MockPage pointandshoot")
+            self.pns.addShootToNote(targetNote: testPage.activeNote, group: group, completion: {
+                XCTAssertEqual(self.testPage?.events.count, 3)
+                XCTAssertEqual(self.testPage?.events[1], "addToNote true")
+                XCTAssertEqual(self.testPage?.events[2], "logInNote https://webpage.com PNS MockPage pointandshoot")
                 expectation.fulfill()
             })
             wait(for: [expectation], timeout: 10.0)

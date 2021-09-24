@@ -111,6 +111,9 @@ extension WebPage {
     func addToNote(allowSearchResult: Bool) -> BeamElement? {
         nil
     }
+    /// Calls BeamNote to fetch a note from the documentManager
+    /// - Parameter noteTitle: The title of the Note
+    /// - Returns: The fetched note or nil if no note exists
     func getNote(fromTitle: String) -> BeamNote? {
         nil
     }

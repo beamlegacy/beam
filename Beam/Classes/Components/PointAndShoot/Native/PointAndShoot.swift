@@ -262,16 +262,15 @@ class PointAndShoot: WebPageHolder, ObservableObject {
     /// - Parameters:
     ///   - noteTitle: title of note to assign to.
     ///   - noteText: optional text to add underneath the shoot quote
-    func addShootToNote(noteTitle: String, withNote noteText: String? = nil, group: ShootGroup, completion: @escaping () -> Void) {
-        guard let sourceUrl = page.url,
-              let currentNote = page.getNote(fromTitle: noteTitle) else {
-            fatalError("Could not find note to update with title \(noteTitle)")
+    func addShootToNote(targetNote: BeamNote, withNote noteText: String? = nil, group: ShootGroup, completion: @escaping () -> Void) {
+        guard let sourceUrl = page.url else {
+            fatalError("Could not find note to update with title \(targetNote.title)")
         }
         // Make group mutable
         var shootGroup = group
         // Set Destination note to the current card
         // Update BrowsingScorer about note submission
-        page.setDestinationNote(currentNote, rootElement: currentNote)
+        page.setDestinationNote(targetNote, rootElement: targetNote)
         scorer.addTextSelection()
         // Convert html to BeamText
         let htmlNoteAdapter = HtmlNoteAdapter(sourceUrl, self.page.downloadManager, self.page.fileStorage)
@@ -294,9 +293,9 @@ class PointAndShoot: WebPageHolder, ObservableObject {
             // TODO: Convert BeamText to BeamElement of quote type
             // Adds urlId to current card source
             let urlId = LinkStore.createIdFor(sourceUrl.absoluteString, title: nil)
-            currentNote.sources.add(urlId: urlId, noteId: currentNote.id, type: .user, sessionId: self.data.sessionId, activeSources: data.activeSources)
+            targetNote.sources.add(urlId: urlId, noteId: targetNote.id, type: .user, sessionId: self.data.sessionId, activeSources: data.activeSources)
             // Updates frecency score of destination note
-            self.data.noteFrecencyScorer.update(id: currentNote.id, value: 1.0, eventType: .notePointAndShoot, date: BeamDate.now, paramKey: .note30d0)
+            self.data.noteFrecencyScorer.update(id: targetNote.id, value: 1.0, eventType: .notePointAndShoot, date: BeamDate.now, paramKey: .note30d0)
             // Add all quotes to source Note
             if let source = self.page.addToNote(allowSearchResult: true) {
                 if let noteText = noteText, !noteText.isEmpty,
@@ -309,7 +308,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
                 elements.forEach({ quote in source.addChild(quote) })
                 // Complete PNS and clear stored data
                 shootGroup.numberOfElements = elements.count
-                shootGroup.setNoteInfo(NoteInfo(id: currentNote.id, title: currentNote.title))
+                shootGroup.setNoteInfo(NoteInfo(id: targetNote.id, title: targetNote.title))
 
                 if shootGroup.numberOfElements != texts.count || shootGroup.numberOfElements == 0 {
                     self.showAlert(shootGroup, texts, "numberOfElements and texts.count mismatch")

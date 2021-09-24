@@ -38,7 +38,7 @@ class NavigationCollectUITests: QuickSpec {
 
     override func spec() {
 
-        let titles = [
+        let _ = [
             "Point And Shoot Test Fixture Ultralight Beam",
             "Point And Shoot Test Fixture I-Beam",
             "Point And Shoot Test Fixture Cursor"

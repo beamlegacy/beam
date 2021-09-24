@@ -191,6 +191,40 @@ extension DestinationNoteAutocompleteList {
             case tomorrow = "Tomorrow"
         }
 
+        /// Using the card name of tomorrow ("22 September 2021") get the matching journal date
+        /// - Parameter cardName: Card name to check
+        /// - Returns: returns date if the card name date ("22 September 2021") matches any replacement dates of the CardReplacementKeywords
+        func getCardReplacementKeywordDate(_ cardName: String) -> Date? {
+            guard let data = data else {
+                return nil
+            }
+
+            guard let todayDate = BeamNoteType.todaysJournal.journalDate else { return nil }
+            let todayDateName = data.todaysName
+            // Return early if card name matches today's date
+            if cardName == todayDateName {
+                return todayDate
+            }
+
+            guard let nextDate = BeamNoteType.nextJournal().journalDate else { return nil }
+            let nextDateName = BeamDate.journalNoteTitle(for: nextDate, with: .long)
+            // Return early if card name matches next days date
+            if cardName == nextDateName {
+                return nextDate
+            }
+
+            guard let previousDate = BeamNoteType.previousJournal().journalDate else { return nil }
+            let previousDateName = BeamDate.journalNoteTitle(for: previousDate, with: .long)
+            // Return true / false for the card name matching previous days date
+            if cardName == previousDateName {
+                return previousDate
+            }
+            return nil
+        }
+
+        /// Gets the real cardname for cardNames like "Today" "Yesterday" or "Tomorrow"
+        /// - Parameter cardName: input name, for example: "Today"
+        /// - Returns: the actual card name, for example: "21 September 2021"
         func realNameForCardName(_ cardName: String) -> String {
             guard let data = data else {
                 return cardName
@@ -214,8 +248,12 @@ extension DestinationNoteAutocompleteList {
             return realCardName
         }
 
-        func getDateForCardReplacementJournalNote(_ cardName: String) -> Date {
-            var journalDate = BeamDate.now
+        /// Returns date for cardNames such as "Today", "Tomorrow", "Yesterday". Also converts matching string dates "21 September 2021" (Today) to Date
+        /// - Parameter cardName: input name, for example: "Today"
+        /// - Returns: replacement date
+        func getDateForCardReplacementJournalNote(_ cardName: String) -> Date? {
+            var journalDate: Date?
+            // convert replacement words to Date
             CardReplacementKeyword.allCases.forEach { replacement in
                 if replacement.rawValue.lowercased().contains(cardName.lowercased()) {
                     switch replacement {
@@ -231,7 +269,15 @@ extension DestinationNoteAutocompleteList {
                     }
                 }
             }
-            return journalDate
+
+            if let cardReplacementJournalDate = journalDate {
+                return cardReplacementJournalDate
+            } else if let date = getCardReplacementKeywordDate(cardName) {
+                // if not found try converting a matching date string to Date
+                return date
+            } else {
+                return nil
+            }
         }
 
         private func getAutoCompleteResutsForCardReplacement(_ text: String) -> [AutocompleteResult] {
