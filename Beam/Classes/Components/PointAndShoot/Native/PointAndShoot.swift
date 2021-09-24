@@ -279,9 +279,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
             let elements = beamElements.map({ element -> BeamElement in
                 element.query = self.page.originalQuery
 
-                guard element.kind == .bullet else {
-                    return element
-                }
+                guard element.kind == .bullet else { return element }
 
                 element.kind = .quote(1, sourceUrl.absoluteString, group.href)
                 return element
@@ -308,12 +306,9 @@ class PointAndShoot: WebPageHolder, ObservableObject {
                     lastQuote.addChild(note)
                 }
                 // Add to source Note
-                elements.forEach({ quote in
-                    source.addChild(quote)
-                })
+                elements.forEach({ quote in source.addChild(quote) })
                 // Complete PNS and clear stored data
                 shootGroup.numberOfElements = elements.count
-
                 shootGroup.setNoteInfo(NoteInfo(id: currentNote.id, title: currentNote.title))
 
                 if shootGroup.numberOfElements != texts.count || shootGroup.numberOfElements == 0 {
