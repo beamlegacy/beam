@@ -308,6 +308,15 @@
         }
       },
       {
+        "package": "Swime",
+        "repositoryURL": "https://github.com/meeloo/Swime",
+        "state": {
+          "branch": "master",
+          "revision": "d775fef44b2155673963723110f4ea28b7be8ce2",
+          "version": null
+        }
+      },
+      {
         "package": "TLDExtract",
         "repositoryURL": "https://github.com/gumob/TLDExtractSwift",
         "state": {

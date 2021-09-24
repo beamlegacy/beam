@@ -43,19 +43,16 @@ class HtmlVisitor {
     /// visit and parse DOM Node and it's children.
     /// - Parameter document: SwiftSoup HTML node
     /// - Returns: Array of BeamElements
-    func parse(_ document: SwiftSoup.Node) -> [BeamElement] {
+    func parse(_ document: SwiftSoup.Node, completion: @escaping ([BeamElement]) -> Void) {
         let elements: [BeamElement] = visit(document)
-        DispatchQueue.global(qos: .userInteractive).async { [self] in
-            // Call closure to download
-            for delayedClosure in delayedClosures {
-                if let downloadManager = downloadManager {
-                    downloadManager.downloadImage(delayedClosure.url, pageUrl: urlBase, completion: delayedClosure.closure)
-                }
+        // Call closure to download
+        for delayedClosure in delayedClosures {
+            if let downloadManager = downloadManager {
+                downloadManager.downloadImage(delayedClosure.url, pageUrl: urlBase, completion: delayedClosure.closure)
             }
-            delayedClosures.removeAll()
         }
-
-        return elements
+        delayedClosures.removeAll()
+        completion(elements)
     }
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
@@ -116,7 +113,9 @@ class HtmlVisitor {
                     let mdUrl = url.absoluteString
                     let imgElement = BeamElement(mdUrl)
                     let fileName = url.lastPathComponent
-                    imgElement.kind = .image(mdUrl)
+                    // BeamElements default to bullets, if we don't create an image kind here the closure
+                    // will lose it's reference because it will be executed after joining BeamElement together
+                    imgElement.kind = .image(UUID())
 
                     // By defining the Closure outside the `visit()` func we keep the reference to the imgElement
                     // With this in memory reference we can close the closure without having to wrap
@@ -142,7 +141,7 @@ class HtmlVisitor {
                     let fileName = UUID().uuidString
                     if let fileStorage = fileStorage,
                        let fileId = HtmlVisitor.storeImageData(base64, mimeType, fileName, fileStorage) {
-                        let imgElement = BeamElement(fileId)
+                        let imgElement = BeamElement()
                         imgElement.kind = .image(fileId)
                         text.append(imgElement)
                     }
@@ -218,16 +217,8 @@ extension HtmlVisitor {
         case imageDownloadFailed
     }
 
-    static fileprivate func storeImageData(_ data: Data, _ mimeType: String, _ name: String, _ fileStorage: BeamFileStorage) -> String? {
-        do {
-            let fileId = data.SHA256
-            try fileStorage.insert(name: name, uid: fileId, data: data, type: mimeType)
-            return fileId
-        } catch let error {
-            Logger.shared.logError("Error while downloading image: \(error)", category: .document)
-        }
-
-        return nil
+    static fileprivate func storeImageData(_ data: Data, _ mimeType: String, _ name: String, _ fileStorage: BeamFileStorage) -> UUID? {
+        return try? fileStorage.insert(name: name, data: data, type: mimeType)
     }
 
     /// Check if element is a default block level element.

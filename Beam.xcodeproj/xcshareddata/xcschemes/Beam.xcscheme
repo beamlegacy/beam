@@ -20,6 +20,20 @@
                ReferencedContainer = "container:Beam.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "NO"
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "965A78472514F149009980D4"
+               BuildableName = "BeamUITests.xctest"
+               BlueprintName = "BeamUITests"
+               ReferencedContainer = "container:Beam.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction
@@ -52,17 +66,8 @@
             </BuildableReference>
          </TestableReference>
          <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "965A78472514F149009980D4"
-               BuildableName = "BeamUITests.xctest"
-               BlueprintName = "BeamUITests"
-               ReferencedContainer = "container:Beam.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
+            skipped = "NO"
+            parallelizable = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "96319D162616232700D1CF31"
@@ -94,6 +99,16 @@
                   Identifier = "ClusteringTests/testTextualSimilarityPipelineWithNonEnglishContent()">
                </Test>
             </SkippedTests>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "965A78472514F149009980D4"
+               BuildableName = "BeamUITests.xctest"
+               BlueprintName = "BeamUITests"
+               ReferencedContainer = "container:Beam.xcodeproj">
+            </BuildableReference>
          </TestableReference>
       </Testables>
    </TestAction>

@@ -8,6 +8,7 @@
 
 import Foundation
 import Combine
+import UUIDKit
 
 public enum ElementKindError: Error {
     case typeNameUnknown(String)
@@ -20,7 +21,7 @@ public enum ElementKind: Codable, Equatable {
     case check(Bool)
     case code
     case divider
-    case image(String)
+    case image(UUID)
     case embed(String)
     case blockReference(UUID, UUID)
 
@@ -90,7 +91,9 @@ public enum ElementKind: Codable, Equatable {
         case "divider":
             self = .divider
         case "image":
-            self = .image(try container.decode(String.self, forKey: .source))
+            let id = try (try? container.decode(UUID.self, forKey: .source)) ??
+            UUID.v5(name: try container.decode(String.self, forKey: .source), namespace: .url)
+            self = .image(id)
 
         case "embed":
             self = .embed(try container.decode(String.self, forKey: .source))
@@ -643,16 +646,6 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
            let url = URL(string: link),
            let embedUrl = url.embed {
             kind = .embed(embedUrl.absoluteString)
-        }
-    }
-
-    /// Utility to convert BeamElement containing a single image url to image kind
-    /// - Parameter id: Without id provided image link will be used instead
-    open func convertToImage(_ id: String?) {
-        if let url = imageLink {
-            // Either use id if provided, else use image url
-            let imageLocation = id ?? url.absoluteString
-            kind = .image(imageLocation)
         }
     }
 
