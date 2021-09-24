@@ -40,6 +40,7 @@ class ClusteringManager: ObservableObject {
     private var cluster: Cluster
     private var scope = Set<AnyCancellable>()
     var suggestedNoteUpdater: SuggestedNoteSourceUpdater
+    var sessionId: UUID
 
     init(ranker: SessionLinkRanker, documentManager: DocumentManager, candidate: Int, navigation: Double, text: Double, entities: Double, sessionId: UUID, activeSources: ActiveSources) {
         self.selectedTabGroupingCandidate = candidate
@@ -51,6 +52,7 @@ class ClusteringManager: ObservableObject {
         self.cluster = Cluster(candidate: candidate, weightNavigation: navigation, weightText: text, weightEntities: entities)
         self.ranker = ranker
         self.documentManager = documentManager
+        self.sessionId = sessionId
         setupObservers()
         #if DEBUG
         setupDebugObservers()
@@ -269,7 +271,23 @@ class ClusteringManager: ObservableObject {
 
     }
 
-    public func saveOrphanedUrls() {
-        suggestedNoteUpdater.saveOrphanedUrls(urlGroups: clusteredPagesId, noteGroups: clusteredNotesId, activeSources: activeSources)
+    public func getOrphanedUrlGroups(urlGroups: [[UInt64]], noteGroups: [[UUID]], activeSources: ActiveSources) -> [[UInt64]] {
+        let activeSourcesUrls = Set(activeSources.urls)
+        return zip(urlGroups, noteGroups)
+            .filter { _, noteGroup in return noteGroup.count == 0 } //not suggested via direct grouping
+            .filter { urlGroup, _ in return activeSourcesUrls.intersection(urlGroup).count == 0 } //not suggested via active source grouping
+            .map { urlGroup, _ in return urlGroup }
+    }
+
+    public func saveOrphanedUrls(orphanedUrlManager: ClusteringOrphanedUrlManager) {
+        let orphanedUrlGroups = getOrphanedUrlGroups(urlGroups: clusteredPagesId, noteGroups: clusteredNotesId, activeSources: activeSources)
+        let savedAt = BeamDate.now
+        for (id, group) in orphanedUrlGroups.enumerated() {
+            for urlId in group {
+                let url = LinkStore.linkFor(urlId)?.url
+                orphanedUrlManager.add(orphanedUrl: OrphanedUrl(sessionId: sessionId, url: url, groupId: id, savedAt: savedAt))
+            }
+        }
+        orphanedUrlManager.save()
     }
 }

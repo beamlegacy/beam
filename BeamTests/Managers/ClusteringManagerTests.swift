@@ -125,4 +125,15 @@ class ClusteringManagerTests: XCTestCase {
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[3]).0) == nodes[4]?.link
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[3]).1) == nodes[1]?.link
     }
+    func testOrphanedUrls() throws {
+        let noteId = UUID()
+        let noteGroups = [[noteId], [], []]
+        let urlGroups: [[UInt64]] = [
+            [0], //this page is in the same cluster as noteId note
+            [1, 2], //this cluster contains noteId's note active source
+            [3]] //this cluster can't be linked to any note
+        let activeSources = ActiveSources()
+        activeSources.activeSources = [noteId: [2]]
+        expect(self.clusteringManager.getOrphanedUrlGroups(urlGroups: urlGroups, noteGroups: noteGroups, activeSources: activeSources)) == [[3]]
+    }
 }

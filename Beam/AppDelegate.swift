@@ -200,7 +200,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationWillTerminate(_ aNotification: Notification) {
         // Insert code here to tear down your application
         saveCloseTabsCmd()
-        data.clusteringManager.saveOrphanedUrls()
+        data.clusteringManager.saveOrphanedUrls(orphanedUrlManager: data.clusteringOrphanedUrlManager)
     }
 
     private func saveCloseTabsCmd() {
