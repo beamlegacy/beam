@@ -107,9 +107,9 @@ class HtmlVisitor {
 
             case "img":
                 guard let src = getImageSrc(element) else { break }
-                // has ImageSRC
-                if let url: URL = getUrl(src),
-                   url.isImageURL {
+                // We assume that any url used as <img src="..." /> is a valid image.
+                // If the closure fails to download an image it defaults to a plain link.
+                if let url: URL = getUrl(src) {
                     let mdUrl = url.absoluteString
                     let imgElement = BeamElement(mdUrl)
                     let fileName = url.lastPathComponent
@@ -162,22 +162,12 @@ class HtmlVisitor {
                 guard let src = getVideoSrc(element),
                       let url: URL = getUrl(src),
                       let mdUrl = url.absoluteString.markdownizedURL else { break }
-                let embedUrl = urlBase.embed ?? url.embed
-                if let mdEmbedUrl = embedUrl?.absoluteString.markdownizedURL {
-                    let embedElement = BeamElement(mdEmbedUrl)
-                    embedElement.text.addAttributes([.link(mdEmbedUrl)], to: embedElement.text.wholeRange)
-                    if allowConvertToEmbed {
-                        embedElement.convertToEmbed() // if possible converts url to embed
-                    }
-                    text.append(embedElement)
-                } else {
-                    let urlElement = BeamElement(src)
-                    urlElement.text.addAttributes([.link(mdUrl)], to: urlElement.text.wholeRange)
-                    if allowConvertToEmbed {
-                        urlElement.convertToEmbed() // if possible converts url to embed
-                    }
-                    text.append(urlElement)
+                let embedElement = BeamElement(mdUrl)
+                embedElement.text.addAttributes([.link(mdUrl)], to: embedElement.text.wholeRange)
+                if allowConvertToEmbed {
+                    embedElement.convertToEmbed() // if possible converts url to embed
                 }
+                text.append(embedElement)
 
             default:
                 let children: [BeamElement] = visitChildren(element)
@@ -294,22 +284,32 @@ extension HtmlVisitor {
         return (base64, mimeType)
     }
 
+    /// Parses urls from a String to URL object. Handles converting relative urls to absolute urls. Allows for `file://` schemes.
+    /// - Parameter src: string to parse
+    /// - Returns: Full absolute url as URL object
     func getUrl(_ src: String) -> URL? {
-        if let url = URL(string: src),
-           (url.host != nil || url.scheme == "file") {
-            if url.scheme != nil {
+        // get url from src string
+        guard var url: URL = URL(string: src) else {
+            return nil
+        }
+        // If we don't have a url host we are dealing with a relative url
+        // that should be converted into an absolute url
+        if url.host == nil,
+           let absoluteUrl = URL(string: src, relativeTo: urlBase) {
+            // Create a full url relative to the urlBase
+            url = absoluteUrl
+        }
+
+        // continue only with urls that have a host or file scheme
+        if url.host != nil || url.scheme == "file" {
+            guard url.scheme == nil else {
                 return url
             }
-
+            // If we don't have a url scheme at all create one from the urlBase scheme
             if let scheme = urlBase.scheme,
                let newUrl = URL(string: scheme + ":" + url.absoluteString) {
                 return newUrl
             }
-        }
-
-        if let url = URL(string: src, relativeTo: urlBase),
-           url.host != nil {
-            return url
         }
 
         return nil
@@ -354,9 +354,17 @@ extension HtmlVisitor {
         // If no src on element try any of the children
         // For the children specifically grabs the `.mp4` file.
         if let childrenWithSource = try? element.getElementsByAttribute("src") {
-            return childrenWithSource.compactMap({ child in
+            let childUrls = childrenWithSource.compactMap({ child in
                 return getVideoSrc(child)
-            }).filter({ $0.contains(".mp4") }).first
+            })
+
+            // If we have any urls containing .mp4 type, return that one
+            if let mp4url = childUrls.first(where: { $0.contains(".mp4") }) {
+                return mp4url
+            } else {
+                // else return any valid video src
+                return childUrls.first
+            }
         }
 
         return nil
