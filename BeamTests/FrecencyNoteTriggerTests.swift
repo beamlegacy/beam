@@ -71,6 +71,7 @@ class FrecencyNoteTriggerTests: XCTestCase {
         var scrollY: CGFloat = .zero
         var originalQuery: String?
         var pointAndShootAllowed: Bool = false
+        var hasError: Bool = false
 
         var title: String = ""
         var url: URL?
@@ -84,6 +85,7 @@ class FrecencyNoteTriggerTests: XCTestCase {
         var score: Float = 0
         var authenticationViewModel: AuthenticationViewModel?
         var searchViewModel: SearchViewModel?
+        var errorPageManager: ErrorPageManager?
 
         func getNote(fromTitle: String) -> BeamNote? {
             if fromTitle == pnsNoteTitle {

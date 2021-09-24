@@ -32,9 +32,12 @@ class WebPageBaseImpl: WebPage {
 
     var title: String = ""
     var url: URL?
+    var hasError: Bool = false
+
 
     var pointAndShoot: PointAndShoot?
     var navigationController: WebNavigationController?
+    var errorPageManager: ErrorPageManager?
     var browsingScorer: BrowsingScorer?
     var passwordOverlayController: PasswordOverlayController?
     var mediaPlayerController: MediaPlayerController?
