@@ -19,7 +19,6 @@ public struct NoteSource: Codable {
         case addedAt
         case type
         case sessionId
-        case groupId
     }
 
     public let urlId: UInt64
@@ -27,7 +26,6 @@ public struct NoteSource: Codable {
     public let type: SourceType
     public var sessionId: UUID?
     var longTermScore: LongTermUrlScore?
-    public var groupId: Int?
 
     var domain: String {
         guard let url = LinkStore.linkFor(urlId)?.url,
@@ -60,9 +58,8 @@ public class NoteSources: Codable {
         return Array(sources.values)
     }
 
-    public func add(urlId: UInt64, noteId: UUID, type: NoteSource.SourceType, date: Date = BeamDate.now, sessionId: UUID, activeSources: ActiveSources? = nil,
-                    groupId: Int? = nil) {
-        let sourceToAdd = NoteSource(urlId: urlId, addedAt: date, type: type, sessionId: sessionId, groupId: groupId)
+    public func add(urlId: UInt64, noteId: UUID, type: NoteSource.SourceType, date: Date = BeamDate.now, sessionId: UUID, activeSources: ActiveSources? = nil) {
+        let sourceToAdd = NoteSource(urlId: urlId, addedAt: date, type: type, sessionId: sessionId)
         switch type {
         case .suggestion: sources[urlId] = sources[urlId] ?? sourceToAdd
         case .user:
