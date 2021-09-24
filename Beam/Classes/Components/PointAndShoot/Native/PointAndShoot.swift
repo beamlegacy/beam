@@ -204,8 +204,8 @@ class PointAndShoot: WebPageHolder, ObservableObject {
         }
 
         if let selectionGroup = activeSelectGroup, activeSelectGroup?.id == id {
-            dismissedGroups.append(selectionGroup)
             activeSelectGroup = nil
+            dismissedGroups.append(selectionGroup)
         }
     }
 

@@ -532,3 +532,150 @@ test("Keydown (Alt) on input element, then mouseMove should set isTypingOnWebVie
   // after mousemove we expect false again
   expect(pns.isTypingOnWebView).toEqual(false)
 })
+
+test("Remove target when found in shootTargets array", () => {
+  const { pns } = pointAndShootTestBed([])
+  // Assign shootTargets
+  const testElement = new BeamHTMLInputElementMock("p")
+  pns.shootTargets = [
+    {
+      id: "shoot-1065773605-3737781321-1233950792",
+      element: testElement
+    },
+    {
+      id: "shoot-1006106738-1762695678-2244185447",
+      element: testElement
+    },
+    {
+      id: "shoot-3086421495-1150594309-1521447044",
+      element: testElement
+    }
+  ]
+  // Expect full array of 3 items
+  expect(pns.shootTargets.length).toEqual(3)
+  // Remove one target
+  pns.removeTarget("shoot-1065773605-3737781321-1233950792")
+  // Expect 1 item to be removed
+  expect(pns.shootTargets.length).toEqual(2)
+})
+
+test("Remove no targets when target isn't found in shootTargets array", () => {
+  const { pns } = pointAndShootTestBed([])
+  // Assign shootTargets
+  const testElement = new BeamHTMLInputElementMock("p")
+  pns.shootTargets = [
+    {
+      id: "shoot-1065773605-3737781321-1233950792",
+      element: testElement
+    },
+    {
+      id: "shoot-1006106738-1762695678-2244185447",
+      element: testElement
+    },
+    {
+      id: "shoot-3086421495-1150594309-1521447044",
+      element: testElement
+    }
+  ]
+  // Expect full array of 3 items
+  expect(pns.shootTargets.length).toEqual(3)
+  // Remove one target
+  pns.removeTarget("id-that-doesnt-exist-in-array")
+  // Expect no items to be removed
+  expect(pns.shootTargets.length).toEqual(3)
+})
+
+test("Remove target when found in selectionRangeGroups array", () => {
+  const { pns } = pointAndShootTestBed([])
+  // Assign selectionRangeGroups
+  const testRange = new BeamRangeMock()
+  pns.selectionRangeGroups = [
+    {
+      id: "selection-2829002974-4275350176-104943234",
+      range: testRange
+    },
+    {
+      id: "selection-2829002974-4275350176-104943098",
+      range: testRange
+    },
+    {
+      id: "selection-2829002974-4275350176-104943567",
+      range: testRange
+    }
+  ]
+  // Expect full array of 3 items
+  expect(pns.selectionRangeGroups.length).toEqual(3)
+  // Remove one target
+  pns.removeTarget("selection-2829002974-4275350176-104943234")
+  // Expect 1 item to be removed
+  expect(pns.selectionRangeGroups.length).toEqual(2)
+})
+
+test("Remove no targets when target isn't found in selectionRangeGroups array", () => {
+  const { pns } = pointAndShootTestBed([])
+  // Assign selectionRangeGroups
+  const testRange = new BeamRangeMock()
+  pns.selectionRangeGroups = [
+    {
+      id: "selection-2829002974-4275350176-104943234",
+      range: testRange
+    },
+    {
+      id: "selection-2829002974-4275350176-104943098",
+      range: testRange
+    },
+    {
+      id: "selection-2829002974-4275350176-104943567",
+      range: testRange
+    }
+  ]
+  // Expect full array of 3 items
+  expect(pns.selectionRangeGroups.length).toEqual(3)
+  // Remove one target
+  pns.removeTarget("id-that-doesnt-exist-in-array")
+  // Expect no items to be removed
+  expect(pns.selectionRangeGroups.length).toEqual(3)
+})
+
+
+test("Remove target from selectionRangeGroups array without changing shootGroups arary", () => {
+  const { pns } = pointAndShootTestBed([])
+  // Assign shootTargets
+  const testElement = new BeamHTMLInputElementMock("p")
+  pns.shootTargets = [
+    {
+      id: "shoot-1065773605-3737781321-1233950792",
+      element: testElement
+    },
+    {
+      id: "shoot-1006106738-1762695678-2244185447",
+      element: testElement
+    },
+    {
+      id: "shoot-3086421495-1150594309-1521447044",
+      element: testElement
+    }
+  ]
+  // Assign selectionRangeGroups
+  const testRange = new BeamRangeMock()
+  pns.selectionRangeGroups = [
+    {
+      id: "selection-2829002974-4275350176-104943234",
+      range: testRange
+    },
+    {
+      id: "selection-2829002974-4275350176-104943098",
+      range: testRange
+    },
+    {
+      id: "selection-2829002974-4275350176-104943567",
+      range: testRange
+    }
+  ]
+  // Expect full array of 3 shoot targets
+  expect(pns.shootTargets.length).toEqual(3)
+  // Remove one selection target
+  pns.removeTarget("selection-2829002974-4275350176-104943234")
+  // Expect full array of 3 shoot targets
+  expect(pns.shootTargets.length).toEqual(3)  
+})
