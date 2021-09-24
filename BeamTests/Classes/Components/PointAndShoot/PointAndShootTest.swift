@@ -184,7 +184,7 @@ class DownloadManagerMock: DownloadManager {
     func downloadURLs(_ urls: [URL], headers: [String: String], completion: @escaping ([DownloadManagerResult]) -> Void) {}
 
     func downloadURL(_ url: URL, headers: [String: String], completion: @escaping (DownloadManagerResult) -> Void) {
-        events.append("downloaded \(url) with headers \(headers)")
+        events.append("downloaded \(url.absoluteString) with headers \(headers)")
         completion(DownloadManagerResult.binary(data: Data([0x01, 0x02, 0x03]), mimeType: "image/png", actualURL: URL(string: "https://webpage.com/image.png")!))
     }
 
