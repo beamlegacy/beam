@@ -20,11 +20,13 @@ class TestWebPage: WebPage {
     var browsingScorer: BrowsingScorer?
     var storage: BeamFileStorage?
     var passwordOverlayController: PasswordOverlayController?
+    var errorPageManager: ErrorPageManager?
     private(set) var webviewWindow: NSWindow?
     private(set) var frame: NSRect = NSRect(x: 0, y: 0, width: 600, height: 800)
     private(set) var mouseLocation: NSPoint!
     private(set) var downloadManager: DownloadManager?
     private(set) var navigationController: WebNavigationController?
+    var hasError: Bool = false
     var mediaPlayerController: MediaPlayerController?
     var appendToIndexer: ((URL, Readability) -> Void)?
     var webView: BeamWebView!

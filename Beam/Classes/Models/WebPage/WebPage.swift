@@ -18,7 +18,9 @@ protocol WebPage: AnyObject, Scorable {
     var originalQuery: String? { get }
     var title: String { get }
     var url: URL? { get }
+    var hasError: Bool { get set }
 
+    var errorPageManager: ErrorPageManager? { get set }
     var fileStorage: BeamFileStorage? { get }
     var downloadManager: DownloadManager? { get }
     var navigationController: WebNavigationController? { get }
