@@ -8,12 +8,6 @@
 import Foundation
 import BeamCore
 
-fileprivate extension String {
-    var quotedForCSV: String {
-        "\"" + replacingOccurrences(of: "\"", with: "\"\"") + "\""
-    }
-}
-
 fileprivate extension Date {
     var toString: String {
         let dateFormater = DateFormatter()
@@ -21,16 +15,8 @@ fileprivate extension Date {
         return dateFormater.string(from: self)
     }
 }
-private func toCsv(columns: [String]) -> String {
-    return columns.map { "\($0)".quotedForCSV }.joined(separator: ",") + "\n"
-}
 
-private func optionalToString<T>(_ elem: T?) -> String {
-    guard let elem = elem else { return "<???>" }
-    return "\(elem)"
-}
-
-private struct NoteAndSourcesRow {
+private struct NoteAndSourcesRow: CsvRow {
     let noteTitle: String
     let noteCreatedAt: Date
     let noteId: UUID
@@ -39,7 +25,6 @@ private struct NoteAndSourcesRow {
     var sourceScore: Float?
     var sourceType: Int?
     var sourceSessionId: UUID?
-    var sourceOrphanedGroupId: Int?
 
     private var sourceAddedAtString: String {
         guard let sourceAddedAt = sourceAddedAt else { return "<???>" }
@@ -50,19 +35,19 @@ private struct NoteAndSourcesRow {
         return sourceSessionId.uuidString
     }
 
-    static let csvHeader: String = toCsv(columns: [
-                                            "noteTitle",
-                                            "noteCreatedAt",
-                                            "noteId",
-                                            "sourceUrl",
-                                            "sourceAddedAt",
-                                            "sourceSessionId",
-                                            "sourceScore",
-                                            "sourceType",
-                                            "sourceOrphanedGroupId"
-    ])
-    var csvRow: String {
-        let columns: [String] = [
+    static var columnNames: [String] { [
+        "noteTitle",
+        "noteCreatedAt",
+        "noteId",
+        "sourceUrl",
+        "sourceAddedAt",
+        "sourceSessionId",
+        "sourceScore",
+        "sourceType"
+        ]
+    }
+
+    var columns: [String] { [
             noteTitle,
             noteCreatedAt.toString,
             noteId.uuidString,
@@ -70,10 +55,8 @@ private struct NoteAndSourcesRow {
             sourceAddedAtString,
             sourceSessionIdString,
             optionalToString(sourceScore),
-            optionalToString(sourceType),
-            optionalToString(sourceOrphanedGroupId)
+            optionalToString(sourceType)
         ]
-        return toCsv(columns: columns)
     }
 }
 
@@ -98,8 +81,7 @@ func export_all_note_sources(to url: URL?) {
                         sourceAddedAt: s.addedAt,
                         sourceScore: s.score,
                         sourceType: s.type.rawValue,
-                        sourceSessionId: s.sessionId,
-                        sourceOrphanedGroupId: s.groupId
+                        sourceSessionId: s.sessionId
                     )
             }
             } else {
@@ -107,12 +89,13 @@ func export_all_note_sources(to url: URL?) {
             }
     }.joined()
 
-    let noteSourcesCSV = NoteAndSourcesRow.csvHeader + notesAndSources.map {$0.csvRow} .joined()
+    let writer = CsvRowsWriter(header: NoteAndSourcesRow.header, rows: Array(notesAndSources))
+    let destination = url.appendingPathComponent("beam_all_note_sources-\(BeamDate.now).csv")
     do {
-        try noteSourcesCSV.write(to: url, atomically: true, encoding: .utf8)
+        try writer.overWrite(to: destination)
     } catch {
-        Logger.shared.logError("Unable to save note sources to \(url)", category: .web)
+        Logger.shared.logError("Unable to save note sources to \(destination)", category: .web)
     }
     //swiftlint:disable:next print
-    print("All note sources saved to file \(url)")
+    print("All note sources saved to file \(destination)")
 }

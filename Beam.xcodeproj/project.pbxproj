@@ -879,6 +879,8 @@
 		DAA60C232666893300C927E5 /* SessionLinkRanker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA60C182666892600C927E5 /* SessionLinkRanker.swift */; };
 		DAA60C2C2666899A00C927E5 /* BeamState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181734D2581204900317ED8 /* BeamState.swift */; };
 		DAB8DB05269C502C00453867 /* UrlScoresCollectionTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB8DB04269C502C00453867 /* UrlScoresCollectionTest.swift */; };
+		DABFD3B026FC974B00C1F7F0 /* ClusteringOrphanedUrlManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABFD3AF26FC974B00C1F7F0 /* ClusteringOrphanedUrlManager.swift */; };
+		DABFD3B726FCAC8300C1F7F0 /* Csv.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABFD3B626FCAC8300C1F7F0 /* Csv.swift */; };
 		DAEAAF3026D3CA4D00D17559 /* ExportAllNoteSources.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAAF2F26D3CA4D00D17559 /* ExportAllNoteSources.swift */; };
 		DAEEA73B26A5C4A600AE72DE /* NoteSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEEA73A26A5C4A600AE72DE /* NoteSource.swift */; };
 		DAEEA74826A6B96A00AE72DE /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEEA74726A6B96A00AE72DE /* Utilities.swift */; };
@@ -1888,6 +1890,8 @@
 		DAA3879C26B1837300CAE20B /* FrecencyNoteTriggerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrecencyNoteTriggerTests.swift; sourceTree = "<group>"; };
 		DAA60C182666892600C927E5 /* SessionLinkRanker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SessionLinkRanker.swift; sourceTree = "<group>"; };
 		DAB8DB04269C502C00453867 /* UrlScoresCollectionTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UrlScoresCollectionTest.swift; sourceTree = "<group>"; };
+		DABFD3AF26FC974B00C1F7F0 /* ClusteringOrphanedUrlManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClusteringOrphanedUrlManager.swift; sourceTree = "<group>"; };
+		DABFD3B626FCAC8300C1F7F0 /* Csv.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Csv.swift; sourceTree = "<group>"; };
 		DAEAAF2F26D3CA4D00D17559 /* ExportAllNoteSources.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportAllNoteSources.swift; sourceTree = "<group>"; };
 		DAEEA73A26A5C4A600AE72DE /* NoteSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteSource.swift; sourceTree = "<group>"; };
 		DAEEA74726A6B96A00AE72DE /* Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
@@ -2437,6 +2441,7 @@
 				96EBCE09262A01160014D923 /* ExportAllBrowsingSessions.swift */,
 				9652A92926A6A96600F0590C /* FakeNoteGenerator.swift */,
 				DAEAAF2F26D3CA4D00D17559 /* ExportAllNoteSources.swift */,
+				DABFD3B626FCAC8300C1F7F0 /* Csv.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -2662,6 +2667,7 @@
 				A0A0FED0268F05CC0080EAEF /* PreferencesManager+Passwords.swift */,
 				A0184F7026AF56AB00993C32 /* PreferencesManager+Advanced.swift */,
 				A0F558F026BD536A0024C47E /* PreferencesManager+EditorDebug.swift */,
+				DABFD3AF26FC974B00C1F7F0 /* ClusteringOrphanedUrlManager.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -5177,6 +5183,7 @@
 				52019A6726DE2F65005E8278 /* BeamObjectManager+Websockets.swift in Sources */,
 				A572370D2655654900AE6BFC /* CoreDataContextObserver.swift in Sources */,
 				33F0480426B14C0100855A08 /* CustomPopoverPresenter.swift in Sources */,
+				DABFD3B726FCAC8300C1F7F0 /* Csv.swift in Sources */,
 				523416A22629D465001F306F /* BeamCoreDataObject.swift in Sources */,
 				9634DD79264AA1A10065383E /* TextFrameLayer.swift in Sources */,
 				418172442581107C00317ED8 /* ScrollableTextView.swift in Sources */,
@@ -5269,6 +5276,7 @@
 				A569EA3026A196F600B0861B /* AutocompleteManager+Publishers.swift in Sources */,
 				416C09F3259C919200AF2903 /* CATransaction+Beam.swift in Sources */,
 				52019A7726DE47D1005E8278 /* DatabaseManager+Promises.swift in Sources */,
+				DABFD3B026FC974B00C1F7F0 /* ClusteringOrphanedUrlManager.swift in Sources */,
 				418172382581107C00317ED8 /* TextNode.swift in Sources */,
 				418172502581107C00317ED8 /* NoteView.swift in Sources */,
 				A5F47EC526F8D6A9004B7CDE /* LottieView.swift in Sources */,
