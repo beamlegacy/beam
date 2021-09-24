@@ -32,7 +32,7 @@ struct ButtonLabelStyle {
     var backgroundColor: Color?
     var hoveredBackgroundColor: Color?
     var activeBackgroundColor: Color = BeamColor.Button.activeBackground.swiftUI
-    var animation: Animation? = nil
+    var animation: Animation?
 }
 
 struct ButtonLabel: View {

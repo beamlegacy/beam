@@ -30,7 +30,13 @@ class TestWebPage: WebPage {
     var mediaPlayerController: MediaPlayerController?
     var appendToIndexer: ((URL, Readability) -> Void)?
     var webView: BeamWebView!
-    var activeNote: String = "Card A"
+    var activeNote: BeamNote {
+        if let note = testNotes.values.first {
+            return note
+        } else {
+            return BeamNote(title: "activeNote backup")
+        }
+    }
     var testNotes: [String: BeamCore.BeamNote] = ["Card A": BeamNote(title: "Card A")]
     var fileStorage: BeamFileStorage? {
         storage
@@ -103,7 +109,7 @@ class TestWebPage: WebPage {
             self.logInNote(url: url, title: self.title, reason: .pointandshoot)
         }
         // use last note
-        return testNotes[activeNote]
+        return activeNote
     }
 
     func closeTab() {
@@ -111,12 +117,12 @@ class TestWebPage: WebPage {
     }
 
     func setDestinationNote(_ note: BeamCore.BeamNote, rootElement: BeamCore.BeamElement?) {
-        events.append("setDestinationNote \(note) \(String(describing: rootElement))")
+        events.append("setDestinationNote \(note.title) \(String(describing: rootElement))")
     }
 
     func getNote(fromTitle: String) -> BeamCore.BeamNote? {
         events.append("getNote \(fromTitle)")
-        return testNotes[fromTitle]
+        return testNotes[fromTitle] ?? nil
     }
 
     func addTextToClusteringManager(_ text: String, url: URL) {}

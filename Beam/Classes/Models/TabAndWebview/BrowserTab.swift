@@ -385,6 +385,9 @@ import Promises
         noteController.score = score
     }
 
+    /// Calls BeamNote to fetch a note from the documentManager
+    /// - Parameter noteTitle: The title of the Note
+    /// - Returns: The fetched note or nil if no note exists
     func getNote(fromTitle noteTitle: String) -> BeamNote? {
         BeamNote.fetch(state.data.documentManager, title: noteTitle)
     }

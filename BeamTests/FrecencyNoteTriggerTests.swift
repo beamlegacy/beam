@@ -158,7 +158,7 @@ class FrecencyNoteTriggerTests: XCTestCase {
         XCTAssertNotNil(pns.activeShootGroup)
         if let group = pns.activeShootGroup {
             let expectation = XCTestExpectation(description: "point and shoot addShootToNote")
-            pns.addShootToNote(noteTitle: pnsNoteTitle, group: group, completion: {
+            pns.addShootToNote(targetNote: pnsNote, group: group, completion: {
                 XCTAssertEqual(self.scorer.updateCalls.count, 1)
                 let call = self.scorer.updateCalls[0]
                 XCTAssertEqual(call.id, pnsNote.id)
