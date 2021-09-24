@@ -177,9 +177,13 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    * @memberof PointAndShoot
    */
   removeShootTarget(id: string): void {
-    this.shootTargets.splice(this.shootTargets.findIndex((target) => {
+    const foundIndex = this.shootTargets.findIndex((target) => {
       return target.id === id
-    }), 1)
+    })
+    // foundIndex is -1 when no match is found. Only remove found items from array
+    if (foundIndex >= 0) {
+      this.shootTargets.splice(foundIndex, 1)
+    }
   }
 
   /**
@@ -189,9 +193,14 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    * @memberof PointAndShoot
    */
    removeSelectRangeGroup(id: string): void {
-    this.selectionRangeGroups.splice(this.selectionRangeGroups.findIndex((target) => {
-      return target.id === id
-    }), 1)
+     const foundIndex = this.selectionRangeGroups.findIndex((target) => {
+       return target.id === id
+      })
+      // foundIndex is -1 when no match is found. Only remove found items from array
+      if (foundIndex >= 0) {
+        this.selectionRangeGroups.splice(foundIndex, 1)
+      }
+
   }
 
   /**
