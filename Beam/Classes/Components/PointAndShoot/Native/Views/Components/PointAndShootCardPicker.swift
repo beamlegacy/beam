@@ -147,7 +147,9 @@ struct PointAndShootCardPicker: View {
                         Icon(name: confirmationIcon, size: 16, color: BeamColor.Generic.text.swiftUI)
                             .transition(AnyTransition.opacity.animation(Animation.easeInOut(duration: 0.15).delay(0.05)))
                             .onTapGesture {
-                                state.navigateToNote(id: group.noteInfo.id)
+                                if group.confirmation != .failure {
+                                    state.navigateToNote(id: group.noteInfo.id)
+                                }
                             }
                     }
                 }
