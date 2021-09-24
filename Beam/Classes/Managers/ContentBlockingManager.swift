@@ -123,4 +123,27 @@ extension ContentBlockingManager {
             completion(entry != nil)
         }
     }
+
+    func authorizeJustOnce(for webView: WKWebView, domain: String, completion: @escaping () -> Void) {
+        Logger.shared.logInfo("Radblock register temporary rulist for \(domain)", category: .contentBlocking)
+        let jsonRuleList = """
+        [
+            {
+                "trigger": { "url-filter": "\(domain)" },
+                "action": { "type": "ignore-previous-rules" }
+            }
+        ]
+        """
+        WKContentRuleListStore.default().compileContentRuleList(forIdentifier: "tmpAllowList", encodedContentRuleList: jsonRuleList) { [synchronize] list, _
+            in
+            guard let list = list else { return }
+
+            // Add the stylesheet-blocker to your webview's configuration
+            let configuration = webView.configuration.userContentController
+            configuration.removeAllContentRuleLists()
+            configuration.add(list)
+            synchronize()
+            completion()
+        }
+    }
 }

@@ -22,6 +22,7 @@ import Promises
     private var isFromNoteSearch: Bool
 
     public func load(url: URL) {
+        hasError = false
         if !isFromNoteSearch {
             navigationController?.setLoading()
         }
@@ -69,12 +70,20 @@ import Promises
     @Published var canGoForward: Bool = false
     @Published var backForwardList: WKBackForwardList!
     @Published var favIcon: NSImage?
+    @Published var hasError: Bool = false {
+        didSet {
+            if !hasError {
+                errorPageManager = nil
+            }
+        }
+    }
 
     @Published var browsingTree: BrowsingTree
     @Published var privateMode = false
 
     @Published var authenticationViewModel: AuthenticationViewModel?
     @Published var searchViewModel: SearchViewModel?
+    @Published var errorPageManager: ErrorPageManager?
 
     var backForwardUrlList: [URL]?
 
@@ -443,6 +452,7 @@ import Promises
     }
 
     func reload() {
+        hasError = false
         leave()
         if webView.url == nil, let url = url {
             load(url: url)
