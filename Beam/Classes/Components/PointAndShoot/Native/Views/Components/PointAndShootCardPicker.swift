@@ -20,7 +20,7 @@ struct PointAndShootCardPicker: View {
     @EnvironmentObject var browserTabsManager: BrowserTabsManager
 
     var focusOnAppear = true
-    var onComplete: ((_ cardName: String?, _ note: String?) -> Void)?
+    var onComplete: ((_ targetNote: BeamNote?, _ note: String?) -> Void)?
 
     @State private var autocompleteModel = DestinationNoteAutocompleteList.Model()
 
@@ -34,26 +34,11 @@ struct PointAndShootCardPicker: View {
 
     @State private var shootCompleted: Bool = false
 
-    private var finalCardName: String {
-        var finalCardName = cardSearchField
-        if !finalCardName.isEmpty {
-            selectSearchResult()
-            finalCardName = autocompleteModel.realNameForCardName(cardSearchField)
-        } else if let currentCardName = currentCardName {
-            finalCardName = currentCardName
-        } else {
-            finalCardName = data.todaysName
-        }
-        return finalCardName
-    }
-
     private var isTodaysNote: String? {
         browserTabsManager.currentTab?.noteController.noteOrDefault.isTodaysNote ?? false ? data.todaysName : nil
     }
 
-    private var placeholderText: String {
-        currentCardName ?? data.todaysName
-    }
+    @State private var destinationCardName: String?
 
     private var textColor: NSColor {
         currentCardName == nil ? BeamColor.Generic.text.nsColor : BeamColor.Beam.nsColor
@@ -87,7 +72,7 @@ struct PointAndShootCardPicker: View {
                         BeamTextField(
                             text: $cardSearchField,
                             isEditing: $isEditingCardName,
-                            placeholder: placeholderText,
+                            placeholder: destinationCardName ?? data.todaysName,
                             font: BeamFont.regular(size: 13).nsFont,
                             textColor: textColor,
                             placeholderColor: BeamColor.Generic.placeholder.nsColor,
@@ -95,15 +80,19 @@ struct PointAndShootCardPicker: View {
                             selectedRangeColor: selectedRangeColor
                         ) { (text) in
                             onTextDidChange(text)
-                        } onCommit: { _ in
+                        } onCommit: { modifierFlags in
                             enableResizeAnimation()
-                            if currentCardName != nil || cardSearchField.isEmpty {
-                                onFinishEditing(canceled: false)
+
+                            let withCommand = modifierFlags?.contains(.command) ?? false
+                            if currentCardName != nil || cardSearchField.isEmpty || withCommand {
+                                // Submit and close CardPicker
+                                onFinishEditing(withCommand)
                             } else {
+                                // Select search result
                                 selectSearchResult()
                             }
                         } onEscape: {
-                            onFinishEditing(canceled: true)
+                            onCancelEditing()
                         } onTab: {
                             isEditingNote = true
                             // select note when pressing tab
@@ -113,7 +102,9 @@ struct PointAndShootCardPicker: View {
                         } onCursorMovement: { move -> Bool in
                             autocompleteModel.handleCursorMovement(move)
                         } onStopEditing: {
-                            cardSearchFieldSelection = nil
+                            DispatchQueue.main.async {
+                                cardSearchFieldSelection = nil
+                            }
                             enableResizeAnimation()
                         } onSelectionChanged: { range in
                             guard range.lowerBound != cardSearchFieldSelection?.lowerBound ||
@@ -134,7 +125,7 @@ struct PointAndShootCardPicker: View {
                             )
                         )
                     } else if completedGroup?.confirmation == .success {
-                        Text(finalCardName)
+                        Text(getFinalCardName())
                             .foregroundColor(BeamColor.Beam.swiftUI)
                             .font(BeamFont.regular(size: 13).swiftUI)
                             .animation(.easeInOut(duration: 0.1))
@@ -149,7 +140,7 @@ struct PointAndShootCardPicker: View {
                         Icon(name: "editor-format_enter", size: 12, color: BeamColor.Generic.placeholder.swiftUI)
                             .transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.15)))
                             .onTapGesture {
-                                onFinishEditing(canceled: false)
+                                onFinishEditing()
                             }
                     } else if let group = completedGroup {
                         let confirmationIcon = group.confirmation == .success ? "collect-generic" : "tabs-close"
@@ -187,9 +178,9 @@ struct PointAndShootCardPicker: View {
                         placeholderColor: BeamColor.Generic.placeholder.nsColor
                     ) { _ in
                     } onCommit: { _ in
-                        onFinishEditing(canceled: false)
+                        onFinishEditing()
                     } onEscape: {
-                        onFinishEditing(canceled: true)
+                        onCancelEditing()
                     }
                     .frame(minHeight: 16)
 
@@ -198,7 +189,7 @@ struct PointAndShootCardPicker: View {
                         Icon(name: "editor-format_enter", size: 12, color: BeamColor.Generic.placeholder.swiftUI)
                             .animation(nil)
                             .onTapGesture {
-                                onFinishEditing(canceled: false)
+                                onFinishEditing()
                             }
                     }
                 }
@@ -210,6 +201,7 @@ struct PointAndShootCardPicker: View {
             if let currentNote = browserTabsManager.currentTab?.noteController.note {
                 currentCardName = currentNote.title
                 cardSearchField = currentNote.title
+                destinationCardName = currentNote.title
             }
             autocompleteModel.data = data
             autocompleteModel.useRecents = false
@@ -323,7 +315,8 @@ extension PointAndShootCardPicker {
     // MARK: - onTextDidChange
     private func onTextDidChange(_ text: String) {
         var searchText = text
-        if let currentCardName = currentCardName, text.count == currentCardName.count - 1 {
+        if let currentCardName = currentCardName,
+            text.count == currentCardName.count - 1 {
             cardSearchField = ""
             searchText = ""
         }
@@ -333,58 +326,83 @@ extension PointAndShootCardPicker {
 }
 
 extension PointAndShootCardPicker {
-    // MARK: - onFinishEditing
-    private func onFinishEditing(canceled: Bool = false) {
+    private func onCancelEditing() {
         guard !shootCompleted else { return }
-        guard !canceled else {
-            onComplete?(nil, nil)
-            return
+        onComplete?(nil, nil)
+    }
+    // MARK: - onFinishEditing
+    private func onFinishEditing(_ withCommand: Bool = false) {
+        guard !shootCompleted else { return }
+        shootCompleted = true
+        // Select search result
+        selectSearchResult(withCommand)
+        // if cardname is either "Today" or todays date e.g. "21 September 2021" we should create a journal note
+        if !withCommand,
+           let date = autocompleteModel.getDateForCardReplacementJournalNote(cardSearchField) {
+            let note = fetchOrCreateJournalNote(date: date)
+            onComplete?(note, addNoteField)
+        } else {
+            let cardName = getFinalCardName(withCommand)
+            let note = fetchOrCreateNote(named: cardName)
+            onComplete?(note, addNoteField)
         }
-        if !finalCardName.isEmpty {
-            shootCompleted = true
-            onComplete?(finalCardName, addNoteField)
+    }
+
+    private func getFinalCardName(_ withCommand: Bool = false) -> String {
+        if withCommand {
+            return cardSearchField
+        } else if !cardSearchField.isEmpty {
+            return autocompleteModel.realNameForCardName(cardSearchField)
+        } else if let currentCardName = currentCardName {
+            return currentCardName
+        } else if let lastCardName = destinationCardName {
+            return lastCardName
+        } else {
+            return data.todaysName
         }
     }
 }
 
 extension PointAndShootCardPicker {
     // MARK: - selectSearchResult
-    private func selectSearchResult(withCommand: Bool = false) {
+    private func selectSearchResult(_ withCommand: Bool = false) {
         guard !cardSearchField.isEmpty else { return }
+        guard let result = autocompleteModel.selectedResult else {
+            Logger.shared.logError("Failed to return a selected autocompleteModel result", category: .pointAndShoot)
+            return
+        }
+
         var finalCardName: String
+        // with command pressed, find or create a note with exact card search string
         if withCommand {
             finalCardName = cardSearchField
-            createNote(named: finalCardName)
+            fetchOrCreateNote(named: finalCardName)
         } else {
-            guard let result = autocompleteModel.selectedResult else {
-                return
-            }
+            // else get the card name from the autocomplete model
             finalCardName = autocompleteModel.realNameForCardName(result.text)
-            if result.source == .createCard {
-                createNote(named: result.text)
-            } else if result.source == .autocomplete && finalCardName != cardSearchField {
-                createJournalNote(date: autocompleteModel.getDateForCardReplacementJournalNote(cardSearchField))
-            }
         }
+        // Update search input to real card name
         cardSearchField = finalCardName
+        // Update search input to real card name
         currentCardName = finalCardName
+        // Update placeholder
+        destinationCardName = finalCardName
     }
 }
 
 extension PointAndShootCardPicker {
-    // MARK: - createNote
+    // MARK: - fetchOrCreateNote
     @discardableResult
-    private func createNote(named name: String) -> BeamNote {
+    private func fetchOrCreateNote(named name: String) -> BeamNote {
         let note = BeamNote.fetchOrCreate(data.documentManager, title: name)
         note.save(documentManager: data.documentManager)
         return note
     }
 
-    // MARK: - createJournalNote
+    // MARK: - fetchOrCreateJournalNote
     @discardableResult
-    private func createJournalNote(date: Date) -> BeamNote {
-        let note = BeamNote.fetchOrCreateJournalNote(data.documentManager,
-                                                     date: date)
+    private func fetchOrCreateJournalNote(date: Date) -> BeamNote {
+        let note = BeamNote.fetchOrCreateJournalNote(data.documentManager, date: date)
         note.save(documentManager: data.documentManager)
         return note
     }
@@ -392,7 +410,7 @@ extension PointAndShootCardPicker {
 
 extension PointAndShootCardPicker {
     // MARK: - onComplete
-    func onComplete(perform action: @escaping (_ cardName: String?, _ note: String?) -> Void ) -> Self {
+    func onComplete(perform action: @escaping (_ targetNote: BeamNote?, _ note: String?) -> Void ) -> Self {
         var copy = self
         copy.onComplete = action
         return copy

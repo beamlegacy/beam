@@ -115,10 +115,10 @@ struct PointAndShootView: View {
             PointAndShootCardPickerPositioning(group: pns.translateAndScaleGroup(group), cardPickerSize: size) {
                 FormatterViewBackground {
                     PointAndShootCardPicker(completedGroup: pns.shootConfirmationGroup, allowAnimation: $allowAnimation)
-                        .onComplete { (noteTitle, note) in
-                            if let noteTitle = noteTitle,
+                        .onComplete { (targetNote, note) in
+                            if let targetNote = targetNote,
                                let shootGroup = pns.activeShootGroup {
-                                pns.addShootToNote(noteTitle: noteTitle, withNote: note, group: shootGroup, completion: {})
+                                pns.addShootToNote(targetNote: targetNote, withNote: note, group: shootGroup, completion: {})
                                 self.offset = 10
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.16) {
                                     self.offset = 0

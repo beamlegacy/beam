@@ -34,7 +34,6 @@ class WebPageBaseImpl: WebPage {
     var url: URL?
     var hasError: Bool = false
 
-
     var pointAndShoot: PointAndShoot?
     var navigationController: WebNavigationController?
     var errorPageManager: ErrorPageManager?
