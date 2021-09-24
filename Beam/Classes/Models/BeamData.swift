@@ -40,6 +40,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var downloadManager: BeamDownloadManager = BeamDownloadManager()
     var sessionLinkRanker = SessionLinkRanker()
     var clusteringManager: ClusteringManager
+    var clusteringOrphanedUrlManager: ClusteringOrphanedUrlManager
     var activeSources = ActiveSources()
     var scope = Set<AnyCancellable>()
     let sessionId = UUID()
@@ -88,6 +89,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     }
 
     static var indexPath: URL { URL(fileURLWithPath: dataFolder(fileName: "index.beamindex")) }
+    static var orphanedUrlsPath: URL { URL(fileURLWithPath: dataFolder(fileName: "clusteringOrphanedUrls.csv")) }
     static var fileDBPath: String { dataFolder(fileName: "files.db") }
     static var linkStorePath: URL { URL(fileURLWithPath: dataFolder(fileName: "links.store")) }
     static var idToTitle: [UUID: String] = [:]
@@ -96,6 +98,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     //swiftlint:disable:next function_body_length
     override init() {
         documentManager = DocumentManager()
+        clusteringOrphanedUrlManager = ClusteringOrphanedUrlManager(savePath: Self.orphanedUrlsPath)
         clusteringManager = ClusteringManager(ranker: sessionLinkRanker, documentManager: documentManager, candidate: 2, navigation: 0.5, text: 0.8, entities: 0.5, sessionId: sessionId, activeSources: activeSources)
         noteAutoSaveService = NoteAutoSaveService()
         linkManager = LinkManager()
