@@ -20,21 +20,33 @@ class HtmlNoteAdapterLargeDOMPerformanceTests: XCTestCase {
     func testArrayBeamElement() throws {
         let htmlNoteAdapter = HtmlNoteAdapter(URL(string: "http://test.com")!)
         self.measure {
-            let _: [BeamElement] = htmlNoteAdapter.convert(html: html)
+            let expectation = XCTestExpectation(description: "convert html to BeamElements")
+            htmlNoteAdapter.convert(html: html, completion: { (_: [BeamElement]) in
+                expectation.fulfill()
+            })
+            wait(for: [expectation], timeout: 10.0)
         }
     }
 
     func testSingleBeamElment() throws {
         let htmlNoteAdapter = HtmlNoteAdapter(URL(string: "http://test.com")!)
         self.measure {
-            let _: BeamElement = htmlNoteAdapter.convert(html: html)
+            let expectation = XCTestExpectation(description: "convert html to BeamElements")
+            htmlNoteAdapter.convert(html: html, completion: { (_: BeamElement) in
+                expectation.fulfill()
+            })
+            wait(for: [expectation], timeout: 10.0)
         }
     }
 
     func testString() throws {
         let htmlNoteAdapter = HtmlNoteAdapter(URL(string: "http://test.com")!)
         self.measure {
-            let _: String = htmlNoteAdapter.convert(html: html)
+            let expectation = XCTestExpectation(description: "convert html to BeamElements")
+            htmlNoteAdapter.convert(html: html, completion: { (_: String) in
+                expectation.fulfill()
+            })
+            wait(for: [expectation], timeout: 10.0)
         }
     }
 }

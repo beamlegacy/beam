@@ -34,7 +34,7 @@ class ImageNode: ElementNode {
     }
 
     private func setupImage() {
-        var uid = ""
+        var uid = UUID.null
         switch element.kind {
         case .image(let id):
             uid = id

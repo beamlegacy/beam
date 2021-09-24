@@ -9,10 +9,47 @@ import Foundation
 import BeamCore
 import GRDB
 import UUIDKit
+import Swime
 
-struct BeamFileRecord {
+struct BeamFileRecordOld {
     var name: String
     var uid: String
+    var data: Data
+    var type: String
+
+    var createdAt: Date = BeamDate.now
+    var updatedAt: Date = BeamDate.now
+    var deletedAt: Date?
+    var previousChecksum: String?
+    var checksum: String?
+}
+
+extension BeamFileRecordOld: TableRecord {
+    /// The table columns
+    enum Columns: String, ColumnExpression {
+        case name, uid, data, type
+    }
+}
+
+// Persistence methods
+extension BeamFileRecordOld: MutablePersistableRecord {
+    /// The values persisted in the database
+    static let persistenceConflictPolicy = PersistenceConflictPolicy(
+        insert: .replace,
+        update: .replace)
+
+    func encode(to container: inout PersistenceContainer) {
+        container[Columns.name] = name
+        container[Columns.uid] = uid
+        container[Columns.data] = data
+        container[Columns.type] = type
+    }
+}
+
+// The new version of the BeamFileRecord (where uid is an UUID)
+struct BeamFileRecord {
+    var name: String
+    var uid: UUID
     var data: Data
     var type: String
 
@@ -62,11 +99,10 @@ extension BeamFileRecord: BeamObjectProtocol {
 
     var beamObjectId: UUID {
         get {
-            UUID.v3(name: uid, namespace: .dns)
+            uid
         }
         set {
-            // we don't store the beam object id as it's built from the contents of the data, but let's check that it's correct at least in debug builds:
-            assert(uid.isEmpty || UUID.v3(name: uid, namespace: .dns) == newValue)
+            uid = newValue
         }
     }
 
@@ -88,9 +124,9 @@ extension BeamFileRecord: BeamObjectProtocol {
 }
 
 protocol BeamFileStorage {
-    func fetch(uid: String) throws -> BeamFileRecord?
-    func insert(name: String, uid: String, data: Data, type: String) throws
-    func remove(uid: String) throws
+    func fetch(uid: UUID) throws -> BeamFileRecord?
+    func insert(name: String, data: Data, type: String?) throws -> UUID
+    func remove(uid: UUID) throws
     func clear() throws
 }
 
@@ -98,6 +134,7 @@ class BeamFileDB: BeamFileStorage {
     static let tableName = "beamFileRecord"
     var dbPool: DatabasePool
 
+    //swiftlint:disable:next function_body_length
     init(path: String) throws {
         let configuration = GRDB.Configuration()
 
@@ -126,9 +163,28 @@ class BeamFileDB: BeamFileStorage {
         migrator.registerMigration("migrateOldData") { db in
             if let storedFiles = rows {
                 for file in storedFiles {
-                    var fileRecord = BeamFileRecord(
+                    var fileRecord = BeamFileRecordOld(
                         name: file["name"],
                         uid: file["uid"],
+                        data: file["data"],
+                        type: file["type"],
+                        createdAt: BeamDate.now,
+                        updatedAt: BeamDate.now,
+                        deletedAt: nil,
+                        previousChecksum: nil)
+                    try fileRecord.insert(db)
+                }
+            }
+        }
+
+        migrator.registerMigration("migrateToUUID") { db in
+            if let storedFiles = rows {
+                for file in storedFiles {
+                    let id = file["uid"] as String
+                    let uuid = UUID(uuidString: id) ?? UUID.v5(name: id, namespace: .url)
+                    var fileRecord = BeamFileRecord(
+                        name: file["name"],
+                        uid: uuid,
                         data: file["data"],
                         type: file["type"],
                         createdAt: BeamDate.now,
@@ -143,7 +199,7 @@ class BeamFileDB: BeamFileStorage {
         try migrator.migrate(dbPool)
     }
 
-    func fetch(uid: String) throws -> BeamFileRecord? {
+    func fetch(uid: UUID) throws -> BeamFileRecord? {
         try dbPool.read({ db in
             try? BeamFileRecord.fetchOne(db, key: uid)
         })
@@ -151,19 +207,18 @@ class BeamFileDB: BeamFileStorage {
 
     func fetchWithBeamObjectId(id: UUID) throws -> BeamFileRecord? {
         try dbPool.read({ db in
-            try? BeamFileRecord.filter(Column("beamObjectId") == id).fetchOne(db)
+            try? BeamFileRecord.filter(Column("uid") == id).fetchOne(db)
         })
     }
 
-    func insert(name: String, uid: String, data: Data, type: String) throws {
-        do {
-            try dbPool.write { db in
-                var f = BeamFileRecord(name: name, uid: uid, data: data, type: type)
-                try f.insert(db)
-            }
-        } catch let error {
-            Logger.shared.logError("Error while inserting file \(name) - \(uid): \(error)", category: .fileDB)
-            throw error
+    func insert(name: String, data: Data, type: String?) throws -> UUID {
+        let uid = UUID.v5(name: data.SHA256, namespace: .url)
+        let mimeType = type ?? Swime.mimeType(data: data)?.mime ?? "application/octet-stream"
+
+        return try dbPool.write { db -> UUID in
+            var f = BeamFileRecord(name: name, uid: uid, data: data, type: mimeType)
+            try f.insert(db)
+            return uid
         }
     }
 
@@ -181,7 +236,7 @@ class BeamFileDB: BeamFileStorage {
         }
     }
 
-    func remove(uid: String) throws {
+    func remove(uid: UUID) throws {
         _ = try dbPool.write { db in
             try BeamFileRecord.deleteOne(db, key: ["uid": uid])
         }
@@ -204,21 +259,22 @@ class BeamFileDBManager: BeamFileStorage {
     static let shared = BeamFileDBManager()
     var fileDB: BeamFileDB
 
-    func insert(name: String, uid: String, data: Data, type: String) {
-        do {
-            let file = BeamFileRecord(name: name, uid: uid, data: data, type: type)
-            try fileDB.insert(files: [file])
+    func insert(name: String, data: Data, type: String? = nil) throws -> UUID {
+        let uid = UUID.v5(name: data.SHA256, namespace: .url)
+        let mimeType = type ?? Swime.mimeType(data: data)?.mime ?? "application/octet-stream"
+        let file = BeamFileRecord(name: name, uid: uid, data: data, type: mimeType)
+        try fileDB.insert(files: [file])
+        if AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled {
             try self.saveOnNetwork(file)
-        } catch {
-            Logger.shared.logError("Error inserting a new file in DB: \(error)", category: .fileDB)
         }
+        return uid
     }
 
-    func fetch(uid: String) throws -> BeamFileRecord? {
+    func fetch(uid: UUID) throws -> BeamFileRecord? {
         try fileDB.fetch(uid: uid)
     }
 
-    func remove(uid: String) throws {
+    func remove(uid: UUID) throws {
         try fileDB.remove(uid: uid)
     }
 

@@ -33,75 +33,85 @@ class HtmlNoteAdapter {
     /// Converts a html string to a plain text string of the content
     /// - Parameter html: String of html content
     /// - Returns: Plain text string
-    func convert(html: String) -> String {
+    func convert(html: String, completion: @escaping (String) -> Void) {
         guard let document = parseBodyFragment(html) else {
-            return ""
+            completion("")
+            return
         }
-        let wrapperElement: BeamElement = convertDocument(document)
-        return wrapperElement.text.text
+        convertDocument(document, completion: { wrapperElement in
+            completion(wrapperElement.text.text)
+        })
     }
 
     /// Converts a html string to a single BeamElement. Each child of
     /// the BeamElement will get inserted as a bullet
     /// - Parameter html: String of html content
     /// - Returns: BeamElement
-    func convert(html: String) -> BeamElement {
+    func convert(html: String, completion: @escaping (BeamElement) -> Void) {
         guard let document = parseBodyFragment(html) else {
-            return BeamElement()
+            completion(BeamElement())
+            return
         }
-
-        return convertDocument(document)
+        convertDocument(document, completion: { elements in
+            completion(elements)
+        })
     }
 
     /// Converts a html string to an array of BeamElements. Each BeamElement
     /// will get inserted as a bullet.
     /// - Parameter html: String of html content
     /// - Returns: Array of BeamElements
-    func convert(html: String) -> [BeamElement] {
+    func convert(html: String, completion: @escaping ([BeamElement]) -> Void) {
         guard let document = parseBodyFragment(html) else {
-            return []
+            completion([])
+            return
         }
-        return convertDocument(document)
+        convertDocument(document, completion: { elements in
+            completion(elements)
+        })
     }
 
-    private func convertDocument(_ document: SwiftSoup.Document) -> BeamElement {
+    private func convertDocument(_ document: SwiftSoup.Document, completion: @escaping (BeamElement) -> Void) {
         // Visit all html elements and parse them into BeamElements
         // each Html Element will be converted to a BeamElement
-        let elements: [BeamElement] = visitor.parse(document)
-        // Each BeamElement will be represented in the journal as a bullet,
-        // some content like links in paragraph we want to display them inline.
-        // To do so we create a wrapper element to add the children to:
-        let wrapperElement = BeamElement()
-        wrapperElement.addChildren(elements)
-        // Join all BeamElement of bullet kind into whole paragraphs
-        wrapperElement.joinKinds()
-        // Then split those paragraphs into BeamElements based on line breaks
-        // Take care to not lose the reference to the original child with `.image` kind.
-        // Losing this reference will make the downloader fail.
-        let newChildren = wrapperElement.children.map({ child -> [BeamElement] in
-            if child.kind == .bullet {
-                return child.text
-                    .splitting(NSCharacterSet.newlines)
-                    .compactMap({ text -> BeamElement? in
-                        let resultText = text.trimming(.whitespaces)
-                        return resultText.count > 0 ? BeamElement(resultText) : nil
-                    })
-            } else {
-                return [child]
-            }
-        })
-        // flatten arrays of arrays
-        .reduce([], +)
-        // Assign the newChildren to the wrapperElement
-        wrapperElement.clearChildren()
-        wrapperElement.addChildren(newChildren)
+        visitor.parse(document, completion: { elements in
+            // Each BeamElement will be represented in the journal as a bullet,
+            // some content like links in paragraph we want to display them inline.
+            // To do so we create a wrapper element to add the children to:
+            let wrapperElement = BeamElement()
+            wrapperElement.addChildren(elements)
+            // Join all BeamElement of bullet kind into whole paragraphs
+            wrapperElement.joinKinds()
+            // Then split those paragraphs into BeamElements based on line breaks
+            // Take care to not lose the reference to the original child with `.image` kind.
+            // Losing this reference will make the downloader fail.
+            let newChildren = wrapperElement.children.map({ child -> [BeamElement] in
+                if child.kind == .bullet {
+                    return child.text
+                        .splitting(NSCharacterSet.newlines)
+                        .compactMap({ text -> BeamElement? in
+                            let resultText = text.trimming(.whitespaces)
+                            return resultText.count > 0 ? BeamElement(resultText) : nil
+                        })
+                } else {
+                    return [child]
+                }
+            })
+            // flatten arrays of arrays
+            .reduce([], +)
+            // Assign the newChildren to the wrapperElement
+            wrapperElement.clearChildren()
+            wrapperElement.addChildren(newChildren)
 
-        return wrapperElement
+            completion(wrapperElement)
+        })
     }
 
-    private func convertDocument(_ document: SwiftSoup.Document) -> [BeamElement] {
-        let wrapperElement: BeamElement = convertDocument(document)
-        return wrapperElement.children
+    private func convertDocument(_ document: SwiftSoup.Document, completion: @escaping ([BeamElement]) -> Void) {
+        let parentCompletion = completion
+        convertDocument(document, completion: { wrapperElement in
+            parentCompletion(wrapperElement.children)
+        })
     }
 
     /// Uses SwiftSoup to parse an html string into a SwiftSoup Document

@@ -458,7 +458,6 @@
 		8AD2637526F4A0480074D673 /* BeamWindowMock.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2635926F4A0480074D673 /* BeamWindowMock.ts */; };
 		8AD2637626F4A0480074D673 /* BeamWebFactoryMock.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2635A26F4A0480074D673 /* BeamWebFactoryMock.ts */; };
 		8AD9DEBE26C6ACF00015B559 /* PointAndShootOffsetWithAnimation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD9DEBD26C6ACF00015B559 /* PointAndShootOffsetWithAnimation.swift */; };
-		8AEADBD126776BC500E36BAC /* UITests-Password.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AEADBC926776BC500E36BAC /* UITests-Password.html */; };
 		8AED4FF026C2A3AA00E29DB7 /* PointAndShootFrameOffset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AED4FEF26C2A3AA00E29DB7 /* PointAndShootFrameOffset.swift */; };
 		8AF0E33D268F30E0007C75D8 /* index_prod.js in Resources */ = {isa = PBXBuildFile; fileRef = 8AF0E335268F30E0007C75D8 /* index_prod.js */; };
 		8AF61F14267BA292006DD5C2 /* RBAllowlistEntry.m in Sources */ = {isa = PBXBuildFile; fileRef = 8AF61F13267BA292006DD5C2 /* RBAllowlistEntry.m */; };
@@ -479,7 +478,6 @@
 		9623ABBF26B0061400309E5E /* Beam3ToBeam4Migration.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 9623ABBE26B0061400309E5E /* Beam3ToBeam4Migration.xcmappingmodel */; };
 		96319C6E26160AB400D1CF31 /* BeamNote+DocumentManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96319C6D26160AB400D1CF31 /* BeamNote+DocumentManager.swift */; };
 		96319C8626160E4A00D1CF31 /* BeamNote+LinkDetection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96319C8526160E4A00D1CF31 /* BeamNote+LinkDetection.swift */; };
-		96319D182616232700D1CF31 /* BeamCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96319D0F2616232600D1CF31 /* BeamCore.framework */; };
 		96319D242616232700D1CF31 /* BeamCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96319D0F2616232600D1CF31 /* BeamCore.framework */; };
 		96319D252616232700D1CF31 /* BeamCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 96319D0F2616232600D1CF31 /* BeamCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		96319D372616233E00D1CF31 /* String+LoremIpsum.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181719D2581107C00317ED8 /* String+LoremIpsum.swift */; };
@@ -537,13 +535,17 @@
 		9691E3D825AD9F3300A13080 /* TextRoot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9691E3D725AD9F3300A13080 /* TextRoot.swift */; };
 		9691E40225AE5D2C00A13080 /* NodeSelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9691E40125AE5D2C00A13080 /* NodeSelection.swift */; };
 		9691E44425B1091300A13080 /* BrowsingSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9691E44325B1091300A13080 /* BrowsingSection.swift */; };
+		9694B28F26FDD59C008AD52B /* BeamCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96319D0F2616232600D1CF31 /* BeamCore.framework */; };
 		96988C8325BB0AF2000223A3 /* DestinationNotePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96988C8225BB0AF2000223A3 /* DestinationNotePicker.swift */; };
 		969CE3EA26CB7B01000AEF37 /* BeamNoteType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 969CE3E926CB7B01000AEF37 /* BeamNoteType.swift */; };
 		96A1C67626F8ABBF006AFF88 /* AppDelegate+JsonImportExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96A1C67526F8ABBF006AFF88 /* AppDelegate+JsonImportExport.swift */; };
 		96A3067C25F698FB0078A453 /* RefNoteTitle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96A3067B25F698FB0078A453 /* RefNoteTitle.swift */; };
-		96AC99F826E65CFB0016E941 /* UUIDKit in Frameworks */ = {isa = PBXBuildFile; productRef = 96AC99F726E65CFB0016E941 /* UUIDKit */; };
 		96BBA79F25FBA573008276FC /* ReparentElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96BBA78A25FBA573008276FC /* ReparentElement.swift */; };
 		96BDCBE926DD043800EBCB6B /* NSSize+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96BDCBE826DD043800EBCB6B /* NSSize+Beam.swift */; };
+		96C0F72D26FCAE6100385449 /* UUIDKit in Frameworks */ = {isa = PBXBuildFile; productRef = 96C0F72C26FCAE6100385449 /* UUIDKit */; };
+		96C0F73026FCB05300385449 /* BeamCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96319D0F2616232600D1CF31 /* BeamCore.framework */; };
+		96C0F73426FCBC0D00385449 /* UUIDKit in Frameworks */ = {isa = PBXBuildFile; productRef = 96C0F73326FCBC0D00385449 /* UUIDKit */; };
+		96C0F73826FCEB7500385449 /* Swime in Frameworks */ = {isa = PBXBuildFile; productRef = 96C0F73726FCEB7500385449 /* Swime */; };
 		96C1D7EB2624C0ED0085FD23 /* BeamElement+Text.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C1D7EA2624C0ED0085FD23 /* BeamElement+Text.swift */; };
 		96C5FE2F268E80BA00889B5E /* Geolocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C5FE2E268E80BA00889B5E /* Geolocation.swift */; };
 		96C5FE44268F4D5700889B5E /* Geolocation.js in Resources */ = {isa = PBXBuildFile; fileRef = 96C5FE43268F4D5700889B5E /* Geolocation.js */; };
@@ -759,12 +761,12 @@
 		A5F47ECA26F8D71C004B7CDE /* editor-unpublish.json in Resources */ = {isa = PBXBuildFile; fileRef = A5F47EC926F8D71C004B7CDE /* editor-unpublish.json */; };
 		A5FE1615264AD64900B7526D /* RecentsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5FE1614264AD64900B7526D /* RecentsListView.swift */; };
 		A5FE96CD2612469C002A2B73 /* AutocompleteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5FE96CC2612469C002A2B73 /* AutocompleteManager.swift */; };
-		B51DC76C26F44F990074ACCA /* PnSAddToCardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51DC76B26F44F990074ACCA /* PnSAddToCardTests.swift */; };
-		B51DC76E26F44FE00074ACCA /* PnSViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51DC76D26F44FE00074ACCA /* PnSViewLocators.swift */; };
-		B51DC77026F4501E0074ACCA /* PnSTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51DC76F26F4501E0074ACCA /* PnSTestView.swift */; };
 		B5056A8D26F88A0700FFD2A2 /* HelpAndFeedbackTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5056A8C26F88A0700FFD2A2 /* HelpAndFeedbackTests.swift */; };
 		B5056A8F26F88AB000FFD2A2 /* HelpTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5056A8E26F88AB000FFD2A2 /* HelpTestView.swift */; };
 		B5056A9126F88CFD00FFD2A2 /* HelpViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5056A9026F88CFD00FFD2A2 /* HelpViewLocators.swift */; };
+		B51DC76C26F44F990074ACCA /* PnSAddToCardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51DC76B26F44F990074ACCA /* PnSAddToCardTests.swift */; };
+		B51DC76E26F44FE00074ACCA /* PnSViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51DC76D26F44FE00074ACCA /* PnSViewLocators.swift */; };
+		B51DC77026F4501E0074ACCA /* PnSTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51DC76F26F4501E0074ACCA /* PnSTestView.swift */; };
 		B54D934726CA6A07006BBDEE /* BrowserTabViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54D934626CA6A07006BBDEE /* BrowserTabViewTests.swift */; };
 		B551F3BF26BD0EBF00B72D27 /* WebsiteAuthTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = B551F3BE26BD0EBF00B72D27 /* WebsiteAuthTest.swift */; };
 		B551F3C126BD0FE800B72D27 /* WebsiteAuthPopupTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B551F3C026BD0FE800B72D27 /* WebsiteAuthPopupTestView.swift */; };
@@ -918,13 +920,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = 96319D0E2616232600D1CF31;
 			remoteInfo = BeamCore;
-		};
-		96319D1B2616232700D1CF31 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 965A781D2514F147009980D4 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 965A78242514F147009980D4;
-			remoteInfo = Beam;
 		};
 		96319D222616232700D1CF31 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -1088,7 +1083,6 @@
 		3355997326CBDDC900F52C23 /* SearchInContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchInContentView.swift; sourceTree = "<group>"; };
 		3355997526CBE0AE00F52C23 /* SearchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchViewModel.swift; sourceTree = "<group>"; };
 		3355999526CBF11E00F52C23 /* SearchWebPage.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = SearchWebPage.js; sourceTree = "<group>"; };
-		337EAE5F26A954AD008E4020 /* UITests-Alerts.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = "UITests-Alerts.html"; sourceTree = "<group>"; };
 		338A669F268DC26000B056EB /* LayerRemoverAnimationDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerRemoverAnimationDelegate.swift; sourceTree = "<group>"; };
 		338A66C1268E053C00B056EB /* BeamDownloadDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamDownloadDocument.swift; sourceTree = "<group>"; };
 		338F276D26DD14B900D4AC97 /* Test.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Test.xcconfig; sourceTree = "<group>"; };
@@ -1474,7 +1468,6 @@
 		8AD2635926F4A0480074D673 /* BeamWindowMock.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = BeamWindowMock.ts; sourceTree = "<group>"; };
 		8AD2635A26F4A0480074D673 /* BeamWebFactoryMock.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = BeamWebFactoryMock.ts; sourceTree = "<group>"; };
 		8AD9DEBD26C6ACF00015B559 /* PointAndShootOffsetWithAnimation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootOffsetWithAnimation.swift; sourceTree = "<group>"; };
-		8AEADBC926776BC500E36BAC /* UITests-Password.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "UITests-Password.html"; sourceTree = "<group>"; };
 		8AED4FEF26C2A3AA00E29DB7 /* PointAndShootFrameOffset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootFrameOffset.swift; sourceTree = "<group>"; };
 		8AF0E335268F30E0007C75D8 /* index_prod.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = index_prod.js; sourceTree = "<group>"; };
 		8AF61F11267BA292006DD5C2 /* RBAllowlistEntry-Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "RBAllowlistEntry-Private.h"; sourceTree = "<group>"; };
@@ -1556,6 +1549,7 @@
 		96C9AA5625901AA9007D3D98 /* LinksSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinksSection.swift; sourceTree = "<group>"; };
 		96C9AAB82593BB67007D3D98 /* Widget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Widget.swift; sourceTree = "<group>"; };
 		96C9CC3D2535CE2C00D70AA6 /* LexerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LexerTests.swift; sourceTree = "<group>"; };
+		96D0EF5E26FB75EC00B967B8 /* CryptoKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CryptoKit.framework; path = System/Library/Frameworks/CryptoKit.framework; sourceTree = SDKROOT; };
 		96DDF54A26823A4200FF8CCE /* BidirectionalLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BidirectionalLink.swift; sourceTree = "<group>"; };
 		96E1356E2546F03900133A24 /* TextNodeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextNodeTests.swift; sourceTree = "<group>"; };
 		96E4505725995CA200BFF36F /* BreadCrumb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BreadCrumb.swift; sourceTree = "<group>"; };
@@ -1755,12 +1749,12 @@
 		A5F47EC926F8D71C004B7CDE /* editor-unpublish.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "editor-unpublish.json"; sourceTree = "<group>"; };
 		A5FE1614264AD64900B7526D /* RecentsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentsListView.swift; sourceTree = "<group>"; };
 		A5FE96CC2612469C002A2B73 /* AutocompleteManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutocompleteManager.swift; sourceTree = "<group>"; };
-		B51DC76B26F44F990074ACCA /* PnSAddToCardTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PnSAddToCardTests.swift; sourceTree = "<group>"; };
-		B51DC76D26F44FE00074ACCA /* PnSViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PnSViewLocators.swift; sourceTree = "<group>"; };
-		B51DC76F26F4501E0074ACCA /* PnSTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PnSTestView.swift; sourceTree = "<group>"; };
 		B5056A8C26F88A0700FFD2A2 /* HelpAndFeedbackTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpAndFeedbackTests.swift; sourceTree = "<group>"; };
 		B5056A8E26F88AB000FFD2A2 /* HelpTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpTestView.swift; sourceTree = "<group>"; };
 		B5056A9026F88CFD00FFD2A2 /* HelpViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpViewLocators.swift; sourceTree = "<group>"; };
+		B51DC76B26F44F990074ACCA /* PnSAddToCardTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PnSAddToCardTests.swift; sourceTree = "<group>"; };
+		B51DC76D26F44FE00074ACCA /* PnSViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PnSViewLocators.swift; sourceTree = "<group>"; };
+		B51DC76F26F4501E0074ACCA /* PnSTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PnSTestView.swift; sourceTree = "<group>"; };
 		B54D934626CA6A07006BBDEE /* BrowserTabViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserTabViewTests.swift; sourceTree = "<group>"; };
 		B551F3BE26BD0EBF00B72D27 /* WebsiteAuthTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebsiteAuthTest.swift; sourceTree = "<group>"; };
 		B551F3C026BD0FE800B72D27 /* WebsiteAuthPopupTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebsiteAuthPopupTestView.swift; sourceTree = "<group>"; };
@@ -1905,6 +1899,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				96C0F72D26FCAE6100385449 /* UUIDKit in Frameworks */,
 				A0A84FC02636FA99008F0326 /* CocoaLumberjackSwift in Frameworks */,
 				96D5AE85264C01AD003AD516 /* TLDExtract in Frameworks */,
 			);
@@ -1914,9 +1909,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				96C0F73026FCB05300385449 /* BeamCore.framework in Frameworks */,
 				A0A84FC72636FA9A008F0326 /* Nimble in Frameworks */,
 				A0A84FC62636FA9A008F0326 /* Quick in Frameworks */,
-				96319D182616232700D1CF31 /* BeamCore.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1924,9 +1919,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				96C0F73826FCEB7500385449 /* Swime in Frameworks */,
 				33B27467264C0F7100A318CD /* AutoUpdate.framework in Frameworks */,
 				525C233C25BAF8EF001B9625 /* libgit2.a in Frameworks */,
-				96AC99F826E65CFB0016E941 /* UUIDKit in Frameworks */,
 				33F0F1C826DE87E000FF8B48 /* Vinyl in Frameworks */,
 				A0A84FB92636FA99008F0326 /* PromiseKit in Frameworks */,
 				A0A84FB72636FA99008F0326 /* JWTDecode in Frameworks */,
@@ -1953,6 +1948,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9694B28F26FDD59C008AD52B /* BeamCore.framework in Frameworks */,
 				A0A84FC22636FA99008F0326 /* Quick in Frameworks */,
 				A0A84FC12636FA99008F0326 /* Nimble in Frameworks */,
 			);
@@ -1964,6 +1960,7 @@
 			files = (
 				A5946846265E30350044A892 /* Fakery in Frameworks */,
 				A0A84FC32636FA9A008F0326 /* Quick in Frameworks */,
+				96C0F73426FCBC0D00385449 /* UUIDKit in Frameworks */,
 				A0A84FC42636FA9A008F0326 /* Nimble in Frameworks */,
 				A0A84FC52636FA9A008F0326 /* CocoaLumberjackSwift in Frameworks */,
 			);
@@ -2133,6 +2130,7 @@
 		24EFBA757ACC5310A2D800B2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				96D0EF5E26FB75EC00B967B8 /* CryptoKit.framework */,
 				33B27441264C0CDB00A318CD /* AutoUpdate.xcodeproj */,
 				525C233B25BAF8EF001B9625 /* libgit2.a */,
 				9645489F2523B3550064D062 /* CloudKit.framework */,
@@ -3979,14 +3977,6 @@
 			name = "Recovered References";
 			sourceTree = "<group>";
 		};
-		B51DC76526F44F5D0074ACCA /* PoinAndShoot */ = {
-			isa = PBXGroup;
-			children = (
-				B51DC76B26F44F990074ACCA /* PnSAddToCardTests.swift */,
-			);
-			path = PoinAndShoot;
-			sourceTree = "<group>";
-		};
 		A5F47EC626F8D70F004B7CDE /* Lotties */ = {
 			isa = PBXGroup;
 			children = (
@@ -4002,6 +3992,14 @@
 				B5056A8C26F88A0700FFD2A2 /* HelpAndFeedbackTests.swift */,
 			);
 			path = Help;
+			sourceTree = "<group>";
+		};
+		B51DC76526F44F5D0074ACCA /* PoinAndShoot */ = {
+			isa = PBXGroup;
+			children = (
+				B51DC76B26F44F990074ACCA /* PnSAddToCardTests.swift */,
+			);
+			path = PoinAndShoot;
 			sourceTree = "<group>";
 		};
 		B54D934526CA69DD006BBDEE /* Browser */ = {
@@ -4307,13 +4305,12 @@
 			buildRules = (
 			);
 			dependencies = (
-				96D5AE7D264BFD4C003AD516 /* PBXTargetDependency */,
-				96D5AE7B264BFD40003AD516 /* PBXTargetDependency */,
 			);
 			name = BeamCore;
 			packageProductDependencies = (
 				96319D52261623BB00D1CF31 /* CocoaLumberjackSwift */,
 				96D5AE84264C01AD003AD516 /* TLDExtract */,
+				96C0F72C26FCAE6100385449 /* UUIDKit */,
 			);
 			productName = BeamCore;
 			productReference = 96319D0F2616232600D1CF31 /* BeamCore.framework */;
@@ -4331,7 +4328,6 @@
 			);
 			dependencies = (
 				96319D1A2616232700D1CF31 /* PBXTargetDependency */,
-				96319D1C2616232700D1CF31 /* PBXTargetDependency */,
 			);
 			name = BeamCoreTests;
 			packageProductDependencies = (
@@ -4379,9 +4375,9 @@
 				52CA277B26401D7000146A00 /* OAuthSwift */,
 				33088D6226B06677004FAE99 /* ZIPFoundation */,
 				33F0F1C726DE87E000FF8B48 /* Vinyl */,
-				96AC99F726E65CFB0016E941 /* UUIDKit */,
 				4E83D3E126F21C4F00796836 /* Clustering */,
 				A5F47EC226F8D633004B7CDE /* Lottie */,
+				96C0F73726FCEB7500385449 /* Swime */,
 			);
 			productName = Beam;
 			productReference = 965A78252514F147009980D4 /* Beam.app */;
@@ -4421,8 +4417,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				A0A6F2A325D1B73A00EFC4BE /* PBXTargetDependency */,
-				A0A6F2A125D1B73400EFC4BE /* PBXTargetDependency */,
 				965A784A2514F149009980D4 /* PBXTargetDependency */,
 			);
 			name = BeamUITests;
@@ -4431,6 +4425,7 @@
 				A0A6F2A625D1B74800EFC4BE /* Nimble */,
 				9639FAF42616614D00C85B95 /* CocoaLumberjackSwift */,
 				A5946845265E30350044A892 /* Fakery */,
+				96C0F73326FCBC0D00385449 /* UUIDKit */,
 			);
 			productName = BeamUITests;
 			productReference = 965A78482514F149009980D4 /* BeamUITests.xctest */;
@@ -4499,6 +4494,7 @@
 				96AC99F626E65CFB0016E941 /* XCRemoteSwiftPackageReference "uuid-kit" */,
 				4E83D3E026F21C4F00796836 /* XCRemoteSwiftPackageReference "clustering" */,
 				A5F47EC126F8D633004B7CDE /* XCRemoteSwiftPackageReference "lottie-ios" */,
+				96C0F73626FCEB7500385449 /* XCRemoteSwiftPackageReference "Swime" */,
 			);
 			productRefGroup = 965A78262514F147009980D4 /* Products */;
 			projectDirPath = "";
@@ -5628,11 +5624,6 @@
 			target = 96319D0E2616232600D1CF31 /* BeamCore */;
 			targetProxy = 96319D192616232700D1CF31 /* PBXContainerItemProxy */;
 		};
-		96319D1C2616232700D1CF31 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 965A78242514F147009980D4 /* Beam */;
-			targetProxy = 96319D1B2616232700D1CF31 /* PBXContainerItemProxy */;
-		};
 		96319D232616232700D1CF31 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 96319D0E2616232600D1CF31 /* BeamCore */;
@@ -5647,18 +5638,6 @@
 			isa = PBXTargetDependency;
 			target = 965A78242514F147009980D4 /* Beam */;
 			targetProxy = 965A78492514F149009980D4 /* PBXContainerItemProxy */;
-		};
-		96D5AE7B264BFD40003AD516 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-		};
-		96D5AE7D264BFD4C003AD516 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-		};
-		A0A6F2A125D1B73400EFC4BE /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-		};
-		A0A6F2A325D1B73A00EFC4BE /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
 		};
 /* End PBXTargetDependency section */
 
@@ -5759,6 +5738,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR/BeamCore.framework/Frameworks/**",
 				);
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"BEAM_WEBKIT_ENHANCEMENT_ENABLED=1",
@@ -5852,7 +5832,6 @@
 		338F275F26DD13FD00D4AC97 /* Test */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEFINES_MODULE = YES;
@@ -5881,7 +5860,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = X87W5M786F;
 				INFOPLIST_FILE = BeamCoreTests/Info.plist;
@@ -5893,6 +5872,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 11.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beamapp.BeamCoreTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Beam.app/Contents/MacOS/Beam";
 			};
@@ -5901,7 +5881,6 @@
 		96319D272616232700D1CF31 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEFINES_MODULE = YES;
@@ -5929,7 +5908,6 @@
 		96319D292616232700D1CF31 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEFINES_MODULE = YES;
@@ -5958,7 +5936,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = X87W5M786F;
 				INFOPLIST_FILE = BeamCoreTests/Info.plist;
@@ -5970,6 +5948,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 11.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beamapp.BeamCoreTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Beam.app/Contents/MacOS/Beam";
 			};
@@ -5979,7 +5958,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = X87W5M786F;
 				INFOPLIST_FILE = BeamCoreTests/Info.plist;
@@ -6136,6 +6115,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR/BeamCore.framework/Frameworks/**",
 				);
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"BEAM_WEBKIT_ENHANCEMENT_ENABLED=1",
@@ -6189,6 +6169,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR/BeamCore.framework/Frameworks/**",
 				);
 				GCC_PREPROCESSOR_DEFINITIONS = "BEAM_WEBKIT_ENHANCEMENT_ENABLED=1";
 				HEADER_SEARCH_PATHS = (
@@ -6545,6 +6526,14 @@
 				minimumVersion = 0.1.0;
 			};
 		};
+		96C0F73626FCEB7500385449 /* XCRemoteSwiftPackageReference "Swime" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/meeloo/Swime";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
 		96D5AE83264C01AD003AD516 /* XCRemoteSwiftPackageReference "TLDExtractSwift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/gumob/TLDExtractSwift";
@@ -6664,10 +6653,20 @@
 			package = 964FE5DF2625D8AA00966E03 /* XCRemoteSwiftPackageReference "GRDB.swift" */;
 			productName = GRDB;
 		};
-		96AC99F726E65CFB0016E941 /* UUIDKit */ = {
+		96C0F72C26FCAE6100385449 /* UUIDKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 96AC99F626E65CFB0016E941 /* XCRemoteSwiftPackageReference "uuid-kit" */;
 			productName = UUIDKit;
+		};
+		96C0F73326FCBC0D00385449 /* UUIDKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 96AC99F626E65CFB0016E941 /* XCRemoteSwiftPackageReference "uuid-kit" */;
+			productName = UUIDKit;
+		};
+		96C0F73726FCEB7500385449 /* Swime */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 96C0F73626FCEB7500385449 /* XCRemoteSwiftPackageReference "Swime" */;
+			productName = Swime;
 		};
 		96D5AE84264C01AD003AD516 /* TLDExtract */ = {
 			isa = XCSwiftPackageProductDependency;

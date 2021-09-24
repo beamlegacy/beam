@@ -11,6 +11,7 @@ import Foundation
 import AppKit
 import Combine
 import BeamCore
+import Swime
 
 public extension CALayer {
     var superlayers: [CALayer] {
@@ -1583,19 +1584,17 @@ public extension CALayer {
                 return false
             }
 
-            let uid = data.SHA256
             let fileManager = BeamFileDBManager()
-            let utTypeCF = image.cgImage.utType
-            let utType = utTypeCF as String? ?? ""
-            let mimeType = UTTypeCopyPreferredTagWithClass(utType as CFString, kUTTagClassMIMEType)?.takeRetainedValue() as String?
-
-            fileManager.insert(name: url.lastPathComponent, uid: uid, data: data, type: mimeType ?? "application/octet-stream")
-
-            // swiftlint:disable:next print
-            let newElement = BeamElement()
-            newElement.kind = .image(uid)
-            rootNode.cmdManager.insertElement(newElement, inNode: newParent, afterNode: afterNode)
-            Logger.shared.logInfo("Added Image to note \(String(describing: rootNode.element.note)) with uid \(uid) from dropped file (\(image))", category: .noteEditor)
+            do {
+                let uid = try fileManager.insert(name: url.lastPathComponent, data: data)
+                let newElement = BeamElement()
+                newElement.kind = .image(uid)
+                rootNode.cmdManager.insertElement(newElement, inNode: newParent, afterNode: afterNode)
+                Logger.shared.logInfo("Added Image to note \(String(describing: rootNode.element.note)) with uid \(uid) from dropped file (\(image))", category: .noteEditor)
+            } catch {
+                Logger.shared.logError("Unable to insert image in FileDB \(error)", category: .fileDB)
+                return false
+            }
         }
 
         return true

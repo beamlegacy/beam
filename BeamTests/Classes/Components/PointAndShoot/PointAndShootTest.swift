@@ -155,13 +155,15 @@ class BrowsingScorerMock: WebPageHolder, BrowsingScorer {
 class FileStorageMock: BeamFileStorage {
     var events: [String] = []
 
-    func fetch(uid: String) throws -> BeamFileRecord? { fatalError("fetch(uid:) has not been implemented") }
+    func fetch(uid: UUID) throws -> BeamFileRecord? { fatalError("fetch(uid:) has not been implemented") }
 
-    func insert(name: String, uid: String, data: Data, type: String) throws {
-        events.append("inserted \(name) with id \(uid) of \(type) for \(data.count) bytes")
+    func insert(name: String, data: Data, type: String?) throws -> UUID {
+        let uid = UUID.v5(name: data.SHA256, namespace: .url)
+        events.append("inserted \(name) with id \(uid) of \(String(describing: type)) for \(data.count) bytes")
+        return uid
     }
 
-    func remove(uid: String) throws {}
+    func remove(uid: UUID) throws {}
 
     func clear() throws {}
 }

@@ -9,8 +9,9 @@ import XCTest
 @testable import Beam
 @testable import BeamCore
 
-private var pnsNoteTitle = "Grocery list"
-private var pnsNote = BeamNote(title: pnsNoteTitle)
+
+fileprivate var pnsNoteTitle = "Grocery list"
+fileprivate var pnsNote = BeamNote(title: pnsNoteTitle)
 
 class FrecencyNoteTriggerTests: XCTestCase {
 
@@ -94,6 +95,22 @@ class FrecencyNoteTriggerTests: XCTestCase {
             return nil
         }
 
+        func addToNote(allowSearchResult: Bool) -> BeamElement? {
+            guard let url = url else {
+                Logger.shared.logError("Cannot get current URL", category: .general)
+                return nil
+            }
+            guard allowSearchResult || SearchEngines.get(url) != nil else {
+                Logger.shared.logWarning("Adding search results is not allowed", category: .web)
+                return nil
+            } // Don't automatically add search results
+
+            let element = BeamElement("url: \(url) text: \(title)")
+            pnsNote.addChild(element)
+            return element
+
+        }
+
     }
 
     override func setUpWithError() throws {
@@ -127,19 +144,30 @@ class FrecencyNoteTriggerTests: XCTestCase {
         let pns = PointAndShoot(scorer: FakeBrowsingScorer(page: page))
         pns.data = data
         pns.page = page
-        pns.activeShootGroup = PointAndShoot.ShootGroup("abc", [PointAndShoot.Target](), "abc")
+        let target: PointAndShoot.Target = PointAndShoot.Target(
+            id: "id",
+            rect: NSRect(x: 101, y: 102, width: 301, height: 302),
+            mouseLocation: NSPoint(x: 201, y: 202),
+            html: "<p>Pointed text</p>",
+            animated: false
+        )
+        pns.activeShootGroup = PointAndShoot.ShootGroup("abc", [target], "abc")
 
         //When point and shooting to a note, frecency score of note gets updated
         XCTAssertEqual(scorer.updateCalls.count, 0)
         XCTAssertNotNil(pns.activeShootGroup)
         if let group = pns.activeShootGroup {
-            pns.addShootToNote(noteTitle: pnsNoteTitle, group: group)
+            let expectation = XCTestExpectation(description: "point and shoot addShootToNote")
+            pns.addShootToNote(noteTitle: pnsNoteTitle, group: group, completion: {
+                XCTAssertEqual(self.scorer.updateCalls.count, 1)
+                let call = self.scorer.updateCalls[0]
+                XCTAssertEqual(call.id, pnsNote.id)
+                XCTAssertEqual(call.scoreValue, 1.0)
+                XCTAssertEqual(call.eventType, FrecencyEventType.notePointAndShoot)
+                XCTAssertEqual(call.paramKey, FrecencyParamKey.note30d0)
+                expectation.fulfill()
+            })
+            wait(for: [expectation], timeout: 10.0)
         }
-        XCTAssertEqual(scorer.updateCalls.count, 1)
-        let call = scorer.updateCalls[0]
-        XCTAssertEqual(call.id, pnsNote.id)
-        XCTAssertEqual(call.scoreValue, 1.0)
-        XCTAssertEqual(call.eventType, FrecencyEventType.notePointAndShoot)
-        XCTAssertEqual(call.paramKey, FrecencyParamKey.note30d0)
     }
 }
