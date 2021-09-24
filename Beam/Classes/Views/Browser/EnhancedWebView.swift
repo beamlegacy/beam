@@ -22,6 +22,11 @@ struct EnhancedWebView: View {
                 if data.showTabStats, let score = tab.browsingTree.current.score {
                     TabStats(score: score)
                 }
+                if tab.hasError, let errorPageManager = tab.errorPageManager {
+                    ErrorPageView(errorManager: errorPageManager) {
+                        tab.reload()
+                    }
+                }
                 if let viewModel = tab.authenticationViewModel {
                     ZStack {
                         BeamColor.AlphaGray.swiftUI.opacity(0.5)
