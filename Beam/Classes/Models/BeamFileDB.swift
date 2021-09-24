@@ -127,7 +127,7 @@ extension BeamFileRecord: BeamObjectProtocol {
 
         createdAt = try container.decode(Date.self, forKey: .createdAt)
         updatedAt = try container.decode(Date.self, forKey: .updatedAt)
-        deletedAt = try container.decode(Date?.self, forKey: .deletedAt)
+        deletedAt = try container.decodeIfPresent(Date.self, forKey: .deletedAt)
 
         data = try container.decode(Data.self, forKey: .data)
     }
