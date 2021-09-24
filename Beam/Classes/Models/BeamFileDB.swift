@@ -118,6 +118,20 @@ extension BeamFileRecord: BeamObjectProtocol {
         case data
     }
 
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        name = try container.decode(String.self, forKey: .name)
+        uid = try (try? container.decode(UUID.self, forKey: .uid)) ?? UUID.v5(name: (try container.decode(String.self, forKey: .uid)), namespace: .url)
+        type = try container.decode(String.self, forKey: .type)
+
+        createdAt = try container.decode(Date.self, forKey: .createdAt)
+        updatedAt = try container.decode(Date.self, forKey: .updatedAt)
+        deletedAt = try container.decode(Date?.self, forKey: .deletedAt)
+
+        data = try container.decode(Data.self, forKey: .data)
+    }
+
     func copy() throws -> BeamFileRecord {
         BeamFileRecord(name: name, uid: uid, data: data, type: type, createdAt: createdAt, updatedAt: updatedAt, deletedAt: deletedAt, previousChecksum: previousChecksum, checksum: checksum)
     }
