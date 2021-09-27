@@ -11,41 +11,6 @@ import GRDB
 import UUIDKit
 import Swime
 
-struct BeamFileRecordOld {
-    var name: String
-    var uid: String
-    var data: Data
-    var type: String
-
-    var createdAt: Date = BeamDate.now
-    var updatedAt: Date = BeamDate.now
-    var deletedAt: Date?
-    var previousChecksum: String?
-    var checksum: String?
-}
-
-extension BeamFileRecordOld: TableRecord {
-    /// The table columns
-    enum Columns: String, ColumnExpression {
-        case name, uid, data, type
-    }
-}
-
-// Persistence methods
-extension BeamFileRecordOld: MutablePersistableRecord {
-    /// The values persisted in the database
-    static let persistenceConflictPolicy = PersistenceConflictPolicy(
-        insert: .replace,
-        update: .replace)
-
-    func encode(to container: inout PersistenceContainer) {
-        container[Columns.name] = name
-        container[Columns.uid] = uid
-        container[Columns.data] = data
-        container[Columns.type] = type
-    }
-}
-
 // The new version of the BeamFileRecord (where uid is an UUID)
 struct BeamFileRecord {
     var name: String
@@ -64,7 +29,7 @@ struct BeamFileRecord {
 extension BeamFileRecord: TableRecord {
     /// The table columns
     enum Columns: String, ColumnExpression {
-        case name, uid, data, type
+        case name, uid, data, type, createdAt, updatedAt, deletedAt, previousChecksum
     }
 }
 
@@ -76,6 +41,10 @@ extension BeamFileRecord: FetchableRecord {
         uid = row[Columns.uid]
         data = row[Columns.data]
         type = row[Columns.type]
+        createdAt = row[Columns.createdAt]
+        updatedAt = row[Columns.updatedAt]
+        deletedAt = row[Columns.deletedAt]
+        previousChecksum = row[Columns.previousChecksum]
     }
 }
 
@@ -91,6 +60,10 @@ extension BeamFileRecord: MutablePersistableRecord {
         container[Columns.uid] = uid
         container[Columns.data] = data
         container[Columns.type] = type
+        container[Columns.createdAt] = createdAt
+        container[Columns.updatedAt] = updatedAt
+        container[Columns.deletedAt] = deletedAt
+        container[Columns.previousChecksum] = previousChecksum
     }
 }
 
@@ -133,7 +106,7 @@ extension BeamFileRecord: BeamObjectProtocol {
     }
 
     func copy() throws -> BeamFileRecord {
-        BeamFileRecord(name: name, uid: uid, data: data, type: type, createdAt: createdAt, updatedAt: updatedAt, deletedAt: deletedAt, previousChecksum: previousChecksum, checksum: checksum)
+        BeamFileRecord(name: name, uid: uid, data: data, type: type, createdAt: createdAt, updatedAt: updatedAt, deletedAt: deletedAt, previousChecksum: previousChecksum)
     }
 }
 
@@ -157,48 +130,32 @@ class BeamFileDB: BeamFileStorage {
         var migrator = DatabaseMigrator()
 
         var rows: [Row]?
-        migrator.registerMigration("saveOldData") { db in
+        migrator.registerMigration("saveOldData2") { db in
             rows = try? Row.fetchAll(db, sql: "SELECT id, name, uid, data, type FROM BeamFileRecord")
         }
 
-        migrator.registerMigration("beamFileTableCreation") { db in
+        migrator.registerMigration("migrateToUUID2") { db in
+            if try db.tableExists("BeamFileRecord") {
+                try db.drop(table: "BeamFileRecord")
+            }
             try db.create(table: BeamFileDB.tableName, ifNotExists: true) { table in
                 table.column("name", .text).notNull().collate(.localizedCaseInsensitiveCompare)
-                table.column("uid", .text).notNull().collate(.caseInsensitiveCompare).primaryKey()
+                table.column("uid", .text).notNull().primaryKey().unique()
                 table.column("data", .blob)
-                table.column("type", .text)
+                table.column("type", .text).collate(.localizedCaseInsensitiveCompare)
                 table.column("createdAt", .datetime).notNull().defaults(sql: "CURRENT_TIMESTAMP")
                 table.column("updatedAt", .datetime).notNull().defaults(sql: "CURRENT_TIMESTAMP")
                 table.column("deletedAt", .datetime)
                 table.column("previousChecksum", .text)
             }
-        }
 
-        migrator.registerMigration("migrateOldData") { db in
             if let storedFiles = rows {
                 for file in storedFiles {
-                    var fileRecord = BeamFileRecordOld(
-                        name: file["name"],
-                        uid: file["uid"],
-                        data: file["data"],
-                        type: file["type"],
-                        createdAt: BeamDate.now,
-                        updatedAt: BeamDate.now,
-                        deletedAt: nil,
-                        previousChecksum: nil)
-                    try fileRecord.insert(db)
-                }
-            }
-        }
-
-        migrator.registerMigration("migrateToUUID") { db in
-            if let storedFiles = rows {
-                for file in storedFiles {
-                    let id = file["uid"] as String
-                    let uuid = UUID(uuidString: id) ?? UUID.v5(name: id, namespace: .url)
+                    let data = file["data"] as Data
+                    let uid = UUID.v5(name: data.SHA256, namespace: .url)
                     var fileRecord = BeamFileRecord(
                         name: file["name"],
-                        uid: uuid,
+                        uid: uid,
                         data: file["data"],
                         type: file["type"],
                         createdAt: BeamDate.now,
