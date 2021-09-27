@@ -30,7 +30,7 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
       point: { 
         id, 
         rect, 
-        html: this.getHtml(element) 
+        html: this.getHtml(element)
       }
     }
 
@@ -51,7 +51,8 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
       return { 
         id, 
         rect, 
-        html: this.getHtml(element) 
+        html: this.getHtml(element),
+        text: element.innerText
       }
     })
 
@@ -127,7 +128,8 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
         }
       })
 
-      rects.push({ id, rectData, html: this.rangeToHtml(range) })
+      const rangeContents = range.cloneContents()
+      rects.push({ id, rectData, html: this.rangeToHtml(range), text: rangeContents.textContent })
     })
     
     const payload = { select: rects }

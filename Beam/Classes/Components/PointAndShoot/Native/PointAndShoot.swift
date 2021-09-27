@@ -146,6 +146,11 @@ class PointAndShoot: WebPageHolder, ObservableObject {
                       activeSelectGroup == nil {
 
                 activeShootGroup = ShootGroup(groupId, [target], href)
+                if let group = activeShootGroup,
+                   let sourceUrl = page.url {
+                    let text = group.text()
+                    self.page.addTextToClusteringManager(text, url: sourceUrl)
+                }
                 throttledHaptic()
             } else {
                 if !isAltKeyDown {
@@ -223,6 +228,11 @@ class PointAndShoot: WebPageHolder, ObservableObject {
         }
         guard !isTypingOnWebView else { return }
         activeShootGroup = group
+
+        let text = group.text()
+        if let sourceUrl = page.url {
+            self.page.addTextToClusteringManager(text, url: sourceUrl)
+        }
     }
 
     /// Set or update targets to collectedGroup
@@ -285,11 +295,6 @@ class PointAndShoot: WebPageHolder, ObservableObject {
             })
             // Reduce array of texts to a single string
             let texts = elements.map({ $0.text })
-            let clusteringText = texts.reduce(String()) { (string, beamText) -> String in
-                string + " " + beamText.text
-            }
-            // Send this string to the ClusteringManager
-            self.page.addTextToClusteringManager(clusteringText, url: sourceUrl)
             // TODO: Convert BeamText to BeamElement of quote type
             // Adds urlId to current card source
             let urlId = LinkStore.createIdFor(sourceUrl.absoluteString, title: nil)

@@ -12,12 +12,14 @@ export class BeamSize {
 export interface BeamRangeGroup {
   id: string
   range: BeamRange
+  text?: string
 }
 
 // TODO: Move to correct place
 export interface BeamShootGroup {
   id: string
   element: BeamHTMLElement
+  text?: string
 }
 
 export interface BeamVisualViewport {
