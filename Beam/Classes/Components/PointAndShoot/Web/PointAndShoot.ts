@@ -177,13 +177,10 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    * @memberof PointAndShoot
    */
   removeShootTarget(id: string): void {
-    const foundIndex = this.shootTargets.findIndex((target) => {
+    // Use removeFromArray so it exists after finding a match
+    this.shootTargets = Util.removeFromArray((target) => {
       return target.id === id
-    })
-    // foundIndex is -1 when no match is found. Only remove found items from array
-    if (foundIndex >= 0) {
-      this.shootTargets.splice(foundIndex, 1)
-    }
+    }, this.shootTargets) as BeamShootGroup[]
   }
 
   /**
@@ -193,14 +190,10 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    * @memberof PointAndShoot
    */
    removeSelectRangeGroup(id: string): void {
-     const foundIndex = this.selectionRangeGroups.findIndex((target) => {
-       return target.id === id
-      })
-      // foundIndex is -1 when no match is found. Only remove found items from array
-      if (foundIndex >= 0) {
-        this.selectionRangeGroups.splice(foundIndex, 1)
-      }
-
+     // Use removeFromArray so it exists after finding a match
+    this.selectionRangeGroups = Util.removeFromArray((target) => {
+      return target.id === id
+    }, this.selectionRangeGroups) as BeamRangeGroup[]
   }
 
   /**
@@ -298,7 +291,6 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
      return altKey && !ev.ctrlKey && !ev.metaKey && !ev.shiftKey
    }
  
-
   upsertShootGroup(newItem: BeamShootGroup, groups: BeamShootGroup[]): void {
     // Update existing rangeGroup
     const index = groups.findIndex(({ element }) => {
