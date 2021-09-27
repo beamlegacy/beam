@@ -576,10 +576,12 @@ import Promises
     }
 
     func goBack() {
+        hasError = false
         webView.goBack()
     }
 
     func goForward() {
+        hasError = false
         webView.goForward()
     }
 
