@@ -60,9 +60,10 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
                 for bounds in selectBounds {
                     if let id = bounds["id"] as? String,
                        let html = bounds["html"] as? String,
+                       let text = bounds["text"] as? String,
                        let targetData = bounds["rectData"] as? [[String: AnyObject]] {
 
-                        if let targets = selectBoundsToTargets(targetData, webPage, href, html, animated: false) {
+                        if let targets = selectBoundsToTargets(targetData, webPage, href, html, text, animated: false) {
                             pointAndShoot.select(id, targets, href)
                         }
                     }
@@ -142,13 +143,14 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
             let rect = pointAndShoot.webPositions.jsToRect(jsArea: rectObject)
             if let html = element["html"] as? String,
                let id = element["id"] as? String {
-                return pointAndShoot.createTarget(id, rect, html, href, animated)
+                let text = element["text"] as? String
+                return pointAndShoot.createTarget(id, rect, html, text ?? "", href, animated)
             }
             return nil
         }
     }
 
-    func selectBoundsToTargets(_ bounds: [[String: AnyObject]], _ webPage: WebPage, _ href: String, _ html: String, animated: Bool) -> [PointAndShoot.Target]? {
+    func selectBoundsToTargets(_ bounds: [[String: AnyObject]], _ webPage: WebPage, _ href: String, _ html: String, _ text: String, animated: Bool) -> [PointAndShoot.Target]? {
         guard let pointAndShoot = webPage.pointAndShoot else {
             Logger.shared.logDebug("Bounds payload can't be unwrapped")
             return nil
@@ -158,7 +160,7 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
             let rectObject = element["rect"] as AnyObject
             let rect = pointAndShoot.webPositions.jsToRect(jsArea: rectObject)
             if let id = element["id"] as? String {
-                return pointAndShoot.createTarget(id, rect, html, href, animated)
+                return pointAndShoot.createTarget(id, rect, html, text, href, animated)
             }
             return nil
         }
