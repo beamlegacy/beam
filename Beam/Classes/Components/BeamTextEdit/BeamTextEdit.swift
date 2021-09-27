@@ -92,7 +92,6 @@ public extension CALayer {
     internal var formatterTargetRange: Range<Int>?
     internal var formatterTargetNode: TextNode?
     internal var isInlineFormatterHidden = true
-    internal var currentTextRange: Range<Int> = 0..<0
 
     func addToMainLayer(_ layer: CALayer) {
         //Logger.shared.logDebug("addToMainLayer: \(layer.name)")
@@ -1109,15 +1108,6 @@ public extension CALayer {
     @IBAction func save(_ sender: Any?) {
         Logger.shared.logInfo("Save document!", category: .noteEditor)
         rootNode.note?.save(documentManager: documentManager)
-    }
-
-    func initInlineTextFormatter() {
-        guard let node = focusedWidget as? TextNode else { return }
-
-        if inlineFormatter == nil {
-            currentTextRange = node.selectedTextRange
-            initInlineFormatterView()
-        }
     }
 
     func showInlineFormatterOnKeyEventsAndClick(isKeyEvent: Bool = false) {

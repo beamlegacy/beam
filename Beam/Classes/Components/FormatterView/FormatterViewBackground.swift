@@ -45,13 +45,15 @@ struct FormatterViewBackground<Content: View>: View {
 extension View {
 
     func formatterViewBackgroundAnimation(with viewModel: BaseFormatterViewViewModel) -> some View {
-        self.animation(.easeInOut(duration: 0.15))
+        self
+            .animation(BeamAnimation.easeInOut(duration: 0.15), value: viewModel.visible)
             .scaleEffect(viewModel.visible ? 1.0 : 0.98)
             .offset(x: 0, y: viewModel.visible ? 0.0 :
                         (viewModel.animationDirection == .bottom ? -4.0 : 4.0)
             )
-            .animation(.spring(response: 0.4, dampingFraction: 0.6))
+            .animation(.spring(response: 0.4, dampingFraction: 0.6), value: viewModel.visible)
             .opacity(viewModel.visible ? 1.0 : 0.0)
-            .animation(viewModel.visible ? .easeInOut(duration: 0.3) : .easeInOut(duration: 0.15))
+            .animation(viewModel.visible ? BeamAnimation.easeInOut(duration: 0.3) : BeamAnimation.easeInOut(duration: 0.15),
+                       value: viewModel.visible)
     }
 }

@@ -34,6 +34,7 @@ private struct CardReferenceFormatterContainerView: View {
         .frame(width: computedSize.width)
         .fixedSize(horizontal: false, vertical: true)
         .frame(height: computedSize.height, alignment: .topLeading)
+        .animation(BeamAnimation.easeInOut(duration: 0.15))
         .formatterViewBackgroundAnimation(with: viewModel)
     }
 }
@@ -49,7 +50,7 @@ class CardReferenceFormatterView: FormatterView {
     private var onSelectNote: ((_ noteId: UUID, _ elementId: UUID?) -> Void)?
     private var onSelectCreate: ((_ title: String) -> Void)?
 
-    override var idealSize: NSSize {
+    override var idealSize: CGSize {
         CardReferenceFormatterContainerView.idealSize(searchCardContent: searchCardContent)
     }
 

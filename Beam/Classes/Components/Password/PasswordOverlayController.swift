@@ -20,7 +20,7 @@ struct WebFieldAutofill: Codable {
 class PasswordOverlayController: WebPageHolder {
     private let userInfoStore: UserInformationsStore
     private let credentialsBuilder: PasswordManagerCredentialsBuilder
-    private var passwordMenuWindow: NSWindow?
+    private var passwordMenuWindow: PopoverWindow?
     private var passwordMenuPosition: CGPoint = .zero
     private var webViewScrollPosition: CGPoint = .zero
     private let encoder: JSONEncoder
@@ -160,8 +160,11 @@ class PasswordOverlayController: WebPageHolder {
         let viewModel = passwordManagerViewModel(for: host, withPasswordGenerator: passwordGenerator)
         let passwordManagerMenu = PasswordManagerMenu(width: location.size.width, viewModel: viewModel)
         guard let webView = (page as? BrowserTab)?.webView,
-              let passwordWindow = CustomPopoverPresenter.shared.present(view: BeamHostingView(rootView: passwordManagerMenu), from: webView, atPoint: location.origin) else { return }
-        passwordWindow.makeKeyAndOrderFront(nil)
+              let passwordWindow = CustomPopoverPresenter.shared.presentPopoverChildWindow(canBecomeKey: false, canBecomeMain: false, withShadow: true)
+        else { return }
+        var updatedRect = webView.convert(location, to: nil)
+        updatedRect.origin.y += location.height
+        passwordWindow.setView(with: passwordManagerMenu, at: updatedRect.origin, fromtopLeft: true)
         passwordMenuWindow = passwordWindow
     }
 
@@ -182,20 +185,18 @@ class PasswordOverlayController: WebPageHolder {
     }
 
     private func dismissPasswordManagerMenu() {
-        CustomPopoverPresenter.shared.dismissMenu()
+        CustomPopoverPresenter.shared.dismissPopovers()
         passwordMenuWindow = nil
         currentPasswordManagerViewModel = nil
     }
 
     func updateScrollPosition(x: CGFloat, y: CGFloat, width: CGFloat, height: CGFloat) {
-        let offset = CGPoint(x: x - webViewScrollPosition.x, y: y - webViewScrollPosition.y)
         webViewScrollPosition.x = x
         webViewScrollPosition.y = y
-        guard let menuWindow = passwordMenuWindow else { return }
         DispatchQueue.main.async {
-            self.passwordMenuPosition.x += offset.x
-            self.passwordMenuPosition.y += offset.y
-            menuWindow.setFrameTopLeftPoint(self.passwordMenuPosition)
+            if self.passwordMenuWindow != nil {
+                self.dismissPasswordManagerMenu()
+            }
             Logger.shared.logDebug("scrolled to \(x) \(y) \(width) \(height)", category: .passwordManager)
         }
     }
@@ -206,9 +207,11 @@ class PasswordOverlayController: WebPageHolder {
         }
         requestWebFieldFrame(elementId: elementId) { frame in
             if let frame = frame {
-                DispatchQueue.main.async {
-                    self.passwordMenuPosition = self.bottomLeftOnScreen(for: frame)
-                    menuWindow.setFrameTopLeftPoint(self.passwordMenuPosition)
+                DispatchQueue.main.async { [unowned self] in
+                    var position = self.page.webView.convert(frame.origin, to: nil)
+                    position.y -= menuWindow.frame.size.height
+                    self.passwordMenuPosition = position
+                    menuWindow.setOrigin(self.passwordMenuPosition)
                     // TODO: update width
                 }
             }
@@ -225,15 +228,6 @@ class PasswordOverlayController: WebPageHolder {
                 completion(nil)
             }
         }
-    }
-
-    private func bottomLeftOnScreen(for windowRect: CGRect) -> CGPoint {
-        guard let window = page.webviewWindow else {
-            fatalError()
-        }
-        let windowHeight = window.contentRect(forFrameRect: page.frame).size.height
-        let localPoint = CGPoint(x: windowRect.origin.x, y: windowHeight - windowRect.origin.y)
-        return window.convertPoint(toScreen: localPoint)
     }
 
     func handleWebFormSubmit(with elementId: String) {

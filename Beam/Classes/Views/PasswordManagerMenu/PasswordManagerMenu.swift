@@ -85,7 +85,6 @@ struct PasswordManagerMenu: View {
         }
         .frame(width: max(width, 400), height: height, alignment: .top)
         .cornerRadius(6)
-        .shadow(color: BeamColor.Formatter.shadow.swiftUI, radius: 15, x: 0, y: 7)
         .animation(nil)
     }
 }

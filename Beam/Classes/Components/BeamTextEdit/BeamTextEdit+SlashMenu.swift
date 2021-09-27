@@ -50,9 +50,9 @@ extension BeamTextEdit {
                               y: rect.maxY + node.offsetInDocument.y + 8)
 
         let items = getSlashMenuItems()
-        let menuView = ContextMenuFormatterView(items: items, handlesTyping: true)
+        let menuView = ContextMenuFormatterView(key: "SlashFormatter", items: items, handlesTyping: true)
         inlineFormatter = menuView
-        CustomPopoverPresenter.shared.presentMenu(menuView, atPoint: atPoint, from: self, animated: false)
+        prepareInlineFormatterWindowBeforeShowing(menuView, atPoint: atPoint)
 
         formatterTargetRange = targetRange
         formatterTargetNode = targetNode
@@ -198,7 +198,7 @@ extension BeamTextEdit {
             self?.onFinishPickingDate(selectedDate, in: node, for: editableRange, placeholderText: placeholderText)
         }
         inlineFormatter = calendarPicker
-        setupInlineFormatterView(calendarPicker)
+        prepareInlineFormatterWindowBeforeShowing(calendarPicker, atPoint: .zero)
         moveInlineFormatterAtSelection(below: true)
         node.focus(position: editableRange.upperBound - 1)
         DispatchQueue.main.async {

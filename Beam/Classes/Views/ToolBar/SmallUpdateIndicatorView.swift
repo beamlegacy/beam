@@ -96,7 +96,7 @@ struct SmallUpdateIndicatorView: View {
     }
 
     private func showReleaseNoteWindow(with release: AppRelease, at origin: CGPoint, hideButtonOnClose: Bool = false) {
-        let window = CustomPopoverPresenter.shared.presentAutoDismissingChildWindow()
+        let window = CustomPopoverPresenter.shared.presentPopoverChildWindow()
         let releaseNoteView = ReleaseNoteView(release: release, closeAction: {
             if hideButtonOnClose {
                 withAnimation {

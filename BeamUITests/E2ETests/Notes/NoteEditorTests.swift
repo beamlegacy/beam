@@ -54,24 +54,25 @@ class NoteEditorTests: BaseTest {
         journalView.app.typeText(contextMenuTriggerKey)
         
         testRailPrint("Then Context menu is displayed")
-        XCTAssertTrue(journalView.group(NoteViewLocators.Groups.slashContextMenu.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
+        let contextMenuView = ContextMenuTestView(key: NoteViewLocators.Groups.slashContextMenu.accessibilityIdentifier)
+        XCTAssertTrue(contextMenuView.menuElement().waitForExistence(timeout: implicitWaitTimeout))
         
         testRailPrint("Then Context menu items exist, enabled and hittable")
         for element in NoteViewLocators.ContextMenuItems.allCases {
             XCTAssertTrue(
-                journalView.staticText(element.accessibilityIdentifier).exists &&
-                journalView.staticText(element.accessibilityIdentifier).isEnabled &&
-                journalView.staticText(element.accessibilityIdentifier).isHittable)
+                contextMenuView.staticText(element.accessibilityIdentifier).exists &&
+                contextMenuView.staticText(element.accessibilityIdentifier).isEnabled &&
+                contextMenuView.staticText(element.accessibilityIdentifier).isHittable)
         }
         
         testRailPrint("When I press delete button")
         journalView.typeKeyboardKey(.delete)
         
         testRailPrint("Then Context menu is NOT displayed")
-        XCTAssertTrue(WaitHelper().waitForDoesntExist(journalView.group(NoteViewLocators.Groups.slashContextMenu.accessibilityIdentifier)))
+        XCTAssertTrue(WaitHelper().waitForDoesntExist(contextMenuView.menuElement()))
         
         journalView.app.typeText(contextMenuTriggerKey + "bol")
-        let boldMenuItem = journalView.staticText(NoteViewLocators.ContextMenuItems.boldItem.accessibilityIdentifier)
+        let boldMenuItem = contextMenuView.staticText(NoteViewLocators.ContextMenuItems.boldItem.accessibilityIdentifier)
         
         testRailPrint("Then Bold context menu item is displayed")
         XCTAssertTrue(boldMenuItem.waitForExistence(timeout: implicitWaitTimeout))
