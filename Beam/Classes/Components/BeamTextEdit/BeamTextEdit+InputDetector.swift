@@ -292,29 +292,30 @@ extension BeamTextEdit {
 
     // MARK: "("
     private func preInputHandleParenthesis(node: TextNode) -> Bool {
-        let cmdManager = rootNode.focusedCmdManager
+//        let cmdManager = rootNode.focusedCmdManager
         let (pos, left) = inputDetectorGetPositionAndPrecedingChar(in: node)
         // capture the left of the cursor to check for an existing (
         if pos > 0 && left == "(" {
-            let initialText = selectedText
-            var ignoreInput = true
-            var atPosition = pos
-            if !self.selectedTextRange.isEmpty {
-                insertPair(node: node, "(", ")")
-                cmdManager.beginGroup(with: "Block Ref Prepare")
-                let newPosition = selectedTextRange.upperBound
-                cmdManager.focusElement(node, cursorPosition: newPosition)
-                cmdManager.cancelSelection(node)
-                atPosition = newPosition
-            } else {
-                cmdManager.beginGroup(with: "Block Ref Prepare")
-                ignoreInput = false
-                cmdManager.insertText(BeamText(text: ")"), in: node, at: pos)
-                atPosition = pos + 1
-            }
-            cmdManager.endGroup()
-            self.showCardReferenceFormatter(initialText: initialText, atPosition: atPosition, searchCardContent: true)
-            return !ignoreInput
+//          Disable Block Reference until further notice
+//            let initialText = selectedText
+//            var ignoreInput = true
+//            var atPosition = pos
+//            if !self.selectedTextRange.isEmpty {
+//                insertPair(node: node, "(", ")")
+//                cmdManager.beginGroup(with: "Block Ref Prepare")
+//                let newPosition = selectedTextRange.upperBound
+//                cmdManager.focusElement(node, cursorPosition: newPosition)
+//                cmdManager.cancelSelection(node)
+//                atPosition = newPosition
+//            } else {
+//                cmdManager.beginGroup(with: "Block Ref Prepare")
+//                ignoreInput = false
+//                cmdManager.insertText(BeamText(text: ")"), in: node, at: pos)
+//                atPosition = pos + 1
+//            }
+//            cmdManager.endGroup()
+//            self.showCardReferenceFormatter(initialText: initialText, atPosition: atPosition, searchCardContent: true)
+//            return !ignoreInput
         }
         insertPair(node: node, "(", ")")
         return false
