@@ -89,6 +89,7 @@ class ContextMenuViewModel: BaseFormatterViewViewModel, ObservableObject {
     @Published var items: [ContextMenuItem] = []
     @Published var selectedIndex: Int?
     @Published var sizeToFit: Bool = false
+    @Published var containerSize: CGSize = .zero
     var onSelectMenuItem: (() -> Void)?
 }
 
@@ -117,7 +118,8 @@ struct ContextMenuView: View {
     @State private var hoveringIndex: Int?
 
     var body: some View {
-        FormatterViewBackground {
+        let computedSize = Self.idealSizeForItems(viewModel.items)
+        return FormatterViewBackground {
             VStack(alignment: .leading, spacing: 5) {
                 ForEach(Array(viewModel.items.enumerated()), id: \.1.id) { index, item in
                     let isSelected = viewModel.selectedIndex == index
@@ -145,9 +147,11 @@ struct ContextMenuView: View {
             .frame(maxWidth: .infinity)
             .padding(viewModel.items.count > 0 ? BeamSpacing._50 : 0)
         }
-        .zIndex(1000)
-        .fixedSize(horizontal: viewModel.sizeToFit, vertical: viewModel.sizeToFit)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .if(viewModel.sizeToFit) { $0.frame(maxWidth: computedSize.width) }
+        .if(!viewModel.sizeToFit) { $0.frame(width: computedSize.width) }
+        .fixedSize(horizontal: viewModel.sizeToFit, vertical: true)
+        .frame(height: viewModel.containerSize.height, alignment: .topLeading)
+        .animation(BeamAnimation.easeInOut(duration: 0.15), value: computedSize.height)
         .formatterViewBackgroundAnimation(with: viewModel)
         .accessibilityElement(children: .contain)
         .accessibility(identifier: "ContextMenu")

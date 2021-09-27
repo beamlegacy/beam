@@ -1,5 +1,5 @@
 //
-//  ContextMenuPresenter.swift
+//  CustomPopoverPresenter.swift
 //  Beam
 //
 //  Created by Remi Santos on 23/03/2021.
@@ -7,135 +7,87 @@
 
 import Foundation
 
-private class ContextMenuWindow: NSWindow {
-
-    override var acceptsFirstResponder: Bool {
-        return true
-    }
-
-    override func mouseDown(with event: NSEvent) {
-        super.mouseDown(with: event)
-        CustomPopoverPresenter.shared.dismissMenu()
-    }
-
-    override func rightMouseDown(with event: NSEvent) {
-        super.rightMouseDown(with: event)
-        CustomPopoverPresenter.shared.dismissMenu()
-    }
-
-    override func otherMouseDown(with event: NSEvent) {
-        super.otherMouseDown(with: event)
-        CustomPopoverPresenter.shared.dismissMenu()
-    }
-}
-
-class FlippedView: NSView {
-    override var isFlipped: Bool { true }
-}
-
 class CustomPopoverPresenter {
     static var shared = CustomPopoverPresenter()
+    static let windowViewPadding: CGFloat = 35
 
-    private var currentView: NSView?
-    private var currentMenu: FormatterView?
-    private var childWindow: NSWindow?
-    private var parentWindow: NSWindow?
+    private var presentedFormatterViews: [FormatterView] = []
+    private var presentedUnknownWindows: [PopoverWindow] = []
 
-    private func createChildWindow(in parent: NSWindow, canOverflow: Bool) -> NSWindow {
-        let windowRect = canOverflow ? parent.screen?.frame : parent.frame
-        let window = ContextMenuWindow(contentRect: windowRect ?? parent.frame, styleMask: .borderless, backing: .buffered, defer: false)
-        window.backgroundColor = .clear
-        window.ignoresMouseEvents = false
-        parent.addChildWindow(window, ordered: .above)
-        childWindow = window
-        parentWindow = parent
+    /// Will dismiss all presented popovers for a given key, or all of them.
+    ///
+    /// - Parameters:
+    ///     - key: if no key is provided, all visible popovers will be dismissed.
+    ///     - animated: will animate out the presented FormatterViews
+    func dismissPopovers(key: String? = nil, animated: Bool = true) {
+        var views = presentedFormatterViews
+        if let key = key {
+            views = views.filter { $0.key == key }
+            presentedFormatterViews.removeAll { $0.key == key }
+        } else {
+            presentedFormatterViews.removeAll()
+            presentedUnknownWindows.forEach { dismissWindow($0) }
+            presentedUnknownWindows.removeAll()
+        }
+        views.forEach { v in
+            if animated {
+                v.animateOnDisappear(completionHandler: { [weak self] in
+                    self?.dismissWindow(v.window)
+                })
+            } else {
+                dismissWindow(v.window)
+            }
+        }
+    }
+
+    private func dismissWindow(_ w: NSWindow?) {
+        guard let w = w, w.isVisible else { return }
+        w.close()
+        w.parent?.removeChildWindow(w)
+    }
+
+    @discardableResult
+    func presentFormatterView(_ view: FormatterView, atPoint: CGPoint,
+                              from fromView: NSView? = nil, animated: Bool = true) -> NSWindow? {
+        let window = presentPopoverChildWindow(canBecomeKey: view.canBecomeKeyView, canBecomeMain: false,
+                                               withShadow: false, movable: false, isUnknown: false)
+        let position = fromView?.convert(atPoint, to: nil) ?? atPoint
+        let idealSize = view.idealSize
+        var rect = CGRect(origin: position, size: idealSize).insetBy(dx: -Self.windowViewPadding, dy: -Self.windowViewPadding) // give some space for shadow
+        rect.origin.y -= idealSize.height
+        window?.setView(with: view, at: rect.origin, fromtopLeft: false)
+        window?.setContentSize(rect.size)
+
+        presentedFormatterViews.append(view)
+        if animated {
+            DispatchQueue.main.async { view.animateOnAppear() }
+        }
         return window
     }
 
-    func dismissMenu(animated: Bool = true) {
-        if animated {
-            let menu = currentMenu
-            menu?.animateOnDisappear(completionHandler: { [weak self] in
-                guard menu == self?.currentMenu else { return }
-                self?.dismissMenu(removeWindow: true)
-            })
-            if currentView != nil && currentMenu == nil {
-                dismissMenu(removeWindow: true)
-            }
-        } else {
-            dismissMenu(removeWindow: true)
-        }
+    func presentPopoverChildWindow(canBecomeKey: Bool = true, canBecomeMain: Bool = true,
+                                   withShadow: Bool = true, movable: Bool = true) -> PopoverWindow? {
+        presentPopoverChildWindow(canBecomeKey: canBecomeKey, canBecomeMain: canBecomeMain,
+                                  withShadow: withShadow, movable: movable, isUnknown: true)
     }
 
-    private func dismissMenu(removeWindow: Bool = false) {
-        if let childWindow = childWindow, let parent = parentWindow, removeWindow {
-            childWindow.setIsVisible(false)
-            parent.removeChildWindow(childWindow)
-            self.parentWindow = nil
-            self.childWindow = nil
-        }
-        currentMenu?.removeFromSuperview()
-        currentView?.removeFromSuperview()
-    }
-
-    func presentMenu(_ menu: FormatterView, atPoint: CGPoint, from fromView: NSView? = nil, animated: Bool = true) {
-        guard let view = fromView ?? AppDelegate.main.window?.contentView else { return }
-        if currentMenu != nil {
-            dismissMenu(removeWindow: true)
-        }
-        menu.frame = NSRect(origin: .zero, size: menu.idealSize)
-        currentMenu = menu
-        guard let parentWindow = view.window else {
-            return
-        }
-        let window = createChildWindow(in: parentWindow, canOverflow: true)
-        window.contentView?.addSubview(menu)
-
-        var position = convertPointToScreen(atPoint, fromView: view, inWindow: parentWindow)
-        position = window.convertPoint(fromScreen: position)
-        position.y = max(0, position.y - menu.bounds.height)
-        menu.setFrameOrigin(position)
-
-        if animated {
-            DispatchQueue.main.async {
-                menu.animateOnAppear()
-            }
-        }
-    }
-
-    func present(view: NSView, from parentView: NSView, atPoint: CGPoint) -> NSWindow? {
-        if currentView != nil {
-            dismissMenu(removeWindow: true)
-        }
-        currentView = view
-        guard let parentWindow = parentView.window else { return nil }
-        let childWindow = createChildWindow(in: parentWindow, canOverflow: false)
-        childWindow.contentView = FlippedView()
-        view.translatesAutoresizingMaskIntoConstraints = false
-        childWindow.contentView?.addSubview(view)
-
-        let position = view.convert(atPoint, from: parentView)
-        view.setFrameOrigin(position)
-
-        return childWindow
-    }
-
-    private func convertPointToScreen(_ point: CGPoint, fromView: NSView, inWindow: NSWindow) -> CGPoint {
-        return inWindow.convertPoint(toScreen: fromView.convert(point, to: nil))
-    }
-
-    func presentAutoDismissingChildWindow() -> AutoDismissingWindow? {
+    private func presentPopoverChildWindow(canBecomeKey: Bool, canBecomeMain: Bool,
+                                           withShadow: Bool, movable: Bool, isUnknown: Bool) -> PopoverWindow? {
 
         guard let mainWindow = AppDelegate.main.window else { return nil }
 
-        let window = AutoDismissingWindow()
+        let window = PopoverWindow(canBecomeKey: canBecomeKey, canBecomeMain: canBecomeMain)
         window.isReleasedWhenClosed = false
         window.isMovableByWindowBackground = true
         window.backgroundColor = .clear
-
-        window.styleMask = [.fullSizeContentView, .borderless]
+        window.hasShadow = withShadow
+        window.isMovable = movable
 
         mainWindow.addChildWindow(window, ordered: .above)
+
+        if isUnknown {
+            presentedUnknownWindows.append(window)
+        }
         return window
     }
 }

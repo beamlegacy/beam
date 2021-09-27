@@ -7,6 +7,7 @@
 
 import Cocoa
 import SwiftUI
+import Combine
 
 // MARK: - SwiftUI View
 private class HyperlinkEditorViewModel: BaseFormatterViewViewModel, ObservableObject {
@@ -85,11 +86,16 @@ private struct HyperlinkEditorView: View {
         }
         .frame(width: Self.idealSize.width, height: Self.idealSize.height)
         .formatterViewBackgroundAnimation(with: viewModel)
-        .onAppear {
-            if viewModel.visible && viewModel.shouldFocusOnAppear {
-                isEditingUrl = true
+        .onReceive(Publishers.Zip(
+            viewModel.$visible,
+            viewModel.$shouldFocusOnAppear
+        ), perform: { visible, shouldFocusOnAppear in
+            if visible && shouldFocusOnAppear {
+                DispatchQueue.main.async {
+                    isEditingUrl = true
+                }
             }
-        }
+        })
     }
 }
 
@@ -122,8 +128,12 @@ class HyperlinkFormatterView: FormatterView {
     private var originalTitleValue: String?
     private var subviewModel = HyperlinkEditorViewModel()
 
-    override var idealSize: NSSize {
+    override var idealSize: CGSize {
         HyperlinkEditorView.idealSize
+    }
+
+    override var canBecomeKeyView: Bool {
+        true
     }
 
     override func animateOnAppear(completionHandler: (() -> Void)? = nil) {
@@ -198,6 +208,7 @@ extension HyperlinkFormatterView {
     }
 
     func startEditingUrl() {
+        self.window?.makeKey()
         subviewModel.shouldFocusOnAppear = true
     }
 

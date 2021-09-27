@@ -44,7 +44,7 @@ struct HelpAndFeedbackMenuView: View {
     @State private var hoveredSection: HelpMenuSection?
     @EnvironmentObject var state: BeamState
     @Environment(\.colorScheme) var colorScheme
-    weak var window: AutoDismissingWindow?
+    weak var window: PopoverWindow?
 
     static let menuWidth: CGFloat = 284.0
 
