@@ -17,6 +17,11 @@ struct WebFieldAutofill: Codable {
     var background: String?
 }
 
+enum PasswordSaveAction {
+    case save
+    case update
+}
+
 class PasswordOverlayController: WebPageHolder {
     private let userInfoStore: UserInformationsStore
     private let credentialsBuilder: PasswordManagerCredentialsBuilder
@@ -283,20 +288,50 @@ class PasswordOverlayController: WebPageHolder {
             return
         }
         Logger.shared.logDebug("FOUND login: \(login), password: (redacted)", category: .passwordManager)
-        if let storedPassword = PasswordManager.shared.password(hostname: hostname, username: login) {
-            if password != storedPassword && password.count > 2 && login.count > 2 {
-                if let browserTab = (self.page as? BrowserTab) {
-                    browserTab.passwordManagerToast(saved: false)
+        if password.count > 2 && login.count > 2 {
+            var saveAction: PasswordSaveAction?
+            if let storedPassword = PasswordManager.shared.password(hostname: hostname, username: login) {
+                if password != storedPassword {
+                    saveAction = .update
                 }
-                PasswordManager.shared.save(hostname: hostname, username: login, password: password)
+            } else {
+                saveAction = .save
             }
-        } else {
-            if password.count > 2 && login.count > 2 {
-                if let browserTab = (self.page as? BrowserTab) {
-                    browserTab.passwordManagerToast(saved: true)
+            if let action = saveAction {
+                confirmSavePassword(username: login, action: action) { save in
+                    guard save else { return }
+                    if let browserTab = (self.page as? BrowserTab) {
+                        browserTab.passwordManagerToast(saved: action == .save)
+                    }
+                    PasswordManager.shared.save(hostname: hostname, username: login, password: password)
                 }
-                PasswordManager.shared.save(hostname: hostname, username: login, password: password)
             }
+        }
+    }
+
+    private func confirmSavePassword(username: String, action: PasswordSaveAction, onDismiss: @escaping (Bool) -> Void) {
+        guard let window = page.webviewWindow else {
+            return onDismiss(true)
+        }
+        let alertMessage: String
+        let saveButtonTitle: String
+        let alert = NSAlert()
+        switch action {
+        case .save:
+            alertMessage = "Would you like to save this password?"
+            saveButtonTitle = "Save Password"
+        case .update:
+            alertMessage = "Would you like to update the saved password for \(username)?"
+            saveButtonTitle = "Update Password"
+        }
+        alert.messageText = alertMessage
+        alert.informativeText = "You can view and remove saved passwords in Beam Passwords preferences."
+        let saveButton = alert.addButton(withTitle: saveButtonTitle)
+        let cancelButton = alert.addButton(withTitle: "Not Now")
+        saveButton.tag = NSApplication.ModalResponse.OK.rawValue
+        cancelButton.tag = NSApplication.ModalResponse.cancel.rawValue
+        alert.beginSheetModal(for: window) { response in
+            onDismiss(response == .OK)
         }
     }
 
