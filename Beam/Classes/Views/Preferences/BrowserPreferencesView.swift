@@ -225,15 +225,15 @@ struct TabsSection: View {
         Checkbox(checkState: PreferencesManager.cmdClickOpenTab, text: "⌘-click opens a link in a new tab", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
             PreferencesManager.cmdClickOpenTab = activated
         }
-        Checkbox(checkState: PreferencesManager.newTabWindowMakeActive, text: "When a new tab or window opens, make it active", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
-            PreferencesManager.newTabWindowMakeActive = activated
-        }
+//        Checkbox(checkState: PreferencesManager.newTabWindowMakeActive, text: "When a new tab or window opens, make it active", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
+//            PreferencesManager.newTabWindowMakeActive = activated
+//        }
         Checkbox(checkState: PreferencesManager.cmdNumberSwitchTabs, text: "Use ⌘1 to ⌘9 to switch tabs", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
             PreferencesManager.cmdNumberSwitchTabs = activated
         }
-        Checkbox(checkState: PreferencesManager.showWebsiteIconTab, text: "Show website icons in tabs", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
-            PreferencesManager.showWebsiteIconTab = activated
-        }
+//        Checkbox(checkState: PreferencesManager.showWebsiteIconTab, text: "Show website icons in tabs", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
+//            PreferencesManager.showWebsiteIconTab = activated
+//        }
         Checkbox(checkState: PreferencesManager.restoreLastBeamSession, text: "Restore all tabs from last session when opening Beam", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
             PreferencesManager.restoreLastBeamSession = activated
         }
