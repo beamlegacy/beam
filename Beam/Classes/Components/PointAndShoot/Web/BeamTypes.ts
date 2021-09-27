@@ -8,14 +8,12 @@ export class BeamSize {
   constructor(public width: number, public height: number) {}
 }
 
-// TODO: Move to correct place
 export interface BeamRangeGroup {
   id: string
   range: BeamRange
   text?: string
 }
 
-// TODO: Move to correct place
 export interface BeamShootGroup {
   id: string
   element: BeamHTMLElement
@@ -479,4 +477,9 @@ export class BeamMutationObserver {
   takeRecords(): BeamMutationRecord[] {
     throw new Error("Method not implemented.")
   }
+}
+
+export interface BeamCoordinates {
+  x: number 
+  y: number
 }

@@ -1,8 +1,8 @@
-import { BeamElement, BeamWindow } from "./BeamTypes"
+import { BeamElement, BeamWindow, BeamCoordinates } from "./BeamTypes"
 
 export class Util {
 
-  static getOffset(object, offset) {
+  static getOffset(object: BeamElement, offset: BeamCoordinates): void {
     if (object) {
       offset.x += object.offsetLeft
       offset.y += object.offsetTop
@@ -10,7 +10,7 @@ export class Util {
     }
   }
 
-  static getScrolled(object: BeamElement, scrolled) {
+  static getScrolled(object: BeamElement, scrolled: BeamCoordinates): void {
     if (object) {
       scrolled.x += object.scrollLeft
       scrolled.y += object.scrollTop
@@ -20,7 +20,15 @@ export class Util {
     }
   }
 
-  static getTopLeft(el: BeamElement) {
+  /**
+   * Get top left X, Y coordinates of element taking into acocunt the scroll position 
+   *
+   * @static
+   * @param {BeamElement} el
+   * @return {*}  {BeamCoordinates}
+   * @memberof Util
+   */
+  static getTopLeft(el: BeamElement): BeamCoordinates {
     const offset = { x: 0, y: 0 }
     Util.getOffset(el, offset)
 
@@ -42,7 +50,7 @@ export class Util {
    * @return {number}
    * @memberof Util
    */
-  static clamp(val: number, min: number, max: number) {
+  static clamp(val: number, min: number, max: number): number {
     return val > max ? max : val < min ? min : val
   }
 
@@ -50,7 +58,7 @@ export class Util {
    * Remove null and undefined from array
    *
    * @static
-   * @param {any[]} array
+   * @param {unknown[]} array
    * @return {*}  {any[]}
    * @memberof Util
    */
@@ -70,7 +78,7 @@ export class Util {
    * @returns {boolean} Returns `true` if `number` is in the range, else `false`.
    * @memberof Util
    */
-  static isNumberInRange(number, start, end) {
+  static isNumberInRange(number: number, start: number, end: number): boolean {
     return Number(number) >= Math.min(start, end) && number <= Math.max(start, end)
   }
 
@@ -90,11 +98,36 @@ export class Util {
   static mapRangeToRange(from: [number, number], to: [number, number], s: number): number {
     return to[0] + ((s - from[0]) * (to[1] - to[0])) / (from[1] - from[0])
   }
+
   /**
    * Generates a good enough non-compliant UUID.
+   *
+   * @static
+   * @param {BeamWindow} win
+   * @return {*}  {string}
+   * @memberof Util
    */
   static uuid(win: BeamWindow): string {
     const buf = new Uint32Array(4)
     return win.crypto.getRandomValues(buf).join("-")
+  }
+
+  /**
+   * Remove first matched item from array, Uses findIndex under the hood.
+   *
+   * @static
+   * @param {(arrayElement) => boolean} matcher when matcher returns true that item is removed from array
+   * @param {unknown[]} array input array
+   * @return {*}  {unknown[]} return updated array
+   * @memberof Util
+   */
+  static removeFromArray(matcher: (arrayElement) => boolean, array: unknown[]): unknown[] {
+    const foundIndex = array.findIndex(matcher)
+    // foundIndex is -1 when no match is found. Only remove found items from array
+    if (foundIndex >= 0) {
+      array.splice(foundIndex, 1)
+    }
+
+    return array
   }
 }
