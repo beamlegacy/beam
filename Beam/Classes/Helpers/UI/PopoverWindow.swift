@@ -1,5 +1,5 @@
 //
-//  AutoDismissingWindow.swift
+//  PopoverWindow.swift
 //  Beam
 //
 //  Created by Ludovic Ollagnier on 19/07/2021.
@@ -8,11 +8,23 @@
 import AppKit
 import SwiftUI
 
-/// Use this class if you need a NSWindow that will close itself once it looses key status, if it hasn't been moved.
-class AutoDismissingWindow: NSWindow {
+/// Use this class if you need a NSWindow that can close itself once it looses key status, if it hasn't been moved.
+class PopoverWindow: NSWindow {
 
     private(set) var didMove = false
     private var moveNotificationToken: NSObjectProtocol?
+
+    private var _canBecomeKey: Bool
+    private var _canBecomeMain: Bool
+    init(canBecomeKey: Bool = true, canBecomeMain: Bool) {
+        _canBecomeKey = canBecomeKey
+        _canBecomeMain = canBecomeMain
+        super.init(contentRect: .zero, styleMask: [.fullSizeContentView, .borderless], backing: .buffered, defer: false)
+    }
+
+    override func setContentSize(_ size: NSSize) {
+        super.setContentSize(size)
+    }
 
     func setOrigin(_ point: CGPoint, fromtopLeft: Bool = false) {
         if let originScreen = self.parent?.convertPoint(toScreen: point) {
@@ -33,12 +45,17 @@ class AutoDismissingWindow: NSWindow {
         setOrigin(origin, fromtopLeft: fromtopLeft)
     }
 
+    func setView(with view: NSView, at origin: NSPoint, fromtopLeft: Bool = false) {
+        self.contentView = view
+        setOrigin(origin, fromtopLeft: fromtopLeft)
+    }
+
     override var canBecomeKey: Bool {
-        return true
+        return _canBecomeKey
     }
 
     override var canBecomeMain: Bool {
-        return true
+        return _canBecomeMain
     }
 
     override func becomeMain() {

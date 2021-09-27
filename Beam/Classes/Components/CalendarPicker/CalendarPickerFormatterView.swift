@@ -25,6 +25,7 @@ private struct CalendarPickerFormatterContainerView: View {
             .frame(width: Self.idealSize.width)
             .fixedSize(horizontal: false, vertical: true)
             .frame(height: Self.idealSize.height, alignment: .topLeading)
+            .animation(BeamAnimation.easeInOut(duration: 0.15))
             .formatterViewBackgroundAnimation(with: viewModel)
     }
 }
@@ -36,14 +37,14 @@ class CalendarPickerFormatterView: FormatterView {
     private var subviewModel = CalendarPickerFormatterContainerView.ViewModel()
     private var dateHasChanged = false
 
-    override var idealSize: NSSize {
+    override var idealSize: CGSize {
         CalendarPickerFormatterContainerView.idealSize
     }
 
     var onDateChange: ((Date) -> Void)?
     var onDismiss: ((Bool) -> Void)?
     convenience init() {
-        self.init(viewType: .inline)
+        self.init(key: "CalendarPicker", viewType: .inline)
     }
 
     override func animateOnAppear(completionHandler: (() -> Void)? = nil) {

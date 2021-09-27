@@ -35,6 +35,7 @@ struct ModeView: View {
                 NoteView(note: currentNote, containerGeometry: containerGeometry, leadingPercentage: PreferencesManager.editorLeadingPercentage,
                          centerText: false, initialFocusedState: state.notesFocusedStates.currentFocusedState) { scrollPoint in
                     contentIsScrolled = scrollPoint.y > NoteView.topSpacingBeforeTitle
+                    CustomPopoverPresenter.shared.dismissPopovers()
                 }
                 .onAppear { contentIsScrolled = false }
                 .transition(.noteContentTransition(transitionModel: transitionModel))
@@ -48,6 +49,7 @@ struct ModeView: View {
                           proxy: containerGeometry) { scrollPoint in
             contentIsScrolled = scrollPoint.y >
                 JournalScrollView.firstNoteTopOffset(forProxy: containerGeometry)
+            CustomPopoverPresenter.shared.dismissPopovers()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .clipped()

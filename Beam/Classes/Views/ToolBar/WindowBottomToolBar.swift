@@ -89,7 +89,7 @@ private struct BottomToolBarTrailingIconView: View {
                         let y = buttonFrame.origin.y + buttonFrame.height + 7
                         let x = buttonFrame.origin.x - HelpAndFeedbackMenuView.menuWidth + 16
 
-                        let window = CustomPopoverPresenter.shared.presentAutoDismissingChildWindow()
+                        let window = CustomPopoverPresenter.shared.presentPopoverChildWindow()
                         let view = HelpAndFeedbackMenuView(window: window)
                             .environmentObject(state)
                         window?.setView(with: view, at: NSPoint(x: x, y: y))

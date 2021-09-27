@@ -67,7 +67,7 @@ import BeamCore
     @Published var overlayViewModel: OverlayViewCenterViewModel = OverlayViewCenterViewModel()
 
     var downloadButtonPosition: CGPoint?
-    weak var downloaderWindow: AutoDismissingWindow?
+    weak var downloaderWindow: PopoverWindow?
 
     private var scope = Set<AnyCancellable>()
     let cmdManager = CommandManager<BeamState>()

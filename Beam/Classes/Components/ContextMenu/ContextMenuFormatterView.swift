@@ -19,8 +19,10 @@ class ContextMenuFormatterView: FormatterView {
     private var sizeToFit: Bool = false
     private var onSelectMenuItem: (() -> Void)?
 
-    override var idealSize: NSSize {
-        return ContextMenuView.idealSizeForItems(displayedItems)
+    private var sizeUpdateDispatchedBlock: DispatchWorkItem?
+    private var lastComputedSize: CGSize = .zero
+    override var idealSize: CGSize {
+        lastComputedSize
     }
 
     private var _handlesTyping: Bool = false
@@ -30,13 +32,15 @@ class ContextMenuFormatterView: FormatterView {
 
     var typingPrefix = 1
 
-    convenience init(items: [ContextMenuItem],
+    convenience init(key: String,
+                     items: [ContextMenuItem],
                      direction: Edge = .bottom,
                      handlesTyping: Bool = false,
                      defaultSelectedIndex: Int? = nil,
                      sizeToFit: Bool = false,
                      onSelectHandler: (() -> Void)? = nil) {
         self.init(frame: CGRect.zero)
+        self.key = key
         self.viewType = .inline
         self.items = items
         self.displayedItems = items
@@ -45,6 +49,7 @@ class ContextMenuFormatterView: FormatterView {
         self.sizeToFit = sizeToFit
         self.onSelectMenuItem = onSelectHandler
         self._handlesTyping = handlesTyping
+        self.lastComputedSize = ContextMenuView.idealSizeForItems(items)
         setupUI()
     }
 
@@ -71,6 +76,7 @@ class ContextMenuFormatterView: FormatterView {
         subviewModel.animationDirection = direction
         subviewModel.sizeToFit = sizeToFit
         subviewModel.onSelectMenuItem = onSelectMenuItem
+        subviewModel.containerSize = idealSize
         let rootView = ContextMenuView(viewModel: subviewModel)
         let hostingView = NSHostingView(rootView: rootView)
         hostingView.autoresizingMask = [.width, .height]
@@ -81,10 +87,29 @@ class ContextMenuFormatterView: FormatterView {
     }
 
     private func updateSize() {
-        var frame = bounds
-        frame.size.height = idealSize.height
-        frame.origin.y = bounds.size.height - frame.size.height
-        hostView?.frame = frame
+        var newFrame = frame
+        let newSize = ContextMenuView.idealSizeForItems(displayedItems)
+        if let window = window as? PopoverWindow {
+            sizeUpdateDispatchedBlock?.cancel()
+            let updateWindowSizeBlock = DispatchWorkItem { [weak self] in
+                self?.lastComputedSize = newSize
+                self?.subviewModel.containerSize = newSize
+                newFrame.size.height = newSize.height + CustomPopoverPresenter.windowViewPadding * 2
+                window.setContentSize(newFrame.size)
+            }
+            if newSize.height < lastComputedSize.height {
+                // give some time for the view to animate then change the window size
+                sizeUpdateDispatchedBlock = updateWindowSizeBlock
+                DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: .milliseconds(400)), execute: updateWindowSizeBlock)
+            } else {
+                updateWindowSizeBlock.perform()
+            }
+        } else {
+            newFrame.size.height = newSize.height
+            newFrame.origin.y = bounds.size.height - newFrame.size.height
+            subviewModel.containerSize = newSize
+            hostView?.frame = newFrame
+        }
     }
 
     private func updateItemsForSearchText(_ text: String) {
