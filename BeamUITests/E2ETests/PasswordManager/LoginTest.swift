@@ -43,6 +43,11 @@ class LoginTest: BaseTest {
         enterInput(helper.randomEmail(), .username, journalView.app)
         enterInput(helper.randomPassword(), .password, journalView.app)
         tapSubmit(journalView.app)
+
+        let button = journalView.app.buttons["Save Password"].firstMatch
+        XCTAssert(button.waitForExistence(timeout: 4))
+        button.tapInTheMiddle()
+
         let confirmationToast = journalView.app.staticTexts["CredentialsConfirmationToast"]
         XCTAssertTrue(confirmationToast.waitForExistence(timeout: implicitWaitTimeout))
     }
