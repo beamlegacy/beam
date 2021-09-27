@@ -14,7 +14,7 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
     // MARK: Public methods
 
     public func initHyperlinkFormatter() {
-        let hyperlinkView = HyperlinkFormatterView(viewType: .inline)
+        let hyperlinkView = HyperlinkFormatterView(key: "HyperlinkFormatter", viewType: .inline)
         hyperlinkView.delegate = self
         inlineFormatter = hyperlinkView
     }
@@ -160,9 +160,9 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
         } else {
             items = self.getDefaultItemsForLink(for: node, link: link)
         }
-        let menuView = ContextMenuFormatterView(items: items, defaultSelectedIndex: fromPaste ? 0 : nil)
+        let menuView = ContextMenuFormatterView(key: "HyperlinkContextMenu", items: items, defaultSelectedIndex: fromPaste ? 0 : nil)
         inlineFormatter = menuView
-        CustomPopoverPresenter.shared.presentMenu(menuView, atPoint: atPoint, from: self, animated: false)
+        prepareInlineFormatterWindowBeforeShowing(menuView, atPoint: atPoint)
 
         formatterTargetRange = targetRange
         formatterTargetNode = targetNode
@@ -171,7 +171,8 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
         }
     }
 
-    private func showHyperlinkFormatter(for targetNode: TextNode?, targetRange: Range<Int>, frame: NSRect?, url: URL?, linkTitle: String?, debounce: Bool = true) {
+    private func showHyperlinkFormatter(for targetNode: TextNode?, targetRange: Range<Int>, frame: NSRect?,
+                                        url: URL?, linkTitle: String?, debounce: Bool = true) {
 
         guard inlineFormatter?.isMouseInsideView != true else { return }
         if let currentHyperlinkView = inlineFormatter as? HyperlinkFormatterView {
@@ -193,28 +194,37 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
         }
 
         clearDebounceTimer()
-        initInlineFormatterView(isHyperlinkView: true)
+        initHyperlinkFormatter()
 
         guard let hyperlinkView = inlineFormatter as? HyperlinkFormatterView,
-              let node = targetNode,
-              let frame = frame,
+              let node = targetNode, let frame = frame,
               isInlineFormatterHidden else { return }
-
+        prepareInlineFormatterWindowBeforeShowing(hyperlinkView, atPoint: .zero)
         formatterTargetRange = targetRange
         formatterTargetNode = targetNode
         hyperlinkView.setInitialValues(url: url?.absoluteString, title: linkTitle)
         if url == nil, let linkTitle = linkTitle, let guessedUrl = URL(string: linkTitle) {
             hyperlinkView.setEditedValues(url: guessedUrl.absoluteString, title: linkTitle)
         }
-        let linkViewSize = hyperlinkView.idealSize
-        hyperlinkView.frame.origin.y = frame.minY + node.offsetInDocument.y - linkViewSize.height - 4
-        hyperlinkView.frame.origin.x = frame.maxX + node.offsetInDocument.x - linkViewSize.width / 2
+        updateLinkFormatterWindow(hyperlinkView: hyperlinkView, frame: frame, in: node)
 
         if debounce {
             debounceShowHideInlineFormatter(true)
         } else {
             showOrHideInlineFormatter(isPresent: true)
         }
+    }
+
+    private func updateLinkFormatterWindow(hyperlinkView: HyperlinkFormatterView, frame: CGRect, in node: TextNode) {
+        let linkViewSize = hyperlinkView.idealSize
+        guard let window = hyperlinkView.window as? PopoverWindow else { return }
+        let origin = CGPoint(x: frame.maxX + node.offsetInDocument.x - linkViewSize.width / 2,
+                             y: frame.minY + node.offsetInDocument.y - linkViewSize.height - 4)
+        let inset = CustomPopoverPresenter.windowViewPadding
+        var rect = CGRect(origin: self.convert(origin, to: nil), size: linkViewSize).insetBy(dx: -inset, dy: -inset)
+        rect.origin.y -= linkViewSize.height
+        window.setContentSize(rect.size)
+        window.setOrigin(rect.origin, fromtopLeft: false)
     }
 
     private func updateLinkToEmbed(in node: TextNode, at range: Range<Int>) {

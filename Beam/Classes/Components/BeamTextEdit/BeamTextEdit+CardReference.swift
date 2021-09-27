@@ -66,7 +66,7 @@ extension BeamTextEdit {
         formatterTargetRange = targetRange
         formatterTargetNode = node
         inlineFormatter = menuView
-        CustomPopoverPresenter.shared.presentMenu(menuView, atPoint: atPoint, from: self, animated: false)
+        prepareInlineFormatterWindowBeforeShowing(menuView, atPoint: atPoint)
         DispatchQueue.main.async {
             self.showOrHideInlineFormatter(isPresent: true)
         }

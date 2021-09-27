@@ -19,9 +19,10 @@ class FormatterView: NSView {
         case inline
     }
 
+    internal var key: String = ""
     internal var viewType: FormatterViewType = .inline
 
-    var idealSize: NSSize {
+    var idealSize: CGSize {
         return .zero
     }
 
@@ -31,7 +32,7 @@ class FormatterView: NSView {
 
     var isMouseInsideView = false
 
-    convenience init(viewType: FormatterViewType) {
+    convenience init(key: String, viewType: FormatterViewType) {
         self.init(frame: .zero)
         self.viewType = viewType
         self.setupUI()

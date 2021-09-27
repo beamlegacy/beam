@@ -180,7 +180,7 @@ struct OmniBar: View {
                         OmniBarDownloadButton(downloadManager: state.data.downloadManager, action: {
                             if let downloaderWindow = state.downloaderWindow {
                                 downloaderWindow.close()
-                            } else if let window = CustomPopoverPresenter.shared.presentAutoDismissingChildWindow() {
+                            } else if let window = CustomPopoverPresenter.shared.presentPopoverChildWindow() {
                                 let downloaderView = DownloaderView(downloader: state.data.downloadManager) { [weak window] in
                                     window?.close()
                                 }

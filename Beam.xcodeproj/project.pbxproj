@@ -109,7 +109,7 @@
 		33B27467264C0F7100A318CD /* AutoUpdate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 33B27450264C0CDC00A318CD /* AutoUpdate.framework */; };
 		33B27468264C0F7100A318CD /* AutoUpdate.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 33B27450264C0CDC00A318CD /* AutoUpdate.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		33B2746A264C103400A318CD /* SmallUpdateIndicatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33B27469264C103400A318CD /* SmallUpdateIndicatorView.swift */; };
-		33CCBFA626A61C15004B6236 /* AutoDismissingWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33CCBFA526A61C14004B6236 /* AutoDismissingWindow.swift */; };
+		33CCBFA626A61C15004B6236 /* PopoverWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33CCBFA526A61C14004B6236 /* PopoverWindow.swift */; };
 		33D3248E26CEA5A300B44281 /* WebSearchMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33D3248D26CEA5A300B44281 /* WebSearchMessageHandler.swift */; };
 		33D5F85A2697478E002C4F25 /* PopupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33D5F8592697478E002C4F25 /* PopupView.swift */; };
 		33DEF48826617E0B00834839 /* CircledButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33DEF48726617E0B00834839 /* CircledButton.swift */; };
@@ -750,6 +750,7 @@
 		A5E112E926BA94E800BAD335 /* BrowserTabUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E112E826BA94E800BAD335 /* BrowserTabUITests.swift */; };
 		A5E3F16326F1ECBE007B1CAB /* String+RangesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E3F16226F1ECBE007B1CAB /* String+RangesTests.swift */; };
 		A5EA892826A9C08100AB5A16 /* CalendarPickerViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5EA892726A9C08100AB5A16 /* CalendarPickerViewModelTests.swift */; };
+		A5EB6EAF26FDFC55001442E7 /* ContextMenuTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5EB6EAE26FDFC55001442E7 /* ContextMenuTestView.swift */; };
 		A5EBF14A26D7BE3100597A1C /* GutterContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5EBF14926D7BE3100597A1C /* GutterContainerView.swift */; };
 		A5EBF15326D7BF8A00597A1C /* BeamTextEdit+Gutter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5EBF15226D7BF8A00597A1C /* BeamTextEdit+Gutter.swift */; };
 		A5EBF15526D8F2FD00597A1C /* VisualEffectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5EBF15426D8F2FD00597A1C /* VisualEffectView.swift */; };
@@ -1096,7 +1097,7 @@
 		33AC9D9926B01A60004E7EF4 /* AuthenticationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationViewModel.swift; sourceTree = "<group>"; };
 		33B27441264C0CDB00A318CD /* AutoUpdate.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = AutoUpdate.xcodeproj; path = Extern/AutoUpdate/AutoUpdate.xcodeproj; sourceTree = "<group>"; };
 		33B27469264C103400A318CD /* SmallUpdateIndicatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmallUpdateIndicatorView.swift; sourceTree = "<group>"; };
-		33CCBFA526A61C14004B6236 /* AutoDismissingWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoDismissingWindow.swift; sourceTree = "<group>"; };
+		33CCBFA526A61C14004B6236 /* PopoverWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverWindow.swift; sourceTree = "<group>"; };
 		33D3248D26CEA5A300B44281 /* WebSearchMessageHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSearchMessageHandler.swift; sourceTree = "<group>"; };
 		33D5F8592697478E002C4F25 /* PopupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopupView.swift; sourceTree = "<group>"; };
 		33DEF48726617E0B00834839 /* CircledButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircledButton.swift; sourceTree = "<group>"; };
@@ -1742,6 +1743,7 @@
 		A5E112E826BA94E800BAD335 /* BrowserTabUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserTabUITests.swift; sourceTree = "<group>"; };
 		A5E3F16226F1ECBE007B1CAB /* String+RangesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+RangesTests.swift"; sourceTree = "<group>"; };
 		A5EA892726A9C08100AB5A16 /* CalendarPickerViewModelTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CalendarPickerViewModelTests.swift; sourceTree = "<group>"; };
+		A5EB6EAE26FDFC55001442E7 /* ContextMenuTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextMenuTestView.swift; sourceTree = "<group>"; };
 		A5EBF14926D7BE3100597A1C /* GutterContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GutterContainerView.swift; sourceTree = "<group>"; };
 		A5EBF15226D7BF8A00597A1C /* BeamTextEdit+Gutter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamTextEdit+Gutter.swift"; sourceTree = "<group>"; };
 		A5EBF15426D8F2FD00597A1C /* VisualEffectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualEffectView.swift; sourceTree = "<group>"; };
@@ -2749,7 +2751,7 @@
 				A0CB7E53268E66CD00D15AFD /* View+Beam.swift */,
 				338A669F268DC26000B056EB /* LayerRemoverAnimationDelegate.swift */,
 				333A0A1F268C4EED004B7905 /* KeyEventHandlingView.swift */,
-				33CCBFA526A61C14004B6236 /* AutoDismissingWindow.swift */,
+				33CCBFA526A61C14004B6236 /* PopoverWindow.swift */,
 				A5EBF15426D8F2FD00597A1C /* VisualEffectView.swift */,
 				A5F47EC426F8D6A9004B7CDE /* LottieView.swift */,
 			);
@@ -4153,6 +4155,7 @@
 				B51DC76F26F4501E0074ACCA /* PnSTestView.swift */,
 				B5056A8E26F88AB000FFD2A2 /* HelpTestView.swift */,
 				B557155626FA257700F6C9D4 /* UpdateTestView.swift */,
+				A5EB6EAE26FDFC55001442E7 /* ContextMenuTestView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -5009,7 +5012,7 @@
 				A50B372425FA180E00E5D34F /* NSApperance+Beam.swift in Sources */,
 				872644C3261B29620070E83D /* PasswordManagerMenuViewModel.swift in Sources */,
 				5298EB2D26274D530033862C /* BeamToBeam2MigrationPolicy.swift in Sources */,
-				33CCBFA626A61C15004B6236 /* AutoDismissingWindow.swift in Sources */,
+				33CCBFA626A61C15004B6236 /* PopoverWindow.swift in Sources */,
 				4181722C2581107C00317ED8 /* AutocompleteList.swift in Sources */,
 				4181727B258110D100317ED8 /* AppDelegate+CoreData.swift in Sources */,
 				96988C8325BB0AF2000223A3 /* DestinationNotePicker.swift in Sources */,
@@ -5631,6 +5634,7 @@
 				B57A9B3D26AB08BC002C954D /* AllCardsTestView.swift in Sources */,
 				B5DC1FC526B963EB00A4C94B /* DownloadsTest.swift in Sources */,
 				B557156526FAF1BA00F6C9D4 /* AllCardsDeleteTests.swift in Sources */,
+				A5EB6EAF26FDFC55001442E7 /* ContextMenuTestView.swift in Sources */,
 				B57A9B3926AB0809002C954D /* BaseView.swift in Sources */,
 				B557155526FA250300F6C9D4 /* UpdateViewTests.swift in Sources */,
 			);

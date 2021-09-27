@@ -1144,14 +1144,13 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 extension Widget {
     func presentMenu(with items: [ContextMenuItem], at: CGPoint) {
         guard let editor = self.editor else { return }
-        let menuView = ContextMenuFormatterView(items: items, direction: .bottom) {
-            CustomPopoverPresenter.shared.dismissMenu()
+        let menuView = ContextMenuFormatterView(key: "WidgetMenu", items: items, direction: .bottom) {
+            CustomPopoverPresenter.shared.dismissPopovers(key: "WidgetMenu")
         }
         let point = CGPoint(x: offsetInDocument.x + at.x, y: offsetInDocument.y + at.y)
         let atPoint = editor.convert(point, to: nil)
         editor.inlineFormatter = menuView
-        CustomPopoverPresenter.shared.presentMenu(menuView, atPoint: atPoint, animated: true)
-
+        CustomPopoverPresenter.shared.presentFormatterView(menuView, atPoint: atPoint)
     }
 }
 

@@ -37,7 +37,7 @@ private struct TextFormatterViewSwiftUI: View {
 
     static func idealSize(forNumberOfItems: Int) -> CGSize {
         let itemSize = CGFloat(forNumberOfItems)
-        let width = (itemSize * 34) + (1.45 * itemSize)
+        let width = (itemSize * 38) + (BeamSpacing._40 * 2)
         return NSSize(width: width, height: 32)
     }
 
@@ -100,7 +100,7 @@ class TextFormatterView: FormatterView {
     private var subviewModel = TextFormatterViewModel()
     private var selectedTypes: Set<TextFormatterType> = []
 
-    override var idealSize: NSSize {
+    override var idealSize: CGSize {
         return TextFormatterViewSwiftUI.idealSize(forNumberOfItems: items.count)
     }
 

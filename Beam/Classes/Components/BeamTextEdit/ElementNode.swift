@@ -551,7 +551,8 @@ public class ElementNode: Widget {
 
     public func layoutCursor(_ cursorRect: NSRect) {
         guard let editor = self.editor else { return }
-        let on = AppDelegate.main.isActive && editor.hasFocus && isFocused && editor.blinkPhase && (root?.state.nodeSelection?.nodes.isEmpty ?? true)
+        let on = AppDelegate.main.isActive && AppDelegate.main.window?.isKeyWindow == true
+            && editor.hasFocus && isFocused && editor.blinkPhase && (root?.state.nodeSelection?.nodes.isEmpty ?? true)
 
         let layer = self.cursorLayer
 

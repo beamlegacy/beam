@@ -12,10 +12,8 @@ import BeamCore
 extension BeamTextEdit {
 
     // MARK: - Properties
-    private static let xPosInlineFormatter: CGFloat = 32
-    private static let yPosInlineFormatter: CGFloat = 28
     private static let bottomConstraint: CGFloat = -55
-    private static let inlineFormatterType: [TextFormatterType] = [.bold, .italic, .strikethrough, .underline, .internalLink, .link]
+    private static let textFormatterType: [TextFormatterType] = [.bold, .italic, .strikethrough, .underline, .internalLink, .link]
 
     private static var bottomAnchor: NSLayoutConstraint?
     private static var centerXAnchor: NSLayoutConstraint?
@@ -43,26 +41,28 @@ extension BeamTextEdit {
 
     // MARK: - UI
 
+    func initInlineTextFormatter() {
+        guard inlineFormatter == nil else { return }
+        let formatterView = TextFormatterView(key: "TextFormatter", viewType: .inline)
+        formatterView.items = BeamTextEdit.textFormatterType
+        formatterView.delegate = self
+        inlineFormatter = formatterView
+        prepareInlineFormatterWindowBeforeShowing(formatterView, atPoint: .zero)
+    }
+
     internal func initInlineFormatterView(isHyperlinkView: Bool = false) {
         guard inlineFormatter == nil else { return }
 
         if isHyperlinkView {
             initHyperlinkFormatter()
         } else {
-            let formatterView = TextFormatterView(viewType: .inline)
-            formatterView.items = BeamTextEdit.inlineFormatterType
+            let formatterView = TextFormatterView(key: "TextFormatter", viewType: .inline)
+            formatterView.items = BeamTextEdit.textFormatterType
             formatterView.delegate = self
             inlineFormatter = formatterView
         }
         guard let formatterView = inlineFormatter else { return }
-        setupInlineFormatterView(formatterView)
-    }
-
-    internal func setupInlineFormatterView(_ formatterView: FormatterView) {
-        let idealSize = formatterView.idealSize
-        formatterView.frame = NSRect(x: 0, y: 0, width: idealSize.width, height: idealSize.height)
-        addSubview(formatterView)
-        formatterView.layer?.zPosition = 10
+        prepareInlineFormatterWindowBeforeShowing(formatterView, atPoint: .zero)
     }
 
     // MARK: - Methods
@@ -80,6 +80,11 @@ extension BeamTextEdit {
         })
     }
 
+    /// This will put the formatter in a window, but you need to call showOrHideInlineFormatter to actually make it visible.
+    internal func prepareInlineFormatterWindowBeforeShowing(_ view: FormatterView, atPoint: CGPoint) {
+        CustomPopoverPresenter.shared.presentFormatterView(view, atPoint: atPoint, from: self, animated: false)
+    }
+
     internal func showOrHideInlineFormatter(isPresent: Bool, isDragged: Bool = false, completionHandler: (() -> Void)? = nil) {
         guard let formatterView = inlineFormatter else {
             completionHandler?()
@@ -87,15 +92,18 @@ extension BeamTextEdit {
         }
 
         if isPresent {
-            formatterView.animateOnAppear {
-                completionHandler?()
+            DispatchQueue.main.async {
+                formatterView.animateOnAppear {
+                    completionHandler?()
+                }
             }
         } else {
-            formatterView.animateOnDisappear {
-                formatterView.removeFromSuperview()
+            formatterView.animateOnDisappear { [weak self] in
+                (formatterView.window as? PopoverWindow)?.close()
+                self?.window?.makeKey()
                 completionHandler?()
             }
-            dismissFormatterView(formatterView, removeView: isDragged)
+            dismissFormatterView(formatterView, removeView: isDragged, animated: false)
         }
     }
 
@@ -254,14 +262,14 @@ extension BeamTextEdit {
         }
     }
 
-    internal func dismissFormatterView(_ view: FormatterView?, removeView: Bool = true) {
+    internal func dismissFormatterView(_ view: FormatterView?, removeView: Bool = false, animated: Bool = true) {
         guard view != nil else { return }
         if removeView {
-            view?.removeFromSuperview()
+            CustomPopoverPresenter.shared.dismissPopovers(key: view?.key, animated: false)
         }
         clearFormatterTypingAttributes(view)
         if view == inlineFormatter {
-            CustomPopoverPresenter.shared.dismissMenu()
+            CustomPopoverPresenter.shared.dismissPopovers()
             isInlineFormatterHidden = true
             inlineFormatter = nil
             formatterTargetRange = nil
@@ -280,37 +288,29 @@ extension BeamTextEdit {
     internal func moveInlineFormatterAtSelection(below: Bool = false) {
         guard let node = focusedWidget as? TextNode,
               let view = inlineFormatter else { return }
-        view.frame.origin = containedFormatterPosition(in: node, formatter: view, tryBelow: below)
+        let idealSize = view.idealSize
+        let origin = self.convert(containedFormatterPosition(in: node, formatter: view, below: below), to: nil)
+        let inset = CustomPopoverPresenter.windowViewPadding
+        var rect = CGRect(origin: origin, size: idealSize).insetBy(dx: -inset, dy: -inset)
+        rect.origin.y -= idealSize.height
+        view.window?.setContentSize(rect.size)
+        (view.window as? PopoverWindow)?.setOrigin(rect.origin, fromtopLeft: false)
     }
 
-    private func containedFormatterPosition(in node: TextNode, formatter: FormatterView, tryBelow: Bool) -> CGPoint {
+    private func containedFormatterPosition(in node: TextNode, formatter: FormatterView, below: Bool) -> CGPoint {
         let idealSize = formatter.idealSize
         var yPos = node.offsetInDocument.y - idealSize.height - 8
         var xPos: CGFloat = node.offsetInDocument.x
         if rootNode.state.nodeSelection == nil {
             let (xOffset, rect) = node.offsetAndFrameAt(index: node.cursorPosition)
-            let positionBelow = rect.maxY + node.offsetInDocument.y + 8
-            if tryBelow && positionBelow + idealSize.height < self.frame.height {
-                // below
-                yPos = positionBelow
-            } else {
-                // above
+            if below {
+                yPos = rect.maxY + node.offsetInDocument.y + 8
+            } else { // above
                 yPos = rect.minY + node.offsetInDocument.y - idealSize.height - 8
             }
             xPos += xOffset - (idealSize.width / 2)
-            if yPos < 0 {
-                if xPos > idealSize.width / 2 {
-                    // on the left
-                    xPos -= idealSize.width / 2 + 8
-                } else {
-                    // or on the right
-                    xPos += idealSize.width
-                }
-                yPos = max(0, rect.minY + node.offsetInDocument.y - idealSize.height / 2)
-            }
         }
         xPos = xPos.clamp(0, self.frame.width - idealSize.width)
-        yPos = yPos.clamp(0, self.frame.height - idealSize.height)
         return CGPoint(x: xPos, y: yPos)
     }
 
