@@ -99,9 +99,7 @@ extension BeamTextEdit {
         return [
             ContextMenuItem(title: "Card Reference", subtitle: "@ or [[", icon: "field-card", action: { action(.internalLink) }),
             ContextMenuItem(title: "Todo", subtitle: "-[]", icon: "editor-task", action: { action(.task) }),
-            ContextMenuItem(title: "Quote", subtitle: "\"", icon: "editor-format_quote", action: { action(.quote) }),
             ContextMenuItem(title: "Date Picker", subtitle: "", icon: "editor-calendar", action: { action(.date) }),
-            ContextMenuItem(title: "Block Reference", subtitle: "((", icon: "editor-blockref", action: { action(.blockRef) }),
             ContextMenuItem.separator(),
             ContextMenuItem(title: "Bold", subtitle: "*", action: { action(.bold) }),
             ContextMenuItem(title: "Italic", subtitle: "**", action: { action(.italic) }),
