@@ -34,6 +34,11 @@ extension PointAndShoot {
                 $1.html.count > $0.count ? $1.html : $0
             })
         }
+        func text() -> String {
+            targets.reduce("", {
+                $1.text?.count ?? 0 > $0.count ? $1.text ?? "" : $0
+            })
+        }
         private(set) var groupPath: CGPath = CGPath(rect: .zero, transform: nil)
         private(set) var groupRect: CGRect = .zero
         private let groupPadding: CGFloat = 4
