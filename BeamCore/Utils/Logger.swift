@@ -47,6 +47,7 @@ public enum LogCategory: String {
     case autocompleteManager
     case topDomain
     case browsingTreeSender
+    case notePublishing
 }
 
 public final class Logger {

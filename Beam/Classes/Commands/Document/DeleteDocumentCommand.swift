@@ -43,6 +43,7 @@ class DeleteDocument: DocumentCommand {
         } else {
             documents = documentIds.compactMap { context?.loadById(id: $0) }
             noteLinks = saveDocumentsLinks(context: context)
+            unpublishNotes(in: documents)
 
             try? context?.delete(documentIds)
             callback()
@@ -60,6 +61,13 @@ class DeleteDocument: DocumentCommand {
             self?.restoreNoteReferences(context: context)
             let done = dones.reduce(into: false) { $0 = $0 || $1 }
             completion?(done)
+        }
+    }
+
+    private func unpublishNotes(in docs: [DocumentStruct]) {
+        let toUnpublish = docs.filter({ $0.isPublic })
+        toUnpublish.forEach { doc in
+            BeamNoteSharingUtils.unpublishNote(with: doc.id, completion: { _ in })
         }
     }
 

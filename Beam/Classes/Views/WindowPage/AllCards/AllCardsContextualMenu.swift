@@ -40,15 +40,15 @@ class AllCardsContextualMenu {
             let count = selectedNotes.count
             countSuffix = count == 1 ? "" : "\(count) Cards"
 
-            if let first = selectedNotes.first, first.isPublic {
+            if let first = selectedNotes.first, first.publicationStatus.isPublic {
                 menu.addItem(NSMenuItem(
-                    title: "Make Private \(countSuffix)",
+                    title: "Unpublish \(countSuffix)",
                     action: #selector(makePrivate),
                     keyEquivalent: ""
                 ))
             } else {
                 menu.addItem(NSMenuItem(
-                    title: "Make Public \(countSuffix)",
+                    title: "Publish \(countSuffix)",
                     action: #selector(makePublic),
                     keyEquivalent: ""
                 ))
@@ -186,9 +186,8 @@ class AllCardsContextualMenu {
     private func makeNotes(isPublic: Bool) -> Promises.Promise<[Bool]> {
         let docManager = documentManager
         let promises: [Promises.Promise<Bool>] = selectedNotes.map { note in
-            note.isPublic = isPublic
             return Promises.Promise { (done, error) in
-                note.save(documentManager: docManager) { (result) in
+                BeamNoteSharingUtils.makeNotePublic(note, becomePublic: isPublic, documentManager: docManager) { result in
                     switch result {
                     case .failure(let e):
                         error(e)

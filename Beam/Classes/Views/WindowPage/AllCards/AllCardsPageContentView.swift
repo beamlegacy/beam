@@ -326,8 +326,14 @@ struct AllCardsPageContentView: View {
         }
         if row >= notesList.count {
             let newNote = state.createNoteForQuery(title)
-            newNote.isPublic = listType == .publicNotes
-            newNote.save(documentManager: data.documentManager)
+            let isPublic = listType == .publicNotes
+
+            //If we create a public note, publish it right after creation, else just save it
+            if isPublic {
+                BeamNoteSharingUtils.makeNotePublic(newNote, becomePublic: true, documentManager: data.documentManager)
+            } else {
+                newNote.save(documentManager: data.documentManager)
+            }
         } else {
             let item = notesList[row]
             let note = BeamNote.fetchOrCreate(data.documentManager, title: item.title)
@@ -364,7 +370,7 @@ private enum CellIdentifiers {
 @objcMembers
 private class NoteTableViewItem: TableViewItem {
     var id: UUID { note?.id ?? document.id }
-    var isPublic: Bool { note?.isPublic ?? document.isPublic }
+    var isPublic: Bool { note?.publicationStatus.isPublic ?? document.isPublic }
     var note: BeamNote? {
         didSet {
             words = note?.textStats.wordsCount ?? words
