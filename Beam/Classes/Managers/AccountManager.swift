@@ -11,6 +11,7 @@ class AccountManager {
     }
 
     let userSessionRequest = UserSessionRequest()
+    let userInfoRequest = UserInfoRequest()
 }
 
 // MARK: - Foundation
@@ -37,6 +38,7 @@ extension AccountManager {
                         // We sync data *after* we potentially connected to websocket, to make sure we don't miss any data
                         AppDelegate.main.beamObjectManager.liveSync { _ in
                             AppDelegate.main.syncDataWithBeamObject()
+                            AppDelegate.main.getUserInfos()
                         }
                     }
 
@@ -74,6 +76,7 @@ extension AccountManager {
                         // We sync data *after* we potentially connected to websocket, to make sure we don't miss any data
                         AppDelegate.main.beamObjectManager.liveSync { _ in
                             AppDelegate.main.syncDataWithBeamObject()
+                            AppDelegate.main.getUserInfos()
                         }
                     }
 
@@ -125,6 +128,27 @@ extension AccountManager {
             }
         } catch {
             Logger.shared.logInfo("Could not forgot password: \(error.localizedDescription)", category: .network)
+            completionHandler?(.failure(error))
+        }
+        return nil
+    }
+
+    @discardableResult
+    func getUserInfos(_ completionHandler: ((Swift.Result<UserInfoRequest.UserInfos, Error>) -> Void)? = nil) -> URLSessionTask? {
+        do {
+            return try userInfoRequest.getUserInfos { result in
+                switch result {
+                case .failure(let error):
+                    Logger.shared.logInfo("Could not get user infos: \(error.localizedDescription)", category: .network)
+                    completionHandler?(.failure(error))
+                case .success(let infos):
+                    Logger.shared.logInfo("Get user infos succeeded", category: .network)
+                    Persistence.Authentication.username = infos.username
+                    completionHandler?(.success(infos))
+                }
+            }
+        } catch {
+            Logger.shared.logInfo("Could not get user infos: \(error.localizedDescription)", category: .network)
             completionHandler?(.failure(error))
         }
         return nil

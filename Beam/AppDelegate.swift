@@ -92,6 +92,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             self.syncDataWithBeamObject()
         }
         fetchTopDomains()
+        getUserInfos()
     }
 
     // MARK: - Web sockets
