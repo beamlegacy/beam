@@ -55,7 +55,7 @@ struct PrivacyPreferencesView: View {
                 UpdateRulesSection(selectedUpdate: $selectedUpdate)
             }
 
-            Preferences.Section(bottomDivider: true) {
+            Preferences.Section(bottomDivider: false) {
             Text("Allowlist:")
                 .font(BeamFont.regular(size: 13).swiftUI)
                 .foregroundColor(BeamColor.Generic.text.swiftUI)
@@ -64,14 +64,14 @@ struct PrivacyPreferencesView: View {
                 AllowListSection(allowListIsPresented: $allowListIsPresented)
             }
 
-            Preferences.Section {
-                Text("Website Data:")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
-                    .frame(width: 250, alignment: .trailing)
-            } content: {
-                WebsiteDataSection()
-            }
+//            Preferences.Section {
+//                Text("Website Data:")
+//                    .font(BeamFont.regular(size: 13).swiftUI)
+//                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+//                    .frame(width: 250, alignment: .trailing)
+//            } content: {
+//                WebsiteDataSection()
+//            }
         }
     }
 }
