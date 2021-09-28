@@ -60,6 +60,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
+        if Configuration.env == "$(ENV)", !NSString(string: ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] ?? "0").boolValue {
+            fatalError("Please restart your build, your ENV wasn't detected properly, and this should only happens for SwiftUI Previews")
+        }
+
         setAppearance(BeamAppearance(rawValue: PreferencesManager.beamAppearancePreference))
         DistributedNotificationCenter.default.addObserver(self, selector: #selector(interfaceModeChanged(sender:)), name: NSNotification.Name(rawValue: "AppleInterfaceThemeChangedNotification"), object: nil)
 
@@ -75,11 +79,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         // So we remember we're not currently using the default api server
         if Configuration.apiHostnameDefault != Configuration.apiHostname {
-            Logger.shared.logInfo("🛑 API HOSTNAME is \(Configuration.apiHostname)", category: .general)
-        }
-
-        if Configuration.env == "$(ENV)", !NSString(string: ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] ?? "0").boolValue {
-            fatalError("Please restart your build, your ENV wasn't detected properly, and this should only happens for SwiftUI Previews")
+            Logger.shared.logWarning("API HOSTNAME is \(Configuration.apiHostname)", category: .general)
         }
 
         #if DEBUG
@@ -134,35 +134,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         let localTimer = BeamDate.now
 
-        let previousDefaultDatabase = DatabaseManager.defaultDatabase
-
         do {
             Logger.shared.logInfo("syncAllFromAPI calling", category: .beamObjectNetwork)
             try beamObjectManager.syncAllFromAPI { result in
-                Logger.shared.logInfo("syncAllFromAPI called", category: .beamObjectNetwork, localTimer: localTimer)
-                switch result {
-                case .success:
-                    DatabaseManager.changeDefaultDatabaseIfNeeded()
-                    self.databaseManager.deleteEmptyDatabases { result in
-                        switch result {
-                        case .failure(let error):
-                            Logger.shared.logError("Error deleting empty databases: \(error.localizedDescription)",
-                                                   category: .database,
-                                                   localTimer: localTimer)
-                            completionHandler?(.failure(error))
-                        case .success:
-                            if previousDefaultDatabase.id != DatabaseManager.defaultDatabase.id {
-                                Logger.shared.logWarning("Default database changed, showing alert",
-                                                         category: .database,
-                                                         localTimer: localTimer)
-                                DatabaseManager.showRestartAlert(previousDefaultDatabase,
-                                                                 DatabaseManager.defaultDatabase)
-                            }
-                            completionHandler?(.success(true))
-                        }
+                self.deleteEmptyDatabases { _ in
+                    switch result {
+                    case .success:
+                        Logger.shared.logInfo("syncAllFromAPI called", category: .beamObjectNetwork, localTimer: localTimer)
+                        DatabaseManager.changeDefaultDatabaseIfNeeded()
+                        completionHandler?(.success(true))
+                    case .failure(let error):
+                        Logger.shared.logInfo("syncAllFromAPI failed", category: .beamObjectNetwork, localTimer: localTimer)
+                        completionHandler?(.failure(error))
                     }
-                case .failure(let error):
-                    completionHandler?(.failure(error))
                 }
             }
         } catch {
@@ -170,6 +154,39 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                                    category: .document,
                                    localTimer: localTimer)
             completionHandler?(.failure(error))
+        }
+    }
+
+    private func deleteEmptyDatabases(_ completionHandler: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
+        let localTimer = BeamDate.now
+        let previousDefaultDatabase = DatabaseManager.defaultDatabase
+
+        Logger.shared.logInfo("Deleting Empty databases", category: .database)
+        self.databaseManager.deleteEmptyDatabases { result in
+            switch result {
+            case .failure(let error):
+                Logger.shared.logError("Error deleting empty databases: \(error.localizedDescription)",
+                                       category: .database,
+                                       localTimer: localTimer)
+                completionHandler?(.failure(error))
+            case .success(let success):
+                Logger.shared.logDebug("Deleted Empty databases, success: \(success)", category: .database)
+                do {
+                    if Configuration.shouldDeleteEmptyDatabase {
+                        try self.databaseManager.deleteCurrentDatabaseIfEmpty()
+                    }
+                } catch {
+                    Logger.shared.logError(error.localizedDescription, category: .database)
+                }
+                if previousDefaultDatabase.id != DatabaseManager.defaultDatabase.id {
+                    Logger.shared.logWarning("Default database changed, showing alert",
+                                             category: .database,
+                                             localTimer: localTimer)
+                    DatabaseManager.showRestartAlert(previousDefaultDatabase,
+                                                     DatabaseManager.defaultDatabase)
+                }
+                completionHandler?(.success(success))
+            }
         }
     }
 
@@ -309,6 +326,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         syncDataWithBeamObject { _ in
+            Logger.shared.logDebug("Sending toApplicationShouldTerminate true")
             DispatchQueue.main.async {
                 NSApplication.shared.reply(toApplicationShouldTerminate: true)
             }

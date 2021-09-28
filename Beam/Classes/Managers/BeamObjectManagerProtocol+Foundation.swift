@@ -2,18 +2,20 @@ import Foundation
 import BeamCore
 
 extension BeamObjectManagerDelegate {
-    func saveAllOnBeamObjectApi(_ completion: @escaping ((Result<Bool, Error>) -> Void)) throws -> APIRequest? {
+    func saveAllOnBeamObjectApi(_ completion: @escaping ((Result<(Int, Date?), Error>) -> Void)) throws -> APIRequest? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw APIRequestError.notAuthenticated
         }
 
         self.willSaveAllOnBeamObjectApi()
 
-        let toSaveObjects = try allObjects()
+        let toSaveObjects = try allObjects(updatedSince: Persistence.Sync.BeamObjects.last_updated_at)
+        let mostRecentUpdatedAt = toSaveObjects.compactMap({ $0.updatedAt }).sorted().last
+
         return try saveOnBeamObjectsAPI(toSaveObjects) { result in
             switch result {
             case .failure(let error): completion(.failure(error))
-            case .success: completion(.success(true))
+            case .success(let savedObjects): completion(.success((savedObjects.count, mostRecentUpdatedAt)))
             }
         }
     }
@@ -25,20 +27,17 @@ extension BeamObjectManagerDelegate {
             throw APIRequestError.notAuthenticated
         }
 
-        let objectsToSave = updatedObjectsOnly(objects)
-
-        guard !objectsToSave.isEmpty else {
-            completion(.success([]))
-            return nil
-        }
+        let beamObjectTypes = Set(objects.map { type(of: $0).beamObjectTypeName }).joined(separator: ", ")
+        Logger.shared.logDebug("saveOnBeamObjectsAPI called with \(objects.count) objects of type \(beamObjectTypes) on API",
+                               category: .beamObjectNetwork)
 
         let objectManager = BeamObjectManager()
         objectManager.conflictPolicyForSave = Self.conflictPolicy
 
-        return try objectManager.saveToAPI(objectsToSave) { result in
+        return try objectManager.saveToAPI(objects) { result in
             switch result {
             case .failure(let error):
-                Logger.shared.logError("Could not save all \(objectsToSave.count) \(BeamObjectType.beamObjectTypeName) objects: \(error.localizedDescription)",
+                Logger.shared.logError("Could not save all \(objects.count) \(BeamObjectType.beamObjectTypeName) objects: \(error.localizedDescription)",
                                        category: .beamObjectNetwork)
 
                 if case BeamObjectManagerObjectError<BeamObjectType>.invalidChecksum = error {
@@ -52,11 +51,13 @@ extension BeamObjectManagerDelegate {
                     return
                 }
 
-                self.manageMultipleErrors(objectsToSave, errors, completion)
+                self.manageMultipleErrors(objects, errors, completion)
 
             case .success(let remoteObjects):
                 do {
                     try self.persistChecksum(remoteObjects)
+                    self.checkPreviousChecksums(remoteObjects)
+
                     completion(.success(remoteObjects))
                 } catch {
                     completion(.failure(error))
@@ -230,6 +231,8 @@ extension BeamObjectManagerDelegate {
 
                         do {
                             try self.persistChecksum([newObject])
+                            self.checkPreviousChecksums([newObject])
+
                             completion(.success(newObject))
                         } catch {
                             completion(.failure(error))
@@ -239,6 +242,8 @@ extension BeamObjectManagerDelegate {
             case .success(let remoteObject):
                 do {
                     try self.persistChecksum([remoteObject])
+                    self.checkPreviousChecksums([remoteObject])
+
                     completion(.success(remoteObject))
                 } catch {
                     completion(.failure(error))
@@ -283,6 +288,7 @@ extension BeamObjectManagerDelegate {
                 case .failure(let error):
                     if !goodObjects.isEmpty {
                         try? self.persistChecksum(goodObjects)
+                        self.checkPreviousChecksums(goodObjects)
                     }
                     completion(.failure(error))
                 case .success(let remoteObjects):

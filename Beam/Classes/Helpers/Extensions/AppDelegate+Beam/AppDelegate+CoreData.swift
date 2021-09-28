@@ -34,7 +34,7 @@ extension AppDelegate {
                             alert.informativeText = error.localizedDescription
                             alert.alertStyle = .critical
                         case .success:
-                            alert.messageText = "All documents and databases deleted"
+                            alert.messageText = "All documents and databases deleted, please restart."
                             alert.alertStyle = .informational
                         }
 

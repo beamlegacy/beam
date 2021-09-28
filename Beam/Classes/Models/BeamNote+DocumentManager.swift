@@ -15,7 +15,7 @@ extension BeamNote: BeamNoteDocument {
             let encoder = JSONEncoder()
             // Will make conflict and merge easier to know what lines conflicted instead
             // of having all content on a single line to save space
-            encoder.outputFormatting = .prettyPrinted
+            encoder.outputFormatting = [.prettyPrinted, .withoutEscapingSlashes]
             let data = try encoder.encode(self)
 
             if databaseId == nil {
@@ -224,7 +224,6 @@ extension BeamNote: BeamNoteDocument {
                             // We delete the passed documentStruct as it conflicts with existing
                             documentManager.delete(id: documentStruct.id) { _ in
                                 DispatchQueue.main.sync {
-
                                     self.updateWithDocumentStruct(existingDocument)
                                     self.savedVersion = existingDocument.version
                                 }
@@ -251,6 +250,9 @@ extension BeamNote: BeamNoteDocument {
                                                    category: .document)
                             dump(documentStruct)
                         }
+
+                        completion?(.failure(error))
+                        return
                     default:
                         Logger.shared.logError("Error saving: \(error.localizedDescription)",
                                                category: .document)

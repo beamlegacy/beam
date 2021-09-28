@@ -64,7 +64,7 @@ class APIRequest: NSObject {
         let queryStruct = loadQuery(bodyParamsRequest)
 
         let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
+        encoder.dateEncodingStrategy = .iso8601withFractionalSeconds
 
         if let queryData = try? encoder.encode(queryStruct) {
             #if DEBUG_API_1
@@ -177,14 +177,7 @@ class APIRequest: NSObject {
         } else if let errors = result.data?.errors, !errors.isEmpty {
             error = APIRequestError.apiError(extractUserErrorMessages(errors))
         } else if let errors = result.data?.value?.errors, !errors.isEmpty {
-            // Sync issue sending an updated version of our document,
-            // server denied updating it as checksum sent is different
-            // from checksum on the server
-            if errors.count == 1, errors[0].message == "Differs from current checksum" {
-                error = APIRequestError.documentConflict
-            } else {
-                error = APIRequestError.apiError(extractUserErrorMessages(errors))
-            }
+            error = APIRequestError.apiError(extractUserErrorMessages(errors))
         } else {
             error = APIRequestError.parserError
         }
@@ -198,17 +191,8 @@ class APIRequest: NSObject {
         let error: Error
 
         guard let errors = result.errors, !errors.isEmpty else { return nil }
-        if errors.count == 1,
-           errors[0].message == "Differs from current checksum",
-           errors[0].path == ["attributes", "previous_checksum"] {
-
-            if (result as? BeamObjectRequest.UpdateBeamObject) != nil {
-                error = APIRequestError.beamObjectInvalidChecksum(result)
-            } else if (result as? BeamObjectRequest.UpdateBeamObjects) != nil {
-                error = APIRequestError.beamObjectInvalidChecksum(result)
-            } else {
-                error = APIRequestError.documentConflict
-            }
+        if errors.count == 1, errors[0].isErrorInvalidChecksum {
+            error = APIRequestError.beamObjectInvalidChecksum(result)
         } else if errors.count == 1,
                   errors[0].path == ["attributes", "title"],
                   errors[0].message == "Title has already been taken" {
@@ -247,7 +231,7 @@ class APIRequest: NSObject {
 
     func defaultDecoder() -> JSONDecoder {
         let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
+        decoder.dateDecodingStrategy = .iso8601withFractionalSeconds
         return decoder
     }
 
@@ -400,7 +384,7 @@ extension APIRequest {
         let text = "[\(callsCount)] [\(Self.uploadedBytes.byteSize)/\(Self.downloadedBytes.byteSize)] [\(bytesSent.byteSize)/\(bytesReceived.byteSize)] [\(authenticated ? "authenticated" : "anonymous")] \(diff)sec \(httpResponse.statusCode) \(filename)"
 
         if diffTime > 1.0 {
-            Logger.shared.logError(text, category: .network)
+            Logger.shared.logDebug("🐢🐢🐢 \(text)", category: .network)
         } else {
             Logger.shared.logDebug(text, category: .network)
         }

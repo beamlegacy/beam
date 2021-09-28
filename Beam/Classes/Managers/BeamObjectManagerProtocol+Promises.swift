@@ -3,7 +3,7 @@ import Promises
 import BeamCore
 
 extension BeamObjectManagerDelegate {
-    func saveAllOnBeamObjectApi() -> Promise<Bool> {
+    func saveAllOnBeamObjectApi() -> Promise<[BeamObjectType]> {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             return Promise(APIRequestError.notAuthenticated)
         }
@@ -11,15 +11,12 @@ extension BeamObjectManagerDelegate {
         self.willSaveAllOnBeamObjectApi()
         var objects: [BeamObjectType]
         do {
-            objects = try allObjects()
+            objects = try allObjects(updatedSince: Persistence.Sync.BeamObjects.last_updated_at)
         } catch {
             return Promise(error)
         }
 
-        let backgroundQueue = DispatchQueue.global(qos: .userInitiated)
-        return saveOnBeamObjectsAPI(objects).then(on: backgroundQueue) { _ in
-            true
-        }
+        return saveOnBeamObjectsAPI(objects)
     }
 
     func saveOnBeamObjectsAPI(_ objects: [BeamObjectType]) -> Promise<[BeamObjectType]> {
@@ -27,23 +24,17 @@ extension BeamObjectManagerDelegate {
             return Promise(APIRequestError.notAuthenticated)
         }
 
-        let objectsToSave = updatedObjectsOnly(objects)
-
-        guard !objectsToSave.isEmpty else {
-            return Promise([])
-        }
-
         let objectManager = BeamObjectManager()
         objectManager.conflictPolicyForSave = Self.conflictPolicy
 
-        let promise: Promise<[BeamObjectType]> = objectManager.saveToAPI(objectsToSave)
+        let promise: Promise<[BeamObjectType]> = objectManager.saveToAPI(objects)
         let backgroundQueue = DispatchQueue.global(qos: .userInitiated)
 
         return promise.then(on: backgroundQueue) { remoteObjects -> Promise<[BeamObjectType]> in
             try self.persistChecksum(remoteObjects)
             return Promise(remoteObjects)
         }.recover(on: backgroundQueue) { error -> Promise<[BeamObjectType]> in
-            Logger.shared.logError("Could not save all \(objectsToSave.count) \(BeamObjectType.beamObjectTypeName) objects: \(error.localizedDescription)",
+            Logger.shared.logError("Could not save all \(objects.count) \(BeamObjectType.beamObjectTypeName) objects: \(error.localizedDescription)",
                                    category: .beamObjectNetwork)
 
             if case BeamObjectManagerObjectError<BeamObjectType>.invalidChecksum = error {
@@ -55,7 +46,7 @@ extension BeamObjectManagerDelegate {
                 throw error
             }
 
-            return self.manageMultipleErrors(objectsToSave, errors)
+            return self.manageMultipleErrors(objects, errors)
         }
     }
 

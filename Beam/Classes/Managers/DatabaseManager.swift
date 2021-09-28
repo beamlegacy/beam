@@ -166,12 +166,12 @@ class DatabaseManager {
             }
 
             for database in conflictingDatabases {
-                Logger.shared.logError("Conflicting \(database.id), title: \(database.title), database: \(database)",
+                Logger.shared.logError("Conflicting \(database.titleAndId), database: \(database)",
                                        category: .coredata)
             }
 
             if let database = conflict.databaseObject as? Database {
-                Logger.shared.logError("Existing database \(database.id), title: \(database.title), database: \(database)",
+                Logger.shared.logError("Existing database \(database.titleAndId), database: \(database)",
                                        category: .coredata)
             }
         }
@@ -189,13 +189,12 @@ class DatabaseManager {
     }
 
     func checkValidations(_ context: NSManagedObjectContext, _ database: Database) throws {
+        guard database.deleted_at == nil else { return }
+
         try checkDuplicateTitles(context, database)
     }
 
     private func checkDuplicateTitles(_ context: NSManagedObjectContext, _ database: Database) throws {
-        // If database is deleted, we don't need to check title uniqueness
-        guard database.deleted_at == nil else { return }
-
         let predicate = NSPredicate(format: "title = %@ AND id != %@", database.title, database.id as CVarArg)
 
         if Database.countWithPredicate(context, predicate) > 0 {
@@ -343,7 +342,7 @@ class DatabaseManager {
     // TODO: we should add a `automaticCreated` in `Database` to know when we created one automatically at start, so a
     // user creating one manually with `Default` as title won't match this
     private static func isDefaultDatabaseAutomaticallyCreated() -> Bool {
-        DatabaseManager.defaultDatabase.title == "Default"
+        DatabaseManager.defaultDatabase.title.prefix(7) == "Default"
     }
 
     /// Is database completly empty, without any documents
@@ -351,7 +350,10 @@ class DatabaseManager {
         context.performAndWait {
             do {
                 for document in try Document.fetchAll(context, nil, nil, databaseId) {
-                    guard DocumentStruct(document: document).isEmpty else { return false }
+                    guard DocumentStruct(document: document).isEmpty else {
+                        Logger.shared.logDebug("document \(document.titleAndId) is not empty", category: .databaseDebug)
+                        return false
+                    }
                 }
             } catch { return false }
 
@@ -368,15 +370,26 @@ class DatabaseManager {
             let predicate = NSPredicate(format: "id != %@", DatabaseManager.defaultDatabase.id as CVarArg)
             guard let databases = try? Database.fetchAll(context, predicate) else { return }
 
+            Logger.shared.logDebug("Databases found: \(databases)", category: .database)
             let group = DispatchGroup()
             var errors: [Error] = []
 
             for database in databases {
+                Logger.shared.logDebug("Looking at \(database.titleAndId)", category: .databaseDebug)
+
                 // Only automatically created DB should be deleted.
                 // TODO: we should add a `automaticCreated` in `Database` instead of checking for title
-                if onlyAutomaticCreated, database.title.prefix(7) != "Default" { continue }
+                if onlyAutomaticCreated, database.title.prefix(7) != "Default" {
+                    Logger.shared.logDebug("Not automatic DB, skip", category: .databaseDebug)
+                    continue
+                }
 
-                guard Self.isDatabaseEmpty(context, database.id) else { continue }
+                guard Self.isDatabaseEmpty(context, database.id) else {
+                    Logger.shared.logDebug("Not empty DB, skip", category: .databaseDebug)
+                    continue
+                }
+
+                Logger.shared.logDebug("Deleting", category: .databaseDebug)
 
                 group.enter()
                 self.delete(DatabaseStruct(database: database)) { result in
@@ -388,11 +401,71 @@ class DatabaseManager {
             group.wait()
 
             guard errors.isEmpty else {
-                completion(.failure(DatabaseManagerError.multipleErrors(errors)))
+                let error = DatabaseManagerError.multipleErrors(errors)
+                Logger.shared.logDebug(error.localizedDescription, category: .databaseDebug)
+                completion(.failure(error))
                 return
             }
 
             completion(.success(true))
         }
+    }
+
+    /// Special case when the defaultDatabase is empty, was probably recently created during Beam app start,
+    /// and should be deleted first to not conflict with one we're receiving now from the API sync with the same title
+    @discardableResult
+    // swiftlint:disable:next cyclomatic_complexity
+    func deleteCurrentDatabaseIfEmpty() throws -> Bool {
+        // Don't delete if the database was manually set
+        guard Persistence.Database.currentDatabaseId == nil else { return false }
+
+        guard Self.isDefaultDatabaseAutomaticallyCreated() else { return false }
+
+        let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
+        var deleted = false
+
+        try context.performAndWait {
+            guard let databases = try? Database.fetchAll(context) else { return }
+            guard databases.count > 1 else { return }
+
+            // TODO: should memoize `Self.defaultDatabase.id` or have a version without CD call
+            let defaultDatabase = Self.defaultDatabase
+            let defaultDatabaseId = defaultDatabase.id
+
+            let databasesWithoutDefault = databases.map { $0.id }.filter { $0 != defaultDatabaseId }
+            guard !databasesWithoutDefault.isEmpty else { return }
+
+            guard Self.isDatabaseEmpty(context, defaultDatabaseId) else {
+                Logger.shared.logWarning("Default Database: \(Self.defaultDatabase.titleAndId) is NOT empty, not deleting",
+                                         category: .databaseDebug)
+                return
+            }
+
+            guard defaultDatabase.title.prefix(7) == "Default" else { return }
+
+            deleted = true
+            Logger.shared.logWarning("Default Database: \(Self.defaultDatabase.titleAndId) is empty, deleting now",
+                                     category: .database)
+
+            let semaphore = DispatchSemaphore(value: 0)
+            var error: Error?
+
+            delete(defaultDatabase) { result in
+                switch result {
+                case .failure(let deleteError): error = deleteError
+                case .success: break
+                }
+                semaphore.signal()
+            }
+
+            let semaphoreResult = semaphore.wait(timeout: DispatchTime.now() + .seconds(30))
+            if case .timedOut = semaphoreResult {
+                throw DatabaseManagerError.networkTimeout
+            }
+
+            if let error = error { throw error }
+        }
+
+        return deleted
     }
 }

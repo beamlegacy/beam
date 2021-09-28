@@ -17,7 +17,13 @@ extension DatabaseManager: BeamObjectManagerDelegate {
 
                 localDatabase.update(updateObject)
                 localDatabase.beam_object_previous_checksum = updateObject.checksum
-                try checkValidations(context, localDatabase)
+                do {
+                    try checkValidations(context, localDatabase)
+                } catch {
+                    Logger.shared.logError("saveObjectsAfterConflict checkValidations: \(error.localizedDescription)",
+                                           category: .database)
+                    localDatabase.deleted_at = BeamDate.now
+                }
             }
             try Self.saveContext(context: context)
         }
@@ -30,15 +36,8 @@ extension DatabaseManager: BeamObjectManagerDelegate {
 
     //swiftlint:disable:next function_body_length
     func receivedObjects(_ databases: [DatabaseStruct]) throws {
-        Logger.shared.logDebug("Received \(databases.count) databases",
-                               category: .databaseNetwork)
         let context = coreDataManager.backgroundContext
-        let localTimer = BeamDate.now
         var changedDatabases: [DatabaseStruct] = []
-
-        if Configuration.shouldDeleteEmptyDatabase {
-            try deleteCurrentDatabaseIfEmpty(databases, context)
-        }
 
         try context.performAndWait {
             var changed = false
@@ -47,8 +46,6 @@ extension DatabaseManager: BeamObjectManagerDelegate {
                 let localDatabase = Database.fetchOrCreateWithId(context, database.id)
 
                 if self.isEqual(localDatabase, to: database) {
-                    Logger.shared.logDebug("\(database.titleAndId): remote is equal to struct version, skip",
-                                           category: .databaseNetwork)
                     continue
                 }
 
@@ -65,6 +62,8 @@ extension DatabaseManager: BeamObjectManagerDelegate {
 
                         good = true
                     } catch {
+                        // I don't need to flag this object `deleted` like I do for DocumentStruct because
+                        // Database `checkValidations` only has title checks. In such case, changing the title.
                         database.title = "\(originalTitle) (\(index))"
                         Logger.shared.logWarning("Validation issue, new title is \(database.title)",
                                                  category: .databaseNetwork)
@@ -98,55 +97,24 @@ extension DatabaseManager: BeamObjectManagerDelegate {
             }
         }
 
-        Logger.shared.logDebug("Received \(databases.count) databases: done. \(changedDatabases.count) remodified",
-                               category: .databaseNetwork,
-                               localTimer: localTimer)
+        if !changedDatabases.isEmpty {
+            Logger.shared.logDebug("Received \(databases.count) databases: \(changedDatabases.count) remodified",
+                                   category: .databaseNetwork)
+        }
     }
 
-    /// Special case when the defaultDatabase is empty, was probably recently created during Beam app start,
-    /// and should be deleted first to not conflict with one we're receiving now from the API sync with the same title
-    private func deleteCurrentDatabaseIfEmpty(_ databases: [DatabaseStruct], _ context: NSManagedObjectContext) throws {
-        // Don't delete if the database was manually set
-        guard Persistence.Database.currentDatabaseId == nil else { return }
-
-        // TODO: should memoize `Self.defaultDatabase.id` or have a version without CD call
-        let defaultDatabase = Self.defaultDatabase
-        let defaultDatabaseId = defaultDatabase.id
-
-        let databasesWithoutDefault = databases.map { $0.id }.filter { $0 != defaultDatabaseId }
-        guard !databasesWithoutDefault.isEmpty else { return }
-
-        guard Self.isDatabaseEmpty(context, defaultDatabaseId) else { return }
-
-        Logger.shared.logWarning("Default Database: \(Self.defaultDatabase.titleAndId) is empty, deleting now",
-                                 category: .database)
-
-        let semaphore = DispatchSemaphore(value: 0)
-        var error: Error?
-
-        delete(defaultDatabase) { result in
-            switch result {
-            case .failure(let deleteError): error = deleteError
-            case .success: break
-            }
-            semaphore.signal()
-        }
-
-        let semaphoreResult = semaphore.wait(timeout: DispatchTime.now() + .seconds(30))
-        if case .timedOut = semaphoreResult {
-            throw DatabaseManagerError.networkTimeout
-        }
-
-        if let error = error { throw error }
-    }
-
-    func allObjects() throws -> [DatabaseStruct] {
+    func allObjects(updatedSince: Date?) throws -> [DatabaseStruct] {
         let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
 
         // Note: when this becomes a memory hog because we manipulate all local databases, we'll want to loop through
         // them by 100s and make multiple network calls instead.
         return try context.performAndWait {
-            try Database.rawFetchAll(context).map {
+            var predicate: NSPredicate?
+            if let updatedSince = updatedSince {
+                predicate = NSPredicate(format: "updated_at >= %@", updatedSince as CVarArg)
+            }
+
+            return try Database.rawFetchAll(context, predicate).map {
                 var result = DatabaseStruct(database: $0)
                 result.previousChecksum = result.beamObjectPreviousChecksum
                 return result
