@@ -187,7 +187,7 @@ extension BeamObjectManager {
             try BeamObject($0, T.beamObjectTypeName)
         }
 
-        let objectsToSave = updatedObjectsOnly(beamObjects)
+        let objectsToSave = Persistence.Sync.BeamObjects.last_updated_at == nil ? beamObjects : updatedObjectsOnly(beamObjects)
 
         guard !objectsToSave.isEmpty else {
             Logger.shared.logDebug("Not saving objects on API, list is empty after checksum check",
