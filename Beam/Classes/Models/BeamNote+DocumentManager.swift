@@ -32,7 +32,7 @@ extension BeamNote: BeamNoteDocument {
                                   data: data,
                                   documentType: type.isJournal ? .journal : .note,
                                   version: version,
-                                  isPublic: isPublic,
+                                  isPublic: publicationStatus.isPublic,
                                   journalDate: type.journalDateString)
         } catch {
             Logger.shared.logError("Unable to encode BeamNote into DocumentStruct [\(title) {\(id)}]", category: .document)
@@ -107,7 +107,6 @@ extension BeamNote: BeamNoteDocument {
 
         self.version = docStruct.version
         self.databaseId = docStruct.databaseId
-        self.isPublic = docStruct.isPublic
         self.deleted = docStruct.deletedAt != nil
 
         self.savedVersion = self.version
@@ -286,7 +285,6 @@ extension BeamNote: BeamNoteDocument {
         note.databaseId = documentStruct.databaseId
         note.savedVersion = note.version
         note.updateDate = documentStruct.updatedAt
-        note.isPublic = documentStruct.isPublic
         note.deleted = documentStruct.deletedAt != nil
         if keepInMemory {
             appendToFetchedNotes(note)
@@ -306,7 +304,6 @@ extension BeamNote: BeamNoteDocument {
             note.databaseId = documentStruct.databaseId
             note.savedVersion = note.version
             note.updateDate = documentStruct.updatedAt
-            note.isPublic = documentStruct.isPublic
             note.deleted = documentStruct.deletedAt != nil
 
             return note

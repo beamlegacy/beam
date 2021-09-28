@@ -10,6 +10,10 @@ enum Persistence {
         @KeychainStorable("authentication.userId") static var userId: String?
         @KeychainStorable("authentication.email") static var email: String?
         @KeychainStorable("authentication.password") static var password: String?
+
+        //For now, we just store the username in-memory.
+        //This have to change when we can have a better sync of it, to ensure it's always in sync with the backend
+        static var username: String?
     }
 
     enum Development {

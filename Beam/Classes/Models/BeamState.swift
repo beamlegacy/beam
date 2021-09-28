@@ -60,6 +60,10 @@ import BeamCore
             browserTabsManager.updateTabsForStateModeChange(mode, previousMode: oldValue)
             updateCanGoBackForward()
             focusOmniBox = false
+
+            if let leavingNote = currentNote, leavingNote.publicationStatus.isPublic, leavingNote.shouldUpdatePublishedVersion {
+                BeamNoteSharingUtils.makeNotePublic(leavingNote, becomePublic: true, documentManager: data.documentManager)
+            }
         }
     }
 

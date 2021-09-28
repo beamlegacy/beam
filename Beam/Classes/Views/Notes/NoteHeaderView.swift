@@ -188,10 +188,10 @@ extension NoteHeaderView {
             self.state = state
             self.documentManager = documentManager
             self.titleText = note.title
-            self.publishState = note.isPublic ? .isPublic : .isPrivate
-            self.noteObserver = note.$isPublic.dropFirst().removeDuplicates().sink { [weak self] newValue in
+            self.publishState = note.publicationStatus.isPublic ? .isPublic : .isPrivate
+            self.noteObserver = note.$publicationStatus.dropFirst().removeDuplicates().sink { [weak self] newValue in
                 guard self?.publishState == .isPublic || self?.publishState == .isPrivate else { return }
-                self?.publishState = newValue ? .isPublic : .isPrivate
+                self?.publishState = newValue.isPublic ? .isPublic : .isPrivate
             }
         }
 
@@ -250,8 +250,7 @@ extension NoteHeaderView {
 
         // MARK: Link
         fileprivate func copyLink(source: NoteHeaderView.CopyLinkSource) {
-            let sharingUtils = BeamNoteSharingUtils(note: note)
-            sharingUtils.copyLinkToClipboard { [weak self] _ in
+            BeamNoteSharingUtils.copyLinkToClipboard(for: note) { [weak self] _ in
                 self?.justCopiedLinkFrom = source
                 self?.copyLinkDispatchItem?.cancel()
                 let workItem = DispatchWorkItem { [weak self] in
@@ -267,21 +266,20 @@ extension NoteHeaderView {
         /// returns true if user is allowed to perform the action
         func togglePublish() -> Bool {
             guard ![.publishing, .unpublishing].contains(publishState) else { return true }
-            let sharingUtils = BeamNoteSharingUtils(note: note)
-            let isPublic = note.isPublic
-            guard isPublic || sharingUtils.canMakePublic else {
+            let isPublic = note.publicationStatus.isPublic
+
+            guard isPublic || BeamNoteSharingUtils.canMakePublic else {
                 return false
             }
             if !isPublic {
                 publishState = .publishing
-                sharingUtils.makeNotePublic(true, documentManager: documentManager) { [weak self] _ in
+                BeamNoteSharingUtils.makeNotePublic(note, becomePublic: true, documentManager: documentManager) { [weak self] _ in
                     DispatchQueue.main.async {
                         self?.noteBecamePublic(true)
                         self?.copyLink(source: .fromPublishButton)
                     }
                 }
             } else {
-                publishState = .unpublishing
                 promptConfirmUnpublish()
             }
             return true
@@ -312,11 +310,12 @@ extension NoteHeaderView {
             alert.beginSheetModal(for: window) { [weak self] response in
                 guard let self = self else { return }
                 guard response == .alertFirstButtonReturn else {
-                    self.publishState = self.note.isPublic == true ? .isPublic : .isPrivate
+                    self.publishState = self.note.publicationStatus.isPublic == true ? .isPublic : .isPrivate
                     return
                 }
-                BeamNoteSharingUtils(note: self.note).makeNotePublic(false, documentManager: self.documentManager) { [weak self] _ in
+                BeamNoteSharingUtils.makeNotePublic(self.note, becomePublic: false, documentManager: self.documentManager) { [weak self] _ in
                     DispatchQueue.main.async {
+                        self?.publishState = .unpublishing
                         self?.noteBecamePublic(false)
                     }
                 }

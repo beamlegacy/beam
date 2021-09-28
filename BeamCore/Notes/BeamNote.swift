@@ -38,11 +38,65 @@ public struct BeamNoteReference: Codable, Equatable, Hashable {
     }
 }
 
+public enum PublicationStatus: Codable, Equatable {
+    case unpublished
+    case published(URL, Date)
+
+    public var isPublic: Bool {
+        switch self {
+        case .published(_, _):
+            return true
+        default:
+            return false
+        }
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        switch self {
+        case .unpublished:
+            try container.encode(PublicationState.unpublished, forKey: .status)
+        case .published(let publicationURL, let publicationDate):
+            try container.encode(PublicationState.published, forKey: .status)
+            try container.encode(publicationURL, forKey: .publicationUrl)
+            try container.encode(publicationDate, forKey: .publicationDate)
+        }
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let status = try container.decode(PublicationState.self, forKey: .status)
+
+        switch status {
+        case .unpublished:
+            self = .unpublished
+        case .published:
+            let publicationDate = try container.decode(Date.self, forKey: .publicationDate)
+            let publicationURL = try container.decode(URL.self, forKey: .publicationUrl)
+            self = .published(publicationURL, publicationDate)
+        }
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case status
+        case publicationUrl
+        case publicationDate
+    }
+
+    private enum PublicationState: String, Codable {
+        case unpublished
+        case published
+    }
+}
+
 // Document:
 public class BeamNote: BeamElement {
     @Published public var title: String { didSet { change(.text) } }
     @Published public var type: BeamNoteType = .note { didSet { change(.meta) } }
-    @Published public var isPublic: Bool = false
+
+    @Published public var publicationStatus: PublicationStatus = .unpublished { didSet { change(.meta) } }
+    public var ongoingPublicationOperation = false
 
     @Published public var searchQueries: [String] = [] { didSet { change(.meta) } } ///< Search queries whose results were used to populate this note
     @Published public var visitedSearchResults: [VisitedPage] = [] { didSet { change(.meta) } } ///< URLs whose content were used to create this note
@@ -87,6 +141,7 @@ public class BeamNote: BeamElement {
         case visitedSearchResults
         case browsingSessions
         case sources
+        case publicationStatus
     }
 
     public required init(from decoder: Decoder) throws {
@@ -100,6 +155,11 @@ public class BeamNote: BeamElement {
         if container.contains(.browsingSessions) {
             browsingSessions = try container.decode([BrowsingTree].self, forKey: .browsingSessions)
         }
+
+        if container.contains(.publicationStatus) {
+            publicationStatus = try container.decode(PublicationStatus.self, forKey: .publicationStatus)
+        }
+
         try super.init(from: decoder)
         if container.contains(.sources) {
             sources = try container.decode(NoteSources.self, forKey: .sources)
@@ -134,6 +194,8 @@ public class BeamNote: BeamElement {
             try container.encode(browsingSessions, forKey: .browsingSessions)
         }
         try container.encode(sources, forKey: .sources)
+        try container.encode(publicationStatus, forKey: .publicationStatus)
+
         try super.encode(to: encoder)
     }
 
@@ -149,7 +211,7 @@ public class BeamNote: BeamElement {
         newNote.type = type
         newNote.version = version
         newNote.savedVersion = savedVersion
-        newNote.isPublic = isPublic
+        newNote.publicationStatus = publicationStatus
 
         return newNote
     }
@@ -323,6 +385,12 @@ public class BeamNote: BeamElement {
         sourceObserver = sources.$changed
             .dropFirst(1)
             .sink { [weak self] _ in self?.change(.meta) }
+    }
+
+    public var shouldUpdatePublishedVersion: Bool {
+        guard case .published(_, let publicationDate) = publicationStatus else { return false }
+        let timeInterval = self.updateDate.timeIntervalSince(publicationDate)
+        return timeInterval > 2
     }
 }
 
