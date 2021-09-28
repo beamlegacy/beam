@@ -763,10 +763,10 @@ class DocumentManagerNetworkTests: QuickSpec {
                             do {
                                 _ = try sut.saveAllOnBeamObjectApi { result in
                                     expect { try result.get() }.toNot(throwError())
-                                    expect { try result.get() } == true
 
                                     do {
-                                        _ = try result.get()
+                                        let result = try result.get()
+                                        expect(result.0) == 2
                                     } catch {
                                         fail(error.localizedDescription)
                                     }
@@ -786,11 +786,11 @@ class DocumentManagerNetworkTests: QuickSpec {
                 }
                 context("PromiseKit") {
                     it("saves as beamObjects") {
-                        let promise: PromiseKit.Promise<Bool> = sut.saveAllOnBeamObjectApi()
+                        let promise: PromiseKit.Promise<[DocumentStruct]> = sut.saveAllOnBeamObjectApi()
                         
                         waitUntil(timeout: .seconds(10)) { done in
-                            promise.done { success in
-                                expect(success) == true
+                            promise.done { documents in
+                                expect(documents).to(haveCount(2))
                                 done()
                             }.catch { fail("Should not be called: \($0)"); done() }
                         }
@@ -804,11 +804,11 @@ class DocumentManagerNetworkTests: QuickSpec {
                 }
                 context("Promises") {
                     it("saves as beamObjects") {
-                        let promise: Promises.Promise<Bool> = sut.saveAllOnBeamObjectApi()
+                        let promise: Promises.Promise<[DocumentStruct]> = sut.saveAllOnBeamObjectApi()
                         
                         waitUntil(timeout: .seconds(10)) { done in
-                            promise.then { success in
-                                expect(success) == true
+                            promise.then { documents in
+                                expect(documents).to(haveCount(2))
                                 done()
                             }.catch { fail("Should not be called: \($0)"); done() }
                         }

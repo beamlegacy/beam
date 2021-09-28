@@ -1,6 +1,7 @@
 import Foundation
 
 enum BeamObjectManagerError: Error {
+    case parsingError(String)
     case notAuthenticated
     case multipleErrors([Error])
     case invalidChecksum(BeamObject)
@@ -13,6 +14,8 @@ enum BeamObjectManagerError: Error {
 extension BeamObjectManagerError: LocalizedError {
     public var errorDescription: String? {
         switch self {
+        case .parsingError(let message):
+            return message
         case .notAuthenticated:
             return "Not Authenticated"
         case .multipleErrors(let errors):
@@ -39,7 +42,25 @@ extension BeamObjectManagerObjectError: LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .invalidChecksum(let conflictedObjects, let goodObjects, let remoteObjects):
-            return "Invalid Checksums: \(conflictedObjects.map { $0.beamObjectId }), good objects: \(goodObjects.map { $0.beamObjectId }), remote objects: \(remoteObjects.map { $0.beamObjectId })"
+            var conflictedObjectIds = conflictedObjects.map { $0.beamObjectId.uuidString }
+            if conflictedObjectIds.count > 10 {
+                conflictedObjectIds = Array(conflictedObjectIds[0...10])
+                conflictedObjectIds.append("...")
+            }
+
+            var goodObjectsIds = goodObjects.map { $0.beamObjectId.uuidString }
+            if goodObjectsIds.count > 10 {
+                goodObjectsIds = Array(goodObjectsIds[0...10])
+                goodObjectsIds.append("...")
+            }
+
+            var remoteObjectsIds = remoteObjects.map { $0.beamObjectId.uuidString }
+            if remoteObjectsIds.count > 10 {
+                remoteObjectsIds = Array(remoteObjectsIds[0...10])
+                remoteObjectsIds.append("...")
+            }
+
+            return "Invalid Checksums: \(conflictedObjects.count) \(conflictedObjectIds), \(goodObjects.count) good objects: \(goodObjectsIds), \(remoteObjects.count) remote objects: \(remoteObjectsIds)"
         }
     }
 }

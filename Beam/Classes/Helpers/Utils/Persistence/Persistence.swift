@@ -45,11 +45,13 @@ enum Persistence {
     enum Sync {
         enum BeamObjects {
             @StandardStorable("sync.beam_objects.last_received_at") static var last_received_at: Date?
+            @StandardStorable("sync.beam_objects.last_updated_at") static var last_updated_at: Date?
         }
 
         /// Clean all stored informations on logout
         static func cleanUp() {
             Persistence.Sync.BeamObjects.last_received_at = nil
+            Persistence.Sync.BeamObjects.last_updated_at = nil
         }
     }
 

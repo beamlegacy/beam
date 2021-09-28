@@ -35,7 +35,7 @@ extension MyRemoteObjectManager: BeamObjectManagerDelegate {
         Self.receivedMyRemoteObjects.append(contentsOf: objects)
     }
 
-    func allObjects() throws -> [MyRemoteObject] {
+    func allObjects(updatedSince: Date?) throws -> [MyRemoteObject] {
         Array(Self.store.values)
     }
 

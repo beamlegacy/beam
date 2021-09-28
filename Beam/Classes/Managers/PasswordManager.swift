@@ -187,15 +187,11 @@ extension PasswordManager: BeamObjectManagerDelegate {
     }
 
     func receivedObjects(_ passwords: [PasswordRecord]) throws {
-        Logger.shared.logDebug("Received \(passwords.count) passwords: updating",
-                               category: .passwordNetwork)
-
         try self.passwordsDB.save(passwords: passwords)
     }
 
-    func allObjects() throws -> [PasswordRecord] {
-        let passwords = try self.passwordsDB.allRecords()
-        return passwords
+    func allObjects(updatedSince: Date?) throws -> [PasswordRecord] {
+        try self.passwordsDB.allRecords(updatedSince)
     }
 
     func saveAllOnNetwork(_ passwords: [PasswordRecord], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
@@ -229,7 +225,7 @@ extension PasswordManager: BeamObjectManagerDelegate {
     }
 
     func persistChecksum(_ objects: [PasswordRecord]) throws {
-        Logger.shared.logDebug("Saved \(objects.count) passwords on the BeamObject API",
+        Logger.shared.logDebug("persistChecksum \(objects.count) passwords on the BeamObject API",
                                category: .passwordNetwork)
 
         var passwords: [PasswordRecord] = []

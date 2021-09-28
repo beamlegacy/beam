@@ -115,6 +115,17 @@ extension BeamObjectRequest {
     }
 
     @discardableResult
+    func fetchAllChecksums(ids: [UUID]? = nil,
+                           beamObjectType: String? = nil,
+                           _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
+        let parameters = BeamObjectsParameters(receivedAtAfter: nil,
+                                               ids: ids,
+                                               beamObjectType: beamObjectType)
+
+        return try fetchAllWithFile("beam_object_checksums", parameters, completion)
+    }
+
+    @discardableResult
     private func fetchAllWithFile<T: Encodable>(_ filename: String,
                                                 _ parameters: T,
                                                 _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {

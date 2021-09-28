@@ -12,6 +12,7 @@ struct DatabaseDetail: View {
             HStack(alignment: VerticalAlignment.center, spacing: 10.0) {
                 RefreshButton
                 SoftDeleteButton
+                SoftUnDeleteButton
                 DeleteButton
                 Spacer()
             }.padding()
@@ -91,6 +92,14 @@ struct DatabaseDetail: View {
         })
     }
 
+    private func softUnDelete() {
+        var dbStruct = DatabaseStruct(database: database)
+        dbStruct.deletedAt = nil
+
+        databaseManager.save(dbStruct, completion: { _ in
+        })
+    }
+
     private var RefreshButton: some View {
         Button(action: {
             refresh()
@@ -112,6 +121,14 @@ struct DatabaseDetail: View {
             softDelete()
         }, label: {
             Text("Soft Delete").frame(minWidth: 100)
+        })
+    }
+
+    private var SoftUnDeleteButton: some View {
+        Button(action: {
+            softUnDelete()
+        }, label: {
+            Text("Recover").frame(minWidth: 100)
         })
     }
 

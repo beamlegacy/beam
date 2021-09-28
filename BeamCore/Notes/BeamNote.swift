@@ -316,11 +316,14 @@ public class BeamNote: BeamElement {
         fetchedNotes[cacheKeyFromTitle(note.title)] = WeakReference(note)
     }
 
+    // Return true if the note is empty. If the user entered any chars, even just \n, will return false
     public func isEntireNoteEmpty() -> Bool {
-        guard let child = children.first,
-              child.text.isEmpty && children.count == 1 else {
+        if children.count > 1 { return false }
+
+        if let child = children.first, !child.text.isEmpty || children.count > 1 {
             return false
         }
+
         return true
     }
 

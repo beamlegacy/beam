@@ -1,0 +1,9 @@
+query ($ids: [ID!], $beamObjectType: String) {
+  me {
+    beamObjects(ids: $ids, type: $beamObjectType) {
+      id
+      type
+      checksum
+    }
+  }
+}
