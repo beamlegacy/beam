@@ -355,7 +355,7 @@ class Document: NSManagedObject, BeamCoreDataObject {
 
     class func fetchAllWithTitleMatch(_ context: NSManagedObjectContext, _ title: String) throws -> [Document] {
         let predicate = NSPredicate(format: "title CONTAINS[cd] %@", title as CVarArg)
-        let sortDescriptor = NSSortDescriptor(key: "title", ascending: true)
+        let sortDescriptor = NSSortDescriptor(key: "title", ascending: true, selector: #selector(NSString.caseInsensitiveCompare))
         return try fetchAll(context, predicate, [sortDescriptor])
     }
 
@@ -363,7 +363,7 @@ class Document: NSManagedObject, BeamCoreDataObject {
                                              _ title: String,
                                              _ limit: Int) throws -> [Document] {
         let predicate = NSPredicate(format: "title CONTAINS[cd] %@", title as CVarArg)
-        let sortDescriptor = NSSortDescriptor(key: "title", ascending: true)
+        let sortDescriptor = NSSortDescriptor(key: "title", ascending: true, selector: #selector(NSString.caseInsensitiveCompare))
         return try fetchAllWithLimit(context, predicate, [sortDescriptor], limit)
     }
 
