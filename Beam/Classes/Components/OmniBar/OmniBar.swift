@@ -41,7 +41,7 @@ struct OmniBar: View {
                 autocompleteManager.searchQuerySelectedRange = url.wholeRange
                 autocompleteManager.setQueryWithoutAutocompleting(url)
             }
-        } else if state.mode == .web && browserTabsManager.currentTab?.url != nil {
+        } else if state.mode != .web || browserTabsManager.currentTab?.url != nil {
             autocompleteManager.resetQuery()
         }
     }
