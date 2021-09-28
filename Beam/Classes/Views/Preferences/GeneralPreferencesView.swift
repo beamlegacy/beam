@@ -33,13 +33,13 @@ struct GeneralPreferencesView: View {
             } content: {
                 AccessibilitySection()
             }
-            Preferences.Section {
-                Text("Updates:")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
-            } content: {
-                UpdatesSection()
-            }
+//            Preferences.Section {
+//                Text("Updates:")
+//                    .font(BeamFont.regular(size: 13).swiftUI)
+//                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+//            } content: {
+//                UpdatesSection()
+//            }
 
         }
     }
@@ -104,22 +104,22 @@ struct AccessibilitySection: View {
     @State private var fontSizeIndex = PreferencesManager.fontSizeIndexPreference
 
     var body: some View {
-        HStack {
-            Checkbox(checkState: PreferencesManager.isFontMinOnPreference, text: "Never use font sizes smaller than", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
-                PreferencesManager.isFontMinOnPreference = activated
-                self.isPickerEnabled = activated
-            }
-            Picker("", selection: $fontSizeIndex) {
-                ForEach(PreferencesManager.shared.fontSizes) {
-                    Text("\($0)")
-                }
-            }.labelsHidden()
-            .frame(width: 45, height: 20, alignment: .center)
-            .disabled(!isPickerEnabled)
-            .onReceive([self.fontSizeIndex].publisher.first()) { value in
-                PreferencesManager.fontSizeIndexPreference = value
-            }
-        }
+//        HStack {
+//            Checkbox(checkState: PreferencesManager.isFontMinOnPreference, text: "Never use font sizes smaller than", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
+//                PreferencesManager.isFontMinOnPreference = activated
+//                self.isPickerEnabled = activated
+//            }
+//            Picker("", selection: $fontSizeIndex) {
+//                ForEach(PreferencesManager.shared.fontSizes) {
+//                    Text("\($0)")
+//                }
+//            }.labelsHidden()
+//            .frame(width: 45, height: 20, alignment: .center)
+//            .disabled(!isPickerEnabled)
+//            .onReceive([self.fontSizeIndex].publisher.first()) { value in
+//                PreferencesManager.fontSizeIndexPreference = value
+//            }
+//        }
 
         Checkbox(checkState: PreferencesManager.isTabToHighlightOn, text: "Press Tab to highlight each item on a web page", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
             PreferencesManager.isTabToHighlightOn = activated
