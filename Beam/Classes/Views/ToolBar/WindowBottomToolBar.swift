@@ -12,16 +12,20 @@ struct WindowBottomToolBar: View {
     @EnvironmentObject var state: BeamState
 
     private var isJournal: Bool {
-        return state.mode == .today
+        state.mode == .today
     }
 
     private var animationEnabled: Bool {
-        return !state.windowIsResizing
+        !state.windowIsResizing
     }
 
     private var currentNote: BeamNote? {
-        return state.currentNote
+        state.currentNote
     }
+
+    private let barHeight: CGFloat = 30
+    private let verticalPadding: CGFloat = BeamSpacing._50
+    private var buttonsHeight: CGFloat { barHeight - verticalPadding * 2 }
 
     private func recentsStack(containerGeometry: GeometryProxy) -> some View {
         GlobalCenteringContainer(enabled: true, containerGeometry: containerGeometry) {
@@ -38,6 +42,7 @@ struct WindowBottomToolBar: View {
                 Spacer(minLength: 20)
                 if [.today, .note].contains(state.mode) {
                     recentsStack(containerGeometry: geo)
+                        .frame(height: buttonsHeight)
                     Spacer(minLength: 20)
                 }
                 HStack {
@@ -45,6 +50,7 @@ struct WindowBottomToolBar: View {
                         ButtonLabel("All Cards") {
                             state.navigateToPage(WindowPage.allCardsWindowPage)
                         }
+                        .frame(height: buttonsHeight)
                         Separator()
                     }
                     BottomToolBarTrailingIconView()
@@ -54,14 +60,14 @@ struct WindowBottomToolBar: View {
                 .padding(.trailing, BeamSpacing._50)
             }
             .padding(.vertical, BeamSpacing._50)
+            .frame(height: barHeight)
             .background(
                 BeamColor.Generic.background.swiftUI
                     .shadow(color: BeamColor.BottomBar.shadow.swiftUI, radius: 0, x: 0, y: -0.5)
             )
-            .frame(height: 30)
             .frame(maxWidth: .infinity)
         }
-        .frame(height: 30)
+        .frame(height: barHeight)
     }
 }
 
