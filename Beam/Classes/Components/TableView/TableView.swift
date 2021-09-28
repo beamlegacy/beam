@@ -181,6 +181,8 @@ class TableViewCoordinator: NSObject {
 
     private var currentSelectedIndexes: IndexSet?
     private var hoveredRow: Int?
+    /// When appearing the first row is hidden between the header, workaround is to manually scroll when rendering the rows.
+    private var shouldResetScrollOnNextReload = false
 
     let parent: TableView
     var hasSeparator: Bool
@@ -190,16 +192,15 @@ class TableViewCoordinator: NSObject {
         self.parent = tableView
         self.hasSeparator = tableView.hasSeparator
         self.customRowHeight = tableView.customRowHeight
+        self.shouldResetScrollOnNextReload = true
         super.init()
         reloadData()
-        DispatchQueue.main.async {
-            self.tableView?.scroll(CGPoint(x: 0, y: -TableView.headerHeight))
-        }
     }
 
     /// - Parameters:
     ///   - soft: keep selection or not
     func reloadData(soft: Bool = false) {
+        guard tableView?.tableColumns != nil else { return }
         if let descriptor = sortDescriptor, let sorted = NSArray(array: originalData).sortedArray(using: [descriptor]) as? [TableViewItem] {
             sortedData = sorted
         } else {
@@ -277,6 +278,10 @@ extension TableViewCoordinator: NSTableViewDataSource {
             } else if hovering {
                 self.parent.onHover?(nil, nil)
             }
+        }
+        if shouldResetScrollOnNextReload, let insets = tableView.enclosingScrollView?.contentView.contentInsets {
+            shouldResetScrollOnNextReload = false
+            self.tableView?.scroll(CGPoint(x: 0, y: -insets.top))
         }
         return rowView
     }
