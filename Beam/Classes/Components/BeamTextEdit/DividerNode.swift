@@ -26,11 +26,12 @@ public class DividerNode: ElementNode {
     }
 
     private var visibleSize: CGSize {
-        return NSSize(width: contentsWidth, height: 2)
+        return NSSize(width: contentsWidth, height: 0.5)
     }
 
     private var lineLayer: CALayer?
     private var focusLayer: CALayer?
+    private var lastApperance: NSAppearance?
 
     init(parent: Widget, element: BeamElement) {
         super.init(parent: parent, element: element)
@@ -44,13 +45,11 @@ public class DividerNode: ElementNode {
 
     func setupDivider() {
         let focus = CALayer()
-        focus.backgroundColor = BeamColor.Generic.textSelection.cgColor
+        focus.cornerRadius = 2
         layer.addSublayer(focus)
         focusLayer = focus
 
         let line = CALayer()
-        line.compositingFilter = "multiplyBlendMode"
-        line.backgroundColor = BeamColor.Mercury.cgColor
         layer.addSublayer(line)
         lineLayer = line
         var updatedPadding = contentsPadding
@@ -69,6 +68,15 @@ public class DividerNode: ElementNode {
 
     override func updateLayout() {
         super.updateLayout()
+        if NSApp.effectiveAppearance != lastApperance {
+            lastApperance = NSApp.effectiveAppearance
+            NSAppearance.withAppAppearance {
+                lineLayer?.compositingFilter = NSApp.effectiveAppearance.isDarkMode ? "screenBlendMode" : "multiplyBlendMode"
+                focusLayer?.backgroundColor = BeamColor.Generic.textSelection.cgColor
+                lineLayer?.backgroundColor = BeamColor.Mercury.cgColor
+            }
+        }
+
         let padding = contentsPadding
         var size = visibleSize
         size.width = selectionLayerWidth
