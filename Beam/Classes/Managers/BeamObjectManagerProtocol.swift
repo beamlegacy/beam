@@ -8,7 +8,7 @@ protocol BeamObjectManagerDelegateProtocol {
 
     // Called when `BeamObjectManager` wants to store all existing `Document` as `BeamObject`
     // it will call this method
-    func saveAllOnBeamObjectApi(_ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws -> APIRequest?
+    func saveAllOnBeamObjectApi(_ completion: @escaping ((Swift.Result<(Int, Date?), Error>) -> Void)) throws -> APIRequest?
 }
 
 protocol BeamObjectManagerDelegate: AnyObject, BeamObjectManagerDelegateProtocol {
@@ -22,7 +22,7 @@ protocol BeamObjectManagerDelegate: AnyObject, BeamObjectManagerDelegateProtocol
     func persistChecksum(_ objects: [BeamObjectType]) throws
 
     /// Returns all objects, used to save all of them as beam objects
-    func allObjects() throws -> [BeamObjectType]
+    func allObjects(updatedSince: Date?) throws -> [BeamObjectType]
 
     /// Will be called before savingAll objects
     func willSaveAllOnBeamObjectApi()
@@ -62,13 +62,22 @@ extension BeamObjectManagerDelegate {
             return
         }
 
-        try receivedObjects(parsedObjects)
-    }
-
-    func updatedObjectsOnly(_ objects: [BeamObjectType]) -> [BeamObjectType] {
-        objects.filter {
-            $0.previousChecksum != $0.checksum || $0.previousChecksum == nil
+        var objectIds = objects.map { $0.beamObjectId.uuidString.lowercased() }
+        if objectIds.count > 10 {
+            objectIds = Array(objectIds[0...10])
+            objectIds.append("...")
         }
+
+        Logger.shared.logDebug("Received \(parsedObjects.count) \(T.beamObjectTypeName): \(objectIds)",
+                               category: .beamObjectNetwork)
+        let localTimer = BeamDate.now
+
+        try receivedObjects(parsedObjects)
+        self.checkPreviousChecksums(parsedObjects)
+
+        Logger.shared.logDebug("Received \(parsedObjects.count) \(T.beamObjectTypeName). Manager done",
+                               category: .beamObjectNetwork,
+                               localTimer: localTimer)
     }
 
     func saveOnBeamObjectsAPI(_ objects: [BeamObjectType]) throws {
@@ -95,5 +104,81 @@ extension BeamObjectManagerDelegate {
         }
 
         if let error = error { throw error }
+    }
+
+    /*
+     This is a check to see if beam object managers store previousChecksum properly and raise errors asap when someone
+     is adding a new object type to be stored on the API.
+
+     Potentially slow, might make that faster?
+
+     */
+    // swiftlint:disable:next cyclomatic_complexity
+    func checkPreviousChecksums(_ remoteObjects: [BeamObjectType]) {
+        #if DEBUG
+        do {
+            let savedObjects = try self.allObjects(updatedSince: nil)
+            var wrongObjects: [BeamObjectType] = []
+            for remoteObject in remoteObjects {
+                guard let savedObject = savedObjects.first(where: {
+                    $0.beamObjectId == remoteObject.beamObjectId
+                }) else { continue }
+
+                if savedObject.previousChecksum != remoteObject.previousChecksum {
+                    wrongObjects.append(remoteObject)
+                }
+            }
+
+            guard !wrongObjects.isEmpty else { return }
+
+            let beamObjectManager = BeamObjectManager()
+
+            Logger.shared.logWarning("\(wrongObjects.count) objects had wrong checksum after save, checking on the API if they've been updated since",
+                                     category: .beamObjectNetwork)
+            try beamObjectManager.fetchBeamObjectChecksums(wrongObjects.map { $0.beamObjectId }) { result in
+                switch result {
+                case .failure(let error):
+                    Logger.shared.logError(error.localizedDescription, category: .beamObjectNetwork)
+                case .success(let remoteBeamObjects):
+                    var diffObjects: [BeamObjectType] = []
+
+                    for remoteObject in remoteObjects {
+                        guard let savedObject = savedObjects.first(where: {
+                            $0.beamObjectId == remoteObject.beamObjectId
+                        }) else { continue }
+
+                        guard let remoteBeamObject = remoteBeamObjects.first(where: {
+                            $0.id == remoteObject.beamObjectId
+                        }) else { continue }
+
+                        if savedObject.previousChecksum != remoteBeamObject.dataChecksum {
+                            diffObjects.append(savedObject)
+                        }
+                    }
+
+                    guard !diffObjects.isEmpty else { return }
+
+                    for remoteObject in remoteObjects {
+                        guard let savedObject = savedObjects.first(where: {
+                            $0.beamObjectId == remoteObject.beamObjectId
+                        }) else { continue }
+
+                        guard let remoteBeamObject = remoteBeamObjects.first(where: {
+                            $0.id == remoteObject.beamObjectId
+                        }) else { continue }
+
+                        if savedObject.previousChecksum != remoteObject.previousChecksum {
+                            Logger.shared.logWarning("previousChecksum for object \(remoteObject.beamObjectId) wasn't saved in local object. Remote: \(String(describing: remoteObject.previousChecksum)), local: \(String(describing: savedObject.previousChecksum)), New remote: \(String(describing: remoteBeamObject.dataChecksum))", category: .beamObjectNetwork)
+                        }
+                    }
+
+                    fatalError("previousChecksum for objects is wrong!")
+                }
+            }
+
+        } catch {
+            fatalError("Failed: \(error.localizedDescription)")
+        }
+        #endif
     }
 }

@@ -9,13 +9,24 @@ extension BeamObjectManager {
             throw BeamObjectManagerError.notAuthenticated
         }
 
+        var localTimer = BeamDate.now
+
         try fetchAllFromAPI { result in
             switch result {
             case .failure:
                 completion?(result)
             case .success:
+                Logger.shared.logDebug("Calling saveAllToAPI, called FetchAllFromAPI",
+                                       category: .beamObjectNetwork,
+                                       localTimer: localTimer)
+
                 do {
-                    try self.saveAllToAPI()
+                    localTimer = BeamDate.now
+                    let objectsCount = try self.saveAllToAPI()
+                    Logger.shared.logDebug("Called saveAllToAPI, saved \(objectsCount) objects",
+                                           category: .beamObjectNetwork,
+                                           localTimer: localTimer)
+
                     completion?(.success(true))
                 } catch {
                     completion?(.failure(error))
@@ -24,8 +35,9 @@ extension BeamObjectManager {
         }
     }
 
+    @discardableResult
     // swiftlint:disable:next function_body_length
-    func saveAllToAPI() throws {
+    func saveAllToAPI() throws -> Int {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw BeamObjectManagerError.notAuthenticated
         }
@@ -34,13 +46,20 @@ extension BeamObjectManager {
         var errors: [Error] = []
         let lock = DispatchSemaphore(value: 1)
         var requests: [APIRequest] = []
+        var savedObjects = 0
+        // Just a very old date as default
+        var mostRecentUpdatedAt: Date = Persistence.Sync.BeamObjects.last_updated_at ?? (BeamDate.now.addingTimeInterval(-(60*60*24*31*12*10)))
+        var mostRecentUpdatedAtChanged = false
+
+        if let updatedAt = Persistence.Sync.BeamObjects.last_updated_at {
+            Logger.shared.logDebug("Using updatedAt for BeamObjects API call: \(updatedAt)", category: .beamObjectNetwork)
+        }
 
         for (_, manager) in Self.managerInstances {
             group.enter()
 
             let localTimer = BeamDate.now
-            Logger.shared.logDebug("saveAllToAPI using \(manager)",
-                                   category: .beamObjectNetwork)
+
             do {
                 let request = try manager.saveAllOnBeamObjectApi { result in
                     switch result {
@@ -49,7 +68,17 @@ extension BeamObjectManager {
                         lock.wait()
                         errors.append(error)
                         lock.signal()
-                    case .success: break
+                    case .success(let countAndDate):
+                        lock.wait()
+
+                        savedObjects += countAndDate.0
+
+                        if let updatedAt = countAndDate.1, updatedAt > mostRecentUpdatedAt {
+                            mostRecentUpdatedAt = updatedAt
+                            mostRecentUpdatedAtChanged = true
+                        }
+
+                        lock.signal()
                     }
 
                     Logger.shared.logDebug("saveAllToAPI using \(manager) done",
@@ -75,6 +104,14 @@ extension BeamObjectManager {
         guard errors.isEmpty else {
             throw BeamObjectManagerError.multipleErrors(errors)
         }
+
+        if mostRecentUpdatedAtChanged {
+            Logger.shared.logDebug("Updating last_updated_at from \(String(describing: Persistence.Sync.BeamObjects.last_updated_at)) to \(mostRecentUpdatedAt)",
+                                   category: .beamObjectNetwork)
+            Persistence.Sync.BeamObjects.last_updated_at = mostRecentUpdatedAt
+        }
+
+        return savedObjects
     }
 
     /// Will fetch all updates from the API and call each managers based on object's type
@@ -88,7 +125,7 @@ extension BeamObjectManager {
         let lastReceivedAt: Date? = Persistence.Sync.BeamObjects.last_received_at
 
         if let lastReceivedAt = lastReceivedAt {
-            Logger.shared.logDebug("Using lastReceivedAt for BeamObjects API call: \(lastReceivedAt)",
+            Logger.shared.logDebug("Using lastReceivedAt for BeamObjects API call: \(lastReceivedAt.iso8601withFractionalSeconds)",
                                    category: .beamObjectNetwork)
         } else {
             Logger.shared.logDebug("No previous updatedAt for BeamObjects API call",
@@ -102,28 +139,26 @@ extension BeamObjectManager {
                                        category: .beamObjectNetwork)
                 completion(.failure(error))
             case .success(let beamObjects):
+                // If we are doing a delta refreshAll, and 0 document is fetched, we exit early
+                // If not doing a delta sync, we don't as we want to update local document as `deleted`
+                guard lastReceivedAt == nil || !beamObjects.isEmpty else {
+                    Logger.shared.logDebug("0 beam object fetched.", category: .beamObjectNetwork)
+                    completion(.success(true))
+                    return
+                }
+
+                if let mostRecentReceivedAt = beamObjects.compactMap({ $0.receivedAt }).sorted().last {
+                    Persistence.Sync.BeamObjects.last_received_at = mostRecentReceivedAt
+                    Logger.shared.logDebug("new ReceivedAt: \(mostRecentReceivedAt.iso8601withFractionalSeconds). \(beamObjects.count) beam objects fetched.",
+                                           category: .beamObjectNetwork)
+                }
+
                 do {
-                    // If we are doing a delta refreshAll, and 0 document is fetched, we exit early
-                    // If not doing a delta sync, we don't as we want to update local document as `deleted`
-                    guard lastReceivedAt == nil || !beamObjects.isEmpty else {
-                        Logger.shared.logDebug("0 beam object fetched.", category: .beamObjectNetwork)
-                        completion(.success(true))
-                        return
-                    }
-
-                    if let mostRecentReceivedAt = beamObjects.compactMap({ $0.updatedAt }).sorted().last {
-                        Persistence.Sync.BeamObjects.last_received_at = mostRecentReceivedAt
-                        Logger.shared.logDebug("new ReceivedAt: \(mostRecentReceivedAt). \(beamObjects.count) beam objects fetched.",
-                                               category: .beamObjectNetwork)
-                        Logger.shared.logDebug("objects IDs: \(beamObjects.map { $0.id.uuidString.lowercased() }.joined(separator: ", "))",
-                                               category: .beamObjectNetwork)
-                    }
-
                     try self.parseObjects(beamObjects)
                     completion(.success(true))
+                    return
                 } catch {
-                    Logger.shared.logError("Error parsing remote beamobjects: \(error.localizedDescription)",
-                                           category: .beamObjectNetwork)
+                    AppDelegate.showMessage("Error fetching objects from API: \(error.localizedDescription). This is not normal, check the logs and ask support.")
                     completion(.failure(error))
                 }
             }
@@ -135,8 +170,14 @@ extension BeamObjectManager {
 
 // MARK: - BeamObjectProtocol
 extension BeamObjectManager {
+    func updatedObjectsOnly(_ objects: [BeamObject]) -> [BeamObject] {
+        objects.filter {
+            $0.previousChecksum != $0.dataChecksum || $0.previousChecksum == nil
+        }
+    }
+
     func saveToAPI<T: BeamObjectProtocol>(_ objects: [T],
-                                          _ completion: @escaping ((Result<[T], Error>) -> Void)) throws -> APIRequest {
+                                          _ completion: @escaping ((Result<[T], Error>) -> Void)) throws -> APIRequest? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw BeamObjectManagerError.notAuthenticated
         }
@@ -146,6 +187,18 @@ extension BeamObjectManager {
             try BeamObject($0, T.beamObjectTypeName)
         }
 
+        let objectsToSave = updatedObjectsOnly(beamObjects)
+
+        guard !objectsToSave.isEmpty else {
+            Logger.shared.logDebug("Not saving objects on API, list is empty after checksum check",
+                                   category: .beamObjectNetwork)
+            completion(.success([]))
+            return nil
+        }
+
+        let beamObjectTypes = Set(objectsToSave.map { $0.beamObjectType }).joined(separator: ", ")
+        Logger.shared.logDebug("Saving \(objectsToSave.count) objects of type \(beamObjectTypes) on API",
+                               category: .beamObjectNetwork)
         try request.saveAll(beamObjects) { result in
             switch result {
             case .failure(let error):
@@ -314,7 +367,7 @@ extension BeamObjectManager {
          */
 
         let objectErrorIds: [String] = errors.compactMap {
-            guard isErrorInvalidChecksum($0) else { return nil }
+            guard $0.isErrorInvalidChecksum else { return nil }
 
             return $0.objectid?.lowercased()
         }
@@ -658,7 +711,7 @@ extension BeamObjectManager {
             }
 
             // We only call `saveToAPIFailure` to fetch remote object with invalid checksum errors
-            guard isErrorInvalidChecksum(error) else { continue }
+            guard error.isErrorInvalidChecksum else { continue }
 
             group.enter()
 
@@ -819,6 +872,14 @@ extension BeamObjectManager {
     @discardableResult
     internal func fetchBeamObjects(_ ids: [UUID],
                                    _ completion: @escaping (Result<[BeamObject], Error>) -> Void) throws -> APIRequest {
+        let request = BeamObjectRequest()
+        try request.fetchAll(ids: ids, completion)
+        return request
+    }
+
+    @discardableResult
+    internal func fetchBeamObjectChecksums(_ ids: [UUID],
+                                           _ completion: @escaping (Result<[BeamObject], Error>) -> Void) throws -> APIRequest {
         let request = BeamObjectRequest()
         try request.fetchAll(ids: ids, completion)
         return request

@@ -425,7 +425,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     context("with PromiseKit") {
                         it("saves all objects") {
                             let networkCalls = APIRequest.callsCount
-                            let promise: PromiseKit.Promise<Bool> = sut.saveAllOnBeamObjectApi()
+                            let promise: PromiseKit.Promise<[MyRemoteObject]> = sut.saveAllOnBeamObjectApi()
 
                             waitUntil(timeout: .seconds(10)) { done in
                                 promise.done { success in
@@ -450,7 +450,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     context("with Promises") {
                         it("saves all objects") {
                             let networkCalls = APIRequest.callsCount
-                            let promise: Promises.Promise<Bool> = sut.saveAllOnBeamObjectApi()
+                            let promise: Promises.Promise<[MyRemoteObject]> = sut.saveAllOnBeamObjectApi()
 
                             waitUntil(timeout: .seconds(10)) { done in
                                 promise.then { success in
@@ -502,7 +502,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 expect(object.previousChecksum).to(beNil())
                             }
 
-                            let promise: PromiseKit.Promise<Bool> = sut.saveAllOnBeamObjectApi()
+                            let promise: PromiseKit.Promise<[MyRemoteObject]> = sut.saveAllOnBeamObjectApi()
 
                             waitUntil(timeout: .seconds(10)) { done in
                                 promise.done { remoteObject in
@@ -524,7 +524,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 expect(object.previousChecksum).to(beNil())
                             }
 
-                            let promise: Promises.Promise<Bool> = sut.saveAllOnBeamObjectApi()
+                            let promise: Promises.Promise<[MyRemoteObject]> = sut.saveAllOnBeamObjectApi()
 
                             waitUntil(timeout: .seconds(10)) { done in
                                 promise.then { remoteObject in
@@ -586,7 +586,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         it("saves all objects") {
                             let networkCalls = APIRequest.callsCount
 
-                            let promise: PromiseKit.Promise<Bool> = sut.saveAllOnBeamObjectApi()
+                            let promise: PromiseKit.Promise<[MyRemoteObject]> = sut.saveAllOnBeamObjectApi()
 
                             waitUntil(timeout: .seconds(10)) { done in
                                 promise.done { success in
@@ -617,7 +617,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         it("saves all objects") {
                             let networkCalls = APIRequest.callsCount
 
-                            let promise: Promises.Promise<Bool> = sut.saveAllOnBeamObjectApi()
+                            let promise: Promises.Promise<[MyRemoteObject]> = sut.saveAllOnBeamObjectApi()
 
                             waitUntil(timeout: .seconds(10)) { done in
                                 promise.then { success in
@@ -666,7 +666,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     }
                     context("with PromiseKit") {
                         it("stores previousChecksum") {
-                            let promise: PromiseKit.Promise<Bool> = sut.saveAllOnBeamObjectApi()
+                            let promise: PromiseKit.Promise<[MyRemoteObject]> = sut.saveAllOnBeamObjectApi()
 
                             waitUntil(timeout: .seconds(10)) { done in
                                 promise.done { success in
@@ -684,7 +684,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     }
                     context("with Promises") {
                         it("stores previousChecksum") {
-                            let promise: Promises.Promise<Bool> = sut.saveAllOnBeamObjectApi()
+                            let promise: Promises.Promise<[MyRemoteObject]> = sut.saveAllOnBeamObjectApi()
 
                             waitUntil(timeout: .seconds(10)) { done in
                                 promise.then { success in
@@ -763,7 +763,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         it("saves all objects") {
                             let networkCalls = APIRequest.callsCount
 
-                            let promise: PromiseKit.Promise<Bool> = sut.saveAllOnBeamObjectApi()
+                            let promise: PromiseKit.Promise<[MyRemoteObject]> = sut.saveAllOnBeamObjectApi()
 
                             waitUntil(timeout: .seconds(10)) { done in
                                 promise.done { success in
@@ -794,7 +794,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         it("saves all objects") {
                             let networkCalls = APIRequest.callsCount
 
-                            let promise: Promises.Promise<Bool> = sut.saveAllOnBeamObjectApi()
+                            let promise: Promises.Promise<[MyRemoteObject]> = sut.saveAllOnBeamObjectApi()
 
                             waitUntil(timeout: .seconds(10)) { done in
                                 promise.then { success in
@@ -872,7 +872,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         it("saves all objects") {
                             let networkCalls = APIRequest.callsCount
 
-                            let promise: PromiseKit.Promise<Bool> = sut.saveAllOnBeamObjectApi()
+                            let promise: PromiseKit.Promise<[MyRemoteObject]> = sut.saveAllOnBeamObjectApi()
 
                             waitUntil(timeout: .seconds(10)) { done in
                                 promise.done { success in
@@ -909,7 +909,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         it("saves all objects") {
                             let networkCalls = APIRequest.callsCount
 
-                            let promise: Promises.Promise<Bool> = sut.saveAllOnBeamObjectApi()
+                            let promise: Promises.Promise<[MyRemoteObject]> = sut.saveAllOnBeamObjectApi()
 
                             waitUntil(timeout: .seconds(10)) { done in
                                 promise.then { success in
@@ -1013,7 +1013,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         it("saves all objects") {
                             let networkCalls = APIRequest.callsCount
 
-                            let promise: PromiseKit.Promise<Bool> = sut.saveAllOnBeamObjectApi()
+                            let promise: PromiseKit.Promise<[MyRemoteObject]> = sut.saveAllOnBeamObjectApi()
 
                             waitUntil(timeout: .seconds(10)) { done in
                                 promise.done { remoteObject in
@@ -1044,7 +1044,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         it("saves all objects") {
                             let networkCalls = APIRequest.callsCount
 
-                            let promise: Promises.Promise<Bool> = sut.saveAllOnBeamObjectApi()
+                            let promise: Promises.Promise<[MyRemoteObject]> = sut.saveAllOnBeamObjectApi()
 
                             waitUntil(timeout: .seconds(10)) { done in
                                 promise.then { remoteObject in
@@ -1128,7 +1128,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         it("saves all objects") {
                             let networkCalls = APIRequest.callsCount
 
-                            let promise: PromiseKit.Promise<Bool> = sut.saveAllOnBeamObjectApi()
+                            let promise: PromiseKit.Promise<[MyRemoteObject]> = sut.saveAllOnBeamObjectApi()
 
                             waitUntil(timeout: .seconds(10)) { done in
                                 promise.done { remoteObject in
@@ -1171,7 +1171,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         it("saves all objects") {
                             let networkCalls = APIRequest.callsCount
 
-                            let promise: Promises.Promise<Bool> = sut.saveAllOnBeamObjectApi()
+                            let promise: Promises.Promise<[MyRemoteObject]> = sut.saveAllOnBeamObjectApi()
 
                             waitUntil(timeout: .seconds(10)) { done in
                                 promise.then { remoteObject in
@@ -1285,7 +1285,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         it("saves all objects") {
                             let networkCalls = APIRequest.callsCount
 
-                            let promise: PromiseKit.Promise<Bool> = sut.saveAllOnBeamObjectApi()
+                            let promise: PromiseKit.Promise<[MyRemoteObject]> = sut.saveAllOnBeamObjectApi()
 
                             waitUntil(timeout: .seconds(10)) { done in
                                 promise.done { remoteObject in
@@ -1316,7 +1316,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         it("saves all objects") {
                             let networkCalls = APIRequest.callsCount
 
-                            let promise: Promises.Promise<Bool> = sut.saveAllOnBeamObjectApi()
+                            let promise: Promises.Promise<[MyRemoteObject]> = sut.saveAllOnBeamObjectApi()
 
                             waitUntil(timeout: .seconds(10)) { done in
                                 promise.then { remoteObject in
@@ -1406,7 +1406,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         it("saves all objects") {
                             let networkCalls = APIRequest.callsCount
 
-                            let promise: PromiseKit.Promise<Bool> = sut.saveAllOnBeamObjectApi()
+                            let promise: PromiseKit.Promise<[MyRemoteObject]> = sut.saveAllOnBeamObjectApi()
 
                             waitUntil(timeout: .seconds(10)) { done in
                                 promise.done { remoteObject in
@@ -1455,7 +1455,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         it("saves all objects") {
                             let networkCalls = APIRequest.callsCount
 
-                            let promise: Promises.Promise<Bool> = sut.saveAllOnBeamObjectApi()
+                            let promise: Promises.Promise<[MyRemoteObject]> = sut.saveAllOnBeamObjectApi()
 
                             waitUntil(timeout: .seconds(10)) { done in
                                 promise.then { remoteObject in

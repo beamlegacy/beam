@@ -23,6 +23,7 @@ struct AdvancedPreferencesView: View {
     @State private var networkEnabled: Bool = Configuration.networkEnabled
     @State private var privateKey = EncryptionManager.shared.privateKey().asString()
     @State private var stateRestorationEnabled = Configuration.stateRestorationEnabled
+    @State private var loading: Bool = false
 
     // Database
     @State private var newDatabaseTitle = ""
@@ -90,11 +91,16 @@ struct AdvancedPreferencesView: View {
                 }
                 Preferences.Section(title: "", bottomDivider: true) {
                     Button(action: {
+                        self.loading = true
                         Persistence.Sync.BeamObjects.last_received_at = nil
-                        AppDelegate.main.syncDataWithBeamObject()
+                        Persistence.Sync.BeamObjects.last_updated_at = nil
+                        AppDelegate.main.syncDataWithBeamObject { _ in
+                            self.loading = false
+                        }
                     }, label: {
                         Text("Force full sync").frame(minWidth: 100)
                     })
+                    .disabled(loading)
                 }
 
                 Preferences.Section(bottomDivider: true) {

@@ -27,8 +27,22 @@ class BeamObjectManager {
          Translators is a way to know what object type is being processed by the manager
          */
         translators[object.beamObjectTypeName] = { manager, objects in
+
             let encapsulatedObjects: [O] = try objects.map {
-                try $0.decodeBeamObject()
+                do {
+                    var result: O = try $0.decodeBeamObject()
+
+                    // Setting previousChecksum so code not doing anything more than storing objects/replacing existing objects
+                    // at least doesn't break the sync and delta sync.
+                    result.previousChecksum = result.checksum
+
+                    return result
+                } catch {
+                    Logger.shared.logError("Error decoding \($0.beamObjectType) beamobject: \(error.localizedDescription)",
+                                           category: .beamObject)
+                    dump($0)
+                    throw error
+                }
             }
 
             try manager.parse(objects: encapsulatedObjects)
@@ -60,6 +74,8 @@ class BeamObjectManager {
     }
 
     internal func parseFilteredObjects(_ filteredObjects: [String: [BeamObject]]) throws {
+        var objectsInErrors: Set<String> = Set()
+
         for (key, objects) in filteredObjects {
             guard let managerInstance = Self.managerInstances[key] else {
                 Logger.shared.logDebug("**managerInstance for \(key) not found** keys: \(Self.managerInstances.keys)",
@@ -73,12 +89,38 @@ class BeamObjectManager {
                 continue
             }
 
-            try translator(managerInstance, objects)
-        }
-    }
+            do {
+                try translator(managerInstance, objects)
+            } catch {
+                Logger.shared.logError("Error parsing remote \(key) beamobjects: \(error.localizedDescription). Retrying one by one.",
+                                       category: .beamObjectNetwork)
 
-    internal func isErrorInvalidChecksum(_ error: UserErrorData) -> Bool {
-        error.message == "Differs from current checksum" && error.path == ["attributes", "previous_checksum"]
+                var objectsInError: [BeamObject] = []
+
+                // When error occurs, we need to know what object is actually failing
+                for beamObject in objects {
+                    do {
+                        try translator(managerInstance, [beamObject])
+                    } catch {
+                        objectsInError.append(beamObject)
+                        objectsInErrors.insert(beamObject.beamObjectType)
+                    }
+                }
+
+                var message: String
+                if objectsInError.count == objects.count {
+                    Logger.shared.logError("All \(key) objects in error", category: .beamObjectNetwork)
+                    message = "All BeamObjects types: \(key) are in error"
+                } else {
+                    Logger.shared.logError("Error parsing following \(key) beamobjects: \(objectsInError.map { $0.id.uuidString }.joined(separator: ", "))",
+                                           category: .beamObjectNetwork)
+                    dump(objectsInError)
+                    message = "Some BeamObjects types: \(key) are in error"
+                }
+
+                throw BeamObjectManagerError.parsingError(message)
+            }
+        }
     }
 
     internal func extractGoodObjects<T: BeamObjectProtocol>(_ objects: [T],
