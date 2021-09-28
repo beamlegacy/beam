@@ -11,21 +11,9 @@ import XCTest
 
 class DestinationNoteAutocompleteListTests: XCTestCase {
     var autocompleteModel = DestinationNoteAutocompleteList.Model()
-    var data = BeamData()
-
-    /// Returns the current date as "21 September 2021"
-    /// - Returns: Date as string "DD Month YYYY"
-    func todaysDateAsString() -> String {
-        let date = Date()
-        let calendar = Calendar.current
-        let day = calendar.component(.day, from: date)
-        let month = calendar.monthSymbols[calendar.component(.month, from: date)-1]
-        let year = calendar.component(.year, from: date)
-        return "\(day) \(month) \(year)"
-    }
 
     override func setUpWithError() throws {
-        self.autocompleteModel.data = data
+        self.autocompleteModel.data = BeamData()
     }
 
     func testGetDateForCardReplacementJournalNote_TodayAsWord() throws {
@@ -35,7 +23,11 @@ class DestinationNoteAutocompleteListTests: XCTestCase {
     }
 
     func testGetDateForCardReplacementJournalNote_TodayAsDateString() throws {
-        let cardName = todaysDateAsString()
+        guard let data = self.autocompleteModel.data else {
+            XCTFail("failed to get todaysName from BeamData")
+            return
+        }
+        let cardName = data.todaysName
         let result = autocompleteModel.getDateForCardReplacementJournalNote(cardName)
         XCTAssertNotNil(result)
     }
@@ -53,8 +45,12 @@ class DestinationNoteAutocompleteListTests: XCTestCase {
     }
 
     func testGetCardReplacementKeywordDate_TodayAsDateString() throws {
-        let cardName = todaysDateAsString()
-        let result = autocompleteModel.getDateForCardReplacementJournalNote(cardName)
+        guard let data = self.autocompleteModel.data else {
+            XCTFail("failed to get todaysName from BeamData")
+            return
+        }
+        let cardName = data.todaysName
+        let result = autocompleteModel.getCardReplacementKeywordDate(cardName)
         XCTAssertNotNil(result)
     }
 
@@ -64,9 +60,12 @@ class DestinationNoteAutocompleteListTests: XCTestCase {
         XCTAssertNil(result)
     }
 
-
     func testRealNameForCardName_TodayAsWord() throws {
-        let cardName = todaysDateAsString()
+        guard let data = self.autocompleteModel.data else {
+            XCTFail("failed to get todaysName from BeamData")
+            return
+        }
+        let cardName = data.todaysName
         let result = autocompleteModel.realNameForCardName(cardName)
         XCTAssertEqual(result, cardName)
     }
@@ -76,6 +75,15 @@ class DestinationNoteAutocompleteListTests: XCTestCase {
         let result = autocompleteModel.realNameForCardName(cardName)
         XCTAssertNotNil(result)
         XCTAssertNotEqual(result, cardName)
-        XCTAssertEqual(result, todaysDateAsString())
+
+        // Assert supporting multiple formats "September 26, 2021" or "26 September 2021"
+        let date = Date()
+        let calendar = Calendar.current
+        let day = calendar.component(.day, from: date)
+        let month = calendar.monthSymbols[calendar.component(.month, from: date)-1]
+        let year = calendar.component(.year, from: date)
+        XCTAssertTrue(result.contains("\(day)"))
+        XCTAssertTrue(result.contains("\(month)"))
+        XCTAssertTrue(result.contains("\(year)"))
     }
 }
