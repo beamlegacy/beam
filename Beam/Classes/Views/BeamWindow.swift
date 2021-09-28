@@ -245,6 +245,14 @@ extension BeamWindow: NSWindowDelegate {
         self.toggleTitleBarAccessoryView()
     }
 
+    func windowWillMiniaturize(_ notification: Notification) {
+        state.browserTabsManager.currentTab?.switchToBackground()
+    }
+
+    func windowDidDeminiaturize(_ notification: Notification) {
+        if isMainWindow { state.browserTabsManager.currentTab?.startReading() }
+    }
+
 }
 
 // MARK: - Custom Field Editor

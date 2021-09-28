@@ -569,7 +569,6 @@ import Promises
     func willSwitchToNewUrl(url: URL) {
         isFromNoteSearch = false
         beamNavigationController.isNavigatingFromNote = false
-        browsingTree.switchToNewSearch()
         if self.url != nil && url.host != self.url?.host {
             resetDestinationNote()
         }
