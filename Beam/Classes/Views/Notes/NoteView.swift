@@ -85,5 +85,11 @@ struct NoteView: View {
             guard headerViewModel?.note != newNote else { return }
             headerViewModel = NoteHeaderView.ViewModel(note: newNote, state: state, documentManager: state.data.documentManager)
         }
+        .onReceive(note.changed.debounce(for: .seconds(10), scheduler: RunLoop.main)) { changed in
+            let (_, change) = changed
+            guard change != .meta else { return }
+            guard note.publicationStatus != .unpublished else { return }
+            BeamNoteSharingUtils.makeNotePublic(note, becomePublic: true, documentManager: state.data.documentManager)
+        }
     }
 }

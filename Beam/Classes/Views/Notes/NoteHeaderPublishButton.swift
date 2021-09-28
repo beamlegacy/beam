@@ -40,6 +40,10 @@ struct NoteHeaderPublishButton: View {
             if publishState == .justPublished || justCopiedLink {
                 publishTitle = "Published"
                 displayCheckIcon = true
+            } else if publishState == .publishing {
+                publishTitle = "Publishing…"
+            } else if publishState == .unpublishing {
+                publishTitle = "Unpublishing…"
             } else {
                 publishTitle = isPublic ? "Unpublish" : "Publish"
             }

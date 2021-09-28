@@ -664,6 +664,24 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
             return nil
         }
     }
+
+    public var richContent: [BeamElement] {
+
+        var richContent: [BeamElement] = []
+
+        switch self.kind {
+        case .image(_):
+            richContent.append(self)
+        default:
+            break
+        }
+
+        for c in children {
+            richContent.append(contentsOf: c.richContent)
+        }
+
+        return richContent
+    }
 }
 
 // MARK: - Text Stats
