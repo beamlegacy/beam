@@ -37,13 +37,20 @@ extension BeamObjectManager {
                 Persistence.Sync.BeamObjects.last_received_at = mostRecentReceivedAt
                 Logger.shared.logDebug("new ReceivedAt: \(mostRecentReceivedAt). \(beamObjects.count) beam objects fetched.",
                                        category: .beamObjectNetwork)
-                Logger.shared.logDebug("objects IDs: \(beamObjects.map { $0.id.uuidString.lowercased() }.joined(separator: ", "))",
+                var objectIds = beamObjects.map { $0.id.uuidString.lowercased() }
+                if objectIds.count > 10 {
+                    objectIds = Array(objectIds[0...10])
+                    objectIds.append("...")
+                }
+                Logger.shared.logDebug("objects IDs: \( objectIds.joined(separator: ", "))",
                                        category: .beamObjectNetwork)
             }
 
             try self.parseObjects(beamObjects)
-
             return true
+        }.recover(on: backgroundQueue) { error -> Promise<Bool> in
+            AppDelegate.showMessage("Error fetching objects from API: \(error.localizedDescription). This is not normal, check the logs and ask support.")
+            return .value(false)
         }
     }
 }
@@ -174,7 +181,7 @@ extension BeamObjectManager {
          */
 
         let objectErrorIds: [String] = errors.compactMap {
-            guard isErrorInvalidChecksum($0) else { return nil }
+            guard $0.isErrorInvalidChecksum else { return nil }
 
             return $0.objectid?.lowercased()
         }
@@ -497,7 +504,7 @@ extension BeamObjectManager {
             }
 
             // We only call `saveToAPIFailure` to fetch remote object with invalid checksum errors
-            guard isErrorInvalidChecksum(error) else { return nil }
+            guard error.isErrorInvalidChecksum else { return nil }
 
             return fetchAndReturnErrorBasedOnConflictPolicy(beamObject)
         }

@@ -10,7 +10,6 @@ enum APIRequestError: Error {
     case parserError
     case deviceNotFound
     case notAuthenticated
-    case documentConflict
     case beamObjectInvalidChecksum(Errorable)
     case apiError([String])
     case apiErrors(Errorable)
@@ -24,8 +23,6 @@ extension APIRequestError: LocalizedError {
         switch self {
         case .beamObjectInvalidChecksum:
             return loc("error.api.beamObject.invalidChecksum")
-        case .documentConflict:
-            return loc("error.api.document.conflict")
         case .parserError:
             return loc("error.api.parserError")
         case .forbidden:
@@ -43,13 +40,22 @@ extension APIRequestError: LocalizedError {
         case .duplicateTitle:
             return loc("error.api.duplicateTitle")
         case .apiErrors(let errorable):
-            return errorable.errors?.compactMap {
+            var errorStrings: [String] = errorable.errors?.compactMap {
                 if let path = $0.path?.joined(separator: ", "), let message = $0.message {
                     return "\($0.objectid ?? "?"): \(path): \(message)"
                 } else {
                     return "\(String(describing: $0.path?.joined(separator: ", "))): \(String(describing: $0.message))"
                 }
-            }.joined(separator: ", ")
+            } ?? []
+
+            if errorStrings.count > 10 {
+                errorStrings = Array(errorStrings[0...10])
+                errorStrings.append("...")
+            }
+
+            errorStrings.insert("\(errorable.errors?.count ?? 0) errors", at: 0)
+
+            return errorStrings.joined(separator: "; ")
         case .notFound:
             return loc("error.api.notFound")
         case .error:

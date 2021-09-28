@@ -10,6 +10,11 @@ struct UserErrorData: Codable, Equatable {
     var objectid: String?
     var message: String?
     var path: [String]?
+
+    var isErrorInvalidChecksum: Bool {
+        guard let message = message else { return false }
+        return message.contains("Differs from current checksum") && path == ["attributes", "previous_checksum"]
+    }
 }
 
 protocol APIResponseCodingKeyProtocol {
@@ -63,14 +68,14 @@ extension APIRequest {
                     // Because this is a possible behavior.
                     value = nil
                 case .keyNotFound(_, let context), .typeMismatch(_, let context):
-                    Logger.shared.logError("🛑 APIResultWrapper init \(context.debugDescription)", category: .network)
+                    Logger.shared.logError("APIResultWrapper init \(context.debugDescription)", category: .network)
                     throw error
                 default:
-                    Logger.shared.logError("🛑 APIResultWrapper init \(error.localizedDescription)", category: .network)
+                    Logger.shared.logError("APIResultWrapper init \(error.localizedDescription)", category: .network)
                     throw error
                 }
             } catch {
-                Logger.shared.logError("🛑 APIResultWrapper init \(error.localizedDescription)", category: .network)
+                Logger.shared.logError("APIResultWrapper init \(error.localizedDescription)", category: .network)
                 throw error
             }
 

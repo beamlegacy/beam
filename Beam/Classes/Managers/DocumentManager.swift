@@ -486,6 +486,8 @@ public class DocumentManager: NSObject {
 
     // MARK: Validations
     func checkValidations(_ context: NSManagedObjectContext, _ document: Document) throws {
+        guard document.deleted_at == nil else { return }
+
         Logger.shared.logDebug("checkValidations for \(document.titleAndId)", category: .documentDebug)
         try checkJournalDay(document)
         try checkDuplicateJournalDates(context, document)
@@ -494,7 +496,7 @@ public class DocumentManager: NSObject {
 
     private func checkJournalDay(_ document: Document) throws {
         guard document.documentType == .journal else { return }
-        guard String(document.journal_day).count != 8 else {return}
+        guard String(document.journal_day).count != 8 else { return }
 
         let errString = "journal_day is \(document.journal_day) for \(document.titleAndId)"
 
@@ -506,10 +508,8 @@ public class DocumentManager: NSObject {
     }
 
     private func checkDuplicateJournalDates(_ context: NSManagedObjectContext, _ document: Document) throws {
-        // If document is deleted, we don't need to check title uniqueness
-        guard document.deleted_at == nil else { return }
         guard document.documentType == .journal else { return }
-        guard String(document.journal_day).count == 8 else {return}
+        guard String(document.journal_day).count == 8 else { return }
 
         let predicate = NSPredicate(format: "journal_day == %d AND id != %@ AND deleted_at == nil AND database_id = %@",
                                     document.journal_day,
@@ -518,9 +518,9 @@ public class DocumentManager: NSObject {
         let documents = (try? Document.fetchAll(context, predicate).map { DocumentStruct(document: $0) }) ?? []
 
         if !documents.isEmpty {
-            let errString = "Journal Date \(document.journal_day) for \(document.titleAndId) already used in \(documents.count) other documents"
+            let errString = "Journal Date \(document.journal_day) for \(document.titleAndId) already used in \(documents.count) other documents: \(documents.map { $0.titleAndId })"
 
-            Logger.shared.logWarning(errString, category: .document)
+            Logger.shared.logError(errString, category: .document)
 
             let userInfo: [String: Any] = [NSLocalizedFailureReasonErrorKey: errString,
                                            NSValidationObjectErrorKey: self,
@@ -531,9 +531,6 @@ public class DocumentManager: NSObject {
     }
 
     func checkDuplicateTitles(_ context: NSManagedObjectContext, _ document: Document) throws {
-        // If document is deleted, we don't need to check title uniqueness
-        guard document.deleted_at == nil else { return }
-
         let predicate = NSPredicate(format: "title = %@ AND id != %@ AND deleted_at == nil AND database_id = %@",
                                     document.title,
                                     document.id as CVarArg,
@@ -541,9 +538,10 @@ public class DocumentManager: NSObject {
         let documents = (try? Document.fetchAll(context, predicate).map { DocumentStruct(document: $0) }) ?? []
 
         if !documents.isEmpty {
-            let errString = "Title \(document.titleAndId) is already used in \(documents.count) other documents"
+            let documentIds = documents.compactMap { $0.titleAndId }.joined(separator: "; ")
+            let errString = "Title \(document.titleAndId) is already used in \(documents.count) other documents: \(documentIds)"
 
-            Logger.shared.logWarning(errString, category: .document)
+            Logger.shared.logError(errString, category: .document)
 
             let userInfo: [String: Any] = [NSLocalizedFailureReasonErrorKey: errString,
                                            NSValidationObjectErrorKey: self,
@@ -752,5 +750,32 @@ extension DocumentManager {
                 }
             }
         return cancellable
+    }
+}
+
+// For tests
+extension DocumentManager {
+    func create(title: String) -> DocumentStruct? {
+        let semaphore = DispatchSemaphore(value: 0)
+        var result: DocumentStruct?
+
+        coreDataManager.persistentContainer.performBackgroundTask { [unowned self] context in
+            let document = Document.create(context, title: title)
+
+            do {
+                try self.checkValidations(context, document)
+
+                result = self.parseDocumentBody(document)
+                try Self.saveContext(context: context)
+            } catch {
+                Logger.shared.logError(error.localizedDescription, category: .coredata)
+            }
+
+            semaphore.signal()
+        }
+
+        semaphore.wait()
+
+        return result
     }
 }

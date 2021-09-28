@@ -404,9 +404,12 @@ class PasswordsDB: PasswordStore {
         }
     }
 
-    func allRecords() throws -> [PasswordRecord] {
+    func allRecords(_ updatedSince: Date? = nil) throws -> [PasswordRecord] {
         try dbPool.read { db in
-            try PasswordRecord.fetchAll(db)
+            if let updatedSince = updatedSince {
+                return try PasswordRecord.filter(PasswordRecord.Columns.updatedAt >= updatedSince).fetchAll(db)
+            }
+            return try PasswordRecord.fetchAll(db)
         }
     }
 

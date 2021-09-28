@@ -14,10 +14,21 @@ extension DocumentManager: BeamObjectManagerDelegate {
                 guard let documentCoreData = try Document.fetchWithId(context, updateObject.id) else {
                     throw DocumentManagerError.localDocumentNotFound
                 }
+
+                guard !self.isEqual(documentCoreData, to: updateObject) else { continue }
+
                 documentCoreData.data = updateObject.data
                 documentCoreData.beam_object_previous_checksum = updateObject.previousChecksum
                 documentCoreData.beam_api_data = updateObject.data
                 documentCoreData.version += 1
+
+                do {
+                    try checkValidations(context, documentCoreData)
+                } catch {
+                    Logger.shared.logError("saveObjectsAfterConflict checkValidations: \(error.localizedDescription)",
+                                           category: .database)
+                    documentCoreData.deleted_at = BeamDate.now
+                }
 
                 let savedDoc = DocumentStruct(document: documentCoreData)
                 self.notificationDocumentUpdate(savedDoc)
@@ -51,8 +62,8 @@ extension DocumentManager: BeamObjectManagerDelegate {
                  */
                 guard documentCoreData.beam_object_previous_checksum != updateObject.previousChecksum ||
                         documentCoreData.beam_api_data != updateObject.data else {
-                    Logger.shared.logDebug("PersistChecksum \(updateObject.titleAndId) already set \(updateObject.previousChecksum ?? "-")",
-                                           category: .documentNetwork)
+//                    Logger.shared.logDebug("PersistChecksum \(updateObject.titleAndId) already set \(updateObject.previousChecksum ?? "-")",
+//                                           category: .documentNetwork)
                     continue
                 }
 
@@ -70,11 +81,7 @@ extension DocumentManager: BeamObjectManagerDelegate {
 
     // swiftlint:disable:next function_body_length cyclomatic_complexity
     func receivedObjects(_ documents: [DocumentStruct]) throws {
-        Logger.shared.logDebug("Received \(documents.count) documents: \(documents.map { $0.beamObjectId.uuidString.lowercased() }.joined(separator: ", "))",
-                               category: .documentNetwork)
-
         var changedDocuments: Set<DocumentStruct> = Set()
-        let localTimer = BeamDate.now
 
         let context = coreDataManager.backgroundContext
         try context.performAndWait {
@@ -83,11 +90,7 @@ extension DocumentManager: BeamObjectManagerDelegate {
             for var document in documents {
                 var localDocument = Document.rawFetchOrCreateWithId(context, document.id)
 
-                if self.isEqual(localDocument, to: document) {
-                    Logger.shared.logDebug("\(document.titleAndId): remote is equal to struct version, skip",
-                                           category: .documentNetwork)
-                    continue
-                }
+                guard !self.isEqual(localDocument, to: document) else { continue }
 
                 if document.checksum == localDocument.beam_object_previous_checksum &&
                     document.data == localDocument.beam_api_data {
@@ -127,7 +130,7 @@ extension DocumentManager: BeamObjectManagerDelegate {
                         }
 
                         switch (error as NSError).code {
-                        case 1001, 1004:
+                        case 1001:
                             let conflictedDocuments = (error as NSError).userInfo["documents"] as? [DocumentStruct]
 
                             // When receiving empty documents from the API and conflict with existing documents,
@@ -137,7 +140,7 @@ extension DocumentManager: BeamObjectManagerDelegate {
                             if document.isEmpty {
                                 document.deletedAt = BeamDate.now
                                 localDocument.deleted_at = document.deletedAt
-                                Logger.shared.logWarning("Title or JournalDate is in conflict but remote document is empty, deleting",
+                                Logger.shared.logWarning("Title is in conflict but remote document is empty, deleting",
                                                          category: .documentNetwork)
 
                                 changedDocuments.insert(document)
@@ -152,18 +155,18 @@ extension DocumentManager: BeamObjectManagerDelegate {
                                     if localConflictedDocumentCD.beam_api_sent_at != nil {
                                         localConflictedDocumentCD.deleted_at = BeamDate.now
                                         changedDocuments.insert(DocumentStruct(document: localConflictedDocumentCD))
-                                        Logger.shared.logWarning("Title or JournalDate is in conflict, but local documents are empty, soft deleting",
+                                        Logger.shared.logWarning("Title is in conflict, but local documents are empty, soft deleting",
                                                                  category: .documentNetwork)
                                     } else {
                                         context.delete(localConflictedDocumentCD)
-                                        Logger.shared.logWarning("Title or JournalDate is in conflict, but local documents are empty, deleting",
+                                        Logger.shared.logWarning("Title is in conflict, but local documents are empty, deleting",
                                                                  category: .documentNetwork)
                                     }
                                 }
 
                             } else {
                                 document.title = "\(originalTitle) (\(index))"
-                                Logger.shared.logWarning("Title or JournalDate is in conflict, neither local or remote are empty.",
+                                Logger.shared.logWarning("Title is in conflict, neither local or remote are empty.",
                                                          category: .documentNetwork)
                                 changedDocuments.insert(document)
                             }
@@ -175,8 +178,37 @@ extension DocumentManager: BeamObjectManagerDelegate {
                             localDocument = Document.rawFetchOrCreateWithId(context, document.id)
                             Logger.shared.logWarning("After reload: \(localDocument.version)",
                                                      category: .documentNetwork)
+                        case 1003:
+                            Logger.shared.logError("journalDate is incorrect: \(error.localizedDescription)", category: .documentNetwork)
+                            if let documents = (error as NSError).userInfo["documents"] as? [DocumentStruct] {
+                                dump(documents)
+                            }
+                            document.deletedAt = BeamDate.now
+                            localDocument.deleted_at = document.deletedAt
+                            changedDocuments.insert(document)
+                            good = true
+                            changed = true
+                        case 1004:
+                            Logger.shared.logError("Error saving, journal date conflicts: \(error.localizedDescription). Deleting it.",
+                                                   category: .document)
+                            if let documents = (error as NSError).userInfo["documents"] as? [DocumentStruct] {
+                                dump(documents)
+                            }
 
-                        default: break
+                            document.deletedAt = BeamDate.now
+                            localDocument.deleted_at = document.deletedAt
+                            changedDocuments.insert(document)
+                            good = true
+                            changed = true
+                        default:
+                            Logger.shared.logError("Error saving: \(error.localizedDescription). Deleting it.",
+                                                   category: .document)
+
+                            document.deletedAt = BeamDate.now
+                            localDocument.deleted_at = document.deletedAt
+                            changedDocuments.insert(document)
+                            good = true
+                            changed = true
                         }
                     }
                 }
@@ -191,7 +223,6 @@ extension DocumentManager: BeamObjectManagerDelegate {
             let semaphore = DispatchSemaphore(value: 0)
             try saveOnBeamObjectsAPI(Array(changedDocuments)) { _ in
                 semaphore.signal()
-
             }
 
             let semaphoreResult = semaphore.wait(timeout: DispatchTime.now() + .seconds(10))
@@ -200,9 +231,10 @@ extension DocumentManager: BeamObjectManagerDelegate {
             }
         }
 
-        Logger.shared.logDebug("Received \(documents.count) documents: done. \(changedDocuments.count) remodified.",
-                               category: .documentNetwork,
-                               localTimer: localTimer)
+        if !changedDocuments.isEmpty {
+            Logger.shared.logDebug("Received \(documents.count) documents: done. \(changedDocuments.count) remodified.",
+                                   category: .documentNetwork)
+        }
     }
 
     func indexDocument(_ docStruct: DocumentStruct) {
@@ -217,13 +249,18 @@ extension DocumentManager: BeamObjectManagerDelegate {
         }
     }
 
-    func allObjects() throws -> [DocumentStruct] {
+    func allObjects(updatedSince: Date?) throws -> [DocumentStruct] {
         let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
 
         // Note: when this becomes a memory hog because we manipulate all local documents, we'll want to loop through
         // them by 100s and make multiple network calls instead.
         return try context.performAndWait {
-            try Document.rawFetchAll(context).map {
+            var predicate: NSPredicate?
+            if let updatedSince = updatedSince {
+                predicate = NSPredicate(format: "updated_at >= %@", updatedSince as CVarArg)
+            }
+
+            return try Document.rawFetchAll(context, predicate).map {
                 var result = DocumentStruct(document: $0)
                 result.previousChecksum = result.beamObjectPreviousChecksum
                 return result
@@ -299,30 +336,6 @@ extension DocumentManager: BeamObjectManagerDelegate {
 
         // Not incrementing `version` on purpose, this is only used to send the merged object back to the API
         result.updatedAt = BeamDate.now
-
-        return result
-    }
-
-    func create(title: String) -> DocumentStruct? {
-        let semaphore = DispatchSemaphore(value: 0)
-        var result: DocumentStruct?
-
-        coreDataManager.persistentContainer.performBackgroundTask { [unowned self] context in
-            let document = Document.create(context, title: title)
-
-            do {
-                try self.checkValidations(context, document)
-
-                result = self.parseDocumentBody(document)
-                try Self.saveContext(context: context)
-            } catch {
-                Logger.shared.logError(error.localizedDescription, category: .coredata)
-            }
-
-            semaphore.signal()
-        }
-
-        semaphore.wait()
 
         return result
     }

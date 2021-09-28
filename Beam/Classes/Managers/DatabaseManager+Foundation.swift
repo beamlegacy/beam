@@ -2,21 +2,6 @@ import Foundation
 import BeamCore
 
 extension DatabaseManager {
-    func syncAll(completion: ((Result<Bool, Error>) -> Void)? = nil) {
-        saveAllOnApi { result in
-            if case .success(let success) = result, success == true {
-                do {
-                    try self.fetchAllOnApi(completion)
-                } catch {
-                    completion?(.failure(error))
-                }
-                return
-            }
-
-            completion?(result)
-        }
-    }
-
     func saveAllOnApi(_ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
         guard AuthenticationManager.shared.isAuthenticated,
               Configuration.networkEnabled else {
@@ -238,8 +223,10 @@ extension DatabaseManager {
                     do {
                         database.beam_object_previous_checksum = remoteDatabaseStruct.checksum
                         database.update(remoteDatabaseStruct)
-                        completion?(.success(try Self.saveContext(context: context)))
+                        let success = try Self.saveContext(context: context)
+                        completion?(.success(success))
                     } catch {
+                        Logger.shared.logError("Error saving: \(error.localizedDescription)", category: .database)
                         completion?(.failure(error))
                     }
                 }

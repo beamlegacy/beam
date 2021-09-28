@@ -52,6 +52,7 @@ class BeamObject: Codable {
         case createdAt
         case updatedAt
         case deletedAt
+        case receivedAt
         case data
         case dataChecksum = "checksum"
         case previousChecksum
@@ -83,7 +84,7 @@ class BeamObject: Codable {
 
     static var encoder: JSONEncoder {
         let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
+        encoder.dateEncodingStrategy = .iso8601withFractionalSeconds
         encoder.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
         encoder.keyEncodingStrategy = .convertToSnakeCase
         return encoder
@@ -91,7 +92,7 @@ class BeamObject: Codable {
 
     static var decoder: JSONDecoder {
         let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
+        decoder.dateDecodingStrategy = .iso8601withFractionalSeconds
         decoder.keyDecodingStrategy = .convertFromSnakeCase
         return decoder
     }
@@ -101,6 +102,7 @@ class BeamObject: Codable {
         result.createdAt = createdAt
         result.updatedAt = updatedAt
         result.deletedAt = deletedAt
+        result.receivedAt = receivedAt
 
         result.data = data
         result.privateKeySignature = privateKeySignature
@@ -114,7 +116,18 @@ class BeamObject: Codable {
         guard let data = data else {
             throw BeamObjectError.noData
         }
-        var decodedObject = try Self.decoder.decode(T.self, from: data)
+
+        var decodedObject: T
+
+        do {
+            decodedObject = try Self.decoder.decode(T.self, from: data)
+        } catch {
+            Logger.shared.logError("Error decoding \(self.beamObjectType) beamObject: \(error.localizedDescription)",
+                                   category: .beamObject)
+            dump(data.asString)
+            throw error
+        }
+
         decodedObject.beamObjectId = id
         decodedObject.checksum = dataChecksum
         decodedObject.createdAt = createdAt ?? decodedObject.createdAt

@@ -206,13 +206,13 @@ class Database: NSManagedObject, BeamCoreDataObject {
     }
 
     class func fetchOrCreateWithId(_ context: NSManagedObjectContext, _ id: UUID) -> Database {
-        let database = (try? fetchFirst(context, NSPredicate(format: "id = %@", id as CVarArg))) ?? create(context)
-        database.id = id
-        return database
+        rawFetchOrCreateWithId(context, id)
     }
 
     class func rawFetchOrCreateWithId(_ context: NSManagedObjectContext, _ id: UUID) -> Database {
-        fetchOrCreateWithId(context, id)
+        let database = (try? rawFetchFirst(context, NSPredicate(format: "id = %@", id as CVarArg))) ?? create(context)
+        database.id = id
+        return database
     }
 
     static func fetchFirst(_ context: NSManagedObjectContext,

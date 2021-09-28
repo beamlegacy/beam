@@ -219,10 +219,13 @@ class BeamFileDB: BeamFileStorage {
         }
     }
 
-    func allRecords() throws -> [BeamFileRecord] {
-        try dbPool.read({ db in
-            try BeamFileRecord.fetchAll(db)
-        })
+    func allRecords(_ updatedSince: Date? = nil) throws -> [BeamFileRecord] {
+        try dbPool.read { db in
+            if let updatedSince = updatedSince {
+                return try BeamFileRecord.filter(PasswordRecord.Columns.updatedAt >= updatedSince).fetchAll(db)
+            }
+            return try BeamFileRecord.fetchAll(db)
+        }
     }
 }
 
@@ -273,14 +276,11 @@ extension BeamFileDBManager: BeamObjectManagerDelegate {
     func willSaveAllOnBeamObjectApi() {}
 
     func receivedObjects(_ files: [BeamFileRecord]) throws {
-        Logger.shared.logDebug("Received \(files.count) files: updating",
-                               category: .fileNetwork)
-
         try fileDB.insert(files: files)
     }
 
-    func allObjects() throws -> [BeamFileRecord] {
-        try fileDB.allRecords()
+    func allObjects(updatedSince: Date?) throws -> [BeamFileRecord] {
+        try fileDB.allRecords(updatedSince)
     }
 
     func saveAllOnNetwork(_ files: [BeamFileRecord], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {

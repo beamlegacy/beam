@@ -19,7 +19,8 @@ struct DocumentsList: View {
                 List(documents.filter({
                     searchText.isEmpty ? true :
                         ($0.title.range(of: searchText, options: .caseInsensitive) != nil) ||
-                        ($0.data?.asString?.range(of: searchText, options: .caseInsensitive) != nil)
+                        ($0.data?.asString?.range(of: searchText, options: .caseInsensitive) != nil ||
+                            $0.id.uuidString.lowercased() == searchText.lowercased())
                 })) { document in
                     NavigationLink(destination: DocumentDetail(document: document).background(Color.white)) {
                         DocumentRow(document: document)
