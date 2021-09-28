@@ -23,7 +23,8 @@ struct AutocompleteList: View {
                 return AutocompleteItem(item: i, selected: isSelectedItem(i),
                                         colorPalette: i.source == .createCard ?
                                             AutocompleteItemColorPalette(informationTextColor: BeamColor.Autocomplete.newCardSubtitle) :
-                                            AutocompleteItem.defaultColorPalette)
+                                            AutocompleteItem.defaultColorPalette,
+                                        additionalLeadingPadding: BeamSpacing._40)
                     .frame(height: itemHeight)
                     .simultaneousGesture(
                         TapGesture(count: 1).onEnded {
