@@ -30,6 +30,7 @@ class BeamUITestsMenuGenerator {
         case .setAutoUpdateToMock: setAutoUpdateToMock()
         case .cleanDownloads: cleanDownloadFolder()
         case .omnibarFillHistory: fillHistory()
+        case .signInWithTestAccount: signInWithTestAccount()
         default: break
         }
     }
@@ -169,5 +170,19 @@ class BeamUITestsMenuGenerator {
     private func addPageToHistory(url: String, title: String, id: Int) {
         _ = IndexDocument(source: url, title: title, contents: title)
         try? GRDBDatabase.shared.insertHistoryUrl(urlId: UInt64(id), url: url, title: title, content: title)
+    }
+
+    private func signInWithTestAccount() {
+        guard !AuthenticationManager.shared.isAuthenticated else { return }
+
+        let accountManager = AccountManager()
+        let email = Configuration.testAccountEmail
+        let password = Configuration.testAccountPassword
+
+        accountManager.signIn(email, password) { result in
+            if case .failure(let error) = result {
+                fatalError(error.localizedDescription)
+            }
+        }
     }
 }
