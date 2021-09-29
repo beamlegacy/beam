@@ -278,6 +278,13 @@
 		523416A22629D465001F306F /* BeamCoreDataObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 523416A12629D465001F306F /* BeamCoreDataObject.swift */; };
 		523A32CF267764A200606768 /* EnvironmentVariables.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52B9A38B264562E60063AEEF /* EnvironmentVariables.swift */; };
 		523FF66125C31D8800B4BD6E /* Data+String.swift in Sources */ = {isa = PBXBuildFile; fileRef = 523FF66025C31D8800B4BD6E /* Data+String.swift */; };
+		5241E5E926F89AE700B08F69 /* UserSessionRequest+Foundation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5241E5E826F89AE700B08F69 /* UserSessionRequest+Foundation.swift */; };
+		5241E5F026F89AF200B08F69 /* UserSessionRequest+PromiseKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5241E5EF26F89AF200B08F69 /* UserSessionRequest+PromiseKit.swift */; };
+		5241E5F226F89AFB00B08F69 /* UserSessionRequest+Promises.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5241E5F126F89AFB00B08F69 /* UserSessionRequest+Promises.swift */; };
+		5241E5F426F89C5000B08F69 /* refresh_token.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 5241E5F326F89C5000B08F69 /* refresh_token.graphql */; };
+		5241E5F626F8B0A900B08F69 /* AccountManager+Foundation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5241E5F526F8B0A900B08F69 /* AccountManager+Foundation.swift */; };
+		5241E5F826F8B0BA00B08F69 /* AccountManager+PromiseKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5241E5F726F8B0BA00B08F69 /* AccountManager+PromiseKit.swift */; };
+		5241E5FA26F8B0C300B08F69 /* AccountManager+Promises.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5241E5F926F8B0C300B08F69 /* AccountManager+Promises.swift */; };
 		524299C725A47D2600F4DBF5 /* AppDelegate+Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524299C625A47D2600F4DBF5 /* AppDelegate+Preferences.swift */; };
 		524299E725A480A300F4DBF5 /* AccountsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524299E225A480A300F4DBF5 /* AccountsView.swift */; };
 		524299EE25A488E000F4DBF5 /* AdvancedPreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524299ED25A488E000F4DBF5 /* AdvancedPreferencesView.swift */; };
@@ -1293,6 +1300,13 @@
 		523416A12629D465001F306F /* BeamCoreDataObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamCoreDataObject.swift; sourceTree = "<group>"; };
 		523FF66025C31D8800B4BD6E /* Data+String.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data+String.swift"; sourceTree = "<group>"; };
 		523FF67825C31D9D00B4BD6E /* String+Data.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Data.swift"; sourceTree = "<group>"; };
+		5241E5E826F89AE700B08F69 /* UserSessionRequest+Foundation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserSessionRequest+Foundation.swift"; sourceTree = "<group>"; };
+		5241E5EF26F89AF200B08F69 /* UserSessionRequest+PromiseKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserSessionRequest+PromiseKit.swift"; sourceTree = "<group>"; };
+		5241E5F126F89AFB00B08F69 /* UserSessionRequest+Promises.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserSessionRequest+Promises.swift"; sourceTree = "<group>"; };
+		5241E5F326F89C5000B08F69 /* refresh_token.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = refresh_token.graphql; sourceTree = "<group>"; };
+		5241E5F526F8B0A900B08F69 /* AccountManager+Foundation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AccountManager+Foundation.swift"; sourceTree = "<group>"; };
+		5241E5F726F8B0BA00B08F69 /* AccountManager+PromiseKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AccountManager+PromiseKit.swift"; sourceTree = "<group>"; };
+		5241E5F926F8B0C300B08F69 /* AccountManager+Promises.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AccountManager+Promises.swift"; sourceTree = "<group>"; };
 		5242684C25ED408500DB1D05 /* String+Split.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Split.swift"; sourceTree = "<group>"; };
 		524299C625A47D2600F4DBF5 /* AppDelegate+Preferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+Preferences.swift"; sourceTree = "<group>"; };
 		524299E225A480A300F4DBF5 /* AccountsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AccountsView.swift; sourceTree = "<group>"; };
@@ -2322,6 +2336,9 @@
 				52019A6026DE2ACB005E8278 /* BeamObjectRequest+Promises.swift */,
 				52F4E4AD264182E00067B017 /* IdentityRequest.swift */,
 				418171632581107C00317ED8 /* UserSessionRequest.swift */,
+				5241E5E826F89AE700B08F69 /* UserSessionRequest+Foundation.swift */,
+				5241E5EF26F89AF200B08F69 /* UserSessionRequest+PromiseKit.swift */,
+				5241E5F126F89AFB00B08F69 /* UserSessionRequest+Promises.swift */,
 				3303E0FB26FA221400E175AC /* UserInfoRequest.swift */,
 			);
 			path = API;
@@ -2357,6 +2374,7 @@
 				418171692581107C00317ED8 /* forgot_password.graphql */,
 				4181716A2581107C00317ED8 /* sign_in.graphql */,
 				52F4E4A126417F210067B017 /* sign_in_with_provider.graphql */,
+				5241E5F326F89C5000B08F69 /* refresh_token.graphql */,
 				3303E10226FA22D300E175AC /* user_infos.graphql */,
 			);
 			path = UserSession;
@@ -2659,6 +2677,9 @@
 				5298EADE26272C2C0033862C /* CoreData */,
 				418171E72581107C00317ED8 /* AuthenticationManager.swift */,
 				418171E82581107C00317ED8 /* AccountManager.swift */,
+				5241E5F526F8B0A900B08F69 /* AccountManager+Foundation.swift */,
+				5241E5F726F8B0BA00B08F69 /* AccountManager+PromiseKit.swift */,
+				5241E5F926F8B0C300B08F69 /* AccountManager+Promises.swift */,
 				5224CD8B26860C0900D4179E /* BeamObjectManager.swift */,
 				52019A6226DE2CC9005E8278 /* BeamObjectManager+Foundation.swift */,
 				52019A6826DE2F8F005E8278 /* BeamObjectManager+PromiseKit.swift */,
@@ -4625,6 +4646,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5224CD462685FF7E00D4179E /* update_beam_objects.graphql in Resources */,
+				5241E5F426F89C5000B08F69 /* refresh_token.graphql in Resources */,
 				8AD2636B26F4A0480074D673 /* video.mov in Resources */,
 				02C07A9B2670D98600894C5D /* Navigation.js in Resources */,
 				02A2B285263190F100D581A5 /* Scorer.js in Resources */,
@@ -5042,6 +5064,7 @@
 				03CA9A9725CC61BF00E7CFA2 /* ContentBlockingManager.swift in Sources */,
 				96120D12260C91C600592546 /* TextFrame.swift in Sources */,
 				9634DD8F264AF7940065383E /* TextLineLayer.swift in Sources */,
+				5241E5F826F8B0BA00B08F69 /* AccountManager+PromiseKit.swift in Sources */,
 				525F932726E239B600A5C7BD /* DatabaseManager+BeamObjectManagerDelegate.swift in Sources */,
 				A06EF0AB26984400007B3BB3 /* CreditCardsModalView.swift in Sources */,
 				4181733725811F6300317ED8 /* Mode.swift in Sources */,
@@ -5100,6 +5123,8 @@
 				96FACC8626050B1E0088DD67 /* SetSelection.swift in Sources */,
 				A5DE141C26491F840023F753 /* WKWebview+Zoom.swift in Sources */,
 				4181722A2581107C00317ED8 /* NSRect+Beam.swift in Sources */,
+				5241E5F626F8B0A900B08F69 /* AccountManager+Foundation.swift in Sources */,
+				5241E5E926F89AE700B08F69 /* UserSessionRequest+Foundation.swift in Sources */,
 				A0CB5AEA268B231400D1EF02 /* CardsPreferencesView.swift in Sources */,
 				52019A7126DE4718005E8278 /* DocumentManager+Promises.swift in Sources */,
 				96FACC6C2604F2650088DD67 /* FocusElement.swift in Sources */,
@@ -5112,6 +5137,7 @@
 				522BC3F526A872740018B51E /* BeamObjectManagerError.swift in Sources */,
 				5224CD822686043600D4179E /* BeamObjectRequest.swift in Sources */,
 				961EC51725B5038E009FA322 /* ChevronButton.swift in Sources */,
+				5241E5FA26F8B0C300B08F69 /* AccountManager+Promises.swift in Sources */,
 				52B17ABA262442BC00CB4728 /* DatabasesList.swift in Sources */,
 				418171FE2581107C00317ED8 /* HtmlNoteAdapter.swift in Sources */,
 				A03CE0EC25F954CB00D767B0 /* BeamNoteDataHolder.swift in Sources */,
@@ -5294,6 +5320,7 @@
 				0325629526051D3B006513E4 /* RBContentBlocker.m in Sources */,
 				A0D1731425E4FC2D00FDE73C /* ReplaceText.swift in Sources */,
 				A0AA693325C41C9B0038F9A3 /* MouseHandler.swift in Sources */,
+				5241E5F226F89AFB00B08F69 /* UserSessionRequest+Promises.swift in Sources */,
 				A5D21FD026974BA500250A6A /* CalendarPickerViewModel.swift in Sources */,
 				A0C63A6825FA249700FB4CCE /* BeamTextHolder.swift in Sources */,
 				418171F22581107C00317ED8 /* APIRequest.swift in Sources */,
@@ -5378,6 +5405,7 @@
 				961EC50B25B495DB009FA322 /* ButtonLayer.swift in Sources */,
 				75BDCDAD26F339B1004BBC7E /* ErrorPageManager.swift in Sources */,
 				418172542581107C00317ED8 /* OmniBar.swift in Sources */,
+				5241E5F026F89AF200B08F69 /* UserSessionRequest+PromiseKit.swift in Sources */,
 				4181721D2581107C00317ED8 /* NSImage+Beam.swift in Sources */,
 				A08DE20D26160DC800F8ABB4 /* BeamTextEdit+CopyPaste.swift in Sources */,
 				A56696B12614CF7F00B814D2 /* TableView.swift in Sources */,
