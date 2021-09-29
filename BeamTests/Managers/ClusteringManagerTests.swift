@@ -41,6 +41,7 @@ class ClusteringManagerTests: XCTestCase {
             BeamNote(title: "Paris"),
             BeamNote(title: "Machine Learning")
         ]
+        notes[0].children = [BeamElement("The official site of Roger Federer is www.rogerfederer.com"), BeamElement("His Wikipedia page is https://en.wikipedia.org/wiki/Roger_Federer"), BeamElement("I wonder if his email is rogerfederer@gmail.com")]
     }
 
     /// Test that adding pages and then notes works correctly
@@ -125,6 +126,8 @@ class ClusteringManagerTests: XCTestCase {
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[3]).0) == nodes[4]?.link
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[3]).1) == nodes[1]?.link
     }
+
+    /// Test that URLs that are not suggested for any note are extracted correctly for the pourposes of monitoring
     func testOrphanedUrls() throws {
         let noteId = UUID()
         let noteGroups = [[noteId], [], []]
@@ -135,5 +138,15 @@ class ClusteringManagerTests: XCTestCase {
         let activeSources = ActiveSources()
         activeSources.activeSources = [noteId: [2]]
         expect(self.clusteringManager.getOrphanedUrlGroups(urlGroups: urlGroups, noteGroups: noteGroups, activeSources: activeSources)) == [[3]]
+    }
+
+    /// Test that text cleaning for notes is done correctly
+    func testNoteTextCleaning() throws {
+        let fullText = self.clusteringManager.cleanTextFrom(note: notes[0])
+        let separators = CharacterSet(charactersIn: " \n")
+        let splittedText = fullText.components(separatedBy: separators)
+        expect(splittedText[0]) == "Tennis"
+        expect(splittedText[1]) == "The"
+        expect(splittedText[8]) == ""
     }
 }
