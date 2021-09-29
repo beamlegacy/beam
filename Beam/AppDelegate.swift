@@ -327,7 +327,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         syncDataWithBeamObject { _ in
             Logger.shared.logDebug("Sending toApplicationShouldTerminate true")
-            DispatchQueue.main.async {
+            RunLoop.main.perform(inModes: [.modalPanel]) {
+                Logger.shared.logDebug("Sending toApplicationShouldTerminate true (main thread)")
                 NSApplication.shared.reply(toApplicationShouldTerminate: true)
             }
         }
