@@ -1,0 +1,10 @@
+mutation ($accessToken: ExpiredJwt!, $refreshToken: Jwt!) {
+    renewCredentials(input: {accessToken: $accessToken, refreshToken: $refreshToken}) {
+        accessToken
+        refreshToken
+        errors {
+            path
+            message
+        }
+    }
+}
