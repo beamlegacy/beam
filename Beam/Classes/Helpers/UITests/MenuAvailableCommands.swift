@@ -3,6 +3,7 @@ import Foundation
 public enum UITestMenuAvailableCommands: String, CaseIterable {
     // Clean up
     case destroyDB = "Destroy Databases"
+    case signInWithTestAccount = "Sign in with Test Account"
     case logout = "Logout"
     case deleteLogs = "Delete Logs"
 
