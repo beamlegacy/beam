@@ -58,26 +58,24 @@ private struct HyperlinkEditorView: View {
             VStack(spacing: 0) {
                 HStack(alignment: .center, spacing: 4) {
                     textField(viewModel.title, editingBinding: $isEditingTitle, placeholder: "Title")
-                    if isEditingTitle {
-                        Icon(name: "editor-format_enter", size: 12, color: BeamColor.LightStoneGray.swiftUI)
-                            .padding(BeamSpacing._20)
-                            .onTapGesture {
-                                onFinishEditing?(false)
-                            }
-                    }
+                    Icon(name: "editor-format_enter", size: 12, color: BeamColor.LightStoneGray.swiftUI)
+                        .opacity(isEditingTitle ? 1 : 0)
+                        .padding(BeamSpacing._20)
+                        .onTapGesture {
+                            onFinishEditing?(false)
+                        }
                 }
                 .frame(height: Self.sectionHeight)
                 Separator(horizontal: true)
                 HStack(alignment: .center, spacing: 4) {
                     textField(viewModel.url, editingBinding: $isEditingUrl, placeholder: "Link URL")
-                    if isEditingUrl {
-                        Icon(name: "editor-format_enter", size: 12, color: BeamColor.LightStoneGray.swiftUI)
-                            .padding(BeamSpacing._20)
-                            .onTapGesture {
-                                onFinishEditing?(false)
-                            }
+                    Icon(name: "editor-format_enter", size: 12, color: BeamColor.LightStoneGray.swiftUI)
+                        .opacity(isEditingUrl ? 1 : 0)
+                        .padding(BeamSpacing._20)
+                        .onTapGesture {
+                            onFinishEditing?(false)
+                        }
 
-                    }
                 }
                 .frame(height: Self.sectionHeight)
             }
@@ -105,6 +103,7 @@ struct HyperlinkEditorView_Previews: PreviewProvider {
         let model = HyperlinkEditorViewModel()
         model.url = .constant("https://beamapp.co")
         model.title = .constant("Beam website")
+        model.visible = true
         return HyperlinkEditorView(viewModel: model)
             .frame(width: 300, height: 90)
     }
