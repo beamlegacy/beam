@@ -35,9 +35,10 @@ class AuthenticationManager {
     }
     var isAuthenticated: Bool {
         let now = BeamDate.now
-        guard let accessToken = accessToken,
-            let accessTokenExpirationDate = expirationDate(accessToken),
-            (accessTokenExpirationDate > now) else {
+        guard let accessToken = accessToken, let refreshToken = refreshToken,
+              let accessTokenExpirationDate = Self.expirationDate(accessToken),
+              let refreshTokenExpirationDate = Self.expirationDate(refreshToken),
+            (accessTokenExpirationDate > now || refreshTokenExpirationDate > now) else {
             return false
         }
 
@@ -79,19 +80,24 @@ class AuthenticationManager {
                 return
             }
 
-            guard self.accessToken == nil, self.refreshToken == nil else {
-                self.log(message: "no accessToken or refreshToken")
-                self.group.leave()
-                return
-            }
-
             Logger.shared.logInfo("accessToken has expired, updating it", category: .network)
             EventsTracker.shared.logBreadcrumb(message: "accessToken has expired, updating it",
                                                category: "app.lifecycle",
                                                type: "system")
 
-            // TODO: call userSessionRequest.refreshToken
-            self.semaphore.wait()
+            let accountManager = AccountManager()
+
+            accountManager.refreshToken { result in
+                switch result {
+                case .failure(let error):
+                    Logger.shared.logInfo("Could not refresh token: \(error.localizedDescription)", category: .network)
+                case .success(let success):
+                    Logger.shared.logInfo("Refresh Token succeeded: \(success)", category: .network)
+                }
+
+                self.group.leave()
+                self.semaphore.signal()
+            }
         }
 
         group.wait()
@@ -107,39 +113,34 @@ class AuthenticationManager {
     }
 
     private func handleUpdateAccessTokenSuccess(_ refresh: UserSessionRequest.RenewCredentials, accessToken: String) {
-        if let errors = refresh.errors, !errors.isEmpty {
-            LibrariesManager.nonFatalError("Can't refresh token: \(errors.compactMap { $0.message })")
-            EventsTracker.shared.logBreadcrumb(message: "Can't refresh token, removing existing tokens",
-                                               category: "app.lifecycle",
-                                               type: "system")
-            self.accessToken = nil
-            self.refreshToken = nil
-        } else if let newAccessToken = refresh.accessToken,
-            let newRefreshToken = refresh.refreshToken {
-            Logger.shared.logInfo("Expiration \(String(describing: self.expirationDate(accessToken))) -> \(String(describing: self.expirationDate(newAccessToken)))", category: .network)
-            EventsTracker.shared.logBreadcrumb(message: "Refreshed access token and refresh token",
-                                               category: "app.lifecycle",
-                                               type: "system")
-
-            self.accessToken = newAccessToken
-            self.refreshToken = newRefreshToken
-        } else {
+        guard let newAccessToken = refresh.accessToken,
+              let newRefreshToken = refresh.refreshToken else {
             LibrariesManager.nonFatalError("Can't refresh token, returned success, no error and no token. Removing existing tokens")
             EventsTracker.shared.logBreadcrumb(message: "Can't refresh token, returned success, no error and no token. Removing existing tokens",
                                                category: "app.lifecycle",
                                                type: "system")
             self.accessToken = nil
             self.refreshToken = nil
+            return
         }
+
+        Logger.shared.logInfo("Expiration \(String(describing: Self.expirationDate(accessToken))) -> \(String(describing: Self.expirationDate(newAccessToken)))", category: .network)
+        EventsTracker.shared.logBreadcrumb(message: "Refreshed access token and refresh token",
+                                           category: "app.lifecycle",
+                                           type: "system")
+
+        self.accessToken = newAccessToken
+        self.refreshToken = newRefreshToken
     }
 
     private func accessTokenIsValid() -> Bool {
-        guard let accessToken = accessToken, let expirationDate = expirationDate(accessToken) else {
+        guard let accessToken = accessToken, let expirationDate = Self.expirationDate(accessToken) else {
             return false
         }
 
-        // add 1 hour just in case
-        let result = expirationDate > BeamDate.now.addingTimeInterval(60 * 60)
+        // Adding 1 minute to be safe, token can be non-expired now but
+        // will be within seconds
+        let result = expirationDate > BeamDate.now.addingTimeInterval(60)
         if !result {
             Logger.shared.logDebug("Access token is invalid: \(expirationDate)", category: .network)
         }
@@ -148,7 +149,7 @@ class AuthenticationManager {
     }
 
     private func refreshTokenIsValid() -> Bool {
-        guard let refreshToken = refreshToken, let expirationDate = expirationDate(refreshToken) else {
+        guard let refreshToken = refreshToken, let expirationDate = Self.expirationDate(refreshToken) else {
             return false
         }
 
@@ -161,7 +162,7 @@ class AuthenticationManager {
         return result
     }
 
-    private func expirationDate(_ accessToken: String) -> Date? {
+    static func expirationDate(_ accessToken: String) -> Date? {
         let jwt = try? decode(jwt: accessToken)
         guard let expirationEpoch = jwt?.claim(name: "exp").double else {
             return nil
@@ -177,11 +178,11 @@ class AuthenticationManager {
                                      "IsAuthenticated": isAuthenticated]
 
         if let accessToken = accessToken {
-            result["AccessTokenExpirationDate"] = expirationDate(accessToken)
+            result["AccessTokenExpirationDate"] = Self.expirationDate(accessToken)
         }
 
         if let refreshToken = refreshToken {
-            result["RefreshTokenExpirationDate"] = expirationDate(refreshToken)
+            result["RefreshTokenExpirationDate"] = Self.expirationDate(refreshToken)
         }
 
         return result

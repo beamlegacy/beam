@@ -63,6 +63,10 @@ struct AccountsView: View {
                     ForgotPasswordButton
                     LogoutButton
                 }
+
+                #if DEBUG
+                RefreshTokenButton
+                #endif
             }
 
             Preferences.Section(title: "Login with") {
@@ -155,6 +159,30 @@ struct AccountsView: View {
         .alert(isPresented: $showingSignInAlert) {
             Alert(title: Text("Error"),
                   message: Text(errorMessage.localizedDescription))
+        }
+    }
+
+    private var RefreshTokenButton: some View {
+        Button(action: {
+            self.loading = true
+            accountManager.refreshToken { result in
+                self.loading = false
+                switch result {
+                case .failure(let error):
+                    errorMessage = error
+                    showingSignInAlert = true
+                    Logger.shared.logInfo("Could not refresh token: \(error.localizedDescription)", category: .network)
+                case .success(let success):
+                    Logger.shared.logInfo("Refresh Token succeeded: \(success)", category: .network)
+                }
+            }
+        }, label: {
+            // TODO: loc
+            Text("Refresh Token").frame(minWidth: 100)
+        })
+        .disabled(!loggedIn)
+        .alert(isPresented: $showingSignInAlert) {
+            Alert(title: Text("Error"), message: Text(errorMessage.localizedDescription))
         }
     }
 

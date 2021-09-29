@@ -5,6 +5,7 @@ mutation SignInWithProvider($identity: IdentityInput!) {
       message
     }
     accessToken
+    refreshToken
     me {
       email
     }
