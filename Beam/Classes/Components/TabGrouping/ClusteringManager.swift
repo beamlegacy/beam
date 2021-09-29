@@ -186,8 +186,19 @@ class ClusteringManager: ObservableObject {
         }
     }
 
+    func cleanTextFrom(note: BeamNote) -> String {
+        var fullText = note.allTexts.map { $0.1.text }.joined(separator: "\n")
+        guard let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue) else { return fullText }
+        let matches = detector.matches(in: fullText, options: [], range: NSRange(location: 0, length: fullText.utf16.count))
+        for match in matches.reversed() {
+            guard let range = Range(match.range, in: fullText) else { continue }
+            fullText.removeSubrange(range)
+        }
+        return fullText.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
     func addNote(note: BeamNote) {
-        let fullText = note.allTexts.map { $0.1.text }.joined(separator: "\n")
+        let fullText = cleanTextFrom(note: note)
         let clusteringNote = ClusteringNote(id: note.id, title: note.title, content: fullText)
         // TODO: Add link information to notes
         self.isClustering = true
