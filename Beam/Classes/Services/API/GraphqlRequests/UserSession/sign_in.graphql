@@ -1,6 +1,7 @@
 mutation SignIn($email: Email!, $password: String!) {
   signIn(input: {email: $email, password: $password}) {
     accessToken
+    refreshToken
     errors {
       path
       message
