@@ -17,9 +17,10 @@ extension NSAttributedString.Key {
 
 class AttributeDecoratedValueAttributedString: BeamText.AttributeDecoratedValue {
     var attributes: [NSAttributedString.Key: Any]
-    init(attributes: [NSAttributedString.Key: Any]) {
+    init(attributes: [NSAttributedString.Key: Any], editable: Bool) {
         self.attributes = attributes
         super.init()
+        self.isEditable = editable
     }
 }
 
