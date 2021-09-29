@@ -147,6 +147,17 @@ public struct BeamText: Codable {
                 return false
             }
         }
+
+        public var isEditable: Bool {
+            switch self {
+            case .link, .internalLink:
+                return false
+            case .decorated(let value):
+                return value.isEditable
+            default:
+                return true
+            }
+        }
     }
 
     open class AttributeDecoratedValue: Equatable, Hashable {
@@ -154,8 +165,8 @@ public struct BeamText: Codable {
             false
         }
 
+        public var isEditable: Bool = false
         public init() { }
-
         public func hash(into hasher: inout Hasher) {
             // not hashable
         }

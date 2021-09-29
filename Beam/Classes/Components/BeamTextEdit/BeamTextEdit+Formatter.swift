@@ -28,7 +28,7 @@ extension BeamTextEdit {
             .foregroundColor: BeamColor.LightStoneGray.nsColor,
             .boxBackgroundColor: BeamColor.Mercury.nsColor
         ]
-        return BeamText.Attribute.decorated(AttributeDecoratedValueAttributedString(attributes: placeholderDecoration))
+        return BeamText.Attribute.decorated(AttributeDecoratedValueAttributedString(attributes: placeholderDecoration, editable: false))
     }
 
     static var formatterAutocompletingAttribute: BeamText.Attribute {
@@ -36,7 +36,7 @@ extension BeamTextEdit {
             .foregroundColor: BeamColor.Niobium.nsColor,
             .boxBackgroundColor: BeamColor.Mercury.nsColor
         ]
-        return BeamText.Attribute.decorated(AttributeDecoratedValueAttributedString(attributes: decoration))
+        return BeamText.Attribute.decorated(AttributeDecoratedValueAttributedString(attributes: decoration, editable: true))
     }
 
     // MARK: - UI

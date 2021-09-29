@@ -151,7 +151,7 @@ class CardReferenceFormatterView: FormatterView {
         _typedAttributes = [BeamTextEdit.formatterAutocompletingAttribute]
         let parenthesisDecoration = AttributeDecoratedValueAttributedString(attributes: [
             .foregroundColor: BeamColor.LightStoneGray.nsColor
-        ])
+        ], editable: true)
         _parenthesisAttributes = [BeamText.Attribute.decorated(parenthesisDecoration)]
     }
     override func typingAttributes(for range: Range<Int>) -> [(attributes: [BeamText.Attribute], range: Range<Int>)]? {

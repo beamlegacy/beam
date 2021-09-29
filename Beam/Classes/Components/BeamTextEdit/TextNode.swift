@@ -1056,11 +1056,9 @@ public class TextNode: ElementNode {
     }
 
     public func uneditableRangeAt(index: Int) -> Range<Int>? {
-        let anyLinkRange = internalLinkRangeAt(index: index) ?? self.linkRangeAt(index: index)
-        if let anyLinkRange = anyLinkRange {
-            return anyLinkRange.position ..< anyLinkRange.end
-        }
-        return nil
+        let range = elementText.rangeAt(position: index)
+        let isNotEditable = range.attributes.first { $0.isEditable == false }
+        return isNotEditable != nil ? range.position..<range.end : nil
     }
 
     // MARK: - Print
