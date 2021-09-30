@@ -165,6 +165,7 @@ class BeamUITestsMenuGenerator {
         addPageToHistory(url: "https://fr.wikipedia.org/wiki/Hello_world", title: "Hello world", id: 1)
         addPageToHistory(url: "https://en.wikipedia.org/wiki/Hubert_Blaine_Wolfeschlegelsteinhausenbergerdorff_Sr.",
                          title: "Hubert Blaine Wolfeschlegelsteinhausenbergerdorff Sr.", id: 2)
+        addPageToHistory(url: "https://www.google.com/search?q=Beam%20the%20best%20browser&client=safari", title: "Beam the best browser", id: 3)
     }
 
     private func addPageToHistory(url: String, title: String, id: Int) {
