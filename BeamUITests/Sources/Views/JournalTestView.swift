@@ -31,7 +31,7 @@ class JournalTestView: BaseView {
     
     @discardableResult
     func openHelpMenu() -> HelpTestView {
-        getHelpButton().click()
+        getHelpButton().clickOnHittable()
         return HelpTestView()
     }
     
