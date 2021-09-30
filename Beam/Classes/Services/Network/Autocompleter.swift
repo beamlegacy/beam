@@ -75,7 +75,15 @@ class Autocompleter: ObservableObject {
                     return
                 }
 
-                let obj = try? JSONSerialization.jsonObject(with: data)
+                // Unfortunately Google sends suggestions results with charset ISO-8859-1
+                // We can't serialize them easily so we need to convert it in ISO Latin first then reconverting in data UTF8
+                let dataIntoISOString = String(data: data, encoding: .isoLatin1)
+                guard let dataUtf8 = dataIntoISOString?.data(using: .utf8) else {
+                    promise(.success([]))
+                    return
+                }
+
+                let obj = try? JSONSerialization.jsonObject(with: dataUtf8)
                 var res = [AutocompleteResult]()
                 if let array = obj as? [Any], let r = array[1] as? [String] {
                     for (index, str) in r.enumerated() {
