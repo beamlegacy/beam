@@ -31,6 +31,7 @@ struct ErrorPageView: View {
 
     var body: some View {
         VStack {
+            Spacer()
             errorImage
             Text(errorManager.title)
                 .font(BeamFont.medium(size: 17).swiftUI)
@@ -65,6 +66,5 @@ struct ErrorPageView: View {
             }
             Spacer()
         }
-        .padding(.top, errorManager.error == .radblock ? 190 : 220)
     }
 }
