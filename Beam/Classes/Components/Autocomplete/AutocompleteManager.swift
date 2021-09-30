@@ -20,7 +20,7 @@ class AutocompleteManager: ObservableObject {
 
     @Published var searchQuerySelectedRange: Range<Int>?
     @Published var autocompleteResults = [AutocompleteResult]()
-    @Published var autocompleteSelectedIndex: Int? = nil {
+    @Published var autocompleteSelectedIndex: Int? {
         didSet {
             updateSearchQueryWhenSelectingAutocomplete(autocompleteSelectedIndex, previousSelectedIndex: oldValue)
         }
@@ -117,6 +117,7 @@ class AutocompleteManager: ObservableObject {
 
     func isResultCandidateForAutoselection(_ result: AutocompleteResult, forSearch searchText: String) -> Bool {
         switch result.source {
+        case .topDomain: return result.text.lowercased().starts(with: searchText.lowercased())
         case .history: return result.text.lowercased().starts(with: searchText.lowercased())
         case .url:
             guard let host = result.url?.minimizedHost ?? URL(string: result.text)?.minimizedHost else { return false }
@@ -252,6 +253,13 @@ extension AutocompleteManager {
         searchQuerySelectedRange = unselectedProposedText.count..<currentText.count
         let newText = unselectedProposedText + currentText.substring(range: newRange)
         return (newText, newRange)
+    }
+
+    func isSentence(_ query: String) -> Bool {
+        if query.numberOfWords > 1 {
+            return true
+        }
+        return false
     }
 
     // MARK: - Animations

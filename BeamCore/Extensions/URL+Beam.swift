@@ -76,4 +76,24 @@ public extension URL {
         }
         return str
     }
+
+    func domainMatchWith(_ text: String) -> Bool {
+        let decomposedDomain = urlStringWithoutScheme.components(separatedBy: "/")
+        let decomposedSearchString = text.components(separatedBy: "/")
+
+        if decomposedDomain.count == 2 && decomposedSearchString.count == 1 {
+            if decomposedDomain[1].isEmpty {
+                if decomposedDomain[1].isEmpty && decomposedDomain[0].contains(decomposedSearchString[0]) && decomposedSearchString[0].count <= decomposedDomain[0].count {
+                    return true
+                }
+            }
+        } else if decomposedDomain.count == 1 {
+            if decomposedDomain[0].contains(decomposedSearchString[0]) {
+                return true
+            }
+        } else if decomposedDomain.count == decomposedSearchString.count {
+            return decomposedDomain == decomposedSearchString
+        }
+        return false
+    }
 }
