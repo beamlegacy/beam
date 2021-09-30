@@ -196,13 +196,13 @@ class Database: NSManagedObject, BeamCoreDataObject {
         return 0
     }
 
-    class func fetchWithId(_ context: NSManagedObjectContext, _ id: UUID) throws -> Database? {
-        return try fetchFirst(context,
-                              NSPredicate(format: "id = %@", id as CVarArg), onlyNonDeleted: false)
+    class func fetchAllWithIds(_ context: NSManagedObjectContext, _ ids: [UUID]) throws -> [Database] {
+        try rawFetchAll(context, NSPredicate(format: "id IN %@", ids))
     }
 
-    class func rawFetchWithId(_ context: NSManagedObjectContext, _ id: UUID) throws -> Database? {
-        return try rawFetchFirst(context, NSPredicate(format: "id = %@", id as CVarArg))
+    class func fetchWithId(_ context: NSManagedObjectContext, _ id: UUID) throws -> Database? {
+        return try rawFetchFirst(context,
+                                 NSPredicate(format: "id = %@", id as CVarArg))
     }
 
     class func fetchOrCreateWithId(_ context: NSManagedObjectContext, _ id: UUID) -> Database {

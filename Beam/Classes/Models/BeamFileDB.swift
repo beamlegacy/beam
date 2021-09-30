@@ -171,9 +171,17 @@ class BeamFileDB: BeamFileStorage {
     }
 
     func fetch(uid: UUID) throws -> BeamFileRecord? {
-        try dbPool.read({ db in
+        try dbPool.read { db in
             try? BeamFileRecord.fetchOne(db, key: uid)
-        })
+        }
+    }
+
+    func fetchWithIds(_ ids: [UUID]) throws -> [BeamFileRecord] {
+        try dbPool.read { db in
+            try BeamFileRecord
+                .filter(ids.contains(BeamFileRecord.Columns.uid))
+                .fetchAll(db)
+        }
     }
 
     func fetchWithBeamObjectId(id: UUID) throws -> BeamFileRecord? {
@@ -283,12 +291,24 @@ extension BeamFileDBManager: BeamObjectManagerDelegate {
         try fileDB.allRecords(updatedSince)
     }
 
+    func checksumsForIds(_ ids: [UUID]) throws -> [UUID: String] {
+        let values: [(UUID, String)] = try fileDB.fetchWithIds(ids).compactMap {
+            guard let previousChecksum = $0.previousChecksum else { return nil }
+            return ($0.beamObjectId, previousChecksum)
+        }
+
+        return Dictionary(uniqueKeysWithValues: values)
+    }
+
     func saveAllOnNetwork(_ files: [BeamFileRecord], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
+        let localTimer = BeamDate.now
+
         try self.saveOnBeamObjectsAPI(files) { result in
             switch result {
             case .success:
-                Logger.shared.logDebug("Saved files on the BeamObject API",
-                                       category: .fileNetwork)
+                Logger.shared.logDebug("Saved \(files.count) files on the BeamObject API",
+                                       category: .fileNetwork,
+                                       localTimer: localTimer)
                 networkCompletion?(.success(true))
             case .failure(let error):
                 Logger.shared.logDebug("Error when saving the files on the BeamObject API with error: \(error.localizedDescription)",
@@ -299,11 +319,13 @@ extension BeamFileDBManager: BeamObjectManagerDelegate {
     }
 
     private func saveOnNetwork(_ file: BeamFileRecord, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
+        let localTimer = BeamDate.now
         try self.saveOnBeamObjectAPI(file) { result in
             switch result {
             case .success:
-                Logger.shared.logDebug("Saved file on the BeamObject API",
-                                       category: .fileNetwork)
+                Logger.shared.logDebug("Saved file \(file.name) on the BeamObject API",
+                                       category: .fileNetwork,
+                                       localTimer: localTimer)
                 networkCompletion?(.success(true))
             case .failure(let error):
                 Logger.shared.logDebug("Error when saving the file on the BeamObject API with error: \(error.localizedDescription)",
@@ -314,7 +336,7 @@ extension BeamFileDBManager: BeamObjectManagerDelegate {
     }
 
     func persistChecksum(_ objects: [BeamFileRecord]) throws {
-        Logger.shared.logDebug("Saved \(objects.count) files on the BeamObject API",
+        Logger.shared.logDebug("Saved \(objects.count) BeamObject checksums",
                                category: .fileNetwork)
 
         var files: [BeamFileRecord] = []

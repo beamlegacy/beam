@@ -44,7 +44,7 @@ class Document: NSManagedObject, BeamCoreDataObject {
     }
 
     func database(_ context: NSManagedObjectContext = CoreDataManager.shared.mainContext) -> Database? {
-        try? Database.rawFetchWithId(context, database_id)
+        try? Database.fetchWithId(context, database_id)
     }
 
     /// Slower than `deleteBatchWithPredicate` but I can't get `deleteBatchWithPredicate`
@@ -302,7 +302,7 @@ class Document: NSManagedObject, BeamCoreDataObject {
     }
 
     class func fetchAllWithIds(_ context: NSManagedObjectContext, _ ids: [UUID]) throws -> [Document] {
-        try fetchAll(context, NSPredicate(format: "id IN %@", ids))
+        try rawFetchAll(context, NSPredicate(format: "id IN %@", ids))
     }
 
     class func fetchWithId(_ context: NSManagedObjectContext, _ id: UUID) throws -> Document? {

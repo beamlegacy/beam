@@ -62,8 +62,6 @@ extension DocumentManager: BeamObjectManagerDelegate {
                  */
                 guard documentCoreData.beam_object_previous_checksum != updateObject.previousChecksum ||
                         documentCoreData.beam_api_data != updateObject.data else {
-//                    Logger.shared.logDebug("PersistChecksum \(updateObject.titleAndId) already set \(updateObject.previousChecksum ?? "-")",
-//                                           category: .documentNetwork)
                     continue
                 }
 
@@ -268,13 +266,28 @@ extension DocumentManager: BeamObjectManagerDelegate {
         }
     }
 
+    func checksumsForIds(_ ids: [UUID]) throws -> [UUID: String] {
+        let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
+
+        return try context.performAndWait {
+            let values: [(UUID, String)] = try Document.fetchAllWithIds(context, ids).compactMap {
+                var result = DocumentStruct(document: $0)
+                result.previousChecksum = result.beamObjectPreviousChecksum
+                guard let previousChecksum = result.previousChecksum else { return nil }
+                return (result.beamObjectId, previousChecksum)
+            }
+
+            return Dictionary(uniqueKeysWithValues: values)
+        }
+    }
+
     private func saveDatabaseAndDocumentOnBeamObjectAPI(_ documentStruct: DocumentStruct,
                                                         _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws {
 
         let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
         var dbStruct: DatabaseStruct?
         try context.performAndWait {
-            guard let dbDatabase = try Database.rawFetchWithId(context, documentStruct.databaseId) else { return }
+            guard let dbDatabase = try Database.fetchWithId(context, documentStruct.databaseId) else { return }
             dbStruct = DatabaseStruct(database: dbDatabase)
         }
 
