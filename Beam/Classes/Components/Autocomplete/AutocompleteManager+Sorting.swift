@@ -29,6 +29,18 @@ extension AutocompleteManager {
         return (results: finalResults, canCreateNote: canCreateNote)
     }
 
+    private func findTopDomainIfNeeded(from results: [AutocompleteResult]) -> (results: [AutocompleteResult], topDomain: AutocompleteResult)? {
+        var finalResults = results
+        for (index, item) in finalResults.enumerated() {
+            guard let itemUrl = item.url else { continue }
+            if itemUrl.domainMatchWith(searchQuery) {
+                finalResults.remove(at: index)
+                return (results: finalResults, topDomain: item)
+            }
+        }
+        return nil
+    }
+
     private func sortResults(notesResults: [AutocompleteResult],
                              historyResults: [AutocompleteResult],
                              urlResults: [AutocompleteResult],
@@ -37,38 +49,52 @@ extension AutocompleteManager {
                              createCardResults: [AutocompleteResult]) -> [AutocompleteResult] {
         var results = [AutocompleteResult]()
 
-        let historyResultsTruncated = Array(historyResults.prefix(6))
+        var historyResultsTruncated = Array(historyResults.prefix(6))
 
         // but prioritize title match over content match ?
         let notesResultsTruncated = Array(notesResults.prefix(6))
-        let urlResultsTruncated = Array(urlResults.prefix(6))
+        var urlResultsTruncated = Array(urlResults.prefix(6))
+        var topHistoryDomainResult: AutocompleteResult?
 
-        results.append(contentsOf: urlResultsTruncated)
-        results.append(contentsOf: notesResultsTruncated)
-        results.append(contentsOf: historyResultsTruncated)
+        if let topDomain = topDomainResults.first {
+            results.insert(topDomain, at: 0)
+        } else if searchQuery.mayBeWebURL || !isSentence(searchQuery) {
+            if let urlResultsTopDomain = findTopDomainIfNeeded(from: urlResultsTruncated) {
+                topHistoryDomainResult = urlResultsTopDomain.topDomain
+                urlResultsTruncated = urlResultsTopDomain.results
+            }
+            if let historyResultsTopDomain = findTopDomainIfNeeded(from: historyResultsTruncated) {
+                if topHistoryDomainResult == nil {
+                    topHistoryDomainResult = historyResultsTopDomain.topDomain
+                }
+                historyResultsTruncated = historyResultsTopDomain.results
+            }
+        }
 
-        results.sort(by: { (lhs, rhs) in
+        var sortableResult = [AutocompleteResult]()
+        sortableResult.append(contentsOf: historyResultsTruncated)
+        sortableResult.append(contentsOf: urlResultsTruncated)
+        sortableResult.append(contentsOf: notesResultsTruncated)
+
+        sortableResult.sort(by: { (lhs, rhs) in
             let lhsr = lhs.text.lowercased().commonPrefix(with: lhs.completingText?.lowercased() ?? "").count
             let rhsr = rhs.text.lowercased().commonPrefix(with: rhs.completingText?.lowercased() ?? "").count
             return lhsr > rhsr
         })
 
-        if let topDomain = topDomainResults.first {
-            if let firstResult = results.first,
-               isResultCandidateForAutoselection(firstResult, forSearch: firstResult.completingText ?? "") {
-                // Push top domain suggestion only when the first result is not satisfying.
-            } else {
-                results.insert(topDomain, at: 0)
-            }
-        }
-
         let resultLimit = 8
         // leave space for at least 2 search engine result and 1 create card
         let hasCreateCard = !createCardResults.isEmpty
         let truncateLength = resultLimit - min(2, searchEngineResults.count) - (hasCreateCard ? 1 : 0)
-        results = Array(results.prefix(truncateLength))
-        let searchEngineMax = 8 - results.count - (hasCreateCard ? 1 : 0)
-        results.append(contentsOf: searchEngineResults.prefix(searchEngineMax))
+        sortableResult = Array(sortableResult.prefix(truncateLength))
+        let searchEngineMax = resultLimit - sortableResult.count - (hasCreateCard ? 1 : 0)
+        sortableResult.insert(contentsOf: searchEngineResults.prefix(searchEngineMax), at: historyResultsTruncated.isEmpty && urlResultsTruncated.isEmpty ? 0 : 1)
+        if let topHistoryDomainResult = topHistoryDomainResult {
+            sortableResult.insert(topHistoryDomainResult, at: 0)
+        }
+
+        results.append(contentsOf: sortableResult)
+        results = Array(results.prefix(resultLimit))
 
         results = self.autocompleteResultsUniqueUrls(sequence: results)
 
