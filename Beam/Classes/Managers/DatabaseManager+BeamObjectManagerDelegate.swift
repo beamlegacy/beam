@@ -122,6 +122,21 @@ extension DatabaseManager: BeamObjectManagerDelegate {
         }
     }
 
+    func checksumsForIds(_ ids: [UUID]) throws -> [UUID: String] {
+        let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
+
+        return try context.performAndWait {
+            let values: [(UUID, String)] = try Database.fetchAllWithIds(context, ids).compactMap {
+                var result = DatabaseStruct(database: $0)
+                result.previousChecksum = result.beamObjectPreviousChecksum
+                guard let previousChecksum = result.previousChecksum else { return nil }
+                return (result.beamObjectId, previousChecksum)
+            }
+
+            return Dictionary(uniqueKeysWithValues: values)
+        }
+    }
+
     func persistChecksum(_ objects: [DatabaseStruct]) throws {
         let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
 
