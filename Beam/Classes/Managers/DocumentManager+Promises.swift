@@ -66,7 +66,7 @@ extension DocumentManager {
 
                     document.version = documentStruct.version
 
-                    if let database = try? Database.rawFetchWithId(context, document.database_id) {
+                    if let database = try? Database.fetchWithId(context, document.database_id) {
                         database.updated_at = BeamDate.now
                     } else {
                         // We should always have a connected database
@@ -131,7 +131,7 @@ extension DocumentManager {
                     throw DocumentManagerError.idNotFound
                 }
 
-                if let database = try? Database.rawFetchWithId(context, document.database_id) {
+                if let database = try? Database.fetchWithId(context, document.database_id) {
                     database.updated_at = BeamDate.now
                 } else {
                     // We should always have a connected database

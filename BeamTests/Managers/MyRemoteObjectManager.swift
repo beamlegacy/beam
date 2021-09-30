@@ -39,6 +39,15 @@ extension MyRemoteObjectManager: BeamObjectManagerDelegate {
         Array(Self.store.values)
     }
 
+    func checksumsForIds(_ ids: [UUID]) throws -> [UUID: String] {
+        let values: [(UUID, String)] = Self.store.values.compactMap {
+            guard let previousChecksum = $0.previousChecksum else { return nil }
+            return ($0.beamObjectId, previousChecksum)
+        }
+
+        return Dictionary(uniqueKeysWithValues: values)
+    }
+
     func manageConflict(_ object: MyRemoteObject,
                         _ remoteObject: MyRemoteObject) throws -> MyRemoteObject {
         var result = object.copy()

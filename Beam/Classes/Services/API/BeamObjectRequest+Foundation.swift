@@ -115,10 +115,11 @@ extension BeamObjectRequest {
     }
 
     @discardableResult
-    func fetchAllChecksums(ids: [UUID]? = nil,
+    func fetchAllChecksums(receivedAtAfter: Date? = nil,
+                           ids: [UUID]? = nil,
                            beamObjectType: String? = nil,
                            _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
-        let parameters = BeamObjectsParameters(receivedAtAfter: nil,
+        let parameters = BeamObjectsParameters(receivedAtAfter: receivedAtAfter,
                                                ids: ids,
                                                beamObjectType: beamObjectType)
 

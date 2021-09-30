@@ -46,7 +46,7 @@ extension BeamObjectManager {
                                        category: .beamObjectNetwork)
             }
 
-            try self.parseObjects(beamObjects)
+            try self.parseFilteredObjects(self.filteredObjects(beamObjects))
             return Promise(true)
         }.recover(on: backgroundQueue) { error -> Promise<Bool> in
             AppDelegate.showMessage("Error fetching objects from API: \(error.localizedDescription). This is not normal, check the logs and ask support.")

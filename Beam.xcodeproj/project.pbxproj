@@ -6607,7 +6607,7 @@
 			repositoryURL = "https://github.com/groue/GRDB.swift.git";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 5.9.0;
+				minimumVersion = 5.12.0;
 			};
 		};
 		96AC99F626E65CFB0016E941 /* XCRemoteSwiftPackageReference "uuid-kit" */ = {

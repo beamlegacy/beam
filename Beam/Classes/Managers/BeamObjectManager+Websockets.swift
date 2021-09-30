@@ -13,7 +13,7 @@ extension BeamObjectManager {
                         Logger.shared.logError(error.localizedDescription, category: .webSocket)
                     case .success(let beamObject):
                         do {
-                            try self.parseObjects([beamObject])
+                            try self.parseFilteredObjects(self.filteredObjects([beamObject]))
                         } catch {
                             AppDelegate.showMessage("Websocket object couldn't be parsed: \(error.localizedDescription). This is not normal, check the logs and ask support.")
                         }

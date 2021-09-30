@@ -9,6 +9,9 @@ protocol BeamObjectManagerDelegateProtocol {
     // Called when `BeamObjectManager` wants to store all existing `Document` as `BeamObject`
     // it will call this method
     func saveAllOnBeamObjectApi(_ completion: @escaping ((Swift.Result<(Int, Date?), Error>) -> Void)) throws -> APIRequest?
+
+    // Called when we want to check checksums for existing IDS
+    func checksumsForIds(_ ids: [UUID]) throws -> [UUID: String]
 }
 
 protocol BeamObjectManagerDelegate: AnyObject, BeamObjectManagerDelegateProtocol {
