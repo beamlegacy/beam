@@ -194,6 +194,15 @@ extension PasswordManager: BeamObjectManagerDelegate {
         try self.passwordsDB.allRecords(updatedSince)
     }
 
+    func checksumsForIds(_ ids: [UUID]) throws -> [UUID: String] {
+        let values: [(UUID, String)] = try passwordsDB.fetchWithIds(ids).compactMap {
+            guard let previousChecksum = $0.previousChecksum else { return nil }
+            return ($0.beamObjectId, previousChecksum)
+        }
+
+        return Dictionary(uniqueKeysWithValues: values)
+    }
+
     func saveAllOnNetwork(_ passwords: [PasswordRecord], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
         try self.saveOnBeamObjectsAPI(passwords) { result in
             switch result {

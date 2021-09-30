@@ -419,6 +419,14 @@ class PasswordsDB: PasswordStore {
         }
     }
 
+    func fetchWithIds(_ ids: [UUID]) throws -> [PasswordRecord] {
+        try dbPool.read { db in
+            try PasswordRecord
+                .filter(ids.contains(PasswordRecord.Columns.uuid))
+                .fetchAll(db)
+        }
+    }
+
     @discardableResult
     func delete(hostname: String, username: String) throws -> PasswordRecord {
         do {

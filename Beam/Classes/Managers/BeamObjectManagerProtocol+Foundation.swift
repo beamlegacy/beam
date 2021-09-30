@@ -10,6 +10,11 @@ extension BeamObjectManagerDelegate {
         self.willSaveAllOnBeamObjectApi()
 
         let toSaveObjects = try allObjects(updatedSince: Persistence.Sync.BeamObjects.last_updated_at)
+
+        guard !toSaveObjects.isEmpty else {
+            completion(.success((0, nil)))
+            return nil
+        }
         let mostRecentUpdatedAt = toSaveObjects.compactMap({ $0.updatedAt }).sorted().last
 
         return try saveOnBeamObjectsAPI(toSaveObjects) { result in
@@ -55,8 +60,10 @@ extension BeamObjectManagerDelegate {
 
             case .success(let remoteObjects):
                 do {
-                    try self.persistChecksum(remoteObjects)
-                    self.checkPreviousChecksums(remoteObjects)
+                    if !remoteObjects.isEmpty {
+                        try self.persistChecksum(remoteObjects)
+                        self.checkPreviousChecksums(remoteObjects)
+                    }
 
                     completion(.success(remoteObjects))
                 } catch {

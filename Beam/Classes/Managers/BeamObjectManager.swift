@@ -64,13 +64,32 @@ class BeamObjectManager {
 
     var conflictPolicyForSave: BeamObjectConflictResolution = .replace
 
-    internal func parseObjects(_ beamObjects: [BeamObject]) throws {
+    internal func filteredObjects(_ beamObjects: [BeamObject]) -> [String: [BeamObject]] {
         let filteredObjects: [String: [BeamObject]] = beamObjects.reduce(into: [:]) { result, object in
             result[object.beamObjectType] = result[object.beamObjectType] ?? []
             result[object.beamObjectType]?.append(object)
         }
 
-        try parseFilteredObjects(filteredObjects)
+        return filteredObjects
+    }
+
+    internal func parseFilteredObjectChecksums(_ filteredObjects: [String: [BeamObject]]) throws -> [String: [BeamObject]] {
+        var results: [String: [BeamObject]] = [:]
+
+        for (key, objects) in filteredObjects {
+            guard let managerInstance = Self.managerInstances[key] else {
+                Logger.shared.logDebug("**managerInstance for \(key) not found** keys: \(Self.managerInstances.keys)",
+                                       category: .beamObject)
+                continue
+            }
+
+            let checksums = try managerInstance.checksumsForIds(objects.map { $0.id })
+
+            let changedObjects = objects.filter { $0.dataChecksum != checksums[$0.id] }
+            results[key] = changedObjects
+        }
+
+        return results
     }
 
     internal func parseFilteredObjects(_ filteredObjects: [String: [BeamObject]]) throws {

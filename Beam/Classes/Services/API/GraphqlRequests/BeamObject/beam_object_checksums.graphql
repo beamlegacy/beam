@@ -1,9 +1,10 @@
-query ($ids: [ID!], $beamObjectType: String) {
+query ($receivedAtAfter: ISO8601DateTime, $ids: [ID!], $beamObjectType: String) {
   me {
-    beamObjects(ids: $ids, type: $beamObjectType) {
+    beamObjects(receivedAtAfter: $receivedAtAfter, ids: $ids, type: $beamObjectType) {
       id
       type
       checksum
+      receivedAt
     }
   }
 }

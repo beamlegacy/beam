@@ -11,7 +11,7 @@ extension BeamObjectManager {
 
         var localTimer = BeamDate.now
 
-        try fetchAllFromAPI { result in
+        try fetchAllByChecksumsFromAPI { result in
             switch result {
             case .failure:
                 completion?(result)
@@ -114,6 +114,103 @@ extension BeamObjectManager {
         return savedObjects
     }
 
+    // Will fetch remote checksums for objects since `lastReceivedAt` and then fetch objects for which we have a different
+    // checksum locally, and therefor must be fetched from the API. This allows for a faster fetch since most of the time
+    // we might already have those object locally if they had been sent and updated from the same device
+    func fetchAllByChecksumsFromAPI(_ completion: @escaping ((Result<Bool, Error>) -> Void)) throws {
+        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            throw BeamObjectManagerError.notAuthenticated
+        }
+
+        let beamRequest = BeamObjectRequest()
+
+        let lastReceivedAt: Date? = Persistence.Sync.BeamObjects.last_received_at
+
+        if let lastReceivedAt = lastReceivedAt {
+            Logger.shared.logDebug("Using lastReceivedAt for BeamObjects API call: \(lastReceivedAt.iso8601withFractionalSeconds)",
+                                   category: .beamObjectNetwork)
+        } else {
+            Logger.shared.logDebug("No previous updatedAt for BeamObjects API call",
+                                   category: .beamObjectNetwork)
+        }
+
+        try beamRequest.fetchAllChecksums(receivedAtAfter: lastReceivedAt) { result in
+            switch result {
+            case .failure(let error):
+                Logger.shared.logDebug("fetchAllByChecksumsFromAPI: \(error.localizedDescription)",
+                                       category: .beamObjectNetwork)
+                completion(.failure(error))
+            case .success(let beamObjects):
+                // If we are doing a delta refreshAll, and 0 document is fetched, we exit early
+                // If not doing a delta sync, we don't as we want to update local document as `deleted`
+                guard lastReceivedAt == nil || !beamObjects.isEmpty else {
+                    Logger.shared.logDebug("0 beam object fetched.", category: .beamObjectNetwork)
+                    completion(.success(true))
+                    return
+                }
+
+                do {
+                    let changedObjects = try self.parseFilteredObjectChecksums(self.filteredObjects(beamObjects))
+
+                    let ids: [UUID] = changedObjects.values.flatMap { $0.map { $0.id }}
+
+                    guard !ids.isEmpty else {
+                        if let mostRecentReceivedAt = beamObjects.compactMap({ $0.receivedAt }).sorted().last {
+                            Persistence.Sync.BeamObjects.last_received_at = mostRecentReceivedAt
+                            Logger.shared.logDebug("new ReceivedAt: \(mostRecentReceivedAt.iso8601withFractionalSeconds). \(beamObjects.count) beam object checksums fetched.",
+                                                   category: .beamObjectNetwork)
+                        }
+                        completion(.success(true))
+                        return
+                    }
+
+                    Logger.shared.logDebug("Need to fetch \(ids.count) objects remotely, different previousChecksum",
+                                           category: .beamObjectNetwork)
+                    let beamRequestForIds = BeamObjectRequest()
+
+                    try beamRequestForIds.fetchAll(receivedAtAfter: nil, ids: ids) { result in
+                        switch result {
+                        case .failure(let error):
+                            Logger.shared.logDebug("fetchAllByChecksumsFromAPI: \(error.localizedDescription)",
+                                                   category: .beamObjectNetwork)
+                            completion(.failure(error))
+                        case .success(let beamObjects):
+                            // If we are doing a delta refreshAll, and 0 document is fetched, we exit early
+                            // If not doing a delta sync, we don't as we want to update local document as `deleted`
+                            guard lastReceivedAt == nil || !beamObjects.isEmpty else {
+                                Logger.shared.logDebug("0 beam object fetched.", category: .beamObjectNetwork)
+                                completion(.success(true))
+                                return
+                            }
+
+                            if let mostRecentReceivedAt = beamObjects.compactMap({ $0.receivedAt }).sorted().last {
+                                Persistence.Sync.BeamObjects.last_received_at = mostRecentReceivedAt
+                                Logger.shared.logDebug("new ReceivedAt: \(mostRecentReceivedAt.iso8601withFractionalSeconds). \(beamObjects.count) beam objects fetched.",
+                                                       category: .beamObjectNetwork)
+                            }
+
+                            do {
+                                try self.parseFilteredObjects(self.filteredObjects(beamObjects))
+                                completion(.success(true))
+                                return
+                            } catch {
+                                AppDelegate.showMessage("Error fetching objects from API: \(error.localizedDescription). This is not normal, check the logs and ask support.")
+                                completion(.failure(error))
+                            }
+                        }
+                    }
+
+                    Self.networkRequestsWithoutID.append(beamRequestForIds)
+                } catch {
+                    AppDelegate.showMessage("Error fetching objects from API then storing locally: \(error.localizedDescription). This is not normal, check the logs and ask support.")
+                    completion(.failure(error))
+                }
+            }
+        }
+
+        Self.networkRequestsWithoutID.append(beamRequest)
+    }
+
     /// Will fetch all updates from the API and call each managers based on object's type
     func fetchAllFromAPI(_ completion: @escaping ((Result<Bool, Error>) -> Void)) throws {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
@@ -154,7 +251,7 @@ extension BeamObjectManager {
                 }
 
                 do {
-                    try self.parseObjects(beamObjects)
+                    try self.parseFilteredObjects(self.filteredObjects(beamObjects))
                     completion(.success(true))
                     return
                 } catch {
