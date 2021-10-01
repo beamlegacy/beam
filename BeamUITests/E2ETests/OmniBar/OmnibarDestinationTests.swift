@@ -13,6 +13,7 @@ class OmnibarDestinationTests: BaseTest {
     //Workaround for https://linear.app/beamapp/issue/BE-1900/default-card-name-format-is-flexible-depending-on-users-locationdate
     let todayCardNameCreationViewFormat = DateHelper().getTodaysDateString(.cardViewCreation)
     let todayCardNameTitleViewFormat = DateHelper().getTodaysDateString(.cardViewTitle)
+    let todayCardNameCreationViewFormatWithout0InDays = DateHelper().getTodaysDateString(.cardViewCreationNoZeros)
     let cardNameToBeCreated = "One Destination"
     let partialSearchKeyword = "One"
     let expectedNumberOfAutocompletedCards = 1
@@ -43,7 +44,7 @@ class OmnibarDestinationTests: BaseTest {
         _ = destinationCardSearchField.waitForExistence(timeout: implicitWaitTimeout)
         XCTAssertTrue(omnibarView.inputHasFocus(destinationCardSearchField))
         XCTAssertEqual(destinationCardSearchField.value as? String, "")
-        XCTAssertTrue(destinationCardSearchField.placeholderValue == todayCardNameTitleViewFormat || destinationCardSearchField.placeholderValue == todayCardNameCreationViewFormat )
+        XCTAssertTrue(destinationCardSearchField.placeholderValue == todayCardNameTitleViewFormat || destinationCardSearchField.placeholderValue == todayCardNameCreationViewFormat || destinationCardSearchField.placeholderValue == todayCardNameCreationViewFormatWithout0InDays)
         
         testRailPrint("Then Selected autocomplete card is \(expectedNumberOfAutocompletedCards)")
         let selectedResultQuery = helper.allAutocompleteResults.matching(helper.autocompleteSelectedPredicate)
