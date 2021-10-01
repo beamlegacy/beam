@@ -10,6 +10,7 @@ import SwiftUI
 struct PointAndShootPathFrame: View {
     var group: PointAndShoot.ShootGroup
     var isCollected: Bool = false
+    var scrollEventCallback: (NSEvent) -> Void
     @State private var isHovering = false
 
     var body: some View {
@@ -23,9 +24,11 @@ struct PointAndShootPathFrame: View {
 
             Rectangle().fill(Color.clear) // needed to enable hover
                 .onHover { isHovering = $0 }
+                .onScroll({ event in
+                    scrollEventCallback(event)
+                })
                 .frame(width: rect.width, height: rect.height)
                 .position(x: x, y: y)
         }
-        .allowsHitTesting(false)
     }
 }
