@@ -99,6 +99,7 @@
 		33353EE026F374B400063078 /* SectionFeaturesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33353EDF26F374B400063078 /* SectionFeaturesView.swift */; };
 		33353EE226F3D0BA00063078 /* ActionableButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33353EE126F3D0BA00063078 /* ActionableButton.swift */; };
 		333A0A20268C4EED004B7905 /* KeyEventHandlingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 333A0A1F268C4EED004B7905 /* KeyEventHandlingView.swift */; };
+		333E61842707094000847A0C /* Swime in Frameworks */ = {isa = PBXBuildFile; productRef = 333E61832707094000847A0C /* Swime */; };
 		3355997426CBDDC900F52C23 /* SearchInContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3355997326CBDDC900F52C23 /* SearchInContentView.swift */; };
 		3355997626CBE0AE00F52C23 /* SearchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3355997526CBE0AE00F52C23 /* SearchViewModel.swift */; };
 		3355999D26CBF11E00F52C23 /* SearchWebPage.js in Resources */ = {isa = PBXBuildFile; fileRef = 3355999526CBF11E00F52C23 /* SearchWebPage.js */; };
@@ -561,7 +562,6 @@
 		96C0F72D26FCAE6100385449 /* UUIDKit in Frameworks */ = {isa = PBXBuildFile; productRef = 96C0F72C26FCAE6100385449 /* UUIDKit */; };
 		96C0F73026FCB05300385449 /* BeamCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96319D0F2616232600D1CF31 /* BeamCore.framework */; };
 		96C0F73426FCBC0D00385449 /* UUIDKit in Frameworks */ = {isa = PBXBuildFile; productRef = 96C0F73326FCBC0D00385449 /* UUIDKit */; };
-		96C0F73826FCEB7500385449 /* Swime in Frameworks */ = {isa = PBXBuildFile; productRef = 96C0F73726FCEB7500385449 /* Swime */; };
 		96C1D7EB2624C0ED0085FD23 /* BeamElement+Text.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C1D7EA2624C0ED0085FD23 /* BeamElement+Text.swift */; };
 		96C5FE2F268E80BA00889B5E /* Geolocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C5FE2E268E80BA00889B5E /* Geolocation.swift */; };
 		96C5FE44268F4D5700889B5E /* Geolocation.js in Resources */ = {isa = PBXBuildFile; fileRef = 96C5FE43268F4D5700889B5E /* Geolocation.js */; };
@@ -1957,7 +1957,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				96C0F73826FCEB7500385449 /* Swime in Frameworks */,
+				333E61842707094000847A0C /* Swime in Frameworks */,
 				33B27467264C0F7100A318CD /* AutoUpdate.framework in Frameworks */,
 				525C233C25BAF8EF001B9625 /* libgit2.a in Frameworks */,
 				33F0F1C826DE87E000FF8B48 /* Vinyl in Frameworks */,
@@ -4450,7 +4450,7 @@
 				33F0F1C726DE87E000FF8B48 /* Vinyl */,
 				4E83D3E126F21C4F00796836 /* Clustering */,
 				A5F47EC226F8D633004B7CDE /* Lottie */,
-				96C0F73726FCEB7500385449 /* Swime */,
+				333E61832707094000847A0C /* Swime */,
 			);
 			productName = Beam;
 			productReference = 965A78252514F147009980D4 /* Beam.app */;
@@ -4567,7 +4567,7 @@
 				96AC99F626E65CFB0016E941 /* XCRemoteSwiftPackageReference "uuid-kit" */,
 				4E83D3E026F21C4F00796836 /* XCRemoteSwiftPackageReference "clustering" */,
 				A5F47EC126F8D633004B7CDE /* XCRemoteSwiftPackageReference "lottie-ios" */,
-				96C0F73626FCEB7500385449 /* XCRemoteSwiftPackageReference "Swime" */,
+				333E61822707094000847A0C /* XCRemoteSwiftPackageReference "Swime" */,
 			);
 			productRefGroup = 965A78262514F147009980D4 /* Products */;
 			projectDirPath = "";
@@ -6474,6 +6474,14 @@
 				minimumVersion = 0.9.12;
 			};
 		};
+		333E61822707094000847A0C /* XCRemoteSwiftPackageReference "Swime" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/meeloo/Swime";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
 		33F0F1C626DE87E000FF8B48 /* XCRemoteSwiftPackageReference "Vinyl" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/penso/Vinyl";
@@ -6618,14 +6626,6 @@
 				minimumVersion = 0.1.0;
 			};
 		};
-		96C0F73626FCEB7500385449 /* XCRemoteSwiftPackageReference "Swime" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/meeloo/Swime";
-			requirement = {
-				branch = master;
-				kind = branch;
-			};
-		};
 		96D5AE83264C01AD003AD516 /* XCRemoteSwiftPackageReference "TLDExtractSwift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/gumob/TLDExtractSwift";
@@ -6649,6 +6649,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 33088D6126B06677004FAE99 /* XCRemoteSwiftPackageReference "ZIPFoundation" */;
 			productName = ZIPFoundation;
+		};
+		333E61832707094000847A0C /* Swime */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 333E61822707094000847A0C /* XCRemoteSwiftPackageReference "Swime" */;
+			productName = Swime;
 		};
 		33F0F1C726DE87E000FF8B48 /* Vinyl */ = {
 			isa = XCSwiftPackageProductDependency;
@@ -6754,11 +6759,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 96AC99F626E65CFB0016E941 /* XCRemoteSwiftPackageReference "uuid-kit" */;
 			productName = UUIDKit;
-		};
-		96C0F73726FCEB7500385449 /* Swime */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 96C0F73626FCEB7500385449 /* XCRemoteSwiftPackageReference "Swime" */;
-			productName = Swime;
 		};
 		96D5AE84264C01AD003AD516 /* TLDExtract */ = {
 			isa = XCSwiftPackageProductDependency;
