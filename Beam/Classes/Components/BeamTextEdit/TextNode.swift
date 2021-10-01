@@ -250,11 +250,11 @@ public class TextNode: ElementNode {
 
             if startLine + 1 != endLine {
                 // bloc doesn't end on the line directly below the start line, so be need to joind the start and end lines with a big rectangle
-                let markRect2 = NSRect(x: 0, y: line1.frame.maxY, width: textFrame.frame.width, height: line2.frame.minY - line1.frame.maxY)
+                let markRect2 = NSRect(x: textPadding.left, y: line1.frame.maxY, width: textFrame.frame.width - textPadding.left, height: line2.frame.minY - line1.frame.maxY)
                 path.addRect(markRect2)
             }
 
-            let markRect3 = NSRect(x: 0, y: line1.frame.maxY, width: xEnd, height: CGFloat(line2.frame.maxY - line1.frame.maxY) + 1)
+            let markRect3 = NSRect(x: textPadding.left, y: line1.frame.maxY, width: xEnd - textPadding.left, height: CGFloat(line2.frame.maxY - line1.frame.maxY) + 1)
             path.addRect(markRect3)
         }
 
@@ -841,7 +841,7 @@ public class TextNode: ElementNode {
         let textLine = textFrame.lines[line]
         let positionInLine = displayIndex
         let result = textLine.offsetFor(index: positionInLine)
-        return CGFloat(result) + textPadding.left
+        return CGFloat(result)
     }
 
     public func offsetAndFrameAt(index: Int) -> (CGFloat, NSRect) {
