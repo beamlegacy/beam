@@ -121,7 +121,7 @@ class BeamWebView: WKWebView {
     }
 
     var mouseClickChange: (NSPoint) -> Void = { _ in
-        // clickc event
+        // click event
     }
 
     var mouseMoveTriggeredChange: (NSPoint, NSEvent.ModifierFlags) -> Void = { (_, _) in

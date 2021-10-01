@@ -42,6 +42,12 @@ struct PointAndShootView: View {
     @State private var scale: CGFloat = 1
     @State private var lastId: String = ""
 
+    func webViewScrollEvent(_ event: NSEvent) {
+        if let tab = browserTabsManager.currentTab {
+            tab.webView.scrollWheel(with: event)
+        }
+    }
+
     @ViewBuilder var body: some View {
         // MARK: - Pointing and Shooting rect
         if let activeGroup = pns.activeShootGroup ?? pns.activePointGroup {
@@ -66,6 +72,9 @@ struct PointAndShootView: View {
                         .animation(.easeInOut(duration: 0.2), value: background)
                         .scaleEffect(scale)
                         .animation(.spring(response: 0.2, dampingFraction: 0.5, blendDuration: 0.2), value: scale)
+                        .onScroll({ event in
+                            webViewScrollEvent(event)
+                        })
                         .frame(width: rect.width, height: rect.height)
                         .animation(shouldAnimateRect ? .timingCurve(0.165, 0.84, 0.44, 1, duration: 0.4) : nil, value: rect.width)
                         .animation(shouldAnimateRect ? .timingCurve(0.165, 0.84, 0.44, 1, duration: 0.4) : nil, value: rect.height)
@@ -86,12 +95,12 @@ struct PointAndShootView: View {
                             }
                         })
                         .pointAndShootFrameOffset(pns, target: target)
-                        .allowsHitTesting(false)
+                        .allowsHitTesting(!pns.isAltKeyDown)
                         .accessibility(identifier: "PointFrame")
                 }
             } else {
                 // MARK: - Selecting
-                PointAndShootPathFrame(group: pns.translateAndScaleGroup(activeGroup))
+                PointAndShootPathFrame(group: pns.translateAndScaleGroup(activeGroup), scrollEventCallback: webViewScrollEvent)
                     .id(activeGroup.id)
                     .zIndex(19) // for animation to work correctly
                     .transition(.asymmetric(
@@ -104,7 +113,7 @@ struct PointAndShootView: View {
         // MARK: - CollectedFrames
         if pns.isAltKeyDown && !pns.hasActiveSelection {
             ForEach(pns.collectedGroups, id: \.id) { collectedGroup in
-                PointAndShootPathFrame(group: pns.translateAndScaleGroup(collectedGroup), isCollected: true)
+                PointAndShootPathFrame(group: pns.translateAndScaleGroup(collectedGroup), isCollected: true, scrollEventCallback: webViewScrollEvent)
                     .id(collectedGroup.id)
             }
         }
