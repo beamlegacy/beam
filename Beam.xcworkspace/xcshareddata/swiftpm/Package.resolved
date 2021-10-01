@@ -177,8 +177,8 @@
         "repositoryURL": "https://github.com/Quick/Nimble.git",
         "state": {
           "branch": null,
-          "revision": "c93f16c25af5770f0d3e6af27c9634640946b068",
-          "version": "9.2.1"
+          "revision": "af1730dde4e6c0d45bf01b99f8a41713ce536790",
+          "version": "9.2.0"
         }
       },
       {
@@ -312,7 +312,7 @@
         "repositoryURL": "https://github.com/meeloo/Swime",
         "state": {
           "branch": "master",
-          "revision": "d775fef44b2155673963723110f4ea28b7be8ce2",
+          "revision": "2dd7e4a252e5aa95a22a45ba37ef186047a77413",
           "version": null
         }
       },
