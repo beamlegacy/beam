@@ -19,6 +19,7 @@ class DateHelper {
     enum DateFormats: String {
         case cardViewTitle = "d MMMM yyyy"
         case cardViewCreation = "MMMM dd, yyyy"
+        case cardViewCreationNoZeros = "MMMM d, yyyy"
         case allCardsViewDates = "d MMM yyyy"
     }
     
