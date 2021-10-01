@@ -14,7 +14,8 @@
 # update_fastlane
 
 default_platform(:mac)
-xcversion(version: ENV["XCODE_VERSION"])
+xcode_file = "../.xcode_version"
+xcversion(version: File.read(xcode_file)) if File.exists?(xcode_file)
 
 platform :mac do
   desc "Run linting"
