@@ -143,7 +143,8 @@ class PointAndShoot: WebPageHolder, ObservableObject {
             } else if hasGraceRectAndMouseOverlap(target, href, mouseLocation),
                       !isLargeTargetArea(target),
                       !isTypingOnWebView,
-                      activeSelectGroup == nil {
+                      activeSelectGroup == nil,
+                      activeShootGroup == nil {
 
                 activeShootGroup = ShootGroup(groupId, [target], href)
                 if let group = activeShootGroup,

@@ -431,6 +431,7 @@
 		8A9B1A9F26DD33EA00B3B5FA /* PointAndShoot+Target.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A9B1A9E26DD33EA00B3B5FA /* PointAndShoot+Target.swift */; };
 		8AA2431626E63A5F002A553A /* SwiftSoup+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AA2431526E63A5F002A553A /* SwiftSoup+Beam.swift */; };
 		8AA2431826E63C0D002A553A /* HtmlVisitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AA2431726E63C0D002A553A /* HtmlVisitor.swift */; };
+		8AA2BC59270339DD00B99B71 /* ScrollCaptureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AA2BC58270339DD00B99B71 /* ScrollCaptureView.swift */; };
 		8AA9EEB72678ACF6009D6B31 /* WebAutocompleteContextTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AA9EEB62678ACF6009D6B31 /* WebAutocompleteContextTest.swift */; };
 		8AB44A9B267C9BE400D18B65 /* PointAndShootMessageHandlerOnLoadTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB44A9A267C9BE400D18B65 /* PointAndShootMessageHandlerOnLoadTest.swift */; };
 		8AB44AAC267CD3AB00D18B65 /* String+Slice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB44AAB267CD3AB00D18B65 /* String+Slice.swift */; };
@@ -1459,6 +1460,7 @@
 		8A9B1A9E26DD33EA00B3B5FA /* PointAndShoot+Target.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PointAndShoot+Target.swift"; sourceTree = "<group>"; };
 		8AA2431526E63A5F002A553A /* SwiftSoup+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SwiftSoup+Beam.swift"; sourceTree = "<group>"; };
 		8AA2431726E63C0D002A553A /* HtmlVisitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HtmlVisitor.swift; sourceTree = "<group>"; };
+		8AA2BC58270339DD00B99B71 /* ScrollCaptureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollCaptureView.swift; sourceTree = "<group>"; };
 		8AA9EEB62678ACF6009D6B31 /* WebAutocompleteContextTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebAutocompleteContextTest.swift; sourceTree = "<group>"; };
 		8AB44A9A267C9BE400D18B65 /* PointAndShootMessageHandlerOnLoadTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootMessageHandlerOnLoadTest.swift; sourceTree = "<group>"; };
 		8AB44AAB267CD3AB00D18B65 /* String+Slice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Slice.swift"; sourceTree = "<group>"; };
@@ -3369,6 +3371,7 @@
 				BAA6719DA7B5A8574E64AE71 /* PointAndShootCardPickerPositioning.swift */,
 				8AED4FEF26C2A3AA00E29DB7 /* PointAndShootFrameOffset.swift */,
 				8AD9DEBD26C6ACF00015B559 /* PointAndShootOffsetWithAnimation.swift */,
+				8AA2BC58270339DD00B99B71 /* ScrollCaptureView.swift */,
 			);
 			path = LayoutHelpers;
 			sourceTree = "<group>";
@@ -5239,6 +5242,7 @@
 				418172222581107C00317ED8 /* NSView+Beam.swift in Sources */,
 				4181744325812C5F00317ED8 /* NSColor+Beam.swift in Sources */,
 				5298EAFD26272CCC0033862C /* CoreDataMigrator.swift in Sources */,
+				8AA2BC59270339DD00B99B71 /* ScrollCaptureView.swift in Sources */,
 				4181721E2581107C00317ED8 /* OSLog+Beam.swift in Sources */,
 				418171F72581107C00317ED8 /* BeamData.swift in Sources */,
 				3330D7CD265E95E0008C9E20 /* LinearProgressView.swift in Sources */,

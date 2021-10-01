@@ -422,9 +422,11 @@ extension PointAndShootCardPicker {
 extension PointAndShootCardPicker {
     /// Temporarily allow animation on the parent wrapper
     func enableResizeAnimation() {
-        self.allowAnimation = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(1)) {
-            self.allowAnimation = false
+        DispatchQueue.main.async {
+            self.allowAnimation = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(1)) {
+                self.allowAnimation = false
+            }
         }
     }
 }
