@@ -94,8 +94,6 @@ struct BeamTextField: NSViewRepresentable {
         textField.setPlaceholder(placeholder, font: font)
         textField.shouldUseIntrinsicContentSize = centered
 
-        clearSelectionIfNeeded(textField, context: context)
-
         if selectedRange != coordinator.lastSelectedRange {
             if let range = selectedRange {
                 let pos = Int(range.startIndex)
@@ -135,18 +133,8 @@ struct BeamTextField: NSViewRepresentable {
         }
     }
 
-    private func clearSelectionIfNeeded(_ textField: Self.NSViewType, context: Self.Context) {
-        if context.coordinator.nextUpdateShouldClearSelection &&
-            textField.isFirstResponder &&
-            selectedRange?.isEmpty != false {
-            textField.placeCursorAtCurrentMouseLocation()
-        }
-        context.coordinator.nextUpdateShouldClearSelection = false
-    }
-
     class Coordinator: NSObject, NSTextFieldDelegate, NSControlTextEditingDelegate {
         let parent: BeamTextField
-        var nextUpdateShouldClearSelection = false
         var lastUpdateWasEditing = false
         var lastSelectedRange: Range<Int>?
         var firstResponderSetterBlock: DispatchWorkItem?
@@ -161,13 +149,6 @@ struct BeamTextField: NSViewRepresentable {
         }
 
         fileprivate func focusChangedHandler(isFocused: Bool) {
-            if !self.parent.isEditing && isFocused {
-                // text field could focus for 2 reasons: [user clicked | us programmatically].
-                // When user clicks, our callbacks will make the view re-render,
-                // causing the selection to be messy. We prevent this here.
-                // See Cursor Blip in https://linear.app/beamapp/issue/BE-661
-                self.nextUpdateShouldClearSelection = true
-            }
             self.parent.isEditing = isFocused
             if isFocused {
                 self.parent.onStartEditing()
