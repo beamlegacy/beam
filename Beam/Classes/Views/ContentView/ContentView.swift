@@ -35,6 +35,7 @@ struct ContentView: View {
                 .edgesIgnoringSafeArea(.top)
                 .zIndex(0)
             OverlayViewCenter(viewModel: state.overlayViewModel)
+                .edgesIgnoringSafeArea(.top)
                 .zIndex(1)
         }
     }
