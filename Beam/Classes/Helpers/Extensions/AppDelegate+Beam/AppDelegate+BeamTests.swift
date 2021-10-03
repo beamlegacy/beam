@@ -16,12 +16,16 @@ extension AppDelegate {
         UITestMenuAvailableCommands.allCases.forEach { item in
             let value = item.rawValue
             var menuItem: NSMenuItem
+            let shortcut = item.shortcut
             if value.hasPrefix("separator") {
                 menuItem = NSMenuItem.separator()
             } else {
                 menuItem = NSMenuItem(title: item.rawValue,
                                       action: #selector(menuCalled),
-                                      keyEquivalent: "")
+                                      keyEquivalent: shortcut?.key ?? "")
+                if let modifiers = shortcut?.modifiers {
+                    menuItem.keyEquivalentModifierMask = modifiers
+                }
             }
             var parentMenu = prepareBeam.submenu
             if let group = item.group {

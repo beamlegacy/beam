@@ -206,7 +206,7 @@ public extension CALayer {
         super.viewDidChangeEffectiveAppearance()
         layer?.backgroundColor = BeamColor.Generic.background.cgColor
         layer?.setNeedsDisplay()
-        setupCardHeader()
+        updateLayersColorsForAppearance()
         rootNode.deepInvalidateRendering()
         rootNode.deepInvalidateText()
     }
@@ -378,15 +378,20 @@ public extension CALayer {
         addToMainLayer(cardHeaderLayer)
     }
 
-    private func updateCardTitleForHover(_ hover: Bool) {
-        guard let cardNote = note as? BeamNote else { return }
+    private func updateLayersColorsForAppearance() {
+        updateCardTitleForHover(false)
+    }
 
-        cardTitleLayer.string = NSAttributedString(string: cardNote.title, attributes: [
-            .font: BeamFont.medium(size: PreferencesManager.editorCardTitleFontSize).nsFont,
-            .foregroundColor: BeamColor.Generic.text.nsColor,
-            .underlineStyle: NSUnderlineStyle.single.rawValue,
-            .underlineColor: hover ? BeamColor.Generic.text.nsColor : BeamColor.Generic.transparent.nsColor
-        ])
+    private func updateCardTitleForHover(_ hover: Bool) {
+        guard let cardNote = note as? BeamNote, showTitle else { return }
+        NSAppearance.withAppAppearance {
+            cardTitleLayer.string = NSAttributedString(string: cardNote.title, attributes: [
+                .font: BeamFont.medium(size: PreferencesManager.editorCardTitleFontSize).nsFont,
+                .foregroundColor: BeamColor.Generic.text.cgColor,
+                .underlineStyle: NSUnderlineStyle.single.rawValue,
+                .underlineColor: hover ? BeamColor.Generic.text.cgColor : BeamColor.Generic.transparent.cgColor
+            ])
+        }
     }
 
     private var cardHeaderPosY: CGFloat {

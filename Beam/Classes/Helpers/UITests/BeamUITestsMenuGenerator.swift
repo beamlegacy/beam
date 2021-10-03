@@ -3,6 +3,8 @@ import Fakery
 import BeamCore
 import AutoUpdate
 
+import SwiftUI // Remove once we remove .testMeetingModal menu
+
 class BeamUITestsMenuGenerator {
     // swiftlint:disable:next cyclomatic_complexity
     func executeCommand(_ command: UITestMenuAvailableCommands) {
@@ -31,6 +33,7 @@ class BeamUITestsMenuGenerator {
         case .cleanDownloads: cleanDownloadFolder()
         case .omnibarFillHistory: fillHistory()
         case .signInWithTestAccount: signInWithTestAccount()
+        case .testMeetingModal: testAddMeeting()
         default: break
         }
     }
@@ -186,4 +189,52 @@ class BeamUITestsMenuGenerator {
             }
         }
     }
+    private func addMeeting(_ meeting: Meeting, to note: BeamNote) {
+        guard let documentManager = AppDelegate.main.window?.state.data.documentManager else { return }
+        var text = BeamText(text: "")
+        var meetingAttributes: [BeamText.Attribute] = []
+        if meeting.linkCards {
+            let meetingNote = BeamNote.fetchOrCreate(documentManager, title: meeting.name)
+            meetingAttributes = [.internalLink(meetingNote.id)]
+        }
+        text.insert(meeting.name, at: 0, withAttributes: meetingAttributes)
+
+        if !meeting.attendees.isEmpty {
+            let prefix = "Meeting with "
+            var position = prefix.count
+            text.insert(prefix, at: 0, withAttributes: [])
+            meeting.attendees.enumerated().forEach { index, attendee in
+                let name = attendee.name
+                let attendeeNote = BeamNote.fetchOrCreate(documentManager, title: name)
+                text.insert(name, at: position, withAttributes: [.internalLink(attendeeNote.id)])
+                position += name.count
+                if index < meeting.attendees.count - 1 {
+                    let separator = ", "
+                    text.insert(separator, at: position, withAttributes: [])
+                    position += separator.count
+                }
+            }
+            text.insert(" for ", at: position, withAttributes: [])
+        }
+        let e = BeamElement(text)
+        note.insert(e, after: note.children.last)
+    }
+
+    private func testAddMeeting() {
+        let state = AppDelegate.main.window?.state
+        let model = MeetingModalView.ViewModel(meetingName: "Meeting Integration",
+                                               attendees: [
+                                                Meeting.Attendee(email: "luis@beamapp.co", name: "Luis Darmon"),
+                                                Meeting.Attendee(email: "dom@beamapp.co", name: "Dom Leca"),
+                                                Meeting.Attendee(email: "remi@beamapp.co", name: "Remi Santos")
+                                               ],
+                                               onFinish: { [weak self] meeting in
+                                                if let meeting = meeting, let note = state?.data.todaysNote {
+                                                    self?.addMeeting(meeting, to: note)
+                                                }
+                                                state?.overlayViewModel.modalView = nil
+                                               })
+        state?.overlayViewModel.modalView = AnyView(MeetingModalView(viewModel: model))
+    }
+
 }

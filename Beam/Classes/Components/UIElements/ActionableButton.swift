@@ -26,33 +26,41 @@ enum ActionableButtonVariant {
             return ActionableButtonStyle(font: BeamFont.medium(size: 13).swiftUI,
                                          foregroundColor: BeamColor.ActionableButtonBlue.foreground.swiftUI,
                                          activeForegroundColor: BeamColor.ActionableButtonBlue.foreground.swiftUI,
+                                         disabledForegroundColor: BeamColor.ActionableButtonBlue.disabledForeground.swiftUI,
                                          backgroundColor: BeamColor.ActionableButtonBlue.background.swiftUI,
                                          hoveredBackgroundColor: BeamColor.ActionableButtonBlue.backgroundHovered.swiftUI,
                                          clickedBackgroundColor: BeamColor.ActionableButtonBlue.backgroundClicked.swiftUI,
+                                         disabledBackgroundColor: BeamColor.ActionableButtonBlue.backgroundDisabled.swiftUI,
                                          iconName: "editor-format_enter")
         case .primaryPurple:
             return ActionableButtonStyle(font: BeamFont.medium(size: 13).swiftUI,
                                          foregroundColor: BeamColor.ActionableButtonPurple.foreground.swiftUI,
                                          activeForegroundColor: BeamColor.ActionableButtonPurple.foreground.swiftUI,
+                                         disabledForegroundColor: BeamColor.ActionableButtonPurple.disabledForeground.swiftUI,
                                          backgroundColor: BeamColor.ActionableButtonPurple.background.swiftUI,
                                          hoveredBackgroundColor: BeamColor.ActionableButtonPurple.backgroundHovered.swiftUI,
                                          clickedBackgroundColor: BeamColor.ActionableButtonPurple.backgroundClicked.swiftUI,
+                                         disabledBackgroundColor: BeamColor.ActionableButtonPurple.backgroundDisabled.swiftUI,
                                          iconName: "editor-format_enter")
         case .secondary:
             return ActionableButtonStyle(font: BeamFont.medium(size: 13).swiftUI,
                                          foregroundColor: BeamColor.ActionableButtonSecondary.foreground.swiftUI,
                                          activeForegroundColor: BeamColor.ActionableButtonSecondary.activeForeground.swiftUI,
+                                         disabledForegroundColor: BeamColor.ActionableButtonSecondary.disabledForeground.swiftUI,
                                          backgroundColor: BeamColor.ActionableButtonSecondary.background.swiftUI,
                                          hoveredBackgroundColor: BeamColor.ActionableButtonSecondary.backgroundHovered.swiftUI,
                                          clickedBackgroundColor: BeamColor.ActionableButtonSecondary.backgroundClicked.swiftUI,
+                                         disabledBackgroundColor: BeamColor.ActionableButtonSecondary.backgroundDisabled.swiftUI,
                                          iconName: "Esc")
         case .custom(let customStyle):
             return ActionableButtonStyle(font: customStyle.font,
                                          foregroundColor: customStyle.foregroundColor,
                                          activeForegroundColor: customStyle.activeForegroundColor,
+                                         disabledForegroundColor: customStyle.disabledForegroundColor,
                                          backgroundColor: customStyle.backgroundColor,
                                          hoveredBackgroundColor: customStyle.hoveredBackgroundColor,
                                          clickedBackgroundColor: customStyle.clickedBackgroundColor,
+                                         disabledBackgroundColor: customStyle.disabledBackgroundColor,
                                          iconName: customStyle.iconName)
         }
     }
@@ -62,9 +70,11 @@ struct ActionableButtonStyle {
     var font = BeamFont.medium(size: 13).swiftUI
     var foregroundColor: Color = BeamColor.Button.text.swiftUI
     var activeForegroundColor: Color = BeamColor.Button.activeText.swiftUI
+    var disabledForegroundColor: Color
     var backgroundColor: Color
     var hoveredBackgroundColor: Color
     var clickedBackgroundColor: Color = BeamColor.Button.activeBackground.swiftUI
+    var disabledBackgroundColor: Color
     let iconName: String
 }
 
@@ -93,7 +103,6 @@ struct ActionableButton: View {
         }
         .frame(height: 30)
         .background(backgroundColor)
-        .overlay(overlay)
         .cornerRadius(3.0)
         .animation(.easeInOut(duration: 0.2), value: isTouched)
         .animation(.easeInOut(duration: 0.2), value: isHovered)
@@ -113,7 +122,7 @@ struct ActionableButton: View {
 
     private var foregroundColor: Color {
         if defaultState == .disabled {
-            return BeamColor.Mercury.swiftUI
+            return variant.style.disabledForegroundColor
         } else if defaultState == .clicked {
             return variant.style.activeForegroundColor
         } else {
@@ -123,20 +132,13 @@ struct ActionableButton: View {
 
     private var backgroundColor: Color {
         if defaultState == .disabled {
-            return Color.clear
+            return variant.style.disabledBackgroundColor
         } else if defaultState == .clicked || isTouched {
             return variant.style.clickedBackgroundColor
         } else if defaultState == .hovered || isHovered {
             return variant.style.hoveredBackgroundColor
         } else {
             return variant.style.backgroundColor
-        }
-    }
-
-    @ViewBuilder private var overlay: some View {
-        if defaultState == .disabled {
-            RoundedRectangle(cornerRadius: 3)
-                .stroke(BeamColor.Mercury.swiftUI, lineWidth: 1.0)
         }
     }
 }
@@ -164,7 +166,7 @@ struct ActionableButton_Previews: PreviewProvider {
                     ActionableButton(text: "Secondary Button", defaultState: .disabled, variant: .secondary, action: nil)
                 }
             }.padding()
-            .background(Color.white)
+            .background(BeamColor.Generic.background.swiftUI)
         }
         if #available(macOS 11.0, *) {
             Group {
@@ -189,7 +191,7 @@ struct ActionableButton_Previews: PreviewProvider {
                     }
                 }
                 .padding()
-                .background(Color.black)
+                .background(BeamColor.Generic.background.swiftUI)
             }.preferredColorScheme(.dark)
         }
     }
