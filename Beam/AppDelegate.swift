@@ -60,12 +60,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        if Configuration.env == "$(ENV)", !NSString(string: ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] ?? "0").boolValue {
+        let isSwiftUIPreview = NSString(string: ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] ?? "0").boolValue
+        if Configuration.env == "$(ENV)", !isSwiftUIPreview {
             fatalError("Please restart your build, your ENV wasn't detected properly, and this should only happens for SwiftUI Previews")
         }
 
-        setAppearance(BeamAppearance(rawValue: PreferencesManager.beamAppearancePreference))
-        DistributedNotificationCenter.default.addObserver(self, selector: #selector(interfaceModeChanged(sender:)), name: NSNotification.Name(rawValue: "AppleInterfaceThemeChangedNotification"), object: nil)
+        if !isSwiftUIPreview {
+            setAppearance(BeamAppearance(rawValue: PreferencesManager.beamAppearancePreference))
+            DistributedNotificationCenter.default.addObserver(self, selector: #selector(interfaceModeChanged(sender:)), name: NSNotification.Name(rawValue: "AppleInterfaceThemeChangedNotification"), object: nil)
+        }
 
         LibrariesManager.shared.configure()
         ContentBlockingManager.shared.setup()

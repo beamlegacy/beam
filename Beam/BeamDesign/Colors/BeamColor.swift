@@ -35,19 +35,39 @@ indirect enum BeamColor {
     case Tundora
 
     case Custom(named: String)
-    case Combining(lightColor: BeamColor, darkColor: BeamColor)
-    case From(color: NSColor)
+    case From(color: NSColor, alpha: CGFloat? = nil)
+
+    /**
+     Creates a dynamic color with provided appearance color.
+
+     Optional alpha parameters are applied inside the dynamic provider,
+     because NSColor's `withAlphaComponent` could cause issue when switching between apperance.
+     */
+    static func combining(lightColor: BeamColor, lightAlpha: CGFloat = 1.0, darkColor: BeamColor, darkAlpha: CGFloat = 1.0) -> BeamColor {
+        guard lightAlpha != 1.0 || darkAlpha != 1.0 else {
+            return BeamColor.From(color: NSColor(withLightColor: lightColor.nsColor, darkColor: darkColor.nsColor))
+        }
+        return BeamColor.From(color: NSColor(name: nil) { appearance in
+            appearance.isDarkMode ? darkColor.nsColor.withAlphaComponent(darkAlpha) : lightColor.nsColor.withAlphaComponent(lightAlpha)
+        })
+    }
 }
 
 extension BeamColor {
+
+    func alpha(_ a: CGFloat) -> BeamColor {
+        BeamColor.From(color: self.nsColor, alpha: a)
+    }
+
     var nsColor: NSColor {
         var colorName: String
         switch self {
         case .Custom(let named):
             colorName = named
-        case .Combining(let lightColor, let darkColor):
-            return NSColor(withLightColor: lightColor.nsColor, darkColor: darkColor.nsColor)
-        case .From(let color):
+        case .From(let color, let alpha):
+            if let alpha = alpha, alpha < 1 {
+                return NSColor(name: nil) { _ in color.withAlphaComponent(alpha) }
+            }
             return color
         default:
             colorName = String(describing: self)

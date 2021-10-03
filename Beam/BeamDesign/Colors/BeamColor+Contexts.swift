@@ -32,17 +32,17 @@ extension BeamColor {
         static let searchHover = BeamColor.Bluetiful
         static let searchClicked = BeamColor.Custom(named: "EditorSearchClicked")
         static let bidirectionalLink = BeamColor.Beam
-        static let bidirectionalLinkBackground = BeamColor.From(color: BeamColor.Beam.nsColor.withAlphaComponent(0.08))
-        static let bidirectionalLinkHighlightedBackground = BeamColor.From(color: BeamColor.Beam.nsColor.withAlphaComponent(0.24))
-        static let bidirectionalUnderline = BeamColor.From(color: BeamColor.Beam.nsColor.withAlphaComponent(0.25))
+        static let bidirectionalLinkBackground = BeamColor.Beam.alpha(0.08)
+        static let bidirectionalLinkHighlightedBackground = BeamColor.Beam.alpha(0.24)
+        static let bidirectionalUnderline = BeamColor.Beam.alpha(0.25)
         static let control = BeamColor.Custom(named: "EditorControlColor")
         static let link = BeamColor.Niobium
         static let linkActive = BeamColor.Bluetiful
-        static let linkActiveBackground = BeamColor.From(color: BeamColor.Bluetiful.nsColor.withAlphaComponent(0.1))
-        static let linkActiveHighlightedBackground = BeamColor.From(color: BeamColor.Bluetiful.nsColor.withAlphaComponent(0.24))
-        static var linkDecoration = BeamColor.Combining(lightColor: BeamColor.AlphaGray, darkColor: BeamColor.LightStoneGray)
+        static let linkActiveBackground = BeamColor.Bluetiful.alpha(0.1)
+        static let linkActiveHighlightedBackground = BeamColor.Bluetiful.alpha(0.24)
+        static var linkDecoration = BeamColor.combining(lightColor: .AlphaGray, darkColor: .LightStoneGray)
         static let syntax = BeamColor.Custom(named: "EditorSyntaxColor")
-        static let indentBackground = BeamColor.From(color: NSColor(withLightColor: BeamColor.Mercury.nsColor.withAlphaComponent(0.5), darkColor: BeamColor.Mercury.nsColor))
+        static let indentBackground = BeamColor.combining(lightColor: .Mercury, lightAlpha: 0.5, darkColor: .Mercury)
         static let underlineAndStrikethrough = BeamColor.Niobium
     }
 }
@@ -77,10 +77,12 @@ extension BeamColor {
 
 extension BeamColor {
     enum Formatter {
-        static let background = BeamColor.From(color: NSColor(withLightColor: NSColor.white.withAlphaComponent(0.98), darkColor: BeamColor.Nero.nsColor.withAlphaComponent(0.98)))
+        static let background = BeamColor.combining(lightColor: .From(color: NSColor.white), lightAlpha: 0.98,
+                                                    darkColor: .Nero, darkAlpha: 0.98)
         static let backgroundHover = BeamColor.Custom(named: "FormatterBackgroundHoverColor")
         static let border = BeamColor.Custom(named: "FormatterBorderColor")
-        static let shadow = BeamColor.From(color: NSColor(withLightColor: NSColor.black.withAlphaComponent(0.25), darkColor: NSColor.black.withAlphaComponent(0.60)))
+        static let shadow = BeamColor.combining(lightColor: .From(color: .black), lightAlpha: 0.25,
+                                                darkColor: .From(color: .black), darkAlpha: 0.6)
         static let icon = BeamColor.Corduroy
         static let iconHoverAndActive = BeamColor.Niobium
         static let buttonBackgroundHover = BeamColor.Custom(named: "FormatterItemHoverColor")
@@ -90,18 +92,12 @@ extension BeamColor {
 extension BeamColor {
     enum PointShoot {
         static let text = BeamColor.From(color: BeamColor.Beam.nsColor)
-        static let pointBackground = BeamColor.From(color: NSColor(
-            withLightColor: BeamColor.Beam.nsColor.withAlphaComponent(0.14),
-            darkColor: BeamColor.Beam.nsColor.withAlphaComponent(0.20)
-        ))
-        static let shootBackground = BeamColor.From(color: NSColor(
-            withLightColor: BeamColor.Beam.nsColor.withAlphaComponent(0.28),
-            darkColor: BeamColor.Beam.nsColor.withAlphaComponent(0.40)
-        ))
-        static let reminiscenceBackground = BeamColor.From(color: NSColor(
-            withLightColor: BeamColor.Beam.nsColor.withAlphaComponent(0.14),
-            darkColor: BeamColor.Beam.nsColor.withAlphaComponent(0.20)
-        ))
+        static let pointBackground = BeamColor.combining(lightColor: .Beam, lightAlpha: 0.14,
+                                                         darkColor: .Beam, darkAlpha: 0.2)
+        static let shootBackground = BeamColor.combining(lightColor: .Beam, lightAlpha: 0.28,
+                                                         darkColor: .Beam, darkAlpha: 0.4)
+        static let reminiscenceBackground = BeamColor.combining(lightColor: .Beam, lightAlpha: 0.14,
+                                                                darkColor: .Beam, darkAlpha: 0.2)
     }
 }
 
@@ -109,33 +105,34 @@ extension BeamColor {
     enum Autocomplete {
         static let link = BeamColor.Bluetiful
         static let subtitleText = BeamColor.LightStoneGray
-        static let newCardSubtitle = BeamColor.From(color: NSColor(withLightColor: BeamColor.Beam.nsColor.withAlphaComponent(0.7), darkColor: BeamColor.Beam.nsColor))
+        static let newCardSubtitle = BeamColor.combining(lightColor: .Beam, lightAlpha: 0.7,
+                                                         darkColor: .Beam)
         static let selectedBackground = BeamColor.Generic.textSelection
-        static let clickedBackground = BeamColor.From(color: BeamColor.Bluetiful.nsColor.withAlphaComponent(0.14))
-        static let focusedBackground = BeamColor.From(color: NSColor(withLightColor: NSColor.white, darkColor: BeamColor.Nero.nsColor))
-        static let focusedShadow = BeamColor.From(color: NSColor(withLightColor: BeamColor.Niobium.nsColor.withAlphaComponent(0.15), darkColor: NSColor.black.withAlphaComponent(0.6)))
-        static let focusedPressedShadow = BeamColor.From(color: NSColor(withLightColor: BeamColor.Niobium.nsColor.withAlphaComponent(0.2), darkColor: NSColor.black.withAlphaComponent(0.8)))
-        static let hoveredShadow = BeamColor.From(color: NSColor(withLightColor: BeamColor.Niobium.nsColor.withAlphaComponent(0.07), darkColor: NSColor.black.withAlphaComponent(0.4)))
+        static let clickedBackground = BeamColor.Bluetiful.alpha(0.14)
+        static let focusedBackground = BeamColor.combining(lightColor: .From(color: .white), darkColor: .Nero)
+        static let focusedShadow = BeamColor.combining(lightColor: .Niobium, lightAlpha: 0.15,
+                                                       darkColor: .From(color: .black), darkAlpha: 0.6)
+        static let focusedPressedShadow = BeamColor.combining(lightColor: .Niobium, lightAlpha: 0.2,
+                                                              darkColor: .From(color: .black), darkAlpha: 0.8)
+        static let hoveredShadow = BeamColor.combining(lightColor: .Niobium, lightAlpha: 0.07,
+                                                       darkColor: .From(color: .black), darkAlpha: 0.4)
     }
 }
 
 extension BeamColor {
     enum NotePicker {
         static let border = BeamColor.Mercury
-        static let selected = BeamColor.From(color: NSColor(
-            withLightColor: BeamColor.Beam.nsColor.withAlphaComponent(0.10),
-            darkColor: BeamColor.Beam.nsColor.withAlphaComponent(0.20)
-        ))
-        static let active = BeamColor.From(color: NSColor(
-            withLightColor: BeamColor.Beam.nsColor.withAlphaComponent(0.20),
-            darkColor: BeamColor.Beam.nsColor.withAlphaComponent(0.30)
-        ))
+        static let selected = BeamColor.combining(lightColor: .Beam, lightAlpha: 0.1,
+                                                  darkColor: .Beam, darkAlpha: 0.2)
+        static let active = BeamColor.combining(lightColor: .Beam, lightAlpha: 0.2,
+                                                darkColor: .Beam, darkAlpha: 0.3)
     }
 }
 
 extension BeamColor {
     enum BottomBar {
-        static let shadow = BeamColor.From(color: NSColor(withLightColor: NSColor.black.withAlphaComponent(0.050), darkColor: BeamColor.Mercury.nsColor))
+        static let shadow = BeamColor.combining(lightColor: .From(color: .black), lightAlpha: 0.050,
+                                                darkColor: .Mercury)
     }
 }
 
@@ -149,32 +146,46 @@ extension BeamColor {
 
 extension BeamColor {
     enum ActionableButtonBlue {
-        static let background = BeamColor.From(color: BeamColor.Bluetiful.nsColor.withAlphaComponent(0.1))
-        static let backgroundHovered = BeamColor.From(color: BeamColor.Bluetiful.nsColor.withAlphaComponent(0.16))
-        static let backgroundClicked = BeamColor.From(color: BeamColor.Bluetiful.nsColor.withAlphaComponent(0.28))
+        static let background = BeamColor.Bluetiful.alpha(0.1)
+        static let backgroundHovered = BeamColor.combining(lightColor: .Bluetiful, lightAlpha: 0.16,
+                                                           darkColor: .Bluetiful, darkAlpha: 0.2)
+        static let backgroundClicked = BeamColor.combining(lightColor: .Bluetiful, lightAlpha: 0.28,
+                                                           darkColor: .Bluetiful, darkAlpha: 0.34)
+        static let backgroundDisabled = BeamColor.combining(lightColor: .Bluetiful, lightAlpha: 0.04,
+                                                            darkColor: .Bluetiful, darkAlpha: 0.07)
         static let foreground = BeamColor.Bluetiful
+        static let disabledForeground = BeamColor.combining(lightColor: .Bluetiful, lightAlpha: 0.15,
+                                                            darkColor: .Bluetiful, darkAlpha: 0.2)
     }
 
     enum ActionableButtonPurple {
-        static let background = BeamColor.From(color: BeamColor.Beam.nsColor.withAlphaComponent(0.1))
-        static let backgroundHovered = BeamColor.From(color: BeamColor.Beam.nsColor.withAlphaComponent(0.16))
-        static let backgroundClicked = BeamColor.From(color: BeamColor.Beam.nsColor.withAlphaComponent(0.28))
+        static let background = BeamColor.Beam.alpha(0.1)
+        static let backgroundHovered = BeamColor.combining(lightColor: .Beam, lightAlpha: 0.16,
+                                                           darkColor: .Beam, darkAlpha: 0.2)
+        static let backgroundClicked = BeamColor.combining(lightColor: .Beam, lightAlpha: 0.28,
+                                                           darkColor: .Beam, darkAlpha: 0.34)
+        static let backgroundDisabled = BeamColor.combining(lightColor: .Beam, lightAlpha: 0.04,
+                                                            darkColor: .Beam, darkAlpha: 0.07)
         static let foreground = BeamColor.Beam
+        static let disabledForeground = BeamColor.combining(lightColor: .Beam, lightAlpha: 0.15,
+                                                            darkColor: .Beam, darkAlpha: 0.2)
     }
 
     enum ActionableButtonSecondary {
-        static let background = BeamColor.Combining(lightColor: .Nero, darkColor: .Mercury)
-        static let backgroundHovered = BeamColor.Combining(lightColor: .Mercury, darkColor: .AlphaGray)
-        static let backgroundClicked = BeamColor.Combining(lightColor: .AlphaGray, darkColor: .LightStoneGray)
+        static let background = BeamColor.combining(lightColor: .Nero, darkColor: .Mercury)
+        static let backgroundHovered = BeamColor.combining(lightColor: .Mercury, darkColor: .AlphaGray)
+        static let backgroundClicked = BeamColor.combining(lightColor: .AlphaGray, darkColor: .LightStoneGray)
         static let foreground = BeamColor.Corduroy
+        static let backgroundDisabled = BeamColor.Nero
         static let activeForeground = BeamColor.Niobium
+        static let disabledForeground = BeamColor.AlphaGray.alpha(0.5)
     }
 }
 
 extension BeamColor {
     enum Passwords {
-        static let hoverBackground = BeamColor.From(color: BeamColor.Bluetiful.nsColor.withAlphaComponent(0.10))
-        static let activeBackground = BeamColor.From(color: BeamColor.Bluetiful.nsColor.withAlphaComponent(0.14))
+        static let hoverBackground = BeamColor.Bluetiful.alpha(0.10)
+        static let activeBackground = BeamColor.Bluetiful.alpha(0.14)
     }
 }
 
@@ -190,26 +201,26 @@ extension BeamColor {
 // MARK: - Cursor & Selection
 extension BeamColor.Generic {
     static private let possibleCursorColors = [
-        BeamColor.From(color: BeamColor.Niobium.nsColor.withAlphaComponent(0.6)),
-        BeamColor.From(color: BeamColor.Niobium.nsColor.withAlphaComponent(0.45)),
-        BeamColor.From(color: BeamColor.Bluetiful.nsColor.withAlphaComponent(0.6)),
-        BeamColor.From(color: BeamColor.Beam.nsColor.withAlphaComponent(0.6)),
-        BeamColor.From(color: BeamColor.Shiraz.nsColor.withAlphaComponent(0.6)),
-        BeamColor.From(color: BeamColor.CharmedGreen.nsColor.withAlphaComponent(0.6))
+        BeamColor.Niobium.alpha(0.6),
+        BeamColor.Niobium.alpha(0.45),
+        BeamColor.Bluetiful.alpha(0.6),
+        BeamColor.Beam.alpha(0.6),
+        BeamColor.Shiraz.alpha(0.6),
+        BeamColor.CharmedGreen.alpha(0.6)
     ]
     static private let possibleSelectionColors = [
-        BeamColor.From(color: NSColor(withLightColor: BeamColor.Niobium.nsColor.withAlphaComponent(0.1),
-                                      darkColor: BeamColor.Niobium.nsColor.withAlphaComponent(0.2))),
-        BeamColor.From(color: NSColor(withLightColor: BeamColor.Niobium.nsColor.withAlphaComponent(0.075),
-                                      darkColor: BeamColor.Niobium.nsColor.withAlphaComponent(0.15))),
-        BeamColor.From(color: NSColor(withLightColor: BeamColor.Bluetiful.nsColor.withAlphaComponent(0.1),
-                                      darkColor: BeamColor.Bluetiful.nsColor.withAlphaComponent(0.2))),
-        BeamColor.From(color: NSColor(withLightColor: BeamColor.Beam.nsColor.withAlphaComponent(0.1),
-                                      darkColor: BeamColor.Beam.nsColor.withAlphaComponent(0.2))),
-        BeamColor.From(color: NSColor(withLightColor: BeamColor.Shiraz.nsColor.withAlphaComponent(0.1),
-                                      darkColor: BeamColor.Shiraz.nsColor.withAlphaComponent(0.2))),
-        BeamColor.From(color: NSColor(withLightColor: BeamColor.CharmedGreen.nsColor.withAlphaComponent(0.1),
-                                      darkColor: BeamColor.CharmedGreen.nsColor.withAlphaComponent(0.2)))
+        BeamColor.combining(lightColor: .Niobium, lightAlpha: 0.1,
+                            darkColor: .Niobium, darkAlpha: 0.2),
+        BeamColor.combining(lightColor: .Niobium, lightAlpha: 0.075,
+                            darkColor: .Niobium, darkAlpha: 0.15),
+        BeamColor.combining(lightColor: .Bluetiful, lightAlpha: 0.1,
+                            darkColor: .Bluetiful, darkAlpha: 0.2),
+        BeamColor.combining(lightColor: .Beam, lightAlpha: 0.1,
+                            darkColor: .Beam, darkAlpha: 0.2),
+        BeamColor.combining(lightColor: .Shiraz, lightAlpha: 0.1,
+                            darkColor: .Shiraz, darkAlpha: 0.2),
+        BeamColor.combining(lightColor: .CharmedGreen, lightAlpha: 0.1,
+                            darkColor: .CharmedGreen, darkAlpha: 0.2)
     ]
     static private let randomCursorColorIndex = Int.random(in: 0..<6)
 
@@ -219,16 +230,13 @@ extension BeamColor.Generic {
 
 extension BeamColor {
     enum CalendarPicker {
-        static let selectedDayBackground = BeamColor.From(color: NSColor(withLightColor: BeamColor.Bluetiful.nsColor.withAlphaComponent(0.08),
-                                                                         darkColor: BeamColor.Bluetiful.nsColor.withAlphaComponent(0.14)))
-        static let selectedDayHoverBackground = BeamColor.From(color: NSColor(withLightColor: BeamColor.Bluetiful.nsColor.withAlphaComponent(0.14),
-                                                                              darkColor: BeamColor.Bluetiful.nsColor.withAlphaComponent(0.24)))
-        static let selectedDayClickedBackground = BeamColor.From(color: NSColor(withLightColor: BeamColor.Bluetiful.nsColor.withAlphaComponent(0.2),
-                                                                                darkColor: BeamColor.Bluetiful.nsColor.withAlphaComponent(0.4)))
-
-        static let dayHoverBackground = BeamColor.From(color: NSColor(withLightColor: BeamColor.Mercury.nsColor,
-                                                                      darkColor: BeamColor.AlphaGray.nsColor))
-        static let dayClickedBackground = BeamColor.From(color: NSColor(withLightColor: BeamColor.AlphaGray.nsColor,
-                                                                        darkColor: BeamColor.LightStoneGray.nsColor))
+        static let selectedDayBackground = BeamColor.combining(lightColor: .Bluetiful, lightAlpha: 0.08,
+                                                               darkColor: .Bluetiful, darkAlpha: 0.14)
+        static let selectedDayHoverBackground = BeamColor.combining(lightColor: .Bluetiful, lightAlpha: 0.14,
+                                                                    darkColor: .Bluetiful, darkAlpha: 0.24)
+        static let selectedDayClickedBackground = BeamColor.combining(lightColor: .Bluetiful, lightAlpha: 0.2,
+                                                                      darkColor: .Bluetiful, darkAlpha: 0.4)
+        static let dayHoverBackground = BeamColor.combining(lightColor: .Mercury, darkColor: .AlphaGray)
+        static let dayClickedBackground = BeamColor.combining(lightColor: .AlphaGray, darkColor: .LightStoneGray)
     }
 }

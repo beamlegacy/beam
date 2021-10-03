@@ -270,12 +270,16 @@ public class TextNode: ElementNode {
     }
 
     override public func invalidateText() {
+        invalidateText(forced: false)
+    }
+
+    private func invalidateText(forced: Bool = false) {
         if parent == nil {
             _attributedString = nil
             return
         }
         let newPadding = textPadding(elementKind: elementKind)
-        if updateAttributedString() || elementText.isEmpty || !NSEdgeInsetsEqual(textPadding, newPadding) {
+        if updateAttributedString() || forced || elementText.isEmpty || !NSEdgeInsetsEqual(textPadding, newPadding) {
             textPadding = newPadding
             updateTextFrame()
             invalidateRendering()
@@ -337,7 +341,7 @@ public class TextNode: ElementNode {
     }
 
     override func deepInvalidateText() {
-        invalidateText()
+        invalidateText(forced: true)
         super.deepInvalidateText()
     }
 
