@@ -45,44 +45,46 @@ class TextLinesDecorationLayer: CALayer {
     }
 
     private func updateSubLayers() {
-        removeAllSublayers()
-        guard let textLines = textLines, !textLines.isEmpty else { return }
+        NSAppearance.withAppAppearance {
+            removeAllSublayers()
+            guard let textLines = textLines, !textLines.isEmpty else { return }
 
-        let textOrigin = CGPoint(x: decorationInset, y: decorationInset)
+            let textOrigin = CGPoint(x: decorationInset, y: decorationInset)
 
-        var layers = [CALayer]()
-        for textLine in textLines {
-            let originY = textOrigin.y + textLine.frame.minY
-            var offset = textOrigin.x + textLine.frame.minX
-            var boxBackgroundRect: CGRect?
-            var boxColor: NSColor?
+            var layers = [CALayer]()
+            for textLine in textLines {
+                let originY = textOrigin.y + textLine.frame.minY
+                var offset = textOrigin.x + textLine.frame.minX
+                var boxBackgroundRect: CGRect?
+                var boxColor: NSColor?
 
-            for run in textLine.runs {
-                var ascent = CGFloat(0)
-                var descent = CGFloat(0)
-                let width = CGFloat(CTRunGetTypographicBounds(run, CFRangeMake(0, 0), &ascent, &descent, nil))
-                let height = ascent + descent
-                if let attributes = CTRunGetAttributes(run) as? [NSAttributedString.Key: Any] {
-                    if let color = attributes[.boxBackgroundColor] as? NSColor {
-                        let inset: CGFloat = -4
-                        let rect = CGRect(x: offset, y: originY, width: width, height: height).insetBy(dx: inset, dy: inset)
-                        boxBackgroundRect = boxBackgroundRect?.union(rect) ?? rect
-                        boxColor = color
-                    } else {
-                        if let boxLayer = buildBoxBackgroundLayer(boxBackgroundRect, color: boxColor) {
-                            layers.append(boxLayer)
+                for run in textLine.runs {
+                    var ascent = CGFloat(0)
+                    var descent = CGFloat(0)
+                    let width = CGFloat(CTRunGetTypographicBounds(run, CFRangeMake(0, 0), &ascent, &descent, nil))
+                    let height = ascent + descent
+                    if let attributes = CTRunGetAttributes(run) as? [NSAttributedString.Key: Any] {
+                        if let color = attributes[.boxBackgroundColor] as? NSColor {
+                            let inset: CGFloat = -4
+                            let rect = CGRect(x: offset, y: originY, width: width, height: height).insetBy(dx: inset, dy: inset)
+                            boxBackgroundRect = boxBackgroundRect?.union(rect) ?? rect
+                            boxColor = color
+                        } else {
+                            if let boxLayer = buildBoxBackgroundLayer(boxBackgroundRect, color: boxColor) {
+                                layers.append(boxLayer)
+                            }
+                            boxBackgroundRect = nil
+                            boxColor = nil
                         }
-                        boxBackgroundRect = nil
-                        boxColor = nil
                     }
+                    offset += CGFloat(width)
                 }
-                offset += CGFloat(width)
+                if let boxLayer = buildBoxBackgroundLayer(boxBackgroundRect, color: boxColor) {
+                    layers.append(boxLayer)
+                }
             }
-            if let boxLayer = buildBoxBackgroundLayer(boxBackgroundRect, color: boxColor) {
-                layers.append(boxLayer)
-            }
+            layers.forEach { addSublayer($0) }
         }
-        layers.forEach { addSublayer($0) }
     }
 
     func buildBoxBackgroundLayer(_ rect: CGRect?, color: NSColor?) -> CAShapeLayer? {

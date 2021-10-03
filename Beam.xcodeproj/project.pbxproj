@@ -725,6 +725,7 @@
 		A57C745826709C8000840BBA /* BeamTextEdit+SlashMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57C745726709C8000840BBA /* BeamTextEdit+SlashMenu.swift */; };
 		A57F9CB126E8F82000D266BA /* TableHeaderCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57F9CB026E8F82000D266BA /* TableHeaderCell.swift */; };
 		A580D5EE26427BCB00EB2E24 /* ContextMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A580D5ED26427BCB00EB2E24 /* ContextMenuView.swift */; };
+		A581B4452705EE98002B41CD /* BoxedTextFieldView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A581B4442705EE98002B41CD /* BoxedTextFieldView.swift */; };
 		A58645E426FB116E00D7FF86 /* WebViewFocusMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58645E326FB116E00D7FF86 /* WebViewFocusMessageHandler.swift */; };
 		A58645E626FB12DC00D7FF86 /* WebViewFocusHandling.js in Resources */ = {isa = PBXBuildFile; fileRef = A58645E526FB12DC00D7FF86 /* WebViewFocusHandling.js */; };
 		A58768FD26F9D3F000E8CC93 /* BeamAnimation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58768FC26F9D3F000E8CC93 /* BeamAnimation.swift */; };
@@ -748,6 +749,8 @@
 		A5B1DBEE26CE933100F1F81A /* CardReferenceFormatterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5B1DBED26CE933100F1F81A /* CardReferenceFormatterView.swift */; };
 		A5B1DBFB26CFDC4800F1F81A /* BeamTextEdit+CardReference.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5B1DBFA26CFDC4800F1F81A /* BeamTextEdit+CardReference.swift */; };
 		A5B268A426845549001797ED /* BeamTextAttributedStringBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5B268A326845549001797ED /* BeamTextAttributedStringBuilder.swift */; };
+		A5B37AD927046A1500989479 /* CheckboxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5B37AD827046A1500989479 /* CheckboxView.swift */; };
+		A5B532432703525D007FC8B8 /* MeetingModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5B532422703525D007FC8B8 /* MeetingModalView.swift */; };
 		A5BF04D32681A4F800CC80EB /* ElementNode+Layers.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BF04D22681A4F800CC80EB /* ElementNode+Layers.swift */; };
 		A5C7F10A267CC9FD002EE550 /* BeamTextEdit+InputDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C7F109267CC9FD002EE550 /* BeamTextEdit+InputDetector.swift */; };
 		A5C9F005261353420096380F /* WindowPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C9F004261353420096380F /* WindowPage.swift */; };
@@ -1736,6 +1739,7 @@
 		A57C745726709C8000840BBA /* BeamTextEdit+SlashMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamTextEdit+SlashMenu.swift"; sourceTree = "<group>"; };
 		A57F9CB026E8F82000D266BA /* TableHeaderCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableHeaderCell.swift; sourceTree = "<group>"; };
 		A580D5ED26427BCB00EB2E24 /* ContextMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextMenuView.swift; sourceTree = "<group>"; };
+		A581B4442705EE98002B41CD /* BoxedTextFieldView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoxedTextFieldView.swift; sourceTree = "<group>"; };
 		A58645E326FB116E00D7FF86 /* WebViewFocusMessageHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewFocusMessageHandler.swift; sourceTree = "<group>"; };
 		A58645E526FB12DC00D7FF86 /* WebViewFocusHandling.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = WebViewFocusHandling.js; sourceTree = "<group>"; };
 		A58768FC26F9D3F000E8CC93 /* BeamAnimation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamAnimation.swift; sourceTree = "<group>"; };
@@ -1757,6 +1761,8 @@
 		A5B1DBED26CE933100F1F81A /* CardReferenceFormatterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardReferenceFormatterView.swift; sourceTree = "<group>"; };
 		A5B1DBFA26CFDC4800F1F81A /* BeamTextEdit+CardReference.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamTextEdit+CardReference.swift"; sourceTree = "<group>"; };
 		A5B268A326845549001797ED /* BeamTextAttributedStringBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamTextAttributedStringBuilder.swift; sourceTree = "<group>"; };
+		A5B37AD827046A1500989479 /* CheckboxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckboxView.swift; sourceTree = "<group>"; };
+		A5B532422703525D007FC8B8 /* MeetingModalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingModalView.swift; sourceTree = "<group>"; };
 		A5BF04D22681A4F800CC80EB /* ElementNode+Layers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ElementNode+Layers.swift"; sourceTree = "<group>"; };
 		A5C7F109267CC9FD002EE550 /* BeamTextEdit+InputDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamTextEdit+InputDetector.swift"; sourceTree = "<group>"; };
 		A5C9F004261353420096380F /* WindowPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowPage.swift; sourceTree = "<group>"; };
@@ -2395,7 +2401,6 @@
 				8AA2430B26E638A9002A553A /* HtmlConverter */,
 				4181716C2581107C00317ED8 /* BeamData.swift */,
 				4181734D2581204900317ED8 /* BeamState.swift */,
-				A05ADF6D264D8C59002DF91A /* OverlayViewCenterViewModel.swift */,
 				4181716E2581107C00317ED8 /* SearchEngine.swift */,
 				A5C9F004261353420096380F /* WindowPage.swift */,
 				524520A325C8234500AC0007 /* BeamElement+Merge.swift */,
@@ -2558,7 +2563,6 @@
 				418173F7258128A500317ED8 /* Journal */,
 				A54936B0260B71FE00EF7622 /* ToolBar */,
 				418171AE2581107C00317ED8 /* BeamWindow.swift */,
-				A05ADF6B264D8C34002DF91A /* OverlayViewCenter.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -2767,12 +2771,15 @@
 				418171D72581107C00317ED8 /* OmniBar */,
 				418171C32581107C00317ED8 /* NotesList */,
 				A57BFEC02615B4AC00CFB646 /* TableView */,
+				A5B37AD227046A0000989479 /* Checkbox */,
 				418171B72581107C00317ED8 /* BeamTextEdit */,
 				BAA679587D9259686224D133 /* PointAndShoot */,
 				A5D8A6D826724E2600CEC37E /* Password */,
 				A5D8A6D926724E6900CEC37E /* BrowsingAnalysis */,
 				BAA674240EA89BD15248E607 /* Download */,
+				A5B5324127035246007FC8B8 /* Meeting */,
 				A5155970267786A8006F6D6F /* MediaPlayer */,
+				A5B5323B27034DA2007FC8B8 /* OverlayViewCenter */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -2781,6 +2788,7 @@
 			isa = PBXGroup;
 			children = (
 				418172A825811A3A00317ED8 /* BeamTextField.swift */,
+				A581B4442705EE98002B41CD /* BoxedTextFieldView.swift */,
 				418172A925811A3A00317ED8 /* BeamTextFieldView.swift */,
 				A00AE82A265EAE9A00156220 /* BeamSearchField.swift */,
 			);
@@ -3516,7 +3524,6 @@
 				961EC4F125B4511D009FA322 /* Layer.swift */,
 				961EC50A25B495DB009FA322 /* ButtonLayer.swift */,
 				961EC51625B5038E009FA322 /* ChevronButton.swift */,
-				A59C4412268233960066AA0E /* CheckboxLayer.swift */,
 				A032BD32261F4677009A3576 /* ShortcutLayer.swift */,
 				A05B74772628701600A78A7C /* LinkButtonLayer.swift */,
 				9634DD90264B203E0065383E /* ShapeLayer.swift */,
@@ -4005,6 +4012,32 @@
 				A56FFE0226971F8500BEE6A1 /* CalendarPickerFormatterView.swift */,
 			);
 			path = CalendarPicker;
+			sourceTree = "<group>";
+		};
+		A5B37AD227046A0000989479 /* Checkbox */ = {
+			isa = PBXGroup;
+			children = (
+				A59C4412268233960066AA0E /* CheckboxLayer.swift */,
+				A5B37AD827046A1500989479 /* CheckboxView.swift */,
+			);
+			path = Checkbox;
+			sourceTree = "<group>";
+		};
+		A5B5323B27034DA2007FC8B8 /* OverlayViewCenter */ = {
+			isa = PBXGroup;
+			children = (
+				A05ADF6B264D8C34002DF91A /* OverlayViewCenter.swift */,
+				A05ADF6D264D8C59002DF91A /* OverlayViewCenterViewModel.swift */,
+			);
+			path = OverlayViewCenter;
+			sourceTree = "<group>";
+		};
+		A5B5324127035246007FC8B8 /* Meeting */ = {
+			isa = PBXGroup;
+			children = (
+				A5B532422703525D007FC8B8 /* MeetingModalView.swift */,
+			);
+			path = Meeting;
 			sourceTree = "<group>";
 		};
 		A5C9F008261364E90096380F /* WindowPage */ = {
@@ -5141,6 +5174,7 @@
 				5224CD822686043600D4179E /* BeamObjectRequest.swift in Sources */,
 				961EC51725B5038E009FA322 /* ChevronButton.swift in Sources */,
 				5241E5FA26F8B0C300B08F69 /* AccountManager+Promises.swift in Sources */,
+				A581B4452705EE98002B41CD /* BoxedTextFieldView.swift in Sources */,
 				52B17ABA262442BC00CB4728 /* DatabasesList.swift in Sources */,
 				418171FE2581107C00317ED8 /* HtmlNoteAdapter.swift in Sources */,
 				A03CE0EC25F954CB00D767B0 /* BeamNoteDataHolder.swift in Sources */,
@@ -5434,6 +5468,7 @@
 				521398D82694931C00AC29C1 /* DatabaseStruct.swift in Sources */,
 				A0CB5AEE268B244800D1EF02 /* AboutPreferencesView.swift in Sources */,
 				3330D7B5265E4441008C9E20 /* Download.swift in Sources */,
+				A5B37AD927046A1500989479 /* CheckboxView.swift in Sources */,
 				96A3067C25F698FB0078A453 /* RefNoteTitle.swift in Sources */,
 				0D65977126975FD500AC9822 /* TopDomainDatabase.swift in Sources */,
 				8AD2631726F3A8C50074D673 /* TimeInterval+Beam.swift in Sources */,
@@ -5512,6 +5547,7 @@
 				52019A6D26DE42C9005E8278 /* DocumentManager+PromiseKit.swift in Sources */,
 				BAA67AB77852A4EE310BF552 /* PointAndShoot+ShootFrameFusionRect.swift in Sources */,
 				BAA675A0EEE5F4636AECCE5D /* PointAndShootCardPicker.swift in Sources */,
+				A5B532432703525D007FC8B8 /* MeetingModalView.swift in Sources */,
 				BAA679FFB80537CB6DE74025 /* BeamMessageHandler.swift in Sources */,
 				BAA671B36B54CF95A2D162CB /* BrowserTabConfiguration.swift in Sources */,
 				BAA67C5AEE52409E39DB25C8 /* BeamWebViewConfiguration.swift in Sources */,
