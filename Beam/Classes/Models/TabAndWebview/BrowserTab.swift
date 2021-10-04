@@ -545,9 +545,10 @@ import Promises
         browsingTree.startReading()
         guard !isLoading && url != nil && !state.focusOmniBox else { return }
         // bring back the focus to where it was
-        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: .milliseconds(200))) {
-            self.webView.window?.makeFirstResponder(self.webView)
-            self.webView.page?.executeJS("refocusLastElement()", objectName: "FocusHandling")
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: .milliseconds(200))) { [weak self] in
+            guard let webView = self?.webView, self?.isActiveTab() == true else { return }
+            webView.window?.makeFirstResponder(webView)
+            webView.page?.executeJS("refocusLastElement()", objectName: "FocusHandling")
         }
     }
 
