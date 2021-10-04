@@ -88,7 +88,7 @@ extension BeamColor {
         var green: CGFloat = 0
         var blue: CGFloat = 0
         var alpha: CGFloat = 0
-        self.nsColor.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
+        self.nsColor.usingColorSpace(.deviceRGB)?.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
         return String(format: "#%02x%02x%02x%02x", Int(red * 255), Int(green * 255), Int(blue * 255), Int(alpha * 255))
     }
 }
