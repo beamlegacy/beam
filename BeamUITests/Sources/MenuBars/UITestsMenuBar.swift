@@ -21,4 +21,9 @@ class UITestsMenuBar: BaseMenuBar {
         menuBarItem(menuBarTitle).click()
         menuItem("Clean SF-Symbols-3.dmg from Downloads").click()
     }
+    
+    func populatePasswordsDB() {
+        menuBarItem(menuBarTitle).click()
+        menuItem(UITestMenuAvailableCommands.populatePasswordsDB.rawValue).clickOnExistence()
+    }
 }
