@@ -19,8 +19,11 @@ class DatabaseManagerNetworkTests: QuickSpec {
         var sut: DatabaseManager!
         var helper: DocumentManagerTestsHelper!
         let beamHelper = BeamTestsHelper()
+        let fixedDate = "2021-03-19T12:21:03Z"
 
         beforeEach {
+            BeamDate.freeze(fixedDate)
+
             coreDataManager = CoreDataManager()
             // Setup CoreData
             coreDataManager.setup()
@@ -44,33 +47,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
 
         afterEach {
             beamHelper.endNetworkRecording()
-        }
-
-        describe("deleteCurrentDatabaseIfEmpty()") {
-            var dbStruct: DatabaseStruct!
-            var dbStruct2: DatabaseStruct!
-
-            beforeEach {
-                dbStruct2 = helper.createDatabaseStruct("995d94e1-e0df-4eca-93e6-8778984bcd29", "Real DB")
-                helper.saveDatabaseLocally(dbStruct2)
-
-                dbStruct = helper.createDatabaseStruct("195d94e1-e0df-4eca-93e6-8778984bcd29", "Default 1")
-                helper.saveDatabaseLocally(dbStruct)
-            }
-
-            afterEach {
-                helper.deleteDatabaseStruct(dbStruct, includedRemote: true)
-                helper.deleteDatabaseStruct(dbStruct2, includedRemote: true)
-            }
-
-            it("deletes current Database and switch") {
-                Persistence.Database.currentDatabaseId = nil
-                expect(DatabaseManager.defaultDatabase.id) == dbStruct.id
-
-                try sut.deleteCurrentDatabaseIfEmpty()
-
-                expect(DatabaseManager.defaultDatabase.id) == dbStruct2.id
-            }
+            BeamDate.reset()
         }
 
         describe(".save()") {
