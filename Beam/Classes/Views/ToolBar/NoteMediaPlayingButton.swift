@@ -37,7 +37,7 @@ struct NoteMediaPlayingButton: View {
             }
             if let contextMenuModel = contextMenuModel {
                 ContextMenuView(viewModel: contextMenuModel)
-                    .frame(width: 180, height: contextMenuSize.height)
+                    .frame(width: contextMenuSize.width, height: contextMenuSize.height)
                     .onHover { hovering in
                         isHoveringMenu = hovering
                         hoverMenuDelayedBlock?.cancel()
@@ -48,7 +48,7 @@ struct NoteMediaPlayingButton: View {
                         hoverMenuDelayedBlock = block
                         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: .milliseconds(1000)), execute: block)
                     }
-                    .offset(x: (-180 / 2) + 10, y: -contextMenuSize.height + 6)
+                    .offset(x: (-contextMenuSize.width / 2) - 20, y: -contextMenuSize.height + 6)
             }
         }
         .frame(width: 20, height: 20)
@@ -79,9 +79,10 @@ struct NoteMediaPlayingButton: View {
             alreadyAddedNotes[i.note.id] = item
             return item
         }
-        contextMenuSize = ContextMenuView.idealSizeForItems(items)
+        contextMenuSize = CGSize(width: 180, height: ContextMenuView.idealSizeForItems(items).height)
         contextMenuModel?.items = items
         contextMenuModel?.animationDirection = .top
+        contextMenuModel?.containerSize = contextMenuSize
         contextMenuModel?.visible = isHoveringButton || isHoveringMenu
     }
 

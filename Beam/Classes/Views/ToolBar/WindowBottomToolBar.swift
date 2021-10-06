@@ -46,7 +46,7 @@ struct WindowBottomToolBar: View {
                     Spacer(minLength: 20)
                 }
                 HStack {
-                    if state.mode == .today {
+                    if state.mode != .page {
                         ButtonLabel("All Cards") {
                             state.navigateToPage(WindowPage.allCardsWindowPage)
                         }
