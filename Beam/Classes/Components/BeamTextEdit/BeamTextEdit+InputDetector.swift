@@ -208,16 +208,17 @@ extension BeamTextEdit {
                 Logger.shared.logInfo("Make header", category: .ui)
 
                 // In this case we will reparent all following sibblings that are not a header to the current node as Paper does
-                guard self.focusedWidget?.isEmpty ?? false else { return nil }
-                guard let node = self.focusedWidget as? TextNode else { return nil }
-                let element = node.element
-                guard let parentNode = self.focusedWidget?.parent as? TextNode else { return nil }
-                let parent = parentNode.element
-                guard let index = self.focusedWidget?.indexInParent else { return nil }
-                for sibbling in parent.children.suffix(from: index + 1) {
-                    guard !sibbling.isHeader else { return nil }
-                    element.addChild(sibbling)
-                }
+                // Commented this part of the feature has it may create some bugs and we are not so sure we want to keep it anymore
+//                guard self.focusedWidget?.isEmpty ?? false else { return nil }
+//                guard let node = self.focusedWidget as? TextNode else { return nil }
+//                let element = node.element
+//                guard let parentNode = self.focusedWidget?.parent as? TextNode else { return nil }
+//                let parent = parentNode.element
+//                guard let index = self.focusedWidget?.indexInParent else { return nil }
+//                for sibling in parent.children.suffix(from: index + 1) {
+//                    guard !sibling.isHeader else { return nil }
+//                    element.addChild(sibling)
+//                }
                 node.cmdManager.deleteText(in: node, for: 0..<level + 1)
                 node.cmdManager.formatText(in: node, for: .heading(level), with: nil, for: nil, isActive: false)
                 self.rootNode.cursorPosition = 0
