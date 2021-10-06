@@ -124,32 +124,33 @@ class OmnibarAutocompleteTests: BaseTest {
         testRailPrint("Then I see search text: \(searchText + "s")")
         XCTAssertTrue(waitHelper.waitForStringValueEqual(searchText + "s", omnibarView.getOmniBarSearchField()))
     }
-    
-    func testFastTypeAutocompleteHistory() {
-        let titleWiki = "Hubert Blaine Wolfeschlegelsteinhausenbergerdorff Sr."
-        let typedTitle = titleWiki.lowercased().substring(from: 3, to: titleWiki.count - 6)
-//        let endTypingAtIndex = titleWiki.count - 6
-//        let expectedFastTypedSearchFieldValue = titleWiki.lowercased().substring(from: 0, to: endTypingAtIndex) + titleWiki.substring(from: endTypingAtIndex, to: titleWiki.count)
 
-//        let waitHelper = WaitHelper()
-//        let autocompleteSelectedResultQuery = helper.allAutocompleteResults.matching(helper.autocompleteSelectedPredicate)
-        launchApp()
-        helper.tapCommand(.omnibarFillHistory)
-        helper.focusSearchField()
-        omnibarView.getOmniBarSearchField().clear()
-
-        testRailPrint("When I type \(typedTitle)")
-        helper.typeInSearchAndWait("hubert b")
-        let selectedResultQuery = self.helper.allAutocompleteResults.matching(self.helper.autocompleteSelectedPredicate)
-        XCTAssertTrue(selectedResultQuery.firstMatch.waitForExistence(timeout: 10))
-//        omnibarView.getOmniBarSearchField().typeSlowly(typedTitle, everyNChar: 5)
-
-//         Disable here since we are now displaying google results and there's one maybe later it will change and we will enable that again
-
-//        testRailPrint("Then selection is available and search field value is \(expectedFastTypedSearchFieldValue)")
-//        XCTAssertTrue(waitHelper.waitForStringValueEqual(expectedFastTypedSearchFieldValue, omnibarView.getOmniBarSearchField()), "Actual omnibox value: \(String(describing: omnibarView.getOmniBarSearchField().value))")
-//        XCTAssertEqual(autocompleteSelectedResultQuery.count, 1)
-    }
+//    Disable here since we are now displaying google results and there's one maybe later it will change and we will enable that again
+//    func testFastTypeAutocompleteHistory() {
+//        let titleWiki = "Hubert Blaine Wolfeschlegelsteinhausenbergerdorff Sr."
+//        let typedTitle = titleWiki.lowercased().substring(from: 3, to: titleWiki.count - 6)
+////        let endTypingAtIndex = titleWiki.count - 6
+////        let expectedFastTypedSearchFieldValue = titleWiki.lowercased().substring(from: 0, to: endTypingAtIndex) + titleWiki.substring(from: endTypingAtIndex, to: titleWiki.count)
+//
+////        let waitHelper = WaitHelper()
+////        let autocompleteSelectedResultQuery = helper.allAutocompleteResults.matching(helper.autocompleteSelectedPredicate)
+//        launchApp()
+//        helper.tapCommand(.omnibarFillHistory)
+//        helper.focusSearchField()
+//        omnibarView.getOmniBarSearchField().clear()
+//
+//        testRailPrint("When I type \(typedTitle)")
+//        helper.typeInSearchAndWait("hubert b")
+//        let selectedResultQuery = self.helper.allAutocompleteResults.matching(self.helper.autocompleteSelectedPredicate)
+//        XCTAssertTrue(selectedResultQuery.firstMatch.waitForExistence(timeout: 10))
+////        omnibarView.getOmniBarSearchField().typeSlowly(typedTitle, everyNChar: 5)
+//
+////         Disable here since we are now displaying google results and there's one maybe later it will change and we will enable that again
+//
+////        testRailPrint("Then selection is available and search field value is \(expectedFastTypedSearchFieldValue)")
+////        XCTAssertTrue(waitHelper.waitForStringValueEqual(expectedFastTypedSearchFieldValue, omnibarView.getOmniBarSearchField()), "Actual omnibox value: \(String(describing: omnibarView.getOmniBarSearchField().value))")
+////        XCTAssertEqual(autocompleteSelectedResultQuery.count, 1)
+//    }
     
     func testAutoCompleteHistorySelection() {
         let partiallyTypedSearchText = "Hel"
