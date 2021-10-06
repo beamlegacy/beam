@@ -33,7 +33,7 @@ class AllowListViewModel: ObservableObject {
                 }
             }
             if let error = error {
-                Logger.shared.logError("Getting whitelist entries error: \(error.localizedDescription)", category: .contentBlocking)
+                Logger.shared.logError("Getting allowlist entries error: \(error.localizedDescription)", category: .contentBlocking)
             }
         }
     }
