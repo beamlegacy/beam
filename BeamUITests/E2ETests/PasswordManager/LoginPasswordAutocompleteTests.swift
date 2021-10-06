@@ -57,8 +57,8 @@ class LoginPasswordAutocompleteTests: BaseTest {
         BeamUITestsHelper(journalView.app).tapCommand(.resizeSquare1000)
         testRailPrint("When I click Other passwords option")
         let webView = journalView.searchInOmniBar(facebookPage, true)
-        XCTAssertTrue(handleWebsiteIsNotOpened(webView), "Google page is still opened")
-        XCTAssertTrue(handleFacebookCookiesPopup(webView), "facebook cookies pop-up blocks the web page")
+        XCTAssertTrue(self.handleWebsiteIsNotOpened(webView), "Google page is still opened")
+        XCTAssertTrue(self.handleFacebookCookiesPopup(webView), "facebook cookies pop-up blocks the web page")
         let passPrefView = helper.openPasswordPreferences()
         
         testRailPrint("Then Password preferences window is opened")
@@ -81,7 +81,7 @@ class LoginPasswordAutocompleteTests: BaseTest {
     }
     
     func handleWebsiteIsNotOpened(_ webView: WebTestView) -> Bool {
-        let facebookWebsiteLinkTitle = webView.staticText("Facebook - Log In or Sign Up")
+        let facebookWebsiteLinkTitle = webView.app.staticTexts["Facebook - Log In or Sign Up"].firstMatch
         if facebookWebsiteLinkTitle.waitForExistence(timeout: minimumWaitTimeout) {
             facebookWebsiteLinkTitle.tapInTheMiddle()
         }

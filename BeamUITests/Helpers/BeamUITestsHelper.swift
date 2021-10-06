@@ -27,11 +27,6 @@ class BeamUITestsHelper {
         self.app = app
     }
 
-    func restart() {
-        self.app.terminate()
-        self.app.launch()
-    }
-
     func tapCommand(_ command: UITestMenuAvailableCommands) {
         UITestMenuAvailableCommands.allCases.forEach {
             if $0 == command {

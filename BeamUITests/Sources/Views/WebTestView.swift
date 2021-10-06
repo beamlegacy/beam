@@ -10,6 +10,12 @@ import XCTest
 
 class WebTestView: BaseView {
     
+    func getDestinationCardElement() -> XCUIElement {
+        let element = staticText(WebViewLocators.Buttons.destinationCard.accessibilityIdentifier)
+        _ = element.waitForExistence(timeout: minimumWaitTimeout)
+        return element
+    }
+    
     @discardableResult
     func openAllCardsMenu() -> AllCardsTestView {
         button(JournalViewLocators.Buttons.allCardsMenuButton.accessibilityIdentifier).click()
@@ -18,7 +24,7 @@ class WebTestView: BaseView {
     
     func searchForCardByTitle(_ title: String) {
         XCTContext.runActivity(named: "Search for '\(title)' card in cards search drop-down") {_ in
-        staticText(WebViewLocators.Buttons.destinationCard.accessibilityIdentifier).clickOnHittable()
+        self.getDestinationCardElement().clickOnHittable()
         searchField(WebViewLocators.SearchFields.destinationCardSearchField.accessibilityIdentifier).typeText(title)
         let predicate = NSPredicate(format: "identifier BEGINSWITH 'autocompleteResult-selected-'")
         app.otherElements.matching(predicate).firstMatch.click()
@@ -26,8 +32,9 @@ class WebTestView: BaseView {
     }
     
     func openDestinationCardSearch() -> XCUIElement {
-        staticText(WebViewLocators.Buttons.destinationCard.accessibilityIdentifier).clickOnHittable()
-        return staticText(WebViewLocators.Buttons.destinationCard.accessibilityIdentifier)
+        let element = self.getDestinationCardElement()
+        element.clickOnHittable()
+        return element
     }
     
     @discardableResult
