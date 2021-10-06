@@ -39,7 +39,6 @@ class PublicServerTests: XCTestCase {
         let testNoteDocumentStruct = testNote!.documentStruct
 
         self.testNoteDocumentStruct = helper.saveLocally(testNoteDocumentStruct!)
-//        testNote!.save(documentManager: helper.documentManager)
     }
 
     override func tearDownWithError() throws {
@@ -154,12 +153,7 @@ class PublicServerTests: XCTestCase {
 
         let publish = expectation(description: "note publish")
         BeamNoteSharingUtils.makeNotePublic(note, becomePublic: true, documentManager: helper.documentManager, completion: { result in
-            switch result {
-            case .success(_):
-                XCTFail("Note publication logged out is impossible")
-            case .failure(let error):
-                XCTAssertEqual(error as! BeamNoteSharingUtilsError, BeamNoteSharingUtilsError.userNotLoggedIn)
-            }
+            assertIsFailure(result)
             publish.fulfill()
         })
         waitForExpectations(timeout: 20, handler: nil)
@@ -171,12 +165,7 @@ class PublicServerTests: XCTestCase {
 
         let publish = expectation(description: "note publish")
         BeamNoteSharingUtils.makeNotePublic(note, becomePublic: false, documentManager: helper.documentManager, completion: { result in
-            switch result {
-            case .success(_):
-                XCTFail("Note publication logged out is impossible")
-            case .failure(let error):
-                XCTAssertEqual(error as! PublicServerError, PublicServerError.notFound)
-            }
+            assertIsFailure(result)
             publish.fulfill()
         })
         waitForExpectations(timeout: 20, handler: nil)

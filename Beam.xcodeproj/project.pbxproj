@@ -110,6 +110,7 @@
 		338A66C2268E053C00B056EB /* BeamDownloadDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 338A66C1268E053C00B056EB /* BeamDownloadDocument.swift */; };
 		3392E56D269D82FE000FA401 /* ClickCatchingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3392E56C269D82FE000FA401 /* ClickCatchingView.swift */; };
 		339D193926AED9E1006DE745 /* AuthenticationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 339D193826AED9E1006DE745 /* AuthenticationView.swift */; };
+		33AA4EB4270C3DC100B74868 /* ExtraAsserts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AA4EB3270C3DC100B74868 /* ExtraAsserts.swift */; };
 		33AC9D8E26AF482E004E7EF4 /* EnhancedWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AC9D8D26AF482E004E7EF4 /* EnhancedWebView.swift */; };
 		33AC9D9826AFF453004E7EF4 /* FocusableTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AC9D9726AFF453004E7EF4 /* FocusableTextField.swift */; };
 		33AC9D9A26B01A60004E7EF4 /* AuthenticationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AC9D9926B01A60004E7EF4 /* AuthenticationViewModel.swift */; };
@@ -1126,6 +1127,7 @@
 		338F276D26DD14B900D4AC97 /* Test.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Test.xcconfig; sourceTree = "<group>"; };
 		3392E56C269D82FE000FA401 /* ClickCatchingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClickCatchingView.swift; sourceTree = "<group>"; };
 		339D193826AED9E1006DE745 /* AuthenticationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationView.swift; sourceTree = "<group>"; };
+		33AA4EB3270C3DC100B74868 /* ExtraAsserts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtraAsserts.swift; sourceTree = "<group>"; };
 		33AC9D8D26AF482E004E7EF4 /* EnhancedWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnhancedWebView.swift; sourceTree = "<group>"; };
 		33AC9D9726AFF453004E7EF4 /* FocusableTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusableTextField.swift; sourceTree = "<group>"; };
 		33AC9D9926B01A60004E7EF4 /* AuthenticationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationViewModel.swift; sourceTree = "<group>"; };
@@ -2999,6 +3001,7 @@
 				A545D30525F7D93B00E68F94 /* MathsTests.swift */,
 				529E1EE525D3EDA300F8B500 /* BeamTestsHelper.swift */,
 				A545D2FE25F7D92700E68F94 /* BeamTests-Bridging-Header.h */,
+				33AA4EB3270C3DC100B74868 /* ExtraAsserts.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -5706,6 +5709,7 @@
 				87A87CE426C2F620009D9EE2 /* PasswordExporterTests.swift in Sources */,
 				5281B01825C962EF00DF66D9 /* DocumentManagerNetworkTests.swift in Sources */,
 				5273C65C25DA835500B00EC3 /* UserSessionRequestTests.swift in Sources */,
+				33AA4EB4270C3DC100B74868 /* ExtraAsserts.swift in Sources */,
 				96E4CEF9258D7E8200D6DE22 /* BeamTextTests.swift in Sources */,
 				4E60970F26C554CD00F90260 /* SuggestedSourcesUpdaterTests.swift in Sources */,
 				9652A93526A6B27500F0590C /* FakeNoteGeneratorTests.swift in Sources */,
