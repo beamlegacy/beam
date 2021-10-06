@@ -44,6 +44,14 @@ class BaseTest: XCTestCase {
         app.launch()
     }
     
+    @discardableResult
+    func restartApp() -> JournalTestView {
+        let app = XCUIApplication()
+        app.terminate()
+        app.launch()
+        return JournalTestView()
+    }
+    
     func assertElementProperties(_ element: XCUIElement, _ isSelectedExpected: Bool, _ isEnabledExpected: Bool, _ isHittableExpected: Bool) {
         XCTAssertEqual(isSelectedExpected, element.isSelected)
         XCTAssertEqual(isEnabledExpected, element.isEnabled)

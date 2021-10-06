@@ -19,7 +19,7 @@ class JournalTest: BaseTest {
         testRailPrint("Given I populate journal with data")
         helper.tapCommand(.logout)
         helper.tapCommand(.populateDBWithJournal)
-        helper.restart()
+        self.restartApp()
         
         testRailPrint("When I scroll for \(numberOfScrolls) times")
         journalView.scroll(numberOfScrolls)
@@ -29,7 +29,7 @@ class JournalTest: BaseTest {
         
         testRailPrint("Given I remove all data from journal")
         helper.tapCommand(.destroyDB)
-        helper.restart()
+        self.restartApp()
         
         testRailPrint("When I scroll for \(numberOfScrolls) times")
         journalView.scroll(numberOfScrolls)
