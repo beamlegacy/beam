@@ -40,9 +40,10 @@ class CardCreationTests: BaseTest {
         testRailPrint("When I create \(cardNameToBeCreated) a card from Webview cards search results")
         let webView = journalView.searchInOmniBar(cardNameToBeCreated, true)
         webView.searchForCardByTitle(cardNameToBeCreated)
+        XCTAssertTrue(WaitHelper().waitForStringValueEqual(cardNameToBeCreated, webView.getDestinationCardElement()), "Destination card is not \(cardNameToBeCreated), but \(String(describing: webView.getDestinationCardElement().value))")
         let cardView = webView.openDestinationCard()
         
-        testRailPrint("Then card with \(cardNameToBeCreated) appears is opened ")
+        testRailPrint("Then card with \(cardNameToBeCreated) is opened")
         XCTAssertTrue(cardView.waitForCardViewToLoad())
         XCTAssertTrue(cardView.staticText(cardNameToBeCreated).waitForExistence(timeout: implicitWaitTimeout))
     }
@@ -66,7 +67,7 @@ class CardCreationTests: BaseTest {
         testRailPrint("When I create \(cardNameToBeCreated) a card from Omnibar search results")
         let cardView = journalView.createCardViaOmnibarSearch(cardNameToBeCreated)
         
-        testRailPrint("Then card with \(cardNameToBeCreated) appears is opened ")
+        testRailPrint("Then card with \(cardNameToBeCreated) is opened")
         XCTAssertTrue(cardView.waitForCardViewToLoad())
         XCTAssertTrue(cardView.staticText(cardNameToBeCreated).waitForExistence(timeout: implicitWaitTimeout))
     }
@@ -79,7 +80,7 @@ class CardCreationTests: BaseTest {
         _ = journalView.app.otherElements.matching(NSPredicate(format: "identifier CONTAINS '\(WebViewLocators.Other.autocompleteResult.accessibilityIdentifier)'")).firstMatch.waitForExistence(timeout: implicitWaitTimeout)
         journalView.app.typeKey("\r", modifierFlags: .command)
         
-        testRailPrint("Then card with \(cardNameToBeCreated) appears is opened ")
+        testRailPrint("Then card with \(cardNameToBeCreated) is opened")
         let cardView = CardTestView()
         XCTAssertTrue(cardView.waitForCardViewToLoad())
         XCTAssertTrue(cardView.staticText(cardNameToBeCreated).waitForExistence(timeout: implicitWaitTimeout))
