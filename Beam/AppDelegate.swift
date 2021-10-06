@@ -356,7 +356,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     lazy var preferencesWindowController = PreferencesWindowController(
         preferencePanes: preferences,
         style: .toolbarItems,
-        animated: false,
+        animated: true,
         hidesToolbarForSingleItem: true
     )
 
