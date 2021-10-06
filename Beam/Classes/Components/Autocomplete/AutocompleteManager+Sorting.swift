@@ -77,9 +77,12 @@ extension AutocompleteManager {
         sortableResult.append(contentsOf: notesResultsTruncated)
 
         sortableResult.sort(by: { (lhs, rhs) in
-            let lhsr = lhs.text.lowercased().commonPrefix(with: lhs.completingText?.lowercased() ?? "").count
-            let rhsr = rhs.text.lowercased().commonPrefix(with: rhs.completingText?.lowercased() ?? "").count
-            return lhsr > rhsr
+            guard let slhs = lhs.score, let srhs = rhs.score else {
+                let lhsr = lhs.text.lowercased().commonPrefix(with: lhs.completingText?.lowercased() ?? "").count
+                let rhsr = rhs.text.lowercased().commonPrefix(with: rhs.completingText?.lowercased() ?? "").count
+                return lhsr > rhsr
+            }
+            return slhs > srhs
         })
 
         let resultLimit = 8
