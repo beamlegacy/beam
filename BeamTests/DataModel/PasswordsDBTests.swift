@@ -232,7 +232,7 @@ class PasswordsDBTests: XCTestCase {
     }
 
     private func stopNetworkTests() {
-        beamHelper.endNetworkRecording()
         BeamObjectTestsHelper().deleteAll()
+        beamHelper.endNetworkRecording()
     }
 }
