@@ -63,7 +63,7 @@ struct WindowBottomToolBar: View {
             .frame(height: barHeight)
             .background(
                 BeamColor.Generic.background.swiftUI
-                    .shadow(color: BeamColor.BottomBar.shadow.swiftUI, radius: 0, x: 0, y: -0.5)
+                    .shadow(color: BeamColor.ToolBar.shadowTop.swiftUI, radius: 0, x: 0, y: -0.5)
             )
             .frame(maxWidth: .infinity)
         }
