@@ -22,9 +22,11 @@ class DocumentManagerNetworkTests: QuickSpec {
         var sut: DocumentManager!
         var helper: DocumentManagerTestsHelper!
         let beamHelper = BeamTestsHelper()
+        let fixedDate = "2021-03-19T12:21:03Z"
 
         beforeEach {
             Configuration.reset()
+            BeamDate.freeze(fixedDate)
 
             coreDataManager = CoreDataManager()
             // Setup CoreData
@@ -59,18 +61,17 @@ class DocumentManagerNetworkTests: QuickSpec {
             beamHelper.endNetworkRecording()
 
             BeamObjectManager.clearNetworkCalls()
+            BeamDate.reset()
         }
 
         describe(".saveAllOnAPI()") {
             var docStruct: DocumentStruct!
             beforeEach {
-                BeamDate.freeze("2021-03-19T12:21:03Z")
                 docStruct = self.createStruct("Doc 1", "995d94e1-e0df-4eca-93e6-8778984bcd18", helper)
             }
 
             afterEach {
                 helper.deleteDocumentStruct(docStruct)
-                BeamDate.reset()
             }
 
             context("with Foundation") {
@@ -141,14 +142,12 @@ class DocumentManagerNetworkTests: QuickSpec {
         describe(".fetchAllOnApi()") {
             var docStruct: DocumentStruct!
             beforeEach {
-                BeamDate.freeze("2021-03-19T12:21:03Z")
                 docStruct = self.createStruct("Doc 1", "995d94e1-e0df-4eca-93e6-8778984bcd18", helper)
                 helper.saveRemotely(docStruct)
             }
 
             afterEach {
                 helper.deleteDocumentStruct(docStruct)
-                BeamDate.reset()
             }
 
             context("with Foundation") {
@@ -183,14 +182,9 @@ class DocumentManagerNetworkTests: QuickSpec {
 
             context("when remote has the same updatedAt") {
                 beforeEach {
-                    BeamDate.freeze("2021-03-19T12:21:03Z")
                     docStruct = self.createStruct("Doc 1", "995d94e1-e0df-4eca-93e6-8778984bcd18", helper)
                     helper.saveRemotely(docStruct)
                     networkCalls = APIRequest.callsCount
-                }
-
-                afterEach {
-                    BeamDate.reset()
                 }
 
                 afterEach {
@@ -228,7 +222,6 @@ class DocumentManagerNetworkTests: QuickSpec {
                     let newRemote = "{\n \"id\" : \"6E38CEAB-8736-4D29-9A5C-C977AB348D99\",\n \"textStats\" : {\n \"wordsCount\" : 4\n },\n \"visitedSearchResults\" : [\n\n ],\n \"sources\" : {\n \"sources\" : [\n\n ]\n },\n \"type\" : {\n \"type\" : \"note\"\n },\n \"title\" : \"foobar\",\n \"searchQueries\" : [\n\n ],\n \"open\" : true,\n \"text\" : {\n \"ranges\" : [\n {\n \"string\" : \"\"\n }\n ]\n },\n \"readOnly\" : false,\n \"children\" : [\n {\n \"readOnly\" : false,\n \"score\" : 0,\n \"id\" : \"13100D1A-DB4E-4B6B-9F19-21E42771ED89\",\n \"creationDate\" : 652264320.13673794,\n \"open\" : true,\n \"textStats\" : {\n \"wordsCount\" : 1\n },\n \"text\" : {\n \"ranges\" : [\n {\n \"string\" : \"1\"\n }\n ]\n }\n },\n {\n \"readOnly\" : false,\n \"score\" : 0,\n \"id\" : \"E1F40F11-7B40-42EA-B684-FF7693A7BD61\",\n \"creationDate\" : 652264320.85678303,\n \"open\" : true,\n \"textStats\" : {\n \"wordsCount\" : 1\n },\n \"text\" : {\n \"ranges\" : [\n {\n \"string\" : \"2\"\n }\n ]\n }\n },\n {\n \"readOnly\" : false,\n \"score\" : 0,\n \"id\" : \"C2B93826-5141-4F25-8355-009DAB90C99E\",\n \"creationDate\" : 652264321.33729601,\n \"open\" : true,\n \"textStats\" : {\n \"wordsCount\" : 1\n },\n \"text\" : {\n \"ranges\" : [\n {\n \"string\" : \"3\"\n }\n ]\n }\n },\n {\n \"readOnly\" : false,\n \"score\" : 0,\n \"id\" : \"3A79B086-AF4A-42C5-A17B-4F5487FD6737\",\n \"creationDate\" : 652264356.52260804,\n \"open\" : true,\n \"textStats\" : {\n \"wordsCount\" : 1\n },\n \"text\" : {\n \"ranges\" : [\n {\n \"string\" : \"4\"\n }\n ]\n }\n }\n ],\n \"score\" : 0.20000000298023224,\n \"creationDate\" : 652263910.29682195\n}"
 
                     beforeEach {
-                        BeamDate.freeze("2021-03-19T12:21:03Z")
                         docStruct = try? helper.createLocalAndRemoteVersionsWithData(ancestor,
                                                                                      newRemote: newRemote,
                                                                                      "6E38CEAB-8736-4D29-9A5C-C977AB348D99",
@@ -238,7 +231,6 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                     afterEach {
                         helper.deleteDocumentStruct(docStruct)
-                        BeamDate.reset()
                     }
 
                     context("with Foundation") {
@@ -276,8 +268,6 @@ class DocumentManagerNetworkTests: QuickSpec {
                     let merged = "0\n1\n2\n3\n4"
 
                     beforeEach {
-                        BeamDate.freeze("2021-03-19T12:21:03Z")
-
                         docStruct = try! helper.createLocalAndRemoteVersionsWithData(ancestor,
                                                                                      newLocal: newLocal,
                                                                                      newRemote: newRemote,
@@ -296,7 +286,6 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                     afterEach {
                         helper.deleteDocumentStruct(docStruct)
-                        BeamDate.reset()
                     }
 
                     context("with Foundation") {
@@ -351,12 +340,10 @@ class DocumentManagerNetworkTests: QuickSpec {
         describe(".save()") {
             var docStruct: DocumentStruct!
             beforeEach {
-                BeamDate.freeze("2021-03-19T12:21:03Z")
                 docStruct = helper.createDocumentStruct(title: "Document Title", id: "995d94e1-e0df-4eca-93e6-8778984bcd18")
             }
             afterEach {
                 helper.deleteDocumentStruct(docStruct)
-                BeamDate.reset()
             }
 
             context("with network") {
@@ -591,14 +578,6 @@ class DocumentManagerNetworkTests: QuickSpec {
 
         describe("BeamObject API") {
             let beamObjectHelper: BeamObjectTestsHelper = BeamObjectTestsHelper()
-
-            beforeEach {
-                BeamDate.freeze("2021-03-19T12:21:03Z")
-            }
-
-            afterEach {
-                BeamDate.reset()
-            }
 
             describe("saveOnBeamObjectAPI()") {
                 var docStruct: DocumentStruct!

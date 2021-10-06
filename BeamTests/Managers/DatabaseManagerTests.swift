@@ -38,6 +38,36 @@ class DatabaseManagerTests: QuickSpec {
             }
         }
 
+        describe("deleteCurrentDatabaseIfEmpty()") {
+            var dbStruct: DatabaseStruct!
+            var dbStruct2: DatabaseStruct!
+
+            beforeEach {
+                try? Database.deleteWithPredicate(CoreDataManager.shared.mainContext)
+
+                dbStruct2 = helper.createDatabaseStruct("995d94e1-e0df-4eca-93e6-8778984bcd29", "Real DB")
+
+                dbStruct = helper.createDatabaseStruct("195d94e1-e0df-4eca-93e6-8778984bcd29", "Default 1")
+                helper.saveDatabaseLocally(dbStruct)
+            }
+
+            afterEach {
+                helper.deleteDatabaseStruct(dbStruct, includedRemote: true)
+                helper.deleteDatabaseStruct(dbStruct2, includedRemote: true)
+            }
+
+            it("deletes current Database and switch") {
+                Persistence.Database.currentDatabaseId = nil
+                expect(DatabaseManager.defaultDatabase.id) == dbStruct.id
+
+                helper.saveDatabaseLocally(dbStruct2)
+
+                try sut.deleteCurrentDatabaseIfEmpty()
+
+                expect(DatabaseManager.defaultDatabase.id) == dbStruct2.id
+            }
+        }
+
         describe(".save()") {
             context("with Foundation") {
                 it("saves database") {
