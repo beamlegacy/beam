@@ -13,24 +13,17 @@ struct BrowserNewTabView: View {
     @State private var isHovering = false
     @State private var isTouchDown = false
 
-    private var buttonState: ButtonLabelState {
-        guard !isTouchDown else { return .clicked }
-        return isHovering ? .hovered : .normal
+    private var iconColor: Color {
+        isTouchDown || isHovering ? BeamColor.Niobium.swiftUI :
+            BeamColor.LightStoneGray.swiftUI
     }
 
     var body: some View {
-        ButtonLabel(icon: "tabs-new",
-                    state: buttonState,
-                    customStyle: ButtonLabelStyle.tinyIconStyle)
+        Icon(name: "tabs-new", size: 16, color: iconColor)
             .padding(.horizontal, BeamSpacing._100)
             .padding(.vertical, BeamSpacing._60)
             .frame(maxHeight: .infinity)
-            .background(BeamColor.Nero.swiftUI
-                            .overlay(Rectangle()
-                                        .fill(BeamColor.BottomBar.shadow.swiftUI)
-                                        .frame(height: 0.5),
-                                     alignment: .top)
-            )
+            .background(BrowserTabView.BackgroundView(isSelected: false, isHovering: isHovering))
             .onHover { isHovering = $0 }
             .onTouchDown { isTouchDown = $0 }
             .simultaneousGesture(TapGesture(count: 1).onEnded {

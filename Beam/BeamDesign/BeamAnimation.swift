@@ -9,12 +9,15 @@ import SwiftUI
 
 enum BeamAnimation {
 
+    /// Use this to slow down of most of our app animations.
+    static private let multiplier: Double = 1.0
+
     static func defaultiOSEasing(duration: Double) -> Animation {
-        Animation.timingCurve(0.25, 0.1, 0.25, 0.1, duration: duration)
+        Animation.timingCurve(0.25, 0.1, 0.25, 0.1, duration: duration * Self.multiplier)
     }
 
     static func easeInOut(duration: Double) -> Animation {
-        Animation.easeInOut(duration: duration)
+        Animation.easeInOut(duration: duration * Self.multiplier)
     }
 
     static func spring(stiffness: Double, damping: Double) -> Animation {

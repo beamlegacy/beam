@@ -106,22 +106,17 @@ struct BrowserTabBar: View {
     }
 
     private var emptySpacer: some View {
-        HStack(spacing: 0) {
-            VStack(alignment: .leading) {
-                Rectangle()
-                    .fill(BeamColor.BottomBar.shadow.swiftUI)
-                    .frame(height: 0.5)
-                Spacer()
-            }
-            Separator(hairline: true).padding(.vertical, 7)
-        }
+        BrowserTabView.BackgroundView(isSelected: false, isHovering: false)
+            .overlay(Separator(hairline: true, color: BrowserTabView.separatorColor)
+                        .padding(.vertical, 7),
+                     alignment: .trailing)
     }
 
     @State private var scrollOffset: CGFloat = 0
     private let animationDuration = 0.3
 
     private var stackAnimation: Animation? {
-        disableAnimation ? nil : .easeInOut(duration: animationDuration)
+        disableAnimation ? nil : BeamAnimation.easeInOut(duration: animationDuration)
     }
     var body: some View {
         HStack(spacing: 0) {
@@ -191,10 +186,13 @@ struct BrowserTabBar: View {
                 state.startNewSearch()
             }
         }
-        .frame(height: 30)
+        .frame(height: 28)
         .background(
-            BeamColor.Nero.swiftUI
-                .shadow(color: Color.black.opacity(0.1), radius: 0, x: 0, y: 0.5)
+            BeamColor.ToolBar.secondaryBackground.swiftUI
+                .overlay(Rectangle()
+                            .fill(BeamColor.ToolBar.shadowBottom.swiftUI)
+                            .frame(height: Separator.hairlineHeight),
+                         alignment: .bottom)
                 .shadow(color: Color.black.opacity(0.04), radius: 7, x: 0, y: 2)
         )
         .animation(nil)

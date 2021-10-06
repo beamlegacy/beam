@@ -62,7 +62,7 @@ struct OmniBar: View {
         return showPivotButton || showDestinationNotePicker
     }
     private var barShadowColor: Color {
-        isAboveContent ? BeamColor.BottomBar.shadow.swiftUI : BeamColor.BottomBar.shadow.swiftUI.opacity(0.0)
+        isAboveContent ? BeamColor.ToolBar.shadowTop.swiftUI : BeamColor.ToolBar.shadowTop.swiftUI.opacity(0.0)
     }
     private var showDownloadsButton: Bool {
         let showButton = !state.data.downloadManager.downloads.isEmpty
