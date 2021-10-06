@@ -8,6 +8,8 @@ import PromiseKit
 import Promises
 
 @testable import Beam
+@testable import BeamCore
+
 class AccountManagerTests: QuickSpec {
     // swiftlint:disable:next function_body_length
     override func spec() {
@@ -15,8 +17,10 @@ class AccountManagerTests: QuickSpec {
         let existingAccountEmail = Configuration.testAccountEmail
         let nonExistingAccountEmail = "fabien+test-\(UUID())@beamapp.co"
         let beamHelper = BeamTestsHelper()
+        let fixedDate = "2021-03-19T12:21:03Z"
 
         beforeEach {
+            BeamDate.freeze(fixedDate)
             AccountManager.logout()
 
             beamHelper.beginNetworkRecording()
@@ -24,6 +28,7 @@ class AccountManagerTests: QuickSpec {
 
         afterEach {
             beamHelper.endNetworkRecording()
+            BeamDate.reset()
         }
 
         describe(".forgotPassword") {

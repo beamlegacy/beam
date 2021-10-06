@@ -14,7 +14,10 @@ import Combine
 
 class noteIndexingTests: XCTestCase {
     let documentManager = DocumentManager()
+    
     override func setUpWithError() throws {
+        BeamTestsHelper.logout()
+
         documentManager.deleteAll() { result in
             DispatchQueue.main.async {
 
