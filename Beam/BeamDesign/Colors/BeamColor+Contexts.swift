@@ -130,9 +130,14 @@ extension BeamColor {
 }
 
 extension BeamColor {
-    enum BottomBar {
-        static let shadow = BeamColor.combining(lightColor: .From(color: .black), lightAlpha: 0.050,
-                                                darkColor: .Mercury)
+    enum ToolBar {
+        static let shadowTop = BeamColor.combining(lightColor: .From(color: .black), lightAlpha: 0.050,
+                                                   darkColor: .Mercury)
+        static let shadowBottom = BeamColor.combining(lightColor: .From(color: .black), lightAlpha: 0.1,
+                                                      darkColor: .Mercury)
+        static let secondaryBackground = BeamColor.combining(lightColor: .Mercury, darkColor: BeamColor.Custom(named: "BrowserTabSecondaryBackground"))
+        static let hoveredSecondaryAdditionalBackground =
+            BeamColor.combining(lightColor: .Niobium.alpha(0.07), darkColor: BeamColor.Custom(named: "BrowserTabHoveredAdditionalBackground"))
     }
 }
 

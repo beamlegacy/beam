@@ -13,6 +13,8 @@ struct BrowserTabView: View {
 
     static let minimumWidth: CGFloat = 26
     static let minimumActiveWidth: CGFloat = 120
+    static let separatorColor = BeamColor.combining(lightColor: .AlphaGray, lightAlpha: 0.4, darkColor: .AlphaGray, darkAlpha: 0.8)
+    static let activeTabSeparatorColor = BeamColor.combining(lightColor: .AlphaGray, lightAlpha: 0.5, darkColor: .Mercury)
 
     @Environment(\.isEnabled) private var isEnabled
     @ObservedObject var tab: BrowserTab
@@ -23,12 +25,15 @@ struct BrowserTabView: View {
     var onClose: (() -> Void)?
 
     private var foregroundColor: Color {
-        isSelected ? BeamColor.Corduroy.swiftUI : BeamColor.LightStoneGray.swiftUI
+        isHovering ? BeamColor.Niobium.swiftUI : BeamColor.Corduroy.swiftUI
     }
 
-    private var backgroundColor: Color {
-        guard !isSelected else { return BeamColor.Generic.background.swiftUI }
-        return isHovering ? BeamColor.Mercury.swiftUI : BeamColor.Nero.swiftUI
+    private var iconForegroundColor: Color {
+        isSelected ? foregroundColor : BeamColor.Corduroy.swiftUI
+    }
+
+    private var separatorColor: BeamColor {
+        isSelected ? Self.activeTabSeparatorColor : Self.separatorColor
     }
 
     private var audioIsPlaying: Bool {
@@ -52,7 +57,7 @@ struct BrowserTabView: View {
     }
 
     private func sideSpacing(geometry: GeometryProxy) -> CGFloat {
-        let maxSpacing: CGFloat = geometry.size.width > Self.minimumActiveWidth ? 32 : 20
+        let maxSpacing: CGFloat = geometry.size.width > Self.minimumActiveWidth ? 24 : 20
         let minSpacing: CGFloat = audioIsPlaying && shouldShowIcon(geometry: geometry) ? 28 : 0
         return max(minSpacing, min(maxSpacing, (geometry.size.width - 16) / 2))
     }
@@ -67,19 +72,17 @@ struct BrowserTabView: View {
             Group {
                 if let icon = tab.favIcon {
                     let iconSize: CGFloat = tab.isLoading ? 10 : 16
-                    Image(nsImage: icon)
-                        .resizable()
-                        .scaledToFit()
+                    let maskSize: CGFloat = tab.isLoading ? 10 : iconSize*2
+                    Image(nsImage: icon).resizable().scaledToFit()
+                        .mask(Circle().fill(Color.black).frame(width: maskSize, height: maskSize))
                         .frame(width: iconSize, height: iconSize)
-                        .if(tab.isLoading) { $0.clipShape(Circle()) }
                 } else {
                     let iconSize: CGFloat = tab.isLoading ? 12 : 16
                     Icon(name: "field-web", size: iconSize, color: foregroundColor)
                 }
             }
-            .transition(.scale)
         }
-        .animation(.easeInOut(duration: 0.15), value: tab.isLoading)
+        .animation(BeamAnimation.spring(stiffness: 380, damping: 20), value: tab.isLoading)
     }
 
     @State private var loadingIndicatorAnimatedFlag = false
@@ -96,7 +99,7 @@ struct BrowserTabView: View {
             .foregroundColor(BeamColor.LightStoneGray.swiftUI)
             .rotationEffect(Angle(degrees: self.loadingIndicatorAnimatedFlag ? 360.0 : 0.0))
             .animation(loadingForeverAnimation, value: self.loadingIndicatorAnimatedFlag)
-            .animation(.easeInOut(duration: 0.15), value: tab.estimatedLoadingProgress)
+            .animation(BeamAnimation.easeInOut(duration: 0.15), value: tab.estimatedLoadingProgress)
             .onReceive(tab.$isLoading, perform: { _ in
                 self.loadingIndicatorAnimatedFlag.toggle()
             })
@@ -104,7 +107,7 @@ struct BrowserTabView: View {
 
     private var titleView: some View {
         Text(tab.title)
-            .font(BeamFont.medium(size: 11).swiftUI)
+            .font(BeamFont.regular(size: 11).swiftUI)
             .foregroundColor(foregroundColor)
             .lineLimit(1)
     }
@@ -131,33 +134,39 @@ struct BrowserTabView: View {
             }
         }
         .transition(.opacity)
-        .animation(.easeInOut(duration: 0.15), value: audioIsPlaying)
+        .animation(BeamAnimation.easeInOut(duration: 0.15), value: audioIsPlaying)
         .frame(width: sideSpace)
     }
+
+    static let activeTabCloseIconStyle = ButtonLabelStyle.tinyIconStyle
+    static let otherTabCloseIconStyle: ButtonLabelStyle = {
+        var style = ButtonLabelStyle.tinyIconStyle
+        style.foregroundColor = BeamColor.Corduroy.swiftUI
+        style.activeForegroundColor = BeamColor.Niobium.swiftUI
+        style.hoveredBackgroundColor = BeamColor.AlphaGray.swiftUI
+        style.activeBackgroundColor = BeamColor.LightStoneGray.swiftUI
+        return style
+    }()
 
     private func trailingSubviews(sideSpace: CGFloat) -> some View {
         HStack {
             if isHovering && !isDragging && sideSpace >= 20 {
-                ButtonLabel(icon: "tabs-close_xs", customStyle: ButtonLabelStyle.tinyIconStyle) {
+                ButtonLabel(icon: "tabs-close_xs", customStyle: isSelected ? Self.activeTabCloseIconStyle : Self.otherTabCloseIconStyle) {
                     onClose?()
                 }
-                .padding(.horizontal, BeamSpacing._60)
+                .padding(.trailing, BeamSpacing._60)
                 .frame(alignment: .trailing)
             }
         }
         .transition(.opacity)
-        .animation(.easeInOut(duration: 0.15))
+        .animation(BeamAnimation.easeInOut(duration: 0.15))
         .frame(width: sideSpace)
     }
 
     private var backgroundAndBorderView: some View {
-        backgroundColor
-            .overlay(Rectangle()
-                        .fill(BeamColor.BottomBar.shadow.swiftUI)
-                        .frame(height: 0.5)
-                        .opacity(isSelected ? 0.0 : 1.0),
-                     alignment: .top)
-            .overlay(Separator(hairline: true).padding(.vertical, CGFloat(isSelected ? 0 : 7)),
+        BrowserTabView.BackgroundView(isSelected: isSelected, isHovering: isHovering)
+            .overlay(Separator(hairline: true, color: separatorColor)
+                        .padding(.vertical, CGFloat(isSelected ? 0 : 7)),
                      alignment: .trailing)
     }
 
@@ -189,19 +198,51 @@ struct BrowserTabView: View {
                 .onHover { hovering in
                     isHovering = isEnabled && hovering
                 }
-                .animation(.easeInOut(duration: 0.15), value: isHovering)
+                .animation(BeamAnimation.easeInOut(duration: 0.15), value: isHovering)
                 .accessibilityElement(children: .contain)
                 .accessibility(identifier: "browserTabBarView")
             }
 
             if isSelected || isDragging {
-                Separator(hairline: true).offset(x: -Separator.hairlineWidth, y: 0)
+                Separator(hairline: true, color: separatorColor)
+                    .background(BeamColor.Generic.background.swiftUI)
+                    .offset(x: -Separator.hairlineWidth, y: 0)
             }
 
         }
         .frame(minWidth: isSelected ? Self.minimumActiveWidth : Self.minimumWidth,
                maxWidth: .infinity,
                maxHeight: .infinity)
+    }
+
+    struct BackgroundView: View {
+
+        var isSelected: Bool
+        var isHovering: Bool
+
+        private var backgroundColor: Color {
+            guard !isSelected else { return BeamColor.Generic.background.swiftUI }
+            return BeamColor.ToolBar.secondaryBackground.swiftUI
+        }
+
+        private var additionalBackgroundColor: Color? {
+            guard !isSelected && isHovering else { return nil }
+            return BeamColor.ToolBar.hoveredSecondaryAdditionalBackground.swiftUI
+        }
+
+        var body: some View {
+            backgroundColor
+                .overlay(additionalBackgroundColor)
+                .overlay(Rectangle()
+                            .fill(BeamColor.ToolBar.shadowTop.swiftUI)
+                            .frame(height: Separator.hairlineHeight)
+                            .opacity(isSelected ? 0.0 : 1.0),
+                         alignment: .top)
+                .overlay(Rectangle()
+                            .fill(BeamColor.ToolBar.shadowBottom.swiftUI)
+                            .frame(height: Separator.hairlineHeight),
+                         alignment: .bottom)
+        }
     }
 }
 
@@ -215,7 +256,7 @@ struct BrowserTabView_Previews: PreviewProvider {
     }()
     static var longTab: BrowserTab = {
         let t = BrowserTab(state: state, browsingTreeOrigin: nil, originMode: .today, note: BeamNote(title: "test2"))
-        t.title = "Very Very Very Very Very Very Very Very Very Long Tab"
+        t.title = "Very Very Very Very Very Very Very Very Very Long Tab Even More"
         return t
     }()
     static var tabPlaying: BrowserTab = {
@@ -225,23 +266,24 @@ struct BrowserTabView_Previews: PreviewProvider {
         return t
     }()
 
+    static let tabHeight: CGFloat = 30
     static var previews: some View {
         ZStack {
             VStack {
                 BrowserTabView(tab: tab, isSelected: true)
-                    .frame(height: 30)
+                    .frame(height: tabHeight)
                 BrowserTabView(tab: longTab, isHovering: false, isSelected: false)
-                    .frame(height: 30)
+                    .frame(height: tabHeight)
                 BrowserTabView(tab: tab, isSelected: true)
-                    .frame(width: 0, height: 30)
+                    .frame(width: 0, height: tabHeight)
                 BrowserTabView(tab: tabPlaying, isSelected: true)
-                    .frame(width: 0, height: 30)
+                    .frame(width: 0, height: tabHeight)
                 BrowserTabView(tab: tab, isHovering: true, isSelected: false)
-                    .frame(width: 60, height: 30)
+                    .frame(width: 60, height: tabHeight)
                 BrowserTabView(tab: tab, isSelected: false)
-                    .frame(width: 0, height: 30)
+                    .frame(width: 0, height: tabHeight)
                 BrowserTabView(tab: tabPlaying, isHovering: true, isSelected: false)
-                    .frame(width: 0, height: 30)
+                    .frame(width: 0, height: tabHeight)
             }
             Rectangle().fill(Color.red)
                 .frame(width: 1, height: 280)

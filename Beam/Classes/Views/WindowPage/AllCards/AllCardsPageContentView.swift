@@ -158,7 +158,7 @@ struct AllCardsPageContentView: View {
 
     static private let secondaryCellFont = BeamFont.regular(size: 10).nsFont
     static private let secondaryCellTextColor = BeamColor.AlphaGray.nsColor
-    static private let secondaryCellSelectedColor = NSColor(withLightColor: BeamColor.AlphaGray.nsColor, darkColor: BeamColor.LightStoneGray.nsColor)
+    static private let secondaryCellSelectedColor = BeamColor.combining(lightColor: .AlphaGray, darkColor: .LightStoneGray).nsColor
     private var columns = [
         TableViewColumn(key: "checkbox", title: "", type: TableViewColumn.ColumnType.CheckBox,
                         sortable: false, resizable: false, width: 25, visibleOnlyOnRowHoverOrSelected: true),
