@@ -9,6 +9,8 @@ import SwiftUI
 
 struct Checkbox: View {
     @State var checkState: Bool
+    @State var isPressed: Bool = false
+
     var text: String?
     var textColor: Color?
     var textFont: Font?
@@ -40,7 +42,7 @@ struct Checkbox: View {
                              .cornerRadius(4)
                 }
             })
-            .buttonStyle(PlainButtonStyle())
+            .buttonStyle(DarkenStyle(isPressedFromOutside: isPressed))
             if !(text?.isEmpty ?? false) {
                 Button {
                     checkState.toggle()
@@ -49,7 +51,11 @@ struct Checkbox: View {
                     Text(text ?? "")
                         .foregroundColor(textColor)
                         .font(textFont)
-                }.buttonStyle(PlainButtonStyle())
+                }.buttonStyle(MinimalisticStyle(isPressed: { isPressed in
+                    DispatchQueue.main.async {
+                        self.isPressed = isPressed
+                    }
+                }))
             }
         }
     }

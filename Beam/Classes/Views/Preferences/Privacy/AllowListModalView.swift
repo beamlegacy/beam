@@ -21,7 +21,7 @@ struct AllowListModalView: View {
     var body: some View {
         VStack(alignment: .center) {
             HStack {
-                Text("Whitelisted sites are excluded from blockers.")
+                Text("Allowed sites are excluded from blockers.")
                     .foregroundColor(BeamColor.Generic.text.swiftUI)
                     Spacer()
                     .font(BeamFont.medium(size: 13).swiftUI)
@@ -42,7 +42,7 @@ struct AllowListModalView: View {
                 } label: {
                     Image("basicAdd")
                         .renderingMode(.template)
-                        .foregroundColor(BeamColor.Generic.background.swiftUI)
+                        .foregroundColor(BeamColor.Generic.text.swiftUI)
                 }.buttonStyle(BorderedButtonStyle())
                 Button {
                     if selectedItems.count > 0 {
@@ -54,7 +54,7 @@ struct AllowListModalView: View {
                 } label: {
                     Image("basicRemove")
                         .renderingMode(.template)
-                        .foregroundColor(BeamColor.Generic.background.swiftUI)
+                        .foregroundColor(BeamColor.Generic.text.swiftUI)
                 }.buttonStyle(BorderedButtonStyle())
                 Spacer()
                 Button(action: {
