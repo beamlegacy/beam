@@ -224,7 +224,6 @@
 		41FAD34F25E5742800D78B36 /* CALayer+Animation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41FAD34E25E5742800D78B36 /* CALayer+Animation.swift */; };
 		4E60970F26C554CD00F90260 /* SuggestedSourcesUpdaterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E60970E26C554CD00F90260 /* SuggestedSourcesUpdaterTests.swift */; };
 		4E6097C826CEA93700F90260 /* ActiveSources.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E6097A326CE8A6F00F90260 /* ActiveSources.swift */; };
-		4E83D3E226F21C4F00796836 /* Clustering in Frameworks */ = {isa = PBXBuildFile; productRef = 4E83D3E126F21C4F00796836 /* Clustering */; };
 		4E9F4C8326F8C75D00420DED /* ClusteringManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E9F4C8226F8C75D00420DED /* ClusteringManagerTests.swift */; };
 		520088B82613265900AED835 /* Database.swift in Sources */ = {isa = PBXBuildFile; fileRef = 520088B72613265900AED835 /* Database.swift */; };
 		520088BC2613266600AED835 /* Database+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 520088BB2613266600AED835 /* Database+CoreDataProperties.swift */; };
@@ -291,6 +290,7 @@
 		524299EE25A488E000F4DBF5 /* AdvancedPreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524299ED25A488E000F4DBF5 /* AdvancedPreferencesView.swift */; };
 		524425F125C832110095422A /* AccountManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524425F025C832110095422A /* AccountManagerTests.swift */; };
 		524520A425C8234500AC0007 /* BeamElement+Merge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524520A325C8234500AC0007 /* BeamElement+Merge.swift */; };
+		52466B22270DA966002D1716 /* Clustering in Frameworks */ = {isa = PBXBuildFile; productRef = 52466B21270DA966002D1716 /* Clustering */; };
 		524B110226283F2D00E3C61B /* DatabaseManagerNetworkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524B110126283F2D00E3C61B /* DatabaseManagerNetworkTests.swift */; };
 		524B856D25D2DD0700BB7C7A /* NSMAnagedObjectContext+performAndWait.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524B856C25D2DD0700BB7C7A /* NSMAnagedObjectContext+performAndWait.swift */; };
 		524CF6CA25F2735D007312F0 /* EncryptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524CF6C925F2735D007312F0 /* EncryptionManager.swift */; };
@@ -788,9 +788,6 @@
 		B50E1C9126FCC30D00E767AE /* SignInSuccessfullyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50E1C9026FCC30D00E767AE /* SignInSuccessfullyTests.swift */; };
 		B50E1C9926FCC8AD00E767AE /* PasswordManagerHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50E1C9826FCC8AD00E767AE /* PasswordManagerHelper.swift */; };
 		B50E1CA22701913B00E767AE /* LoginPasswordAutocompleteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50E1CA12701913B00E767AE /* LoginPasswordAutocompleteTests.swift */; };
-		B51DC76C26F44F990074ACCA /* PnSAddToCardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51DC76B26F44F990074ACCA /* PnSAddToCardTests.swift */; };
-		B51DC76E26F44FE00074ACCA /* PnSViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51DC76D26F44FE00074ACCA /* PnSViewLocators.swift */; };
-		B51DC77026F4501E0074ACCA /* PnSTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51DC76F26F4501E0074ACCA /* PnSTestView.swift */; };
 		B51DC76C26F44F990074ACCA /* PnSAddToCardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51DC76B26F44F990074ACCA /* PnSAddToCardTests.swift */; };
 		B51DC76E26F44FE00074ACCA /* PnSViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51DC76D26F44FE00074ACCA /* PnSViewLocators.swift */; };
 		B51DC77026F4501E0074ACCA /* PnSTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51DC76F26F4501E0074ACCA /* PnSTestView.swift */; };
@@ -1811,9 +1808,6 @@
 		B51DC76B26F44F990074ACCA /* PnSAddToCardTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PnSAddToCardTests.swift; sourceTree = "<group>"; };
 		B51DC76D26F44FE00074ACCA /* PnSViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PnSViewLocators.swift; sourceTree = "<group>"; };
 		B51DC76F26F4501E0074ACCA /* PnSTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PnSTestView.swift; sourceTree = "<group>"; };
-		B51DC76B26F44F990074ACCA /* PnSAddToCardTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PnSAddToCardTests.swift; sourceTree = "<group>"; };
-		B51DC76D26F44FE00074ACCA /* PnSViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PnSViewLocators.swift; sourceTree = "<group>"; };
-		B51DC76F26F4501E0074ACCA /* PnSTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PnSTestView.swift; sourceTree = "<group>"; };
 		B54D934626CA6A07006BBDEE /* BrowserTabViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserTabViewTests.swift; sourceTree = "<group>"; };
 		B551F3BE26BD0EBF00B72D27 /* WebsiteAuthTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebsiteAuthTest.swift; sourceTree = "<group>"; };
 		B551F3C026BD0FE800B72D27 /* WebsiteAuthPopupTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebsiteAuthPopupTestView.swift; sourceTree = "<group>"; };
@@ -1993,6 +1987,7 @@
 				96319D242616232700D1CF31 /* BeamCore.framework in Frameworks */,
 				3315DC912667859A002A47CF /* Preferences in Frameworks */,
 				3315DC952667859A002A47CF /* GRDB in Frameworks */,
+				52466B22270DA966002D1716 /* Clustering in Frameworks */,
 				33793AD2265CFEC50041E1B8 /* FavIcon in Frameworks */,
 				3315DC932667859A002A47CF /* Promises in Frameworks */,
 				A0A84FBC2636FA99008F0326 /* PMKFoundation in Frameworks */,
@@ -2004,7 +1999,6 @@
 				3315DC962667859A002A47CF /* OAuthSwift in Frameworks */,
 				33793AD1265CFEC50041E1B8 /* SwiftSoup in Frameworks */,
 				33088D6326B06677004FAE99 /* ZIPFoundation in Frameworks */,
-				4E83D3E226F21C4F00796836 /* Clustering in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4524,9 +4518,9 @@
 				52CA277B26401D7000146A00 /* OAuthSwift */,
 				33088D6226B06677004FAE99 /* ZIPFoundation */,
 				33F0F1C726DE87E000FF8B48 /* Vinyl */,
-				4E83D3E126F21C4F00796836 /* Clustering */,
 				A5F47EC226F8D633004B7CDE /* Lottie */,
 				333E61832707094000847A0C /* Swime */,
+				52466B21270DA966002D1716 /* Clustering */,
 			);
 			productName = Beam;
 			productReference = 965A78252514F147009980D4 /* Beam.app */;
@@ -4641,9 +4635,9 @@
 				33088D6126B06677004FAE99 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
 				33F0F1C626DE87E000FF8B48 /* XCRemoteSwiftPackageReference "Vinyl" */,
 				96AC99F626E65CFB0016E941 /* XCRemoteSwiftPackageReference "uuid-kit" */,
-				4E83D3E026F21C4F00796836 /* XCRemoteSwiftPackageReference "clustering" */,
 				A5F47EC126F8D633004B7CDE /* XCRemoteSwiftPackageReference "lottie-ios" */,
 				333E61822707094000847A0C /* XCRemoteSwiftPackageReference "Swime" */,
+				52466B20270DA966002D1716 /* XCRemoteSwiftPackageReference "clustering" */,
 			);
 			productRefGroup = 965A78262514F147009980D4 /* Products */;
 			projectDirPath = "";
@@ -6576,14 +6570,6 @@
 				minimumVersion = 0.10.5;
 			};
 		};
-		4E83D3E026F21C4F00796836 /* XCRemoteSwiftPackageReference "clustering" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "git@gitlab.com:beamgroup/clustering.git";
-			requirement = {
-				branch = main;
-				kind = branch;
-			};
-		};
 		5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Quick/Nimble.git";
@@ -6614,6 +6600,14 @@
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 2.2.0;
+			};
+		};
+		52466B20270DA966002D1716 /* XCRemoteSwiftPackageReference "clustering" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://gitlab+deploy-token-596840:s63rWYma33o3RCwsbebz@gitlab.com/beamgroup/clustering.git";
+			requirement = {
+				branch = main;
+				kind = branch;
 			};
 		};
 		524CF6D125F276D1007312F0 /* XCRemoteSwiftPackageReference "KeychainAccess" */ = {
@@ -6746,11 +6740,6 @@
 			package = 33F0F1C626DE87E000FF8B48 /* XCRemoteSwiftPackageReference "Vinyl" */;
 			productName = Vinyl;
 		};
-		4E83D3E126F21C4F00796836 /* Clustering */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 4E83D3E026F21C4F00796836 /* XCRemoteSwiftPackageReference "clustering" */;
-			productName = Clustering;
-		};
 		5239C11525C2C4AE009C51E1 /* Nimble */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */;
@@ -6770,6 +6759,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 524299AD25A47CA500F4DBF5 /* XCRemoteSwiftPackageReference "Preferences" */;
 			productName = Preferences;
+		};
+		52466B21270DA966002D1716 /* Clustering */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 52466B20270DA966002D1716 /* XCRemoteSwiftPackageReference "clustering" */;
+			productName = Clustering;
 		};
 		524CF6D225F276D1007312F0 /* KeychainAccess */ = {
 			isa = XCSwiftPackageProductDependency;
