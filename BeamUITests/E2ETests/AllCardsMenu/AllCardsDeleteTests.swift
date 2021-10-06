@@ -14,7 +14,9 @@ class AllCardsDeleteTests: BaseTest {
     let cardName2 = "Card All 2"
     
     func testDeleteAllCards() {
-        let journalView = launchApp()
+        launchApp()
+        UITestsMenuBar().destroyDB()
+        let journalView = self.restartApp()
         
         testRailPrint("Given I create 2 cards")
         journalView.createCardViaOmnibarSearch(cardName1)
@@ -30,7 +32,10 @@ class AllCardsDeleteTests: BaseTest {
     }
     
     func testDeleteSingleCard() {
-        let journalView = launchApp()
+        launchApp()
+        UITestsMenuBar().destroyDB()
+        let journalView = self.restartApp()
+        
         let indexOfCard = 1
         testRailPrint("Given I create 2 cards")
         journalView.createCardViaOmnibarSearch(cardName1)
