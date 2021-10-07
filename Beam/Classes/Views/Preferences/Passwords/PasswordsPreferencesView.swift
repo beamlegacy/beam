@@ -23,6 +23,9 @@ struct PasswordsPreferencesView: View {
                 Text("").labelsHidden()
             } content: {
                 Passwords(passwordsViewModel: passwordsViewModel)
+                    .onAppear {
+                        passwordsViewModel.refresh()
+                    }
             }
             Preferences.Section {
                 Text("").labelsHidden()
@@ -48,6 +51,9 @@ struct Passwords: View {
     @State private var selectedEntries = IndexSet()
     @State private var passwordSelected: Bool = false
     @State private var multipleSelection: Bool = false
+
+    @State private var showingAddPasswordSheet: Bool = false
+    @State private var showingEditPasswordSheet: Bool = false
 
     var body: some View {
         HStack {
@@ -76,18 +82,45 @@ struct Passwords: View {
                 }
                 HStack {
                     Button {
+                        showingAddPasswordSheet = true
                     } label: {
                         Image("basicAdd")
                             .renderingMode(.template)
-                            .foregroundColor(BeamColor.Generic.background.swiftUI)
+                            .foregroundColor(BeamColor.Generic.text.swiftUI)
                     }.buttonStyle(BorderedButtonStyle())
+                        .sheet(isPresented: $showingAddPasswordSheet) {
+                            PasswordEditView(hostname: "",
+                                             username: "",
+                                             password: "", editType: .create) {
+                                passwordsViewModel.refresh()
+                            }.frame(width: 400, height: 179, alignment: .center)
+                        }
                     Button {
-
+                        promptDeletePasswordsAlert()
                     } label: {
                         Image("basicRemove")
                             .renderingMode(.template)
-                            .foregroundColor(BeamColor.Generic.background.swiftUI)
+                            .foregroundColor(BeamColor.Generic.text.swiftUI)
                     }.buttonStyle(BorderedButtonStyle())
+                        .disabled(passwordsViewModel.selectedEntries.count == 0)
+
+                    Button {
+                        showingEditPasswordSheet = true
+                    } label: {
+                        Text("Details...")
+                            .foregroundColor(BeamColor.Generic.text.swiftUI)
+                    }.buttonStyle(BorderedButtonStyle())
+                        .sheet(isPresented: $showingEditPasswordSheet) {
+                            if let entry = passwordsViewModel.selectedEntries.first,
+                               let password = PasswordManager.shared.password(hostname: entry.minimizedHost, username: entry.username) {
+                                PasswordEditView(hostname: entry.minimizedHost,
+                                                 username: entry.username,
+                                                 password: password, editType: .update) {
+                                    passwordsViewModel.refresh()
+                                }
+                            }
+                        }
+                        .disabled(passwordsViewModel.selectedEntries.count == 0 || passwordsViewModel.selectedEntries.count > 1)
                     Spacer()
                     HStack {
                         Button {
@@ -111,6 +144,30 @@ struct Passwords: View {
             }.frame(width: 682, alignment: .center)
             Spacer()
         }.foregroundColor(BeamColor.Generic.background.swiftUI)
+    }
+
+    private func promptDeletePasswordsAlert() {
+        var messageText: String = ""
+        if passwordsViewModel.selectedEntries.count > 1 {
+            messageText = "Are you sure you want to remove these passwords?"
+        } else if let password = passwordsViewModel.selectedEntries.first {
+            messageText = "Are you sure you want to remove the password for “\(password.username)” on “\(password.minimizedHost)”?"
+        }
+
+        let alert = NSAlert()
+        alert.messageText = messageText
+        alert.addButton(withTitle: "Remove")
+        alert.addButton(withTitle: "Cancel")
+        alert.alertStyle = .warning
+        guard let window = PasswordsPreferencesViewController.view.window else { return }
+        alert.beginSheetModal(for: window) { response in
+            guard response == .alertFirstButtonReturn else { return }
+            for entry in passwordsViewModel.selectedEntries {
+                PasswordManager.shared.delete(hostname: entry.minimizedHost, for: entry.username)
+            }
+            passwordsViewModel.refresh()
+            if !searchString.isEmpty { searchString.removeAll() }
+        }
     }
 
     private func importPasswordAction(completion: @escaping () -> Void) {

@@ -38,12 +38,15 @@ class PasswordTableViewItem: IconAndTextTableViewItem {
         self.password = password
         self.hostname = hostname
         super.init()
-        self.favIcon = NSImage(named: "field-web")
         self.text = hostname
-        guard let hostURL = URL(string: "https://\(hostname)") else { return }
-        FaviconProvider.shared.imageForUrl(hostURL) { [weak self] (image) in
-            guard let self = self else { return }
-            self.favIcon = image // TODO: refresh table view
+    }
+
+    override func loadRemoteFavIcon(completion: @escaping (NSImage) -> Void) {
+        guard let hostURL = URL(string: hostname.validUrl().url) else { return }
+        FaviconProvider.shared.imageForUrl(hostURL) { image in
+            if let remoteImage = image {
+                completion(remoteImage)
+            }
         }
     }
 }
