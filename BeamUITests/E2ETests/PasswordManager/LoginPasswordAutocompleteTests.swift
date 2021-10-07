@@ -45,7 +45,12 @@ class LoginPasswordAutocompleteTests: BaseTest {
         
         testRailPrint("Then the field is successfully autofilled on autofill pop-up click")
         helper.getAutofillPopupElement().click()
-        XCTAssertEqual(emailField.value as? String, helper.login)
+        
+        if !WaitHelper().waitForStringValueEqual(helper.login, emailField) || helper.doesAutofillPopupExist() {
+            helper.getAutofillPopupElement().click()
+        }
+
+        XCTAssertTrue(WaitHelper().waitForStringValueEqual(helper.login, emailField), "email field is \(String(describing: emailField.value)) and autofill pop-up existence is \(helper.doesAutofillPopupExist())")
         XCTAssertEqual(passwordField.value as? String, "••••••••••")
         XCTAssertFalse(helper.doesAutofillPopupExist())                        
     }
@@ -82,7 +87,7 @@ class LoginPasswordAutocompleteTests: BaseTest {
     
     func handleWebsiteIsNotOpened(_ webView: WebTestView) -> Bool {
         let facebookWebsiteLinkTitle = webView.app.staticTexts["Facebook - Log In or Sign Up"].firstMatch
-        if facebookWebsiteLinkTitle.waitForExistence(timeout: minimumWaitTimeout) {
+        if facebookWebsiteLinkTitle.waitForExistence(timeout: implicitWaitTimeout) {
             facebookWebsiteLinkTitle.tapInTheMiddle()
         }
         return WaitHelper().waitForDoesntExist(webView.image("Google"))

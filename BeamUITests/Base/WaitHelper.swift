@@ -67,6 +67,11 @@ class WaitHelper: XCTestCase {
     }
     
     @discardableResult
+    func waitForIsEnabled(_ element: XCUIElement) -> Bool {
+        return waitFor(PredicateFormat.isEnabled.rawValue, element)
+    }
+    
+    @discardableResult
     func waitForKeyboardFocus(_ element: XCUIElement) -> Bool {
         return waitFor(PredicateFormat.hasKeyboardFocus.rawValue, element)
     }
@@ -78,6 +83,7 @@ class WaitHelper: XCTestCase {
     
     
     enum PredicateFormat: String {
+        case isEnabled = "isEnabled == true"
         case isHittable = "isHittable == true"
         case isNotHittable = "isHittable == false"
         case exists = "exists == true"
