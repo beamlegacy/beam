@@ -49,7 +49,7 @@ window.beam.__ID__Nav = {
                 }, 1000)
             }
 
-            window.open = decorate(window, undefined)
+            window.open = this.decorate(window, undefined)
             window.addEventListener("popstate", () => keepLinksPrivacy())
             keepLinksPrivacy()
         }
