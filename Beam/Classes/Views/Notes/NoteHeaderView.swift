@@ -107,7 +107,7 @@ struct NoteHeaderView: View {
     }
 
     private var dateView: some View {
-        Text("\(BeamDate.journalNoteTitle(for: model.note.creationDate))")
+        Text("\(BeamDate.journalNoteTitle(for: model.note?.creationDate ?? BeamDate.now))")
             .font(BeamFont.medium(size: 12).swiftUI)
             .foregroundColor(BeamColor.Generic.placeholder.swiftUI)
     }
@@ -138,7 +138,7 @@ struct NoteHeaderView: View {
         HStack {
             VStack(alignment: .leading, spacing: BeamSpacing._40) {
                 dateView
-                    .opacity(model.note.type.isJournal ? 0 : 1)
+                    .opacity(model.note?.type.isJournal == true ? 0 : 1)
                     .offset(x: 1, y: 0) // compensate for different font size leading alignment
                 HStack {
                     titleView
@@ -161,11 +161,17 @@ extension NoteHeaderView {
     }
 
     class ViewModel: ObservableObject {
-        @Published var note: BeamNote
-        private weak var state: BeamState?
+        @Published var note: BeamNote? {
+            didSet {
+                guard note != oldValue else { return }
+                updateOnNoteChanged()
+            }
+        }
+        weak var state: BeamState?
+        var documentManager: DocumentManager?
 
         // title editing
-        @Published fileprivate var titleText: String
+        @Published fileprivate var titleText: String = ""
         @Published fileprivate var titleSelectedRange: Range<Int>?
         @Published fileprivate var isEditingTitle = false
         @Published fileprivate var isTitleTaken = false
@@ -176,34 +182,43 @@ extension NoteHeaderView {
         @Published fileprivate var justCopiedLinkFrom: NoteHeaderView.CopyLinkSource?
         private var publishingDispatchItem: DispatchWorkItem?
         private var copyLinkDispatchItem: DispatchWorkItem?
-        private var noteObserver: AnyCancellable?
+        private var noteObservers = Set<AnyCancellable>()
 
-        private var documentManager: DocumentManager
         fileprivate var canEditTitle: Bool {
-            !note.type.isJournal
+            note?.type.isJournal == false
         }
 
-        init(note: BeamNote, state: BeamState? = nil, documentManager: DocumentManager) {
-            self.note = note
+        init(note: BeamNote? = nil, state: BeamState? = nil, documentManager: DocumentManager? = nil) {
             self.state = state
             self.documentManager = documentManager
-            self.titleText = note.title
-            self.publishState = note.publicationStatus.isPublic ? .isPublic : .isPrivate
-            self.noteObserver = note.$publicationStatus.dropFirst().removeDuplicates().sink { [weak self] newValue in
-                guard self?.publishState == .isPublic || self?.publishState == .isPrivate else { return }
-                self?.publishState = newValue.isPublic ? .isPublic : .isPrivate
+            self.note = note
+        }
+
+        private func updateOnNoteChanged() {
+            self.noteObservers.removeAll()
+            if let note = note {
+                note.$publicationStatus.dropFirst().removeDuplicates().sink { [weak self] newValue in
+                    guard self?.publishState == .isPublic || self?.publishState == .isPrivate else { return }
+                    self?.publishState = newValue.isPublic ? .isPublic : .isPrivate
+                }.store(in: &noteObservers)
+                note.$title.dropFirst().sink { [weak self] newTitle in
+                    guard self?.isEditingTitle != true && self?.titleText != newTitle else { return }
+                    self?.titleText = newTitle
+                }.store(in: &noteObservers)
             }
+            self.titleText = note?.title ?? ""
+            self.publishState = note?.publicationStatus.isPublic == true ? .isPublic : .isPrivate
         }
 
         func textFieldDidChange(_ text: String) {
             titleSelectedRange = nil
             let newTitle = formatToValidTitle(titleText)
-            let existingNote = documentManager.loadDocumentByTitle(title: newTitle)
-            self.isTitleTaken = existingNote != nil && existingNote?.id != note.id
+            let existingNote = documentManager?.loadDocumentByTitle(title: newTitle)
+            self.isTitleTaken = existingNote != nil && existingNote?.id != note?.id
         }
 
         func resetEditingState() {
-            titleText = note.title
+            titleText = note?.title ?? ""
             isEditingTitle = false
             isTitleTaken = false
             wiggleValue = 0
@@ -214,8 +229,9 @@ extension NoteHeaderView {
         }
 
         func commitRenameCard(fromTextField: Bool) {
+            guard let documentManager = documentManager else { return }
             let newTitle = formatToValidTitle(titleText)
-            guard !newTitle.isEmpty, newTitle != note.title, !isTitleTaken, canEditTitle else {
+            guard !newTitle.isEmpty, newTitle != note?.title, !isTitleTaken, canEditTitle else {
                 if fromTextField && isTitleTaken {
                     wiggleValue += 1
                 } else {
@@ -223,7 +239,7 @@ extension NoteHeaderView {
                 }
                 return
             }
-            note.updateTitle(newTitle, documentManager: documentManager)
+            note?.updateTitle(newTitle, documentManager: documentManager)
             isEditingTitle = false
         }
 
@@ -250,6 +266,7 @@ extension NoteHeaderView {
 
         // MARK: Link
         fileprivate func copyLink(source: NoteHeaderView.CopyLinkSource) {
+            guard let note = note else { return }
             BeamNoteSharingUtils.copyLinkToClipboard(for: note) { [weak self] _ in
                 self?.justCopiedLinkFrom = source
                 self?.copyLinkDispatchItem?.cancel()
@@ -265,6 +282,8 @@ extension NoteHeaderView {
 
         /// returns true if user is allowed to perform the action
         func togglePublish() -> Bool {
+            guard let note = note else { return false }
+            guard let documentManager = documentManager else { return false }
             guard ![.publishing, .unpublishing].contains(publishState) else { return true }
             let isPublic = note.publicationStatus.isPublic
 
@@ -300,6 +319,7 @@ extension NoteHeaderView {
         }
 
         private func promptConfirmUnpublish() {
+            guard let note = note else { return }
             let alert = NSAlert()
             alert.messageText = "Are you sure you want to unpublish the card \"\(note.title)\"?"
             alert.informativeText = "Others will no longer have access to this card."
@@ -308,12 +328,13 @@ extension NoteHeaderView {
             alert.alertStyle = .warning
             guard let window = AppDelegate.main.window else { return }
             alert.beginSheetModal(for: window) { [weak self] response in
-                guard let self = self else { return }
+                guard let self = self, let note = self.note else { return }
+                guard let documentManager = self.documentManager else { return }
                 guard response == .alertFirstButtonReturn else {
-                    self.publishState = self.note.publicationStatus.isPublic == true ? .isPublic : .isPrivate
+                    self.publishState = note.publicationStatus.isPublic == true ? .isPublic : .isPrivate
                     return
                 }
-                BeamNoteSharingUtils.makeNotePublic(self.note, becomePublic: false, documentManager: self.documentManager) { [weak self] _ in
+                BeamNoteSharingUtils.makeNotePublic(note, becomePublic: false, documentManager: documentManager) { [weak self] _ in
                     DispatchQueue.main.async {
                         self?.publishState = .unpublishing
                         self?.noteBecamePublic(false)
@@ -324,6 +345,8 @@ extension NoteHeaderView {
 
         // MARK: Delete
         private func confirmedDelete() {
+            guard let note = note else { return }
+            guard let documentManager = documentManager else { return }
             let cmdManager = CommandManagerAsync<DocumentManager>()
             cmdManager.deleteDocuments(ids: [note.id], in: documentManager)
             guard let state = state else { return }
@@ -339,6 +362,7 @@ extension NoteHeaderView {
         }
 
         func promptConfirmDelete() {
+            guard let note = note else { return }
             let alert = NSAlert()
             alert.messageText = "Are you sure you want to delete the card \"\(note.title)\"?"
             alert.informativeText = "This cannot be undone."
