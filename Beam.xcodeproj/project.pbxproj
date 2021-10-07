@@ -647,6 +647,7 @@
 		A0A84FEB26381B64008F0326 /* OtherPasswordsModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0A84FEA26381B64008F0326 /* OtherPasswordsModal.swift */; };
 		A0A84FF1263835D3008F0326 /* PasswordsTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0A84FF0263835D3008F0326 /* PasswordsTableView.swift */; };
 		A0AA693325C41C9B0038F9A3 /* MouseHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0AA693225C41C9B0038F9A3 /* MouseHandler.swift */; };
+		A0AEC25027022ADA00BEE4F3 /* PasswordEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0AEC24F27022ADA00BEE4F3 /* PasswordEditView.swift */; };
 		A0B8C44F26D550D300130FC7 /* Beam5ToBeam6MigrationPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0B8C44E26D550D300130FC7 /* Beam5ToBeam6MigrationPolicy.swift */; };
 		A0C0C2A725E5109F00BE34F0 /* InsertElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0C0C2A625E5109F00BE34F0 /* InsertElement.swift */; };
 		A0C58C382640026600FB95D8 /* ToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0C58C372640026600FB95D8 /* ToastView.swift */; };
@@ -1670,6 +1671,7 @@
 		A0A84FEA26381B64008F0326 /* OtherPasswordsModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OtherPasswordsModal.swift; sourceTree = "<group>"; };
 		A0A84FF0263835D3008F0326 /* PasswordsTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordsTableView.swift; sourceTree = "<group>"; };
 		A0AA693225C41C9B0038F9A3 /* MouseHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MouseHandler.swift; sourceTree = "<group>"; };
+		A0AEC24F27022ADA00BEE4F3 /* PasswordEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordEditView.swift; sourceTree = "<group>"; };
 		A0B8C44E26D550D300130FC7 /* Beam5ToBeam6MigrationPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Beam5ToBeam6MigrationPolicy.swift; sourceTree = "<group>"; };
 		A0B8C45A26D556A900130FC7 /* Beam6.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Beam6.xcdatamodel; sourceTree = "<group>"; };
 		A0C0C2A625E5109F00BE34F0 /* InsertElement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsertElement.swift; sourceTree = "<group>"; };
@@ -2977,10 +2979,7 @@
 				A0CB5AE7268B20C200D1EF02 /* BrowserPreferencesView.swift */,
 				A0CB5AE9268B231400D1EF02 /* CardsPreferencesView.swift */,
 				A0CB5AE6268B206600D1EF02 /* Privacy */,
-				A0CB5AEB268B241400D1EF02 /* PasswordsPreferencesView.swift */,
-				A06EF0AA26984400007B3BB3 /* CreditCardsModalView.swift */,
-				A039B14C26960F21008A2E0B /* UserInformationsModalView.swift */,
-				A0A026762696614E00B94227 /* UserInformationsEditModalView.swift */,
+				A0AEC24927022A9C00BEE4F3 /* Passwords */,
 				524299E225A480A300F4DBF5 /* AccountsView.swift */,
 				A0877A3626FDD8400081C7D8 /* ChangeCredentialsView.swift */,
 				A0CB5AED268B244800D1EF02 /* AboutPreferencesView.swift */,
@@ -3832,6 +3831,18 @@
 				A5946802265CE5940044A892 /* Editor */,
 			);
 			path = Commands;
+			sourceTree = "<group>";
+		};
+		A0AEC24927022A9C00BEE4F3 /* Passwords */ = {
+			isa = PBXGroup;
+			children = (
+				A0CB5AEB268B241400D1EF02 /* PasswordsPreferencesView.swift */,
+				A06EF0AA26984400007B3BB3 /* CreditCardsModalView.swift */,
+				A039B14C26960F21008A2E0B /* UserInformationsModalView.swift */,
+				A0A026762696614E00B94227 /* UserInformationsEditModalView.swift */,
+				A0AEC24F27022ADA00BEE4F3 /* PasswordEditView.swift */,
+			);
+			path = Passwords;
 			sourceTree = "<group>";
 		};
 		A0C5D845263C636C00FA6F6E /* Toast */ = {
@@ -5243,6 +5254,7 @@
 				A0125A0426DE333500590CB5 /* CloseTab.swift in Sources */,
 				9623ABBD26B002DC00309E5E /* Beam3ToBeam4MigrationPolicy.swift in Sources */,
 				523FF66125C31D8800B4BD6E /* Data+String.swift in Sources */,
+				A0AEC25027022ADA00BEE4F3 /* PasswordEditView.swift in Sources */,
 				A57BFEBD2615B49C00CFB646 /* TableRowView.swift in Sources */,
 				A515597B267786E1006F6D6F /* MediaPlayerMessageHandler.swift in Sources */,
 				A5EBF15326D7BF8A00597A1C /* BeamTextEdit+Gutter.swift in Sources */,
