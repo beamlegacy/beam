@@ -291,30 +291,30 @@
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <menu key="submenu" title="Find" id="1b7-l0-nxx">
                                                 <items>
-                                                    <menuItem title="Find…" tag="7" keyEquivalent="f" id="Xz5-n4-O0W">
+                                                    <menuItem title="Find…" tag="6" keyEquivalent="f" id="Xz5-n4-O0W">
                                                         <connections>
                                                             <action selector="performFindPanelAction:" target="Ady-hI-5gd" id="cD7-Qs-BN4"/>
                                                         </connections>
                                                     </menuItem>
-                                                    <menuItem title="Find and Replace…" tag="7" keyEquivalent="f" id="YEy-JH-Tfz">
+                                                    <menuItem title="Find and Replace…" tag="7" hidden="YES" keyEquivalent="f" id="YEy-JH-Tfz">
                                                         <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
                                                         <connections>
                                                             <action selector="performFindPanelAction:" target="Ady-hI-5gd" id="WD3-Gg-5AJ"/>
                                                         </connections>
                                                     </menuItem>
-                                                    <menuItem title="Find Next" tag="2" keyEquivalent="g" id="q09-fT-Sye">
+                                                    <menuItem title="Find Next" tag="6" keyEquivalent="g" id="q09-fT-Sye">
                                                         <connections>
-                                                            <action selector="performFindPanelAction:" target="Ady-hI-5gd" id="NDo-RZ-v9R"/>
+                                                            <action selector="performFindNextPanelAction:" target="Ady-hI-5gd" id="AfQ-zn-Q71"/>
                                                         </connections>
                                                     </menuItem>
-                                                    <menuItem title="Find Previous" tag="3" keyEquivalent="G" id="OwM-mh-QMV">
+                                                    <menuItem title="Find Previous" tag="6" keyEquivalent="G" id="OwM-mh-QMV">
                                                         <connections>
-                                                            <action selector="performFindPanelAction:" target="Ady-hI-5gd" id="HOh-sY-3ay"/>
+                                                            <action selector="performFindPreviousPanelAction:" target="Ady-hI-5gd" id="ad3-p7-y5O"/>
                                                         </connections>
                                                     </menuItem>
-                                                    <menuItem title="Use Selection for Find" tag="7" keyEquivalent="e" id="buJ-ug-pKt">
+                                                    <menuItem title="Use Selection for Find" tag="6" keyEquivalent="e" id="buJ-ug-pKt">
                                                         <connections>
-                                                            <action selector="performFindPanelAction:" target="Ady-hI-5gd" id="U76-nv-p5D"/>
+                                                            <action selector="performFindPanelActionFromSelection:" target="Ady-hI-5gd" id="qIg-U7-7ct"/>
                                                         </connections>
                                                     </menuItem>
                                                     <menuItem title="Jump to Selection" keyEquivalent="j" id="S0p-oC-mLd">

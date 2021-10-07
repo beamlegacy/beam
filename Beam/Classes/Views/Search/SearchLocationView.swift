@@ -65,7 +65,7 @@ struct PositionIndicator: View {
     var body: some View {
         RoundedRectangle(cornerRadius: 100)
             .foregroundColor(indicatorColor)
-            .frame(width: 14, height: 3, alignment: .center)
+            .frame(width: 8, height: 3, alignment: .center)
     }
 
     var indicatorColor: Color {

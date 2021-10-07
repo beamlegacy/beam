@@ -16,4 +16,18 @@ public extension String {
         })
         return count
     }
+
+    func countInstances(of stringToFind: String) -> [NSRange] {
+        guard stringToFind.count > 0 else { return [] }
+        var count = 0
+        var searchRange: Range<String.Index>?
+        var ranges: [NSRange] = []
+
+        while let foundRange = range(of: stringToFind, options: [.caseInsensitive, .diacriticInsensitive], range: searchRange) {
+            count += 1
+            searchRange = Range(uncheckedBounds: (lower: foundRange.upperBound, upper: endIndex))
+            ranges.append(NSRange(foundRange, in: self))
+        }
+        return ranges
+    }
 }

@@ -13,6 +13,26 @@ import Combine
 import BeamCore
 import Swime
 
+struct SearchResult {
+    public init(element: TextNode, ranges: [NSRange]) {
+        self.element = element
+        self.ranges = ranges
+    }
+
+    public let element: TextNode
+    public let ranges: [NSRange]
+
+    func getPositions() -> [Double] {
+        let verticalPositions = ranges.map({ (range: NSRange) -> Double in
+            let position = range.lowerBound
+            let rect = element.rectAt(sourcePosition: position)
+            let origin = rect.origin
+            return Double(origin.y + element.offsetInDocument.y)
+        })
+        return verticalPositions
+    }
+}
+
 public extension CALayer {
     var superlayers: [CALayer] {
         guard let superlayer = superlayer else { return [] }
@@ -35,6 +55,13 @@ public extension CALayer {
 // swiftlint:disable:next type_body_length
 @objc public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     var data: BeamData?
+    weak var state: BeamState? {
+        didSet {
+            state?.currentEditor = self
+            data = state?.data
+        }
+    }
+
     var cardTopSpace: CGFloat {
         journalMode ? PreferencesManager.editorJournalTopPadding : PreferencesManager.editorCardTopPadding
     }
@@ -52,6 +79,7 @@ public extension CALayer {
         didSet {
             note?.updateNoteNamesInInternalLinks(recursive: true)
             updateRoot(with: note)
+            searchViewModel?.search()
         }
     }
 
@@ -61,6 +89,14 @@ public extension CALayer {
 
         clearRoot()
         rootNode = TextRoot(editor: self, element: note)
+
+        rootNode.element
+            .changed
+            .debounce(for: .seconds(1), scheduler: RunLoop.main)
+            .sink { [weak self] change in
+                guard change.1 == .text || change.1 == .tree else { return }
+                self?.searchViewModel?.search()
+            }.store(in: &noteCancellables)
     }
 
     private func clearRoot() {
@@ -253,6 +289,14 @@ public extension CALayer {
     public var onStartEditing: (() -> Void)?
     public var onEndEditing: (() -> Void)?
     public var onFocusChanged: ((UUID, Int) -> Void)?
+    var onSearchToggle: (SearchViewModel?) -> Void = { _ in }
+    var searchViewModel: SearchViewModel? {
+        didSet {
+            onSearchToggle(searchViewModel)
+        }
+    }
+
+    var searchResults: [SearchResult]?
 
     public var config = TextConfig()
 
@@ -539,6 +583,22 @@ public extension CALayer {
         if highlight == true {
             node.highlight()
         }
+    }
+
+    func showElement(at height: Double, inElementWithId elementId: UUID?, unfold: Bool = false) {
+        guard let id = elementId,
+              let element = note.findElement(id),
+              let node = rootNode.nodeFor(element)
+        else {
+            self.scroll(.zero)
+            return
+        }
+
+        if unfold {
+            node.allParents.forEach { ($0 as? ElementNode)?.unfold() }
+            node.unfold()
+        }
+        self.scroll(NSPoint(x: 0, y: CGFloat(height) - cardHeaderPosY))
     }
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length

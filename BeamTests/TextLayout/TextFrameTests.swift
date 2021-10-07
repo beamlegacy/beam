@@ -58,7 +58,8 @@ class TextFrameTests: XCTestCase {
 
         let config = BeamTextAttributedStringBuilder.Config(elementKind: elementKind,
                                                             ranges: text.ranges,
-                                                            fontSize: fontSize)
+                                                            fontSize: fontSize,
+                                                            searchedRanges: [])
         let asBuilder = BeamTextAttributedStringBuilder()
         attributedString = asBuilder.build(config: config)
         let position = NSPoint(x: 0, y: 0)
@@ -150,7 +151,8 @@ class TextFrameTests: XCTestCase {
 
         let config = BeamTextAttributedStringBuilder.Config(elementKind: elementKind,
                                                             ranges: text.ranges,
-                                                            fontSize: fontSize)
+                                                            fontSize: fontSize,
+                                                            searchedRanges: [])
         let asBuilder = BeamTextAttributedStringBuilder()
         attributedString = asBuilder.build(config: config)
 
