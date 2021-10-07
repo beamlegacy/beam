@@ -619,6 +619,7 @@
 		A07F2436269C8529008918B0 /* PreferencePaneBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A07F2435269C8529008918B0 /* PreferencePaneBuilder.swift */; };
 		A07F2438269D8B0D008918B0 /* UserDefaultStorable.swift in Sources */ = {isa = PBXBuildFile; fileRef = A07F2437269D8B0D008918B0 /* UserDefaultStorable.swift */; };
 		A07F243A269D9624008918B0 /* PreferencesManager+Privacy.swift in Sources */ = {isa = PBXBuildFile; fileRef = A07F2439269D9624008918B0 /* PreferencesManager+Privacy.swift */; };
+		A0877A3726FDD8400081C7D8 /* ChangeCredentialsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0877A3626FDD8400081C7D8 /* ChangeCredentialsView.swift */; };
 		A08D739426413DEC00A9A604 /* UserProfileMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = A08D739326413DEC00A9A604 /* UserProfileMenu.swift */; };
 		A08DE20D26160DC800F8ABB4 /* BeamTextEdit+CopyPaste.swift in Sources */ = {isa = PBXBuildFile; fileRef = A08DE20C26160DC800F8ABB4 /* BeamTextEdit+CopyPaste.swift */; };
 		A0A026772696614E00B94227 /* UserInformationsEditModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0A026762696614E00B94227 /* UserInformationsEditModalView.swift */; };
@@ -1647,6 +1648,7 @@
 		A07F2435269C8529008918B0 /* PreferencePaneBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencePaneBuilder.swift; sourceTree = "<group>"; };
 		A07F2437269D8B0D008918B0 /* UserDefaultStorable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultStorable.swift; sourceTree = "<group>"; };
 		A07F2439269D9624008918B0 /* PreferencesManager+Privacy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PreferencesManager+Privacy.swift"; sourceTree = "<group>"; };
+		A0877A3626FDD8400081C7D8 /* ChangeCredentialsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChangeCredentialsView.swift; sourceTree = "<group>"; };
 		A08D739326413DEC00A9A604 /* UserProfileMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfileMenu.swift; sourceTree = "<group>"; };
 		A08DE20C26160DC800F8ABB4 /* BeamTextEdit+CopyPaste.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamTextEdit+CopyPaste.swift"; sourceTree = "<group>"; };
 		A0A026762696614E00B94227 /* UserInformationsEditModalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserInformationsEditModalView.swift; sourceTree = "<group>"; };
@@ -2965,6 +2967,7 @@
 				A039B14C26960F21008A2E0B /* UserInformationsModalView.swift */,
 				A0A026762696614E00B94227 /* UserInformationsEditModalView.swift */,
 				524299E225A480A300F4DBF5 /* AccountsView.swift */,
+				A0877A3626FDD8400081C7D8 /* ChangeCredentialsView.swift */,
 				A0CB5AED268B244800D1EF02 /* AboutPreferencesView.swift */,
 				524299ED25A488E000F4DBF5 /* AdvancedPreferencesView.swift */,
 				A0F558E526BD51A70024C47E /* EditorDebugPreferencesView.swift */,
@@ -5143,6 +5146,7 @@
 				5298EB2D26274D530033862C /* BeamToBeam2MigrationPolicy.swift in Sources */,
 				33CCBFA626A61C15004B6236 /* PopoverWindow.swift in Sources */,
 				4181722C2581107C00317ED8 /* AutocompleteList.swift in Sources */,
+				A0877A3726FDD8400081C7D8 /* ChangeCredentialsView.swift in Sources */,
 				4181727B258110D100317ED8 /* AppDelegate+CoreData.swift in Sources */,
 				96988C8325BB0AF2000223A3 /* DestinationNotePicker.swift in Sources */,
 				A57BFEA12615B45C00CFB646 /* TableCellView.swift in Sources */,

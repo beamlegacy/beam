@@ -76,4 +76,11 @@ public extension String {
         self.matches(withRegex: "^(http:\\/\\/|https:\\/\\/)(localhost)", options: .caseInsensitive)
     }
 
+    var containsSymbol: Bool {
+        self.matches(withRegex: "[!\"#$%&'()*+,-./:;<=>?@\\[\\\\\\]^_`{|}~]")
+    }
+
+    var containsDigit: Bool {
+        self.matches(withRegex: "[0-9]")
+    }
 }

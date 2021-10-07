@@ -129,7 +129,6 @@ struct AnnoyancesSection: View {
             VStack {
                 Text("Some websites display banners which impair the site’s functionality in order to force your content to be tracked.")
                     .font(BeamFont.regular(size: 11).swiftUI)
-                    .multilineTextAlignment(.leading)
                     .foregroundColor(BeamColor.Corduroy.swiftUI)
                     .padding(.leading, 18)
                     .lineLimit(nil)
