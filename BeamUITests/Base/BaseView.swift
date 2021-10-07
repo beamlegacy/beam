@@ -113,8 +113,24 @@ class BaseView {
         return WebTestView()
     }
     
-    func copyText(_ textToCopy: String) {
-        self.staticText(textToCopy).doubleClick()
-        
+    @discardableResult
+    func pasteText(textToPaste: String) -> BaseView {
+        let text = textToPaste
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(text, forType: .string)
+        app.typeKey("v", modifierFlags: .command)
+        return self
+    }
+    
+    @discardableResult
+    func selectAllShortcut() -> BaseView {
+        app.typeKey("a", modifierFlags:.command)
+        return self
+    }
+    
+    @discardableResult
+    func triggerSearchField() -> SearchTestView {
+        app.typeKey("f", modifierFlags:.command)
+        return SearchTestView()
     }
 }

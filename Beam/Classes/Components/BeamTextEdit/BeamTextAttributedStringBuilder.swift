@@ -19,6 +19,9 @@ struct BeamTextAttributedStringBuilder {
         var markedRange: Swift.Range<Int>?
         var selectedRange: Swift.Range<Int>?
 
+        var searchedRanges: [Swift.Range<Int>]
+        var currentSearchRangeIndex: Int?
+
         var mouseInteraction: MouseInteraction?
     }
 
@@ -43,13 +46,43 @@ struct BeamTextAttributedStringBuilder {
                     attributedString.addAttribute(.underlineStyle, value: NSUnderlineStyle.single.rawValue, range: r)
                     attributedString.addAttribute(.underlineColor, value: BeamColor.Editor.underlineAndStrikethrough.nsColor, range: r)
                 }
-
             }
 
             addImageToLink(attributedString, range, mouseInteraction: config.mouseInteraction)
             string.append(attributedString)
         }
+
+        applySearchRanges(to: string, with: config)
+
         return string
+    }
+
+    private func applySearchRanges(to string: NSMutableAttributedString, with config: Config) {
+        let links = config.ranges.filter({ $0.attributes.contains(where: { attrib -> Bool in attrib.rawValue == BeamText.Attribute.link("").rawValue }) })
+
+        for foundRange in config.searchedRanges {
+            var color = BeamColor.Search.foundElement.nsColor
+            if let currentResult = config.currentSearchRangeIndex, currentResult < config.searchedRanges.count, config.searchedRanges[currentResult] == foundRange {
+                color = BeamColor.Search.currentElement.nsColor
+            }
+
+            var linksBefore = 0
+            var linksInside = 0
+            links.forEach { range in
+                if range.end < foundRange.lowerBound {
+                    linksBefore += 1
+                }
+                if foundRange.lowerBound < range.end && range.end < foundRange.lowerBound + foundRange.count {
+                    linksInside += 1
+                }
+            }
+
+            let r = NSRange(location: foundRange.lowerBound + linksBefore, length: foundRange.count + linksInside)
+
+            if r.location + r.length <= string.length {
+                string.addAttribute(.boxBackgroundColor, value: color, range: r)
+            }
+        }
     }
 
     private func updateAttributes(_ attributedString: NSMutableAttributedString, withMouseInteraction mouseInteraction: MouseInteraction) -> NSMutableAttributedString {

@@ -20,7 +20,8 @@ enum SearchViewLocators {
     }
     
     enum TextFields: String, CaseIterable, UIElement {
-        case searchField = "Find on Page"
+        case searchFieldWeb = "Find on Page"
+        case searchFieldCard = "Find on Card"
     }
     
 }

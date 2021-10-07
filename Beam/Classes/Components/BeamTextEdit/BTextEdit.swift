@@ -15,7 +15,7 @@ public struct BTextEditScrollable: NSViewRepresentable {
     public typealias NSViewType = NSScrollView
 
     var note: BeamNote
-    var data: BeamData
+    var state: BeamState
     var openURL: (URL, BeamElement) -> Void
     var openCard: (_ noteId: UUID, _ elementId: UUID?, _ unfold: Bool?) -> Void
     var startQuery: (TextNode, Bool) -> Void = { _, _ in }
@@ -24,6 +24,7 @@ public struct BTextEditScrollable: NSViewRepresentable {
     var onEndEditing: () -> Void = { }
     var onFocusChanged: ((UUID, Int) -> Void)?
     var onScroll: ((CGPoint) -> Void)?
+    var onSearchToggle: (SearchViewModel?) -> Void = { _ in }
 
     var minimumWidth: CGFloat = 800
     var maximumWidth: CGFloat = 1024
@@ -45,7 +46,7 @@ public struct BTextEditScrollable: NSViewRepresentable {
     public func makeNSView(context: Context) -> NSViewType {
         let edit = BeamTextEdit(root: note, journalMode: false)
 
-        edit.data = data
+        edit.state = state
         updateEditorProperties(edit, context: context)
 
         let scrollView = buildScrollView()
@@ -90,6 +91,7 @@ public struct BTextEditScrollable: NSViewRepresentable {
         editor.onStartEditing = onStartEditing
         editor.onEndEditing = onEndEditing
         editor.onFocusChanged = onFocusChanged
+        editor.onSearchToggle = onSearchToggle
 
         editor.minimumWidth = minimumWidth
         editor.maximumWidth = maximumWidth

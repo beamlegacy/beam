@@ -12,7 +12,7 @@ import Combine
 
 struct NoteView: View {
     @EnvironmentObject var state: BeamState
-
+    
     static var topSpacingBeforeTitle: CGFloat {
         NoteHeaderView.topPadding
     }
@@ -26,6 +26,7 @@ struct NoteView: View {
     var onScroll: ((CGPoint) -> Void)?
 
     @State private var headerViewModel: NoteHeaderView.ViewModel?
+    @State var searchViewModel: SearchViewModel?
 
     private var headerHeight: CGFloat {
         NoteHeaderView.topPadding + 90
@@ -51,7 +52,7 @@ struct NoteView: View {
         ZStack(alignment: .top) {
             BTextEditScrollable(
                 note: note,
-                data: state.data,
+                state: state,
                 openURL: { url, element in
                     state.handleOpenUrl(url, note: note, element: element)
                 },
@@ -66,6 +67,9 @@ struct NoteView: View {
                     state.updateNoteFocusedState(note: note, focusedElement: elementId, cursorPosition: cursorPosition)
                 },
                 onScroll: onScroll,
+                onSearchToggle: { search in
+                    self.searchViewModel = search
+                },
                 topOffset: headerHeight,
                 footerHeight: 60,
                 leadingPercentage: leadingPercentage,
@@ -77,6 +81,7 @@ struct NoteView: View {
             .accessibility(identifier: "noteView")
             .animation(nil)
         }
+        .overlay(searchView)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(BeamColor.Generic.background.swiftUI)
         .onReceive(Just(note)) { newNote in
@@ -90,6 +95,24 @@ struct NoteView: View {
             guard change != .meta else { return }
             guard note.publicationStatus != .unpublished else { return }
             BeamNoteSharingUtils.makeNotePublic(note, becomePublic: true, documentManager: state.data.documentManager)
+        }
+    }
+
+    @ViewBuilder var searchView: some View {
+        if let search = self.searchViewModel {
+            GeometryReader { proxy in
+                VStack {
+                    HStack(alignment: .top, spacing: 12) {
+                        Spacer()
+                        SearchInContentView(viewModel: search)
+                            .padding(.top, 10)
+                        SearchLocationView(viewModel: search, height: proxy.size.height)
+                            .frame(width: 8)
+                            .padding(.trailing, 10)
+                    }
+                    Spacer()
+                }
+            }
         }
     }
 }

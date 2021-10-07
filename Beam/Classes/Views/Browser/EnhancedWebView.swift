@@ -39,13 +39,12 @@ struct EnhancedWebView: View {
                 }
                 if let search = tab.searchViewModel {
                     VStack {
-                        HStack(alignment: .top) {
+                        HStack(alignment: .top, spacing: 12) {
                             Spacer()
                             SearchInContentView(viewModel: search)
-                                .padding(.trailing, 13)
                                 .padding(.top, 10)
                             SearchLocationView(viewModel: search, height: proxy.size.height)
-                                .frame(width: 14)
+                                .frame(width: 8)
                                 .padding(.trailing, 10)
                         }
                         Spacer()

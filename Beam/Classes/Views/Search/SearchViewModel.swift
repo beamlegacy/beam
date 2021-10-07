@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Combine
 
 class SearchViewModel: ObservableObject {
 
@@ -16,26 +17,44 @@ class SearchViewModel: ObservableObject {
 
     @Published var searchTerms: String {
         didSet {
-            onChange?(searchTerms)
+            typing = true
         }
     }
-    @Published var foundOccurences: UInt
-    @Published var currentOccurence: UInt
+    @Published var foundOccurences: UInt {
+        didSet {
+            typing = false
+        }
+    }
+    @Published var currentOccurence: UInt {
+        didSet {
+            guard foundOccurences > 0 else { return }
+            if currentOccurence > foundOccurences {
+                currentOccurence = 1
+            } else if currentOccurence <= 0 {
+                currentOccurence = foundOccurences
+            }
+        }
+    }
 
     @Published var positions: [Double]
     @Published var currentPosition: Double
     @Published var pageHeight: Double?
     @Published var incompleteSearch: Bool
+    @Published var typing: Bool
+
+    @Published var isEditing: Bool = true
 
     var didBecomeFirstResponder: Bool
 
-    var onChange: ((String) -> Void)?
-    var findNext: ((String) -> Void)?
-    var findPrevious: ((String) -> Void)?
+    private var onChange: ((String) -> Void)?
+    private var findNext: ((String) -> Void)?
+    private var findPrevious: ((String) -> Void)?
+    private var done: (() -> Void)?
     var onLocationIndicatorTap: ((Double) -> Void)?
-    var done: (() -> Void)?
 
     let context: PresentationContext
+
+    private var scope: Set<AnyCancellable>
 
     init(context: PresentationContext, terms: String = "", found: UInt = 0, onChange: ((String) -> Void)? = nil, onLocationIndicatorTap: ((Double) -> Void)? = nil, next: ((String) -> Void)? = nil, previous: ((String) -> Void)? = nil, done:(() -> Void)? = nil) {
         self.context = context
@@ -56,6 +75,20 @@ class SearchViewModel: ObservableObject {
         self.incompleteSearch = false
 
         self.didBecomeFirstResponder = false
+
+        self.scope = []
+        self.typing = false
+
+        $searchTerms
+            .debounce(for: .milliseconds(400), scheduler: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.search()
+            }
+            .store(in: &scope)
+    }
+
+    func search() {
+        onChange?(searchTerms)
     }
 
     func next() {
@@ -68,5 +101,9 @@ class SearchViewModel: ObservableObject {
 
     func close() {
         done?()
+    }
+
+    func onCommit(_ modifierFlags: NSEvent.ModifierFlags?) {
+        next()
     }
 }

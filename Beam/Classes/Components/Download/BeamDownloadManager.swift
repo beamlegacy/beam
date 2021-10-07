@@ -340,7 +340,9 @@ public class BeamDownloadManager: NSObject, DownloadManager, ObservableObject {
             .publisher(for: \.fractionCompleted)
             .throttle(for: 1, scheduler: RunLoop.current, latest: true)
             .receive(on: RunLoop.main)
-            .assign(to: \.fractionCompleted, on: self)
+            .sink(receiveValue: { [weak self] value in
+                self?.fractionCompleted = value
+            })
             .store(in: &scope)
     }
 

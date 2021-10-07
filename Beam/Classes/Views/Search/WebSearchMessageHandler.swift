@@ -10,6 +10,7 @@ import BeamCore
 
 enum SearchMessage: String, CaseIterable {
     case webPageSearch
+    case webSearchCurrentSelection
 }
 
 class WebSearchMessageHandler: BeamMessageHandler<SearchMessage> {
@@ -49,6 +50,10 @@ class WebSearchMessageHandler: BeamMessageHandler<SearchMessage> {
             }
             if let currentPosition = body["currentSelected"] as? Double {
                 searchViewModel.currentPosition = currentPosition
+            }
+        case .webSearchCurrentSelection:
+            if let selection = body["selection"] as? String {
+                searchViewModel.searchTerms = selection
             }
         }
     }

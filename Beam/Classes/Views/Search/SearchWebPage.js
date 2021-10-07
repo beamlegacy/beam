@@ -28,20 +28,21 @@ window.beam.__ID__SearchWebPage = {
       HIGHLIGHT_CLASS_NAME: "__ID__find-highlight",
       HIGHLIGHT_CLASS_NAME_ACTIVE: "__ID__find-highlight-active",
 
-      HIGHLIGHT_COLOR: "#FFD600",
-      HIGHLIGHT_COLOR_ACTIVE: "#FF9900",
+      HIGHLIGHT_COLOR: "rgba(255, 214, 0, 0.6)",
+      HIGHLIGHT_COLOR_ACTIVE: "rgba(255, 153, 0, 0.8)",
     },
 
     buildCSS: function () {
       return `.${this.constants.HIGHLIGHT_CLASS_NAME} {
         color: #000;
         background-color: ${this.constants.HIGHLIGHT_COLOR};
+        border-radius: 1px;
         box-shadow: 0 0 0 2px ${this.constants.HIGHLIGHT_COLOR};
         transition: all ${this.constants.SCROLL_DURATION}ms ease ${this.constants.SCROLL_DURATION}ms;
       }
       .${this.constants.HIGHLIGHT_CLASS_NAME}.${this.constants.HIGHLIGHT_CLASS_NAME_ACTIVE} {
         background-color: ${this.constants.HIGHLIGHT_COLOR_ACTIVE};
-        box-shadow: 0 0 0 4px ${this.constants.HIGHLIGHT_COLOR_ACTIVE},0 1px 3px 3px rgba(0,0,0,.75);
+        box-shadow: 0 0 0 2px ${this.constants.HIGHLIGHT_COLOR_ACTIVE};
       }`;
     },
 
@@ -341,7 +342,12 @@ window.beam.__ID__SearchWebPage = {
 
     clamp: function (value, min, max) {
       return Math.max(min, Math.min(value, max));
-    }
+    },
+
+    getSelection: function () {
+        var txt = document.getSelection().toString() ;
+        window.webkit.messageHandlers.webSearchCurrentSelection.postMessage( {selection:txt} ) ;
+    },
 }
 
 window.beam.__ID__SearchWebPage.setupElements();

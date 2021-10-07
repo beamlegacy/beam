@@ -37,8 +37,7 @@ class WebsiteAuthTest: BaseTest {
         XCTAssertTrue(appWebsiteView.staticText(AppWebsiteViewLocators.Labels.accessDeniedLabel.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
     }
     
-    func testAuthenticateSuccessfully() throws {
-        try XCTSkipIf(true, "Skipped until the fix of incorrect string pasting in Secure text field to be found")
+    func testAuthenticateSuccessfully() {
         let journalView = launchApp()
         
         testRailPrint("Given I open \(searchAppWebsite) link")

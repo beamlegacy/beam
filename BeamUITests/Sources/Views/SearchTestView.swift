@@ -10,24 +10,24 @@ import XCTest
 
 class SearchTestView: BaseView {
     
-    func getSearchField() -> XCUIElement {
-        _ = self.textField(SearchViewLocators.TextFields.searchField.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout)
-        return self.textField(SearchViewLocators.TextFields.searchField.accessibilityIdentifier)
+    func getWebSearchField() -> XCUIElement {
+        _ = self.textField(SearchViewLocators.TextFields.searchFieldWeb.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout)
+        return self.textField(SearchViewLocators.TextFields.searchFieldWeb.accessibilityIdentifier)
+    }
+    
+    func getCardSearchField() -> XCUIElement {
+        _ = self.textField(SearchViewLocators.TextFields.searchFieldCard.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout)
+        return self.textField(SearchViewLocators.TextFields.searchFieldCard.accessibilityIdentifier)
     }
     
     @discardableResult
-    func typeInSearchField(_ searchText: String, _ pressEnter: Bool = false) -> SearchTestView {
-        getSearchField().click()
-        getSearchField().typeText(searchText)
+    func typeInSearchField(_ searchText: String, isWebSearch: Bool , _ pressEnter: Bool = false) -> SearchTestView {
+        let searchField = isWebSearch ? getWebSearchField() : getCardSearchField()
+        searchField.click()
+        searchField.typeText(searchText)
         if pressEnter {
             typeKeyboardKey(.enter)
         }
-        return self
-    }
-    
-    @discardableResult
-    func triggerSearchField() -> SearchTestView {
-        app.typeKey("f", modifierFlags:.command)
         return self
     }
     
@@ -49,6 +49,19 @@ class SearchTestView: BaseView {
             self.image(SearchViewLocators.Buttons.backwardButton.accessibilityIdentifier).click()
         }
         return self
+    }
+    
+    @discardableResult
+    func activateSearchField(isWebSearch: Bool) -> SearchTestView {
+        triggerSearchField()
+        let searchField = isWebSearch ? getWebSearchField() : getCardSearchField()
+        searchField.tapInTheMiddle()
+        return self
+    }
+    
+    func getSearchFieldValue(isWebSearch: Bool) -> String {
+        let searchField = isWebSearch ? getWebSearchField() : getCardSearchField()
+        return searchField.value as? String ?? "\(String(describing: searchField.value)) unwrap issue"
     }
     
     func assertResultsCounterNumber(_ expectedValue: String) -> Bool {
