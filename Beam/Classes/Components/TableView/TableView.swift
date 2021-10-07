@@ -19,6 +19,8 @@ class IconAndTextTableViewItem: TableViewItem {
     override init() {
         super.init()
     }
+
+    func loadRemoteFavIcon(completion: @escaping (NSImage) -> Void) {}
 }
 
 class TwoTextFieldViewItem: IconAndTextTableViewItem {
@@ -412,7 +414,11 @@ extension TableViewCoordinator: NSTableViewDelegate {
     -> BeamTableCellIconAndTextView {
         let iconAndTextCell = BeamTableCellIconAndTextView()
         let item = sortedData[row] as? IconAndTextTableViewItem
-        iconAndTextCell.updateWithIcon(item?.favIcon)
+        // Placeholder Image
+        iconAndTextCell.updateWithIcon(NSImage(named: "field-web"))
+        item?.loadRemoteFavIcon(completion: { favIcon in
+            iconAndTextCell.updateWithIcon(favIcon)
+        })
         let editable = column.editable && !column.isLink
         iconAndTextCell.textField?.stringValue = item?.text ?? ""
         iconAndTextCell.textField?.isEditable = editable
