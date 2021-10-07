@@ -11,7 +11,7 @@ import AppKit
 import Combine
 import BeamCore
 
-public struct BTextEditScrollable: NSViewRepresentable {
+public struct BTextEditScrollable<Content: View>: NSViewRepresentable {
     public typealias NSViewType = NSScrollView
 
     var note: BeamNote
@@ -35,7 +35,7 @@ public struct BTextEditScrollable: NSViewRepresentable {
     var showTitle = true
     var initialFocusedState: NoteEditFocusedState?
 
-    var headerView: AnyView?
+    var headerView: () -> Content
 
     private let focusOnAppear = true
 
@@ -58,7 +58,7 @@ public struct BTextEditScrollable: NSViewRepresentable {
             scrollView.contentView.topAnchor.constraint(equalTo: edit.topAnchor)
         ])
 
-        updateHeaderView(scrollView, context: context)
+        buildHeaderView(scrollView, context: context)
         if focusOnAppear {
             focusEditor(edit)
         }
@@ -75,11 +75,9 @@ public struct BTextEditScrollable: NSViewRepresentable {
             if focusOnAppear {
                 focusEditor(edit)
             }
-        }
-
-        updateHeaderView(nsView, context: context)
-        context.coordinator.onDeinit = { [weak edit] in
-            edit?.hideInlineFormatter()
+            context.coordinator.onDeinit = { [weak edit] in
+                edit?.hideInlineFormatter()
+            }
         }
     }
 
@@ -113,12 +111,12 @@ public struct BTextEditScrollable: NSViewRepresentable {
         }
     }
 
-    private func updateHeaderView(_ scrollView: NSViewType, context: Context) {
-        guard let headerView = headerView, let documentView = scrollView.documentView
-        else { return }
+    private func buildHeaderView(_ scrollView: NSViewType, context: Context) {
+        guard let documentView = scrollView.documentView else { return }
         context.coordinator.headerHostingView?.removeFromSuperview()
-        let hosting = NSHostingView<AnyView>(rootView: headerView)
+        let hosting = NSHostingController(rootView: headerView()).view
         hosting.translatesAutoresizingMaskIntoConstraints = false
+        hosting.frame = documentView.bounds
         documentView.addSubview(hosting)
         documentView.addConstraints([
             hosting.leftAnchor.constraint(equalTo: documentView.leftAnchor),
@@ -148,7 +146,7 @@ extension BTextEditScrollable {
     public class BTextEditScrollableCoordinator: NSObject {
         private let parent: BTextEditScrollable
         fileprivate var onDeinit: () -> Void = {}
-        fileprivate var headerHostingView: NSHostingView<AnyView>?
+        fileprivate var headerHostingView: NSView?
 
         init(_ edit: BTextEditScrollable) {
             self.parent = edit

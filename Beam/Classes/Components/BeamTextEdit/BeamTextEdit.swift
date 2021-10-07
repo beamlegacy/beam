@@ -106,10 +106,6 @@ public extension CALayer {
             }
         }
 
-        for c in subviews {
-            c.removeFromSuperview()
-        }
-
         rootNode?.clearMapping() // Clear all previous references in the node tree
         rootNode?.editor = nil
         rootNode = TextRoot(editor: self, element: BeamElement())
