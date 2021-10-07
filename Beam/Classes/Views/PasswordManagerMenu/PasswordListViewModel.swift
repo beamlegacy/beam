@@ -46,13 +46,12 @@ final class PasswordListViewModel: ObservableObject {
     }
 
     func refresh() {
+        currentSelection.removeAll()
         let entries = PasswordManager.shared.fetchAll()
-        if !entries.isEmpty {
-            self.allPasswordEntries = entries
-            self.allPasswordTableViewItems = entries.map(PasswordTableViewItem.init)
-            self.filteredPasswordEntries = self.allPasswordEntries.filtered(by: self.searchString)
-            self.filteredPasswordTableViewItems = self.allPasswordTableViewItems.filtered(by: self.searchString)
-        }
+        self.allPasswordEntries = entries
+        self.allPasswordTableViewItems = entries.map(PasswordTableViewItem.init)
+        self.filteredPasswordEntries = self.allPasswordEntries.filtered(by: self.searchString)
+        self.filteredPasswordTableViewItems = self.allPasswordTableViewItems.filtered(by: self.searchString)
     }
 }
 
