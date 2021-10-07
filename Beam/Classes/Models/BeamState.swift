@@ -69,6 +69,7 @@ import BeamCore
 
     @Published var currentPage: WindowPage?
     @Published var overlayViewModel: OverlayViewCenterViewModel = OverlayViewCenterViewModel()
+    weak var currentEditor: BeamTextEdit?
 
     var downloadButtonPosition: CGPoint?
     weak var downloaderWindow: PopoverWindow?
@@ -534,22 +535,5 @@ extension BeamState {
             notesFocusedStates.currentFocusedState = NoteEditFocusedState(elementId: focusedElement, cursorPosition: cursorPosition)
         }
         notesFocusedStates.saveNoteFocusedState(noteId: note.id, focusedElement: focusedElement, cursorPosition: cursorPosition)
-    }
-}
-
-// MARK: - Search
-extension BeamState {
-
-    func search() {
-        switch mode {
-        case .today:
-            break
-        case .note:
-            break
-        case .web:
-            browserTabsManager.currentTab?.searchInTab()
-        case .page:
-            break
-        }
     }
 }

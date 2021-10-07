@@ -50,7 +50,20 @@ class CardTestView: BaseView {
     }
     
     func getCardNoteValueByIndex(_ index: Int) -> String {
-        return getCardNotesForVisiblePart()[index].value as? String ?? errorFetchStringValue
+        return getCardNoteElementByIndex(index).value as? String ?? errorFetchStringValue
+    }
+    
+    func getCardNoteElementByIndex(_ index: Int) -> XCUIElement {
+        return getCardNotesForVisiblePart()[index]
+    }
+    
+    @discardableResult
+    func typeInCardNoteByIndex(noteIndex: Int, text: String, needsActivation: Bool = false) -> CardTestView {
+        if needsActivation {
+            getCardNotesForVisiblePart()[noteIndex].tapInTheMiddle()
+        }
+        app.typeText(text)
+        return self
     }
     
     func navigateToWebView() {

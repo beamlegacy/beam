@@ -136,3 +136,43 @@ extension WebPage {
 
     func addTextToClusteringManager(_ text: String, url: URL) { }
 }
+
+extension WebPage {
+
+    func searchInContent(fromSelection: Bool = false) {
+        guard self.searchViewModel == nil else {
+            self.searchViewModel?.isEditing = true
+            return
+        }
+
+        let viewModel = SearchViewModel(context: .web) { [weak self] search in
+            self?.find(search, using: "find")
+        } onLocationIndicatorTap: { position in
+            _ = self.executeJS("window.scrollTo(0, \(position));", objectName: nil)
+        } next: { [weak self] search in
+            self?.find(search, using: "findNext")
+        } previous: { [weak self] search in
+            self?.find(search, using: "findPrevious")
+        } done: { [weak self] in
+            self?.webView.page?.executeJS("findDone()", objectName: "SearchWebPage")
+            self?.searchViewModel = nil
+        }
+
+        self.searchViewModel = viewModel
+
+        if fromSelection {
+            self.webView.page?.executeJS("getSelection()", objectName: "SearchWebPage")
+        }
+    }
+
+    func cancelSearch() {
+        guard let searchViewModel = self.searchViewModel else { return }
+        searchViewModel.close()
+        NSApp.mainWindow?.makeFirstResponder(webView)
+    }
+
+    func find(_ search: String, using function: String) {
+        let escaped = search.replacingOccurrences(of: "//", with: "///").replacingOccurrences(of: "\"", with: "\\\"")
+        self.webView.page?.executeJS("\(function)(\"\(escaped)\")", objectName: "SearchWebPage")
+    }
+}

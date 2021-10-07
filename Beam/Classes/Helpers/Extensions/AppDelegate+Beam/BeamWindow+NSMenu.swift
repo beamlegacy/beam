@@ -110,10 +110,6 @@ extension BeamWindow {
         }
     }
 
-    @IBAction func performFindPanelAction(_ sender: Any?) {
-        state.search()
-    }
-
     // MARK: Navigation
     @IBAction func goBack(_ sender: Any?) {
         state.goBack()

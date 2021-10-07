@@ -13,6 +13,8 @@ extension NSAttributedString.Key {
     static let source = NSAttributedString.Key(rawValue: "beamSource")
     static let hoverUnderlineColor = NSAttributedString.Key(rawValue: "beam_hoverUnderlineColor") // NSColor, default nil
     static let boxBackgroundColor = NSAttributedString.Key(rawValue: "beam_boxBackgroundColor") // NSColor, default nil
+    static let searchFoundBackground = NSAttributedString.Key(rawValue: "beam_searchFoundResult") // NSColor, default nil
+    static let searchCurrentResultBackground = NSAttributedString.Key(rawValue: "beam_searchCurrentResult") // NSColor, default nil
 }
 
 class AttributeDecoratedValueAttributedString: BeamText.AttributeDecoratedValue {
@@ -72,6 +74,8 @@ extension BeamText {
                                                             caret: caret,
                                                             markedRange: node.markedTextRange,
                                                             selectedRange: selectedRange,
+                                                            searchedRanges: node.searchHighlightRanges,
+                                                            currentSearchRangeIndex: node.currentSearchHightlight,
                                                             mouseInteraction: mouseInteraction)
         let builder = BeamTextAttributedStringBuilder()
         return builder.build(config: config)

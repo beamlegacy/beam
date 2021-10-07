@@ -84,6 +84,12 @@ class BeamWebView: WKWebView {
                 return
             }
         }
+
+        if event.keyCode == KeyCode.escape.rawValue && page?.searchViewModel != nil {
+            page?.cancelSearch()
+            return
+        }
+
         super.keyDown(with: event)
     }
 

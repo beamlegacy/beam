@@ -84,6 +84,9 @@ public class TextNode: ElementNode {
         }
     }
 
+    var searchHighlightRanges: [Range<Int>] = []
+    var currentSearchHightlight: Int?
+
     var textLayer: Layer? {
         self.layers["text"]
     }
@@ -1479,5 +1482,42 @@ public class TextNode: ElementNode {
     public override func clampTextRange(_ range: Range<Int>) -> Range<Int> {
         text.clamp(range)
     }
+
+}
+
+// MARK: - Search
+extension TextNode {
+
+    func allElementsContaining(someText: String) -> [SearchResult] {
+
+        var results = [SearchResult]()
+        self.searchHighlightRanges = []
+        let ranges = text.text.countInstances(of: someText)
+        if !ranges.isEmpty {
+            results.append(SearchResult(element: self, ranges: ranges))
+            self.searchHighlightRanges = ranges.map({ Range($0) }).compactMap({ $0 })
+        }
+
+        for c in children where c is TextNode {
+            guard let c = c as? TextNode else { continue }
+            let elements = c.allElementsContaining(someText: someText)
+            if !elements.isEmpty {
+                results.append(contentsOf: elements)
+            }
+        }
+
+        return results
+    }
+
+    func clearSearch() {
+        self.searchHighlightRanges = []
+        self.currentSearchHightlight = nil
+        for c in children {
+            if let c = c as? TextNode {
+                c.clearSearch()
+            }
+        }
+    }
+
 
 }

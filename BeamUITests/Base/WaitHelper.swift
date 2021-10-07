@@ -42,6 +42,16 @@ class WaitHelper: XCTestCase {
     }
     
     @discardableResult
+    func waitForCountValueEqual(timeout: TimeInterval, expectedNumber: Int, elementQuery: XCUIElementQuery) -> Bool {
+        var count: TimeInterval = 0
+        while elementQuery.count != expectedNumber && count < timeout {
+            sleep(1)
+            count += 1
+        }
+        return count < timeout
+    }
+    
+    @discardableResult
     func waitForIdentifierEqual(_ expectedIdentifier: String, _ element: XCUIElement) -> Bool {
         return waitFor(PredicateFormat.identifierEquals.rawValue + "'\(expectedIdentifier)'", element)
     }
