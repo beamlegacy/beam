@@ -12,7 +12,7 @@ import Combine
 
 struct NoteView: View {
     @EnvironmentObject var state: BeamState
-    
+
     static var topSpacingBeforeTitle: CGFloat {
         NoteHeaderView.topPadding
     }
@@ -25,27 +25,12 @@ struct NoteView: View {
     var initialFocusedState: NoteEditFocusedState?
     var onScroll: ((CGPoint) -> Void)?
 
-    @State private var headerViewModel: NoteHeaderView.ViewModel?
+    @State private var headerViewModel = NoteHeaderView.ViewModel()
+    @State private var headerLayoutModel = HeaderViewContainer.LayoutModel()
     @State var searchViewModel: SearchViewModel?
 
     private var headerHeight: CGFloat {
         NoteHeaderView.topPadding + 90
-    }
-
-    var headerView: AnyView? {
-        guard let headerViewModel = headerViewModel else {
-            return nil
-        }
-        return AnyView(GeometryReader { geoProxy in
-            let headerWidth = BeamTextEdit.textNodeWidth(for: geoProxy.size)
-            let leadingPadding = centerText ? 0 : (geoProxy.size.width - headerWidth) * (leadingPercentage / 100)
-            Group {
-                NoteHeaderView(model: headerViewModel)
-                    .frame(maxWidth: headerWidth)
-            }
-            .frame(maxWidth: .infinity, alignment: centerText ? .center : .bottomLeading)
-            .padding(.leading, leadingPadding)
-        }.frame(height: headerHeight))
     }
 
     var body: some View {
@@ -76,7 +61,11 @@ struct NoteView: View {
                 centerText: centerText,
                 showTitle: false,
                 initialFocusedState: initialFocusedState,
-                headerView: headerView
+                headerView: {
+                    HeaderViewContainer(layoutModel: headerLayoutModel, headerViewModel: headerViewModel)
+                        .frame(height: headerHeight)
+                        .frame(maxWidth: .infinity)
+                }
             )
             .accessibility(identifier: "noteView")
             .animation(nil)
@@ -87,8 +76,12 @@ struct NoteView: View {
         .onReceive(Just(note)) { newNote in
             // Ideally we could use @StateObject in NoteHeaderView to let it manage its model
             // But its macOS > 11. So the parent need to own the model.
-            guard headerViewModel?.note != newNote else { return }
-            headerViewModel = NoteHeaderView.ViewModel(note: newNote, state: state, documentManager: state.data.documentManager)
+            guard headerViewModel.note != newNote else { return }
+            headerLayoutModel.centerText = centerText
+            headerLayoutModel.leadingPercentage = leadingPercentage
+            headerViewModel.state = state
+            headerViewModel.documentManager = state.data.documentManager
+            headerViewModel.note = newNote
         }
         .onReceive(note.changed.debounce(for: .seconds(10), scheduler: RunLoop.main)) { changed in
             let (_, change) = changed
@@ -113,6 +106,30 @@ struct NoteView: View {
                     Spacer()
                 }
             }
+        }
+    }
+}
+
+private struct HeaderViewContainer: View {
+
+    class LayoutModel: ObservableObject {
+        @Published var centerText: Bool = false
+        @Published var leadingPercentage: CGFloat = 0
+    }
+
+    @ObservedObject var layoutModel: HeaderViewContainer.LayoutModel
+    @ObservedObject var headerViewModel: NoteHeaderView.ViewModel
+
+    var body: some View {
+        GeometryReader { geoProxy in
+            let headerWidth = BeamTextEdit.textNodeWidth(for: geoProxy.size)
+            let leadingPadding = layoutModel.centerText ? 0 : (geoProxy.size.width - headerWidth) * (layoutModel.leadingPercentage / 100)
+            Group {
+                NoteHeaderView(model: headerViewModel)
+                    .frame(maxWidth: headerWidth)
+            }
+            .frame(maxWidth: .infinity, alignment: layoutModel.centerText ? .center : .bottomLeading)
+            .padding(.leading, leadingPadding)
         }
     }
 }
