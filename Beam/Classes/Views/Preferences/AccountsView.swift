@@ -7,9 +7,11 @@ let AccountsPreferenceViewController: PreferencePane = PreferencesPaneBuilder.bu
     AccountsView()
 }
 
-/**
+/*
 The main view of “Accounts” preference pane.
 */
+
+// swiftlint:disable:next type_body_length
 struct AccountsView: View {
     @State private var email: String = Persistence.Authentication.email ?? ""
     @State private var password: String = Persistence.Authentication.password ?? ""
@@ -19,102 +21,70 @@ struct AccountsView: View {
     @State private var loading: Bool = false
     @State private var identities: [IdentityType] = []
 
+    @State private var showingChangeEmailSheet: Bool = false
+    @State private var showingChangePasswordSheet: Bool = false
+
+    @State var encryptionKeyIsHover = false
+    @State var encryptionKeyIsCopied = false
+
+    let transition = AnyTransition.asymmetric(insertion: AnyTransition.opacity.animation(BeamAnimation.easeInOut(duration: 0.2)),
+                                              removal: AnyTransition.opacity.animation(BeamAnimation.easeInOut(duration: 0.08)))
+
     private let accountManager = AccountManager()
     private let contentWidth: Double = PreferencesManager.contentWidth
 
 	var body: some View {
         Preferences.Container(contentWidth: contentWidth) {
-            Preferences.Section(title: "Account") {
-                // TODO: loc
-                if #available(OSX 11.0, *) {
-                    TextField("johnnyappleseed@apple.com", text: $email)
-                        .textContentType(.username)
-                        .disabled(loggedIn || loading)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .frame(maxWidth: 200)
+            Preferences.Section {
+                Text("Account:")
+                    .font(BeamFont.regular(size: 13).swiftUI)
+                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+                    .frame(width: 250, alignment: .trailing)
+            } content: {
+                if loggedIn {
+                    VStack(alignment: .leading) {
+                        // TODO: This need to be changed later on for the username
+                        Text(Persistence.Authentication.email ?? "")
+                            .font(BeamFont.regular(size: 13).swiftUI)
+                            .foregroundColor(BeamColor.Generic.text.swiftUI)
+                            .frame(height: 16)
+                        Text(email)
+                            .font(BeamFont.regular(size: 11).swiftUI)
+                            .foregroundColor(BeamColor.Corduroy.swiftUI)
+                            .frame(height: 13)
+
+                        LogoutButton
+                            .padding(.bottom, 5)
+
+                        EncryptionKeyView
+                        #if DEBUG
+                        RefreshTokenButton
+                        #endif
+                    }
                 } else {
-                    TextField("johnnyappleseed@apple.com", text: $email)
-                        .disabled(loggedIn || loading)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .frame(maxWidth: 200)
+                    VStack(alignment: .leading) {
+                        AccountCredentialsView(email: $email,
+                                               password: $password,
+                                               loggedIn: $loggedIn,
+                                               loading: $loading)
+                        HStack(spacing: 10) {
+                            SignUpButton
+                            SignInButton
+                        }
+                        VStack(alignment: .leading) {
+                            GoogleSignInButton
+                            GithubSignInButton
+                        }
+                    }
+                    VStack {
+                        Text("Join Beam to publish your cards and sync your graphs between your devices")
+                            .lineLimit(2)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .multilineTextAlignment(.leading)
+                            .font(BeamFont.regular(size: 11).swiftUI)
+                            .foregroundColor(BeamColor.Corduroy.swiftUI)
+                    }.frame(width: 211, height: 26, alignment: .leading)
                 }
-
-                // TODO: loc
-                if #available(OSX 11.0, *) {
-                    SecureField("Enter your password", text: $password)
-                        .textContentType(.password)
-                        .disabled(loggedIn || loading)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .frame(maxWidth: 200)
-                } else {
-                    SecureField("Enter your password", text: $password)
-                        .disabled(loggedIn || loading)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .frame(maxWidth: 200)
-                }
-            }
-
-            Preferences.Section(title: "Actions") {
-                HStack {
-                    SignInButton
-                    SignUpButton
-                }
-                HStack {
-                    ForgotPasswordButton
-                    LogoutButton
-                }
-
-                #if DEBUG
-                RefreshTokenButton
-                #endif
-            }
-
-            Preferences.Section(title: "Login with") {
-                GithubButton(buttonType: .signin, onClick: {
-                    loading = true
-                }, onConnect: {
-                    loggedIn = AccountManager().loggedIn
-                    fetchIdentities()
-                    loading = false
-                }, onFailure: {
-                    loading = false
-                }).disabled(loggedIn || loading)
-
-                GoogleButton(buttonType: .signin, onClick: {
-                    loading = true
-                }, onConnect: {
-                    loggedIn = AccountManager().loggedIn
-                    fetchIdentities()
-                    loading = false
-                }, onFailure: {
-                    loading = false
-                }).disabled(loggedIn || loading)
-            }
-
-            Preferences.Section(title: "Connected Providers") {
-                ForEach(identities, id: \.id) { identity in
-                    disconnectButton(identity)
-                }
-            }
-
-            Preferences.Section(title: "Connect Providers") {
-                GithubButton(buttonType: .connect, onClick: {
-                    loading = true
-                }, onConnect: {
-                    fetchIdentities()
-                    loading = false
-                }, onFailure: {
-                    loading = false
-                }).disabled(!loggedIn || loading || identities.compactMap { $0.provider }.contains("github"))
-
-                GoogleButton(buttonType: .connect, onClick: {
-                    loading = true
-                }, onConnect: {
-                    fetchIdentities()
-                    loading = false
-                }, onFailure: {
-                    loading = false
-                }).disabled(!loggedIn || loading || identities.compactMap { $0.provider }.contains("google"))
             }
         }.onAppear(perform: {
             self.fetchIdentities()
@@ -130,33 +100,114 @@ struct AccountsView: View {
             }
              */
         })
+        if loggedIn {
+            Preferences.Container(contentWidth: contentWidth) {
+                Preferences.Section(bottomDivider: true) {
+                    Text("Connect:")
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.text.swiftUI)
+                        .frame(width: 250, alignment: .trailing)
+                } content: {
+                    VStack(alignment: .leading) {
+                        if let googleIdendity = identities.first(where: {$0.provider == "google"}) {
+                            disconnectButton(googleIdendity)
+                        } else {
+                            GoogleSignInButton
+                        }
+                        if let githubIdendity = identities.first(where: {$0.provider == "github"}) {
+                            disconnectButton(githubIdendity)
+                        } else {
+                            GithubSignInButton
+                        }
+                    }
+                }
+                Preferences.Section(bottomDivider: false) {
+                    Text("Manage:")
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.text.swiftUI)
+                        .frame(width: 250, alignment: .trailing)
+                } content: {
+                    VStack(alignment: .leading) {
+                        Button(action: {
+                            showingChangeEmailSheet.toggle()
+                        }, label: {
+                            // TODO: loc
+                            Text("Change Email Address...")
+                                .frame(width: 148, height: 20, alignment: .center)
+                        }).sheet(isPresented: $showingChangeEmailSheet) {
+                            ChangeCredentialsView(changeCredentialsType: .email)
+                                .frame(width: 485, height: 151, alignment: .center)
+                        }
+                        Button(action: {
+                            showingChangePasswordSheet.toggle()
+                        }, label: {
+                            // TODO: loc
+                            Text("Change Password...")
+                                .frame(width: 121, height: 20, alignment: .center)
+                        }).sheet(isPresented: $showingChangePasswordSheet) {
+                            ChangeCredentialsView(changeCredentialsType: .password)
+                                .frame(width: 485, height: 198, alignment: .center)
+                        }
+                    }.padding(.bottom, 20)
 
-        ProgressIndicator(isAnimated: loading, controlSize: .small).padding()
+                    VStack(alignment: .leading) {
+                        Button(action: {
+                            promptDeleteAllGraphAlert()
+                        }, label: {
+                            // TODO: loc
+                            Text("Delete All Graphs...")
+                                .frame(width: 116, height: 20, alignment: .center)
+                        })
+                        Text("All your cards will be deleted and cannot be recovered.")
+                            .font(BeamFont.regular(size: 11).swiftUI)
+                            .foregroundColor(BeamColor.Corduroy.swiftUI)
+                            .frame(width: 286, alignment: .leading)
+                            .padding(.bottom, 20)
+
+                        Button(action: {
+                            promptDeleteAccountActionAlert()
+                        }, label: {
+                            // TODO: loc
+                            Text("Delete Account...")
+                                .frame(width: 105, height: 20, alignment: .center)
+                        })
+                        VStack {
+                            Text("Your account, all your graphs and all your cards will be deleted and cannot be recovered.")
+                                .lineLimit(2)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .multilineTextAlignment(.leading)
+                                .font(BeamFont.regular(size: 11).swiftUI)
+                                .foregroundColor(BeamColor.Corduroy.swiftUI)
+                        }.frame(width: 286, height: 26, alignment: .leading)
+                    }
+                }
+            }
+        }
 	}
 
-    @State private var showingSignInAlert = false
-    private var SignInButton: some View {
+    @State private var showingSignUpAlert = false
+    private var SignUpButton: some View {
         Button(action: {
             self.loading = true
-            accountManager.signIn(email, password) { result in
+            accountManager.signUp(email, password) { result in
                 self.loading = false
-                loggedIn = AccountManager().loggedIn
                 switch result {
                 case .failure(let error):
                     errorMessage = error
-                    showingSignInAlert = true
-                    Logger.shared.logInfo("Could not signin: \(error.localizedDescription)", category: .network)
+                    showingSignUpAlert = true
+                    Logger.shared.logInfo("Could not sign up: \(error.localizedDescription)", category: .network)
                 case .success:
-                    Logger.shared.logInfo("signIn succeeded", category: .network)
+                    Logger.shared.logInfo("signUp succeeded", category: .network)
                     self.fetchIdentities()
                 }
             }
         }, label: {
             // TODO: loc
-            Text("Sign In").frame(minWidth: 100)
+            Text("Sign Up...")
+                .frame(width: 63, height: 20, alignment: .center)
         })
         .disabled(loggedIn || loading || email.isEmpty || password.isEmpty)
-        .alert(isPresented: $showingSignInAlert) {
+        .alert(isPresented: $showingSignUpAlert) {
             Alert(title: Text("Error"),
                   message: Text(errorMessage.localizedDescription))
         }
@@ -186,31 +237,57 @@ struct AccountsView: View {
         }
     }
 
-    @State private var showingSignUpAlert = false
-    private var SignUpButton: some View {
+    @State private var showingSignInAlert = false
+    private var SignInButton: some View {
         Button(action: {
             self.loading = true
-            accountManager.signUp(email, password) { result in
+            accountManager.signIn(email, password) { result in
                 self.loading = false
+                loggedIn = AccountManager().loggedIn
                 switch result {
                 case .failure(let error):
                     errorMessage = error
-                    showingSignUpAlert = true
-                    Logger.shared.logInfo("Could not sign up: \(error.localizedDescription)", category: .network)
+                    showingSignInAlert = true
+                    Logger.shared.logInfo("Could not sign in: \(error.localizedDescription)", category: .network)
                 case .success:
-                    Logger.shared.logInfo("signUp succeeded", category: .network)
+                    Logger.shared.logInfo("sign in succeeded", category: .network)
                     self.fetchIdentities()
                 }
             }
         }, label: {
             // TODO: loc
-            Text("Sign Up").frame(minWidth: 100)
+            Text("Sign In...")
+                .frame(width: 56, height: 20, alignment: .center)
         })
         .disabled(loggedIn || loading || email.isEmpty || password.isEmpty)
-        .alert(isPresented: $showingSignUpAlert) {
+        .alert(isPresented: $showingSignInAlert) {
             Alert(title: Text("Error"),
                   message: Text(errorMessage.localizedDescription))
         }
+    }
+
+    private var GoogleSignInButton: some View {
+        GoogleButton(buttonType: loggedIn ? .connect : .signin, onClick: {
+            loading = true
+        }, onConnect: {
+            loggedIn = AccountManager().loggedIn
+            fetchIdentities()
+            loading = false
+        }, onFailure: {
+            loading = false
+        }).disabled(loading)
+    }
+
+    private var GithubSignInButton: some View {
+        GithubButton(buttonType: loggedIn ? .connect : .signin, onClick: {
+            loading = true
+        }, onConnect: {
+            loggedIn = AccountManager().loggedIn
+            fetchIdentities()
+            loading = false
+        }, onFailure: {
+            loading = false
+        }).disabled(loading)
     }
 
     @State private var showingForgotPasswordAlert = false
@@ -241,13 +318,58 @@ struct AccountsView: View {
 
     private var LogoutButton: some View {
         Button(action: {
-            self.identities = []
-            AccountManager.logout()
-            loggedIn = AccountManager().loggedIn
+            promptLogoutAlert()
         }, label: {
             // TODO: loc
-            Text("Logout").frame(minWidth: 100)
+            Text("Sign Out...")
         }).disabled(!loggedIn)
+            .frame(width: 83, height: 20, alignment: .center)
+    }
+
+    private var EncryptionKeyView: some View {
+        VStack(alignment: .leading) {
+            Button(action: {
+                encryptionKeyIsCopied.toggle()
+
+                let pasteboard = NSPasteboard.general
+                pasteboard.clearContents()
+                pasteboard.setString(EncryptionManager.shared.privateKey().asString(), forType: .string)
+
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                    encryptionKeyIsCopied.toggle()
+                }
+            }, label: {
+                HStack {
+                    Text(EncryptionManager.shared.privateKey().asString())
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.text.swiftUI)
+                    Image("preferences-account-copy")
+                        .renderingMode(.template)
+                        .foregroundColor(encryptionKeyIsHover ? BeamColor.Generic.text.swiftUI : BeamColor.Generic.subtitle.swiftUI)
+                        .frame(width: 12, height: 12, alignment: .top)
+                }
+            }).buttonStyle(PlainButtonStyle())
+                .frame(width: 350, height: 16, alignment: .center)
+                .onHover {
+                    encryptionKeyIsHover = $0
+                } .overlay(
+                    ZStack(alignment: .trailing) {
+                        if encryptionKeyIsCopied {
+                            Tooltip(title: "Encryption Key Copied !")
+                                .fixedSize()
+                                .offset(x: 140, y: -25)
+                                .transition(transition)
+                        }
+                    })
+
+            Text("Your encryption key is used to decrypt your cards on Beam Web. Click to copy it and paste it on Beam Web.")
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+                .multilineTextAlignment(.leading)
+                .font(BeamFont.regular(size: 11).swiftUI)
+                .foregroundColor(BeamColor.Corduroy.swiftUI)
+                .frame(width: 354, height: 26, alignment: .leading)
+        }
     }
 
     private func disconnectButton(_ identity: IdentityType) -> some View {
@@ -258,8 +380,11 @@ struct AccountsView: View {
                 self.fetchIdentities()
             }
         }, label: {
-            Text("Disconnect \(identity.provider ?? "-") (\(identity.email ?? "-"))")
-                .frame(minWidth: 100)
+            if let provider = identity.provider {
+                Text("Disconnect \(provider.prefix(1).capitalized + provider.dropFirst())...").frame(width: 126, height: 20)
+            } else {
+                Text("Disconnect...").frame(width: 126, height: 20)
+            }
         }).disabled(!loggedIn))
     }
 
@@ -273,10 +398,96 @@ struct AccountsView: View {
             self.identities = identities
         }
     }
+
+    private func promptLogoutAlert() {
+        let alert = NSAlert()
+        alert.messageText = "Are you sure you want to sign out from your Beam account?"
+        alert.addButton(withTitle: "Sign Out")
+        alert.addButton(withTitle: "Cancel")
+        alert.alertStyle = .warning
+        guard let window = AccountsPreferenceViewController.view.window else { return }
+        alert.beginSheetModal(for: window) { response in
+            guard response == .alertFirstButtonReturn else { return }
+            self.identities = []
+            AccountManager.logout()
+            loggedIn = AccountManager().loggedIn
+        }
+    }
+
+    // TODO: Implement when endpoint is ready
+    private func promptDeleteAllGraphAlert() {
+        let alert = NSAlert()
+        alert.messageText = "Are you sure you want to delete all your graphs?"
+        alert.informativeText = "All your cards will be deleted and cannot be recovered."
+        alert.addButton(withTitle: "Delete")
+        alert.addButton(withTitle: "Cancel")
+        alert.alertStyle = .warning
+        guard let window = AccountsPreferenceViewController.view.window else { return }
+        alert.beginSheetModal(for: window) { response in
+            guard response == .alertFirstButtonReturn else { return }
+            // TODO: Implement
+        }
+    }
+
+    // TODO: Implement when endpoint is ready
+    private func promptDeleteAccountActionAlert() {
+        let alert = NSAlert()
+        alert.messageText = "Are you sure you want to delete your Beam account?"
+        alert.informativeText = "Your account, all your graphs and all your cards will be deleted and cannot be recovered."
+        alert.addButton(withTitle: "Delete")
+        alert.addButton(withTitle: "Cancel")
+        alert.alertStyle = .warning
+        guard let window = AccountsPreferenceViewController.view.window else { return }
+        alert.beginSheetModal(for: window) { response in
+            guard response == .alertFirstButtonReturn else { return }
+            // TODO: Implement when endpoint is ready
+        }
+    }
+}
+
+struct AccountCredentialsView: View {
+    @Binding var email: String
+    @Binding var password: String
+    @Binding var loggedIn: Bool
+    @Binding var loading: Bool
+
+    var body: some View {
+        // TODO: loc
+        if #available(OSX 11.0, *) {
+            TextField("johnnyappleseed@apple.com", text: $email)
+                .textContentType(.username)
+                .disabled(loggedIn || loading)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .frame(maxWidth: 200)
+                .frame(width: 161, alignment: .leading)
+        } else {
+            TextField("johnnyappleseed@apple.com", text: $email)
+                .disabled(loggedIn || loading)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .frame(maxWidth: 200)
+                .frame(width: 161, alignment: .leading)
+        }
+        // TODO: loc
+        if #available(macOS 11.0, *) {
+            SecureField("Enter your password", text: $password)
+                .textContentType(.password)
+                .disabled(loggedIn || loading)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .frame(maxWidth: 200)
+                .frame(width: 161, alignment: .leading)
+        } else {
+            SecureField("Enter your password", text: $password)
+                .disabled(loggedIn || loading)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .frame(maxWidth: 200)
+                .frame(width: 161, alignment: .leading)
+        }
+    }
 }
 
 struct AccountsView_Previews: PreviewProvider {
 	static var previews: some View {
 		AccountsView()
 	}
+    // swiftlint:disable:next file_length
 }

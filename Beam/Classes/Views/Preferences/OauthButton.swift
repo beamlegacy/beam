@@ -21,8 +21,8 @@ struct OauthButton: View {
 
     private var buttonText: String {
         switch buttonType {
-        case .connect: return "Connect \(type.rawValue.capitalized)"
-        case .signin: return "Sign In With \(type.rawValue.capitalized)"
+        case .connect: return "Connect \(type.rawValue.capitalized)..."
+        case .signin: return "Sign In With \(type.rawValue.capitalized)..."
         }
     }
 
@@ -33,7 +33,8 @@ struct OauthButton: View {
 
             connect()
         }, label: {
-            Text(buttonText).frame(minWidth: 100)
+            Text(buttonText)
+                .frame(width: 126, height: 20)
         })
     }
 
