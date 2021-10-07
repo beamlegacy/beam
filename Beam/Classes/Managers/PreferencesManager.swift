@@ -44,6 +44,13 @@ class PreferencesManager {
         ContentBlockingManager.shared.synchronize()
     }
 
+    static func openLink(url: URL?) {
+        if let url = url, let state = AppDelegate.main.windows.first?.state {
+            state.mode = .web
+            _ = state.createTab(withURL: url, originalQuery: nil)
+            AppDelegate.main.closePreferencesWindow()
+        }
+    }
 }
 
 // MARK: - General Preferences

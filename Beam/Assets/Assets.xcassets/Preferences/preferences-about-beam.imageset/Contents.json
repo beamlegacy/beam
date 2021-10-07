@@ -1,15 +1,22 @@
 {
   "images" : [
     {
-      "filename" : "icon_128x128@2x.png",
-      "idiom" : "universal"
+      "filename" : "preferences-about-beam.png",
+      "idiom" : "universal",
+      "scale" : "1x"
+    },
+    {
+      "filename" : "preferences-about-beam@2x.png",
+      "idiom" : "universal",
+      "scale" : "2x"
+    },
+    {
+      "idiom" : "universal",
+      "scale" : "3x"
     }
   ],
   "info" : {
     "author" : "xcode",
     "version" : 1
-  },
-  "properties" : {
-    "template-rendering-intent" : "original"
   }
 }
