@@ -11,6 +11,7 @@ enum HelpMenuSection: String, CaseIterable, Identifiable {
     case shortcuts
     case featureRequest
     case bugReport
+    case twitter
 
     var id: HelpMenuSection {
         return self
@@ -24,6 +25,8 @@ enum HelpMenuSection: String, CaseIterable, Identifiable {
             return "Feature Request"
         case .bugReport:
             return "Report a bug"
+        case .twitter:
+            return "Follow @getonbeam"
         }
     }
 
@@ -35,6 +38,8 @@ enum HelpMenuSection: String, CaseIterable, Identifiable {
             return URL(string: "https://beamapp.canny.io/feature-r")
         case .bugReport:
             return URL(string: "https://beamapp.canny.io/bugs")
+        case .twitter:
+            return URL(string: "https://twitter.com/getonbeam")
         }
     }
 }

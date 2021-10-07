@@ -15,22 +15,19 @@ let AboutPreferencesViewController: PreferencePane = PreferencesPaneBuilder.buil
 struct AboutPreferencesView: View {
     private let contentWidth: Double = PreferencesManager.contentWidth
 
-    @State var beamVersion: String = "1.0"
-    @State var beamBuildNumber: String = "104"
     var body: some View {
         Preferences.Container(contentWidth: contentWidth) {
             Preferences.Section(bottomDivider: true) {
                 Text("").labelsHidden()
             } content: {
-                BeamAboutSection(beamVersion: $beamVersion,
-                                 beamBuildNumber: $beamBuildNumber)
+                BeamAboutSection()
             }
             Preferences.Section {
                 Text("").labelsHidden()
             } content: {
                 BeamSocialSection()
             }
-        }
+        }.frame(height: 352, alignment: .center)
     }
 }
 
@@ -41,60 +38,118 @@ struct AboutPreferencesView_Previews: PreviewProvider {
 }
 
 struct BeamAboutSection: View {
-    @Binding var beamVersion: String
-    @Binding var beamBuildNumber: String
+    private var TermsAndConditionsButton: some View {
+        if #available(macOS 11.0, *) {
+           return Button {
+
+            } label: {
+                (Text("Terms & Conditions") + Text(Image("editor-url").renderingMode(.template)))
+                    .underline()
+                    .font(BeamFont.regular(size: 12).swiftUI)
+                    .foregroundColor(BeamColor.Corduroy.swiftUI)
+            }.buttonStyle(PlainButtonStyle())
+        } else {
+           return Button {
+
+            } label: {
+                Text("Terms & Conditions")
+                    .underline()
+                    .font(BeamFont.regular(size: 12).swiftUI)
+                    .foregroundColor(BeamColor.Corduroy.swiftUI)
+            }.buttonStyle(PlainButtonStyle())
+        }
+    }
+
+    private var PrivacyPolicyButton: some View {
+        if #available(macOS 11.0, *) {
+           return Button {
+
+            } label: {
+                (Text("Privacy Policy") + Text(Image("editor-url").renderingMode(.template)))
+                    .underline()
+                    .font(BeamFont.regular(size: 12).swiftUI)
+                    .foregroundColor(BeamColor.Corduroy.swiftUI)
+
+            }.buttonStyle(PlainButtonStyle())
+
+        } else {
+           return Button {
+
+            } label: {
+                Text("Privacy Policy")
+                    .underline()
+                    .font(BeamFont.regular(size: 12).swiftUI)
+                    .foregroundColor(BeamColor.Corduroy.swiftUI)
+            }.buttonStyle(PlainButtonStyle())
+        }
+    }
+
     var body: some View {
         VStack {
-            HStack {
-                Image("preferences-about-beam")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 128, height: 128, alignment: .center)
+            HStack(alignment: .top) {
+                Spacer(minLength: 100)
+                VStack {
+                    Image("preferences-about-beam")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 128, height: 128, alignment: .top)
+                    Spacer()
+                }
                 VStack(alignment: .leading) {
                     Text("Beam")
                         .font(BeamFont.medium(size: 20).swiftUI)
                         .foregroundColor(BeamColor.Generic.text.swiftUI)
-                    Text("Version \(beamVersion) (\(beamBuildNumber))")
+                    Text("Version \(Information.appVersion ?? "0") (\(Information.appBuild ?? "0"))")
                         .font(BeamFont.medium(size: 10).swiftUI)
                         .foregroundColor(BeamColor.Corduroy.swiftUI)
                         .frame(height: 12, alignment: .center)
-                    Text("Terms & Conditions")
-                        .underline()
-                        .font(BeamFont.medium(size: 12).swiftUI)
-                        .foregroundColor(BeamColor.Corduroy.swiftUI)
-                        .frame(height: 21, alignment: .center)
-                    Text("Privacy Policy")
-                        .underline()
-                        .font(BeamFont.medium(size: 12).swiftUI)
-                        .foregroundColor(BeamColor.Corduroy.swiftUI)
-                        .frame(height: 21, alignment: .center)
-                    HStack {
-                        Button {
+                        .padding(.bottom, 4)
 
-                        } label: {
-                            Text("Bug Report")
-                                .font(BeamFont.regular(size: 13).swiftUI)
-                                .foregroundColor(BeamColor.Generic.text.swiftUI)
-                        }.buttonStyle(BorderedButtonStyle())
-                        Button {
+                    TermsAndConditionsButton
+                        .frame(height: 21)
+                    PrivacyPolicyButton
+                        .frame(height: 21)
+                        .padding(.bottom, 26)
 
-                        } label: {
-                            Text("Feature Request")
-                                .font(BeamFont.regular(size: 13).swiftUI)
-                                .foregroundColor(BeamColor.Generic.text.swiftUI)
-                        }.buttonStyle(BorderedButtonStyle())
-                    }
-                }
+                    Button {
+                        PreferencesManager.openLink(url: HelpMenuSection.featureRequest.url)
+                    } label: {
+                        Text("Feature Request...")
+                            .font(BeamFont.regular(size: 13).swiftUI)
+                            .foregroundColor(BeamColor.Generic.text.swiftUI)
+                    }.buttonStyle(BorderedButtonStyle())
+                        .frame(height: 20)
+                        .padding(.bottom, 3)
+                    Button {
+                        PreferencesManager.openLink(url: HelpMenuSection.bugReport.url)
+                    } label: {
+                        Text("Report a bug...")
+                            .font(BeamFont.regular(size: 13).swiftUI)
+                            .foregroundColor(BeamColor.Generic.text.swiftUI)
+                    }.buttonStyle(BorderedButtonStyle())
+                        .frame(height: 20)
+                        .padding(.bottom, 5)
+                    Button {
+
+                    } label: {
+                        Text("Contact Support...")
+                            .font(BeamFont.regular(size: 13).swiftUI)
+                            .foregroundColor(BeamColor.Generic.text.swiftUI)
+                    }.buttonStyle(BorderedButtonStyle())
+                        .frame(height: 20)
+                        .padding(.bottom, 15)
+                }.padding(.top, 18)
+                Spacer(minLength: 333)
             }
-        }.frame(width: 573, alignment: .center)
+        }
     }
 }
 
 struct BeamSocialSection: View {
     var body: some View {
         VStack {
-            HStack(alignment: .center) {
-                Spacer()
+            HStack {
+                Spacer(minLength: 172)
                 VStack(alignment: .leading) {
                     Text("Follow Beam on Twitter")
                         .font(BeamFont.regular(size: 13).swiftUI)
@@ -105,14 +160,15 @@ struct BeamSocialSection: View {
                 }
                 Spacer()
                 Button {
-
+                    PreferencesManager.openLink(url: HelpMenuSection.twitter.url)
                 } label: {
                     Text("Follow")
                         .font(BeamFont.regular(size: 13).swiftUI)
                         .foregroundColor(BeamColor.Generic.text.swiftUI)
                         .frame(width: 70, height: 20, alignment: .center)
                 }.buttonStyle(BorderedButtonStyle())
+                Spacer(minLength: 179)
             }
-        }.frame(width: 573, alignment: .center)
+        }
     }
 }

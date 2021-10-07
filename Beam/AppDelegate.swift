@@ -364,6 +364,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         preferencesWindowController.show()
     }
 
+    func closePreferencesWindow() {
+        preferencesWindowController.close()
+    }
+
     func applicationWillHide(_ notification: Notification) {
         for window in windows {
             window.state.browserTabsManager.currentTab?.switchToBackground()

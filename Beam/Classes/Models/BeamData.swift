@@ -306,8 +306,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         let downloadFolder = fileManager.urls(for: .downloadsDirectory, in: .userDomainMask).first!
         var archiveName = "Beam data archive"
 
-        if let infos = Bundle.main.infoDictionary, let name = infos["CFBundleName"] as? String,
-           let version = infos["CFBundleShortVersionString"] as? String, let build = infos["CFBundleVersion"] as? String {
+        if let name = Information.appName, let version = Information.appVersion, let build = Information.appBuild {
             archiveName = "\(name) v.\(version)_\(build) data backup"
         }
 

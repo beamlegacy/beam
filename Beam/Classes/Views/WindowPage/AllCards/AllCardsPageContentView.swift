@@ -401,4 +401,5 @@ private class NoteTableViewItem: TableViewItem {
         guard let otherNote = object as? NoteTableViewItem else { return false }
         return note?.id == otherNote.note?.id
     }
+    // swiftlint:disable:next file_length
 }
