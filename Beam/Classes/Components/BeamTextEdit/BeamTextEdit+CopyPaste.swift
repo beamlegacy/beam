@@ -53,6 +53,7 @@ extension BeamTextEdit {
                                                                 caret: nil,
                                                                 markedRange: .none,
                                                                 selectedRange: .none,
+                                                                searchedRanges: [],
                                                                 mouseInteraction: nil)
             let builder = BeamTextAttributedStringBuilder()
             strNode.append(builder.build(config: config))

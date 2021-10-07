@@ -625,41 +625,5 @@ import Promises
             sender.send(browsingTree: browsingTree)
         }
     }
-}
-
-extension BrowserTab {
-
-    func searchInTab() {
-        guard self.searchViewModel == nil else {
-            cancelSearch()
-            return
-        }
-
-        let viewModel = SearchViewModel(context: .web) { [weak self] search in
-            self?.find(search, using: "find")
-        } onLocationIndicatorTap: { position in
-            _ = self.executeJS("window.scrollTo(0, \(position));", objectName: nil)
-        } next: { [weak self] search in
-            self?.find(search, using: "findNext")
-        } previous: { [weak self] search in
-            self?.find(search, using: "findPrevious")
-        } done: { [weak self] in
-            self?.webView.page?.executeJS("findDone()", objectName: "SearchWebPage")
-            self?.searchViewModel = nil
-        }
-
-        self.searchViewModel = viewModel
-    }
-
-    private func cancelSearch() {
-        guard let searchViewModel = self.searchViewModel else { return }
-        searchViewModel.done?()
-    }
-
-    private func find(_ search: String, using function: String) {
-        let escaped = search.replacingOccurrences(of: "//", with: "///").replacingOccurrences(of: "\"", with: "\\\"")
-        self.webView.page?.executeJS("\(function)(\"\(escaped)\")", objectName: "SearchWebPage")
-    }
-
     // swiftlint:disable:next file_length
 }

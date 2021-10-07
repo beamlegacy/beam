@@ -8,14 +8,18 @@ extension XCUIElement {
         XCUIApplication().typeKey(.delete, modifierFlags: .function)
     }
 
-    public func tapInTheMiddle() {
+    @discardableResult
+    public func tapInTheMiddle() -> XCUIElement {
         self.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+        return self
     }
 
-    public func typeSlowly(_ text: String, everyNChar: Int) {
+    @discardableResult
+    public func typeSlowly(_ text: String, everyNChar: Int) -> XCUIElement {
         for c in text.split(every: everyNChar) {
             self.typeText(c)
         }
+        return self
     }
 
     public func waitForNonExistence(timeout: TimeInterval, for testCase: XCTestCase){
@@ -24,25 +28,33 @@ extension XCUIElement {
         testCase.wait(for: [expectation], timeout: timeout)
     }
     
-    public func clickOnHittable() {
+    @discardableResult
+    public func clickOnHittable() -> XCUIElement {
         _ = self.waitForExistence(timeout: WaitHelper().minimumWaitTimeout)
         WaitHelper().waitForIsHittable(self)
         self.click()
+        return self
     }
     
-    public func clickOnExistence() {
+    @discardableResult
+    public func clickOnExistence() -> XCUIElement {
         _ = self.waitForExistence(timeout: WaitHelper().minimumWaitTimeout)
         self.click()
+        return self
     }
     
-    public func clickAndType(_ text: String) {
+    @discardableResult
+    public func clickAndType(_ text: String) -> XCUIElement {
         self.tapInTheMiddle()
         self.typeText(text)
+        return self
     }
     
-    public func focusAndTypeTextOnExistence(_ text: String) {
+    @discardableResult
+    public func focusAndTypeTextOnExistence(_ text: String) -> XCUIElement {
         _ = self.waitForExistence(timeout: WaitHelper().minimumWaitTimeout)
         self.tapInTheMiddle()
         self.typeText(text)
+        return self
     }
 }

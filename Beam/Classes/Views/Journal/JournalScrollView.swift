@@ -82,7 +82,7 @@ struct JournalScrollView: NSViewRepresentable {
 
     private func getTextEditView(for note: BeamNote) -> BeamTextEdit {
         let textEditView = BeamTextEdit(root: note, journalMode: true)
-        textEditView.data = state.data
+        textEditView.state = state
         textEditView.onStartEditing = {
             self.isEditing = true
         }

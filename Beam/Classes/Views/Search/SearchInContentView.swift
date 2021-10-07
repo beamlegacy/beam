@@ -12,21 +12,20 @@ struct SearchInContentView: View {
     @ObservedObject var viewModel: SearchViewModel
     @Environment(\.colorScheme) var colorScheme
 
-    @State private var isEditing = true
-
     private let backgroundColor: Color = Color(.windowBackgroundColor)
     private let searchFieldFont = BeamFont.regular(size: 13).nsFont
     private let searchFieldTextColor = BeamColor.Niobium.nsColor
-    private let resultsTextFont = BeamFont.regular(size: 12).swiftUI
+    private let resultsTextFont = BeamFont.regular(size: 11).swiftUI
     private let resultsTextColor = BeamColor.AlphaGray.swiftUI
 
     var body: some View {
         HStack(spacing: 10) {
-            BeamTextField(text: $viewModel.searchTerms, isEditing: $isEditing, placeholder: title, font: searchFieldFont, textColor: searchFieldTextColor, placeholderColor: BeamColor.AlphaGray.nsColor)
-            if !viewModel.searchTerms.isEmpty {
+            BeamTextField(text: $viewModel.searchTerms, isEditing: $viewModel.isEditing, placeholder: title, font: searchFieldFont, textColor: searchFieldTextColor, placeholderColor: BeamColor.AlphaGray.nsColor, onCommit: viewModel.onCommit, onEscape: viewModel.close)
+            if !viewModel.searchTerms.isEmpty && !viewModel.typing {
                 Text(results)
                     .font(resultsTextFont)
                     .foregroundColor(resultsTextColor)
+                    .animation(nil)
                 Separator(color: BeamColor.Mercury)
                 ButtonLabel(icon: "find-forward", state: viewModel.foundOccurences == 0 ? .disabled : .normal, customStyle: searchButtonLabelStyle) {
                     viewModel.previous()
@@ -39,9 +38,11 @@ struct SearchInContentView: View {
                 viewModel.close()
             }
         }
-            .padding()
-            .frame(width: 320, height: 32)
-            .background(backgroundView)
+        .padding(.trailing, 10)
+        .padding(.leading, 12)
+        .padding(.vertical, 8)
+        .frame(width: 320, height: 32)
+        .background(backgroundView)
     }
 
     private var backgroundView: some View {

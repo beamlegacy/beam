@@ -68,6 +68,7 @@ class RecentsManager: ObservableObject {
         notesCancellables.removeAll()
         recentNotes.forEach { n in
             n.objectWillChange
+                .receive(on: RunLoop.main)
                 .sink { _ in self.objectWillChange.send() }
                 .store(in: &notesCancellables)
         }
