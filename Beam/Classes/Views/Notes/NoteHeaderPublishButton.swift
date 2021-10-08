@@ -21,6 +21,7 @@ struct NoteHeaderPublishButton: View {
     var publishState: PublishButtonState
     var justCopiedLink = false
     var showError: Bool
+//    var enableAnimations: Bool = true
     var action: () -> Void
 
     @State private var hovering = false
@@ -31,7 +32,8 @@ struct NoteHeaderPublishButton: View {
         [.publishing, .unpublishing].contains(publishState)
     }
     var body: some View {
-        let displayTitle = justCopiedLink || hovering || isWaitingChanges
+        let justPublishedOrCopied = justCopiedLink || publishState == .justPublished
+        let displayTitle = justPublishedOrCopied || hovering || isWaitingChanges
         var publishTitle: String?
         var displayCheckIcon = false
         let isPublic = publishState == .isPublic || publishState == .unpublishing
@@ -48,7 +50,8 @@ struct NoteHeaderPublishButton: View {
                 publishTitle = isPublic ? "Unpublish" : "Publish"
             }
         }
-
+        let springAnimation = BeamAnimation.spring(stiffness: 480, damping: 30)
+        let containerAnimation = BeamAnimation.easeInOut(duration: 0.15)
         return HStack(spacing: BeamSpacing._100) {
             ButtonLabel(customView: { _, _ in
                 AnyView(
@@ -76,10 +79,15 @@ struct NoteHeaderPublishButton: View {
                                 ))
                         }
                     }
-                    .animation(BeamAnimation.spring(stiffness: 480, damping: 30))
+                    .animation(springAnimation, value: displayCheckIcon)
+                    .animation(springAnimation, value: isPublic)
+                    .animation(springAnimation, value: publishTitle)
+                    .animation(nil)
                 )
             }, state: displayTitle ? .clicked : .normal, customStyle: customButtonLabelStyle, action: action)
-            .animation(BeamAnimation.easeInOut(duration: 0.15))
+            .animation(containerAnimation, value: displayCheckIcon)
+            .animation(containerAnimation, value: isPublic)
+            .animation(containerAnimation, value: publishTitle)
             .onHover { h in
                 hovering = h
             }
