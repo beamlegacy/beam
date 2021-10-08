@@ -1079,10 +1079,15 @@ public extension CALayer {
 
         //        window?.makeFirstResponder(self)
         let point = convert(event.locationInWindow)
-        startSelectionDrag()
-        _ = rootNode.dispatchMouseDragged(mouseInfo: MouseInfo(rootNode, point, event))
+
+        let widget = rootNode.dispatchMouseDragged(mouseInfo: MouseInfo(rootNode, point, event))
+        if let resizable = widget as? ResizableNode, resizable.isResizing {
+
+        } else {
+            startSelectionDrag()
+            mouseDraggedUpdate(with: event)
+        }
         cursorUpdate(with: event)
-        mouseDraggedUpdate(with: event)
         autoscroll(with: event)
     }
 
@@ -1157,7 +1162,8 @@ public extension CALayer {
         guard inlineFormatter?.isMouseInsideView != true else { return }
         let point = convert(event.locationInWindow)
         let views = rootNode.getWidgetsAt(point, point, ignoreX: true)
-        let cursors = views.compactMap { $0.cursor }
+        let preciseViews = rootNode.getWidgetsAt(point, point, ignoreX: false)
+        let cursors = preciseViews.compactMap { $0.cursor }
         let cursor = cursors.last ?? .arrow
         cursor.set()
         dispatchHover(Set<Widget>(views.compactMap { $0 as? Widget }))
@@ -1714,7 +1720,7 @@ public extension CALayer {
             do {
                 let uid = try fileManager.insert(name: url.lastPathComponent, data: data)
                 let newElement = BeamElement()
-                newElement.kind = .image(uid)
+                newElement.kind = .image(uid, displayRatio: nil)
                 rootNode.cmdManager.insertElement(newElement, inNode: newParent, afterNode: afterNode)
                 Logger.shared.logInfo("Added Image to note \(String(describing: rootNode.element.note)) with uid \(uid) from dropped file (\(image))", category: .noteEditor)
             } catch {
