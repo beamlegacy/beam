@@ -13,6 +13,8 @@ import XCTest
 class PublicServerTests: XCTestCase {
 
     var helper: DocumentManagerTestsHelper!
+    var beamTestHelper = BeamTestsHelper()
+    var coreDataManager: CoreDataManager!
 
     var testNote: BeamNote?
     var testNoteDocumentStruct: DocumentStruct!
@@ -20,10 +22,15 @@ class PublicServerTests: XCTestCase {
     override func setUpWithError() throws {
 
         BeamTestsHelper.logout()
-        BeamTestsHelper().beginNetworkRecording(test: self)
+        beamTestHelper.beginNetworkRecording(test: self)
+
+        coreDataManager = CoreDataManager()
+        // Setup CoreData
+        coreDataManager.setup()
+        CoreDataManager.shared = coreDataManager
 
         helper = DocumentManagerTestsHelper(documentManager: DocumentManager(),
-                                            coreDataManager: CoreDataManager.shared)
+                                            coreDataManager: coreDataManager)
 
         helper.deleteAllDocuments()
         helper.deleteAllDatabases()
@@ -39,13 +46,17 @@ class PublicServerTests: XCTestCase {
         let testNoteDocumentStruct = testNote!.documentStruct
 
         self.testNoteDocumentStruct = helper.saveLocally(testNoteDocumentStruct!)
+
+        // Consecutive saves expect both those variable to be up to date
+        testNote!.version = self.testNoteDocumentStruct.version
+        testNote!.savedVersion = testNote!.version
     }
 
     override func tearDownWithError() throws {
 
         helper.deleteDocumentStruct(testNoteDocumentStruct)
         BeamTestsHelper.logout()
-        BeamTestsHelper().endNetworkRecording()
+        beamTestHelper.endNetworkRecording()
     }
 
     func testNotePublicationUnpublicationWithUsername() {
@@ -55,7 +66,10 @@ class PublicServerTests: XCTestCase {
         Persistence.Authentication.username = "Test user"
 
         let publish = expectation(description: "note publish")
-        BeamNoteSharingUtils.makeNotePublic(note, becomePublic: true, documentManager: helper.documentManager, completion: { result in
+        BeamNoteSharingUtils.makeNotePublic(note,
+                                            becomePublic: true,
+                                            documentManager: helper.documentManager,
+                                            completion: { result in
             switch result {
             case .success(let published):
                 XCTAssertTrue(published)
