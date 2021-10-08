@@ -56,9 +56,7 @@ extension AutocompleteManager {
         var urlResultsTruncated = Array(urlResults.prefix(6))
         var topHistoryDomainResult: AutocompleteResult?
 
-        if let topDomain = topDomainResults.first {
-            results.insert(topDomain, at: 0)
-        } else if searchQuery.mayBeWebURL || !isSentence(searchQuery) {
+        if searchQuery.mayBeWebURL || !isSentence(searchQuery) {
             if let urlResultsTopDomain = findTopDomainIfNeeded(from: urlResultsTruncated) {
                 topHistoryDomainResult = urlResultsTopDomain.topDomain
                 urlResultsTruncated = urlResultsTopDomain.results
@@ -68,6 +66,9 @@ extension AutocompleteManager {
                     topHistoryDomainResult = historyResultsTopDomain.topDomain
                 }
                 historyResultsTruncated = historyResultsTopDomain.results
+            }
+            if let topDomain = topDomainResults.first, topHistoryDomainResult == nil {
+                results.insert(topDomain, at: 0)
             }
         }
 
