@@ -29,27 +29,49 @@ class LoginTest: BaseTest {
         let target = "Submit"
         let parent = app.webViews.containing(.button, identifier: target).element
         let button = parent.buttons[target].firstMatch
-        XCTAssert(button.waitForExistence(timeout: 4))
+        XCTAssert(button.waitForExistence(timeout: minimumWaitTimeout))
         let buttonMiddle = button.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
         buttonMiddle.tap()
     }
     
-    func testloginFormAuthentication() {
+    func testloginFormPasswordSave() {
+        let journalView = testPreparartion()
+        //to be moved in a test view once https://gitlab.com/beamgroup/beam/-/merge_requests/1410 is merged
+        handleCredentialsPopUp("Save Password", journalView)
+
+        XCTAssertTrue(journalView.staticText("CredentialsConfirmationToast").waitForExistence(timeout: implicitWaitTimeout))
+        //to be added - assertion in password preferences - it exists there. Password cleaning required
+    }
+    
+    func testloginFormPasswordSaveCancellation() {
+        let journalView = testPreparartion()
+        //to be moved in a test view once https://gitlab.com/beamgroup/beam/-/merge_requests/1410 is merged
+        handleCredentialsPopUp("Not Now", journalView)
+
+        XCTAssertFalse(journalView.staticText("CredentialsConfirmationToast").waitForExistence(timeout: minimumWaitTimeout))
+        //to be added - assertion in password preferences - it exists there. Password cleaning required
+    }
+    
+    func testPreparartion() -> JournalTestView {
         let journalView = launchApp()
         let helper = BeamUITestsHelper(journalView.app)
 
         helper.openTestPage(page: BeamUITestsHelper.UITestsPageCommand.password)
-        
+        enterInput(helper.randomPassword(), .password, journalView.app) //password first to avoid Other Passwords cover over the Submit button
         enterInput(helper.randomEmail(), .username, journalView.app)
-        enterInput(helper.randomPassword(), .password, journalView.app)
+        // close Other Passwords if it still covers Submit button
+        if PasswordManagerHelper().getOtherPasswordsOptionElement().exists {
+            journalView.typeKeyboardKey(.escape)
+        }
         tapSubmit(journalView.app)
-
-        let button = journalView.app.buttons["Save Password"].firstMatch
-        XCTAssert(button.waitForExistence(timeout: 4))
+        return journalView
+    }
+    
+    func handleCredentialsPopUp(_ buttonOption: String, _ view: JournalTestView) {
+        let button = view.button(buttonOption)
+        XCTAssertTrue(button.waitForExistence(timeout: implicitWaitTimeout))
+        WaitHelper().waitForIsEnabled(button)
         button.tapInTheMiddle()
-
-        let confirmationToast = journalView.app.staticTexts["CredentialsConfirmationToast"]
-        XCTAssertTrue(confirmationToast.waitForExistence(timeout: implicitWaitTimeout))
     }
     
 }
