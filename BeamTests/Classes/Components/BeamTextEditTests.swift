@@ -21,6 +21,7 @@ class BeamTextEditTests: XCTestCase {
         data = BeamData()
         editor = BeamTextEdit(root: note, journalMode: false)
         editor.data = data
+        editor.prepareRoot()
     }
 
     override func tearDownWithError() throws {
@@ -89,7 +90,7 @@ class BeamTextEditTests: XCTestCase {
         let root = editor.rootNode!
 
         let bullet = BeamElement("Some text and a link.com")
-        let node = TextNode(parent: root, element: bullet)
+        let node = TextNode(parent: root, element: bullet, availableWidth: 600)
 
         XCTAssertNil(editor.linkStringForPrecedingCharacters(atIndex: 10, in: node))
 
@@ -108,7 +109,7 @@ class BeamTextEditTests: XCTestCase {
         ]
         //adding a note source in the case of a url detected after pressing enter
         let bullet = BeamElement("Some text and a link.com")
-        let node = TextNode(parent: root, element: bullet)
+        let node = TextNode(parent: root, element: bullet, availableWidth: 600)
         editor.focusedWidget = node
         root.cursorPosition = node.textCount
         editor.pressEnter(false, false, false, false)
@@ -117,7 +118,7 @@ class BeamTextEditTests: XCTestCase {
 
         //adding a note source in the case of a url detected after inserting a space
         let anotherBullet = BeamElement("Some other text and a anotherlink.com")
-        let anotherNode = TextNode(parent: root, element: anotherBullet)
+        let anotherNode = TextNode(parent: root, element: anotherBullet, availableWidth: 600)
         editor.focusedWidget = anotherNode
         root.cursorPosition = anotherNode.textCount
         editor.insertText(string: " ", replacementRange: nil)

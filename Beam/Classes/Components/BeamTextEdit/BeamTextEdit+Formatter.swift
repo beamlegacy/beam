@@ -108,6 +108,7 @@ extension BeamTextEdit {
     }
 
     internal func updateInlineFormatterView(isDragged: Bool = false, isKeyEvent: Bool = false) {
+        guard let rootNode = rootNode else { return }
         guard inlineFormatter != nil else { return }
         detectTextFormatterType()
 
@@ -154,6 +155,7 @@ extension BeamTextEdit {
 
     // swiftlint:disable:next cyclomatic_complexity
     internal func detectTextFormatterType() {
+        guard let rootNode = rootNode else { return }
         guard let node = focusedWidget as? TextNode else { return }
 
         var types: [TextFormatterType] = []
@@ -187,6 +189,7 @@ extension BeamTextEdit {
     }
 
     internal func updateFormatterView(with type: TextFormatterType, attribute: BeamText.Attribute? = nil, kind: ElementKind = .bullet) {
+        guard let rootNode = rootNode else { return }
         guard let node = focusedWidget as? TextNode else { return }
 
         var hasAttribute = false
@@ -301,7 +304,7 @@ extension BeamTextEdit {
         let idealSize = formatter.idealSize
         var yPos = node.offsetInDocument.y - idealSize.height - 8
         var xPos: CGFloat = node.offsetInDocument.x
-        if rootNode.state.nodeSelection == nil {
+        if rootNode?.state.nodeSelection == nil {
             let (xOffset, rect) = node.offsetAndFrameAt(index: node.cursorPosition)
             if below {
                 yPos = rect.maxY + node.offsetInDocument.y + 8
@@ -321,6 +324,7 @@ extension BeamTextEdit {
 
     // MARK: Private Methods (Text Formatting)
     private func changeTextFormat(with node: TextNode, kind: ElementKind, isActive: Bool) {
+        guard let rootNode = rootNode else { return }
         if rootNode.state.nodeSelection != nil {
             rootNode.note?.cmdManager.beginGroup(with: "ChangeTextFormat")
             guard let nodeSelection = rootNode.state.nodeSelection else { return }
@@ -337,6 +341,7 @@ extension BeamTextEdit {
     }
 
     private func updateAttributeState(with node: TextNode, attribute: BeamText.Attribute, isActive: Bool) {
+        guard let rootNode = rootNode else { return }
 
         if rootNode.state.nodeSelection != nil {
             guard let nodeSelection = rootNode.state.nodeSelection else { return }
@@ -351,11 +356,11 @@ extension BeamTextEdit {
         } else if rootNode.textIsSelected {
             rootNode.note?.cmdManager.formatText(in: node, for: nil, with: attribute, for: node.selectedTextRange, isActive: isActive)
         } else {
-            if let index = rootNode?.state.attributes.firstIndex(of: attribute),
-               ((rootNode?.state.attributes.contains(attribute)) != nil), isActive {
-                rootNode?.state.attributes.remove(at: index)
+            if let index = rootNode.state.attributes.firstIndex(of: attribute),
+               rootNode.state.attributes.contains(attribute), isActive {
+                rootNode.state.attributes.remove(at: index)
             } else {
-                rootNode?.state.attributes.append(attribute)
+                rootNode.state.attributes.append(attribute)
             }
         }
     }

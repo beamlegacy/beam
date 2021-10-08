@@ -202,6 +202,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
             }
             computeRendering()
             computedIdealSize = NSSize(width: availableWidth, height: paddedContentsSize.height + idealChildrenSize.height + padding.top + padding.bottom).rounded()
+            editor?.appendToCurrentIndicativeLayoutHeight(computedIdealSize.height)
 
             if computedIdealSize.width.isNaN || !computedIdealSize.width.isFinite {
                 Logger.shared.logError("computedIdealSize.width is not integral \(computedIdealSize.width)", category: .noteEditor)
@@ -325,7 +326,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     }
 
     // MARK: - Initializer
-    init(parent: Widget, nodeProvider: NodeProvider? = nil) {
+    init(parent: Widget, nodeProvider: NodeProvider? = nil, availableWidth: CGFloat?) {
         self.parent = parent
         self.editor = parent.editor
         self.nodeProvider = nodeProvider
@@ -333,17 +334,18 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         selectionLayer = CALayer()
         super.init()
         setupWidget()
-        availableWidth = parent.availableWidth - parent.childInset
+        self.availableWidth = availableWidth ?? (parent.availableWidth - parent.childInset)
 
         setupAccessibility()
     }
 
     // this version should only be used by TextRoot
-    init(editor: BeamTextEdit, nodeProvider: NodeProvider? = nil) {
+    init(editor: BeamTextEdit, nodeProvider: NodeProvider? = nil, availableWidth: CGFloat?) {
         self.editor = editor
         self.nodeProvider = nodeProvider
         layer = CALayer()
         selectionLayer = CALayer()
+        self.availableWidth = availableWidth ?? 1
         super.init()
         setupWidget()
     }
@@ -392,7 +394,10 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
     func updateSubLayersLayout() { }
 
-    var initialLayout = true
+    fileprivate var initialLayout = true
+    var inInitialLayout: Bool {
+        initialLayout || (editor?.frame.isEmpty ?? true)
+    }
     final func setLayout(_ frame: NSRect) {
         self.frame = frame
         defer {
@@ -400,7 +405,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
             initialLayout = false
         }
 
-        if initialLayout {
+        if inInitialLayout {
             CATransaction.begin()
             CATransaction.setDisableActions(true)
         }
@@ -421,7 +426,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
             invalidate()  // invalidate after the change
         }
 
-        if initialLayout {
+        if inInitialLayout {
             updateLayersVisibility()
             CATransaction.commit()
         }
@@ -951,7 +956,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
             p = p!.parent
         }
 
-        if n != nil {
+        if n != nil && n !== self {
             return n
         }
 
@@ -1132,6 +1137,11 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         }
 
         return widgets
+    }
+
+    var hasCmdManager: Bool {
+        guard let root = root, root.note != nil else { return false }
+        return true
     }
 
     var cmdManager: CommandManager<Widget> {

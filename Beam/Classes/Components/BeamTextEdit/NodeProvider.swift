@@ -70,43 +70,45 @@ class NodeProviderImpl: NodeProvider {
         // BreadCrumbs can't create TextNodes, only ProxyTextNodes
         let node: ElementNode = proxy ?
             {
+                let width = withParent.availableWidth - withParent.childInset
                 guard let note = element as? BeamNote else {
                     switch element.kind {
                     case .image:
-                        return ProxyImageNode(parent: withParent, element: element)
+                        return ProxyImageNode(parent: withParent, element: element, availableWidth: width)
                     case .embed:
-                        return ProxyEmbedNode(parent: withParent, element: element)
+                        return ProxyEmbedNode(parent: withParent, element: element, availableWidth: width)
                     case .blockReference:
-                        return BlockReferenceNode(parent: withParent, element: element)
+                        return BlockReferenceNode(parent: withParent, element: element, availableWidth: width)
                     case .divider:
-                        return DividerNode(parent: withParent, element: element)
+                        return DividerNode(parent: withParent, element: element, availableWidth: width)
                     default:
-                        return ProxyTextNode(parent: withParent, element: element)
+                        return ProxyTextNode(parent: withParent, element: element, availableWidth: width)
                     }
                 }
-                return TextRoot(editor: editor, element: note)
+                return TextRoot(editor: editor, element: note, availableWidth: BeamTextEdit.textNodeWidth(for: editor.frame.size))
             }()
             :
             {
+                let width = withParent.availableWidth - withParent.childInset
                 guard let note = element as? BeamNote else {
                     guard element.note == nil || element.note == holder?.root?.note else {
-                        return ProxyTextNode(parent: withParent, element: element)
+                        return ProxyTextNode(parent: withParent, element: element, availableWidth: width)
                     }
 
                     switch element.kind {
                     case .image:
-                        return ImageNode(parent: withParent, element: element)
+                        return ImageNode(parent: withParent, element: element, availableWidth: width)
                     case .embed:
-                        return EmbedNode(parent: withParent, element: element)
+                        return EmbedNode(parent: withParent, element: element, availableWidth: width)
                     case .blockReference:
-                        return BlockReferenceNode(parent: withParent, element: element)
+                        return BlockReferenceNode(parent: withParent, element: element, availableWidth: width)
                     case .divider:
-                        return DividerNode(parent: withParent, element: element)
+                        return DividerNode(parent: withParent, element: element, availableWidth: width)
                     default:
-                        return TextNode(parent: withParent, element: element)
+                        return TextNode(parent: withParent, element: element, availableWidth: width)
                     }
                 }
-                return TextRoot(editor: editor, element: note)
+                return TextRoot(editor: editor, element: note, availableWidth: BeamTextEdit.textNodeWidth(for: editor.frame.size))
             }()
 
         accessingMapping = true

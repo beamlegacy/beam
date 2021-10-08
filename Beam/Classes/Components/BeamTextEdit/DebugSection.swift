@@ -24,10 +24,10 @@ class DebugSection: Widget {
         }
     }
 
-    init(parent: Widget, note: BeamNote) {
+    init(parent: Widget, note: BeamNote, availableWidth: CGFloat?) {
         self.note = note
 
-        super.init(parent: parent)
+        super.init(parent: parent, availableWidth: availableWidth)
 
         textLayer.string = "Debug"
         textLayer.foregroundColor = BeamColor.DebugSection.sectionTitle.cgColor

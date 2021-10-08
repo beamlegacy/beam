@@ -89,6 +89,7 @@ extension BeamTextEdit {
 
     // MARK: - Cut
     @IBAction func cut(_ sender: Any) {
+        guard let rootNode = rootNode else { return }
         setPasteboard()
         if let nodes = rootNode.state.nodeSelection?.sortedNodes, !nodes.isEmpty {
             rootNode.eraseNodeSelection(createEmptyNodeInPlace: nodes.count == rootNode.element.children.count)
@@ -105,6 +106,7 @@ extension BeamTextEdit {
 
     // swiftlint:disable:next function_body_length
     private func setPasteboard() {
+        guard let rootNode = rootNode else { return }
         let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
         pasteboard.declareTypes(supportedCopyTypes, owner: nil)
@@ -185,12 +187,13 @@ extension BeamTextEdit {
         }
     }
     private func paste(beamTextHolder: BeamTextHolder) {
-        rootNode.insertText(text: beamTextHolder.bText, replacementRange: nil)
+        rootNode?.insertText(text: beamTextHolder.bText, replacementRange: nil)
         addNoteSourceFrom(text: beamTextHolder.bText)
     }
 
     // swiftlint:disable:next cyclomatic_complexity
     private func paste(elementHolder: BeamNoteDataHolder) {
+        guard let rootNode = rootNode else { return }
         do {
             guard let mngrNode = focusedWidget else {
                 Logger.shared.logError("Cannot paste contents in an editor without a focused bullet", category: .noteEditor)
@@ -236,6 +239,7 @@ extension BeamTextEdit {
     }
 
     private func paste(attributedStrings: [NSAttributedString]) {
+        guard let rootNode = rootNode else { return }
         guard let mngrNode = focusedWidget else {
             Logger.shared.logError("Cannot paste contents in an editor without a focused bullet", category: .noteEditor)
             return

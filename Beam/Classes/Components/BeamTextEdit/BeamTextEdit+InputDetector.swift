@@ -11,13 +11,14 @@ import BeamCore
 extension BeamTextEdit {
 
     private func inputDetectorGetPositionAndPrecedingChar(in node: TextNode) -> (Int, String) {
-        let pos = self.selectedTextRange.isEmpty ? rootNode.cursorPosition : self.selectedTextRange.lowerBound
+        let pos = self.selectedTextRange.isEmpty ? node.cursorPosition : self.selectedTextRange.lowerBound
         let substr = node.text.extract(range: max(0, pos - 1) ..< pos)
         let left = substr.text
         return (pos, left)
     }
 
     private func insertPair(node: TextNode, _ left: String, _ right: String) {
+        guard let rootNode = rootNode else { return }
         let cmdManager = rootNode.focusedCmdManager
         let selectedRange = selectedTextRange
         cmdManager.beginGroup(with: "Insert Pair")
@@ -30,6 +31,7 @@ extension BeamTextEdit {
 
     // swiftlint:disable:next function_body_length cyclomatic_complexity
     func preDetectInput(_ input: String) -> Bool {
+        guard let rootNode = rootNode else { return true }
         guard inputDetectorEnabled else { return true }
         guard let node = focusedWidget as? TextNode else { return true }
         defer { inputDetectorLastInput = input }
@@ -76,7 +78,7 @@ extension BeamTextEdit {
                 }
                 return true
             },
-            "]": { [unowned self] in
+            "]": {
                 guard node.text.count >= 2 else { return true }
                 let cmdManager = rootNode.focusedCmdManager
                 let startRange = 0..<2
@@ -121,6 +123,7 @@ extension BeamTextEdit {
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
     func postDetectInput(_ input: String) -> BeamText.Attribute? {
+        guard let rootNode = rootNode else { return nil }
         guard inputDetectorEnabled else { return nil }
         guard let node = focusedWidget as? TextNode else { return nil }
 
@@ -133,7 +136,7 @@ extension BeamTextEdit {
 
                 node.cmdManager.deleteText(in: node, for: 0..<level + 1)
                 node.cmdManager.formatText(in: node, for: .quote(level, "", ""), with: nil, for: nil, isActive: false)
-                self.rootNode.cursorPosition = 0
+                self.rootNode?.cursorPosition = 0
             }
             return nil
         }
@@ -144,7 +147,7 @@ extension BeamTextEdit {
 
             if node.cursorPosition <= 2, isBold {
                 Logger.shared.logInfo("Make Bold", category: .ui)
-                self.rootNode.cursorPosition = 0
+                rootNode.cursorPosition = 0
                 node.cmdManager.deleteText(in: node, for: 0..<2)
 
                 if !node.text.isEmpty {
@@ -156,7 +159,7 @@ extension BeamTextEdit {
 
             if node.cursorPosition <= 3, isItalic {
                 Logger.shared.logInfo("Make Italic", category: .ui)
-                self.rootNode.cursorPosition = 0
+                rootNode.cursorPosition = 0
                 node.cmdManager.deleteText(in: node, for: 0..<3)
 
                 if !node.text.isEmpty {
@@ -172,7 +175,7 @@ extension BeamTextEdit {
             let isStrikethrough = node.text.prefix(3).text == "~~ "
             if node.cursorPosition <= 3, isStrikethrough {
                 Logger.shared.logInfo("Make Strikethrough", category: .ui)
-                self.rootNode.cursorPosition = 0
+                rootNode.cursorPosition = 0
                 node.cmdManager.deleteText(in: node, for: 0..<3)
 
                 if !node.text.isEmpty {
@@ -188,7 +191,7 @@ extension BeamTextEdit {
             let isUnderline = node.text.prefix(2).text == "_ "
             if node.cursorPosition <= 2, isUnderline {
                 Logger.shared.logInfo("Make Underline", category: .ui)
-                self.rootNode.cursorPosition = 0
+                rootNode.cursorPosition = 0
                 node.cmdManager.deleteText(in: node, for: 0..<2)
 
                 if !node.text.isEmpty {
@@ -221,7 +224,7 @@ extension BeamTextEdit {
 //                }
                 node.cmdManager.deleteText(in: node, for: 0..<level + 1)
                 node.cmdManager.formatText(in: node, for: .heading(level), with: nil, for: nil, isActive: false)
-                self.rootNode.cursorPosition = 0
+                rootNode.cursorPosition = 0
                 return nil
             }
             return nil
@@ -261,6 +264,7 @@ extension BeamTextEdit {
     // MARK: - Handlers
     // MARK: "space"
     private func preInputHandleSpace(node: TextNode) -> Bool {
+        guard let rootNode = rootNode else { return true }
         guard self.selectedTextRange.isEmpty else { return true }
 
         let (pos, _) = inputDetectorGetPositionAndPrecedingChar(in: node)
@@ -324,6 +328,7 @@ extension BeamTextEdit {
 
     // MARK: "-"
     func postInputHandleDash(node: TextNode) -> BeamText.Attribute? {
+        guard let rootNode = rootNode else { return nil }
         guard node.textCount == 3, node.cursorPosition == 3 else { return nil }
 
         let isTripleDash = node.text.prefix(3).text == "---"

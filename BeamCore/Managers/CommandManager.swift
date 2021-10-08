@@ -120,6 +120,9 @@ public class CommandManager<Context> {
     private var groupFailed: Bool = false
 
     private var lastCmdDate: Date?
+    private var runningCommandLevel = 0
+
+    public var isRunningCommand: Bool { runningCommandLevel != 0 }
 
     public init() {}
 
@@ -142,6 +145,11 @@ public class CommandManager<Context> {
 
     @discardableResult
     public func run(command: Command<Context>, on context: Context?) -> Bool {
+        runningCommandLevel += 1
+        defer {
+            runningCommandLevel -= 1
+        }
+
         EventsTracker.logBreadcrumb(message: "Run command \(command.name)", category: "CommandManager")
         Logger.shared.logDebug("Run: \(command.name)", category: .commandManager)
         let done = command.run(context: context)
@@ -160,6 +168,11 @@ public class CommandManager<Context> {
     }
 
     public func undo(context: Context?) -> Bool {
+        runningCommandLevel += 1
+        defer {
+            runningCommandLevel -= 1
+        }
+
         guard groupCmd.isEmpty else {
             fatalError("Cannot Undo with a GroupCommand active, it should be ended first.")
         }
@@ -180,6 +193,11 @@ public class CommandManager<Context> {
     }
 
     public func redo(context: Context?) -> Bool {
+        runningCommandLevel += 1
+        defer {
+            runningCommandLevel -= 1
+        }
+
         guard groupCmd.isEmpty else {
             fatalError("Cannot Redo with a GroupCommand active, it should be ended first.")
         }

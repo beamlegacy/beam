@@ -33,14 +33,14 @@ public class EmbedNode: ElementNode {
         return URL(string: sourceURL)?.embed
     }
 
-    init(parent: Widget, element: BeamElement) {
-        super.init(parent: parent, element: element)
+    init(parent: Widget, element: BeamElement, availableWidth: CGFloat?) {
+        super.init(parent: parent, element: element, availableWidth: availableWidth)
 
         setupEmbed()
     }
 
-    init(editor: BeamTextEdit, element: BeamElement) {
-        super.init(editor: editor, element: element)
+    init(editor: BeamTextEdit, element: BeamElement, availableWidth: CGFloat?) {
+        super.init(editor: editor, element: element, availableWidth: availableWidth)
 
         setupEmbed()
     }

@@ -25,6 +25,7 @@ class CommandNodeTests: QuickSpec {
             let bullet2 = BeamElement("Second bullet")
             note.addChild(bullet2)
             let editor = BeamTextEdit(root: note, journalMode: true)
+            editor.prepareRoot()
             rootNode = editor.rootNode!
 
             let tree = """
@@ -45,6 +46,7 @@ class CommandNodeTests: QuickSpec {
                 let bullet2 = BeamElement("Second bullet")
 
                 editor = BeamTextEdit(root: note, journalMode: true)
+                editor.prepareRoot()
                 rootNode = editor.rootNode!
                 (rootNode.children.first as? TextNode)?.element.addChild(bullet2)
 
@@ -88,6 +90,7 @@ class CommandNodeTests: QuickSpec {
                 let bullet2 = BeamElement("Second bullet")
                 note.addChild(bullet2)
                 editor = BeamTextEdit(root: note, journalMode: true)
+                editor.prepareRoot()
                 rootNode = editor.rootNode!
 
                 tree = """
@@ -183,6 +186,7 @@ class CommandNodeTests: QuickSpec {
                 let bullet2 = BeamElement("Second bullet")
                 note.addChild(bullet2)
                 editor = BeamTextEdit(root: note, journalMode: true)
+                editor.prepareRoot()
                 rootNode = editor.rootNode!
 
                 tree = """

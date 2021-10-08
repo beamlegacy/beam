@@ -27,9 +27,9 @@ class LinksSection: Widget {
         }
     }
 
-    init(parent: Widget, note: BeamNote) {
+    init(parent: Widget, note: BeamNote, availableWidth: CGFloat?) {
         self.note = note
-        super.init(parent: parent)
+        super.init(parent: parent, availableWidth: availableWidth)
 
         setupUI(openChildren: openChildrenDefault)
         setupSectionMode()
@@ -70,7 +70,7 @@ class LinksSection: Widget {
                 let referenced = element.text.hasReferenceToNote(titled: self.note.title)
                 return alreadyPresent || linked || referenced
             })
-//            .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
+            .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
             .sink { [weak self] _ in
                 guard let self = self else { return }
                 let updatedLinks = self.links
@@ -96,14 +96,15 @@ class LinksSection: Widget {
         var newrefs = [UUID: RefNoteTitle]()
         var toRemove = Set<RefNoteTitle>(titles.values)
 
-        for noteReference in allLinks {
+        // BeamNote by itself don't contain any text so there is no reason to count it as a reference:
+        for noteReference in allLinks where noteReference.elementID != noteReference.noteID {
             let noteID = noteReference.noteID
             guard let breadCrumb = root?.getBreadCrumb(for: noteReference) else { continue }
 
             // Prepare title children:
             guard let refTitleWidget = try? titles[noteID]
                     ?? newrefs[noteID]
-                    ?? RefNoteTitle(parent: self, noteId: noteID)
+                    ?? RefNoteTitle(parent: self, noteId: noteID, availableWidth: availableWidth - childInset)
             else { continue }
             newrefs[noteID] = refTitleWidget
             toRemove.remove(refTitleWidget)

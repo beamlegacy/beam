@@ -25,6 +25,7 @@ class CommandsTextTests: QuickSpec {
             // Setup a simple node tree
             let note = self.setupAndResetTree()
             let editor = BeamTextEdit(root: note, journalMode: true)
+            editor.prepareRoot()
             rootNode = editor.rootNode!
 
             tree = """
@@ -43,6 +44,7 @@ class CommandsTextTests: QuickSpec {
 
                 let note = self.setupAndResetTree()
                 editor = BeamTextEdit(root: note, journalMode: true)
+                editor.prepareRoot()
                 rootNode = editor.rootNode!
 
                 tree = """

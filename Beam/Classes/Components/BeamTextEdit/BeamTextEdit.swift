@@ -13,19 +13,20 @@ import Combine
 import BeamCore
 import Swime
 
-struct SearchResult {
-    public init(element: TextNode, ranges: [NSRange]) {
+public struct SearchResult {
+    public init(element: ElementNode, ranges: [NSRange]) {
         self.element = element
         self.ranges = ranges
     }
 
-    public let element: TextNode
+    public let element: ElementNode
     public let ranges: [NSRange]
 
     func getPositions() -> [Double] {
         let verticalPositions = ranges.map({ (range: NSRange) -> Double in
             let position = range.lowerBound
-            let rect = element.rectAt(sourcePosition: position)
+            let caretIndex = element.caretIndexForSourcePosition(position) ?? 0
+            let rect = element.rectAt(caretIndex: caretIndex)
             let origin = rect.origin
             return Double(origin.y + element.offsetInDocument.y)
         })
@@ -67,6 +68,7 @@ public extension CALayer {
     }
     var centerText = false {
         didSet {
+            guard centerText != oldValue else { return }
             setupCardHeader()
         }
     }
@@ -75,9 +77,10 @@ public extension CALayer {
     var isTodaysNote: Bool {
         _isTodaysNote
     }
-    var note: BeamElement! {
+    var note: BeamElement {
         didSet {
-            note?.updateNoteNamesInInternalLinks(recursive: true)
+            _isTodaysNote = note.note?.isTodaysNote ?? false
+            note.updateNoteNamesInInternalLinks(recursive: true)
             updateRoot(with: note)
             searchViewModel?.search()
         }
@@ -85,12 +88,13 @@ public extension CALayer {
 
     func updateRoot(with note: BeamElement) {
         guard note != rootNode?.element else { return }
-        _isTodaysNote = note.note?.isTodaysNote ?? false
 
         clearRoot()
-        rootNode = TextRoot(editor: self, element: note)
+        let root = TextRoot(editor: self, element: note, availableWidth: Self.textNodeWidth(for: frame.size))
+        rootNode = root
+        invalidateLayout()
 
-        rootNode.element
+        root.element
             .changed
             .debounce(for: .seconds(1), scheduler: RunLoop.main)
             .sink { [weak self] change in
@@ -108,7 +112,7 @@ public extension CALayer {
 
         rootNode?.clearMapping() // Clear all previous references in the node tree
         rootNode?.editor = nil
-        rootNode = TextRoot(editor: self, element: BeamElement())
+        rootNode = TextRoot(editor: self, element: BeamElement(), availableWidth: Self.textNodeWidth(for: frame.size))
         // Remove all subsciptions:
         noteCancellables.removeAll()
         safeContentSize = .zero
@@ -171,11 +175,14 @@ public extension CALayer {
         RunLoop.main.add(timer, forMode: .default)
 
         initBlinking()
-        updateRoot(with: root)
+        unpreparedRoot = root
 
+        setupCardHeader()
         registerForDraggedTypes([.fileURL])
         refreshAndHandleDeletionsAsync()
     }
+
+    var unpreparedRoot: BeamElement?
 
     public override func viewDidMoveToSuperview() {
         super.viewDidMoveToSuperview()
@@ -238,9 +245,10 @@ public extension CALayer {
         super.viewDidChangeEffectiveAppearance()
         layer?.backgroundColor = BeamColor.Generic.background.cgColor
         layer?.setNeedsDisplay()
+        setupCardHeader()
         updateLayersColorsForAppearance()
-        rootNode.deepInvalidateRendering()
-        rootNode.deepInvalidateText()
+        rootNode?.deepInvalidateRendering()
+        rootNode?.deepInvalidateText()
     }
 
     var timer: Timer!
@@ -298,18 +306,18 @@ public extension CALayer {
 
     var selectedTextRange: Range<Int> {
         get {
-            rootNode.state.selectedTextRange
+            rootNode?.state.selectedTextRange ?? 0..<0
         }
         set {
             assert(newValue.lowerBound != NSNotFound)
             assert(newValue.upperBound != NSNotFound)
-            rootNode.state.selectedTextRange = newValue
+            rootNode?.state.selectedTextRange = newValue
             reBlink()
         }
     }
 
     var selectedText: String {
-        return rootNode.selectedText
+        return rootNode?.selectedText ?? ""
     }
 
     static let smallTreshold = CGFloat(800)
@@ -324,17 +332,46 @@ public extension CALayer {
             let newbig = isBig
 
             if oldbig != newbig {
-                rootNode.deepInvalidateText()
+                rootNode?.deepInvalidateText()
                 invalidateLayout()
             }
         }
+    }
+
+    var currentIndicativeLayoutHeight: CGFloat = 0
+    func appendToCurrentIndicativeLayoutHeight(_ height: CGFloat) {
+        currentIndicativeLayoutHeight += height
+    }
+    var remainingIndicativeVisibleHeight: CGFloat? {
+        guard let h = window?.frame.height ?? NSScreen.main?.visibleFrame.height
+        else {
+            return nil
+        }
+        // 30 pixel sounds reasonable so that we get at least one line of text layout
+        return max(30, (h - (currentIndicativeLayoutHeight + topOffsetActual)))
     }
 
     var shouldDisableAnimationAtNextLayout = false
     func disableAnimationAtNextLayout() {
         shouldDisableAnimationAtNextLayout = true
     }
+
+    func prepareRoot() {
+        guard let root = unpreparedRoot else { return }
+        unpreparedRoot = nil
+        let old = inRelayout
+        inRelayout = true
+        updateRoot(with: root)
+        inRelayout = old
+    }
+
     func relayoutRoot() {
+        currentIndicativeLayoutHeight = 0
+        if !frame.isEmpty {
+            prepareRoot()
+        }
+
+        currentIndicativeLayoutHeight = 0
         layoutInvalidated = false
         let r = bounds
         let textNodeWidth = Self.textNodeWidth(for: frame.size)
@@ -357,9 +394,9 @@ public extension CALayer {
     private func updateLayout(for rect: NSRect) {
         let textNodeWidth = Self.textNodeWidth(for: frame.size)
         let workBlock = { [unowned self] in
-            self.rootNode.availableWidth = textNodeWidth
+            rootNode?.availableWidth = textNodeWidth
             self.updateCardHearderLayer(rect)
-            self.rootNode.setLayout(rect)
+            rootNode?.setLayout(rect)
             self.updateTrailingGutterLayout(textRect: rect)
         }
         if isResizing || shouldDisableAnimationAtNextLayout {
@@ -378,7 +415,7 @@ public extension CALayer {
     }
 
     // This is the root node of what we are editing:
-    var rootNode: TextRoot! {
+    var rootNode: TextRoot? {
         didSet {
             guard oldValue != rootNode else { return }
             invalidateIntrinsicContentSize()
@@ -387,16 +424,16 @@ public extension CALayer {
 
     // This is the node that the user is currently editing. It can be any node in the rootNode tree
     var focusedWidget: Widget? {
-        get { rootNode.focusedWidget }
+        get { rootNode?.focusedWidget }
         set {
             invalidate()
-            rootNode.focusedWidget = newValue
+            rootNode?.focusedWidget = newValue
             invalidate()
         }
     }
     var mouseHandler: Widget? {
-        get { rootNode.mouseHandler }
-        set { rootNode.mouseHandler = newValue }
+        get { rootNode?.mouseHandler }
+        set { rootNode?.mouseHandler = newValue }
     }
 
     var topOffset: CGFloat = 28 { didSet { invalidateLayout() } }
@@ -457,6 +494,9 @@ public extension CALayer {
     var realContentSize: NSSize = .zero
     var safeContentSize: NSSize = .zero
     override public var intrinsicContentSize: NSSize {
+        guard !frame.isEmpty, let rootNode = rootNode else {
+            return NSSize(width: 670, height: 30)
+        }
         let textNodeWidth = Self.textNodeWidth(for: frame.size)
         rootNode.availableWidth = textNodeWidth
         let height = rootNode.idealSize.height + topOffsetActual + footerHeight + cardTopSpace
@@ -501,15 +541,17 @@ public extension CALayer {
 
     // Text Input from AppKit:
     public func hasMarkedText() -> Bool {
-        return rootNode.hasMarkedText()
+        return rootNode?.hasMarkedText() ?? false
     }
 
     public func unmarkText() {
-        rootNode.unmarkText()
+        rootNode?.unmarkText()
     }
 
     public func insertText(string: String, replacementRange: Range<Int>?) {
-        guard let node = focusedWidget as? ElementNode, !node.readOnly else { return }
+        guard let rootNode = rootNode,
+              let node = focusedWidget as? ElementNode, !node.readOnly
+        else { return }
         defer { inputDetectorLastInput = string }
         guard preDetectInput(string) else { return }
         rootNode.insertText(string: string, replacementRange: replacementRange)
@@ -521,7 +563,7 @@ public extension CALayer {
     }
 
     public func firstRect(forCharacterRange range: Range<Int>) -> (NSRect, Range<Int>) {
-        return rootNode.firstRect(forCharacterRange: range)
+        return rootNode?.firstRect(forCharacterRange: range) ?? (.zero, 0..<1)
     }
 
     public var enabled = true
@@ -533,7 +575,7 @@ public extension CALayer {
         hasFocus = true
         invalidate()
         if focusedWidget == nil {
-            focusedWidget = rootNode.children.first(where: { widget in
+            focusedWidget = rootNode?.children.first(where: { widget in
                 widget as? ElementNode != nil
             })
             focusedWidget?.invalidate()
@@ -549,8 +591,8 @@ public extension CALayer {
 
         guard (inlineFormatter as? HyperlinkFormatterView) == nil else { return super.resignFirstResponder() }
 
-        rootNode.cancelSelection()
-        rootNode.cancelNodeSelection()
+        rootNode?.cancelSelection()
+        rootNode?.cancelNodeSelection()
         (focusedWidget as? TextNode)?.invalidateText() // force removing the syntax highlighting
         focusedWidget?.invalidate()
         focusedWidget?.onUnfocus()
@@ -563,12 +605,20 @@ public extension CALayer {
 
     func focusElement(withId elementId: UUID?, atCursorPosition: Int?, highlight: Bool = false, unfold: Bool = false) {
         guard let id = elementId,
-              let element = note.findElement(id),
-              let node = rootNode.nodeFor(element)
+              let element = note.findElement(id)
         else {
             self.scroll(.zero)
             return
         }
+
+        guard let node = rootNode?.nodeFor(element) else {
+            // the element exists but we don't yet have an UI for it, try again later:
+            DispatchQueue.main.async { [weak self] in
+                self?.focusElement(withId: elementId, atCursorPosition: atCursorPosition, highlight: highlight, unfold: unfold)
+            }
+            return
+        }
+
         if unfold {
             node.allParents.forEach { ($0 as? ElementNode)?.unfold() }
             node.unfold()
@@ -584,7 +634,7 @@ public extension CALayer {
     func showElement(at height: Double, inElementWithId elementId: UUID?, unfold: Bool = false) {
         guard let id = elementId,
               let element = note.findElement(id),
-              let node = rootNode.nodeFor(element)
+              let node = rootNode?.nodeFor(element)
         else {
             self.scroll(.zero)
             return
@@ -599,7 +649,9 @@ public extension CALayer {
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
     func pressEnter(_ option: Bool, _ command: Bool, _ shift: Bool, _ ctrl: Bool) {
-        guard let node = focusedWidget as? ElementNode else { return }
+        guard let rootNode = rootNode,
+              let node = focusedWidget as? ElementNode
+        else { return }
 
         if option || shift {
             rootNode.insertNewline()
@@ -677,6 +729,7 @@ public extension CALayer {
 
     //swiftlint:disable:next cyclomatic_complexity function_body_length
     override open func keyDown(with event: NSEvent) {
+        guard let rootNode = rootNode else { return }
         if self.hasFocus {
             hideMouseForEditing()
 
@@ -772,6 +825,7 @@ public extension CALayer {
     }
 
     func hideMouseForEditing() {
+        guard let rootNode = rootNode else { return }
         NSCursor.setHiddenUntilMouseMoves(true)
         // dispatch hidden mouse events manually
         dispatchHover(Set<Widget>())
@@ -834,9 +888,9 @@ public extension CALayer {
         let selection = selectedRange.location == NSNotFound ? nil : selectedRange.lowerBound..<selectedRange.upperBound
         let replacement = replacementRange.location == NSNotFound ? nil : replacementRange.lowerBound..<replacementRange.upperBound
         if let str = string as? String {
-            rootNode.setMarkedText(string: str, selectedRange: selection, replacementRange: replacement)
+            rootNode?.setMarkedText(string: str, selectedRange: selection, replacementRange: replacement)
         } else if let str = string as? NSAttributedString {
-            rootNode.setMarkedText(string: str.string, selectedRange: selection, replacementRange: replacement)
+            rootNode?.setMarkedText(string: str.string, selectedRange: selection, replacementRange: replacement)
         }
         reBlink()
     }
@@ -853,7 +907,7 @@ public extension CALayer {
     /* Returns the marked range. Returns {NSNotFound, 0} if no marked range.
      */
     public func markedRange() -> NSRange {
-        guard let range = rootNode.markedTextRange else {
+        guard let range = rootNode?.markedTextRange else {
             return NSRange(location: NSNotFound, length: 0)
         }
         //        Logger.shared.logDebug("markedRange \(r)", category: .document)
@@ -914,6 +968,7 @@ public extension CALayer {
     // these undo/redo methods override the subviews undoManagers behavior
     // if we're not actually the first responder, let's just forward it.
     @IBAction func undo(_ sender: Any) {
+        guard let rootNode = rootNode else { return }
         if let firstResponder = window?.firstResponder, let undoManager = firstResponder.undoManager, firstResponder != self {
             undoManager.undo()
             return
@@ -923,6 +978,7 @@ public extension CALayer {
     }
 
     @IBAction func redo(_ sender: Any) {
+        guard let rootNode = rootNode else { return }
         if let firstResponder = window?.firstResponder, let undoManager = firstResponder.undoManager, firstResponder != self {
             undoManager.redo()
             return
@@ -972,6 +1028,7 @@ public extension CALayer {
 
     var mouseDownPos: NSPoint?
     private func handleMouseDown(event: NSEvent) {
+        guard let rootNode = rootNode else { return }
         guard !(inputContext?.handleEvent(event) ?? false) else { return }
         reBlink()
         rootNode.cancelNodeSelection() // TODO: change this to handle manipulating the node selection with the mouse
@@ -998,6 +1055,7 @@ public extension CALayer {
     let scrollYBorderDown = CGFloat(90)
 
     public func setHotSpotToCursorPosition() {
+        guard let rootNode = rootNode else { return }
         guard focusedWidget as? ElementNode != nil else { return }
         var rect = rectAt(caretIndex: rootNode.caretIndex).insetBy(dx: -scrollXBorder, dy: 0)
         rect.origin.y -= scrollYBorderUp
@@ -1016,6 +1074,7 @@ public extension CALayer {
     }
 
     override public func mouseDragged(with event: NSEvent) {
+        guard let rootNode = rootNode else { return }
         guard !(inputContext?.handleEvent(event) ?? false) else { return }
 
         //        window?.makeFirstResponder(self)
@@ -1032,6 +1091,7 @@ public extension CALayer {
     }
 
     override public func mouseMoved(with event: NSEvent) {
+        guard let rootNode = rootNode else { return }
         if showTitle {
             let titleCoord = cardTitleLayer.convert(event.locationInWindow, from: nil)
             let hoversCardTitle = cardTitleLayer.contains(titleCoord)
@@ -1056,11 +1116,12 @@ public extension CALayer {
 
     // swiftlint:disable:next cyclomatic_complexity
     public func mouseDraggedUpdate(with event: NSEvent) {
+        guard let rootNode = rootNode else { return }
         guard let startPos = mouseDownPos else { return }
         let eventPoint = convert(event.locationInWindow)
         let widgets = rootNode.getWidgetsBetween(startPos, eventPoint)
 
-        if let selection = rootNode?.state.nodeSelection, let focussedNode = focusedWidget as? ElementNode {
+        if let selection = rootNode.state.nodeSelection, let focussedNode = focusedWidget as? ElementNode {
             var textNodes = widgets.compactMap { $0 as? ElementNode }
             if eventPoint.y < startPos.y {
                 textNodes = textNodes.reversed()
@@ -1085,13 +1146,14 @@ public extension CALayer {
             }
         } else {
             if widgets.count > 0 {
-                _ = rootNode?.startNodeSelection()
+                _ = rootNode.startNodeSelection()
             }
             return
         }
     }
 
     public override func cursorUpdate(with event: NSEvent) {
+        guard let rootNode = rootNode else { return }
         guard inlineFormatter?.isMouseInsideView != true else { return }
         let point = convert(event.locationInWindow)
         let views = rootNode.getWidgetsAt(point, point, ignoreX: true)
@@ -1102,10 +1164,11 @@ public extension CALayer {
     }
 
     func dispatchHover(_ widgets: Set<Widget>) {
-        rootNode.dispatchHover(widgets)
+        rootNode?.dispatchHover(widgets)
     }
 
     override public func mouseUp(with event: NSEvent) {
+        guard let rootNode = rootNode else { return }
         guard !(inputContext?.handleEvent(event) ?? false) else { return }
         stopSelectionDrag()
 
@@ -1141,7 +1204,7 @@ public extension CALayer {
             return
         }
         window.acceptsMouseMovedEvents = true
-        rootNode.contentsScale = window.backingScaleFactor
+        rootNode?.contentsScale = window.backingScaleFactor
 
         cardTitleLayer.contentsScale = window.backingScaleFactor
         cardTimeLayer.contentsScale = window.backingScaleFactor
@@ -1168,7 +1231,7 @@ public extension CALayer {
 
     @IBAction func save(_ sender: Any?) {
         Logger.shared.logInfo("Save document!", category: .noteEditor)
-        rootNode.note?.save(documentManager: documentManager)
+        rootNode?.note?.save(documentManager: documentManager)
     }
 
     func showInlineFormatterOnKeyEventsAndClick(isKeyEvent: Bool = false) {
@@ -1191,11 +1254,11 @@ public extension CALayer {
     }
 
     @IBAction func selectAllHierarchically(_ sender: Any?) {
-        rootNode.selectAllNodesHierarchically()
+        rootNode?.selectAllNodesHierarchically()
     }
 
     func dumpWidgetTree() -> [String] {
-        return rootNode.dumpWidgetTree()
+        rootNode?.dumpWidgetTree() ?? []
     }
 
     func dumpSubLayers(_ layer: CALayer, _ level: Int) -> [String] {
@@ -1220,8 +1283,7 @@ public extension CALayer {
     }
 
     public override func accessibilityChildren() -> [Any]? {
-        let ch = rootNode.allVisibleChildren
-        return ch
+        rootNode?.allVisibleChildren
     }
 
     public override var accessibilityFocusedUIElement: Any {
@@ -1239,7 +1301,7 @@ public extension CALayer {
 
         guard inlineFormatter?.formatterHandlesCursorMovement(direction: .left) != true else { return }
 
-        rootNode.moveLeft()
+        rootNode?.moveLeft()
         hideInlineFormatter()
     }
 
@@ -1252,11 +1314,12 @@ public extension CALayer {
 
         guard inlineFormatter?.formatterHandlesCursorMovement(direction: .right) != true else { return }
 
-        rootNode.moveRight()
+        rootNode?.moveRight()
         hideInlineFormatter()
     }
 
     override public func moveLeftAndModifySelection(_ sender: Any?) {
+        guard let rootNode = rootNode else { return }
         let showFormatter = rootNode.cursorPosition != 0
         rootNode.moveLeftAndModifySelection()
         if showFormatter {
@@ -1265,24 +1328,25 @@ public extension CALayer {
     }
 
     override public func moveWordRight(_ sender: Any?) {
-        rootNode.moveWordRight()
+        rootNode?.moveWordRight()
     }
 
     override public func moveWordLeft(_ sender: Any?) {
-        rootNode.moveWordLeft()
+        rootNode?.moveWordLeft()
     }
 
     override public func moveWordRightAndModifySelection(_ sender: Any?) {
-        rootNode.moveWordRightAndModifySelection()
+        rootNode?.moveWordRightAndModifySelection()
         showInlineFormatterOnKeyEventsAndClick()
     }
 
     override public func moveWordLeftAndModifySelection(_ sender: Any?) {
-        rootNode.moveWordLeftAndModifySelection()
+        rootNode?.moveWordLeftAndModifySelection()
         showInlineFormatterOnKeyEventsAndClick()
     }
 
     override public func moveRightAndModifySelection(_ sender: Any?) {
+        guard let rootNode = rootNode else { return }
         guard let node = focusedWidget as? ElementNode else { return }
         let showFormatter = rootNode.cursorPosition != node.textCount
         rootNode.moveRightAndModifySelection()
@@ -1292,53 +1356,54 @@ public extension CALayer {
     }
 
     override public func moveToBeginningOfLine(_ sender: Any?) {
-        rootNode.moveToBeginningOfLine()
+        rootNode?.moveToBeginningOfLine()
         hideInlineFormatter()
     }
 
     override public func moveToEndOfLine(_ sender: Any?) {
-        rootNode.moveToEndOfLine()
+        rootNode?.moveToEndOfLine()
         hideInlineFormatter()
         detectTextFormatterType()
     }
 
     override public func moveToBeginningOfLineAndModifySelection(_ sender: Any?) {
-        rootNode.moveToBeginningOfLineAndModifySelection()
+        rootNode?.moveToBeginningOfLineAndModifySelection()
         showInlineFormatterOnKeyEventsAndClick()
     }
 
     override public func moveToEndOfLineAndModifySelection(_ sender: Any?) {
-        rootNode.moveToEndOfLineAndModifySelection()
+        rootNode?.moveToEndOfLineAndModifySelection()
         showInlineFormatterOnKeyEventsAndClick()
     }
 
     public override func moveToBeginningOfDocument(_ sender: Any?) {
         guard inlineFormatter?.formatterHandlesCursorMovement(direction: .up,
                                                               modifierFlags: .command) != true else { return }
-        rootNode.moveToBeginningOfDocument()
+        rootNode?.moveToBeginningOfDocument()
     }
 
     public override func moveToEndOfDocument(_ sender: Any?) {
         guard inlineFormatter?.formatterHandlesCursorMovement(direction: .down,
                                                               modifierFlags: .command) != true else { return }
-        rootNode.moveToEndOfDocument()
+        rootNode?.moveToEndOfDocument()
     }
 
     override public func moveUp(_ sender: Any?) {
         if inlineFormatter?.formatterHandlesCursorMovement(direction: .up) != true {
-            rootNode.moveUp()
+            rootNode?.moveUp()
             hideInlineFormatter()
         }
     }
 
     override public func moveDown(_ sender: Any?) {
         if inlineFormatter?.formatterHandlesCursorMovement(direction: .down) != true {
-            rootNode.moveDown()
+            rootNode?.moveDown()
             hideInlineFormatter()
         }
     }
 
     override public func selectAll(_ sender: Any?) {
+        guard let rootNode = rootNode else { return }
         rootNode.selectAll()
         if rootNode.state.nodeSelection?.nodes.count ?? 0 <= 1 {
             showInlineFormatterOnKeyEventsAndClick(isKeyEvent: true)
@@ -1348,6 +1413,7 @@ public extension CALayer {
     }
 
     override public func moveUpAndModifySelection(_ sender: Any?) {
+        guard let rootNode = rootNode else { return }
         rootNode.moveUpAndModifySelection()
         if rootNode.state.nodeSelection?.nodes.count ?? 0 <= 1 {
             showInlineFormatterOnKeyEventsAndClick(isKeyEvent: true)
@@ -1355,29 +1421,34 @@ public extension CALayer {
     }
 
     override public func moveDownAndModifySelection(_ sender: Any?) {
+        guard let rootNode = rootNode else { return }
         rootNode.moveDownAndModifySelection()
         if rootNode.state.nodeSelection?.nodes.count ?? 0 <= 1 {
             showInlineFormatterOnKeyEventsAndClick(isKeyEvent: true)
         }
     }
 
-//    override public func scrollPageUp(_ sender: Any?) {
-//    }
-//
-//    override public func scrollPageDown(_ sender: Any?) {
-//    }
-//
+    override public func scrollPageUp(_ sender: Any?) {
+        enclosingScrollView?.pageUp(sender)
+    }
+
+    override public func scrollPageDown(_ sender: Any?) {
+        enclosingScrollView?.pageDown(sender)
+    }
+
 //    override public func scrollLineUp(_ sender: Any?) {
 //    }
 //
 //    override public func scrollLineDown(_ sender: Any?) {
 //    }
 //
-//    override public func scrollToBeginningOfDocument(_ sender: Any?) {
-//    }
-//
-//    override public func scrollToEndOfDocument(_ sender: Any?) {
-//    }
+    override public func scrollToBeginningOfDocument(_ sender: Any?) {
+        scroll(.zero)
+    }
+
+    override public func scrollToEndOfDocument(_ sender: Any?) {
+        scroll(NSPoint(x: 0, y: frame.height))
+    }
 
         /* Graphical Element transposition */
 
@@ -1390,7 +1461,7 @@ public extension CALayer {
         /* Selections */
 
     override public func selectParagraph(_ sender: Any?) {
-        rootNode.selectAllNodesHierarchically()
+        rootNode?.selectAllNodesHierarchically()
     }
 
     override public func selectLine(_ sender: Any?) {
@@ -1402,15 +1473,15 @@ public extension CALayer {
         /* Insertions and Indentations */
 
     override public func indent(_ sender: Any?) {
-        rootNode.increaseIndentation()
+        rootNode?.increaseIndentation()
     }
 
     override public func insertTab(_ sender: Any?) {
-        rootNode.increaseIndentation()
+        rootNode?.increaseIndentation()
     }
 
     override public func insertBacktab(_ sender: Any?) {
-        rootNode.decreaseIndentation()
+        rootNode?.decreaseIndentation()
     }
 
     override public func insertNewline(_ sender: Any?) {
@@ -1464,6 +1535,7 @@ public extension CALayer {
         /* Deletions */
 
     override public func deleteForward(_ sender: Any?) {
+        guard let rootNode = rootNode else { return }
         rootNode.deleteForward()
 
         guard let node = focusedWidget as? TextNode else { return }
@@ -1472,6 +1544,7 @@ public extension CALayer {
     }
 
     override public func deleteBackward(_ sender: Any?) {
+        guard let rootNode = rootNode else { return }
         rootNode.deleteBackward()
 
         updateInlineFormatterView(isKeyEvent: true)
@@ -1559,6 +1632,7 @@ public extension CALayer {
     var dragIndicator = CALayer()
 //    weak var lastDragNode: ElementNode?
     @discardableResult private func updateDragIndicator(at point: CGPoint?) -> (ElementNode, Bool)? {
+        guard let rootNode = rootNode else { return nil }
         guard let point = point,
               let node = rootNode.widgetAt(point: CGPoint(x: point.x, y: point.y - rootNode.frame.minY)) as? ElementNode
         else {
@@ -1608,6 +1682,7 @@ public extension CALayer {
     }
 
     public override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
+        guard let rootNode = rootNode else { return false }
         defer {
             updateDragIndicator(at: nil)
         }
