@@ -17,41 +17,44 @@ private class EmbedNodeWebViewConfiguration: BeamWebViewConfigurationBase {
     }
 }
 
-public class EmbedNode: ElementNode {
+class EmbedNode: ResizableNode {
 
     private static var webViewConfiguration = EmbedNodeWebViewConfiguration()
     var webView: BeamWebView?
     private var webPage: EmbedNodeWebPage?
-    var visibleSize: CGSize {
-        let width = contentsWidth
-        let height = (width / embedWidth) * embedHeight
-        return NSSize(width: width, height: height)
-    }
+
+    private let sizeRatio = 240.0/320.0
 
     private var embedUrl: URL? {
-        guard case .embed(let sourceURL) = element.kind else { return nil }
+        guard case .embed(let sourceURL, _) = element.kind else { return nil }
         return URL(string: sourceURL)?.embed
     }
 
     init(parent: Widget, element: BeamElement, availableWidth: CGFloat?) {
         super.init(parent: parent, element: element, availableWidth: availableWidth)
 
-        setupEmbed()
+        setupEmbed(availableWidth: availableWidth ?? fallBackWidth)
     }
 
     init(editor: BeamTextEdit, element: BeamElement, availableWidth: CGFloat?) {
         super.init(editor: editor, element: element, availableWidth: availableWidth)
 
-        setupEmbed()
+        setupEmbed(availableWidth: availableWidth ?? fallBackWidth)
     }
 
-    func setupEmbed() {
+    func setupEmbed(availableWidth: CGFloat) {
         guard case .embed = element.kind else {
             Logger.shared.logError("EmbedNode can only handle url elements, not \(element.kind)", category: .noteEditor)
             return
         }
 
+        if case .embed(_, let ratio) = element.kind {
+            desiredWidthRatio = ratio
+        }
+
         guard let url = embedUrl else { return }
+
+        setupResizeHandleLayer()
 
         let webviewConfiguration = EmbedNode.webViewConfiguration
         var webView: BeamWebView?
@@ -85,6 +88,10 @@ public class EmbedNode: ElementNode {
         setAccessibilityRole(.textArea)
 
         contentsPadding = NSEdgeInsets(top: 4, left: contentsPadding.left + 4, bottom: 14, right: 4)
+
+        // Embed don't have size on there own… By default, they are as wide as the editor
+        let height = availableWidth  * CGFloat(sizeRatio)
+        resizableElementContentSize = CGSize(width: availableWidth, height: height)
     }
 
     deinit {
@@ -107,9 +114,6 @@ public class EmbedNode: ElementNode {
         webPage = nil
     }
 
-    let embedWidth = CGFloat(320)
-    let embedHeight = CGFloat(240)
-
     override func updateRendering() -> CGFloat {
         updateFocus()
         return visibleSize.height
@@ -122,8 +126,11 @@ public class EmbedNode: ElementNode {
 
     override func updateLayout() {
         super.updateLayout()
+
         let r = layer.frame
-        webView?.frame = NSRect(x: r.minX, y: r.minY, width: r.width - contentsLead, height: r.height)
+        let visibleSize = visibleSize
+
+        webView?.frame = NSRect(x: r.minX, y: r.minY, width: visibleSize.width, height: visibleSize.height)
     }
 
     var focusMargin = CGFloat(3)
