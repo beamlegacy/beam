@@ -1,16 +1,8 @@
 import Foundation
 import Sentry
-import BeamCore
 
-class EventsTracker {
-    static let shared = EventsTracker()
-    private let dateFormatter: DateFormatter = {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-        return dateFormatter
-    }()
-
-    func log(event: Event) {
+public class EventsTracker {
+    public static func log(event: Event) {
         let crumb = Breadcrumb(level: .info, category: "event")
         crumb.message = event.rawValue
         SentrySDK.addBreadcrumb(crumb: crumb)
@@ -18,7 +10,7 @@ class EventsTracker {
         Logger.shared.logInfo(event.rawValue, category: .tracking)
     }
 
-    func log(event: Event, properties: [String: String]) {
+    public static func log(event: Event, properties: [String: String]) {
         let crumb = Breadcrumb(level: .info, category: "event")
         crumb.message = event.rawValue
         crumb.data = properties
@@ -27,20 +19,22 @@ class EventsTracker {
         Logger.shared.logInfo(event.rawValue, category: .tracking)
     }
 
-    func logBreadcrumb(message: String? = nil,
-                       category: String = "ui.lifecycle",
-                       type: String = "navigation",
-                       data: [String: Any]? = nil) {
-        let crumb = Breadcrumb(level: .info, category: category)
+    public static func logBreadcrumb(level: SentryLevel = .debug, message: String, category: String, type: String? = nil, data: [String: Any]? = nil) {
+        #if TEST || DEBUG
+        let crumb = Breadcrumb()
+        crumb.level = level
+        crumb.category = category
         crumb.message = message
-        crumb.type = type // navigation, system, debug, user
-        crumb.data = data // screen: name for uiviewcontroller
+        crumb.type = type
+        crumb.data = data
         SentrySDK.addBreadcrumb(crumb: crumb)
+        #endif
     }
+
 }
 
 // MARK: - Events
-extension EventsTracker {
+public extension EventsTracker {
     enum Event: String, CaseIterable {
         // App livecycle
         case appLaunch = "APP_LAUNCH"
