@@ -74,34 +74,40 @@ class BeamNoteSharingUtils {
 
         if becomePublic {
             publishNote(note, username: username) { result in
-                DispatchQueue.main.async {
-                    switch result {
-                    case .failure(let error):
-                        Logger.shared.logError(error.localizedDescription, category: .notePublishing)
-                        completion?(.failure(error))
-                    case .success(let status):
-                        note.publicationStatus = status
-                        note.save(documentManager: documentManager, completion: nil)
-                        completion?(.success(true))
-                    }
-                    note.ongoingPublicationOperation = false
-                }
+                makeNotePublicHandler(note, becomePublic, documentManager, result, completion)
             }
         } else {
             unpublishNote(with: note.id, completion: { result in
-                DispatchQueue.main.async {
+                makeNotePublicHandler(note, becomePublic, documentManager, result, completion)
+            })
+        }
+    }
+
+    static private func makeNotePublicHandler(_ note: BeamNote,
+                                              _ becomePublic: Bool,
+                                              _ documentManager: DocumentManager,
+                                              _ result: Result<PublicationStatus, Error>,
+                                              _ completion: ((Result<Bool, Error>) -> Void)? = nil) {
+        DispatchQueue.main.async {
+            switch result {
+            case .failure(let error):
+                Logger.shared.logError(error.localizedDescription, category: .notePublishing)
+                completion?(.failure(error))
+            case .success(let status):
+                note.publicationStatus = status
+                note.save(documentManager: documentManager) { result in
                     switch result {
                     case .failure(let error):
                         Logger.shared.logError(error.localizedDescription, category: .notePublishing)
-                        completion?(.failure(error))
-                    case .success(let status):
-                        note.publicationStatus = status
-                        note.save(documentManager: documentManager, completion: nil)
-                        completion?(.success(false))
+                        completion?(result)
+                    case .success:
+                        // TODO: if `save` isn't successful, we should probably call completion with `.failure`
+                        completion?(.success(becomePublic))
                     }
+
                     note.ongoingPublicationOperation = false
                 }
-            })
+            }
         }
     }
 

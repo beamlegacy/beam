@@ -26,12 +26,6 @@ class PasswordsDBTests: XCTestCase {
         try? EncryptionManager.shared.replacePrivateKey(Configuration.testPrivateKey)
     }
 
-    override func tearDown() {
-        super.tearDown()
-
-        PasswordManager.shared.realDeleteAll()
-    }
-
     func testSavingPassword() {
         PasswordManager.shared.save(hostname: Self.host.minimizedHost!, username: Self.username, password: Self.password)
 
@@ -233,6 +227,7 @@ class PasswordsDBTests: XCTestCase {
 
     private func stopNetworkTests() {
         BeamObjectTestsHelper().deleteAll()
+        PasswordManager.shared.realDeleteAll()
         beamHelper.endNetworkRecording()
     }
 }
