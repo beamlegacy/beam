@@ -11,6 +11,7 @@ import Combine
 import WebKit
 import SwiftSoup
 import BeamCore
+import Sentry
 
 @objc class BeamState: NSObject, ObservableObject, Codable {
     var data: BeamData
@@ -18,6 +19,7 @@ import BeamCore
 
     @Published var currentNote: BeamNote? {
         didSet {
+            EventsTracker.logBreadcrumb(message: "currentNote changed to \(String(describing: currentNote))", category: "BeamState")
             if let note = currentNote {
                 recentsManager.currentNoteChanged(note)
                 handleNoteDeletion(note)
@@ -57,6 +59,7 @@ import BeamCore
 
     @Published var mode: Mode = .today {
         didSet {
+            EventsTracker.logBreadcrumb(message: "mode changed to \(mode)", category: "BeamState")
             browserTabsManager.updateTabsForStateModeChange(mode, previousMode: oldValue)
             updateCanGoBackForward()
             focusOmniBox = false
@@ -79,6 +82,7 @@ import BeamCore
 
     func goBack() {
         guard canGoBack else { return }
+        EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
         switch mode {
         case .note, .page, .today:
             if let back = backForwardList.goBack() {
@@ -100,6 +104,7 @@ import BeamCore
 
     func goForward() {
         guard canGoForward else { return }
+        EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
         switch mode {
         case .note, .page, .today:
             if let forward = backForwardList.goForward() {
@@ -120,6 +125,7 @@ import BeamCore
     }
 
     func toggleBetweenWebAndNote() {
+        EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
         switch mode {
         case .web:
             let noteController = currentTab?.noteController
@@ -148,12 +154,14 @@ import BeamCore
 
     @available(*, deprecated, message: "Using title might navigate to a different card if multiple databases, use ID if possible.")
     @discardableResult func navigateToNote(named: String, elementId: UUID? = nil) -> Bool {
+        EventsTracker.logBreadcrumb(message: "\(#function) named \(named) - elementId \(String(describing: elementId))", category: "BeamState")
         //Logger.shared.logDebug("load note named \(named)")
         let note = BeamNote.fetchOrCreate(data.documentManager, title: named)
         return navigateToNote(note, elementId: elementId)
     }
 
     @discardableResult func navigateToNote(id: UUID, elementId: UUID? = nil, unfold: Bool = false) -> Bool {
+        EventsTracker.logBreadcrumb(message: "\(#function) id \(id) - elementId \(String(describing: elementId))", category: "BeamState")
         //Logger.shared.logDebug("load note named \(named)")
         guard let note = BeamNote.fetch(data.documentManager, id: id) else {
             return false
@@ -162,6 +170,7 @@ import BeamCore
     }
 
     @discardableResult func navigateToNote(_ note: BeamNote, elementId: UUID? = nil, unfold: Bool = false) -> Bool {
+        EventsTracker.logBreadcrumb(message: "\(#function) \(note) - elementId \(String(describing: elementId))", category: "BeamState")
         mode = .note
 
         guard note != currentNote else { return true }
@@ -185,6 +194,7 @@ import BeamCore
     }
 
     @discardableResult func navigateToJournal(note: BeamNote?, clearNavigation: Bool = false) -> Bool {
+        EventsTracker.logBreadcrumb(message: "\(#function) \(String(describing: note))", category: "BeamState")
         mode = .today
 
         currentPage = nil
@@ -201,6 +211,7 @@ import BeamCore
     }
 
     func navigateToPage(_ page: WindowPage) {
+        EventsTracker.logBreadcrumb(message: "\(#function) \(page)", category: "BeamState")
         mode = .page
 
         currentNote = nil
@@ -213,11 +224,13 @@ import BeamCore
     }
 
     func navigateCurrentTab(toURL url: URL) {
+        EventsTracker.logBreadcrumb(message: "\(#function) toURL \(url)", category: "BeamState")
         currentTab?.willSwitchToNewUrl(url: url)
         currentTab?.load(url: url)
     }
 
     func addNewTab(origin: BrowsingTreeOrigin?, setCurrent: Bool = true, note: BeamNote? = nil, element: BeamElement? = nil, url: URL? = nil, webView: BeamWebView? = nil) -> BrowserTab {
+        EventsTracker.logBreadcrumb(message: "\(#function) \(String(describing: origin)) \(String(describing: note)) \(String(describing: url))", category: "BeamState")
         let tab = BrowserTab(state: self, browsingTreeOrigin: origin, originMode: mode, note: note, rootElement: element, webView: webView)
         browserTabsManager.addNewTab(tab, setCurrent: setCurrent, withURL: url)
         mode = .web
@@ -225,41 +238,49 @@ import BeamCore
     }
 
     func createTab(withURL url: URL, originalQuery: String?, setCurrent: Bool = true, note: BeamNote? = nil, rootElement: BeamElement? = nil, webView: BeamWebView? = nil) -> BrowserTab {
+        EventsTracker.logBreadcrumb(message: "\(#function) \(String(describing: note)) \(String(describing: url))", category: "BeamState")
         let origin = BrowsingTreeOrigin.searchBar(query: originalQuery ?? "<???>")
         return addNewTab(origin: origin, setCurrent: setCurrent, note: note, element: rootElement, url: url, webView: webView)
     }
 
     func createTabFromNote(_ note: BeamNote, element: BeamElement, withURL url: URL) {
+        EventsTracker.logBreadcrumb(message: "createTabFromNote \(note.id)/\(note.title) element \(element.id)/\(element.kind) withURL \(url)", category: "BeamState")
         let origin = BrowsingTreeOrigin.linkFromNote(noteName: note.title)
         _ = addNewTab(origin: origin, note: note, element: element, url: url)
     }
 
     func createEmptyTab() {
+        EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
         _ = addNewTab(origin: nil)
     }
 
     func createEmptyTabWithCurrentDestinationCard() {
+        EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
         guard let destinationNote = BeamNote.fetch(data.documentManager, title: destinationCardName) else { return }
         _ = addNewTab(origin: nil, note: destinationNote)
     }
 
     func createTabFromNode(_ node: TextNode, withURL url: URL) {
+        EventsTracker.logBreadcrumb(message: "createTabFromNode \(node) withURL \(url)", category: "BeamState")
         guard let note = node.root?.note else { return }
         let origin = BrowsingTreeOrigin.searchFromNode(nodeText: node.strippedText)
         _ = addNewTab(origin: origin, note: note, element: node.element, url: url)
     }
 
     func closedTab(_ index: Int) {
+        EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
         let tab = self.browserTabsManager.tabs[index]
         cmdManager.run(command: CloseTab(tab: tab), on: self)
     }
 
     func closeCurrentTab() -> Bool {
+        EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
         guard let currentTab = self.browserTabsManager.currentTab else { return false }
         return cmdManager.run(command: CloseTab(tab: currentTab), on: self)
     }
 
     func createNoteForQuery(_ query: String) -> BeamNote {
+        EventsTracker.logBreadcrumb(message: "createNoteForQuery \(query)", category: "BeamState")
         if let n = BeamNote.fetch(data.documentManager, title: query) {
             return n
         }
@@ -297,6 +318,7 @@ import BeamCore
     }
 
     func startQuery(_ node: TextNode, animated: Bool) {
+        EventsTracker.logBreadcrumb(message: "startQuery \(node)", category: "BeamState")
         let query = node.currentSelectionWithFullSentences()
         guard !query.isEmpty, let url = urlFor(query: query) else { return }
 
@@ -317,6 +339,7 @@ import BeamCore
     }
 
     private func selectAutocompleteResult(_ result: AutocompleteResult) {
+        EventsTracker.logBreadcrumb(message: "\(#function) - \(result)", category: "BeamState")
         switch result.source {
         case .autocomplete:
             searchEngine.query = result.text
@@ -351,6 +374,7 @@ import BeamCore
     }
 
     func startQuery() {
+        EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
         let queryString = autocompleteManager.searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
 
         focusOmniBox = false
@@ -451,6 +475,7 @@ import BeamCore
     }
 
     func focusOmnibox() {
+        EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
         if let url = browserTabsManager.currentTab?.url?.absoluteString, mode == .web {
             autocompleteManager.searchQuerySelectedRange = url.wholeRange
             autocompleteManager.setQueryWithoutAutocompleting(url)
@@ -459,6 +484,7 @@ import BeamCore
     }
 
     func startNewSearch() {
+        EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
         autocompleteManager.cancelAutocomplete()
         autocompleteManager.resetQuery()
         if mode == .web {
@@ -471,6 +497,7 @@ import BeamCore
     }
 
     func resetDestinationCard() {
+        EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
         destinationCardName = currentTab?.noteController.noteOrDefault.title ?? data.todaysName
         destinationCardNameSelectedRange = nil
         destinationCardIsFocused = false
