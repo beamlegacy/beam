@@ -114,6 +114,8 @@
 		339D193926AED9E1006DE745 /* AuthenticationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 339D193826AED9E1006DE745 /* AuthenticationView.swift */; };
 		33AA4EB4270C3DC100B74868 /* ExtraAsserts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AA4EB3270C3DC100B74868 /* ExtraAsserts.swift */; };
 		33AA4ED2270DD43900B74868 /* String+SearchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AA4ED1270DD43900B74868 /* String+SearchTests.swift */; };
+		33AA4EDF270DF5D200B74868 /* ResizableNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AA4EDE270DF5D200B74868 /* ResizableNode.swift */; };
+		33AA4EF2270F515900B74868 /* BeamPropertyWrappers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AA4EF1270F515800B74868 /* BeamPropertyWrappers.swift */; };
 		33AC9D8E26AF482E004E7EF4 /* EnhancedWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AC9D8D26AF482E004E7EF4 /* EnhancedWebView.swift */; };
 		33AC9D9826AFF453004E7EF4 /* FocusableTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AC9D9726AFF453004E7EF4 /* FocusableTextField.swift */; };
 		33AC9D9A26B01A60004E7EF4 /* AuthenticationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AC9D9926B01A60004E7EF4 /* AuthenticationViewModel.swift */; };
@@ -1136,6 +1138,8 @@
 		339D193826AED9E1006DE745 /* AuthenticationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationView.swift; sourceTree = "<group>"; };
 		33AA4EB3270C3DC100B74868 /* ExtraAsserts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtraAsserts.swift; sourceTree = "<group>"; };
 		33AA4ED1270DD43900B74868 /* String+SearchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+SearchTests.swift"; sourceTree = "<group>"; };
+		33AA4EDE270DF5D200B74868 /* ResizableNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResizableNode.swift; sourceTree = "<group>"; };
+		33AA4EF1270F515800B74868 /* BeamPropertyWrappers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamPropertyWrappers.swift; sourceTree = "<group>"; };
 		33AC9D8D26AF482E004E7EF4 /* EnhancedWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnhancedWebView.swift; sourceTree = "<group>"; };
 		33AC9D9726AFF453004E7EF4 /* FocusableTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusableTextField.swift; sourceTree = "<group>"; };
 		33AC9D9926B01A60004E7EF4 /* AuthenticationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationViewModel.swift; sourceTree = "<group>"; };
@@ -2526,6 +2530,7 @@
 				9652A92926A6A96600F0590C /* FakeNoteGenerator.swift */,
 				DAEAAF2F26D3CA4D00D17559 /* ExportAllNoteSources.swift */,
 				DABFD3B626FCAC8300C1F7F0 /* Csv.swift */,
+				33AA4EF1270F515800B74868 /* BeamPropertyWrappers.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -2644,6 +2649,7 @@
 				9661A58A266A70DA00CB56B3 /* NodeProvider.swift */,
 				A5919F7E268EF964009015C5 /* TextEditCmdReturnAnimator.swift */,
 				A0F558F426BD8F260024C47E /* DebugSection.swift */,
+				33AA4EDE270DF5D200B74868 /* ResizableNode.swift */,
 			);
 			path = BeamTextEdit;
 			sourceTree = "<group>";
@@ -5161,6 +5167,7 @@
 				418172392581107C00317ED8 /* Lexer.swift in Sources */,
 				A5C7F10A267CC9FD002EE550 /* BeamTextEdit+InputDetector.swift in Sources */,
 				87F11BC3266524B2003BE98E /* WebAutocompleteProtocols.swift in Sources */,
+				33AA4EDF270DF5D200B74868 /* ResizableNode.swift in Sources */,
 				3303E0EC26F8DC3F00E175AC /* PublicNote.swift in Sources */,
 				521EEDF72593824100BA2485 /* AppDelegate+Document.swift in Sources */,
 				33353EE226F3D0BA00063078 /* ActionableButton.swift in Sources */,
@@ -5540,6 +5547,7 @@
 				A0EDF5DB266EE08C0079803E /* BeamPlaceholder.swift in Sources */,
 				521398D82694931C00AC29C1 /* DatabaseStruct.swift in Sources */,
 				A0CB5AEE268B244800D1EF02 /* AboutPreferencesView.swift in Sources */,
+				33AA4EF2270F515900B74868 /* BeamPropertyWrappers.swift in Sources */,
 				3330D7B5265E4441008C9E20 /* Download.swift in Sources */,
 				A5B37AD927046A1500989479 /* CheckboxView.swift in Sources */,
 				96A3067C25F698FB0078A453 /* RefNoteTitle.swift in Sources */,

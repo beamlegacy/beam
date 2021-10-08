@@ -99,7 +99,7 @@ class PublicServer {
             body.append(note)
             for content in richContent {
                 switch content.kind {
-                case .image(let fileId):
+                case .image(let fileId, _):
                     if let fileRecord = try? fileDB.fetch(uid: fileId) {
                         let resourceData = fileRecord.data
                         let resourcePart = createMultipartBody(data: resourceData, documentName: fileRecord.uid.uuidString, fileNameAndExtension: fileRecord.name, mimetype: fileRecord.type)
