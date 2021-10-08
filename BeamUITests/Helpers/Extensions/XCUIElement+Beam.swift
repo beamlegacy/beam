@@ -44,6 +44,14 @@ extension XCUIElement {
     }
     
     @discardableResult
+    public func clickOnEnabled() -> XCUIElement {
+        _ = self.waitForExistence(timeout: WaitHelper().minimumWaitTimeout)
+        WaitHelper().waitForIsEnabled(self)
+        self.click()
+        return self
+    }
+    
+    @discardableResult
     public func clickAndType(_ text: String) -> XCUIElement {
         self.tapInTheMiddle()
         self.typeText(text)
