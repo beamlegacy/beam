@@ -61,10 +61,10 @@ extension BeamTextEdit {
         case .divider:
             strNode.append(NSAttributedString(string: "\n---\n"))
 
-        case let .image(source):
+        case let .image(source, _):
             strNode.append(buildStringFrom(image: source))
 
-        case let .embed(source):
+        case let .embed(source, _):
             guard let url = URL(string: source) else { return strNode }
             strNode.append(NSAttributedString(string: source, attributes: [.link: url]))
         }

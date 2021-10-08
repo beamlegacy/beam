@@ -9,35 +9,27 @@ import Foundation
 import BeamCore
 import AppKit
 
-class ImageNode: ElementNode {
+class ImageNode: ResizableNode {
 
     private let focusMargin = CGFloat(3)
     private let cornerRadius = CGFloat(3)
-    private var imageSize = CGSize.zero
-
-    var visibleSize: CGSize {
-        let computedWidth = imageSize.width > contentsWidth ? contentsWidth : imageSize.width
-        let width = computedWidth.isNaN ? 0 : computedWidth
-        let computedHeight = (width / imageSize.width) * imageSize.height
-        let height = computedHeight.isNaN ? 0 : computedHeight
-        return NSSize(width: width, height: height)
-    }
 
     init(parent: Widget, element: BeamElement, availableWidth: CGFloat?) {
         super.init(parent: parent, element: element, availableWidth: availableWidth)
-        setupImage()
+        setupImage(width: availableWidth ?? fallBackWidth)
     }
 
     init(editor: BeamTextEdit, element: BeamElement, availableWidth: CGFloat?) {
         super.init(editor: editor, element: element, availableWidth: availableWidth)
-        setupImage()
+        setupImage(width: availableWidth ?? fallBackWidth)
     }
 
-    private func setupImage() {
+    private func setupImage(width: CGFloat) {
         var uid = UUID.null
         switch element.kind {
-        case .image(let id):
+        case .image(let id, let ratio):
             uid = id
+            desiredWidthRatio = ratio
         default:
             Logger.shared.logError("ImageNode can only handle image elements, not \(element.kind)", category: .noteEditor)
             return
@@ -52,21 +44,21 @@ class ImageNode: ElementNode {
         if let animatedImageLayer = Layer.animatedImage(named: "image", imageData: imageRecord.data) {
             animatedImageLayer.layer.position = .zero
             imageLayer = animatedImageLayer
-            imageSize = animatedImageLayer.bounds.size
+            resizableElementContentSize = animatedImageLayer.bounds.size
         } else {
             guard let image = NSImage(data: imageRecord.data) else {
                 Logger.shared.logError("ImageNode unable to decode image '\(uid)' from FileDB", category: .noteEditor)
                 return
             }
 
-            imageSize = image.size
-            guard imageSize.width > 0, imageSize.width.isFinite,
-                  imageSize.height > 0, imageSize.height.isFinite else {
-                Logger.shared.logError("Loaded Image '\(uid)' has invalid size \(imageSize)", category: .noteEditor)
+            resizableElementContentSize = image.size
+            guard resizableElementContentSize.width > 0, resizableElementContentSize.width.isFinite,
+                  resizableElementContentSize.height > 0, resizableElementContentSize.height.isFinite else {
+                Logger.shared.logError("Loaded Image '\(uid)' has invalid size \(resizableElementContentSize)", category: .noteEditor)
                 return
             }
-            let width = availableWidth - childInset
-            let height = (width / imageSize.width) * imageSize.height
+//            let width = width
+            let height = (width / resizableElementContentSize.width) * resizableElementContentSize.height
             imageLayer = Layer.image(named: "image", image: image, size: CGSize(width: width, height: height))
         }
 
@@ -81,6 +73,7 @@ class ImageNode: ElementNode {
         contentsPadding = NSEdgeInsets(top: 4, left: contentsPadding.left + 4, bottom: 14, right: 4)
 
         setupFocusLayer()
+        setupResizeHandleLayer()
     }
 
     private func setupFocusLayer() {
@@ -141,7 +134,7 @@ class ImageNode: ElementNode {
     }
 
     override func mouseDown(mouseInfo: MouseInfo) -> Bool {
-        if mouseInfo.position.x < imageSize.width / 2 {
+        if mouseInfo.position.x < resizableElementContentSize.width / 2 {
             focus(position: 0)
         } else {
             focus(position: 1)

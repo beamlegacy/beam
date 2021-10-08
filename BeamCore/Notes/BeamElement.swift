@@ -21,8 +21,8 @@ public enum ElementKind: Codable, Equatable {
     case check(Bool)
     case code
     case divider
-    case image(UUID)
-    case embed(String)
+    case image(UUID, displayRatio: Double?)
+    case embed(String, displayRatio: Double?)
     case blockReference(UUID, UUID)
 
     public var isText: Bool {
@@ -46,6 +46,7 @@ public enum ElementKind: Codable, Equatable {
         case source
         case title
         case value
+        case sizeRatio
     }
 
     public var rawValue: String {
@@ -62,9 +63,9 @@ public enum ElementKind: Codable, Equatable {
             return "code"
         case .divider:
             return "divider"
-        case .image(let source):
+        case .image(let source, _):
             return "image '\(source)'"
-        case .embed(let source):
+        case .embed(let source, _):
             return "embed '\(source)'"
         case .blockReference(let note, let elementId):
             return "blockReference '\(note).\(elementId)'"
@@ -93,10 +94,11 @@ public enum ElementKind: Codable, Equatable {
         case "image":
             let id = try (try? container.decode(UUID.self, forKey: .source)) ??
             UUID.v5(name: try container.decode(String.self, forKey: .source), namespace: .url)
-            self = .image(id)
-
+            let sizeRatio = try? container.decodeIfPresent(Double.self, forKey: .sizeRatio)
+            self = .image(id, displayRatio: sizeRatio)
         case "embed":
-            self = .embed(try container.decode(String.self, forKey: .source))
+            let sizeRatio = try? container.decodeIfPresent(Double.self, forKey: .sizeRatio)
+            self = .embed(try container.decode(String.self, forKey: .source), displayRatio: sizeRatio)
         case "blockReference":
             let noteID = try (try? container.decode(UUID.self, forKey: .title)) ?? BeamNote.idForNoteNamed(try container.decode(String.self, forKey: .title), false) ?? UUID.null
             let elementID = try (try? container.decode(UUID.self, forKey: .source)) ?? UUID(uuidString: try container.decode(String.self, forKey: .source)) ?? UUID.null
@@ -127,12 +129,14 @@ public enum ElementKind: Codable, Equatable {
             try container.encode("code", forKey: .type)
         case .divider:
             try container.encode("divider", forKey: .type)
-        case let .image(source):
+        case let .image(source, sizeRatio):
             try container.encode("image", forKey: .type)
             try container.encode(source, forKey: .source)
-        case let .embed(source):
+            try container.encode(sizeRatio, forKey: .sizeRatio)
+        case let .embed(source, sizeRatio):
             try container.encode("embed", forKey: .type)
             try container.encode(source, forKey: .source)
+            try container.encode(sizeRatio, forKey: .sizeRatio)
         case let .blockReference(title, source):
             try container.encode("blockReference", forKey: .type)
             try container.encode(title, forKey: .title)
@@ -639,13 +643,13 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
     }
 
     /// Utility to convert BeamElement containing a single embedable url to embed kind
-   open func convertToEmbed() {
+    open func convertToEmbed() {
         let links = text.links
         if links.count == 1,
            let link = links.first,
            let url = URL(string: link),
            let embedUrl = url.embed {
-            kind = .embed(embedUrl.absoluteString)
+            kind = .embed(embedUrl.absoluteString, displayRatio: nil)
         }
     }
 
