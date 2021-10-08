@@ -118,7 +118,14 @@ class AutocompleteManager: ObservableObject {
     func isResultCandidateForAutoselection(_ result: AutocompleteResult, forSearch searchText: String) -> Bool {
         switch result.source {
         case .topDomain: return result.text.lowercased().starts(with: searchText.lowercased())
-        case .history: return result.text.lowercased().starts(with: searchText.lowercased())
+        case .history:
+            if searchText.mayBeURL {
+                guard let host = result.url?.minimizedHost ?? URL(string: result.text)?.minimizedHost else {
+                    return false
+                }
+                return host.lowercased().starts(with: searchText.lowercased())
+            }
+            return result.text.lowercased().starts(with: searchText.lowercased())
         case .url:
             guard let host = result.url?.minimizedHost ?? URL(string: result.text)?.minimizedHost else { return false }
             return result.text.lowercased().contains(host)
