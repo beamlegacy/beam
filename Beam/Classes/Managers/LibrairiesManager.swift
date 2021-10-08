@@ -38,6 +38,10 @@ extension LibrariesManager {
             scope.setEnvironment(Configuration.env)
             scope.setDist(Information.appBuild)
             scope.setTag(value: currentHost, key: "hostname")
+
+            if let mergeRequestSourceBranche = ProcessInfo.processInfo.environment["CI_MERGE_REQUEST_SOURCE_BRANCH_NAME"] {
+                scope.setTag(value: mergeRequestSourceBranche, key: "MERGE_REQUEST")
+            }
         }
     }
 
