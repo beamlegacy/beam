@@ -17,14 +17,14 @@ class JavascriptNativeInteractionsTests: BaseTest {
         let helper = BeamUITestsHelper(journalView.app)
         
         testRailPrint("Given I open a test page to \(buttonTitle)")
-        helper.openTestPage(page: BeamUITestsHelper.UITestsPageCommand.alerts)
+        helper.openTestPage(page: .alerts)
         
         let webViewElement = journalView.app.webViews.containing(.button, identifier: buttonTitle).element
         let button = webViewElement.buttons[buttonTitle].firstMatch
         button.clickOnHittable()
         testRailPrint("When \(buttonTitle) is invoked")
         let alert = journalView.app.dialogs.firstMatch
-        XCTAssert(alert.waitForExistence(timeout: implicitWaitTimeout))
+        XCTAssert(alert.waitForExistence(timeout: minimumWaitTimeout))
         return (webViewElement, alert, button)
     }
     
@@ -33,8 +33,8 @@ class JavascriptNativeInteractionsTests: BaseTest {
         let alert = preparationResult.1
         
         testRailPrint("Then alert box is displayed and interacted")
-        XCTAssert(alert.waitForExistence(timeout: implicitWaitTimeout))
-        XCTAssertTrue(alert.staticTexts["Hello! I am an alert box!"].exists)
+        XCTAssert(alert.waitForExistence(timeout: minimumWaitTimeout))
+        XCTAssertTrue(alert.staticTexts["Hello! I am an alert box!"].waitForExistence(timeout: minimumWaitTimeout))
         alert.buttons["Ok"].firstMatch.tap()
     }
     
@@ -49,7 +49,7 @@ class JavascriptNativeInteractionsTests: BaseTest {
         textField.typeText("Scotty")
 
         alert.buttons["Submit"].firstMatch.tap()
-        XCTAssertTrue(webView.staticTexts["Beam me up, Scotty!"].exists)
+        XCTAssertTrue(webView.staticTexts["Beam me up, Scotty!"].waitForExistence(timeout: minimumWaitTimeout))
     }
     
     func testJSNativeConfirmationInteraction() {
@@ -63,48 +63,47 @@ class JavascriptNativeInteractionsTests: BaseTest {
         let cancel = alert.buttons["Cancel"].firstMatch
         
         ok.tap()
-        XCTAssertTrue(webView.staticTexts["YES"].exists)
+        XCTAssertTrue(webView.staticTexts["YES"].waitForExistence(timeout: minimumWaitTimeout))
         
         button.tap()
-        XCTAssert(alert.waitForExistence(timeout: implicitWaitTimeout))
+        XCTAssertTrue(alert.waitForExistence(timeout: minimumWaitTimeout))
         
         cancel.tap()
-        XCTAssertTrue(webView.staticTexts["NO"].exists)
+        XCTAssertTrue(webView.staticTexts["NO"].waitForExistence(timeout: minimumWaitTimeout))
     }
     
     func testJSNativeFileDialogInteraction() {
         let fileExistanceLabel = "NO FILE"
         let journalView = launchApp()
-        let helper = BeamUITestsHelper(journalView.app)
         
         testRailPrint("Given I open a test page with Upload File dialog")
-        helper.openTestPage(page: BeamUITestsHelper.UITestsPageCommand.alerts)
+        BeamUITestsHelper(journalView.app).openTestPage(page: .alerts)
         let message = "no file selected"
         let webView = journalView.app.webViews.containing(.button, identifier: message).element
-        XCTAssert(webView.exists)
-        XCTAssertTrue(webView.staticTexts[fileExistanceLabel].exists)
+        XCTAssert(webView.waitForExistence(timeout: minimumWaitTimeout))
+        XCTAssertTrue(webView.staticTexts[fileExistanceLabel].waitForExistence(timeout: minimumWaitTimeout))
         
         testRailPrint("When \(message) is clicked")
         webView.buttons[message].tap()
 
         testRailPrint("Then I can successfully upload the file")
         let alert = journalView.app.dialogs.firstMatch
-        XCTAssert(alert.waitForExistence(timeout: implicitWaitTimeout))
-        let ok = alert.buttons["Open"].firstMatch
+        XCTAssert(alert.waitForExistence(timeout: minimumWaitTimeout))
+        let open = alert.buttons["Open"].firstMatch
 
         journalView.app.typeKey("g", modifierFlags: [.command, .shift])
 
         let sheet = alert.sheets.firstMatch
-        XCTAssert(sheet.waitForExistence(timeout: implicitWaitTimeout))
+        XCTAssert(sheet.waitForExistence(timeout: minimumWaitTimeout))
 
         let goButton = alert.buttons["Go"]
         let input = sheet.comboBoxes.firstMatch
         input.typeText("/Applications")
         goButton.tap()
-        sleep(2)
+        WaitHelper().waitForDoesntExist(goButton)
         journalView.typeKeyboardKey(.downArrow)
-        ok.tap()
-        XCTAssertFalse(webView.staticTexts[fileExistanceLabel].exists)
+        open.clickOnEnabled()
+        XCTAssertTrue(WaitHelper().waitForDoesntExist(webView.staticTexts[fileExistanceLabel]))
     }
     
 }
