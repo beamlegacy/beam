@@ -35,11 +35,11 @@ class RefNoteTitle: Widget {
         }
     }
 
-    init(parent: Widget, noteId: UUID) throws {
+    init(parent: Widget, noteId: UUID, availableWidth: CGFloat?) throws {
         self.noteId = noteId
         let title = BeamNote.titleForNoteId(noteId, false) ?? "<note not found>"
         self.noteTitle = title
-        super.init(parent: parent)
+        super.init(parent: parent, availableWidth: availableWidth)
 
         titleLayer.string = NSAttributedString(string: noteTitle.capitalized, attributes: [
             .font: BeamFont.medium(size: 15).nsFont,

@@ -51,4 +51,17 @@ extension NSColor {
     static func + (lhs: NSColor, rhs: NSColor) -> NSColor {
         return lhs.add(rhs)
     }
+
+    //swiftlint:disable:next large_tuple
+    var componentsRGBA: (r: CGFloat, g: CGFloat, b: CGFloat, a: CGFloat) {
+        guard let color = self.usingColorSpace(.deviceRGB) else {
+            fatalError()
+        }
+        return (r: color.redComponent, g: color.greenComponent, b: color.blueComponent, a: color.alphaComponent)
+    }
+
+    var componentsRGBAArray: [CGFloat] {
+        let (r, g, b, a) = self.componentsRGBA
+        return [r, g, b, a]
+    }
 }

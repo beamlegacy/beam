@@ -44,7 +44,7 @@ struct BeamTextAttributedStringBuilder {
                 if attributedString.string.count >= markedRange.upperBound {
                     let r = NSRange(location: markedRange.lowerBound, length: markedRange.count)
                     attributedString.addAttribute(.underlineStyle, value: NSUnderlineStyle.single.rawValue, range: r)
-                    attributedString.addAttribute(.underlineColor, value: BeamColor.Editor.underlineAndStrikethrough.nsColor, range: r)
+                    attributedString.addAttribute(.underlineColor, value: BeamColor.Editor.underlineAndStrikethrough.staticColor, range: r)
                 }
             }
 
@@ -160,44 +160,44 @@ struct BeamTextAttributedStringBuilder {
         }
 
         stringAttributes[.font] = font(fontSize: config.fontSize, strong: strong, emphasis: emphasis, elementKind: config.elementKind)
-        stringAttributes[.foregroundColor] = BeamColor.Generic.text.nsColor
+        stringAttributes[.foregroundColor] = BeamColor.Generic.text.staticColor
         if let link = webLink {
             if let url = URL(string: link) ?? link.toEncodedURL {
                 stringAttributes[.link] = url as NSURL
             }
             if isCursorCloseToRange {
-                stringAttributes[.foregroundColor] = BeamColor.Editor.linkActive.nsColor
+                stringAttributes[.foregroundColor] = BeamColor.Editor.linkActive.staticColor
                 stringAttributes[.boxBackgroundColor] = isCursorInsideRange ?
-                    BeamColor.Editor.linkActiveHighlightedBackground.nsColor :
-                    BeamColor.Editor.linkActiveBackground.nsColor
+                    BeamColor.Editor.linkActiveHighlightedBackground.staticColor :
+                    BeamColor.Editor.linkActiveBackground.staticColor
             } else {
-                stringAttributes[.foregroundColor] = BeamColor.Editor.link.nsColor
+                stringAttributes[.foregroundColor] = BeamColor.Editor.link.staticColor
                 stringAttributes[.underlineStyle] = NSUnderlineStyle.single.rawValue
-                stringAttributes[.underlineColor] = BeamColor.Editor.linkDecoration.nsColor
-                stringAttributes[.hoverUnderlineColor] = BeamColor.Editor.link.nsColor
+                stringAttributes[.underlineColor] = BeamColor.Editor.linkDecoration.staticColor
+                stringAttributes[.hoverUnderlineColor] = BeamColor.Editor.link.staticColor
             }
         } else if let link = internalLink {
             stringAttributes[.link] = link
-            stringAttributes[.foregroundColor] = BeamColor.Editor.bidirectionalLink.nsColor
+            stringAttributes[.foregroundColor] = BeamColor.Editor.bidirectionalLink.staticColor
             if isCursorCloseToRange {
                 stringAttributes[.boxBackgroundColor] = isCursorInsideRange ?
-                    BeamColor.Editor.bidirectionalLinkHighlightedBackground.nsColor :
-                    BeamColor.Editor.bidirectionalLinkBackground.nsColor
+                    BeamColor.Editor.bidirectionalLinkHighlightedBackground.staticColor :
+                    BeamColor.Editor.bidirectionalLinkBackground.staticColor
             } else {
-                stringAttributes[.hoverUnderlineColor] = BeamColor.Editor.bidirectionalLink.nsColor
+                stringAttributes[.hoverUnderlineColor] = BeamColor.Editor.bidirectionalLink.staticColor
                 stringAttributes[.underlineStyle] = NSUnderlineStyle.single.rawValue
-                stringAttributes[.underlineColor] = BeamColor.Editor.bidirectionalUnderline.nsColor
+                stringAttributes[.underlineColor] = BeamColor.Editor.bidirectionalUnderline.staticColor
             }
         }
 
         if strikethrough {
             stringAttributes[.strikethroughStyle] = NSUnderlineStyle.single.rawValue
-            stringAttributes[.strikethroughColor] = BeamColor.Editor.underlineAndStrikethrough.nsColor
+            stringAttributes[.strikethroughColor] = BeamColor.Editor.underlineAndStrikethrough.staticColor
         }
 
         if underline {
             stringAttributes[.underlineStyle] = NSUnderlineStyle.single.rawValue
-            stringAttributes[.underlineColor] = BeamColor.Editor.underlineAndStrikethrough.nsColor
+            stringAttributes[.underlineColor] = BeamColor.Editor.underlineAndStrikethrough.staticColor
         }
 
         if let source = source {
@@ -212,17 +212,17 @@ struct BeamTextAttributedStringBuilder {
         return stringAttributes
     }
 
-    func addImageToLink(_ attributedString: NSMutableAttributedString, _ range: BeamText.Range, mouseInteraction: MouseInteraction?) {
-        guard attributedString.length > 0 else { return }
-        guard range.attributes.contains(where: { attrib -> Bool in attrib.rawValue == BeamText.Attribute.link("").rawValue }) else { return }
-        let imageName = "editor-url"
-        guard let image = NSImage(named: imageName) else { return }
-
-        let hasBoxBackground = attributedString.attribute(.boxBackgroundColor, at: 0, effectiveRange: nil) != nil
-        var color = hasBoxBackground ? BeamColor.Editor.linkActive.nsColor : BeamColor.Editor.linkDecoration.nsColor
-        if !hasBoxBackground, let mouseInt = mouseInteraction, mouseInt.type == .hovered, BeamText.isPositionOnLinkArrow(mouseInt.range.lowerBound, in: range) {
-            color = BeamColor.Editor.link.nsColor
+    static var ctRuns: [String: NSAttributedString] = [:]
+    static func createGlyphForImage(named imageName: String, color: NSColor?, attributes: [NSAttributedString.Key: Any]) -> NSAttributedString? {
+        let id = "\(imageName)-\(color?.componentsRGBAArray ?? [])"
+        if let cachedGlyph = ctRuns[id] {
+            let fakeGlyph = NSMutableAttributedString(attributedString: cachedGlyph)
+            _ = fakeGlyph.addAttributes(attributes)
+            fakeGlyph.removeAttribute(.underlineStyle, range: fakeGlyph.wholeRange)
+            fakeGlyph.removeAttribute(.underlineColor, range: fakeGlyph.wholeRange)
+            return fakeGlyph
         }
+        guard let image = NSImage(named: imageName) else { return nil }
         let extentBuffer = UnsafeMutablePointer<ImageRunStruct>.allocate(capacity: 1)
         extentBuffer.initialize(to: ImageRunStruct(ascent: image.size.height, descent: 0, width: image.size.width, image: imageName, color: color))
 
@@ -241,10 +241,29 @@ struct BeamTextAttributedStringBuilder {
         let delegate = CTRunDelegateCreate(&callbacks, extentBuffer)
 
         let attrDictionaryDelegate = [(kCTRunDelegateAttributeName as NSAttributedString.Key): (delegate as Any)]
-        let fakeGlyph = NSMutableAttributedString(string: " ", attributes: attrDictionaryDelegate)
-        _ = fakeGlyph.addAttributes(attributedString.attributes(at: 0, effectiveRange: nil))
+        let glyph = NSMutableAttributedString(string: " ", attributes: attrDictionaryDelegate)
+        ctRuns[id] = glyph
+
+        let fakeGlyph = NSMutableAttributedString(attributedString: glyph)
+        _ = fakeGlyph.addAttributes(attributes)
         fakeGlyph.removeAttribute(.underlineStyle, range: fakeGlyph.wholeRange)
         fakeGlyph.removeAttribute(.underlineColor, range: fakeGlyph.wholeRange)
+        return fakeGlyph
+    }
+
+    func addImageToLink(_ attributedString: NSMutableAttributedString, _ range: BeamText.Range, mouseInteraction: MouseInteraction?) {
+        guard attributedString.length > 0 else { return }
+        guard range.attributes.contains(where: { attrib -> Bool in attrib.rawValue == BeamText.Attribute.link("").rawValue }) else { return }
+
+        let hasBoxBackground = attributedString.attribute(.boxBackgroundColor, at: 0, effectiveRange: nil) != nil
+        var color = hasBoxBackground ? BeamColor.Editor.linkActive.staticColor : BeamColor.Editor.linkDecoration.staticColor
+        if !hasBoxBackground, let mouseInt = mouseInteraction, mouseInt.type == .hovered, BeamText.isPositionOnLinkArrow(mouseInt.range.lowerBound, in: range) {
+            color = BeamColor.Editor.link.staticColor
+        }
+        let imageName = "editor-url"
+        guard let fakeGlyph = Self.createGlyphForImage(named: imageName, color: color, attributes: attributedString.attributes(at: 0, effectiveRange: nil)) else {
+            return
+        }
         attributedString.append(fakeGlyph)
     }
 }

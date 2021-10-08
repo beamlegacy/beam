@@ -1,6 +1,7 @@
 // swiftlint:disable file_length
 import BeamCore
 import GRDB
+import Dispatch
 
 /// GRDBDatabase lets the application access the database.
 /// It's role is to setup the database schema.
@@ -213,6 +214,42 @@ extension GRDBDatabase {
             throw error
         }
         updateIndexedAt(for: note)
+    }
+
+    func appendAsync(element: BeamElement) {
+        guard let note = element.note else { return }
+        let noteTitle = note.title
+        let noteId = note.id
+        let elementId = element.id
+        let text = element.text.text
+        let links = element.internalLinksInSelf
+
+        DispatchQueue.global(qos: .default).async {
+            do {
+                try dbWriter.write { db in
+                    try BeamElementRecord.filter(Column("noteId") == noteId.uuidString && Column("uid") == element.id.uuidString).deleteAll(db)
+                    var record = BeamElementRecord(id: nil, title: noteTitle, text: text, uid: elementId.uuidString, noteId: noteId.uuidString)
+                    try record.insert(db)
+                    try BidirectionalLink.filter(Column("sourceElementId") == elementId && Column("sourceNoteId") == noteId).deleteAll(db)
+                }
+
+                for link in links {
+                    appendLink(link)
+                }
+
+                _ = try dbWriter.write({ db in
+                    var noteIndexingRecord = BeamNoteIndexingRecord(id: nil, noteId: noteId.uuidString, indexedAt: BeamDate.now)
+                    try BeamNoteIndexingRecord
+                        .filter(BeamNoteIndexingRecord.Columns.noteId == noteId.uuidString)
+                        .deleteAll(db)
+                    try noteIndexingRecord.insert(db)
+                })
+
+            } catch {
+                Logger.shared.logError("Error while indexing element \(noteTitle) - \(element.id.uuidString): \(error)", category: .search)
+            }
+            updateIndexedAt(for: note)
+        }
     }
 
     func remove(note: BeamNote) throws {

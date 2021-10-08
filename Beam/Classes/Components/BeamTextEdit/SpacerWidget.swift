@@ -16,9 +16,9 @@ class SpacerWidget: Widget {
 
     var spacerType: SpacerType
 
-   init(parent: Widget, spacerType: SpacerType) {
+    init(parent: Widget, spacerType: SpacerType, availableWidth: CGFloat?) {
         self.spacerType = spacerType
-        super.init(parent: parent)
+        super.init(parent: parent, availableWidth: availableWidth)
     }
 
     override func updateRendering() -> CGFloat {

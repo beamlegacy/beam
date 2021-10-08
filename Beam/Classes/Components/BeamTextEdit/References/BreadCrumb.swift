@@ -49,9 +49,9 @@ class BreadCrumb: Widget {
     private let spaceBreadcrumbIcon: CGFloat = 3
     private var containerPadding: CGFloat = 8
 
-    init(parent: Widget, element: BeamElement) {
+    init(parent: Widget, element: BeamElement, availableWidth: CGFloat?) {
         self.proxy = ProxyElement(for: element)
-        super.init(parent: parent, nodeProvider: NodeProviderImpl(proxy: true))
+        super.init(parent: parent, nodeProvider: NodeProviderImpl(proxy: true), availableWidth: availableWidth)
 
         self.crumbChain = computeCrumbChain(from: element)
 
@@ -249,7 +249,7 @@ class BreadCrumb: Widget {
     }
 
     func converReferenceToLink(_ text: String) {
-        guard let rootNote = editor?.note?.note else { return }
+        guard let rootNote = editor?.note.note else { return }
 
         text.ranges(of: rootNote.title, options: .caseInsensitive).forEach { range in
             let start = text.position(at: range.lowerBound)

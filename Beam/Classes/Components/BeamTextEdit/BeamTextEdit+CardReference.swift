@@ -12,6 +12,7 @@ extension BeamTextEdit {
 
     @discardableResult
     public func makeInternalLinkForSelectionOrShowFormatter(for node: TextNode, applyFormat: Bool = true) -> BeamText.Attribute? {
+        guard let rootNode = rootNode else { return nil }
         let title = node.root?.state.nodeSelection != nil ? node.text.text : selectedText
         guard !title.isEmpty, let doc = documentManager.loadDocumentByTitle(title: title) else {
             let text = selectedText
@@ -74,6 +75,7 @@ extension BeamTextEdit {
 
     private func onFinishSelectingLinkRef(in node: TextNode, title: String,
                                           range: Range<Int>, prefix: Int, suffix: Int) {
+        guard let rootNode = rootNode else { return }
         hideInlineFormatter()
         let replacementStart = range.lowerBound - prefix
         let replacementEnd = rootNode.cursorPosition + suffix
@@ -92,6 +94,7 @@ extension BeamTextEdit {
     }
 
     private func onFinishSelectingBlockRef(in node: TextNode, noteId: UUID, elementId: UUID, range: Range<Int>, prefix: Int, suffix: Int) {
+        guard let rootNode = rootNode else { return }
         hideInlineFormatter()
         let blockElement = BeamElement("")
         blockElement.kind = .blockReference(noteId, elementId)

@@ -436,7 +436,7 @@ extension TextRoot {
     public func unmarkText() {
         guard let node = focusedWidget as? TextNode, !node.readOnly else { return }
         markedTextRange = nil
-        node.invalidateText()
+        node.invalidateTextAsync()
     }
 
     public func insertText(string: String, replacementRange: Range<Int>?) {

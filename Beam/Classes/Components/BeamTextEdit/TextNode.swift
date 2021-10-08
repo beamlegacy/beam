@@ -14,7 +14,14 @@ import BeamCore
 
 // swiftlint:disable:next type_body_length
 public class TextNode: ElementNode {
-    var textFrame: TextFrame?
+    var textFrame: TextFrame? {
+        didSet {
+            guard let textFrame = textFrame else { return }
+            let layerTree = textFrame.layerTree
+            let textLayer = Layer(name: "text", layer: layerTree)
+            addLayer(textLayer, origin: CGPoint(x: contentsLead, y: 0))
+        }
+    }
     var emptyTextFrame: TextFrame?
 
     var mouseIsDragged = false
@@ -55,7 +62,7 @@ public class TextNode: ElementNode {
     override var hover: Bool {
         didSet {
             if oldValue != hover {
-                invalidateText()
+                invalidateTextAsync()
             }
         }
     }
@@ -80,12 +87,8 @@ public class TextNode: ElementNode {
 
             displayedElement.text = newValue
             displayedElement.note?.modifiedByUser()
-            invalidateText()
         }
     }
-
-    var searchHighlightRanges: [Range<Int>] = []
-    var currentSearchHightlight: Int?
 
     var textLayer: Layer? {
         self.layers["text"]
@@ -93,7 +96,7 @@ public class TextNode: ElementNode {
 
     override var open: Bool {
         didSet {
-            guard !initialLayout, element.open != open else { return }
+            guard !inInitialLayout, element.open != open else { return }
             element.open = open
         }
     }
@@ -140,7 +143,7 @@ public class TextNode: ElementNode {
     var markedTextRange: Range<Int>? { root?.markedTextRange }
 
     override var firstLineHeight: CGFloat {
-        let textFrame = emptyTextFrame ?? self.textFrame
+        let textFrame = emptyTextFrame ?? textFrame
         return textFrame?.lines.first?.bounds.height ?? CGFloat(fontSize * interlineFactor)
     }
     override var firstLineBaseline: CGFloat {
@@ -176,14 +179,14 @@ public class TextNode: ElementNode {
 
     // MARK: - Initializer
 
-    override init(parent: Widget, element: BeamElement, nodeProvider: NodeProvider? = nil) {
-        super.init(parent: parent, element: element, nodeProvider: nodeProvider)
+    override init(parent: Widget, element: BeamElement, nodeProvider: NodeProvider? = nil, availableWidth: CGFloat?) {
+        super.init(parent: parent, element: element, nodeProvider: nodeProvider, availableWidth: availableWidth)
 
         setupTextNode()
     }
 
-    override init(editor: BeamTextEdit, element: BeamElement, nodeProvider: NodeProvider? = nil) {
-        super.init(editor: editor, element: element, nodeProvider: nodeProvider)
+    override init(editor: BeamTextEdit, element: BeamElement, nodeProvider: NodeProvider? = nil, availableWidth: CGFloat?) {
+        super.init(editor: editor, element: element, nodeProvider: nodeProvider, availableWidth: availableWidth)
 
         setupTextNode()
     }
@@ -272,7 +275,36 @@ public class TextNode: ElementNode {
         updateActionLayer(animate: !editor.isResizing)
     }
 
+    var invalidateTextDispatched = false
+
+    public func invalidateTextAsync() {
+        if !invalidateTextDispatched {
+            invalidateTextDispatched = true
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self, self.invalidateTextDispatched else { return }
+                self.invalidateTextDispatched = false
+                self.invalidateText()
+            }
+        }
+    }
+
+    var invalidateTextCount = 0
+    var invalidateUpdatedTextCount = 0
     override public func invalidateText() {
+        invalidateTextCount += 1
+//        guard !hasCmdManager || !cmdManager.isRunningCommand else {
+//            if !invalidateTextDispatched {
+//                invalidateTextDispatched = true
+//                DispatchQueue.main.async { [weak self] in
+//                    guard let self = self else { return }
+//                    self.invalidateTextDispatched = false
+//                    self.invalidateText()
+//                }
+//            }
+//            return
+//        }
+//
+        invalidateTextDispatched = false
         invalidateText(forced: false)
     }
 
@@ -309,31 +341,58 @@ public class TextNode: ElementNode {
         }
     }
 
+    func buildTextFrames(position: CGPoint, width: CGFloat, height: CGFloat?, attributedString: NSAttributedString) -> (TextFrame, TextFrame?) {
+
+        let textFrame = TextFrame.create(string: attributedString, atPosition: position, textWidth: width, singleLineHeightFactor: PreferencesManager.editorLineHeight, maxHeight: height)
+
+        if debug {
+            Logger.shared.logInfo("After updateTextFrame() - \(attributedString) / \(self.textFrame?.frame ?? .zero)")
+        }
+
+        var fakeFrame: TextFrame?
+        if attributedString.string.isEmpty {
+            let dummyText = buildAttributedString(for: BeamText(text: "Dummy!"), enableInteractions: false)
+            fakeFrame = TextFrame.create(string: dummyText, atPosition: position, textWidth: width, singleLineHeightFactor: PreferencesManager.editorLineHeight, maxHeight: nil)
+
+        }
+
+        return (textFrame, fakeFrame)
+    }
+
+    var maxVisibleHeight: CGFloat? {
+        return editor?.remainingIndicativeVisibleHeight
+    }
+
     func updateTextFrame() {
         if selfVisible {
+            invalidateUpdatedTextCount += 1
+            if debug {
+                Logger.shared.logInfo("updateTextFrame \(element.note?.title ?? "<untitled>")/\(elementId) - \(invalidateTextCount) - \(invalidateUpdatedTextCount) (width: \(availableWidth) - frame: \(frame)", category: .noteEditor)
+            }
             emptyTextFrame = nil
 
             if debug {
                 Logger.shared.logInfo("Before updateTextFrame() - \(attributedString) / \(self.textFrame?.frame ?? .zero)")
             }
 
-            let attrStr = attributedString
             let width = contentsWidth - textPadding.left - textPadding.right
-            let textFrame = TextFrame.create(string: attrStr, atPosition: NSPoint(x: textPadding.left, y: textPadding.top), textWidth: width, singleLineHeightFactor: PreferencesManager.editorLineHeight)
+
+            let maxHeight = inInitialLayout ? maxVisibleHeight : nil
+            let position = CGPoint(x: textPadding.left, y: textPadding.top)
+            let (textFrame, fakeFrame) = buildTextFrames(position: position, width: width, height: maxHeight, attributedString: attributedString)
+
             self.textFrame = textFrame
-            let layerTree = textFrame.layerTree
-            let textLayer = Layer(name: "text", layer: layerTree)
-            addLayer(textLayer, origin: CGPoint(x: contentsLead, y: 0))
+            self.emptyTextFrame = fakeFrame
 
-            if debug {
-                Logger.shared.logInfo("After updateTextFrame() - \(attributedString) / \(self.textFrame?.frame ?? .zero)")
-            }
-
-            if attrStr.string.isEmpty {
-                let dummyText = buildAttributedString(for: BeamText(text: "Dummy!"))
-                let fakelayout = TextFrame.create(string: dummyText, atPosition: NSPoint(x: textPadding.left, y: textPadding.top), textWidth: width, singleLineHeightFactor: PreferencesManager.editorLineHeight)
-
-                self.emptyTextFrame = fakelayout
+            if inInitialLayout, !textFrame.isComplete {
+                // if we deliberately made the choice to compute a smaller height of text for performances reasons, we must start again with the full height when possible:
+                DispatchQueue.global(qos: .userInteractive).async { [self, attributedString] in
+                    let (textFrame, _) = self.buildTextFrames(position: position, width: width, height: nil, attributedString: attributedString)
+                    DispatchQueue.main.async {
+                        self.textFrame = textFrame
+                        invalidateLayout()
+                    }
+                }
             }
         }
     }
@@ -665,7 +724,7 @@ public class TextNode: ElementNode {
             if link != nil {
                 let (linkRange, linkFrame) = linkRangeAt(point: mouseInfo.position)
                 if let linkRange = linkRange, let currentNode = widgetAt(point: mouseInfo.position) as? TextNode, !isMouseInsideFormatter {
-                    invalidateText()
+                    invalidateTextAsync()
                     cursor = .pointingHand
                     if let positionInText = indexAt(point: mouseInfo.position, limitToTextString: false),
                        BeamText.isPositionOnLinkArrow(positionInText, in: linkRange) {
@@ -683,7 +742,7 @@ public class TextNode: ElementNode {
                     cursor = internalLink != nil ? .pointingHand : .iBeam
                 }
                 editor.linkStoppedHovering()
-                invalidateText()
+                invalidateTextAsync()
             }
         }
         lastHoverMouseInfo = mouseInfo
@@ -881,25 +940,33 @@ public class TextNode: ElementNode {
     override public func caretAbove(_ caretIndex: Int) -> Int {
         guard let textFrame = textFrame else { return 0 }
         let currentCaret = textFrame.carets[caretIndex]
-        let lineAbove = currentCaret.line - 1
-        guard lineAbove >= 0 else { return 0 }
+        let lineAboveIndex = currentCaret.line - 1
+        guard lineAboveIndex >= 0 else { return 0 }
         let offset = currentCaret.offset
-        return
-            textFrame.carets.firstIndex { $0.line == lineAbove && $0.offset.x >= offset.x }
-            ?? textFrame.carets.lastIndex { $0.line == lineAbove }
-            ?? 0
+        let lineAbove = textFrame.lines[lineAboveIndex]
+        if let index = lineAbove.carets.binarySearch(predicate: {
+            $0.offset.x < offset.x
+        }) {
+            return lineAbove.caretOffset + index
+        }
+
+        return lineAbove.caretOffset + lineAbove.carets.count - 1
     }
 
     override public func caretBelow(_ caretIndex: Int) -> Int {
         guard let textFrame = textFrame else { return 0 }
         let currentCaret = textFrame.carets[caretIndex]
-        let lineBelow = currentCaret.line + 1
-        guard lineBelow < textFrame.lines.count else { return textFrame.carets.count - 1 }
+        let lineBelowIndex = currentCaret.line + 1
+        guard lineBelowIndex < textFrame.lines.count else { return textFrame.carets.count - 1 }
         let offset = currentCaret.offset
-        return
-            textFrame.carets.firstIndex { $0.line == lineBelow && $0.offset.x >= offset.x }
-            ?? textFrame.carets.lastIndex { $0.line == lineBelow }
-            ?? textFrame.carets.count - 1
+        let lineBelow = textFrame.lines[lineBelowIndex]
+        if let index = lineBelow.carets.binarySearch(predicate: {
+            $0.offset.x < offset.x
+        }) {
+            return lineBelow.caretOffset + index
+        }
+
+        return lineBelow.caretOffset + lineBelow.carets.count - 1
     }
 
     override public func positionForCaretIndex(_ caretIndex: Int) -> Int {
@@ -938,9 +1005,13 @@ public class TextNode: ElementNode {
 
     override public func rectAt(caretIndex: Int) -> NSRect {
         computeRendering()
-        guard let textFrame = textFrame else { return .zero }
+        guard let textFrame = emptyTextFrame ?? textFrame else { return .zero }
         let caret = caretIndex >= textFrame.carets.count ? initialCaret : textFrame.carets[caretIndex]
         let position = caret.positionInSource
+
+        guard caret.line < textFrame.lines.count else {
+            return .null
+        }
 
         let textLine: TextLine = {
             if let emptyLayout = emptyTextFrame {
@@ -957,7 +1028,7 @@ public class TextNode: ElementNode {
     }
 
     override public func indexOnLastLine(atOffset x: CGFloat) -> Int {
-        guard let lines = textFrame?.lines else { return 0 }
+        guard let lines = (emptyTextFrame ?? self.textFrame)?.lines else { return 0 }
         guard !lines.isEmpty else { return 0 }
         guard let line = lines.last else { return 0 }
         let displayIndex = line.stringIndexFor(position: NSPoint(x: x - contentsPadding.left, y: 0))
@@ -969,7 +1040,7 @@ public class TextNode: ElementNode {
     }
 
     override public func indexOnFirstLine(atOffset x: CGFloat) -> Int {
-        guard let lines = textFrame?.lines else { return 0 }
+        guard let lines = (emptyTextFrame ?? self.textFrame)?.lines else { return 0 }
         guard !lines.isEmpty else { return 0 }
         guard let line = lines.first else { return 0 }
         let displayIndex = line.stringIndexFor(position: NSPoint(x: x - contentsPadding.left, y: 0))
@@ -1107,17 +1178,17 @@ public class TextNode: ElementNode {
         context.fill(contentsFrame)
     }
 
-    private func buildAttributedString(for beamText: BeamText) -> NSMutableAttributedString {
+    private func buildAttributedString(for beamText: BeamText, enableInteractions: Bool = true) -> NSMutableAttributedString {
 
         var mouseInteraction: MouseInteraction?
-        if let hoverMouse = lastHoverMouseInfo, isHoveringText() {
+        if enableInteractions, let hoverMouse = lastHoverMouseInfo, isHoveringText() {
             if let pos = indexAt(point: hoverMouse.position, limitToTextString: false) {
                 let nsrange = NSRange(location: pos, length: 1)
                 mouseInteraction = MouseInteraction(type: MouseInteractionType.hovered, range: nsrange)
             }
         }
-        let caret = isFocused ? caretAtIndex(caretIndex) : nil
-        let selectedRange = selected ? text.wholeRange : selectedTextRange
+        let caret = enableInteractions ? (isFocused ? caretAtIndex(caretIndex) : nil) : nil
+        let selectedRange = enableInteractions ? (selected ? text.wholeRange : selectedTextRange) : text.wholeRange
         let str = beamText.buildAttributedString(node: self,
                                                  caret: caret,
                                                  selectedRange: selectedRange,
@@ -1126,7 +1197,7 @@ public class TextNode: ElementNode {
         //        paragraphStyle.alignment = .justified
         paragraphStyle.lineBreakMode = .byWordWrapping
         paragraphStyle.lineHeightMultiple = interlineFactor
-        paragraphStyle.lineSpacing = 40
+//        paragraphStyle.lineSpacing = 40
         paragraphStyle.paragraphSpacingBefore = 0
         paragraphStyle.paragraphSpacing = 10
 
@@ -1482,42 +1553,5 @@ public class TextNode: ElementNode {
     public override func clampTextRange(_ range: Range<Int>) -> Range<Int> {
         text.clamp(range)
     }
-
-}
-
-// MARK: - Search
-extension TextNode {
-
-    func allElementsContaining(someText: String) -> [SearchResult] {
-
-        var results = [SearchResult]()
-        self.searchHighlightRanges = []
-        let ranges = text.text.countInstances(of: someText)
-        if !ranges.isEmpty {
-            results.append(SearchResult(element: self, ranges: ranges))
-            self.searchHighlightRanges = ranges.map({ Range($0) }).compactMap({ $0 })
-        }
-
-        for c in children where c is TextNode {
-            guard let c = c as? TextNode else { continue }
-            let elements = c.allElementsContaining(someText: someText)
-            if !elements.isEmpty {
-                results.append(contentsOf: elements)
-            }
-        }
-
-        return results
-    }
-
-    func clearSearch() {
-        self.searchHighlightRanges = []
-        self.currentSearchHightlight = nil
-        for c in children {
-            if let c = c as? TextNode {
-                c.clearSearch()
-            }
-        }
-    }
-
 
 }
