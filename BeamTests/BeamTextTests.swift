@@ -268,7 +268,7 @@ class BeamTextTests: XCTestCase {
         let asBuilder = BeamTextAttributedStringBuilder()
         let config = BeamTextAttributedStringBuilder.Config(elementKind: .bullet, ranges: text.ranges, fontSize: 12, searchedRanges: [])
         let attributedString = asBuilder.build(config: config)
-        let textFrame = TextFrame.create(string: attributedString, atPosition: NSPoint(), textWidth: 500, singleLineHeightFactor: nil)
+        let textFrame = TextFrame.create(string: attributedString, atPosition: NSPoint(), textWidth: 500, singleLineHeightFactor: nil, maxHeight: nil)
         guard let line = textFrame.lines.first else { fatalError() }
         let carets = line.carets
 

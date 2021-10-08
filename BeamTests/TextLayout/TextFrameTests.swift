@@ -64,7 +64,7 @@ class TextFrameTests: XCTestCase {
         attributedString = asBuilder.build(config: config)
         let position = NSPoint(x: 0, y: 0)
 
-        let textFrame = TextFrame.create(string: attributedString, atPosition: position, textWidth: textWidth, singleLineHeightFactor: nil)
+        let textFrame = TextFrame.create(string: attributedString, atPosition: position, textWidth: textWidth, singleLineHeightFactor: nil, maxHeight: nil)
         carets = textFrame.carets
 
         expect(textFrame.frame.origin) == position
@@ -158,7 +158,7 @@ class TextFrameTests: XCTestCase {
 
         let position = NSPoint(x: 0, y: 0)
 
-        let textFrame = TextFrame.create(string: attributedString, atPosition: position, textWidth: textWidth, singleLineHeightFactor: nil)
+        let textFrame = TextFrame.create(string: attributedString, atPosition: position, textWidth: textWidth, singleLineHeightFactor: nil, maxHeight: nil)
         carets = textFrame.carets
 
         expect(textFrame.frame.origin) == position

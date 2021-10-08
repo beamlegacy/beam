@@ -88,6 +88,7 @@ class TextNodeTests: XCTestCase {
     func createNodeWithInternalLink() -> TextNode {
         let note = createMiniArborescence(title: "title")
         editor = BeamTextEdit(root: note, journalMode: true)
+        editor.prepareRoot()
         let root = editor.rootNode!
         note.addChild(BeamElement("before link "))
         let linkElement = BeamText(text: "My Internal Note", attributes: [
@@ -106,6 +107,7 @@ class TextNodeTests: XCTestCase {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
         editor = BeamTextEdit(root: note, journalMode: true)
+        editor.prepareRoot()
         let root = editor.rootNode!
 //        Logger.shared.logDebug("Tree:\n\(root.printTree())\n")
         validateRootWithNote(root: root, note: note)
@@ -130,6 +132,7 @@ class TextNodeTests: XCTestCase {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
         editor = BeamTextEdit(root: note, journalMode: true)
+        editor.prepareRoot()
         let root = editor.rootNode!
 //        Logger.shared.logDebug("Tree:\n\(root.printTree())\n")
         validateRootWithNote(root: root, note: note)
@@ -154,6 +157,7 @@ class TextNodeTests: XCTestCase {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
         editor = BeamTextEdit(root: note, journalMode: true)
+        editor.prepareRoot()
         let root = editor.rootNode!
         validateRootWithNote(root: root, note: note)
 
@@ -178,11 +182,12 @@ class TextNodeTests: XCTestCase {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
         editor = BeamTextEdit(root: note, journalMode: true)
+        editor.prepareRoot()
         let root = editor.rootNode!
         validateRootWithNote(root: root, note: note)
 
         let bullet3 = BeamElement("bullet3")
-        root.addChild(TextNode(parent: root, element: bullet3))
+        root.addChild(TextNode(parent: root, element: bullet3, availableWidth: 600))
 
         let str1 = """
         title
@@ -207,10 +212,11 @@ class TextNodeTests: XCTestCase {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
         editor = BeamTextEdit(root: note, journalMode: true)
+        editor.prepareRoot()
         let root = editor.rootNode!
         validateRootWithNote(root: root, note: note)
 
-        _ = root.insert(node: TextNode(parent: root, element: BeamElement("bullet3")), after: root.children.first!)
+        _ = root.insert(node: TextNode(parent: root, element: BeamElement("bullet3"), availableWidth: 600), after: root.children.first!)
 
         let str1 = """
         title
@@ -234,6 +240,7 @@ class TextNodeTests: XCTestCase {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
         editor = BeamTextEdit(root: note, journalMode: true)
+        editor.prepareRoot()
         let root = editor.rootNode!
         validateRootWithNote(root: root, note: note)
 
@@ -261,6 +268,7 @@ class TextNodeTests: XCTestCase {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
         editor = BeamTextEdit(root: note, journalMode: true)
+        editor.prepareRoot()
         let root = editor.rootNode!
         validateRootWithNote(root: root, note: note)
 
@@ -289,10 +297,11 @@ class TextNodeTests: XCTestCase {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
         editor = BeamTextEdit(root: note, journalMode: true)
+        editor.prepareRoot()
         let root = editor.rootNode!
         validateRootWithNote(root: root, note: note)
 
-        let node = TextNode(parent: root, element: BeamElement("bullet13"))
+        let node = TextNode(parent: root, element: BeamElement("bullet13"), availableWidth: 600)
         node.element.addChild(BeamElement("bullet131"))
         let first = root.children.first as? TextNode
         first?.element.addChild(node.element)
@@ -320,10 +329,11 @@ class TextNodeTests: XCTestCase {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
         editor = BeamTextEdit(root: note, journalMode: true)
+        editor.prepareRoot()
         let root = editor.rootNode!
         validateRootWithNote(root: root, note: note)
 
-        let node = TextNode(parent: root, element: BeamElement("bullet13"))
+        let node = TextNode(parent: root, element: BeamElement("bullet13"), availableWidth: 600)
         node.element.addChild(BeamElement("bullet131"))
         let first = root.children.first as? TextNode
         _ = first?.element.insert(node.element, after: first!.element.children.first!)
@@ -351,6 +361,7 @@ class TextNodeTests: XCTestCase {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
         editor = BeamTextEdit(root: note, journalMode: true)
+        editor.prepareRoot()
         let root = editor.rootNode!
 //        Logger.shared.logDebug("Tree:\n\(root.printTree())\n")
         validateRootWithNote(root: root, note: note)
@@ -375,6 +386,7 @@ class TextNodeTests: XCTestCase {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
         editor = BeamTextEdit(root: note, journalMode: true)
+        editor.prepareRoot()
         let root = editor.rootNode!
 //        Logger.shared.logDebug("Tree:\n\(root.printTree())\n")
         validateRootWithNote(root: root, note: note)
@@ -402,6 +414,7 @@ class TextNodeTests: XCTestCase {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
         editor = BeamTextEdit(root: note, journalMode: true)
+        editor.prepareRoot()
         let root = editor.rootNode!
 //        Logger.shared.logDebug("Tree:\n\(root.printTree())\n")
         validateRootWithNote(root: root, note: note)
@@ -459,6 +472,7 @@ class TextNodeTests: XCTestCase {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
         editor = BeamTextEdit(root: note, journalMode: true)
+        editor.prepareRoot()
         let root = editor.rootNode!
 //        Logger.shared.logDebug("Tree:\n\(root.printTree())\n")
         validateRootWithNote(root: root, note: note)
@@ -515,6 +529,7 @@ class TextNodeTests: XCTestCase {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
         editor = BeamTextEdit(root: note, journalMode: true)
+        editor.prepareRoot()
         let root = editor.rootNode!
 //        Logger.shared.logDebug("Tree:\n\(root.printTree())\n")
         validateRootWithNote(root: root, note: note)
@@ -606,6 +621,7 @@ class TextNodeTests: XCTestCase {
         let frame = NSRect(x: 0, y: 0, width: 400, height: 500)
         let note = createMiniArborescence(title: "title")
         editor = BeamTextEdit(root: note, journalMode: true)
+        editor.prepareRoot()
         guard let root = editor?.rootNode else { XCTFail("RootNode isn't attached to an editor."); return }
         validateRootWithNote(root: root, note: note)
 
@@ -646,6 +662,7 @@ class TextNodeTests: XCTestCase {
         let frame = NSRect(x: 0, y: 0, width: 400, height: 500)
         let note = createMiniArborescence(title: "title")
         editor = BeamTextEdit(root: note, journalMode: true)
+        editor.prepareRoot()
         let root = editor.rootNode!
 //        Logger.shared.logDebug("Tree:\n\(root.printTree())\n")
         validateRootWithNote(root: root, note: note)
@@ -689,6 +706,7 @@ class TextNodeTests: XCTestCase {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
         editor = BeamTextEdit(root: note, journalMode: true)
+        editor.prepareRoot()
         let root = editor.rootNode!
         XCTAssertEqual(" bullet1 bullet11 bullet12 bullet2 bullet21 bullet22 bullet23", root.fullStrippedText)
         BeamNote.clearCancellables()
@@ -699,6 +717,7 @@ class TextNodeTests: XCTestCase {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
         editor = BeamTextEdit(root: note, journalMode: true)
+        editor.prepareRoot()
         let root = editor.rootNode!
         note.addChild(BeamElement("before link "))
         let linkElement = BeamText(text: "ExternalLink.com", attributes: [

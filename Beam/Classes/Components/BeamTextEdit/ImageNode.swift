@@ -23,13 +23,13 @@ class ImageNode: ElementNode {
         return NSSize(width: width, height: height)
     }
 
-    init(parent: Widget, element: BeamElement) {
-        super.init(parent: parent, element: element)
+    init(parent: Widget, element: BeamElement, availableWidth: CGFloat?) {
+        super.init(parent: parent, element: element, availableWidth: availableWidth)
         setupImage()
     }
 
-    init(editor: BeamTextEdit, element: BeamElement) {
-        super.init(editor: editor, element: element)
+    init(editor: BeamTextEdit, element: BeamElement, availableWidth: CGFloat?) {
+        super.init(editor: editor, element: element, availableWidth: availableWidth)
         setupImage()
     }
 

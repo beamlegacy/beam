@@ -88,18 +88,18 @@ public class TextLine {
         return carets.last?.positionInSource ?? 0
     }
 
+    private func charsToSkip(_ index: Int) -> Int {
+        notInSourcePositions.binarySearch(predicate: { elem -> Bool in
+            index > elem
+        }) ?? notInSourcePositions.count
+
+    }
     public func fromSource(_ index: Int) -> Int {
-        let skipped = notInSourcePositions.compactMap { pos -> Int? in
-            pos < index ? pos : nil
-        }.count
-        return index + skipped
+        index + charsToSkip(index)
     }
 
     public func toSource(_ index: Int) -> Int {
-        let toSkip = notInSourcePositions.compactMap { pos -> Int? in
-            pos < index ? pos : nil
-        }.count
-        return index - toSkip
+        index - charsToSkip(index)
     }
 
     public func isAfterEndOfLine(_ point: NSPoint) -> Bool {
@@ -115,13 +115,24 @@ public class TextLine {
         return carets[position].offset.x
     }
 
+    public var caretOffset = 0
     lazy public var carets: [Caret] = {
         var c = [Caret]()
         c.reserveCapacity(CTLineGetGlyphCount(ctLine))
         let y = frame.minY
 
+        var currentNotInSource = 0
+        let end = notInSourcePositions.count
+        var value = notInSourcePositions.first
         CTLineEnumerateCaretOffsets(ctLine) { [self] (offset, index, leading, _) in
-            let inSource = !self.notInSourcePositions.binaryContains(index)
+            while currentNotInSource < end, let val = value, val < index {
+                currentNotInSource += 1
+                if currentNotInSource < end {
+                    value = notInSourcePositions[currentNotInSource]
+                }
+            }
+            let notInSource = value == index
+            let inSource = !notInSource
             let caret = Caret(offset: CGPoint(x: self.frame.origin.x + CGFloat(offset), y: y), indexInSource: -1, indexOnScreen: index, edge: leading ? .leading : .trailing, inSource: inSource, line: self.indexInFrame)
             var insertionIndex = c.count - 1
             while insertionIndex > 0 && c[insertionIndex] > caret {

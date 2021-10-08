@@ -17,14 +17,14 @@ class ProxyTextNode: TextNode, ProxyNode {
 
     // MARK: - Initializer
 
-    init(parent: Widget, element: BeamElement) {
+    init(parent: Widget, element: BeamElement, availableWidth: CGFloat?) {
         guard let proxyElement = parent.proxyFor(element) else { fatalError("Can't create a ProxyTextNode without a proxy provider in the parent chain") }
-        super.init(parent: parent, element: proxyElement)
+        super.init(parent: parent, element: proxyElement, availableWidth: availableWidth)
 
         element.$children
             .receive(on: DispatchQueue.main)
             .sink { [unowned self] newChildren in
-                guard self.editor != nil else { return }
+                guard self.editor != nil, parent != nil else { return }
                 self.children = newChildren.compactMap({ e -> ProxyTextNode? in
                     let ref = nodeFor(e, withParent: self)
                     ref.parent = self

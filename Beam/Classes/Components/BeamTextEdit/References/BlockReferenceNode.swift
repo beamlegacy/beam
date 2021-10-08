@@ -35,14 +35,14 @@ class BlockReferenceNode: TextNode {
         }
     }
 
-    init(parent: Widget, element: BeamElement) {
-        super.init(parent: parent, element: element, nodeProvider: NodeProviderImpl(proxy: true))
+    init(parent: Widget, element: BeamElement, availableWidth: CGFloat?) {
+        super.init(parent: parent, element: element, nodeProvider: NodeProviderImpl(proxy: true), availableWidth: availableWidth)
 
         setupBlockReference()
     }
 
-    init(editor: BeamTextEdit, element: BeamElement) {
-        super.init(editor: editor, element: element, nodeProvider: NodeProviderImpl(proxy: true))
+    init(editor: BeamTextEdit, element: BeamElement, availableWidth: CGFloat?) {
+        super.init(editor: editor, element: element, nodeProvider: NodeProviderImpl(proxy: true), availableWidth: availableWidth)
 
         setupBlockReference()
     }
