@@ -4,11 +4,13 @@ import PromiseKit
 import PMKFoundation
 import Promises
 import BeamCore
+import Vinyl
 
 // swiftlint:disable file_length
 
 class BeamURLSession {
     static var shared = URLSession.shared
+    static var shouldNotBeVinyled = false
     static func reset() {
         Self.shared = URLSession.shared
     }
@@ -22,7 +24,7 @@ class APIRequest: NSObject {
     private static var uploadedBytes: Int64 = 0
     private static var downloadedBytes: Int64 = 0
     let backgroundQueue = DispatchQueue(label: "APIRequest backgroundQueue", qos: .userInitiated)
-    private(set) var dataTask: URLSessionDataTask?
+    private(set) var dataTask: Foundation.URLSessionDataTask?
     private var cancelRequest: Bool = false
 
     static var deviceId = UUID() // TODO: Persist this in Persistence
@@ -254,7 +256,8 @@ extension APIRequest {
     //swiftlint:disable:next function_body_length
     func performRequest<T: Decodable & Errorable, E: GraphqlParametersProtocol>(bodyParamsRequest: E,
                                                                                 authenticatedCall: Bool? = nil,
-                                                                                completionHandler: @escaping (Swift.Result<T, Error>) -> Void) throws -> URLSessionDataTask {
+                                                                                completionHandler: @escaping (Swift.Result<T, Error>) -> Void) throws -> Foundation.URLSessionDataTask {
+
         let request = try makeUrlRequest(bodyParamsRequest, authenticatedCall: authenticatedCall)
 
         let filename = bodyParamsRequest.fileName ?? "no filename"
@@ -267,11 +270,15 @@ extension APIRequest {
         Self.networkCallFilesSemaphore.signal()
 
         if !Self.expectedCallFiles.isEmpty, !Self.expectedCallFiles.starts(with: Self.networkCallFiles) {
-            Logger.shared.logDebug("expectedFiles: \(Self.expectedCallFiles)", category: .network)
-            Logger.shared.logDebug("current network: \(Self.networkCallFiles)", category: .network)
-            Logger.shared.logError("🕸 current network calls is different from expected", category: .network)
+            Logger.shared.logDebug("Expected network calls: \(Self.expectedCallFiles)", category: .network)
+            Logger.shared.logDebug("Current network calls: \(Self.networkCallFiles)", category: .network)
+            Logger.shared.logError("Current network calls is different from expected", category: .network)
         }
         #endif
+
+        if Configuration.env == "test", !BeamURLSession.shouldNotBeVinyled, !(BeamURLSession.shared is Turntable) {
+            fatalError("All network calls must be catched by Vinyl in test environment. \(filename) was called.")
+        }
 
         // Note: all `completionHandler` call must use `backgroundQueue.async` because if the
         // code called in the completion handler is blocking, it will prevent new following requests
@@ -368,9 +375,9 @@ extension APIRequest {
 
         #if DEBUG
         if !Self.expectedCallFiles.isEmpty, !Self.expectedCallFiles.starts(with: Self.networkCallFiles) {
-            Logger.shared.logDebug("expectedFiles: \(Self.expectedCallFiles)", category: .network)
-            Logger.shared.logDebug("current network: \(Self.networkCallFiles)", category: .network)
-            Logger.shared.logError("🕸 current network calls is different from expected", category: .network)
+            Logger.shared.logDebug("Expected network calls: \(Self.expectedCallFiles)", category: .network)
+            Logger.shared.logDebug("Current network calls: \(Self.networkCallFiles)", category: .network)
+            Logger.shared.logError("Current network calls is different from expected", category: .network)
         }
         #endif
 

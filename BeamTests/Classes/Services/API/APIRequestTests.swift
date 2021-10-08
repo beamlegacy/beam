@@ -60,6 +60,10 @@ class APIRequestTests: QuickSpec {
                 beforeEach {
                     Configuration.apiHostname = "http://localhost2"
                     beamHelper.disableNetworkRecording()
+                    BeamURLSession.shouldNotBeVinyled = true
+                }
+                afterEach {
+                    BeamURLSession.shouldNotBeVinyled = false
                 }
 
                 it("manages errors") {
@@ -98,6 +102,11 @@ class APIRequestTests: QuickSpec {
             context("with wrong api hostname") {
                 beforeEach {
                     Configuration.apiHostname = "http://localhost2"
+                    beamHelper.disableNetworkRecording()
+                    BeamURLSession.shouldNotBeVinyled = true
+                }
+                afterEach {
+                    BeamURLSession.shouldNotBeVinyled = false
                 }
 
                 it("manages errors") {
@@ -141,6 +150,10 @@ class APIRequestTests: QuickSpec {
                 beforeEach {
                     Configuration.apiHostname = "http://localhost2"
                     beamHelper.disableNetworkRecording()
+                    BeamURLSession.shouldNotBeVinyled = true
+                }
+                afterEach {
+                    BeamURLSession.shouldNotBeVinyled = false
                 }
 
                 it("manages errors") {

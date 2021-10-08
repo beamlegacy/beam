@@ -10,7 +10,7 @@ import Vinyl
 @testable import BeamCore
 
 class BeamTestsHelper {
-    var turntable: Turntable?
+    private var turntable: Turntable?
     var testName: String = "no_test_name"
 
     func beginNetworkRecording(test: XCTestCase? = nil) {
@@ -57,9 +57,7 @@ class BeamTestsHelper {
         if !expectedNetworkCalls.isEmpty, expectedNetworkCalls != APIRequest.networkCallFiles {
             Logger.shared.logError("Expected network calls: \(expectedNetworkCalls)", category: .network)
             Logger.shared.logError("Current network calls: \(APIRequest.networkCallFiles)", category: .network)
-
-            Logger.shared.logDebug("\nrm BeamTests/Vinyl/\(QuickSpec.current.name.c99ExtendedIdentifier)*", category: .network)
-            fail("Expected network calls is different from current network calls")
+            fatalError("Expected network calls is different from current network calls")
         }
         saveAPIRequests()
 
