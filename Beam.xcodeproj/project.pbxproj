@@ -164,7 +164,6 @@
 		4181720A2581107C00317ED8 /* BrowserTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171822581107C00317ED8 /* BrowserTab.swift */; };
 		4181720E2581107C00317ED8 /* NoteBackForwardList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171862581107C00317ED8 /* NoteBackForwardList.swift */; };
 		418172112581107C00317ED8 /* Readability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181718B2581107C00317ED8 /* Readability.swift */; };
-		418172122581107C00317ED8 /* EventsTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181718C2581107C00317ED8 /* EventsTracker.swift */; };
 		418172152581107C00317ED8 /* NSContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181718F2581107C00317ED8 /* NSContainerView.swift */; };
 		418172182581107C00317ED8 /* PerformanceDebug.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171922581107C00317ED8 /* PerformanceDebug.swift */; };
 		418172192581107C00317ED8 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171942581107C00317ED8 /* Persistence.swift */; };
@@ -546,6 +545,8 @@
 		9674080625F237B2000AC2B8 /* String+URLTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9674080525F237B2000AC2B8 /* String+URLTests.swift */; };
 		9678217526726005001413EF /* LockButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9678217426726005001413EF /* LockButton.swift */; };
 		967B2685255465C5003F40E3 /* HtmlNoteAdapterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 967B2684255465C5003F40E3 /* HtmlNoteAdapterTests.swift */; };
+		9684F26F270F8DDA006BF53E /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = 9684F26E270F8DDA006BF53E /* Sentry */; };
+		9684F273270F9C25006BF53E /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = 9684F272270F9C25006BF53E /* Sentry */; };
 		96851B3926D55772008032E4 /* String+NLTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96851B3826D55772008032E4 /* String+NLTests.swift */; };
 		9686B47B26D6B9A400749455 /* NoteIndexingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9686B47A26D6B9A400749455 /* NoteIndexingTests.swift */; };
 		968A2DCA263973540021107F /* TextFrameTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 968A2DC9263973540021107F /* TextFrameTests.swift */; };
@@ -583,6 +584,7 @@
 		96E4CF76258EC88300D6DE22 /* BeamTextTools.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E4CF75258EC88300D6DE22 /* BeamTextTools.swift */; };
 		96EBCE0A262A01160014D923 /* ExportAllBrowsingSessions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96EBCE09262A01160014D923 /* ExportAllBrowsingSessions.swift */; };
 		96F2BF0F263B208500F02F16 /* Caret.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F2BF0E263B208500F02F16 /* Caret.swift */; };
+		96F5354A27104BE400B719C6 /* EventsTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181718C2581107C00317ED8 /* EventsTracker.swift */; };
 		96F673D225B7207100E8175B /* StoredLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F673D125B7207100E8175B /* StoredLink.swift */; };
 		96F936632590FA59006D8E53 /* BTextEdit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F936622590FA59006D8E53 /* BTextEdit.swift */; };
 		96FACC522604B0EE0088DD67 /* DeleteElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96FACC512604B0EE0088DD67 /* DeleteElement.swift */; };
@@ -631,7 +633,6 @@
 		A0A0FED1268F05CC0080EAEF /* PreferencesManager+Passwords.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0A0FED0268F05CC0080EAEF /* PreferencesManager+Passwords.swift */; };
 		A0A3BED5266FD1B200566D6C /* BeamStepperButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0A3BED4266FD1B200566D6C /* BeamStepperButton.swift */; };
 		A0A4301626655993003A3C08 /* ClusteringManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0A4301526655993003A3C08 /* ClusteringManager.swift */; };
-		A0A84FB62636FA99008F0326 /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = 527FB71925B9A97A00959146 /* Sentry */; };
 		A0A84FB72636FA99008F0326 /* JWTDecode in Frameworks */ = {isa = PBXBuildFile; productRef = 527FB71E25B9A9B600959146 /* JWTDecode */; };
 		A0A84FB92636FA99008F0326 /* PromiseKit in Frameworks */ = {isa = PBXBuildFile; productRef = 52BB698A25CD4E1E007A1173 /* PromiseKit */; };
 		A0A84FBC2636FA99008F0326 /* PMKFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 523E91CB25D17004001124E0 /* PMKFoundation */; };
@@ -1976,6 +1977,7 @@
 				96C0F72D26FCAE6100385449 /* UUIDKit in Frameworks */,
 				A0A84FC02636FA99008F0326 /* CocoaLumberjackSwift in Frameworks */,
 				96D5AE85264C01AD003AD516 /* TLDExtract in Frameworks */,
+				9684F26F270F8DDA006BF53E /* Sentry in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2009,7 +2011,6 @@
 				A0A84FBC2636FA99008F0326 /* PMKFoundation in Frameworks */,
 				33793AD7265CFEC50041E1B8 /* KeychainAccess in Frameworks */,
 				3315DC942667859A002A47CF /* PromisesTestHelpers in Frameworks */,
-				A0A84FB62636FA99008F0326 /* Sentry in Frameworks */,
 				964548A02523B3550064D062 /* CloudKit.framework in Frameworks */,
 				A5F47EC326F8D633004B7CDE /* Lottie in Frameworks */,
 				3315DC962667859A002A47CF /* OAuthSwift in Frameworks */,
@@ -2037,6 +2038,7 @@
 				96C0F73426FCBC0D00385449 /* UUIDKit in Frameworks */,
 				A0A84FC42636FA9A008F0326 /* Nimble in Frameworks */,
 				A0A84FC52636FA9A008F0326 /* CocoaLumberjackSwift in Frameworks */,
+				9684F273270F9C25006BF53E /* Sentry in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2510,7 +2512,6 @@
 				418171932581107C00317ED8 /* Persistence */,
 				418172FC25811DB200317ED8 /* Web */,
 				4181718B2581107C00317ED8 /* Readability.swift */,
-				4181718C2581107C00317ED8 /* EventsTracker.swift */,
 				8A2A398626F24F9E0084A073 /* Debounce.swift */,
 				8AD2631426F3A8730074D673 /* Throttle.swift */,
 				4181718F2581107C00317ED8 /* NSContainerView.swift */,
@@ -3637,6 +3638,7 @@
 			children = (
 				418171852581107C00317ED8 /* BID.swift */,
 				4181718D2581107C00317ED8 /* Logger.swift */,
+				4181718C2581107C00317ED8 /* EventsTracker.swift */,
 				9676141F25CA989D00BDA862 /* WeakReference.swift */,
 				9676143725CAAD5300BDA862 /* RWLock.swift */,
 			);
@@ -4486,6 +4488,7 @@
 				96319D52261623BB00D1CF31 /* CocoaLumberjackSwift */,
 				96D5AE84264C01AD003AD516 /* TLDExtract */,
 				96C0F72C26FCAE6100385449 /* UUIDKit */,
+				9684F26E270F8DDA006BF53E /* Sentry */,
 			);
 			productName = BeamCore;
 			productReference = 96319D0F2616232600D1CF31 /* BeamCore.framework */;
@@ -4538,7 +4541,6 @@
 				9631C746251CE997009B40C4 /* SwiftSoup */,
 				96474E3E254D9ADB00A920B3 /* FavIcon */,
 				524299AE25A47CA500F4DBF5 /* Preferences */,
-				527FB71925B9A97A00959146 /* Sentry */,
 				527FB71E25B9A9B600959146 /* JWTDecode */,
 				527FB72325B9AAA200959146 /* Fakery */,
 				52BB698A25CD4E1E007A1173 /* PromiseKit */,
@@ -4601,6 +4603,7 @@
 				9639FAF42616614D00C85B95 /* CocoaLumberjackSwift */,
 				A5946845265E30350044A892 /* Fakery */,
 				96C0F73326FCBC0D00385449 /* UUIDKit */,
+				9684F272270F9C25006BF53E /* Sentry */,
 			);
 			productName = BeamUITests;
 			productReference = 965A78482514F149009980D4 /* BeamUITests.xctest */;
@@ -5041,6 +5044,7 @@
 				96319D472616233E00D1CF31 /* String+Data.swift in Sources */,
 				523A32CF267764A200606768 /* EnvironmentVariables.swift in Sources */,
 				9609AF502617159B00322141 /* URL+Beam.swift in Sources */,
+				96F5354A27104BE400B719C6 /* EventsTracker.swift in Sources */,
 				522BC3D726A6EAEE0018B51E /* Date+IntValue.swift in Sources */,
 				96319D3D2616233E00D1CF31 /* BeamText+String.swift in Sources */,
 				96319D372616233E00D1CF31 /* String+LoremIpsum.swift in Sources */,
@@ -5212,7 +5216,6 @@
 				521EEDDD25937E9200BA2485 /* DocumentsWindow.swift in Sources */,
 				75F5909226F3972F001D5D19 /* ErrorPageView.swift in Sources */,
 				33353EE026F374B400063078 /* SectionFeaturesView.swift in Sources */,
-				418172122581107C00317ED8 /* EventsTracker.swift in Sources */,
 				A0CB7E54268E66CD00D15AFD /* View+Beam.swift in Sources */,
 				52019A5626DE2AB0005E8278 /* BeamObjectRequest+Foundation.swift in Sources */,
 				414B98FE25A27930002E81A3 /* FormatterType.swift in Sources */,
@@ -6810,11 +6813,6 @@
 			package = 524CF6D125F276D1007312F0 /* XCRemoteSwiftPackageReference "KeychainAccess" */;
 			productName = KeychainAccess;
 		};
-		527FB71925B9A97A00959146 /* Sentry */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 527FB71825B9A97A00959146 /* XCRemoteSwiftPackageReference "sentry-cocoa" */;
-			productName = Sentry;
-		};
 		527FB71E25B9A9B600959146 /* JWTDecode */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 527FB71D25B9A9B600959146 /* XCRemoteSwiftPackageReference "JWTDecode.swift" */;
@@ -6869,6 +6867,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 964FE5DF2625D8AA00966E03 /* XCRemoteSwiftPackageReference "GRDB.swift" */;
 			productName = GRDB;
+		};
+		9684F26E270F8DDA006BF53E /* Sentry */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 527FB71825B9A97A00959146 /* XCRemoteSwiftPackageReference "sentry-cocoa" */;
+			productName = Sentry;
+		};
+		9684F272270F9C25006BF53E /* Sentry */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 527FB71825B9A97A00959146 /* XCRemoteSwiftPackageReference "sentry-cocoa" */;
+			productName = Sentry;
 		};
 		96C0F72C26FCAE6100385449 /* UUIDKit */ = {
 			isa = XCSwiftPackageProductDependency;

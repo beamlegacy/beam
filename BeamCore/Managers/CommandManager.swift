@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Sentry
 
 open class Command<Context>: Codable {
     open var name: String
@@ -141,6 +142,7 @@ public class CommandManager<Context> {
 
     @discardableResult
     public func run(command: Command<Context>, on context: Context?) -> Bool {
+        EventsTracker.logBreadcrumb(message: "Run command \(command.name)", category: "CommandManager")
         Logger.shared.logDebug("Run: \(command.name)", category: .commandManager)
         let done = command.run(context: context)
 
@@ -163,6 +165,8 @@ public class CommandManager<Context> {
         }
 
         guard let lastCmd = doneQueue.last else { return false }
+        EventsTracker.logBreadcrumb(message: "Undo command \(lastCmd.name)", category: "CommandManager")
+
         Logger.shared.logDebug("Undo: \(lastCmd.name)", category: .commandManager)
 
         guard lastCmd.undo(context: context) else {
@@ -181,6 +185,8 @@ public class CommandManager<Context> {
         }
 
         guard let lastCmd = undoneQueue.last else { return false }
+        EventsTracker.logBreadcrumb(message: "Redo command \(lastCmd.name)", category: "CommandManager")
+
         Logger.shared.logDebug("Redo: \(lastCmd.name)", category: .commandManager)
 
         guard lastCmd.run(context: context) else {
