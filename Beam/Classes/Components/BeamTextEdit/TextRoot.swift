@@ -32,7 +32,7 @@ public struct TextConfig {
     var blendMode: CGBlendMode = .normal
 }
 
-public class TextRoot: TextNode {
+public class TextRoot: ElementNode {
     @Published var textIsSelected = false
     static var showBrowsingSection = false
     var note: BeamNote? { element as? BeamNote }
@@ -41,7 +41,7 @@ public class TextRoot: TextNode {
 
     private var _config = TextConfig()
     override var config: TextConfig { _config }
-    override var selectedTextRange: Range<Int> {
+    var selectedTextRange: Range<Int> {
         get {
             state.selectedTextRange
         }
@@ -50,7 +50,7 @@ public class TextRoot: TextNode {
             state.selectedTextRange = newValue
         }
     }
-    override var markedTextRange: Range<Int>? {
+    var markedTextRange: Range<Int>? {
         get {
             state.markedTextRange
         }
@@ -84,7 +84,7 @@ public class TextRoot: TextNode {
             state.selectedTextRange = cursorPosition ..< cursorPosition
         }
         updateTextAttributesAtCursorPosition()
-        n?.invalidateText()
+        n?.invalidateTextAsync()
         focusedWidget?.invalidate()
         editor?.reBlink()
         n?.updateCursor()
@@ -153,10 +153,10 @@ public class TextRoot: TextNode {
             let oldNode = oldValue as? TextNode
             let newNode = focusedWidget as? TextNode
             oldValue?.onUnfocus()
-            oldNode?.invalidateText()
+            oldNode?.invalidateTextAsync()
             oldValue?.invalidate()
             focusedWidget?.onFocus()
-            newNode?.invalidateText()
+            newNode?.invalidateTextAsync()
             focusedWidget?.invalidate()
             cancelSelection()
         }
@@ -174,22 +174,22 @@ public class TextRoot: TextNode {
         editor?.invalidate()
     }
 
-    init(editor: BeamTextEdit, element: BeamElement) {
-        super.init(editor: editor, element: element, nodeProvider: NodeProviderImpl(proxy: false))
+    init(editor: BeamTextEdit, element: BeamElement, availableWidth: CGFloat) {
+        super.init(editor: editor, element: element, nodeProvider: NodeProviderImpl(proxy: false), availableWidth: availableWidth)
 
         childrenSpacing = PreferencesManager.editorParentSpacing
 
         if let note = note {
-            topSpacerWidget = SpacerWidget(parent: self, spacerType: .top)
-            linksSection = LinksSection(parent: self, note: note)
-            middleSpacerWidget = SpacerWidget(parent: self, spacerType: .middle)
-            referencesSection = ReferencesSection(parent: self, note: note)
-            bottomSpacerWidget = SpacerWidget(parent: self, spacerType: .bottom)
+            topSpacerWidget = SpacerWidget(parent: self, spacerType: .top, availableWidth: availableWidth - childInset)
+            linksSection = LinksSection(parent: self, note: note, availableWidth: availableWidth - childInset)
+            middleSpacerWidget = SpacerWidget(parent: self, spacerType: .middle, availableWidth: availableWidth - childInset)
+            referencesSection = ReferencesSection(parent: self, note: note, availableWidth: availableWidth - childInset)
+            bottomSpacerWidget = SpacerWidget(parent: self, spacerType: .bottom, availableWidth: availableWidth - childInset)
             if Self.showBrowsingSection {
-                browsingSection = BrowsingSection(parent: self, note: note)
+                browsingSection = BrowsingSection(parent: self, note: note, availableWidth: availableWidth - childInset)
             }
             if PreferencesManager.showDebugSection {
-                debugSection = DebugSection(parent: self, note: note)
+                debugSection = DebugSection(parent: self, note: note, availableWidth: availableWidth - childInset)
             }
         }
         updateTextChildren(elements: element.children)
@@ -197,15 +197,13 @@ public class TextRoot: TextNode {
         self.selfVisible = false
         self.cursor = .arrow
 
-        self.text = BeamText()
-
         // Main bullets:
         if element.children.isEmpty {
             // Create one empty initial bullet
             element.addChild(BeamElement())
         }
 
-        if let note = self.note, note.references.isEmpty && note.links.isEmpty,
+        if let note = self.note, note.fastLinksAndReferences.isEmpty,
            note.isTodaysNote && element.children.count == 1 && element.children.first?.text.isEmpty ?? false {
             let first = children.first as? TextNode
             first?.placeholder = BeamText(text: BeamPlaceholder.allPlaceholders.randomElement() ?? "Hello World !")
@@ -234,7 +232,7 @@ public class TextRoot: TextNode {
     }
 
     override var fullStrippedText: String {
-        children.prefix(children.count).reduce(attributedString.string) { partial, node -> String in
+        children.prefix(children.count).reduce("") { partial, node -> String in
             guard let node = node as? TextNode else { return partial }
             return partial + " " + node.fullStrippedText
         }
@@ -274,7 +272,7 @@ public class TextRoot: TextNode {
         guard let breadCrumb = breadCrumbs[noteReference]?.ref else {
             guard let referencingNote = BeamNote.fetch(DocumentManager(), id: noteReference.noteID) else { return nil }
             guard let referencingElement = referencingNote.findElement(noteReference.elementID) else { return nil }
-            let breadCrumb = BreadCrumb(parent: self, element: referencingElement)
+            let breadCrumb = BreadCrumb(parent: self, element: referencingElement, availableWidth: availableWidth - childInset)
             breadCrumbs[noteReference] = WeakReference(breadCrumb)
             return breadCrumb
         }

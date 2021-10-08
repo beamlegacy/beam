@@ -169,7 +169,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     private func setupSubscribers() {
         $lastChangedElement.sink { [weak self] element in
             guard let self = self, let element = element else { return }
-            try? GRDBDatabase.shared.append(element: element)
+            GRDBDatabase.shared.appendAsync(element: element)
             self.lastIndexedElement = element
             if let note = element.note,
                note.type == .note,

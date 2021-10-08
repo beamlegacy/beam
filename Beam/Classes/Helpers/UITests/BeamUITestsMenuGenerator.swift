@@ -65,7 +65,7 @@ class BeamUITestsMenuGenerator {
     }
 
     private func insertTextInCurrentNote() {
-        guard let currentNote = AppDelegate.main.window?.state.currentNote ?? (AppDelegate.main.window?.firstResponder as? BeamTextEdit)?.rootNode.note else {
+        guard let currentNote = AppDelegate.main.window?.state.currentNote ?? (AppDelegate.main.window?.firstResponder as? BeamTextEdit)?.rootNode?.note else {
             Logger.shared.logDebug("Current note is nil", category: .general)
 
             return

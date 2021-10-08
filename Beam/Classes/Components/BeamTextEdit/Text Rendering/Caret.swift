@@ -61,14 +61,6 @@ public struct Caret: Comparable {
 
 }
 
-public func filterCarets(_ carets: [Caret], filter: CaretFilter) -> [Caret] {
-    carets.compactMap { caret -> Caret? in
-        return (!filter.contains(.traillingEdge) || caret.edge.isLeading)
-            && (!filter.contains(.notInSource) || caret.inSource)
-            ? caret : nil
-    }
-}
-
 public func nextCaret(for index: Int, in carets: [Caret]) -> Int {
     guard index < carets.count - 1 else {
         //swiftlint:disable:next print

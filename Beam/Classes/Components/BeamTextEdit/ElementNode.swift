@@ -79,7 +79,7 @@ public class ElementNode: Widget {
 
     override var open: Bool {
         didSet {
-            guard !initialLayout, element.open != open else { return }
+            guard !inInitialLayout, element.open != open else { return }
             element.open = open
         }
     }
@@ -175,17 +175,17 @@ public class ElementNode: Widget {
 
     // MARK: - Initializer
 
-    init(parent: Widget, element: BeamElement, nodeProvider: NodeProvider? = nil) {
+    init(parent: Widget, element: BeamElement, nodeProvider: NodeProvider? = nil, availableWidth: CGFloat?) {
         self.element = element
-        super.init(parent: parent, nodeProvider: nodeProvider)
+        super.init(parent: parent, nodeProvider: nodeProvider, availableWidth: availableWidth)
 
         setupElementNode()
     }
 
-    init(editor: BeamTextEdit, element: BeamElement, nodeProvider: NodeProvider? = nil) {
+    init(editor: BeamTextEdit, element: BeamElement, nodeProvider: NodeProvider? = nil, availableWidth: CGFloat?) {
         self.element = element
 
-        super.init(editor: editor, nodeProvider: nodeProvider)
+        super.init(editor: editor, nodeProvider: nodeProvider, availableWidth: availableWidth)
 
         setupElementNode()
     }
@@ -196,7 +196,7 @@ public class ElementNode: Widget {
 
         displayedElement.$children
             .sink { [unowned self] elements in
-                guard self.parent != nil else { return }
+                guard (self.parent != nil) || (self as? TextRoot != nil) else { return }
                 updateTextChildren(elements: elements)
             }.store(in: &scope)
 
@@ -625,6 +625,13 @@ public class ElementNode: Widget {
         }
         return isLink
     }
+
+    // MARK: Search
+
+    var searchHighlightRanges: [Range<Int>] = []
+    var currentSearchHightlight: Int?
+
+    // MARK: Positions and carets
 
     public func position(after index: Int, avoidUneditableRange: Bool = false) -> Int {
         return min(1, index + 1)

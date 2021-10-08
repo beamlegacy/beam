@@ -216,6 +216,7 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
     }
 
     private func updateLinkFormatterWindow(hyperlinkView: HyperlinkFormatterView, frame: CGRect, in node: TextNode) {
+        guard let rootNode = rootNode else { return }
         let linkViewSize = hyperlinkView.idealSize
         guard let window = hyperlinkView.window as? PopoverWindow else { return }
         let origin = CGPoint(x: frame.maxX + node.offsetInDocument.x - linkViewSize.width / 2,
@@ -234,7 +235,7 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
         embedElement.kind = .embed(link.absoluteString)
         let parent = node.parent as? ElementNode ?? node
         let shouldDeleteEntireNode = node.text.wholeRange == range && node.children.count == 0
-        let cmdManager = rootNode.note?.cmdManager
+        let cmdManager = rootNode?.note?.cmdManager
         cmdManager?.beginGroup(with: "Replace Link by Embed")
         cmdManager?.insertElement(embedElement, inNode: parent, afterNode: node)
         if shouldDeleteEntireNode {
@@ -247,6 +248,7 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
     }
 
     private func updateLink(in node: TextNode, at range: Range<Int>, newTitle: String?, newUrl: String?, originalUrl: String?) {
+        guard let rootNode = rootNode else { return }
         guard let noteId = node.displayedElementNoteId else {
             return
         }

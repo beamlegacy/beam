@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import BeamCore
 
 public class TextFrame {
     private init(ctFrame: CTFrame, position: NSPoint, attributedString: NSAttributedString, singleLineHeightFactor: CGFloat?) {
@@ -24,6 +25,7 @@ public class TextFrame {
     public var position: NSPoint
     public var lines = [TextLine]()
     public var notInSourcePositions = [Int]()
+    public var isComplete: Bool = false
 
     public var visibleRange: Range<Int> {
         let r = CTFrameGetVisibleStringRange(ctFrame)
@@ -95,6 +97,13 @@ public class TextFrame {
         Y += paragraphSpacingBefore
         var index = 0
 
+        if let lastLine = ctLines.last {
+            let range = CTLineGetStringRange(lastLine)
+            isComplete = (range.location + range.length) == attributedString.length
+        } else {
+            isComplete = true
+        }
+
         let lineCount = ctLines.count
         lines = ctLines.map {
             let cfRange = CTLineGetStringRange($0)
@@ -113,7 +122,8 @@ public class TextFrame {
             //Logger.shared.logDebug("     line[\(i)] frame \(line.frame) (textPos \(textPos)")
             //}
             sourceOffset = line.carets.last?.positionInSource ?? sourceOffset
-            if let paragraphStyle = attributedString.attribute(.paragraphStyle, at: line.range.lowerBound, longestEffectiveRange: nil, in: range) as? NSParagraphStyle {
+            let lowerBound = line.carets.first?.positionInSource ?? 0
+            if let paragraphStyle = attributedString.attribute(.paragraphStyle, at: lowerBound, longestEffectiveRange: nil, in: range) as? NSParagraphStyle {
                 line.interlineFactor = lineCount == 1 ? (singleLineHeightFactor ?? paragraphStyle.lineHeightMultiple) : paragraphStyle.lineHeightMultiple
             }
             Y += (line.frame.height * line.interlineFactor).rounded(.up)
@@ -143,6 +153,7 @@ public class TextFrame {
     lazy public var carets: [Caret] = {
         var carets = [Caret]()
         for line in lines {
+            line.caretOffset = carets.count
             carets.append(contentsOf: line.carets)
         }
         return carets
@@ -155,9 +166,15 @@ public class TextFrame {
 
     public func caretIndexForSourcePosition(_ index: Int) -> Int? {
         guard carets.last?.positionInSource != index else { return carets.count - 1 }
-        return carets.firstIndex(where: { caret -> Bool in
-            caret.positionInSource == index && (caret.edge.isLeading || !caret.inSource)
-        })
+        guard let firstCaret = carets.binarySearch(predicate: { $0.positionInSource < index }) else { return nil }
+        for i in firstCaret..<carets.count {
+            let caret = carets[i]
+            guard caret.positionInSource == index else { return nil }
+            if caret.edge.isLeading || !caret.inSource {
+                return i
+            }
+        }
+        return nil
     }
 
     public func position(before index: Int) -> Int {
@@ -170,7 +187,7 @@ public class TextFrame {
         return nextCaret(for: index, in: carets)
     }
 
-    public class func create(string: NSAttributedString, atPosition position: NSPoint, textWidth: CGFloat, singleLineHeightFactor: CGFloat?) -> TextFrame {
+    public class func create(string: NSAttributedString, atPosition position: NSPoint, textWidth: CGFloat, singleLineHeightFactor: CGFloat?, maxHeight: CGFloat?) -> TextFrame {
         assert(textWidth != 0)
         var string = string
         if string.string.last == "\n" {
@@ -180,7 +197,7 @@ public class TextFrame {
         }
         let framesetter = CTFramesetterCreateWithAttributedString(string)
         let pos = CGPoint(x: position.x.rounded(), y: position.y.rounded())
-        let path = CGPath(rect: CGRect(origin: pos, size: CGSize(width: textWidth.rounded(), height: CGFloat.greatestFiniteMagnitude)), transform: nil)
+        let path = CGPath(rect: CGRect(origin: pos, size: CGSize(width: textWidth.rounded(), height: maxHeight ?? CGFloat.greatestFiniteMagnitude)), transform: nil)
 
         let frameAttributes: [String: Any] = [:]
         let frame = CTFramesetterCreateFrame(framesetter,
@@ -189,7 +206,6 @@ public class TextFrame {
                                              frameAttributes as CFDictionary)
 
         let f = TextFrame(ctFrame: frame, position: position, attributedString: string, singleLineHeightFactor: singleLineHeightFactor)
-
         return f
     }
 

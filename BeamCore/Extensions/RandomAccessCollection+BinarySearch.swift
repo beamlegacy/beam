@@ -38,4 +38,15 @@ public extension RandomAccessCollection {
         }) else { return false }
         return self[index] == element
     }
+
+    func iterativeContain(_ element: Element, fromIndex index: Index) -> (Bool, Index) where Element: Comparable {
+        let end = endIndex
+        var i = index
+        while i < end, self[i] < element {
+            i = self.index(after: i)
+        }
+
+        guard i < end else { return (false, i) }
+        return (self[i] == element, i)
+    }
 }

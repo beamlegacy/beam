@@ -26,11 +26,14 @@ class ReferencesSection: LinksSection {
         linkActionLayer.string = "Link All"
     }
 
-    override var links: [BeamNoteReference] { note.references }
+    override var links: [BeamNoteReference] { note.fastReferences }
 
     override func setupSectionMode() {
-        super.setupSectionMode()
-        createLinkAllLayer()
+        self.createLinkAllLayer()
+        updateHeading(note.fastReferences.count)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            super.setupSectionMode()
+        }
     }
 
     override func updateHeading(_ count: Int) {

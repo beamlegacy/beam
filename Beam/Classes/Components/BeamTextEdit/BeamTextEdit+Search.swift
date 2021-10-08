@@ -7,6 +7,43 @@
 
 import Foundation
 
+// MARK: - Search
+public extension ElementNode {
+
+    func allElementsContaining(someText: String) -> [SearchResult] {
+
+        var results = [SearchResult]()
+        self.searchHighlightRanges = []
+        if let textNode = self as? TextNode {
+            let ranges = textNode.text.text.countInstances(of: someText)
+            if !ranges.isEmpty {
+                results.append(SearchResult(element: self, ranges: ranges))
+                self.searchHighlightRanges = ranges.map({ Range($0) }).compactMap({ $0 })
+            }
+        }
+
+        for c in children where c is TextNode {
+            guard let c = c as? TextNode else { continue }
+            let elements = c.allElementsContaining(someText: someText)
+            if !elements.isEmpty {
+                results.append(contentsOf: elements)
+            }
+        }
+
+        return results
+    }
+
+    func clearSearch() {
+        self.searchHighlightRanges = []
+        self.currentSearchHightlight = nil
+        for c in children {
+            if let c = c as? TextNode {
+                c.clearSearch()
+            }
+        }
+    }
+}
+
 extension BeamTextEdit {
 
     func searchInNote(fromSelection: Bool) {
@@ -25,15 +62,15 @@ extension BeamTextEdit {
             guard let vm = self?.searchViewModel else { return }
             vm.currentOccurence += 1
             self?.highlightCurrentSearchResult(for: vm.currentOccurence)
-            self?.rootNode.deepInvalidateText()
+            self?.rootNode?.deepInvalidateText()
         } previous: { [weak self] _ in
             guard let vm = self?.searchViewModel else { return }
             vm.currentOccurence -= 1
             self?.highlightCurrentSearchResult(for: vm.currentOccurence)
-            self?.rootNode.deepInvalidateText()
+            self?.rootNode?.deepInvalidateText()
         } done: {  [weak self] in
-            self?.rootNode.clearSearch()
-            self?.rootNode.deepInvalidateText()
+            self?.rootNode?.clearSearch()
+            self?.rootNode?.deepInvalidateText()
             self?.searchViewModel = nil
         }
 
@@ -46,11 +83,10 @@ extension BeamTextEdit {
 
     private func performSearchAndUpdateUI(with search: String) {
         DispatchQueue.global(qos: .userInteractive).async {
-            guard let vm = self.searchViewModel else { return }
-            let results = self.rootNode.allElementsContaining(someText: search)
+            guard let vm = self.searchViewModel, let results = self.rootNode?.allElementsContaining(someText: search) else { return }
 
             let nodeWithResults = Set(results.map({ $0.element }))
-            var nodesWithOutdatedResults: Set<TextNode> = []
+            var nodesWithOutdatedResults: Set<ElementNode> = []
             if let oldResults = self.searchResults {
                 let oldNodeWithResults = Set(oldResults.map({ $0.element }))
                 nodesWithOutdatedResults = oldNodeWithResults.subtracting(nodeWithResults)
@@ -72,7 +108,7 @@ extension BeamTextEdit {
                 nodeWithResults.union(nodesWithOutdatedResults).forEach({ $0.invalidateText() })
 
                 vm.positions = Array(positions)
-                vm.pageHeight = Double(self.frame.size.height ?? 0.0)
+                vm.pageHeight = Double(self.frame.size.height)
             }
         }
     }
