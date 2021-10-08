@@ -13,7 +13,7 @@ extension BeamTextEdit {
 
     // MARK: - Properties
     private static let bottomConstraint: CGFloat = -55
-    private static let textFormatterType: [TextFormatterType] = [.bold, .italic, .strikethrough, .underline, .internalLink, .link]
+    private static let textFormatterType: [TextFormatterType] = [.bold, .italic, .internalLink, .link, .h1, .h2]
 
     private static var bottomAnchor: NSLayoutConstraint?
     private static var centerXAnchor: NSLayoutConstraint?
