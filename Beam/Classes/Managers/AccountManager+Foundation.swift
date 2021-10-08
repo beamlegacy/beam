@@ -22,7 +22,7 @@ extension AccountManager {
                     }
 
                     Logger.shared.logInfo("Expiration \(String(describing: AuthenticationManager.expirationDate(accessToken))) -> \(String(describing: AuthenticationManager.expirationDate(newAccessToken)))", category: .network)
-                    EventsTracker.shared.logBreadcrumb(message: "Refreshed access token and refresh token",
+                    EventsTracker.logBreadcrumb(message: "Refreshed access token and refresh token",
                                                        category: "app.lifecycle",
                                                        type: "system")
 
