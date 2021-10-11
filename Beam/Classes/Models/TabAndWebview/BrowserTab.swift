@@ -83,7 +83,13 @@ import Promises
 
     @Published var authenticationViewModel: AuthenticationViewModel?
     @Published var searchViewModel: SearchViewModel?
-    @Published var errorPageManager: ErrorPageManager?
+    @Published var errorPageManager: ErrorPageManager? {
+        didSet {
+            if errorPageManager != nil {
+                hasError = true
+            }
+        }
+    }
 
     var backForwardUrlList: [URL]?
 
@@ -418,12 +424,25 @@ import Promises
             self.receivedWebviewTitle(value)
         }.store(in: &scope)
         webView.publisher(for: \.url).sink { [unowned self] webviewUrl in
-            guard webviewUrl != nil else {
+            guard let webviewUrl = webviewUrl else {
                 return // webview probably failed to load
             }
-            url = webviewUrl
+            if BeamURL(webviewUrl).isErrorPage {
+                let beamSchemeUrl = BeamURL(webviewUrl)
+                url = beamSchemeUrl.originalURLFromErrorPage
+
+                if let extractedCode = BeamURL.getQueryStringParameter(url: beamSchemeUrl.url.absoluteString, param: "code"),
+                   let errorCode = Int(extractedCode),
+                   let errorUrl = url {
+                    errorPageManager = .init(errorCode, webView: webView,
+                                             errorUrl: errorUrl,
+                                             defaultLocalizedDescription: BeamURL.getQueryStringParameter(url: beamSchemeUrl.url.absoluteString, param: "localizedDescription"))
+                }
+            } else {
+                url = webviewUrl
+            }
             leave()
-            if webviewUrl?.absoluteString != nil {
+            if webviewUrl.absoluteString != nil {
                 updateFavIcon()
                 // self.browsingTree.current.score.openIndex = self.navigationCount
                 // self.updateScore()
@@ -457,7 +476,9 @@ import Promises
     func reload() {
         hasError = false
         leave()
-        if webView.url == nil, let url = url {
+        if let webviewUrl = webView.url, BeamURL(webviewUrl).isErrorPage, let originalUrl = BeamURL(webviewUrl).originalURLFromErrorPage {
+            webView.replaceLocation(with: originalUrl)
+        } else if webView.url == nil, let url = url {
             load(url: url)
         } else {
             webView.reload()
