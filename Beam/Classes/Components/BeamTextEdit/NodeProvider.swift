@@ -55,15 +55,17 @@ class NodeProviderImpl: NodeProvider {
         return mapping[element]?.ref
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
+    // swiftlint:disable:next cyclomatic_complexity, function_body_length
     func nodeFor(_ element: BeamElement, withParent: Widget) -> ElementNode {
         guard let editor = holder?.editor else { fatalError() }
 
         if let h = (holder as? ElementNode), h.displayedElement.id == element.id {
+            h.parent = withParent
             return h
         }
 
         if let node = mapping[element]?.ref {
+            node.parent = withParent
             return node
         }
 
