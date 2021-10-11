@@ -236,7 +236,7 @@ class Document: NSManagedObject, BeamCoreDataObject {
                                  _ sortDescriptors: [NSSortDescriptor]? = nil,
                                  _ limit: Int = 0,
                                  _ fetchOffset: Int = 0) throws -> [Document] {
-        try fetchAllWithLimit(context, predicate, sortDescriptors, limit, fetchOffset, nil)
+        try fetchAllWithLimit(context, predicate, sortDescriptors, limit, fetchOffset, DatabaseManager.defaultDatabase.id)
     }
 
     class func fetchAllWithLimit(_ context: NSManagedObjectContext,
