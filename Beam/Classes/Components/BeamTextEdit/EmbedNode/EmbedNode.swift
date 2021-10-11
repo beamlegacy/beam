@@ -127,9 +127,10 @@ class EmbedNode: ResizableNode {
     override func updateLayout() {
         super.updateLayout()
 
-        let r = layer.frame
-        let visibleSize = visibleSize
+        let height = availableWidth  * CGFloat(sizeRatio)
+        resizableElementContentSize = CGSize(width: availableWidth, height: height)
 
+        let r = layer.frame
         webView?.frame = NSRect(x: r.minX, y: r.minY, width: visibleSize.width, height: visibleSize.height)
     }
 
