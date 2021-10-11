@@ -23,16 +23,20 @@ class ProxyTextNode: TextNode, ProxyNode {
 
         element.$children
             .receive(on: DispatchQueue.main)
-            .sink { [unowned self] newChildren in
-                guard self.editor != nil, parent != nil else { return }
+            .sink { [weak self] newChildren in
+                guard let self = self,
+                      self.parent != nil,
+                      self.root != nil,
+                      self.editor != nil
+                else { return }
                 self.children = newChildren.compactMap({ e -> ProxyTextNode? in
-                    let ref = nodeFor(e, withParent: self)
+                    let ref = self.nodeFor(e, withParent: self)
                     ref.parent = self
                     return ref as? ProxyTextNode
                 })
 
                 self.invalidateRendering()
-                updateChildrenVisibility()
+                self.updateChildrenVisibility()
         }.store(in: &scope)
     }
 
