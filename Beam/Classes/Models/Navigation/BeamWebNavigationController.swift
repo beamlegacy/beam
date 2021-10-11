@@ -127,12 +127,26 @@ extension BeamWebNavigationController: WKNavigationDelegate {
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
         Logger.shared.logError("didFail: \(error)", category: .javascript)
         let error = error as NSError
-        guard let errorUrl = error.userInfo[NSURLErrorFailingURLErrorKey] as? URL,
-              error.code != WebKitErrorFrameLoadInterruptedByPolicyChange else { return }
-        let errorManager = ErrorPageManager(error, webView: webView)
-        webView.load(errorManager.htmlPage(), mimeType: "", characterEncodingName: "utf-8", baseURL: errorUrl)
-        page.hasError = true
+
+        if error.domain == "WebKitErrorDomain" && error.code == 102 {
+            return
+        }
+
+        if error.code == Int(CFNetworkErrors.cfurlErrorCancelled.rawValue) {
+            return
+        }
+
+        guard
+            let errorUrl = error.userInfo[NSURLErrorFailingURLErrorKey] as? URL,
+            error.code != WebKitErrorFrameLoadInterruptedByPolicyChange else { return }
+        let errorManager = ErrorPageManager(error.code, webView: webView, errorUrl: errorUrl, defaultLocalizedDescription: error.localizedDescription)
         page.errorPageManager = errorManager
+
+        if errorManager.error == .radblock {
+            webView.load(errorManager.htmlPage(), mimeType: "", characterEncodingName: "utf-8", baseURL: errorUrl)
+        } else {
+            errorManager.loadPage(for: errorUrl)
+        }
     }
 
     func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) { }
