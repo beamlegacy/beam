@@ -258,14 +258,20 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         return NSRect(origin: offset, size: contentsFrame.size)
     }
 
-    weak var parent: Widget?
+    weak var parent: Widget? {
+        didSet {
+            if parent == nil && oldValue?.root?.focusedWidget === self {
+                oldValue?.root?.focusedWidget = nil
+            }
+            _root = nil
+        }
+    }
 
     weak var root: TextRoot? {
         if let r = _root {
             return r
         }
-        guard let parent = parent else { return self as? TextRoot }
-        _root = parent.root
+        _root = parent?.root ?? (self as? TextRoot)
         return _root
     }
 
@@ -311,6 +317,9 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
     public weak var editor: BeamTextEdit? {
         didSet {
+            if editor == nil {
+                _root = nil
+            }
             for child in children {
                 child.editor = editor
             }
@@ -1042,14 +1051,6 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
         context.setFillColor(c.copy(alpha: 0.2)!)
         context.fill(contentsFrame)
-    }
-
-    private func invalidateRoot() {
-        _root = nil
-
-        for c in children {
-            c.invalidateRoot()
-        }
     }
 
     private func inSubTreeOf(_ node: Widget) -> Bool {
