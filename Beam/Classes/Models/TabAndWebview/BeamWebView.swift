@@ -45,6 +45,12 @@ class BeamWebView: WKWebView {
     fileprivate var currentConfiguration: WKWebViewConfiguration
 
     override init(frame: CGRect, configuration: WKWebViewConfiguration) {
+        if configuration.urlSchemeHandler(forURLScheme: BeamURL.scheme) == nil {
+            BeamSchemeHandler.responders = [
+                ErrorPageHandler.path: ErrorPageHandler()
+            ]
+            configuration.setURLSchemeHandler(BeamSchemeHandler(), forURLScheme: BeamURL.scheme)
+        }
         currentConfiguration = configuration
         super.init(frame: frame, configuration: configuration)
         allowsBackForwardNavigationGestures = true
@@ -168,5 +174,11 @@ extension WKWebView {
     /// So everytime you try to access it, it creates a copy of it, which is most likely not what we want.
     var configurationWithoutMakingCopy: WKWebViewConfiguration {
         (self as? BeamWebView)?.currentConfiguration ?? configuration
+    }
+
+    // Use JS to redirect the page without adding a history entry
+    func replaceLocation(with url: URL) {
+        let safeUrl = url.absoluteString.replacingOccurrences(of: "'", with: "%27")
+        evaluateJavaScript("location.replace('\(safeUrl)')")
     }
 }

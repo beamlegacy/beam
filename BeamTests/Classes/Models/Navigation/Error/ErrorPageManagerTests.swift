@@ -10,39 +10,23 @@ import XCTest
 
 class ErrorPageManagerTests: XCTestCase {
 
-    private func errorBuilder(code: Int) -> NSError {
-        NSError(domain: "web", code: code, userInfo: nil)
-    }
-
     func testErrorIsCorrect_WhenRadBlockIsTriggered() {
-        let errorPageManager = ErrorPageManager(
-            errorBuilder(code: 104),
-            webView: .init()
-        )
+        let errorPageManager = ErrorPageManager(104, webView: .init(), errorUrl: URL(string: "https://google.com")!)
         XCTAssertEqual(errorPageManager.error, .radblock)
     }
 
     func testErrorIsCorrect_WhenHavingNoNetwork() {
-        let errorPageManager = ErrorPageManager(
-            errorBuilder(code: NSURLErrorNotConnectedToInternet),
-            webView: .init()
-        )
+        let errorPageManager = ErrorPageManager(NSURLErrorNotConnectedToInternet, webView: .init(), errorUrl: URL(string: "https://google.com")!)
         XCTAssertEqual(errorPageManager.error, .network)
     }
 
     func testErrorIsCorrect_WhenHostIsUnreachable() {
-        let errorPageManager = ErrorPageManager(
-            errorBuilder(code: NSURLErrorCannotFindHost),
-            webView: .init()
-        )
+        let errorPageManager = ErrorPageManager(NSURLErrorCannotFindHost, webView: .init(), errorUrl: URL(string: "https://google.com")!)
         XCTAssertEqual(errorPageManager.error, .hostUnreachable)
     }
 
     func testErrorIsCorrect_WhenTriggersUnknownError() {
-        let errorPageManager = ErrorPageManager(
-            errorBuilder(code: 9999999),
-            webView: .init()
-        )
+        let errorPageManager = ErrorPageManager(9999999, webView: .init(), errorUrl: URL(string: "https://google.com")!)
         XCTAssertEqual(errorPageManager.error, .unknown)
     }
 }
