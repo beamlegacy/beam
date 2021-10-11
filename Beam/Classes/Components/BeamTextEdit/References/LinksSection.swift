@@ -57,7 +57,8 @@ class LinksSection: Widget {
 
     var links: [BeamNoteReference] { note.links }
 
-    func setupSectionMode() {
+    /// This method is doing the actual work of setting up the links section. It is used both by LinksSection and ReferencesSection
+    final func doSetupSectionMode() {
         AppDelegate.main.data.$lastIndexedElement
             .dropFirst()
             .filter({ element in
@@ -78,6 +79,11 @@ class LinksSection: Widget {
             }.store(in: &scope)
 
         self.updateLinkedReferences(links: self.links)
+    }
+
+    /// This method is overriden in ReferencesSection to properly handle reference:
+    func setupSectionMode() {
+        doSetupSectionMode()
     }
 
     var currentReferences = [BeamNoteReference]()
