@@ -13,10 +13,12 @@ struct CalendarPickerView: View {
     @ObservedObject private var model: CalendarPickerView.Model
 
     @Binding private var selectedDate: Date
-    init(selectedDate: Binding<Date>, calendar: Calendar? = nil) {
+    private var onPresentSubmenu: (([ContextMenuItem], CGPoint) -> Void)?
+    init(selectedDate: Binding<Date>, calendar: Calendar? = nil, onPresentSubmenu: (([ContextMenuItem], CGPoint) -> Void)? = nil) {
         let model = CalendarPickerView.Model(date: selectedDate.wrappedValue, calendar: calendar)
         self.model = model
         self._selectedDate = selectedDate
+        self.onPresentSubmenu = onPresentSubmenu
     }
 
     var headerMonthAndYearView: some View {
@@ -78,7 +80,7 @@ struct CalendarPickerView: View {
         var atPoint = geometryProxy.frame(in: .global).origin
         let currentMonth = model.calendar.component(.month, from: model.baseDate)
         atPoint.y += CGFloat(currentMonth + 2) * ContextMenuView.itemHeight
-        showContextMenu(items: items, at: atPoint)
+        self.onPresentSubmenu?(items, atPoint)
     }
 
     func getYearsContextItems() -> [ContextMenuItem] {
@@ -97,14 +99,7 @@ struct CalendarPickerView: View {
         var atPoint = frame.origin
         atPoint.x = frame.maxX - 60
         atPoint.y += (CGFloat(items.count/2) + 2.5) * ContextMenuView.itemHeight
-        showContextMenu(items: items, at: atPoint)
-    }
-
-    func showContextMenu(items: [ContextMenuItem], at: CGPoint) {
-        let menuView = ContextMenuFormatterView(key: "CalendarSubMenu", items: items, direction: .bottom, sizeToFit: true) {
-            CustomPopoverPresenter.shared.dismissPopovers(key: "CalendarSubMenu")
-        }
-        CustomPopoverPresenter.shared.presentFormatterView(menuView, atPoint: at)
+        self.onPresentSubmenu?(items, atPoint)
     }
 }
 
