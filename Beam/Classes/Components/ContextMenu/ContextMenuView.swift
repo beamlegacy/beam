@@ -119,42 +119,45 @@ struct ContextMenuView: View {
 
     var body: some View {
         let computedSize = Self.idealSizeForItems(viewModel.items)
-        return FormatterViewBackground {
-            VStack(alignment: .leading, spacing: 5) {
-                ForEach(Array(viewModel.items.enumerated()), id: \.1.id) { index, item in
-                    let isSelected = viewModel.selectedIndex == index
-                    if item.type == .separator {
-                        Separator(horizontal: true)
-                    } else {
-                        ContextMenuItemView(item: item, highlight: isSelected)
-                            .frame(height: ContextMenuView.itemHeight)
-                            .disabled(item.action == nil)
-                            .onTapGesture {
-                                item.action?()
-                                viewModel.onSelectMenuItem?()
-                            }
-                            .onHoverOnceVisible { hovering in
-                                if isSelected && !hovering && hoveringIndex == index {
-                                    viewModel.selectedIndex = nil
-                                } else if hovering && item.action != nil {
-                                    viewModel.selectedIndex = index
+        return ZStack {
+            FormatterViewBackground {
+                VStack(alignment: .leading, spacing: 5) {
+                    ForEach(Array(viewModel.items.enumerated()), id: \.1.id) { index, item in
+                        let isSelected = viewModel.selectedIndex == index
+                        if item.type == .separator {
+                            Separator(horizontal: true)
+                        } else {
+                            ContextMenuItemView(item: item, highlight: isSelected)
+                                .frame(height: ContextMenuView.itemHeight)
+                                .disabled(item.action == nil)
+                                .onTapGesture {
+                                    item.action?()
+                                    viewModel.onSelectMenuItem?()
                                 }
-                                hoveringIndex = hovering ? index : nil
-                            }
+                                .onHoverOnceVisible { hovering in
+                                    if isSelected && !hovering && hoveringIndex == index {
+                                        viewModel.selectedIndex = nil
+                                    } else if hovering && item.action != nil {
+                                        viewModel.selectedIndex = index
+                                    }
+                                    hoveringIndex = hovering ? index : nil
+                                }
+                        }
                     }
                 }
+                .frame(maxWidth: .infinity)
+                .padding(viewModel.items.count > 0 ? BeamSpacing._50 : 0)
             }
-            .frame(maxWidth: .infinity)
-            .padding(viewModel.items.count > 0 ? BeamSpacing._50 : 0)
+            .if(viewModel.sizeToFit) { $0.frame(maxWidth: computedSize.width, alignment: .leading) }
+            .if(!viewModel.sizeToFit) { $0.frame(width: computedSize.width, alignment: .leading) }
+            .fixedSize(horizontal: viewModel.sizeToFit, vertical: true)
+            .frame(height: viewModel.containerSize.height, alignment: .topLeading)
+            .animation(BeamAnimation.easeInOut(duration: 0.15), value: computedSize.height)
+            .formatterViewBackgroundAnimation(with: viewModel)
+            .accessibilityElement(children: .contain)
+            .accessibility(identifier: "ContextMenu")
         }
-        .if(viewModel.sizeToFit) { $0.frame(maxWidth: computedSize.width) }
-        .if(!viewModel.sizeToFit) { $0.frame(width: computedSize.width) }
-        .fixedSize(horizontal: viewModel.sizeToFit, vertical: true)
-        .frame(height: viewModel.containerSize.height, alignment: .topLeading)
-        .animation(BeamAnimation.easeInOut(duration: 0.15), value: computedSize.height)
-        .formatterViewBackgroundAnimation(with: viewModel)
-        .accessibilityElement(children: .contain)
-        .accessibility(identifier: "ContextMenu")
+        .frame(width: viewModel.containerSize.width, height: viewModel.containerSize.height, alignment: .topLeading)
     }
 }
 
@@ -172,13 +175,14 @@ struct ContextMenuView_Previews: PreviewProvider {
         model.items = Self.items
         model.visible = true
         model.sizeToFit = true
+        model.containerSize = CGSize(width: 200, height: 200)
         return model
     }
     static var previews: some View {
         ZStack {
             ContextMenuView(viewModel: model)
         }
-        .frame(width: 200, height: 200)
+        .frame(width: model.containerSize.width, height: model.containerSize.height)
         .padding(.all)
     }
 }

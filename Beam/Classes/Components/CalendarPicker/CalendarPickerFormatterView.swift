@@ -13,7 +13,9 @@ import BeamCore
 
 private struct CalendarPickerFormatterContainerView: View {
 
-    class ViewModel: BaseFormatterViewViewModel, ObservableObject { }
+    class ViewModel: BaseFormatterViewViewModel, ObservableObject {
+        weak var window: NSWindow?
+    }
 
     static let idealSize = CGSize(width: 240, height: 260)
 
@@ -21,12 +23,26 @@ private struct CalendarPickerFormatterContainerView: View {
     @Binding var selectedDate: Date
     var calendar: Calendar
     var body: some View {
-        CalendarPickerView(selectedDate: $selectedDate, calendar: calendar)
+        CalendarPickerView(selectedDate: $selectedDate, calendar: calendar,
+                           onPresentSubmenu: { items, point in
+                            showContextMenu(items: items, at: point)
+                           })
             .frame(width: Self.idealSize.width)
             .fixedSize(horizontal: false, vertical: true)
             .frame(height: Self.idealSize.height, alignment: .topLeading)
             .animation(BeamAnimation.easeInOut(duration: 0.15))
             .formatterViewBackgroundAnimation(with: viewModel)
+    }
+
+    func showContextMenu(items: [ContextMenuItem], at: CGPoint) {
+        let window = viewModel.window
+        let finalPoint = window?.parent?.convertPoint(fromScreen: window?.convertPoint(toScreen: at) ?? .zero) ?? at
+        let subMenuIdentifier = "CalendarSubMenu"
+        CustomPopoverPresenter.shared.dismissPopovers(key: subMenuIdentifier)
+        let menuView = ContextMenuFormatterView(key: "CalendarSubMenu", items: items, direction: .bottom, sizeToFit: true) {
+            CustomPopoverPresenter.shared.dismissPopovers(key: subMenuIdentifier)
+        }
+        CustomPopoverPresenter.shared.presentFormatterView(menuView, atPoint: finalPoint)
     }
 }
 
@@ -62,6 +78,11 @@ class CalendarPickerFormatterView: FormatterView {
         DispatchQueue.main.asyncAfter(deadline: .now() + FormatterView.disappearAnimationDuration) {
             completionHandler?()
         }
+    }
+
+    override func viewWillMove(toWindow newWindow: NSWindow?) {
+        super.viewWillMove(toWindow: newWindow)
+        subviewModel.window = newWindow
     }
 
     private var date = BeamDate.now {
