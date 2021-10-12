@@ -173,8 +173,8 @@ struct BeamTextAttributedStringBuilder {
             } else {
                 stringAttributes[.foregroundColor] = BeamColor.Editor.link.staticColor
                 stringAttributes[.underlineStyle] = NSUnderlineStyle.single.rawValue
-                stringAttributes[.underlineColor] = BeamColor.Editor.linkDecoration.staticColor
-                stringAttributes[.hoverUnderlineColor] = BeamColor.Editor.link.staticColor
+                stringAttributes[.underlineColor] = NSColor.clear
+                stringAttributes[.hoverUnderlineColor] = BeamColor.Editor.linkDecoration.staticColor
             }
         } else if let link = internalLink {
             stringAttributes[.link] = link
@@ -213,8 +213,8 @@ struct BeamTextAttributedStringBuilder {
     }
 
     static var ctRuns: [String: NSAttributedString] = [:]
-    static func createGlyphForImage(named imageName: String, color: NSColor?, attributes: [NSAttributedString.Key: Any]) -> NSAttributedString? {
-        let id = "\(imageName)-\(color?.componentsRGBAArray ?? [])"
+    static func createGlyphForImage(named imageName: String, color: NSColor?, attributes: [NSAttributedString.Key: Any], offset: CGPoint = .zero) -> NSAttributedString? {
+        let id = "\(imageName)-\(color?.componentsRGBAArray ?? [])-\(offset != .zero ? "(\(offset.x),\(offset.y)" : "")"
         if let cachedGlyph = ctRuns[id] {
             let fakeGlyph = NSMutableAttributedString(attributedString: cachedGlyph)
             _ = fakeGlyph.addAttributes(attributes)
@@ -224,7 +224,7 @@ struct BeamTextAttributedStringBuilder {
         }
         guard let image = NSImage(named: imageName) else { return nil }
         let extentBuffer = UnsafeMutablePointer<ImageRunStruct>.allocate(capacity: 1)
-        extentBuffer.initialize(to: ImageRunStruct(ascent: image.size.height, descent: 0, width: image.size.width, image: imageName, color: color))
+        extentBuffer.initialize(to: ImageRunStruct(ascent: image.size.height, descent: 0, width: image.size.width, image: imageName, color: color, offset: offset))
 
         var callbacks = CTRunDelegateCallbacks(version: kCTRunDelegateVersion1, dealloc: { _ in
         }, getAscent: { (pointer) -> CGFloat in
@@ -256,12 +256,14 @@ struct BeamTextAttributedStringBuilder {
         guard range.attributes.contains(where: { attrib -> Bool in attrib.rawValue == BeamText.Attribute.link("").rawValue }) else { return }
 
         let hasBoxBackground = attributedString.attribute(.boxBackgroundColor, at: 0, effectiveRange: nil) != nil
-        var color = hasBoxBackground ? BeamColor.Editor.linkActive.staticColor : BeamColor.Editor.linkDecoration.staticColor
-        if !hasBoxBackground, let mouseInt = mouseInteraction, mouseInt.type == .hovered, BeamText.isPositionOnLinkArrow(mouseInt.range.lowerBound, in: range) {
-            color = BeamColor.Editor.link.staticColor
+        let color = hasBoxBackground ? BeamColor.Editor.linkActive.staticColor : BeamColor.Editor.link.staticColor
+        var offset: CGPoint = .zero
+        if !hasBoxBackground, let mouseInt = mouseInteraction, mouseInt.type == .hovered,
+           ((range.position...range.end).contains(mouseInt.range.upperBound) || BeamText.isPositionOnLinkArrow(mouseInt.range.lowerBound, in: range)) {
+            offset = CGPoint(x: 2, y: 2)
         }
         let imageName = "editor-url"
-        guard let fakeGlyph = Self.createGlyphForImage(named: imageName, color: color, attributes: attributedString.attributes(at: 0, effectiveRange: nil)) else {
+        guard let fakeGlyph = Self.createGlyphForImage(named: imageName, color: color, attributes: attributedString.attributes(at: 0, effectiveRange: nil), offset: offset) else {
             return
         }
         attributedString.append(fakeGlyph)

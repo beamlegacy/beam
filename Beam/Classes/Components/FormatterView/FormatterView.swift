@@ -31,7 +31,7 @@ class FormatterView: NSView {
     }
 
     var isMouseInsideView = false
-
+    private var isVisible = false
     convenience init(key: String, viewType: FormatterViewType) {
         self.init(frame: .zero)
         self.viewType = viewType
@@ -42,9 +42,13 @@ class FormatterView: NSView {
         self.wantsLayer = true
     }
 
-    func animateOnAppear(completionHandler: (() -> Void)? = nil) { }
+    func animateOnAppear(completionHandler: (() -> Void)? = nil) {
+        isVisible = true
+    }
 
-    func animateOnDisappear(completionHandler: (() -> Void)? = nil) { }
+    func animateOnDisappear(completionHandler: (() -> Void)? = nil) {
+        isVisible = false
+    }
 
     private var customTrackingArea: NSTrackingArea?
     override func updateTrackingAreas() {
@@ -63,6 +67,7 @@ class FormatterView: NSView {
 
     override func mouseEntered(with event: NSEvent) {
         super.mouseEntered(with: event)
+        guard isVisible else { return }
         isMouseInsideView = true
     }
 

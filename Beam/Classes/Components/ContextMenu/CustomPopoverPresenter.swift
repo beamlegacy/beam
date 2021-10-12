@@ -55,7 +55,11 @@ class CustomPopoverPresenter {
         let idealSize = view.idealSize
         var rect = CGRect(origin: position, size: idealSize).insetBy(dx: -Self.windowViewPadding, dy: -Self.windowViewPadding) // give some space for shadow
         rect.origin.y -= idealSize.height
-        window?.setView(with: view, at: rect.origin, fromtopLeft: false)
+        let container = NSView(frame: CGRect(origin: .zero, size: rect.size))
+        container.autoresizingMask = [.width, .height]
+        container.addSubview(view)
+        view.frame = CGRect(origin: CGPoint(x: Self.windowViewPadding, y: Self.windowViewPadding), size: idealSize)
+        window?.setView(with: container, at: rect.origin, fromtopLeft: false)
         window?.setContentSize(rect.size)
 
         presentedFormatterViews.append(view)
