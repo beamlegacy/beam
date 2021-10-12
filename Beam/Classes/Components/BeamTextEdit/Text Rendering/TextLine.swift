@@ -14,6 +14,7 @@ public struct ImageRunStruct {
     public let width: CGFloat
     public let image: String
     public let color: NSColor?
+    public var offset: CGPoint = .zero
 }
 
 public class TextLine {
@@ -195,7 +196,7 @@ public class TextLine {
                         let imageName = imageRun.image
                         guard let image = NSImage(named: imageName) else { continue }
 
-                        var rect = CGRect(origin: CGPoint(x: offset + 1, y: 4), size: image.size)
+                        var rect = CGRect(origin: CGPoint(x: offset + 1 + imageRun.offset.x, y: 4 + imageRun.offset.y), size: image.size)
                         guard let cgImage = image.cgImage(forProposedRect: &rect,
                                                           context: nil,
                                                           hints: nil) else { continue }

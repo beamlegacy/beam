@@ -173,6 +173,7 @@ class HyperlinkFormatterView: FormatterView {
         let hostingView = NSHostingView(rootView: rootView)
         hostingView.autoresizingMask = [.width, .height]
         hostingView.frame = self.bounds
+
         self.addSubview(hostingView)
         hostView = hostingView
         self.layer?.masksToBounds = false
