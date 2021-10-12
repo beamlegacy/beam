@@ -73,6 +73,9 @@ import Sentry
     @Published var currentPage: WindowPage?
     @Published var overlayViewModel: OverlayViewCenterViewModel = OverlayViewCenterViewModel()
     weak var currentEditor: BeamTextEdit?
+    var editorShouldAllowMouseEvents: Bool {
+        overlayViewModel.modalView == nil
+    }
 
     var downloadButtonPosition: CGPoint?
     weak var downloaderWindow: PopoverWindow?

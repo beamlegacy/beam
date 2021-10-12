@@ -1018,6 +1018,10 @@ public extension CALayer {
     }
 
     // MARK: - Mouse Event
+    private func shouldAllowMouseEvents() -> Bool {
+        state?.editorShouldAllowMouseEvents != false && inlineFormatter?.isMouseInsideView != true
+    }
+
     override public func updateTrackingAreas() {
         for trackingArea in trackingAreas {
             removeTrackingArea(trackingArea)
@@ -1028,7 +1032,7 @@ public extension CALayer {
 
     var mouseDownPos: NSPoint?
     private func handleMouseDown(event: NSEvent) {
-        guard let rootNode = rootNode else { return }
+        guard let rootNode = rootNode, shouldAllowMouseEvents() else { return }
         guard !(inputContext?.handleEvent(event) ?? false) else { return }
         reBlink()
         rootNode.cancelNodeSelection() // TODO: change this to handle manipulating the node selection with the mouse
@@ -1074,7 +1078,7 @@ public extension CALayer {
     }
 
     override public func mouseDragged(with event: NSEvent) {
-        guard let rootNode = rootNode else { return }
+        guard let rootNode = rootNode, shouldAllowMouseEvents() else { return }
         guard !(inputContext?.handleEvent(event) ?? false) else { return }
 
         //        window?.makeFirstResponder(self)
@@ -1096,7 +1100,7 @@ public extension CALayer {
     }
 
     override public func mouseMoved(with event: NSEvent) {
-        guard let rootNode = rootNode else { return }
+        guard let rootNode = rootNode, shouldAllowMouseEvents() else { return }
         if showTitle {
             let titleCoord = cardTitleLayer.convert(event.locationInWindow, from: nil)
             let hoversCardTitle = cardTitleLayer.contains(titleCoord)
@@ -1111,7 +1115,6 @@ public extension CALayer {
             super.mouseMoved(with: event)
             return
         }
-        guard inlineFormatter?.isMouseInsideView != true else { return }
 
         let point = convert(event.locationInWindow)
         let mouseInfo = MouseInfo(rootNode, point, event)
@@ -1121,7 +1124,7 @@ public extension CALayer {
 
     // swiftlint:disable:next cyclomatic_complexity
     public func mouseDraggedUpdate(with event: NSEvent) {
-        guard let rootNode = rootNode else { return }
+        guard let rootNode = rootNode, shouldAllowMouseEvents() else { return }
         guard let startPos = mouseDownPos else { return }
         let eventPoint = convert(event.locationInWindow)
         let widgets = rootNode.getWidgetsBetween(startPos, eventPoint)
@@ -1158,8 +1161,7 @@ public extension CALayer {
     }
 
     public override func cursorUpdate(with event: NSEvent) {
-        guard let rootNode = rootNode else { return }
-        guard inlineFormatter?.isMouseInsideView != true else { return }
+        guard let rootNode = rootNode, shouldAllowMouseEvents() else { return }
         let point = convert(event.locationInWindow)
         let views = rootNode.getWidgetsAt(point, point, ignoreX: true)
         let preciseViews = rootNode.getWidgetsAt(point, point, ignoreX: false)
@@ -1174,7 +1176,7 @@ public extension CALayer {
     }
 
     override public func mouseUp(with event: NSEvent) {
-        guard let rootNode = rootNode else { return }
+        guard let rootNode = rootNode, shouldAllowMouseEvents() else { return }
         guard !(inputContext?.handleEvent(event) ?? false) else { return }
         stopSelectionDrag()
 
