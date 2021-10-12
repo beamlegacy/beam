@@ -32,26 +32,32 @@ struct MeetingModalView: View {
         viewModel.attendees.count > 5
     }
 
+    @State private var hoveredCloseButtonIndex: Int?
+
     var body: some View {
         FormatterViewBackground {
             VStack(alignment: .leading, spacing: 0) {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 0) {
                         Text("Meeting")
-                            .font(BeamFont.medium(size: 12).swiftUI)
+                            .font(BeamFont.regular(size: 12).swiftUI)
                             .foregroundColor(BeamColor.LightStoneGray.swiftUI)
                             .padding(.bottom, BeamSpacing._120)
 
                         HStack {
                             BoxedTextFieldView(title: "Meeting Title", text: $viewModel.meetingName)
-                            Icon(name: "tabs-close", color: BeamColor.AlphaGray.swiftUI)
+                            Icon(name: "tabs-close",
+                                 color: hoveredCloseButtonIndex == -1 ? BeamColor.Niobium.swiftUI : BeamColor.AlphaGray.swiftUI)
                                 .onTapGesture {
                                     viewModel.meetingName = ""
+                                }
+                                .onHover { h in
+                                    hoveredCloseButtonIndex = h ? -1 : nil
                                 }
                         }
 
                         Text("Attendees")
-                            .font(BeamFont.medium(size: 12).swiftUI)
+                            .font(BeamFont.regular(size: 12).swiftUI)
                             .foregroundColor(BeamColor.LightStoneGray.swiftUI)
                             .padding(.top, 30)
                             .padding(.bottom, BeamSpacing._120)
@@ -64,9 +70,13 @@ struct MeetingModalView: View {
                                     BoxedTextFieldView(title: "Name", text: Binding<String>(
                                                     get: { attendee.name },
                                                     set: { viewModel.attendees[index].name = $0 }), foregroundColor: BeamColor.Beam)
-                                    Icon(name: "tabs-close", color: BeamColor.AlphaGray.swiftUI)
+                                    Icon(name: "tabs-close",
+                                         color: hoveredCloseButtonIndex == index ? BeamColor.Niobium.swiftUI : BeamColor.AlphaGray.swiftUI)
                                         .onTapGesture {
                                             viewModel.removeAttendee(attendee)
+                                        }
+                                        .onHover { h in
+                                            hoveredCloseButtonIndex = h ? index : nil
                                         }
                                 }
                             }
@@ -83,11 +93,11 @@ struct MeetingModalView: View {
                             }
                         }
                     }
-                    .padding([.horizontal, .top], BeamSpacing._400)
+                    .padding([.horizontal, .top], BeamSpacing._400 * 2)
                     .padding(.bottom, BeamSpacing._200)
                 }
 
-                HStack {
+                HStack(spacing: BeamSpacing._200) {
                     HStack(spacing: BeamSpacing._60) {
                         CheckboxView(checked: $viewModel.linkCards)
                         Text("Link Cards")
@@ -116,7 +126,7 @@ struct MeetingModalView: View {
                 }
             }))
         }
-        .frame(width: 600)
+        .frame(width: 728)
         .frame(minHeight: 300, maxHeight: 500)
         .fixedSize(horizontal: false, vertical: true)
     }
@@ -172,6 +182,6 @@ struct MeetingModalView_Previews: PreviewProvider {
     ])
     static var previews: some View {
         MeetingModalView(viewModel: model)
-            .frame(width: 700, height: 500)
+            .frame(width: 800, height: 500)
     }
 }
