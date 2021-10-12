@@ -24,58 +24,39 @@ enum ActionableButtonVariant {
         switch self {
         case .primaryBlue:
             return ActionableButtonStyle(font: BeamFont.medium(size: 13).swiftUI,
-                                         foregroundColor: BeamColor.ActionableButtonBlue.foreground.swiftUI,
-                                         activeForegroundColor: BeamColor.ActionableButtonBlue.foreground.swiftUI,
-                                         disabledForegroundColor: BeamColor.ActionableButtonBlue.disabledForeground.swiftUI,
-                                         backgroundColor: BeamColor.ActionableButtonBlue.background.swiftUI,
-                                         hoveredBackgroundColor: BeamColor.ActionableButtonBlue.backgroundHovered.swiftUI,
-                                         clickedBackgroundColor: BeamColor.ActionableButtonBlue.backgroundClicked.swiftUI,
-                                         disabledBackgroundColor: BeamColor.ActionableButtonBlue.backgroundDisabled.swiftUI,
-                                         iconName: "editor-format_enter")
+                                         foregroundColor: .primaryBlueForeground,
+                                         backgroundColor: .primaryBlueBackground,
+                                         icon: .init(name: "editor-format_enter"))
         case .primaryPurple:
             return ActionableButtonStyle(font: BeamFont.medium(size: 13).swiftUI,
-                                         foregroundColor: BeamColor.ActionableButtonPurple.foreground.swiftUI,
-                                         activeForegroundColor: BeamColor.ActionableButtonPurple.foreground.swiftUI,
-                                         disabledForegroundColor: BeamColor.ActionableButtonPurple.disabledForeground.swiftUI,
-                                         backgroundColor: BeamColor.ActionableButtonPurple.background.swiftUI,
-                                         hoveredBackgroundColor: BeamColor.ActionableButtonPurple.backgroundHovered.swiftUI,
-                                         clickedBackgroundColor: BeamColor.ActionableButtonPurple.backgroundClicked.swiftUI,
-                                         disabledBackgroundColor: BeamColor.ActionableButtonPurple.backgroundDisabled.swiftUI,
-                                         iconName: "editor-format_enter")
+                                         foregroundColor: .primaryPurpleForeground,
+                                         backgroundColor: .primaryPurpleBackground,
+                                         icon: .init(name: "editor-format_enter"))
         case .secondary:
             return ActionableButtonStyle(font: BeamFont.medium(size: 13).swiftUI,
-                                         foregroundColor: BeamColor.ActionableButtonSecondary.foreground.swiftUI,
-                                         activeForegroundColor: BeamColor.ActionableButtonSecondary.activeForeground.swiftUI,
-                                         disabledForegroundColor: BeamColor.ActionableButtonSecondary.disabledForeground.swiftUI,
-                                         backgroundColor: BeamColor.ActionableButtonSecondary.background.swiftUI,
-                                         hoveredBackgroundColor: BeamColor.ActionableButtonSecondary.backgroundHovered.swiftUI,
-                                         clickedBackgroundColor: BeamColor.ActionableButtonSecondary.backgroundClicked.swiftUI,
-                                         disabledBackgroundColor: BeamColor.ActionableButtonSecondary.backgroundDisabled.swiftUI,
-                                         iconName: "Esc")
+                                         foregroundColor: .secondaryForeground,
+                                         backgroundColor: .secondaryBackground,
+                                         icon: .init(name: "editor-format_esc", size: 16, palette: .secondaryIcon))
         case .custom(let customStyle):
             return ActionableButtonStyle(font: customStyle.font,
                                          foregroundColor: customStyle.foregroundColor,
-                                         activeForegroundColor: customStyle.activeForegroundColor,
-                                         disabledForegroundColor: customStyle.disabledForegroundColor,
                                          backgroundColor: customStyle.backgroundColor,
-                                         hoveredBackgroundColor: customStyle.hoveredBackgroundColor,
-                                         clickedBackgroundColor: customStyle.clickedBackgroundColor,
-                                         disabledBackgroundColor: customStyle.disabledBackgroundColor,
-                                         iconName: customStyle.iconName)
+                                         icon: customStyle.icon)
         }
     }
 }
 
 struct ActionableButtonStyle {
     var font = BeamFont.medium(size: 13).swiftUI
-    var foregroundColor: Color = BeamColor.Button.text.swiftUI
-    var activeForegroundColor: Color = BeamColor.Button.activeText.swiftUI
-    var disabledForegroundColor: Color
-    var backgroundColor: Color
-    var hoveredBackgroundColor: Color
-    var clickedBackgroundColor: Color = BeamColor.Button.activeBackground.swiftUI
-    var disabledBackgroundColor: Color
-    let iconName: String
+    var foregroundColor: ActionableButtonState.Palette
+    var backgroundColor: ActionableButtonState.Palette
+    var icon: Icon?
+
+    struct Icon {
+        let name: String
+        var size: CGFloat = 12
+        var palette: ActionableButtonState.Palette?
+    }
 }
 
 struct ActionableButton: View {
@@ -94,12 +75,10 @@ struct ActionableButton: View {
             Text(text)
                 .foregroundColor(foregroundColor)
                 .padding(.leading, 12)
-            Image(variant.style.iconName)
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .foregroundColor(foregroundColor)
-                .frame(width: 12, height: 12)
-                .padding(.trailing, 12)
+            if let icon = variant.style.icon {
+                Icon(name: icon.name, size: icon.size, color: iconColor)
+                    .padding(.trailing, 12)
+            }
         }
         .frame(height: 30)
         .background(backgroundColor)
@@ -121,25 +100,83 @@ struct ActionableButton: View {
     }
 
     private var foregroundColor: Color {
+        let palette = variant.style.foregroundColor
         if defaultState == .disabled {
-            return variant.style.disabledForegroundColor
+            return palette.disabled.swiftUI
         } else if defaultState == .clicked {
-            return variant.style.activeForegroundColor
+            return palette.clicked.swiftUI
         } else {
-            return variant.style.foregroundColor
+            return palette.normal.swiftUI
         }
     }
 
     private var backgroundColor: Color {
+        let palette = variant.style.backgroundColor
         if defaultState == .disabled {
-            return variant.style.disabledBackgroundColor
+            return palette.disabled.swiftUI
         } else if defaultState == .clicked || isTouched {
-            return variant.style.clickedBackgroundColor
+            return palette.clicked.swiftUI
         } else if defaultState == .hovered || isHovered {
-            return variant.style.hoveredBackgroundColor
+            return palette.hovered.swiftUI
         } else {
-            return variant.style.backgroundColor
+            return palette.normal.swiftUI
         }
+    }
+
+    private var iconColor: Color {
+        if let iconPalette = variant.style.icon?.palette {
+            if defaultState == .disabled {
+                return iconPalette.disabled.swiftUI
+            } else if defaultState == .clicked || isTouched {
+                return iconPalette.clicked.swiftUI
+            } else if defaultState == .hovered || isHovered {
+                return iconPalette.hovered.swiftUI
+            } else {
+                return iconPalette.normal.swiftUI
+            }
+        }
+        return foregroundColor
+    }
+}
+
+extension ActionableButtonState {
+    struct Palette {
+        var normal: BeamColor
+        var hovered: BeamColor
+        var clicked: BeamColor
+        var disabled: BeamColor
+
+        static let primaryBlueForeground = ActionableButtonState.Palette(normal: .ActionableButtonBlue.foreground,
+                                                                         hovered: .ActionableButtonBlue.foreground,
+                                                                         clicked: .ActionableButtonBlue.foreground,
+                                                                         disabled: .ActionableButtonBlue.disabledForeground)
+        static let primaryBlueBackground = ActionableButtonState.Palette(normal: .ActionableButtonBlue.background,
+                                                                         hovered: .ActionableButtonBlue.backgroundHovered,
+                                                                         clicked: .ActionableButtonBlue.backgroundClicked,
+                                                                         disabled: .ActionableButtonBlue.backgroundDisabled)
+
+        static let primaryPurpleForeground = ActionableButtonState.Palette(normal: .ActionableButtonPurple.foreground,
+                                                                           hovered: .ActionableButtonPurple.foreground,
+                                                                           clicked: .ActionableButtonPurple.foreground,
+                                                                           disabled: .ActionableButtonPurple.disabledForeground)
+        static let primaryPurpleBackground = ActionableButtonState.Palette(normal: .ActionableButtonPurple.background,
+                                                                           hovered: .ActionableButtonPurple.backgroundHovered,
+                                                                           clicked: .ActionableButtonPurple.backgroundClicked,
+                                                                           disabled: .ActionableButtonPurple.backgroundDisabled)
+
+        static let secondaryForeground = ActionableButtonState.Palette(normal: .ActionableButtonSecondary.foreground,
+                                                                       hovered: .ActionableButtonSecondary.foreground,
+                                                                       clicked: .ActionableButtonSecondary.activeForeground,
+                                                                       disabled: .ActionableButtonSecondary.disabledForeground)
+        static let secondaryBackground = ActionableButtonState.Palette(normal: .ActionableButtonSecondary.background,
+                                                                       hovered: .ActionableButtonSecondary.backgroundHovered,
+                                                                       clicked: .ActionableButtonSecondary.backgroundClicked,
+                                                                       disabled: .ActionableButtonSecondary.backgroundDisabled)
+
+        static let secondaryIcon = ActionableButtonState.Palette(normal: .ActionableButtonSecondary.icon,
+                                                                 hovered: .ActionableButtonSecondary.iconHovered,
+                                                                 clicked: .ActionableButtonSecondary.iconActive,
+                                                                 disabled: .ActionableButtonSecondary.iconDisabled)
     }
 }
 

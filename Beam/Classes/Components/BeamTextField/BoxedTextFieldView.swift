@@ -22,10 +22,15 @@ struct BoxedTextFieldView: View {
                           textColor: foregroundColor.nsColor,
                           placeholderColor: BeamColor.AlphaGray.nsColor,
                           onCommit: { _ in onCommit?() })
+                .frame(height: 32)
         }
-        .padding(BeamSpacing._80)
-        .cornerRadius(3.0)
+        .padding(.horizontal, BeamSpacing._80)
         .border(colorScheme == .dark ? BeamColor.Mercury.swiftUI : BeamColor.Nero.swiftUI, width: 1.5)
+        .cornerRadius(3.0)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            isEditing = true
+        }
     }
 }
 

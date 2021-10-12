@@ -184,6 +184,10 @@ extension BeamColor {
         static let backgroundDisabled = BeamColor.Nero
         static let activeForeground = BeamColor.Niobium
         static let disabledForeground = BeamColor.AlphaGray.alpha(0.5)
+        static let icon = BeamColor.AlphaGray
+        static let iconHovered = BeamColor.LightStoneGray
+        static let iconActive = BeamColor.Corduroy
+        static let iconDisabled = BeamColor.AlphaGray.alpha(0.5)
     }
 }
 
