@@ -87,15 +87,16 @@ class ContextMenuFormatterView: FormatterView {
     }
 
     private func updateSize() {
-        var newFrame = frame
         let newSize = ContextMenuView.idealSizeForItems(displayedItems)
         if let window = window as? PopoverWindow {
+            var newWindowFrame = window.frame
             sizeUpdateDispatchedBlock?.cancel()
             let updateWindowSizeBlock = DispatchWorkItem { [weak self] in
                 self?.lastComputedSize = newSize
                 self?.subviewModel.containerSize = newSize
-                newFrame.size.height = newSize.height + CustomPopoverPresenter.windowViewPadding * 2
-                window.setContentSize(newFrame.size)
+                newWindowFrame.size.height = newSize.height + CustomPopoverPresenter.windowViewPadding * 2
+                self?.hostView?.frame.size.height = newSize.height
+                window.setContentSize(newWindowFrame.size)
             }
             if newSize.height < lastComputedSize.height {
                 // give some time for the view to animate then change the window size
@@ -105,6 +106,7 @@ class ContextMenuFormatterView: FormatterView {
                 updateWindowSizeBlock.perform()
             }
         } else {
+            var newFrame = frame
             newFrame.size.height = newSize.height
             newFrame.origin.y = bounds.size.height - newFrame.size.height
             subviewModel.containerSize = newSize
