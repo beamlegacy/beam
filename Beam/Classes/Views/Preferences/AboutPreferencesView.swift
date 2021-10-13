@@ -39,49 +39,26 @@ struct AboutPreferencesView_Previews: PreviewProvider {
 
 struct BeamAboutSection: View {
     private var TermsAndConditionsButton: some View {
-        if #available(macOS 11.0, *) {
-           return Button {
+        Button {
 
-            } label: {
-                (Text("Terms & Conditions") + Text(Image("editor-url").renderingMode(.template)))
-                    .underline()
-                    .font(BeamFont.regular(size: 12).swiftUI)
-                    .foregroundColor(BeamColor.Corduroy.swiftUI)
-            }.buttonStyle(PlainButtonStyle())
-        } else {
-           return Button {
-
-            } label: {
-                Text("Terms & Conditions")
-                    .underline()
-                    .font(BeamFont.regular(size: 12).swiftUI)
-                    .foregroundColor(BeamColor.Corduroy.swiftUI)
-            }.buttonStyle(PlainButtonStyle())
-        }
+        } label: {
+            (Text("Terms & Conditions") + Text(Image("editor-url").renderingMode(.template)))
+                .underline()
+                .font(BeamFont.regular(size: 12).swiftUI)
+                .foregroundColor(BeamColor.Corduroy.swiftUI)
+        }.buttonStyle(PlainButtonStyle())
     }
 
     private var PrivacyPolicyButton: some View {
-        if #available(macOS 11.0, *) {
-           return Button {
-
-            } label: {
-                (Text("Privacy Policy") + Text(Image("editor-url").renderingMode(.template)))
-                    .underline()
-                    .font(BeamFont.regular(size: 12).swiftUI)
-                    .foregroundColor(BeamColor.Corduroy.swiftUI)
-
-            }.buttonStyle(PlainButtonStyle())
-
-        } else {
-           return Button {
-
-            } label: {
-                Text("Privacy Policy")
-                    .underline()
-                    .font(BeamFont.regular(size: 12).swiftUI)
-                    .foregroundColor(BeamColor.Corduroy.swiftUI)
-            }.buttonStyle(PlainButtonStyle())
-        }
+        Button {
+            
+        } label: {
+            (Text("Privacy Policy") + Text(Image("editor-url").renderingMode(.template)))
+                .underline()
+                .font(BeamFont.regular(size: 12).swiftUI)
+                .foregroundColor(BeamColor.Corduroy.swiftUI)
+            
+        }.buttonStyle(PlainButtonStyle())
     }
 
     var body: some View {
