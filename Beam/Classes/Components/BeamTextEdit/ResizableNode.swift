@@ -25,7 +25,7 @@ class ResizableNode: ElementNode {
         let embedWidth = (fullWidth - contentsLead)
         return embedWidth
     }
-    
+
     var visibleSize: CGSize {
         let computedWidth: CGFloat
         if let ratio = desiredWidthRatio {
@@ -91,7 +91,6 @@ class ResizableNode: ElementNode {
                 self?.invalidateLayout(animated: true)
                 return true
             }
-
             self?.initialDragImageGlobalPosition = info.globalPosition
             self?.initialDragImageSize = self?.visibleSize
             return true
@@ -107,7 +106,6 @@ class ResizableNode: ElementNode {
             guard let contentsWidth = self?.contentsWidth else { return false }
 
             self?.isResizing = true
-
             let xTranslation = info.globalPosition.x - initialPosition.x
             let desiredWidth = initialSize.width + xTranslation
             self?.desiredWidthRatio = Double(desiredWidth / contentsWidth)
