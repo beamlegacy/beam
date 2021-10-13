@@ -14,14 +14,22 @@ window.beam.__ID__Nav = {
     setTimeout(() => {
       const links = document.querySelectorAll("[target='_blank']")
       for (let link of links) {
+        const children = link.children
         const newLink = document.createElement("a")
         newLink.rel = link.rel
         newLink.href = link.href
-        newLink.textContent = link.textContent
-        newLink.target = "_blank"
+        newLink.target = link.target
+        newLink.dataset = link.dataset
+        newLink.ariadataset = link.ariadataset
+        newLink.draggable = link.draggable
         newLink.className = link.className
         newLink.style = link.style
         newLink.dataset.beam = "yes"
+        if (children.length > 0) {
+          newLink.append(...children)
+        } else {
+          newLink.textContent = link.textContent
+        }
         link.parentElement.replaceChild(newLink, link)
       }
     }, delay)
