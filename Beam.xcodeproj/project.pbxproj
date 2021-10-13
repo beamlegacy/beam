@@ -6662,7 +6662,7 @@
 			repositoryURL = "https://gitlab+deploy-token-596840:s63rWYma33o3RCwsbebz@gitlab.com/beamgroup/clustering.git";
 			requirement = {
 				kind = revision;
-				revision = 083dafb108ab4fe801724baa7554bf50fb48edda;
+				revision = e982188317f80b527fa51823e5fe78a4f579fb96;
 			};
 		};
 		524CF6D125F276D1007312F0 /* XCRemoteSwiftPackageReference "KeychainAccess" */ = {
