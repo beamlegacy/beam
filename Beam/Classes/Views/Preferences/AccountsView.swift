@@ -450,44 +450,27 @@ struct AccountCredentialsView: View {
     @Binding var password: String
     @Binding var loggedIn: Bool
     @Binding var loading: Bool
-
+    
     var body: some View {
         // TODO: loc
-        if #available(OSX 11.0, *) {
-            TextField("johnnyappleseed@apple.com", text: $email)
-                .textContentType(.username)
-                .disabled(loggedIn || loading)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .frame(maxWidth: 200)
-                .frame(width: 161, alignment: .leading)
-        } else {
-            TextField("johnnyappleseed@apple.com", text: $email)
-                .disabled(loggedIn || loading)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .frame(maxWidth: 200)
-                .frame(width: 161, alignment: .leading)
-        }
-        // TODO: loc
-        if #available(macOS 11.0, *) {
-            SecureField("Enter your password", text: $password)
-                .textContentType(.password)
-                .disabled(loggedIn || loading)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .frame(maxWidth: 200)
-                .frame(width: 161, alignment: .leading)
-        } else {
-            SecureField("Enter your password", text: $password)
-                .disabled(loggedIn || loading)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .frame(maxWidth: 200)
-                .frame(width: 161, alignment: .leading)
-        }
+        TextField("johnnyappleseed@apple.com", text: $email)
+            .textContentType(.username)
+            .disabled(loggedIn || loading)
+            .textFieldStyle(RoundedBorderTextFieldStyle())
+            .frame(maxWidth: 200)
+            .frame(width: 161, alignment: .leading)
+        SecureField("Enter your password", text: $password)
+            .textContentType(.password)
+            .disabled(loggedIn || loading)
+            .textFieldStyle(RoundedBorderTextFieldStyle())
+            .frame(maxWidth: 200)
+            .frame(width: 161, alignment: .leading)
     }
 }
 
 struct AccountsView_Previews: PreviewProvider {
-	static var previews: some View {
-		AccountsView()
-	}
+    static var previews: some View {
+        AccountsView()
+    }
     // swiftlint:disable:next file_length
 }

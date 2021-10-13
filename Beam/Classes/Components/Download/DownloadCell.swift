@@ -174,18 +174,14 @@ struct DownloadCell_Previews: PreviewProvider {
                 DownloadCell(download: d3)
                     .frame(width: 368.0)
             }
-            if #available(macOS 11.0, *) {
-                Group {
-                    DownloadCell(download: d1)
-                        .frame(width: 368.0)
-                    DownloadCell(download: d2)
-                        .frame(width: 368.0)
-                    DownloadCell(download: d3)
-                        .frame(width: 368.0)
-                }.preferredColorScheme(.dark)
-            } else {
-                // Fallback on earlier versions
-            }
+            Group {
+                DownloadCell(download: d1)
+                    .frame(width: 368.0)
+                DownloadCell(download: d2)
+                    .frame(width: 368.0)
+                DownloadCell(download: d3)
+                    .frame(width: 368.0)
+            }.preferredColorScheme(.dark)
         }
 
     }

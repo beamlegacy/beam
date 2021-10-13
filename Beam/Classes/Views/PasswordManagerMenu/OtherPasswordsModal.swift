@@ -138,12 +138,8 @@ struct OtherPasswordModalCancelButton: View {
     var action:() -> Void
 
     var body: some View {
-        if #available(macOS 11.0, *) {
-            OtherPasswordModalButton(title: title, isDisabled: isDisabled, action: action)
-                .keyboardShortcut(.cancelAction)
-        } else {
-            OtherPasswordModalButton(title: title, isDisabled: isDisabled, action: action)
-        }
+        OtherPasswordModalButton(title: title, isDisabled: isDisabled, action: action)
+            .keyboardShortcut(.cancelAction)
     }
 }
 

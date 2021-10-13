@@ -68,11 +68,7 @@ class WordsFile {
         }
         self.fileHandle = fileHandle
         do {
-            if #available(macOS 10.15.4, *) {
-                fileLength = try fileHandle.seekToEnd()
-            } else {
-                fileLength = fileHandle.seekToEndOfFile()
-            }
+            fileLength = try fileHandle.seekToEnd()
         } catch {
             return nil
         }
@@ -94,17 +90,12 @@ class WordsFile {
         let lastOffset = fileLength - UInt64(blockSize)
         let randomOffset = (0...lastOffset).randomElement()!
         let randomBlock: Data
-        if #available(macOS 10.15.4, *) {
-            do {
-                try fileHandle.seek(toOffset: randomOffset)
-                guard let data = try fileHandle.read(upToCount: blockSize) else { return nil }
-                randomBlock = data
-            } catch {
-                return nil
-            }
-        } else {
-            fileHandle.seek(toFileOffset: randomOffset)
-            randomBlock = fileHandle.readData(ofLength: blockSize)
+        do {
+            try fileHandle.seek(toOffset: randomOffset)
+            guard let data = try fileHandle.read(upToCount: blockSize) else { return nil }
+            randomBlock = data
+        } catch {
+            return nil
         }
         let lineFeed = Character("\n").asciiValue!
         guard let firstLF = randomBlock.firstIndex(of: lineFeed), let lastLF = randomBlock.lastIndex(of: lineFeed) else {

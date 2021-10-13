@@ -8,6 +8,7 @@
 import Foundation
 
 extension WKWebView {
+
     private func setZoomWithJS(_ zoomLevel: Float) {
         evaluateJavaScript("document.body.style.zoom = \(zoomLevel)", completionHandler: nil)
     }
@@ -23,38 +24,18 @@ extension WKWebView {
     }
 
     func zoomReset() {
-        if #available(macOS 11.0, *) {
-            pageZoom = 1
-        } else {
-            setZoomWithJS(1.0)
-        }
+        pageZoom = 1
     }
 
     func zoomIn() {
-        if #available(macOS 11.0, *) {
-            pageZoom += 0.1
-        } else {
-            getCurrentZoomFromJS { zoom in
-                self.setZoomWithJS(zoom + 0.1)
-            }
-        }
+        pageZoom += 0.1
     }
 
     func zoomOut() {
-        if #available(macOS 11.0, *) {
-            pageZoom -= 0.1
-        } else {
-            getCurrentZoomFromJS { zoom in
-                self.setZoomWithJS(zoom - 0.1)
-            }
-        }
+        pageZoom -= 0.1
     }
 
     func zoomLevel() -> CGFloat {
-        if #available(macOS 11.0, *) {
-            return pageZoom
-        }
-        // For PNS scaling, document zoom fallback isn't handled here, but retrieved in JS directly
-        return 1.0
+        pageZoom
     }
 }

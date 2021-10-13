@@ -59,18 +59,16 @@ struct Tooltip_Previews: PreviewProvider {
                 .padding(20)
                 .background(BeamColor.Generic.background.swiftUI)
         }
-        if #available(macOS 11.0, *) {
-            Group {
-                VStack(spacing: 8) {
-                    Tooltip(title: "Label", subtitle: "⌘⌥⇧⌃⇪⌥⇧⌘⇪⌃")
-                    Tooltip(title: "Label")
-                    Tooltip(title: "Label", icon: "tooltip-mark", subtitle: "⌘⌥⇧⌃⇪")
-                    Tooltip(title: "Label", icon: "tooltip-mark")
-                }
-                .padding(20)
-                .background(BeamColor.Generic.background.swiftUI)
-                .preferredColorScheme(.dark)
+        Group {
+            VStack(spacing: 8) {
+                Tooltip(title: "Label", subtitle: "⌘⌥⇧⌃⇪⌥⇧⌘⇪⌃")
+                Tooltip(title: "Label")
+                Tooltip(title: "Label", icon: "tooltip-mark", subtitle: "⌘⌥⇧⌃⇪")
+                Tooltip(title: "Label", icon: "tooltip-mark")
             }
+            .padding(20)
+            .background(BeamColor.Generic.background.swiftUI)
+            .preferredColorScheme(.dark)
         }
     }
 }

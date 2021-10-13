@@ -20,16 +20,7 @@ extension NSAppearance {
     }
 
     static func withAppAppearance(_ block: () -> Void) {
-        if #available(macOS 11.0, *) {
-            NSApp.effectiveAppearance.performAsCurrentDrawingAppearance {
-                block()
-            }
-        } else {
-            let previousAppearance = NSAppearance.current
-            NSAppearance.current = NSApp.effectiveAppearance
-            defer {
-                NSAppearance.current = previousAppearance
-            }
+        NSApp.effectiveAppearance.performAsCurrentDrawingAppearance {
             block()
         }
     }
