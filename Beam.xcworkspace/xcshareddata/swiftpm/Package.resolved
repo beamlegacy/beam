@@ -23,8 +23,8 @@
         "package": "Clustering",
         "repositoryURL": "https://gitlab+deploy-token-596840:s63rWYma33o3RCwsbebz@gitlab.com/beamgroup/clustering.git",
         "state": {
-          "branch": "main",
-          "revision": "083dafb108ab4fe801724baa7554bf50fb48edda",
+          "branch": null,
+          "revision": "e982188317f80b527fa51823e5fe78a4f579fb96",
           "version": null
         }
       },
