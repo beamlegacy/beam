@@ -9,55 +9,58 @@ import XCTest
 
 class StringRegexTests: XCTestCase {
 
-    let validWebURLs = ["swift.fr", "http://swift.fr", "http://SwIft.Fr"]
-    let validFileURLs = ["file:///swift.beamappfile", "file:///path/to/swift.html"]
-    let validEmails = ["swift@beamapp.co", "s@b.co"]
+    let validWebURLs = ["swift.fr", "http://swift.fr", "http://SwIft.Fr", "http://the-super--swift.fr"]
+    let validFileURLs = ["file:///swift.beamappfile", "file:///path/to/swift.html", "file:///some-dir/some-swift--file.html"]
+    let validEmails = ["swift@beamapp.co", "s@b.co", "john-swift--the3rd@beamapp.co"]
 
     let invalidWebURLs = ["http://swift", "swift"]
     let invalidFileURLs = ["file://swift.html", "file://path/swift.html", "file"]
     let invalidEmails = ["swift", "https://swift", "@swift.co", "mailto:swift@beamapp.co", "swift@beamapp.co:wrong"]
 
     func testMayBeURL() {
-        XCTAssertTrue(validWebURLs[0].mayBeURL)
-        XCTAssertTrue(validWebURLs[1].mayBeURL)
-        XCTAssertTrue(validWebURLs[2].mayBeURL)
-        XCTAssertTrue(validFileURLs[0].mayBeURL)
-        XCTAssertTrue(validFileURLs[1].mayBeURL)
+        for validWebURL in validWebURLs {
+            XCTAssertTrue(validWebURL.mayBeURL, "\(validWebURL) should be a valid URL")
+        }
+        for validFileURL in validFileURLs {
+            XCTAssertTrue(validFileURL.mayBeURL, "\(validFileURL) should be a valid URL")
+        }
 
-        XCTAssertFalse(invalidWebURLs[0].mayBeURL)
-        XCTAssertFalse(invalidWebURLs[1].mayBeURL)
-        XCTAssertFalse(invalidFileURLs[0].mayBeURL)
-        XCTAssertFalse(invalidFileURLs[1].mayBeURL)
-        XCTAssertFalse(invalidFileURLs[2].mayBeURL)
+        for invalidWebURL in invalidWebURLs {
+            XCTAssertFalse(invalidWebURL.mayBeURL, "\(invalidWebURL) should not be a valid URL")
+        }
+        for invalidFileURL in invalidFileURLs {
+            XCTAssertFalse(invalidFileURL.mayBeURL, "\(invalidFileURL) should not be a valid URL")
+        }
     }
 
     func testMayBeWebURL() {
-        XCTAssertTrue(validWebURLs[0].mayBeWebURL)
-        XCTAssertTrue(validWebURLs[1].mayBeWebURL)
-        XCTAssertTrue(validWebURLs[2].mayBeWebURL)
+        for validWebURL in validWebURLs {
+            XCTAssertTrue(validWebURL.mayBeWebURL, "\(validWebURL) should be a valid Web URL")
+        }
 
-        XCTAssertFalse(invalidWebURLs[0].mayBeWebURL)
-        XCTAssertFalse(invalidWebURLs[1].mayBeWebURL)
+        for invalidWebURL in invalidWebURLs {
+            XCTAssertFalse(invalidWebURL.mayBeWebURL, "\(invalidWebURL) should not be valid Web URL")
+        }
     }
 
     func testMayBeFileURL() {
-        XCTAssertTrue(validFileURLs[0].mayBeFileURL)
-        XCTAssertTrue(validFileURLs[1].mayBeFileURL)
+        for validFileURL in validFileURLs {
+            XCTAssertTrue(validFileURL.mayBeFileURL, "\(validFileURL) should be a valid file URL")
+        }
 
-        XCTAssertFalse(invalidFileURLs[0].mayBeFileURL)
-        XCTAssertFalse(invalidFileURLs[1].mayBeFileURL)
-        XCTAssertFalse(invalidFileURLs[2].mayBeFileURL)
+        for invalidFileURL in invalidFileURLs {
+            XCTAssertFalse(invalidFileURL.mayBeFileURL, "\(invalidFileURL) should not be a valid file URL")
+        }
     }
 
     func testMayBeEmail() {
-        XCTAssertTrue(validEmails[0].mayBeEmail)
-        XCTAssertTrue(validEmails[1].mayBeEmail)
+        for validEmail in validEmails {
+            XCTAssertTrue(validEmail.mayBeEmail, "\(validEmail) should be a valid email")
+        }
 
-        XCTAssertFalse(invalidEmails[0].mayBeEmail)
-        XCTAssertFalse(invalidEmails[1].mayBeEmail)
-        XCTAssertFalse(invalidEmails[2].mayBeEmail)
-        XCTAssertFalse(invalidEmails[3].mayBeEmail)
-        XCTAssertFalse(invalidEmails[4].mayBeEmail)
+        for invalidEmail in invalidEmails {
+            XCTAssertFalse(invalidEmail.mayBeEmail, "\(invalidEmail) should not be a valid email")
+        }
     }
 
 }
