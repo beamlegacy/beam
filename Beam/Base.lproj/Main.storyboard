@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="18122" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="19162" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="18122"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="19162"/>
     </dependencies>
     <scenes>
         <!--Beam Application-->
@@ -881,26 +881,26 @@
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="eu3-7i-yIM"/>
-                                        <menuItem title="Show previous tab" tag="4" keyEquivalent="[" id="TK0-jr-lkZ" userLabel="Show Previous Tab">
+                                        <menuItem title="Show Previous tab" tag="-4" keyEquivalent="[" id="TK0-jr-lkZ" userLabel="Show Previous Tab">
                                             <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
                                             <connections>
                                                 <action selector="showPreviousTab:" target="Ady-hI-5gd" id="QFs-kq-p2g"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Show Previous Tab" tag="-4" enabled="NO" id="oAb-PD-njU" userLabel="Show Previous Tab">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                        <menuItem title="Show Previous Tab" tag="4" keyEquivalent="" id="oAb-PD-njU" userLabel="Show Previous Tab">
+                                            <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
                                             <connections>
                                                 <action selector="showPreviousTab:" target="Ady-hI-5gd" id="cP6-aq-98d"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Show Next Tab" tag="4" keyEquivalent="]" id="ALY-z5-5pM" userLabel="Show Next Tab">
+                                        <menuItem title="Show Next Tab" tag="-4" keyEquivalent="]" id="ALY-z5-5pM" userLabel="Show Next Tab">
                                             <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
                                             <connections>
                                                 <action selector="showNextTab:" target="Ady-hI-5gd" id="NFT-aq-DrR"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Show Next Tab" tag="-4" enabled="NO" id="KJE-FH-Z16" userLabel="Show Next Tab">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                        <menuItem title="Show Next Tab" tag="4" keyEquivalent="" id="KJE-FH-Z16" userLabel="Show Next Tab">
+                                            <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
                                             <connections>
                                                 <action selector="showNextTab:" target="Ady-hI-5gd" id="q1N-Nw-YOb"/>
                                             </connections>
