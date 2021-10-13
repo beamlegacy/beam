@@ -54,11 +54,9 @@ struct DestinationNoteAutocompleteList: View {
         Group {
             if allowScroll {
                 ScrollView {
-                    RetroCompatibleScrollViewReader { retroProxy in
-                        list .onReceive(Just(retroProxy)) { p in
-                            if p != model.scrollViewProxy {
-                                model.scrollViewProxy = p
-                            }
+                    ScrollViewReader { proxy in
+                        list.onAppear {
+                            model.scrollViewProxy = proxy
                         }
                     }
                 }
@@ -81,7 +79,7 @@ struct DestinationNoteAutocompleteList: View {
                     .if(!model.searchCardContent) {
                         $0.frame(height: itemHeight)
                     }
-                    .retroCompatibleScrollId(i.id)
+                    .id(i.id)
                     .transition(.identity)
                     .animation(nil)
                     .simultaneousGesture(
@@ -131,7 +129,7 @@ extension DestinationNoteAutocompleteList {
             return results[index]
         }
 
-        fileprivate var scrollViewProxy: RetroCompatibleScrollViewProxy?
+        fileprivate var scrollViewProxy: ScrollViewProxy?
         fileprivate var disableHoverSelection = false
         @Published var selectedIndex: Int?
         @Published var results: [AutocompleteResult] = []

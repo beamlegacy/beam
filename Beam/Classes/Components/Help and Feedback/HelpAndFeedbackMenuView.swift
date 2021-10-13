@@ -116,10 +116,8 @@ struct HelpAndFeedbackMenuView_Previews: PreviewProvider {
     static var previews: some View {
         Group {
             HelpAndFeedbackMenuView()
-            if #available(macOS 11.0, *) {
-                HelpAndFeedbackMenuView()
-                    .preferredColorScheme(.dark)
-            }
+            HelpAndFeedbackMenuView()
+                .preferredColorScheme(.dark)
         }
     }
 }
