@@ -49,7 +49,7 @@ class ClusteringManager: ObservableObject {
         self.weightEntities = entities
         self.activeSources = activeSources
         self.suggestedNoteUpdater = SuggestedNoteSourceUpdater(sessionId: sessionId, documentManager: documentManager)
-        self.cluster = Cluster(candidate: candidate, weightNavigation: navigation, weightText: text, weightEntities: entities)
+        self.cluster = Cluster(candidate: candidate, weightNavigation: navigation, weightText: text, weightEntities: entities, noteContentThreshold: 100)
         self.ranker = ranker
         self.documentManager = documentManager
         self.sessionId = sessionId
@@ -210,7 +210,11 @@ class ClusteringManager: ObservableObject {
             switch result {
             case .failure(let error):
                 self.isClustering = false
-                Logger.shared.logError("Error while adding note to cluster for \(clusteringNote): \(error)", category: .clustering)
+                if error as? Cluster.AdditionError == .notEnoughTextInNote {
+                    Logger.shared.logInfo("Note ignored by the clustering process due to insufficient content. Suggestions can still be made for the note.")
+                } else {
+                    Logger.shared.logError("Error while adding note to cluster for \(clusteringNote): \(error)", category: .clustering)
+                }
             case .success(let result):
                 DispatchQueue.main.async {
                     self.isClustering = false
