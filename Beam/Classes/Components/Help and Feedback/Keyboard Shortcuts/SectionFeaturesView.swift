@@ -22,7 +22,7 @@ enum SectionShortcuts: String {
                     KeyboardFeature(name: "Save page", shortcuts: [Shortcut(modifiers: [.command], keys: [.string("S")])]),
                     KeyboardFeature(name: "Omnibox", shortcuts: [Shortcut(modifiers: [.command], keys: [.string("L")])]),
                     KeyboardFeature(name: "Go to Card", shortcuts: [Shortcut(modifiers: [.command], keys: [.string("D")])]),
-                    KeyboardFeature(name: "Destination Card", shortcuts: [Shortcut(modifiers: [.shift, .command], keys: [.string("S")])]),
+                    KeyboardFeature(name: "Destination Card", shortcuts: [Shortcut(modifiers: [.shift, .command], keys: [.string("D")])]),
                     KeyboardFeature(name: "New Tab", shortcuts: [Shortcut(modifiers: [.command], keys: [.string("T")])]),
                     KeyboardFeature(name: "Close Tab", shortcuts: [Shortcut(modifiers: [.command], keys: [.string("W")])]),
                     KeyboardFeature(name: "Reload page", shortcuts: [Shortcut(modifiers: [.command], keys: [.string("R")])]),
@@ -53,8 +53,8 @@ enum SectionShortcuts: String {
                     KeyboardFeature(name: "Bold", shortcuts: [Shortcut(modifiers: [], keys: [.string("*")])]),
                     KeyboardFeature(name: "Italic", shortcuts: [Shortcut(modifiers: [], keys: [.string("**")])]),
                     KeyboardFeature(name: "Strikeout", shortcuts: [Shortcut(modifiers: [], keys: [.string("~~")])]),
-                    KeyboardFeature(name: "Journal", shortcuts: [Shortcut(modifiers: [.shift, .command], keys: [.string("H")])]),
-                    KeyboardFeature(name: "All cards", shortcuts: [Shortcut(modifiers: [.shift, .command], keys: [.string("?")])]),
+                    KeyboardFeature(name: "Journal", shortcuts: [Shortcut(modifiers: [.shift, .command], keys: [.string("J")])]),
+                    KeyboardFeature(name: "All cards", shortcuts: [Shortcut(modifiers: [.shift, .command], keys: [.string("H")])]),
                     KeyboardFeature(name: "Find", shortcuts: [Shortcut(modifiers: [.command], keys: [.string("F")])])
             ]        }
     }

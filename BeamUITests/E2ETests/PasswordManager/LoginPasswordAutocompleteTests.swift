@@ -12,7 +12,8 @@ class LoginPasswordAutocompleteTests: BaseTest {
     
     let facebookPage = "https://www.facebook.com "
     
-    func testAutocompleteSuccessfullyAppears() {
+    func testAutocompleteSuccessfullyAppears() throws {
+        try XCTSkipIf(true, "To be refactored once https://linear.app/beamapp/issue/BE-1563/create-uitest-menu-option-having-httpsmockloginimoofcom-integration is Done")
         let journalView = launchApp()
         UITestsMenuBar().destroyDB()
         UITestsMenuBar().populatePasswordsDB()
