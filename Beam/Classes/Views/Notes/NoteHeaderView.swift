@@ -126,10 +126,8 @@ struct NoteHeaderView: View {
                                             }
                                         }
                                     })
-
 //            Feature not available yet.
 //            ButtonLabel(icon: "editor-sources", state: .disabled)
-
             ButtonLabel(icon: "editor-delete", action: model.promptConfirmDelete)
         }
     }
@@ -279,7 +277,6 @@ extension NoteHeaderView {
         }
 
         // MARK: Publishing
-
         /// returns true if user is allowed to perform the action
         func togglePublish() -> Bool {
             guard let note = note else { return false }

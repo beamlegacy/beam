@@ -55,7 +55,7 @@ class NodeProviderImpl: NodeProvider {
         return mapping[element]?.ref
     }
 
-    // swiftlint:disable:next cyclomatic_complexity, function_body_length
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
     func nodeFor(_ element: BeamElement, withParent: Widget) -> ElementNode {
         guard let editor = holder?.editor else { fatalError() }
 

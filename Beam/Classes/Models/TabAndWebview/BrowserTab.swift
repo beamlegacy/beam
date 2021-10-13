@@ -442,8 +442,8 @@ import Promises
                 url = webviewUrl
             }
             leave()
-            if webviewUrl.absoluteString != nil {
-                updateFavIcon()
+            updateFavIcon()
+            if !webviewUrl.absoluteString.isEmpty {
                 // self.browsingTree.current.score.openIndex = self.navigationCount
                 // self.updateScore()
                 // self.navigationCount = 0

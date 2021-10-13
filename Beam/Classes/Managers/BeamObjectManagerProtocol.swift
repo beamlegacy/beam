@@ -133,11 +133,9 @@ extension BeamObjectManagerDelegate {
             }
 
             guard !wrongObjects.isEmpty else { return }
-
-            let beamObjectManager = BeamObjectManager()
-
             Logger.shared.logWarning("\(wrongObjects.count) objects had wrong checksum after save, checking on the API if they've been updated since",
                                      category: .beamObjectNetwork)
+            let beamObjectManager = BeamObjectManager()
             try beamObjectManager.fetchBeamObjectChecksums(wrongObjects.map { $0.beamObjectId }) { result in
                 switch result {
                 case .failure(let error):
@@ -174,14 +172,10 @@ extension BeamObjectManagerDelegate {
                             Logger.shared.logWarning("previousChecksum for object \(remoteObject.beamObjectId) wasn't saved in local object. Remote: \(String(describing: remoteObject.previousChecksum)), local: \(String(describing: savedObject.previousChecksum)), New remote: \(String(describing: remoteBeamObject.dataChecksum))", category: .beamObjectNetwork)
                         }
                     }
-
                     fatalError("previousChecksum for objects is wrong!")
                 }
             }
-
-        } catch {
-            fatalError("Failed: \(error.localizedDescription)")
-        }
+        } catch { fatalError("Failed: \(error.localizedDescription)") }
         #endif
     }
 }
