@@ -161,18 +161,18 @@ class ClusteringManager: ObservableObject {
                 replaceContent = true
             }
             cluster.add(page: pageToAdd, ranking: ranking, replaceContent: replaceContent) { result in
+                DispatchQueue.main.async {
+                    self.isClustering = false
+                }
                 switch result {
                 case .failure(let error):
                     self.isClustering = false
                     Logger.shared.logError("Error while adding page to cluster for \(pageToAdd): \(error)", category: .clustering)
                 case .success(let result):
-                    DispatchQueue.main.async {
-                        self.isClustering = false
-                        self.clusteredPagesId = result.pageGroups
-                        self.clusteredNotesId = result.noteGroups
-                        self.sendRanking = result.sendRanking
-                        self.logForClustering(result: result.pageGroups, changeCandidate: false)
-                    }
+                    self.clusteredPagesId = result.pageGroups
+                    self.clusteredNotesId = result.noteGroups
+                    self.sendRanking = result.sendRanking
+                    self.logForClustering(result: result.pageGroups, changeCandidate: false)
                 }
             }
         }
@@ -207,22 +207,21 @@ class ClusteringManager: ObservableObject {
             ranking = self.ranker.clusteringRemovalSorted(links: self.clusteredPagesId.reduce([], +))
         }
         self.cluster.add(note: clusteringNote, ranking: ranking) { result in
+            DispatchQueue.main.async {
+                self.isClustering = false
+            }
             switch result {
             case .failure(let error):
-                self.isClustering = false
                 if error as? Cluster.AdditionError == .notEnoughTextInNote {
                     Logger.shared.logInfo("Note ignored by the clustering process due to insufficient content. Suggestions can still be made for the note.")
                 } else {
                     Logger.shared.logError("Error while adding note to cluster for \(clusteringNote): \(error)", category: .clustering)
                 }
             case .success(let result):
-                DispatchQueue.main.async {
-                    self.isClustering = false
-                    self.clusteredPagesId = result.pageGroups
-                    self.clusteredNotesId = result.noteGroups
-                    self.sendRanking = result.sendRanking
-                    self.logForClustering(result: result.pageGroups, changeCandidate: false)
-                }
+                self.clusteredPagesId = result.pageGroups
+                self.clusteredNotesId = result.noteGroups
+                self.sendRanking = result.sendRanking
+                self.logForClustering(result: result.pageGroups, changeCandidate: false)
             }
         }
     }
@@ -230,18 +229,17 @@ class ClusteringManager: ObservableObject {
     func change(candidate: Int, weightNavigation: Double, weightText: Double, weightEntities: Double) {
         isClustering = true
         cluster.changeCandidate(to: candidate, with: weightNavigation, with: weightText, with: weightEntities) { result in
+            DispatchQueue.main.async {
+                self.isClustering = false
+            }
             switch result {
             case .failure(let error):
-                self.isClustering = false
                 Logger.shared.logError("Error while changing candidate to cluster for: \(error)", category: .clustering)
             case .success(let result):
-                DispatchQueue.main.async {
-                    self.isClustering = false
-                    self.clusteredPagesId = self.reorganizeGroups(clusters: result.pageGroups)
-                    self.clusteredNotesId = result.noteGroups
-                    self.sendRanking = result.sendRanking
-                    self.logForClustering(result: result.pageGroups, changeCandidate: true)
-                }
+                self.clusteredPagesId = self.reorganizeGroups(clusters: result.pageGroups)
+                self.clusteredNotesId = result.noteGroups
+                self.sendRanking = result.sendRanking
+                self.logForClustering(result: result.pageGroups, changeCandidate: true)
             }
         }
     }
