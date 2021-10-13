@@ -22,7 +22,7 @@ class ClusteringManagerTests: XCTestCase {
         activeSources = ActiveSources()
         clusteringManager = ClusteringManager(ranker: sessionLinkRanker, documentManager: documentManager, candidate: 2, navigation: 0.5, text: 0.8, entities: 0.5, sessionId: UUID(), activeSources: activeSources)
 
-        clusteringManager.initialiseNotes = false
+        clusteringManager.initialiseNotes = .twoOrMorePagesAdded
         
         documents = [
             IndexDocument(id: 0, title: "Roger Federer"),

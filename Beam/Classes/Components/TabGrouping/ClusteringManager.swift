@@ -12,6 +12,13 @@ import Clustering
 import Fakery
 
 class ClusteringManager: ObservableObject {
+
+    enum InitialiseNotes {
+        case zeroPagesAdded
+        case onePageAdded
+        case twoOrMorePagesAdded
+    }
+
     var clusteredPagesId: [[UInt64]] = [[]] {
         didSet {
             transformToClusteredPages()
@@ -24,7 +31,7 @@ class ClusteringManager: ObservableObject {
         }
     }
     var sendRanking = false
-    var initialiseNotes = true
+    var initialiseNotes: InitialiseNotes = .zeroPagesAdded
     var ranker: SessionLinkRanker
     var documentManager: DocumentManager
     var activeSources: ActiveSources
@@ -176,13 +183,18 @@ class ClusteringManager: ObservableObject {
                 }
             }
         }
-        // After adding the first page, add notes from previous sessions
-        if initialiseNotes {
+        // After adding the second page, add notes from previous sessions
+        switch initialiseNotes {
+        case .zeroPagesAdded:
+            initialiseNotes = .onePageAdded
+        case .onePageAdded:
             let notes = BeamNote.fetchNotesWithType(documentManager, type: .note, 10, 0)
             for note in notes {
                 self.addNote(note: note)
             }
-            self.initialiseNotes = false
+            initialiseNotes = .twoOrMorePagesAdded
+        case .twoOrMorePagesAdded:
+            break
         }
     }
 
