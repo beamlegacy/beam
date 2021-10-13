@@ -28,12 +28,10 @@ struct ShortcutView_Previews: PreviewProvider {
         Group {
             ShortcutView(shortcut: Shortcut(modifiers: [.shift, .command], keys: [.tab]))
             ShortcutView(shortcut: Shortcut(modifiers: [.shift, .command], keys: [.string("d")]))
-            if #available(macOS 11.0, *) {
-                ShortcutView(shortcut: Shortcut(modifiers: [.shift, .command], keys: [.tab]))
-                    .preferredColorScheme(.dark)
-                ShortcutView(shortcut: Shortcut(modifiers: [.shift, .command], keys: [.string("d")]))
-                    .preferredColorScheme(.dark)
-            }
+            ShortcutView(shortcut: Shortcut(modifiers: [.shift, .command], keys: [.tab]))
+                .preferredColorScheme(.dark)
+            ShortcutView(shortcut: Shortcut(modifiers: [.shift, .command], keys: [.string("d")]))
+                .preferredColorScheme(.dark)
         }
     }
 }

@@ -70,9 +70,8 @@ struct TableView: NSViewRepresentable {
         view.allowsColumnReordering = false
         view.columnAutoresizingStyle = .reverseSequentialColumnAutoresizingStyle
         view.intercellSpacing = .zero
-        if #available(OSX 11.0, *) {
-            view.style = .plain
-        }
+        view.style = .plain
+
         scrollView.documentView = view
         context.coordinator.tableView = view
         view.delegate = context.coordinator

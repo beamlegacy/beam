@@ -205,31 +205,29 @@ struct ActionableButton_Previews: PreviewProvider {
             }.padding()
             .background(BeamColor.Generic.background.swiftUI)
         }
-        if #available(macOS 11.0, *) {
-            Group {
-                HStack {
-                    VStack {
-                        ActionableButton(text: "Primary Button", defaultState: .normal, variant: .primaryBlue, action: nil)
-                        ActionableButton(text: "Primary Button", defaultState: .hovered, variant: .primaryBlue, action: nil)
-                        ActionableButton(text: "Primary Button", defaultState: .clicked, variant: .primaryBlue, action: nil)
-                        ActionableButton(text: "Primary Button", defaultState: .disabled, variant: .primaryBlue, action: nil)
-                    }
-                    VStack {
-                        ActionableButton(text: "Primary Button", defaultState: .normal, variant: .primaryPurple, action: nil)
-                        ActionableButton(text: "Primary Button", defaultState: .hovered, variant: .primaryPurple, action: nil)
-                        ActionableButton(text: "Primary Button", defaultState: .clicked, variant: .primaryPurple, action: nil)
-                        ActionableButton(text: "Primary Button", defaultState: .disabled, variant: .primaryPurple, action: nil)
-                    }
-                    VStack {
-                        ActionableButton(text: "Secondary Button", defaultState: .normal, variant: .secondary, action: nil)
-                        ActionableButton(text: "Secondary Button", defaultState: .hovered, variant: .secondary, action: nil)
-                        ActionableButton(text: "Secondary Button", defaultState: .clicked, variant: .secondary, action: nil)
-                        ActionableButton(text: "Secondary Button", defaultState: .disabled, variant: .secondary, action: nil)
-                    }
+        Group {
+            HStack {
+                VStack {
+                    ActionableButton(text: "Primary Button", defaultState: .normal, variant: .primaryBlue, action: nil)
+                    ActionableButton(text: "Primary Button", defaultState: .hovered, variant: .primaryBlue, action: nil)
+                    ActionableButton(text: "Primary Button", defaultState: .clicked, variant: .primaryBlue, action: nil)
+                    ActionableButton(text: "Primary Button", defaultState: .disabled, variant: .primaryBlue, action: nil)
                 }
-                .padding()
-                .background(BeamColor.Generic.background.swiftUI)
-            }.preferredColorScheme(.dark)
-        }
+                VStack {
+                    ActionableButton(text: "Primary Button", defaultState: .normal, variant: .primaryPurple, action: nil)
+                    ActionableButton(text: "Primary Button", defaultState: .hovered, variant: .primaryPurple, action: nil)
+                    ActionableButton(text: "Primary Button", defaultState: .clicked, variant: .primaryPurple, action: nil)
+                    ActionableButton(text: "Primary Button", defaultState: .disabled, variant: .primaryPurple, action: nil)
+                }
+                VStack {
+                    ActionableButton(text: "Secondary Button", defaultState: .normal, variant: .secondary, action: nil)
+                    ActionableButton(text: "Secondary Button", defaultState: .hovered, variant: .secondary, action: nil)
+                    ActionableButton(text: "Secondary Button", defaultState: .clicked, variant: .secondary, action: nil)
+                    ActionableButton(text: "Secondary Button", defaultState: .disabled, variant: .secondary, action: nil)
+                }
+            }
+            .padding()
+            .background(BeamColor.Generic.background.swiftUI)
+        }.preferredColorScheme(.dark)
     }
 }

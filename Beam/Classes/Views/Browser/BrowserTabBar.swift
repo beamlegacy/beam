@@ -123,7 +123,7 @@ struct BrowserTabBar: View {
             GeometryReader { geometry in
                 ZStack(alignment: .leading) {
                     TrackableScrollView(.horizontal, showIndicators: false, contentOffset: $scrollOffset) {
-                        RetroCompatibleScrollViewReader { retroProxy in
+                        ScrollViewReader { proxy in
                             HStack(spacing: 0) {
                                 ForEach(Array(zip(tabs.indices, tabs)), id: \.1) { (index, tab) in
                                     let selected = isSelected(tab)
@@ -146,10 +146,11 @@ struct BrowserTabBar: View {
                                         .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .identity))
                                         .disabled(isDraggingATab && !selected)
                                         .opacity(isTheDraggedTab ? 0 : 1)
+                                        .id("tab-\(tab.id)")
                                         .onAppear {
                                             guard selected else { return }
                                             DispatchQueue.main.asyncAfter(deadline: .now() + animationDuration) {
-                                                scrollToTabIfNeeded(tab, containerGeometry: geometry, scrollViewProxy: retroProxy)
+                                                scrollToTabIfNeeded(tab, containerGeometry: geometry, scrollViewProxy: proxy)
                                             }
                                         }
                                     if index == dragModel.draggingOverIndex && index > dragStartIndex {
@@ -162,7 +163,7 @@ struct BrowserTabBar: View {
                             .animation(stackAnimation, value: dragModel.draggingOverIndex)
                             .onAppear {
                                 guard let currentTab = currentTab else { return }
-                                scrollToTabIfNeeded(currentTab, containerGeometry: geometry, scrollViewProxy: retroProxy, animated: false)
+                                scrollToTabIfNeeded(currentTab, containerGeometry: geometry, scrollViewProxy: proxy, animated: false)
                             }
                         }
                     }
@@ -282,7 +283,7 @@ struct BrowserTabBar: View {
 
     private func scrollToTabIfNeeded(_ tab: BrowserTab,
                                      containerGeometry: GeometryProxy,
-                                     scrollViewProxy: RetroCompatibleScrollViewProxy,
+                                     scrollViewProxy: ScrollViewProxy,
                                      animated: Bool = true) {
         let index = position(of: tab)
         let tabWidth = widthForTab(selected: isSelected(tab), containerGeometry: containerGeometry)
@@ -292,10 +293,10 @@ struct BrowserTabBar: View {
         guard outOfBoundsWidth > 0 else { return }
         if animated {
             withAnimation {
-                scrollViewProxy.scrollTo(point)
+                scrollViewProxy.scrollTo("tab-\(tab.id)")
             }
         } else {
-            scrollViewProxy.scrollTo(point)
+            scrollViewProxy.scrollTo("tab-\(tab.id)")
         }
     }
 
