@@ -1291,7 +1291,16 @@ public extension CALayer {
     }
 
     public override func accessibilityChildren() -> [Any]? {
-        rootNode?.allVisibleChildren
+        var children: [Any]?
+        if let visibleChildren = rootNode?.allVisibleChildren {
+            children = visibleChildren
+        }
+        if let superChildren = super.accessibilityChildren() {
+            var copy = children ?? [Any]()
+            copy.append(contentsOf: superChildren)
+            children = copy
+        }
+        return children
     }
 
     public override var accessibilityFocusedUIElement: Any {
