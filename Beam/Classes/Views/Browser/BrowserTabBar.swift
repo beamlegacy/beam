@@ -100,6 +100,7 @@ struct BrowserTabBar: View {
     @ObservedObject private var dragModel = BrowserTabBarDragModel()
     @State private var disableAnimation = false
     @State private var firstGestureValue: DragGesture.Value?
+    @State private var enableScrollOffsetTracking = false
 
     private var isDraggingATab: Bool {
         return dragModel.draggingOverIndex != nil
@@ -122,7 +123,7 @@ struct BrowserTabBar: View {
         HStack(spacing: 0) {
             GeometryReader { geometry in
                 ZStack(alignment: .leading) {
-                    TrackableScrollView(.horizontal, showIndicators: false, contentOffset: $scrollOffset) {
+                    TrackableScrollView(.horizontal, showIndicators: false, enableTracking: enableScrollOffsetTracking, contentOffset: $scrollOffset) {
                         ScrollViewReader { proxy in
                             HStack(spacing: 0) {
                                 ForEach(Array(zip(tabs.indices, tabs)), id: \.1) { (index, tab) in
@@ -164,6 +165,9 @@ struct BrowserTabBar: View {
                             .onAppear {
                                 guard let currentTab = currentTab else { return }
                                 scrollToTabIfNeeded(currentTab, containerGeometry: geometry, scrollViewProxy: proxy, animated: false)
+                                DispatchQueue.main.asyncAfter(deadline: .now().advanced(by: .milliseconds(500))) {
+                                    self.enableScrollOffsetTracking = true
+                                }
                             }
                         }
                     }
