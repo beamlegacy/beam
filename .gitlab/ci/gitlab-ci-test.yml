@@ -52,6 +52,8 @@ swift lint:
       when: never
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
       when: never
+    - if: '$CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"'
+      when: never
     - if: '$CI_COMMIT_TAG'
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
     - if: '$CI_COMMIT_BRANCH == "develop"'
@@ -136,6 +138,8 @@ coverage_check:
     - if: '$COVERAGE_CHECK_DISABLED'
       when: never
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"'
       when: never
     - if: '$CI_COMMIT_TAG'
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
