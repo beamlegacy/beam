@@ -216,7 +216,6 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
     }
 
     private func updateLinkFormatterWindow(hyperlinkView: HyperlinkFormatterView, frame: CGRect, in node: TextNode) {
-        guard let rootNode = rootNode else { return }
         let linkViewSize = hyperlinkView.idealSize
         guard let window = hyperlinkView.window as? PopoverWindow else { return }
         let origin = CGPoint(x: frame.maxX + node.offsetInDocument.x - linkViewSize.width / 2,
