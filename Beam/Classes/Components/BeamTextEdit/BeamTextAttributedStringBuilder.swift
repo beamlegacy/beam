@@ -165,6 +165,7 @@ struct BeamTextAttributedStringBuilder {
             if let url = URL(string: link) ?? link.toEncodedURL {
                 stringAttributes[.link] = url as NSURL
             }
+            stringAttributes[.font] = BeamFont.medium(size: config.fontSize).nsFont
             if isCursorCloseToRange {
                 stringAttributes[.foregroundColor] = BeamColor.Editor.linkActive.staticColor
                 stringAttributes[.boxBackgroundColor] = isCursorInsideRange ?
@@ -257,13 +258,16 @@ struct BeamTextAttributedStringBuilder {
 
         let hasBoxBackground = attributedString.attribute(.boxBackgroundColor, at: 0, effectiveRange: nil) != nil
         let color = hasBoxBackground ? BeamColor.Editor.linkActive.staticColor : BeamColor.Editor.link.staticColor
-        var offset: CGPoint = .zero
-        if !hasBoxBackground, let mouseInt = mouseInteraction, mouseInt.type == .hovered,
-           ((range.position...range.end).contains(mouseInt.range.upperBound) || BeamText.isPositionOnLinkArrow(mouseInt.range.lowerBound, in: range)) {
-            offset = CGPoint(x: 2, y: 2)
-        }
+
+//        Disabling arrow offset change for now -> BE-2118
+//        var offset: CGPoint = .zero
+//        if !hasBoxBackground, let mouseInt = mouseInteraction, mouseInt.type == .hovered,
+//           ((range.position...range.end).contains(mouseInt.range.upperBound) || BeamText.isPositionOnLinkArrow(mouseInt.range.lowerBound, in: range)) {
+//            offset = CGPoint(x: 2, y: 2)
+//        }
+
         let imageName = "editor-url"
-        guard let fakeGlyph = Self.createGlyphForImage(named: imageName, color: color, attributes: attributedString.attributes(at: 0, effectiveRange: nil), offset: offset) else {
+        guard let fakeGlyph = Self.createGlyphForImage(named: imageName, color: color, attributes: attributedString.attributes(at: 0, effectiveRange: nil)) else {
             return
         }
         attributedString.append(fakeGlyph)
