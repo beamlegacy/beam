@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="19162" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="18122" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
-        <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="19162"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="18122"/>
     </dependencies>
     <scenes>
         <!--Beam Application-->
@@ -867,7 +866,7 @@
                             </menuItem>
                             <menuItem title="Window" id="aUF-d1-5bR">
                                 <modifierMask key="keyEquivalentModifierMask"/>
-                                <menu key="submenu" title="Window" systemMenu="window" autoenablesItems="NO" id="Td7-aD-5lo">
+                                <menu key="submenu" title="Window" systemMenu="window" id="Td7-aD-5lo">
                                     <items>
                                         <menuItem title="Minimize" keyEquivalent="m" id="OY7-WF-poV">
                                             <connections>
@@ -881,25 +880,25 @@
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="eu3-7i-yIM"/>
-                                        <menuItem title="Show Previous tab" tag="-4" keyEquivalent="[" id="TK0-jr-lkZ" userLabel="Show Previous Tab">
+                                        <menuItem title="Show Previous tab" tag="-4" keyEquivalent="[" id="TK0-jr-lkZ" userLabel="Show Previous Tab" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
                                             <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
                                             <connections>
                                                 <action selector="showPreviousTab:" target="Ady-hI-5gd" id="QFs-kq-p2g"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Show Previous Tab" tag="4" keyEquivalent="" id="oAb-PD-njU" userLabel="Show Previous Tab">
+                                        <menuItem title="Show Previous Tab" tag="4" keyEquivalent="" id="oAb-PD-njU" userLabel="Show Previous Tab" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
                                             <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
                                             <connections>
                                                 <action selector="showPreviousTab:" target="Ady-hI-5gd" id="cP6-aq-98d"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Show Next Tab" tag="-4" keyEquivalent="]" id="ALY-z5-5pM" userLabel="Show Next Tab">
+                                        <menuItem title="Show Next Tab" tag="-4" keyEquivalent="]" id="ALY-z5-5pM" userLabel="Show Next Tab" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
                                             <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
                                             <connections>
                                                 <action selector="showNextTab:" target="Ady-hI-5gd" id="NFT-aq-DrR"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Show Next Tab" tag="4" keyEquivalent="" id="KJE-FH-Z16" userLabel="Show Next Tab">
+                                        <menuItem title="Show Next Tab" tag="4" keyEquivalent="" id="KJE-FH-Z16" userLabel="Show Next Tab" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
                                             <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
                                             <connections>
                                                 <action selector="showNextTab:" target="Ady-hI-5gd" id="q1N-Nw-YOb"/>
