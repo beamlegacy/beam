@@ -674,7 +674,7 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
         var richContent: [BeamElement] = []
 
         switch self.kind {
-        case .image(_):
+        case .image(_, _):
             richContent.append(self)
         default:
             break
