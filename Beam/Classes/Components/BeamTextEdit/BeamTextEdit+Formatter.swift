@@ -288,6 +288,15 @@ extension BeamTextEdit {
         }
     }
 
+    func baseInlineFormatterPosition(for node: TextNode) -> CGPoint {
+        var (offset, rect) = node.offsetAndFrameAt(index: node.cursorPosition)
+        if rect.size.height == .zero {
+            rect.size.height = node.firstLineHeight
+        }
+        return CGPoint(x: offset + node.offsetInDocument.x + node.contentsLead,
+                       y: rect.maxY + node.offsetInDocument.y)
+    }
+
     internal func moveInlineFormatterAtSelection(below: Bool = false) {
         guard let node = focusedWidget as? TextNode,
               let view = inlineFormatter else { return }

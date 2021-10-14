@@ -9,8 +9,8 @@ import Foundation
 import XCTest
 
 class CardViewTests: BaseTest {
-    
-    
+
+
     func testDefaultCardView() throws {
         try XCTSkipIf(true, "Workaround to open a card from journal/all cards menu is pending")
         let defaultNumberOfCardsAtFreshInstallation = 1

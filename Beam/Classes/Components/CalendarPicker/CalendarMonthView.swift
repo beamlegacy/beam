@@ -58,9 +58,11 @@ struct CalendarMonthView: View {
         let isHovering = hoveredDate == day.date
         let isTouchingDown = touchdownDate == day.date
         var color = day.isWithinDisplayedMonth || isHovering || isTouchingDown ? BeamColor.Niobium : BeamColor.AlphaGray
-        if day.isSelected {
+        if day.isSelected || day.isHighlighted {
             color = BeamColor.Bluetiful
-            font = BeamFont.medium(size: 13)
+            if day.isSelected {
+                font = BeamFont.medium(size: 13)
+            }
         }
         var backgroundColor: BeamColor?
         if isTouchingDown {

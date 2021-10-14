@@ -41,12 +41,9 @@ extension BeamTextEdit {
         clearDebounceTimer()
         guard let node = formatterTargetNode ?? (focusedWidget as? TextNode),
               isInlineFormatterHidden else { return }
-        var (offset, rect) = node.offsetAndFrameAt(index: atPosition-prefix)
-        if rect.size.height == .zero {
-            rect.size.height = node.firstLineHeight
-        }
-        let atPoint = CGPoint(x: offset + node.offsetInDocument.x + node.contentsLead - 4,
-                              y: rect.maxY + node.offsetInDocument.y + 8)
+        var atPoint = baseInlineFormatterPosition(for: node)
+        atPoint.x -= 4
+        atPoint.y += 8
         var targetRange = atPosition..<atPosition
         if let text = initialText {
             targetRange = max(0, targetRange.lowerBound - text.count)..<targetRange.upperBound

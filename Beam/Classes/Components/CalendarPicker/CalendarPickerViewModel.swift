@@ -12,6 +12,7 @@ struct CalendarDay: Hashable {
     let number: String
     let isSelected: Bool
     let isWithinDisplayedMonth: Bool
+    let isHighlighted: Bool
 }
 
 struct CalendarMonth {
@@ -36,6 +37,12 @@ extension CalendarPickerView {
         }
         @Published var selectedDate: Date {
             didSet {
+                updateData()
+            }
+        }
+        @Published var highlightedDates: [Date] = [] {
+            didSet {
+                guard highlightedDates != oldValue else { return }
                 updateData()
             }
         }
@@ -160,11 +167,13 @@ extension CalendarPickerView {
                 to: baseDate)
                 ?? baseDate
 
+            let highlighted = highlightedDates.first { calendar.isDate(date, inSameDayAs: $0) } != nil
             return CalendarDay(
                 date: date,
                 number: dayFormatter.string(from: date),
                 isSelected: calendar.isDate(date, inSameDayAs: selectedDate),
-                isWithinDisplayedMonth: isWithinDisplayedMonth
+                isWithinDisplayedMonth: isWithinDisplayedMonth,
+                isHighlighted: highlighted
             )
         }
 

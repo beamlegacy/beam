@@ -189,33 +189,10 @@ class BeamUITestsMenuGenerator {
             }
         }
     }
+
     private func addMeeting(_ meeting: Meeting, to note: BeamNote) {
         guard let documentManager = AppDelegate.main.window?.state.data.documentManager else { return }
-        var text = BeamText(text: "")
-        var meetingAttributes: [BeamText.Attribute] = []
-        if meeting.linkCards {
-            let meetingNote = BeamNote.fetchOrCreate(documentManager, title: meeting.name)
-            meetingAttributes = [.internalLink(meetingNote.id)]
-        }
-        text.insert(meeting.name, at: 0, withAttributes: meetingAttributes)
-
-        if !meeting.attendees.isEmpty {
-            let prefix = "Meeting with "
-            var position = prefix.count
-            text.insert(prefix, at: 0, withAttributes: [])
-            meeting.attendees.enumerated().forEach { index, attendee in
-                let name = attendee.name
-                let attendeeNote = BeamNote.fetchOrCreate(documentManager, title: name)
-                text.insert(name, at: position, withAttributes: [.internalLink(attendeeNote.id)])
-                position += name.count
-                if index < meeting.attendees.count - 1 {
-                    let separator = ", "
-                    text.insert(separator, at: position, withAttributes: [])
-                    position += separator.count
-                }
-            }
-            text.insert(" for ", at: position, withAttributes: [])
-        }
+        let text = meeting.buildBeamText(documentManager: documentManager)
         let e = BeamElement(text)
         note.insert(e, after: note.children.last)
     }
@@ -232,9 +209,9 @@ class BeamUITestsMenuGenerator {
                                                 if let meeting = meeting, let note = state?.data.todaysNote {
                                                     self?.addMeeting(meeting, to: note)
                                                 }
-                                                state?.overlayViewModel.modalView = nil
+                                                state?.overlayViewModel.dismissCurrentModal()
                                                })
-        state?.overlayViewModel.modalView = AnyView(MeetingModalView(viewModel: model))
+        state?.overlayViewModel.presentModal(MeetingModalView(viewModel: model))
     }
 
 }
