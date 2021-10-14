@@ -72,7 +72,7 @@ struct BrowserTabView: View {
             Group {
                 if let icon = tab.favIcon {
                     let iconSize: CGFloat = tab.isLoading ? 10 : 16
-                    let maskSize: CGFloat = tab.isLoading ? 10 : iconSize*2
+                    let maskSize: CGFloat = tab.isLoading ? iconSize : iconSize*1.5
                     Image(nsImage: icon).resizable().scaledToFit()
                         .mask(Circle().fill(Color.black).frame(width: maskSize, height: maskSize))
                         .frame(width: iconSize, height: iconSize)
@@ -82,6 +82,7 @@ struct BrowserTabView: View {
                 }
             }
         }
+        .animation(nil, value: isHovering)
         .animation(BeamAnimation.spring(stiffness: 380, damping: 20), value: tab.isLoading)
     }
 
