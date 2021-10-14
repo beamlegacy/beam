@@ -27,6 +27,7 @@ extension BeamTextEdit {
         case underline
         case internalLink
         case date
+        case meeting
         case blockRef
     }
 
@@ -42,12 +43,9 @@ extension BeamTextEdit {
         clearDebounceTimer()
         guard let node = formatterTargetNode ?? (focusedWidget as? TextNode),
               isInlineFormatterHidden else { return }
-        var (offset, rect) = node.offsetAndFrameAt(index: node.cursorPosition)
-        if rect.size.height == .zero {
-            rect.size.height = node.firstLineHeight
-        }
-        let atPoint = CGPoint(x: offset + node.offsetInDocument.x + node.contentsLead,
-                              y: rect.maxY + node.offsetInDocument.y + 8)
+
+        var atPoint = baseInlineFormatterPosition(for: node)
+        atPoint.y += 8
 
         let items = getSlashMenuItems()
         let menuView = ContextMenuFormatterView(key: "SlashFormatter", items: items, handlesTyping: true)
@@ -80,6 +78,8 @@ extension BeamTextEdit {
             insertInternalLink(in: node, for: range)
         case .date:
             insertDate(in: node, for: range)
+        case .meeting:
+            insertMeetingSearch(in: node, for: range)
         case .blockRef:
             insertBlockRef(in: node, for: range)
         default:
@@ -96,7 +96,7 @@ extension BeamTextEdit {
         let action: (SlashMenuAction) -> Void = { [weak self] type in
             self?.handleAction(type)
         }
-        return [
+        var items = [
             ContextMenuItem(title: "Card Reference", subtitle: "@ or [[", icon: "field-card", action: { action(.internalLink) }),
             ContextMenuItem(title: "Todo", subtitle: "-[]", icon: "editor-task", action: { action(.task) }),
             ContextMenuItem(title: "Date Picker", subtitle: "", icon: "editor-calendar", action: { action(.date) }),
@@ -110,6 +110,11 @@ extension BeamTextEdit {
             ContextMenuItem(title: "Text", subtitle: "-", action: { action(.text) }),
             ContextMenuItem(title: "Divider", subtitle: "---", action: { action(.divider) })
         ]
+        #if DEBUG
+        // TODO: insert only if google calendar is setup
+        items.insert(ContextMenuItem(title: "Meeting", subtitle: "", icon: "editor-calendar", action: { action(.meeting) }), at: 3)
+        #endif
+        return items
     }
 
     // MARK: - perform actions
@@ -237,5 +242,64 @@ extension BeamTextEdit {
         }
         node.focus(position: cursorPosition)
         node.cmdManager.endGroup()
+    }
+}
+
+// MARK: - Meeting Picker
+extension BeamTextEdit {
+    private func insertMeetingSearch(in node: TextNode, for range: Range<Int>) {
+        let meetingPicker = MeetingFormatterView()
+        meetingPicker.onFinish = { [weak node, weak self] meeting in
+            guard let node = node else { return }
+            let editedRange = (self?.formatterTargetRange?.lowerBound ?? 0)..<node.cursorPosition
+            guard let meeting = meeting else {
+                node.cmdManager.deleteText(in: node, for: editedRange)
+                return
+            }
+
+            let model = MeetingModalView.ViewModel(meetingName: meeting.name,
+                                                   attendees: meeting.attendees,
+                                                   onFinish: { [weak self, weak node] meeting in
+                                                    guard let node = node else { return }
+                                                    self?.onFinishSelectingMeeting(in: node, meeting: meeting, range: editedRange)
+                                                   })
+            self?.state?.overlayViewModel.presentModal(MeetingModalView(viewModel: model))
+            self?.hideInlineFormatter()
+        }
+
+        var atPoint = baseInlineFormatterPosition(for: node)
+        atPoint.y -= 8
+        inlineFormatter = meetingPicker
+        formatterTargetNode = node
+        formatterTargetRange = node.cursorPosition..<node.cursorPosition
+        prepareInlineFormatterWindowBeforeShowing(meetingPicker, atPoint: atPoint)
+        DispatchQueue.main.async {
+            self.showOrHideInlineFormatter(isPresent: true)
+        }
+    }
+
+    private func onFinishSelectingMeeting(in node: TextNode, meeting: Meeting?, range: Range<Int>) {
+        state?.overlayViewModel.dismissCurrentModal()
+        if let editor = rootNode?.editor {
+            editor.window?.makeFirstResponder(editor)
+        }
+        guard let documentManager = data?.documentManager, let meeting = meeting else {
+            node.cmdManager.deleteText(in: node, for: range)
+            return
+        }
+        let text = meeting.buildBeamText(documentManager: documentManager)
+        let cmdManager = node.cmdManager
+        cmdManager.beginGroup(with: "Insert Meeting")
+        defer { cmdManager.endGroup() }
+        let meetingElement = BeamElement(text)
+        let emptyChild = BeamElement("")
+        meetingElement.addChild(emptyChild)
+        if let parentNode = (node.parent as? ElementNode) {
+            cmdManager.insertElement(meetingElement, inNode: parentNode, afterNode: node)
+            if let emptyNode = parentNode.nodeFor(meetingElement)?.nodeFor(emptyChild) {
+                cmdManager.focusElement(emptyNode, cursorPosition: 0)
+            }
+            cmdManager.deleteElement(for: node)
+        }
     }
 }

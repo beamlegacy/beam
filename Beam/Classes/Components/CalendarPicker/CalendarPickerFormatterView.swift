@@ -27,6 +27,7 @@ private struct CalendarPickerFormatterContainerView: View {
                            onPresentSubmenu: { items, point in
                             showContextMenu(items: items, at: point)
                            })
+            .background(FormatterViewBackground<EmptyView>())
             .frame(width: Self.idealSize.width)
             .fixedSize(horizontal: false, vertical: true)
             .frame(height: Self.idealSize.height, alignment: .topLeading)
