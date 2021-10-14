@@ -14,8 +14,9 @@ struct CalendarPickerView: View {
 
     @Binding private var selectedDate: Date
     private var onPresentSubmenu: (([ContextMenuItem], CGPoint) -> Void)?
-    init(selectedDate: Binding<Date>, calendar: Calendar? = nil, onPresentSubmenu: (([ContextMenuItem], CGPoint) -> Void)? = nil) {
+    init(selectedDate: Binding<Date>, highlightedDates: [Date] = [], calendar: Calendar? = nil, onPresentSubmenu: (([ContextMenuItem], CGPoint) -> Void)? = nil) {
         let model = CalendarPickerView.Model(date: selectedDate.wrappedValue, calendar: calendar)
+        model.highlightedDates = highlightedDates
         self.model = model
         self._selectedDate = selectedDate
         self.onPresentSubmenu = onPresentSubmenu
@@ -62,7 +63,6 @@ struct CalendarPickerView: View {
         }
         .frame(width: 240, alignment: .top)
         .fixedSize(horizontal: false, vertical: true)
-        .background(FormatterViewBackground<EmptyView>())
     }
 
     func getMonthsContextItems() -> [ContextMenuItem] {

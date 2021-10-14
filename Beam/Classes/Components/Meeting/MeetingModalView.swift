@@ -6,11 +6,14 @@
 //
 
 import SwiftUI
+import BeamCore
 
-struct Meeting {
+struct Meeting: Identifiable {
+    var id: UUID = UUID()
     var name: String
+    var date: Date = BeamDate.now
     var attendees: [Attendee]
-    var linkCards: Bool
+    var linkCards: Bool = true
 
     class Attendee: Identifiable {
         var id: UUID = UUID()
