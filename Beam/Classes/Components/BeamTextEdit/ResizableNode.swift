@@ -7,6 +7,7 @@
 
 import Foundation
 import Combine
+import BeamCore
 
 class ResizableNode: ElementNode {
 
@@ -152,7 +153,7 @@ class ResizableNode: ElementNode {
     private func updateElementRatio() {
         switch element.kind {
         case .image(let uid, _):
-            element.kind = .image(uid, displayRatio: desiredWidthRatio)
+            element.kind = .image(uid, displayInfos: MediaDisplayInfos(height: Int(resizableElementContentSize.height), width: Int(resizableElementContentSize.width), displayRatio: desiredWidthRatio))
         case .embed(let source, _):
             element.kind = .embed(source, displayRatio: desiredWidthRatio)
         default:
