@@ -91,6 +91,10 @@ struct NoteHeaderPublishButton: View {
             .onHover { h in
                 hovering = h
             }
+            .accessibilityElement(children: .ignore)
+            .accessibility(addTraits: .isButton)
+            .accessibility(value: Text(title ?? "Publish"))
+            .accessibility(identifier: "NoteHeaderPublishButton")
             .overlay(!justCopiedLink ? nil :
                         Tooltip(title: "Link Copied")
                         .fixedSize().offset(x: 0, y: -25)
