@@ -14,6 +14,19 @@ public enum ElementKindError: Error {
     case typeNameUnknown(String)
 }
 
+public struct MediaDisplayInfos: Codable, Equatable {
+
+    public init(height: Int? = nil, width: Int? = nil, displayRatio: Double? = nil) {
+        self.height = height
+        self.width = width
+        self.displayRatio = displayRatio
+    }
+
+    public let height: Int?
+    public let width: Int?
+    public let displayRatio: Double?
+}
+
 public enum ElementKind: Codable, Equatable {
     case bullet
     case heading(Int)
@@ -21,7 +34,7 @@ public enum ElementKind: Codable, Equatable {
     case check(Bool)
     case code
     case divider
-    case image(UUID, displayRatio: Double?)
+    case image(UUID, displayInfos: MediaDisplayInfos)
     case embed(String, displayRatio: Double?)
     case blockReference(UUID, UUID)
 
@@ -47,6 +60,9 @@ public enum ElementKind: Codable, Equatable {
         case title
         case value
         case sizeRatio
+        case height
+        case width
+        case displayInfos
     }
 
     public var rawValue: String {
@@ -94,8 +110,15 @@ public enum ElementKind: Codable, Equatable {
         case "image":
             let id = try (try? container.decode(UUID.self, forKey: .source)) ??
             UUID.v5(name: try container.decode(String.self, forKey: .source), namespace: .url)
-            let sizeRatio = try? container.decodeIfPresent(Double.self, forKey: .sizeRatio)
-            self = .image(id, displayRatio: sizeRatio)
+
+            var displayInfos = MediaDisplayInfos()
+            if let infos = try? container.decodeIfPresent(MediaDisplayInfos.self, forKey: .displayInfos) {
+                displayInfos = infos
+            } else if let sizeRatio = try? container.decodeIfPresent(Double.self, forKey: .sizeRatio) {
+                displayInfos = MediaDisplayInfos(height: nil, width: nil, displayRatio: sizeRatio)
+            }
+            
+            self = .image(id, displayInfos: displayInfos)
         case "embed":
             let sizeRatio = try? container.decodeIfPresent(Double.self, forKey: .sizeRatio)
             self = .embed(try container.decode(String.self, forKey: .source), displayRatio: sizeRatio)
@@ -129,10 +152,10 @@ public enum ElementKind: Codable, Equatable {
             try container.encode("code", forKey: .type)
         case .divider:
             try container.encode("divider", forKey: .type)
-        case let .image(source, sizeRatio):
+        case let .image(source, displayInfo):
             try container.encode("image", forKey: .type)
             try container.encode(source, forKey: .source)
-            try container.encode(sizeRatio, forKey: .sizeRatio)
+            try container.encode(displayInfo, forKey: .displayInfos)
         case let .embed(source, sizeRatio):
             try container.encode("embed", forKey: .type)
             try container.encode(source, forKey: .source)

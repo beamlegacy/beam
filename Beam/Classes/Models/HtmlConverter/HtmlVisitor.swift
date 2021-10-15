@@ -115,7 +115,7 @@ class HtmlVisitor {
                     let fileName = url.lastPathComponent
                     // BeamElements default to bullets, if we don't create an image kind here the closure
                     // will lose it's reference because it will be executed after joining BeamElement together
-                    imgElement.kind = .image(UUID(), displayRatio: nil)
+                    imgElement.kind = .image(UUID(), displayInfos: MediaDisplayInfos())
 
                     // By defining the Closure outside the `visit()` func we keep the reference to the imgElement
                     // With this in memory reference we can close the closure without having to wrap
@@ -124,11 +124,12 @@ class HtmlVisitor {
                     if let fileStorage = fileStorage {
                         let closure: ((data: Data, mimeType: String)?) -> Void = { result in
                             guard let (data, mimeType) = result,
-                                  let fileId = Self.storeImageData(data, mimeType, fileName, fileStorage) else {
+                                  let fileId = Self.storeImageData(data, mimeType, fileName, fileStorage),
+                                  let image = NSImage(data: data) else {
                                 imgElement.text.addAttributes([.link(mdUrl)], to: imgElement.text.wholeRange)
                                 return
                             }
-                            imgElement.kind = .image(fileId, displayRatio: nil)
+                            imgElement.kind = .image(fileId, displayInfos: MediaDisplayInfos(height: Int(image.size.height), width: Int(image.size.width), displayRatio: nil))
                         }
                         let object = DelayedClosure(closure: closure, url: url)
                         delayedClosures.append(object)
@@ -140,9 +141,10 @@ class HtmlVisitor {
                 } else if let (base64, mimeType) = getBase64(src) {
                     let fileName = UUID().uuidString
                     if let fileStorage = fileStorage,
-                       let fileId = HtmlVisitor.storeImageData(base64, mimeType, fileName, fileStorage) {
+                       let fileId = HtmlVisitor.storeImageData(base64, mimeType, fileName, fileStorage),
+                       let image = NSImage(data: base64) {
                         let imgElement = BeamElement()
-                        imgElement.kind = .image(fileId, displayRatio: nil)
+                        imgElement.kind = .image(fileId, displayInfos: MediaDisplayInfos(height: Int(image.size.height), width: Int(image.size.width), displayRatio: nil))
                         text.append(imgElement)
                     }
                 }
