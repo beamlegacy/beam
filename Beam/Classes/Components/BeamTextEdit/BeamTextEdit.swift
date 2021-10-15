@@ -738,6 +738,8 @@ public extension CALayer {
                 rootNode.cancelSelection()
                 if inlineFormatter != nil {
                     hideInlineFormatter()
+                } else if searchViewModel != nil {
+                    cancelSearch()
                 } else if let node = rootNode.focusedWidget as? ElementNode {
                     cancelBlockRefEditing(node)
                 }

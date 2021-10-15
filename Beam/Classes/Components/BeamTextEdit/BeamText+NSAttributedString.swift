@@ -77,6 +77,16 @@ extension BeamText {
                                                             searchedRanges: node.searchHighlightRanges,
                                                             currentSearchRangeIndex: node.currentSearchHightlight,
                                                             mouseInteraction: mouseInteraction)
+
+        //If current node contains the current search result, block invalidate on hover during the bump animation
+        //If not, the layer is redrawn before animation is over.
+        if node.currentSearchHightlight != nil {
+            node.invalidateOnHover = false
+            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(300)) {
+                node.invalidateOnHover = true
+            }
+        }
+
         let builder = BeamTextAttributedStringBuilder()
         return builder.build(config: config)
     }

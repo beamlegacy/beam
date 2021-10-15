@@ -79,11 +79,14 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         }
     }
 
+    var invalidateOnHover = true
     var hover: Bool = false {
         didSet {
+            guard invalidateOnHover else { return }
             invalidate()
         }
     }
+
     var cursor: NSCursor?
 
     internal var children: [Widget] = [] {
