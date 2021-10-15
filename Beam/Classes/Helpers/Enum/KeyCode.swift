@@ -15,8 +15,10 @@ enum KeyCode: UInt16 {
     case down = 125
     case up = 126
     case enter = 36
+    case `return` = 76
     case space = 49
     case backspace = 51
+    case lineFeed = 52
 
     case one = 18
     case two = 19
@@ -28,6 +30,16 @@ enum KeyCode: UInt16 {
     case eight = 28
     case nine = 25
     case zero = 29
+
+    ///Use this when you want to catch what's usually called "insert new line"
+    var meansNewLine: Bool {
+        switch self {
+        case .enter, .return, .lineFeed:
+            return true
+        default:
+            return false
+        }
+    }
 
     // Keycodes reference
     // https://eastmanreference.com/complete-list-of-applescript-key-codes

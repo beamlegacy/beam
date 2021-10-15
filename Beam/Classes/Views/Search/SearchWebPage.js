@@ -301,7 +301,7 @@ window.beam.__ID__SearchWebPage = {
       let rect = element.getBoundingClientRect();
 
       let targetX = this.clamp(rect.left + window.scrollX - window.innerWidth / 2, 0, document.body.scrollWidth);
-      let targetY = this.clamp(this.constants.SCROLL_OFFSET_Y + rect.top + window.scrollY - window.innerHeight / 2 + 100, 0, document.body.scrollHeight);
+      let targetY = this.clamp(this.constants.SCROLL_OFFSET_Y + rect.top + window.scrollY - window.innerHeight / 2 + 100, 0, this.height);
 
       let startX = window.scrollX;
       let startY = window.scrollY;
