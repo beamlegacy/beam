@@ -61,9 +61,11 @@ struct BeamTextAttributedStringBuilder {
         let links = config.ranges.filter({ $0.attributes.contains(where: { attrib -> Bool in attrib.rawValue == BeamText.Attribute.link("").rawValue }) })
 
         for foundRange in config.searchedRanges {
-            var color = BeamColor.Search.foundElement.nsColor
-            if let currentResult = config.currentSearchRangeIndex, currentResult < config.searchedRanges.count, config.searchedRanges[currentResult] == foundRange {
-                color = BeamColor.Search.currentElement.nsColor
+
+            var isCurrentResult = false
+            if let currentResult = config.currentSearchRangeIndex,
+               currentResult < config.searchedRanges.count, config.searchedRanges[currentResult] == foundRange {
+                isCurrentResult = true
             }
 
             var linksBefore = 0
@@ -79,8 +81,11 @@ struct BeamTextAttributedStringBuilder {
 
             let r = NSRange(location: foundRange.lowerBound + linksBefore, length: foundRange.count + linksInside)
 
+            let color = isCurrentResult ? BeamColor.Search.currentElement.nsColor : BeamColor.Search.foundElement.nsColor
+            let attribute: NSAttributedString.Key = isCurrentResult ? .searchCurrentResultBackground : .searchFoundBackground
+
             if r.location + r.length <= string.length {
-                string.addAttribute(.boxBackgroundColor, value: color, range: r)
+                string.addAttribute(attribute, value: color, range: r)
             }
         }
     }

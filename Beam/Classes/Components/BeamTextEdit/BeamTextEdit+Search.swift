@@ -69,9 +69,7 @@ extension BeamTextEdit {
             self?.highlightCurrentSearchResult(for: vm.currentOccurence)
             self?.rootNode?.deepInvalidateText()
         } done: {  [weak self] in
-            self?.rootNode?.clearSearch()
-            self?.rootNode?.deepInvalidateText()
-            self?.searchViewModel = nil
+            self?.cancelSearch()
         }
 
         self.searchViewModel = viewModel
@@ -98,19 +96,30 @@ extension BeamTextEdit {
                 positions.formUnion($0.getPositions())
             })
 
+            let foundOccurences = UInt(results.reduce(0, { previous, searchResult in
+                previous + searchResult.ranges.count
+            }))
+
             DispatchQueue.main.async {
                 vm.currentOccurence = 1
-                vm.foundOccurences = UInt(results.reduce(0, { previous, searchResult in
-                    previous + searchResult.ranges.count
-                }))
+                vm.foundOccurences = foundOccurences
                 self.highlightCurrentSearchResult(for: vm.currentOccurence, scrollingToHighlight: false)
 
-                nodeWithResults.union(nodesWithOutdatedResults).forEach({ $0.invalidateText() })
+                nodeWithResults.union(nodesWithOutdatedResults).forEach({
+                    $0.invalidateText()
+                })
 
                 vm.positions = Array(positions)
                 vm.pageHeight = Double(self.frame.size.height)
             }
         }
+    }
+
+    func cancelSearch() {
+        self.rootNode?.clearSearch()
+        self.rootNode?.deepInvalidateText()
+        self.searchViewModel = nil
+        self.searchResults = nil
     }
 
     private func highlightCurrentSearchResult(for position: UInt, scrollingToHighlight: Bool = true) {
@@ -129,7 +138,11 @@ extension BeamTextEdit {
                 continue
             }
 
-            searchResults.map({ $0.element }).forEach({ $0.currentSearchHightlight = nil })
+            searchResults.map({ $0.element }).forEach({
+                $0.currentSearchHightlight = nil
+                $0.allParents.forEach { ($0 as? ElementNode)?.unfold() }
+                $0.unfold()
+            })
             let rangeIndex = offset-1
             currentResult.element.currentSearchHightlight = rangeIndex
             let highlightedVerticalPosition = currentResult.getPositions()[rangeIndex]

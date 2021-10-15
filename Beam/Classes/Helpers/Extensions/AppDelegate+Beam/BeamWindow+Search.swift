@@ -12,9 +12,9 @@ extension BeamWindow {
     @IBAction func performFindPanelAction(_ sender: Any?) {
         switch state.mode {
         case .web:
-            state.browserTabsManager.currentTab?.searchInContent()
+            state.browserTabsManager.currentTab?.searchInContent(fromSelection: true)
         case .note:
-            state.currentEditor?.searchInNote(fromSelection: false)
+            state.currentEditor?.searchInNote(fromSelection: true)
         default:
             break
         }
