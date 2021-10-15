@@ -139,6 +139,7 @@ struct BeamTextField: NSViewRepresentable {
         var lastSelectedRange: Range<Int>?
         var firstResponderSetterBlock: DispatchWorkItem?
         private var automaticScrollSetterBlock: DispatchWorkItem?
+        var modifierFlagsPressed: NSEvent.ModifierFlags?
 
         init(_ textField: BeamTextField) {
             self.parent = textField
@@ -171,12 +172,22 @@ struct BeamTextField: NSViewRepresentable {
                 return parent.onCursorMovement(.left)
             case KeyCode.right.rawValue:
                 return parent.onCursorMovement(.right)
-            case KeyCode.enter.rawValue where event.modifierFlags.contains(.command):
-                parent.onCommit(.command)
-                return true
             default:
                 break
             }
+
+            if let keyCode = KeyCode(rawValue: event.keyCode), keyCode.meansNewLine {
+                if event.modifierFlags.contains(.command) {
+                    parent.onCommit(.command)
+                } else if event.modifierFlags.contains(.shift) {
+                    parent.onCommit(.shift)
+                } else {
+                    parent.onCommit(nil)
+                }
+                return true
+            }
+
+            modifierFlagsPressed = event.modifierFlags
             if !event.modifierFlags.isEmpty {
                 parent.onModifierFlagPressed?(event)
             }
@@ -215,7 +226,7 @@ struct BeamTextField: NSViewRepresentable {
 
         func control(_ control: NSControl, textView: NSTextView, doCommandBy commandSelector: Selector) -> Bool {
             if commandSelector == #selector(NSResponder.insertNewline(_:)) {
-                parent.onCommit(nil)
+                parent.onCommit(modifierFlagsPressed)
                 return true
             } else if commandSelector == #selector(NSResponder.cancelOperation(_:)) {
                 if let onEscape = parent.onEscape {
@@ -228,7 +239,6 @@ struct BeamTextField: NSViewRepresentable {
             }
             return false
         }
-
     }
 }
 

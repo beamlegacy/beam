@@ -104,6 +104,10 @@ class SearchViewModel: ObservableObject {
     }
 
     func onCommit(_ modifierFlags: NSEvent.ModifierFlags?) {
-        next()
+        if let modifiers = modifierFlags, modifiers.contains(.shift) {
+            previous()
+        } else {
+            next()
+        }
     }
 }

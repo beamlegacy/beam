@@ -52,7 +52,7 @@ class BeamTextFieldView: NSTextField {
     var onFocusChanged: (Bool) -> Void = { _ in }
     var onSelectionChanged: (NSRange) -> Void = { _ in }
 
-    var monitor: Any?
+    var flagsMonitor: Any?
 
     public init() {
         super.init(frame: NSRect())
@@ -64,9 +64,11 @@ class BeamTextFieldView: NSTextField {
     }
 
     deinit {
-        guard let monitor = monitor else { return }
-        NSEvent.removeMonitor(monitor)
+        if let monitor = flagsMonitor {
+            NSEvent.removeMonitor(monitor)
+        }
     }
+
     override func draw(_ dirtyRect: NSRect) {
         setupTextField()
         super.draw(dirtyRect)
@@ -112,8 +114,9 @@ class BeamTextFieldView: NSTextField {
         drawsBackground = false
         lineBreakMode = .byTruncatingTail
         allowsEditingTextAttributes = true
-        guard monitor == nil else { return }
-        monitor = NSEvent.addLocalMonitorForEvents(matching: .flagsChanged, handler: commandKey(evt:))
+        if flagsMonitor == nil {
+            flagsMonitor = NSEvent.addLocalMonitorForEvents(matching: .flagsChanged, handler: commandKey(evt:))
+        }
     }
 
     private func commandKey(evt: NSEvent) -> NSEvent {

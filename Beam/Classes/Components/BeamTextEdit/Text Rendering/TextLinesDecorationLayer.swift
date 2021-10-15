@@ -63,19 +63,10 @@ class TextLinesDecorationLayer: CALayer {
                     var descent = CGFloat(0)
                     let width = CGFloat(CTRunGetTypographicBounds(run, CFRangeMake(0, 0), &ascent, &descent, nil))
                     let height = ascent + descent
+                    let rect = computeRect(offset: offset, originY: originY, width: width, height: height)
+
                     if let attributes = CTRunGetAttributes(run) as? [NSAttributedString.Key: Any] {
-                        if let color = attributes[.boxBackgroundColor] as? NSColor {
-                            let inset: CGFloat = -4
-                            let rect = CGRect(x: offset, y: originY, width: width, height: height).insetBy(dx: inset, dy: inset)
-                            boxBackgroundRect = boxBackgroundRect?.union(rect) ?? rect
-                            boxColor = color
-                        } else {
-                            if let boxLayer = buildBoxBackgroundLayer(boxBackgroundRect, color: boxColor) {
-                                layers.append(boxLayer)
-                            }
-                            boxBackgroundRect = nil
-                            boxColor = nil
-                        }
+                        layers.append(contentsOf: decorate(with: attributes, rect: rect, boxBackgroundRect: &boxBackgroundRect, boxColor: &boxColor))
                     }
                     offset += CGFloat(width)
                 }
@@ -87,13 +78,80 @@ class TextLinesDecorationLayer: CALayer {
         }
     }
 
-    func buildBoxBackgroundLayer(_ rect: CGRect?, color: NSColor?) -> CAShapeLayer? {
+    var lastAnimatedRect: CGRect?
+
+    func buildBoxBackgroundLayer(_ rect: CGRect?, color: NSColor?, bumpAnimation: Bool = false) -> CAShapeLayer? {
         guard let rect = rect, let boxColor = color else { return nil }
-        let path = NSBezierPath(roundedRect: rect, xRadius: 4, yRadius: 4).cgPath
+        let path = NSBezierPath(roundedRect: CGRect(origin: .zero, size: rect.size), xRadius: 4, yRadius: 4).cgPath
         let layer = CAShapeLayer()
+        layer.frame = rect
         layer.path = path
         layer.fillColor = BeamColor.Generic.background.nsColor.add(boxColor).cgColor
+
+        if bumpAnimation {
+            if let last = lastAnimatedRect, last == rect {
+                return layer
+            }
+
+            let scaleUp = CABasicAnimation(keyPath: "transform.scale")
+            scaleUp.fromValue = 1.0
+            scaleUp.toValue = 1.3
+            scaleUp.duration = 0.2
+            scaleUp.timingFunction = CAMediaTimingFunction(name: .easeIn)
+
+            let scaleDown = CABasicAnimation(keyPath: "transform.scale")
+            scaleDown.fromValue = 1.3
+            scaleDown.toValue = 1.0
+            scaleDown.duration = 0.07
+            scaleDown.beginTime = 0.2
+            scaleDown.timingFunction = CAMediaTimingFunction(name: .easeOut)
+
+            let group = CAAnimationGroup()
+            group.animations = [scaleUp, scaleDown]
+            group.duration = 0.27
+
+            layer.add(group, forKey: "bumpAnim")
+
+            lastAnimatedRect = rect
+        }
+
         return layer
     }
 
+    private func computeRect(offset: CGFloat, originY: CGFloat, width: CGFloat, height: CGFloat) -> CGRect {
+        let inset: CGFloat = -4
+        let rect = CGRect(x: offset, y: originY, width: width, height: height).insetBy(dx: inset, dy: inset)
+        return rect
+    }
+
+    private func decorate(with attributes: [NSAttributedString.Key: Any],
+                          rect: CGRect,
+                          boxBackgroundRect: inout CGRect?,
+                          boxColor: inout NSColor?) -> [CALayer]{
+        var layers = [CALayer]()
+
+        if let color = attributes[.boxBackgroundColor] as? NSColor {
+            boxBackgroundRect = boxBackgroundRect?.union(rect) ?? rect
+            boxColor = color
+        } else if let color = attributes[.searchFoundBackground] as? NSColor {
+            if let last = lastAnimatedRect, last == rect {
+                lastAnimatedRect = nil
+            }
+            if let searchLayer = buildBoxBackgroundLayer(rect, color: color) {
+                layers.append(searchLayer)
+            }
+        } else if let color = attributes[.searchCurrentResultBackground] as? NSColor {
+            if let searchLayer = buildBoxBackgroundLayer(rect, color: color, bumpAnimation: true) {
+                layers.append(searchLayer)
+            }
+        } else {
+            if let boxLayer = buildBoxBackgroundLayer(boxBackgroundRect, color: boxColor) {
+                layers.append(boxLayer)
+            }
+            boxBackgroundRect = nil
+            boxColor = nil
+        }
+
+        return layers
+    }
 }
