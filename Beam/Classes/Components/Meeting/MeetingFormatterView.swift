@@ -82,7 +82,7 @@ private struct MeetingFormatterContainerView: View {
                 }), searchQuery: viewModel.searchText)
                     .animation(nil)
                 Separator(color: BeamColor.Nero)
-                CalendarPickerView(selectedDate: $viewModel.selectedDate, highlightedDates: viewModel.allMeetingDates, calendar: calendar) { items, point in
+                CalendarPickerView(selectedDate: $viewModel.selectedDate, highlightedDates: viewModel.allMeetingDates, calendar: calendar, theme: .beam) { items, point in
                     showContextMenu(items: items, at: point)
                 }
             }
@@ -190,6 +190,7 @@ class MeetingFormatterView: FormatterView {
     }
 
     override func formatterHandlesInputText(_ text: String) -> Bool {
+        guard !text.isEmpty || !subviewModel.searchText.isEmpty else { return false } // delete backward
         searchMeeting(for: text)
         return true
     }

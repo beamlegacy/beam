@@ -19,6 +19,7 @@ struct CalendarMonthView: View {
     var days: [CalendarDay]
     var baseDate: Date
     @Binding var selectedDate: Date
+    var theme = Theme.bluetiful
     @State private var hoveredDate: Date?
     @State private var touchdownDate: Date?
 
@@ -59,18 +60,18 @@ struct CalendarMonthView: View {
         let isTouchingDown = touchdownDate == day.date
         var color = day.isWithinDisplayedMonth || isHovering || isTouchingDown ? BeamColor.Niobium : BeamColor.AlphaGray
         if day.isSelected || day.isHighlighted {
-            color = BeamColor.Bluetiful
+            color = theme.selectedForegroundColor
             if day.isSelected {
                 font = BeamFont.medium(size: 13)
             }
         }
         var backgroundColor: BeamColor?
         if isTouchingDown {
-            backgroundColor = day.isSelected ? BeamColor.CalendarPicker.selectedDayClickedBackground : BeamColor.CalendarPicker.dayClickedBackground
+            backgroundColor = day.isSelected ? theme.selectedClickedBackgroundColor : BeamColor.CalendarPicker.dayClickedBackground
         } else if isHovering {
-            backgroundColor = day.isSelected ? BeamColor.CalendarPicker.selectedDayHoverBackground : BeamColor.CalendarPicker.dayHoverBackground
+            backgroundColor = day.isSelected ? theme.selectedHoveredBackgroundColor : BeamColor.CalendarPicker.dayHoverBackground
         } else if day.isSelected {
-            backgroundColor = BeamColor.CalendarPicker.selectedDayBackground
+            backgroundColor = theme.selectedBackgroundColor
         }
         return Text(day.number)
             .foregroundColor(color.swiftUI)
@@ -131,5 +132,20 @@ struct CalendarMonthView: View {
         }
         .padding(.horizontal, BeamSpacing._80)
         .padding(.bottom, BeamSpacing._50)
+    }
+}
+
+extension CalendarMonthView {
+    struct Theme {
+        var selectedForegroundColor = BeamColor.Bluetiful
+        var selectedBackgroundColor = BeamColor.CalendarPicker.selectedDayBackground
+        var selectedHoveredBackgroundColor = BeamColor.CalendarPicker.selectedDayHoverBackground
+        var selectedClickedBackgroundColor = BeamColor.CalendarPicker.selectedDayClickedBackground
+
+        static let bluetiful = Theme()
+        static let beam = Theme(selectedForegroundColor: .Beam,
+                                selectedBackgroundColor: BeamColor.CalendarPicker.beamSelectedDayBackground,
+                                selectedHoveredBackgroundColor: BeamColor.CalendarPicker.beamSelectedDayHoverBackground,
+                                selectedClickedBackgroundColor: BeamColor.CalendarPicker.beamSelectedDayClickedBackground)
     }
 }
