@@ -659,7 +659,7 @@ extension DocumentManager {
     /// Use this to have updates when the underlaying CD object `Document` changes
     func onDocumentChange(_ documentStruct: DocumentStruct,
                           completionHandler: @escaping (DocumentStruct) -> Void) -> AnyCancellable {
-        Logger.shared.logDebug("onDocumentChange called for \(documentStruct.titleAndId)", category: .documentDebug)
+        Logger.shared.logDebug("onDocumentChange called for \(documentStruct.titleAndId)", category: .documentNotification)
 
         var documentId = documentStruct.id
         let cancellable = NotificationCenter.default
@@ -699,7 +699,7 @@ extension DocumentManager {
                         let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
                         context.performAndWait {
                             guard let coreDataDocument = try? Document.fetchWithId(context, documentId) else {
-                                Logger.shared.logDebug("notification for \(document.titleAndId) (new id)",
+                                Logger.shared.logDebug("onDocumentChange for \(document.titleAndId) (new id)",
                                                        category: .documentNotification)
                                 documentId = document.id
                                 completionHandler(document)
@@ -707,21 +707,21 @@ extension DocumentManager {
                             }
 
                             if documentStruct.deletedAt == nil, coreDataDocument.deleted_at != documentStruct.deletedAt {
-                                Logger.shared.logDebug("notification for \(document.titleAndId) (new id)",
+                                Logger.shared.logDebug("onDocumentChange for \(document.titleAndId) (new id)",
                                                        category: .documentNotification)
                                 documentId = document.id
                                 completionHandler(document)
                             } else {
-                                Logger.shared.logDebug("No notification for \(document.titleAndId) (new id)",
+                                Logger.shared.logDebug("onDocumentChange: no notification for \(document.titleAndId) (new id)",
                                                        category: .documentNotification)
                             }
                         }
                     } else if document.id == documentId {
-                        Logger.shared.logDebug("notification for \(document.titleAndId)",
+                        Logger.shared.logDebug("onDocumentChange for \(document.titleAndId)",
                                                category: .documentNotification)
                         completionHandler(document)
                     } else if document.title == documentStruct.title {
-                        Logger.shared.logDebug("notification for \(document.titleAndId) but not detected. onDocumentChange() called with \(documentStruct.titleAndId), {\(documentId)}",
+                        Logger.shared.logDebug("onDocumentChange for \(document.titleAndId) but not detected. Called with \(documentStruct.titleAndId), {\(documentId)}",
                                                category: .documentNotification)
                     }
                 }
