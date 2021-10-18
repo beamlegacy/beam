@@ -54,7 +54,7 @@ public class TextNode: ElementNode {
 
     override var parent: Widget? {
         didSet {
-            guard parent != nil else { return }
+            guard parent != oldValue, parent != nil else { return }
             updateTextChildren(elements: displayedElement.children)
         }
     }
@@ -766,7 +766,7 @@ public class TextNode: ElementNode {
         case .none:
             return false
         case .select(let o):
-            root?.selectedTextRange = text.clamp(p < o ? cursorPosition..<o : o..<cursorPosition)
+            root?.selectedTextRange = text.clamp(p < o ? p..<o : o..<p)
             mouseIsDragged = root?.state.nodeSelection == nil
 
             // When more than one bullet is selected hide & disable cmd+enter action

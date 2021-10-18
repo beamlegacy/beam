@@ -10,6 +10,17 @@
 
 import Foundation
 
+public enum WritingDirection {
+    case leftToRight
+    case rightToLeft
+}
+
+public enum CaretPositionInLine {
+    case start
+    case middle
+    case end
+}
+
 public struct CaretFilter: OptionSet {
     public let rawValue: Int
 
@@ -43,6 +54,9 @@ public struct Caret: Comparable {
     public var inSource: Bool
     public var line: Int
 
+    public var direction: WritingDirection = .leftToRight
+    public var positionInLine: CaretPositionInLine = .middle
+
     /// positionInSource is the index in the source string adjusted for edge position (before or after the character)
     public var positionInSource: Int {
         return indexInSource + ((edge == .trailing) ? (inSource ? 1 : 0) : 0)
@@ -63,34 +77,40 @@ public struct Caret: Comparable {
 
 public func nextCaret(for index: Int, in carets: [Caret]) -> Int {
     guard index < carets.count - 1 else {
-        //swiftlint:disable:next print
-//        print("[1]nextCaret \(index) -> \(index) \(carets[index].debugDescription)")
-        return index
+        return carets.count - 1
     }
 
-    let position = carets[index].positionOnScreen
     var newIndex = index + 1
-    while newIndex + 1 < carets.count {
+    let caret = carets[index]
+    let offset = caret.offset.x
+    let line = caret.line
+    while newIndex < carets.count {
         let caret = carets[newIndex]
-        if caret.positionOnScreen > position && caret.edge.isLeading {
-            //swiftlint:disable:next print
-//            print("[2]nextCaret \(index) -> \(newIndex) \(carets[newIndex].debugDescription)")
+        if (caret.offset.x > offset && (caret.edge.isLeading || caret.positionInLine == .end)) || caret.line != line {
             return newIndex
         }
 
         newIndex += 1
     }
 
-    //swiftlint:disable:next print
-//    print("[3]nextCaret \(index) -> \(newIndex) \(carets[newIndex].debugDescription)")
     return newIndex
 }
 
 public func previousCaret(for index: Int, in carets: [Caret]) -> Int {
-    let position = carets[index].positionOnScreen
-    var newIndex = index
-    while (carets[newIndex].positionOnScreen >= position) &&
-          (newIndex - 1 >= 0) {
+    guard index > 0 else {
+        return 0
+    }
+
+    var newIndex = index - 1
+    let caret = carets[index]
+    let offset = caret.offset.x
+    let line = caret.line
+    while newIndex > 0 {
+        let caret = carets[newIndex]
+        if caret.offset.x < offset || caret.line != line {
+            return newIndex
+        }
+
         newIndex -= 1
     }
 

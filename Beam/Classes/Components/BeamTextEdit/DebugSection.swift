@@ -14,6 +14,10 @@ class DebugSection: Widget {
     let separatorLayer = CALayer()
     let chevronLayer = CALayer()
 
+    let savingLayer = CATextLayer()
+    let updatesLayer = CATextLayer()
+    let updateAttemptsLayer = CATextLayer()
+
     override var mainLayerName: String {
         "DebugSection"
     }
@@ -21,20 +25,34 @@ class DebugSection: Widget {
     override var contentsScale: CGFloat {
         didSet {
             textLayer.contentsScale = contentsScale
+            savingLayer.contentsScale = contentsScale
+            updatesLayer.contentsScale = contentsScale
+            updateAttemptsLayer.contentsScale = contentsScale
         }
+    }
+
+    private func setupTextLayer(_ layer: CATextLayer, name: String, string: String, position: CGPoint) {
+        layer.name = name
+        layer.string = string
+        layer.foregroundColor = BeamColor.DebugSection.sectionTitle.cgColor
+        layer.fontSize = 12
+        layer.font = BeamFont.semibold(size: 0).nsFont
+        layer.frame = CGRect(origin: position, size: textLayer.preferredFrameSize())
     }
 
     init(parent: Widget, note: BeamNote, availableWidth: CGFloat?) {
         self.note = note
 
         super.init(parent: parent, availableWidth: availableWidth)
+        setupTextLayer(textLayer, name: "Debug", string: "Debug", position: CGPoint(x: 20, y: 0))
+        setupTextLayer(savingLayer, name: "saving", string: "-", position: CGPoint(x: 100, y: 0))
+        setupTextLayer(updatesLayer, name: "updates", string: "-", position: CGPoint(x: 200, y: 0))
+        setupTextLayer(updateAttemptsLayer, name: "update attempts", string: "-", position: CGPoint(x: 300, y: 0))
 
-        textLayer.string = "Debug"
-        textLayer.foregroundColor = BeamColor.DebugSection.sectionTitle.cgColor
-        textLayer.fontSize = 12
-        textLayer.font = BeamFont.semibold(size: 0).nsFont
         layer.addSublayer(textLayer)
-        textLayer.frame = CGRect(origin: CGPoint(x: 20, y: 0), size: textLayer.preferredFrameSize())
+        layer.addSublayer(savingLayer)
+        layer.addSublayer(updatesLayer)
+        layer.addSublayer(updateAttemptsLayer)
 
         addLayer(ChevronButton("chevron", open: open, changed: { [unowned self] value in
             self.open = value
@@ -46,6 +64,27 @@ class DebugSection: Widget {
         setupDebugInfoLayer()
 
         updateLayerVisibility()
+
+        note.$saving.sink { [weak self] value in
+            guard let self = self else { return }
+            let deadline = value ? DispatchTime.now() : DispatchTime.now() + 0.5
+            DispatchQueue.main.asyncAfter(deadline: deadline) {
+                self.savingLayer.string = value ? "saving" : ""
+                self.savingLayer.frame = CGRect(origin: self.savingLayer.frame.origin, size: self.savingLayer.preferredFrameSize())
+            }
+        }.store(in: &scope)
+
+        note.$updateAttempts.sink { [weak self] value in
+            guard let self = self else { return }
+            self.updateAttemptsLayer.string = "update attemps: \(value)"
+            self.updateAttemptsLayer.frame = CGRect(origin: self.updateAttemptsLayer.frame.origin, size: self.updateAttemptsLayer.preferredFrameSize())
+        }.store(in: &scope)
+
+        note.$updates.sink { [weak self] value in
+            guard let self = self else { return }
+            self.updatesLayer.string = "updates: \(value)"
+            self.updatesLayer.frame = CGRect(origin: self.updatesLayer.frame.origin, size: self.updatesLayer.preferredFrameSize())
+        }.store(in: &scope)
     }
 
     override func updateRendering() -> CGFloat {
@@ -72,6 +111,7 @@ class DebugSection: Widget {
         defaultDatabaseIdLayer.layer.isHidden = !open
         previousChecksumLayer.layer.isHidden = !open
         separatorLayer.isHidden = !open
+
     }
 
     private func setupDebugInfoLayer() {

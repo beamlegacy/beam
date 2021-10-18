@@ -27,7 +27,8 @@ class ProxyTextNode: TextNode, ProxyNode {
                 guard let self = self,
                       self.parent != nil,
                       self.root != nil,
-                      self.editor != nil
+                      self.editor != nil,
+                      self.isInNodeProviderTree
                 else { return }
                 self.children = newChildren.compactMap({ e -> ProxyTextNode? in
                     let ref = self.nodeFor(e, withParent: self)

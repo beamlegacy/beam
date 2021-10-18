@@ -18,6 +18,13 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     var debug = false
     var currentFrameInDocument = NSRect()
     var nodeProvider: NodeProvider?
+    var isInNodeProviderTree: Bool {
+        get {
+            guard nodeProvider == nil else { return true }
+            guard let parent = parent else { return false }
+            return parent.isInNodeProviderTree
+        }
+    }
     var isTreeBoundary: Bool { nodeProvider != nil }
 
     var isEmpty: Bool { children.isEmpty }
@@ -41,8 +48,9 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         }
     }
 
-    var contentsScale = CGFloat(2) {
+    var contentsScale = CGFloat(0) {
         didSet {
+            guard contentsScale != oldValue else { return }
             layer.contentsScale = contentsScale
             selectionLayer.contentsScale = contentsScale
 
@@ -149,7 +157,6 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         for c in children {
             c.parent = self
             c.availableWidth = availableWidth - childInset
-            c.contentsScale = contentsScale
             editor?.addToMainLayer(c.layer)
             for l in c.layers where l.value.layer.superlayer == nil {
                 editor?.addToMainLayer(l.value.layer)
@@ -170,11 +177,10 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
     var availableWidth: CGFloat = 1 {
         didSet {
-            if availableWidth != oldValue {
-                updateChildren()
-                invalidatedRendering = true
-                computeRendering()
-            }
+            guard availableWidth != oldValue else { return }
+            updateChildren()
+            invalidatedRendering = true
+            computeRendering()
         }
     }
 
@@ -263,6 +269,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
     weak var parent: Widget? {
         didSet {
+            guard parent != oldValue else { return }
             if parent == nil && oldValue?.root?.focusedWidget === self {
                 oldValue?.root?.focusedWidget = nil
             }
@@ -320,12 +327,19 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
     public weak var editor: BeamTextEdit? {
         didSet {
+            guard editor != oldValue else { return }
             if editor == nil {
                 _root = nil
             }
+
+            if let scale = editor?.window?.backingScaleFactor {
+                contentsScale = scale
+            }
+
             for child in children {
                 child.editor = editor
             }
+
         }
     }
 
@@ -523,6 +537,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     }
 
     final func invalidateLayout() {
+        guard !inInitialLayout else { return }
         invalidate()
         // TODO: fix this optimisation so that we don't go up the tree every time
 //        guard !needLayout else {
@@ -555,12 +570,14 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     }
 
     final func invalidate() {
+        guard !inInitialLayout else { return }
         guard !layer.needsDisplay() else { return }
         layer.setNeedsDisplay()
         onInvalidated()
     }
 
     final func invalidateRendering() {
+        guard !inInitialLayout else { return }
         invalidatedRendering = true
         invalidateLayout()
     }

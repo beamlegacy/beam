@@ -92,6 +92,10 @@ public extension CALayer {
         clearRoot()
         let root = TextRoot(editor: self, element: note, availableWidth: Self.textNodeWidth(for: frame.size))
         rootNode = root
+        if let window = window {
+            root.contentsScale = window.backingScaleFactor
+        }
+
         invalidateLayout()
 
         root.element
@@ -112,7 +116,7 @@ public extension CALayer {
 
         rootNode?.clearMapping() // Clear all previous references in the node tree
         rootNode?.editor = nil
-        rootNode = TextRoot(editor: self, element: BeamElement(), availableWidth: Self.textNodeWidth(for: frame.size))
+        rootNode = nil
         // Remove all subsciptions:
         noteCancellables.removeAll()
         safeContentSize = .zero
