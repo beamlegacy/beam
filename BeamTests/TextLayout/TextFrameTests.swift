@@ -208,6 +208,9 @@ class TextFrameTests: XCTestCase {
         expect(self.cursor) == 8
 
         cursor = nextCaret(for: cursor, in: carets)
+        expect(self.cursor) == 9
+
+        cursor = nextCaret(for: cursor, in: carets)
         expect(self.cursor) == 10
 
         cursor = nextCaret(for: cursor, in: carets)
@@ -223,6 +226,9 @@ class TextFrameTests: XCTestCase {
 
         cursor = previousCaret(for: cursor, in: carets)
         expect(self.cursor) == 10
+
+        cursor = previousCaret(for: cursor, in: carets)
+        expect(self.cursor) == 9
 
         cursor = previousCaret(for: cursor, in: carets)
         expect(self.cursor) == 8

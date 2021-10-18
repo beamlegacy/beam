@@ -123,7 +123,10 @@ import AVFoundation
 
     var contentsScale: CGFloat {
         get { self.layer.contentsScale }
-        set { self.layer.deepContentsScale = newValue }
+        set {
+            guard newValue != contentsScale else { return }
+            self.layer.deepContentsScale = newValue
+        }
     }
 }
 

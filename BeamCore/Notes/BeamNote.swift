@@ -106,6 +106,9 @@ public class BeamNote: BeamElement {
     public var savedVersion: Int64 = 0
     public var databaseId: UUID?
     @Published public var deleted: Bool = false
+    @Published public var saving: Bool = false
+    @Published public var updateAttempts: Int = 0
+    @Published public var updates: Int = 0
 
     public var titleAndId: String {
         "\(title) {\(id)} v\(version)"
@@ -181,7 +184,19 @@ public class BeamNote: BeamElement {
         }
         open = true
         checkHasNote()
+
+        #if DEBUG
+        let count = (Self.decodeCount[id] ?? 0) + 1
+        Self.decodeCount[id] = count
+        //swiftlint:disable print
+        print("Decoded \(ttl) - \(id) (count = \(count))")
+        //swiftlint:enable print
+        #endif
     }
+
+    #if DEBUG
+    static var decodeCount = [UUID: Int]()
+    #endif
 
     override public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
@@ -249,9 +264,7 @@ public class BeamNote: BeamElement {
 
     public static func getFetchedNote(_ id: UUID) -> BeamNote? {
         beamCheckMainThread()
-        return Self.fetchedNotes.first(where: { (_, value: WeakReference<BeamNote>) in
-            value.ref?.id == id
-        })?.value.ref
+        return Self.fetchedNotes[id]?.ref
     }
 
     public func getFetchedNote(_ title: String) -> BeamNote? {
@@ -261,7 +274,8 @@ public class BeamNote: BeamElement {
 
     public static func getFetchedNote(_ title: String) -> BeamNote? {
         beamCheckMainThread()
-        return Self.fetchedNotes[cacheKeyFromTitle(title)]?.ref
+        guard let uid = Self.fetchedNotesTitles[title] else { return nil }
+        return Self.getFetchedNote(uid)
     }
 
     public func getFetchedNote(_ id: UUID) -> BeamNote? {
@@ -273,7 +287,8 @@ public class BeamNote: BeamElement {
 
     public static func appendToFetchedNotes(_ note: BeamNote) {
         beamCheckMainThread()
-        fetchedNotes[cacheKeyFromTitle(note.title)] = WeakReference<BeamNote>(note)
+        fetchedNotes[note.id] = WeakReference<BeamNote>(note)
+        fetchedNotesTitles[note.title] = note.id
         let cancellableKey = cancellableKeyFromNote(note)
         fetchedNotesCancellables.removeValue(forKey: cancellableKey)
 
@@ -289,7 +304,8 @@ public class BeamNote: BeamElement {
             note.observeDocumentChange()
         }
 
-        fetchedNotes[cacheKeyFromTitle(note.title)] = WeakReference(note)
+        fetchedNotes[note.id] = WeakReference(note)
+        fetchedNotesTitles[note.title] = note.id
     }
 
     public static func clearCancellables() {
@@ -307,13 +323,14 @@ public class BeamNote: BeamElement {
     public static func unload(note: BeamNote) {
         beamCheckMainThread()
         fetchedNotesCancellables.removeValue(forKey: cancellableKeyFromNote(note))
-        fetchedNotes.removeValue(forKey: cacheKeyFromTitle(note.title))
+        fetchedNotes.removeValue(forKey: note.id)
+        fetchedNotesTitles.removeValue(forKey: note.title)
     }
 
     public static func reloadAfterRename(previousTitle: String, note: BeamNote) {
         beamCheckMainThread()
-        fetchedNotes.removeValue(forKey: cacheKeyFromTitle(previousTitle))
-        fetchedNotes[cacheKeyFromTitle(note.title)] = WeakReference(note)
+        fetchedNotesTitles.removeValue(forKey: cacheKeyFromTitle(previousTitle))
+        fetchedNotesTitles[cacheKeyFromTitle(note.title)] = note.id
     }
 
     // Return true if the note is empty. If the user entered any chars, even just \n, will return false
@@ -328,7 +345,8 @@ public class BeamNote: BeamElement {
     }
 
     public static var indexingQueue = DispatchQueue(label: "BeamNoteIndexing")
-    public private(set) static var fetchedNotes: [String: WeakReference<BeamNote>] = [:]
+    public private(set) static var fetchedNotes: [UUID: WeakReference<BeamNote>] = [:]
+    public private(set) static var fetchedNotesTitles: [String: UUID] = [:]
     private static var fetchedNotesCancellables: [UUID: Cancellable] = [:]
 
     public func createdByUser() {

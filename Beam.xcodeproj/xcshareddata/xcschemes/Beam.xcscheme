@@ -80,30 +80,6 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "4EEEAF572652AC4A0082D77E"
-               BuildableName = "ClusteringTests.xctest"
-               BlueprintName = "ClusteringTests"
-               ReferencedContainer = "container:Beam/Clustering/Clustering.xcodeproj">
-            </BuildableReference>
-            <SkippedTests>
-               <Test
-                  Identifier = "ClusteringTests/testChangeCandidate()">
-               </Test>
-               <Test
-                  Identifier = "ClusteringTests/testScoreTextualEmbeddingWithNonEnglishContent()">
-               </Test>
-               <Test
-                  Identifier = "ClusteringTests/testTextualSimilarityMatrixProcessWithNonEnglishContent()">
-               </Test>
-               <Test
-                  Identifier = "ClusteringTests/testTextualSimilarityPipelineWithNonEnglishContent()">
-               </Test>
-            </SkippedTests>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
                BlueprintIdentifier = "965A78472514F149009980D4"
                BuildableName = "BeamUITests.xctest"
                BlueprintName = "BeamUITests"
