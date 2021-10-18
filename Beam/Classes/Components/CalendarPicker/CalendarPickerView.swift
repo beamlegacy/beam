@@ -13,12 +13,16 @@ struct CalendarPickerView: View {
     @ObservedObject private var model: CalendarPickerView.Model
 
     @Binding private var selectedDate: Date
+    private var monthViewTheme: CalendarMonthView.Theme
     private var onPresentSubmenu: (([ContextMenuItem], CGPoint) -> Void)?
-    init(selectedDate: Binding<Date>, highlightedDates: [Date] = [], calendar: Calendar? = nil, onPresentSubmenu: (([ContextMenuItem], CGPoint) -> Void)? = nil) {
+
+    init(selectedDate: Binding<Date>, highlightedDates: [Date] = [], calendar: Calendar? = nil, theme: CalendarMonthView.Theme = .bluetiful,
+         onPresentSubmenu: (([ContextMenuItem], CGPoint) -> Void)? = nil) {
         let model = CalendarPickerView.Model(date: selectedDate.wrappedValue, calendar: calendar)
         model.highlightedDates = highlightedDates
         self.model = model
         self._selectedDate = selectedDate
+        self.monthViewTheme = theme
         self.onPresentSubmenu = onPresentSubmenu
     }
 
@@ -57,9 +61,8 @@ struct CalendarPickerView: View {
             CalendarMonthView(calendar: model.calendar,
                               days: model.daysInMonth,
                               baseDate: model.baseDate,
-                              selectedDate: $selectedDate.onChange { d in
-                                model.selectedDate = d
-                              })
+                              selectedDate: $selectedDate.onChange { model.selectedDate = $0 },
+                              theme: monthViewTheme)
         }
         .frame(width: 240, alignment: .top)
         .fixedSize(horizontal: false, vertical: true)
