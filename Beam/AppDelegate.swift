@@ -258,6 +258,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationWillFinishLaunching(_ notification: Notification) {
         CoreDataManager.shared.setup()
+        _ = LoggerRecorder.shared
+        Logger.shared.logDebug("-------------------------( applicationLaunching )-------------------------",
+                                category: .marker)
 
         // Register for URL opening event
         NSAppleEventManager
@@ -284,7 +287,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return handleURL(incomingURL)
     }
 
-    var consoleWindow: ConsoleWindow?
     var documentsWindow: DocumentsWindow?
     var databasesWindow: DatabasesWindow?
     var tabGroupingWindow: TabGroupingWindow?

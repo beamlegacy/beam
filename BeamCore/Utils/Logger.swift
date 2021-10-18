@@ -3,7 +3,7 @@ import os.log
 import CocoaLumberjack
 import CocoaLumberjackSwift
 
-public enum LogCategory: String {
+public enum LogCategory: String, CaseIterable {
     case general
     case tracking
     case network
@@ -48,6 +48,7 @@ public enum LogCategory: String {
     case topDomain
     case browsingTreeSender
     case notePublishing
+    case marker
 }
 
 public final class Logger {
@@ -58,6 +59,8 @@ public final class Logger {
     }
 
     private var subsystem = "beam"
+
+    public var callback: ((String, OSLogType, LogCategory, TimeInterval?) -> Void)?
 
     // If you want to change this for you and uncluter your console logs, add into `.envrc.private`:
     // export HIDE_CATEGORIES="web documentDebug javascript pointAndShoot coredataDebug"
@@ -150,23 +153,27 @@ public final class Logger {
             DDLogWarn("[\(category.rawValue)] ⚠️ \(message)")
         }
 
-        log("⚠️ \(message)", level: .default, category: category, localTimer: localTimer)
+        log("⚠️ \(message)", level: .info, category: category, localTimer: localTimer)
     }
 
     private func log(_ message: String, level: OSLogType, category: LogCategory, localTimer: Date? = nil) {
+        var timeDiff: TimeInterval?
+        if let localTimer = localTimer {
+            timeDiff = BeamDate.now.timeIntervalSince(localTimer)
+        }
+
+        callback?(message, level, category, timeDiff)
+
         #if DEBUG
         if hideCategories.contains(category) { return }
 
         let log = OSLog(subsystem: subsystem, category: category.rawValue)
 
-        if let localTimer = localTimer {
-            let diff = String(format: "%.2f", BeamDate.now.timeIntervalSince(localTimer))
-
-            os_log("%{public}@ in %@sec", log: log, type: level, message, diff)
+        if let timeDiff = timeDiff {
+            os_log("%{public}@ in %@sec", log: log, type: level, message, String(format: "%.4f", timeDiff))
         } else {
             os_log("%{public}@", log: log, type: level, message)
         }
-
         #endif
     }
 }
