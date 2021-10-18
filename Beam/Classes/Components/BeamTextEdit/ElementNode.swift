@@ -72,7 +72,7 @@ public class ElementNode: Widget {
 
     override var parent: Widget? {
         didSet {
-            guard parent != nil else { return }
+            guard parent != nil, parent != oldValue else { return }
             updateTextChildren(elements: displayedElement.children)
         }
     }
@@ -195,6 +195,7 @@ public class ElementNode: Widget {
         createElementLayers()
 
         displayedElement.$children
+            .removeDuplicates()
             .sink { [unowned self] elements in
                 guard (self.parent != nil) || (self as? TextRoot != nil) else { return }
                 updateTextChildren(elements: elements)

@@ -267,13 +267,18 @@ public class TextRoot: ElementNode {
         return NSRect(origin: CGPoint(), size: editor.frame.size)
     }
 
-    private var breadCrumbs: [BeamNoteReference: WeakReference<BreadCrumb>] = [:]
+    struct ReferencingBreadCrumb {
+        weak var breadCrumb: BreadCrumb?
+        var note: BeamNote
+    }
+
+    private var breadCrumbs: [BeamNoteReference: ReferencingBreadCrumb] = [:]
     func getBreadCrumb(for noteReference: BeamNoteReference) -> BreadCrumb? {
-        guard let breadCrumb = breadCrumbs[noteReference]?.ref else {
+        guard let breadCrumb = breadCrumbs[noteReference]?.breadCrumb else {
             guard let referencingNote = BeamNote.fetch(DocumentManager(), id: noteReference.noteID) else { return nil }
             guard let referencingElement = referencingNote.findElement(noteReference.elementID) else { return nil }
-            let breadCrumb = BreadCrumb(parent: self, element: referencingElement, availableWidth: availableWidth - childInset)
-            breadCrumbs[noteReference] = WeakReference(breadCrumb)
+            let breadCrumb = BreadCrumb(parent: self, sourceNote: referencingNote, element: referencingElement, availableWidth: availableWidth - childInset)
+            breadCrumbs[noteReference] = ReferencingBreadCrumb(breadCrumb: breadCrumb, note: referencingNote)
             return breadCrumb
         }
         return breadCrumb

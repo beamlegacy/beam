@@ -18,26 +18,33 @@ extension BeamNote: BeamNoteDocument {
             encoder.outputFormatting = [.prettyPrinted, .withoutEscapingSlashes]
             let data = try encoder.encode(self)
 
-            if databaseId == nil {
-                Logger.shared.logError("DatabaseID should already have been set", category: .document)
-            }
-
-            let structDBId = databaseId ?? DatabaseManager.defaultDatabase.id
-
-            return DocumentStruct(id: id,
-                                  databaseId: structDBId,
-                                  title: title,
-                                  createdAt: creationDate,
-                                  updatedAt: updateDate,
-                                  data: data,
-                                  documentType: type.isJournal ? .journal : .note,
-                                  version: version,
-                                  isPublic: publicationStatus.isPublic,
-                                  journalDate: type.journalDateString)
+            guard var docStruct = documentStructLight else { return nil }
+            docStruct.data = data
+            return docStruct
         } catch {
             Logger.shared.logError("Unable to encode BeamNote into DocumentStruct [\(title) {\(id)}]", category: .document)
             return nil
         }
+    }
+
+    /// This version of DocumentStruct doesn't contain the encoded data. If must only be used for observing task
+    var documentStructLight: DocumentStruct? {
+        if databaseId == nil {
+            Logger.shared.logError("DatabaseID should already have been set", category: .document)
+        }
+
+        let structDBId = databaseId ?? DatabaseManager.defaultDatabase.id
+
+        return DocumentStruct(id: id,
+                              databaseId: structDBId,
+                              title: title,
+                              createdAt: creationDate,
+                              updatedAt: updateDate,
+                              data: Data(),
+                              documentType: type.isJournal ? .journal : .note,
+                              version: version,
+                              isPublic: publicationStatus.isPublic,
+                              journalDate: type.journalDateString)
     }
 
     public func observeDocumentChange(documentManager: DocumentManager) {
@@ -46,7 +53,7 @@ extension BeamNote: BeamNoteDocument {
             Logger.shared.logError("BeamNote already has change observer", category: .document)
             return
         }
-        guard let docStruct = documentStruct else { return }
+        guard let docStruct = documentStructLight else { return }
 
         Logger.shared.logInfo("Observe changes for note \(titleAndId)", category: .document)
         activeDocumentCancellables = []
@@ -54,6 +61,7 @@ extension BeamNote: BeamNoteDocument {
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
 
+                self.updateAttempts += 1
                 /*
                  When receiving updates for a new document, we don't check the version
                  */
@@ -87,6 +95,7 @@ extension BeamNote: BeamNoteDocument {
 
     func updateWithDocumentStruct(_ docStruct: DocumentStruct) {
         beamCheckMainThread()
+        self.updates += 1
         let decoder = JSONDecoder()
         guard let newSelf = try? decoder.decode(BeamNote.self, from: docStruct.data) else {
             Logger.shared.logError("Unable to decode new documentStruct \(docStruct.title) {\(docStruct.id)}",
@@ -133,12 +142,14 @@ extension BeamNote: BeamNoteDocument {
     // swiftlint:disable:next cyclomatic_complexity function_body_length
     public func save(documentManager: DocumentManager, completion: ((Result<Bool, Error>) -> Void)? = nil) {
         beamCheckMainThread()
-        guard version == savedVersion else {
+        guard !saving && version == savedVersion else {
             Logger.shared.logWarning("Waiting for last save: \(title) {\(id)} - saved version \(savedVersion) / current \(version)",
                                      category: .document)
             completion?(.failure(BeamNoteError.saveAlreadyRunning))
             return
         }
+
+        saving = true
 
         /*
          When saving the note, we must increment its version first. `documentManager.save()` will check for
@@ -151,6 +162,7 @@ extension BeamNote: BeamNoteDocument {
             version -= 1
             Logger.shared.logError("Unable to find active document struct \(titleAndId)", category: .document)
             completion?(.failure(BeamNoteError.unableToCreateDocumentStruct))
+            saving = false
             return
         }
 
@@ -159,6 +171,7 @@ extension BeamNote: BeamNoteDocument {
 
         Logger.shared.logInfo("BeamNote wants to save: \(titleAndId)", category: .document)
         documentManager.save(documentStruct, completion: { [weak self] result in
+            defer { DispatchQueue.main.async { self?.saving = false } }
             guard let self = self else { completion?(result); return }
 
             switch result {
@@ -228,6 +241,7 @@ extension BeamNote: BeamNoteDocument {
                                     self.savedVersion = existingDocument.version
                                 }
 
+                                DispatchQueue.main.async { self.saving = false }
                                 completion?(result)
                             }
 
@@ -252,6 +266,7 @@ extension BeamNote: BeamNoteDocument {
                         }
 
                         completion?(.failure(error))
+                        DispatchQueue.main.async { self.saving = false }
                         return
                     default:
                         Logger.shared.logError("Error saving: \(error.localizedDescription)",
@@ -272,12 +287,22 @@ extension BeamNote: BeamNoteDocument {
             }
 
             completion?(result)
+            DispatchQueue.main.async { self.saving = false }
         })
     }
 
     static func instanciateNote(_ documentStruct: DocumentStruct,
                                 keepInMemory: Bool = true,
                                 decodeChildren: Bool = true) throws -> BeamNote {
+        if documentStruct.databaseId != Database.defaultDatabase().id {
+            let alert = NSAlert()
+            alert.informativeText = "We just tried loading a note from a database that is NOT the default database!"
+            alert.addButton(withTitle: "Ok")
+
+            // Display the NSAlert
+            alert.runModal()
+        }
+
         let decoder = JSONDecoder()
         if decodeChildren == false {
             decoder.userInfo[BeamElement.recursiveCoding] = false
