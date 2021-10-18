@@ -335,7 +335,7 @@ struct AdvancedPreferencesView: View {
             }.onAppear {
                 observeDefaultDatabase()
             }
-        }.frame(minHeight: 500)
+        }.frame(maxHeight: 500)
     }
 
     @State private var showNewDatabase = false

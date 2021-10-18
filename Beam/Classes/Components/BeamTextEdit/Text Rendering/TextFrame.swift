@@ -87,6 +87,7 @@ public class TextFrame {
         })
 
         var sourceOffset = 0
+        var caretOffset = 0
 
         // swiftlint:disable:next force_cast
         let ctLines = (CTFrameGetLines(ctFrame) as! [CTLine])
@@ -105,10 +106,11 @@ public class TextFrame {
         }
 
         let lineCount = ctLines.count
+
         lines = ctLines.map {
             let cfRange = CTLineGetStringRange($0)
             let range = NSRange(location: cfRange.location, length: cfRange.length)
-            let line = TextLine(indexInFrame: index, ctLine: $0, attributedString: attributedString, sourceOffset: sourceOffset, notInSourcePositions: notInSourcePositions)
+            let line = TextLine(indexInFrame: index, ctLine: $0, attributedString: attributedString, sourceOffset: sourceOffset, caretOffset: caretOffset, notInSourcePositions: notInSourcePositions)
 
             let textPos = lineOrigins[index]
             let x = textPos.x
@@ -121,7 +123,9 @@ public class TextFrame {
             //if debug {
             //Logger.shared.logDebug("     line[\(i)] frame \(line.frame) (textPos \(textPos)")
             //}
+
             sourceOffset = line.carets.last?.positionInSource ?? sourceOffset
+            caretOffset += line.carets.count
             let lowerBound = line.carets.first?.positionInSource ?? 0
             if let paragraphStyle = attributedString.attribute(.paragraphStyle, at: lowerBound, longestEffectiveRange: nil, in: range) as? NSParagraphStyle {
                 line.interlineFactor = lineCount == 1 ? (singleLineHeightFactor ?? paragraphStyle.lineHeightMultiple) : paragraphStyle.lineHeightMultiple
@@ -151,21 +155,31 @@ public class TextFrame {
     }
 
     lazy public var carets: [Caret] = {
-        var carets = [Caret]()
-        for line in lines {
-            line.caretOffset = carets.count
-            carets.append(contentsOf: line.carets)
-        }
-        return carets
+        lines.flatMap { $0.carets }
     }()
+
+    public var caretsCount: Int { carets.count }
+    public func caretAt(_ index: Int) -> Caret {
+        guard let lineIndex = lines.binarySearch(predicate: { line -> Bool in
+            index > line.caretOffset + line.carets.count - 1
+        }) else {
+            Logger.shared.logError("out of bounds looking for caret \(index) out of \(caretsCount)", category: .noteEditor)
+            // Return a fake caret to prevent a crash:
+            return Caret(offset: .zero, indexInSource: 0, indexOnScreen: 0, edge: .leading, inSource: true, line: 0)
+        }
+
+        let line = lines[lineIndex]
+        let actualIndex = index - line.caretOffset
+        return line.carets[actualIndex]
+    }
 
     public func caretForSourcePosition(_ index: Int) -> Caret? {
         guard let caretIndex = caretIndexForSourcePosition(index) else { return nil }
-        return carets[caretIndex]
+        return caretAt(caretIndex)
     }
 
     public func caretIndexForSourcePosition(_ index: Int) -> Int? {
-        guard carets.last?.positionInSource != index else { return carets.count - 1 }
+        guard carets.last?.positionInSource != index else { return max(0, caretsCount - 1) }
         guard let firstCaret = carets.binarySearch(predicate: { $0.positionInSource < index }) else { return nil }
         for i in firstCaret..<carets.count {
             let caret = carets[i]

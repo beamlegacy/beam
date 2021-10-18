@@ -19,10 +19,11 @@ public struct ImageRunStruct {
 
 public class TextLine {
 
-    public init(indexInFrame: Int, ctLine: CTLine, attributedString: NSAttributedString, sourceOffset: Int, notInSourcePositions: [Int]) {
+    public init(indexInFrame: Int, ctLine: CTLine, attributedString: NSAttributedString, sourceOffset: Int, caretOffset: Int, notInSourcePositions: [Int]) {
         self.indexInFrame = indexInFrame
         self.ctLine = ctLine
         self.sourceOffset = sourceOffset
+        self.caretOffset = caretOffset
         self.notInSourcePositions = notInSourcePositions
     }
 
@@ -116,15 +117,16 @@ public class TextLine {
         return carets[position].offset.x
     }
 
-    public var caretOffset = 0
+    var caretOffset: Int
     lazy public var carets: [Caret] = {
         var c = [Caret]()
-        c.reserveCapacity(CTLineGetGlyphCount(ctLine))
+        c.reserveCapacity(CTLineGetGlyphCount(ctLine) * 3)
         let y = frame.minY
 
         var currentNotInSource = 0
         let end = notInSourcePositions.count
         var value = notInSourcePositions.first
+        var count = sourceOffset
         CTLineEnumerateCaretOffsets(ctLine) { [self] (offset, index, leading, _) in
             while currentNotInSource < end, let val = value, val < index {
                 currentNotInSource += 1
@@ -134,20 +136,30 @@ public class TextLine {
             }
             let notInSource = value == index
             let inSource = !notInSource
-            let caret = Caret(offset: CGPoint(x: self.frame.origin.x + CGFloat(offset), y: y), indexInSource: -1, indexOnScreen: index, edge: leading ? .leading : .trailing, inSource: inSource, line: self.indexInFrame)
-            var insertionIndex = c.count - 1
-            while insertionIndex > 0 && c[insertionIndex] > caret {
-                insertionIndex -= 1
+            let caret = Caret(offset: CGPoint(x: self.frame.origin.x + CGFloat(offset), y: y), indexInSource: count, indexOnScreen: index, edge: leading ? .leading : .trailing, inSource: inSource, line: self.indexInFrame)
+            c.append(caret)
+            count += (!caret.inSource || caret.edge.isLeading) ? 0 : 1
+        }
+
+        for i in 0..<c.count / 2 {
+            var lead = c[i * 2]
+            var trail = c[i * 2 + 1]
+            // L2R or R2L?
+            if lead.edge.isTrailing && trail.edge.isLeading {
+                // R2L!
+                lead.direction = .rightToLeft
+                lead.edge = .leading
+                trail.edge = .trailing
+                trail.direction = .rightToLeft
+                c[i * 2] = lead
+                c[i * 2 + 1] = trail
             }
-            c.insert(caret, at: insertionIndex + 1)
         }
 
-        var count = sourceOffset
-        for i in 0 ..< c.count {
-            c[i].indexInSource = count
-            count += (!c[i].inSource || c[i].edge.isLeading) ? 0 : 1
+        if !c.isEmpty {
+            c[0].positionInLine = .start
+            c[c.count - 1].positionInLine = .end
         }
-
         return c
     }()
 
