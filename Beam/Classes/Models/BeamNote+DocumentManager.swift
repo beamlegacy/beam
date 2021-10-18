@@ -66,7 +66,8 @@ extension BeamNote: BeamNoteDocument {
                  When receiving updates for a new document, we don't check the version
                  */
                 if self.version >= doc.version, self.id == doc.id {
-                    //Logger.shared.logDebug("BeamNote \(self.titleAndId) observer skipped \(doc.titleAndId) (must be greater than current \(self.version))")
+                    Logger.shared.logDebug("\(self.titleAndId) observer skipped \(doc.version) (must be > \(self.version))",
+                                           category: .documentNotification)
                     return
                 }
 
@@ -74,6 +75,9 @@ extension BeamNote: BeamNoteDocument {
                 defer {
                     changePropagationEnabled = true
                 }
+
+                Logger.shared.logDebug("onDocumentChange received for \(doc.titleAndId)",
+                                       category: .documentNotification)
 
                 updateWithDocumentStruct(doc)
             }

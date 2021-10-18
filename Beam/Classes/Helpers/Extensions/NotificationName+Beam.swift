@@ -8,4 +8,5 @@ extension Notification.Name {
     static let apiDocumentConflict = Notification.Name("apiDocumentConflict")
     static let defaultDatabaseUpdate = Notification.Name("defaultDatabaseUpdate")
     static let documentUpdate = Notification.Name("documentUpdate")
+    static let loggerInsert = Notification.Name("loggerInsert")
 }
