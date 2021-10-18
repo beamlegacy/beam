@@ -239,6 +239,7 @@ extension BeamColor.Generic {
 
 extension BeamColor {
     enum CalendarPicker {
+        // default theme
         static let selectedDayBackground = BeamColor.combining(lightColor: .Bluetiful, lightAlpha: 0.08,
                                                                darkColor: .Bluetiful, darkAlpha: 0.14)
         static let selectedDayHoverBackground = BeamColor.combining(lightColor: .Bluetiful, lightAlpha: 0.14,
@@ -247,5 +248,13 @@ extension BeamColor {
                                                                       darkColor: .Bluetiful, darkAlpha: 0.4)
         static let dayHoverBackground = BeamColor.combining(lightColor: .Mercury, darkColor: .AlphaGray)
         static let dayClickedBackground = BeamColor.combining(lightColor: .AlphaGray, darkColor: .LightStoneGray)
+
+        // beam theme
+        static let beamSelectedDayBackground = BeamColor.combining(lightColor: .Beam, lightAlpha: 0.08,
+                                                                   darkColor: .Beam, darkAlpha: 0.14)
+        static let beamSelectedDayHoverBackground = BeamColor.combining(lightColor: .Beam, lightAlpha: 0.14,
+                                                                        darkColor: .Beam, darkAlpha: 0.24)
+        static let beamSelectedDayClickedBackground = BeamColor.combining(lightColor: .Beam, lightAlpha: 0.2,
+                                                                          darkColor: .Beam, darkAlpha: 0.4)
     }
 }
