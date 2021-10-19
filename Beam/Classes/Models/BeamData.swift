@@ -99,7 +99,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     override init() {
         documentManager = DocumentManager()
         clusteringOrphanedUrlManager = ClusteringOrphanedUrlManager(savePath: Self.orphanedUrlsPath)
-        clusteringManager = ClusteringManager(ranker: sessionLinkRanker, documentManager: documentManager, candidate: 2, navigation: 0.5, text: 0.8, entities: 0.5, sessionId: sessionId, activeSources: activeSources)
+        clusteringManager = ClusteringManager(ranker: sessionLinkRanker, documentManager: documentManager, candidate: 2, navigation: 0.5, text: 0.9, entities: 0.4, sessionId: sessionId, activeSources: activeSources)
         noteAutoSaveService = NoteAutoSaveService()
         linkManager = LinkManager()
         let linkCount = LinkStore.shared.loadFromDB(linkManager: linkManager)
