@@ -8,6 +8,7 @@
 if (!window.beam) {
   window.beam = {};
 }
+
 window.beam.__ID__SearchWebPage = {
 
     lastEscapedQuery: "",
@@ -23,35 +24,67 @@ window.beam.__ID__SearchWebPage = {
     constants: {
       MAXIMUM_HIGHLIGHT_COUNT: 999,
       SCROLL_OFFSET_Y: 40,
-      SCROLL_DURATION: 100,
 
       HIGHLIGHT_CLASS_NAME: "__ID__find-highlight",
       HIGHLIGHT_CLASS_NAME_ACTIVE: "__ID__find-highlight-active",
+      RESULT_CLASS_NAME: "__ID__find-result",
 
       HIGHLIGHT_COLOR: "rgba(255, 214, 0, 0.6)",
       HIGHLIGHT_COLOR_ACTIVE: "rgba(255, 153, 0, 0.8)",
+      BUMP_ANIMATION_NAME: "__ID__bump",
     },
 
     buildCSS: function () {
-      return `.${this.constants.HIGHLIGHT_CLASS_NAME} {
-        color: #000;
-        background-color: ${this.constants.HIGHLIGHT_COLOR};
-        border-radius: 1px;
-        box-shadow: 0 0 0 2px ${this.constants.HIGHLIGHT_COLOR};
-        transition: all ${this.constants.SCROLL_DURATION}ms ease ${this.constants.SCROLL_DURATION}ms;
-      }
-      .${this.constants.HIGHLIGHT_CLASS_NAME}.${this.constants.HIGHLIGHT_CLASS_NAME_ACTIVE} {
-        background-color: ${this.constants.HIGHLIGHT_COLOR_ACTIVE};
-        box-shadow: 0 0 0 2px ${this.constants.HIGHLIGHT_COLOR_ACTIVE};
-      }`;
+      return `
+        @keyframes ${this.constants.BUMP_ANIMATION_NAME} {
+          0% {
+            transform: scale(1);
+          }
+
+          100% {
+            transform: scale(1.3);
+          }
+        }
+
+        .${this.constants.HIGHLIGHT_CLASS_NAME} {
+          color: #000 !important;
+          display: inline-block;
+          position: relative;
+        }
+
+        .${this.constants.HIGHLIGHT_CLASS_NAME} > span {
+          background-color: transparent !important;
+          position: relative;
+        }
+
+        .${this.constants.HIGHLIGHT_CLASS_NAME}::before {
+          background-color: ${this.constants.HIGHLIGHT_COLOR};
+          border-radius: 3px;
+          bottom: 0;
+          content: "";
+          left: -2px;
+          position: absolute;
+          right: -2px;
+          top: 0;
+          transform-origin: center center;
+          transition: all 0.2s ease;
+        }
+
+        .${this.constants.HIGHLIGHT_CLASS_NAME}.${this.constants.HIGHLIGHT_CLASS_NAME_ACTIVE}::before {
+          animation:
+            ${this.constants.BUMP_ANIMATION_NAME} 200ms cubic-bezier(0.42, 0, 1, 1) both,
+            ${this.constants.BUMP_ANIMATION_NAME} 70ms cubic-bezier(0, 0, 0.58, 1) 200ms forwards reverse
+          ;
+          background-color: ${this.constants.HIGHLIGHT_COLOR_ACTIVE};
+        }`;
     },
 
     setupElements: function () {
-      this.highlightSpan = document.createElement("span");
-      this.highlightSpan.className = this.constants.HIGHLIGHT_CLASS_NAME;
-
       this.styleElement = document.createElement("style");
       this.styleElement.innerHTML = this.buildCSS();
+
+      this.highlightSpan = document.createElement("span");
+      this.highlightSpan.className = this.constants.HIGHLIGHT_CLASS_NAME;
     },
 
     find: function (query) {
@@ -159,7 +192,7 @@ window.beam.__ID__SearchWebPage = {
 
       let lastActiveHighlight = document.querySelector("." + this.constants.HIGHLIGHT_CLASS_NAME_ACTIVE);
       if (lastActiveHighlight) {
-        lastActiveHighlight.className = this.constants.HIGHLIGHT_CLASS_NAME;
+        lastActiveHighlight.classList.remove(this.constants.HIGHLIGHT_CLASS_NAME_ACTIVE);
       }
 
       if (!this.lastHighlights) {
@@ -168,10 +201,10 @@ window.beam.__ID__SearchWebPage = {
 
       let activeHighlight = this.lastHighlights[this.activeHighlightIndex];
       if (activeHighlight) {
-        activeHighlight.className = this.constants.HIGHLIGHT_CLASS_NAME + " " + this.constants.HIGHLIGHT_CLASS_NAME_ACTIVE;
-        this.scrollToElement(activeHighlight, this.constants.SCROLL_DURATION);
-
+        this.jumpToElement(activeHighlight);
         let selected = activeHighlight.getBoundingClientRect().top + window.scrollY;
+
+        activeHighlight.classList.add(this.constants.HIGHLIGHT_CLASS_NAME, this.constants.HIGHLIGHT_CLASS_NAME_ACTIVE);
 
         window.webkit.messageHandlers.webPageSearch.postMessage({ currentResult: this.activeHighlightIndex + 1, currentSelected: selected, height: this.height });
       } else {
@@ -181,11 +214,12 @@ window.beam.__ID__SearchWebPage = {
 
     removeHighlight: function (highlight) {
       let parent = highlight.parentNode;
-      if (parent) {
-        while (highlight.firstChild) {
-          parent.insertBefore(highlight.firstChild, highlight);
-        }
 
+      if (parent) {
+          //We are doubling firstChild because we wrap in two spans
+        while (highlight.firstChild.firstChild) {
+          parent.insertBefore(highlight.firstChild.firstChild, highlight);
+        }
         highlight.remove();
         parent.normalize();
       }
@@ -258,10 +292,12 @@ window.beam.__ID__SearchWebPage = {
           }
 
           // Add element for this match.
-          let element = this.highlightSpan.cloneNode(false);
+          let wrapper = this.highlightSpan.cloneNode(false);
+          let element = document.createElement("span");
+          wrapper.appendChild(element)
           element.textContent = matchTextContent;
-          replacementFragment.appendChild(element);
-          highlights.push(element);
+          replacementFragment.appendChild(wrapper);
+          highlights.push(wrapper);
 
           lastIndex = regExp.lastIndex;
           hasReplacement = true;
@@ -295,41 +331,14 @@ window.beam.__ID__SearchWebPage = {
         callback(replacements, highlights, isMaximumHighlightCount);
       };
       return operation;
-    },    
+    },
 
-    scrollToElement: function (element, duration) {
+    jumpToElement: function (element) {
       let rect = element.getBoundingClientRect();
-
       let targetX = this.clamp(rect.left + window.scrollX - window.innerWidth / 2, 0, document.body.scrollWidth);
       let targetY = this.clamp(this.constants.SCROLL_OFFSET_Y + rect.top + window.scrollY - window.innerHeight / 2 + 100, 0, this.height);
 
-      let startX = window.scrollX;
-      let startY = window.scrollY;
-
-      let deltaX = targetX - startX;
-      let deltaY = targetY - startY;
-
-      let startTimestamp;
-
-      function step(timestamp) {
-        if (!startTimestamp) {
-          startTimestamp = timestamp;
-        }
-
-        let time = timestamp - startTimestamp;
-        let percent = Math.min(time / duration, 1);
-
-        let x = startX + deltaX * percent;
-        let y = startY + deltaY * percent;
-
-        window.scrollTo(x, y);
-
-        if (time < duration) {
-          requestAnimationFrame(step);
-        }
-      }
-
-      requestAnimationFrame(step);
+        window.scrollTo(targetX, targetY);
     },
 
     isTextNodeVisible: function (textNode) {
