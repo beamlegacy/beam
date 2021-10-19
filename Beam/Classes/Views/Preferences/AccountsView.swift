@@ -450,7 +450,7 @@ struct AccountCredentialsView: View {
     @Binding var password: String
     @Binding var loggedIn: Bool
     @Binding var loading: Bool
-    
+
     var body: some View {
         // TODO: loc
         TextField("johnnyappleseed@apple.com", text: $email)
