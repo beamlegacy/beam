@@ -88,6 +88,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         #if DEBUG
         self.beamUIMenuGenerator = BeamUITestsMenuGenerator()
         prepareMenuForTestEnv()
+
+        // In test mode, we want to start fresh without auth tokens as they may have expired
+        if Configuration.env == "test" {
+            AccountManager.logout()
+        }
         #endif
 
         // We sync data *after* we potentially connected to websocket, to make sure we don't miss any data
