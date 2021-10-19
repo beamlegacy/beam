@@ -1,5 +1,5 @@
-import { BeamMutationObserver, BeamMutationRecord, BeamNode } from "../BeamTypes"
-import { WebFactory } from "../WebFactory"
+import {BeamMutationObserver, BeamMutationRecord, BeamNode} from "../../BeamTypes"
+import {WebFactory} from "../../../../../Components/PointAndShoot/Web/WebFactory"
 
 export class BeamMutationObserverMock implements BeamMutationObserver {
   constructor(public fn) {

@@ -1,5 +1,5 @@
-import { WebEventsUI } from "./WebEventsUI"
-import { BeamRangeGroup, BeamShootGroup } from "./BeamTypes"
+import {WebEventsUI} from "./WebEventsUI"
+import {BeamRangeGroup, BeamShootGroup} from "../../../Helpers/Utils/Web/BeamTypes"
 
 export interface PointAndShootUI extends WebEventsUI {
   pointBounds(pointTarget?: BeamShootGroup): void

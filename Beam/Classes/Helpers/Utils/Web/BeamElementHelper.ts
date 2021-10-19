@@ -1,7 +1,8 @@
 import {
   BeamElement,
   BeamHTMLElement,
-  BeamHTMLInputElement, BeamHTMLTextAreaElement,
+  BeamHTMLInputElement,
+  BeamHTMLTextAreaElement,
   BeamRect,
   BeamWindow
 } from "./BeamTypes"
@@ -84,7 +85,7 @@ export class BeamElementHelper {
     }
   }
 
-  static parseElementBasedOnStyles(element: BeamElement, win: BeamWindow): BeamHTMLElement {
+  static parseElementBasedOnStyles(element: BeamElement, win: BeamWindow<any>): BeamHTMLElement {
     const imgUrl = this.getBackgroundImageURL(element, win)
     if (imgUrl) {
       const img = win.document.createElement("img")
@@ -103,7 +104,7 @@ export class BeamElementHelper {
    * @param win: {BeamWindow}
    * @return If the element is considered visible
    */
-  static isVisible(element: BeamElement, win: BeamWindow): boolean {
+  static isVisible(element: BeamElement, win: BeamWindow<any>): boolean {
     let visible = false
 
     if (element) {
@@ -309,7 +310,7 @@ export class BeamElementHelper {
    * @param element
    * @param win
    */
-  static getClippingElements(element: BeamElement, win: BeamWindow): BeamElement[] {
+  static getClippingElements(element: BeamElement, win: BeamWindow<any>): BeamElement[] {
     const clippingElement = BeamElementHelper.getClippingElement(element, win)
     if (!clippingElement) {
       return []
@@ -330,7 +331,7 @@ export class BeamElementHelper {
    * @param elements
    * @param win
    */
-  static getClippingArea(elements: BeamElement[], win: BeamWindow): BeamRect {
+  static getClippingArea(elements: BeamElement[], win: BeamWindow<any>): BeamRect {
     const areas: BeamRect[] = elements.map(el => {
       const style = win.getComputedStyle?.(el)
       if (style) {

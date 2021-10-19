@@ -2,7 +2,7 @@
  * Types used by Beam API (to exchange messages, typically).
  */
 
-import { BeamHTMLCollection } from "./Test/BeamMocks"
+import {BeamHTMLCollection} from "./Test/Mock/BeamHTMLCollection"
 
 export class BeamSize {
   constructor(public width: number, public height: number) {}
@@ -80,23 +80,25 @@ export class NoteInfo {
 export type MessagePayload = Record<string, unknown>
 
 export interface BeamMessageHandler {
-  postMessage(message: MessagePayload, targetOrigin: string, transfer?: Transferable[]): void
+  postMessage(message: MessagePayload, targetOrigin?: string, transfer?: Transferable[]): void
 }
 
-export interface BeamWebkit {
+export type MessageHandlers = {
+  [name: string]: BeamMessageHandler
+}
+
+export interface BeamWebkit<M = MessageHandlers> {
   /**
    *
    */
-  messageHandlers: {
-    [name: string]: BeamMessageHandler
-  }
+  messageHandlers: M
 }
 
 export interface BeamCrypto {
   getRandomValues: any
 }
 
-export interface BeamWindow extends BeamEventTarget {
+export interface BeamWindow<M = MessageHandlers> extends BeamEventTarget {
   crypto: BeamCrypto
   frameElement: any
   frames: BeamWindow[]
@@ -137,14 +139,13 @@ export interface BeamWindow extends BeamEventTarget {
 
   location: BeamLocation
 
-  /**
-   * @type BeamWebkit
-   */
-  webkit
+  webkit: BeamWebkit<M>
 
   scroll(xCoord: number, yCoord: number): void
 
   getComputedStyle(el: BeamElement, pseudo?: string): CSSStyleDeclaration
+
+  open(url?: string, name?: string, specs?: string, replace?: boolean): BeamWindow<M> | null
 }
 
 export type BeamLocation = Location

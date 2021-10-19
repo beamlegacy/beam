@@ -1,4 +1,4 @@
-import { BeamMutationObserver } from "./BeamTypes"
+import {BeamMutationObserver} from "../../../Helpers/Utils/Web/BeamTypes"
 
 export class WebFactory  {
   MutationObserver: BeamMutationObserver

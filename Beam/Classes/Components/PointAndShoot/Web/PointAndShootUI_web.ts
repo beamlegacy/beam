@@ -1,7 +1,6 @@
-import { BeamRangeGroup, BeamShootGroup} from "./BeamTypes"
+import {BeamHTMLElement, BeamRangeGroup, BeamShootGroup} from "../../../Helpers/Utils/Web/BeamTypes"
 import {PointAndShootUI} from "./PointAndShootUI"
 import {WebEventsUI_web} from "./WebEventsUI_web"
-import {BeamHTMLElement} from "./BeamTypes"
 
 export class PointAndShootUI_web extends WebEventsUI_web implements PointAndShootUI {
 

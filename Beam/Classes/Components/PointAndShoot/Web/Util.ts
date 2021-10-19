@@ -1,4 +1,4 @@
-import { BeamElement, BeamWindow, BeamCoordinates } from "./BeamTypes"
+import {BeamCoordinates, BeamElement, BeamWindow} from "../../../Helpers/Utils/Web/BeamTypes"
 
 export class Util {
 
@@ -107,7 +107,7 @@ export class Util {
    * @return {*}  {string}
    * @memberof Util
    */
-  static uuid(win: BeamWindow): string {
+  static uuid(win: BeamWindow<any>): string {
     const buf = new Uint32Array(4)
     return win.crypto.getRandomValues(buf).join("-")
   }

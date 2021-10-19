@@ -1,8 +1,8 @@
-import { BeamRangeGroup, BeamShootGroup } from "./BeamTypes"
-import { PointAndShootUI } from "./PointAndShootUI"
-import { PointAndShootUI_native } from "./PointAndShootUI_native"
-import { PointAndShootUI_web } from "./PointAndShootUI_web"
-import { FrameInfo } from "./WebEventsUI"
+import {BeamRangeGroup, BeamShootGroup} from "../../../Helpers/Utils/Web/BeamTypes"
+import {PointAndShootUI} from "./PointAndShootUI"
+import {PointAndShootUI_native} from "./PointAndShootUI_native"
+import {PointAndShootUI_web} from "./PointAndShootUI_web"
+import {FrameInfo} from "./WebEventsUI"
 
 export class PointAndShootUI_debug implements PointAndShootUI {
   /**

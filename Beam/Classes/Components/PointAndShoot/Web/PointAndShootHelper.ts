@@ -1,12 +1,6 @@
-import {
-  BeamElement,
-  BeamNode,
-  BeamNodeType,
-  BeamText,
-  BeamWindow
-} from "./BeamTypes"
-import {BeamElementHelper} from "./BeamElementHelper"
-import { Util } from "./Util"
+import {BeamElement, BeamNode, BeamNodeType, BeamText, BeamWindow} from "../../../Helpers/Utils/Web/BeamTypes"
+import {BeamElementHelper} from "../../../Helpers/Utils/Web/BeamElementHelper"
+import {Util} from "./Util"
 
 export class PointAndShootHelper {
   /**

@@ -1,4 +1,4 @@
-import {BeamEvent, BeamEventTarget} from "../BeamTypes"
+import {BeamEvent, BeamEventTarget} from "../../BeamTypes"
 
 export class BeamEventTargetMock implements BeamEventTarget {
   readonly eventListeners = {}

@@ -1,8 +1,11 @@
 import {PointAndShoot} from "../PointAndShoot"
-import {BeamDocumentMock, BeamHTMLIFrameElementMock, BeamMouseEvent, BeamNamedNodeMap} from "./BeamMocks"
-import {BeamWindowMock} from "./BeamWindowMock"
 import {PointAndShootUIMock} from "./PointAndShootUIMock"
-import {BeamWebFactoryMock} from "./BeamWebFactoryMock"
+import {BeamWebFactoryMock} from "../../../../Helpers/Utils/Web/Test/Mock/BeamWebFactoryMock"
+import {BeamMouseEvent} from "../../../../Helpers/Utils/Web/BeamMouseEvent"
+import {BeamDocumentMock} from "../../../../Helpers/Utils/Web/Test/Mock/BeamDocumentMock"
+import {BeamNamedNodeMap} from "../../../../Helpers/Utils/Web/BeamNamedNodeMap"
+import {PNSWindowMock} from "./PointAndShoot.test"
+import {PNSBeamHTMLIFrameElementMock} from "./PNSBeamHTMLIFrameElementMock"
 
 /**
  * @param frameEls {BeamHTMLElement[]}
@@ -32,7 +35,7 @@ function pointAndShootTestBed(frameEls = []): {pns: PointAndShoot, testUI: Point
       }
     }
   })
-  const win = new BeamWindowMock(testDocument)
+  const win = new PNSWindowMock(testDocument)
   win.scrollX = 0
   win.scrollY = 0
   PointAndShoot.instance = null  // Allow test suite to instantiate multiple PointAndShoots
@@ -57,7 +60,7 @@ function pointAndShootTestBed(frameEls = []): {pns: PointAndShoot, testUI: Point
 }
 
 test("single iframe point", () => {
-  const iframe1El = new BeamHTMLIFrameElementMock(new BeamNamedNodeMap({
+  const iframe1El = new PNSBeamHTMLIFrameElementMock(new PNSWindowMock(), new BeamNamedNodeMap({
     src: "https://iframe1.com",
     width: 800,
     height: 600,

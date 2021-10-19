@@ -1,4 +1,4 @@
-import { BeamRect } from "./BeamTypes"
+import {BeamRect} from "../../../Helpers/Utils/Web/BeamTypes"
 
 export class FrameInfo {
   /**
