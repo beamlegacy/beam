@@ -1,7 +1,7 @@
 import {PointAndShoot} from "./PointAndShoot"
-import {Native} from "./Native"
+import {Native} from "../../../Helpers/Utils/Web/Native"
 import {PointAndShootUI_debug} from "./PointAndShootUI_debug"
-import { WebFactory } from "./WebFactory"
+import {WebFactory} from "./WebFactory"
 
 const win = window
 const native = Native.getInstance(win)

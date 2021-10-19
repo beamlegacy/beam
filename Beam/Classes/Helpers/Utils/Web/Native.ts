@@ -1,23 +1,21 @@
-import {BeamMessageHandler, BeamWindow, MessagePayload} from "./BeamTypes"
+import {BeamWindow, MessagePayload} from "./BeamTypes"
 
-export class Native {
+export class Native<M> {
   /**
    * Singleton
    */
-  static instance: Native
+  static instance: Native<any>
 
   readonly href: string
 
-  protected readonly messageHandlers: {
-    [name: string]: BeamMessageHandler
-  }
+  protected readonly messageHandlers: M
 
   /**
    * @param win {BeamWindow}
    */
-  static getInstance(win: BeamWindow): Native {
+  static getInstance<M>(win: BeamWindow<M>): Native<M> {
     if (!Native.instance) {
-      Native.instance = new Native(win)
+      Native.instance = new Native<M>(win)
     }
     return Native.instance
   }
@@ -29,10 +27,10 @@ export class Native {
   /**
    * @param win {BeamWindow}
    */
-  constructor(readonly win: BeamWindow) {
+  constructor(readonly win: BeamWindow<M>) {
     this.href = win.location.href
     console.log("href", this.href)
-    this.messageHandlers = win.webkit && win.webkit.messageHandlers
+    this.messageHandlers = win.webkit && win.webkit.messageHandlers as M
     if (!this.messageHandlers) {
       throw Error("Could not find webkit message handlers")
     }

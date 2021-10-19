@@ -11,7 +11,7 @@ enum NavigationMessages: String, CaseIterable {
 class WebNavigationMessageHandler: BeamMessageHandler<NavigationMessages> {
 
     init(config: BeamWebViewConfiguration) {
-        super.init(config: config, messages: NavigationMessages.self, jsFileName: "Navigation")
+        super.init(config: config, messages: NavigationMessages.self, jsFileName: "navigation_prod")
     }
 
     override func onMessage(messageName: String, messageBody: Any?, from webPage: WebPage) {

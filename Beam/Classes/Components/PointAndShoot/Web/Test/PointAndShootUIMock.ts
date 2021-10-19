@@ -1,6 +1,6 @@
-import { PointAndShootUI } from "../PointAndShootUI"
-import { WebEventsUIMock } from "./WebEventsUIMock"
-import { BeamRangeGroup, BeamShootGroup } from "../BeamTypes"
+import {PointAndShootUI} from "../PointAndShootUI"
+import {WebEventsUIMock} from "./WebEventsUIMock"
+import {BeamRangeGroup, BeamShootGroup} from "../../../../Helpers/Utils/Web/BeamTypes"
 
 export class PointAndShootUIMock extends WebEventsUIMock implements PointAndShootUI {
   isTypingOnWebView(isTypingOnWebView: boolean): void {

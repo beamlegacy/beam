@@ -1,9 +1,13 @@
-import { BeamDocumentMock, BeamHTMLElementMock, BeamRangeMock, BeamTextMock } from "./BeamMocks"
-import { BeamWindowMock } from "./BeamWindowMock"
-import { PointAndShootUI_native } from "../PointAndShootUI_native"
-import { NativeMock } from "./NativeMock"
-import { BeamRange } from "../BeamTypes"
-import { measure } from "jest-measure"
+import {PointAndShootUI_native} from "../PointAndShootUI_native"
+import {NativeMock} from "../../../../Helpers/Utils/Web/Test/Mock/NativeMock"
+import {BeamRange} from "../../../../Helpers/Utils/Web/BeamTypes"
+import {measure} from "jest-measure"
+import {PNSWindowMock} from "./PointAndShoot.test"
+import {BeamDocumentMock} from "../../../../Helpers/Utils/Web/Test/Mock/BeamDocumentMock"
+import {BeamTextMock} from "../../../../Helpers/Utils/Web/Test/Mock/BeamTextMock"
+import {BeamHTMLElementMock} from "../../../../Helpers/Utils/Web/Test/Mock/BeamHTMLElementMock"
+import {BeamRangeMock} from "../../../../Helpers/Utils/Web/Test/Mock/BeamRangeMock"
+import {PointAndShootMessages} from "../PointAndShoot"
 
 describe.skip("elementBounds", () => {
 
@@ -150,8 +154,8 @@ function pointAndShootTestBed(frameEls = []) {
       }
     }
   })
-  const win = new BeamWindowMock(testDocument)
-  const native = new NativeMock(win)
+  const win = new PNSWindowMock(testDocument)
+  const native = new NativeMock<PointAndShootMessages>(win)
   const pnsNativeUI = new PointAndShootUI_native(native)
 
   return { pnsNativeUI, native }

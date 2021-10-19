@@ -1,15 +1,16 @@
 import {
-    BeamCrypto,
+  BeamCrypto,
   BeamDocument,
   BeamHTMLElement,
   BeamLocation,
   BeamMessageHandler,
   BeamVisualViewport,
+  BeamWebkit,
   BeamWindow
-} from "../BeamTypes"
-import {BeamDocumentMock, BeamLocationMock} from "./BeamMocks"
-import {PointAndShoot} from "../PointAndShoot"
+} from "../../BeamTypes"
 import {BeamEventTargetMock} from "./BeamEventTargetMock"
+import {BeamLocationMock} from "./BeamLocationMock"
+import {BeamDocumentMock} from "./BeamDocumentMock"
 
 export class MessageHandlerMock implements BeamMessageHandler {
   events = []
@@ -38,15 +39,15 @@ export class BeamCryptoMock implements BeamCrypto {
     }
 }
 
-export class BeamWindowMock extends BeamEventTargetMock implements BeamWindow {
+export abstract class BeamWindowMock<M> extends BeamEventTargetMock implements BeamWindow<M> {
+
   visualViewport = new BeamVisualViewportMock()
 
   readonly document: BeamDocument
-  pns: PointAndShoot
 
-  constructor(document: BeamDocument = new BeamDocumentMock(), location: BeamLocation = new BeamLocationMock()) {
+  protected constructor(doc: BeamDocument = new BeamDocumentMock(), location: BeamLocation = new BeamLocationMock()) {
     super()
-    this.document = document
+    this.document = doc
     this.location = location
     this.visualViewport.scale = 1
   }
@@ -59,13 +60,11 @@ export class BeamWindowMock extends BeamEventTargetMock implements BeamWindow {
     this.scrollY = yCoord
   }
 
-  webkit = {
-    messageHandlers: {
-      pointAndShoot_frameBounds: new MessageHandlerMock()
-    }
-  }
+  webkit: BeamWebkit<M>
 
-  getEventListeners(_win: BeamWindow) {
+  abstract create(doc: BeamDocument, location: BeamLocation): BeamWindowMock<M>
+
+  getEventListeners(_win: BeamWindow<any>) {
     return this.eventListeners
   }
 
@@ -74,6 +73,11 @@ export class BeamWindowMock extends BeamEventTargetMock implements BeamWindow {
       throw new Error("getComputedStyle not implemented for pseudo elements")
     }
     return el.style
+  }
+
+  open(url?: string, name?: string, specs?: string, replace?: boolean): BeamWindow<M> | null {
+    console.log(`opening ${url}`)
+    return this.create(new BeamDocumentMock(), new BeamLocationMock({href: url}))
   }
 
   innerHeight

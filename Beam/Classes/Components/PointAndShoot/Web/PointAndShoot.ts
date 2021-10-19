@@ -1,18 +1,26 @@
-import { WebEvents } from "./WebEvents"
-import { PointAndShootUI } from "./PointAndShootUI"
+import {WebEvents} from "./WebEvents"
+import {PointAndShootUI} from "./PointAndShootUI"
 import {
-  BeamWindow,
-  BeamSelection,
-  BeamRange,
-  BeamHTMLElement,
   BeamElement,
+  BeamHTMLElement,
+  BeamMessageHandler,
+  BeamRange,
   BeamRangeGroup,
-  BeamShootGroup
-} from "./BeamTypes"
-import { Util } from "./Util"
-import { WebFactory } from "./WebFactory"
-import { BeamMouseEvent, BeamUIEvent } from "./Test/BeamMocks"
-import { BeamElementHelper } from "./BeamElementHelper"
+  BeamSelection,
+  BeamShootGroup,
+  BeamWindow
+} from "../../../Helpers/Utils/Web/BeamTypes"
+import {Util} from "./Util"
+import {WebFactory} from "./WebFactory"
+import {BeamElementHelper} from "../../../Helpers/Utils/Web/BeamElementHelper"
+import {BeamUIEvent} from "../../../Helpers/Utils/Web/BeamUIEvent"
+import {BeamMouseEvent} from "../../../Helpers/Utils/Web/BeamMouseEvent"
+
+export interface PointAndShootMessages {
+  pointAndShoot_frameBounds: BeamMessageHandler
+}
+
+export type PNSWindow = BeamWindow<PointAndShootMessages>
 
 /**
  * Listen to events that hover and select web blocks with Option.
@@ -33,7 +41,7 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    */
   timer
   touchDuration = 2500
-  mouseLocation = { x: 0, y: 0 }
+  mouseLocation = {x: 0, y: 0}
   selectionUUID?: string
   pointTarget: BeamShootGroup
   shootTargets: BeamShootGroup[] = []
@@ -47,7 +55,7 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    * @param webFactory
    * @return {PointAndShoot}
    */
-  static getInstance(win: BeamWindow, ui: PointAndShootUI, webFactory: WebFactory): PointAndShoot {
+  static getInstance(win: PNSWindow, ui: PointAndShootUI, webFactory: WebFactory): PointAndShoot {
     if (!PointAndShoot.instance) {
       PointAndShoot.instance = new PointAndShoot(win, ui, webFactory)
     }
@@ -59,7 +67,7 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    * @param ui {PointAndShootUI}
    * @param webFactory
    */
-  constructor(win: BeamWindow, ui: PointAndShootUI, webFactory: WebFactory) {
+  constructor(win: PNSWindow, ui: PointAndShootUI, webFactory: WebFactory) {
     super(win, ui, webFactory)
     this.datasetKey = `${this.prefix}Collect`
     this.selectionUUID = Util.uuid(win)
@@ -127,7 +135,9 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
   select(): void {
     const selection = this.getSelection()
     // reset the uuid to store a new selection next time
-    if (selection.rangeCount == 0) { return }
+    if (selection.rangeCount == 0) {
+      return
+    }
     if (selection.isCollapsed) {
       // clear selectionTarget when we have a stored value 
       this.ui.clearSelection(this.selectionUUID)
@@ -189,8 +199,8 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    * @param {string} id - id of target to remove
    * @memberof PointAndShoot
    */
-   removeSelectRangeGroup(id: string): void {
-     // Use removeFromArray so it exists after finding a match
+  removeSelectRangeGroup(id: string): void {
+    // Use removeFromArray so it exists after finding a match
     this.selectionRangeGroups = Util.removeFromArray((target) => {
       return target.id === id
     }, this.selectionRangeGroups) as BeamRangeGroup[]
@@ -204,8 +214,8 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
 
   onScroll(ev: BeamUIEvent): void {
     if (this.mouseLocation?.x && !this.isPointDisabled(ev)) {
-        const target = this.win.document.elementFromPoint(this.mouseLocation.x, this.mouseLocation.y)
-        this.point(target)
+      const target = this.win.document.elementFromPoint(this.mouseLocation.x, this.mouseLocation.y)
+      this.point(target)
     } else {
       this.sendBounds()
     }
@@ -225,7 +235,7 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
     this.mouseLocation.y = ev.clientY
   }
 
-  onClick(ev: BeamUIEvent): void {    
+  onClick(ev: BeamUIEvent): void {
     if (this.isOnlyAltKey(ev)) {
       ev.preventDefault()
       ev.stopPropagation()
@@ -280,20 +290,21 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
   onResize(): void {
     this.sendBounds()
   }
+
   /**
    * ======================================================================
    * Helpers ==============================================================
    * ======================================================================
    */
-   
-   isOnlyAltKey(ev): boolean {
-     const altKey = ev.altKey || ev.key == "Alt"
-     return altKey && !ev.ctrlKey && !ev.metaKey && !ev.shiftKey
-   }
- 
+
+  isOnlyAltKey(ev): boolean {
+    const altKey = ev.altKey || ev.key == "Alt"
+    return altKey && !ev.ctrlKey && !ev.metaKey && !ev.shiftKey
+  }
+
   upsertShootGroup(newItem: BeamShootGroup, groups: BeamShootGroup[]): void {
     // Update existing rangeGroup
-    const index = groups.findIndex(({ element }) => {
+    const index = groups.findIndex(({element}) => {
       return element == newItem.element
     })
     if (index != -1) {
@@ -305,7 +316,7 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
 
   upsertRangeGroup(newItem: BeamRangeGroup, groups: BeamRangeGroup[]): void {
     // Update existing rangeGroup
-    const index = groups.findIndex(({ id }) => {
+    const index = groups.findIndex(({id}) => {
       return id == newItem.id
     })
     if (index != -1) {
@@ -376,9 +387,9 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
 
   isEventTargetActive(ev: BeamUIEvent): boolean {
     return !!(
-      this.win.document.activeElement &&
-      this.win.document.activeElement !== this.win.document.body &&
-      this.win.document.activeElement.contains(ev.target)
+        this.win.document.activeElement &&
+        this.win.document.activeElement !== this.win.document.body &&
+        this.win.document.activeElement.contains(ev.target)
     )
   }
 

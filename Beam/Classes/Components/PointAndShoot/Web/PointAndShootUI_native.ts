@@ -1,17 +1,26 @@
-import { PointAndShootUI } from "./PointAndShootUI"
-import { Native } from "./Native"
-import { WebEventsUI_native } from "./WebEventsUI_native"
-import { BeamElement, BeamNodeType, BeamRect, BeamRange, BeamRangeGroup, BeamShootGroup, BeamHTMLElement } from "./BeamTypes"
-import { BeamElementHelper } from "./BeamElementHelper"
-import { BeamRectHelper } from "./BeamRectHelper"
-import { PointAndShootHelper } from "./PointAndShootHelper"
-import { dequal as isDeepEqual } from "dequal"
+import {PointAndShootUI} from "./PointAndShootUI"
+import {Native} from "../../../Helpers/Utils/Web/Native"
+import {WebEventsUI_native} from "./WebEventsUI_native"
+import {
+  BeamElement,
+  BeamHTMLElement,
+  BeamNodeType,
+  BeamRange,
+  BeamRangeGroup,
+  BeamRect,
+  BeamShootGroup
+} from "../../../Helpers/Utils/Web/BeamTypes"
+import {BeamElementHelper} from "../../../Helpers/Utils/Web/BeamElementHelper"
+import {BeamRectHelper} from "../../../Helpers/Utils/Web/BeamRectHelper"
+import {PointAndShootHelper} from "./PointAndShootHelper"
+import {dequal as isDeepEqual} from "dequal"
+import {PointAndShootMessages} from "./PointAndShoot"
 
 export class PointAndShootUI_native extends WebEventsUI_native implements PointAndShootUI {
   /**
    * @param native {Native}
    */
-  constructor(native: Native) {
+  constructor(native: Native<PointAndShootMessages>) {
     super(native)
     this.datasetKey = `${this.prefix}Collect`
   }

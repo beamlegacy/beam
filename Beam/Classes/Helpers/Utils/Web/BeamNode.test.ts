@@ -1,4 +1,5 @@
-import {BeamHTMLElementMock, BeamTextMock} from "./BeamMocks"
+import {BeamTextMock} from "./Test/Mock/BeamTextMock"
+import {BeamHTMLElementMock} from "./Test/Mock/BeamHTMLElementMock"
 
 test("empty", () => {
   const p = new BeamHTMLElementMock("p")
