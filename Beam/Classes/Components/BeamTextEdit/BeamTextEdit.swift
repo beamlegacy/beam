@@ -90,6 +90,7 @@ public extension CALayer {
         guard note != rootNode?.element else { return }
 
         clearRoot()
+        scroll(.zero)
         let root = TextRoot(editor: self, element: note, availableWidth: Self.textNodeWidth(for: frame.size))
         rootNode = root
         if let window = window {
@@ -121,7 +122,6 @@ public extension CALayer {
         noteCancellables.removeAll()
         safeContentSize = .zero
         realContentSize = .zero
-        scroll(.zero)
         invalidateIntrinsicContentSize()
     }
 
