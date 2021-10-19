@@ -33,4 +33,4 @@ Depending on the selected build, the generated code will vary in size.
 
 The default build (`yarn run build`) is an alias for `build_debug` for now.
 It is automatically launched as a phase of the XCode build,
-through the execution of the `/scripts/build_js.sh` script.
+through the execution of the `/scripts/build_js_<component name>.sh` script.

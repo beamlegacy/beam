@@ -1,5 +1,5 @@
 import {FrameInfo, WebEventsUI} from "../WebEventsUI"
-import {EventsMock} from "./EventsMock"
+import {EventsMock} from "../../../../Helpers/Utils/Web/Test/Mock/EventsMock"
 
 export class WebEventsUIMock extends EventsMock implements WebEventsUI {
   setFramesInfo(framesInfo: FrameInfo[]) {

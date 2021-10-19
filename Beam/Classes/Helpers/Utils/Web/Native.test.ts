@@ -1,6 +1,19 @@
-import {Native} from "../Native"
-import {BeamDocumentMock, BeamHTMLIFrameElementMock, BeamLocationMock} from "./BeamMocks"
-import {BeamWindowMock} from "./BeamWindowMock"
+import {Native} from "./Native"
+import {BeamWindowMock} from "./Test/Mock/BeamWindowMock"
+import {BeamLocationMock} from "./Test/Mock/BeamLocationMock"
+import {BeamDocumentMock} from "./Test/Mock/BeamDocumentMock"
+import {PNSWindowMock} from "../../../Components/PointAndShoot/Web/Test/PointAndShoot.test"
+import {PNSBeamHTMLIFrameElementMock} from "../../../Components/PointAndShoot/Web/Test/PNSBeamHTMLIFrameElementMock"
+import {BeamDocument, BeamLocation} from "./BeamTypes"
+
+class TestWindowMock extends BeamWindowMock<any> {
+  constructor() {
+    super()
+  }
+  create(doc: BeamDocument, location: BeamLocation): TestWindowMock {
+    return new TestWindowMock();
+  }
+}
 
 /**
  *
@@ -34,13 +47,14 @@ function nativeTestBed(href, frameEls = []) {
       }
     }
   })
-  const windowMock = new BeamWindowMock(testDocument, new BeamLocationMock({href}))
+  const windowMock = new PNSWindowMock(testDocument, new BeamLocationMock({href}))
   windowMock.scroll(0, 0)
   return windowMock
 }
 
 test("send frame href in message", () => {
-  const iframe1 = new BeamHTMLIFrameElementMock()
+  const mainWindow = new TestWindowMock()
+  const iframe1 = new PNSBeamHTMLIFrameElementMock(mainWindow)
   Object.assign(iframe1, {
     src: "https://iframe1.com/about-us.html",
     clientLeft: 101,
