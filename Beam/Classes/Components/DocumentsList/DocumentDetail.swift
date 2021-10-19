@@ -24,7 +24,7 @@ struct DocumentDetail: View {
 
                 HStack {
                     VStack {
-                        if let date = document.journal_day {
+                        if let date = document.journal_day, date != 0 {
                             HStack {
                                 Text("Journal Date:").bold()
                                 Text(JournalDateConverter.toString(from: date))
