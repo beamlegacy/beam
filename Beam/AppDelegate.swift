@@ -288,6 +288,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     var documentsWindow: DocumentsWindow?
+    var filesWindow: FilesWindow?
     var databasesWindow: DatabasesWindow?
     var tabGroupingWindow: TabGroupingWindow?
 
