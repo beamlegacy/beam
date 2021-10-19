@@ -1,5 +1,5 @@
-import { FrameInfo, WebEventsUI } from "./WebEventsUI"
-import { BeamWindow } from "./BeamTypes"
+import {FrameInfo, WebEventsUI} from "./WebEventsUI"
+import {BeamWindow} from "../../../Helpers/Utils/Web/BeamTypes"
 
 export class WebEventsUI_web implements WebEventsUI {
   protected prefix = "__ID__"

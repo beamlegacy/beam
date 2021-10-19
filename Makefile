@@ -96,6 +96,7 @@ swiftlint_rules:
 lint:
 	fastlane lint
 	yarn --cwd ./Beam/Classes/Components/PointAndShoot/Web run lint
+	yarn --cwd ./Beam/Classes/Models/Navigation/Web run lint
 
 install_variable_injector:
 	rm -rf variable-injector
@@ -165,6 +166,7 @@ js_test:
 	yarn --cwd ./Beam/Classes/Components/PointAndShoot/Web run build
 	RUN_BENCHMARK=true yarn --cwd ./Beam/Classes/Components/PointAndShoot/Web run test-ci
 	yarn --cwd ./Beam/Classes/Components/PointAndShoot/Web run benchmark-show
+	yarn --cwd ./Beam/Classes/Models/Navigation/Web run test-ci
 
 clean_app_files:
 	rm -rf "${HOME}/Library/Containers/co.beamapp.macos.dev/Data/Library/Application Support/"*

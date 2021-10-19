@@ -1,17 +1,37 @@
-import { BeamRange } from "../BeamTypes"
-import { PointAndShoot } from "../PointAndShoot"
-import {
-  BeamDocumentMock,
-  BeamHTMLElementMock, BeamHTMLInputElementMock, BeamHTMLTextAreaElementMock,
-  BeamKeyEvent,
-  BeamMouseEvent,
-  BeamRangeMock,
-  BeamSelectionMock
-} from "./BeamMocks"
-import { BeamWindowMock } from "./BeamWindowMock"
-import { PointAndShootUIMock } from "./PointAndShootUIMock"
-import { BeamWebFactoryMock } from "./BeamWebFactoryMock"
-import { BeamElementHelper } from "../BeamElementHelper"
+import {BeamDocument, BeamLocation, BeamRange, BeamWebkit} from "../../../../Helpers/Utils/Web/BeamTypes"
+import {PNSWindow, PointAndShoot, PointAndShootMessages} from "../PointAndShoot"
+import {BeamWindowMock, MessageHandlerMock} from "../../../../Helpers/Utils/Web/Test/Mock/BeamWindowMock"
+import {PointAndShootUIMock} from "./PointAndShootUIMock"
+import {BeamWebFactoryMock} from "../../../../Helpers/Utils/Web/Test/Mock/BeamWebFactoryMock"
+import {BeamElementHelper} from "../../../../Helpers/Utils/Web/BeamElementHelper"
+import {BeamLocationMock} from "../../../../Helpers/Utils/Web/Test/Mock/BeamLocationMock"
+import {BeamMouseEvent} from "../../../../Helpers/Utils/Web/BeamMouseEvent"
+import {BeamKeyEvent} from "../../../../Helpers/Utils/Web/BeamKeyEvent"
+import {BeamDocumentMock} from "../../../../Helpers/Utils/Web/Test/Mock/BeamDocumentMock"
+import {BeamHTMLInputElementMock} from "../../../../Helpers/Utils/Web/Test/Mock/BeamHTMLInputElementMock"
+import {BeamHTMLTextAreaElementMock} from "../../../../Helpers/Utils/Web/Test/Mock/BeamHTMLTextAreaElementMock"
+import {BeamSelectionMock} from "../../../../Helpers/Utils/Web/Test/Mock/BeamSelectionMock"
+import {BeamHTMLElementMock} from "../../../../Helpers/Utils/Web/Test/Mock/BeamHTMLElementMock"
+import {BeamRangeMock} from "../../../../Helpers/Utils/Web/Test/Mock/BeamRangeMock"
+
+export class PNSWindowMock extends BeamWindowMock<PointAndShootMessages> implements PNSWindow {
+
+  pns: PointAndShoot
+
+  constructor(doc: BeamDocument = new BeamDocumentMock(), location: BeamLocation = new BeamLocationMock()) {
+    super(doc, location)
+  }
+
+  webkit: BeamWebkit<PointAndShootMessages> = {
+    messageHandlers: {
+      pointAndShoot_frameBounds: new MessageHandlerMock()
+    }
+  }
+
+  create(doc: BeamDocument, location: BeamLocation): PNSWindowMock {
+    return new PNSWindowMock(doc, location)
+  }
+}
 
 /**
  * @param frameEls {BeamHTMLElement[]}
@@ -49,7 +69,7 @@ function pointAndShootTestBed(frameEls = [], documentAttributes = {}) {
     },
     ...documentAttributes
   })
-  const win = new BeamWindowMock(testDocument)
+  const win = new PNSWindowMock(testDocument)
   PointAndShoot.instance = null // Allow test suite to instantiate multiple PointAndShoots
   const pns = new PointAndShoot(win, testUI, new BeamWebFactoryMock())
 

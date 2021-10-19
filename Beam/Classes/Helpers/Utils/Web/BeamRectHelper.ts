@@ -1,6 +1,7 @@
 import {BeamRect} from "./BeamTypes"
 
 export class BeamRectHelper {
+
   static filterRectArrayByRectArray(sourceArray: BeamRect[], filterArray: BeamRect[]): BeamRect[] {
     return sourceArray.filter((sourceRect) => {
       // When rect matches array return true to filter it

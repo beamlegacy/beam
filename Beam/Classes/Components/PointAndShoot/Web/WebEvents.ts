@@ -1,7 +1,12 @@
-import type { BeamHTMLIFrameElement, BeamMutationObserver, BeamNode, BeamWindow } from "./BeamTypes"
-import type { WebEventsUI } from "./WebEventsUI"
-import { FrameInfo } from "./WebEventsUI"
-import { WebFactory } from "./WebFactory"
+import type {
+  BeamHTMLIFrameElement,
+  BeamMutationObserver,
+  BeamNode,
+  BeamWindow
+} from "../../../Helpers/Utils/Web/BeamTypes"
+import type {WebEventsUI} from "./WebEventsUI"
+import {FrameInfo} from "./WebEventsUI"
+import {WebFactory} from "./WebFactory"
 
 export class WebEvents<UI extends WebEventsUI> {
   win: BeamWindow
@@ -38,7 +43,7 @@ export class WebEvents<UI extends WebEventsUI> {
    * @param ui {WebEventsUI}
    * @param webFactory
    */
-  constructor(win: BeamWindow, protected ui: UI, webFactory: WebFactory) {
+  constructor(win: BeamWindow<any>, protected ui: UI, webFactory: WebFactory) {
     this.log("initializing")
     this.setWindow(win)
     this.setObserver(webFactory, "body", this.zoomMutationCallback)

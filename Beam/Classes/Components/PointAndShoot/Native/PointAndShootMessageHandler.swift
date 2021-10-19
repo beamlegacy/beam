@@ -19,7 +19,7 @@ enum PointAndShootMessages: String, CaseIterable {
 class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
 
     init(config: BeamWebViewConfiguration) {
-        super.init(config: config, messages: PointAndShootMessages.self, jsFileName: "index_prod")
+        super.init(config: config, messages: PointAndShootMessages.self, jsFileName: "pns_prod")
     }
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length

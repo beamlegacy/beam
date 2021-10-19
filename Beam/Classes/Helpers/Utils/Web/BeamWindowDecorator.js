@@ -1,4 +1,4 @@
-import {BeamVisualViewport, BeamWindow} from "./BeamMocks"
+import {BeamVisualViewport, BeamWindow} from "./Test/Mock/BeamMocks"
 
 /**
  * Allows to decorate the standard Window to look like a BeamWindow.
