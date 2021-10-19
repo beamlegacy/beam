@@ -12,7 +12,7 @@ import UUIDKit
 import Swime
 
 // The new version of the BeamFileRecord (where uid is an UUID)
-struct BeamFileRecord {
+struct BeamFileRecord: Equatable, Hashable {
     var name: String
     var uid: UUID
     var data: Data
@@ -176,6 +176,12 @@ class BeamFileDB: BeamFileStorage {
         }
     }
 
+    func fetchRandom() throws -> BeamFileRecord? {
+        try dbPool.read { db in
+            try? BeamFileRecord.fetchOne(db)
+        }
+    }
+
     func fetchWithIds(_ ids: [UUID]) throws -> [BeamFileRecord] {
         try dbPool.read { db in
             try BeamFileRecord
@@ -239,13 +245,14 @@ class BeamFileDB: BeamFileStorage {
 
 class BeamFileDBManager: BeamFileStorage {
     static let shared = BeamFileDBManager()
-    var fileDB: BeamFileDB
+    //swiftlint:disable:next force_try
+    static var fileDB: BeamFileDB = try! BeamFileDB(path: BeamData.fileDBPath)
 
     func insert(name: String, data: Data, type: String? = nil) throws -> UUID {
         let uid = UUID.v5(name: data.SHA256, namespace: .url)
         let mimeType = type ?? Swime.mimeType(data: data)?.mime ?? "application/octet-stream"
         let file = BeamFileRecord(name: name, uid: uid, data: data, type: mimeType)
-        try fileDB.insert(files: [file])
+        try Self.fileDB.insert(files: [file])
         if AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled {
             try self.saveOnNetwork(file)
         }
@@ -253,23 +260,33 @@ class BeamFileDBManager: BeamFileStorage {
     }
 
     func fetch(uid: UUID) throws -> BeamFileRecord? {
-        try fileDB.fetch(uid: uid)
+        try Self.fileDB.fetch(uid: uid)
     }
 
     func remove(uid: UUID) throws {
-        try fileDB.remove(uid: uid)
+        try Self.fileDB.remove(uid: uid)
     }
 
     func clear() throws {
-        try fileDB.clear()
+        try Self.fileDB.clear()
     }
 
-    init() {
-        do {
-            fileDB = try BeamFileDB(path: BeamData.fileDBPath)
-        } catch let error {
-            Logger.shared.logError("Error while creating the File Database [\(error)]", category: .fileDB)
-            fatalError()
+    func refresh(_ file: BeamFileRecord, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
+        try self.refreshFromBeamObjectAPI(file, true) { result in
+            switch result {
+            case .success(let remoteFile):
+                if var remoteFile = remoteFile {
+                    do {
+                        remoteFile.previousChecksum = remoteFile.checksum
+                        try Self.fileDB.insert(files: [remoteFile])
+                    } catch {
+                        networkCompletion?(.failure(error))
+                    }
+                }
+                networkCompletion?(.success(true))
+            case .failure(let error):
+                networkCompletion?(.failure(error))
+            }
         }
     }
 }
@@ -284,15 +301,15 @@ extension BeamFileDBManager: BeamObjectManagerDelegate {
     func willSaveAllOnBeamObjectApi() {}
 
     func receivedObjects(_ files: [BeamFileRecord]) throws {
-        try fileDB.insert(files: files)
+        try Self.fileDB.insert(files: files)
     }
 
     func allObjects(updatedSince: Date?) throws -> [BeamFileRecord] {
-        try fileDB.allRecords(updatedSince)
+        try Self.fileDB.allRecords(updatedSince)
     }
 
     func checksumsForIds(_ ids: [UUID]) throws -> [UUID: String] {
-        let values: [(UUID, String)] = try fileDB.fetchWithIds(ids).compactMap {
+        let values: [(UUID, String)] = try Self.fileDB.fetchWithIds(ids).compactMap {
             guard let previousChecksum = $0.previousChecksum else { return nil }
             return ($0.beamObjectId, previousChecksum)
         }
@@ -342,14 +359,14 @@ extension BeamFileDBManager: BeamObjectManagerDelegate {
         var files: [BeamFileRecord] = []
         for updateObject in objects {
             // TODO: make faster with a `fetchWithIds(ids: [UUID])`
-            guard var file = try? fileDB.fetchWithBeamObjectId(id: updateObject.beamObjectId) else {
+            guard var file = try? Self.fileDB.fetchWithBeamObjectId(id: updateObject.beamObjectId) else {
                 throw BeamFileDBManagerError.localFileNotFound
             }
 
             file.previousChecksum = updateObject.previousChecksum
             files.append(file)
         }
-        try fileDB.insert(files: files)
+        try Self.fileDB.insert(files: files)
     }
 
     func manageConflict(_ object: BeamFileRecord,
@@ -358,7 +375,11 @@ extension BeamFileDBManager: BeamObjectManagerDelegate {
     }
 
     func saveObjectsAfterConflict(_ objects: [BeamFileRecord]) throws {
-        try fileDB.insert(files: objects)
+        try Self.fileDB.insert(files: objects)
     }
 
+}
+
+extension BeamFileRecord: Identifiable {
+    public var id: UUID { uid }
 }
