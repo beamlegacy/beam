@@ -7,7 +7,7 @@
 
 import Foundation
 import BeamCore
-typealias UpdateSources = [UUID: [UInt64]]
+typealias UpdateSources = [UUID: Set<UInt64>]
 
 public class SuggestedNoteSourceUpdater {
     var oldUrlGroups: [[UInt64]] = [[]]
@@ -64,8 +64,8 @@ public class SuggestedNoteSourceUpdater {
     ///   - sourcesToAdd: A dictionary from noteId to a list of pageId's, representing sources that are to be added
     ///   - sourcesToRemove: A dictionary from notId to a list of pageId's, representing sources that are to be removed
     func createUpdateInstructions(urlGroups: [[UInt64]], noteGroups: [[UUID]], activeSources: [UUID: [UInt64]]) -> (sourcesToAdd: UpdateSources, sourcesToRemove: UpdateSources)? {
-        var sourcesToAdd: [UUID: [UInt64]] = [:]
-        var sourcesToRemove: [UUID: [UInt64]] = [:]
+        var sourcesToAdd: [UUID: Set<UInt64>] = [:]
+        var sourcesToRemove: [UUID: Set<UInt64>] = [:]
 
         // Adding and removing notes do to them going into or out of a common group with the note itself
         let noteToGroupOld = noteToGroup(noteGroups: self.oldNoteGroups)
@@ -74,10 +74,10 @@ public class SuggestedNoteSourceUpdater {
                 if let noteOldGroup = noteToGroupOld[noteId] {
                     let oldSources = Set(self.oldUrlGroups[noteOldGroup])
                     let newSources = Set(urlGroups[noteGroup.offset])
-                    sourcesToAdd[noteId] = Array(newSources.subtracting(oldSources))
-                    sourcesToRemove[noteId] = Array(oldSources.subtracting(newSources))
+                    sourcesToAdd[noteId] = newSources.subtracting(oldSources)
+                    sourcesToRemove[noteId] = oldSources.subtracting(newSources)
                 } else {
-                    sourcesToAdd[noteId] = urlGroups[noteGroup.offset]
+                    sourcesToAdd[noteId] = Set(urlGroups[noteGroup.offset])
                 }
             }
         }
@@ -88,23 +88,23 @@ public class SuggestedNoteSourceUpdater {
             for pageId in activeSources[noteId] ?? [] {
                 let newGroup = self.groupFromPage(pageId: pageId, urlGroups: urlGroups)
                 let oldGroup = self.groupFromPage(pageId: pageId, urlGroups: self.oldUrlGroups)
-                var sourcesToAddForNote = [UInt64]()
+                var sourcesToAddForNote = Set([UInt64]())
                 if let oldActiveSourcesForNote = self.oldActiveSources[noteId],
                    oldActiveSourcesForNote.contains(pageId) {
-                    sourcesToAddForNote = Array(Set(newGroup).subtracting(Set(oldGroup)))
+                    sourcesToAddForNote = Set(newGroup).subtracting(Set(oldGroup))
                 } else {
-                    sourcesToAddForNote = Array(Set(newGroup).subtracting(Set(activeSources[noteId] ?? [])))
+                    sourcesToAddForNote = Set(newGroup).subtracting(Set(activeSources[noteId] ?? []))
                     // If it is a new acrive source for the note, add all of the group
                 }
-                var doNotRemove = [UInt64]()
+                var doNotRemove = Set(self.oldUrlGroups.joined()).subtracting(Set(urlGroups.joined())) // Pages that appeared before and no longer appear should not be removed, as they were deleted
                 if let groupIndex = noteToGroupNew[noteId] {
-                    doNotRemove = urlGroups[groupIndex]
+                    doNotRemove = doNotRemove.union(Set(urlGroups[groupIndex]))
                     //Do not remove pages - despite splitting with an active source, they're in the same group as the note itself
                 }
                 var sourcesToRemoveForNote = Set(oldGroup).subtracting(Set(newGroup))
                 sourcesToRemoveForNote = sourcesToRemoveForNote.subtracting(Set(doNotRemove))
-                sourcesToAdd[noteId] = Array(Set(sourcesToAdd[noteId] ?? []).union(sourcesToAddForNote))
-                sourcesToRemove[noteId] = Array(Set(sourcesToRemove[noteId] ?? []).union(sourcesToRemoveForNote))
+                sourcesToAdd[noteId] = Set(sourcesToAdd[noteId] ?? []).union(sourcesToAddForNote)
+                sourcesToRemove[noteId] = Set(sourcesToRemove[noteId] ?? []).union(sourcesToRemoveForNote)
             }
         }
 
@@ -114,7 +114,7 @@ public class SuggestedNoteSourceUpdater {
             for activeSourceId in activeSources[noteId] ?? [] {
                 pagesInGroupWithActive += groupFromPage(pageId: activeSourceId, urlGroups: urlGroups)
             }
-            sourcesToRemove[noteId] = Array(Set(sourcesToRemove[noteId] ?? []).subtracting(Set(pagesInGroupWithActive)))
+            sourcesToRemove[noteId] = Set(sourcesToRemove[noteId] ?? []).subtracting(Set(pagesInGroupWithActive))
         }
         return (sourcesToAdd: sourcesToAdd, sourcesToRemove: sourcesToRemove)
     }
