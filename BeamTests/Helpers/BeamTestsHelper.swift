@@ -57,7 +57,7 @@ class BeamTestsHelper {
         if !expectedNetworkCalls.isEmpty, expectedNetworkCalls != APIRequest.networkCallFiles {
             Logger.shared.logError("Expected network calls: \(expectedNetworkCalls)", category: .network)
             Logger.shared.logError("Current network calls: \(APIRequest.networkCallFiles)", category: .network)
-            fatalError("Expected network calls is different from current network calls")
+            fatalError("Expected network calls is different from current network calls. Expected \(expectedNetworkCalls) and currently is \(APIRequest.networkCallFiles)")
         }
         saveAPIRequests()
 
