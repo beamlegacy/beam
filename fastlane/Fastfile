@@ -298,10 +298,13 @@ platform :mac do
     get_version_number_from_plist(info_plist: "builds/Beam.app/Contents/Info.plist")
     get_build_number_from_plist(info_plist: "builds/Beam.app/Contents/Info.plist")
 
-    sentry_upload_dsym(
+    sentry_upload_dif(
       org_slug: "beamapp",
       project_slug: "beam-macos",
-      dsym_path: "builds/Beam.app.dSYM.zip"
+      # Takes too long
+      # force_foreground: true,
+      # wait: true,
+      path: "builds/Beam.app.dSYM.zip"
     )
 
     sentry_create_release(
