@@ -297,14 +297,11 @@ extension BeamNote: BeamNoteDocument {
 
     static func instanciateNote(_ documentStruct: DocumentStruct,
                                 keepInMemory: Bool = true,
-                                decodeChildren: Bool = true) throws -> BeamNote {
-        if documentStruct.databaseId != Database.defaultDatabase().id {
-            let alert = NSAlert()
-            alert.informativeText = "We just tried loading a note from a database that is NOT the default database!"
-            alert.addButton(withTitle: "Ok")
+                                decodeChildren: Bool = true,
+                                verifyDatabase: Bool = true) throws -> BeamNote {
 
-            // Display the NSAlert
-            alert.runModal()
+        if verifyDatabase && documentStruct.databaseId != Database.defaultDatabase().id {
+            Logger.shared.logError("We just tried loading a note from a database that is NOT the default database!", category: .database)
         }
 
         let decoder = JSONDecoder()

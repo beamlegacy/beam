@@ -418,6 +418,7 @@ public class DocumentManager: NSObject {
             document.database_id == documentStruct.databaseId &&
             document.document_type == documentStruct.documentType.rawValue &&
             document.deleted_at?.intValue == documentStruct.deletedAt?.intValue &&
+            document.beam_object_previous_checksum == documentStruct.previousChecksum &&
             document.id == documentStruct.id
     }
 
