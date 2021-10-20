@@ -320,7 +320,8 @@ class Document: NSManagedObject, BeamCoreDataObject {
     }
 
     class func fetchWithTitle(_ context: NSManagedObjectContext, _ title: String) throws -> Document? {
-        try fetchFirst(context, NSPredicate(format: "title ==[cd] %@", title as CVarArg))
+        let sortDescriptor = NSSortDescriptor(key: "title", ascending: true, selector: #selector(NSString.caseInsensitiveCompare))
+        return try fetchFirst(context, NSPredicate(format: "title ==[cd] %@", title as CVarArg), [sortDescriptor])
     }
 
     class func fetchOrCreateWithTitle(_ context: NSManagedObjectContext, _ title: String) -> Document {
