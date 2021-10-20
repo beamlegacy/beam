@@ -70,8 +70,11 @@ class Autocompleter: ObservableObject {
                 if let error = error as? URLError, error.code == .cancelled {
                     return
                 }
+
+                var res = [AutocompleteResult]()
+                res.append(AutocompleteResult(text: query, source: .autocomplete, url: url, information: description))
                 guard let data = data else {
-                    promise(.success([]))
+                    promise(.success(res))
                     return
                 }
 
@@ -79,13 +82,13 @@ class Autocompleter: ObservableObject {
                 // We can't serialize them easily so we need to convert it in ISO Latin first then reconverting in data UTF8
                 let dataIntoISOString = String(data: data, encoding: .isoLatin1)
                 guard let dataUtf8 = dataIntoISOString?.data(using: .utf8) else {
-                    promise(.success([]))
+                    promise(.success(res))
                     return
                 }
 
                 let obj = try? JSONSerialization.jsonObject(with: dataUtf8)
-                var res = [AutocompleteResult]()
-                if let array = obj as? [Any], let r = array[1] as? [String] {
+                if let array = obj as? [Any], let r = array[1] as? [String], !r.isEmpty {
+                    res = [AutocompleteResult]()
                     for (index, str) in r.enumerated() {
                         let isURL = str.mayBeWebURL
                         let source: AutocompleteResult.Source = isURL ? .url : .autocomplete
