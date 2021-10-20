@@ -37,7 +37,8 @@ struct DocumentStruct: BeamObjectProtocol {
         do {
             let beamNote = try BeamNote.instanciateNote(self,
                                                         keepInMemory: false,
-                                                        decodeChildren: true)
+                                                        decodeChildren: true,
+                                                        verifyDatabase: false)
             guard beamNote.isEntireNoteEmpty() else { return false }
 
             return true
