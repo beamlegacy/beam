@@ -220,7 +220,14 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
       el = svgRoot
     }
 
-    // Make sure the element has something we're interested in
+    const bounds = el.getBoundingClientRect()
+    // If we have a too large element, exit early
+    if (BeamElementHelper.isLargerThanWindow(bounds, win)) {
+      console.log("returning early because bounds are larger than window");
+      return 
+    }
+
+    // Make sure the element has something we're interested in, otherwise exit early
     if (!PointAndShootHelper.isMeaningfulOrChildrenAre(el, win)) {
       return
     }
@@ -239,15 +246,13 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
     // return early with the simple element rect
     // check if the whole tree contains more than 150 html elements
     if (childElementTreeCount > 150) {
-      const area = el.getBoundingClientRect()
-      return this.setArea(area, area, clippingArea)
+      return this.setArea(area, bounds, clippingArea)
     }
     // check if the direct childNodes (this includes text nodes) are more than 150
     const childNodes = PointAndShootHelper.getMeaningfulChildNodes(el, win)
     // Filter useful childNodes
     if (childNodes.length > 150) {
-      const area = el.getBoundingClientRect()
-      return this.setArea(area, area, clippingArea)
+      return this.setArea(area, bounds, clippingArea)
     }
 
     // If it's an image or media, select the whole element

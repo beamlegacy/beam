@@ -19,12 +19,12 @@ extension PointAndShoot {
         return graceArea.contains(mouse)
     }
 
-    /// Checks if target is 150% taller than window frame.
+    /// Checks if target is 120% taller or 110% wider than window frame.
     /// - Parameter target: Target to check
-    /// - Returns: true if target is tall
+    /// - Returns: true if either width or height is largeey
     func isLargeTargetArea(_ target: Target) -> Bool {
         let yPercent = (100 / page.frame.height) * target.rect.height
-        let yIsLarge = yPercent > 100
+        let yIsLarge = yPercent > 120
 
         let xPercent = (100 / page.frame.width) * target.rect.width
         let xIsLarge = xPercent > 110

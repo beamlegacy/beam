@@ -9,6 +9,7 @@ import {BeamTextMock} from "../../../../Helpers/Utils/Web/Test/Mock/BeamTextMock
 import {BeamHTMLElementMock} from "../../../../Helpers/Utils/Web/Test/Mock/BeamHTMLElementMock"
 import {BeamRangeMock} from "../../../../Helpers/Utils/Web/Test/Mock/BeamRangeMock"
 import {PointAndShootMessages} from "../PointAndShoot"
+import { PointAndShootHelper } from "../PointAndShootHelper"
 
 /**
  * @param frameEls {BeamHTMLElement[]}
@@ -468,6 +469,64 @@ describe("isMeaningful filtering", () => {
       expect(area2).toMatchObject(expected)
     }
   )
+})
+
+
+describe("isTextMeaningful", () => {
+  test("Return false for strings containing only '•'", () => {
+    const input = "•"
+    expect(PointAndShootHelper.isTextMeaningful(input)).toBe(false)
+  })
+
+  test("Return false for strings containing only '-'", () => {
+    const input = "-"
+    expect(PointAndShootHelper.isTextMeaningful(input)).toBe(false)
+  })
+
+  test("Return false for strings containing only '|'", () => {
+    const input = "|"
+    expect(PointAndShootHelper.isTextMeaningful(input)).toBe(false)
+  })
+
+  test("Return false for strings containing only '–'", () => {
+    const input = "–"
+    expect(PointAndShootHelper.isTextMeaningful(input)).toBe(false)
+  })
+
+  test("Return false for strings containing only '—'", () => {
+    const input = "—"
+    expect(PointAndShootHelper.isTextMeaningful(input)).toBe(false)
+  })
+
+  test("Return true for strings containing only '.'", () => {
+    const input = "."
+    expect(PointAndShootHelper.isTextMeaningful(input)).toBe(true)
+  })
+
+  test("Return true for strings containing only '#'", () => {
+    const input = "#"
+    expect(PointAndShootHelper.isTextMeaningful(input)).toBe(true)
+  })
+
+  test("Return true for strings containing only '$'", () => {
+    const input = "$"
+    expect(PointAndShootHelper.isTextMeaningful(input)).toBe(true)
+  })
+
+  test("Return true for strings containing a combination useless and useful characters like '@' and '|'", () => {
+    const input = "|@|"
+    expect(PointAndShootHelper.isTextMeaningful(input)).toBe(true)
+  })
+
+  test("Return true for strings containing a single word", () => {
+    const input = "Beam"
+    expect(PointAndShootHelper.isTextMeaningful(input)).toBe(true)
+  })
+
+  test("Return false for empty strings", () => {
+    const input = ""
+    expect(PointAndShootHelper.isTextMeaningful(input)).toBe(false)
+  })
 })
 
 describe("overflow / clipping handling", () => {
