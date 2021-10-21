@@ -9,6 +9,23 @@ import SwiftUI
 
 struct NoteHeaderPublishButton: View {
 
+    enum ErrorMessage {
+        case loggedOut
+        case noUsername
+        case custom(String)
+
+        var message: String {
+            switch self {
+            case .loggedOut:
+                return "You need to be logged in"
+            case .noUsername:
+                return "You need to have a username"
+            case .custom(let message):
+                return message
+            }
+        }
+    }
+
     enum PublishButtonState {
         case isPublic
         case isPrivate
@@ -20,7 +37,7 @@ struct NoteHeaderPublishButton: View {
 
     var publishState: PublishButtonState
     var justCopiedLink = false
-    var showError: Bool
+    var error: ErrorMessage?
 //    var enableAnimations: Bool = true
     var action: () -> Void
 
@@ -52,6 +69,15 @@ struct NoteHeaderPublishButton: View {
         }
         let springAnimation = BeamAnimation.spring(stiffness: 480, damping: 30)
         let containerAnimation = BeamAnimation.easeInOut(duration: 0.15)
+
+        @ViewBuilder var errorOverlay: some View {
+            if let error = error {
+                Tooltip(title: error.message, icon: "status-private")
+                .fixedSize().offset(x: 0, y: -25)
+                .transition(AnyTransition.opacity.animation(BeamAnimation.defaultiOSEasing(duration: 0.3)))
+            }
+        }
+
         return HStack(spacing: BeamSpacing._100) {
             ButtonLabel(customView: { _, _ in
                 AnyView(
@@ -99,11 +125,7 @@ struct NoteHeaderPublishButton: View {
                         Tooltip(title: "Link Copied")
                         .fixedSize().offset(x: 0, y: -25)
                         .transition(AnyTransition.opacity.animation(BeamAnimation.defaultiOSEasing(duration: 0.3))), alignment: .top)
-
-            .overlay(showError != true ? nil :
-                        Tooltip(title: "You need to be logged in", icon: "status-private")
-                        .fixedSize().offset(x: 0, y: -25)
-                        .transition(AnyTransition.opacity.animation(BeamAnimation.defaultiOSEasing(duration: 0.3))), alignment: .top)
+            .overlay(errorOverlay, alignment: .top)
         }
     }
 }

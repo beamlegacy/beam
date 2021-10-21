@@ -11,8 +11,9 @@ import BeamCore
 enum BeamNoteSharingUtilsError: Error {
     case emptyPublicUrl
     case userNotLoggedIn
-    case notPublishedURLAndDate
     case ongoingOperation
+    case missingRequirement
+    case canceled
 }
 
 class BeamNoteSharingUtils {
@@ -63,17 +64,10 @@ class BeamNoteSharingUtils {
             return
         }
 
-        guard let username = Persistence.Authentication.username ?? Persistence.Authentication.email else {
-            let error = BeamNoteSharingUtilsError.userNotLoggedIn
-            Logger.shared.logError(error.localizedDescription, category: .notePublishing)
-            completion?(.failure(error))
-            return
-        }
-
         note.ongoingPublicationOperation = true
 
         if becomePublic {
-            publishNote(note, username: username) { result in
+            publishNote(note) { result in
                 makeNotePublicHandler(note, becomePublic, documentManager, result, completion)
             }
         } else {
@@ -93,6 +87,7 @@ class BeamNoteSharingUtils {
             case .failure(let error):
                 Logger.shared.logError(error.localizedDescription, category: .notePublishing)
                 completion?(.failure(error))
+                note.ongoingPublicationOperation = false
             case .success(let status):
                 note.publicationStatus = status
                 note.save(documentManager: documentManager) { result in
@@ -104,7 +99,6 @@ class BeamNoteSharingUtils {
                         // TODO: if `save` isn't successful, we should probably call completion with `.failure`
                         completion?(.success(becomePublic))
                     }
-
                     note.ongoingPublicationOperation = false
                 }
             }
@@ -117,8 +111,8 @@ class BeamNoteSharingUtils {
     ///   - note: The note to publish
     ///   - username: The current user username, or if not set it's email
     ///   - completion: The callback with the resulted PublicationStatus or error
-    static func publishNote(_ note: BeamNote, username: String, completion: @escaping ((Result<PublicationStatus, Error>) -> Void)) {
-        Self.publicServer.request(publicServerRequest: .publishNote(note: note, username: username), completion: { completion($0) })
+    static func publishNote(_ note: BeamNote, completion: @escaping ((Result<PublicationStatus, Error>) -> Void)) {
+        Self.publicServer.request(publicServerRequest: .publishNote(note: note), completion: { completion($0) })
     }
 
     /// Unpublish a note from the Public Server.

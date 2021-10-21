@@ -21,7 +21,7 @@ struct NoteHeaderView: View {
         model.isTitleTaken ? errorColor : BeamColor.Generic.text
     }
 
-    @State private var publishShowError = false
+    @State private var publishShowError: NoteHeaderPublishButton.ErrorMessage?
     @State private var hoveringLinkButton = false
 
     private var copyLinkView: some View {
@@ -116,19 +116,45 @@ struct NoteHeaderView: View {
         HStack(spacing: BeamSpacing._100) {
             NoteHeaderPublishButton(publishState: model.publishState,
                                     justCopiedLink: model.justCopiedLinkFrom == .fromPublishButton,
-                                    showError: publishShowError,
+                                    error: publishShowError,
                                     action: {
-                                        let canPerform = model.togglePublish()
-                                        if !canPerform {
-                                            publishShowError = true
-                                            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: .seconds(2))) {
-                                                publishShowError = false
+                                        let canPerform = model.togglePublish { result in
+                                            switch result {
+                                            case .success(_):
+                                                break
+                                            case .failure(let error):
+                                                handlePublicationError(error: error)
                                             }
+                                        }
+                                        if !canPerform {
+                                            showPublicationError(error: .loggedOut)
                                         }
                                     })
 //            Feature not available yet.
 //            ButtonLabel(icon: "editor-sources", state: .disabled)
             ButtonLabel(icon: "editor-delete", action: model.promptConfirmDelete)
+        }
+    }
+
+    private func handlePublicationError(error: Error) {
+        if let error = error as? PublicServerError, error == .notAllowed {
+            showPublicationError(error: .noUsername)
+        } else if let error = error as? BeamNoteSharingUtilsError {
+            switch error {
+            case .canceled:
+                break
+            default:
+                showPublicationError(error: .custom(error.localizedDescription))
+            }
+        } else {
+            showPublicationError(error: .custom(error.localizedDescription))
+        }
+    }
+
+    private func showPublicationError(error: NoteHeaderPublishButton.ErrorMessage) {
+        publishShowError = error
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: .seconds(2))) {
+            publishShowError = nil
         }
     }
 
@@ -278,25 +304,40 @@ extension NoteHeaderView {
 
         // MARK: Publishing
         /// returns true if user is allowed to perform the action
-        func togglePublish() -> Bool {
-            guard let note = note else { return false }
-            guard let documentManager = documentManager else { return false }
-            guard ![.publishing, .unpublishing].contains(publishState) else { return true }
+        func togglePublish(completion: @escaping ((Result<Bool, Error>) -> Void)) -> Bool {
+            let missingRequirement: Result<Bool, Error> = Result.failure(BeamNoteSharingUtilsError.missingRequirement)
+
+            guard let note = note, let documentManager = documentManager else {
+                completion(missingRequirement)
+                return false
+            }
+
+            guard ![.publishing, .unpublishing].contains(publishState) else {
+                completion(missingRequirement)
+                return true
+            }
             let isPublic = note.publicationStatus.isPublic
 
             guard isPublic || BeamNoteSharingUtils.canMakePublic else {
+                completion(missingRequirement)
                 return false
             }
             if !isPublic {
                 publishState = .publishing
-                BeamNoteSharingUtils.makeNotePublic(note, becomePublic: true, documentManager: documentManager) { [weak self] _ in
+                BeamNoteSharingUtils.makeNotePublic(note, becomePublic: true, documentManager: documentManager) { [weak self] result in
                     DispatchQueue.main.async {
+                        guard case .success(let published) = result, published == true else {
+                            self?.noteBecamePublic(false)
+                            completion(result)
+                            return
+                        }
                         self?.noteBecamePublic(true)
                         self?.copyLink(source: .fromPublishButton)
+                        completion(result)
                     }
                 }
             } else {
-                promptConfirmUnpublish()
+                promptConfirmUnpublish(completion: completion)
             }
             return true
         }
@@ -315,8 +356,13 @@ extension NoteHeaderView {
             }
         }
 
-        private func promptConfirmUnpublish() {
-            guard let note = note else { return }
+        private func promptConfirmUnpublish(completion: @escaping ((Result<Bool, Error>) -> Void)) {
+            let missingRequirement: Result<Bool, Error> = Result.failure(BeamNoteSharingUtilsError.missingRequirement)
+
+            guard let note = note else {
+                completion(missingRequirement)
+                return
+            }
             let alert = NSAlert()
             alert.messageText = "Are you sure you want to unpublish the card \"\(note.title)\"?"
             alert.informativeText = "Others will no longer have access to this card."
@@ -325,15 +371,25 @@ extension NoteHeaderView {
             alert.alertStyle = .warning
             guard let window = AppDelegate.main.window else { return }
             alert.beginSheetModal(for: window) { [weak self] response in
-                guard let self = self, let note = self.note else { return }
-                guard let documentManager = self.documentManager else { return }
-                guard response == .alertFirstButtonReturn else {
-                    self.publishState = note.publicationStatus.isPublic == true ? .isPublic : .isPrivate
+                guard let self = self, let note = self.note, let documentManager = self.documentManager else {
+                    completion(missingRequirement)
                     return
                 }
-                BeamNoteSharingUtils.makeNotePublic(note, becomePublic: false, documentManager: documentManager) { [weak self] _ in
+                guard response == .alertFirstButtonReturn else {
+                    self.publishState = note.publicationStatus.isPublic == true ? .isPublic : .isPrivate
+                    completion(Result.failure(BeamNoteSharingUtilsError.canceled))
+                    return
+                }
+                self.publishState = .unpublishing
+                BeamNoteSharingUtils.makeNotePublic(note, becomePublic: false, documentManager: documentManager) { [weak self] result in
+                    defer {
+                        completion(result)
+                    }
+                    guard case .success(let published) = result, published == false else {
+                        self?.noteBecamePublic(true)
+                        return
+                    }
                     DispatchQueue.main.async {
-                        self?.publishState = .unpublishing
                         self?.noteBecamePublic(false)
                     }
                 }
