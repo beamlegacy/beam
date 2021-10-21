@@ -37,9 +37,4 @@ class ReferencesTests: BaseTest {
         XCTAssertEqual(cardView.getNumberOfVisibleNotes(), 3)
         XCTAssertEqual(cardView.getCardNoteValueByIndex(0), cardName1)
     }
-    
-    override func tearDown() {
-        UITestsMenuBar().destroyDB()
-    }
-
 }

@@ -52,9 +52,4 @@ class AllCardsDeleteTests: BaseTest {
         XCTAssertEqual(allCardsView.getNumberOfCards(), cardsBeforeDeletion - 1)
         XCTAssertFalse(allCardsView.isCardNameAvailable(cardName))
     }
-    
-    override func tearDown() {
-        UITestsMenuBar().destroyDB()
-    }
-    
 }

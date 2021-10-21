@@ -40,9 +40,4 @@ class LinksTests: BaseTest {
         XCTAssertEqual(cardView.getLinksNamesNumber(), 2)
         XCTAssertEqual(cardView.getLinkContentByIndex(0), cardName1 + " ")
     }
-    
-    override func tearDown() {
-        UITestsMenuBar().destroyDB()
-    }
-    
 }

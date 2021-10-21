@@ -83,9 +83,4 @@ class NoteEditorTests: BaseTest {
         testRailPrint("Then Bold context menu item is NOT displayed")
         XCTAssertTrue(WaitHelper().waitForDoesntExist(boldMenuItem))
     }
-    
-    override func tearDown() {
-        UITestsMenuBar().destroyDB()
-    }
-    
 }

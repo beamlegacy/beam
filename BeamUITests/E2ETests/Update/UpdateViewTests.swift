@@ -38,9 +38,4 @@ class UpdateViewTests: BaseTest {
         testRailPrint("Then it is visible in All cards view")
         XCTAssertTrue(allCardsView.staticText(JournalViewLocators.StaticTexts.updateNowButton.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout))
     }
-    
-    override func tearDown() {
-        UITestsMenuBar().destroyDB()
-    }
-    
 }

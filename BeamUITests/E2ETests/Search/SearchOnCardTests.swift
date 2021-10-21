@@ -150,9 +150,4 @@ class SearchOnCardTests: BaseTest {
         }
         return searchView
     }
-    
-    override func tearDown() {
-        UITestsMenuBar().destroyDB()
-    }
-    
 }
