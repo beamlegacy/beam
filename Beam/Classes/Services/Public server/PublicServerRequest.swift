@@ -21,12 +21,12 @@ enum PublicServerError: Error {
 class PublicServer {
 
     enum Request {
-        case publishNote(note: BeamNote, username: String)
+        case publishNote(note: BeamNote)
         case unpublishNote(noteId: UUID)
 
         func bodyParameters() throws -> (Data, String)? {
             switch self {
-            case .publishNote(let note, _):
+            case .publishNote(let note):
                 return createBody(for: note)
             case .unpublishNote:
                 return nil
@@ -35,8 +35,8 @@ class PublicServer {
 
         var route: String {
             switch self {
-            case .publishNote(_, let username):
-                return "/note/\(username)"
+            case .publishNote(_):
+                return "/note"
             case .unpublishNote(let noteId):
                 return "/note/\(noteId)"
             }
@@ -48,7 +48,7 @@ class PublicServer {
 
         var httpMethod: String {
             switch self {
-            case .publishNote(_, _):
+            case .publishNote(_):
                 return "POST"
             case .unpublishNote(_):
                 return "DELETE"
