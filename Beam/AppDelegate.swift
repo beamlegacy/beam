@@ -420,7 +420,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 }
                 return true
             }
+        } else if ["html", "htm"].contains(url.pathExtension) {
+            return handleURL(URL(fileURLWithPath: filename))
         }
+
         return true
     }
 
