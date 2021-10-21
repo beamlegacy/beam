@@ -535,4 +535,5 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
         }
         return score
     }
+    public var rootId: UUID? { root?.id }
 }

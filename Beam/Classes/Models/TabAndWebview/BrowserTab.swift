@@ -264,7 +264,7 @@ import Promises
         self.webView.page = self
         uiDelegateController.page = self
         mediaPlayerController = MediaPlayerController(page: self)
-        noteController.noteOrDefault.browsingSessions.append(browsingTree)
+        addTreeToNote()
         setupObservers()
         beamNavigationController.isNavigatingFromNote = isFromNoteSearch
     }
@@ -303,7 +303,7 @@ import Promises
 
         originMode = .today
         super.init()
-        noteController.noteOrDefault.browsingSessions.append(tree)
+        addTreeToNote()
     }
 
     func postLoadSetup(state: BeamState) {
@@ -367,6 +367,11 @@ import Promises
 
         let element = noteController.addContent(url: url, text: title, reason: .pointandshoot)
         return element
+    }
+    private func addTreeToNote() {
+        if let rootId = browsingTree.rootId {
+            noteController.noteOrDefault.browsingSessionIds.append(rootId)
+        }
     }
 
     private func receivedWebviewTitle(_ title: String? = nil) {
@@ -628,6 +633,7 @@ import Promises
         passwordOverlayController?.dismiss()
         authenticationViewModel?.cancel()
         browsingTree.closeTab()
+        saveTree()
         sendTree()
     }
 
@@ -635,6 +641,7 @@ import Promises
         passwordOverlayController?.dismiss()
         authenticationViewModel?.cancel()
         browsingTree.closeApp()
+        saveTree(grouped: true)
         sendTree(grouped: true)
     }
 
@@ -644,6 +651,15 @@ import Promises
             sender.groupSend(browsingTree: browsingTree)
         } else {
             sender.send(browsingTree: browsingTree)
+        }
+    }
+
+    private func saveTree(grouped: Bool = false) {
+        let appSessionId = state.data.sessionId
+        if grouped {
+            BrowsingTreeStoreManager.shared.groupSave(browsingTree: self.browsingTree, appSessionId: appSessionId)
+        } else {
+            BrowsingTreeStoreManager.shared.save(browsingTree: self.browsingTree, appSessionId: appSessionId) {}
         }
     }
     // swiftlint:disable:next file_length

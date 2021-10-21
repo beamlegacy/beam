@@ -2,6 +2,8 @@
 import BeamCore
 import GRDB
 import Dispatch
+import Foundation
+
 
 /// GRDBDatabase lets the application access the database.
 /// It's role is to setup the database schema.
@@ -145,6 +147,19 @@ struct GRDBDatabase {
             }
         }
 
+        migrator.registerMigration("createBrowsingTreeRecord") { db in
+            try db.create(table: "BrowsingTreeRecord", ifNotExists: true) { t in
+                t.column("rootId", .text).primaryKey()
+                t.column("rootCreatedAt", .date).indexed().notNull()
+                t.column("appSessionId", .text)
+                t.column("data", .blob).notNull()
+                t.column("createdAt", .datetime).notNull().defaults(sql: "CURRENT_TIMESTAMP")
+                t.column("updatedAt", .datetime).notNull().defaults(sql: "CURRENT_TIMESTAMP")
+                t.column("deletedAt", .datetime)
+                t.column("previousChecksum", .text)
+            }
+
+        }
         #if DEBUG
         // Speed up development by nuking the database when migrations change
         migrator.eraseDatabaseOnSchemaChange = true
@@ -331,6 +346,10 @@ extension GRDBDatabase {
             try BeamNoteIndexingRecord.deleteAll(db)
             try BidirectionalLink.deleteAll(db)
             try HistoryUrlRecord.deleteAll(db)
+            try BrowsingTreeRecord.deleteAll(db)
+            try FrecencyUrlRecord.deleteAll(db)
+            try FrecencyNoteRecord.deleteAll(db)
+            try LongTermUrlScore.deleteAll(db)
             try db.execute(sql: "DELETE FROM HistoryUrlContent")
             try db.dropFTS4SynchronizationTriggers(forTable: "HistoryUrlRecord")
         }
@@ -801,6 +820,58 @@ extension GRDBDatabase {
 
     func getManyLongTermUrlScore(urlIds: [UInt64]) -> [LongTermUrlScore] {
         return (try? dbReader.read { db in try LongTermUrlScore.fetchAll(db, ids: urlIds) }) ?? []
+    }
+
+    // MARK: - BrowsingTree
+    func save(browsingTreeRecord: BrowsingTreeRecord) throws {
+        do {
+            try dbWriter.write { db in try browsingTreeRecord.save(db) }
+        } catch {
+            Logger.shared.logError("Couldn't save tree with id \(browsingTreeRecord.rootId)", category: .database)
+            throw error
+        }
+    }
+    func save(browsingTreeRecords: [BrowsingTreeRecord]) throws {
+        do {
+            try dbWriter.write { db in
+                try browsingTreeRecords.forEach { (record) in try record.save(db) }
+            }
+        } catch {
+            Logger.shared.logError("Couldn't save trees \(browsingTreeRecords)", category: .database)
+            throw error
+        }
+    }
+    func getBrowsingTree(rootId: UUID) throws -> BrowsingTreeRecord? {
+        try dbReader.read { db in try BrowsingTreeRecord.fetchOne(db, id: rootId) }
+    }
+    func getBrowsingTrees(rootIds: [UUID]) throws -> [BrowsingTreeRecord] {
+        try dbReader.read { db in try BrowsingTreeRecord.fetchAll(db, ids: rootIds) }
+    }
+    func getAllBrowsingTrees(updatedSince: Date? = nil) throws -> [BrowsingTreeRecord] {
+        try dbReader.read { db in
+            if let updatedSince = updatedSince {
+                return try BrowsingTreeRecord.filter(BrowsingTreeRecord.Columns.updatedAt >= updatedSince).fetchAll(db)
+            }
+            return try BrowsingTreeRecord.fetchAll(db)
+        }
+    }
+    func exists(browsingTreeRecord: BrowsingTreeRecord) throws -> Bool {
+        try dbReader.read { db in
+            try browsingTreeRecord.exists(db)
+        }
+    }
+    func browsingTreeExists(rootId: UUID) throws -> Bool {
+        try dbReader.read { db in
+            try BrowsingTreeRecord.filter(id: rootId).fetchCount(db) > 0
+        }
+    }
+    var countBrowsingTrees: Int? {
+        return try? dbReader.read { db in try BrowsingTreeRecord.fetchCount(db) }
+    }
+    func clearBrowsingTrees() throws {
+        _ = try dbWriter.write { db in
+            try BrowsingTreeRecord.deleteAll(db)
+        }
     }
 }
 

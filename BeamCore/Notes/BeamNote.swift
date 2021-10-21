@@ -100,7 +100,7 @@ public class BeamNote: BeamElement {
 
     @Published public var searchQueries: [String] = [] { didSet { change(.meta) } } ///< Search queries whose results were used to populate this note
     @Published public var visitedSearchResults: [VisitedPage] = [] { didSet { change(.meta) } } ///< URLs whose content were used to create this note
-    @Published public var browsingSessions = [BrowsingTree]() { didSet { change(.meta) } }
+    public var browsingSessionIds = [UUID]() { didSet { change(.meta) } }
     public var sources = NoteSources()
     public var version: Int64 = 0
     public var savedVersion: Int64 = 0
@@ -142,9 +142,9 @@ public class BeamNote: BeamElement {
         case type
         case searchQueries
         case visitedSearchResults
-        case browsingSessions
         case sources
         case publicationStatus
+        case browsingSessionIds
     }
 
     public required init(from decoder: Decoder) throws {
@@ -155,10 +155,6 @@ public class BeamNote: BeamElement {
 
         searchQueries = try container.decode([String].self, forKey: .searchQueries)
         visitedSearchResults = try container.decode([VisitedPage].self, forKey: .visitedSearchResults)
-        if container.contains(.browsingSessions) {
-            browsingSessions = try container.decode([BrowsingTree].self, forKey: .browsingSessions)
-        }
-
         if container.contains(.publicationStatus) {
             publicationStatus = try container.decode(PublicationStatus.self, forKey: .publicationStatus)
         }
@@ -174,7 +170,7 @@ public class BeamNote: BeamElement {
         } else {
             type = try container.decode(BeamNoteType.self, forKey: .type)
         }
-
+        browsingSessionIds = (try container.decodeIfPresent([UUID].self, forKey: .browsingSessionIds) ?? [UUID]())
         switch type {
         case .note:
             break
@@ -205,12 +201,9 @@ public class BeamNote: BeamElement {
         try container.encode(type, forKey: .type)
         try container.encode(searchQueries, forKey: .searchQueries)
         try container.encode(visitedSearchResults, forKey: .visitedSearchResults)
-        if !browsingSessions.isEmpty {
-            try container.encode(browsingSessions, forKey: .browsingSessions)
-        }
         try container.encode(sources, forKey: .sources)
         try container.encode(publicationStatus, forKey: .publicationStatus)
-
+        try container.encode(browsingSessionIds, forKey: .browsingSessionIds)
         try super.encode(to: encoder)
     }
 
@@ -422,5 +415,4 @@ public func beamCheckMainThread() {
     }
     #endif
 }
-
 // swiftlint:enable file_length
