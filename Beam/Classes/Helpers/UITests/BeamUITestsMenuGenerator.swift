@@ -174,6 +174,8 @@ class BeamUITestsMenuGenerator {
     private func addPageToHistory(url: String, title: String, id: Int) {
         _ = IndexDocument(source: url, title: title, contents: title)
         try? GRDBDatabase.shared.insertHistoryUrl(urlId: UInt64(id), url: url, title: title, content: title)
+        var frecency = FrecencyUrlRecord(urlId: UInt64(id), lastAccessAt: BeamDate.now, frecencyScore: 1, frecencySortScore: 1, frecencyKey: AutocompleteManager.urlFrecencyParamKey)
+        try? GRDBDatabase.shared.saveFrecencyUrl(&frecency)
     }
 
     private func signInWithTestAccount() {
