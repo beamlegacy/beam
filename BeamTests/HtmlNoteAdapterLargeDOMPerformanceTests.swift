@@ -18,6 +18,7 @@ class HtmlNoteAdapterLargeDOMPerformanceTests: XCTestCase {
 """
 
     func testArrayBeamElement() throws {
+        try XCTSkipIf(true, "Skipped due to >20sec run times")
         let htmlNoteAdapter = HtmlNoteAdapter(URL(string: "http://test.com")!)
         self.measure {
             let expectation = XCTestExpectation(description: "convert html to BeamElements")
@@ -29,6 +30,7 @@ class HtmlNoteAdapterLargeDOMPerformanceTests: XCTestCase {
     }
 
     func testSingleBeamElment() throws {
+        try XCTSkipIf(true, "Skipped due to >20sec run times")
         let htmlNoteAdapter = HtmlNoteAdapter(URL(string: "http://test.com")!)
         self.measure {
             let expectation = XCTestExpectation(description: "convert html to BeamElements")
@@ -40,6 +42,7 @@ class HtmlNoteAdapterLargeDOMPerformanceTests: XCTestCase {
     }
 
     func testString() throws {
+        try XCTSkipIf(true, "Skipped due to >20sec run times")
         let htmlNoteAdapter = HtmlNoteAdapter(URL(string: "http://test.com")!)
         self.measure {
             let expectation = XCTestExpectation(description: "convert html to BeamElements")
