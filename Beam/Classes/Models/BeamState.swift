@@ -477,11 +477,15 @@ import Sentry
         }
     }
 
-    func focusOmnibox() {
+    func setFocusOmnibox() {
         EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
-        if let url = browserTabsManager.currentTab?.url?.absoluteString, mode == .web {
-            autocompleteManager.searchQuerySelectedRange = url.wholeRange
-            autocompleteManager.setQueryWithoutAutocompleting(url)
+        if mode == .web {
+            if let url = browserTabsManager.currentTab?.url?.absoluteString {
+                autocompleteManager.searchQuerySelectedRange = url.wholeRange
+                autocompleteManager.setQueryWithoutAutocompleting(url)
+            } else {
+                autocompleteManager.resetQuery()
+            }
         }
         focusOmniBox = true
     }
@@ -530,6 +534,18 @@ extension BeamState: BrowserTabsManagerDelegate {
     }
     private weak var currentTab: BrowserTab? {
         browserTabsManager.currentTab
+    }
+
+    func showNextTab() {
+        let wasFocused = focusOmniBox
+        browserTabsManager.showNextTab()
+        if wasFocused { setFocusOmnibox() }
+    }
+
+    func showPreviousTab() {
+        let wasFocused = focusOmniBox
+        browserTabsManager.showPreviousTab()
+        if wasFocused { setFocusOmnibox() }
     }
 
     // MARK: BrowserTabsManagerDelegate
