@@ -116,7 +116,6 @@ extension BeamNote: BeamNoteDocument {
         self.type = newSelf.type
         self.searchQueries = newSelf.searchQueries
         self.visitedSearchResults = newSelf.visitedSearchResults
-        self.browsingSessions = newSelf.browsingSessions
 
         self.version = docStruct.version
         self.databaseId = docStruct.databaseId

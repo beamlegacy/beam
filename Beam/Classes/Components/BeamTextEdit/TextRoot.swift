@@ -34,7 +34,6 @@ public struct TextConfig {
 
 public class TextRoot: ElementNode {
     @Published var textIsSelected = false
-    static var showBrowsingSection = false
     var note: BeamNote? { element as? BeamNote }
 
     var state = TextState()
@@ -129,7 +128,6 @@ public class TextRoot: ElementNode {
     var bottomSpacerWidget: SpacerWidget?
     var linksSection: LinksSection?
     var referencesSection: LinksSection?
-    var browsingSection: BrowsingSection?
     var debugSection: DebugSection?
 
     var otherSections: [Widget?] {
@@ -139,7 +137,6 @@ public class TextRoot: ElementNode {
             middleSpacerWidget,
             referencesSection,
             bottomSpacerWidget,
-            browsingSection,
             debugSection
         ]
     }
@@ -185,9 +182,6 @@ public class TextRoot: ElementNode {
             middleSpacerWidget = SpacerWidget(parent: self, spacerType: .middle, availableWidth: availableWidth - childInset)
             referencesSection = ReferencesSection(parent: self, note: note, availableWidth: availableWidth - childInset)
             bottomSpacerWidget = SpacerWidget(parent: self, spacerType: .bottom, availableWidth: availableWidth - childInset)
-            if Self.showBrowsingSection {
-                browsingSection = BrowsingSection(parent: self, note: note, availableWidth: availableWidth - childInset)
-            }
             if PreferencesManager.showDebugSection {
                 debugSection = DebugSection(parent: self, note: note, availableWidth: availableWidth - childInset)
             }
