@@ -110,9 +110,4 @@ class OmnibarDestinationTests: BaseTest {
         let selectedResultQuery = helper.allAutocompleteResults.matching(helper.autocompleteSelectedPredicate)
         XCTAssertEqual(selectedResultQuery.count, expectedNumberOfAutocompletedCards)
     }
-    
-    override func tearDown() {
-        UITestsMenuBar().destroyDB()
-    }
-    
 }

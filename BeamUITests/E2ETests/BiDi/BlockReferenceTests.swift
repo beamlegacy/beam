@@ -98,9 +98,4 @@ class BlockReferenceTests: BaseTest {
         cardView.addTestRef(referencePart)
         return noteForReference
     }
-    
-    override func tearDown() {
-        UITestsMenuBar().destroyDB()
-    }
-    
 }

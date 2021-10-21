@@ -85,8 +85,4 @@ class CardCreationTests: BaseTest {
         XCTAssertTrue(cardView.waitForCardViewToLoad())
         XCTAssertTrue(cardView.staticText(cardNameToBeCreated).waitForExistence(timeout: implicitWaitTimeout))
     }
-    
-    override func tearDown() {
-        UITestsMenuBar().destroyDB()
-    }
 }

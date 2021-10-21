@@ -39,9 +39,4 @@ class CardViewTests: BaseTest {
         XCTAssertEqual(notes.count, defaultNotesCount)
         XCTAssertEqual(notes.first?.value as! String, "")
     }
-    
-    override func tearDown() {
-        UITestsMenuBar().destroyDB()
-    }
-    
 }

@@ -35,7 +35,7 @@ class LoginTest: BaseTest {
     }
     
     func testloginFormPasswordSave() {
-        let journalView = testPreparartion()
+        let journalView = preparartion()
         //to be moved in a test view once https://gitlab.com/beamgroup/beam/-/merge_requests/1410 is merged
         handleCredentialsPopUp("Save Password", journalView)
 
@@ -44,7 +44,7 @@ class LoginTest: BaseTest {
     }
     
     func testloginFormPasswordSaveCancellation() {
-        let journalView = testPreparartion()
+        let journalView = preparartion()
         //to be moved in a test view once https://gitlab.com/beamgroup/beam/-/merge_requests/1410 is merged
         handleCredentialsPopUp("Not Now", journalView)
 
@@ -52,8 +52,9 @@ class LoginTest: BaseTest {
         //to be added - assertion in password preferences - it exists there. Password cleaning required
     }
     
-    func testPreparartion() -> JournalTestView {
+    func preparartion() -> JournalTestView {
         let journalView = launchApp()
+        
         let helper = BeamUITestsHelper(journalView.app)
 
         helper.openTestPage(page: BeamUITestsHelper.UITestsPageCommand.password)

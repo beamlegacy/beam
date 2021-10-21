@@ -94,8 +94,4 @@ class LoginPasswordAutocompleteTests: BaseTest {
         }
         return WaitHelper().waitForDoesntExist(webView.image("Google"))
     }
-    
-    override func tearDown() {
-        UITestsMenuBar().destroyDB()
-    }
 }

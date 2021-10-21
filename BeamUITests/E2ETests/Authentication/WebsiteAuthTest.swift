@@ -10,7 +10,7 @@ import XCTest
 
 class WebsiteAuthTest: BaseTest {
     
-    let searchAppWebsite = "app.beamapp.co"
+    let searchAppWebsite = "app.beamapp.co "
     let correctLogin = "beam"
     let correctPass = "jiUJDLr>3Dxx"
     
@@ -18,7 +18,8 @@ class WebsiteAuthTest: BaseTest {
         let journalView = launchApp()
         
         testRailPrint("Given I open \(searchAppWebsite) link")
-        journalView.searchInOmniBar(searchAppWebsite, true)
+        journalView.openWebsite(searchAppWebsite)
+        
         let websiteAuthPopupTestView = WebsiteAuthPopupTestView()
         
         testRailPrint("Then I see Website Auth Popup with the following elements on it:")
@@ -41,14 +42,14 @@ class WebsiteAuthTest: BaseTest {
         let journalView = launchApp()
         
         testRailPrint("Given I open \(searchAppWebsite) link")
-        journalView.searchInOmniBar(searchAppWebsite, true)
+        journalView.openWebsite(searchAppWebsite)
         let websiteAuthPopupTestView = WebsiteAuthPopupTestView()
         
         testRailPrint("When I populate auth pop-up with correct credentials")
         let appWebsiteView = websiteAuthPopupTestView.authenticate(correctLogin, correctPass)
         
         testRailPrint("Then I'm successfully redirected to the website and pop-up is closed")
-        XCTAssertTrue(appWebsiteView.staticText("Beam is where ideas take shape").waitForExistence(timeout: implicitWaitTimeout))
+        XCTAssertTrue(appWebsiteView.staticText("Beam Objects").waitForExistence(timeout: implicitWaitTimeout) || appWebsiteView.staticText("Beam is where ideas take shape").waitForExistence(timeout: implicitWaitTimeout))
     }
     
     func testAuthenticationFailure() throws {
@@ -56,7 +57,7 @@ class WebsiteAuthTest: BaseTest {
         let journalView = launchApp()
         
         testRailPrint("Given I open \(searchAppWebsite) link")
-        journalView.searchInOmniBar(searchAppWebsite, true)
+        journalView.openWebsite(searchAppWebsite)
         let websiteAuthPopupTestView = WebsiteAuthPopupTestView()
         
         testRailPrint("When I populate auth pop-up with correct credentials")
