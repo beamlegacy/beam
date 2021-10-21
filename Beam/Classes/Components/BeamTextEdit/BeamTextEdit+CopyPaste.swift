@@ -199,8 +199,9 @@ extension BeamTextEdit {
                 Logger.shared.logError("Cannot paste contents in an editor without a focused bullet", category: .noteEditor)
                 return
             }
-            mngrNode.cmdManager.beginGroup(with: "PasteElementContent")
-            defer { mngrNode.cmdManager.endGroup() }
+            let cmdManager = mngrNode.cmdManager
+            cmdManager.beginGroup(with: "PasteElementContent")
+            defer { cmdManager.endGroup() }
 
             if rootNode.state.nodeSelection != nil {
                 rootNode.eraseNodeSelection(createEmptyNodeInPlace: true, createNodeInEmptyParent: false)
