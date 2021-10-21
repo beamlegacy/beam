@@ -370,4 +370,27 @@ export class BeamElementHelper {
           return !escapingElement || escapingElement.contains(container)
         })
   }
+  /**
+   * Checks if target is 120% taller or 110% wider than window frame.
+   *
+   * @static
+   * @param {DOMRect} bounds element bounds to check
+   * @param {BeamWindow} win 
+   * @return {*}  {boolean} true if either width or height is large
+   * @memberof PointAndShootHelper
+   */
+   static isLargerThanWindow(bounds: DOMRect, win: BeamWindow): boolean {  
+    const windowHeight = win.innerHeight
+    const yPercent = (100 / windowHeight) * bounds.height
+    const yIsLarge = yPercent > 110
+    // If possible return early to skip the second win.innterWidth call
+    if (yIsLarge) {
+      return yIsLarge
+    }
+    
+    const windowWidth = win.innerWidth
+    const xPercent = (100 / windowWidth) * bounds.width
+    const xIsLarge = xPercent > 110
+    return xIsLarge
+  }
 }

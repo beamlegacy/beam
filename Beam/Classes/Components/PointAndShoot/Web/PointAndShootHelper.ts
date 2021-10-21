@@ -4,6 +4,24 @@ import {Util} from "./Util"
 
 export class PointAndShootHelper {
   /**
+   * Check if string matches any items in array of strings. For a minor performance
+   * improvement we check first if the string is a single character.
+   *
+   * @static
+   * @param {string} text
+   * @return {*}  {boolean} true if text matches
+   * @memberof PointAndShootHelper
+   */
+  static isOnlyMarkupChar(text: string): boolean {
+    if (text.length == 1) {
+      return [
+        "•", "-", "|", "–", "—", "·"
+      ].includes(text)
+    } else {
+      return false
+    }
+  }
+  /**
    * Returns whether or not a text is deemed useful enough as a single unit
    * we should be very cautious with what we filter out, so instead of relying
    * on the text length > 1 char we're just having a blacklist of characters
@@ -13,9 +31,7 @@ export class PointAndShootHelper {
   static isTextMeaningful(text: string): boolean {
     if (text) {
       const trimmed = text.trim()
-      return !!trimmed && ![
-        "•", "-", "|", "–", "—", "·"
-      ].includes(trimmed)
+      return !!trimmed && !this.isOnlyMarkupChar(trimmed)
     }
     return false
   }
