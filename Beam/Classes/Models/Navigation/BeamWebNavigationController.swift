@@ -90,11 +90,21 @@ extension BeamWebNavigationController: WKNavigationDelegate {
         default:
             Logger.shared.logInfo("Creating new webview for \(String(describing: navigationAction.request.url?.absoluteString))", category: .web)
         }
+
         if let targetURL = navigationAction.request.url {
             if navigationAction.modifierFlags.contains(.command) {
                 Logger.shared.logInfo("Cmd required create new tab toward \(String(describing: navigationAction.request.url))")
                 _ = page.createNewTab(targetURL, nil, setCurrent: false)
                 decisionHandler(.cancel, preferences)
+                return
+            }
+
+            let navigationUrlHandler = ExternalDeeplinkHandler(request: navigationAction.request)
+            if navigationUrlHandler.isDeeplink() {
+                 decisionHandler(.cancel, preferences)
+                if navigationUrlHandler.shouldOpenDeeplink() {
+                    NSWorkspace.shared.open(targetURL)
+                }
                 return
             }
         }
@@ -118,14 +128,13 @@ extension BeamWebNavigationController: WKNavigationDelegate {
         }
     }
 
-    func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
-    }
+    func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) { }
 
-    func webView(_ webView: WKWebView, didReceiveServerRedirectForProvisionalNavigation navigation: WKNavigation!) {
-    }
+    func webView(_ webView: WKWebView, didReceiveServerRedirectForProvisionalNavigation navigation: WKNavigation!) { }
 
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
         Logger.shared.logError("didFail: \(error)", category: .javascript)
+        page.errorPageManager = nil
         let error = error as NSError
 
         if error.domain == "WebKitErrorDomain" && error.code == 102 {
@@ -200,7 +209,6 @@ extension BeamWebNavigationController: WKNavigationDelegate {
         }
     }
 
-    func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
-    }
+    func webViewWebContentProcessDidTerminate(_ webView: WKWebView) { }
 
 }
