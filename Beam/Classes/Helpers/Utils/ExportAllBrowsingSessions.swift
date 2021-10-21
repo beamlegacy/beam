@@ -11,13 +11,12 @@ import BeamCore
 func export_all_browsing_sessions(to url: URL?) {
     guard let url = url else { return }
 
-    let docManager = DocumentManager()
-    let sessions = docManager.allDocumentsTitles(includeDeletedNotes: true).compactMap({ title -> [BrowsingTree]? in
-        guard let note = BeamNote.fetch(docManager, title: title, keepInMemory: false) else { return nil }
-        return note.browsingSessions
-    }).reduce([], { result, trees -> [BrowsingTree] in
-        result + trees
-    })
+    let treeManager = BrowsingTreeStoreManager.shared
+
+    guard let sessions = try? treeManager.getAllBrowsingTrees() else {
+        Logger.shared.logError("Could not fetch browsing sessions", category: .web)
+        return
+    }
 
     let encoder = JSONEncoder()
 

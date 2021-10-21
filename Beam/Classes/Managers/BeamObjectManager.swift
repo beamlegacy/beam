@@ -60,6 +60,7 @@ class BeamObjectManager {
         DatabaseManager().registerOnBeamObjectManager()
         PasswordManager.shared.registerOnBeamObjectManager()
         BeamFileDBManager.shared.registerOnBeamObjectManager()
+        BrowsingTreeStoreManager.shared.registerOnBeamObjectManager()
     }
 
     var conflictPolicyForSave: BeamObjectConflictResolution = .replace
