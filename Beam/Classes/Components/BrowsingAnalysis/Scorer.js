@@ -1,8 +1,14 @@
 if (!window.beam) {
     window.beam = {};
 }
+
 window.beam.__ID__Scorer = {
+    waiting: false,
     scorer_scroll: function (_ev) {
+      if (window.beam.__ID__Scorer.waiting) {
+          // return early if we're still throttled
+          return
+      }
       const win = window
       const doc = win.document
       const body = doc.body
@@ -25,6 +31,11 @@ window.beam.__ID__Scorer = {
         scale: win.visualViewport.scale
       }
       window.webkit.messageHandlers.score_scroll.postMessage(scrollInfo)
+      window.beam.__ID__Scorer.waiting = true;    
+      // After timeout allow scorer_scroll to be called again         
+      setTimeout(function () {      
+        window.beam.__ID__Scorer.waiting = false;          
+      }, 500);
     }
 };
 

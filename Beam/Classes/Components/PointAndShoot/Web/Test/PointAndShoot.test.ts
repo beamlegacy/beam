@@ -94,7 +94,6 @@ function createRange(): BeamRange {
 }
 
 test("mouse move without Option", () => {
-  // Note: option isn't taken into account on the JS side anymore
   const { pns, testUI } = pointAndShootTestBed()
   const hoveredElement = new BeamHTMLElementMock("p")
   hoveredElement.bounds = {
@@ -107,12 +106,7 @@ test("mouse move without Option", () => {
   hoveredElement.height = 120
   const pointEvent = new BeamMouseEvent({ name: "mousemove", target: hoveredElement, clientX: 101, clientY: 102 })
   pns.onMouseMove(pointEvent)
-  expect(testUI.eventsCount).toEqual(6)
-  expect(testUI.findEventByName("hasSelection")).toEqual({ name: "hasSelection", hasSelection: false })
-  expect(testUI.findEventByName("selectBounds")).toEqual({ name: "selectBounds", rangeGroups: [] })
-  expect(testUI.findEventByName("shootBounds")).toEqual({ name: "shootBounds", shootTargets: [] })
-  expect(testUI.findEventByName("pointBounds")).toBeTruthy()
-  expect(testUI.findEventByName("frames")).toBeTruthy()
+  expect(testUI.eventsCount).toEqual(0)
 })
 
 test("point with mouse move + Option", () => {

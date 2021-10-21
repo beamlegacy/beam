@@ -222,7 +222,8 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
   }
 
   onMouseMove(ev: BeamMouseEvent): void {
-    if (this.mouseLocation?.x !== ev.clientX || this.mouseLocation?.y !== ev.clientY) {
+    const mouseLocationHasChanged = this.mouseLocation?.x !== ev.clientX || this.mouseLocation?.y !== ev.clientY
+    if (mouseLocationHasChanged && this.isOnlyAltKey(ev)) {
       // Code when the (physical) mouse actually moves
       if (!this.isPointDisabled(ev)) {
         this.point(ev.target)
