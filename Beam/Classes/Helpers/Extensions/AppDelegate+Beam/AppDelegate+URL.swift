@@ -28,7 +28,7 @@ extension AppDelegate {
         var handled = false
         if scheme == "beam" {
             processBeamURL(components: components)
-        } else if url.absoluteString.mayBeWebURL {
+        } else if url.absoluteString.mayBeWebURL || url.absoluteString.mayBeFileURL {
             handled = processWebURL(components: components)
         } else {
             OAuthSwift.handle(url: url)
