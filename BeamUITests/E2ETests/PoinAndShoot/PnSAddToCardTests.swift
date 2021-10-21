@@ -174,10 +174,4 @@ class PnSAddToCardTests: BaseTest {
         let cardNotes = CardTestView().getCardNotesForVisiblePart()
         XCTAssertEqual(cardNotes.count, 0)
     }
-    
-    
-    override func tearDown() {
-        UITestsMenuBar().destroyDB()
-    }
-    
 }

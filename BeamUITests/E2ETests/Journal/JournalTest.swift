@@ -37,6 +37,4 @@ class JournalTest: BaseTest {
         testRailPrint("Then Journal scroll view still exists")
         XCTAssertTrue(journalScrollView.exists)
     }
-    
-    
 }

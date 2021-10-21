@@ -73,8 +73,4 @@ class DownloadsTest: BaseTest {
         XCTAssertFalse(downloadsView.staticText(DownloadViewLocators.Labels.downloadsLabel.accessibilityIdentifier).exists)
         XCTAssertFalse(omniBarView.button(OmniBarLocators.Buttons.downloadsButton.accessibilityIdentifier).exists)
     }
-    
-    override func tearDown() {
-        UITestsMenuBar().destroyDB()
-    }
 }
