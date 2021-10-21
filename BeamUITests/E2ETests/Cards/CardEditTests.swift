@@ -109,9 +109,4 @@ class CardEditTests: BaseTest {
         XCTAssertTrue(cardView.staticText(CardViewLocators.StaticTexts.privateLabel.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
         XCTAssertTrue(cardView.image(CardViewLocators.Buttons.privateLock.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
     }
-    
-    override func tearDown() {
-        UITestsMenuBar().destroyDB()
-    }
-    
 }

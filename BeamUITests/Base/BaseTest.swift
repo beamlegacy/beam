@@ -14,6 +14,7 @@ class BaseTest: XCTestCase {
 
     let implicitWaitTimeout = TimeInterval(10)
     let minimumWaitTimeout = TimeInterval(2)
+    let beamAppInstance = XCUIApplication(bundleIdentifier: "co.beamapp.macos")
     
     override func setUpWithError() throws {
         try super.setUpWithError()
@@ -22,7 +23,16 @@ class BaseTest: XCTestCase {
 
     override func tearDownWithError() throws {
         super.tearDown()
+        terminateAppInstance()
         storeScreenshot()
+    }
+    
+    override func tearDown() {
+        if isAppRunning() {
+            UITestsMenuBar().destroyDB()
+        }
+        super.tearDown()
+        terminateAppInstance()
     }
 
     private func storeScreenshot() {
@@ -59,4 +69,14 @@ class BaseTest: XCTestCase {
     }
     
     func testRailPrint(_ text: String) { print(text) }
+    
+    func terminateAppInstance() {
+        if isAppRunning() {
+            beamAppInstance.terminate()
+        }
+    }
+    
+    func isAppRunning() -> Bool {
+        return beamAppInstance.state != XCUIApplication.State.notRunning
+    }
 }

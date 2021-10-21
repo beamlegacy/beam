@@ -216,8 +216,4 @@ class OmnibarAutocompleteTests: BaseTest {
         testRailPrint("Then search field value is updated accordingly")
         XCTAssertTrue(waitHelper.waitForStringValueEqual(expectedSearchFieldText + "s", omnibarView.getOmniBarSearchField()))
     }
-    
-    override func tearDown() {
-        UITestsMenuBar().destroyDB()
-    }
 }

@@ -175,9 +175,4 @@ class SearchOnWebTests: BaseTest {
         testRailPrint("Then I see correct number of results")
         XCTAssertTrue(WaitHelper().waitForCountValueEqual(timeout: minimumWaitTimeout, expectedNumber: 2, elementQuery: searchView.app.staticTexts.matching(identifier: expectedSecondResult)))
     }
-    
-    override func tearDown() {
-        UITestsMenuBar().destroyDB()
-    }
-    
 }

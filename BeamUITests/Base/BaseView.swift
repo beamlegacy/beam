@@ -101,15 +101,30 @@ class BaseView {
     
     @discardableResult
     func searchInOmniBar(_ searchText: String, _ typeReturnButton: Bool) -> WebTestView {
-        let omniSearchField = searchField(OmniBarLocators.SearchFields.omniSearchField.accessibilityIdentifier)
-        omniSearchField.tapInTheMiddle()
-        omniSearchField.clear()
-        omniSearchField.typeText(searchText)
-        WaitHelper().waitForStringValueEqual(searchText, OmniBarTestView().getOmniBarSearchField())
+        populateOmnibarWith(searchText)
         if typeReturnButton {
             typeKeyboardKey(.enter)
             _ = button(OmniBarLocators.Buttons.openCardButton.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout)
         }
+        return WebTestView()
+    }
+    
+    @discardableResult
+    func populateOmnibarWith(_ text: String) -> OmniBarTestView {
+        let omniSearchField = searchField(OmniBarLocators.SearchFields.omniSearchField.accessibilityIdentifier)
+        omniSearchField.tapInTheMiddle()
+        omniSearchField.clear()
+        omniSearchField.typeText(text)
+        WaitHelper().waitForStringValueEqual(text, OmniBarTestView().getOmniBarSearchField(), minimumWaitTimeout)
+        return OmniBarTestView()
+    }
+    
+    @discardableResult
+    func openWebsite(_ url: String) -> WebTestView {
+        _ = populateOmnibarWith(url)
+        self.typeKeyboardKey(.space) //trick to get rid of Google Search autofill on CI
+        self.typeKeyboardKey(.delete)
+        self.typeKeyboardKey(.enter)
         return WebTestView()
     }
     
