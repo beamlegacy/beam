@@ -10,11 +10,11 @@ import Foundation
 /// NSMenu bar methods handling
 extension BeamWindow {
     @IBAction func showPreviousTab(_ sender: Any?) {
-        state.browserTabsManager.showPreviousTab()
+        state.showPreviousTab()
     }
 
     @IBAction func showNextTab(_ sender: Any?) {
-        state.browserTabsManager.showNextTab()
+        state.showNextTab()
     }
 
     @IBAction func showJournal(_ sender: Any?) {
@@ -89,7 +89,7 @@ extension BeamWindow {
     }
 
     @IBAction func openLocation(_ sender: Any?) {
-        state.focusOmnibox()
+        state.setFocusOmnibox()
     }
 
     @IBAction func showCardSelector(_ sender: Any?) {
