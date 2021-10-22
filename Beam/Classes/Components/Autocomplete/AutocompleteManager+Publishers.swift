@@ -55,7 +55,7 @@ extension AutocompleteManager {
 
     private func autocompleteNotesResults(for query: String) -> Future<[AutocompleteResult], Error> {
         Future { [weak self] promise in
-            self?.beamData.documentManager.documentsWithLimitTitleMatch(title: query, limit: 6) { result in
+            self?.beamData.documentManager.documentsWithTitleMatch(title: query) { result in
                 switch result {
                 case .failure(let error): promise(.failure(error))
                 case .success(let documentStructs):
@@ -63,8 +63,8 @@ extension AutocompleteManager {
                     let scores = GRDBDatabase.shared.getFrecencyScoreValues(noteIds: ids, paramKey: AutocompleteManager.noteFrecencyParamKey)
                     let autocompleteResults = documentStructs.map {
                         AutocompleteResult(text: $0.title, source: .note(noteId: $0.id), completingText: query, uuid: $0.id, score: scores[$0.id])
-                    }
-                    promise(.success(autocompleteResults))
+                    }.sorted(by: >).prefix(6)
+                    promise(.success(Array(autocompleteResults)))
                 }
             }
         }
@@ -113,12 +113,15 @@ extension AutocompleteManager {
 
     private func autocompleteLinkStoreResults(for query: String) -> Future<[AutocompleteResult], Error> {
         Future { promise in
-            let results = LinkStore.shared.getLinks(matchingUrl: query).map { result -> AutocompleteResult in
-                let url = URL(string: result.url)
-                let text = url?.urlStringWithoutScheme.removingPercentEncoding ?? result.url
+            let links = LinkStore.shared.getLinks(matchingUrl: query)
+            let scores = GRDBDatabase.shared.getFrecencyScoreValues(urlIds: Array(links.keys), paramKey: AutocompleteManager.urlFrecencyParamKey)
+            let results = links.map { (urlId, link) -> AutocompleteResult in
+                let url = URL(string: link.url)
+                let text = url?.urlStringWithoutScheme.removingPercentEncoding ?? link.url
                 return AutocompleteResult(text: text, source: .url, url: url,
-                                          information: result.title, completingText: query)
-            }
+                                          information: link.title, completingText: query,
+                                          score: scores[urlId])
+            }.sorted(by: >)
             promise(.success(results))
         }
     }
@@ -191,5 +194,4 @@ extension AutocompleteManager {
             self.autocompleteResults = finalResults
         }
     }
-
 }

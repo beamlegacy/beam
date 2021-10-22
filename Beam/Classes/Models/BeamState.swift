@@ -184,6 +184,7 @@ import Sentry
 
         note.sources.refreshScores()
         data.noteFrecencyScorer.update(id: note.id, value: 1.0, eventType: .noteVisit, date: BeamDate.now, paramKey: .note30d0)
+        data.noteFrecencyScorer.update(id: note.id, value: 1.0, eventType: .noteVisit, date: BeamDate.now, paramKey: .note30d1)
         currentPage = nil
         currentNote = note
         if let elementId = elementId {

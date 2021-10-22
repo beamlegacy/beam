@@ -77,14 +77,7 @@ extension AutocompleteManager {
         sortableResult.append(contentsOf: urlResultsTruncated)
         sortableResult.append(contentsOf: notesResultsTruncated)
 
-        sortableResult.sort(by: { (lhs, rhs) in
-            guard let slhs = lhs.score, let srhs = rhs.score else {
-                let lhsr = lhs.text.lowercased().commonPrefix(with: lhs.completingText?.lowercased() ?? "").count
-                let rhsr = rhs.text.lowercased().commonPrefix(with: rhs.completingText?.lowercased() ?? "").count
-                return lhsr > rhsr
-            }
-            return slhs > srhs
-        })
+        sortableResult.sort(by: >)
 
         let resultLimit = 8
         // leave space for at least 2 search engine result and 1 create card

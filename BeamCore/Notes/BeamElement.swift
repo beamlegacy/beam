@@ -117,7 +117,7 @@ public enum ElementKind: Codable, Equatable {
             } else if let sizeRatio = try? container.decodeIfPresent(Double.self, forKey: .sizeRatio) {
                 displayInfos = MediaDisplayInfos(height: nil, width: nil, displayRatio: sizeRatio)
             }
-            
+
             self = .image(id, displayInfos: displayInfos)
         case "embed":
             let sizeRatio = try? container.decodeIfPresent(Double.self, forKey: .sizeRatio)
