@@ -8,7 +8,7 @@
 import Foundation
 
 class ExternalDeeplinkHandler {
-    static let internalSchemes: Set<String> = ["http", "https", "file", "about"]
+    static let internalSchemes: Set<String> = ["http", "https", "file", "about", "beam"]
 
     let request: URLRequest
 
