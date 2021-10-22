@@ -35,7 +35,7 @@ protocol WebPage: AnyObject, Scorable {
     func executeJS(_ jsCode: String, objectName: String?) -> Promise<Any?>
 
     // MARK: Note handling
-    func addToNote(allowSearchResult: Bool) -> BeamElement?
+    func addToNote(allowSearchResult: Bool, inSourceBullet: Bool) -> BeamElement?
     func setDestinationNote(_ note: BeamNote, rootElement: BeamElement?)
     func getNote(fromTitle: String) -> BeamNote?
 
@@ -109,7 +109,7 @@ extension WebPage {
     }
 
     func setDestinationNote(_ note: BeamNote, rootElement: BeamElement?) { }
-    func addToNote(allowSearchResult: Bool) -> BeamElement? {
+    func addToNote(allowSearchResult: Bool, inSourceBullet: Bool) -> BeamElement? {
         nil
     }
     /// Calls BeamNote to fetch a note from the documentManager

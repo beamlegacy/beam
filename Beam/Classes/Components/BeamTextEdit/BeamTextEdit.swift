@@ -1667,11 +1667,13 @@ public extension CALayer {
         if dragIndicator.superlayer == nil {
             layer?.addSublayer(dragIndicator)
         }
-        dragIndicator.backgroundColor = .black
+        dragIndicator.backgroundColor = BeamColor.Bluetiful.cgColor
         dragIndicator.borderWidth = 0
         dragIndicator.isHidden = false
+        dragIndicator.zPosition = 10
+        dragIndicator.cornerRadius = 1
 
-        dragIndicator.frame = CGRect(x: node.offsetInDocument.x + node.contentsLead, y: node.offsetInDocument.y + node.contentsFrame.maxY, width: node.frame.width - node.contentsLead, height: 1)
+        dragIndicator.frame = CGRect(x: node.offsetInDocument.x + node.contentsLead, y: node.offsetInDocument.y + node.contentsFrame.maxY, width: node.frame.width - node.contentsLead, height: 2)
 
         if point.y < (node.offsetInDocument.y + node.contentsFrame.height / 2) {
             return (node, false)

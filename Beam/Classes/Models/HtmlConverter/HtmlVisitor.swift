@@ -122,7 +122,7 @@ class HtmlVisitor {
                     // everything in closures
 
                     if let fileStorage = fileStorage {
-                        let closure: ((data: Data, mimeType: String)?) -> Void = { result in
+                        let closure: ((data: Data, mimeType: String)?) -> Void = { [urlBase] result in
                             guard let (data, mimeType) = result,
                                   let fileId = Self.storeImageData(data, mimeType, fileName, fileStorage),
                                   let image = NSImage(data: data) else {
@@ -130,6 +130,9 @@ class HtmlVisitor {
                                 return
                             }
                             imgElement.kind = .image(fileId, displayInfos: MediaDisplayInfos(height: Int(image.size.height), width: Int(image.size.width), displayRatio: nil))
+
+                            // If we can get the image, change the text of the element to the actual source instead of the link
+                            imgElement.text = BeamText(text: urlBase.absoluteString)
                         }
                         let object = DelayedClosure(closure: closure, url: url)
                         delayedClosures.append(object)
@@ -145,6 +148,10 @@ class HtmlVisitor {
                        let image = NSImage(data: base64) {
                         let imgElement = BeamElement()
                         imgElement.kind = .image(fileId, displayInfos: MediaDisplayInfos(height: Int(image.size.height), width: Int(image.size.width), displayRatio: nil))
+
+                        // If we can get the image, change the text of the element to the actual source instead of the link
+                        imgElement.text = BeamText(text: urlBase.absoluteString)
+
                         text.append(imgElement)
                     }
                 }
