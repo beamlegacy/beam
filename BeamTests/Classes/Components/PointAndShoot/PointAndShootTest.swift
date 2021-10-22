@@ -63,7 +63,7 @@ class TestWebPage: WebPage {
         events.append("addJS \(source.hashValue) \(String(describing: when))")
     }
 
-    func createNewTab(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, setCurrent: Bool) -> WebPage {
+    func createNewTab(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, setCurrent: Bool) -> WebPage? {
         events.append("createNewTab \(targetURL) \(setCurrent))")
         return TestWebPage(browsingScorer: browsingScorer, passwordOverlayController: passwordOverlayController, pns: pointAndShoot,
                            fileStorage: storage, downloadManager: downloadManager, navigationController: navigationController)
@@ -83,6 +83,8 @@ class TestWebPage: WebPage {
     func leave() {
         events.append("leave")
     }
+
+    func shouldNavigateInANewTab(url: URL) -> Bool { false }
 
     func navigatedTo(url: URL, title: String, isNavigation: Bool) {
         events.append("navigatedTo \(url) \(title)")
