@@ -29,7 +29,9 @@ struct BeamTextField: NSViewRepresentable {
 
     var onCommit: (_ modifierFlags: NSEvent.ModifierFlags?) -> Void = { _ in }
     var onEscape: (() -> Void)?
-    var onTab: (() -> Void)?
+    var onBackspace: (() -> Void)?
+    /// Returns true to stop event propagation
+    var onTab: (() -> Bool)?
     var onCursorMovement: (CursorMovement) -> Bool = { _ in false }
     var onModifierFlagPressed: ((_ modifierFlag: NSEvent) -> Void)?
     var onStartEditing: () -> Void = { }
@@ -233,9 +235,10 @@ struct BeamTextField: NSViewRepresentable {
                     onEscape()
                 }
                 return true
-            } else if let onTab = parent.onTab, commandSelector == #selector(NSResponder.insertTab(_:)) {
-                onTab()
-                return true
+            } else if commandSelector == #selector(NSResponder.insertTab(_:)), let onTab = parent.onTab {
+                return onTab()
+            } else if commandSelector == #selector(NSResponder.deleteBackward(_:)), let onBackspace = parent.onBackspace {
+                onBackspace()
             }
             return false
         }

@@ -37,67 +37,126 @@ struct MeetingModalView: View {
 
     @State private var hoveredCloseButtonIndex: Int?
 
+    // macOS >= 12 has @FocusState that works with .focused(_, equals:). Trying to mimic the pattern here.
+    @State private var focusedField: FocusableField?
+    private enum FocusableField: Hashable, Equatable {
+        case meetingName
+        case attendeeName(_ attendeeId: UUID)
+        case attendeeEmail(_ attendeeId: UUID)
+    }
+
     var body: some View {
         FormatterViewBackground {
             VStack(alignment: .leading, spacing: 0) {
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 0) {
-                        Text("Meeting")
-                            .font(BeamFont.regular(size: 12).swiftUI)
-                            .foregroundColor(BeamColor.LightStoneGray.swiftUI)
-                            .padding(.bottom, BeamSpacing._120)
+                    ScrollViewReader { proxy in
+                        VStack(alignment: .leading, spacing: 0) {
+                            Text("Meeting")
+                                .font(BeamFont.regular(size: 12).swiftUI)
+                                .foregroundColor(BeamColor.LightStoneGray.swiftUI)
+                                .padding(.bottom, BeamSpacing._120)
 
-                        HStack {
-                            BoxedTextFieldView(title: "Meeting Title", text: $viewModel.meetingName)
-                            Icon(name: "tabs-close",
-                                 color: hoveredCloseButtonIndex == -1 ? BeamColor.Niobium.swiftUI : BeamColor.AlphaGray.swiftUI)
-                                .onTapGesture {
-                                    viewModel.meetingName = ""
-                                }
-                                .onHover { h in
-                                    hoveredCloseButtonIndex = h ? -1 : nil
-                                }
-                        }
+                            HStack {
+                                BoxedTextFieldView(title: "Meeting Title", text: $viewModel.meetingName, isEditing: Binding<Bool>(
+                                    get: { focusedField == .meetingName },
+                                    set: {
+                                        if $0 {
+                                            focusedField = .meetingName
+                                        } else if focusedField == .meetingName {
+                                            focusedField = nil
+                                        }
+                                    }))
+                                Icon(name: "tabs-close",
+                                     color: hoveredCloseButtonIndex == -1 ? BeamColor.Niobium.swiftUI : BeamColor.AlphaGray.swiftUI)
+                                    .onTapGesture {
+                                        viewModel.meetingName = ""
+                                    }
+                                    .onHover { h in
+                                        hoveredCloseButtonIndex = h ? -1 : nil
+                                    }
+                            }
 
-                        Text("Attendees")
-                            .font(BeamFont.regular(size: 12).swiftUI)
-                            .foregroundColor(BeamColor.LightStoneGray.swiftUI)
-                            .padding(.top, 30)
-                            .padding(.bottom, BeamSpacing._120)
-                        VStack(spacing: BeamSpacing._80) {
-                            ForEach(Array(viewModel.attendees.enumerated()), id: \.1.id) { index, attendee in
-                                HStack(spacing: BeamSpacing._80) {
-                                    BoxedTextFieldView(title: "Email Address", text: Binding<String>(
-                                                    get: { attendee.email },
-                                                    set: { viewModel.attendees[index].email = $0 }))
-                                    BoxedTextFieldView(title: "Name", text: Binding<String>(
-                                                    get: { attendee.name },
-                                                    set: { viewModel.attendees[index].name = $0 }), foregroundColor: BeamColor.Beam)
-                                    Icon(name: "tabs-close",
-                                         color: hoveredCloseButtonIndex == index ? BeamColor.Niobium.swiftUI : BeamColor.AlphaGray.swiftUI)
-                                        .onTapGesture {
-                                            viewModel.removeAttendee(attendee)
-                                        }
-                                        .onHover { h in
-                                            hoveredCloseButtonIndex = h ? index : nil
-                                        }
+                            Text("Attendees")
+                                .font(BeamFont.regular(size: 12).swiftUI)
+                                .foregroundColor(BeamColor.LightStoneGray.swiftUI)
+                                .padding(.top, 30)
+                                .padding(.bottom, BeamSpacing._120)
+                            VStack(spacing: BeamSpacing._80) {
+                                ForEach(Array(viewModel.attendees.enumerated()), id: \.1.id) { index, attendee in
+                                    HStack(spacing: BeamSpacing._80) {
+                                        BoxedTextFieldView(title: "Email Address", text: Binding<String>(
+                                            get: { attendee.email },
+                                            set: { viewModel.attendees[index].email = $0 }),
+                                                           isEditing: Binding<Bool>(
+                                                            get: { focusedField == .attendeeEmail(attendee.id) },
+                                                            set: {
+                                                                if $0 {
+                                                                    focusedField = .attendeeEmail(attendee.id)
+                                                                } else if focusedField == .attendeeEmail(attendee.id) {
+                                                                    focusedField = nil
+                                                                }
+                                                            }),
+                                                           onCommit: { viewModel.addMeeting() },
+                                                           onBackspace: { if attendee.email.isEmpty { viewModel.removeAttendee(attendee) } },
+                                                           onEscape: { viewModel.cancel() })
+                                        BoxedTextFieldView(title: "Name", text: Binding<String>(
+                                            get: { attendee.name },
+                                            set: { viewModel.attendees[index].name = $0 }),
+                                                           isEditing: Binding<Bool>(
+                                                            get: { focusedField == .attendeeName(attendee.id) },
+                                                            set: {
+                                                                if $0 {
+                                                                    focusedField = .attendeeName(attendee.id)
+                                                                } else if focusedField == .attendeeName(attendee.id) {
+                                                                    focusedField = nil
+                                                                }
+                                                            }),
+                                                           foregroundColor: BeamColor.Beam,
+                                                           onCommit: { viewModel.addMeeting() },
+                                                           onEscape: { viewModel.cancel() },
+                                                           onTab: {
+                                            if index == viewModel.attendees.count - 1 {
+                                                viewModel.createNewAttendee()
+                                                focusLastAttendee(scrollViewProxy: proxy)
+                                                return true
+                                            }
+                                            return false
+                                        })
+                                        Icon(name: "tabs-close",
+                                             color: hoveredCloseButtonIndex == index ? BeamColor.Niobium.swiftUI : BeamColor.AlphaGray.swiftUI)
+                                            .onTapGesture {
+                                                viewModel.removeAttendee(attendee)
+                                            }
+                                            .onHover { h in
+                                                hoveredCloseButtonIndex = h ? index : nil
+                                            }
+                                    }
+                                    .id(attendee.id)
+                                }
+                                if viewModel.canAddAttendee {
+                                    HStack(spacing: BeamSpacing._80) {
+                                        Text("Add Attendee")
+                                            .font(BeamFont.regular(size: 12).swiftUI)
+                                            .foregroundColor(BeamColor.LightStoneGray.swiftUI)
+                                            .padding(BeamSpacing._80)
+                                        Spacer()
+                                        Icon(name: "tabs-new",
+                                             color: hoveredCloseButtonIndex == -2 ? BeamColor.Niobium.swiftUI : BeamColor.AlphaGray.swiftUI)
+                                            .onHover { h in
+                                                hoveredCloseButtonIndex = h ? -2 : nil
+                                            }
+                                    }
+                                    .contentShape(Rectangle())
+                                    .onTapGesture {
+                                        viewModel.createNewAttendee()
+                                        focusLastAttendee(scrollViewProxy: proxy)
+                                    }.id("add-attendee")
                                 }
                             }
-                            if viewModel.canAddAttendee {
-                                HStack(spacing: BeamSpacing._80) {
-                                    BoxedTextFieldView(title: "Email Address", text: $viewModel.additionalAttendee.email, onCommit: {
-                                        viewModel.onCommitNewAttendee()
-                                    })
-                                    BoxedTextFieldView(title: "Name", text: $viewModel.additionalAttendee.name, onCommit: {
-                                        viewModel.onCommitNewAttendee()
-                                    })
-                                    Icon(name: "tabs-close").opacity(0)
-                                }
-                            }
                         }
+                        .padding([.horizontal, .top], BeamSpacing._400 * 2)
+                        .padding(.bottom, BeamSpacing._200)
                     }
-                    .padding([.horizontal, .top], BeamSpacing._400 * 2)
-                    .padding(.bottom, BeamSpacing._200)
                 }
 
                 HStack(spacing: BeamSpacing._200) {
@@ -133,6 +192,14 @@ struct MeetingModalView: View {
         .frame(minHeight: 300, maxHeight: 500)
         .fixedSize(horizontal: false, vertical: true)
     }
+
+    func focusLastAttendee(scrollViewProxy: ScrollViewProxy) {
+        guard let last = viewModel.attendees.last else { return }
+        focusedField = .attendeeEmail(last.id)
+        DispatchQueue.main.asyncAfter(deadline: .now().advanced(by: .milliseconds(100))) {
+            scrollViewProxy.scrollTo("add-attendee")
+        }
+    }
 }
 
 extension MeetingModalView {
@@ -140,7 +207,6 @@ extension MeetingModalView {
     class ViewModel: ObservableObject {
         @Published fileprivate var attendees: [Meeting.Attendee]
         @Published fileprivate var meetingName: String
-        @Published fileprivate var additionalAttendee = Meeting.Attendee(email: "", name: "")
         @Published fileprivate var linkCards: Bool = true
 
         private var onFinish: ((Meeting?) -> Void)?
@@ -151,7 +217,11 @@ extension MeetingModalView {
 
         init(meetingName: String, attendees: [Meeting.Attendee], onFinish: ((Meeting?) -> Void)? = nil) {
             self.meetingName = meetingName
-            self.attendees = attendees
+            if attendees.isEmpty {
+                self.attendees = [.init(email: "", name: "")]
+            } else {
+                self.attendees = attendees
+            }
             self.onFinish = onFinish
         }
 
@@ -159,16 +229,14 @@ extension MeetingModalView {
             self.attendees.removeAll { $0.id == attendee.id }
         }
 
-        func onCommitNewAttendee() {
-            guard !additionalAttendee.email.isEmpty && !additionalAttendee.name.isEmpty else { return }
-
-            self.attendees.append(additionalAttendee)
-            self.additionalAttendee = .init(email: "", name: "")
+        func createNewAttendee() {
+            self.attendees.append(.init(email: "", name: ""))
         }
 
         func addMeeting() {
             guard !meetingName.isEmpty else { return }
-            let meeting = Meeting(name: meetingName, attendees: attendees, linkCards: linkCards)
+            let onlyFilledAttendees = attendees.filter { !$0.email.isEmpty || !$0.name.isEmpty }
+            let meeting = Meeting(name: meetingName, attendees: onlyFilledAttendees, linkCards: linkCards)
             onFinish?(meeting)
         }
 
