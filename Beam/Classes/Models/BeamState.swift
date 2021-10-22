@@ -35,7 +35,7 @@ import Sentry
         AutocompleteManager(with: data, searchEngine: searchEngine)
     }()
     private(set) lazy var browserTabsManager: BrowserTabsManager = {
-        let manager = BrowserTabsManager(with: data)
+        let manager = BrowserTabsManager(with: data, state: self)
         manager.delegate = self
         return manager
     }()
@@ -55,7 +55,11 @@ import Sentry
     @Published var destinationCardNameSelectedRange: Range<Int>?
 
     @Published var windowIsResizing = false
+    @Published var windowIsMain = true
     @Published var windowFrame = CGRect.zero
+    var associatedWindow: NSWindow? {
+        AppDelegate.main.windows.first { $0.state === self }
+    }
 
     @Published var mode: Mode = .today {
         didSet {
@@ -270,16 +274,27 @@ import Sentry
         _ = addNewTab(origin: origin, note: note, element: node.element, url: url)
     }
 
-    func closedTab(_ index: Int) {
+    func closedTab(_ index: Int, allowClosingPinned: Bool = false) {
         EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
         let tab = self.browserTabsManager.tabs[index]
-        cmdManager.run(command: CloseTab(tab: tab), on: self)
+        closeTabIfPossible(tab, allowClosingPinned: allowClosingPinned)
     }
 
-    func closeCurrentTab() -> Bool {
+    func closeCurrentTab(allowClosingPinned: Bool = false) -> Bool {
         EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
         guard let currentTab = self.browserTabsManager.currentTab else { return false }
-        return cmdManager.run(command: CloseTab(tab: currentTab), on: self)
+        return closeTabIfPossible(currentTab, allowClosingPinned: allowClosingPinned)
+    }
+
+    @discardableResult
+    private func closeTabIfPossible(_ tab: BrowserTab, allowClosingPinned: Bool = false) -> Bool {
+        if tab.isPinned && !allowClosingPinned {
+            if let nextUnpinnedTabIndex = browserTabsManager.tabs.firstIndex(where: { !$0.isPinned }) {
+                browserTabsManager.showTab(at: nextUnpinnedTabIndex)
+            }
+            return true
+        }
+        return cmdManager.run(command: CloseTab(tab: tab), on: self)
     }
 
     func createNoteForQuery(_ query: String) -> BeamNote {
@@ -348,7 +363,7 @@ import Sentry
             searchEngine.query = result.text
             // Logger.shared.logDebug("Start search query: \(searchEngine.searchUrl)")
             let url = URL(string: searchEngine.searchUrl)!
-            if mode == .web, currentTab != nil {
+            if mode == .web && currentTab != nil && currentTab?.shouldNavigateInANewTab(url: url) != true {
                 navigateCurrentTab(toURL: url)
             } else {
                 _ = createTab(withURL: url, originalQuery: result.text)
@@ -360,7 +375,7 @@ import Sentry
                 Logger.shared.logError("autocomplete result without correct url \(result.text)", category: .search)
                 return
             }
-            if  mode == .web && currentTab != nil {
+            if  mode == .web && currentTab != nil && currentTab?.shouldNavigateInANewTab(url: url) != true {
                 navigateCurrentTab(toURL: url)
             } else {
                 _ = createTab(withURL: url, originalQuery: result.text)
@@ -395,7 +410,7 @@ import Sentry
 
         // Logger.shared.logDebug("Start query: \(url)")
 
-        if mode == .web, currentTab != nil {
+        if mode == .web && currentTab != nil && currentTab?.shouldNavigateInANewTab(url: url) != true {
             navigateCurrentTab(toURL: url)
         } else {
             _ = createTab(withURL: url, originalQuery: queryString)

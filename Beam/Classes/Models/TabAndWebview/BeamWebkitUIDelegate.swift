@@ -29,7 +29,7 @@ class BeamWebkitUIDelegateController: WebPageHolder, WKUIDelegate {
         }
         Logger.shared.logInfo("Creating new webview tab for \(url.absoluteString)", category: .web)
         let newTab = page.createNewTab(url, configuration, setCurrent: true)
-        return newTab.webView
+        return newTab?.webView
     }
 
     func webViewDidClose(_ webView: WKWebView) {

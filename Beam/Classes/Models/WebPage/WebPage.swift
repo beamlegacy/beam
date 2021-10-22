@@ -40,7 +40,7 @@ protocol WebPage: AnyObject, Scorable {
     func getNote(fromTitle: String) -> BeamNote?
 
     // MARK: Tab handling
-    func createNewTab(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, setCurrent: Bool) -> WebPage
+    func createNewTab(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, setCurrent: Bool) -> WebPage?
     func createNewWindow(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, windowFeatures: WKWindowFeatures, setCurrent: Bool) -> BeamWebView
     func closeTab()
     /**
@@ -52,6 +52,7 @@ protocol WebPage: AnyObject, Scorable {
     /// Leave the page, either by back or forward.
     func leave()
     var appendToIndexer: ((URL, Readability) -> Void)? { get }
+    func shouldNavigateInANewTab(url: URL) -> Bool
     func navigatedTo(url: URL, title: String?, reason: NoteElementAddReason)
     func addTextToClusteringManager(_ text: String, url: URL)
 
@@ -124,10 +125,11 @@ extension WebPage {
 
     func isActiveTab() -> Bool { false }
     func leave() { }
-    func createNewTab(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, setCurrent: Bool) -> WebPage {
+    func createNewTab(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, setCurrent: Bool) -> WebPage? {
         self
     }
 
+    func shouldNavigateInANewTab(url: URL) -> Bool { false }
     func navigatedTo(url: URL, title: String?, reason: NoteElementAddReason) { }
 
     func createNewWindow(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, windowFeatures: WKWindowFeatures, setCurrent: Bool) -> BeamWebView {

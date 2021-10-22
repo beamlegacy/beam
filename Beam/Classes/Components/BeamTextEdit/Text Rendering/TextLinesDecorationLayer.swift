@@ -127,7 +127,7 @@ class TextLinesDecorationLayer: CALayer {
     private func decorate(with attributes: [NSAttributedString.Key: Any],
                           rect: CGRect,
                           boxBackgroundRect: inout CGRect?,
-                          boxColor: inout NSColor?) -> [CALayer]{
+                          boxColor: inout NSColor?) -> [CALayer] {
         var layers = [CALayer]()
 
         if let color = attributes[.boxBackgroundColor] as? NSColor {
