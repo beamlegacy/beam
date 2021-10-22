@@ -95,7 +95,7 @@ class FrecencyNoteTriggerTests: XCTestCase {
             return nil
         }
 
-        func addToNote(allowSearchResult: Bool) -> BeamElement? {
+        func addToNote(allowSearchResult: Bool, inSourceBullet: Bool = true) -> BeamElement? {
             guard let url = url else {
                 Logger.shared.logError("Cannot get current URL", category: .general)
                 return nil

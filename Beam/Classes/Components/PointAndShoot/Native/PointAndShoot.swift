@@ -303,15 +303,19 @@ class PointAndShoot: WebPageHolder, ObservableObject {
             // Updates frecency score of destination note
             self.data.noteFrecencyScorer.update(id: targetNote.id, value: 1.0, eventType: .notePointAndShoot, date: BeamDate.now, paramKey: .note30d0)
             // Add all quotes to source Note
-            if let source = self.page.addToNote(allowSearchResult: true) {
+
+            let shouldAddToSource = shouldAddToSourceNote(elements)
+            if let destinationElement = self.page.addToNote(allowSearchResult: true, inSourceBullet: shouldAddToSource) {
                 if let noteText = noteText, !noteText.isEmpty,
                    let lastQuote = elements.last {
                     // Append NoteText last quote
                     let note = self.createNote(noteText)
                     lastQuote.addChild(note)
                 }
+
                 // Add to source Note
-                elements.forEach({ quote in source.addChild(quote) })
+                elements.forEach({ quote in destinationElement.addChild(quote) })
+
                 // Complete PNS and clear stored data
                 shootGroup.numberOfElements = elements.count
                 shootGroup.setNoteInfo(NoteInfo(id: targetNote.id, title: targetNote.title))
@@ -371,5 +375,18 @@ class PointAndShoot: WebPageHolder, ObservableObject {
     /// - Parameter id: ID of target to remove
     func removeTarget(_ id: String) {
         self.page.executeJS("removeTarget(\"\(id)\")", objectName: "PointAndShoot")
+    }
+
+    //This variable could be migrated as a preference if we want. Setting to true gives the original PnS behavior
+    var embedMediaInSourceBullet = false
+
+    private func shouldAddToSourceNote(_ elements: [BeamElement]) -> Bool {
+        guard !embedMediaInSourceBullet else { return true }
+
+        if let first = elements.first, elements.count == 1, first.kind.isMedia {
+            return false
+        } else {
+            return true
+        }
     }
 }

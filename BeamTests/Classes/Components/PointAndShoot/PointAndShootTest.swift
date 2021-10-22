@@ -105,7 +105,7 @@ class TestWebPage: WebPage {
         events.append("logInNote \(url) \(title ?? "") \(reason)")
     }
 
-    func addToNote(allowSearchResult: Bool) -> BeamCore.BeamElement? {
+    func addToNote(allowSearchResult: Bool, inSourceBullet: Bool = true) -> BeamCore.BeamElement? {
         events.append("addToNote \(allowSearchResult)")
         if let url = self.url {
             self.logInNote(url: url, title: self.title, reason: .pointandshoot)
