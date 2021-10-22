@@ -99,6 +99,7 @@ struct PointAndShootCardPicker: View {
                             if currentCardName == nil || !cardSearchField.isEmpty {
                                 selectSearchResult()
                             }
+                            return true
                         } onCursorMovement: { move -> Bool in
                             autocompleteModel.handleCursorMovement(move)
                         } onStopEditing: {
