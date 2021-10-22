@@ -172,7 +172,7 @@ extension BrowserTabsManager {
         if let url = url {
             tab.load(url: url)
         }
-        if let tabIndex = index, tabs.count > tabIndex, !setCurrent {
+        if let tabIndex = index, tabs.count > tabIndex {
             tabs.insert(tab, at: tabIndex)
         } else {
             tabs.append(tab)
