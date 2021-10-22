@@ -17,6 +17,7 @@ struct BeamFileRecord: Equatable, Hashable {
     var uid: UUID
     var data: Data
     var type: String
+    var size: Int
 
     var createdAt: Date = BeamDate.now
     var updatedAt: Date = BeamDate.now
@@ -45,6 +46,7 @@ extension BeamFileRecord: FetchableRecord {
         updatedAt = row[Columns.updatedAt]
         deletedAt = row[Columns.deletedAt]
         previousChecksum = row[Columns.previousChecksum]
+        size = data.count
     }
 }
 
@@ -89,6 +91,7 @@ extension BeamFileRecord: BeamObjectProtocol {
         case deletedAt
 
         case data
+        case size
     }
 
     public init(from decoder: Decoder) throws {
@@ -103,10 +106,11 @@ extension BeamFileRecord: BeamObjectProtocol {
         deletedAt = try container.decodeIfPresent(Date.self, forKey: .deletedAt)
 
         data = try container.decode(Data.self, forKey: .data)
+        size = data.count
     }
 
     func copy() throws -> BeamFileRecord {
-        BeamFileRecord(name: name, uid: uid, data: data, type: type, createdAt: createdAt, updatedAt: updatedAt, deletedAt: deletedAt, previousChecksum: previousChecksum)
+        BeamFileRecord(name: name, uid: uid, data: data, type: type, size: size, createdAt: createdAt, updatedAt: updatedAt, deletedAt: deletedAt, previousChecksum: previousChecksum)
     }
 }
 
@@ -158,6 +162,7 @@ class BeamFileDB: BeamFileStorage {
                         uid: uid,
                         data: file["data"],
                         type: file["type"],
+                        size: data.count,
                         createdAt: BeamDate.now,
                         updatedAt: BeamDate.now,
                         deletedAt: nil,
@@ -201,7 +206,7 @@ class BeamFileDB: BeamFileStorage {
         let mimeType = type ?? Swime.mimeType(data: data)?.mime ?? "application/octet-stream"
 
         return try dbPool.write { db -> UUID in
-            var f = BeamFileRecord(name: name, uid: uid, data: data, type: mimeType)
+            var f = BeamFileRecord(name: name, uid: uid, data: data, type: mimeType, size: data.count)
             try f.insert(db)
             return uid
         }
@@ -251,7 +256,7 @@ class BeamFileDBManager: BeamFileStorage {
     func insert(name: String, data: Data, type: String? = nil) throws -> UUID {
         let uid = UUID.v5(name: data.SHA256, namespace: .url)
         let mimeType = type ?? Swime.mimeType(data: data)?.mime ?? "application/octet-stream"
-        let file = BeamFileRecord(name: name, uid: uid, data: data, type: mimeType)
+        let file = BeamFileRecord(name: name, uid: uid, data: data, type: mimeType, size: data.count)
         try Self.fileDB.insert(files: [file])
         if AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled {
             try self.saveOnNetwork(file)
