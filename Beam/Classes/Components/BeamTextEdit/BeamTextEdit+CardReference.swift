@@ -85,6 +85,7 @@ extension BeamTextEdit {
         let (_, linkedNoteId) = node.unproxyElement.makeInternalLink(replacementStart..<linkEnd)
         if let linkedNoteId = linkedNoteId {
             data?.noteFrecencyScorer.update(id: linkedNoteId, value: 1.0, eventType: .noteBiDiLink, date: BeamDate.now, paramKey: .note30d0)
+            data?.noteFrecencyScorer.update(id: linkedNoteId, value: 1.0, eventType: .noteBiDiLink, date: BeamDate.now, paramKey: .note30d1)
         }
         cmdManager.insertText(BeamText(text: " "), in: node, at: linkEnd)
         rootNode.cursorPosition = linkEnd + 1

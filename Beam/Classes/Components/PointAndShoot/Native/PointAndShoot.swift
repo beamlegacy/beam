@@ -302,6 +302,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
             targetNote.sources.add(urlId: urlId, noteId: targetNote.id, type: .user, sessionId: self.data.sessionId, activeSources: data.activeSources)
             // Updates frecency score of destination note
             self.data.noteFrecencyScorer.update(id: targetNote.id, value: 1.0, eventType: .notePointAndShoot, date: BeamDate.now, paramKey: .note30d0)
+            self.data.noteFrecencyScorer.update(id: targetNote.id, value: 1.0, eventType: .notePointAndShoot, date: BeamDate.now, paramKey: .note30d1)
             // Add all quotes to source Note
 
             let shouldAddToSource = shouldAddToSourceNote(elements)

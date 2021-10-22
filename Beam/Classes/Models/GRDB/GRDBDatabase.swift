@@ -498,18 +498,21 @@ extension GRDBDatabase {
                         filter: SQLSpecificExpressible? = nil,
                         frencencyParam: FrecencyParamKey) throws -> [SearchResult] {
 
-        let association = BeamElementRecord.frecency.filter(FrecencyNoteRecord.Columns.frecencyKey == frencencyParam).forKey("frecency")
+        let association = BeamElementRecord.frecency
+            .filter(FrecencyNoteRecord.Columns.frecencyKey == frencencyParam)
+            .order(FrecencyNoteRecord.Columns.frecencySortScore.desc)
+            .forKey("frecency")
         var query: QueryInterfaceRequest<BeamElementRecord>
         if let pattern = pattern {
             query = BeamElementRecord.matching(pattern).including(optional: association)
         } else {
-            query = BeamElementRecord.all()
-        }
-        if let maxResults = maxResults {
-            query = query.limit(maxResults)
+            query = BeamElementRecord.all().including(optional: association)
         }
         if let filter = filter {
             query = query.filter(filter)
+        }
+        if let maxResults = maxResults {
+            query = query.limit(maxResults)
         }
         return try SearchResultWithFrecencies.fetchAll(db, query).compactMap { record in
             let beamElement = record.beamElement
@@ -772,6 +775,17 @@ extension GRDBDatabase {
         }
 
         return result
+    }
+    func getFrecencyScoreValues(urlIds: [UInt64], paramKey: FrecencyParamKey) -> [UInt64: Float] {
+        var scores = [UInt64: Float]()
+        try? dbReader.read { db in
+            return try FrecencyUrlRecord
+                .filter(urlIds.contains(FrecencyUrlRecord.Columns.urlId))
+                .filter(FrecencyNoteRecord.Columns.frecencyKey == paramKey)
+                .fetchCursor(db)
+                .forEach { scores[$0.urlId] = $0.frecencySortScore }
+        }
+        return scores
     }
 
     // MARK: - FrecencyNoteRecord
