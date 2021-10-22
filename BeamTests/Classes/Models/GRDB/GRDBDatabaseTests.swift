@@ -330,3 +330,49 @@ class GRDBDatabaseBeamElementTests: XCTestCase {
         expect(scores) == [nil]
     }
 }
+
+class GRDBDatabaseBeamElementWithFrecencyTests: XCTestCase {
+        lazy var notes: [BeamNote] = {
+            var notes = [BeamNote]()
+            let titleAndContents = [
+                ["note 1", "la mer"],
+                ["note 2", "la mer"],
+                ["note 3", "la mer"],
+                ["note 4", "le sable"],
+            ]
+            for noteData in titleAndContents {
+                let note = BeamNote(title: noteData[0])
+                note.addChild(BeamElement(noteData[1]))
+                notes.append(note)
+            }
+            return notes
+        }()
+
+        var db : GRDBDatabase! = nil
+
+        override func setUpWithError() throws {
+            self.db = GRDBDatabase.empty()
+            do {
+                for note in notes { try db.append(note: note) }
+            } catch {
+                XCTFail("note indexing failed")
+            }
+        }
+
+    func testSearchRanked() throws {
+        let frecencies = [
+            FrecencyNoteRecord(noteId: notes[0].id, lastAccessAt: Date(), frecencyScore: 5, frecencySortScore: 10, frecencyKey: .note30d0),
+            FrecencyNoteRecord(noteId: notes[0].id, lastAccessAt: Date(), frecencyScore: 4, frecencySortScore: 8, frecencyKey: .note30d1),
+            FrecencyNoteRecord(noteId: notes[1].id, lastAccessAt: Date(), frecencyScore: 3, frecencySortScore: 7, frecencyKey: .note30d0),
+            FrecencyNoteRecord(noteId: notes[2].id, lastAccessAt: Date(), frecencyScore: 1, frecencySortScore: 2, frecencyKey: .note30d0),
+            FrecencyNoteRecord(noteId: notes[3].id, lastAccessAt: Date(), frecencyScore: 4.5, frecencySortScore: 9, frecencyKey: .note30d1),
+
+        ]
+        for frecency in frecencies {
+            try db.saveFrecencyNote(frecency)
+        }
+        let scores = db.search(matchingAllTokensIn:"la mer", maxResults: 2, frecencyParam: .note30d0).map { $0.frecency?.frecencySortScore }
+        expect(scores.count) == 2
+        expect(scores) == [10.0, 7.0]
+    }
+}

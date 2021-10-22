@@ -273,6 +273,21 @@ public class DocumentManager: NSObject {
         } catch { return [] }
     }
 
+    func documentsWithTitleMatch(title: String, completion: @escaping (Swift.Result<[DocumentStruct], Error>) -> Void) {
+        let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
+        context.perform {
+            do {
+                let results = try Document.fetchAllWithTitleMatch(context, title)
+                    .compactMap { document -> DocumentStruct? in
+                        self.parseDocumentBody(document)
+                    }
+                completion(.success(results))
+            } catch {
+                completion(.failure(error))
+            }
+        }
+    }
+
     func documentsWithLimitTitleMatch(title: String, limit: Int = 4, completion: @escaping (Swift.Result<[DocumentStruct], Error>) -> Void) {
         let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
         context.perform {
