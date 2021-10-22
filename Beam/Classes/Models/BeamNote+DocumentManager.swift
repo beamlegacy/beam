@@ -99,6 +99,12 @@ extension BeamNote: BeamNoteDocument {
 
     func updateWithDocumentStruct(_ docStruct: DocumentStruct) {
         beamCheckMainThread()
+        if self.version >= docStruct.version, self.id == docStruct.id {
+            Logger.shared.logDebug("\(self.titleAndId) update skipped \(docStruct.version) (must be > \(self.version))",
+                                   category: .document)
+            return
+        }
+
         self.updates += 1
         let decoder = JSONDecoder()
         guard let newSelf = try? decoder.decode(BeamNote.self, from: docStruct.data) else {
@@ -205,6 +211,7 @@ extension BeamNote: BeamNoteDocument {
                          avoid losing content.
                          */
 
+                        /* This is the way you should handle the error in your completion handler:
                         if let dbDocumentStruct = documentManager.loadById(id: documentStruct.id) {
                             DispatchQueue.main.async {
                                 self.updateWithDocumentStruct(dbDocumentStruct)
@@ -213,6 +220,7 @@ extension BeamNote: BeamNoteDocument {
 
                         Logger.shared.logError("Version changed to \(self.savedVersion)/\(self.version)",
                                                category: .document)
+                         */
                     case 1001:
                         Logger.shared.logError("Title already exists for \(self.titleAndId)",
                                                category: .document)
