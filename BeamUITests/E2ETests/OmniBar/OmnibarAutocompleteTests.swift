@@ -125,15 +125,14 @@ class OmnibarAutocompleteTests: BaseTest {
         XCTAssertTrue(waitHelper.waitForStringValueEqual(searchText + "s", omnibarView.getOmniBarSearchField()))
     }
 
-//    Disable here since we are now displaying google results and there's one maybe later it will change and we will enable that again
 //    func testFastTypeAutocompleteHistory() {
 //        let titleWiki = "Hubert Blaine Wolfeschlegelsteinhausenbergerdorff Sr."
 //        let typedTitle = titleWiki.lowercased().substring(from: 3, to: titleWiki.count - 6)
-////        let endTypingAtIndex = titleWiki.count - 6
-////        let expectedFastTypedSearchFieldValue = titleWiki.lowercased().substring(from: 0, to: endTypingAtIndex) + titleWiki.substring(from: endTypingAtIndex, to: titleWiki.count)
+//        let endTypingAtIndex = titleWiki.count - 6
+//        let expectedFastTypedSearchFieldValue = titleWiki.lowercased().substring(from: 0, to: endTypingAtIndex) + titleWiki.substring(from: endTypingAtIndex, to: titleWiki.count)
 //
-////        let waitHelper = WaitHelper()
-////        let autocompleteSelectedResultQuery = helper.allAutocompleteResults.matching(helper.autocompleteSelectedPredicate)
+//        let waitHelper = WaitHelper()
+//        let autocompleteSelectedResultQuery = helper.allAutocompleteResults.matching(helper.autocompleteSelectedPredicate)
 //        launchApp()
 //        helper.tapCommand(.omnibarFillHistory)
 //        helper.focusSearchField()
