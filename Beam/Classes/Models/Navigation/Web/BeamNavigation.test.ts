@@ -26,12 +26,6 @@ describe("BeamNavigation", () => {
   const win = new NavigationWindowMock()
   const beamNavigation = new BeamNavigation(win)
 
-  test("recognizes Google URLs", () => {
-    expect(beamNavigation.isGoogleUrl("https://meet.google.com")).toBe(true)
-    expect(beamNavigation.isGoogleUrl("https://mail.google.com")).toBe(true)
-    expect(beamNavigation.isGoogleUrl("https://docs.google.com")).toBe(true)
-  })
-
   test("rewrite links", () => {
     const a = document.createRange().createContextualFragment(`<a href="https://linear.app/beamapp/issue/BE-2188/beam-cant-open-httpscloudoptimizerio" target="_blank" data-saferedirecturl="https://www.google.com/url?q=https://linear.app/beamapp/issue/BE-2188/beam-cant-open-httpscloudoptimizerio&amp;source=gmail&amp;ust=1634376972756000&amp;usg=AFQjCNFdqr0KDMfXL_WNvkPcENYF08os0A">https://linear.app/beamapp/
     <wbr>
