@@ -8,11 +8,18 @@ class LoggerNSTableController: NSViewController {
     @IBOutlet weak var tableView: NSTableView!
     var logEntries: [LogEntry] = []
     private var textField: NSTextField = NSTextField()
-    private var selectedCategory: String?
+    private var selectedCategories: [String] = []
+
     private var searchText: String?
 
     public func deleteAll() {
-        LoggerRecorder.shared.deleteAll(selectedCategory)
+        if selectedCategories.isEmpty {
+            LoggerRecorder.shared.deleteAll()
+        } else {
+            selectedCategories.forEach {
+                LoggerRecorder.shared.deleteAll($0)
+            }
+        }
         logEntries = []
         tableView.reloadData()
     }
@@ -33,17 +40,25 @@ class LoggerNSTableController: NSViewController {
                 return
             }
 
-            if let fileHandle = try? FileHandle(forWritingTo: url) {
+            Logger.shared.logDebug("Writing logs at \(url)", category: .general)
+            do {
+                FileManager.default.createFile(atPath: url.path,
+                                               contents: nil,
+                                               attributes: nil)
+                let fileHandle = try FileHandle(forWritingTo: url)
                 self.logEntries.forEach { logEntry in
                     let csvLine = [logEntry.created_at?.iso8601withFractionalSeconds ?? "",
-                                    logEntry.level ?? "",
-                                    logEntry.category ?? "",
-                                    logEntry.log?.quotedForCSV ?? ""].joined(separator: ",")
+                                   logEntry.level ?? "",
+                                   logEntry.category ?? "",
+                                   logEntry.log?.quotedForCSV ?? ""].joined(separator: ",")
 
                     fileHandle.write(csvLine.asData)
                     fileHandle.write("\n".asData)
                 }
+                Logger.shared.logDebug("Wrote \(self.logEntries.count) log entries", category: .general)
                 fileHandle.closeFile()
+            } catch {
+                Logger.shared.logError("Error opening \(url): \(error.localizedDescription)", category: .general)
             }
         }
     }
@@ -67,8 +82,8 @@ class LoggerNSTableController: NSViewController {
         tableView.scrollRowToVisible(self.logEntries.count - 1)
     }
 
-    public func setCategory(_ category: String?) {
-        selectedCategory = category
+    public func setCategories(_ categories: [String]) {
+        selectedCategories = categories
         loadData()
         tableView.reloadData()
         tableView.scrollRowToVisible(self.logEntries.count - 1)
@@ -87,8 +102,9 @@ class LoggerNSTableController: NSViewController {
         request.fetchLimit = 500
 
         var predicates: [NSPredicate] = []
-        if let selectedCategory = selectedCategory {
-            predicates.append(NSPredicate(format: "category IN %@", [selectedCategory, "marker"]))
+        if !selectedCategories.isEmpty {
+            selectedCategories.append("marker")
+            predicates.append(NSPredicate(format: "category IN %@", selectedCategories))
         }
 
         if let searchText = searchText, !searchText.isEmpty {
@@ -124,8 +140,9 @@ class LoggerNSTableController: NSViewController {
                     return
                 }
 
-                if let selectedCategory = self.selectedCategory,
-                   ![selectedCategory, "marker"].contains(logEntry.category) {
+                if !self.selectedCategories.isEmpty,
+                   let category = logEntry.category,
+                   !self.selectedCategories.contains(category) {
                     return
                 }
 
