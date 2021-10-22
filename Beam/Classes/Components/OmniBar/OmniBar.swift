@@ -280,7 +280,7 @@ struct OmniBar_Previews: PreviewProvider {
     static let focusedState = BeamState()
     static let beamData = BeamData()
     static let autocompleteManager = AutocompleteManager(with: beamData, searchEngine: GoogleSearch())
-    static let browserTabManager = BrowserTabsManager(with: beamData)
+    static let browserTabManager = BrowserTabsManager(with: beamData, state: state)
 
     static var previews: some View {
         state.focusOmniBox = false

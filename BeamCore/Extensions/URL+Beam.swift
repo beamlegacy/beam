@@ -9,9 +9,18 @@ public extension URL {
         return urlString
     }
 
+    /// Returns `"business.app.beamapp.co"` from `"https://business.app.beamapp.co"`
     var minimizedHost: String? {
         guard let host = host else { return nil }
         return removeWWWPrefix(in: host)
+    }
+
+    /// Returns `"beamapp.co"` from `"https://business.app.beamapp.co"`
+    var mainHost: String? {
+        guard let minimizedHost = minimizedHost else { return nil }
+        let components = minimizedHost.split(separator: ".")
+        guard components.count > 2 else { return minimizedHost }
+        return components.suffix(from: components.count - 2).joined(separator: ".")
     }
 
     var urlStringWithoutScheme: String {

@@ -35,7 +35,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var window: BeamWindow? {
         (NSApplication.shared.keyWindow ?? NSApplication.shared.mainWindow) as? BeamWindow
     }
-    var windows: [BeamWindow] = []
+    var windows: [BeamWindow] = [] {
+        didSet {
+            if windows.count == 0 {
+                data.allWindowsDidClose()
+            }
+        }
+    }
     var data: BeamData!
 
     var cancellableScope = Set<AnyCancellable>()
@@ -237,6 +243,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             window.state.cmdManager.beginGroup(with: AppDelegate.closeTabCmdGrp)
 
             for tab in window.state.browserTabsManager.tabs {
+                guard !tab.isPinned else { continue }
                 let closeTabCmd = CloseTab(tab: tab, appIsClosing: true)
                 window.state.cmdManager.run(command: closeTabCmd, on: window.state)
             }
@@ -385,7 +392,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidUnhide(_ notification: Notification) {
         for window in windows where window.isMainWindow {
-            window.state.browserTabsManager.currentTab?.startReading()
+            window.state.browserTabsManager.currentTab?.startReading(withState: window.state)
         }
     }
 
@@ -394,7 +401,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidBecomeActive(_ notification: Notification) {
         isActive = true
         for window in windows where window.isMainWindow {
-            window.state.browserTabsManager.currentTab?.startReading()
+            guard window.state.mode == .web else { continue }
+            window.state.browserTabsManager.currentTab?.startReading(withState: window.state)
         }
     }
 

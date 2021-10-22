@@ -4,7 +4,6 @@
 //
 //  Created by Sebastien Metrot on 31/10/2020.
 //
-
 import Foundation
 import Combine
 import BeamCore
@@ -17,7 +16,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         if let note = _todaysNote, note.isTodaysNote {
             return note
         }
-
         setupJournal()
         return _todaysNote!
     }
@@ -30,6 +28,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     @Published var isFetching = false
     @Published var newDay: Bool = false
     @Published var tabToIndex: TabInformation?
+    @Published private(set) var pinnedTabs: [BrowserTab] = []
     //swiftlint:disable:next large_tuple
     @Published var renamedNote: (noteId: UUID, previousName: String, newName: String) = (UUID.null, "", "")
     var noteAutoSaveService: NoteAutoSaveService
@@ -47,6 +46,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var browsingTreeSender: BrowsingTreeSender?
     var noteFrecencyScorer: FrecencyScorer = ExponentialFrecencyScorer(storage: GRDBNoteFrecencyStorage())
     var versionChecker: VersionChecker
+    private var pinnedTabsManager = PinnedBrowserTabsManager()
 
     static func dataFolder(fileName: String) -> String {
         let paths = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)
@@ -159,6 +159,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
 
         updateNoteCount()
         setupSubscribers()
+        resetPinnedTabs()
 
         self.versionChecker.customPreinstall = {
             self.backup()
@@ -211,10 +212,12 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
             self?.objectWillChange.send()
         }.store(in: &scope)
 
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(calendarDayDidChange(notification:)),
-                                               name: NSNotification.Name.NSCalendarDayChanged,
-                                               object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(calendarDayDidChange(notification:)),
+                                               name: NSNotification.Name.NSCalendarDayChanged, object: nil)
+    }
+
+    func allWindowsDidClose() {
+        resetPinnedTabs()
     }
 
     func saveData() {
@@ -257,7 +260,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         observeJournal(note: note)
         journal.append(note)
         _todaysNote = note
-
         updateJournal(with: 2, and: journal.count)
     }
 
@@ -328,6 +330,7 @@ extension BeamData {
     }
 }
 
+// MARK: - Default Browser
 public extension BeamData {
     // Looked at how chromium does it in their third_party/mozilla/NSWorkspace+Utils.m file
     static var installedBrowserURLs: [URL] {
@@ -339,7 +342,6 @@ public extension BeamData {
             }
         }
         // add the default if it isn't there
-
         if let defaultHandler = defaultBrowserURL, !apps.contains(defaultHandler) {
             apps.append(defaultHandler)
         }
@@ -380,5 +382,17 @@ public extension BeamData {
         LSSetDefaultHandlerForURLScheme("https" as CFString, bundleID)
         LSSetDefaultRoleHandlerForContentType(kUTTypeHTML, .viewer, bundleID)
         LSSetDefaultRoleHandlerForContentType(kUTTypeURL, .viewer, bundleID)
+    }
+}
+
+// MARK: - Pinned Tab
+extension BeamData {
+    func savePinnedTabs(_ tabs: [BrowserTab]) {
+        pinnedTabs = tabs
+        pinnedTabsManager.savePinnedTabs(tabs: tabs)
+    }
+
+    func resetPinnedTabs() {
+        pinnedTabs = pinnedTabsManager.getPinnedTabs()
     }
 }

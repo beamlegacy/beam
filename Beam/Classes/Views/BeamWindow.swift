@@ -219,6 +219,15 @@ class BeamWindow: NSWindow, NSDraggingDestination {
 
 extension BeamWindow: NSWindowDelegate {
 
+    func windowDidBecomeMain(_ notification: Notification) {
+        state.windowIsMain = true
+        for window in AppDelegate.main.windows where window != self {
+            window.state.windowIsMain = false
+        }
+        guard state.mode == .web else { return }
+        state.browserTabsManager.currentTab?.startReading(withState: state)
+    }
+
     func windowDidMove(_ notification: Notification) {
         self.state.windowFrame = self.frame
     }
@@ -250,7 +259,7 @@ extension BeamWindow: NSWindowDelegate {
     }
 
     func windowDidDeminiaturize(_ notification: Notification) {
-        if isMainWindow { state.browserTabsManager.currentTab?.startReading() }
+        if isMainWindow { state.browserTabsManager.currentTab?.startReading(withState: state) }
     }
 
 }

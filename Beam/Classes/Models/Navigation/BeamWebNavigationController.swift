@@ -85,28 +85,31 @@ extension BeamWebNavigationController: WKNavigationDelegate {
         switch navigationAction.navigationType {
         case .backForward:
             handleBackForwardWebView(navigationAction: navigationAction)
-        case .other:
-            Logger.shared.logInfo("Nav Redirecting toward \(String(describing: navigationAction.request.url?.absoluteString))", category: .web)
         default:
-            Logger.shared.logInfo("Creating new webview for \(String(describing: navigationAction.request.url?.absoluteString))", category: .web)
+            Logger.shared.logInfo("Nav Redirecting toward: \(navigationAction.request.url?.absoluteString ?? "nilURL"), type:\(navigationAction.navigationType)",
+                                  category: .web)
         }
 
         if let targetURL = navigationAction.request.url {
-            if navigationAction.modifierFlags.contains(.command) {
-                Logger.shared.logInfo("Cmd required create new tab toward \(String(describing: navigationAction.request.url))")
-                _ = page.createNewTab(targetURL, nil, setCurrent: false)
-                decisionHandler(.cancel, preferences)
-                return
-            }
-
             let navigationUrlHandler = ExternalDeeplinkHandler(request: navigationAction.request)
+            let withCommandKey = navigationAction.modifierFlags.contains(.command)
             if navigationUrlHandler.isDeeplink() {
-                 decisionHandler(.cancel, preferences)
+                decisionHandler(.cancel, preferences)
                 if navigationUrlHandler.shouldOpenDeeplink() {
                     NSWorkspace.shared.open(targetURL)
                 }
                 return
+            } else if navigationAction.navigationType == .linkActivated && (withCommandKey || page.shouldNavigateInANewTab(url: targetURL)) {
+                if withCommandKey {
+                    Logger.shared.logInfo("Cmd required create new tab toward: \(String(describing: targetURL))", category: .web)
+                } else {
+                    Logger.shared.logInfo("WebPage required to create a new tab for \(String(describing: targetURL))", category: .web)
+                }
+                _ = page.createNewTab(targetURL, nil, setCurrent: !withCommandKey)
+                decisionHandler(.cancel, preferences)
+                return
             }
+
         }
         decisionHandler(.allow, preferences)
     }

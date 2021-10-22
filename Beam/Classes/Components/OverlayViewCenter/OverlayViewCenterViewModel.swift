@@ -36,7 +36,7 @@ class OverlayViewCenterViewModel: ObservableObject {
         toastView = AnyView(ToastTextIconView(text: text, icon: icon))
     }
 
-    func presentModal<V>(_ view: V) where V : View {
+    func presentModal<V>(_ view: V) where V: View {
         modalView = AnyView(view)
     }
 

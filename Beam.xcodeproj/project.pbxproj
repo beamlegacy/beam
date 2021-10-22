@@ -701,6 +701,8 @@
 		A5233DE525FB682700BE6F05 /* FaviconProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5233DE425FB682700BE6F05 /* FaviconProvider.swift */; };
 		A52393A826541A06008D4C85 /* ModeViewTransitions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52393A726541A06008D4C85 /* ModeViewTransitions.swift */; };
 		A52393AA26541A18008D4C85 /* ModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52393A926541A18008D4C85 /* ModeView.swift */; };
+		A52B5017271D72FB0078670C /* PinnedBrowserTabsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52B5016271D72FB0078670C /* PinnedBrowserTabsManager.swift */; };
+		A52B5022271DCB950078670C /* BrowserTabBarDragModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52B5021271DCB950078670C /* BrowserTabBarDragModel.swift */; };
 		A52BFDF72608D6710028D3F3 /* BeamFont.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52BFDF62608D6710028D3F3 /* BeamFont.swift */; };
 		A52BFE63260901980028D3F3 /* Separator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52BFE62260901980028D3F3 /* Separator.swift */; };
 		A52FCB632666514000BCD38A /* TextLinesDecorationLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52FCB622666514000BCD38A /* TextLinesDecorationLayer.swift */; };
@@ -1743,6 +1745,8 @@
 		A5233DE425FB682700BE6F05 /* FaviconProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaviconProvider.swift; sourceTree = "<group>"; };
 		A52393A726541A06008D4C85 /* ModeViewTransitions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModeViewTransitions.swift; sourceTree = "<group>"; };
 		A52393A926541A18008D4C85 /* ModeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModeView.swift; sourceTree = "<group>"; };
+		A52B5016271D72FB0078670C /* PinnedBrowserTabsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinnedBrowserTabsManager.swift; sourceTree = "<group>"; };
+		A52B5021271DCB950078670C /* BrowserTabBarDragModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserTabBarDragModel.swift; sourceTree = "<group>"; };
 		A52BFDF62608D6710028D3F3 /* BeamFont.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamFont.swift; sourceTree = "<group>"; };
 		A52BFE62260901980028D3F3 /* Separator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Separator.swift; sourceTree = "<group>"; };
 		A52FCB622666514000BCD38A /* TextLinesDecorationLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextLinesDecorationLayer.swift; sourceTree = "<group>"; };
@@ -2734,6 +2738,7 @@
 			isa = PBXGroup;
 			children = (
 				418171D12581107C00317ED8 /* BrowserTabBar.swift */,
+				A52B5021271DCB950078670C /* BrowserTabBarDragModel.swift */,
 				418171D02581107C00317ED8 /* BrowserTabView.swift */,
 				A514401A2638038C0021DD56 /* BrowserNewTabView.swift */,
 				418171D22581107C00317ED8 /* TabStats.swift */,
@@ -4070,6 +4075,7 @@
 				BAA67A4B26FC61E9505EF7DB /* BeamMessageHandler.swift */,
 				BAA67CDE485E5E7774A978D2 /* LoggingMessageHandler.swift */,
 				A58645E326FB116E00D7FF86 /* WebViewFocusMessageHandler.swift */,
+				A52B5016271D72FB0078670C /* PinnedBrowserTabsManager.swift */,
 			);
 			path = TabAndWebview;
 			sourceTree = "<group>";
@@ -5318,6 +5324,7 @@
 				A5C7F10A267CC9FD002EE550 /* BeamTextEdit+InputDetector.swift in Sources */,
 				87F11BC3266524B2003BE98E /* WebAutocompleteProtocols.swift in Sources */,
 				33AA4EDF270DF5D200B74868 /* ResizableNode.swift in Sources */,
+				A52B5017271D72FB0078670C /* PinnedBrowserTabsManager.swift in Sources */,
 				3303E0EC26F8DC3F00E175AC /* PublicNote.swift in Sources */,
 				521EEDF72593824100BA2485 /* AppDelegate+Document.swift in Sources */,
 				52842D502715B3A80099602C /* FilesContentView.swift in Sources */,
@@ -5467,6 +5474,7 @@
 				418172282581107C00317ED8 /* Range+Beam.swift in Sources */,
 				52842D552715CFDF0099602C /* FileDetail.swift in Sources */,
 				A0CB7E5D268E733400D15AFD /* PreferencesManager+Browser.swift in Sources */,
+				A52B5022271DCB950078670C /* BrowserTabBarDragModel.swift in Sources */,
 				3330D7CB265E466D008C9E20 /* OmniBarDownloadButton.swift in Sources */,
 				87F11BD9266533C1003BE98E /* PasswordGenerator.swift in Sources */,
 				5224CD7C2686034200D4179E /* BeamObject.swift in Sources */,
