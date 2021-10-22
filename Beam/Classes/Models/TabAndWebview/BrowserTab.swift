@@ -23,6 +23,7 @@ import Promises
     private var isFromNoteSearch: Bool = false
 
     public func load(url: URL) {
+        guard !url.absoluteString.isEmpty else { return }
         hasError = false
         screenshotCapture = nil
         if !isFromNoteSearch {
