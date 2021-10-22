@@ -1,0 +1,9 @@
+google.com
+facebook.com
+amazon.com
+youtube.com
+yahoo.com
+ebay.com
+wikipedia.org
+twitter.com
+reddit.com

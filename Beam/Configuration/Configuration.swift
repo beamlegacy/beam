@@ -60,7 +60,15 @@ struct Configuration {
         }
     }
 
-    static var topDomainUrl: URL = URL(string: "http://downloads.majestic.com/majestic_million.csv")!
+    static let topDomainsVersion = "0.1"
+
+    static var topDomains: [String] = {
+        let filePath = Bundle.main.path(forResource: "topdomains_v" + Self.topDomainsVersion, ofType: "txt")
+        if let filePath = filePath, let result = try? String(contentsOfFile: filePath).components(separatedBy: "\n") {
+            return result
+        }
+        return []
+    }()
 
     static private var publicHostnameKey = "publicHostname"
     static var publicHostname: String {

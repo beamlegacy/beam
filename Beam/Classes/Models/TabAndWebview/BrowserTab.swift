@@ -494,11 +494,9 @@ import Promises
             }
             leave()
             updateFavIcon()
-            if !webviewUrl.absoluteString.isEmpty {
-                // self.browsingTree.current.score.openIndex = self.navigationCount
-                // self.updateScore()
-                // self.navigationCount = 0
-            }
+            // self.browsingTree.current.score.openIndex = self.navigationCount
+            // self.updateScore()
+            // self.navigationCount = 0
         }.store(in: &scope)
         webView.publisher(for: \.isLoading).sink { [unowned self] value in isLoading = value }.store(in: &scope)
         webView.publisher(for: \.estimatedProgress).sink { [unowned self] value in estimatedLoadingProgress = value }.store(in: &scope)
