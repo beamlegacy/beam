@@ -35,6 +35,7 @@ enum Persistence {
 
     enum TopDomains {
         @StandardStorable("last_fetched_at") static var lastFetchedAt: Date?
+        @StandardStorable("top_domains.version") static var version: String?
     }
 
     enum Database {
