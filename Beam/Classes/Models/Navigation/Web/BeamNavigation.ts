@@ -11,27 +11,6 @@ export class BeamNavigation {
   constructor(private win: NavigationWindow) {
   }
 
-  isGoogleUrl(url): boolean {
-    return /(.*)\.google.([a-z]+)/.test(url)
-  }
-
-  /**
-   *
-   */
-  rewriteLinks(delay: number): void {
-    /*    setTimeout(() => {
-          const links = document.querySelectorAll("[target='_blank']")
-          Array.prototype.forEach.call(links, link => {
-            this.rewriteLink(link as HTMLAnchorElement)
-          })
-        }, delay)*/
-  }
-
-  rewriteLink(link: HTMLAnchorElement): void {
-    const newLink = this.linkWithoutListeners(link)
-    link.parentElement.replaceChild(newLink, link)
-  }
-
   linkWithoutListeners(link: HTMLAnchorElement): HTMLAnchorElement {
     const newLink = document.createElement("a") as HTMLAnchorElement
     if (link.rel) {
@@ -96,16 +75,6 @@ export class BeamNavigation {
     history.pushState = this.decorate(history, "pushState")
     history.replaceState = this.decorate(history, "replaceState")
 
-    const currentUrl = this.win.location.href
-    if (this.isGoogleUrl(currentUrl)) {
-      /*this.win.open = (...args) => {
-        throw new Error(`Trying to open: ${JSON.stringify(args)}`)
-      }*/
-      this.win.addEventListener("popstate", () => this.rewriteLinks(900))
-      this.win.addEventListener("pushState", () => this.rewriteLinks(900))
-      this.win.addEventListener("replaceState", () => this.rewriteLinks(900))
-      this.rewriteLinks(1000)
-    }
     this.win.addEventListener("replaceState", this.locationChanged.bind(this))
     this.win.addEventListener("pushState", this.locationChanged.bind(this))
   }
