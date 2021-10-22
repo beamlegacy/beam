@@ -318,7 +318,7 @@
 		5273C66D25DA857400B00EC3 /* BeamUITestsMenuGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5273C66C25DA857400B00EC3 /* BeamUITestsMenuGenerator.swift */; };
 		527524E126A1909200C2F385 /* BeamObjectManagerNetworkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 527524E026A1909200C2F385 /* BeamObjectManagerNetworkTests.swift */; };
 		527524EB26A1A9E100C2F385 /* BeamObjectTestsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 527524EA26A1A9E100C2F385 /* BeamObjectTestsHelper.swift */; };
-		527C4F302719818A00772973 /* LoggerCategoryTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 527C4F2F2719818A00772973 /* LoggerCategoryTableView.swift */; };
+		527C4F302719818A00772973 /* LoggerCategoryTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 527C4F2F2719818A00772973 /* LoggerCategoryTableViewController.swift */; };
 		527DF48725710ECB00A0A56D /* DocumentManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 527DF48625710ECB00A0A56D /* DocumentManagerTests.swift */; };
 		527F371426C6C42000BA9A25 /* BeamNote+Debug.swift in Sources */ = {isa = PBXBuildFile; fileRef = 527F370C26C6C42000BA9A25 /* BeamNote+Debug.swift */; };
 		5281B01825C962EF00DF66D9 /* DocumentManagerNetworkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5281B01725C962EF00DF66D9 /* DocumentManagerNetworkTests.swift */; };
@@ -1376,7 +1376,7 @@
 		5273C66C25DA857400B00EC3 /* BeamUITestsMenuGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamUITestsMenuGenerator.swift; sourceTree = "<group>"; };
 		527524E026A1909200C2F385 /* BeamObjectManagerNetworkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamObjectManagerNetworkTests.swift; sourceTree = "<group>"; };
 		527524EA26A1A9E100C2F385 /* BeamObjectTestsHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamObjectTestsHelper.swift; sourceTree = "<group>"; };
-		527C4F2F2719818A00772973 /* LoggerCategoryTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggerCategoryTableView.swift; sourceTree = "<group>"; };
+		527C4F2F2719818A00772973 /* LoggerCategoryTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggerCategoryTableViewController.swift; sourceTree = "<group>"; };
 		527DF48625710ECB00A0A56D /* DocumentManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentManagerTests.swift; sourceTree = "<group>"; };
 		527F370C26C6C42000BA9A25 /* BeamNote+Debug.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "BeamNote+Debug.swift"; sourceTree = "<group>"; };
 		5281B01725C962EF00DF66D9 /* DocumentManagerNetworkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentManagerNetworkTests.swift; sourceTree = "<group>"; };
@@ -3284,7 +3284,7 @@
 				522D48A32719D1D90038DB81 /* LoggerWindowController.swift */,
 				5295D91527187246008AF38C /* LoggerNSTableController.swift */,
 				522D48A72719D2990038DB81 /* NSTableView+ScrollToVisible.swift */,
-				527C4F2F2719818A00772973 /* LoggerCategoryTableView.swift */,
+				527C4F2F2719818A00772973 /* LoggerCategoryTableViewController.swift */,
 				522D489C2719D1C00038DB81 /* LoggerNSWindow.swift */,
 			);
 			path = Logger;
@@ -5345,7 +5345,7 @@
 				5298EB2D26274D530033862C /* BeamToBeam2MigrationPolicy.swift in Sources */,
 				33CCBFA626A61C15004B6236 /* PopoverWindow.swift in Sources */,
 				4181722C2581107C00317ED8 /* AutocompleteList.swift in Sources */,
-				527C4F302719818A00772973 /* LoggerCategoryTableView.swift in Sources */,
+				527C4F302719818A00772973 /* LoggerCategoryTableViewController.swift in Sources */,
 				A0877A3726FDD8400081C7D8 /* ChangeCredentialsView.swift in Sources */,
 				4181727B258110D100317ED8 /* AppDelegate+CoreData.swift in Sources */,
 				96988C8325BB0AF2000223A3 /* DestinationNotePicker.swift in Sources */,
