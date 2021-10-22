@@ -74,11 +74,11 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
                 pointAndShoot.clearSelection(id)
 
             case PointAndShootMessages.pointAndShoot_hasSelection:
-                guard let hasSelection = dict["hasSelection"] as? Bool else { throw PointAndShootError("hasSelection payload incomplete") }
+                let hasSelection = toBool(dict, key: "hasSelection")
                 pointAndShoot.hasActiveSelection = hasSelection
 
             case PointAndShootMessages.pointAndShoot_isTypingOnWebView:
-                guard let isTypingOnWebView = dict["isTypingOnWebView"] as? Bool else { throw PointAndShootError("isTypingOnWebView payload incomplete") }
+                let isTypingOnWebView = toBool(dict, key: "isTypingOnWebView")
                 pointAndShoot.isTypingOnWebView = isTypingOnWebView
 
             case PointAndShootMessages.pointAndShoot_pinch:
@@ -166,5 +166,9 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
         }
 
         return res
+    }
+
+    func toBool(_ dict: [String : AnyObject], key: String) -> Bool {
+        return dict[key] as? Int == 1 ? true : false
     }
 }

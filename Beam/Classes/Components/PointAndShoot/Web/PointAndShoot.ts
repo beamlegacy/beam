@@ -81,7 +81,7 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
     win.addEventListener("click", this.onClick.bind(this), true)
     win.addEventListener("touchstart", this.onTouchstart.bind(this), false)
     win.addEventListener("touchend", this.onTouchend.bind(this), false)
-    win.addEventListener("keydown", this.onKeyDown.bind(this), false)
+    win.addEventListener("keydown", this.onKeyDown.bind(this), { capture: true })
     win.addEventListener("mouseup", this.onMouseUp.bind(this))
     win.document.addEventListener("selectionchange", () => this.onSelection())
     win.addEventListener("scroll", this.onScroll.bind(this), true)
