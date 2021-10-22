@@ -39,15 +39,14 @@ class LoggerCategoryTableViewController: NSViewController {
         guard let table = notification.object as? NSTableView else {
             return
         }
-        let row = table.selectedRow
 
-        let category = categories[row]
+        let selectedCategories = table.selectedRowIndexes.compactMap { categories[$0] }
 
         if let logController = parentSplit?.splitViewItems[1].viewController as? LoggerNSTableController {
-            if row == 0 {
-                logController.setCategory(nil)
+            if table.selectedRowIndexes.contains(0) {
+                logController.setCategories([])
             } else {
-                logController.setCategory(category)
+                logController.setCategories(selectedCategories)
             }
         }
     }

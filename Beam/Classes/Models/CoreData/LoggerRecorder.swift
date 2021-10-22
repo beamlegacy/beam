@@ -55,7 +55,7 @@ class LoggerRecorder {
         }
     }
 
-    public func deleteAll(_ category: String?) {
+    public func deleteAll(_ category: String? = nil) {
         let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
 
         context.perform {
