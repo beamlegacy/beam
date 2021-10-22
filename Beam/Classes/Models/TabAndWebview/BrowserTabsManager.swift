@@ -35,11 +35,13 @@ class BrowserTabsManager: ObservableObject {
     weak var delegate: BrowserTabsManagerDelegate?
 
     private var tabScope = Set<AnyCancellable>()
+    private var dataScope = Set<AnyCancellable>()
     private var tabsAreVisible: Bool {
         self.delegate?.areTabsVisible(for: self) == true
     }
 
     private var data: BeamData
+    private weak var state: BeamState?
     @Published public var tabs: [BrowserTab] = [] {
         didSet {
             self.updateTabsHandlers()
@@ -53,7 +55,7 @@ class BrowserTabsManager: ObservableObject {
             if tabsAreVisible {
                 latestCurrentTab = oldValue?.browsingTree
                 oldValue?.switchToOtherTab()
-                currentTab?.startReading()
+                currentTab?.startReading(withState: state)
             }
 
             self.updateCurrentTabObservers()
@@ -61,8 +63,29 @@ class BrowserTabsManager: ObservableObject {
         }
     }
 
-    init(with data: BeamData) {
+    init(with data: BeamData, state: BeamState) {
         self.data = data
+        self.state = state
+        tabs.append(contentsOf: data.pinnedTabs)
+        setupPinnedTabObserver()
+        currentTab = tabs.first
+    }
+
+    private var isModifyingPinnedTabs = false
+    private func setupPinnedTabObserver() {
+        data.$pinnedTabs
+            .scan(([], [])) { ($0.1, $1) }
+            .sink { [weak self] (previousPinnedTab, newPinnedTabs) in
+                guard self?.isModifyingPinnedTabs == false else { return }
+                // receiving updated pinned tabs from another window
+                var tabs = self?.tabs ?? []
+                let previousIds = previousPinnedTab.map { $0.id }
+                let statePinnedTabs = tabs.filter { $0.isPinned || previousIds.contains($0.id) }
+                guard statePinnedTabs != newPinnedTabs else { return }
+                tabs.removeAll { previousIds.contains($0.id) }
+                tabs.insert(contentsOf: newPinnedTabs, at: 0)
+                self?.tabs = tabs
+        }.store(in: &dataScope)
     }
 
     private func updateCurrentTabObservers() {
@@ -132,7 +155,7 @@ extension BrowserTabsManager {
     func updateTabsForStateModeChange(_ newMode: Mode, previousMode: Mode) {
         guard newMode != previousMode else { return }
         if newMode == .web {
-            currentTab?.startReading()
+            currentTab?.startReading(withState: state)
         } else if previousMode == .web {
             switch newMode {
             case .note:
@@ -202,10 +225,30 @@ extension BrowserTabsManager {
         if window?.firstResponder is BeamWebView {
             window?.makeFirstResponder(nil)
         }
-        if let currentTab = currentTab {
+        if let currentTab = currentTab, let webView = currentTab.webView {
             DispatchQueue.main.async {
-                currentTab.webView.window?.makeFirstResponder(currentTab.webView)
+                webView.window?.makeFirstResponder(currentTab.webView)
             }
         }
+    }
+
+    private func updateIsPinned(for tab: BrowserTab, isPinned: Bool) {
+        isModifyingPinnedTabs = true
+        defer { isModifyingPinnedTabs = false }
+        tab.isPinned = isPinned
+        tabs.sort { a, b in
+            a.isPinned && !b.isPinned
+        }
+        let allPinnedTabs = tabs.filter { $0.isPinned }
+        data.savePinnedTabs(allPinnedTabs)
+        self.objectWillChange.send()
+    }
+
+    func pinTab(_ tabToPin: BrowserTab) {
+        updateIsPinned(for: tabToPin, isPinned: true)
+    }
+
+    func unpinTab(_ tabToUnpin: BrowserTab) {
+        updateIsPinned(for: tabToUnpin, isPinned: false)
     }
 }

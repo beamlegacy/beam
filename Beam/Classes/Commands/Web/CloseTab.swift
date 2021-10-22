@@ -48,12 +48,15 @@ class CloseTab: WebCommand {
         try container.encode(tab, forKey: .tab)
         try container.encode(tabData, forKey: .tabData)
         try container.encode(tabIndex, forKey: .tabIndex)
-        try container.encode(wasCurrentTab, forKey: .wasCurrentTab)
     }
 
     override func run(context: BeamState?) -> Bool {
         guard let context = context, let tab = self.tab else { return false }
         tabData = encode(tab: tab)
+
+        if tab.isPinned {
+            context.browserTabsManager.unpinTab(tab)
+        }
 
         if appIsClosing {
             tab.closeApp()
@@ -66,7 +69,6 @@ class CloseTab: WebCommand {
             self.tabIndex = i
 
             context.browserTabsManager.tabs.remove(at: i)
-
             if context.browserTabsManager.currentTab === tab {
                 let nextTabIndex = min(i, context.browserTabsManager.tabs.count - 1)
                 if nextTabIndex >= 0 {
@@ -89,6 +91,9 @@ class CloseTab: WebCommand {
               let tabIndex = self.tabIndex else { return false }
 
         context.browserTabsManager.addNewTab(tab, setCurrent: wasCurrentTab, withURL: nil, at: tabIndex)
+        if tab.isPinned {
+            context.browserTabsManager.pinTab(tab)
+        }
         tab.postLoadSetup(state: context)
         self.tab = tab
         return true

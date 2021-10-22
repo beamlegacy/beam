@@ -12,6 +12,7 @@ import BeamCore
 struct BrowserTabView: View {
 
     static let minimumWidth: CGFloat = 26
+    static let pinnedWidth: CGFloat = 36
     static let minimumActiveWidth: CGFloat = 120
     static let separatorColor = BeamColor.combining(lightColor: .AlphaGray, lightAlpha: 0.4, darkColor: .AlphaGray, darkAlpha: 0.8)
     static let activeTabSeparatorColor = BeamColor.combining(lightColor: .AlphaGray, lightAlpha: 0.5, darkColor: .Mercury)
@@ -22,10 +23,14 @@ struct BrowserTabView: View {
 
     var isSelected: Bool = false
     var isDragging: Bool = false
+    var allowHover: Bool = true
     var onClose: (() -> Void)?
 
+    private var displayHoverStyle: Bool {
+        allowHover && isHovering && isEnabled
+    }
     private var foregroundColor: Color {
-        isHovering ? BeamColor.Niobium.swiftUI : BeamColor.Corduroy.swiftUI
+        displayHoverStyle ? BeamColor.Niobium.swiftUI : BeamColor.Corduroy.swiftUI
     }
 
     private var iconForegroundColor: Color {
@@ -82,8 +87,8 @@ struct BrowserTabView: View {
                 }
             }
         }
-        .animation(nil, value: isHovering)
-        .animation(BeamAnimation.spring(stiffness: 380, damping: 20), value: tab.isLoading)
+        .animation(nil, value: displayHoverStyle)
+        .animation(isDragging ? nil : BeamAnimation.spring(stiffness: 380, damping: 20), value: tab.isLoading)
     }
 
     @State private var loadingIndicatorAnimatedFlag = false
@@ -151,7 +156,7 @@ struct BrowserTabView: View {
 
     private func trailingSubviews(sideSpace: CGFloat) -> some View {
         HStack {
-            if isHovering && !isDragging && sideSpace >= 20 {
+            if displayHoverStyle && !isDragging && sideSpace >= 20 {
                 ButtonLabel(icon: "tabs-close_xs", customStyle: isSelected ? Self.activeTabCloseIconStyle : Self.otherTabCloseIconStyle) {
                     onClose?()
                 }
@@ -165,10 +170,11 @@ struct BrowserTabView: View {
     }
 
     private var backgroundAndBorderView: some View {
-        BrowserTabView.BackgroundView(isSelected: isSelected, isHovering: isHovering)
+        BrowserTabView.BackgroundView(isSelected: isSelected, isHovering: displayHoverStyle)
             .overlay(Separator(hairline: true, color: separatorColor)
                         .padding(.vertical, CGFloat(isSelected ? 0 : 7)),
                      alignment: .trailing)
+            .shadow(color: BeamColor.ToolBar.shadowBottom.swiftUI.opacity(isDragging ? 1 : 0), radius: 8, x: 0, y: 2)
     }
 
     // MARK: Main View
@@ -196,10 +202,8 @@ struct BrowserTabView: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(backgroundAndBorderView)
-                .onHover { hovering in
-                    isHovering = isEnabled && hovering
-                }
-                .animation(BeamAnimation.easeInOut(duration: 0.15), value: isHovering)
+                .onHover { isHovering = $0 }
+                .animation(BeamAnimation.easeInOut(duration: 0.15), value: displayHoverStyle)
                 .accessibilityElement(children: .contain)
                 .accessibility(identifier: "browserTabBarView")
             }
@@ -211,9 +215,7 @@ struct BrowserTabView: View {
             }
 
         }
-        .frame(minWidth: isSelected ? Self.minimumActiveWidth : Self.minimumWidth,
-               maxWidth: .infinity,
-               maxHeight: .infinity)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     struct BackgroundView: View {

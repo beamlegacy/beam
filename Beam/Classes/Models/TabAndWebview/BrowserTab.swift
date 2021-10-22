@@ -5,10 +5,11 @@ import WebKit
 import BeamCore
 import Promises
 
+// swiftlint:disable file_length
 // swiftlint:disable:next type_body_length
 @objc class BrowserTab: NSObject, ObservableObject, Identifiable, Codable, WebPage, Scorable {
 
-    var id: UUID
+    var id: UUID = UUID()
 
     var scrollX: CGFloat = 0
     var scrollY: CGFloat = 0
@@ -19,10 +20,11 @@ import Promises
     let uiDelegateController = BeamWebkitUIDelegateController()
     let noteController: WebNoteController
 
-    private var isFromNoteSearch: Bool
+    private var isFromNoteSearch: Bool = false
 
     public func load(url: URL) {
         hasError = false
+        screenshotCapture = nil
         if !isFromNoteSearch {
             navigationController?.setLoading()
         }
@@ -80,6 +82,8 @@ import Promises
 
     @Published var browsingTree: BrowsingTree
     @Published var privateMode = false
+    @Published var isPinned = false
+    @Published var screenshotCapture: NSImage?
 
     @Published var authenticationViewModel: AuthenticationViewModel?
     @Published var searchViewModel: SearchViewModel?
@@ -104,12 +108,16 @@ import Promises
     }
 
     func isActiveTab() -> Bool {
-        self == state.browserTabsManager.currentTab
+        self == state?.browserTabsManager.currentTab
     }
 
     func leave() {
         pointAndShoot?.leavePage()
         cancelSearch()
+    }
+
+    func shouldNavigateInANewTab(url: URL) -> Bool {
+        return isPinned && self.url != nil && url.mainHost != self.url?.mainHost
     }
 
     func navigatedTo(url: URL, title: String?, reason: NoteElementAddReason) {
@@ -125,7 +133,7 @@ import Promises
             isFromNoteSearch = false
             elementToFocus = noteController.element
         } else {
-            elementToFocus = noteController.add(url: url, text: title, reason: reason, isNavigatingFromNote: beamNavigationController.isNavigatingFromNote, browsingOrigin: self.browsingTree.origin)
+            elementToFocus = noteController.add(url: url, text: title, reason: reason, isNavigatingFromNote: beamNavigationController?.isNavigatingFromNote == true, browsingOrigin: self.browsingTree.origin)
         }
         if let elementToFocus = elementToFocus {
             updateFocusedStateToElement(elementToFocus)
@@ -137,9 +145,9 @@ import Promises
 
     private func updateFocusedStateToElement(_ element: BeamElement) {
         guard let note = element.note ?? noteController.note else { return }
-        state.updateNoteFocusedState(note: note,
-                                     focusedElement: element.id,
-                                     cursorPosition: element.text.wholeRange.upperBound)
+        state?.updateNoteFocusedState(note: note,
+                                      focusedElement: element.id,
+                                      cursorPosition: element.text.wholeRange.upperBound)
     }
 
     lazy var passwordOverlayController: PasswordOverlayController? = {
@@ -161,19 +169,28 @@ import Promises
         return pns
     }()
 
+    private var _navigationController: BeamWebNavigationController?
     var navigationController: WebNavigationController? {
         beamNavigationController
     }
 
-    lazy var beamNavigationController: BeamWebNavigationController = {
+    private var beamNavigationController: BeamWebNavigationController? {
+        guard _navigationController == nil else { return _navigationController }
+        guard let webView = webView else { return nil }
         let navController = BeamWebNavigationController(browsingTree: browsingTree, noteController: noteController, webView: webView)
         navController.page = self
+        _navigationController = navController
         return navController
-    }()
+    }
 
     @Published var mediaPlayerController: MediaPlayerController?
 
-    var state: BeamState!
+    weak var state: BeamState? {
+        didSet {
+            guard oldValue != nil && state != oldValue else { return }
+            tabDidChangeWindow()
+        }
+    }
 
     public var score: Float {
         get { noteController.score }
@@ -185,7 +202,7 @@ import Promises
     }
 
     var downloadManager: DownloadManager? {
-        state.data.downloadManager
+        state?.data.downloadManager
     }
 
     var frame: NSRect {
@@ -198,12 +215,12 @@ import Promises
 
     private func resetDestinationNote() {
         noteController.setDestination(note: nil)
-        state.resetDestinationCard()
+        state?.resetDestinationCard()
     }
 
     func setDestinationNote(_ note: BeamNote, rootElement: BeamElement? = nil) {
         noteController.setDestination(note: note, rootElement: rootElement)
-        state.destinationCardName = note.title
+        state?.destinationCardName = note.title
         browsingTree.destinationNoteChange()
     }
 
@@ -231,7 +248,7 @@ import Promises
        - id:
        - webView:
      */
-    init(state: BeamState, browsingTreeOrigin: BrowsingTreeOrigin?, originMode: Mode, note: BeamNote?, rootElement: BeamElement? = nil,
+    init(state: BeamState?, browsingTreeOrigin: BrowsingTreeOrigin?, originMode: Mode, note: BeamNote?, rootElement: BeamElement? = nil,
          id: UUID = UUID(), webView: BeamWebView? = nil) {
         self.state = state
         self.id = id
@@ -243,30 +260,50 @@ import Promises
             self.webView = suppliedWebView
             backForwardList = suppliedWebView.backForwardList
         } else {
-            let web = BeamWebView(frame: NSRect(), configuration: Self.webViewConfiguration)
+            let web = BeamWebView(frame: .zero, configuration: Self.webViewConfiguration)
             web.wantsLayer = true
             web.allowsMagnification = true
 
-            state.setup(webView: web)
+            state?.setup(webView: web)
             backForwardList = web.backForwardList
             self.webView = web
         }
 
-        browsingTree = BrowsingTree(
-            browsingTreeOrigin,
-            frecencyScorer: ExponentialFrecencyScorer(storage: GRDBUrlFrecencyStorage()),
-            longTermScoreStore: LongTermUrlScoreStore()
-        )
+        browsingTree = Self.newBrowsingTree(origin: browsingTreeOrigin)
         noteController = WebNoteController(note: note, rootElement: rootElement)
 
         super.init()
-
         self.webView.page = self
         uiDelegateController.page = self
         mediaPlayerController = MediaPlayerController(page: self)
         addTreeToNote()
         setupObservers()
-        beamNavigationController.isNavigatingFromNote = isFromNoteSearch
+        beamNavigationController?.isNavigatingFromNote = isFromNoteSearch
+    }
+
+    init(pinnedTabWithId id: UUID, url: URL, title: String) {
+        self.id = id
+        self.url = url
+        self.preloadUrl = url
+        self.title = title
+        self.isPinned = true
+        self.originMode = .web
+
+        browsingTree = Self.newBrowsingTree(origin: browsingTreeOrigin)
+        noteController = WebNoteController(note: nil, rootElement: nil)
+
+        super.init()
+        DispatchQueue.main.async {
+            self.updateFavIcon()
+        }
+    }
+
+    private static func newBrowsingTree(origin: BrowsingTreeOrigin?) -> BrowsingTree {
+        BrowsingTree(
+            origin,
+            frecencyScorer: ExponentialFrecencyScorer(storage: GRDBUrlFrecencyStorage()),
+            longTermScoreStore: LongTermUrlScoreStore()
+        )
     }
 
     required init?(coder: NSCoder) {
@@ -281,6 +318,7 @@ import Promises
         case backForwardUrlList
         case browsingTree
         case privateMode
+        case isPinned
         case noteController
     }
 
@@ -299,11 +337,11 @@ import Promises
         browsingTree = tree
         noteController = try container.decode(WebNoteController.self, forKey: .noteController)
         privateMode = try container.decode(Bool.self, forKey: .privateMode)
+        isPinned = try container.decode(Bool.self, forKey: .isPinned)
         isFromNoteSearch = false
 
-        originMode = .today
+        originMode = .web
         super.init()
-        addTreeToNote()
     }
 
     func postLoadSetup(state: BeamState) {
@@ -318,6 +356,7 @@ import Promises
         self.webView.page = self
         uiDelegateController.page = self
         mediaPlayerController = MediaPlayerController(page: self)
+        addTreeToNote()
         setupObservers()
         if let backForwardListUrl = backForwardUrlList {
             for url in backForwardListUrl {
@@ -341,17 +380,18 @@ import Promises
         if let originalQuery = originalQuery {
             try container.encode(originalQuery, forKey: .originalQuery)
         }
-        if let currentURL = webView.url {
+        if let currentURL = webView?.url {
             try container.encode(currentURL, forKey: .url)
         }
         var backForwardUrlList = [URL]()
-        for backForwardListItem in webView.backForwardList.backList {
+        for backForwardListItem in webView?.backForwardList.backList ?? [] {
             backForwardUrlList.append(backForwardListItem.url)
         }
         try container.encode(backForwardUrlList, forKey: .backForwardUrlList)
 
         try container.encode(browsingTree, forKey: .browsingTree)
         try container.encode(privateMode, forKey: .privateMode)
+        try container.encode(isPinned, forKey: .isPinned)
         try container.encode(noteController, forKey: .noteController)
     }
 
@@ -400,7 +440,8 @@ import Promises
     /// - Parameter noteTitle: The title of the Note
     /// - Returns: The fetched note or nil if no note exists
     func getNote(fromTitle noteTitle: String) -> BeamNote? {
-        BeamNote.fetch(state.data.documentManager, title: noteTitle)
+        guard let documentManager = state?.data.documentManager else { return nil }
+        return BeamNote.fetch(documentManager, title: noteTitle)
     }
 
     var backListSize = 0
@@ -416,9 +457,9 @@ import Promises
     ///   - url: The url of the page the PnS was performed in.
     ///
     func addTextToClusteringManager(_ text: String, url: URL) {
-        let clusteringManager = state.data.clusteringManager
+        let clusteringManager = state?.data.clusteringManager
         let id = browsingTree.current.link
-        clusteringManager.addPage(id: id, parentId: nil, newContent: text)
+        clusteringManager?.addPage(id: id, parentId: nil, newContent: text)
     }
 
     private func setupObservers() {
@@ -469,8 +510,8 @@ import Promises
 
     func cancelObservers() {
         scope.removeAll()
-        webView.navigationDelegate = nil
-        webView.uiDelegate = nil
+        webView?.navigationDelegate = nil
+        webView?.uiDelegate = nil
     }
 
     private func encodeStringTo64(fromString: String) -> String? {
@@ -494,7 +535,7 @@ import Promises
         webView.stopLoading()
     }
 
-    func createNewTab(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, setCurrent: Bool, state: BeamState) -> WebPage {
+    private func createNewTab(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, setCurrent: Bool, state: BeamState) -> WebPage {
         let newWebView = BeamWebView(frame: NSRect(), configuration: configuration ?? Self.webViewConfiguration)
         newWebView.wantsLayer = true
         newWebView.allowsMagnification = true
@@ -506,7 +547,7 @@ import Promises
             rootOrigin: browsingTree.origin.rootOrigin
         )
         let newTab = state.addNewTab(origin: origin, setCurrent: setCurrent,
-                                     note: noteController.note, element: beamNavigationController.isNavigatingFromNote ? noteController.element : nil,
+                                     note: noteController.note, element: beamNavigationController?.isNavigatingFromNote == true ? noteController.element : nil,
                                      url: targetURL, webView: newWebView)
         newTab.browsingTree.current.score.openIndex = navigationCount
         navigationCount += 1
@@ -514,8 +555,9 @@ import Promises
         return newTab
     }
 
-    func createNewTab(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, setCurrent: Bool) -> WebPage {
-        createNewTab(targetURL, configuration, setCurrent: setCurrent, state: state)
+    func createNewTab(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, setCurrent: Bool) -> WebPage? {
+        guard let state = state else { return nil }
+        return createNewTab(targetURL, configuration, setCurrent: setCurrent, state: state)
     }
 
     func createNewWindow(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, windowFeatures: WKWindowFeatures, setCurrent: Bool) -> BeamWebView {
@@ -546,7 +588,7 @@ import Promises
             newWebView.enableAutoCloseWindow = true
             newWebView.wantsLayer = true
             newWebView.allowsMagnification = true
-            state.setup(webView: newWebView)
+            state?.setup(webView: newWebView)
 
             var windowMasks: NSWindow.StyleMask = [.closable, .miniaturizable, .titled, .unifiedTitleAndToolbar]
             if windowFeatures.allowsResizing != 0 {
@@ -566,10 +608,19 @@ import Promises
 
     var navigationCount: Int = 0
 
-    func startReading() {
+    func startReading(withState newState: BeamState?) {
+        if newState != state {
+            if state == nil, let newState = newState {
+                // first read on a lazy tab
+                postLoadSetup(state: newState)
+            } else {
+                state = newState
+            }
+        }
+
         lastViewDate = BeamDate.now
         browsingTree.startReading()
-        guard !isLoading && url != nil && !state.focusOmniBox else { return }
+        guard !isLoading && url != nil && state?.focusOmniBox != true else { return }
         // bring back the focus to where it was
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: .milliseconds(200))) { [weak self] in
             guard let webView = self?.webView, self?.isActiveTab() == true else { return }
@@ -595,8 +646,8 @@ import Promises
 
     func willSwitchToNewUrl(url: URL) {
         isFromNoteSearch = false
-        beamNavigationController.isNavigatingFromNote = false
-        if self.url != nil && url.host != self.url?.host {
+        beamNavigationController?.isNavigatingFromNote = false
+        if self.url != nil && url.mainHost != self.url?.mainHost {
             resetDestinationNote()
         }
     }
@@ -624,12 +675,12 @@ import Promises
     }
 
     func passwordManagerToast(saved: Bool) {
-        state.overlayViewModel.toastView = AnyView(CredentialsConfirmationToast(saved: saved))
+        state?.overlayViewModel.toastView = AnyView(CredentialsConfirmationToast(saved: saved))
     }
 
     func closeTab() {
         isFromNoteSearch = false
-        beamNavigationController.isNavigatingFromNote = false
+        beamNavigationController?.isNavigatingFromNote = false
         passwordOverlayController?.dismiss()
         authenticationViewModel?.cancel()
         browsingTree.closeTab()
@@ -645,8 +696,17 @@ import Promises
         sendTree(grouped: true)
     }
 
+    private func tabDidChangeWindow() {
+        guard isPinned else { return }
+        let config = WKSnapshotConfiguration()
+        config.afterScreenUpdates = false
+        webView.takeSnapshot(with: config) { [weak self] image, _ in
+            self?.screenshotCapture = image
+        }
+    }
+
     private func sendTree(grouped: Bool = false) {
-        guard let sender = state.data.browsingTreeSender else { return }
+        guard let sender = state?.data.browsingTreeSender else { return }
         if grouped {
             sender.groupSend(browsingTree: browsingTree)
         } else {
@@ -655,12 +715,11 @@ import Promises
     }
 
     private func saveTree(grouped: Bool = false) {
-        let appSessionId = state.data.sessionId
+        guard let appSessionId = state?.data.sessionId else { return }
         if grouped {
             BrowsingTreeStoreManager.shared.groupSave(browsingTree: self.browsingTree, appSessionId: appSessionId)
         } else {
             BrowsingTreeStoreManager.shared.save(browsingTree: self.browsingTree, appSessionId: appSessionId) {}
         }
     }
-    // swiftlint:disable:next file_length
 }
