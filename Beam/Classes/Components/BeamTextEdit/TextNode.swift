@@ -103,7 +103,7 @@ public class TextNode: ElementNode {
 
     var placeholder = BeamText() {
         didSet {
-            guard oldValue != text else { return }
+            guard oldValue != text || text.isEmpty else { return }
             invalidateText()
         }
     }
