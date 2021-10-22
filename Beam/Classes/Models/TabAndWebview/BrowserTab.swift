@@ -395,7 +395,7 @@ import Promises
         try container.encode(noteController, forKey: .noteController)
     }
 
-    func addToNote(allowSearchResult: Bool) -> BeamElement? {
+    func addToNote(allowSearchResult: Bool, inSourceBullet: Bool = true) -> BeamElement? {
         guard let url = url else {
             Logger.shared.logError("Cannot get current URL", category: .general)
             return nil
@@ -405,8 +405,13 @@ import Promises
             return nil
         } // Don't automatically add search results
 
-        let element = noteController.addContent(url: url, text: title, reason: .pointandshoot)
-        return element
+        if inSourceBullet {
+            let element = noteController.addContent(url: url, text: title, reason: .pointandshoot)
+            return element
+        } else {
+            let element = noteController.note
+            return element
+        }
     }
     private func addTreeToNote() {
         if let rootId = browsingTree.rootId {

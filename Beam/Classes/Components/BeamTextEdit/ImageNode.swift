@@ -14,6 +14,8 @@ class ImageNode: ResizableNode {
     private let focusMargin = CGFloat(3)
     private let cornerRadius = CGFloat(3)
 
+    private var sourceImageLayer: CALayer?
+
     init(parent: Widget, element: BeamElement, availableWidth: CGFloat?) {
         super.init(parent: parent, element: element, availableWidth: availableWidth)
         setupImage(width: availableWidth ?? fallBackWidth)
@@ -57,7 +59,7 @@ class ImageNode: ResizableNode {
                 Logger.shared.logError("Loaded Image '\(uid)' has invalid size \(resizableElementContentSize)", category: .noteEditor)
                 return
             }
-//            let width = width
+
             let height = (width / resizableElementContentSize.width) * resizableElementContentSize.height
             imageLayer = Layer.image(named: "image", image: image, size: CGSize(width: width, height: height))
         }
@@ -74,6 +76,10 @@ class ImageNode: ResizableNode {
 
         setupFocusLayer()
         setupResizeHandleLayer()
+
+        if URL(string: self.elementText.text) != nil {
+            setupSourceButtonLayer()
+        }
     }
 
     private func setupFocusLayer() {
@@ -87,6 +93,94 @@ class ImageNode: ResizableNode {
         borderLayer.zPosition = 0
         let focusLayer = Layer(name: "focus", layer: borderLayer)
         addLayer(focusLayer, origin: .zero)
+    }
+
+    private func setupSourceButtonLayer() {
+
+        guard let sourceImage = NSImage(named: "editor-url_big") else { return }
+        sourceImage.isTemplate = true
+        let tintedImage = sourceImage.fill(color: BeamColor.Corduroy.nsColor)
+
+        let path = NSBezierPath(roundedRect: NSRect(origin: .zero, size: CGSize(width: 22, height: 22)), xRadius: 4, yRadius: 4)
+
+        //The global layer
+        let globalLayer = CALayer()
+        globalLayer.frame = NSRect(origin: .zero, size: CGSize(width: 22, height: 22))
+        globalLayer.masksToBounds = true
+        globalLayer.zPosition = 2
+
+        //Set the mask to clip the blurred background
+        let mask = CAShapeLayer()
+        mask.frame = NSRect(origin: .zero, size: CGSize(width: 22, height: 22))
+        mask.path = path.cgPath
+        mask.fillColor = .black
+        globalLayer.mask = mask
+
+        // The rounded shape layer
+        let shape = CAShapeLayer()
+        shape.frame = NSRect(origin: .zero, size: CGSize(width: 22, height: 22))
+        shape.name = "backgound"
+        shape.path = path.cgPath
+
+        shape.fillColor = BeamColor.Editor.sourceButtonBackground.cgColor
+        shape.strokeColor = BeamColor.Editor.sourceButtonStroke.cgColor
+        shape.lineWidth = 1
+        shape.opacity = 0.7
+
+        //The arrow image layer
+        let sourceImageLayer = CALayer()
+        sourceImageLayer.name = "source-image"
+        sourceImageLayer.contents = tintedImage
+        sourceImageLayer.frame = CGRect(origin: CGPoint(x: 3.0, y: 3.0), size: sourceImage.size)
+        sourceImageLayer.compositingFilter = "multiplyBlendMode"
+
+        //Keep reference to the source image layer for easier update
+        self.sourceImageLayer = sourceImageLayer
+
+        shape.addSublayer(sourceImageLayer)
+        globalLayer.addSublayer(shape)
+
+        globalLayer.opacity = 0.0
+
+        let sourceLayer = sourceButtonLayer(with: globalLayer, shape: shape)
+        addLayer(sourceLayer, origin: .zero)
+    }
+
+    private func sourceButtonLayer(with caLayer: CALayer, shape: CAShapeLayer) -> Layer {
+        let sourceLayer = Layer(name: "source", layer: caLayer)
+
+        sourceLayer.hovered = { [sourceImageLayer] hover in
+            guard let sourceImage = NSImage(named: "editor-url_big") else { return }
+            sourceImage.isTemplate = true
+            let tintedImage = sourceImage.fill(color: hover ? .white : BeamColor.Corduroy.nsColor)
+
+            self.sourceImageLayer?.contents = tintedImage
+            sourceImageLayer?.compositingFilter = hover ? nil : "multiplyBlendMode"
+
+            shape.fillColor = hover ? BeamColor.Editor.sourceButtonBackgroundHover.cgColor : BeamColor.Editor.sourceButtonBackground.cgColor
+        }
+
+        sourceLayer.mouseDown = { [weak self] mouseInfo in
+            guard mouseInfo.event.clickCount == 1 else { return false }
+            if let text = self?.elementText.text, URL(string: text) != nil {
+                shape.opacity = 0.9
+                return true
+            }
+            return false
+        }
+
+        sourceLayer.mouseUp = { [weak self] mouseInfo in
+            guard mouseInfo.event.clickCount == 1 else { return false }
+            if let text = self?.elementText.text, let url = URL(string: text) {
+                self?.editor?.state?.handleOpenUrl(url, note: self?.element.note, element: self?.element)
+                shape.opacity = 0.7
+                return true
+            }
+            return false
+        }
+
+        sourceLayer.cursor = .pointingHand
+        return sourceLayer
     }
 
     override func updateRendering() -> CGFloat {
@@ -109,6 +203,12 @@ class ImageNode: ResizableNode {
                 borderLayer.path = borderPath.cgPath
                 borderLayer.position = CGPoint(x: position.x + bounds.size.width / 2, y: position.y + bounds.size.height / 2)
                 borderLayer.bounds = focusBounds
+            }
+
+            if let source = layers["source"] {
+                let margin: CGFloat = 6.0
+                let size = source.layer.frame.size
+                source.layer.frame.origin = CGPoint(x: contentsLead + visibleSize.width - margin - size.width, y: contentsTop + margin)
             }
         }
     }
@@ -141,6 +241,23 @@ class ImageNode: ResizableNode {
         }
         dragMode = .select(0)
         return true
+    }
+
+    override var hover: Bool {
+        didSet {
+            if let source = layers["source"] {
+                source.layer.opacity = hover ? 1.0 : 0.0
+
+                if hover, let blur = CIFilter(name: "CIGaussianBlur") {
+                    blur.name = "blur"
+                    source.layer.backgroundFilters = [blur]
+                } else {
+                    source.layer.backgroundFilters = []
+                }
+            }
+            invalidate()
+            super.hover = hover
+        }
     }
 }
 
