@@ -4,7 +4,7 @@ import Combine
 // To improve the auto complete results we get, look at how chromium does it:
 // https://chromium.googlesource.com/chromium/src/+/master/components/omnibox/browser/search_suggestion_parser.cc
 
-struct AutocompleteResult: Identifiable, Equatable {
+struct AutocompleteResult: Identifiable, Equatable, Comparable {
 
     enum Source: Equatable, Hashable {
         case history
@@ -44,6 +44,15 @@ struct AutocompleteResult: Identifiable, Equatable {
     var completingText: String?
     var uuid = UUID()
     var score: Float?
+
+    static func < (lhs: AutocompleteResult, rhs: AutocompleteResult) -> Bool {
+        guard let slhs = lhs.score, let srhs = rhs.score else {
+            let lhsr = lhs.text.lowercased().commonPrefix(with: lhs.completingText?.lowercased() ?? "").count
+            let rhsr = rhs.text.lowercased().commonPrefix(with: rhs.completingText?.lowercased() ?? "").count
+            return lhsr < rhsr
+        }
+        return slhs < srhs
+    }
 }
 
 class Autocompleter: ObservableObject {

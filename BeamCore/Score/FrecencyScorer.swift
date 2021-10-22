@@ -25,10 +25,17 @@ private let webEventWeights: [FrecencyEventType: Float] = [
     .webLinkActivation: 1,
     .webFromNote: 1.5
 ]
-private let noteEventWeights: [FrecencyEventType: Float] = [
-    .noteVisit: 1,
-    .noteBiDiLink: 5,
-    .notePointAndShoot: 5
+private let noteEventWeights: [[FrecencyEventType: Float]] = [
+    [
+        .noteVisit: 1,
+        .noteBiDiLink: 5,
+        .notePointAndShoot: 5
+    ],
+    [
+        .noteVisit: 1,
+        .noteBiDiLink: 1,
+        .notePointAndShoot: 1
+    ]
 ]
 
 private func scoreSortValue(score: Float, timeStamp: Date, halfLife: Float) -> Float {
@@ -53,7 +60,8 @@ public struct FrecencyParam: Equatable {
 public let FrecencyParameters: [FrecencyParamKey: FrecencyParam] = [
     .webReadingTime30d0: FrecencyParam(key: .webReadingTime30d0, eventWeights: webEventWeights, halfLife: halfLife),
     .webVisit30d0: FrecencyParam(key: .webVisit30d0, eventWeights: webEventWeights, halfLife: halfLife),
-    .note30d0: FrecencyParam(key: .note30d0, eventWeights: noteEventWeights, halfLife: halfLife)
+    .note30d0: FrecencyParam(key: .note30d0, eventWeights: noteEventWeights[0], halfLife: halfLife),
+    .note30d1: FrecencyParam(key: .note30d1, eventWeights: noteEventWeights[1], halfLife: halfLife)
 ]
 
 public protocol FrecencyScoreIdKey {}

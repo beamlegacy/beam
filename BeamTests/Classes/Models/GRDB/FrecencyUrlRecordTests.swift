@@ -32,4 +32,21 @@ class FrecencyUrlRecordTests: XCTestCase {
             try expect(FrecencyUrlRecord.fetchCount(db)) == 3
         }
     }
+    func testGetMany() throws {
+        let db = GRDBDatabase.empty()
+        let records = [
+            FrecencyUrlRecord(urlId: 0, lastAccessAt: Date(timeIntervalSince1970: 0), frecencyScore: 0.34,           frecencySortScore: 10, frecencyKey: .webVisit30d0),
+            FrecencyUrlRecord(urlId: 1, lastAccessAt: Date(timeIntervalSince1970: 1), frecencyScore: 0,              frecencySortScore: 9, frecencyKey: .webVisit30d0),
+            FrecencyUrlRecord(urlId: 1, lastAccessAt: Date(timeIntervalSince1970: 1), frecencyScore: Float.infinity, frecencySortScore: 8, frecencyKey: .webReadingTime30d0),
+            FrecencyUrlRecord(urlId: 2, lastAccessAt: Date(timeIntervalSince1970: 1), frecencyScore: Float.infinity, frecencySortScore: 7, frecencyKey: .webVisit30d0),
+        ]
+
+        for var rec in records {
+            try db.saveFrecencyUrl(&rec)
+        }
+        let scores = try XCTUnwrap( db.getFrecencyScoreValues(urlIds: [0, 1], paramKey: .webVisit30d0))
+        XCTAssertEqual(scores.count, 2)
+        XCTAssertEqual(scores[0], 10)
+        XCTAssertEqual(scores[1], 9)
+    }
 }
