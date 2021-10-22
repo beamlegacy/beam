@@ -10,9 +10,13 @@ import SwiftUI
 struct BoxedTextFieldView: View {
     var title: String
     @Binding var text: String
+    @Binding var isEditing: Bool
     var foregroundColor: BeamColor = BeamColor.Generic.text
     var onCommit: (() -> Void)?
-    @State private var isEditing: Bool = false
+    var onBackspace: (() -> Void)?
+    var onEscape: (() -> Void)?
+    var onTab: (() -> Bool)?
+
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
@@ -21,7 +25,10 @@ struct BoxedTextFieldView: View {
                           font: BeamFont.regular(size: 12).nsFont,
                           textColor: foregroundColor.nsColor,
                           placeholderColor: BeamColor.AlphaGray.nsColor,
-                          onCommit: { _ in onCommit?() })
+                          onCommit: { _ in onCommit?() },
+                          onEscape: onEscape,
+                          onBackspace: onBackspace,
+                          onTab: onTab)
                 .frame(height: 32)
         }
         .padding(.horizontal, BeamSpacing._80)
@@ -31,12 +38,13 @@ struct BoxedTextFieldView: View {
         .onTapGesture {
             isEditing = true
         }
+        .focusable()
     }
 }
 
 struct BoxedTextFieldView_Previews: PreviewProvider {
     static var previews: some View {
-        BoxedTextFieldView(title: "The Title", text: .constant("Text content"))
+        BoxedTextFieldView(title: "The Title", text: .constant("Text content"), isEditing: .constant(false))
             .background(BeamColor.Generic.background.swiftUI)
     }
 }
