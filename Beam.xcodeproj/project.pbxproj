@@ -62,8 +62,8 @@
 		0D700435269764BD00C7B243 /* TopDomainDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D700434269764BD00C7B243 /* TopDomainDatabaseTests.swift */; };
 		0DC6E2CF269DE73B00BD2E2A /* AppDelegate+TopDomain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DC6E2CE269DE73B00BD2E2A /* AppDelegate+TopDomain.swift */; };
 		0DC6E2D9269DEB4900BD2E2A /* TopDomainDelegateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DC6E2D8269DEB4900BD2E2A /* TopDomainDelegateTests.swift */; };
-		0DC6E2DE26A0527900BD2E2A /* majestic_million_test.csv in Resources */ = {isa = PBXBuildFile; fileRef = 0DC6E2DB26A02B5900BD2E2A /* majestic_million_test.csv */; };
-		0DC6E2E926A0A4DB00BD2E2A /* majestic_million_test.csv in Resources */ = {isa = PBXBuildFile; fileRef = 0DC6E2DB26A02B5900BD2E2A /* majestic_million_test.csv */; };
+		0DC6E2DE26A0527900BD2E2A /* topdomains_test.txt in Resources */ = {isa = PBXBuildFile; fileRef = 0DC6E2DB26A02B5900BD2E2A /* topdomains_test.txt */; };
+		0DC6E2E926A0A4DB00BD2E2A /* topdomains_test.txt in Resources */ = {isa = PBXBuildFile; fileRef = 0DC6E2DB26A02B5900BD2E2A /* topdomains_test.txt */; };
 		0DD0DACC2681C9630005339A /* GRDBDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DD0DACB2681C9630005339A /* GRDBDatabase.swift */; };
 		0DEE978D2642965600AB95AE /* GRDBDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DEE978C2642965600AB95AE /* GRDBDatabaseTests.swift */; };
 		0DF3376D26948BAB0024C504 /* String+SliceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DF3376C26948BAB0024C504 /* String+SliceTests.swift */; };
@@ -396,6 +396,7 @@
 		56A5BD3725CCAFA400ED7C50 /* english.stopwords in Resources */ = {isa = PBXBuildFile; fileRef = 56A5BD3625CCAFA400ED7C50 /* english.stopwords */; };
 		7521342B26F4A00D00BBBD6D /* GenericErrorPage.html in Resources */ = {isa = PBXBuildFile; fileRef = 7521342A26F4A00D00BBBD6D /* GenericErrorPage.html */; };
 		759442D726FCA86E00CBFB7A /* ErrorPageManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 759442D626FCA86E00CBFB7A /* ErrorPageManagerTests.swift */; };
+		75A1E5B52719A7DA000824B1 /* topdomains_v0.1.txt in Resources */ = {isa = PBXBuildFile; fileRef = 75A1E5B42719A7DA000824B1 /* topdomains_v0.1.txt */; };
 		75A1E5BA271D98F1000824B1 /* ExternalDeeplinkHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75A1E5B9271D98F1000824B1 /* ExternalDeeplinkHandler.swift */; };
 		75BDCDAD26F339B1004BBC7E /* ErrorPageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75BDCDAC26F339B1004BBC7E /* ErrorPageManager.swift */; };
 		75F5909226F3972F001D5D19 /* ErrorPageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75F5909126F3972F001D5D19 /* ErrorPageView.swift */; };
@@ -537,7 +538,6 @@
 		964548A02523B3550064D062 /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9645489F2523B3550064D062 /* CloudKit.framework */; };
 		964FE5B72624813E00966E03 /* RandomAccessCollection+BinarySearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 964FE5B62624813E00966E03 /* RandomAccessCollection+BinarySearch.swift */; };
 		964FE64D262D8ED300966E03 /* Dictionary+valuesMatchingKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 964FE64C262D8ED300966E03 /* Dictionary+valuesMatchingKeys.swift */; };
-		9652A91D26A568B800F0590C /* TopDomainDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9652A91C26A568B800F0590C /* TopDomainDelegate.swift */; };
 		9652A93426A6B24E00F0590C /* FakeNoteGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9652A92926A6A96600F0590C /* FakeNoteGenerator.swift */; };
 		9652A93526A6B27500F0590C /* FakeNoteGeneratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9652A93226A6B13700F0590C /* FakeNoteGeneratorTests.swift */; };
 		965A78292514F147009980D4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965A78282514F147009980D4 /* AppDelegate.swift */; };
@@ -1113,7 +1113,7 @@
 		0D700434269764BD00C7B243 /* TopDomainDatabaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopDomainDatabaseTests.swift; sourceTree = "<group>"; };
 		0DC6E2CE269DE73B00BD2E2A /* AppDelegate+TopDomain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+TopDomain.swift"; sourceTree = "<group>"; };
 		0DC6E2D8269DEB4900BD2E2A /* TopDomainDelegateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopDomainDelegateTests.swift; sourceTree = "<group>"; };
-		0DC6E2DB26A02B5900BD2E2A /* majestic_million_test.csv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = majestic_million_test.csv; sourceTree = "<group>"; };
+		0DC6E2DB26A02B5900BD2E2A /* topdomains_test.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = topdomains_test.txt; sourceTree = "<group>"; };
 		0DD0DACB2681C9630005339A /* GRDBDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GRDBDatabase.swift; sourceTree = "<group>"; };
 		0DEE978C2642965600AB95AE /* GRDBDatabaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GRDBDatabaseTests.swift; sourceTree = "<group>"; };
 		0DF3376C26948BAB0024C504 /* String+SliceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+SliceTests.swift"; sourceTree = "<group>"; };
@@ -1461,6 +1461,7 @@
 		56A5BD3625CCAFA400ED7C50 /* english.stopwords */ = {isa = PBXFileReference; lastKnownFileType = text; path = english.stopwords; sourceTree = "<group>"; };
 		7521342A26F4A00D00BBBD6D /* GenericErrorPage.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = GenericErrorPage.html; sourceTree = "<group>"; };
 		759442D626FCA86E00CBFB7A /* ErrorPageManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorPageManagerTests.swift; sourceTree = "<group>"; };
+		75A1E5B42719A7DA000824B1 /* topdomains_v0.1.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = topdomains_v0.1.txt; sourceTree = "<group>"; };
 		75A1E5B9271D98F1000824B1 /* ExternalDeeplinkHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalDeeplinkHandler.swift; sourceTree = "<group>"; };
 		75BDCDAC26F339B1004BBC7E /* ErrorPageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorPageManager.swift; sourceTree = "<group>"; };
 		75F5909126F3972F001D5D19 /* ErrorPageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorPageView.swift; sourceTree = "<group>"; };
@@ -1585,7 +1586,6 @@
 		9645489F2523B3550064D062 /* CloudKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CloudKit.framework; path = System/Library/Frameworks/CloudKit.framework; sourceTree = SDKROOT; };
 		964FE5B62624813E00966E03 /* RandomAccessCollection+BinarySearch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RandomAccessCollection+BinarySearch.swift"; sourceTree = "<group>"; };
 		964FE64C262D8ED300966E03 /* Dictionary+valuesMatchingKeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Dictionary+valuesMatchingKeys.swift"; sourceTree = "<group>"; };
-		9652A91C26A568B800F0590C /* TopDomainDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopDomainDelegate.swift; sourceTree = "<group>"; };
 		9652A92926A6A96600F0590C /* FakeNoteGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FakeNoteGenerator.swift; sourceTree = "<group>"; };
 		9652A93226A6B13700F0590C /* FakeNoteGeneratorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FakeNoteGeneratorTests.swift; sourceTree = "<group>"; };
 		965A78252514F147009980D4 /* Beam.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Beam.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -2220,7 +2220,7 @@
 		0DC6E2DA26A02B0E00BD2E2A /* Assets */ = {
 			isa = PBXGroup;
 			children = (
-				0DC6E2DB26A02B5900BD2E2A /* majestic_million_test.csv */,
+				0DC6E2DB26A02B5900BD2E2A /* topdomains_test.txt */,
 			);
 			path = Assets;
 			sourceTree = "<group>";
@@ -2237,7 +2237,6 @@
 				96DDF54A26823A4200FF8CCE /* BidirectionalLink.swift */,
 				0D4EC933268372E800487B75 /* FrecencyScore.swift */,
 				0D65977026975FD500AC9822 /* TopDomainDatabase.swift */,
-				9652A91C26A568B800F0590C /* TopDomainDelegate.swift */,
 				DAA0A509270CA8ED00F952E5 /* BrowsingTreeStore.swift */,
 			);
 			path = GRDB;
@@ -2368,6 +2367,7 @@
 				A5F47EC626F8D70F004B7CDE /* Lotties */,
 				56A5BD1A25CC590500ED7C50 /* NaturalLanguage */,
 				418171112581082200317ED8 /* Assets.xcassets */,
+				75A1E5AE2719A7AE000824B1 /* TopDomains */,
 			);
 			path = Assets;
 			sourceTree = "<group>";
@@ -3397,6 +3397,14 @@
 				759442D626FCA86E00CBFB7A /* ErrorPageManagerTests.swift */,
 			);
 			path = Error;
+			sourceTree = "<group>";
+		};
+		75A1E5AE2719A7AE000824B1 /* TopDomains */ = {
+			isa = PBXGroup;
+			children = (
+				75A1E5B42719A7DA000824B1 /* topdomains_v0.1.txt */,
+			);
+			path = TopDomains;
 			sourceTree = "<group>";
 		};
 		75BDCDA626F3385D004BBC7E /* Error */ = {
@@ -4909,10 +4917,11 @@
 				41D169AA25DC07260018E5F2 /* Inter-Medium.otf in Resources */,
 				52F4E4A226417F210067B017 /* sign_in_with_provider.graphql in Resources */,
 				41D169A625DC07260018E5F2 /* Inter-Bold.otf in Resources */,
+				75A1E5B52719A7DA000824B1 /* topdomains_v0.1.txt in Resources */,
 				520BC40126D7B02200A82966 /* subscription_beam_objects_updated.graphql in Resources */,
 				A58645E626FB12DC00D7FF86 /* WebViewFocusHandling.js in Resources */,
 				8AD2637326F4A0480074D673 /* UITests-1.html in Resources */,
-				0DC6E2DE26A0527900BD2E2A /* majestic_million_test.csv in Resources */,
+				0DC6E2DE26A0527900BD2E2A /* topdomains_test.txt in Resources */,
 				032562A826051D3B006513E4 /* blockerList.json in Resources */,
 				418171122581082200317ED8 /* Assets.xcassets in Resources */,
 				8AD2636926F4A0480074D673 /* UITests-2.html in Resources */,
@@ -4972,7 +4981,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0DC6E2E926A0A4DB00BD2E2A /* majestic_million_test.csv in Resources */,
+				0DC6E2E926A0A4DB00BD2E2A /* topdomains_test.txt in Resources */,
 				5281B09425C99D3300DF66D9 /* 2_local.json in Resources */,
 				5281B08A25C998E700DF66D9 /* 1_ancestor.json in Resources */,
 				032562C026051D48006513E4 /* kith.gz in Resources */,
@@ -5616,7 +5625,6 @@
 				032562AD26051D3B006513E4 /* RBFilterBuilder.m in Sources */,
 				524CF6CA25F2735D007312F0 /* EncryptionManager.swift in Sources */,
 				96F673D225B7207100E8175B /* StoredLink.swift in Sources */,
-				9652A91D26A568B800F0590C /* TopDomainDelegate.swift in Sources */,
 				DA69304D268B4DD9008EF756 /* BrowsingTreeSender.swift in Sources */,
 				032562AC26051D3B006513E4 /* punycode.c in Sources */,
 				96120D4B260CD5E100592546 /* TextEdit+Hyperlink.swift in Sources */,

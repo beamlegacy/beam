@@ -5,14 +5,11 @@ extension AppDelegate {
     func fetchTopDomains(forced: Bool = false) {
         guard Configuration.env != "test" else { return }
 
-        // Will not fetch more than once per week, unless we have no entries
+        // Will not fill database unless we have a new version of the file
         if !forced,
-           let lastFetchedAt = Persistence.TopDomains.lastFetchedAt,
-           BeamDate.now.timeIntervalSince(lastFetchedAt) <= (60*60*24*7),
+           Persistence.TopDomains.version == Configuration.topDomainsVersion,
            TopDomainDatabase.shared.count() > 0 {
-            let diff = Int(BeamDate.now.timeIntervalSince(lastFetchedAt))
-            Logger.shared.logDebug("Last fetch is \(diff)sec old, skip.",
-                                   category: .topDomain)
+            Logger.shared.logDebug("Last database version is correct", category: .topDomain)
             return
         }
 
@@ -21,11 +18,7 @@ extension AppDelegate {
         } catch {
             Logger.shared.logWarning("unable to clear top domain DB: \(error)", category: .topDomain)
         }
-
-        let delegate = TopDomainDelegate(TopDomainDatabase.shared)
-        let session = URLSession(configuration: .default,
-                                 delegate: delegate,
-                                 delegateQueue: delegate.queue)
-        session.dataTask(with: Configuration.topDomainUrl).resume()
+        TopDomainDatabase.shared.add(Configuration.topDomains)
+        Persistence.TopDomains.version = Configuration.topDomainsVersion
     }
 }
