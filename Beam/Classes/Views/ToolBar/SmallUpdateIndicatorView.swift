@@ -50,6 +50,12 @@ struct SmallUpdateIndicatorView: View {
                 EmptyView()
             case .error(errorDesc: let errorDesc):
                 ButtonLabel("Update error : \(errorDesc)", customStyle: buttonLabelStyle)
+                    .onReceive(opacityTimer, perform: { _ in
+                        withAnimation {
+                            opacity = 0
+                        }
+                        opacityTimer.upstream.connect().cancel()
+                    })
             case .downloading(progress: _):
                 EmptyView()
             case .downloaded(let downloadedRelease):
