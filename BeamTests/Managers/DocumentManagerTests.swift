@@ -376,7 +376,7 @@ class DocumentManagerTests: QuickSpec {
             }
         }
 
-        describe(".delete()") {
+        describe(".delete(id:)") {
             context("with Foundation") {
                 it("deletes document") {
                     var docStruct = helper.createDocumentStruct()
@@ -426,6 +426,70 @@ class DocumentManagerTests: QuickSpec {
                                                                             CVarArg))
 
                     expect(count).to(equal(0))
+                }
+            }
+        }
+
+        describe(".delete(ids:)") {
+            context("with Foundation") {
+                it("deletes document") {
+                    var docStruct = helper.createDocumentStruct()
+                    docStruct = helper.saveLocally(docStruct)
+
+                    var docStruct2 = helper.createDocumentStruct()
+                    docStruct2 = helper.saveLocally(docStruct2)
+                    waitUntil(timeout: .seconds(10)) { done in
+                        sut.delete(ids: [docStruct.id, docStruct2.id]) { _ in
+                            done()
+                        }
+                    }
+
+                    var count = Document.countWithPredicate(mainContext,
+                                                            NSPredicate(format: "id = %@", docStruct.id as
+                                                                            CVarArg))
+
+                    expect(count).to(equal(0))
+
+                    count = Document.countWithPredicate(mainContext,
+                                                        NSPredicate(format: "id = %@", docStruct2.id as
+                                                                    CVarArg))
+
+                    expect(count).to(equal(0))
+                }
+            }
+        }
+
+        describe(".softDelete(ids:)") {
+            context("with Foundation") {
+                it("deletes document") {
+                    var docStruct = helper.createDocumentStruct()
+                    docStruct = helper.saveLocally(docStruct)
+
+                    var docStruct2 = helper.createDocumentStruct()
+                    docStruct2 = helper.saveLocally(docStruct2)
+                    waitUntil(timeout: .seconds(10)) { done in
+                        sut.softDelete(ids: [docStruct.id, docStruct2.id]) { _ in
+                            done()
+                        }
+                    }
+
+                    var count = Document.countWithPredicate(mainContext,
+                                                            NSPredicate(format: "id = %@", docStruct.id as
+                                                                            CVarArg))
+
+                    expect(count).to(equal(0))
+
+                    count = Document.countWithPredicate(mainContext,
+                                                        NSPredicate(format: "id = %@", docStruct2.id as
+                                                                    CVarArg))
+
+                    expect(count).to(equal(0))
+
+                    var document = try? Document.fetchWithId(mainContext, docStruct.id)
+                    expect(document?.deleted_at).toNot(beNil())
+
+                    document = try? Document.fetchWithId(mainContext, docStruct2.id)
+                    expect(document?.deleted_at).toNot(beNil())
                 }
             }
         }
