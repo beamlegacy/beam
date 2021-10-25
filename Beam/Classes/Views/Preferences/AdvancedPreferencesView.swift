@@ -29,6 +29,7 @@ struct AdvancedPreferencesView: View {
     @State var pnsJSIsOn = PreferencesManager.PnsJSIsOn
     @State var browsingSessionCollectionIsOn = PreferencesManager.browsingSessionCollectionIsOn
     @State var showDebugSection = PreferencesManager.showDebugSection
+    @State var showOmnibarScoreSection = PreferencesManager.showOmnibarScoreSection
     @State var showTabGrougpingMenuItem = PreferencesManager.showTabGrougpingMenuItem
     @State var isDataBackupOnUpdateOn = PreferencesManager.isDataBackupOnUpdateOn
 
@@ -299,6 +300,14 @@ struct AdvancedPreferencesView: View {
                     DebugSectionCheckbox
                 }
 
+                Preferences.Section(bottomDivider: true) {
+                    Text("Show frecency / score in Omnibar")
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.text.swiftUI)
+                } content: {
+                    OmnibarScoreSectionCheckbox
+                }
+
                 Preferences.Section(bottomDivider: false) {
                     Text("Enable Point and Shoot view")
                         .font(BeamFont.regular(size: 13).swiftUI)
@@ -397,6 +406,17 @@ struct AdvancedPreferencesView: View {
             .foregroundColor(BeamColor.Generic.text.swiftUI)
             .onReceive([showDebugSection].publisher.first()) {
                 PreferencesManager.showDebugSection = $0
+            }
+    }
+
+    private var OmnibarScoreSectionCheckbox: some View {
+        return Toggle(isOn: $showOmnibarScoreSection) {
+            Text("Enabled")
+        }.toggleStyle(CheckboxToggleStyle())
+            .font(BeamFont.regular(size: 13).swiftUI)
+            .foregroundColor(BeamColor.Generic.text.swiftUI)
+            .onReceive([showOmnibarScoreSection].publisher.first()) {
+                PreferencesManager.showOmnibarScoreSection = $0
             }
     }
 
