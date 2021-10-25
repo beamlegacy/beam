@@ -27,7 +27,7 @@ class PointAndShootPointingTest: PointAndShootTest {
             animated: false
         )
         // Point
-        self.pns.point(target, "https://pnsTest.co")
+        self.pns.point(target, "placeholder string", "https://pnsTest.co")
         XCTAssertNotNil(self.pns.activePointGroup)
     }
 }
