@@ -51,9 +51,11 @@ struct Passwords: View {
     @State private var selectedEntries = IndexSet()
     @State private var passwordSelected: Bool = false
     @State private var multipleSelection: Bool = false
+    @State private var doubleTapRow: Int = 0
 
     @State private var showingAddPasswordSheet: Bool = false
     @State private var showingEditPasswordSheet: Bool = false
+    @State private var showingEditPasswordSheetonDoubleTap: Bool = false
 
     var body: some View {
         HStack {
@@ -72,13 +74,30 @@ struct Passwords: View {
                 }
                 HStack {
                     Spacer()
-                    PasswordsTableView(passwordEntries: passwordsViewModel.filteredPasswordTableViewItems, onSelectionChanged: { idx in
+                    PasswordsTableView(passwordEntries: passwordsViewModel.filteredPasswordTableViewItems) { idx in
                         passwordsViewModel.updateSelection(idx)
-                    })
+                    } onDoubleTap: { row in
+                        doubleTapRow = row
+                        showingEditPasswordSheetonDoubleTap = true
+                    }
                     .frame(width: 682, height: 240, alignment: .center)
                     .border(BeamColor.Mercury.swiftUI, width: 1)
                     .background(BeamColor.Generic.background.swiftUI)
                     Spacer()
+
+                    Button {
+                    } label: {
+                        Text("").hidden()
+                    }.hidden()
+                    .sheet(isPresented: $showingEditPasswordSheetonDoubleTap) {
+                        if let password = PasswordManager.shared.password(hostname: passwordsViewModel.filteredPasswordEntries[doubleTapRow].minimizedHost, username: passwordsViewModel.filteredPasswordEntries[doubleTapRow].username) {
+                            PasswordEditView(hostname: passwordsViewModel.filteredPasswordEntries[doubleTapRow].minimizedHost,
+                                             username: passwordsViewModel.filteredPasswordEntries[doubleTapRow].username,
+                                             password: password, editType: .update) {
+                                passwordsViewModel.refresh()
+                            }.frame(width: 400, height: 179, alignment: .center)
+                        }
+                    }
                 }
                 HStack {
                     Button {

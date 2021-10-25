@@ -11,7 +11,7 @@ import SwiftUI
 final class PasswordListViewModel: ObservableObject {
     private var allPasswordEntries: [PasswordManagerEntry] = []
     private var allPasswordTableViewItems: [PasswordTableViewItem] = []
-    private var filteredPasswordEntries: [PasswordManagerEntry] = []
+    var filteredPasswordEntries: [PasswordManagerEntry] = []
 
     @Published var filteredPasswordTableViewItems: [PasswordTableViewItem] = []
     private var currentSelection = IndexSet()
