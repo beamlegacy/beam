@@ -37,4 +37,13 @@ class JournalTest: BaseTest {
         testRailPrint("Then Journal scroll view still exists")
         XCTAssertTrue(journalScrollView.exists)
     }
+    
+    func testIfJournalIsEmptyByDefault() throws {
+        let journalView = launchApp()
+        testRailPrint("When the journal is first loaded the note is empty by default")
+        journalView.waitForJournalViewToLoad()
+        let beforeCardNotes = CardTestView().getCardNotesForVisiblePart()
+        XCTAssertEqual(beforeCardNotes[0].value as? String, "")
+    }
+
 }
