@@ -45,7 +45,7 @@ class CGPath_UnionTest: PointAndShootTest {
         let targets = self.helperCreateFakeTargets(10)
         let newTargets = self.helperCreateFakeTargets(10, 5)
         let id = UUID().uuidString
-        var group = PointAndShoot.ShootGroup(id, targets, faker.internet.url())
+        var group = PointAndShoot.ShootGroup(id, targets, "placeholder string", faker.internet.url())
         let beforeGroupPath = group.groupPath
         self.measure {
             group.updateTargets(id, newTargets)
@@ -58,7 +58,7 @@ class CGPath_UnionTest: PointAndShootTest {
         let targets = self.helperCreateFakeTargets(400)
         let newTargets = self.helperCreateFakeTargets(400, 5)
         let id = UUID().uuidString
-        var group = PointAndShoot.ShootGroup(id, targets, faker.internet.url())
+        var group = PointAndShoot.ShootGroup(id, targets, "placeholder string", faker.internet.url())
         let beforeGroupPath = group.groupPath
         self.measure {
             group.updateTargets(id, newTargets)
@@ -71,7 +71,7 @@ class CGPath_UnionTest: PointAndShootTest {
         let targets = self.helperCreateFakeTargets(40000)
         let newTargets = self.helperCreateFakeTargets(40000, 5)
         let id = UUID().uuidString
-        var group = PointAndShoot.ShootGroup(id, targets, faker.internet.url())
+        var group = PointAndShoot.ShootGroup(id, targets, "placeholder string", faker.internet.url())
         let beforeGroupPath = group.groupPath
         self.measure {
             group.updateTargets(id, newTargets)
