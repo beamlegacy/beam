@@ -14,7 +14,6 @@ function config(name, mode = "production") {
     },
     output: {
       filename: "navigation_prod.js",
-      library: "beam",
       path: path.resolve(__dirname, ".")
     }
   }
