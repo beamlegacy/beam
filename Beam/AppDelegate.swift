@@ -109,6 +109,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         getUserInfos()
     }
 
+    // Work around to fix odd animation in Preferences Panes
+    // https://github.com/sindresorhus/Preferences/issues/60
+    // I don't like this but couldn't find anything else to fix this issue
+    // It means that a full rewrite of the Preferences without the Preferences SPM is needed
+    // As soon as the target is 11.0
+    // https://developer.apple.com/documentation/swiftui/settings
+    private var openedPrefPanelOnce: Bool = false
+    func fixFirstTimeLanuchOddAnimationByImplicitlyShowIt() {
+        Preferences.PaneIdentifier.allBeamPreferences.forEach {
+            preferencesWindowController.show(preferencePane: $0)
+        }
+        preferencesWindowController.close()
+        openedPrefPanelOnce = true
+    }
+
     // MARK: - Web sockets
     func disconnectWebSockets() {
         beamObjectManager.disconnectLiveSync()
@@ -377,6 +392,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     )
 
     @IBAction private func preferencesMenuItemActionHandler(_ sender: NSMenuItem) {
+        if !openedPrefPanelOnce {
+            fixFirstTimeLanuchOddAnimationByImplicitlyShowIt()
+        }
         preferencesWindowController.show()
     }
 

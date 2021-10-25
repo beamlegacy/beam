@@ -119,7 +119,7 @@ struct EditorDebugPreferencesView: View {
                     }
                 }
             }
-        }.frame(minHeight: 500)
+        }.frame(maxHeight: 500)
     }
 
     private func formatter() -> NumberFormatter {
@@ -150,10 +150,14 @@ struct EditorAppearance: View {
 
     var body: some View {
         VStack(alignment: .leading) {
-            Checkbox(checkState: editorIsCentered, text: "Center Text Editor", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 12).swiftUI) { activated in
-                editorIsCentered = activated
-                PreferencesManager.editorIsCentered = activated
-            }
+            Toggle(isOn: $editorIsCentered) {
+                Text("Center Text Editor")
+            }.toggleStyle(CheckboxToggleStyle())
+                .font(BeamFont.regular(size: 13).swiftUI)
+                .foregroundColor(BeamColor.Generic.text.swiftUI)
+                .onReceive([editorIsCentered].publisher.first()) {
+                    PreferencesManager.editorIsCentered = $0
+                }
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Leading percentage")
