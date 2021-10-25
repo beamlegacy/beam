@@ -29,14 +29,17 @@ class DeleteDocument: DocumentCommand {
         var noteLinks: [BeamNoteReference]?
 
         let callback = {
-            noteLinks?.forEach { ref in
-                ref.note?.updateNoteNamesInInternalLinks(recursive: true)
+            DispatchQueue.main.async {
+                noteLinks?.forEach { ref in
+                    ref.note?.updateNoteNamesInInternalLinks(recursive: true)
+                }
             }
         }
 
         if allDocuments {
             documents = context?.loadAll() ?? []
-            context?.deleteAll { _ in
+
+            context?.softDelete(ids: documents.map { $0.id }) { _ in
                 callback()
                 completion?(true)
             }
@@ -45,9 +48,10 @@ class DeleteDocument: DocumentCommand {
             noteLinks = saveDocumentsLinks(context: context)
             unpublishNotes(in: documents)
 
-            try? context?.delete(documentIds)
-            callback()
-            completion?(true)
+            context?.softDelete(ids: documentIds) { _ in
+                callback()
+                completion?(true)
+            }
         }
     }
 

@@ -386,17 +386,6 @@ extension BeamNote: BeamNoteDocument {
             return nil
         }
 
-        // HOTFIX: remove empty notes that were errounously saved
-        guard !doc.data.isEmpty else {
-            Logger.shared.logError("HOTFIX - Data for note \(doc.title) (\(doc.id)) is empty -> deleting the note from the DB", category: .document)
-            do {
-                try documentManager.delete([doc.id])
-            } catch {
-                Logger.shared.logError("HOTFIX - Error while deleting \(doc.title) (\(doc.id))", category: .document)
-            }
-            return nil
-        }
-
         //        Logger.shared.logDebug("Note loaded:\n\(String(data: doc.data, encoding: .utf8)!)\n", category: .document)
 
         do {
