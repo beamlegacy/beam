@@ -108,8 +108,19 @@ class LoggerNSTableController: NSViewController {
         }
 
         if let searchText = searchText, !searchText.isEmpty {
-            predicates.append(NSPredicate(format: "log CONTAINS[cd] %@", searchText))
+            var searchPredicate = NSPredicate(format: "log CONTAINS[cd] %@", searchText)
             request.fetchLimit = 0
+
+            if selectedCategories.isEmpty {
+                let categoryPredicate = NSPredicate(format: "category CONTAINS[cd] %@", searchText)
+                let markerPredicate = NSPredicate(format: "category IN %@", ["marker"])
+                searchPredicate = NSCompoundPredicate(orPredicateWithSubpredicates: [searchPredicate,
+                                                                                     categoryPredicate,
+                                                                                     markerPredicate])
+                predicates.append(searchPredicate)
+            } else {
+                predicates.append(searchPredicate)
+            }
         }
 
         request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
@@ -136,6 +147,7 @@ class LoggerNSTableController: NSViewController {
                 if let searchText = self.searchText,
                    !searchText.isEmpty,
                    logEntry.log?.range(of: searchText, options: .caseInsensitive) == nil,
+                   logEntry.category?.range(of: searchText, options: .caseInsensitive) == nil,
                    logEntry.category != "marker" {
                     return
                 }

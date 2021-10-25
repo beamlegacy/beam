@@ -49,6 +49,7 @@ public enum LogCategory: String, CaseIterable {
     case browsingTreeSender
     case notePublishing
     case marker
+    case sentry
 }
 
 public final class Logger {
