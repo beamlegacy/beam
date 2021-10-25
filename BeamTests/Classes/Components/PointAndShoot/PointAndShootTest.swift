@@ -272,7 +272,7 @@ class PointAndShootTest: XCTestCase {
             targets.append(target)
         }
 
-        return PointAndShoot.ShootGroup(UUID().uuidString, targets, faker.internet.url())
+        return PointAndShoot.ShootGroup(UUID().uuidString, targets, "placeholder text", faker.internet.url())
     }
 
     // Note: this class is only used to setup the Point and Shoot Mocks and testbed

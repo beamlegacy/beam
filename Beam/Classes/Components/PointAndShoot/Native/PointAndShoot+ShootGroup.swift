@@ -15,10 +15,11 @@ extension PointAndShoot {
     }
 
     struct ShootGroup {
-        init(_ id: String, _ targets: [Target], _ href: String, _ noteInfo: NoteInfo = NoteInfo(title: "")) {
+        init(_ id: String, _ targets: [Target], _ text: String, _ href: String, _ noteInfo: NoteInfo = NoteInfo(title: "")) {
             self.id = id
             self.href = href
             self.targets = targets
+            self.text = text
             self.noteInfo = noteInfo
             self.updateSelectionPath()
         }
@@ -34,11 +35,8 @@ extension PointAndShoot {
                 $1.html.count > $0.count ? $1.html : $0
             })
         }
-        func text() -> String {
-            targets.reduce("", {
-                $1.text?.count ?? 0 > $0.count ? $1.text ?? "" : $0
-            })
-        }
+        /// Plain text string of the targeted content
+        var text: String
         private(set) var groupPath: CGPath = CGPath(rect: .zero, transform: nil)
         private(set) var groupRect: CGRect = .zero
         private let groupPadding: CGFloat = 4
@@ -110,6 +108,6 @@ extension PointAndShoot {
         let circleRect = NSRect(x: mouseLocation.x - (size / 2), y: mouseLocation.y - (size / 2), width: size, height: size)
         var circleTarget = target
         circleTarget.rect = circleRect
-        return ShootGroup("point-uuid", [circleTarget], href)
+        return ShootGroup("point-uuid", [circleTarget], "", href)
     }
 }

@@ -107,7 +107,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
     })
 
     /// Set activePointGroup with target. Updating the activePointGroup will update the UI directly.
-    func point(_ target: Target, _ href: String) {
+    func point(_ target: Target, _ text: String, _ href: String) {
         guard activeShootGroup == nil else { return }
         guard !isTypingOnWebView else { return }
 
@@ -119,7 +119,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
             }
         }
 
-        activePointGroup = ShootGroup("point-uuid", [target], href)
+        activePointGroup = ShootGroup("point-uuid", [target], text, href)
 
     }
 
@@ -128,11 +128,11 @@ class PointAndShoot: WebPageHolder, ObservableObject {
     ///   - groupId: id of group
     ///   - targets: Set of targets to draw
     ///   - href: Url of frame targets are located in
-    func pointShoot(_ groupId: String, _ target: Target, _ href: String) {
+    func pointShoot(_ groupId: String, _ target: Target, _ text: String, _ href: String) {
         guard !targetIsDismissed(groupId), !hasActiveSelection else { return }
 
         if targetIsCollected(groupId) {
-            collect(groupId, [target], href)
+            collect(groupId, [target], text, href)
             return
         }
 
@@ -146,16 +146,16 @@ class PointAndShoot: WebPageHolder, ObservableObject {
                       activeSelectGroup == nil,
                       activeShootGroup == nil {
 
-                activeShootGroup = ShootGroup(groupId, [target], href)
-                if let group = activeShootGroup,
-                   let sourceUrl = page.url {
-                    let text = group.text()
+                activeShootGroup = ShootGroup(groupId, [target], text, href)
+                if let group = self.activeShootGroup,
+                   let sourceUrl = self.page.url {
+                    let text = group.text
                     self.page.addTextToClusteringManager(text, url: sourceUrl)
                 }
                 throttledHaptic()
             } else {
                 if !isAltKeyDown {
-                    let tempGroup = ShootGroup(groupId, [], href)
+                    let tempGroup = ShootGroup(groupId, [], text, href)
                     dismissedGroups.append(tempGroup)
                 }
             }
@@ -168,13 +168,13 @@ class PointAndShoot: WebPageHolder, ObservableObject {
     ///   - groupId: id of group, for selections this is the non-number version. Targets have the same `id + index`
     ///   - targets: Target rects to draw
     ///   - href: href of frame
-    func select(_ groupId: String, _ targets: [Target], _ href: String) {
+    func select(_ groupId: String, _ targets: [Target], _ text: String, _ href: String) {
         guard !isTypingOnWebView, !targets.isEmpty else {
             return
         }
         // Check if the incomming group is already collected
         if targetIsCollected(groupId) {
-            collect(groupId, targets, href)
+            collect(groupId, targets, text, href)
             return
         }
         // Check if the target was previously dismissed
@@ -194,7 +194,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
             return
         } else if hasActiveSelection, activeSelectGroup == nil {
             // Create a new Selection group
-            activeSelectGroup = ShootGroup(groupId, targets, href)
+            activeSelectGroup = ShootGroup(groupId, targets, text, href)
             return
         }
     }
@@ -224,14 +224,14 @@ class PointAndShoot: WebPageHolder, ObservableObject {
         }
 
         if targetIsCollected(group.id) {
-            collect(group.id, group.targets, group.href)
+            collect(group.id, group.targets, group.text, group.href)
             return
         }
         guard !isTypingOnWebView else { return }
         activeShootGroup = group
 
-        let text = group.text()
-        if let sourceUrl = page.url {
+        let text = group.text
+        if let sourceUrl = self.page.url {
             self.page.addTextToClusteringManager(text, url: sourceUrl)
         }
     }
@@ -241,7 +241,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
     ///   - groupId: id of group to update
     ///   - targets: Set of targets to draw
     ///   - href: Url of frame targets are located in
-    func collect(_ groupId: String, _ targets: [Target], _ href: String) {
+    func collect(_ groupId: String, _ targets: [Target], _ text: String, _ href: String) {
         guard targets.count > 0 else { return }
         guard !isTypingOnWebView else { return }
 
@@ -255,7 +255,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
             existingGroup.updateTargets(groupId, targets)
             collectedGroups[index] = existingGroup
         } else {
-            let newGroup = ShootGroup(groupId, targets, href)
+            let newGroup = ShootGroup(groupId, targets, text, href)
             collectedGroups.append(newGroup)
         }
     }
