@@ -5141,13 +5141,12 @@
 			inputFileListPaths = (
 			);
 			inputPaths = (
-				"$(SRCROOT)/scripts/build_xcfilelist_pns.sh",
 			);
 			name = "Build Web xcfilelist: Point and Shoot";
 			outputFileListPaths = (
+				"$(SRCROOT)/WebFileList_pns.xcfilelist",
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/WebFileList_pns.xcfilelist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -5181,13 +5180,12 @@
 			inputFileListPaths = (
 			);
 			inputPaths = (
-				"$(SRCROOT)/scripts/build_xcfilelist_navigation.sh",
 			);
 			name = "Build Web xcfilelist: Navigation";
 			outputFileListPaths = (
+				"$(SRCROOT)/WebFileList_navigation.xcfilelist",
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/WebFileList_navigation.xcfilelist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;

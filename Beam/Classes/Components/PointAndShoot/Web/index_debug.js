@@ -7,4 +7,9 @@ const win = window
 const native = Native.getInstance(win)
 
 const pointAndShootUI = new PointAndShootUI_debug()
-export const __ID__PointAndShoot = PointAndShoot.getInstance(win, pointAndShootUI, new WebFactory())
+
+if (!window.beam) {
+  window.beam = {}
+}
+
+window.beam.__ID__PointAndShoot = PointAndShoot.getInstance(win, pointAndShootUI, new WebFactory())
