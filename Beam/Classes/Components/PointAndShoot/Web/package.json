@@ -14,6 +14,7 @@
     "start": "webpack serve --mode=development",
     "dist": "webpack --mode=production",
     "test": "node --experimental-vm-modules node_modules/.bin/jest --reporters=default --silent",
+    "test:verbose": "node --experimental-vm-modules node_modules/.bin/jest --reporters=default",
     "test-ci": "node --experimental-vm-modules node_modules/.bin/jest --ci --silent --reporters=default --reporters=jest-junit --coverage",
     "benchmark-show": "yarn run jest-measure",
     "benchmark-update": "UPDATE_BENCHMARK=true yarn test",
