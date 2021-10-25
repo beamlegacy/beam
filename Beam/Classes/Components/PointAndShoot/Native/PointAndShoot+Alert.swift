@@ -12,9 +12,9 @@ extension PointAndShoot {
     /// Triggers an alert modal to report collect failing
     /// - Parameters:
     ///   - group: ShootGroup to be collected
-    ///   - texts: texts converted from html
+    ///   - elements: Array of collected BeamElements
     ///   - message: optional message to provide additional information
-    func showAlert(_ group: ShootGroup, _ texts: [BeamText], _ message: String = "") {
+    func showAlert(_ group: ShootGroup, _ elements: [BeamElement], _ message: String = "") {
         // Set the message as the NSAlert text
         let message = """
         # Unsupported html found
@@ -29,10 +29,10 @@ extension PointAndShoot {
         \(group.html())
         ```
 
-        ## BeamTexts
-        \(texts.count) texts collected
+        ## [BeamElement]
+        \(elements.count) elements collected
         ```Swift
-        \(texts)
+        \(elements)
         ```
 
         ## Additional Information
