@@ -277,6 +277,7 @@
 		522BC3D726A6EAEE0018B51E /* Date+IntValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 522BC3D626A6EAEE0018B51E /* Date+IntValue.swift */; };
 		522BC3E826A8724B0018B51E /* BeamObjectManagerProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 522BC3E726A8724B0018B51E /* BeamObjectManagerProtocol.swift */; };
 		522BC3F526A872740018B51E /* BeamObjectManagerError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 522BC3F426A872740018B51E /* BeamObjectManagerError.swift */; };
+		522C30E92726F7CB00805319 /* EnvironmentVariablesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 522C30E82726F7CB00805319 /* EnvironmentVariablesTests.swift */; };
 		522D489D2719D1C00038DB81 /* LoggerNSWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 522D489C2719D1C00038DB81 /* LoggerNSWindow.swift */; };
 		522D48A42719D1D90038DB81 /* LoggerWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 522D48A32719D1D90038DB81 /* LoggerWindowController.swift */; };
 		522D48A62719D1F20038DB81 /* LoggerSplitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 522D48A52719D1F20038DB81 /* LoggerSplitViewController.swift */; };
@@ -1335,6 +1336,7 @@
 		522BC3D626A6EAEE0018B51E /* Date+IntValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+IntValue.swift"; sourceTree = "<group>"; };
 		522BC3E726A8724B0018B51E /* BeamObjectManagerProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamObjectManagerProtocol.swift; sourceTree = "<group>"; };
 		522BC3F426A872740018B51E /* BeamObjectManagerError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamObjectManagerError.swift; sourceTree = "<group>"; };
+		522C30E82726F7CB00805319 /* EnvironmentVariablesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvironmentVariablesTests.swift; sourceTree = "<group>"; };
 		522D489C2719D1C00038DB81 /* LoggerNSWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggerNSWindow.swift; sourceTree = "<group>"; };
 		522D48A32719D1D90038DB81 /* LoggerWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggerWindowController.swift; sourceTree = "<group>"; };
 		522D48A52719D1F20038DB81 /* LoggerSplitViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggerSplitViewController.swift; sourceTree = "<group>"; };
@@ -3147,6 +3149,7 @@
 			isa = PBXGroup;
 			children = (
 				5281B07425C994BE00DF66D9 /* ConfigurationTests.swift */,
+				522C30E82726F7CB00805319 /* EnvironmentVariablesTests.swift */,
 			);
 			path = Configuration;
 			sourceTree = "<group>";
@@ -5917,6 +5920,7 @@
 				52A7DE3226AECFC6003E770E /* MyRemoteObjectManager.swift in Sources */,
 				5273C65B25DA835500B00EC3 /* APIRequestTests.swift in Sources */,
 				759442D726FCA86E00CBFB7A /* ErrorPageManagerTests.swift in Sources */,
+				522C30E92726F7CB00805319 /* EnvironmentVariablesTests.swift in Sources */,
 				A545D30625F7D93B00E68F94 /* MathsTests.swift in Sources */,
 				DAEEA77C26A701CC00AE72DE /* NoteSourceTests.swift in Sources */,
 				8A14155A267393E2005F2464 /* WebPositionsTest.swift in Sources */,
