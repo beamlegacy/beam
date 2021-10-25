@@ -146,32 +146,53 @@ class PnSAddToCardTests: BaseTest {
     }
     
     func testCollectVideo() throws {
-        try XCTSkipIf(true, "Blocked by https://linear.app/beamapp/issue/BE-1751/pns-adding-to-a-card-fails-for-google-images")
-        launchApp()
+        let journalView = launchApp()
         let pnsView = PnSTestView()
         let helper = BeamUITestsHelper(pnsView.app)
         helper.openTestPage(page: .media)
         
         let itemToCollect = pnsView.app.groups.containing(.button, identifier:"Play Video").children(matching: .group).element.children(matching: .group).element
         pnsView.addToTodayCard(itemToCollect)
+
+        testRailPrint("Then switch to journal")
+        OmniBarTestView().navigateToCardViaPivotButton()
+        journalView.waitForJournalViewToLoad()
+
+        testRailPrint("Then the note contains video link")
+        let cardNotes = CardTestView().getCardNotesForVisiblePart()
+        XCTAssertEqual(cardNotes.count, 2)
+        XCTAssertEqual(cardNotes[0].value as? String, "Media Player Test Page")
+        if let videoNote = cardNotes[1].value as? String {
+            XCTAssertTrue(videoNote.contains("Beam.app/Contents/Resources/video.mov"))
+        } else {
+            XCTFail("expected cardNote[1].value to be a string")
+        }
     }
-    
+
     func testFailedToCollect() throws {
-        try XCTSkipIf(true, "Blocked by https://linear.app/beamapp/issue/BE-1967/failed-to-collect-still-adds-a-link-to-a-card")
+        // If this test is flakey, make sure browsing collect is disabled first
         let journalView = launchApp()
         let pnsView = PnSTestView()
         let helper = BeamUITestsHelper(pnsView.app)
+
+        testRailPrint("When the journal is first loaded the note is empty by default")
+        let beforeCardNotes = CardTestView().getCardNotesForVisiblePart()
+        XCTAssertEqual(beforeCardNotes.count, 1)
+        XCTAssertEqual(beforeCardNotes[0].value as? String, "")
         helper.openTestPage(page: .media)
         
         let itemToCollect = pnsView.app.windows.groups["Audio Controls"].children(matching: .group).element(boundBy: 1).children(matching: .slider).element
         pnsView.addToTodayCard(itemToCollect)
 
-        print("Then Failed to collect message appears")
+        testRailPrint("Then Failed to collect message appears")
         pnsView.passFailedToCollectPopUpAlert()
         XCTAssertTrue(pnsView.staticText(PnSViewLocators.StaticTexts.failedCollectPopup.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
         OmniBarTestView().navigateToCardViaPivotButton()
         journalView.waitForJournalViewToLoad()
+
+        testRailPrint("Then the note is still empty")
         let cardNotes = CardTestView().getCardNotesForVisiblePart()
-        XCTAssertEqual(cardNotes.count, 0)
+        XCTAssertEqual(cardNotes.count, 1)
+        XCTAssertEqual(cardNotes[0].value as? String, "")
     }
 }

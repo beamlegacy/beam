@@ -279,10 +279,6 @@ class PointAndShoot: WebPageHolder, ObservableObject {
         }
         // Make group mutable
         var shootGroup = group
-        // Set Destination note to the current card
-        // Update BrowsingScorer about note submission
-        page.setDestinationNote(targetNote, rootElement: targetNote)
-        scorer.addTextSelection()
         // Convert html to BeamText
         let htmlNoteAdapter = HtmlNoteAdapter(sourceUrl, self.page.downloadManager, self.page.fileStorage)
         htmlNoteAdapter.convert(html: shootGroup.html(), completion: { [self] (beamElements: [BeamElement]) in
@@ -294,8 +290,22 @@ class PointAndShoot: WebPageHolder, ObservableObject {
                 element.kind = .quote(1, sourceUrl.absoluteString, group.href)
                 return element
             })
-            // Reduce array of texts to a single string
-            let texts = elements.map({ $0.text })
+            // Update shootgroup information
+            shootGroup.numberOfElements = elements.count
+            shootGroup.setNoteInfo(NoteInfo(id: targetNote.id, title: targetNote.title))
+            // exit early when failing to collect correctly
+            guard shootGroup.numberOfElements != 0 else {
+                self.showAlert(shootGroup, elements, "failed to collect html elements")
+                shootGroup.setConfirmation(.failure)
+                self.showShootConfirmation(group: shootGroup)
+                completion()
+                return
+            }
+
+            // Set Destination note to the current card
+            // Update BrowsingScorer about note submission
+            page.setDestinationNote(targetNote, rootElement: targetNote)
+            scorer.addTextSelection()
             // TODO: Convert BeamText to BeamElement of quote type
             // Adds urlId to current card source
             let urlId = LinkStore.createIdFor(sourceUrl.absoluteString, title: nil)
@@ -321,15 +331,13 @@ class PointAndShoot: WebPageHolder, ObservableObject {
                 shootGroup.numberOfElements = elements.count
                 shootGroup.setNoteInfo(NoteInfo(id: targetNote.id, title: targetNote.title))
 
-                if shootGroup.numberOfElements != texts.count || shootGroup.numberOfElements == 0 {
-                    self.showAlert(shootGroup, texts, "numberOfElements and texts.count mismatch")
+                if shootGroup.numberOfElements == 0 {
+                    self.showAlert(shootGroup, elements, "numberOfElements is zero")
                     shootGroup.setConfirmation(.failure)
                 } else {
                     shootGroup.setConfirmation(.success)
                 }
 
-                self.collectedGroups.append(shootGroup)
-                self.activeShootGroup = nil
                 self.showShootConfirmation(group: shootGroup)
                 completion()
             }
@@ -339,7 +347,14 @@ class PointAndShoot: WebPageHolder, ObservableObject {
     /// Draws shoot confirmation
     /// - Parameter group: ShootGroup of targets to draw the confirmation UI
     private func showShootConfirmation(group: ShootGroup) {
-        shootConfirmationGroup = group
+        guard let confirmation = group.confirmation else {
+            fatalError("ShootGroup confirmation enum should be set, instead recieved: \(group)")
+        }
+        var mutableGroup = group
+        mutableGroup.setConfirmation(confirmation)
+        self.collectedGroups.append(mutableGroup)
+        self.activeShootGroup = nil
+        shootConfirmationGroup = mutableGroup
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
             guard let self = self else { return }
             self.shootConfirmationGroup = nil

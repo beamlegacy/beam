@@ -4222,12 +4222,12 @@
 			path = Help;
 			sourceTree = "<group>";
 		};
-		B51DC76526F44F5D0074ACCA /* PoinAndShoot */ = {
+		B51DC76526F44F5D0074ACCA /* PointAndShoot */ = {
 			isa = PBXGroup;
 			children = (
 				B51DC76B26F44F990074ACCA /* PnSAddToCardTests.swift */,
 			);
-			path = PoinAndShoot;
+			path = PointAndShoot;
 			sourceTree = "<group>";
 		};
 		B54D934526CA69DD006BBDEE /* Browser */ = {
@@ -4378,7 +4378,7 @@
 		B57A9B3E26AB091A002C954D /* E2ETests */ = {
 			isa = PBXGroup;
 			children = (
-				B51DC76526F44F5D0074ACCA /* PoinAndShoot */,
+				B51DC76526F44F5D0074ACCA /* PointAndShoot */,
 				B557155C26FAF15B00F6C9D4 /* AllCardsMenu */,
 				B557155326FA24F400F6C9D4 /* Update */,
 				B5F845DA26F8CC8900B15209 /* BiDi */,
