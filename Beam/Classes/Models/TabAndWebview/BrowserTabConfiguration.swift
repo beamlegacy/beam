@@ -4,7 +4,7 @@ class BrowserTabConfiguration: BeamWebViewConfigurationBase {
 
     override func registerAllMessageHandlers() {
         LoggingMessageHandler(config: self).register(to: self)
-        if  PreferencesManager.showPNSview == true {
+        if  PreferencesManager.showPNSView == true {
             PointAndShootMessageHandler(config: self).register(to: self)
         }
         WebNavigationMessageHandler(config: self).register(to: self)

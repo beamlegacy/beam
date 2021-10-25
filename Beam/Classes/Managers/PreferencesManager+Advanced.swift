@@ -41,7 +41,7 @@ extension PreferencesManager {
     static var showDebugSection: Bool
 
     @UserDefault(key: showPNSKey, defaultValue: showPNSDefault, container: advancedPreferencesContainer)
-    static var showPNSview: Bool
+    static var showPNSView: Bool
 
     @UserDefault(key: PnsJSIsOnKey, defaultValue: PnsJSIsOnDefault, container: advancedPreferencesContainer)
     static var PnsJSIsOn: Bool

@@ -83,25 +83,43 @@ struct PrivacyPreferencesView_Previews: PreviewProvider {
 }
 
 struct AdsSection: View {
+    @State private var isAdsFilterEnabled = PreferencesManager.isAdsFilterEnabled
+
     var body: some View {
-        Checkbox(checkState: PreferencesManager.isAdsFilterEnabled, text: "Remove most advertisments while browsing", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
-            PreferencesManager.isAdsFilterEnabled = activated
-        }
+        Toggle(isOn: $isAdsFilterEnabled) {
+            Text("Remove most advertisments while browsing")
+        }.toggleStyle(CheckboxToggleStyle())
+            .font(BeamFont.regular(size: 13).swiftUI)
+            .foregroundColor(BeamColor.Generic.text.swiftUI)
+            .onReceive([isAdsFilterEnabled].publisher.first()) {
+                PreferencesManager.isAdsFilterEnabled = $0
+            }
     }
 }
 
 struct TrackersSection: View {
+    @State private var isPrivacyFilterEnabled = PreferencesManager.isPrivacyFilterEnabled
+    @State private var isSocialMediaFilterEnabled = PreferencesManager.isSocialMediaFilterEnabled
+
     var body: some View {
         VStack(alignment: .leading) {
-            Checkbox(checkState: PreferencesManager.isPrivacyFilterEnabled, text: "Prevent Internet history tracking", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
-                PreferencesManager.isPrivacyFilterEnabled = activated
-                if !activated && PreferencesManager.isSocialMediaFilterEnabled {
-                    PreferencesManager.isSocialMediaFilterEnabled = false
+            Toggle(isOn: $isPrivacyFilterEnabled) {
+                Text("Prevent Internet history tracking")
+            }.toggleStyle(CheckboxToggleStyle())
+                .font(BeamFont.regular(size: 13).swiftUI)
+                .foregroundColor(BeamColor.Generic.text.swiftUI)
+                .onReceive([isPrivacyFilterEnabled].publisher.first()) {
+                    PreferencesManager.isPrivacyFilterEnabled = $0
                 }
-            }
-            Checkbox(checkState: PreferencesManager.isSocialMediaFilterEnabled, text: "Block Social Media Buttons", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
-                PreferencesManager.isSocialMediaFilterEnabled = activated
-            }
+
+            Toggle(isOn: $isSocialMediaFilterEnabled) {
+                Text("Block Social Media Buttons")
+            }.toggleStyle(CheckboxToggleStyle())
+                .font(BeamFont.regular(size: 13).swiftUI)
+                .foregroundColor(BeamColor.Generic.text.swiftUI)
+                .onReceive([isSocialMediaFilterEnabled].publisher.first()) {
+                    PreferencesManager.isSocialMediaFilterEnabled = $0
+                }
             VStack {
                 Text("Websites which embed social media buttons implicitly track your browser history, even if you don’t have an account.")
                     .font(BeamFont.regular(size: 11).swiftUI)
@@ -115,17 +133,27 @@ struct TrackersSection: View {
 }
 
 struct AnnoyancesSection: View {
+    @State private var isAnnoyancesFilterEnabled = PreferencesManager.isAnnoyancesFilterEnabled
+    @State private var isCookiesFilterEnabled = PreferencesManager.isCookiesFilterEnabled
+
     var body: some View {
         VStack(alignment: .leading) {
-            Checkbox(checkState: PreferencesManager.isAnnoyancesFilterEnabled, text: "Remove banners and popups from websites", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
-                PreferencesManager.isAnnoyancesFilterEnabled = activated
-                if !activated && PreferencesManager.isCookiesFilterEnabled {
-                    PreferencesManager.isCookiesFilterEnabled = false
+            Toggle(isOn: $isAnnoyancesFilterEnabled) {
+                Text("Remove banners and popups from websites")
+            }.toggleStyle(CheckboxToggleStyle())
+                .font(BeamFont.regular(size: 13).swiftUI)
+                .foregroundColor(BeamColor.Generic.text.swiftUI)
+                .onReceive([isAnnoyancesFilterEnabled].publisher.first()) {
+                    PreferencesManager.isAnnoyancesFilterEnabled = $0
                 }
-            }
-            Checkbox(checkState: PreferencesManager.isCookiesFilterEnabled, text: "Hide cookie banners", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
-                PreferencesManager.isCookiesFilterEnabled = activated
-            }
+            Toggle(isOn: $isCookiesFilterEnabled) {
+                Text("Hide cookie banners")
+            }.toggleStyle(CheckboxToggleStyle())
+                .font(BeamFont.regular(size: 13).swiftUI)
+                .foregroundColor(BeamColor.Generic.text.swiftUI)
+                .onReceive([isCookiesFilterEnabled].publisher.first()) {
+                    PreferencesManager.isCookiesFilterEnabled = $0
+                }
             VStack {
                 Text("Some websites display banners which impair the site’s functionality in order to force your content to be tracked.")
                     .font(BeamFont.regular(size: 11).swiftUI)
@@ -189,7 +217,12 @@ struct AllowListSection: View {
 struct WebsiteDataSection: View {
     var body: some View {
         VStack(alignment: .leading) {
-            Checkbox(checkState: false, text: "Block All Cookies", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { _ in }
+            Toggle(isOn: .constant(false)) {
+                Text("Block All Cookies")
+            }.toggleStyle(CheckboxToggleStyle())
+                .font(BeamFont.regular(size: 13).swiftUI)
+                .foregroundColor(BeamColor.Generic.text.swiftUI)
+
             HStack {
                 Button("Manage Website Data...") {
 
