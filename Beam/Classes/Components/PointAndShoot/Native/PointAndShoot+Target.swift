@@ -19,8 +19,6 @@ extension PointAndShoot {
         var mouseLocation: NSPoint
         /// HTML string of the targeted element
         var html: String
-        /// Plain text string of the targeted content
-        var text: String?
         /// Decides if ui applies animations
         var animated: Bool
         /// Translates target for scaling and positioning of frame
@@ -35,7 +33,7 @@ extension PointAndShoot {
                 x: (mouseLocation.x + xDelta) * scale,
                 y: (mouseLocation.y + yDelta) * scale
             )
-            return Target(id: id, rect: newRect, mouseLocation: newLocation, html: html, text: text, animated: animated)
+            return Target(id: id, rect: newRect, mouseLocation: newLocation, html: html, animated: animated)
         }
     }
 
@@ -44,14 +42,15 @@ extension PointAndShoot {
     ///   - rect: area of target to be drawn
     ///   - id: id of html element
     ///   - href: url location of target
+    ///   - html: html of Target
+    ///   - animated: should animate or not
     /// - Returns: Translated target
-    func createTarget(_ id: String, _ rect: NSRect, _ html: String, _ text: String = "", _ href: String, _ animated: Bool) -> Target {
+    func createTarget(_ id: String, _ rect: NSRect, _ html: String, _ href: String, _ animated: Bool) -> Target {
         return Target(
             id: id,
             rect: rect,
             mouseLocation: mouseLocation.clamp(rect),
             html: html,
-            text: text,
             animated: animated
         )
     }
