@@ -343,7 +343,7 @@
 		528DBBC226C440820054F9FF /* BeamDate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C3077A25C311950027C4B1 /* BeamDate.swift */; };
 		528F296D26B449EA006857E5 /* Beam.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 528F296826B449EA006857E5 /* Beam.xcdatamodeld */; };
 		5291CEE8268B5969001645A2 /* PasswordManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5291CEE7268B5969001645A2 /* PasswordManager.swift */; };
-		5295D91627187246008AF38C /* LoggerNSTableController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5295D91527187246008AF38C /* LoggerNSTableController.swift */; };
+		5295D91627187246008AF38C /* LoggerNSTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5295D91527187246008AF38C /* LoggerNSTableViewController.swift */; };
 		5298268C2641A37500E9448C /* GithubButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5298268B2641A37500E9448C /* GithubButton.swift */; };
 		529826A62641A46E00E9448C /* GoogleButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 529826A52641A46E00E9448C /* GoogleButton.swift */; };
 		5298649125D151D300D27A80 /* AutocompleteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5298649025D151D300D27A80 /* AutocompleteTests.swift */; };
@@ -1404,7 +1404,7 @@
 		528F296C26B449EA006857E5 /* Beam4.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Beam4.xcdatamodel; sourceTree = "<group>"; };
 		528F297226B449FB006857E5 /* Beam5.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Beam5.xcdatamodel; sourceTree = "<group>"; };
 		5291CEE7268B5969001645A2 /* PasswordManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordManager.swift; sourceTree = "<group>"; };
-		5295D91527187246008AF38C /* LoggerNSTableController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggerNSTableController.swift; sourceTree = "<group>"; };
+		5295D91527187246008AF38C /* LoggerNSTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggerNSTableViewController.swift; sourceTree = "<group>"; };
 		5298268B2641A37500E9448C /* GithubButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GithubButton.swift; sourceTree = "<group>"; };
 		529826A52641A46E00E9448C /* GoogleButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleButton.swift; sourceTree = "<group>"; };
 		5298649025D151D300D27A80 /* AutocompleteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutocompleteTests.swift; sourceTree = "<group>"; };
@@ -3280,7 +3280,7 @@
 			children = (
 				522D48A52719D1F20038DB81 /* LoggerSplitViewController.swift */,
 				522D48A32719D1D90038DB81 /* LoggerWindowController.swift */,
-				5295D91527187246008AF38C /* LoggerNSTableController.swift */,
+				5295D91527187246008AF38C /* LoggerNSTableViewController.swift */,
 				522D48A72719D2990038DB81 /* NSTableView+ScrollToVisible.swift */,
 				527C4F2F2719818A00772973 /* LoggerCategoryTableViewController.swift */,
 				522D489C2719D1C00038DB81 /* LoggerNSWindow.swift */,
@@ -5599,7 +5599,7 @@
 				8AED4FF026C2A3AA00E29DB7 /* PointAndShootFrameOffset.swift in Sources */,
 				A043B7E7265937DA00E267E5 /* AppDelegate+TabGrouping.swift in Sources */,
 				DA6A53B726C2BEDC00B87B0C /* SuggestedNoteSourcesUpdater.swift in Sources */,
-				5295D91627187246008AF38C /* LoggerNSTableController.swift in Sources */,
+				5295D91627187246008AF38C /* LoggerNSTableViewController.swift in Sources */,
 				33353EDA26F369AD00063078 /* KeyboardFeatureView.swift in Sources */,
 				96FACC522604B0EE0088DD67 /* DeleteElement.swift in Sources */,
 				4181725E2581107C00317ED8 /* AccountManager.swift in Sources */,

@@ -50,6 +50,7 @@ public enum LogCategory: String, CaseIterable {
     case notePublishing
     case favIcon
     case marker
+    case sentry
 }
 
 public final class Logger {
