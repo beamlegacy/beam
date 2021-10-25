@@ -1552,5 +1552,4 @@ public class TextNode: ElementNode {
     public override func clampTextRange(_ range: Range<Int>) -> Range<Int> {
         text.clamp(range)
     }
-
 }

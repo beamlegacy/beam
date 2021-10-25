@@ -34,7 +34,8 @@ struct OauthButton: View {
             connect()
         }, label: {
             Text(buttonText)
-                .frame(width: 126, height: 20)
+                .foregroundColor(BeamColor.Generic.text.swiftUI)
+                .frame(width: buttonType == .connect ? 126 : 145)
         })
     }
 

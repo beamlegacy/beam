@@ -13,8 +13,8 @@ The main view of “Accounts” preference pane.
 
 // swiftlint:disable:next type_body_length
 struct AccountsView: View {
-    @State private var email: String = Persistence.Authentication.email ?? ""
-    @State private var password: String = Persistence.Authentication.password ?? ""
+    @State private var email: String = ""
+    @State private var password: String = ""
     @State private var enableLogging: Bool = true
     @State private var loggedIn: Bool = AccountManager().loggedIn
     @State private var errorMessage: Error!
@@ -44,7 +44,7 @@ struct AccountsView: View {
                 if loggedIn {
                     VStack(alignment: .leading) {
                         // TODO: This need to be changed later on for the username
-                        Text(Persistence.Authentication.email ?? "")
+                        Text(email)
                             .font(BeamFont.regular(size: 13).swiftUI)
                             .foregroundColor(BeamColor.Generic.text.swiftUI)
                             .frame(height: 16)
@@ -133,7 +133,8 @@ struct AccountsView: View {
                         }, label: {
                             // TODO: loc
                             Text("Change Email Address...")
-                                .frame(width: 148, height: 20, alignment: .center)
+                                .foregroundColor(BeamColor.Generic.text.swiftUI)
+                                .frame(width: 148)
                         }).sheet(isPresented: $showingChangeEmailSheet) {
                             ChangeCredentialsView(changeCredentialsType: .email)
                                 .frame(width: 485, height: 151, alignment: .center)
@@ -143,7 +144,8 @@ struct AccountsView: View {
                         }, label: {
                             // TODO: loc
                             Text("Change Password...")
-                                .frame(width: 121, height: 20, alignment: .center)
+                                .foregroundColor(BeamColor.Generic.text.swiftUI)
+                                .frame(width: 121)
                         }).sheet(isPresented: $showingChangePasswordSheet) {
                             ChangeCredentialsView(changeCredentialsType: .password)
                                 .frame(width: 485, height: 198, alignment: .center)
@@ -156,7 +158,8 @@ struct AccountsView: View {
                         }, label: {
                             // TODO: loc
                             Text("Delete All Graphs...")
-                                .frame(width: 116, height: 20, alignment: .center)
+                                .foregroundColor(BeamColor.Generic.text.swiftUI)
+                                .frame(width: 116)
                         })
                         Text("All your cards will be deleted and cannot be recovered.")
                             .font(BeamFont.regular(size: 11).swiftUI)
@@ -169,7 +172,8 @@ struct AccountsView: View {
                         }, label: {
                             // TODO: loc
                             Text("Delete Account...")
-                                .frame(width: 105, height: 20, alignment: .center)
+                                .foregroundColor(BeamColor.Generic.text.swiftUI)
+                                .frame(width: 105)
                         })
                         VStack {
                             Text("Your account, all your graphs and all your cards will be deleted and cannot be recovered.")
@@ -204,7 +208,8 @@ struct AccountsView: View {
         }, label: {
             // TODO: loc
             Text("Sign Up...")
-                .frame(width: 63, height: 20, alignment: .center)
+                .foregroundColor(BeamColor.Generic.text.swiftUI)
+                .frame(width: 63)
         })
         .disabled(loggedIn || loading || email.isEmpty || password.isEmpty)
         .alert(isPresented: $showingSignUpAlert) {
@@ -230,6 +235,7 @@ struct AccountsView: View {
         }, label: {
             // TODO: loc
             Text("Refresh Token").frame(minWidth: 100)
+                .foregroundColor(BeamColor.Generic.text.swiftUI)
         })
         .disabled(!loggedIn)
         .alert(isPresented: $showingSignInAlert) {
@@ -257,12 +263,18 @@ struct AccountsView: View {
         }, label: {
             // TODO: loc
             Text("Sign In...")
-                .frame(width: 56, height: 20, alignment: .center)
+                .foregroundColor(BeamColor.Generic.text.swiftUI)
+                .frame(width: 56)
         })
         .disabled(loggedIn || loading || email.isEmpty || password.isEmpty)
         .alert(isPresented: $showingSignInAlert) {
+            #if DEBUG
             Alert(title: Text("Error"),
-                  message: Text(errorMessage.localizedDescription))
+                  message: Text("Invalid password or email with: \(errorMessage.localizedDescription)"))
+            #else
+            Alert(title: Text("Error"),
+                  message: Text("Invalid password or email"))
+            #endif
         }
     }
 
@@ -322,6 +334,7 @@ struct AccountsView: View {
         }, label: {
             // TODO: loc
             Text("Sign Out...")
+                .foregroundColor(BeamColor.Generic.text.swiftUI)
         }).disabled(!loggedIn)
             .frame(width: 83, height: 20, alignment: .center)
     }
@@ -381,9 +394,13 @@ struct AccountsView: View {
             }
         }, label: {
             if let provider = identity.provider {
-                Text("Disconnect \(provider.prefix(1).capitalized + provider.dropFirst())...").frame(width: 126, height: 20)
+                Text("Disconnect \(provider.prefix(1).capitalized + provider.dropFirst())...")
+                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+                    .frame(width: 126)
             } else {
-                Text("Disconnect...").frame(width: 126, height: 20)
+                Text("Disconnect...")
+                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+                    .frame(width: 126)
             }
         }).disabled(!loggedIn))
     }
@@ -410,6 +427,8 @@ struct AccountsView: View {
             guard response == .alertFirstButtonReturn else { return }
             self.identities = []
             AccountManager.logout()
+            email = ""
+            password = ""
             loggedIn = AccountManager().loggedIn
         }
     }

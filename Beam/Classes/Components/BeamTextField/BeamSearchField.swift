@@ -50,6 +50,7 @@ struct BeamSearchField: View {
                         }, label: {
                             Image("xmark.circle.fill")
                                 .resizable()
+                                .scaledToFit()
                                 .aspectRatio(contentMode: .fit)
                                 .frame(width: 12, height: 12)
                                 .padding(.trailing, 6.5)

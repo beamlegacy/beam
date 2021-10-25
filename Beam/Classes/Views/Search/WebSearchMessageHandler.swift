@@ -19,6 +19,7 @@ class WebSearchMessageHandler: BeamMessageHandler<SearchMessage> {
         super.init(config: config, messages: SearchMessage.self, jsFileName: "SearchWebPage")
     }
 
+    // swiftlint:disable:next cyclomatic_complexity
     override func onMessage(messageName: String, messageBody: Any?, from webPage: WebPage) {
         guard let receivedMessage = SearchMessage(rawValue: messageName) else {
             Logger.shared.logError("Unsupported message \(messageName) for WebSearch message handler", category: .web)

@@ -116,7 +116,7 @@ extension BeamObjectManagerDelegate {
      Potentially slow, might make that faster?
 
      */
-    // swiftlint:disable:next cyclomatic_complexity
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
     func checkPreviousChecksums(_ remoteObjects: [BeamObjectType]) {
         #if DEBUG
         do {
