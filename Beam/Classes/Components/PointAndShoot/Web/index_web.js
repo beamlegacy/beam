@@ -5,4 +5,9 @@ import { WebFactory } from "./WebFactory"
 const win = window
 
 const pointAndShootUI = new PointAndShootUI_web()
-export const __ID__PointAndShoot = PointAndShoot.getInstance(win, pointAndShootUI, new WebFactory())
+
+if (!window.beam) {
+  window.beam = {}
+}
+
+window.beam.__ID__PointAndShoot = PointAndShoot.getInstance(win, pointAndShootUI, new WebFactory())
