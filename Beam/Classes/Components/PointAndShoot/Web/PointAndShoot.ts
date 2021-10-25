@@ -272,7 +272,9 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
 
   onKeyDown(ev: BeamMouseEvent): void {
     if (this.isPointDisabled(ev)) {
-      this.isTypingOnWebView = true
+      if (!this.isOnlyAltKey(ev)) {
+        this.isTypingOnWebView = true
+      }
       this.sendBounds()
     } else {
       const target = this.win.document.elementFromPoint(this.mouseLocation.x, this.mouseLocation.y)

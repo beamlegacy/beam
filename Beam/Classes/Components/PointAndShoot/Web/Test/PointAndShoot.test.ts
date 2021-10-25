@@ -502,7 +502,7 @@ test("Keydown (A) on input element, then mouseMove should set isTypingOnWebView 
   expect(pns.isTypingOnWebView).toEqual(false)
 })
 
-test("Keydown (Alt) on input element, then mouseMove should set isTypingOnWebView back to false", () => {
+test("Keydown (Alt) on input element, should not set set isTypingOnWebView to true", () => {
   // Setup elements
   const inputElement = new BeamHTMLInputElementMock("input", {type: "text"})
   inputElement.bounds = {
@@ -526,13 +526,13 @@ test("Keydown (Alt) on input element, then mouseMove should set isTypingOnWebVie
 
   const { pns } = pointAndShootTestBed([], {activeElement: inputElement})
   // initally we expect typing to be false
-  expect(pns.isTypingOnWebView).toEqual(false)    
+  expect(pns.isTypingOnWebView).toEqual(false)   
 
   const keyEvent = new BeamKeyEvent({ key: "Alt", target: inputElement})
   pns.onKeyDown(keyEvent)
 
-  // when typing we expect true
-  expect(pns.isTypingOnWebView).toEqual(true)
+  // when typing we expect false
+  expect(pns.isTypingOnWebView).toEqual(false)
 
   const pointEvent = new BeamMouseEvent({
     name: "mousemove",
