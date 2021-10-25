@@ -593,7 +593,6 @@
 		96FACC8626050B1E0088DD67 /* SetSelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96FACC8526050B1E0088DD67 /* SetSelection.swift */; };
 		96FACC8A26079C7E0088DD67 /* InputText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96FACC8926079C7E0088DD67 /* InputText.swift */; };
 		96FD761B25B1C43500B04ED3 /* BrowsingNodeWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96FD761A25B1C43500B04ED3 /* BrowsingNodeWidget.swift */; };
-		A00590B72667911200698E75 /* Checkbox.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00590B62667911200698E75 /* Checkbox.swift */; };
 		A00AE82B265EAE9A00156220 /* BeamSearchField.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00AE82A265EAE9A00156220 /* BeamSearchField.swift */; };
 		A00F5A262656965900D338E1 /* PasswordsDBTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00F5A252656965900D338E1 /* PasswordsDBTests.swift */; };
 		A01030AA25F149EA00D740C5 /* TextEditorCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = A01030A925F149EA00D740C5 /* TextEditorCommand.swift */; };
@@ -1645,7 +1644,6 @@
 		96FACC8526050B1E0088DD67 /* SetSelection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetSelection.swift; sourceTree = "<group>"; };
 		96FACC8926079C7E0088DD67 /* InputText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputText.swift; sourceTree = "<group>"; };
 		96FD761A25B1C43500B04ED3 /* BrowsingNodeWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowsingNodeWidget.swift; sourceTree = "<group>"; };
-		A00590B62667911200698E75 /* Checkbox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Checkbox.swift; sourceTree = "<group>"; };
 		A00AE82A265EAE9A00156220 /* BeamSearchField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamSearchField.swift; sourceTree = "<group>"; };
 		A00F5A252656965900D338E1 /* PasswordsDBTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordsDBTests.swift; sourceTree = "<group>"; };
 		A01030A925F149EA00D740C5 /* TextEditorCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditorCommand.swift; sourceTree = "<group>"; };
@@ -3969,7 +3967,6 @@
 				A0E9B0E226668C1300FC99A5 /* FaviconView.swift */,
 				A52BFE62260901980028D3F3 /* Separator.swift */,
 				A5153EDC260CC4DC00C84902 /* ButtonLabel.swift */,
-				A00590B62667911200698E75 /* Checkbox.swift */,
 				A0A3BED4266FD1B200566D6C /* BeamStepperButton.swift */,
 				3330D7CC265E95E0008C9E20 /* LinearProgressView.swift */,
 				33DEF48726617E0B00834839 /* CircledButton.swift */,
@@ -5559,7 +5556,6 @@
 				522D48A42719D1D90038DB81 /* LoggerWindowController.swift in Sources */,
 				A5946806265CE5ED0044A892 /* DocumentCommand.swift in Sources */,
 				A5233DE525FB682700BE6F05 /* FaviconProvider.swift in Sources */,
-				A00590B72667911200698E75 /* Checkbox.swift in Sources */,
 				33DEF48826617E0B00834839 /* CircledButton.swift in Sources */,
 				4181723D2581107C00317ED8 /* BeamTextEdit.swift in Sources */,
 				5268FD1027020A9B003677B2 /* Date+iso8601millseconds.swift in Sources */,
@@ -6835,7 +6831,7 @@
 			repositoryURL = "https://github.com/sindresorhus/Preferences";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 2.2.0;
+				minimumVersion = 2.5.0;
 			};
 		};
 		52466B20270DA966002D1716 /* XCRemoteSwiftPackageReference "clustering" */ = {

@@ -25,6 +25,13 @@ struct AdvancedPreferencesView: View {
     @State private var stateRestorationEnabled = Configuration.stateRestorationEnabled
     @State private var loading: Bool = false
 
+    @State var showPNSView = PreferencesManager.showPNSView
+    @State var pnsJSIsOn = PreferencesManager.PnsJSIsOn
+    @State var browsingSessionCollectionIsOn = PreferencesManager.browsingSessionCollectionIsOn
+    @State var showDebugSection = PreferencesManager.showDebugSection
+    @State var showTabGrougpingMenuItem = PreferencesManager.showTabGrougpingMenuItem
+    @State var isDataBackupOnUpdateOn = PreferencesManager.isDataBackupOnUpdateOn
+
     // Database
     @State private var newDatabaseTitle = ""
     @State private var selectedDatabase = Database.defaultDatabase()
@@ -350,39 +357,70 @@ struct AdvancedPreferencesView: View {
     }
 
     private var PnsViewEnabledCheckbox: some View {
-        Checkbox(checkState: PreferencesManager.showPNSview, text: "Enabled", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
-            PreferencesManager.showPNSview = activated
-        }
+        return Toggle(isOn: $showPNSView) {
+            Text("Enabled")
+        }.toggleStyle(CheckboxToggleStyle())
+            .font(BeamFont.regular(size: 13).swiftUI)
+            .foregroundColor(BeamColor.Generic.text.swiftUI)
+            .onReceive([showPNSView].publisher.first()) {
+                PreferencesManager.showPNSView = $0
+            }
     }
 
     private var PnsJSEnabledCheckbox: some View {
-        Checkbox(checkState: PreferencesManager.PnsJSIsOn, text: "Enabled", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
-            PreferencesManager.PnsJSIsOn = activated
-        }
+        return Toggle(isOn: $pnsJSIsOn) {
+            Text("Enabled")
+        }.toggleStyle(CheckboxToggleStyle())
+            .font(BeamFont.regular(size: 13).swiftUI)
+            .foregroundColor(BeamColor.Generic.text.swiftUI)
+            .onReceive([pnsJSIsOn].publisher.first()) {
+                PreferencesManager.PnsJSIsOn = $0
+            }
     }
 
     private var BrowsingSessionCollectionCheckbox: some View {
-        Checkbox(checkState: PreferencesManager.browsingSessionCollectionIsOn, text: "Enabled", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
-            PreferencesManager.browsingSessionCollectionIsOn = activated
-        }
+        return Toggle(isOn: $browsingSessionCollectionIsOn) {
+            Text("Enabled")
+        }.toggleStyle(CheckboxToggleStyle())
+            .font(BeamFont.regular(size: 13).swiftUI)
+            .foregroundColor(BeamColor.Generic.text.swiftUI)
+            .onReceive([browsingSessionCollectionIsOn].publisher.first()) {
+                PreferencesManager.browsingSessionCollectionIsOn = $0
+            }
     }
 
     private var DebugSectionCheckbox: some View {
-        Checkbox(checkState: PreferencesManager.showDebugSection, text: "Enabled", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
-            PreferencesManager.showDebugSection = activated
-        }
+        return Toggle(isOn: $showDebugSection) {
+            Text("Enabled")
+        }.toggleStyle(CheckboxToggleStyle())
+            .font(BeamFont.regular(size: 13).swiftUI)
+            .foregroundColor(BeamColor.Generic.text.swiftUI)
+            .onReceive([showDebugSection].publisher.first()) {
+                PreferencesManager.showDebugSection = $0
+            }
     }
 
     private var EnableTabGroupingWindowCheckbox: some View {
-        Checkbox(checkState: PreferencesManager.showTabGrougpingMenuItem, text: "Enabled", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
-            PreferencesManager.showTabGrougpingMenuItem = activated
-        }
+        return Toggle(isOn: $showTabGrougpingMenuItem) {
+            Text("Enabled")
+        }.toggleStyle(CheckboxToggleStyle())
+            .font(BeamFont.regular(size: 13).swiftUI)
+            .foregroundColor(BeamColor.Generic.text.swiftUI)
+            .onReceive([showTabGrougpingMenuItem].publisher.first()) {
+                PreferencesManager.showTabGrougpingMenuItem = $0
+            }
+
     }
 
     private var AutomaticBackupBeforeUpdate: some View {
-        Checkbox(checkState: PreferencesManager.isDataBackupOnUpdateOn, text: "enabled", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
-            PreferencesManager.isDataBackupOnUpdateOn = activated
-        }
+        return Toggle(isOn: $isDataBackupOnUpdateOn) {
+            Text("Enabled")
+        }.toggleStyle(CheckboxToggleStyle())
+            .font(BeamFont.regular(size: 13).swiftUI)
+            .foregroundColor(BeamColor.Generic.text.swiftUI)
+            .onReceive([isDataBackupOnUpdateOn].publisher.first()) {
+                PreferencesManager.isDataBackupOnUpdateOn = $0
+            }
     }
 
     private var ResetAPIEndpointsButton: some View {

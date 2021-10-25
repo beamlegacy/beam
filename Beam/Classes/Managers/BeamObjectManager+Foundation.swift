@@ -117,6 +117,7 @@ extension BeamObjectManager {
     // Will fetch remote checksums for objects since `lastReceivedAt` and then fetch objects for which we have a different
     // checksum locally, and therefor must be fetched from the API. This allows for a faster fetch since most of the time
     // we might already have those object locally if they had been sent and updated from the same device
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
     func fetchAllByChecksumsFromAPI(_ completion: @escaping ((Result<Bool, Error>) -> Void)) throws {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw BeamObjectManagerError.notAuthenticated

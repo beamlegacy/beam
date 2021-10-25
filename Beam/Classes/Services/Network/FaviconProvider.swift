@@ -47,12 +47,12 @@ final class FaviconProvider {
                     handler(image)
                     return
                 } else if case let .failure(error) = result {
-                    Logger.shared.logDebug("FaviconProvider failure: \(error.localizedDescription)")
+                    Logger.shared.logDebug("FaviconProvider failure: \(error.localizedDescription)", category: .favIcon)
                 }
                 handler(nil)
             }
         } catch let error {
-            Logger.shared.logDebug("FaviconProvider error: \(error.localizedDescription)")
+            Logger.shared.logDebug("FaviconProvider error: \(error.localizedDescription)", category: .favIcon)
             handler(nil)
         }
     }
