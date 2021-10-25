@@ -4,11 +4,12 @@ import Combine
 import PMKFoundation
 import BeamCore
 
-enum DocumentManagerError: Error, Equatable {
+enum DocumentManagerError: Error {
     case unresolvedConflict
     case localDocumentNotFound
     case idNotFound
     case operationCancelled
+    case multipleErrors([Error])
 }
 
 extension DocumentManagerError: LocalizedError {
@@ -22,6 +23,8 @@ extension DocumentManagerError: LocalizedError {
             return "id Not Found"
         case .operationCancelled:
             return "operation cancelled"
+        case .multipleErrors(let errors):
+            return "Multiple errors: \(errors)"
         }
     }
 }
@@ -574,7 +577,7 @@ public class DocumentManager: NSObject {
         let existingDocument = try? Document.fetchWithId(context, document.id)
 
         if let existingVersion = existingDocument?.version, existingVersion >= newVersion {
-            let errString = "\(document.title): coredata version: \(existingVersion), newVersion: \(newVersion)"
+            let errString = "\(document.title): coredata version: \(existingVersion) should be < newVersion: \(newVersion)"
             let userInfo: [String: Any] = [NSLocalizedFailureReasonErrorKey: errString, NSValidationObjectErrorKey: self]
             throw NSError(domain: "DOCUMENT_ERROR_DOMAIN", code: 1002, userInfo: userInfo)
         }

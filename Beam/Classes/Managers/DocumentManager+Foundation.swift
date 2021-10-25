@@ -345,50 +345,34 @@ extension DocumentManager {
 
     // MARK: -
     // MARK: Delete
-    func delete(_ ids: [UUID]) throws {
-        let group = DispatchGroup()
+
+    func softDelete(ids: [UUID], completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
         var errors: [Error] = []
-        let lock = DispatchSemaphore(value: 1)
-
-        for id in ids {
-            group.enter()
-            delete(id: id) { result in
-                switch result {
-                case .failure(let error):
-                    lock.wait()
-                    errors.append(error)
-                    lock.signal()
-                case .success: break
-                }
-                group.leave()
-            }
-        }
-        group.wait()
-
-        if let error = errors.first {
-            throw error
-        }
-    }
-
-    func delete(id: UUID, _ networkDelete: Bool = true, completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
-        Self.cancelPreviousThrottledAPICall(id)
-
+        var goodObjects: [DocumentStruct] = []
         coreDataManager.persistentContainer.performBackgroundTask { context in
+            for id in ids {
+                guard let document = try? Document.fetchWithId(context, id) else {
+                    errors.append(DocumentManagerError.idNotFound)
+                    continue
+                }
 
-            guard let document = try? Document.fetchWithId(context, id) else {
-                completion(.failure(DocumentManagerError.idNotFound))
-                return
+                if let database = try? Database.fetchWithId(context, document.database_id) {
+                    database.updated_at = BeamDate.now
+                } else {
+                    // We should always have a connected database
+                    Logger.shared.logError("No connected database", category: .document)
+                }
+
+                var documentStruct = DocumentStruct(document: document)
+                documentStruct.deletedAt = BeamDate.now
+                documentStruct.previousChecksum = documentStruct.beamObjectPreviousChecksum
+
+                document.deleted_at = documentStruct.deletedAt
+                goodObjects.append(documentStruct)
+
+                // Ping others about the update
+                self.notificationDocumentUpdate(documentStruct)
             }
-
-            if let database = try? Database.fetchWithId(context, document.database_id) {
-                database.updated_at = BeamDate.now
-            } else {
-                // We should always have a connected database
-                Logger.shared.logError("No connected database", category: .document)
-            }
-
-            let documentStruct = DocumentStruct(document: document)
-            document.delete(context)
 
             do {
                 try Self.saveContext(context: context)
@@ -398,25 +382,110 @@ extension DocumentManager {
                 return
             }
 
-            // Ping others about the update
-            self.notificationDocumentDelete(documentStruct)
-
             // If not authenticated
             guard AuthenticationManager.shared.isAuthenticated,
-                  Configuration.networkEnabled,
-                  networkDelete else {
+                  Configuration.networkEnabled else {
                 completion(.success(false))
                 return
             }
 
             do {
-                try self.deleteFromBeamObjectAPI(id, completion)
+                try self.saveOnBeamObjectsAPI(goodObjects) { result in
+                    guard errors.isEmpty else {
+                        completion(.failure(DocumentManagerError.multipleErrors(errors)))
+                        return
+                    }
+
+                    switch result {
+                    case .failure(let error): completion(.failure(error))
+                    case .success: completion(.success(true))
+                    }
+                }
             } catch {
                 completion(.failure(error))
             }
         }
     }
 
+    func softDelete(id: UUID, completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
+        self.softDelete(ids: [id], completion: completion)
+    }
+
+    /**
+     You should *not* use this unless you know what you're doing, deleting objects prevent the deletion to be propagated
+     to other devices through the API. Use `softDelete` instead.
+
+     Good scenario examples to use `delete`:
+
+     - you know the note has not been propagated yet (previousChecksums are nil)
+     - you're adding this in a debug window for developers (like DocumentDetail)
+     */
+    func delete(ids: [UUID], completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
+        ids.forEach { Self.cancelPreviousThrottledAPICall($0) }
+
+        var errors: [Error] = []
+        var goodIds: [UUID] = []
+        coreDataManager.persistentContainer.performBackgroundTask { context in
+            for id in ids {
+                guard let document = try? Document.fetchWithId(context, id) else {
+                    errors.append(DocumentManagerError.idNotFound)
+                    continue
+                }
+
+                if let database = try? Database.fetchWithId(context, document.database_id) {
+                    database.updated_at = BeamDate.now
+                } else {
+                    // We should always have a connected database
+                    Logger.shared.logError("No connected database", category: .document)
+                }
+
+                let documentStruct = DocumentStruct(document: document)
+                document.delete(context)
+                goodIds.append(id)
+
+                // Ping others about the update
+                self.notificationDocumentDelete(documentStruct)
+            }
+
+            do {
+                try Self.saveContext(context: context)
+            } catch {
+                Logger.shared.logError(error.localizedDescription, category: .document)
+                completion(.failure(error))
+                return
+            }
+
+            // If not authenticated
+            guard AuthenticationManager.shared.isAuthenticated,
+                  Configuration.networkEnabled else {
+                completion(.success(false))
+                return
+            }
+
+            do {
+                try self.deleteFromBeamObjectAPI(goodIds) { result in
+                    guard errors.isEmpty else {
+                        completion(.failure(DocumentManagerError.multipleErrors(errors)))
+                        return
+                    }
+
+                    completion(result)
+                }
+            } catch {
+                completion(.failure(error))
+            }
+        }
+    }
+
+    /**
+     You should *not* use this unless you know what you're doing, deleting objects prevent the deletion to be propagated
+     to other devices through the API. Use `softDelete` instead.
+     */
+    func delete(id: UUID, _ networkDelete: Bool = true, completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
+        self.delete(ids: [id], completion: completion)
+    }
+
+    /// WARNING: this will delete *ALL* documents, including from different databases.
     func deleteAll(includedRemote: Bool = true, completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
         do {
             try Document.deleteWithPredicate(CoreDataManager.shared.mainContext)
