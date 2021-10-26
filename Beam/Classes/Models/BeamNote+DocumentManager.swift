@@ -97,10 +97,11 @@ extension BeamNote: BeamNoteDocument {
         })
     }
 
-    func updateWithDocumentStruct(_ docStruct: DocumentStruct) {
+    func updateWithDocumentStruct(_ docStruct: DocumentStruct, file: StaticString = #file, line: UInt = #line) {
         beamCheckMainThread()
+        let context = "file: \(file):\(line)"
         if self.version >= docStruct.version, self.id == docStruct.id {
-            Logger.shared.logDebug("\(self.titleAndId) update skipped \(docStruct.version) (must be > \(self.version))",
+            Logger.shared.logDebug("\(self.titleAndId) update skipped \(docStruct.version) (must be > \(self.version)) [caller: \(context)]",
                                    category: .document)
             return
         }
@@ -108,7 +109,7 @@ extension BeamNote: BeamNoteDocument {
         self.updates += 1
         let decoder = JSONDecoder()
         guard let newSelf = try? decoder.decode(BeamNote.self, from: docStruct.data) else {
-            Logger.shared.logError("Unable to decode new documentStruct \(docStruct.title) {\(docStruct.id)}",
+            Logger.shared.logError("Unable to decode new documentStruct \(docStruct.title) {\(docStruct.id)} [caller: \(context)]",
                                    category: .document)
             return
         }
@@ -129,6 +130,7 @@ extension BeamNote: BeamNoteDocument {
 
         self.savedVersion = self.version
 
+        Logger.shared.logDebug("updateWithDocumentStruct updating \(title) - \(id) [caller: \(context)]", category: .document)
         recursiveUpdate(other: newSelf)
     }
 
