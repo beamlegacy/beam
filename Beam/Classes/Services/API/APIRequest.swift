@@ -64,6 +64,9 @@ class APIRequest: NSObject {
 
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601withFractionalSeconds
+//        #if DEBUG
+        encoder.outputFormatting = [.prettyPrinted, .withoutEscapingSlashes]
+//        #endif
 
         if let queryData = try? encoder.encode(queryStruct) {
             #if DEBUG_API_1
@@ -83,14 +86,11 @@ class APIRequest: NSObject {
         }
         assert(request.httpBody != nil)
 
-        return request
-    }
+        if let files = bodyParamsRequest.files {
 
-    struct FileUpload {
-        let contentType: String
-        let binary: Data
-        let filename: String
-        var variableName: String = "file"
+        }
+
+        return request
     }
 
     // If request contains a filename but no query, load the query from fileName
