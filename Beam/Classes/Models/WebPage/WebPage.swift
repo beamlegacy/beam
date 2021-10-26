@@ -19,6 +19,7 @@ protocol WebPage: AnyObject, Scorable {
     var title: String { get }
     var url: URL? { get }
     var hasError: Bool { get set }
+    var responseStatusCode: Int { get set }
 
     var errorPageManager: ErrorPageManager? { get set }
     var fileStorage: BeamFileStorage? { get }

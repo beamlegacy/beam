@@ -27,6 +27,7 @@ class TestWebPage: WebPage {
     private(set) var downloadManager: DownloadManager?
     private(set) var navigationController: WebNavigationController?
     var hasError: Bool = false
+    var responseStatusCode: Int = 200
     var mediaPlayerController: MediaPlayerController?
     var appendToIndexer: ((URL, Readability) -> Void)?
     var webView: BeamWebView!
