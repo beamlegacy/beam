@@ -33,12 +33,14 @@ extension AppDelegate {
                             alert.messageText = "Could not delete databases"
                             alert.informativeText = error.localizedDescription
                             alert.alertStyle = .critical
+                            alert.runModal()
                         case .success:
-                            alert.messageText = "All documents and databases deleted, please restart."
+                            alert.messageText = "All documents and databases deleted. Beam must exit now."
                             alert.alertStyle = .informational
+                            alert.addButton(withTitle: "Exit now")
+                            alert.runModal()
+                            NSApplication.shared.terminate(nil)
                         }
-
-                        alert.runModal()
                     }
                 }
             }
