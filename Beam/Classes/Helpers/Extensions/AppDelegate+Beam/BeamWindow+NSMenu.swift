@@ -110,6 +110,10 @@ extension BeamWindow {
         }
     }
 
+    @IBAction func showHelp(_ sender: Any?) {
+        state.navigateToPage(.shortcutsWindowPage)
+    }
+
     // MARK: Navigation
     @IBAction func goBack(_ sender: Any?) {
         state.goBack()
