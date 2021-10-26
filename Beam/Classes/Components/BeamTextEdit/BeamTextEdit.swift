@@ -1049,7 +1049,7 @@ public extension CALayer {
         let info = MouseInfo(rootNode, mouseDownPos ?? .zero, event)
         mouseHandler = rootNode.dispatchMouseDown(mouseInfo: info)
         if mouseHandler != nil { cursorUpdate(with: event) }
-        hideInlineFormatter()
+        if event.clickCount == 1 { hideInlineFormatter() }
     }
 
     public override func rightMouseDown(with event: NSEvent) {
