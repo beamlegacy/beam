@@ -25,6 +25,11 @@ public struct MediaDisplayInfos: Codable, Equatable {
     public let height: Int?
     public let width: Int?
     public let displayRatio: Double?
+
+    public var size: CGSize? {
+        guard let height = height, let width = width else { return nil }
+        return CGSize(width: width, height: height)
+    }
 }
 
 public enum ElementKind: Codable, Equatable {
