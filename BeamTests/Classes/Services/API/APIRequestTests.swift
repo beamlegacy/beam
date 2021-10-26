@@ -6,6 +6,8 @@ import Promises
 import PromiseKit
 
 @testable import Beam
+@testable import BeamCore
+
 class APIRequestTests: QuickSpec {
     var sut: APIRequest!
 
@@ -23,8 +25,8 @@ class APIRequestTests: QuickSpec {
         let email = Configuration.testAccountEmail
         let variables = ForgotPasswordParameters(email: email)
         let bodyParamsRequest = GraphqlParameters(fileName: "forgot_password", variables: variables)
-        let backgroundQueue = DispatchQueue(label: "APIRequestTests backgroundQueue", qos: .default)
         let beamHelper = BeamTestsHelper()
+        let beamObjectHelper = BeamObjectTestsHelper()
 
         beforeEach {
             self.sut = APIRequest()
@@ -34,6 +36,74 @@ class APIRequestTests: QuickSpec {
         afterEach {
             Configuration.reset()
             beamHelper.endNetworkRecording()
+        }
+
+        describe("performRequest()") {
+            context("with files") {
+                context("with Foundation") {
+                    let uuid = "295d94e1-e0df-4eca-93e6-8778984bcd58".uuid ?? UUID()
+                    beforeEach {
+                        BeamTestsHelper.logout()
+                        try? EncryptionManager.shared.replacePrivateKey(Configuration.testPrivateKey)
+
+                        BeamURLSession.shouldNotBeVinyled = true
+//                        beamHelper.beginNetworkRecording()
+                        BeamTestsHelper.login()
+                    }
+
+                    afterEach {
+                        let semaphore = DispatchSemaphore(value: 0)
+                        _ = try? BeamObjectManager().delete(uuid) { _ in
+                            semaphore.signal()
+                        }
+
+                        let semaResult = semaphore.wait(timeout: DispatchTime.now() + .seconds(5))
+                        if case .timedOut = semaResult {
+                            fail("Timedout")
+                        }
+                    }
+
+                    fit("upload multipart data") {
+                        let object = MyRemoteObject(beamObjectId: uuid,
+                                                    createdAt: BeamDate.now,
+                                                    updatedAt: BeamDate.now,
+                                                    deletedAt: nil,
+                                                    previousChecksum: nil,
+                                                    checksum: nil,
+                                                    title: "foobar")
+                        let beamObject = try BeamObject(object, MyRemoteObject.beamObjectTypeName)
+                        let data = beamObject.data
+                        try beamObject.encrypt()
+
+                        let parameters = BeamObjectRequest.UpdateBeamObject(beamObject: beamObject,
+                                                                            privateKey: EncryptionManager.shared.privateKey().asString())
+
+                        let fileUpload = GraphqlFileUpload(contentType: "application/octet-stream",
+                                                           binary: beamObject.data!,
+                                                           filename: "\(uuid).enc",
+                                                           variableName: "beamObjectData")
+
+                        let bodyParamsRequest = GraphqlParameters(fileName: "update_beam_object",
+                                                                  variables: parameters,
+                                                                  files: [fileUpload])
+
+                        waitUntil(timeout: .seconds(10)) { done in
+                            _ = try? self.sut.performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<BeamObjectRequest.UpdateBeamObject, Error>) in
+                                let updateBeamObject = try? result.get()
+
+                                // Result should not generate error, and be true since this email exists
+                                expect { try result.get() }.toNot(throwError())
+                                expect(updateBeamObject?.beamObject).toNot(beNil())
+                                expect(updateBeamObject?.beamObject?.id) == uuid
+                                done()
+                            }
+                        }
+
+                        let remoteObject = beamObjectHelper.fetchOnAPI(uuid)
+                        expect(remoteObject?.data) == data
+                    }
+                }
+            }
         }
 
         context("with Foundation") {
@@ -90,7 +160,7 @@ class APIRequestTests: QuickSpec {
                         let promise: PromiseKit.Promise<ForgotPassword> = self.sut
                             .performRequest(bodyParamsRequest: bodyParamsRequest,
                                             authenticatedCall: false)
-                        promise.done(on: backgroundQueue) { (forgotPassword: ForgotPassword) in
+                        promise.done { (forgotPassword: ForgotPassword) in
                             expect(forgotPassword.success).to(beTrue())
                             done()
                         }
@@ -114,10 +184,10 @@ class APIRequestTests: QuickSpec {
                         let promise: PromiseKit.Promise<ForgotPassword> = self.sut
                             .performRequest(bodyParamsRequest: bodyParamsRequest,
                                             authenticatedCall: false)
-                        promise.done(on: backgroundQueue) { _ in
+                        promise.done { _ in
                             fail("shouldn't be called")
                         }
-                        .catch(on: backgroundQueue) { error in
+                        .catch { error in
                             expect((error as NSError).code) == NSURLErrorCannotFindHost
                             done()
                         }
@@ -137,7 +207,7 @@ class APIRequestTests: QuickSpec {
                         let promise: Promises.Promise<ForgotPassword> = self.sut
                             .performRequest(bodyParamsRequest: bodyParamsRequest,
                                             authenticatedCall: false)
-                        promise.then(on: backgroundQueue) { (forgotPassword: ForgotPassword) in
+                        promise.then { (forgotPassword: ForgotPassword) in
                             expect(forgotPassword.success).to(beTrue())
                             done()
                         }
@@ -161,10 +231,10 @@ class APIRequestTests: QuickSpec {
                         let promise: Promises.Promise<ForgotPassword> = self.sut
                             .performRequest(bodyParamsRequest: bodyParamsRequest,
                                             authenticatedCall: false)
-                        promise.then(on: backgroundQueue) { (forgotPassword: ForgotPassword) in
+                        promise.then { (forgotPassword: ForgotPassword) in
                             fail("shouldn't be called")
                         }
-                        .catch(on: backgroundQueue) { error in
+                        .catch { error in
                             expect((error as NSError).code) == NSURLErrorCannotFindHost
                             done()
                         }
