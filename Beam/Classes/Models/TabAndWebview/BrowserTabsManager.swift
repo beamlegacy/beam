@@ -12,6 +12,7 @@ import BeamCore
 
 struct TabInformation {
     var url: URL
+    var shouldBeIndexed: Bool = true
     weak var tabTree: BrowsingTree?
     weak var currentTabTree: BrowsingTree?
     weak var parentBrowsingNode: BrowsingNode?
@@ -120,8 +121,9 @@ class BrowserTabsManager: ObservableObject {
             }
 
             tab.appendToIndexer = { [unowned self, weak tab] url, read in
+                guard let tab = tab else { return }
                 var textForClustering = ""
-                let tabTree = tab?.browsingTree.deepCopy()
+                let tabTree = tab.browsingTree.deepCopy()
                 let currentTabTree = currentTab?.browsingTree.deepCopy()
 
                 self.indexingQueue.async { [unowned self] in
@@ -131,8 +133,8 @@ class BrowserTabsManager: ObservableObject {
                     DispatchQueue.main.async { [weak self] in
                         guard let self = self else { return }
                         let indexDocument = IndexDocument(source: url.absoluteString, title: read.title, contents: read.textContent)
-
                         let tabInformation: TabInformation? = TabInformation(url: url,
+                                                                             shouldBeIndexed: tab.responseStatusCode == 200,
                                                                              tabTree: tabTree,
                                                                              currentTabTree: currentTabTree,
                                                                              parentBrowsingNode: tabTree?.current.parent,

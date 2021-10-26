@@ -4,7 +4,6 @@ import GRDB
 import Dispatch
 import Foundation
 
-
 /// GRDBDatabase lets the application access the database.
 /// It's role is to setup the database schema.
 struct GRDBDatabase {

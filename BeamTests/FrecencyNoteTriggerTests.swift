@@ -73,6 +73,7 @@ class FrecencyNoteTriggerTests: XCTestCase {
         var originalQuery: String?
         var pointAndShootAllowed: Bool = false
         var hasError: Bool = false
+        var responseStatusCode: Int = 200
 
         var title: String = ""
         var url: URL?
