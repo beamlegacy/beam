@@ -173,12 +173,21 @@
         }
       },
       {
+        "package": "Macaw",
+        "repositoryURL": "https://github.com/eLud/Macaw/",
+        "state": {
+          "branch": "master",
+          "revision": "6d7ea15dfd4ba354480ddfeee4d1860df271b46d",
+          "version": null
+        }
+      },
+      {
         "package": "Nimble",
         "repositoryURL": "https://github.com/Quick/Nimble.git",
         "state": {
           "branch": null,
-          "revision": "af1730dde4e6c0d45bf01b99f8a41713ce536790",
-          "version": "9.2.0"
+          "revision": "c93f16c25af5770f0d3e6af27c9634640946b068",
+          "version": "9.2.1"
         }
       },
       {
@@ -186,7 +195,7 @@
         "repositoryURL": "https://github.com/OAuthSwift/OAuthSwift.git",
         "state": {
           "branch": "master",
-          "revision": "e09698d5f9e106353544fa586edd408da869158d",
+          "revision": "8e62dc0243de97e37640e97fd0641fad4dbe6e1f",
           "version": null
         }
       },
@@ -213,8 +222,8 @@
         "repositoryURL": "https://github.com/mxcl/PromiseKit",
         "state": {
           "branch": null,
-          "revision": "2ff97931d2721ecae9f94d8cbf4cf853a7d79180",
-          "version": "6.16.0"
+          "revision": "00afea5360bf1c02ac83209c2c8991f73b5a4e7d",
+          "version": "6.16.1"
         }
       },
       {
@@ -249,8 +258,8 @@
         "repositoryURL": "https://github.com/getsentry/sentry-cocoa.git",
         "state": {
           "branch": null,
-          "revision": "a8898a7b681851748ac5ac03894e40d5e5861b84",
-          "version": "7.4.1"
+          "revision": "f293c351067275d688a1f11a709c33c3ac2dc0ee",
+          "version": "7.4.8"
         }
       },
       {
@@ -314,6 +323,15 @@
           "branch": "master",
           "revision": "2dd7e4a252e5aa95a22a45ba37ef186047a77413",
           "version": null
+        }
+      },
+      {
+        "package": "SWXMLHash",
+        "repositoryURL": "https://github.com/drmohundro/SWXMLHash",
+        "state": {
+          "branch": null,
+          "revision": "6469881a3f30417c5bb02404ea4b69207f297592",
+          "version": "6.0.0"
         }
       },
       {

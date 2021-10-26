@@ -126,6 +126,7 @@
 		33DEF48826617E0B00834839 /* CircledButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33DEF48726617E0B00834839 /* CircledButton.swift */; };
 		33F0480426B14C0100855A08 /* CustomPopoverPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33F047FC26B14C0000855A08 /* CustomPopoverPresenter.swift */; };
 		33F0F1C826DE87E000FF8B48 /* Vinyl in Frameworks */ = {isa = PBXBuildFile; productRef = 33F0F1C726DE87E000FF8B48 /* Vinyl */; };
+		33F64F1227283201004EB0CD /* Macaw in Frameworks */ = {isa = PBXBuildFile; productRef = 33F64F1127283201004EB0CD /* Macaw */; };
 		33FE719826D38A0400E63849 /* SearchLocationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33FE719726D38A0400E63849 /* SearchLocationView.swift */; };
 		4100D96B25AEFEEA00EF04CB /* BeamTextEdit+Shortcut.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4100D96A25AEFEEA00EF04CB /* BeamTextEdit+Shortcut.swift */; };
 		4105CE7525A60681009AB687 /* FormatterTypeButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4105CE7425A60681009AB687 /* FormatterTypeButton.swift */; };
@@ -2055,6 +2056,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				33F64F1227283201004EB0CD /* Macaw in Frameworks */,
 				333E61842707094000847A0C /* Swime in Frameworks */,
 				33B27467264C0F7100A318CD /* AutoUpdate.framework in Frameworks */,
 				525C233C25BAF8EF001B9625 /* libgit2.a in Frameworks */,
@@ -4689,6 +4691,7 @@
 				A5F47EC226F8D633004B7CDE /* Lottie */,
 				333E61832707094000847A0C /* Swime */,
 				52466B21270DA966002D1716 /* Clustering */,
+				33F64F1127283201004EB0CD /* Macaw */,
 			);
 			productName = Beam;
 			productReference = 965A78252514F147009980D4 /* Beam.app */;
@@ -4807,6 +4810,7 @@
 				A5F47EC126F8D633004B7CDE /* XCRemoteSwiftPackageReference "lottie-ios" */,
 				333E61822707094000847A0C /* XCRemoteSwiftPackageReference "Swime" */,
 				52466B20270DA966002D1716 /* XCRemoteSwiftPackageReference "clustering" */,
+				33F64F1027283201004EB0CD /* XCRemoteSwiftPackageReference "Macaw" */,
 			);
 			productRefGroup = 965A78262514F147009980D4 /* Products */;
 			projectDirPath = "";
@@ -6804,6 +6808,14 @@
 				minimumVersion = 0.10.5;
 			};
 		};
+		33F64F1027283201004EB0CD /* XCRemoteSwiftPackageReference "Macaw" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/eLud/Macaw/";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
 		5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Quick/Nimble.git";
@@ -6973,6 +6985,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 33F0F1C626DE87E000FF8B48 /* XCRemoteSwiftPackageReference "Vinyl" */;
 			productName = Vinyl;
+		};
+		33F64F1127283201004EB0CD /* Macaw */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 33F64F1027283201004EB0CD /* XCRemoteSwiftPackageReference "Macaw" */;
+			productName = Macaw;
 		};
 		5239C11525C2C4AE009C51E1 /* Nimble */ = {
 			isa = XCSwiftPackageProductDependency;
