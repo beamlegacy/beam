@@ -64,6 +64,7 @@ import Promises
     @Published var title: String = "New Tab"
     @Published var originalQuery: String?
     @Published var url: URL?
+    @Published var responseStatusCode: Int = 200
     @Published var isLoading: Bool = false
     @Published var estimatedLoadingProgress: Double = 0
     @Published var hasOnlySecureContent: Bool = false
