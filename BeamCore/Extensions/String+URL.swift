@@ -13,9 +13,13 @@ public extension String {
         return self.addingPercentEncoding(withAllowedCharacters: CharacterSet(charactersIn: "()").inverted)
     }
 
+    private var isPercentEncoded: Bool {
+        self.removingPercentEncoding != self
+    }
+
     var toEncodedURL: URL? {
         guard mayBeURL,
-              let encodedString = self.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
+              let encodedString = isPercentEncoded ? self : self.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
               let url = URL(string: encodedString) ?? URL(string: self)
         else { return nil }
         return url
