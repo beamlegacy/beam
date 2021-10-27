@@ -6,6 +6,7 @@
 //
 
 import Foundation
+
 enum PasswordViewLocators {
     
     enum Buttons: String, CaseIterable, UIElement {

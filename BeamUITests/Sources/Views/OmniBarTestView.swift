@@ -19,7 +19,7 @@ class OmniBarTestView: BaseView {
     }
     
     func getSearchFieldValue() -> String {
-        return self.getOmniBarSearchField().value as? String ?? ""
+        return self.getElementStringValue(element: getOmniBarSearchField())
     }
     
     func clickRefreshButton() {

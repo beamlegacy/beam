@@ -13,8 +13,7 @@ class AllCardsTestView: BaseView {
     @discardableResult
     func deleteAllCards() -> AllCardsTestView {
         triggerAllCardsMenuOptionAction(.deleteNotes)
-        button(AllCardsViewLocators.Buttons.alertDeleteButton.accessibilityIdentifier).clickOnExistence()
-        WaitHelper().waitForDoesntExist(button(AllCardsViewLocators.Buttons.alertDeleteButton.accessibilityIdentifier))
+        AlertTestView().confirmDeletion()
         return self
     }
     
@@ -22,8 +21,7 @@ class AllCardsTestView: BaseView {
     func deleteCardByIndex(_ index: Int) -> AllCardsTestView {
         getCardsNames()[index].hover()
         triggerSingleCardMenuOptionAction(.deleteNotes)
-        button(AllCardsViewLocators.Buttons.alertDeleteButton.accessibilityIdentifier).clickOnExistence()
-        WaitHelper().waitForDoesntExist(button(AllCardsViewLocators.Buttons.alertDeleteButton.accessibilityIdentifier))
+        AlertTestView().confirmDeletion()
         return self
     }
     
@@ -46,7 +44,7 @@ class AllCardsTestView: BaseView {
     }
     
     func getCardNameValueByIndex(_ index: Int) -> String {
-        return getCardsNames()[index].value as? String ?? errorFetchStringValue
+        return self.getElementStringValue(element: getCardsNames()[index])
     }
     
     func getNumberOfCards() -> Int {
@@ -76,11 +74,19 @@ class AllCardsTestView: BaseView {
         return false
     }
     
-    func selectCardByName(_ cardName: String) -> AllCardsTestView {
+    //TBD
+    /*func selectCardByName(_ cardName: String) -> AllCardsTestView {
         app.windows.tables.staticTexts[AllCardsViewLocators.ColumnCells.cardTitleColumnCell.accessibilityIdentifier].click()
         return self
+    }*/
+    
+    @discardableResult
+    func openFirstCard() -> CardTestView {
+        app.windows.tables.staticTexts[AllCardsViewLocators.ColumnCells.cardTitleColumnCell.accessibilityIdentifier].firstMatch.coordinate(withNormalizedOffset: CGVector(dx: 0.015, dy: 0.9)).tap()
+        return CardTestView()
     }
     
+    @discardableResult
     func openJournal() -> JournalTestView {
         button(AllCardsViewLocators.Buttons.journalButton.accessibilityIdentifier).click()
         return JournalTestView()
