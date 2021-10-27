@@ -192,7 +192,7 @@ struct BeamTextAttributedStringBuilder {
             } else {
                 stringAttributes[.hoverUnderlineColor] = BeamColor.Editor.bidirectionalLink.staticColor
                 stringAttributes[.underlineStyle] = NSUnderlineStyle.single.rawValue
-                stringAttributes[.underlineColor] = BeamColor.Editor.bidirectionalUnderline.staticColor
+                stringAttributes[.underlineColor] = NSColor.clear
             }
         }
 
