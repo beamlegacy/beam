@@ -80,7 +80,7 @@ class BeamUITestsHelper {
     }
 
     func showJournal() {
-        self.app.typeKey("J", modifierFlags: [.command, .shift])
+        ShortcutsHelper().shortcutActionInvoke(action: .showJournal)
     }
 
     // Doesn't work 

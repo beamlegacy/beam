@@ -16,6 +16,10 @@ class WebTestView: BaseView {
         return element
     }
     
+    func getDestinationCardTitle() -> String {
+        return getElementStringValue(element: getDestinationCardElement())
+    }
+    
     @discardableResult
     func openAllCardsMenu() -> AllCardsTestView {
         button(JournalViewLocators.Buttons.allCardsMenuButton.accessibilityIdentifier).click()
@@ -58,8 +62,8 @@ class WebTestView: BaseView {
         return getTabs().count
     }
     
-    func getTab(number: Int) -> XCUIElement {
-        getTabs().element(boundBy: number - 1)
+    func getTabByIndex(index: Int) -> XCUIElement {
+        getTabs().element(boundBy: index)
     }
     
     func getTabs() -> XCUIElementQuery {
@@ -78,5 +82,16 @@ class WebTestView: BaseView {
         app.groups.matching(identifier:WebViewLocators.Images.browserTabBar.accessibilityIdentifier).firstMatch.hover()
         app.images.matching(identifier: WebViewLocators.Buttons.closeTabButton.accessibilityIdentifier).firstMatch.click()
         return self
+    }
+    
+    @discardableResult
+    func dragDropTab(draggedTabIndexFromSelectedTab: Int, destinationTabIndexFromSelectedTab: Int) -> WebTestView {
+        //Important! Counting starts form the next of selected tab
+        self.getTabByIndex(index: draggedTabIndexFromSelectedTab).click(forDuration: self.defaultPressDurationSeconds, thenDragTo: self.getTabByIndex(index: destinationTabIndexFromSelectedTab))
+        return self
+    }
+    
+    func isGoogleSearchTabOpened() -> Bool {
+        return image("Google").waitForExistence(timeout: minimumWaitTimeout)
     }
 }

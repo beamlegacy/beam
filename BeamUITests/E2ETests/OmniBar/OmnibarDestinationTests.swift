@@ -43,7 +43,7 @@ class OmnibarDestinationTests: BaseTest {
         testRailPrint("Then destination card has a focus, empty search field and a card name")
         _ = destinationCardSearchField.waitForExistence(timeout: implicitWaitTimeout)
         XCTAssertTrue(omnibarView.inputHasFocus(destinationCardSearchField))
-        XCTAssertEqual(destinationCardSearchField.value as? String, "")
+        XCTAssertEqual(journalView.getElementStringValue(element: destinationCardSearchField), emptyString)
         XCTAssertTrue(destinationCardSearchField.placeholderValue == todayCardNameTitleViewFormat || destinationCardSearchField.placeholderValue == todayCardNameCreationViewFormat || destinationCardSearchField.placeholderValue == todayCardNameCreationViewFormatWithout0InDays)
         
         testRailPrint("Then Selected autocomplete card is \(expectedNumberOfAutocompletedCards)")
@@ -70,7 +70,7 @@ class OmnibarDestinationTests: BaseTest {
         destinationCardSearchField.typeText("\r")
         
         testRailPrint("Then I see \(cardNameToBeCreated) in search results")
-        XCTAssertEqual(destinationCardTitle.value as? String, cardNameToBeCreated)
+        XCTAssertEqual(journalView.getElementStringValue(element: destinationCardTitle), cardNameToBeCreated)
         
         testRailPrint("When I click escape button")
         omnibarView.typeKeyboardKey(.escape)
@@ -84,11 +84,10 @@ class OmnibarDestinationTests: BaseTest {
         cardView.navigateToWebView()
         
         testRailPrint("Then I see \(cardNameToBeCreated) as destination card")
-        XCTAssertEqual(destinationCardTitle.value as? String, cardNameToBeCreated)
+        XCTAssertEqual(journalView.getElementStringValue(element: destinationCardTitle), cardNameToBeCreated)
     }
     
-    func testFocusDestinationCardUsingShortcut() throws {
-        try XCTSkipIf(true, "Temp skip due crash bug. To be included once crash is fixed asap")
+    func testFocusDestinationCardUsingShortcut() {
         let journalView = launchApp()
         testRailPrint("Given I clean the DB and create a card named: \(cardNameToBeCreated)")
         helper.cleanupDB(logout: false)
@@ -97,13 +96,12 @@ class OmnibarDestinationTests: BaseTest {
         testRailPrint("When I search in omnibar change card using shortcut")
         omnibarView.searchInOmniBar(helper.randomSearchTerm(), true)
         _ = destinationCardTitle.waitForExistence(timeout: implicitWaitTimeout)
-        WebTestView().openDestinationCard()
-        GoMenu().changeCard()
+        ShortcutsHelper().shortcutActionInvoke(action: .changeDestinationCard)
         
         testRailPrint("Then destination card has a focus, empty search field and a card name")
         _ = destinationCardSearchField.waitForExistence(timeout: implicitWaitTimeout)
         XCTAssertTrue(omnibarView.inputHasFocus(destinationCardSearchField))
-        XCTAssertEqual(destinationCardSearchField.value as? String, "")
+        XCTAssertEqual(journalView.getElementStringValue(element: destinationCardSearchField), emptyString)
         XCTAssertTrue(destinationCardSearchField.placeholderValue == todayCardNameTitleViewFormat || destinationCardSearchField.placeholderValue == todayCardNameCreationViewFormat )
         
         testRailPrint("Then Selected autocomplete card is \(expectedNumberOfAutocompletedCards)")

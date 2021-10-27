@@ -38,7 +38,7 @@ class NavigationCollectUITests: QuickSpec {
 
     override func spec() {
 
-        let _ = [
+        let titles = [
             "Point And Shoot Test Fixture Ultralight Beam",
             "Point And Shoot Test Fixture I-Beam",
             "Point And Shoot Test Fixture Cursor"
@@ -60,7 +60,7 @@ class NavigationCollectUITests: QuickSpec {
             }
             
             //Test is disabled to to the bug https://linear.app/beamapp/issue/BE-1910/links-are-collected-by-pns-as-embed-videos
-            /*it("add links to journal in order") {
+            it("add links to journal in order") {
                 self.helper.openTestPage(page: .page1)
                 let title0 = titles[0]
                 let staticText0 = self.app.staticTexts[title0]
@@ -86,7 +86,7 @@ class NavigationCollectUITests: QuickSpec {
                 expect(self.journalChildren.element(boundBy: 0).value as? String) == title0
                 expect(self.journalChildren.element(boundBy: 1).value as? String) == title1
                 expect(self.journalChildren.element(boundBy: 2).value as? String) == title2
-            }*/
+            }
 
             //Test is disabled to to the bug https://linear.app/beamapp/issue/BE-1910/links-are-collected-by-pns-as-embed-videos
             /*it("can navigate links in collected text") {

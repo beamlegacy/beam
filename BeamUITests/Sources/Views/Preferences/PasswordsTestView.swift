@@ -8,16 +8,16 @@
 import Foundation
 import XCTest
 
-class PasswordsTestView: BaseView {
+class PasswordsTestView: PreferencesBaseView {
     
     @discardableResult
     func clickCancel() -> WebTestView {
-        app/*@START_MENU_TOKEN@*/.sheets/*[[".dialogs.sheets",".sheets"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.buttons[PasswordViewLocators.Buttons.cancelButton.accessibilityIdentifier].clickOnHittable()
+        buttonSheets(PasswordViewLocators.Buttons.cancelButton.accessibilityIdentifier).clickOnHittable()
         return WebTestView()
     }
     
     func isPasswordPreferencesOpened() -> Bool {
-        return app/*@START_MENU_TOKEN@*/.dialogs.sheets/*[[".dialogs.sheets",".sheets"],[[[-1,1],[-1,0]]],[1]]@END_MENU_TOKEN@*/.staticTexts[PasswordViewLocators.StaticTexts.windowTitle.accessibilityIdentifier].waitForExistence(timeout: minimumWaitTimeout)
+        return staticTextSheets(PasswordViewLocators.StaticTexts.windowTitle.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout)
     }
     
     func waitForPreferenceToClose() -> Bool {

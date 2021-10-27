@@ -161,7 +161,6 @@ class OmnibarAutocompleteTests: BaseTest {
         launchApp()
         helper.tapCommand(.omnibarFillHistory)
 
-        
         testRailPrint("When I type: \(partiallyTypedSearchText)")
         omnibarView.getOmniBarSearchField().click()
         omnibarView.getOmniBarSearchField().typeText(partiallyTypedSearchText)
