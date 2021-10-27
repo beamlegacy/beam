@@ -382,6 +382,7 @@
 		52DF49A625E42110009A651E /* BeamUITestsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52DF49A525E42110009A651E /* BeamUITestsHelper.swift */; };
 		52E04FD6252C7A4600AD9F56 /* writing_space.json in Resources */ = {isa = PBXBuildFile; fileRef = 52E04FD5252C7A4600AD9F56 /* writing_space.json */; };
 		52E04FED252C814D00AD9F56 /* RoamImporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52E04FEC252C814D00AD9F56 /* RoamImporterTests.swift */; };
+		52ECE01527282C100010E223 /* update_beam_object_large.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 52ECE01427282C100010E223 /* update_beam_object_large.graphql */; };
 		52F27FCB25B9B404006E09A2 /* ViewModelFetchedResults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52F27FB625B9B404006E09A2 /* ViewModelFetchedResults.swift */; };
 		52F4E49826417EF00067B017 /* create_identity.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 52F4E49726417EF00067B017 /* create_identity.graphql */; };
 		52F4E4A226417F210067B017 /* sign_in_with_provider.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 52F4E4A126417F210067B017 /* sign_in_with_provider.graphql */; };
@@ -1450,6 +1451,7 @@
 		52DF49A525E42110009A651E /* BeamUITestsHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamUITestsHelper.swift; sourceTree = "<group>"; };
 		52E04FD5252C7A4600AD9F56 /* writing_space.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = writing_space.json; sourceTree = "<group>"; };
 		52E04FEC252C814D00AD9F56 /* RoamImporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoamImporterTests.swift; sourceTree = "<group>"; };
+		52ECE01427282C100010E223 /* update_beam_object_large.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = update_beam_object_large.graphql; sourceTree = "<group>"; };
 		52F27FB625B9B404006E09A2 /* ViewModelFetchedResults.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewModelFetchedResults.swift; sourceTree = "<group>"; };
 		52F4E49726417EF00067B017 /* create_identity.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = create_identity.graphql; sourceTree = "<group>"; };
 		52F4E4A126417F210067B017 /* sign_in_with_provider.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = sign_in_with_provider.graphql; sourceTree = "<group>"; };
@@ -3026,6 +3028,7 @@
 				5224CD5F2685FFB500D4179E /* delete_all_beam_objects.graphql */,
 				5224CD452685FF7E00D4179E /* update_beam_objects.graphql */,
 				5224CD512685FF9B00D4179E /* update_beam_object.graphql */,
+				52ECE01427282C100010E223 /* update_beam_object_large.graphql */,
 				5224CD692685FFD100D4179E /* beam_object.graphql */,
 				5224CD6F2685FFDD00D4179E /* beam_objects.graphql */,
 				522F149227033DE000EDF2F6 /* beam_object_checksums.graphql */,
@@ -3291,7 +3294,7 @@
 			children = (
 				522D48A52719D1F20038DB81 /* LoggerSplitViewController.swift */,
 				522D48A32719D1D90038DB81 /* LoggerWindowController.swift */,
-				5295D91527187246008AF38C /* LoggerNSTableController.swift */,
+				5295D91527187246008AF38C /* LoggerNSTableViewController.swift */,
 				522D48A72719D2990038DB81 /* NSTableView+ScrollToVisible.swift */,
 				527C4F2F2719818A00772973 /* LoggerCategoryTableViewController.swift */,
 				522D489C2719D1C00038DB81 /* LoggerNSWindow.swift */,
@@ -4938,6 +4941,7 @@
 				41B4277B25E52DCA00A8243F /* Localizable.stringsdict in Resources */,
 				8AC2EFD8266F86F500049005 /* webpack.config.js in Resources */,
 				A5F47EC826F8D718004B7CDE /* editor-publish.json in Resources */,
+				52ECE01527282C100010E223 /* update_beam_object_large.graphql in Resources */,
 				5224CD762685FFFC00D4179E /* beam_object_updated_at.graphql in Resources */,
 				8759678526FB903C0097C3CC /* UITests-Passwords.csv in Resources */,
 				8AD2637126F4A0480074D673 /* UITests-Playground.html in Resources */,
@@ -5614,7 +5618,7 @@
 				8AED4FF026C2A3AA00E29DB7 /* PointAndShootFrameOffset.swift in Sources */,
 				A043B7E7265937DA00E267E5 /* AppDelegate+TabGrouping.swift in Sources */,
 				DA6A53B726C2BEDC00B87B0C /* SuggestedNoteSourcesUpdater.swift in Sources */,
-				5295D91627187246008AF38C /* LoggerNSTableController.swift in Sources */,
+				5295D91627187246008AF38C /* LoggerNSTableViewController.swift in Sources */,
 				33353EDA26F369AD00063078 /* KeyboardFeatureView.swift in Sources */,
 				96FACC522604B0EE0088DD67 /* DeleteElement.swift in Sources */,
 				4181725E2581107C00317ED8 /* AccountManager.swift in Sources */,
