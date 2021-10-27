@@ -19,7 +19,7 @@ struct TabInformation {
     weak var previousTabTree: BrowsingTree?
     var document: IndexDocument
     var textContent: String
-    var cleanedTextContentForClustering: String
+    var cleanedTextContentForClustering: [String]
 }
 
 protocol BrowserTabsManagerDelegate: AnyObject {
@@ -122,7 +122,7 @@ class BrowserTabsManager: ObservableObject {
 
             tab.appendToIndexer = { [unowned self, weak tab] url, read in
                 guard let tab = tab else { return }
-                var textForClustering = ""
+                var textForClustering = [""]
                 let tabTree = tab.browsingTree.deepCopy()
                 let currentTabTree = currentTab?.browsingTree.deepCopy()
 

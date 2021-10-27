@@ -55,7 +55,7 @@ class HtmlNoteAdapterTests: XCTestCase {
         let htmlNoteAdapter = self.setupTestMocks("http://test.com")
         let txt = htmlNoteAdapter.convertForClustering(html: html)
         
-        XCTAssertEqual(txt, "This is another paragraph.")
+        XCTAssertEqual(txt, ["This is a paragraph.", "This is another paragraph."])
     }
     
     func testBasicParagraph() throws {
