@@ -354,6 +354,11 @@ import Promises
 
         state.setup(webView: web)
         backForwardList = web.backForwardList
+        web.page = self
+
+        uiDelegateController.page = self
+        mediaPlayerController = MediaPlayerController(page: self)
+        addTreeToNote()
         webView = web
         self.webView.page = self
         uiDelegateController.page = self
@@ -369,7 +374,7 @@ import Promises
         if let suppliedPreloadURL = preloadUrl {
             preloadUrl = nil
             DispatchQueue.main.async { [weak self] in
-                self?.webView.load(URLRequest(url: suppliedPreloadURL))
+                self?.load(url: suppliedPreloadURL)
             }
         }
     }
@@ -470,6 +475,9 @@ import Promises
     }
 
     private func setupObservers() {
+        if !scope.isEmpty {
+            cancelObservers()
+        }
         Logger.shared.logDebug("setupObservers", category: .javascript)
         webView.publisher(for: \.title)
             .debounce(for: .milliseconds(200), scheduler: DispatchQueue.main)
@@ -514,6 +522,7 @@ import Promises
     }
 
     func cancelObservers() {
+        Logger.shared.logDebug("cancelObservers", category: .javascript)
         scope.removeAll()
         webView?.navigationDelegate = nil
         webView?.uiDelegate = nil
@@ -613,7 +622,8 @@ import Promises
 
     var navigationCount: Int = 0
 
-    func startReading(withState newState: BeamState?) {
+    private var refocusDispatchItem: DispatchWorkItem?
+    func tabDidAppear(withState newState: BeamState?) {
         if newState != state {
             if state == nil, let newState = newState {
                 // first read on a lazy tab
@@ -627,11 +637,14 @@ import Promises
         browsingTree.startReading()
         guard !isLoading && url != nil && state?.focusOmniBox != true else { return }
         // bring back the focus to where it was
-        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: .milliseconds(200))) { [weak self] in
+        refocusDispatchItem?.cancel()
+        let workItem = DispatchWorkItem { [weak self] in
             guard let webView = self?.webView, self?.isActiveTab() == true else { return }
             webView.window?.makeFirstResponder(webView)
             webView.page?.executeJS("refocusLastElement()", objectName: "FocusHandling")
         }
+        refocusDispatchItem = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now().advanced(by: .milliseconds(200)), execute: workItem)
     }
 
     func switchToCard() {

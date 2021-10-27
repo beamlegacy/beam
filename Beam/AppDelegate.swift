@@ -410,7 +410,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidUnhide(_ notification: Notification) {
         for window in windows where window.isMainWindow {
-            window.state.browserTabsManager.currentTab?.startReading(withState: window.state)
+            window.state.browserTabsManager.currentTab?.tabDidAppear(withState: window.state)
         }
     }
 
@@ -420,7 +420,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         isActive = true
         for window in windows where window.isMainWindow {
             guard window.state.mode == .web else { continue }
-            window.state.browserTabsManager.currentTab?.startReading(withState: window.state)
+            window.state.browserTabsManager.currentTab?.tabDidAppear(withState: window.state)
         }
     }
 

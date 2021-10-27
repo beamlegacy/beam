@@ -56,7 +56,7 @@ class BrowserTabsManager: ObservableObject {
             if tabsAreVisible {
                 latestCurrentTab = oldValue?.browsingTree
                 oldValue?.switchToOtherTab()
-                currentTab?.startReading(withState: state)
+                currentTab?.tabDidAppear(withState: state)
             }
 
             self.updateCurrentTabObservers()
@@ -157,7 +157,7 @@ extension BrowserTabsManager {
     func updateTabsForStateModeChange(_ newMode: Mode, previousMode: Mode) {
         guard newMode != previousMode else { return }
         if newMode == .web {
-            currentTab?.startReading(withState: state)
+            currentTab?.tabDidAppear(withState: state)
         } else if previousMode == .web {
             switch newMode {
             case .note:

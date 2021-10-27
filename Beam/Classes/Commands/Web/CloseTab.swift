@@ -94,7 +94,9 @@ class CloseTab: WebCommand {
         if tab.isPinned {
             context.browserTabsManager.pinTab(tab)
         }
-        tab.postLoadSetup(state: context)
+        if !wasCurrentTab {
+            tab.postLoadSetup(state: context)
+        }
         self.tab = tab
         return true
     }
