@@ -532,11 +532,9 @@ import Sentry
             guard deleted else { return }
             noteDeletionCancellable = nil
             self.navigateToJournal(note: nil)
-            let alert = NSAlert()
-            alert.messageText = "The note '\(note.title)' has been deleted."
-            alert.alertStyle = .critical
-            alert.informativeText = "Navigating back to the journal."
-            alert.runModal()
+
+            UserAlert.showError(message: "The note '\(note.title)' has been deleted.",
+                                informativeText: "Navigating back to the journal.")
         }
     }
 }

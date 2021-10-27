@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="19162" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="19455" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="19162"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="19455"/>
         <capability name="Search Toolbar Item" minToolsVersion="12.0" minSystemVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -385,19 +385,6 @@
                                                             <action selector="exportAllNotesToJSON:" target="Voe-Tx-rLC" id="xv1-5n-Ltx"/>
                                                         </connections>
                                                     </menuItem>
-                                                    <menuItem isSeparatorItem="YES" id="p48-Cr-YKh"/>
-                                                    <menuItem title="Send all notes to API" id="hvj-Zt-QCz">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="sendAllNotesToAPI:" target="Voe-Tx-rLC" id="erI-oe-Q9k"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                    <menuItem title="Fetch all notes from API" id="nVV-sn-gD8">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="refreshNotesFromAPI:" target="Voe-Tx-rLC" id="pVk-C4-CGO"/>
-                                                        </connections>
-                                                    </menuItem>
                                                     <menuItem isSeparatorItem="YES" id="ITV-pu-Qpw"/>
                                                     <menuItem title="Delete all notes" id="4e7-0u-pUE">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
@@ -409,19 +396,6 @@
                                                         <modifierMask key="keyEquivalentModifierMask"/>
                                                         <connections>
                                                             <action selector="deleteLocalDocuments:" target="Voe-Tx-rLC" id="RoE-cB-YGe"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                    <menuItem isSeparatorItem="YES" id="9I3-kZ-pf6"/>
-                                                    <menuItem title="Send all databases to API" id="wLk-2d-Sjr">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="sendAllDatabasesToAPI:" target="Voe-Tx-rLC" id="6Md-VS-tVK"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                    <menuItem title="Fetch all databases from API" id="7g3-Yd-w8e">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="refreshDatabasesFromAPI:" target="Voe-Tx-rLC" id="uaV-Rh-JFZ"/>
                                                         </connections>
                                                     </menuItem>
                                                     <menuItem isSeparatorItem="YES" id="EDR-BD-fNS"/>
@@ -1241,13 +1215,13 @@
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <scrollView autohidesScrollers="YES" horizontalLineScroll="24" horizontalPageScroll="10" verticalLineScroll="24" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="oXk-Ey-8xs">
-                                <rect key="frame" x="0.0" y="0.0" width="800" height="780"/>
+                                <rect key="frame" x="0.0" y="0.0" width="800" height="777"/>
                                 <clipView key="contentView" id="DvU-s3-Ha3">
-                                    <rect key="frame" x="1" y="1" width="798" height="778"/>
+                                    <rect key="frame" x="1" y="1" width="798" height="775"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" tableStyle="inset" alternatingRowBackgroundColors="YES" columnReordering="NO" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" rowHeight="24" viewBased="YES" id="fld-jj-1Ba">
-                                            <rect key="frame" x="0.0" y="0.0" width="798" height="778"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="798" height="775"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <size key="intercellSpacing" width="17" height="0.0"/>
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>

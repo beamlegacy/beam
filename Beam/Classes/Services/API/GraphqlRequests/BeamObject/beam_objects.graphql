@@ -9,6 +9,7 @@ query ($receivedAtAfter: ISO8601DateTime, $ids: [ID!], $beamObjectType: String) 
       data
       type
       checksum
+      privateKeySignature
     }
   }
 }

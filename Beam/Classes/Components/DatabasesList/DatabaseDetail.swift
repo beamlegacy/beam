@@ -14,6 +14,7 @@ struct DatabaseDetail: View {
                 SoftDeleteButton
                 SoftUnDeleteButton
                 DeleteButton
+                MoveOrphanButton
                 Spacer()
             }.padding()
 
@@ -81,22 +82,36 @@ struct DatabaseDetail: View {
     }
 
     private func delete() {
-        databaseManager.delete(DatabaseStruct(database: database)) { _ in }
+        let timer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { _ in
+            refreshing = true
+        }
+        databaseManager.delete(DatabaseStruct(database: database)) { _ in
+            timer.invalidate()
+            refreshing = false
+        }
     }
 
     private func softDelete() {
         var dbStruct = DatabaseStruct(database: database)
         dbStruct.deletedAt = BeamDate.now
-
+        let timer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { _ in
+            refreshing = true
+        }
         databaseManager.save(dbStruct, completion: { _ in
+            timer.invalidate()
+            refreshing = false
         })
     }
 
     private func softUnDelete() {
         var dbStruct = DatabaseStruct(database: database)
         dbStruct.deletedAt = nil
-
+        let timer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { _ in
+            refreshing = true
+        }
         databaseManager.save(dbStruct, completion: { _ in
+            timer.invalidate()
+            refreshing = false
         })
     }
 
@@ -113,7 +128,22 @@ struct DatabaseDetail: View {
             delete()
         }, label: {
             Text("Delete").frame(minWidth: 100)
-        })
+        }).disabled(refreshing)
+    }
+
+    private var MoveOrphanButton: some View {
+        Button(action: {
+            let timer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { _ in
+                refreshing = true
+            }
+
+            DocumentManager().moveAllOrphanNotes(databaseId: database.id) { _ in
+                timer.invalidate()
+                refreshing = false
+            }
+        }, label: {
+            Text("Move Orphan Notes").frame(minWidth: 100)
+        }).disabled(refreshing)
     }
 
     private var SoftDeleteButton: some View {
@@ -121,7 +151,7 @@ struct DatabaseDetail: View {
             softDelete()
         }, label: {
             Text("Soft Delete").frame(minWidth: 100)
-        })
+        }).disabled(refreshing)
     }
 
     private var SoftUnDeleteButton: some View {
@@ -129,7 +159,7 @@ struct DatabaseDetail: View {
             softUnDelete()
         }, label: {
             Text("Recover").frame(minWidth: 100)
-        })
+        }).disabled(refreshing)
     }
 
     static private let dateFormat: DateFormatter = {

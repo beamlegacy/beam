@@ -102,13 +102,9 @@ class DatabaseManager {
             NotificationCenter.default.post(name: .defaultDatabaseUpdate, object: newValue)
 
             // TODO: remove this once the app knows how to switch database live
-            let alert = NSAlert()
-            alert.messageText = "Database changed"
-            alert.alertStyle = .critical
-            alert.informativeText = "DB Changed from \(oldValue.title) {\(oldValue.id)} to \(newValue.title) {\(newValue.id)}. Beam must exit now."
-
-            alert.addButton(withTitle: "Exit now")
-            alert.runModal()
+            UserAlert.showError(message: "Database changed",
+                                informativeText: "DB Changed from \(oldValue.title) {\(oldValue.id)} to \(newValue.title) {\(newValue.id)}. Beam must exit now.",
+                                buttonTitle: "Exit now")
 
             NSApplication.shared.terminate(nil)
         }

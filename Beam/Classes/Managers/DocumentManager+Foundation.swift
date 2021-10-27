@@ -569,4 +569,36 @@ extension DocumentManager {
             }
         }
     }
+
+    // MARK: -
+    // MARK: Database related
+    func moveAllOrphanNotes(databaseId: UUID, _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
+        let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
+
+        context.perform {
+            do {
+                let databaseIds = DatabaseManager().all().map { $0.id }
+
+                let predicate = NSPredicate(format: "NOT (database_id IN %@)",
+                                            databaseIds)
+                let orphanDocuments = try Document.rawFetchAllWithLimit(context, predicate)
+
+                for document in orphanDocuments {
+                    document.database_id = databaseId
+                }
+
+                try context.save()
+
+                if !orphanDocuments.isEmpty {
+                    UserAlert.showMessage(message: "\(orphanDocuments.count) documents impacted, must exit.", buttonTitle: "Exit now")
+                    NSApplication.shared.terminate(nil)
+                } else {
+                    UserAlert.showMessage(message: "no document impacted")
+                }
+                completion(.success(true))
+            } catch {
+                completion(.failure(error))
+            }
+        }
+    }
 }

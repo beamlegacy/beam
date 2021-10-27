@@ -64,6 +64,11 @@
                BlueprintName = "BeamTests"
                ReferencedContainer = "container:Beam.xcodeproj">
             </BuildableReference>
+            <SkippedTests>
+               <Test
+                  Identifier = "PublicServerTests">
+               </Test>
+            </SkippedTests>
          </TestableReference>
          <TestableReference
             skipped = "NO"

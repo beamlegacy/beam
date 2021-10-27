@@ -381,6 +381,7 @@
 		52DF49A625E42110009A651E /* BeamUITestsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52DF49A525E42110009A651E /* BeamUITestsHelper.swift */; };
 		52E04FD6252C7A4600AD9F56 /* writing_space.json in Resources */ = {isa = PBXBuildFile; fileRef = 52E04FD5252C7A4600AD9F56 /* writing_space.json */; };
 		52E04FED252C814D00AD9F56 /* RoamImporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52E04FEC252C814D00AD9F56 /* RoamImporterTests.swift */; };
+		52ECE01E272970260010E223 /* UserAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52ECE01D272970260010E223 /* UserAlert.swift */; };
 		52F27FCB25B9B404006E09A2 /* ViewModelFetchedResults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52F27FB625B9B404006E09A2 /* ViewModelFetchedResults.swift */; };
 		52F4E49826417EF00067B017 /* create_identity.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 52F4E49726417EF00067B017 /* create_identity.graphql */; };
 		52F4E4A226417F210067B017 /* sign_in_with_provider.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 52F4E4A126417F210067B017 /* sign_in_with_provider.graphql */; };
@@ -1445,6 +1446,7 @@
 		52DF49A525E42110009A651E /* BeamUITestsHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamUITestsHelper.swift; sourceTree = "<group>"; };
 		52E04FD5252C7A4600AD9F56 /* writing_space.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = writing_space.json; sourceTree = "<group>"; };
 		52E04FEC252C814D00AD9F56 /* RoamImporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoamImporterTests.swift; sourceTree = "<group>"; };
+		52ECE01D272970260010E223 /* UserAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAlert.swift; sourceTree = "<group>"; };
 		52F27FB625B9B404006E09A2 /* ViewModelFetchedResults.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewModelFetchedResults.swift; sourceTree = "<group>"; };
 		52F4E49726417EF00067B017 /* create_identity.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = create_identity.graphql; sourceTree = "<group>"; };
 		52F4E4A126417F210067B017 /* sign_in_with_provider.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = sign_in_with_provider.graphql; sourceTree = "<group>"; };
@@ -2656,6 +2658,7 @@
 				418173F7258128A500317ED8 /* Journal */,
 				A54936B0260B71FE00EF7622 /* ToolBar */,
 				418171AE2581107C00317ED8 /* BeamWindow.swift */,
+				52ECE01D272970260010E223 /* UserAlert.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -5592,6 +5595,7 @@
 				A520D8DF25F8DF8D00400720 /* TouchDownModifier.swift in Sources */,
 				418171ED2581107C00317ED8 /* Session.swift in Sources */,
 				A5C9F00A261364F50096380F /* WindowPageView.swift in Sources */,
+				52ECE01E272970260010E223 /* UserAlert.swift in Sources */,
 				A5919F7F268EF964009015C5 /* TextEditCmdReturnAnimator.swift in Sources */,
 				52842D522715B3F40099602C /* FilesList.swift in Sources */,
 				4181713325810CDC00317ED8 /* Constants.swift in Sources */,
