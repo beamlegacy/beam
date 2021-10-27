@@ -9,8 +9,11 @@ import Foundation
 import XCTest
 
 class CardViewTests: BaseTest {
-
-
+    
+    let todayCardNameCreationViewFormat = DateHelper().getTodaysDateString(.cardViewCreation)
+    let todayCardNameTitleViewFormat = DateHelper().getTodaysDateString(.cardViewTitle)
+    let todayCardNameCreationViewFormatWithout0InDays = DateHelper().getTodaysDateString(.cardViewCreationNoZeros)
+    
     func testDefaultCardView() throws {
         try XCTSkipIf(true, "Workaround to open a card from journal/all cards menu is pending")
         let defaultNumberOfCardsAtFreshInstallation = 1
@@ -23,14 +26,17 @@ class CardViewTests: BaseTest {
         
         let todaysDateInCardTitleFormat = DateHelper().getTodaysDateString(.cardViewTitle)
         let todaysDateInCardCreationDateFormat = DateHelper().getTodaysDateString(.cardViewCreation)
-        testRailPrint("When I open \(todaysDateInCardTitleFormat) from Journal view view")
+        testRailPrint("When I open \(todaysDateInCardTitleFormat) from All cards view")
         let cardView = allCardsView.openJournal()
                                     .openRecentCardByName(todaysDateInCardTitleFormat)
-        
         testRailPrint("Then the title of the card is \(todaysDateInCardTitleFormat) and its creation date is \(todaysDateInCardCreationDateFormat)")
+        cardView.waitForCardViewToLoad()
+        let cardTitle = cardView.getCardTitle()
+        XCTAssertTrue(cardTitle == todayCardNameTitleViewFormat || cardTitle == todayCardNameCreationViewFormat || cardTitle == todayCardNameCreationViewFormatWithout0InDays)
         XCTAssertTrue(cardView.staticText(CardViewLocators.StaticTexts.privateLabel.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
         XCTAssertTrue(cardView.staticText(todaysDateInCardCreationDateFormat).exists)
-        XCTAssertTrue(cardView.image(CardViewLocators.Buttons.editorOptions.accessibilityIdentifier).exists)
+        XCTAssertTrue(cardView.image(CardViewLocators.Buttons.deleteCardButton.accessibilityIdentifier).exists)
+        XCTAssertTrue(cardView.image(CardViewLocators.Buttons.publishCardButton.accessibilityIdentifier).exists)
         XCTAssertTrue(cardView.staticText(todaysDateInCardTitleFormat).exists)
         
         let defaultNotesCount = 1

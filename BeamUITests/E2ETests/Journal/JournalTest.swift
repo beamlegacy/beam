@@ -32,7 +32,7 @@ class JournalTest: BaseTest {
         self.restartApp()
         
         testRailPrint("When I scroll for \(numberOfScrolls) times")
-        journalView.scroll(numberOfScrolls)
+        journalView.scroll(1)
         
         testRailPrint("Then Journal scroll view still exists")
         XCTAssertTrue(journalScrollView.exists)

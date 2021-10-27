@@ -12,8 +12,6 @@ enum AllCardsViewLocators {
     enum Buttons: String, CaseIterable, UIElement {
         case newCardButton = "tabs new"
         case journalButton = "journal"
-        case alertDeleteButton = "Delete..."
-        case alertCancelButton = "Cancel"
     }
     
     enum TextFields: String, CaseIterable, UIElement {

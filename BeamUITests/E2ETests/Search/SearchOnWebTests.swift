@@ -103,7 +103,9 @@ class SearchOnWebTests: BaseTest {
         XCTAssertTrue(searchView.assertResultsCounterNumber("1/1"))
         
         testRailPrint("When I clean the text field")
-        searchView.selectAllShortcut().typeKeyboardKey(.delete)
+        searchView.shortcutsHelper
+            .shortcutActionInvoke(action: .selectAll)
+            .typeKeyboardKey(.delete)
     }
     
     func testScrollDownUpToSearchedWord() throws {
