@@ -54,9 +54,11 @@ class DebugSection: Widget {
         layer.addSublayer(updatesLayer)
         layer.addSublayer(updateAttemptsLayer)
 
-        addLayer(ChevronButton("chevron", open: open, changed: { [unowned self] value in
+        let chevron = ChevronButton("chevron", open: open, changed: { [unowned self] value in
             self.open = value
-        }), origin: CGPoint(x: 0, y: 0))
+        })
+        chevron.setAccessibilityIdentifier("debug_arrow")
+        addLayer(chevron, origin: CGPoint(x: 0, y: 0))
 
         separatorLayer.backgroundColor = BeamColor.DebugSection.separator.cgColor
         self.layer.addSublayer(separatorLayer)

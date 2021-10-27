@@ -48,6 +48,7 @@ extension ElementNode {
             self.open = value
             layers[LayerName.indentLayer.rawValue]?.layer.isHidden = !value
         })
+        disclosureLayer.setAccessibilityIdentifier("node_arrow")
         addLayer(disclosureLayer, origin: point)
         updateDisclosureLayer()
     }
