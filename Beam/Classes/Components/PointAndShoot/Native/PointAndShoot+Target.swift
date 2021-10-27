@@ -55,27 +55,47 @@ extension PointAndShoot {
         )
     }
 
-    func translateAndScaleTarget(_ target: PointAndShoot.Target, _ href: String) -> PointAndShoot.Target {
+    func translateAndScaleTargets(_ targets: [PointAndShoot.Target], _ href: String) -> [PointAndShoot.Target] {
         guard let view = page.webView else {
             fatalError("Webview is required to scale target correctly")
         }
-        let scale: CGFloat = webPositions.scale * view.zoomLevel()
+        let scale: CGFloat = scaleForWebPositions(webView: view)
         // We can reduce calculations for the MainWindowFrame
-        guard href != page.url?.absoluteString else {
+        let isDifferentUrl = href != page.url?.absoluteString
+        let (xDelta, yDelta) = deltaForWebPositions(href: href)
+        return targets.map({ target in
+            translateAndScaleTarget(target, xDelta: xDelta, yDelta: yDelta, scale: scale, isDifferentUrl: isDifferentUrl)
+        })
+    }
+
+    func translateAndScaleTarget(_ target: PointAndShoot.Target, _ href: String) -> PointAndShoot.Target {
+        translateAndScaleTargets([target], href).first ?? target
+    }
+
+    private func translateAndScaleTarget(_ target: PointAndShoot.Target,
+                                         xDelta: CGFloat, yDelta: CGFloat, scale: CGFloat, isDifferentUrl: Bool) -> PointAndShoot.Target {
+        // We can reduce calculations for the MainWindowFrame
+        guard isDifferentUrl else {
             // We can futher reduce calculations if the scale is 1
             guard scale != 1 else {
                 return target
             }
             return target.translateTarget(0, 0, scale: scale)
         }
+        return target.translateTarget(xDelta, yDelta, scale: scale)
+    }
 
+    private func scaleForWebPositions(webView: WKWebView) -> CGFloat {
+        webPositions.scale * webView.zoomLevel()
+    }
+
+    private func deltaForWebPositions(href: String) -> (x: CGFloat, y: CGFloat) {
         let frameOffsetX = webPositions.viewportPosition(href, prop: WebPositions.FramePosition.x).reduce(0, +)
         let frameOffsetY = webPositions.viewportPosition(href, prop: WebPositions.FramePosition.y).reduce(0, +)
         let frameScrollX = webPositions.viewportPosition(href, prop: WebPositions.FramePosition.scrollX)
         let frameScrollY = webPositions.viewportPosition(href, prop: WebPositions.FramePosition.scrollY)
         let xDelta = frameOffsetX - frameScrollX.reduce(0, +)
         let yDelta = frameOffsetY - frameScrollY.reduce(0, +)
-
-        return target.translateTarget(xDelta, yDelta, scale: scale)
+        return (x: xDelta, y: yDelta)
     }
 }

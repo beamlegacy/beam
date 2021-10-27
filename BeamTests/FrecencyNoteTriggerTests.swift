@@ -152,7 +152,7 @@ class FrecencyNoteTriggerTests: XCTestCase {
             html: "<p>Pointed text</p>",
             animated: false
         )
-        pns.activeShootGroup = PointAndShoot.ShootGroup("abc", [target], "placeholder", "abc")
+        pns.activeShootGroup = PointAndShoot.ShootGroup("abc", [target], "placeholder", "abc", shapeCache: .init())
 
         //When point and shooting to a note, frecency score of note gets updated
         XCTAssertEqual(scorer.updateCalls.count, 0)
