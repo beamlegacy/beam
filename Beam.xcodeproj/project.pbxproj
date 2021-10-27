@@ -437,7 +437,7 @@
 		8A78699C264C7E4500F769D2 /* XCUIElementQuery+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A78699B264C7E4500F769D2 /* XCUIElementQuery+Beam.swift */; };
 		8A7920F02680AA1E00F74A75 /* URL+BeamTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A7920EF2680AA1E00F74A75 /* URL+BeamTest.swift */; };
 		8A7C80F526F9E04000D3BA72 /* DestinationNoteAutocompleteListTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A7C80F426F9E04000D3BA72 /* DestinationNoteAutocompleteListTests.swift */; };
-		8A7C8C1926B8137F00471A5B /* CGPath+UnionTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A7C8C1826B8137F00471A5B /* CGPath+UnionTest.swift */; };
+		8A7C8C1926B8137F00471A5B /* PointAndShootTargetsPathTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A7C8C1826B8137F00471A5B /* PointAndShootTargetsPathTests.swift */; };
 		8A7F948326A8576100270A74 /* PointAndShootHandleMouseClickTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A7F948226A8576100270A74 /* PointAndShootHandleMouseClickTest.swift */; };
 		8A7F948C26A858B800270A74 /* PointAndShootRefreshTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A7F948B26A858B800270A74 /* PointAndShootRefreshTest.swift */; };
 		8A7F949026A85D7600270A74 /* PointAndShootShootGroupTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A7F948F26A85D7600270A74 /* PointAndShootShootGroupTest.swift */; };
@@ -888,7 +888,6 @@
 		BAA67A6498E4E69779855E19 /* DownloadManagerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67555219BDD4CBD252C60 /* DownloadManagerTest.swift */; };
 		BAA67A72C76AE25BF2FC60BD /* BrowsingScorer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67D3D273F24009F3AE570 /* BrowsingScorer.swift */; };
 		BAA67AB22C0A91EBCA6D7BB7 /* WebNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67837448460D14C798F73 /* WebNavigationController.swift */; };
-		BAA67AB77852A4EE310BF552 /* PointAndShoot+ShootFrameFusionRect.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA674C683DA5DEC733F4746 /* PointAndShoot+ShootFrameFusionRect.swift */; };
 		BAA67ACD35DACF0E03ED520B /* DownloadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67A3C749F22077F5B7194 /* DownloadManager.swift */; };
 		BAA67AEAB5F02CF0D106321F /* BeamHTMLCollection.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA676FA04FDC60F63E9A342 /* BeamHTMLCollection.ts */; };
 		BAA67AF4FC4809A4B37353AD /* ScorerMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA671BF2E38E5B7F5764244 /* ScorerMessageHandler.swift */; };
@@ -1502,7 +1501,7 @@
 		8A78699B264C7E4500F769D2 /* XCUIElementQuery+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "XCUIElementQuery+Beam.swift"; sourceTree = "<group>"; };
 		8A7920EF2680AA1E00F74A75 /* URL+BeamTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+BeamTest.swift"; sourceTree = "<group>"; };
 		8A7C80F426F9E04000D3BA72 /* DestinationNoteAutocompleteListTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DestinationNoteAutocompleteListTests.swift; sourceTree = "<group>"; };
-		8A7C8C1826B8137F00471A5B /* CGPath+UnionTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGPath+UnionTest.swift"; sourceTree = "<group>"; };
+		8A7C8C1826B8137F00471A5B /* PointAndShootTargetsPathTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootTargetsPathTests.swift; sourceTree = "<group>"; };
 		8A7F948226A8576100270A74 /* PointAndShootHandleMouseClickTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootHandleMouseClickTest.swift; sourceTree = "<group>"; };
 		8A7F948B26A858B800270A74 /* PointAndShootRefreshTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootRefreshTest.swift; sourceTree = "<group>"; };
 		8A7F948F26A85D7600270A74 /* PointAndShootShootGroupTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootShootGroupTest.swift; sourceTree = "<group>"; };
@@ -1933,7 +1932,6 @@
 		BAA674174D9C44BC3C8FF465 /* ContentTypes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentTypes.swift; sourceTree = "<group>"; };
 		BAA674235D786C984B68A49A /* WebEvents.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = WebEvents.ts; sourceTree = "<group>"; };
 		BAA67494A353CE9F59952C32 /* PointAndShootUI_web.scss */ = {isa = PBXFileReference; lastKnownFileType = text; path = PointAndShootUI_web.scss; sourceTree = "<group>"; };
-		BAA674C683DA5DEC733F4746 /* PointAndShoot+ShootFrameFusionRect.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "PointAndShoot+ShootFrameFusionRect.swift"; sourceTree = "<group>"; };
 		BAA674E2D0D02C762E153B11 /* BeamHTMLElementMock.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = BeamHTMLElementMock.ts; sourceTree = "<group>"; };
 		BAA674EC8D9B3E2517A4F0F9 /* Frames.test.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = Frames.test.ts; sourceTree = "<group>"; };
 		BAA67507E9208E664806B668 /* BeamNode.test.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = BeamNode.test.ts; sourceTree = "<group>"; };
@@ -3485,6 +3483,7 @@
 				8AC2EFDA266F8A0800049005 /* PointAndShootPointingTest.swift */,
 				8AC2EFDC266F8A1400049005 /* PointAndShootShootingTest.swift */,
 				8AC2EFDE266F8A6F00049005 /* PointAndShootPersistToJournalTest.swift */,
+				8A7C8C1826B8137F00471A5B /* PointAndShootTargetsPathTests.swift */,
 			);
 			path = PointAndShoot;
 			sourceTree = "<group>";
@@ -3527,7 +3526,6 @@
 				8A9B1A9526DD321E00B3B5FA /* PointAndShoot+ShootGroup.swift */,
 				8A4801AC26A1EBBF008F33FE /* PointAndShoot+Helpers.swift */,
 				8A4801A326A1EB66008F33FE /* PointAndShoot+DrawRules.swift */,
-				BAA674C683DA5DEC733F4746 /* PointAndShoot+ShootFrameFusionRect.swift */,
 				8A23713126D91C2800D8526A /* PointAndShoot+Alert.swift */,
 				BAA6754D043D1DD6321A8F80 /* Views */,
 			);
@@ -3817,7 +3815,6 @@
 				527DF48525710EAE00A0A56D /* Managers */,
 				52A43D92252C790200178F3B /* DataModel */,
 				965A78432514F149009980D4 /* Info.plist */,
-				8A7C8C1826B8137F00471A5B /* CGPath+UnionTest.swift */,
 				96C9CC3D2535CE2C00D70AA6 /* LexerTests.swift */,
 				969084CB25365AAE009D3C96 /* ParserTests.swift */,
 				96E1356E2546F03900133A24 /* TextNodeTests.swift */,
@@ -5810,7 +5807,6 @@
 				BAA670C2CFE33BC83DF12343 /* PointAndShootCardPickerPositioning.swift in Sources */,
 				3355997426CBDDC900F52C23 /* SearchInContentView.swift in Sources */,
 				52019A6D26DE42C9005E8278 /* DocumentManager+PromiseKit.swift in Sources */,
-				BAA67AB77852A4EE310BF552 /* PointAndShoot+ShootFrameFusionRect.swift in Sources */,
 				BAA675A0EEE5F4636AECCE5D /* PointAndShootCardPicker.swift in Sources */,
 				A5B532432703525D007FC8B8 /* MeetingModalView.swift in Sources */,
 				BAA679FFB80537CB6DE74025 /* BeamMessageHandler.swift in Sources */,
@@ -5913,7 +5909,7 @@
 				52A7DE3826AED01A003E770E /* MyRemoteObjectManagerNetworkTests.swift in Sources */,
 				332AB2F626FE2461007717D8 /* PublicServerTests.swift in Sources */,
 				8A68F4652671159D00B0C022 /* PointAndShootMessageHandlerFrameBoundsTest.swift in Sources */,
-				8A7C8C1926B8137F00471A5B /* CGPath+UnionTest.swift in Sources */,
+				8A7C8C1926B8137F00471A5B /* PointAndShootTargetsPathTests.swift in Sources */,
 				8A7F949226A8611600270A74 /* PointAndShootCancelShootTest.swift in Sources */,
 				963DBB3D2698655C00080928 /* BeamElementLinksTests.swift in Sources */,
 				96C9CC3E2535CE2C00D70AA6 /* LexerTests.swift in Sources */,
