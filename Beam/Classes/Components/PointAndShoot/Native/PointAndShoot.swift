@@ -27,6 +27,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
     var webPositions: WebPositions = WebPositions()
     var data: BeamData = AppDelegate.main.data
     private let scorer: BrowsingScorer
+    let shapeCache = PnSTargetsShapeCache()
 
     @Published var activePointGroup: ShootGroup?
     @Published var activeSelectGroup: ShootGroup?
@@ -119,7 +120,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
             }
         }
 
-        activePointGroup = ShootGroup("point-uuid", [target], text, href)
+        activePointGroup = ShootGroup("point-uuid", [target], text, href, shapeCache: shapeCache)
 
     }
 
@@ -146,7 +147,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
                       activeSelectGroup == nil,
                       activeShootGroup == nil {
 
-                activeShootGroup = ShootGroup(groupId, [target], text, href)
+                activeShootGroup = ShootGroup(groupId, [target], text, href, shapeCache: shapeCache)
                 if let group = self.activeShootGroup,
                    let sourceUrl = self.page.url {
                     let text = group.text
@@ -155,7 +156,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
                 throttledHaptic()
             } else {
                 if !isAltKeyDown {
-                    let tempGroup = ShootGroup(groupId, [], text, href)
+                    let tempGroup = ShootGroup(groupId, [], text, href, shapeCache: shapeCache)
                     dismissedGroups.append(tempGroup)
                 }
             }
@@ -190,11 +191,12 @@ class PointAndShoot: WebPageHolder, ObservableObject {
 
         if activeSelectGroup?.id == groupId {
             // Update selection group
-            activeSelectGroup?.updateTargets(groupId, targets)
+            let shouldUpdatePath = isAltKeyDown || targets.count <= 1
+            activeSelectGroup?.updateTargets(groupId, targets, updatePath: shouldUpdatePath)
             return
         } else if hasActiveSelection, activeSelectGroup == nil {
             // Create a new Selection group
-            activeSelectGroup = ShootGroup(groupId, targets, text, href)
+            activeSelectGroup = ShootGroup(groupId, targets, text, href, shapeCache: shapeCache)
             return
         }
     }
@@ -228,10 +230,12 @@ class PointAndShoot: WebPageHolder, ObservableObject {
             return
         }
         guard !isTypingOnWebView else { return }
+        var group = group
+        group.updateSelectionPath()
         activeShootGroup = group
 
-        let text = group.text
         if let sourceUrl = self.page.url {
+            let text = group.text
             self.page.addTextToClusteringManager(text, url: sourceUrl)
         }
     }
@@ -255,7 +259,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
             existingGroup.updateTargets(groupId, targets)
             collectedGroups[index] = existingGroup
         } else {
-            let newGroup = ShootGroup(groupId, targets, text, href)
+            let newGroup = ShootGroup(groupId, targets, text, href, shapeCache: shapeCache)
             collectedGroups.append(newGroup)
         }
     }
@@ -366,6 +370,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
         activePointGroup = nil
         activeSelectGroup = nil
         activeShootGroup = nil
+        shapeCache.clear()
         collectedGroups.removeAll()
         dismissedGroups.removeAll()
         shootConfirmationGroup = nil
