@@ -479,12 +479,22 @@ extension BeamObjectManager {
         do {
             try fetchObjects(conflictedObjects) { result in
                 switch result {
-                case .failure(let error): completion(.failure(error))
+                case .failure(let error):
+                    completion(.failure(error))
                 case .success(let fetchedConflictedObjects):
                     switch self.conflictPolicyForSave {
                     case .replace:
-                        do {
 
+                        // When we fetch objects but they have a different encryption key,
+                        // fetchedConflictedObjects will be empty and we don't know what to do with it since we can't
+                        // decode them or view their paste checksum for now
+                        // TODO: fetch remote object checksums and overwrite
+                        guard fetchedConflictedObjects.count == conflictedObjects.count else {
+                            completion(.failure(BeamObjectManagerError.fetchError))
+                            return
+                        }
+
+                        do {
                             let toSaveObjects: [T] = try conflictedObjects.compactMap {
                                 let conflictedObject = $0
 

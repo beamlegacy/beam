@@ -198,17 +198,10 @@ class BeamWindow: NSWindow, NSDraggingDestination {
                 Logger.shared.logError("Saving imported note '\(note.title)' from \(url)", category: .document)
                 note.autoSave()
 
-                let alert = NSAlert()
-                alert.addButton(withTitle: "OK")
-                alert.informativeText = "Note '\(note.title)' was imported succesfully"
-                alert.messageText = "Note Imported"
-                alert.runModal()
+                UserAlert.showMessage(message: "Note Imported",
+                                      informativeText: "Note '\(note.title)' was imported succesfully")
             } catch let error {
-                let alert = NSAlert()
-                alert.addButton(withTitle: "OK")
-                alert.informativeText = "Unable to import '\(url)'"
-                alert.messageText = "Note Not Imported"
-                alert.runModal()
+                UserAlert.showError(message: "Note Not Imported", informativeText: "Unable to import '\(url)'")
                 Logger.shared.logError("Unable to decode dropped BeamNode '\(url)': \(error)", category: .document)
             }
 

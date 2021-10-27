@@ -68,10 +68,7 @@ class OauthController: NSObject, OAuthSwiftURLHandlerType, WKNavigationDelegate 
             OAuthSwift.handle(url: url)
         }
 
-        let alert = NSAlert()
-        alert.alertStyle = .critical
-        alert.messageText = error.localizedDescription
-        alert.runModal()
+        UserAlert.showError(error: error)
     }
 
     private func dismissWebViewController() {
