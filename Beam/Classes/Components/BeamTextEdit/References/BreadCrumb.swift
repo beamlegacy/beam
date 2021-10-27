@@ -248,6 +248,7 @@ class BreadCrumb: Widget {
             self.selectCrumb(self.selectedCrumb == index ? self.crumbChain.count - 1 : index)
         })
         addLayer(chevron)
+        chevron.setAccessibilityIdentifier("breadcrumb_arrow")
         crumbArrowLayers.append(chevron.layer)
     }
 

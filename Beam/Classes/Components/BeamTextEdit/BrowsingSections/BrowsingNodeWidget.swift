@@ -39,9 +39,11 @@ class BrowsingNodeWidget: Widget {
         textLayer.foregroundColor = BeamColor.Editor.icon.cgColor
         textLayer.fontSize = 14
 
-        addLayer(ChevronButton("chevron", open: open, changed: { [unowned self] value in
+        let chevron = ChevronButton("chevron", open: open, changed: { [unowned self] value in
             self.open = value
-        }))
+        })
+        chevron.setAccessibilityIdentifier("browsingNode_arrow")
+        addLayer(chevron)
 
         browsingNode.$children
             .receive(on: DispatchQueue.main)
