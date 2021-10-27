@@ -31,10 +31,10 @@ class ClusteringManagerTests: XCTestCase {
             IndexDocument(id: 3, title: "Richard Gasquet")
         ]
         informations = [
-            TabInformation(url: URL(string: "http://www.rogerfederer.com")!, document: documents[0], textContent: "Roger Federer is the best tennis player ever", cleanedTextContentForClustering: "Roger Federer is the best tennis player ever"),
-            TabInformation(url: URL(string: "https://rafaelnadal.com/en/")!, document: documents[1], textContent: "Rafael Nadal is also pretty good", cleanedTextContentForClustering: "Rafael Nadal is also pretty good"),
-            TabInformation(url: URL(string: "https://novakdjokovic.com/en/")!, document: documents[2], textContent: "Not you", cleanedTextContentForClustering: "Not you"),
-            TabInformation(url: URL(string: "http://www.richardgasquet.net")!, document: documents[3], textContent: "Richard Gasquet has a wonderful one-handed backhand", cleanedTextContentForClustering: "Not you")
+            TabInformation(url: URL(string: "http://www.rogerfederer.com")!, document: documents[0], textContent: "Roger Federer is the best tennis player ever", cleanedTextContentForClustering: ["Roger Federer is the best tennis player ever"]),
+            TabInformation(url: URL(string: "https://rafaelnadal.com/en/")!, document: documents[1], textContent: "Rafael Nadal is also pretty good", cleanedTextContentForClustering: ["Rafael Nadal is also pretty good"]),
+            TabInformation(url: URL(string: "https://novakdjokovic.com/en/")!, document: documents[2], textContent: "Not you", cleanedTextContentForClustering: ["Not you"]),
+            TabInformation(url: URL(string: "http://www.richardgasquet.net")!, document: documents[3], textContent: "Richard Gasquet has a wonderful one-handed backhand", cleanedTextContentForClustering: ["Richard Gasquet has a wonderful one-handed backhand"])
         ]
         notes = [
             BeamNote(title: "Tennis"),
