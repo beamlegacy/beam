@@ -14,6 +14,7 @@ class BaseTest: XCTestCase {
 
     let implicitWaitTimeout = TimeInterval(10)
     let minimumWaitTimeout = TimeInterval(2)
+    let emptyString = ""
     let beamAppInstance = XCUIApplication(bundleIdentifier: "co.beamapp.macos")
     
     override func setUpWithError() throws {
@@ -33,6 +34,15 @@ class BaseTest: XCTestCase {
         }
         super.tearDown()
         terminateAppInstance()
+    }
+    
+    func waitUntiAppIsNotRunning(timeout: TimeInterval = TimeInterval(2)) -> Bool {
+        var count: TimeInterval = 0
+        while isAppRunning() && count < timeout {
+            sleep(1)
+            count += 1
+        }
+        return count < timeout
     }
 
     private func storeScreenshot() {
@@ -66,6 +76,12 @@ class BaseTest: XCTestCase {
         XCTAssertEqual(isSelectedExpected, element.isSelected)
         XCTAssertEqual(isEnabledExpected, element.isEnabled)
         XCTAssertEqual(isHittableExpected, element.isHittable)
+    }
+    
+    @discardableResult
+    func openFirstCardInAllCardsList() -> CardTestView {
+        ShortcutsHelper().shortcutActionInvoke(action: .showAllCards)
+        return AllCardsTestView().openFirstCard()
     }
     
     func testRailPrint(_ text: String) { print(text) }
