@@ -55,9 +55,7 @@ extension BeamWindow {
                     _ = newBeamWindow.state.cmdManager.undo(context: newBeamWindow.state)
                 }
 
-                if let currentTab = newBeamWindow.state.browserTabsManager.currentTab,
-                   newBeamWindow.state.mode != .web {
-                    currentTab.postLoadSetup(state: newBeamWindow.state)
+                if newBeamWindow.state.browserTabsManager.currentTab != nil, newBeamWindow.state.mode != .web {
                     newBeamWindow.state.mode = .web
                 }
 
