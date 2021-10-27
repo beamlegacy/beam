@@ -60,13 +60,19 @@ class APIRequest: NSObject {
                              forHTTPHeaderField: "Authorization")
         }
 
-        let queryStruct = loadQuery(bodyParamsRequest)
+        var queryStruct = loadQuery(bodyParamsRequest)
+
+        // Remove files
+        let files = queryStruct.files
+        queryStruct.files = nil
 
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601withFractionalSeconds
-//        #if DEBUG
+        #if DEBUG
         encoder.outputFormatting = [.prettyPrinted, .withoutEscapingSlashes]
-//        #endif
+        #else
+        encoder.outputFormatting = [.withoutEscapingSlashes]
+        #endif
 
         if let queryData = try? encoder.encode(queryStruct) {
             #if DEBUG_API_1
@@ -86,11 +92,32 @@ class APIRequest: NSObject {
         }
         assert(request.httpBody != nil)
 
-        if let files = bodyParamsRequest.files {
+        if files != nil {
+
+        } else {
 
         }
 
         return request
+    }
+
+    private func createMultipartBody<E: GraphqlParametersProtocol>(_ bodyParamsRequest: E,
+                                                                   files: [GraphqlFileUpload]) -> Data {
+        let body = NSMutableData()
+        let boundary = "Boundary-\(UUID().uuidString)"
+        let lineBreak = "\r\n"
+        let boundaryPrefix = "--\(boundary)\r\n"
+
+        body.appendString(boundaryPrefix)
+        body.appendString("Content-Disposition: form-data; name=\"\(documentName)\"")
+        if let fileNameAndExtension = fileNameAndExtension {
+            body.appendString("; filename=\"\(fileNameAndExtension)\"")
+        }
+        body.appendString("\(lineBreak)")
+        body.appendString("Content-Type: \(mimetype)\(lineBreak)\(lineBreak)")
+        body.append(data)
+
+        return body as Data
     }
 
     // If request contains a filename but no query, load the query from fileName
