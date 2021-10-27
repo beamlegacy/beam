@@ -73,10 +73,7 @@ extension AppDelegate {
             do {
                 try doc.data.write(to: url)
             } catch {
-                let alert = NSAlert()
-                alert.alertStyle = .critical
-                alert.messageText = error.localizedDescription
-                alert.runModal()
+                UserAlert.showError(message: error.localizedDescription)
 
                 return
             }

@@ -7,5 +7,6 @@ query beamObject($id: ID!) {
     createdAt
     updatedAt
     deletedAt
+    privateKeySignature
   }
 }

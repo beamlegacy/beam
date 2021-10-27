@@ -44,6 +44,7 @@ class BeamObject: Codable {
 
     enum BeamObjectError: Error {
         case noData
+        case differentEncryptionKey
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -174,6 +175,11 @@ extension BeamObject {
     func decrypt() throws {
         guard let dataBang = data else { return }
 
+        let currentPrivateKeySignature = try EncryptionManager.shared.privateKey().asString().SHA256()
+        guard privateKeySignature == currentPrivateKeySignature else {
+            throw BeamObjectError.differentEncryptionKey
+        }
+
         do {
             data = try EncryptionManager.shared.decryptData(dataBang)
         } catch DecodingError.dataCorrupted {
@@ -187,7 +193,6 @@ extension BeamObject {
             throw EncryptionManagerError.authenticationFailure
         } catch {
             Logger.shared.logError("\(type(of: error)): \(error) \(error.localizedDescription)", category: .encryption)
-            Logger.shared.logDebug("Encoded string: \(dataBang)", category: .encryption)
             throw error
         }
     }

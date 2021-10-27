@@ -154,9 +154,17 @@ extension BeamObjectRequest {
                             return $0
                         } catch EncryptionManagerError.authenticationFailure {
                             Logger.shared.logError("Can't decrypt \($0)", category: .beamObjectNetwork)
+                        } catch BeamObject.BeamObjectError.differentEncryptionKey {
+                            let privateKeySignature = try EncryptionManager.shared.privateKey().asString().SHA256()
+                            Logger.shared.logError("Can't decrypt beam object, private key \($0.privateKeySignature ?? "-") unavailable. Current private key: \(privateKeySignature).", category: .beamObjectNetwork)
                         }
 
                         return nil
+                    }
+
+                    if decryptedObjects.count < beamObjects.count {
+                        UserAlert.showError(message: "Encryption error",
+                                            informativeText: "\(beamObjects.count - decryptedObjects.count) objects we fetched couldn't be decrypted, please check logs and fill up a bug report")
                     }
 
                     completion(.success(decryptedObjects))
