@@ -580,7 +580,11 @@ extension BeamState: BrowserTabsManagerDelegate {
     }
     func tabsManagerDidChangeCurrentTab(_ currentTab: BrowserTab?) {
         resetDestinationCard()
-        focusOmniBox = false
+        if areTabsVisible(for: browserTabsManager), let tab = currentTab, tab.url == nil {
+            setFocusOmnibox()
+        } else {
+            focusOmniBox = false
+        }
     }
 
     func tabsManagerBrowsingHistoryChanged(canGoBack: Bool, canGoForward: Bool) {

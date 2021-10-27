@@ -77,9 +77,8 @@ struct BrowserTabView: View {
             Group {
                 if let icon = tab.favIcon {
                     let iconSize: CGFloat = tab.isLoading ? 10 : 16
-                    let maskSize: CGFloat = tab.isLoading ? iconSize : iconSize*1.5
                     Image(nsImage: icon).resizable().scaledToFit()
-                        .mask(Circle().fill(Color.black).frame(width: maskSize, height: maskSize))
+                        .cornerRadius(tab.isLoading ? iconSize / 2 : 0)
                         .frame(width: iconSize, height: iconSize)
                 } else {
                     let iconSize: CGFloat = tab.isLoading ? 12 : 16
