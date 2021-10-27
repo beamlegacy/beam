@@ -151,11 +151,11 @@ class ClusteringManager: ObservableObject {
     func addPage(id: UInt64, parentId: UInt64?, value: TabInformation? = nil, newContent: String? = nil) {
         var pageToAdd: Page?
         if let value = value {
-            pageToAdd = Page(id: id, parentId: parentId, title: value.document.title, content: value.cleanedTextContentForClustering)
+            pageToAdd = Page(id: id, parentId: parentId, title: value.document.title, originalContent: value.cleanedTextContentForClustering)
             tabsInfo.append(value)
         } else if let newContent = newContent {
-            pageToAdd = Page(id: id, parentId: nil, title: nil, content: newContent)
-            // TODO: Shold we bother changing the content in tabsInfo?
+            pageToAdd = Page(id: id, parentId: nil, title: nil, cleanedContent: newContent)
+            // TODO: Should we bother changing the content in tabsInfo?
         }
         isClustering = true
         var ranking: [UInt64]?
