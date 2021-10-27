@@ -457,10 +457,6 @@ import Sentry
 
         setup(data: data)
         mode = try container.decode(Mode.self, forKey: .mode)
-
-        for tab in browserTabsManager.tabs {
-            tab.postLoadSetup(state: self)
-        }
     }
 
     func encode(to encoder: Encoder) throws {

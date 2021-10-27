@@ -218,7 +218,7 @@ extension BeamWindow: NSWindowDelegate {
             window.state.windowIsMain = false
         }
         guard state.mode == .web else { return }
-        state.browserTabsManager.currentTab?.startReading(withState: state)
+        state.browserTabsManager.currentTab?.tabDidAppear(withState: state)
     }
 
     func windowDidMove(_ notification: Notification) {
@@ -252,7 +252,7 @@ extension BeamWindow: NSWindowDelegate {
     }
 
     func windowDidDeminiaturize(_ notification: Notification) {
-        if isMainWindow { state.browserTabsManager.currentTab?.startReading(withState: state) }
+        if isMainWindow { state.browserTabsManager.currentTab?.tabDidAppear(withState: state) }
     }
 
 }
