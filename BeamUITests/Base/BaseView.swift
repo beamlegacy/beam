@@ -127,8 +127,6 @@ class BaseView {
     @discardableResult
     func openWebsite(_ url: String) -> WebTestView {
         _ = populateOmnibarWith(url)
-        self.typeKeyboardKey(.space) //trick to get rid of Google Search autofill on CI
-        self.typeKeyboardKey(.delete)
         self.typeKeyboardKey(.enter)
         return WebTestView()
     }
