@@ -132,7 +132,8 @@ class AutocompleteManager: ObservableObject {
             guard let host = result.url?.minimizedHost ?? URL(string: result.text)?.minimizedHost else { return false }
             return result.text.lowercased().contains(host)
         case .autocomplete:
-            return autocompleteResults.count == 2 && result.text == searchQuery // 1 search suggestion + 1 new card
+            return autocompleteResults.count == 2 // 1 search engine result + 1 create card
+            && !searchQuery.mayBeURL && result.text == searchQuery
         default:
             return false
         }
