@@ -74,8 +74,11 @@ class CalendarPickerFormatterView: FormatterView {
 
     override func animateOnDisappear(completionHandler: (() -> Void)? = nil) {
         super.animateOnDisappear()
+        if subviewModel.visible {
+            onDismiss?(dateHasChanged)
+        }
         subviewModel.visible = false
-        onDismiss?(dateHasChanged)
+
         DispatchQueue.main.asyncAfter(deadline: .now() + FormatterView.disappearAnimationDuration) {
             completionHandler?()
         }
