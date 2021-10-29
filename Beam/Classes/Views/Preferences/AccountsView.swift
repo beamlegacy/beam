@@ -13,8 +13,13 @@ The main view of “Accounts” preference pane.
 
 // swiftlint:disable:next type_body_length
 struct AccountsView: View {
-    @State private var email: String = ""
+    #if DEBUG
+    @State private var email: String = Persistence.Authentication.email ?? ""
+    @State private var password: String = Persistence.Authentication.password ?? ""
+    #else
+    @State private var email: String = Persistence.Authentication.email ?? ""
     @State private var password: String = ""
+    #endif
     @State private var enableLogging: Bool = true
     @State private var loggedIn: Bool = AccountManager().loggedIn
     @State private var errorMessage: Error!
@@ -427,8 +432,9 @@ struct AccountsView: View {
             guard response == .alertFirstButtonReturn else { return }
             self.identities = []
             AccountManager.logout()
-            email = ""
+            #if !DEBUG
             password = ""
+            #endif
             loggedIn = AccountManager().loggedIn
         }
     }
