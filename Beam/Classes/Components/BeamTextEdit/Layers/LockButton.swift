@@ -45,8 +45,8 @@ class LockButton: ButtonLayer {
 
         updateLock()
 
-        setAccessibilityLabel("disclosure triangle")
-        setAccessibilityRole(.disclosureTriangle)
+        setAccessibilityLabel("lock button")
+        setAccessibilityRole(.button)
         setAccessibilityDisclosed(locked)
     }
 
