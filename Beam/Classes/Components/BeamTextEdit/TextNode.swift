@@ -883,7 +883,14 @@ public class TextNode: ElementNode {
         guard line >= 0 else { return nil }
         let l = textFrame.lines[line]
         let point = NSPoint(x: point.x - contentsPadding.left, y: point.y - contentsPadding.top)
-        guard l.frame.contains(point) else { return nil } // point is outside the line
+        var lineFrame = l.frame
+        if line > 0 && line < textFrame.lines.count { // add padding for inbetween lines
+            lineFrame = lineFrame.insetBy(dx: 0, dy: -fontSize)
+            if line == textFrame.lines.count - 1 { // add only top padding for last line
+                lineFrame.size.height -= fontSize
+            }
+        }
+        guard lineFrame.contains(point)  else { return nil } // point is outside the line
 
         let displayIndex = l.stringIndexFor(position: point)
         if !limitToTextString {
