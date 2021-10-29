@@ -398,6 +398,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         preferencesWindowController.show()
     }
 
+    func openPreferencesWindow(to prefPane: Preferences.PaneIdentifier) {
+        preferencesWindowController.show(preferencePane: prefPane)
+    }
+
     func closePreferencesWindow() {
         preferencesWindowController.close()
     }

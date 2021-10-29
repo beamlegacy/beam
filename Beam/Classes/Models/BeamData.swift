@@ -10,6 +10,7 @@ import BeamCore
 import AutoUpdate
 import ZIPFoundation
 
+// swiftlint:disable file_length
 public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var _todaysNote: BeamNote?
     var todaysNote: BeamNote {
@@ -37,6 +38,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var cookies: HTTPCookieStorage
     var documentManager: DocumentManager
     var downloadManager: BeamDownloadManager = BeamDownloadManager()
+    var calendarManager: CalendarManager = CalendarManager()
     var sessionLinkRanker = SessionLinkRanker()
     var clusteringManager: ClusteringManager
     var clusteringOrphanedUrlManager: ClusteringOrphanedUrlManager
@@ -166,7 +168,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         }
     }
 
-    // swiftlint:disable:next function_body_length
+    // swiftlint:disable:next function_body_length cyclomatic_complexity
     private func setupSubscribers() {
         $lastChangedElement.sink { [weak self] element in
             guard let self = self, let element = element else { return }
@@ -214,6 +216,18 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
 
         downloadManager.$downloads.sink { [weak self] _ in
             self?.objectWillChange.send()
+        }.store(in: &scope)
+
+        calendarManager.$connectedSources.sink { [weak self] _ in
+            guard let self = self else { return }
+            self.reloadAllEvents()
+        }.store(in: &scope)
+
+        calendarManager.$didAllowSource.sink { [weak self] didAllowSource in
+            guard let self = self else { return }
+            if didAllowSource {
+                self.reloadAllEvents()
+            }
         }.store(in: &scope)
 
         NotificationCenter.default.addObserver(self, selector: #selector(calendarDayDidChange(notification:)),
@@ -264,13 +278,19 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         observeJournal(note: note)
         journal.append(note)
         _todaysNote = note
+        loadEvents(for: note.id, for: BeamDate.now)
         updateJournal(with: 2, and: journal.count)
     }
 
     func updateJournal(with limit: Int = 0, and fetchOffset: Int = 0) {
         isFetching = true
         let _journal = BeamNote.fetchNotesWithType(documentManager, type: .journal, limit, fetchOffset).compactMap { $0.type.isJournal && !$0.type.isFutureJournal ? $0 : nil }
-        for note in _journal { observeJournal(note: note) }
+        for note in _journal {
+            observeJournal(note: note)
+            if let journalDate = note.type.journalDate, !note.isEntireNoteEmpty() {
+                loadEvents(for: note.id, for: journalDate)
+            }
+        }
         journal.append(contentsOf: _journal)
     }
 
@@ -279,9 +299,31 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     }
 
     func reloadJournal() {
-        journal = []
+        journal.removeAll()
+        calendarManager.meetingsForNote.removeAll()
         setupJournal()
         if newDay { newDay.toggle() }
+    }
+
+    func reloadAllEvents() {
+        if calendarManager.isConnected(calendarService: .googleCalendar) {
+            for journal in journal {
+                if let journalDate = journal.type.journalDate, !journal.isEntireNoteEmpty() || journal.isTodaysNote {
+                    loadEvents(for: journal.id, for: journalDate)
+                }
+            }
+        }
+    }
+
+    private func loadEvents(for noteUuid: UUID, for journalDate: Date) {
+        if calendarManager.isConnected(calendarService: .googleCalendar) {
+            self.calendarManager.requestMeetings(for: journalDate, onlyToday: true) { meetings in
+                guard let oldMeetings = self.calendarManager.meetingsForNote[noteUuid], oldMeetings == meetings else {
+                    self.calendarManager.meetingsForNote[noteUuid] = meetings
+                    return
+                }
+            }
+        }
     }
 
     public func cookiesDidChange(in cookieStore: WKHTTPCookieStore) {

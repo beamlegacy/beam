@@ -257,7 +257,7 @@ extension BeamTextEdit {
                 return
             }
 
-            let model = MeetingModalView.ViewModel(meetingName: meeting.name,
+            let model = MeetingModalView.ViewModel(meetingName: meeting.name, startTime: meeting.startTime,
                                                    attendees: meeting.attendees,
                                                    onFinish: { [weak self, weak node] meeting in
                                                     guard let node = node else { return }
