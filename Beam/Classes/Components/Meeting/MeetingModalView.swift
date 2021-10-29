@@ -8,14 +8,20 @@
 import SwiftUI
 import BeamCore
 
-struct Meeting: Identifiable {
+struct Meeting: Identifiable, Equatable {
+
     var id: UUID = UUID()
     var name: String
+    var startTime: Date
     var date: Date = BeamDate.now
     var attendees: [Attendee]
     var linkCards: Bool = true
 
-    class Attendee: Identifiable {
+    static func == (lhs: Meeting, rhs: Meeting) -> Bool {
+        return lhs.name == rhs.name && lhs.startTime == rhs.startTime && lhs.attendees == rhs.attendees
+    }
+
+    class Attendee: Identifiable, Equatable {
         var id: UUID = UUID()
 
         var email: String
@@ -24,6 +30,15 @@ struct Meeting: Identifiable {
         init(email: String, name: String) {
             self.email = email
             self.name = name
+
+            if let atChar = self.email.range(of: "@"), self.name.isEmpty {
+                self.name = String(self.email.prefix(upTo: atChar.lowerBound))
+                self.name = self.name.prefix(1).capitalized + self.name.dropFirst()
+            }
+        }
+
+        static func == (lhs: Attendee, rhs: Attendee) -> Bool {
+            return lhs.name == rhs.name && lhs.email == rhs.email
         }
     }
 }
@@ -205,8 +220,10 @@ struct MeetingModalView: View {
 extension MeetingModalView {
 
     class ViewModel: ObservableObject {
-        @Published fileprivate var attendees: [Meeting.Attendee]
         @Published fileprivate var meetingName: String
+        @Published fileprivate var startTime: Date
+        @Published fileprivate var attendees: [Meeting.Attendee]
+        @Published fileprivate var additionalAttendee = Meeting.Attendee(email: "", name: "")
         @Published fileprivate var linkCards: Bool = true
 
         private var onFinish: ((Meeting?) -> Void)?
@@ -215,13 +232,10 @@ extension MeetingModalView {
             true
         }
 
-        init(meetingName: String, attendees: [Meeting.Attendee], onFinish: ((Meeting?) -> Void)? = nil) {
+        init(meetingName: String, startTime: Date, attendees: [Meeting.Attendee], onFinish: ((Meeting?) -> Void)? = nil) {
             self.meetingName = meetingName
-            if attendees.isEmpty {
-                self.attendees = [.init(email: "", name: "")]
-            } else {
-                self.attendees = attendees
-            }
+            self.startTime = startTime
+            self.attendees = attendees
             self.onFinish = onFinish
         }
 
@@ -235,8 +249,7 @@ extension MeetingModalView {
 
         func addMeeting() {
             guard !meetingName.isEmpty else { return }
-            let onlyFilledAttendees = attendees.filter { !$0.email.isEmpty || !$0.name.isEmpty }
-            let meeting = Meeting(name: meetingName, attendees: onlyFilledAttendees, linkCards: linkCards)
+            let meeting = Meeting(name: meetingName, startTime: startTime, attendees: attendees, linkCards: linkCards)
             onFinish?(meeting)
         }
 
@@ -246,7 +259,7 @@ extension MeetingModalView {
     }
 }
 struct MeetingModalView_Previews: PreviewProvider {
-    static let model = MeetingModalView.ViewModel(meetingName: "Some Meeting Name", attendees: [
+    static let model = MeetingModalView.ViewModel(meetingName: "Some Meeting Name", startTime: BeamDate.now, attendees: [
         Meeting.Attendee(email: "stef@beamapp.co", name: "Stef"),
         Meeting.Attendee(email: "luis@beamapp.co", name: "Luis"),
         Meeting.Attendee(email: "remi@beamapp.co", name: "Remi")

@@ -83,6 +83,7 @@ public extension CALayer {
             note.updateNoteNamesInInternalLinks(recursive: true)
             updateRoot(with: note)
             searchViewModel?.search()
+            updateCalendarLeadingGutter(for: note.id)
         }
     }
 
@@ -402,6 +403,7 @@ public extension CALayer {
             self.updateCardHearderLayer(rect)
             rootNode?.setLayout(rect)
             self.updateTrailingGutterLayout(textRect: rect)
+            self.updateLeadingGutterLayout(textRect: rect)
         }
         if isResizing || shouldDisableAnimationAtNextLayout {
             shouldDisableAnimationAtNextLayout = false

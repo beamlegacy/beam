@@ -33,12 +33,12 @@ class BeamUITestsMenuGenerator {
         case .cleanDownloads: cleanDownloadFolder()
         case .omnibarFillHistory: fillHistory()
         case .signInWithTestAccount: signInWithTestAccount()
-        case .testMeetingModal: testAddMeeting()
         default: break
         }
     }
 
     var documentManager = DocumentManager()
+    var googleCalendarService = GoogleCalendarService()
 
     private func logout() {
         AccountManager.logout()
@@ -191,29 +191,4 @@ class BeamUITestsMenuGenerator {
             }
         }
     }
-
-    private func addMeeting(_ meeting: Meeting, to note: BeamNote) {
-        guard let documentManager = AppDelegate.main.window?.state.data.documentManager else { return }
-        let text = meeting.buildBeamText(documentManager: documentManager)
-        let e = BeamElement(text)
-        note.insert(e, after: note.children.last)
-    }
-
-    private func testAddMeeting() {
-        let state = AppDelegate.main.window?.state
-        let model = MeetingModalView.ViewModel(meetingName: "Meeting Integration",
-                                               attendees: [
-                                                Meeting.Attendee(email: "luis@beamapp.co", name: "Luis Darmon"),
-                                                Meeting.Attendee(email: "dom@beamapp.co", name: "Dom Leca"),
-                                                Meeting.Attendee(email: "remi@beamapp.co", name: "Remi Santos")
-                                               ],
-                                               onFinish: { [weak self] meeting in
-                                                if let meeting = meeting, let note = state?.data.todaysNote {
-                                                    self?.addMeeting(meeting, to: note)
-                                                }
-                                                state?.overlayViewModel.dismissCurrentModal()
-                                               })
-        state?.overlayViewModel.presentModal(MeetingModalView(viewModel: model))
-    }
-
 }
