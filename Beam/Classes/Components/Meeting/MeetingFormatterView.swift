@@ -224,25 +224,26 @@ class MeetingFormatterView: FormatterView {
 extension MeetingFormatterView {
 
     private func selectedMeeting(for date: Date) -> Meeting {
-        Meeting(id: selectedMeetingUUID, name: "Yeah sure", date: date, attendees: [])
+        Meeting(id: selectedMeetingUUID, name: "Yeah sure", startTime: BeamDate.now, date: date, attendees: [])
     }
+
     private func fakeResults(for date: Date) -> [MeetingsForDay] { [
         MeetingsForDay(date: date, meetings: [
             selectedMeeting(for: date.addingTimeInterval(2000)),
-            Meeting(name: "Yeah sure \(calendar.dateComponents([.day], from: date).day!)-\(calendar.dateComponents([.month], from: date).month!)", date: date.addingTimeInterval(6000), attendees: []),
-            Meeting(name: "Ouiiiii", date: date.addingTimeInterval(20000), attendees: [])
+            Meeting(name: "Yeah sure \(calendar.dateComponents([.day], from: date).day!)-\(calendar.dateComponents([.month], from: date).month!)", startTime: BeamDate.now, date: date.addingTimeInterval(6000), attendees: []),
+            Meeting(name: "Ouiiiii", startTime: BeamDate.now, date: BeamDate.now.addingTimeInterval(20000), attendees: [])
         ])
     ] }
 
     private var searchFakeResults: [MeetingsForDay] { [
         MeetingsForDay(date: BeamDate.now.addingTimeInterval(150000), meetings: [
-            Meeting(name: "Malaga retreat", date: BeamDate.now.addingTimeInterval(10000), attendees: [
+            Meeting(name: "Malaga retreat", startTime: BeamDate.now, date: BeamDate.now.addingTimeInterval(10000), attendees: [
                 .init(email: "john@beamapp.co", name: "John Begood"),
                 .init(email: "dam@beamapp.co", name: "Dam Dam")
             ])
         ]),
         MeetingsForDay(date: BeamDate.now.addingTimeInterval(300000), meetings: [
-            Meeting(name: "Something in the future", date: BeamDate.now.addingTimeInterval(150000), attendees: [])
+            Meeting(name: "Something in the future", startTime: BeamDate.now, date: BeamDate.now.addingTimeInterval(150000), attendees: [])
         ])
     ] }
 }

@@ -48,6 +48,7 @@ public enum LogCategory: String, CaseIterable {
     case topDomain
     case browsingTreeSender
     case notePublishing
+    case eventCalendar
     case favIcon
     case marker
     case sentry
