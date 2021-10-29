@@ -30,7 +30,8 @@ class EditorShortcutsTests: BaseTest {
         
         testRailPrint("Then I see \(searchWord) link as a first note")
         XCTAssertEqual(cardView.getNumberOfVisibleNotes(), 1)
-        XCTAssertTrue(cardView.getCardNoteValueByIndex(0) == searchWord + " - Google Search" || cardView.getCardNoteValueByIndex(0) == "https://www.google.com/search?q=\(searchWord)&client=safari")
+        XCTAssertTrue(cardView.getCardNoteValueByIndex(0) == searchWord + " - Google Search" ||
+                        cardView.getCardNoteValueByIndex(0) == searchWord + " - Recherche Google" || cardView.getCardNoteValueByIndex(0) == "https://www.google.com/search?q=\(searchWord)&client=safari")
         cardView.getCardNoteElementByIndex(0).coordinate(withNormalizedOffset: CGVector(dx: 0.015, dy: 0.5)).tap()
         
         testRailPrint("Then I'm redirected to a new tab and the card has not beed changed")
