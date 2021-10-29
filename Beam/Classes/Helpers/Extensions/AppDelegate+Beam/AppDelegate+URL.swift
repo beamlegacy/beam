@@ -94,12 +94,18 @@ extension AppDelegate {
         if components.host != Configuration.publicHostname {
             guard let url = components.url else { return false }
             Logger.shared.logDebug("Opened external URL: \(url.absoluteString)", category: .general)
-            _ = window.state.createTab(withURL: url, originalQuery: url.absoluteString)
             NSApp.activate(ignoringOtherApps: true)
             if window.isMiniaturized {
                 window.deminiaturize(nil)
             }
             window.makeKeyAndOrderFront(nil)
+
+            let tab = window.state.createTab(withURL: url, originalQuery: url.absoluteString)
+
+            // We need to wait for a render cycle before asking the webView to become first responder
+            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(16)) {
+                tab.webviewWindow?.makeFirstResponder(tab.webView)
+            }
             return true
         }
 
