@@ -14,7 +14,6 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
     case resizeSquare1000 = "Resize Window Square"
     case enableBrowsingSessionCollection = "Enable BrowsingSession Collect"
     case disableBrowsingSessionCollection = "Disable BrowsingSession Collect"
-    case testMeetingModal = "Test Add Meeting"
 
     case separatorB
     // Load HTML Page
@@ -53,8 +52,6 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
 
     var shortcut: (key: String, modifiers: NSEvent.ModifierFlags)? {
         switch self {
-        case .testMeetingModal:
-            return (key: "m", modifiers: [.command, .shift])
         default:
             return nil
         }

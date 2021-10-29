@@ -4,7 +4,7 @@ import BeamCore
 import OAuthSwift
 
 let AccountsPreferenceViewController: PreferencePane = PreferencesPaneBuilder.build(identifier: .accounts, title: "Account", imageName: "preferences-account") {
-    AccountsView()
+    AccountsView(googleCalendarNeedsPermission: AppDelegate.main.data.calendarManager.connectedSources.first(where: {$0.name == CalendarServices.googleCalendar.rawValue})?.inNeedOfPermission ?? true)
 }
 
 /*
@@ -20,6 +20,7 @@ struct AccountsView: View {
     @State private var errorMessage: Error!
     @State private var loading: Bool = false
     @State private var identities: [IdentityType] = []
+    @State var googleCalendarNeedsPermission: Bool
 
     @State private var showingChangeEmailSheet: Bool = false
     @State private var showingChangePasswordSheet: Bool = false
@@ -110,7 +111,21 @@ struct AccountsView: View {
                 } content: {
                     VStack(alignment: .leading) {
                         if let googleIdendity = identities.first(where: {$0.provider == "google"}) {
-                            disconnectButton(googleIdendity)
+                            HStack {
+                                disconnectButton(googleIdendity)
+                                if googleCalendarNeedsPermission {
+                                    AskGooglePermission
+                                }
+                            }
+                            if googleCalendarNeedsPermission {
+                                Text("Click on the Give Permissions button to give Beam access to your Google Calendar & Contacts.")
+                                    .lineLimit(2)
+                                    .fixedSize(horizontal: false, vertical: true)
+                                    .multilineTextAlignment(.leading)
+                                    .font(BeamFont.regular(size: 11).swiftUI)
+                                    .foregroundColor(BeamColor.Corduroy.swiftUI)
+                                    .frame(width: 354, height: 26, alignment: .leading)
+                            }
                         } else {
                             GoogleSignInButton
                         }
@@ -285,9 +300,21 @@ struct AccountsView: View {
             loggedIn = AccountManager().loggedIn
             fetchIdentities()
             loading = false
+            AppDelegate.main.data.calendarManager.connect(calendarService: .googleCalendar)
         }, onFailure: {
             loading = false
         }).disabled(loading)
+    }
+
+    private var AskGooglePermission: some View {
+        Button {
+            AppDelegate.main.data.calendarManager.requestAccess(from: .googleCalendar) { isConnected in
+                // TODO: Handle error with alert maybe
+                googleCalendarNeedsPermission = !isConnected
+            }
+        } label: {
+            Text("Give Permissions...")
+        }
     }
 
     private var GithubSignInButton: some View {
@@ -390,7 +417,12 @@ struct AccountsView: View {
 
         return AnyView(Button(action: {
             IdentityRequest().delete(id).then { _ in
+                if identity.provider == IdentityRequest.Provider.google.rawValue {
+                    Persistence.Authentication.googleAccessToken = nil
+                    Persistence.Authentication.googleRefreshToken = nil
+                }
                 self.fetchIdentities()
+                AppDelegate.main.data.calendarManager.disconnect(calendarService: .googleCalendar)
             }
         }, label: {
             if let provider = identity.provider {
@@ -489,7 +521,9 @@ struct AccountCredentialsView: View {
 
 struct AccountsView_Previews: PreviewProvider {
     static var previews: some View {
-        AccountsView()
+        AccountsView(googleCalendarNeedsPermission: true)
+        AccountsView(googleCalendarNeedsPermission: false)
+
     }
     // swiftlint:disable:next file_length
 }

@@ -55,6 +55,11 @@ struct OauthButton: View {
             case .success(let (credential, _, _)):
                 Logger.shared.logDebug("\(type.rawValue) Token: \(credential.oauthToken)", category: .network)
 
+                if type.rawValue == IdentityRequest.Provider.google.rawValue {
+                    Persistence.Authentication.googleAccessToken = credential.oauthToken
+                    Persistence.Authentication.googleRefreshToken = credential.oauthRefreshToken
+                }
+
                 switch buttonType {
                 case .connect:
                     IdentityRequest().create(credential.oauthToken, type).then { _ in
