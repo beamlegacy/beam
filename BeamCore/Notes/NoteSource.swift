@@ -21,7 +21,7 @@ public struct NoteSource: Codable {
         case sessionId
     }
 
-    public let urlId: UInt64
+    public let urlId: UUID
     public let addedAt: Date
     public let type: SourceType
     public var sessionId: UUID?
@@ -42,23 +42,23 @@ public class NoteSources: Codable {
     enum CodingKeys: CodingKey {
         case sources
     }
-    private var sources: [UInt64: NoteSource]
+    private var sources: [UUID: NoteSource]
     @Published var changed: Bool = false
 
     init() {
-        sources = [UInt64: NoteSource]()
+        sources = [UUID: NoteSource]()
     }
     public var count: Int { sources.count }
-    public var urlIds: [UInt64] { Array(sources.keys) }
+    public var urlIds: [UUID] { Array(sources.keys) }
 
-    func get(urlId: UInt64) -> NoteSource? {
+    func get(urlId: UUID) -> NoteSource? {
         return sources[urlId]
     }
     public func getAll() -> [NoteSource] {
         return Array(sources.values)
     }
 
-    public func add(urlId: UInt64, noteId: UUID, type: NoteSource.SourceType, date: Date = BeamDate.now, sessionId: UUID, activeSources: ActiveSources? = nil) {
+    public func add(urlId: UUID, noteId: UUID, type: NoteSource.SourceType, date: Date = BeamDate.now, sessionId: UUID, activeSources: ActiveSources? = nil) {
         let sourceToAdd = NoteSource(urlId: urlId, addedAt: date, type: type, sessionId: sessionId)
         switch type {
         case .suggestion: sources[urlId] = sources[urlId] ?? sourceToAdd
@@ -75,7 +75,7 @@ public class NoteSources: Codable {
     }
 
     // if sessionId is not nil, removes source only if its session id matches
-    public func remove(urlId: UInt64, noteId: UUID, isUserSourceProtected: Bool = true, sessionId: UUID? = nil, activeSources: ActiveSources? = nil) {
+    public func remove(urlId: UUID, noteId: UUID, isUserSourceProtected: Bool = true, sessionId: UUID? = nil, activeSources: ActiveSources? = nil) {
         guard let source = sources[urlId] else { return }
         if source.type == .user {
             if isUserSourceProtected {

@@ -98,7 +98,6 @@ class BeamUITestsMenuGenerator {
         DatabaseManager().deleteAll { _ in }
         let data = AppDelegate.main.window?.state.data
         try? LinkStore.shared.deleteAll()
-        data?.linkManager.deleteAllLinks()
         try? GRDBDatabase.shared.clear()
         data?.saveData()
     }
@@ -165,16 +164,16 @@ class BeamUITestsMenuGenerator {
     }
 
     private func fillHistory(longTitle: Bool = false) {
-        addPageToHistory(url: "https://fr.wikipedia.org/wiki/Hello_world", title: "Hello world", id: 1)
+        addPageToHistory(url: "https://fr.wikipedia.org/wiki/Hello_world", title: "Hello world", id: UUID())
         addPageToHistory(url: "https://en.wikipedia.org/wiki/Hubert_Blaine_Wolfeschlegelsteinhausenbergerdorff_Sr.",
-                         title: "Hubert Blaine Wolfeschlegelsteinhausenbergerdorff Sr.", id: 2)
-        addPageToHistory(url: "https://www.google.com/search?q=Beam%20the%20best%20browser&client=safari", title: "Beam the best browser", id: 3)
+                         title: "Hubert Blaine Wolfeschlegelsteinhausenbergerdorff Sr.", id: UUID())
+        addPageToHistory(url: "https://www.google.com/search?q=Beam%20the%20best%20browser&client=safari", title: "Beam the best browser", id: UUID())
     }
 
-    private func addPageToHistory(url: String, title: String, id: Int) {
+    private func addPageToHistory(url: String, title: String, id: UUID) {
         _ = IndexDocument(source: url, title: title, contents: title)
-        try? GRDBDatabase.shared.insertHistoryUrl(urlId: UInt64(id), url: url, title: title, content: title)
-        var frecency = FrecencyUrlRecord(urlId: UInt64(id), lastAccessAt: BeamDate.now, frecencyScore: 1, frecencySortScore: 1, frecencyKey: AutocompleteManager.urlFrecencyParamKey)
+        try? GRDBDatabase.shared.insertHistoryUrl(urlId: id, url: url, title: title, content: title)
+        var frecency = FrecencyUrlRecord(urlId: id, lastAccessAt: BeamDate.now, frecencyScore: 1, frecencySortScore: 1, frecencyKey: AutocompleteManager.urlFrecencyParamKey)
         try? GRDBDatabase.shared.saveFrecencyUrl(&frecency)
     }
 

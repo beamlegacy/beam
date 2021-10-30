@@ -161,9 +161,13 @@ public class BeamNote: BeamElement {
 
         try super.init(from: decoder)
         if container.contains(.sources) {
-            sources = try container.decode(NoteSources.self, forKey: .sources)
-            setupSourceObserver()
+            do {
+                sources = try container.decode(NoteSources.self, forKey: .sources)
+            } catch {
+                Logger.shared.logWarning("⚠️ Couldn't decode sources for note id: \(id) - title: \(title)", category: .document)
+            }
         }
+        setupSourceObserver()
 
         if let oldType = try? container.decode(NoteType.self, forKey: .type) {
             type = BeamNoteType.fromOldType(oldType, title: ttl, fallbackDate: creationDate)
