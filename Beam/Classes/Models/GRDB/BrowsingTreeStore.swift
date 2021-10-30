@@ -123,9 +123,9 @@ class BrowsingTreeStoreManager: BrowsingTreeStoreProtocol {
         }
     }
     func save(browsingTree: BrowsingTree, appSessionId: UUID? = nil, completion:  @escaping () -> Void) {
-        DispatchQueue.global().async {
+        DispatchQueue.global().async { [weak self] in
             do {
-                try BrowsingTreeStoreManager.shared.save(browsingTree: browsingTree, appSessionId: appSessionId)
+                try self?.save(browsingTree: browsingTree, appSessionId: appSessionId)
                 completion()
             } catch {
                 Logger.shared.logError("Couldn't save tree with id: \(browsingTree.root.id) in db", category: .database)
@@ -169,11 +169,32 @@ class BrowsingTreeStoreManager: BrowsingTreeStoreProtocol {
     func browsingTreeExists(rootId: UUID) throws -> Bool {
         try db.browsingTreeExists(rootId: rootId)
     }
+
     var countBrowsingTrees: Int? {
         db.countBrowsingTrees
     }
+
     func clearBrowsingTrees() throws {
         try db.clearBrowsingTrees()
+    }
+
+    func remoteDeleteAll(_ completion: ((Result<Bool, Error>) -> Void)? = nil) {
+        Logger.shared.logInfo("Deleting browsing trees from API", category: .browsingTreeNetwork)
+        do {
+            try BrowsingTreeStoreManager.shared.deleteAllFromBeamObjectAPI { result in
+                switch result {
+                case .failure(let error):
+                    Logger.shared.logError(error.localizedDescription, category: .browsingTreeNetwork)
+                    completion?(.failure(error))
+                case .success:
+                    Logger.shared.logInfo("Succesfully deleted browsing trees from API", category: .browsingTreeNetwork)
+                    completion?(.success(true))
+                }
+            }
+        } catch {
+            Logger.shared.logError(error.localizedDescription, category: .database)
+            completion?(.failure(error))
+        }
     }
 }
 enum BrowsingTreeStoreManagerError: Error, Equatable {

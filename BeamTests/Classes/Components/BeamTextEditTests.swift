@@ -13,6 +13,7 @@ class BeamTextEditTests: XCTestCase {
     var note: BeamNote!
     var data: BeamData!
     var editor: BeamTextEdit!
+    let previousNetworkEnabled = Configuration.networkEnabled
 
     override func setUpWithError() throws {
         try super.setUpWithError()
@@ -22,10 +23,12 @@ class BeamTextEditTests: XCTestCase {
         editor = BeamTextEdit(root: note, journalMode: false)
         editor.data = data
         editor.prepareRoot()
+        Configuration.networkEnabled = false
     }
 
     override func tearDownWithError() throws {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
+        Configuration.networkEnabled = previousNetworkEnabled
     }
 
     func testCopyPasteUrls() throws {

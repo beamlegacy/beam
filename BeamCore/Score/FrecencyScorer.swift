@@ -64,17 +64,13 @@ public let FrecencyParameters: [FrecencyParamKey: FrecencyParam] = [
     .note30d1: FrecencyParam(key: .note30d1, eventWeights: noteEventWeights[1], halfLife: halfLife)
 ]
 
-public protocol FrecencyScoreIdKey {}
-extension UInt64: FrecencyScoreIdKey {}
-extension UUID: FrecencyScoreIdKey {}
-
 public struct FrecencyScore {
-    public let id: FrecencyScoreIdKey
+    public let id: UUID
     public var lastTimestamp: Date
     public var lastScore: Float
     public var sortValue: Float
 
-    public init(id: FrecencyScoreIdKey, lastTimestamp: Date, lastScore: Float, sortValue: Float) {
+    public init(id: UUID, lastTimestamp: Date, lastScore: Float, sortValue: Float) {
         self.id = id
         self.lastTimestamp = lastTimestamp
         self.lastScore = lastScore
@@ -83,12 +79,12 @@ public struct FrecencyScore {
 }
 
 public protocol FrecencyStorage {
-    func fetchOne(id: FrecencyScoreIdKey, paramKey: FrecencyParamKey) throws -> FrecencyScore?
+    func fetchOne(id: UUID, paramKey: FrecencyParamKey) throws -> FrecencyScore?
     func save(score: FrecencyScore, paramKey: FrecencyParamKey) throws
 }
 
 public protocol FrecencyScorer {
-    func update(id: FrecencyScoreIdKey, value: Float, eventType: FrecencyEventType, date: Date, paramKey: FrecencyParamKey)
+    func update(id: UUID, value: Float, eventType: FrecencyEventType, date: Date, paramKey: FrecencyParamKey)
 }
 
 public class ExponentialFrecencyScorer: FrecencyScorer {
@@ -104,7 +100,7 @@ public class ExponentialFrecencyScorer: FrecencyScorer {
         return param.eventWeights[eventType] ?? 1
     }
 
-    private func updatedScore(id: FrecencyScoreIdKey, value: Float, date: Date, param: FrecencyParam) -> FrecencyScore {
+    private func updatedScore(id: UUID, value: Float, date: Date, param: FrecencyParam) -> FrecencyScore {
         guard let score = try? storage.fetchOne(id: id, paramKey: param.key) else {
             let sortValue: Float = scoreSortValue(score: value, timeStamp: date, halfLife: param.halfLife)
             return  FrecencyScore(id: id, lastTimestamp: date, lastScore: value, sortValue: sortValue)
@@ -115,7 +111,7 @@ public class ExponentialFrecencyScorer: FrecencyScorer {
         return FrecencyScore(id: id, lastTimestamp: date, lastScore: updatedValue, sortValue: sortValue)
     }
 
-    public func update(id: FrecencyScoreIdKey, value: Float, eventType: FrecencyEventType, date: Date, paramKey: FrecencyParamKey) {
+    public func update(id: UUID, value: Float, eventType: FrecencyEventType, date: Date, paramKey: FrecencyParamKey) {
         guard let param = params[paramKey] else {return}
         let weightedValue = value * eventWeight(eventType: eventType, param: param)
         let score = updatedScore(id: id, value: weightedValue, date: date, param: param)

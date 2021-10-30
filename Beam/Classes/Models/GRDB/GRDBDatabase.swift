@@ -157,7 +157,51 @@ struct GRDBDatabase {
                 t.column("deletedAt", .datetime)
                 t.column("previousChecksum", .text)
             }
+        }
+        migrator.registerMigration("deleteLegacyUrlIdRelatedRows") { db in
+            try db.dropFTS4SynchronizationTriggers(forTable: "HistoryUrlRecord")
+            try db.drop(table: "historyUrlRecord")
+            try db.drop(table: "historyUrlContent")
+            try db.drop(table: "frecencyUrlRecord")
+            try db.drop(table: "longTermUrlScore")
 
+            try db.create(table: "historyUrlRecord", ifNotExists: true) { t in
+                // LinkStore URL id
+                t.column("urlId", .text).primaryKey()
+                t.column("url", .text)
+                t.column("last_visited_at", .date)
+                t.column("title", .text)
+                t.column("content", .text)
+            }
+
+            // Index title and text in FTS from HistoryUrlRecord.
+            try db.create(virtualTable: "historyUrlContent", using: FTS4()) { t in
+                t.synchronize(withTable: "historyUrlRecord")
+                t.tokenizer = .unicode61()
+                t.column("title")
+                t.column("content")
+            }
+
+            try db.create(table: "frecencyUrlRecord", ifNotExists: true) { t in
+                t.column("urlId", .text) // FIXME: with .references("linkStore", column: "urlId")
+                t.column("lastAccessAt", .date)
+                t.column("frecencyScore", .double)
+                t.column("frecencySortScore", .double)
+                t.column("frecencyKey")
+                t.primaryKey(["urlId", "frecencyKey"])
+            }
+
+            try db.create(table: "longTermUrlScore", ifNotExists: true) { t in
+                t.column("urlId", .text).primaryKey()
+                t.column("visitCount", .integer)
+                t.column("readingTimeToLastEvent", .double)
+                t.column("textSelections", .integer)
+                t.column("scrollRatioX", .double)
+                t.column("scrollRatioY", .double)
+                t.column("textAmount", .integer)
+                t.column("area", .double)
+                t.column("lastCreationDate", .datetime)
+            }
         }
         #if DEBUG
         // Speed up development by nuking the database when migrations change
@@ -391,7 +435,7 @@ extension GRDBDatabase {
     /// - Parameter url: URL to the page
     /// - Parameter title: Title of the page indexed in FTS
     /// - Parameter text: Content of the page indexed in FTS
-    func insertHistoryUrl(urlId: UInt64, url: String, title: String, content: String?) throws {
+    func insertHistoryUrl(urlId: UUID, url: String, title: String, content: String?) throws {
         try dbWriter.write { db in
             try db.execute(
                 sql: """
@@ -763,7 +807,7 @@ extension GRDBDatabase {
         }
     }
 
-    func fetchOneFrecency(fromUrl: UInt64) throws -> [FrecencyParamKey: FrecencyUrlRecord] {
+    func fetchOneFrecency(fromUrl: UUID) throws -> [FrecencyParamKey: FrecencyUrlRecord] {
         var result = [FrecencyParamKey: FrecencyUrlRecord]()
         for type in FrecencyParamKey.allCases {
             try dbReader.read { db in
@@ -775,8 +819,8 @@ extension GRDBDatabase {
 
         return result
     }
-    func getFrecencyScoreValues(urlIds: [UInt64], paramKey: FrecencyParamKey) -> [UInt64: Float] {
-        var scores = [UInt64: Float]()
+    func getFrecencyScoreValues(urlIds: [UUID], paramKey: FrecencyParamKey) -> [UUID: Float] {
+        var scores = [UUID: Float]()
         try? dbReader.read { db in
             return try FrecencyUrlRecord
                 .filter(urlIds.contains(FrecencyUrlRecord.Columns.urlId))
@@ -815,11 +859,11 @@ extension GRDBDatabase {
     }
 
     // MARK: - LongTermUrlScore
-    func getLongTermUrlScore(urlId: UInt64) -> LongTermUrlScore? {
+    func getLongTermUrlScore(urlId: UUID) -> LongTermUrlScore? {
         return try? dbReader.read { db in try LongTermUrlScore.fetchOne(db, id: urlId) }
     }
 
-    func updateLongTermUrlScore(urlId: UInt64, changes: (LongTermUrlScore) -> Void ) {
+    func updateLongTermUrlScore(urlId: UUID, changes: (LongTermUrlScore) -> Void ) {
         do {
             try dbWriter.write {db in
                 let score = (try? LongTermUrlScore.fetchOne(db, id: urlId)) ?? LongTermUrlScore(urlId: urlId)
@@ -831,7 +875,7 @@ extension GRDBDatabase {
         }
     }
 
-    func getManyLongTermUrlScore(urlIds: [UInt64]) -> [LongTermUrlScore] {
+    func getManyLongTermUrlScore(urlIds: [UUID]) -> [LongTermUrlScore] {
         return (try? dbReader.read { db in try LongTermUrlScore.fetchAll(db, ids: urlIds) }) ?? []
     }
 

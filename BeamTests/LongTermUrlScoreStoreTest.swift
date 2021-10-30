@@ -22,7 +22,7 @@ class LongTermUrlScoreStoreTests: XCTestCase {
             XCTAssertEqual(score.area, 0)
         }
         
-        func assertCount(urlId: UInt64, count: Int) throws {
+        func assertCount(urlId: UUID, count: Int) throws {
             try db.dbReader.read { db in
                 let query = LongTermUrlScore.filter(id: urlId)
                 try XCTAssertEqual(query.fetchCount(db), count)
@@ -32,7 +32,7 @@ class LongTermUrlScoreStoreTests: XCTestCase {
         let db = GRDBDatabase.empty()
         
         //when a given urlId's record does not exist yet, a 0 valued record (+ changes) is inserted
-        let urlId: UInt64 = 0
+        let urlId = UUID()
         try assertCount(urlId: urlId, count: 0)
         db.updateLongTermUrlScore(urlId: urlId) { $0.textSelections += 1 }
         var score = try XCTUnwrap(db.getLongTermUrlScore(urlId: urlId))
@@ -52,7 +52,7 @@ class LongTermUrlScoreStoreTests: XCTestCase {
         try assertCount(urlId: urlId, count: 1)
         
         //an other url id update doesnt interfere with previous one
-        let otherUrlId: UInt64 = 1
+        let otherUrlId = UUID()
         let otherDate = BeamDate.now
         db.updateLongTermUrlScore(urlId: otherUrlId) { $0.lastCreationDate = otherDate }
         score = try XCTUnwrap(db.getLongTermUrlScore(urlId: urlId))
@@ -64,8 +64,9 @@ class LongTermUrlScoreStoreTests: XCTestCase {
         //fetching works for an empty list
         XCTAssertEqual(db.getManyLongTermUrlScore(urlIds: []).count, 0)
         
-        let idsToInsert: [UInt64] = [0, 1, 3]
-        let idsToFetch: [UInt64] = [1, 3, 7]
+        let urlIds = (0...4).map { _ in UUID() }
+        let idsToInsert: [UUID] = [urlIds[0], urlIds[1], urlIds[2]]
+        let idsToFetch: [UUID] = [urlIds[1], urlIds[2], urlIds[3]]
         //no score are fetched prior insertion
         XCTAssertEqual(db.getManyLongTermUrlScore(urlIds: idsToFetch).count, 0)
         for id in idsToInsert {

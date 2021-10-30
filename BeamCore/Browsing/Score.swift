@@ -18,7 +18,22 @@ private func nilMax(date: Date?, otherDate: Date?) -> Date? {
     return max(unwrappedDate, unwrappedOtherDate)
 }
 
-public class Score: Codable {
+public class Score: Codable, Equatable {
+    public static func == (lhs: Score, rhs: Score) -> Bool {
+        return lhs.readingTimeToLastEvent == rhs.readingTimeToLastEvent
+        && lhs.textSelections == rhs.textSelections
+        && lhs.scrollRatioX == rhs.scrollRatioX
+        && lhs.scrollRatioY == rhs.scrollRatioY
+        && lhs.openIndex == rhs.openIndex
+        && lhs.outbounds == rhs.outbounds
+        && lhs.textAmount == rhs.textAmount
+        && lhs.area == rhs.area
+        && lhs.inbounds == rhs.inbounds
+        && lhs.videoTotalDuration == rhs.videoTotalDuration
+        && lhs.videoReadingDuration == rhs.videoReadingDuration
+        && lhs.id == rhs.id
+    }
+
     // Codable:
     enum CodingKeys: String, CodingKey {
         case readingTimeToLastEvent = "readingTime"

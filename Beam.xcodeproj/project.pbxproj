@@ -500,7 +500,6 @@
 		961EC4F225B4511D009FA322 /* Layer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 961EC4F125B4511D009FA322 /* Layer.swift */; };
 		961EC50B25B495DB009FA322 /* ButtonLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 961EC50A25B495DB009FA322 /* ButtonLayer.swift */; };
 		961EC51725B5038E009FA322 /* ChevronButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 961EC51625B5038E009FA322 /* ChevronButton.swift */; };
-		961EC58625B7A75A009FA322 /* LinkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 961EC58525B7A75A009FA322 /* LinkManager.swift */; };
 		9623ABBD26B002DC00309E5E /* Beam3ToBeam4MigrationPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9623ABBC26B002DC00309E5E /* Beam3ToBeam4MigrationPolicy.swift */; };
 		9623ABBF26B0061400309E5E /* Beam3ToBeam4Migration.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 9623ABBE26B0061400309E5E /* Beam3ToBeam4Migration.xcmappingmodel */; };
 		96319C6E26160AB400D1CF31 /* BeamNote+DocumentManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96319C6D26160AB400D1CF31 /* BeamNote+DocumentManager.swift */; };
@@ -589,6 +588,7 @@
 		96EBCE0A262A01160014D923 /* ExportAllBrowsingSessions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96EBCE09262A01160014D923 /* ExportAllBrowsingSessions.swift */; };
 		96F2BF0F263B208500F02F16 /* Caret.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F2BF0E263B208500F02F16 /* Caret.swift */; };
 		96F5354A27104BE400B719C6 /* EventsTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181718C2581107C00317ED8 /* EventsTracker.swift */; };
+		96F5355A271DADDD00B719C6 /* BeamLinkDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F53559271DADDD00B719C6 /* BeamLinkDB.swift */; };
 		96F673D225B7207100E8175B /* StoredLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F673D125B7207100E8175B /* StoredLink.swift */; };
 		96F936632590FA59006D8E53 /* BTextEdit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F936622590FA59006D8E53 /* BTextEdit.swift */; };
 		96FACC522604B0EE0088DD67 /* DeleteElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96FACC512604B0EE0088DD67 /* DeleteElement.swift */; };
@@ -1586,7 +1586,6 @@
 		961EC4F125B4511D009FA322 /* Layer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Layer.swift; sourceTree = "<group>"; };
 		961EC50A25B495DB009FA322 /* ButtonLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonLayer.swift; sourceTree = "<group>"; };
 		961EC51625B5038E009FA322 /* ChevronButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChevronButton.swift; sourceTree = "<group>"; };
-		961EC58525B7A75A009FA322 /* LinkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkManager.swift; sourceTree = "<group>"; };
 		9623ABBC26B002DC00309E5E /* Beam3ToBeam4MigrationPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Beam3ToBeam4MigrationPolicy.swift; sourceTree = "<group>"; };
 		9623ABBE26B0061400309E5E /* Beam3ToBeam4Migration.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = Beam3ToBeam4Migration.xcmappingmodel; sourceTree = "<group>"; };
 		96319C6D26160AB400D1CF31 /* BeamNote+DocumentManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamNote+DocumentManager.swift"; sourceTree = "<group>"; };
@@ -1658,6 +1657,7 @@
 		96E4CF75258EC88300D6DE22 /* BeamTextTools.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamTextTools.swift; sourceTree = "<group>"; };
 		96EBCE09262A01160014D923 /* ExportAllBrowsingSessions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportAllBrowsingSessions.swift; sourceTree = "<group>"; };
 		96F2BF0E263B208500F02F16 /* Caret.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Caret.swift; sourceTree = "<group>"; };
+		96F53559271DADDD00B719C6 /* BeamLinkDB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamLinkDB.swift; sourceTree = "<group>"; };
 		96F673D125B7207100E8175B /* StoredLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoredLink.swift; sourceTree = "<group>"; };
 		96F93617258CFDD2006D8E53 /* BeamText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamText.swift; sourceTree = "<group>"; };
 		96F936622590FA59006D8E53 /* BTextEdit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BTextEdit.swift; sourceTree = "<group>"; };
@@ -2850,7 +2850,6 @@
 				52C5A40826DFAB2D00CD559F /* DocumentStruct+Debug.swift */,
 				524CF6C925F2735D007312F0 /* EncryptionManager.swift */,
 				418171EA2581107C00317ED8 /* LibrairiesManager.swift */,
-				961EC58525B7A75A009FA322 /* LinkManager.swift */,
 				A0AA693225C41C9B0038F9A3 /* MouseHandler.swift */,
 				5291CEE7268B5969001645A2 /* PasswordManager.swift */,
 				A0F462342668D79E0003EAD6 /* RadBlockPreferencesManager.swift */,
@@ -2863,6 +2862,7 @@
 				A0184F7026AF56AB00993C32 /* PreferencesManager+Advanced.swift */,
 				A0F558F026BD536A0024C47E /* PreferencesManager+EditorDebug.swift */,
 				DABFD3AF26FC974B00C1F7F0 /* ClusteringOrphanedUrlManager.swift */,
+				96F53559271DADDD00B719C6 /* BeamLinkDB.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -5854,9 +5854,9 @@
 				5285672A26275A8D00DDBE45 /* BeamToBeam2Migration.xcmappingmodel in Sources */,
 				8A4172D626A063FD00F93128 /* NSPoint+Beam.swift in Sources */,
 				96C5FE2F268E80BA00889B5E /* Geolocation.swift in Sources */,
+				96F5355A271DADDD00B719C6 /* BeamLinkDB.swift in Sources */,
 				A51ED9A72608D0CD00CA99E5 /* ContextMenuFormatterView.swift in Sources */,
 				4105CE7525A60681009AB687 /* FormatterTypeButton.swift in Sources */,
-				961EC58625B7A75A009FA322 /* LinkManager.swift in Sources */,
 				A57F9CB126E8F82000D266BA /* TableHeaderCell.swift in Sources */,
 				032562A626051D3B006513E4 /* RBFilterManager.m in Sources */,
 				418172372581107C00317ED8 /* TextEditOperations.swift in Sources */,
@@ -6973,7 +6973,7 @@
 			repositoryURL = "https://gitlab+deploy-token-596840:s63rWYma33o3RCwsbebz@gitlab.com/beamgroup/clustering.git";
 			requirement = {
 				kind = revision;
-				revision = c3005c1ec4fe997d2292f974b87854d3334d35c6;
+				revision = 22199fcfc5bbc0a56db11d7209370ed79fa7bf02;
 			};
 		};
 		524CF6D125F276D1007312F0 /* XCRemoteSwiftPackageReference "KeychainAccess" */ = {
