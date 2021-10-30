@@ -140,7 +140,7 @@ public struct ReadingEvent: Codable {
 }
 
 public struct ScoredLink: Hashable {
-    public var link: UInt64
+    public var link: UUID
     public var score: Score
 
     public static func == (lhs: ScoredLink, rhs: ScoredLink) -> Bool {
@@ -154,7 +154,8 @@ public struct ScoredLink: Hashable {
 
 public class BrowsingNode: ObservableObject, Codable {
     public let id: UUID
-    public var link: UInt64
+    public var legacy = false
+    public var link: UUID
     public let isLinkActivation: Bool
     public weak var parent: BrowsingNode?
     public weak var tree: BrowsingTree! {
@@ -241,6 +242,7 @@ public class BrowsingNode: ObservableObject, Codable {
     // Codable:
     enum CodingKeys: String, CodingKey {
         case link
+        case legacy
         case events
         case children
         case id
@@ -249,8 +251,14 @@ public class BrowsingNode: ObservableObject, Codable {
 
     public required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-
-        link = try container.decode(UInt64.self, forKey: .link)
+        // TODO: Remove legacyLink handling when all legacy trees have been deleted
+        if (try? container.decode(UInt64.self, forKey: .link)) != nil {
+            legacy = true
+            link = UUID()
+        } else {
+            legacy = (try? container.decode(Bool.self, forKey: .legacy)) ?? false
+            link = try container.decode(UUID.self, forKey: .link)
+        }
         id = (try? container.decode(UUID.self, forKey: .id)) ?? UUID()
         isLinkActivation = (try? container.decode(Bool.self, forKey: .isLinkActivation)) ?? false
         if container.contains(.events) {
@@ -268,6 +276,7 @@ public class BrowsingNode: ObservableObject, Codable {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
         try container.encode(link, forKey: .link)
+        try container.encode(legacy, forKey: .legacy)
         try container.encode(id, forKey: .id)
         if !events.isEmpty {
             try container.encode(events, forKey: .events)
@@ -356,6 +365,7 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
     enum CodingKeys: String, CodingKey {
         case root
         case scores
+        case legacyScores
         case origin
         case currentPath
     }
@@ -371,15 +381,15 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
             current = root
         }
 
-        if container.contains(.scores) {
-            scores = try container.decode([UInt64: Score].self, forKey: .scores)
+        scoreStep: if container.contains(.scores) {
+            guard let scores = try? container.decode([UUID: Score].self, forKey: .scores) else { break scoreStep }
+            self.scores = scores
         } else {
             // old version, let's fish for them:
             root.visit { link in
                 self.scores[link.link] = Score()
             }
         }
-
         root.tree = self
     }
 
@@ -488,8 +498,8 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
         current.addEvent(.destinationNoteChange)
     }
 
-    public var links: Set<UInt64> {
-        var set = Set<UInt64>()
+    public var links: Set<UUID> {
+        var set = Set<UUID>()
 
         root.visit { link in
             set.insert(link.link)
@@ -497,8 +507,8 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
 
         return set
     }
-    public var idUrlMapping: [UInt64: String] {
-        var mapping = [UInt64: String]()
+    public var idUrlMapping: [UUID: String] {
+        var mapping = [UUID: String]()
         links.forEach {
             if let url = LinkStore.linkFor($0)?.url {mapping[$0] = url}
         }
@@ -526,8 +536,8 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
         root.dump()
     }
 
-    var scores = [UInt64: Score]()
-    func scoreFor(link: UInt64) -> Score {
+    var scores = [UUID: Score]()
+    func scoreFor(link: UUID) -> Score {
         guard let score = scores[link] else {
             let score = Score()
             scores[link] = score

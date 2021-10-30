@@ -29,8 +29,7 @@ class FrecencyNoteTriggerTests: XCTestCase {
 
     class FakeFrecencyScorer: FrecencyScorer {
         public var updateCalls = [UpdateScoreArgs]()
-        func update(id: FrecencyScoreIdKey, value: Float, eventType: FrecencyEventType, date: Date, paramKey: FrecencyParamKey) {
-            guard let id = id as? UUID else { return }
+        func update(id: UUID, value: Float, eventType: FrecencyEventType, date: Date, paramKey: FrecencyParamKey) {
             let args = UpdateScoreArgs(id: id, scoreValue: value, eventType: eventType, date: date, paramKey: paramKey)
             updateCalls.append(args)
         }

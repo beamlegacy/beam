@@ -100,7 +100,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             AccountManager.logout()
         }
         #endif
-
         // We sync data *after* we potentially connected to websocket, to make sure we don't miss any data
         beamObjectManager.liveSync { _ in
             self.syncDataWithBeamObject()

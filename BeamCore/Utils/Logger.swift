@@ -32,12 +32,14 @@ public enum LogCategory: String, CaseIterable {
     case contentBlocking
     case pointAndShoot
     case fileDB
+    case linkDB
     case oauth
     case webSocket
     case passwordsDB
     case passwordManager
     case passwordNetwork
     case fileNetwork
+    case linkNetwork
     case clustering
     case commandManager
     case beamObject
@@ -47,6 +49,7 @@ public enum LogCategory: String, CaseIterable {
     case autocompleteManager
     case topDomain
     case browsingTreeSender
+    case browsingTreeNetwork
     case notePublishing
     case eventCalendar
     case favIcon

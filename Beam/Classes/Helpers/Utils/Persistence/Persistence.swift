@@ -58,7 +58,6 @@ enum Persistence {
             Persistence.Sync.BeamObjects.last_updated_at = nil
         }
     }
-
     /// Clean all stored informations on logout
     static func cleanUp() {
         Persistence.Authentication.accessToken = nil

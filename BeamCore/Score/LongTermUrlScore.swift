@@ -22,7 +22,7 @@ public class LongTermUrlScore: Codable {
         case lastCreationDate
     }
 
-    public let urlId: UInt64
+    public let urlId: UUID
     public var visitCount: Int = 0
     public var readingTimeToLastEvent: CFTimeInterval = 0
     public var textSelections: Int = 0
@@ -32,7 +32,7 @@ public class LongTermUrlScore: Codable {
     public var area: Float = 0
     public var lastCreationDate: Date?
 
-    public init(urlId: UInt64) {
+    public init(urlId: UUID) {
         self.urlId = urlId
     }
 
@@ -48,6 +48,6 @@ public class LongTermUrlScore: Codable {
 }
 
 public protocol LongTermUrlScoreStoreProtocol {
-    func apply(to urlId: UInt64, changes: (LongTermUrlScore) -> Void)
-    func getMany(urlIds: [UInt64]) -> [LongTermUrlScore]
+    func apply(to urlId: UUID, changes: (LongTermUrlScore) -> Void)
+    func getMany(urlIds: [UUID]) -> [LongTermUrlScore]
 }

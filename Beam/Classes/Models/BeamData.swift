@@ -33,7 +33,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     //swiftlint:disable:next large_tuple
     @Published var renamedNote: (noteId: UUID, previousName: String, newName: String) = (UUID.null, "", "")
     var noteAutoSaveService: NoteAutoSaveService
-    var linkManager: LinkManager
 
     var cookies: HTTPCookieStorage
     var documentManager: DocumentManager
@@ -93,25 +92,23 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     static var indexPath: URL { URL(fileURLWithPath: dataFolder(fileName: "index.beamindex")) }
     static var orphanedUrlsPath: URL { URL(fileURLWithPath: dataFolder(fileName: "clusteringOrphanedUrls.csv")) }
     static var fileDBPath: String { dataFolder(fileName: "files.db") }
-    static var linkStorePath: URL { URL(fileURLWithPath: dataFolder(fileName: "links.store")) }
+    static var linkDBPath: String { dataFolder(fileName: "links.db") }
     static var idToTitle: [UUID: String] = [:]
     static var titleToId: [String: UUID] = [:]
 
+    var linkDB: BeamLinkDB
+
     //swiftlint:disable:next function_body_length
     override init() {
+        do {
+            LinkStore.shared = LinkStore(linkManager: try BeamLinkDB(path: Self.linkDBPath))
+        } catch {
+            Logger.shared.logError("Unable to initialise link storage \(error)", category: .linkDB)
+        }
         documentManager = DocumentManager()
         clusteringOrphanedUrlManager = ClusteringOrphanedUrlManager(savePath: Self.orphanedUrlsPath)
         clusteringManager = ClusteringManager(ranker: sessionLinkRanker, documentManager: documentManager, candidate: 2, navigation: 0.5, text: 0.9, entities: 0.4, sessionId: sessionId, activeSources: activeSources)
         noteAutoSaveService = NoteAutoSaveService()
-        linkManager = LinkManager()
-        let linkCount = LinkStore.shared.loadFromDB(linkManager: linkManager)
-        Logger.shared.logInfo("Loaded \(linkCount) links from DB", category: .document)
-        do {
-            try LinkStore.loadFrom(Self.linkStorePath)
-        } catch {
-            Logger.shared.logError("Unable to load link store from \(Self.linkStorePath)", category: .search)
-        }
-
         cookies = HTTPCookieStorage()
 
         if let feed = URL(string: Configuration.updateFeedURL) {
@@ -128,6 +125,12 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
             waitTimeOut: 2.0
         )
         browsingTreeSender = BrowsingTreeSender(config: treeConfig, appSessionId: sessionId)
+        do {
+            linkDB = try BeamLinkDB(path: BeamData.linkDBPath)
+        } catch {
+            Logger.shared.logError("Unable to access link DB \(error)", category: .linkDB)
+            fatalError("Unable to access link DB \(error)")
+        }
 
         super.init()
 
@@ -185,8 +188,8 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         $tabToIndex.sink { [weak self] tabToIndex in
             guard let self = self,
                   let tabToIndex = tabToIndex else { return }
-            var currentId: UInt64?
-            var parentId: UInt64?
+            var currentId: UUID?
+            var parentId: UUID?
             (currentId, parentId) = self.clusteringManager.getIdAndParent(tabToIndex: tabToIndex)
             guard let id = currentId else { return }
             if tabToIndex.shouldBeIndexed {
@@ -239,14 +242,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     }
 
     func saveData() {
-        // save search index
-        do {
-            Logger.shared.logInfo("Save link store to \(Self.linkStorePath)", category: .search)
-            try LinkStore.saveTo(Self.linkStorePath)
-        } catch {
-            Logger.shared.logError("Unable to save link store to \(Self.linkStorePath): \(error)", category: .search)
-        }
-
         noteAutoSaveService.saveNotes()
     }
 
