@@ -8,18 +8,18 @@
 @testable import Beam
 
 import XCTest
-private typealias Table = [UInt64: LongTermUrlScore]
+private typealias Table = [UUID: LongTermUrlScore]
 
 
 class UrlScoresCollectionTest: XCTestCase {
     class FakeLongTermScoreStore: LongTermUrlScoreStoreProtocol {
         fileprivate var data = Table()
-        func apply(to urlId: UInt64, changes: (LongTermUrlScore) -> Void) {
+        func apply(to urlId: UUID, changes: (LongTermUrlScore) -> Void) {
             let score = data[urlId] ?? LongTermUrlScore(urlId: urlId)
             changes(score)
             data[urlId] = score
         }
-        func getMany(urlIds: [UInt64]) -> [LongTermUrlScore] {
+        func getMany(urlIds: [UUID]) -> [LongTermUrlScore] {
             return []
         }
     }

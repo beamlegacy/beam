@@ -13,17 +13,23 @@ class NoteSourceTests: XCTestCase {
     private var scoreStore: LongTermUrlScoreStoreProtocol!
     private var sources: NoteSources!
     private var note: BeamNote!
+    let previousNetworkEnabled = Configuration.networkEnabled
     
     override func setUp() {
         super.setUp()
         note = BeamNote(title: "Some research")
         sources = note.sources
         scoreStore = LongTermUrlScoreStore(db: GRDBDatabase.empty())
+        Configuration.networkEnabled = false
+    }
+    override func tearDown() {
+        super.tearDown()
+        Configuration.networkEnabled = previousNetworkEnabled
     }
     
     func testAdd() throws {
-        let firstUrlId: UInt64 = 0
-        let secondUrlId: UInt64 = 1
+        let firstUrlId = UUID()
+        let secondUrlId = UUID()
         let noteId = UUID()
         let now = BeamDate.now
         let before = Date() - Double(60.0 * 60.0)
@@ -58,8 +64,8 @@ class NoteSourceTests: XCTestCase {
     }
 
     func testRemoveProtected() throws {
-        let firstUrlId: UInt64 = 0
-        let secondUrlId: UInt64 = 1
+        let firstUrlId = UUID()
+        let secondUrlId = UUID()
         let noteId = UUID()
         let sessionId = UUID()
         let activeSources = ActiveSources()
@@ -77,8 +83,8 @@ class NoteSourceTests: XCTestCase {
     }
 
     func testRemoveUnprotected() throws {
-        let firstUrlId: UInt64 = 0
-        let secondUrlId: UInt64 = 1
+        let firstUrlId = UUID()
+        let secondUrlId = UUID()
         let sessionId = UUID()
         let noteId = UUID()
         let activeSources = ActiveSources()
@@ -91,8 +97,8 @@ class NoteSourceTests: XCTestCase {
         XCTAssertEqual(sources.count, 0)
     }
     func testRemoveWithSessionId() throws {
-        let firstUrlId: UInt64 = 0
-        let secondUrlId: UInt64 = 1
+        let firstUrlId = UUID()
+        let secondUrlId = UUID()
         let firstSessionId = UUID()
         let secondSessionId = UUID()
         let noteId = UUID()
@@ -162,7 +168,7 @@ class NoteSourceTests: XCTestCase {
             ("http://www.url.com/c", 1, .user, yesterday),
         ]
         
-        func indexToUrlId(index: Int) -> UInt64 {
+        func indexToUrlId(index: Int) -> UUID {
             let url = dataSet[index].0
             return LinkStore.getIdFor(url)!
         }
@@ -183,7 +189,7 @@ class NoteSourceTests: XCTestCase {
         
         //sorting sources (in case of ties, user sources are shown first an then sorted by scores)
         var sortedUrlIds = sources.sortedByDomain().map { $0.urlId }
-        var expectedSortedIds: [UInt64] = [1, 3, 2, 0].map(indexToUrlId)
+        var expectedSortedIds: [UUID] = [1, 3, 2, 0].map(indexToUrlId)
         XCTAssertEqual(sortedUrlIds, expectedSortedIds)
         
         sortedUrlIds = sources.sortedByDomain(ascending: false).map { $0.urlId }
@@ -205,21 +211,21 @@ class NoteSourceTests: XCTestCase {
 
     func testNoteChangeTrigger() throws {
         let updateDate = note.updateDate
-
+        let urlId = UUID()
         //adding a note source will trigger a note save
-        note.sources.add(urlId: 0, noteId: note.id, type: .user, sessionId: UUID())
+        note.sources.add(urlId: urlId, noteId: note.id, type: .user, sessionId: UUID())
         let updateDateSourceCreate = note.updateDate
         XCTAssertEqual(note.lastChangeType, .meta)
         XCTAssert(updateDateSourceCreate.timeIntervalSince(updateDate) > 0)
 
         //updating a note source will trigger a note save
-        note.sources.add(urlId: 0, noteId: note.id, type: .user, sessionId: UUID())
+        note.sources.add(urlId: urlId, noteId: note.id, type: .user, sessionId: UUID())
         let updateDateSourceUpdate = note.updateDate
         XCTAssertEqual(note.lastChangeType, .meta)
         XCTAssert(updateDateSourceUpdate.timeIntervalSince(updateDateSourceCreate) > 0)
 
         //deleting a note source will trigger a note save
-        note.sources.remove(urlId: 0, noteId: note.id, isUserSourceProtected: false)
+        note.sources.remove(urlId: urlId, noteId: note.id, isUserSourceProtected: false)
         let updateDateSourceDelete = note.updateDate
         XCTAssertEqual(note.lastChangeType, .meta)
         XCTAssert(updateDateSourceDelete.timeIntervalSince(updateDateSourceUpdate) > 0)

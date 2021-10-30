@@ -13,7 +13,7 @@ struct BrowsingTreeSendData: Codable {
     let rootId: UUID
     let userId: UUID
     let appSessionId: UUID
-    let idUrlMapping: [UInt64: String]
+    let idUrlMapping: [UUID: String]
     let data: BrowsingTree
 
     enum CodingKeys: String, CodingKey {

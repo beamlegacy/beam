@@ -1,7 +1,7 @@
 import GRDB
 
 struct HistoryUrlRecord {
-    var id: Int64?
+    var id: UUID?
     var title: String
     var url: String
     var content: String
@@ -51,7 +51,7 @@ extension HistoryUrlRecord: MutablePersistableRecord {
     }
 
     // Update auto-incremented id upon successful insertion
-    mutating func didInsert(with rowID: Int64, for column: String?) {
+    mutating func didInsert(with rowID: UUID, for column: String?) {
         id = rowID
     }
 }

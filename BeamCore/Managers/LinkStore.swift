@@ -6,149 +6,73 @@
 //
 
 import Foundation
+import UUIDKit
 
 public struct Link: Codable {
+    public var id: UUID
     public var url: String
-    public var visits: [Date]
     public var title: String?
-}
 
-public struct LinkStruct {
-    public let bid: Int64
-    public let url: String
-    public let title: String?
+    public var createdAt: Date
+    public var updatedAt: Date
+    public var deletedAt: Date?
+    public var previousChecksum: String?
+    public var checksum: String?
 
-    public init(bid: Int64, url: String, title: String?) {
-        self.bid = bid
+    public init(url: String, title: String?, createdAt: Date = BeamDate.now, updatedAt: Date = BeamDate.now, deletedAt: Date? = nil, previousChecksum: String? = nil) {
+        self.id = UUID.v5(name: url, namespace: .url)
         self.url = url
         self.title = title
+
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+        self.deletedAt = deletedAt
+        self.previousChecksum = previousChecksum
     }
 }
 
-public protocol LinkManagerBase {
-    func loadLinks() -> [LinkStruct]
-    func saveLink(_ linkStruct: LinkStruct, completion: ((Result<Bool, Error>) -> Void)?)
-    func deleteAllLinks()
+public protocol LinkManager {
+    func getLinks(matchingUrl url: String) -> [UUID: Link]
+    func getIdFor(link: String) -> UUID?
+    func createIdFor(link: String, title: String?) -> UUID
+    func linkFor(id: UUID) -> Link?
+    func visit(link: String, title: String?)
+    func deleteAll() throws
+    var allLinks: [Link] { get }
 }
 
-public class FakeLinkManager: LinkManagerBase {
-    public func loadLinks() -> [LinkStruct] { return [] }
-    public func saveLink(_ linkStruct: LinkStruct, completion: ((Result<Bool, Error>) -> Void)?) {
-        //completion
-    }
-    public func deleteAllLinks() { }
+public class FakeLinkManager: LinkManager {
+    public func getLinks(matchingUrl url: String) -> [UUID: Link] { [:] }
+    public func getIdFor(link: String) -> UUID? { nil }
+    public func createIdFor(link: String, title: String?) -> UUID { .null }
+    public func linkFor(id: UUID) -> Link? { nil }
+    public func visit(link: String, title: String?) { }
+    public func deleteAll() throws { }
+    public var allLinks: [Link] { [] }
 }
 
-public class LinkStore: Codable {
-    public var idGenerator = MonotonicIncreasingID64()
+public class LinkStore: LinkManager {
     public static var shared = LinkStore(linkManager: FakeLinkManager())
-    public var linkManager: LinkManagerBase
+    public var linkManager: LinkManager
 
-    public private(set) var links = [UInt64: Link]()
-    public private(set) var ids = [String: UInt64]()
-
-    public init(linkManager: LinkManagerBase) {
+    public init(linkManager: LinkManager) {
         self.linkManager = linkManager
     }
 
-    public func loadFromDB(linkManager: LinkManagerBase) -> Int {
-        self.linkManager = linkManager
-        let loadedLinks = linkManager.loadLinks()
-        for link in loadedLinks {
-            links[UInt64(bitPattern: link.bid)] = Link(url: link.url, visits: [])
-        }
-        return loadedLinks.count
-    }
-
-    public func getLinks(matchingUrl url: String) -> [UInt64: Link] {
-        links.filter { $0.value.url.contains(url) }
-    }
-
-    required public init(from decoder: Decoder) throws {
-        linkManager = FakeLinkManager()
-
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        links = try container.decode([UInt64: Link].self, forKey: .links)
-        for link in links {
-            ids[link.value.url] = link.key
-        }
-
-        if container.contains(.idGenerator) {
-            idGenerator = try container.decode(MonotonicIncreasingID64.self, forKey: .idGenerator)
-        }
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(links, forKey: .links)
-        try container.encode(idGenerator, forKey: .idGenerator)
-    }
-
-    enum CodingKeys: String, CodingKey {
-        case links
-        case idGenerator
-    }
-
-    public func getIdFor(link: String) -> UInt64? {
-        guard let id = ids[link] else {
-            return nil
-        }
-
-        return id
-    }
-
-    public func createIdFor(link: String, title: String? = nil) -> UInt64 {
-        guard let id = getIdFor(link: link) else {
-            let id = idGenerator.newValue()
-            ids[link] = id
-            links[id] = Link(url: link, visits: [], title: title)
-            let linkStruct = LinkStruct(bid: Int64(bitPattern: id), url: link, title: title)
-            linkManager.saveLink(linkStruct, completion: nil)
-            return id
-        }
-
-        return id
-    }
-
-    public func linkFor(id: UInt64) -> Link? {
-        guard let link = links[id] else {
-            return nil
-        }
-
-        return link
-    }
-
-    public func visit(link: String, title: String? = nil) {
-        let id = createIdFor(link: link, title: title)
-        guard var linkStruct = linkFor(id: id) else {
-            Logger.shared.logError("Unable to fetch Link Structure for link \(link)", category: .search)
-            return
-        }
-        linkStruct.visits.append(BeamDate.now)
-        if let title = title {
-            linkStruct.title = title
-        }
-        links[id] = linkStruct
-    }
-
-    public func deleteAll() throws {
-        linkManager.deleteAllLinks()
-        links.removeAll()
-    }
-
-    public static func linkFor(_ id: UInt64) -> Link? {
+    public func getLinks(matchingUrl url: String) -> [UUID: Link] { linkManager.getLinks(matchingUrl: url) }
+    public func getIdFor(link: String) -> UUID? { linkManager.getIdFor(link: link) }
+    public func createIdFor(link: String, title: String? = nil) -> UUID { linkManager.createIdFor(link: link, title: title) }
+    public func linkFor(id: UUID) -> Link? { linkManager.linkFor(id: id) }
+    public func visit(link: String, title: String? = nil) { linkManager.visit(link: link, title: title) }
+    public func deleteAll() throws { try linkManager.deleteAll() }
+    public static func linkFor(_ id: UUID) -> Link? {
         return shared.linkFor(id: id)
     }
 
-    public static func createIdFor(_ link: String, title: String?) -> UInt64 {
-        return shared.createIdFor(link: link, title: title)
-    }
+    public static func createIdFor(_ link: String, title: String?) -> UUID { shared.createIdFor(link: link, title: title) }
+    public static func getIdFor(_ link: String) -> UUID? { shared.getIdFor(link: link) }
 
-    public static func getIdFor(_ link: String) -> UInt64? {
-        return shared.getIdFor(link: link)
-    }
-
-    public static func isInternalLink(id: UInt64) -> Bool {
+    public static func isInternalLink(id: UUID) -> Bool {
         guard let link = linkFor(id) else { return false }
         return isInternal(link: link.url)
     }
@@ -158,14 +82,5 @@ public class LinkStore: Codable {
         return url.scheme == "beam"
     }
 
-    public static func loadFrom(_ path: URL) throws {
-        let decoder = JSONDecoder()
-        shared = try decoder.decode(Self.self, from: Data(contentsOf: path))
-    }
-
-    public static func saveTo(_ path: URL) throws {
-        let encoder = JSONEncoder()
-        let data = try encoder.encode(shared)
-        try data.write(to: path)
-    }
+    public var allLinks: [Link] { linkManager.allLinks }
 }
