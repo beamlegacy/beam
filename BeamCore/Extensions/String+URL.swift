@@ -55,4 +55,8 @@ public extension String {
     var tld: String? {
         Self.TLDextractor.parse(self)?.rootDomain
     }
+
+    var containsCharacters: Bool {
+        return !self.trimmingCharacters(in: .whitespaces).isEmpty
+    }
 }
