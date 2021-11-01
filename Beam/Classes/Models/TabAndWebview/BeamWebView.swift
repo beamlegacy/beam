@@ -72,6 +72,11 @@ class BeamWebView: WKWebView {
         fatalError()
     }
 
+    override func cursorUpdate(with event: NSEvent) {
+        // This override fixes the cursor blinking when WebView is overlayed by a Swift UI View
+        // BE-2205: https://linear.app/beamapp/issue/BE-2205/cursor-blinks-in-web-mode
+    }
+
     override func viewDidMoveToSuperview() {
         if automaticallyResignResponder && superview == nil && self.window?.firstResponder == self {
             self.window?.makeFirstResponder(nil)
