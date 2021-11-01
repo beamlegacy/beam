@@ -196,10 +196,10 @@ class BeamTableCellIconAndTextView: NSTableCellView {
             _iconView.leadingAnchor.constraint(equalTo: _contentView.leadingAnchor),
             _iconView.centerYAnchor.constraint(equalTo: _contentView.centerYAnchor),
             _iconView.widthAnchor.constraint(equalToConstant: 16),
-            _iconView.heightAnchor.constraint(equalToConstant: 16),
+            _iconView.heightAnchor.constraint(equalToConstant: 22),
             _textField.leadingAnchor.constraint(equalTo: _iconView.trailingAnchor, constant: 6),
             _textField.trailingAnchor.constraint(equalTo: _contentView.trailingAnchor),
-            _textField.centerYAnchor.constraint(equalTo: _contentView.centerYAnchor),
+            _textField.topAnchor.constraint(equalTo: _contentView.topAnchor, constant: 4),
             _textField.heightAnchor.constraint(equalToConstant: 22)
 
         ])
