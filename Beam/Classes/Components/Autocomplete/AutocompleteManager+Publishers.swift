@@ -127,13 +127,13 @@ extension AutocompleteManager {
     }
 
     private func autocompleteCanCreateNoteResult(for query: String) -> Future<Bool, Error> {
-        Future { [weak self] promise in
+        Future { [weak self, query] promise in
             self?.beamData.documentManager.loadDocumentByTitle(title: query) { result in
                 switch result {
                 case .failure(let error):
                     promise(.failure(error))
                 case .success(let documentStruct):
-                    let canCreateNote = documentStruct == nil && URL(string: query)?.scheme == nil
+                    let canCreateNote = documentStruct == nil && URL(string: query)?.scheme == nil && query.containsCharacters
                     promise(.success(canCreateNote))
                 }
             }

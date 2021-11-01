@@ -81,7 +81,9 @@ class Autocompleter: ObservableObject {
                 }
 
                 var res = [AutocompleteResult]()
-                res.append(AutocompleteResult(text: query, source: .autocomplete, url: url, information: description))
+                if query.containsCharacters {
+                    res.append(AutocompleteResult(text: query, source: .autocomplete, url: url, information: description))
+                }
                 guard let data = data else {
                     promise(.success(res))
                     return
