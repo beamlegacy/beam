@@ -124,6 +124,7 @@ import Promises
 
     func navigatedTo(url: URL, title: String?, reason: NoteElementAddReason) {
         logInNote(url: url, title: title, reason: reason)
+        updateFavIcon(fromWebView: true)
         updateScore()
     }
 
@@ -296,7 +297,7 @@ import Promises
 
         super.init()
         DispatchQueue.main.async {
-            self.updateFavIcon()
+            self.updateFavIcon(fromWebView: false)
         }
     }
 
@@ -434,11 +435,13 @@ import Promises
         self.title = title ?? ""
     }
 
-    private func updateFavIcon() {
+    private func updateFavIcon(fromWebView: Bool, cacheOnly: Bool = false) {
         guard let url = url else { favIcon = nil; return }
-        FaviconProvider.shared.imageForUrl(url) { [weak self] (image) in
+        FaviconProvider.shared.favicon(fromURL: url, webView: fromWebView ? webView : nil, cacheOnly: cacheOnly) { [weak self] (image) in
             guard let self = self else { return }
-            self.favIcon = image
+            DispatchQueue.main.async {
+                self.favIcon = image
+            }
         }
     }
 
@@ -503,7 +506,7 @@ import Promises
                 url = webviewUrl
             }
             leave()
-            updateFavIcon()
+            updateFavIcon(fromWebView: false, cacheOnly: true)
             // self.browsingTree.current.score.openIndex = self.navigationCount
             // self.updateScore()
             // self.navigationCount = 0

@@ -57,8 +57,9 @@ struct OmniBarSearchField: View {
 
     private var favicon: NSImage? {
         var icon: NSImage?
-        if let autocompleteResult = selectedAutocompleteResult, let url = autocompleteResult.url, autocompleteResult.source == .history {
-            FaviconProvider.shared.imageForUrl(url, cacheOnly: true) { (image) in
+        if let autocompleteResult = selectedAutocompleteResult, let url = autocompleteResult.url,
+           [.history, .url, .topDomain].contains(autocompleteResult.source) {
+            FaviconProvider.shared.favicon(fromURL: url, cacheOnly: true) { (image) in
                 icon = image
             }
         }
