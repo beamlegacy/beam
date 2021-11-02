@@ -20,44 +20,42 @@ struct BrowserPreferencesView: View {
         Preferences.Container(contentWidth: contentWidth) {
             Preferences.Section {
                 Text("Default Browser:")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
                     .frame(width: 250, alignment: .trailing)
             } content: {
                 DefaultBrowserSection()
             }
             Preferences.Section(bottomDivider: true) {
                 Text("Search Engine:")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
             } content: {
                 SearchEngineSection()
             }
 
             Preferences.Section(bottomDivider: true) {
                 Text("Bookmarks & Settings:")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
             } content: {
                 BookmarksSection()
             }
 
             Preferences.Section(bottomDivider: true) {
                 Text("Downloads:")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
             } content: {
                 DownloadSection()
             }
 
-            Preferences.Section {
+            Preferences.Section(bottomDivider: true) {
                 Text("Tabs:")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
             } content: {
                 TabsSection()
             }
+
+            Preferences.Section {
+                Text("Clear Caches:")
+            } content: {
+                ClearCachesSection()
+            }
         }
+        .font(BeamFont.regular(size: 13).swiftUI)
+        .foregroundColor(BeamColor.Generic.text.swiftUI)
     }
 }
 
@@ -86,6 +84,19 @@ struct DefaultBrowserSection: View {
     }
 
     @State var cancellable: Cancellable?
+}
+
+struct ClearCachesSection: View {
+
+    var body: some View {
+        Button {
+            FaviconProvider.shared.clearCache()
+            WKWebsiteDataStore.default().removeData(ofTypes: [WKWebsiteDataTypeDiskCache, WKWebsiteDataTypeMemoryCache], modifiedSince: Date(timeIntervalSince1970: 0), completionHandler:{ })
+        } label: {
+            Text("Clear All Web Caches")
+                .font(BeamFont.regular(size: 13).swiftUI)
+        }
+    }
 }
 
 struct SearchEngineSection: View {
