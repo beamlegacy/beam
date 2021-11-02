@@ -498,7 +498,7 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
         if type == .text || type == .tree {
             updateTextStats()
         }
-        parent?.childChanged(self, type)
+        parent?.childChanged(child, type)
     }
 
     open func findElement(_ id: UUID) -> BeamElement? {
