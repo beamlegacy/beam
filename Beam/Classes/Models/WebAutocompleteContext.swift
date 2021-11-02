@@ -365,7 +365,7 @@ final class WebAutocompleteContext {
     // If more special cases arise it could make sense to define rules in a plist file and create a separate class.
     private func autocompleteRules(for host: String?) -> WebAutocompleteRules {
         switch host {
-        case "pinterest.com", "netflix.com":
+        case "pinterest.com", "netflix.com", "maderasbarber.com":
             return WebAutocompleteRules(discardAutocompleteAttribute: .whenPasswordField)
         default:
             return .default
