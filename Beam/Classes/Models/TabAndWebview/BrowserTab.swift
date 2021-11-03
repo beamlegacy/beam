@@ -450,6 +450,11 @@ import Promises
         guard let url = url else { favIcon = nil; return }
         FaviconProvider.shared.favicon(fromURL: url, webView: fromWebView ? webView : nil, cacheOnly: cacheOnly) { [weak self] (image) in
             guard let self = self else { return }
+            guard image != nil || !fromWebView else {
+                // no favicon found from webview, try url instead.
+                self.updateFavIcon(fromWebView: false)
+                return
+            }
             DispatchQueue.main.async {
                 self.favIcon = image
             }
