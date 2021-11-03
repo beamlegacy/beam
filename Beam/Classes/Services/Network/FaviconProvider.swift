@@ -72,7 +72,9 @@ final class FaviconProvider {
     func favicon(fromURL url: URL, webView: WKWebView? = nil, cacheOnly: Bool = false, handler: @escaping FaviconProviderHandler) {
         let scaledSize = defaultScaledSize
         let cacheKey = cacheKeyForURL(url, size: scaledSize)
+        var handlerWasCalled = false
         if let cached = cache[cacheKey] {
+            handlerWasCalled = true
             handler(cached.image)
             // if cached is old or not from webView, let's still retrieve a new one
             var cacheShouldBeReplaced = false
@@ -89,7 +91,11 @@ final class FaviconProvider {
             return
         }
         if let webView = webView {
-            retrieveFavicon(fromWebView: webView, handler: handler)
+            retrieveFavicon(fromWebView: webView) { image in
+                if image != nil || !handlerWasCalled {
+                    handler(image)
+                }
+            }
         } else {
             retrieveFavicon(fromURL: url, handler: handler)
         }
@@ -198,7 +204,7 @@ final class FaviconProvider {
         var favicons = [];
         var nodeList = document.getElementsByTagName('link');
         for (var i = 0; i < nodeList.length; i++) {
-            if((nodeList[i].getAttribute('rel') == 'icon')||(nodeList[i].getAttribute('rel') == 'shortcut icon')) {
+            if((nodeList[i].getAttribute('rel').toLowerCase() == 'icon')||(nodeList[i].getAttribute('rel').toLowerCase() == 'shortcut icon')) {
                 const node = nodeList[i];
                 favicons.push({
                     url: node.getAttribute('href'),
