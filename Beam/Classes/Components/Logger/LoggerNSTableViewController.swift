@@ -70,11 +70,6 @@ class LoggerNSTableController: NSViewController {
         tableView.doubleAction = #selector(didDoubleSelectRow)
     }
 
-    override func viewWillAppear() {
-        super.viewWillAppear()
-
-    }
-
     override func viewDidAppear() {
         super.viewDidAppear()
         loadData()
@@ -109,17 +104,19 @@ class LoggerNSTableController: NSViewController {
 
         if let searchText = searchText, !searchText.isEmpty {
             var searchPredicate = NSPredicate(format: "log CONTAINS[cd] %@", searchText)
-            request.fetchLimit = 0
+            let levelPredicate = NSPredicate(format: "level CONTAINS[cd] %@", searchText)
 
             if selectedCategories.isEmpty {
                 let categoryPredicate = NSPredicate(format: "category CONTAINS[cd] %@", searchText)
                 let markerPredicate = NSPredicate(format: "category IN %@", ["marker"])
                 searchPredicate = NSCompoundPredicate(orPredicateWithSubpredicates: [searchPredicate,
                                                                                      categoryPredicate,
+                                                                                     levelPredicate,
                                                                                      markerPredicate])
                 predicates.append(searchPredicate)
             } else {
-                predicates.append(searchPredicate)
+                predicates.append(NSCompoundPredicate(orPredicateWithSubpredicates: [searchPredicate,
+                                                                                     levelPredicate]))
             }
         }
 
@@ -194,6 +191,9 @@ extension LoggerNSTableController: NSTableViewDelegate {
         let logEntry = logEntries[row]
         guard let log = logEntry.log else { return tableView.rowHeight }
 
+        // Some logs are way too big, and calculating their height is too slow
+        guard log.count <= 10240 else { return tableView.rowHeight * 20 }
+
         textField.stringValue = log
 
         guard let tableColumn = tableView.tableColumn(withIdentifier: NSUserInterfaceItemIdentifier(rawValue: "log")),
@@ -204,6 +204,7 @@ extension LoggerNSTableController: NSTableViewDelegate {
         dataCell.stringValue = log
         dataCell.wraps = true
         let rect = CGRect(x: 0, y: 0, width: tableColumn.width, height: CGFloat.greatestFiniteMagnitude)
+
         return max(dataCell.cellSize(forBounds: rect).height + 10.0, tableView.rowHeight)
     }
 
