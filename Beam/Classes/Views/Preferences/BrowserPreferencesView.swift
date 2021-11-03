@@ -91,7 +91,7 @@ struct ClearCachesSection: View {
     var body: some View {
         Button {
             FaviconProvider.shared.clearCache()
-            WKWebsiteDataStore.default().removeData(ofTypes: [WKWebsiteDataTypeDiskCache, WKWebsiteDataTypeMemoryCache], modifiedSince: Date(timeIntervalSince1970: 0), completionHandler:{ })
+            WKWebsiteDataStore.default().removeData(ofTypes: [WKWebsiteDataTypeDiskCache, WKWebsiteDataTypeMemoryCache], modifiedSince: Date(timeIntervalSince1970: 0), completionHandler: { })
         } label: {
             Text("Clear All Web Caches")
                 .font(BeamFont.regular(size: 13).swiftUI)

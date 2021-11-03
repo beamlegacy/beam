@@ -690,8 +690,8 @@
 		A0F558F126BD536A0024C47E /* PreferencesManager+EditorDebug.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0F558F026BD536A0024C47E /* PreferencesManager+EditorDebug.swift */; };
 		A0F558F526BD8F260024C47E /* DebugSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0F558F426BD8F260024C47E /* DebugSection.swift */; };
 		A50241D426D8FA6600C93E1E /* GutterItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50241D326D8FA6600C93E1E /* GutterItemView.swift */; };
-		A50612D626CC75200053AD37 /* Calendar+Calculations.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50612D526CC75200053AD37 /* Calendar+Calculations.swift */; };
-		A50612DF26CC75C70053AD37 /* Calendar+CalculationsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50612DE26CC75C70053AD37 /* Calendar+CalculationsTests.swift */; };
+		A50612D626CC75200053AD37 /* Calendar+Additions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50612D526CC75200053AD37 /* Calendar+Additions.swift */; };
+		A50612DF26CC75C70053AD37 /* Calendar+AdditionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50612DE26CC75C70053AD37 /* Calendar+AdditionsTests.swift */; };
 		A50B372425FA180E00E5D34F /* NSApperance+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50B372325FA180E00E5D34F /* NSApperance+Beam.swift */; };
 		A5105ADF26F3863B00E9A0BA /* TableHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5105ADE26F3863B00E9A0BA /* TableHeaderView.swift */; };
 		A5144001263803600021DD56 /* TrackableScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5144000263803600021DD56 /* TrackableScrollView.swift */; };
@@ -1751,8 +1751,8 @@
 		A0F558F026BD536A0024C47E /* PreferencesManager+EditorDebug.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PreferencesManager+EditorDebug.swift"; sourceTree = "<group>"; };
 		A0F558F426BD8F260024C47E /* DebugSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugSection.swift; sourceTree = "<group>"; };
 		A50241D326D8FA6600C93E1E /* GutterItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GutterItemView.swift; sourceTree = "<group>"; };
-		A50612D526CC75200053AD37 /* Calendar+Calculations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar+Calculations.swift"; sourceTree = "<group>"; };
-		A50612DE26CC75C70053AD37 /* Calendar+CalculationsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar+CalculationsTests.swift"; sourceTree = "<group>"; };
+		A50612D526CC75200053AD37 /* Calendar+Additions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar+Additions.swift"; sourceTree = "<group>"; };
+		A50612DE26CC75C70053AD37 /* Calendar+AdditionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar+AdditionsTests.swift"; sourceTree = "<group>"; };
 		A50B372325FA180E00E5D34F /* NSApperance+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSApperance+Beam.swift"; sourceTree = "<group>"; };
 		A5105ADE26F3863B00E9A0BA /* TableHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableHeaderView.swift; sourceTree = "<group>"; };
 		A5109F902670227800304B3A /* CommandManagerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandManagerTests.swift; sourceTree = "<group>"; };
@@ -3384,7 +3384,7 @@
 				0DC6E2D7269DEB3000BD2E2A /* AppDelegate+Beam */,
 				562A8B5025B5E38D004D3D8A /* String+Beam */,
 				A5316A182667B9110039ED9C /* Range+BeamTests.swift */,
-				A50612DE26CC75C70053AD37 /* Calendar+CalculationsTests.swift */,
+				A50612DE26CC75C70053AD37 /* Calendar+AdditionsTests.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -4225,7 +4225,7 @@
 			isa = PBXGroup;
 			children = (
 				A5A955CA2695576D00F3FDD2 /* CalendarPickerView.swift */,
-				A50612D526CC75200053AD37 /* Calendar+Calculations.swift */,
+				A50612D526CC75200053AD37 /* Calendar+Additions.swift */,
 				A5D21FCF26974BA500250A6A /* CalendarPickerViewModel.swift */,
 				A5D21FD826974C0200250A6A /* CalendarMonthView.swift */,
 				A56FFE0226971F8500BEE6A1 /* CalendarPickerFormatterView.swift */,
@@ -5884,7 +5884,7 @@
 				522969E226669016005067A6 /* APIWebSocketRequest.swift in Sources */,
 				418172452581107C00317ED8 /* SearchBar.swift in Sources */,
 				418172182581107C00317ED8 /* PerformanceDebug.swift in Sources */,
-				A50612D626CC75200053AD37 /* Calendar+Calculations.swift in Sources */,
+				A50612D626CC75200053AD37 /* Calendar+Additions.swift in Sources */,
 				33353EDC26F36B4300063078 /* Shortcut.swift in Sources */,
 				A57BFEB92615B48300CFB646 /* CheckBoxTableCellView.swift in Sources */,
 				A043B800265A547100E267E5 /* TabGroupingContentView.swift in Sources */,
@@ -6017,7 +6017,7 @@
 				8A3C216D2670FF880029AC1A /* PointAndShootTargetTest.swift in Sources */,
 				525C235825BAFCAA001B9625 /* MergeTests.swift in Sources */,
 				032562BB26051D45006513E4 /* RBFilterManagerTests.m in Sources */,
-				A50612DF26CC75C70053AD37 /* Calendar+CalculationsTests.swift in Sources */,
+				A50612DF26CC75C70053AD37 /* Calendar+AdditionsTests.swift in Sources */,
 				527524EB26A1A9E100C2F385 /* BeamObjectTestsHelper.swift in Sources */,
 				8AC2EFDB266F8A0800049005 /* PointAndShootPointingTest.swift in Sources */,
 				8AA9EEB72678ACF6009D6B31 /* WebAutocompleteContextTest.swift in Sources */,

@@ -110,10 +110,9 @@ extension BeamTextEdit {
             ContextMenuItem(title: "Text", subtitle: "-", action: { action(.text) }),
             ContextMenuItem(title: "Divider", subtitle: "---", action: { action(.divider) })
         ]
-        #if DEBUG
-        // TODO: insert only if google calendar is setup
-        items.insert(ContextMenuItem(title: "Meeting", subtitle: "", icon: "editor-calendar", action: { action(.meeting) }), at: 3)
-        #endif
+        if data?.calendarManager.isConnected(calendarService: .googleCalendar) == true {
+            items.insert(ContextMenuItem(title: "Meeting", subtitle: "", icon: "editor-calendar", action: { action(.meeting) }), at: 3)
+        }
         return items
     }
 
@@ -248,10 +247,11 @@ extension BeamTextEdit {
 // MARK: - Meeting Picker
 extension BeamTextEdit {
     private func insertMeetingSearch(in node: TextNode, for range: Range<Int>) {
-        let meetingPicker = MeetingFormatterView()
+        guard let calendarManager = data?.calendarManager else { return }
+        let meetingPicker = MeetingFormatterView(calendarManager: calendarManager, todaysNote: data?.todaysNote)
         meetingPicker.onFinish = { [weak node, weak self] meeting in
-            guard let node = node else { return }
-            let editedRange = (self?.formatterTargetRange?.lowerBound ?? 0)..<node.cursorPosition
+            guard let node = node, let lowerBound = self?.formatterTargetRange?.lowerBound else { return }
+            let editedRange = lowerBound <= node.cursorPosition ? lowerBound..<node.cursorPosition : node.cursorPosition..<node.cursorPosition
             guard let meeting = meeting else {
                 node.cmdManager.deleteText(in: node, for: editedRange)
                 return
