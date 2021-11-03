@@ -154,6 +154,10 @@ extension BeamWindow {
         state.browserTabsManager.currentTab?.dumpBrowsingTree()
     }
 
+    @IBAction func collectPageToCard(_ sender: Any?) {
+        state.browserTabsManager.currentTab?.collectTab()
+    }
+
     // MARK: - Web Navigation
 
     var shift: Bool { NSEvent.modifierFlags.contains(.shift) }

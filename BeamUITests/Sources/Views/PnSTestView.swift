@@ -20,6 +20,11 @@ class PnSTestView: BaseView {
         }
     }
     
+    @discardableResult
+    func waitForCollectPopUpAppear() -> Bool {
+        return self.textField(PnSViewLocators.Other.shootCardPicker.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout)
+    }
+    
     func pointAndShootElement(_ element: XCUIElement) {
         XCUIElement.perform(withKeyModifiers: .option) {
             element.click()
