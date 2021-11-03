@@ -38,6 +38,9 @@ class WebPositions: ObservableObject {
     /// - Parameter frame: frame to set
     /// - Returns: true if frame isn't the root frame
     fileprivate func isChild(_ frame: WebPositions.FrameInfo) -> Bool {
+        guard !frame.href.isEmpty, !frame.parentHref.isEmpty else {
+            return false
+        }
         return frame.href != frame.parentHref
     }
 
@@ -46,8 +49,11 @@ class WebPositions: ObservableObject {
     ///   - href: url of frame
     ///   - prop: positional property to calculate
     ///   - allPositions: Used as aggregator Array for recursive calculation
+    ///   - depth: Current recursion depth, defaults to 0
     /// - Returns: Array of values, starting with the frame's own value.
-    private func calculateViewportPosition(href: HREF, prop: FramePosition, allPositions: [CGFloat] = []) -> [CGFloat] {
+    private func calculateViewportPosition(href: HREF, prop: FramePosition, allPositions: [CGFloat] = [], depth: Int = 0) -> [CGFloat] {
+        // Limit recursion to a depth of 10
+        let DEPTH_LIMIT = 10
         // by default allPositions starts as empty array []
         // reassign allPositions to mutable value
         var positions: [CGFloat] = allPositions
@@ -69,10 +75,10 @@ class WebPositions: ObservableObject {
         case .scrollY:
             positions.append(frame.scrollY)
         }
-        // If we aren't on the root frame
-        if isChild(frame) {
+        // If we aren't on the root frame, and we are below the depth recursion limit
+        if isChild(frame), depth < DEPTH_LIMIT {
             // run this function recursively
-            return calculateViewportPosition(href: frame.parentHref, prop: prop, allPositions: positions)
+            return calculateViewportPosition(href: frame.parentHref, prop: prop, allPositions: positions, depth: depth + 1)
         }
         // return full position array
         return positions
@@ -94,6 +100,9 @@ class WebPositions: ObservableObject {
     /// Sets frameInfo to stored dict. Will only set frameInfo when the provided frame is a child frame, or isn't registered yet.
     /// - Parameter frame: a full FrameInfo object
     func setFrameInfo(frame: FrameInfo) {
+        guard !frame.href.isEmpty else {
+            return
+        }
         if isChild(frame) {
             framesInfo[frame.href] = frame
         }
