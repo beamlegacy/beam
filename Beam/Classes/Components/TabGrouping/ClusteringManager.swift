@@ -31,7 +31,7 @@ class ClusteringManager: ObservableObject {
         }
     }
     var sendRanking = false
-    var initialiseNotes: InitialiseNotes = .zeroPagesAdded
+    var initialiseNotes = false
     var ranker: SessionLinkRanker
     var documentManager: DocumentManager
     var activeSources: ActiveSources
@@ -179,23 +179,26 @@ class ClusteringManager: ObservableObject {
                 case .success(let result):
                     self.clusteredPagesId = result.pageGroups
                     self.clusteredNotesId = result.noteGroups
-                    self.sendRanking = result.sendRanking
+                    if result.flag == .sendRanking {
+                        self.sendRanking = true
+                        self.initialiseNotes = false
+                    } else if result.flag == .addNotes {
+                        self.initialiseNotes = true
+                        self.sendRanking = false
+                    } else {
+                        self.initialiseNotes = false
+                        self.sendRanking = false
+                    }
                     self.logForClustering(result: result.pageGroups, changeCandidate: false)
                 }
             }
         }
         // After adding the second page, add notes from previous sessions
-        switch initialiseNotes {
-        case .zeroPagesAdded:
-            initialiseNotes = .onePageAdded
-        case .onePageAdded:
+        if self.initialiseNotes {
             let notes = BeamNote.fetchNotesWithType(documentManager, type: .note, 10, 0)
             for note in notes {
                 self.addNote(note: note)
             }
-            initialiseNotes = .twoOrMorePagesAdded
-        case .twoOrMorePagesAdded:
-            break
         }
     }
 
@@ -233,7 +236,16 @@ class ClusteringManager: ObservableObject {
             case .success(let result):
                 self.clusteredPagesId = result.pageGroups
                 self.clusteredNotesId = result.noteGroups
-                self.sendRanking = result.sendRanking
+                if result.flag == .sendRanking {
+                    self.sendRanking = true
+                    self.initialiseNotes = false
+                } else if result.flag == .addNotes {
+                    self.initialiseNotes = true
+                    self.sendRanking = false
+                } else {
+                    self.initialiseNotes = false
+                    self.sendRanking = false
+                }
                 self.logForClustering(result: result.pageGroups, changeCandidate: false)
             }
         }
@@ -251,7 +263,16 @@ class ClusteringManager: ObservableObject {
             case .success(let result):
                 self.clusteredPagesId = self.reorganizeGroups(clusters: result.pageGroups)
                 self.clusteredNotesId = result.noteGroups
-                self.sendRanking = result.sendRanking
+                if result.flag == .sendRanking {
+                    self.sendRanking = true
+                    self.initialiseNotes = false
+                } else if result.flag == .addNotes {
+                    self.initialiseNotes = true
+                    self.sendRanking = false
+                } else {
+                    self.initialiseNotes = false
+                    self.sendRanking = false
+                }
                 self.logForClustering(result: result.pageGroups, changeCandidate: true)
             }
         }
