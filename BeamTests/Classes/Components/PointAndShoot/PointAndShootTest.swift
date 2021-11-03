@@ -2,14 +2,13 @@ import XCTest
 import Promises
 import Nimble
 import Fakery
+import Combine
 
 @testable import Beam
 @testable import BeamCore
 
 class TestWebPage: WebPage {
     var events: [String] = []
-    var scrollX: CGFloat = 0
-    var scrollY: CGFloat = 0
     private(set) var originalQuery: String?
     private(set) var pointAndShootAllowed: Bool = true
     private(set) var title: String = "PNS MockPage"
@@ -17,6 +16,7 @@ class TestWebPage: WebPage {
     private(set) var url: URL? = URL(string: urlStr)
     var score: Float = 0
     var pointAndShoot: PointAndShoot?
+    var webPositions: WebPositions?
     var browsingScorer: BrowsingScorer?
     var storage: BeamFileStorage?
     var passwordOverlayController: PasswordOverlayController?
@@ -54,6 +54,7 @@ class TestWebPage: WebPage {
         self.downloadManager = downloadManager
         self.navigationController = navigationController
         self.webView = BeamWebView()
+        self.webPositions = WebPositions()
     }
 
     func addCSS(source: String, when: WKUserScriptInjectionTime) {
@@ -148,6 +149,7 @@ class MockUserInformationsStore: UserInformationsStore {
 }
 
 class BrowsingScorerMock: WebPageHolder, BrowsingScorer {
+    var debouncedUpdateScrollingScore = PassthroughSubject<WebPositions.FrameInfo, Never>()
     private(set) var currentScore: BeamCore.Score = Score()
 
     override init() {
@@ -159,6 +161,7 @@ class BrowsingScorerMock: WebPageHolder, BrowsingScorer {
     func addTextSelection() {}
 
     func applyLongTermScore(changes: (LongTermUrlScore) -> Void) {}
+    func updateScrollingScore(_ frame: WebPositions.FrameInfo) {}
 }
 
 class FileStorageMock: BeamFileStorage {
@@ -237,7 +240,7 @@ class PointAndShootTest: XCTestCase {
         let testFileStorage = FileStorageMock()
         let testDownloadManager = DownloadManagerMock()
         let navigationController = NavigationControllerMock()
-        pns = PointAndShoot(scorer: testBrowsingScorer)
+        pns = PointAndShoot()
         let page = TestWebPage(browsingScorer: testBrowsingScorer,
                                passwordOverlayController: testPasswordOverlayController, pns: pns,
                                fileStorage: testFileStorage, downloadManager: testDownloadManager,

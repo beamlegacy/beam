@@ -5,8 +5,8 @@ export class NativeMock<M> extends Native<M> {
 
   events = []
 
-  constructor(win: BeamWindow<M>) {
-    super(win)
+  constructor(win: BeamWindow<M>, componentPrefix: string) {
+    super(win, componentPrefix)
   }
 
   sendMessage(name: string, payload: MessagePayload): void {

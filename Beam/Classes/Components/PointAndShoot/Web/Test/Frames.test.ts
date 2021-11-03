@@ -1,11 +1,12 @@
 import {PointAndShoot} from "../PointAndShoot"
 import {PointAndShootUIMock} from "./PointAndShootUIMock"
-import {BeamWebFactoryMock} from "../../../../Helpers/Utils/Web/Test/Mock/BeamWebFactoryMock"
 import {BeamMouseEvent} from "../../../../Helpers/Utils/Web/BeamMouseEvent"
 import {BeamDocumentMock} from "../../../../Helpers/Utils/Web/Test/Mock/BeamDocumentMock"
 import {BeamNamedNodeMap} from "../../../../Helpers/Utils/Web/BeamNamedNodeMap"
 import {PNSWindowMock} from "./PointAndShoot.test"
-import {PNSBeamHTMLIFrameElementMock} from "./PNSBeamHTMLIFrameElementMock"
+import { BeamHTMLIFrameElementMock } from "../../../../Helpers/Utils/Web/Test/Mock/BeamHTMLIFrameElementMock"
+
+const SENDBOUNDS_EVENTS = 5
 
 /**
  * @param frameEls {BeamHTMLElement[]}
@@ -39,7 +40,7 @@ function pointAndShootTestBed(frameEls = []): {pns: PointAndShoot, testUI: Point
   win.scrollX = 0
   win.scrollY = 0
   PointAndShoot.instance = null  // Allow test suite to instantiate multiple PointAndShoots
-  const pns = new PointAndShoot(win, testUI, new BeamWebFactoryMock())
+  const pns = new PointAndShoot(win, testUI)
   win.pns = pns
 
   // Check registered event listeners
@@ -48,19 +49,12 @@ function pointAndShootTestBed(frameEls = []): {pns: PointAndShoot, testUI: Point
   expect(eventListeners["scroll"]).toBeDefined()
 
   // Check initial state
-  expect(testUI.eventsCount).toBeGreaterThanOrEqual(1)
-  expect(testUI.eventsCount).toEqual(6)
-  expect(testUI.findEventByName("hasSelection")).toBeTruthy()
-  expect(testUI.findEventByName("selectBounds")).toBeTruthy()
-  expect(testUI.findEventByName("shootBounds")).toBeTruthy()
-  expect(testUI.findEventByName("pointBounds")).toBeTruthy()
-  expect(testUI.findEventByName("frames")).toBeTruthy()
-  testUI.clearEvents()  // To ease further events counting
+  expect(testUI.eventsCount).toEqual(0)
   return {pns, testUI: testUI}
 }
 
 test("single iframe point", () => {
-  const iframe1El = new PNSBeamHTMLIFrameElementMock(new PNSWindowMock(), new BeamNamedNodeMap({
+  const iframe1El = new BeamHTMLIFrameElementMock(new PNSWindowMock(), new BeamNamedNodeMap({
     src: "https://iframe1.com",
     width: 800,
     height: 600,
@@ -82,7 +76,7 @@ test("single iframe point", () => {
     })
     rootPns.onMouseMove(outsideFrame1PointEvent)
 
-    expect(testUI.eventsCount).toEqual(6)
+    expect(testUI.eventsCount).toEqual(SENDBOUNDS_EVENTS)
     expect(testUI.findEventByName("pointBounds").pointTarget.element).toEqual(iframe1El)
   }
   {
@@ -95,12 +89,12 @@ test("single iframe point", () => {
     })
     iframe1Pns.onMouseMove(insideFrame1PointEvent)
     
-    expect(testUI.eventsCount).toEqual(6)
+    expect(testUI.eventsCount).toEqual(SENDBOUNDS_EVENTS)
     expect(testUI.findEventByName("pointBounds").pointTarget.element).toEqual(iframe1El)
 
     const delta = 50
     iframe1El.scrollY(delta)
     
-    expect(iframe1testUI.eventsCount).toEqual(12) // aka 2 document events
+    expect(iframe1testUI.eventsCount).toEqual(SENDBOUNDS_EVENTS*2)
   }
 })

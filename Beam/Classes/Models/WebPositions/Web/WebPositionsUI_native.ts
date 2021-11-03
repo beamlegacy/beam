@@ -1,8 +1,8 @@
 import {Native} from "../../../Helpers/Utils/Web/Native"
-import {FrameInfo, WebEventsUI} from "./WebEventsUI"
-import {BeamWindow} from "../../../Helpers/Utils/Web/BeamTypes"
+import {WebPositionsUI} from "./WebPositionsUI"
+import {BeamWindow, FrameInfo} from "../../../Helpers/Utils/Web/BeamTypes"
 
-export class WebEventsUI_native implements WebEventsUI {
+export class WebPositionsUI_native implements WebPositionsUI {
   /**
    * @param native {Native}
    */
@@ -17,13 +17,13 @@ export class WebEventsUI_native implements WebEventsUI {
   /**
    *
    * @param win {BeamWindow}
-   * @returns {WebEventsUI_native}
+   * @returns {WebPositionsUI_native}
    */
-  static getInstance(win: BeamWindow): WebEventsUI_native {
+  static getInstance(win: BeamWindow): WebPositionsUI_native {
     let instance
     try {
-      const native = Native.getInstance(win)
-      instance = new WebEventsUI_native(native)
+      const native = Native.getInstance(win, "webPositions")
+      instance = new WebPositionsUI_native(native)
     } catch (e) {
       console.error(e)
       instance = null

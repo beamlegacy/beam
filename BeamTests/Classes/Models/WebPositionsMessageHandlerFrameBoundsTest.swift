@@ -1,6 +1,6 @@
 // swiftlint:disable file_length
 //
-//  PointAndShootMessageHandlerFrameBoundsTest.swift
+//  WebPositionsMessageHandlerFrameBoundsTest.swift
 //  BeamTests
 //
 //  Created by Stef Kors on 09/06/2021.
@@ -14,9 +14,9 @@ import Nimble
 @testable import BeamCore
 
 // swiftlint:disable type_body_length type_name file_length
-class PointAndShootMessageHandlerFrameBoundsTest: PointAndShootTest {
+class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
     var browserTabConfiguration: BrowserTabConfiguration!
-    var pointAndShootMessageHandler: PointAndShootMessageHandler!
+    var webPositionsMessageHandler: WebPositionsMessageHandler!
     var windowFrameBounds: [String: Any] = [
         "bounds": [
             "height": 1000,
@@ -29,7 +29,7 @@ class PointAndShootMessageHandlerFrameBoundsTest: PointAndShootTest {
     override func setUpWithError() throws {
         initTestBed()
         self.browserTabConfiguration = BrowserTabConfiguration()
-        self.pointAndShootMessageHandler = PointAndShootMessageHandler(config: browserTabConfiguration)
+        self.webPositionsMessageHandler = WebPositionsMessageHandler(config: browserTabConfiguration)
     }
 
     fileprivate func helperAssertFrameInfoEqual(_ frameInfo: WebPositions.FrameInfo, _ expectedFrameInfo: WebPositions.FrameInfo) {
@@ -45,7 +45,11 @@ class PointAndShootMessageHandlerFrameBoundsTest: PointAndShootTest {
     fileprivate func helperRegisterWindowFrameInfo() {
         // Register window frame
         let windowHref = self.pns.page.url!.string
-        let positions = self.pns.webPositions
+        guard let page = self.testPage,
+              let positions = page.webPositions else {
+                  XCTFail("webPositions are required for test")
+                  return
+              }
 
         // Init window size and position
         let windowFrame = NSRect(x: 0, y: 0, width: 1000, height: 1000)
@@ -63,11 +67,15 @@ class PointAndShootMessageHandlerFrameBoundsTest: PointAndShootTest {
 
     func testOnMessage_frameBounds_windowFrame() throws {
         let windowHref = self.pns.page.url!.string
-        let positions = self.pns.webPositions
+        guard let page = self.testPage,
+              let positions = page.webPositions else {
+                  XCTFail("webPositions are required for test")
+                  return
+              }
         XCTAssertEqual(positions.framesInfo.count, 0, "webPositions should contain no frameInfo")
         // Send bounds of windowFrame
-        self.pointAndShootMessageHandler.onMessage(
-            messageName: "pointAndShoot_frameBounds",
+        self.webPositionsMessageHandler.onMessage(
+            messageName: WebPositionsMessages.WebPositions_frameBounds.rawValue,
             messageBody: [
                 "href": windowHref,
                 "frames": [
@@ -101,7 +109,11 @@ class PointAndShootMessageHandlerFrameBoundsTest: PointAndShootTest {
     // swiftlint:disable:next function_body_length
     func testOnMessage_frameBounds_iFrame() throws {
         let windowHref = self.pns.page.url!.string
-        let positions = self.pns.webPositions
+        guard let page = self.testPage,
+              let positions = page.webPositions else {
+                  XCTFail("webPositions are required for test")
+                  return
+              }
 
         // Each frame on the page will send a "frameBounds" event
         // A page containing a single iFrame:
@@ -124,8 +136,8 @@ class PointAndShootMessageHandlerFrameBoundsTest: PointAndShootTest {
         // Send iframe event
         // Note: The height and width might be a bit smaller (±2px) from what the parent sends
         //       The bounds provided by the parent should be leading
-        self.pointAndShootMessageHandler.onMessage(
-            messageName: "pointAndShoot_frameBounds",
+        self.webPositionsMessageHandler.onMessage(
+            messageName: WebPositionsMessages.WebPositions_frameBounds.rawValue,
             messageBody: [
                 "href": "https://www.iframe.com/about-us",
                 "frames": [
@@ -143,8 +155,8 @@ class PointAndShootMessageHandlerFrameBoundsTest: PointAndShootTest {
             from: self.pns.page
         )
         // Send windowFrame event
-        self.pointAndShootMessageHandler.onMessage(
-            messageName: "pointAndShoot_frameBounds",
+        self.webPositionsMessageHandler.onMessage(
+            messageName: WebPositionsMessages.WebPositions_frameBounds.rawValue,
             messageBody: [
                 "href": windowHref,
                 "frames": [
@@ -194,7 +206,11 @@ class PointAndShootMessageHandlerFrameBoundsTest: PointAndShootTest {
     // swiftlint:disable:next function_body_length
     func testOnMessage_frameBounds_iFrame_reverse_order() throws {
         let windowHref = self.pns.page.url!.string
-        let positions = self.pns.webPositions
+        guard let page = self.testPage,
+              let positions = page.webPositions else {
+                  XCTFail("webPositions are required for test")
+                  return
+              }
 
         // Each frame on the page will send a "frameBounds" event
         // A page containing a single iFrame:
@@ -215,8 +231,8 @@ class PointAndShootMessageHandlerFrameBoundsTest: PointAndShootTest {
         // We expect to start with zero frames
         XCTAssertEqual(positions.framesInfo.count, 0, "webPositions should contain no frameInfo")
         // Send windowFrame event
-        self.pointAndShootMessageHandler.onMessage(
-            messageName: "pointAndShoot_frameBounds",
+        self.webPositionsMessageHandler.onMessage(
+            messageName: WebPositionsMessages.WebPositions_frameBounds.rawValue,
             messageBody: [
                 "href": windowHref,
                 "frames": [
@@ -238,8 +254,8 @@ class PointAndShootMessageHandlerFrameBoundsTest: PointAndShootTest {
         // Send iframe event
         // Note: The height and width might be a bit smaller (±2px) from what the parent sends
         //       The bounds provided by the parent should be leading
-        self.pointAndShootMessageHandler.onMessage(
-            messageName: "pointAndShoot_frameBounds",
+        self.webPositionsMessageHandler.onMessage(
+            messageName: WebPositionsMessages.WebPositions_frameBounds.rawValue,
             messageBody: [
                 "href": "https://www.iframe.com/about-us",
                 "frames": [
@@ -269,7 +285,11 @@ class PointAndShootMessageHandlerFrameBoundsTest: PointAndShootTest {
             width: 1000,
             height: 1000
         )
-        helperAssertFrameInfoEqual(positions.framesInfo[windowHref]!, expectedWindowFrameInfo)
+        guard let frame = positions.framesInfo[windowHref] else {
+            XCTFail("borked")
+            return
+        }
+        helperAssertFrameInfoEqual(frame, expectedWindowFrameInfo)
 
         let expectediFrameInfo = WebPositions.FrameInfo(
             href: "https://www.iframe.com/about-us",
@@ -288,15 +308,16 @@ class PointAndShootMessageHandlerFrameBoundsTest: PointAndShootTest {
     // swiftlint:disable:next function_body_length
     func testOnMessage_frameBounds_onLoad_frameBounds_sequence() throws {
         let windowHref = self.pns.page.url!.string
-        let positions = self.pns.webPositions
+        guard let page = self.testPage,
+              let positions = page.webPositions else {
+                  XCTFail("webPositions are required for test")
+                  return
+              }
 
         // This test simulates the full sequence of loading a page
         // Order of events:
-        // - onLoad "iFrame2"
         // - frameBounds "iFrame2"
-        // - onLoad "iFrame1"
         // - frameBounds "iFrame1"
-        // - onLoad "windowFrame"
         // - frameBounds "windowFrame"
         //
         // These event can arrive in any order and shouldn't overwrite or clear previously registered frames.
@@ -315,15 +336,9 @@ class PointAndShootMessageHandlerFrameBoundsTest: PointAndShootTest {
         //
         // We expect to start with zero frames
         XCTAssertEqual(positions.framesInfo.count, 0, "webPositions should contain no frameInfo")
-        // Send onLoad "iFrame2"
-        self.pointAndShootMessageHandler.onMessage(
-            messageName: "pointAndShoot_onLoad",
-            messageBody: ["href": "https://www.iframe2.com" ],
-            from: self.pns.page
-        )
         // Send frameBounds "iFrame2"
-        self.pointAndShootMessageHandler.onMessage(
-            messageName: "pointAndShoot_frameBounds",
+        self.webPositionsMessageHandler.onMessage(
+            messageName: WebPositionsMessages.WebPositions_frameBounds.rawValue,
             messageBody: [
                 "href": "https://www.iframe2.com",
                 "frames": [
@@ -341,18 +356,12 @@ class PointAndShootMessageHandlerFrameBoundsTest: PointAndShootTest {
             from: self.pns.page
         )
         //
-        // Send onLoad "iFrame1"
-        self.pointAndShootMessageHandler.onMessage(
-            messageName: "pointAndShoot_onLoad",
-            messageBody: ["href": "https://www.iframe1.com/about-us" ],
-            from: self.pns.page
-        )
         // Send frameBounds "iFrame1"
         // Note: The height and width might be a bit smaller (±2px) from what the parent sends
         //       The bounds provided by the parent should be leading
         // Send windowFrame event
-        self.pointAndShootMessageHandler.onMessage(
-            messageName: "pointAndShoot_frameBounds",
+        self.webPositionsMessageHandler.onMessage(
+            messageName: WebPositionsMessages.WebPositions_frameBounds.rawValue,
             messageBody: [
                 "href": "https://www.iframe1.com/about-us",
                 "frames": [
@@ -380,14 +389,8 @@ class PointAndShootMessageHandlerFrameBoundsTest: PointAndShootTest {
         )
         //
         // Send onLoad "windowHref"
-        self.pointAndShootMessageHandler.onMessage(
-            messageName: "pointAndShoot_onLoad",
-            messageBody: ["href": windowHref ],
-            from: self.pns.page
-        )
-        // Send onLoad "windowHref"
-        self.pointAndShootMessageHandler.onMessage(
-            messageName: "pointAndShoot_frameBounds",
+        self.webPositionsMessageHandler.onMessage(
+            messageName: WebPositionsMessages.WebPositions_frameBounds.rawValue,
             messageBody: [
                 "href": windowHref,
                 "frames": [
@@ -451,7 +454,11 @@ class PointAndShootMessageHandlerFrameBoundsTest: PointAndShootTest {
     // swiftlint:disable:next function_body_length
     func testOnMessage_frameBounds_nested_iframes() throws {
         let windowHref = self.pns.page.url!.string
-        let positions = self.pns.webPositions
+        guard let page = self.testPage,
+              let positions = page.webPositions else {
+                  XCTFail("webPositions are required for test")
+                  return
+              }
 
         // Each frame on the page will send a "frameBounds" event
         // A page containing a single iFrame:
@@ -475,8 +482,8 @@ class PointAndShootMessageHandlerFrameBoundsTest: PointAndShootTest {
         // We expect to start with zero frames
         XCTAssertEqual(positions.framesInfo.count, 0, "webPositions should contain no frameInfo")
         // Send windowFrame event
-        self.pointAndShootMessageHandler.onMessage(
-            messageName: "pointAndShoot_frameBounds",
+        self.webPositionsMessageHandler.onMessage(
+            messageName: WebPositionsMessages.WebPositions_frameBounds.rawValue,
             messageBody: [
                 "href": windowHref,
                 "frames": [
@@ -499,8 +506,8 @@ class PointAndShootMessageHandlerFrameBoundsTest: PointAndShootTest {
         // Note: The height and width might be a bit smaller (±2px) from what the parent sends
         //       The bounds provided by the parent should be leading
         // Send windowFrame event
-        self.pointAndShootMessageHandler.onMessage(
-            messageName: "pointAndShoot_frameBounds",
+        self.webPositionsMessageHandler.onMessage(
+            messageName: WebPositionsMessages.WebPositions_frameBounds.rawValue,
             messageBody: [
                 "href": "https://www.iframe1.com/about-us",
                 "frames": [
@@ -528,8 +535,8 @@ class PointAndShootMessageHandlerFrameBoundsTest: PointAndShootTest {
         )
 
         // Send iframe3 event
-        self.pointAndShootMessageHandler.onMessage(
-            messageName: "pointAndShoot_frameBounds",
+        self.webPositionsMessageHandler.onMessage(
+            messageName: WebPositionsMessages.WebPositions_frameBounds.rawValue,
             messageBody: [
                 "href": "https://www.iframe2.com",
                 "frames": [
@@ -591,7 +598,11 @@ class PointAndShootMessageHandlerFrameBoundsTest: PointAndShootTest {
     // swiftlint:disable:next function_body_length
     func testOnMessage_frameBounds_nested_iframes_reverse_order() throws {
         let windowHref = self.pns.page.url!.string
-        let positions = self.pns.webPositions
+        guard let page = self.testPage,
+              let positions = page.webPositions else {
+                  XCTFail("webPositions are required for test")
+                  return
+              }
 
         // Each frame on the page will send a "frameBounds" event
         // A page containing a single iFrame:
@@ -615,8 +626,8 @@ class PointAndShootMessageHandlerFrameBoundsTest: PointAndShootTest {
         // We expect to start with zero frames
         XCTAssertEqual(positions.framesInfo.count, 0, "webPositions should contain no frameInfo")
         // Send iframe3 event
-        self.pointAndShootMessageHandler.onMessage(
-            messageName: "pointAndShoot_frameBounds",
+        self.webPositionsMessageHandler.onMessage(
+            messageName: WebPositionsMessages.WebPositions_frameBounds.rawValue,
             messageBody: [
                 "href": "https://www.iframe2.com",
                 "frames": [
@@ -637,8 +648,8 @@ class PointAndShootMessageHandlerFrameBoundsTest: PointAndShootTest {
         // Note: The height and width might be a bit smaller (±2px) from what the parent sends
         //       The bounds provided by the parent should be leading
         // Send windowFrame event
-        self.pointAndShootMessageHandler.onMessage(
-            messageName: "pointAndShoot_frameBounds",
+        self.webPositionsMessageHandler.onMessage(
+            messageName: WebPositionsMessages.WebPositions_frameBounds.rawValue,
             messageBody: [
                 "href": "https://www.iframe1.com/about-us",
                 "frames": [
@@ -665,8 +676,8 @@ class PointAndShootMessageHandlerFrameBoundsTest: PointAndShootTest {
             from: self.pns.page
         )
         // Send windowFrame event
-        self.pointAndShootMessageHandler.onMessage(
-            messageName: "pointAndShoot_frameBounds",
+        self.webPositionsMessageHandler.onMessage(
+            messageName: WebPositionsMessages.WebPositions_frameBounds.rawValue,
             messageBody: [
                 "href": windowHref,
                 "frames": [
@@ -727,7 +738,11 @@ class PointAndShootMessageHandlerFrameBoundsTest: PointAndShootTest {
 
     func testOnMessage_frameBounds_windowFrame_Scroll() throws {
         let windowHref = self.pns.page.url!.string
-        let positions = self.pns.webPositions
+        guard let page = self.testPage,
+              let positions = page.webPositions else {
+                  XCTFail("webPositions are required for test")
+                  return
+              }
 
         // Each frame on the page will send a "frameBounds" event
         // A page containing a single iFrame:
@@ -738,8 +753,8 @@ class PointAndShootMessageHandlerFrameBoundsTest: PointAndShootTest {
         // +----------------------------------------+
         //
         // Send windowFrame event
-        self.pointAndShootMessageHandler.onMessage(
-            messageName: "pointAndShoot_frameBounds",
+        self.webPositionsMessageHandler.onMessage(
+            messageName: WebPositionsMessages.WebPositions_frameBounds.rawValue,
             messageBody: [
                 "href": windowHref,
                 "frames": [
@@ -750,8 +765,8 @@ class PointAndShootMessageHandlerFrameBoundsTest: PointAndShootTest {
         )
         XCTAssertEqual(positions.framesInfo.count, 1, "webPositions should contain 1 frameInfos")
         // Send windowFrame scroll event
-        self.pointAndShootMessageHandler.onMessage(
-            messageName: "pointAndShoot_scroll",
+        self.webPositionsMessageHandler.onMessage(
+            messageName: WebPositionsMessages.WebPositions_scroll.rawValue,
             messageBody: [
                 "href": windowHref,
                 "height": 1000,
@@ -779,7 +794,11 @@ class PointAndShootMessageHandlerFrameBoundsTest: PointAndShootTest {
     // swiftlint:disable:next function_body_length
     func testOnMessage_frameBounds_nested_iframes_Scroll() throws {
         let windowHref = self.pns.page.url!.string
-        let positions = self.pns.webPositions
+        guard let page = self.testPage,
+              let positions = page.webPositions else {
+                  XCTFail("webPositions are required for test")
+                  return
+              }
 
         // Each frame on the page will send a "frameBounds" event
         // A page containing a single iFrame:
@@ -803,8 +822,8 @@ class PointAndShootMessageHandlerFrameBoundsTest: PointAndShootTest {
         // We expect to start with zero frames
         XCTAssertEqual(positions.framesInfo.count, 0, "webPositions should contain no frameInfo")
         // Send iframe3 event
-        self.pointAndShootMessageHandler.onMessage(
-            messageName: "pointAndShoot_frameBounds",
+        self.webPositionsMessageHandler.onMessage(
+            messageName: WebPositionsMessages.WebPositions_frameBounds.rawValue,
             messageBody: [
                 "href": "https://www.iframe2.com",
                 "frames": [
@@ -825,8 +844,8 @@ class PointAndShootMessageHandlerFrameBoundsTest: PointAndShootTest {
         // Note: The height and width might be a bit smaller (±2px) from what the parent sends
         //       The bounds provided by the parent should be leading
         // Send windowFrame event
-        self.pointAndShootMessageHandler.onMessage(
-            messageName: "pointAndShoot_frameBounds",
+        self.webPositionsMessageHandler.onMessage(
+            messageName: WebPositionsMessages.WebPositions_frameBounds.rawValue,
             messageBody: [
                 "href": "https://www.iframe1.com/about-us",
                 "frames": [
@@ -853,8 +872,8 @@ class PointAndShootMessageHandlerFrameBoundsTest: PointAndShootTest {
             from: self.pns.page
         )
         // Send windowFrame event
-        self.pointAndShootMessageHandler.onMessage(
-            messageName: "pointAndShoot_frameBounds",
+        self.webPositionsMessageHandler.onMessage(
+            messageName: WebPositionsMessages.WebPositions_frameBounds.rawValue,
             messageBody: [
                 "href": windowHref,
                 "frames": [
@@ -874,8 +893,8 @@ class PointAndShootMessageHandlerFrameBoundsTest: PointAndShootTest {
         )
         XCTAssertEqual(positions.framesInfo.count, 3, "webPositions should contain 3 frameInfos")
         // Send windowFrame scroll event
-        self.pointAndShootMessageHandler.onMessage(
-            messageName: "pointAndShoot_scroll",
+        self.webPositionsMessageHandler.onMessage(
+            messageName: WebPositionsMessages.WebPositions_scroll.rawValue,
             messageBody: [
                 "href": windowHref,
                 "height": 1000,
@@ -887,8 +906,8 @@ class PointAndShootMessageHandlerFrameBoundsTest: PointAndShootTest {
             from: self.pns.page
         )
 
-        self.pointAndShootMessageHandler.onMessage(
-            messageName: "pointAndShoot_scroll",
+        self.webPositionsMessageHandler.onMessage(
+            messageName: WebPositionsMessages.WebPositions_scroll.rawValue,
             messageBody: [
                 "href": "https://www.iframe1.com/about-us",
                 "height": 900,
@@ -900,8 +919,8 @@ class PointAndShootMessageHandlerFrameBoundsTest: PointAndShootTest {
             from: self.pns.page
         )
 
-        self.pointAndShootMessageHandler.onMessage(
-            messageName: "pointAndShoot_scroll",
+        self.webPositionsMessageHandler.onMessage(
+            messageName: WebPositionsMessages.WebPositions_scroll.rawValue,
             messageBody: [
                 "href": "https://www.iframe2.com",
                 "height": 800,

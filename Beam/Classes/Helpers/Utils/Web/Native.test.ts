@@ -64,7 +64,7 @@ test("send frame href in message", () => {
   })
   const iframes = [iframe1]
   const win = nativeTestBed(iframe1.src, iframes)
-  const native = new Native(win)
+  const native = new Native(win, "pointAndShoot")
   expect(native.href).toEqual(iframe1.src)
 
   const frameInfo = {href: iframe1.src, bounds: {x: iframe1.clientLeft, y: iframe1.clientTop, width: iframe1.width}}
