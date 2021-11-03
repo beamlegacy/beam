@@ -1,5 +1,5 @@
 //
-//  Calendar+Calculations.swift
+//  Calendar+Additions.swift
 //  Beam
 //
 //  Created by Remi Santos on 17/08/2021.
@@ -15,4 +15,12 @@ extension Calendar {
         self.range(of: .weekday, in: .weekOfYear, for: date)?.count ?? 0
     }
 
+    func startOfMonth(for date: Date) -> Date? {
+        self.date(from: self.dateComponents([.year, .month], from: startOfDay(for: date)))
+    }
+
+    func endOfMonth(for date: Date) -> Date? {
+        guard let startOfMonth = self.startOfMonth(for: date) else { return nil }
+        return self.date(byAdding: DateComponents(month: 1, day: -1), to: startOfMonth)
+    }
 }

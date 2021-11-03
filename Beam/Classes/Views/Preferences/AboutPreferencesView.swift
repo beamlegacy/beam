@@ -54,7 +54,7 @@ struct BeamAboutSection: View {
         } label: {
             (Text("Privacy Policy") + Text(Image("editor-url").renderingMode(.template)))
                 .underline()
-                .font(BeamFont.regular(size: 12).swiftUI)            
+                .font(BeamFont.regular(size: 12).swiftUI)
         }.buttonStyle(PlainButtonStyle())
     }
 
