@@ -100,12 +100,7 @@ extension AppDelegate {
             }
             window.makeKeyAndOrderFront(nil)
 
-            let tab = window.state.createTab(withURL: url, originalQuery: url.absoluteString)
-
-            // We need to wait for a render cycle before asking the webView to become first responder
-            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(16)) {
-                tab.webviewWindow?.makeFirstResponder(tab.webView)
-            }
+            _ = window.state.createTab(withURL: url, originalQuery: url.absoluteString)
             return true
         }
 
