@@ -58,11 +58,10 @@ class NoteEditorTests: BaseTest {
         XCTAssertTrue(contextMenuView.menuElement().waitForExistence(timeout: implicitWaitTimeout))
         
         testRailPrint("Then Context menu items exist, enabled and hittable")
-        for element in NoteViewLocators.ContextMenuItems.allCases {
-            XCTAssertTrue(
-                contextMenuView.staticText(element.accessibilityIdentifier).exists &&
-                contextMenuView.staticText(element.accessibilityIdentifier).isEnabled &&
-                contextMenuView.staticText(element.accessibilityIdentifier).isHittable)
+        for item in NoteViewLocators.ContextMenuItems.allCases {
+            let identifier = item.accessibilityIdentifier
+            let element = contextMenuView.staticText(identifier).firstMatch
+            XCTAssertTrue(element.exists && element.isEnabled && element.isHittable, "element \(identifier) couldn't be reached")
         }
         
         testRailPrint("When I press delete button")

@@ -64,7 +64,7 @@ class CardReferenceFormatterView: FormatterView {
                      excludingElements: [UUID] = [],
                      onSelectNoteHandler: ((_ noteId: UUID, _ elementId: UUID?) -> Void)? = nil,
                      onCreateNoteHandler: ((_ title: String) -> Void)? = nil) {
-        self.init(frame: CGRect.zero)
+        self.init(key: "CardReference", viewType: .inline)
         self.typingPrefix = typingPrefix
         self.typingSuffix = typingSuffix
         self.searchCardContent = searchCardContent

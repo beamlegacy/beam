@@ -32,10 +32,15 @@ class FormatterView: NSView {
 
     var isMouseInsideView = false
     private var isVisible = false
-    convenience init(key: String, viewType: FormatterViewType) {
-        self.init(frame: .zero)
+    init(key: String, viewType: FormatterViewType) {
+        super.init(frame: .zero)
+        self.key = key
         self.viewType = viewType
         self.setupUI()
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 
     func setupUI() {

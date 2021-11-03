@@ -39,9 +39,7 @@ class ContextMenuFormatterView: FormatterView {
                      defaultSelectedIndex: Int? = nil,
                      sizeToFit: Bool = false,
                      onSelectHandler: (() -> Void)? = nil) {
-        self.init(frame: CGRect.zero)
-        self.key = key
-        self.viewType = .inline
+        self.init(key: key, viewType: .inline)
         self.items = items
         self.displayedItems = items
         self.direction = direction

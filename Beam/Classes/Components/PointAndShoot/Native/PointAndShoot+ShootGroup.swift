@@ -112,7 +112,7 @@ extension PointAndShoot {
             let initialRect: CGRect = targets.first?.rect ?? .zero
             let shouldUseCache = targets.count > 10
             var cacheKey: NSString?
-            if shouldUseCache, let shapeCache = shapeCache  {
+            if shouldUseCache, let shapeCache = shapeCache {
                 let key = shapeCache.cacheKey(for: targets)
                 if let cachedRect = largefusionRectsCache[key] {
                     let diffX = cachedRect.firstRect.minX - initialRect.minX
