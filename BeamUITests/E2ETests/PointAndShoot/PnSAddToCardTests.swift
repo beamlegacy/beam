@@ -193,4 +193,37 @@ class PnSAddToCardTests: BaseTest {
         XCTAssertEqual(cardNotes.count, 1)
         XCTAssertEqual(cardNotes[0].value as? String, "")
     }
+    
+    func testCollectFullPage() {
+        launchApp()
+        let pnsView = PnSTestView()
+        let helper = BeamUITestsHelper(pnsView.app)
+        let shortcutsHelper = ShortcutsHelper()
+        let expectedNoteText = "Point And Shoot Test Fixture Cursor"
+        
+        testRailPrint("Given I open Test page")
+        helper.openTestPage(page: .page3)
+        
+        testRailPrint("When I collect full page")
+        shortcutsHelper.shortcutActionInvoke(action: .collectFullPage)
+        pnsView.waitForCollectPopUpAppear()
+        pnsView.typeKeyboardKey(.enter)
+        shortcutsHelper.shortcutActionInvoke(action: .switchBetweenCardWeb)
+        
+        testRailPrint("Then I see \(expectedNoteText) as collected link")
+        let cardView = CardTestView()
+        let cardNotes = CardTestView().getCardNotesForVisiblePart()
+        //To be refactored once BE-2117 merged
+        XCTAssertEqual(cardNotes.count, 2)
+        XCTAssertEqual(cardView.getElementStringValue(element: cardNotes[0]), expectedNoteText)
+        XCTAssertEqual(cardView.getElementStringValue(element: cardNotes[1]), expectedNoteText)
+        
+        testRailPrint("When I try to collect full page for empty tab")
+        shortcutsHelper.shortcutActionInvoke(action: .switchBetweenCardWeb)
+        shortcutsHelper.shortcutActionInvoke(action: .newTab)
+        shortcutsHelper.shortcutActionInvoke(action: .collectFullPage)
+        
+        testRailPrint("Then collect page doesn't appear")
+        XCTAssertFalse(pnsView.waitForCollectPopUpAppear(), "Collect pop-up appeared for an empty page")
+    }
 }

@@ -34,6 +34,10 @@ struct PointAndShootCardPicker: View {
 
     @State private var shootCompleted: Bool = false
 
+    var completed: Bool {
+        return shootCompleted || completedGroup?.directShoot == true
+    }
+
     private var isTodaysNote: String? {
         browserTabsManager.currentTab?.noteController.noteOrDefault.isTodaysNote ?? false ? data.todaysName : nil
     }
@@ -64,11 +68,11 @@ struct PointAndShootCardPicker: View {
             // MARK: - Top Half
             HStack(spacing: BeamSpacing._40) {
                 // MARK: - Prefix
-                PrefixLabel(completed: shootCompleted && completedGroup != nil, confirmation: completedGroup?.confirmation)
+                PrefixLabel(completed: completed && completedGroup != nil, confirmation: completedGroup?.confirmation)
 
                 // MARK: - TextField
                 ZStack {
-                    if !shootCompleted {
+                    if !completed {
                         BeamTextField(
                             text: $cardSearchField,
                             isEditing: $isEditingCardName,
@@ -122,7 +126,7 @@ struct PointAndShootCardPicker: View {
                                 currentCardName: currentCardName,
                                 tokenize: cursorIsOnCardName,
                                 selectedResult: nil,
-                                completed: shootCompleted
+                                completed: completed
                             )
                         )
                     } else if completedGroup?.confirmation == .success {
@@ -137,7 +141,7 @@ struct PointAndShootCardPicker: View {
 
                 // MARK: - Icon
                 if isEditingCardName && (currentCardName != nil || cardSearchField.isEmpty) {
-                    if !shootCompleted {
+                    if !completed {
                         Icon(name: "editor-format_enter", size: 12, color: BeamColor.Generic.placeholder.swiftUI)
                             .transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.15)))
                             .onTapGesture {
@@ -162,7 +166,7 @@ struct PointAndShootCardPicker: View {
 
             Spacer()
 
-            if !shootCompleted {
+            if !completed {
                 // MARK: - Autocomplete
                 if isEditingCardName && currentCardName == nil {
                     DestinationNoteAutocompleteList(model: autocompleteModel)
@@ -330,12 +334,12 @@ extension PointAndShootCardPicker {
 
 extension PointAndShootCardPicker {
     private func onCancelEditing() {
-        guard !shootCompleted else { return }
+        guard !completed else { return }
         onComplete?(nil, nil)
     }
     // MARK: - onFinishEditing
     private func onFinishEditing(_ withCommand: Bool = false) {
-        guard !shootCompleted else { return }
+        guard !completed else { return }
         shootCompleted = true
         // Select search result
         selectSearchResult(withCommand)
