@@ -728,6 +728,36 @@ import Promises
         sendTree(grouped: true)
     }
 
+    func collectTab() {
+
+        guard let layer = webView.layer,
+                let url = url,
+                let pns = pointAndShoot,
+                !isLoading else { return }
+
+        let animator = FullPageCollectAnimator(webView: webView)
+
+        guard let (hoverLayer, hoverGroup, webViewGroup) = animator.buildFullPageCollectAnimation() else { return }
+
+        let remover = LayerRemoverAnimationDelegate(with: hoverLayer) { _ in
+            DispatchQueue.main.async {
+                let target = PointAndShoot.Target.init(id: UUID().uuidString, rect: self.webView.frame, mouseLocation: pns.mouseLocation, html: "<a href=\"\(url)\">\(self.title)</a>", animated: true)
+                let shootGroup = PointAndShoot.ShootGroup.init(UUID().uuidString, [target], "", "", shapeCache: nil, showRect: false, directShoot: true)
+
+                if let note = self.noteController.note {
+                    pns.addShootToNote(targetNote: note, withNote: nil, group: shootGroup, completion: {})
+                } else {
+                    pns.activeShootGroup = shootGroup
+                }
+            }
+        }
+        hoverGroup.delegate = remover
+
+        layer.superlayer?.addSublayer(hoverLayer)
+        layer.add(webViewGroup, forKey: "animation")
+        hoverLayer.add(hoverGroup, forKey: "hover")
+    }
+
     private func tabDidChangeWindow() {
         guard isPinned else { return }
         let config = WKSnapshotConfiguration()

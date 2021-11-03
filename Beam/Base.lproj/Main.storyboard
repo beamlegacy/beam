@@ -379,14 +379,9 @@
                                                 <action selector="performClose:" target="Ady-hI-5gd" id="HmO-Ls-i7Q"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Save…" keyEquivalent="s" id="pxx-59-PXV">
+                                        <menuItem title="Collect Page to card…" tag="4" enabled="NO" keyEquivalent="s" id="pxx-59-PXV" customClass="LoadedWebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
                                             <connections>
-                                                <action selector="saveDocument:" target="Ady-hI-5gd" id="teZ-XB-qJY"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="Save As…" keyEquivalent="S" id="Bw7-FT-i3A">
-                                            <connections>
-                                                <action selector="saveDocumentAs:" target="Ady-hI-5gd" id="mDf-zr-I0C"/>
+                                                <action selector="collectPageToCard:" target="Ady-hI-5gd" id="YjN-Z7-AFg"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="24w-bP-3Wy"/>
@@ -1261,13 +1256,13 @@
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <scrollView autohidesScrollers="YES" horizontalLineScroll="24" horizontalPageScroll="10" verticalLineScroll="24" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="oXk-Ey-8xs">
-                                <rect key="frame" x="0.0" y="0.0" width="800" height="767"/>
+                                <rect key="frame" x="0.0" y="0.0" width="800" height="765"/>
                                 <clipView key="contentView" id="DvU-s3-Ha3">
-                                    <rect key="frame" x="1" y="1" width="798" height="765"/>
+                                    <rect key="frame" x="1" y="1" width="798" height="763"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" tableStyle="inset" alternatingRowBackgroundColors="YES" columnReordering="NO" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" rowHeight="24" viewBased="YES" id="fld-jj-1Ba">
-                                            <rect key="frame" x="0.0" y="0.0" width="798" height="765"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="798" height="763"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <size key="intercellSpacing" width="17" height="0.0"/>
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
