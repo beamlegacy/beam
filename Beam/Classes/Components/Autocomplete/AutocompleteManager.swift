@@ -13,7 +13,7 @@ import SwiftUI
 // BeamState Autocomplete management
 class AutocompleteManager: ObservableObject {
     static let noteFrecencyParamKey: FrecencyParamKey = .note30d0
-    static let urlFrecencyParamKey: FrecencyParamKey = .webReadingTime30d0
+    static let urlFrecencyParamKey: FrecencyParamKey = .webVisit30d0
 
     @Published var searchQuery: String = ""
 
