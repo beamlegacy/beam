@@ -67,7 +67,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         let isSwiftUIPreview = NSString(string: ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] ?? "0").boolValue
-        if Configuration.env == "$(ENV)", !isSwiftUIPreview {
+        if Configuration.env == "$(ENV)" || Configuration.sentryKey == "$(SENTRY_KEY)", !isSwiftUIPreview {
             fatalError("Please restart your build, your ENV wasn't detected properly, and this should only happens for SwiftUI Previews")
         }
 
