@@ -128,7 +128,7 @@ struct OmniBarSearchField: View {
                 .disabled(!isEditing) // Allow Window dragging
                 .accessibility(addTraits: .isSearchField)
                 .accessibility(identifier: "OmniBarSearchField")
-                if let subtitle = resultSubtitle {
+                if let subtitle = resultSubtitle, !textFieldText.wrappedValue.isEmpty {
                     HStack(spacing: 0) {
                         Text(textFieldText.wrappedValue)
                             .font(BeamFont.medium(size: 13).swiftUI)
