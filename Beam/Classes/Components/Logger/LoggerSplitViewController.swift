@@ -1,6 +1,7 @@
 import Foundation
 
 class LoggerSplitViewController: NSSplitViewController {
+    var progressIndicator: NSProgressIndicator?
     private var searchTask: DispatchWorkItem?
     var categoryController: LoggerCategoryTableViewController? {
         splitViewItems.first?.viewController as? LoggerCategoryTableViewController
@@ -12,7 +13,7 @@ class LoggerSplitViewController: NSSplitViewController {
         super.viewDidLoad()
 
         if let leftVC = splitViewItems.first?.viewController {
-            leftVC.view.widthAnchor.constraint(lessThanOrEqualToConstant: 180).isActive = true
+            leftVC.view.widthAnchor.constraint(lessThanOrEqualToConstant: 210).isActive = true
         }
     }
 
@@ -37,9 +38,11 @@ extension LoggerSplitViewController: NSTextFieldDelegate, NSSearchFieldDelegate 
 
         let task = DispatchWorkItem { [weak self] in
             self?.logsController?.setSearchText((obj.object as? NSSearchField)?.stringValue)
+            self?.progressIndicator?.stopAnimation(nil)
         }
-        self.searchTask = task
+        searchTask = task
+        progressIndicator?.startAnimation(nil)
 
-        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.1, execute: task)
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.5, execute: task)
     }
 }
