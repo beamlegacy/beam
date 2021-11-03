@@ -1,25 +1,19 @@
 {
-  "name": "beam-collect",
+  "name": "beam-webpositions",
   "private": true,
   "version": "0.1.0",
-  "description": "Beam web collect",
+  "description": "Beam JS WebPositions handler",
   "scripts": {
     "clean": "rm -Rf node_modules",
     "prebuild": "yarn install",
-    "build": "yarn run build_native",
-    "build_native": "webpack --mode=development",
-    "build_web": "node_modules/.bin/sass --embed-source-map index_web.scss:index_prod.css && parcel build --no-content-hash --no-optimize index_web.js",
-    "build_debug": "node_modules/.bin/sass --embed-source-map index_debug.scss:index_prod.css && parcel build --no-content-hash --no-optimize index_debug.js",
+    "build": "webpack --mode=development",
+    "dist": "webpack --mode=production",
     "watch": "webpack --watch --mode=development",
     "start": "webpack serve --mode=development",
-    "dist": "webpack --mode=production",
     "test": "node --experimental-vm-modules node_modules/.bin/jest --reporters=default --silent",
-    "test:verbose": "node --experimental-vm-modules node_modules/.bin/jest --reporters=default",
     "test-ci": "node --experimental-vm-modules node_modules/.bin/jest --ci --silent --reporters=default --reporters=jest-junit --coverage",
-    "benchmark-show": "yarn run jest-measure",
-    "benchmark-update": "UPDATE_BENCHMARK=true yarn test",
-    "lint": "eslint **/*.ts --format gitlab .",
-    "lint-fix": "eslint **/*.ts --format gitlab . --fix"
+    "lint": "eslint **/*.ts --format gitlab ..",
+    "lint-fix": "eslint **/*.ts --format gitlab .. --fix"
   },
   "targets": {
     "main": {
@@ -44,7 +38,6 @@
     "@typescript-eslint/parser": "^4.28.4",
     "babel-jest": "^26.6.3",
     "css-loader": "^5.2.4",
-    "debounce": "^1.2.1",
     "dequal": "^2.0.2",
     "eslint": "^7.31.0",
     "eslint-formatter-gitlab": "^2.2.0",

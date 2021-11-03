@@ -1,5 +1,4 @@
 import {BeamMutationObserver, BeamMutationRecord, BeamNode} from "../../BeamTypes"
-import {WebFactory} from "../../../../../Components/PointAndShoot/Web/WebFactory"
 
 export class BeamMutationObserverMock implements BeamMutationObserver {
   constructor(public fn) {
@@ -14,12 +13,5 @@ export class BeamMutationObserverMock implements BeamMutationObserver {
   }
   takeRecords(): BeamMutationRecord[] {
     throw new Error("Method not implemented.")
-  }
-}
-
-export class BeamWebFactoryMock implements WebFactory {
-  MutationObserver: BeamMutationObserver;
-  createMutationObserver(fn): BeamMutationObserver {
-    return new BeamMutationObserverMock(fn)
   }
 }

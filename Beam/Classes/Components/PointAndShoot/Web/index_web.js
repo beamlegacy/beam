@@ -1,6 +1,5 @@
 import {PointAndShoot} from "./PointAndShoot"
 import {PointAndShootUI_web} from "./PointAndShootUI_web"
-import { WebFactory } from "./WebFactory"
 
 const win = window
 
@@ -10,4 +9,4 @@ if (!window.beam) {
   window.beam = {}
 }
 
-window.beam.__ID__PointAndShoot = PointAndShoot.getInstance(win, pointAndShootUI, new WebFactory())
+window.beam.__ID__PointAndShoot = PointAndShoot.getInstance(win, pointAndShootUI)

@@ -6,6 +6,8 @@
 //
 
 import XCTest
+import Combine
+
 @testable import Beam
 @testable import BeamCore
 
@@ -36,6 +38,7 @@ class FrecencyNoteTriggerTests: XCTestCase {
     }
 
     class FakeBrowsingScorer: BrowsingScorer {
+        var debouncedUpdateScrollingScore = PassthroughSubject<WebPositions.FrameInfo, Never>()
         var page: WebPage
         var currentScore: Score = Score()
 
@@ -45,6 +48,7 @@ class FrecencyNoteTriggerTests: XCTestCase {
         func updateScore() {}
         func addTextSelection() {}
         func applyLongTermScore(changes: (LongTermUrlScore) -> Void) {}
+        func updateScrollingScore(_ frame: WebPositions.FrameInfo) {}
     }
 
     class FakeBeamWebViewConfiguration: BeamWebViewConfiguration {
@@ -77,6 +81,7 @@ class FrecencyNoteTriggerTests: XCTestCase {
         var title: String = ""
         var url: URL?
 
+        var webPositions: WebPositions?
         var pointAndShoot: PointAndShoot?
         var navigationController: WebNavigationController?
         var browsingScorer: BrowsingScorer?
@@ -141,7 +146,7 @@ class FrecencyNoteTriggerTests: XCTestCase {
         let webView = BeamWebView(frame: CGRect(), configuration: config)
         let page = FakeWebPage(webView: webView)
         page.url = URL(string: "http://www.amazon.gr")
-        let pns = PointAndShoot(scorer: FakeBrowsingScorer(page: page))
+        let pns = PointAndShoot()
         pns.data = data
         pns.page = page
         let target: PointAndShoot.Target = PointAndShoot.Target(

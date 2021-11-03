@@ -25,8 +25,6 @@ class WebPageBaseImpl: WebPage {
     var fileStorage: BeamFileStorage?
 
     var frame: NSRect = .zero
-    var scrollX: CGFloat = .zero
-    var scrollY: CGFloat = .zero
     var originalQuery: String?
     var pointAndShootAllowed: Bool = false
 
@@ -36,6 +34,7 @@ class WebPageBaseImpl: WebPage {
     var responseStatusCode: Int = 200
 
     var pointAndShoot: PointAndShoot?
+    var webPositions: WebPositions?
     var navigationController: WebNavigationController?
     var errorPageManager: ErrorPageManager?
     var browsingScorer: BrowsingScorer?
