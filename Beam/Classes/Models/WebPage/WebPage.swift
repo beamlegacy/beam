@@ -12,8 +12,6 @@ protocol WebPage: AnyObject, Scorable {
     var webviewWindow: NSWindow? { get }
 
     var frame: NSRect { get }
-    var scrollX: CGFloat { get set }
-    var scrollY: CGFloat { get set }
 
     var originalQuery: String? { get }
     var title: String { get }
@@ -31,6 +29,7 @@ protocol WebPage: AnyObject, Scorable {
 
     var pointAndShootAllowed: Bool { get }
     var pointAndShoot: PointAndShoot? { get }
+    var webPositions: WebPositions? { get }
 
     @discardableResult
     func executeJS(_ jsCode: String, objectName: String?) -> Promise<Any?>

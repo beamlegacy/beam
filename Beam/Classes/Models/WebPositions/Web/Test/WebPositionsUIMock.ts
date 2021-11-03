@@ -1,7 +1,8 @@
-import {FrameInfo, WebEventsUI} from "../WebEventsUI"
-import {EventsMock} from "../../../../Helpers/Utils/Web/Test/Mock/EventsMock"
+import { FrameInfo } from "../../../../Helpers/Utils/Web/BeamTypes"
+import { EventsMock } from "../../../../Helpers/Utils/Web/Test/Mock/EventsMock"
+import { WebPositionsUI } from "../WebPositionsUI"
 
-export class WebEventsUIMock extends EventsMock implements WebEventsUI {
+export class WebPositionsUIMock extends EventsMock implements WebPositionsUI {
   setFramesInfo(framesInfo: FrameInfo[]) {
     this.events.push({name: "frames", framesInfo})
   }

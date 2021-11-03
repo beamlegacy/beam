@@ -1,8 +1,7 @@
-import {BeamRangeGroup, BeamShootGroup} from "../../../Helpers/Utils/Web/BeamTypes"
+import {BeamRangeGroup, BeamShootGroup, FrameInfo} from "../../../Helpers/Utils/Web/BeamTypes"
 import {PointAndShootUI} from "./PointAndShootUI"
 import {PointAndShootUI_native} from "./PointAndShootUI_native"
 import {PointAndShootUI_web} from "./PointAndShootUI_web"
-import {FrameInfo} from "./WebEventsUI"
 
 export class PointAndShootUI_debug implements PointAndShootUI {
   /**
@@ -14,8 +13,9 @@ export class PointAndShootUI_debug implements PointAndShootUI {
     this.native = native
     this.web = web
   }
-  isTypingOnWebView(_isTypingOnWebView: boolean): void {
-      throw new Error("Method not implemented.")
+  prefix: string
+  typingOnWebView(_isTypingOnWebView: boolean): void {
+    throw new Error("Method not implemented.")
   }
   clearSelection(_id: string): void {
     throw new Error("Method not implemented.")

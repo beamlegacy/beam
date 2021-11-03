@@ -11,8 +11,6 @@ import Promises
 
     var id: UUID = UUID()
 
-    var scrollX: CGFloat = 0
-    var scrollY: CGFloat = 0
     var width: CGFloat = 0
     var height: CGFloat = 0
     private var pixelRatio: Double = 1
@@ -166,11 +164,24 @@ import Promises
     }()
 
     lazy var pointAndShoot: PointAndShoot? = {
-        guard let scorer = browsingScorer else { return nil }
-        let pns = PointAndShoot(scorer: scorer)
+        let pns = PointAndShoot()
         pns.page = self
         return pns
     }()
+
+    lazy var webPositions: WebPositions? = {
+        let webPositions = WebPositions(scrollUpdateCallback: scrollUpdateCallback)
+        webPositions.page = self
+        return webPositions
+    }()
+
+    /// The callback triggered when WebPositions recieves an updated scroll position.
+    /// Callback will be called very often. Take care of your own debouncing or throttling
+    /// - Parameter frame: WebPage frame coordinates and positions
+    func scrollUpdateCallback(_ frame: WebPositions.FrameInfo) {
+        guard let scorer = browsingScorer else { return }
+        scorer.debouncedUpdateScrollingScore.send(frame)
+    }
 
     private var _navigationController: BeamWebNavigationController?
     var navigationController: WebNavigationController? {

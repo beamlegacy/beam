@@ -5,9 +5,7 @@ import BeamCore
  from the frame-relative positions provided by JavaScript in a web frame.
  */
 
-class WebPositions: ObservableObject {
-    @Published var scale: CGFloat = 1
-
+class WebPositions: WebPageHolder, ObservableObject {
     /**
      * Frame info by frame URL
      */
@@ -32,6 +30,13 @@ class WebPositions: ObservableObject {
         var scrollY: CGFloat = 0
         var width: CGFloat = -1
         var height: CGFloat = -1
+    }
+
+    var scrollUpdateCallback: ((_ frame: FrameInfo) -> Void)?
+
+    // Setup debouncer
+    init(scrollUpdateCallback: ((_ frame: FrameInfo) -> Void)? = nil) {
+        self.scrollUpdateCallback = scrollUpdateCallback
     }
 
     /// Utility to check if provided frame is a child frame
@@ -122,6 +127,7 @@ class WebPositions: ObservableObject {
         frame.scrollX = scrollX
         frame.scrollY = scrollY
         framesInfo[href] = frame
+        scrollUpdateCallback?(frame)
     }
 
     /// Utility to remove items from framesInfo
@@ -133,31 +139,5 @@ class WebPositions: ObservableObject {
         }
 
         framesInfo.removeAll()
-    }
-
-    /**
-     - Parameter jsArea: a dictionary with x, y, width and height
-     - Returns:
-     */
-    func jsToRect(jsArea: AnyObject) -> NSRect {
-        guard let frameX = jsArea["x"] as? CGFloat,
-              let frameY = jsArea["y"] as? CGFloat,
-              let width = jsArea["width"] as? CGFloat,
-              let height = jsArea["height"] as? CGFloat else {
-            return .zero
-        }
-        return NSRect(x: frameX, y: frameY, width: width, height: height)
-    }
-
-    /**
-     - Parameter jsPoint: a dictionary with x, y
-     - Returns:
-     */
-    func jsToPoint(jsPoint: AnyObject) -> NSPoint {
-        guard let frameX = jsPoint["x"] as? CGFloat,
-              let frameY = jsPoint["y"] as? CGFloat else {
-            return .zero
-        }
-        return NSPoint(x: frameX, y: frameY)
     }
 }
