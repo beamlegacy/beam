@@ -16,12 +16,14 @@ extension PointAndShoot {
 
     struct ShootGroup {
         init(_ id: String, _ targets: [Target], _ text: String, _ href: String,
-             _ noteInfo: NoteInfo = NoteInfo(title: ""), shapeCache: PnSTargetsShapeCache?) {
+             _ noteInfo: NoteInfo = NoteInfo(title: ""), shapeCache: PnSTargetsShapeCache?, showRect: Bool = true, directShoot: Bool = false) {
             self.id = id
             self.href = href
             self.targets = targets
             self.text = text
             self.noteInfo = noteInfo
+            self.showRect = showRect
+            self.directShoot = directShoot
             self.shapeCache = shapeCache
             self.updateSelectionPath()
         }
@@ -33,6 +35,8 @@ extension PointAndShoot {
         var shapeCache: PnSTargetsShapeCache?
         var numberOfElements: Int = 0
         var confirmation: ShootConfirmation?
+        var showRect: Bool
+        var directShoot: Bool
         func html() -> String {
             targets.reduce("", {
                 $1.html.count > $0.count ? $1.html : $0

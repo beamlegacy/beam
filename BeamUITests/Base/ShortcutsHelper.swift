@@ -62,6 +62,7 @@ class ShortcutsHelper {
         case quitApp
         case close
         case closeWindow
+        case collectFullPage
     }
     
     @discardableResult
@@ -129,6 +130,8 @@ class ShortcutsHelper {
             invokeCMDKey("w")
         case .closeWindow:
             invokeCMDShiftKey("w")
+        case .collectFullPage:
+            invokeCMDKey("s")
         }
         return BaseView()
     }

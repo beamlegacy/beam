@@ -50,7 +50,7 @@ struct PointAndShootView: View {
 
     @ViewBuilder var body: some View {
         // MARK: - Pointing and Shooting rect
-        if let activeGroup = pns.activeShootGroup ?? pns.activePointGroup {
+        if let activeGroup = pns.activeShootGroup ?? pns.activePointGroup, activeGroup.showRect {
             if activeGroup.targets.count == 1,
                let target = activeGroup.targets.first {
                 // MARK: - Pointing

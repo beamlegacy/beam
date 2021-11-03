@@ -120,6 +120,7 @@
 		33B27468264C0F7100A318CD /* AutoUpdate.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 33B27450264C0CDC00A318CD /* AutoUpdate.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		33B2746A264C103400A318CD /* SmallUpdateIndicatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33B27469264C103400A318CD /* SmallUpdateIndicatorView.swift */; };
 		33CCBFA626A61C15004B6236 /* PopoverWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33CCBFA526A61C14004B6236 /* PopoverWindow.swift */; };
+		33D0D90B2732BFAB00D6C924 /* FullPageCollectAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33D0D90A2732BFAB00D6C924 /* FullPageCollectAnimator.swift */; };
 		33D3248E26CEA5A300B44281 /* WebSearchMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33D3248D26CEA5A300B44281 /* WebSearchMessageHandler.swift */; };
 		33D5F85A2697478E002C4F25 /* PopupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33D5F8592697478E002C4F25 /* PopupView.swift */; };
 		33DEF48826617E0B00834839 /* CircledButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33DEF48726617E0B00834839 /* CircledButton.swift */; };
@@ -1178,6 +1179,7 @@
 		33B27441264C0CDB00A318CD /* AutoUpdate.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = AutoUpdate.xcodeproj; path = Extern/AutoUpdate/AutoUpdate.xcodeproj; sourceTree = "<group>"; };
 		33B27469264C103400A318CD /* SmallUpdateIndicatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmallUpdateIndicatorView.swift; sourceTree = "<group>"; };
 		33CCBFA526A61C14004B6236 /* PopoverWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverWindow.swift; sourceTree = "<group>"; };
+		33D0D90A2732BFAB00D6C924 /* FullPageCollectAnimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FullPageCollectAnimator.swift; sourceTree = "<group>"; };
 		33D3248D26CEA5A300B44281 /* WebSearchMessageHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSearchMessageHandler.swift; sourceTree = "<group>"; };
 		33D5F8592697478E002C4F25 /* PopupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopupView.swift; sourceTree = "<group>"; };
 		33DEF48726617E0B00834839 /* CircledButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircledButton.swift; sourceTree = "<group>"; };
@@ -4172,6 +4174,7 @@
 				BAA67CDE485E5E7774A978D2 /* LoggingMessageHandler.swift */,
 				A58645E326FB116E00D7FF86 /* WebViewFocusMessageHandler.swift */,
 				A52B5016271D72FB0078670C /* PinnedBrowserTabsManager.swift */,
+				33D0D90A2732BFAB00D6C924 /* FullPageCollectAnimator.swift */,
 			);
 			path = TabAndWebview;
 			sourceTree = "<group>";
@@ -5687,6 +5690,7 @@
 				33AC9D9826AFF453004E7EF4 /* FocusableTextField.swift in Sources */,
 				4181724E2581107C00317ED8 /* TabStats.swift in Sources */,
 				4181724F2581107C00317ED8 /* WebView.swift in Sources */,
+				33D0D90B2732BFAB00D6C924 /* FullPageCollectAnimator.swift in Sources */,
 				A5208E05261F2156006193AF /* AllCardsContextualMenu.swift in Sources */,
 				A5C9F005261353420096380F /* WindowPage.swift in Sources */,
 				96C9AA5725901AA9007D3D98 /* LinksSection.swift in Sources */,
