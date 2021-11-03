@@ -110,7 +110,8 @@ platform :mac do
       skip_testing: "BeamUITests",
       output_types: "junit",
       output_files: "tests.xml",
-      use_system_scm: true
+      use_system_scm: true,
+      number_of_retries: 2
     )
     # For Gitlab artifacts
     slather(

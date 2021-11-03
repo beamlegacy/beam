@@ -1,30 +1,35 @@
 import {PointAndShootUI} from "./PointAndShootUI"
 import {Native} from "../../../Helpers/Utils/Web/Native"
-import {WebEventsUI_native} from "./WebEventsUI_native"
 import {
   BeamElement,
   BeamHTMLElement,
+  BeamMessageHandler,
   BeamNodeType,
   BeamRange,
   BeamRangeGroup,
   BeamRect,
-  BeamShootGroup
+  BeamShootGroup,
+  FrameInfo,
+  MessageHandlers
 } from "../../../Helpers/Utils/Web/BeamTypes"
 import {BeamElementHelper} from "../../../Helpers/Utils/Web/BeamElementHelper"
 import {BeamRectHelper} from "../../../Helpers/Utils/Web/BeamRectHelper"
 import {PointAndShootHelper} from "./PointAndShootHelper"
 import {dequal as isDeepEqual} from "dequal"
-import {PointAndShootMessages} from "./PointAndShoot"
 
-export class PointAndShootUI_native extends WebEventsUI_native implements PointAndShootUI {
+export class PointAndShootUI_native implements PointAndShootUI {
+  native
   /**
    * @param native {Native}
    */
-  constructor(native: Native<PointAndShootMessages>) {
-    super(native)
+  constructor(native: Native<MessageHandlers>) {
+    this.native = native
     this.datasetKey = `${this.prefix}Collect`
   }
-  protected prefix = "__ID__"
+  setFramesInfo(framesInfo: FrameInfo[]): void {
+    this.native.sendMessage("frameBounds", { frames: framesInfo })
+  }
+  prefix = "__ID__"
   datasetKey
 
   pointPayload = {}
@@ -156,7 +161,7 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
     this.native.sendMessage("hasSelection", { hasSelection })
   }
   
-  isTypingOnWebView(isTypingOnWebView: boolean): void {
+  typingOnWebView(isTypingOnWebView: boolean): void {
     this.native.sendMessage("isTypingOnWebView", { isTypingOnWebView })
   }
 
@@ -223,7 +228,6 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
     const bounds = el.getBoundingClientRect()
     // If we have a too large element, exit early
     if (BeamElementHelper.isLargerThanWindow(bounds, win)) {
-      console.log("returning early because bounds are larger than window");
       return 
     }
 

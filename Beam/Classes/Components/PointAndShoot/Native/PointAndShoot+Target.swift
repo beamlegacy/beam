@@ -59,7 +59,7 @@ extension PointAndShoot {
         guard let view = page.webView else {
             fatalError("Webview is required to scale target correctly")
         }
-        let scale: CGFloat = scaleForWebPositions(webView: view)
+        let scale: CGFloat = view.zoomLevel()
         // We can reduce calculations for the MainWindowFrame
         let isDifferentUrl = href != page.url?.absoluteString
         let (xDelta, yDelta) = deltaForWebPositions(href: href)
@@ -85,11 +85,10 @@ extension PointAndShoot {
         return target.translateTarget(xDelta, yDelta, scale: scale)
     }
 
-    private func scaleForWebPositions(webView: WKWebView) -> CGFloat {
-        webPositions.scale * webView.zoomLevel()
-    }
-
     private func deltaForWebPositions(href: String) -> (x: CGFloat, y: CGFloat) {
+        guard let webPositions = page.webPositions else {
+            fatalError("webPositions is required to scale target correctly")
+        }
         let frameOffsetX = webPositions.viewportPosition(href, prop: WebPositions.FramePosition.x).reduce(0, +)
         let frameOffsetY = webPositions.viewportPosition(href, prop: WebPositions.FramePosition.y).reduce(0, +)
         let frameScrollX = webPositions.viewportPosition(href, prop: WebPositions.FramePosition.scrollX)

@@ -29,11 +29,10 @@ export class BeamElementHelper {
    * Returns if an element is a textarea or an input elements with a text
    * based input type (text, email, date, number...)
    *
-   * @param element {BeamElement} The DOM Element to check.
+   * @param element {BeamHTMLElement} The DOM Element to check.
    * @return If the element is some kind of text input.
    */
-
-  static isTextualInputType(element: BeamElement): boolean {
+  static isTextualInputType(element: BeamHTMLElement): boolean {
     const tag = element.tagName.toLowerCase()
     if (tag === "textarea") {
       return true
@@ -104,6 +103,7 @@ export class BeamElementHelper {
    * @param win: {BeamWindow}
    * @return If the element is considered visible
    */
+  // is slow, propertyvalue and boundingrect
   static isVisible(element: BeamElement, win: BeamWindow<any>): boolean {
     let visible = false
 

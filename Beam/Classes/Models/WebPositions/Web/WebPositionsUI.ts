@@ -1,16 +1,6 @@
-import {BeamRect} from "../../../Helpers/Utils/Web/BeamTypes"
+import {FrameInfo} from "../../../Helpers/Utils/Web/BeamTypes"
 
-export class FrameInfo {
-  /**
-   */
-  href: string
-
-  /**
-   */
-  bounds: BeamRect
-}
-
-export interface WebEventsUI {
+export interface WebPositionsUI {
   setFramesInfo(framesInfo: FrameInfo[])
 
   setScrollInfo(scrollInfo: any)

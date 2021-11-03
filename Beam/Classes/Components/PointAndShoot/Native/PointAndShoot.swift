@@ -24,9 +24,10 @@ public struct NoteInfo: Encodable {
 
 // swiftlint:disable file_length
 class PointAndShoot: WebPageHolder, ObservableObject {
-    var webPositions: WebPositions = WebPositions()
     var data: BeamData = AppDelegate.main.data
-    private let scorer: BrowsingScorer
+    private var scorer: BrowsingScorer? {
+        page.browsingScorer
+    }
     let shapeCache = PnSTargetsShapeCache()
 
     @Published var activePointGroup: ShootGroup?
@@ -46,10 +47,6 @@ class PointAndShoot: WebPageHolder, ObservableObject {
     @Published var hasActiveSelection: Bool = false
     @Published var isTypingOnWebView: Bool = false
     @Published var mouseLocation: NSPoint = NSPoint()
-
-    init(scorer: BrowsingScorer) {
-        self.scorer = scorer
-    }
 
     override var page: WebPage {
         get {
@@ -309,7 +306,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
             // Set Destination note to the current card
             // Update BrowsingScorer about note submission
             page.setDestinationNote(targetNote, rootElement: targetNote)
-            scorer.addTextSelection()
+            scorer?.addTextSelection()
             // TODO: Convert BeamText to BeamElement of quote type
             // Adds urlId to current card source
             let urlId = LinkStore.createIdFor(sourceUrl.absoluteString, title: nil)

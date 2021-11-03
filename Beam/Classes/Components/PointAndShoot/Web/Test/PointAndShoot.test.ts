@@ -1,8 +1,7 @@
-import {BeamDocument, BeamLocation, BeamRange, BeamWebkit} from "../../../../Helpers/Utils/Web/BeamTypes"
-import {PNSWindow, PointAndShoot, PointAndShootMessages} from "../PointAndShoot"
+import {BeamDocument, BeamLocation, BeamRange, BeamWebkit, BeamMessageHandler, MessageHandlers} from "../../../../Helpers/Utils/Web/BeamTypes"
+import {PointAndShoot} from "../PointAndShoot"
 import {BeamWindowMock, MessageHandlerMock} from "../../../../Helpers/Utils/Web/Test/Mock/BeamWindowMock"
 import {PointAndShootUIMock} from "./PointAndShootUIMock"
-import {BeamWebFactoryMock} from "../../../../Helpers/Utils/Web/Test/Mock/BeamWebFactoryMock"
 import {BeamElementHelper} from "../../../../Helpers/Utils/Web/BeamElementHelper"
 import {BeamLocationMock} from "../../../../Helpers/Utils/Web/Test/Mock/BeamLocationMock"
 import {BeamMouseEvent} from "../../../../Helpers/Utils/Web/BeamMouseEvent"
@@ -13,8 +12,14 @@ import {BeamHTMLTextAreaElementMock} from "../../../../Helpers/Utils/Web/Test/Mo
 import {BeamSelectionMock} from "../../../../Helpers/Utils/Web/Test/Mock/BeamSelectionMock"
 import {BeamHTMLElementMock} from "../../../../Helpers/Utils/Web/Test/Mock/BeamHTMLElementMock"
 import {BeamRangeMock} from "../../../../Helpers/Utils/Web/Test/Mock/BeamRangeMock"
+import { PointAndShootHelper } from "../PointAndShootHelper"
 
-export class PNSWindowMock extends BeamWindowMock<PointAndShootMessages> implements PNSWindow {
+const SENDBOUNDS_EVENTS = 5
+
+export class PNSWindowMock extends BeamWindowMock<MessageHandlers> {
+  create(doc: BeamDocument, location: Location): BeamWindowMock<MessageHandlers> {
+    return new PNSWindowMock(doc, location)
+  }
 
   pns: PointAndShoot
 
@@ -22,14 +27,10 @@ export class PNSWindowMock extends BeamWindowMock<PointAndShootMessages> impleme
     super(doc, location)
   }
 
-  webkit: BeamWebkit<PointAndShootMessages> = {
+  webkit: BeamWebkit<MessageHandlers> = {
     messageHandlers: {
-      pointAndShoot_frameBounds: new MessageHandlerMock()
+      pointAndShoot_frameBounds: new MessageHandlerMock() 
     }
-  }
-
-  create(doc: BeamDocument, location: BeamLocation): PNSWindowMock {
-    return new PNSWindowMock(doc, location)
   }
 }
 
@@ -71,15 +72,14 @@ function pointAndShootTestBed(frameEls = [], documentAttributes = {}) {
   })
   const win = new PNSWindowMock(testDocument)
   PointAndShoot.instance = null // Allow test suite to instantiate multiple PointAndShoots
-  const pns = new PointAndShoot(win, testUI, new BeamWebFactoryMock())
+  const pns = new PointAndShoot(win, testUI)
 
   // Check registered event listeners
   const eventListeners = win.getEventListeners(win)
   expect(eventListeners["mousemove"]).toBeDefined()
   expect(eventListeners["scroll"]).toBeDefined()
-
   // Check initial state
-  expect(testUI.eventsCount).toBeGreaterThanOrEqual(1)
+  expect(testUI.eventsCount).toEqual(0)
   testUI.clearEvents() // To ease further events counting
   return { pns, testUI }
 }
@@ -109,7 +109,7 @@ test("mouse move without Option", () => {
   expect(testUI.eventsCount).toEqual(0)
 })
 
-test("point with mouse move + Option", () => {
+test.only("point with mouse move + Option", () => {
   // Note: option isn't taken into account on the JS side anymore
   const { pns, testUI } = pointAndShootTestBed()
   const pointedElement = new BeamHTMLElementMock("p")
@@ -128,10 +128,10 @@ test("point with mouse move + Option", () => {
     altKey: true,
     clientX: 101,
     clientY: 102
-  })
+  })  
   pns.onMouseMove(pointEvent)
 
-  expect(testUI.eventsCount).toEqual(6)
+  expect(testUI.eventsCount).toEqual(SENDBOUNDS_EVENTS)
   const testEvent = testUI.findEventByName("pointBounds")
   expect(testEvent.pointTarget.element).toEqual(pointedElement)
 })
@@ -157,7 +157,7 @@ test("point with mouse move + Option should be allowed on unfocused input elemen
   })
   pns.onMouseMove(pointEvent)
 
-  expect(testUI.eventsCount).toEqual(6)
+  expect(testUI.eventsCount).toEqual(SENDBOUNDS_EVENTS)
   const testEvent = testUI.findEventByName("pointBounds")
   expect(testEvent.pointTarget.element).toEqual(pointedElement)
 })
@@ -199,7 +199,7 @@ test.each(textualInputTypes)(
     expect(BeamElementHelper.getType(pointedElement)).toEqual(type)
 
     // expect events on active text inputs, but no shootTargets added
-    expect(testUI.eventsCount).toEqual(6)
+    expect(testUI.eventsCount).toEqual(SENDBOUNDS_EVENTS)
     expect(pns.shootTargets.length).toEqual(0)
     expect(pns.selectionRangeGroups.length).toEqual(0)
   }
@@ -231,7 +231,7 @@ test("point with mouse move + Option should be prevented on active text inputs",
   expect(BeamElementHelper.getType(pointedElement)).toEqual("text")
 
   // expect events on active text inputs, but no shootTargets added
-  expect(testUI.eventsCount).toEqual(6)
+  expect(testUI.eventsCount).toEqual(SENDBOUNDS_EVENTS)
   expect(pns.shootTargets.length).toEqual(0)
   expect(pns.selectionRangeGroups.length).toEqual(0)
 })
@@ -261,7 +261,7 @@ test("point with mouse move + Option should be prevented on active textarea", ()
   expect(pointedElement.tagName).toEqual("textarea")
 
   // expect events on active text inputs, but no shootTargets added
-  expect(testUI.eventsCount).toEqual(6)
+  expect(testUI.eventsCount).toEqual(SENDBOUNDS_EVENTS)
   expect(pns.shootTargets.length).toEqual(0)
   expect(pns.selectionRangeGroups.length).toEqual(0)
 })
@@ -293,7 +293,7 @@ test("point with mouse move + Option should be prevented on active contentEditab
 
 
   // expect events on active text inputs, but no shootTargets added
-  expect(testUI.eventsCount).toEqual(6)
+  expect(testUI.eventsCount).toEqual(SENDBOUNDS_EVENTS)
   expect(pns.shootTargets.length).toEqual(0)
   expect(pns.selectionRangeGroups.length).toEqual(0)
 })
@@ -333,7 +333,7 @@ test("point with mouse move + Option should be prevented on elements nested with
   expect(BeamElementHelper.getContentEditable(pointedElement.parentElement)).toEqual("true")
   expect(BeamElementHelper.getContentEditable(pointedElement)).toEqual("inherit")
   // expect events on active text inputs, but no shootTargets added
-  expect(testUI.eventsCount).toEqual(6)
+  expect(testUI.eventsCount).toEqual(SENDBOUNDS_EVENTS)
   expect(pns.shootTargets.length).toEqual(0)
   expect(pns.selectionRangeGroups.length).toEqual(0)
 })
@@ -370,17 +370,12 @@ test("mouse move + Option then click on an arbitrary input element should not sh
 
 
   // expect events on active text inputs, but no shootTargets added
-  expect(testUI.eventsCount).toEqual(12)
+  expect(testUI.eventsCount).toEqual(SENDBOUNDS_EVENTS*2)
   expect(pns.shootTargets.length).toEqual(0)
   expect(pns.selectionRangeGroups.length).toEqual(0)
 })
 
 test("point with Option key down then mouse move", () => {
-  const { pns, testUI } = pointAndShootTestBed()
-
-  const keyEvent = new BeamKeyEvent({ key: "Alt" })
-  pns.onKeyDown(keyEvent)
-
   const pointedElement = new BeamHTMLElementMock("p")
   pointedElement.bounds = {
     width: 130,
@@ -390,6 +385,12 @@ test("point with Option key down then mouse move", () => {
   }
   pointedElement.width = 130
   pointedElement.height = 120
+
+  const { pns, testUI } = pointAndShootTestBed([], {activeElement: pointedElement})
+
+  const keyEvent = new BeamKeyEvent({ key: "Alt" })
+  pns.onKeyDown(keyEvent)
+
   const pointEvent = new BeamMouseEvent({
     name: "mousemove",
     target: pointedElement,
@@ -399,12 +400,11 @@ test("point with Option key down then mouse move", () => {
   })
   pns.onMouseMove(pointEvent)
 
-  expect(testUI.eventsCount).toEqual(12) // aka 2 document events
+  expect(testUI.eventsCount).toEqual(SENDBOUNDS_EVENTS*2) // aka 2 document events
   expect(testUI.findEventByName("hasSelection")).toEqual({ name: "hasSelection", hasSelection: false })
   expect(testUI.findEventByName("selectBounds")).toEqual({ name: "selectBounds", rangeGroups: [] })
   expect(testUI.findEventByName("shootBounds")).toEqual({ name: "shootBounds", shootTargets: [] })
   expect(testUI.findEventByName("pointBounds")).toBeTruthy()
-  expect(testUI.findEventByName("frames")).toBeTruthy()
 })
 
 test("getSelectionRanges should return the number of available ranges", () => {
@@ -415,7 +415,7 @@ test("getSelectionRanges should return the number of available ranges", () => {
   selection.addRange(createRange())
   selection.addRange(createRange())
   selection.addRange(createRange())
-  const ranges = pns.getSelectionRanges(selection)
+  const ranges = PointAndShootHelper.getSelectionRanges(selection)
 
   expect(ranges.length).toEqual(4)
 })
@@ -433,7 +433,7 @@ test("onSelection should create selection event in testUI", () => {
   // run onSelection event
   pns.onSelection()
   // expect:
-  expect(testUI.eventsCount).toEqual(6)
+  expect(testUI.eventsCount).toEqual(SENDBOUNDS_EVENTS)
   expect(testUI.findEventByName("selectBounds").rangeGroups.length).toEqual(1)
 })
 
@@ -502,7 +502,7 @@ test("Keydown (A) on input element, then mouseMove should set isTypingOnWebView 
   expect(pns.isTypingOnWebView).toEqual(false)
 })
 
-test("Keydown (Alt) on input element, should not set set isTypingOnWebView to true", () => {
+test("Keydown (Alt) on input element, should set isTypingOnWebView to true", () => {
   // Setup elements
   const inputElement = new BeamHTMLInputElementMock("input", {type: "text"})
   inputElement.bounds = {
@@ -531,8 +531,8 @@ test("Keydown (Alt) on input element, should not set set isTypingOnWebView to tr
   const keyEvent = new BeamKeyEvent({ key: "Alt", target: inputElement})
   pns.onKeyDown(keyEvent)
 
-  // when typing we expect false
-  expect(pns.isTypingOnWebView).toEqual(false)
+  // when type Alt on inputElement we expect true
+  expect(pns.isTypingOnWebView).toEqual(true)
 
   const pointEvent = new BeamMouseEvent({
     name: "mousemove",
