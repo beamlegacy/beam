@@ -8,14 +8,19 @@
 import Foundation
 import BeamCore
 
-enum PublicServerError: Error {
+enum PublicServerError: Error, Equatable {
     case notAuthenticated
     case notAllowed
     case notFound
     case wrongFormat
-    case serverError
+    case serverError(error: String?)
     case parsingError
     case noDataReceived
+    case noUsername
+}
+
+struct ErrorMessage: Decodable {
+    let message: String?
 }
 
 class PublicServer {
@@ -55,7 +60,7 @@ class PublicServer {
             }
         }
 
-        func error(for responseCode: Int) -> PublicServerError? {
+        func error(for responseCode: Int, data: Data?) -> PublicServerError? {
             switch responseCode {
             case 200...299:
                 return nil
@@ -65,10 +70,13 @@ class PublicServer {
                 return .notAllowed
             case 404:
                 return .notFound
+            case 412:
+                return .noUsername
             case 422:
                 return .wrongFormat
             default:
-                return .serverError
+                let error = errorMessage(from: data)
+                return .serverError(error: error)
             }
         }
 
@@ -131,6 +139,13 @@ class PublicServer {
             body.append(data)
             return body as Data
         }
+
+        private func errorMessage(from data: Data?) -> String? {
+            guard let data = data else { return nil }
+            let decoder = JSONDecoder()
+            let error = try? decoder.decode(ErrorMessage.self, from: data)
+            return error?.message
+        }
     }
 
     let baseURL = URL(string: "https://public.beamapp.co")!
@@ -152,7 +167,7 @@ class PublicServer {
                     return
                 }
 
-                if let response = urlResponse as? HTTPURLResponse, let serverError = publicServerRequest.error(for: response.statusCode) {
+                if let response = urlResponse as? HTTPURLResponse, let serverError = publicServerRequest.error(for: response.statusCode, data: data) {
                     completion(.failure(serverError))
                     return
                 }

@@ -137,8 +137,15 @@ struct NoteHeaderView: View {
     }
 
     private func handlePublicationError(error: Error) {
-        if let error = error as? PublicServerError, error == .notAllowed {
-            showPublicationError(error: .noUsername)
+        if let error = error as? PublicServerError {
+            switch error {
+            case .noUsername:
+                showPublicationError(error: .noUsername)
+            case .serverError(error: let error):
+                showPublicationError(error: .custom(error ?? "An error occurred…"))
+            default:
+                showPublicationError(error: .custom(error.localizedDescription))
+            }
         } else if let error = error as? BeamNoteSharingUtilsError {
             switch error {
             case .canceled:
