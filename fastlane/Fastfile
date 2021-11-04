@@ -287,7 +287,8 @@ platform :mac do
       package: "builds/Beam.app",
       verbose: true,
       print_log: true,
-      bundle_id: ENV["APP_IDENTIFIER"]
+      bundle_id: ENV["APP_IDENTIFIER"],
+      asc_provider: ENV["TEAM_ID"]
     )
   end
 
