@@ -326,6 +326,12 @@ class PointAndShoot: WebPageHolder, ObservableObject {
                 }
 
                 // Add to source Note
+                if destinationElement.children.count == 1,
+                   let onlyChild = destinationElement.children.first,
+                   onlyChild.text.isEmpty,
+                   onlyChild.kind == .bullet {
+                    destinationElement.removeChild(onlyChild)
+                }
                 elements.forEach({ quote in destinationElement.addChild(quote) })
 
                 // Complete PNS and clear stored data
