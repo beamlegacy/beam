@@ -110,11 +110,19 @@ class AutocompleteManager: ObservableObject {
         if !finalResults.isEmpty {
             Logger.shared.logDebug("-- Autosuggest results for `\(searchText)` --", category: .autocompleteManager)
             for result in finalResults {
-                Logger.shared.logDebug("\(result.source) \(result.id) \(String(describing: result.url))", category: .autocompleteManager)
+                Logger.shared.logDebug("\(String(describing: result))", category: .autocompleteManager)
             }
         }
         let (elapsedTime, timeUnit) = startedAt.endChrono()
         Logger.shared.logInfo("autocomplete results in \(elapsedTime) \(timeUnit)", category: .autocompleteManager)
+    }
+
+    static func logIntermediate(step: String, stepShortName: String, results: [AutocompleteResult]) {
+        Logger.shared.logDebug("-------------\(step)-------------------", category: .autocompleteManager)
+        for res in results {
+            Logger.shared.logDebug("\(stepShortName): \(String(describing: res))", category: .autocompleteManager)
+        }
+        Logger.shared.logDebug("--------------------------------------", category: .autocompleteManager)
     }
 
     func isResultCandidateForAutoselection(_ result: AutocompleteResult, forSearch searchText: String) -> Bool {
