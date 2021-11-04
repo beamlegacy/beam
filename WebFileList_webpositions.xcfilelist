@@ -4,8 +4,6 @@
 ./Beam/Classes/Models/WebPositions/Web/WebPositionsUI.ts
 ./Beam/Classes/Models/WebPositions/Web/WebPositions.ts
 ./Beam/Classes/Helpers/Utils/Web/BeamMouseEvent.ts
-./Beam/Classes/Helpers/Utils/Web/Native.test.ts
-./Beam/Classes/Helpers/Utils/Web/BeamNode.test.ts
 ./Beam/Classes/Helpers/Utils/Web/Test/Mock/BeamTextMock.ts
 ./Beam/Classes/Helpers/Utils/Web/Test/Mock/BeamHTMLInputElementMock.ts
 ./Beam/Classes/Helpers/Utils/Web/Test/Mock/EventsMock.ts

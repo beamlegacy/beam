@@ -1,4 +1,7 @@
 ./Beam/Classes/Components/PointAndShoot/Web/PointAndShootUI.ts
+./Beam/Classes/Components/PointAndShoot/Web/Test/Native.test.ts
+./Beam/Classes/Components/PointAndShoot/Web/Test/BeamNode.test.ts
+./Beam/Classes/Components/PointAndShoot/Web/Test/PNSWindowMock.ts
 ./Beam/Classes/Components/PointAndShoot/Web/Test/PointAndShootUI_native.test.ts
 ./Beam/Classes/Components/PointAndShoot/Web/Test/PointAndShootUIMock.ts
 ./Beam/Classes/Components/PointAndShoot/Web/Test/PointAndShoot.test.ts
@@ -11,8 +14,6 @@
 ./Beam/Classes/Components/PointAndShoot/Web/Util.ts
 ./Beam/Classes/Components/PointAndShoot/Web/PointAndShootUI_debug.ts
 ./Beam/Classes/Helpers/Utils/Web/BeamMouseEvent.ts
-./Beam/Classes/Helpers/Utils/Web/Native.test.ts
-./Beam/Classes/Helpers/Utils/Web/BeamNode.test.ts
 ./Beam/Classes/Helpers/Utils/Web/Test/Mock/BeamTextMock.ts
 ./Beam/Classes/Helpers/Utils/Web/Test/Mock/BeamHTMLInputElementMock.ts
 ./Beam/Classes/Helpers/Utils/Web/Test/Mock/EventsMock.ts
