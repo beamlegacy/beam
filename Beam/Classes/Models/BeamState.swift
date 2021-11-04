@@ -235,12 +235,16 @@ import Sentry
         EventsTracker.logBreadcrumb(message: "\(#function) toURL \(url)", category: "BeamState")
         currentTab?.willSwitchToNewUrl(url: url)
         currentTab?.load(url: url)
+
+        guard let currentTabId = currentTab?.id else { return }
+        browserTabsManager.removeTabFromGroup(tabId: currentTabId)
+        browserTabsManager.createNewGroup(for: currentTabId)
     }
 
     func addNewTab(origin: BrowsingTreeOrigin?, setCurrent: Bool = true, note: BeamNote? = nil, element: BeamElement? = nil, url: URL? = nil, webView: BeamWebView? = nil) -> BrowserTab {
         EventsTracker.logBreadcrumb(message: "\(#function) \(String(describing: origin)) \(String(describing: note)) \(String(describing: url))", category: "BeamState")
         let tab = BrowserTab(state: self, browsingTreeOrigin: origin, originMode: mode, note: note, rootElement: element, webView: webView)
-        browserTabsManager.addNewTab(tab, setCurrent: setCurrent, withURL: url)
+        browserTabsManager.addNewTabAndGroup(tab, setCurrent: setCurrent, withURL: url)
         mode = .web
         return tab
     }
@@ -249,7 +253,7 @@ import Sentry
         EventsTracker.logBreadcrumb(message: "\(#function) \(String(describing: note)) \(String(describing: url))", category: "BeamState")
         let origin = BrowsingTreeOrigin.searchBar(query: originalQuery ?? "<???>")
         let tab = addNewTab(origin: origin, setCurrent: setCurrent, note: note, element: rootElement, url: url, webView: webView)
-        
+
         DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(200)) {
             tab.webviewWindow?.makeFirstResponder(tab.webView)
         }
