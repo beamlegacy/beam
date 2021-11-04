@@ -47,6 +47,7 @@ class BrowserTabsManager: ObservableObject {
         didSet {
             self.updateTabsHandlers()
             self.delegate?.tabsManagerDidUpdateTabs(tabs)
+            self.autoSave()
         }
     }
 
@@ -89,6 +90,7 @@ class BrowserTabsManager: ObservableObject {
 
             self.updateCurrentTabObservers()
             self.delegate?.tabsManagerDidChangeCurrentTab(currentTab)
+            self.autoSave()
         }
     }
 
@@ -122,10 +124,12 @@ class BrowserTabsManager: ObservableObject {
         currentTab?.$canGoBack.sink { [unowned self]  v in
             guard let tab = self.currentTab else { return }
             self.delegate?.tabsManagerBrowsingHistoryChanged(canGoBack: v, canGoForward: tab.canGoForward)
+            self.autoSave()
         }.store(in: &tabScope)
         currentTab?.$canGoForward.sink { [unowned self]  v in
             guard let tab = self.currentTab else { return }
             self.delegate?.tabsManagerBrowsingHistoryChanged(canGoBack: tab.canGoBack, canGoForward: v)
+            self.autoSave()
         }.store(in: &tabScope)
     }
 
@@ -296,5 +300,14 @@ extension BrowserTabsManager {
 
     func unpinTab(_ tabToUnpin: BrowserTab) {
         updateIsPinned(for: tabToUnpin, isPinned: false)
+    }
+}
+
+// State tabs auto save
+extension BrowserTabsManager {
+    func autoSave() {
+        if tabs.contains(where: { !$0.isPinned }) {
+            AppDelegate.main.saveCloseTabsCmd(onExit: false)
+        }
     }
 }

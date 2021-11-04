@@ -77,6 +77,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         LibrariesManager.shared.configure()
+        // We set our own ExceptionHandler but first we get the already set one in that case Sentry
+        // We do what we want when there is an exception, in this case saving the tabs then we pass it back to Sentry
+        NSSetUncaughtExceptionHandler { _ in
+            guard let prevHandler = NSGetUncaughtExceptionHandler() else { return }
+            AppDelegate.main.saveCloseTabsCmd(onExit: true)
+            NSSetUncaughtExceptionHandler(prevHandler)
+        }
+
         ContentBlockingManager.shared.setup()
         BeamObjectManager.setup()
 
@@ -245,34 +253,33 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     static let closeTabCmdGrp = "CloseTabCmdGrp"
     func applicationWillTerminate(_ aNotification: Notification) {
         // Insert code here to tear down your application
-        saveCloseTabsCmd()
         data.clusteringManager.saveOrphanedUrls(orphanedUrlManager: data.clusteringOrphanedUrlManager)
     }
 
-    private func saveCloseTabsCmd() {
+    public func saveCloseTabsCmd(onExit: Bool) {
+        guard windows.contains(where: { $0.state.browserTabsManager.tabs.count > 0}) else { return }
         var windowForTabsCmd = [Int: Command<BeamState>]()
         var windowCount = 0
+        let tmpCmdManager = CommandManager<BeamState>()
 
         for window in windows where window.state.browserTabsManager.tabs.count > 0 {
-            window.state.cmdManager.beginGroup(with: AppDelegate.closeTabCmdGrp)
+            tmpCmdManager.beginGroup(with: AppDelegate.closeTabCmdGrp)
 
             for tab in window.state.browserTabsManager.tabs {
-                guard !tab.isPinned else { continue }
-                let closeTabCmd = CloseTab(tab: tab, appIsClosing: true)
-                window.state.cmdManager.run(command: closeTabCmd, on: window.state)
+                guard !tab.isPinned, let index = window.state.browserTabsManager.tabs.firstIndex(of: tab) else { continue }
+                let closeTabCmd = CloseTab(tab: tab, appIsClosing: true, tabIndex: index, wasCurrentTab: window.state.browserTabsManager.currentTab === tab)
+                tmpCmdManager.appendToDone(command: closeTabCmd)
             }
-            window.state.cmdManager.endGroup(forceGroup: true)
+            tmpCmdManager.endGroup(forceGroup: true)
 
-            if let lastCmd = window.state.cmdManager.lastCmd {
+            if let lastCmd = tmpCmdManager.lastCmd {
                 windowForTabsCmd[windowCount] = lastCmd
                 windowCount += 1
             }
         }
         let encoder = JSONEncoder()
         guard let data = try? encoder.encode(windowForTabsCmd) else { return }
-        UserDefaults.standard.set(data, forKey: BeamWindow.savedCloseTabCmdsKey)
-        _ = self.data.browsingTreeSender?.groupWait()
-        _ = BrowsingTreeStoreManager.shared.groupWait()
+        UserDefaults.standard.set(data, forKey: onExit ? BeamWindow.savedCloseTabCmdsKey : BeamWindow.savedTabsKey)
     }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
@@ -322,7 +329,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: -
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         data.saveData()
-
+        saveCloseTabsCmd(onExit: true)
+        _ = self.data.browsingTreeSender?.groupWait()
+        _ = BrowsingTreeStoreManager.shared.groupWait()
         // Save changes in the application's managed object context before the application terminates.
         let context = CoreDataManager.shared.mainContext
 
