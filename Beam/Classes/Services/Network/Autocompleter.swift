@@ -4,7 +4,7 @@ import Combine
 // To improve the auto complete results we get, look at how chromium does it:
 // https://chromium.googlesource.com/chromium/src/+/master/components/omnibox/browser/search_suggestion_parser.cc
 
-struct AutocompleteResult: Identifiable, Equatable, Comparable {
+struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConvertible {
 
     enum Source: Equatable, Hashable {
         case history
@@ -52,6 +52,15 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable {
             return lhsr < rhsr
         }
         return slhs < srhs
+    }
+    var description: String {
+        var urlToPrint: String
+        if let url = url {
+            urlToPrint = "\(url.host ?? "")\(url.path)"
+        } else {
+            urlToPrint = "<???>"
+        }
+        return "id: \(id) text: \(text) - source: \(source) - url: \(urlToPrint) - score: \(score ?? Float.nan)"
     }
 }
 
