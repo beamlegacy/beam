@@ -8,6 +8,5 @@ export interface PointAndShootUI {
   clearSelection(id: string): void
   hasSelection(hasSelection: boolean): void
   typingOnWebView(isTypingOnWebView: boolean): void
-
   setFramesInfo(framesInfo: FrameInfo[])
 }

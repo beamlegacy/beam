@@ -56,6 +56,7 @@ export class PointAndShoot {
     this.ui = ui
     this.selectionUUID = Util.uuid(win)
     this.registerEventListeners()
+    this.sendBounds = this.sendBounds.bind(this)
   }
   /**
    * Registers all Event Listeners Point and Shoot requires.
@@ -269,7 +270,7 @@ export class PointAndShoot {
       PointAndShootHelper.isOnlyAltKey(ev)
     ) {
       // Code when the (physical) mouse actually moves
-      if (!PointAndShootHelper.isPointDisabled(this.win, ev.target)) {
+      if (Boolean(ev.target) && !PointAndShootHelper.isPointDisabled(this.win, ev.target)) {
         this.point(ev.target)
         this.isTypingOnWebView = false
       } else {
@@ -293,7 +294,7 @@ export class PointAndShoot {
       ev.stopPropagation()
     }
 
-    if (!PointAndShootHelper.isPointDisabled(this.win, ev.target)) {
+    if (Boolean(ev.target) && !PointAndShootHelper.isPointDisabled(this.win, ev.target)) {
       this.shoot(ev.target)
     } else {
       this.sendBounds()

@@ -1,5 +1,12 @@
-import {BeamTextMock} from "./Test/Mock/BeamTextMock"
-import {BeamHTMLElementMock} from "./Test/Mock/BeamHTMLElementMock"
+import { BeamHTMLElementMock } from "../../../../Helpers/Utils/Web/Test/Mock/BeamHTMLElementMock"
+import { BeamTextMock } from "../../../../Helpers/Utils/Web/Test/Mock/BeamTextMock"
+
+
+jest.mock("debounce", () => ({
+  debounce: jest.fn(fn => {
+    return fn.apply(this)
+  })
+}))
 
 test("empty", () => {
   const p = new BeamHTMLElementMock("p")

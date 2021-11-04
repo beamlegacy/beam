@@ -3,12 +3,18 @@ import {NativeMock} from "../../../../Helpers/Utils/Web/Test/Mock/NativeMock"
 import {BeamElement, BeamRange, BeamMessageHandler, MessageHandlers} from "../../../../Helpers/Utils/Web/BeamTypes"
 import {BeamElementHelper} from "../../../../Helpers/Utils/Web/BeamElementHelper"
 import {BeamRectHelper} from "../../../../Helpers/Utils/Web/BeamRectHelper"
-import {PNSWindowMock} from "./PointAndShoot.test"
+import { PNSWindowMock } from "./PNSWindowMock"
 import {BeamDocumentMock} from "../../../../Helpers/Utils/Web/Test/Mock/BeamDocumentMock"
 import {BeamTextMock} from "../../../../Helpers/Utils/Web/Test/Mock/BeamTextMock"
 import {BeamHTMLElementMock} from "../../../../Helpers/Utils/Web/Test/Mock/BeamHTMLElementMock"
 import {BeamRangeMock} from "../../../../Helpers/Utils/Web/Test/Mock/BeamRangeMock"
 import { PointAndShootHelper } from "../PointAndShootHelper"
+
+jest.mock("debounce", () => ({
+  debounce: jest.fn(fn => {
+    return fn()
+  })
+}))
 
 /**
  * @param frameEls {BeamHTMLElement[]}
