@@ -69,6 +69,8 @@ class CloseTab: WebCommand {
             self.tabIndex = i
 
             context.browserTabsManager.tabs.remove(at: i)
+            context.browserTabsManager.removeTabFromGroup(tabId: tab.id)
+
             if context.browserTabsManager.currentTab === tab {
                 let nextTabIndex = min(i, context.browserTabsManager.tabs.count - 1)
                 if nextTabIndex >= 0 {
@@ -87,10 +89,9 @@ class CloseTab: WebCommand {
     override func undo(context: BeamState?) -> Bool {
         guard let context = context,
               let data = self.tabData,
-              let tab = decode(data: data),
-              let tabIndex = self.tabIndex else { return false }
+              let tab = decode(data: data) else { return false }
 
-        context.browserTabsManager.addNewTab(tab, setCurrent: wasCurrentTab, withURL: nil, at: tabIndex)
+        context.browserTabsManager.addNewTabAndGroup(tab, setCurrent: wasCurrentTab)
         if tab.isPinned {
             context.browserTabsManager.pinTab(tab)
         }
