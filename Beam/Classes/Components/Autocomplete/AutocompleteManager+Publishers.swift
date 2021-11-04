@@ -64,7 +64,9 @@ extension AutocompleteManager {
                     let autocompleteResults = documentStructs.map {
                         AutocompleteResult(text: $0.title, source: .note(noteId: $0.id), completingText: query, uuid: $0.id, score: scores[$0.id])
                     }.sorted(by: >).prefix(6)
-                    promise(.success(Array(autocompleteResults)))
+                    let autocompleteResultsArray = Array(autocompleteResults)
+                    AutocompleteManager.logIntermediate(step: "NoteTitle", stepShortName: "NT", results: autocompleteResultsArray)
+                    promise(.success(autocompleteResultsArray))
                 }
             }
         }
@@ -84,6 +86,7 @@ extension AutocompleteManager {
                         return AutocompleteResult(text: result.title, source: .note(noteId: result.noteId, elementId: result.uid),
                                                   completingText: query, uuid: result.uid, score: result.frecency?.frecencySortScore)
                     }
+                    AutocompleteManager.logIntermediate(step: "NoteContent", stepShortName: "NC", results: autocompleteResults)
                     promise(.success(autocompleteResults))
                 }
             }
@@ -105,6 +108,7 @@ extension AutocompleteManager {
                         return AutocompleteResult(text: result.title, source: .history,
                                                   url: url, information: information, completingText: query, score: result.frecency?.frecencySortScore)
                     }
+                    AutocompleteManager.logIntermediate(step: "HistoryContent", stepShortName: "HC", results: autocompleteResults)
                     promise(.success(autocompleteResults))
                 }
             }
@@ -122,6 +126,7 @@ extension AutocompleteManager {
                                           information: link.title, completingText: query,
                                           score: scores[urlId])
             }.sorted(by: >)
+            AutocompleteManager.logIntermediate(step: "HistoryTittle", stepShortName: "HT", results: results)
             promise(.success(results))
         }
     }
@@ -151,6 +156,7 @@ extension AutocompleteManager {
                         return
                     }
                     let ac = AutocompleteResult(text: url.absoluteString, source: .topDomain, url: url, completingText: query)
+                    AutocompleteManager.logIntermediate(step: "TopDomain", stepShortName: "TD", results: [ac])
                     promise(.success([ac]))
                 }
             }
@@ -171,6 +177,7 @@ extension AutocompleteManager {
                     return
                 }
                 promiseReturnedAlready = true
+                AutocompleteManager.logIntermediate(step: "SearchEngine", stepShortName: "SE", results: results)
                 promise(.success(results))
             }.store(in: &self.searchRequestsCancellables)
 
