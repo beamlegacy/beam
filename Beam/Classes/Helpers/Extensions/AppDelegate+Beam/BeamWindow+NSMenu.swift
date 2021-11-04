@@ -37,6 +37,8 @@ extension BeamWindow {
         state.createEmptyTabWithCurrentDestinationCard()
     }
 
+    static let savedCloseTabCmdsKey = "savedClosedTabCmds"
+    static let savedTabsKey = "savedTabsKey"
     @IBAction func reOpenClosedTab(_ sender: Any?) {
         if state.cmdManager.canUndo {
             if state.mode != .web {
@@ -44,23 +46,30 @@ extension BeamWindow {
             }
             _ = state.cmdManager.undo(context: state)
         } else if let data = UserDefaults.standard.data(forKey: Self.savedCloseTabCmdsKey) {
-            let decoder = JSONDecoder()
-            guard let windowCommands = try? decoder.decode([Int: GroupWebCommand].self, from: data) else { return }
-            for windowCommand in windowCommands.keys {
-                let newBeamWindow = AppDelegate.main.createWindow(frame: nil)
-                guard let command = windowCommands[windowCommand] else { continue }
-                newBeamWindow.state.cmdManager.appendToDone(command: command)
-
-                if newBeamWindow.state.cmdManager.canUndo {
-                    _ = newBeamWindow.state.cmdManager.undo(context: newBeamWindow.state)
-                }
-
-                if newBeamWindow.state.browserTabsManager.currentTab != nil, newBeamWindow.state.mode != .web {
-                    newBeamWindow.state.mode = .web
-                }
-
-            }
+            restoreTabs(from: data)
             UserDefaults.standard.removeObject(forKey: Self.savedCloseTabCmdsKey)
+            UserDefaults.standard.removeObject(forKey: Self.savedTabsKey)
+        } else if let data = UserDefaults.standard.data(forKey: Self.savedTabsKey) {
+            restoreTabs(from: data)
+            UserDefaults.standard.removeObject(forKey: Self.savedTabsKey)
+        }
+    }
+
+    private func restoreTabs(from data: Data) {
+        let decoder = JSONDecoder()
+        guard let windowCommands = try? decoder.decode([Int: GroupWebCommand].self, from: data) else { return }
+        for windowCommand in windowCommands.keys {
+            let newBeamWindow = AppDelegate.main.createWindow(frame: nil)
+            guard let command = windowCommands[windowCommand] else { continue }
+            newBeamWindow.state.cmdManager.appendToDone(command: command)
+
+            if newBeamWindow.state.cmdManager.canUndo {
+                _ = newBeamWindow.state.cmdManager.undo(context: newBeamWindow.state)
+            }
+
+            if newBeamWindow.state.browserTabsManager.currentTab != nil, newBeamWindow.state.mode != .web {
+                newBeamWindow.state.mode = .web
+            }
         }
     }
 
