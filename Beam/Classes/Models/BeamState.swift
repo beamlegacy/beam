@@ -249,7 +249,7 @@ import Sentry
         EventsTracker.logBreadcrumb(message: "\(#function) \(String(describing: note)) \(String(describing: url))", category: "BeamState")
         let origin = BrowsingTreeOrigin.searchBar(query: originalQuery ?? "<???>")
         let tab = addNewTab(origin: origin, setCurrent: setCurrent, note: note, element: rootElement, url: url, webView: webView)
-        
+
         DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(200)) {
             tab.webviewWindow?.makeFirstResponder(tab.webView)
         }
