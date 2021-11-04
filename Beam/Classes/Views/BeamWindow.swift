@@ -147,17 +147,6 @@ class BeamWindow: NSWindow, NSDraggingDestination {
         animationLayer.opacity = 0.0
     }
 
-    static let savedCloseTabCmdsKey = "savedClosedTabCmds"
-
-    private func restablishedLastCommands() {
-        if let data = UserDefaults.standard.data(forKey: Self.savedCloseTabCmdsKey) {
-            let decoder = JSONDecoder()
-            guard let closedTabsGroupCmd = try? decoder.decode(GroupWebCommand.self, from: data) else { return }
-            state.cmdManager.appendToDone(command: closedTabsGroupCmd)
-            UserDefaults.standard.removeObject(forKey: Self.savedCloseTabCmdsKey)
-        }
-    }
-
     // Drag and drop:
     public func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
         if sender.draggingPasteboard.availableType(from: [.fileURL]) != nil {
