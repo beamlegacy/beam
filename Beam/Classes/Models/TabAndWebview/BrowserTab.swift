@@ -370,7 +370,6 @@ import Promises
 
         uiDelegateController.page = self
         mediaPlayerController = MediaPlayerController(page: self)
-        addTreeToNote()
         webView = web
         self.webView.page = self
         uiDelegateController.page = self
