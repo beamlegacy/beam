@@ -3,7 +3,7 @@ import {BeamRangeGroup, BeamShootGroup, FrameInfo} from "../../../../Helpers/Uti
 import { EventsMock } from "../../../../Helpers/Utils/Web/Test/Mock/EventsMock"
 
 export class PointAndShootUIMock extends EventsMock implements PointAndShootUI {
-  setFramesInfo(framesInfo: FrameInfo[]) {
+  setFramesInfo(framesInfo: FrameInfo[]): void {
     this.events.push({name: "frames", framesInfo})
   }
   prefix: string  

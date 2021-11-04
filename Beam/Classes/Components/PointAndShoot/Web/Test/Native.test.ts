@@ -1,19 +1,14 @@
-import {Native} from "./Native"
-import {BeamWindowMock} from "./Test/Mock/BeamWindowMock"
-import {BeamLocationMock} from "./Test/Mock/BeamLocationMock"
-import {BeamDocumentMock} from "./Test/Mock/BeamDocumentMock"
-import {PNSWindowMock} from "../../../Components/PointAndShoot/Web/Test/PointAndShoot.test"
-import {PNSBeamHTMLIFrameElementMock} from "../../../Components/PointAndShoot/Web/Test/PNSBeamHTMLIFrameElementMock"
-import {BeamDocument, BeamLocation} from "./BeamTypes"
+import {Native} from "../../../../Helpers/Utils/Web/Native"
+import {BeamLocationMock} from "../../../../Helpers/Utils/Web/Test/Mock/BeamLocationMock"
+import {BeamDocumentMock} from "../../../../Helpers/Utils/Web/Test/Mock/BeamDocumentMock"
+import { PNSWindowMock } from "./PNSWindowMock"
+import { BeamHTMLIFrameElementMock } from "../../../../Helpers/Utils/Web/Test/Mock/BeamHTMLIFrameElementMock"
 
-class TestWindowMock extends BeamWindowMock<any> {
-  constructor() {
-    super()
-  }
-  create(doc: BeamDocument, location: BeamLocation): TestWindowMock {
-    return new TestWindowMock();
-  }
-}
+jest.mock("debounce", () => ({
+  debounce: jest.fn(fn => {
+    return fn()
+  })
+}))
 
 /**
  *
@@ -53,8 +48,8 @@ function nativeTestBed(href, frameEls = []) {
 }
 
 test("send frame href in message", () => {
-  const mainWindow = new TestWindowMock()
-  const iframe1 = new PNSBeamHTMLIFrameElementMock(mainWindow)
+  const mainWindow = new PNSWindowMock()
+  const iframe1 = new BeamHTMLIFrameElementMock(mainWindow)
   Object.assign(iframe1, {
     src: "https://iframe1.com/about-us.html",
     clientLeft: 101,
@@ -70,9 +65,10 @@ test("send frame href in message", () => {
   const frameInfo = {href: iframe1.src, bounds: {x: iframe1.clientLeft, y: iframe1.clientTop, width: iframe1.width}}
   native.sendMessage("frameBounds", frameInfo)
   const mockMessageHandlers = win.webkit.messageHandlers
-  expect(mockMessageHandlers.pointAndShoot_frameBounds.events.length).toEqual(1)
-  expect(mockMessageHandlers.pointAndShoot_frameBounds.events[0]).toEqual({
-    name: "postMessage",
-    payload: {...frameInfo, href: iframe1.src}
-  })
+  expect(mockMessageHandlers).toEqual({"pointAndShoot_frameBounds": {
+    "events": [{
+      name: "postMessage",
+      payload: {...frameInfo, href: iframe1.src}
+    }]
+  }})
 })
