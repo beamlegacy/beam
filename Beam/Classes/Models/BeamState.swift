@@ -304,7 +304,8 @@ import Sentry
             }
             return true
         }
-        return cmdManager.run(command: CloseTab(tab: tab), on: self)
+        guard let tabIndex = browserTabsManager.tabs.firstIndex(of: tab) else { return false }
+        return cmdManager.run(command: CloseTab(tab: tab, tabIndex: tabIndex, wasCurrentTab: browserTabsManager.currentTab === tab), on: self)
     }
 
     func createNoteForQuery(_ query: String) -> BeamNote {

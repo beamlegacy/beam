@@ -16,7 +16,13 @@ class PinnedBrowserTabsManager {
         let title: String
     }
 
-    private static let PinnedTabsUserDefaultsKey = "PinnedTabs"
+    private static var PinnedTabsUserDefaultsKey: String {
+        #if TEST || DEBUG
+            return "PinnedTabsDebug"
+        #else
+            return "PinnedTabs"
+        #endif
+    }
 
     private var encoder: JSONEncoder {
         JSONEncoder()

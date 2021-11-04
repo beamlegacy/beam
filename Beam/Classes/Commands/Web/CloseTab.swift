@@ -13,7 +13,7 @@ class CloseTab: WebCommand {
 
     weak var tab: BrowserTab?
     var tabData: Data?
-    var tabIndex: Int?
+    var tabIndex: Int
     var appIsClosing: Bool = false
     var wasCurrentTab: Bool = false
 
@@ -24,20 +24,24 @@ class CloseTab: WebCommand {
         case wasCurrentTab
     }
 
-    init(tab: BrowserTab, appIsClosing: Bool = false) {
+    init(tab: BrowserTab, appIsClosing: Bool = false, tabIndex: Int, wasCurrentTab: Bool) {
         self.tab = tab
         self.appIsClosing = appIsClosing
+        self.tabIndex = tabIndex
+        self.wasCurrentTab = wasCurrentTab
+
         super.init(name: Self.name)
+        self.tabData = encode(tab: tab)
     }
 
     required init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         tab = try values.decode(BrowserTab.self, forKey: .tab)
+        tabIndex = try values.decode(Int.self, forKey: .tabIndex)
 
         try super.init(from: decoder)
 
         tabData = try values.decode(Data.self, forKey: .tabData)
-        tabIndex = try values.decode(Int.self, forKey: .tabIndex)
         wasCurrentTab = try values.decode(Bool.self, forKey: .wasCurrentTab)
     }
 
@@ -48,12 +52,11 @@ class CloseTab: WebCommand {
         try container.encode(tab, forKey: .tab)
         try container.encode(tabData, forKey: .tabData)
         try container.encode(tabIndex, forKey: .tabIndex)
+        try container.encode(wasCurrentTab, forKey: .wasCurrentTab)
     }
 
     override func run(context: BeamState?) -> Bool {
         guard let context = context, let tab = self.tab else { return false }
-        tabData = encode(tab: tab)
-
         if tab.isPinned {
             context.browserTabsManager.unpinTab(tab)
         }
@@ -80,10 +83,9 @@ class CloseTab: WebCommand {
                 }
                 wasCurrentTab = true
             }
-            context.browserTabsManager.resetFirstResponderAfterClosingTab()
-            return true
         }
-        return false
+        context.browserTabsManager.resetFirstResponderAfterClosingTab()
+        return true
     }
 
     override func undo(context: BeamState?) -> Bool {
