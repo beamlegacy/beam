@@ -49,6 +49,34 @@ class BrowserTabsManager: ObservableObject {
             self.delegate?.tabsManagerDidUpdateTabs(tabs)
         }
     }
+
+    private var tabsGroup: [Int: [UUID]] = [:]
+
+    private var currentTabGroupValue: [UUID]? {
+        guard let groupKey = tabsGroup.first(where: { $1.contains(where: { $0 == currentTab?.id }) })?.key else { return nil }
+        return tabsGroup[groupKey]
+    }
+
+    private var currentTabGroupKey: Int? {
+        tabsGroup.first(where: { $1.contains(where: { $0 == currentTab?.id }) })?.key
+    }
+
+    public func createNewGroup(for tabId: UUID) {
+        var newGroupNbr = 0
+        if let lastGroupNbr = Array(tabsGroup.keys).last {
+            newGroupNbr = lastGroupNbr + 1
+        }
+        tabsGroup[newGroupNbr] = [tabId]
+    }
+
+    public func removeTabFromGroup(tabId: UUID) {
+        guard let groupKey = currentTabGroupKey else { return }
+        tabsGroup[groupKey]?.removeAll(where: {$0 == tabId})
+        if let group = tabsGroup[groupKey], group.isEmpty {
+            tabsGroup.removeValue(forKey: groupKey)
+        }
+    }
+
     public var tabHistory: [Data] = []
     private weak var latestCurrentTab: BrowsingTree?
     @Published var currentTab: BrowserTab? {
@@ -170,7 +198,23 @@ extension BrowserTabsManager {
         }
     }
 
-    func addNewTab(_ tab: BrowserTab, setCurrent: Bool = true, withURL url: URL? = nil, at index: Int? = nil) {
+    // This is now the only entry point to add a tab
+    func addNewTabAndGroup(_ tab: BrowserTab, setCurrent: Bool = true, withURL url: URL? = nil) {
+        if let index = tabs.firstIndex(where: {$0.id == currentTabGroupValue?.last}) {
+            addNewTab(tab, setCurrent: setCurrent, withURL: url, at: index + 1)
+        } else {
+            addNewTab(tab, setCurrent: setCurrent, withURL: url)
+        }
+
+        guard !tab.isPinned else { return }
+        if let currentTabGroupKey = currentTabGroupKey, url != nil {
+            tabsGroup[currentTabGroupKey]?.append(tab.id)
+        } else {
+            createNewGroup(for: tab.id)
+        }
+    }
+
+    private func addNewTab(_ tab: BrowserTab, setCurrent: Bool = true, withURL url: URL? = nil, at index: Int? = nil) {
         if let url = url {
             tab.load(url: url)
         }
