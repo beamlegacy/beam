@@ -1,6 +1,7 @@
 /* eslint-env node */
 
 const path = require("path")
+const webpack = require("webpack")
 const sharedConfig = require("../../../Helpers/Utils/Web/webpack.config")
 
 function config(name, mode = "production") {

@@ -3,8 +3,14 @@ import {PointAndShootUIMock} from "./PointAndShootUIMock"
 import {BeamMouseEvent} from "../../../../Helpers/Utils/Web/BeamMouseEvent"
 import {BeamDocumentMock} from "../../../../Helpers/Utils/Web/Test/Mock/BeamDocumentMock"
 import {BeamNamedNodeMap} from "../../../../Helpers/Utils/Web/BeamNamedNodeMap"
-import {PNSWindowMock} from "./PointAndShoot.test"
+import { PNSWindowMock } from "./PNSWindowMock"
 import { BeamHTMLIFrameElementMock } from "../../../../Helpers/Utils/Web/Test/Mock/BeamHTMLIFrameElementMock"
+
+jest.mock("debounce", () => ({
+  debounce: jest.fn(fn => {
+    return fn()
+  })
+}))
 
 const SENDBOUNDS_EVENTS = 5
 
@@ -49,7 +55,7 @@ function pointAndShootTestBed(frameEls = []): {pns: PointAndShoot, testUI: Point
   expect(eventListeners["scroll"]).toBeDefined()
 
   // Check initial state
-  expect(testUI.eventsCount).toEqual(0)
+  expect(testUI.eventsCount).toEqual(SENDBOUNDS_EVENTS*3)
   return {pns, testUI: testUI}
 }
 
@@ -76,8 +82,13 @@ test("single iframe point", () => {
     })
     rootPns.onMouseMove(outsideFrame1PointEvent)
 
-    expect(testUI.eventsCount).toEqual(SENDBOUNDS_EVENTS)
-    expect(testUI.findEventByName("pointBounds").pointTarget.element).toEqual(iframe1El)
+    expect(testUI.eventsCount).toEqual(SENDBOUNDS_EVENTS*4)
+    // Get all pointBound events and filter out those with undefined targets
+    const pointBoundsEvents = testUI.events.filter(event => {
+      return event.name == "pointBounds" && Boolean(event.pointTarget)
+    })
+    expect(pointBoundsEvents.length).toEqual(1)
+    expect(pointBoundsEvents[0].pointTarget.element).toEqual(iframe1El)
   }
   {
     const insideFrame1PointEvent = new BeamMouseEvent({
@@ -89,12 +100,17 @@ test("single iframe point", () => {
     })
     iframe1Pns.onMouseMove(insideFrame1PointEvent)
     
-    expect(testUI.eventsCount).toEqual(SENDBOUNDS_EVENTS)
-    expect(testUI.findEventByName("pointBounds").pointTarget.element).toEqual(iframe1El)
+    expect(testUI.eventsCount).toEqual(SENDBOUNDS_EVENTS*4)
+    // Get all pointBound events and filter out those with undefined targets
+    const pointBoundsEvents = testUI.events.filter(event => {
+      return event.name == "pointBounds" && Boolean(event.pointTarget)
+    })
+    expect(pointBoundsEvents.length).toEqual(1)
+    expect(pointBoundsEvents[0].pointTarget.element).toEqual(iframe1El)
 
     const delta = 50
     iframe1El.scrollY(delta)
     
-    expect(iframe1testUI.eventsCount).toEqual(SENDBOUNDS_EVENTS*2)
+    expect(iframe1testUI.eventsCount).toEqual(SENDBOUNDS_EVENTS*4)
   }
 })
