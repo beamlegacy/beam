@@ -107,6 +107,9 @@ class ClusteringManager: ObservableObject {
     }
 
     func getIdAndParent(tabToIndex: TabInformation) -> (UUID?, UUID?) {
+        guard tabToIndex.isPinnedTab == false else {
+            return (nil, nil)
+        }
         var id = tabToIndex.currentTabTree?.current.link
         var parentId = tabToIndex.parentBrowsingNode?.link
         var parentTimeStamp = Date.distantPast
