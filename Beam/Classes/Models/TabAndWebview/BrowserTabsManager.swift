@@ -10,18 +10,6 @@ import Combine
 import SwiftSoup
 import BeamCore
 
-struct TabInformation {
-    var url: URL
-    var shouldBeIndexed: Bool = true
-    weak var tabTree: BrowsingTree?
-    weak var currentTabTree: BrowsingTree?
-    weak var parentBrowsingNode: BrowsingNode?
-    weak var previousTabTree: BrowsingTree?
-    var document: IndexDocument
-    var textContent: String
-    var cleanedTextContentForClustering: [String]
-}
-
 protocol BrowserTabsManagerDelegate: AnyObject {
 
     func areTabsVisible(for manager: BrowserTabsManager) -> Bool
@@ -173,7 +161,8 @@ class BrowserTabsManager: ObservableObject {
                                                                              previousTabTree: self.latestCurrentTab,
                                                                              document: indexDocument,
                                                                              textContent: read.textContent,
-                                                                             cleanedTextContentForClustering: textForClustering)
+                                                                             cleanedTextContentForClustering: textForClustering,
+                                                                             isPinnedTab: tab.isPinned)
                         self.data.tabToIndex = tabInformation
                         self.latestCurrentTab = nil
                     }
@@ -310,4 +299,17 @@ extension BrowserTabsManager {
             AppDelegate.main.saveCloseTabsCmd(onExit: false)
         }
     }
+}
+
+struct TabInformation {
+    var url: URL
+    var shouldBeIndexed: Bool = true
+    weak var tabTree: BrowsingTree?
+    weak var currentTabTree: BrowsingTree?
+    weak var parentBrowsingNode: BrowsingNode?
+    weak var previousTabTree: BrowsingTree?
+    var document: IndexDocument
+    var textContent: String
+    var cleanedTextContentForClustering: [String]
+    var isPinnedTab: Bool = false
 }
