@@ -170,18 +170,10 @@ import Promises
     }()
 
     lazy var webPositions: WebPositions? = {
-        let webPositions = WebPositions(scrollUpdateCallback: scrollUpdateCallback)
-        webPositions.page = self
+        let webPositions = WebPositions()
+        webPositions.delegate = self
         return webPositions
     }()
-
-    /// The callback triggered when WebPositions recieves an updated scroll position.
-    /// Callback will be called very often. Take care of your own debouncing or throttling
-    /// - Parameter frame: WebPage frame coordinates and positions
-    func scrollUpdateCallback(_ frame: WebPositions.FrameInfo) {
-        guard let scorer = browsingScorer else { return }
-        scorer.debouncedUpdateScrollingScore.send(frame)
-    }
 
     private var _navigationController: BeamWebNavigationController?
     var navigationController: WebNavigationController? {
@@ -787,5 +779,15 @@ import Promises
         } else {
             BrowsingTreeStoreManager.shared.save(browsingTree: self.browsingTree, appSessionId: appSessionId) {}
         }
+    }
+}
+
+extension BrowserTab: WebPositionsDelegate {
+    /// The callback triggered when WebPositions recieves an updated scroll position.
+    /// Callback will be called very often. Take care of your own debouncing or throttling
+    /// - Parameter frame: WebPage frame coordinates and positions
+    func webPositionsDidUpdateScroll(with frame: WebPositions.FrameInfo) {
+        guard let scorer = browsingScorer else { return }
+        scorer.debouncedUpdateScrollingScore.send(frame)
     }
 }

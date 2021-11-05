@@ -61,6 +61,17 @@ class WebTestView: BaseView {
     func getNumberOfTabs() -> Int {
         return getTabs().count
     }
+
+    func getNumberOfWebViewInMemory() -> Int {
+        UITestsMenuBar().showWebViewCount()
+        let element = app.staticTexts.element(matching: NSPredicate(format: "value BEGINSWITH 'WebViews alives:'")).firstMatch
+        var intValue: Int?
+        if let value = (element.value as? String)?.split(separator: ":").last {
+            intValue = Int(value)
+        }
+        app.dialogs.buttons.firstMatch.click()
+        return intValue ?? -1
+    }
     
     func getTabByIndex(index: Int) -> XCUIElement {
         getTabs().element(boundBy: index)
@@ -94,4 +105,5 @@ class WebTestView: BaseView {
     func isGoogleSearchTabOpened() -> Bool {
         return image("Google").waitForExistence(timeout: minimumWaitTimeout)
     }
+
 }

@@ -21,19 +21,22 @@ class BrowserTabViewTests: BaseTest {
             
         testRailPrint("Then 1 tab is opened")
         XCTAssertEqual(webView.getNumberOfTabs(), 1)
-        
+        XCTAssertEqual(webView.getNumberOfWebViewInMemory(), 1)
+
         testRailPrint("When I open another from the link on the web page")
         uiTestPageLink.click()
         
         testRailPrint("Then 2 tabs are available")
         XCTAssertEqual(webView.getNumberOfTabs(), 2)
-        
+        XCTAssertEqual(webView.getNumberOfWebViewInMemory(), 2)
+
         testRailPrint("When I close 1 tab")
         webView.closeTab()
         
         testRailPrint("Then 1 tab is opened")
         XCTAssertEqual(webView.getNumberOfTabs(), 1)
-        
+        XCTAssertEqual(webView.getNumberOfWebViewInMemory(), 1)
+
         testRailPrint("When I open tab using + icon")
         webView.openTab()
         
@@ -43,9 +46,9 @@ class BrowserTabViewTests: BaseTest {
         testRailPrint("When I close tabs")
         webView.closeTab()
         webView.closeTab()
-        
+        XCTAssertEqual(webView.getNumberOfWebViewInMemory(), 0)
+
         testRailPrint("Then I'm redirected to Journal")
         XCTAssertTrue(WaitHelper().waitFor( WaitHelper.PredicateFormat.exists.rawValue, journalView.scrollView(JournalViewLocators.ScrollViews.journalScrollView.accessibilityIdentifier)))
     }
-    
 }
