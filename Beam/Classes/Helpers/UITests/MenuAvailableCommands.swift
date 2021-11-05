@@ -34,6 +34,7 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
     case setAutoUpdateToMock = "Set Autoupdate to Mock"
     case cleanDownloads = "Clean SF-Symbols-3.dmg from Downloads"
     case populatePasswordsDB = "Populate Passwords Database"
+    case showWebViewCount = "Show Number of WebView in Memory"
 
     // Omnibar setup
     case omnibarFillHistory = "Fill History with Results"

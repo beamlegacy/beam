@@ -88,7 +88,6 @@ class UrlScoresCollectionTest: XCTestCase {
         scorer.page = page
         let positions = WebPositions()
         page.webPositions = positions
-        positions.page = page
 
         let creationDate = try XCTUnwrap(tree.root.events.first?.date)
         let link = tree.root.link
