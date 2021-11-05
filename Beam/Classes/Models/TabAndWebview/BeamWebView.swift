@@ -38,6 +38,10 @@ private class BeamWebViewAutoClose: NSObject, WKUIDelegate {
 
 class BeamWebView: WKWebView {
 
+#if TEST || DEBUG
+    static var aliveWebViewsCount: Int = 0
+#endif
+
     weak var page: WebPage?
     private let automaticallyResignResponder = true
 
@@ -61,11 +65,17 @@ class BeamWebView: WKWebView {
             optionKeyToggle(event.modifierFlags)
             return event
         }
+        #if TEST || DEBUG
+            Self.aliveWebViewsCount += 1
+        #endif
     }
 
     deinit {
         guard let monitor = monitor else { return }
         NSEvent.removeMonitor(monitor)
+        #if TEST || DEBUG
+            Self.aliveWebViewsCount -= 1
+        #endif
     }
 
     required init?(coder: NSCoder) {

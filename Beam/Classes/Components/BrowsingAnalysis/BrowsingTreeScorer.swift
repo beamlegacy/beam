@@ -15,8 +15,8 @@ class BrowsingTreeScorer: WebPageHolder, BrowsingScorer {
 
         debouncedUpdateScrollingScore
             .debounce(for: .seconds(200), scheduler: RunLoop.main)
-            .sink { frame in
-                self.updateScrollingScore(frame)
+            .sink { [weak self] frame in
+                self?.updateScrollingScore(frame)
             }
             .store(in: &cancellables)
     }

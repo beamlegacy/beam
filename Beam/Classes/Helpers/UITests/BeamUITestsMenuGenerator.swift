@@ -33,6 +33,7 @@ class BeamUITestsMenuGenerator {
         case .cleanDownloads: cleanDownloadFolder()
         case .omnibarFillHistory: fillHistory()
         case .signInWithTestAccount: signInWithTestAccount()
+        case .showWebViewCount: showWebViewCount()
         default: break
         }
     }
@@ -189,5 +190,17 @@ class BeamUITestsMenuGenerator {
                 fatalError(error.localizedDescription)
             }
         }
+    }
+
+    private func showWebViewCount() {
+        #if TEST || DEBUG
+        let alert = NSAlert()
+        alert.messageText = "Leak Helper"
+        alert.informativeText = "WebViews alives:\(BeamWebView.aliveWebViewsCount)"
+        alert.addButton(withTitle: "Dismiss Alert")
+
+        // Display the NSAlert
+        alert.runModal()
+        #endif
     }
 }
