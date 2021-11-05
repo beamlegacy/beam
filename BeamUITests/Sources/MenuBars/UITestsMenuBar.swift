@@ -36,4 +36,8 @@ class UITestsMenuBar: BaseMenuBar {
         menuBarItem(menuBarTitle).click()
         menuItem(UITestMenuAvailableCommands.populatePasswordsDB.rawValue).clickOnExistence()
     }
+
+    func showWebViewCount() {
+        menuItem(UITestMenuAvailableCommands.showWebViewCount.rawValue).tap()
+    }
 }

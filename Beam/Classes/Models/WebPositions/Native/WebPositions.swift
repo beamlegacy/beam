@@ -1,11 +1,13 @@
 import BeamCore
 
+protocol WebPositionsDelegate: AnyObject {
+    func webPositionsDidUpdateScroll(with frame: WebPositions.FrameInfo)
+}
 /**
  Computes blocks positions on the native web view
  from the frame-relative positions provided by JavaScript in a web frame.
  */
-
-class WebPositions: WebPageHolder, ObservableObject {
+class WebPositions: ObservableObject {
     /**
      * Frame info by frame URL
      */
@@ -32,12 +34,7 @@ class WebPositions: WebPageHolder, ObservableObject {
         var height: CGFloat = -1
     }
 
-    var scrollUpdateCallback: ((_ frame: FrameInfo) -> Void)?
-
-    // Setup debouncer
-    init(scrollUpdateCallback: ((_ frame: FrameInfo) -> Void)? = nil) {
-        self.scrollUpdateCallback = scrollUpdateCallback
-    }
+    weak var delegate: WebPositionsDelegate?
 
     /// Utility to check if provided frame is a child frame
     /// - Parameter frame: frame to set
@@ -127,7 +124,7 @@ class WebPositions: WebPageHolder, ObservableObject {
         frame.scrollX = scrollX
         frame.scrollY = scrollY
         framesInfo[href] = frame
-        scrollUpdateCallback?(frame)
+        delegate?.webPositionsDidUpdateScroll(with: frame)
     }
 
     /// Utility to remove items from framesInfo
