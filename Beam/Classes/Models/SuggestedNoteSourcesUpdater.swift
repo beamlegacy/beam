@@ -17,6 +17,8 @@ public class SuggestedNoteSourceUpdater {
     private var sessionId: UUID
     private var documentManager: DocumentManager
     private let myQueue = DispatchQueue(label: "sourceSuggestionQueue")
+    let frecencyFetcher = GRDBUrlFrecencyStorage()
+    let LongTermUrlScoreStoreProtocol = LongTermUrlScoreStore.shared
 
     init(sessionId: UUID, documentManager: DocumentManager) {
         self.sessionId = sessionId
@@ -131,8 +133,14 @@ public class SuggestedNoteSourceUpdater {
             DispatchQueue.main.async {
                 if let note = BeamNote.fetch(self.documentManager, id: noteId) {
                     if let addPagesToNote = sourcesToAdd[noteId] {
-                        for pageId in addPagesToNote {
-                            note.sources.add(urlId: pageId, noteId: noteId, type: .suggestion, sessionId: self.sessionId)
+                        note.sources.refreshScores {
+                            for pageId in addPagesToNote {
+                                let longTermScore = self.LongTermUrlScoreStoreProtocol.getMany(urlIds: [pageId])
+                                let frecency = try? self.frecencyFetcher.fetchOne(id: pageId, paramKey: .webVisit30d0)
+                                DispatchQueue.main.async {
+                                    note.sources.add(urlId: pageId, noteId: noteId, type: .suggestion, sessionId: self.sessionId, frecency: frecency?.lastScore, longTermScore: longTermScore[0])
+                                }
+                            }
                         }
                     }
                     if let removePagesFromNote = sourcesToRemove[noteId] {
