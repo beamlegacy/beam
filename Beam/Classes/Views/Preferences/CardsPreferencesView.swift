@@ -46,7 +46,7 @@ struct CardsPreferencesView: View {
                     .font(BeamFont.regular(size: 13).swiftUI)
                     .foregroundColor(BeamColor.Generic.text.swiftUI)
             } content: {
-                EmbedContentSection()
+                PreferencesEmbedContentSection()
             }
         }
     }
@@ -93,12 +93,12 @@ struct SpellingGrammarSection: View {
     }
 }
 
-struct EmbedContentSection: View {
+struct PreferencesEmbedContentSection: View {
     @State private var embedContent = PreferencesManager.embedContentPreference
 
     var body: some View {
         Picker("", selection: $embedContent) {
-            ForEach(EmbedContent.allCases) { embedContentPref in
+            ForEach(PreferencesEmbedOptions.allCases) { embedContentPref in
                 Text(embedContentPref.name)
             }
         }.labelsHidden()

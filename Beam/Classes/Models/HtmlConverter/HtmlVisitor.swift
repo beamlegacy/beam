@@ -29,8 +29,8 @@ class HtmlVisitor {
     var fileStorage: BeamFileStorage?
     // Checks preferences to allow embedding of content
     var allowConvertToEmbed: Bool {
-        PreferencesManager.embedContentPreference == EmbedContent.always.id ||
-            PreferencesManager.embedContentPreference == EmbedContent.only.id
+        PreferencesManager.embedContentPreference == PreferencesEmbedOptions.always.id ||
+            PreferencesManager.embedContentPreference == PreferencesEmbedOptions.only.id
     }
 
     var delayedClosures: [DelayedClosure] = []
@@ -73,7 +73,7 @@ class HtmlVisitor {
                     let url: String = getUrl(href)
                     child.text.addAttributes([.link(url)], to: child.text.wholeRange)
                     if allowConvertToEmbed {
-                        child.convertToEmbed() // if possible converts url to embed
+                        convertElementToEmbed(child) // if possible converts url to embed
                     }
                     return child
                 })
@@ -165,7 +165,7 @@ class HtmlVisitor {
                 let iframeElement = BeamElement(mdUrl)
                 iframeElement.text.addAttributes([.link(mdUrl)], to: iframeElement.text.wholeRange)
                 if allowConvertToEmbed {
-                    iframeElement.convertToEmbed() // if possible converts url to embed
+                    convertElementToEmbed(iframeElement) // if possible converts url to embed
                 }
                 text.append(iframeElement)
 
@@ -176,7 +176,7 @@ class HtmlVisitor {
                 let embedElement = BeamElement(mdUrl)
                 embedElement.text.addAttributes([.link(mdUrl)], to: embedElement.text.wholeRange)
                 if allowConvertToEmbed {
-                    embedElement.convertToEmbed() // if possible converts url to embed
+                    convertElementToEmbed(embedElement) // if possible converts url to embed
                 }
                 text.append(embedElement)
 
@@ -210,6 +210,17 @@ class HtmlVisitor {
         depth -= 1
 
         return result
+    }
+
+    /// Utility to convert BeamElement containing a single embedable url to embed kind
+    private func convertElementToEmbed(_ element: BeamElement) {
+        let links = element.text.links
+        if links.count == 1,
+           let link = links.first,
+           let url = URL(string: link),
+           EmbedContentBuilder().canBuildEmbed(for: url) {
+            element.kind = .embed(url.absoluteString, displayRatio: nil)
+        }
     }
 }
 
