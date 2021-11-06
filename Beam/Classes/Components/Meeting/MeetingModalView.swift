@@ -68,7 +68,7 @@ struct MeetingModalView: View {
                         VStack(alignment: .leading, spacing: 0) {
                             Text("Meeting")
                                 .font(BeamFont.regular(size: 12).swiftUI)
-                                .foregroundColor(BeamColor.LightStoneGray.swiftUI)
+                                .foregroundColor(BeamColor.AlphaGray.swiftUI)
                                 .padding(.bottom, BeamSpacing._120)
 
                             HStack {
@@ -82,7 +82,7 @@ struct MeetingModalView: View {
                                         }
                                     }))
                                 Icon(name: "tabs-close",
-                                     color: hoveredCloseButtonIndex == -1 ? BeamColor.Niobium.swiftUI : BeamColor.AlphaGray.swiftUI)
+                                     color: hoveredCloseButtonIndex == -1 ? BeamColor.Corduroy.swiftUI : BeamColor.AlphaGray.swiftUI)
                                     .onTapGesture {
                                         viewModel.meetingName = ""
                                     }
@@ -93,7 +93,7 @@ struct MeetingModalView: View {
 
                             Text("Attendees")
                                 .font(BeamFont.regular(size: 12).swiftUI)
-                                .foregroundColor(BeamColor.LightStoneGray.swiftUI)
+                                .foregroundColor(BeamColor.AlphaGray.swiftUI)
                                 .padding(.top, 30)
                                 .padding(.bottom, BeamSpacing._120)
                             VStack(spacing: BeamSpacing._80) {
@@ -138,7 +138,7 @@ struct MeetingModalView: View {
                                             return false
                                         })
                                         Icon(name: "tabs-close",
-                                             color: hoveredCloseButtonIndex == index ? BeamColor.Niobium.swiftUI : BeamColor.AlphaGray.swiftUI)
+                                             color: hoveredCloseButtonIndex == index ? BeamColor.Corduroy.swiftUI : BeamColor.AlphaGray.swiftUI)
                                             .onTapGesture {
                                                 viewModel.removeAttendee(attendee)
                                             }
@@ -149,27 +149,16 @@ struct MeetingModalView: View {
                                     .id(attendee.id)
                                 }
                                 if viewModel.canAddAttendee {
-                                    HStack(spacing: BeamSpacing._80) {
-                                        Text("Add Attendee")
-                                            .font(BeamFont.regular(size: 12).swiftUI)
-                                            .foregroundColor(BeamColor.LightStoneGray.swiftUI)
-                                            .padding(BeamSpacing._80)
-                                        Spacer()
-                                        Icon(name: "tabs-new",
-                                             color: hoveredCloseButtonIndex == -2 ? BeamColor.Niobium.swiftUI : BeamColor.AlphaGray.swiftUI)
-                                            .onHover { h in
-                                                hoveredCloseButtonIndex = h ? -2 : nil
-                                            }
-                                    }
-                                    .contentShape(Rectangle())
-                                    .onTapGesture {
-                                        viewModel.createNewAttendee()
-                                        focusLastAttendee(scrollViewProxy: proxy)
-                                    }.id("add-attendee")
+                                    MeetingModalAddAttendeeRow()
+                                        .contentShape(Rectangle())
+                                        .onTapGesture {
+                                            viewModel.createNewAttendee()
+                                            focusLastAttendee(scrollViewProxy: proxy)
+                                        }.id("add-attendee")
                                 }
                             }
                         }
-                        .padding([.horizontal, .top], BeamSpacing._400 * 2)
+                        .padding([.horizontal, .top], BeamSpacing._400)
                         .padding(.bottom, BeamSpacing._200)
                     }
                 }
@@ -184,10 +173,10 @@ struct MeetingModalView: View {
                         viewModel.linkCards.toggle()
                     }
                     Spacer()
-                    ActionableButton(text: "Cancel", defaultState: .normal, variant: .secondary) {
+                    ActionableButton(text: "Cancel", defaultState: .normal, variant: .secondary, minWidth: 120) {
                         viewModel.cancel()
                     }
-                    ActionableButton(text: "Add Meeting", defaultState: .normal, variant: .primaryPurple) {
+                    ActionableButton(text: "Add", defaultState: .normal, variant: .primaryPurple, minWidth: 120) {
                         viewModel.addMeeting()
                     }
                 }
@@ -214,6 +203,28 @@ struct MeetingModalView: View {
         DispatchQueue.main.asyncAfter(deadline: .now().advanced(by: .milliseconds(100))) {
             scrollViewProxy.scrollTo("add-attendee")
         }
+    }
+}
+
+private struct MeetingModalAddAttendeeRow: View {
+    @State private var isHovering = false
+    private var foregroundColor: Color {
+        isHovering ? BeamColor.Corduroy.swiftUI : BeamColor.LightStoneGray.swiftUI
+    }
+    var body: some View {
+        HStack(spacing: BeamSpacing._80) {
+            HStack(spacing: 0) {
+                Text("Add Attendee")
+                    .font(BeamFont.regular(size: 12).swiftUI)
+                    .foregroundColor(foregroundColor)
+                    .padding(BeamSpacing._80)
+                Spacer()
+            }
+            .border(BoxedTextFieldView.borderColor.swiftUI, width: 1.5)
+            .cornerRadius(3.0)
+            Icon(name: "tabs-new", color: isHovering ? BeamColor.Corduroy.swiftUI : BeamColor.AlphaGray.swiftUI)
+        }
+        .onHover { isHovering = $0 }
     }
 }
 

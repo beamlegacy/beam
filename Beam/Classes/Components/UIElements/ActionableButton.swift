@@ -64,7 +64,7 @@ struct ActionableButton: View {
     let text: String
     let defaultState: ActionableButtonState
     let variant: ActionableButtonVariant
-
+    var minWidth: CGFloat = 0
     let action: (() -> Void)?
 
     @State private var isHovered = false
@@ -75,12 +75,18 @@ struct ActionableButton: View {
             Text(text)
                 .foregroundColor(foregroundColor)
                 .padding(.leading, 12)
+            if minWidth > 0 {
+                Spacer(minLength: 0)
+            }
             if let icon = variant.style.icon {
                 Icon(name: icon.name, size: icon.size, color: iconColor)
                     .padding(.trailing, 12)
             }
         }
         .frame(height: 30)
+        .if(minWidth > 0) {
+            $0.frame(minWidth: minWidth).fixedSize()
+        }
         .background(backgroundColor)
         .cornerRadius(3.0)
         .animation(.easeInOut(duration: 0.2), value: isTouched)
