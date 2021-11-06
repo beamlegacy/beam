@@ -137,11 +137,13 @@ extension PointAndShoot {
     }
 
     func translateAndScaleGroup(_ group: PointAndShoot.ShootGroup) -> PointAndShoot.ShootGroup {
-        var newGroup = group
         let href = group.href
-        let newTargets: [Target] = translateAndScaleTargets(newGroup.targets, href)
-        newGroup.updateTargets(newGroup.id, newTargets)
-        return newGroup
+        if let newTargets: [Target] = translateAndScaleTargetsIfNeeded(group.targets, href) {
+            var newGroup = group
+            newGroup.updateTargets(newGroup.id, newTargets)
+            return newGroup
+        }
+        return group
     }
 
     func convertTargetToCircleShootGroup(_ target: Target, _ href: String) -> ShootGroup {
