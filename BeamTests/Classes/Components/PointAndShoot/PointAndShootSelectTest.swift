@@ -170,7 +170,7 @@ class PointAndShootSelectTest: PointAndShootTest {
             scrollY: 300
         )
         let updatedTargets = group.targets.map({ target in
-            self.pns.translateAndScaleTarget(target, group.href)
+            self.pns.translateAndScaleTargetIfNeeded(target, group.href) ?? target
         })
         // send updated event with original group id
         self.pns.select(group.id, updatedTargets, group.text, group.href)
