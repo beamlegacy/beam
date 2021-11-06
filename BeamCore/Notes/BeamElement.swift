@@ -671,17 +671,6 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
         return self
     }
 
-    /// Utility to convert BeamElement containing a single embedable url to embed kind
-    open func convertToEmbed() {
-        let links = text.links
-        if links.count == 1,
-           let link = links.first,
-           let url = URL(string: link),
-           let embedUrl = url.embed {
-            kind = .embed(embedUrl.absoluteString, displayRatio: nil)
-        }
-    }
-
     /// Contains image url when a BeamElement's text contains a single image link
     open var imageLink: URL? {
         let imageLinks = text.links.compactMap({ link -> URL? in

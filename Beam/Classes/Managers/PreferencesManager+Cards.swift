@@ -6,7 +6,7 @@
 //
 
 import Foundation
-enum EmbedContent: Int, CaseIterable, Identifiable {
+enum PreferencesEmbedOptions: Int, CaseIterable, Identifiable {
     case always
     case only
     case never

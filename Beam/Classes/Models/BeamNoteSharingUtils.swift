@@ -18,7 +18,7 @@ enum BeamNoteSharingUtilsError: Error {
 
 class BeamNoteSharingUtils {
 
-    static private let publicServer: PublicServer = PublicServer()
+    static private let publicServer: RestAPIServer = RestAPIServer()
 
     static var canMakePublic: Bool {
         AuthenticationManager.shared.isAuthenticated
@@ -112,7 +112,7 @@ class BeamNoteSharingUtils {
     ///   - username: The current user username, or if not set it's email
     ///   - completion: The callback with the resulted PublicationStatus or error
     static func publishNote(_ note: BeamNote, completion: @escaping ((Result<PublicationStatus, Error>) -> Void)) {
-        Self.publicServer.request(publicServerRequest: .publishNote(note: note), completion: { completion($0) })
+        Self.publicServer.request(serverRequest: .publishNote(note: note), completion: { completion($0) })
     }
 
     /// Unpublish a note from the Public Server.
@@ -121,6 +121,6 @@ class BeamNoteSharingUtils {
     ///   - noteId: The id of the note to unpublish
     ///   - completion: The callback with the resulted PublicationStatus or error
     static func unpublishNote(with noteId: UUID, completion: @escaping ((Result<PublicationStatus, Error>) -> Void)) {
-        BeamNoteSharingUtils.publicServer.request(publicServerRequest: .unpublishNote(noteId: noteId), completion: { completion($0) })
+        BeamNoteSharingUtils.publicServer.request(serverRequest: .unpublishNote(noteId: noteId), completion: { completion($0) })
     }
 }
