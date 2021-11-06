@@ -53,6 +53,7 @@ public enum LogCategory: String, CaseIterable {
     case notePublishing
     case eventCalendar
     case favIcon
+    case embed
     case marker
     case sentry
 }

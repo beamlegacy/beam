@@ -1,5 +1,5 @@
 //
-//  PublicServerRequest.swift
+//  RestAPIServer.swift
 //  Beam
 //
 //  Created by Ludovic Ollagnier on 20/09/2021.
@@ -8,26 +8,13 @@
 import Foundation
 import BeamCore
 
-enum PublicServerError: Error, Equatable {
-    case notAuthenticated
-    case notAllowed
-    case notFound
-    case wrongFormat
-    case serverError(error: String?)
-    case parsingError
-    case noDataReceived
-    case noUsername
-}
-
-struct ErrorMessage: Decodable {
-    let message: String?
-}
-
-class PublicServer {
+/// Manage requests to additional beam apis server like publishing and embeds
+class RestAPIServer {
 
     enum Request {
         case publishNote(note: BeamNote)
         case unpublishNote(noteId: UUID)
+        case embed(url: URL)
 
         func bodyParameters() throws -> (Data, String)? {
             switch self {
@@ -35,6 +22,17 @@ class PublicServer {
                 return createBody(for: note)
             case .unpublishNote:
                 return nil
+            case .embed(_):
+                return nil
+            }
+        }
+
+        var baseURL: URL {
+            switch self {
+            case .publishNote(_), .unpublishNote(_):
+                return URL(string: EnvironmentVariables.PublicAPI.publishServer)!
+            case .embed(_):
+                return URL(string: EnvironmentVariables.PublicAPI.embed)!
             }
         }
 
@@ -44,6 +42,18 @@ class PublicServer {
                 return "/note"
             case .unpublishNote(let noteId):
                 return "/note/\(noteId)"
+            case .embed(_):
+                return "/parseContent"
+            }
+        }
+
+        var queryParameters: [String: String]? {
+            switch self {
+            case .publishNote(_), .unpublishNote(_):
+                return nil
+            case .embed(let url):
+                let content = url.absoluteString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? url.absoluteString
+                return ["content": content]
             }
         }
 
@@ -57,10 +67,12 @@ class PublicServer {
                 return "POST"
             case .unpublishNote(_):
                 return "DELETE"
+            case .embed(_):
+                return "GET"
             }
         }
 
-        func error(for responseCode: Int, data: Data?) -> PublicServerError? {
+        func error(for responseCode: Int, data: Data?) -> RestAPIServer.Error? {
             switch responseCode {
             case 200...299:
                 return nil
@@ -92,12 +104,12 @@ class PublicServer {
                 return (encodedNote, "application/json")
             } else {
                 guard let data = multipart(encodedPublicNote: encodedNote, richContent: richContent) else { return nil }
-                return (data, "multipart/form-data; boundary=\(PublicServer.multipartBoundary)")
+                return (data, "multipart/form-data; boundary=\(RestAPIServer.multipartBoundary)")
             }
         }
 
         private func multipart(encodedPublicNote: Data, richContent: [BeamElement]) -> Data? {
-            let boundary = PublicServer.multipartBoundary
+            let boundary = RestAPIServer.multipartBoundary
             let lineBreak = "\r\n"
 
             let body = NSMutableData()
@@ -126,7 +138,7 @@ class PublicServer {
 
         private func createMultipartBody(data: Data, documentName: String, fileNameAndExtension: String?, mimetype: String) -> Data {
             let body = NSMutableData()
-            let boundary = PublicServer.multipartBoundary
+            let boundary = RestAPIServer.multipartBoundary
             let lineBreak = "\r\n"
             let boundaryPrefix = "--\(boundary)\r\n"
             body.appendString(boundaryPrefix)
@@ -143,19 +155,18 @@ class PublicServer {
         private func errorMessage(from data: Data?) -> String? {
             guard let data = data else { return nil }
             let decoder = JSONDecoder()
-            let error = try? decoder.decode(ErrorMessage.self, from: data)
+            let error = try? decoder.decode(RestAPIServer.ErrorMessage.self, from: data)
             return error?.message
         }
     }
 
-    let baseURL = URL(string: "https://public.beamapp.co")!
     static let multipartBoundary = "WebAppBoundary"
 
-    func request<T: Decodable>(publicServerRequest: Request, completion: @escaping (Result<T, Error>) -> Void) {
+    func request<T: Decodable>(serverRequest: Request, completion: @escaping (Result<T, Swift.Error>) -> Void) {
         DispatchQueue.global(qos: .userInitiated).async {
             let urlRequest: URLRequest
             do {
-                urlRequest = try self.createUrlRequest(request: publicServerRequest)
+                urlRequest = try self.createUrlRequest(request: serverRequest)
             } catch {
                 completion(.failure(error))
                 return
@@ -167,7 +178,7 @@ class PublicServer {
                     return
                 }
 
-                if let response = urlResponse as? HTTPURLResponse, let serverError = publicServerRequest.error(for: response.statusCode, data: data) {
+                if let response = urlResponse as? HTTPURLResponse, let serverError = serverRequest.error(for: response.statusCode, data: data) {
                     completion(.failure(serverError))
                     return
                 }
@@ -175,7 +186,7 @@ class PublicServer {
                 let jsonDecoder = JSONDecoder()
                 jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
                 guard let data = data else {
-                    completion(.failure(PublicServerError.noDataReceived))
+                    completion(.failure(RestAPIServer.Error.noDataReceived))
                     return
                 }
 
@@ -183,7 +194,7 @@ class PublicServer {
                     let response = try jsonDecoder.decode(T.self, from: data)
                     completion(.success(response))
                 } catch {
-                    completion(.failure(PublicServerError.parsingError))
+                    completion(.failure(RestAPIServer.Error.parsingError))
                 }
             }
             task.resume()
@@ -192,13 +203,21 @@ class PublicServer {
 
     private func createUrlRequest(request: Request) throws -> URLRequest {
 
-        let url = baseURL.appendingPathComponent(request.route)
+        var urlComponents = URLComponents(url: request.baseURL.appendingPathComponent(request.route), resolvingAgainstBaseURL: false)
+        if let queryParameters = request.queryParameters {
+            var queryItems = [URLQueryItem]()
+            queryParameters.forEach { (key, value) in
+                queryItems.append(.init(name: key, value: value))
+            }
+            urlComponents?.queryItems = queryItems
+        }
+        guard let url = urlComponents?.url else { throw RestAPIServer.Error.invalidURL }
         var urlRequest = URLRequest(url: url)
 
         if request.requiresAuthentication {
             AuthenticationManager.shared.updateAccessTokenIfNeeded()
             guard AuthenticationManager.shared.isAuthenticated, let accessToken = AuthenticationManager.shared.accessToken else {
-                throw PublicServerError.notAuthenticated
+                throw RestAPIServer.Error.notAuthenticated
             }
             urlRequest.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
         }
@@ -210,6 +229,24 @@ class PublicServer {
         }
 
         return urlRequest
+    }
+}
+
+extension RestAPIServer {
+    enum Error: Swift.Error, Equatable {
+        case invalidURL
+        case notAuthenticated
+        case notAllowed
+        case notFound
+        case wrongFormat
+        case serverError(error: String?)
+        case parsingError
+        case noDataReceived
+        case noUsername
+    }
+
+    struct ErrorMessage: Decodable {
+        let message: String?
     }
 }
 
