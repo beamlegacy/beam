@@ -30,7 +30,11 @@ public struct EnvironmentVariables {
     public struct BrowsingTree {
         static public private(set) var accessToken = "$(BROWSING_TREE_ACCESS_TOKEN)"
         static public private(set) var url = "$(BROWSING_TREE_URL)"
+    }
 
+    public struct PublicAPI {
+        static public private(set) var embed = "$(PUBLIC_API_EMBED_URL)"
+        static public private(set) var publishServer = "$(PUBLIC_API_PUBLISH_URL)"
     }
 
     public struct Sentry {

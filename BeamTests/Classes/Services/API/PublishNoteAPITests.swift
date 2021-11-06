@@ -1,5 +1,5 @@
 //
-//  PublicServerTests.swift
+//  PublishNoteAPITests.swift
 //  BeamTests
 //
 //  Created by Ludovic Ollagnier on 24/09/2021.
@@ -10,7 +10,7 @@ import XCTest
 @testable import Beam
 @testable import BeamCore
 
-class PublicServerTests: XCTestCase {
+class PublishNoteAPITests: XCTestCase {
 
     var helper: DocumentManagerTestsHelper!
     var beamTestHelper = BeamTestsHelper()

@@ -137,7 +137,7 @@ struct NoteHeaderView: View {
     }
 
     private func handlePublicationError(error: Error) {
-        if let error = error as? PublicServerError {
+        if let error = error as? RestAPIServer.Error {
             switch error {
             case .noUsername:
                 showPublicationError(error: .noUsername)
