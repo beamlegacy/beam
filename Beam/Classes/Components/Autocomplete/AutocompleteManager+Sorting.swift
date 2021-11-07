@@ -78,7 +78,7 @@ extension AutocompleteManager {
         sortableResult.append(contentsOf: notesResultsTruncated)
 
         sortableResult.sort(by: >)
-        AutocompleteManager.logIntermediate(step: "SortableResults", stepShortName: "SR", results: sortableResult)
+        Self.logIntermediate(step: "SortableResults", stepShortName: "SR", results: sortableResult)
         let resultLimit = 8
         // leave space for at least 2 search engine result and 1 create card
         let hasCreateCard = !createCardResults.isEmpty

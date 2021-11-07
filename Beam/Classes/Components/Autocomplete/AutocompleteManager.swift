@@ -118,11 +118,13 @@ class AutocompleteManager: ObservableObject {
     }
 
     static func logIntermediate(step: String, stepShortName: String, results: [AutocompleteResult]) {
+        #if DEBUG
         Logger.shared.logDebug("-------------\(step)-------------------", category: .autocompleteManager)
         for res in results {
             Logger.shared.logDebug("\(stepShortName): \(String(describing: res))", category: .autocompleteManager)
         }
         Logger.shared.logDebug("--------------------------------------", category: .autocompleteManager)
+        #endif
     }
 
     func isResultCandidateForAutoselection(_ result: AutocompleteResult, forSearch searchText: String) -> Bool {
