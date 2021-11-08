@@ -8,6 +8,12 @@
 import Foundation
 import TLDExtract
 
+private extension CharacterSet {
+    static var beamURLQueryAllowed: CharacterSet {
+        .urlQueryAllowed.union(CharacterSet(charactersIn: "#"))
+    }
+}
+
 public extension String {
     var markdownizedURL: String? {
         return self.addingPercentEncoding(withAllowedCharacters: CharacterSet(charactersIn: "()").inverted)
@@ -18,11 +24,19 @@ public extension String {
     }
 
     var toEncodedURL: URL? {
-        guard mayBeURL,
-              let encodedString = isPercentEncoded ? self : self.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-              let url = URL(string: encodedString) ?? URL(string: self)
-        else { return nil }
-        return url
+        guard mayBeURL else {
+            return nil
+        }
+
+        if isPercentEncoded {
+            return URL(string: self)
+        }
+
+        if let encodedString = self.addingPercentEncoding(withAllowedCharacters: .beamURLQueryAllowed) {
+            return URL(string: encodedString)
+        }
+
+        return URL(string: self)
     }
 
     func urlRangesInside() -> [NSRange]? {
