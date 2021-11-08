@@ -1244,7 +1244,7 @@ public extension CALayer {
         relayoutRoot()
     }
 
-    let documentManager = DocumentManager(coreDataManager: CoreDataManager.shared)
+    let documentManager = DocumentManager()
 
     @IBAction func save(_ sender: Any?) {
         Logger.shared.logInfo("Save document!", category: .noteEditor)

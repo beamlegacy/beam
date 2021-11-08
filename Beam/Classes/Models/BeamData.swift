@@ -162,9 +162,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
             Self.updateTitleIdNoteMapping(noteId: noteId, currentName: previousName, newName: newName)
         }.store(in: &scope)
 
-        updateNoteCount()
         setupSubscribers()
-        resetPinnedTabs()
 
         self.versionChecker.customPreinstall = {
             self.backup()
@@ -291,7 +289,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     }
 
     func updateNoteCount() {
-        noteCount = Document.countWithPredicate(CoreDataManager.shared.mainContext)
+        noteCount = DocumentManager().count()
     }
 
     func reloadJournal() {

@@ -175,7 +175,7 @@ class ScrollViewContentWatcher: NSObject {
     }
 
     private func loadMore() {
-        let totalJournal = data.documentManager.countDocumentsWithType(type: .journal)
+        let totalJournal = DocumentManager().count(filters: [.type(.journal)])
         if totalJournal != self.dataSource.count {
             data.updateJournal(with: 2, and: dataSource.count)
             dataSource = data.journal

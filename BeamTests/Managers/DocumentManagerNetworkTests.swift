@@ -356,8 +356,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                                      { _ in done() })
                         }
 
-                        let count = Document.countWithPredicate(coreDataManager.mainContext,
-                                                                NSPredicate(format: "id = %@", docStruct.id as CVarArg))
+                        let count = sut.count(filters: [.id(docStruct.id)])
                         expect(count) == 1
                     }
 
@@ -822,10 +821,8 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                     try sut.receivedObjects(objects)
 
-                    expect(1) == Document.countWithPredicate(CoreDataManager.shared.mainContext,
-                                                             NSPredicate(format: "id = %@", docStruct.id as CVarArg))
-                    expect(1) == Document.countWithPredicate(CoreDataManager.shared.mainContext,
-                                                             NSPredicate(format: "id = %@", docStruct2.id as CVarArg))
+                    expect(1) == sut.count(filters: [.id(docStruct.id)])
+                    expect(1) == sut.count(filters: [.id(docStruct2.id)])
                 }
 
                 context("without any locally saved documents") {
@@ -842,13 +839,11 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                             expect(APIRequest.callsCount - networkCalls) == 0
 
-                            expect(1) == Document.countWithPredicate(CoreDataManager.shared.mainContext,
-                                                                     NSPredicate(format: "id = %@", docStruct.id as CVarArg))
-                            expect(1) == Document.countWithPredicate(CoreDataManager.shared.mainContext,
-                                                                     NSPredicate(format: "id = %@", docStruct2.id as CVarArg))
+                            expect(1) == sut.count(filters: [.id(docStruct.id)])
+                            expect(1) == sut.count(filters: [.id(docStruct2.id)])
 
-                            expect(try? Document.fetchWithId(CoreDataManager.shared.mainContext, docStruct.id)?.title) == docStruct.title
-                            expect(try? Document.fetchWithId(CoreDataManager.shared.mainContext, docStruct2.id)?.title) == docStruct2.title
+                            expect(try? sut.fetchWithId(docStruct.id)?.title) == docStruct.title
+                            expect(try? sut.fetchWithId(docStruct2.id)?.title) == docStruct2.title
                         }
                     }
 
@@ -869,14 +864,12 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                             expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
 
-                            expect(Document.countWithPredicate(CoreDataManager.shared.mainContext,
-                                                               NSPredicate(format: "id = %@", docStruct.id as CVarArg))) == 1
-                            expect(Document.countWithPredicate(CoreDataManager.shared.mainContext,
-                                                               NSPredicate(format: "id = %@", docStruct2.id as CVarArg))) == 0
+                            expect(sut.count(filters: [.id(docStruct.id)])) == 1
+                            expect(sut.count(filters: [.id(docStruct2.id)])) == 0
 
-                            expect(try? Document.fetchWithId(CoreDataManager.shared.mainContext, docStruct.id)?.title) == docStruct.title
+                            expect(try? sut.fetchWithId(docStruct.id)?.title) == docStruct.title
 
-                            expect(try? Document.fetchWithId(CoreDataManager.shared.mainContext, docStruct2.id)?.title) == docStruct2.title
+                            expect(try? sut.fetchWithId(docStruct2.id)?.title) == docStruct2.title
 
                             let remoteObject1: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct.beamObjectId)
                             expect(remoteObject1).to(beNil())
@@ -912,13 +905,11 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                             expect(APIRequest.callsCount - networkCalls) == 0
 
-                            expect(1) == Document.countWithPredicate(CoreDataManager.shared.mainContext,
-                                                                     NSPredicate(format: "id = %@", docStruct.id as CVarArg))
-                            expect(1) == Document.countWithPredicate(CoreDataManager.shared.mainContext,
-                                                                     NSPredicate(format: "id = %@", docStruct2.id as CVarArg))
+                            expect(1) == sut.count(filters: [.id(docStruct.id)])
+                            expect(1) == sut.count(filters: [.id(docStruct2.id)])
 
-                            expect(try? Document.fetchWithId(CoreDataManager.shared.mainContext, docStruct.id)?.title) == docStruct.title
-                            expect(try? Document.fetchWithId(CoreDataManager.shared.mainContext, docStruct2.id)?.title) == docStruct2.title
+                            expect(try? sut.fetchWithId(docStruct.id)?.title) == docStruct.title
+                            expect(try? sut.fetchWithId(docStruct2.id)?.title) == docStruct2.title
                         }
                     }
 
@@ -938,15 +929,13 @@ class DocumentManagerNetworkTests: QuickSpec {
                             let expectedNetworkCalls = ["update_beam_objects"]
                             expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
 
-                            expect(Document.countWithPredicate(CoreDataManager.shared.mainContext,
-                                                               NSPredicate(format: "id = %@", docStruct.id as CVarArg))) == 1
-                            expect(Document.countWithPredicate(CoreDataManager.shared.mainContext,
-                                                               NSPredicate(format: "id = %@", docStruct2.id as CVarArg))) == 1
+                            expect(sut.count(filters: [.id(docStruct.id)])) == 1
+                            expect(sut.count(filters: [.id(docStruct2.id)])) == 1
 
                             docStruct2.title = "\(newTitle1) (2)"
 
-                            expect(try? Document.fetchWithId(CoreDataManager.shared.mainContext, docStruct.id)?.title) == docStruct.title
-                            expect(try? Document.fetchWithId(CoreDataManager.shared.mainContext, docStruct2.id)?.title) == docStruct2.title
+                            expect(try? sut.fetchWithId(docStruct.id)?.title) == docStruct.title
+                            expect(try? sut.fetchWithId(docStruct2.id)?.title) == docStruct2.title
 
                             let remoteObject1: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct.beamObjectId)
                             expect(remoteObject1).to(beNil())
@@ -976,13 +965,11 @@ class DocumentManagerNetworkTests: QuickSpec {
                             try sut.receivedObjects([docStruct3])
                             expect(APIRequest.callsCount - networkCalls) == 0
 
-                            expect(Document.countWithPredicate(CoreDataManager.shared.mainContext,
-                                                               NSPredicate(format: "id = %@", docStruct.id as CVarArg))) == 0
-                            expect(Document.countWithPredicate(CoreDataManager.shared.mainContext,
-                                                               NSPredicate(format: "id = %@", docStruct3.id as CVarArg))) == 1
+                            expect(sut.count(filters: [.id(docStruct.id)])) == 0
+                            expect(sut.count(filters: [.id(docStruct3.id)])) == 1
 
-                            expect(try? Document.fetchWithId(CoreDataManager.shared.mainContext, docStruct.id)).to(beNil())
-                            expect(try? Document.fetchWithId(CoreDataManager.shared.mainContext, docStruct3.id)?.title) == docStruct.title
+                            expect(try? sut.fetchWithId(docStruct.id)).to(beNil())
+                            expect(try? sut.fetchWithId(docStruct3.id)?.title) == docStruct.title
 
                             let remoteObject1: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct.beamObjectId)
                             expect(remoteObject1).to(beNil())
@@ -1011,12 +998,10 @@ class DocumentManagerNetworkTests: QuickSpec {
                             let expectedNetworkCalls = ["update_beam_objects"]
                             expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
 
-                            expect(Document.countWithPredicate(CoreDataManager.shared.mainContext,
-                                                               NSPredicate(format: "id = %@", docStruct.id as CVarArg))) == 1
-                            expect(Document.countWithPredicate(CoreDataManager.shared.mainContext,
-                                                               NSPredicate(format: "id = %@", docStruct3.id as CVarArg))) == 0
+                            expect(sut.count(filters: [.id(docStruct.id)])) == 1
+                            expect(sut.count(filters: [.id(docStruct3.id)])) == 0
 
-                            let localDocument = try? Document.fetchWithId(CoreDataManager.shared.mainContext, docStruct.id)
+                            let localDocument = try? sut.fetchWithId(docStruct.id)
                             expect(localDocument?.title) == docStruct.title
                             expect(localDocument?.deleted_at).to(beNil())
 

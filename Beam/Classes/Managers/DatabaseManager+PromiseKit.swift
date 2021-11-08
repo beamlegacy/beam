@@ -71,8 +71,7 @@ extension DatabaseManager {
                         throw DatabaseManagerError.localDatabaseNotFound
                     }
 
-                    try Document.deleteWithPredicate(context, NSPredicate(format: "database_id = %@",
-                                                                          database.id as CVarArg))
+                    try DocumentManager().deleteAll(databaseId: database.id)
                     coreDataDatabase.delete(context)
                     try Self.saveContext(context: context)
 

@@ -117,8 +117,9 @@ class DebugSection: Widget {
     }
 
     private func setupDebugInfoLayer() {
+        let documentManager = DocumentManager()
         let nodeDatabaseId = self.note.documentStruct?.databaseId.uuidString ?? "-"
-        let localDocument = try? Document.fetchWithId(CoreDataManager.shared.mainContext, self.note.id)
+        let localDocument = try? documentManager.fetchWithId(self.note.id)
         let previousChecksum = localDocument?.beam_object_previous_checksum ?? "-"
 
         let defaultDatabaseId = DatabaseManager.defaultDatabase.id.uuidString
