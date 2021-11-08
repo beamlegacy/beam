@@ -3,6 +3,7 @@ import GRDB
 struct HistoryUrlRecord {
     var id: UUID?
     var title: String
+    var aliasUrl: String
     var url: String
     var content: String
 }
@@ -12,6 +13,7 @@ extension HistoryUrlRecord: TableRecord {
     /// The table columns
     enum Columns: String, ColumnExpression {
         case id, urlId, url, title, content
+        case aliasUrl = "alias_domain"
     }
 
     static let frecencyForeign = "frecency"
@@ -26,6 +28,7 @@ extension HistoryUrlRecord: FetchableRecord {
     init(row: Row) {
         id = row[Columns.id]
         url = row[Columns.url]
+        aliasUrl = row[Columns.aliasUrl] ?? ""
         title = row[Columns.title]
         content = row[Columns.content] ?? ""
     }
@@ -48,6 +51,7 @@ extension HistoryUrlRecord: MutablePersistableRecord {
         container[Columns.url] = url
         container[Columns.title] = title
         container[Columns.content] = content
+        container[Columns.aliasUrl] = aliasUrl
     }
 
     // Update auto-incremented id upon successful insertion
