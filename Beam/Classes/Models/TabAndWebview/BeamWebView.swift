@@ -68,6 +68,10 @@ class BeamWebView: WKWebView {
         #if TEST || DEBUG
             Self.aliveWebViewsCount += 1
         #endif
+
+        #if BEAM_WEBKIT_ENHANCEMENT_ENABLED
+        self._setAddsVisitedLinks(true)
+        #endif
     }
 
     deinit {

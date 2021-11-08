@@ -14,6 +14,10 @@
 -(void)_setFullScreenEnabled:(BOOL)fullScreenEnabled;
 -(void)_setAllowsPictureInPictureMediaPlayback:(BOOL)allowed;
 @end
+
+@interface WKWebView ()
+- (void)_setAddsVisitedLinks:(BOOL)addsVisitedLinks;
+@end
 #endif
 
 // https://stackoverflow.com/questions/34956002/how-to-properly-handle-nsfilehandle-exceptions-in-swift-2-0/35003095#35003095
