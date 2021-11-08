@@ -93,6 +93,7 @@ class BrowserTabsManager: ObservableObject {
     private var isModifyingPinnedTabs = false
     private func setupPinnedTabObserver() {
         data.$pinnedTabs
+            .dropFirst()
             .scan(([], [])) { ($0.1, $1) }
             .sink { [weak self] (previousPinnedTab, newPinnedTabs) in
                 guard self?.isModifyingPinnedTabs == false else { return }

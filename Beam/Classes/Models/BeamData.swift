@@ -163,7 +163,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         }.store(in: &scope)
 
         setupSubscribers()
-
+        resetPinnedTabs()
         self.versionChecker.customPreinstall = {
             self.backup()
         }
