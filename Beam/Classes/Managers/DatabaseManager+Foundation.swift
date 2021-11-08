@@ -109,9 +109,10 @@ extension DatabaseManager {
             }
 
             do {
-                let documentIds = try Document.fetchAll(context, NSPredicate(format: "database_id = %@", id as CVarArg)).map { $0.id }
+                let documentManager = DocumentManager()
+                let documentIds = try documentManager.fetchAll(filters: [.databaseId(id)]).map { $0.id }
 
-                try Document.deleteWithPredicate(context, NSPredicate(format: "database_id = %@", id as CVarArg))
+                _ = try documentManager.deleteAll(databaseId: id)
                 coredataDb.delete(context)
 
                 try Self.saveContext(context: context)

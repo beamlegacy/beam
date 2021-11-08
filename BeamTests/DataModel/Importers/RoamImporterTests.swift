@@ -10,6 +10,7 @@ class RoamImporterTests: CoreDataTests {
     }()
 
     func notestNoteImport() throws {
+        let documentManager = DocumentManager()
         let roamImporter = RoamImporter()
         guard let data = fixtureData else {
             fatalError("Can't find roam fixture file")
@@ -17,10 +18,10 @@ class RoamImporterTests: CoreDataTests {
         let roamNotes = try roamImporter.parseAndCreate(context, data)
 
         XCTAssertEqual(roamNotes.count, 62)
-        XCTAssertEqual(Document.countWithPredicate(context), 62)
+        XCTAssertEqual(documentManager.count(), 62)
 
         //swiftlint:disable:next force_try
-        let notes = try! Document.fetchAll(context, nil, [NSSortDescriptor(keyPath: \Document.title, ascending: true)])
+        let notes = try! documentManager.fetchAll(sortingKey: .title(true))
 
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy'-'MM'-'dd' 'HH':'mm':'ss ZZZ"

@@ -29,30 +29,48 @@ extension DocumentManagerError: LocalizedError {
     }
 }
 
+enum DocumentFilter {
+    case allDatabases
+    case databaseId(UUID)
+    case notDatabaseId(UUID)
+    case notDatabaseIds([UUID])
+    case id(UUID)
+    case notId(UUID)
+    case ids([UUID])
+    case notIds([UUID])
+    case title(String)
+    case titleMatch(String)
+    case journalDate(Int64)
+    case nonFutureJournalDate(Int64)
+    case type(DocumentType)
+    case nonDeleted ///< filter out deleted notes (the default if nothing is explicitely requested)
+    case deleted ///< filter out non delete notes
+    case includeDeleted ///< don't filter out anything
+    case updatedSince(Date)
+
+    case limit(Int)
+    case offset(Int)
+
+}
+
 // swiftlint:disable file_length
 // swiftlint:disable:next type_body_length
 public class DocumentManager: NSObject {
     var coreDataManager: CoreDataManager
-    let mainContext: NSManagedObjectContext
-    let backgroundContext: NSManagedObjectContext
-    let backgroundQueue = DispatchQueue(label: "DocumentManager backgroundQueue", qos: .default)
+    var context: NSManagedObjectContext
+    static let backgroundQueue = DispatchQueue(label: "DocumentManager backgroundQueue", qos: .default)
+    var backgroundQueue: DispatchQueue { Self.backgroundQueue }
 
     let saveDocumentQueue = OperationQueue()
     var saveOperations: [UUID: BlockOperation] = [:]
     var saveDocumentPromiseCancels: [UUID: () -> Void] = [:]
 
-    static var networkRequests: [UUID: APIRequest] = [:]
-    static var networkRequestsSemaphore = DispatchSemaphore(value: 1)
     static var networkTasks: [UUID: (DispatchWorkItem, ((Swift.Result<Bool, Error>) -> Void)?)] = [:]
     static var networkTasksSemaphore = DispatchSemaphore(value: 1)
 
-    private var webSocketRequest = APIWebSocketRequest()
-
     init(coreDataManager: CoreDataManager? = nil) {
         self.coreDataManager = coreDataManager ?? CoreDataManager.shared
-        self.mainContext = self.coreDataManager.mainContext
-        self.backgroundContext = self.coreDataManager.backgroundContext
-
+        context = Thread.isMainThread ? self.coreDataManager.mainContext : self.coreDataManager.persistentContainer.newBackgroundContext()
         saveDocumentQueue.maxConcurrentOperationCount = 1
 
         super.init()
@@ -101,8 +119,6 @@ public class DocumentManager: NSObject {
     }
 
     func printObjects(_ notification: Notification) {
-        // let context = notification.object as? NSManagedObjectContext
-
         printObjectsFromNotification(notification, NSInsertedObjectsKey)
         printObjectsFromNotification(notification, NSUpdatedObjectsKey)
         printObjectsFromNotification(notification, NSDeletedObjectsKey)
@@ -114,162 +130,90 @@ public class DocumentManager: NSObject {
         }
     }
 
-    func clearNetworkCalls() {
-        Self.networkRequestsSemaphore.wait()
-        defer { Self.networkRequestsSemaphore.signal() }
-
-        for (_, request) in Self.networkRequests {
-            request.cancel()
-        }
-    }
-
     // MARK: CoreData Load
     func loadById(id: UUID) -> DocumentStruct? {
-        let semaphore = DispatchSemaphore(value: 0)
-        var result: DocumentStruct?
-
-        coreDataManager.persistentContainer.performBackgroundTask { [unowned self] context in
-            defer { semaphore.signal() }
-            guard let document = try? Document.fetchWithId(context, id) else { return }
-
-            result = parseDocumentBody(document)
-        }
-
-        semaphore.wait()
-        return result
+        guard let document = try? self.fetchWithId(id) else { return nil }
+        return parseDocumentBody(document)
     }
 
     func fetchOrCreate(title: String) -> DocumentStruct? {
-        let semaphore = DispatchSemaphore(value: 0)
-        var result: DocumentStruct?
-
-        coreDataManager.persistentContainer.performBackgroundTask { [unowned self] context in
-            defer { semaphore.signal() }
-
-            let document = Document.fetchOrCreateWithTitle(context, title)
-
-            do {
-                try self.checkValidations(context, document)
-
-                result = self.parseDocumentBody(document)
-                try Self.saveContext(context: context)
-            } catch {
-                Logger.shared.logError(error.localizedDescription, category: .coredata)
-            }
+        do {
+            let document = try fetchOrCreateWithTitle(title)
+            return parseDocumentBody(document)
+        } catch {
+            Logger.shared.logError(error.localizedDescription, category: .coredata)
+            return nil
         }
-
-        semaphore.wait()
-        return result
     }
 
     func allDocumentsTitles(includeDeletedNotes: Bool) -> [String] {
-        let predicate = includeDeletedNotes ? nil : NSPredicate(format: "deleted_at == nil")
-        if Thread.isMainThread {
-            return Document.fetchAllNames(mainContext, predicate)
-        } else {
-            var result: [String] = []
-            let context = coreDataManager.persistentContainer.newBackgroundContext()
-            context.performAndWait {
-                result = Document.fetchAllNames(context, predicate)
-            }
-            return result
-        }
+        return fetchAllNames(filters: includeDeletedNotes ? [.includeDeleted] : [])
     }
 
     func allDocumentsIds(includeDeletedNotes: Bool) -> [UUID] {
-        let predicate = includeDeletedNotes ? nil : NSPredicate(format: "deleted_at == nil")
-        if Thread.isMainThread {
-            let result = (try? Document.fetchAll(mainContext, predicate)) ?? []
-            return result.map { $0.id }
-        } else {
-            var result: [Document] = []
-            let context = coreDataManager.persistentContainer.newBackgroundContext()
-            context.performAndWait {
-                result = (try? Document.fetchAll(context, predicate)) ?? []
-            }
-            return result.map { $0.id }
-        }
+        let result = (try? fetchAll(filters: includeDeletedNotes ? [.includeDeleted] : [])) ?? []
+        return result.map { $0.id }
     }
 
     func loadDocByTitleInBg(title: String) -> DocumentStruct? {
-        var result: DocumentStruct?
-        let context = coreDataManager.persistentContainer.newBackgroundContext()
-        context.performAndWait {
-            result = loadDocumentByTitle(title: title, context: context)
-        }
-        return result
+        guard let document = try? fetchWithTitle(title) else { return nil }
+        return parseDocumentBody(document)
     }
 
-    func loadDocumentByTitle(title: String, context: NSManagedObjectContext? = nil) -> DocumentStruct? {
-        guard let document = try? Document.fetchWithTitle(context ?? mainContext, title) else { return nil }
+    func loadDocumentByTitle(title: String) -> DocumentStruct? {
+        guard let document = try? fetchWithTitle(title) else { return nil }
 
         return parseDocumentBody(document)
     }
 
     func loadDocumentByTitle(title: String,
-                             context: NSManagedObjectContext? = nil,
                              completion: @escaping (Swift.Result<DocumentStruct?, Error>) -> Void) {
-        let bgContext = context ?? CoreDataManager.shared.persistentContainer.newBackgroundContext()
-        bgContext.perform {
+        backgroundQueue.async {
+            let documentManager = DocumentManager()
             do {
-                guard let document = try Document.fetchWithTitle(bgContext, title) else {
+                guard let document = try documentManager.fetchWithTitle(title) else {
                     completion(.success(nil))
                     return
                 }
 
-                completion(.success(self.parseDocumentBody(document)))
+                completion(.success(documentManager.parseDocumentBody(document)))
             } catch {
                 completion(.failure(error))
             }
         }
     }
 
-    func loadDocumentById(id: UUID, context: NSManagedObjectContext? = nil) -> DocumentStruct? {
-        guard let document = try? Document.fetchWithId(context ?? mainContext, id) else { return nil }
-
+    func loadDocumentById(id: UUID) -> DocumentStruct? {
+        guard let document = try? fetchWithId(id) else { return nil }
         return parseDocumentBody(document)
     }
 
-    func loadDocumentsById(ids: [UUID], context: NSManagedObjectContext? = nil) -> [DocumentStruct] {
+    func loadDocumentsById(ids: [UUID]) -> [DocumentStruct] {
         do {
-            return try Document.fetchAllWithIds(context ?? mainContext, ids).compactMap {
+            return try fetchAllWithIds(ids).compactMap {
                 parseDocumentBody($0)
             }
         } catch { return [] }
     }
 
     func loadDocumentWithJournalDate(_ date: String) -> DocumentStruct? {
-        guard let document = Document.fetchWithJournalDate(mainContext, date) else { return nil }
+        guard let document = fetchWithJournalDate(date) else { return nil }
         return parseDocumentBody(document)
     }
 
     func loadDocumentsWithType(type: DocumentType, _ limit: Int, _ fetchOffset: Int) -> [DocumentStruct] {
         do {
-            return try Document.fetchWithTypeAndLimit(context: mainContext,
-                                                      type.rawValue,
-                                                      limit,
-                                                      fetchOffset).compactMap { (document) -> DocumentStruct? in
-            parseDocumentBody(document)
-            }
-        } catch { return [] }
-    }
-
-    func countDocumentsWithType(type: DocumentType) -> Int {
-        return Document.countWithPredicate(mainContext, NSPredicate(format: "document_type = %ld", type.rawValue))
-    }
-
-    func documentsWithTitleMatch(title: String) -> [DocumentStruct] {
-        do {
-            return try Document.fetchAllWithTitleMatch(mainContext, title)
-                .compactMap { document -> DocumentStruct? in
+            return try fetchWithTypeAndLimit(type,
+                                             limit,
+                                             fetchOffset).compactMap { (document) -> DocumentStruct? in
                 parseDocumentBody(document)
             }
         } catch { return [] }
     }
 
-    func documentsWithPredicate(_ predicate: NSPredicate) -> [DocumentStruct] {
+    func documentsWithTitleMatch(title: String) -> [DocumentStruct] {
         do {
-            return try Document.fetchAll(mainContext, predicate)
+            return try fetchAllWithTitleMatch(title: title, limit: 0)
                 .compactMap { document -> DocumentStruct? in
                 parseDocumentBody(document)
             }
@@ -277,12 +221,12 @@ public class DocumentManager: NSObject {
     }
 
     func documentsWithTitleMatch(title: String, completion: @escaping (Swift.Result<[DocumentStruct], Error>) -> Void) {
-        let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
-        context.perform {
+        backgroundQueue.async {
             do {
-                let results = try Document.fetchAllWithTitleMatch(context, title)
+                let documentManager = DocumentManager()
+                let results = try documentManager.fetchAllWithTitleMatch(title: title, limit: 0)
                     .compactMap { document -> DocumentStruct? in
-                        self.parseDocumentBody(document)
+                        documentManager.parseDocumentBody(document)
                     }
                 completion(.success(results))
             } catch {
@@ -292,12 +236,12 @@ public class DocumentManager: NSObject {
     }
 
     func documentsWithLimitTitleMatch(title: String, limit: Int = 4, completion: @escaping (Swift.Result<[DocumentStruct], Error>) -> Void) {
-        let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
-        context.perform {
+        backgroundQueue.async {
+            let documentManager = DocumentManager()
             do {
-                let results = try Document.fetchAllWithLimitedTitleMatch(context, title, limit)
+                let results = try documentManager.fetchAllWithTitleMatch(title: title, limit: limit)
                     .compactMap { document -> DocumentStruct? in
-                        self.parseDocumentBody(document)
+                        documentManager.parseDocumentBody(document)
                     }
                 completion(.success(results))
             } catch {
@@ -308,17 +252,16 @@ public class DocumentManager: NSObject {
 
     func documentsWithLimitTitleMatch(title: String, limit: Int = 4) -> [DocumentStruct] {
         do {
-            return try Document.fetchAllWithLimitedTitleMatch(mainContext, title, limit)
+            return try fetchAllWithTitleMatch(title: title, limit: limit)
                 .compactMap { document -> DocumentStruct? in
                 parseDocumentBody(document)
             }
         } catch { return [] }
     }
 
-    func loadAllWithLimit(_ limit: Int = 4, _ sortDescriptors: [NSSortDescriptor]? = nil) -> [DocumentStruct] {
+    func loadAllWithLimit(_ limit: Int = 4, sortingKey: SortingKey? = nil) -> [DocumentStruct] {
         do {
-            return try Document.fetchAllWithLimitResult(mainContext, limit, sortDescriptors)
-                .compactMap { document -> DocumentStruct? in
+            return try fetchAll(filters: [.limit(limit)], sortingKey: sortingKey).compactMap { document -> DocumentStruct? in
             parseDocumentBody(document)
                 }
         } catch { return [] }
@@ -326,7 +269,7 @@ public class DocumentManager: NSObject {
 
     func loadAll() -> [DocumentStruct] {
         do {
-            return try Document.fetchAll(mainContext).compactMap { document in
+            return try fetchAll().compactMap { document in
             parseDocumentBody(document)
             }
         } catch { return [] }
@@ -348,33 +291,6 @@ public class DocumentManager: NSObject {
                        beamObjectPreviousChecksum: document.beam_object_previous_checksum,
                        journalDate: document.document_type == DocumentType.journal.rawValue ? JournalDateConverter.toString(from: document.journal_day) : nil
         )
-    }
-
-    /// Must be called within the context thread
-    private func deleteNonExistingIds(_ context: NSManagedObjectContext, _ remoteDocumentsIds: [UUID]) {
-        // TODO: We could optimize using an `UPDATE` statement instead of loading all documents but I don't expect
-        // this to ever have a lot of them
-        let documents = (try? Document.fetchAllWithLimit(context,
-                                                        NSPredicate(format: "NOT id IN %@", remoteDocumentsIds))) ?? []
-        for document in documents {
-            Logger.shared.logDebug("Marking \(document.title) as deleted", category: .document)
-            document.deleted_at = BeamDate.now
-            document.version += 1
-            notificationDocumentUpdate(DocumentStruct(document: document))
-        }
-    }
-
-    private func deleteLocalDocumentAndWait(_ id: UUID) throws {
-        let context = coreDataManager.persistentContainer.newBackgroundContext()
-        try context.performAndWait {
-            guard let document = try? Document.fetchWithId(context, id) else {
-                return
-            }
-
-            document.deleted_at = BeamDate.now
-
-            try Self.saveContext(context: context)
-        }
     }
 
     /// Update local coredata instance with data we fetched remotely, we detected the need for a merge between both versions
@@ -406,7 +322,6 @@ public class DocumentManager: NSObject {
 
         document.data = newData
         document.beam_api_data = input2
-//        document.version += 1
         return true
     }
 
@@ -443,17 +358,21 @@ public class DocumentManager: NSObject {
     static var savedCount = 0
     // MARK: NSManagedObjectContext saves
     @discardableResult
-    static func saveContext(context: NSManagedObjectContext) throws -> Bool {
+    func saveContext(file: StaticString = #file, line: UInt = #line) throws -> Bool {
+        Logger.shared.logDebug("DocumentManager.saveContext called from \(file):\(line). \(context.hasChanges ? "changed" : "unchanged")", category: .document)
+
         guard context.hasChanges else {
             return false
         }
 
-        savedCount += 1
+        Logger.shared.logDebug("\tInserted: \(context.insertedObjects)\n\tDeleted: \(context.deletedObjects)\n\tUpdated: \(context.updatedObjects)\n\tRegistered: \(context.registeredObjects)", category: .document)
+
+        Self.savedCount += 1
 
         do {
             let localTimer = BeamDate.now
             try CoreDataManager.save(context)
-            Logger.shared.logDebug("[\(savedCount)] CoreDataManager saved", category: .coredata, localTimer: localTimer)
+            Logger.shared.logDebug("[\(Self.savedCount)] CoreDataManager saved", category: .coredata, localTimer: localTimer)
             return true
         } catch let error as NSError {
             switch error.code {
@@ -474,7 +393,7 @@ public class DocumentManager: NSObject {
     }
 
     // swiftlint:disable:next cyclomatic_complexity
-    static private func logConstraintConflict(_ error: NSError) {
+    private func logConstraintConflict(_ error: NSError) {
         guard error.domain == NSCocoaErrorDomain, let conflicts = error.userInfo["conflictList"] as? [NSConstraintConflict] else { return }
 
         for conflict in conflicts {
@@ -494,7 +413,7 @@ public class DocumentManager: NSObject {
     }
 
     // swiftlint:disable:next cyclomatic_complexity
-    static private func logMergeConflict(_ error: NSError) {
+    private func logMergeConflict(_ error: NSError) {
         guard error.domain == NSCocoaErrorDomain, let conflicts = error.userInfo["conflictList"] as? [NSMergeConflict] else { return }
 
         for conflict in conflicts {
@@ -504,13 +423,13 @@ public class DocumentManager: NSObject {
     }
 
     // MARK: Validations
-    func checkValidations(_ context: NSManagedObjectContext, _ document: Document) throws {
+    internal func checkValidations(_ document: Document) throws {
         guard document.deleted_at == nil else { return }
 
         Logger.shared.logDebug("checkValidations for \(document.titleAndId)", category: .documentDebug)
         try checkJournalDay(document)
-        try checkDuplicateJournalDates(context, document)
-        try checkDuplicateTitles(context, document)
+        try checkDuplicateJournalDates(document)
+        try checkDuplicateTitles(document)
     }
 
     private func checkJournalDay(_ document: Document) throws {
@@ -526,15 +445,11 @@ public class DocumentManager: NSObject {
         throw NSError(domain: "DOCUMENT_ERROR_DOMAIN", code: 1003, userInfo: userInfo)
     }
 
-    private func checkDuplicateJournalDates(_ context: NSManagedObjectContext, _ document: Document) throws {
+    private func checkDuplicateJournalDates(_ document: Document) throws {
         guard document.documentType == .journal else { return }
         guard String(document.journal_day).count == 8 else { return }
 
-        let predicate = NSPredicate(format: "journal_day == %d AND id != %@ AND deleted_at == nil AND database_id = %@",
-                                    document.journal_day,
-                                    document.id as CVarArg,
-                                    document.database_id as CVarArg)
-        let documents = (try? Document.fetchAll(context, predicate).map { DocumentStruct(document: $0) }) ?? []
+        let documents = (try? fetchAll(filters: [.journalDate(document.journal_day), .notId(document.id), .databaseId(document.database_id), .nonDeleted]).map { DocumentStruct(document: $0) }) ?? []
 
         if !documents.isEmpty {
             let errString = "Journal Date \(document.journal_day) for \(document.titleAndId) already used in \(documents.count) other documents: \(documents.map { $0.titleAndId })"
@@ -549,12 +464,8 @@ public class DocumentManager: NSObject {
         }
     }
 
-    func checkDuplicateTitles(_ context: NSManagedObjectContext, _ document: Document) throws {
-        let predicate = NSPredicate(format: "title = %@ AND id != %@ AND deleted_at == nil AND database_id = %@",
-                                    document.title,
-                                    document.id as CVarArg,
-                                    document.database_id as CVarArg)
-        let documents = (try? Document.fetchAll(context, predicate).map { DocumentStruct(document: $0) }) ?? []
+    private func checkDuplicateTitles(_ document: Document) throws {
+        let documents = (try? fetchAll(filters: [.title(document.title), .notId(document.id), .nonDeleted, .databaseId(document.database_id)]).map { DocumentStruct(document: $0) }) ?? []
 
         if !documents.isEmpty {
             let documentIds = documents.compactMap { $0.titleAndId }.joined(separator: "; ")
@@ -570,11 +481,11 @@ public class DocumentManager: NSObject {
         }
     }
 
-    func checkVersion(_ context: NSManagedObjectContext, _ document: Document, _ newVersion: Int64) throws {
+    internal func checkVersion(_ document: Document, _ newVersion: Int64) throws {
         // If document is deleted, we don't need to check version uniqueness
         guard document.deleted_at == nil else { return }
 
-        let existingDocument = try? Document.fetchWithId(context, document.id)
+        let existingDocument = try? fetchWithId(document.id)
 
         if let existingVersion = existingDocument?.version, existingVersion >= newVersion {
             let errString = "\(document.title): coredata version: \(existingVersion) should be < newVersion: \(newVersion)"
@@ -638,11 +549,11 @@ public class DocumentManager: NSObject {
                                    category: .documentNetwork)
             let localTimer = BeamDate.now
 
-            let context = self.coreDataManager.backgroundContext
-            context.perform {
+            self.backgroundQueue.async {
                 // We want to fetch back the document, to update it's previousChecksum
                 // context.refresh(document, mergeChanges: false)
-                guard let updatedDocument = try? Document.fetchWithId(context, documentStruct.id) else {
+                let documentManager = DocumentManager()
+                guard let updatedDocument = try? documentManager.fetchWithId(documentStruct.id) else {
                     Logger.shared.logWarning("Weird, document disappeared (deleted?), isCancelled: \(networkTask.isCancelled): \(documentStruct.titleAndId)",
                                              category: .coredata)
                     networkCompletion?(.failure(DocumentManagerError.localDocumentNotFound))
@@ -684,6 +595,7 @@ extension DocumentManager {
         let cancellable = NotificationCenter.default
             .publisher(for: .documentUpdate)
             .sink { notification in
+                let documentManager = DocumentManager()
                 guard let updatedDocuments = notification.userInfo?["updatedDocuments"] as? [DocumentStruct] else {
                     return
                 }
@@ -715,25 +627,22 @@ extension DocumentManager {
                          we don't want the editor UI to change.
                          */
 
-                        let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
-                        context.performAndWait {
-                            guard let coreDataDocument = try? Document.fetchWithId(context, documentId) else {
-                                Logger.shared.logDebug("onDocumentChange for \(document.titleAndId) (new id)",
-                                                       category: .documentNotification)
-                                documentId = document.id
-                                completionHandler(document)
-                                return
-                            }
+                        guard let coreDataDocument = try? documentManager.fetchWithId(documentId) else {
+                            Logger.shared.logDebug("onDocumentChange for \(document.titleAndId) (new id)",
+                                                   category: .documentNotification)
+                            documentId = document.id
+                            completionHandler(document)
+                            return
+                        }
 
-                            if documentStruct.deletedAt == nil, coreDataDocument.deleted_at != documentStruct.deletedAt {
-                                Logger.shared.logDebug("onDocumentChange for \(document.titleAndId) (new id)",
-                                                       category: .documentNotification)
-                                documentId = document.id
-                                completionHandler(document)
-                            } else {
-                                Logger.shared.logDebug("onDocumentChange: no notification for \(document.titleAndId) (new id)",
-                                                       category: .documentNotification)
-                            }
+                        if documentStruct.deletedAt == nil, coreDataDocument.deleted_at != documentStruct.deletedAt {
+                            Logger.shared.logDebug("onDocumentChange for \(document.titleAndId) (new id)",
+                                                   category: .documentNotification)
+                            documentId = document.id
+                            completionHandler(document)
+                        } else {
+                            Logger.shared.logDebug("onDocumentChange: no notification for \(document.titleAndId) (new id)",
+                                                   category: .documentNotification)
                         }
                     } else if document.id == documentId {
                         Logger.shared.logDebug("onDocumentChange for \(document.titleAndId)",
@@ -775,26 +684,258 @@ extension DocumentManager {
 // For tests
 extension DocumentManager {
     func create(title: String) -> DocumentStruct? {
-        let semaphore = DispatchSemaphore(value: 0)
         var result: DocumentStruct?
 
-        coreDataManager.persistentContainer.performBackgroundTask { [unowned self] context in
-            let document = Document.create(context, title: title)
-
-            do {
-                try self.checkValidations(context, document)
-
-                result = self.parseDocumentBody(document)
-                try Self.saveContext(context: context)
-            } catch {
-                Logger.shared.logError(error.localizedDescription, category: .coredata)
-            }
-
-            semaphore.signal()
+        do {
+            let document: Document = try create(id: UUID(), title: title)
+            result = parseDocumentBody(document)
+        } catch {
+            Logger.shared.logError(error.localizedDescription, category: .coredata)
         }
 
-        semaphore.wait()
-
         return result
+    }
+
+    // From Document:
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
+    class func fetchRequest(filters: [DocumentFilter], sortingKey: SortingKey?) -> NSFetchRequest<Document> {
+        let request = NSFetchRequest<Document>(entityName: "Document")
+
+        var predicates: [NSPredicate] = []
+        var defaultDB = true
+        var deletionFilter = false
+
+        for filter in filters {
+            switch filter {
+            case .allDatabases:
+                defaultDB = false
+
+            case let .databaseId(dbId):
+                defaultDB = false
+                predicates.append(NSPredicate(format: "database_id = %@",
+                                              dbId as CVarArg))
+            case let .notDatabaseId(dbId):
+                defaultDB = false
+                predicates.append(NSPredicate(format: "NOT database_id = %@",
+                                              dbId as CVarArg))
+
+            case let .notDatabaseIds(dbIds):
+                defaultDB = false
+                predicates.append(NSPredicate(format: "NOT (database_id IN %@)",
+                                              dbIds))
+            case let .id(id):
+                predicates.append(NSPredicate(format: "id = %@",
+                                              id as CVarArg))
+            case let .notId(id):
+                predicates.append(NSPredicate(format: "id != %@",
+                                              id as CVarArg))
+            case let .ids(ids):
+                predicates.append(NSPredicate(format: "id IN %@", ids))
+
+            case let .notIds(ids):
+                predicates.append(NSPredicate(format: "NOT id IN %@", ids))
+
+            case let .title(title):
+                predicates.append(NSPredicate(format: "title ==[cd] %@",
+                                              title))
+            case let .titleMatch(title):
+                predicates.append(NSPredicate(format: "title CONTAINS[cd] %@", title as CVarArg))
+            case let .journalDate(journalDate):
+                predicates.append(NSPredicate(format: "journal_day == %d",
+                                              journalDate))
+            case let .nonFutureJournalDate(journalDate):
+                predicates.append(NSPredicate(format: "journal_day <= \(journalDate)"))
+
+            case let .type(type):
+                predicates.append(NSPredicate(format: "document_type = %ld", type.rawValue))
+
+            case .nonDeleted:
+                deletionFilter = true
+                predicates.append(NSPredicate(format: "deleted_at == nil"))
+
+            case .deleted:
+                deletionFilter = true
+                predicates.append(NSPredicate(format: "deleted_at != nil"))
+
+            case .includeDeleted:
+                deletionFilter = true
+
+            case let .updatedSince(date):
+                predicates.append(NSPredicate(format: "updated_at >= %@", date as CVarArg))
+
+            case let .limit(limit):
+                request.fetchLimit = limit
+
+            case let .offset(offset):
+                request.fetchOffset = offset
+            }
+        }
+
+        if !deletionFilter {
+            // if there is no deletion filter, only search for non deleted notes by default:
+            predicates.append(NSPredicate(format: "deleted_at == nil"))
+        }
+
+        if defaultDB {
+            predicates.append(NSPredicate(format: "database_id = %@",
+                                          DatabaseManager.defaultDatabase.id as CVarArg))
+        }
+
+        request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
+
+        if let sortingKey = sortingKey {
+            request.sortDescriptors = sortDescriptorsFor(sortingKey)
+        }
+
+        return request
+    }
+
+    /// Slower than `deleteBatchWithPredicate` but I can't get `deleteBatchWithPredicate`
+    /// to properly propagate changes to other contexts :(
+    func deleteAll(databaseId: UUID?) throws {
+        do {
+            let filters: [DocumentFilter] = {
+                if let databaseId = databaseId {
+                    return [.databaseId(databaseId), .includeDeleted]
+                } else {
+                    return [.includeDeleted, .allDatabases]
+                }
+            }()
+            let allDocuments = try fetchAll(filters: filters)
+            for document in allDocuments {
+                context.delete(document)
+            }
+
+            try saveContext()
+        } catch {
+            Logger.shared.logError("DocumentManager.deleteAll failed: \(error)", category: .document)
+            throw error
+        }
+    }
+
+    func create(id: UUID, title: String? = nil) throws -> Document {
+        let document = Document(context: context)
+        document.id = id
+        document.database_id = DatabaseManager.defaultDatabase.id
+        document.version = 0
+        document.document_type = DocumentType.note.rawValue
+        if let title = title {
+            document.title = title
+        }
+
+        try checkValidations(document)
+        try saveContext()
+
+        return document
+    }
+
+    func count(filters: [DocumentFilter] = []) -> Int {
+        // Fetch existing if any
+        let fetchRequest = DocumentManager.fetchRequest(filters: filters, sortingKey: nil)
+
+        do {
+            let fetchedTransactions = try context.count(for: fetchRequest)
+            return fetchedTransactions
+        } catch {
+            // TODO: raise error?
+            Logger.shared.logError("Can't count: \(error)", category: .coredata)
+        }
+
+        return 0
+    }
+
+    enum SortingKey {
+        case title(Bool) ///< Ascending = true, Descending = false
+        case journal_day(Bool) ///< Ascending = true, Descending = false
+        case journal(Bool)
+        case updatedAt(Bool)
+    }
+
+    internal class func sortDescriptorsFor(_ key: SortingKey) -> [NSSortDescriptor] {
+        switch key {
+        case .title(let ascencing):
+            return [NSSortDescriptor(key: "title", ascending: ascencing, selector: #selector(NSString.caseInsensitiveCompare))]
+
+        case let .journal_day(ascending):
+            return [NSSortDescriptor(key: "journal_day", ascending: ascending)]
+
+        case let .journal(ascending):
+            return  [NSSortDescriptor(key: "journal_day", ascending: ascending),
+                     NSSortDescriptor(key: "created_at", ascending: ascending)]
+
+        case let .updatedAt(ascending):
+            return [NSSortDescriptor(key: "updated_at",
+                              ascending: ascending)]
+        }
+    }
+
+    func fetchFirst(filters: [DocumentFilter] = [],
+                    sortingKey: SortingKey? = nil) throws -> Document? {
+        return try fetchAll(filters: [.limit(1)] + filters,
+                            sortingKey: sortingKey).first
+    }
+
+    func fetchAll(filters: [DocumentFilter] = [], sortingKey: SortingKey? = nil) throws -> [Document] {
+        let fetchRequest = DocumentManager.fetchRequest(filters: filters, sortingKey: sortingKey)
+
+        let fetchedDocuments = try context.fetch(fetchRequest)
+        return fetchedDocuments
+    }
+
+    func fetchAllNames(filters: [DocumentFilter], sortingKey: SortingKey? = nil) -> [String] {
+        let fetchRequest = DocumentManager.fetchRequest(filters: filters, sortingKey: sortingKey)
+        fetchRequest.propertiesToFetch = ["title"]
+
+        do {
+            let fetchedDocuments = try context.fetch(fetchRequest)
+            return fetchedDocuments.compactMap { $0.title }
+        } catch {
+            // TODO: raise error?
+            Logger.shared.logError("Can't fetch all: \(error)", category: .coredata)
+        }
+
+        return []
+    }
+
+    func fetchAllWithIds(_ ids: [UUID]) throws -> [Document] {
+        try fetchAll(filters: [.nonDeleted, .ids(ids)])
+    }
+
+    func fetchWithId(_ id: UUID) throws -> Document? {
+        try fetchFirst(filters: [.id(id), .includeDeleted, .allDatabases])
+    }
+
+    func fetchOrCreateWithId(_ id: UUID) throws -> Document {
+        let document = try ((try? fetchWithId(id)) ?? (try create(id: id)))
+        return document
+    }
+
+    func fetchWithTitle(_ title: String) throws -> Document? {
+        return try fetchFirst(filters: [.title(title)], sortingKey: .title(true))
+    }
+
+    func fetchOrCreateWithTitle(_ title: String) throws -> Document {
+        try ((try? fetchFirst(filters: [.title(title)])) ?? (try create(id: UUID(), title: title)))
+    }
+
+    func fetchWithJournalDate(_ date: String) -> Document? {
+        let date = JournalDateConverter.toInt(from: date)
+        return try? fetchFirst(filters: [.journalDate(date)])
+    }
+
+    func fetchWithTypeAndLimit(_ type: DocumentType,
+                               _ limit: Int,
+                               _ fetchOffset: Int) throws -> [Document] {
+
+        let today = BeamNoteType.titleForDate(BeamDate.now)
+        let todayInt = JournalDateConverter.toInt(from: today)
+
+        return try fetchAll(filters: [.type(type), .nonFutureJournalDate(todayInt), .limit(limit), .offset(fetchOffset)], sortingKey: .journal(false))
+    }
+
+    func fetchAllWithTitleMatch(title: String,
+                                limit: Int) throws -> [Document] {
+        return try fetchAll(filters: [.titleMatch(title), .limit(limit)],
+                            sortingKey: .title(true))
     }
 }
