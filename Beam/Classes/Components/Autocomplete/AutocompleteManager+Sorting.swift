@@ -73,8 +73,7 @@ extension AutocompleteManager {
         }
 
         var sortableResult = [AutocompleteResult]()
-        sortableResult.append(contentsOf: historyResultsTruncated)
-        sortableResult.append(contentsOf: urlResultsTruncated)
+        sortableResult.append(contentsOf: autocompleteResultsUniqueUrls(sequence: historyResultsTruncated + urlResultsTruncated))
         sortableResult.append(contentsOf: notesResultsTruncated)
 
         sortableResult.sort(by: >)
@@ -85,15 +84,13 @@ extension AutocompleteManager {
         let truncateLength = resultLimit - min(2, searchEngineResults.count) - (hasCreateCard ? 1 : 0)
         sortableResult = Array(sortableResult.prefix(truncateLength))
         let searchEngineMax = resultLimit - sortableResult.count - (hasCreateCard ? 1 : 0)
-        sortableResult.insert(contentsOf: searchEngineResults.prefix(searchEngineMax), at: historyResultsTruncated.isEmpty && urlResultsTruncated.isEmpty ? 0 : 1)
+        sortableResult.insert(contentsOf: searchEngineResults.prefix(searchEngineMax), at: historyResultsTruncated.isEmpty && urlResultsTruncated.isEmpty && notesResultsTruncated.isEmpty ? 0 : 1)
         if let topHistoryDomainResult = topHistoryDomainResult {
             sortableResult.insert(topHistoryDomainResult, at: 0)
         }
 
         results.append(contentsOf: sortableResult)
         results = Array(results.prefix(resultLimit))
-
-        results = self.autocompleteResultsUniqueUrls(sequence: results)
 
         results.append(contentsOf: createCardResults)
         return results
