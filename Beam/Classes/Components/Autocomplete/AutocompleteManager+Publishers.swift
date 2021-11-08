@@ -22,6 +22,7 @@ extension AutocompleteManager {
             futureToPublisher(autocompleteNotesContentsResults(for: searchText), source: .note),
             futureToPublisher(autocompleteTopDomainResults(for: searchText), source: .topDomain),
             futureToPublisher(autocompleteHistoryResults(for: searchText), source: .history),
+            futureToPublisher(autocompleteAliasHistoryResults(for: searchText), source: .history),
             futureToPublisher(autocompleteLinkStoreResults(for: searchText), source: .url),
             self.autocompleteCanCreateNoteResult(for: searchText)
                 .replaceError(with: false)
@@ -114,6 +115,33 @@ extension AutocompleteManager {
                     }
                     self.logIntermediate(step: "HistoryContent", stepShortName: "HC", results: autocompleteResults)
                     promise(.success(autocompleteResults))
+                }
+            }
+        }
+    }
+
+    private func autocompleteAliasHistoryResults(for query: String) -> Future<[AutocompleteResult], Error> {
+        Future { promise in
+            GRDBDatabase.shared.searchAlias(query: query, enabledFrecencyParam: AutocompleteManager.urlFrecencyParamKey) { result in
+                switch result {
+                case .failure(let error): promise(.failure(error))
+                case .success(let historyResult):
+                    guard let historyResult = historyResult else {
+                        promise(.success([]))
+                        return
+                    }
+                    var information: String? = historyResult.url
+                    let url = URL(string: historyResult.url)
+                    if let url = url {
+                        information = url.urlStringWithoutScheme.removingPercentEncoding
+                    }
+                    promise(.success([AutocompleteResult(text: historyResult.title,
+                                                         source: .history,
+                                                         url: url,
+                                                         information: information,
+                                                         completingText: query,
+                                                         score: historyResult.frecency?.frecencySortScore)
+                                     ]))
                 }
             }
         }

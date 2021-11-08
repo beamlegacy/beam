@@ -45,4 +45,19 @@ class URLBeamTest: XCTestCase {
         XCTAssertFalse(URL(string: "https://wikipedia.org/wiki")!.domainMatchWith("wikipedia.org"))
         XCTAssertFalse(URL(string: "https://wikipedia.org/wiki")!.domainMatchWith("wikipedia.org/"))
     }
+
+    func testUrlIsDomain_WhenHavingCorrectDomain() {
+        XCTAssertTrue(URL(string: "https://wikipedia.org/")!.isDomain)
+        XCTAssertTrue(URL(string: "https://www.wikipedia.org/")!.isDomain)
+        XCTAssertTrue(URL(string: "https://wikipedia.org")!.isDomain)
+        XCTAssertTrue(URL(string: "https://www.wikipedia.org")!.isDomain)
+        XCTAssertTrue(URL(string: "https://wikipedia.customextension")!.isDomain)
+        XCTAssertTrue(URL(string: "https://wikipedia.org/?hello=param")!.isDomain)
+    }
+
+    func testUrlIsNotDomain_WhenHavingIncorrectDomain() {
+        XCTAssertFalse(URL(string: "https://wikipedia.org/wiki")!.isDomain)
+        XCTAssertFalse(URL(string: "https://www.wikipedia.org/wiki")!.isDomain)
+        XCTAssertFalse(URL(string: "https://wikipedia.org/page.html")!.isDomain)
+    }
 }

@@ -202,8 +202,9 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
                 if tabToIndex.shouldBeIndexed {
                     try GRDBDatabase.shared.insertHistoryUrl(urlId: id,
                                                              url: tabToIndex.url.string,
+                                                             aliasDomain: tabToIndex.userTypedUrl?.absoluteString,
                                                              title: tabToIndex.document.title,
-                                                             content: tabToIndex.textContent)
+                                                             content: nil)
                 }
             } catch {
                 Logger.shared.logError("unable to save history url \(tabToIndex.url.string)", category: .search)
