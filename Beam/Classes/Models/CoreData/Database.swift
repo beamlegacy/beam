@@ -43,8 +43,7 @@ class Database: NSManagedObject, BeamCoreDataObject {
     }
 
     func documentsCount() -> Int {
-        Document.countWithPredicate(CoreDataManager.shared.mainContext,
-                                    NSPredicate(format: "deleted_at == nil"), id)
+        DocumentManager().count(filters: [.databaseId(id)])
     }
 
     class func defaultDatabase(_ context: NSManagedObjectContext = CoreDataManager.shared.mainContext) -> Database {

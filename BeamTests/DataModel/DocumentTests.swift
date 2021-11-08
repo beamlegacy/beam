@@ -25,9 +25,9 @@ class DocumentTests: QuickSpec {
             coreDataManager.setup()
             //CoreDataManager.shared = coreDataManager
 
-            mainContext = coreDataManager.mainContext
-            backgroundContext = coreDataManager.backgroundContext
             sut = DocumentManager(coreDataManager: coreDataManager)
+            mainContext = sut.context
+            backgroundContext = coreDataManager.backgroundContext
             helper = DocumentManagerTestsHelper(documentManager: sut,
                                                      coreDataManager: coreDataManager)
 
@@ -39,17 +39,17 @@ class DocumentTests: QuickSpec {
             helper.deleteAllDocuments()
         }
 
-        describe(".countWithPredicate()") {
+        describe(".count()") {
             it("fetches document") {
                 let count = 3
-                let countBefore = Document.countWithPredicate(mainContext)
+                let countBefore = sut.count()
 
                 for _ in 1...count {
                     var docStruct = helper.createDocumentStruct()
                     docStruct = helper.saveLocally(docStruct)
                 }
 
-                let countAfter = Document.countWithPredicate(mainContext)
+                let countAfter = sut.count()
                 expect(countAfter) >= countBefore + count
                 // Because sometimes BeamNote adds today's journal note
                 expect(countAfter) <= countBefore + count + 1
@@ -61,7 +61,7 @@ class DocumentTests: QuickSpec {
             // Typing `\` in Omnibar used to crash
             it("doesn't crash with \\") {
                 expect {
-                    try Document.fetchWithTitle(mainContext, "\\")
+                    try sut.fetchWithTitle("\\")
                 }.toNot(throwError())
             }
         }
@@ -75,7 +75,7 @@ class DocumentTests: QuickSpec {
                 _ = helper.saveLocally(helper.createDocumentStruct())
                 _ = helper.saveLocally(helper.createDocumentStruct(title: "foobar"))
 
-                let result = try! Document.fetchAllWithTitleMatch(mainContext, "foobar")
+                let result = try! sut.fetchAllWithTitleMatch(title: "foobar", limit: 0)
                 expect(result).to(haveCount(times))
                 expect(result[0].title).to(equal("foobar"))
                 expect(result[1].title).to(equal("foobar 1"))
@@ -84,7 +84,7 @@ class DocumentTests: QuickSpec {
 
         describe("MD5") {
             it("generates the same MD5 as Ruby") {
-                let document = Document.create(mainContext, title: "foobar")
+                let document: Document = try sut.create(id: UUID(), title: "foobar")
                 document.data = "foobar".data(using: .utf8)
                 // Calculated from Ruby with Digest::MD5.hexdigest "foobar"
                 expect(document.data?.MD5).to(equal("3858f62230ac3c915f300c664312c63f"))
@@ -115,11 +115,12 @@ class DocumentTests: QuickSpec {
                 let id = UUID()
                 let title = String.randomTitle()
 
-                let document1 = Document.create(mainContext, title: title)
-                let document2 = Document.create(mainContext, title: title)
+                let document1: Document = try sut.create(id: UUID(), title: title)
+                let document2: Document = try sut.create(id: UUID(), title: title + "2")
 
                 document1.id = id
                 document2.id = id
+                document2.title = title
 
                 expect { try CoreDataManager.save(mainContext) }.to(throwError { (error: CocoaError) in
                     expect(error.code) == CocoaError.Code.managedObjectConstraintMerge
@@ -136,7 +137,7 @@ class DocumentTests: QuickSpec {
                 let title2 = String.randomTitle()
                 let title3 = String.randomTitle()
 
-                let document1 = Document.create(mainContext, title: title)
+                let document1: Document = try sut.create(id: UUID(), title: title)
                 expect { try CoreDataManager.save(mainContext) }.toNot(throwError())
                 var document2: Document!
                 backgroundContext.performAndWait {
@@ -148,12 +149,10 @@ class DocumentTests: QuickSpec {
                 document2.title = title3
 
                 expect { try CoreDataManager.save(backgroundContext) }.toNot(throwError())
-                expect { try DocumentManager.saveContext(context: backgroundContext) }.toNot(throwError())
-
-                expect { try CoreDataManager.save(mainContext) }.to(throwError { (error: CocoaError) in
+                expect { try sut.saveContext() }.to(throwError { (error: CocoaError) in
                     expect(error.code) == CocoaError.Code.managedObjectMerge
                 })
-                expect { try DocumentManager.saveContext(context: mainContext) }.to(throwError { (error: CocoaError) in
+                expect { try sut.saveContext() }.to(throwError { (error: CocoaError) in
                     expect(error.code) == CocoaError.Code.managedObjectMerge
                 })
 

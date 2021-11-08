@@ -499,10 +499,10 @@ extension BeamNote: BeamNoteDocument {
 
     public var lastChangedElement: BeamElement? {
         get {
-            AppDelegate.main.data.lastChangedElement
+            AppDelegate.main.data?.lastChangedElement
         }
         set {
-            AppDelegate.main.data.lastChangedElement = newValue
+            AppDelegate.main.data?.lastChangedElement = newValue
         }
     }
 

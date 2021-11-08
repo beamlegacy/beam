@@ -170,6 +170,7 @@ public class ElementNode: Widget {
     }
 
     func updateTextChildren(elements: [BeamElement]) {
+        guard isInNodeProviderTree else { return }
         children = buildTextChildren(elements: elements)
     }
 
