@@ -111,7 +111,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // We sync data *after* we potentially connected to websocket, to make sure we don't miss any data
         beamObjectManager.liveSync { _ in
             self.syncDataWithBeamObject()
-            self.data.resetPinnedTabs()
             self.data.updateNoteCount()
         }
         fetchTopDomains()
