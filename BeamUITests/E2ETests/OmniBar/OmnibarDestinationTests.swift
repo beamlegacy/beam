@@ -44,7 +44,8 @@ class OmnibarDestinationTests: BaseTest {
         _ = destinationCardSearchField.waitForExistence(timeout: implicitWaitTimeout)
         XCTAssertTrue(omnibarView.inputHasFocus(destinationCardSearchField))
         XCTAssertEqual(journalView.getElementStringValue(element: destinationCardSearchField), emptyString)
-        XCTAssertTrue(destinationCardSearchField.placeholderValue == todayCardNameTitleViewFormat || destinationCardSearchField.placeholderValue == todayCardNameCreationViewFormat || destinationCardSearchField.placeholderValue == todayCardNameCreationViewFormatWithout0InDays)
+        XCTAssertTrue(destinationCardSearchField.placeholderValue == todayCardNameTitleViewFormat || destinationCardSearchField.placeholderValue == todayCardNameCreationViewFormat || destinationCardSearchField.placeholderValue == todayCardNameCreationViewFormatWithout0InDays,
+                      "Actual card name is \(String(describing: destinationCardSearchField.placeholderValue))")
         
         testRailPrint("Then Selected autocomplete card is \(expectedNumberOfAutocompletedCards)")
         let selectedResultQuery = helper.allAutocompleteResults.matching(helper.autocompleteSelectedPredicate)
@@ -103,7 +104,8 @@ class OmnibarDestinationTests: BaseTest {
         XCTAssertTrue(omnibarView.inputHasFocus(destinationCardSearchField))
         XCTAssertEqual(journalView.getElementStringValue(element: destinationCardSearchField), emptyString)
         XCTAssertTrue(destinationCardSearchField.placeholderValue == todayCardNameTitleViewFormat || destinationCardSearchField.placeholderValue == todayCardNameCreationViewFormat ||
-            destinationCardSearchField.placeholderValue == todayCardNameCreationViewFormatWithout0InDays)
+            destinationCardSearchField.placeholderValue == todayCardNameCreationViewFormatWithout0InDays,
+                      "Actual card name is \(String(describing: destinationCardSearchField.placeholderValue))")
         
         testRailPrint("Then Selected autocomplete card is \(expectedNumberOfAutocompletedCards)")
         let selectedResultQuery = helper.allAutocompleteResults.matching(helper.autocompleteSelectedPredicate)

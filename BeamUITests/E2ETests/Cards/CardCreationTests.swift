@@ -69,7 +69,7 @@ class CardCreationTests: BaseTest {
         
         testRailPrint("Then card with \(cardNameToBeCreated) is opened")
         XCTAssertTrue(cardView.waitForCardViewToLoad())
-        XCTAssertTrue(cardView.staticText(cardNameToBeCreated).waitForExistence(timeout: implicitWaitTimeout))
+        XCTAssertTrue(cardView.staticText(cardNameToBeCreated).waitForExistence(timeout: minimumWaitTimeout))
     }
     
     func testCreateCardOmniboxCmdEnter() {

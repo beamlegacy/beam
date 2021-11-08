@@ -16,11 +16,16 @@ class UITestPagePasswordManager: BaseView {
     }
     
     func enterInput(_ value: String, _ formLabel: FormInputs) {
+        clickInputField(formLabel).typeText(value)
+    }
+    
+    @discardableResult
+    func clickInputField(_ formLabel: FormInputs) -> XCUIElement {
         let parent = app.webViews.containing(.staticText, identifier: formLabel.rawValue).element
         let input = parent.staticTexts[formLabel.rawValue].firstMatch
         XCTAssert(input.waitForExistence(timeout: implicitWaitTimeout))
-        input.doubleTapInTheMiddle()
-        input.typeText(value)
+        input.tapInTheMiddle()
+        return input
     }
 
     func tapSubmit() {
