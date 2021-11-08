@@ -284,6 +284,11 @@ import Sentry
         _ = addNewTab(origin: origin, note: note, element: node.element, url: url)
     }
 
+    func duplicate(tab: BrowserTab) {
+        let duplicatedTab = BrowserTab(state: self, browsingTreeOrigin: tab.browsingTreeOrigin, originMode: .web, note: nil)
+        browserTabsManager.addNewTabAndGroup(duplicatedTab, setCurrent: true, withURL: tab.url)
+    }
+
     func closedTab(_ index: Int, allowClosingPinned: Bool = false) {
         EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
         let tab = self.browserTabsManager.tabs[index]
@@ -294,6 +299,31 @@ import Sentry
         EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
         guard let currentTab = self.browserTabsManager.currentTab else { return false }
         return closeTabIfPossible(currentTab, allowClosingPinned: allowClosingPinned)
+    }
+
+    func closeAllTabsButCurrent() {
+        cmdManager.beginGroup(with: "CloseAllTabsButCurrentCmdGrp")
+        for tab in browserTabsManager.tabs where tab.id != browserTabsManager.currentTab?.id && !tab.isPinned {
+            guard let tabIndex = browserTabsManager.tabs.firstIndex(of: tab) else { continue }
+            cmdManager.run(command: CloseTab(tab: tab, tabIndex: tabIndex, wasCurrentTab: false), on: self)
+        }
+        cmdManager.endGroup(forceGroup: true)
+    }
+
+    func closeTabsToTheRight() {
+        guard let currentTab = browserTabsManager.currentTab, let currentTabIndex = browserTabsManager.tabs.firstIndex(of: currentTab) else { return }
+        var rightTabs = [BrowserTab]()
+        for rightTabIndex in currentTabIndex + 1...browserTabsManager.tabs.count - 1 {
+            guard rightTabIndex > currentTabIndex, !browserTabsManager.tabs[rightTabIndex].isPinned else { continue }
+            rightTabs.append(browserTabsManager.tabs[rightTabIndex])
+        }
+
+        cmdManager.beginGroup(with: "CloseTabsToTheRightCmdGrp")
+        for tab in rightTabs {
+            guard let tabIndex = browserTabsManager.tabs.firstIndex(of: tab) else { continue }
+            cmdManager.run(command: CloseTab(tab: tab, tabIndex: tabIndex, wasCurrentTab: false), on: self)
+        }
+        cmdManager.endGroup(forceGroup: true)
     }
 
     @discardableResult

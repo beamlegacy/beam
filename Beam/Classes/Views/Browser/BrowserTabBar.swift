@@ -45,6 +45,7 @@ struct BrowserTabBar: View {
         disableAnimation ? nil : BeamAnimation.easeInOut(duration: animationDuration)
     }
 
+    // swiftlint:disable function_body_length
     func renderItem(tab: BrowserTab, index: Int, allowHover: Bool, widthProvider: TabWidthProvider,
                     containerGeometry: GeometryProxy, scrollViewProxy: ScrollViewProxy?) -> some View {
         Group {
@@ -83,11 +84,23 @@ struct BrowserTabBar: View {
                             state.browserTabsManager.pinTab(tab)
                         }
                     }.disabled(!tab.isPinned && tab.url == nil)
+                    Button("Duplicate Tab") {
+                        guard index < tabs.count else { return }
+                        let tab = tabs[index]
+                        state.duplicate(tab: tab)
+                    }
+                    Divider()
                     Button("Close Tab") {
                         guard index < tabs.count else { return }
                         let tab = tabs[index]
                         onTabClose(tab, fromContextMenu: true)
                     }
+                    Button("Close Other Tabs") {
+                        state.closeAllTabsButCurrent()
+                    }.disabled(tabs.allSatisfy({ $0.isPinned }))
+                    Button("Close Tabs to the Right") {
+                        state.closeTabsToTheRight()
+                    }.disabled(index + 1 >= tabs.count || tabs.allSatisfy({ $0.isPinned }))
                 }
             if index == dragModel.draggingOverIndex && index > dragStartIndex {
                 emptySpacer.frame(width: dragModel.widthForDraggingTab)
