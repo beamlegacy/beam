@@ -91,7 +91,9 @@ public extension CALayer {
         guard note != rootNode?.element else { return }
 
         clearRoot()
-        scroll(.zero)
+        if rootNode != nil {
+            scroll(.zero)
+        }
         let root = TextRoot(editor: self, element: note, availableWidth: Self.textNodeWidth(for: frame.size))
         rootNode = root
         if let window = window {
