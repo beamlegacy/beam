@@ -80,6 +80,7 @@ class FrecencyNoteTriggerTests: XCTestCase {
 
         var title: String = ""
         var url: URL?
+        var userTypedDomain: URL?
 
         var webPositions: WebPositions?
         var pointAndShoot: PointAndShoot?

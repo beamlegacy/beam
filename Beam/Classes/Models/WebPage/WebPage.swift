@@ -14,6 +14,7 @@ protocol WebPage: AnyObject, Scorable {
     var frame: NSRect { get }
 
     var originalQuery: String? { get }
+    var userTypedDomain: URL? { get set }
     var title: String { get }
     var url: URL? { get }
     var hasError: Bool { get set }

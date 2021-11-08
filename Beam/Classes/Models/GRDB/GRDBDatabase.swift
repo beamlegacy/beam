@@ -203,6 +203,31 @@ struct GRDBDatabase {
                 t.column("lastCreationDate", .datetime)
             }
         }
+
+        migrator.registerMigration("addHistoryUrlRecordAliasDomain") { db in
+            try db.dropFTS4SynchronizationTriggers(forTable: "HistoryUrlRecord")
+            try db.drop(table: "historyUrlRecord")
+            try db.drop(table: "historyUrlContent")
+
+            try db.create(table: "historyUrlRecord", ifNotExists: true) { t in
+                // LinkStore URL id
+                t.column("urlId", .text).primaryKey()
+                t.column("url", .text)
+                t.column("alias_domain", .text)
+                t.column("last_visited_at", .date)
+                t.column("title", .text)
+                t.column("content", .text)
+            }
+
+            // Index title and text in FTS from HistoryUrlRecord.
+            try db.create(virtualTable: "historyUrlContent", using: FTS4()) { t in
+                t.synchronize(withTable: "historyUrlRecord")
+                t.tokenizer = .unicode61()
+                t.column("title")
+                t.column("content")
+            }
+        }
+
         #if DEBUG
         // Speed up development by nuking the database when migrations change
         migrator.eraseDatabaseOnSchemaChange = true
@@ -435,14 +460,14 @@ extension GRDBDatabase {
     /// - Parameter url: URL to the page
     /// - Parameter title: Title of the page indexed in FTS
     /// - Parameter text: Content of the page indexed in FTS
-    func insertHistoryUrl(urlId: UUID, url: String, title: String, content: String?) throws {
+    func insertHistoryUrl(urlId: UUID, url: String, aliasDomain: String?, title: String, content: String?) throws {
         try dbWriter.write { db in
             try db.execute(
                 sql: """
-                INSERT OR REPLACE INTO historyUrlRecord (urlId, url, title, content, last_visited_at)
-                VALUES (?, ?, ?, ?, datetime('now'))
+                INSERT OR REPLACE INTO historyUrlRecord (urlId, url, alias_domain, title, content, last_visited_at)
+                VALUES (?, ?, ?, ?, ?, datetime('now'))
                 """,
-                arguments: [urlId, url, title, content ?? ""])
+                arguments: [urlId, url, aliasDomain ?? "", title, content ?? ""])
         }
     }
 }
@@ -748,6 +773,36 @@ extension GRDBDatabase {
                                             frecency: record.frecency)
                     }
                 completion(.success(results))
+            } catch {
+                Logger.shared.logError("history search failure: \(error)", category: .search)
+                completion(.failure(error))
+            }
+        }
+    }
+
+    func searchAlias(query: String,
+                     enabledFrecencyParam: FrecencyParamKey? = nil,
+                     completion: @escaping (Result<HistorySearchResult?, Error>) -> Void) {
+        dbReader.asyncRead { (dbResult: Result<GRDB.Database, Error>) in
+            do {
+                let db = try dbResult.get()
+                var request = HistoryUrlRecord
+                    .filter(HistoryUrlRecord.Columns.aliasUrl.like("%\(query)%"))
+                    .including(optional: HistoryUrlRecord.frecency)
+                if let frecencyParam = enabledFrecencyParam {
+                    request = request
+                        .filter(literal: "frecencyUrlRecord.frecencyKey = \(frecencyParam)")
+                        .order(literal: "frecencyUrlRecord.frecencySortScore DESC")
+                }
+                let result = try request
+                    .asRequest(of: HistoryUrlRecordWithFrecency.self)
+                    .fetchOne(db)
+                    .map { record -> HistorySearchResult in
+                        HistorySearchResult(title: record.history.title,
+                                            url: record.history.aliasUrl,
+                                            frecency: record.frecency)
+                    }
+                completion(.success(result))
             } catch {
                 Logger.shared.logError("history search failure: \(error)", category: .search)
                 completion(.failure(error))

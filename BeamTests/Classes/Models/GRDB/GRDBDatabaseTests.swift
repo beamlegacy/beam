@@ -44,6 +44,7 @@ La recopie vidéo est également au menu depuis le centre de contrôle de l'appa
         ] {
             try db.insertHistoryUrl(urlId: history.urlId,
                                     url: history.url,
+                                    aliasDomain: nil,
                                     title: history.title,
                                     content: history.content)
         }
@@ -126,6 +127,7 @@ La recopie vidéo est également au menu depuis le centre de contrôle de l'appa
         ] {
             try db.insertHistoryUrl(urlId: history.urlId,
                                     url: history.url,
+                                    aliasDomain: nil,
                                     title: history.title,
                                     content: history.content)
         }
@@ -184,6 +186,7 @@ La recopie vidéo est également au menu depuis le centre de contrôle de l'appa
         ] {
             try db.insertHistoryUrl(urlId: history.urlId,
                                     url: history.url,
+                                    aliasDomain: nil,
                                     title: history.title,
                                     content: history.content)
         }
