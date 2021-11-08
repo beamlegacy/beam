@@ -37,7 +37,11 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var cookies: HTTPCookieStorage
     var documentManager: DocumentManager
     var downloadManager: BeamDownloadManager = BeamDownloadManager()
-    var calendarManager: CalendarManager = CalendarManager()
+    lazy var calendarManager: CalendarManager = {
+        let cm = CalendarManager()
+        observeCalendarManager(cm)
+        return cm
+    }()
     var sessionLinkRanker = SessionLinkRanker()
     var clusteringManager: ClusteringManager
     var clusteringOrphanedUrlManager: ClusteringOrphanedUrlManager
@@ -220,18 +224,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
             self?.objectWillChange.send()
         }.store(in: &scope)
 
-        calendarManager.$connectedSources.sink { [weak self] _ in
-            guard let self = self else { return }
-            self.reloadAllEvents()
-        }.store(in: &scope)
-
-        calendarManager.$didAllowSource.sink { [weak self] didAllowSource in
-            guard let self = self else { return }
-            if didAllowSource {
-                self.reloadAllEvents()
-            }
-        }.store(in: &scope)
-
         NotificationCenter.default.addObserver(self, selector: #selector(calendarDayDidChange(notification:)),
                                                name: NSNotification.Name.NSCalendarDayChanged, object: nil)
     }
@@ -266,22 +258,21 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
             }.store(in: &journalCancellables)
     }
 
-    func setupJournal() {
+    func setupJournal(firstSetup: Bool = false) {
         journalCancellables = []
         let note  = BeamNote.fetchOrCreateJournalNote(documentManager, date: BeamDate.now)
         observeJournal(note: note)
         journal.append(note)
         _todaysNote = note
-        loadEvents(for: note.id, for: BeamDate.now)
-        updateJournal(with: 2, and: journal.count)
+        updateJournal(with: 2, and: journal.count, fetchEvents: !firstSetup)
     }
 
-    func updateJournal(with limit: Int = 0, and fetchOffset: Int = 0) {
+    func updateJournal(with limit: Int = 0, and fetchOffset: Int = 0, fetchEvents: Bool = true) {
         isFetching = true
         let _journal = BeamNote.fetchNotesWithType(documentManager, type: .journal, limit, fetchOffset).compactMap { $0.type.isJournal && !$0.type.isFutureJournal ? $0 : nil }
         for note in _journal {
             observeJournal(note: note)
-            if let journalDate = note.type.journalDate, !note.isEntireNoteEmpty() {
+            if fetchEvents, let journalDate = note.type.journalDate, !note.isEntireNoteEmpty() {
                 loadEvents(for: note.id, for: journalDate)
             }
         }
@@ -297,6 +288,20 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         calendarManager.meetingsForNote.removeAll()
         setupJournal()
         if newDay { newDay.toggle() }
+    }
+
+    private func observeCalendarManager(_ calendarManager: CalendarManager) {
+        calendarManager.$connectedSources.dropFirst().sink { [weak self] _ in
+            guard let self = self else { return }
+            self.reloadAllEvents()
+        }.store(in: &scope)
+
+        calendarManager.$didAllowSource.dropFirst().sink { [weak self] didAllowSource in
+            guard let self = self else { return }
+            if didAllowSource {
+                self.reloadAllEvents()
+            }
+        }.store(in: &scope)
     }
 
     func reloadAllEvents() {

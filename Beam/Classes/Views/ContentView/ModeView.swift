@@ -53,7 +53,9 @@ struct ModeView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .clipped()
         .onAppear {
-            state.data.reloadAllEvents()
+            DispatchQueue.main.async {
+                state.data.reloadAllEvents()
+            }
             contentIsScrolled = false
         }
         .animation(nil)
