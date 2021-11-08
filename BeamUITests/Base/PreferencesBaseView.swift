@@ -42,6 +42,38 @@ class PreferencesBaseView: BaseView {
         return app.dialogs.sheets.buttons[element]
     }
     
+    func labelTables(_ element: String) -> XCUIElement {
+        return app.dialogs.sheets.tables.staticTexts[element]
+    }
+    
+    func textFieldTables(_ element: String) -> XCUIElement {
+        return app.dialogs.sheets.tables.textFields[element]
+    }
+    
+    func textViewTables(_ element: String) -> XCUIElement {
+        return app.dialogs.sheets.tables.textViews[element]
+    }
+    
+    func staticTextTables(_ element: String) -> XCUIElement {
+        return app.dialogs.sheets.tables.staticTexts[element]
+    }
+    
+    func searchFieldTables(_ element: String) -> XCUIElement {
+        return app.dialogs.sheets.tables.searchFields[element]
+    }
+    
+    func secureTextFieldTables(_ element: String) -> XCUIElement {
+        return app.dialogs.sheets.tables.secureTextFields[element]
+    }
+    
+    func checkBoxTables(_ element: String) -> XCUIElement {
+        return app.dialogs.sheets.tables.checkBoxes[element]
+    }
+    
+    func buttonTables(_ element: String) -> XCUIElement {
+        return app.dialogs.sheets.tables.buttons[element]
+    }
+    
     enum PreferenceMenus {
         case general
         case browser
