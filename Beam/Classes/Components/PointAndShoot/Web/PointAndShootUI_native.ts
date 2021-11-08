@@ -102,24 +102,36 @@ export class PointAndShootUI_native implements PointAndShootUI {
 
       const parent = range.commonAncestorContainer as BeamElement
 
-      // Recursively get the bounds of all useless elements in the parent container
-      const childNodes = PointAndShootHelper.getChildNodes(parent, win)
+      // Get all childNotes directly under the parent
+      const parentChildNodes = parent?.childNodes ?? []
 
       const arrayOfRectsToDismiss = []
-      for (const child of childNodes) {
-        switch (child?.nodeType) {
-          case BeamNodeType.element: {
-            const childElement = child as BeamElement
-            if (PointAndShootHelper.isUselessOrChildrenAre(childElement, win)) {
-              const bounds = childElement.getBoundingClientRect() as BeamRect
-              // getBoundingClientRect takes the visual size. 
-              // scrollHeight and scrollWidth gets the actual size of the elements
-              bounds.height = childElement.scrollHeight
-              bounds.width = childElement.scrollWidth
-              arrayOfRectsToDismiss.push(bounds)
+      // For performance reasons, We want to skip doing complex calculations for a large number of childNotes.
+      // This can happen when the commonAncestorContainer is a wrappen element around a large DOM.
+      // 
+      // When a parent element contains a large amount of direct childNodes under
+      // Skip removing useless rects and use all of the rects provided to us.
+      if (parentChildNodes.length < 150) {
+        const childNodes = PointAndShootHelper.getElementAndTextChildNodesRecursively(parent, win)
+        // For performance reasons, if we have a large amount of childNodes
+        // Skip removing useless rects and use all of the rects provided to us
+        if (childNodes.length < 150) {
+          for (const child of childNodes) {
+            switch (child?.nodeType) {
+              case BeamNodeType.element: {
+                const childElement = child as BeamElement
+                if (PointAndShootHelper.isUselessOrChildrenAre(childElement, win)) {
+                  const bounds = childElement.getBoundingClientRect() as BeamRect
+                  // getBoundingClientRect takes the visual size. 
+                  // scrollHeight and scrollWidth gets the actual size of the elements
+                  bounds.height = childElement.scrollHeight
+                  bounds.width = childElement.scrollWidth
+                  arrayOfRectsToDismiss.push(bounds)
+                }
+              }
+                break
             }
           }
-            break
         }
       }
       

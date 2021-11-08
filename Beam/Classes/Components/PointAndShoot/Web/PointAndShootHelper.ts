@@ -115,33 +115,34 @@ export class PointAndShootHelper {
    * @return {*}  {BeamNode[]}
    * @memberof PointAndShootHelper
    */
-  static getChildNodes(element: BeamElement, win: BeamWindow): BeamNode[] {
+  static getElementAndTextChildNodesRecursively(element: BeamElement, win: BeamWindow): BeamNode[] {
     if (!element?.childNodes) {
       return [element]
     }
-    // Filter childNodes down to the nodes we want.
-    let childNodes = [...element.childNodes].filter((child) => {
-      return child.nodeType === (BeamNodeType.element || BeamNodeType.text)
+
+    const nodes = [];
+
+    [...element.childNodes].forEach((child) => {
+      switch (child.nodeType) {
+        case BeamNodeType.element:
+          nodes.push(child)
+          // eslint-disable-next-line no-case-declarations
+          const childNodesOfChild = this.getElementAndTextChildNodesRecursively(child as BeamElement, win)
+          nodes.push(...childNodesOfChild)
+          break;
+        case BeamNodeType.text:
+          nodes.push(child)
+          break;
+        default:
+          break;
+      }
     })
 
-    // if no useless child nodes return the element itself
-    if (childNodes.length == 0) {
+    if (nodes.length == 0) {
       return [element]
     }
 
-    // map through the nodes we have
-    childNodes.forEach((node) => {
-      // For element nodes we should get their children
-      if (node.nodeType === BeamNodeType.element) {
-        const nodes = this.getChildNodes(node as BeamElement, win)
-        childNodes = [...childNodes, ...nodes]
-      }
-
-      // any others return the node
-      childNodes.push(node)
-    })
-
-    return Util.compact(childNodes)
+    return nodes
   }
 
   /**
