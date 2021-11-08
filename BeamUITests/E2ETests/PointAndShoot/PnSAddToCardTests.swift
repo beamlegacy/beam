@@ -67,7 +67,7 @@ class PnSAddToCardTests: BaseTest {
         
         print("Then 2 non-empty notes are added")
         XCTAssertEqual(cardNotes.count, 2)
-        XCTAssertNotEqual(cardNotes[0].value as? String, "", "note added is an empty string")
+        XCTAssertNotEqual(cardView.getElementStringValue(element: cardNotes[0]), emptyString, "note added is an empty string")
     }
     
     func testAddTextToExistingCard() {
@@ -93,8 +93,8 @@ class PnSAddToCardTests: BaseTest {
         
         print("Then 2 non-empty notes are added to an empty first one?")
         XCTAssertEqual(cardNotes.count, 3)
-        XCTAssertEqual(cardNotes[0].value as? String, "Point And Shoot Test Fixture Cursor")
-        XCTAssertEqual(cardNotes[1].value as? String, "The pointer hotspot is the active pixel of the pointer, used to target a click or drag. The hotspot is normally along the pointer edges or in its center, though it may reside at any location in the pointer.[9][10][11]")
+        XCTAssertEqual(cardView.getElementStringValue(element: cardNotes[0]), "Point And Shoot Test Fixture Cursor")
+        XCTAssertEqual(cardView.getElementStringValue(element: cardNotes[1]), "The pointer hotspot is the active pixel of the pointer, used to target a click or drag. The hotspot is normally along the pointer edges or in its center, though it may reside at any location in the pointer.[9][10][11]")
     }
     
     func testAddTextUsingNotes() {
@@ -119,7 +119,7 @@ class PnSAddToCardTests: BaseTest {
         _ = cardView.waitForCardViewToLoad()
         let cardNotes = cardView.getCardNotesForVisiblePart()
         XCTAssertEqual(cardNotes.count, 4) //4 as far as link is considered as a note by accessibility
-        XCTAssertEqual(cardNotes[2].value as? String, noteText)
+        XCTAssertEqual(cardView.getElementStringValue(element: cardNotes[2]), noteText)
     }
     
     func testCollectImage() throws {
@@ -154,13 +154,13 @@ class PnSAddToCardTests: BaseTest {
         pnsView.addToTodayCard(itemToCollect)
 
         testRailPrint("Then switch to journal")
-        OmniBarTestView().navigateToCardViaPivotButton()
+        let cardView = OmniBarTestView().navigateToCardViaPivotButton()
         journalView.waitForJournalViewToLoad()
 
         testRailPrint("Then the note contains video link")
-        let cardNotes = CardTestView().getCardNotesForVisiblePart()
+        let cardNotes = cardView.getCardNotesForVisiblePart()
         XCTAssertEqual(cardNotes.count, 2)
-        XCTAssertEqual(cardNotes[0].value as? String, "Media Player Test Page")
+        XCTAssertEqual(cardView.getElementStringValue(element: cardNotes[0]), "Media Player Test Page")
         if let videoNote = cardNotes[1].value as? String {
             XCTAssertTrue(videoNote.contains("Beam.app/Contents/Resources/video.mov"))
         } else {
@@ -175,9 +175,10 @@ class PnSAddToCardTests: BaseTest {
         let helper = BeamUITestsHelper(pnsView.app)
 
         testRailPrint("When the journal is first loaded the note is empty by default")
-        let beforeCardNotes = CardTestView().getCardNotesForVisiblePart()
+        let cardView = CardTestView()
+        let beforeCardNotes = cardView.getCardNotesForVisiblePart()
         XCTAssertEqual(beforeCardNotes.count, 1)
-        XCTAssertEqual(beforeCardNotes[0].value as? String, "")
+        XCTAssertEqual(cardView.getElementStringValue(element: beforeCardNotes[0]), emptyString)
         helper.openTestPage(page: .media)
         let itemToCollect = pnsView.app.windows.groups["Audio Controls"].children(matching: .group).element(boundBy: 1).children(matching: .slider).element
         pnsView.addToTodayCard(itemToCollect)
@@ -191,7 +192,7 @@ class PnSAddToCardTests: BaseTest {
         testRailPrint("Then the note is still empty")
         let cardNotes = CardTestView().getCardNotesForVisiblePart()
         XCTAssertEqual(cardNotes.count, 1)
-        XCTAssertEqual(cardNotes[0].value as? String, "")
+        XCTAssertEqual(cardView.getElementStringValue(element: cardNotes[0]), emptyString)
     }
     
     func testCollectFullPage() {
@@ -212,7 +213,7 @@ class PnSAddToCardTests: BaseTest {
         
         testRailPrint("Then I see \(expectedNoteText) as collected link")
         let cardView = CardTestView()
-        let cardNotes = CardTestView().getCardNotesForVisiblePart()
+        let cardNotes = cardView.getCardNotesForVisiblePart()
         //To be refactored once BE-2117 merged
         XCTAssertEqual(cardNotes.count, 2)
         XCTAssertEqual(cardView.getElementStringValue(element: cardNotes[0]), expectedNoteText)
