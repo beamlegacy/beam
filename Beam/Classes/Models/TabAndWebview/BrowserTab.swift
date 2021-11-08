@@ -28,6 +28,9 @@ import Promises
             navigationController?.setLoading()
         }
         self.url = url
+        if url.isDomain {
+            userTypedDomain = url
+        }
         navigationCount = 0
         if url.isFileURL {
             webView.loadFileURL(url, allowingReadAccessTo: url.deletingLastPathComponent())
@@ -63,6 +66,7 @@ import Promises
     @Published var originalQuery: String?
     @Published var url: URL?
     @Published var responseStatusCode: Int = 200
+    @Published var userTypedDomain: URL?
     @Published var isLoading: Bool = false
     @Published var estimatedLoadingProgress: Double = 0
     @Published var hasOnlySecureContent: Bool = false
@@ -498,6 +502,9 @@ import Promises
             guard let webviewUrl = webviewUrl else {
                 return // webview probably failed to load
             }
+            if webviewUrl.isDomain {
+                userTypedDomain = nil
+            }
             if BeamURL(webviewUrl).isErrorPage {
                 let beamSchemeUrl = BeamURL(webviewUrl)
                 url = beamSchemeUrl.originalURLFromErrorPage
@@ -514,6 +521,11 @@ import Promises
             }
             leave()
             updateFavIcon(fromWebView: false, cacheOnly: true)
+            if PreferencesManager.enableSpaIndexing {
+                // not just in didFinish delegate but everytime we observe url change, it's the only solution for SPA websites
+                // https://github.com/mozilla-mobile/firefox-ios/wiki/WKWebView-navigation-and-security-considerations#single-page-js-apps-spas
+                navigationController?.navigatedTo(url: webviewUrl, webView: webView, replace: false)
+            }
             // self.browsingTree.current.score.openIndex = self.navigationCount
             // self.updateScore()
             // self.navigationCount = 0

@@ -81,4 +81,8 @@ public extension URL {
         }
         return false
     }
+
+    var isDomain: Bool {
+        self.pathComponents.count <= 1
+    }
 }

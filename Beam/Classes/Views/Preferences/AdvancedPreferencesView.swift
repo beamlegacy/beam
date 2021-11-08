@@ -32,6 +32,7 @@ struct AdvancedPreferencesView: View {
     @State var showOmnibarScoreSection = PreferencesManager.showOmnibarScoreSection
     @State var showTabGrougpingMenuItem = PreferencesManager.showTabGrougpingMenuItem
     @State var isDataBackupOnUpdateOn = PreferencesManager.isDataBackupOnUpdateOn
+    @State var enableSpaIndexing = PreferencesManager.enableSpaIndexing
 
     // Database
     @State private var newDatabaseTitle = ""
@@ -308,6 +309,14 @@ struct AdvancedPreferencesView: View {
                     OmnibarScoreSectionCheckbox
                 }
 
+                Preferences.Section(bottomDivider: true) {
+                    Text("Enable SPAs History Indexing (eg: YouTube)")
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.text.swiftUI)
+                } content: {
+                    SpaIndexingSectionCheckbox
+                }
+
                 Preferences.Section(bottomDivider: false) {
                     Text("Enable Point and Shoot view")
                         .font(BeamFont.regular(size: 13).swiftUI)
@@ -417,6 +426,17 @@ struct AdvancedPreferencesView: View {
             .foregroundColor(BeamColor.Generic.text.swiftUI)
             .onReceive([showOmnibarScoreSection].publisher.first()) {
                 PreferencesManager.showOmnibarScoreSection = $0
+            }
+    }
+
+    private var SpaIndexingSectionCheckbox: some View {
+        return Toggle(isOn: $enableSpaIndexing) {
+            Text("Enabled")
+        }.toggleStyle(CheckboxToggleStyle())
+            .font(BeamFont.regular(size: 13).swiftUI)
+            .foregroundColor(BeamColor.Generic.text.swiftUI)
+            .onReceive([enableSpaIndexing].publisher.first()) {
+                PreferencesManager.enableSpaIndexing = $0
             }
     }
 
