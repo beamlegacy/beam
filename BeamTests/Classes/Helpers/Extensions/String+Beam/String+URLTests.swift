@@ -99,4 +99,19 @@ class String_URLTests: XCTestCase {
         XCTAssertEqual(URL(string: "google.com/testing")!.urlStringWithoutScheme, "google.com/testing")
         XCTAssertEqual(URL(string: "google")!.urlStringWithoutScheme, "google")
     }
+
+    func testStringToEncodedUrl() {
+        let string = "https://www.example.com/上海+中國"
+        XCTAssertEqual(string.toEncodedURL?.absoluteString, "https://www.example.com/%E4%B8%8A%E6%B5%B7+%E4%B8%AD%E5%9C%8B")
+    }
+
+    func testStringToEncodedUrl_KeepAnchor() {
+        let string = "https://www.example.com/#anchor"
+        XCTAssertEqual(string.toEncodedURL?.absoluteString, "https://www.example.com/#anchor")
+    }
+
+    func testStringToEncodedUrl_KeepAnchorWhenMixedWithEncoding() {
+        let string = "https://www.example.com/上海+中國#anchor"
+        XCTAssertEqual(string.toEncodedURL?.absoluteString, "https://www.example.com/%E4%B8%8A%E6%B5%B7+%E4%B8%AD%E5%9C%8B#anchor")
+    }
 }
