@@ -76,62 +76,34 @@ class ShortcutsHelper {
     @discardableResult
     func shortcutActionInvoke(action: ShortcutCommand) -> BaseView {
         switch action {
-        case .selectAll:
-            invokeCMDKey("a")
-        case .undo:
-            invokeCMDKey("z")
-        case .redo:
-            invokeCMDShiftKey("z")
-        case .copy:
-            invokeCMDKey("c")
-        case .paste:
-            invokeCMDKey("v")
-        case .cut:
-            invokeCMDKey("x")
-        case .search:
-            invokeCMDKey("f")
-        case .openPreferences:
-            invokeCMDKey(",")
-        case .showJournal:
-            invokeCMDShiftKey("j")
-        case .showAllCards:
-            invokeCMDShiftKey("h")
-        case .instantSearch:
-            invokeCMDKey(.return)
-        case .switchBetweenCardWeb:
-            invokeCMDKey("d")
-        case .foldBullet:
-            invokeCMDKey(.upArrow)
-        case .unfoldBullet:
-            invokeCMDKey(.downArrow)
-        case .newTab:
-            invokeCMDKey("t")
-        case .closeTab:
-            invokeCMDKey("w")
-        case .reloadPage:
-            invokeCMDKey("r")
-        case .reopenClosedTab:
-            invokeCMDShiftKey("t")
-        case .jumpToNextTab:
-            invokeCMDShiftKey("]")
-        case .jumpToPreviousTab:
-            invokeCMDShiftKey("[")
-        case .jumpToLastTab:
-            invokeCMDKey("9")
-        case .zoomIn:
-            invokeCMDKey("+")
-        case .zoomOut:
-            invokeCMDKey("-")
-        case .changeDestinationCard:
-            invokeCMDShiftKey("d")
-        case .quitApp:
-            invokeCMDKey("q")
-        case .close:
-            invokeCMDKey("w")
-        case .closeWindow:
-            invokeCMDShiftKey("w")
-        case .collectFullPage:
-            invokeCMDKey("s")
+        case .selectAll: invokeCMDKey("a")
+        case .undo: invokeCMDKey("z")
+        case .redo: invokeCMDShiftKey("z")
+        case .copy: invokeCMDKey("c")
+        case .paste: invokeCMDKey("v")
+        case .cut: invokeCMDKey("x")
+        case .search: invokeCMDKey("f")
+        case .openPreferences: invokeCMDKey(",")
+        case .showJournal: invokeCMDShiftKey("j")
+        case .showAllCards: invokeCMDShiftKey("h")
+        case .instantSearch: invokeCMDKey(.return)
+        case .switchBetweenCardWeb: invokeCMDKey("d")
+        case .foldBullet: invokeCMDKey(.upArrow)
+        case .unfoldBullet: invokeCMDKey(.downArrow)
+        case .newTab: invokeCMDKey("t")
+        case .closeTab: invokeCMDKey("w")
+        case .reloadPage: invokeCMDKey("r")
+        case .reopenClosedTab: invokeCMDShiftKey("t")
+        case .jumpToNextTab: invokeCMDShiftKey("]")
+        case .jumpToPreviousTab: invokeCMDShiftKey("[")
+        case .jumpToLastTab: invokeCMDKey("9")
+        case .zoomIn: invokeCMDKey("+")
+        case .zoomOut: invokeCMDKey("-")
+        case .changeDestinationCard: invokeCMDShiftKey("d")
+        case .quitApp: invokeCMDKey("q")
+        case .close: invokeCMDKey("w")
+        case .closeWindow: invokeCMDShiftKey("w")
+        case .collectFullPage: invokeCMDKey("s")
         }
         return BaseView()
     }
