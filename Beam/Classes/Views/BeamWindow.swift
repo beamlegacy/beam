@@ -179,7 +179,8 @@ class BeamWindow: NSWindow, NSDraggingDestination {
                 note.resetIds() // use a new UUID to be sure not to overwrite an existing note
                 let titleBase = note.title
                 var i = 0
-                while DocumentManager().allDocumentsTitles(includeDeletedNotes: false).contains(note.title.lowercased()) {
+                let documentManager = DocumentManager()
+                while documentManager.allDocumentsTitles(includeDeletedNotes: false).contains(note.title.lowercased()) {
                     note.title = titleBase + " #\(i)"
                     i += 1
                 }

@@ -25,7 +25,7 @@ class DocumentManagerTestsHelper {
     func deleteAllDocuments() {
         let semaphore = DispatchSemaphore(value: 0)
 
-        documentManager.deleteAll { _ in
+        DocumentManager().deleteAll { _ in
             semaphore.signal()
         }
         semaphore.wait()
@@ -269,7 +269,7 @@ class DocumentManagerTestsHelper {
             // savingRemotely changed previousData and checksum but we want to "simulate" that remote saves from another
             // device, needing to rewrite the local version we had before
             // docStruct = saveLocally(localStruct)
-            guard let document = try? Document.fetchWithId(CoreDataManager.shared.mainContext, docStruct.id) else {
+            guard let document = try? documentManager.fetchWithId(docStruct.id) else {
                 fail("Couldn't fetch document")
                 return docStruct
             }
@@ -277,7 +277,7 @@ class DocumentManagerTestsHelper {
             document.beam_api_data = localStruct.previousData
             document.beam_object_previous_checksum = localStruct.beamObjectPreviousChecksum
             document.beam_api_checksum = localStruct.previousChecksum
-            _ = try? DocumentManager.saveContext(context: CoreDataManager.shared.mainContext)
+            _ = try? documentManager.saveContext()
         }
 
         localDocStruct = documentManager.loadById(id: docStruct.id)

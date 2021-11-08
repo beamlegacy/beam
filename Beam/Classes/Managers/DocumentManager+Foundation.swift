@@ -8,11 +8,10 @@ extension DocumentManager {
     // MARK: -
     // MARK: Create
     func fetchOrCreateAsync(title: String, completion: ((DocumentStruct?) -> Void)? = nil) {
-        coreDataManager.persistentContainer.performBackgroundTask { [unowned self] context in
-            let document = Document.fetchOrCreateWithTitle(context, title)
+        backgroundQueue.async { [unowned self] in
+            let documentManager = DocumentManager()
             do {
-                try self.checkValidations(context, document)
-                try Self.saveContext(context: context)
+                let document = try documentManager.fetchOrCreateWithTitle(title)
                 completion?(self.parseDocumentBody(document))
             } catch {
                 completion?(nil)
@@ -20,13 +19,11 @@ extension DocumentManager {
         }
     }
 
-    func createAsync(title: String, completion: ((Swift.Result<DocumentStruct, Error>) -> Void)? = nil) {
-        coreDataManager.backgroundContext.perform { [unowned self] in
-            let context = self.coreDataManager.backgroundContext
-            let document = Document.create(context, title: title)
+    func createAsync(id: UUID, title: String, completion: ((Swift.Result<DocumentStruct, Error>) -> Void)? = nil) {
+        backgroundQueue.async { [unowned self] in
+            let documentManager = DocumentManager()
             do {
-                try self.checkValidations(context, document)
-                try Self.saveContext(context: context)
+                let document: Document = try documentManager.create(id: id, title: title)
                 completion?(.success(self.parseDocumentBody(document)))
             } catch {
                 completion?(.failure(error))
@@ -71,10 +68,11 @@ extension DocumentManager {
                 }
 
                 // Saving the remote version locally
-                self.coreDataManager.persistentContainer.performBackgroundTask { context in
-                    let document = Document.rawFetchOrCreateWithId(context, documentStruct.id)
+                self.backgroundQueue.async { [unowned self] in
+                    let documentManager = DocumentManager()
 
                     do {
+                        let document = try documentManager.fetchOrCreateWithId(documentStruct.id)
                         Logger.shared.logDebug("Fetched \(remoteDocumentStruct.title) {\(remoteDocumentStruct.id)} with previous checksum \(remoteDocumentStruct.checksum ?? "-")",
                                                category: .documentNetwork)
                         document.beam_object_previous_checksum = remoteDocumentStruct.checksum
@@ -85,11 +83,11 @@ extension DocumentManager {
                         document.update(remoteDocumentStruct)
                         document.version += 1
 
-                        try self.checkValidations(context, document)
+                        try documentManager.checkValidations(document)
 
                         self.notificationDocumentUpdate(DocumentStruct(document: document))
 
-                        completion?(.success(try Self.saveContext(context: context)))
+                        completion?(.success(try documentManager.saveContext()))
                     } catch {
                         completion?(.failure(error))
                     }
@@ -182,9 +180,9 @@ extension DocumentManager {
                 completion?(.failure(DocumentManagerError.operationCancelled))
                 return
             }
-            let context = self.coreDataManager.backgroundContext
 
-            context.performAndWait { [weak self] in
+            let documentManager = DocumentManager()
+            documentManager.context.performAndWait { [weak self] in
                 guard let self = self else { return }
 
                 if blockOperation.isCancelled {
@@ -192,27 +190,25 @@ extension DocumentManager {
                     return
                 }
 
-                let document = Document.rawFetchOrCreateWithId(context, documentStruct.id)
-                document.update(documentStruct)
-                document.data = documentStruct.data
-                document.updated_at = BeamDate.now
-
                 do {
-                    try self.checkValidations(context, document)
-                    try self.checkVersion(context, document, documentStruct.version)
+                    let document = try documentManager.fetchOrCreateWithId(documentStruct.id)
+                    document.update(documentStruct)
+                    document.data = documentStruct.data
+                    document.updated_at = BeamDate.now
+                    try documentManager.checkValidations(document)
+                    try documentManager.checkVersion(document, documentStruct.version)
+                    document.version = documentStruct.version
+
+                    if let database = try? Database.fetchWithId(documentManager.context, document.database_id) {
+                        database.updated_at = BeamDate.now
+                    } else {
+                        // We should always have a connected database
+                        Logger.shared.logError("Didn't find database \(document.database_id)", category: .document)
+                    }
                 } catch {
                     Logger.shared.logError(error.localizedDescription, category: .document)
                     completion?(.failure(error))
                     return
-                }
-
-                document.version = documentStruct.version
-
-                if let database = try? Database.fetchWithId(context, document.database_id) {
-                    database.updated_at = BeamDate.now
-                } else {
-                    // We should always have a connected database
-                    Logger.shared.logError("Didn't find database \(document.database_id)", category: .document)
                 }
 
                 if blockOperation.isCancelled {
@@ -221,7 +217,7 @@ extension DocumentManager {
                 }
 
                 do {
-                    try Self.saveContext(context: context)
+                    try documentManager.saveContext()
                 } catch {
                     completion?(.failure(error))
                     return
@@ -349,14 +345,15 @@ extension DocumentManager {
     func softDelete(ids: [UUID], completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
         var errors: [Error] = []
         var goodObjects: [DocumentStruct] = []
-        coreDataManager.persistentContainer.performBackgroundTask { context in
+        backgroundQueue.async { [unowned self] in
+            let documentManager = DocumentManager()
             for id in ids {
-                guard let document = try? Document.fetchWithId(context, id) else {
+                guard let document = try? documentManager.fetchWithId(id) else {
                     errors.append(DocumentManagerError.idNotFound)
                     continue
                 }
 
-                if let database = try? Database.fetchWithId(context, document.database_id) {
+                if let database = try? Database.fetchWithId(documentManager.context, document.database_id) {
                     database.updated_at = BeamDate.now
                 } else {
                     // We should always have a connected database
@@ -375,7 +372,7 @@ extension DocumentManager {
             }
 
             do {
-                try Self.saveContext(context: context)
+                try documentManager.saveContext()
             } catch {
                 Logger.shared.logError(error.localizedDescription, category: .document)
                 completion(.failure(error))
@@ -425,14 +422,15 @@ extension DocumentManager {
 
         var errors: [Error] = []
         var goodIds: [UUID] = []
-        coreDataManager.persistentContainer.performBackgroundTask { context in
+        backgroundQueue.async { [unowned self] in
+            let documentManager = DocumentManager()
             for id in ids {
-                guard let document = try? Document.fetchWithId(context, id) else {
+                guard let document: Document = try? documentManager.fetchWithId(id) else {
                     errors.append(DocumentManagerError.idNotFound)
                     continue
                 }
 
-                if let database = try? Database.fetchWithId(context, document.database_id) {
+                if let database = try? Database.fetchWithId(documentManager.context, document.database_id) {
                     database.updated_at = BeamDate.now
                 } else {
                     // We should always have a connected database
@@ -440,7 +438,7 @@ extension DocumentManager {
                 }
 
                 let documentStruct = DocumentStruct(document: document)
-                document.delete(context)
+                document.delete(documentManager.context)
                 goodIds.append(id)
 
                 // Ping others about the update
@@ -448,7 +446,7 @@ extension DocumentManager {
             }
 
             do {
-                try Self.saveContext(context: context)
+                try documentManager.saveContext()
             } catch {
                 Logger.shared.logError(error.localizedDescription, category: .document)
                 completion(.failure(error))
@@ -488,8 +486,7 @@ extension DocumentManager {
     /// WARNING: this will delete *ALL* documents, including from different databases.
     func deleteAll(includedRemote: Bool = true, completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
         do {
-            try Document.deleteWithPredicate(CoreDataManager.shared.mainContext)
-            try Self.saveContext(context: CoreDataManager.shared.mainContext)
+            try deleteAll(databaseId: nil)
         } catch {
             Logger.shared.logError(error.localizedDescription, category: .coredata)
         }
@@ -541,31 +538,34 @@ extension DocumentManager {
             return
         }
 
-        CoreDataManager.shared.persistentContainer.performBackgroundTask { context in
-            do {
-                let documents = (try? Document.rawFetchAll(context)) ?? []
+        backgroundQueue.async {
+            let documentManager = DocumentManager()
+            documentManager.context.performAndWait {
+                do {
+                    let documents = (try? documentManager.fetchAll(filters: [.allDatabases, .includeDeleted])) ?? []
 
-                Logger.shared.logDebug("Uploading \(documents.count) documents", category: .documentNetwork)
-                if documents.count == 0 {
-                    completion?(.success(true))
-                    return
-                }
-
-                // Cancel previous saves as we're saving all of the objects anyway
-                Self.cancelAllPreviousThrottledAPICall()
-
-                let documentStructs = documents.map { DocumentStruct(document: $0) }
-                try self.saveOnBeamObjectsAPI(documentStructs) { result in
-                    switch result {
-                    case .failure(let error):
-                        Logger.shared.logError(error.localizedDescription, category: .documentNetwork)
-                        completion?(.failure(error))
-                    case .success:
+                    Logger.shared.logDebug("Uploading \(documents.count) documents", category: .documentNetwork)
+                    if documents.count == 0 {
                         completion?(.success(true))
+                        return
                     }
+
+                    // Cancel previous saves as we're saving all of the objects anyway
+                    Self.cancelAllPreviousThrottledAPICall()
+
+                    let documentStructs = documents.map { DocumentStruct(document: $0) }
+                    try self.saveOnBeamObjectsAPI(documentStructs) { result in
+                        switch result {
+                        case .failure(let error):
+                            Logger.shared.logError(error.localizedDescription, category: .documentNetwork)
+                            completion?(.failure(error))
+                        case .success:
+                            completion?(.success(true))
+                        }
+                    }
+                } catch {
+                    completion?(.failure(error))
                 }
-            } catch {
-                completion?(.failure(error))
             }
         }
     }
@@ -573,15 +573,12 @@ extension DocumentManager {
     // MARK: -
     // MARK: Database related
     func moveAllOrphanNotes(databaseId: UUID, _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
-        let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
-
-        context.perform {
+        backgroundQueue.async { [unowned self] in
+            let documentManager = DocumentManager()
             do {
                 let databaseIds = DatabaseManager().all().map { $0.id }
 
-                let predicate = NSPredicate(format: "NOT (database_id IN %@)",
-                                            databaseIds)
-                let orphanDocuments = try Document.rawFetchAllWithLimit(context, predicate)
+                let orphanDocuments = try documentManager.fetchAll(filters: [.notDatabaseIds(databaseIds), .includeDeleted])
 
                 for document in orphanDocuments {
                     document.database_id = databaseId

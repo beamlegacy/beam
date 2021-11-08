@@ -90,7 +90,8 @@ extension AppDelegate {
             do {
                 try CoreDataManager.shared.importBackup(url)
 
-                let documentsCount = Document.countWithPredicate(CoreDataManager.shared.mainContext)
+                let documentManager = DocumentManager()
+                let documentsCount = documentManager.count()
 
                 // TODO: i18n
                 UserAlert.showError(message: "Backup file has been imported",
@@ -116,7 +117,8 @@ extension AppDelegate {
         openPanel.begin { [weak openPanel] result in
             guard result == .OK, let selectedPath = openPanel?.url?.path else { openPanel?.close(); return }
 
-            let beforeNotesCount = Document.countWithPredicate(CoreDataManager.shared.mainContext)
+            let documentManager = DocumentManager()
+            let beforeNotesCount = documentManager.count()
 
             let roamImporter = RoamImporter()
             do {
@@ -126,7 +128,7 @@ extension AppDelegate {
                 // TODO: raise error?
                 Logger.shared.logError("error: \(error.localizedDescription)", category: .general)
             }
-            let afterNotesCount = Document.countWithPredicate(CoreDataManager.shared.mainContext)
+            let afterNotesCount = documentManager.count()
 
             UserAlert.showMessage(message: "Roam file has been imported",
                                   informativeText: "\(afterNotesCount - beforeNotesCount) notes have been imported")

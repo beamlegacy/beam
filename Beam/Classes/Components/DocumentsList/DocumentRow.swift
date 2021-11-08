@@ -37,10 +37,9 @@ struct DocumentRow: View {
 
 struct DocumentRow_Previews: PreviewProvider {
     static var previews: some View {
-        let context = CoreDataManager.shared.mainContext
         //swiftlint:disable force_try
-        let outline = try! Document.fetchWithTitle(context, "outline")!
-        let document = try! Document.fetchFirst(context)!
+        let outline = try! DocumentManager().fetchWithTitle("outline")!
+        let document = try! DocumentManager().fetchFirst()!
         return Group {
             DocumentRow(document: outline)
             DocumentRow(document: document)

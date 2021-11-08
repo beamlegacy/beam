@@ -283,9 +283,9 @@ struct DocumentDetail: View {
 
 struct DocumentDetail_Previews: PreviewProvider {
     static var previews: some View {
-        let context = CoreDataManager.shared.mainContext
         // swiftlint:disable:next force_try
-        let document = try! Document.fetchFirst(context)!
+        let documentManager = DocumentManager()
+        let document = try! documentManager.fetchFirst()!
 
         return DocumentDetail(document: document).background(Color.white)
     }

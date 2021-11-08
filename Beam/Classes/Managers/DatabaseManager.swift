@@ -245,7 +245,7 @@ class DatabaseManager {
     // MARK: -
     // MARK: Count
     func documentsCountForDatabase(_ id: UUID) -> Int {
-        Document.countWithPredicate(CoreDataManager.shared.mainContext, nil, id)
+        DocumentManager().count(filters: [.databaseId(id)])
     }
 
     // MARK: -
@@ -345,7 +345,8 @@ class DatabaseManager {
     static func isDatabaseEmpty(_ context: NSManagedObjectContext, _ databaseId: UUID) -> Bool {
         context.performAndWait {
             do {
-                for document in try Document.fetchAll(context, nil, nil, databaseId) {
+                let documentManager = DocumentManager()
+                for document in try documentManager.fetchAll(filters: [.databaseId(databaseId)]) {
                     guard DocumentStruct(document: document).isEmpty else {
                         Logger.shared.logDebug("document \(document.titleAndId) is not empty", category: .databaseDebug)
                         return false

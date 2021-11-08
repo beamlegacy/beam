@@ -83,6 +83,9 @@ class noteIndexingTests: XCTestCase {
         note2.addChild(element1_2)
         save(note: note2)
 
+        // Explicitely sleep to let the full text search engine index things
+        Thread.sleep(forTimeInterval: 1)
+
         // I expect that no link as been added:
         expect(try GRDBDatabase.shared.countBidirectionalLinks()) == 0
         // However there should be 4 indexed elements now:
@@ -95,12 +98,18 @@ class noteIndexingTests: XCTestCase {
 
         element1_1.text = BeamText(text: "removing a reference by using another text...")
 
+        // Explicitely sleep to let the full text search engine index things
+        Thread.sleep(forTimeInterval: 1)
+
         expect(note1.references.count) == 0
         expect(note2.references.count) == 0
         expect(note1.links.count) == 0
         expect(note2.links.count) == 0
 
         element1_2.text.append(" let's add a reference to '\(title1)' the second note")
+
+        // Explicitely sleep to let the full text search engine index things
+        Thread.sleep(forTimeInterval: 1)
 
         expect(note1.references.count) == 1
         expect(note2.references.count) == 0
@@ -109,6 +118,9 @@ class noteIndexingTests: XCTestCase {
 
         element1_2.text.append(" What about adding a link to ")
         element1_2.text.append(note1.title, withAttributes: [.internalLink(note1.id)])
+
+        // Explicitely sleep to let the full text search engine index things
+        Thread.sleep(forTimeInterval: 1)
 
         expect(note1.references.count) == 1
         expect(note2.references.count) == 0
