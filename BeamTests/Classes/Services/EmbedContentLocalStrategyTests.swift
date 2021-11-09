@@ -34,6 +34,10 @@ class EmbedContentLocalStrategyTests: XCTestCase {
     }
 
     func testYouTubeWatchURL() throws {
+        let usedIds = [
+            "peFZbP64dsU", "cKZDdG9FTKY", "dQw4w9WgXcQ", "6dwqZw0j_jY", "1p3vcRhsYGo", "-wtIMTCHWuI", "uJ2PZaO1N5E",
+            "M7lc1UVf-VE", "ZnuwB35GYMY", "q0mljE9K", "up_lNV-yoK4", "C0DPdy98e4c", "q0mljE9K-gY", "iCtffPv9yKY"
+        ]
         let strings = [
             "http://www.youtube.com/watch?v=peFZbP64dsU",
             "http://www.youtube.com/watch?v=cKZDdG9FTKY&feature=channel",
@@ -67,8 +71,35 @@ class EmbedContentLocalStrategyTests: XCTestCase {
             XCTAssertNotNil(result, "failed: \(string)")
             if let id = result?.split(separator: "/").last {
                 XCTAssertEqual(result, "https://www.youtube.com/embed/\(id)")
+                XCTAssertTrue(usedIds.contains(String(id)), "id \(id) not found")
             } else {
-                XCTFail("failed to get correct youtube embed url")
+                XCTFail("failed to get correct youtube embed url, got '\(string)' instead")
+            }
+        }
+    }
+
+    func testYouTubeURLWithTimestamp() throws {
+        let strings = [
+            "http://www.youtube.com/watch?v=6oHdAA3AqnE&t=61&feature=channel",
+            "http://youtube.com/v/6oHdAA3AqnE?feature=youtube_gdata_player&t=61",
+            "http://youtu.be/6oHdAA3AqnE?feature=youtube_gdata_playe&t=61",
+            "http://www.youtube.com/user/Scobleizer#p/u/1/6oHdAA3AqnE?t=61&rel=0",
+            "http://youtu.be/-wtIMTCHWuI?t=61",
+            "https://youtu.be/uJ2PZaO1N5E?t=61",
+            "https://www.youtube.com/embed/M7lc1UVf-VE?start=61",
+            "www.youtube-nocookie.com/embed/up_lNV-yoK4?rel=0&start=61",
+            "youtu.be/6oHdAA3AqnE?t=61",
+            "https://www.youtube.com/watch?v=6oHdAA3AqnE&t=61",
+            "https://youtube.com/watch?t=61&v=6oHdAA3AqnE",
+        ]
+
+        for string in strings {
+            let result = embed(string)
+            XCTAssertNotNil(result, "failed: \(string)")
+            if let id = result?.split(separator: "/").last?.split(separator: "?").first {
+                XCTAssertEqual(result, "https://www.youtube.com/embed/\(id)?start=61")
+            } else {
+                XCTFail("failed to get correct youtube embed url, got '\(string)' instead")
             }
         }
     }
