@@ -898,7 +898,7 @@
 		BAA67192B5EB78981741C311 /* WebPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67CEFFAFA38F29CF1C84F /* WebPage.swift */; };
 		BAA671B36B54CF95A2D162CB /* BrowserTabConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67F4FA344471FF8691E1A /* BrowserTabConfiguration.swift */; };
 		BAA67259A3927FBE4C92280B /* BrowsingTreeScorer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA6777EB9326511BE7FD0DC /* BrowsingTreeScorer.swift */; };
-		BAA672842544E82A5782C2A7 /* BeamWindowDecorator.js in Sources */ = {isa = PBXBuildFile; fileRef = BAA67E114386A7E280F2068C /* BeamWindowDecorator.js */; };
+		BAA672842544E82A5782C2A7 /* BeamWindowDecorator.js in Resources */ = {isa = PBXBuildFile; fileRef = BAA67E114386A7E280F2068C /* BeamWindowDecorator.js */; };
 		BAA6734B9E1478E3084B0A3A /* WebNoteControllerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA6711C12F68C78C7D44DA5 /* WebNoteControllerTest.swift */; };
 		BAA673C9223F304A166B92D5 /* WebNoteController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67971FD6352F46D77E3BE /* WebNoteController.swift */; };
 		BAA674265355DDF432FE4B7A /* WebNavigationMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67F5672D6E4512AF90CAC /* WebNavigationMessageHandler.swift */; };
@@ -5031,6 +5031,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BAA672842544E82A5782C2A7 /* BeamWindowDecorator.js in Resources */,
 				8ADD06082729657D004C3EC9 /* WebPositionsUI.ts in Resources */,
 				8AC643D1271DA9FC00DDC899 /* navigation_prod.js in Resources */,
 				8AC643CF271DA98B00DDC899 /* pns_prod.js in Resources */,
@@ -6023,7 +6024,6 @@
 				BAA676DF0484BA2E4D6CECDF /* BeamWebNavigationController.swift in Sources */,
 				BAA67FA1EA0AEC590CEE0AB8 /* WebNavigationContext.swift in Sources */,
 				A59C4413268233960066AA0E /* CheckboxLayer.swift in Sources */,
-				BAA672842544E82A5782C2A7 /* BeamWindowDecorator.js in Sources */,
 				A51F555227329829002C5584 /* EmbedContentBuilder.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
