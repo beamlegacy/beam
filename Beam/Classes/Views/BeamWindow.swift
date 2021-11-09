@@ -40,7 +40,7 @@ class BeamWindow: NSWindow, NSDraggingDestination {
     init(contentRect: NSRect, data: BeamData) {
         self.data = data
 
-        data.setupJournal()
+        data.setupJournal(firstSetup: true)
 
         super.init(contentRect: contentRect, styleMask: [.titled, .closable, .miniaturizable, .resizable, .unifiedTitleAndToolbar, .fullSizeContentView],
                    backing: .buffered, defer: false)
