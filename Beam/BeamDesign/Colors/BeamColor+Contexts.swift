@@ -266,3 +266,10 @@ extension BeamColor {
                                                                           darkColor: .Beam, darkAlpha: 0.4)
     }
 }
+
+extension BeamColor {
+    enum Gradient {
+        static let beamGradientStart = BeamColor.From(color: NSColor(deviceRed: 184/255, green: 102/255, blue: 255/255, alpha: 1))
+        static let beamGradientEnd = BeamColor.From(color: NSColor(deviceRed: 116/255, green: 51/255, blue: 255/255, alpha: 1))
+    }
+}
