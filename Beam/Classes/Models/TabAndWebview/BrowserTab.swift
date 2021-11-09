@@ -503,7 +503,7 @@ import Promises
                 return // webview probably failed to load
             }
             if webviewUrl.isDomain {
-                userTypedDomain = nil
+                userTypedDomain = webviewUrl
             }
             if BeamURL(webviewUrl).isErrorPage {
                 let beamSchemeUrl = BeamURL(webviewUrl)

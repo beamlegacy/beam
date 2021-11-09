@@ -204,7 +204,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
                 if tabToIndex.shouldBeIndexed {
                     try GRDBDatabase.shared.insertHistoryUrl(urlId: id,
                                                              url: tabToIndex.url.string,
-                                                             aliasDomain: tabToIndex.userTypedUrl?.absoluteString,
+                                                             aliasDomain: tabToIndex.userTypedDomain?.absoluteString,
                                                              title: tabToIndex.document.title,
                                                              content: nil)
                 }

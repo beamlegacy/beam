@@ -164,7 +164,7 @@ class BrowserTabsManager: ObservableObject {
                         }
 
                         let tabInformation: TabInformation? = TabInformation(url: url,
-                                                                             userTypedUrl: shouldIndexUserTypedUrl ? tab.userTypedDomain : nil,
+                                                                             userTypedDomain: shouldIndexUserTypedUrl ? tab.userTypedDomain : nil,
                                                                              shouldBeIndexed: tab.responseStatusCode == 200,
                                                                              tabTree: tabTree,
                                                                              currentTabTree: currentTabTree,
@@ -315,7 +315,7 @@ extension BrowserTabsManager {
 
 struct TabInformation {
     var url: URL
-    var userTypedUrl: URL?
+    var userTypedDomain: URL?
     var shouldBeIndexed: Bool = true
     weak var tabTree: BrowsingTree?
     weak var currentTabTree: BrowsingTree?
