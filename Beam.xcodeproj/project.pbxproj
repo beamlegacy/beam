@@ -777,6 +777,8 @@
 		A59C4413268233960066AA0E /* CheckboxLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A59C4412268233960066AA0E /* CheckboxLayer.swift */; };
 		A59D33882655101A002E7E96 /* WiggleEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = A59D33872655101A002E7E96 /* WiggleEffect.swift */; };
 		A5A2314526FB355B00D01D08 /* DividerNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A2314426FB355B00D01D08 /* DividerNode.swift */; };
+		A5A2D52F27393730003D0925 /* AnimatedGradient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A2D52E27393730003D0925 /* AnimatedGradient.swift */; };
+		A5A2D53727394F55003D0925 /* ActionableButton+Gradient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A2D53627394F55003D0925 /* ActionableButton+Gradient.swift */; };
 		A5A6152526A808B600193C03 /* AutocompleteManager+Sorting.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A6152426A808B600193C03 /* AutocompleteManager+Sorting.swift */; };
 		A5A6A428267F123C007F1B2F /* CommandManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5109F902670227800304B3A /* CommandManagerTests.swift */; };
 		A5A955CB2695576D00F3FDD2 /* CalendarPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A955CA2695576D00F3FDD2 /* CalendarPickerView.swift */; };
@@ -1844,6 +1846,8 @@
 		A59C4412268233960066AA0E /* CheckboxLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckboxLayer.swift; sourceTree = "<group>"; };
 		A59D33872655101A002E7E96 /* WiggleEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WiggleEffect.swift; sourceTree = "<group>"; };
 		A5A2314426FB355B00D01D08 /* DividerNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DividerNode.swift; sourceTree = "<group>"; };
+		A5A2D52E27393730003D0925 /* AnimatedGradient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimatedGradient.swift; sourceTree = "<group>"; };
+		A5A2D53627394F55003D0925 /* ActionableButton+Gradient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ActionableButton+Gradient.swift"; sourceTree = "<group>"; };
 		A5A6152426A808B600193C03 /* AutocompleteManager+Sorting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AutocompleteManager+Sorting.swift"; sourceTree = "<group>"; };
 		A5A955CA2695576D00F3FDD2 /* CalendarPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarPickerView.swift; sourceTree = "<group>"; };
 		A5B1DBED26CE933100F1F81A /* CardReferenceFormatterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardReferenceFormatterView.swift; sourceTree = "<group>"; };
@@ -4078,6 +4082,8 @@
 				33DEF48726617E0B00834839 /* CircledButton.swift */,
 				33D5F8592697478E002C4F25 /* PopupView.swift */,
 				33353EE126F3D0BA00063078 /* ActionableButton.swift */,
+				A5A2D53627394F55003D0925 /* ActionableButton+Gradient.swift */,
+				A5A2D52E27393730003D0925 /* AnimatedGradient.swift */,
 				A5F47EBA26F8AEB2004B7CDE /* Tooltip.swift */,
 			);
 			path = UIElements;
@@ -5632,6 +5638,7 @@
 				0D4EC934268372E800487B75 /* FrecencyScore.swift in Sources */,
 				96BBA79F25FBA573008276FC /* ReparentElement.swift in Sources */,
 				520088BC2613266600AED835 /* Database+CoreDataProperties.swift in Sources */,
+				A5A2D52F27393730003D0925 /* AnimatedGradient.swift in Sources */,
 				520088C02613295000AED835 /* DatabaseManager.swift in Sources */,
 				525F932526E2392A00A5C7BD /* DocumentManager+BeamObjectManagerDelegate.swift in Sources */,
 				418172152581107C00317ED8 /* NSContainerView.swift in Sources */,
@@ -6017,6 +6024,7 @@
 				BAA673C9223F304A166B92D5 /* WebNoteController.swift in Sources */,
 				A5919F6D268EA0A2009015C5 /* WebPageBaseImpl.swift in Sources */,
 				BAA67A0791B680C684C00DFD /* BeamWebkitUIDelegate.swift in Sources */,
+				A5A2D53727394F55003D0925 /* ActionableButton+Gradient.swift in Sources */,
 				BAA67AB22C0A91EBCA6D7BB7 /* WebNavigationController.swift in Sources */,
 				3303E0EA26F8C91100E175AC /* RestAPIServer.swift in Sources */,
 				A519F06E2721A4A400BB42E2 /* ImageCodableWrapper.swift in Sources */,
