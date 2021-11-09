@@ -182,68 +182,60 @@ extension DocumentManager {
             }
 
             let documentManager = DocumentManager()
-            documentManager.context.performAndWait { [weak self] in
-                guard let self = self else { return }
 
-                if blockOperation.isCancelled {
-                    completion?(.failure(DocumentManagerError.operationCancelled))
-                    return
-                }
+            do {
+                let document = try documentManager.fetchOrCreateWithId(documentStruct.id)
+                document.update(documentStruct)
+                document.data = documentStruct.data
+                document.updated_at = BeamDate.now
+                try documentManager.checkValidations(document)
+                try documentManager.checkVersion(document, documentStruct.version)
+                document.version = documentStruct.version
 
-                do {
-                    let document = try documentManager.fetchOrCreateWithId(documentStruct.id)
-                    document.update(documentStruct)
-                    document.data = documentStruct.data
-                    document.updated_at = BeamDate.now
-                    try documentManager.checkValidations(document)
-                    try documentManager.checkVersion(document, documentStruct.version)
-                    document.version = documentStruct.version
-
-                    if let database = try? Database.fetchWithId(documentManager.context, document.database_id) {
-                        database.updated_at = BeamDate.now
-                    } else {
-                        // We should always have a connected database
-                        Logger.shared.logError("Didn't find database \(document.database_id)", category: .document)
-                    }
-                } catch {
-                    Logger.shared.logError(error.localizedDescription, category: .document)
-                    completion?(.failure(error))
-                    return
-                }
-
-                if blockOperation.isCancelled {
-                    completion?(.failure(DocumentManagerError.operationCancelled))
-                    return
-                }
-
-                do {
-                    try documentManager.saveContext()
-                } catch {
-                    completion?(.failure(error))
-                    return
-                }
-
-                // Ping others about the update
-                self.notificationDocumentUpdate(documentStruct)
-
-                if blockOperation.isCancelled {
-                    completion?(.failure(DocumentManagerError.operationCancelled))
-                    return
-                }
-
-                completion?(.success(true))
-
-                // If not authenticated, we don't need to send to BeamAPI
-                if AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled, networkSave {
-                    self.saveAndThrottle(documentStruct, 1.0, networkCompletion)
+                if let database = try? Database.fetchWithId(documentManager.context, document.database_id) {
+                    database.updated_at = BeamDate.now
                 } else {
-                    networkCompletion?(.failure(APIRequestError.notAuthenticated))
+                    // We should always have a connected database
+                    Logger.shared.logError("Didn't find database \(document.database_id)", category: .document)
                 }
+            } catch {
+                Logger.shared.logError(error.localizedDescription, category: .document)
+                completion?(.failure(error))
+                return
+            }
 
-                DispatchQueue.main.async {
-                    guard self.saveOperations[documentStruct.id] === blockOperation else { return }
-                    self.saveOperations.removeValue(forKey: documentStruct.id)
-                }
+            if blockOperation.isCancelled {
+                completion?(.failure(DocumentManagerError.operationCancelled))
+                return
+            }
+
+            do {
+                try documentManager.saveContext()
+            } catch {
+                completion?(.failure(error))
+                return
+            }
+
+            // Ping others about the update
+            self.notificationDocumentUpdate(documentStruct)
+
+            if blockOperation.isCancelled {
+                completion?(.failure(DocumentManagerError.operationCancelled))
+                return
+            }
+
+            completion?(.success(true))
+
+            // If not authenticated, we don't need to send to BeamAPI
+            if AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled, networkSave {
+                self.saveAndThrottle(documentStruct, 1.0, networkCompletion)
+            } else {
+                networkCompletion?(.failure(APIRequestError.notAuthenticated))
+            }
+
+            DispatchQueue.main.async {
+                guard self.saveOperations[documentStruct.id] === blockOperation else { return }
+                self.saveOperations.removeValue(forKey: documentStruct.id)
             }
         }
 
