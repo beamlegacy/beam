@@ -63,4 +63,31 @@ class StringRegexTests: XCTestCase {
         }
     }
 
+    let emailPattern = "([a-z0-9_\\.-]+)@([a-z0-9-_]+)(\\.[a-z0-9_\\.-]+)*(\\.[a-z0-9]{2,10})"
+    func testCapturedGroups() {
+        let email = "macos@beamapp.co.uk"
+        let result = email.capturedGroups(withRegex: emailPattern)
+        XCTAssertEqual(result.count, 4)
+        XCTAssertEqual(result[0], "macos")
+        XCTAssertEqual(result[1], "beamapp")
+        XCTAssertEqual(result[2], ".co")
+        XCTAssertEqual(result[3], ".uk")
+    }
+
+    func testCapturedGroupAtIndex() {
+        let email = "macos@beamapp.co.uk"
+        let result = email.capturedGroup(withRegex: emailPattern, groupIndex: 1)
+        XCTAssertNotNil(result)
+        XCTAssertEqual(result, "beamapp")
+
+        XCTAssertNil("something@.co".capturedGroup(withRegex: emailPattern, groupIndex: 0))
+        XCTAssertNil("something@beamapp.co".capturedGroup(withRegex: emailPattern, groupIndex: 5))
+    }
+
+    func testMatches() {
+        XCTAssertTrue("macos@beamapp.co".matches(withRegex: emailPattern))
+        XCTAssertTrue("a@b.co".matches(withRegex: emailPattern))
+        XCTAssertFalse("a@co".matches(withRegex: emailPattern))
+        XCTAssertFalse("macosbeamapp.co".matches(withRegex: emailPattern))
+    }
 }

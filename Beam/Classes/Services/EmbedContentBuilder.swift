@@ -154,17 +154,23 @@ struct EmbedContentLocalStrategy: EmbedContentStrategy {
     // MARK: Youtube
     private func youtubeEmbedURL(from url: URL) -> URL? {
         guard let youtubeID = extractYouTubeId(from: url) else { return nil }
-        return URL(string: "https://www.youtube.com/embed/\(youtubeID)")
+        var urlString = "https://www.youtube.com/embed/\(youtubeID)"
+        if let timestamp = extractYouTubeTimestamp(from: url) {
+            urlString += "?start=\(timestamp)"
+        }
+        return URL(string: urlString)
     }
 
     private func extractYouTubeId(from url: URL) -> String? {
         let string = url.absoluteString
         let typePattern = "(?:(?:\\.be\\/|embed\\/|v\\/|\\?v=|\\&v=|\\/videos\\/)|(?:[\\w+]+#\\w\\/\\w(?:\\/[\\w]+)?\\/\\w\\/))([\\w-_]+)"
-        let regex = try? NSRegularExpression(pattern: typePattern, options: .caseInsensitive)
-        return regex
-            .flatMap { $0.firstMatch(in: string, range: NSRange(location: 0, length: string.count)) }
-            .flatMap { Range($0.range(at: 1), in: string) }
-            .map { String(string[$0]) }
+        return string.capturedGroup(withRegex: typePattern, groupIndex: 0)
+    }
+
+    private func extractYouTubeTimestamp(from youtubeURL: URL) -> String? {
+        let string = youtubeURL.absoluteString
+        let typePattern = "(?:(?:t|start)=([0-9]+))"
+        return string.capturedGroup(withRegex: typePattern, groupIndex: 0)
     }
 }
 
