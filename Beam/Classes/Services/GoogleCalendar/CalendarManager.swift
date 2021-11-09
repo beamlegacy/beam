@@ -42,7 +42,12 @@ class CalendarManager: ObservableObject {
     @Published var meetingsForNote = [BeamNote.ID: [Meeting]]()
     @Published var didAllowSource: Bool = false
 
-    init() {
+    init() { }
+
+    private var didLazyInitConnectedSources = false
+    func lazyInitConnectedSources() {
+        guard !didLazyInitConnectedSources else { return }
+        didLazyInitConnectedSources = true
         if Persistence.Authentication.googleAccessToken != nil && Persistence.Authentication.googleRefreshToken != nil {
             let googleCalendar = GoogleCalendarService()
             self.connectedSources.append(googleCalendar)
@@ -51,6 +56,7 @@ class CalendarManager: ObservableObject {
 
     func isConnected(calendarService: CalendarServices) -> Bool {
         guard AuthenticationManager.shared.isAuthenticated else { return false }
+        lazyInitConnectedSources()
         guard let connectedSource = connectedSources.first(where: { $0.name == calendarService.rawValue }), !connectedSource.inNeedOfPermission else {
             return false
         }
@@ -58,6 +64,7 @@ class CalendarManager: ObservableObject {
     }
 
     func connect(calendarService: CalendarServices) {
+        lazyInitConnectedSources()
         switch calendarService {
         case .googleCalendar:
             let googleCalendar = GoogleCalendarService()
@@ -67,6 +74,7 @@ class CalendarManager: ObservableObject {
     }
 
     func disconnect(calendarService: CalendarServices) {
+        lazyInitConnectedSources()
         switch calendarService {
         case .googleCalendar:
             self.connectedSources = self.connectedSources.filter({$0.name != calendarService.rawValue})
@@ -74,6 +82,7 @@ class CalendarManager: ObservableObject {
     }
 
     func requestAccess(from calendarService: CalendarServices, completionHandler: @escaping (Bool) -> Void) {
+        lazyInitConnectedSources()
         switch calendarService {
         case .googleCalendar:
             let googleCalendar = GoogleCalendarService()
@@ -95,7 +104,7 @@ class CalendarManager: ObservableObject {
     func requestMeetings(for dateMin: Date, and dateMax: Date? = nil, onlyToday: Bool, query: String? = nil, completionHandler: @escaping ([Meeting]) -> Void) {
         var allMeetings: [Meeting] = []
         let dispatchGroup = DispatchGroup()
-
+        lazyInitConnectedSources()
         calendarQueue.async {
             for source in self.connectedSources {
                 dispatchGroup.enter()
