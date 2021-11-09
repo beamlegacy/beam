@@ -155,8 +155,11 @@ class LoggerNSTableController: NSViewController {
                     return
                 }
 
-                self.logEntries.append(logEntry)
+                self.logEntries.removeFirst()
+                self.tableView.removeRows(at: IndexSet(integer: 0),
+                                          withAnimation: [])
 
+                self.logEntries.append(logEntry)
                 self.tableView.insertRows(at: IndexSet(integer: self.logEntries.count - 1),
                                           withAnimation: [])
 
