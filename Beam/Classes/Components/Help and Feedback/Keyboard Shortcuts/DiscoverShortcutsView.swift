@@ -18,11 +18,14 @@ struct DiscoverShortcutsView: View {
             if !compactHeight {
                 Spacer()
             }
-            HStack(alignment: .top, spacing: compactWidth ? 40 : 60) {
-                ForEach(sections, id: \.self) {
-                    SectionFeaturesView(section: $0)
+            ScrollView {
+                HStack(alignment: .top, spacing: compactWidth ? 40 : 60) {
+                    ForEach(sections, id: \.self) {
+                        SectionFeaturesView(section: $0)
+                    }
                 }
             }
+            .frame(maxHeight: 550) // enough to fit all the shorcuts, might change over time
             ActionableButton(text: "Done", defaultState: .normal, variant: .primaryBlue) {
                 navigateToJournal()
             }
