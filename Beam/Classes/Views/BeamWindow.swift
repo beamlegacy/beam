@@ -87,12 +87,18 @@ class BeamWindow: NSWindow, NSDraggingDestination {
     }
 
     override func performClose(_ sender: Any?) {
-        if state.mode != .web, state.hasBrowserTabs {
+        if state.mode != .web && state.hasUnpinnedBrowserTabs {
             state.mode = .web
             return
         }
-        if state.closeCurrentTab() { return }
-
+        if state.mode == .web {
+            let currentTab = state.browserTabsManager.currentTab
+            _ = state.closeCurrentTab()
+            if currentTab == state.browserTabsManager.currentTab { // currentTab might be the last unclosable tab (unpinned tab)
+                state.mode = .today
+            }
+            return
+        }
         super.performClose(sender)
     }
 
