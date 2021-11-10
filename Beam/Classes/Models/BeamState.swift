@@ -295,6 +295,7 @@ import Sentry
         closeTabIfPossible(tab, allowClosingPinned: allowClosingPinned)
     }
 
+    /// returns true if the tab was closed
     func closeCurrentTab(allowClosingPinned: Bool = false) -> Bool {
         EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
         guard let currentTab = self.browserTabsManager.currentTab else { return false }
@@ -331,8 +332,9 @@ import Sentry
         if tab.isPinned && !allowClosingPinned {
             if let nextUnpinnedTabIndex = browserTabsManager.tabs.firstIndex(where: { !$0.isPinned }) {
                 browserTabsManager.showTab(at: nextUnpinnedTabIndex)
+                return true
             }
-            return true
+            return false
         }
         guard let tabIndex = browserTabsManager.tabs.firstIndex(of: tab) else { return false }
         return cmdManager.run(command: CloseTab(tab: tab, tabIndex: tabIndex, wasCurrentTab: browserTabsManager.currentTab === tab), on: self)
@@ -581,6 +583,9 @@ extension BeamState: BrowserTabsManagerDelegate {
     // convenient vars
     var hasBrowserTabs: Bool {
         !browserTabsManager.tabs.isEmpty
+    }
+    var hasUnpinnedBrowserTabs: Bool {
+        browserTabsManager.tabs.first(where: { !$0.isPinned }) != nil
     }
     private weak var currentTab: BrowserTab? {
         browserTabsManager.currentTab
