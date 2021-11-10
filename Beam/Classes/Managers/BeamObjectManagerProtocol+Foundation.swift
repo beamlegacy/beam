@@ -211,7 +211,7 @@ extension BeamObjectManagerDelegate {
 
     @discardableResult
     func saveOnBeamObjectAPI(_ object: BeamObjectType,
-                             _ completion: @escaping ((Result<BeamObjectType, Error>) -> Void)) throws -> APIRequest {
+                             _ completion: @escaping ((Result<BeamObjectType, Error>) -> Void)) throws -> APIRequest? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw APIRequestError.notAuthenticated
         }

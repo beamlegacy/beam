@@ -89,7 +89,9 @@ extension BeamObjectManager {
 
                 if let request = request {
                     requests.append(request)
+                    #if DEBUG
                     Self.networkRequestsWithoutID.append(request)
+                    #endif
                 }
             } catch {
                 lock.wait()
@@ -201,7 +203,9 @@ extension BeamObjectManager {
                         }
                     }
 
+                    #if DEBUG
                     Self.networkRequestsWithoutID.append(beamRequestForIds)
+                    #endif
                 } catch {
                     AppDelegate.showMessage("Error fetching objects from API then storing locally: \(error.localizedDescription). This is not normal, check the logs and ask support.")
                     completion(.failure(error))
@@ -209,7 +213,9 @@ extension BeamObjectManager {
             }
         }
 
+        #if DEBUG
         Self.networkRequestsWithoutID.append(beamRequest)
+        #endif
     }
 
     /// Will fetch all updates from the API and call each managers based on object's type
@@ -262,7 +268,9 @@ extension BeamObjectManager {
             }
         }
 
+        #if DEBUG
         Self.networkRequestsWithoutID.append(beamRequest)
+        #endif
     }
 }
 
@@ -325,7 +333,9 @@ extension BeamObjectManager {
             }
         }
 
+        #if DEBUG
         Self.networkRequestsWithoutID.append(request)
+        #endif
         return request
     }
 
@@ -544,15 +554,49 @@ extension BeamObjectManager {
         }
     }
 
+    /// Completion will not be called if returned `APIRequest` is `nil`
     func saveToAPI<T: BeamObjectProtocol>(_ object: T,
-                                          _ completion: @escaping ((Result<T, Error>) -> Void)) throws -> APIRequest {
+                                          _ completion: @escaping ((Result<T, Error>) -> Void)) throws -> APIRequest? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw BeamObjectManagerError.notAuthenticated
         }
 
         let beamObject = try BeamObject(object, T.beamObjectTypeName)
 
-        Self.networkRequests[beamObject.id]?.cancel()
+        Self.networkRequestsSemaphore.wait()
+        defer { Self.networkRequestsSemaphore.signal() }
+
+        /*
+         We used to cancel previous network calls for a specific beam object to save network space, but the checksum
+         and previousChecksum mechanism means the request may have been fired already, with the server-side already received the
+         new data with checksum.
+
+         The way our Rails API works (and many other framework) is it will continue to proceed with the received request
+         even if the request is being cancelled in the meantime, and there is *no* guarantee where the request will stop.
+
+         We should therefor not cancel the request but let it be, for the local DB to store the sent checksum as
+         previousChecksum and sent it again with the new data to prevent conflict unrelated to the user.
+
+         if let previousRequest = Self.networkRequests[beamObject.id] {
+             Logger.shared.logDebug("saveToAPI T: Cancel previous call \(previousRequest)",
+                                    category: .beamObjectNetwork)
+             previousRequest.cancel()
+         }
+
+         */
+
+        if let previousRequest = Self.networkRequests[beamObject.id] {
+            if let dataTask = previousRequest.dataTask {
+                if dataTask.state == .running {
+                    // Only 1 request at a time can be running per object ID, for the checksum not to conflict
+                    Logger.shared.logWarning("Request for \(beamObject.id) is already running, please wait it finished",
+                                             category: .beamObjectNetwork)
+                    return nil
+                }
+            }
+            // On going request for this
+        }
+
         let request = BeamObjectRequest()
         Self.networkRequests[beamObject.id] = request
 
@@ -576,19 +620,29 @@ extension BeamObjectManager {
             case .failure(let error):
                 self.saveToAPIFailure(object, error, completion)
             }
+
+            Self.networkRequestsSemaphore.wait()
+            if let savedRequest = Self.networkRequests[beamObject.id],
+               savedRequest == request {
+                Self.networkRequests.removeValue(forKey: beamObject.id)
+            }
+            Self.networkRequestsSemaphore.signal()
         }
 
+        #if DEBUG
         Self.networkRequestsWithoutID.append(request)
+        #endif
+
         return request
     }
 
     internal func saveToAPIFailure<T: BeamObjectProtocol>(_ object: T,
                                                           _ error: Error,
                                                           _ completion: @escaping ((Result<T, Error>) -> Void)) {
-        Logger.shared.logError("Could not save \(object): \(error.localizedDescription)",
+        Logger.shared.logError("saveToAPIFailure: Could not save \(object): \(error.localizedDescription)",
                                category: .beamObjectNetwork)
 
-        // Early return except for checksum issues.
+        // Early return except for checksum issues.
         guard case APIRequestError.beamObjectInvalidChecksum = error else {
             completion(.failure(error))
             return
@@ -718,7 +772,10 @@ extension BeamObjectManager {
             }
         }
 
+        #if DEBUG
         Self.networkRequestsWithoutID.append(request)
+        #endif
+
         return request
     }
 
@@ -727,7 +784,7 @@ extension BeamObjectManager {
     internal func saveToAPIBeamObjectsFailure(_ beamObjects: [BeamObject],
                                               _ error: Error,
                                               _ completion: @escaping ((Result<[BeamObject], Error>) -> Void)) {
-        Logger.shared.logError("Could not save \(beamObjects): \(error.localizedDescription)",
+        Logger.shared.logError("saveToAPIBeamObjectsFailure: Could not save \(beamObjects): \(error.localizedDescription)",
                                category: .beamObject)
 
         switch error {
@@ -878,7 +935,24 @@ extension BeamObjectManager {
             throw BeamObjectManagerError.notAuthenticated
         }
 
-        Self.networkRequests[beamObject.id]?.cancel()
+        /*
+         We used to cancel previous network calls for a specific beam object to save network space, but the checksum
+         and previousChecksum mechanism means the request may have been fired already, with the server-side receiving the
+         new data with checksum.
+
+         The way our Rails API works (and many other framework) is it will continue to proceed with the received request
+         even if the request is being cancelled in the meantime, and there is *no* guarantee where the request will stop.
+
+         We should therefor not cancel the request but let it be, for the local coredata to store the sent checksum as
+         previousChecksum and sent it again with the new data to prevent conflict.
+
+         if let previousRequest = Self.networkRequests[beamObject.id] {
+             Logger.shared.logDebug("saveToAPI BeamObject: Cancel previous call", category: .beamObjectNetwork)
+             previousRequest.cancel()
+         }
+
+         */
+
         let request = BeamObjectRequest()
         Self.networkRequests[beamObject.id] = request
 
@@ -889,9 +963,9 @@ extension BeamObjectManager {
                 savedBeamObject.previousChecksum = updateBeamObject.dataChecksum
                 completion(.success(savedBeamObject))
             case .failure(let error):
-                // Early return except for checksum issues.
+                // Early return except for checksum issues.
                 guard case APIRequestError.beamObjectInvalidChecksum = error else {
-                    Logger.shared.logError("Could not save \(beamObject): \(error.localizedDescription)",
+                    Logger.shared.logError("saveToAPI Could not save \(beamObject): \(error.localizedDescription)",
                                            category: .beamObjectNetwork)
                     completion(.failure(error))
                     return
@@ -1031,7 +1105,10 @@ extension BeamObjectManager {
             throw BeamObjectManagerError.notAuthenticated
         }
 
-        Self.networkRequests[id]?.cancel()
+        if let previousRequest = Self.networkRequests[id] {
+            Logger.shared.logDebug("delete: Cancel previous call", category: .beamObjectNetwork)
+            previousRequest.cancel()
+        }
         let request = BeamObjectRequest()
         Self.networkRequests[id] = request
 

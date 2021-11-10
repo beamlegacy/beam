@@ -7,9 +7,11 @@ extension BeamObjectManager {
             request.cancel()
         }
 
+        #if DEBUG
         for request in Self.networkRequestsWithoutID {
             request.cancel()
         }
+        #endif
     }
 
     /*
@@ -17,11 +19,13 @@ extension BeamObjectManager {
      not work when used with Vinyl, which doesn't implement `cancel()`.
      */
     static func isAllNetworkCallsCompleted() -> Bool {
+        #if DEBUG
         for request in Self.networkRequestsWithoutID {
             if [URLSessionTask.State.suspended, .running].contains(request.dataTask?.state) {
                 return false
             }
         }
+        #endif
 
         for (_, request) in Self.networkRequests {
             if [URLSessionTask.State.suspended, .running].contains(request.dataTask?.state) {
