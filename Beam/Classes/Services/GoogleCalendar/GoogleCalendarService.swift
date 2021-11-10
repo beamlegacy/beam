@@ -201,7 +201,6 @@ class GoogleCalendarService {
         authClient.renewAccessToken(withRefreshToken: refreshToken, parameters: .none, headers: .none) { result in
             switch result {
             case .success(let response):
-                Persistence.Authentication.googleRefreshToken = response.credential.oauthRefreshToken
                 Persistence.Authentication.googleAccessToken = response.credential.oauthToken
                 completionHandler(.success(true))
             case .failure(let error):
