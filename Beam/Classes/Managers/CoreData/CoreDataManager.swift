@@ -104,13 +104,13 @@ class CoreDataManager {
             Logger.shared.logError("unable to commit editing before saving", category: .coredata)
         }
 
-        if context.hasChanges {
-            do {
-                try context.save()
-            } catch {
-                Logger.shared.logError("unable to save: \(error.localizedDescription)", category: .coredata)
-                throw error
-            }
+        guard context.hasChanges else { return }
+
+        do {
+            try context.save()
+        } catch {
+            Logger.shared.logError("unable to save: \(error.localizedDescription)", category: .coredata)
+            throw error
         }
     }
 

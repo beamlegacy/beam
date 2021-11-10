@@ -107,8 +107,10 @@ extension DocumentManager {
                                category: .documentNetwork)
 
         Self.networkTasks.forEach { (_, tuple) in
-            tuple.0.cancel()
-            tuple.1?(.failure(DocumentManagerError.operationCancelled))
+            if tuple.1 == false {
+                tuple.0.cancel()
+                tuple.2?(.failure(DocumentManagerError.operationCancelled))
+            }
         }
     }
 
@@ -166,9 +168,15 @@ extension DocumentManager {
         Logger.shared.logDebug("Saving \(documentStruct.titleAndId)", category: .document)
         Logger.shared.logDebug(documentStruct.data.asString ?? "-", category: .documentDebug)
 
+        Self.saveOperationsSemaphore.wait()
+        defer { Self.saveOperationsSemaphore.signal() }
+
         let blockOperation = BlockOperation()
-        saveOperations[documentStruct.id]?.cancel()
-        saveOperations[documentStruct.id] = blockOperation
+        if let saveOperation = Self.saveOperations[documentStruct.id] {
+            Logger.shared.logDebug("Existing save operation, cancelling it", category: .document)
+            saveOperation.cancel()
+        }
+        Self.saveOperations[documentStruct.id] = blockOperation
 
         blockOperation.addExecutionBlock { [weak blockOperation, weak self] in
             guard let self = self,
@@ -234,12 +242,12 @@ extension DocumentManager {
             }
 
             DispatchQueue.main.async {
-                guard self.saveOperations[documentStruct.id] === blockOperation else { return }
-                self.saveOperations.removeValue(forKey: documentStruct.id)
+                guard Self.saveOperations[documentStruct.id] === blockOperation else { return }
+                Self.saveOperations.removeValue(forKey: documentStruct.id)
             }
         }
 
-        saveDocumentQueue.addOperation(blockOperation)
+        Self.saveDocumentQueue.addOperation(blockOperation)
     }
 
     @discardableResult
