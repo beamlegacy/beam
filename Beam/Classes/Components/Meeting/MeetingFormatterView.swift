@@ -27,10 +27,17 @@ private struct MeetingFormatterContainerView: View {
                 }))
             }
         }
-        @Published var selectedMeeting: Meeting?
+        @Published var selectedMeeting: Meeting? {
+            didSet {
+                if let id = selectedMeeting?.id {
+                    scrollViewProxy?.scrollTo(id)
+                }
+            }
+        }
 
         var onSelectMeeting: ((_ meeting: Meeting) -> Void)?
         weak var window: NSWindow?
+        fileprivate var scrollViewProxy: ScrollViewProxy?
     }
 
     static let idealSize = CGSize(width: 484, height: 260)
@@ -84,11 +91,16 @@ private struct MeetingFormatterContainerView: View {
                 .background(
                     // putting scrollview in zstack background to not let its height influence the container height.
                     ScrollView {
-                        MeetingsListView(meetingsByDay: viewModel.meetingsByDay, selectedMeeting: $viewModel.selectedMeeting.onChange({ m in
-                            guard let m = m else { return }
-                            viewModel.onSelectMeeting?(m)
-                        }), searchQuery: viewModel.searchText, isLoading: viewModel.isLoading)
-                            .animation(nil)
+                        ScrollViewReader { proxy in
+                            MeetingsListView(meetingsByDay: viewModel.meetingsByDay, selectedMeeting: $viewModel.selectedMeeting.onChange({ m in
+                                guard let m = m else { return }
+                                viewModel.onSelectMeeting?(m)
+                            }), searchQuery: viewModel.searchText, isLoading: viewModel.isLoading)
+                                .animation(nil)
+                                .onAppear {
+                                    viewModel.scrollViewProxy = proxy
+                                }
+                        }
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 )
@@ -240,6 +252,7 @@ class MeetingFormatterView: FormatterView {
     // MARK: Key Handlers
     override func formatterHandlesCursorMovement(direction: CursorMovement,
                                                  modifierFlags: NSEvent.ModifierFlags? = nil) -> Bool {
+        guard [.up, .down].contains(direction) else { return true }
         let allMeetings: [Meeting] = subviewModel.meetingsByDay.reduce([Meeting]()) { meetings, meetingForDay in
             return meetings + meetingForDay.meetings
         }
