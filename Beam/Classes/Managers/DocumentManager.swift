@@ -355,6 +355,21 @@ public class DocumentManager: NSObject {
             document.id == documentStruct.id
     }
 
+    private func addLogLine(_ objects: Set<NSManagedObject>, name: String) {
+        guard !objects.isEmpty else { return }
+        var dict: [String: Int] = [:]
+
+        for object in objects {
+            guard let name = object.entity.name else { continue }
+
+            dict[name] = (dict[name] ?? 0) + 1
+        }
+
+        Logger.shared.logDebug("\(name) \(objects.count) objects: \(dict)", category: .coredata)
+
+//        dump(objects)
+    }
+
     static var savedCount = 0
     // MARK: NSManagedObjectContext saves
     @discardableResult
@@ -365,7 +380,10 @@ public class DocumentManager: NSObject {
             return false
         }
 
-        Logger.shared.logDebug("\tInserted: \(context.insertedObjects)\n\tDeleted: \(context.deletedObjects)\n\tUpdated: \(context.updatedObjects)\n\tRegistered: \(context.registeredObjects)", category: .document)
+        addLogLine(context.insertedObjects, name: "Inserted")
+        addLogLine(context.deletedObjects, name: "Deleted")
+        addLogLine(context.updatedObjects, name: "Updated")
+        addLogLine(context.registeredObjects, name: "Registered")
 
         Self.savedCount += 1
 
