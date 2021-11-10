@@ -37,7 +37,7 @@ class BeamWindow: NSWindow, NSDraggingDestination {
     private var trafficLightLeftMargin: CGFloat = 20
 
     // swiftlint:disable:next function_body_length
-    init(contentRect: NSRect, data: BeamData) {
+    init(contentRect: NSRect, data: BeamData, minimumSize: CGSize? = nil) {
         self.data = data
 
         data.setupJournal(firstSetup: true)
@@ -57,13 +57,14 @@ class BeamWindow: NSWindow, NSDraggingDestination {
         self.setupWindowButtons()
         self.setTitleBarAccessoryView()
 
+        let minimumSize = minimumSize ?? contentRect.size
         // Create the SwiftUI view and set the context as the value for the managedObjectContext environment keyPath.
         // Add `@Environment(\.managedObjectContext)` in the views that will need the context.
         let mainView = ContentView()
             .environmentObject(state)
             .environmentObject(data)
             .environmentObject(state.browserTabsManager)
-            .frame(minWidth: contentRect.width, maxWidth: .infinity, minHeight: contentRect.height, maxHeight: .infinity)
+            .frame(minWidth: minimumSize.width, maxWidth: .infinity, minHeight: minimumSize.height, maxHeight: .infinity)
 
         let hostingView = BeamHostingView(rootView: mainView)
         hostingView.frame = contentRect
