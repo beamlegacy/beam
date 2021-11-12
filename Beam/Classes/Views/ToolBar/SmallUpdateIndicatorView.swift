@@ -34,7 +34,7 @@ struct SmallUpdateIndicatorView: View {
                 }.frame(maxWidth: 250)
             case .noUpdate where versionChecker.currentRelease != nil :
                 GeometryReader { proxy in
-                    ButtonLabel("Updated", icon: "tooltip-mark", customStyle: buttonLabelStyle) {
+                    ButtonLabel("Updated", icon: "tool-keep", customStyle: buttonLabelStyle) {
                         showReleaseNoteWindow(with: versionChecker.currentRelease!, at: proxy.frame(in: .global).origin, hideButtonOnClose: true)
                     }
                     .onReceive(opacityTimer, perform: { _ in
