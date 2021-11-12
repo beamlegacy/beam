@@ -57,13 +57,17 @@ class BreadCrumb: Widget {
 
         self.crumbChain = computeCrumbChain(from: element)
 
-        let node = nodeFor(element, withParent: self)
-        if let ref = node as? ProxyTextNode {
-            ref.open = element.children.isEmpty // Yes, this is intentional
-            self.proxyTextNode = ref
-            self.currentLinkedRefNode = ref
+        if isInNodeProviderTree {
+            let node = nodeFor(element, withParent: self)
+            if let ref = node as? ProxyTextNode {
+                ref.open = element.children.isEmpty // Yes, this is intentional
+                self.proxyTextNode = ref
+                self.currentLinkedRefNode = ref
+            } else {
+                Logger.shared.logError("Couldn't create a proxy text node for \(element) (node: \(node)", category: .noteEditor)
+            }
         } else {
-            Logger.shared.logError("Couldn't create a proxy text node for \(element) (node: \(node)", category: .noteEditor)
+            Logger.shared.logError("Trying to init a breadCrumb on a dead branch of the document tree for \(element). Bailing out", category: .noteEditor)
         }
 
         guard let note = self.crumbChain.first as? BeamNote else { return }
