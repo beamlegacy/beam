@@ -245,7 +245,8 @@ extension BeamTextEdit {
             Logger.shared.logError("Cannot paste contents in an editor without a focused bullet", category: .noteEditor)
             return
         }
-        mngrNode.cmdManager.beginGroup(with: "PasteAttributedContent")
+        let cmdManager = mngrNode.cmdManager
+        cmdManager.beginGroup(with: "PasteAttributedContent")
         guard let node = focusedWidget as? TextNode else { return }
         var lastInserted: ElementNode? = node
         let parent = node.parent as? ElementNode ?? node
@@ -272,10 +273,10 @@ extension BeamTextEdit {
 
             let embedable = showLinkEmbedPasteMenu(for: linkRange)
             if !embedable {
-                mngrNode.cmdManager.insertText(BeamText(text: " ", attributes: []), in: lastInsertedNode, at: linkRange.end)
-                mngrNode.cmdManager.focusElement(lastInsertedNode, cursorPosition: linkRange.end + 1)
+                cmdManager.insertText(BeamText(text: " ", attributes: []), in: lastInsertedNode, at: linkRange.end)
+                cmdManager.focusElement(lastInsertedNode, cursorPosition: linkRange.end + 1)
             }
         }
-        mngrNode.cmdManager.endGroup()
+        cmdManager.endGroup()
     }
 }
