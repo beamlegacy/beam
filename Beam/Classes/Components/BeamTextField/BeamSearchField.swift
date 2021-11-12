@@ -48,7 +48,7 @@ struct BeamSearchField: View {
                         Button(action: {
                                 searchStr = ""
                         }, label: {
-                            Image("xmark.circle.fill")
+                            Image(systemName: "xmark.circle.fill")
                                 .resizable()
                                 .scaledToFit()
                                 .aspectRatio(contentMode: .fit)
