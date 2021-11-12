@@ -142,7 +142,7 @@ class BeamWindow: NSWindow, NSDraggingDestination {
         animationLayer.position = self.mouseLocationOutsideOfEventStream
         animationLayer.zPosition = .greatestFiniteMagnitude
 
-        let flyingImage = NSImage(named: "flying-download")
+        let flyingImage = NSImage(named: "download-file_glyph")
         animationLayer.contents = flyingImage?.cgImage
 
         self.contentView?.layer?.addSublayer(animationLayer)
