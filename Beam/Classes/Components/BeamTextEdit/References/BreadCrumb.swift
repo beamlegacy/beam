@@ -20,7 +20,7 @@ class BreadCrumb: Widget {
     var selectedCrumb: Int?
     var container: Layer?
 
-    var proxyTextNode: ProxyTextNode!
+    var proxyTextNode: ProxyTextNode?
     var sourceNote: BeamNote
 
     override var open: Bool {
@@ -37,7 +37,7 @@ class BreadCrumb: Widget {
     }
 
     private var currentNote: BeamNote?
-    private var currentLinkedRefNode: ProxyTextNode!
+    private var currentLinkedRefNode: ProxyTextNode?
     private var firstBreadcrumbText = ""
     private var breadcrumbPlaceholder = "..."
 
@@ -57,10 +57,14 @@ class BreadCrumb: Widget {
 
         self.crumbChain = computeCrumbChain(from: element)
 
-        guard let ref = nodeFor(element, withParent: self) as? ProxyTextNode else { fatalError() }
-        ref.open = element.children.isEmpty // Yes, this is intentional
-        self.proxyTextNode = ref
-        self.currentLinkedRefNode = ref
+        let node = nodeFor(element, withParent: self)
+        if let ref = node as? ProxyTextNode {
+            ref.open = element.children.isEmpty // Yes, this is intentional
+            self.proxyTextNode = ref
+            self.currentLinkedRefNode = ref
+        } else {
+            Logger.shared.logError("Couldn't create a proxy text node for \(element) (node: \(node)", category: .noteEditor)
+        }
 
         guard let note = self.crumbChain.first as? BeamNote else { return }
 
@@ -162,7 +166,11 @@ class BreadCrumb: Widget {
             }
         }
 
-        children = [currentLinkedRefNode]
+        if let currentLinkedRefNode = currentLinkedRefNode {
+            children = [currentLinkedRefNode]
+        } else {
+            children = []
+        }
 
         layoutBreadCrumbs()
         invalidateLayout()
@@ -306,7 +314,7 @@ class BreadCrumb: Widget {
     }
 
     var isLink: Bool {
-        proxyTextNode.isLink
+        proxyTextNode?.isLink ?? false
     }
 
     var isReference: Bool {
