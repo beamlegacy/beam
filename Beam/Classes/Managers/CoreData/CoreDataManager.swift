@@ -69,8 +69,12 @@ class CoreDataManager {
                     Logger.shared.logDebug("sqlite file: \(fileUrl)", category: .coredata)
                 }
 
-                guard error == nil else {
-                    fatalError("was unable to load store \(error!)")
+                if let error = error {
+                    UserAlert.showError(message: "Coredata store error", error: error)
+
+                    NSApplication.shared.terminate(nil)
+
+                    return
                 }
 
                 completion()

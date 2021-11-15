@@ -586,6 +586,7 @@ public class DocumentManager: NSObject {
             let documentManager = DocumentManager()
 
             Logger.shared.logDebug("Fetching documentManager.fetchWithId", category: .documentNetwork)
+
             guard let updatedDocument = try? documentManager.fetchWithId(documentStruct.id) else {
                 Logger.shared.logWarning("Weird, document disappeared (deleted?), isCancelled: \(networkTask.isCancelled): \(documentStruct.titleAndId)",
                                          category: .coredata)

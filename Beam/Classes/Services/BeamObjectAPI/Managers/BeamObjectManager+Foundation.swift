@@ -58,46 +58,48 @@ extension BeamObjectManager {
         for (_, manager) in Self.managerInstances {
             group.enter()
 
-            let localTimer = BeamDate.now
+            DispatchQueue.global(qos: .userInitiated).async {
+                let localTimer = BeamDate.now
 
-            do {
-                let request = try manager.saveAllOnBeamObjectApi { result in
-                    switch result {
-                    case .failure(let error):
-                        Logger.shared.logError("Can't saveAll: \(error.localizedDescription)", category: .beamObjectNetwork)
-                        lock.wait()
-                        errors.append(error)
-                        lock.signal()
-                    case .success(let countAndDate):
-                        lock.wait()
+                do {
+                    let request = try manager.saveAllOnBeamObjectApi { result in
+                        switch result {
+                        case .failure(let error):
+                            Logger.shared.logError("Can't saveAll: \(error.localizedDescription)", category: .beamObjectNetwork)
+                            lock.wait()
+                            errors.append(error)
+                            lock.signal()
+                        case .success(let countAndDate):
+                            lock.wait()
 
-                        savedObjects += countAndDate.0
+                            savedObjects += countAndDate.0
 
-                        if let updatedAt = countAndDate.1, updatedAt > mostRecentUpdatedAt {
-                            mostRecentUpdatedAt = updatedAt
-                            mostRecentUpdatedAtChanged = true
+                            if let updatedAt = countAndDate.1, updatedAt > mostRecentUpdatedAt {
+                                mostRecentUpdatedAt = updatedAt
+                                mostRecentUpdatedAtChanged = true
+                            }
+
+                            lock.signal()
                         }
 
-                        lock.signal()
+                        Logger.shared.logDebug("saveAllToAPI using \(manager) done",
+                                               category: .beamObjectNetwork,
+                                               localTimer: localTimer)
+                        group.leave()
                     }
 
-                    Logger.shared.logDebug("saveAllToAPI using \(manager) done",
-                                           category: .beamObjectNetwork,
-                                           localTimer: localTimer)
+                    if let request = request {
+                        requests.append(request)
+                        #if DEBUG
+                        Self.networkRequestsWithoutID.append(request)
+                        #endif
+                    }
+                } catch {
+                    lock.wait()
+                    errors.append(error)
+                    lock.signal()
                     group.leave()
                 }
-
-                if let request = request {
-                    requests.append(request)
-                    #if DEBUG
-                    Self.networkRequestsWithoutID.append(request)
-                    #endif
-                }
-            } catch {
-                lock.wait()
-                errors.append(error)
-                lock.signal()
-                group.leave()
             }
         }
 
