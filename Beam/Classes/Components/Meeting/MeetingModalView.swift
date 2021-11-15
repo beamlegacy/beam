@@ -13,9 +13,16 @@ struct Meeting: Identifiable, Equatable {
     var id: UUID = UUID()
     var name: String
     var startTime: Date
-    var date: Date = BeamDate.now
+    var endTime: Date?
+    var allDayEvent: Bool = false
     var attendees: [Attendee]
+    var htmlLink: String?
+    var meetingLink: String?
     var linkCards: Bool = true
+    var duration: DateComponents? {
+        guard let endTime = endTime else { return nil }
+        return Calendar.current.dateComponents([.hour, .minute], from: startTime, to: endTime)
+    }
 
     static func == (lhs: Meeting, rhs: Meeting) -> Bool {
         return lhs.name == rhs.name && lhs.startTime == rhs.startTime && lhs.attendees == rhs.attendees
