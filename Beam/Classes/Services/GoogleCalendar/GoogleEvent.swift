@@ -28,6 +28,8 @@ class GoogleEvent: Codable {
     let startDate: EventDate?
     let endDate: EventDate?
     let attendees: [GoogleEventAttendee]?
+    let htmlLink: String?
+    let hangoutLink: String?
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -36,6 +38,8 @@ class GoogleEvent: Codable {
         case startDate = "start"
         case endDate = "end"
         case attendees
+        case htmlLink
+        case hangoutLink
     }
 
     required public init(from decoder: Decoder) throws {
@@ -47,10 +51,13 @@ class GoogleEvent: Codable {
         startDate = try? container.decode(EventDate.self, forKey: .startDate)
         endDate = try? container.decode(EventDate.self, forKey: .endDate)
         attendees = try? container.decode([GoogleEventAttendee].self, forKey: .attendees)
+        htmlLink = try? container.decode(String.self, forKey: .htmlLink)
+        hangoutLink = try? container.decode(String.self, forKey: .hangoutLink)
     }
 }
 
 class EventDate: Codable {
+    let date: String?
     let dateTime: String?
     let timeZone: String?
 }

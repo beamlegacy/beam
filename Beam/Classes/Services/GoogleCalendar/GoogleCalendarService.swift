@@ -241,7 +241,10 @@ class GoogleCalendarService {
     }
 
     private func convertApiObject(eventList: GoogleEventList) -> [Meeting] {
-        let dateFormatter = ISO8601DateFormatter()
+        let isoDateformatter = ISO8601DateFormatter()
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+
         var meetings: [Meeting] = []
 
         let acceptedEventList = eventList.events.filter { event in
@@ -250,14 +253,31 @@ class GoogleCalendarService {
         }
 
         for event in acceptedEventList {
-            guard let eventSummary = event.summary, let startTime = event.startDate?.dateTime, let date = dateFormatter.date(from: startTime) else { continue }
+            guard let eventSummary = event.summary else { continue }
+
+            var startDate: Date
+            var endDate: Date
+            var allDayEvent: Bool = false
+            if let startTime = event.startDate?.dateTime, let startDateFormatted = isoDateformatter.date(from: startTime),
+               let endTime = event.endDate?.dateTime, let endDateFormatted = isoDateformatter.date(from: endTime) {
+                startDate = startDateFormatted
+                endDate = endDateFormatted
+            } else if let startTime = event.startDate?.date, let startDateFormatted = dateFormatter.date(from: startTime),
+                      let endTime = event.endDate?.date, let endDateFormatted = dateFormatter.date(from: endTime) {
+                startDate = startDateFormatted
+                endDate = endDateFormatted
+                allDayEvent = true
+            } else {
+                continue
+            }
+
             var meetingAttendees: [Meeting.Attendee] = []
             if let attendees = event.attendees {
                 for attendee in attendees where attendee.`self` != true {
                     meetingAttendees.append(Meeting.Attendee(email: attendee.email ?? "", name: attendee.displayName ?? ""))
                 }
             }
-            meetings.append(Meeting(name: eventSummary, startTime: date, attendees: meetingAttendees, linkCards: true))
+            meetings.append(Meeting(name: eventSummary, startTime: startDate, endTime: endDate, allDayEvent: allDayEvent, attendees: meetingAttendees, htmlLink: event.htmlLink, meetingLink: event.hangoutLink, linkCards: true))
         }
         return meetings
     }
