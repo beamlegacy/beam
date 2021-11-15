@@ -14,9 +14,6 @@ class BeamObjectManager {
     static var managerInstances: [String: BeamObjectManagerDelegateProtocol] = [:]
     static var translators: [String: (BeamObjectManagerDelegateProtocol, [BeamObject]) throws -> Void] = [:]
 
-    static var networkRequests: [UUID: APIRequest] = [:]
-    static var networkRequestsSemaphore = DispatchSemaphore(value: 1)
-
     #if DEBUG
     static var networkRequestsWithoutID: [APIRequest] = []
     #endif

@@ -45,7 +45,6 @@ extension BeamObjectManager {
         let group = DispatchGroup()
         var errors: [Error] = []
         let lock = DispatchSemaphore(value: 1)
-        var requests: [APIRequest] = []
         var savedObjects = 0
         // Just a very old date as default
         var mostRecentUpdatedAt: Date = Persistence.Sync.BeamObjects.last_updated_at ?? (BeamDate.now.addingTimeInterval(-(60*60*24*31*12*10)))
@@ -89,7 +88,6 @@ extension BeamObjectManager {
                     }
 
                     if let request = request {
-                        requests.append(request)
                         #if DEBUG
                         Self.networkRequestsWithoutID.append(request)
                         #endif
@@ -565,42 +563,7 @@ extension BeamObjectManager {
 
         let beamObject = try BeamObject(object, T.beamObjectTypeName)
 
-        Self.networkRequestsSemaphore.wait()
-        defer { Self.networkRequestsSemaphore.signal() }
-
-        /*
-         We used to cancel previous network calls for a specific beam object to save network space, but the checksum
-         and previousChecksum mechanism means the request may have been fired already, with the server-side already received the
-         new data with checksum.
-
-         The way our Rails API works (and many other framework) is it will continue to proceed with the received request
-         even if the request is being cancelled in the meantime, and there is *no* guarantee where the request will stop.
-
-         We should therefor not cancel the request but let it be, for the local DB to store the sent checksum as
-         previousChecksum and sent it again with the new data to prevent conflict unrelated to the user.
-
-         if let previousRequest = Self.networkRequests[beamObject.id] {
-             Logger.shared.logDebug("saveToAPI T: Cancel previous call \(previousRequest)",
-                                    category: .beamObjectNetwork)
-             previousRequest.cancel()
-         }
-
-         */
-
-        if let previousRequest = Self.networkRequests[beamObject.id] {
-            if let dataTask = previousRequest.dataTask {
-                if dataTask.state == .running {
-                    // Only 1 request at a time can be running per object ID, for the checksum not to conflict
-                    Logger.shared.logWarning("Request for \(beamObject.id) is already running, please wait it finished",
-                                             category: .beamObjectNetwork)
-                    return nil
-                }
-            }
-            // On going request for this
-        }
-
         let request = BeamObjectRequest()
-        Self.networkRequests[beamObject.id] = request
 
         try request.save(beamObject) { requestResult in
             switch requestResult {
@@ -622,13 +585,6 @@ extension BeamObjectManager {
             case .failure(let error):
                 self.saveToAPIFailure(object, error, completion)
             }
-
-            Self.networkRequestsSemaphore.wait()
-            if let savedRequest = Self.networkRequests[beamObject.id],
-               savedRequest == request {
-                Self.networkRequests.removeValue(forKey: beamObject.id)
-            }
-            Self.networkRequestsSemaphore.signal()
         }
 
         #if DEBUG
@@ -937,26 +893,7 @@ extension BeamObjectManager {
             throw BeamObjectManagerError.notAuthenticated
         }
 
-        /*
-         We used to cancel previous network calls for a specific beam object to save network space, but the checksum
-         and previousChecksum mechanism means the request may have been fired already, with the server-side receiving the
-         new data with checksum.
-
-         The way our Rails API works (and many other framework) is it will continue to proceed with the received request
-         even if the request is being cancelled in the meantime, and there is *no* guarantee where the request will stop.
-
-         We should therefor not cancel the request but let it be, for the local coredata to store the sent checksum as
-         previousChecksum and sent it again with the new data to prevent conflict.
-
-         if let previousRequest = Self.networkRequests[beamObject.id] {
-             Logger.shared.logDebug("saveToAPI BeamObject: Cancel previous call", category: .beamObjectNetwork)
-             previousRequest.cancel()
-         }
-
-         */
-
         let request = BeamObjectRequest()
-        Self.networkRequests[beamObject.id] = request
 
         try request.save(beamObject) { requestResult in
             switch requestResult {
@@ -1107,12 +1044,7 @@ extension BeamObjectManager {
             throw BeamObjectManagerError.notAuthenticated
         }
 
-        if let previousRequest = Self.networkRequests[id] {
-            Logger.shared.logDebug("delete: Cancel previous call", category: .beamObjectNetwork)
-            previousRequest.cancel()
-        }
         let request = BeamObjectRequest()
-        Self.networkRequests[id] = request
 
         try request.delete(id) { result in
             switch result {
