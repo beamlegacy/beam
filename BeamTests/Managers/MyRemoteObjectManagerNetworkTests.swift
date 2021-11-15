@@ -1925,6 +1925,71 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                 }
             }
 
+            context("When called twice") {
+                let newTitle1 = "new Title1"
+
+                beforeEach {
+                    self.saveAllObjectsAndSaveChecksum()
+
+                    object1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
+                    object2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
+                    object3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
+
+                    title1 = object1.title!
+                    title2 = object2.title!
+                    title3 = object3.title!
+
+                    BeamDate.travel(2)
+
+                    object1.title = newTitle1
+                    object1.updatedAt = BeamDate.now
+                }
+
+                it("doesn't generate conflicts") {
+                    let networkCalls = APIRequest.callsCount
+
+                    waitUntil(timeout: .seconds(10)) { done in
+                        do {
+                            let group = DispatchGroup()
+
+                            group.enter()
+                            _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3]) { _ in group.leave() }
+
+                            group.enter()
+                            _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3]) { result in
+                                expect { try result.get() }.toNot(throwError())
+
+                                group.leave()
+                            }
+
+                            group.wait()
+                            done()
+
+                        } catch {
+                            fail(error.localizedDescription)
+                        }
+                    }
+
+                    let expectedNetworkCalls = ["update_beam_objects", "update_beam_objects"]
+
+                    expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
+                    expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
+
+                    let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1.beamObjectId)
+                    expect(object1) == remoteObject1
+
+                    let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2.beamObjectId)
+                    expect(object2) == remoteObject2
+
+                    let remoteObject3: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object3.beamObjectId)
+                    expect(object3) == remoteObject3
+
+                    expect(remoteObject1?.checksum) == (try self.checksum(object1))
+                    expect(remoteObject2?.checksum) == (try self.checksum(object2))
+                    expect(remoteObject3?.checksum) == (try self.checksum(object3))
+                }
+            }
+
             context("when all objects already exist, and we save all with 1 conflicted object") {
                 let newTitle1 = "new Title1"
 
@@ -3438,6 +3503,48 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
             context("when object already exist on the API") {
                 beforeEach {
                     self.saveObjectAndSaveChecksum(object)
+                }
+
+                context("when called twice") {
+                    let newTitle = "new Title"
+
+                    it("doesn't generate conflicts") {
+                        object.title = newTitle
+                        let networkCalls = APIRequest.callsCount
+
+                        waitUntil(timeout: .seconds(10)) { done in
+                            do {
+                                let group = DispatchGroup()
+
+                                group.enter()
+
+                                _ = try sut.saveOnBeamObjectAPI(object) { _ in group.leave() }
+
+                                group.enter()
+
+                                _ = try sut.saveOnBeamObjectAPI(object) { result in
+                                    expect { try result.get() }.toNot(throwError())
+
+                                    group.leave()
+                                }
+                                group.wait()
+                                done()
+                            } catch {
+                                fail(error.localizedDescription)
+                            }
+                        }
+
+                        let expectedNetworkCalls = ["update_beam_object", "update_beam_object"]
+
+                        expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
+
+                        expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
+
+                        let remoteObject: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object.beamObjectId)
+                        expect(object) == remoteObject
+
+                        expect(remoteObject?.checksum) == (try self.checksum(object))
+                    }
                 }
 
                 context("with conflict") {

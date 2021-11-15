@@ -3,10 +3,6 @@ import Foundation
 // MARK: - For tests
 extension BeamObjectManager {
     static func clearNetworkCalls() {
-        for (_, request) in Self.networkRequests {
-            request.cancel()
-        }
-
         #if DEBUG
         for request in Self.networkRequestsWithoutID {
             request.cancel()
@@ -26,13 +22,6 @@ extension BeamObjectManager {
             }
         }
         #endif
-
-        for (_, request) in Self.networkRequests {
-            if [URLSessionTask.State.suspended, .running].contains(request.dataTask?.state) {
-                return false
-            }
-        }
-
         return true
     }
 }

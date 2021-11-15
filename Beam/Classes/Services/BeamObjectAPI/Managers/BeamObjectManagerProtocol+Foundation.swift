@@ -217,6 +217,8 @@ extension BeamObjectManagerDelegate {
                 case .failure(let error):
                     if case APIRequestError.notFound = error {
                         completion(.success(nil))
+                        BeamObjectManagerCall.deleteObjectSemaphore(uuid: object.beamObjectId)
+                        semaphore.signal()
                         return
                     }
                     completion(.failure(error))
@@ -233,6 +235,8 @@ extension BeamObjectManagerDelegate {
             case .failure(let error):
                 if case APIRequestError.notFound = error {
                     completion(.success(nil))
+                    BeamObjectManagerCall.deleteObjectSemaphore(uuid: object.beamObjectId)
+                    semaphore.signal()
                     return
                 }
 
@@ -240,6 +244,8 @@ extension BeamObjectManagerDelegate {
             case .success(let updatedAt):
                 guard let updatedAt = updatedAt, updatedAt > object.updatedAt else {
                     completion(.success(nil))
+                    BeamObjectManagerCall.deleteObjectSemaphore(uuid: object.beamObjectId)
+                    semaphore.signal()
                     return
                 }
 
