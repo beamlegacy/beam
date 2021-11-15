@@ -136,15 +136,15 @@ struct MeetingsListView: View {
 }
 
 struct MeetingsListView_Previews: PreviewProvider {
-    static var selectedMeeting = Meeting(name: "Snack", startTime: BeamDate.now, date: BeamDate.now, attendees: [])
+    static var selectedMeeting = Meeting(name: "Snack", startTime: BeamDate.now, endTime: BeamDate.now, attendees: [])
     static var previews: some View {
         MeetingsListView(meetingsByDay: [
             MeetingsForDay(date: BeamDate.now, meetings: [
-                Meeting(name: "Yeah sure", startTime: BeamDate.now, date: BeamDate.now.addingTimeInterval(-30000), attendees: []),
+                Meeting(name: "Yeah sure", startTime: BeamDate.now, endTime: BeamDate.now.addingTimeInterval(-30000), attendees: []),
                 selectedMeeting
             ]),
             MeetingsForDay(date: BeamDate.now.addingTimeInterval(150000), meetings: [
-                Meeting(name: "Ouiiiii", startTime: BeamDate.now, date: BeamDate.now.addingTimeInterval(10000), attendees: [])
+                Meeting(name: "Ouiiiii", startTime: BeamDate.now, endTime: BeamDate.now.addingTimeInterval(10000), attendees: [])
             ])
         ], selectedMeeting: .constant(selectedMeeting), isLoading: true)
         .background(BeamColor.Generic.background.swiftUI)
