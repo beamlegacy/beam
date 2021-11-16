@@ -27,5 +27,6 @@
 ./Beam/Classes/Helpers/Utils/Web/Native.ts
 ./Beam/Classes/Helpers/Utils/Web/BeamUIEvent.ts
 ./Beam/Classes/Helpers/Utils/Web/BeamElementHelper.ts
+./Beam/Classes/Helpers/Utils/Web/BeamEmbedHelper.ts
 ./Beam/Classes/Helpers/Utils/Web/BeamTypes.ts
 ./Beam/Classes/Helpers/Utils/Web/BeamKeyEvent.ts

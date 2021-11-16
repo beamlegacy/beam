@@ -103,7 +103,7 @@ test("test pointBounds payload", () => {
   expect(pointRect.y).toEqual(block.offsetTop)
   expect(pointRect.width).toEqual(mostRightChild.offsetLeft + mostRightChild.width - mostLeftChild.offsetLeft)
   expect(pointRect.height).toEqual(34 - mostTopChild.offsetTop)
-  expect(payload.html).toEqual("<p><b>MEAN</b> (<a href=\"/wiki/MongoDB\">MongoDB</a></p>")
+  expect(payload.html).toEqual(undefined)
 })
 
 test("test shootBounds payload", () => {

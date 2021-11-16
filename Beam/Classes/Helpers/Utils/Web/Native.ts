@@ -5,7 +5,7 @@ export class Native<M> {
    * Singleton
    */
   static instance: Native<any>
-
+  win: BeamWindow<M>
   readonly href: string
   readonly componentPrefix: string
 
@@ -28,7 +28,8 @@ export class Native<M> {
   /**
    * @param win {BeamWindow}
    */
-  constructor(readonly win: BeamWindow<M>, componentPrefix: string) {
+  constructor(win: BeamWindow<M>, componentPrefix: string) {
+    this.win = win
     this.href = win.location.href
     this.componentPrefix = componentPrefix
     this.messageHandlers = win.webkit && win.webkit.messageHandlers as M
@@ -50,7 +51,7 @@ export class Native<M> {
     const messageKey = `${this.componentPrefix}_${name}`
     const messageHandler = this.messageHandlers[messageKey]
     if (messageHandler) {
-      const href = this.href
+      const href = this.win.location.href
       messageHandler.postMessage({href, ...payload}, href)
     } else {
       throw Error(`No message handler for message "${messageKey}"`)

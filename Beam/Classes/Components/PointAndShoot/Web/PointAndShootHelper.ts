@@ -12,7 +12,6 @@ import {
   BeamWindow
 } from "../../../Helpers/Utils/Web/BeamTypes"
 import { BeamElementHelper } from "../../../Helpers/Utils/Web/BeamElementHelper"
-import { Util } from "./Util"
 
 export class PointAndShootHelper {
   /**
@@ -56,7 +55,8 @@ export class PointAndShootHelper {
    */
   static isMeaningful(element: BeamElement, win: BeamWindow): boolean {
     return (
-      (BeamElementHelper.isMedia(element) ||
+      (BeamElementHelper.isEmbed(element, win) ||
+        BeamElementHelper.isMedia(element) ||
         BeamElementHelper.isImageContainer(element, win) ||
         PointAndShootHelper.isTextMeaningful(BeamElementHelper.getTextValue(element))) &&
       BeamElementHelper.isVisible(element, win)
@@ -129,12 +129,12 @@ export class PointAndShootHelper {
           // eslint-disable-next-line no-case-declarations
           const childNodesOfChild = this.getElementAndTextChildNodesRecursively(child as BeamElement, win)
           nodes.push(...childNodesOfChild)
-          break;
+          break
         case BeamNodeType.text:
           nodes.push(child)
-          break;
+          break
         default:
-          break;
+          break
       }
     })
 
