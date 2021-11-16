@@ -3,7 +3,6 @@ import {Native} from "../../../Helpers/Utils/Web/Native"
 import {
   BeamElement,
   BeamHTMLElement,
-  BeamMessageHandler,
   BeamNodeType,
   BeamRange,
   BeamRangeGroup,
@@ -16,6 +15,7 @@ import {BeamElementHelper} from "../../../Helpers/Utils/Web/BeamElementHelper"
 import {BeamRectHelper} from "../../../Helpers/Utils/Web/BeamRectHelper"
 import {PointAndShootHelper} from "./PointAndShootHelper"
 import {dequal as isDeepEqual} from "dequal"
+import { BeamEmbedHelper } from "../../../Helpers/Utils/Web/BeamEmbedHelper"
 
 export class PointAndShootUI_native implements PointAndShootUI {
   native
@@ -43,8 +43,7 @@ export class PointAndShootUI_native implements PointAndShootUI {
     const payload = {
       point: { 
         id, 
-        rect, 
-        html: this.getHtml(element)
+        rect
       }
     }
 
@@ -83,7 +82,22 @@ export class PointAndShootUI_native implements PointAndShootUI {
 
   selectPayload = {}
   private getHtml(element: BeamHTMLElement): string {
-    const parsedElement = BeamElementHelper.parseElementBasedOnStyles(element, this.native.win)
+    const { win } = this.native
+
+    let elementString
+    // If we support embedding on the current location
+    if (BeamElementHelper.isEmbed(element, win)) {
+      // parse the element for embedding. Parsing can fail so we support 
+      // falling back on the default element parsing
+      elementString = BeamEmbedHelper.parseElementForEmbed(element, win)
+    }
+
+    if (elementString) {
+      return elementString
+    }
+
+    // default element parser
+    const parsedElement = BeamElementHelper.parseElementBasedOnStyles(element, win)
     return parsedElement.outerHTML
   }
 
@@ -272,7 +286,7 @@ export class PointAndShootUI_native implements PointAndShootUI {
     }
 
     // If it's an image or media, select the whole element
-    const selectWholeElement = BeamElementHelper.isImage(el, win) || BeamElementHelper.isMedia(el)
+    const selectWholeElement = BeamElementHelper.isImage(el, win) || BeamElementHelper.isMedia(el) || BeamElementHelper.isEmbed(el, win)
 
     // We have meaningful children, inspect them and compute their bounds
     if (childNodes.length > 0 && !selectWholeElement) {
@@ -309,8 +323,7 @@ export class PointAndShootUI_native implements PointAndShootUI {
 
     // No meaningful childNodes, check the element itself
     if (PointAndShootHelper.isMeaningful(el, win)) {
-      const elementBounds = el.getBoundingClientRect()
-      area = this.setArea(area, elementBounds, clippingArea)
+      area = this.setArea(area, bounds, clippingArea)
     }
 
     return area
