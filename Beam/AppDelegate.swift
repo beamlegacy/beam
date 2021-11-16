@@ -370,6 +370,44 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
 
+        if data.downloadManager.ongoingDownload {
+            let downloads = data.downloadManager.downloads.filter { d in
+                d.state == .running
+            }
+
+            let message: String
+            let question: String
+
+            if let uniqueDownload = downloads.first, downloads.count == 1 {
+                question = NSLocalizedString("A download is in progress", comment: "Quit during download")
+                message = """
+                        Are you sure you want to quit? Beam is currently downloading "\(uniqueDownload.suggestedFileName)".
+                        If you quit now, Beam won’t finish downloading this file.
+                        """
+            } else {
+                question = NSLocalizedString("Downloads are in progress", comment: "Quit during downloads")
+                message = """
+                        Are you sure you want to quit? Beam is currently downloading \(downloads.count) files.
+                        If you quit now, Beam won’t finish downloading these files.
+                        """
+            }
+
+            let alert = NSAlert()
+
+            let info = NSLocalizedString(message, comment: "Quit with download message")
+            let quitButton = NSLocalizedString("Quit", comment: "Quit button title")
+            let cancelButton = NSLocalizedString("Don't quit", comment: "Don't quit button title")
+            alert.messageText = question
+            alert.informativeText = info
+            alert.addButton(withTitle: quitButton)
+            alert.addButton(withTitle: cancelButton)
+
+            let answer = alert.runModal()
+            if answer == .alertSecondButtonReturn {
+                return .terminateCancel
+            }
+        }
+
         syncDataWithBeamObject { _ in
             Logger.shared.logDebug("Sending toApplicationShouldTerminate true")
             RunLoop.main.perform(inModes: [.modalPanel]) {
