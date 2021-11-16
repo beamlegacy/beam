@@ -46,13 +46,9 @@ extension BeamObjectManagerDelegate {
         let objectManager = BeamObjectManager()
         objectManager.conflictPolicyForSave = Self.conflictPolicy
 
-        Logger.shared.logDebug("👁👁👁👁👁👁👁👁👁👁👁👁👁👁👁", category: .beamObjectNetwork)
-
         let uuids = objects.map { $0.beamObjectId }
         let semaphores = BeamObjectManagerCall.objectsSemaphores(uuids: uuids)
         semaphores.forEach { $0.wait() }
-
-        Logger.shared.logDebug("👺👺👺👺👺👺👺👺👺👺👺👺👺", category: .beamObjectNetwork)
 
         // A previous network call might have changed the previousChecksum in the meantime
         let checksums = try checksumsForIds(objects.map { $0.beamObjectId })
@@ -101,7 +97,6 @@ extension BeamObjectManagerDelegate {
 
         BeamObjectManagerCall.deleteObjectsSemaphores(uuids: uuids)
         semaphores.forEach { $0.signal() }
-        Logger.shared.logDebug("🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠", category: .beamObjectNetwork)
     }
 
     internal func saveOnBeamObjectsAPIError(objects: [BeamObjectType],
@@ -116,7 +111,6 @@ extension BeamObjectManagerDelegate {
         if case BeamObjectManagerObjectError<BeamObjectType>.invalidChecksum = error {
             BeamObjectManagerCall.deleteObjectsSemaphores(uuids: uuids)
             semaphores.forEach { $0.signal() }
-            Logger.shared.logDebug("🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠", category: .beamObjectNetwork)
 
             self.manageInvalidChecksum(error, deep, completion)
             return
@@ -126,7 +120,6 @@ extension BeamObjectManagerDelegate {
         guard case BeamObjectManagerError.multipleErrors(let errors) = error else {
             BeamObjectManagerCall.deleteObjectsSemaphores(uuids: uuids)
             semaphores.forEach { $0.signal() }
-            Logger.shared.logDebug("🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠", category: .beamObjectNetwork)
 
             completion(.failure(error))
             return
@@ -136,7 +129,6 @@ extension BeamObjectManagerDelegate {
 
         BeamObjectManagerCall.deleteObjectsSemaphores(uuids: uuids)
         semaphores.forEach { $0.signal() }
-        Logger.shared.logDebug("🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠", category: .beamObjectNetwork)
     }
 
     @discardableResult
@@ -210,7 +202,7 @@ extension BeamObjectManagerDelegate {
     }
 
     @discardableResult
-    // swiftlint:disable:next cyclomatic_complexity
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
     func refreshFromBeamObjectAPI(_ object: BeamObjectType,
                                   _ forced: Bool = false,
                                   _ completion: @escaping ((Result<BeamObjectType?, Error>) -> Void)) throws -> APIRequest {
@@ -303,12 +295,8 @@ extension BeamObjectManagerDelegate {
         Logger.shared.logDebug("saveOnBeamObjectAPI called. Object type: \(type(of: object).beamObjectTypeName)",
                                category: .beamObjectNetwork)
 
-        Logger.shared.logDebug("👁👁👁👁👁👁👁👁👁👁👁👁👁👁👁", category: .beamObjectNetwork)
-
         let semaphore = BeamObjectManagerCall.objectSemaphore(uuid: object.beamObjectId)
         semaphore.wait()
-
-        Logger.shared.logDebug("👺👺👺👺👺👺👺👺👺👺👺👺👺", category: .beamObjectNetwork)
 
         var objectToSave = try object.copy()
 
@@ -348,7 +336,6 @@ extension BeamObjectManagerDelegate {
 
         BeamObjectManagerCall.deleteObjectSemaphore(uuid: object.beamObjectId)
         semaphore.signal()
-        Logger.shared.logDebug("🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠", category: .beamObjectNetwork)
     }
 
     internal func saveOnBeamObjectAPIError(object: BeamObjectType,
@@ -360,7 +347,6 @@ extension BeamObjectManagerDelegate {
 
             BeamObjectManagerCall.deleteObjectSemaphore(uuid: object.beamObjectId)
             semaphore.signal()
-            Logger.shared.logDebug("🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠", category: .beamObjectNetwork)
 
             return
         }
@@ -369,7 +355,6 @@ extension BeamObjectManagerDelegate {
         // first
         BeamObjectManagerCall.deleteObjectSemaphore(uuid: object.beamObjectId)
         semaphore.signal()
-        Logger.shared.logDebug("🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠", category: .beamObjectNetwork)
 
         self.manageInvalidChecksum(error, 0) { result in
             switch result {
