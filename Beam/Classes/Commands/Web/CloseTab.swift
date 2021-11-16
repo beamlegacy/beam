@@ -93,7 +93,7 @@ class CloseTab: WebCommand {
               let data = self.tabData,
               let tab = decode(data: data) else { return false }
 
-        context.browserTabsManager.addNewTabAndGroup(tab, setCurrent: wasCurrentTab)
+        context.browserTabsManager.addNewTabAndGroup(tab, setCurrent: wasCurrentTab, withURL: tab.url, at: tabIndex)
         if tab.isPinned {
             context.browserTabsManager.pinTab(tab)
         }
