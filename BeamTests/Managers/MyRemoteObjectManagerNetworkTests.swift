@@ -31,7 +31,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
             BeamObjectManager.unregisterAll()
             sut.registerOnBeamObjectManager()
 
-//            beamObjectHelper.deleteAll()
             MyRemoteObjectManager.store.removeAll()
 
             try? EncryptionManager.shared.replacePrivateKey(Configuration.testPrivateKey)
