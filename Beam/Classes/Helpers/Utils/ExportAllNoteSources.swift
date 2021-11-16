@@ -66,7 +66,7 @@ func export_all_note_sources(to url: URL?) {
     let documentManager = DocumentManager()
     let notesAndSources = documentManager.allDocumentsTitles(includeDeletedNotes: true)
         .compactMap { title -> [NoteAndSourcesRow]? in
-            guard let note = BeamNote.fetch(documentManager, title: title, keepInMemory: false),
+            guard let note = BeamNote.fetch(title: title, keepInMemory: false),
                   !note.type.isJournal else { return nil }
             let sem = DispatchSemaphore(value: 0)
             note.sources.refreshScores { sem.signal() }

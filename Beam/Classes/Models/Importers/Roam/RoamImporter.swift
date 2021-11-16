@@ -58,7 +58,7 @@ class RoamImporter {
         let roamNotes = try parseData(data)
 
         for roamNote in roamNotes {
-            let newNote = BeamNote.fetchOrCreate(documentManager, title: roamNote.title)
+            let newNote = BeamNote.fetchOrCreate(title: roamNote.title)
             newNote.importedByUser()
             newNote.clearChildren()
 
@@ -68,7 +68,7 @@ class RoamImporter {
 
             newNote.creationDate = roamNote.createTime ?? newNote.creationDate
             newNote.updateDate = roamNote.editTime ?? newNote.updateDate
-            newNote.save(documentManager: documentManager)
+            newNote.save()
         }
 
         return roamNotes

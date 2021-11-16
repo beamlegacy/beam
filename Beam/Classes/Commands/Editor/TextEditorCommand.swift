@@ -24,7 +24,7 @@ class TextEditorCommand: Command<Widget> {
     }
 
     func getElement(for noteId: UUID, and id: UUID) -> BeamElementInstance? {
-        guard let note = BeamNote.fetch(AppDelegate.main.documentManager, id: noteId),
+        guard let note = BeamNote.fetch(id: noteId),
               let element = note.findElement(id) else { return nil }
         return BeamElementInstance(note: note, element: element)
     }

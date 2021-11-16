@@ -215,7 +215,7 @@ class CommandsTextTests: QuickSpec {
     private func setupAndResetTree() -> BeamNote {
         // Setup a simple node tree
         BeamNote.clearCancellables()
-        let note = BeamNote.fetchOrCreate(DocumentManager(), title: "TestEditCommands")
+        let note = BeamNote.fetchOrCreate(title: "TestEditCommands")
 
         let bullet1 = BeamElement("First bullet")
         note.addChild(bullet1)

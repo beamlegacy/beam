@@ -80,14 +80,13 @@ struct NoteView: View {
             headerLayoutModel.centerText = centerText
             headerLayoutModel.leadingPercentage = leadingPercentage
             headerViewModel.state = state
-            headerViewModel.documentManager = state.data.documentManager
             headerViewModel.note = newNote
         }
         .onReceive(note.changed.debounce(for: .seconds(10), scheduler: RunLoop.main)) { changed in
             let (_, change) = changed
             guard change != .meta else { return }
             guard note.publicationStatus != .unpublished else { return }
-            BeamNoteSharingUtils.makeNotePublic(note, becomePublic: true, documentManager: state.data.documentManager)
+            BeamNoteSharingUtils.makeNotePublic(note, becomePublic: true)
         }
     }
 

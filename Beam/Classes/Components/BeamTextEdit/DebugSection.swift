@@ -67,7 +67,8 @@ class DebugSection: Widget {
 
         updateLayerVisibility()
 
-        note.$saving.sink { [weak self] value in
+        note.$saving.sink { [weak self] val in
+            let value = val.load(ordering: .relaxed)
             guard let self = self else { return }
             let deadline = value ? DispatchTime.now() : DispatchTime.now() + 0.5
             DispatchQueue.main.asyncAfter(deadline: deadline) {

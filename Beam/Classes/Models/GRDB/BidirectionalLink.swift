@@ -58,11 +58,11 @@ public extension BidirectionalLink {
     }
 
     var linkedNote: BeamNote? {
-        BeamNote.fetch(DocumentManager(), id: linkedNoteId)
+        BeamNote.fetch(id: linkedNoteId)
     }
 
     var sourceNote: BeamNote? {
-        BeamNote.fetch(DocumentManager(), id: sourceNoteId)
+        BeamNote.fetch(id: sourceNoteId)
     }
 
     var sourceElement: BeamElement? {
