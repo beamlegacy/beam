@@ -67,6 +67,7 @@ public class DocumentManager: NSObject {
 
     var saveDocumentPromiseCancels: [UUID: () -> Void] = [:]
 
+    //swiftlint:disable:next large_tuple
     static var networkTasks: [UUID: (DispatchWorkItem, Bool, ((Swift.Result<Bool, Error>) -> Void)?)] = [:]
     static var networkTasksSemaphore = DispatchSemaphore(value: 1)
     var thread: Thread

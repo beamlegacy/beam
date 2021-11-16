@@ -240,10 +240,11 @@ extension DocumentManager {
                 networkCompletion?(.failure(APIRequestError.notAuthenticated))
             }
 
-            DispatchQueue.main.async {
-                guard Self.saveOperations[documentStruct.id] === blockOperation else { return }
-                Self.saveOperations.removeValue(forKey: documentStruct.id)
-            }
+            Self.saveOperationsSemaphore.wait()
+            defer { Self.saveOperationsSemaphore.signal() }
+
+            guard Self.saveOperations[documentStruct.id] === blockOperation else { return }
+            Self.saveOperations.removeValue(forKey: documentStruct.id)
         }
 
         Self.saveDocumentQueue.addOperation(blockOperation)
