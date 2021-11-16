@@ -39,36 +39,36 @@ extension DocumentManager: BeamObjectManagerDelegate {
     func persistChecksum(_ objects: [DocumentStruct]) throws {
         var changed = false
 
-        try context.performAndWait {
-            for updateObject in objects {
-                guard let documentCoreData = try? fetchWithId(updateObject.id) else {
-                    throw DocumentManagerError.localDocumentNotFound
-                }
+        let documentManager = DocumentManager()
 
-                /*
-                 `persistChecksum` might be called more than once for the same object, if you save one object and
-                 it conflicts, once merged it will call saveOnBeamAPI() again and there will be no way to know this
-                 2nd save doesn't need to persist checksum, unless passing a method attribute `dontSaveChecksum`
-                 which is annoying as a pattern.
-
-                 Instead I just check if it's the same, with same previous data and we skip the save to avoid a
-                 CD save.
-                 */
-                guard documentCoreData.beam_object_previous_checksum != updateObject.previousChecksum ||
-                        documentCoreData.beam_api_data != updateObject.data else {
-                    continue
-                }
-
-                Logger.shared.logDebug("PersistChecksum \(updateObject.titleAndId) with previous checksum \(updateObject.previousChecksum ?? "-")",
-                                       category: .documentNetwork)
-                documentCoreData.beam_object_previous_checksum = updateObject.previousChecksum
-                documentCoreData.beam_api_data = updateObject.data
-
-                changed = true
+        for updateObject in objects {
+            guard let documentCoreData = try? documentManager.fetchWithId(updateObject.id) else {
+                throw DocumentManagerError.localDocumentNotFound
             }
 
-            if changed { try saveContext() }
+            /*
+             `persistChecksum` might be called more than once for the same object, if you save one object and
+             it conflicts, once merged it will call saveOnBeamAPI() again and there will be no way to know this
+             2nd save doesn't need to persist checksum, unless passing a method attribute `dontSaveChecksum`
+             which is annoying as a pattern.
+
+             Instead I just check if it's the same, with same previous data and we skip the save to avoid a
+             CD save.
+             */
+            guard documentCoreData.beam_object_previous_checksum != updateObject.previousChecksum ||
+                    documentCoreData.beam_api_data != updateObject.data else {
+                        continue
+                    }
+
+            Logger.shared.logDebug("PersistChecksum \(updateObject.titleAndId) with previous checksum \(updateObject.previousChecksum ?? "-")",
+                                   category: .documentNetwork)
+            documentCoreData.beam_object_previous_checksum = updateObject.previousChecksum
+            documentCoreData.beam_api_data = updateObject.data
+
+            changed = true
         }
+
+        if changed { try documentManager.saveContext() }
     }
 
     // swiftlint:disable:next function_body_length cyclomatic_complexity

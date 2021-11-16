@@ -168,27 +168,8 @@ extension DocumentManager {
         Logger.shared.logDebug("Saving \(documentStruct.titleAndId)", category: .document)
         Logger.shared.logDebug(documentStruct.data.asString ?? "-", category: .documentDebug)
 
-        Self.saveOperationsSemaphore.wait()
-        defer { Self.saveOperationsSemaphore.signal() }
-
-        let blockOperation = BlockOperation()
-        if let saveOperation = Self.saveOperations[documentStruct.id] {
-            Logger.shared.logDebug("Existing save operation, cancelling it", category: .document)
-            saveOperation.cancel()
-        }
-        Self.saveOperations[documentStruct.id] = blockOperation
-
-        blockOperation.addExecutionBlock { [weak blockOperation] in
-            guard let blockOperation = blockOperation
-            else { return }
-
+        saveDocumentQueue.async {
             let documentManager = DocumentManager()
-
-            // In case the operationqueue was cancelled way before this started
-            if blockOperation.isCancelled {
-                completion?(.failure(DocumentManagerError.operationCancelled))
-                return
-            }
 
             do {
                 let document = try documentManager.fetchOrCreateWithId(documentStruct.id)
@@ -208,11 +189,7 @@ extension DocumentManager {
             } catch {
                 Logger.shared.logError(error.localizedDescription, category: .document)
                 completion?(.failure(error))
-                return
-            }
-
-            if blockOperation.isCancelled {
-                completion?(.failure(DocumentManagerError.operationCancelled))
+                networkCompletion?(.failure(DocumentManagerError.networkNotCalled))
                 return
             }
 
@@ -220,16 +197,12 @@ extension DocumentManager {
                 try documentManager.saveContext()
             } catch {
                 completion?(.failure(error))
+                networkCompletion?(.failure(DocumentManagerError.networkNotCalled))
                 return
             }
 
             // Ping others about the update
             documentManager.notificationDocumentUpdate(documentStruct)
-
-            if blockOperation.isCancelled {
-                completion?(.failure(DocumentManagerError.operationCancelled))
-                return
-            }
 
             completion?(.success(true))
 
@@ -239,15 +212,7 @@ extension DocumentManager {
             } else {
                 networkCompletion?(.failure(APIRequestError.notAuthenticated))
             }
-
-            Self.saveOperationsSemaphore.wait()
-            defer { Self.saveOperationsSemaphore.signal() }
-
-            guard Self.saveOperations[documentStruct.id] === blockOperation else { return }
-            Self.saveOperations.removeValue(forKey: documentStruct.id)
         }
-
-        Self.saveDocumentQueue.addOperation(blockOperation)
     }
 
     @discardableResult
