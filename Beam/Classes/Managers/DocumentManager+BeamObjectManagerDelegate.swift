@@ -252,11 +252,14 @@ extension DocumentManager: BeamObjectManagerDelegate {
         }
 
         // This method is called across threads so we need to create a local documentManager to have fetchAll be safe:
-        return try DocumentManager().fetchAll(filters: filters).map {
+        let documentManager = DocumentManager()
+        let allDocuments = try documentManager.fetchAll(filters: filters)
+        let allDocStrucs: [DocumentStruct] = allDocuments.map {
             var result = DocumentStruct(document: $0)
             result.previousChecksum = result.beamObjectPreviousChecksum
             return result
         }
+        return allDocStrucs
     }
 
     func checksumsForIds(_ ids: [UUID]) throws -> [UUID: String] {
