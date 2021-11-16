@@ -260,7 +260,8 @@ extension DocumentManager: BeamObjectManagerDelegate {
     }
 
     func checksumsForIds(_ ids: [UUID]) throws -> [UUID: String] {
-        let values: [(UUID, String)] = try fetchAllWithIds(ids).compactMap {
+        let documentManager = DocumentManager()
+        let values: [(UUID, String)] = try documentManager.fetchAllWithIds(ids).compactMap {
             var result = DocumentStruct(document: $0)
             result.previousChecksum = result.beamObjectPreviousChecksum
             guard let previousChecksum = result.previousChecksum else { return nil }
