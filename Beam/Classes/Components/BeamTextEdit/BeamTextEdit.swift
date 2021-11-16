@@ -1250,7 +1250,7 @@ public extension CALayer {
 
     @IBAction func save(_ sender: Any?) {
         Logger.shared.logInfo("Save document!", category: .noteEditor)
-        rootNode?.note?.save(documentManager: documentManager)
+        rootNode?.note?.save()
     }
 
     func showInlineFormatterOnKeyEventsAndClick(isKeyEvent: Bool = false) {

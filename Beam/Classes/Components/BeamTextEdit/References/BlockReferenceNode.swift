@@ -80,7 +80,7 @@ class BlockReferenceNode: TextNode {
             return
         }
 
-        guard let referencingNote = BeamNote.fetch(DocumentManager(), id: refNoteId),
+        guard let referencingNote = BeamNote.fetch(id: refNoteId),
               let referencingElement = referencingNote.findElement(refElementId)
         else {
             let errorText = "BlockReferenceNode unable to fetch bloc from note '\(String(describing: refNoteId))'\nid '\(String(describing: refElementId))'"

@@ -9,6 +9,7 @@ import XCTest
 
 @testable import Beam
 @testable import BeamCore
+import Atomics
 
 class PublishNoteAPITests: XCTestCase {
 
@@ -48,7 +49,7 @@ class PublishNoteAPITests: XCTestCase {
         self.testNoteDocumentStruct = helper.saveLocally(testNoteDocumentStruct!)
 
         // Consecutive saves expect both those variable to be up to date
-        testNote!.version = self.testNoteDocumentStruct.version
+        testNote!.version.store(self.testNoteDocumentStruct.version, ordering: .relaxed)
         testNote!.savedVersion = testNote!.version
     }
 
@@ -68,7 +69,6 @@ class PublishNoteAPITests: XCTestCase {
         let publish = expectation(description: "note publish")
         BeamNoteSharingUtils.makeNotePublic(note,
                                             becomePublic: true,
-                                            documentManager: helper.documentManager,
                                             completion: { result in
             switch result {
             case .success(let published):
@@ -84,7 +84,7 @@ class PublishNoteAPITests: XCTestCase {
         XCTAssertNotNil(pubLink)
 
         let unpublish = expectation(description: "note unpublish")
-        BeamNoteSharingUtils.makeNotePublic(note, becomePublic: false, documentManager: helper.documentManager, completion: { result in
+        BeamNoteSharingUtils.makeNotePublic(note, becomePublic: false, completion: { result in
             switch result {
             case .success(let published):
                 XCTAssertFalse(published)
@@ -106,7 +106,7 @@ class PublishNoteAPITests: XCTestCase {
         BeamTestsHelper.logout()
 
         let publish = expectation(description: "note publish")
-        BeamNoteSharingUtils.makeNotePublic(note, becomePublic: true, documentManager: helper.documentManager, completion: { result in
+        BeamNoteSharingUtils.makeNotePublic(note, becomePublic: true, completion: { result in
             assertIsFailure(result)
             publish.fulfill()
         })
@@ -118,7 +118,7 @@ class PublishNoteAPITests: XCTestCase {
         guard let note = testNote else { fatalError("We should have a test note in setUp") }
 
         let publish = expectation(description: "note publish")
-        BeamNoteSharingUtils.makeNotePublic(note, becomePublic: false, documentManager: helper.documentManager, completion: { result in
+        BeamNoteSharingUtils.makeNotePublic(note, becomePublic: false, completion: { result in
             assertIsFailure(result)
             publish.fulfill()
         })

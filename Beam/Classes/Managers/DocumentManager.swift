@@ -67,8 +67,22 @@ public class DocumentManager: NSObject {
 
     static var networkTasks: [UUID: (DispatchWorkItem, ((Swift.Result<Bool, Error>) -> Void)?)] = [:]
     static var networkTasksSemaphore = DispatchSemaphore(value: 1)
+    var thread: Thread
+    @discardableResult func checkThread() -> Bool {
+        let res = self.thread == Thread.current
+
+        if !res {
+            Logger.shared.logError("Using DocumentManager instance outside its origin thread", category: .document)
+        }
+        #if DEBUG
+        assert(res)
+        #endif
+
+        return res
+    }
 
     init(coreDataManager: CoreDataManager? = nil) {
+        self.thread = Thread.current
         self.coreDataManager = coreDataManager ?? CoreDataManager.shared
         context = Thread.isMainThread ? self.coreDataManager.mainContext : self.coreDataManager.persistentContainer.newBackgroundContext()
         saveDocumentQueue.maxConcurrentOperationCount = 1
@@ -104,6 +118,7 @@ public class DocumentManager: NSObject {
     }
 
     private func printObjectsFromNotification(_ notification: Notification, _ keyPath: String) {
+        checkThread()
         if let objects = notification.userInfo?[keyPath] as? Set<NSManagedObject>, !objects.isEmpty {
             let titles = objects.compactMap { object -> String? in
                 guard let document = object as? Document else { return nil }
@@ -119,6 +134,7 @@ public class DocumentManager: NSObject {
     }
 
     func printObjects(_ notification: Notification) {
+        checkThread()
         printObjectsFromNotification(notification, NSInsertedObjectsKey)
         printObjectsFromNotification(notification, NSUpdatedObjectsKey)
         printObjectsFromNotification(notification, NSDeletedObjectsKey)
@@ -132,11 +148,13 @@ public class DocumentManager: NSObject {
 
     // MARK: CoreData Load
     func loadById(id: UUID) -> DocumentStruct? {
+        checkThread()
         guard let document = try? self.fetchWithId(id) else { return nil }
         return parseDocumentBody(document)
     }
 
     func fetchOrCreate(title: String) -> DocumentStruct? {
+        checkThread()
         do {
             let document = try fetchOrCreateWithTitle(title)
             return parseDocumentBody(document)
@@ -147,20 +165,24 @@ public class DocumentManager: NSObject {
     }
 
     func allDocumentsTitles(includeDeletedNotes: Bool) -> [String] {
+        checkThread()
         return fetchAllNames(filters: includeDeletedNotes ? [.includeDeleted] : [])
     }
 
     func allDocumentsIds(includeDeletedNotes: Bool) -> [UUID] {
+        checkThread()
         let result = (try? fetchAll(filters: includeDeletedNotes ? [.includeDeleted] : [])) ?? []
         return result.map { $0.id }
     }
 
     func loadDocByTitleInBg(title: String) -> DocumentStruct? {
+        checkThread()
         guard let document = try? fetchWithTitle(title) else { return nil }
         return parseDocumentBody(document)
     }
 
     func loadDocumentByTitle(title: String) -> DocumentStruct? {
+        checkThread()
         guard let document = try? fetchWithTitle(title) else { return nil }
 
         return parseDocumentBody(document)
@@ -184,11 +206,13 @@ public class DocumentManager: NSObject {
     }
 
     func loadDocumentById(id: UUID) -> DocumentStruct? {
+        checkThread()
         guard let document = try? fetchWithId(id) else { return nil }
         return parseDocumentBody(document)
     }
 
     func loadDocumentsById(ids: [UUID]) -> [DocumentStruct] {
+        checkThread()
         do {
             return try fetchAllWithIds(ids).compactMap {
                 parseDocumentBody($0)
@@ -197,11 +221,13 @@ public class DocumentManager: NSObject {
     }
 
     func loadDocumentWithJournalDate(_ date: String) -> DocumentStruct? {
+        checkThread()
         guard let document = fetchWithJournalDate(date) else { return nil }
         return parseDocumentBody(document)
     }
 
     func loadDocumentsWithType(type: DocumentType, _ limit: Int, _ fetchOffset: Int) -> [DocumentStruct] {
+        checkThread()
         do {
             return try fetchWithTypeAndLimit(type,
                                              limit,
@@ -212,6 +238,7 @@ public class DocumentManager: NSObject {
     }
 
     func documentsWithTitleMatch(title: String) -> [DocumentStruct] {
+        checkThread()
         do {
             return try fetchAllWithTitleMatch(title: title, limit: 0)
                 .compactMap { document -> DocumentStruct? in
@@ -251,6 +278,7 @@ public class DocumentManager: NSObject {
     }
 
     func documentsWithLimitTitleMatch(title: String, limit: Int = 4) -> [DocumentStruct] {
+        checkThread()
         do {
             return try fetchAllWithTitleMatch(title: title, limit: limit)
                 .compactMap { document -> DocumentStruct? in
@@ -260,6 +288,7 @@ public class DocumentManager: NSObject {
     }
 
     func loadAllWithLimit(_ limit: Int = 4, sortingKey: SortingKey? = nil) -> [DocumentStruct] {
+        checkThread()
         do {
             return try fetchAll(filters: [.limit(limit)], sortingKey: sortingKey).compactMap { document -> DocumentStruct? in
             parseDocumentBody(document)
@@ -268,6 +297,7 @@ public class DocumentManager: NSObject {
     }
 
     func loadAll() -> [DocumentStruct] {
+        checkThread()
         do {
             return try fetchAll().compactMap { document in
             parseDocumentBody(document)
@@ -295,6 +325,7 @@ public class DocumentManager: NSObject {
 
     /// Update local coredata instance with data we fetched remotely, we detected the need for a merge between both versions
     private func mergeWithLocalChanges(_ document: Document, _ input2: Data) -> Bool {
+        checkThread()
         guard let beam_api_data = document.beam_api_data,
               let input1 = document.data else {
             return false
@@ -326,6 +357,7 @@ public class DocumentManager: NSObject {
     }
 
     func mergeDocumentWithNewData(_ document: Document, _ documentStruct: DocumentStruct) -> Bool {
+        checkThread()
         guard mergeWithLocalChanges(document, documentStruct.data) else {
             // Local version could not be merged with remote version
             Logger.shared.logWarning("Document has local change but could not merge", category: .documentMerge)
@@ -343,7 +375,7 @@ public class DocumentManager: NSObject {
         // Server side doesn't store milliseconds for updatedAt and createdAt.
         // Local coredata does, rounding using Int() to compare them
 
-        return document.updated_at.intValue == documentStruct.updatedAt.intValue &&
+        document.updated_at.intValue == documentStruct.updatedAt.intValue &&
             document.created_at.intValue == documentStruct.createdAt.intValue &&
             document.title == documentStruct.title &&
             document.data == documentStruct.data &&
@@ -374,6 +406,7 @@ public class DocumentManager: NSObject {
     // MARK: NSManagedObjectContext saves
     @discardableResult
     func saveContext(file: StaticString = #file, line: UInt = #line) throws -> Bool {
+        checkThread()
         Logger.shared.logDebug("DocumentManager.saveContext called from \(file):\(line). \(context.hasChanges ? "changed" : "unchanged")", category: .document)
 
         guard context.hasChanges else {
@@ -442,6 +475,7 @@ public class DocumentManager: NSObject {
 
     // MARK: Validations
     internal func checkValidations(_ document: Document) throws {
+        checkThread()
         guard document.deleted_at == nil else { return }
 
         Logger.shared.logDebug("checkValidations for \(document.titleAndId)", category: .documentDebug)
@@ -451,6 +485,7 @@ public class DocumentManager: NSObject {
     }
 
     private func checkJournalDay(_ document: Document) throws {
+        checkThread()
         guard document.documentType == .journal else { return }
         guard String(document.journal_day).count != 8 else { return }
 
@@ -464,6 +499,7 @@ public class DocumentManager: NSObject {
     }
 
     private func checkDuplicateJournalDates(_ document: Document) throws {
+        checkThread()
         guard document.documentType == .journal else { return }
         guard String(document.journal_day).count == 8 else { return }
 
@@ -483,6 +519,7 @@ public class DocumentManager: NSObject {
     }
 
     private func checkDuplicateTitles(_ document: Document) throws {
+        checkThread()
         let documents = (try? fetchAll(filters: [.title(document.title), .notId(document.id), .nonDeleted, .databaseId(document.database_id)]).map { DocumentStruct(document: $0) }) ?? []
 
         if !documents.isEmpty {
@@ -500,6 +537,7 @@ public class DocumentManager: NSObject {
     }
 
     internal func checkVersion(_ document: Document, _ newVersion: Int64) throws {
+        checkThread()
         // If document is deleted, we don't need to check version uniqueness
         guard document.deleted_at == nil else { return }
 
@@ -545,6 +583,7 @@ public class DocumentManager: NSObject {
     func saveAndThrottle(_ documentStruct: DocumentStruct,
                          _ delay: Double = 1.0,
                          _ networkCompletion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
+        checkThread()
         let document_id = documentStruct.id
 
         // This is not using `cancelPreviousThrottledAPICall` as we want to:
@@ -702,6 +741,7 @@ extension DocumentManager {
 // For tests
 extension DocumentManager {
     func create(title: String) -> DocumentStruct? {
+        checkThread()
         var result: DocumentStruct?
 
         do {
@@ -811,6 +851,7 @@ extension DocumentManager {
     /// Slower than `deleteBatchWithPredicate` but I can't get `deleteBatchWithPredicate`
     /// to properly propagate changes to other contexts :(
     func deleteAll(databaseId: UUID?) throws {
+        checkThread()
         do {
             let filters: [DocumentFilter] = {
                 if let databaseId = databaseId {
@@ -832,6 +873,7 @@ extension DocumentManager {
     }
 
     func create(id: UUID, title: String? = nil) throws -> Document {
+        checkThread()
         let document = Document(context: context)
         document.id = id
         document.database_id = DatabaseManager.defaultDatabase.id
@@ -848,6 +890,7 @@ extension DocumentManager {
     }
 
     func count(filters: [DocumentFilter] = []) -> Int {
+        checkThread()
         // Fetch existing if any
         let fetchRequest = DocumentManager.fetchRequest(filters: filters, sortingKey: nil)
 
@@ -889,11 +932,13 @@ extension DocumentManager {
 
     func fetchFirst(filters: [DocumentFilter] = [],
                     sortingKey: SortingKey? = nil) throws -> Document? {
+        checkThread()
         return try fetchAll(filters: [.limit(1)] + filters,
                             sortingKey: sortingKey).first
     }
 
     func fetchAll(filters: [DocumentFilter] = [], sortingKey: SortingKey? = nil) throws -> [Document] {
+        checkThread()
         let fetchRequest = DocumentManager.fetchRequest(filters: filters, sortingKey: sortingKey)
 
         let fetchedDocuments = try context.fetch(fetchRequest)
@@ -901,6 +946,7 @@ extension DocumentManager {
     }
 
     func fetchAllNames(filters: [DocumentFilter], sortingKey: SortingKey? = nil) -> [String] {
+        checkThread()
         let fetchRequest = DocumentManager.fetchRequest(filters: filters, sortingKey: sortingKey)
         fetchRequest.propertiesToFetch = ["title"]
 
@@ -916,27 +962,33 @@ extension DocumentManager {
     }
 
     func fetchAllWithIds(_ ids: [UUID]) throws -> [Document] {
-        try fetchAll(filters: [.nonDeleted, .ids(ids)])
+        checkThread()
+        return try fetchAll(filters: [.nonDeleted, .ids(ids)])
     }
 
     func fetchWithId(_ id: UUID) throws -> Document? {
-        try fetchFirst(filters: [.id(id), .includeDeleted, .allDatabases])
+        checkThread()
+        return try fetchFirst(filters: [.id(id), .includeDeleted, .allDatabases])
     }
 
     func fetchOrCreateWithId(_ id: UUID) throws -> Document {
+        checkThread()
         let document = try ((try? fetchWithId(id)) ?? (try create(id: id)))
         return document
     }
 
     func fetchWithTitle(_ title: String) throws -> Document? {
+        checkThread()
         return try fetchFirst(filters: [.title(title)], sortingKey: .title(true))
     }
 
     func fetchOrCreateWithTitle(_ title: String) throws -> Document {
-        try ((try? fetchFirst(filters: [.title(title)])) ?? (try create(id: UUID(), title: title)))
+        checkThread()
+        return try ((try? fetchFirst(filters: [.title(title)])) ?? (try create(id: UUID(), title: title)))
     }
 
     func fetchWithJournalDate(_ date: String) -> Document? {
+        checkThread()
         let date = JournalDateConverter.toInt(from: date)
         return try? fetchFirst(filters: [.journalDate(date)])
     }
@@ -944,6 +996,7 @@ extension DocumentManager {
     func fetchWithTypeAndLimit(_ type: DocumentType,
                                _ limit: Int,
                                _ fetchOffset: Int) throws -> [Document] {
+        checkThread()
 
         let today = BeamNoteType.titleForDate(BeamDate.now)
         let todayInt = JournalDateConverter.toInt(from: today)
@@ -953,6 +1006,7 @@ extension DocumentManager {
 
     func fetchAllWithTitleMatch(title: String,
                                 limit: Int) throws -> [Document] {
+        checkThread()
         return try fetchAll(filters: [.titleMatch(title), .limit(limit)],
                             sortingKey: .title(true))
     }

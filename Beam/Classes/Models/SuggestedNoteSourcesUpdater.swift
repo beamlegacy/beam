@@ -15,14 +15,12 @@ public class SuggestedNoteSourceUpdater {
     var oldActiveSources = [UUID: [UUID]]() // Per note, all of its active sources (if any)
     // TODO: When uploading active sources from database, make sure to initialise  the updater with it
     private var sessionId: UUID
-    private var documentManager: DocumentManager
     private let myQueue = DispatchQueue(label: "sourceSuggestionQueue")
     let frecencyFetcher = GRDBUrlFrecencyStorage()
     let LongTermUrlScoreStoreProtocol = LongTermUrlScoreStore.shared
 
-    init(sessionId: UUID, documentManager: DocumentManager) {
+    init(sessionId: UUID) {
         self.sessionId = sessionId
-        self.documentManager = documentManager
     }
 
     /// Given a grouping of notes (list of lists of UUIDs), create a dictionary that helps find the integer
@@ -131,7 +129,7 @@ public class SuggestedNoteSourceUpdater {
         let allNotes = Array(Set(sourcesToRemove.keys).union(Set(sourcesToAdd.keys)))
         for noteId in allNotes {
             DispatchQueue.main.async {
-                if let note = BeamNote.fetch(self.documentManager, id: noteId) {
+                if let note = BeamNote.fetch(id: noteId) {
                     if let addPagesToNote = sourcesToAdd[noteId] {
                         note.sources.refreshScores {
                             for pageId in addPagesToNote {

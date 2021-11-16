@@ -408,16 +408,16 @@ extension PointAndShootCardPicker {
     // MARK: - fetchOrCreateNote
     @discardableResult
     private func fetchOrCreateNote(named name: String) -> BeamNote {
-        let note = BeamNote.fetchOrCreate(data.documentManager, title: name)
-        note.save(documentManager: data.documentManager)
+        let note = BeamNote.fetchOrCreate(title: name)
+        note.save()
         return note
     }
 
     // MARK: - fetchOrCreateJournalNote
     @discardableResult
     private func fetchOrCreateJournalNote(date: Date) -> BeamNote {
-        let note = BeamNote.fetchOrCreateJournalNote(data.documentManager, date: date)
-        note.save(documentManager: data.documentManager)
+        let note = BeamNote.fetchOrCreateJournalNote(date: date)
+        note.save()
         return note
     }
 }
