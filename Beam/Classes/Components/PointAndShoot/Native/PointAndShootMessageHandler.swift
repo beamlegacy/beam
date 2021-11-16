@@ -90,13 +90,13 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
 
     func pointBoundsToTargets(_ bounds: [String: AnyObject], _ webPage: WebPage, _ href: String, animated: Bool) -> PointAndShoot.Target? {
         guard let pointAndShoot = webPage.pointAndShoot,
-              let html = bounds["html"] as? String,
               let id = bounds["id"] as? String else {
             Logger.shared.logDebug("Bounds payload can't be unwrapped")
             return nil
         }
 
         let rectObject = bounds["rect"] as AnyObject
+        let html = bounds["html"] as? String ?? ""
         let rect = jsToRect(jsArea: rectObject)
         return pointAndShoot.createTarget(id, rect, html, href, animated)
     }
