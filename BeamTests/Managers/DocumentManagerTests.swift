@@ -18,7 +18,6 @@ class DocumentManagerTests: QuickSpec {
     override func spec() {
         var sut: DocumentManager!
         var helper: DocumentManagerTestsHelper!
-        let mainContext = CoreDataManager.shared.mainContext
 
         beforeEach {
             sut = DocumentManager()

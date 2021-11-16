@@ -31,12 +31,14 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
             BeamObjectManager.unregisterAll()
             sut.registerOnBeamObjectManager()
 
+//            beamObjectHelper.deleteAll()
             MyRemoteObjectManager.store.removeAll()
 
             try? EncryptionManager.shared.replacePrivateKey(Configuration.testPrivateKey)
         }
 
         afterEach {
+            BeamObjectManager.clearNetworkCalls()
             beamHelper.endNetworkRecording()
 
             BeamDate.reset()
@@ -717,7 +719,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     object1.previousChecksum = "00a3c318664ebae8b2239cd2be6dae3f546feb789cb005fa9f31512709f2fb00"
                     object1.title = newTitle1
                     object1.updatedAt = BeamDate.now
-                    MyRemoteObjectManager.store["195d94e1-e0df-4eca-93e6-8778984bcd58".uuid!] = object1
+                    MyRemoteObjectManager.store[object1.beamObjectId] = object1
                 }
 
                 context("with replace policy") {
@@ -830,7 +832,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                             waitUntil(timeout: .seconds(10)) { done in
                                 do {
-                                    _ = try sut.saveAllOnBeamObjectApi() { result in
+                                    _ = try sut.saveAllOnBeamObjectApi { result in
                                         expect { try result.get() }.toNot(throwError())
 
                                         done()
@@ -966,8 +968,8 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     object1.updatedAt = BeamDate.now
                     object2.updatedAt = BeamDate.now
 
-                    MyRemoteObjectManager.store["195d94e1-e0df-4eca-93e6-8778984bcd58".uuid!] = object1
-                    MyRemoteObjectManager.store["295d94e1-e0df-4eca-93e6-8778984bcd58".uuid!] = object2
+                    MyRemoteObjectManager.store[object1.beamObjectId] = object1
+                    MyRemoteObjectManager.store[object2.beamObjectId] = object2
                 }
 
                 context("with replace policy") {
@@ -1237,9 +1239,9 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     object2.updatedAt = BeamDate.now
                     object3.updatedAt = BeamDate.now
 
-                    MyRemoteObjectManager.store["195d94e1-e0df-4eca-93e6-8778984bcd58".uuid!] = object1
-                    MyRemoteObjectManager.store["295d94e1-e0df-4eca-93e6-8778984bcd58".uuid!] = object2
-                    MyRemoteObjectManager.store["395d94e1-e0df-4eca-93e6-8778984bcd58".uuid!] = object3
+                    MyRemoteObjectManager.store[object1.beamObjectId] = object1
+                    MyRemoteObjectManager.store[object2.beamObjectId] = object2
+                    MyRemoteObjectManager.store[object3.beamObjectId] = object3
                 }
 
                 context("with replace policy") {
@@ -2007,8 +2009,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     BeamDate.travel(2)
 
                     // Create 1 conflicted object
-                    object1.previousChecksum = "00a3c318664ebae8b2239cd2be6dae3f546feb789cb005fa9f31512709f2fb00"
-
+                    MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum = "00a3c318664ebae8b2239cd2be6dae3f546feb789cb005fa9f31512709f2fb00"
                     object1.title = newTitle1
                     object1.updatedAt = BeamDate.now
                 }
@@ -2365,8 +2366,8 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     // Create 2 conflicted objects
                     BeamDate.travel(2)
 
-                    object1.previousChecksum = "00a3c318664ebae8b2239cd2be6dae3f546feb789cb005fa9f31512709f2fb00"
-                    object2.previousChecksum = "11a3c318664ebae8b2239cd2be6dae3f546feb789cb005fa9f31512709f2fb11"
+                    MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum = "00a3c318664ebae8b2239cd2be6dae3f546feb789cb005fa9f31512709f2fb00"
+                    MyRemoteObjectManager.store[object2.beamObjectId]?.previousChecksum = "11a3c318664ebae8b2239cd2be6dae3f546feb789cb005fa9f31512709f2fb11"
 
                     object1.title = newTitle1
                     object2.title = newTitle2
@@ -2772,9 +2773,9 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                     BeamDate.travel(2)
 
-                    object1.previousChecksum = "11a3c318664ebae8b2239cd2be6dae3f546feb789cb005fa9f31512709f2fb00"
-                    object2.previousChecksum = "22a3c318664ebae8b2239cd2be6dae3f546feb789cb005fa9f31512709f2fb00"
-                    object3.previousChecksum = "33a3c318664ebae8b2239cd2be6dae3f546feb789cb005fa9f31512709f2fb00"
+                    MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum = "11a3c318664ebae8b2239cd2be6dae3f546feb789cb005fa9f31512709f2fb00"
+                    MyRemoteObjectManager.store[object2.beamObjectId]?.previousChecksum = "22a3c318664ebae8b2239cd2be6dae3f546feb789cb005fa9f31512709f2fb00"
+                    MyRemoteObjectManager.store[object3.beamObjectId]?.previousChecksum = "33a3c318664ebae8b2239cd2be6dae3f546feb789cb005fa9f31512709f2fb00"
 
                     object1.title = newTitle1
                     object2.title = newTitle2
@@ -3011,10 +3012,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
 
                         it("stores all objects previousChecksum with merged content") {
-                            expect(MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum) == previousChecksum1
-                            expect(MyRemoteObjectManager.store[object2.beamObjectId]?.previousChecksum) == previousChecksum2
-                            expect(MyRemoteObjectManager.store[object3.beamObjectId]?.previousChecksum) == previousChecksum3
-
                             object1.title = newTitle1
                             object2.title = newTitle2
                             object3.title = newTitle3
@@ -3099,10 +3096,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
 
                         it("stores all objects previousChecksum with merged content") {
-                            expect(MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum) == previousChecksum1
-                            expect(MyRemoteObjectManager.store[object2.beamObjectId]?.previousChecksum) == previousChecksum2
-                            expect(MyRemoteObjectManager.store[object3.beamObjectId]?.previousChecksum) == previousChecksum3
-
                             object1.title = newTitle1
                             object2.title = newTitle2
                             object3.title = newTitle3
@@ -3185,10 +3178,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
 
                         it("stores all objects previousChecksum with merged content") {
-                            expect(MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum) == previousChecksum1
-                            expect(MyRemoteObjectManager.store[object2.beamObjectId]?.previousChecksum) == previousChecksum2
-                            expect(MyRemoteObjectManager.store[object3.beamObjectId]?.previousChecksum) == previousChecksum3
-
                             object1.title = newTitle1
                             object2.title = newTitle2
                             object3.title = newTitle3
@@ -3371,7 +3360,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                 context("when we send a previousChecksum") {
                     beforeEach {
-                        object.previousChecksum = try? "foobar".SHA256()
+                        MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum = try? "foobar".SHA256()
                     }
                     context("Foundation") {
                         it("saves new object") {
@@ -3400,8 +3389,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
 
                         it("stores previousChecksum") {
-                            expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum).to(beNil())
-
                             waitUntil(timeout: .seconds(10)) { done in
                                 do {
                                     _ = try sut.saveOnBeamObjectsAPI(Array(MyRemoteObjectManager.store.values)) { result in
@@ -3442,8 +3429,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
 
                         it("stores previousChecksum") {
-                            expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum).to(beNil())
-
                             let promise: PromiseKit.Promise<MyRemoteObject> = sut.saveOnBeamObjectAPI(object)
                             waitUntil(timeout: .seconds(10)) { done in
                                 promise.done { remoteObject in
@@ -3482,8 +3467,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
 
                         it("stores previousChecksum") {
-                            expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum).to(beNil())
-
                             let promise: Promises.Promise<MyRemoteObject> = sut.saveOnBeamObjectAPI(object)
                             waitUntil(timeout: .seconds(10)) { done in
                                 promise.then { remoteObject in
@@ -3557,7 +3540,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         BeamDate.travel(2)
 
                         // Create 1 conflicted object
-                        object.previousChecksum = "00a3c318664ebae8b2239cd2be6dae3f546feb789cb005fa9f31512709f2fb00"
+                        MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum = "00a3c318664ebae8b2239cd2be6dae3f546feb789cb005fa9f31512709f2fb00"
                         object.updatedAt = BeamDate.now
                     }
 
@@ -3594,8 +3577,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             }
 
                             it("stores previousChecksum with overwritten content") {
-                                expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum) == previousChecksum
-
                                 object.title = newTitle
 
                                 waitUntil(timeout: .seconds(10)) { done in
@@ -3643,8 +3624,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             }
 
                             it("stores previousChecksum with overwritten content") {
-                                expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum) == previousChecksum
-
                                 object.title = newTitle
 
                                 let promise: PromiseKit.Promise<MyRemoteObject> = sut.saveOnBeamObjectAPI(object)
@@ -3690,8 +3669,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             }
 
                             it("stores previousChecksum with overwritten content") {
-                                expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum) == previousChecksum
-
                                 object.title = newTitle
 
                                 let promise: Promises.Promise<MyRemoteObject> = sut.saveOnBeamObjectAPI(object)
@@ -3753,8 +3730,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             }
 
                             it("stores previousChecksum based on merged content") {
-                                expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum) == previousChecksum
-
                                 object.title = newTitle
 
                                 waitUntil(timeout: .seconds(10)) { done in
@@ -3810,8 +3785,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             }
 
                             it("stores previousChecksum based on merged content") {
-                                expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum) == previousChecksum
-
                                 object.title = newTitle
 
                                 let promise: PromiseKit.Promise<MyRemoteObject> = sut.saveOnBeamObjectAPI(object)
@@ -3865,8 +3838,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             }
 
                             it("stores previousChecksum based on merged content") {
-                                expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum) == previousChecksum
-
                                 object.title = newTitle
 
                                 let promise: Promises.Promise<MyRemoteObject> = sut.saveOnBeamObjectAPI(object)
