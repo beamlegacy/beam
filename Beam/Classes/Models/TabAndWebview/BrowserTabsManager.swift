@@ -39,30 +39,37 @@ class BrowserTabsManager: ObservableObject {
         }
     }
 
-    private var tabsGroup: [Int: [UUID]] = [:]
+    private var tabsGroup: [UUID: [UUID]] = [:]
 
     private var currentTabGroupValue: [UUID]? {
-        guard let groupKey = tabsGroup.first(where: { $1.contains(where: { $0 == currentTab?.id }) })?.key else { return nil }
-        return tabsGroup[groupKey]
-    }
-
-    private var currentTabGroupKey: Int? {
-        tabsGroup.first(where: { $1.contains(where: { $0 == currentTab?.id }) })?.key
-    }
-
-    public func createNewGroup(for tabId: UUID) {
-        var newGroupNbr = 0
-        if let lastGroupNbr = Array(tabsGroup.keys).last {
-            newGroupNbr = lastGroupNbr + 1
+        guard let currentTabId = self.currentTab?.id, tabsGroup[currentTabId] != nil else {
+            return tabsGroup.first(where: { $1.contains(where: { $0 == currentTab?.id }) })?.value
         }
-        tabsGroup[newGroupNbr] = [tabId]
+        return tabsGroup[currentTabId]
+    }
+
+    public var currentTabGroupKey: UUID? {
+        guard let currentTabId = self.currentTab?.id, tabsGroup[currentTabId] != nil else {
+            return tabsGroup.first(where: { $1.contains(where: { $0 == currentTab?.id }) })?.key
+        }
+        return currentTabId
+    }
+
+    public func createNewGroup(for tabId: UUID, with tabs: [UUID] = []) {
+        tabsGroup[tabId] = tabs
     }
 
     public func removeTabFromGroup(tabId: UUID) {
         guard let groupKey = currentTabGroupKey else { return }
-        tabsGroup[groupKey]?.removeAll(where: {$0 == tabId})
-        if let group = tabsGroup[groupKey], group.isEmpty {
-            tabsGroup.removeValue(forKey: groupKey)
+        if tabId == groupKey {
+            guard var group = tabsGroup.removeValue(forKey: groupKey), !group.isEmpty else { return }
+            let firstTab = group.removeFirst()
+            tabsGroup[firstTab] = group
+        } else {
+            tabsGroup[groupKey]?.removeAll(where: {$0 == tabId})
+            if let group = tabsGroup[groupKey], group.isEmpty {
+                tabsGroup.removeValue(forKey: groupKey)
+            }
         }
     }
 
@@ -203,16 +210,26 @@ extension BrowserTabsManager {
         }
     }
 
-    // This is now the only entry point to add a tab
-    func addNewTabAndGroup(_ tab: BrowserTab, setCurrent: Bool = true, withURL url: URL? = nil) {
-        if let index = tabs.firstIndex(where: {$0.id == currentTabGroupValue?.last}) {
-            addNewTab(tab, setCurrent: setCurrent, withURL: url, at: index + 1)
+    private var indexForNewTabInGroup: Int? {
+        guard let currentTabGroupValue = currentTabGroupValue,
+              let currentTabIndex = tabs.firstIndex(where: {$0.id == currentTab?.id}) else { return nil }
+        if let lastTabIndex = tabs.firstIndex(where: {$0.id == currentTabGroupValue.last}), lastTabIndex > currentTabIndex {
+            return lastTabIndex + 1
         } else {
-            addNewTab(tab, setCurrent: setCurrent, withURL: url)
+            return currentTabIndex + 1
+        }
+    }
+
+    // This is now the only entry point to add a tab
+    func addNewTabAndGroup(_ tab: BrowserTab, setCurrent: Bool = true, withURL url: URL? = nil, at tabIndex: Int? = nil) {
+        if tabIndex == nil {
+            addNewTab(tab, setCurrent: setCurrent, withURL: url, at: indexForNewTabInGroup)
+        } else {
+            addNewTab(tab, setCurrent: setCurrent, withURL: url, at: tabIndex)
         }
 
         guard !tab.isPinned else { return }
-        if let currentTabGroupKey = currentTabGroupKey, url != nil {
+        if let currentTabGroupKey = currentTabGroupKey, (url != nil || tab.preloadUrl != nil) {
             tabsGroup[currentTabGroupKey]?.append(tab.id)
         } else {
             createNewGroup(for: tab.id)
