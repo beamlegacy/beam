@@ -7,6 +7,7 @@ import type {
   FrameInfo
 } from "../../../Helpers/Utils/Web/BeamTypes"
 import type {WebPositionsUI as WebPositionsUI} from "./WebPositionsUI"
+import debounce from "debounce"
 
 export class WebPositions<UI extends WebPositionsUI> {
   win: BeamWindow
@@ -116,6 +117,8 @@ export class WebPositions<UI extends WebPositionsUI> {
       y: this.win.scrollY
     }
     this.ui.setScrollInfo(scrollInfo)
+    const immediate = true
+    debounce(this.sendFramesInfo, 200, immediate)
   }
 
   onResize(_ev): void {

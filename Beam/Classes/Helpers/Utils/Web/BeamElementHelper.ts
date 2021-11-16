@@ -7,6 +7,7 @@ import {
   BeamWindow
 } from "./BeamTypes"
 import {BeamRectHelper} from "./BeamRectHelper"
+import { BeamEmbedHelper } from "./BeamEmbedHelper"
 
 /**
  * Useful methods for HTML Elements
@@ -85,10 +86,10 @@ export class BeamElementHelper {
   }
 
   static parseElementBasedOnStyles(element: BeamElement, win: BeamWindow<any>): BeamHTMLElement {
-    const imgUrl = this.getBackgroundImageURL(element, win)
-    if (imgUrl) {
+    const backgroundImageURL = this.getBackgroundImageURL(element, win)
+    if (backgroundImageURL) {
       const img = win.document.createElement("img")
-      img.setAttribute("src", imgUrl)
+      img.setAttribute("src", backgroundImageURL)
       return img
     } else {
       return element as BeamHTMLElement
@@ -139,6 +140,19 @@ export class BeamElementHelper {
       }
     }
     return visible
+  }
+
+  /**
+   * Returns true if element is Embed. Shorthand for calling `BeamEmbedHelper.isEmbed`
+   *
+   * @static
+   * @param {BeamElement} element
+   * @param {BeamWindow} win
+   * @return {*}  {boolean}
+   * @memberof BeamElementHelper
+   */
+  static isEmbed(element: BeamElement, win: BeamWindow): boolean {
+    return BeamEmbedHelper.isEmbed(element, win)
   }
 
   /**

@@ -17,7 +17,7 @@ export class BeamElementMock extends BeamNodeMock implements BeamElement, BeamEl
   offsetParent: BeamElement
   scrollLeft = 0
   scrollTop = 0
-
+  href: string
   scrollHeight: number
   scrollWidth: number
 

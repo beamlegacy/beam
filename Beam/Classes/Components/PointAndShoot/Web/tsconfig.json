@@ -1,5 +1,5 @@
 {
-  "include": ["**/*", ".prettierrc.js", "../../../Models/WebPositions/Web/WebPositions.ts", "../../../Models/WebPositions/Web/Test/WebPositionsUIMock.ts"],
+  "include": ["**/*", ".prettierrc.js"],
   "compilerOptions": {
     "target": "ES2018",
     "types": ["jest", "node"],
