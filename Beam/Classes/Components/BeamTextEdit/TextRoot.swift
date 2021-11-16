@@ -269,7 +269,7 @@ public class TextRoot: ElementNode {
     private var breadCrumbs: [BeamNoteReference: ReferencingBreadCrumb] = [:]
     func getBreadCrumb(for noteReference: BeamNoteReference) -> BreadCrumb? {
         guard let breadCrumb = breadCrumbs[noteReference]?.breadCrumb else {
-            guard let referencingNote = BeamNote.fetch(DocumentManager(), id: noteReference.noteID) else { return nil }
+            guard let referencingNote = BeamNote.fetch(id: noteReference.noteID) else { return nil }
             guard let referencingElement = referencingNote.findElement(noteReference.elementID) else { return nil }
             let breadCrumb = BreadCrumb(parent: self, sourceNote: referencingNote, element: referencingElement, availableWidth: availableWidth - childInset)
             breadCrumbs[noteReference] = ReferencingBreadCrumb(breadCrumb: breadCrumb, note: referencingNote)

@@ -39,16 +39,27 @@ struct CalendarView: View {
             VStack(alignment: .leading) {
                 ForEach(viewModel.meetings) { meeting in
                     if isHoveringConnect {
-                        CalendarIemView(time: meeting.startTime, title: meeting.name, onClick: {
+                        CalendarIemView(allDayEvent: meeting.allDayEvent, time: meeting.startTime,
+                                        meetingLink: meeting.meetingLink, title: meeting.name, onClick: {
                             prompt(meeting)
-                        })
+                        }).transition(AnyTransition.asymmetric(
+                                insertion: AnyTransition.move(edge: .leading).animation(BeamAnimation.spring(stiffness: 400, damping: 20).delay(0.10)) .combined(with: .opacity.animation(.easeInOut(duration: 0.15).delay(0.10))),
+                                removal: AnyTransition.move(edge: .leading).animation(BeamAnimation.spring(stiffness: 400, damping: 35)).combined(with: .opacity.animation(.easeInOut(duration: 0.15)))
+                            ))
                     } else {
-                        CalendarItemHiddenView(itemStr: meeting.name)
+                        CalendarItemHiddenView(meetingDuration: meeting.duration)
+                            .frame(minHeight: 16, maxHeight: 16)
+                            .padding(.top, 4)
+                            .transition(AnyTransition.asymmetric(
+                                insertion: AnyTransition.scale(scale: 1.5, anchor: .leading).animation(BeamAnimation.spring(stiffness: 400, damping: 25).delay(0.15)).combined(with: .opacity.animation(.easeInOut(duration: 0.15).delay(0.15))),
+                                removal: AnyTransition.scale(scale: 0.1, anchor: .leading).animation(BeamAnimation.spring(stiffness: 400, damping: 25)).combined(with: .opacity.animation(.easeInOut(duration: 0.15)))))
                     }
                 }
+            }.onHover { isHovering in
+                withAnimation {
+                    isHoveringConnect = isHovering
+                }
             }
-                .onHover { isHoveringConnect = $0 }
-                .animation(.easeInOut(duration: 0.3))
         } else {
             isNotConnectedView
                 .padding(.leading, 14)
@@ -63,32 +74,24 @@ struct CalendarView: View {
     private var isNotConnectedView: some View {
         HStack(spacing: 5) {
             VStack {
-                Image("status-connection_issue")
+                Image("editor-calendar")
                     .renderingMode(.template)
                     .resizable()
                     .frame(width: 16, height: 16)
-                    .foregroundColor(BeamColor.Shiraz.swiftUI)
+                    .foregroundColor(BeamColor.LightStoneGray.swiftUI)
                 Spacer()
             }.frame(width: 21)
             if isHoveringNotConnect {
-                VStack {
-                    HStack {
-                        Text("Permissions Access")
-                            .font(BeamFont.medium(size: 12).swiftUI)
-                            .foregroundColor(BeamColor.Shiraz.swiftUI)
-                        Image("editor-calendar_arrow")
-                            .renderingMode(.template)
-                            .resizable()
-                            .frame(width: 10, height: 10)
-                            .foregroundColor(BeamColor.Shiraz.swiftUI)
-                    }
-                    Text("You need to give Beam access to your Google Calendar & Contacts from Beam’s Account Preferences")
-                        .lineLimit(8)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .multilineTextAlignment(.leading)
+                VStack(alignment: .leading, spacing: 4.5) {
+                    Text("Connect your Calendar")
                         .font(BeamFont.medium(size: 12).swiftUI)
                         .foregroundColor(BeamColor.LightStoneGray.swiftUI)
-                        .frame(width: 130)
+                    Text("Write a meeting note or join a video call")
+                        .lineLimit(3)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .multilineTextAlignment(.leading)
+                        .font(BeamFont.regular(size: 11).swiftUI)
+                        .foregroundColor(BeamColor.LightStoneGray.swiftUI)
                     Spacer()
                 }
             }
@@ -109,11 +112,10 @@ struct CalendarView: View {
     }
 
     private func addMeeting(_ meeting: Meeting, to note: BeamNote) {
-        guard let documentManager = AppDelegate.main.window?.state.data.documentManager else { return }
         var text = BeamText(text: "")
         var meetingAttributes: [BeamText.Attribute] = []
         if meeting.linkCards {
-            let meetingNote = BeamNote.fetchOrCreate(documentManager, title: meeting.name)
+            let meetingNote = BeamNote.fetchOrCreate(title: meeting.name)
             meetingAttributes = [.internalLink(meetingNote.id)]
         }
         text.insert(meeting.name, at: 0, withAttributes: meetingAttributes)
@@ -124,7 +126,7 @@ struct CalendarView: View {
             text.insert(prefix, at: 0, withAttributes: [])
             meeting.attendees.enumerated().forEach { index, attendee in
                 let name = attendee.name
-                let attendeeNote = BeamNote.fetchOrCreate(documentManager, title: name)
+                let attendeeNote = BeamNote.fetchOrCreate(title: name)
                 text.insert(name, at: position, withAttributes: [.internalLink(attendeeNote.id)])
                 position += name.count
                 if index < meeting.attendees.count - 1 {
@@ -141,46 +143,81 @@ struct CalendarView: View {
 }
 
 struct CalendarItemHiddenView: View {
-    var itemStr: String
+    var meetingDuration: DateComponents?
 
     var body: some View {
         VStack {
             RoundedRectangle(cornerRadius: 100, style: .continuous)
-                .fill(BeamColor.AlphaGray.swiftUI)
-                .frame(width: itemStr.widthOfString(usingFont: BeamFont.regular(size: 12).nsFont), height: 2)
-        }.padding(.bottom, 20)
-            .padding(.leading, 14)
+                .fill(BeamColor.AlphaGray.alpha(0.40).swiftUI)
+                .frame(width: getWidthForDuration(), height: 2)
+        }.padding(.leading, 14)
+    }
+
+    private func getWidthForDuration() -> CGFloat {
+        let maxWidth: CGFloat = 70
+        let minWidth: CGFloat = 8
+        let logMaxWidth = log(maxWidth)
+        let logMinWidth = log(minWidth)
+        let hours = meetingDuration?.hour ?? 0
+        let minutes = meetingDuration?.minute ?? 0
+        let totalMinutes: CGFloat = CGFloat((hours * 60 + minutes))
+        let scale = (logMaxWidth - logMinWidth) / (maxWidth - minWidth)
+
+        let value = (((log(totalMinutes) - logMinWidth) / scale) + minWidth)
+
+        return CGFloat(max(minWidth, min(value, maxWidth)))
     }
 }
 
 struct CalendarIemView: View {
+    var allDayEvent: Bool
     var time: Date
+    var meetingLink: String?
     var title: String
     var onClick: (() -> Void)
 
-    @State var isHovering = false
+    @State var isHoveringItem = false
+    @State var isHoveringMeetingBtn = false
 
     var body: some View {
         VStack {
-            HStack {
-                Text(time.formatHourMin)
-                    .font(BeamFont.regular(size: 10).swiftUI)
-                    .foregroundColor(isHovering ? BeamColor.Niobium.swiftUI : BeamColor.AlphaGray.swiftUI)
+            HStack(alignment: .center) {
+                if !allDayEvent {
+                    Text(time.formatHourMin)
+                        .font(BeamFont.regular(size: 11).swiftUI)
+                        .foregroundColor(isHoveringItem ? BeamColor.Niobium.swiftUI : BeamColor.AlphaGray.swiftUI)
+                        .fixedSize(horizontal: true, vertical: false)
+                }
+                if let meetingLink = meetingLink {
+                    Button {
+                        _ = AppDelegate.main.window?.state.addNewTab(origin: nil, setCurrent: true, note: nil, element: nil, url: URL(string: meetingLink), webView: nil)
+                    } label: {
+                        Image("editor-calendar_video")
+                            .renderingMode(.template)
+                            .resizable()
+                            .frame(width: 16, height: 16)
+                            .foregroundColor(isHoveringMeetingBtn ? BeamColor.Bluetiful.swiftUI : isHoveringItem ? BeamColor.Niobium.swiftUI : BeamColor.AlphaGray.swiftUI)
+                    }.buttonStyle(PlainButtonStyle())
+                        .frame(width: 16, height: 16)
+                        .padding(.bottom, 1)
+                        .onHover { isHoveringMeetingBtn = $0 }
+                }
                 Text(title)
-                    .font(isHovering ? BeamFont.bold(size: 12).swiftUI : BeamFont.regular(size: 12).swiftUI)
-                    .foregroundColor(isHovering ? BeamColor.Niobium.swiftUI : BeamColor.LightStoneGray.swiftUI)
-                if isHovering {
+                    .font(isHoveringItem ? BeamFont.medium(size: 12).swiftUI : BeamFont.regular(size: 12).swiftUI)
+                    .foregroundColor(isHoveringItem ? BeamColor.Niobium.swiftUI : BeamColor.LightStoneGray.swiftUI)
+                if isHoveringItem {
                     Image("editor-calendar_arrow")
                         .renderingMode(.template)
                         .resizable()
                         .frame(width: 10, height: 10)
-                        .foregroundColor(BeamColor.Beam.swiftUI)
+                        .foregroundColor(BeamColor.Niobium.swiftUI)
                 }
-            }.frame(height: 15)
-        }.padding(.bottom, 12)
+            }
+        }.frame(minHeight: 16, maxHeight: 16)
+        .padding(.top, 4)
         .padding(.leading, 14)
             .onHover {
-                isHovering = $0
+                isHoveringItem = $0
             }.onTapGesture {
                 onClick()
             }

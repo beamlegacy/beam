@@ -48,9 +48,8 @@ class BeamNoteSharingUtils {
     /// - Parameters:
     ///   - note: The note to publish or unpublish
     ///   - becomePublic: If we should publish or unpublish
-    ///   - documentManager: The document manager to save the note after the udpate
     ///   - completion: The callback with the result (is note public) or the error
-    static func makeNotePublic(_ note: BeamNote, becomePublic: Bool, documentManager: DocumentManager, completion: ((Result<Bool, Error>) -> Void)? = nil) {
+    static func makeNotePublic(_ note: BeamNote, becomePublic: Bool, completion: ((Result<Bool, Error>) -> Void)? = nil) {
 
         guard note.ongoingPublicationOperation == false else {
             completion?(.failure(BeamNoteSharingUtilsError.ongoingOperation))
@@ -68,18 +67,17 @@ class BeamNoteSharingUtils {
 
         if becomePublic {
             publishNote(note) { result in
-                makeNotePublicHandler(note, becomePublic, documentManager, result, completion)
+                makeNotePublicHandler(note, becomePublic, result, completion)
             }
         } else {
             unpublishNote(with: note.id, completion: { result in
-                makeNotePublicHandler(note, becomePublic, documentManager, result, completion)
+                makeNotePublicHandler(note, becomePublic, result, completion)
             })
         }
     }
 
     static private func makeNotePublicHandler(_ note: BeamNote,
                                               _ becomePublic: Bool,
-                                              _ documentManager: DocumentManager,
                                               _ result: Result<PublicationStatus, Error>,
                                               _ completion: ((Result<Bool, Error>) -> Void)? = nil) {
         DispatchQueue.main.async {
@@ -90,7 +88,7 @@ class BeamNoteSharingUtils {
                 note.ongoingPublicationOperation = false
             case .success(let status):
                 note.publicationStatus = status
-                note.save(documentManager: documentManager) { result in
+                note.save() { result in
                     switch result {
                     case .failure(let error):
                         Logger.shared.logError(error.localizedDescription, category: .notePublishing)

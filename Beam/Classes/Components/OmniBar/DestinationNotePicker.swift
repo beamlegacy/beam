@@ -168,22 +168,22 @@ struct DestinationNotePicker: View {
     func changeDestinationCard(to cardName: String, note: BeamNote?) {
         let cardName = autocompleteModel.realNameForCardName(cardName)
         state.destinationCardName = cardName
-        if let finalNote = note ?? BeamNote.fetch(state.data.documentManager, title: cardName) {
+        if let finalNote = note ?? BeamNote.fetch(title: cardName) {
             tab.setDestinationNote(finalNote, rootElement: finalNote)
         }
     }
 
     @discardableResult
     func createNote(named name: String) -> BeamNote {
-        let note = BeamNote.fetchOrCreate(state.data.documentManager, title: name)
-        note.save(documentManager: state.data.documentManager)
+        let note = BeamNote.fetchOrCreate(title: name)
+        note.save()
         return note
     }
 
     @discardableResult
     func createJournalNote(date: Date) -> BeamNote {
-        let note = BeamNote.fetchOrCreateJournalNote(state.data.documentManager, date: date)
-        note.save(documentManager: state.data.documentManager)
+        let note = BeamNote.fetchOrCreateJournalNote(date: date)
+        note.save()
         return note
     }
 

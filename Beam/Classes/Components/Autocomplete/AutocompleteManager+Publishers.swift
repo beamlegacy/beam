@@ -60,7 +60,7 @@ extension AutocompleteManager {
 
     private func autocompleteNotesResults(for query: String) -> Future<[AutocompleteResult], Error> {
         Future { [weak self] promise in
-            self?.beamData.documentManager.documentsWithTitleMatch(title: query) { result in
+            DocumentManager().documentsWithTitleMatch(title: query) { result in
                 switch result {
                 case .failure(let error): promise(.failure(error))
                 case .success(let documentStructs):
@@ -83,11 +83,12 @@ extension AutocompleteManager {
                 switch result {
                 case .failure(let error): promise(.failure(error))
                 case .success(let notesContentResults):
+                    let documentManager = DocumentManager()
                     let ids = notesContentResults.map { $0.noteId }
-                    let docs = beamData?.documentManager.loadDocumentsById(ids: ids)
+                    let docs = documentManager.loadDocumentsById(ids: ids)
                     let autocompleteResults = notesContentResults.compactMap { result -> AutocompleteResult? in
                         // Check if the note still exists before proceeding.
-                        guard docs?.first(where: { $0.id == result.noteId }) != nil else { return nil }
+                        guard docs.first(where: { $0.id == result.noteId }) != nil else { return nil }
                         return AutocompleteResult(text: result.title, source: .note(noteId: result.noteId, elementId: result.uid),
                                                   completingText: query, uuid: result.uid, score: result.frecency?.frecencySortScore)
                     }
@@ -165,7 +166,7 @@ extension AutocompleteManager {
 
     private func autocompleteCanCreateNoteResult(for query: String) -> Future<Bool, Error> {
         Future { [weak self, query] promise in
-            self?.beamData.documentManager.loadDocumentByTitle(title: query) { result in
+            DocumentManager().loadDocumentByTitle(title: query) { result in
                 switch result {
                 case .failure(let error):
                     promise(.failure(error))

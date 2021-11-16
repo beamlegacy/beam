@@ -77,7 +77,7 @@ extension DocumentManager {
                                                category: .documentNetwork)
                         document.beam_object_previous_checksum = remoteDocumentStruct.checksum
 
-                        if !self.mergeDocumentWithNewData(document, remoteDocumentStruct) {
+                        if !documentManager.mergeDocumentWithNewData(document, remoteDocumentStruct) {
                             document.data = remoteDocumentStruct.data
                         }
                         document.update(remoteDocumentStruct)
@@ -178,18 +178,17 @@ extension DocumentManager {
         }
         Self.saveOperations[documentStruct.id] = blockOperation
 
-        blockOperation.addExecutionBlock { [weak blockOperation, weak self] in
-            guard let self = self,
-                  let blockOperation = blockOperation
+        blockOperation.addExecutionBlock { [weak blockOperation] in
+            guard let blockOperation = blockOperation
             else { return }
+
+            let documentManager = DocumentManager()
 
             // In case the operationqueue was cancelled way before this started
             if blockOperation.isCancelled {
                 completion?(.failure(DocumentManagerError.operationCancelled))
                 return
             }
-
-            let documentManager = DocumentManager()
 
             do {
                 let document = try documentManager.fetchOrCreateWithId(documentStruct.id)
@@ -225,7 +224,7 @@ extension DocumentManager {
             }
 
             // Ping others about the update
-            self.notificationDocumentUpdate(documentStruct)
+            documentManager.notificationDocumentUpdate(documentStruct)
 
             if blockOperation.isCancelled {
                 completion?(.failure(DocumentManagerError.operationCancelled))
@@ -236,7 +235,7 @@ extension DocumentManager {
 
             // If not authenticated, we don't need to send to BeamAPI
             if AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled, networkSave {
-                self.saveAndThrottle(documentStruct, 1.0, networkCompletion)
+                documentManager.saveAndThrottle(documentStruct, 1.0, networkCompletion)
             } else {
                 networkCompletion?(.failure(APIRequestError.notAuthenticated))
             }
@@ -345,7 +344,7 @@ extension DocumentManager {
     func softDelete(ids: [UUID], completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
         var errors: [Error] = []
         var goodObjects: [DocumentStruct] = []
-        backgroundQueue.async { [unowned self] in
+        backgroundQueue.async {
             let documentManager = DocumentManager()
             for id in ids {
                 guard let document = try? documentManager.fetchWithId(id) else {
@@ -368,7 +367,7 @@ extension DocumentManager {
                 goodObjects.append(documentStruct)
 
                 // Ping others about the update
-                self.notificationDocumentUpdate(documentStruct)
+                documentManager.notificationDocumentUpdate(documentStruct)
             }
 
             do {
@@ -422,7 +421,7 @@ extension DocumentManager {
 
         var errors: [Error] = []
         var goodIds: [UUID] = []
-        backgroundQueue.async { [unowned self] in
+        backgroundQueue.async {
             let documentManager = DocumentManager()
             for id in ids {
                 guard let document: Document = try? documentManager.fetchWithId(id) else {
@@ -442,7 +441,7 @@ extension DocumentManager {
                 goodIds.append(id)
 
                 // Ping others about the update
-                self.notificationDocumentDelete(documentStruct)
+                documentManager.notificationDocumentDelete(documentStruct)
             }
 
             do {
@@ -573,7 +572,7 @@ extension DocumentManager {
     // MARK: -
     // MARK: Database related
     func moveAllOrphanNotes(databaseId: UUID, _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
-        backgroundQueue.async { [unowned self] in
+        backgroundQueue.async {
             let documentManager = DocumentManager()
             do {
                 let databaseIds = DatabaseManager().all().map { $0.id }
@@ -584,7 +583,7 @@ extension DocumentManager {
                     document.database_id = databaseId
                 }
 
-                try context.save()
+                try documentManager.context.save()
 
                 if !orphanDocuments.isEmpty {
                     UserAlert.showMessage(message: "\(orphanDocuments.count) documents impacted, must exit.", buttonTitle: "Exit now")

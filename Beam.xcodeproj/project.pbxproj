@@ -511,6 +511,8 @@
 		961EC51725B5038E009FA322 /* ChevronButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 961EC51625B5038E009FA322 /* ChevronButton.swift */; };
 		9623ABBD26B002DC00309E5E /* Beam3ToBeam4MigrationPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9623ABBC26B002DC00309E5E /* Beam3ToBeam4MigrationPolicy.swift */; };
 		9623ABBF26B0061400309E5E /* Beam3ToBeam4Migration.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 9623ABBE26B0061400309E5E /* Beam3ToBeam4Migration.xcmappingmodel */; };
+		9624A65727431B4200B8D012 /* Atomics in Frameworks */ = {isa = PBXBuildFile; productRef = 9624A65627431B4200B8D012 /* Atomics */; };
+		9624A6592743212500B8D012 /* Atomics in Frameworks */ = {isa = PBXBuildFile; productRef = 9624A6582743212500B8D012 /* Atomics */; };
 		96319C6E26160AB400D1CF31 /* BeamNote+DocumentManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96319C6D26160AB400D1CF31 /* BeamNote+DocumentManager.swift */; };
 		96319C8626160E4A00D1CF31 /* BeamNote+LinkDetection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96319C8526160E4A00D1CF31 /* BeamNote+LinkDetection.swift */; };
 		96319D242616232700D1CF31 /* BeamCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96319D0F2616232600D1CF31 /* BeamCore.framework */; };
@@ -2085,6 +2087,7 @@
 			files = (
 				96C0F72D26FCAE6100385449 /* UUIDKit in Frameworks */,
 				A0A84FC02636FA99008F0326 /* CocoaLumberjackSwift in Frameworks */,
+				9624A65727431B4200B8D012 /* Atomics in Frameworks */,
 				96D5AE85264C01AD003AD516 /* TLDExtract in Frameworks */,
 				9684F26F270F8DDA006BF53E /* Sentry in Frameworks */,
 			);
@@ -2149,6 +2152,7 @@
 				A0A84FC42636FA9A008F0326 /* Nimble in Frameworks */,
 				A0A84FC52636FA9A008F0326 /* CocoaLumberjackSwift in Frameworks */,
 				9684F273270F9C25006BF53E /* Sentry in Frameworks */,
+				9624A6592743212500B8D012 /* Atomics in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4813,6 +4817,7 @@
 				96D5AE84264C01AD003AD516 /* TLDExtract */,
 				96C0F72C26FCAE6100385449 /* UUIDKit */,
 				9684F26E270F8DDA006BF53E /* Sentry */,
+				9624A65627431B4200B8D012 /* Atomics */,
 			);
 			productName = BeamCore;
 			productReference = 96319D0F2616232600D1CF31 /* BeamCore.framework */;
@@ -4933,6 +4938,7 @@
 				A5946845265E30350044A892 /* Fakery */,
 				96C0F73326FCBC0D00385449 /* UUIDKit */,
 				9684F272270F9C25006BF53E /* Sentry */,
+				9624A6582743212500B8D012 /* Atomics */,
 			);
 			productName = BeamUITests;
 			productReference = 965A78482514F149009980D4 /* BeamUITests.xctest */;
@@ -5003,6 +5009,7 @@
 				333E61822707094000847A0C /* XCRemoteSwiftPackageReference "Swime" */,
 				52466B20270DA966002D1716 /* XCRemoteSwiftPackageReference "clustering" */,
 				33F64F1027283201004EB0CD /* XCRemoteSwiftPackageReference "Macaw" */,
+				9624A65527431B4200B8D012 /* XCRemoteSwiftPackageReference "swift-atomics" */,
 			);
 			productRefGroup = 965A78262514F147009980D4 /* Products */;
 			projectDirPath = "";
@@ -7180,6 +7187,14 @@
 				minimumVersion = 1.2.12;
 			};
 		};
+		9624A65527431B4200B8D012 /* XCRemoteSwiftPackageReference "swift-atomics" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-atomics.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
 		9631C745251CE997009B40C4 /* XCRemoteSwiftPackageReference "SwiftSoup" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/scinfu/SwiftSoup.git";
@@ -7310,6 +7325,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises" */;
 			productName = PromisesTestHelpers;
+		};
+		9624A65627431B4200B8D012 /* Atomics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9624A65527431B4200B8D012 /* XCRemoteSwiftPackageReference "swift-atomics" */;
+			productName = Atomics;
+		};
+		9624A6582743212500B8D012 /* Atomics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9624A65527431B4200B8D012 /* XCRemoteSwiftPackageReference "swift-atomics" */;
+			productName = Atomics;
 		};
 		96319D52261623BB00D1CF31 /* CocoaLumberjackSwift */ = {
 			isa = XCSwiftPackageProductDependency;

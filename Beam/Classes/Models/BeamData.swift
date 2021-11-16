@@ -35,7 +35,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var noteAutoSaveService: NoteAutoSaveService
 
     var cookies: HTTPCookieStorage
-    var documentManager: DocumentManager
     var downloadManager: BeamDownloadManager = BeamDownloadManager()
     lazy var calendarManager: CalendarManager = {
         let cm = CalendarManager()
@@ -109,9 +108,8 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         } catch {
             Logger.shared.logError("Unable to initialise link storage \(error)", category: .linkDB)
         }
-        documentManager = DocumentManager()
         clusteringOrphanedUrlManager = ClusteringOrphanedUrlManager(savePath: Self.orphanedUrlsPath)
-        clusteringManager = ClusteringManager(ranker: sessionLinkRanker, documentManager: documentManager, candidate: 2, navigation: 0.5, text: 0.9, entities: 0.4, sessionId: sessionId, activeSources: activeSources)
+        clusteringManager = ClusteringManager(ranker: sessionLinkRanker, candidate: 2, navigation: 0.5, text: 0.9, entities: 0.4, sessionId: sessionId, activeSources: activeSources)
         noteAutoSaveService = NoteAutoSaveService()
         cookies = HTTPCookieStorage()
 
@@ -138,9 +136,10 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
 
         super.init()
 
+        let documentManager = DocumentManager()
         BeamNote.idForNoteNamed = { title, includeDeletedNotes in
             guard let id = Self.titleToId[title] else {
-                guard let doc = self.documentManager.loadDocumentByTitle(title: title),
+                guard let doc = documentManager.loadDocumentByTitle(title: title),
                       includeDeletedNotes || doc.deletedAt == nil
                 else { return nil }
                 let id = doc.id
@@ -152,7 +151,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         }
         BeamNote.titleForNoteId = { id, includeDeletedNotes in
             guard let title = Self.idToTitle[id] else {
-                guard let doc = self.documentManager.loadDocumentById(id: id),
+                guard let doc = documentManager.loadDocumentById(id: id),
                       includeDeletedNotes || doc.deletedAt == nil
                 else { return nil }
                 let title = doc.title
@@ -260,7 +259,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
 
     func setupJournal(firstSetup: Bool = false) {
         journalCancellables = []
-        let note  = BeamNote.fetchOrCreateJournalNote(documentManager, date: BeamDate.now)
+        let note  = BeamNote.fetchOrCreateJournalNote(date: BeamDate.now)
         observeJournal(note: note)
         journal.append(note)
         _todaysNote = note
@@ -269,7 +268,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
 
     func updateJournal(with limit: Int = 0, and fetchOffset: Int = 0, fetchEvents: Bool = true) {
         isFetching = true
-        let _journal = BeamNote.fetchNotesWithType(documentManager, type: .journal, limit, fetchOffset).compactMap { $0.type.isJournal && !$0.type.isFutureJournal ? $0 : nil }
+        let _journal = BeamNote.fetchNotesWithType(type: .journal, limit, fetchOffset).compactMap { $0.type.isJournal && !$0.type.isFutureJournal ? $0 : nil }
         for note in _journal {
             observeJournal(note: note)
             if fetchEvents, let journalDate = note.type.journalDate, !note.isEntireNoteEmpty() {

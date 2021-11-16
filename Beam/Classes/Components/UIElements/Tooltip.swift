@@ -53,8 +53,8 @@ struct Tooltip_Previews: PreviewProvider {
                 VStack(spacing: 8) {
                     Tooltip(title: "Label", subtitle: "⌘⌥⇧⌃⇪⌥⇧⌘⇪⌃")
                     Tooltip(title: "Label")
-                    Tooltip(title: "Label", icon: "tooltip-mark", subtitle: "⌘⌥⇧⌃⇪")
-                    Tooltip(title: "Label", icon: "tooltip-mark")
+                    Tooltip(title: "Label", icon: "tool-keep", subtitle: "⌘⌥⇧⌃⇪")
+                    Tooltip(title: "Label", icon: "tool-keep")
                 }
                 .padding(20)
                 .background(BeamColor.Generic.background.swiftUI)
@@ -63,8 +63,8 @@ struct Tooltip_Previews: PreviewProvider {
             VStack(spacing: 8) {
                 Tooltip(title: "Label", subtitle: "⌘⌥⇧⌃⇪⌥⇧⌘⇪⌃")
                 Tooltip(title: "Label")
-                Tooltip(title: "Label", icon: "tooltip-mark", subtitle: "⌘⌥⇧⌃⇪")
-                Tooltip(title: "Label", icon: "tooltip-mark")
+                Tooltip(title: "Label", icon: "tool-keep", subtitle: "⌘⌥⇧⌃⇪")
+                Tooltip(title: "Label", icon: "tool-keep")
             }
             .padding(20)
             .background(BeamColor.Generic.background.swiftUI)

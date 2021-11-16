@@ -33,7 +33,6 @@ class ClusteringManager: ObservableObject {
     var sendRanking = false
     var initialiseNotes = false
     var ranker: SessionLinkRanker
-    var documentManager: DocumentManager
     var activeSources: ActiveSources
     @Published var noteToAdd: BeamNote?
     @Published var clusteredTabs: [[TabInformation?]] = [[]]
@@ -49,16 +48,15 @@ class ClusteringManager: ObservableObject {
     var suggestedNoteUpdater: SuggestedNoteSourceUpdater
     var sessionId: UUID
 
-    init(ranker: SessionLinkRanker, documentManager: DocumentManager, candidate: Int, navigation: Double, text: Double, entities: Double, sessionId: UUID, activeSources: ActiveSources) {
+    init(ranker: SessionLinkRanker, candidate: Int, navigation: Double, text: Double, entities: Double, sessionId: UUID, activeSources: ActiveSources) {
         self.selectedTabGroupingCandidate = candidate
         self.weightNavigation = navigation
         self.weightText = text
         self.weightEntities = entities
         self.activeSources = activeSources
-        self.suggestedNoteUpdater = SuggestedNoteSourceUpdater(sessionId: sessionId, documentManager: documentManager)
+        self.suggestedNoteUpdater = SuggestedNoteSourceUpdater(sessionId: sessionId)
         self.cluster = Cluster(candidate: candidate, weightNavigation: navigation, weightText: text, weightEntities: entities, noteContentThreshold: 100)
         self.ranker = ranker
-        self.documentManager = documentManager
         self.sessionId = sessionId
         setupObservers()
         #if DEBUG
@@ -198,7 +196,7 @@ class ClusteringManager: ObservableObject {
         }
         // After adding the second page, add notes from previous sessions
         if self.initialiseNotes {
-            let notes = BeamNote.fetchNotesWithType(documentManager, type: .note, 10, 0)
+            let notes = BeamNote.fetchNotesWithType(type: .note, 10, 0)
             for note in notes {
                 self.addNote(note: note)
             }

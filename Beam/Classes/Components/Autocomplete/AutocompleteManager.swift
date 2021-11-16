@@ -117,14 +117,14 @@ class AutocompleteManager: ObservableObject {
         Logger.shared.logInfo("autocomplete results in \(elapsedTime) \(timeUnit)", category: .autocompleteManager)
     }
 
-    static func logIntermediate(step: String, stepShortName: String, results: [AutocompleteResult]) {
-        #if DEBUG
+    static func logIntermediate(step: String, stepShortName: String, results: [AutocompleteResult], limit: Int = 10) {
         Logger.shared.logDebug("-------------\(step)-------------------", category: .autocompleteManager)
-        for res in results {
+        for res in results.prefix(limit) {
             Logger.shared.logDebug("\(stepShortName): \(String(describing: res))", category: .autocompleteManager)
         }
-        Logger.shared.logDebug("--------------------------------------", category: .autocompleteManager)
-        #endif
+        if results.count > limit {
+            Logger.shared.logDebug("\(stepShortName): truncated results: \(results.count - limit)", category: .autocompleteManager)
+        }
     }
 
     func isResultCandidateForAutoselection(_ result: AutocompleteResult, forSearch searchText: String) -> Bool {

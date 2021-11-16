@@ -38,8 +38,7 @@ class AllCardsViewModel: ObservableObject, Identifiable {
     }
 
     fileprivate func refreshAllNotes() {
-        guard let documentManager = data?.documentManager else { return }
-        allNotes = documentManager.loadAll()
+        allNotes = DocumentManager().loadAll()
     }
 
     private func updateNoteItemsFromAllNotes() {
@@ -79,9 +78,8 @@ class AllCardsViewModel: ObservableObject, Identifiable {
     }
 
     private func asyncComputeNotesMetadata(notesItems: [NoteTableViewItem]) {
-        guard let documentManager = data?.documentManager else { return }
         metadataFetchers.removeAll()
-        fetchAllNotesMetadata(for: notesItems, documentManager: documentManager)
+        fetchAllNotesMetadata(for: notesItems)
             .receive(on: DispatchQueue.main)
             .sink { fetchedNotes in
                 self.updateMetadatasForItems(with: fetchedNotes)
@@ -89,15 +87,15 @@ class AllCardsViewModel: ObservableObject, Identifiable {
             .store(in: &metadataFetchers)
     }
 
-    private func fetchAllNotesMetadata(for notesItems: [NoteTableViewItem], documentManager: DocumentManager) -> AnyPublisher<[UUID: BeamNote], Never> {
+    private func fetchAllNotesMetadata(for notesItems: [NoteTableViewItem]) -> AnyPublisher<[UUID: BeamNote], Never> {
         Future { promise in
             var metadatas = [UUID: NoteListMetadata]()
             var fetchedNotes = [UUID: BeamNote]()
             DispatchQueue.global(qos: .userInteractive).async {
                 notesItems.forEach { item in
                     guard item.note == nil || item.mentions < 0 else { return }
-                    guard let note = item.note ?? item.note(withDocumentManager: documentManager) else { return }
-                    let mentions = note.linksAndReferences(with: documentManager, fast: true).count
+                    guard let note = item.note ?? item.getNote() else { return }
+                    let mentions = note.linksAndReferences(fast: true).count
                     let metadata = NoteListMetadata(mentions: mentions, wordsCount: note.textStats.wordsCount)
                     metadatas[item.id] = metadata
                     fetchedNotes[item.id] = note
@@ -299,18 +297,16 @@ struct AllCardsPageContentView: View {
     func showGlobalContextualMenu(at: NSPoint, for row: Int? = nil, allowImports: Bool = false) {
         let notes = currentNotesList
         var selectedNotes: [BeamNote] = []
-        let docManager = data.documentManager
         if let row = row, row < notes.count {
             let item = notes[row]
-            if let note = item.note ?? item.note(withDocumentManager: docManager) {
+            if let note = item.note ?? item.getNote() {
                 selectedNotes = [note]
             }
         } else {
-            selectedNotes = notes.enumerated().filter { i, _ in selectedRowsIndexes.contains(i) }.compactMap({ _, item -> BeamNote? in
-                item.note ?? item.note(withDocumentManager: docManager)
+            selectedNotes = notes.enumerated().filter { i, _ in selectedRowsIndexes.contains(i) }.compactMap({ _, item -> BeamNote? in item.getNote()
             })
         }
-        let handler = AllCardsContextualMenu(documentManager: docManager, selectedNotes: selectedNotes, onFinish: { shouldReload in
+        let handler = AllCardsContextualMenu(selectedNotes: selectedNotes, onFinish: { shouldReload in
             if shouldReload {
                 model.refreshAllNotes()
             }
@@ -330,15 +326,15 @@ struct AllCardsPageContentView: View {
 
             //If we create a public note, publish it right after creation, else just save it
             if isPublic {
-                BeamNoteSharingUtils.makeNotePublic(newNote, becomePublic: true, documentManager: data.documentManager)
+                BeamNoteSharingUtils.makeNotePublic(newNote, becomePublic: true)
             } else {
-                newNote.save(documentManager: data.documentManager)
+                newNote.save()
             }
         } else {
             let item = notesList[row]
-            let note = BeamNote.fetchOrCreate(data.documentManager, title: item.title)
+            let note = BeamNote.fetchOrCreate(title: item.title)
             if note.title != title {
-                note.updateTitle(title, documentManager: data.documentManager)
+                note.updateTitle(title)
                 model.refreshAllNotes()
             }
         }
@@ -393,8 +389,8 @@ private class NoteTableViewItem: TableViewItem {
         words = note?.textStats.wordsCount ?? -1
     }
 
-    func note(withDocumentManager documentManager: DocumentManager) -> BeamNote? {
-        note ?? BeamNote.fetch(documentManager, id: id, keepInMemory: false, decodeChildren: false)
+    func getNote() -> BeamNote? {
+        note ?? BeamNote.fetch(id: id, keepInMemory: false, decodeChildren: false)
     }
 
     override func isEqual(_ object: Any?) -> Bool {
