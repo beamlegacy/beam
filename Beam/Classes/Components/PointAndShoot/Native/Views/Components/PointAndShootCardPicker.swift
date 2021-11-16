@@ -139,7 +139,7 @@ struct PointAndShootCardPicker: View {
                         Text(getFinalCardName())
                             .foregroundColor(BeamColor.Beam.swiftUI)
                             .font(BeamFont.regular(size: 13).swiftUI)
-                            .animation(.easeInOut(duration: 0.1))
+                            .transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.1)))
                     }
                 }
 
