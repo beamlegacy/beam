@@ -3523,11 +3523,8 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                 context("with conflict") {
                     let newTitle = "new Title"
-                    var previousChecksum = ""
 
                     beforeEach {
-                        previousChecksum = (try? self.checksum(object)) ?? ""
-
                         BeamDate.travel(2)
 
                         // Create 1 conflicted object
