@@ -985,6 +985,16 @@ extension GRDBDatabase {
             try BrowsingTreeRecord.deleteAll(db)
         }
     }
+    func deleteBrowsingTree(id: UUID) throws {
+        _ = try dbWriter.write { db in
+            try BrowsingTreeRecord.deleteOne(db, id: id)
+        }
+    }
+    func deleteBrowsingTrees(ids: [UUID]) throws {
+        _ = try dbWriter.write { db in
+            try BrowsingTreeRecord.deleteAll(db, ids: ids)
+        }
+    }
 }
 
 extension GRDBDatabase {
