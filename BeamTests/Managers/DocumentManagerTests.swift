@@ -112,7 +112,7 @@ class DocumentManagerTests: QuickSpec {
                     expect(count) == 1
                 }
 
-                it("saves only the last call on coreData") {
+                it("saves all calls on coreData") {
                     var docStruct = helper.createDocumentStruct()
                     let before = DocumentManager.savedCount
 
@@ -129,7 +129,7 @@ class DocumentManagerTests: QuickSpec {
                     // Testing `== 1` might sometimes fail because of speed issue. We want to
                     // make sure we don't have all calls and some operations have been cancelled.
                     // 2 sounds like a good number.
-                    expect(DocumentManager.savedCount - before) <= 2
+                    expect(DocumentManager.savedCount - before) == 7
                 }
 
                 context("with duplicate titles") {
