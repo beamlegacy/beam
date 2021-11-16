@@ -38,8 +38,9 @@ struct DocumentRow: View {
 struct DocumentRow_Previews: PreviewProvider {
     static var previews: some View {
         //swiftlint:disable force_try
-        let outline = try! DocumentManager().fetchWithTitle("outline")!
-        let document = try! DocumentManager().fetchFirst()!
+        let documentManager = DocumentManager()
+        let outline = try! documentManager.fetchWithTitle("outline")!
+        let document = try! documentManager.fetchFirst()!
         return Group {
             DocumentRow(document: outline)
             DocumentRow(document: document)

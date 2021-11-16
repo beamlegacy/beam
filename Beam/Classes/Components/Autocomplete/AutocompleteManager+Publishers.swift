@@ -60,7 +60,8 @@ extension AutocompleteManager {
 
     private func autocompleteNotesResults(for query: String) -> Future<[AutocompleteResult], Error> {
         Future { [weak self] promise in
-            DocumentManager().documentsWithTitleMatch(title: query) { result in
+            let documentManager = DocumentManager()
+            documentManager.documentsWithTitleMatch(title: query) { result in
                 switch result {
                 case .failure(let error): promise(.failure(error))
                 case .success(let documentStructs):
@@ -166,7 +167,8 @@ extension AutocompleteManager {
 
     private func autocompleteCanCreateNoteResult(for query: String) -> Future<Bool, Error> {
         Future { [weak self, query] promise in
-            DocumentManager().loadDocumentByTitle(title: query) { result in
+            let documentManager = DocumentManager()
+            documentManager.loadDocumentByTitle(title: query) { result in
                 switch result {
                 case .failure(let error):
                     promise(.failure(error))
