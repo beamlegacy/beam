@@ -12,7 +12,7 @@ class OauthWindow: NSWindow, NSWindowDelegate {
 
         super.init(contentRect: contentRect,
                    styleMask: [.titled, .closable, .miniaturizable,
-                               .texturedBackground, .resizable, .fullSizeContentView],
+                               .resizable, .fullSizeContentView],
                    backing: .buffered,
                    defer: false)
         title = "Oauth"

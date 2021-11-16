@@ -14,8 +14,10 @@ class BeamObjectManager {
     static var managerInstances: [String: BeamObjectManagerDelegateProtocol] = [:]
     static var translators: [String: (BeamObjectManagerDelegateProtocol, [BeamObject]) throws -> Void] = [:]
 
-    static var networkRequests: [UUID: APIRequest] = [:]
-    static var networkRequestsWithoutID: [APIRequest] = []
+    #if DEBUG
+    static var networkRequests: [APIRequest] = []
+    #endif
+
     var webSocketRequest = APIWebSocketRequest()
 
     let backgroundQueue = DispatchQueue(label: "BeamObjectManager backgroundQueue", qos: .userInitiated)

@@ -45,7 +45,6 @@ extension BeamObjectManager {
         let group = DispatchGroup()
         var errors: [Error] = []
         let lock = DispatchSemaphore(value: 1)
-        var requests: [APIRequest] = []
         var savedObjects = 0
         // Just a very old date as default
         var mostRecentUpdatedAt: Date = Persistence.Sync.BeamObjects.last_updated_at ?? (BeamDate.now.addingTimeInterval(-(60*60*24*31*12*10)))
@@ -58,44 +57,47 @@ extension BeamObjectManager {
         for (_, manager) in Self.managerInstances {
             group.enter()
 
-            let localTimer = BeamDate.now
+            DispatchQueue.global(qos: .userInitiated).async {
+                let localTimer = BeamDate.now
 
-            do {
-                let request = try manager.saveAllOnBeamObjectApi { result in
-                    switch result {
-                    case .failure(let error):
-                        Logger.shared.logError("Can't saveAll: \(error.localizedDescription)", category: .beamObjectNetwork)
-                        lock.wait()
-                        errors.append(error)
-                        lock.signal()
-                    case .success(let countAndDate):
-                        lock.wait()
+                do {
+                    let request = try manager.saveAllOnBeamObjectApi { result in
+                        switch result {
+                        case .failure(let error):
+                            Logger.shared.logError("Can't saveAll: \(error.localizedDescription)", category: .beamObjectNetwork)
+                            lock.wait()
+                            errors.append(error)
+                            lock.signal()
+                        case .success(let countAndDate):
+                            lock.wait()
 
-                        savedObjects += countAndDate.0
+                            savedObjects += countAndDate.0
 
-                        if let updatedAt = countAndDate.1, updatedAt > mostRecentUpdatedAt {
-                            mostRecentUpdatedAt = updatedAt
-                            mostRecentUpdatedAtChanged = true
+                            if let updatedAt = countAndDate.1, updatedAt > mostRecentUpdatedAt {
+                                mostRecentUpdatedAt = updatedAt
+                                mostRecentUpdatedAtChanged = true
+                            }
+
+                            lock.signal()
                         }
 
-                        lock.signal()
+                        Logger.shared.logDebug("saveAllToAPI using \(manager) done",
+                                               category: .beamObjectNetwork,
+                                               localTimer: localTimer)
+                        group.leave()
                     }
 
-                    Logger.shared.logDebug("saveAllToAPI using \(manager) done",
-                                           category: .beamObjectNetwork,
-                                           localTimer: localTimer)
+                    if let request = request {
+                        #if DEBUG
+                        Self.networkRequests.append(request)
+                        #endif
+                    }
+                } catch {
+                    lock.wait()
+                    errors.append(error)
+                    lock.signal()
                     group.leave()
                 }
-
-                if let request = request {
-                    requests.append(request)
-                    Self.networkRequestsWithoutID.append(request)
-                }
-            } catch {
-                lock.wait()
-                errors.append(error)
-                lock.signal()
-                group.leave()
             }
         }
 
@@ -201,7 +203,9 @@ extension BeamObjectManager {
                         }
                     }
 
-                    Self.networkRequestsWithoutID.append(beamRequestForIds)
+                    #if DEBUG
+                    Self.networkRequests.append(beamRequestForIds)
+                    #endif
                 } catch {
                     AppDelegate.showMessage("Error fetching objects from API then storing locally: \(error.localizedDescription). This is not normal, check the logs and ask support.")
                     completion(.failure(error))
@@ -209,7 +213,9 @@ extension BeamObjectManager {
             }
         }
 
-        Self.networkRequestsWithoutID.append(beamRequest)
+        #if DEBUG
+        Self.networkRequests.append(beamRequest)
+        #endif
     }
 
     /// Will fetch all updates from the API and call each managers based on object's type
@@ -262,7 +268,9 @@ extension BeamObjectManager {
             }
         }
 
-        Self.networkRequestsWithoutID.append(beamRequest)
+        #if DEBUG
+        Self.networkRequests.append(beamRequest)
+        #endif
     }
 }
 
@@ -325,7 +333,9 @@ extension BeamObjectManager {
             }
         }
 
-        Self.networkRequestsWithoutID.append(request)
+        #if DEBUG
+        Self.networkRequests.append(request)
+        #endif
         return request
     }
 
@@ -544,17 +554,16 @@ extension BeamObjectManager {
         }
     }
 
+    /// Completion will not be called if returned `APIRequest` is `nil`
     func saveToAPI<T: BeamObjectProtocol>(_ object: T,
-                                          _ completion: @escaping ((Result<T, Error>) -> Void)) throws -> APIRequest {
+                                          _ completion: @escaping ((Result<T, Error>) -> Void)) throws -> APIRequest? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw BeamObjectManagerError.notAuthenticated
         }
 
         let beamObject = try BeamObject(object, T.beamObjectTypeName)
 
-        Self.networkRequests[beamObject.id]?.cancel()
         let request = BeamObjectRequest()
-        Self.networkRequests[beamObject.id] = request
 
         try request.save(beamObject) { requestResult in
             switch requestResult {
@@ -578,17 +587,20 @@ extension BeamObjectManager {
             }
         }
 
-        Self.networkRequestsWithoutID.append(request)
+        #if DEBUG
+        Self.networkRequests.append(request)
+        #endif
+
         return request
     }
 
     internal func saveToAPIFailure<T: BeamObjectProtocol>(_ object: T,
                                                           _ error: Error,
                                                           _ completion: @escaping ((Result<T, Error>) -> Void)) {
-        Logger.shared.logError("Could not save \(object): \(error.localizedDescription)",
+        Logger.shared.logError("saveToAPIFailure: Could not save \(object): \(error.localizedDescription)",
                                category: .beamObjectNetwork)
 
-        // Early return except for checksum issues.
+        // Early return except for checksum issues.
         guard case APIRequestError.beamObjectInvalidChecksum = error else {
             completion(.failure(error))
             return
@@ -718,7 +730,10 @@ extension BeamObjectManager {
             }
         }
 
-        Self.networkRequestsWithoutID.append(request)
+        #if DEBUG
+        Self.networkRequests.append(request)
+        #endif
+
         return request
     }
 
@@ -727,7 +742,7 @@ extension BeamObjectManager {
     internal func saveToAPIBeamObjectsFailure(_ beamObjects: [BeamObject],
                                               _ error: Error,
                                               _ completion: @escaping ((Result<[BeamObject], Error>) -> Void)) {
-        Logger.shared.logError("Could not save \(beamObjects): \(error.localizedDescription)",
+        Logger.shared.logError("saveToAPIBeamObjectsFailure: Could not save \(beamObjects): \(error.localizedDescription)",
                                category: .beamObject)
 
         switch error {
@@ -878,9 +893,7 @@ extension BeamObjectManager {
             throw BeamObjectManagerError.notAuthenticated
         }
 
-        Self.networkRequests[beamObject.id]?.cancel()
         let request = BeamObjectRequest()
-        Self.networkRequests[beamObject.id] = request
 
         try request.save(beamObject) { requestResult in
             switch requestResult {
@@ -889,9 +902,9 @@ extension BeamObjectManager {
                 savedBeamObject.previousChecksum = updateBeamObject.dataChecksum
                 completion(.success(savedBeamObject))
             case .failure(let error):
-                // Early return except for checksum issues.
+                // Early return except for checksum issues.
                 guard case APIRequestError.beamObjectInvalidChecksum = error else {
-                    Logger.shared.logError("Could not save \(beamObject): \(error.localizedDescription)",
+                    Logger.shared.logError("saveToAPI Could not save \(beamObject): \(error.localizedDescription)",
                                            category: .beamObjectNetwork)
                     completion(.failure(error))
                     return
@@ -922,6 +935,10 @@ extension BeamObjectManager {
                 }
             }
         }
+
+        #if DEBUG
+        Self.networkRequests.append(request)
+        #endif
 
         return request
     }
@@ -1031,9 +1048,7 @@ extension BeamObjectManager {
             throw BeamObjectManagerError.notAuthenticated
         }
 
-        Self.networkRequests[id]?.cancel()
         let request = BeamObjectRequest()
-        Self.networkRequests[id] = request
 
         try request.delete(id) { result in
             switch result {
@@ -1047,6 +1062,10 @@ extension BeamObjectManager {
             case .success(let object): completion?(.success(object))
             }
         }
+
+        #if DEBUG
+        Self.networkRequests.append(request)
+        #endif
 
         return request
     }
@@ -1066,6 +1085,10 @@ extension BeamObjectManager {
             case .success(let success): completion?(.success(success))
             }
         }
+
+        #if DEBUG
+        Self.networkRequests.append(request)
+        #endif
 
         return request
     }

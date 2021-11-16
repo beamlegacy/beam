@@ -106,7 +106,7 @@ class UrlScoresCollectionTest: XCTestCase {
         XCTAssertEqual(score.area, 0)
         XCTAssertEqual(score.lastCreationDate, creationDate)
 
-        guard let positions = page.webPositions else {
+        guard page.webPositions != nil else {
             XCTFail("expected test page")
             return
         }

@@ -284,6 +284,7 @@
 		522D48A62719D1F20038DB81 /* LoggerSplitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 522D48A52719D1F20038DB81 /* LoggerSplitViewController.swift */; };
 		522D48A82719D2990038DB81 /* NSTableView+ScrollToVisible.swift in Sources */ = {isa = PBXBuildFile; fileRef = 522D48A72719D2990038DB81 /* NSTableView+ScrollToVisible.swift */; };
 		522F149327033DE000EDF2F6 /* beam_object_checksums.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 522F149227033DE000EDF2F6 /* beam_object_checksums.graphql */; };
+		523060A827426D1400A03844 /* BeamObjectManagerCall.swift in Sources */ = {isa = PBXBuildFile; fileRef = 523060A727426D1400A03844 /* BeamObjectManagerCall.swift */; };
 		523416A22629D465001F306F /* BeamCoreDataObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 523416A12629D465001F306F /* BeamCoreDataObject.swift */; };
 		523A32CF267764A200606768 /* EnvironmentVariables.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52B9A38B264562E60063AEEF /* EnvironmentVariables.swift */; };
 		523FF66125C31D8800B4BD6E /* Data+String.swift in Sources */ = {isa = PBXBuildFile; fileRef = 523FF66025C31D8800B4BD6E /* Data+String.swift */; };
@@ -1371,6 +1372,7 @@
 		522D48A52719D1F20038DB81 /* LoggerSplitViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggerSplitViewController.swift; sourceTree = "<group>"; };
 		522D48A72719D2990038DB81 /* NSTableView+ScrollToVisible.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSTableView+ScrollToVisible.swift"; sourceTree = "<group>"; };
 		522F149227033DE000EDF2F6 /* beam_object_checksums.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = beam_object_checksums.graphql; sourceTree = "<group>"; };
+		523060A727426D1400A03844 /* BeamObjectManagerCall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamObjectManagerCall.swift; sourceTree = "<group>"; };
 		523416A12629D465001F306F /* BeamCoreDataObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamCoreDataObject.swift; sourceTree = "<group>"; };
 		523FF66025C31D8800B4BD6E /* Data+String.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data+String.swift"; sourceTree = "<group>"; };
 		523FF67825C31D9D00B4BD6E /* String+Data.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Data.swift"; sourceTree = "<group>"; };
@@ -2457,6 +2459,7 @@
 		418171592581107C00317ED8 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				5230609D27426BC600A03844 /* BeamObjectAPI */,
 				A07C01362705ECFC00D91750 /* GoogleCalendar */,
 				3303E0E326F8C8FF00E175AC /* Additional APIs */,
 				4181715C2581107C00317ED8 /* API */,
@@ -2485,10 +2488,6 @@
 				522969E126669016005067A6 /* APIWebSocketRequest.swift */,
 				529E1AD325D45CFA00DD25B8 /* APIRequestError.swift */,
 				418171622581107C00317ED8 /* APIResponse.swift */,
-				5224CD812686043600D4179E /* BeamObjectRequest.swift */,
-				52019A5526DE2AB0005E8278 /* BeamObjectRequest+Foundation.swift */,
-				52019A5E26DE2AC2005E8278 /* BeamObjectRequest+PromiseKit.swift */,
-				52019A6026DE2ACB005E8278 /* BeamObjectRequest+Promises.swift */,
 				52F4E4AD264182E00067B017 /* IdentityRequest.swift */,
 				418171632581107C00317ED8 /* UserSessionRequest.swift */,
 				5241E5E826F89AE700B08F69 /* UserSessionRequest+Foundation.swift */,
@@ -2507,7 +2506,6 @@
 				4181715F2581107C00317ED8 /* Session.swift */,
 				418171602581107C00317ED8 /* GraphqlParametersProtocol.swift */,
 				418171612581107C00317ED8 /* User.swift */,
-				5224CD7B2686034200D4179E /* BeamObject.swift */,
 			);
 			path = GraphqlRequestsTypes;
 			sourceTree = "<group>";
@@ -2515,7 +2513,6 @@
 		418171662581107C00317ED8 /* GraphqlRequests */ = {
 			isa = PBXGroup;
 			children = (
-				5224CD3D2685FF6D00D4179E /* BeamObject */,
 				52F4E48226417ED90067B017 /* Identities */,
 				418171672581107C00317ED8 /* UserSession */,
 			);
@@ -2840,17 +2837,6 @@
 				5241E5F526F8B0A900B08F69 /* AccountManager+Foundation.swift */,
 				5241E5F726F8B0BA00B08F69 /* AccountManager+PromiseKit.swift */,
 				5241E5F926F8B0C300B08F69 /* AccountManager+Promises.swift */,
-				5224CD8B26860C0900D4179E /* BeamObjectManager.swift */,
-				52019A6226DE2CC9005E8278 /* BeamObjectManager+Foundation.swift */,
-				52019A6826DE2F8F005E8278 /* BeamObjectManager+PromiseKit.swift */,
-				52019A6A26DE2F96005E8278 /* BeamObjectManager+Promises.swift */,
-				52019A6426DE2ECD005E8278 /* BeamObjectManager+Tests.swift */,
-				52019A6626DE2F65005E8278 /* BeamObjectManager+Websockets.swift */,
-				522BC3F426A872740018B51E /* BeamObjectManagerError.swift */,
-				522BC3E726A8724B0018B51E /* BeamObjectManagerProtocol.swift */,
-				52019A7826DE49C2005E8278 /* BeamObjectManagerProtocol+Foundation.swift */,
-				52019A7A26DE49CD005E8278 /* BeamObjectManagerProtocol+PromiseKit.swift */,
-				52019A7C26DE49D7005E8278 /* BeamObjectManagerProtocol+Promises.swift */,
 				03CA9A9625CC61BF00E7CFA2 /* ContentBlockingManager.swift */,
 				520088BF2613295000AED835 /* DatabaseManager.swift */,
 				525F932626E239B600A5C7BD /* DatabaseManager+BeamObjectManagerDelegate.swift */,
@@ -3093,6 +3079,63 @@
 				A0642C3126D9979300B49054 /* Beam5ToBeam6Migration.xcmappingmodel */,
 			);
 			path = Migrations;
+			sourceTree = "<group>";
+		};
+		5230609D27426BC600A03844 /* BeamObjectAPI */ = {
+			isa = PBXGroup;
+			children = (
+				523060A627426C7400A03844 /* GraphQLRequests */,
+				523060A527426C2800A03844 /* Requests */,
+				523060A427426C0F00A03844 /* Models */,
+				523060A327426BF700A03844 /* Managers */,
+			);
+			path = BeamObjectAPI;
+			sourceTree = "<group>";
+		};
+		523060A327426BF700A03844 /* Managers */ = {
+			isa = PBXGroup;
+			children = (
+				5224CD8B26860C0900D4179E /* BeamObjectManager.swift */,
+				52019A6226DE2CC9005E8278 /* BeamObjectManager+Foundation.swift */,
+				52019A6826DE2F8F005E8278 /* BeamObjectManager+PromiseKit.swift */,
+				52019A6A26DE2F96005E8278 /* BeamObjectManager+Promises.swift */,
+				52019A6426DE2ECD005E8278 /* BeamObjectManager+Tests.swift */,
+				52019A6626DE2F65005E8278 /* BeamObjectManager+Websockets.swift */,
+				522BC3F426A872740018B51E /* BeamObjectManagerError.swift */,
+				522BC3E726A8724B0018B51E /* BeamObjectManagerProtocol.swift */,
+				52019A7826DE49C2005E8278 /* BeamObjectManagerProtocol+Foundation.swift */,
+				52019A7A26DE49CD005E8278 /* BeamObjectManagerProtocol+PromiseKit.swift */,
+				52019A7C26DE49D7005E8278 /* BeamObjectManagerProtocol+Promises.swift */,
+				523060A727426D1400A03844 /* BeamObjectManagerCall.swift */,
+			);
+			path = Managers;
+			sourceTree = "<group>";
+		};
+		523060A427426C0F00A03844 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				5224CD7B2686034200D4179E /* BeamObject.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		523060A527426C2800A03844 /* Requests */ = {
+			isa = PBXGroup;
+			children = (
+				5224CD812686043600D4179E /* BeamObjectRequest.swift */,
+				52019A5526DE2AB0005E8278 /* BeamObjectRequest+Foundation.swift */,
+				52019A5E26DE2AC2005E8278 /* BeamObjectRequest+PromiseKit.swift */,
+				52019A6026DE2ACB005E8278 /* BeamObjectRequest+Promises.swift */,
+			);
+			path = Requests;
+			sourceTree = "<group>";
+		};
+		523060A627426C7400A03844 /* GraphQLRequests */ = {
+			isa = PBXGroup;
+			children = (
+				5224CD3D2685FF6D00D4179E /* BeamObject */,
+			);
+			path = GraphQLRequests;
 			sourceTree = "<group>";
 		};
 		523A32C72677648700606768 /* Configuration */ = {
@@ -5759,6 +5802,7 @@
 				0D15BE432681DAC30035F322 /* BeamElementRecord.swift in Sources */,
 				A043B7FE26593A5300E267E5 /* TabGroupingWindow.swift in Sources */,
 				418173C32581276F00317ED8 /* String+NSMutableAttributedString.swift in Sources */,
+				523060A827426D1400A03844 /* BeamObjectManagerCall.swift in Sources */,
 				A5DE86A42692AEEC00E05C20 /* BeamWindow+NSMenu.swift in Sources */,
 				A5ECC8FF2679EBB500D8A087 /* HoverVisibleModifier.swift in Sources */,
 				96120D0E260C917600592546 /* TextLine.swift in Sources */,

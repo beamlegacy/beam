@@ -1,44 +1,66 @@
 import Foundation
-import Promises
+import PromiseKit
 import BeamCore
 
 extension BeamObjectManagerDelegate {
     func saveAllOnBeamObjectApi() -> Promise<[BeamObjectType]> {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-            return Promise(APIRequestError.notAuthenticated)
+            return Promise(error: APIRequestError.notAuthenticated)
         }
 
         self.willSaveAllOnBeamObjectApi()
+
         var objects: [BeamObjectType]
         do {
             objects = try allObjects(updatedSince: Persistence.Sync.BeamObjects.last_updated_at)
         } catch {
-            return Promise(error)
+            return Promise(error: error)
         }
 
-        return saveOnBeamObjectsAPI(objects)
+        let promise: Promise<[BeamObjectType]> = saveOnBeamObjectsAPI(objects)
+        return promise
     }
 
-    func saveOnBeamObjectsAPI(_ objects: [BeamObjectType]) -> Promise<[BeamObjectType]> {
+    func saveOnBeamObjectsAPI(_ objects: [BeamObjectType], deep: Int = 0, refreshPreviousChecksum: Bool = true) -> Promise<[BeamObjectType]> {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-            return Promise(APIRequestError.notAuthenticated)
+            return Promise(error: APIRequestError.notAuthenticated)
+        }
+
+        guard deep < 3 else {
+            return Promise(error: BeamObjectManagerDelegateError.nestedTooDeep)
         }
 
         let objectManager = BeamObjectManager()
         objectManager.conflictPolicyForSave = Self.conflictPolicy
 
-        let promise: Promise<[BeamObjectType]> = objectManager.saveToAPI(objects)
+        let objectsToSave: [BeamObjectType]
+        do {
+            // A previous network call might have changed the previousChecksum in the meantime
+            let checksums = try checksumsForIds(objects.map { $0.beamObjectId })
+
+            objectsToSave = try objects.map {
+                var objectToSave = try $0.copy()
+                if refreshPreviousChecksum {
+                    objectToSave.previousChecksum = checksums[$0.beamObjectId]
+                }
+                return objectToSave
+            }
+        } catch {
+            return Promise(error: error)
+        }
+
+        let promise: Promise<[BeamObjectType]> = objectManager.saveToAPI(objectsToSave)
         let backgroundQueue = DispatchQueue.global(qos: .userInitiated)
 
-        return promise.then(on: backgroundQueue) { remoteObjects -> Promise<[BeamObjectType]> in
+        return promise.map(on: backgroundQueue) { remoteObjects in
             try self.persistChecksum(remoteObjects)
-            return Promise(remoteObjects)
+            return remoteObjects
         }.recover(on: backgroundQueue) { error -> Promise<[BeamObjectType]> in
             Logger.shared.logError("Could not save all \(objects.count) \(BeamObjectType.beamObjectTypeName) objects: \(error.localizedDescription)",
                                    category: .beamObjectNetwork)
 
             if case BeamObjectManagerObjectError<BeamObjectType>.invalidChecksum = error {
-                return self.manageInvalidChecksum(error)
+                return self.manageInvalidChecksum(deep: deep, error: error)
             }
 
             // We don't manage anything else than `BeamObjectManagerError.multipleErrors`
@@ -50,12 +72,12 @@ extension BeamObjectManagerDelegate {
         }
     }
 
-    internal func manageInvalidChecksum(_ error: Error) -> Promise<[BeamObjectType]> {
+    internal func manageInvalidChecksum(deep: Int, error: Error) -> Promise<[BeamObjectType]> {
         // Early return except for checksum issues.
         guard case BeamObjectManagerObjectError<BeamObjectType>.invalidChecksum(let conflictedObjects,
                                                                                 let goodObjects,
                                                                                 let remoteObjects) = error else {
-            return Promise(error)
+            return Promise(error: error)
         }
 
         do {
@@ -77,17 +99,17 @@ extension BeamObjectManagerDelegate {
                 }
             }
 
-            let promise: Promise<[BeamObjectType]> = self.saveOnBeamObjectsAPI(mergedObjects)
+            let promise: Promise<[BeamObjectType]> = self.saveOnBeamObjectsAPI(mergedObjects, deep: deep + 1, refreshPreviousChecksum: false)
             let backgroundQueue = DispatchQueue.global(qos: .userInitiated)
 
-            return promise.then(on: backgroundQueue) { remoteObjects -> Promise<[BeamObjectType]> in
+            return promise.map(on: backgroundQueue) { remoteObjects in
                 var allObjects: [BeamObjectType] = []
                 allObjects.append(contentsOf: goodObjects)
                 allObjects.append(contentsOf: remoteObjects)
 
                 try self.saveObjectsAfterConflict(remoteObjects)
 
-                return Promise(allObjects)
+                return allObjects
             }.recover(on: backgroundQueue) { error -> Promise<[BeamObjectType]> in
                 if !goodObjects.isEmpty {
                     try? self.persistChecksum(goodObjects)
@@ -95,7 +117,7 @@ extension BeamObjectManagerDelegate {
                 throw error
             }
         } catch {
-            return Promise(error)
+            return Promise(error: error)
         }
     }
 
@@ -112,15 +134,15 @@ extension BeamObjectManagerDelegate {
             guard case BeamObjectManagerObjectError<BeamObjectType>.invalidChecksum(let conflictedObjects,
                                                                                     let errorGoodObjects,
                                                                                     let remoteObjects) = insideError else {
-                return Promise(BeamObjectManagerError.multipleErrors(errors))
+                return Promise(error: BeamObjectManagerError.multipleErrors(errors))
             }
 
             guard let conflictedObject = conflictedObjects.first, conflictedObjects.count == 1 else {
-                return Promise(BeamObjectManagerDelegateError.runtimeError("Had more than one object back"))
+                return Promise(error: BeamObjectManagerDelegateError.runtimeError("Had more than one object back"))
             }
 
             guard let remoteObject = remoteObjects.first, remoteObjects.count == 1 else {
-                return Promise(BeamObjectManagerDelegateError.runtimeError("Had more than one object back"))
+                return Promise(error: BeamObjectManagerDelegateError.runtimeError("Had more than one object back"))
             }
 
             do {
@@ -130,33 +152,33 @@ extension BeamObjectManagerDelegate {
                 goodObjects.append(contentsOf: errorGoodObjects)
                 newObjects.append(mergedObject)
             } catch {
-                return Promise(error)
+                return Promise(error: error)
             }
         }
 
         let promise: Promise<[BeamObjectType]> = saveOnBeamObjectsAPI(newObjects)
         let backgroundQueue = DispatchQueue.global(qos: .userInitiated)
 
-        return promise.then(on: backgroundQueue) { newObjectsSaved -> Promise<[BeamObjectType]> in
+        return promise.map(on: backgroundQueue) { newObjectsSaved in
             try self.saveObjectsAfterConflict(newObjectsSaved)
-            return Promise(goodObjects + newObjectsSaved)
+            return goodObjects + newObjectsSaved
         }
     }
 
     func deleteFromBeamObjectAPI(_ id: UUID) -> Promise<Bool> {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-            return Promise(APIRequestError.notAuthenticated)
+            return Promise(error: APIRequestError.notAuthenticated)
         }
 
         let objectManager = BeamObjectManager()
         let backgroundQueue = DispatchQueue.global(qos: .userInitiated)
 
-        return objectManager.delete(id).then(on: backgroundQueue) { _ in true }
+        return objectManager.delete(id).map(on: backgroundQueue) { _ in true }
     }
 
     func deleteFromBeamObjectAPI(_ ids: [UUID]) -> Promise<Bool> {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-            return Promise(APIRequestError.notAuthenticated)
+            return Promise(error: APIRequestError.notAuthenticated)
         }
 
         let promises: [Promise<Bool>] = ids.map {
@@ -164,14 +186,16 @@ extension BeamObjectManagerDelegate {
         }
         let backgroundQueue = DispatchQueue.global(qos: .userInitiated)
 
-        return all(promises).then(on: backgroundQueue) { _ in
-            Promise(true)
+        return firstly {
+            when(fulfilled: promises).asVoid().then(on: backgroundQueue) {
+                Promise.value(true)
+            }
         }
     }
 
     func deleteAllFromBeamObjectAPI() -> Promise<Bool> {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-            return Promise(APIRequestError.notAuthenticated)
+            return Promise(error: APIRequestError.notAuthenticated)
         }
 
         let objectManager = BeamObjectManager()
@@ -181,7 +205,7 @@ extension BeamObjectManagerDelegate {
     func refreshFromBeamObjectAPI(_ object: BeamObjectType,
                                   _ forced: Bool = false) -> Promise<BeamObjectType?> {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-            return Promise(APIRequestError.notAuthenticated)
+            return Promise(error: APIRequestError.notAuthenticated)
         }
 
         let objectManager = BeamObjectManager()
@@ -189,21 +213,21 @@ extension BeamObjectManagerDelegate {
 
         guard !forced else {
             return objectManager.fetchObject(object).then(on: backgroundQueue) {
-                Promise($0)
+                Promise.value($0)
             }
         }
 
         return objectManager.fetchObjectUpdatedAt(object).then(on: backgroundQueue) { updatedAt -> Promise<BeamObjectType?> in
             guard let updatedAt = updatedAt, updatedAt > object.updatedAt else {
-                return Promise(nil)
+                return .value(nil)
             }
 
             return objectManager.fetchObject(object).then(on: backgroundQueue) {
-                Promise($0)
+                Promise.value($0)
             }
         }.recover(on: backgroundQueue) { error -> Promise<BeamObjectType?> in
             if case APIRequestError.notFound = error {
-                return Promise(nil)
+                return .value(nil)
             }
             throw error
         }
@@ -211,7 +235,7 @@ extension BeamObjectManagerDelegate {
 
     func fetchAllFromBeamObjectAPI() -> Promise<[BeamObjectType]> {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-            return Promise(APIRequestError.notAuthenticated)
+            return Promise(error: APIRequestError.notAuthenticated)
         }
 
         let objectManager = BeamObjectManager()
@@ -221,31 +245,42 @@ extension BeamObjectManagerDelegate {
 
     func saveOnBeamObjectAPI(_ object: BeamObjectType) -> Promise<BeamObjectType> {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-            return Promise(APIRequestError.notAuthenticated)
+            return Promise(error: APIRequestError.notAuthenticated)
         }
 
         let objectManager = BeamObjectManager()
         objectManager.conflictPolicyForSave = Self.conflictPolicy
         let backgroundQueue = DispatchQueue.global(qos: .userInitiated)
 
-        let promise: Promise<BeamObjectType> = objectManager.saveToAPI(object)
+        var objectToSave: BeamObjectType
+
+        do {
+            objectToSave = try object.copy()
+
+            // A previous network call might have changed the previousChecksum in the meantime
+            objectToSave.previousChecksum = (try checksumsForIds([object.beamObjectId]))[object.beamObjectId]
+        } catch {
+            return Promise(error: error)
+        }
+
+        let promise: Promise<BeamObjectType> = objectManager.saveToAPI(objectToSave)
 
         return promise.then(on: backgroundQueue) { remoteObject -> Promise<BeamObjectType> in
             try self.persistChecksum([remoteObject])
-            return Promise(remoteObject)
+            return .value(remoteObject)
         }.recover(on: backgroundQueue) { error -> Promise<BeamObjectType> in
             guard case BeamObjectManagerObjectError<BeamObjectType>.invalidChecksum = error else {
                 throw error
             }
 
-            let promise2: Promise<[BeamObjectType]> = self.manageInvalidChecksum(error)
-            return promise2.then(on: backgroundQueue) { objects in
+            let promise2: Promise<[BeamObjectType]> = self.manageInvalidChecksum(deep: 0, error: error)
+            return promise2.map(on: backgroundQueue) { objects in
                 guard let newObject = objects.first, objects.count == 1 else {
                     throw BeamObjectManagerDelegateError.runtimeError("Had more than one object back")
                 }
 
                 try self.persistChecksum([newObject])
-                return Promise(newObject)
+                return newObject
             }
         }
     }

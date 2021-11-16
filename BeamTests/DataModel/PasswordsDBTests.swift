@@ -227,7 +227,12 @@ class PasswordsDBTests: XCTestCase {
 
     private func stopNetworkTests() {
         BeamObjectTestsHelper().deleteAll()
-        PasswordManager.shared.realDeleteAll()
+        let semaphore = DispatchSemaphore(value: 0)
+
+        PasswordManager.shared.realDeleteAll { _ in
+            semaphore.signal()
+        }
+        semaphore.wait()
         beamHelper.endNetworkRecording()
     }
 }

@@ -18,7 +18,7 @@ class SignInTests: BaseTest {
         ShortcutsHelper().shortcutActionInvoke(action: .openPreferences)
         GeneralPreferenceTestView().navigateTo(menu: .account)
         
-        let accountView = AccountTestView().signIn()
+        _ = AccountTestView().signIn()
         self.restartApp()
         testRailPrint("Then ")
         

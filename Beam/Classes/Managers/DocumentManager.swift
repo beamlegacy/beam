@@ -9,6 +9,7 @@ enum DocumentManagerError: Error {
     case localDocumentNotFound
     case idNotFound
     case operationCancelled
+    case networkNotCalled
     case multipleErrors([Error])
 }
 
@@ -23,8 +24,10 @@ extension DocumentManagerError: LocalizedError {
             return "id Not Found"
         case .operationCancelled:
             return "operation cancelled"
+        case .networkNotCalled:
+            return "network not called"
         case .multipleErrors(let errors):
-            return "Multiple errors: \(errors)"
+            return "multiple errors: \(errors)"
         }
     }
 }
@@ -58,14 +61,16 @@ enum DocumentFilter {
 public class DocumentManager: NSObject {
     var coreDataManager: CoreDataManager
     var context: NSManagedObjectContext
-    static let backgroundQueue = DispatchQueue(label: "DocumentManager backgroundQueue", qos: .default)
+    static let backgroundQueue = DispatchQueue(label: "co.beamapp.documentManager.backgroundQueue", qos: .default)
     var backgroundQueue: DispatchQueue { Self.backgroundQueue }
 
-    let saveDocumentQueue = OperationQueue()
-    var saveOperations: [UUID: BlockOperation] = [:]
+    static let saveDocumentQueue = DispatchQueue(label: "co.beamapp.documentManager.saveQueue", qos: .userInitiated)
+    var saveDocumentQueue: DispatchQueue { Self.saveDocumentQueue }
+
     var saveDocumentPromiseCancels: [UUID: () -> Void] = [:]
 
-    static var networkTasks: [UUID: (DispatchWorkItem, ((Swift.Result<Bool, Error>) -> Void)?)] = [:]
+    //swiftlint:disable:next large_tuple
+    static var networkTasks: [UUID: (DispatchWorkItem, Bool, ((Swift.Result<Bool, Error>) -> Void)?)] = [:]
     static var networkTasksSemaphore = DispatchSemaphore(value: 1)
     var thread: Thread
     @discardableResult func checkThread() -> Bool {
@@ -85,7 +90,6 @@ public class DocumentManager: NSObject {
         self.thread = Thread.current
         self.coreDataManager = coreDataManager ?? CoreDataManager.shared
         context = Thread.isMainThread ? self.coreDataManager.mainContext : self.coreDataManager.persistentContainer.newBackgroundContext()
-        saveDocumentQueue.maxConcurrentOperationCount = 1
 
         super.init()
 
@@ -580,6 +584,7 @@ public class DocumentManager: NSObject {
     }
 
     // MARK: Shared
+    // swiftlint:disable function_body_length
     func saveAndThrottle(_ documentStruct: DocumentStruct,
                          _ delay: Double = 1.0,
                          _ networkCompletion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
@@ -592,44 +597,83 @@ public class DocumentManager: NSObject {
         Self.networkTasksSemaphore.wait()
         defer { Self.networkTasksSemaphore.signal() }
 
+        /*
+         We only want to discard previous throttled network tasks if they haven't started yet, else we need to let them
+         run and complete, to make sure they store the previous checksum
+         */
         if let tuple = Self.networkTasks[document_id] {
-            tuple.0.cancel()
-            tuple.1?(.failure(DocumentManagerError.operationCancelled))
-        }
+            if tuple.1 == false {
+                Logger.shared.logDebug("Cancel previous throttled network call", category: .documentNetwork)
 
-        var networkTask: DispatchWorkItem!
-
-        networkTask = DispatchWorkItem { [weak self] in
-            guard let self = self else { return }
-
-            Logger.shared.logDebug("Network task for \(documentStruct.titleAndId) executing",
-                                   category: .documentNetwork)
-            let localTimer = BeamDate.now
-
-            self.backgroundQueue.async {
-                // We want to fetch back the document, to update it's previousChecksum
-                // context.refresh(document, mergeChanges: false)
-                let documentManager = DocumentManager()
-                guard let updatedDocument = try? documentManager.fetchWithId(documentStruct.id) else {
-                    Logger.shared.logWarning("Weird, document disappeared (deleted?), isCancelled: \(networkTask.isCancelled): \(documentStruct.titleAndId)",
-                                             category: .coredata)
-                    networkCompletion?(.failure(DocumentManagerError.localDocumentNotFound))
-                    return
-                }
-
-                self.saveDocumentStructOnAPI(DocumentStruct(document: updatedDocument)) { result in
-                    Self.networkTasksSemaphore.wait()
-                    Self.networkTasks.removeValue(forKey: document_id)
-                    Self.networkTasksSemaphore.signal()
-                    networkCompletion?(result)
-                    Logger.shared.logDebug("Network task for \(documentStruct.titleAndId) executed",
-                                           category: .documentNetwork,
-                                           localTimer: localTimer)
-                }
+                tuple.0.cancel()
+                tuple.2?(.failure(DocumentManagerError.operationCancelled))
             }
         }
 
-        Self.networkTasks[document_id] = (networkTask, networkCompletion)
+        var networkTask: DispatchWorkItem!
+        var networkTaskStarted = false
+
+        networkTask = DispatchWorkItem {
+            Logger.shared.logDebug("Network task called for \(documentStruct.titleAndId)",
+                                   category: .documentNetwork)
+
+            guard !networkTask.isCancelled else {
+                Logger.shared.logDebug("Network task called for \(documentStruct.titleAndId) but task is cancelled",
+                                       category: .documentNetwork)
+                networkCompletion?(.failure(DocumentManagerError.operationCancelled))
+                return
+            }
+            networkTaskStarted = true
+
+            Logger.shared.logDebug("Network task for \(documentStruct.titleAndId) executing",
+                                   category: .documentNetwork)
+
+            let localTimer = BeamDate.now
+
+            // We want to fetch back the document, to update it's previousChecksum
+            // context.refresh(document, mergeChanges: false)
+            let documentManager = DocumentManager()
+
+            Logger.shared.logDebug("Fetching documentManager.fetchWithId", category: .documentNetwork)
+
+            guard let updatedDocument = try? documentManager.fetchWithId(documentStruct.id) else {
+                Logger.shared.logWarning("Weird, document disappeared (deleted?), isCancelled: \(networkTask.isCancelled): \(documentStruct.titleAndId)",
+                                         category: .coredata)
+                networkCompletion?(.failure(DocumentManagerError.localDocumentNotFound))
+                return
+            }
+            Logger.shared.logDebug("Fetching documentManager.fetchWithId: previousChecksum \(updatedDocument.beam_object_previous_checksum ?? "-")", category: .documentNetwork)
+
+            let saveObject = DocumentStruct(document: updatedDocument)
+
+            Logger.shared.logDebug("Network task for \(saveObject.titleAndId).",
+                                   category: .documentNetwork)
+
+            guard !networkTask.isCancelled else { return }
+
+            let semaphore = DispatchSemaphore(value: 0)
+            let request = documentManager.saveDocumentStructOnAPI(saveObject) { result in
+                networkCompletion?(result)
+
+                Self.networkTasksSemaphore.wait()
+                Self.networkTasks.removeValue(forKey: document_id)
+                Self.networkTasksSemaphore.signal()
+
+                Logger.shared.logDebug("Network task for \(documentStruct.titleAndId) executed",
+                                       category: .documentNetwork,
+                                       localTimer: localTimer)
+
+                semaphore.signal()
+            }
+            semaphore.wait()
+
+            if request == nil {
+                Logger.shared.logDebug("Network call already running, reinjecting", category: .documentNetwork)
+                documentManager.saveAndThrottle(saveObject)
+            }
+        }
+
+        Self.networkTasks[document_id] = (networkTask, networkTaskStarted, networkCompletion)
         // `asyncAfter` will not execute before `deadline` but might be executed later. It is not accurate.
         // TODO: use `Timer.scheduledTimer` or `perform:with:afterDelay`
         backgroundQueue.asyncAfter(deadline: .now() + delay, execute: networkTask)

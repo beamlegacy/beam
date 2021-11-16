@@ -35,8 +35,7 @@ class DatabaseManager {
     private let mainContext: NSManagedObjectContext
     private let backgroundContext: NSManagedObjectContext
     let saveDatabaseQueue = OperationQueue()
-    private static var networkRequests: [UUID: APIRequest] = [:]
-    private static var networkTasks: [UUID: URLSessionTask] = [:]
+
     let backgroundQueue = DispatchQueue(label: "DatabaseManager backgroundQueue", qos: .default)
     var saveDatabasePromiseCancels: [UUID: () -> Void] = [:]
 

@@ -110,7 +110,6 @@ class BeamUITestsMenuGenerator {
     }
 
     private func populateWithJournalNote(count: Int) {
-        let documentManager = DocumentManager()
         let generator = FakeNoteGenerator(count: count, journalRatio: 1, futureRatio: 0)
         generator.generateNotes()
         for note in generator.notes {
@@ -139,7 +138,6 @@ class BeamUITestsMenuGenerator {
     }
 
     static public func create100Notes() {
-        let documentManager = DocumentManager()
         let generator = FakeNoteGenerator(count: 100, journalRatio: 0.2, futureRatio: 0.1)
         generator.generateNotes()
         for note in generator.notes {

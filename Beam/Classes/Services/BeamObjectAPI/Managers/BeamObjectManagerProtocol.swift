@@ -44,6 +44,7 @@ protocol BeamObjectManagerDelegate: AnyObject, BeamObjectManagerDelegateProtocol
 
 enum BeamObjectManagerDelegateError: Error {
     case runtimeError(String)
+    case nestedTooDeep
 }
 
 extension BeamObjectManagerDelegateError: LocalizedError {
@@ -51,6 +52,8 @@ extension BeamObjectManagerDelegateError: LocalizedError {
         switch self {
         case .runtimeError(let text):
             return text
+        case .nestedTooDeep:
+            return "Nested too deep"
         }
     }
 }

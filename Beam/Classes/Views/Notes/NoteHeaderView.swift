@@ -258,7 +258,6 @@ extension NoteHeaderView {
         }
 
         func commitRenameCard(fromTextField: Bool) {
-            let documentManager = DocumentManager()
             let newTitle = formatToValidTitle(titleText)
             guard !newTitle.isEmpty, newTitle != note?.title, !isTitleTaken, canEditTitle else {
                 if fromTextField && isTitleTaken {
