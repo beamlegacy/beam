@@ -584,6 +584,7 @@ public class DocumentManager: NSObject {
     }
 
     // MARK: Shared
+    // swiftlint:disable function_body_length
     func saveAndThrottle(_ documentStruct: DocumentStruct,
                          _ delay: Double = 1.0,
                          _ networkCompletion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {

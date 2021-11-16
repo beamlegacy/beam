@@ -88,7 +88,7 @@ class BeamNoteSharingUtils {
                 note.ongoingPublicationOperation = false
             case .success(let status):
                 note.publicationStatus = status
-                note.save() { result in
+                note.save { result in
                     switch result {
                     case .failure(let error):
                         Logger.shared.logError(error.localizedDescription, category: .notePublishing)

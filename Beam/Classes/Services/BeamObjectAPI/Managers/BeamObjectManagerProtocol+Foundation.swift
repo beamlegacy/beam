@@ -1,5 +1,6 @@
 import Foundation
 import BeamCore
+// swiftlint:disable file_length
 
 extension BeamObjectManagerDelegate {
     func saveAllOnBeamObjectApi(_ completion: @escaping ((Result<(Int, Date?), Error>) -> Void)) throws -> APIRequest? {

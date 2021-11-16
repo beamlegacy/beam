@@ -2751,10 +2751,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                 let newTitle2 = "new Title2"
                 let newTitle3 = "new Title3"
 
-                var previousChecksum1 = ""
-                var previousChecksum2 = ""
-                var previousChecksum3 = ""
-
                 beforeEach {
                     self.saveAllObjectsAndSaveChecksum()
 
@@ -2765,10 +2761,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     title1 = object1.title!
                     title2 = object2.title!
                     title3 = object3.title!
-
-                    previousChecksum1 = (try? self.checksum(object1)) ?? ""
-                    previousChecksum2 = (try? self.checksum(object2)) ?? ""
-                    previousChecksum3 = (try? self.checksum(object3)) ?? ""
 
                     BeamDate.travel(2)
 
