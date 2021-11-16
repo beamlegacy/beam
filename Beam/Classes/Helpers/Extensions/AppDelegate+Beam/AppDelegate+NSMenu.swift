@@ -125,7 +125,6 @@ class WebviewRelatedMenuItem: NSMenuItem, MenuItemCustomValidation {
 
 class LoadedWebviewRelatedMenuItem: NSMenuItem, MenuItemCustomValidation {
     func validateForState(_ state: BeamState?, window: NSWindow?) -> Bool {
-        let textViewFirstResponder = window?.firstResponder as? NSTextView
         return state?.mode == .web &&
             state?.browserTabsManager.currentTab != nil
         && state?.browserTabsManager.currentTab?.url != nil
