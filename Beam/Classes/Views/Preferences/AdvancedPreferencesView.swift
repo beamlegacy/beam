@@ -278,6 +278,24 @@ struct AdvancedPreferencesView: View {
                     })
                 }
 
+                Preferences.Section(title: "Cleanup ", bottomDivider: true) {
+                    Button(action: {
+                        let manager = DocumentManager()
+                        manager
+                            .allDocumentsIds(includeDeletedNotes: true)
+                            .forEach { _ = BeamNote.fetch(id: $0, keepInMemory: false) }
+                    }, label: {
+                        Text("Notes browsing sessions").frame(minWidth: 100)
+                    })
+                    Button(action: {
+                        self.loading = true
+                        BrowsingTreeStoreManager.shared.legacyCleanup { _ in
+                            self.loading = false
+                        }
+                    }, label: {
+                        Text("Legacy browsing trees").frame(minWidth: 100)
+                    }).disabled(loading)
+                }
                 Preferences.Section(title: "Encryption key", bottomDivider: true) {
                     TextField("Private Key", text: privateKeyBinding)
                         .textFieldStyle(RoundedBorderTextFieldStyle()).frame(maxWidth: 400)
