@@ -5,7 +5,7 @@ import Combine
 class DatabasesWindow: NSWindow, NSWindowDelegate {
     init(contentRect: NSRect) {
         super.init(contentRect: contentRect,
-                   styleMask: [.titled, .closable, .miniaturizable, .texturedBackground, .resizable, .fullSizeContentView],
+                   styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
                    backing: .buffered,
                    defer: false)
         title = "All Databases"

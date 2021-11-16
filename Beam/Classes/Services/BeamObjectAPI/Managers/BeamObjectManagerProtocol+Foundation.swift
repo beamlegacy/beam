@@ -1,5 +1,6 @@
 import Foundation
 import BeamCore
+// swiftlint:disable file_length
 
 extension BeamObjectManagerDelegate {
     func saveAllOnBeamObjectApi(_ completion: @escaping ((Result<(Int, Date?), Error>) -> Void)) throws -> APIRequest? {
@@ -27,50 +28,108 @@ extension BeamObjectManagerDelegate {
 
     @discardableResult
     func saveOnBeamObjectsAPI(_ objects: [BeamObjectType],
+                              deep: Int = 0,
+                              refreshPreviousChecksum: Bool = true,
                               _ completion: @escaping ((Result<[BeamObjectType], Error>) -> Void)) throws -> APIRequest? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw APIRequestError.notAuthenticated
         }
 
+        guard deep < 3 else {
+            completion(.failure(BeamObjectManagerDelegateError.nestedTooDeep))
+            return nil
+        }
+
         let beamObjectTypes = Set(objects.map { type(of: $0).beamObjectTypeName }).joined(separator: ", ")
-        Logger.shared.logDebug("saveOnBeamObjectsAPI called with \(objects.count) objects of type \(beamObjectTypes) on API",
+        Logger.shared.logDebug("saveOnBeamObjectsAPI called with \(objects.count) objects of type \(beamObjectTypes)",
                                category: .beamObjectNetwork)
 
         let objectManager = BeamObjectManager()
         objectManager.conflictPolicyForSave = Self.conflictPolicy
 
-        return try objectManager.saveToAPI(objects) { result in
+        let uuids = objects.map { $0.beamObjectId }
+        let semaphores = BeamObjectManagerCall.objectsSemaphores(uuids: uuids)
+        semaphores.forEach { $0.wait() }
+
+        // A previous network call might have changed the previousChecksum in the meantime
+        let checksums = try checksumsForIds(objects.map { $0.beamObjectId })
+
+        let objectsToSave: [BeamObjectType] = try objects.map {
+            var objectToSave = try $0.copy()
+            if refreshPreviousChecksum {
+                objectToSave.previousChecksum = checksums[$0.beamObjectId]
+            }
+            return objectToSave
+        }
+
+        return try objectManager.saveToAPI(objectsToSave) { result in
             switch result {
             case .failure(let error):
-                Logger.shared.logError("Could not save all \(objects.count) \(BeamObjectType.beamObjectTypeName) objects: \(error.localizedDescription)",
-                                       category: .beamObjectNetwork)
-
-                if case BeamObjectManagerObjectError<BeamObjectType>.invalidChecksum = error {
-                    self.manageInvalidChecksum(error, completion)
-                    return
-                }
-
-                // We don't manage anything else than `BeamObjectManagerError.multipleErrors`
-                guard case BeamObjectManagerError.multipleErrors(let errors) = error else {
-                    completion(.failure(error))
-                    return
-                }
-
-                self.manageMultipleErrors(objects, errors, completion)
+                self.saveOnBeamObjectsAPIError(objects: objectsToSave,
+                                               uuids: uuids,
+                                               semaphores: semaphores,
+                                               deep: deep,
+                                               error: error,
+                                               completion)
 
             case .success(let remoteObjects):
-                do {
-                    if !remoteObjects.isEmpty {
-                        try self.persistChecksum(remoteObjects)
-                        self.checkPreviousChecksums(remoteObjects)
-                    }
-
-                    completion(.success(remoteObjects))
-                } catch {
-                    completion(.failure(error))
-                }
+                self.saveOnBeamObjectsAPISuccess(uuids: uuids,
+                                                 remoteObjects: remoteObjects,
+                                                 semaphores: semaphores,
+                                                 completion)
             }
         }
+    }
+
+    internal func saveOnBeamObjectsAPISuccess(uuids: [UUID],
+                                              remoteObjects: [BeamObjectType],
+                                              semaphores: [DispatchSemaphore],
+                                              _ completion: @escaping ((Result<[BeamObjectType], Error>) -> Void)) {
+        do {
+            if !remoteObjects.isEmpty {
+                try self.persistChecksum(remoteObjects)
+                self.checkPreviousChecksums(remoteObjects)
+            }
+
+            completion(.success(remoteObjects))
+        } catch {
+            completion(.failure(error))
+        }
+
+        BeamObjectManagerCall.deleteObjectsSemaphores(uuids: uuids)
+        semaphores.forEach { $0.signal() }
+    }
+
+    internal func saveOnBeamObjectsAPIError(objects: [BeamObjectType],
+                                            uuids: [UUID],
+                                            semaphores: [DispatchSemaphore],
+                                            deep: Int,
+                                            error: Error,
+                                            _ completion: @escaping ((Result<[BeamObjectType], Error>) -> Void)) {
+        Logger.shared.logError("Could not save all \(objects.count) \(BeamObjectType.beamObjectTypeName) objects: \(error.localizedDescription)",
+                               category: .beamObjectNetwork)
+
+        if case BeamObjectManagerObjectError<BeamObjectType>.invalidChecksum = error {
+            BeamObjectManagerCall.deleteObjectsSemaphores(uuids: uuids)
+            semaphores.forEach { $0.signal() }
+
+            self.manageInvalidChecksum(error, deep, completion)
+            return
+        }
+
+        // We don't manage anything else than `BeamObjectManagerError.multipleErrors`
+        guard case BeamObjectManagerError.multipleErrors(let errors) = error else {
+            BeamObjectManagerCall.deleteObjectsSemaphores(uuids: uuids)
+            semaphores.forEach { $0.signal() }
+
+            completion(.failure(error))
+            return
+        }
+
+        self.manageMultipleErrors(objects, errors, completion)
+
+        BeamObjectManagerCall.deleteObjectsSemaphores(uuids: uuids)
+        semaphores.forEach { $0.signal() }
     }
 
     @discardableResult
@@ -144,7 +203,7 @@ extension BeamObjectManagerDelegate {
     }
 
     @discardableResult
-    // swiftlint:disable:next cyclomatic_complexity
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
     func refreshFromBeamObjectAPI(_ object: BeamObjectType,
                                   _ forced: Bool = false,
                                   _ completion: @escaping ((Result<BeamObjectType?, Error>) -> Void)) throws -> APIRequest {
@@ -154,17 +213,25 @@ extension BeamObjectManagerDelegate {
 
         let objectManager = BeamObjectManager()
 
+        let semaphore = BeamObjectManagerCall.objectSemaphore(uuid: object.beamObjectId)
+        semaphore.wait()
+
         guard !forced else {
             return try objectManager.fetchObject(object) { result in
                 switch result {
                 case .failure(let error):
                     if case APIRequestError.notFound = error {
                         completion(.success(nil))
+                        BeamObjectManagerCall.deleteObjectSemaphore(uuid: object.beamObjectId)
+                        semaphore.signal()
                         return
                     }
                     completion(.failure(error))
                 case .success(let remoteObject): completion(.success(remoteObject))
                 }
+
+                BeamObjectManagerCall.deleteObjectSemaphore(uuid: object.beamObjectId)
+                semaphore.signal()
             }
         }
 
@@ -173,6 +240,8 @@ extension BeamObjectManagerDelegate {
             case .failure(let error):
                 if case APIRequestError.notFound = error {
                     completion(.success(nil))
+                    BeamObjectManagerCall.deleteObjectSemaphore(uuid: object.beamObjectId)
+                    semaphore.signal()
                     return
                 }
 
@@ -180,6 +249,8 @@ extension BeamObjectManagerDelegate {
             case .success(let updatedAt):
                 guard let updatedAt = updatedAt, updatedAt > object.updatedAt else {
                     completion(.success(nil))
+                    BeamObjectManagerCall.deleteObjectSemaphore(uuid: object.beamObjectId)
+                    semaphore.signal()
                     return
                 }
 
@@ -195,6 +266,9 @@ extension BeamObjectManagerDelegate {
                     completion(.failure(error))
                 }
             }
+
+            BeamObjectManagerCall.deleteObjectSemaphore(uuid: object.beamObjectId)
+            semaphore.signal()
         }
     }
 
@@ -211,7 +285,7 @@ extension BeamObjectManagerDelegate {
 
     @discardableResult
     func saveOnBeamObjectAPI(_ object: BeamObjectType,
-                             _ completion: @escaping ((Result<BeamObjectType, Error>) -> Void)) throws -> APIRequest {
+                             _ completion: @escaping ((Result<BeamObjectType, Error>) -> Void)) throws -> APIRequest? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw APIRequestError.notAuthenticated
         }
@@ -219,49 +293,93 @@ extension BeamObjectManagerDelegate {
         let objectManager = BeamObjectManager()
         objectManager.conflictPolicyForSave = Self.conflictPolicy
 
-        let networkTask = try objectManager.saveToAPI(object) { result in
+        Logger.shared.logDebug("saveOnBeamObjectAPI called. Object type: \(type(of: object).beamObjectTypeName)",
+                               category: .beamObjectNetwork)
+
+        let semaphore = BeamObjectManagerCall.objectSemaphore(uuid: object.beamObjectId)
+        semaphore.wait()
+
+        var objectToSave = try object.copy()
+
+        // A previous network call might have changed the previousChecksum in the meantime
+        objectToSave.previousChecksum = (try checksumsForIds([object.beamObjectId]))[object.beamObjectId]
+
+        let networkTask = try objectManager.saveToAPI(objectToSave) { result in
             switch result {
             case .failure(let error):
-                guard case BeamObjectManagerObjectError<BeamObjectType>.invalidChecksum = error else {
-                    completion(.failure(error))
-                    return
-                }
-
-                self.manageInvalidChecksum(error) { result in
-                    switch result {
-                    case .failure(let error): completion(.failure(error))
-                    case .success(let objects):
-                        guard let newObject = objects.first, objects.count == 1 else {
-                            completion(.failure(BeamObjectManagerDelegateError.runtimeError("Had more than one object back")))
-                            return
-                        }
-
-                        do {
-                            try self.persistChecksum([newObject])
-                            self.checkPreviousChecksums([newObject])
-
-                            completion(.success(newObject))
-                        } catch {
-                            completion(.failure(error))
-                        }
-                    }
-                }
+                self.saveOnBeamObjectAPIError(object: object,
+                                              semaphore: semaphore,
+                                              error: error,
+                                              completion)
             case .success(let remoteObject):
-                do {
-                    try self.persistChecksum([remoteObject])
-                    self.checkPreviousChecksums([remoteObject])
-
-                    completion(.success(remoteObject))
-                } catch {
-                    completion(.failure(error))
-                }
+                self.saveOnBeamObjectAPISuccess(object: object,
+                                                remoteObject: remoteObject,
+                                                semaphore: semaphore,
+                                                completion)
             }
         }
 
         return networkTask
     }
 
+    internal func saveOnBeamObjectAPISuccess(object: BeamObjectType,
+                                             remoteObject: BeamObjectType,
+                                             semaphore: DispatchSemaphore,
+                                             _ completion: @escaping ((Result<BeamObjectType, Error>) -> Void)) {
+        do {
+            try self.persistChecksum([remoteObject])
+            self.checkPreviousChecksums([remoteObject])
+
+            completion(.success(remoteObject))
+        } catch {
+            completion(.failure(error))
+        }
+
+        BeamObjectManagerCall.deleteObjectSemaphore(uuid: object.beamObjectId)
+        semaphore.signal()
+    }
+
+    internal func saveOnBeamObjectAPIError(object: BeamObjectType,
+                                           semaphore: DispatchSemaphore,
+                                           error: Error,
+                                           _ completion: @escaping ((Result<BeamObjectType, Error>) -> Void)) {
+        guard case BeamObjectManagerObjectError<BeamObjectType>.invalidChecksum = error else {
+            completion(.failure(error))
+
+            BeamObjectManagerCall.deleteObjectSemaphore(uuid: object.beamObjectId)
+            semaphore.signal()
+
+            return
+        }
+
+        // When dealing with invalid checksum, we will retry the `saveOnBeamObjectAPI` so semaphore must be unlocked
+        // first
+        BeamObjectManagerCall.deleteObjectSemaphore(uuid: object.beamObjectId)
+        semaphore.signal()
+
+        self.manageInvalidChecksum(error, 0) { result in
+            switch result {
+            case .failure(let error): completion(.failure(error))
+            case .success(let objects):
+                guard let newObject = objects.first, objects.count == 1 else {
+                    completion(.failure(BeamObjectManagerDelegateError.runtimeError("Had more than one object back")))
+                    return
+                }
+
+                do {
+                    try self.persistChecksum([newObject])
+                    self.checkPreviousChecksums([newObject])
+
+                    completion(.success(newObject))
+                } catch {
+                    completion(.failure(error))
+                }
+            }
+        }
+    }
+
     internal func manageInvalidChecksum(_ error: Error,
+                                        _ deep: Int,
                                         _ completion: @escaping ((Result<[BeamObjectType], Error>) -> Void)) {
         // Early return except for checksum issues.
         guard case BeamObjectManagerObjectError<BeamObjectType>.invalidChecksum(let conflictedObjects,
@@ -290,7 +408,7 @@ extension BeamObjectManagerDelegate {
                 }
             }
 
-            try self.saveOnBeamObjectsAPI(mergedObjects) { result in
+            try self.saveOnBeamObjectsAPI(mergedObjects, deep: deep + 1, refreshPreviousChecksum: false) { result in
                 switch result {
                 case .failure(let error):
                     if !goodObjects.isEmpty {

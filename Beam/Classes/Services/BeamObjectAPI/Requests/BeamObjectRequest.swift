@@ -69,4 +69,13 @@ class BeamObjectRequest: APIRequest {
         return UpdateBeamObjects(beamObjects: result, privateKey: nil)
         #endif
     }
+
+    override func cancel() {
+        super.cancel()
+
+        if Configuration.env == "dev" {
+            Logger.shared.logWarning("Be careful cancelling BeamObject requests! Can't do that for writes...",
+                                     category: .beamObjectNetwork)
+        }
+    }
 }

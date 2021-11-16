@@ -33,8 +33,6 @@ class NoteAutoSaveService: ObservableObject {
     }
 
     func saveNotes() {
-        let documentManager = DocumentManager()
-
         for note in notesToSave {
             note.key.save()
 //            if note.value {

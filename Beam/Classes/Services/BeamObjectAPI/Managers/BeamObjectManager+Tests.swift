@@ -3,13 +3,11 @@ import Foundation
 // MARK: - For tests
 extension BeamObjectManager {
     static func clearNetworkCalls() {
-        for (_, request) in Self.networkRequests {
+        #if DEBUG
+        for request in Self.networkRequests {
             request.cancel()
         }
-
-        for request in Self.networkRequestsWithoutID {
-            request.cancel()
-        }
+        #endif
     }
 
     /*
@@ -17,18 +15,13 @@ extension BeamObjectManager {
      not work when used with Vinyl, which doesn't implement `cancel()`.
      */
     static func isAllNetworkCallsCompleted() -> Bool {
-        for request in Self.networkRequestsWithoutID {
+        #if DEBUG
+        for request in Self.networkRequests {
             if [URLSessionTask.State.suspended, .running].contains(request.dataTask?.state) {
                 return false
             }
         }
-
-        for (_, request) in Self.networkRequests {
-            if [URLSessionTask.State.suspended, .running].contains(request.dataTask?.state) {
-                return false
-            }
-        }
-
+        #endif
         return true
     }
 }
