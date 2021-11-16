@@ -11,7 +11,8 @@ import XCTest
 class CardTestView: BaseView {
     
     var cardTitle: XCUIElement { return textField(CardViewLocators.TextFields.cardTitle.accessibilityIdentifier)}
-    
+
+    @discardableResult
     func waitForCardViewToLoad() -> Bool {
         return scrollView(CardViewLocators.ScrollViews.noteView.accessibilityIdentifier)
             .waitForExistence(timeout: implicitWaitTimeout)
