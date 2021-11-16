@@ -4,7 +4,7 @@ import Foundation
 extension BeamObjectManager {
     static func clearNetworkCalls() {
         #if DEBUG
-        for request in Self.networkRequestsWithoutID {
+        for request in Self.networkRequests {
             request.cancel()
         }
         #endif
@@ -16,7 +16,7 @@ extension BeamObjectManager {
      */
     static func isAllNetworkCallsCompleted() -> Bool {
         #if DEBUG
-        for request in Self.networkRequestsWithoutID {
+        for request in Self.networkRequests {
             if [URLSessionTask.State.suspended, .running].contains(request.dataTask?.state) {
                 return false
             }

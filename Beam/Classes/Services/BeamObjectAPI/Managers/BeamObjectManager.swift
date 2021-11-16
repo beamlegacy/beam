@@ -15,7 +15,7 @@ class BeamObjectManager {
     static var translators: [String: (BeamObjectManagerDelegateProtocol, [BeamObject]) throws -> Void] = [:]
 
     #if DEBUG
-    static var networkRequestsWithoutID: [APIRequest] = []
+    static var networkRequests: [APIRequest] = []
     #endif
 
     var webSocketRequest = APIWebSocketRequest()
