@@ -308,9 +308,11 @@ extension BeamNote: BeamNoteDocument {
                 Logger.shared.logError("Saving note \(self.titleAndId) failed: \(error)", category: .document)
 
                 if self.pendingSave.load(ordering: .relaxed) > 0 {
-                    Logger.shared.logDebug("Trying again: Saving note \(self.titleAndId) as there were \(self.pendingSave) pending save operations",
-                                           category: .document)
-                    self.save(completion: completion)
+                    DispatchQueue.main.async {
+                        Logger.shared.logDebug("Trying again: Saving note \(self.titleAndId) as there were \(self.pendingSave) pending save operations",
+                                               category: .document)
+                        self.save(completion: completion)
+                    }
                     return
                 }
             }
