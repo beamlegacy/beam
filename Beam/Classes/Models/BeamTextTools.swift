@@ -45,7 +45,7 @@ extension BeamText {
             return nil
         }
 
-        let linkedNote = BeamNote.fetchOrCreate(AppDelegate.main.data.documentManager, title: link)
+        let linkedNote = BeamNote.fetchOrCreate(title: link)
         if linkedNote.children.isEmpty {
             linkedNote.addChild(BeamElement())
         }
@@ -61,7 +61,7 @@ extension BeamText {
         }
 
         linkedNote.referencedByUser()
-        linkedNote.save(documentManager: AppDelegate.main.data.documentManager)
+        linkedNote.save()
 
         return linkedNote.id
     }

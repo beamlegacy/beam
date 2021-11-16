@@ -52,7 +52,7 @@ class TextNodeTests: XCTestCase {
     }
 
     func createMiniArborescence(title: String) -> BeamNote {
-        let note = BeamNote.fetchOrCreate(DocumentManager(), title: title)
+        let note = BeamNote.fetchOrCreate(title: title)
         let bullet1 = BeamElement("bullet1")
         note.addChild(bullet1)
         let bullet11 = BeamElement("bullet11")

@@ -214,7 +214,7 @@ extension BeamTextEdit {
             return
         }
         let title = BeamDate.journalNoteTitle(for: date)
-        let note = BeamNote.fetchOrCreateJournalNote(documentManager, date: date)
+        let note = BeamNote.fetchOrCreateJournalNote(date: date)
         let dateText = BeamText(text: title, attributes: [.internalLink(note.id)])
         node.cmdManager.replaceText(in: node, for: range, with: dateText)
     }
@@ -283,11 +283,11 @@ extension BeamTextEdit {
         if let editor = rootNode?.editor {
             editor.window?.makeFirstResponder(editor)
         }
-        guard let documentManager = data?.documentManager, let meeting = meeting else {
+        guard let meeting = meeting else {
             node.cmdManager.deleteText(in: node, for: range)
             return
         }
-        let text = meeting.buildBeamText(documentManager: documentManager)
+        let text = meeting.buildBeamText()
         let cmdManager = node.cmdManager
         cmdManager.beginGroup(with: "Insert Meeting")
         defer { cmdManager.endGroup() }
