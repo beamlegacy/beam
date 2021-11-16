@@ -27,9 +27,16 @@ extension BeamObjectManagerDelegate {
 
     @discardableResult
     func saveOnBeamObjectsAPI(_ objects: [BeamObjectType],
+                              deep: Int = 0,
+                              refreshPreviousChecksum: Bool = true,
                               _ completion: @escaping ((Result<[BeamObjectType], Error>) -> Void)) throws -> APIRequest? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw APIRequestError.notAuthenticated
+        }
+
+        guard deep < 3 else {
+            completion(.failure(BeamObjectManagerDelegateError.nestedTooDeep))
+            return nil
         }
 
         let beamObjectTypes = Set(objects.map { type(of: $0).beamObjectTypeName }).joined(separator: ", ")
@@ -52,7 +59,9 @@ extension BeamObjectManagerDelegate {
 
         let objectsToSave: [BeamObjectType] = try objects.map {
             var objectToSave = try $0.copy()
-            objectToSave.previousChecksum = checksums[$0.beamObjectId]
+            if refreshPreviousChecksum {
+                objectToSave.previousChecksum = checksums[$0.beamObjectId]
+            }
             return objectToSave
         }
 
@@ -62,7 +71,9 @@ extension BeamObjectManagerDelegate {
                 self.saveOnBeamObjectsAPIError(objects: objectsToSave,
                                                uuids: uuids,
                                                semaphores: semaphores,
-                                               error: error, completion)
+                                               deep: deep,
+                                               error: error,
+                                               completion)
 
             case .success(let remoteObjects):
                 self.saveOnBeamObjectsAPISuccess(uuids: uuids,
@@ -96,6 +107,7 @@ extension BeamObjectManagerDelegate {
     internal func saveOnBeamObjectsAPIError(objects: [BeamObjectType],
                                             uuids: [UUID],
                                             semaphores: [DispatchSemaphore],
+                                            deep: Int,
                                             error: Error,
                                             _ completion: @escaping ((Result<[BeamObjectType], Error>) -> Void)) {
         Logger.shared.logError("Could not save all \(objects.count) \(BeamObjectType.beamObjectTypeName) objects: \(error.localizedDescription)",
@@ -106,7 +118,7 @@ extension BeamObjectManagerDelegate {
             semaphores.forEach { $0.signal() }
             Logger.shared.logDebug("🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠", category: .beamObjectNetwork)
 
-            self.manageInvalidChecksum(error, completion)
+            self.manageInvalidChecksum(error, deep, completion)
             return
         }
 
@@ -359,7 +371,7 @@ extension BeamObjectManagerDelegate {
         semaphore.signal()
         Logger.shared.logDebug("🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠", category: .beamObjectNetwork)
 
-        self.manageInvalidChecksum(error) { result in
+        self.manageInvalidChecksum(error, 0) { result in
             switch result {
             case .failure(let error): completion(.failure(error))
             case .success(let objects):
@@ -381,6 +393,7 @@ extension BeamObjectManagerDelegate {
     }
 
     internal func manageInvalidChecksum(_ error: Error,
+                                        _ deep: Int,
                                         _ completion: @escaping ((Result<[BeamObjectType], Error>) -> Void)) {
         // Early return except for checksum issues.
         guard case BeamObjectManagerObjectError<BeamObjectType>.invalidChecksum(let conflictedObjects,
@@ -409,7 +422,7 @@ extension BeamObjectManagerDelegate {
                 }
             }
 
-            try self.saveOnBeamObjectsAPI(mergedObjects) { result in
+            try self.saveOnBeamObjectsAPI(mergedObjects, deep: deep + 1, refreshPreviousChecksum: false) { result in
                 switch result {
                 case .failure(let error):
                     if !goodObjects.isEmpty {
