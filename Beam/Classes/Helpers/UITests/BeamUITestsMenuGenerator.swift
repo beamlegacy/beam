@@ -84,7 +84,7 @@ class BeamUITestsMenuGenerator {
 
         Logger.shared.logDebug("current Note: \(currentNote.id) copy: \(newNote.id)", category: .documentDebug)
 
-        newNote.save(documentManager: documentManager) { result in
+        newNote.save { result in
             switch result {
             case .failure(let error):
                 Logger.shared.logError(error.localizedDescription, category: .general)
@@ -114,7 +114,7 @@ class BeamUITestsMenuGenerator {
         let generator = FakeNoteGenerator(count: count, journalRatio: 1, futureRatio: 0)
         generator.generateNotes()
         for note in generator.notes {
-            note.save(documentManager: documentManager)
+            note.save()
         }
     }
 
@@ -143,7 +143,7 @@ class BeamUITestsMenuGenerator {
         let generator = FakeNoteGenerator(count: 100, journalRatio: 0.2, futureRatio: 0.1)
         generator.generateNotes()
         for note in generator.notes {
-            note.save(documentManager: documentManager)
+            note.save()
         }
     }
 

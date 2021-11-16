@@ -45,7 +45,7 @@ class DeleteDocument: DocumentCommand {
             }
         } else {
             documents = documentIds.compactMap { context?.loadById(id: $0) }
-            noteLinks = saveDocumentsLinks(context: context)
+            noteLinks = saveDocumentsLinks()
             unpublishNotes(in: documents)
 
             context?.softDelete(ids: documentIds) { _ in
@@ -62,7 +62,7 @@ class DeleteDocument: DocumentCommand {
         }
         let promises: [Promises.Promise<Bool>] = documents.compactMap { context?.save($0) }
         Promises.all(promises).then { [weak self] dones in
-            self?.restoreNoteReferences(context: context)
+            self?.restoreNoteReferences()
             let done = dones.reduce(into: false) { $0 = $0 || $1 }
             completion?(done)
         }
@@ -75,11 +75,11 @@ class DeleteDocument: DocumentCommand {
         }
     }
 
-    private func saveDocumentsLinks(context: DocumentManager?) -> [BeamNoteReference] {
+    private func saveDocumentsLinks() -> [BeamNoteReference] {
         var noteLinks = [BeamNoteReference]()
         var refsMapping = [UUID: Set<UUID>]()
         documents.forEach { doc in
-            if let dm = context, let note = BeamNote.fetch(dm, id: doc.id) {
+            if let note = BeamNote.fetch(id: doc.id) {
                 let links = note.links
                 if !links.isEmpty {
                     noteLinks.append(contentsOf: links)
@@ -92,10 +92,9 @@ class DeleteDocument: DocumentCommand {
         return noteLinks
     }
 
-    private func restoreNoteReferences(context: DocumentManager?) {
-        guard let dm = context else { return }
+    private func restoreNoteReferences() {
         documents.forEach { doc in
-            guard let storedRefs = savedReferences?[doc.id], !storedRefs.isEmpty, let note = BeamNote.fetch(dm, id: doc.id)
+            guard let storedRefs = savedReferences?[doc.id], !storedRefs.isEmpty, let note = BeamNote.fetch(id: doc.id)
             else { return }
             note.references.forEach { ref in
                 ref.element?.text.makeLinksToNoteExplicit(forNote: note.title)

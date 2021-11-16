@@ -112,11 +112,10 @@ struct CalendarView: View {
     }
 
     private func addMeeting(_ meeting: Meeting, to note: BeamNote) {
-        guard let documentManager = AppDelegate.main.window?.state.data.documentManager else { return }
         var text = BeamText(text: "")
         var meetingAttributes: [BeamText.Attribute] = []
         if meeting.linkCards {
-            let meetingNote = BeamNote.fetchOrCreate(documentManager, title: meeting.name)
+            let meetingNote = BeamNote.fetchOrCreate(title: meeting.name)
             meetingAttributes = [.internalLink(meetingNote.id)]
         }
         text.insert(meeting.name, at: 0, withAttributes: meetingAttributes)
@@ -127,7 +126,7 @@ struct CalendarView: View {
             text.insert(prefix, at: 0, withAttributes: [])
             meeting.attendees.enumerated().forEach { index, attendee in
                 let name = attendee.name
-                let attendeeNote = BeamNote.fetchOrCreate(documentManager, title: name)
+                let attendeeNote = BeamNote.fetchOrCreate(title: name)
                 text.insert(name, at: position, withAttributes: [.internalLink(attendeeNote.id)])
                 position += name.count
                 if index < meeting.attendees.count - 1 {

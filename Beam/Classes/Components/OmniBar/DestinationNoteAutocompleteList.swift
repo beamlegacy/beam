@@ -332,11 +332,12 @@ extension DestinationNoteAutocompleteList {
             var autocompleteItems: [AutocompleteResult]
             var allowCreateCard = false
             var items = [DocumentStruct]()
+            let documentManager = DocumentManager()
             if !text.isEmpty {
                 allowCreateCard = true
-                items = data.documentManager.documentsWithLimitTitleMatch(title: text, limit: itemLimit)
+                items = documentManager.documentsWithLimitTitleMatch(title: text, limit: itemLimit)
             } else if useRecents {
-                items = data.documentManager.loadAllWithLimit(itemLimit)
+                items = documentManager.loadAllWithLimit(itemLimit)
             }
             items = Array(items.prefix(itemLimit))
             autocompleteItems = items.map {

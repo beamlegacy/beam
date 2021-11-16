@@ -33,10 +33,10 @@ class NoteAutoSaveService: ObservableObject {
     }
 
     func saveNotes() {
-        let documentManager = AppDelegate.main.data.documentManager
+        let documentManager = DocumentManager()
 
         for note in notesToSave {
-            note.key.save(documentManager: documentManager)
+            note.key.save()
 //            if note.value {
 //                BeamNote.requestLinkDetection()
 //            }

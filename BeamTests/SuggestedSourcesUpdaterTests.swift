@@ -10,7 +10,7 @@ class SuggestedNoteSourceUpdaterTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        updater = SuggestedNoteSourceUpdater(sessionId: UUID(), documentManager: DocumentManager())
+        updater = SuggestedNoteSourceUpdater(sessionId: UUID())
         for _ in 0...6 {
             pageIDs.append(UUID())
         }

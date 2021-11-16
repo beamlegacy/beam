@@ -466,8 +466,7 @@ import Promises
     /// - Parameter noteTitle: The title of the Note
     /// - Returns: The fetched note or nil if no note exists
     func getNote(fromTitle noteTitle: String) -> BeamNote? {
-        guard let documentManager = state?.data.documentManager else { return nil }
-        return BeamNote.fetch(documentManager, title: noteTitle)
+        return BeamNote.fetch(title: noteTitle)
     }
 
     var backListSize = 0
