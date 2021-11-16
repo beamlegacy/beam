@@ -268,8 +268,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         for window in windows where window.state.browserTabsManager.tabs.count > 0 {
             tmpCmdManager.beginGroup(with: AppDelegate.closeTabCmdGrp)
 
-            for tab in window.state.browserTabsManager.tabs {
-                guard !tab.isPinned, let index = window.state.browserTabsManager.tabs.firstIndex(of: tab) else { continue }
+            for tab in window.state.browserTabsManager.tabs.reversed() {
+                guard !tab.isPinned, tab.url != nil, let index = window.state.browserTabsManager.tabs.firstIndex(of: tab) else { continue }
                 let closeTabCmd = CloseTab(tab: tab, appIsClosing: true, tabIndex: index, wasCurrentTab: window.state.browserTabsManager.currentTab === tab)
                 tmpCmdManager.appendToDone(command: closeTabCmd)
             }

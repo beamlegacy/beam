@@ -59,8 +59,11 @@ extension BeamWindow {
         let decoder = JSONDecoder()
         guard let windowCommands = try? decoder.decode([Int: GroupWebCommand].self, from: data) else { return }
         for windowCommand in windowCommands.keys {
-            guard let beamWindow = AppDelegate.main.window,
+            guard var beamWindow = AppDelegate.main.window,
                     let command = windowCommands[windowCommand] else { continue }
+            if windowCommand > 0 {
+                beamWindow = AppDelegate.main.createWindow(frame: nil)
+            }
             beamWindow.state.cmdManager.appendToDone(command: command)
 
             if beamWindow.state.cmdManager.canUndo {
