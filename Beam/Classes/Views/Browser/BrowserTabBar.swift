@@ -97,7 +97,7 @@ struct BrowserTabBar: View {
                     }
                     Button("Close Other Tabs") {
                         state.closeAllTabsButCurrent()
-                    }.disabled(tabs.allSatisfy({ $0.isPinned }))
+                    }.disabled(tabs.allSatisfy({ $0.isPinned }) || tabs.count <= 1)
                     Button("Close Tabs to the Right") {
                         state.closeTabsToTheRight()
                     }.disabled(index + 1 >= tabs.count || tabs.allSatisfy({ $0.isPinned }))

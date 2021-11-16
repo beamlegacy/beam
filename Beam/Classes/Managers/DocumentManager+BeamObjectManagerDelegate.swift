@@ -77,8 +77,9 @@ extension DocumentManager: BeamObjectManagerDelegate {
 
         var changed = false
 
+        let documentManager = DocumentManager()
         for var document in documents {
-            guard var localDocument = try? fetchOrCreateWithId(document.id) else {
+            guard var localDocument = try? documentManager.fetchOrCreateWithId(document.id) else {
                 Logger.shared.logError("Received object \(document.titleAndId), but could't create it localy, skip",
                                        category: .documentNetwork)
                 continue
@@ -250,7 +251,8 @@ extension DocumentManager: BeamObjectManagerDelegate {
             filters.append(.updatedSince(updatedSince))
         }
 
-        return try fetchAll(filters: filters).map {
+        // This method is called across threads so we need to create a local documentManager to have fetchAll be safe:
+        return try DocumentManager().fetchAll(filters: filters).map {
             var result = DocumentStruct(document: $0)
             result.previousChecksum = result.beamObjectPreviousChecksum
             return result
@@ -258,7 +260,8 @@ extension DocumentManager: BeamObjectManagerDelegate {
     }
 
     func checksumsForIds(_ ids: [UUID]) throws -> [UUID: String] {
-        let values: [(UUID, String)] = try fetchAllWithIds(ids).compactMap {
+        let documentManager = DocumentManager()
+        let values: [(UUID, String)] = try documentManager.fetchAllWithIds(ids).compactMap {
             guard let previousChecksum = $0.beam_object_previous_checksum else { return nil }
             return ($0.id, previousChecksum)
         }

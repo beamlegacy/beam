@@ -59,16 +59,16 @@ extension BeamWindow {
         let decoder = JSONDecoder()
         guard let windowCommands = try? decoder.decode([Int: GroupWebCommand].self, from: data) else { return }
         for windowCommand in windowCommands.keys {
-            let newBeamWindow = AppDelegate.main.createWindow(frame: nil)
-            guard let command = windowCommands[windowCommand] else { continue }
-            newBeamWindow.state.cmdManager.appendToDone(command: command)
+            guard let beamWindow = AppDelegate.main.window,
+                    let command = windowCommands[windowCommand] else { continue }
+            beamWindow.state.cmdManager.appendToDone(command: command)
 
-            if newBeamWindow.state.cmdManager.canUndo {
-                _ = newBeamWindow.state.cmdManager.undo(context: newBeamWindow.state)
+            if beamWindow.state.cmdManager.canUndo {
+                _ = beamWindow.state.cmdManager.undo(context: beamWindow.state)
             }
 
-            if newBeamWindow.state.browserTabsManager.currentTab != nil, newBeamWindow.state.mode != .web {
-                newBeamWindow.state.mode = .web
+            if beamWindow.state.browserTabsManager.currentTab != nil, beamWindow.state.mode != .web {
+                beamWindow.state.mode = .web
             }
         }
     }

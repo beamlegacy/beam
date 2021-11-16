@@ -24,27 +24,27 @@ public extension BeamNote {
     }
 
     var references: [BeamNoteReference] {
-        references(with: AppDelegate.main.documentManager, verifyMatch: true)
+        references(verifyMatch: true)
     }
 
     var fastReferences: [BeamNoteReference] {
-        references(with: AppDelegate.main.documentManager, verifyMatch: false)
+        references(verifyMatch: false)
     }
 
-    func linksAndReferences(with documentManager: DocumentManager, fast: Bool) -> [BeamNoteReference] {
-        return links + references(with: documentManager, verifyMatch: !fast)
+    func linksAndReferences(fast: Bool) -> [BeamNoteReference] {
+        return links + references(verifyMatch: !fast)
     }
 
-    private func references(with documentManager: DocumentManager, verifyMatch: Bool) -> [BeamNoteReference] {
-        referencesMatching(self.title, id: self.id, documentManager: documentManager, verifyMatch: verifyMatch)
+    private func references(verifyMatch: Bool) -> [BeamNoteReference] {
+        referencesMatching(self.title, id: self.id, verifyMatch: verifyMatch)
     }
 
-    private func referencesMatching(_ titleToMatch: String, id idToMatch: UUID, documentManager: DocumentManager, verifyMatch: Bool) -> [BeamNoteReference] {
+    private func referencesMatching(_ titleToMatch: String, id idToMatch: UUID, verifyMatch: Bool) -> [BeamNoteReference] {
         GRDBDatabase.shared.search(matchingPhrase: titleToMatch).compactMap { result -> BeamNoteReference? in
             let noteRef = BeamNoteReference(noteID: result.noteId, elementID: result.uid)
             guard result.noteId != self.id else { return nil }
             guard verifyMatch else { return noteRef }
-            guard  let note = BeamNote.fetch(documentManager, id: result.noteId),
+            guard  let note = BeamNote.fetch(id: result.noteId),
                   let element = note.findElement(result.uid),
                   element.hasReferenceToNote(named: titleToMatch)
             else { return nil }
@@ -86,7 +86,7 @@ public extension BeamElement {
 
 public extension BeamNoteReference {
     var note: BeamNote? {
-        BeamNote.fetch(DocumentManager(), id: noteID)
+        BeamNote.fetch(id: noteID)
     }
 
     var element: BeamElement? {
