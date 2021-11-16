@@ -204,7 +204,8 @@ extension BeamNote: BeamNoteDocument {
         indexContents()
 
         Logger.shared.logInfo("BeamNote wants to save: \(titleAndId)", category: .document)
-        DocumentManager().save(documentStruct, completion: { result in
+        let documentManager = DocumentManager()
+        documentManager.save(documentStruct, completion: { result in
             switch result {
             case .success(let success):
                 guard success else { break }
