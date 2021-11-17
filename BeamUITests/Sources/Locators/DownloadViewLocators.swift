@@ -18,7 +18,7 @@ enum DownloadViewLocators {
         case resumeDownloadButton = "download-resume"
         case stopDownloadButton = "download-pause"
         case viewInFinderButton = "download-view"
-        case closeDownloadButton = "tabs-close"
+        case closeDownloadButton = "tool-close"
     }
     
 }

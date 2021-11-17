@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "shortcut-tab_mac.pdf",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

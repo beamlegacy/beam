@@ -48,13 +48,14 @@ struct BeamSearchField: View {
                         Button(action: {
                                 searchStr = ""
                         }, label: {
-                            Image(systemName: "xmark.circle.fill")
-                                .resizable()
-                                .scaledToFit()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(width: 12, height: 12)
+                            Icon(name: "tool-clear_xs", size: 16, color: BeamColor.Generic.placeholder.swiftUI)
+//                            Image(systemName: "xmark.circle.fill")
+//                                .resizable()
+//                                .scaledToFit()
+//                                .aspectRatio(contentMode: .fit)
+//                                .frame(width: 12, height: 12)
                                 .padding(.trailing, 6.5)
-                                .foregroundColor(BeamColor.Generic.placeholder.swiftUI)
+//                                .foregroundColor(BeamColor.Generic.placeholder.swiftUI)
                         })
                         .buttonStyle(PlainButtonStyle())
                         .opacity(xMarkIsHovered ? 1 : 0.6)

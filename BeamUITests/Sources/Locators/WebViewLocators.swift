@@ -10,7 +10,7 @@ import Foundation
 enum WebViewLocators {
     
     enum Buttons: String, CaseIterable, UIElement {
-        case newTabButton = "tabs-new"
+        case newTabButton = "tool-new"
         case closeTabButton = "tabs-close_xs"
         case destinationCard = "DestinationNoteTitle"
     }

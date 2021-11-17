@@ -60,17 +60,17 @@ class ShortcutLayer: Layer {
         for icon in icons {
             let iconLayer = Layer.icon(named: icon, color: BeamColor.Editor.searchNormal.nsColor)
             iconLayer.frame.origin.x = posX
+            iconLayer.frame.origin.y = 2
             posX += iconLayer.frame.width + iconSpacing
             iconsLayer.append(iconLayer)
             self.layer.addSublayer(iconLayer)
-
         }
     }
 
     private func setupText() {
         let posX: CGFloat = textSpacing
         let textLayer = Layer.text(text, color: BeamColor.Editor.searchNormal.nsColor)
-        textLayer.font = BeamFont.regular(size: 12).nsFont
+        textLayer.font = BeamFont.medium(size: 12).nsFont
         textLayer.frame.origin.x = posX
         textLayer.isHidden = true
         self.textLayer = textLayer
