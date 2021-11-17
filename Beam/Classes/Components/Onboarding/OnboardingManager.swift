@@ -14,9 +14,11 @@ struct OnboardingStep: Equatable {
         case profile
         case emailConnect
         case imports
+        case loading
     }
 
     let type: StepType
+    var title: String?
 }
 
 class OnboardingManager: ObservableObject {
@@ -93,10 +95,12 @@ class OnboardingManager: ObservableObject {
             if AuthenticationManager.shared.isAuthenticated && AuthenticationManager.shared.username == nil {
                 return OnboardingStep(type: .profile)
             } else {
-                return nil
+                return OnboardingStep(type: .imports)
             }
-            //        case .profile:
-            //            return OnboardingStep(type: .imports)
+        case .profile:
+            return OnboardingStep(type: .imports)
+        case .imports:
+            return nil
         default:
             return nil
         }
