@@ -74,12 +74,17 @@ enum BeamLinkDBManagerError: Error, Equatable {
 public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
     static let tableName = "Link"
     var dbPool: DatabasePool
+    static var shared = BeamLinkDB(path: BeamData.linkDBPath)
 
     //swiftlint:disable:next function_body_length
-    init(path: String) throws {
+    init(path: String) {
         let configuration = GRDB.Configuration()
 
-        dbPool = try DatabasePool(path: path, configuration: configuration)
+        do {
+            dbPool = try DatabasePool(path: path, configuration: configuration)
+        } catch {
+            fatalError("Couldn't instanciate link db: \(error)")
+        }
 
         var migrator = DatabaseMigrator()
 
@@ -94,8 +99,11 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
                 table.column("previousChecksum", .text)
             }
         }
-
-        try migrator.migrate(dbPool)
+        do {
+            try migrator.migrate(dbPool)
+        } catch {
+            fatalError("Couldn't migrate link db: \(error)")
+        }
     }
 
     public func getLinks(matchingUrl url: String) -> [UUID: Link] {
@@ -114,11 +122,11 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
         }
     }
 
-    public func store(link: Link, saveOnNetwork: Bool) throws {
-        try store(links: [link], saveOnNetwork: saveOnNetwork)
+    public func store(link: Link, saveOnNetwork: Bool, networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
+        try store(links: [link], saveOnNetwork: saveOnNetwork, networkCompletion: networkCompletion)
     }
 
-    public func store(links: [Link], saveOnNetwork: Bool) throws {
+    public func store(links: [Link], saveOnNetwork: Bool, networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
         try dbPool.write { db in
             for var link in links {
                 try link.insert(db)
@@ -127,7 +135,7 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
 
         if saveOnNetwork, AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled {
             for link in links {
-                try self.saveOnNetwork(link)
+                try self.saveOnNetwork(link, networkCompletion)
             }
         }
     }
@@ -175,6 +183,12 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
         (try? dbPool.read { db in
             try? Link.fetchAll(db)
         }) ?? []
+    }
+    public func showAllLinks() {
+        Logger.shared.logDebug("------Links-------", category: .linkDB)
+        for link in allLinks.sorted(by: { (lhs, rhs) in lhs.url < rhs.url }) {
+            Logger.shared.logDebug("id: \(link.id) - url: \(link.url)", category: .linkDB)
+        }
     }
 
     // MARK: Sync
