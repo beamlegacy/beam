@@ -964,6 +964,7 @@
 		DAB8DB05269C502C00453867 /* UrlScoresCollectionTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB8DB04269C502C00453867 /* UrlScoresCollectionTest.swift */; };
 		DABFD3B026FC974B00C1F7F0 /* ClusteringOrphanedUrlManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABFD3AF26FC974B00C1F7F0 /* ClusteringOrphanedUrlManager.swift */; };
 		DABFD3B726FCAC8300C1F7F0 /* Csv.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABFD3B626FCAC8300C1F7F0 /* Csv.swift */; };
+		DABFF8072742731B00FAF364 /* BeamLinkDBTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABFF8062742731B00FAF364 /* BeamLinkDBTest.swift */; };
 		DAEAAF3026D3CA4D00D17559 /* ExportAllNoteSources.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAAF2F26D3CA4D00D17559 /* ExportAllNoteSources.swift */; };
 		DAEEA73B26A5C4A600AE72DE /* NoteSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEEA73A26A5C4A600AE72DE /* NoteSource.swift */; };
 		DAEEA74826A6B96A00AE72DE /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEEA74726A6B96A00AE72DE /* Utilities.swift */; };
@@ -2072,6 +2073,7 @@
 		DAB8DB04269C502C00453867 /* UrlScoresCollectionTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UrlScoresCollectionTest.swift; sourceTree = "<group>"; };
 		DABFD3AF26FC974B00C1F7F0 /* ClusteringOrphanedUrlManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClusteringOrphanedUrlManager.swift; sourceTree = "<group>"; };
 		DABFD3B626FCAC8300C1F7F0 /* Csv.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Csv.swift; sourceTree = "<group>"; };
+		DABFF8062742731B00FAF364 /* BeamLinkDBTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamLinkDBTest.swift; sourceTree = "<group>"; };
 		DAEAAF2F26D3CA4D00D17559 /* ExportAllNoteSources.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportAllNoteSources.swift; sourceTree = "<group>"; };
 		DAEEA73A26A5C4A600AE72DE /* NoteSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteSource.swift; sourceTree = "<group>"; };
 		DAEEA74726A6B96A00AE72DE /* Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
@@ -3212,6 +3214,7 @@
 		527DF48525710EAE00A0A56D /* Managers */ = {
 			isa = PBXGroup;
 			children = (
+				DABFF8062742731B00FAF364 /* BeamLinkDBTest.swift */,
 				5281B07A25C9987100DF66D9 /* Fixtures */,
 				524425F025C832110095422A /* AccountManagerTests.swift */,
 				963DBB3C2698655C00080928 /* BeamElementLinksTests.swift */,
@@ -6163,6 +6166,7 @@
 				0DEE978D2642965600AB95AE /* GRDBDatabaseTests.swift in Sources */,
 				522AFB2825CBFAB100F60647 /* DocumentManagerTestsHelper.swift in Sources */,
 				969084CC25365AAE009D3C96 /* ParserTests.swift in Sources */,
+				DABFF8072742731B00FAF364 /* BeamLinkDBTest.swift in Sources */,
 				52A7DE3826AED01A003E770E /* MyRemoteObjectManagerNetworkTests.swift in Sources */,
 				332AB2F626FE2461007717D8 /* PublishNoteAPITests.swift in Sources */,
 				8A68F4652671159D00B0C022 /* WebPositionsMessageHandlerFrameBoundsTest.swift in Sources */,

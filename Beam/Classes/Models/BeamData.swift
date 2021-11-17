@@ -103,11 +103,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
 
     //swiftlint:disable:next function_body_length
     override init() {
-        do {
-            LinkStore.shared = LinkStore(linkManager: try BeamLinkDB(path: Self.linkDBPath))
-        } catch {
-            Logger.shared.logError("Unable to initialise link storage \(error)", category: .linkDB)
-        }
+        LinkStore.shared = LinkStore(linkManager: BeamLinkDB.shared)
         clusteringOrphanedUrlManager = ClusteringOrphanedUrlManager(savePath: Self.orphanedUrlsPath)
         clusteringManager = ClusteringManager(ranker: sessionLinkRanker, candidate: 2, navigation: 0.5, text: 0.9, entities: 0.4, sessionId: sessionId, activeSources: activeSources)
         noteAutoSaveService = NoteAutoSaveService()
