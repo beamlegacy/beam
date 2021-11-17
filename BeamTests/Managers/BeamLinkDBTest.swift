@@ -20,7 +20,7 @@ class BeamLinkDBTests: XCTestCase {
     func testSavingLinkOnBeamObjects() throws {
         let expectation = self.expectation(description: "save link")
         let link = Link(url: "http://abc.com", title: "Your daily dose of alphabet")
-        try BeamLinkDB.shared.store(link: link, saveOnNetwork: true) { _ in
+        try BeamLinkDB.shared.store(link: link, shouldSaveOnNetwork: true) { _ in
             expectation.fulfill()
         }
         wait(for: [expectation], timeout: 10.0)

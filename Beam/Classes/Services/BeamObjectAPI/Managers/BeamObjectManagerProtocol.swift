@@ -123,7 +123,7 @@ extension BeamObjectManagerDelegate {
     func checkPreviousChecksums(_ remoteObjects: [BeamObjectType]) {
         #if DEBUG
         do {
-            let savedObjects = try self.allObjects(updatedSince: nil)
+            let savedObjects = try allObjects(updatedSince: nil)
             var wrongObjects: [BeamObjectType] = []
             for remoteObject in remoteObjects {
                 guard let savedObject = savedObjects.first(where: {
