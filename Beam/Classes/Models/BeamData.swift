@@ -93,7 +93,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     }
 
     static var indexPath: URL { URL(fileURLWithPath: dataFolder(fileName: "index.beamindex")) }
-    static var orphanedUrlsPath: URL { URL(fileURLWithPath: dataFolder(fileName: "clusteringOrphanedUrls.csv")) }
+    static var orphanedUrlsPath: URL { URL(fileURLWithPath: dataFolder(fileName: "clusteringOrphanedUrlsWithNavigation.csv")) }
     static var fileDBPath: String { dataFolder(fileName: "files.db") }
     static var linkDBPath: String { dataFolder(fileName: "links.db") }
     static var idToTitle: [UUID: String] = [:]
