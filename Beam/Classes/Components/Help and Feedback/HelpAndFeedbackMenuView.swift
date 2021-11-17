@@ -59,7 +59,7 @@ struct HelpAndFeedbackMenuView: View {
                 Text("Help & Feedback")
                     .font(BeamFont.regular(size: 13).swiftUI)
                 Spacer()
-                ButtonLabel(icon: "tabs-close", customStyle: ButtonLabelStyle(horizontalPadding: -2, activeBackgroundColor: Color.clear)) {
+                ButtonLabel(icon: "tool-close", customStyle: ButtonLabelStyle(horizontalPadding: -2, activeBackgroundColor: Color.clear)) {
                     window?.close()
                 }
             }.padding(.horizontal, 12)

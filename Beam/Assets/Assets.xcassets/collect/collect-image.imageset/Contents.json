@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "collect-image.pdf",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

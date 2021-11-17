@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "tool-clear_xs.pdf",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
