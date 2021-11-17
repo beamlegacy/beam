@@ -9,7 +9,11 @@ import Foundation
 import UUIDKit
 
 public struct Link: Codable {
-    public var id: UUID
+    enum CodingKeys: String, CodingKey {
+        case url, title, createdAt, updatedAt, deletedAt
+
+    }
+    public var id: UUID = .null
     public var url: String
     public var title: String?
 
