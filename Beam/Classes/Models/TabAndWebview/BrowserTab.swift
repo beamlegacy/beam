@@ -740,8 +740,8 @@ import Promises
 
         guard let layer = webView.layer,
                 let url = url,
-                let pns = pointAndShoot,
-                !isLoading else { return }
+                let pns = pointAndShoot
+        else { return }
 
         let animator = FullPageCollectAnimator(webView: webView)
 

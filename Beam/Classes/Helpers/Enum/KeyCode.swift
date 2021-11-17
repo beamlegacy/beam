@@ -31,6 +31,9 @@ enum KeyCode: UInt16 {
     case nine = 25
     case zero = 29
 
+    //Used for option-S full page collect
+    case s = 1
+
     ///Use this when you want to catch what's usually called "insert new line"
     var meansNewLine: Bool {
         switch self {
