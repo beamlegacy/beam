@@ -72,14 +72,13 @@ extension DocumentManager: BeamObjectManagerDelegate {
     }
 
     // swiftlint:disable:next function_body_length cyclomatic_complexity
-    func receivedObjects(_ documents: [DocumentStruct]) throws {
+    internal func receivedObjectsInContext(_ documents: [DocumentStruct]) throws {
         var changedDocuments: Set<DocumentStruct> = Set()
 
         var changed = false
 
-        let documentManager = DocumentManager()
         for var document in documents {
-            guard var localDocument = try? documentManager.fetchOrCreateWithId(document.id) else {
+            guard var localDocument = try? fetchOrCreateWithId(document.id) else {
                 Logger.shared.logError("Received object \(document.titleAndId), but could't create it localy, skip",
                                        category: .documentNetwork)
                 continue
@@ -99,7 +98,7 @@ extension DocumentManager: BeamObjectManagerDelegate {
 
             while !good && index < 10 {
                 do {
-                    if localDocument.objectID.isTemporaryID || !self.mergeDocumentWithNewData(localDocument, document) {
+                    if localDocument.objectID.isTemporaryID || !mergeDocumentWithNewData(localDocument, document) {
                         localDocument.data = document.data
                     }
 
@@ -113,7 +112,7 @@ extension DocumentManager: BeamObjectManagerDelegate {
                     try checkValidations(localDocument)
 
                     let savedDoc = DocumentStruct(document: localDocument)
-                    self.notificationDocumentUpdate(savedDoc)
+                    notificationDocumentUpdate(savedDoc)
                     indexDocument(savedDoc)
 
                     good = true
@@ -231,6 +230,13 @@ extension DocumentManager: BeamObjectManagerDelegate {
         }
     }
 
+    func receivedObjects(_ documents: [DocumentStruct]) throws {
+        let documentManager = DocumentManager()
+        try documentManager.context.performAndWait {
+            try documentManager.receivedObjectsInContext(documents)
+        }
+    }
+
     func indexDocument(_ docStruct: DocumentStruct) {
         BeamNote.indexingQueue.async {
             let decoder = JSONDecoder()
@@ -270,38 +276,6 @@ extension DocumentManager: BeamObjectManagerDelegate {
         }
 
         return Dictionary(uniqueKeysWithValues: values)
-    }
-
-    private func saveDatabaseAndDocumentOnBeamObjectAPI(_ documentStruct: DocumentStruct,
-                                                        _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) throws {
-        var dbStruct: DatabaseStruct?
-        guard let dbDatabase = try Database.fetchWithId(context, documentStruct.databaseId) else { return }
-        dbStruct = DatabaseStruct(database: dbDatabase)
-
-        guard let databaseStruct = dbStruct else {
-            throw DatabaseManagerError.localDatabaseNotFound
-        }
-
-        let databaseManager = DatabaseManager()
-
-        // TODO: add a way to cancel the database API calls
-        _ = try databaseManager.saveOnBeamObjectAPI(databaseStruct) { result in
-            switch result {
-            case .failure(let error):
-                completion(.failure(error))
-            case .success:
-                do {
-                    try self.saveOnBeamObjectAPI(documentStruct) { result in
-                        switch result {
-                        case .failure(let error): completion(.failure(error))
-                        case .success: completion(.success(true))
-                        }
-                    }
-                } catch {
-                    completion(.failure(error))
-                }
-            }
-        }
     }
 
     func manageConflict(_ documentStruct: DocumentStruct,

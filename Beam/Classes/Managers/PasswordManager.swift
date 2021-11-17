@@ -219,16 +219,24 @@ extension PasswordManager: BeamObjectManagerDelegate {
     }
 
     private func saveOnNetwork(_ password: PasswordRecord, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
-        try self.saveOnBeamObjectAPI(password) { result in
-            switch result {
-            case .success:
-                Logger.shared.logDebug("Saved password on the BeamObject API",
-                                       category: .passwordNetwork)
-                networkCompletion?(.success(true))
-            case .failure(let error):
-                Logger.shared.logDebug("Error when saving the password on the BeamObject API with error: \(error.localizedDescription)",
-                                       category: .passwordNetwork)
-                networkCompletion?(.failure(error))
+        let backgroundQueue = DispatchQueue(label: "PasswordManager BeamObjectManager backgroundQueue", qos: .userInitiated)
+
+        backgroundQueue.async { [weak self] in
+            do {
+                try self?.saveOnBeamObjectAPI(password) { result in
+                    switch result {
+                    case .success:
+                        Logger.shared.logDebug("Saved password on the BeamObject API",
+                                               category: .passwordNetwork)
+                        networkCompletion?(.success(true))
+                    case .failure(let error):
+                        Logger.shared.logDebug("Error when saving the password on the BeamObject API with error: \(error.localizedDescription)",
+                                               category: .passwordNetwork)
+                        networkCompletion?(.failure(error))
+                    }
+                }
+            } catch {
+                Logger.shared.logError(error.localizedDescription, category: .passwordNetwork)
             }
         }
     }
