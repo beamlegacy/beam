@@ -10,6 +10,7 @@ import SwiftUI
 struct PasswordsTableView: View {
     var passwordEntries: [PasswordTableViewItem]
     var onSelectionChanged: (IndexSet) -> Void // identifiable --> use id somewhere
+    var onDoubleTap: ((Int) -> Void)?
 
     static let passwordColumns = [
         TableViewColumn(key: "hostname", title: "Sites", type: TableViewColumn.ColumnType.IconAndText,
@@ -23,6 +24,9 @@ struct PasswordsTableView: View {
                   columns: Self.passwordColumns, creationRowTitle: nil, shouldReloadData: .constant(nil)) { (_, _) in
         } onSelectionChanged: { idx in
             onSelectionChanged(idx)
+        } onDoubleTap: { row in
+            guard let onDoubleTap = onDoubleTap else { return }
+            onDoubleTap(row)
         }
     }
 }
@@ -43,7 +47,7 @@ class PasswordTableViewItem: IconAndTextTableViewItem {
 
     override func loadRemoteFavIcon(completion: @escaping (NSImage) -> Void) {
         guard let hostURL = URL(string: hostname.validUrl().url) else { return }
-        FaviconProvider.shared.imageForUrl(hostURL) { image in
+        FaviconProvider.shared.favicon(fromURL: hostURL) { image in
             if let remoteImage = image {
                 completion(remoteImage)
             }
@@ -59,6 +63,6 @@ extension PasswordTableViewItem {
 
 struct PasswordsTableView_Previews: PreviewProvider {
     static var previews: some View {
-        PasswordsTableView(passwordEntries: [], onSelectionChanged: { _ in })
+        PasswordsTableView(passwordEntries: [], onSelectionChanged: { _ in }, onDoubleTap: { _ in })
     }
 }

@@ -18,16 +18,30 @@ class LibrariesManager: NSObject {
 extension LibrariesManager {
     func setupSentry() {
         guard Configuration.sentryEnabled else {
-            Logger.shared.logDebug("Sentry is disabled", category: .general)
+            Logger.shared.logDebug("Sentry is disabled", category: .sentry)
             return
         }
-        SentrySDK.start(options: [
-            "dsn": "https://\(Configuration.sentryKey)@\(Configuration.sentryHostname)/\(Configuration.sentryProject)",
-            "debug": false,
-            "sampleRate": 1.0,
-            "enableAutoSessionTracking": true,
-            "release": Information.appVersionAndBuild
-        ])
+
+        Logger.shared.logDebug("Sentry enabled: https://\(Configuration.sentryKey[0..<3])...@\(Configuration.sentryHostname)/\(Configuration.sentryProject)",
+                               category: .sentry)
+
+        SentrySDK.start { options in
+            options.dsn = "https://\(Configuration.sentryKey)@\(Configuration.sentryHostname)/\(Configuration.sentryProject)"
+            options.beforeSend = { event in
+                Logger.shared.logDebug("Event: \(event.type ?? "-") \(event.level) \(event.message?.message ?? "-")",
+                                       category: .sentry)
+                return event
+            }
+            options.beforeBreadcrumb = { event in
+                Logger.shared.logDebug("Breadcrumb: \(event.type ?? "-") \(event.category) \(event.message ?? "-") \(event.data?.description ?? "-")",
+                                       category: .sentry)
+                return event
+            }
+            options.debug = true
+            options.tracesSampleRate = 1.0
+            options.releaseName = Information.appVersionAndBuild
+        }
+
         setupSentryScope()
         setSentryUser()
     }

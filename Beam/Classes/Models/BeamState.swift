@@ -29,7 +29,7 @@ import Sentry
     }
 
     private(set) lazy var recentsManager: RecentsManager = {
-        RecentsManager(with: data.documentManager)
+        RecentsManager(with: DocumentManager())
     }()
     private(set) lazy var autocompleteManager: AutocompleteManager = {
         AutocompleteManager(with: data, searchEngine: searchEngine)
@@ -69,7 +69,7 @@ import Sentry
             focusOmniBox = false
 
             if let leavingNote = currentNote, leavingNote.publicationStatus.isPublic, leavingNote.shouldUpdatePublishedVersion {
-                BeamNoteSharingUtils.makeNotePublic(leavingNote, becomePublic: true, documentManager: data.documentManager)
+                BeamNoteSharingUtils.makeNotePublic(leavingNote, becomePublic: true)
             }
         }
     }
@@ -163,14 +163,14 @@ import Sentry
     @discardableResult func navigateToNote(named: String, elementId: UUID? = nil) -> Bool {
         EventsTracker.logBreadcrumb(message: "\(#function) named \(named) - elementId \(String(describing: elementId))", category: "BeamState")
         //Logger.shared.logDebug("load note named \(named)")
-        let note = BeamNote.fetchOrCreate(data.documentManager, title: named)
+        let note = BeamNote.fetchOrCreate(title: named)
         return navigateToNote(note, elementId: elementId)
     }
 
     @discardableResult func navigateToNote(id: UUID, elementId: UUID? = nil, unfold: Bool = false) -> Bool {
         EventsTracker.logBreadcrumb(message: "\(#function) id \(id) - elementId \(String(describing: elementId))", category: "BeamState")
         //Logger.shared.logDebug("load note named \(named)")
-        guard let note = BeamNote.fetch(data.documentManager, id: id) else {
+        guard let note = BeamNote.fetch(id: id) else {
             return false
         }
         return navigateToNote(note, elementId: elementId, unfold: unfold)
@@ -235,12 +235,16 @@ import Sentry
         EventsTracker.logBreadcrumb(message: "\(#function) toURL \(url)", category: "BeamState")
         currentTab?.willSwitchToNewUrl(url: url)
         currentTab?.load(url: url)
+
+        guard let currentTabId = currentTab?.id else { return }
+        browserTabsManager.removeTabFromGroup(tabId: currentTabId)
+        browserTabsManager.createNewGroup(for: currentTabId)
     }
 
     func addNewTab(origin: BrowsingTreeOrigin?, setCurrent: Bool = true, note: BeamNote? = nil, element: BeamElement? = nil, url: URL? = nil, webView: BeamWebView? = nil) -> BrowserTab {
         EventsTracker.logBreadcrumb(message: "\(#function) \(String(describing: origin)) \(String(describing: note)) \(String(describing: url))", category: "BeamState")
         let tab = BrowserTab(state: self, browsingTreeOrigin: origin, originMode: mode, note: note, rootElement: element, webView: webView)
-        browserTabsManager.addNewTab(tab, setCurrent: setCurrent, withURL: url)
+        browserTabsManager.addNewTabAndGroup(tab, setCurrent: setCurrent, withURL: url)
         mode = .web
         return tab
     }
@@ -248,7 +252,12 @@ import Sentry
     func createTab(withURL url: URL, originalQuery: String?, setCurrent: Bool = true, note: BeamNote? = nil, rootElement: BeamElement? = nil, webView: BeamWebView? = nil) -> BrowserTab {
         EventsTracker.logBreadcrumb(message: "\(#function) \(String(describing: note)) \(String(describing: url))", category: "BeamState")
         let origin = BrowsingTreeOrigin.searchBar(query: originalQuery ?? "<???>")
-        return addNewTab(origin: origin, setCurrent: setCurrent, note: note, element: rootElement, url: url, webView: webView)
+        let tab = addNewTab(origin: origin, setCurrent: setCurrent, note: note, element: rootElement, url: url, webView: webView)
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(200)) {
+            tab.webviewWindow?.makeFirstResponder(tab.webView)
+        }
+        return tab
     }
 
     func createTabFromNote(_ note: BeamNote, element: BeamElement, withURL url: URL) {
@@ -264,7 +273,7 @@ import Sentry
 
     func createEmptyTabWithCurrentDestinationCard() {
         EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
-        guard let destinationNote = BeamNote.fetch(data.documentManager, title: destinationCardName) else { return }
+        guard let destinationNote = BeamNote.fetch(title: destinationCardName) else { return }
         _ = addNewTab(origin: nil, note: destinationNote)
     }
 
@@ -275,16 +284,47 @@ import Sentry
         _ = addNewTab(origin: origin, note: note, element: node.element, url: url)
     }
 
+    func duplicate(tab: BrowserTab) {
+        let duplicatedTab = BrowserTab(state: self, browsingTreeOrigin: tab.browsingTreeOrigin, originMode: .web, note: nil)
+        browserTabsManager.addNewTabAndGroup(duplicatedTab, setCurrent: true, withURL: tab.url)
+    }
+
     func closedTab(_ index: Int, allowClosingPinned: Bool = false) {
         EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
         let tab = self.browserTabsManager.tabs[index]
         closeTabIfPossible(tab, allowClosingPinned: allowClosingPinned)
     }
 
+    /// returns true if the tab was closed
     func closeCurrentTab(allowClosingPinned: Bool = false) -> Bool {
         EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
         guard let currentTab = self.browserTabsManager.currentTab else { return false }
         return closeTabIfPossible(currentTab, allowClosingPinned: allowClosingPinned)
+    }
+
+    func closeAllTabsButCurrent() {
+        cmdManager.beginGroup(with: "CloseAllTabsButCurrentCmdGrp")
+        for tab in browserTabsManager.tabs where tab.id != browserTabsManager.currentTab?.id && !tab.isPinned {
+            guard let tabIndex = browserTabsManager.tabs.firstIndex(of: tab) else { continue }
+            cmdManager.run(command: CloseTab(tab: tab, tabIndex: tabIndex, wasCurrentTab: false), on: self)
+        }
+        cmdManager.endGroup(forceGroup: true)
+    }
+
+    func closeTabsToTheRight() {
+        guard let currentTab = browserTabsManager.currentTab, let currentTabIndex = browserTabsManager.tabs.firstIndex(of: currentTab) else { return }
+        var rightTabs = [BrowserTab]()
+        for rightTabIndex in currentTabIndex + 1...browserTabsManager.tabs.count - 1 {
+            guard rightTabIndex > currentTabIndex, !browserTabsManager.tabs[rightTabIndex].isPinned else { continue }
+            rightTabs.append(browserTabsManager.tabs[rightTabIndex])
+        }
+
+        cmdManager.beginGroup(with: "CloseTabsToTheRightCmdGrp")
+        for tab in rightTabs {
+            guard let tabIndex = browserTabsManager.tabs.firstIndex(of: tab) else { continue }
+            cmdManager.run(command: CloseTab(tab: tab, tabIndex: tabIndex, wasCurrentTab: false), on: self)
+        }
+        cmdManager.endGroup(forceGroup: true)
     }
 
     @discardableResult
@@ -292,19 +332,21 @@ import Sentry
         if tab.isPinned && !allowClosingPinned {
             if let nextUnpinnedTabIndex = browserTabsManager.tabs.firstIndex(where: { !$0.isPinned }) {
                 browserTabsManager.showTab(at: nextUnpinnedTabIndex)
+                return true
             }
-            return true
+            return false
         }
-        return cmdManager.run(command: CloseTab(tab: tab), on: self)
+        guard let tabIndex = browserTabsManager.tabs.firstIndex(of: tab) else { return false }
+        return cmdManager.run(command: CloseTab(tab: tab, tabIndex: tabIndex, wasCurrentTab: browserTabsManager.currentTab === tab), on: self)
     }
 
     func createNoteForQuery(_ query: String) -> BeamNote {
         EventsTracker.logBreadcrumb(message: "createNoteForQuery \(query)", category: "BeamState")
-        if let n = BeamNote.fetch(data.documentManager, title: query) {
+        if let n = BeamNote.fetch(title: query) {
             return n
         }
 
-        let n = BeamNote.create(data.documentManager, title: query)
+        let n = BeamNote.create(title: query)
 
         let e = BeamElement()
         e.text = BeamText(text: query, attributes: [.internalLink(n.id)])
@@ -446,7 +488,7 @@ import Sentry
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         if let currentNoteTitle = try? container.decode(String.self, forKey: .currentNote) {
-            currentNote = BeamNote.fetch(data.documentManager, title: currentNoteTitle)
+            currentNote = BeamNote.fetch(title: currentNoteTitle)
         }
         backForwardList = try container.decode(NoteBackForwardList.self, forKey: .backForwardList)
 
@@ -457,10 +499,6 @@ import Sentry
 
         setup(data: data)
         mode = try container.decode(Mode.self, forKey: .mode)
-
-        for tab in browserTabsManager.tabs {
-            tab.postLoadSetup(state: self)
-        }
     }
 
     func encode(to encoder: Encoder) throws {
@@ -532,11 +570,9 @@ import Sentry
             guard deleted else { return }
             noteDeletionCancellable = nil
             self.navigateToJournal(note: nil)
-            let alert = NSAlert()
-            alert.messageText = "The note '\(note.title)' has been deleted."
-            alert.alertStyle = .critical
-            alert.informativeText = "Navigating back to the journal."
-            alert.runModal()
+
+            UserAlert.showError(message: "The note '\(note.title)' has been deleted.",
+                                informativeText: "Navigating back to the journal.")
         }
     }
 }
@@ -547,6 +583,9 @@ extension BeamState: BrowserTabsManagerDelegate {
     // convenient vars
     var hasBrowserTabs: Bool {
         !browserTabsManager.tabs.isEmpty
+    }
+    var hasUnpinnedBrowserTabs: Bool {
+        browserTabsManager.tabs.first(where: { !$0.isPinned }) != nil
     }
     private weak var currentTab: BrowserTab? {
         browserTabsManager.currentTab
@@ -580,7 +619,11 @@ extension BeamState: BrowserTabsManagerDelegate {
     }
     func tabsManagerDidChangeCurrentTab(_ currentTab: BrowserTab?) {
         resetDestinationCard()
-        focusOmniBox = false
+        if areTabsVisible(for: browserTabsManager), let tab = currentTab, tab.url == nil {
+            setFocusOmnibox()
+        } else {
+            focusOmniBox = false
+        }
     }
 
     func tabsManagerBrowsingHistoryChanged(canGoBack: Bool, canGoForward: Bool) {

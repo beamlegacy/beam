@@ -33,7 +33,7 @@ struct DownloadCell: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            Image("download-icon")
+            Image(nsImage: icon(for: download.fileSystemURL.pathExtension))
                 .allowsHitTesting(false)
             VStack(alignment: .leading, spacing: 4) {
                 Text(download.fileSystemURL.lastPathComponent)
@@ -109,6 +109,10 @@ struct DownloadCell: View {
                 return ""
             }
         }
+    }
+
+    private func icon(for fileExtension: String) -> NSImage {
+        NSWorkspace.shared.icon(forFileType: fileExtension)
     }
 
     private func pauseDownload() {

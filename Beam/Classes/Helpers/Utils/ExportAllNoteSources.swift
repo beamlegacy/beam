@@ -63,10 +63,10 @@ private struct NoteAndSourcesRow: CsvRow {
 func export_all_note_sources(to url: URL?) {
     guard let url = url else { return }
 
-    let docManager = DocumentManager()
-    let notesAndSources = docManager.allDocumentsTitles(includeDeletedNotes: true)
+    let documentManager = DocumentManager()
+    let notesAndSources = documentManager.allDocumentsTitles(includeDeletedNotes: true)
         .compactMap { title -> [NoteAndSourcesRow]? in
-            guard let note = BeamNote.fetch(docManager, title: title, keepInMemory: false),
+            guard let note = BeamNote.fetch(title: title, keepInMemory: false),
                   !note.type.isJournal else { return nil }
             let sem = DispatchSemaphore(value: 0)
             note.sources.refreshScores { sem.signal() }

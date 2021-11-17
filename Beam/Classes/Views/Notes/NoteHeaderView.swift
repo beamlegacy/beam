@@ -137,8 +137,15 @@ struct NoteHeaderView: View {
     }
 
     private func handlePublicationError(error: Error) {
-        if let error = error as? PublicServerError, error == .notAllowed {
-            showPublicationError(error: .noUsername)
+        if let error = error as? RestAPIServer.Error {
+            switch error {
+            case .noUsername:
+                showPublicationError(error: .noUsername)
+            case .serverError(error: let error):
+                showPublicationError(error: .custom(error ?? "An error occurred…"))
+            default:
+                showPublicationError(error: .custom(error.localizedDescription))
+            }
         } else if let error = error as? BeamNoteSharingUtilsError {
             switch error {
             case .canceled:
@@ -192,7 +199,6 @@ extension NoteHeaderView {
             }
         }
         weak var state: BeamState?
-        var documentManager: DocumentManager?
 
         // title editing
         @Published fileprivate var titleText: String = ""
@@ -212,9 +218,8 @@ extension NoteHeaderView {
             note?.type.isJournal == false
         }
 
-        init(note: BeamNote? = nil, state: BeamState? = nil, documentManager: DocumentManager? = nil) {
+        init(note: BeamNote? = nil, state: BeamState? = nil) {
             self.state = state
-            self.documentManager = documentManager
             self.note = note
         }
 
@@ -237,7 +242,7 @@ extension NoteHeaderView {
         func textFieldDidChange(_ text: String) {
             titleSelectedRange = nil
             let newTitle = formatToValidTitle(titleText)
-            let existingNote = documentManager?.loadDocumentByTitle(title: newTitle)
+            let existingNote = DocumentManager().loadDocumentByTitle(title: newTitle)
             self.isTitleTaken = existingNote != nil && existingNote?.id != note?.id
         }
 
@@ -253,7 +258,6 @@ extension NoteHeaderView {
         }
 
         func commitRenameCard(fromTextField: Bool) {
-            guard let documentManager = documentManager else { return }
             let newTitle = formatToValidTitle(titleText)
             guard !newTitle.isEmpty, newTitle != note?.title, !isTitleTaken, canEditTitle else {
                 if fromTextField && isTitleTaken {
@@ -263,7 +267,7 @@ extension NoteHeaderView {
                 }
                 return
             }
-            note?.updateTitle(newTitle, documentManager: documentManager)
+            note?.updateTitle(newTitle)
             isEditingTitle = false
         }
 
@@ -307,7 +311,7 @@ extension NoteHeaderView {
         func togglePublish(completion: @escaping ((Result<Bool, Error>) -> Void)) -> Bool {
             let missingRequirement: Result<Bool, Error> = Result.failure(BeamNoteSharingUtilsError.missingRequirement)
 
-            guard let note = note, let documentManager = documentManager else {
+            guard let note = note else {
                 completion(missingRequirement)
                 return false
             }
@@ -324,7 +328,7 @@ extension NoteHeaderView {
             }
             if !isPublic {
                 publishState = .publishing
-                BeamNoteSharingUtils.makeNotePublic(note, becomePublic: true, documentManager: documentManager) { [weak self] result in
+                BeamNoteSharingUtils.makeNotePublic(note, becomePublic: true) { [weak self] result in
                     DispatchQueue.main.async {
                         guard case .success(let published) = result, published == true else {
                             self?.noteBecamePublic(false)
@@ -371,7 +375,7 @@ extension NoteHeaderView {
             alert.alertStyle = .warning
             guard let window = AppDelegate.main.window else { return }
             alert.beginSheetModal(for: window) { [weak self] response in
-                guard let self = self, let note = self.note, let documentManager = self.documentManager else {
+                guard let self = self, let note = self.note else {
                     completion(missingRequirement)
                     return
                 }
@@ -381,7 +385,7 @@ extension NoteHeaderView {
                     return
                 }
                 self.publishState = .unpublishing
-                BeamNoteSharingUtils.makeNotePublic(note, becomePublic: false, documentManager: documentManager) { [weak self] result in
+                BeamNoteSharingUtils.makeNotePublic(note, becomePublic: false) { [weak self] result in
                     defer {
                         completion(result)
                     }
@@ -399,9 +403,8 @@ extension NoteHeaderView {
         // MARK: Delete
         private func confirmedDelete() {
             guard let note = note else { return }
-            guard let documentManager = documentManager else { return }
             let cmdManager = CommandManagerAsync<DocumentManager>()
-            cmdManager.deleteDocuments(ids: [note.id], in: documentManager)
+            cmdManager.deleteDocuments(ids: [note.id], in: DocumentManager())
             guard let state = state else { return }
             DispatchQueue.main.async {
                 if state.canGoBack {
@@ -432,12 +435,11 @@ extension NoteHeaderView {
 }
 
 struct NoteHeaderView_Previews: PreviewProvider {
-    static let documentManager = DocumentManager()
     static var classicModel: NoteHeaderView.ViewModel {
-        NoteHeaderView.ViewModel(note: BeamNote(title: "My note title"), documentManager: documentManager)
+        NoteHeaderView.ViewModel(note: BeamNote(title: "My note title"))
     }
     static var titleTakenModel: NoteHeaderView.ViewModel {
-        let model = NoteHeaderView.ViewModel(note: BeamNote(title: "Taken Title"), documentManager: documentManager)
+        let model = NoteHeaderView.ViewModel(note: BeamNote(title: "Taken Title"))
         model.isTitleTaken = true
         return model
     }

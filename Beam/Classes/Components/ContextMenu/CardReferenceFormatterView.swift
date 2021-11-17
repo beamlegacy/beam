@@ -59,12 +59,11 @@ class CardReferenceFormatterView: FormatterView {
     private var typingPrefix = 0
     private var typingSuffix = 0
 
-    convenience init(initialText: String?, searchCardContent: Bool = false,
-                     typingPrefix: Int = 0, typingSuffix: Int = 0,
-                     excludingElements: [UUID] = [],
-                     onSelectNoteHandler: ((_ noteId: UUID, _ elementId: UUID?) -> Void)? = nil,
-                     onCreateNoteHandler: ((_ title: String) -> Void)? = nil) {
-        self.init(frame: CGRect.zero)
+    init(initialText: String?, searchCardContent: Bool = false,
+         typingPrefix: Int = 0, typingSuffix: Int = 0,
+         excludingElements: [UUID] = [],
+         onSelectNoteHandler: ((_ noteId: UUID, _ elementId: UUID?) -> Void)? = nil,
+         onCreateNoteHandler: ((_ title: String) -> Void)? = nil) {
         self.typingPrefix = typingPrefix
         self.typingSuffix = typingSuffix
         self.searchCardContent = searchCardContent
@@ -72,7 +71,11 @@ class CardReferenceFormatterView: FormatterView {
         self.onSelectCreate = onCreateNoteHandler
         self.initialText = initialText
         self.excludeElements = excludingElements
-        setupUI()
+        super.init(key: "CardReference", viewType: .inline)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 
     override func animateOnAppear(completionHandler: (() -> Void)? = nil) {

@@ -6,6 +6,8 @@
 //
 
 import XCTest
+import Combine
+
 @testable import Beam
 @testable import BeamCore
 
@@ -29,14 +31,14 @@ class FrecencyNoteTriggerTests: XCTestCase {
 
     class FakeFrecencyScorer: FrecencyScorer {
         public var updateCalls = [UpdateScoreArgs]()
-        func update(id: FrecencyScoreIdKey, value: Float, eventType: FrecencyEventType, date: Date, paramKey: FrecencyParamKey) {
-            guard let id = id as? UUID else { return }
+        func update(id: UUID, value: Float, eventType: FrecencyEventType, date: Date, paramKey: FrecencyParamKey) {
             let args = UpdateScoreArgs(id: id, scoreValue: value, eventType: eventType, date: date, paramKey: paramKey)
             updateCalls.append(args)
         }
     }
 
     class FakeBrowsingScorer: BrowsingScorer {
+        var debouncedUpdateScrollingScore = PassthroughSubject<WebPositions.FrameInfo, Never>()
         var page: WebPage
         var currentScore: Score = Score()
 
@@ -46,6 +48,7 @@ class FrecencyNoteTriggerTests: XCTestCase {
         func updateScore() {}
         func addTextSelection() {}
         func applyLongTermScore(changes: (LongTermUrlScore) -> Void) {}
+        func updateScrollingScore(_ frame: WebPositions.FrameInfo) {}
     }
 
     class FakeBeamWebViewConfiguration: BeamWebViewConfiguration {
@@ -73,10 +76,13 @@ class FrecencyNoteTriggerTests: XCTestCase {
         var originalQuery: String?
         var pointAndShootAllowed: Bool = false
         var hasError: Bool = false
+        var responseStatusCode: Int = 200
 
         var title: String = ""
         var url: URL?
+        var userTypedDomain: URL?
 
+        var webPositions: WebPositions?
         var pointAndShoot: PointAndShoot?
         var navigationController: WebNavigationController?
         var browsingScorer: BrowsingScorer?
@@ -141,7 +147,7 @@ class FrecencyNoteTriggerTests: XCTestCase {
         let webView = BeamWebView(frame: CGRect(), configuration: config)
         let page = FakeWebPage(webView: webView)
         page.url = URL(string: "http://www.amazon.gr")
-        let pns = PointAndShoot(scorer: FakeBrowsingScorer(page: page))
+        let pns = PointAndShoot()
         pns.data = data
         pns.page = page
         let target: PointAndShoot.Target = PointAndShoot.Target(
@@ -151,7 +157,7 @@ class FrecencyNoteTriggerTests: XCTestCase {
             html: "<p>Pointed text</p>",
             animated: false
         )
-        pns.activeShootGroup = PointAndShoot.ShootGroup("abc", [target], "abc")
+        pns.activeShootGroup = PointAndShoot.ShootGroup("abc", [target], "placeholder", "abc", shapeCache: .init())
 
         //When point and shooting to a note, frecency score of note gets updated
         XCTAssertEqual(scorer.updateCalls.count, 0)

@@ -120,6 +120,13 @@ struct AutocompleteItem: View {
                     }
                     .layoutPriority(0)
                 }
+
+                if PreferencesManager.showOmnibarScoreSection, let score = item.score {
+                    Spacer()
+                    StyledText(verbatim: " Score: \(score)")
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.CharmedGreen.swiftUI)
+                }
             }
             Spacer(minLength: 0)
             if item.source == .createCard && allowCmdEnter {
@@ -138,7 +145,7 @@ struct AutocompleteItem: View {
         }
         .onAppear {
             if let url = item.url {
-                FaviconProvider.shared.imageForUrl(url, cacheOnly: item.source != .topDomain) { (image) in
+                FaviconProvider.shared.favicon(fromURL: url, cacheOnly: item.source != .topDomain) { (image) in
                     self.favicon = image
                 }
             }

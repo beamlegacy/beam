@@ -256,9 +256,23 @@ class CommandNodeTests: QuickSpec {
     }
 
     private func setupTree() -> BeamNote {
+        BeamTestsHelper.logout()
+
+        DocumentManager().deleteAll() { result in
+            DispatchQueue.main.async {
+
+                switch result {
+                case .failure(let error):
+                    // TODO: i18n
+                    XCTFail("Could not delete documents \(error)")
+                case .success:
+                    break
+                }
+            }
+        }
 
         BeamNote.clearCancellables()
-        let note = BeamNote.fetchOrCreate(DocumentManager(), title: "TestCommands")
+        let note = BeamNote.fetchOrCreate(title: "TestCommands")
 
         let bullet1 = BeamElement("First bullet")
         note.addChild(bullet1)

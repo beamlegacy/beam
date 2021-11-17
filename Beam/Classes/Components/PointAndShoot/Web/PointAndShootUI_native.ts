@@ -1,6 +1,5 @@
 import {PointAndShootUI} from "./PointAndShootUI"
 import {Native} from "../../../Helpers/Utils/Web/Native"
-import {WebEventsUI_native} from "./WebEventsUI_native"
 import {
   BeamElement,
   BeamHTMLElement,
@@ -8,23 +7,29 @@ import {
   BeamRange,
   BeamRangeGroup,
   BeamRect,
-  BeamShootGroup
+  BeamShootGroup,
+  FrameInfo,
+  MessageHandlers
 } from "../../../Helpers/Utils/Web/BeamTypes"
 import {BeamElementHelper} from "../../../Helpers/Utils/Web/BeamElementHelper"
 import {BeamRectHelper} from "../../../Helpers/Utils/Web/BeamRectHelper"
 import {PointAndShootHelper} from "./PointAndShootHelper"
 import {dequal as isDeepEqual} from "dequal"
-import {PointAndShootMessages} from "./PointAndShoot"
+import { BeamEmbedHelper } from "../../../Helpers/Utils/Web/BeamEmbedHelper"
 
-export class PointAndShootUI_native extends WebEventsUI_native implements PointAndShootUI {
+export class PointAndShootUI_native implements PointAndShootUI {
+  native
   /**
    * @param native {Native}
    */
-  constructor(native: Native<PointAndShootMessages>) {
-    super(native)
+  constructor(native: Native<MessageHandlers>) {
+    this.native = native
     this.datasetKey = `${this.prefix}Collect`
   }
-  protected prefix = "__ID__"
+  setFramesInfo(framesInfo: FrameInfo[]): void {
+    this.native.sendMessage("frameBounds", { frames: framesInfo })
+  }
+  prefix = "__ID__"
   datasetKey
 
   pointPayload = {}
@@ -38,8 +43,7 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
     const payload = {
       point: { 
         id, 
-        rect, 
-        html: this.getHtml(element)
+        rect
       }
     }
 
@@ -78,7 +82,22 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
 
   selectPayload = {}
   private getHtml(element: BeamHTMLElement): string {
-    const parsedElement = BeamElementHelper.parseElementBasedOnStyles(element, this.native.win)
+    const { win } = this.native
+
+    let elementString
+    // If we support embedding on the current location
+    if (BeamElementHelper.isEmbed(element, win)) {
+      // parse the element for embedding. Parsing can fail so we support 
+      // falling back on the default element parsing
+      elementString = BeamEmbedHelper.parseElementForEmbed(element, win)
+    }
+
+    if (elementString) {
+      return elementString
+    }
+
+    // default element parser
+    const parsedElement = BeamElementHelper.parseElementBasedOnStyles(element, win)
     return parsedElement.outerHTML
   }
 
@@ -97,24 +116,36 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
 
       const parent = range.commonAncestorContainer as BeamElement
 
-      // Recursively get the bounds of all useless elements in the parent container
-      const childNodes = PointAndShootHelper.getChildNodes(parent, win)
+      // Get all childNotes directly under the parent
+      const parentChildNodes = parent?.childNodes ?? []
 
       const arrayOfRectsToDismiss = []
-      for (const child of childNodes) {
-        switch (child?.nodeType) {
-          case BeamNodeType.element: {
-            const childElement = child as BeamElement
-            if (PointAndShootHelper.isUselessOrChildrenAre(childElement, win)) {
-              const bounds = childElement.getBoundingClientRect() as BeamRect
-              // getBoundingClientRect takes the visual size. 
-              // scrollHeight and scrollWidth gets the actual size of the elements
-              bounds.height = childElement.scrollHeight
-              bounds.width = childElement.scrollWidth
-              arrayOfRectsToDismiss.push(bounds)
+      // For performance reasons, We want to skip doing complex calculations for a large number of childNotes.
+      // This can happen when the commonAncestorContainer is a wrappen element around a large DOM.
+      // 
+      // When a parent element contains a large amount of direct childNodes under
+      // Skip removing useless rects and use all of the rects provided to us.
+      if (parentChildNodes.length < 150) {
+        const childNodes = PointAndShootHelper.getElementAndTextChildNodesRecursively(parent, win)
+        // For performance reasons, if we have a large amount of childNodes
+        // Skip removing useless rects and use all of the rects provided to us
+        if (childNodes.length < 150) {
+          for (const child of childNodes) {
+            switch (child?.nodeType) {
+              case BeamNodeType.element: {
+                const childElement = child as BeamElement
+                if (PointAndShootHelper.isUselessOrChildrenAre(childElement, win)) {
+                  const bounds = childElement.getBoundingClientRect() as BeamRect
+                  // getBoundingClientRect takes the visual size. 
+                  // scrollHeight and scrollWidth gets the actual size of the elements
+                  bounds.height = childElement.scrollHeight
+                  bounds.width = childElement.scrollWidth
+                  arrayOfRectsToDismiss.push(bounds)
+                }
+              }
+                break
             }
           }
-            break
         }
       }
       
@@ -156,7 +187,7 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
     this.native.sendMessage("hasSelection", { hasSelection })
   }
   
-  isTypingOnWebView(isTypingOnWebView: boolean): void {
+  typingOnWebView(isTypingOnWebView: boolean): void {
     this.native.sendMessage("isTypingOnWebView", { isTypingOnWebView })
   }
 
@@ -223,7 +254,6 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
     const bounds = el.getBoundingClientRect()
     // If we have a too large element, exit early
     if (BeamElementHelper.isLargerThanWindow(bounds, win)) {
-      console.log("returning early because bounds are larger than window");
       return 
     }
 
@@ -256,7 +286,7 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
     }
 
     // If it's an image or media, select the whole element
-    const selectWholeElement = BeamElementHelper.isImage(el, win) || BeamElementHelper.isMedia(el)
+    const selectWholeElement = BeamElementHelper.isImage(el, win) || BeamElementHelper.isMedia(el) || BeamElementHelper.isEmbed(el, win)
 
     // We have meaningful children, inspect them and compute their bounds
     if (childNodes.length > 0 && !selectWholeElement) {
@@ -293,8 +323,7 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
 
     // No meaningful childNodes, check the element itself
     if (PointAndShootHelper.isMeaningful(el, win)) {
-      const elementBounds = el.getBoundingClientRect()
-      area = this.setArea(area, elementBounds, clippingArea)
+      area = this.setArea(area, bounds, clippingArea)
     }
 
     return area

@@ -8,6 +8,7 @@
 import Foundation
 import SwiftSoup
 import BeamCore
+import Swime
 
 struct DelayedClosure {
     var closure: ((data: Data, mimeType: String)?) -> Void
@@ -28,8 +29,8 @@ class HtmlVisitor {
     var fileStorage: BeamFileStorage?
     // Checks preferences to allow embedding of content
     var allowConvertToEmbed: Bool {
-        PreferencesManager.embedContentPreference == EmbedContent.always.id ||
-            PreferencesManager.embedContentPreference == EmbedContent.only.id
+        PreferencesManager.embedContentPreference == PreferencesEmbedOptions.always.id ||
+            PreferencesManager.embedContentPreference == PreferencesEmbedOptions.only.id
     }
 
     var delayedClosures: [DelayedClosure] = []
@@ -72,7 +73,7 @@ class HtmlVisitor {
                     let url: String = getUrl(href)
                     child.text.addAttributes([.link(url)], to: child.text.wholeRange)
                     if allowConvertToEmbed {
-                        child.convertToEmbed() // if possible converts url to embed
+                        convertElementToEmbed(child) // if possible converts url to embed
                     }
                     return child
                 })
@@ -106,7 +107,8 @@ class HtmlVisitor {
                 text.append(contentsOf: children)
 
             case "img":
-                guard let src = getImageSrc(element) else { break }
+                let imgAttr = getImageAttributes(element)
+                guard let src = imgAttr.src else { break }
                 // We assume that any url used as <img src="..." /> is a valid image.
                 // If the closure fails to download an image it defaults to a plain link.
                 if let url: URL = getUrl(src) {
@@ -125,11 +127,11 @@ class HtmlVisitor {
                         let closure: ((data: Data, mimeType: String)?) -> Void = { [urlBase] result in
                             guard let (data, mimeType) = result,
                                   let fileId = Self.storeImageData(data, mimeType, fileName, fileStorage),
-                                  let image = NSImage(data: data) else {
+                                  let size = Self.imageSize(data: data, type: mimeType, htmlSize: imgAttr.size) else {
                                 imgElement.text.addAttributes([.link(mdUrl)], to: imgElement.text.wholeRange)
                                 return
                             }
-                            imgElement.kind = .image(fileId, displayInfos: MediaDisplayInfos(height: Int(image.size.height), width: Int(image.size.width), displayRatio: nil))
+                            imgElement.kind = .image(fileId, displayInfos: MediaDisplayInfos(height: Int(size.height), width: Int(size.width), displayRatio: nil))
 
                             // If we can get the image, change the text of the element to the actual source instead of the link
                             imgElement.text = BeamText(text: urlBase.absoluteString)
@@ -145,9 +147,9 @@ class HtmlVisitor {
                     let fileName = UUID().uuidString
                     if let fileStorage = fileStorage,
                        let fileId = HtmlVisitor.storeImageData(base64, mimeType, fileName, fileStorage),
-                       let image = NSImage(data: base64) {
+                       let size = Self.imageSize(data: base64, type: mimeType, htmlSize: imgAttr.size) {
                         let imgElement = BeamElement()
-                        imgElement.kind = .image(fileId, displayInfos: MediaDisplayInfos(height: Int(image.size.height), width: Int(image.size.width), displayRatio: nil))
+                        imgElement.kind = .image(fileId, displayInfos: MediaDisplayInfos(height: Int(size.height), width: Int(size.width), displayRatio: nil))
 
                         // If we can get the image, change the text of the element to the actual source instead of the link
                         imgElement.text = BeamText(text: urlBase.absoluteString)
@@ -157,13 +159,13 @@ class HtmlVisitor {
                 }
 
             case "iframe":
-                guard let src = getImageSrc(element),
+                guard let src = getImageAttributes(element).src,
                       let url: URL = getUrl(src),
                       let mdUrl = url.absoluteString.markdownizedURL else { break }
                 let iframeElement = BeamElement(mdUrl)
                 iframeElement.text.addAttributes([.link(mdUrl)], to: iframeElement.text.wholeRange)
                 if allowConvertToEmbed {
-                    iframeElement.convertToEmbed() // if possible converts url to embed
+                    convertElementToEmbed(iframeElement) // if possible converts url to embed
                 }
                 text.append(iframeElement)
 
@@ -174,7 +176,7 @@ class HtmlVisitor {
                 let embedElement = BeamElement(mdUrl)
                 embedElement.text.addAttributes([.link(mdUrl)], to: embedElement.text.wholeRange)
                 if allowConvertToEmbed {
-                    embedElement.convertToEmbed() // if possible converts url to embed
+                    convertElementToEmbed(embedElement) // if possible converts url to embed
                 }
                 text.append(embedElement)
 
@@ -208,6 +210,17 @@ class HtmlVisitor {
         depth -= 1
 
         return result
+    }
+
+    /// Utility to convert BeamElement containing a single embedable url to embed kind
+    private func convertElementToEmbed(_ element: BeamElement) {
+        let links = element.text.links
+        if links.count == 1,
+           let link = links.first,
+           let url = URL(string: link),
+           EmbedContentBuilder().canBuildEmbed(for: url) {
+            element.kind = .embed(url.absoluteString, displayRatio: nil)
+        }
     }
 }
 
@@ -338,12 +351,19 @@ extension HtmlVisitor {
     /// Gets the `src` of an image element
     /// - Parameter element: image element
     /// - Returns: src string or nil
-    func getImageSrc(_ element: Element) -> String? {
+    func getImageAttributes(_ element: Element) -> (src: String?, size: CGSize?) {
         if let src = try? element.attr("src") {
-            return src
+            var size: CGSize?
+            if let widthStr = try? element.attr("width"),
+                let width = Int(widthStr),
+                let heightStr = try? element.attr("height"),
+                let height = Int(heightStr) {
+                size = CGSize(width: width, height: height)
+            }
+            return (src, size)
         }
 
-        return nil
+        return (nil, nil)
     }
 
     /// Gets the `src` of an video element. Supports video elements without `src` attribute that does have children with a `src` tag containing an mp4.
@@ -377,5 +397,18 @@ extension HtmlVisitor {
         }
 
         return nil
+    }
+
+    private static func imageSize(data: Data, type: String, htmlSize: CGSize?) -> CGSize? {
+        switch type {
+        case "image/svg+xml":
+            return htmlSize
+        default:
+            let image = NSImage(data: data)
+            if image == nil {
+                Logger.shared.logError("Unable to get image size from an image of type \(type) using NSImage", category: .pointAndShoot)
+            }
+            return image?.size ?? htmlSize
+        }
     }
 }

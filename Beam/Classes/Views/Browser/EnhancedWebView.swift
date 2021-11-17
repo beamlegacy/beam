@@ -23,7 +23,7 @@ struct EnhancedWebView: View {
                 }
                 if state.windowIsMain || tabBelongsToThisWindow {
                     WebView(webView: tab.webView)
-                    if let pns = tab.pointAndShoot, PreferencesManager.showPNSview == true {
+                    if let pns = tab.pointAndShoot, PreferencesManager.showPNSView == true {
                         PointAndShootView(pns: pns)
                     }
                     if let viewModel = tab.authenticationViewModel {

@@ -10,17 +10,6 @@ import Combine
 import SwiftSoup
 import BeamCore
 
-struct TabInformation {
-    var url: URL
-    weak var tabTree: BrowsingTree?
-    weak var currentTabTree: BrowsingTree?
-    weak var parentBrowsingNode: BrowsingNode?
-    weak var previousTabTree: BrowsingTree?
-    var document: IndexDocument
-    var textContent: String
-    var cleanedTextContentForClustering: String
-}
-
 protocol BrowserTabsManagerDelegate: AnyObject {
 
     func areTabsVisible(for manager: BrowserTabsManager) -> Bool
@@ -46,8 +35,44 @@ class BrowserTabsManager: ObservableObject {
         didSet {
             self.updateTabsHandlers()
             self.delegate?.tabsManagerDidUpdateTabs(tabs)
+            self.autoSave()
         }
     }
+
+    private var tabsGroup: [UUID: [UUID]] = [:]
+
+    private var currentTabGroupValue: [UUID]? {
+        guard let currentTabId = self.currentTab?.id, tabsGroup[currentTabId] != nil else {
+            return tabsGroup.first(where: { $1.contains(where: { $0 == currentTab?.id }) })?.value
+        }
+        return tabsGroup[currentTabId]
+    }
+
+    public var currentTabGroupKey: UUID? {
+        guard let currentTabId = self.currentTab?.id, tabsGroup[currentTabId] != nil else {
+            return tabsGroup.first(where: { $1.contains(where: { $0 == currentTab?.id }) })?.key
+        }
+        return currentTabId
+    }
+
+    public func createNewGroup(for tabId: UUID, with tabs: [UUID] = []) {
+        tabsGroup[tabId] = tabs
+    }
+
+    public func removeTabFromGroup(tabId: UUID) {
+        guard let groupKey = currentTabGroupKey else { return }
+        if tabId == groupKey {
+            guard var group = tabsGroup.removeValue(forKey: groupKey), !group.isEmpty else { return }
+            let firstTab = group.removeFirst()
+            tabsGroup[firstTab] = group
+        } else {
+            tabsGroup[groupKey]?.removeAll(where: {$0 == tabId})
+            if let group = tabsGroup[groupKey], group.isEmpty {
+                tabsGroup.removeValue(forKey: groupKey)
+            }
+        }
+    }
+
     public var tabHistory: [Data] = []
     private weak var latestCurrentTab: BrowsingTree?
     @Published var currentTab: BrowserTab? {
@@ -55,11 +80,12 @@ class BrowserTabsManager: ObservableObject {
             if tabsAreVisible {
                 latestCurrentTab = oldValue?.browsingTree
                 oldValue?.switchToOtherTab()
-                currentTab?.startReading(withState: state)
+                currentTab?.tabDidAppear(withState: state)
             }
 
             self.updateCurrentTabObservers()
             self.delegate?.tabsManagerDidChangeCurrentTab(currentTab)
+            self.autoSave()
         }
     }
 
@@ -74,6 +100,7 @@ class BrowserTabsManager: ObservableObject {
     private var isModifyingPinnedTabs = false
     private func setupPinnedTabObserver() {
         data.$pinnedTabs
+            .dropFirst()
             .scan(([], [])) { ($0.1, $1) }
             .sink { [weak self] (previousPinnedTab, newPinnedTabs) in
                 guard self?.isModifyingPinnedTabs == false else { return }
@@ -93,10 +120,12 @@ class BrowserTabsManager: ObservableObject {
         currentTab?.$canGoBack.sink { [unowned self]  v in
             guard let tab = self.currentTab else { return }
             self.delegate?.tabsManagerBrowsingHistoryChanged(canGoBack: v, canGoForward: tab.canGoForward)
+            self.autoSave()
         }.store(in: &tabScope)
         currentTab?.$canGoForward.sink { [unowned self]  v in
             guard let tab = self.currentTab else { return }
             self.delegate?.tabsManagerBrowsingHistoryChanged(canGoBack: tab.canGoBack, canGoForward: v)
+            self.autoSave()
         }.store(in: &tabScope)
     }
 
@@ -120,8 +149,9 @@ class BrowserTabsManager: ObservableObject {
             }
 
             tab.appendToIndexer = { [unowned self, weak tab] url, read in
-                var textForClustering = ""
-                let tabTree = tab?.browsingTree.deepCopy()
+                guard let tab = tab else { return }
+                var textForClustering = [""]
+                let tabTree = tab.browsingTree.deepCopy()
                 let currentTabTree = currentTab?.browsingTree.deepCopy()
 
                 self.indexingQueue.async { [unowned self] in
@@ -131,16 +161,28 @@ class BrowserTabsManager: ObservableObject {
                     DispatchQueue.main.async { [weak self] in
                         guard let self = self else { return }
                         let indexDocument = IndexDocument(source: url.absoluteString, title: read.title, contents: read.textContent)
+                        var shouldIndexUserTypedUrl = tab.userTypedDomain != nil && tab.userTypedDomain != tab.url
+
+                        // this check is case last url redirected just contains a /
+                        if let url = tab.url, let userTypedUrl = tab.userTypedDomain {
+                            if url.absoluteString.prefix(url.absoluteString.count - 1) == userTypedUrl.absoluteString {
+                                shouldIndexUserTypedUrl = false
+                            }
+                        }
 
                         let tabInformation: TabInformation? = TabInformation(url: url,
+                                                                             userTypedDomain: shouldIndexUserTypedUrl ? tab.userTypedDomain : nil,
+                                                                             shouldBeIndexed: tab.responseStatusCode == 200,
                                                                              tabTree: tabTree,
                                                                              currentTabTree: currentTabTree,
                                                                              parentBrowsingNode: tabTree?.current.parent,
                                                                              previousTabTree: self.latestCurrentTab,
                                                                              document: indexDocument,
                                                                              textContent: read.textContent,
-                                                                             cleanedTextContentForClustering: textForClustering)
+                                                                             cleanedTextContentForClustering: textForClustering,
+                                                                             isPinnedTab: tab.isPinned)
                         self.data.tabToIndex = tabInformation
+                        self.currentTab?.userTypedDomain = nil
                         self.latestCurrentTab = nil
                     }
                 }
@@ -155,7 +197,7 @@ extension BrowserTabsManager {
     func updateTabsForStateModeChange(_ newMode: Mode, previousMode: Mode) {
         guard newMode != previousMode else { return }
         if newMode == .web {
-            currentTab?.startReading(withState: state)
+            currentTab?.tabDidAppear(withState: state)
         } else if previousMode == .web {
             switch newMode {
             case .note:
@@ -168,7 +210,33 @@ extension BrowserTabsManager {
         }
     }
 
-    func addNewTab(_ tab: BrowserTab, setCurrent: Bool = true, withURL url: URL? = nil, at index: Int? = nil) {
+    private var indexForNewTabInGroup: Int? {
+        guard let currentTabGroupValue = currentTabGroupValue,
+              let currentTabIndex = tabs.firstIndex(where: {$0.id == currentTab?.id}) else { return nil }
+        if let lastTabIndex = tabs.firstIndex(where: {$0.id == currentTabGroupValue.last}), lastTabIndex > currentTabIndex {
+            return lastTabIndex + 1
+        } else {
+            return currentTabIndex + 1
+        }
+    }
+
+    // This is now the only entry point to add a tab
+    func addNewTabAndGroup(_ tab: BrowserTab, setCurrent: Bool = true, withURL url: URL? = nil, at tabIndex: Int? = nil) {
+        if tabIndex == nil {
+            addNewTab(tab, setCurrent: setCurrent, withURL: url, at: indexForNewTabInGroup)
+        } else {
+            addNewTab(tab, setCurrent: setCurrent, withURL: url, at: tabIndex)
+        }
+
+        guard !tab.isPinned else { return }
+        if let currentTabGroupKey = currentTabGroupKey, (url != nil || tab.preloadUrl != nil) {
+            tabsGroup[currentTabGroupKey]?.append(tab.id)
+        } else {
+            createNewGroup(for: tab.id)
+        }
+    }
+
+    private func addNewTab(_ tab: BrowserTab, setCurrent: Bool = true, withURL url: URL? = nil, at index: Int? = nil) {
         if let url = url {
             tab.load(url: url)
         }
@@ -251,4 +319,27 @@ extension BrowserTabsManager {
     func unpinTab(_ tabToUnpin: BrowserTab) {
         updateIsPinned(for: tabToUnpin, isPinned: false)
     }
+}
+
+// State tabs auto save
+extension BrowserTabsManager {
+    func autoSave() {
+        if tabs.contains(where: { !$0.isPinned }) {
+            AppDelegate.main.saveCloseTabsCmd(onExit: false)
+        }
+    }
+}
+
+struct TabInformation {
+    var url: URL
+    var userTypedDomain: URL?
+    var shouldBeIndexed: Bool = true
+    weak var tabTree: BrowsingTree?
+    weak var currentTabTree: BrowsingTree?
+    weak var parentBrowsingNode: BrowsingNode?
+    weak var previousTabTree: BrowsingTree?
+    var document: IndexDocument
+    var textContent: String
+    var cleanedTextContentForClustering: [String]
+    var isPinnedTab: Bool = false
 }

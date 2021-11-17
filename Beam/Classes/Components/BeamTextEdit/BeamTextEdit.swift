@@ -83,6 +83,7 @@ public extension CALayer {
             note.updateNoteNamesInInternalLinks(recursive: true)
             updateRoot(with: note)
             searchViewModel?.search()
+            updateCalendarLeadingGutter(for: note.id)
         }
     }
 
@@ -90,7 +91,9 @@ public extension CALayer {
         guard note != rootNode?.element else { return }
 
         clearRoot()
-        scroll(.zero)
+        if rootNode != nil {
+            scroll(.zero)
+        }
         let root = TextRoot(editor: self, element: note, availableWidth: Self.textNodeWidth(for: frame.size))
         rootNode = root
         if let window = window {
@@ -402,6 +405,7 @@ public extension CALayer {
             self.updateCardHearderLayer(rect)
             rootNode?.setLayout(rect)
             self.updateTrailingGutterLayout(textRect: rect)
+            self.updateLeadingGutterLayout(textRect: rect)
         }
         if isResizing || shouldDisableAnimationAtNextLayout {
             shouldDisableAnimationAtNextLayout = false
@@ -1045,11 +1049,11 @@ public extension CALayer {
         if self.mouseDownPos != nil {
             self.mouseDownPos = nil
         }
+        if event.clickCount == 1 { hideInlineFormatter() }
         self.mouseDownPos = convert(event.locationInWindow)
         let info = MouseInfo(rootNode, mouseDownPos ?? .zero, event)
         mouseHandler = rootNode.dispatchMouseDown(mouseInfo: info)
         if mouseHandler != nil { cursorUpdate(with: event) }
-        hideInlineFormatter()
     }
 
     public override func rightMouseDown(with event: NSEvent) {
@@ -1242,11 +1246,11 @@ public extension CALayer {
         relayoutRoot()
     }
 
-    let documentManager = DocumentManager(coreDataManager: CoreDataManager.shared)
+    let documentManager = DocumentManager()
 
     @IBAction func save(_ sender: Any?) {
         Logger.shared.logInfo("Save document!", category: .noteEditor)
-        rootNode?.note?.save(documentManager: documentManager)
+        rootNode?.note?.save()
     }
 
     func showInlineFormatterOnKeyEventsAndClick(isKeyEvent: Bool = false) {

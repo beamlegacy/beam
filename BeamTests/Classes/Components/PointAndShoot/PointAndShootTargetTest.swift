@@ -29,7 +29,11 @@ class PointAndShootTargetTest: PointAndShootTest {
     override func setUpWithError() throws {
         initTestBed()
         let windowHref = self.pns.page.url!.string
-        let positions = self.pns.webPositions
+        guard let page = self.testPage,
+              let positions = page.webPositions else {
+                  XCTFail("expected test page")
+                  return
+              }
         // Register window to framesInfo
         positions.framesInfo[windowHref] = WebPositions.FrameInfo(
             href: windowHref,
@@ -51,30 +55,39 @@ class PointAndShootTargetTest: PointAndShootTest {
 
     /// When only the window frame is registered, translating the target shouldn't change the target.
     func testtranslateAndScaleTarget_noiFrames() throws {
-        let positions = self.pns.webPositions
+        guard let page = self.testPage,
+              let positions = page.webPositions else {
+                  XCTFail("expected test page")
+                  return
+              }
         let windowHref = self.pns.page.url!.string
 
-        let translatedTarget = self.pns.translateAndScaleTarget(target, windowHref)
+        let translatedTarget = self.pns.translateAndScaleTargetIfNeeded(target, windowHref)
 
         // We should have 1 window frame like so:
         // +----------------------------------------+
         // | windowFrame                            |
         // +----------------------------------------+
+        XCTAssertNil(translatedTarget)
         XCTAssertEqual(positions.framesInfo.count, 1, "Should contain 1 frameInfo objects")
-        XCTAssertEqual(translatedTarget.rect, target.rect)
-        XCTAssertEqual(translatedTarget.mouseLocation, target.mouseLocation)
+        let finalTarget = translatedTarget ?? target
+        XCTAssertEqual(finalTarget.rect, target.rect)
+        XCTAssertEqual(finalTarget.mouseLocation, target.mouseLocation)
     }
 
     func testtranslateAndScaleTarget_noiFrames_scroll() throws {
-        let positions = self.pns.webPositions
+        guard let page = self.testPage,
+              let positions = page.webPositions else {
+                  XCTFail("expected test page")
+                  return
+              }
         let windowHref = self.pns.page.url!.string
 
         // set scroll positions
         let scrollDelta: CGFloat = 33
         positions.setFrameInfoScroll(href: windowHref, scrollX: 0, scrollY: scrollDelta)
 
-        let translatedTarget = self.pns.translateAndScaleTarget(target, windowHref)
-
+        let translatedTarget = self.pns.translateAndScaleTargetIfNeeded(target, windowHref)
         // We should have 1 window frame like so:
         // +----------------------------------------+
         // | windowFrame                            |
@@ -89,12 +102,18 @@ class PointAndShootTargetTest: PointAndShootTest {
         )
         // translateAndScaleTarget shouldn't change the location of the windowFrame.
         // The sendBounds function on the JS side takes care repositioning the Targets.
-        XCTAssertEqual(translatedTarget.rect, expectedTarget.rect)
-        XCTAssertEqual(translatedTarget.mouseLocation, expectedTarget.mouseLocation)
+        XCTAssertNil(translatedTarget)
+        let finalTarget = translatedTarget ?? target
+        XCTAssertEqual(finalTarget.rect, expectedTarget.rect)
+        XCTAssertEqual(finalTarget.mouseLocation, expectedTarget.mouseLocation)
     }
 
     func testtranslateAndScaleTarget_singleiFrame_scroll_window() throws {
-        let positions = self.pns.webPositions
+        guard let page = self.testPage,
+              let positions = page.webPositions else {
+                  XCTFail("expected test page")
+                  return
+              }
         let windowHref = self.pns.page.url!.string
         // set scroll positions
         let scrollDeltaWindow: CGFloat = 87
@@ -109,7 +128,7 @@ class PointAndShootTargetTest: PointAndShootTest {
         // +-+--------------------------------------+
         XCTAssertEqual(positions.framesInfo.count, 2, "Should contain 2 frameInfo objects")
         // Assert Window
-        let translatedWindowTarget = self.pns.translateAndScaleTarget(target, windowHref)
+        let translatedWindowTarget = self.pns.translateAndScaleTargetIfNeeded(target, windowHref)
         let expectedWindowTarget: PointAndShoot.Target = PointAndShoot.Target(
             id: UUID().uuidString,
             rect: NSRect(x: 101, y: 102, width: 301, height: 302),
@@ -119,10 +138,12 @@ class PointAndShootTargetTest: PointAndShootTest {
         )
         // translateAndScaleTarget shouldn't change the location of the windowFrame.
         // The sendBounds function on the JS side takes care repositioning the Targets.
-        XCTAssertEqual(translatedWindowTarget.rect, expectedWindowTarget.rect)
-        XCTAssertEqual(translatedWindowTarget.mouseLocation, expectedWindowTarget.mouseLocation)
+        XCTAssertNil(translatedWindowTarget)
+        let finalWindowTarget = translatedWindowTarget ?? target
+        XCTAssertEqual(finalWindowTarget.rect, expectedWindowTarget.rect)
+        XCTAssertEqual(finalWindowTarget.mouseLocation, expectedWindowTarget.mouseLocation)
 
-        let translatedTarget = self.pns.translateAndScaleTarget(target, iFrame.href)
+        let translatedTarget = self.pns.translateAndScaleTargetIfNeeded(target, iFrame.href)
         let expectedTarget: PointAndShoot.Target = PointAndShoot.Target(
             id: UUID().uuidString,
             rect: NSRect(x: 201, y: 202 - scrollDeltaWindow, width: 301, height: 302),
@@ -130,12 +151,17 @@ class PointAndShootTargetTest: PointAndShootTest {
             html: "<h1>Target</h1>",
             animated: false
         )
-        XCTAssertEqual(translatedTarget.rect, expectedTarget.rect)
-        XCTAssertEqual(translatedTarget.mouseLocation, expectedTarget.mouseLocation)
+        XCTAssertNotNil(translatedTarget)
+        XCTAssertEqual(translatedTarget?.rect, expectedTarget.rect)
+        XCTAssertEqual(translatedTarget?.mouseLocation, expectedTarget.mouseLocation)
     }
 
     func testtranslateAndScaleTarget_singleiFrame_scroll_iframe() throws {
-        let positions = self.pns.webPositions
+        guard let page = self.testPage,
+              let positions = page.webPositions else {
+                  XCTFail("expected test page")
+                  return
+              }
         let windowHref = self.pns.page.url!.string
         // Register Frame to framesInfo
         positions.framesInfo[iFrame.href] = iFrame
@@ -150,7 +176,7 @@ class PointAndShootTargetTest: PointAndShootTest {
         // +-+--------------------------------------+
         XCTAssertEqual(positions.framesInfo.count, 2, "Should contain 2 frameInfo objects")
         // Assert Window
-        let translatedWindowTarget = self.pns.translateAndScaleTarget(target, windowHref)
+        let translatedWindowTarget = self.pns.translateAndScaleTargetIfNeeded(target, windowHref)
         let expectedWindowTarget: PointAndShoot.Target = PointAndShoot.Target(
             id: UUID().uuidString,
             rect: NSRect(x: 101, y: 102, width: 301, height: 302),
@@ -158,10 +184,13 @@ class PointAndShootTargetTest: PointAndShootTest {
             html: "<h1>Target</h1>",
             animated: false
         )
-        XCTAssertEqual(translatedWindowTarget.rect, expectedWindowTarget.rect)
-        XCTAssertEqual(translatedWindowTarget.mouseLocation, expectedWindowTarget.mouseLocation)
+        XCTAssertNil(translatedWindowTarget)
 
-        let translatedTarget = self.pns.translateAndScaleTarget(target, iFrame.href)
+        let finalWindowTarget = translatedWindowTarget ?? target
+        XCTAssertEqual(finalWindowTarget.rect, expectedWindowTarget.rect)
+        XCTAssertEqual(finalWindowTarget.mouseLocation, expectedWindowTarget.mouseLocation)
+
+        let translatedTarget = self.pns.translateAndScaleTargetIfNeeded(target, iFrame.href)
         // Scrolling in the iframe, shouldn't impact the x, y of the target in that iframe.
         let expectedTarget: PointAndShoot.Target = PointAndShoot.Target(
             id: UUID().uuidString,
@@ -175,12 +204,17 @@ class PointAndShootTargetTest: PointAndShootTest {
             html: "<h1>Target</h1>",
             animated: false
         )
-        XCTAssertEqual(translatedTarget.rect, expectedTarget.rect)
-        XCTAssertEqual(translatedTarget.mouseLocation, expectedTarget.mouseLocation)
+        XCTAssertNotNil(translatedTarget)
+        XCTAssertEqual(translatedTarget?.rect, expectedTarget.rect)
+        XCTAssertEqual(translatedTarget?.mouseLocation, expectedTarget.mouseLocation)
     }
 
     func testtranslateAndScaleTarget_singleiFrame_scroll_both() throws {
-        let positions = self.pns.webPositions
+        guard let page = self.testPage,
+              let positions = page.webPositions else {
+                  XCTFail("expected test page")
+                  return
+              }
         let windowHref = self.pns.page.url!.string
         // Register Frame to framesInfo
         positions.framesInfo[iFrame.href] = iFrame
@@ -197,7 +231,7 @@ class PointAndShootTargetTest: PointAndShootTest {
         // +-+--------------------------------------+
         XCTAssertEqual(positions.framesInfo.count, 2, "Should contain 2 frameInfo objects")
         // Assert Window
-        let translatedWindowTarget = self.pns.translateAndScaleTarget(target, windowHref)
+        let translatedWindowTarget = self.pns.translateAndScaleTargetIfNeeded(target, windowHref)
         let expectedWindowTarget: PointAndShoot.Target = PointAndShoot.Target(
             id: UUID().uuidString,
             rect: NSRect(x: 101, y: 102, width: 301, height: 302),
@@ -207,10 +241,12 @@ class PointAndShootTargetTest: PointAndShootTest {
         )
         // translateAndScaleTarget shouldn't change the location of the windowFrame.
         // The sendBounds function on the JS side takes care repositioning the Targets.
-        XCTAssertEqual(translatedWindowTarget.rect, expectedWindowTarget.rect)
-        XCTAssertEqual(translatedWindowTarget.mouseLocation, expectedWindowTarget.mouseLocation)
+        XCTAssertNil(translatedWindowTarget)
+        let finalWindowTarget = translatedWindowTarget ?? target
+        XCTAssertEqual(finalWindowTarget.rect, expectedWindowTarget.rect)
+        XCTAssertEqual(finalWindowTarget.mouseLocation, expectedWindowTarget.mouseLocation)
 
-        let translatedTarget = self.pns.translateAndScaleTarget(target, iFrame.href)
+        let translatedTarget = self.pns.translateAndScaleTargetIfNeeded(target, iFrame.href)
         // Scrolling in the iframe, shouldn't impact the x, y of the target in that iframe.
         // However scrollin in the window frame, does impact the x, y of the target in the iframe
         let expectedTarget: PointAndShoot.Target = PointAndShoot.Target(
@@ -225,12 +261,17 @@ class PointAndShootTargetTest: PointAndShootTest {
             html: "<h1>Target</h1>",
             animated: false
         )
-        XCTAssertEqual(translatedTarget.rect, expectedTarget.rect)
-        XCTAssertEqual(translatedTarget.mouseLocation, expectedTarget.mouseLocation)
+        XCTAssertNotNil(translatedTarget)
+        XCTAssertEqual(translatedTarget?.rect, expectedTarget.rect)
+        XCTAssertEqual(translatedTarget?.mouseLocation, expectedTarget.mouseLocation)
     }
 
     func testtranslateAndScaleTarget_singleiFrame() throws {
-        let positions = self.pns.webPositions
+        guard let page = self.testPage,
+              let positions = page.webPositions else {
+                  XCTFail("expected test page")
+                  return
+              }
         // Register Frame to framesInfo
         positions.framesInfo[iFrame.href] = iFrame
         // We should have 2 frames nested like so:
@@ -241,7 +282,7 @@ class PointAndShootTargetTest: PointAndShootTest {
         // +-+--------------------------------------+
         XCTAssertEqual(positions.framesInfo.count, 2, "Should contain 2 frameInfo objects")
         // Assert
-        let translatedTarget = self.pns.translateAndScaleTarget(target, iFrame.href)
+        let translatedTarget = self.pns.translateAndScaleTargetIfNeeded(target, iFrame.href)
         let expectedTarget: PointAndShoot.Target = PointAndShoot.Target(
             id: UUID().uuidString,
             rect: NSRect(x: 101 + iFrame.x, y: 102 + iFrame.y, width: 301, height: 302),
@@ -249,12 +290,17 @@ class PointAndShootTargetTest: PointAndShootTest {
             html: "<h1>Target</h1>",
             animated: false
         )
-        XCTAssertEqual(translatedTarget.rect, expectedTarget.rect)
-        XCTAssertEqual(translatedTarget.mouseLocation, expectedTarget.mouseLocation)
+        XCTAssertNotNil(translatedTarget)
+        XCTAssertEqual(translatedTarget?.rect, expectedTarget.rect)
+        XCTAssertEqual(translatedTarget?.mouseLocation, expectedTarget.mouseLocation)
     }
 
     func testtranslateAndScaleTarget_singleiFramesNested() throws {
-        let positions = self.pns.webPositions
+        guard let page = self.testPage,
+              let positions = page.webPositions else {
+                  XCTFail("expected test page")
+                  return
+              }
         // Register Frames to framesInfo
         positions.framesInfo[iFrame.href] = iFrame
         positions.framesInfo[iFrame2.href] = iFrame2
@@ -269,7 +315,7 @@ class PointAndShootTargetTest: PointAndShootTest {
         // +-+-+------------------------------------+
         XCTAssertEqual(positions.framesInfo.count, 3, "Should contain 3 frameInfo objects")
         // Assert
-        let translatedTarget = self.pns.translateAndScaleTarget(target, iFrame2.href)
+        let translatedTarget = self.pns.translateAndScaleTargetIfNeeded(target, iFrame2.href)
         let expectedTarget: PointAndShoot.Target = PointAndShoot.Target(
             id: UUID().uuidString,
             rect: NSRect(x: 301, y: 302, width: 301, height: 302),
@@ -277,12 +323,17 @@ class PointAndShootTargetTest: PointAndShootTest {
             html: "<h1>Target</h1>",
             animated: false
         )
-        XCTAssertEqual(translatedTarget.rect, expectedTarget.rect)
-        XCTAssertEqual(translatedTarget.mouseLocation, expectedTarget.mouseLocation)
+        XCTAssertNotNil(translatedTarget)
+        XCTAssertEqual(translatedTarget?.rect, expectedTarget.rect)
+        XCTAssertEqual(translatedTarget?.mouseLocation, expectedTarget.mouseLocation)
     }
 
     func testtranslateAndScaleTarget_iFramesNested_withSiblings() throws {
-        let positions = self.pns.webPositions
+        guard let page = self.testPage,
+              let positions = page.webPositions else {
+                  XCTFail("expected test page")
+                  return
+              }
         // Register Frames to framesInfo
         positions.framesInfo[iFrameA.href] = iFrameA
         positions.framesInfo[iFrameB.href] = iFrameB
@@ -314,7 +365,7 @@ class PointAndShootTargetTest: PointAndShootTest {
             html: "<h1>Target</h1>",
             animated: false
         )
-        let translatedTarget_iFrameA = self.pns.translateAndScaleTarget(target_iFrameA, iFrameA.href)
+        let translatedTarget_iFrameA = self.pns.translateAndScaleTargetIfNeeded(target_iFrameA, iFrameA.href)
         let expectedTarget_iFrameA: PointAndShoot.Target = PointAndShoot.Target(
             id: UUID().uuidString,
             rect: NSRect(x: 201, y: 202, width: 301, height: 302),
@@ -322,8 +373,9 @@ class PointAndShootTargetTest: PointAndShootTest {
             html: "<h1>Target</h1>",
             animated: false
         )
-        XCTAssertEqual(translatedTarget_iFrameA.rect, expectedTarget_iFrameA.rect)
-        XCTAssertEqual(translatedTarget_iFrameA.mouseLocation, expectedTarget_iFrameA.mouseLocation)
+        XCTAssertNotNil(translatedTarget_iFrameA)
+        XCTAssertEqual(translatedTarget_iFrameA?.rect, expectedTarget_iFrameA.rect)
+        XCTAssertEqual(translatedTarget_iFrameA?.mouseLocation, expectedTarget_iFrameA.mouseLocation)
         //
         // Assert a target location in iFrameC
         let target_iFrameC: PointAndShoot.Target = PointAndShoot.Target(
@@ -333,7 +385,7 @@ class PointAndShootTargetTest: PointAndShootTest {
             html: "<h1>Target</h1>",
             animated: false
         )
-        let translatedTarget_iFrameC = self.pns.translateAndScaleTarget(target_iFrameC, iFrameC.href)
+        let translatedTarget_iFrameC = self.pns.translateAndScaleTargetIfNeeded(target_iFrameC, iFrameC.href)
         let expectedTarget_iFrameC: PointAndShoot.Target = PointAndShoot.Target(
             id: UUID().uuidString,
             rect: NSRect(x: 301, y: 302, width: 301, height: 302),
@@ -341,7 +393,8 @@ class PointAndShootTargetTest: PointAndShootTest {
             html: "<h1>Target</h1>",
             animated: false
         )
-        XCTAssertEqual(translatedTarget_iFrameC.rect, expectedTarget_iFrameC.rect)
-        XCTAssertEqual(translatedTarget_iFrameC.mouseLocation, expectedTarget_iFrameC.mouseLocation)
+        XCTAssertNotNil(translatedTarget_iFrameC)
+        XCTAssertEqual(translatedTarget_iFrameC?.rect, expectedTarget_iFrameC.rect)
+        XCTAssertEqual(translatedTarget_iFrameC?.mouseLocation, expectedTarget_iFrameC.mouseLocation)
     }
 }

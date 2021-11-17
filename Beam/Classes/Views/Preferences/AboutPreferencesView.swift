@@ -45,7 +45,6 @@ struct BeamAboutSection: View {
             (Text("Terms & Conditions") + Text(Image("editor-url").renderingMode(.template)))
                 .underline()
                 .font(BeamFont.regular(size: 12).swiftUI)
-                .foregroundColor(BeamColor.Corduroy.swiftUI)
         }.buttonStyle(PlainButtonStyle())
     }
 
@@ -56,15 +55,13 @@ struct BeamAboutSection: View {
             (Text("Privacy Policy") + Text(Image("editor-url").renderingMode(.template)))
                 .underline()
                 .font(BeamFont.regular(size: 12).swiftUI)
-                .foregroundColor(BeamColor.Corduroy.swiftUI)
-
         }.buttonStyle(PlainButtonStyle())
     }
 
     var body: some View {
         VStack {
             HStack(alignment: .top) {
-                Spacer(minLength: 100)
+                Spacer(minLength: 160)
                 VStack {
                     Image("preferences-about-beam")
                         .resizable()
@@ -76,11 +73,12 @@ struct BeamAboutSection: View {
                     Text("Beam")
                         .font(BeamFont.medium(size: 20).swiftUI)
                         .foregroundColor(BeamColor.Generic.text.swiftUI)
+                        .frame(height: 24, alignment: .center)
                     Text("Version \(Information.appVersion ?? "0") (\(Information.appBuild ?? "0"))")
                         .font(BeamFont.medium(size: 10).swiftUI)
                         .foregroundColor(BeamColor.Corduroy.swiftUI)
                         .frame(height: 12, alignment: .center)
-                        .padding(.bottom, 4)
+                        .padding(.bottom, 2)
 
                     TermsAndConditionsButton
                         .frame(height: 21)
@@ -93,30 +91,25 @@ struct BeamAboutSection: View {
                     } label: {
                         Text("Feature Request...")
                             .font(BeamFont.regular(size: 13).swiftUI)
-                            .foregroundColor(BeamColor.Generic.text.swiftUI)
                     }.buttonStyle(BorderedButtonStyle())
-                        .frame(height: 20)
                         .padding(.bottom, 3)
                     Button {
                         PreferencesManager.openLink(url: HelpMenuSection.bugReport.url)
                     } label: {
                         Text("Report a bug...")
                             .font(BeamFont.regular(size: 13).swiftUI)
-                            .foregroundColor(BeamColor.Generic.text.swiftUI)
                     }.buttonStyle(BorderedButtonStyle())
-                        .frame(height: 20)
                         .padding(.bottom, 5)
                     Button {
 
                     } label: {
                         Text("Contact Support...")
                             .font(BeamFont.regular(size: 13).swiftUI)
-                            .foregroundColor(BeamColor.Generic.text.swiftUI)
                     }.buttonStyle(BorderedButtonStyle())
-                        .frame(height: 20)
                         .padding(.bottom, 15)
-                }.padding(.top, 18)
-                Spacer(minLength: 333)
+                }.padding(.top, 16)
+                    .padding(.leading, 2)
+                Spacer(minLength: 298)
             }
         }
     }
@@ -141,8 +134,7 @@ struct BeamSocialSection: View {
                 } label: {
                     Text("Follow")
                         .font(BeamFont.regular(size: 13).swiftUI)
-                        .foregroundColor(BeamColor.Generic.text.swiftUI)
-                        .frame(width: 70, height: 20, alignment: .center)
+                        .frame(width: 70)
                 }.buttonStyle(BorderedButtonStyle())
                 Spacer(minLength: 179)
             }

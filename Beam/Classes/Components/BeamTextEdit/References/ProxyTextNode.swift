@@ -18,7 +18,8 @@ class ProxyTextNode: TextNode, ProxyNode {
     // MARK: - Initializer
 
     init(parent: Widget, element: BeamElement, availableWidth: CGFloat?) {
-        guard let proxyElement = parent.proxyFor(element) else { fatalError("Can't create a ProxyTextNode without a proxy provider in the parent chain") }
+        // We must create a fake element if we're building on a dead branch of the document tree, it will just disapear soon without breaking.
+        let proxyElement = parent.proxyFor(element) ?? BeamElement()
         super.init(parent: parent, element: proxyElement, availableWidth: availableWidth)
 
         element.$children

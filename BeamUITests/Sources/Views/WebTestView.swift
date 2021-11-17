@@ -16,6 +16,10 @@ class WebTestView: BaseView {
         return element
     }
     
+    func getDestinationCardTitle() -> String {
+        return getElementStringValue(element: getDestinationCardElement())
+    }
+    
     @discardableResult
     func openAllCardsMenu() -> AllCardsTestView {
         button(JournalViewLocators.Buttons.allCardsMenuButton.accessibilityIdentifier).click()
@@ -42,8 +46,9 @@ class WebTestView: BaseView {
         XCTContext.runActivity(named: "Click on proposed New card option for '\(searchText)' search keyword") {_ in
         let predicate = NSPredicate(format: "identifier BEGINSWITH 'autocompleteResult-" + searchText + "-createCard'")
         let cardCreationElement = app.otherElements.matching(predicate).firstMatch
-        XCTAssertTrue(cardCreationElement.waitForExistence(timeout: minimumWaitTimeout), "\(searchText) is NOT in the create card autocomplete result")
-        cardCreationElement.clickOnHittable()
+        //Try out to replace additional waiting
+        //XCTAssertTrue(cardCreationElement.waitForExistence(timeout: minimumWaitTimeout), "\(searchText) is NOT in the create card autocomplete result")
+        cardCreationElement.clickOnExistence()
         return CardTestView()
         }
     }
@@ -57,9 +62,20 @@ class WebTestView: BaseView {
     func getNumberOfTabs() -> Int {
         return getTabs().count
     }
+
+    func getNumberOfWebViewInMemory() -> Int {
+        UITestsMenuBar().showWebViewCount()
+        let element = app.staticTexts.element(matching: NSPredicate(format: "value BEGINSWITH 'WebViews alives:'")).firstMatch
+        var intValue: Int?
+        if let value = (element.value as? String)?.split(separator: ":").last {
+            intValue = Int(value)
+        }
+        app.dialogs.buttons.firstMatch.click()
+        return intValue ?? -1
+    }
     
-    func getTab(number: Int) -> XCUIElement {
-        getTabs().element(boundBy: number - 1)
+    func getTabByIndex(index: Int) -> XCUIElement {
+        getTabs().element(boundBy: index)
     }
     
     func getTabs() -> XCUIElementQuery {
@@ -79,4 +95,16 @@ class WebTestView: BaseView {
         app.images.matching(identifier: WebViewLocators.Buttons.closeTabButton.accessibilityIdentifier).firstMatch.click()
         return self
     }
+    
+    @discardableResult
+    func dragDropTab(draggedTabIndexFromSelectedTab: Int, destinationTabIndexFromSelectedTab: Int) -> WebTestView {
+        //Important! Counting starts form the next of selected tab
+        self.getTabByIndex(index: draggedTabIndexFromSelectedTab).click(forDuration: self.defaultPressDurationSeconds, thenDragTo: self.getTabByIndex(index: destinationTabIndexFromSelectedTab))
+        return self
+    }
+    
+    func isGoogleSearchTabOpened() -> Bool {
+        return image("Google").waitForExistence(timeout: minimumWaitTimeout)
+    }
+
 }

@@ -11,7 +11,8 @@ import XCTest
 class CardTestView: BaseView {
     
     var cardTitle: XCUIElement { return textField(CardViewLocators.TextFields.cardTitle.accessibilityIdentifier)}
-    
+
+    @discardableResult
     func waitForCardViewToLoad() -> Bool {
         return scrollView(CardViewLocators.ScrollViews.noteView.accessibilityIdentifier)
             .waitForExistence(timeout: implicitWaitTimeout)
@@ -22,14 +23,25 @@ class CardTestView: BaseView {
     }
     
     func getCardTitle() -> String {
-        return cardTitle.value as? String ?? errorFetchStringValue
+        return getElementStringValue(element: cardTitle)
+    }
+    
+    func clickDeleteButton() -> AlertTestView {
+        image(CardViewLocators.Buttons.deleteCardButton.accessibilityIdentifier).clickOnExistence()
+        return AlertTestView()
+    }
+    
+    @discardableResult
+    func makeCardTitleEditable() -> XCUIElement {
+        self.cardTitle.tapInTheMiddle()
+        sleep(1) //to be removed when handling coursor appearance at card title
+        self.cardTitle.tapInTheMiddle()
+        return cardTitle
     }
     
     @discardableResult
     func publishCard() -> CardTestView {
-        image(CardViewLocators.Buttons.editorButton.accessibilityIdentifier).click()
-        _ = staticText(CardViewLocators.StaticTexts.publishLabel.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout)
-        staticText(CardViewLocators.StaticTexts.publishLabel.accessibilityIdentifier).click()
+        button(CardViewLocators.Buttons.publishCardButton.accessibilityIdentifier).clickOnExistence()
         return self
     }
     
@@ -43,6 +55,10 @@ class CardTestView: BaseView {
     
     func getCardNotesForVisiblePart() -> [XCUIElement] {
         return app.windows.textViews.matching(identifier: CardViewLocators.TextFields.noteField.accessibilityIdentifier).allElementsBoundByIndex
+    }
+    
+    func getCardNotesElementQueryForVisiblePart() -> XCUIElementQuery {
+        return app.windows.textViews.matching(identifier: CardViewLocators.TextFields.noteField.accessibilityIdentifier)
     }
     
     func getNumberOfVisibleNotes() -> Int {
@@ -79,7 +95,7 @@ class CardTestView: BaseView {
     }
     
     func getLinksNames() -> [XCUIElement] {
-        return app.windows.buttons.matching(identifier: "cardTitleLayer").allElementsBoundByIndex
+        return app.windows.buttons.matching(identifier: CardViewLocators.Buttons.linkNamesButton.accessibilityIdentifier).allElementsBoundByIndex
     }
     
     func getLinksContent() -> [XCUIElement] {
@@ -91,7 +107,7 @@ class CardTestView: BaseView {
     }
     
     func getLinkContentByIndex(_ index: Int) -> String {
-        return getLinksContent()[index].value as? String ?? errorFetchStringValue
+        return getElementStringValue(element: getLinksContent()[index])
     }
     
     func getLinkNameByIndex(_ index: Int) -> String {
@@ -143,9 +159,20 @@ class CardTestView: BaseView {
     }
     
     @discardableResult
-    func clickReferencesDisclosureTriangle() -> CardTestView {
-        otherElement(AllCardsViewLocators.Others.referenceSection.accessibilityIdentifier).disclosureTriangles[AllCardsViewLocators.Others.disclosureTriangle.accessibilityIdentifier].firstMatch.tapInTheMiddle()
+    func clickDisclosureTriangleByIndex(_ index: Int = 0) -> CardTestView {
+        let element = getDisclosureTriangles().element(boundBy: index)
+        element.tapInTheMiddle()
         return self
+    }
+    
+    func getDisclosureTriangles() -> XCUIElementQuery {
+        return app.disclosureTriangles
+            .matching(identifier: AllCardsViewLocators.Others.disclosureTriangle.accessibilityIdentifier)
+            .matching(NSPredicate(format: WaitHelper.PredicateFormat.isHittable.rawValue))
+    }
+    
+    func getCountOfDisclosureTriangles() -> Int {
+        return getDisclosureTriangles().count
     }
     
     @discardableResult

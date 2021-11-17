@@ -33,15 +33,15 @@ class PointAndShootPersistToJournalTest: PointAndShootTest {
             animated: false
         )
         // Point
-        self.pns.point(paragraphTarget, "https://pnsTest.co")
+        self.pns.point(paragraphTarget, "placeholder string", "https://pnsTest.co")
         // Shoot
         XCTAssertNil(self.pns.activeShootGroup)
         self.pns.isAltKeyDown = true
-        self.pns.pointShoot(paragraphTarget.id, paragraphTarget, "https://pnsTest.co")
+        self.pns.pointShoot(paragraphTarget.id, paragraphTarget, "placeholder string", "https://pnsTest.co")
         XCTAssertNotNil(self.pns.activeShootGroup)
 
         // Add shoot to note
-        let group2 = PointAndShoot.ShootGroup("id", [paragraphTarget], page.url!.absoluteString)
+        let group2 = PointAndShoot.ShootGroup("id", [paragraphTarget], "placeholder string", page.url!.absoluteString, shapeCache: .init())
         let expectation = XCTestExpectation(description: "point and shoot addShootToNote")
         self.pns.addShootToNote(targetNote: page.activeNote, group: group2, completion: {
             XCTAssertEqual(self.pns.collectedGroups.count, 1)
@@ -67,15 +67,15 @@ class PointAndShootPersistToJournalTest: PointAndShootTest {
             animated: false
         )
         // Point
-        self.pns.point(paragraphTarget, "https://pnsTest.co")
+        self.pns.point(paragraphTarget, "placeholder string", "https://pnsTest.co")
         // Shoot
         XCTAssertNil(self.pns.activeShootGroup)
         self.pns.isAltKeyDown = true
-        self.pns.pointShoot(paragraphTarget.id, paragraphTarget, "https://pnsTest.co")
+        self.pns.pointShoot(paragraphTarget.id, paragraphTarget, "placeholder string", "https://pnsTest.co")
         XCTAssertNotNil(self.pns.activeShootGroup)
 
         // Add shoot to note
-        let group = PointAndShoot.ShootGroup("id", [paragraphTarget], page.url!.absoluteString)
+        let group = PointAndShoot.ShootGroup("id", [paragraphTarget], "placeholder string", page.url!.absoluteString, shapeCache: .init())
         let expectation = XCTestExpectation(description: "point and shoot addShootToNote")
         self.pns.addShootToNote(targetNote: page.activeNote, group: group, completion: {
             XCTAssertEqual(self.pns.collectedGroups.count, 1)
@@ -92,15 +92,15 @@ class PointAndShootPersistToJournalTest: PointAndShootTest {
             animated: false
         )
         // Point
-        self.pns.point(paragraphTarget2, "https://pnsTest.co")
+        self.pns.point(paragraphTarget2, "placeholder string", "https://pnsTest.co")
         // Shoot
         XCTAssertNil(self.pns.activeShootGroup)
         self.pns.isAltKeyDown = true
-        self.pns.pointShoot(paragraphTarget2.id, paragraphTarget2, "https://pnsTest.co")
+        self.pns.pointShoot(paragraphTarget2.id, paragraphTarget2, "placeholder string", "https://pnsTest.co")
         XCTAssertNotNil(self.pns.activeShootGroup)
 
         // Add shoot to note
-        let group2 = PointAndShoot.ShootGroup("id", [paragraphTarget2], page.url!.absoluteString)
+        let group2 = PointAndShoot.ShootGroup("id", [paragraphTarget2], "placeholder string", page.url!.absoluteString, shapeCache: .init())
         let expectation2 = XCTestExpectation(description: "point and shoot addShootToNote")
         self.pns.addShootToNote(targetNote: page.activeNote, group: group2, completion: {
             XCTAssertEqual(self.pns.collectedGroups.count, 2)
@@ -122,11 +122,11 @@ class PointAndShootPersistToJournalTest: PointAndShootTest {
             animated: false
         )
         // Point
-        self.pns.point(paragraphTarget, "https://pnsTest.co")
+        self.pns.point(paragraphTarget, "placeholder string", "https://pnsTest.co")
         // Shoot
         XCTAssertNil(self.pns.activeShootGroup)
         self.pns.isAltKeyDown = true
-        self.pns.pointShoot(paragraphTarget.id, paragraphTarget, "https://pnsTest.co")
+        self.pns.pointShoot(paragraphTarget.id, paragraphTarget, "placeholder string", "https://pnsTest.co")
         XCTAssertNotNil(self.pns.activeShootGroup)
 
         // confirm a known existing note exists:
@@ -137,7 +137,7 @@ class PointAndShootPersistToJournalTest: PointAndShootTest {
         XCTAssertNil(nonExistentNote)
 
         // Try to add to note existent note
-        let group = PointAndShoot.ShootGroup("id", [paragraphTarget], page.url!.absoluteString)
+        let group = PointAndShoot.ShootGroup("id", [paragraphTarget], "placeholder string", page.url!.absoluteString, shapeCache: .init())
         let expectation = XCTestExpectation(description: "point and shoot addShootToNote")
         self.pns.addShootToNote(targetNote: BeamNote(title: "fake non existent note title"), group: group, completion: {
             // Expect it to still work.

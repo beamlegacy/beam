@@ -43,9 +43,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
     var data: BeamData!
-
     var cancellableScope = Set<AnyCancellable>()
 
+    private let defaultWindowMinimumSize = CGSize(width: 800, height: 400)
+    private let defaultWindowSize = CGSize(width: 800, height: 600)
     public private(set) lazy var documentManager = DocumentManager()
     public private(set) lazy var databaseManager = DatabaseManager()
     public private(set) lazy var beamObjectManager = BeamObjectManager()
@@ -67,7 +68,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         let isSwiftUIPreview = NSString(string: ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] ?? "0").boolValue
-        if Configuration.env == "$(ENV)", !isSwiftUIPreview {
+        if Configuration.env == "$(ENV)" || Configuration.sentryKey == "$(SENTRY_KEY)", !isSwiftUIPreview {
             fatalError("Please restart your build, your ENV wasn't detected properly, and this should only happens for SwiftUI Previews")
         }
 
@@ -77,6 +78,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         LibrariesManager.shared.configure()
+        // We set our own ExceptionHandler but first we get the already set one in that case Sentry
+        // We do what we want when there is an exception, in this case saving the tabs then we pass it back to Sentry
+        NSSetUncaughtExceptionHandler { _ in
+            guard let prevHandler = NSGetUncaughtExceptionHandler() else { return }
+            AppDelegate.main.saveCloseTabsCmd(onExit: true)
+            NSSetUncaughtExceptionHandler(prevHandler)
+        }
+
         ContentBlockingManager.shared.setup()
         BeamObjectManager.setup()
 
@@ -100,13 +109,28 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             AccountManager.logout()
         }
         #endif
-
         // We sync data *after* we potentially connected to websocket, to make sure we don't miss any data
         beamObjectManager.liveSync { _ in
             self.syncDataWithBeamObject()
+            self.data.updateNoteCount()
         }
         fetchTopDomains()
         getUserInfos()
+    }
+
+    // Work around to fix odd animation in Preferences Panes
+    // https://github.com/sindresorhus/Preferences/issues/60
+    // I don't like this but couldn't find anything else to fix this issue
+    // It means that a full rewrite of the Preferences without the Preferences SPM is needed
+    // As soon as the target is 11.0
+    // https://developer.apple.com/documentation/swiftui/settings
+    private var openedPrefPanelOnce: Bool = false
+    func fixFirstTimeLanuchOddAnimationByImplicitlyShowIt() {
+        Preferences.PaneIdentifier.allBeamPreferences.forEach {
+            preferencesWindowController.show(preferencePane: $0)
+        }
+        preferencesWindowController.close()
+        openedPrefPanelOnce = true
     }
 
     // MARK: - Web sockets
@@ -211,8 +235,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @discardableResult
     func createWindow(frame: NSRect?) -> BeamWindow {
         // Create the window and set the content view.
-        let window = BeamWindow(contentRect: frame ?? NSRect(x: 0, y: 0, width: 800, height: 600),
-                                data: data)
+        let window = BeamWindow(contentRect: frame ?? CGRect(origin: .zero, size: defaultWindowSize),
+                                data: data,
+                                minimumSize: frame?.size ?? defaultWindowMinimumSize)
         if frame == nil && windows.count == 0 {
             window.center()
         } else {
@@ -231,34 +256,33 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     static let closeTabCmdGrp = "CloseTabCmdGrp"
     func applicationWillTerminate(_ aNotification: Notification) {
         // Insert code here to tear down your application
-        saveCloseTabsCmd()
         data.clusteringManager.saveOrphanedUrls(orphanedUrlManager: data.clusteringOrphanedUrlManager)
     }
 
-    private func saveCloseTabsCmd() {
+    public func saveCloseTabsCmd(onExit: Bool) {
+        guard windows.contains(where: { $0.state.browserTabsManager.tabs.count > 0}) else { return }
         var windowForTabsCmd = [Int: Command<BeamState>]()
         var windowCount = 0
+        let tmpCmdManager = CommandManager<BeamState>()
 
         for window in windows where window.state.browserTabsManager.tabs.count > 0 {
-            window.state.cmdManager.beginGroup(with: AppDelegate.closeTabCmdGrp)
+            tmpCmdManager.beginGroup(with: AppDelegate.closeTabCmdGrp)
 
-            for tab in window.state.browserTabsManager.tabs {
-                guard !tab.isPinned else { continue }
-                let closeTabCmd = CloseTab(tab: tab, appIsClosing: true)
-                window.state.cmdManager.run(command: closeTabCmd, on: window.state)
+            for tab in window.state.browserTabsManager.tabs.reversed() {
+                guard !tab.isPinned, tab.url != nil, let index = window.state.browserTabsManager.tabs.firstIndex(of: tab) else { continue }
+                let closeTabCmd = CloseTab(tab: tab, appIsClosing: true, tabIndex: index, wasCurrentTab: window.state.browserTabsManager.currentTab === tab)
+                tmpCmdManager.appendToDone(command: closeTabCmd)
             }
-            window.state.cmdManager.endGroup(forceGroup: true)
+            tmpCmdManager.endGroup(forceGroup: true)
 
-            if let lastCmd = window.state.cmdManager.lastCmd {
+            if let lastCmd = tmpCmdManager.lastCmd {
                 windowForTabsCmd[windowCount] = lastCmd
                 windowCount += 1
             }
         }
         let encoder = JSONEncoder()
         guard let data = try? encoder.encode(windowForTabsCmd) else { return }
-        UserDefaults.standard.set(data, forKey: BeamWindow.savedCloseTabCmdsKey)
-        _ = self.data.browsingTreeSender?.groupWait()
-        _ = BrowsingTreeStoreManager.shared.groupWait()
+        UserDefaults.standard.set(data, forKey: onExit ? BeamWindow.savedCloseTabCmdsKey : BeamWindow.savedTabsKey)
     }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
@@ -308,7 +332,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: -
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         data.saveData()
-
+        saveCloseTabsCmd(onExit: true)
+        _ = self.data.browsingTreeSender?.groupWait()
+        _ = BrowsingTreeStoreManager.shared.groupWait()
         // Save changes in the application's managed object context before the application terminates.
         let context = CoreDataManager.shared.mainContext
 
@@ -333,6 +359,44 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             let quitButton = NSLocalizedString("Quit anyway", comment: "Quit anyway button title")
             let cancelButton = NSLocalizedString("Cancel", comment: "Cancel button title")
             let alert = NSAlert()
+            alert.messageText = question
+            alert.informativeText = info
+            alert.addButton(withTitle: quitButton)
+            alert.addButton(withTitle: cancelButton)
+
+            let answer = alert.runModal()
+            if answer == .alertSecondButtonReturn {
+                return .terminateCancel
+            }
+        }
+
+        if data.downloadManager.ongoingDownload {
+            let downloads = data.downloadManager.downloads.filter { d in
+                d.state == .running
+            }
+
+            let message: String
+            let question: String
+
+            if let uniqueDownload = downloads.first, downloads.count == 1 {
+                question = NSLocalizedString("A download is in progress", comment: "Quit during download")
+                message = """
+                        Are you sure you want to quit? Beam is currently downloading "\(uniqueDownload.suggestedFileName)".
+                        If you quit now, Beam won’t finish downloading this file.
+                        """
+            } else {
+                question = NSLocalizedString("Downloads are in progress", comment: "Quit during downloads")
+                message = """
+                        Are you sure you want to quit? Beam is currently downloading \(downloads.count) files.
+                        If you quit now, Beam won’t finish downloading these files.
+                        """
+            }
+
+            let alert = NSAlert()
+
+            let info = NSLocalizedString(message, comment: "Quit with download message")
+            let quitButton = NSLocalizedString("Quit", comment: "Quit button title")
+            let cancelButton = NSLocalizedString("Don't quit", comment: "Don't quit button title")
             alert.messageText = question
             alert.informativeText = info
             alert.addButton(withTitle: quitButton)
@@ -377,7 +441,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     )
 
     @IBAction private func preferencesMenuItemActionHandler(_ sender: NSMenuItem) {
+        if !openedPrefPanelOnce {
+            fixFirstTimeLanuchOddAnimationByImplicitlyShowIt()
+        }
         preferencesWindowController.show()
+    }
+
+    func openPreferencesWindow(to prefPane: Preferences.PaneIdentifier) {
+        preferencesWindowController.show(preferencePane: prefPane)
     }
 
     func closePreferencesWindow() {
@@ -392,7 +463,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidUnhide(_ notification: Notification) {
         for window in windows where window.isMainWindow {
-            window.state.browserTabsManager.currentTab?.startReading(withState: window.state)
+            window.state.browserTabsManager.currentTab?.tabDidAppear(withState: window.state)
         }
     }
 
@@ -402,7 +473,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         isActive = true
         for window in windows where window.isMainWindow {
             guard window.state.mode == .web else { continue }
-            window.state.browserTabsManager.currentTab?.startReading(withState: window.state)
+            window.state.browserTabsManager.currentTab?.tabDidAppear(withState: window.state)
         }
     }
 

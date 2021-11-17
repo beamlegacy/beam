@@ -28,12 +28,10 @@ class RecentsManager: ObservableObject {
     }
 
     private func fetchRecents() {
-        let sort = [NSSortDescriptor(key: "updated_at",
-                                     ascending: false)]
-        recentNotes = documentManager.loadAllWithLimit(maxNumberOfRecents, sort).compactMap {
+        recentNotes = documentManager.loadAllWithLimit(maxNumberOfRecents, sortingKey: .updatedAt(false)).compactMap {
             // Maybe we could `instancateNote` automatically, to avoid refetching the CD object in `fetch`?
             // try? BeamNote.instanciateNote(documentManager, $0)
-            BeamNote.fetch(documentManager, id: $0.id)
+            BeamNote.fetch(id: $0.id)
         }
     }
 

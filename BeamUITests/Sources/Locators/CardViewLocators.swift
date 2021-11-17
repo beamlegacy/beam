@@ -18,11 +18,14 @@ enum CardViewLocators {
         case contextMenuRename = "ContextMenuItem-rename"
         case privateLock = "status-private"
         case editorButton = "editor-breadcrumb_down"
-        case copyLinkButton = "editor-url_link"
+        case copyCardLinkButton = "editor-url_link"
         case linksSection = "LinksSection"
         case referencesSection = "ReferencesSection"
         case linkButton = "link"
         case linkAllButton = "linkAllLayer"
+        case deleteCardButton = "editor-delete"
+        case publishCardButton = "NoteHeaderPublishButton"
+        case linkNamesButton = "cardTitleLayer"
     }
     
     enum TextFields: String, CaseIterable, UIElement {

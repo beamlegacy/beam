@@ -10,6 +10,7 @@ import BeamCore
 import AutoUpdate
 import ZIPFoundation
 
+// swiftlint:disable file_length
 public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var _todaysNote: BeamNote?
     var todaysNote: BeamNote {
@@ -32,11 +33,14 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     //swiftlint:disable:next large_tuple
     @Published var renamedNote: (noteId: UUID, previousName: String, newName: String) = (UUID.null, "", "")
     var noteAutoSaveService: NoteAutoSaveService
-    var linkManager: LinkManager
 
     var cookies: HTTPCookieStorage
-    var documentManager: DocumentManager
     var downloadManager: BeamDownloadManager = BeamDownloadManager()
+    lazy var calendarManager: CalendarManager = {
+        let cm = CalendarManager()
+        observeCalendarManager(cm)
+        return cm
+    }()
     var sessionLinkRanker = SessionLinkRanker()
     var clusteringManager: ClusteringManager
     var clusteringOrphanedUrlManager: ClusteringOrphanedUrlManager
@@ -91,25 +95,22 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     static var indexPath: URL { URL(fileURLWithPath: dataFolder(fileName: "index.beamindex")) }
     static var orphanedUrlsPath: URL { URL(fileURLWithPath: dataFolder(fileName: "clusteringOrphanedUrls.csv")) }
     static var fileDBPath: String { dataFolder(fileName: "files.db") }
-    static var linkStorePath: URL { URL(fileURLWithPath: dataFolder(fileName: "links.store")) }
+    static var linkDBPath: String { dataFolder(fileName: "links.db") }
     static var idToTitle: [UUID: String] = [:]
     static var titleToId: [String: UUID] = [:]
 
+    var linkDB: BeamLinkDB
+
     //swiftlint:disable:next function_body_length
     override init() {
-        documentManager = DocumentManager()
-        clusteringOrphanedUrlManager = ClusteringOrphanedUrlManager(savePath: Self.orphanedUrlsPath)
-        clusteringManager = ClusteringManager(ranker: sessionLinkRanker, documentManager: documentManager, candidate: 2, navigation: 0.5, text: 0.9, entities: 0.4, sessionId: sessionId, activeSources: activeSources)
-        noteAutoSaveService = NoteAutoSaveService()
-        linkManager = LinkManager()
-        let linkCount = LinkStore.shared.loadFromDB(linkManager: linkManager)
-        Logger.shared.logInfo("Loaded \(linkCount) links from DB", category: .document)
         do {
-            try LinkStore.loadFrom(Self.linkStorePath)
+            LinkStore.shared = LinkStore(linkManager: try BeamLinkDB(path: Self.linkDBPath))
         } catch {
-            Logger.shared.logError("Unable to load link store from \(Self.linkStorePath)", category: .search)
+            Logger.shared.logError("Unable to initialise link storage \(error)", category: .linkDB)
         }
-
+        clusteringOrphanedUrlManager = ClusteringOrphanedUrlManager(savePath: Self.orphanedUrlsPath)
+        clusteringManager = ClusteringManager(ranker: sessionLinkRanker, candidate: 2, navigation: 0.5, text: 0.9, entities: 0.4, sessionId: sessionId, activeSources: activeSources)
+        noteAutoSaveService = NoteAutoSaveService()
         cookies = HTTPCookieStorage()
 
         if let feed = URL(string: Configuration.updateFeedURL) {
@@ -126,12 +127,19 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
             waitTimeOut: 2.0
         )
         browsingTreeSender = BrowsingTreeSender(config: treeConfig, appSessionId: sessionId)
+        do {
+            linkDB = try BeamLinkDB(path: BeamData.linkDBPath)
+        } catch {
+            Logger.shared.logError("Unable to access link DB \(error)", category: .linkDB)
+            fatalError("Unable to access link DB \(error)")
+        }
 
         super.init()
 
+        let documentManager = DocumentManager()
         BeamNote.idForNoteNamed = { title, includeDeletedNotes in
             guard let id = Self.titleToId[title] else {
-                guard let doc = self.documentManager.loadDocumentByTitle(title: title),
+                guard let doc = documentManager.loadDocumentByTitle(title: title),
                       includeDeletedNotes || doc.deletedAt == nil
                 else { return nil }
                 let id = doc.id
@@ -143,7 +151,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         }
         BeamNote.titleForNoteId = { id, includeDeletedNotes in
             guard let title = Self.idToTitle[id] else {
-                guard let doc = self.documentManager.loadDocumentById(id: id),
+                guard let doc = documentManager.loadDocumentById(id: id),
                       includeDeletedNotes || doc.deletedAt == nil
                 else { return nil }
                 let title = doc.title
@@ -157,16 +165,14 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
             Self.updateTitleIdNoteMapping(noteId: noteId, currentName: previousName, newName: newName)
         }.store(in: &scope)
 
-        updateNoteCount()
         setupSubscribers()
         resetPinnedTabs()
-
         self.versionChecker.customPreinstall = {
             self.backup()
         }
     }
 
-    // swiftlint:disable:next function_body_length
+    // swiftlint:disable:next function_body_length cyclomatic_complexity
     private func setupSubscribers() {
         $lastChangedElement.sink { [weak self] element in
             guard let self = self, let element = element else { return }
@@ -183,19 +189,24 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         $tabToIndex.sink { [weak self] tabToIndex in
             guard let self = self,
                   let tabToIndex = tabToIndex else { return }
-            var currentId: UInt64?
-            var parentId: UInt64?
+            var currentId: UUID?
+            var parentId: UUID?
             (currentId, parentId) = self.clusteringManager.getIdAndParent(tabToIndex: tabToIndex)
             guard let id = currentId else { return }
-            self.clusteringManager.addPage(id: id, parentId: parentId, value: tabToIndex)
-            LinkStore.shared.visit(link: tabToIndex.url.string, title: tabToIndex.document.title)
+            if tabToIndex.shouldBeIndexed {
+                self.clusteringManager.addPage(id: id, parentId: parentId, value: tabToIndex)
+                LinkStore.shared.visit(link: tabToIndex.url.string, title: tabToIndex.document.title)
+            }
 
             // Update history record
             do {
-                try GRDBDatabase.shared.insertHistoryUrl(urlId: id,
-                                                         url: tabToIndex.url.string,
-                                                         title: tabToIndex.document.title,
-                                                         content: tabToIndex.textContent)
+                if tabToIndex.shouldBeIndexed {
+                    try GRDBDatabase.shared.insertHistoryUrl(urlId: id,
+                                                             url: tabToIndex.url.string,
+                                                             aliasDomain: tabToIndex.userTypedDomain?.absoluteString,
+                                                             title: tabToIndex.document.title,
+                                                             content: nil)
+                }
             } catch {
                 Logger.shared.logError("unable to save history url \(tabToIndex.url.string)", category: .search)
             }
@@ -221,14 +232,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     }
 
     func saveData() {
-        // save search index
-        do {
-            Logger.shared.logInfo("Save link store to \(Self.linkStorePath)", category: .search)
-            try LinkStore.saveTo(Self.linkStorePath)
-        } catch {
-            Logger.shared.logError("Unable to save link store to \(Self.linkStorePath): \(error)", category: .search)
-        }
-
         noteAutoSaveService.saveNotes()
     }
 
@@ -254,30 +257,71 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
             }.store(in: &journalCancellables)
     }
 
-    func setupJournal() {
+    func setupJournal(firstSetup: Bool = false) {
         journalCancellables = []
-        let note  = BeamNote.fetchOrCreateJournalNote(documentManager, date: BeamDate.now)
+        let note  = BeamNote.fetchOrCreateJournalNote(date: BeamDate.now)
         observeJournal(note: note)
         journal.append(note)
         _todaysNote = note
-        updateJournal(with: 2, and: journal.count)
+        updateJournal(with: 2, and: journal.count, fetchEvents: !firstSetup)
     }
 
-    func updateJournal(with limit: Int = 0, and fetchOffset: Int = 0) {
+    func updateJournal(with limit: Int = 0, and fetchOffset: Int = 0, fetchEvents: Bool = true) {
         isFetching = true
-        let _journal = BeamNote.fetchNotesWithType(documentManager, type: .journal, limit, fetchOffset).compactMap { $0.type.isJournal && !$0.type.isFutureJournal ? $0 : nil }
-        for note in _journal { observeJournal(note: note) }
+        let _journal = BeamNote.fetchNotesWithType(type: .journal, limit, fetchOffset).compactMap { $0.type.isJournal && !$0.type.isFutureJournal ? $0 : nil }
+        for note in _journal {
+            observeJournal(note: note)
+            if fetchEvents, let journalDate = note.type.journalDate, !note.isEntireNoteEmpty() {
+                loadEvents(for: note.id, for: journalDate)
+            }
+        }
         journal.append(contentsOf: _journal)
     }
 
     func updateNoteCount() {
-        noteCount = Document.countWithPredicate(CoreDataManager.shared.mainContext)
+        noteCount = DocumentManager().count()
     }
 
     func reloadJournal() {
-        journal = []
+        journal.removeAll()
+        calendarManager.meetingsForNote.removeAll()
         setupJournal()
         if newDay { newDay.toggle() }
+    }
+
+    private func observeCalendarManager(_ calendarManager: CalendarManager) {
+        calendarManager.$connectedSources.dropFirst().sink { [weak self] _ in
+            guard let self = self else { return }
+            self.reloadAllEvents()
+        }.store(in: &scope)
+
+        calendarManager.$didAllowSource.dropFirst().sink { [weak self] didAllowSource in
+            guard let self = self else { return }
+            if didAllowSource {
+                self.reloadAllEvents()
+            }
+        }.store(in: &scope)
+    }
+
+    func reloadAllEvents() {
+        if calendarManager.isConnected(calendarService: .googleCalendar) {
+            for journal in journal {
+                if let journalDate = journal.type.journalDate, !journal.isEntireNoteEmpty() || journal.isTodaysNote {
+                    loadEvents(for: journal.id, for: journalDate)
+                }
+            }
+        }
+    }
+
+    private func loadEvents(for noteUuid: UUID, for journalDate: Date) {
+        if calendarManager.isConnected(calendarService: .googleCalendar) {
+            self.calendarManager.requestMeetings(for: journalDate, onlyToday: true) { meetings in
+                guard let oldMeetings = self.calendarManager.meetingsForNote[noteUuid], oldMeetings == meetings else {
+                    self.calendarManager.meetingsForNote[noteUuid] = meetings
+                    return
+                }
+            }
+        }
     }
 
     public func cookiesDidChange(in cookieStore: WKHTTPCookieStore) {

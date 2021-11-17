@@ -161,7 +161,6 @@ class OmnibarAutocompleteTests: BaseTest {
         launchApp()
         helper.tapCommand(.omnibarFillHistory)
 
-        
         testRailPrint("When I type: \(partiallyTypedSearchText)")
         omnibarView.getOmniBarSearchField().click()
         omnibarView.getOmniBarSearchField().typeText(partiallyTypedSearchText)
@@ -214,5 +213,24 @@ class OmnibarAutocompleteTests: BaseTest {
         omnibarView.getOmniBarSearchField().typeText("s")
         testRailPrint("Then search field value is updated accordingly")
         XCTAssertTrue(waitHelper.waitForStringValueEqual(expectedSearchFieldText + "s", omnibarView.getOmniBarSearchField()))
+    }
+
+    func testAutoCompleteHistoryFromAliasUrlSelection() {
+        let partiallyTypedSearchText = "alternateurl.co"
+        let expectedSearchFieldText = "Beam"
+        let expectedHistoryIdentifier = "autocompleteResult-selected-\(expectedSearchFieldText)-history"
+        let waitHelper = WaitHelper()
+
+        launchApp()
+        helper.tapCommand(.omnibarFillHistory)
+
+        testRailPrint("When I type: \(partiallyTypedSearchText)")
+        omnibarView.getOmniBarSearchField().click()
+        omnibarView.getOmniBarSearchField().typeText(partiallyTypedSearchText)
+        let results = omnibarView.getAutocompleteResults()
+        let firstResult = results.firstMatch
+
+        testRailPrint("Then search field value is \(expectedSearchFieldText)")
+        XCTAssertTrue(waitHelper.waitForIdentifierEqual(expectedHistoryIdentifier, firstResult))
     }
 }

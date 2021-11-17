@@ -15,30 +15,19 @@ extension AppDelegate {
         documentManager.deleteAll(includedRemote: includedRemote) { result in
             switch result {
             case .failure(let error):
-                DispatchQueue.main.async {
-                    let alert = NSAlert()
-                    alert.messageText = "Could not delete documents"
-                    alert.informativeText = error.localizedDescription
-                    alert.alertStyle = .critical
-                    alert.runModal()
-                }
+                UserAlert.showError(message: "Could not delete documents",
+                                    error: error)
             case .success:
                 self.databaseManager.deleteAll(includedRemote: includedRemote) { result in
-                    DispatchQueue.main.async {
-                        let alert = NSAlert()
-
-                        switch result {
-                        case .failure(let error):
-                            // TODO: i18n
-                            alert.messageText = "Could not delete databases"
-                            alert.informativeText = error.localizedDescription
-                            alert.alertStyle = .critical
-                        case .success:
-                            alert.messageText = "All documents and databases deleted, please restart."
-                            alert.alertStyle = .informational
-                        }
-
-                        alert.runModal()
+                    switch result {
+                    case .failure(let error):
+                        // TODO: i18n
+                        UserAlert.showError(message: "Could not delete databases",
+                                            error: error)
+                    case .success:
+                        UserAlert.showMessage(message: "All documents and databases deleted. Beam must exit now.",
+                                              buttonTitle: "Exit now")
+                        NSApplication.shared.terminate(nil)
                     }
                 }
             }
@@ -76,11 +65,8 @@ extension AppDelegate {
             do {
                 try CoreDataManager.shared.backup(url)
             } catch {
-                let alert = NSAlert()
-                alert.alertStyle = .critical
-                alert.messageText = "Could not import backup: \(error.localizedDescription)"
-                alert.informativeText = error.localizedDescription
-                alert.runModal()
+                UserAlert.showError(message: "Could not import backup: \(error.localizedDescription)",
+                                    error: error)
             }
             url.stopAccessingSecurityScopedResource()
         }
@@ -101,23 +87,19 @@ extension AppDelegate {
         openPanel.begin { [weak openPanel] result in
             guard result == .OK, let url = openPanel?.url else { openPanel?.close(); return }
 
-            let alert = NSAlert()
-            alert.alertStyle = .critical
-
             do {
                 try CoreDataManager.shared.importBackup(url)
 
-                let documentsCount = Document.countWithPredicate(CoreDataManager.shared.mainContext)
+                let documentManager = DocumentManager()
+                let documentsCount = documentManager.count()
 
                 // TODO: i18n
-                alert.messageText = "Backup file has been imported"
-                alert.informativeText = "\(documentsCount) notes have been imported"
+                UserAlert.showError(message: "Backup file has been imported",
+                                    informativeText: "\(documentsCount) notes have been imported")
             } catch {
-                alert.messageText = "Could not import backup"
-                alert.informativeText = error.localizedDescription
-                alert.alertStyle = .critical
+                UserAlert.showError(message: "Could not import backup",
+                                    error: error)
             }
-            alert.runModal()
 
             openPanel?.close()
         }
@@ -135,7 +117,8 @@ extension AppDelegate {
         openPanel.begin { [weak openPanel] result in
             guard result == .OK, let selectedPath = openPanel?.url?.path else { openPanel?.close(); return }
 
-            let beforeNotesCount = Document.countWithPredicate(CoreDataManager.shared.mainContext)
+            let documentManager = DocumentManager()
+            let beforeNotesCount = documentManager.count()
 
             let roamImporter = RoamImporter()
             do {
@@ -145,34 +128,12 @@ extension AppDelegate {
                 // TODO: raise error?
                 Logger.shared.logError("error: \(error.localizedDescription)", category: .general)
             }
-            let afterNotesCount = Document.countWithPredicate(CoreDataManager.shared.mainContext)
+            let afterNotesCount = documentManager.count()
 
-            let alert = NSAlert()
-            alert.alertStyle = .informational
-            alert.messageText = "Roam file has been imported"
-            alert.informativeText = "\(afterNotesCount - beforeNotesCount) notes have been imported"
-            alert.runModal()
+            UserAlert.showMessage(message: "Roam file has been imported",
+                                  informativeText: "\(afterNotesCount - beforeNotesCount) notes have been imported")
 
             openPanel?.close()
-        }
-    }
-
-    // MARK: - Send to API
-    @IBAction func sendAllNotesToAPI(_ sender: Any) {
-        documentManager.saveAllOnAPI { result in
-            DispatchQueue.main.async {
-                let alert = NSAlert()
-                switch result {
-                case .failure(let error):
-                    alert.alertStyle = .critical
-                    alert.messageText = error.localizedDescription
-                case .success:
-                    alert.alertStyle = .informational
-                    // TODO: i18n
-                    alert.messageText = "All documents sent to API"
-                }
-                alert.runModal()
-            }
         }
     }
 }

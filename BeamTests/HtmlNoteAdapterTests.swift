@@ -55,7 +55,7 @@ class HtmlNoteAdapterTests: XCTestCase {
         let htmlNoteAdapter = self.setupTestMocks("http://test.com")
         let txt = htmlNoteAdapter.convertForClustering(html: html)
         
-        XCTAssertEqual(txt, "This is another paragraph.")
+        XCTAssertEqual(txt, ["This is a paragraph.", "This is another paragraph."])
     }
     
     func testBasicParagraph() throws {
@@ -248,13 +248,13 @@ class HtmlNoteAdapterTests: XCTestCase {
         let html = """
         <video tabindex="-1" class="video-stream html5-main-video" controlslist="nodownload" style="width: 878px; height: 494px; left: 0px; top: 0px;" src="blob:https://www.youtube.com/269afa34-170e-476e-9528-11bddf201561"></video>
         """
-        let htmlNoteAdapter = self.setupTestMocks("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+        let urlString = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+        let htmlNoteAdapter = self.setupTestMocks(urlString)
         let expectation = XCTestExpectation(description: "convert html to BeamElements")
         htmlNoteAdapter.convert(html: html, completion: { (results: [BeamElement]) in
             XCTAssertEqual(results.count, 1)
             if let embedElement = results.first {
-                let embedUrl = "https://www.youtube.com/embed/dQw4w9WgXcQ"
-                XCTAssertEqual(embedElement.kind, .embed(embedUrl, displayRatio: nil))
+                XCTAssertEqual(embedElement.kind, .embed(urlString, displayRatio: nil))
             }
             expectation.fulfill()
         })

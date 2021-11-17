@@ -116,7 +116,7 @@ class BrowsingTreeScoreTests: XCTestCase {
     }
 
     struct UpdateScoreArgs {
-        let id: UInt64
+        let id: UUID
         let scoreValue: Float
         let eventType: FrecencyEventType
         let date: Date
@@ -125,19 +125,15 @@ class BrowsingTreeScoreTests: XCTestCase {
 
     class FakeFrecencyScorer: FrecencyScorer {
         public var updateCalls = [UpdateScoreArgs]()
-        func update(id: FrecencyScoreIdKey, value: Float, eventType: FrecencyEventType, date: Date, paramKey: FrecencyParamKey) {
-            guard let id = id as? UInt64 else { return }
+        func update(id: UUID, value: Float, eventType: FrecencyEventType, date: Date, paramKey: FrecencyParamKey) {
             let args = UpdateScoreArgs(id: id, scoreValue: value, eventType: eventType, date: date, paramKey: paramKey)
             updateCalls.append(args)
-        }
-        func rank(urlIds: [UInt64], paramKey: FrecencyParamKey, date: Date) -> [UInt64] {
-            return [UInt64]()
         }
     }
 
     func testFrecencyWrite() {
         //checks that frecency writer is called with right values
-        func testCall(call: UpdateScoreArgs, expectedUrlId urlId: UInt64, expectedValue value: Float, expectedEventType eventType: FrecencyEventType, expectedDate date: Date, expectedKey paramKey: FrecencyParamKey) {
+        func testCall(call: UpdateScoreArgs, expectedUrlId urlId: UUID, expectedValue value: Float, expectedEventType eventType: FrecencyEventType, expectedDate date: Date, expectedKey paramKey: FrecencyParamKey) {
             XCTAssertEqual(call.id, urlId)
             XCTAssertEqual(call.scoreValue, value)
             XCTAssertEqual(call.date, date)

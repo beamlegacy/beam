@@ -38,9 +38,6 @@ extension ElementNode {
         let indentLayer = CALayer()
         indentLayer.backgroundColor = BeamColor.Editor.indentBackground.cgColor
         indentLayer.enableAnimations = false
-        indentLayer.actions = [
-            "opacity": opacityAnimation
-        ]
         addLayer(Layer(name: LayerName.indentLayer.rawValue, layer: indentLayer))
         updateIndentLayer()
     }
@@ -51,9 +48,7 @@ extension ElementNode {
             self.open = value
             layers[LayerName.indentLayer.rawValue]?.layer.isHidden = !value
         })
-        disclosureLayer.layer.actions = [
-            "opacity": opacityAnimation
-        ]
+        disclosureLayer.setAccessibilityIdentifier("node_arrow")
         addLayer(disclosureLayer, origin: point)
         updateDisclosureLayer()
     }
@@ -108,16 +103,14 @@ extension ElementNode {
             disclosureLayer.frame.origin = CGPoint(x: Self.bulletLayerPositionX, y: bulletLayerPositionY)
         }
 
-        let show = showDisclosureButton && (PreferencesManager.alwaysShowBullets || hover)
-        disclosureLayer.layer.opacity = Float(show ? 1 : 0)
+        disclosureLayer.layer.isHidden = !showDisclosureButton
     }
 
     private func updateIndentLayer() {
         guard let indentLayer = layers[LayerName.indentLayer.rawValue] else { return }
         let y = firstLineHeight + 3
         indentLayer.frame = NSRect(x: Self.indentLayerPosX, y: y, width: 0.5, height: frame.height - y)
-        let show = (showDisclosureButton && (PreferencesManager.alwaysShowBullets || hover))  && self.open
-        indentLayer.layer.opacity = Float(show ? 1 : 0)
+        indentLayer.layer.isHidden = !showDisclosureButton && self.open
     }
 
     private func updateCheckboxLayer() {

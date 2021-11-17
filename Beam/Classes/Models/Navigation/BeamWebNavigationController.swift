@@ -46,6 +46,7 @@ class BeamWebNavigationController: WebPageHolder, WebNavigationController {
             guard let self = self else { return }
             switch result {
             case let .success(read):
+                guard self.page.responseStatusCode == 200 else { return }
                 self.browsingTree.navigateTo(url: url.absoluteString, title: read.title, startReading: self.page.isActiveTab(),
                                              isLinkActivation: isLinkActivation, readCount: read.content.count)
                 self.page.appendToIndexer?(url, read)
@@ -127,6 +128,9 @@ extension BeamWebNavigationController: WKNavigationDelegate {
             }
             page.downloadManager?.downloadFile(at: url, headers: headers, suggestedFileName: response.suggestedFilename, destinationFoldedURL: DownloadFolder(rawValue: PreferencesManager.selectedDownloadFolder)?.sandboxAccessibleUrl)
         } else {
+            if let response = navigationResponse.response as? HTTPURLResponse {
+                page.responseStatusCode = response.statusCode
+            }
             decisionHandler(.allow)
         }
     }

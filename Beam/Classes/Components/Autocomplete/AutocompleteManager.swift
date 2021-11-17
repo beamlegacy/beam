@@ -13,7 +13,7 @@ import SwiftUI
 // BeamState Autocomplete management
 class AutocompleteManager: ObservableObject {
     static let noteFrecencyParamKey: FrecencyParamKey = .note30d0
-    static let urlFrecencyParamKey: FrecencyParamKey = .webReadingTime30d0
+    static let urlFrecencyParamKey: FrecencyParamKey = .webVisit30d0
 
     @Published var searchQuery: String = ""
 
@@ -110,11 +110,21 @@ class AutocompleteManager: ObservableObject {
         if !finalResults.isEmpty {
             Logger.shared.logDebug("-- Autosuggest results for `\(searchText)` --", category: .autocompleteManager)
             for result in finalResults {
-                Logger.shared.logDebug("\(result.source) \(result.id) \(String(describing: result.url))", category: .autocompleteManager)
+                Logger.shared.logDebug("\(String(describing: result))", category: .autocompleteManager)
             }
         }
         let (elapsedTime, timeUnit) = startedAt.endChrono()
         Logger.shared.logInfo("autocomplete results in \(elapsedTime) \(timeUnit)", category: .autocompleteManager)
+    }
+
+    static func logIntermediate(step: String, stepShortName: String, results: [AutocompleteResult], limit: Int = 10) {
+        Logger.shared.logDebug("-------------\(step)-------------------", category: .autocompleteManager)
+        for res in results.prefix(limit) {
+            Logger.shared.logDebug("\(stepShortName): \(String(describing: res))", category: .autocompleteManager)
+        }
+        if results.count > limit {
+            Logger.shared.logDebug("\(stepShortName): truncated results: \(results.count - limit)", category: .autocompleteManager)
+        }
     }
 
     func isResultCandidateForAutoselection(_ result: AutocompleteResult, forSearch searchText: String) -> Bool {
@@ -132,10 +142,8 @@ class AutocompleteManager: ObservableObject {
             guard let host = result.url?.minimizedHost ?? URL(string: result.text)?.minimizedHost else { return false }
             return result.text.lowercased().contains(host)
         case .autocomplete:
-            if autocompleteResults.count == 2 { // Suggestion + new card
-                return result.text == searchQuery
-            }
-            return false
+            return autocompleteResults.count == 2 // 1 search engine result + 1 create card
+            && !searchQuery.mayBeURL && result.text == searchQuery
         default:
             return false
         }
@@ -174,7 +182,7 @@ class AutocompleteManager: ObservableObject {
                 let additionalText = resultText.substring(range: newSelection)
                 searchQuery = completingText + additionalText
                 searchQuerySelectedRange = newSelection
-            } else {
+            } else if searchQuery != resultText {
                 searchQuery = resultText
                 searchQuerySelectedRange = resultText.count..<resultText.count
             }

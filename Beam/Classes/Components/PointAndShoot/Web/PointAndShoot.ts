@@ -1,125 +1,146 @@
-import {WebEvents} from "./WebEvents"
-import {PointAndShootUI} from "./PointAndShootUI"
+import { PointAndShootUI } from "./PointAndShootUI"
 import {
-  BeamElement,
   BeamHTMLElement,
-  BeamMessageHandler,
+  BeamMouseLocation,
   BeamRange,
   BeamRangeGroup,
-  BeamSelection,
   BeamShootGroup,
   BeamWindow
 } from "../../../Helpers/Utils/Web/BeamTypes"
-import {Util} from "./Util"
-import {WebFactory} from "./WebFactory"
-import {BeamElementHelper} from "../../../Helpers/Utils/Web/BeamElementHelper"
-import {BeamUIEvent} from "../../../Helpers/Utils/Web/BeamUIEvent"
-import {BeamMouseEvent} from "../../../Helpers/Utils/Web/BeamMouseEvent"
-
-export interface PointAndShootMessages {
-  pointAndShoot_frameBounds: BeamMessageHandler
-}
-
-export type PNSWindow = BeamWindow<PointAndShootMessages>
+import { Util } from "./Util"
+import { BeamUIEvent } from "../../../Helpers/Utils/Web/BeamUIEvent"
+import { BeamMouseEvent } from "../../../Helpers/Utils/Web/BeamMouseEvent"
+import { debounce } from "debounce"
+import { BeamKeyEvent } from "../../../Helpers/Utils/Web/BeamKeyEvent"
+import { PointAndShootHelper } from "./PointAndShootHelper"
 
 /**
  * Listen to events that hover and select web blocks with Option.
  */
-export class PointAndShoot extends WebEvents<PointAndShootUI> {
-  /**
-   * Singleton.
-   */
+export class PointAndShoot {
+  win: BeamWindow
+  ui: PointAndShootUI
   static instance: PointAndShoot
-
-  /**
-   * @type string
-   */
-  datasetKey: string
-
-  /**
-   * Amount of time we want the user to touch before we do something
-   */
+  prefix = "__ID__"
   timer
   touchDuration = 2500
-  mouseLocation = {x: 0, y: 0}
+  mouseLocation: BeamMouseLocation = { x: 0, y: 0 }
   selectionUUID?: string
   pointTarget: BeamShootGroup
   shootTargets: BeamShootGroup[] = []
   selectionRangeGroups: BeamRangeGroup[] = []
   isTypingOnWebView = false
-
   /**
+   * Returns the Point and Shoot instance. A new instance will be created if none exists yet.
    *
-   * @param win {BeamWindow}
-   * @param ui {PointAndShootUI}
-   * @param webFactory
-   * @return {PointAndShoot}
+   * @static
+   * @param {BeamWindow} win
+   * @param {PointAndShootUI} ui
+   * @return {*}  {PointAndShoot}
+   * @memberof PointAndShoot
    */
-  static getInstance(win: PNSWindow, ui: PointAndShootUI, webFactory: WebFactory): PointAndShoot {
+  static getInstance(win: BeamWindow, ui: PointAndShootUI): PointAndShoot {
     if (!PointAndShoot.instance) {
-      PointAndShoot.instance = new PointAndShoot(win, ui, webFactory)
+      PointAndShoot.instance = new PointAndShoot(win, ui)
     }
     return PointAndShoot.instance
   }
-
   /**
-   * @param win {(BeamWindow)}
-   * @param ui {PointAndShootUI}
-   * @param webFactory
+   * Creates an instance of PointAndShoot.
+   * @param {BeamWindow} win
+   * @param {PointAndShootUI} ui
+   * @memberof PointAndShoot
    */
-  constructor(win: PNSWindow, ui: PointAndShootUI, webFactory: WebFactory) {
-    super(win, ui, webFactory)
-    this.datasetKey = `${this.prefix}Collect`
+  constructor(win: BeamWindow, ui: PointAndShootUI) {
+    this.win = win
+    this.ui = ui
     this.selectionUUID = Util.uuid(win)
+    this.registerEventListeners()
+    this.sendBounds = this.sendBounds.bind(this)
   }
+  /**
+   * Registers all Event Listeners Point and Shoot requires.
+   *
+   * @memberof PointAndShoot
+   */
+  registerEventListeners(): void {
+    this.win.addEventListener("mousemove", this.onMouseMove.bind(this))
+    this.win.addEventListener("click", this.onClick.bind(this), true)
+    this.win.addEventListener("touchstart", this.onTouchstart.bind(this), false)
+    this.win.addEventListener("touchend", this.onTouchend.bind(this), false)
+    this.win.addEventListener("keydown", this.onKeyDown.bind(this), {
+      capture: true
+    })
+    this.win.addEventListener("mouseup", this.onMouseUp.bind(this))
+    this.win.document.addEventListener(
+      "selectionchange",
+      this.onSelection.bind(this)
+    )
 
-  setWindow(win: BeamWindow): void {
-    super.setWindow(win)
-    this.log("setWindow")
+    const immediate = true
+    const debounceTimeout = 8 // 120fps
+    this.win.addEventListener("scroll", this.onScroll.bind(this), true)
+    this.win.addEventListener(
+      "resize",
+      debounce(this.onResize.bind(this), debounceTimeout, immediate),
+      true
+    )
+    this.win.addEventListener(
+      "orientationchange",
+      this.onResize.bind(this),
+      true
+    )
 
-    win.addEventListener("mousemove", this.onMouseMove.bind(this))
-    win.addEventListener("click", this.onClick.bind(this), true)
-    win.addEventListener("touchstart", this.onTouchstart.bind(this), false)
-    win.addEventListener("touchend", this.onTouchend.bind(this), false)
-    win.addEventListener("keydown", this.onKeyDown.bind(this), { capture: true })
-    win.addEventListener("mouseup", this.onMouseUp.bind(this))
-    win.document.addEventListener("selectionchange", () => this.onSelection())
-    win.addEventListener("scroll", this.onScroll.bind(this), true)
-    this.log("events registered")
-
-    win.addEventListener("resize", this.onResize.bind(this), true)
-    win.addEventListener("orientationchange", this.onResize.bind(this), true)
-
-    const vv = win.visualViewport
-    vv.addEventListener("onresize", this.onResize.bind(this))
-    vv.addEventListener("scroll", this.onResize.bind(this))
+    const vv = this.win.visualViewport
+    vv.addEventListener(
+      "onresize",
+      debounce(this.onResize.bind(this), debounceTimeout, immediate)
+    )
+    vv.addEventListener(
+      "scroll",
+      debounce(this.onResize.bind(this), debounceTimeout, immediate)
+    )
   }
 
   log(...args: unknown[]): void {
     console.log(this.toString(), args)
   }
-
+  /**
+   * Send updates to the UI.
+   *
+   * @memberof PointAndShoot
+   */
   sendBounds(): void {
-    // First send frame positioning
-    this.sendFramesInfo()
-    // Second send Boolean flags
-    this.ui.hasSelection(this.hasSelection())
-    this.ui.isTypingOnWebView(this.isTypingOnWebView)
+    // First send Boolean flags
+    this.ui.hasSelection(PointAndShootHelper.hasSelection(this.win))
+    this.ui.typingOnWebView(this.isTypingOnWebView)
     // Lastly send positioning bounds
     this.ui.pointBounds(this.pointTarget)
     this.ui.shootBounds(this.shootTargets)
     this.ui.selectBounds(this.selectionRangeGroups)
   }
-
+  /**
+   * Upserts the target element to the shootTargets Array. Then triggers
+   * a UI update.
+   *
+   * @param {BeamHTMLElement} targetEl
+   * @memberof PointAndShoot
+   */
   shoot(targetEl: BeamHTMLElement): void {
     const shootGroup = {
       id: Util.uuid(this.win),
       element: targetEl
     }
-    this.upsertShootGroup(shootGroup, this.shootTargets)
+    PointAndShootHelper.upsertShootGroup(shootGroup, this.shootTargets)
     this.sendBounds()
   }
-
+  /**
+   * Updates the point element with the target element. The pointTarget only
+   * gets updated when the target is different. Then triggers a UI update.
+   *
+   * @param {BeamHTMLElement} targetEl
+   * @memberof PointAndShoot
+   */
   point(targetEl: BeamHTMLElement): void {
     // only assign new pointTarget when pointTarget is different
     if (this.pointTarget?.element != targetEl) {
@@ -131,15 +152,25 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
 
     this.sendBounds()
   }
-
+  /**
+   * Upserts the selectionRangeGroups Array with current Selection. A new
+   * selectionRangeGroup is created when the current selection is collapsed,
+   * this also messages the UI with a "clearSelection" event.
+   *
+   * The selectionRangeGroups Array is always updated. However updating the UI
+   * with the new Bounds is debounced by 8ms (120fps). This reduces the amount
+   * of expensive calculations.
+   *
+   * @memberof PointAndShoot
+   */
   select(): void {
-    const selection = this.getSelection()
+    const selection = PointAndShootHelper.getSelection(this.win)
     // reset the uuid to store a new selection next time
     if (selection.rangeCount == 0) {
       return
     }
     if (selection.isCollapsed) {
-      // clear selectionTarget when we have a stored value 
+      // clear selectionTarget when we have a stored value
       this.ui.clearSelection(this.selectionUUID)
       this.selectionUUID = Util.uuid(this.win)
       return
@@ -153,24 +184,14 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
       range: range as BeamRange
     }
 
-    this.upsertRangeGroup(rangeGroup, this.selectionRangeGroups)
-
-    this.sendBounds()
+    PointAndShootHelper.upsertRangeGroup(rangeGroup, this.selectionRangeGroups)
+    debounce(this.sendBounds, 8) // 120fps
   }
-
   /**
-   * Returns boolean if document has active selection
-   */
-  hasSelection(): boolean {
-    return Boolean(this.win.document.getSelection().toString())
-  }
-
-
-  /**
-   * For performance reasons we want to stop listening to element we don't care about
-   * However due to limitations in the Swift to JS bridge in iframes we can't rely
-   * on this happening all the time. For most browsing behaviour we can remove unused targets
-   * resulting in greatly improved performance.
+   * For performance reasons we want to stop listening to element we don't care
+   * about. However due to limitations in the Swift to JS bridge in iframes we
+   * can't rely on this happening all the time. For most browsing behaviour we
+   * can remove unused targets resulting in greatly improved performance.
    *
    * @param {string} id - id of the target element to stop watching
    * @memberof PointAndShoot
@@ -179,7 +200,6 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
     this.removeSelectRangeGroup(id)
     this.removeShootTarget(id)
   }
-
   /**
    * Remove target with id from observed elements
    *
@@ -192,7 +212,6 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
       return target.id === id
     }, this.shootTargets) as BeamShootGroup[]
   }
-
   /**
    * Remove target with id from observed ranges
    *
@@ -211,21 +230,47 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    * Eventlisteners =======================================================
    * ======================================================================
    */
-
+  /**
+   * When called it updates the pointing target when pointing isn't currently 
+   * disabled. Then it sends updates to the UI. 
+   *
+   * @param {BeamUIEvent} ev
+   * @memberof PointAndShoot
+   */
   onScroll(ev: BeamUIEvent): void {
-    if (this.mouseLocation?.x && !this.isPointDisabled(ev)) {
-      const target = this.win.document.elementFromPoint(this.mouseLocation.x, this.mouseLocation.y)
+    if (
+      this.mouseLocation?.x &&
+      !PointAndShootHelper.isPointDisabled(this.win, ev.target)
+    ) {
+      const target = PointAndShootHelper.getElementAtMouseLocation(
+        this.win,
+        this.mouseLocation
+      )
       this.point(target)
     } else {
       this.sendBounds()
     }
   }
-
+  /**
+   * When called it only sends UI updates when the mouseLocation has changed 
+   * from the previous Coordinates and when the Alt key is pressed. If pointing 
+   * is allowed the pointing target is updated and `isTypingOnWebView` is set 
+   * to false.
+   *
+   * @param {BeamMouseEvent} ev
+   * @memberof PointAndShoot
+   */
   onMouseMove(ev: BeamMouseEvent): void {
-    const mouseLocationHasChanged = this.mouseLocation?.x !== ev.clientX || this.mouseLocation?.y !== ev.clientY
-    if (mouseLocationHasChanged && this.isOnlyAltKey(ev)) {
+    if (
+      PointAndShootHelper.hasMouseLocationChanged(
+        this.mouseLocation,
+        ev.clientX,
+        ev.clientY
+      ) &&
+      PointAndShootHelper.isOnlyAltKey(ev)
+    ) {
       // Code when the (physical) mouse actually moves
-      if (!this.isPointDisabled(ev)) {
+      if (Boolean(ev.target) && !PointAndShootHelper.isPointDisabled(this.win, ev.target)) {
         this.point(ev.target)
         this.isTypingOnWebView = false
       } else {
@@ -235,195 +280,105 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
     this.mouseLocation.x = ev.clientX
     this.mouseLocation.y = ev.clientY
   }
-
+  /**
+   * When the user clicks and pointing is allowed on the target element, a new 
+   * Shoot target is created. onClick should always send updated bounds so the 
+   * UI is updated.
+   *
+   * @param {BeamUIEvent} ev
+   * @memberof PointAndShoot
+   */
   onClick(ev: BeamUIEvent): void {
-    if (this.isOnlyAltKey(ev)) {
+    if (PointAndShootHelper.isOnlyAltKey(ev)) {
       ev.preventDefault()
       ev.stopPropagation()
     }
 
-    if (!this.isPointDisabled(ev)) {
+    if (Boolean(ev.target) && !PointAndShootHelper.isPointDisabled(this.win, ev.target)) {
       this.shoot(ev.target)
     } else {
       this.sendBounds()
     }
   }
-
-  onlongtouch(ev: BeamUIEvent): void {
-    if (!this.isPointDisabled(ev)) {
+  /**
+   * onClick but for touch events
+   *
+   * @param {BeamUIEvent} ev
+   * @memberof PointAndShoot
+   */
+  onLongtouch(ev: BeamUIEvent): void {
+    if (!PointAndShootHelper.isPointDisabled(this.win, ev.target)) {
       this.shoot(ev.target)
     } else {
       this.sendBounds()
     }
   }
-
+  /**
+   * onClick but for touch events
+   *
+   * @param {TouchEvent} ev
+   * @memberof PointAndShoot
+   */
   onTouchstart(ev: TouchEvent): void {
     if (!this.timer) {
-      this.timer = setTimeout(() => this.onlongtouch(ev), this.touchDuration)
+      this.timer = setTimeout(() => this.onLongtouch(ev), this.touchDuration)
     }
   }
-
+  /**
+   * onClick but for touch events
+   *
+   * @memberof PointAndShoot
+   */
   onTouchend(): void {
     if (this.timer) {
       clearTimeout(this.timer)
       this.timer = null
     }
   }
-
-  onKeyDown(ev: BeamMouseEvent): void {
-    if (this.isPointDisabled(ev)) {
+  /**
+   * When called while a the current activeElement is a text input,
+   * `isTypingOnWebView` is set to true and the UI is updated. When it isn't an 
+   * active text input `isTypingOnWebView` is set to false and the current 
+   * pointTarget is set to the element underneath the Mouse Location.
+   *
+   * @param {BeamKeyEvent} _ev
+   * @memberof PointAndShoot
+   */
+  onKeyDown(_ev: BeamKeyEvent): void {
+    if (PointAndShootHelper.hasFocusedTextualInput(this.win)) {
       this.isTypingOnWebView = true
       this.sendBounds()
     } else {
-      const target = this.win.document.elementFromPoint(this.mouseLocation.x, this.mouseLocation.y)
+      this.isTypingOnWebView = false
+      const target = PointAndShootHelper.getElementAtMouseLocation(
+        this.win,
+        this.mouseLocation
+      )
       this.point(target)
     }
   }
-
+  /**
+   * When called handle the selection
+   *
+   * @memberof PointAndShoot
+   */
+   onSelection(): void {
+    this.select()
+  }
+  /**
+   * When called update the UI
+   *
+   * @memberof PointAndShoot
+   */
   onMouseUp(): void {
     this.sendBounds()
   }
-
-  onSelection(): void {
-    this.select()
-  }
-
+  /**
+   * When called update the UI
+   *
+   * @memberof PointAndShoot
+   */
   onResize(): void {
     this.sendBounds()
-  }
-
-  /**
-   * ======================================================================
-   * Helpers ==============================================================
-   * ======================================================================
-   */
-
-  isOnlyAltKey(ev): boolean {
-    const altKey = ev.altKey || ev.key == "Alt"
-    return altKey && !ev.ctrlKey && !ev.metaKey && !ev.shiftKey
-  }
-
-  upsertShootGroup(newItem: BeamShootGroup, groups: BeamShootGroup[]): void {
-    // Update existing rangeGroup
-    const index = groups.findIndex(({element}) => {
-      return element == newItem.element
-    })
-    if (index != -1) {
-      groups[index] = newItem
-    } else {
-      groups.push(newItem)
-    }
-  }
-
-  upsertRangeGroup(newItem: BeamRangeGroup, groups: BeamRangeGroup[]): void {
-    // Update existing rangeGroup
-    const index = groups.findIndex(({id}) => {
-      return id == newItem.id
-    })
-    if (index != -1) {
-      groups[index] = newItem
-    } else {
-      groups.push(newItem)
-    }
-  }
-
-  /**
-   * Check for textarea and input elements with matching type attribute
-   *
-   * @param element {BeamElement} The DOM Element to check.
-   * @return If the element is some kind of text input.
-   */
-  isTextualInputType(element: BeamElement): boolean {
-    const tag = element.tagName.toLowerCase()
-    if (tag === "textarea") {
-      return true
-    } else if (tag === "input") {
-      const types = [
-        "text",
-        "email",
-        "password",
-        "date",
-        "datetime-local",
-        "month",
-        "number",
-        "search",
-        "tel",
-        "time",
-        "url",
-        "week",
-        // for legacy support
-        "datetime"
-      ]
-      return types.includes(BeamElementHelper.getType(element))
-    }
-
-    return false
-  }
-
-  // In addition to the target.type we have to check for contentEditable values
-  isExplicitlyContentEditable(element: BeamHTMLElement): boolean {
-    return ["true", "plaintext-only"].includes(BeamElementHelper.getContentEditable(element))
-  }
-
-  /**
-   * Check for inherited contenteditable attribute value by traversing
-   * the ancestors until an explicitly set value is found
-   *
-   * @param element {(BeamNode)} The DOM node to check.
-   * @return If the element inherits from an actual contenteditable valid values
-   *         ("true", "plaintext-only")
-   */
-  getInheritedContentEditable(element: BeamHTMLElement): boolean {
-    let isEditable = this.isExplicitlyContentEditable(element)
-    const parent = element.parentElement as BeamHTMLElement
-    if (parent && BeamElementHelper.getContentEditable(element) === "inherit") {
-      isEditable = this.getInheritedContentEditable(parent)
-    }
-    return isEditable
-  }
-
-  isEventTargetTextualInput(ev: BeamUIEvent): boolean {
-    return BeamElementHelper.isTextualInputType(ev.target) || this.getInheritedContentEditable(ev.target)
-  }
-
-  isEventTargetActive(ev: BeamUIEvent): boolean {
-    return !!(
-        this.win.document.activeElement &&
-        this.win.document.activeElement !== this.win.document.body &&
-        this.win.document.activeElement.contains(ev.target)
-    )
-  }
-
-  isActiveTextualInput(ev: BeamUIEvent): boolean {
-    return this.isEventTargetActive(ev) && this.isEventTargetTextualInput(ev)
-  }
-
-  isPointDisabled(ev: BeamUIEvent): boolean {
-    return this.isActiveTextualInput(ev) || this.hasSelection()
-  }
-
-  /**
-   * Returns an array of ranges for a given HTML selection
-   *
-   * @param {BeamSelection} selection
-   * @return {*}  {BeamRange[]}
-   */
-  getSelectionRanges(selection: BeamSelection): BeamRange[] {
-    const ranges = []
-    const count = selection.rangeCount
-    for (let index = 0; index < count; ++index) {
-      const range = selection.getRangeAt(index)
-      ranges.push(range)
-    }
-    return ranges
-  }
-
-  /**
-   * Returns the current active (text) selection on the document
-   *
-   * @return {BeamSelection}
-   */
-  getSelection(): BeamSelection {
-    return this.win.document.getSelection()
   }
 }

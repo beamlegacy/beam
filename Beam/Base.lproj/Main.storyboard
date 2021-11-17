@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="19162" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="19455" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="19162"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="19455"/>
         <capability name="Search Toolbar Item" minToolsVersion="12.0" minSystemVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -82,7 +82,7 @@
                                 <toolbarItem implicitItemIdentifier="6E8F077E-D3CA-4C32-9095-EFF243E6E0A9" label="Toggle Split Bar" paletteLabel="Toggle Split Bar" image="sidebar.leading" catalog="system" sizingBehavior="auto" id="c0V-op-6Yv">
                                     <nil key="toolTip"/>
                                     <button key="view" id="yHY-hc-5m1">
-                                        <rect key="frame" x="36" y="14" width="18" height="14"/>
+                                        <rect key="frame" x="36" y="14.5" width="18" height="14"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="sidebar.leading" catalog="system" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" inset="2" id="jHP-wd-w3X">
                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -93,10 +93,19 @@
                                         <action selector="hideSideBar:" target="8AQ-rt-M5U" id="g4Y-Cf-7zU"/>
                                     </connections>
                                 </toolbarItem>
+                                <toolbarItem implicitItemIdentifier="38C3FC00-5906-44F6-A443-BF3DDA0A6A31" label="Loading" paletteLabel="Loading" tag="-1" sizingBehavior="auto" id="RZV-SL-0et">
+                                    <nil key="toolTip"/>
+                                    <progressIndicator key="view" maxValue="100" displayedWhenStopped="NO" indeterminate="YES" controlSize="small" style="spinning" id="Pmm-b4-9De">
+                                        <rect key="frame" x="17" y="14" width="16" height="16"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                    </progressIndicator>
+                                </toolbarItem>
                             </allowedToolbarItems>
                             <defaultToolbarItems>
                                 <toolbarItem reference="c0V-op-6Yv"/>
                                 <toolbarItem reference="Al8-Sk-NhG"/>
+                                <toolbarItem reference="RZV-SL-0et"/>
+                                <toolbarItem reference="WQe-ep-sAh"/>
                                 <toolbarItem reference="AF6-9T-izh"/>
                                 <toolbarItem reference="WQe-ep-sAh"/>
                                 <toolbarItem reference="aIS-6H-duI"/>
@@ -108,6 +117,7 @@
                         </toolbar>
                     </window>
                     <connections>
+                        <outlet property="progressIndicator" destination="Pmm-b4-9De" id="eM1-YT-HJy"/>
                         <outlet property="searchField" destination="g26-aw-gfe" id="aVl-Tn-xbZ"/>
                         <segue destination="MMn-9G-Ulk" kind="relationship" relationship="window.shadowedContentViewController" id="gfn-eY-Qgl"/>
                     </connections>
@@ -142,23 +152,23 @@
             <objects>
                 <viewController id="yGR-zx-fhS" customClass="LoggerCategoryTableViewController" customModule="Beam" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="bGu-au-hmc">
-                        <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
+                        <rect key="frame" x="0.0" y="0.0" width="817" height="300"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <scrollView autohidesScrollers="YES" horizontalLineScroll="30" horizontalPageScroll="10" verticalLineScroll="30" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="JNW-fB-vcW">
-                                <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
+                                <rect key="frame" x="0.0" y="0.0" width="817" height="300"/>
                                 <clipView key="contentView" id="zXK-Nf-beN">
-                                    <rect key="frame" x="1" y="1" width="448" height="298"/>
+                                    <rect key="frame" x="1" y="1" width="815" height="298"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" tableStyle="inset" columnReordering="NO" columnResizing="NO" autosaveColumns="NO" rowHeight="30" viewBased="YES" id="lS3-Yu-zQX">
-                                            <rect key="frame" x="0.0" y="0.0" width="448" height="298"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="815" height="298"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <size key="intercellSpacing" width="17" height="0.0"/>
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                             <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
                                             <tableColumns>
-                                                <tableColumn identifier="category" width="416" minWidth="40" maxWidth="1000" id="l72-Ym-HYL">
+                                                <tableColumn identifier="category" width="100" minWidth="40" maxWidth="100" id="l72-Ym-HYL">
                                                     <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" title="Category">
                                                         <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                         <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
@@ -171,11 +181,11 @@
                                                     <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                     <prototypeCellViews>
                                                         <tableCellView id="9aj-3j-We6">
-                                                            <rect key="frame" x="18" y="0.0" width="411" height="24"/>
+                                                            <rect key="frame" x="18" y="0.0" width="98" height="24"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
                                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="dvu-mV-IyP">
-                                                                    <rect key="frame" x="0.0" y="4" width="411" height="16"/>
+                                                                    <rect key="frame" x="0.0" y="4" width="98" height="16"/>
                                                                     <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Category" id="siH-1Q-xQx">
                                                                         <font key="font" usesAppearanceFont="YES"/>
                                                                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -194,6 +204,42 @@
                                                         </tableCellView>
                                                     </prototypeCellViews>
                                                 </tableColumn>
+                                                <tableColumn identifier="count" width="666" minWidth="10" maxWidth="900" id="7z8-xE-kN5">
+                                                    <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Count">
+                                                        <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
+                                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                    </tableHeaderCell>
+                                                    <textFieldCell key="dataCell" lineBreakMode="truncatingTail" selectable="YES" editable="YES" alignment="left" title="Text Cell" id="cpu-Hg-Bg3">
+                                                        <font key="font" metaFont="system"/>
+                                                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                        <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                    </textFieldCell>
+                                                    <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
+                                                    <prototypeCellViews>
+                                                        <tableCellView id="caa-18-eaz">
+                                                            <rect key="frame" x="133" y="0.0" width="663" height="17"/>
+                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                            <subviews>
+                                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="aPA-J8-lcR">
+                                                                    <rect key="frame" x="0.0" y="1" width="663" height="16"/>
+                                                                    <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="right" title="4123" id="EXh-ap-BhL">
+                                                                        <font key="font" usesAppearanceFont="YES"/>
+                                                                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                                    </textFieldCell>
+                                                                </textField>
+                                                            </subviews>
+                                                            <constraints>
+                                                                <constraint firstItem="aPA-J8-lcR" firstAttribute="centerX" secondItem="caa-18-eaz" secondAttribute="centerX" id="CKv-9O-gUv"/>
+                                                                <constraint firstItem="aPA-J8-lcR" firstAttribute="leading" secondItem="caa-18-eaz" secondAttribute="leading" constant="2" id="ZE7-Gw-UZP"/>
+                                                                <constraint firstItem="aPA-J8-lcR" firstAttribute="centerY" secondItem="caa-18-eaz" secondAttribute="centerY" id="y6R-8p-RP5"/>
+                                                            </constraints>
+                                                            <connections>
+                                                                <outlet property="textField" destination="aPA-J8-lcR" id="2DS-UM-FnC"/>
+                                                            </connections>
+                                                        </tableCellView>
+                                                    </prototypeCellViews>
+                                                </tableColumn>
                                             </tableColumns>
                                             <connections>
                                                 <outlet property="dataSource" destination="yGR-zx-fhS" id="YWo-QG-gCr"/>
@@ -203,7 +249,7 @@
                                     </subviews>
                                 </clipView>
                                 <scroller key="horizontalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="fL9-I5-twe">
-                                    <rect key="frame" x="1" y="283" width="448" height="16"/>
+                                    <rect key="frame" x="1" y="283" width="268" height="16"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                                 <scroller key="verticalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="NO" id="xk4-4n-tW7">
@@ -225,7 +271,7 @@
                 </viewController>
                 <customObject id="nWi-OS-nxB" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-348" y="239"/>
+            <point key="canvasLocation" x="-464" y="240"/>
         </scene>
         <!--Beam Application-->
         <scene sceneID="JPo-4y-FX3">
@@ -333,14 +379,9 @@
                                                 <action selector="performClose:" target="Ady-hI-5gd" id="HmO-Ls-i7Q"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Save…" keyEquivalent="s" id="pxx-59-PXV">
+                                        <menuItem title="Collect Page to card…" tag="4" enabled="NO" keyEquivalent="s" id="pxx-59-PXV" customClass="LoadedWebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
                                             <connections>
-                                                <action selector="saveDocument:" target="Ady-hI-5gd" id="teZ-XB-qJY"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="Save As…" keyEquivalent="S" id="Bw7-FT-i3A">
-                                            <connections>
-                                                <action selector="saveDocumentAs:" target="Ady-hI-5gd" id="mDf-zr-I0C"/>
+                                                <action selector="collectPageToCard:" target="Ady-hI-5gd" id="YjN-Z7-AFg"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="24w-bP-3Wy"/>
@@ -385,19 +426,6 @@
                                                             <action selector="exportAllNotesToJSON:" target="Voe-Tx-rLC" id="xv1-5n-Ltx"/>
                                                         </connections>
                                                     </menuItem>
-                                                    <menuItem isSeparatorItem="YES" id="p48-Cr-YKh"/>
-                                                    <menuItem title="Send all notes to API" id="hvj-Zt-QCz">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="sendAllNotesToAPI:" target="Voe-Tx-rLC" id="erI-oe-Q9k"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                    <menuItem title="Fetch all notes from API" id="nVV-sn-gD8">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="refreshNotesFromAPI:" target="Voe-Tx-rLC" id="pVk-C4-CGO"/>
-                                                        </connections>
-                                                    </menuItem>
                                                     <menuItem isSeparatorItem="YES" id="ITV-pu-Qpw"/>
                                                     <menuItem title="Delete all notes" id="4e7-0u-pUE">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
@@ -409,19 +437,6 @@
                                                         <modifierMask key="keyEquivalentModifierMask"/>
                                                         <connections>
                                                             <action selector="deleteLocalDocuments:" target="Voe-Tx-rLC" id="RoE-cB-YGe"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                    <menuItem isSeparatorItem="YES" id="9I3-kZ-pf6"/>
-                                                    <menuItem title="Send all databases to API" id="wLk-2d-Sjr">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="sendAllDatabasesToAPI:" target="Voe-Tx-rLC" id="6Md-VS-tVK"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                    <menuItem title="Fetch all databases from API" id="7g3-Yd-w8e">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="refreshDatabasesFromAPI:" target="Voe-Tx-rLC" id="uaV-Rh-JFZ"/>
                                                         </connections>
                                                     </menuItem>
                                                     <menuItem isSeparatorItem="YES" id="EDR-BD-fNS"/>
@@ -1241,13 +1256,13 @@
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <scrollView autohidesScrollers="YES" horizontalLineScroll="24" horizontalPageScroll="10" verticalLineScroll="24" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="oXk-Ey-8xs">
-                                <rect key="frame" x="0.0" y="0.0" width="800" height="780"/>
+                                <rect key="frame" x="0.0" y="0.0" width="800" height="765"/>
                                 <clipView key="contentView" id="DvU-s3-Ha3">
-                                    <rect key="frame" x="1" y="1" width="798" height="778"/>
+                                    <rect key="frame" x="1" y="1" width="798" height="763"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" tableStyle="inset" alternatingRowBackgroundColors="YES" columnReordering="NO" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" rowHeight="24" viewBased="YES" id="fld-jj-1Ba">
-                                            <rect key="frame" x="0.0" y="0.0" width="798" height="778"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="798" height="763"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <size key="intercellSpacing" width="17" height="0.0"/>
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>

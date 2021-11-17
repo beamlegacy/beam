@@ -1,7 +1,7 @@
 #!/bin/sh
 
 OSX_VERSION=`sw_vers -productVersion | cut -d'.' -f1`
-HOSTNAME=`hostname | cut -d'.' -f1 | tr '[a-z]' '[A-Z]'`
+HOSTNAME=`hostname | cut -d'.' -f1 | tr '[a-z]' '[A-Z]' | sed -e s/-/_/g`
 
 declare "XCODE_VERSION_FOR_MACOS_${OSX_VERSION}"
 declare "XCODE_VERSION_FOR_HOST_${HOSTNAME}"

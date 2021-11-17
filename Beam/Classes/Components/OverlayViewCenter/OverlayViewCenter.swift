@@ -19,7 +19,7 @@ struct OverlayViewCenter: View {
                     modalView
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(BeamColor.Nero.swiftUI.opacity(0.85).onTapGesture {
+                .background(BeamColor.Nero.swiftUI.opacity(0.4).onTapGesture {
                     viewModel.modalView = nil
                 })
                 .transition(AnyTransition.opacity.animation(BeamAnimation.easeInOut(duration: 0.3)))

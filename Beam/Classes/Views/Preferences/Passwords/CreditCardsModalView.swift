@@ -23,7 +23,7 @@ struct CreditCardsModalView: View {
                 Spacer()
             }.padding(20)
 
-            CreditCardsTableView(allCreditCards: MockCreditCardStore.shared.fetchAll(), onSelectionChanged: { idx in
+            CreditCardsTableView(allCreditCards: [], onSelectionChanged: { idx in
                 DispatchQueue.main.async {
                     self.creditCardIsSelected = idx.count > 0
                     self.selectedEntries = idx
@@ -34,18 +34,17 @@ struct CreditCardsModalView: View {
 
             HStack {
                 Button {
-                    MockCreditCardStore.shared.save(creditCard: CreditCard(cardDescription: "Another Card", cardNumber: 18989898, cardHolder: "Moi", cardDate: BeamDate.now))
                 } label: {
                     Image("basicAdd")
                         .renderingMode(.template)
-                        .foregroundColor(BeamColor.Generic.background.swiftUI)
+                        .foregroundColor(BeamColor.Generic.text.swiftUI)
                 }.buttonStyle(BorderedButtonStyle())
 
                 Button {
                 } label: {
                     Image("basicRemove")
                         .renderingMode(.template)
-                        .foregroundColor(BeamColor.Generic.background.swiftUI)
+                        .foregroundColor(BeamColor.Generic.text.swiftUI)
                 }.buttonStyle(BorderedButtonStyle())
                 .disabled(!self.creditCardIsSelected)
                 Spacer()

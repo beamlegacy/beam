@@ -36,9 +36,14 @@ class LinksSection: Widget {
     }
 
     func setupUI(openChildren: Bool) {
-        addLayer(ChevronButton("disclosure", open: openChildren, changed: { [unowned self] value in
+        let chevron = ChevronButton("disclosure", open: openChildren, changed: { [unowned self] value in
             self.open = value
-        }))
+            guard let root = self.parent as? TextRoot else { return }
+            root.editor?.hideInlineFormatter()
+            root.cancelSelection()
+        })
+        chevron.setAccessibilityIdentifier("linksSection_arrow")
+        addLayer(chevron)
 
         sectionTitleLayer.font = BeamFont.semibold(size: 0).nsFont
         sectionTitleLayer.fontSize = 12

@@ -102,13 +102,15 @@ struct AppearanceView: View {
 struct AccessibilitySection: View {
     @State private var isPickerEnabled: Bool = PreferencesManager.isFontMinOnPreference
     @State private var fontSizeIndex = PreferencesManager.fontSizeIndexPreference
+    @State private var isTabToHighlightOn = PreferencesManager.isTabToHighlightOn
 
     var body: some View {
 //        HStack {
-//            Checkbox(checkState: PreferencesManager.isFontMinOnPreference, text: "Never use font sizes smaller than", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
-//                PreferencesManager.isFontMinOnPreference = activated
-//                self.isPickerEnabled = activated
-//            }
+//        Toggle(isOn: $isPickerEnabled) {
+//            Text("Never use font sizes smaller than")
+//        }.toggleStyle(CheckboxToggleStyle())
+//            .font(BeamFont.regular(size: 13).swiftUI)
+//            .foregroundColor(BeamColor.Generic.text.swiftUI)
 //            Picker("", selection: $fontSizeIndex) {
 //                ForEach(PreferencesManager.shared.fontSizes) {
 //                    Text("\($0)")
@@ -121,9 +123,14 @@ struct AccessibilitySection: View {
 //            }
 //        }
 
-        Checkbox(checkState: PreferencesManager.isTabToHighlightOn, text: "Press Tab to highlight each item on a web page", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
-            PreferencesManager.isTabToHighlightOn = activated
-        }
+        Toggle(isOn: $isTabToHighlightOn) {
+            Text("Press Tab to highlight each item on a web page")
+        }.toggleStyle(CheckboxToggleStyle())
+            .font(BeamFont.regular(size: 13).swiftUI)
+            .foregroundColor(BeamColor.Generic.text.swiftUI)
+            .onReceive([isTabToHighlightOn].publisher.first()) {
+                PreferencesManager.isTabToHighlightOn = $0
+            }
         VStack {
             Text("Option-Tab to highlights each item.")
                 .font(BeamFont.regular(size: 11).swiftUI)
@@ -136,9 +143,16 @@ struct AccessibilitySection: View {
 }
 
 struct UpdatesSection: View {
+    @State private var isAutoUpdateOn = PreferencesManager.isAutoUpdateOn
+
     var body: some View {
-        Checkbox(checkState: PreferencesManager.isAutoUpdateOn, text: "Automatically update Beam", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
-            PreferencesManager.isAutoUpdateOn = activated
-        }
+        Toggle(isOn: $isAutoUpdateOn) {
+            Text("Automatically update Beam")
+        }.toggleStyle(CheckboxToggleStyle())
+            .font(BeamFont.regular(size: 13).swiftUI)
+            .foregroundColor(BeamColor.Generic.text.swiftUI)
+            .onReceive([isAutoUpdateOn].publisher.first()) {
+                PreferencesManager.isAutoUpdateOn = $0
+            }
     }
 }

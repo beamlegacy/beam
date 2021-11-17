@@ -20,6 +20,11 @@ class PnSTestView: BaseView {
         }
     }
     
+    @discardableResult
+    func waitForCollectPopUpAppear() -> Bool {
+        return self.textField(PnSViewLocators.Other.shootCardPicker.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout)
+    }
+    
     func pointAndShootElement(_ element: XCUIElement) {
         XCUIElement.perform(withKeyModifiers: .option) {
             element.click()
@@ -54,11 +59,10 @@ class PnSTestView: BaseView {
             let elementMiddle = elementToAdd.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
             // click at middle of element1 to make sure the page has focus
             elementMiddle.hover()
-            _ = otherElement(PnSViewLocators.Other.pointFrame.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout)
+            _ = otherElement(PnSViewLocators.Other.pointFrame.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout)
             elementMiddle.click()
-            let destinationCard = textField(DateHelper().getTodaysDateString(.cardViewTitle))
-            _ = destinationCard.waitForExistence(timeout: implicitWaitTimeout)
-            destinationCard.click()
+            let destinationCard = app.textFields.matching(identifier: PnSViewLocators.Other.shootCardPicker.accessibilityIdentifier).firstMatch
+            destinationCard.clickOnExistence()
             typeKeyboardKey(.delete)
             destinationCard.typeText("\r")
         }

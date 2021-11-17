@@ -15,7 +15,6 @@ protocol AllCardsContextualMenuDelegate: AnyObject {
 
 class AllCardsContextualMenu {
 
-    private let documentManager: DocumentManager
     private let selectedNotes: [BeamNote]
     private let onLoadBlock: ((_ isLoading: Bool) -> Void)?
     private let onFinishBlock: ((_ needReload: Bool) -> Void)?
@@ -24,8 +23,7 @@ class AllCardsContextualMenu {
     var undoManager: UndoManager?
     weak var delegate: AllCardsContextualMenuDelegate?
 
-    init(documentManager: DocumentManager, selectedNotes: [BeamNote], onLoad: ((_ isLoading: Bool) -> Void)? = nil, onFinish: ((_ needReload: Bool) -> Void)? = nil) {
-        self.documentManager = documentManager
+    init(selectedNotes: [BeamNote], onLoad: ((_ isLoading: Bool) -> Void)? = nil, onFinish: ((_ needReload: Bool) -> Void)? = nil) {
         self.selectedNotes = selectedNotes
         self.onLoadBlock = onLoad
         self.onFinishBlock = onFinish
@@ -157,6 +155,7 @@ class AllCardsContextualMenu {
     }
 
     @objc private func exportNotesToJSON() {
+        let documentManager = DocumentManager()
         if selectedNotes.count == 1 {
             guard let note = selectedNotes.first else { return }
             AppDelegate.main.exportOneNoteToJSON(note: note)
@@ -184,10 +183,9 @@ class AllCardsContextualMenu {
     }
 
     private func makeNotes(isPublic: Bool) -> Promises.Promise<[Bool]> {
-        let docManager = documentManager
         let promises: [Promises.Promise<Bool>] = selectedNotes.map { note in
             return Promises.Promise { (done, error) in
-                BeamNoteSharingUtils.makeNotePublic(note, becomePublic: isPublic, documentManager: docManager) { result in
+                BeamNoteSharingUtils.makeNotePublic(note, becomePublic: isPublic) { result in
                     switch result {
                     case .failure(let e):
                         error(e)
@@ -225,7 +223,7 @@ class AllCardsContextualMenu {
         guard selectedNotes.count > 0 else {
             onLoadBlock?(true)
             self.delegate?.contextualMenuWillDeleteDocuments(ids: [], all: true)
-            cmdManager.deleteAllDocuments(in: documentManager) { _ in
+            cmdManager.deleteAllDocuments(in: DocumentManager()) { _ in
                 DispatchQueue.main.async {
                     self.registerUndo(actionName: "Delete All Cards")
                     self.onFinishBlock?(true)
@@ -236,7 +234,7 @@ class AllCardsContextualMenu {
         onLoadBlock?(true)
         let ids = selectedNotes.map { $0.id }
         self.delegate?.contextualMenuWillDeleteDocuments(ids: ids, all: false)
-        cmdManager.deleteDocuments(ids: ids, in: documentManager) { _ in
+        cmdManager.deleteDocuments(ids: ids, in: DocumentManager()) { _ in
             DispatchQueue.main.async {
                 let count = ids.count
                 self.registerUndo(actionName: "Delete \(count) Card\(count > 1 ? "s" : "")")
@@ -249,9 +247,9 @@ class AllCardsContextualMenu {
         undoManager?.registerUndo(withTarget: self, handler: { _ in
             self.registerUndo(redo: !redo, actionName: actionName)
             if redo {
-                self.cmdManager.redoAsync(context: self.documentManager) { _ in }
+                self.cmdManager.redoAsync(context: DocumentManager()) { _ in }
             } else {
-                self.cmdManager.undoAsync(context: self.documentManager) { _ in }
+                self.cmdManager.undoAsync(context: DocumentManager()) { _ in }
             }
         })
         undoManager?.setActionName(actionName)

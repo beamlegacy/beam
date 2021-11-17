@@ -37,6 +37,8 @@ extension BeamWindow {
         state.createEmptyTabWithCurrentDestinationCard()
     }
 
+    static let savedCloseTabCmdsKey = "savedClosedTabCmds"
+    static let savedTabsKey = "savedTabsKey"
     @IBAction func reOpenClosedTab(_ sender: Any?) {
         if state.cmdManager.canUndo {
             if state.mode != .web {
@@ -44,25 +46,33 @@ extension BeamWindow {
             }
             _ = state.cmdManager.undo(context: state)
         } else if let data = UserDefaults.standard.data(forKey: Self.savedCloseTabCmdsKey) {
-            let decoder = JSONDecoder()
-            guard let windowCommands = try? decoder.decode([Int: GroupWebCommand].self, from: data) else { return }
-            for windowCommand in windowCommands.keys {
-                let newBeamWindow = AppDelegate.main.createWindow(frame: nil)
-                guard let command = windowCommands[windowCommand] else { continue }
-                newBeamWindow.state.cmdManager.appendToDone(command: command)
-
-                if newBeamWindow.state.cmdManager.canUndo {
-                    _ = newBeamWindow.state.cmdManager.undo(context: newBeamWindow.state)
-                }
-
-                if let currentTab = newBeamWindow.state.browserTabsManager.currentTab,
-                   newBeamWindow.state.mode != .web {
-                    currentTab.postLoadSetup(state: newBeamWindow.state)
-                    newBeamWindow.state.mode = .web
-                }
-
-            }
+            restoreTabs(from: data)
             UserDefaults.standard.removeObject(forKey: Self.savedCloseTabCmdsKey)
+            UserDefaults.standard.removeObject(forKey: Self.savedTabsKey)
+        } else if let data = UserDefaults.standard.data(forKey: Self.savedTabsKey) {
+            restoreTabs(from: data)
+            UserDefaults.standard.removeObject(forKey: Self.savedTabsKey)
+        }
+    }
+
+    private func restoreTabs(from data: Data) {
+        let decoder = JSONDecoder()
+        guard let windowCommands = try? decoder.decode([Int: GroupWebCommand].self, from: data) else { return }
+        for windowCommand in windowCommands.keys {
+            guard var beamWindow = AppDelegate.main.window,
+                    let command = windowCommands[windowCommand] else { continue }
+            if windowCommand > 0 {
+                beamWindow = AppDelegate.main.createWindow(frame: nil)
+            }
+            beamWindow.state.cmdManager.appendToDone(command: command)
+
+            if beamWindow.state.cmdManager.canUndo {
+                _ = beamWindow.state.cmdManager.undo(context: beamWindow.state)
+            }
+
+            if beamWindow.state.browserTabsManager.currentTab != nil, beamWindow.state.mode != .web {
+                beamWindow.state.mode = .web
+            }
         }
     }
 
@@ -110,6 +120,10 @@ extension BeamWindow {
         }
     }
 
+    @IBAction func showHelp(_ sender: Any?) {
+        state.navigateToPage(.shortcutsWindowPage)
+    }
+
     // MARK: Navigation
     @IBAction func goBack(_ sender: Any?) {
         state.goBack()
@@ -150,6 +164,10 @@ extension BeamWindow {
 
     @IBAction func dumpBrowsingTree(_ sender: Any?) {
         state.browserTabsManager.currentTab?.dumpBrowsingTree()
+    }
+
+    @IBAction func collectPageToCard(_ sender: Any?) {
+        state.browserTabsManager.currentTab?.collectTab()
     }
 
     // MARK: - Web Navigation

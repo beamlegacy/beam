@@ -172,6 +172,7 @@ class BeamTableCellIconAndTextView: NSTableCellView {
 
         _textField.backgroundColor = .clear
         _textField.isBordered = false
+        _textField.lineBreakMode = .byTruncatingTail
         _textField.translatesAutoresizingMaskIntoConstraints = false
         _textField.font = BeamFont.regular(size: 13).nsFont
         _textField.textColor = BeamColor.Generic.text.nsColor
@@ -195,10 +196,12 @@ class BeamTableCellIconAndTextView: NSTableCellView {
             _iconView.leadingAnchor.constraint(equalTo: _contentView.leadingAnchor),
             _iconView.centerYAnchor.constraint(equalTo: _contentView.centerYAnchor),
             _iconView.widthAnchor.constraint(equalToConstant: 16),
-            _iconView.heightAnchor.constraint(equalToConstant: 16),
+            _iconView.heightAnchor.constraint(equalToConstant: 22),
             _textField.leadingAnchor.constraint(equalTo: _iconView.trailingAnchor, constant: 6),
             _textField.trailingAnchor.constraint(equalTo: _contentView.trailingAnchor),
-            _textField.centerYAnchor.constraint(equalTo: _contentView.centerYAnchor)
+            _textField.topAnchor.constraint(equalTo: _contentView.topAnchor, constant: 4),
+            _textField.heightAnchor.constraint(equalToConstant: 22)
+
         ])
         self.textField = self._textField
         self.textField?.isHidden = false

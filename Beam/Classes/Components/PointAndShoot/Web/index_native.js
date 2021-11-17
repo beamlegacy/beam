@@ -1,11 +1,15 @@
 import {PointAndShoot} from "./PointAndShoot"
 import {PointAndShootUI_native} from "./PointAndShootUI_native"
 import {Native} from "../../../Helpers/Utils/Web/Native"
-import {WebFactory} from "./WebFactory"
 import "./index_native.scss"
 
 const win = window
-const native = Native.getInstance(win)
+const native = Native.getInstance(win, "pointAndShoot")
 
 const pointAndShootUI = new PointAndShootUI_native(native)
-export const __ID__PointAndShoot = PointAndShoot.getInstance(win, pointAndShootUI, new WebFactory())
+
+if (!window.beam) {
+  window.beam = {}
+}
+
+window.beam.__ID__PointAndShoot = PointAndShoot.getInstance(win, pointAndShootUI)

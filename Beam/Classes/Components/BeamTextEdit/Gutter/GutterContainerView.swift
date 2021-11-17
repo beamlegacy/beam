@@ -9,6 +9,44 @@ import Foundation
 import SwiftUI
 
 struct GutterView: View {
+    var isLeading: Bool
+    var leadingGutterViewType: LeadingGutterView.LeadingGutterViewType?
+    var trailingGutterViewModel: TrailingGutterView.Model?
+
+    var body: some View {
+        if isLeading {
+            if let leadingGutterViewType = leadingGutterViewType {
+                LeadingGutterView(type: leadingGutterViewType)
+            }
+        } else {
+            if let trailingGutterViewModel = trailingGutterViewModel {
+                TrailingGutterView(model: trailingGutterViewModel)
+            }
+        }
+    }
+}
+
+struct LeadingGutterView: View {
+    enum LeadingGutterViewType {
+        case calendarGutterView(viewModel: CalendarGutterViewModel)
+    }
+    var type: LeadingGutterViewType
+
+    var body: some View {
+        GeometryReader { geometry in
+            VStack {
+                switch type {
+                case .calendarGutterView(let viewModel):
+                    CalendarView(viewModel: viewModel)
+                }
+            }.frame(maxWidth: 221, maxHeight: .infinity, alignment: .topLeading)
+                .frame(width: geometry.size.width, alignment: .topLeading)
+                .zIndex(1000)
+        }
+    }
+}
+
+struct TrailingGutterView: View {
     @ObservedObject var model: Model
 
     var body: some View {
@@ -30,7 +68,7 @@ struct GutterView: View {
     }
 }
 
-extension GutterView {
+extension TrailingGutterView {
     class Model: ObservableObject {
         @Published var items: [GutterItem]
         init(items: [GutterItem]) {
@@ -44,10 +82,18 @@ class GutterContainerView: NSView {
         true
     }
 
+    var isLeading: Bool
+    var leadingGutterViewType: LeadingGutterView.LeadingGutterViewType? {
+        didSet {
+            setupUI()
+        }
+    }
     private var hostingView: NSHostingView<GutterView>?
-    private var model = GutterView.Model(items: [])
+    private var trailingGutterViewModel = TrailingGutterView.Model(items: [])
 
-    override init(frame frameRect: NSRect) {
+    init(frame frameRect: NSRect, isLeading: Bool, leadingGutterViewType: LeadingGutterView.LeadingGutterViewType? = nil) {
+        self.isLeading = isLeading
+        self.leadingGutterViewType = leadingGutterViewType
         super.init(frame: frameRect)
         setupUI()
     }
@@ -57,9 +103,12 @@ class GutterContainerView: NSView {
     }
 
     private func setupUI() {
+        self.subviews.removeAll()
         self.wantsLayer = true
         self.layer?.masksToBounds = false
-        let view = NSHostingView(rootView: GutterView(model: model))
+        let view = NSHostingView(rootView: GutterView(isLeading: isLeading,
+                                                      leadingGutterViewType: leadingGutterViewType,
+                                                      trailingGutterViewModel: trailingGutterViewModel))
         view.translatesAutoresizingMaskIntoConstraints = false
         view.wantsLayer = true
         view.layer?.masksToBounds = false
@@ -67,11 +116,11 @@ class GutterContainerView: NSView {
     }
 
     func addItem(_ item: GutterItem) {
-        model.items.append(item)
+        trailingGutterViewModel.items.append(item)
     }
 
     func removeItem(_ item: GutterItem) {
-        model.items.removeAll(where: { i in
+        trailingGutterViewModel.items.removeAll(where: { i in
             i == item
         })
     }

@@ -19,7 +19,7 @@ class ClusteringManager: ObservableObject {
         case twoOrMorePagesAdded
     }
 
-    var clusteredPagesId: [[UInt64]] = [[]] {
+    var clusteredPagesId: [[UUID]] = [[]] {
         didSet {
             transformToClusteredPages()
         }
@@ -31,9 +31,8 @@ class ClusteringManager: ObservableObject {
         }
     }
     var sendRanking = false
-    var initialiseNotes: InitialiseNotes = .zeroPagesAdded
+    var initialiseNotes = false
     var ranker: SessionLinkRanker
-    var documentManager: DocumentManager
     var activeSources: ActiveSources
     @Published var noteToAdd: BeamNote?
     @Published var clusteredTabs: [[TabInformation?]] = [[]]
@@ -49,16 +48,15 @@ class ClusteringManager: ObservableObject {
     var suggestedNoteUpdater: SuggestedNoteSourceUpdater
     var sessionId: UUID
 
-    init(ranker: SessionLinkRanker, documentManager: DocumentManager, candidate: Int, navigation: Double, text: Double, entities: Double, sessionId: UUID, activeSources: ActiveSources) {
+    init(ranker: SessionLinkRanker, candidate: Int, navigation: Double, text: Double, entities: Double, sessionId: UUID, activeSources: ActiveSources) {
         self.selectedTabGroupingCandidate = candidate
         self.weightNavigation = navigation
         self.weightText = text
         self.weightEntities = entities
         self.activeSources = activeSources
-        self.suggestedNoteUpdater = SuggestedNoteSourceUpdater(sessionId: sessionId, documentManager: documentManager)
+        self.suggestedNoteUpdater = SuggestedNoteSourceUpdater(sessionId: sessionId)
         self.cluster = Cluster(candidate: candidate, weightNavigation: navigation, weightText: text, weightEntities: entities, noteContentThreshold: 100)
         self.ranker = ranker
-        self.documentManager = documentManager
         self.sessionId = sessionId
         setupObservers()
         #if DEBUG
@@ -106,7 +104,10 @@ class ClusteringManager: ObservableObject {
         }.store(in: &scope)
     }
 
-    func getIdAndParent(tabToIndex: TabInformation) -> (UInt64?, UInt64?) {
+    func getIdAndParent(tabToIndex: TabInformation) -> (UUID?, UUID?) {
+        guard tabToIndex.isPinnedTab == false else {
+            return (nil, nil)
+        }
         var id = tabToIndex.currentTabTree?.current.link
         var parentId = tabToIndex.parentBrowsingNode?.link
         var parentTimeStamp = Date.distantPast
@@ -148,17 +149,18 @@ class ClusteringManager: ObservableObject {
         return (id, parentId)
     }
 
-    func addPage(id: UInt64, parentId: UInt64?, value: TabInformation? = nil, newContent: String? = nil) {
+    // swiftlint:disable:next cyclomatic_complexity
+    func addPage(id: UUID, parentId: UUID?, value: TabInformation? = nil, newContent: String? = nil) {
         var pageToAdd: Page?
         if let value = value {
-            pageToAdd = Page(id: id, parentId: parentId, title: value.document.title, content: value.cleanedTextContentForClustering)
+            pageToAdd = Page(id: id, parentId: parentId, title: value.document.title, originalContent: value.cleanedTextContentForClustering)
             tabsInfo.append(value)
         } else if let newContent = newContent {
-            pageToAdd = Page(id: id, parentId: nil, title: nil, content: newContent)
-            // TODO: Shold we bother changing the content in tabsInfo?
+            pageToAdd = Page(id: id, parentId: nil, title: nil, cleanedContent: newContent)
+            // TODO: Should we bother changing the content in tabsInfo?
         }
         isClustering = true
-        var ranking: [UInt64]?
+        var ranking: [UUID]?
         if self.sendRanking {
             ranking = self.ranker.clusteringRemovalSorted(links: self.clusteredPagesId.reduce([], +))
         }
@@ -178,23 +180,26 @@ class ClusteringManager: ObservableObject {
                 case .success(let result):
                     self.clusteredPagesId = result.pageGroups
                     self.clusteredNotesId = result.noteGroups
-                    self.sendRanking = result.sendRanking
+                    if result.flag == .sendRanking {
+                        self.sendRanking = true
+                        self.initialiseNotes = false
+                    } else if result.flag == .addNotes {
+                        self.initialiseNotes = true
+                        self.sendRanking = false
+                    } else {
+                        self.initialiseNotes = false
+                        self.sendRanking = false
+                    }
                     self.logForClustering(result: result.pageGroups, changeCandidate: false)
                 }
             }
         }
         // After adding the second page, add notes from previous sessions
-        switch initialiseNotes {
-        case .zeroPagesAdded:
-            initialiseNotes = .onePageAdded
-        case .onePageAdded:
-            let notes = BeamNote.fetchNotesWithType(documentManager, type: .note, 10, 0)
+        if self.initialiseNotes {
+            let notes = BeamNote.fetchNotesWithType(type: .note, 10, 0)
             for note in notes {
                 self.addNote(note: note)
             }
-            initialiseNotes = .twoOrMorePagesAdded
-        case .twoOrMorePagesAdded:
-            break
         }
     }
 
@@ -214,7 +219,7 @@ class ClusteringManager: ObservableObject {
         let clusteringNote = ClusteringNote(id: note.id, title: note.title, content: fullText)
         // TODO: Add link information to notes
         self.isClustering = true
-        var ranking: [UInt64]?
+        var ranking: [UUID]?
         if self.sendRanking {
             ranking = self.ranker.clusteringRemovalSorted(links: self.clusteredPagesId.reduce([], +))
         }
@@ -232,7 +237,16 @@ class ClusteringManager: ObservableObject {
             case .success(let result):
                 self.clusteredPagesId = result.pageGroups
                 self.clusteredNotesId = result.noteGroups
-                self.sendRanking = result.sendRanking
+                if result.flag == .sendRanking {
+                    self.sendRanking = true
+                    self.initialiseNotes = false
+                } else if result.flag == .addNotes {
+                    self.initialiseNotes = true
+                    self.sendRanking = false
+                } else {
+                    self.initialiseNotes = false
+                    self.sendRanking = false
+                }
                 self.logForClustering(result: result.pageGroups, changeCandidate: false)
             }
         }
@@ -250,13 +264,22 @@ class ClusteringManager: ObservableObject {
             case .success(let result):
                 self.clusteredPagesId = self.reorganizeGroups(clusters: result.pageGroups)
                 self.clusteredNotesId = result.noteGroups
-                self.sendRanking = result.sendRanking
+                if result.flag == .sendRanking {
+                    self.sendRanking = true
+                    self.initialiseNotes = false
+                } else if result.flag == .addNotes {
+                    self.initialiseNotes = true
+                    self.sendRanking = false
+                } else {
+                    self.initialiseNotes = false
+                    self.sendRanking = false
+                }
                 self.logForClustering(result: result.pageGroups, changeCandidate: true)
             }
         }
     }
 
-    private func reorganizeGroups(clusters: [[UInt64]]) -> [[UInt64]] {
+    private func reorganizeGroups(clusters: [[UUID]]) -> [[UUID]] {
         var clusters = clusters
         for cluster in clusters.enumerated() {
             clusters[cluster.offset] = self.ranker.clusteringSorted(links: cluster.element)
@@ -287,7 +310,7 @@ class ClusteringManager: ObservableObject {
         self.suggestedNoteUpdater.update(urlGroups: self.clusteredPagesId, noteGroups: self.clusteredNotesId, activeSources: self.activeSources.activeSources)
     }
 
-    private func logForClustering(result: [[UInt64]], changeCandidate: Bool) {
+    private func logForClustering(result: [[UUID]], changeCandidate: Bool) {
         if changeCandidate {
             Logger.shared.logDebug("Result provided by ClusteringFramework from changing to candidate \(self.selectedTabGroupingCandidate) with Nav \(self.weightNavigation), Text \(self.weightText), Entities \(self.weightEntities) for result: \(result)", category: .clustering)
         } else {
@@ -296,7 +319,7 @@ class ClusteringManager: ObservableObject {
 
     }
 
-    public func getOrphanedUrlGroups(urlGroups: [[UInt64]], noteGroups: [[UUID]], activeSources: ActiveSources) -> [[UInt64]] {
+    public func getOrphanedUrlGroups(urlGroups: [[UUID]], noteGroups: [[UUID]], activeSources: ActiveSources) -> [[UUID]] {
         let activeSourcesUrls = Set(activeSources.urls)
         return zip(urlGroups, noteGroups)
             .filter { _, noteGroup in return noteGroup.count == 0 } //not suggested via direct grouping

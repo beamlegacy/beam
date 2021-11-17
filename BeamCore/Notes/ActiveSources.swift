@@ -1,13 +1,13 @@
 import Foundation
 
 public class ActiveSources {
-    public var activeSources: [UUID: [UInt64]]
+    public var activeSources: [UUID: [UUID]]
 
     public init() {
-        activeSources = [UUID: [UInt64]]()
+        activeSources = [UUID: [UUID]]()
     }
 
-    public func addActiveSource(pageId: UInt64, noteId: UUID) {
+    public func addActiveSource(pageId: UUID, noteId: UUID) {
         if var pages = self.activeSources[noteId] {
             if !pages.contains(pageId) {
                 pages.append(pageId)
@@ -18,7 +18,7 @@ public class ActiveSources {
         }
     }
 
-    public func removeActiveSource(pageId: UInt64, noteId: UUID) {
+    public func removeActiveSource(pageId: UUID, noteId: UUID) {
         if var pages = self.activeSources[noteId] {
             while let index = pages.firstIndex(of: pageId) {
                 pages.remove(at: index)
@@ -26,5 +26,5 @@ public class ActiveSources {
             self.activeSources[noteId] = pages
         }
     }
-    public var urls: [UInt64] { activeSources.values.flatMap { $0 } }
+    public var urls: [UUID] { activeSources.values.flatMap { $0 } }
 }

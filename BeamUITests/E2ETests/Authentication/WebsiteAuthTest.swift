@@ -10,13 +10,13 @@ import XCTest
 
 class WebsiteAuthTest: BaseTest {
     
-    let searchAppWebsite = "app.beamapp.co "
+    let searchAppWebsite = "app.beamapp.co"
     let correctLogin = "beam"
     let correctPass = "jiUJDLr>3Dxx"
     
     func testAuthPopUpView() {
         let journalView = launchApp()
-        
+        OmniBarUITestsHelper(journalView.app).tapCommand(.omnibarFillHistory)
         testRailPrint("Given I open \(searchAppWebsite) link")
         journalView.openWebsite(searchAppWebsite)
         
@@ -40,7 +40,7 @@ class WebsiteAuthTest: BaseTest {
     
     func testAuthenticateSuccessfully() {
         let journalView = launchApp()
-        
+        OmniBarUITestsHelper(journalView.app).tapCommand(.omnibarFillHistory)
         testRailPrint("Given I open \(searchAppWebsite) link")
         journalView.openWebsite(searchAppWebsite)
         let websiteAuthPopupTestView = WebsiteAuthPopupTestView()
@@ -55,7 +55,7 @@ class WebsiteAuthTest: BaseTest {
     func testAuthenticationFailure() throws {
         try XCTSkipIf(true, "Skipped due to unknown false failure on server side. To be fixed soon")
         let journalView = launchApp()
-        
+        OmniBarUITestsHelper(journalView.app).tapCommand(.omnibarFillHistory)
         testRailPrint("Given I open \(searchAppWebsite) link")
         journalView.openWebsite(searchAppWebsite)
         let websiteAuthPopupTestView = WebsiteAuthPopupTestView()

@@ -4,13 +4,19 @@ import XCTest
 extension XCUIElement {
     
     public func clear() {
-        XCUIApplication().typeKey("a", modifierFlags: .command)
+        ShortcutsHelper().shortcutActionInvoke(action: .selectAll)
         XCUIApplication().typeKey(.delete, modifierFlags: .function)
     }
 
     @discardableResult
     public func tapInTheMiddle() -> XCUIElement {
         self.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+        return self
+    }
+    
+    @discardableResult
+    public func doubleTapInTheMiddle() -> XCUIElement {
+        self.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).doubleTap()
         return self
     }
 

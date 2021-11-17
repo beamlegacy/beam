@@ -12,13 +12,13 @@ protocol WebPage: AnyObject, Scorable {
     var webviewWindow: NSWindow? { get }
 
     var frame: NSRect { get }
-    var scrollX: CGFloat { get set }
-    var scrollY: CGFloat { get set }
 
     var originalQuery: String? { get }
+    var userTypedDomain: URL? { get set }
     var title: String { get }
     var url: URL? { get }
     var hasError: Bool { get set }
+    var responseStatusCode: Int { get set }
 
     var errorPageManager: ErrorPageManager? { get set }
     var fileStorage: BeamFileStorage? { get }
@@ -30,6 +30,7 @@ protocol WebPage: AnyObject, Scorable {
 
     var pointAndShootAllowed: Bool { get }
     var pointAndShoot: PointAndShoot? { get }
+    var webPositions: WebPositions? { get }
 
     @discardableResult
     func executeJS(_ jsCode: String, objectName: String?) -> Promise<Any?>

@@ -11,7 +11,6 @@ import BeamCore
 struct ModeView: View {
 
     @EnvironmentObject var state: BeamState
-    @EnvironmentObject var data: BeamData
     @EnvironmentObject var browserTabsManager: BrowserTabsManager
     var containerGeometry: GeometryProxy
     @Binding var contentIsScrolled: Bool
@@ -53,7 +52,12 @@ struct ModeView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .clipped()
-        .onAppear { contentIsScrolled = false }
+        .onAppear {
+            DispatchQueue.main.async {
+                state.data.reloadAllEvents()
+            }
+            contentIsScrolled = false
+        }
         .animation(nil)
         .transition(.noteContentTransition(transitionModel: transitionModel))
         .accessibility(identifier: "journalView")

@@ -9,6 +9,7 @@ import Foundation
 import BeamCore
 import AppKit
 import WebKit
+import Combine
 
 private class EmbedNodeWebViewConfiguration: BeamWebViewConfigurationBase {
     override func registerAllMessageHandlers() {
@@ -22,12 +23,18 @@ class EmbedNode: ResizableNode {
     private static var webViewConfiguration = EmbedNodeWebViewConfiguration()
     var webView: BeamWebView?
     private var webPage: EmbedNodeWebPage?
-
+    private var embedCancellables = Set<AnyCancellable>()
     private let sizeRatio = 240.0/320.0
+    private var loadingView: NSView?
+    private var isLoadingEmbed = false {
+        didSet {
+            loadingView?.isHidden = !isLoadingEmbed
+        }
+    }
 
-    private var embedUrl: URL? {
-        guard case .embed(let sourceURL, _) = element.kind else { return nil }
-        return URL(string: sourceURL)?.embed
+    private var sourceURL: URL? {
+        guard case .embed(let sourceURL, _) = element.kind, let url = URL(string: sourceURL) else { return nil }
+        return url
     }
 
     init(parent: Widget, element: BeamElement, availableWidth: CGFloat?) {
@@ -44,7 +51,7 @@ class EmbedNode: ResizableNode {
 
     func setupEmbed(availableWidth: CGFloat) {
         guard case .embed = element.kind else {
-            Logger.shared.logError("EmbedNode can only handle url elements, not \(element.kind)", category: .noteEditor)
+            Logger.shared.logError("EmbedNode can only handle url elements, not \(element.kind)", category: .embed)
             return
         }
 
@@ -52,14 +59,14 @@ class EmbedNode: ResizableNode {
             desiredWidthRatio = ratio
         }
 
-        guard let url = embedUrl else { return }
-
         setupResizeHandleLayer()
+
+        guard let sourceURL = sourceURL else { return }
 
         let webviewConfiguration = EmbedNode.webViewConfiguration
         var webView: BeamWebView?
         if let note = editor?.note as? BeamNote {
-            webView = mediaPlayerManager?.playingWebViewForNote(note: note, elementId: elementId, url: url)
+            webView = mediaPlayerManager?.playingWebViewForNote(note: note, elementId: elementId, url: sourceURL)
             webPage = webView?.page as? EmbedNodeWebPage
         }
 
@@ -70,7 +77,6 @@ class EmbedNode: ResizableNode {
             webPage = p
             wv.page = p
             AppDelegate.main.data.setup(webView: wv)
-            wv.load(URLRequest(url: url))
             webView = wv
         }
 
@@ -92,6 +98,9 @@ class EmbedNode: ResizableNode {
         // Embed don't have size on there own… By default, they are as wide as the editor
         let height = availableWidth  * CGFloat(sizeRatio)
         resizableElementContentSize = CGSize(width: availableWidth, height: height)
+
+        setupLoader()
+        updateEmbedContent()
     }
 
     deinit {
@@ -106,9 +115,60 @@ class EmbedNode: ResizableNode {
         clearWebViewAndStopPlaying()
     }
 
+    private func setupLoader() {
+        let text = NSTextField(labelWithAttributedString: NSAttributedString(string: "Loading...", attributes: [
+            .font: BeamFont.regular(size: 13).nsFont,
+            .foregroundColor: BeamColor.AlphaGray.nsColor
+        ]))
+        let container = NSView()
+        container.isHidden = true
+        container.wantsLayer = true
+        container.layer?.backgroundColor = BeamColor.Nero.cgColor
+        container.addSubview(text)
+        container.frame = webView?.bounds ?? .zero
+        container.autoresizingMask = [.width, .height]
+        text.translatesAutoresizingMaskIntoConstraints = false
+        container.addConstraints([
+            text.centerXAnchor.constraint(equalTo: container.centerXAnchor),
+            text.centerYAnchor.constraint(equalTo: container.centerYAnchor)
+        ])
+        webView?.addSubview(container)
+        self.loadingView = container
+    }
+
+    private func updateEmbedContent() {
+        guard let sourceURL = sourceURL else { return }
+
+        embedCancellables.removeAll()
+        let builder = EmbedContentBuilder()
+        if let embedUrl = builder.embeddableContent(for: sourceURL)?.embedURL {
+            webView?.load(URLRequest(url: embedUrl))
+        } else {
+            isLoadingEmbed = true
+            builder.embeddableContentAsync(for: sourceURL)
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] completion in
+                    switch completion {
+                    case .failure(_):
+                        Logger.shared.logError("Embed Node couldn't load content for \(sourceURL.absoluteString)", category: .embed)
+                    case .finished:
+                        break
+                    }
+                    self?.isLoadingEmbed = false
+                    self?.embedCancellables.removeAll()
+                } receiveValue: { [weak self] embedContent in
+                    if [.url, .image].contains(embedContent.type), let url = embedContent.embedURL {
+                        self?.webView?.load(URLRequest(url: url))
+                    } else if embedContent.type == .page, let content = embedContent.embedContent {
+                        self?.webView?.loadHTMLString(content, baseURL: nil)
+                    }
+                }.store(in: &embedCancellables)
+        }
+    }
+
     private func clearWebViewAndStopPlaying() {
         guard let note = editor?.note as? BeamNote,
-              let url = self.embedUrl else { return }
+              let url = self.sourceURL else { return }
         mediaPlayerManager?.stopNotePlaying(note: note, elementId: elementId, url: url)
         webView?.page = nil
         webPage = nil
@@ -131,7 +191,7 @@ class EmbedNode: ResizableNode {
         resizableElementContentSize = CGSize(width: availableWidth, height: height)
 
         let r = layer.frame
-        webView?.frame = NSRect(x: r.minX, y: r.minY, width: visibleSize.width, height: visibleSize.height)
+        webView?.frame = CGRect(x: r.minX, y: r.minY, width: visibleSize.width, height: visibleSize.height)
     }
 
     var focusMargin = CGFloat(3)
@@ -188,7 +248,7 @@ extension EmbedNode: EmbedNodeWebPageDelegate {
         guard let note = root?.editor?.note as? BeamNote,
               let webView = webView,
               let mediaManager = mediaPlayerManager,
-              let url = self.embedUrl else { return }
+              let url = self.sourceURL else { return }
         if controller?.isPlaying == true {
             mediaManager.addNotePlaying(note: note, elementId: elementId, webView: webView)
         } else {
@@ -200,42 +260,42 @@ extension EmbedNode: EmbedNodeWebPageDelegate {
 extension EmbedNode: WKNavigationDelegate {
 
     public func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
-        Logger.shared.logDebug("Embed decidePolicyFor: \(String(describing: navigationAction))", category: .noteEditor)
+        Logger.shared.logDebug("Embed decidePolicyFor: \(String(describing: navigationAction))", category: .embed)
         decisionHandler(.allow)
     }
 
     public func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, preferences: WKWebpagePreferences, decisionHandler: @escaping (WKNavigationActionPolicy, WKWebpagePreferences) -> Void) {
-        Logger.shared.logDebug("Embed decidePolicyFor: \(String(describing: navigationAction))", category: .noteEditor)
+        Logger.shared.logDebug("Embed decidePolicyFor: \(String(describing: navigationAction))", category: .embed)
         decisionHandler(.allow, preferences)
     }
 
     public func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse, decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
-        Logger.shared.logDebug("Embed decidePolicyFor: \(String(describing: navigationResponse))", category: .noteEditor)
+        Logger.shared.logDebug("Embed decidePolicyFor: \(String(describing: navigationResponse))", category: .embed)
         decisionHandler(.allow)
     }
 
     public func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
-        Logger.shared.logDebug("Embed didStartProvisionalNavigation: \(String(describing: navigation))", category: .noteEditor)
+        Logger.shared.logDebug("Embed didStartProvisionalNavigation: \(String(describing: navigation))", category: .embed)
     }
 
     public func webView(_ webView: WKWebView, didReceiveServerRedirectForProvisionalNavigation navigation: WKNavigation!) {
-        Logger.shared.logDebug("Embed didReceiveServerRedirectForProvisionalNavigation: \(String(describing: navigation))", category: .noteEditor)
+        Logger.shared.logDebug("Embed didReceiveServerRedirectForProvisionalNavigation: \(String(describing: navigation))", category: .embed)
     }
 
     public func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
-        Logger.shared.logDebug("Embed didFailProvisionalNavigation: \(String(describing: navigation))", category: .noteEditor)
+        Logger.shared.logDebug("Embed didFailProvisionalNavigation: \(String(describing: navigation))", category: .embed)
     }
 
     public func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
-        Logger.shared.logDebug("Embed didCommit: \(String(describing: navigation))", category: .noteEditor)
+        Logger.shared.logDebug("Embed didCommit: \(String(describing: navigation))", category: .embed)
     }
 
     public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        Logger.shared.logDebug("Embed didFinish: \(String(describing: navigation))", category: .noteEditor)
+        Logger.shared.logDebug("Embed didFinish: \(String(describing: navigation))", category: .embed)
     }
 
     public func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-        Logger.shared.logError("Embed Error: \(error)", category: .noteEditor)
+        Logger.shared.logError("Embed Error: \(error)", category: .embed)
     }
 
     public func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {

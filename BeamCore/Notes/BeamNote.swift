@@ -7,6 +7,7 @@
 
 import Foundation
 import Combine
+import Atomics
 
 public protocol BeamNoteDocument {
     func observeDocumentChange()
@@ -102,11 +103,11 @@ public class BeamNote: BeamElement {
     @Published public var visitedSearchResults: [VisitedPage] = [] { didSet { change(.meta) } } ///< URLs whose content were used to create this note
     public var browsingSessionIds = [UUID]() { didSet { change(.meta) } }
     public var sources = NoteSources()
-    public var version: Int64 = 0
-    public var savedVersion: Int64 = 0
+    @Published public var version = ManagedAtomic<Int64>(0)
+    @Published public var savedVersion = ManagedAtomic<Int64>(0)
     public var databaseId: UUID?
     @Published public var deleted: Bool = false
-    @Published public var saving: Bool = false
+    @Published public var saving = ManagedAtomic<Bool>(false)
     @Published public var updateAttempts: Int = 0
     @Published public var updates: Int = 0
 
@@ -161,9 +162,13 @@ public class BeamNote: BeamElement {
 
         try super.init(from: decoder)
         if container.contains(.sources) {
-            sources = try container.decode(NoteSources.self, forKey: .sources)
-            setupSourceObserver()
+            do {
+                sources = try container.decode(NoteSources.self, forKey: .sources)
+            } catch {
+                Logger.shared.logWarning("⚠️ Couldn't decode sources for note id: \(id) - title: \(title)", category: .document)
+            }
         }
+        setupSourceObserver()
 
         if let oldType = try? container.decode(NoteType.self, forKey: .type) {
             type = BeamNoteType.fromOldType(oldType, title: ttl, fallbackDate: creationDate)
@@ -217,7 +222,7 @@ public class BeamNote: BeamElement {
         newNote.creationDate = creationDate
         newNote.updateDate = updateDate
         newNote.type = type
-        newNote.version = version
+        newNote.version.store(version.load(ordering: .relaxed), ordering: .relaxed)
         newNote.savedVersion = savedVersion
         newNote.publicationStatus = publicationStatus
 
@@ -276,7 +281,7 @@ public class BeamNote: BeamElement {
         return Self.getFetchedNote(id)
     }
 
-    public var pendingSave: Int = 0
+    public var pendingSave = ManagedAtomic<Int>(0)
 
     public static func appendToFetchedNotes(_ note: BeamNote) {
         beamCheckMainThread()

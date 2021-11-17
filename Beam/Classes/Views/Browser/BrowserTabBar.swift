@@ -45,7 +45,8 @@ struct BrowserTabBar: View {
         disableAnimation ? nil : BeamAnimation.easeInOut(duration: animationDuration)
     }
 
-    func renderItem(tab: BrowserTab, index: Int, allowHover: Bool,
+    // swiftlint:disable function_body_length
+    func renderItem(tab: BrowserTab, index: Int, allowHover: Bool, widthProvider: TabWidthProvider,
                     containerGeometry: GeometryProxy, scrollViewProxy: ScrollViewProxy?) -> some View {
         Group {
             let selected = isSelected(tab)
@@ -65,7 +66,7 @@ struct BrowserTabBar: View {
             })
                 .zIndex(selected ? 1 : 0)
                 .frame(width: isTheDraggedTab ? 0 :
-                        widthForTab(selected: selected, pinned: tab.isPinned, containerGeometry: containerGeometry))
+                        widthProvider.widthForTab(selected: selected, pinned: tab.isPinned))
                 .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .identity))
                 .disabled(isDraggingATab && !selected)
                 .opacity(isTheDraggedTab ? 0 : 1)
@@ -83,11 +84,23 @@ struct BrowserTabBar: View {
                             state.browserTabsManager.pinTab(tab)
                         }
                     }.disabled(!tab.isPinned && tab.url == nil)
+                    Button("Duplicate Tab") {
+                        guard index < tabs.count else { return }
+                        let tab = tabs[index]
+                        state.duplicate(tab: tab)
+                    }
+                    Divider()
                     Button("Close Tab") {
                         guard index < tabs.count else { return }
                         let tab = tabs[index]
                         onTabClose(tab, fromContextMenu: true)
                     }
+                    Button("Close Other Tabs") {
+                        state.closeAllTabsButCurrent()
+                    }.disabled(tabs.allSatisfy({ $0.isPinned }) || tabs.count <= 1)
+                    Button("Close Tabs to the Right") {
+                        state.closeTabsToTheRight()
+                    }.disabled(index + 1 >= tabs.count || tabs.allSatisfy({ $0.isPinned }))
                 }
             if index == dragModel.draggingOverIndex && index > dragStartIndex {
                 emptySpacer.frame(width: dragModel.widthForDraggingTab)
@@ -95,26 +108,19 @@ struct BrowserTabBar: View {
         }
     }
 
-    private var tabsSections: (pinnedTabs: [BrowserTab], otherTabs: [BrowserTab]) {
-        guard let firstUnpinnedIndex = tabs.firstIndex(where: { !$0.isPinned }) else {
-            return (tabs, [])
-        }
-        guard firstUnpinnedIndex > 0 else { return ([], tabs) }
-        return (Array(tabs[0..<firstUnpinnedIndex]), Array(tabs[firstUnpinnedIndex..<tabs.count]))
-    }
-
     var body: some View {
         HStack(spacing: 0) {
             GeometryReader { geometry in
+                let widthProvider = widthProvider(for: geometry)
+                let tabsSections = buildTabsSections(with: tabs)
                 ZStack(alignment: .leading) {
-                    let tabsSections = tabsSections
                     HStack(spacing: 0) {
                         // Fixed Pinned Tabs
                         HStack(spacing: 0) {
                             let pinnedTabs = tabsSections.pinnedTabs
-                            ForEach(Array(zip(pinnedTabs.indices, pinnedTabs)), id: \.1.stackIdentifier) { (index, tab) in
+                            ForEach(Array(zip(pinnedTabs.indices, pinnedTabs)), id: \.1) { (index, tab) in
                                 renderItem(tab: tab, index: index, allowHover: true,
-                                           containerGeometry: geometry, scrollViewProxy: nil)
+                                           widthProvider: widthProvider, containerGeometry: geometry, scrollViewProxy: nil)
                             }
                         }
                         // Scrollable Tabs
@@ -123,9 +129,9 @@ struct BrowserTabBar: View {
                                 HStack(spacing: 0) {
                                     let otherTabs = tabsSections.otherTabs
                                     let startIndex = tabs.count - otherTabs.count
-                                    ForEach(Array(zip(otherTabs.indices, otherTabs)), id: \.1.stackIdentifier) { (index, tab) in
+                                    ForEach(Array(zip(otherTabs.indices, otherTabs)), id: \.1) { (index, tab) in
                                         renderItem(tab: tab, index: startIndex + index, allowHover: isHoveringScrollView,
-                                                   containerGeometry: geometry, scrollViewProxy: proxy)
+                                                   widthProvider: widthProvider, containerGeometry: geometry, scrollViewProxy: proxy)
                                     }
                                 }
                                 .onAppear {
@@ -177,20 +183,25 @@ struct BrowserTabBar: View {
         .animation(nil)
     }
 
+    private func buildTabsSections(with tabs: [BrowserTab]) -> (pinnedTabs: [BrowserTab], otherTabs: [BrowserTab]) {
+        guard let firstUnpinnedIndex = tabs.firstIndex(where: { !$0.isPinned }) else {
+            return (tabs, [])
+        }
+        guard firstUnpinnedIndex > 0 else { return ([], tabs) }
+        return (Array(tabs[0..<firstUnpinnedIndex]), Array(tabs[firstUnpinnedIndex..<tabs.count]))
+    }
+
     private func dragGestureOnChange(gestureValue: DragGesture.Value,
                                      containerGeometry: GeometryProxy) {
         guard let currentTab = currentTab else { return }
         if dragModel.dragStartIndex == nil {
             firstGestureValue = gestureValue
             let currentTabIndex = position(of: currentTab)
-            dragModel.prepareForDrag(gestureValue: gestureValue,
-                                     scrollContentOffset: scrollOffset,
-                                     currentTabIndex: currentTabIndex,
-                                     tabsCount: tabs.count,
-                                     pinnedTabsCount: tabs.filter { $0.isPinned }.count,
-                                     tabWidthBuilder: { selected, pinned in
-                                        widthForTab(selected: selected, pinned: pinned, containerGeometry: containerGeometry)
-                                     })
+            let pinnedCount = pinnedTabs().count
+            let widthProvider = widthProvider(for: containerGeometry)
+            dragModel.prepareForDrag(gestureValue: gestureValue, scrollContentOffset: scrollOffset,
+                                     currentTabIndex: currentTabIndex, tabsCount: tabs.count, pinnedTabsCount: pinnedCount,
+                                     widthProvider: widthProvider)
             if let newStartIndex = dragModel.dragStartIndex, newStartIndex != currentTabIndex {
                 self.currentTab = tabs[newStartIndex]
                 return
@@ -249,23 +260,10 @@ struct BrowserTabBar: View {
         tabs.filter { $0.isPinned }
     }
 
-    private func widthForTab(selected: Bool, pinned: Bool, containerGeometry: GeometryProxy) -> CGFloat {
-        guard !pinned else { return BrowserTabView.pinnedWidth }
-        var pinnedTabsCount = pinnedTabs().count
-        if dragModel.draggingOverPins && currentTab?.isPinned != true {
-            pinnedTabsCount += 1
-        } else if dragModel.draggingOverIndex != nil && !dragModel.draggingOverPins && currentTab?.isPinned == true {
-            pinnedTabsCount -= 1
-        }
-        let availableWidth = containerGeometry.size.width - (CGFloat(pinnedTabsCount) * BrowserTabView.pinnedWidth)
-        let unpinnedTabsCount = tabs.count - pinnedTabsCount
-        guard unpinnedTabsCount > 0 else { return availableWidth }
-        var tabWidth = availableWidth / CGFloat(unpinnedTabsCount)
-        if tabWidth < BrowserTabView.minimumActiveWidth {
-            // not enough space for all tabs
-            tabWidth = (availableWidth - BrowserTabView.minimumActiveWidth) / CGFloat(unpinnedTabsCount - 1)
-        }
-        return max(selected ? BrowserTabView.minimumActiveWidth : BrowserTabView.minimumWidth, tabWidth)
+    private func widthProvider(for containerGeometry: GeometryProxy) -> TabWidthProvider {
+        TabWidthProvider(tabsCount: tabs.count, pinnedTabsCount: pinnedTabs().count,
+                         containerSize: containerGeometry.size, currentTabIsPinned: currentTab?.isPinned == true,
+                         dragModel: dragModel)
     }
 
     private func moveTabs(from currentIndex: Int, to index: Int, with tab: BrowserTab) {
@@ -291,8 +289,9 @@ struct BrowserTabBar: View {
                                      scrollViewProxy: ScrollViewProxy,
                                      animated: Bool = true) {
         let index = position(of: tab)
-        let tabWidth = widthForTab(selected: isSelected(tab), pinned: tab.isPinned, containerGeometry: containerGeometry)
-        let tabOriginX = CGFloat(index) * widthForTab(selected: false, pinned: false, containerGeometry: containerGeometry)
+        let widthProvider = widthProvider(for: containerGeometry)
+        let tabWidth = widthProvider.widthForTab(selected: isSelected(tab), pinned: tab.isPinned)
+        let tabOriginX = CGFloat(index) * widthProvider.widthForTab(selected: false, pinned: false)
         let point = CGPoint(x: tabOriginX + tabWidth, y: 0)
         let outOfBoundsWidth = point.x - (containerGeometry.size.width + scrollOffset)
         guard outOfBoundsWidth > 0 else { return }
@@ -304,7 +303,42 @@ struct BrowserTabBar: View {
             scrollViewProxy.scrollTo("tab-\(tab.id)")
         }
     }
+}
 
+class TabWidthProvider {
+    private var tabsCount: Int
+    private var pinnedTabsCount: Int
+    private var containerSize: CGSize
+    private var currentTabIsPinned: Bool
+    private weak var dragModel: BrowserTabBarDragModel?
+
+    internal init(tabsCount: Int, pinnedTabsCount: Int, containerSize: CGSize,
+                  currentTabIsPinned: Bool, dragModel: BrowserTabBarDragModel) {
+        self.tabsCount = tabsCount
+        self.pinnedTabsCount = pinnedTabsCount
+        self.containerSize = containerSize
+        self.currentTabIsPinned = currentTabIsPinned
+        self.dragModel = dragModel
+    }
+
+    func widthForTab(selected: Bool, pinned: Bool) -> CGFloat {
+        guard !pinned else { return BrowserTabView.pinnedWidth }
+        var pinnedTabsCount = pinnedTabsCount
+        if dragModel?.draggingOverPins == true && !currentTabIsPinned {
+            pinnedTabsCount += 1
+        } else if dragModel?.draggingOverIndex != nil && dragModel?.draggingOverPins != true && currentTabIsPinned {
+            pinnedTabsCount -= 1
+        }
+        let availableWidth = containerSize.width - (CGFloat(pinnedTabsCount) * BrowserTabView.pinnedWidth)
+        let unpinnedTabsCount = tabsCount - pinnedTabsCount
+        guard unpinnedTabsCount > 0 else { return availableWidth }
+        var tabWidth = availableWidth / CGFloat(unpinnedTabsCount)
+        if tabWidth < BrowserTabView.minimumActiveWidth {
+            // not enough space for all tabs
+            tabWidth = (availableWidth - BrowserTabView.minimumActiveWidth) / CGFloat(unpinnedTabsCount - 1)
+        }
+        return max(selected ? BrowserTabView.minimumActiveWidth : BrowserTabView.minimumWidth, tabWidth)
+    }
 }
 
 struct BrowserTabBar_Previews: PreviewProvider {

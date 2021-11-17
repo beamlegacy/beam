@@ -9,30 +9,28 @@ import PromiseKit
  */
 
 extension DocumentManager {
-    func create(title: String) -> Promise<DocumentStruct> {
+    func create(id: UUID, title: String) -> Promise<DocumentStruct> {
         coreDataManager.background()
-            .then(on: backgroundQueue) { context -> Promise<DocumentStruct> in
-                try context.performAndWait {
-                    let document = Document.create(context, title: title)
-
-                    try self.checkValidations(context, document)
-                    try Self.saveContext(context: context)
-
-                    return .value(self.parseDocumentBody(document))
+            .then(on: backgroundQueue) { _ -> Promise<DocumentStruct> in
+                let documentManager = DocumentManager()
+                return try documentManager.context.performAndWait {
+                    let document: Document = try documentManager.create(id: id, title: title)
+                    return .value(documentManager.parseDocumentBody(document))
                 }
             }
     }
 
     func fetchOrCreate(title: String) -> Promise<DocumentStruct> {
         coreDataManager.background()
-            .then(on: backgroundQueue) { context -> Promise<DocumentStruct> in
-                try context.performAndWait {
-                    let document = Document.fetchOrCreateWithTitle(context, title)
-
-                    try self.checkValidations(context, document)
-                    try Self.saveContext(context: context)
-
-                    return .value(self.parseDocumentBody(document))
+            .then(on: backgroundQueue) { _ -> Promise<DocumentStruct> in
+                let documentManager = DocumentManager()
+                return documentManager.context.performAndWait {
+                    do {
+                        let document = try documentManager.fetchOrCreateWithTitle(title)
+                        return .value(documentManager.parseDocumentBody(document))
+                    } catch {
+                        return Promise<DocumentStruct>(error: error)
+                    }
                 }
             }
     }
@@ -48,19 +46,20 @@ extension DocumentManager {
 
         let result = promise
             .then(on: self.backgroundQueue) { context -> Promise<Bool> in
-                Logger.shared.logDebug("Saving \(documentStruct.titleAndId)", category: .document)
-                Logger.shared.logDebug(documentStruct.data.asString ?? "-", category: .documentDebug)
+                let documentManager = DocumentManager()
+                return try documentManager.context.performAndWait {
+                    Logger.shared.logDebug("Saving \(documentStruct.titleAndId)", category: .document)
+                    Logger.shared.logDebug(documentStruct.data.asString ?? "-", category: .documentDebug)
 
-                guard !cancelme else { throw PMKError.cancelled }
+                    guard !cancelme else { throw PMKError.cancelled }
 
-                return try context.performAndWait {
-                    let document = Document.fetchOrCreateWithId(context, documentStruct.id)
+                    let document = try documentManager.fetchOrCreateWithId(documentStruct.id)
                     document.update(documentStruct)
                     document.data = documentStruct.data
                     document.updated_at = BeamDate.now
 
                     guard !cancelme else { throw PMKError.cancelled }
-                    try self.checkValidations(context, document)
+                    try documentManager.checkValidations(document)
 
                     guard !cancelme else { throw PMKError.cancelled }
 
@@ -73,7 +72,7 @@ extension DocumentManager {
                         Logger.shared.logError("Didn't find database \(document.database_id)", category: .document)
                     }
 
-                    try Self.saveContext(context: context)
+                    try documentManager.saveContext()
 
                     // Ping others about the update
                     let savedDocumentStruct = DocumentStruct(document: document)
@@ -105,8 +104,8 @@ extension DocumentManager {
 
     func deleteAll(includedRemote: Bool = true) -> Promise<Bool> {
         do {
-            try Document.deleteWithPredicate(CoreDataManager.shared.mainContext)
-            try Self.saveContext(context: CoreDataManager.shared.mainContext)
+            let documentManager = DocumentManager()
+            try documentManager.deleteAll(databaseId: nil)
         } catch {
             Logger.shared.logError(error.localizedDescription, category: .coredata)
         }
@@ -128,31 +127,34 @@ extension DocumentManager {
 
         return coreDataManager.background()
             .then(on: backgroundQueue) { context -> Promise<Bool> in
-                guard let document = try? Document.fetchWithId(context, id) else {
-                    throw DocumentManagerError.idNotFound
+                let documentManager = DocumentManager()
+                return try documentManager.context.performAndWait {
+                    guard let document = try? documentManager.fetchWithId(id) else {
+                        throw DocumentManagerError.idNotFound
+                    }
+
+                    if let database = try? Database.fetchWithId(context, document.database_id) {
+                        database.updated_at = BeamDate.now
+                    } else {
+                        // We should always have a connected database
+                        Logger.shared.logError("No connected database", category: .document)
+                    }
+
+                    let documentStruct = DocumentStruct(document: document)
+                    document.delete(documentManager.context)
+
+                    try documentManager.saveContext()
+
+                    self.notificationDocumentDelete(documentStruct)
+
+                    guard AuthenticationManager.shared.isAuthenticated,
+                          Configuration.networkEnabled,
+                          networkDelete else {
+                        return .value(false)
+                    }
+
+                    return self.deleteFromBeamObjectAPI(id)
                 }
-
-                if let database = try? Database.fetchWithId(context, document.database_id) {
-                    database.updated_at = BeamDate.now
-                } else {
-                    // We should always have a connected database
-                    Logger.shared.logError("No connected database", category: .document)
-                }
-
-                let documentStruct = DocumentStruct(document: document)
-                document.delete(context)
-
-                try Self.saveContext(context: context)
-
-                self.notificationDocumentDelete(documentStruct)
-
-                guard AuthenticationManager.shared.isAuthenticated,
-                      Configuration.networkEnabled,
-                      networkDelete else {
-                    return .value(false)
-                }
-
-                return self.deleteFromBeamObjectAPI(id)
             }
     }
 
@@ -163,24 +165,27 @@ extension DocumentManager {
 
         let promise: Guarantee<NSManagedObjectContext> = coreDataManager.background()
 
-        return promise.then(on: backgroundQueue) { context -> Promise<Bool> in
-            let documents = try Document.rawFetchAll(context)
-            Logger.shared.logDebug("Uploading \(documents.count) documents", category: .documentNetwork)
-            if documents.isEmpty {
-                return .value(true)
-            }
-
-            // Cancel previous saves as we're saving all of the objects anyway
-            Self.cancelAllPreviousThrottledAPICall()
-
-            let documentStructs = documents.map { DocumentStruct(document: $0) }
-            let savePromise: Promise<[DocumentStruct]> = self.saveOnBeamObjectsAPI(documentStructs)
-
-            return savePromise.then(on: self.backgroundQueue) { savedDocumentStructs -> Promise<Bool> in
-                guard savedDocumentStructs.count == documents.count else {
-                    return .value(false)
+        return promise.then(on: backgroundQueue) { _ -> Promise<Bool> in
+            let documentManager = DocumentManager()
+            return try documentManager.context.performAndWait {
+                let documents = try documentManager.fetchAll(filters: [.includeDeleted])
+                Logger.shared.logDebug("Uploading \(documents.count) documents", category: .documentNetwork)
+                if documents.isEmpty {
+                    return .value(true)
                 }
-                return .value(true)
+
+                // Cancel previous saves as we're saving all of the objects anyway
+                Self.cancelAllPreviousThrottledAPICall()
+
+                let documentStructs = documents.map { DocumentStruct(document: $0) }
+                let savePromise: Promise<[DocumentStruct]> = self.saveOnBeamObjectsAPI(documentStructs)
+
+                return savePromise.then(on: self.backgroundQueue) { savedDocumentStructs -> Promise<Bool> in
+                    guard savedDocumentStructs.count == documents.count else {
+                        return .value(false)
+                    }
+                    return .value(true)
+                }
             }
         }
     }

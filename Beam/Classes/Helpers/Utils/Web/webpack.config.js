@@ -5,7 +5,7 @@ const path = require("path")
 function config(name, mode = "production") {
   return {
     mode,
-    devtool: mode === "production" ? undefined : "inline-source-map",
+    devtool: "cheap-module-source-map",
     devServer: {
       contentBase: "./dist",
       https: false, // Required by service workers if we don't use localhost

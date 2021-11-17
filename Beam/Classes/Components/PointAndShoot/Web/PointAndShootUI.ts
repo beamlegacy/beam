@@ -1,11 +1,12 @@
-import {WebEventsUI} from "./WebEventsUI"
-import {BeamRangeGroup, BeamShootGroup} from "../../../Helpers/Utils/Web/BeamTypes"
+import {BeamRangeGroup, BeamShootGroup, FrameInfo} from "../../../Helpers/Utils/Web/BeamTypes"
 
-export interface PointAndShootUI extends WebEventsUI {
+export interface PointAndShootUI {
+  prefix: string
   pointBounds(pointTarget?: BeamShootGroup): void
   shootBounds(shootTargets: BeamShootGroup[]): void
   selectBounds(rangeGroups: BeamRangeGroup[]): void
   clearSelection(id: string): void
   hasSelection(hasSelection: boolean): void
-  isTypingOnWebView(isTypingOnWebView: boolean): void
+  typingOnWebView(isTypingOnWebView: boolean): void
+  setFramesInfo(framesInfo: FrameInfo[])
 }

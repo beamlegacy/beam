@@ -2,21 +2,22 @@ import XCTest
 import Promises
 import Nimble
 import Fakery
+import Combine
 
 @testable import Beam
 @testable import BeamCore
 
 class TestWebPage: WebPage {
     var events: [String] = []
-    var scrollX: CGFloat = 0
-    var scrollY: CGFloat = 0
     private(set) var originalQuery: String?
     private(set) var pointAndShootAllowed: Bool = true
     private(set) var title: String = "PNS MockPage"
     static let urlStr = "https://webpage.com"
     private(set) var url: URL? = URL(string: urlStr)
+    var userTypedDomain: URL?
     var score: Float = 0
     var pointAndShoot: PointAndShoot?
+    var webPositions: WebPositions?
     var browsingScorer: BrowsingScorer?
     var storage: BeamFileStorage?
     var passwordOverlayController: PasswordOverlayController?
@@ -27,6 +28,7 @@ class TestWebPage: WebPage {
     private(set) var downloadManager: DownloadManager?
     private(set) var navigationController: WebNavigationController?
     var hasError: Bool = false
+    var responseStatusCode: Int = 200
     var mediaPlayerController: MediaPlayerController?
     var appendToIndexer: ((URL, Readability) -> Void)?
     var webView: BeamWebView!
@@ -53,6 +55,7 @@ class TestWebPage: WebPage {
         self.downloadManager = downloadManager
         self.navigationController = navigationController
         self.webView = BeamWebView()
+        self.webPositions = WebPositions()
     }
 
     func addCSS(source: String, when: WKUserScriptInjectionTime) {
@@ -147,6 +150,7 @@ class MockUserInformationsStore: UserInformationsStore {
 }
 
 class BrowsingScorerMock: WebPageHolder, BrowsingScorer {
+    var debouncedUpdateScrollingScore = PassthroughSubject<WebPositions.FrameInfo, Never>()
     private(set) var currentScore: BeamCore.Score = Score()
 
     override init() {
@@ -158,6 +162,7 @@ class BrowsingScorerMock: WebPageHolder, BrowsingScorer {
     func addTextSelection() {}
 
     func applyLongTermScore(changes: (LongTermUrlScore) -> Void) {}
+    func updateScrollingScore(_ frame: WebPositions.FrameInfo) {}
 }
 
 class FileStorageMock: BeamFileStorage {
@@ -236,7 +241,7 @@ class PointAndShootTest: XCTestCase {
         let testFileStorage = FileStorageMock()
         let testDownloadManager = DownloadManagerMock()
         let navigationController = NavigationControllerMock()
-        pns = PointAndShoot(scorer: testBrowsingScorer)
+        pns = PointAndShoot()
         let page = TestWebPage(browsingScorer: testBrowsingScorer,
                                passwordOverlayController: testPasswordOverlayController, pns: pns,
                                fileStorage: testFileStorage, downloadManager: testDownloadManager,
@@ -272,7 +277,7 @@ class PointAndShootTest: XCTestCase {
             targets.append(target)
         }
 
-        return PointAndShoot.ShootGroup(UUID().uuidString, targets, faker.internet.url())
+        return PointAndShoot.ShootGroup(UUID().uuidString, targets, "placeholder text", faker.internet.url(), shapeCache: .init())
     }
 
     // Note: this class is only used to setup the Point and Shoot Mocks and testbed

@@ -18,7 +18,6 @@ class DocumentManagerTests: QuickSpec {
     override func spec() {
         var sut: DocumentManager!
         var helper: DocumentManagerTestsHelper!
-        let mainContext = CoreDataManager.shared.mainContext
 
         beforeEach {
             sut = DocumentManager()
@@ -35,7 +34,7 @@ class DocumentManagerTests: QuickSpec {
             beforeEach {
                 var docStruct = helper.createDocumentStruct()
                 docStruct = helper.saveLocally(docStruct)
-                let count = Document.countWithPredicate(mainContext)
+                let count = sut.count()
                 expect(count) >= 1
             }
 
@@ -46,9 +45,9 @@ class DocumentManagerTests: QuickSpec {
                             done()
                         }
                     }
-                    let count = Document.countWithPredicate(mainContext)
+                    let count = sut.count()
                     if count > 0 {
-                        let documentStructs = try Document.fetchAll(mainContext)
+                        let documentStructs = try sut.fetchAll()
                         dump(documentStructs)
 
                         fail("Still have documents: \(documentStructs.compactMap { $0.title })")
@@ -66,9 +65,9 @@ class DocumentManagerTests: QuickSpec {
                             done()
                         }.catch { _ in }
                     }
-                    let count = Document.countWithPredicate(mainContext)
+                    let count = sut.count()
                     if count > 0 {
-                        let documentStructs = try Document.fetchAll(mainContext)
+                        let documentStructs = try sut.fetchAll()
                         dump(documentStructs)
 
                         fail("Still have documents: \(documentStructs.compactMap { $0.title })")
@@ -86,9 +85,9 @@ class DocumentManagerTests: QuickSpec {
                             done()
                         }
                     }
-                    let count = Document.countWithPredicate(mainContext)
+                    let count = sut.count()
                     if count > 0 {
-                        let documentStructs = try Document.fetchAll(mainContext)
+                        let documentStructs = try sut.fetchAll()
                         dump(documentStructs)
 
                         fail("Still have documents: \(documentStructs.compactMap { $0.title })")
@@ -109,12 +108,11 @@ class DocumentManagerTests: QuickSpec {
                         })
                     }
 
-                    let count = Document.countWithPredicate(mainContext,
-                                                            NSPredicate(format: "id = %@", docStruct.id as CVarArg))
+                    let count = sut.count(filters: [.id(docStruct.id)])
                     expect(count) == 1
                 }
 
-                it("saves only the last call on coreData") {
+                it("saves all calls on coreData") {
                     var docStruct = helper.createDocumentStruct()
                     let before = DocumentManager.savedCount
 
@@ -131,7 +129,7 @@ class DocumentManagerTests: QuickSpec {
                     // Testing `== 1` might sometimes fail because of speed issue. We want to
                     // make sure we don't have all calls and some operations have been cancelled.
                     // 2 sounds like a good number.
-                    expect(DocumentManager.savedCount - before) <= 2
+                    expect(DocumentManager.savedCount - before) == 7
                 }
 
                 context("with duplicate titles") {
@@ -160,8 +158,7 @@ class DocumentManagerTests: QuickSpec {
                             })
                         }
 
-                        let count = Document.rawCountWithPredicate(mainContext,
-                                                                   NSPredicate(format: "title = %@", docStruct.title))
+                        let count = sut.count(filters: [.title(docStruct.title), .includeDeleted])
                         expect(count) == 2
                     }
                 }
@@ -181,8 +178,7 @@ class DocumentManagerTests: QuickSpec {
                             .catch { _ in }
                     }
 
-                    let count = Document.countWithPredicate(mainContext,
-                                                            NSPredicate(format: "id = %@", docStruct.id as CVarArg))
+                    let count = sut.count(filters: [.id(docStruct.id)])
                     expect(count) == 1
                 }
 
@@ -254,8 +250,7 @@ class DocumentManagerTests: QuickSpec {
                                 .catch { _ in }
                         }
 
-                        let count = Document.rawCountWithPredicate(mainContext,
-                                                                   NSPredicate(format: "title = %@", docStruct.title))
+                        let count = sut.count(filters: [.title(docStruct.title), .includeDeleted])
                         expect(count) == 2
                     }
                 }
@@ -275,8 +270,7 @@ class DocumentManagerTests: QuickSpec {
                             .catch { _ in }
                     }
 
-                    let count = Document.countWithPredicate(mainContext,
-                                                            NSPredicate(format: "id = %@", docStruct.id as CVarArg))
+                    let count = sut.count(filters: [.id(docStruct.id)])
                     expect(count) == 1
                 }
 
@@ -344,8 +338,7 @@ class DocumentManagerTests: QuickSpec {
                                 .catch { _ in }
                         }
 
-                        let count = Document.rawCountWithPredicate(mainContext,
-                                                                   NSPredicate(format: "title = %@", docStruct.title))
+                        let count = sut.count(filters: [.title(docStruct.title), .includeDeleted])
                         expect(count) == 2
                     }
                 }
@@ -376,7 +369,7 @@ class DocumentManagerTests: QuickSpec {
             }
         }
 
-        describe(".delete()") {
+        describe(".delete(id:)") {
             context("with Foundation") {
                 it("deletes document") {
                     var docStruct = helper.createDocumentStruct()
@@ -387,9 +380,7 @@ class DocumentManagerTests: QuickSpec {
                         }
                     }
 
-                    let count = Document.countWithPredicate(mainContext,
-                                                            NSPredicate(format: "id = %@", docStruct.id as
-                                                                            CVarArg))
+                    let count = sut.count(filters: [.id(docStruct.id)])
 
                     expect(count).to(equal(0))
                 }
@@ -405,9 +396,7 @@ class DocumentManagerTests: QuickSpec {
                             .catch { _ in }
                     }
 
-                    let count = Document.countWithPredicate(mainContext,
-                                                            NSPredicate(format: "id = %@", docStruct.id as
-                                                                            CVarArg))
+                    let count = sut.count(filters: [.id(docStruct.id)])
 
                     expect(count).to(equal(0))
                 }
@@ -421,11 +410,65 @@ class DocumentManagerTests: QuickSpec {
                         promise.then { _ in done() }
                     }
 
-                    let count = Document.countWithPredicate(mainContext,
-                                                            NSPredicate(format: "id = %@", docStruct.id as
-                                                                            CVarArg))
+                    let count = sut.count(filters: [.id(docStruct.id)])
 
                     expect(count).to(equal(0))
+                }
+            }
+        }
+
+        describe(".delete(ids:)") {
+            context("with Foundation") {
+                it("deletes document") {
+                    var docStruct = helper.createDocumentStruct()
+                    docStruct = helper.saveLocally(docStruct)
+
+                    var docStruct2 = helper.createDocumentStruct()
+                    docStruct2 = helper.saveLocally(docStruct2)
+                    waitUntil(timeout: .seconds(10)) { done in
+                        sut.delete(ids: [docStruct.id, docStruct2.id]) { _ in
+                            done()
+                        }
+                    }
+
+                    var count = sut.count(filters: [.id(docStruct.id)])
+
+                    expect(count).to(equal(0))
+
+                    count = sut.count(filters: [.id(docStruct2.id)])
+
+                    expect(count).to(equal(0))
+                }
+            }
+        }
+
+        describe(".softDelete(ids:)") {
+            context("with Foundation") {
+                it("deletes document") {
+                    var docStruct = helper.createDocumentStruct()
+                    docStruct = helper.saveLocally(docStruct)
+
+                    var docStruct2 = helper.createDocumentStruct()
+                    docStruct2 = helper.saveLocally(docStruct2)
+                    waitUntil(timeout: .seconds(10)) { done in
+                        sut.softDelete(ids: [docStruct.id, docStruct2.id]) { _ in
+                            done()
+                        }
+                    }
+
+                    var count = sut.count(filters: [.id(docStruct.id)])
+
+                    expect(count).to(equal(0))
+
+                    count = sut.count(filters: [.id(docStruct2.id)])
+
+                    expect(count).to(equal(0))
+
+                    var document = try? sut.fetchWithId(docStruct.id)
+                    expect(document?.deleted_at).toNot(beNil())
+
+                    document = try? sut.fetchWithId(docStruct2.id)
+                    expect(document?.deleted_at).toNot(beNil())
                 }
             }
         }
@@ -436,9 +479,7 @@ class DocumentManagerTests: QuickSpec {
                 let docStruct = sut.create(title: title)!
                 expect(docStruct.title) == title
 
-                let count = Document.countWithPredicate(mainContext,
-                                                        NSPredicate(format: "id = %@", docStruct.id as CVarArg),
-                                                        docStruct.databaseId)
+                let count = sut.count(filters: [.databaseId(docStruct.databaseId), .id(docStruct.id)])
 
                 expect(count) == 1
             }
@@ -460,7 +501,7 @@ class DocumentManagerTests: QuickSpec {
                 it("creates document") {
                     waitUntil(timeout: .seconds(10)) { done in
                         sut
-                            .create(title: title)
+                            .create(id: UUID(), title: title)
                             .done { docStruct in
                                 expect(docStruct.title).to(equal(title))
                                 done()
@@ -472,7 +513,7 @@ class DocumentManagerTests: QuickSpec {
                 it("creates a document and execute the proper thread") {
                     waitUntil(timeout: .seconds(10)) { done in
                         sut
-                            .create(title: title)
+                            .create(id: UUID(), title: title)
                             .done { docStruct in
                                 expect(docStruct.title).to(equal(title))
                                 done()
@@ -486,7 +527,7 @@ class DocumentManagerTests: QuickSpec {
                     docStruct = helper.saveLocally(docStruct)
                     waitUntil(timeout: .seconds(10)) { done in
                         sut
-                            .create(title: title)
+                            .create(id: UUID(), title: title)
                             .done { docStruct in
                                 fail("Shouldn't happen")
                                 done()
@@ -522,7 +563,7 @@ class DocumentManagerTests: QuickSpec {
                         sut
                             .create(title: title)
                             .then { docStruct in
-                                sut.backgroundContext.performAndWait {
+                                sut.backgroundQueue.sync {
                                     expect(docStruct.title).to(equal(title))
                                     done()
                                 }
@@ -555,7 +596,7 @@ class DocumentManagerTests: QuickSpec {
                 let title = String.randomTitle()
 
                 waitUntil(timeout: .seconds(10)) { done in
-                    sut.createAsync(title: title) { result in
+                    sut.createAsync(id: UUID(), title: title) { result in
                         expect { try result.get() }.toNot(throwError())
                         expect { try result.get().title }.to(equal(title))
                         done()
@@ -597,7 +638,7 @@ class DocumentManagerTests: QuickSpec {
                         let semaphore = DispatchSemaphore(value: 0)
                         let title = String.randomTitle()
 
-                        sut.createAsync(title: title) { result in
+                        sut.createAsync(id: UUID(), title: title) { result in
                             expect { try result.get() }.toNot(throwError())
                             expect { try result.get().title }.to(equal(title))
                             semaphore.signal()

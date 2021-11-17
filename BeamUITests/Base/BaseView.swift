@@ -15,7 +15,8 @@ class BaseView {
     let implicitWaitTimeout = TimeInterval(10)
     let minimumWaitTimeout = TimeInterval(2)
     let defaultPressDurationSeconds = 1.5
-    let errorFetchStringValue = "ERROR:failed to fetch value"
+    let errorFetchStringValue = "ERROR:failed to fetch string value from "
+    let shortcutsHelper = ShortcutsHelper()
     //Wrapper over the elements
     func label(_ element: String) -> XCUIElement {
         return app.windows.staticTexts[element]
@@ -109,6 +110,10 @@ class BaseView {
         return WebTestView()
     }
     
+    func getElementStringValue(element: XCUIElement) -> String {        
+        return element.value as? String ?? errorFetchStringValue + element.identifier
+    }
+        
     @discardableResult
     func populateOmnibarWith(_ text: String) -> OmniBarTestView {
         let omniSearchField = searchField(OmniBarLocators.SearchFields.omniSearchField.accessibilityIdentifier)
@@ -122,8 +127,6 @@ class BaseView {
     @discardableResult
     func openWebsite(_ url: String) -> WebTestView {
         _ = populateOmnibarWith(url)
-        self.typeKeyboardKey(.space) //trick to get rid of Google Search autofill on CI
-        self.typeKeyboardKey(.delete)
         self.typeKeyboardKey(.enter)
         return WebTestView()
     }
@@ -133,19 +136,20 @@ class BaseView {
         let text = textToPaste
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(text, forType: .string)
-        app.typeKey("v", modifierFlags: .command)
-        return self
-    }
-    
-    @discardableResult
-    func selectAllShortcut() -> BaseView {
-        app.typeKey("a", modifierFlags:.command)
+        shortcutsHelper.shortcutActionInvoke(action: .paste)
         return self
     }
     
     @discardableResult
     func triggerSearchField() -> SearchTestView {
-        app.typeKey("f", modifierFlags:.command)
+        shortcutsHelper.shortcutActionInvoke(action: .search)
         return SearchTestView()
+    }
+    
+    @discardableResult
+    func selectAllAndDelete() -> BaseView {
+        ShortcutsHelper().shortcutActionInvoke(action: .selectAll)
+        typeKeyboardKey(.delete)
+        return self
     }
 }

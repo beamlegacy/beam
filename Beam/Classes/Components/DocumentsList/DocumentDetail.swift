@@ -15,6 +15,7 @@ struct DocumentDetail: View {
                 HStack(alignment: VerticalAlignment.center, spacing: 10.0) {
                     RefreshButton
                     SoftDeleteButton
+                    SoftUnDeleteButton
                     LocalDeleteButton
                     DeleteButton
                     PublicButton
@@ -173,18 +174,27 @@ struct DocumentDetail: View {
     }
 
     private func softDelete() {
-        var documentStruct = DocumentStruct(document: document)
-        documentStruct.deletedAt = BeamDate.now
+        let documentStruct = DocumentStruct(document: document)
 
-        documentManager.save(documentStruct, completion: { _ in
+        documentManager.softDelete(id: documentStruct.id, completion: { _ in
+        })
+    }
+
+    private func softUnDelete() {
+        var documentStruct = DocumentStruct(document: document)
+        documentStruct.deletedAt = nil
+        documentStruct.version += 1
+
+        documentManager.saveThenSaveOnAPI(documentStruct, completion: { _ in
         })
     }
 
     private func togglePublic() {
         var documentStruct = DocumentStruct(document: document)
+        documentStruct.version += 1
         documentStruct.isPublic = !documentStruct.isPublic
 
-        documentManager.save(documentStruct, completion: { _ in
+        documentManager.saveThenSaveOnAPI(documentStruct, completion: { _ in
         })
     }
 
@@ -201,6 +211,14 @@ struct DocumentDetail: View {
             delete()
         }, label: {
             Text("Delete").frame(minWidth: 100)
+        })
+    }
+
+    private var SoftUnDeleteButton: some View {
+        Button(action: {
+            softUnDelete()
+        }, label: {
+            Text("Recover").frame(minWidth: 100)
         })
     }
 
@@ -242,7 +260,10 @@ struct DocumentDetail: View {
 
         document.database_id = db.id
 
-        documentManager.save(DocumentStruct(document: document), completion: { result in
+        var docStruct = DocumentStruct(document: document)
+        docStruct.version += 1
+
+        documentManager.save(docStruct, completion: { result in
             switch result {
             case .failure(let error):
                 Logger.shared.logError(error.localizedDescription, category: .document)
@@ -262,9 +283,9 @@ struct DocumentDetail: View {
 
 struct DocumentDetail_Previews: PreviewProvider {
     static var previews: some View {
-        let context = CoreDataManager.shared.mainContext
         // swiftlint:disable:next force_try
-        let document = try! Document.fetchFirst(context)!
+        let documentManager = DocumentManager()
+        let document = try! documentManager.fetchFirst()!
 
         return DocumentDetail(document: document).background(Color.white)
     }

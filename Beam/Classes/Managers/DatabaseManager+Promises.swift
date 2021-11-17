@@ -62,12 +62,12 @@ extension DatabaseManager {
         return promise
             .then(on: backgroundQueue) { context -> Promise<Bool> in
                 try context.performAndWait {
+                    let documentManager = DocumentManager()
                     guard let coreDataDatabase = try? Database.fetchWithId(context, database.id) else {
                         throw DatabaseManagerError.localDatabaseNotFound
                     }
 
-                    try Document.deleteWithPredicate(context, NSPredicate(format: "database_id = %@",
-                                                                          database.id as CVarArg))
+                    _ = try documentManager.deleteAll(databaseId: database.id)
                     coreDataDatabase.delete(context)
                     try Self.saveContext(context: context)
 

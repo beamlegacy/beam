@@ -134,41 +134,25 @@ extension HtmlNoteAdapter {
     /// Convert a html string to a simplefied text string with only the paragraph (`<p>`)
     /// text and the anchor tags (`<a>`) inside paragraphs as content.
     /// - Parameter html: String of html content
-    /// - Returns: Plain text string
-    func convertForClustering(html: String) -> String {
+    /// - Returns: Array of strings
+    func convertForClustering(html: String) -> [String] {
         guard let document = parseBodyFragment(html) else {
-            return ""
+            return [""]
         }
 
-        var cleanedText = ""
         var alternateCleanedText = [String]()
 
         do {
             let paragraphs = try document.select("p")
             for paragraph in paragraphs.array() {
-                for node in paragraph.getChildNodes() {
-                    if let element = node as? SwiftSoup.Element {
-                        switch element.tagName() {
-                        case "a":
-                            let aText = try element.text()
-                            cleanedText.append(aText)
-                        default:
-                            cleanedText.append("")
-                        }
-                    } else {
-                        if let textNode = node as? SwiftSoup.TextNode {
-                            cleanedText.append(textNode.text())
-                        }
-                    }
-                    let myText = try paragraph.text()
-                    if !alternateCleanedText.contains(myText) {
-                        alternateCleanedText += [myText]
-                    }
+                let myText = try paragraph.text()
+                if !alternateCleanedText.contains(myText) {
+                    alternateCleanedText += [myText]
                 }
             }
         } catch {
             Logger.shared.logError("convertForClustering: error", category: .document)
         }
-        return alternateCleanedText.max(by: {$1.count > $0.count}) ?? cleanedText
+        return alternateCleanedText
     }
 }

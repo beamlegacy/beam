@@ -11,11 +11,22 @@ protocol BeamNSTableViewDelegate: AnyObject {
     func tableViewDidChangeEffectiveAppearance(_ tableView: BeamNSTableView)
     func tableView(_ tableView: BeamNSTableView, mouseDownFor row: Int, column: Int, locationInWindow: NSPoint) -> Bool
     func tableView(_ tableView: BeamNSTableView, rightMouseDownFor row: Int, column: Int, locationInWindow: NSPoint)
+    func tableView(_ tableView: BeamNSTableView, didDoubleTap row: Int)
 }
 
 class BeamNSTableView: NSTableView {
 
     weak var additionalDelegate: BeamNSTableViewDelegate?
+
+    init() {
+        super.init(frame: .zero)
+        self.target = self
+        self.doubleAction = #selector(didDoubleSelectRow)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     override func viewDidChangeEffectiveAppearance() {
         super.viewDidChangeEffectiveAppearance()
@@ -46,5 +57,10 @@ class BeamNSTableView: NSTableView {
         }
         guard shouldPropagate else { return }
         super.mouseDown(with: event)
+    }
+
+    @objc func didDoubleSelectRow() {
+        guard let additionalDelegate = additionalDelegate else { return }
+        additionalDelegate.tableView(self, didDoubleTap: self.selectedRow)
     }
 }

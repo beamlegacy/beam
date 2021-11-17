@@ -53,6 +53,7 @@ struct TableView: NSViewRepresentable {
     var onHover: ((_ row: Int?, _ location: NSRect?) -> Void)?
     var onMouseDown: ((_ row: Int, _ column: TableViewColumn) -> Void)?
     var onRightMouseDown: ((Int, _ column: TableViewColumn, NSPoint) -> Void)?
+    var onDoubleTap: ((_ row: Int) -> Void)?
 
     typealias NSViewType = NSScrollView
 
@@ -557,4 +558,10 @@ extension TableViewCoordinator: BeamNSTableViewDelegate {
         let columnData = parent.columns[column]
         onRightMouseDown(originalRow, columnData, locationInWindow)
     }
+
+    func tableView(_ tableView: BeamNSTableView, didDoubleTap row: Int) {
+        guard let onDoubleTap = parent.onDoubleTap, let originalRow = getOriginalDataIndexes(for: [row]).first else { return }
+        onDoubleTap(originalRow)
+    }
+
 }

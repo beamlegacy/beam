@@ -27,22 +27,31 @@ struct PointAndShootCardPicker: View {
     @State private var isEditingCardName = false
 
     @State private var isEditingNote = false
-    @State private var currentCardName: String?
+    @State private var currentCardName: String? {
+        didSet {
+            textColor = currentCardName == nil ? BeamColor.Generic.text.nsColor : BeamColor.Beam.nsColor
+        }
+    }
     @State private var cardSearchField = ""
     @State private var cardSearchFieldSelection: Range<Int>?
     @State private var addNoteField = ""
 
+    @State private var textColor = BeamColor.Generic.text.nsColor
+    private let font = BeamFont.regular(size: 13).nsFont
+    private let placeholderColor = BeamColor.Generic.placeholder.nsColor
+    private let secondLabelTextColor = BeamColor.Generic.text.nsColor
     @State private var shootCompleted: Bool = false
+
+    var completed: Bool {
+        return shootCompleted || completedGroup?.directShoot == true
+    }
 
     private var isTodaysNote: String? {
         browserTabsManager.currentTab?.noteController.noteOrDefault.isTodaysNote ?? false ? data.todaysName : nil
     }
 
     @State private var destinationCardName: String?
-
-    private var textColor: NSColor {
-        currentCardName == nil ? BeamColor.Generic.text.nsColor : BeamColor.Beam.nsColor
-    }
+    @State var todaysCardName: String = ""
 
     private var cursorIsOnCardName: Bool {
         if let selection = cardSearchFieldSelection {
@@ -51,12 +60,13 @@ struct PointAndShootCardPicker: View {
         return false
     }
 
+    private let transparentColor = BeamColor.Generic.transparent.nsColor
+    private let textSelectionColor = BeamColor.Generic.transparent.nsColor
     private var selectedRangeColor: NSColor {
         if cursorIsOnCardName, currentCardName != nil {
-            return BeamColor.Generic.transparent.nsColor
+            return transparentColor
         }
-
-        return BeamColor.Generic.textSelection.nsColor
+        return textSelectionColor
     }
 
     var body: some View {
@@ -64,18 +74,18 @@ struct PointAndShootCardPicker: View {
             // MARK: - Top Half
             HStack(spacing: BeamSpacing._40) {
                 // MARK: - Prefix
-                PrefixLabel(completed: shootCompleted && completedGroup != nil, confirmation: completedGroup?.confirmation)
+                PrefixLabel(completed: completed && completedGroup != nil, confirmation: completedGroup?.confirmation)
 
                 // MARK: - TextField
                 ZStack {
-                    if !shootCompleted {
+                    if !completed {
                         BeamTextField(
                             text: $cardSearchField,
                             isEditing: $isEditingCardName,
-                            placeholder: destinationCardName ?? data.todaysName,
-                            font: BeamFont.regular(size: 13).nsFont,
+                            placeholder: destinationCardName ?? todaysCardName,
+                            font: font,
                             textColor: textColor,
-                            placeholderColor: BeamColor.Generic.placeholder.nsColor,
+                            placeholderColor: placeholderColor,
                             selectedRange: cardSearchFieldSelection,
                             selectedRangeColor: selectedRangeColor
                         ) { (text) in
@@ -122,14 +132,14 @@ struct PointAndShootCardPicker: View {
                                 currentCardName: currentCardName,
                                 tokenize: cursorIsOnCardName,
                                 selectedResult: nil,
-                                completed: shootCompleted
+                                completed: completed
                             )
                         )
                     } else if completedGroup?.confirmation == .success {
                         Text(getFinalCardName())
                             .foregroundColor(BeamColor.Beam.swiftUI)
                             .font(BeamFont.regular(size: 13).swiftUI)
-                            .animation(.easeInOut(duration: 0.1))
+                            .transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.1)))
                     }
                 }
 
@@ -137,7 +147,7 @@ struct PointAndShootCardPicker: View {
 
                 // MARK: - Icon
                 if isEditingCardName && (currentCardName != nil || cardSearchField.isEmpty) {
-                    if !shootCompleted {
+                    if !completed {
                         Icon(name: "editor-format_enter", size: 12, color: BeamColor.Generic.placeholder.swiftUI)
                             .transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.15)))
                             .onTapGesture {
@@ -162,7 +172,7 @@ struct PointAndShootCardPicker: View {
 
             Spacer()
 
-            if !shootCompleted {
+            if !completed {
                 // MARK: - Autocomplete
                 if isEditingCardName && currentCardName == nil {
                     DestinationNoteAutocompleteList(model: autocompleteModel)
@@ -176,9 +186,9 @@ struct PointAndShootCardPicker: View {
                         text: $addNoteField,
                         isEditing: $isEditingNote,
                         placeholder: "Add note",
-                        font: BeamFont.regular(size: 13).nsFont,
-                        textColor: BeamColor.Generic.text.nsColor,
-                        placeholderColor: BeamColor.Generic.placeholder.nsColor
+                        font: font,
+                        textColor: secondLabelTextColor,
+                        placeholderColor: placeholderColor
                     ) { _ in
                     } onCommit: { _ in
                         onFinishEditing()
@@ -201,6 +211,7 @@ struct PointAndShootCardPicker: View {
             }
         }
         .onAppear {
+            todaysCardName = data.todaysName
             if let currentNote = browserTabsManager.currentTab?.noteController.note {
                 currentCardName = currentNote.title
                 cardSearchField = currentNote.title
@@ -330,12 +341,12 @@ extension PointAndShootCardPicker {
 
 extension PointAndShootCardPicker {
     private func onCancelEditing() {
-        guard !shootCompleted else { return }
+        guard !completed else { return }
         onComplete?(nil, nil)
     }
     // MARK: - onFinishEditing
     private func onFinishEditing(_ withCommand: Bool = false) {
-        guard !shootCompleted else { return }
+        guard !completed else { return }
         shootCompleted = true
         // Select search result
         selectSearchResult(withCommand)
@@ -397,16 +408,16 @@ extension PointAndShootCardPicker {
     // MARK: - fetchOrCreateNote
     @discardableResult
     private func fetchOrCreateNote(named name: String) -> BeamNote {
-        let note = BeamNote.fetchOrCreate(data.documentManager, title: name)
-        note.save(documentManager: data.documentManager)
+        let note = BeamNote.fetchOrCreate(title: name)
+        note.save()
         return note
     }
 
     // MARK: - fetchOrCreateJournalNote
     @discardableResult
     private func fetchOrCreateJournalNote(date: Date) -> BeamNote {
-        let note = BeamNote.fetchOrCreateJournalNote(data.documentManager, date: date)
-        note.save(documentManager: data.documentManager)
+        let note = BeamNote.fetchOrCreateJournalNote(date: date)
+        note.save()
         return note
     }
 }

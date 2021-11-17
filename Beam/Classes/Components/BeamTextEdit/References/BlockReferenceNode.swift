@@ -49,7 +49,7 @@ class BlockReferenceNode: TextNode {
 
     deinit {
         if let gutterItem = gutterItem {
-            editor?.removeGutterItem(item: gutterItem)
+            editor?.removeGutterItem(item: gutterItem, fromLeadingGutter: false)
         }
     }
 
@@ -80,7 +80,7 @@ class BlockReferenceNode: TextNode {
             return
         }
 
-        guard let referencingNote = BeamNote.fetch(DocumentManager(), id: refNoteId),
+        guard let referencingNote = BeamNote.fetch(id: refNoteId),
               let referencingElement = referencingNote.findElement(refElementId)
         else {
             let errorText = "BlockReferenceNode unable to fetch bloc from note '\(String(describing: refNoteId))'\nid '\(String(describing: refElementId))'"
@@ -107,7 +107,7 @@ class BlockReferenceNode: TextNode {
         let item = GutterItem(id: self.elementId, title: referencingNote.title, icon: "field-card") { [weak self] in
             self?.openReferencedCard()
         }
-        editor?.addGutterItem(item: item)
+        editor?.addGutterItem(item: item, toLeadingGutter: false)
         gutterItem = item
         setAccessibilityLabel("BlockReferenceNode")
         setAccessibilityRole(.textArea)

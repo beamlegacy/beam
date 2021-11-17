@@ -28,7 +28,7 @@ class PointAndShootSelectTest: PointAndShootTest {
         // required to allow setting the selection group
         self.pns.hasActiveSelection = true
         // calling select for the first time sets the activeSelectGroup
-        self.pns.select(group.id, group.targets, group.href)
+        self.pns.select(group.id, group.targets, group.text, group.href)
 
         XCTAssertNil(self.pns.activePointGroup)
         XCTAssertNotNil(self.pns.activeSelectGroup)
@@ -47,7 +47,7 @@ class PointAndShootSelectTest: PointAndShootTest {
         // required to allow setting the selection group
         self.pns.hasActiveSelection = true
         // calling select for the first time sets the activeSelectGroup
-        self.pns.select(group.id, group.targets, group.href)
+        self.pns.select(group.id, group.targets, group.text, group.href)
 
         XCTAssertNil(self.pns.activePointGroup)
         XCTAssertNotNil(self.pns.activeSelectGroup)
@@ -55,7 +55,7 @@ class PointAndShootSelectTest: PointAndShootTest {
 
         let group2 = helperCreateRandomGroups()
         // calling select for the second time with the same group id updates the activeSelectGroup
-        self.pns.select(group.id, group2.targets, group.href)
+        self.pns.select(group.id, group2.targets, group.text, group.href)
         XCTAssertEqual(self.pns.activeSelectGroup?.id, group.id)
         // for example the target rect is equal
         if let activeGroup = self.pns.activeSelectGroup {
@@ -77,7 +77,7 @@ class PointAndShootSelectTest: PointAndShootTest {
         // required to allow setting the selection group
         self.pns.hasActiveSelection = true
         // calling select for the first time sets the activeSelectGroup
-        self.pns.select(group.id, group.targets, group.href)
+        self.pns.select(group.id, group.targets, group.text, group.href)
 
         XCTAssertNil(self.pns.activePointGroup)
         XCTAssertNotNil(self.pns.activeSelectGroup)
@@ -88,7 +88,7 @@ class PointAndShootSelectTest: PointAndShootTest {
         // when the selection collapses it calls
         self.pns.clearSelection(group.id)
         // calling select for the second time with group2
-        self.pns.select(group2.id, group2.targets, group2.href)
+        self.pns.select(group2.id, group2.targets, group2.text, group2.href)
         XCTAssertEqual(self.pns.activeSelectGroup?.id, group2.id)
         // for example the target rect is equal
         if let activeGroup = self.pns.activeSelectGroup {
@@ -110,7 +110,7 @@ class PointAndShootSelectTest: PointAndShootTest {
         // required to allow setting the selection group
         self.pns.hasActiveSelection = false
         // calling select for the first time sets the activeSelectGroup
-        self.pns.select(group.id, group.targets, group.href)
+        self.pns.select(group.id, group.targets, group.text, group.href)
 
         // because hasActiveSelection is false, everything is still nil
         XCTAssertNil(self.pns.activePointGroup)
@@ -128,7 +128,7 @@ class PointAndShootSelectTest: PointAndShootTest {
         // required to allow setting the selection group
         self.pns.hasActiveSelection = true
         // calling select for the first time sets the activeSelectGroup
-        self.pns.select(group.id, group.targets, group.href)
+        self.pns.select(group.id, group.targets, group.text, group.href)
 
         XCTAssertNil(self.pns.activePointGroup)
         XCTAssertNotNil(self.pns.activeSelectGroup)
@@ -159,16 +159,21 @@ class PointAndShootSelectTest: PointAndShootTest {
 
         self.pns.collectedGroups = [group]
         // create a new set of targets
-        self.pns.webPositions.framesInfo[group.href] = WebPositions.FrameInfo(
+        guard let page = self.testPage,
+              let positions = page.webPositions else {
+                  XCTFail("expected test page")
+                  return
+              }
+        positions.framesInfo[group.href] = WebPositions.FrameInfo(
             href: group.href,
             parentHref: group.href,
             scrollY: 300
         )
         let updatedTargets = group.targets.map({ target in
-            self.pns.translateAndScaleTarget(target, group.href)
+            self.pns.translateAndScaleTargetIfNeeded(target, group.href) ?? target
         })
         // send updated event with original group id
-        self.pns.select(group.id, updatedTargets, group.href)
+        self.pns.select(group.id, updatedTargets, group.text, group.href)
 
         XCTAssertNil(self.pns.activePointGroup)
         XCTAssertNil(self.pns.activeSelectGroup)

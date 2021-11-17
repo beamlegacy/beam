@@ -8,6 +8,13 @@
 import Foundation
 
 public extension String {
+
+    func capturedGroup(withRegex pattern: String, groupIndex: Int) -> String? {
+        let groups = self.capturedGroups(withRegex: pattern)
+        guard groupIndex < groups.count else { return nil }
+        return groups[groupIndex]
+    }
+
     func capturedGroups(withRegex pattern: String) -> [String] {
         var results = [String]()
         let ranges = capturedRanges(withRegex: pattern)
@@ -32,9 +39,10 @@ public extension String {
 
         let lastRangeIndex = match.numberOfRanges - 1
         guard lastRangeIndex >= 1 else { return results }
-
+        let maxUpperBound = self.count
         for i in 1...lastRangeIndex {
             let capturedGroupIndex = match.range(at: i)
+            guard capturedGroupIndex.lowerBound < maxUpperBound else { continue }
             results.append(capturedGroupIndex.lowerBound..<capturedGroupIndex.upperBound)
         }
 

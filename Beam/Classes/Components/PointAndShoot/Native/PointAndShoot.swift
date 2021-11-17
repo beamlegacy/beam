@@ -24,9 +24,11 @@ public struct NoteInfo: Encodable {
 
 // swiftlint:disable file_length
 class PointAndShoot: WebPageHolder, ObservableObject {
-    var webPositions: WebPositions = WebPositions()
     var data: BeamData = AppDelegate.main.data
-    private let scorer: BrowsingScorer
+    private var scorer: BrowsingScorer? {
+        page.browsingScorer
+    }
+    let shapeCache = PnSTargetsShapeCache()
 
     @Published var activePointGroup: ShootGroup?
     @Published var activeSelectGroup: ShootGroup?
@@ -45,10 +47,6 @@ class PointAndShoot: WebPageHolder, ObservableObject {
     @Published var hasActiveSelection: Bool = false
     @Published var isTypingOnWebView: Bool = false
     @Published var mouseLocation: NSPoint = NSPoint()
-
-    init(scorer: BrowsingScorer) {
-        self.scorer = scorer
-    }
 
     override var page: WebPage {
         get {
@@ -107,7 +105,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
     })
 
     /// Set activePointGroup with target. Updating the activePointGroup will update the UI directly.
-    func point(_ target: Target, _ href: String) {
+    func point(_ target: Target, _ text: String, _ href: String) {
         guard activeShootGroup == nil else { return }
         guard !isTypingOnWebView else { return }
 
@@ -119,7 +117,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
             }
         }
 
-        activePointGroup = ShootGroup("point-uuid", [target], href)
+        activePointGroup = ShootGroup("point-uuid", [target], text, href, shapeCache: shapeCache)
 
     }
 
@@ -128,11 +126,11 @@ class PointAndShoot: WebPageHolder, ObservableObject {
     ///   - groupId: id of group
     ///   - targets: Set of targets to draw
     ///   - href: Url of frame targets are located in
-    func pointShoot(_ groupId: String, _ target: Target, _ href: String) {
+    func pointShoot(_ groupId: String, _ target: Target, _ text: String, _ href: String) {
         guard !targetIsDismissed(groupId), !hasActiveSelection else { return }
 
         if targetIsCollected(groupId) {
-            collect(groupId, [target], href)
+            collect(groupId, [target], text, href)
             return
         }
 
@@ -146,16 +144,16 @@ class PointAndShoot: WebPageHolder, ObservableObject {
                       activeSelectGroup == nil,
                       activeShootGroup == nil {
 
-                activeShootGroup = ShootGroup(groupId, [target], href)
-                if let group = activeShootGroup,
-                   let sourceUrl = page.url {
-                    let text = group.text()
+                activeShootGroup = ShootGroup(groupId, [target], text, href, shapeCache: shapeCache)
+                if let group = self.activeShootGroup,
+                   let sourceUrl = self.page.url {
+                    let text = group.text
                     self.page.addTextToClusteringManager(text, url: sourceUrl)
                 }
                 throttledHaptic()
             } else {
                 if !isAltKeyDown {
-                    let tempGroup = ShootGroup(groupId, [], href)
+                    let tempGroup = ShootGroup(groupId, [], text, href, shapeCache: shapeCache)
                     dismissedGroups.append(tempGroup)
                 }
             }
@@ -168,13 +166,13 @@ class PointAndShoot: WebPageHolder, ObservableObject {
     ///   - groupId: id of group, for selections this is the non-number version. Targets have the same `id + index`
     ///   - targets: Target rects to draw
     ///   - href: href of frame
-    func select(_ groupId: String, _ targets: [Target], _ href: String) {
+    func select(_ groupId: String, _ targets: [Target], _ text: String, _ href: String) {
         guard !isTypingOnWebView, !targets.isEmpty else {
             return
         }
         // Check if the incomming group is already collected
         if targetIsCollected(groupId) {
-            collect(groupId, targets, href)
+            collect(groupId, targets, text, href)
             return
         }
         // Check if the target was previously dismissed
@@ -190,11 +188,12 @@ class PointAndShoot: WebPageHolder, ObservableObject {
 
         if activeSelectGroup?.id == groupId {
             // Update selection group
-            activeSelectGroup?.updateTargets(groupId, targets)
+            let shouldUpdatePath = isAltKeyDown || targets.count <= 1
+            activeSelectGroup?.updateTargets(groupId, targets, updatePath: shouldUpdatePath)
             return
         } else if hasActiveSelection, activeSelectGroup == nil {
             // Create a new Selection group
-            activeSelectGroup = ShootGroup(groupId, targets, href)
+            activeSelectGroup = ShootGroup(groupId, targets, text, href, shapeCache: shapeCache)
             return
         }
     }
@@ -224,14 +223,16 @@ class PointAndShoot: WebPageHolder, ObservableObject {
         }
 
         if targetIsCollected(group.id) {
-            collect(group.id, group.targets, group.href)
+            collect(group.id, group.targets, group.text, group.href)
             return
         }
         guard !isTypingOnWebView else { return }
+        var group = group
+        group.updateSelectionPath()
         activeShootGroup = group
 
-        let text = group.text()
-        if let sourceUrl = page.url {
+        if let sourceUrl = self.page.url {
+            let text = group.text
             self.page.addTextToClusteringManager(text, url: sourceUrl)
         }
     }
@@ -241,7 +242,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
     ///   - groupId: id of group to update
     ///   - targets: Set of targets to draw
     ///   - href: Url of frame targets are located in
-    func collect(_ groupId: String, _ targets: [Target], _ href: String) {
+    func collect(_ groupId: String, _ targets: [Target], _ text: String, _ href: String) {
         guard targets.count > 0 else { return }
         guard !isTypingOnWebView else { return }
 
@@ -255,7 +256,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
             existingGroup.updateTargets(groupId, targets)
             collectedGroups[index] = existingGroup
         } else {
-            let newGroup = ShootGroup(groupId, targets, href)
+            let newGroup = ShootGroup(groupId, targets, text, href, shapeCache: shapeCache)
             collectedGroups.append(newGroup)
         }
     }
@@ -279,10 +280,6 @@ class PointAndShoot: WebPageHolder, ObservableObject {
         }
         // Make group mutable
         var shootGroup = group
-        // Set Destination note to the current card
-        // Update BrowsingScorer about note submission
-        page.setDestinationNote(targetNote, rootElement: targetNote)
-        scorer.addTextSelection()
         // Convert html to BeamText
         let htmlNoteAdapter = HtmlNoteAdapter(sourceUrl, self.page.downloadManager, self.page.fileStorage)
         htmlNoteAdapter.convert(html: shootGroup.html(), completion: { [self] (beamElements: [BeamElement]) in
@@ -294,8 +291,22 @@ class PointAndShoot: WebPageHolder, ObservableObject {
                 element.kind = .quote(1, sourceUrl.absoluteString, group.href)
                 return element
             })
-            // Reduce array of texts to a single string
-            let texts = elements.map({ $0.text })
+            // Update shootgroup information
+            shootGroup.numberOfElements = elements.count
+            shootGroup.setNoteInfo(NoteInfo(id: targetNote.id, title: targetNote.title))
+            // exit early when failing to collect correctly
+            guard shootGroup.numberOfElements != 0 else {
+                self.showAlert(shootGroup, elements, "failed to collect html elements")
+                shootGroup.setConfirmation(.failure)
+                self.showShootConfirmation(group: shootGroup)
+                completion()
+                return
+            }
+
+            // Set Destination note to the current card
+            // Update BrowsingScorer about note submission
+            page.setDestinationNote(targetNote, rootElement: targetNote)
+            scorer?.addTextSelection()
             // TODO: Convert BeamText to BeamElement of quote type
             // Adds urlId to current card source
             let urlId = LinkStore.createIdFor(sourceUrl.absoluteString, title: nil)
@@ -315,21 +326,25 @@ class PointAndShoot: WebPageHolder, ObservableObject {
                 }
 
                 // Add to source Note
+                if destinationElement.children.count == 1,
+                   let onlyChild = destinationElement.children.first,
+                   onlyChild.text.isEmpty,
+                   onlyChild.kind == .bullet {
+                    destinationElement.removeChild(onlyChild)
+                }
                 elements.forEach({ quote in destinationElement.addChild(quote) })
 
                 // Complete PNS and clear stored data
                 shootGroup.numberOfElements = elements.count
                 shootGroup.setNoteInfo(NoteInfo(id: targetNote.id, title: targetNote.title))
 
-                if shootGroup.numberOfElements != texts.count || shootGroup.numberOfElements == 0 {
-                    self.showAlert(shootGroup, texts, "numberOfElements and texts.count mismatch")
+                if shootGroup.numberOfElements == 0 {
+                    self.showAlert(shootGroup, elements, "numberOfElements is zero")
                     shootGroup.setConfirmation(.failure)
                 } else {
                     shootGroup.setConfirmation(.success)
                 }
 
-                self.collectedGroups.append(shootGroup)
-                self.activeShootGroup = nil
                 self.showShootConfirmation(group: shootGroup)
                 completion()
             }
@@ -339,7 +354,14 @@ class PointAndShoot: WebPageHolder, ObservableObject {
     /// Draws shoot confirmation
     /// - Parameter group: ShootGroup of targets to draw the confirmation UI
     private func showShootConfirmation(group: ShootGroup) {
-        shootConfirmationGroup = group
+        guard let confirmation = group.confirmation else {
+            fatalError("ShootGroup confirmation enum should be set, instead recieved: \(group)")
+        }
+        var mutableGroup = group
+        mutableGroup.setConfirmation(confirmation)
+        self.collectedGroups.append(mutableGroup)
+        self.activeShootGroup = nil
+        shootConfirmationGroup = mutableGroup
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
             guard let self = self else { return }
             self.shootConfirmationGroup = nil
@@ -351,6 +373,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
         activePointGroup = nil
         activeSelectGroup = nil
         activeShootGroup = nil
+        shapeCache.clear()
         collectedGroups.removeAll()
         dismissedGroups.removeAll()
         shootConfirmationGroup = nil

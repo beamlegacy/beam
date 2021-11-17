@@ -16,6 +16,26 @@ extension Formatter {
 
 extension Date {
     var iso8601withFractionalSeconds: String { return Formatter.iso8601withFractionalSeconds.string(from: self) }
+
+    var isoCalStartOfDay: Date {
+        let cal = Calendar(identifier: .iso8601)
+        return cal.startOfDay(for: self)
+    }
+
+    var isoCalEndOfDay: Date {
+        let cal = Calendar(identifier: .iso8601)
+
+        var components = DateComponents()
+        components.day = 1
+        components.second = -1
+        return cal.date(byAdding: components, to: isoCalStartOfDay)!
+    }
+
+    var formatHourMin: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"
+        return formatter.string(from: self)
+    }
 }
 
 extension String {
