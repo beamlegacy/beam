@@ -39,7 +39,9 @@ struct OnboardingView: View {
                     .offset(x: 0, y: stepOffset[.emailConnect] ?? 0)
                     .opacity(stepOpacity[.emailConnect] ?? 1)
                 case .imports:
-                    OnboardingImportsView()
+                    OnboardingImportsView(actions: $model.actions) { nextStep in
+                        model.advanceToNextStep(nextStep)
+                    }
                         .offset(x: 0, y: stepOffset[.imports] ?? 0)
                         .opacity(stepOpacity[.imports] ?? 1)
                 default:
@@ -97,6 +99,11 @@ struct OnboardingView: View {
 
     private let customButtonStyle = ButtonLabelStyle(font: BeamFont.regular(size: 10).swiftUI, activeBackgroundColor: .clear)
     private let bottomBarHeight: CGFloat = 76
+    private var secondarActionVariant: ActionableButtonVariant {
+        var style = ActionableButtonVariant.secondary.style
+        style.icon = .init(name: "shortcut-bttn_space", size: 16, palette: style.icon?.palette, alignment: .trailing)
+        return .custom(style)
+    }
     private var bottomBar: some View {
         GeometryReader { proxy in
             HStack(spacing: 0) {
@@ -125,7 +132,7 @@ struct OnboardingView: View {
                 HStack(spacing: BeamSpacing._200) {
                     ForEach(model.actions) { action in
                         ActionableButton(text: action.title, defaultState: !action.enabled ? .disabled : .normal,
-                                         variant: action.secondary ? .secondary : .gradient(icon: "shortcut-return"),
+                                         variant: action.secondary ? secondarActionVariant : .gradient(icon: "shortcut-return"),
                                          minWidth: action.secondary ? 110 : 146,
                                          action: !action.enabled ? nil : {
                             if action.onClick?() != false {
