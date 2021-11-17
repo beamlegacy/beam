@@ -44,6 +44,8 @@ protocol WebPage: AnyObject, Scorable {
     func createNewTab(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, setCurrent: Bool) -> WebPage?
     func createNewWindow(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, windowFeatures: WKWindowFeatures, setCurrent: Bool) -> BeamWebView
     func closeTab()
+
+    func collectTab()
     /**
      - Returns: if the webpage is displayed in the active browser tab.
      */
@@ -123,6 +125,8 @@ extension WebPage {
     func closeTab() {
         self.authenticationViewModel?.cancel()
     }
+
+    func collectTab() {}
 
     func isActiveTab() -> Bool { false }
     func leave() { }

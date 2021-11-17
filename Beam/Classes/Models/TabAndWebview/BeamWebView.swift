@@ -115,6 +115,11 @@ class BeamWebView: WKWebView {
             return
         }
 
+        if let keyCode = KeyCode(rawValue: event.keyCode), keyCode == .s, event.modifierFlags.contains(.option) {
+            page?.collectTab()
+            return
+        }
+
         super.keyDown(with: event)
     }
 
