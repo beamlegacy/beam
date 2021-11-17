@@ -15,22 +15,21 @@ struct PointAndShootView: View {
     @State private var allowAnimation: Bool = false
     @State private var wiggleValue: CGFloat = 0
 
-    var point: UnitPoint {
+    private var transitionAnchor: UnitPoint {
         UnitPoint(
             x: (1 / pns.page.frame.width) * pns.mouseLocation.x,
             y: (1 / pns.page.frame.height) * pns.mouseLocation.y
         )
     }
 
-    private var transitionIn: AnyTransition {
-        AnyTransition.opacity.animation(Animation.easeInOut(duration: 0.2))
-            .combined(with: AnyTransition.scale(scale: 0.98, anchor: point).animation(.spring(response: 0.4, dampingFraction: 0.75)))
-    }
-
-    var transitionOut: AnyTransition {
-        AnyTransition.scale(scale: 1.03, anchor: point).animation(Animation.easeInOut(duration: 0.1))
-            .combined(with: AnyTransition.scale(scale: 0.7, anchor: point).animation(Animation.easeInOut(duration: 0.25).delay(0.1)))
+    private var transitionInOut: AnyTransition {
+        let anchor = transitionAnchor
+        let transitionIn = AnyTransition.opacity.animation(Animation.easeInOut(duration: 0.2))
+            .combined(with: AnyTransition.scale(scale: 0.98, anchor: anchor).animation(.spring(response: 0.4, dampingFraction: 0.75)))
+        let transitionOut = AnyTransition.scale(scale: 1.03, anchor: anchor).animation(Animation.easeInOut(duration: 0.1))
+            .combined(with: AnyTransition.scale(scale: 0.7, anchor: anchor).animation(Animation.easeInOut(duration: 0.25).delay(0.1)))
             .combined(with: AnyTransition.opacity.animation(Animation.easeInOut(duration: 0.3)))
+        return AnyTransition.asymmetric(insertion: transitionIn, removal: transitionOut)
     }
 
     var shouldAnimateRect: Bool {
@@ -50,7 +49,7 @@ struct PointAndShootView: View {
 
     @ViewBuilder var body: some View {
         // MARK: - Pointing and Shooting rect
-        if let activeGroup = pns.activeShootGroup ?? pns.activePointGroup {
+        if let activeGroup = pns.activeShootGroup ?? pns.activePointGroup, activeGroup.showRect {
             if activeGroup.targets.count == 1,
                let target = activeGroup.targets.first {
                 // MARK: - Pointing
@@ -103,10 +102,7 @@ struct PointAndShootView: View {
                 PointAndShootPathFrame(group: pns.translateAndScaleGroup(activeGroup), scrollEventCallback: webViewScrollEvent)
                     .id(activeGroup.id)
                     .zIndex(19) // for animation to work correctly
-                    .transition(.asymmetric(
-                        insertion: transitionIn,
-                        removal: transitionOut
-                    ))
+                    .transition(transitionInOut)
             }
         }
 
@@ -142,10 +138,7 @@ struct PointAndShootView: View {
             .animation(.spring(response: 0.4, dampingFraction: 0.58), value: wiggleValue)
             .animation(allowAnimation ? .spring(response: 0.4, dampingFraction: 0.58) : nil)
             .zIndex(21) // for animation to work correctly
-            .transition(.asymmetric(
-                insertion: transitionIn,
-                removal: transitionOut
-            ))
+            .transition(transitionInOut)
             .pointAndShootOffsetWithAnimation(y: offset, animation: .spring(response: 0.2, dampingFraction: 0.58))
             .id(group.id)
             .onReceive(pns.$shootConfirmationGroup, perform: { group in

@@ -32,7 +32,11 @@ class PointAndShootMessageHandlerOnLoadTest: PointAndShootTest {
     }
 
     func testOnMessage_onLoad_frameBounds() throws {
-        let positions = self.pns.webPositions
+        guard let page = self.testPage,
+              let positions = page.webPositions else {
+                  XCTFail("expected test page")
+                  return
+              }
         let windowHref = self.pns.page.url!.string
         self.pointAndShootMessageHandler.onMessage(
             messageName: "pointAndShoot_frameBounds",

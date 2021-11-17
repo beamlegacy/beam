@@ -4,7 +4,7 @@ import BeamCore
 import OAuthSwift
 
 let AccountsPreferenceViewController: PreferencePane = PreferencesPaneBuilder.build(identifier: .accounts, title: "Account", imageName: "preferences-account") {
-    AccountsView()
+    AccountsView(googleCalendarNeedsPermission: AppDelegate.main.data.calendarManager.connectedSources.first(where: {$0.name == CalendarServices.googleCalendar.rawValue})?.inNeedOfPermission ?? true)
 }
 
 /*
@@ -13,13 +13,19 @@ The main view of “Accounts” preference pane.
 
 // swiftlint:disable:next type_body_length
 struct AccountsView: View {
+    #if DEBUG
     @State private var email: String = Persistence.Authentication.email ?? ""
     @State private var password: String = Persistence.Authentication.password ?? ""
+    #else
+    @State private var email: String = Persistence.Authentication.email ?? ""
+    @State private var password: String = ""
+    #endif
     @State private var enableLogging: Bool = true
     @State private var loggedIn: Bool = AccountManager().loggedIn
     @State private var errorMessage: Error!
     @State private var loading: Bool = false
     @State private var identities: [IdentityType] = []
+    @State var googleCalendarNeedsPermission: Bool
 
     @State private var showingChangeEmailSheet: Bool = false
     @State private var showingChangePasswordSheet: Bool = false
@@ -44,7 +50,7 @@ struct AccountsView: View {
                 if loggedIn {
                     VStack(alignment: .leading) {
                         // TODO: This need to be changed later on for the username
-                        Text(Persistence.Authentication.email ?? "")
+                        Text(email)
                             .font(BeamFont.regular(size: 13).swiftUI)
                             .foregroundColor(BeamColor.Generic.text.swiftUI)
                             .frame(height: 16)
@@ -110,7 +116,21 @@ struct AccountsView: View {
                 } content: {
                     VStack(alignment: .leading) {
                         if let googleIdendity = identities.first(where: {$0.provider == "google"}) {
-                            disconnectButton(googleIdendity)
+                            HStack {
+                                disconnectButton(googleIdendity)
+                                if googleCalendarNeedsPermission {
+                                    AskGooglePermission
+                                }
+                            }
+                            if googleCalendarNeedsPermission {
+                                Text("Click on the Give Permissions button to give Beam access to your Google Calendar & Contacts.")
+                                    .lineLimit(2)
+                                    .fixedSize(horizontal: false, vertical: true)
+                                    .multilineTextAlignment(.leading)
+                                    .font(BeamFont.regular(size: 11).swiftUI)
+                                    .foregroundColor(BeamColor.Corduroy.swiftUI)
+                                    .frame(width: 354, height: 26, alignment: .leading)
+                            }
                         } else {
                             GoogleSignInButton
                         }
@@ -133,7 +153,8 @@ struct AccountsView: View {
                         }, label: {
                             // TODO: loc
                             Text("Change Email Address...")
-                                .frame(width: 148, height: 20, alignment: .center)
+                                .foregroundColor(BeamColor.Generic.text.swiftUI)
+                                .frame(width: 148)
                         }).sheet(isPresented: $showingChangeEmailSheet) {
                             ChangeCredentialsView(changeCredentialsType: .email)
                                 .frame(width: 485, height: 151, alignment: .center)
@@ -143,7 +164,8 @@ struct AccountsView: View {
                         }, label: {
                             // TODO: loc
                             Text("Change Password...")
-                                .frame(width: 121, height: 20, alignment: .center)
+                                .foregroundColor(BeamColor.Generic.text.swiftUI)
+                                .frame(width: 121)
                         }).sheet(isPresented: $showingChangePasswordSheet) {
                             ChangeCredentialsView(changeCredentialsType: .password)
                                 .frame(width: 485, height: 198, alignment: .center)
@@ -156,7 +178,8 @@ struct AccountsView: View {
                         }, label: {
                             // TODO: loc
                             Text("Delete All Graphs...")
-                                .frame(width: 116, height: 20, alignment: .center)
+                                .foregroundColor(BeamColor.Generic.text.swiftUI)
+                                .frame(width: 116)
                         })
                         Text("All your cards will be deleted and cannot be recovered.")
                             .font(BeamFont.regular(size: 11).swiftUI)
@@ -169,7 +192,8 @@ struct AccountsView: View {
                         }, label: {
                             // TODO: loc
                             Text("Delete Account...")
-                                .frame(width: 105, height: 20, alignment: .center)
+                                .foregroundColor(BeamColor.Generic.text.swiftUI)
+                                .frame(width: 105)
                         })
                         VStack {
                             Text("Your account, all your graphs and all your cards will be deleted and cannot be recovered.")
@@ -204,7 +228,8 @@ struct AccountsView: View {
         }, label: {
             // TODO: loc
             Text("Sign Up...")
-                .frame(width: 63, height: 20, alignment: .center)
+                .foregroundColor(BeamColor.Generic.text.swiftUI)
+                .frame(width: 63)
         })
         .disabled(loggedIn || loading || email.isEmpty || password.isEmpty)
         .alert(isPresented: $showingSignUpAlert) {
@@ -230,6 +255,7 @@ struct AccountsView: View {
         }, label: {
             // TODO: loc
             Text("Refresh Token").frame(minWidth: 100)
+                .foregroundColor(BeamColor.Generic.text.swiftUI)
         })
         .disabled(!loggedIn)
         .alert(isPresented: $showingSignInAlert) {
@@ -257,12 +283,18 @@ struct AccountsView: View {
         }, label: {
             // TODO: loc
             Text("Sign In...")
-                .frame(width: 56, height: 20, alignment: .center)
+                .foregroundColor(BeamColor.Generic.text.swiftUI)
+                .frame(width: 56)
         })
         .disabled(loggedIn || loading || email.isEmpty || password.isEmpty)
         .alert(isPresented: $showingSignInAlert) {
+            #if DEBUG
             Alert(title: Text("Error"),
-                  message: Text(errorMessage.localizedDescription))
+                  message: Text("Invalid password or email with: \(errorMessage.localizedDescription)"))
+            #else
+            Alert(title: Text("Error"),
+                  message: Text("Invalid password or email"))
+            #endif
         }
     }
 
@@ -273,9 +305,21 @@ struct AccountsView: View {
             loggedIn = AccountManager().loggedIn
             fetchIdentities()
             loading = false
+            AppDelegate.main.data.calendarManager.connect(calendarService: .googleCalendar)
         }, onFailure: {
             loading = false
         }).disabled(loading)
+    }
+
+    private var AskGooglePermission: some View {
+        Button {
+            AppDelegate.main.data.calendarManager.requestAccess(from: .googleCalendar) { isConnected in
+                // TODO: Handle error with alert maybe
+                googleCalendarNeedsPermission = !isConnected
+            }
+        } label: {
+            Text("Give Permissions...")
+        }
     }
 
     private var GithubSignInButton: some View {
@@ -322,6 +366,7 @@ struct AccountsView: View {
         }, label: {
             // TODO: loc
             Text("Sign Out...")
+                .foregroundColor(BeamColor.Generic.text.swiftUI)
         }).disabled(!loggedIn)
             .frame(width: 83, height: 20, alignment: .center)
     }
@@ -377,13 +422,22 @@ struct AccountsView: View {
 
         return AnyView(Button(action: {
             IdentityRequest().delete(id).then { _ in
+                if identity.provider == IdentityRequest.Provider.google.rawValue {
+                    Persistence.Authentication.googleAccessToken = nil
+                    Persistence.Authentication.googleRefreshToken = nil
+                }
                 self.fetchIdentities()
+                AppDelegate.main.data.calendarManager.disconnect(calendarService: .googleCalendar)
             }
         }, label: {
             if let provider = identity.provider {
-                Text("Disconnect \(provider.prefix(1).capitalized + provider.dropFirst())...").frame(width: 126, height: 20)
+                Text("Disconnect \(provider.prefix(1).capitalized + provider.dropFirst())...")
+                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+                    .frame(width: 126)
             } else {
-                Text("Disconnect...").frame(width: 126, height: 20)
+                Text("Disconnect...")
+                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+                    .frame(width: 126)
             }
         }).disabled(!loggedIn))
     }
@@ -410,6 +464,9 @@ struct AccountsView: View {
             guard response == .alertFirstButtonReturn else { return }
             self.identities = []
             AccountManager.logout()
+            #if !DEBUG
+            password = ""
+            #endif
             loggedIn = AccountManager().loggedIn
         }
     }
@@ -470,7 +527,9 @@ struct AccountCredentialsView: View {
 
 struct AccountsView_Previews: PreviewProvider {
     static var previews: some View {
-        AccountsView()
+        AccountsView(googleCalendarNeedsPermission: true)
+        AccountsView(googleCalendarNeedsPermission: false)
+
     }
     // swiftlint:disable:next file_length
 }

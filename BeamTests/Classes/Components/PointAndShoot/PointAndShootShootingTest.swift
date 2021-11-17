@@ -30,7 +30,7 @@ class PointAndShootShootingTest: PointAndShootTest {
 
         XCTAssertNil(self.pns.activeShootGroup)
         self.pns.isAltKeyDown = true
-        self.pns.pointShoot(target.id, target, "https://pnsTest.co")
+        self.pns.pointShoot(target.id, target, "text string", "https://pnsTest.co")
         XCTAssertNil(self.pns.activeShootGroup)
     }
 
@@ -43,10 +43,10 @@ class PointAndShootShootingTest: PointAndShootTest {
             animated: false
         )
         // Point
-        self.pns.point(target, "https://pnsTest.co")
+        self.pns.point(target, "text string", "https://pnsTest.co")
         XCTAssertNil(self.pns.activeShootGroup)
         self.pns.isAltKeyDown = true
-        self.pns.pointShoot(target.id, target, "https://pnsTest.co")
+        self.pns.pointShoot(target.id, target, "text string", "https://pnsTest.co")
         XCTAssertNotNil(self.pns.activeShootGroup)
     }
 
@@ -59,11 +59,11 @@ class PointAndShootShootingTest: PointAndShootTest {
             animated: false
         )
         // Point
-        self.pns.point(target, "https://pnsTest.co")
+        self.pns.point(target, "text string", "https://pnsTest.co")
         // Shoot
         XCTAssertNil(self.pns.activeShootGroup)
         self.pns.isAltKeyDown = true
-        self.pns.pointShoot(target.id, target, "https://pnsTest.co")
+        self.pns.pointShoot(target.id, target, "text string", "https://pnsTest.co")
         XCTAssertNotNil(self.pns.activeShootGroup)
     }
 
@@ -76,11 +76,11 @@ class PointAndShootShootingTest: PointAndShootTest {
             animated: false
         )
         // Point
-        self.pns.point(target, "https://pnsTest.co")
+        self.pns.point(target, "text string", "https://pnsTest.co")
         // Shoot
         XCTAssertNil(self.pns.activeShootGroup)
         self.pns.isAltKeyDown = true
-        self.pns.pointShoot(target.id, target, "https://pnsTest.co")
+        self.pns.pointShoot(target.id, target, "text string", "https://pnsTest.co")
         XCTAssertNotNil(self.pns.activeShootGroup)
         XCTAssertEqual(self.pns.dismissedGroups.count, 0)
         self.pns.cancelShoot()
@@ -97,11 +97,11 @@ class PointAndShootShootingTest: PointAndShootTest {
             animated: false
         )
         // Point
-        self.pns.point(target, "https://pnsTest.co")
+        self.pns.point(target, "text string", "https://pnsTest.co")
         // Shoot
         XCTAssertNil(self.pns.activeShootGroup)
         self.pns.isAltKeyDown = true
-        self.pns.pointShoot(target.id, target, "https://pnsTest.co")
+        self.pns.pointShoot(target.id, target, "text string", "https://pnsTest.co")
         XCTAssertNotNil(self.pns.activeShootGroup)
 
         guard let testPage = self.testPage else {

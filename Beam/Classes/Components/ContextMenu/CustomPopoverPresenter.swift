@@ -50,7 +50,7 @@ class CustomPopoverPresenter {
     func presentFormatterView(_ view: FormatterView, atPoint: CGPoint,
                               from fromView: NSView? = nil, animated: Bool = true) -> NSWindow? {
         let window = presentPopoverChildWindow(canBecomeKey: view.canBecomeKeyView, canBecomeMain: false,
-                                               withShadow: false, movable: false, isUnknown: false)
+                                               withShadow: false, movable: false, storedInPresenter: false)
         let position = fromView?.convert(atPoint, to: nil) ?? atPoint
         let idealSize = view.idealSize
         var rect = CGRect(origin: position, size: idealSize).insetBy(dx: -Self.windowViewPadding, dy: -Self.windowViewPadding) // give some space for shadow
@@ -70,13 +70,7 @@ class CustomPopoverPresenter {
     }
 
     func presentPopoverChildWindow(canBecomeKey: Bool = true, canBecomeMain: Bool = true,
-                                   withShadow: Bool = true, movable: Bool = true) -> PopoverWindow? {
-        presentPopoverChildWindow(canBecomeKey: canBecomeKey, canBecomeMain: canBecomeMain,
-                                  withShadow: withShadow, movable: movable, isUnknown: true)
-    }
-
-    private func presentPopoverChildWindow(canBecomeKey: Bool, canBecomeMain: Bool,
-                                           withShadow: Bool, movable: Bool, isUnknown: Bool) -> PopoverWindow? {
+                                   withShadow: Bool = true, movable: Bool = true, storedInPresenter: Bool = false) -> PopoverWindow? {
 
         guard let mainWindow = AppDelegate.main.window else { return nil }
 
@@ -89,7 +83,7 @@ class CustomPopoverPresenter {
 
         mainWindow.addChildWindow(window, ordered: .above)
 
-        if isUnknown {
+        if storedInPresenter {
             presentedUnknownWindows.append(window)
         }
         return window

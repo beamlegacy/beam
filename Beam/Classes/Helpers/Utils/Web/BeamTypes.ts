@@ -51,12 +51,12 @@ export interface BeamVisualViewport {
    */
   height
 
-  /**
-   * @type {number}
-   */
-  scale
-
   addEventListener(name, cb)
+}
+
+export interface BeamResizeInfo {
+  width: number
+  height: number
 }
 
 export class BeamRect extends BeamSize {
@@ -258,7 +258,7 @@ export interface BeamElement extends BeamParentNode {
   scrollHeight: number
   scrollWidth: number
   tagName: string
-
+  href: string
   getClientRects(): DOMRectList
   setAttribute(qualifiedName: string, value: string): void
   getAttribute(qualifiedName: string): string | null
@@ -483,4 +483,14 @@ export class BeamMutationObserver {
 export interface BeamCoordinates {
   x: number 
   y: number
+}
+
+export class FrameInfo {
+  /**
+   */
+  href: string
+
+  /**
+   */
+  bounds: BeamRect
 }

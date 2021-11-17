@@ -51,34 +51,61 @@ struct Passwords: View {
     @State private var selectedEntries = IndexSet()
     @State private var passwordSelected: Bool = false
     @State private var multipleSelection: Bool = false
+    @State private var doubleTapRow: Int = 0
 
     @State private var showingAddPasswordSheet: Bool = false
     @State private var showingEditPasswordSheet: Bool = false
+    @State private var showingEditPasswordSheetonDoubleTap: Bool = false
+
+    @State private var autofillUsernamePasswords = PreferencesManager.autofillUsernamePasswords
 
     var body: some View {
         HStack {
             Spacer()
             VStack(alignment: .center) {
                 HStack {
-                    Checkbox(checkState: PreferencesManager.autofillUsernamePasswords, text: "Autofill username and passwords", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
-                        PreferencesManager.autofillUsernamePasswords = activated
-                    }
+                    Toggle(isOn: $autofillUsernamePasswords) {
+                        Text("Autofill username and passwords")
+                    }.toggleStyle(CheckboxToggleStyle())
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.text.swiftUI)
+                        .onReceive([autofillUsernamePasswords].publisher.first()) {
+                            PreferencesManager.autofillUsernamePasswords = $0
+                        }
                     Spacer()
                     BeamSearchField(searchStr: $searchString, isEditing: $isEditing, placeholderStr: "Search", font: BeamFont.regular(size: 13).nsFont, textColor: BeamColor.Generic.text.nsColor, placeholderColor: BeamColor.Generic.placeholder.nsColor)
                         .frame(width: 220, height: 21, alignment: .center)
+                        .foregroundColor(BeamColor.Generic.background.swiftUI)
                         .onUpdate(of: searchString) { searchString in
                             passwordsViewModel.searchString = searchString
                         }
                 }
                 HStack {
                     Spacer()
-                    PasswordsTableView(passwordEntries: passwordsViewModel.filteredPasswordTableViewItems, onSelectionChanged: { idx in
+                    PasswordsTableView(passwordEntries: passwordsViewModel.filteredPasswordTableViewItems) { idx in
                         passwordsViewModel.updateSelection(idx)
-                    })
+                    } onDoubleTap: { row in
+                        doubleTapRow = row
+                        showingEditPasswordSheetonDoubleTap = true
+                    }
                     .frame(width: 682, height: 240, alignment: .center)
                     .border(BeamColor.Mercury.swiftUI, width: 1)
                     .background(BeamColor.Generic.background.swiftUI)
                     Spacer()
+
+                    Button {
+                    } label: {
+                        Text("").hidden()
+                    }.hidden()
+                    .sheet(isPresented: $showingEditPasswordSheetonDoubleTap) {
+                        if let password = PasswordManager.shared.password(hostname: passwordsViewModel.filteredPasswordEntries[doubleTapRow].minimizedHost, username: passwordsViewModel.filteredPasswordEntries[doubleTapRow].username) {
+                            PasswordEditView(hostname: passwordsViewModel.filteredPasswordEntries[doubleTapRow].minimizedHost,
+                                             username: passwordsViewModel.filteredPasswordEntries[doubleTapRow].username,
+                                             password: password, editType: .update) {
+                                passwordsViewModel.refresh()
+                            }.frame(width: 400, height: 179, alignment: .center)
+                        }
+                    }
                 }
                 HStack {
                     Button {
@@ -86,7 +113,6 @@ struct Passwords: View {
                     } label: {
                         Image("basicAdd")
                             .renderingMode(.template)
-                            .foregroundColor(BeamColor.Generic.text.swiftUI)
                     }.buttonStyle(BorderedButtonStyle())
                         .sheet(isPresented: $showingAddPasswordSheet) {
                             PasswordEditView(hostname: "",
@@ -100,7 +126,6 @@ struct Passwords: View {
                     } label: {
                         Image("basicRemove")
                             .renderingMode(.template)
-                            .foregroundColor(BeamColor.Generic.text.swiftUI)
                     }.buttonStyle(BorderedButtonStyle())
                         .disabled(passwordsViewModel.selectedEntries.count == 0)
 
@@ -108,7 +133,6 @@ struct Passwords: View {
                         showingEditPasswordSheet = true
                     } label: {
                         Text("Details...")
-                            .foregroundColor(BeamColor.Generic.text.swiftUI)
                     }.buttonStyle(BorderedButtonStyle())
                         .sheet(isPresented: $showingEditPasswordSheet) {
                             if let entry = passwordsViewModel.selectedEntries.first,
@@ -130,20 +154,18 @@ struct Passwords: View {
                         } label: {
                             Text("Import...")
                                 .font(BeamFont.regular(size: 13).swiftUI)
-                                .foregroundColor(BeamColor.Generic.text.swiftUI)
                         }.buttonStyle(BorderedButtonStyle())
                         Button {
                             exportPasswordAction()
                         } label: {
                             Text("Export...")
                                 .font(BeamFont.regular(size: 13).swiftUI)
-                                .foregroundColor(BeamColor.Generic.text.swiftUI)
                         }.buttonStyle(BorderedButtonStyle())
                     }
                 }
             }.frame(width: 682, alignment: .center)
             Spacer()
-        }.foregroundColor(BeamColor.Generic.background.swiftUI)
+        }
     }
 
     private func promptDeletePasswordsAlert() {
@@ -216,6 +238,9 @@ struct Webforms: View {
     @State var showingAdressesSheet: Bool = false
     @State var showingCreditCardsSheet: Bool = false
 
+    @State private var autofillAdresses = PreferencesManager.autofillAdresses
+    @State private var autofillCreditCards = PreferencesManager.autofillCreditCards
+
     var body: some View {
         HStack(alignment: .firstTextBaseline) {
             Spacer()
@@ -223,12 +248,22 @@ struct Webforms: View {
                 .font(BeamFont.regular(size: 13).swiftUI)
                 .foregroundColor(BeamColor.Generic.text.swiftUI)
             VStack(alignment: .leading) {
-                Checkbox(checkState: PreferencesManager.autofillAdresses, text: "Addresses", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
-                    PreferencesManager.autofillAdresses = activated
-                }
-                Checkbox(checkState: PreferencesManager.autofillCreditCards, text: "Credit cards", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
-                    PreferencesManager.autofillCreditCards = activated
-                }
+                Toggle(isOn: $autofillAdresses) {
+                    Text("Addresses")
+                }.toggleStyle(CheckboxToggleStyle())
+                    .font(BeamFont.regular(size: 13).swiftUI)
+                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+                    .onReceive([autofillAdresses].publisher.first()) {
+                        PreferencesManager.autofillAdresses = $0
+                    }
+                Toggle(isOn: $autofillCreditCards) {
+                    Text("Credit cards")
+                }.toggleStyle(CheckboxToggleStyle())
+                    .font(BeamFont.regular(size: 13).swiftUI)
+                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+                    .onReceive([autofillCreditCards].publisher.first()) {
+                        PreferencesManager.autofillCreditCards = $0
+                    }
             }
             Spacer()
             VStack(alignment: .trailing) {
@@ -237,10 +272,9 @@ struct Webforms: View {
                 } label: {
                     Text("Edit...")
                         .font(BeamFont.regular(size: 13).swiftUI)
-                        .foregroundColor(BeamColor.Generic.text.swiftUI)
                 }.buttonStyle(BorderedButtonStyle())
                 .sheet(isPresented: $showingAdressesSheet) {
-                    UserInformationsModalView(userInformations: MockUserInformationsStore().fetchAll())
+                    UserInformationsModalView(userInformations: [])
                         .frame(width: 440, height: 361, alignment: .center)
                 }
                 Button {
@@ -248,7 +282,6 @@ struct Webforms: View {
                 } label: {
                     Text("Edit...")
                         .font(BeamFont.regular(size: 13).swiftUI)
-                        .foregroundColor(BeamColor.Generic.text.swiftUI)
                 }.buttonStyle(BorderedButtonStyle())
                 .sheet(isPresented: $showingCreditCardsSheet) {
                     CreditCardsModalView()

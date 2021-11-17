@@ -11,7 +11,7 @@ class CoreDataManagerTests: QuickSpec {
 
         beforeEach {
             sut = CoreDataManager.shared
-            documentManager = DocumentManager()
+            documentManager = DocumentManager(coreDataManager: sut)
             helper = DocumentManagerTestsHelper(documentManager: documentManager,
                                                 coreDataManager: CoreDataManager.shared)
         }
@@ -32,7 +32,7 @@ class CoreDataManagerTests: QuickSpec {
 
             it("imports its own backup") {
                 // New note exists
-                expect(try! Document.fetchAll(sut.mainContext).map { $0.title }.contains(docStruct.title)) == true
+                expect(try! documentManager.fetchAll().map { $0.title }.contains(docStruct.title)) == true
 
                 do {
                     try sut.backup(backupURL)
@@ -45,9 +45,9 @@ class CoreDataManagerTests: QuickSpec {
 //                print(docStruct.title)
 
                 // New note exists, then is deleted
-                expect(try! Document.fetchAll(sut.mainContext).map { $0.title }.contains(docStruct.title)) == true
+                expect(try! documentManager.fetchAll().map { $0.title }.contains(docStruct.title)) == true
                 helper.deleteAllDocuments()
-                expect(try! Document.fetchAll(sut.mainContext).map { $0.title }.contains(docStruct.title)) == false
+                expect(try! documentManager.fetchAll().map { $0.title }.contains(docStruct.title)) == false
 
                 do {
                     try sut.importBackup(backupURL)
@@ -56,7 +56,7 @@ class CoreDataManagerTests: QuickSpec {
                 }
 
                 // New note exists
-                expect(try! Document.fetchAll(sut.mainContext).map { $0.title }.contains(docStruct.title)) == true
+                expect(try! documentManager.fetchAll().map { $0.title }.contains(docStruct.title)) == true
             }
         }
 
@@ -72,8 +72,8 @@ class CoreDataManagerTests: QuickSpec {
 
             it("replaces database with existing backup") {
                 // New created note exists
-                expect(try! Document.fetchAll(sut.mainContext).map { $0.title }.contains(docStruct.title)) == true
-                expect(try! Document.fetchAll(sut.mainContext).map { $0.title }.contains(backupStructTitle)) == false
+                expect(try! documentManager.fetchAll().map { $0.title }.contains(docStruct.title)) == true
+                expect(try! documentManager.fetchAll().map { $0.title }.contains(backupStructTitle)) == false
 
                 do {
                     try sut.importBackup(url)
@@ -82,14 +82,14 @@ class CoreDataManagerTests: QuickSpec {
                 }
 
                 // New created note disappeared with backup replacement
-                expect(try! Document.fetchAll(sut.mainContext).map { $0.title }.contains(docStruct.title)) == false
-                expect(try! Document.fetchAll(sut.mainContext).map { $0.title }.contains(backupStructTitle)) == true
+                expect(try! documentManager.fetchAll().map { $0.title }.contains(docStruct.title)) == false
+                expect(try! documentManager.fetchAll().map { $0.title }.contains(backupStructTitle)) == true
 
                 // New note are created, backup note still exists
                 docStruct = helper.createDocumentStruct()
                 docStruct = helper.saveLocally(docStruct)
-                expect(try! Document.fetchAll(sut.mainContext).map { $0.title }.contains(docStruct.title)) == true
-                expect(try! Document.fetchAll(sut.mainContext).map { $0.title }.contains(backupStructTitle)) == true
+                expect(try! documentManager.fetchAll().map { $0.title }.contains(docStruct.title)) == true
+                expect(try! documentManager.fetchAll().map { $0.title }.contains(backupStructTitle)) == true
             }
         }
     }

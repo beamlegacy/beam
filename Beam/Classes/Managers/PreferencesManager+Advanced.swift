@@ -12,8 +12,10 @@ extension PreferencesManager {
     static let browsingSessionCollectionIsOnKey = "browsingSessionCollectionIsOn"
     static let showTabGrougpingMenuItemKey = "showTabGrougpingMenuItem"
     static let showDebugSectionKey = "showDebugSection"
+    static let showOmnibarScoreSectionKey = "showOmnibarScoreSection"
     static let showPNSKey = "showPNSview"
     static let PnsJSIsOnKey = "PnsJSIsOn"
+    static let SpaIndexingKey = "SpaIndexing"
 }
 
 // MARK: - Default Values
@@ -24,8 +26,10 @@ extension PreferencesManager {
     static let browsingSessionCollectionIsOnDefault = false
     static let showTabGrougpingMenuItemDefault = false
     static let showDebugSectionDefault = false
+    static let showOmnibarScoreSectionDefault = false
     static let showPNSDefault = true
     static let PnsJSIsOnDefault = true
+    static let spaIndexingDefault = false
 }
 
 extension PreferencesManager {
@@ -40,9 +44,15 @@ extension PreferencesManager {
     @UserDefault(key: showDebugSectionKey, defaultValue: showDebugSectionDefault, container: advancedPreferencesContainer)
     static var showDebugSection: Bool
 
+    @UserDefault(key: showOmnibarScoreSectionKey, defaultValue: showOmnibarScoreSectionDefault, container: advancedPreferencesContainer)
+    static var showOmnibarScoreSection: Bool
+
     @UserDefault(key: showPNSKey, defaultValue: showPNSDefault, container: advancedPreferencesContainer)
-    static var showPNSview: Bool
+    static var showPNSView: Bool
 
     @UserDefault(key: PnsJSIsOnKey, defaultValue: PnsJSIsOnDefault, container: advancedPreferencesContainer)
     static var PnsJSIsOn: Bool
+
+    @UserDefault(key: SpaIndexingKey, defaultValue: spaIndexingDefault, container: advancedPreferencesContainer)
+    static var enableSpaIndexing: Bool
 }

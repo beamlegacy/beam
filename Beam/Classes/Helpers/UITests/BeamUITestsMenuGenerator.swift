@@ -33,12 +33,13 @@ class BeamUITestsMenuGenerator {
         case .cleanDownloads: cleanDownloadFolder()
         case .omnibarFillHistory: fillHistory()
         case .signInWithTestAccount: signInWithTestAccount()
-        case .testMeetingModal: testAddMeeting()
+        case .showWebViewCount: showWebViewCount()
         default: break
         }
     }
 
     var documentManager = DocumentManager()
+    var googleCalendarService = GoogleCalendarService()
 
     private func logout() {
         AccountManager.logout()
@@ -83,7 +84,7 @@ class BeamUITestsMenuGenerator {
 
         Logger.shared.logDebug("current Note: \(currentNote.id) copy: \(newNote.id)", category: .documentDebug)
 
-        newNote.save(documentManager: documentManager) { result in
+        newNote.save { result in
             switch result {
             case .failure(let error):
                 Logger.shared.logError(error.localizedDescription, category: .general)
@@ -98,7 +99,6 @@ class BeamUITestsMenuGenerator {
         DatabaseManager().deleteAll { _ in }
         let data = AppDelegate.main.window?.state.data
         try? LinkStore.shared.deleteAll()
-        data?.linkManager.deleteAllLinks()
         try? GRDBDatabase.shared.clear()
         data?.saveData()
     }
@@ -110,11 +110,10 @@ class BeamUITestsMenuGenerator {
     }
 
     private func populateWithJournalNote(count: Int) {
-        let documentManager = DocumentManager()
         let generator = FakeNoteGenerator(count: count, journalRatio: 1, futureRatio: 0)
         generator.generateNotes()
         for note in generator.notes {
-            note.save(documentManager: documentManager)
+            note.save()
         }
     }
 
@@ -139,11 +138,10 @@ class BeamUITestsMenuGenerator {
     }
 
     static public func create100Notes() {
-        let documentManager = DocumentManager()
         let generator = FakeNoteGenerator(count: 100, journalRatio: 0.2, futureRatio: 0.1)
         generator.generateNotes()
         for note in generator.notes {
-            note.save(documentManager: documentManager)
+            note.save()
         }
     }
 
@@ -165,16 +163,17 @@ class BeamUITestsMenuGenerator {
     }
 
     private func fillHistory(longTitle: Bool = false) {
-        addPageToHistory(url: "https://fr.wikipedia.org/wiki/Hello_world", title: "Hello world", id: 1)
+        addPageToHistory(url: "https://fr.wikipedia.org/wiki/Hello_world", title: "Hello world", id: UUID())
         addPageToHistory(url: "https://en.wikipedia.org/wiki/Hubert_Blaine_Wolfeschlegelsteinhausenbergerdorff_Sr.",
-                         title: "Hubert Blaine Wolfeschlegelsteinhausenbergerdorff Sr.", id: 2)
-        addPageToHistory(url: "https://www.google.com/search?q=Beam%20the%20best%20browser&client=safari", title: "Beam the best browser", id: 3)
+                         title: "Hubert Blaine Wolfeschlegelsteinhausenbergerdorff Sr.", id: UUID())
+        addPageToHistory(url: "https://www.google.com/search?q=Beam%20the%20best%20browser&client=safari", title: "Beam the best browser", id: UUID())
+        addPageToHistory(url: "https://beamapp.co", aliasUrl: "https://alternateurl.com", title: "Beam", id: UUID())
     }
 
-    private func addPageToHistory(url: String, title: String, id: Int) {
+    private func addPageToHistory(url: String, aliasUrl: String? = nil, title: String, id: UUID) {
         _ = IndexDocument(source: url, title: title, contents: title)
-        try? GRDBDatabase.shared.insertHistoryUrl(urlId: UInt64(id), url: url, title: title, content: title)
-        var frecency = FrecencyUrlRecord(urlId: UInt64(id), lastAccessAt: BeamDate.now, frecencyScore: 1, frecencySortScore: 1, frecencyKey: AutocompleteManager.urlFrecencyParamKey)
+        try? GRDBDatabase.shared.insertHistoryUrl(urlId: id, url: url, aliasDomain: aliasUrl, title: title, content: title)
+        var frecency = FrecencyUrlRecord(urlId: id, lastAccessAt: BeamDate.now, frecencyScore: 1, frecencySortScore: 1, frecencyKey: AutocompleteManager.urlFrecencyParamKey)
         try? GRDBDatabase.shared.saveFrecencyUrl(&frecency)
     }
 
@@ -192,28 +191,15 @@ class BeamUITestsMenuGenerator {
         }
     }
 
-    private func addMeeting(_ meeting: Meeting, to note: BeamNote) {
-        guard let documentManager = AppDelegate.main.window?.state.data.documentManager else { return }
-        let text = meeting.buildBeamText(documentManager: documentManager)
-        let e = BeamElement(text)
-        note.insert(e, after: note.children.last)
-    }
+    private func showWebViewCount() {
+        #if TEST || DEBUG
+        let alert = NSAlert()
+        alert.messageText = "Leak Helper"
+        alert.informativeText = "WebViews alives:\(BeamWebView.aliveWebViewsCount)"
+        alert.addButton(withTitle: "Dismiss Alert")
 
-    private func testAddMeeting() {
-        let state = AppDelegate.main.window?.state
-        let model = MeetingModalView.ViewModel(meetingName: "Meeting Integration",
-                                               attendees: [
-                                                Meeting.Attendee(email: "luis@beamapp.co", name: "Luis Darmon"),
-                                                Meeting.Attendee(email: "dom@beamapp.co", name: "Dom Leca"),
-                                                Meeting.Attendee(email: "remi@beamapp.co", name: "Remi Santos")
-                                               ],
-                                               onFinish: { [weak self] meeting in
-                                                if let meeting = meeting, let note = state?.data.todaysNote {
-                                                    self?.addMeeting(meeting, to: note)
-                                                }
-                                                state?.overlayViewModel.dismissCurrentModal()
-                                               })
-        state?.overlayViewModel.presentModal(MeetingModalView(viewModel: model))
+        // Display the NSAlert
+        alert.runModal()
+        #endif
     }
-
 }

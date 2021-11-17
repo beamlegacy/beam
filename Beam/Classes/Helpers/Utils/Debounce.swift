@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Combine
 
 /**
  Wraps a function in a new function that will only execute the wrapped function if `delay` has passed without this function being called.
@@ -24,4 +25,21 @@ func debounce(delay: DispatchTimeInterval, queue: DispatchQueue = .main, action:
         currentWorkItem = DispatchWorkItem { action() }
         queue.asyncAfter(deadline: .now() + delay, execute: currentWorkItem!)
     }
+}
+
+/**
+ Create a publisher that will only publish when `delay` has passed.
+
+ Using it with `.sink` and `.store` to get a cancellable debounced event.
+
+ - Parameter delay: A `DispatchTimeInterval` to wait before publishing.
+
+ - Returns: A new `AnyPublisher` that will publish after the `delay` time passes.
+ */
+func debouncePublisher(delay: DispatchTimeInterval) -> AnyPublisher<Any, Never> {
+    Future { promise in
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+            promise(.success(true))
+        }
+    }.eraseToAnyPublisher()
 }

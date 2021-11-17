@@ -39,7 +39,7 @@ func export_all_browsing_sessions(to url: URL?) {
     print("All browsing sessions saved to file \(sessionsFileURL)")
 
     // MARK: Links
-    guard let linksData = try? encoder.encode(LinkStore.shared.links)
+    guard let linksData = try? encoder.encode(LinkStore.shared.allLinks)
     else {
         Logger.shared.logError("Unable to encode list of links", category: .web)
         return

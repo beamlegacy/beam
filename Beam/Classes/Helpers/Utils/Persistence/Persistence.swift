@@ -11,6 +11,9 @@ enum Persistence {
         @KeychainStorable("authentication.email") static var email: String?
         @KeychainStorable("authentication.password") static var password: String?
 
+        @KeychainStorable("authentication.google.accessToken") static var googleAccessToken: String?
+        @KeychainStorable("authentication.google.refreshToken") static var googleRefreshToken: String?
+
         //For now, we just store the username in-memory.
         //This have to change when we can have a better sync of it, to ensure it's always in sync with the backend
         static var username: String?
@@ -55,12 +58,13 @@ enum Persistence {
             Persistence.Sync.BeamObjects.last_updated_at = nil
         }
     }
-
     /// Clean all stored informations on logout
     static func cleanUp() {
         Persistence.Authentication.accessToken = nil
         Persistence.Authentication.refreshToken = nil
         Persistence.Authentication.userId = nil
+        Persistence.Authentication.googleAccessToken = nil
+        Persistence.Authentication.googleRefreshToken = nil
         Sync.cleanUp()
     }
 }

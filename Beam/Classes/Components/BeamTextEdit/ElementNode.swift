@@ -164,12 +164,14 @@ public class ElementNode: Widget {
     }
 
     func buildTextChildren(elements: [BeamElement]) -> [Widget] {
-        elements.map { childElement -> ElementNode in
+        guard isInNodeProviderTree else { return [] }
+        return elements.map { childElement -> ElementNode in
             nodeFor(childElement, withParent: self)
         }
     }
 
     func updateTextChildren(elements: [BeamElement]) {
+        guard isInNodeProviderTree else { return }
         children = buildTextChildren(elements: elements)
     }
 

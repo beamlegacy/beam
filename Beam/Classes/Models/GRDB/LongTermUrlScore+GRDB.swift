@@ -9,7 +9,7 @@ import GRDB
 import BeamCore
 
 extension LongTermUrlScore: Identifiable {
-    public var id: UInt64 { urlId }
+    public var id: UUID { urlId }
 }
 
 extension LongTermUrlScore: FetchableRecord {}
@@ -37,11 +37,11 @@ class LongTermUrlScoreStore: LongTermUrlScoreStoreProtocol {
         self.db = db
     }
 
-    func apply(to urlId: UInt64, changes: (LongTermUrlScore) -> Void) {
+    func apply(to urlId: UUID, changes: (LongTermUrlScore) -> Void) {
         db.updateLongTermUrlScore(urlId: urlId, changes: changes)
     }
 
-    func getMany(urlIds: [UInt64]) -> [LongTermUrlScore] {
+    func getMany(urlIds: [UUID]) -> [LongTermUrlScore] {
         return db.getManyLongTermUrlScore(urlIds: urlIds)
     }
 }

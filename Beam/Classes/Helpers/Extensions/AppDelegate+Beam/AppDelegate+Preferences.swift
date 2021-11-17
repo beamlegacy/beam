@@ -13,4 +13,8 @@ extension Preferences.PaneIdentifier {
     static let advanced = Self("advanced")
     static let editorDebug = Self("editorDebug")
 
+    static var allBeamPreferences: [Preferences.PaneIdentifier] {
+        [.browser, .cards, .privacy, .passwords, .accounts, .about, .general]
+    }
+
 }

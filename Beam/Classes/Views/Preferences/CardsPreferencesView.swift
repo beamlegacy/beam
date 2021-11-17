@@ -14,6 +14,7 @@ let CardsPreferencesViewController: PreferencePane = PreferencesPaneBuilder.buil
 
 struct CardsPreferencesView: View {
     private let contentWidth: Double = PreferencesManager.contentWidth
+    @State private var alwaysShowBullets = PreferencesManager.alwaysShowBullets
 
     var body: some View {
         Preferences.Container(contentWidth: contentWidth) {
@@ -31,16 +32,21 @@ struct CardsPreferencesView: View {
                     .foregroundColor(BeamColor.Generic.text.swiftUI)
                     .frame(width: 250, alignment: .trailing)
             } content: {
-                Checkbox(checkState: PreferencesManager.alwaysShowBullets, text: "Always show bullets", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
-                    PreferencesManager.alwaysShowBullets = activated
-                }
+                Toggle(isOn: $alwaysShowBullets) {
+                    Text("Always show bullets")
+                }.toggleStyle(CheckboxToggleStyle())
+                    .font(BeamFont.regular(size: 13).swiftUI)
+                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+                    .onReceive([alwaysShowBullets].publisher.first()) {
+                        PreferencesManager.alwaysShowBullets = $0
+                    }
             }
             Preferences.Section {
                 Text("Embed Content:")
                     .font(BeamFont.regular(size: 13).swiftUI)
                     .foregroundColor(BeamColor.Generic.text.swiftUI)
             } content: {
-                EmbedContentSection()
+                PreferencesEmbedContentSection()
             }
         }
     }
@@ -53,31 +59,52 @@ struct CardsPreferencesView_Previews: PreviewProvider {
 }
 
 struct SpellingGrammarSection: View {
+    @State private var checkSpellingIsOn = PreferencesManager.checkSpellingIsOn
+    @State private var checkGrammarIsOn = PreferencesManager.checkGrammarIsOn
+    @State private var correctSpellingIsOn = PreferencesManager.correctSpellingIsOn
+
     var body: some View {
-        Checkbox(checkState: PreferencesManager.checkSpellingIsOn, text: "Check spelling while typing", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
-            PreferencesManager.checkSpellingIsOn = activated
-        }
-        Checkbox(checkState: PreferencesManager.checkGrammarIsOn, text: "Check grammar with spelling", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
-            PreferencesManager.checkGrammarIsOn = activated
-        }
-        Checkbox(checkState: PreferencesManager.correctSpellingIsOn, text: "Correct spelling", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
-            PreferencesManager.correctSpellingIsOn = activated
-        }
+        Toggle(isOn: $checkSpellingIsOn) {
+            Text("Check spelling while typing")
+        }.toggleStyle(CheckboxToggleStyle())
+            .font(BeamFont.regular(size: 13).swiftUI)
+            .foregroundColor(BeamColor.Generic.text.swiftUI)
+            .onReceive([checkSpellingIsOn].publisher.first()) {
+                PreferencesManager.checkSpellingIsOn = $0
+            }
+
+        Toggle(isOn: $checkGrammarIsOn) {
+            Text("Check grammar with spelling")
+        }.toggleStyle(CheckboxToggleStyle())
+            .font(BeamFont.regular(size: 13).swiftUI)
+            .foregroundColor(BeamColor.Generic.text.swiftUI)
+            .onReceive([checkGrammarIsOn].publisher.first()) {
+                PreferencesManager.checkGrammarIsOn = $0
+            }
+
+        Toggle(isOn: $correctSpellingIsOn) {
+            Text("Correct spelling")
+        }.toggleStyle(CheckboxToggleStyle())
+            .font(BeamFont.regular(size: 13).swiftUI)
+            .foregroundColor(BeamColor.Generic.text.swiftUI)
+            .onReceive([correctSpellingIsOn].publisher.first()) {
+                PreferencesManager.correctSpellingIsOn = $0
+            }
     }
 }
 
-struct EmbedContentSection: View {
+struct PreferencesEmbedContentSection: View {
     @State private var embedContent = PreferencesManager.embedContentPreference
 
     var body: some View {
         Picker("", selection: $embedContent) {
-            ForEach(EmbedContent.allCases) { embedContentPref in
+            ForEach(PreferencesEmbedOptions.allCases) { embedContentPref in
                 Text(embedContentPref.name)
             }
         }.labelsHidden()
         .frame(width: 212, height: 20)
-        .onReceive([self.embedContent].publisher.first()) { value in
-            PreferencesManager.embedContentPreference = value
+        .onReceive([self.embedContent].publisher.first()) {
+            PreferencesManager.embedContentPreference = $0
         }
     }
 }

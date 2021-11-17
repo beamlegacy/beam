@@ -57,15 +57,17 @@ class LoginPasswordAutocompleteTests: BaseTest {
         XCTAssertFalse(helper.doesAutofillPopupExist())*/
     }
     
-    func testOtherPasswordsAppearance() {
+    func testOtherPasswordsAppearanceRemovalFill() {
         let journalView = launchApp()
+        
+        testRailPrint("Given I populate passwords and load a test page")
         UITestsMenuBar().populatePasswordsDB()
+        OmniBarUITestsHelper(journalView.app).tapCommand(.loadUITestPagePassword)
         let helper = PasswordManagerHelper()
-        BeamUITestsHelper(journalView.app).tapCommand(.resizeSquare1000)
+        let passwordPage = UITestPagePasswordManager()
+        
         testRailPrint("When I click Other passwords option")
-        let webView = journalView.searchInOmniBar(facebookPage, true)
-        XCTAssertTrue(self.handleWebsiteIsNotOpened(webView), "Google page is still opened")
-        XCTAssertTrue(self.handleFacebookCookiesPopup(webView), "facebook cookies pop-up blocks the web page")
+        passwordPage.clickInputField(.password)
         let passPrefView = helper.openPasswordPreferences()
         
         testRailPrint("Then Password preferences window is opened")
@@ -76,6 +78,41 @@ class LoginPasswordAutocompleteTests: BaseTest {
         passPrefView.clickCancel()
         XCTAssertTrue(passPrefView.waitForPreferenceToClose())
         XCTAssertTrue(helper.getOtherPasswordsOptionElement().exists)
+        
+        testRailPrint("Then authentication fields are NOT auto-populated")
+        XCTAssertEqual(passwordPage.getInputValue(.username), emptyString)
+        XCTAssertEqual(passwordPage.getInputValue(.password), emptyString)
+        
+        testRailPrint("When I open Other passwords option and cancel password remove")
+        helper.openPasswordPreferences()
+        passPrefView.staticTextTables("apple.com").clickOnExistence()
+        let alertView = passPrefView.clickRemove()
+        
+        testRailPrint("Then it is not removed from the list of passwords")
+        alertView.cancelDeletionFromSheets()
+        XCTAssertTrue(passPrefView.staticTextTables("apple.com").exists)
+        
+        testRailPrint("Then it is removed from the list of passwords")
+        passPrefView.clickRemove()
+        alertView.confirmRemoveFromSheets()
+        XCTAssertTrue(WaitHelper().waitForDoesntExist(passPrefView.staticTextTables("apple.com")))
+        
+        testRailPrint("When I choose Fill option for another password")
+        passPrefView.staticTextTables("facebook.com").clickOnExistence()
+        passPrefView.clickFill()
+        XCTAssertTrue(passPrefView.waitForPreferenceToClose())
+        
+        testRailPrint("Then authentication fields are auto-populated")
+        XCTAssertEqual(passwordPage.getInputValue(.username), "qa@beamapp.co")
+        XCTAssertEqual(passwordPage.getInputValue(.password), "••••••••••")
+    }
+    
+    func testSearchPasswords() throws {
+        try XCTSkipIf(true, "Identifiers needed")
+    }
+    
+    func testSortPasswords() throws {
+        try XCTSkipIf(true, "Identifiers needed")
     }
     
     @discardableResult

@@ -165,7 +165,7 @@ class PasswordOverlayController: WebPageHolder {
         let viewModel = passwordManagerViewModel(for: host, withPasswordGenerator: passwordGenerator)
         let passwordManagerMenu = PasswordManagerMenu(width: location.size.width, viewModel: viewModel)
         guard let webView = (page as? BrowserTab)?.webView,
-              let passwordWindow = CustomPopoverPresenter.shared.presentPopoverChildWindow(canBecomeKey: false, canBecomeMain: false, withShadow: true)
+              let passwordWindow = CustomPopoverPresenter.shared.presentPopoverChildWindow(canBecomeKey: false, canBecomeMain: false, withShadow: true, storedInPresenter: true)
         else { return }
         var updatedRect = webView.convert(location, to: nil)
         updatedRect.origin.y += location.height

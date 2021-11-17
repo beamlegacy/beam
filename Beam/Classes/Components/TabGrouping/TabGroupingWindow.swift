@@ -14,7 +14,7 @@ class TabGroupingWindow: NSWindow, NSWindowDelegate {
 
     init(contentRect: NSRect, clusteringManager: ClusteringManager) {
         super.init(contentRect: contentRect,
-                   styleMask: [.titled, .closable, .miniaturizable, .texturedBackground, .resizable, .fullSizeContentView],
+                   styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
                    backing: .buffered,
                    defer: false)
         title = "Tab Grouping"

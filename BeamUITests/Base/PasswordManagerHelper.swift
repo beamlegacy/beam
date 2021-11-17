@@ -25,6 +25,7 @@ class PasswordManagerHelper: BaseView {
         return app.staticTexts["Other Passwords..."]
     }
     
+    @discardableResult
     func openPasswordPreferences() -> PasswordsTestView {
         getOtherPasswordsOptionElement().clickOnExistence()
         return PasswordsTestView()

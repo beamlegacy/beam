@@ -40,30 +40,6 @@ public extension URL {
         ["http", "https", "file"]
     }
 
-    func extractYouTubeId() -> String? {
-        // TODO: remove this when we can rely on oembed for url conversion
-        let url = absoluteString
-        let typePattern = "(?:(?:\\.be\\/|embed\\/|v\\/|\\?v=|\\&v=|\\/videos\\/)|(?:[\\w+]+#\\w\\/\\w(?:\\/[\\w]+)?\\/\\w\\/))([\\w-_]+)"
-        let regex = try? NSRegularExpression(pattern: typePattern, options: .caseInsensitive)
-        return regex
-            .flatMap { $0.firstMatch(in: url, range: NSRange(location: 0, length: url.count)) }
-            .flatMap { Range($0.range(at: 1), in: url) }
-            .map { String(url[$0]) }
-    }
-
-    var embed: URL? {
-        // TODO: remove this when we can rely on oembed for url conversion
-        if let youtubeID = extractYouTubeId() {
-            return URL(string: "https://www.youtube.com/embed/\(youtubeID)")
-        }
-
-        if path.contains("/embed/") {
-            return self
-        }
-
-        return nil
-    }
-
     var isImageURL: Bool {
         let imageExtensions = ["png", "jpg", "jpeg", "gif"]
         return imageExtensions.contains(self.pathExtension)
@@ -104,5 +80,9 @@ public extension URL {
             return decomposedDomain == decomposedSearchString
         }
         return false
+    }
+
+    var isDomain: Bool {
+        self.pathComponents.count <= 1
     }
 }

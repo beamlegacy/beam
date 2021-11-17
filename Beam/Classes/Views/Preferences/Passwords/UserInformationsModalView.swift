@@ -48,7 +48,7 @@ struct UserInformationsModalView: View {
                     } label: {
                         Image("basicAdd")
                             .renderingMode(.template)
-                            .foregroundColor(BeamColor.Generic.background.swiftUI)
+                            .foregroundColor(BeamColor.Generic.text.swiftUI)
                     }.buttonStyle(BorderedButtonStyle())
                     .sheet(isPresented: $showingUserInformationsAdd) {
                         UserInformationsEditModalView(country: "",
@@ -66,7 +66,7 @@ struct UserInformationsModalView: View {
                     } label: {
                         Image("basicRemove")
                             .renderingMode(.template)
-                            .foregroundColor(BeamColor.Generic.background.swiftUI)
+                            .foregroundColor(BeamColor.Generic.text.swiftUI)
                     }.buttonStyle(BorderedButtonStyle())
                     .disabled(!userInfoIsSelected)
 

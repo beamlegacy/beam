@@ -8,14 +8,27 @@
 import SwiftUI
 import BeamCore
 
-struct Meeting: Identifiable {
+struct Meeting: Identifiable, Equatable {
+
     var id: UUID = UUID()
     var name: String
-    var date: Date = BeamDate.now
+    var startTime: Date
+    var endTime: Date?
+    var allDayEvent: Bool = false
     var attendees: [Attendee]
+    var htmlLink: String?
+    var meetingLink: String?
     var linkCards: Bool = true
+    var duration: DateComponents? {
+        guard let endTime = endTime else { return nil }
+        return Calendar.current.dateComponents([.hour, .minute], from: startTime, to: endTime)
+    }
 
-    class Attendee: Identifiable {
+    static func == (lhs: Meeting, rhs: Meeting) -> Bool {
+        return lhs.name == rhs.name && lhs.startTime == rhs.startTime && lhs.attendees == rhs.attendees
+    }
+
+    class Attendee: Identifiable, Equatable {
         var id: UUID = UUID()
 
         var email: String
@@ -24,6 +37,15 @@ struct Meeting: Identifiable {
         init(email: String, name: String) {
             self.email = email
             self.name = name
+
+            if let atChar = self.email.range(of: "@"), self.name.isEmpty {
+                self.name = String(self.email.prefix(upTo: atChar.lowerBound))
+                self.name = self.name.prefix(1).capitalized + self.name.dropFirst()
+            }
+        }
+
+        static func == (lhs: Attendee, rhs: Attendee) -> Bool {
+            return lhs.name == rhs.name && lhs.email == rhs.email
         }
     }
 }
@@ -53,7 +75,7 @@ struct MeetingModalView: View {
                         VStack(alignment: .leading, spacing: 0) {
                             Text("Meeting")
                                 .font(BeamFont.regular(size: 12).swiftUI)
-                                .foregroundColor(BeamColor.LightStoneGray.swiftUI)
+                                .foregroundColor(BeamColor.AlphaGray.swiftUI)
                                 .padding(.bottom, BeamSpacing._120)
 
                             HStack {
@@ -67,7 +89,7 @@ struct MeetingModalView: View {
                                         }
                                     }))
                                 Icon(name: "tabs-close",
-                                     color: hoveredCloseButtonIndex == -1 ? BeamColor.Niobium.swiftUI : BeamColor.AlphaGray.swiftUI)
+                                     color: hoveredCloseButtonIndex == -1 ? BeamColor.Corduroy.swiftUI : BeamColor.AlphaGray.swiftUI)
                                     .onTapGesture {
                                         viewModel.meetingName = ""
                                     }
@@ -78,7 +100,7 @@ struct MeetingModalView: View {
 
                             Text("Attendees")
                                 .font(BeamFont.regular(size: 12).swiftUI)
-                                .foregroundColor(BeamColor.LightStoneGray.swiftUI)
+                                .foregroundColor(BeamColor.AlphaGray.swiftUI)
                                 .padding(.top, 30)
                                 .padding(.bottom, BeamSpacing._120)
                             VStack(spacing: BeamSpacing._80) {
@@ -123,7 +145,7 @@ struct MeetingModalView: View {
                                             return false
                                         })
                                         Icon(name: "tabs-close",
-                                             color: hoveredCloseButtonIndex == index ? BeamColor.Niobium.swiftUI : BeamColor.AlphaGray.swiftUI)
+                                             color: hoveredCloseButtonIndex == index ? BeamColor.Corduroy.swiftUI : BeamColor.AlphaGray.swiftUI)
                                             .onTapGesture {
                                                 viewModel.removeAttendee(attendee)
                                             }
@@ -134,27 +156,16 @@ struct MeetingModalView: View {
                                     .id(attendee.id)
                                 }
                                 if viewModel.canAddAttendee {
-                                    HStack(spacing: BeamSpacing._80) {
-                                        Text("Add Attendee")
-                                            .font(BeamFont.regular(size: 12).swiftUI)
-                                            .foregroundColor(BeamColor.LightStoneGray.swiftUI)
-                                            .padding(BeamSpacing._80)
-                                        Spacer()
-                                        Icon(name: "tabs-new",
-                                             color: hoveredCloseButtonIndex == -2 ? BeamColor.Niobium.swiftUI : BeamColor.AlphaGray.swiftUI)
-                                            .onHover { h in
-                                                hoveredCloseButtonIndex = h ? -2 : nil
-                                            }
-                                    }
-                                    .contentShape(Rectangle())
-                                    .onTapGesture {
-                                        viewModel.createNewAttendee()
-                                        focusLastAttendee(scrollViewProxy: proxy)
-                                    }.id("add-attendee")
+                                    MeetingModalAddAttendeeRow()
+                                        .contentShape(Rectangle())
+                                        .onTapGesture {
+                                            viewModel.createNewAttendee()
+                                            focusLastAttendee(scrollViewProxy: proxy)
+                                        }.id("add-attendee")
                                 }
                             }
                         }
-                        .padding([.horizontal, .top], BeamSpacing._400 * 2)
+                        .padding([.horizontal, .top], BeamSpacing._400)
                         .padding(.bottom, BeamSpacing._200)
                     }
                 }
@@ -169,10 +180,10 @@ struct MeetingModalView: View {
                         viewModel.linkCards.toggle()
                     }
                     Spacer()
-                    ActionableButton(text: "Cancel", defaultState: .normal, variant: .secondary) {
+                    ActionableButton(text: "Cancel", defaultState: .normal, variant: .secondary, minWidth: 120) {
                         viewModel.cancel()
                     }
-                    ActionableButton(text: "Add Meeting", defaultState: .normal, variant: .primaryPurple) {
+                    ActionableButton(text: "Add", defaultState: .normal, variant: .primaryPurple, minWidth: 120) {
                         viewModel.addMeeting()
                     }
                 }
@@ -202,11 +213,35 @@ struct MeetingModalView: View {
     }
 }
 
+private struct MeetingModalAddAttendeeRow: View {
+    @State private var isHovering = false
+    private var foregroundColor: Color {
+        isHovering ? BeamColor.Corduroy.swiftUI : BeamColor.LightStoneGray.swiftUI
+    }
+    var body: some View {
+        HStack(spacing: BeamSpacing._80) {
+            HStack(spacing: 0) {
+                Text("Add Attendee")
+                    .font(BeamFont.regular(size: 12).swiftUI)
+                    .foregroundColor(foregroundColor)
+                    .padding(BeamSpacing._80)
+                Spacer()
+            }
+            .border(BoxedTextFieldView.borderColor.swiftUI, width: 1.5)
+            .cornerRadius(3.0)
+            Icon(name: "tabs-new", color: isHovering ? BeamColor.Corduroy.swiftUI : BeamColor.AlphaGray.swiftUI)
+        }
+        .onHover { isHovering = $0 }
+    }
+}
+
 extension MeetingModalView {
 
     class ViewModel: ObservableObject {
-        @Published fileprivate var attendees: [Meeting.Attendee]
         @Published fileprivate var meetingName: String
+        @Published fileprivate var startTime: Date
+        @Published fileprivate var attendees: [Meeting.Attendee]
+        @Published fileprivate var additionalAttendee = Meeting.Attendee(email: "", name: "")
         @Published fileprivate var linkCards: Bool = true
 
         private var onFinish: ((Meeting?) -> Void)?
@@ -215,13 +250,10 @@ extension MeetingModalView {
             true
         }
 
-        init(meetingName: String, attendees: [Meeting.Attendee], onFinish: ((Meeting?) -> Void)? = nil) {
+        init(meetingName: String, startTime: Date, attendees: [Meeting.Attendee], onFinish: ((Meeting?) -> Void)? = nil) {
             self.meetingName = meetingName
-            if attendees.isEmpty {
-                self.attendees = [.init(email: "", name: "")]
-            } else {
-                self.attendees = attendees
-            }
+            self.startTime = startTime
+            self.attendees = attendees
             self.onFinish = onFinish
         }
 
@@ -235,8 +267,7 @@ extension MeetingModalView {
 
         func addMeeting() {
             guard !meetingName.isEmpty else { return }
-            let onlyFilledAttendees = attendees.filter { !$0.email.isEmpty || !$0.name.isEmpty }
-            let meeting = Meeting(name: meetingName, attendees: onlyFilledAttendees, linkCards: linkCards)
+            let meeting = Meeting(name: meetingName, startTime: startTime, attendees: attendees, linkCards: linkCards)
             onFinish?(meeting)
         }
 
@@ -246,7 +277,7 @@ extension MeetingModalView {
     }
 }
 struct MeetingModalView_Previews: PreviewProvider {
-    static let model = MeetingModalView.ViewModel(meetingName: "Some Meeting Name", attendees: [
+    static let model = MeetingModalView.ViewModel(meetingName: "Some Meeting Name", startTime: BeamDate.now, attendees: [
         Meeting.Attendee(email: "stef@beamapp.co", name: "Stef"),
         Meeting.Attendee(email: "luis@beamapp.co", name: "Luis"),
         Meeting.Attendee(email: "remi@beamapp.co", name: "Remi")

@@ -20,44 +20,42 @@ struct BrowserPreferencesView: View {
         Preferences.Container(contentWidth: contentWidth) {
             Preferences.Section {
                 Text("Default Browser:")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
                     .frame(width: 250, alignment: .trailing)
             } content: {
                 DefaultBrowserSection()
             }
             Preferences.Section(bottomDivider: true) {
                 Text("Search Engine:")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
             } content: {
                 SearchEngineSection()
             }
 
             Preferences.Section(bottomDivider: true) {
                 Text("Bookmarks & Settings:")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
             } content: {
                 BookmarksSection()
             }
 
             Preferences.Section(bottomDivider: true) {
                 Text("Downloads:")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
             } content: {
                 DownloadSection()
             }
 
-            Preferences.Section {
+            Preferences.Section(bottomDivider: true) {
                 Text("Tabs:")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
             } content: {
                 TabsSection()
             }
+
+            Preferences.Section {
+                Text("Clear Caches:")
+            } content: {
+                ClearCachesSection()
+            }
         }
+        .font(BeamFont.regular(size: 13).swiftUI)
+        .foregroundColor(BeamColor.Generic.text.swiftUI)
     }
 }
 
@@ -81,7 +79,6 @@ struct DefaultBrowserSection: View {
         } label: {
             Text("Set Default...")
                 .font(BeamFont.regular(size: 13).swiftUI)
-                .foregroundColor(BeamColor.Generic.text.swiftUI)
         }.frame(width: 99, height: 20, alignment: .leading)
         .disabled(isDefaultBrowser)
     }
@@ -89,8 +86,22 @@ struct DefaultBrowserSection: View {
     @State var cancellable: Cancellable?
 }
 
+struct ClearCachesSection: View {
+
+    var body: some View {
+        Button {
+            FaviconProvider.shared.clearCache()
+            WKWebsiteDataStore.default().removeData(ofTypes: [WKWebsiteDataTypeDiskCache, WKWebsiteDataTypeMemoryCache], modifiedSince: Date(timeIntervalSince1970: 0), completionHandler: { })
+        } label: {
+            Text("Clear All Web Caches")
+                .font(BeamFont.regular(size: 13).swiftUI)
+        }
+    }
+}
+
 struct SearchEngineSection: View {
     @State private var selectedSearchEngine = PreferencesManager.selectedSearchEngine
+    @State private var includeSearchEngineSuggestion =  PreferencesManager.includeSearchEngineSuggestion
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -103,9 +114,14 @@ struct SearchEngineSection: View {
             .onReceive([self.selectedSearchEngine].publisher.first()) { value in
                 PreferencesManager.selectedSearchEngine = value
             }
-            Checkbox(checkState: PreferencesManager.includeSearchEngineSuggestion, text: "Include search engine suggestions", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
-                PreferencesManager.includeSearchEngineSuggestion = activated
-            }
+            Toggle(isOn: $includeSearchEngineSuggestion) {
+                Text("Include search engine suggestions")
+            }.toggleStyle(CheckboxToggleStyle())
+                .font(BeamFont.regular(size: 13).swiftUI)
+                .foregroundColor(BeamColor.Generic.text.swiftUI)
+                .onReceive([includeSearchEngineSuggestion].publisher.first()) {
+                    PreferencesManager.includeSearchEngineSuggestion = $0
+                }
         }
     }
 }
@@ -127,7 +143,6 @@ struct BookmarksSection: View {
             } label: {
                 Text("Import...")
                     .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
             }.frame(width: 99, height: 20, alignment: .leading)
             Text("Import your bookmarks, passwords and history from other browsers")
                 .font(BeamFont.regular(size: 11).swiftUI)
@@ -221,21 +236,48 @@ struct DownloadSection: View {
 }
 
 struct TabsSection: View {
+    @State private var cmdClickOpenTab = PreferencesManager.cmdClickOpenTab
+    @State private var newTabWindowMakeActive = PreferencesManager.newTabWindowMakeActive
+    @State private var cmdNumberSwitchTabs = PreferencesManager.cmdNumberSwitchTabs
+    @State private var showWebsiteIconTab = PreferencesManager.showWebsiteIconTab
+    @State private var restoreLastBeamSession = PreferencesManager.restoreLastBeamSession
+
     var body: some View {
-        Checkbox(checkState: PreferencesManager.cmdClickOpenTab, text: "⌘-click opens a link in a new tab", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
-            PreferencesManager.cmdClickOpenTab = activated
-        }
-//        Checkbox(checkState: PreferencesManager.newTabWindowMakeActive, text: "When a new tab or window opens, make it active", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
-//            PreferencesManager.newTabWindowMakeActive = activated
-//        }
-        Checkbox(checkState: PreferencesManager.cmdNumberSwitchTabs, text: "Use ⌘1 to ⌘9 to switch tabs", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
-            PreferencesManager.cmdNumberSwitchTabs = activated
-        }
-//        Checkbox(checkState: PreferencesManager.showWebsiteIconTab, text: "Show website icons in tabs", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
-//            PreferencesManager.showWebsiteIconTab = activated
-//        }
-        Checkbox(checkState: PreferencesManager.restoreLastBeamSession, text: "Restore all tabs from last session when opening Beam", textColor: BeamColor.Generic.text.swiftUI, textFont: BeamFont.regular(size: 13).swiftUI) { activated in
-            PreferencesManager.restoreLastBeamSession = activated
-        }
+        Toggle(isOn: $cmdClickOpenTab) {
+            Text("⌘-click opens a link in a new tab")
+        }.toggleStyle(CheckboxToggleStyle())
+            .font(BeamFont.regular(size: 13).swiftUI)
+            .foregroundColor(BeamColor.Generic.text.swiftUI)
+            .onReceive([cmdClickOpenTab].publisher.first()) {
+                PreferencesManager.cmdClickOpenTab = $0
+            }
+//        Toggle(isOn: $newTabWindowMakeActive) {
+//            Text("When a new tab or window opens, make it active")
+//        }.toggleStyle(CheckboxToggleStyle())
+//            .font(BeamFont.regular(size: 13).swiftUI)
+//            .foregroundColor(BeamColor.Generic.text.swiftUI)
+
+        Toggle(isOn: $cmdNumberSwitchTabs) {
+            Text("Use ⌘1 to ⌘9 to switch tabs")
+        }.toggleStyle(CheckboxToggleStyle())
+            .font(BeamFont.regular(size: 13).swiftUI)
+            .foregroundColor(BeamColor.Generic.text.swiftUI)
+            .onReceive([cmdNumberSwitchTabs].publisher.first()) {
+                PreferencesManager.cmdNumberSwitchTabs = $0
+            }
+//        Toggle(isOn: $showWebsiteIconTab) {
+//            Text("Show website icons in tabs")
+//        }.toggleStyle(CheckboxToggleStyle())
+//            .font(BeamFont.regular(size: 13).swiftUI)
+//            .foregroundColor(BeamColor.Generic.text.swiftUI)
+
+        Toggle(isOn: $restoreLastBeamSession) {
+            Text("Restore all tabs from last session when opening Beam")
+        }.toggleStyle(CheckboxToggleStyle())
+            .font(BeamFont.regular(size: 13).swiftUI)
+            .foregroundColor(BeamColor.Generic.text.swiftUI)
+            .onReceive([restoreLastBeamSession].publisher.first()) {
+                PreferencesManager.restoreLastBeamSession = $0
+            }
     }
 }

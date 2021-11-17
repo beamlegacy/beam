@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import AppKit
 
 public extension String {
     var numberOfWords: Int {
@@ -30,4 +31,10 @@ public extension String {
         }
         return ranges
     }
+
+    func widthOfString(usingFont font: NSFont) -> CGFloat {
+         let fontAttributes = [NSAttributedString.Key.font: font]
+         let size = self.size(withAttributes: fontAttributes)
+         return size.width
+     }
 }

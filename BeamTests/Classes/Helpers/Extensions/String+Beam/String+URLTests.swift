@@ -17,9 +17,9 @@ class String_URLTests: XCTestCase {
     }
 
     func testToEncodedURL() {
-        XCTAssertNil("prout".toEncodedURL)
+        XCTAssertNil("something".toEncodedURL)
         XCTAssertNil("".toEncodedURL)
-        XCTAssertNil("some garbage".toEncodedURL)
+        XCTAssertNil("some space".toEncodedURL)
 
         XCTAssertEqual("wikipedia.org".toEncodedURL, URL(string: "wikipedia.org"))
         XCTAssertEqual("wikipedia.org/truc".toEncodedURL, URL(string: "wikipedia.org/truc"))
@@ -31,6 +31,9 @@ class String_URLTests: XCTestCase {
         XCTAssertEqual("https://he.wikipedia.org/wiki/רפאל_נדאל".toEncodedURL, URL(string: "https://he.wikipedia.org/wiki/%D7%A8%D7%A4%D7%90%D7%9C_%D7%A0%D7%93%D7%90%D7%9C"))
         XCTAssertEqual("https://ru.wikipedia.org/wiki/Надаль,_Рафаэль".toEncodedURL, URL(string: "https://ru.wikipedia.org/wiki/%D0%9D%D0%B0%D0%B4%D0%B0%D0%BB%D1%8C,_%D0%A0%D0%B0%D1%84%D0%B0%D1%8D%D0%BB%D1%8C"))
         XCTAssertEqual("https://ary.wikipedia.org/wiki/رافاييل_نادال".toEncodedURL, URL(string: "https://ary.wikipedia.org/wiki/%D8%B1%D8%A7%D9%81%D8%A7%D9%8A%D9%8A%D9%84_%D9%86%D8%A7%D8%AF%D8%A7%D9%84"))
+
+        // already encoded doesn't loose encoding :
+        XCTAssertEqual("https://he.wikipedia.org/wiki/%D7%A8%D7%A4%D7%90%D7%9C_%D7%A0%D7%93%D7%90%D7%9C".toEncodedURL, URL(string: "https://he.wikipedia.org/wiki/%D7%A8%D7%A4%D7%90%D7%9C_%D7%A0%D7%93%D7%90%D7%9C"))
     }
 
     func testUrlRangesInside() {
@@ -95,5 +98,20 @@ class String_URLTests: XCTestCase {
         XCTAssertEqual(URL(string: "http://www.google.com/testing")!.urlStringWithoutScheme, "google.com/testing")
         XCTAssertEqual(URL(string: "google.com/testing")!.urlStringWithoutScheme, "google.com/testing")
         XCTAssertEqual(URL(string: "google")!.urlStringWithoutScheme, "google")
+    }
+
+    func testStringToEncodedUrl() {
+        let string = "https://www.example.com/上海+中國"
+        XCTAssertEqual(string.toEncodedURL?.absoluteString, "https://www.example.com/%E4%B8%8A%E6%B5%B7+%E4%B8%AD%E5%9C%8B")
+    }
+
+    func testStringToEncodedUrl_KeepAnchor() {
+        let string = "https://www.example.com/#anchor"
+        XCTAssertEqual(string.toEncodedURL?.absoluteString, "https://www.example.com/#anchor")
+    }
+
+    func testStringToEncodedUrl_KeepAnchorWhenMixedWithEncoding() {
+        let string = "https://www.example.com/上海+中國#anchor"
+        XCTAssertEqual(string.toEncodedURL?.absoluteString, "https://www.example.com/%E4%B8%8A%E6%B5%B7+%E4%B8%AD%E5%9C%8B#anchor")
     }
 }

@@ -8,18 +8,18 @@
 @testable import Beam
 
 import XCTest
-private typealias Table = [UInt64: LongTermUrlScore]
+private typealias Table = [UUID: LongTermUrlScore]
 
 
 class UrlScoresCollectionTest: XCTestCase {
     class FakeLongTermScoreStore: LongTermUrlScoreStoreProtocol {
         fileprivate var data = Table()
-        func apply(to urlId: UInt64, changes: (LongTermUrlScore) -> Void) {
+        func apply(to urlId: UUID, changes: (LongTermUrlScore) -> Void) {
             let score = data[urlId] ?? LongTermUrlScore(urlId: urlId)
             changes(score)
             data[urlId] = score
         }
-        func getMany(urlIds: [UInt64]) -> [LongTermUrlScore] {
+        func getMany(urlIds: [UUID]) -> [LongTermUrlScore] {
             return []
         }
     }
@@ -86,7 +86,9 @@ class UrlScoresCollectionTest: XCTestCase {
         let scorer = BrowsingTreeScorer(browsingTree: tree)
         page.browsingScorer = scorer
         scorer.page = page
-        let messageHandler = ScorerMessageHandler(config: config)
+        let positions = WebPositions()
+        page.webPositions = positions
+
         let creationDate = try XCTUnwrap(tree.root.events.first?.date)
         let link = tree.root.link
 
@@ -104,15 +106,24 @@ class UrlScoresCollectionTest: XCTestCase {
         XCTAssertEqual(score.area, 0)
         XCTAssertEqual(score.lastCreationDate, creationDate)
 
+        guard page.webPositions != nil else {
+            XCTFail("expected test page")
+            return
+        }
+
         //first scroll
-        var message = [
-            "x": 2,
-            "y": 5,
-            "width": 10,
-            "height": 10,
-            "scale": 1
-        ]
-        messageHandler.onMessage(messageName: "score_scroll", messageBody: message, from: page)
+        let scroll1 = WebPositions.FrameInfo(
+            href: "https://example.com",
+            parentHref: "https://example.com",
+            x: 0,
+            y: 0,
+            scrollX: 2,
+            scrollY: 5,
+            width: 10,
+            height: 10
+        )
+
+        scorer.updateScrollingScore(scroll1)
         score = try XCTUnwrap(store.data[link])
         
         XCTAssertEqual(score.urlId, link)
@@ -126,14 +137,17 @@ class UrlScoresCollectionTest: XCTestCase {
         XCTAssertEqual(score.lastCreationDate, creationDate)
         
         //second scroll
-        message = [
-            "x": 8,
-            "y": 4,
-            "width": 20,
-            "height": 20,
-            "scale": 1
-        ]
-        messageHandler.onMessage(messageName: "score_scroll", messageBody: message, from: page)
+        let scroll2 = WebPositions.FrameInfo(
+            href: "https://example.com",
+            parentHref: "https://example.com",
+            x: 0,
+            y: 0,
+            scrollX: 8,
+            scrollY: 4,
+            width: 20,
+            height: 20
+        )
+        scorer.updateScrollingScore(scroll2)
         score = try XCTUnwrap(store.data[link])
         
         XCTAssertEqual(score.urlId, link)

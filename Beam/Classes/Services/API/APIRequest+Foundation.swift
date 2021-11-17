@@ -44,15 +44,6 @@ extension APIRequest {
                 return
             }
 
-            // Quit early in case of already cancelled requests
-            if let error = error as NSError?, error.code == NSURLErrorCancelled {
-                self.logCancelledRequest(filename, localTimer)
-                self.backgroundQueue.async {
-                    completionHandler(.failure(error))
-                }
-                return
-            }
-
             var countOfBytesReceived: Int64 = 0
             var countOfBytesSent: Int64 = 0
 
@@ -66,6 +57,23 @@ extension APIRequest {
 
             Self.downloadedBytes += countOfBytesReceived
             Self.uploadedBytes += countOfBytesSent
+            Self.callsCount += 1
+
+            // Quit early in case of already cancelled requests
+            if let error = error as NSError?, error.code == NSURLErrorCancelled {
+                /*
+                 In such case, we already potentially sent and received all data, and maybe should just proceed like a
+                 regular request if we can parse its result meaning it's a fullfilled request.
+
+                 This way we can store the sent checksum as previousChecksum
+                 */
+
+                self.logCancelledRequest(filename, localTimer)
+                self.backgroundQueue.async {
+                    completionHandler(.failure(error))
+                }
+                return
+            }
 
             self.logRequest(filename,
                             response,
@@ -74,8 +82,6 @@ extension APIRequest {
                             countOfBytesSent,
                             countOfBytesReceived,
                             authenticatedCall ?? self.authenticatedAPICall)
-
-            Self.callsCount += 1
 
             if let error = error {
                 self.backgroundQueue.async {

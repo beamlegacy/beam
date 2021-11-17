@@ -37,7 +37,7 @@ class OmnibarViewTests: BaseTest {
         XCTAssertEqual(omnibarSearchField.value as? String, partiallyDeletedSearchText)
         
         testRailPrint("When I delete all input: \(partiallyDeletedSearchText)")
-        omnibarSearchField.typeKey("a", modifierFlags: .command)
+        ShortcutsHelper().shortcutActionInvoke(action: .selectAll)
         omnibarView.typeKeyboardKey(.delete)
         
         testRailPrint("Then Omnibar search field is empty")

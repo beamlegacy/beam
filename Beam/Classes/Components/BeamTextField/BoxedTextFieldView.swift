@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct BoxedTextFieldView: View {
+    static var borderColor: BeamColor = BeamColor.combining(lightColor: .Mercury.alpha(0.75), darkColor: .AlphaGray.alpha(0.4))
+
     var title: String
     @Binding var text: String
     @Binding var isEditing: Bool
@@ -32,7 +34,7 @@ struct BoxedTextFieldView: View {
                 .frame(height: 32)
         }
         .padding(.horizontal, BeamSpacing._80)
-        .border(colorScheme == .dark ? BeamColor.Mercury.swiftUI : BeamColor.Nero.swiftUI, width: 1.5)
+        .border(Self.borderColor.swiftUI, width: 1.5)
         .cornerRadius(3.0)
         .contentShape(Rectangle())
         .onTapGesture {

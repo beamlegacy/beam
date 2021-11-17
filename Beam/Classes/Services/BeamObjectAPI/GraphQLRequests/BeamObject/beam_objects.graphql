@@ -1,0 +1,15 @@
+query ($receivedAtAfter: ISO8601DateTime, $ids: [ID!], $beamObjectType: String) {
+  me {
+    beamObjects(receivedAtAfter: $receivedAtAfter, ids: $ids, type: $beamObjectType) {
+      id
+      createdAt
+      updatedAt
+      deletedAt
+      receivedAt
+      data
+      type
+      checksum
+      privateKeySignature
+    }
+  }
+}

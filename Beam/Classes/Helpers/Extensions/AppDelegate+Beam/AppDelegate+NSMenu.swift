@@ -70,6 +70,19 @@ extension AppDelegate: NSMenuDelegate, NSMenuItemValidation {
 
             let value = abs(item.tag)
             item.isEnabled = passConditionTag(tag: value, for: state)
+
+            if item.action == #selector(BeamWindow.collectPageToCard(_:)) {
+                updateFullPageCollectMenu(item)
+            }
+        }
+    }
+
+    private func updateFullPageCollectMenu(_ menuItem: NSMenuItem) {
+        guard let currentTab = window?.state.browserTabsManager.currentTab else { return }
+        if let note = currentTab.noteController.note {
+            menuItem.title = "Collect Page to \(note.title)"
+        } else {
+            menuItem.title = "Collect Page to Card…"
         }
     }
 
@@ -107,5 +120,14 @@ class WebviewRelatedMenuItem: NSMenuItem, MenuItemCustomValidation {
         return state?.mode == .web &&
             state?.browserTabsManager.currentTab != nil
             && beamTextField == nil
+    }
+}
+
+class LoadedWebviewRelatedMenuItem: NSMenuItem, MenuItemCustomValidation {
+    func validateForState(_ state: BeamState?, window: NSWindow?) -> Bool {
+        return state?.mode == .web &&
+            state?.browserTabsManager.currentTab != nil
+        && state?.browserTabsManager.currentTab?.url != nil
+        && !(state?.browserTabsManager.currentTab?.isLoading ?? true)
     }
 }

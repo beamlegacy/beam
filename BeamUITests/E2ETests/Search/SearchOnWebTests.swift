@@ -96,14 +96,16 @@ class SearchOnWebTests: BaseTest {
         testRailPrint("Given I open a test page")
         helper.openTestPage(page: .page2)
         let textToPaste1 = "Spanish, Italian"
-        let textToPaste2 = "An I-beam, also known as H-beam (for universal column, UC), w-beam (for \"wide flange\"), universal beam (UB), rolled steel joist (RSJ)"
+        _ = "An I-beam, also known as H-beam (for universal column, UC), w-beam (for \"wide flange\"), universal beam (UB), rolled steel joist (RSJ)"
         testRailPrint("When I paste \(textToPaste1) in the search field")
         searchView.activateSearchField(isWebSearch: true).pasteText(textToPaste: textToPaste1)
         testRailPrint("Then I see correct number of results")
         XCTAssertTrue(searchView.assertResultsCounterNumber("1/1"))
         
         testRailPrint("When I clean the text field")
-        searchView.selectAllShortcut().typeKeyboardKey(.delete)
+        searchView.shortcutsHelper
+            .shortcutActionInvoke(action: .selectAll)
+            .typeKeyboardKey(.delete)
     }
     
     func testScrollDownUpToSearchedWord() throws {

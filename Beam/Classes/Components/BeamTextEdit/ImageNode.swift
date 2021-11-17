@@ -8,6 +8,7 @@
 import Foundation
 import BeamCore
 import AppKit
+import Macaw
 
 class ImageNode: ResizableNode {
 
@@ -48,7 +49,7 @@ class ImageNode: ResizableNode {
             imageLayer = animatedImageLayer
             resizableElementContentSize = animatedImageLayer.bounds.size
         } else {
-            guard let image = NSImage(data: imageRecord.data) else {
+            guard let image = createImage(from: imageRecord) else {
                 Logger.shared.logError("ImageNode unable to decode image '\(uid)' from FileDB", category: .noteEditor)
                 return
             }
@@ -79,6 +80,17 @@ class ImageNode: ResizableNode {
 
         if URL(string: self.elementText.text) != nil {
             setupSourceButtonLayer()
+        }
+    }
+
+    private func createImage(from imageRecord: BeamFileRecord) -> NSImage? {
+        switch imageRecord.type {
+        case "image/svg+xml":
+            guard let svgString = imageRecord.data.asString, case .image(_, let info) = element.kind, let size = info.size else { return nil }
+            let svgNode = try? SVGParser.parse(text: svgString)
+            return try? svgNode?.toNativeImage(size: Size(Double(size.width), Double(size.height)), scale: NSScreen.main?.backingScaleFactor ?? 1)
+        default:
+            return NSImage(data: imageRecord.data)
         }
     }
 

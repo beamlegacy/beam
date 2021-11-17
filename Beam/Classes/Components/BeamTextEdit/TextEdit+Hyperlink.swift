@@ -51,16 +51,16 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
 
     /// - Returns: `true` if link can be embed, and therefore was changed or a menu was presented
     public func showLinkEmbedPasteMenu(for linkRange: BeamText.Range) -> Bool {
-        guard let node = focusedWidget as? TextNode else { return false }
+        guard let node = focusedWidget as? TextNode,
+              let link = node.linkAt(index: node.cursorPosition),
+              linkCanBeEmbed(link) else { return false }
         var (_, rect) = node.offsetAndFrameAt(index: node.cursorPosition)
         rect.origin.x = rect.maxX
-        guard let link = node.linkAt(index: node.cursorPosition),
-              linkCanBeEmbed(link) else { return false }
         dismissFormatterView(inlineFormatter)
         let targetRange = linkRange.position..<linkRange.end
-        if PreferencesManager.embedContentPreference == EmbedContent.always.id {
+        if PreferencesManager.embedContentPreference == PreferencesEmbedOptions.always.id {
             self.updateLinkToEmbed(in: node, at: targetRange)
-        } else if PreferencesManager.embedContentPreference == EmbedContent.only.id {
+        } else if PreferencesManager.embedContentPreference == PreferencesEmbedOptions.only.id {
             showHyperlinkContextMenu(for: node, targetRange: targetRange, frame: rect, url: link, linkTitle: selectedText, fromPaste: true)
         }
         return true
@@ -75,7 +75,7 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
     }
 
     public func linkCanBeEmbed(_ url: URL) -> Bool {
-        url.embed != nil
+        EmbedContentBuilder().canBuildEmbed(for: url)
     }
 
     // MARK: Mouse Events
@@ -124,9 +124,10 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
             })
         ]
         if linkCanBeEmbed(link) {
-            allItems.insert(ContextMenuItem(title: "Show as Embed", action: {
+            allItems.insert(ContextMenuItem(title: "Show as Embed", action: { [weak self] in
+                guard let self = self else { return }
                 self.updateLinkToEmbed(in: node, at: self.selectedTextRange)
-                self.showOrHideInlineFormatter(isPresent: false)
+                self.hideInlineFormatter()
             }), at: 3)
         }
         return allItems

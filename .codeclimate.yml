@@ -7,6 +7,11 @@ plugins:
     enabled: true
   fixme:
     enabled: true
+  eslint:
+    enabled: true
+    config:
+      extensions:
+        - .ts
 exclude_patterns:
   - Pods
   - Extern

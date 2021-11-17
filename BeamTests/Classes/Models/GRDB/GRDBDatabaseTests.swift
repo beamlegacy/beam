@@ -34,16 +34,17 @@ class GRDBDatabaseHistoryTests: XCTestCase {
 
     func testSearchHistory() throws {
         let db = GRDBDatabase.empty()
-
+        let urlIds = (0...2).map { _ in UUID() }
         for history in [
-            (urlId: 0, url: "https://macg.co", title: "Avec macOS Monterey, le Mac devient un récepteur AirPlay", content: """
+            (urlId: urlIds[0], url: "https://macg.co", title: "Avec macOS Monterey, le Mac devient un récepteur AirPlay", content: """
 La recopie vidéo est également au menu depuis le centre de contrôle de l'appareil iOS. Le Mac prend en charge l'affichage portrait et paysage, et depuis l'app Photos, les clichés peuvent occuper le maximum d'espace possible sur l'écran de l'ordinateur (en zoomant sur l'iPhone, la photo s'agrandira sur le Mac).
 """ ),
-            (urlId: 1, url: "https://doesnotexists.co", title: "", content: nil),
-            (urlId: 2, url: "https://unicode-separator.com", title: "foo·bar", content: nil)
+            (urlId: urlIds[1], url: "https://doesnotexists.co", title: "", content: nil),
+            (urlId: urlIds[2], url: "https://unicode-separator.com", title: "foo·bar", content: nil)
         ] {
-            try db.insertHistoryUrl(urlId: UInt64(history.urlId),
+            try db.insertHistoryUrl(urlId: history.urlId,
                                     url: history.url,
+                                    aliasDomain: nil,
                                     title: history.title,
                                     content: history.content)
         }
@@ -97,7 +98,7 @@ La recopie vidéo est également au menu depuis le centre de contrôle de l'appa
 
         // Check frecency record is retrieved
         do {
-            var frecency = FrecencyUrlRecord(urlId: 0,
+            var frecency = FrecencyUrlRecord(urlId: urlIds[0],
                                              lastAccessAt: Date(timeIntervalSince1970: 0),
                                              frecencyScore: 0.42,
                                              frecencySortScore: 0,
@@ -118,25 +119,26 @@ La recopie vidéo est également au menu depuis le centre de contrôle de l'appa
 
     func testSearchHistoryFrecencySort() throws {
         let db = GRDBDatabase.empty()
-
+        let urlIds = (0...2).map { _ in UUID() }
         for history in [
-            (urlId: 0, url: "https://foobar.co", title: "foo bar", content: ""),
-            (urlId: 1, url: "https://foobar1.co", title: "foo baz", content: nil),
-            (urlId: 2, url: "https://foobar2.co", title: "foo·bar baz", content: nil)
+            (urlId: urlIds[0], url: "https://foobar.co", title: "foo bar", content: ""),
+            (urlId: urlIds[1], url: "https://foobar1.co", title: "foo baz", content: nil),
+            (urlId: urlIds[2], url: "https://foobar2.co", title: "foo·bar baz", content: nil)
         ] {
-            try db.insertHistoryUrl(urlId: UInt64(history.urlId),
+            try db.insertHistoryUrl(urlId: history.urlId,
                                     url: history.url,
+                                    aliasDomain: nil,
                                     title: history.title,
                                     content: history.content)
         }
 
         for f in [
-            (urlId: 0, lastAccessAt: BeamDate.now, frecencyScore: 0.0, frecencySortScore: 0.42,            frecencyKey: FrecencyParamKey.webVisit30d0),
-            (urlId: 1, lastAccessAt: BeamDate.now, frecencyScore: 0.0, frecencySortScore: -0.05,           frecencyKey: FrecencyParamKey.webVisit30d0),
-            (urlId: 2, lastAccessAt: BeamDate.now, frecencyScore: 0.0, frecencySortScore: 1.42,            frecencyKey: FrecencyParamKey.webVisit30d0),
-            (urlId: 2, lastAccessAt: BeamDate.now, frecencyScore: 0.0, frecencySortScore: -Float.infinity, frecencyKey: FrecencyParamKey.webReadingTime30d0),
+            (urlId: urlIds[0], lastAccessAt: BeamDate.now, frecencyScore: 0.0, frecencySortScore: 0.42,            frecencyKey: FrecencyParamKey.webVisit30d0),
+            (urlId: urlIds[1], lastAccessAt: BeamDate.now, frecencyScore: 0.0, frecencySortScore: -0.05,           frecencyKey: FrecencyParamKey.webVisit30d0),
+            (urlId: urlIds[2], lastAccessAt: BeamDate.now, frecencyScore: 0.0, frecencySortScore: 1.42,            frecencyKey: FrecencyParamKey.webVisit30d0),
+            (urlId: urlIds[2], lastAccessAt: BeamDate.now, frecencyScore: 0.0, frecencySortScore: -Float.infinity, frecencyKey: FrecencyParamKey.webReadingTime30d0),
         ] {
-            var frecency = FrecencyUrlRecord(urlId: UInt64(f.urlId),
+            var frecency = FrecencyUrlRecord(urlId: f.urlId,
                                              lastAccessAt: f.lastAccessAt,
                                              frecencyScore: Float(f.frecencyScore),
                                              frecencySortScore: Float(f.frecencySortScore),
@@ -148,12 +150,12 @@ La recopie vidéo est également au menu depuis le centre de contrôle de l'appa
         searchHistory(db, query: "foo", enabledFrecencyParam: .webVisit30d0) { matches in
             expect(matches.count) == 3
 
-            for (expectedUrlId, match) in zip([ 2, 0, 1 ], matches) {
+            for (expectedUrlId, match) in zip([urlIds[2], urlIds[0], urlIds[1]], matches) {
                 guard let f = match.frecency else {
                     fail("expect a frecency record")
                     continue
                 }
-                expect(f.urlId) == UInt64(expectedUrlId)
+                expect(f.urlId) == expectedUrlId
             }
         }
 
@@ -161,12 +163,12 @@ La recopie vidéo est également au menu depuis le centre de contrôle de l'appa
         searchHistory(db, query: "foo", enabledFrecencyParam: .webReadingTime30d0) { matches in
             expect(matches.count) == 1
 
-            for (expectedUrlId, match) in zip([ 2 ], matches) {
+            for (expectedUrlId, match) in zip([ urlIds[2] ], matches) {
                 guard let f = match.frecency else {
                     fail("expect a frecency record")
                     continue
                 }
-                expect(f.urlId) == UInt64(expectedUrlId)
+                expect(f.urlId) == expectedUrlId
             }
         }
     }
@@ -174,16 +176,17 @@ La recopie vidéo est également au menu depuis le centre de contrôle de l'appa
     /// When a URL is visited multiple times. Searching the DB must the result once.
     func testSearchHistoryIsUnique() throws {
         let db = GRDBDatabase.empty()
-
+        let urldIds = (0...2).map  { _ in UUID() }
         for history in [
-            (urlId: 0, url: "https://www.lemonde.fr/", title: "Le Monde.fr", content: ""),
-            (urlId: 0, url: "https://www.lemonde.fr/", title: "Le Monde.fr", content: nil),
-            (urlId: 1, url: "https://macg.co/article1", title: "", content: "macOS Monterey, le Mac devient un récepteur AirPlay"),
-            (urlId: 2, url: "https://macg.co/article2", title: "", content: "Le Mac prend en charge l'affichage portrait et paysage"),
+            (urlId: urldIds[0], url: "https://www.lemonde.fr/", title: "Le Monde.fr", content: ""),
+            (urlId: urldIds[0], url: "https://www.lemonde.fr/", title: "Le Monde.fr", content: nil),
+            (urlId: urldIds[1], url: "https://macg.co/article1", title: "", content: "macOS Monterey, le Mac devient un récepteur AirPlay"),
+            (urlId: urldIds[2], url: "https://macg.co/article2", title: "", content: "Le Mac prend en charge l'affichage portrait et paysage"),
             // TODO: unique with ≠ URL but = urlId
         ] {
-            try db.insertHistoryUrl(urlId: UInt64(history.urlId),
+            try db.insertHistoryUrl(urlId: history.urlId,
                                     url: history.url,
+                                    aliasDomain: nil,
                                     title: history.title,
                                     content: history.content)
         }

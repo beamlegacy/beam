@@ -11,10 +11,6 @@ public enum DocumentType: Int16, Codable {
 }
 
 extension Document {
-    @nonobjc public class func fetchRequest() -> NSFetchRequest<Document> {
-        return NSFetchRequest<Document>(entityName: "Document")
-    }
-
     //swiftlint:disable identifier_name
     @NSManaged public var id: UUID
     @NSManaged public var data: Data?

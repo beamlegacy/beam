@@ -58,9 +58,11 @@ class RefNoteTitle: Widget {
             self?.updateTitleForHover(hover)
         }
 
-        addLayer(ChevronButton("chevron", open: open, changed: { [unowned self] value in
+        let chevron = ChevronButton("chevron", open: open, changed: { [unowned self] value in
             self.open = value
-        }))
+        })
+        chevron.setAccessibilityIdentifier("refNote_arrow")
+        addLayer(chevron)
 
         guard let cardTitleLayer = cardTitleLayer else { return }
 

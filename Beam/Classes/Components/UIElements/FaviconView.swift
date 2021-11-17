@@ -39,7 +39,7 @@ struct FaviconView: View {
                 self.faviconState = .generic
                 return
             }
-            FaviconProvider.shared.imageForUrl(url) { image in
+            FaviconProvider.shared.favicon(fromURL: url) { image in
                 if let favicon = image {
                     self.faviconState = .available(favicon)
                 } else {

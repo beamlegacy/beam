@@ -54,9 +54,11 @@ class DebugSection: Widget {
         layer.addSublayer(updatesLayer)
         layer.addSublayer(updateAttemptsLayer)
 
-        addLayer(ChevronButton("chevron", open: open, changed: { [unowned self] value in
+        let chevron = ChevronButton("chevron", open: open, changed: { [unowned self] value in
             self.open = value
-        }), origin: CGPoint(x: 0, y: 0))
+        })
+        chevron.setAccessibilityIdentifier("debug_arrow")
+        addLayer(chevron, origin: CGPoint(x: 0, y: 0))
 
         separatorLayer.backgroundColor = BeamColor.DebugSection.separator.cgColor
         self.layer.addSublayer(separatorLayer)
@@ -65,7 +67,8 @@ class DebugSection: Widget {
 
         updateLayerVisibility()
 
-        note.$saving.sink { [weak self] value in
+        note.$saving.sink { [weak self] val in
+            let value = val.load(ordering: .relaxed)
             guard let self = self else { return }
             let deadline = value ? DispatchTime.now() : DispatchTime.now() + 0.5
             DispatchQueue.main.asyncAfter(deadline: deadline) {
@@ -115,8 +118,9 @@ class DebugSection: Widget {
     }
 
     private func setupDebugInfoLayer() {
+        let documentManager = DocumentManager()
         let nodeDatabaseId = self.note.documentStruct?.databaseId.uuidString ?? "-"
-        let localDocument = try? Document.fetchWithId(CoreDataManager.shared.mainContext, self.note.id)
+        let localDocument = try? documentManager.fetchWithId(self.note.id)
         let previousChecksum = localDocument?.beam_object_previous_checksum ?? "-"
 
         let defaultDatabaseId = DatabaseManager.defaultDatabase.id.uuidString

@@ -21,7 +21,7 @@ class CalendarPickerViewModelTests: QuickSpec {
         beforeEach {
             var calendar = Calendar(identifier: .gregorian)
             calendar.firstWeekday = 1 // Sunday as first day of week
-            let dateComponents = DateComponents(calendar: calendar, year: 2020, month: 6, day: 16) // 16 June 2020
+            let dateComponents = DateComponents(calendar: calendar, year: 2020, month: 6, day: 16) // 16 June 2020 (beam company creation)
             baseDate = calendar.date(from: dateComponents) ?? Date()
 
             model = CalendarPickerView.Model(date: baseDate, calendar: calendar)

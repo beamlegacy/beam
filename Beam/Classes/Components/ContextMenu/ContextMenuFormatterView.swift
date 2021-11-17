@@ -32,16 +32,14 @@ class ContextMenuFormatterView: FormatterView {
 
     var typingPrefix = 1
 
-    convenience init(key: String,
-                     items: [ContextMenuItem],
-                     direction: Edge = .bottom,
-                     handlesTyping: Bool = false,
-                     defaultSelectedIndex: Int? = nil,
-                     sizeToFit: Bool = false,
-                     onSelectHandler: (() -> Void)? = nil) {
-        self.init(frame: CGRect.zero)
-        self.key = key
-        self.viewType = .inline
+    init(key: String,
+         items: [ContextMenuItem],
+         direction: Edge = .bottom,
+         handlesTyping: Bool = false,
+         defaultSelectedIndex: Int? = nil,
+         sizeToFit: Bool = false,
+         onSelectHandler: (() -> Void)? = nil) {
+
         self.items = items
         self.displayedItems = items
         self.direction = direction
@@ -50,9 +48,13 @@ class ContextMenuFormatterView: FormatterView {
         self.onSelectMenuItem = onSelectHandler
         self._handlesTyping = handlesTyping
         self.lastComputedSize = ContextMenuView.idealSizeForItems(items)
-        setupUI()
+        super.init(key: key, viewType: .inline)
     }
 
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func animateOnAppear(completionHandler: (() -> Void)? = nil) {
         super.animateOnAppear()
         subviewModel.visible = true

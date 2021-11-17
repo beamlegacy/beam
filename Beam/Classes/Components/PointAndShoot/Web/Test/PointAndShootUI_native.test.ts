@@ -1,15 +1,20 @@
 import {PointAndShootUI_native} from "../PointAndShootUI_native"
 import {NativeMock} from "../../../../Helpers/Utils/Web/Test/Mock/NativeMock"
-import {BeamElement, BeamRange} from "../../../../Helpers/Utils/Web/BeamTypes"
+import {BeamElement, BeamRange, BeamMessageHandler, MessageHandlers} from "../../../../Helpers/Utils/Web/BeamTypes"
 import {BeamElementHelper} from "../../../../Helpers/Utils/Web/BeamElementHelper"
 import {BeamRectHelper} from "../../../../Helpers/Utils/Web/BeamRectHelper"
-import {PNSWindowMock} from "./PointAndShoot.test"
+import { PNSWindowMock } from "./PNSWindowMock"
 import {BeamDocumentMock} from "../../../../Helpers/Utils/Web/Test/Mock/BeamDocumentMock"
 import {BeamTextMock} from "../../../../Helpers/Utils/Web/Test/Mock/BeamTextMock"
 import {BeamHTMLElementMock} from "../../../../Helpers/Utils/Web/Test/Mock/BeamHTMLElementMock"
 import {BeamRangeMock} from "../../../../Helpers/Utils/Web/Test/Mock/BeamRangeMock"
-import {PointAndShootMessages} from "../PointAndShoot"
 import { PointAndShootHelper } from "../PointAndShootHelper"
+
+jest.mock("debounce", () => ({
+  debounce: jest.fn(fn => {
+    return fn()
+  })
+}))
 
 /**
  * @param frameEls {BeamHTMLElement[]}
@@ -42,7 +47,7 @@ function pointAndShootTestBed(frameEls = []) {
     }
   })
   const win = new PNSWindowMock(testDocument)
-  const native = new NativeMock<PointAndShootMessages>(win)
+  const native = new NativeMock<MessageHandlers>(win, "pointAndShoot")
   const pnsNativeUI = new PointAndShootUI_native(native)
 
   return { pnsNativeUI, native }
@@ -98,7 +103,7 @@ test("test pointBounds payload", () => {
   expect(pointRect.y).toEqual(block.offsetTop)
   expect(pointRect.width).toEqual(mostRightChild.offsetLeft + mostRightChild.width - mostLeftChild.offsetLeft)
   expect(pointRect.height).toEqual(34 - mostTopChild.offsetTop)
-  expect(payload.html).toEqual("<p><b>MEAN</b> (<a href=\"/wiki/MongoDB\">MongoDB</a></p>")
+  expect(payload.html).toEqual(undefined)
 })
 
 test("test shootBounds payload", () => {

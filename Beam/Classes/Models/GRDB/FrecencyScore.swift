@@ -3,7 +3,7 @@ import GRDB
 
 public struct FrecencyUrlRecord {
     /// URL id from LinkStore
-    var urlId: UInt64
+    var urlId: UUID
     var lastAccessAt: Date
     /// Frecency internal score. Not suited for querying.
     var frecencyScore: Float
@@ -85,8 +85,7 @@ extension FrecencyNoteRecord: TableRecord {
 }
 
 public class GRDBUrlFrecencyStorage: FrecencyStorage {
-    public func fetchOne(id: FrecencyScoreIdKey, paramKey: FrecencyParamKey) throws -> FrecencyScore? {
-        guard let id = id as? UInt64 else { return nil }
+    public func fetchOne(id: UUID, paramKey: FrecencyParamKey) throws -> FrecencyScore? {
         do {
             if let record = try GRDBDatabase.shared.fetchOneFrecency(fromUrl: id)[paramKey] {
                 return FrecencyScore(id: record.urlId,
@@ -102,8 +101,7 @@ public class GRDBUrlFrecencyStorage: FrecencyStorage {
     }
 
     public func save(score: FrecencyScore, paramKey: FrecencyParamKey) throws {
-        guard let id = score.id as? UInt64 else { return }
-        var record = FrecencyUrlRecord(urlId: id,
+        var record = FrecencyUrlRecord(urlId: score.id,
                                        lastAccessAt: score.lastTimestamp,
                                        frecencyScore: score.lastScore,
                                        frecencySortScore: score.sortValue,
@@ -113,8 +111,7 @@ public class GRDBUrlFrecencyStorage: FrecencyStorage {
 }
 
 public class GRDBNoteFrecencyStorage: FrecencyStorage {
-    public func fetchOne(id: FrecencyScoreIdKey, paramKey: FrecencyParamKey) throws -> FrecencyScore? {
-        guard let id = id as? UUID else { return nil }
+    public func fetchOne(id: UUID, paramKey: FrecencyParamKey) throws -> FrecencyScore? {
         do {
             if let record = try GRDBDatabase.shared.fetchOneFrecencyNote(noteId: id, paramKey: paramKey) {
                 return FrecencyScore(id: record.noteId,
@@ -129,8 +126,7 @@ public class GRDBNoteFrecencyStorage: FrecencyStorage {
     }
 
     public func save(score: FrecencyScore, paramKey: FrecencyParamKey) throws {
-        guard let id = score.id as? UUID else { return }
-        let record = FrecencyNoteRecord(noteId: id,
+        let record = FrecencyNoteRecord(noteId: score.id,
                                        lastAccessAt: score.lastTimestamp,
                                        frecencyScore: score.lastScore,
                                        frecencySortScore: score.sortValue,

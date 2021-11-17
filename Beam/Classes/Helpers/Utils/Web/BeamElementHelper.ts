@@ -7,6 +7,7 @@ import {
   BeamWindow
 } from "./BeamTypes"
 import {BeamRectHelper} from "./BeamRectHelper"
+import { BeamEmbedHelper } from "./BeamEmbedHelper"
 
 /**
  * Useful methods for HTML Elements
@@ -29,11 +30,10 @@ export class BeamElementHelper {
    * Returns if an element is a textarea or an input elements with a text
    * based input type (text, email, date, number...)
    *
-   * @param element {BeamElement} The DOM Element to check.
+   * @param element {BeamHTMLElement} The DOM Element to check.
    * @return If the element is some kind of text input.
    */
-
-  static isTextualInputType(element: BeamElement): boolean {
+  static isTextualInputType(element: BeamHTMLElement): boolean {
     const tag = element.tagName.toLowerCase()
     if (tag === "textarea") {
       return true
@@ -86,10 +86,10 @@ export class BeamElementHelper {
   }
 
   static parseElementBasedOnStyles(element: BeamElement, win: BeamWindow<any>): BeamHTMLElement {
-    const imgUrl = this.getBackgroundImageURL(element, win)
-    if (imgUrl) {
+    const backgroundImageURL = this.getBackgroundImageURL(element, win)
+    if (backgroundImageURL) {
       const img = win.document.createElement("img")
-      img.setAttribute("src", imgUrl)
+      img.setAttribute("src", backgroundImageURL)
       return img
     } else {
       return element as BeamHTMLElement
@@ -104,6 +104,7 @@ export class BeamElementHelper {
    * @param win: {BeamWindow}
    * @return If the element is considered visible
    */
+  // is slow, propertyvalue and boundingrect
   static isVisible(element: BeamElement, win: BeamWindow<any>): boolean {
     let visible = false
 
@@ -139,6 +140,19 @@ export class BeamElementHelper {
       }
     }
     return visible
+  }
+
+  /**
+   * Returns true if element is Embed. Shorthand for calling `BeamEmbedHelper.isEmbed`
+   *
+   * @static
+   * @param {BeamElement} element
+   * @param {BeamWindow} win
+   * @return {*}  {boolean}
+   * @memberof BeamElementHelper
+   */
+  static isEmbed(element: BeamElement, win: BeamWindow): boolean {
+    return BeamEmbedHelper.isEmbed(element, win)
   }
 
   /**

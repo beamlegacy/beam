@@ -27,7 +27,7 @@ class PointAndShootShootGroupTest: PointAndShootTest {
             html: "<p>Pointed text</p>",
             animated: false
         )
-        var group = PointAndShoot.ShootGroup("point-uuid", [initialTarget], "https://pnshref.co")
+        var group = PointAndShoot.ShootGroup("point-uuid", [initialTarget], "placeholder text", "https://pnshref.co", shapeCache: .init())
 
         let newTarget: PointAndShoot.Target = PointAndShoot.Target(
             id: id,
@@ -51,7 +51,7 @@ class PointAndShootShootGroupTest: PointAndShootTest {
             html: "<p>Pointed text</p>",
             animated: false
         )
-        var group = PointAndShoot.ShootGroup("point-uuid", [initialTarget], "https://pnshref.co")
+        var group = PointAndShoot.ShootGroup("point-uuid", [initialTarget], "placeholder text", "https://pnshref.co", shapeCache: .init())
 
         let newTarget: PointAndShoot.Target = PointAndShoot.Target(
             id: id,
@@ -77,7 +77,7 @@ class PointAndShootShootGroupTest: PointAndShootTest {
             html: "<p>Pointed text</p>",
             animated: false
         )
-        var group = PointAndShoot.ShootGroup("point-uuid", [initialTarget], "https://pnshref.co")
+        var group = PointAndShoot.ShootGroup("point-uuid", [initialTarget], "placeholder text", "https://pnshref.co", shapeCache: .init())
 
         let newTarget: PointAndShoot.Target = PointAndShoot.Target(
             id: UUID().uuidString,
@@ -103,7 +103,7 @@ class PointAndShootShootGroupTest: PointAndShootTest {
             html: "<p>Pointed text</p>",
             animated: false
         )
-        var group = PointAndShoot.ShootGroup("point-uuid", [initialTarget], "https://pnshref.co")
+        var group = PointAndShoot.ShootGroup("point-uuid", [initialTarget], "placeholder text", "https://pnshref.co", shapeCache: .init())
 
         let newTarget: PointAndShoot.Target = PointAndShoot.Target(
             id: id,

@@ -69,8 +69,12 @@ class CoreDataManager {
                     Logger.shared.logDebug("sqlite file: \(fileUrl)", category: .coredata)
                 }
 
-                guard error == nil else {
-                    fatalError("was unable to load store \(error!)")
+                if let error = error {
+                    UserAlert.showError(message: "Coredata store error", error: error)
+
+                    NSApplication.shared.terminate(nil)
+
+                    return
                 }
 
                 completion()
@@ -104,13 +108,13 @@ class CoreDataManager {
             Logger.shared.logError("unable to commit editing before saving", category: .coredata)
         }
 
-        if context.hasChanges {
-            do {
-                try context.save()
-            } catch {
-                Logger.shared.logError("unable to save: \(error.localizedDescription)", category: .coredata)
-                throw error
-            }
+        guard context.hasChanges else { return }
+
+        do {
+            try context.save()
+        } catch {
+            Logger.shared.logError("unable to save: \(error.localizedDescription)", category: .coredata)
+            throw error
         }
     }
 

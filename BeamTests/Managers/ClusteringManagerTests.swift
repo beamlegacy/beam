@@ -12,6 +12,7 @@ class ClusteringManagerTests: XCTestCase {
     var activeSources: ActiveSources!
     var clusteringManager: ClusteringManager!
 
+    var pageIDs: [UUID] = []
     var documents: [IndexDocument]!
     var informations: [TabInformation]!
     var notes: [BeamNote]!
@@ -20,21 +21,22 @@ class ClusteringManagerTests: XCTestCase {
         documentManager = DocumentManager()
         sessionLinkRanker = SessionLinkRanker()
         activeSources = ActiveSources()
-        clusteringManager = ClusteringManager(ranker: sessionLinkRanker, documentManager: documentManager, candidate: 2, navigation: 0.5, text: 0.9, entities: 0.4, sessionId: UUID(), activeSources: activeSources)
+        clusteringManager = ClusteringManager(ranker: sessionLinkRanker, candidate: 2, navigation: 0.5, text: 0.9, entities: 0.4, sessionId: UUID(), activeSources: activeSources)
 
-        clusteringManager.initialiseNotes = .twoOrMorePagesAdded
-        
+        for _ in 0...3 {
+            pageIDs.append(UUID())
+        }
         documents = [
-            IndexDocument(id: 0, title: "Roger Federer"),
-            IndexDocument(id: 1, title: "Rafael Nadal"),
-            IndexDocument(id: 2, title: "Novak Djokovic"),
-            IndexDocument(id: 3, title: "Richard Gasquet")
+            IndexDocument(id: self.pageIDs[0], title: "Roger Federer"),
+            IndexDocument(id: self.pageIDs[1], title: "Rafael Nadal"),
+            IndexDocument(id: self.pageIDs[2], title: "Novak Djokovic"),
+            IndexDocument(id: self.pageIDs[3], title: "Richard Gasquet")
         ]
         informations = [
-            TabInformation(url: URL(string: "http://www.rogerfederer.com")!, document: documents[0], textContent: "Roger Federer is the best tennis player ever", cleanedTextContentForClustering: "Roger Federer is the best tennis player ever"),
-            TabInformation(url: URL(string: "https://rafaelnadal.com/en/")!, document: documents[1], textContent: "Rafael Nadal is also pretty good", cleanedTextContentForClustering: "Rafael Nadal is also pretty good"),
-            TabInformation(url: URL(string: "https://novakdjokovic.com/en/")!, document: documents[2], textContent: "Not you", cleanedTextContentForClustering: "Not you"),
-            TabInformation(url: URL(string: "http://www.richardgasquet.net")!, document: documents[3], textContent: "Richard Gasquet has a wonderful one-handed backhand", cleanedTextContentForClustering: "Not you")
+            TabInformation(url: URL(string: "http://www.rogerfederer.com")!, document: documents[0], textContent: "Roger Federer is the best tennis player ever", cleanedTextContentForClustering: ["Roger Federer is the best tennis player ever"]),
+            TabInformation(url: URL(string: "https://rafaelnadal.com/en/")!, document: documents[1], textContent: "Rafael Nadal is also pretty good", cleanedTextContentForClustering: ["Rafael Nadal is also pretty good"]),
+            TabInformation(url: URL(string: "https://novakdjokovic.com/en/")!, document: documents[2], textContent: "Not you", cleanedTextContentForClustering: ["Not you"]),
+            TabInformation(url: URL(string: "http://www.richardgasquet.net")!, document: documents[3], textContent: "Richard Gasquet has a wonderful one-handed backhand", cleanedTextContentForClustering: ["Richard Gasquet has a wonderful one-handed backhand"])
         ]
         notes = [
             BeamNote(title: "Tennis"),
@@ -51,20 +53,20 @@ class ClusteringManagerTests: XCTestCase {
     /// Test that adding pages and then notes works correctly
     func testAddPagesThenNotes() throws {
         clusteringManager.addPage(id: documents[0].id, parentId: nil, value: informations[0])
-        expect(self.clusteringManager.clusteredPagesId).toEventually(equal([[0]]))
+        expect(self.clusteringManager.clusteredPagesId).toEventually(equal([[self.pageIDs[0]]]))
 
         clusteringManager.addPage(id: documents[1].id, parentId: nil, value: informations[1])
-        expect(self.clusteringManager.clusteredPagesId).toEventually(equal([[0,1]]) || contain([1]))
+        expect(self.clusteringManager.clusteredPagesId).toEventually(equal([[self.pageIDs[0],self.pageIDs[1]]]) || contain([self.pageIDs[1]]))
 
         clusteringManager.addNote(note: notes[0])
         expect(self.clusteringManager.clusteredNotesId).toEventually(contain([notes[0].id]))
 
         clusteringManager.addNote(note: notes[1])
         expect(self.clusteringManager.clusteredNotesId).toEventually(contain([notes[1].id]) || contain([notes[0].id, notes[1].id]))
-        expect(self.clusteringManager.clusteredPagesId).toEventually(contain([0,1]) || contain([1]))
+        expect(self.clusteringManager.clusteredPagesId).toEventually(contain([self.pageIDs[0],self.pageIDs[1]]) || contain([self.pageIDs[1]]))
 
         clusteringManager.addPage(id: documents[2].id, parentId: nil, value: informations[2])
-        expect(self.clusteringManager.clusteredPagesId).toEventually(contain([0, 1, 2]) || contain([2]) || contain([0, 2]) || contain([1, 2]))
+        expect(self.clusteringManager.clusteredPagesId).toEventually(contain([self.pageIDs[0], self.pageIDs[1], self.pageIDs[2]]) || contain([self.pageIDs[2]]) || contain([self.pageIDs[0], self.pageIDs[2]]) || contain([self.pageIDs[1], self.pageIDs[2]]))
     }
 
     /// Test that adding notes and then pages works correctly. Includes a short note that is not to be added
@@ -80,15 +82,13 @@ class ClusteringManagerTests: XCTestCase {
         expect(self.clusteringManager.clusteredNotesId).toEventually(contain([notes[1].id]) || contain([notes[0].id, notes[1].id]))
 
         clusteringManager.addPage(id: documents[0].id, parentId: nil, value: informations[0])
-        expect(self.clusteringManager.clusteredPagesId).toEventually(contain([0]))
+        expect(self.clusteringManager.clusteredPagesId).toEventually(contain([self.pageIDs[0]]))
 
         clusteringManager.addPage(id: documents[1].id, parentId: nil, value: informations[1])
-        expect(self.clusteringManager.clusteredPagesId).toEventually(contain([0,1]) || contain([1]))
+        expect(self.clusteringManager.clusteredPagesId).toEventually(contain([self.pageIDs[0],self.pageIDs[1]]) || contain([self.pageIDs[1]]))
 
         clusteringManager.addNote(note: notes[2])
-        if !self.clusteringManager.clusteredNotesId.contains([notes[0].id, notes[1].id, notes[2].id]) {
-            expect(self.clusteringManager.clusteredNotesId).toEventually(contain([notes[2].id]) || contain([notes[0].id, notes[2].id]) || contain([notes[1].id, notes[2].id]))
-        }
+        expect(self.clusteringManager.clusteredNotesId).toEventually(contain([notes[0].id, notes[2].id]) || contain([notes[1].id, notes[2].id]) || contain([notes[2].id]))
     }
 
     /// Test that the clusteringManager knows how to extract id-s and parenting relations correctly
@@ -139,13 +139,13 @@ class ClusteringManagerTests: XCTestCase {
     func testOrphanedUrls() throws {
         let noteId = UUID()
         let noteGroups = [[noteId], [], []]
-        let urlGroups: [[UInt64]] = [
-            [0], //this page is in the same cluster as noteId note
-            [1, 2], //this cluster contains noteId's note active source
-            [3]] //this cluster can't be linked to any note
+        let urlGroups: [[UUID]] = [
+            [self.pageIDs[0]], //this page is in the same cluster as noteId note
+            [self.pageIDs[1], self.pageIDs[2]], //this cluster contains noteId's note active source
+            [self.pageIDs[3]]] //this cluster can't be linked to any note
         let activeSources = ActiveSources()
-        activeSources.activeSources = [noteId: [2]]
-        expect(self.clusteringManager.getOrphanedUrlGroups(urlGroups: urlGroups, noteGroups: noteGroups, activeSources: activeSources)) == [[3]]
+        activeSources.activeSources = [noteId: [self.pageIDs[2]]]
+        expect(self.clusteringManager.getOrphanedUrlGroups(urlGroups: urlGroups, noteGroups: noteGroups, activeSources: activeSources)) == [[self.pageIDs[3]]]
     }
 
     /// Test that text cleaning for notes is done correctly

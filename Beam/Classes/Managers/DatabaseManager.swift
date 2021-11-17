@@ -35,8 +35,7 @@ class DatabaseManager {
     private let mainContext: NSManagedObjectContext
     private let backgroundContext: NSManagedObjectContext
     let saveDatabaseQueue = OperationQueue()
-    private static var networkRequests: [UUID: APIRequest] = [:]
-    private static var networkTasks: [UUID: URLSessionTask] = [:]
+
     let backgroundQueue = DispatchQueue(label: "DatabaseManager backgroundQueue", qos: .default)
     var saveDatabasePromiseCancels: [UUID: () -> Void] = [:]
 
@@ -102,13 +101,9 @@ class DatabaseManager {
             NotificationCenter.default.post(name: .defaultDatabaseUpdate, object: newValue)
 
             // TODO: remove this once the app knows how to switch database live
-            let alert = NSAlert()
-            alert.messageText = "Database changed"
-            alert.alertStyle = .critical
-            alert.informativeText = "DB Changed from \(oldValue.title) {\(oldValue.id)} to \(newValue.title) {\(newValue.id)}. Beam must exit now."
-
-            alert.addButton(withTitle: "Exit now")
-            alert.runModal()
+            UserAlert.showError(message: "Database changed",
+                                informativeText: "DB Changed from \(oldValue.title) {\(oldValue.id)} to \(newValue.title) {\(newValue.id)}. Beam must exit now.",
+                                buttonTitle: "Exit now")
 
             NSApplication.shared.terminate(nil)
         }
@@ -249,7 +244,7 @@ class DatabaseManager {
     // MARK: -
     // MARK: Count
     func documentsCountForDatabase(_ id: UUID) -> Int {
-        Document.countWithPredicate(CoreDataManager.shared.mainContext, nil, id)
+        DocumentManager().count(filters: [.databaseId(id)])
     }
 
     // MARK: -
@@ -349,7 +344,8 @@ class DatabaseManager {
     static func isDatabaseEmpty(_ context: NSManagedObjectContext, _ databaseId: UUID) -> Bool {
         context.performAndWait {
             do {
-                for document in try Document.fetchAll(context, nil, nil, databaseId) {
+                let documentManager = DocumentManager()
+                for document in try documentManager.fetchAll(filters: [.databaseId(databaseId)]) {
                     guard DocumentStruct(document: document).isEmpty else {
                         Logger.shared.logDebug("document \(document.titleAndId) is not empty", category: .databaseDebug)
                         return false

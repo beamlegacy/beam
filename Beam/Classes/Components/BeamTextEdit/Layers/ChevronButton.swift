@@ -34,13 +34,13 @@ class ChevronButton: ButtonLayer {
         ]
         updateChevron()
 
-        setAccessibilityLabel("disclosure triangle")
         setAccessibilityRole(.disclosureTriangle)
         setAccessibilityDisclosed(open)
     }
 
     func updateChevron() {
         chevron.setAffineTransform(CGAffineTransform(rotationAngle: open ? CGFloat.pi / 2 : 0))
+        setAccessibilityLabel("disclosure triangle \(open ? "opened" : "closed")")
     }
 
     override func isAccessibilityDisclosed() -> Bool {

@@ -12,12 +12,17 @@ import BeamCore
 extension AutocompleteManager {
     typealias AutocompletePublisherSourceResults = (source: AutocompleteResult.Source, results: [AutocompleteResult])
 
+    private func logIntermediate(step: String, stepShortName: String, results: [AutocompleteResult]) {
+        Self.logIntermediate(step: step, stepShortName: stepShortName, results: results)
+    }
+
     func getAutocompletePublishers(for searchText: String) -> [AnyPublisher<AutocompletePublisherSourceResults, Never>] {
         [
             futureToPublisher(autocompleteNotesResults(for: searchText), source: .note),
             futureToPublisher(autocompleteNotesContentsResults(for: searchText), source: .note),
             futureToPublisher(autocompleteTopDomainResults(for: searchText), source: .topDomain),
             futureToPublisher(autocompleteHistoryResults(for: searchText), source: .history),
+            futureToPublisher(autocompleteAliasHistoryResults(for: searchText), source: .history),
             futureToPublisher(autocompleteLinkStoreResults(for: searchText), source: .url),
             self.autocompleteCanCreateNoteResult(for: searchText)
                 .replaceError(with: false)
@@ -55,7 +60,8 @@ extension AutocompleteManager {
 
     private func autocompleteNotesResults(for query: String) -> Future<[AutocompleteResult], Error> {
         Future { [weak self] promise in
-            self?.beamData.documentManager.documentsWithTitleMatch(title: query) { result in
+            let documentManager = DocumentManager()
+            documentManager.documentsWithTitleMatch(title: query) { result in
                 switch result {
                 case .failure(let error): promise(.failure(error))
                 case .success(let documentStructs):
@@ -64,7 +70,9 @@ extension AutocompleteManager {
                     let autocompleteResults = documentStructs.map {
                         AutocompleteResult(text: $0.title, source: .note(noteId: $0.id), completingText: query, uuid: $0.id, score: scores[$0.id])
                     }.sorted(by: >).prefix(6)
-                    promise(.success(Array(autocompleteResults)))
+                    let autocompleteResultsArray = Array(autocompleteResults)
+                    self?.logIntermediate(step: "NoteTitle", stepShortName: "NT", results: autocompleteResultsArray)
+                    promise(.success(autocompleteResultsArray))
                 }
             }
         }
@@ -76,14 +84,16 @@ extension AutocompleteManager {
                 switch result {
                 case .failure(let error): promise(.failure(error))
                 case .success(let notesContentResults):
+                    let documentManager = DocumentManager()
                     let ids = notesContentResults.map { $0.noteId }
-                    let docs = beamData?.documentManager.loadDocumentsById(ids: ids)
+                    let docs = documentManager.loadDocumentsById(ids: ids)
                     let autocompleteResults = notesContentResults.compactMap { result -> AutocompleteResult? in
                         // Check if the note still exists before proceeding.
-                        guard docs?.first(where: { $0.id == result.noteId }) != nil else { return nil }
+                        guard docs.first(where: { $0.id == result.noteId }) != nil else { return nil }
                         return AutocompleteResult(text: result.title, source: .note(noteId: result.noteId, elementId: result.uid),
                                                   completingText: query, uuid: result.uid, score: result.frecency?.frecencySortScore)
                     }
+                    self.logIntermediate(step: "NoteContent", stepShortName: "NC", results: autocompleteResults)
                     promise(.success(autocompleteResults))
                 }
             }
@@ -105,7 +115,35 @@ extension AutocompleteManager {
                         return AutocompleteResult(text: result.title, source: .history,
                                                   url: url, information: information, completingText: query, score: result.frecency?.frecencySortScore)
                     }
+                    self.logIntermediate(step: "HistoryContent", stepShortName: "HC", results: autocompleteResults)
                     promise(.success(autocompleteResults))
+                }
+            }
+        }
+    }
+
+    private func autocompleteAliasHistoryResults(for query: String) -> Future<[AutocompleteResult], Error> {
+        Future { promise in
+            GRDBDatabase.shared.searchAlias(query: query, enabledFrecencyParam: AutocompleteManager.urlFrecencyParamKey) { result in
+                switch result {
+                case .failure(let error): promise(.failure(error))
+                case .success(let historyResult):
+                    guard let historyResult = historyResult else {
+                        promise(.success([]))
+                        return
+                    }
+                    var information: String? = historyResult.url
+                    let url = URL(string: historyResult.url)
+                    if let url = url {
+                        information = url.urlStringWithoutScheme.removingPercentEncoding
+                    }
+                    promise(.success([AutocompleteResult(text: historyResult.title,
+                                                         source: .history,
+                                                         url: url,
+                                                         information: information,
+                                                         completingText: query,
+                                                         score: historyResult.frecency?.frecencySortScore)
+                                     ]))
                 }
             }
         }
@@ -122,18 +160,20 @@ extension AutocompleteManager {
                                           information: link.title, completingText: query,
                                           score: scores[urlId])
             }.sorted(by: >)
+            self.logIntermediate(step: "HistoryTittle", stepShortName: "HT", results: results)
             promise(.success(results))
         }
     }
 
     private func autocompleteCanCreateNoteResult(for query: String) -> Future<Bool, Error> {
-        Future { [weak self] promise in
-            self?.beamData.documentManager.loadDocumentByTitle(title: query) { result in
+        Future { [weak self, query] promise in
+            let documentManager = DocumentManager()
+            documentManager.loadDocumentByTitle(title: query) { result in
                 switch result {
                 case .failure(let error):
                     promise(.failure(error))
                 case .success(let documentStruct):
-                    let canCreateNote = documentStruct == nil && URL(string: query)?.scheme == nil
+                    let canCreateNote = documentStruct == nil && URL(string: query)?.scheme == nil && query.containsCharacters
                     promise(.success(canCreateNote))
                 }
             }
@@ -151,6 +191,7 @@ extension AutocompleteManager {
                         return
                     }
                     let ac = AutocompleteResult(text: url.absoluteString, source: .topDomain, url: url, completingText: query)
+                    self.logIntermediate(step: "TopDomain", stepShortName: "TD", results: [ac])
                     promise(.success([ac]))
                 }
             }
@@ -171,6 +212,7 @@ extension AutocompleteManager {
                     return
                 }
                 promiseReturnedAlready = true
+                self.logIntermediate(step: "SearchEngine", stepShortName: "SE", results: results)
                 promise(.success(results))
             }.store(in: &self.searchRequestsCancellables)
 

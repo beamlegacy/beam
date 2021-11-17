@@ -11,8 +11,6 @@ import Promises
 
     var id: UUID = UUID()
 
-    var scrollX: CGFloat = 0
-    var scrollY: CGFloat = 0
     var width: CGFloat = 0
     var height: CGFloat = 0
     private var pixelRatio: Double = 1
@@ -30,6 +28,9 @@ import Promises
             navigationController?.setLoading()
         }
         self.url = url
+        if url.isDomain {
+            userTypedDomain = url
+        }
         navigationCount = 0
         if url.isFileURL {
             webView.loadFileURL(url, allowingReadAccessTo: url.deletingLastPathComponent())
@@ -64,6 +65,8 @@ import Promises
     @Published var title: String = "New Tab"
     @Published var originalQuery: String?
     @Published var url: URL?
+    @Published var responseStatusCode: Int = 200
+    @Published var userTypedDomain: URL?
     @Published var isLoading: Bool = false
     @Published var estimatedLoadingProgress: Double = 0
     @Published var hasOnlySecureContent: Bool = false
@@ -123,6 +126,7 @@ import Promises
 
     func navigatedTo(url: URL, title: String?, reason: NoteElementAddReason) {
         logInNote(url: url, title: title, reason: reason)
+        updateFavIcon(fromWebView: true)
         updateScore()
     }
 
@@ -164,10 +168,15 @@ import Promises
     }()
 
     lazy var pointAndShoot: PointAndShoot? = {
-        guard let scorer = browsingScorer else { return nil }
-        let pns = PointAndShoot(scorer: scorer)
+        let pns = PointAndShoot()
         pns.page = self
         return pns
+    }()
+
+    lazy var webPositions: WebPositions? = {
+        let webPositions = WebPositions()
+        webPositions.delegate = self
+        return webPositions
     }()
 
     private var _navigationController: BeamWebNavigationController?
@@ -295,7 +304,7 @@ import Promises
 
         super.init()
         DispatchQueue.main.async {
-            self.updateFavIcon()
+            self.updateFavIcon(fromWebView: false)
         }
     }
 
@@ -353,6 +362,10 @@ import Promises
 
         state.setup(webView: web)
         backForwardList = web.backForwardList
+        web.page = self
+
+        uiDelegateController.page = self
+        mediaPlayerController = MediaPlayerController(page: self)
         webView = web
         self.webView.page = self
         uiDelegateController.page = self
@@ -368,7 +381,7 @@ import Promises
         if let suppliedPreloadURL = preloadUrl {
             preloadUrl = nil
             DispatchQueue.main.async { [weak self] in
-                self?.webView.load(URLRequest(url: suppliedPreloadURL))
+                self?.load(url: suppliedPreloadURL)
             }
         }
     }
@@ -428,11 +441,18 @@ import Promises
         self.title = title ?? ""
     }
 
-    private func updateFavIcon() {
+    private func updateFavIcon(fromWebView: Bool, cacheOnly: Bool = false) {
         guard let url = url else { favIcon = nil; return }
-        FaviconProvider.shared.imageForUrl(url) { [weak self] (image) in
+        FaviconProvider.shared.favicon(fromURL: url, webView: fromWebView ? webView : nil, cacheOnly: cacheOnly) { [weak self] (image) in
             guard let self = self else { return }
-            self.favIcon = image
+            guard image != nil || !fromWebView else {
+                // no favicon found from webview, try url instead.
+                self.updateFavIcon(fromWebView: false)
+                return
+            }
+            DispatchQueue.main.async {
+                self.favIcon = image
+            }
         }
     }
 
@@ -446,8 +466,7 @@ import Promises
     /// - Parameter noteTitle: The title of the Note
     /// - Returns: The fetched note or nil if no note exists
     func getNote(fromTitle noteTitle: String) -> BeamNote? {
-        guard let documentManager = state?.data.documentManager else { return nil }
-        return BeamNote.fetch(documentManager, title: noteTitle)
+        return BeamNote.fetch(title: noteTitle)
     }
 
     var backListSize = 0
@@ -469,6 +488,9 @@ import Promises
     }
 
     private func setupObservers() {
+        if !scope.isEmpty {
+            cancelObservers()
+        }
         Logger.shared.logDebug("setupObservers", category: .javascript)
         webView.publisher(for: \.title)
             .debounce(for: .milliseconds(200), scheduler: DispatchQueue.main)
@@ -478,6 +500,9 @@ import Promises
         webView.publisher(for: \.url).sink { [unowned self] webviewUrl in
             guard let webviewUrl = webviewUrl else {
                 return // webview probably failed to load
+            }
+            if webviewUrl.isDomain {
+                userTypedDomain = webviewUrl
             }
             if BeamURL(webviewUrl).isErrorPage {
                 let beamSchemeUrl = BeamURL(webviewUrl)
@@ -494,7 +519,12 @@ import Promises
                 url = webviewUrl
             }
             leave()
-            updateFavIcon()
+            updateFavIcon(fromWebView: false, cacheOnly: true)
+            if PreferencesManager.enableSpaIndexing {
+                // not just in didFinish delegate but everytime we observe url change, it's the only solution for SPA websites
+                // https://github.com/mozilla-mobile/firefox-ios/wiki/WKWebView-navigation-and-security-considerations#single-page-js-apps-spas
+                navigationController?.navigatedTo(url: webviewUrl, webView: webView, replace: false)
+            }
             // self.browsingTree.current.score.openIndex = self.navigationCount
             // self.updateScore()
             // self.navigationCount = 0
@@ -513,6 +543,7 @@ import Promises
     }
 
     func cancelObservers() {
+        Logger.shared.logDebug("cancelObservers", category: .javascript)
         scope.removeAll()
         webView?.navigationDelegate = nil
         webView?.uiDelegate = nil
@@ -561,6 +592,10 @@ import Promises
 
     func createNewTab(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, setCurrent: Bool) -> WebPage? {
         guard let state = state else { return nil }
+        if let currentTabId = state.browserTabsManager.currentTab?.id, !setCurrent && state.browserTabsManager.currentTabGroupKey != currentTabId {
+            state.browserTabsManager.removeTabFromGroup(tabId: currentTabId)
+            state.browserTabsManager.createNewGroup(for: currentTabId)
+        }
         return createNewTab(targetURL, configuration, setCurrent: setCurrent, state: state)
     }
 
@@ -612,7 +647,8 @@ import Promises
 
     var navigationCount: Int = 0
 
-    func startReading(withState newState: BeamState?) {
+    private var refocusDispatchItem: DispatchWorkItem?
+    func tabDidAppear(withState newState: BeamState?) {
         if newState != state {
             if state == nil, let newState = newState {
                 // first read on a lazy tab
@@ -626,11 +662,14 @@ import Promises
         browsingTree.startReading()
         guard !isLoading && url != nil && state?.focusOmniBox != true else { return }
         // bring back the focus to where it was
-        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: .milliseconds(200))) { [weak self] in
+        refocusDispatchItem?.cancel()
+        let workItem = DispatchWorkItem { [weak self] in
             guard let webView = self?.webView, self?.isActiveTab() == true else { return }
             webView.window?.makeFirstResponder(webView)
             webView.page?.executeJS("refocusLastElement()", objectName: "FocusHandling")
         }
+        refocusDispatchItem = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now().advanced(by: .milliseconds(200)), execute: workItem)
     }
 
     func switchToCard() {
@@ -700,6 +739,36 @@ import Promises
         sendTree(grouped: true)
     }
 
+    func collectTab() {
+
+        guard let layer = webView.layer,
+                let url = url,
+                let pns = pointAndShoot,
+                !isLoading else { return }
+
+        let animator = FullPageCollectAnimator(webView: webView)
+
+        guard let (hoverLayer, hoverGroup, webViewGroup) = animator.buildFullPageCollectAnimation() else { return }
+
+        let remover = LayerRemoverAnimationDelegate(with: hoverLayer) { _ in
+            DispatchQueue.main.async {
+                let target = PointAndShoot.Target.init(id: UUID().uuidString, rect: self.webView.frame, mouseLocation: pns.mouseLocation, html: "<a href=\"\(url)\">\(self.title)</a>", animated: true)
+                let shootGroup = PointAndShoot.ShootGroup.init(UUID().uuidString, [target], "", "", shapeCache: nil, showRect: false, directShoot: true)
+
+                if let note = self.noteController.note {
+                    pns.addShootToNote(targetNote: note, withNote: nil, group: shootGroup, completion: {})
+                } else {
+                    pns.activeShootGroup = shootGroup
+                }
+            }
+        }
+        hoverGroup.delegate = remover
+
+        layer.superlayer?.addSublayer(hoverLayer)
+        layer.add(webViewGroup, forKey: "animation")
+        hoverLayer.add(hoverGroup, forKey: "hover")
+    }
+
     private func tabDidChangeWindow() {
         guard isPinned else { return }
         let config = WKSnapshotConfiguration()
@@ -725,5 +794,15 @@ import Promises
         } else {
             BrowsingTreeStoreManager.shared.save(browsingTree: self.browsingTree, appSessionId: appSessionId) {}
         }
+    }
+}
+
+extension BrowserTab: WebPositionsDelegate {
+    /// The callback triggered when WebPositions recieves an updated scroll position.
+    /// Callback will be called very often. Take care of your own debouncing or throttling
+    /// - Parameter frame: WebPage frame coordinates and positions
+    func webPositionsDidUpdateScroll(with frame: WebPositions.FrameInfo) {
+        guard let scorer = browsingScorer else { return }
+        scorer.debouncedUpdateScrollingScore.send(frame)
     }
 }

@@ -8,16 +8,39 @@
 import Foundation
 import XCTest
 
-class PasswordsTestView: BaseView {
+class PasswordsTestView: PreferencesBaseView {
     
     @discardableResult
     func clickCancel() -> WebTestView {
-        app/*@START_MENU_TOKEN@*/.sheets/*[[".dialogs.sheets",".sheets"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.buttons[PasswordViewLocators.Buttons.cancelButton.accessibilityIdentifier].clickOnHittable()
+        buttonSheets(PasswordViewLocators.Buttons.cancelButton.accessibilityIdentifier).clickOnExistence()
         return WebTestView()
     }
     
+    @discardableResult
+    func clickFill() -> WebTestView {
+        buttonSheets(PasswordViewLocators.Buttons.fillButton.accessibilityIdentifier).clickOnExistence()
+        return WebTestView()
+    }
+    
+    @discardableResult
+    func clickRemove() -> AlertTestView {
+        buttonSheets(PasswordViewLocators.Buttons.removeButton.accessibilityIdentifier).clickOnExistence()
+        return AlertTestView()
+    }
+    
+    @discardableResult
+    func searchForPasswordBy(_ searchKeyword: String) -> PasswordsTestView {
+        buttonTables(PasswordViewLocators.TextFields.searchField.accessibilityIdentifier).clickOnExistence()
+        buttonTables(PasswordViewLocators.TextFields.searchField.accessibilityIdentifier).typeText(searchKeyword)
+        return self
+    }
+    
     func isPasswordPreferencesOpened() -> Bool {
-        return app/*@START_MENU_TOKEN@*/.dialogs.sheets/*[[".dialogs.sheets",".sheets"],[[[-1,1],[-1,0]]],[1]]@END_MENU_TOKEN@*/.staticTexts[PasswordViewLocators.StaticTexts.windowTitle.accessibilityIdentifier].waitForExistence(timeout: minimumWaitTimeout)
+        return staticTextSheets(PasswordViewLocators.StaticTexts.windowTitle.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout)
+    }
+    
+    func isPasswordDisplayedBy(_ text: String) -> Bool {
+        return staticTextTables(text).waitForExistence(timeout: minimumWaitTimeout)
     }
     
     func waitForPreferenceToClose() -> Bool {

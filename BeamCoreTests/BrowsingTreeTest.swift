@@ -27,13 +27,13 @@ class BrowsingTreeTest: XCTestCase {
                                            {"date": 643295446.507388,
                                             "type": "startReading"}],
                                 "id": "4045225C-5E34-4520-9C46-BC7450837F6F",
-                                "link": 218}],
+                                "link": "CB95AAF0-B3DF-4CBA-B92E-9051AA959FAE"}],
                   "events": [{"date": 643295384.698409, "type": "creation"},
                              {"date": 643295385.234729, "type": "startReading"},
                              {"date": 643295386.780153, "type": "searchBarNavigation"}],
                   "id": "313D8A29-1C6D-4A0A-9970-12293C1CCA2B",
-                  "link": 78},
-         "scores": [218,
+                  "link": "46C67F6A-8B3A-42E1-86DE-E3AE5C66AAFE"},
+         "scores": ["46C67F6A-8B3A-42E1-86DE-E3AE5C66AAFE",
                     {"area": 3747357,
                      "inbounds": 0,
                      "openIndex": 0,
@@ -147,9 +147,59 @@ class BrowsingTreeTest: XCTestCase {
         let root = tree.current!
         tree.navigateTo(url: "www.chocolate.com", title: nil, startReading: true, isLinkActivation: false, readCount: 0)
         let current = tree.current!
-        var mapping = [UInt64: String]()
+        var mapping = [UUID: String]()
         mapping[root.link] = "<???>"
         mapping[current.link] = "www.chocolate.com"
         XCTAssertEqual(tree.idUrlMapping, mapping)
+    }
+    func testUrlIdMigration() throws {
+        //Checks that a tree bearing legacy Uint64 urlId can be decoded and detected as legacy
+        var legacyJson = """
+        {"origin": {"type": "searchBar", "value": "patrick dewaere"},
+         "root": {"children": [{"events": [{"date": 643295386.78019, "type": "creation"}],
+                                "id": "4045225C-5E34-4520-9C46-BC7450837F6F",
+                                "link": 0}],
+                  "events": [{"date": 643295384.698409, "type": "creation"}],
+                  "id": "313D8A29-1C6D-4A0A-9970-12293C1CCA2B",
+                  "link": 1 },
+         "scores": [0,
+                    {"area": 3747357,
+                     "inbounds": 0,
+                     "openIndex": 0,
+                     "outbounds": 0,
+                     "readingTime": 0,
+                     "scrollRatioX": 0,
+                     "scrollRatioY": 0.34304097294807434,
+                     "textAmount": 1594,
+                     "textSelections": 0,
+                     "videoReadingDuration": 0,
+                     "videoTotalDuration": 0}
+            ]
+        }
+        """.data(using: .utf8)!
+
+        let decoder = JSONDecoder()
+        let encoder = JSONEncoder()
+        var legacyDecoded = try XCTUnwrap(try? decoder.decode(BrowsingTree.self, from: legacyJson))
+        var legacyRoot = try XCTUnwrap(legacyDecoded.root)
+        XCTAssert(legacyRoot.legacy)
+        //Checks that additionnal encode decode doesnt loose the legacy information
+        legacyJson = try XCTUnwrap(try? encoder.encode(legacyDecoded))
+        legacyDecoded = try XCTUnwrap(try? decoder.decode(BrowsingTree.self, from: legacyJson))
+        legacyRoot = try XCTUnwrap(legacyDecoded.root)
+        XCTAssert(legacyRoot.legacy)
+
+        //Checks that encode decode works properly for non legacy trees
+        let currentTree = BrowsingTree(nil)
+        let rootUrlId = currentTree.root.link
+        currentTree.navigateTo(url: "http://cool.cat", title: nil, startReading: true, isLinkActivation: false, readCount: 10)
+        let childUrlId = currentTree.current.link
+        XCTAssert(!currentTree.root.legacy)
+        let currentJson = try XCTUnwrap(try? encoder.encode(currentTree))
+        let decodedCurrentTree = try XCTUnwrap(try? decoder.decode(BrowsingTree.self, from: currentJson))
+        XCTAssert(!decodedCurrentTree.root.legacy)
+        XCTAssertEqual(currentTree.scores, decodedCurrentTree.scores)
+        XCTAssertEqual(rootUrlId, decodedCurrentTree.root.link)
+        XCTAssertEqual(childUrlId, decodedCurrentTree.current.link)
     }
 }

@@ -94,12 +94,13 @@ extension AppDelegate {
         if components.host != Configuration.publicHostname {
             guard let url = components.url else { return false }
             Logger.shared.logDebug("Opened external URL: \(url.absoluteString)", category: .general)
-            _ = window.state.createTab(withURL: url, originalQuery: url.absoluteString)
             NSApp.activate(ignoringOtherApps: true)
             if window.isMiniaturized {
                 window.deminiaturize(nil)
             }
             window.makeKeyAndOrderFront(nil)
+
+            _ = window.state.createTab(withURL: url, originalQuery: url.absoluteString)
             return true
         }
 

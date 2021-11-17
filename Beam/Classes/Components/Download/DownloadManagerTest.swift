@@ -16,12 +16,13 @@ class DownloadManagerTest: XCTestCase {
 
         XCTAssertNotNil(result)
 
-        if case .text(let value, let mimeType, _) = result! {
-            XCTAssertEqual("text/html", mimeType)
-            XCTAssertTrue(value.count > 0)
-        } else {
+        guard let result = result, case .text(let value, let mimeType, _) = result else {
             XCTFail("expected text response")
+            return
         }
+
+        XCTAssertEqual("text/html", mimeType)
+        XCTAssertTrue(value.count > 0)
     }
 
     func testDownloadTextAndImage() {
@@ -29,14 +30,14 @@ class DownloadManagerTest: XCTestCase {
 
         XCTAssertNotNil(results)
 
-        if case .text(let value, let mimeType, _) = results![0] {
+        if let text = results?.first, case .text(let value, let mimeType, _) = text {
             XCTAssertEqual("text/html", mimeType)
             XCTAssertTrue(value.count > 0)
         } else {
             XCTFail("expected text response for first result")
         }
 
-        if case .binary(let data, let mimeType, _) = results![1] {
+        if let image = results?[1], case .binary(let data, let mimeType, _) = image {
             XCTAssertEqual("image/x-icon", mimeType)
             XCTAssertTrue(data.count > 0)
         } else {
@@ -49,12 +50,13 @@ class DownloadManagerTest: XCTestCase {
 
         XCTAssertNotNil(result)
 
-        if case .binary(let data, let mimeType, _) = result! {
-            XCTAssertEqual("image/x-icon", mimeType)
-            XCTAssertTrue(data.count > 0)
-        } else {
+        guard let result = result, case .binary(let data, let mimeType, _) = result else {
             XCTFail("expected binary response")
+            return
         }
+
+        XCTAssertEqual("image/x-icon", mimeType)
+        XCTAssertTrue(data.count > 0)
     }
 
     // Disabled as failing due to network conditions/availability/timeout

@@ -34,7 +34,8 @@ struct OauthButton: View {
             connect()
         }, label: {
             Text(buttonText)
-                .frame(width: 126, height: 20)
+                .foregroundColor(BeamColor.Generic.text.swiftUI)
+                .frame(width: buttonType == .connect ? 126 : 145)
         })
     }
 
@@ -53,6 +54,11 @@ struct OauthButton: View {
             switch result {
             case .success(let (credential, _, _)):
                 Logger.shared.logDebug("\(type.rawValue) Token: \(credential.oauthToken)", category: .network)
+
+                if type.rawValue == IdentityRequest.Provider.google.rawValue {
+                    Persistence.Authentication.googleAccessToken = credential.oauthToken
+                    Persistence.Authentication.googleRefreshToken = credential.oauthRefreshToken
+                }
 
                 switch buttonType {
                 case .connect:

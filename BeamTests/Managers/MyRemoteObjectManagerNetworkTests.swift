@@ -37,6 +37,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
         }
 
         afterEach {
+            BeamObjectManager.clearNetworkCalls()
             beamHelper.endNetworkRecording()
 
             BeamDate.reset()
@@ -566,9 +567,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 }
                             }
 
-                            let expectedNetworkCalls = ["update_beam_objects",
-                                                        "beam_objects",
-                                                        "update_beam_objects"]
+                            let expectedNetworkCalls = ["update_beam_objects"]
 
                             expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
 
@@ -597,9 +596,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 }
                             }
 
-                            let expectedNetworkCalls = ["update_beam_objects",
-                                                        "beam_objects",
-                                                        "update_beam_objects"]
+                            let expectedNetworkCalls = ["update_beam_objects"]
 
                             expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
 
@@ -628,9 +625,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 }
                             }
 
-                            let expectedNetworkCalls = ["update_beam_objects",
-                                                        "beam_objects",
-                                                        "update_beam_objects"]
+                            let expectedNetworkCalls = ["update_beam_objects"]
 
                             expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
 
@@ -723,7 +718,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     object1.previousChecksum = "00a3c318664ebae8b2239cd2be6dae3f546feb789cb005fa9f31512709f2fb00"
                     object1.title = newTitle1
                     object1.updatedAt = BeamDate.now
-                    MyRemoteObjectManager.store["195d94e1-e0df-4eca-93e6-8778984bcd58".uuid!] = object1
+                    MyRemoteObjectManager.store[object1.beamObjectId] = object1
                 }
 
                 context("with replace policy") {
@@ -836,7 +831,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                             waitUntil(timeout: .seconds(10)) { done in
                                 do {
-                                    _ = try sut.saveAllOnBeamObjectApi() { result in
+                                    _ = try sut.saveAllOnBeamObjectApi { result in
                                         expect { try result.get() }.toNot(throwError())
 
                                         done()
@@ -972,8 +967,8 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     object1.updatedAt = BeamDate.now
                     object2.updatedAt = BeamDate.now
 
-                    MyRemoteObjectManager.store["195d94e1-e0df-4eca-93e6-8778984bcd58".uuid!] = object1
-                    MyRemoteObjectManager.store["295d94e1-e0df-4eca-93e6-8778984bcd58".uuid!] = object2
+                    MyRemoteObjectManager.store[object1.beamObjectId] = object1
+                    MyRemoteObjectManager.store[object2.beamObjectId] = object2
                 }
 
                 context("with replace policy") {
@@ -1243,9 +1238,9 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     object2.updatedAt = BeamDate.now
                     object3.updatedAt = BeamDate.now
 
-                    MyRemoteObjectManager.store["195d94e1-e0df-4eca-93e6-8778984bcd58".uuid!] = object1
-                    MyRemoteObjectManager.store["295d94e1-e0df-4eca-93e6-8778984bcd58".uuid!] = object2
-                    MyRemoteObjectManager.store["395d94e1-e0df-4eca-93e6-8778984bcd58".uuid!] = object3
+                    MyRemoteObjectManager.store[object1.beamObjectId] = object1
+                    MyRemoteObjectManager.store[object2.beamObjectId] = object2
+                    MyRemoteObjectManager.store[object3.beamObjectId] = object3
                 }
 
                 context("with replace policy") {
@@ -1931,6 +1926,71 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                 }
             }
 
+            context("When called twice") {
+                let newTitle1 = "new Title1"
+
+                beforeEach {
+                    self.saveAllObjectsAndSaveChecksum()
+
+                    object1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
+                    object2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
+                    object3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
+
+                    title1 = object1.title!
+                    title2 = object2.title!
+                    title3 = object3.title!
+
+                    BeamDate.travel(2)
+
+                    object1.title = newTitle1
+                    object1.updatedAt = BeamDate.now
+                }
+
+                it("doesn't generate conflicts") {
+                    let networkCalls = APIRequest.callsCount
+
+                    waitUntil(timeout: .seconds(10)) { done in
+                        do {
+                            let group = DispatchGroup()
+
+                            group.enter()
+                            _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3]) { _ in group.leave() }
+
+                            group.enter()
+                            _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3]) { result in
+                                expect { try result.get() }.toNot(throwError())
+
+                                group.leave()
+                            }
+
+                            group.wait()
+                            done()
+
+                        } catch {
+                            fail(error.localizedDescription)
+                        }
+                    }
+
+                    let expectedNetworkCalls = ["update_beam_objects", "update_beam_objects"]
+
+                    expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
+                    expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
+
+                    let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1.beamObjectId)
+                    expect(object1) == remoteObject1
+
+                    let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2.beamObjectId)
+                    expect(object2) == remoteObject2
+
+                    let remoteObject3: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object3.beamObjectId)
+                    expect(object3) == remoteObject3
+
+                    expect(remoteObject1?.checksum) == (try self.checksum(object1))
+                    expect(remoteObject2?.checksum) == (try self.checksum(object2))
+                    expect(remoteObject3?.checksum) == (try self.checksum(object3))
+                }
+            }
+
             context("when all objects already exist, and we save all with 1 conflicted object") {
                 let newTitle1 = "new Title1"
 
@@ -1948,8 +2008,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     BeamDate.travel(2)
 
                     // Create 1 conflicted object
-                    object1.previousChecksum = "00a3c318664ebae8b2239cd2be6dae3f546feb789cb005fa9f31512709f2fb00"
-
+                    MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum = "00a3c318664ebae8b2239cd2be6dae3f546feb789cb005fa9f31512709f2fb00"
                     object1.title = newTitle1
                     object1.updatedAt = BeamDate.now
                 }
@@ -2306,8 +2365,8 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     // Create 2 conflicted objects
                     BeamDate.travel(2)
 
-                    object1.previousChecksum = "00a3c318664ebae8b2239cd2be6dae3f546feb789cb005fa9f31512709f2fb00"
-                    object2.previousChecksum = "11a3c318664ebae8b2239cd2be6dae3f546feb789cb005fa9f31512709f2fb11"
+                    MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum = "00a3c318664ebae8b2239cd2be6dae3f546feb789cb005fa9f31512709f2fb00"
+                    MyRemoteObjectManager.store[object2.beamObjectId]?.previousChecksum = "11a3c318664ebae8b2239cd2be6dae3f546feb789cb005fa9f31512709f2fb11"
 
                     object1.title = newTitle1
                     object2.title = newTitle2
@@ -2692,10 +2751,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                 let newTitle2 = "new Title2"
                 let newTitle3 = "new Title3"
 
-                var previousChecksum1 = ""
-                var previousChecksum2 = ""
-                var previousChecksum3 = ""
-
                 beforeEach {
                     self.saveAllObjectsAndSaveChecksum()
 
@@ -2707,15 +2762,11 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     title2 = object2.title!
                     title3 = object3.title!
 
-                    previousChecksum1 = (try? self.checksum(object1)) ?? ""
-                    previousChecksum2 = (try? self.checksum(object2)) ?? ""
-                    previousChecksum3 = (try? self.checksum(object3)) ?? ""
-
                     BeamDate.travel(2)
 
-                    object1.previousChecksum = "11a3c318664ebae8b2239cd2be6dae3f546feb789cb005fa9f31512709f2fb00"
-                    object2.previousChecksum = "22a3c318664ebae8b2239cd2be6dae3f546feb789cb005fa9f31512709f2fb00"
-                    object3.previousChecksum = "33a3c318664ebae8b2239cd2be6dae3f546feb789cb005fa9f31512709f2fb00"
+                    MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum = "11a3c318664ebae8b2239cd2be6dae3f546feb789cb005fa9f31512709f2fb00"
+                    MyRemoteObjectManager.store[object2.beamObjectId]?.previousChecksum = "22a3c318664ebae8b2239cd2be6dae3f546feb789cb005fa9f31512709f2fb00"
+                    MyRemoteObjectManager.store[object3.beamObjectId]?.previousChecksum = "33a3c318664ebae8b2239cd2be6dae3f546feb789cb005fa9f31512709f2fb00"
 
                     object1.title = newTitle1
                     object2.title = newTitle2
@@ -2952,10 +3003,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
 
                         it("stores all objects previousChecksum with merged content") {
-                            expect(MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum) == previousChecksum1
-                            expect(MyRemoteObjectManager.store[object2.beamObjectId]?.previousChecksum) == previousChecksum2
-                            expect(MyRemoteObjectManager.store[object3.beamObjectId]?.previousChecksum) == previousChecksum3
-
                             object1.title = newTitle1
                             object2.title = newTitle2
                             object3.title = newTitle3
@@ -3040,10 +3087,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
 
                         it("stores all objects previousChecksum with merged content") {
-                            expect(MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum) == previousChecksum1
-                            expect(MyRemoteObjectManager.store[object2.beamObjectId]?.previousChecksum) == previousChecksum2
-                            expect(MyRemoteObjectManager.store[object3.beamObjectId]?.previousChecksum) == previousChecksum3
-
                             object1.title = newTitle1
                             object2.title = newTitle2
                             object3.title = newTitle3
@@ -3126,10 +3169,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
 
                         it("stores all objects previousChecksum with merged content") {
-                            expect(MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum) == previousChecksum1
-                            expect(MyRemoteObjectManager.store[object2.beamObjectId]?.previousChecksum) == previousChecksum2
-                            expect(MyRemoteObjectManager.store[object3.beamObjectId]?.previousChecksum) == previousChecksum3
-
                             object1.title = newTitle1
                             object2.title = newTitle2
                             object3.title = newTitle3
@@ -3312,7 +3351,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                 context("when we send a previousChecksum") {
                     beforeEach {
-                        object.previousChecksum = try? "foobar".SHA256()
+                        MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum = try? "foobar".SHA256()
                     }
                     context("Foundation") {
                         it("saves new object") {
@@ -3330,8 +3369,8 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 }
                             }
 
-                            expect(APIRequest.callsCount - networkCalls) == 3
-                            expect(APIRequest.networkCallFiles) == ["sign_in", "update_beam_object", "beam_object", "update_beam_object"]
+                            expect(APIRequest.callsCount - networkCalls) == 1
+                            expect(APIRequest.networkCallFiles) == ["sign_in", "update_beam_object"]
 
                             let remoteObject: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object.beamObjectId)
                             expect(object) == remoteObject
@@ -3341,8 +3380,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
 
                         it("stores previousChecksum") {
-                            expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum).to(beNil())
-
                             waitUntil(timeout: .seconds(10)) { done in
                                 do {
                                     _ = try sut.saveOnBeamObjectsAPI(Array(MyRemoteObjectManager.store.values)) { result in
@@ -3372,8 +3409,8 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 }
                             }
 
-                            expect(APIRequest.callsCount - networkCalls) == 3
-                            expect(APIRequest.networkCallFiles) == ["sign_in", "update_beam_object", "beam_object", "update_beam_object"]
+                            expect(APIRequest.callsCount - networkCalls) == 1
+                            expect(APIRequest.networkCallFiles) == ["sign_in", "update_beam_object"]
 
                             let remoteObject: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object.beamObjectId)
                             expect(object) == remoteObject
@@ -3383,8 +3420,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
 
                         it("stores previousChecksum") {
-                            expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum).to(beNil())
-
                             let promise: PromiseKit.Promise<MyRemoteObject> = sut.saveOnBeamObjectAPI(object)
                             waitUntil(timeout: .seconds(10)) { done in
                                 promise.done { remoteObject in
@@ -3412,8 +3447,8 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 }
                             }
 
-                            expect(APIRequest.callsCount - networkCalls) == 3
-                            expect(APIRequest.networkCallFiles) == ["sign_in", "update_beam_object", "beam_object", "update_beam_object"]
+                            expect(APIRequest.callsCount - networkCalls) == 1
+                            expect(APIRequest.networkCallFiles) == ["sign_in", "update_beam_object"]
 
                             let remoteObject: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object.beamObjectId)
                             expect(object) == remoteObject
@@ -3423,8 +3458,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
 
                         it("stores previousChecksum") {
-                            expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum).to(beNil())
-
                             let promise: Promises.Promise<MyRemoteObject> = sut.saveOnBeamObjectAPI(object)
                             waitUntil(timeout: .seconds(10)) { done in
                                 promise.then { remoteObject in
@@ -3446,17 +3479,56 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     self.saveObjectAndSaveChecksum(object)
                 }
 
+                context("when called twice") {
+                    let newTitle = "new Title"
+
+                    it("doesn't generate conflicts") {
+                        object.title = newTitle
+                        let networkCalls = APIRequest.callsCount
+
+                        waitUntil(timeout: .seconds(10)) { done in
+                            do {
+                                let group = DispatchGroup()
+
+                                group.enter()
+
+                                _ = try sut.saveOnBeamObjectAPI(object) { _ in group.leave() }
+
+                                group.enter()
+
+                                _ = try sut.saveOnBeamObjectAPI(object) { result in
+                                    expect { try result.get() }.toNot(throwError())
+
+                                    group.leave()
+                                }
+                                group.wait()
+                                done()
+                            } catch {
+                                fail(error.localizedDescription)
+                            }
+                        }
+
+                        let expectedNetworkCalls = ["update_beam_object", "update_beam_object"]
+
+                        expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
+
+                        expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
+
+                        let remoteObject: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object.beamObjectId)
+                        expect(object) == remoteObject
+
+                        expect(remoteObject?.checksum) == (try self.checksum(object))
+                    }
+                }
+
                 context("with conflict") {
                     let newTitle = "new Title"
-                    var previousChecksum = ""
 
                     beforeEach {
-                        previousChecksum = (try? self.checksum(object)) ?? ""
-
                         BeamDate.travel(2)
 
                         // Create 1 conflicted object
-                        object.previousChecksum = "00a3c318664ebae8b2239cd2be6dae3f546feb789cb005fa9f31512709f2fb00"
+                        MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum = "00a3c318664ebae8b2239cd2be6dae3f546feb789cb005fa9f31512709f2fb00"
                         object.updatedAt = BeamDate.now
                     }
 
@@ -3493,8 +3565,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             }
 
                             it("stores previousChecksum with overwritten content") {
-                                expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum) == previousChecksum
-
                                 object.title = newTitle
 
                                 waitUntil(timeout: .seconds(10)) { done in
@@ -3542,8 +3612,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             }
 
                             it("stores previousChecksum with overwritten content") {
-                                expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum) == previousChecksum
-
                                 object.title = newTitle
 
                                 let promise: PromiseKit.Promise<MyRemoteObject> = sut.saveOnBeamObjectAPI(object)
@@ -3589,8 +3657,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             }
 
                             it("stores previousChecksum with overwritten content") {
-                                expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum) == previousChecksum
-
                                 object.title = newTitle
 
                                 let promise: Promises.Promise<MyRemoteObject> = sut.saveOnBeamObjectAPI(object)
@@ -3652,8 +3718,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             }
 
                             it("stores previousChecksum based on merged content") {
-                                expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum) == previousChecksum
-
                                 object.title = newTitle
 
                                 waitUntil(timeout: .seconds(10)) { done in
@@ -3709,8 +3773,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             }
 
                             it("stores previousChecksum based on merged content") {
-                                expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum) == previousChecksum
-
                                 object.title = newTitle
 
                                 let promise: PromiseKit.Promise<MyRemoteObject> = sut.saveOnBeamObjectAPI(object)
@@ -3764,8 +3826,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             }
 
                             it("stores previousChecksum based on merged content") {
-                                expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum) == previousChecksum
-
                                 object.title = newTitle
 
                                 let promise: Promises.Promise<MyRemoteObject> = sut.saveOnBeamObjectAPI(object)

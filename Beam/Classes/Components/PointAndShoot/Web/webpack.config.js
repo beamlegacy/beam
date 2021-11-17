@@ -15,7 +15,6 @@ function config(mode = "production") {
     },
     output: {
       filename: "pns_prod.js",
-      library: "beam",
       path: path.resolve(__dirname, ".")
     },
     plugins: [

@@ -58,5 +58,10 @@ class BrowsingTreeRecordTests: XCTestCase {
         fetchedRecords = try XCTUnwrap(try? db.getAllBrowsingTrees(updatedSince: sortedRecords[1].updatedAt))
         XCTAssertEqual(sortedRecords.count, 2)
         XCTAssertEqual(fetchedRecords[0].rootId, anotherRootId)
+
+        //test delete
+        XCTAssertEqual(db.countBrowsingTrees, 2)
+        try db.deleteBrowsingTrees(ids: [rootId, anotherRootId])
+        XCTAssertEqual(db.countBrowsingTrees, 0)
     }
 }

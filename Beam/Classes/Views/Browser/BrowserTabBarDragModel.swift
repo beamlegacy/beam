@@ -15,14 +15,14 @@ class BrowserTabBarDragModel: ObservableObject {
     @Published var draggingOverPins: Bool = false {
         didSet {
             guard draggingOverPins != oldValue || defaultTabWidth == 0 else { return }
-            defaultTabWidth = tabWidthBuilder(false, false)
-            activeTabWidth = tabWidthBuilder(true, false)
-            pinnedTabWidth = tabWidthBuilder(false, true)
+            defaultTabWidth = tabWidth(selected: false, pinned: false)
+            activeTabWidth = tabWidth(selected: true, pinned: false)
+            pinnedTabWidth = tabWidth(selected: false, pinned: true)
         }
     }
 
     private var dragStartScrollOffset: CGFloat = 0
-    private var tabWidthBuilder: (_ selected: Bool, _ pinned: Bool) -> CGFloat = { _, _ in 0 }
+    private var widthProvider: TabWidthProvider?
     private var defaultTabWidth: CGFloat = 0
     private var activeTabWidth: CGFloat = 0
     private var pinnedTabWidth: CGFloat = 0
@@ -33,17 +33,14 @@ class BrowserTabBarDragModel: ObservableObject {
         draggingOverPins ? pinnedTabWidth : activeTabWidth
     }
 
-    func prepareForDrag(gestureValue: DragGesture.Value,
-                        scrollContentOffset: CGFloat,
-                        currentTabIndex: Int,
-                        tabsCount: Int,
-                        pinnedTabsCount: Int,
-                        tabWidthBuilder: @escaping (_ selected: Bool, _ pinned: Bool) -> CGFloat) {
+    func prepareForDrag(gestureValue: DragGesture.Value, scrollContentOffset: CGFloat,
+                        currentTabIndex: Int, tabsCount: Int, pinnedTabsCount: Int,
+                        widthProvider: TabWidthProvider) {
 
         self.tabsCount = tabsCount
         self.pinnedTabsCount = pinnedTabsCount
-        self.tabWidthBuilder = tabWidthBuilder
-        self.pinnedTabWidth = tabWidthBuilder(false, true)
+        self.widthProvider = widthProvider
+        self.pinnedTabWidth = tabWidth(selected: false, pinned: true)
         self.dragStartScrollOffset = scrollContentOffset
 
         var locationX = gestureValue.startLocation.x
@@ -70,6 +67,7 @@ class BrowserTabBarDragModel: ObservableObject {
 
     func cleanAfterDrag() {
         offset = .zero
+        widthProvider = nil
         defaultTabWidth = 0
         activeTabWidth = 0
         pinnedTabWidth = 0
@@ -79,6 +77,10 @@ class BrowserTabBarDragModel: ObservableObject {
         dragStartScrollOffset = 0
         tabsCount = 0
         pinnedTabsCount = 0
+    }
+
+    private func tabWidth(selected: Bool, pinned: Bool) -> CGFloat {
+        widthProvider?.widthForTab(selected: selected, pinned: pinned) ?? 0
     }
 
     private func pinnedTabsCountDuringDrag() -> CGFloat {

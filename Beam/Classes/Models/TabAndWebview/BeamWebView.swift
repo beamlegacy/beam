@@ -38,6 +38,10 @@ private class BeamWebViewAutoClose: NSObject, WKUIDelegate {
 
 class BeamWebView: WKWebView {
 
+#if TEST || DEBUG
+    static var aliveWebViewsCount: Int = 0
+#endif
+
     weak var page: WebPage?
     private let automaticallyResignResponder = true
 
@@ -61,15 +65,30 @@ class BeamWebView: WKWebView {
             optionKeyToggle(event.modifierFlags)
             return event
         }
+        #if TEST || DEBUG
+            Self.aliveWebViewsCount += 1
+        #endif
+
+        #if BEAM_WEBKIT_ENHANCEMENT_ENABLED
+        self._setAddsVisitedLinks(true)
+        #endif
     }
 
     deinit {
         guard let monitor = monitor else { return }
         NSEvent.removeMonitor(monitor)
+        #if TEST || DEBUG
+            Self.aliveWebViewsCount -= 1
+        #endif
     }
 
     required init?(coder: NSCoder) {
         fatalError()
+    }
+
+    override func cursorUpdate(with event: NSEvent) {
+        // This override fixes the cursor blinking when WebView is overlayed by a Swift UI View
+        // BE-2205: https://linear.app/beamapp/issue/BE-2205/cursor-blinks-in-web-mode
     }
 
     override func viewDidMoveToSuperview() {

@@ -8,6 +8,7 @@
 
 import Foundation
 import BeamCore
+import Atomics
 
 extension BeamNote: BeamNoteDocument {
     var documentStruct: DocumentStruct? {
@@ -42,13 +43,14 @@ extension BeamNote: BeamNoteDocument {
                               updatedAt: updateDate,
                               data: Data(),
                               documentType: type.isJournal ? .journal : .note,
-                              version: version,
+                              version: version.load(ordering: .relaxed),
                               isPublic: publicationStatus.isPublic,
                               journalDate: type.journalDateString)
     }
 
-    public func observeDocumentChange(documentManager: DocumentManager) {
+    public func observeDocumentChange() {
         beamCheckMainThread()
+        let documentManager = DocumentManager()
         guard activeDocumentCancellables.isEmpty else {
             Logger.shared.logError("BeamNote already has change observer", category: .document)
             return
@@ -65,8 +67,8 @@ extension BeamNote: BeamNoteDocument {
                 /*
                  When receiving updates for a new document, we don't check the version
                  */
-                if self.version >= doc.version, self.id == doc.id {
-                    Logger.shared.logDebug("\(self.titleAndId) observer skipped \(doc.version) (must be > \(self.version))",
+                if self.version.load(ordering: .relaxed) >= doc.version, self.id == doc.id {
+                    Logger.shared.logDebug("\(self.titleAndId) observer skipped \(doc.version) (must be > \(self.version.load(ordering: .relaxed)))",
                                            category: .documentNotification)
                     return
                 }
@@ -97,10 +99,11 @@ extension BeamNote: BeamNoteDocument {
         })
     }
 
-    func updateWithDocumentStruct(_ docStruct: DocumentStruct) {
+    func updateWithDocumentStruct(_ docStruct: DocumentStruct, file: StaticString = #file, line: UInt = #line) {
         beamCheckMainThread()
-        if self.version >= docStruct.version, self.id == docStruct.id {
-            Logger.shared.logDebug("\(self.titleAndId) update skipped \(docStruct.version) (must be > \(self.version))",
+        let context = "file: \(file):\(line)"
+        if self.version.load(ordering: .relaxed) >= docStruct.version, self.id == docStruct.id {
+            Logger.shared.logDebug("\(self.titleAndId) update skipped \(docStruct.version) (must be > \(self.version.load(ordering: .relaxed))) [caller: \(context)]",
                                    category: .document)
             return
         }
@@ -108,7 +111,7 @@ extension BeamNote: BeamNoteDocument {
         self.updates += 1
         let decoder = JSONDecoder()
         guard let newSelf = try? decoder.decode(BeamNote.self, from: docStruct.data) else {
-            Logger.shared.logError("Unable to decode new documentStruct \(docStruct.title) {\(docStruct.id)}",
+            Logger.shared.logError("Unable to decode new documentStruct \(docStruct.title) {\(docStruct.id)} [caller: \(context)]",
                                    category: .document)
             return
         }
@@ -123,16 +126,17 @@ extension BeamNote: BeamNoteDocument {
         self.searchQueries = newSelf.searchQueries
         self.visitedSearchResults = newSelf.visitedSearchResults
 
-        self.version = docStruct.version
+        self.version.store(docStruct.version, ordering: .relaxed)
         self.databaseId = docStruct.databaseId
         self.deleted = docStruct.deletedAt != nil
 
-        self.savedVersion = self.version
+        self.savedVersion.store(self.version.load(ordering: .relaxed), ordering: .relaxed)
 
+        Logger.shared.logDebug("updateWithDocumentStruct updating \(title) - \(id) [caller: \(context)]", category: .document)
         recursiveUpdate(other: newSelf)
     }
 
-    public func updateTitle(_ newTitle: String, documentManager: DocumentManager) {
+    public func updateTitle(_ newTitle: String) {
         beamCheckMainThread()
         let previousTitle = self.title
         try? GRDBDatabase.shared.remove(note: self)
@@ -148,30 +152,51 @@ extension BeamNote: BeamNoteDocument {
         try? GRDBDatabase.shared.append(note: self)
     }
 
+    public func syncedSave() -> Bool {
+        var saved = false
+        let semaphore = DispatchSemaphore(value: 0)
+        save { result in
+            switch result {
+            case .failure(let error):
+                Logger.shared.logError("Failed to save note \(self): \(error)", category: .document)
+            case .success(let res):
+                saved = res
+                if !res {
+                    Logger.shared.logError("Unable to save note \(self)", category: .document)
+                }
+            }
+
+            semaphore.signal()
+        }
+        semaphore.wait()
+
+        return saved
+    }
+
     // swiftlint:disable:next cyclomatic_complexity function_body_length
-    public func save(documentManager: DocumentManager, completion: ((Result<Bool, Error>) -> Void)? = nil) {
+    public func save(completion: ((Result<Bool, Error>) -> Void)? = nil) {
         beamCheckMainThread()
-        guard !saving && version == savedVersion else {
-            Logger.shared.logWarning("Waiting for last save: \(title) {\(id)} - saved version \(savedVersion) / current \(version)",
+        guard !saving.load(ordering: .relaxed) && version.load(ordering: .relaxed) == savedVersion.load(ordering: .relaxed) else {
+            Logger.shared.logWarning("Waiting for last save: \(title) {\(id)} - saved version \(savedVersion.load(ordering: .relaxed)) / current \(version.load(ordering: .relaxed))",
                                      category: .document)
             completion?(.failure(BeamNoteError.saveAlreadyRunning))
             return
         }
 
-        saving = true
+        saving.store(true, ordering: .relaxed)
 
         /*
          When saving the note, we must increment its version first. `documentManager.save()` will check for
          version increase between saves.
          */
 
-        version += 1
+        version.wrappingIncrement(ordering: .relaxed)
 
         guard let documentStruct = documentStruct else {
-            version -= 1
+            version.wrappingDecrement(ordering: .relaxed)
             Logger.shared.logError("Unable to find active document struct \(titleAndId)", category: .document)
+            saving.store(false, ordering: .relaxed)
             completion?(.failure(BeamNoteError.unableToCreateDocumentStruct))
-            saving = false
             return
         }
 
@@ -179,23 +204,17 @@ extension BeamNote: BeamNoteDocument {
         indexContents()
 
         Logger.shared.logInfo("BeamNote wants to save: \(titleAndId)", category: .document)
-        documentManager.save(documentStruct, completion: { [weak self] result in
-            defer { DispatchQueue.main.async { self?.saving = false } }
-            guard let self = self else { completion?(result); return }
-
+        let documentManager = DocumentManager()
+        documentManager.save(documentStruct, completion: { result in
             switch result {
             case .success(let success):
                 guard success else { break }
                 // TSAN: We need to sync dispatch it to the main thread to make sure it doesn't create a data race.
-                DispatchQueue.main.async {
-                    self.savedVersion = self.version
-                    self.pendingSave = 0
-                }
+                self.savedVersion.store(self.version.load(ordering: .relaxed), ordering: .relaxed)
+                self.pendingSave.store(0, ordering: .relaxed)
 
             case .failure(BeamNoteError.saveAlreadyRunning):
-                DispatchQueue.main.async {
-                    self.pendingSave += 1
-                }
+                self.pendingSave.wrappingIncrement(ordering: .relaxed)
 
             case .failure(let error):
                 if (error as NSError).domain == "DOCUMENT_ERROR_DOMAIN" {
@@ -246,17 +265,18 @@ extension BeamNote: BeamNoteDocument {
                             dump(documentStruct)
 
                             // We delete the passed documentStruct as it conflicts with existing
-                            documentManager.delete(id: documentStruct.id) { _ in
-                                DispatchQueue.main.sync {
+                            DocumentManager().delete(id: documentStruct.id) { _ in
+                                DispatchQueue.main.async {
                                     self.updateWithDocumentStruct(existingDocument)
-                                    self.savedVersion = existingDocument.version
+                                    self.savedVersion.store(existingDocument.version, ordering: .relaxed)
                                 }
 
-                                DispatchQueue.main.async { self.saving = false }
+                                self.saving.store(false, ordering: .relaxed)
                                 completion?(result)
                             }
 
                             // Avoid calling save() again
+                            self.saving.store(false, ordering: .relaxed)
                             return
                         }
                     case 1003:
@@ -276,8 +296,8 @@ extension BeamNote: BeamNoteDocument {
                             dump(documentStruct)
                         }
 
+                        self.saving.store(false, ordering: .relaxed)
                         completion?(.failure(error))
-                        DispatchQueue.main.async { self.saving = false }
                         return
                     default:
                         Logger.shared.logError("Error saving: \(error.localizedDescription)",
@@ -285,20 +305,21 @@ extension BeamNote: BeamNoteDocument {
                     }
                 }
 
-                DispatchQueue.main.async {
-                    self.version = self.savedVersion
-                }
+                self.version.store(self.savedVersion.load(ordering: .relaxed), ordering: .relaxed)
                 Logger.shared.logError("Saving note \(self.titleAndId) failed: \(error)", category: .document)
 
-                if self.pendingSave > 0 {
-                    Logger.shared.logDebug("Trying again: Saving note \(self.titleAndId) as there were \(self.pendingSave) pending save operations",
-                                           category: .document)
-                    self.save(documentManager: documentManager, completion: completion)
+                if self.pendingSave.load(ordering: .relaxed) > 0 {
+                    DispatchQueue.main.async {
+                        Logger.shared.logDebug("Trying again: Saving note \(self.titleAndId) as there were \(self.pendingSave) pending save operations",
+                                               category: .document)
+                        self.save(completion: completion)
+                    }
+                    return
                 }
             }
 
+            self.saving.store(false, ordering: .relaxed)
             completion?(result)
-            DispatchQueue.main.async { self.saving = false }
         })
     }
 
@@ -316,9 +337,9 @@ extension BeamNote: BeamNoteDocument {
             decoder.userInfo[BeamElement.recursiveCoding] = false
         }
         let note = try decoder.decode(BeamNote.self, from: documentStruct.data)
-        note.version = documentStruct.version
+        note.version.store(documentStruct.version, ordering: .relaxed)
         note.databaseId = documentStruct.databaseId
-        note.savedVersion = note.version
+        note.savedVersion.store(note.version.load(ordering: .relaxed), ordering: .relaxed)
         note.updateDate = documentStruct.updatedAt
         note.deleted = documentStruct.deletedAt != nil
         if keepInMemory {
@@ -335,9 +356,9 @@ extension BeamNote: BeamNoteDocument {
         }
         if let previousData = documentStruct.previousData {
             let note = try decoder.decode(BeamNote.self, from: previousData)
-            note.version = documentStruct.version
+            note.version.store(documentStruct.version, ordering: .relaxed)
             note.databaseId = documentStruct.databaseId
-            note.savedVersion = note.version
+            note.savedVersion.store(note.version.load(ordering: .relaxed), ordering: .relaxed)
             note.updateDate = documentStruct.updatedAt
             note.deleted = documentStruct.deletedAt != nil
 
@@ -346,11 +367,11 @@ extension BeamNote: BeamNoteDocument {
         return nil
     }
 
-    public static func fetch(_ documentManager: DocumentManager,
-                             title: String,
+    public static func fetch(title: String,
                              keepInMemory: Bool = true,
                              decodeChildren: Bool = true) -> BeamNote? {
         beamCheckMainThread()
+        let documentManager = DocumentManager()
         // Is the note in the cache?
         if let note = getFetchedNote(title) {
             return note
@@ -370,11 +391,11 @@ extension BeamNote: BeamNoteDocument {
         return nil
     }
 
-    public static func fetch(_ documentManager: DocumentManager,
-                             journalDate: Date,
+    public static func fetch(journalDate: Date,
                              keepInMemory: Bool = true,
                              decodeChildren: Bool = true) -> BeamNote? {
         beamCheckMainThread()
+        let documentManager = DocumentManager()
         // Is the note in the cache?
         let title = BeamDate.journalNoteTitle(for: journalDate)
         if let note = getFetchedNote(title) {
@@ -383,17 +404,6 @@ extension BeamNote: BeamNoteDocument {
 
         // Is the note in the document store?
         guard let doc = documentManager.loadDocumentWithJournalDate(BeamNoteType.iso8601ForDate(journalDate)) else {
-            return nil
-        }
-
-        // HOTFIX: remove empty notes that were errounously saved
-        guard !doc.data.isEmpty else {
-            Logger.shared.logError("HOTFIX - Data for note \(doc.title) (\(doc.id)) is empty -> deleting the note from the DB", category: .document)
-            do {
-                try documentManager.delete([doc.id])
-            } catch {
-                Logger.shared.logError("HOTFIX - Error while deleting \(doc.title) (\(doc.id))", category: .document)
-            }
             return nil
         }
 
@@ -408,10 +418,10 @@ extension BeamNote: BeamNoteDocument {
         return nil
     }
 
-    public static func fetch(_ documentManager: DocumentManager,
-                             id: UUID,
+    public static func fetch(id: UUID,
                              keepInMemory: Bool = true,
                              decodeChildren: Bool = true) -> BeamNote? {
+        let documentManager = DocumentManager()
         if keepInMemory {
             beamCheckMainThread()
             // Is the note in the cache?
@@ -434,8 +444,9 @@ extension BeamNote: BeamNoteDocument {
         return nil
     }
 
-    public static func fetchNotesWithType(_ documentManager: DocumentManager, type: DocumentType, _ limit: Int, _ fetchOffset: Int) -> [BeamNote] {
+    public static func fetchNotesWithType(type: DocumentType, _ limit: Int, _ fetchOffset: Int) -> [BeamNote] {
         beamCheckMainThread()
+        let documentManager = DocumentManager()
         return documentManager.loadDocumentsWithType(type: type, limit, fetchOffset).compactMap { doc -> BeamNote? in
             if let note = getFetchedNote(doc.title) {
                 return note
@@ -450,7 +461,7 @@ extension BeamNote: BeamNoteDocument {
     }
 
     // Beware that this function crashes whatever note with that title in the cache
-    public static func create(_ documentManager: DocumentManager, title: String) -> BeamNote {
+    public static func create(title: String) -> BeamNote {
         beamCheckMainThread()
         assert(getFetchedNote(title) == nil)
         let note = BeamNote(title: title)
@@ -458,11 +469,11 @@ extension BeamNote: BeamNoteDocument {
 
         appendToFetchedNotes(note)
         updateNoteCount()
-        note.save(documentManager: documentManager)
+        _ = note.syncedSave()
         return note
     }
 
-    public static func create(_ documentManager: DocumentManager, journalDate: Date) -> BeamNote {
+    public static func create(journalDate: Date) -> BeamNote {
         beamCheckMainThread()
         let note = BeamNote(journalDate: journalDate)
         note.databaseId = DatabaseManager.defaultDatabase.id
@@ -470,13 +481,8 @@ extension BeamNote: BeamNoteDocument {
         // TODO: should force a first quick save to trigger any title conflicts with the API asap
         appendToFetchedNotes(note)
         updateNoteCount()
-        note.save(documentManager: documentManager)
+        _ = note.syncedSave()
         return note
-    }
-
-    public func observeDocumentChange() {
-        beamCheckMainThread()
-        observeDocumentChange(documentManager: AppDelegate.main.data.documentManager)
     }
 
     public func autoSave() {
@@ -484,34 +490,34 @@ extension BeamNote: BeamNoteDocument {
         AppDelegate.main.data.noteAutoSaveService.addNoteToSave(self)
     }
 
-    public static func fetchOrCreate(_ documentManager: DocumentManager, title: String) -> BeamNote {
+    public static func fetchOrCreate(title: String) -> BeamNote {
         beamCheckMainThread()
         // Is the note in the cache?
-        if let note = fetch(documentManager, title: title) {
+        if let note = fetch(title: title) {
             return note
         }
 
         // create a new note and add it to the cache
-        return create(documentManager, title: title)
+        return create(title: title)
     }
 
-    public static func fetchOrCreateJournalNote(_ documentManager: DocumentManager, date: Date) -> BeamNote {
+    public static func fetchOrCreateJournalNote(date: Date) -> BeamNote {
         beamCheckMainThread()
         // Is the note in the cache?
-        if let note = fetch(documentManager, journalDate: date) {
+        if let note = fetch(journalDate: date) {
             return note
         }
 
         // create a new note and add it to the cache
-        return create(documentManager, journalDate: date)
+        return create(journalDate: date)
     }
 
     public var lastChangedElement: BeamElement? {
         get {
-            AppDelegate.main.data.lastChangedElement
+            AppDelegate.main.data?.lastChangedElement
         }
         set {
-            AppDelegate.main.data.lastChangedElement = newValue
+            AppDelegate.main.data?.lastChangedElement = newValue
         }
     }
 
@@ -523,15 +529,14 @@ extension BeamNote: BeamNoteDocument {
 
     public static func indexAllNotes() {
         beamCheckMainThread()
-        let documentManager = DocumentManager()
         var log = [String]()
         log.append("Before reindexing, DB contains \((try? GRDBDatabase.shared.countBidirectionalLinks()) ?? -1) bidirectional links from \((try? GRDBDatabase.shared.countIndexedElements()) ?? -1) indexed elements")
         try? GRDBDatabase.shared.clearElements()
         try? GRDBDatabase.shared.clearBidirectionalLinks()
         try? GRDBDatabase.shared.clearNoteIndexingRecord()
-        let allTitles = documentManager.allDocumentsTitles(includeDeletedNotes: false)
+        let allTitles = DocumentManager().allDocumentsTitles(includeDeletedNotes: false)
         for title in allTitles {
-            if let note = BeamNote.fetch(documentManager, title: title) {
+            if let note = BeamNote.fetch(title: title) {
                 note.indexContents()
             }
         }
@@ -548,8 +553,8 @@ extension BeamNote: BeamNoteDocument {
         let documentManager = DocumentManager()
         var rebuilt = [String]()
         for id in documentManager.allDocumentsIds(includeDeletedNotes: false) {
-            if let note = BeamNote.fetch(documentManager, id: id) {
-                note.save(documentManager: documentManager)
+            if let note = BeamNote.fetch(id: id) {
+                _ = note.syncedSave()
                 rebuilt.append("rebuilt note '\(note.title)' [\(note.id)]")
                 rebuilt.append(contentsOf: note.validateLinks(fix: true))
             }
@@ -565,7 +570,7 @@ extension BeamNote: BeamNoteDocument {
         let documentManager = DocumentManager()
         var all = [String]()
         for id in documentManager.allDocumentsIds(includeDeletedNotes: false) {
-            if let note = BeamNote.fetch(documentManager, id: id) {
+            if let note = BeamNote.fetch(id: id) {
                 let str = "validating \(note.title) - [\(note.id)]"
                 all.append(str)
                 //swiftlint:disable:next print

@@ -37,10 +37,10 @@ class BeamWindow: NSWindow, NSDraggingDestination {
     private var trafficLightLeftMargin: CGFloat = 20
 
     // swiftlint:disable:next function_body_length
-    init(contentRect: NSRect, data: BeamData) {
+    init(contentRect: NSRect, data: BeamData, minimumSize: CGSize? = nil) {
         self.data = data
 
-        data.setupJournal()
+        data.setupJournal(firstSetup: true)
 
         super.init(contentRect: contentRect, styleMask: [.titled, .closable, .miniaturizable, .resizable, .unifiedTitleAndToolbar, .fullSizeContentView],
                    backing: .buffered, defer: false)
@@ -57,13 +57,14 @@ class BeamWindow: NSWindow, NSDraggingDestination {
         self.setupWindowButtons()
         self.setTitleBarAccessoryView()
 
+        let minimumSize = minimumSize ?? contentRect.size
         // Create the SwiftUI view and set the context as the value for the managedObjectContext environment keyPath.
         // Add `@Environment(\.managedObjectContext)` in the views that will need the context.
         let mainView = ContentView()
             .environmentObject(state)
             .environmentObject(data)
             .environmentObject(state.browserTabsManager)
-            .frame(minWidth: contentRect.width, maxWidth: .infinity, minHeight: contentRect.height, maxHeight: .infinity)
+            .frame(minWidth: minimumSize.width, maxWidth: .infinity, minHeight: minimumSize.height, maxHeight: .infinity)
 
         let hostingView = BeamHostingView(rootView: mainView)
         hostingView.frame = contentRect
@@ -87,12 +88,18 @@ class BeamWindow: NSWindow, NSDraggingDestination {
     }
 
     override func performClose(_ sender: Any?) {
-        if state.mode != .web, state.hasBrowserTabs {
+        if state.mode != .web && state.hasUnpinnedBrowserTabs {
             state.mode = .web
             return
         }
-        if state.closeCurrentTab() { return }
-
+        if state.mode == .web {
+            let currentTab = state.browserTabsManager.currentTab
+            _ = state.closeCurrentTab()
+            if currentTab == state.browserTabsManager.currentTab { // currentTab might be the last unclosable tab (unpinned tab)
+                state.mode = .today
+            }
+            return
+        }
         super.performClose(sender)
     }
 
@@ -135,7 +142,7 @@ class BeamWindow: NSWindow, NSDraggingDestination {
         animationLayer.position = self.mouseLocationOutsideOfEventStream
         animationLayer.zPosition = .greatestFiniteMagnitude
 
-        let flyingImage = NSImage(named: "flying-download")
+        let flyingImage = NSImage(named: "download-file_glyph")
         animationLayer.contents = flyingImage?.cgImage
 
         self.contentView?.layer?.addSublayer(animationLayer)
@@ -145,17 +152,6 @@ class BeamWindow: NSWindow, NSDraggingDestination {
 
         animationLayer.add(animationGroup, forKey: "download")
         animationLayer.opacity = 0.0
-    }
-
-    static let savedCloseTabCmdsKey = "savedClosedTabCmds"
-
-    private func restablishedLastCommands() {
-        if let data = UserDefaults.standard.data(forKey: Self.savedCloseTabCmdsKey) {
-            let decoder = JSONDecoder()
-            guard let closedTabsGroupCmd = try? decoder.decode(GroupWebCommand.self, from: data) else { return }
-            state.cmdManager.appendToDone(command: closedTabsGroupCmd)
-            UserDefaults.standard.removeObject(forKey: Self.savedCloseTabCmdsKey)
-        }
     }
 
     // Drag and drop:
@@ -190,7 +186,8 @@ class BeamWindow: NSWindow, NSDraggingDestination {
                 note.resetIds() // use a new UUID to be sure not to overwrite an existing note
                 let titleBase = note.title
                 var i = 0
-                while DocumentManager().allDocumentsTitles(includeDeletedNotes: false).contains(note.title.lowercased()) {
+                let documentManager = DocumentManager()
+                while documentManager.allDocumentsTitles(includeDeletedNotes: false).contains(note.title.lowercased()) {
                     note.title = titleBase + " #\(i)"
                     i += 1
                 }
@@ -198,17 +195,10 @@ class BeamWindow: NSWindow, NSDraggingDestination {
                 Logger.shared.logError("Saving imported note '\(note.title)' from \(url)", category: .document)
                 note.autoSave()
 
-                let alert = NSAlert()
-                alert.addButton(withTitle: "OK")
-                alert.informativeText = "Note '\(note.title)' was imported succesfully"
-                alert.messageText = "Note Imported"
-                alert.runModal()
+                UserAlert.showMessage(message: "Note Imported",
+                                      informativeText: "Note '\(note.title)' was imported succesfully")
             } catch let error {
-                let alert = NSAlert()
-                alert.addButton(withTitle: "OK")
-                alert.informativeText = "Unable to import '\(url)'"
-                alert.messageText = "Note Not Imported"
-                alert.runModal()
+                UserAlert.showError(message: "Note Not Imported", informativeText: "Unable to import '\(url)'")
                 Logger.shared.logError("Unable to decode dropped BeamNode '\(url)': \(error)", category: .document)
             }
 
@@ -225,7 +215,7 @@ extension BeamWindow: NSWindowDelegate {
             window.state.windowIsMain = false
         }
         guard state.mode == .web else { return }
-        state.browserTabsManager.currentTab?.startReading(withState: state)
+        state.browserTabsManager.currentTab?.tabDidAppear(withState: state)
     }
 
     func windowDidMove(_ notification: Notification) {
@@ -259,7 +249,7 @@ extension BeamWindow: NSWindowDelegate {
     }
 
     func windowDidDeminiaturize(_ notification: Notification) {
-        if isMainWindow { state.browserTabsManager.currentTab?.startReading(withState: state) }
+        if isMainWindow { state.browserTabsManager.currentTab?.tabDidAppear(withState: state) }
     }
 
 }

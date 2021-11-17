@@ -17,17 +17,27 @@ private struct MeetingFormatterContainerView: View {
         @Published var searchText: String = ""
         @Published var selectedDate: Date = .init()
         @Published var allMeetingDates: [Date] = []
+        @Published var isLoading = false
         @Published var meetingsByDay: [MeetingsForDay] = [] {
             didSet {
-                allMeetingDates = meetingsByDay.reduce([Date](), { result, meetingsForDay in
-                    result + meetingsForDay.meetings.map { $0.date }
-                })
+                allMeetingDates = Array(meetingsByDay.reduce(Set<Date>(), { result, meetingsForDay in
+                    var r = result
+                    meetingsForDay.meetings.forEach { r.insert($0.startTime) }
+                    return r
+                }))
             }
         }
-        @Published var selectedMeeting: Meeting?
+        @Published var selectedMeeting: Meeting? {
+            didSet {
+                if let id = selectedMeeting?.id {
+                    scrollViewProxy?.scrollTo(id)
+                }
+            }
+        }
 
         var onSelectMeeting: ((_ meeting: Meeting) -> Void)?
         weak var window: NSWindow?
+        fileprivate var scrollViewProxy: ScrollViewProxy?
     }
 
     static let idealSize = CGSize(width: 484, height: 260)
@@ -76,11 +86,24 @@ private struct MeetingFormatterContainerView: View {
                 .transition(.opacity.animation(BeamAnimation.easeInOut(duration: 0.15)))
             }
             HStack(spacing: 0) {
-                MeetingsListView(meetingsByDay: viewModel.meetingsByDay, selectedMeeting: $viewModel.selectedMeeting.onChange({ m in
-                    guard let m = m else { return }
-                    viewModel.onSelectMeeting?(m)
-                }), searchQuery: viewModel.searchText)
-                    .animation(nil)
+                ZStack(alignment: .topLeading) { }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(
+                    // putting scrollview in zstack background to not let its height influence the container height.
+                    ScrollView {
+                        ScrollViewReader { proxy in
+                            MeetingsListView(meetingsByDay: viewModel.meetingsByDay, selectedMeeting: $viewModel.selectedMeeting.onChange({ m in
+                                guard let m = m else { return }
+                                viewModel.onSelectMeeting?(m)
+                            }), searchQuery: viewModel.searchText, isLoading: viewModel.isLoading)
+                                .animation(nil)
+                                .onAppear {
+                                    viewModel.scrollViewProxy = proxy
+                                }
+                        }
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                )
                 Separator(color: BeamColor.Nero)
                 CalendarPickerView(selectedDate: $viewModel.selectedDate, highlightedDates: viewModel.allMeetingDates, calendar: calendar, theme: .beam) { items, point in
                     showContextMenu(items: items, at: point)
@@ -110,20 +133,28 @@ private struct MeetingFormatterContainerView: View {
 // MARK: - NSView Container
 class MeetingFormatterView: FormatterView {
 
+    private var calendarManager: CalendarManager
     private var hostView: NSHostingView<MeetingFormatterContainerView>?
     private var subviewModel = MeetingFormatterContainerView.ViewModel()
     private var dateObserver: AnyCancellable?
+    private let calendar = Calendar.current
+    private weak var todaysNote: BeamNote?
 
     override var idealSize: CGSize {
         MeetingFormatterContainerView.idealSize
     }
     override var handlesTyping: Bool { true }
 
-    private var sentFinish = false
     var onFinish: ((_ meeting: Meeting?) -> Void)?
 
-    convenience init() {
-        self.init(key: "MeetingPicker", viewType: .inline)
+    init(calendarManager: CalendarManager, todaysNote: BeamNote?) {
+        self.todaysNote = todaysNote
+        self.calendarManager = calendarManager
+        super.init(key: "MeetingPicker", viewType: .inline)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 
     override func viewWillMove(toWindow newWindow: NSWindow?) {
@@ -141,31 +172,87 @@ class MeetingFormatterView: FormatterView {
 
     override func animateOnDisappear(completionHandler: (() -> Void)? = nil) {
         super.animateOnDisappear()
-        subviewModel.visible = false
-        if !sentFinish {
+        if subviewModel.visible {
             onFinish?(nil)
         }
+        subviewModel.visible = false
         DispatchQueue.main.asyncAfter(deadline: .now() + FormatterView.disappearAnimationDuration) {
             completionHandler?()
         }
     }
 
-    private func searchMeeting(for date: Date) {
-        subviewModel.meetingsByDay = fakeResults(for: date)
-        subviewModel.selectedMeeting = subviewModel.meetingsByDay.first?.meetings.first
+    private func groupMeetingsByDay(_ meetings: [Meeting]) -> [MeetingsForDay] {
+        var dic: [Date: MeetingsForDay] = [:]
+        meetings.forEach { meeting in
+            let key = meeting.startTime.isoCalStartOfDay
+            var d = dic[key]
+            if d != nil {
+                d?.meetings.append(meeting)
+            } else {
+                d = MeetingsForDay(date: meeting.startTime, meetings: [meeting])
+            }
+            dic[key] = d
+        }
+        return dic.values.sorted { $0.date < $1.date }
     }
 
-    private func searchMeeting(for text: String) {
-        subviewModel.searchText = text
-        subviewModel.meetingsByDay = text.isEmpty ? fakeResults(for: BeamDate.now) : searchFakeResults
-        subviewModel.selectedMeeting = subviewModel.meetingsByDay.first?.meetings.first
+    private func limitDisplayMeetings(_ meetings: [Meeting], for date: Date) -> [Meeting] {
+        var sameDayMeetings = [Meeting]()
+        var otherDayMeetings = [Meeting]()
+        meetings.forEach {
+            if calendar.isDate($0.startTime, inSameDayAs: date) {
+                sameDayMeetings.append($0)
+            } else {
+                otherDayMeetings.append($0)
+            }
+        }
+        guard sameDayMeetings.count < 8 else {
+            return sameDayMeetings
+        }
+        return sameDayMeetings + otherDayMeetings.prefix(upTo: min(otherDayMeetings.count, 8 - sameDayMeetings.count))
     }
 
-    private let calendar = Calendar.current
+    private var debouncedRequestWorkItem: DispatchWorkItem?
+    private var requestsCancellables = Set<AnyCancellable>()
+
+    private func searchMeeting(for date: Date, text: String?) {
+        subviewModel.isLoading = true
+        subviewModel.searchText = text ?? ""
+
+        requestsCancellables.removeAll()
+        debouncePublisher(delay: .milliseconds(300)).sink { [weak self] _ in
+            guard let self = self else { return }
+            self.requestMeetingsFuture(for: date, text: text)
+                .sink { [weak self] meetings in
+                    guard let self = self else { return }
+                    self.subviewModel.isLoading = false
+                    let relevantMeetings = self.limitDisplayMeetings(meetings, for: date)
+                    self.subviewModel.meetingsByDay = self.groupMeetingsByDay(relevantMeetings)
+                    self.subviewModel.selectedMeeting = self.subviewModel.meetingsByDay.first?.meetings.first
+                }.store(in: &self.requestsCancellables)
+        }.store(in: &requestsCancellables)
+    }
+
+    private func requestMeetingsFuture(for date: Date, text: String?) -> AnyPublisher<[Meeting], Never> {
+        Future { [weak self] promise in
+            guard let self = self else { return }
+            let query = text?.isEmpty == true ? nil : text
+            var endDate: Date?
+            if query?.isEmpty != false {
+                let endOfDisplayedMonthDate = self.calendar.endOfMonth(for: date) ?? date
+                let minimumEndDate = self.calendar.date(byAdding: DateComponents(day: 7), to: date) ?? date
+                endDate = endOfDisplayedMonthDate > minimumEndDate ? endOfDisplayedMonthDate : minimumEndDate
+            }
+            self.calendarManager.requestMeetings(for: date, and: endDate, onlyToday: false, query: query) { meetings in
+                promise(.success(meetings))
+            }
+        }.eraseToAnyPublisher()
+    }
 
     // MARK: Key Handlers
     override func formatterHandlesCursorMovement(direction: CursorMovement,
                                                  modifierFlags: NSEvent.ModifierFlags? = nil) -> Bool {
+        guard [.up, .down].contains(direction) else { return true }
         let allMeetings: [Meeting] = subviewModel.meetingsByDay.reduce([Meeting]()) { meetings, meetingForDay in
             return meetings + meetingForDay.meetings
         }
@@ -191,7 +278,7 @@ class MeetingFormatterView: FormatterView {
 
     override func formatterHandlesInputText(_ text: String) -> Bool {
         guard !text.isEmpty || !subviewModel.searchText.isEmpty else { return false } // delete backward
-        searchMeeting(for: text)
+        searchMeeting(for: subviewModel.selectedDate, text: text)
         return true
     }
 
@@ -199,13 +286,19 @@ class MeetingFormatterView: FormatterView {
     override func setupUI() {
         super.setupUI()
         subviewModel.selectedDate = BeamDate.now
-        subviewModel.selectedMeeting = selectedMeeting(for: BeamDate.now)
-        subviewModel.meetingsByDay = fakeResults(for: BeamDate.now)
+        if let todaysNote = todaysNote, let meetings = calendarManager.meetingsForNote[todaysNote.id], !meetings.isEmpty {
+            subviewModel.meetingsByDay = [
+                MeetingsForDay(date: BeamDate.now.isoCalStartOfDay, meetings: meetings)
+            ]
+            subviewModel.selectedMeeting = subviewModel.meetingsByDay.first?.meetings.first
+        } else {
+            searchMeeting(for: subviewModel.selectedDate, text: nil)
+        }
         subviewModel.onSelectMeeting = { [weak self] meeting in
             self?.onFinish?(meeting)
         }
-        dateObserver = subviewModel.$selectedDate.sink { [weak self] newDate in
-            self?.searchMeeting(for: newDate)
+        dateObserver = subviewModel.$selectedDate.dropFirst().sink { [weak self] newDate in
+            self?.searchMeeting(for: newDate, text: self?.subviewModel.searchText)
         }
         let rootView = MeetingFormatterContainerView(viewModel: subviewModel, calendar: calendar)
         let hostingView = NSHostingView(rootView: rootView)
@@ -215,34 +308,4 @@ class MeetingFormatterView: FormatterView {
         hostView = hostingView
         self.layer?.masksToBounds = false
     }
-
-    private let selectedMeetingUUID = UUID()
-
-}
-
-// MARK: - Fake Meetings Data
-extension MeetingFormatterView {
-
-    private func selectedMeeting(for date: Date) -> Meeting {
-        Meeting(id: selectedMeetingUUID, name: "Yeah sure", date: date, attendees: [])
-    }
-    private func fakeResults(for date: Date) -> [MeetingsForDay] { [
-        MeetingsForDay(date: date, meetings: [
-            selectedMeeting(for: date.addingTimeInterval(2000)),
-            Meeting(name: "Yeah sure \(calendar.dateComponents([.day], from: date).day!)-\(calendar.dateComponents([.month], from: date).month!)", date: date.addingTimeInterval(6000), attendees: []),
-            Meeting(name: "Ouiiiii", date: date.addingTimeInterval(20000), attendees: [])
-        ])
-    ] }
-
-    private var searchFakeResults: [MeetingsForDay] { [
-        MeetingsForDay(date: BeamDate.now.addingTimeInterval(150000), meetings: [
-            Meeting(name: "Malaga retreat", date: BeamDate.now.addingTimeInterval(10000), attendees: [
-                .init(email: "john@beamapp.co", name: "John Begood"),
-                .init(email: "dam@beamapp.co", name: "Dam Dam")
-            ])
-        ]),
-        MeetingsForDay(date: BeamDate.now.addingTimeInterval(300000), meetings: [
-            Meeting(name: "Something in the future", date: BeamDate.now.addingTimeInterval(150000), attendees: [])
-        ])
-    ] }
 }

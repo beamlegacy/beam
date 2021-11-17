@@ -1,9 +1,8 @@
-import {BeamHTMLElement, BeamRangeGroup, BeamShootGroup} from "../../../Helpers/Utils/Web/BeamTypes"
+import {BeamHTMLElement, BeamRangeGroup, BeamShootGroup, FrameInfo} from "../../../Helpers/Utils/Web/BeamTypes"
 import {PointAndShootUI} from "./PointAndShootUI"
-import {WebEventsUI_web} from "./WebEventsUI_web"
 
-export class PointAndShootUI_web extends WebEventsUI_web implements PointAndShootUI {
-
+export class PointAndShootUI_web implements PointAndShootUI {
+  prefix= "__ID__"
   shootClass = `${this.prefix}-shoot`
 
   pointClass = `${this.prefix}-point`
@@ -86,18 +85,25 @@ export class PointAndShootUI_web extends WebEventsUI_web implements PointAndShoo
    * @type {(BeamWindow)}
    */
   win
+  lang: any
 
   /**
    * @param win {BeamWindow}
    */
   constructor(win) {
-    super(win)
+    this.win = win
     this.log(`${this.toString()} instantiated`)
+  }
+  setFramesInfo(framesInfo: FrameInfo[]) {
+    throw new Error("Method not implemented.")
+  }
+  log(arg0: string): void {
+    throw new Error("Method not implemented.")
   }
   clearSelection(_id: string): void {
     throw new Error("Method not implemented.")
   }
-    isTypingOnWebView(_isTypingOnWebView: boolean): void {
+    typingOnWebView(_isTypingOnWebView: boolean): void {
         throw new Error("Method not implemented.")
     }
   pointBounds(_pointTarget?: BeamShootGroup): void {
