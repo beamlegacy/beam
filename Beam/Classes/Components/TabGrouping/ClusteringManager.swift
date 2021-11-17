@@ -47,6 +47,7 @@ class ClusteringManager: ObservableObject {
     private var scope = Set<AnyCancellable>()
     var suggestedNoteUpdater: SuggestedNoteSourceUpdater
     var sessionId: UUID
+    var navigationBasedPageGroups = [[UUID]]()
 
     init(ranker: SessionLinkRanker, candidate: Int, navigation: Double, text: Double, entities: Double, sessionId: UUID, activeSources: ActiveSources) {
         self.selectedTabGroupingCandidate = candidate
@@ -104,6 +105,16 @@ class ClusteringManager: ObservableObject {
         }.store(in: &scope)
     }
 
+    func findPageGroupForID(pageID: UUID, pageGroups: [[UUID]]) -> Int? {
+        for pageGroup in pageGroups.enumerated() {
+            if pageGroup.element.contains(pageID) {
+                return pageGroup.offset
+            }
+        }
+        return nil
+    }
+
+    // swiftlint:disable:next cyclomatic_complexity
     func getIdAndParent(tabToIndex: TabInformation) -> (UUID?, UUID?) {
         guard tabToIndex.isPinnedTab == false else {
             return (nil, nil)
@@ -145,6 +156,17 @@ class ClusteringManager: ObservableObject {
            let type = previousTabTree.current.events.last?.type,
            type == .openLinkInNewTab {
             parentId = previousTabTree.current.link
+        }
+
+        // The following is only here in order to save groups based on navigation, remove before release:
+        if let id = id,
+           self.findPageGroupForID(pageID: id, pageGroups: self.navigationBasedPageGroups) == nil {
+            if let parentId = parentId,
+               let group = self.findPageGroupForID(pageID: parentId, pageGroups: self.navigationBasedPageGroups) {
+                self.navigationBasedPageGroups[group].append(id)
+            } else {
+                self.navigationBasedPageGroups.append([id])
+            }
         }
         return (id, parentId)
     }
@@ -333,7 +355,7 @@ class ClusteringManager: ObservableObject {
         for (id, group) in orphanedUrlGroups.enumerated() {
             for urlId in group {
                 let url = LinkStore.linkFor(urlId)?.url
-                orphanedUrlManager.add(orphanedUrl: OrphanedUrl(sessionId: sessionId, url: url, groupId: id, savedAt: savedAt))
+                orphanedUrlManager.add(orphanedUrl: OrphanedUrl(sessionId: sessionId, url: url, groupId: id, navigationGroupId: self.findPageGroupForID(pageID: urlId, pageGroups: self.navigationBasedPageGroups), savedAt: savedAt))
             }
         }
         orphanedUrlManager.save()
