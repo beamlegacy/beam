@@ -16,7 +16,7 @@ enum CardViewLocators {
     enum Buttons: String, CaseIterable, UIElement {
         case editorOptions = "editor-options"
         case contextMenuRename = "ContextMenuItem-rename"
-        case privateLock = "status-private"
+        case privateLock = "status-lock"
         case editorButton = "editor-breadcrumb_down"
         case copyCardLinkButton = "editor-url_link"
         case linksSection = "LinksSection"

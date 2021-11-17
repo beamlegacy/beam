@@ -34,7 +34,7 @@ struct SearchInContentView: View {
                     viewModel.next()
                 }
             }
-            ButtonLabel(icon: "tabs-close", customStyle: searchButtonLabelStyle) {
+            ButtonLabel(icon: "tool-close", customStyle: searchButtonLabelStyle) {
                 viewModel.close()
             }
         }

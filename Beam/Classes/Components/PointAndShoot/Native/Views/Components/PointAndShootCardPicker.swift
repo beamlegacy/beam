@@ -148,13 +148,13 @@ struct PointAndShootCardPicker: View {
                 // MARK: - Icon
                 if isEditingCardName && (currentCardName != nil || cardSearchField.isEmpty) {
                     if !completed {
-                        Icon(name: "editor-format_enter", size: 12, color: BeamColor.Generic.placeholder.swiftUI)
+                        Icon(name: "shortcut-return", size: 12, color: BeamColor.Generic.placeholder.swiftUI)
                             .transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.15)))
                             .onTapGesture {
                                 onFinishEditing()
                             }
                     } else if let group = completedGroup {
-                        let confirmationIcon = group.confirmation == .success ? "collect-generic" : "tabs-close"
+                        let confirmationIcon = group.confirmation == .success ? "collect-generic" : "tool-close"
                         Icon(name: confirmationIcon, size: 16, color: BeamColor.Generic.text.swiftUI)
                             .transition(AnyTransition.opacity.animation(Animation.easeInOut(duration: 0.15).delay(0.05)))
                             .onTapGesture {
@@ -199,7 +199,7 @@ struct PointAndShootCardPicker: View {
 
                     // MARK: - Icon
                     if isEditingNote {
-                        Icon(name: "editor-format_enter", size: 12, color: BeamColor.Generic.placeholder.swiftUI)
+                        Icon(name: "shortcut-return", size: 12, color: BeamColor.Generic.placeholder.swiftUI)
                             .animation(nil)
                             .onTapGesture {
                                 onFinishEditing()

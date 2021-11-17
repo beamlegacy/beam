@@ -178,6 +178,7 @@ class BeamTableCellIconAndTextView: NSTableCellView {
         _textField.textColor = BeamColor.Generic.text.nsColor
         _textField.wantsLayer = true
 
+        _iconView.contentTintColor = BeamColor.LightStoneGray.nsColor
         _iconView.translatesAutoresizingMaskIntoConstraints = false
         _iconView.isEnabled = true
 

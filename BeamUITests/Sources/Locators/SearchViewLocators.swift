@@ -16,7 +16,7 @@ enum SearchViewLocators {
     enum Buttons: String, CaseIterable, UIElement {
         case forwardButton = "find-forward"
         case backwardButton = "find-previous"
-        case closeButton = "tabs-close"
+        case closeButton = "tool-close"
     }
     
     enum TextFields: String, CaseIterable, UIElement {

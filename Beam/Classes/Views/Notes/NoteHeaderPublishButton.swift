@@ -72,7 +72,7 @@ struct NoteHeaderPublishButton: View {
 
         @ViewBuilder var errorOverlay: some View {
             if let error = error {
-                Tooltip(title: error.message, icon: "status-private")
+                Tooltip(title: error.message, icon: "status-lock")
                 .fixedSize().offset(x: 0, y: -25)
                 .transition(AnyTransition.opacity.animation(BeamAnimation.defaultiOSEasing(duration: 0.3)))
             }

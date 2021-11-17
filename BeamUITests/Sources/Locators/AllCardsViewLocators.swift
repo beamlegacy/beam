@@ -10,7 +10,7 @@ import Foundation
 enum AllCardsViewLocators {
     
     enum Buttons: String, CaseIterable, UIElement {
-        case newCardButton = "tabs new"
+        case newCardButton = "tool new"
         case journalButton = "journal"
     }
     

@@ -130,9 +130,9 @@ struct AutocompleteItem: View {
             }
             Spacer(minLength: 0)
             if item.source == .createCard && allowCmdEnter {
-                Icon(name: "shortcut-cmd+return", size: 12, color: secondaryTextColor)
+                Icon(name: "shortcut-cmd+return", size: 12, color: secondaryTextColor, alignment: .trailing)
             } else {
-                Icon(name: "editor-format_enter", size: 12, color: selected ? secondaryTextColor : .clear)
+                Icon(name: "shortcut-return", size: 12, color: selected ? secondaryTextColor : .clear, alignment: .trailing)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
