@@ -46,7 +46,7 @@ struct DownloaderView: View {
                     Button(action: {
                         onClose()
                     }, label: {
-                        Image("tabs-close")
+                        Image("tool-close")
                             .renderingMode(.template)
                             .foregroundColor(foregroundColor)
                     })

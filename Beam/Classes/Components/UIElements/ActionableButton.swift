@@ -26,17 +26,17 @@ enum ActionableButtonVariant {
             return ActionableButtonStyle(font: BeamFont.medium(size: 13).swiftUI,
                                          foregroundColor: .primaryBlueForeground,
                                          backgroundColor: .primaryBlueBackground,
-                                         icon: .init(name: "editor-format_enter"))
+                                         icon: .init(name: "shortcut-return"))
         case .primaryPurple:
             return ActionableButtonStyle(font: BeamFont.medium(size: 13).swiftUI,
                                          foregroundColor: .primaryPurpleForeground,
                                          backgroundColor: .primaryPurpleBackground,
-                                         icon: .init(name: "editor-format_enter"))
+                                         icon: .init(name: "shortcut-return"))
         case .secondary:
             return ActionableButtonStyle(font: BeamFont.medium(size: 13).swiftUI,
                                          foregroundColor: .secondaryForeground,
                                          backgroundColor: .secondaryBackground,
-                                         icon: .init(name: "editor-format_esc", size: 16, palette: .secondaryIcon))
+                                         icon: .init(name: "shortcut-bttn_esc", size: 16, palette: .secondaryIcon))
         case .custom(let customStyle):
             return customStyle
         }

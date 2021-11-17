@@ -100,8 +100,8 @@ struct TextEditCmdReturnAnimator {
     }
 
     private func setupIconLayer(expandedBoxRect: NSRect) -> CALayer {
-        let iconLayer = Layer.icon(named: "editor-cmdreturn", color: BeamColor.LightStoneGray.nsColor)
-        iconLayer.frame.origin = CGPoint(x: expandedBoxRect.maxX - 25, y: expandedBoxRect.minY + 5)
+        let iconLayer = Layer.icon(named: "shortcut-cmd+return", color: BeamColor.LightStoneGray.nsColor)
+        iconLayer.frame.origin = CGPoint(x: expandedBoxRect.maxX - 26, y: expandedBoxRect.minY + 7)
 
         // ANIMATIONS
         iconLayer.add(iconLayerAnimation(), forKey: "iconAnimationGroup")
