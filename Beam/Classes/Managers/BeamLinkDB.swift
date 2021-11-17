@@ -23,12 +23,12 @@ extension Link: FetchableRecord {
     /// Creates a record from a database row
     public init(row: Row) {
         self.init(url: row[Columns.url],
-                   title: row[Columns.title],
-                   createdAt: row[Columns.createdAt],
-                   updatedAt: row[Columns.updatedAt],
-                   deletedAt: row[Columns.deletedAt],
-                   previousChecksum: row[Columns.previousChecksum]
-                   )
+                  title: row[Columns.title],
+                  createdAt: row[Columns.createdAt],
+                  updatedAt: row[Columns.updatedAt],
+                  deletedAt: row[Columns.deletedAt],
+                  previousChecksum: row[Columns.previousChecksum]
+        )
     }
 }
 
@@ -116,39 +116,40 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
         return matchingLinks
     }
 
-    public func getIdFor(link: String) -> UUID? {
+    public func getIdFor(url: String) -> UUID? {
         try? dbPool.read { db in
-            try Link.filter(Column("url") == link).fetchOne(db)?.id
+            try Link.filter(Column("url") == url).fetchOne(db)?.id
         }
     }
 
-    public func store(link: Link, saveOnNetwork: Bool, networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
-        try store(links: [link], saveOnNetwork: saveOnNetwork, networkCompletion: networkCompletion)
+    public func getLinkFor(url: String, title: String?) -> Link {
+        (try? dbPool.read { db in
+            try Link.filter(Column("url") == url).fetchOne(db)
+        }) ?? Link(url: url, title: title)
     }
 
-    public func store(links: [Link], saveOnNetwork: Bool, networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
+    public func store(link: Link, shouldSaveOnNetwork: Bool, networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
+        try store(links: [link], shouldSaveOnNetwork: shouldSaveOnNetwork, networkCompletion: networkCompletion)
+    }
+
+    public func store(links: [Link], shouldSaveOnNetwork: Bool, networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
         try dbPool.write { db in
             for var link in links {
                 try link.insert(db)
             }
         }
 
-        if saveOnNetwork, AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled {
-            for link in links {
-                try self.saveOnNetwork(link, networkCompletion)
-            }
-        }
+        guard shouldSaveOnNetwork, AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else { return }
+
+        saveOnNetwork(links, networkCompletion)
     }
 
-    public func createIdFor(link url: String, title: String? = nil) -> UUID {
-        var link = Link(url: url, title: title)
+    public func createIdFor(url: String, title: String? = nil) -> UUID {
+        var link = getLinkFor(url: url, title: title)
         _ = try? dbPool.write { db in
             try link.insert(db)
         }
 
-        if AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled {
-            _ = try? self.saveOnNetwork(link)
-        }
         return link.id
     }
 
@@ -158,18 +159,21 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
         }
     }
 
-    public func visit(link url: String, title: String? = nil) {
-        var link = Link(url: url, title: title)
+    public func visit(url: String, title: String? = nil) {
+        var link = getLinkFor(url: url, title: title)
+        link.updatedAt = BeamDate.now
+        link.title = title
+
         _ = try? dbPool.write { db in
             do {
-                try link.update(db, columns: [Column("updateAt")])
+                try link.update(db, columns: [Column("updateAt"), Column("title")])
             } catch {
                 try link.insert(db)
             }
         }
 
         if AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled {
-            _ = try? self.saveOnNetwork(link)
+            saveOnNetwork(link)
         }
     }
 
@@ -197,7 +201,7 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
     func willSaveAllOnBeamObjectApi() {}
 
     func receivedObjects(_ links: [Link]) throws {
-        try store(links: links, saveOnNetwork: false)
+        try store(links: links, shouldSaveOnNetwork: false)
     }
 
     func allObjects(updatedSince: Date?) throws -> [Link] {
@@ -244,25 +248,66 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
         }
     }
 
-    private func saveOnNetwork(_ link: Link, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
+    private func saveOnNetwork(_ links: [Link], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
         let localTimer = BeamDate.now
-        try saveOnBeamObjectAPI(link) { result in
-            switch result {
-            case .success:
-                Logger.shared.logDebug("Saved link \(link.url) [\(link.id)] on the BeamObject API",
-                                       category: .linkNetwork,
-                                       localTimer: localTimer)
-                networkCompletion?(.success(true))
-            case .failure(let error):
-                Logger.shared.logDebug("Error when saving the link on the BeamObject API with error: \(error.localizedDescription)",
-                                       category: .linkNetwork)
-                networkCompletion?(.failure(error))
+
+        Logger.shared.logDebug("Will save links \(links) on the BeamObject API",
+                               category: .linkNetwork)
+
+        let backgroundQueue = DispatchQueue(label: "Links BeamObjectManager backgroundQueue", qos: .userInitiated)
+
+        backgroundQueue.async { [weak self] in
+            do {
+                try self?.saveOnBeamObjectsAPI(links) { result in
+                    switch result {
+                    case .success:
+                        Logger.shared.logDebug("Saved links \(links) on the BeamObject API",
+                                               category: .linkNetwork,
+                                               localTimer: localTimer)
+                        networkCompletion?(.success(true))
+                    case .failure(let error):
+                        Logger.shared.logDebug("Error when saving the link on the BeamObjects API with error: \(error.localizedDescription)",
+                                               category: .linkNetwork)
+                        networkCompletion?(.failure(error))
+                    }
+                }
+            } catch {
+                Logger.shared.logError(error.localizedDescription, category: .fileNetwork)
+            }
+        }
+    }
+
+    private func saveOnNetwork(_ link: Link, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
+        let localTimer = BeamDate.now
+
+        Logger.shared.logDebug("Will save link \(link.url) [\(link.id)] on the BeamObject API",
+                               category: .linkNetwork)
+
+        let backgroundQueue = DispatchQueue(label: "Link BeamObjectManager backgroundQueue", qos: .userInitiated)
+
+        backgroundQueue.async { [weak self] in
+            do {
+                try self?.saveOnBeamObjectAPI(link) { result in
+                    switch result {
+                    case .success:
+                        Logger.shared.logDebug("Saved link \(link.url) [\(link.id)] on the BeamObject API",
+                                               category: .linkNetwork,
+                                               localTimer: localTimer)
+                        networkCompletion?(.success(true))
+                    case .failure(let error):
+                        Logger.shared.logDebug("Error when saving the link on the BeamObject API with error: \(error.localizedDescription)",
+                                               category: .linkNetwork)
+                        networkCompletion?(.failure(error))
+                    }
+                }
+            } catch {
+                Logger.shared.logError(error.localizedDescription, category: .fileNetwork)
             }
         }
     }
 
     func persistChecksum(_ objects: [Link]) throws {
-        Logger.shared.logDebug("Saved \(objects.count) BeamObject checksums",
+        Logger.shared.logDebug("Saved \(objects.count) \(Self.BeamObjectType) checksums",
                                category: .linkNetwork)
 
         var links: [Link] = []
@@ -275,7 +320,7 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
             link.previousChecksum = updateObject.previousChecksum
             links.append(link)
         }
-        try store(links: links, saveOnNetwork: false)
+        try store(links: links, shouldSaveOnNetwork: false)
     }
 
     func manageConflict(_ object: Link,
@@ -284,7 +329,7 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
     }
 
     func saveObjectsAfterConflict(_ objects: [Link]) throws {
-        try store(links: objects, saveOnNetwork: false)
+        try store(links: objects, shouldSaveOnNetwork: false)
     }
 
 }

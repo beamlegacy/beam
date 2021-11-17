@@ -241,6 +241,7 @@ extension DocumentManager {
                 }
             }
         } catch {
+            Logger.shared.logError(error.localizedDescription, category: .documentNetwork)
             completion?(.failure(error))
             return nil
         }
