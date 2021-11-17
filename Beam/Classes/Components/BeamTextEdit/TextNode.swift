@@ -618,7 +618,7 @@ public class TextNode: ElementNode {
             return handleRightMouseDown(mouseInfo: mouseInfo)
         }
 
-        if contentsFrame.containsY(mouseInfo.position) {
+        if contentsFrame.contains(mouseInfo.position) {
 
             let clickPos = positionAt(point: mouseInfo.position)
 
