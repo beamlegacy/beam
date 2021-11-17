@@ -22,6 +22,7 @@ class EmbedNode: ResizableNode {
 
     private static var webViewConfiguration = EmbedNodeWebViewConfiguration()
     var webView: BeamWebView?
+    private var embedView = NSView()
     private var webPage: EmbedNodeWebPage?
     private var embedCancellables = Set<AnyCancellable>()
     private let sizeRatio = 240.0/320.0
@@ -80,12 +81,17 @@ class EmbedNode: ResizableNode {
             webView = wv
         }
 
-        webView?.navigationDelegate = self
-        webView?.wantsLayer = true
-        webView?.allowsMagnification = true
         webPage?.delegate = self
         if let webView = webView {
-            editor?.addSubview(webView)
+            webView.navigationDelegate = self
+            webView.wantsLayer = true
+            webView.allowsMagnification = true
+            let webFrame = NSRect(x: 0, y: 0, width: 150, height: 150)
+            embedView.frame = webFrame
+            webView.frame = NSRect(origin: .zero, size: webFrame.size)
+            webView.autoresizingMask = [.width, .height]
+            embedView.addSubview(webView)
+            editor?.addSubview(embedView)
         }
 
         self.webView = webView
@@ -191,7 +197,8 @@ class EmbedNode: ResizableNode {
         resizableElementContentSize = CGSize(width: availableWidth, height: height)
 
         let r = layer.frame
-        webView?.frame = CGRect(x: r.minX, y: r.minY, width: visibleSize.width, height: visibleSize.height)
+        let embedFrame = CGRect(x: r.minX, y: r.minY, width: visibleSize.width, height: visibleSize.height)
+        embedView.frame = embedFrame
     }
 
     var focusMargin = CGFloat(3)
