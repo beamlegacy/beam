@@ -146,6 +146,9 @@ public class TextRoot: ElementNode {
 
     weak var focusedWidget: Widget? {
         didSet {
+            #if DEBUG
+            assert(focusedWidget?.className != TextRoot.className())
+            #endif
             guard oldValue !== focusedWidget else { return }
             let oldNode = oldValue as? TextNode
             let newNode = focusedWidget as? TextNode
@@ -233,6 +236,7 @@ public class TextRoot: ElementNode {
     }
 
     func focus(widget: Widget, position newPosition: Int? = 0) {
+        guard widget !== self else { return }
         self.focusedWidget = widget
         if let position = newPosition {
             self.cursorPosition = position
