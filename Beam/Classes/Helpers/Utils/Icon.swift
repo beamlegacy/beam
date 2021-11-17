@@ -21,6 +21,5 @@ struct Icon: View {
             .foregroundColor(.white)
             .colorMultiply(color) // foregroundColor cannot be animated while colorMultiply can
             .frame(width: size, height: size, alignment: alignment)
-            .border(Color.black)
     }
 }
