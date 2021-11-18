@@ -50,6 +50,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var browsingTreeSender: BrowsingTreeSender?
     var noteFrecencyScorer: FrecencyScorer = ExponentialFrecencyScorer(storage: GRDBNoteFrecencyStorage())
     var versionChecker: VersionChecker
+    var onboardingManager = OnboardingManager()
     private var pinnedTabsManager = PinnedBrowserTabsManager()
 
     static func dataFolder(fileName: String) -> String {

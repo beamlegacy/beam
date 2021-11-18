@@ -44,7 +44,7 @@ struct NoteHeaderPublishButton: View {
     @State private var hovering = false
     @State private var title: String?
 
-    private let customButtonLabelStyle = ButtonLabelStyle(animation: BeamAnimation.easeInOut(duration: 0.15))
+    private let customButtonLabelStyle = ButtonLabelStyle(disableAnimations: false)
     var isWaitingChanges: Bool {
         [.publishing, .unpublishing].contains(publishState)
     }

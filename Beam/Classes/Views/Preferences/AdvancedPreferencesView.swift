@@ -358,6 +358,7 @@ struct AdvancedPreferencesView: View {
                 Preferences.Section(title: "Actions", bottomDivider: true) {
                     CrashButton
                     CopyAccessToken
+                    ResetOnboarding
                 }
                 Preferences.Section(title: "State Restoration Enabled", bottomDivider: true) {
                     StateRestorationEnabledButton
@@ -515,6 +516,15 @@ struct AdvancedPreferencesView: View {
             // TODO: loc
             Text("Copy Access Token").frame(minWidth: 100)
         }).disabled(!loggedIn)
+    }
+
+    private var ResetOnboarding: some View {
+        Button(action: {
+            Persistence.Authentication.hasSeenOnboarding = false
+            AuthenticationManager.shared.username = nil
+        }, label: {
+            Text("Reset Onboarding").frame(minWidth: 100)
+        })
     }
 
     private var ResetPrivateKey: some View {

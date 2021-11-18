@@ -267,7 +267,7 @@ struct AccountsView: View {
     private var SignInButton: some View {
         Button(action: {
             self.loading = true
-            accountManager.signIn(email, password) { result in
+            accountManager.signIn(email: email, password: password, completionHandler: { result in
                 self.loading = false
                 loggedIn = AccountManager().loggedIn
                 switch result {
@@ -279,7 +279,7 @@ struct AccountsView: View {
                     Logger.shared.logInfo("sign in succeeded", category: .network)
                     self.fetchIdentities()
                 }
-            }
+            })
         }, label: {
             // TODO: loc
             Text("Sign In...")
@@ -299,12 +299,13 @@ struct AccountsView: View {
     }
 
     private var GoogleSignInButton: some View {
-        GoogleButton(buttonType: loggedIn ? .connect : .signin, onClick: {
+        GoogleButton<Text>(buttonType: loggedIn ? .connect : .signin, onClick: {
             loading = true
         }, onConnect: {
             loggedIn = AccountManager().loggedIn
             fetchIdentities()
             loading = false
+            //FIXME: move this to AccountManager
             AppDelegate.main.data.calendarManager.connect(calendarService: .googleCalendar)
         }, onFailure: {
             loading = false
