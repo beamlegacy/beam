@@ -210,7 +210,7 @@ extension BeamTextEdit {
 
     private func onFinishPickingDate(_ date: Date?, in node: TextNode, for range: Range<Int>, placeholderText: BeamText) {
         guard let date = date else {
-            cleanupDatePickerPlaceholder(in: node, for: range, placeholderText: placeholderText)
+            cleanupPickerPlaceholder(in: node, for: range, placeholderText: placeholderText)
             return
         }
         let title = BeamDate.journalNoteTitle(for: date)
@@ -219,11 +219,11 @@ extension BeamTextEdit {
         node.cmdManager.replaceText(in: node, for: range, with: dateText)
     }
 
-    private func cleanupDatePickerPlaceholder(in node: TextNode, for range: Range<Int>, placeholderText: BeamText) {
+    private func cleanupPickerPlaceholder(in node: TextNode, for range: Range<Int>, placeholderText: BeamText) {
         let decoAttribute = placeholderText.ranges.first?.attributes.first
         var rangesToDelete = [BeamText.Range]()
         var rangesToClean = [BeamText.Range]()
-        node.cmdManager.beginGroup(with: "DatePicker cancel")
+        node.cmdManager.beginGroup(with: "Picker placeholder cleanup")
         let decoRanges = node.text.ranges.filter { $0.attributes.first?.rawValue == decoAttribute?.rawValue }
         decoRanges.forEach { r in
             if decoRanges.count == 1 || r.position >= range.lowerBound && r.end < range.upperBound {
@@ -248,12 +248,16 @@ extension BeamTextEdit {
 extension BeamTextEdit {
     private func insertMeetingSearch(in node: TextNode, for range: Range<Int>) {
         guard let calendarManager = data?.calendarManager else { return }
+        let placeholderText = BeamText(text: "/", attributes: [Self.formatterPlaceholderAttribute])
+        let cursorPosition = range.lowerBound
+        node.root?.cmdManager.insertText(placeholderText, in: node, at: cursorPosition)
+        let endPlaceholderCursorPosition = cursorPosition + placeholderText.count
         let meetingPicker = MeetingFormatterView(calendarManager: calendarManager, todaysNote: data?.todaysNote)
         meetingPicker.onFinish = { [weak node, weak self] meeting in
             guard let node = node, let lowerBound = self?.formatterTargetRange?.lowerBound else { return }
-            let editedRange = lowerBound <= node.cursorPosition ? lowerBound..<node.cursorPosition : node.cursorPosition..<node.cursorPosition
+            let editedRange = lowerBound <= cursorPosition ? lowerBound..<endPlaceholderCursorPosition : cursorPosition..<endPlaceholderCursorPosition
             guard let meeting = meeting else {
-                node.cmdManager.deleteText(in: node, for: editedRange)
+                self?.cleanupPickerPlaceholder(in: node, for: editedRange, placeholderText: placeholderText)
                 return
             }
 
@@ -271,7 +275,8 @@ extension BeamTextEdit {
         atPoint.y -= 8
         inlineFormatter = meetingPicker
         formatterTargetNode = node
-        formatterTargetRange = node.cursorPosition..<node.cursorPosition
+        formatterTargetRange = endPlaceholderCursorPosition..<endPlaceholderCursorPosition
+        node.focus(position: endPlaceholderCursorPosition)
         prepareInlineFormatterWindowBeforeShowing(meetingPicker, atPoint: atPoint)
         DispatchQueue.main.async {
             self.showOrHideInlineFormatter(isPresent: true)
