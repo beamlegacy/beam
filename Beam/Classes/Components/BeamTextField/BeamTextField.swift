@@ -9,7 +9,7 @@ import SwiftUI
 
 struct BeamTextField: NSViewRepresentable {
 
-    typealias NSViewType = BeamTextFieldView
+    typealias NSViewType = NSTextField
 
     @Binding var text: String
     @Binding var isEditing: Bool
@@ -22,6 +22,8 @@ struct BeamTextField: NSViewRepresentable {
     var selectedRange: Range<Int>?
     var selectedRangeColor: NSColor?
     var multiline = false
+    var secure = false
+    var contentType: NSTextContentType?
 
     var onTextChanged: (String) -> Void = { _ in }
     // Return a replacement text and selection
@@ -45,30 +47,30 @@ struct BeamTextField: NSViewRepresentable {
     }
 
     func makeNSView(context: Self.Context) -> Self.NSViewType {
-        let textField = BeamTextFieldView()
+        var textField: BeamNSTextFieldProtocol = secure ? BeamNSSecureTextField() : BeamNSTextField()
+        guard let view = textField as? NSTextField else {
+            fatalError("BeamTextField couldn't create a NSTextField")
+        }
         let coordinator = context.coordinator
-        textField.setContentCompressionResistancePriority(.defaultLow, for: .vertical)
-
-        textField.delegate = coordinator
-        textField.focusRingType = .none
+        view.setContentCompressionResistancePriority(.defaultLow, for: .vertical)
+        view.delegate = coordinator
+        view.focusRingType = .none
+        view.contentType = contentType
 
         if !multiline {
-            textField.usesSingleLineMode = true
+            view.usesSingleLineMode = true
         }
-
         if let textColor = textColor {
-            textField.textColor = textColor
+            view.textColor = textColor
         }
 
         if let placeholderColor = placeholderColor {
             textField.placeholderColor = placeholderColor
         }
-
         if let selectedRangeColor = selectedRangeColor {
             textField.updateTextSelectionColor(selectedRangeColor)
         }
-
-        textField.setText(text, font: font)
+        textField.setText(text, font: font, icon: nil, skipGuards: false)
         textField.onPerformKeyEquivalent = { [weak coordinator] event in
             coordinator?.performKeyEquivalentHandler(event: event) ?? false
         }
@@ -78,29 +80,30 @@ struct BeamTextField: NSViewRepresentable {
         textField.onSelectionChanged = { [weak coordinator] range in
             coordinator?.selectionChangedHandler(range)
         }
-        return textField
+        return view
     }
 
-    func updateNSView(_ textField: Self.NSViewType, context: Self.Context) {
+    func updateNSView(_ view: Self.NSViewType, context: Self.Context) {
         let coordinator = context.coordinator
 
-        if textField.textColor != textColor {
-            textField.textColor = textColor
+        guard var textField = view as? BeamNSTextFieldProtocol else { return }
+        if view.textColor != textColor {
+            view.textColor = textColor
         }
 
         if let selectedRangeColor = selectedRangeColor {
             textField.updateTextSelectionColor(selectedRangeColor)
         }
 
-        textField.setText(text, font: font)
-        textField.setPlaceholder(placeholder, font: font)
+        textField.setText(text, font: font, icon: nil, skipGuards: false)
+        textField.setPlaceholder(placeholder, font: font, icon: nil)
         textField.shouldUseIntrinsicContentSize = centered
 
         if selectedRange != coordinator.lastSelectedRange {
             if let range = selectedRange {
                 let pos = Int(range.startIndex)
                 let len = Int(range.endIndex - range.startIndex)
-                updateSelectedRange(textField, range: NSRange(location: pos, length: len))
+                updateSelectedRange(view, range: NSRange(location: pos, length: len))
             }
             coordinator.lastSelectedRange = selectedRange
         }
@@ -111,15 +114,15 @@ struct BeamTextField: NSViewRepresentable {
             let isCurrentlyFirstResponder = textField.isFirstResponder
             let wasEditing = coordinator.lastUpdateWasEditing
             if isEditing && !isCurrentlyFirstResponder {
-                textField.becomeFirstResponder()
+                view.becomeFirstResponder()
             } else if !isEditing && isCurrentlyFirstResponder {
-                textField.resignFirstResponder()
+                view.resignFirstResponder()
                 // If no other field is a first responder, we can safely clear the window's responder.
                 // Otherwise the cursor is not completely removed from the field.
-                textField.window?.makeFirstResponder(nil)
+                view.window?.makeFirstResponder(nil)
             } else if !isEditing && wasEditing {
-                textField.resignFirstResponder()
-                textField.invalidateIntrinsicContentSize()
+                view.resignFirstResponder()
+                view.invalidateIntrinsicContentSize()
             }
             coordinator.lastUpdateWasEditing = isEditing
         }
@@ -127,10 +130,10 @@ struct BeamTextField: NSViewRepresentable {
         DispatchQueue.main.async(execute: firstResponderSetterBlock)
     }
 
-    private func updateSelectedRange(_ textField: Self.NSViewType, range: NSRange) {
-        let fieldeditor = textField.currentEditor()
+    private func updateSelectedRange(_ view: Self.NSViewType, range: NSRange) {
+        let fieldeditor = view.currentEditor()
         fieldeditor?.selectedRange = range
-        if let selectedRangeColor = selectedRangeColor {
+        if let selectedRangeColor = selectedRangeColor, let textField = view as? BeamNSTextFieldProtocol {
             textField.updateTextSelectionColor(selectedRangeColor)
         }
     }
@@ -198,7 +201,7 @@ struct BeamTextField: NSViewRepresentable {
 
         // MARK: Delegates
         func controlTextDidEndEditing(_ obj: Notification) {
-            guard let textField = obj.object as? NSViewType else { return }
+            guard let textField = obj.object as? BeamNSTextFieldProtocol else { return }
             textField.onFocusChanged(false)
         }
 
@@ -211,7 +214,7 @@ struct BeamTextField: NSViewRepresentable {
                let textView = textField.currentEditor() as? BeamTextFieldViewFieldEditor {
                 textView.disableAutomaticScrollOnType = true
                 // Changing the replacement text here instantaneously, faster than waiting for SwiftUI update
-                textField.setText(newText, font: parent.font, skipGuards: true)
+                (textField as? BeamNSTextFieldProtocol)?.setText(newText, font: parent.font, icon: nil, skipGuards: true)
                 parent.updateSelectedRange(textField, range: NSRange(location: newRange.lowerBound, length: newRange.count))
                 finalText = newText
 
@@ -249,8 +252,7 @@ extension BeamTextField {
     func centered(_ centered: Bool) -> some View {
         var copy = self
         copy.centered = centered
-        return
-            copy
-                .fixedSize(horizontal: centered, vertical: false) // enables the use of intrinsic content size
+        return copy
+            .fixedSize(horizontal: centered, vertical: false) // enables the use of intrinsic content size
     }
 }

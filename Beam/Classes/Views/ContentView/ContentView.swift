@@ -9,38 +9,50 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var state: BeamState
+    @EnvironmentObject var onboardingManager: OnboardingManager
 
     @State private var contentIsScrolled = false
     private var showOmnibarBorder: Bool {
         contentIsScrolled && [.note, .today].contains(state.mode)
     }
 
+    var mainAppContent: some View {
+        GeometryReader { geometry in
+            VStack(spacing: 0) {
+                OmniBar(isAboveContent: showOmnibarBorder)
+                    .environmentObject(state.autocompleteManager)
+                    .zIndex(10)
+                ModeView(containerGeometry: geometry, contentIsScrolled: $contentIsScrolled)
+                if shouldDisplayBottomBar {
+                    WindowBottomToolBar()
+                        .transition(AnyTransition.opacity.animation(Animation.easeInOut(duration: 0.2)))
+                }
+            }
+        }
+    }
+
     var body: some View {
         ZStack {
-            GeometryReader { geometry in
-                VStack(spacing: 0) {
-                    OmniBar(isAboveContent: showOmnibarBorder)
-                        .environmentObject(state.autocompleteManager)
-                        .zIndex(10)
-                    ModeView(containerGeometry: geometry, contentIsScrolled: $contentIsScrolled)
-                    if shouldDisplayBottomBar {
-                        WindowBottomToolBar()
-                            .transition(AnyTransition.opacity.animation(Animation.easeInOut(duration: 0.2)))
-                    }
+            Group {
+                if onboardingManager.needsToDisplayOnboard {
+                    OnboardingView(model: onboardingManager)
+                        .transition(.opacity.animation(BeamAnimation.easeInOut(duration: 0.2)))
+                } else {
+                    mainAppContent
+                        .transition(.opacity.animation(BeamAnimation.easeInOut(duration: 0.2)))
                 }
-                .background(BeamColor.Generic.background.swiftUI)
             }
             .frame(minWidth: 800)
-                .background(BeamColor.Generic.background.swiftUI)
-                .edgesIgnoringSafeArea(.top)
-                .zIndex(0)
+            .background(BeamColor.Generic.background.swiftUI)
+            .edgesIgnoringSafeArea(.top)
+            .zIndex(0)
             OverlayViewCenter(viewModel: state.overlayViewModel)
                 .edgesIgnoringSafeArea(.top)
                 .zIndex(1)
         }
     }
 
-    var shouldDisplayBottomBar: Bool {
+    private var shouldDisplayBottomBar: Bool {
         switch state.mode {
         case .web:
             return false

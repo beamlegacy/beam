@@ -3,21 +3,23 @@ import SwiftUI
 import BeamCore
 import OAuthSwift
 
-struct OauthButton: View {
+enum OAuthButtonType {
+    case connect
+    case signin
+}
+
+struct OauthButton<Content: View>: View {
     var type: IdentityRequest.Provider
     var authClient: OAuth2Swift
     var callbackURL: String
     var scope: String
-    var buttonType: ButtonType = .connect
+    var buttonType: OAuthButtonType = .connect
 
     var onClick: (() -> Void)?
     var onConnect: (() -> Void)?
+    var onDataSync: (() -> Void)?
     var onFailure: (() -> Void)?
-
-    enum ButtonType {
-        case connect
-        case signin
-    }
+    var label: (_ title: String) -> Content
 
     private var buttonText: String {
         switch buttonType {
@@ -33,9 +35,7 @@ struct OauthButton: View {
 
             connect()
         }, label: {
-            Text(buttonText)
-                .foregroundColor(BeamColor.Generic.text.swiftUI)
-                .frame(width: buttonType == .connect ? 126 : 145)
+            label(buttonText)
         })
     }
 
@@ -66,8 +66,10 @@ struct OauthButton: View {
                         onConnect?()
                     }
                 case .signin:
-                    AccountManager().signInWithProvider(type, credential.oauthToken).then { _ in
+                    AccountManager().signInWithProvider(provider: type, accessToken: credential.oauthToken) { _ in
                         onConnect?()
+                    } syncCompletion: { _ in
+                        onDataSync?()
                     }
                 }
             case .failure(let error):

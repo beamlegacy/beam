@@ -138,24 +138,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         beamObjectManager.disconnectLiveSync()
     }
 
-    // MARK: -
-    // MARK: Oauth window
-    var oauthWindow: OauthWindow?
-    func openOauthWindow(title: String?) -> OauthWindow {
-        if let oauthWindow = oauthWindow { return oauthWindow }
-
-        oauthWindow = OauthWindow(contentRect: NSRect(x: 0, y: 0, width: 450, height: 500))
-        guard let oauthWindow = oauthWindow else { fatalError("Can't create oauthwindow") }
-
-        if let title = title {
-            oauthWindow.title = title
-        }
-        oauthWindow.center()
-        oauthWindow.makeKeyAndOrderFront(window)
-
-        return oauthWindow
-    }
-
+    // MARK: - Database
     func syncDataWithBeamObject(_ completionHandler: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
         guard Configuration.env != "test",
               AuthenticationManager.shared.isAuthenticated,
@@ -216,7 +199,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 } catch {
                     Logger.shared.logError(error.localizedDescription, category: .database)
                 }
-                if previousDefaultDatabase.id != DatabaseManager.defaultDatabase.id {
+                if previousDefaultDatabase.id != DatabaseManager.defaultDatabase.id, window?.state.isShowingOnboarding != true {
                     Logger.shared.logWarning("Default database changed, showing alert",
                                              category: .database,
                                              localTimer: localTimer)
@@ -226,6 +209,38 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 completionHandler?(.success(success))
             }
         }
+    }
+
+    // MARK: -
+    // MARK: Windows
+    var oauthWindow: OauthWindow?
+    func openOauthWindow(title: String?) -> OauthWindow {
+        if let oauthWindow = oauthWindow { return oauthWindow }
+
+        oauthWindow = OauthWindow(contentRect: NSRect(x: 0, y: 0, width: 450, height: 500))
+        guard let oauthWindow = oauthWindow else { fatalError("Can't create oauthwindow") }
+
+        if let title = title {
+            oauthWindow.title = title
+        }
+        oauthWindow.center()
+        oauthWindow.makeKeyAndOrderFront(window)
+
+        return oauthWindow
+    }
+
+    var minimalistWebWindow: NSWindow?
+    @discardableResult
+    func openMinimalistWebWindow(url: URL, title: String?) -> NSWindow {
+        let minWindow = minimalistWebWindow as? MinimalistWebViewWindow ?? MinimalistWebViewWindow(contentRect: NSRect(x: 0, y: 0, width: 450, height: 500))
+        if let title = title {
+            minWindow.title = title
+        }
+        minWindow.center()
+        minWindow.makeKeyAndOrderFront(window)
+        minWindow.controller.openURL(url)
+        minimalistWebWindow = minWindow
+        return minWindow
     }
 
     @IBAction func newWindow(_ sender: Any?) {
@@ -253,6 +268,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return window
     }
 
+    // MARK: - Tabs
     static let closeTabCmdGrp = "CloseTabCmdGrp"
     func applicationWillTerminate(_ aNotification: Notification) {
         // Insert code here to tear down your application
@@ -441,6 +457,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     )
 
     @IBAction private func preferencesMenuItemActionHandler(_ sender: NSMenuItem) {
+        guard !data.onboardingManager.needsToDisplayOnboard else { return }
         if !openedPrefPanelOnce {
             fixFirstTimeLanuchOddAnimationByImplicitlyShowIt()
         }

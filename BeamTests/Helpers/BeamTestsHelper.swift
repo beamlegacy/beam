@@ -125,13 +125,13 @@ class BeamTestsHelper {
         let password = Configuration.testAccountPassword
 
         waitUntil(timeout: .seconds(10)) { done in
-            accountManager.signIn(email, password) { result in
+            accountManager.signIn(email: email, password: password, completionHandler: { result in
                 if case .failure(let error) = result {
                     fail(error.localizedDescription)
                 }
                 expect { try result.get() } == true
                 done()
-            }
+            })
         }
 
         if let current = QuickSpec.current {

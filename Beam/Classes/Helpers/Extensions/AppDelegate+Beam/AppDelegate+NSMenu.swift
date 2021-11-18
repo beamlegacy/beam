@@ -116,7 +116,7 @@ private protocol MenuItemCustomValidation {
 class WebviewRelatedMenuItem: NSMenuItem, MenuItemCustomValidation {
     func validateForState(_ state: BeamState?, window: NSWindow?) -> Bool {
         let textViewFirstResponder = window?.firstResponder as? NSTextView
-        let beamTextField = textViewFirstResponder?.delegate as? BeamTextFieldView
+        let beamTextField = textViewFirstResponder?.delegate as? BeamNSTextFieldProtocol
         return state?.mode == .web &&
             state?.browserTabsManager.currentTab != nil
             && beamTextField == nil
