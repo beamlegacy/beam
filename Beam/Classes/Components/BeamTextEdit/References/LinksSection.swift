@@ -40,7 +40,7 @@ class LinksSection: Widget {
             self.open = value
             guard let root = self.parent as? TextRoot else { return }
             root.editor?.hideInlineFormatter()
-            root.cancelSelection()
+            root.cancelSelection(.current)
         })
         chevron.setAccessibilityIdentifier("linksSection_arrow")
         addLayer(chevron)
