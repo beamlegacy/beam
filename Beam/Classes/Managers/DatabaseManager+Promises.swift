@@ -21,7 +21,7 @@ extension DatabaseManager {
 
         let promise: Promise<NSManagedObjectContext> = coreDataManager.background()
 
-        return promise.then(on: backgroundQueue) { context -> Promise<Bool> in
+        return promise.then(on: Self.backgroundQueue) { context -> Promise<Bool> in
             let databases = try Database.rawFetchAll(context)
             Logger.shared.logDebug("Uploading \(databases.count) databases", category: .databaseNetwork)
             if databases.isEmpty {
@@ -31,7 +31,7 @@ extension DatabaseManager {
             let databaseStructs = databases.map { DatabaseStruct(database: $0) }
             let savePromise: Promise<[DatabaseStruct]> = self.saveOnBeamObjectsAPI(databaseStructs)
 
-            return savePromise.then(on: self.backgroundQueue) { savedDatabaseStructs -> Promise<Bool> in
+            return savePromise.then(on: Self.backgroundQueue) { savedDatabaseStructs -> Promise<Bool> in
                 guard savedDatabaseStructs.count == databases.count else {
                     return Promise(false)
                 }
@@ -48,7 +48,7 @@ extension DatabaseManager {
 
         let promise: Promise<[DatabaseStruct]> = self.fetchAllFromBeamObjectAPI()
 
-        return promise.then(on: backgroundQueue) { databases -> Promise<Bool> in
+        return promise.then(on: Self.backgroundQueue) { databases -> Promise<Bool> in
             try self.receivedObjects(databases)
             return Promise(true)
         }
@@ -60,7 +60,7 @@ extension DatabaseManager {
         let promise: Promise<NSManagedObjectContext> = coreDataManager.background()
 
         return promise
-            .then(on: backgroundQueue) { context -> Promise<Bool> in
+            .then(on: Self.backgroundQueue) { context -> Promise<Bool> in
                 try context.performAndWait {
                     let documentManager = DocumentManager()
                     guard let coreDataDatabase = try? Database.fetchWithId(context, database.id) else {
@@ -118,7 +118,7 @@ extension DatabaseManager {
         saveDatabasePromiseCancels[databaseStruct.id]?()
 
         let result = promise
-            .then(on: self.backgroundQueue) { context -> Promise<Bool> in
+            .then(on: Self.backgroundQueue) { context -> Promise<Bool> in
                 Logger.shared.logDebug("Saving database \(databaseStruct.title)", category: .database)
 
                 guard !cancelme else { throw DatabaseManagerError.operationCancelled }
@@ -139,7 +139,7 @@ extension DatabaseManager {
                     context.refresh(database, mergeChanges: false)
 
                     let updatedDatabaseStruct = DatabaseStruct(database: database)
-                    return self.saveOnBeamObjectAPI(updatedDatabaseStruct).then(on: self.backgroundQueue) { _ in
+                    return self.saveOnBeamObjectAPI(updatedDatabaseStruct).then(on: Self.backgroundQueue) { _ in
                         true
                     }
                 }
