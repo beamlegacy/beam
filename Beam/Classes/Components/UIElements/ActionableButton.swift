@@ -47,7 +47,7 @@ struct ActionableButtonStyle {
     var font = BeamFont.medium(size: 13).swiftUI
     var foregroundColor: ActionableButtonState.Palette
     var backgroundColor: ActionableButtonState.Palette
-    var customBackground: (() -> AnyView)?
+    var customBackground: ((ActionableButtonState) -> AnyView)?
     var textAlignment = HorizontalAlignment.leading
     var icon: Icon?
 
@@ -118,8 +118,8 @@ struct ActionableButton: View {
             }
         }
         .frame(height: 30)
-        .background(variant.style.customBackground != nil ? nil : backgroundColor)
-        .background(variant.style.customBackground?())
+        .background(customBackground)
+        .background(backgroundColor)
         .cornerRadius(6.0)
         .animation(.easeInOut(duration: 0.2), value: isTouched)
         .animation(.easeInOut(duration: 0.2), value: isHovered)
@@ -137,40 +137,62 @@ struct ActionableButton: View {
         )
     }
 
+    private var actualState: ActionableButtonState {
+        if defaultState == .disabled {
+            return .disabled
+        } else if defaultState == .clicked || isTouched {
+            return .clicked
+        } else if defaultState == .hovered || isHovered {
+            return .hovered
+        }
+        return .normal
+    }
+
+    private var customBackground: some View {
+        Group {
+            variant.style.customBackground?(actualState)
+        }
+    }
+
     private var foregroundColor: Color {
         let palette = variant.style.foregroundColor
-        if defaultState == .disabled {
-            return palette.disabled.swiftUI
-        } else if defaultState == .clicked {
-            return palette.clicked.swiftUI
-        } else {
+        switch actualState {
+        case .normal:
             return palette.normal.swiftUI
+        case .hovered:
+            return palette.hovered.swiftUI
+        case .clicked:
+            return palette.clicked.swiftUI
+        case .disabled:
+            return palette.disabled.swiftUI
         }
     }
 
     private var backgroundColor: Color {
         let palette = variant.style.backgroundColor
-        if defaultState == .disabled {
-            return palette.disabled.swiftUI
-        } else if defaultState == .clicked || isTouched {
-            return palette.clicked.swiftUI
-        } else if defaultState == .hovered || isHovered {
-            return palette.hovered.swiftUI
-        } else {
+        switch actualState {
+        case .normal:
             return palette.normal.swiftUI
+        case .hovered:
+            return palette.hovered.swiftUI
+        case .clicked:
+            return palette.clicked.swiftUI
+        case .disabled:
+            return palette.disabled.swiftUI
         }
     }
 
     private var iconColor: Color {
         if let iconPalette = variant.style.icon?.palette {
-            if defaultState == .disabled {
-                return iconPalette.disabled.swiftUI
-            } else if defaultState == .clicked || isTouched {
-                return iconPalette.clicked.swiftUI
-            } else if defaultState == .hovered || isHovered {
-                return iconPalette.hovered.swiftUI
-            } else {
+            switch actualState {
+            case .normal:
                 return iconPalette.normal.swiftUI
+            case .hovered:
+                return iconPalette.hovered.swiftUI
+            case .clicked:
+                return iconPalette.clicked.swiftUI
+            case .disabled:
+                return iconPalette.disabled.swiftUI
             }
         }
         return foregroundColor

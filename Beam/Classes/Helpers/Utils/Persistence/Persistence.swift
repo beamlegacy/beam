@@ -17,6 +17,7 @@ enum Persistence {
         //For now, we just store the username in-memory.
         //This have to change when we can have a better sync of it, to ensure it's always in sync with the backend
         static var username: String?
+        @StandardStorable("authentication.hasSeenOnboarding") static var hasSeenOnboarding: Bool?
     }
 
     enum Development {
@@ -63,6 +64,8 @@ enum Persistence {
         Persistence.Authentication.accessToken = nil
         Persistence.Authentication.refreshToken = nil
         Persistence.Authentication.userId = nil
+        Persistence.Authentication.email = nil
+        Persistence.Authentication.password = nil
         Persistence.Authentication.googleAccessToken = nil
         Persistence.Authentication.googleRefreshToken = nil
         Sync.cleanUp()
