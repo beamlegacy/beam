@@ -34,6 +34,7 @@ class BeamUITestsMenuGenerator {
         case .omnibarFillHistory: fillHistory()
         case .signInWithTestAccount: signInWithTestAccount()
         case .showWebViewCount: showWebViewCount()
+        case .showOnboarding: showOnboarding()
         default: break
         }
     }
@@ -184,11 +185,11 @@ class BeamUITestsMenuGenerator {
         let email = Configuration.testAccountEmail
         let password = Configuration.testAccountPassword
 
-        accountManager.signIn(email, password) { result in
+        accountManager.signIn(email: email, password: password, completionHandler: { result in
             if case .failure(let error) = result {
                 fatalError(error.localizedDescription)
             }
-        }
+        })
     }
 
     private func showWebViewCount() {
@@ -201,5 +202,11 @@ class BeamUITestsMenuGenerator {
         // Display the NSAlert
         alert.runModal()
         #endif
+    }
+
+    private func showOnboarding() {
+        logout()
+        AuthenticationManager.shared.username = nil
+        AppDelegate.main.window?.state.data.onboardingManager.resetOnboarding()
     }
 }

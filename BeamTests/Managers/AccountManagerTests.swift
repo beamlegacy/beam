@@ -221,10 +221,10 @@ class AccountManagerTests: QuickSpec {
                         expect(sut.loggedIn).to(beFalse())
 
                         waitUntil(timeout: .seconds(10)) { done in
-                            sut.signIn(existingAccountEmail, password) { result in
+                            sut.signIn(email: existingAccountEmail, password: password, completionHandler: { result in
                                 expect { try result.get() }.toNot(throwError())
                                 done()
-                            }
+                            })
                         }
 
                         expect(sut.loggedIn).to(beTrue())
@@ -237,7 +237,7 @@ class AccountManagerTests: QuickSpec {
                     it("doesn't authenticate") {
                         expect(sut.loggedIn).to(beFalse())
                         waitUntil(timeout: .seconds(10)) { done in
-                            sut.signIn(existingAccountEmail, password) { result in
+                            sut.signIn(email: existingAccountEmail, password: password, completionHandler: { result in
                                 expect { try result.get() }.to(throwError { (error: APIRequestError) in
                                     let errorable = UserSessionRequest.SignIn(
                                         accessToken: nil,
@@ -248,7 +248,7 @@ class AccountManagerTests: QuickSpec {
                                     expect(error).to(matchError(APIRequestError.apiErrors(errorable)))
                                 })
                                 done()
-                            }
+                            })
                         }
                         expect(sut.loggedIn).to(beFalse())
                     }

@@ -80,6 +80,9 @@ import Sentry
     var editorShouldAllowMouseEvents: Bool {
         overlayViewModel.modalView == nil
     }
+    var isShowingOnboarding: Bool {
+        data.onboardingManager.needsToDisplayOnboard
+    }
 
     var downloadButtonPosition: CGPoint?
     weak var downloaderWindow: PopoverWindow?
