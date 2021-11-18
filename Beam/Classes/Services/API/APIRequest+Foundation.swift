@@ -29,7 +29,7 @@ extension APIRequest {
         #endif
 
         if Configuration.env == "test", !BeamURLSession.shouldNotBeVinyled, !(BeamURLSession.shared is Turntable) {
-            fatalError("All network calls must be catched by Vinyl in test environment. \(filename) was called.")
+            fatalError("All network calls must be caught by Vinyl in test environment. \(filename) was called.")
         }
 
         // Note: all `completionHandler` call must use `backgroundQueue.async` because if the
