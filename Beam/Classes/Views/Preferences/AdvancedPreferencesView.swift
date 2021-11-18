@@ -283,7 +283,10 @@ struct AdvancedPreferencesView: View {
                         let manager = DocumentManager()
                         manager
                             .allDocumentsIds(includeDeletedNotes: true)
-                            .forEach { _ = BeamNote.fetch(id: $0, keepInMemory: false) }
+                            .forEach {
+                                let note = BeamNote.fetch(id: $0, keepInMemory: false)
+                                note?.save { _ in }
+                            }
                     }, label: {
                         Text("Notes browsing sessions").frame(minWidth: 100)
                     })
