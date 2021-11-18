@@ -1,6 +1,10 @@
 //swiftlint:disable file_length
 import Foundation
 
+public enum CursorPositionAfterSelection {
+    case start, end, current
+}
+
 extension TextRoot {
     func moveLeft() {
         cancelNodeSelection()
@@ -20,7 +24,7 @@ extension TextRoot {
                 caretIndex = node.position(before: caretIndex, avoidUneditableRange: isInsideUneditableRange ?? true)
             }
         }
-        cancelSelection()
+        cancelSelection(.start)
         node.invalidateText()
     }
 
@@ -40,7 +44,7 @@ extension TextRoot {
                 caretIndex = node.position(after: caretIndex, avoidUneditableRange: isInsideUneditableRange ?? true)
             }
         }
-        cancelSelection()
+        cancelSelection(.end)
         node.invalidateText()
     }
 
@@ -98,7 +102,7 @@ extension TextRoot {
             pos = node.caretAtIndex(updatedCaretIndex).positionOnScreen
         }
         cursorPosition = pos
-        cancelSelection()
+        cancelSelection(.end)
         node.invalidateText()
     }
 
@@ -122,7 +126,7 @@ extension TextRoot {
             pos = node.caretAtIndex(updatedCaretIndex).positionOnScreen
         }
         cursorPosition = pos == cursorPosition ? 0 : pos
-        cancelSelection()
+        cancelSelection(.start)
         node.invalidateText()
     }
 
@@ -164,14 +168,14 @@ extension TextRoot {
         cancelNodeSelection()
         guard let node = focusedWidget as? TextNode else { return }
         cursorPosition = node.beginningOfLineFromPosition(cursorPosition)
-        cancelSelection()
+        cancelSelection(.start)
     }
 
     func moveToEndOfLine() {
         cancelNodeSelection()
         guard let node = focusedWidget as? TextNode else { return }
         cursorPosition = node.endOfLineFromPosition(cursorPosition)
-        cancelSelection()
+        cancelSelection(.end)
     }
 
     func moveToBeginningOfLineAndModifySelection() {
@@ -221,7 +225,7 @@ extension TextRoot {
             }
             self.caretIndex = _caretIndex
         }
-        cancelSelection()
+        cancelSelection(.start)
         node.invalidateText()
     }
 
@@ -246,7 +250,7 @@ extension TextRoot {
                 self.caretIndex = _caretIndex
             }
         }
-        cancelSelection()
+        cancelSelection(.end)
         node.invalidateText()
     }
 
@@ -269,7 +273,16 @@ extension TextRoot {
         return false
     }
 
-    public func cancelSelection() {
+    public func cancelSelection(_ position: CursorPositionAfterSelection) {
+        switch position {
+        case .current:
+            break
+        case .start:
+            cursorPosition = selectedTextRange.startIndex
+        case .end:
+            cursorPosition = selectedTextRange.endIndex
+        }
+
         selectedTextRange = cursorPosition..<cursorPosition
         unmarkText()
         focusedWidget?.invalidate()
@@ -423,7 +436,7 @@ extension TextRoot {
 
         let selection = NodeSelection(start: node, end: node)
         root?.state.nodeSelection = selection
-        cancelSelection()
+        cancelSelection(.current)
         return selection
     }
 

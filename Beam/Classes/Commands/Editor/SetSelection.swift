@@ -61,7 +61,7 @@ class CancelSelection: TextEditorCommand {
     override func run(context: Widget?) -> Bool {
         oldSelection = context?.root?.selectedTextRange
         oldCursorPosition = context?.root?.cursorPosition
-        context?.root?.cancelSelection()
+        context?.root?.cancelSelection(.current)
 
         return true
     }
