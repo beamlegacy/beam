@@ -21,17 +21,17 @@ enum ShortcutKey: Hashable {
         case .string(let str):
             return buildView(with: characterImage(string: str))
         case .up:
-            return buildView(with: Image("kb-up_arrow"))
+            return buildView(with: Image("shortcut-up_arrow"))
         case .down:
-            return buildView(with: Image("kb-down_arrow"))
+            return buildView(with: Image("shortcut-down_arrow"))
         case .left:
-            return buildView(with: Image("kb-left_arrow"))
+            return buildView(with: Image("shortcut-left_arrow"))
         case .right:
-            return buildView(with: Image("kb-right_arrow"))
+            return buildView(with: Image("shortcut-right_arrow"))
         case .tab:
-            return buildView(with: Image("kb-tab_mac"))
+            return buildView(with: Image("shortcut-tab_mac"))
         case .enter:
-            return buildView(with: Image("editor-format_enter"))
+            return buildView(with: Image("shortcut-return"))
         }
     }
 
@@ -64,6 +64,7 @@ enum ShortcutKey: Hashable {
                 .foregroundColor(BeamColor.Mercury.swiftUI)
             symbol
                 .resizable()
+                .renderingMode(.template)
                 .aspectRatio(contentMode: .fit)
                 .foregroundColor(BeamColor.Corduroy.swiftUI)
                 .frame(width: 12, height: 12)
@@ -72,7 +73,7 @@ enum ShortcutKey: Hashable {
 
     private func characterImage(string: String) -> Image {
         let attributedString = NSAttributedString(string: string.uppercased())
-        let image = attributedString.image(foregroundColor: BeamColor.Corduroy.nsColor, font: BeamFont.regular(size: 14).nsFont)
+        let image = attributedString.image(foregroundColor: BeamColor.Corduroy.nsColor, font: BeamFont.semibold(size: 14).nsFont)
         return Image(nsImage: image)
     }
 }

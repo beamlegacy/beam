@@ -20,7 +20,7 @@ class LockButton: ButtonLayer {
     init(_ name: String, locked: Bool, changed: @escaping (Bool) -> Void = { _ in }) {
         self.changed = changed
         self.locked = locked
-        lockedIcon = Layer.icon(named: "status-locked", color: BeamColor.Editor.chevron.nsColor)
+        lockedIcon = Layer.icon(named: "status-lock", color: BeamColor.Editor.chevron.nsColor)
         unlockedIcon = Layer.icon(named: "status-unlocked", color: BeamColor.Editor.chevron.nsColor)
         super.init(name, CALayer())
         activated = { [unowned self] in

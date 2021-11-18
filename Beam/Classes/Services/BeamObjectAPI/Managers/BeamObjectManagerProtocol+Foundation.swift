@@ -26,6 +26,7 @@ extension BeamObjectManagerDelegate {
         }
     }
 
+    // swiftlint:disable:next function_body_length
     @discardableResult
     func saveOnBeamObjectsAPI(_ objects: [BeamObjectType],
                               deep: Int = 0,
@@ -40,6 +41,12 @@ extension BeamObjectManagerDelegate {
             return nil
         }
 
+        if Thread.isMainThread, Configuration.env != "test" {
+            Logger.shared.logError("Please don't use saveOnBeamObjectsAPI in the main thread. Create your own DispatchQueue instead.",
+                                   category: .beamObjectNetwork)
+            assert(false)
+        }
+
         let beamObjectTypes = Set(objects.map { type(of: $0).beamObjectTypeName }).joined(separator: ", ")
         Logger.shared.logDebug("saveOnBeamObjectsAPI called with \(objects.count) objects of type \(beamObjectTypes)",
                                category: .beamObjectNetwork)
@@ -49,7 +56,13 @@ extension BeamObjectManagerDelegate {
 
         let uuids = objects.map { $0.beamObjectId }
         let semaphores = BeamObjectManagerCall.objectsSemaphores(uuids: uuids)
-        semaphores.forEach { $0.wait() }
+        semaphores.forEach {
+            let semaResult = $0.wait(timeout: DispatchTime.now() + .seconds(10))
+
+            if case .timedOut = semaResult {
+                Logger.shared.logError("network semaphore expired", category: .beamObjectNetwork)
+            }
+        }
 
         // A previous network call might have changed the previousChecksum in the meantime
         let checksums = try checksumsForIds(objects.map { $0.beamObjectId })
@@ -62,23 +75,33 @@ extension BeamObjectManagerDelegate {
             return objectToSave
         }
 
-        return try objectManager.saveToAPI(objectsToSave) { result in
-            switch result {
-            case .failure(let error):
-                self.saveOnBeamObjectsAPIError(objects: objectsToSave,
-                                               uuids: uuids,
-                                               semaphores: semaphores,
-                                               deep: deep,
-                                               error: error,
-                                               completion)
+        var networkTask: APIRequest?
 
-            case .success(let remoteObjects):
-                self.saveOnBeamObjectsAPISuccess(uuids: uuids,
-                                                 remoteObjects: remoteObjects,
-                                                 semaphores: semaphores,
-                                                 completion)
+        do {
+            networkTask = try objectManager.saveToAPI(objectsToSave) { result in
+                switch result {
+                case .failure(let error):
+                    self.saveOnBeamObjectsAPIError(objects: objectsToSave,
+                                                   uuids: uuids,
+                                                   semaphores: semaphores,
+                                                   deep: deep,
+                                                   error: error,
+                                                   completion)
+
+                case .success(let remoteObjects):
+                    self.saveOnBeamObjectsAPISuccess(uuids: uuids,
+                                                     remoteObjects: remoteObjects,
+                                                     semaphores: semaphores,
+                                                     completion)
+                }
             }
+        } catch {
+            Logger.shared.logError(error.localizedDescription, category: .beamObjectNetwork)
+            BeamObjectManagerCall.deleteObjectsSemaphores(uuids: uuids)
+            semaphores.forEach { $0.signal() }
         }
+
+        return networkTask
     }
 
     internal func saveOnBeamObjectsAPISuccess(uuids: [UUID],
@@ -290,33 +313,52 @@ extension BeamObjectManagerDelegate {
             throw APIRequestError.notAuthenticated
         }
 
+        if Thread.isMainThread, Configuration.env != "test" {
+            Logger.shared.logError("Please don't use saveOnBeamObjectAPI in the main thread. Create your own DispatchQueue instead.",
+                                   category: .beamObjectNetwork)
+            assert(false)
+        }
+
         let objectManager = BeamObjectManager()
         objectManager.conflictPolicyForSave = Self.conflictPolicy
 
-        Logger.shared.logDebug("saveOnBeamObjectAPI called. Object type: \(type(of: object).beamObjectTypeName)",
+        Logger.shared.logDebug("saveOnBeamObjectAPI called. Object \(object.beamObjectId), type: \(type(of: object).beamObjectTypeName)",
                                category: .beamObjectNetwork)
 
         let semaphore = BeamObjectManagerCall.objectSemaphore(uuid: object.beamObjectId)
-        semaphore.wait()
+        let semaResult = semaphore.wait(timeout: DispatchTime.now() + .seconds(10))
+
+        if case .timedOut = semaResult {
+            Logger.shared.logError("network semaphore expired for Object \(object.beamObjectId), type: \(type(of: object).beamObjectTypeName)",
+                                   category: .beamObjectNetwork)
+        }
 
         var objectToSave = try object.copy()
 
         // A previous network call might have changed the previousChecksum in the meantime
         objectToSave.previousChecksum = (try checksumsForIds([object.beamObjectId]))[object.beamObjectId]
 
-        let networkTask = try objectManager.saveToAPI(objectToSave) { result in
-            switch result {
-            case .failure(let error):
-                self.saveOnBeamObjectAPIError(object: object,
-                                              semaphore: semaphore,
-                                              error: error,
-                                              completion)
-            case .success(let remoteObject):
-                self.saveOnBeamObjectAPISuccess(object: object,
-                                                remoteObject: remoteObject,
-                                                semaphore: semaphore,
-                                                completion)
+        var networkTask: APIRequest?
+
+        do {
+            networkTask = try objectManager.saveToAPI(objectToSave) { result in
+                switch result {
+                case .failure(let error):
+                    self.saveOnBeamObjectAPIError(object: object,
+                                                  semaphore: semaphore,
+                                                  error: error,
+                                                  completion)
+                case .success(let remoteObject):
+                    self.saveOnBeamObjectAPISuccess(object: object,
+                                                    remoteObject: remoteObject,
+                                                    semaphore: semaphore,
+                                                    completion)
+                }
             }
+        } catch {
+            Logger.shared.logError(error.localizedDescription, category: .beamObjectNetwork)
+            BeamObjectManagerCall.deleteObjectSemaphore(uuid: object.beamObjectId)
+            semaphore.signal()
         }
 
         return networkTask

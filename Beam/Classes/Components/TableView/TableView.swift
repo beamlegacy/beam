@@ -351,7 +351,9 @@ extension TableViewCoordinator: NSTableViewDelegate {
             // creation row
             if column.type == .CheckBox {
                 let iconCell = BeamTableCellIconView()
-                iconCell.updateWithIcon(NSImage(named: "tabs-new"))
+                let img = NSImage(named: "tool-new")
+                img?.isTemplate = true
+                iconCell.updateWithIcon(img)
                 return iconCell
             } else {
                 let textCell = BeamTableCellView()
@@ -415,7 +417,9 @@ extension TableViewCoordinator: NSTableViewDelegate {
         let iconAndTextCell = BeamTableCellIconAndTextView()
         let item = sortedData[row] as? IconAndTextTableViewItem
         // Placeholder Image
-        iconAndTextCell.updateWithIcon(NSImage(named: "field-web"))
+        let placeholderImage = NSImage(named: "field-web")
+        placeholderImage?.isTemplate = true
+        iconAndTextCell.updateWithIcon(placeholderImage)
         item?.loadRemoteFavIcon(completion: { favIcon in
             iconAndTextCell.updateWithIcon(favIcon)
         })

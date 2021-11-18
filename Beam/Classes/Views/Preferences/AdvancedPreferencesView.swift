@@ -301,6 +301,7 @@ struct AdvancedPreferencesView: View {
                         .textFieldStyle(RoundedBorderTextFieldStyle()).frame(maxWidth: 400)
                     Text((try? privateKeyBinding.wrappedValue.SHA256()) ?? "-")
                     ResetPrivateKey
+                    VerifyPrivateKey
                 }
 
                 Preferences.Section(bottomDivider: true) {
@@ -520,6 +521,35 @@ struct AdvancedPreferencesView: View {
         }, label: {
             // TODO: loc
             Text("Reset Private Key").frame(minWidth: 100)
+        })
+    }
+
+    private var VerifyPrivateKey: some View {
+        Button(action: {
+            do {
+                let string = "This is the clear text with accent é 🤤"
+                let encryptedString = try EncryptionManager.shared.encryptString(string)
+                var decryptedString: String?
+
+                if let encryptedString = encryptedString {
+                    decryptedString = try EncryptionManager.shared.decryptString(encryptedString)
+
+                    if decryptedString == string, encryptedString != string {
+                        UserAlert.showMessage(message: "Encryption",
+                                              informativeText: "Encryption worked ✅ Clear text is \(string) and encrypted data is \(encryptedString)")
+
+                        return
+                    }
+                }
+
+                UserAlert.showError(message: "Encryption",
+                                    informativeText: "This encryption didn't work, key is corrupted!")
+            } catch {
+                UserAlert.showError(message: "Encryption", error: error)
+            }
+        }, label: {
+            // TODO: loc
+            Text("Verify Private Key").frame(minWidth: 100)
         })
     }
 

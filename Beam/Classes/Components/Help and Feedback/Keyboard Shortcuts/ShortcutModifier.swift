@@ -16,13 +16,13 @@ enum ShortcutModifier: Hashable {
     var symbol: some View {
         switch self {
         case .option:
-            return buildView(with: Image("editor-format_option"))
+            return buildView(with: Image("shortcut-option"))
         case .command:
-            return buildView(with: Image("kb-cmd"))
+            return buildView(with: Image("shortcut-cmd"))
         case .shift:
-            return buildView(with: Image("editor-format_shift"))
+            return buildView(with: Image("shortcut-shift"))
         case .control:
-            return buildView(with: Image("editor-format_control"))
+            return buildView(with: Image("shortcut-control"))
         }
     }
 
@@ -32,6 +32,7 @@ enum ShortcutModifier: Hashable {
                 .foregroundColor(BeamColor.Mercury.swiftUI)
             symbol
                 .resizable()
+                .renderingMode(.template)
                 .foregroundColor(BeamColor.Corduroy.swiftUI)
                 .frame(width: 11, height: 11)
         }.frame(width: 18, height: 18)

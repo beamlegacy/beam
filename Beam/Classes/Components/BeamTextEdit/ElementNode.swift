@@ -153,7 +153,6 @@ public class ElementNode: Widget {
 
     private var debounceClickTimer: Timer?
     private var actionLayerIsHovered = false
-    private var icon = NSImage(named: "editor-cmdreturn")
 
     private let debounceClickInterval = 0.23
 

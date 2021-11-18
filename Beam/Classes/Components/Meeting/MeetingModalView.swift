@@ -88,7 +88,7 @@ struct MeetingModalView: View {
                                             focusedField = nil
                                         }
                                     }))
-                                Icon(name: "tabs-close",
+                                Icon(name: "tool-close",
                                      color: hoveredCloseButtonIndex == -1 ? BeamColor.Corduroy.swiftUI : BeamColor.AlphaGray.swiftUI)
                                     .onTapGesture {
                                         viewModel.meetingName = ""
@@ -144,7 +144,7 @@ struct MeetingModalView: View {
                                             }
                                             return false
                                         })
-                                        Icon(name: "tabs-close",
+                                        Icon(name: "tool-close",
                                              color: hoveredCloseButtonIndex == index ? BeamColor.Corduroy.swiftUI : BeamColor.AlphaGray.swiftUI)
                                             .onTapGesture {
                                                 viewModel.removeAttendee(attendee)
@@ -229,7 +229,7 @@ private struct MeetingModalAddAttendeeRow: View {
             }
             .border(BoxedTextFieldView.borderColor.swiftUI, width: 1.5)
             .cornerRadius(3.0)
-            Icon(name: "tabs-new", color: isHovering ? BeamColor.Corduroy.swiftUI : BeamColor.AlphaGray.swiftUI)
+            Icon(name: "tool-new", color: isHovering ? BeamColor.Corduroy.swiftUI : BeamColor.AlphaGray.swiftUI)
         }
         .onHover { isHovering = $0 }
     }
