@@ -599,7 +599,7 @@ public extension CALayer {
 
         guard (inlineFormatter as? HyperlinkFormatterView) == nil else { return super.resignFirstResponder() }
 
-        rootNode?.cancelSelection()
+        rootNode?.cancelSelection(.current)
         rootNode?.cancelNodeSelection()
         (focusedWidget as? TextNode)?.invalidateText() // force removing the syntax highlighting
         focusedWidget?.invalidate()
@@ -743,7 +743,7 @@ public extension CALayer {
 
             switch event.keyCode {
             case KeyCode.escape.rawValue:
-                rootNode.cancelSelection()
+                rootNode.cancelSelection(.current)
                 if inlineFormatter != nil {
                     hideInlineFormatter()
                 } else if searchViewModel != nil {

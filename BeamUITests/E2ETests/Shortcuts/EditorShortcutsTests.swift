@@ -94,7 +94,7 @@ class EditorShortcutsTests: BaseTest {
         testRailPrint("Then copy paste existing text")
         helper.shortcutActionInvoke(action: .selectAll)
         helper.shortcutActionInvoke(action: .copy)
-        cardView.typeKeyboardKey(.leftArrow)
+        cardView.typeKeyboardKey(.rightArrow)
         cardView.typeKeyboardKey(.return)
         cardView.pasteText(textToPaste: textToType)
         XCTAssertTrue(wait.waitForCountValueEqual(timeout: minimumWaitTimeout, expectedNumber: 2, elementQuery: cardView.getCardNotesElementQueryForVisiblePart()))
