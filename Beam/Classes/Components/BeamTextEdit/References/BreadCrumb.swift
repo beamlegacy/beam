@@ -256,7 +256,7 @@ class BreadCrumb: Widget {
     }
 
     func createBreadcrumbArrowLayer(index: Int) {
-        let chevron = ChevronButton(breadcrumbChevronLayerName(for: index), icon: "editor-breadcrumb_arrow", open: index == selectedCrumb, changed: { [unowned self] _ in
+        let chevron = ChevronButton(breadcrumbChevronLayerName(for: index), icon: "editor-breadcrumb_right", open: index == selectedCrumb, changed: { [unowned self] _ in
             self.selectCrumb(self.selectedCrumb == index ? self.crumbChain.count - 1 : index)
         })
         addLayer(chevron)

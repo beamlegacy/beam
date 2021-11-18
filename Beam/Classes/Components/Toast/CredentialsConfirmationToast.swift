@@ -12,7 +12,7 @@ struct CredentialsConfirmationToast: View {
 
     var body: some View {
         HStack {
-            Icon(name: "password-key", color: BeamColor.Generic.text.swiftUI)
+            Icon(name: "autofill-password_xs", color: BeamColor.Generic.text.swiftUI)
             Text(saved ? "Username & Password Saved" : "Username & Password Updated")
                 .font(BeamFont.medium(size: 13).swiftUI)
                 .foregroundColor(BeamColor.Generic.text.swiftUI)

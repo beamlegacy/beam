@@ -19,7 +19,7 @@ struct BrowserNewTabView: View {
     }
 
     var body: some View {
-        Icon(name: "tabs-new", size: 16, color: iconColor)
+        Icon(name: "tool-new", size: 16, color: iconColor)
             .padding(.horizontal, BeamSpacing._100)
             .padding(.vertical, BeamSpacing._60)
             .frame(maxHeight: .infinity)

@@ -11,8 +11,13 @@ extension BeamObjectRequest {
         let parameters = try saveBeamObjectParameters(saveObject)
         let bodyParamsRequest = GraphqlParameters(fileName: "update_beam_object", variables: parameters)
 
-        Logger.shared.logDebug("Sent checksum: \(saveObject.dataChecksum ?? "-"), previousChecksum: \(saveObject.previousChecksum ?? "-") for \(saveObject.description)",
-                               category: .beamObjectNetwork)
+        if saveObject.dataChecksum == saveObject.previousChecksum {
+            Logger.shared.logWarning("Sent checksum and previousChecksum the same: \(saveObject.dataChecksum ?? "-") for \(saveObject.description), this network call could have been avoided.",
+                                   category: .beamObjectNetwork)
+        } else {
+            Logger.shared.logDebug("Sent checksum: \(saveObject.dataChecksum ?? "-"), previousChecksum: \(saveObject.previousChecksum ?? "-") for \(saveObject.description)",
+                                   category: .beamObjectNetwork)
+        }
 
         return try performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<UpdateBeamObject, Error>) in
             switch result {

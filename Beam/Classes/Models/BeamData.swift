@@ -93,7 +93,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     }
 
     static var indexPath: URL { URL(fileURLWithPath: dataFolder(fileName: "index.beamindex")) }
-    static var orphanedUrlsPath: URL { URL(fileURLWithPath: dataFolder(fileName: "clusteringOrphanedUrls.csv")) }
+    static var orphanedUrlsPath: URL { URL(fileURLWithPath: dataFolder(fileName: "clusteringOrphanedUrlsWithNavigation.csv")) }
     static var fileDBPath: String { dataFolder(fileName: "files.db") }
     static var linkDBPath: String { dataFolder(fileName: "links.db") }
     static var idToTitle: [UUID: String] = [:]
@@ -103,11 +103,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
 
     //swiftlint:disable:next function_body_length
     override init() {
-        do {
-            LinkStore.shared = LinkStore(linkManager: try BeamLinkDB(path: Self.linkDBPath))
-        } catch {
-            Logger.shared.logError("Unable to initialise link storage \(error)", category: .linkDB)
-        }
+        LinkStore.shared = LinkStore(linkManager: BeamLinkDB.shared)
         clusteringOrphanedUrlManager = ClusteringOrphanedUrlManager(savePath: Self.orphanedUrlsPath)
         clusteringManager = ClusteringManager(ranker: sessionLinkRanker, candidate: 2, navigation: 0.5, text: 0.9, entities: 0.4, sessionId: sessionId, activeSources: activeSources)
         noteAutoSaveService = NoteAutoSaveService()
@@ -195,7 +191,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
             guard let id = currentId else { return }
             if tabToIndex.shouldBeIndexed {
                 self.clusteringManager.addPage(id: id, parentId: parentId, value: tabToIndex)
-                LinkStore.shared.visit(link: tabToIndex.url.string, title: tabToIndex.document.title)
+                LinkStore.shared.visit(url: tabToIndex.url.string, title: tabToIndex.document.title)
             }
 
             // Update history record

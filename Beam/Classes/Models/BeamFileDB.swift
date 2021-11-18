@@ -358,7 +358,7 @@ extension BeamFileDBManager: BeamObjectManagerDelegate {
     }
 
     func persistChecksum(_ objects: [BeamFileRecord]) throws {
-        Logger.shared.logDebug("Saved \(objects.count) BeamObject checksums",
+        Logger.shared.logDebug("Saved \(objects.count) \(Self.BeamObjectType) checksums",
                                category: .fileNetwork)
 
         var files: [BeamFileRecord] = []

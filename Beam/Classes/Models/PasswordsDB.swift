@@ -23,7 +23,7 @@ enum PasswordDBError: Error {
 struct PasswordRecord {
     internal static let databaseUUIDEncodingStrategy = DatabaseUUIDEncodingStrategy.string
 
-    var uuid: UUID
+    var uuid: UUID = .null
     var entryId: String
     var hostname: String
     var host: String? // TODO: Remove the support of old keys
@@ -51,7 +51,6 @@ extension PasswordRecord: BeamObjectProtocol {
 
     // Used for encoding this into BeamObject
     enum CodingKeys: String, CodingKey {
-        case uuid
         case entryId
         case hostname
         case host // TODO: Remove the support of old keys
@@ -81,7 +80,6 @@ extension PasswordRecord: BeamObjectProtocol {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        uuid = try container.decode(UUID.self, forKey: .uuid)
         entryId = try container.decode(String.self, forKey: .entryId)
 
         hostname = try (try? container.decode(String.self, forKey: .hostname)) ?? (try container.decode(String.self, forKey: .host))

@@ -97,7 +97,7 @@
                                     <nil key="toolTip"/>
                                     <progressIndicator key="view" maxValue="100" displayedWhenStopped="NO" indeterminate="YES" controlSize="small" style="spinning" id="Pmm-b4-9De">
                                         <rect key="frame" x="17" y="14" width="16" height="16"/>
-                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                        <autoresizingMask key="autoresizingMask"/>
                                     </progressIndicator>
                                 </toolbarItem>
                             </allowedToolbarItems>
@@ -379,9 +379,15 @@
                                                 <action selector="performClose:" target="Ady-hI-5gd" id="HmO-Ls-i7Q"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Collect Page to card…" tag="4" enabled="NO" keyEquivalent="s" id="pxx-59-PXV" customClass="LoadedWebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
+                                        <menuItem title="Collect Page to card…" tag="4" enabled="NO" keyEquivalent="s" id="pxx-59-PXV" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
                                             <connections>
                                                 <action selector="collectPageToCard:" target="Ady-hI-5gd" id="YjN-Z7-AFg"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Collect Page to card…" tag="4" enabled="NO" alternate="YES" keyEquivalent="s" id="IqJ-4H-Bqz" customClass="LoadedWebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
+                                            <modifierMask key="keyEquivalentModifierMask" option="YES"/>
+                                            <connections>
+                                                <action selector="collectPageToCard:" target="Ady-hI-5gd" id="vCu-Ik-TRT"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="24w-bP-3Wy"/>
@@ -1256,13 +1262,13 @@
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <scrollView autohidesScrollers="YES" horizontalLineScroll="24" horizontalPageScroll="10" verticalLineScroll="24" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="oXk-Ey-8xs">
-                                <rect key="frame" x="0.0" y="0.0" width="800" height="765"/>
+                                <rect key="frame" x="0.0" y="0.0" width="800" height="763"/>
                                 <clipView key="contentView" id="DvU-s3-Ha3">
-                                    <rect key="frame" x="1" y="1" width="798" height="763"/>
+                                    <rect key="frame" x="1" y="1" width="798" height="760"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" tableStyle="inset" alternatingRowBackgroundColors="YES" columnReordering="NO" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" rowHeight="24" viewBased="YES" id="fld-jj-1Ba">
-                                            <rect key="frame" x="0.0" y="0.0" width="798" height="763"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="798" height="760"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <size key="intercellSpacing" width="17" height="0.0"/>
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>

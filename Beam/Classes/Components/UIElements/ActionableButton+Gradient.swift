@@ -28,7 +28,7 @@ struct ActionableButtonGradient_Previews: PreviewProvider {
     static var previews: some View {
         VStack {
             ActionableButton(text: "Actionable Button", defaultState: .normal, variant: ActionableButton.gradientStyle())
-            ActionableButton(text: "Press Enter", defaultState: .normal, variant: ActionableButton.gradientStyle(icon: "editor-format_enter"))
+            ActionableButton(text: "Press Enter", defaultState: .normal, variant: ActionableButton.gradientStyle(icon: "shortcut-return"))
         }
         .padding()
     }

@@ -9,7 +9,11 @@ import Foundation
 import UUIDKit
 
 public struct Link: Codable {
-    public var id: UUID
+    enum CodingKeys: String, CodingKey {
+        case url, title, createdAt, updatedAt, deletedAt
+    }
+
+    public var id: UUID = .null
     public var url: String
     public var title: String?
 
@@ -26,27 +30,27 @@ public struct Link: Codable {
 
         self.createdAt = createdAt
         self.updatedAt = updatedAt
-        self.deletedAt = deletedAt
-        self.previousChecksum = previousChecksum
+self.deletedAt = deletedAt
+    self.previousChecksum = previousChecksum
     }
 }
 
 public protocol LinkManager {
     func getLinks(matchingUrl url: String) -> [UUID: Link]
-    func getIdFor(link: String) -> UUID?
-    func createIdFor(link: String, title: String?) -> UUID
+    func getIdFor(url: String) -> UUID?
+    func createIdFor(url: String, title: String?) -> UUID
     func linkFor(id: UUID) -> Link?
-    func visit(link: String, title: String?)
+    func visit(url: String, title: String?)
     func deleteAll() throws
     var allLinks: [Link] { get }
 }
 
 public class FakeLinkManager: LinkManager {
     public func getLinks(matchingUrl url: String) -> [UUID: Link] { [:] }
-    public func getIdFor(link: String) -> UUID? { nil }
-    public func createIdFor(link: String, title: String?) -> UUID { .null }
+    public func getIdFor(url: String) -> UUID? { nil }
+    public func createIdFor(url: String, title: String?) -> UUID { .null }
     public func linkFor(id: UUID) -> Link? { nil }
-    public func visit(link: String, title: String?) { }
+    public func visit(url: String, title: String?) { }
     public func deleteAll() throws { }
     public var allLinks: [Link] { [] }
 }
@@ -60,17 +64,17 @@ public class LinkStore: LinkManager {
     }
 
     public func getLinks(matchingUrl url: String) -> [UUID: Link] { linkManager.getLinks(matchingUrl: url) }
-    public func getIdFor(link: String) -> UUID? { linkManager.getIdFor(link: link) }
-    public func createIdFor(link: String, title: String? = nil) -> UUID { linkManager.createIdFor(link: link, title: title) }
+    public func getIdFor(url: String) -> UUID? { linkManager.getIdFor(url: url) }
+    public func createIdFor(url: String, title: String? = nil) -> UUID { linkManager.createIdFor(url: url, title: title) }
     public func linkFor(id: UUID) -> Link? { linkManager.linkFor(id: id) }
-    public func visit(link: String, title: String? = nil) { linkManager.visit(link: link, title: title) }
+    public func visit(url: String, title: String? = nil) { linkManager.visit(url: url, title: title) }
     public func deleteAll() throws { try linkManager.deleteAll() }
     public static func linkFor(_ id: UUID) -> Link? {
         return shared.linkFor(id: id)
     }
 
-    public static func createIdFor(_ link: String, title: String?) -> UUID { shared.createIdFor(link: link, title: title) }
-    public static func getIdFor(_ link: String) -> UUID? { shared.getIdFor(link: link) }
+    public static func createIdFor(_ url: String, title: String?) -> UUID { shared.createIdFor(url: url, title: title) }
+    public static func getIdFor(_ url: String) -> UUID? { shared.getIdFor(url: url) }
 
     public static func isInternalLink(id: UUID) -> Bool {
         guard let link = linkFor(id) else { return false }

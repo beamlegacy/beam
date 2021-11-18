@@ -158,7 +158,6 @@ public class TextNode: ElementNode {
 
     private var debounceClickTimer: Timer?
     private var actionLayerIsHovered = false
-    private var icon = NSImage(named: "editor-cmdreturn")
 
     private let debounceClickInterval = 0.23
     var actionLayerPadding = CGFloat(11)
@@ -520,7 +519,7 @@ public class TextNode: ElementNode {
             return actionLayer
         }
 
-        let actionLayer = ShortcutLayer(name: Self.cmdEnterLayer, text: "Search", icons: ["editor-cmdreturn"]) { [unowned self] _ in
+        let actionLayer = ShortcutLayer(name: Self.cmdEnterLayer, text: "Search", icons: ["shortcut-cmd+return"]) { [unowned self] _ in
             self.editor?.startQuery(self, true)
         }
         actionLayer.layer.isHidden = true
@@ -619,7 +618,7 @@ public class TextNode: ElementNode {
             return handleRightMouseDown(mouseInfo: mouseInfo)
         }
 
-        if contentsFrame.containsY(mouseInfo.position) {
+        if contentsFrame.contains(mouseInfo.position) {
 
             let clickPos = positionAt(point: mouseInfo.position)
 

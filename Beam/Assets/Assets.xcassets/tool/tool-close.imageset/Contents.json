@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "tool-close.pdf",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

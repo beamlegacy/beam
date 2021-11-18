@@ -137,8 +137,11 @@ struct CalendarView: View {
             }
             text.insert(" for ", at: position, withAttributes: [])
         }
-        let e = BeamElement(text)
-        note.insert(e, after: note.children.last)
+        if let lastBeamElementText = note.children.last?.text, lastBeamElementText.isEmpty {
+            note.children.last?.text = text
+        } else {
+            note.insert(BeamElement(text), after: note.children.last)
+        }
     }
 }
 
