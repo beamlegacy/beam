@@ -1,5 +1,5 @@
-mutation UpdateBeamObject($id: ID!, $data: String, $privateKeySignature: String, $type: String, $checksum: SHA256, $previousChecksum: SHA256, $createdAt: ISO8601DateTime, $updatedAt: ISO8601DateTime, $deletedAt: ISO8601DateTime, $privateKey: String) {
-  updateBeamObject(input: {beamObject: {id: $id, data: $data, privateKeySignature: $privateKeySignature, type: $type, checksum: $checksum, previousChecksum: $previousChecksum, createdAt: $createdAt, updatedAt: $updatedAt, deletedAt: $deletedAt}, privateKey: $privateKey}) {
+mutation UpdateBeamObject($id: ID!, $data: Upload, $privateKeySignature: String, $type: String, $checksum: SHA256, $previousChecksum: SHA256, $createdAt: ISO8601DateTime, $updatedAt: ISO8601DateTime, $deletedAt: ISO8601DateTime, $privateKey: String) {
+  updateBeamObject(input: {beamObject: {id: $id, largeData: $data, privateKeySignature: $privateKeySignature, type: $type, checksum: $checksum, previousChecksum: $previousChecksum, createdAt: $createdAt, updatedAt: $updatedAt, deletedAt: $deletedAt}, privateKey: $privateKey}) {
     beamObject {
       id
       checksum

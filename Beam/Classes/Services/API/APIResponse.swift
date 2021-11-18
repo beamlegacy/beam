@@ -67,15 +67,18 @@ extension APIRequest {
                     // In case the error is value not found, we force the value to nil.
                     // Because this is a possible behavior.
                     value = nil
-                case .keyNotFound(_, let context), .typeMismatch(_, let context):
-                    Logger.shared.logError("APIResultWrapper init \(context.debugDescription)", category: .network)
+                case .keyNotFound(_, let context):
+                    Logger.shared.logError("APIResultWrapper keyNotFound \(context.debugDescription)", category: .network)
+                    throw error
+                case .typeMismatch(_, let context):
+                    Logger.shared.logError("APIResultWrapper typeMismatch \(context.debugDescription)", category: .network)
                     throw error
                 default:
-                    Logger.shared.logError("APIResultWrapper init \(error.localizedDescription)", category: .network)
+                    Logger.shared.logError("APIResultWrapper: \(error.localizedDescription)", category: .network)
                     throw error
                 }
             } catch {
-                Logger.shared.logError("APIResultWrapper init \(error.localizedDescription)", category: .network)
+                Logger.shared.logError("APIResultWrapper: \(error.localizedDescription)", category: .network)
                 throw error
             }
 

@@ -41,13 +41,17 @@ class APIRequestTests: QuickSpec {
         describe("performRequest()") {
             context("with files") {
                 context("with Foundation") {
-                    let uuid = "295d94e1-e0df-4eca-93e6-8778984bcd58".uuid ?? UUID()
+                    let uuid = "295d94e1-e0df-4eca-93e6-8778984bcd58".uuid!
+                    let fixedDate = "2021-03-19T12:21:03Z"
+
                     beforeEach {
+                        BeamDate.freeze(fixedDate)
+
                         BeamTestsHelper.logout()
                         try? EncryptionManager.shared.replacePrivateKey(Configuration.testPrivateKey)
 
                         BeamURLSession.shouldNotBeVinyled = true
-//                        beamHelper.beginNetworkRecording()
+                        beamHelper.beginNetworkRecording()
                         BeamTestsHelper.login()
                     }
 
@@ -71,45 +75,38 @@ class APIRequestTests: QuickSpec {
                                                     previousChecksum: nil,
                                                     checksum: nil,
                                                     title: "foobar")
+
                         let beamObject = try BeamObject(object, MyRemoteObject.beamObjectTypeName)
-                        let data = beamObject.data
                         try beamObject.encrypt()
 
+                        struct LargeFileBeamObjectWithPrivateKey: Codable {
+                            var id: UUID
+                            var data: Data?
+                            var checksum: String?
+                            var privateKeySignature: String?
+                            var type: String
+                            var createdAt: Date
+                            var updatedAt: Date
+                            var privateKey: String
+                        }
+
+                        let largeFileObject = LargeFileBeamObjectWithPrivateKey(id: object.beamObjectId,
+                                                                                data: object.previousData,
+                                                                                checksum: beamObject.dataChecksum,
+                                                                                privateKeySignature: beamObject.privateKeySignature,
+                                                                                type: beamObject.beamObjectType,
+                                                                                createdAt: object.createdAt,
+                                                                                updatedAt: object.updatedAt,
+                                                                                privateKey: EncryptionManager.shared.privateKey().asString())
+
+                        // Multipart version of the encrypted object
                         let fileUpload = GraphqlFileUpload(contentType: "application/octet-stream",
                                                            binary: beamObject.data!,
                                                            filename: "\(uuid).enc",
-                                                           variableName: "beamObjectData")
-
-                        beamObject.data = nil
-
-                        // Internal struct
-                        struct LargeUpdateBeamObject: Codable {
-                            var id: UUID
-                            var type: String
-                            var createdAt: Date? = nil
-                            var updatedAt: Date? = nil
-                            var deletedAt: Date? = nil
-
-                            var data: Data? = nil
-                            var checksum: String? = nil
-                            var previousChecksum: String? = nil
-                            var privateKeySignature: String? = nil
-//                            let privateKey: String?
-                        }
-
-                        let parameters = LargeUpdateBeamObject(id: beamObject.id,
-                                                               type: beamObject.beamObjectType,
-                                                               createdAt: beamObject.createdAt,
-                                                               updatedAt: beamObject.updatedAt,
-                                                               deletedAt: beamObject.deletedAt,
-                                                               data: nil,
-                                                               checksum: beamObject.dataChecksum,
-                                                               previousChecksum: beamObject.previousChecksum,
-                                                               privateKeySignature: beamObject.privateKeySignature)
-//                                                               privateKey: EncryptionManager.shared.privateKey().asString())
+                                                           variableName: "data")
 
                         let bodyParamsRequest = GraphqlParameters(fileName: "update_beam_object_large",
-                                                                  variables: parameters,
+                                                                  variables: beamObject,
                                                                   files: [fileUpload])
 
                         waitUntil(timeout: .seconds(10)) { done in
@@ -123,7 +120,6 @@ class APIRequestTests: QuickSpec {
 
                                 let updateBeamObject = try? result.get()
 
-                                // Result should not generate error, and be true since this email exists
                                 expect { try result.get() }.toNot(throwError())
                                 expect(updateBeamObject?.beamObject).toNot(beNil())
                                 expect(updateBeamObject?.beamObject?.id) == uuid
@@ -132,8 +128,10 @@ class APIRequestTests: QuickSpec {
                         }
 
                         let remoteObject = beamObjectHelper.fetchOnAPI(uuid)
-//                        expect(remoteObject?.createdAt) == beamObject.createdAt
-//                        expect(remoteObject?.data) == data
+
+                        try beamObject.decrypt()
+                        expect(remoteObject?.createdAt?.intValue) == beamObject.createdAt?.intValue
+                        expect(remoteObject?.data) == beamObject.data
                     }
                 }
             }

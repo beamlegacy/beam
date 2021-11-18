@@ -24,6 +24,7 @@ struct MyRemoteObject: BeamObjectProtocol {
 
     var title: String?
 
+
     // Used for encoding this into BeamObject
     enum CodingKeys: String, CodingKey {
         case title
