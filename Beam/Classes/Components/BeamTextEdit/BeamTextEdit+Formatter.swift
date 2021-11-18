@@ -261,7 +261,7 @@ extension BeamTextEdit {
         }
         if cancelSelection {
             node.root?.cancelNodeSelection()
-            node.root?.cancelSelection()
+            node.root?.cancelSelection(.current)
         }
     }
 
