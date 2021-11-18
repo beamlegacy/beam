@@ -95,7 +95,7 @@ class AllCardsViewModel: ObservableObject, Identifiable {
                 notesItems.forEach { item in
                     guard item.note == nil || item.mentions < 0 else { return }
                     guard let note = item.note ?? item.getNote() else { return }
-                    let mentions = note.linksAndReferences(fast: true).count
+                    let mentions = note.mentionsCount
                     let metadata = NoteListMetadata(mentions: mentions, wordsCount: note.textStats.wordsCount)
                     metadatas[item.id] = metadata
                     fetchedNotes[item.id] = note
