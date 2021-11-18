@@ -302,6 +302,7 @@
 		524520A425C8234500AC0007 /* BeamElement+Merge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524520A325C8234500AC0007 /* BeamElement+Merge.swift */; };
 		52466B22270DA966002D1716 /* Clustering in Frameworks */ = {isa = PBXBuildFile; productRef = 52466B21270DA966002D1716 /* Clustering */; };
 		524B110226283F2D00E3C61B /* DatabaseManagerNetworkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524B110126283F2D00E3C61B /* DatabaseManagerNetworkTests.swift */; };
+		524B6C45274666C7002F1C96 /* update_beam_object_large.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 524B6C44274666C7002F1C96 /* update_beam_object_large.graphql */; };
 		524B856D25D2DD0700BB7C7A /* NSMAnagedObjectContext+performAndWait.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524B856C25D2DD0700BB7C7A /* NSMAnagedObjectContext+performAndWait.swift */; };
 		524CF6CA25F2735D007312F0 /* EncryptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524CF6C925F2735D007312F0 /* EncryptionManager.swift */; };
 		524CF6CE25F27609007312F0 /* KeychainStorable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524CF6CD25F27609007312F0 /* KeychainStorable.swift */; };
@@ -385,7 +386,6 @@
 		52DF49A625E42110009A651E /* BeamUITestsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52DF49A525E42110009A651E /* BeamUITestsHelper.swift */; };
 		52E04FD6252C7A4600AD9F56 /* writing_space.json in Resources */ = {isa = PBXBuildFile; fileRef = 52E04FD5252C7A4600AD9F56 /* writing_space.json */; };
 		52E04FED252C814D00AD9F56 /* RoamImporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52E04FEC252C814D00AD9F56 /* RoamImporterTests.swift */; };
-		52ECE01527282C100010E223 /* update_beam_object_large.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 52ECE01427282C100010E223 /* update_beam_object_large.graphql */; };
 		52ECE01E272970260010E223 /* UserAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52ECE01D272970260010E223 /* UserAlert.swift */; };
 		52F27FCB25B9B404006E09A2 /* ViewModelFetchedResults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52F27FB625B9B404006E09A2 /* ViewModelFetchedResults.swift */; };
 		52F4E49826417EF00067B017 /* create_identity.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 52F4E49726417EF00067B017 /* create_identity.graphql */; };
@@ -1395,6 +1395,7 @@
 		524425F025C832110095422A /* AccountManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountManagerTests.swift; sourceTree = "<group>"; };
 		524520A325C8234500AC0007 /* BeamElement+Merge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamElement+Merge.swift"; sourceTree = "<group>"; };
 		524B110126283F2D00E3C61B /* DatabaseManagerNetworkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseManagerNetworkTests.swift; sourceTree = "<group>"; };
+		524B6C44274666C7002F1C96 /* update_beam_object_large.graphql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = update_beam_object_large.graphql; sourceTree = "<group>"; };
 		524B856C25D2DD0700BB7C7A /* NSMAnagedObjectContext+performAndWait.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSMAnagedObjectContext+performAndWait.swift"; sourceTree = "<group>"; };
 		524CF6C925F2735D007312F0 /* EncryptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EncryptionManager.swift; sourceTree = "<group>"; };
 		524CF6CD25F27609007312F0 /* KeychainStorable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStorable.swift; sourceTree = "<group>"; };
@@ -1484,7 +1485,6 @@
 		52DF49A525E42110009A651E /* BeamUITestsHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamUITestsHelper.swift; sourceTree = "<group>"; };
 		52E04FD5252C7A4600AD9F56 /* writing_space.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = writing_space.json; sourceTree = "<group>"; };
 		52E04FEC252C814D00AD9F56 /* RoamImporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoamImporterTests.swift; sourceTree = "<group>"; };
-		52ECE01427282C100010E223 /* update_beam_object_large.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = update_beam_object_large.graphql; sourceTree = "<group>"; };
 		52ECE01D272970260010E223 /* UserAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAlert.swift; sourceTree = "<group>"; };
 		52F27FB625B9B404006E09A2 /* ViewModelFetchedResults.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewModelFetchedResults.swift; sourceTree = "<group>"; };
 		52F4E49726417EF00067B017 /* create_identity.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = create_identity.graphql; sourceTree = "<group>"; };
@@ -3071,7 +3071,7 @@
 				5224CD5F2685FFB500D4179E /* delete_all_beam_objects.graphql */,
 				5224CD452685FF7E00D4179E /* update_beam_objects.graphql */,
 				5224CD512685FF9B00D4179E /* update_beam_object.graphql */,
-				52ECE01427282C100010E223 /* update_beam_object_large.graphql */,
+				524B6C44274666C7002F1C96 /* update_beam_object_large.graphql */,
 				5224CD692685FFD100D4179E /* beam_object.graphql */,
 				5224CD6F2685FFDD00D4179E /* beam_objects.graphql */,
 				522F149227033DE000EDF2F6 /* beam_object_checksums.graphql */,
@@ -5147,12 +5147,12 @@
 				8AD2637326F4A0480074D673 /* UITests-1.html in Resources */,
 				0DC6E2DE26A0527900BD2E2A /* topdomains_test.txt in Resources */,
 				032562A826051D3B006513E4 /* blockerList.json in Resources */,
+				524B6C45274666C7002F1C96 /* update_beam_object_large.graphql in Resources */,
 				418171122581082200317ED8 /* Assets.xcassets in Resources */,
 				8AD2636926F4A0480074D673 /* UITests-2.html in Resources */,
 				56A5BD3125CC680E00ED7C50 /* url.stopwords in Resources */,
 				41B4277B25E52DCA00A8243F /* Localizable.stringsdict in Resources */,
 				A5F47EC826F8D718004B7CDE /* editor-publish.json in Resources */,
-				52ECE01527282C100010E223 /* update_beam_object_large.graphql in Resources */,
 				5224CD762685FFFC00D4179E /* beam_object_updated_at.graphql in Resources */,
 				8759678526FB903C0097C3CC /* UITests-Passwords.csv in Resources */,
 				8AD2637126F4A0480074D673 /* UITests-Playground.html in Resources */,

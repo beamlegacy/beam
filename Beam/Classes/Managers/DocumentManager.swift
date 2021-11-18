@@ -652,7 +652,7 @@ public class DocumentManager: NSObject {
             guard !networkTask.isCancelled else { return }
 
             let semaphore = DispatchSemaphore(value: 0)
-            let request = documentManager.saveDocumentStructOnAPI(saveObject) { result in
+            documentManager.saveDocumentStructOnAPI(saveObject) { result in
                 networkCompletion?(result)
 
                 Self.networkTasksSemaphore.wait()
@@ -666,11 +666,6 @@ public class DocumentManager: NSObject {
                 semaphore.signal()
             }
             semaphore.wait()
-
-            if request == nil {
-                Logger.shared.logDebug("Network call already running, reinjecting", category: .documentNetwork)
-                documentManager.saveAndThrottle(saveObject)
-            }
         }
 
         Self.networkTasks[document_id] = (networkTask, networkTaskStarted, networkCompletion)
