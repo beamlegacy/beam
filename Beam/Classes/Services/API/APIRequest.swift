@@ -30,6 +30,7 @@ class APIRequest: NSObject {
         cancelRequest
     }
 
+    // swiftlint:disable:next function_body_length
     func makeUrlRequest<E: GraphqlParametersProtocol>(_ bodyParamsRequest: E, authenticatedCall: Bool?) throws -> URLRequest {
         guard let url = URL(string: route) else { fatalError("Can't get URL: \(route)") }
         var request = URLRequest(url: url)
@@ -37,7 +38,6 @@ class APIRequest: NSObject {
             "Device": Self.deviceId.uuidString.lowercased(),
             "User-Agent": "Beam client, \(Information.appVersionAndBuild)",
             "Accept": "application/json",
-            "Content-Type": "application/json",
             "Accept-Language": Locale.current.languageCode ?? "en"
         ]
 
@@ -74,51 +74,65 @@ class APIRequest: NSObject {
         encoder.outputFormatting = [.withoutEscapingSlashes]
         #endif
 
-        if let queryData = try? encoder.encode(queryStruct) {
-            #if DEBUG_API_1
-            if let queryDataString = queryData.asString {
-//                if let jsonResult = try JSONSerialization.jsonObject(with: queryData, options: []) as? NSDictionary {
-//                    Logger.shared.logDebug("-> HTTP Request:\n\(jsonResult.description)", category: .network)
-//                }
-//                #if DEBUG_API_2
-                Logger.shared.logDebug("-> HTTP Request: \(route)\n\(queryDataString.replacingOccurrences(of: "\\n", with: "\n"))",
-                                       category: .network)
-//                #endif
-            } else {
-                assert(false)
+        let graphqlQuery = try encoder.encode(queryStruct)
+
+        // Will do a multipart upload
+        if let files = files {
+            let boundary = "------------------------\(UUID().uuidString)"
+            let lineBreak = "\r\n"
+            var queryData = Data()
+
+            // see https://www.floriangaechter.com/blog/graphql-file-uploading/ for example about file uploads & GraphQL
+
+            // Add the GraphQL query
+            queryData.append("\(lineBreak)--\(boundary)\(lineBreak)".asData)
+            queryData.append("Content-Disposition: form-data; name=\"operations\"\(lineBreak)\(lineBreak)".asData)
+            queryData.append(graphqlQuery)
+
+            var mapperDictionary: [String: [String]] = [:]
+
+            for file in files {
+                queryData.append("\(lineBreak)--\(boundary)\(lineBreak)".asData)
+                queryData.append("Content-Disposition: form-data; name=\"\(file.variableName)\"; filename=\"\(file.variableName)\"\(lineBreak)".asData)
+                queryData.append("Content-Type: \(file.contentType)\(lineBreak)\(lineBreak)".asData)
+                queryData.append(file.binary)
+//                queryData.append("This is the binary data".asData)
+
+                mapperDictionary[file.variableName] = ["variables.\(file.variableName)"]
             }
-            #endif
+
+            queryData.append("\(lineBreak)--\(boundary)\(lineBreak)".asData)
+            queryData.append("Content-Disposition: form-data; name=\"map\"\(lineBreak)\(lineBreak)".asData)
+            let mapper = try encoder.encode(mapperDictionary)
+            queryData.append(mapper)
+            queryData.append("\(lineBreak)--\(boundary)--".asData)
+
+            // Request headers
+            request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+            request.setValue("\(queryData.count)", forHTTPHeaderField: "Content-Length")
+
             request.httpBody = queryData
+        } else {
+            request.setValue("application/json",
+                             forHTTPHeaderField: "Content-Type")
+            request.httpBody = graphqlQuery
         }
+
         assert(request.httpBody != nil)
 
-        if files != nil {
-            //     urlRequest.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-
-//            request.allHTTPHeaderFields
-
-        } else {
-
+        #if DEBUG_API_1
+        if let queryDataString = request.httpBody?.asString {
+            //                if let jsonResult = try JSONSerialization.jsonObject(with: queryData, options: []) as? NSDictionary {
+            //                    Logger.shared.logDebug("-> HTTP Request:\n\(jsonResult.description)", category: .network)
+            //                }
+            //                #if DEBUG_API_2
+            Logger.shared.logDebug("-> HTTP Request: \(route)\n\(queryDataString.replacingOccurrences(of: "\\n", with: "\n"))",
+                                   category: .network)
+            //                #endif
         }
+        #endif
 
         return request
-    }
-
-    private func createMultipartBody<E: GraphqlParametersProtocol>(_ bodyParamsRequest: E,
-                                                                   boundary: String?,
-                                                                   files: [GraphqlFileUpload]) -> Data {
-        var result = Data()
-        let boundary = boundary ?? UUID().uuidString
-        let lineBreak = "\r\n"
-
-        for file in files {
-            result.append("\(lineBreak)--\(boundary)\(lineBreak)".asData)
-            result.append("Content-Disposition: form-data; name=\"\(file.variableName)\"; filename=\"\(file.variableName)\"\(lineBreak)".asData)
-            result.append("Content-Type: \(file.contentType)\(lineBreak)\(lineBreak)".asData)
-            result.append(file.binary)
-        }
-
-        return result
     }
 
     // If request contains a filename but no query, load the query from fileName
