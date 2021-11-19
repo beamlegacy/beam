@@ -83,6 +83,7 @@ class APIRequest: NSObject {
             var queryData = Data()
 
             // see https://www.floriangaechter.com/blog/graphql-file-uploading/ for example about file uploads & GraphQL
+            // see RFC1521 for multipart https://datatracker.ietf.org/doc/html/rfc1521#page-29
 
             // Add the GraphQL query
             queryData.append("\(lineBreak)--\(boundary)\(lineBreak)".asData)

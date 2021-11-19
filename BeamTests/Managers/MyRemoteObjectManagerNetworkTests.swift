@@ -3224,7 +3224,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
             context("when object doesn't exist on the API") {
                 context("when we don't send previousChecksum") {
                     context("Foundation") {
-                        fit("saves new object") {
+                        it("saves new object") {
                             let networkCalls = APIRequest.callsCount
 
                             waitUntil(timeout: .seconds(10)) { done in
