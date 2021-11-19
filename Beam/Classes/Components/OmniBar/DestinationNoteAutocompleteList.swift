@@ -328,21 +328,28 @@ extension DestinationNoteAutocompleteList {
         }
 
         private func getSearchResultForNoteTitle(text: String, itemLimit: Int) -> [AutocompleteResult] {
-            guard let data = data else { return [] }
             var autocompleteItems: [AutocompleteResult]
             var allowCreateCard = false
             var items = [DocumentStruct]()
+            var scores = [UUID: Float]()
             let documentManager = DocumentManager()
             if !text.isEmpty {
                 allowCreateCard = true
-                items = documentManager.documentsWithLimitTitleMatch(title: text, limit: itemLimit)
+                items = documentManager.documentsWithTitleMatch(title: text)
+                let noteIds = items.map { $0.id }
+                scores = GRDBDatabase.shared.getFrecencyScoreValues(noteIds: noteIds, paramKey: AutocompleteManager.noteFrecencyParamKey)
             } else if useRecents {
-                items = documentManager.loadAllWithLimit(itemLimit)
+                //When query is empty, we get top N frecencies' noteIds
+                //and fetch corresponding notes (avoids fetching all the notes)
+                scores = GRDBDatabase.shared.getTopNoteFrecencies(limit: itemLimit, paramKey: AutocompleteManager.noteFrecencyParamKey)
+                items = documentManager.loadDocumentsById(ids: Array(scores.keys))
             }
-            items = Array(items.prefix(itemLimit))
-            autocompleteItems = items.map {
-                AutocompleteResult(text: $0.title, source: .note(noteId: $0.id), completingText: searchText, uuid: $0.id)
+            let itemsSlice = items.map {
+                AutocompleteResult(text: $0.title, source: .note(noteId: $0.id), completingText: searchText, uuid: $0.id, score: scores[$0.id])
             }
+                .sorted(by: >)
+                .prefix(itemLimit)
+            autocompleteItems = Array(itemsSlice)
             let cardReplacementResults = getAutoCompleteResutsForCardReplacement(text)
             if !cardReplacementResults.isEmpty {
                 autocompleteItems.insert(contentsOf: cardReplacementResults, at: 0)

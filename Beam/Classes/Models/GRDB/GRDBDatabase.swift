@@ -912,6 +912,18 @@ extension GRDBDatabase {
         }
         return scores
     }
+    func getTopNoteFrecencies(limit: Int = 10, paramKey: FrecencyParamKey) -> [UUID: Float] {
+        var scores = [UUID: Float]()
+        try? dbReader.read { db in
+            return try FrecencyNoteRecord
+                .filter(FrecencyNoteRecord.Columns.frecencyKey == paramKey)
+                .order(FrecencyNoteRecord.Columns.frecencySortScore.desc)
+                .limit(limit)
+                .fetchCursor(db)
+                .forEach { scores[$0.noteId] = $0.frecencySortScore }
+        }
+        return scores
+    }
 
     // MARK: - LongTermUrlScore
     func getLongTermUrlScore(urlId: UUID) -> LongTermUrlScore? {
