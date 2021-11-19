@@ -459,6 +459,10 @@ extension BeamNote: BeamNoteDocument {
             }
         }
     }
+    static private func insertDefaultFrecency(noteId: UUID) {
+        AppDelegate.main.data.noteFrecencyScorer.update(id: noteId, value: 1.0, eventType: .noteCreate, date: BeamDate.now, paramKey: .note30d0)
+        AppDelegate.main.data.noteFrecencyScorer.update(id: noteId, value: 1.0, eventType: .noteCreate, date: BeamDate.now, paramKey: .note30d1)
+    }
 
     // Beware that this function crashes whatever note with that title in the cache
     public static func create(title: String) -> BeamNote {
@@ -467,6 +471,7 @@ extension BeamNote: BeamNoteDocument {
         let note = BeamNote(title: title)
         note.databaseId = DatabaseManager.defaultDatabase.id
 
+        Self.insertDefaultFrecency(noteId: note.id)
         appendToFetchedNotes(note)
         updateNoteCount()
         _ = note.syncedSave()
@@ -478,6 +483,7 @@ extension BeamNote: BeamNoteDocument {
         let note = BeamNote(journalDate: journalDate)
         note.databaseId = DatabaseManager.defaultDatabase.id
 
+        Self.insertDefaultFrecency(noteId: note.id)
         // TODO: should force a first quick save to trigger any title conflicts with the API asap
         appendToFetchedNotes(note)
         updateNoteCount()
