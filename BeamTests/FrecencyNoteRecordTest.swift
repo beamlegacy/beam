@@ -68,4 +68,22 @@ class FrecencyNoteRecordTest: XCTestCase {
         ]
         XCTAssertEqual(fetchedScores, expectedScores)
     }
+    func testFetchTopRecords() throws {
+        let db = GRDBDatabase.empty()
+        let ids = Array((0..<3).map { _ in UUID() })
+        let records = [
+            FrecencyNoteRecord(noteId: ids[0], lastAccessAt: Date(), frecencyScore: 1.0, frecencySortScore: 1.5, frecencyKey: .note30d0),
+            FrecencyNoteRecord(noteId: ids[1], lastAccessAt: Date(), frecencyScore: 3.0, frecencySortScore: 3.5, frecencyKey: .note30d0),
+            FrecencyNoteRecord(noteId: ids[2], lastAccessAt: Date(), frecencyScore: 2.0, frecencySortScore: 2.5, frecencyKey: .note30d0),
+            FrecencyNoteRecord(noteId: ids[0], lastAccessAt: Date(), frecencyScore: 4.0, frecencySortScore: 4.5, frecencyKey: .note30d1)
+        ]
+        for record in records {
+            try db.saveFrecencyNote(record)
+        }
+        let topScores = db.getTopNoteFrecencies(limit: 2, paramKey: .note30d0)
+        XCTAssertEqual(topScores.count, 2)
+        XCTAssertEqual(topScores[ids[1]], 3.5)
+        XCTAssertEqual(topScores[ids[2]], 2.5)
+
+    }
 }
