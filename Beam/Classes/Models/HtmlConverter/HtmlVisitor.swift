@@ -404,11 +404,11 @@ extension HtmlVisitor {
         case "image/svg+xml":
             return htmlSize
         default:
-            let image = NSImage(data: data)
-            if image == nil {
+            guard let image = NSImage(data: data), let rep = image.representations.first else {
                 Logger.shared.logError("Unable to get image size from an image of type \(type) using NSImage", category: .pointAndShoot)
+                return htmlSize
             }
-            return image?.size ?? htmlSize
+            return CGSize(width: rep.pixelsWide, height: rep.pixelsHigh)
         }
     }
 }
