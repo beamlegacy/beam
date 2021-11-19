@@ -54,7 +54,6 @@ class BeamObjectRequest: APIRequest {
         #else
         return UpdateBeamObject(beamObject: beamObject, privateKey: nil)
         #endif
-
     }
 
     internal func saveBeamObjectsParameters(_ beamObjects: [BeamObject]) throws -> UpdateBeamObjects {

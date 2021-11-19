@@ -77,7 +77,7 @@ class APIRequest: NSObject {
         let graphqlQuery = try encoder.encode(queryStruct)
 
         // Will do a multipart upload
-        if let files = files {
+        if let files = files, !files.isEmpty {
             let boundary = "------------------------\(UUID().uuidString)"
             let lineBreak = "\r\n"
             var queryData = Data()
