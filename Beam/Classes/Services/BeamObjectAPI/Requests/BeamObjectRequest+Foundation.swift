@@ -8,8 +8,47 @@ extension BeamObjectRequest {
               _ completion: @escaping (Swift.Result<BeamObject, Error>) -> Void) throws -> URLSessionDataTask {
         let saveObject = beamObject.copy()
 
-        let parameters = try saveBeamObjectParameters(saveObject)
-        let bodyParamsRequest = GraphqlParameters(fileName: "update_beam_object", variables: parameters)
+        try saveObject.encrypt()
+
+        struct LargeBeamObjectWithPrivateKey: Codable {
+            var id: UUID
+            var data: Data?
+            var checksum: String?
+            var previousChecksum: String?
+
+            var privateKeySignature: String?
+            var type: String
+            var createdAt: Date?
+            var updatedAt: Date?
+            var privateKey: String?
+        }
+
+        var largeFileObject = LargeBeamObjectWithPrivateKey(id: saveObject.id,
+                                                            data: saveObject.data,
+                                                            checksum: saveObject.dataChecksum,
+                                                            previousChecksum: saveObject.previousChecksum,
+                                                            privateKeySignature: saveObject.privateKeySignature,
+                                                            type: saveObject.beamObjectType,
+                                                            createdAt: saveObject.createdAt,
+                                                            updatedAt: saveObject.updatedAt)
+
+        #if DEBUG
+        largeFileObject.privateKey = EncryptionManager.shared.privateKey().asString()
+        #endif
+
+        // Multipart version of the encrypted object
+        var fileUpload: GraphqlFileUpload?
+
+        if let data = saveObject.data {
+            fileUpload = GraphqlFileUpload(contentType: "application/octet-stream",
+                                           binary: data,
+                                           filename: "\(saveObject.id).enc",
+                                           variableName: "data")
+        }
+
+        let bodyParamsRequest = GraphqlParameters(fileName: "update_beam_object_large",
+                                                  variables: largeFileObject,
+                                                  files: [fileUpload].compactMap { $0 })
 
         if saveObject.dataChecksum == saveObject.previousChecksum {
             Logger.shared.logWarning("Sent checksum and previousChecksum the same: \(saveObject.dataChecksum ?? "-") for \(saveObject.description), this network call could have been avoided.",
