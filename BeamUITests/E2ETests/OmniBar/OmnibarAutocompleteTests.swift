@@ -203,16 +203,6 @@ class OmnibarAutocompleteTests: BaseTest {
         testRailPrint("Then search field value is updated accordingly and there is 1 selected result")
         XCTAssertTrue(waitHelper.waitForStringValueEqual(expectedSearchFieldText, omnibarView.getOmniBarSearchField()))
         XCTAssertEqual(autocompleteSelectedResultQuery.count, 1)
-        
-        testRailPrint("When I press right arrow")
-        omnibarView.typeKeyboardKey(.rightArrow)
-        testRailPrint("Then non of the results is selected")
-        XCTAssertEqual(autocompleteSelectedResultQuery.count, 0)
-        
-        testRailPrint("When I type: s")
-        omnibarView.getOmniBarSearchField().typeText("s")
-        testRailPrint("Then search field value is updated accordingly")
-        XCTAssertTrue(waitHelper.waitForStringValueEqual(expectedSearchFieldText + "s", omnibarView.getOmniBarSearchField()))
     }
 
     func testAutoCompleteHistoryFromAliasUrlSelection() {
@@ -232,5 +222,52 @@ class OmnibarAutocompleteTests: BaseTest {
 
         testRailPrint("Then search field value is \(expectedSearchFieldText)")
         XCTAssertTrue(waitHelper.waitForIdentifierEqual(expectedHistoryIdentifier, firstResult))
+    }
+
+    func testAutocompleteLeftRightArrowBehavior() {
+        let partiallyTypedSearchText = "Hel"
+        let expectedSearchFieldText = "Hello world"
+        let expectedHistoryIdentifier = "autocompleteResult-selected-\(expectedSearchFieldText)-history"
+        let expectedURL = "fr.wikipedia.org/wiki/Hello_world"
+        let waitHelper = WaitHelper()
+
+        launchApp()
+        helper.tapCommand(.omnibarFillHistory)
+
+        testRailPrint("When I type: \(partiallyTypedSearchText)")
+        omnibarView.getOmniBarSearchField().click()
+        omnibarView.getOmniBarSearchField().typeText(partiallyTypedSearchText)
+        let results = omnibarView.getAutocompleteResults()
+        let firstResult = results.firstMatch
+
+
+        testRailPrint("Then search field value is \(expectedSearchFieldText)")
+        XCTAssertTrue(waitHelper.waitForIdentifierEqual(expectedHistoryIdentifier, firstResult))
+        XCTAssertTrue(waitHelper.waitForStringValueEqual(expectedSearchFieldText, omnibarView.getOmniBarSearchField()))
+
+        testRailPrint("When I press right arrow key")
+        omnibarView.typeKeyboardKey(.rightArrow)
+
+        testRailPrint("Then I see selection is cleared")
+        let autocompleteSelectedResultQuery = omnibarView.getAutocompleteResults().matching(helper.autocompleteSelectedPredicate)
+        XCTAssertEqual(autocompleteSelectedResultQuery.count, 0)
+
+        testRailPrint("Then search field value is \(expectedURL)")
+        XCTAssertTrue(waitHelper.waitForStringValueEqual(expectedURL, omnibarView.getOmniBarSearchField()))
+
+        testRailPrint("When I press down arrow key")
+        omnibarView.typeKeyboardKey(.downArrow)
+
+        testRailPrint("Then I see 1 selected result from autocomplete")
+        XCTAssertEqual(autocompleteSelectedResultQuery.count, 1)
+
+        testRailPrint("When I press left arrow key")
+        omnibarView.typeKeyboardKey(.leftArrow)
+
+        testRailPrint("Then I see selection is cleared")
+        XCTAssertEqual(autocompleteSelectedResultQuery.count, 0)
+
+        testRailPrint("Then search field value is \(partiallyTypedSearchText)")
+        XCTAssertTrue(waitHelper.waitForStringValueEqual(partiallyTypedSearchText, omnibarView.getOmniBarSearchField()))
     }
 }
