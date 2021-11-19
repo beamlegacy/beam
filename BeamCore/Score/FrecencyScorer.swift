@@ -14,6 +14,7 @@ public enum FrecencyEventType {
     case webFromNote
     case webSearchBar
     //beamnote interaction frecency events
+    case noteCreate
     case noteVisit
     case noteBiDiLink
     case notePointAndShoot
@@ -27,11 +28,13 @@ private let webEventWeights: [FrecencyEventType: Float] = [
 ]
 private let noteEventWeights: [[FrecencyEventType: Float]] = [
     [
+        .noteCreate: 0,
         .noteVisit: 1,
         .noteBiDiLink: 5,
         .notePointAndShoot: 5
     ],
     [
+        .noteCreate: 0,
         .noteVisit: 1,
         .noteBiDiLink: 1,
         .notePointAndShoot: 1
