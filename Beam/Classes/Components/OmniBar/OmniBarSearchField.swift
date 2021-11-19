@@ -206,9 +206,8 @@ struct OmniBarSearchField: View {
                 autocompleteManager.selectNextAutocomplete()
             }
             return true
-        default:
-            autocompleteManager.resetAutocompleteSelection()
-            return false
+        case .right, .left:
+            return autocompleteManager.handleLeftRightCursorMovement(move)
         }
     }
 
