@@ -161,17 +161,12 @@ class AutocompleteManager: ObservableObject {
     private func updateSearchQueryWhenSelectingAutocomplete(_ selectedIndex: Int?, previousSelectedIndex: Int?) {
         if let i = selectedIndex, i >= 0, i < autocompleteResults.count {
             let result = autocompleteResults[i]
-            var resultText = result.text
+            let resultText = result.text
             textChangeIsFromSelection = true
 
             // if the first result is compatible with autoselection, select the added string
             if i == 0, let completingText = result.completingText,
                isResultCandidateForAutoselection(result, forSearch: completingText) {
-                if result.source == .url || result.source == .history {
-                    if let resultTextDropped = resultText.dropBefore(substring: completingText) {
-                        resultText = resultTextDropped
-                    }
-                }
                 let completingTextEnd = completingText.wholeRange.upperBound
                 let newSelection = completingTextEnd..<max(resultText.count, completingTextEnd)
                 guard newSelection.count > 0 else { return }
@@ -226,6 +221,26 @@ extension AutocompleteManager {
             autocompleteSelectedIndex = (i + 1).clampInLoop(0, autocompleteResults.count - 1)
         } else {
             autocompleteSelectedIndex = 0
+        }
+    }
+
+    func handleLeftRightCursorMovement(_ cursorMovement: CursorMovement) -> Bool {
+        switch cursorMovement {
+        case .right:
+            if let selectedIndex = autocompleteSelectedIndex, let url = autocompleteResults[selectedIndex].url, searchQuery != url.urlStringWithoutScheme {
+                textChangeIsFromSelection = true
+                searchQuery = url.scheme?.contains("http") == true ? url.urlStringWithoutScheme : url.absoluteString
+            }
+            resetAutocompleteSelection()
+            return false
+        case .left:
+            if autocompleteSelectedIndex != nil, let selectedTextRange = searchQuerySelectedRange, !selectedTextRange.isEmpty {
+                searchQuery = searchQuery.substring(from: 0, to: selectedTextRange.lowerBound)
+            }
+            resetAutocompleteSelection()
+            return false
+        default:
+            return false
         }
     }
 
