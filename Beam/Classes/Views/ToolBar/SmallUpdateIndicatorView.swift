@@ -27,7 +27,7 @@ struct SmallUpdateIndicatorView: View {
             case .updateAvailable(let release):
                 GeometryReader { proxy in
                     ButtonLabel("Update available", icon: "status-publish", customStyle: buttonLabelStyle) {
-                        showReleaseNoteWindow(with: release, at: proxy.frame(in: .global).origin)
+                        showReleaseNoteWindow(with: release, geometry: proxy)
                     }.onAppear {
                         opacity = 1
                     }
@@ -35,7 +35,7 @@ struct SmallUpdateIndicatorView: View {
             case .noUpdate where versionChecker.currentRelease != nil :
                 GeometryReader { proxy in
                     ButtonLabel("Updated", icon: "tool-keep", customStyle: buttonLabelStyle) {
-                        showReleaseNoteWindow(with: versionChecker.currentRelease!, at: proxy.frame(in: .global).origin, hideButtonOnClose: true)
+                        showReleaseNoteWindow(with: versionChecker.currentRelease!, geometry: proxy, hideButtonOnClose: true)
                     }
                     .onReceive(opacityTimer, perform: { _ in
                         withAnimation {
@@ -61,7 +61,7 @@ struct SmallUpdateIndicatorView: View {
             case .downloaded(let downloadedRelease):
                 GeometryReader { proxy in
                     ButtonLabel("Update now", icon: "status-publish", customStyle: buttonLabelStyle) {
-                        showReleaseNoteWindow(with: downloadedRelease.appRelease, at: proxy.frame(in: .global).origin)
+                        showReleaseNoteWindow(with: downloadedRelease.appRelease, geometry: proxy)
                     }.onAppear {
                         opacity = 1
                     }
@@ -101,7 +101,7 @@ struct SmallUpdateIndicatorView: View {
         return style
     }
 
-    private func showReleaseNoteWindow(with release: AppRelease, at origin: CGPoint, hideButtonOnClose: Bool = false) {
+    private func showReleaseNoteWindow(with release: AppRelease, geometry: GeometryProxy, hideButtonOnClose: Bool = false) {
         let window = CustomPopoverPresenter.shared.presentPopoverChildWindow()
         let releaseNoteView = ReleaseNoteView(release: release, closeAction: {
             if hideButtonOnClose {
@@ -114,10 +114,11 @@ struct SmallUpdateIndicatorView: View {
             window?.close()
         }, history: versionChecker.missedReleases, checker: self.versionChecker, style: beamStyle).cornerRadius(6)
 
-        var origin = origin
-        origin.x += 7
-        origin.y += 25
-
+        let frame = geometry.safeTopLeftGlobalFrame(in: window?.parent)
+        var origin = CGPoint(x: frame.minX + 7, y: frame.minY - 6)
+        if let parentWindow = window?.parent {
+            origin = origin.flippedPointToBottomLeftOrigin(in: parentWindow)
+        }
         window?.setView(with: releaseNoteView, at: origin)
         window?.makeKey()
     }

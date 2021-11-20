@@ -26,9 +26,9 @@ class PopoverWindow: NSWindow {
         super.setContentSize(size)
     }
 
-    func setOrigin(_ point: CGPoint, fromtopLeft: Bool = false) {
+    func setOrigin(_ point: CGPoint, fromTopLeft: Bool = false) {
         if let originScreen = self.parent?.convertPoint(toScreen: point) {
-            if fromtopLeft {
+            if fromTopLeft {
                 self.setFrameTopLeftPoint(originScreen)
             } else {
                 self.setFrameOrigin(originScreen)
@@ -40,14 +40,18 @@ class PopoverWindow: NSWindow {
         self.contentView = NSHostingView(rootView: content)
     }
 
-    func setView<Content>(with view: Content, at origin: NSPoint, fromtopLeft: Bool = false) where Content: View {
+    func setView<Content>(with view: Content, at origin: NSPoint, fromTopLeft: Bool = false) where Content: View {
+        if fromTopLeft && self.frame.size == .zero {
+            // to place top left corner we need a minimum width, otherwise the window will center to that location when resized.
+            self.setContentSize(CGSize(width: 10, height: 10))
+        }
         setView(content: view)
-        setOrigin(origin, fromtopLeft: fromtopLeft)
+        setOrigin(origin, fromTopLeft: fromTopLeft)
     }
 
-    func setView(with view: NSView, at origin: NSPoint, fromtopLeft: Bool = false) {
+    func setView(with view: NSView, at origin: NSPoint, fromTopLeft: Bool = false) {
         self.contentView = view
-        setOrigin(origin, fromtopLeft: fromtopLeft)
+        setOrigin(origin, fromTopLeft: fromTopLeft)
     }
 
     override var canBecomeKey: Bool {

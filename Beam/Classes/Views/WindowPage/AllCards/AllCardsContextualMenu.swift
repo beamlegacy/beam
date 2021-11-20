@@ -30,6 +30,7 @@ class AllCardsContextualMenu {
     }
 
     func presentMenuForNotes(at: CGPoint, allowImports: Bool = false) {
+        guard let window = AppDelegate.main.window else { return }
         let menu = NSMenu()
         menu.font = BeamFont.regular(size: 13).nsFont
 
@@ -76,7 +77,8 @@ class AllCardsContextualMenu {
         ))
 
         finalizeAllMenuItems(menu.items)
-        menu.popUp(positioning: nil, at: at, in: AppDelegate.main.window?.contentView)
+        let position = CGRect(origin: at, size: .zero).flippedRectToBottomLeftOrigin(in: window).origin
+        menu.popUp(positioning: nil, at: position, in: window.contentView)
     }
 
     private func setupImportMenu(in menu: NSMenu) {
