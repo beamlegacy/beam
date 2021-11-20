@@ -105,7 +105,8 @@ private struct MeetingFormatterContainerView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 )
                 Separator(color: BeamColor.Nero)
-                CalendarPickerView(selectedDate: $viewModel.selectedDate, highlightedDates: viewModel.allMeetingDates, calendar: calendar, theme: .beam) { items, point in
+                CalendarPickerView(selectedDate: $viewModel.selectedDate, highlightedDates: viewModel.allMeetingDates,
+                                   calendar: calendar, theme: .beam, parentWindow: viewModel.window) { items, point in
                     showContextMenu(items: items, at: point)
                 }
             }

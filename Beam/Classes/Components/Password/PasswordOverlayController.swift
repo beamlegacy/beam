@@ -169,7 +169,7 @@ class PasswordOverlayController: WebPageHolder {
         else { return }
         var updatedRect = webView.convert(location, to: nil)
         updatedRect.origin.y += location.height
-        passwordWindow.setView(with: passwordManagerMenu, at: updatedRect.origin, fromtopLeft: true)
+        passwordWindow.setView(with: passwordManagerMenu, at: updatedRect.origin, fromTopLeft: true)
         passwordMenuWindow = passwordWindow
     }
 

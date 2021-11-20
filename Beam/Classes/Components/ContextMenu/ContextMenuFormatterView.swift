@@ -54,7 +54,7 @@ class ContextMenuFormatterView: FormatterView {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     override func animateOnAppear(completionHandler: (() -> Void)? = nil) {
         super.animateOnAppear()
         subviewModel.visible = true
