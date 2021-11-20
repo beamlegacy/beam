@@ -23,7 +23,7 @@ private struct CalendarPickerFormatterContainerView: View {
     @Binding var selectedDate: Date
     var calendar: Calendar
     var body: some View {
-        CalendarPickerView(selectedDate: $selectedDate, calendar: calendar,
+        CalendarPickerView(selectedDate: $selectedDate, calendar: calendar, parentWindow: viewModel.window,
                            onPresentSubmenu: { items, point in
                             showContextMenu(items: items, at: point)
                            })
@@ -35,9 +35,13 @@ private struct CalendarPickerFormatterContainerView: View {
             .formatterViewBackgroundAnimation(with: viewModel)
     }
 
-    func showContextMenu(items: [ContextMenuItem], at: CGPoint) {
+    private func showContextMenu(items: [ContextMenuItem], at: CGPoint) {
         let window = viewModel.window
-        let finalPoint = window?.parent?.convertPoint(fromScreen: window?.convertPoint(toScreen: at) ?? .zero) ?? at
+        var point = at
+        if let window = window {
+            point = at.flippedPointToBottomLeftOrigin(in: window)
+        }
+        let finalPoint = window?.parent?.convertPoint(fromScreen: window?.convertPoint(toScreen: point) ?? .zero) ?? point
         let subMenuIdentifier = "CalendarSubMenu"
         CustomPopoverPresenter.shared.dismissPopovers(key: subMenuIdentifier)
         let menuView = ContextMenuFormatterView(key: "CalendarSubMenu", items: items, direction: .bottom, sizeToFit: true) {

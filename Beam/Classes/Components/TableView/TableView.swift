@@ -269,8 +269,9 @@ extension TableViewCoordinator: NSTableViewDataSource {
         }
         rowView.onHover = { [weak self, weak tableView] hovering in
             guard let self = self, let tableView = tableView,
+                  let window = tableView.window,
                   rowView.frame.origin.y >= tableView.visibleRect.origin.y else { return }
-            let rowFrame = tableView.convert(rowView.frame, to: nil)
+            let rowFrame = tableView.convert(rowView.frame, to: nil).flippedRectToTopLeftOrigin(in: window)
             self.hoveredRow = hovering ? row : nil
             self.updateCellsVisibility(for: row, in: tableView,
                                        hovering: hovering, selected: self.currentSelectedIndexes?.contains(row) == true)
@@ -556,11 +557,13 @@ extension TableViewCoordinator: BeamNSTableViewDelegate {
 
     func tableView(_ tableView: BeamNSTableView, rightMouseDownFor row: Int, column: Int, locationInWindow: NSPoint) {
         guard let onRightMouseDown = parent.onRightMouseDown,
+              let window = tableView.window,
               let originalRow = getOriginalDataIndexes(for: [row]).first,
               column < parent.columns.count
         else { return }
         let columnData = parent.columns[column]
-        onRightMouseDown(originalRow, columnData, locationInWindow)
+        let location = CGRect(origin: locationInWindow, size: .zero).flippedRectToTopLeftOrigin(in: window).origin
+        onRightMouseDown(originalRow, columnData, location)
     }
 
     func tableView(_ tableView: BeamNSTableView, didDoubleTap row: Int) {
