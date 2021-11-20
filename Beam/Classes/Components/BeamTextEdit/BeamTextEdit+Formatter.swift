@@ -306,7 +306,7 @@ extension BeamTextEdit {
         var rect = CGRect(origin: origin, size: idealSize).insetBy(dx: -inset, dy: -inset)
         rect.origin.y -= idealSize.height
         view.window?.setContentSize(rect.size)
-        (view.window as? PopoverWindow)?.setOrigin(rect.origin, fromtopLeft: false)
+        (view.window as? PopoverWindow)?.setOrigin(rect.origin)
     }
 
     private func containedFormatterPosition(in node: TextNode, formatter: FormatterView, below: Bool) -> CGPoint {

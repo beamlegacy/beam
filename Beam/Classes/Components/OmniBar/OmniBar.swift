@@ -184,16 +184,19 @@ struct OmniBar: View {
                                 let downloaderView = DownloaderView(downloader: state.data.downloadManager) { [weak window] in
                                     window?.close()
                                 }
-                                let omnibarFrame = containerGeometry.frame(in: .global)
-                                let origin = CGPoint(x: omnibarFrame.origin.x + omnibarFrame.width - DownloaderView.width - 18, y: omnibarFrame.origin.y)
-                                window.setView(with: downloaderView, at: origin, fromtopLeft: true)
+                                let omnibarFrame = containerGeometry.safeTopLeftGlobalFrame(in: window.parent)
+                                var origin = CGPoint(x: omnibarFrame.origin.x + omnibarFrame.width - DownloaderView.width - 18, y: omnibarFrame.maxY)
+                                if let parentWindow = window.parent {
+                                    origin = origin.flippedPointToBottomLeftOrigin(in: parentWindow)
+                                }
+                                window.setView(with: downloaderView, at: origin, fromTopLeft: true)
                                 window.makeKey()
                                 state.downloaderWindow = window
                             }
                         })
                         .frame(height: 32, alignment: .top)
                         .background(GeometryReader { proxy -> Color in
-                            let rect = proxy.frame(in: .global)
+                            let rect = proxy.safeTopLeftGlobalFrame(in: nil)
                             let center = CGPoint(x: rect.origin.x + rect.width / 2, y: rect.origin.y + rect.height / 2)
                             state.downloadButtonPosition = center
                             return Color.clear

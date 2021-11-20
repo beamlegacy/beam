@@ -91,14 +91,17 @@ private struct BottomToolBarTrailingIconView: View {
             } else {
                 GeometryReader { proxy in
                     ButtonLabel("?", customStyle: ButtonLabelStyle(font: BeamFont.medium(size: 11).swiftUI, horizontalPadding: 5, verticalPadding: 2)) {
-                        let buttonFrame = proxy.frame(in: .global)
-                        let y = buttonFrame.origin.y + buttonFrame.height + 7
-                        let x = buttonFrame.origin.x - HelpAndFeedbackMenuView.menuWidth + 16
-
                         let window = CustomPopoverPresenter.shared.presentPopoverChildWindow()
                         let view = HelpAndFeedbackMenuView(window: window)
                             .environmentObject(state)
-                        window?.setView(with: view, at: NSPoint(x: x, y: y))
+                        let buttonFrame = proxy.safeTopLeftGlobalFrame(in: window?.parent)
+                        let y = buttonFrame.minY - 7
+                        let x = buttonFrame.origin.x - HelpAndFeedbackMenuView.menuWidth + 16
+                        var origin = CGPoint(x: x, y: y)
+                        if let parentWindow = window?.parent {
+                            origin = origin.flippedPointToBottomLeftOrigin(in: parentWindow)
+                        }
+                        window?.setView(with: view, at: origin)
                         window?.isMovable = false
                         window?.makeKey()
                     }

@@ -813,6 +813,7 @@
 		A5DE86A42692AEEC00E05C20 /* BeamWindow+NSMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5DE86A32692AEEC00E05C20 /* BeamWindow+NSMenu.swift */; };
 		A5E04DEB263BEDA600BFB4C1 /* BrowserTabsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E04DEA263BEDA600BFB4C1 /* BrowserTabsManager.swift */; };
 		A5E112E926BA94E800BAD335 /* BrowserTabUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E112E826BA94E800BAD335 /* BrowserTabUITests.swift */; };
+		A5E2938A2746C6C300638ABA /* FlippedGeometryHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E293892746C6C300638ABA /* FlippedGeometryHelper.swift */; };
 		A5E3F16326F1ECBE007B1CAB /* String+RangesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E3F16226F1ECBE007B1CAB /* String+RangesTests.swift */; };
 		A5E9D38F27293A260064E255 /* FaviconProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E9D38E27293A260064E255 /* FaviconProviderTests.swift */; };
 		A5EA892826A9C08100AB5A16 /* CalendarPickerViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5EA892726A9C08100AB5A16 /* CalendarPickerViewModelTests.swift */; };
@@ -1889,6 +1890,7 @@
 		A5DE86A32692AEEC00E05C20 /* BeamWindow+NSMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamWindow+NSMenu.swift"; sourceTree = "<group>"; };
 		A5E04DEA263BEDA600BFB4C1 /* BrowserTabsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserTabsManager.swift; sourceTree = "<group>"; };
 		A5E112E826BA94E800BAD335 /* BrowserTabUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserTabUITests.swift; sourceTree = "<group>"; };
+		A5E293892746C6C300638ABA /* FlippedGeometryHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlippedGeometryHelper.swift; sourceTree = "<group>"; };
 		A5E3F16226F1ECBE007B1CAB /* String+RangesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+RangesTests.swift"; sourceTree = "<group>"; };
 		A5E9D38E27293A260064E255 /* FaviconProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaviconProviderTests.swift; sourceTree = "<group>"; };
 		A5EA892726A9C08100AB5A16 /* CalendarPickerViewModelTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CalendarPickerViewModelTests.swift; sourceTree = "<group>"; };
@@ -2655,6 +2657,7 @@
 				DAEAAF2F26D3CA4D00D17559 /* ExportAllNoteSources.swift */,
 				DABFD3B626FCAC8300C1F7F0 /* Csv.swift */,
 				33AA4EF1270F515800B74868 /* BeamPropertyWrappers.swift */,
+				A5E293892746C6C300638ABA /* FlippedGeometryHelper.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -5613,6 +5616,7 @@
 				52842D502715B3A80099602C /* FilesContentView.swift in Sources */,
 				33353EE226F3D0BA00063078 /* ActionableButton.swift in Sources */,
 				418172532581107C00317ED8 /* Chevrons.swift in Sources */,
+				A5E2938A2746C6C300638ABA /* FlippedGeometryHelper.swift in Sources */,
 				33AC9D9A26B01A60004E7EF4 /* AuthenticationViewModel.swift in Sources */,
 				A536DE0F269C6ABD003FAAF4 /* ToastTextIconView.swift in Sources */,
 				A0208F8225D6BB1C00CA054C /* AppDelegate+BeamTests.swift in Sources */,

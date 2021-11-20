@@ -139,7 +139,7 @@ class BeamWindow: NSWindow, NSDraggingDestination {
     /// It should be trigerred when a file download starts
     func downloadAnimation() {
 
-        guard let buttonPosition = state.downloadButtonPosition else { return }
+        guard let buttonPosition = state.downloadButtonPosition?.flippedPointToBottomLeftOrigin(in: self) else { return }
         let animationLayer = CALayer()
         animationLayer.frame = CGRect(origin: CGPoint(x: 50, y: 50), size: CGSize(width: 64, height: 64))
         animationLayer.position = self.mouseLocationOutsideOfEventStream
