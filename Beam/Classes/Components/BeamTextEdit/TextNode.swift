@@ -1508,7 +1508,7 @@ public class TextNode: ElementNode {
             // Now fish for words:
             for word in sentenceString.wordRanges {
                 let wordString = String(sentenceString[word])
-                let wordRange = text.range(from: word)
+                let wordRange = sentenceString.range(from: word)
                 let frames = textFramesAt(range: (sentenceRange.lowerBound + wordRange.lowerBound) ..< (sentenceRange.lowerBound + wordRange.upperBound))
                 var wordFrame = frames.first ?? NSRect()
                 let actualY = contentsFrame.height - wordFrame.maxY
