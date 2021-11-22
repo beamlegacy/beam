@@ -733,4 +733,9 @@ extension BeamElement {
         let wordsCount = self.calculateWordsCount()
         textStats.wordsCount = wordsCount
     }
+
+    public var indexPath: IndexPath {
+        guard let parent = parent, let index = indexInParent else { return IndexPath() }
+        return parent.indexPath.appending(index)
+    }
 }
