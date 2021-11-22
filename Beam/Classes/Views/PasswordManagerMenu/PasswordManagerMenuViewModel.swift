@@ -17,6 +17,15 @@ protocol PasswordManagerMenuDelegate: AnyObject {
     func dismiss()
 }
 
+struct PasswordManagerMenuOptions: Equatable {
+    let showExistingCredentials: Bool
+    let suggestNewPassword: Bool
+
+    static let login = PasswordManagerMenuOptions(showExistingCredentials: true, suggestNewPassword: false)
+    static let createAccount = PasswordManagerMenuOptions(showExistingCredentials: false, suggestNewPassword: true)
+    static let ambiguousPassword = PasswordManagerMenuOptions(showExistingCredentials: true, suggestNewPassword: true)
+}
+
 enum PasswordSearchCellMode {
     case none
     case button
@@ -29,6 +38,8 @@ class PasswordManagerMenuViewModel: ObservableObject {
         var allEntries: [PasswordManagerEntry]
         var hasScroll: Bool
         var hasMoreThanOneEntry: Bool
+        var showSuggestPasswordOption: Bool
+        var suggestNewPassword: Bool
         var userInfo: UserInformations?
     }
 
@@ -40,27 +51,39 @@ class PasswordManagerMenuViewModel: ObservableObject {
     @Published var scrollingListHeight: CGFloat?
 
     let host: URL
+    let options: PasswordManagerMenuOptions
     let credentialsBuilder: PasswordManagerCredentialsBuilder
     private let userInfoStore: UserInformationsStore
     private var entriesForHost: [PasswordManagerEntry]
     private var allEntries: [PasswordManagerEntry]
-    private var revealFullList: Bool = false
-    private var revealMoreItemsInList: Bool = false
+    private var revealFullList = false
+    private var revealMoreItemsInList = false
+    private var showPasswordGenerator = false
     private var subscribers = Set<AnyCancellable>()
 
-    init(host: URL, credentialsBuilder: PasswordManagerCredentialsBuilder, userInfoStore: UserInformationsStore, withPasswordGenerator passwordGenerator: Bool) {
+    init(host: URL, credentialsBuilder: PasswordManagerCredentialsBuilder, userInfoStore: UserInformationsStore, options: PasswordManagerMenuOptions) {
         self.host = host
+        self.options = options
         self.credentialsBuilder = credentialsBuilder
         self.userInfoStore = userInfoStore
         self.entriesForHost = []
         self.allEntries = []
-        self.display = Contents(entriesForHost: Array(entriesForHost.prefix(1)), allEntries: allEntries, hasScroll: false, hasMoreThanOneEntry: entriesForHost.count > 1, userInfo: userInfoStore.fetchAll().first ?? nil)
+        self.display = Contents(
+            entriesForHost: Array(entriesForHost.prefix(1)),
+            allEntries: allEntries,
+            hasScroll: false,
+            hasMoreThanOneEntry: entriesForHost.count > 1,
+            showSuggestPasswordOption: options.showExistingCredentials && options.suggestNewPassword,
+            suggestNewPassword: !options.showExistingCredentials,
+            userInfo: userInfoStore.fetchAll().first ?? nil
+        )
         self.otherPasswordsViewModel = PasswordListViewModel()
-        if passwordGenerator {
+        if options.suggestNewPassword {
             let passwordGeneratorViewModel = PasswordGeneratorViewModel()
             passwordGeneratorViewModel.delegate = self
             self.passwordGeneratorViewModel = passwordGeneratorViewModel
-        } else {
+        }
+        if options.showExistingCredentials {
             let entries = PasswordManager.shared.entries(for: host.minimizedHost ?? host.urlStringWithoutScheme, exact: false)
             if !entries.isEmpty {
                 self.entriesForHost = entries
@@ -92,6 +115,12 @@ class PasswordManagerMenuViewModel: ObservableObject {
         updateAllEntries()
     }
 
+    func onSuggestNewPassword(state: PasswordManagerMenuCellState) {
+        guard state == .clicked else { return }
+        showPasswordGenerator = true
+        updateDisplay()
+    }
+
     private func updateDisplay() {
         var visibleEntries: [PasswordManagerEntry]
         if revealMoreItemsInList {
@@ -104,7 +133,15 @@ class PasswordManagerMenuViewModel: ObservableObject {
             }
         }
         let hasScroll = entriesForHost.count == 3
-        display = Contents(entriesForHost: visibleEntries, allEntries: allEntries, hasScroll: hasScroll, hasMoreThanOneEntry: entriesForHost.count > 1, userInfo: display.userInfo)
+        display = Contents(
+            entriesForHost: visibleEntries,
+            allEntries: allEntries,
+            hasScroll: hasScroll,
+            hasMoreThanOneEntry: entriesForHost.count > 1,
+            showSuggestPasswordOption: options.showExistingCredentials && options.suggestNewPassword && !showPasswordGenerator,
+            suggestNewPassword: !options.showExistingCredentials || showPasswordGenerator,
+            userInfo: display.userInfo
+        )
     }
 
     private func updateAllEntries() {
