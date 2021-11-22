@@ -115,16 +115,14 @@ class PasswordOverlayController: WebPageHolder {
             return
         }
         currentlyFocusedElementId = elementId
-        if autocompleteGroup.isAmbiguous, let host = page.url?.minimizedHost {
-            let entries = PasswordManager.shared.entries(for: host, exact: false)
-            let createAccount = entries.isEmpty
-            self.showPasswordManagerMenu(for: elementId, withPasswordGenerator: createAccount)
+        if autocompleteGroup.isAmbiguous, let fieldWithFocus = autocompleteGroup.field(id: elementId) {
+            self.showPasswordManagerMenu(for: elementId, options: fieldWithFocus.role.isPassword ? .ambiguousPassword : .login)
         } else {
             switch autocompleteGroup.action {
             case .createAccount:
-                self.showPasswordManagerMenu(for: elementId, withPasswordGenerator: true)
+                self.showPasswordManagerMenu(for: elementId, options: .createAccount)
             case .login:
-                self.showPasswordManagerMenu(for: elementId, withPasswordGenerator: false)
+                self.showPasswordManagerMenu(for: elementId, options: .login)
             default:
                 break
             }
@@ -142,14 +140,14 @@ class PasswordOverlayController: WebPageHolder {
         currentlyFocusedElementId = nil
     }
 
-    private func showPasswordManagerMenu(for elementId: String, withPasswordGenerator passwordGenerator: Bool) {
+    private func showPasswordManagerMenu(for elementId: String, options: PasswordManagerMenuOptions) {
         requestWebFieldFrame(elementId: elementId) { frame in
             if let frame = frame {
                 DispatchQueue.main.async {
                     guard self.currentlyFocusedElementId == elementId else {
                         return
                     }
-                    self.showPasswordManagerMenu(at: frame, withPasswordGenerator: passwordGenerator)
+                    self.showPasswordManagerMenu(at: frame, options: options)
                 }
             } else {
                 Logger.shared.logError("Could not get frame for element \(elementId)", category: .passwordManager)
@@ -157,12 +155,12 @@ class PasswordOverlayController: WebPageHolder {
         }
     }
 
-    private func showPasswordManagerMenu(at location: CGRect, withPasswordGenerator passwordGenerator: Bool) {
+    private func showPasswordManagerMenu(at location: CGRect, options: PasswordManagerMenuOptions) {
         guard let host = page.url else { return }
         if passwordMenuWindow != nil {
             dismissPasswordManagerMenu()
         }
-        let viewModel = passwordManagerViewModel(for: host, withPasswordGenerator: passwordGenerator)
+        let viewModel = passwordManagerViewModel(for: host, options: options)
         let passwordManagerMenu = PasswordManagerMenu(width: location.size.width, viewModel: viewModel)
         guard let webView = (page as? BrowserTab)?.webView,
               let passwordWindow = CustomPopoverPresenter.shared.presentPopoverChildWindow(canBecomeKey: false, canBecomeMain: false, withShadow: true, storedInPresenter: true)
@@ -173,17 +171,16 @@ class PasswordOverlayController: WebPageHolder {
         passwordMenuWindow = passwordWindow
     }
 
-    private func passwordManagerViewModel(for host: URL, withPasswordGenerator passwordGenerator: Bool) -> PasswordManagerMenuViewModel {
+    private func passwordManagerViewModel(for host: URL, options: PasswordManagerMenuOptions) -> PasswordManagerMenuViewModel {
         if let viewModel = currentPasswordManagerViewModel {
-            let viewModelHasPasswordGenerator = viewModel.passwordGeneratorViewModel != nil
-            if viewModel.host != host || viewModelHasPasswordGenerator != passwordGenerator {
+            if viewModel.host != host || viewModel.options != options {
                 currentPasswordManagerViewModel = nil
             }
         }
         if let viewModel = currentPasswordManagerViewModel {
             return viewModel
         }
-        let viewModel = PasswordManagerMenuViewModel(host: host, credentialsBuilder: credentialsBuilder, userInfoStore: userInfoStore, withPasswordGenerator: passwordGenerator)
+        let viewModel = PasswordManagerMenuViewModel(host: host, credentialsBuilder: credentialsBuilder, userInfoStore: userInfoStore, options: options)
         viewModel.delegate = self
         currentPasswordManagerViewModel = viewModel
         return viewModel
