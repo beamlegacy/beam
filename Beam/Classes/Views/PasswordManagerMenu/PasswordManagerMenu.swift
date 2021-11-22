@@ -19,17 +19,15 @@ struct PasswordManagerMenu: View {
     let width: CGFloat
     @ObservedObject var viewModel: PasswordManagerMenuViewModel
 
-    @State private var searchString: String = ""
-    @State private var suggestedPassword: String = ""
+    @State private var searchString = ""
+    @State private var suggestedPassword = ""
     @State private var showingOtherPasswordsSheet = false
     @State private var height: CGFloat?
-
-    @State private var isShowingToast: Bool = false
 
     var body: some View {
         FormatterViewBackground {
             VStack(alignment: .leading, spacing: 0) {
-                if let passwordGeneratorViewModel = viewModel.passwordGeneratorViewModel {
+                if viewModel.display.suggestNewPassword, let passwordGeneratorViewModel = viewModel.passwordGeneratorViewModel {
                     PasswordGeneratorSuggestionCell(viewModel: passwordGeneratorViewModel)
                         .frame(height: 81, alignment: .center)
                 } else {
@@ -73,6 +71,12 @@ struct PasswordManagerMenu: View {
                             }).frame(width: 568, height: 361, alignment: .center)
                         })
                     }
+                    if viewModel.display.showSuggestPasswordOption {
+                        Separator(horizontal: true)
+                            .padding(.vertical, 1)
+                            .padding(.horizontal, 12)
+                        SuggestPasswordCell(onChange: viewModel.onSuggestNewPassword)
+                    }
                 }
             }
             .fixedSize(horizontal: false, vertical: true)
@@ -92,6 +96,6 @@ struct PasswordManagerMenu: View {
 struct PasswordManagerMenu_Previews: PreviewProvider {
     static var userInfoStore = MockUserInformationsStore()
     static var previews: some View {
-        PasswordManagerMenu(width: 300, viewModel: PasswordManagerMenuViewModel(host: URL(string: "http://mock1.beam")!, credentialsBuilder: PasswordManagerCredentialsBuilder(), userInfoStore: userInfoStore, withPasswordGenerator: false))
+        PasswordManagerMenu(width: 300, viewModel: PasswordManagerMenuViewModel(host: URL(string: "http://mock1.beam")!, credentialsBuilder: PasswordManagerCredentialsBuilder(), userInfoStore: userInfoStore, options: .login))
     }
 }
