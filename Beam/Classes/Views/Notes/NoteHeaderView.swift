@@ -35,17 +35,17 @@ struct NoteHeaderView: View {
             ZStack {
                 if justCopiedLink {
                     Tooltip(title: "Link Copied")
-                        .fixedSize().offset(x: -18, y: 0)
+                        .fixedSize().offset(x: -22, y: 0)
                         .transition(transition)
                 } else if hoveringLinkButton {
                     Tooltip(title: "Copy Link")
-                        .fixedSize().offset(x: -18, y: 0)
+                        .fixedSize().offset(x: -22, y: 0)
                         .transition(transition)
                 }
             }, alignment: .trailing)
         .onHover { hoveringLinkButton = $0 }
         .transition(AnyTransition.opacity.animation(BeamAnimation.easeInOut(duration: 0.15)))
-        .offset(x: -20, y: 0)
+        .offset(x: -30, y: 0)
     }
 
     private var titleView: some View {
