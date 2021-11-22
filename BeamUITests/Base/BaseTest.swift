@@ -36,13 +36,13 @@ class BaseTest: XCTestCase {
         terminateAppInstance()
     }
     
-    func waitUntiAppIsNotRunning(timeout: TimeInterval = TimeInterval(2)) -> Bool {
+    func waitUntiAppIsNotRunningFor(timeout: TimeInterval = TimeInterval(5)) -> Bool {
         var count: TimeInterval = 0
         while isAppRunning() && count < timeout {
             sleep(1)
             count += 1
         }
-        return count < timeout
+        return isAppRunning()
     }
 
     private func storeScreenshot() {
