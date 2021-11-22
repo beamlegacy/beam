@@ -76,7 +76,7 @@ struct Passwords: View {
                     BeamSearchField(searchStr: $searchString, isEditing: $isEditing, placeholderStr: "Search", font: BeamFont.regular(size: 13).nsFont, textColor: BeamColor.Generic.text.nsColor, placeholderColor: BeamColor.Generic.placeholder.nsColor)
                         .frame(width: 220, height: 21, alignment: .center)
                         .foregroundColor(BeamColor.Generic.background.swiftUI)
-                        .onUpdate(of: searchString) { searchString in
+                        .onChange(of: searchString) { searchString in
                             passwordsViewModel.searchString = searchString
                         }
                 }
