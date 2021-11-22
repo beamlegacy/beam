@@ -96,4 +96,26 @@ class RefNoteTitle: Widget {
     override var mainLayerName: String {
         "RefNoteTitle - \(noteTitle)"
     }
+
+    // Modify AddChild so that children are always sorted
+    override func addChild(_ child: Widget) {
+        guard !children.contains(child) else { return }
+        changingChildren = true
+        defer { changingChildren = false }
+        var newChildren = children
+        newChildren.append(child)
+        children = newChildren.sorted { left, right in
+            guard let leftBC = left as? BreadCrumb,
+                  let rightBC = right as? BreadCrumb,
+                  let leftElementNode = leftBC.children.first as? ElementNode,
+                  let rightElementNode = rightBC.children.first as? ElementNode
+            else { return false }
+            let leftElement = leftElementNode.displayedElement
+            let rightElement = rightElementNode.displayedElement
+
+            return leftElement.indexPath < rightElement.indexPath
+        }
+        updateAddedChild(child: child)
+    }
+
 }
