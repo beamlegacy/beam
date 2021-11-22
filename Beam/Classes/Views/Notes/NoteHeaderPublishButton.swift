@@ -73,7 +73,7 @@ struct NoteHeaderPublishButton: View {
         @ViewBuilder var errorOverlay: some View {
             if let error = error {
                 Tooltip(title: error.message, icon: "status-lock")
-                .fixedSize().offset(x: 0, y: -25)
+                .fixedSize().offset(x: 0, y: -28)
                 .transition(AnyTransition.opacity.animation(BeamAnimation.defaultiOSEasing(duration: 0.3)))
             }
         }
@@ -123,7 +123,7 @@ struct NoteHeaderPublishButton: View {
             .accessibility(identifier: "NoteHeaderPublishButton")
             .overlay(!justCopiedLink ? nil :
                         Tooltip(title: "Link Copied")
-                        .fixedSize().offset(x: 0, y: -25)
+                        .fixedSize().offset(x: 0, y: -28)
                         .transition(AnyTransition.opacity.animation(BeamAnimation.defaultiOSEasing(duration: 0.3))), alignment: .top)
             .overlay(errorOverlay, alignment: .top)
         }
