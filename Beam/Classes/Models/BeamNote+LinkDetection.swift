@@ -83,6 +83,7 @@ public extension BeamElement {
         if res, let note = note, !note.cmdManager.isEmpty {
             // If the card renaming has changed anything in the currently edited note we need to reset the commandManager
             note.resetCommandManager()
+            _ = note.syncedSave()
         }
         return res
     }

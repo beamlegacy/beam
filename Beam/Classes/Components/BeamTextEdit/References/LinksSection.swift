@@ -153,8 +153,8 @@ class LinksSection: Widget {
         children.sort { left, right in
             guard let left = left.children.first as? BreadCrumb,
                   let right = right.children.first as? BreadCrumb,
-                  let leftDate = left.proxy.proxy.note?.creationDate,
-                  let rightDate = right.proxy.proxy.note?.creationDate
+                  let leftDate = left.proxy.proxy.note?.updateDate,
+                  let rightDate = right.proxy.proxy.note?.updateDate
             else {
                 Logger.shared.logError("LinksSection - Trying to compared notes that have no date", category: .noteEditor)
                 return false
