@@ -860,7 +860,7 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                             expect(APIRequest.callsCount - networkCalls) == 1
 
-                            let expectedNetworkCalls = ["update_beam_objects"]
+                            let expectedNetworkCalls = ["update_beam_objects_large"]
 
                             expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
 
@@ -926,7 +926,7 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                             expect(APIRequest.callsCount - networkCalls) == 1
 
-                            let expectedNetworkCalls = ["update_beam_objects"]
+                            let expectedNetworkCalls = ["update_beam_objects_large"]
                             expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
 
                             expect(sut.count(filters: [.id(docStruct.id)])) == 1
@@ -995,7 +995,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                             try sut.receivedObjects([docStruct3])
                             expect(APIRequest.callsCount - networkCalls) == 1
 
-                            let expectedNetworkCalls = ["update_beam_objects"]
+                            let expectedNetworkCalls = ["update_beam_objects_large"]
                             expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
 
                             expect(sut.count(filters: [.id(docStruct.id)])) == 1
