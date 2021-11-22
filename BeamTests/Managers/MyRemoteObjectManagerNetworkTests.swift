@@ -413,7 +413,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             }
 
                             expect(APIRequest.callsCount - networkCalls) == 1
-                            expect(APIRequest.networkCallFiles) == ["sign_in", "update_beam_objects"]
+                            expect(APIRequest.networkCallFiles) == ["sign_in", "update_beam_objects_large"]
 
                             for key in [UUID(uuidString: "195d94e1-e0df-4eca-93e6-8778984bcd58")!,
                                         UUID(uuidString: "295d94e1-e0df-4eca-93e6-8778984bcd58")!,
@@ -567,7 +567,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 }
                             }
 
-                            let expectedNetworkCalls = ["update_beam_objects"]
+                            let expectedNetworkCalls = ["update_beam_objects_large"]
 
                             expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
 
@@ -738,7 +738,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 }
                             }
 
-                            let expectedNetworkCalls = ["update_beam_objects",
+                            let expectedNetworkCalls = ["update_beam_objects_large",
                                                         "beam_object",
                                                         "update_beam_object_large"]
 
@@ -841,9 +841,9 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 }
                             }
 
-                            let expectedNetworkCalls = ["update_beam_objects",
+                            let expectedNetworkCalls = ["update_beam_objects_large",
                                                         "beam_object",
-                                                        "update_beam_objects"]
+                                                        "update_beam_objects_large"]
 
                             expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
 
@@ -988,9 +988,9 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 }
                             }
 
-                            let expectedNetworkCalls = ["update_beam_objects",
+                            let expectedNetworkCalls = ["update_beam_objects_large",
                                                         "beam_objects",
-                                                        "update_beam_objects"]
+                                                        "update_beam_objects_large"]
 
                             expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
 
@@ -1091,9 +1091,9 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 }
                             }
 
-                            let expectedNetworkCalls = ["update_beam_objects",
+                            let expectedNetworkCalls = ["update_beam_objects_large",
                                                         "beam_objects",
-                                                        "update_beam_objects"]
+                                                        "update_beam_objects_large"]
 
                             expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
 
@@ -1260,9 +1260,9 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 }
                             }
 
-                            let expectedNetworkCalls = ["update_beam_objects",
+                            let expectedNetworkCalls = ["update_beam_objects_large",
                                                         "beam_objects",
-                                                        "update_beam_objects"]
+                                                        "update_beam_objects_large"]
 
                             expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
 
@@ -1363,9 +1363,9 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 }
                             }
 
-                            let expectedNetworkCalls = ["update_beam_objects",
+                            let expectedNetworkCalls = ["update_beam_objects_large",
                                                         "beam_objects",
-                                                        "update_beam_objects"]
+                                                        "update_beam_objects_large"]
 
                             expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
 
@@ -1544,7 +1544,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             }
 
                             expect(APIRequest.callsCount - networkCalls) == 1
-                            expect(APIRequest.networkCallFiles) == ["sign_in", "update_beam_objects"]
+                            expect(APIRequest.networkCallFiles) == ["sign_in", "update_beam_objects_large"]
 
                             let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1.beamObjectId)
                             let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2.beamObjectId)
@@ -1561,6 +1561,10 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             expect(remoteObject1?.checksum) == (try self.checksum(object1))
                             expect(remoteObject2?.checksum) == (try self.checksum(object2))
                             expect(remoteObject3?.checksum) == (try self.checksum(object3))
+
+                            expect(remoteObject1?.title) == object1.title
+                            expect(remoteObject2?.title) == object2.title
+                            expect(remoteObject3?.title) == object3.title
                         }
                     }
                     context("PromiseKit") {
@@ -1746,7 +1750,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             }
 
                             expect(APIRequest.callsCount - networkCalls) == 1
-                            expect(APIRequest.networkCallFiles) == ["sign_in", "update_beam_objects"]
+                            expect(APIRequest.networkCallFiles) == ["sign_in", "update_beam_objects_large"]
 
                             let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1.beamObjectId)
                             let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2.beamObjectId)
@@ -1971,7 +1975,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
                     }
 
-                    let expectedNetworkCalls = ["update_beam_objects", "update_beam_objects"]
+                    let expectedNetworkCalls = ["update_beam_objects_large", "update_beam_objects_large"]
 
                     expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
                     expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
@@ -2030,7 +2034,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 }
                             }
 
-                            let expectedNetworkCalls = ["update_beam_objects",
+                            let expectedNetworkCalls = ["update_beam_objects_large",
                                                         "beam_object",
                                                         "update_beam_object_large"]
 
@@ -2196,9 +2200,9 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 }
                             }
 
-                            let expectedNetworkCalls = ["update_beam_objects",
+                            let expectedNetworkCalls = ["update_beam_objects_large",
                                                         "beam_object",
-                                                        "update_beam_objects"]
+                                                        "update_beam_objects_large"]
 
                             expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
                             expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
@@ -2392,9 +2396,9 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 }
                             }
 
-                            let expectedNetworkCalls = ["update_beam_objects",
+                            let expectedNetworkCalls = ["update_beam_objects_large",
                                                         "beam_objects",
-                                                        "update_beam_objects"]
+                                                        "update_beam_objects_large"]
 
                             expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
 
@@ -2564,9 +2568,9 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 }
                             }
 
-                            let expectedNetworkCalls = ["update_beam_objects",
+                            let expectedNetworkCalls = ["update_beam_objects_large",
                                                         "beam_objects",
-                                                        "update_beam_objects"]
+                                                        "update_beam_objects_large"]
 
                             expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
 
@@ -2794,9 +2798,9 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 }
                             }
 
-                            let expectedNetworkCalls = ["update_beam_objects",
+                            let expectedNetworkCalls = ["update_beam_objects_large",
                                                         "beam_objects",
-                                                        "update_beam_objects"]
+                                                        "update_beam_objects_large"]
 
                             expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
 
@@ -2967,9 +2971,9 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 }
                             }
 
-                            let expectedNetworkCalls = ["update_beam_objects",
+                            let expectedNetworkCalls = ["update_beam_objects_large",
                                                         "beam_objects",
-                                                        "update_beam_objects"]
+                                                        "update_beam_objects_large"]
 
                             expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
 
@@ -3700,7 +3704,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                                 let expectedNetworkCalls = ["update_beam_object_large",
                                                             "beam_object",
-                                                            "update_beam_objects"]
+                                                            "update_beam_objects_large"]
 
                                 expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
 

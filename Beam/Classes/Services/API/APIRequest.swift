@@ -94,12 +94,12 @@ class APIRequest: NSObject {
 
             for file in files {
                 queryData.append("\(lineBreak)--\(boundary)\(lineBreak)".asData)
-                queryData.append("Content-Disposition: form-data; name=\"\(file.variableName)\"; filename=\"\(file.variableName)\"\(lineBreak)".asData)
+                queryData.append("Content-Disposition: form-data; name=\"\(file.filename)\"; filename=\"\(file.filename)\"\(lineBreak)".asData)
                 queryData.append("Content-Type: \(file.contentType)\(lineBreak)\(lineBreak)".asData)
                 queryData.append(file.binary)
 //                queryData.append("This is the binary data".asData)
 
-                mapperDictionary[file.variableName] = ["variables.\(file.variableName)"]
+                mapperDictionary[file.filename] = ["variables.\(file.variableName)"]
             }
 
             queryData.append("\(lineBreak)--\(boundary)\(lineBreak)".asData)

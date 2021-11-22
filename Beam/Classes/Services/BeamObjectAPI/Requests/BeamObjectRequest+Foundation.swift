@@ -4,6 +4,7 @@ import BeamCore
 extension BeamObjectRequest {
     @discardableResult
     // return multiple errors, as the API might return more than one.
+    // swiftlint:disable:next function_body_length
     func save(_ beamObject: BeamObject,
               _ completion: @escaping (Swift.Result<BeamObject, Error>) -> Void) throws -> URLSessionDataTask {
         let saveObject = beamObject.copy()
@@ -12,7 +13,6 @@ extension BeamObjectRequest {
 
         struct LargeBeamObjectWithPrivateKey: Codable {
             var id: UUID
-            var data: Data?
             var checksum: String?
             var previousChecksum: String?
 
@@ -24,7 +24,6 @@ extension BeamObjectRequest {
         }
 
         var largeFileObject = LargeBeamObjectWithPrivateKey(id: saveObject.id,
-                                                            data: saveObject.data,
                                                             checksum: saveObject.dataChecksum,
                                                             previousChecksum: saveObject.previousChecksum,
                                                             privateKeySignature: saveObject.privateKeySignature,
@@ -74,20 +73,103 @@ extension BeamObjectRequest {
     }
 
     @discardableResult
-    func saveAll(_ beamObjects: [BeamObject],
-                 _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask? {
+    // return multiple errors, as the API might return more than one.
+    func saveInline(_ beamObject: BeamObject,
+                    _ completion: @escaping (Swift.Result<BeamObject, Error>) -> Void) throws -> URLSessionDataTask {
+        let saveObject = beamObject.copy()
+
+        try saveObject.encrypt()
+
+        let parameters = try saveBeamObjectParameters(saveObject)
+
+        let bodyParamsRequest = GraphqlParameters(fileName: "update_beam_object",
+                                                  variables: parameters)
+
+        if saveObject.dataChecksum == saveObject.previousChecksum {
+            Logger.shared.logWarning("Sent checksum and previousChecksum the same: \(saveObject.dataChecksum ?? "-") for \(saveObject.description), this network call could have been avoided.",
+                                   category: .beamObjectNetwork)
+        } else {
+            Logger.shared.logDebug("Sent checksum: \(saveObject.dataChecksum ?? "-"), previousChecksum: \(saveObject.previousChecksum ?? "-") for \(saveObject.description)",
+                                   category: .beamObjectNetwork)
+        }
+
+        return try performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<UpdateBeamObject, Error>) in
+            switch result {
+            case .failure(let error):
+                completion(.failure(error))
+            case .success(let updateBeamObject):
+                guard let beamObject = updateBeamObject.beamObject else {
+                    completion(.failure(APIRequestError.parserError))
+                    return
+                }
+                beamObject.previousChecksum = beamObject.dataChecksum
+                completion(.success(beamObject))
+            }
+        }
+    }
+
+    @discardableResult
+    func save(_ beamObjects: [BeamObject],
+              _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask? {
+
+        struct LargeBeamObjectsWithPrivateKey: Codable {
+            var beamObjects: [BeamObject]
+            var largeFiles: [Data?]
+            var privateKey: String?
+        }
+
+        var largeFileObject = LargeBeamObjectsWithPrivateKey(beamObjects: [], largeFiles: [])
+        var filesUpload: [GraphqlFileUpload] = []
+        #if DEBUG
+        largeFileObject.privateKey = EncryptionManager.shared.privateKey().asString()
+        #endif
+
+        for (index, beamObject) in beamObjects.enumerated() {
+            let saveObject = beamObject.copy()
+            try saveObject.encrypt()
+
+            if let data = saveObject.data {
+                largeFileObject.largeFiles.append(nil)
+
+                filesUpload.append(GraphqlFileUpload(contentType: "application/octet-stream",
+                                                     binary: data,
+                                                     filename: "\(index)",
+                                                     variableName: "largeFiles.\(index)"))
+            }
+
+            saveObject.data = nil
+            largeFileObject.beamObjects.append(saveObject)
+        }
+
+        let bodyParamsRequest = GraphqlParameters(fileName: "update_beam_objects_large",
+                                                  variables: largeFileObject,
+                                                  files: filesUpload)
+
+        return try performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<UpdateBeamObjects, Error>) in
+            switch result {
+            case .failure(let error):
+                completion(.failure(error))
+            case .success(let updateBeamObjects):
+                guard let beamObjects = updateBeamObjects.beamObjects else {
+                    completion(.failure(APIRequestError.parserError))
+                    return
+                }
+
+                completion(.success(beamObjects))
+            }
+        }
+    }
+
+    @discardableResult
+    func saveInline(_ beamObjects: [BeamObject],
+                    _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask? {
         var parameters: UpdateBeamObjects
 
         let saveObjects: [BeamObject] = beamObjects.map {
             $0.copy()
         }
 
-        do {
-            parameters = try saveBeamObjectsParameters(saveObjects)
-        } catch {
-            completion(.failure(error))
-            return nil
-        }
+        parameters = try saveBeamObjectsParameters(saveObjects)
 
         let bodyParamsRequest = GraphqlParameters(fileName: "update_beam_objects", variables: parameters)
 

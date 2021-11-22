@@ -305,7 +305,7 @@ extension BeamObjectManager {
         let beamObjectTypes = Set(objectsToSave.map { $0.beamObjectType }).joined(separator: ", ")
         Logger.shared.logDebug("Saving \(objectsToSave.count) objects of type \(beamObjectTypes) on API",
                                category: .beamObjectNetwork)
-        try request.saveAll(beamObjects) { result in
+        try request.save(beamObjects) { result in
             switch result {
             case .failure(let error):
                 self.saveToAPIFailure(objects, error, completion)
@@ -715,7 +715,7 @@ extension BeamObjectManager {
 
         let request = BeamObjectRequest()
 
-        try request.saveAll(beamObjects) { result in
+        try request.save(beamObjects) { result in
             switch result {
             case .failure(let error):
                 self.saveToAPIBeamObjectsFailure(beamObjects, error, completion)

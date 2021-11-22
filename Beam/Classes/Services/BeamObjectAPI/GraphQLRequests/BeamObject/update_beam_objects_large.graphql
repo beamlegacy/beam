@@ -1,0 +1,14 @@
+mutation UpdateBeamObjects($beamObjects: [BeamObjectInput!]!, $largeFiles: [Upload!], $privateKey: String) {
+  updateBeamObjects(input: {beamObjectsInput: $beamObjects, largeFiles: $largeFiles, privateKey: $privateKey}) {
+    beamObjects {
+      id
+      checksum
+      type
+    }
+    errors {
+      objectid
+      path
+      message
+    }
+  }
+}
