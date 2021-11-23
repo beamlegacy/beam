@@ -25,6 +25,7 @@ private struct NoteAndSourcesRow: CsvRow {
     var sourceScore: Float?
     var sourceType: Int?
     var sourceSessionId: UUID?
+    var similarity: Double?
 
     private var sourceAddedAtString: String {
         guard let sourceAddedAt = sourceAddedAt else { return "<???>" }
@@ -43,7 +44,8 @@ private struct NoteAndSourcesRow: CsvRow {
         "sourceAddedAt",
         "sourceSessionId",
         "sourceScore",
-        "sourceType"
+        "sourceType",
+        "similarity"
         ]
     }
 
@@ -55,7 +57,8 @@ private struct NoteAndSourcesRow: CsvRow {
             sourceAddedAtString,
             sourceSessionIdString,
             optionalToString(sourceScore),
-            optionalToString(sourceType)
+            optionalToString(sourceType),
+            optionalToString(similarity)
         ]
     }
 }
@@ -81,7 +84,8 @@ func export_all_note_sources(to url: URL?) {
                         sourceAddedAt: s.addedAt,
                         sourceScore: s.score,
                         sourceType: s.type.rawValue,
-                        sourceSessionId: s.sessionId
+                        sourceSessionId: s.sessionId,
+                        similarity: s.similarity
                     )
             }
             } else {
