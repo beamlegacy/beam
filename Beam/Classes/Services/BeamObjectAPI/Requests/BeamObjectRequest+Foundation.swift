@@ -97,10 +97,15 @@ extension BeamObjectRequest {
               _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask? {
         var filesUpload: [GraphqlFileUpload] = []
         var saveBeamObjects: [BeamObject] = []
+        var sameChecksum = false
 
         for (index, beamObject) in beamObjects.enumerated() {
             let saveObject = beamObject.copy()
             try saveObject.encrypt()
+
+            if saveObject.dataChecksum == saveObject.previousChecksum {
+                sameChecksum = true
+            }
 
             if let data = saveObject.data {
                 filesUpload.append(GraphqlFileUpload(contentType: "application/octet-stream",
@@ -111,6 +116,11 @@ extension BeamObjectRequest {
 
             saveObject.data = nil
             saveBeamObjects.append(saveObject)
+        }
+
+        if sameChecksum {
+            Logger.shared.logWarning("Sent checksum and previousChecksum, some objects in this network call could have been avoided.",
+                                     category: .beamObjectNetwork)
         }
 
         var parameters = UpdateBeamObjects(beamObjects: saveBeamObjects, privateKey: nil)

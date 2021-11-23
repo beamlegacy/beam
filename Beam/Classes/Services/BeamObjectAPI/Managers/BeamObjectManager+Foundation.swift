@@ -283,6 +283,7 @@ extension BeamObjectManager {
     }
 
     func saveToAPI<T: BeamObjectProtocol>(_ objects: [T],
+                                          force: Bool = false,
                                           _ completion: @escaping ((Result<[T], Error>) -> Void)) throws -> APIRequest? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw BeamObjectManagerError.notAuthenticated
@@ -293,10 +294,10 @@ extension BeamObjectManager {
             try BeamObject($0, T.beamObjectTypeName)
         }
 
-        let objectsToSave = Persistence.Sync.BeamObjects.last_updated_at == nil ? beamObjects : updatedObjectsOnly(beamObjects)
+        let objectsToSave = force ? beamObjects : updatedObjectsOnly(beamObjects)
 
         guard !objectsToSave.isEmpty else {
-            Logger.shared.logDebug("Not saving objects on API, list is empty after checksum check",
+            Logger.shared.logDebug("Skip objects, based on previousChecksum they were already saved",
                                    category: .beamObjectNetwork)
             completion(.success([]))
             return nil
@@ -556,12 +557,20 @@ extension BeamObjectManager {
 
     /// Completion will not be called if returned `APIRequest` is `nil`
     func saveToAPI<T: BeamObjectProtocol>(_ object: T,
+                                          force: Bool = false,
                                           _ completion: @escaping ((Result<T, Error>) -> Void)) throws -> APIRequest? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw BeamObjectManagerError.notAuthenticated
         }
 
         let beamObject = try BeamObject(object, T.beamObjectTypeName)
+
+        guard beamObject.previousChecksum != beamObject.dataChecksum || beamObject.previousChecksum == nil || force else {
+            Logger.shared.logDebug("Skip object, based on previousChecksum it was already saved",
+                                   category: .beamObjectNetwork)
+            completion(.success(object))
+            return nil
+        }
 
         let request = BeamObjectRequest()
 

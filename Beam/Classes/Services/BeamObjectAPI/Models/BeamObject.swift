@@ -140,10 +140,19 @@ class BeamObject: Codable {
     }
 
     func encodeObject<T: BeamObjectProtocol>(_ object: T) throws {
+        let localTimer = BeamDate.now
+
         let jsonData = try Self.encoder.encode(object)
 
         data = jsonData
         dataChecksum = jsonData.SHA256
+
+        let timeDiff = BeamDate.now.timeIntervalSince(localTimer)
+        if timeDiff > 1.0 {
+            Logger.shared.logError("Slow BeamObject encoding, data size: \(jsonData.count)",
+                                   category: .beamObject,
+                                   localTimer: localTimer)
+        }
     }
 
     func decode<T: BeamObjectProtocol>() -> T? {
