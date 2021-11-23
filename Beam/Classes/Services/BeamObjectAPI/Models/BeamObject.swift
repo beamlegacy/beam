@@ -28,6 +28,7 @@ class BeamObject: Codable {
     var receivedAt: Date?
 
     var data: Data?
+    var largeData: Data?
     var dataChecksum: String?
     var previousChecksum: String?
     var privateKeySignature: String?

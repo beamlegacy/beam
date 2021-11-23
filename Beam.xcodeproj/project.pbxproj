@@ -251,7 +251,6 @@
 		52019A7D26DE49D7005E8278 /* BeamObjectManagerProtocol+Promises.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52019A7C26DE49D7005E8278 /* BeamObjectManagerProtocol+Promises.swift */; };
 		520303D9261CAEF10028BC8E /* DatabaseManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 520303D8261CAEF10028BC8E /* DatabaseManagerTests.swift */; };
 		5204FE3B25F128BD00FD22F8 /* DocumentStruct.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5204FE3A25F128BD00FD22F8 /* DocumentStruct.swift */; };
-		5206DC37274BB7A200622C86 /* update_beam_objects_large.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 5206DC36274BB7A200622C86 /* update_beam_objects_large.graphql */; };
 		520BC40126D7B02200A82966 /* subscription_beam_objects_updated.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 520BC40026D7B02200A82966 /* subscription_beam_objects_updated.graphql */; };
 		520BC40E26D7B05F00A82966 /* subscription_beam_object_updated.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 520BC40D26D7B05F00A82966 /* subscription_beam_object_updated.graphql */; };
 		521398D82694931C00AC29C1 /* DatabaseStruct.swift in Sources */ = {isa = PBXBuildFile; fileRef = 521398D72694931C00AC29C1 /* DatabaseStruct.swift */; };
@@ -303,7 +302,6 @@
 		524520A425C8234500AC0007 /* BeamElement+Merge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524520A325C8234500AC0007 /* BeamElement+Merge.swift */; };
 		52466B22270DA966002D1716 /* Clustering in Frameworks */ = {isa = PBXBuildFile; productRef = 52466B21270DA966002D1716 /* Clustering */; };
 		524B110226283F2D00E3C61B /* DatabaseManagerNetworkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524B110126283F2D00E3C61B /* DatabaseManagerNetworkTests.swift */; };
-		524B6C45274666C7002F1C96 /* update_beam_object_large.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 524B6C44274666C7002F1C96 /* update_beam_object_large.graphql */; };
 		524B856D25D2DD0700BB7C7A /* NSMAnagedObjectContext+performAndWait.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524B856C25D2DD0700BB7C7A /* NSMAnagedObjectContext+performAndWait.swift */; };
 		524CF6CA25F2735D007312F0 /* EncryptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524CF6C925F2735D007312F0 /* EncryptionManager.swift */; };
 		524CF6CE25F27609007312F0 /* KeychainStorable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524CF6CD25F27609007312F0 /* KeychainStorable.swift */; };
@@ -1344,7 +1342,6 @@
 		52019A7C26DE49D7005E8278 /* BeamObjectManagerProtocol+Promises.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamObjectManagerProtocol+Promises.swift"; sourceTree = "<group>"; };
 		520303D8261CAEF10028BC8E /* DatabaseManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseManagerTests.swift; sourceTree = "<group>"; };
 		5204FE3A25F128BD00FD22F8 /* DocumentStruct.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentStruct.swift; sourceTree = "<group>"; };
-		5206DC36274BB7A200622C86 /* update_beam_objects_large.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = update_beam_objects_large.graphql; sourceTree = "<group>"; };
 		520BC40026D7B02200A82966 /* subscription_beam_objects_updated.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = subscription_beam_objects_updated.graphql; sourceTree = "<group>"; };
 		520BC40D26D7B05F00A82966 /* subscription_beam_object_updated.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = subscription_beam_object_updated.graphql; sourceTree = "<group>"; };
 		521398D72694931C00AC29C1 /* DatabaseStruct.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseStruct.swift; sourceTree = "<group>"; };
@@ -1397,7 +1394,6 @@
 		524425F025C832110095422A /* AccountManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountManagerTests.swift; sourceTree = "<group>"; };
 		524520A325C8234500AC0007 /* BeamElement+Merge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamElement+Merge.swift"; sourceTree = "<group>"; };
 		524B110126283F2D00E3C61B /* DatabaseManagerNetworkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseManagerNetworkTests.swift; sourceTree = "<group>"; };
-		524B6C44274666C7002F1C96 /* update_beam_object_large.graphql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = update_beam_object_large.graphql; sourceTree = "<group>"; };
 		524B856C25D2DD0700BB7C7A /* NSMAnagedObjectContext+performAndWait.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSMAnagedObjectContext+performAndWait.swift"; sourceTree = "<group>"; };
 		524CF6C925F2735D007312F0 /* EncryptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EncryptionManager.swift; sourceTree = "<group>"; };
 		524CF6CD25F27609007312F0 /* KeychainStorable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStorable.swift; sourceTree = "<group>"; };
@@ -3072,9 +3068,7 @@
 				5224CD4B2685FF8C00D4179E /* delete_beam_object.graphql */,
 				5224CD5F2685FFB500D4179E /* delete_all_beam_objects.graphql */,
 				5224CD452685FF7E00D4179E /* update_beam_objects.graphql */,
-				5206DC36274BB7A200622C86 /* update_beam_objects_large.graphql */,
 				5224CD512685FF9B00D4179E /* update_beam_object.graphql */,
-				524B6C44274666C7002F1C96 /* update_beam_object_large.graphql */,
 				5224CD692685FFD100D4179E /* beam_object.graphql */,
 				5224CD6F2685FFDD00D4179E /* beam_objects.graphql */,
 				522F149227033DE000EDF2F6 /* beam_object_checksums.graphql */,
@@ -5133,7 +5127,6 @@
 				418171F42581107C00317ED8 /* sign_up.graphql in Resources */,
 				032562AB26051D3B006513E4 /* Info.plist in Resources */,
 				8AD2636326F4A0480074D673 /* PointAndShoot.test.ts in Resources */,
-				5206DC37274BB7A200622C86 /* update_beam_objects_large.graphql in Resources */,
 				96C5FE44268F4D5700889B5E /* Geolocation.js in Resources */,
 				52F4E4B42641844E0067B017 /* delete_identity.graphql in Resources */,
 				418171F62581107C00317ED8 /* sign_in.graphql in Resources */,
@@ -5151,7 +5144,6 @@
 				8AD2637326F4A0480074D673 /* UITests-1.html in Resources */,
 				0DC6E2DE26A0527900BD2E2A /* topdomains_test.txt in Resources */,
 				032562A826051D3B006513E4 /* blockerList.json in Resources */,
-				524B6C45274666C7002F1C96 /* update_beam_object_large.graphql in Resources */,
 				418171122581082200317ED8 /* Assets.xcassets in Resources */,
 				8AD2636926F4A0480074D673 /* UITests-2.html in Resources */,
 				56A5BD3125CC680E00ED7C50 /* url.stopwords in Resources */,

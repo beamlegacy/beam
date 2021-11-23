@@ -23,7 +23,7 @@ class BeamObjectRequest: APIRequest {
 
     class UpdateBeamObject: Codable, Errorable {
         let beamObject: BeamObject?
-        let privateKey: String?
+        var privateKey: String?
         var errors: [UserErrorData]?
 
         init(beamObject: BeamObject?, privateKey: String?) {
@@ -36,7 +36,7 @@ class BeamObjectRequest: APIRequest {
 
     struct UpdateBeamObjects: Codable, Errorable {
         let beamObjects: [BeamObject]?
-        let privateKey: String?
+        var privateKey: String?
         var errors: [UserErrorData]?
     }
 
