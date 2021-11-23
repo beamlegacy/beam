@@ -10,7 +10,13 @@ extension BeamObjectManagerDelegate {
 
         self.willSaveAllOnBeamObjectApi()
 
+        let localTimer = BeamDate.now
+
         let toSaveObjects = try allObjects(updatedSince: Persistence.Sync.BeamObjects.last_updated_at)
+
+        Logger.shared.logDebug("\(Self.BeamObjectType.beamObjectTypeName) manager returned \(toSaveObjects.count) objects",
+                               category: .beamObjectNetwork,
+                               localTimer: localTimer)
 
         guard !toSaveObjects.isEmpty else {
             completion(.success((0, nil)))
@@ -26,9 +32,10 @@ extension BeamObjectManagerDelegate {
         }
     }
 
-    // swiftlint:disable:next function_body_length
     @discardableResult
+    // swiftlint:disable:next function_body_length
     func saveOnBeamObjectsAPI(_ objects: [BeamObjectType],
+                              force: Bool = false,
                               deep: Int = 0,
                               refreshPreviousChecksum: Bool = true,
                               _ completion: @escaping ((Result<[BeamObjectType], Error>) -> Void)) throws -> APIRequest? {
@@ -308,6 +315,7 @@ extension BeamObjectManagerDelegate {
 
     @discardableResult
     func saveOnBeamObjectAPI(_ object: BeamObjectType,
+                             force: Bool = false,
                              _ completion: @escaping ((Result<BeamObjectType, Error>) -> Void)) throws -> APIRequest? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw APIRequestError.notAuthenticated

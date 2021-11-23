@@ -172,6 +172,10 @@ class BeamFileDB: BeamFileStorage {
             }
         }
 
+        migrator.registerMigration("addUpdatedAtIndex") { db in
+            try db.create(index: "byUpdatedAt", on: BeamFileDB.tableName, columns: ["updatedAt"], unique: false)
+        }
+
         try migrator.migrate(dbPool)
     }
 
