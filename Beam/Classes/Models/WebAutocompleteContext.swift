@@ -24,6 +24,10 @@ struct WebInputField {
         case newPassword
         case email
         case tel
+
+        var isPassword: Bool {
+            self == .currentPassword || self == .newPassword
+        }
     }
 
     let id: String // beamId
@@ -34,6 +38,10 @@ struct WebAutocompleteGroup {
     var action: WebAutocompleteAction
     var relatedFields: [WebInputField]
     var isAmbiguous = false // can be part of either login or account creation, must be determined by context
+
+    func field(id: String) -> WebInputField? {
+        relatedFields.first { $0.id == id }
+    }
 }
 
 struct WebAutocompleteRules {

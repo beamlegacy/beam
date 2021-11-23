@@ -9,16 +9,19 @@ import Foundation
 import BeamCore
 
 public extension BeamNote {
+    var mentionsCount: Int {
+        Set<BeamNoteReference>(linksAndReferences(fast: true)).count
+    }
     var linksAndReferences: [BeamNoteReference] {
-        return links + references
+        links + references
     }
 
     var fastLinksAndReferences: [BeamNoteReference] {
-        return links + fastReferences
+        links + fastReferences
     }
 
     var links: [BeamNoteReference] {
-        return (try? GRDBDatabase.shared.fetchLinks(toNote: self.id).map({ bidiLink in
+        (try? GRDBDatabase.shared.fetchLinks(toNote: self.id).map({ bidiLink in
             BeamNoteReference(noteID: bidiLink.sourceNoteId, elementID: bidiLink.sourceElementId)
         })) ?? []
     }
@@ -32,7 +35,7 @@ public extension BeamNote {
     }
 
     func linksAndReferences(fast: Bool) -> [BeamNoteReference] {
-        return links + references(verifyMatch: !fast)
+        links + references(verifyMatch: !fast)
     }
 
     private func references(verifyMatch: Bool) -> [BeamNoteReference] {
@@ -59,8 +62,9 @@ public extension BeamElement {
         let links = self.text.internalLinks.map { BidirectionalLink(sourceNoteId: note.id, sourceElementId: self.id, linkedNoteId: $0) }
         return links
     }
+
     var internalLinks: [BidirectionalLink] {
-        return internalLinksInSelf + children.flatMap { $0.internalLinks }
+        internalLinksInSelf + children.flatMap { $0.internalLinks }
     }
 }
 
@@ -79,6 +83,7 @@ public extension BeamElement {
         if res, let note = note, !note.cmdManager.isEmpty {
             // If the card renaming has changed anything in the currently edited note we need to reset the commandManager
             note.resetCommandManager()
+            _ = note.syncedSave()
         }
         return res
     }
@@ -90,6 +95,6 @@ public extension BeamNoteReference {
     }
 
     var element: BeamElement? {
-        return note?.findElement(elementID)
+        note?.findElement(elementID)
     }
 }

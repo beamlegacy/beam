@@ -302,6 +302,7 @@ enum BeamFileDBManagerError: Error, Equatable {
 
 extension BeamFileDBManager: BeamObjectManagerDelegate {
     static var conflictPolicy: BeamObjectConflictResolution = .replace
+    internal static var backgroundQueue: DispatchQueue = DispatchQueue(label: "BeamFileDBManager BeamObjectManager backgroundQueue", qos: .userInitiated)
 
     func willSaveAllOnBeamObjectApi() {}
 
@@ -323,36 +324,47 @@ extension BeamFileDBManager: BeamObjectManagerDelegate {
     }
 
     func saveAllOnNetwork(_ files: [BeamFileRecord], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
-        let localTimer = BeamDate.now
-
-        try self.saveOnBeamObjectsAPI(files) { result in
-            switch result {
-            case .success:
-                Logger.shared.logDebug("Saved \(files.count) files on the BeamObject API",
-                                       category: .fileNetwork,
-                                       localTimer: localTimer)
-                networkCompletion?(.success(true))
-            case .failure(let error):
-                Logger.shared.logDebug("Error when saving the files on the BeamObject API with error: \(error.localizedDescription)",
-                                       category: .fileNetwork)
-                networkCompletion?(.failure(error))
+        Self.backgroundQueue.async { [weak self] in
+            do {
+                let localTimer = BeamDate.now
+                try self?.saveOnBeamObjectsAPI(files) { result in
+                    switch result {
+                    case .success:
+                        Logger.shared.logDebug("Saved \(files.count) files on the BeamObject API",
+                                               category: .fileNetwork,
+                                               localTimer: localTimer)
+                        networkCompletion?(.success(true))
+                    case .failure(let error):
+                        Logger.shared.logDebug("Error when saving the files on the BeamObject API with error: \(error.localizedDescription)",
+                                               category: .fileNetwork)
+                        networkCompletion?(.failure(error))
+                    }
+                }
+            } catch {
+                Logger.shared.logError(error.localizedDescription, category: .fileNetwork)
             }
         }
     }
 
     private func saveOnNetwork(_ file: BeamFileRecord, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
-        let localTimer = BeamDate.now
-        try self.saveOnBeamObjectAPI(file) { result in
-            switch result {
-            case .success:
-                Logger.shared.logDebug("Saved file \(file.name) on the BeamObject API",
-                                       category: .fileNetwork,
-                                       localTimer: localTimer)
-                networkCompletion?(.success(true))
-            case .failure(let error):
-                Logger.shared.logDebug("Error when saving the file on the BeamObject API with error: \(error.localizedDescription)",
-                                       category: .fileNetwork)
-                networkCompletion?(.failure(error))
+        Self.backgroundQueue.async { [weak self] in
+            do {
+                let localTimer = BeamDate.now
+                try self?.saveOnBeamObjectAPI(file) { result in
+                    switch result {
+                    case .success:
+                        Logger.shared.logDebug("Saved file \(file.name) on the BeamObject API",
+                                               category: .fileNetwork,
+                                               localTimer: localTimer)
+                        networkCompletion?(.success(true))
+                    case .failure(let error):
+                        Logger.shared.logDebug("Error when saving the file on the BeamObject API with error: \(error.localizedDescription)",
+                                               category: .fileNetwork)
+                        networkCompletion?(.failure(error))
+                    }
+                }
+            } catch {
+                Logger.shared.logError(error.localizedDescription, category: .fileNetwork)
             }
         }
     }

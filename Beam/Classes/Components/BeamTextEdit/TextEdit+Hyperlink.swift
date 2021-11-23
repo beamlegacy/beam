@@ -225,7 +225,7 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
         var rect = CGRect(origin: self.convert(origin, to: nil), size: linkViewSize).insetBy(dx: -inset, dy: -inset)
         rect.origin.y -= linkViewSize.height
         window.setContentSize(rect.size)
-        window.setOrigin(rect.origin, fromtopLeft: false)
+        window.setOrigin(rect.origin)
     }
 
     private func updateLinkToEmbed(in node: TextNode, at range: Range<Int>) {
@@ -279,7 +279,7 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
             }
         }
         window?.makeFirstResponder(self)
-        rootNode.cancelSelection()
+        rootNode.cancelSelection(.current)
         rootNode.focus(widget: node, position: newCursorPosition)
     }
 

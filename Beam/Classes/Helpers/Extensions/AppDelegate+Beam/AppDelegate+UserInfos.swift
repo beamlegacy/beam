@@ -8,12 +8,16 @@
 import Foundation
 
 extension AppDelegate {
-    func getUserInfos() {
+    func getUserInfos(_ completionHandler: ((Result<Bool, Error>) -> Void)? = nil) {
         guard Configuration.env != "test",
               AuthenticationManager.shared.isAuthenticated,
-              Configuration.networkEnabled else { return }
-
+              Configuration.networkEnabled else {
+                  completionHandler?(.success(false))
+                  return
+              }
         let accountManager = AccountManager()
-        accountManager.getUserInfos()
+        accountManager.getUserInfos { _ in
+            completionHandler?(.success(true))
+        }
     }
 }

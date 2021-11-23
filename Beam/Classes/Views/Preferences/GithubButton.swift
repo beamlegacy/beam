@@ -3,9 +3,10 @@ import OAuthSwift
 import BeamCore
 
 struct GithubButton: View {
-    var buttonType: OauthButton.ButtonType = .connect
+    var buttonType: OAuthButtonType = .connect
     var onClick: (() -> Void)?
     var onConnect: (() -> Void)?
+    var onDataSync: (() -> Void)?
     var onFailure: (() -> Void)?
 
     private let type = IdentityRequest.Provider.github
@@ -27,7 +28,12 @@ struct GithubButton: View {
                     buttonType: buttonType,
                     onClick: onClick,
                     onConnect: onConnect,
-                    onFailure: onFailure)
+                    onDataSync: onDataSync,
+                    onFailure: onFailure) { title in
+            Text(title)
+                .foregroundColor(BeamColor.Generic.text.swiftUI)
+                .frame(width: buttonType == .connect ? 126 : 145)
+        }
     }
 }
 

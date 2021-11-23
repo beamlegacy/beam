@@ -33,6 +33,10 @@ class AuthenticationManager {
         get { Persistence.Authentication.refreshToken }
         set { Persistence.Authentication.refreshToken = newValue }
     }
+    var username: String? {
+        get { Persistence.Authentication.username }
+        set { Persistence.Authentication.username = newValue }
+    }
     var isAuthenticated: Bool {
         let now = BeamDate.now
         guard let accessToken = accessToken, let refreshToken = refreshToken,

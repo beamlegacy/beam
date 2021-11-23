@@ -75,6 +75,7 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
     static let tableName = "Link"
     var dbPool: DatabasePool
     static var shared = BeamLinkDB(path: BeamData.linkDBPath)
+    internal static var backgroundQueue = DispatchQueue(label: "Links BeamObjectManager backgroundQueue", qos: .userInitiated)
 
     //swiftlint:disable:next function_body_length
     init(path: String) {
@@ -233,17 +234,23 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
     func saveAllOnNetwork(_ links: [Link], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
         let localTimer = BeamDate.now
 
-        try self.saveOnBeamObjectsAPI(links) { result in
-            switch result {
-            case .success:
-                Logger.shared.logDebug("Saved \(links.count) links on the BeamObject API",
-                                       category: .linkNetwork,
-                                       localTimer: localTimer)
-                networkCompletion?(.success(true))
-            case .failure(let error):
-                Logger.shared.logDebug("Error when saving the links on the BeamObject API with error: \(error.localizedDescription)",
-                                       category: .linkNetwork)
-                networkCompletion?(.failure(error))
+        Self.backgroundQueue.async { [weak self] in
+            do {
+                try self?.saveOnBeamObjectsAPI(links) { result in
+                    switch result {
+                    case .success:
+                        Logger.shared.logDebug("Saved \(links.count) links on the BeamObject API",
+                                               category: .linkNetwork,
+                                               localTimer: localTimer)
+                        networkCompletion?(.success(true))
+                    case .failure(let error):
+                        Logger.shared.logDebug("Error when saving the links on the BeamObject API with error: \(error.localizedDescription)",
+                                               category: .linkNetwork)
+                        networkCompletion?(.failure(error))
+                    }
+                }
+            } catch {
+                Logger.shared.logError(error.localizedDescription, category: .fileNetwork)
             }
         }
     }
@@ -254,9 +261,7 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
         Logger.shared.logDebug("Will save links \(links) on the BeamObject API",
                                category: .linkNetwork)
 
-        let backgroundQueue = DispatchQueue(label: "Links BeamObjectManager backgroundQueue", qos: .userInitiated)
-
-        backgroundQueue.async { [weak self] in
+        Self.backgroundQueue.async { [weak self] in
             do {
                 try self?.saveOnBeamObjectsAPI(links) { result in
                     switch result {

@@ -14,14 +14,16 @@ struct CalendarPickerView: View {
 
     @Binding private var selectedDate: Date
     private var monthViewTheme: CalendarMonthView.Theme
+    private var parentWindow: NSWindow?
     private var onPresentSubmenu: (([ContextMenuItem], CGPoint) -> Void)?
 
     init(selectedDate: Binding<Date>, highlightedDates: [Date] = [], calendar: Calendar? = nil, theme: CalendarMonthView.Theme = .bluetiful,
-         onPresentSubmenu: (([ContextMenuItem], CGPoint) -> Void)? = nil) {
+         parentWindow: NSWindow?, onPresentSubmenu: (([ContextMenuItem], CGPoint) -> Void)? = nil) {
         let model = CalendarPickerView.Model(date: selectedDate.wrappedValue, calendar: calendar)
         model.highlightedDates = highlightedDates
         self.model = model
         self._selectedDate = selectedDate
+        self.parentWindow = parentWindow
         self.monthViewTheme = theme
         self.onPresentSubmenu = onPresentSubmenu
     }
@@ -80,9 +82,9 @@ struct CalendarPickerView: View {
 
     func showMonthContextMenu(geometryProxy: GeometryProxy) {
         let items = getMonthsContextItems()
-        var atPoint = geometryProxy.frame(in: .global).origin
+        var atPoint = geometryProxy.safeTopLeftGlobalFrame(in: parentWindow).origin
         let currentMonth = model.calendar.component(.month, from: model.baseDate)
-        atPoint.y += CGFloat(currentMonth + 2) * ContextMenuView.itemHeight
+        atPoint.y -= CGFloat(currentMonth + 2) * ContextMenuView.itemHeight
         self.onPresentSubmenu?(items, atPoint)
     }
 
@@ -98,10 +100,10 @@ struct CalendarPickerView: View {
 
     func showYearContextMenu(geometryProxy: GeometryProxy) {
         let items = getYearsContextItems()
-        let frame = geometryProxy.frame(in: .global)
+        let frame = geometryProxy.safeTopLeftGlobalFrame(in: parentWindow)
         var atPoint = frame.origin
         atPoint.x = frame.maxX - 60
-        atPoint.y += (CGFloat(items.count/2) + 2.5) * ContextMenuView.itemHeight
+        atPoint.y -= (CGFloat(items.count/2) + 1.5) * ContextMenuView.itemHeight
         self.onPresentSubmenu?(items, atPoint)
     }
 }
@@ -115,9 +117,9 @@ struct CalendarPickerView_Previews: PreviewProvider {
     }
     static var previews: some View {
         Group {
-            CalendarPickerView(selectedDate: .constant(date))
+            CalendarPickerView(selectedDate: .constant(date), parentWindow: nil)
                 .frame(width: 240, alignment: .top)
-            CalendarPickerView(selectedDate: .constant(date), calendar: customCalendar)
+            CalendarPickerView(selectedDate: .constant(date), calendar: customCalendar, parentWindow: nil)
                 .frame(width: 240, alignment: .top)
         }
     }

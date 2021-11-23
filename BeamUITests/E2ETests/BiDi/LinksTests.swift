@@ -25,19 +25,16 @@ class LinksTests: BaseTest {
         
         testRailPrint("Then I link card 2 to card 1")
         cardView.createBiDiLink(cardName1).openBiDiLink(0)
-        XCTAssertEqual(cardView.getLinksNamesNumber(), 2)
-        XCTAssertEqual(cardView.getLinksContentNumber(), 2)
+        XCTAssertEqual(cardView.getLinksNamesNumber(), 1)
+        XCTAssertEqual(cardView.getLinksContentNumber(), 1)
         XCTAssertEqual(cardView.getLinkNameByIndex(0), cardName2)
         XCTAssertEqual(cardView.getLinkContentByIndex(0), cardName1 + " ") //looks like a bug
-        XCTAssertTrue(cardView.getLinkNameByIndex(1) == todayCardNameCreationViewFormat || cardView.getLinkNameByIndex(1) == todayCardNameTitleViewFormat || cardView.getLinkNameByIndex(1) == todayCardNameCreationViewFormatWithout0InDays, "Actual link name is \(String(describing: cardView.getLinkNameByIndex(1)))")
-        XCTAssertEqual(cardView.getLinkContentByIndex(1), cardName1)
-        
+
         testRailPrint("Then I can navigate to a card by Link both sides")
         cardView.openLinkByIndex(0)
-        XCTAssertEqual(cardView.getLinksNamesNumber(), 1)
-        XCTAssertEqual(cardView.getLinkContentByIndex(0), cardName2)
+        XCTAssertEqual(cardView.getLinksNamesNumber(), 0)
         cardView.openBiDiLink(0)
-        XCTAssertEqual(cardView.getLinksNamesNumber(), 2)
+        XCTAssertEqual(cardView.getLinksNamesNumber(), 1)
         XCTAssertEqual(cardView.getLinkContentByIndex(0), cardName1 + " ")
     }
 }

@@ -95,7 +95,7 @@ class AllCardsViewModel: ObservableObject, Identifiable {
                 notesItems.forEach { item in
                     guard item.note == nil || item.mentions < 0 else { return }
                     guard let note = item.note ?? item.getNote() else { return }
-                    let mentions = note.linksAndReferences(fast: true).count
+                    let mentions = note.mentionsCount
                     let metadata = NoteListMetadata(mentions: mentions, wordsCount: note.textStats.wordsCount)
                     metadatas[item.id] = metadata
                     fetchedNotes[item.id] = note
@@ -204,7 +204,7 @@ struct AllCardsPageContentView: View {
                     Icon(name: "editor-breadcrumb_down", size: 8, color: BeamColor.LightStoneGray.swiftUI)
                 }
                 .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .global).onEnded({ v in
-                    showGlobalContextualMenu(at: v.location, allowImports: true)
+                    showGlobalContextualMenu(at: v.location.swiftUISafeTopLeftPoint(in: nil), allowImports: true)
                 }))
                 Spacer()
                 ButtonLabel("All (\(model.allNotesItems.count))", state: listType == .allNotes ? .active : .normal) {
@@ -255,7 +255,7 @@ struct AllCardsPageContentView: View {
                         showContextualMenuForHoveredRow(tableViewGeometry: geo)
                     }
                     .opacity(hoveredRowIndex != nil && hoveredRowFrame != nil ? 1.0 : 0.0)
-                    .offset(x: -32, y: geo.frame(in: .global).maxY - (hoveredRowFrame?.maxY ?? 0) + 3)
+                    .offset(x: -32, y: (hoveredRowFrame?.minY ?? 0) - geo.safeTopLeftGlobalFrame(in: nil).minY + 3)
                 }
             )
             .frame(maxHeight: .infinity)
@@ -288,8 +288,8 @@ struct AllCardsPageContentView: View {
     }
 
     func showContextualMenuForHoveredRow(tableViewGeometry: GeometryProxy) {
-        let tableViewFrame = tableViewGeometry.frame(in: .global)
-        let point = CGPoint(x: tableViewFrame.minX - TableView.rowHeight, y: (hoveredRowFrame?.maxY ?? 0) - TableView.rowHeight - BeamSpacing._40)
+        let tableViewFrame = tableViewGeometry.safeTopLeftGlobalFrame(in: nil)
+        let point = CGPoint(x: tableViewFrame.minX - TableView.rowHeight - BeamSpacing._40, y: (hoveredRowFrame?.maxY ?? 0) + BeamSpacing._40)
         let forRow = selectedRowsIndexes.contains(hoveredRowIndex ?? -1) ? nil : hoveredRowIndex
         showGlobalContextualMenu(at: point, for: forRow)
     }

@@ -2,11 +2,13 @@ import SwiftUI
 import BeamCore
 import OAuthSwift
 
-struct GoogleButton: View {
-    var buttonType: OauthButton.ButtonType = .connect
+struct GoogleButton<Content: View>: View {
+    var buttonType: OAuthButtonType = .connect
     var onClick: (() -> Void)?
     var onConnect: (() -> Void)?
+    var onDataSync: (() -> Void)?
     var onFailure: (() -> Void)?
+    var label: ((_ title: String) -> Content)?
 
     private let type = IdentityRequest.Provider.google
 
@@ -26,12 +28,23 @@ struct GoogleButton: View {
                     buttonType: buttonType,
                     onClick: onClick,
                     onConnect: onConnect,
-                    onFailure: onFailure)
+                    onDataSync: onDataSync,
+                    onFailure: onFailure) { title in
+            Group {
+                if let label = label {
+                    label(title)
+                } else {
+                    Text(title)
+                        .foregroundColor(BeamColor.Generic.text.swiftUI)
+                        .frame(width: buttonType == .connect ? 126 : 145)
+                }
+            }
+        }
     }
 }
 
 struct GoogleButton_Previews: PreviewProvider {
     static var previews: some View {
-        GoogleButton()
+        GoogleButton<Text>()
     }
 }

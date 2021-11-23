@@ -7,6 +7,7 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
     case signInWithTestAccount = "Sign in with Test Account"
     case logout = "Logout"
     case deleteLogs = "Delete Logs"
+    case showOnboarding = "Reset Onboarding"
 
     case separatorA
     case resizeWindowLandscape = "Resize Window to Landscape"

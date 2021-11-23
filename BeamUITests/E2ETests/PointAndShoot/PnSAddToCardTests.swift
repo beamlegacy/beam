@@ -92,7 +92,7 @@ class PnSAddToCardTests: BaseTest {
         let cardNotes = cardView.getCardNotesForVisiblePart()
         
         print("Then 2 non-empty notes are added to an empty first one?")
-        XCTAssertEqual(cardNotes.count, 3)
+        XCTAssertEqual(cardNotes.count, 2)
         XCTAssertEqual(cardView.getElementStringValue(element: cardNotes[0]), "Point And Shoot Test Fixture Cursor")
         XCTAssertEqual(cardView.getElementStringValue(element: cardNotes[1]), "The pointer hotspot is the active pixel of the pointer, used to target a click or drag. The hotspot is normally along the pointer edges or in its center, though it may reside at any location in the pointer.[9][10][11]")
     }
@@ -118,7 +118,7 @@ class PnSAddToCardTests: BaseTest {
         OmniBarTestView().navigateToCardViaPivotButton()
         _ = cardView.waitForCardViewToLoad()
         let cardNotes = cardView.getCardNotesForVisiblePart()
-        XCTAssertEqual(cardNotes.count, 4) //4 as far as link is considered as a note by accessibility
+        XCTAssertEqual(cardNotes.count, 3) //4 as far as link is considered as a note by accessibility
         XCTAssertEqual(cardView.getElementStringValue(element: cardNotes[2]), noteText)
     }
     
