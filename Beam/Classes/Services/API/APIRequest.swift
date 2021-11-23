@@ -44,6 +44,7 @@ class APIRequest: NSObject {
         request.httpMethod = "POST"
         request.allHTTPHeaderFields = headers
 
+        // Authentication headers
         if authenticatedCall ?? authenticatedAPICall {
             AuthenticationManager.shared.updateAccessTokenIfNeeded()
 
@@ -62,7 +63,7 @@ class APIRequest: NSObject {
 
         var queryStruct = loadQuery(bodyParamsRequest)
 
-        // Remove files
+        // Remove attached files before the encoding of the GraphQL query
         let files = queryStruct.files
         queryStruct.files = nil
 
@@ -76,14 +77,32 @@ class APIRequest: NSObject {
 
         let graphqlQuery = try encoder.encode(queryStruct)
 
-        // Will do a multipart upload
+        /*
+         We will use multipart file uploads for efficiency, this uses the File Upload feature as listed at
+         https://www.apollographql.com/blog/graphql/file-uploads/with-apollo-server-2-0/ given on our Ruby API by
+         the https://github.com/jetruby/apollo_upload_server-ruby RubyGem.
+
+         You can see the saveOnBeamObject and saveOnBeamObjects for code samples how to name `variableName` so it
+         has precedence and is used by the server to replace the inline GraphQL query variable. Tests available at
+         https://github.com/jetruby/apollo_upload_server-ruby/blob/master/spec/apollo_upload_server/graphql_data_builder_spec.rb
+         give a pretty good idea how to put index in names in the format of `'0.variables.input.avatars.2'`
+
+         Best if you can't figure it out is to first use `curl` in command line, `scripts/test_multipart_upload.sh` shows
+         samples and you can read https://graphql-compose.github.io/docs/guide/file-uploads.html or
+         https://dilipkumar.medium.com/graphql-and-file-upload-using-react-and-node-js-c1d629e1b86b
+
+         see RFC1521 for multipart https://datatracker.ietf.org/doc/html/rfc1521#page-29
+         see https://www.floriangaechter.com/blog/graphql-file-uploading/ for example about file uploads & GraphQL
+
+         use https://www.requestcatcher.com to view all HTTP requests but don't include private keys! I don't know who's
+         behind this service.
+         */
+
         if let files = files, !files.isEmpty {
             let boundary = "------------------------\(UUID().uuidString)"
             let lineBreak = "\r\n"
             var queryData = Data()
 
-            // see https://www.floriangaechter.com/blog/graphql-file-uploading/ for example about file uploads & GraphQL
-            // see RFC1521 for multipart https://datatracker.ietf.org/doc/html/rfc1521#page-29
 
             // Add the GraphQL query
             queryData.append("\(lineBreak)--\(boundary)\(lineBreak)".asData)
@@ -96,8 +115,7 @@ class APIRequest: NSObject {
                 queryData.append("\(lineBreak)--\(boundary)\(lineBreak)".asData)
                 queryData.append("Content-Disposition: form-data; name=\"\(file.filename)\"; filename=\"\(file.filename)\"\(lineBreak)".asData)
                 queryData.append("Content-Type: \(file.contentType)\(lineBreak)\(lineBreak)".asData)
-                queryData.append(file.binary)
-//                queryData.append("This is the binary data".asData)
+                queryData.append(file.binary) // use query.append("whatever".asData) for debug and display logs
 
                 mapperDictionary[file.filename] = ["variables.\(file.variableName)"]
             }
@@ -130,6 +148,9 @@ class APIRequest: NSObject {
             Logger.shared.logDebug("-> HTTP Request: \(route)\n\(queryDataString.replacingOccurrences(of: "\\n", with: "\n"))",
                                    category: .network)
             //                #endif
+        } else {
+            Logger.shared.logDebug("-> HTTP Request: \(route) (can't display multipart uploads)\n",
+                                   category: .network)
         }
         #endif
 

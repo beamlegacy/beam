@@ -11,30 +11,6 @@ extension BeamObjectRequest {
 
         try saveObject.encrypt()
 
-        struct LargeBeamObjectWithPrivateKey: Codable {
-            var id: UUID
-            var checksum: String?
-            var previousChecksum: String?
-
-            var privateKeySignature: String?
-            var type: String
-            var createdAt: Date?
-            var updatedAt: Date?
-            var privateKey: String?
-        }
-
-        var largeFileObject = LargeBeamObjectWithPrivateKey(id: saveObject.id,
-                                                            checksum: saveObject.dataChecksum,
-                                                            previousChecksum: saveObject.previousChecksum,
-                                                            privateKeySignature: saveObject.privateKeySignature,
-                                                            type: saveObject.beamObjectType,
-                                                            createdAt: saveObject.createdAt,
-                                                            updatedAt: saveObject.updatedAt)
-
-        #if DEBUG
-        largeFileObject.privateKey = EncryptionManager.shared.privateKey().asString()
-        #endif
-
         // Multipart version of the encrypted object
         var fileUpload: GraphqlFileUpload?
 
@@ -42,11 +18,19 @@ extension BeamObjectRequest {
             fileUpload = GraphqlFileUpload(contentType: "application/octet-stream",
                                            binary: data,
                                            filename: "\(saveObject.id).enc",
-                                           variableName: "data")
+                                           variableName: "beamObject.largeData")
+
+            saveObject.data = nil
         }
 
-        let bodyParamsRequest = GraphqlParameters(fileName: "update_beam_object_large",
-                                                  variables: largeFileObject,
+        let parameters = UpdateBeamObject(beamObject: saveObject, privateKey: nil)
+
+        #if DEBUG
+        parameters.privateKey = EncryptionManager.shared.privateKey().asString()
+        #endif
+
+        let bodyParamsRequest = GraphqlParameters(fileName: "update_beam_object",
+                                                  variables: parameters,
                                                   files: [fileUpload].compactMap { $0 })
 
         if saveObject.dataChecksum == saveObject.previousChecksum {
@@ -111,38 +95,32 @@ extension BeamObjectRequest {
     @discardableResult
     func save(_ beamObjects: [BeamObject],
               _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask? {
-
-        struct LargeBeamObjectsWithPrivateKey: Codable {
-            var beamObjects: [BeamObject]
-            var largeFiles: [Data?]
-            var privateKey: String?
-        }
-
-        var largeFileObject = LargeBeamObjectsWithPrivateKey(beamObjects: [], largeFiles: [])
         var filesUpload: [GraphqlFileUpload] = []
-        #if DEBUG
-        largeFileObject.privateKey = EncryptionManager.shared.privateKey().asString()
-        #endif
+        var saveBeamObjects: [BeamObject] = []
 
         for (index, beamObject) in beamObjects.enumerated() {
             let saveObject = beamObject.copy()
             try saveObject.encrypt()
 
             if let data = saveObject.data {
-                largeFileObject.largeFiles.append(nil)
-
                 filesUpload.append(GraphqlFileUpload(contentType: "application/octet-stream",
                                                      binary: data,
-                                                     filename: "\(index)",
-                                                     variableName: "largeFiles.\(index)"))
+                                                     filename: "\(saveObject.id).enc",
+                                                     variableName: "beamObjects.\(index).largeData"))
             }
 
             saveObject.data = nil
-            largeFileObject.beamObjects.append(saveObject)
+            saveBeamObjects.append(saveObject)
         }
 
-        let bodyParamsRequest = GraphqlParameters(fileName: "update_beam_objects_large",
-                                                  variables: largeFileObject,
+        var parameters = UpdateBeamObjects(beamObjects: saveBeamObjects, privateKey: nil)
+
+        #if DEBUG
+        parameters.privateKey = EncryptionManager.shared.privateKey().asString()
+        #endif
+
+        let bodyParamsRequest = GraphqlParameters(fileName: "update_beam_objects",
+                                                  variables: parameters,
                                                   files: filesUpload)
 
         return try performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<UpdateBeamObjects, Error>) in

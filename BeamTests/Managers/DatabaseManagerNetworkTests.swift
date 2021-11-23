@@ -151,7 +151,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
                         }
                     }
 
-                    let expectedNetworkCalls = ["sign_in", "delete_all_beam_objects", "delete_all_beam_objects", "update_beam_object_large", "delete_beam_object"]
+                    let expectedNetworkCalls = ["sign_in", "delete_all_beam_objects", "delete_all_beam_objects", "update_beam_object", "delete_beam_object"]
                     expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
 
                     let remoteStruct = helper.fetchDatabaseOnAPI(dbStruct)
@@ -695,7 +695,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
                         it("saves them locally, change the title and save it remotely") {
                             try sut.receivedObjects([dbStruct, dbStruct2])
 
-                            let expectedNetworkCalls = ["update_beam_objects_large"]
+                            let expectedNetworkCalls = ["update_beam_objects"]
 
                             expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
 
@@ -772,7 +772,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
 
                             expect(APIRequest.callsCount - networkCalls) == 1
 
-                            let expectedNetworkCalls = ["update_beam_objects_large"]
+                            let expectedNetworkCalls = ["update_beam_objects"]
                             expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
 
                             expect(1) == Database.countWithPredicate(CoreDataManager.shared.mainContext,
