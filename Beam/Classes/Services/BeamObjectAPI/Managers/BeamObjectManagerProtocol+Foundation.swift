@@ -85,7 +85,7 @@ extension BeamObjectManagerDelegate {
         var networkTask: APIRequest?
 
         do {
-            networkTask = try objectManager.saveToAPI(objectsToSave) { result in
+            networkTask = try objectManager.saveToAPI(objectsToSave, force: force) { result in
                 switch result {
                 case .failure(let error):
                     self.saveOnBeamObjectsAPIError(objects: objectsToSave,
@@ -349,7 +349,7 @@ extension BeamObjectManagerDelegate {
         var networkTask: APIRequest?
 
         do {
-            networkTask = try objectManager.saveToAPI(objectToSave) { result in
+            networkTask = try objectManager.saveToAPI(objectToSave, force: force) { result in
                 switch result {
                 case .failure(let error):
                     self.saveOnBeamObjectAPIError(object: object,
@@ -458,7 +458,7 @@ extension BeamObjectManagerDelegate {
                 }
             }
 
-            try self.saveOnBeamObjectsAPI(mergedObjects, deep: deep + 1, refreshPreviousChecksum: false) { result in
+            try self.saveOnBeamObjectsAPI(mergedObjects, force: true, deep: deep + 1, refreshPreviousChecksum: false) { result in
                 switch result {
                 case .failure(let error):
                     if !goodObjects.isEmpty {
