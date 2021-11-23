@@ -46,12 +46,14 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
     var score: Float?
 
     static func < (lhs: AutocompleteResult, rhs: AutocompleteResult) -> Bool {
-        guard let slhs = lhs.score, let srhs = rhs.score else {
-            let lhsr = lhs.text.lowercased().commonPrefix(with: lhs.completingText?.lowercased() ?? "").count
-            let rhsr = rhs.text.lowercased().commonPrefix(with: rhs.completingText?.lowercased() ?? "").count
-            return lhsr < rhsr
-        }
-        return slhs < srhs
+        if let slhs = lhs.score, let srhs = rhs.score { return slhs < srhs }
+        if lhs.score != nil { return false }
+        if rhs.score != nil { return true }
+        let lhsr = lhs.text.lowercased().commonPrefix(with: lhs.completingText?.lowercased() ?? "").count
+        let rhsr = rhs.text.lowercased().commonPrefix(with: rhs.completingText?.lowercased() ?? "").count
+        if lhsr == rhsr { return lhs.text < rhs.text }
+        return lhsr < rhsr
+
     }
     var description: String {
         var urlToPrint: String
