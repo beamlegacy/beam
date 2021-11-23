@@ -64,7 +64,7 @@ class PublishNoteAPITests: XCTestCase {
 
         guard let note = testNote else { fatalError("We should have a test note in setUp") }
 
-        Persistence.Authentication.username = "Test user"
+        AuthenticationManager.shared.username = "Test user"
 
         let publish = expectation(description: "note publish")
         BeamNoteSharingUtils.makeNotePublic(note,

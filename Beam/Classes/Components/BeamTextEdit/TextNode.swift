@@ -634,7 +634,7 @@ public class TextNode: ElementNode {
 
             if mouseInfo.event.clickCount == 1 && editor.inlineFormatter != nil {
                 focus(position: clickPos)
-                root?.cancelSelection()
+                root?.cancelSelection(.current)
                 dragMode = .select(cursorPosition)
 
                 debounceClickTimer = Timer.scheduledTimer(withTimeInterval: debounceClickInterval, repeats: false, block: { [weak self] (_) in
@@ -649,7 +649,7 @@ public class TextNode: ElementNode {
                 return true
             } else if mouseInfo.event.clickCount == 1 {
                 focus(position: clickPos)
-                root?.cancelSelection()
+                root?.cancelSelection(.current)
                 dragMode = .select(cursorPosition)
                 return true
             } else if mouseInfo.event.clickCount == 2 {
@@ -1508,7 +1508,7 @@ public class TextNode: ElementNode {
             // Now fish for words:
             for word in sentenceString.wordRanges {
                 let wordString = String(sentenceString[word])
-                let wordRange = text.range(from: word)
+                let wordRange = sentenceString.range(from: word)
                 let frames = textFramesAt(range: (sentenceRange.lowerBound + wordRange.lowerBound) ..< (sentenceRange.lowerBound + wordRange.upperBound))
                 var wordFrame = frames.first ?? NSRect()
                 let actualY = contentsFrame.height - wordFrame.maxY

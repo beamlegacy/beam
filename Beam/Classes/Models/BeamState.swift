@@ -80,6 +80,9 @@ import Sentry
     var editorShouldAllowMouseEvents: Bool {
         overlayViewModel.modalView == nil
     }
+    var isShowingOnboarding: Bool {
+        data.onboardingManager.needsToDisplayOnboard
+    }
 
     var downloadButtonPosition: CGPoint?
     weak var downloaderWindow: PopoverWindow?
@@ -347,11 +350,6 @@ import Sentry
         }
 
         let n = BeamNote.create(title: query)
-
-        let e = BeamElement()
-        e.text = BeamText(text: query, attributes: [.internalLink(n.id)])
-        data.todaysNote.insert(e, after: data.todaysNote.children.last)
-
         return n
     }
 

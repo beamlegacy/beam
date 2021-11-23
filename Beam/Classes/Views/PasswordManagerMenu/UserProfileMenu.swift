@@ -29,7 +29,7 @@ struct UserProfileMenu: View {
 
 struct UserProfileMenu_Previews: PreviewProvider {
     static var previews: some View {
-        UserProfileMenu(viewModel: PasswordManagerMenuViewModel(host: URL(string: "https://beamapp.co")!, credentialsBuilder: PasswordManagerCredentialsBuilder(), userInfoStore: MockUserInformationsStore(), withPasswordGenerator: false), width: 220)
+        UserProfileMenu(viewModel: PasswordManagerMenuViewModel(host: URL(string: "https://beamapp.co")!, credentialsBuilder: PasswordManagerCredentialsBuilder(), userInfoStore: MockUserInformationsStore(), options: .login), width: 220)
     }
 }
 
@@ -69,7 +69,7 @@ struct UserProfileCell: View {
 
 struct UserProfileCell_Previews: PreviewProvider {
     static var previews: some View {
-        UserProfileCell(viewModel: PasswordManagerMenuViewModel(host: URL(string: "https://beamapp.co")!, credentialsBuilder: PasswordManagerCredentialsBuilder(), userInfoStore: MockUserInformationsStore(), withPasswordGenerator: false))
+        UserProfileCell(viewModel: PasswordManagerMenuViewModel(host: URL(string: "https://beamapp.co")!, credentialsBuilder: PasswordManagerCredentialsBuilder(), userInfoStore: MockUserInformationsStore(), options: .login))
     }
 }
 

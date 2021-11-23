@@ -41,9 +41,10 @@ extension AccountManager {
     }
 
     @discardableResult
-    func signIn(_ email: String,
-                _ password: String,
-                _ completionHandler: ((Result<Bool, Error>) -> Void)? = nil) -> URLSessionTask? {
+    func signIn(email: String,
+                password: String,
+                completionHandler: ((Result<Bool, Error>) -> Void)? = nil,
+                syncCompletion: ((Result<Bool, Error>) -> Void)? = nil) -> URLSessionTask? {
         do {
             return try userSessionRequest.signIn(email: email, password: password) { result in
                 switch result {
@@ -62,8 +63,19 @@ extension AccountManager {
                     DispatchQueue.main.async {
                         // We sync data *after* we potentially connected to websocket, to make sure we don't miss any data
                         AppDelegate.main.beamObjectManager.liveSync { _ in
-                            AppDelegate.main.syncDataWithBeamObject()
-                            AppDelegate.main.getUserInfos()
+                            var callsToWait = 2
+                            let callNetworkCompletionIfNeeded: () -> Void = {
+                                callsToWait -= 1
+                                if callsToWait == 0 {
+                                    syncCompletion?(.success(true))
+                                }
+                            }
+                            AppDelegate.main.syncDataWithBeamObject { _ in
+                                callNetworkCompletionIfNeeded()
+                            }
+                            AppDelegate.main.getUserInfos { _ in
+                                callNetworkCompletionIfNeeded()
+                            }
                         }
                     }
 
@@ -78,9 +90,10 @@ extension AccountManager {
     }
 
     @discardableResult
-    func signInWithProvider(_ provider: IdentityRequest.Provider,
-                            _ accessToken: String,
-                            _ completionHandler: ((Result<Bool, Error>) -> Void)? = nil) -> URLSessionTask? {
+    func signInWithProvider(provider: IdentityRequest.Provider,
+                            accessToken: String,
+                            completionHandler: ((Result<Bool, Error>) -> Void)? = nil,
+                            syncCompletion: ((Result<Bool, Error>) -> Void)? = nil) -> URLSessionTask? {
         do {
             return try userSessionRequest.signInWithProvider(provider: provider, accessToken: accessToken) { result in
                 switch result {
@@ -100,9 +113,18 @@ extension AccountManager {
                     // TODO: move this syncData to a manager instead.
                     DispatchQueue.main.async {
                         // We sync data *after* we potentially connected to websocket, to make sure we don't miss any data
-                        AppDelegate.main.beamObjectManager.liveSync { _ in
-                            AppDelegate.main.syncDataWithBeamObject()
-                            AppDelegate.main.getUserInfos()
+                        var callsToWait = 2
+                        let callNetworkCompletionIfNeeded: () -> Void = {
+                            callsToWait -= 1
+                            if callsToWait == 0 {
+                                syncCompletion?(.success(true))
+                            }
+                        }
+                        AppDelegate.main.syncDataWithBeamObject { _ in
+                            callNetworkCompletionIfNeeded()
+                        }
+                        AppDelegate.main.getUserInfos { _ in
+                            callNetworkCompletionIfNeeded()
                         }
                     }
 

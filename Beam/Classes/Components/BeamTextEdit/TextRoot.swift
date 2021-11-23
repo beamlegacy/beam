@@ -158,7 +158,7 @@ public class TextRoot: ElementNode {
             focusedWidget?.onFocus()
             newNode?.invalidateTextAsync()
             focusedWidget?.invalidate()
-            cancelSelection()
+            cancelSelection(.current)
         }
     }
 

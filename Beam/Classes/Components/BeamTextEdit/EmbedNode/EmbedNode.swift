@@ -155,6 +155,7 @@ class EmbedNode: ResizableNode {
                 .receive(on: DispatchQueue.main)
                 .sink { [weak self] completion in
                     switch completion {
+                    // swiftlint:disable:next empty_enum_arguments
                     case .failure(_):
                         Logger.shared.logError("Embed Node couldn't load content for \(sourceURL.absoluteString)", category: .embed)
                     case .finished:
@@ -166,10 +167,64 @@ class EmbedNode: ResizableNode {
                     if [.url, .image].contains(embedContent.type), let url = embedContent.embedURL {
                         self?.webView?.load(URLRequest(url: url))
                     } else if embedContent.type == .page, let content = embedContent.embedContent {
-                        self?.webView?.loadHTMLString(content, baseURL: nil)
+                        let theme = self?.webView?.isDarkMode ?? false ? "dark" : "light"
+                        let headContent = self?.getHeadContent(theme: theme) ?? ""
+                        let styledEmbedContent = headContent + content
+                        self?.webView?.loadHTMLString(styledEmbedContent, baseURL: nil)
                     }
                 }.store(in: &embedCancellables)
         }
+    }
+
+    // swiftlint:disable:next function_body_length
+    /// Returns html a `<head>` tag, css style and a small script to correctly style the embed webview
+    /// background in both Light and Dark color schemes. Also specifically provides support for twitter embeds
+    /// - Parameter theme: The inital "dark" or "light" theme
+    /// - Returns: html `<head>`tag as String
+    private func getHeadContent(theme: String) -> String {
+        return """
+                        <head>
+                            <meta name="twitter:dnt" content="on" />
+                            <meta name="twitter:widgets:theme" content="\(theme)" />
+                            <meta name="twitter:widgets:chrome" content="transparent" />
+                            <style>
+                            /* Light */
+                            :root {
+                                --Beam-Embed-Background: #ffffffff;
+                                --Beam-Embed-Color: #393e47ff;
+                            }
+
+                            @media (prefers-color-scheme: dark) {
+                                /* Dark */
+                                :root {
+                                    --Beam-Embed-Background: #1c1c1fff;
+                                    --Beam-Embed-Color: #edededff;
+                                }
+                            }
+
+                            html {
+                                color: var(--Beam-Embed-Color);
+                                background-color: var(--Beam-Embed-Background);
+                            }
+                            </style>
+                            <script>
+                            function switchTweetTheme(currentTheme, targetTheme) {
+                                var tweets = document.querySelectorAll("[data-tweet-id]")
+
+                                tweets.forEach(function (tweet) {
+                                    var src = tweet.getAttribute("src")
+                                    tweet.setAttribute("src",src.replace("theme=" + currentTheme, "theme=" + targetTheme))
+                                })
+                            }
+
+                            window.matchMedia("(prefers-color-scheme: dark)").addListener((event) => {
+                                let currentTheme = event.matches ? "light" : "dark"
+                                let targetTheme = event.matches ? "dark" : "light"
+                                switchTweetTheme(currentTheme, targetTheme)
+                            })
+                            </script>
+                        </head>
+                        """
     }
 
     private func clearWebViewAndStopPlaying() {

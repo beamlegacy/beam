@@ -63,6 +63,7 @@ class BeamWindow: NSWindow, NSDraggingDestination {
         let mainView = ContentView()
             .environmentObject(state)
             .environmentObject(data)
+            .environmentObject(data.onboardingManager)
             .environmentObject(state.browserTabsManager)
             .frame(minWidth: minimumSize.width, maxWidth: .infinity, minHeight: minimumSize.height, maxHeight: .infinity)
 
@@ -88,17 +89,19 @@ class BeamWindow: NSWindow, NSDraggingDestination {
     }
 
     override func performClose(_ sender: Any?) {
-        if state.mode != .web && state.hasUnpinnedBrowserTabs {
-            state.mode = .web
-            return
-        }
-        if state.mode == .web {
-            let currentTab = state.browserTabsManager.currentTab
-            _ = state.closeCurrentTab()
-            if currentTab == state.browserTabsManager.currentTab { // currentTab might be the last unclosable tab (unpinned tab)
-                state.mode = .today
+        if !state.isShowingOnboarding {
+            if state.mode != .web && state.hasUnpinnedBrowserTabs {
+                state.mode = .web
+                return
             }
-            return
+            if state.mode == .web {
+                let currentTab = state.browserTabsManager.currentTab
+                _ = state.closeCurrentTab()
+                if currentTab == state.browserTabsManager.currentTab { // currentTab might be the last unclosable tab (unpinned tab)
+                    state.mode = .today
+                }
+                return
+            }
         }
         super.performClose(sender)
     }
@@ -136,7 +139,7 @@ class BeamWindow: NSWindow, NSDraggingDestination {
     /// It should be trigerred when a file download starts
     func downloadAnimation() {
 
-        guard let buttonPosition = state.downloadButtonPosition else { return }
+        guard let buttonPosition = state.downloadButtonPosition?.flippedPointToBottomLeftOrigin(in: self) else { return }
         let animationLayer = CALayer()
         animationLayer.frame = CGRect(origin: CGPoint(x: 50, y: 50), size: CGSize(width: 64, height: 64))
         animationLayer.position = self.mouseLocationOutsideOfEventStream

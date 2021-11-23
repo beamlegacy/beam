@@ -16,7 +16,7 @@ extension ElementNode {
     }
     private static var bulletLayerPositionX = CGFloat(-4)
     @objc var bulletLayerPositionY: CGFloat {
-        firstLineBaseline - 13
+        firstLineBaseline - 15
     }
 
     private enum LayerName: String {
@@ -110,7 +110,7 @@ extension ElementNode {
         guard let indentLayer = layers[LayerName.indentLayer.rawValue] else { return }
         let y = firstLineHeight + 3
         indentLayer.frame = NSRect(x: Self.indentLayerPosX, y: y, width: 0.5, height: frame.height - y)
-        indentLayer.layer.isHidden = !showDisclosureButton && self.open
+        indentLayer.layer.isHidden = !(showDisclosureButton && self.open)
     }
 
     private func updateCheckboxLayer() {

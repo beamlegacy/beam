@@ -7,8 +7,9 @@ extension DocumentManager: BeamObjectManagerDelegate {
     }
 
     func saveObjectsAfterConflict(_ objects: [DocumentStruct]) throws {
+        let documentManager = DocumentManager()
         for updateObject in objects {
-            guard let documentCoreData = try fetchWithId(updateObject.id) else {
+            guard let documentCoreData = try documentManager.fetchWithId(updateObject.id) else {
                 throw DocumentManagerError.localDocumentNotFound
             }
 
@@ -20,7 +21,8 @@ extension DocumentManager: BeamObjectManagerDelegate {
             documentCoreData.version += 1
 
             do {
-                try checkValidations(documentCoreData)
+                let documentManager = DocumentManager()
+                try documentManager.checkValidations(documentCoreData)
             } catch {
                 Logger.shared.logError("saveObjectsAfterConflict checkValidations: \(error.localizedDescription)",
                                        category: .database)
@@ -31,7 +33,7 @@ extension DocumentManager: BeamObjectManagerDelegate {
             self.notificationDocumentUpdate(savedDoc)
             indexDocument(savedDoc)
         }
-        try saveContext()
+        try documentManager.saveContext()
     }
 
     static var conflictPolicy: BeamObjectConflictResolution = .fetchRemoteAndError
@@ -283,9 +285,9 @@ extension DocumentManager: BeamObjectManagerDelegate {
         Logger.shared.logWarning("Could not save \(documentStruct.titleAndId) because of conflict", category: .documentNetwork)
 
         var result = documentStruct.copy()
-
+        let documentManager = DocumentManager()
         // Merging might fail, in such case we send the remote version of the document
-        let document = try fetchOrCreateWithId(documentStruct.id)
+        let document = try documentManager.fetchOrCreateWithId(documentStruct.id)
         if let beam_api_data = document.beam_api_data,
            let data = BeamElement.threeWayMerge(ancestor: beam_api_data,
                                                 input1: documentStruct.data,

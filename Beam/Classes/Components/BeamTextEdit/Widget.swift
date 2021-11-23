@@ -18,11 +18,8 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     var debug = false
     var currentFrameInDocument = NSRect()
     var nodeProvider: NodeProvider?
-    var isInNodeProviderTree: Bool {
-        guard nodeProvider == nil else { return true }
-        guard let parent = parent else { return false }
-        return parent.isInNodeProviderTree
-    }
+    var hasValidNodeProvider: Bool { nodeProvider?.holder != nil }
+    var isInNodeProviderTree: Bool { hasValidNodeProvider || (parent?.isInNodeProviderTree ?? false) }
     var isTreeBoundary: Bool { nodeProvider != nil }
 
     var isEmpty: Bool { children.isEmpty }

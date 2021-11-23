@@ -32,7 +32,7 @@ struct OtherPasswordModal: View {
                     dismiss()
                 })
                 .frame(width: 220, height: 21, alignment: .center)
-                .onUpdate(of: searchString) { // use onChange(of: searchString) when deployment target is upgraded to macOS 11
+                .onChange(of: searchString) {
                     viewModel.searchString = $0
                 }
             }
@@ -85,13 +85,6 @@ struct OtherPasswordModal: View {
     private func dismiss() {
         onDismiss()
         presentationMode.wrappedValue.dismiss()
-    }
-}
-
-extension View {
-    func onUpdate<T>(of variable: T, perform: (T) -> Void) -> Self {
-        perform(variable)
-        return self
     }
 }
 

@@ -54,7 +54,13 @@ class ImageNode: ResizableNode {
                 return
             }
 
-            resizableElementContentSize = image.size
+            let imgRect = NSRect(x: 0, y: 0, width: width, height: 0)
+            if let imageRep = image.bestRepresentation(for: imgRect, context: nil, hints: nil) {
+                resizableElementContentSize = CGSize(width: imageRep.pixelsWide, height: imageRep.pixelsHigh)
+            } else {
+                resizableElementContentSize = image.size
+            }
+
             guard resizableElementContentSize.width > 0, resizableElementContentSize.width.isFinite,
                   resizableElementContentSize.height > 0, resizableElementContentSize.height.isFinite else {
                 Logger.shared.logError("Loaded Image '\(uid)' has invalid size \(resizableElementContentSize)", category: .noteEditor)

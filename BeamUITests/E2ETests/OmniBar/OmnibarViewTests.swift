@@ -16,7 +16,7 @@ class OmnibarViewTests: BaseTest {
         launchApp()
         
         let omnibarView = OmniBarTestView()
-        let omnibarSearchField = omnibarView.searchField(OmniBarLocators.SearchFields.omniSearchField.accessibilityIdentifier)
+        let omnibarSearchField = omnibarView.getOmniBarSearchField()
         
         testRailPrint("Then Omnibar search field is focused on launched")
         XCTAssertTrue(omnibarView.inputHasFocus(omnibarSearchField))

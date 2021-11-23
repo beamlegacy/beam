@@ -16,6 +16,7 @@ protocol BeamObjectManagerDelegateProtocol {
 
 protocol BeamObjectManagerDelegate: AnyObject, BeamObjectManagerDelegateProtocol {
     associatedtype BeamObjectType: BeamObjectProtocol
+    static var backgroundQueue: DispatchQueue { get }
     func registerOnBeamObjectManager()
 
     /// When new objects have been received and should be stored locally by the manager

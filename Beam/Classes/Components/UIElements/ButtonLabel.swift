@@ -32,7 +32,7 @@ struct ButtonLabelStyle {
     var backgroundColor: Color?
     var hoveredBackgroundColor: Color?
     var activeBackgroundColor: Color = BeamColor.Button.activeBackground.swiftUI
-    var animation: Animation?
+    var disableAnimations = true // Should be replaced by the parent view disabling animations with .animation(nil) when needed.
 }
 
 struct ButtonLabel: View {
@@ -110,7 +110,9 @@ struct ButtonLabel: View {
         .padding(.horizontal, style.horizontalPadding)
         .padding(.vertical, style.verticalPadding)
         .background(backgroundColor)
-        .animation(style.animation)
+        .if(style.disableAnimations) {
+            $0.animation(nil)
+        }
         .cornerRadius(3)
         .onHover { hovering in
             guard defaultState != .disabled else { return }

@@ -475,7 +475,7 @@ extension TextRoot {
         if hasCmdGroup {
             focusedCmdManager.endGroup()
         }
-        cancelSelection()
+        cancelSelection(.start)
         unmarkText()
     }
 
