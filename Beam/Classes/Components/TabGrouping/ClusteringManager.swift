@@ -48,6 +48,7 @@ class ClusteringManager: ObservableObject {
     var suggestedNoteUpdater: SuggestedNoteSourceUpdater
     var sessionId: UUID
     var navigationBasedPageGroups = [[UUID]]()
+    var similarities = [UUID: [UUID: Double]]()
 
     init(ranker: SessionLinkRanker, candidate: Int, navigation: Double, text: Double, entities: Double, sessionId: UUID, activeSources: ActiveSources) {
         self.selectedTabGroupingCandidate = candidate
@@ -191,7 +192,7 @@ class ClusteringManager: ObservableObject {
             if newContent != nil {
                 replaceContent = true
             }
-            cluster.add(page: pageToAdd, ranking: ranking, replaceContent: replaceContent) { result in
+            cluster.add(page: pageToAdd, ranking: ranking, activeSources: activeSources.activeSources.map({ $0.1 }).reduce([], +), replaceContent: replaceContent) { result in
                 DispatchQueue.main.async {
                     self.isClustering = false
                 }
@@ -200,6 +201,7 @@ class ClusteringManager: ObservableObject {
                     self.isClustering = false
                     Logger.shared.logError("Error while adding page to cluster for \(pageToAdd): \(error)", category: .clustering)
                 case .success(let result):
+                    self.similarities = result.similarities
                     self.clusteredPagesId = result.pageGroups
                     self.clusteredNotesId = result.noteGroups
                     if result.flag == .sendRanking {
@@ -245,7 +247,7 @@ class ClusteringManager: ObservableObject {
         if self.sendRanking {
             ranking = self.ranker.clusteringRemovalSorted(links: self.clusteredPagesId.reduce([], +))
         }
-        self.cluster.add(note: clusteringNote, ranking: ranking) { result in
+        self.cluster.add(note: clusteringNote, ranking: ranking, activeSources: activeSources.activeSources.map({ $0.1 }).reduce([], +)) { result in
             DispatchQueue.main.async {
                 self.isClustering = false
             }
@@ -257,6 +259,7 @@ class ClusteringManager: ObservableObject {
                     Logger.shared.logError("Error while adding note to cluster for \(clusteringNote): \(error)", category: .clustering)
                 }
             case .success(let result):
+                self.similarities = result.similarities
                 self.clusteredPagesId = result.pageGroups
                 self.clusteredNotesId = result.noteGroups
                 if result.flag == .sendRanking {
@@ -276,7 +279,7 @@ class ClusteringManager: ObservableObject {
 
     func change(candidate: Int, weightNavigation: Double, weightText: Double, weightEntities: Double) {
         isClustering = true
-        cluster.changeCandidate(to: candidate, with: weightNavigation, with: weightText, with: weightEntities) { result in
+        cluster.changeCandidate(to: candidate, with: weightNavigation, with: weightText, with: weightEntities, activeSources: Array(Set(activeSources.activeSources.map({ $0.1 }).reduce([], +)))) { result in
             DispatchQueue.main.async {
                 self.isClustering = false
             }
@@ -284,7 +287,8 @@ class ClusteringManager: ObservableObject {
             case .failure(let error):
                 Logger.shared.logError("Error while changing candidate to cluster for: \(error)", category: .clustering)
             case .success(let result):
-                self.clusteredPagesId = self.reorganizeGroups(clusters: result.pageGroups)
+                self.similarities = result.similarities
+                self.clusteredPagesId = result.pageGroups
                 self.clusteredNotesId = result.noteGroups
                 if result.flag == .sendRanking {
                     self.sendRanking = true
@@ -329,7 +333,7 @@ class ClusteringManager: ObservableObject {
     }
 
     private func updateNoteSources() {
-        self.suggestedNoteUpdater.update(urlGroups: self.clusteredPagesId, noteGroups: self.clusteredNotesId, activeSources: self.activeSources.activeSources)
+        self.suggestedNoteUpdater.update(urlGroups: self.clusteredPagesId, noteGroups: self.clusteredNotesId, activeSources: self.activeSources.activeSources, similarities: self.similarities)
     }
 
     private func logForClustering(result: [[UUID]], changeCandidate: Bool) {

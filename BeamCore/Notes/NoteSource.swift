@@ -20,6 +20,7 @@ public struct NoteSource: Codable {
         case type
         case sessionId
         case frecencyAtAddition
+        case similarity
     }
 
     public let urlId: UUID
@@ -28,6 +29,7 @@ public struct NoteSource: Codable {
     public var sessionId: UUID?
     var longTermScore: LongTermUrlScore?
     var frecencyAtAddition: Float?
+    public var similarity: Double?
 
     var domain: String {
         guard let url = LinkStore.linkFor(urlId)?.url,
@@ -37,7 +39,7 @@ public struct NoteSource: Codable {
         return components.host ?? "<???>"
     }
     var addedAtDay: Date { Calendar.current.startOfDay(for: addedAt) }
-    public var score: Float { (longTermScore?.score() ?? 0) / (frecencyAtAddition ?? 1) }
+    public var score: Float { ((longTermScore?.score() ?? 0) * Float(similarity ?? 1)) / (frecencyAtAddition ?? 1) }
 }
 
 public class NoteSources: Codable {
@@ -60,14 +62,17 @@ public class NoteSources: Codable {
         return Array(sources.values)
     }
 
-    public func add(urlId: UUID, noteId: UUID, type: NoteSource.SourceType, date: Date = BeamDate.now, sessionId: UUID, frecency: Float? = nil, longTermScore: LongTermUrlScore? = nil, activeSources: ActiveSources? = nil) {
-        let sourceToAdd = NoteSource(urlId: urlId, addedAt: date, type: type, sessionId: sessionId, longTermScore: longTermScore, frecencyAtAddition: frecency)
+    public func add(urlId: UUID, noteId: UUID, type: NoteSource.SourceType, date: Date = BeamDate.now, sessionId: UUID, frecency: Float? = nil, similarity: Double? = nil, longTermScore: LongTermUrlScore? = nil, activeSources: ActiveSources? = nil) {
+        let sourceToAdd = NoteSource(urlId: urlId, addedAt: date, type: type, sessionId: sessionId, longTermScore: longTermScore, frecencyAtAddition: frecency, similarity: similarity)
         switch type {
         case .suggestion:
             if let oldSource = sources[urlId],
-               oldSource.type == .suggestion,
-               oldSource.score < sourceToAdd.score {
-                sources[urlId] = sourceToAdd
+               oldSource.type == .suggestion {
+                if oldSource.score < sourceToAdd.score {
+                    sources[urlId] = sourceToAdd
+                } else {
+                    sources[urlId]?.similarity = similarity
+                }
             } else if sources[urlId] == nil {
                 sources[urlId] = sourceToAdd
             }
