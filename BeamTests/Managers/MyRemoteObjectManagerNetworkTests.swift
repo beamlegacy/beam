@@ -1958,10 +1958,10 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             let group = DispatchGroup()
 
                             group.enter()
-                            _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3]) { _ in group.leave() }
+                            _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3], force: true) { _ in group.leave() }
 
                             group.enter()
-                            _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3]) { result in
+                            _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3], force: true) { result in
                                 expect { try result.get() }.toNot(throwError())
 
                                 group.leave()
@@ -3496,11 +3496,11 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                                 group.enter()
 
-                                _ = try sut.saveOnBeamObjectAPI(object) { _ in group.leave() }
+                                _ = try sut.saveOnBeamObjectAPI(object, force: true) { _ in group.leave() }
 
                                 group.enter()
 
-                                _ = try sut.saveOnBeamObjectAPI(object) { result in
+                                _ = try sut.saveOnBeamObjectAPI(object, force: true) { result in
                                     expect { try result.get() }.toNot(throwError())
 
                                     group.leave()

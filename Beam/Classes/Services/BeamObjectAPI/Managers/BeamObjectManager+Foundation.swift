@@ -297,7 +297,7 @@ extension BeamObjectManager {
         let objectsToSave = force ? beamObjects : updatedObjectsOnly(beamObjects)
 
         guard !objectsToSave.isEmpty else {
-            Logger.shared.logDebug("Skip objects, based on previousChecksum they were already saved",
+            Logger.shared.logDebug("Skip \(beamObjects.count) objects, based on previousChecksum they were already saved",
                                    category: .beamObjectNetwork)
             completion(.success([]))
             return nil
