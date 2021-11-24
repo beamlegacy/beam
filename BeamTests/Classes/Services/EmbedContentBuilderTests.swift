@@ -33,13 +33,13 @@ class EmbedContentBuilderTests: XCTestCase {
         strategy.canEmbed = false
         XCTAssertFalse(builder.canBuildEmbed(for: url))
 
-        let expectedContent = EmbedContent(sourceURL: url, type: .url, embedURL: url, embedContent: "some content")
+        let expectedContent = EmbedContent(title: "embed.com", type: .url, sourceURL: url, embedURL: url, html: "some content")
         strategy.returnContent = expectedContent
 
         let result = builder.embeddableContent(for: url)
         XCTAssertNotNil(result)
         XCTAssertEqual(result?.sourceURL, url)
-        XCTAssertEqual(result?.embedContent, "some content")
+        XCTAssertEqual(result?.html, "some content")
     }
 
     func testUseCache() {
@@ -49,7 +49,7 @@ class EmbedContentBuilderTests: XCTestCase {
         let strategy = MockStrategy()
         builder.strategies = [strategy]
 
-        let expectedContent = EmbedContent(sourceURL: url, type: .url, embedURL: url, embedContent: "some content")
+        let expectedContent = EmbedContent(title: "embed.com", type: .url, sourceURL: url, embedURL: url, html: "some content")
         strategy.returnContent = expectedContent
 
         XCTAssertEqual(strategy.numberOfCallsToBuild, 0)
@@ -57,13 +57,13 @@ class EmbedContentBuilderTests: XCTestCase {
         XCTAssertEqual(strategy.numberOfCallsToBuild, 1)
         XCTAssertNotNil(result)
         XCTAssertEqual(result?.sourceURL, url)
-        XCTAssertEqual(result?.embedContent, "some content")
+        XCTAssertEqual(result?.html, "some content")
         _ = builder.embeddableContent(for: url)
         _ = builder.embeddableContent(for: url)
         let last = builder.embeddableContent(for: url)
         XCTAssertEqual(strategy.numberOfCallsToBuild, 1)
         XCTAssertNotNil(last)
         XCTAssertEqual(last?.sourceURL, url)
-        XCTAssertEqual(last?.embedContent, "some content")
+        XCTAssertEqual(last?.html, "some content")
     }
 }
