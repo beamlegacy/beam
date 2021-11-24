@@ -318,8 +318,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
 
             let addWithSourceBullet = shouldAddWithSourceBullet(elements)
             if let destinationElement = self.page.addToNote(allowSearchResult: true, inSourceBullet: addWithSourceBullet) {
-                if let noteText = noteText, !noteText.isEmpty,
-                   let lastQuote = elements.last {
+                if let noteText = noteText, !noteText.isEmpty, let lastQuote = elements.last {
                     // Append NoteText last quote
                     let note = self.createNote(noteText)
                     lastQuote.addChild(note)
@@ -328,27 +327,31 @@ class PointAndShoot: WebPageHolder, ObservableObject {
                 // Add to source Note
                 if destinationElement.children.count == 1,
                    let onlyChild = destinationElement.children.first,
-                   onlyChild.text.isEmpty,
-                   onlyChild.kind == .bullet {
+                   onlyChild.text.isEmpty, onlyChild.kind == .bullet {
                     destinationElement.removeChild(onlyChild)
                 }
                 elements.forEach({ quote in destinationElement.addChild(quote) })
+                updateShootGroupAfterAddPageToNote(shootGroup: shootGroup, elements: elements, targetNote: targetNote)
 
-                // Complete PNS and clear stored data
-                shootGroup.numberOfElements = elements.count
-                shootGroup.setNoteInfo(NoteInfo(id: targetNote.id, title: targetNote.title))
-
-                if shootGroup.numberOfElements == 0 {
-                    self.showAlert(shootGroup, elements, "numberOfElements is zero")
-                    shootGroup.setConfirmation(.failure)
-                } else {
-                    shootGroup.setConfirmation(.success)
-                }
-
-                self.showShootConfirmation(group: shootGroup)
                 completion()
             }
         })
+    }
+
+    private func updateShootGroupAfterAddPageToNote(shootGroup: ShootGroup, elements: [BeamElement], targetNote: BeamNote) {
+        var shootGroup = shootGroup
+        // Complete PNS and clear stored data
+        shootGroup.numberOfElements = elements.count
+        shootGroup.setNoteInfo(NoteInfo(id: targetNote.id, title: targetNote.title))
+
+        if shootGroup.numberOfElements == 0 {
+            self.showAlert(shootGroup, elements, "numberOfElements is zero")
+            shootGroup.setConfirmation(.failure)
+        } else {
+            shootGroup.setConfirmation(.success)
+        }
+
+        self.showShootConfirmation(group: shootGroup)
     }
 
     /// Draws shoot confirmation

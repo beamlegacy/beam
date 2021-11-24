@@ -20,7 +20,7 @@ extension ElementNode {
     }
 
     @objc var indentLayerPositionY: CGFloat { 3 }
-    
+
     private enum LayerName: String {
         case indentLayer
         case bullet

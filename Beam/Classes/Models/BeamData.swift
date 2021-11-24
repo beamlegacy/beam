@@ -124,12 +124,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
             waitTimeOut: 2.0
         )
         browsingTreeSender = BrowsingTreeSender(config: treeConfig, appSessionId: sessionId)
-        do {
-            linkDB = try BeamLinkDB(path: BeamData.linkDBPath)
-        } catch {
-            Logger.shared.logError("Unable to access link DB \(error)", category: .linkDB)
-            fatalError("Unable to access link DB \(error)")
-        }
+        linkDB = BeamLinkDB(path: BeamData.linkDBPath)
 
         super.init()
 
