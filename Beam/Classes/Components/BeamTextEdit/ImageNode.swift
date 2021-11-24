@@ -282,4 +282,6 @@ class ImageNode: ResizableNode {
 // MARK: - ImageNode + Layer
 extension ImageNode {
     override var bulletLayerPositionY: CGFloat { 9 }
+
+    override var indentLayerPositionY: CGFloat { 28 }
 }
