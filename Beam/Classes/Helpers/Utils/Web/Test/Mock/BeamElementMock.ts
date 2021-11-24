@@ -37,7 +37,9 @@ export class BeamElementMock extends BeamNodeMock implements BeamElement, BeamEl
     }
     this.querySelectorResult[query].push(element)
   }
-
+  cloneNode(): BeamElement {
+    return Object.assign({}, this)
+  }
   querySelectorAll(query: string): BeamElementMock[] {
     if (query == "*") {
       const arrays = Object.values(this.querySelectorResult) || []

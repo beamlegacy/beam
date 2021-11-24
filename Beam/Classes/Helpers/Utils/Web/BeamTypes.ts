@@ -213,6 +213,7 @@ export interface BeamCharacterData extends BeamNode {
 export type BeamText = BeamCharacterData
 
 export interface BeamElement extends BeamParentNode {
+  cloneNode(arg0: boolean): BeamElement
   querySelectorAll(query: string): BeamElement[]
   removeAttribute(pointDatasetKey: any)
   dataset: any

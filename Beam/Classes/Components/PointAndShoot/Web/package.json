@@ -13,9 +13,9 @@
     "watch": "webpack --watch --mode=development",
     "start": "webpack serve --mode=development",
     "dist": "webpack --mode=production",
-    "test": "node --experimental-vm-modules node_modules/.bin/jest --reporters=default --silent --verbose",
-    "test:verbose": "node --experimental-vm-modules node_modules/.bin/jest --reporters=default --verbose",
-    "test-ci": "node --experimental-vm-modules node_modules/.bin/jest --ci --silent --verbose --reporters=default --reporters=jest-junit --coverage",
+    "test": "jest --reporters=default --silent --verbose",
+    "test:verbose": "jest --reporters=default --verbose",
+    "test-ci": "jest --ci --silent --verbose --reporters=default --reporters=jest-junit --coverage",
     "benchmark-show": "yarn run jest-measure",
     "benchmark-update": "UPDATE_BENCHMARK=true yarn test",
     "lint": "eslint **/*.ts --format gitlab .",
@@ -75,12 +75,5 @@
     "plugins": [
       "@babel/plugin-proposal-class-properties"
     ]
-  },
-  "jest": {
-    "transform": {},
-    "moduleNameMapper": {
-      "^.+\\.(css|scss)$": "identity-obj-proxy",
-      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/fileMocks.js"
-    }
   }
 }
