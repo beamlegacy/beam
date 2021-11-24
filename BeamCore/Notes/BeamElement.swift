@@ -93,6 +93,7 @@ public enum ElementKind: Codable, Equatable {
         }
     }
 
+    // swiftlint:disable:next cyclomatic_complexity
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
