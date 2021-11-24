@@ -83,20 +83,6 @@ export class PointAndShootUI_native implements PointAndShootUI {
   selectPayload = {}
   private getHtml(element: BeamHTMLElement): string {
     const { win } = this.native
-
-    let elementString
-    // If we support embedding on the current location
-    if (BeamElementHelper.isEmbed(element, win)) {
-      // parse the element for embedding. Parsing can fail so we support 
-      // falling back on the default element parsing
-      elementString = BeamEmbedHelper.parseElementForEmbed(element, win)
-    }
-
-    if (elementString) {
-      return elementString
-    }
-
-    // default element parser
     const parsedElement = BeamElementHelper.parseElementBasedOnStyles(element, win)
     return parsedElement.outerHTML
   }

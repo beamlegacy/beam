@@ -85,15 +85,99 @@ export class BeamElementHelper {
     }
   }
 
-  static parseElementBasedOnStyles(element: BeamElement, win: BeamWindow<any>): BeamHTMLElement {
+  /**
+   * If element is background image, convert element to image element
+   *
+   * @static
+   * @param {BeamElement} element
+   * @param {BeamWindow<any>} win
+   * @return {*}  {BeamHTMLElement}
+   * @memberof BeamElementHelper
+   */
+  static parseBackgroundImageToImageElement(element: BeamElement, win: BeamWindow<any>): BeamHTMLElement {
     const backgroundImageURL = this.getBackgroundImageURL(element, win)
-    if (backgroundImageURL) {
-      const img = win.document.createElement("img")
-      img.setAttribute("src", backgroundImageURL)
-      return img
-    } else {
-      return element as BeamHTMLElement
+    if (!backgroundImageURL) {
+      return null
     }
+
+    const img = win.document.createElement("img")
+    img.setAttribute("src", backgroundImageURL)
+    return img
+  }
+
+  /**
+   * If element has anchor tag as parent, wrap element in anchor tag
+   *
+   * @static
+   * @param {BeamElement} element
+   * @param {BeamWindow<any>} win
+   * @return {*}  {BeamHTMLElement}
+   * @memberof BeamElementHelper
+   */
+  static wrapElementInAnchor(element: BeamElement, win: BeamWindow<any>): BeamHTMLElement {
+    const parentOfType = BeamElementHelper.hasParentOfType(element, "A")
+    
+    if (!parentOfType) {
+      return null
+    }
+
+    const elementClode = element.cloneNode(true)
+    const wrapper = win.document.createElement("a")
+    wrapper.setAttribute("href", parentOfType.href)
+    wrapper.appendChild(elementClode)
+    return wrapper
+  }
+  /**
+   * Returns parent of node type. Maximum allowed recursive depth is 10
+   *
+   * @private
+   * @param {*} node target node to start at
+   * @param {*} type parent type to search for
+   * @param {number} [count=0] iteration count
+   * @return {*} 
+   * @memberof PointAndShootUI_native
+   */
+  static hasParentOfType(element, type, count = 0) {
+    if (count > 10) return null
+    if (type !== "BODY" && element?.tagName === "BODY") return null
+    if (!element?.parentElement) return null
+    if (type === element?.tagName) return element
+    const newCount = count++
+    return BeamElementHelper.hasParentOfType(element.parentElement, type, newCount)
+  }
+  /**
+   * Parse Element based on it's styles and structure. Included conversions:
+   * - Convert background image element to img element
+   * - Wrapping element in anchor if parent is anchor tag
+   *
+   * @static
+   * @param {BeamElement} element
+   * @param {BeamWindow<any>} win
+   * @return {*}  {BeamHTMLElement}
+   * @memberof BeamElementHelper
+   */
+  static parseElementBasedOnStyles(element: BeamElement, win: BeamWindow<any>): BeamHTMLElement {
+    const convertedToImage = BeamElementHelper.parseBackgroundImageToImageElement(element, win)
+    if (convertedToImage) {
+      return convertedToImage
+    }
+
+    // If we support embedding on the current location
+    if (BeamElementHelper.isEmbed(element, win)) {
+      // parse the element for embedding.
+      const embedElement = BeamEmbedHelper.parseElementForEmbed(element, win)
+      if (embedElement) {
+        return embedElement
+      }
+    }
+
+    const wrappedInAnchor = BeamElementHelper.wrapElementInAnchor(element, win)
+    
+    if (wrappedInAnchor) {
+      return wrappedInAnchor
+    }
+    
+    return element as BeamHTMLElement
   }
 
   /**
