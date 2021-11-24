@@ -73,6 +73,7 @@ extension BeamObjectRequest {
             }
 
             try? beamObject.decrypt()
+            try? beamObject.setTimestamps()
             return beamObject
         }
     }
@@ -124,6 +125,7 @@ extension BeamObjectRequest {
             return try beamObjects.compactMap {
                 do {
                     try $0.decrypt()
+                    try $0.setTimestamps()
                     return $0
                 } catch EncryptionManagerError.authenticationFailure {
                     Logger.shared.logError("Can't decrypt \($0)", category: .beamObjectNetwork)
@@ -152,6 +154,7 @@ extension BeamObjectRequest {
 
         return promise.map(on: self.backgroundQueue) {
             try $0.decrypt()
+            try $0.setTimestamps()
             return $0
         }
     }

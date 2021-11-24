@@ -265,7 +265,7 @@ extension BeamObjectManagerDelegate {
             }
         }
 
-        return try objectManager.fetchObjectUpdatedAt(object) { result in
+        return try objectManager.fetchObjectChecksum(object) { result in
             switch result {
             case .failure(let error):
                 if case APIRequestError.notFound = error {
@@ -276,15 +276,17 @@ extension BeamObjectManagerDelegate {
                 }
 
                 completion(.failure(error))
-            case .success(let updatedAt):
-                guard let updatedAt = updatedAt, updatedAt > object.updatedAt else {
-                    completion(.success(nil))
-                    BeamObjectManagerCall.deleteObjectSemaphore(uuid: object.beamObjectId)
-                    semaphore.signal()
-                    return
-                }
-
+            case .success(let remoteChecksum):
                 do {
+                    let beamObject = try BeamObject(object, BeamObjectType.beamObjectTypeName)
+
+                    guard let remoteChecksum = remoteChecksum, remoteChecksum != beamObject.dataChecksum else {
+                        completion(.success(nil))
+                        BeamObjectManagerCall.deleteObjectSemaphore(uuid: object.beamObjectId)
+                        semaphore.signal()
+                        return
+                    }
+
                     _ = try objectManager.fetchObject(object) { result in
                         switch result {
                         case .failure(let error): completion(.failure(error))
