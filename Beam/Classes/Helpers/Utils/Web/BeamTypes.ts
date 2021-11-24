@@ -20,6 +20,11 @@ export interface BeamShootGroup {
   text?: string
 }
 
+export interface BeamElementBounds {
+  element: BeamHTMLElement | BeamElement
+  rect: BeamRect
+}
+
 export interface BeamVisualViewport {
   /**
    * @type {number}
