@@ -34,26 +34,45 @@ struct CalendarView: View {
     @State var isHoveringNotConnect = false
     @ObservedObject var viewModel: CalendarGutterViewModel
 
+    private var transitionInOutHiddenView: AnyTransition {
+        let transitionIn = AnyTransition.move(edge: .leading).animation(BeamAnimation.easingBounce(duration: 0.15))
+            .combined(with: .scale(scale: 0.8, anchor: .center).animation(BeamAnimation.easingBounce(duration: 0.15)))
+            .combined(with: .scale(scale: 1.2, anchor: .center).animation(BeamAnimation.easingBounce(duration: 0.15)))
+            .combined(with: .opacity.animation(.easeInOut(duration: 0.15)))
+
+        let transitionOut = AnyTransition.move(edge: .leading).animation(BeamAnimation.easingBounce(duration: 0.15))
+            .combined(with: .scale(scale: 1.2, anchor: .center).animation(BeamAnimation.easingBounce(duration: 0.15)))
+            .combined(with: .scale(scale: 0.8, anchor: .center).animation(BeamAnimation.easingBounce(duration: 0.15)))
+            .combined(with: .opacity.animation(.easeInOut(duration: 0.15)))
+
+        return AnyTransition.asymmetric(insertion: transitionIn, removal: transitionOut)
+    }
+
     var body: some View {
         if viewModel.isConnected {
             VStack(alignment: .leading) {
-                ForEach(viewModel.meetings) { meeting in
-                    if isHoveringConnect {
-                        CalendarIemView(allDayEvent: meeting.allDayEvent, time: meeting.startTime,
-                                        meetingLink: meeting.meetingLink, title: meeting.name, onClick: {
-                            prompt(meeting)
-                        }).transition(AnyTransition.asymmetric(
-                                insertion: AnyTransition.move(edge: .leading).animation(BeamAnimation.spring(stiffness: 400, damping: 20).delay(0.10)) .combined(with: .opacity.animation(.easeInOut(duration: 0.15).delay(0.10))),
-                                removal: AnyTransition.move(edge: .leading).animation(BeamAnimation.spring(stiffness: 400, damping: 35)).combined(with: .opacity.animation(.easeInOut(duration: 0.15)))
-                            ))
-                    } else {
-                        CalendarItemHiddenView(meetingDuration: meeting.duration)
-                            .frame(minHeight: 16, maxHeight: 16)
-                            .padding(.top, 4)
-                            .transition(AnyTransition.asymmetric(
-                                insertion: AnyTransition.scale(scale: 1.5, anchor: .leading).animation(BeamAnimation.spring(stiffness: 400, damping: 25).delay(0.15)).combined(with: .opacity.animation(.easeInOut(duration: 0.15).delay(0.15))),
-                                removal: AnyTransition.scale(scale: 0.1, anchor: .leading).animation(BeamAnimation.spring(stiffness: 400, damping: 25)).combined(with: .opacity.animation(.easeInOut(duration: 0.15)))))
-                    }
+                if isHoveringConnect {
+                    VStack(alignment: .leading) {
+                        ForEach(viewModel.meetings) { meeting in
+                            CalendarIemView(allDayEvent: meeting.allDayEvent, time: meeting.startTime,
+                                            meetingLink: meeting.meetingLink, title: meeting.name, onClick: {
+                                prompt(meeting)
+                            })
+                        }
+                    }.transition(AnyTransition.asymmetric(
+                        insertion: .move(edge: .leading).animation(BeamAnimation.easingBounce(duration: 0.15).delay(0.15))
+                            .combined(with: .opacity.animation(.easeInOut(duration: 0.15).delay(0.15))),
+                            removal: .move(edge: .leading).animation(BeamAnimation.easingBounce(duration: 0.15))
+                            .combined(with: .opacity.animation(.easeInOut(duration: 0.15)))
+                        ))
+                } else {
+                    VStack(alignment: .leading) {
+                        ForEach(viewModel.meetings) { meeting in
+                            CalendarItemHiddenView(meetingDuration: meeting.duration)
+                                .frame(minHeight: 16, maxHeight: 16)
+                                .padding(.top, 4)
+                        }
+                    }.transition(transitionInOutHiddenView)
                 }
             }.onHover { isHovering in
                 withAnimation {
@@ -157,8 +176,8 @@ struct CalendarItemHiddenView: View {
     }
 
     private func getWidthForDuration() -> CGFloat {
-        let maxWidth: CGFloat = 70
-        let minWidth: CGFloat = 8
+        let maxWidth: CGFloat = 26
+        let minWidth: CGFloat = 14
         let logMaxWidth = log(maxWidth)
         let logMinWidth = log(minWidth)
         let hours = meetingDuration?.hour ?? 0
@@ -206,7 +225,7 @@ struct CalendarIemView: View {
                         .onHover { isHoveringMeetingBtn = $0 }
                 }
                 Text(title)
-                    .font(isHoveringItem ? BeamFont.medium(size: 12).swiftUI : BeamFont.regular(size: 12).swiftUI)
+                    .font(BeamFont.regular(size: 12).swiftUI)
                     .foregroundColor(isHoveringItem ? BeamColor.Niobium.swiftUI : BeamColor.LightStoneGray.swiftUI)
                 if isHoveringItem {
                     Image("editor-calendar_arrow")
@@ -214,15 +233,20 @@ struct CalendarIemView: View {
                         .resizable()
                         .frame(width: 10, height: 10)
                         .foregroundColor(BeamColor.Niobium.swiftUI)
+                        .transition(AnyTransition.asymmetric(
+                                insertion: .opacity.animation(.easeInOut(duration: 0.15).delay(0.10)),
+                                removal: .opacity.animation(.easeInOut(duration: 0.15))
+                            ))
                 }
             }
         }.frame(minHeight: 16, maxHeight: 16)
         .padding(.top, 4)
         .padding(.leading, 14)
-            .onHover {
-                isHoveringItem = $0
-            }.onTapGesture {
+        .onHover { isHovering in
+            isHoveringItem = isHovering
+        }
+        .onTapGesture {
                 onClick()
-            }
+        }
     }
 }
