@@ -207,7 +207,7 @@ describe("Pointing mode overlay bounding area calculation", () => {
     expect(isParentVisible).toBe(true)
     const isChildVisible = BeamElementHelper.isVisible(child as BeamElement, native.win)
     expect(isChildVisible).toBe(true)
-    const area = pnsNativeUI.elementBounds(parent)
+    const { rect: area } = pnsNativeUI.elementBounds(parent)
     const expected = { x: 20, y: 20, width: 10, height: 10 }
     expect(area).toMatchObject(expected)
   })
@@ -245,7 +245,7 @@ describe("Pointing mode overlay bounding area calculation", () => {
     expect(isChildVisible).toBe(true)
     const isChild2Visible = BeamElementHelper.isVisible(child2 as BeamElement, native.win)
     expect(isChild2Visible).toBe(true)
-    const area = pnsNativeUI.elementBounds(parent)
+    const { rect: area } = pnsNativeUI.elementBounds(parent)
     const expected = { x: 20, y: 20, width: 100, height: 100 }
     expect(area).toMatchObject(expected)
   })
@@ -283,7 +283,7 @@ describe("Pointing mode overlay bounding area calculation", () => {
     expect(isChildVisible).toBe(true)
     const isChild2Visible = BeamElementHelper.isVisible(child2, native.win)
     expect(isChild2Visible).toBe(false)
-    const area = pnsNativeUI.elementBounds(parent)
+    const { rect: area } = pnsNativeUI.elementBounds(parent)
     const expected = { x: 20, y: 20, width: 10, height: 10 }
     expect(area).toMatchObject(expected)
   })
@@ -310,7 +310,7 @@ describe("Pointing mode overlay bounding area calculation", () => {
         child.style.setProperty(prop[0], prop[1])
       }
       parent.appendChild(child)
-      const area = pnsNativeUI.elementBounds(child)
+      const { rect: area } = pnsNativeUI.elementBounds(child, undefined, undefined, -1) // -1 disables recursive search
       const isChildVisible = BeamElementHelper.isVisible(child as BeamElement, native.win)
       if (expected) {
         expect(isChildVisible).toBe(true)
@@ -358,7 +358,7 @@ describe("isMeaningful filtering", () => {
 
       const isParentVisible = BeamElementHelper.isVisible(parent as BeamElement, native.win)
       expect(isParentVisible).toBe(true)
-      const area = pnsNativeUI.elementBounds(parent)
+      const { rect: area } = pnsNativeUI.elementBounds(parent)
       expect(area).toBeUndefined()
     }
   )
@@ -379,7 +379,7 @@ describe("isMeaningful filtering", () => {
 
       const isVisible = BeamElementHelper.isVisible(element as BeamElement, native.win)
       expect(isVisible).toBe(true)
-      const area = pnsNativeUI.elementBounds(element)
+      const { rect: area } = pnsNativeUI.elementBounds(element)
       if (expectsTagToBeSelected) {
         const expected = { x: element.offsetLeft, y: element.offsetTop, width: element.width, height: element.height }
         expect(area).toMatchObject(expected)
@@ -399,7 +399,7 @@ describe("isMeaningful filtering", () => {
 
       const isVisible2 = BeamElementHelper.isVisible(parent as BeamElement, native.win)
       expect(isVisible2).toBe(true)
-      const area2 = pnsNativeUI.elementBounds(parent)
+      const { rect: area2 } = pnsNativeUI.elementBounds(parent)
       if (expectsTagToBeSelected) {
         const expected2 = {
           x: parent.offsetLeft + element.offsetLeft,
@@ -463,15 +463,15 @@ describe("isMeaningful filtering", () => {
 
       const isParentVisible = BeamElementHelper.isVisible(parent as BeamElement, native.win)
       expect(isParentVisible).toBe(true)
-      const area = pnsNativeUI.elementBounds(parent)
-      expect(area).toBeUndefined()
+      const { rect } = pnsNativeUI.elementBounds(parent)
+      expect(rect).toBeUndefined()
 
       // Update text to be meaningful
       parent.removeChild(parent.childNodes[0])
       parent.appendChild(new BeamTextMock("• Hello"))
-      const area2 = pnsNativeUI.elementBounds(parent)
+      const {rect: rect2} = pnsNativeUI.elementBounds(parent)
       const expected = { x: 10, y: 10, width: 40, height: 40 }
-      expect(area2).toMatchObject(expected)
+      expect(rect2).toMatchObject(expected)
     }
   )
 })
@@ -562,7 +562,7 @@ describe("overflow / clipping handling", () => {
     const isChildVisible = BeamElementHelper.isVisible(child, native.win)
     expect(isChildVisible).toBe(true)
 
-    const area = pnsNativeUI.elementBounds(parent)
+    const { rect: area } = pnsNativeUI.elementBounds(parent)
     const expected = { x: 20, y: 20, width: 90, height: 90 }
     expect(area).toMatchObject(expected)
   })
@@ -605,9 +605,9 @@ describe("overflow / clipping handling", () => {
     const isChild2Visible = BeamElementHelper.isVisible(child2, native.win)
     expect(isChild2Visible).toBe(true)
 
-    const area = pnsNativeUI.elementBounds(child2)
+    const { rect } = pnsNativeUI.elementBounds(child2)
     const expected = { x: 60, y: 60, width: 50, height: 50 }
-    expect(area).toMatchObject(expected)
+    expect(rect).toMatchObject(expected)
   })
 
   test("overflow-x and overflow-y set to hidden without their counterpart", () => {
@@ -638,13 +638,13 @@ describe("overflow / clipping handling", () => {
     const isChildVisible = BeamElementHelper.isVisible(child, native.win)
     expect(isChildVisible).toBe(true)
 
-    const area = pnsNativeUI.elementBounds(child)
+    const { rect } = pnsNativeUI.elementBounds(child)
     const clippingElements = BeamElementHelper.getClippingElements(child, native.win)
     const clippingArea = BeamElementHelper.getClippingArea(clippingElements, native.win)
     const _ = BeamRectHelper.intersection(child.getBoundingClientRect(), clippingArea)
 
     const expected = { x: 60, y: 60, width: 50, height: 200 }
-    expect(area).toMatchObject(expected)
+    expect(rect).toMatchObject(expected)
   })
 
   test("overflow escaping on absolute positioned elements", () => {
@@ -694,9 +694,9 @@ describe("overflow / clipping handling", () => {
     const isChild2Visible = BeamElementHelper.isVisible(child2, native.win)
     expect(isChild2Visible).toBe(true)
 
-    const area = pnsNativeUI.elementBounds(child2)
+    const { rect } = pnsNativeUI.elementBounds(child2)
     const expected = { x: 50, y: 50, width: 300, height: 300 }
-    expect(area).toMatchObject(expected)
+    expect(rect).toMatchObject(expected)
   })
 
   test("overflow escaping on fixed positioned elements", () => {
@@ -732,7 +732,7 @@ describe("overflow / clipping handling", () => {
     const isChildVisible = BeamElementHelper.isVisible(child, native.win)
     expect(isChildVisible).toBe(true)
 
-    const area = pnsNativeUI.elementBounds(child)
+    const { rect: area } = pnsNativeUI.elementBounds(child)
     const expected = { x: 0, y: 0, width: 200, height: 200 }
     expect(area).toMatchObject(expected)
   })
@@ -763,7 +763,7 @@ describe("overflow / clipping handling", () => {
     const isChildVisible = BeamElementHelper.isVisible(child, native.win)
     expect(isChildVisible).toBe(true)
 
-    const area = pnsNativeUI.elementBounds(parent)
+    const { rect: area } = pnsNativeUI.elementBounds(parent)
     expect(area).toBeUndefined()
   })
 
@@ -793,12 +793,12 @@ describe("overflow / clipping handling", () => {
     const isChildVisible = BeamElementHelper.isVisible(child, native.win)
     expect(isChildVisible).toBe(true)
 
-    const area = pnsNativeUI.elementBounds(parent)
+    const { rect: area } = pnsNativeUI.elementBounds(parent)
     const expected = { x: 10, y: 10, width: 100, height: 100 }
     expect(area).toMatchObject(expected)
 
     parent.style.setProperty("clip", "auto")
-    const area2 = pnsNativeUI.elementBounds(parent)
+    const { rect: area2 } = pnsNativeUI.elementBounds(parent)
     expect(area2).toMatchObject(expected)
   })
 
@@ -828,12 +828,12 @@ describe("overflow / clipping handling", () => {
     const isChildVisible = BeamElementHelper.isVisible(child, native.win)
     expect(isChildVisible).toBe(true)
 
-    const area = pnsNativeUI.elementBounds(parent)
+    const { rect: area } = pnsNativeUI.elementBounds(parent)
     const expected = { x: 10, y: 10, width: 100, height: 100 }
     expect(area).toMatchObject(expected)
 
     parent.style.setProperty("clip-path", "none")
-    const area2 = pnsNativeUI.elementBounds(parent)
+    const { rect: area2 } = pnsNativeUI.elementBounds(parent)
     expect(area2).toMatchObject(expected)
   })
 })
