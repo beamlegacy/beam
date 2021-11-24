@@ -28,17 +28,17 @@ export class BeamEmbedHelper {
    * - Twitter
    *
    * @static
-   * @param {BeamHTMLElement} element
+   * @param {BeamElement} element
    * @param {BeamWindow} win
-   * @return {*}  {string}
+   * @return {*}  {BeamHTMLElement}
    * @memberof BeamEmbedHelper
    */
-  static parseElementForEmbed(element: BeamHTMLElement, win: BeamWindow): string {
+  static parseElementForEmbed(element: BeamElement, win: BeamWindow): BeamHTMLElement {
     const { hostname } = win.location
 
     switch (hostname) {
       case "twitter.com":
-        return BeamEmbedHelper.parseTwitterElementForEmbed(element)
+        return BeamEmbedHelper.parseTwitterElementForEmbed(element, win)
         break
 
       default:
@@ -47,14 +47,16 @@ export class BeamEmbedHelper {
     }
   }
   /**
-   * convert element found on twitter.com to a tweet url. returns undefined when element isn't a tweet
+   * Convert element found on twitter.com to a anchor elemnt containing the tweet url. 
+   * returns undefined when element isn't a tweet
    *
    * @static
-   * @param {BeamHTMLElement} element
-   * @return {*}  {string}
+   * @param {BeamElement} element
+   * @param {BeamWindow<any>} win
+   * @return {*}  {BeamHTMLElement} 
    * @memberof BeamEmbedHelper
    */
-  static parseTwitterElementForEmbed(element: BeamHTMLElement): string {
+  static parseTwitterElementForEmbed(element: BeamElement, win: BeamWindow<any>): BeamHTMLElement {
     if (!BeamEmbedHelper.isTweet(element)) {
       return
     }
@@ -63,7 +65,10 @@ export class BeamEmbedHelper {
     const linkElements = element.querySelectorAll('a[href*="/status/"]')
     // return the href of the first element in NodeList
     const href = linkElements?.[0].href
-    return `<a href="${href}">${href}</a>`
+    const anchor = win.document.createElement("a")
+    anchor.setAttribute("href", href)
+    anchor.innerText = href
+    return anchor
   }
   /**
    * Returns if the provided element is a tweet. Should only be run on twitter.com
