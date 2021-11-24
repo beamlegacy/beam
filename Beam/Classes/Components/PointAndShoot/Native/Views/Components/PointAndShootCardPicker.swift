@@ -136,7 +136,7 @@ struct PointAndShootCardPicker: View {
                             )
                         )
                     } else if completedGroup?.confirmation == .success {
-                        Text(getFinalCardName())
+                        Text(destinationCardName ?? getFinalCardName())
                             .foregroundColor(BeamColor.Beam.swiftUI)
                             .font(BeamFont.regular(size: 13).swiftUI)
                             .transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.1)))
@@ -349,7 +349,9 @@ extension PointAndShootCardPicker {
         guard !completed else { return }
         shootCompleted = true
         // Select search result
-        selectSearchResult(withCommand)
+        if withCommand {
+            selectSearchResult(withCommand)
+        }
         // if cardname is either "Today" or todays date e.g. "21 September 2021" we should create a journal note
         if !withCommand,
            let date = autocompleteModel.getDateForCardReplacementJournalNote(cardSearchField) {
