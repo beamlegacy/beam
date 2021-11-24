@@ -119,7 +119,7 @@ extension BeamObjectRequest {
         }
 
         if sameChecksum {
-            Logger.shared.logWarning("Sent checksum and previousChecksum, some objects in this network call could have been avoided.",
+            Logger.shared.logWarning("Some objects have the same checksum and previousChecksum, they could have been avoided.",
                                      category: .beamObjectNetwork)
         }
 
@@ -268,6 +268,7 @@ extension BeamObjectRequest {
                     let decryptedObjects: [BeamObject] = try beamObjects.compactMap {
                         do {
                             try $0.decrypt()
+                            try $0.setTimestamps()
                             return $0
                         } catch EncryptionManagerError.authenticationFailure {
                             Logger.shared.logError("Can't decrypt \($0)", category: .beamObjectNetwork)
@@ -320,6 +321,7 @@ extension BeamObjectRequest {
             case .success(let fetchBeamObject):
                 do {
                     try fetchBeamObject.decrypt()
+                    try fetchBeamObject.setTimestamps()
                 } catch {
                     // Will catch decrypting errors
                     completionHandler(.failure(error))

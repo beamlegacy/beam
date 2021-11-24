@@ -253,8 +253,11 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
                         expect(APIRequest.callsCount - networkCalls) == 1
 
-                        expect(object) == (try beamObjectHelper.fetchOnAPI(object.beamObjectId))
-                        expect(object2) == (try beamObjectHelper.fetchOnAPI(object2.beamObjectId))
+                        let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object.beamObjectId)
+                        let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2.beamObjectId)
+
+                        expect(object) == remoteObject1
+                        expect(object2) == remoteObject2
 
                         // `previousChecksum` should be set on returned objects
                         let beamObject = try BeamObject(object, MyRemoteObject.beamObjectTypeName)
@@ -453,8 +456,11 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                                 // update_beam_object + beam_object + beam_object + update_beam_object
                                 expect(APIRequest.callsCount - networkCalls) == 4
 
-                                expect(object) == (try beamObjectHelper.fetchOnAPI(object.beamObjectId))
-                                expect(object2) == (try beamObjectHelper.fetchOnAPI(object2.beamObjectId))
+                                let fetchedObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object.beamObjectId)
+                                let fetchedObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2.beamObjectId)
+
+                                expect(object) == fetchedObject1
+                                expect(object2) == fetchedObject2
 
                                 let remoteBeamObject = returnedBeamObjects.first(where: { $0.id == object.beamObjectId })
                                 let remoteBeamObject2 = returnedBeamObjects.first(where: { $0.id == object2.beamObjectId })

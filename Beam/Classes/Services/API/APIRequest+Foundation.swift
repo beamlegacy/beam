@@ -98,7 +98,8 @@ extension APIRequest {
                     completionHandler(.success(value))
                 }
             } catch {
-                Logger.shared.logError("Can't parse \(data?.asString ?? "-")", category: .network)
+                Logger.shared.logError("Can't parse into \(T.self): \(data?.asString ?? "-")", category: .network)
+                Logger.shared.logError(error.localizedDescription, category: .network)
                 self.backgroundQueue.async {
                     completionHandler(.failure(error))
                 }
