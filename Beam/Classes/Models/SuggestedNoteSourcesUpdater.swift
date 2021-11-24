@@ -119,9 +119,8 @@ public class SuggestedNoteSourceUpdater {
         return (sourcesToAdd: sourcesToAdd, sourcesToRemove: sourcesToRemove)
     }
 
-    
     func getSimilarityForSuggestion(suggestionPageId: UUID, noteId: UUID, activeSources: [UUID: [UUID]], similarities: [UUID: [UUID: Double]]) -> Double? {
-        var finalSimilarity: Double? = nil
+        var finalSimilarity: Double?
         finalSimilarity = similarities[noteId]?[suggestionPageId]
         for pageId in (activeSources[noteId] ?? [UUID]()) {
             if let similarity = similarities[pageId]?[suggestionPageId] {

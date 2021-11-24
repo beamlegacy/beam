@@ -810,6 +810,7 @@
 		A5D21FD026974BA500250A6A /* CalendarPickerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5D21FCF26974BA500250A6A /* CalendarPickerViewModel.swift */; };
 		A5D21FD926974C0200250A6A /* CalendarMonthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5D21FD826974C0200250A6A /* CalendarMonthView.swift */; };
 		A5D6250A26034B1C00A3E676 /* FormatterViewBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5D6250926034B1C00A3E676 /* FormatterViewBackground.swift */; };
+		A5D88596274E919300F37859 /* NodeHeaderViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5D88595274E919300F37859 /* NodeHeaderViewModel.swift */; };
 		A5DE141C26491F840023F753 /* WKWebview+Zoom.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5DE141B26491F840023F753 /* WKWebview+Zoom.swift */; };
 		A5DE143226496F250023F753 /* NoteHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5DE143126496F250023F753 /* NoteHeaderView.swift */; };
 		A5DE86A42692AEEC00E05C20 /* BeamWindow+NSMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5DE86A32692AEEC00E05C20 /* BeamWindow+NSMenu.swift */; };
@@ -1890,6 +1891,7 @@
 		A5D21FCF26974BA500250A6A /* CalendarPickerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarPickerViewModel.swift; sourceTree = "<group>"; };
 		A5D21FD826974C0200250A6A /* CalendarMonthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarMonthView.swift; sourceTree = "<group>"; };
 		A5D6250926034B1C00A3E676 /* FormatterViewBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatterViewBackground.swift; sourceTree = "<group>"; };
+		A5D88595274E919300F37859 /* NodeHeaderViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NodeHeaderViewModel.swift; sourceTree = "<group>"; };
 		A5DE141B26491F840023F753 /* WKWebview+Zoom.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WKWebview+Zoom.swift"; sourceTree = "<group>"; };
 		A5DE143126496F250023F753 /* NoteHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteHeaderView.swift; sourceTree = "<group>"; };
 		A5DE86A32692AEEC00E05C20 /* BeamWindow+NSMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamWindow+NSMenu.swift"; sourceTree = "<group>"; };
@@ -2831,6 +2833,7 @@
 			children = (
 				418171D52581107C00317ED8 /* NoteView.swift */,
 				A5DE143126496F250023F753 /* NoteHeaderView.swift */,
+				A5D88595274E919300F37859 /* NodeHeaderViewModel.swift */,
 				A587690326FA0E8200E8CC93 /* NoteHeaderPublishButton.swift */,
 			);
 			path = Notes;
@@ -5565,6 +5568,7 @@
 				522D48A62719D1F20038DB81 /* LoggerSplitViewController.swift in Sources */,
 				0325629326051D3B006513E4 /* RBKVO.m in Sources */,
 				032562FD26051DCB006513E4 /* RBMockClient.m in Sources */,
+				A5D88596274E919300F37859 /* NodeHeaderViewModel.swift in Sources */,
 				96FD761B25B1C43500B04ED3 /* BrowsingNodeWidget.swift in Sources */,
 				521EEDFB2593927100BA2485 /* Int+ByteSize.swift in Sources */,
 				33AC9D8E26AF482E004E7EF4 /* EnhancedWebView.swift in Sources */,

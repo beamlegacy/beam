@@ -79,7 +79,7 @@ extension AutocompleteManager {
     }
 
     private func autocompleteNotesContentsResults(for query: String) -> Future<[AutocompleteResult], Error> {
-        Future { [weak beamData] promise in
+        Future { promise in
             GRDBDatabase.shared.search(matchingAllTokensIn: query, maxResults: 10, frecencyParam: AutocompleteManager.noteFrecencyParamKey) { result in
                 switch result {
                 case .failure(let error): promise(.failure(error))
@@ -166,7 +166,7 @@ extension AutocompleteManager {
     }
 
     private func autocompleteCanCreateNoteResult(for query: String) -> Future<Bool, Error> {
-        Future { [weak self, query] promise in
+        Future { promise in
             let documentManager = DocumentManager()
             documentManager.loadDocumentByTitle(title: query) { result in
                 switch result {

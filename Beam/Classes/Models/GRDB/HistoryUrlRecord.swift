@@ -55,7 +55,7 @@ extension HistoryUrlRecord: MutablePersistableRecord {
     }
 
     // Update auto-incremented id upon successful insertion
-    mutating func didInsert(with rowID: UUID, for column: String?) {
-        id = rowID
+    mutating func didInsert(with rowID: Int64, for column: String?) {
+//        id = rowID
     }
 }

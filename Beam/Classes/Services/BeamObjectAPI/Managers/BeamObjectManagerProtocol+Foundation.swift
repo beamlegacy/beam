@@ -26,8 +26,8 @@ extension BeamObjectManagerDelegate {
         }
     }
 
-    // swiftlint:disable:next function_body_length
     @discardableResult
+    // swiftlint:disable:next function_body_length
     func saveOnBeamObjectsAPI(_ objects: [BeamObjectType],
                               deep: Int = 0,
                               refreshPreviousChecksum: Bool = true,

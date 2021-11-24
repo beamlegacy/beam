@@ -37,8 +37,7 @@ class ImageNode: ResizableNode {
             Logger.shared.logError("ImageNode can only handle image elements, not \(element.kind)", category: .noteEditor)
             return
         }
-        guard let imageRecord = try? BeamFileDBManager.shared.fetch(uid: uid)
-        else {
+        guard let imageRecord = try? BeamFileDBManager.shared.fetch(uid: uid) else {
             Logger.shared.logError("ImageNode unable to fetch image '\(uid)' from FileDB", category: .noteEditor)
             return
         }
@@ -71,10 +70,7 @@ class ImageNode: ResizableNode {
             imageLayer = Layer.image(named: "image", image: image, size: CGSize(width: width, height: height))
         }
 
-        imageLayer.layer.cornerRadius = cornerRadius
-        imageLayer.layer.masksToBounds = true
-        imageLayer.layer.zPosition = 1
-        addLayer(imageLayer, origin: .zero)
+        setupImageLayer(imageLayer)
 
         setAccessibilityLabel("ImageNode")
         setAccessibilityRole(.textArea)
@@ -83,10 +79,16 @@ class ImageNode: ResizableNode {
 
         setupFocusLayer()
         setupResizeHandleLayer()
-
         if URL(string: self.elementText.text) != nil {
             setupSourceButtonLayer()
         }
+    }
+
+    private func setupImageLayer(_ imageLayer: Layer) {
+        imageLayer.layer.cornerRadius = cornerRadius
+        imageLayer.layer.masksToBounds = true
+        imageLayer.layer.zPosition = 1
+        addLayer(imageLayer, origin: .zero)
     }
 
     private func createImage(from imageRecord: BeamFileRecord) -> NSImage? {
