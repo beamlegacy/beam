@@ -84,11 +84,7 @@ class ResizableNode: ElementNode {
         let handle = Layer(name: "handle", layer: handleLayer) { [weak self] info in
             if info.event.clickCount == 2 {
                 guard let elementSize = self?.resizableElementContentSize else { return false }
-                if self?.visibleSize.width == self?.smallestWidth(for: elementSize) {
-                    self?.desiredWidthRatio = 1.0
-                } else {
-                    self?.desiredWidthRatio = 0.0
-                }
+                self?.desiredWidthRatio = self?.visibleSize.width == self?.smallestWidth(for: elementSize) ? 1.0 : 0.0
                 self?.invalidateLayout(animated: true)
                 return true
             }

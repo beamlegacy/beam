@@ -497,15 +497,13 @@ public class TextNode: ElementNode {
         if selfVisible {
             size = textRect.size
 
-            if self as? TextRoot == nil {
-                switch elementKind {
-                case .heading(1):
-                    size.height += PreferencesManager.editorHeaderOneSize
-                case .heading(2):
-                    size.height += PreferencesManager.editorHeaderTwoSize
-                default:
-                    size.height -= 5
-                }
+            switch elementKind {
+            case .heading(1):
+                size.height += PreferencesManager.editorHeaderOneSize
+            case .heading(2):
+                size.height += PreferencesManager.editorHeaderTwoSize
+            default:
+                size.height -= 5
             }
         }
 

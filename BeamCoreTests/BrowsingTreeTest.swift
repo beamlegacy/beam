@@ -152,6 +152,8 @@ class BrowsingTreeTest: XCTestCase {
         mapping[current.link] = "www.chocolate.com"
         XCTAssertEqual(tree.idUrlMapping, mapping)
     }
+
+    //swiftlint:disable:next function_body_length
     func testUrlIdMigration() throws {
         //Checks that a tree bearing legacy Uint64 urlId can be decoded and detected as legacy
         var legacyJson = """
