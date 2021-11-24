@@ -15,15 +15,36 @@ enum EmbedContentError: Error, Equatable {
 }
 
 struct EmbedContent {
-    enum EmbedContentType {
+    /// oEmbed compliant media type
+    enum MediaType: String {
+        @available(*, deprecated, message: "Use link instead")
         case url
+        @available(*, deprecated, message: "Use photo instead")
         case image
+        @available(*, deprecated, message: "Use rich instead")
         case page
+        @available(*, deprecated, message: "Use rich instead")
+        case audio
+
+        case video
+        case photo
+        case link
+        // aka: HTML string to be embedded in WebView
+        case rich
     }
+    // Title of page where the original content was found, likely improved with OpenGraph or
+    // twitter meta information. If no useful title can be found it defaults to sourceURL
+    var title: String
+    // Type of embedded content, used to determine display strategy
+    var type: MediaType
+    // URL where the original content can be found
     var sourceURL: URL
-    var type: EmbedContentType
+    // URL used for displaying embedded content
     var embedURL: URL?
-    var embedContent: String?
+    // HTML content used for embedding in WebView
+    var html: String?
+    // URL to thumbnail image, usually the favicon of the embed service
+    var thumbnail: URL?
 }
 
 private class EmbedContentCache {
@@ -146,7 +167,7 @@ struct EmbedContentLocalStrategy: EmbedContentStrategy {
         }
         var result: EmbedContent?
         if let embedURL = embedURL {
-            result = EmbedContent(sourceURL: url, type: .url, embedURL: embedURL)
+            result = EmbedContent(title: url.absoluteString, type: .url, sourceURL: url, embedURL: embedURL)
         }
         completion(result, result == nil ? .notEmbeddable : nil)
     }
@@ -183,7 +204,7 @@ struct EmbedContentAPIStrategy: EmbedContentStrategy {
 
     private struct EmbedAPIResult: Codable {
         var url: String
-        var title: String?
+        var title: String
         var thumbnail: String?
         var html: String?
         var type: String?
@@ -213,7 +234,7 @@ struct EmbedContentAPIStrategy: EmbedContentStrategy {
                 type = cachedItem.type
             } else {
                 url = try values.decode(String.self, forKey: .url)
-                title = try? values.decode(String.self, forKey: .title)
+                title = try values.decode(String.self, forKey: .title)
                 thumbnail = try? values.decode(String.self, forKey: .thumbnail)
                 html = try? values.decode(String.self, forKey: .html)
                 type = try? values.decode(String.self, forKey: .type)
@@ -246,6 +267,7 @@ struct EmbedContentAPIStrategy: EmbedContentStrategy {
             var error: EmbedContentError?
             var embedContent: EmbedContent?
             switch result {
+            // swiftlint:disable:next empty_enum_arguments
             case .failure(_):
                 error = .notEmbeddable
             case .success(let results):
@@ -259,16 +281,29 @@ struct EmbedContentAPIStrategy: EmbedContentStrategy {
         }
     }
 
+    private func getThumbnailURL(url: String?) -> URL? {
+        guard let url = url,
+              let imageUrl = URL(string: url) else {
+                  return nil
+              }
+        return imageUrl
+    }
+
     private func embedAPIResultToContent(_ apiResult: EmbedAPIResult, sourceURL: URL) -> EmbedContent? {
-        let urlString = apiResult.url
-        let url = URL(string: urlString)
-        if apiResult.type == "image", let thumbnailString = apiResult.thumbnail, let imageURL = URL(string: thumbnailString) ?? url {
-            return EmbedContent(sourceURL: sourceURL, type: .image, embedURL: imageURL)
-        } else if let html = apiResult.html {
-            return EmbedContent(sourceURL: sourceURL, type: .page, embedContent: html)
-        } else if let url = url {
-            return EmbedContent(sourceURL: sourceURL, type: .url, embedURL: url)
-        }
-        return nil
+        let title = apiResult.title
+
+        guard let rawType = apiResult.type,
+              let typeEnum = EmbedContent.MediaType(rawValue: rawType),
+              let url = URL(string: apiResult.url) else {
+                  if let url = URL(string: apiResult.url) {
+                      // if we have no matching MediaType, for example when `apiResult.type` is `text/html`, default to MediaType.url
+                      return EmbedContent(title: apiResult.title, type: .url, sourceURL: sourceURL, embedURL: url)
+                  }
+                  return nil
+              }
+
+        let thumbnail = getThumbnailURL(url: apiResult.thumbnail) ?? url
+        let embed = EmbedContent(title: title, type: typeEnum, sourceURL: sourceURL, embedURL: url, html: apiResult.html, thumbnail: thumbnail)
+        return embed
     }
 }
