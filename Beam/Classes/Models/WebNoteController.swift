@@ -179,22 +179,26 @@ class WebNoteController: Encodable, Decodable {
        - url:
      */
     func setContents(url: URL, text: String? = nil) {
-        let beamText = element.text
-        let titleStr = text ?? beamText.text
-        let name = titleStr.isEmpty ? url.absoluteString : titleStr
-        if currentElementIsSimple() {
-            var range = beamText.ranges[0]
-            let attributes = range.attributes
-            if attributes.isEmpty {    // New contents?
-                element.text = BeamText(text: name, attributes: [.link(url.absoluteString)])
-            } else if name == range.string {
-                range.attributes = [.link(url.absoluteString)]
-            } else {
-                let attr: BeamText.Attribute = attributes[0]
-                if case .link(url.absoluteString) = attr {
-                    element.text = BeamText(text: name, attributes: attributes)
-                }
-            }
+        guard currentElementIsSimple(), let range = element.text.ranges.first else {
+            return
         }
+
+        let name = getContentName(url: url, text: text)
+        var attributes = range.attributes
+        let alreadyHadLink = attributes.contains(where: { $0 == .link(url.absoluteString) })
+
+        if !alreadyHadLink || name != range.string {
+            // let updatedAttributed = range.attributes + [.link(url.absoluteString)]
+            attributes.append(.link(url.absoluteString))
+            element.text = BeamText(text: name, attributes: attributes)
+        }
+    }
+
+    private func getContentName(url: URL, text: String? = nil) -> String {
+        var titleStr = element.text.text
+        if let text = text, !text.isEmpty {
+            titleStr = text
+        }
+        return titleStr.isEmpty ? url.absoluteString : titleStr
     }
 }

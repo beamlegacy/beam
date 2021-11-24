@@ -316,8 +316,8 @@ class PointAndShoot: WebPageHolder, ObservableObject {
             self.data.noteFrecencyScorer.update(id: targetNote.id, value: 1.0, eventType: .notePointAndShoot, date: BeamDate.now, paramKey: .note30d1)
             // Add all quotes to source Note
 
-            let shouldAddToSource = shouldAddToSourceNote(elements)
-            if let destinationElement = self.page.addToNote(allowSearchResult: true, inSourceBullet: shouldAddToSource) {
+            let addWithSourceBullet = shouldAddWithSourceBullet(elements)
+            if let destinationElement = self.page.addToNote(allowSearchResult: true, inSourceBullet: addWithSourceBullet) {
                 if let noteText = noteText, !noteText.isEmpty,
                    let lastQuote = elements.last {
                     // Append NoteText last quote
@@ -404,13 +404,19 @@ class PointAndShoot: WebPageHolder, ObservableObject {
     //This variable could be migrated as a preference if we want. Setting to true gives the original PnS behavior
     var embedMediaInSourceBullet = false
 
-    private func shouldAddToSourceNote(_ elements: [BeamElement]) -> Bool {
-        guard !embedMediaInSourceBullet else { return true }
+    /// Decides if this set of elements should be inserted with a source bullet
+    /// - Parameter elements: Array of BeamElement content
+    /// - Returns: true if elements should be added under a source bullen
+    private func shouldAddWithSourceBullet(_ elements: [BeamElement]) -> Bool {
+        guard !embedMediaInSourceBullet,
+              let first = elements.first,
+                elements.count == 1 else { return true }
 
-        if let first = elements.first, elements.count == 1, first.kind.isMedia {
+        // A single Image should be inserted without source bullet
+        if first.kind.isMedia {
             return false
-        } else {
-            return true
         }
+
+        return true
     }
 }
