@@ -6,13 +6,13 @@ class LoggerRecorder {
     public static var shared = LoggerRecorder()
 
     public init() {
-        Logger.shared.callback = { (message, level, category, duration) in
+        Logger.shared.callback = { (message, level, category, thread, duration) in
             let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
 
             context.perform {
                 let logEntry = LogEntry(context: context)
                 logEntry.created_at = BeamDate.now
-                logEntry.log = message
+                logEntry.log = "[\(thread)] \(message)"
                 logEntry.category = category.rawValue
                 logEntry.level = self.logType(level)
                 logEntry.duration = nil

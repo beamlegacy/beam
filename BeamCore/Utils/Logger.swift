@@ -67,7 +67,7 @@ public final class Logger {
 
     private var subsystem = "beam"
 
-    public var callback: ((String, OSLogType, LogCategory, TimeInterval?) -> Void)?
+    public var callback: ((String, OSLogType, LogCategory, String, TimeInterval?) -> Void)?
 
     // If you want to change this for you and uncluter your console logs, add into `.envrc.private`:
     // export HIDE_CATEGORIES="web documentDebug javascript pointAndShoot coredataDebug"
@@ -169,7 +169,11 @@ public final class Logger {
             timeDiff = BeamDate.now.timeIntervalSince(localTimer)
         }
 
-        callback?(message, level, category, timeDiff)
+        var tid: UInt64 = 0
+        pthread_threadid_np(nil, &tid)
+        let threadName = Thread.isMainThread ? "main" : "\(tid)"
+
+        callback?(message, level, category, threadName, timeDiff)
 
         #if DEBUG
         if hideCategories.contains(category) { return }

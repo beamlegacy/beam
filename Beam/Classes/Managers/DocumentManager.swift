@@ -437,7 +437,8 @@ public class DocumentManager: NSObject {
                 logConstraintConflict(error)
             case 133020:
                 // Saving a version of NSManagedObject which is outdated
-                Logger.shared.logError("Couldn't save context because the object is outdated and more recent in CoreData: \(error)", category: .coredata)
+                Logger.shared.logError("Couldn't save context because the object is outdated and more recent in CoreData: \(error)",
+                                       category: .coredata)
                 logMergeConflict(error)
             default:
                 Logger.shared.logError("Couldn't save context: \(error)", category: .coredata)
