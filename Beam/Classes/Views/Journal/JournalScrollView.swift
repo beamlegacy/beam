@@ -140,18 +140,23 @@ class ScrollViewContentWatcher: NSObject {
     private let data: BeamData
     private var dataSource: [BeamNote]
     var onScroll: ((CGPoint) -> Void)?
+    weak var contentView: NSClipView?
 
     init(with scrollView: NSScrollView, data: BeamData, dataSource: [BeamNote]) {
         self.data = data
         self.dataSource = dataSource
 
         super.init()
-        let contentView = scrollView.contentView
-        contentView.postsBoundsChangedNotifications = true
+        contentView = scrollView.contentView
+        contentView?.postsBoundsChangedNotifications = true
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(contentOffsetDidChange(notification:)),
                                                name: NSView.boundsDidChangeNotification,
                                                object: contentView)
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(defaultDatabaseDidChange(notification:)),
+                                               name: .defaultDatabaseUpdate,
+                                               object: nil)
     }
 
     @objc private func contentOffsetDidChange(notification: Notification) {
@@ -172,6 +177,18 @@ class ScrollViewContentWatcher: NSObject {
             loadMore()
         }
         onScroll?(clipView.bounds.origin)
+    }
+
+    @objc private func defaultDatabaseDidChange(notification: Notification) {
+        guard let clipView = contentView,
+              let scrollView = clipView.superview as? NSScrollView,
+              let documentView = scrollView.documentView as? JournalStackView else { return }
+
+        BeamNote.clearCancellables()
+        documentView.invalidateLayout()
+        documentView.removeChildViews()
+        data.reloadJournal()
+        documentView.layout()
     }
 
     private func loadMore() {
