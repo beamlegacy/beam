@@ -187,7 +187,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
             guard let id = currentId else { return }
             if tabToIndex.shouldBeIndexed {
                 self.clusteringManager.addPage(id: id, parentId: parentId, value: tabToIndex)
-                LinkStore.shared.visit(url: tabToIndex.url.string, title: tabToIndex.document.title)
+                LinkStore.shared.visit(tabToIndex.url.string, title: tabToIndex.document.title)
             }
 
             // Update history record

@@ -19,12 +19,12 @@ struct IndexDocument: Codable {
 
 extension IndexDocument {
     init(source: String, title: String, language: NLLanguage? = nil, contents: String, outboundLinks: [String] = []) {
-        self.id = LinkStore.createIdFor(source, title: title)
+        self.id = LinkStore.getOrCreateIdFor(source, title: title)
         self.title = title
         self.language = language ?? (NLLanguageRecognizer.dominantLanguage(for: contents) ?? .undetermined)
         self.outboundLinks = outboundLinks.compactMap({ link -> UUID? in
             // Only register links that points to cards or to pages we have really visited:
-            guard let id = LinkStore.getIdFor(link) else { return nil }
+            let id = LinkStore.getOrCreateIdFor(link)
 //            guard LinkStore.isInternalLink(id: id) else { return nil }
             return id
         })
