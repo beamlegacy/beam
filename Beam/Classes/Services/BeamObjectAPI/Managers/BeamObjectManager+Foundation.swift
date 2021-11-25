@@ -103,14 +103,14 @@ extension BeamObjectManager {
 
         group.wait()
 
-        guard errors.isEmpty else {
-            throw BeamObjectManagerError.multipleErrors(errors)
-        }
-
         if mostRecentUpdatedAtChanged {
             Logger.shared.logDebug("Updating last_updated_at from \(String(describing: Persistence.Sync.BeamObjects.last_updated_at)) to \(mostRecentUpdatedAt)",
                                    category: .beamObjectNetwork)
             Persistence.Sync.BeamObjects.last_updated_at = mostRecentUpdatedAt
+        }
+
+        guard errors.isEmpty else {
+            throw BeamObjectManagerError.multipleErrors(errors)
         }
 
         return savedObjects
