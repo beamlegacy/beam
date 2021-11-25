@@ -205,7 +205,10 @@ public class BrowsingNode: ObservableObject, Codable {
             isForeground = false
             if let lastStartReading = lastStartReading {
                 let readingTime = Float(date.timeIntervalSince(lastStartReading))
-                tree.frecencyScorer?.update(id: link, value: readingTime, eventType: visitType, date: lastStartReading, paramKey: .webReadingTime30d0)
+                if let scorer = tree.frecencyScorer {
+                    scorer.update(id: link, value: readingTime, eventType: visitType, date: lastStartReading, paramKey: .webReadingTime30d0)
+                    Self.updateDomainFrecency(scorer: scorer, id: link, value: readingTime, date: lastStartReading, paramKey: .webReadingTime30d0)
+                }
                 self.lastStartReading = nil
             }
         }
@@ -224,6 +227,14 @@ public class BrowsingNode: ObservableObject, Codable {
         return isLinkActivation ? .webLinkActivation : .webSearchBar
     }
 
+    private static func updateDomainFrecency(scorer: FrecencyScorer, id: UUID, value: Float, date: Date, paramKey: FrecencyParamKey) {
+        if let isDomain = LinkStore.shared.isDomain(id: id),
+            !isDomain,
+            let domainId = LinkStore.shared.getDomainId(id: id) {
+            scorer.update(id: domainId, value: value, eventType: .webDomainIncrement, date: date, paramKey: paramKey)
+        }
+    }
+
     public init(tree: BrowsingTree, parent: BrowsingNode?, url: String, title: String?, isLinkActivation: Bool) {
         id = UUID()
         self.link = LinkStore.createIdFor(url, title: title)
@@ -233,9 +244,10 @@ public class BrowsingNode: ObservableObject, Codable {
         let creationDate = events.first?.date
         score.lastCreationDate = creationDate
         longTermScoreApply { $0.lastCreationDate = creationDate }
-        if let creationDate = creationDate {
-            tree.frecencyScorer?.update(id: link, value: 1, eventType: visitType, date: creationDate, paramKey: .webVisit30d0)
-        }
+        if let creationDate = creationDate, let scorer = tree.frecencyScorer {
+            scorer.update(id: link, value: 1, eventType: visitType, date: creationDate, paramKey: .webVisit30d0)
+            Self.updateDomainFrecency(scorer: scorer, id: link, value: 1, date: creationDate, paramKey: .webVisit30d0)
+            }
         longTermScoreApply { $0.visitCount += 1 }
     }
 
