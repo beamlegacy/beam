@@ -13,19 +13,25 @@ struct AutocompleteList: View {
     @Binding var selectedIndex: Int?
     @Binding var elements: [AutocompleteResult]
     var modifierFlagsPressed: NSEvent.ModifierFlags?
+    var designV2 = false
 
-    private let itemHeight: CGFloat = 32
     @State private var hoveredItemIndex: Int?
 
     var body: some View {
         VStack(spacing: 0) {
             ForEach(elements) { i in
-                return AutocompleteItem(item: i, selected: isSelectedItem(i),
-                                        colorPalette: i.source == .createCard ?
-                                            AutocompleteItemColorPalette(informationTextColor: BeamColor.Autocomplete.newCardSubtitle) :
-                                            AutocompleteItem.defaultColorPalette,
-                                        additionalLeadingPadding: BeamSpacing._40)
-                    .frame(height: itemHeight)
+                if designV2 && i.source == .createCard {
+                    Separator(horizontal: true)
+                        .padding(.vertical, BeamSpacing._60)
+                }
+                AutocompleteItem(item: i, selected: isSelectedItem(i),
+                                 colorPalette: i.source == .createCard ?
+                                 AutocompleteItemColorPalette(informationTextColor: BeamColor.Autocomplete.newCardSubtitle) :
+                                    AutocompleteItem.defaultColorPalette,
+                                 additionalLeadingPadding: designV2 ? 0 : BeamSpacing._40,
+                                 designV2: designV2)
+                    .frame(height: designV2 ? 36 : 32)
+                    .padding(.horizontal, designV2 ? BeamSpacing._60 : 0)
                     .simultaneousGesture(
                         TapGesture(count: 1).onEnded {
                             selectedIndex = indexFor(item: i)
@@ -42,12 +48,15 @@ struct AutocompleteList: View {
                     }
             }
         }
+        .padding(.vertical, designV2 ? BeamSpacing._60 : 0)
         .animation(nil)
         .frame(maxWidth: .infinity, alignment: .top)
     }
 
     func isSelectedItem(_ item: AutocompleteResult) -> Bool {
-        if modifierFlagsPressed?.contains(.command) == true {
+        if designV2 && modifierFlagsPressed?.contains(.option) == true {
+            return item.source == .createCard
+        } else if !designV2 && modifierFlagsPressed?.contains(.command) == true {
             return item.source == .createCard
         } else if let i = selectedIndex, i < elements.count, elements[i] == item {
             return true
@@ -68,10 +77,12 @@ struct AutocompleteList: View {
 
 struct AutocompleteList_Previews: PreviewProvider {
     static var elements = [
-        AutocompleteResult(text: "prout", source: .autocomplete),
-        AutocompleteResult(text: "asldkfjh sadlkfjh", source: .autocomplete),
-        AutocompleteResult(text: "bleh blehbleh", source: .autocomplete)]
+        AutocompleteResult(text: "Search Result 1", source: .autocomplete),
+        AutocompleteResult(text: "Search Result 2", source: .autocomplete),
+        AutocompleteResult(text: "Site Visited", source: .history, url: URL(string: "https://apple.com")),
+        AutocompleteResult(text: "result.com", source: .url),
+        AutocompleteResult(text: "My Own Card", source: .createCard)]
     static var previews: some View {
-        AutocompleteList(selectedIndex: .constant(1), elements: .constant(Self.elements), modifierFlagsPressed: nil)
+        AutocompleteList(selectedIndex: .constant(1), elements: .constant(Self.elements), modifierFlagsPressed: nil, designV2: true)
     }
 }
