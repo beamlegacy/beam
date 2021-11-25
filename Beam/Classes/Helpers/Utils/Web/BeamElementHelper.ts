@@ -106,6 +106,27 @@ export class BeamElementHelper {
   }
 
   /**
+   * Converts an element src with srcset to an img element with the currentSrc as src.
+   *
+   * @static
+   * @param {BeamElement} element
+   * @param {BeamWindow<any>} win
+   * @return {*}  {BeamHTMLElement}
+   * @memberof BeamElementHelper
+   */
+  static parseImageForSrcset(element: BeamElement, win: BeamWindow<any>): BeamHTMLElement {
+    const hasSrcset = Boolean(element.srcset)
+    const currentSrc = element.currentSrc
+    if (!hasSrcset || !currentSrc) {
+      return null
+    }
+
+    const img = win.document.createElement("img")
+    img.setAttribute("src", currentSrc)
+    return img
+  }
+
+  /**
    * If element has anchor tag as parent, wrap element in anchor tag
    *
    * @static
@@ -160,6 +181,11 @@ export class BeamElementHelper {
     const convertedToImage = BeamElementHelper.parseBackgroundImageToImageElement(element, win)
     if (convertedToImage) {
       return convertedToImage
+    }
+
+    const parsedForSRCSET = BeamElementHelper.parseImageForSrcset(element, win)
+    if (parsedForSRCSET) {
+      return parsedForSRCSET
     }
 
     // If we support embedding on the current location
