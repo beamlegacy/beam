@@ -16,13 +16,8 @@ class PinnedBrowserTabsManager {
         let title: String
     }
 
-    private static var PinnedTabsUserDefaultsKey: String {
-        #if TEST || DEBUG
-            return "PinnedTabsDebug"
-        #else
-            return "PinnedTabs"
-        #endif
-    }
+    @UserDefault(key: "PinnedTabs", defaultValue: Data(), suiteName: "PinnedBrowserTabsManager")
+    var pinnedTabsData: Data
 
     private var encoder: JSONEncoder {
         JSONEncoder()
@@ -32,8 +27,8 @@ class PinnedBrowserTabsManager {
     }
 
     private func getPinnedTabsInfos() throws -> [PinnedTabInfo] {
-        guard let data = UserDefaults.standard.value(forKey: Self.PinnedTabsUserDefaultsKey) as? Data else { return [] }
-        return try decoder.decode([PinnedTabInfo].self, from: data)
+        guard !pinnedTabsData.isEmpty else { return [] }
+        return try decoder.decode([PinnedTabInfo].self, from: pinnedTabsData)
     }
 
     func getPinnedTabs() -> [BrowserTab] {
@@ -58,7 +53,7 @@ class PinnedBrowserTabsManager {
                 return currentInfos.first { $0.tabId == tab.id } ?? PinnedTabInfo(tabId: tab.id, url: url, title: tab.title)
             }
             let data = try encoder.encode(newInfos)
-            UserDefaults.standard.set(data, forKey: Self.PinnedTabsUserDefaultsKey)
+            pinnedTabsData = data
         } catch {
             Logger.shared.logError("Couldn't encode pinned tabs", category: .web)
         }

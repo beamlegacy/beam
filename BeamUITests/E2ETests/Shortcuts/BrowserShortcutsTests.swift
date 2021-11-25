@@ -20,21 +20,28 @@ class BrowserShortcutsTests: BaseTest {
         BeamUITestsHelper(journalView.app).openTestPage(page: .password)
         testRailPrint("Given I open a web page")
         XCTAssertTrue(testPage.isPasswordPageOpened())
-        
+
+        BeamUITestsHelper(journalView.app).openTestPage(page: .password)
+        testRailPrint("Given I open a second web page")
+        XCTAssertTrue(testPage.isPasswordPageOpened())
+
         testRailPrint("Then I can open tabs using shortcuts")
-        helper.shortcutActionInvokeRepeatedly(action: .newTab, numberOfTimes: 9)
-        XCTAssertEqual(webView.getNumberOfTabs(), 10)
+        helper.shortcutActionInvokeRepeatedly(action: .newTab, numberOfTimes: 2)
+        XCTAssertEqual(webView.getNumberOfTabs(), 4)
         XCTAssertFalse(testPage.isPasswordPageOpened())
         
         testRailPrint("Then I can close tabs using shortcuts")
-        helper.shortcutActionInvokeRepeatedly(action: .closeTab, numberOfTimes: 9)
+        helper.shortcutActionInvokeRepeatedly(action: .closeTab, numberOfTimes: 3)
         XCTAssertEqual(webView.getNumberOfTabs(), 1)
         XCTAssertTrue(testPage.isPasswordPageOpened())
         
         testRailPrint("Then I can reopen tabs using shortcuts")
-        helper.shortcutActionInvokeRepeatedly(action: .reopenClosedTab, numberOfTimes: 5)
-        XCTAssertEqual(webView.getNumberOfTabs(), 6)
-        XCTAssertFalse(testPage.isPasswordPageOpened())
+        helper.shortcutActionInvokeRepeatedly(action: .reOpenClosedTab, numberOfTimes: 1)
+        XCTAssertEqual(webView.getNumberOfTabs(), 2)
+        XCTAssertTrue(testPage.isPasswordPageOpened())
+
+        helper.shortcutActionInvokeRepeatedly(action: .closeTab, numberOfTimes: webView.getNumberOfTabs())
+        XCTAssertEqual(webView.getNumberOfTabs(), 0)
     }
     
     func testJumpBetweenWebTabs() throws {
@@ -67,6 +74,9 @@ class BrowserShortcutsTests: BaseTest {
         
         helper.shortcutActionInvoke(action: .jumpToPreviousTab)
         XCTAssertTrue(self.isMediaPageOpened())
+
+        helper.shortcutActionInvokeRepeatedly(action: .closeTab, numberOfTimes: webView.getNumberOfTabs())
+        XCTAssertEqual(webView.getNumberOfTabs(), 0)
     }
     
     func testWebPageReload() {
@@ -86,6 +96,9 @@ class BrowserShortcutsTests: BaseTest {
         XCTAssertNotEqual(testPage.getInputValue(.password), emptyString)
         OmniBarTestView().clickRefreshButton()
         XCTAssertEqual(testPage.getInputValue(.password), emptyString)
+
+        helper.shortcutActionInvokeRepeatedly(action: .closeTab, numberOfTimes: webView.getNumberOfTabs())
+        XCTAssertEqual(webView.getNumberOfTabs(), 0)
     }
     
     func testReopenTabsCmdT() throws {
@@ -94,7 +107,7 @@ class BrowserShortcutsTests: BaseTest {
         let expectedTabsNumber = 3
         
         testRailPrint("Then nothing happens by default on CMD+T action")
-        helper.shortcutActionInvokeRepeatedly(action: .reopenClosedTab, numberOfTimes: 5)
+        helper.shortcutActionInvokeRepeatedly(action: .reOpenClosedTab, numberOfTimes: 5)
         
         testRailPrint("Given I open web pages")
         testHelper.openTestPage(page: .password)
@@ -107,11 +120,11 @@ class BrowserShortcutsTests: BaseTest {
         
         testRailPrint("Then tabs are reopened on app relaunch")
         journalView.waitForJournalViewToLoad()
-        helper.shortcutActionInvoke(action: .reopenClosedTab)
+        helper.shortcutActionInvoke(action: .reOpenClosedTab)
         XCTAssertTrue(WaitHelper().waitForCountValueEqual(timeout: minimumWaitTimeout, expectedNumber: expectedTabsNumber, elementQuery: webView.getTabs()))
         
         testRailPrint("Then no other tabs are reopened on additional CMD+T action")
-        helper.shortcutActionInvokeRepeatedly(action: .reopenClosedTab, numberOfTimes: 5)
+        helper.shortcutActionInvokeRepeatedly(action: .reOpenClosedTab, numberOfTimes: 5)
         XCTAssertTrue(WaitHelper().waitForCountValueEqual(timeout: minimumWaitTimeout, expectedNumber: expectedTabsNumber, elementQuery: webView.getTabs()))
         
         testRailPrint("When I close tabs")
@@ -119,10 +132,14 @@ class BrowserShortcutsTests: BaseTest {
         XCTAssertTrue(WaitHelper().waitForCountValueEqual(timeout: minimumWaitTimeout, expectedNumber: 1, elementQuery: webView.getTabs()))
         
         testRailPrint("Then no other tabs are reopened on one per CMD+T action")
-        helper.shortcutActionInvoke(action: .reopenClosedTab)
+        helper.shortcutActionInvoke(action: .reOpenClosedTab)
         XCTAssertTrue(WaitHelper().waitForCountValueEqual(timeout: minimumWaitTimeout, expectedNumber: 2, elementQuery: webView.getTabs()))
-        helper.shortcutActionInvoke(action: .reopenClosedTab)
+        helper.shortcutActionInvoke(action: .reOpenClosedTab)
         XCTAssertTrue(WaitHelper().waitForCountValueEqual(timeout: minimumWaitTimeout, expectedNumber: 3, elementQuery: webView.getTabs()))
+
+        //Clean tabs since restoreLastBeamSessionDefault is ON by default
+        helper.shortcutActionInvokeRepeatedly(action: .closeTab, numberOfTimes: webView.getNumberOfTabs())
+        XCTAssertEqual(webView.getNumberOfTabs(), 0)
     }
     
     func isMediaPageOpened() -> Bool {
