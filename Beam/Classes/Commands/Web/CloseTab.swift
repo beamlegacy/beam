@@ -93,6 +93,10 @@ class CloseTab: WebCommand {
               let data = self.tabData,
               let tab = decode(data: data) else { return false }
 
+        if context.browserTabsManager.tabs.contains(where: { $0.id == tab.id && $0.url == tab.preloadUrl }) {
+            // Doesn't needs to be undone since it's already existing
+            return true
+        }
         context.browserTabsManager.addNewTabAndGroup(tab, setCurrent: wasCurrentTab, withURL: tab.url, at: tabIndex)
         if tab.isPinned {
             context.browserTabsManager.pinTab(tab)

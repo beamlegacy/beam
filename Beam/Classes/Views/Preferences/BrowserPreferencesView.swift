@@ -272,7 +272,7 @@ struct TabsSection: View {
 //            .foregroundColor(BeamColor.Generic.text.swiftUI)
 
         Toggle(isOn: $restoreLastBeamSession) {
-            Text("Restore all tabs from last session when opening Beam")
+            Text("Restore all tabs from last session")
         }.toggleStyle(CheckboxToggleStyle())
             .font(BeamFont.regular(size: 13).swiftUI)
             .foregroundColor(BeamColor.Generic.text.swiftUI)

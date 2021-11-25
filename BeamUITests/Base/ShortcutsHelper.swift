@@ -52,7 +52,7 @@ class ShortcutsHelper {
         case newTab
         case closeTab
         case reloadPage
-        case reopenClosedTab
+        case reOpenClosedTab
         case jumpToNextTab
         case jumpToPreviousTab
         case jumpToLastTab
@@ -93,7 +93,7 @@ class ShortcutsHelper {
         case .newTab: invokeCMDKey("t")
         case .closeTab: invokeCMDKey("w")
         case .reloadPage: invokeCMDKey("r")
-        case .reopenClosedTab: invokeCMDShiftKey("t")
+        case .reOpenClosedTab: invokeCMDShiftKey("t")
         case .jumpToNextTab: invokeCMDShiftKey("]")
         case .jumpToPreviousTab: invokeCMDShiftKey("[")
         case .jumpToLastTab: invokeCMDKey("9")
