@@ -1760,7 +1760,7 @@ public extension CALayer {
 
     func addNoteSourceFrom(url: String) {
         guard let note = note as? BeamNote, let data = data else { return }
-        let urlId = LinkStore.createIdFor(url, title: nil)
+        let urlId = LinkStore.getOrCreateIdFor(url)
         note.sources.add(urlId: urlId, noteId: note.id, type: .user, sessionId: data.sessionId, activeSources: data.activeSources)
     }
     func addNoteSourceFrom(text: BeamText) {
