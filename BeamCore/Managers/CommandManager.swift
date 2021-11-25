@@ -144,7 +144,7 @@ public class CommandManager<Context> {
     }
 
     @discardableResult
-    public func run(command: Command<Context>, on context: Context?) -> Bool {
+    public func run(command: Command<Context>, on context: Context?, needsToBeSaved: Bool = true) -> Bool {
         runningCommandLevel += 1
         defer {
             runningCommandLevel -= 1
@@ -154,8 +154,10 @@ public class CommandManager<Context> {
         Logger.shared.logDebug("Run: \(command.name)", category: .commandManager)
         let done = command.run(context: context)
 
-        if done && !groupFailed {
+        if done && !groupFailed && needsToBeSaved {
             appendToDone(command: command)
+        } else if done && !groupFailed && !needsToBeSaved {
+            return done
         } else {
             Logger.shared.logDebug("\(command.name) run failed", category: .commandManager)
             guard groupCmd.isEmpty else {

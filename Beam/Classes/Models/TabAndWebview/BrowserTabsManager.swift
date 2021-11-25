@@ -314,10 +314,12 @@ extension BrowserTabsManager {
 
     func pinTab(_ tabToPin: BrowserTab) {
         updateIsPinned(for: tabToPin, isPinned: true)
+        removeTabFromGroup(tabId: tabToPin.id)
     }
 
     func unpinTab(_ tabToUnpin: BrowserTab) {
         updateIsPinned(for: tabToUnpin, isPinned: false)
+        createNewGroup(for: tabToUnpin.id)
     }
 }
 
