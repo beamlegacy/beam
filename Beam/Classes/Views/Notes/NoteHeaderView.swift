@@ -120,7 +120,7 @@ struct NoteHeaderView: View {
                                     action: {
                                         let canPerform = model.togglePublish { result in
                                             switch result {
-                                            case .success(_):
+                                            case .success:
                                                 break
                                             case .failure(let error):
                                                 handlePublicationError(error: error)
