@@ -885,6 +885,11 @@
 		B5BA078B26AF3EDF00D31FED /* BaseMenuBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BA078A26AF3EDF00D31FED /* BaseMenuBar.swift */; };
 		B5BA078D26B0027A00D31FED /* CardEditTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BA078C26B0027A00D31FED /* CardEditTests.swift */; };
 		B5C71D532716F4280028D495 /* UITestPagePasswordManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C71D522716F4280028D495 /* UITestPagePasswordManager.swift */; };
+		B5CDFF2D274E390500742CC9 /* OnboardingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CDFF2C274E390500742CC9 /* OnboardingTests.swift */; };
+		B5CDFF2F274E3FD600742CC9 /* OnboardingLandingTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CDFF2E274E3FD600742CC9 /* OnboardingLandingTestView.swift */; };
+		B5CDFF31274E400F00742CC9 /* OnboardingLandingViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CDFF30274E400F00742CC9 /* OnboardingLandingViewLocators.swift */; };
+		B5CDFF3A274EC83800742CC9 /* OnboardingUsernameTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CDFF39274EC83800742CC9 /* OnboardingUsernameTestView.swift */; };
+		B5CDFF3D274EC8B300742CC9 /* OnboardingUsernameViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CDFF3C274EC8B300742CC9 /* OnboardingUsernameViewLocators.swift */; };
 		B5DC1F8126B1975900A4C94B /* OmniBarLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DC1F8026B1975900A4C94B /* OmniBarLocators.swift */; };
 		B5DC1F8A26B19C8700A4C94B /* OmniBarTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DC1F8926B19C8700A4C94B /* OmniBarTestView.swift */; };
 		B5DC1FB526B928CA00A4C94B /* DateHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DC1FB426B928CA00A4C94B /* DateHelper.swift */; };
@@ -1973,6 +1978,11 @@
 		B5BA078A26AF3EDF00D31FED /* BaseMenuBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseMenuBar.swift; sourceTree = "<group>"; };
 		B5BA078C26B0027A00D31FED /* CardEditTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardEditTests.swift; sourceTree = "<group>"; };
 		B5C71D522716F4280028D495 /* UITestPagePasswordManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITestPagePasswordManager.swift; sourceTree = "<group>"; };
+		B5CDFF2C274E390500742CC9 /* OnboardingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingTests.swift; sourceTree = "<group>"; };
+		B5CDFF2E274E3FD600742CC9 /* OnboardingLandingTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingLandingTestView.swift; sourceTree = "<group>"; };
+		B5CDFF30274E400F00742CC9 /* OnboardingLandingViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingLandingViewLocators.swift; sourceTree = "<group>"; };
+		B5CDFF39274EC83800742CC9 /* OnboardingUsernameTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingUsernameTestView.swift; sourceTree = "<group>"; };
+		B5CDFF3C274EC8B300742CC9 /* OnboardingUsernameViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingUsernameViewLocators.swift; sourceTree = "<group>"; };
 		B5DC1F8026B1975900A4C94B /* OmniBarLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniBarLocators.swift; sourceTree = "<group>"; };
 		B5DC1F8926B19C8700A4C94B /* OmniBarTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniBarTestView.swift; sourceTree = "<group>"; };
 		B5DC1FB426B928CA00A4C94B /* DateHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateHelper.swift; sourceTree = "<group>"; };
@@ -4573,6 +4583,7 @@
 		B57A9B3326AB076C002C954D /* Locators */ = {
 			isa = PBXGroup;
 			children = (
+				B5CDFF3B274EC84F00742CC9 /* Onboarding */,
 				B5984C9B27031F6B00192B5F /* Preferences */,
 				B57A9B3A26AB08A5002C954D /* AllCardsViewLocators.swift */,
 				B5E8010B26AEA1F100C8BD61 /* JournalViewLocators.swift */,
@@ -4595,6 +4606,7 @@
 		B57A9B3426AB0774002C954D /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				B5CDFF38274EC82700742CC9 /* Onboarding */,
 				B5984C9827031F2200192B5F /* Preferences */,
 				B57A9B3C26AB08BC002C954D /* AllCardsTestView.swift */,
 				B5E8010926AEA1E100C8BD61 /* JournalTestView.swift */,
@@ -4617,6 +4629,7 @@
 		B57A9B3E26AB091A002C954D /* E2ETests */ = {
 			isa = PBXGroup;
 			children = (
+				B5CDFF26274E38E800742CC9 /* Onboarding */,
 				B5FAE2FA270ECF7100EAC8A3 /* Shortcuts */,
 				B5FAE2F1270ECEC500EAC8A3 /* Preferences */,
 				B51DC76526F44F5D0074ACCA /* PointAndShoot */,
@@ -4684,6 +4697,32 @@
 				B5C71D522716F4280028D495 /* UITestPagePasswordManager.swift */,
 			);
 			path = UITestWebMockPages;
+			sourceTree = "<group>";
+		};
+		B5CDFF26274E38E800742CC9 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				B5CDFF2C274E390500742CC9 /* OnboardingTests.swift */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
+		B5CDFF38274EC82700742CC9 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				B5CDFF2E274E3FD600742CC9 /* OnboardingLandingTestView.swift */,
+				B5CDFF39274EC83800742CC9 /* OnboardingUsernameTestView.swift */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
+		B5CDFF3B274EC84F00742CC9 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				B5CDFF30274E400F00742CC9 /* OnboardingLandingViewLocators.swift */,
+				B5CDFF3C274EC8B300742CC9 /* OnboardingUsernameViewLocators.swift */,
+			);
+			path = Onboarding;
 			sourceTree = "<group>";
 		};
 		B5DC1FC326B963D500A4C94B /* Downloads */ = {
@@ -6355,8 +6394,12 @@
 				B5DC1F8A26B19C8700A4C94B /* OmniBarTestView.swift in Sources */,
 				B50E1C9926FCC8AD00E767AE /* PasswordManagerHelper.swift in Sources */,
 				A53C8F532644B22B003A5DF8 /* OmniBarUITestsHelper.swift in Sources */,
+				B5CDFF3D274EC8B300742CC9 /* OnboardingUsernameViewLocators.swift in Sources */,
 				B5056A9126F88CFD00FFD2A2 /* HelpViewLocators.swift in Sources */,
 				B57535F026BD5F690053CE2D /* NoteEditorTests.swift in Sources */,
+				B5CDFF2F274E3FD600742CC9 /* OnboardingLandingTestView.swift in Sources */,
+				B5CDFF2D274E390500742CC9 /* OnboardingTests.swift in Sources */,
+				B5CDFF3A274EC83800742CC9 /* OnboardingUsernameTestView.swift in Sources */,
 				B57A9B4126AB0947002C954D /* CardCreationTests.swift in Sources */,
 				B55B4E3F26C108B900604850 /* OmnibarViewTests.swift in Sources */,
 				B5BA077D26AF3AE400D31FED /* CardTestView.swift in Sources */,
@@ -6375,6 +6418,7 @@
 				B557155726FA257700F6C9D4 /* UpdateTestView.swift in Sources */,
 				A5679CE2262ECB9500E7FA69 /* NavigationCollectUITests.swift in Sources */,
 				B5984C9A27031F3B00192B5F /* PasswordsTestView.swift in Sources */,
+				B5CDFF31274E400F00742CC9 /* OnboardingLandingViewLocators.swift in Sources */,
 				B5BA078D26B0027A00D31FED /* CardEditTests.swift in Sources */,
 				B5BA078626AF3B4400D31FED /* CardViewLocators.swift in Sources */,
 				B57A9B3126AB06AD002C954D /* BaseTest.swift in Sources */,

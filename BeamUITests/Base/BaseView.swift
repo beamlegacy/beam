@@ -152,4 +152,8 @@ class BaseView {
         typeKeyboardKey(.delete)
         return self
     }
+    
+    func isSafariAutoCompleteOpen() -> Bool {
+        return textField("SafariPlatformSupportAutoCompleteWindow").exists
+    }
 }
