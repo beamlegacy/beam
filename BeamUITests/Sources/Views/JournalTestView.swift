@@ -55,10 +55,14 @@ class JournalTestView: BaseView {
     }
     
     @discardableResult
-        func waitForJournalViewToLoad() -> JournalTestView {
-            _ = scrollView(JournalViewLocators.ScrollViews.journalScrollView.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout)
-            return self
-        }
+    func waitForJournalViewToLoad() -> JournalTestView {
+        _ = scrollView(JournalViewLocators.ScrollViews.journalScrollView.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout)
+        return self
+    }
+    
+    func isJournalOpened() -> Bool {
+        return scrollView(JournalViewLocators.ScrollViews.journalScrollView.accessibilityIdentifier).exists
+    }
     
     func clickUpdateNow() -> UpdateTestView {
         self.staticText(JournalViewLocators.StaticTexts.updateNowButton.accessibilityIdentifier).clickOnExistence()
