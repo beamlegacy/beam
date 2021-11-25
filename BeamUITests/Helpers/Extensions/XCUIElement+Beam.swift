@@ -65,6 +65,14 @@ extension XCUIElement {
     }
     
     @discardableResult
+    public func clickClearAndType(_ text: String) -> XCUIElement {
+        self.tapInTheMiddle()
+        self.clear()
+        self.typeText(text)
+        return self
+    }
+    
+    @discardableResult
     public func focusAndTypeTextOnExistence(_ text: String) -> XCUIElement {
         _ = self.waitForExistence(timeout: WaitHelper().minimumWaitTimeout)
         self.tapInTheMiddle()

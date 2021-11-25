@@ -109,6 +109,9 @@ struct OnboardingEmailConnectView: View {
                         }
                         .opacity(loadingState != nil ? 0.3 : 1.0)
                         .allowsHitTesting(loadingState == nil)
+                        .disabled(!areCredentialsValid)
+                        .accessibilityAddTraits(.isButton)
+                        .accessibility(identifier: "connect_button")
                         ButtonLabel("Forgot password", customStyle: .init(font: BeamFont.regular(size: 10).swiftUI, activeBackgroundColor: .clear, disableAnimations: false)) {
                             sendForgotPassword()
                         }
