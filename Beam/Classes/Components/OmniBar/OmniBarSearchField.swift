@@ -21,6 +21,7 @@ struct OmniBarSearchField: View {
     }
     @Binding var modifierFlagsPressed: NSEvent.ModifierFlags?
     var enableAnimations: Bool = true
+    var designV2: Bool = false
 
     @State private var shouldCenter: Bool = true
     @State private var currentDisplayMode: Mode = .today
@@ -79,7 +80,7 @@ struct OmniBarSearchField: View {
 
     private var textColor: BeamColor {
         guard !isEditing else { return BeamColor.Generic.text }
-        guard textFieldText.wrappedValue.isEmpty else { return BeamColor.LightStoneGray }
+        guard designV2 || textFieldText.wrappedValue.isEmpty else { return BeamColor.LightStoneGray }
         return BeamColor.Generic.placeholder
     }
 
@@ -89,9 +90,17 @@ struct OmniBarSearchField: View {
         }
         return BeamColor.Autocomplete.link
     }
+    private var textSelectionColor: BeamColor {
+        designV2 ? BeamColor.Generic.blueTextSelection : BeamColor.Generic.textSelection
+    }
 
+    private let designV2TextFieldFont = BeamFont.regular(size: 15)
+    private let defaultTextFielfont = BeamFont.medium(size: 13)
+    private var textFont: BeamFont {
+        designV2 ? designV2TextFieldFont : defaultTextFielfont
+    }
     var body: some View {
-        return HStack(spacing: 8) {
+        HStack(spacing: designV2 ? BeamSpacing._120 : BeamSpacing._80) {
             if let icon = favicon {
                 Image(nsImage: icon)
                     .resizable()
@@ -100,38 +109,54 @@ struct OmniBarSearchField: View {
                     .frame(width: shouldShowWebHost ? 0 : 16)
                     .transition(.identity)
             } else if let iconName = leadingIconName {
-                Icon(name: iconName, size: 16, color: textColor.swiftUI)
+                Icon(name: iconName, size: 16, color: (designV2 ? BeamColor.LightStoneGray : textColor).swiftUI)
                     .opacity(shouldShowWebHost ? 0 : 1.0)
                     .frame(width: shouldShowWebHost ? 0 : 16)
                     .transition(.identity)
             }
             ZStack(alignment: .leading) {
-                BeamTextField(
-                    text: textFieldText,
-                    isEditing: $isEditing.onChange(editingDidChange),
-                    placeholder: "Search Beam or the web",
-                    font: BeamFont.medium(size: 13).nsFont,
-                    textColor: textColor.nsColor,
-                    placeholderColor: BeamColor.Generic.placeholder.nsColor,
-                    selectedRange: autocompleteManager.searchQuerySelectedRange,
-                    textWillChange: { autocompleteManager.replacementTextForProposedText($0) },
-                    onCommit: { modifierFlags in
-                        onEnterPressed(withCommand: modifierFlags?.contains(.command) ?? false)
-                    },
-                    onEscape: onEscapePressed,
-                    onCursorMovement: { handleCursorMovement($0) },
-                    onModifierFlagPressed: { event in
-                        modifierFlagsPressed = event.modifierFlags.contains(.command) ? .command : nil
+                Group {
+                    if state.useOmniboxV2 && !designV2 {
+                        HStack(spacing: 0) {
+                            let hasText = !textFieldText.wrappedValue.isEmpty
+                            Text(hasText ? textFieldText.wrappedValue : "Search Beam or the web")
+                                .font(textFont.swiftUI)
+                                .foregroundColor(hasText ? textColor.swiftUI : BeamColor.Generic.placeholder.swiftUI)
+                            if !shouldCenter || currentDisplayMode == .web {
+                                Spacer(minLength: 0)
+                            }
+                        }
+                    } else {
+                        BeamTextField(
+                            text: textFieldText,
+                            isEditing: $isEditing.onChange(editingDidChange),
+                            placeholder: "Search Beam or the web",
+                            font: textFont.nsFont,
+                            textColor: textColor.nsColor,
+                            placeholderColor: BeamColor.Generic.placeholder.nsColor,
+                            selectedRange: autocompleteManager.searchQuerySelectedRange,
+                            selectedRangeColor: textSelectionColor.nsColor,
+                            multiline: designV2, // without this, the height is incorrect.
+                            textWillChange: { autocompleteManager.replacementTextForProposedText($0) },
+                            onCommit: { modifierFlags in
+                                onEnterPressed(modifierFlags: modifierFlags)
+                            },
+                            onEscape: onEscapePressed,
+                            onCursorMovement: { handleCursorMovement($0) },
+                            onModifierFlagPressed: { event in
+                                modifierFlagsPressed = event.modifierFlags
+                            }
+                        )
+                            .centered(!designV2 && shouldCenter && currentDisplayMode != .web)
                     }
-                )
-                .centered(shouldCenter && currentDisplayMode != .web)
+                }
                 .disabled(!isEditing) // Allow Window dragging
                 .accessibility(addTraits: .isSearchField)
-                .accessibility(identifier: "OmniBarSearchField")
+                .accessibility(identifier: "OmniBarSearchField" + (designV2 ? "-boxed" : ""))
                 if let subtitle = resultSubtitle, !textFieldText.wrappedValue.isEmpty {
                     HStack(spacing: 0) {
                         Text(textFieldText.wrappedValue)
-                            .font(BeamFont.medium(size: 13).swiftUI)
+                            .font(textFont.swiftUI)
                             .foregroundColor(Color.purple)
                             .hidden()
                             .layoutPriority(10)
@@ -140,10 +165,10 @@ struct OmniBarSearchField: View {
                             HStack {
                             let pixelRoundUp = geo.frame(in: .global).minX.truncatingRemainder(dividingBy: 1)
                                 Text(" – \(subtitle)")
-                                .font(BeamFont.regular(size: 13).swiftUI)
+                                .font(textFont.swiftUI)
                                 .foregroundColor(subtitleColor.swiftUI)
                                 .background(autocompleteManager.searchQuerySelectedRange?.isEmpty == false ?
-                                                BeamColor.Generic.textSelection.swiftUI :
+                                            textSelectionColor.swiftUI :
                                                 nil)
                                 // We need to stick the subtitle exactly after the text selection
                                 // text length might end up "in between pixels", so we need to offset that point-pixel roundup.
@@ -158,7 +183,10 @@ struct OmniBarSearchField: View {
                 }
             }
         }
-        .animation(enableAnimations ? .timingCurve(0.25, 0.1, 0.25, 1.0, duration: 0.3) : nil)
+        .if(!designV2) {
+            // animation for centering text, not needed in V2
+            $0.animation(enableAnimations ? .timingCurve(0.25, 0.1, 0.25, 1.0, duration: 0.3) : nil)
+        }
         .onReceive(Just(state.mode)) { newMode in
             // Locally handling the state mode to manage animations
             DispatchQueue.main.async {
@@ -173,9 +201,9 @@ struct OmniBarSearchField: View {
         shouldCenter = !isNowEditing
     }
 
-    func onEnterPressed(withCommand: Bool) {
-        if withCommand {
-            // Cmd+Enter select create card
+    func onEnterPressed(modifierFlags: NSEvent.ModifierFlags?) {
+        let isCreateCardShortcut = (designV2 && modifierFlags?.contains(.option) == true) || (!designV2 && modifierFlags?.contains(.command) == true)
+        if isCreateCardShortcut {
             if let createCardIndex = autocompleteManager.autocompleteResults.firstIndex(where: { (result) -> Bool in
                 return result.source == .createCard
             }) {
@@ -212,7 +240,13 @@ struct OmniBarSearchField: View {
     }
 
     private func onEscapePressed() {
-        if autocompleteManager.autocompleteResults.isEmpty {
+        if designV2 {
+            if autocompleteManager.searchQuery.isEmpty {
+                unfocusField()
+            } else {
+                autocompleteManager.setQuery("", updateAutocompleteResults: true)
+            }
+        } else if autocompleteManager.autocompleteResults.isEmpty {
             if autocompleteManager.searchQuery.isEmpty || currentDisplayMode == .web {
                 unfocusField()
             } else {
