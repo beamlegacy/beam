@@ -70,6 +70,19 @@ class DuckDuckGoSearch: SearchEngine {
     }
 }
 
+class MockSearchEngine: SearchEngine {
+    let name: String = "Mock"
+    let description: String = "Mock Search"
+    var query: String = ""
+    let prefix: String = "no"
+    var searchUrl: String = ""
+    var autocompleteUrl: String = ""
+
+    func canHandle(_ queryUrl: URL) -> Bool {
+        return false
+    }
+}
+
 class SearchEngines {
 
     static let google: GoogleSearch = GoogleSearch()

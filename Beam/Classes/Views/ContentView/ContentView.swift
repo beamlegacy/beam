@@ -27,7 +27,13 @@ struct ContentView: View {
                     WindowBottomToolBar()
                         .transition(AnyTransition.opacity.animation(Animation.easeInOut(duration: 0.2)))
                 }
-            }
+            }.overlay(
+                state.useOmniboxV2 ?
+                OmniboxV2Container()
+                    .environmentObject(state.autocompleteManager)
+                : nil,
+                alignment: .top
+            )
         }
     }
 

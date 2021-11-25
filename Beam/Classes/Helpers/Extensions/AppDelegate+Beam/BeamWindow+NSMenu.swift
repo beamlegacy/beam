@@ -102,6 +102,10 @@ extension BeamWindow {
         state.setFocusOmnibox()
     }
 
+    @IBAction func openDocument(_ sender: Any?) {
+        state.setFocusOmnibox()
+    }
+
     @IBAction func showCardSelector(_ sender: Any?) {
         state.destinationCardIsFocused = true
     }

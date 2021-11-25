@@ -798,6 +798,7 @@
 		A5B268A426845549001797ED /* BeamTextAttributedStringBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5B268A326845549001797ED /* BeamTextAttributedStringBuilder.swift */; };
 		A5B37AD927046A1500989479 /* CheckboxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5B37AD827046A1500989479 /* CheckboxView.swift */; };
 		A5B532432703525D007FC8B8 /* MeetingModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5B532422703525D007FC8B8 /* MeetingModalView.swift */; };
+		A5B71852274B92E70010FE8E /* OmniboxV2Box.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5B71851274B92E70010FE8E /* OmniboxV2Box.swift */; };
 		A5BF04D32681A4F800CC80EB /* ElementNode+Layers.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BF04D22681A4F800CC80EB /* ElementNode+Layers.swift */; };
 		A5C7F10A267CC9FD002EE550 /* BeamTextEdit+InputDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C7F109267CC9FD002EE550 /* BeamTextEdit+InputDetector.swift */; };
 		A5C9F005261353420096380F /* WindowPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C9F004261353420096380F /* WindowPage.swift */; };
@@ -811,6 +812,9 @@
 		A5D21FD926974C0200250A6A /* CalendarMonthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5D21FD826974C0200250A6A /* CalendarMonthView.swift */; };
 		A5D6250A26034B1C00A3E676 /* FormatterViewBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5D6250926034B1C00A3E676 /* FormatterViewBackground.swift */; };
 		A5D88596274E919300F37859 /* NodeHeaderViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5D88595274E919300F37859 /* NodeHeaderViewModel.swift */; };
+		A5D88585274E4E2100F37859 /* BlendModePerColorScheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5D88584274E4E2100F37859 /* BlendModePerColorScheme.swift */; };
+		A5D8858C274E4EB600F37859 /* OmniboxV2ClearButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5D8858B274E4EB600F37859 /* OmniboxV2ClearButton.swift */; };
+		A5D8858E274E4F0100F37859 /* OmniboxV2BoxBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5D8858D274E4F0100F37859 /* OmniboxV2BoxBackground.swift */; };
 		A5DE141C26491F840023F753 /* WKWebview+Zoom.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5DE141B26491F840023F753 /* WKWebview+Zoom.swift */; };
 		A5DE143226496F250023F753 /* NoteHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5DE143126496F250023F753 /* NoteHeaderView.swift */; };
 		A5DE86A42692AEEC00E05C20 /* BeamWindow+NSMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5DE86A32692AEEC00E05C20 /* BeamWindow+NSMenu.swift */; };
@@ -1879,6 +1883,7 @@
 		A5B268A326845549001797ED /* BeamTextAttributedStringBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamTextAttributedStringBuilder.swift; sourceTree = "<group>"; };
 		A5B37AD827046A1500989479 /* CheckboxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckboxView.swift; sourceTree = "<group>"; };
 		A5B532422703525D007FC8B8 /* MeetingModalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingModalView.swift; sourceTree = "<group>"; };
+		A5B71851274B92E70010FE8E /* OmniboxV2Box.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniboxV2Box.swift; sourceTree = "<group>"; };
 		A5BF04D22681A4F800CC80EB /* ElementNode+Layers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ElementNode+Layers.swift"; sourceTree = "<group>"; };
 		A5C7F109267CC9FD002EE550 /* BeamTextEdit+InputDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamTextEdit+InputDetector.swift"; sourceTree = "<group>"; };
 		A5C9F004261353420096380F /* WindowPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowPage.swift; sourceTree = "<group>"; };
@@ -1892,6 +1897,9 @@
 		A5D21FD826974C0200250A6A /* CalendarMonthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarMonthView.swift; sourceTree = "<group>"; };
 		A5D6250926034B1C00A3E676 /* FormatterViewBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatterViewBackground.swift; sourceTree = "<group>"; };
 		A5D88595274E919300F37859 /* NodeHeaderViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NodeHeaderViewModel.swift; sourceTree = "<group>"; };
+		A5D88584274E4E2100F37859 /* BlendModePerColorScheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlendModePerColorScheme.swift; sourceTree = "<group>"; };
+		A5D8858B274E4EB600F37859 /* OmniboxV2ClearButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniboxV2ClearButton.swift; sourceTree = "<group>"; };
+		A5D8858D274E4F0100F37859 /* OmniboxV2BoxBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniboxV2BoxBackground.swift; sourceTree = "<group>"; };
 		A5DE141B26491F840023F753 /* WKWebview+Zoom.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WKWebview+Zoom.swift"; sourceTree = "<group>"; };
 		A5DE143126496F250023F753 /* NoteHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteHeaderView.swift; sourceTree = "<group>"; };
 		A5DE86A32692AEEC00E05C20 /* BeamWindow+NSMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamWindow+NSMenu.swift"; sourceTree = "<group>"; };
@@ -2938,6 +2946,7 @@
 				414B98EE25A239C6002E81A3 /* FormatterView */,
 				418172A725811A3A00317ED8 /* BeamTextField */,
 				521EEDC725937E7B00BA2485 /* DocumentsList */,
+				A5B7184B274B929D0010FE8E /* OmniboxV2 */,
 				418171D72581107C00317ED8 /* OmniBar */,
 				418171C32581107C00317ED8 /* NotesList */,
 				A57BFEC02615B4AC00CFB646 /* TableView */,
@@ -2985,6 +2994,7 @@
 				A5EBF15426D8F2FD00597A1C /* VisualEffectView.swift */,
 				A5F47EC426F8D6A9004B7CDE /* LottieView.swift */,
 				A09FBA602705AD44009E44F7 /* CheckboxButtonStyle.swift */,
+				A5D88584274E4E2100F37859 /* BlendModePerColorScheme.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -4375,6 +4385,16 @@
 			path = Meeting;
 			sourceTree = "<group>";
 		};
+		A5B7184B274B929D0010FE8E /* OmniboxV2 */ = {
+			isa = PBXGroup;
+			children = (
+				A5B71851274B92E70010FE8E /* OmniboxV2Box.swift */,
+				A5D8858D274E4F0100F37859 /* OmniboxV2BoxBackground.swift */,
+				A5D8858B274E4EB600F37859 /* OmniboxV2ClearButton.swift */,
+			);
+			path = OmniboxV2;
+			sourceTree = "<group>";
+		};
 		A5C9F008261364E90096380F /* WindowPage */ = {
 			isa = PBXGroup;
 			children = (
@@ -5580,6 +5600,7 @@
 				0D3DD8F52681CD4B009F2DF0 /* HistoryUrlRecord.swift in Sources */,
 				4181720E2581107C00317ED8 /* NoteBackForwardList.swift in Sources */,
 				332AB2F026FE17D6007717D8 /* AppDelegate+UserInfos.swift in Sources */,
+				A5B71852274B92E70010FE8E /* OmniboxV2Box.swift in Sources */,
 				A52393AA26541A18008D4C85 /* ModeView.swift in Sources */,
 				A552DF2925F0E22B00570C85 /* OmniBarFieldBackground.swift in Sources */,
 				A0A84FF1263835D3008F0326 /* PasswordsTableView.swift in Sources */,
@@ -5695,6 +5716,7 @@
 				418172D625811B8700317ED8 /* RoundRectButtonStyle.swift in Sources */,
 				A0C58C382640026600FB95D8 /* ToastView.swift in Sources */,
 				96FACC8626050B1E0088DD67 /* SetSelection.swift in Sources */,
+				A5D8858E274E4F0100F37859 /* OmniboxV2BoxBackground.swift in Sources */,
 				A5DE141C26491F840023F753 /* WKWebview+Zoom.swift in Sources */,
 				4181722A2581107C00317ED8 /* NSRect+Beam.swift in Sources */,
 				5241E5F626F8B0A900B08F69 /* AccountManager+Foundation.swift in Sources */,
@@ -5973,6 +5995,7 @@
 				A0C0C2A725E5109F00BE34F0 /* InsertElement.swift in Sources */,
 				41FAD34F25E5742800D78B36 /* CALayer+Animation.swift in Sources */,
 				524299EE25A488E000F4DBF5 /* AdvancedPreferencesView.swift in Sources */,
+				A5D8858C274E4EB600F37859 /* OmniboxV2ClearButton.swift in Sources */,
 				522BC3E826A8724B0018B51E /* BeamObjectManagerProtocol.swift in Sources */,
 				418171FC2581107C00317ED8 /* RoamImporter.swift in Sources */,
 				A56FFE0326971F8500BEE6A1 /* CalendarPickerFormatterView.swift in Sources */,
@@ -6123,6 +6146,7 @@
 				BAA67E2CEDBE8BF2696AB646 /* BeamWebView.swift in Sources */,
 				BAA67ACD35DACF0E03ED520B /* DownloadManager.swift in Sources */,
 				BAA67F0398B7B9D2CA9ADE25 /* ContentTypes.swift in Sources */,
+				A5D88585274E4E2100F37859 /* BlendModePerColorScheme.swift in Sources */,
 				BAA679A5A0853E5E53ACD3F1 /* BeamDownloadManager.swift in Sources */,
 				BAA673C9223F304A166B92D5 /* WebNoteController.swift in Sources */,
 				A52596E9273EB8AC004B27E4 /* OnboardingImportsView.swift in Sources */,
