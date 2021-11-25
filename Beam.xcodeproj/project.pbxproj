@@ -119,10 +119,14 @@
 		33B27467264C0F7100A318CD /* AutoUpdate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 33B27450264C0CDC00A318CD /* AutoUpdate.framework */; };
 		33B27468264C0F7100A318CD /* AutoUpdate.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 33B27450264C0CDC00A318CD /* AutoUpdate.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		33B2746A264C103400A318CD /* SmallUpdateIndicatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33B27469264C103400A318CD /* SmallUpdateIndicatorView.swift */; };
+		33B2FF2D274C3F8500518F12 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 33B2FF2C274C3F8500518F12 /* Lottie */; };
+		33BBA505274423E200FE92DB /* editor-embed_collapse.json in Resources */ = {isa = PBXBuildFile; fileRef = 33BBA504274423E200FE92DB /* editor-embed_collapse.json */; };
+		33BBA507274423E700FE92DB /* editor-embed_expand.json in Resources */ = {isa = PBXBuildFile; fileRef = 33BBA506274423E700FE92DB /* editor-embed_expand.json */; };
 		33CCBFA626A61C15004B6236 /* PopoverWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33CCBFA526A61C14004B6236 /* PopoverWindow.swift */; };
 		33D0D90B2732BFAB00D6C924 /* FullPageCollectAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33D0D90A2732BFAB00D6C924 /* FullPageCollectAnimator.swift */; };
 		33D3248E26CEA5A300B44281 /* WebSearchMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33D3248D26CEA5A300B44281 /* WebSearchMessageHandler.swift */; };
 		33D5F85A2697478E002C4F25 /* PopupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33D5F8592697478E002C4F25 /* PopupView.swift */; };
+		33DE802C273A482000B7FCAF /* CollapsableNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33DE802B273A481F00B7FCAF /* CollapsableNode.swift */; };
 		33DEF48826617E0B00834839 /* CircledButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33DEF48726617E0B00834839 /* CircledButton.swift */; };
 		33F0480426B14C0100855A08 /* CustomPopoverPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33F047FC26B14C0000855A08 /* CustomPopoverPresenter.swift */; };
 		33F0F1C826DE87E000FF8B48 /* Vinyl in Frameworks */ = {isa = PBXBuildFile; productRef = 33F0F1C726DE87E000FF8B48 /* Vinyl */; };
@@ -832,7 +836,6 @@
 		A5ECC8FF2679EBB500D8A087 /* HoverVisibleModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5ECC8FE2679EBB500D8A087 /* HoverVisibleModifier.swift */; };
 		A5F1F6262643EDA600D41505 /* BeamNoteSharingUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F1F6252643EDA600D41505 /* BeamNoteSharingUtils.swift */; };
 		A5F47EBB26F8AEB2004B7CDE /* Tooltip.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F47EBA26F8AEB2004B7CDE /* Tooltip.swift */; };
-		A5F47EC326F8D633004B7CDE /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = A5F47EC226F8D633004B7CDE /* Lottie */; };
 		A5F47EC526F8D6A9004B7CDE /* LottieView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F47EC426F8D6A9004B7CDE /* LottieView.swift */; };
 		A5F47EC826F8D718004B7CDE /* editor-publish.json in Resources */ = {isa = PBXBuildFile; fileRef = A5F47EC726F8D718004B7CDE /* editor-publish.json */; };
 		A5F47ECA26F8D71C004B7CDE /* editor-unpublish.json in Resources */ = {isa = PBXBuildFile; fileRef = A5F47EC926F8D71C004B7CDE /* editor-unpublish.json */; };
@@ -1205,10 +1208,13 @@
 		33AC9D9926B01A60004E7EF4 /* AuthenticationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationViewModel.swift; sourceTree = "<group>"; };
 		33B27441264C0CDB00A318CD /* AutoUpdate.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = AutoUpdate.xcodeproj; path = Extern/AutoUpdate/AutoUpdate.xcodeproj; sourceTree = "<group>"; };
 		33B27469264C103400A318CD /* SmallUpdateIndicatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmallUpdateIndicatorView.swift; sourceTree = "<group>"; };
+		33BBA504274423E200FE92DB /* editor-embed_collapse.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "editor-embed_collapse.json"; sourceTree = "<group>"; };
+		33BBA506274423E700FE92DB /* editor-embed_expand.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "editor-embed_expand.json"; sourceTree = "<group>"; };
 		33CCBFA526A61C14004B6236 /* PopoverWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverWindow.swift; sourceTree = "<group>"; };
 		33D0D90A2732BFAB00D6C924 /* FullPageCollectAnimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FullPageCollectAnimator.swift; sourceTree = "<group>"; };
 		33D3248D26CEA5A300B44281 /* WebSearchMessageHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSearchMessageHandler.swift; sourceTree = "<group>"; };
 		33D5F8592697478E002C4F25 /* PopupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopupView.swift; sourceTree = "<group>"; };
+		33DE802B273A481F00B7FCAF /* CollapsableNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollapsableNode.swift; sourceTree = "<group>"; };
 		33DEF48726617E0B00834839 /* CircledButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircledButton.swift; sourceTree = "<group>"; };
 		33F047FC26B14C0000855A08 /* CustomPopoverPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomPopoverPresenter.swift; sourceTree = "<group>"; };
 		33FE719726D38A0400E63849 /* SearchLocationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchLocationView.swift; sourceTree = "<group>"; };
@@ -2158,8 +2164,8 @@
 				A0A84FBC2636FA99008F0326 /* PMKFoundation in Frameworks */,
 				33793AD7265CFEC50041E1B8 /* KeychainAccess in Frameworks */,
 				3315DC942667859A002A47CF /* PromisesTestHelpers in Frameworks */,
+				33B2FF2D274C3F8500518F12 /* Lottie in Frameworks */,
 				964548A02523B3550064D062 /* CloudKit.framework in Frameworks */,
-				A5F47EC326F8D633004B7CDE /* Lottie in Frameworks */,
 				3315DC962667859A002A47CF /* OAuthSwift in Frameworks */,
 				33793AD1265CFEC50041E1B8 /* SwiftSoup in Frameworks */,
 				33088D6326B06677004FAE99 /* ZIPFoundation in Frameworks */,
@@ -2799,6 +2805,7 @@
 				A5919F7E268EF964009015C5 /* TextEditCmdReturnAnimator.swift */,
 				A0F558F426BD8F260024C47E /* DebugSection.swift */,
 				33AA4EDE270DF5D200B74868 /* ResizableNode.swift */,
+				33DE802B273A481F00B7FCAF /* CollapsableNode.swift */,
 			);
 			path = BeamTextEdit;
 			sourceTree = "<group>";
@@ -4433,6 +4440,8 @@
 		A5F47EC626F8D70F004B7CDE /* Lotties */ = {
 			isa = PBXGroup;
 			children = (
+				33BBA506274423E700FE92DB /* editor-embed_expand.json */,
+				33BBA504274423E200FE92DB /* editor-embed_collapse.json */,
 				A5F47EC726F8D718004B7CDE /* editor-publish.json */,
 				A5F47EC926F8D71C004B7CDE /* editor-unpublish.json */,
 			);
@@ -4952,10 +4961,10 @@
 				52CA277B26401D7000146A00 /* OAuthSwift */,
 				33088D6226B06677004FAE99 /* ZIPFoundation */,
 				33F0F1C726DE87E000FF8B48 /* Vinyl */,
-				A5F47EC226F8D633004B7CDE /* Lottie */,
 				333E61832707094000847A0C /* Swime */,
 				52466B21270DA966002D1716 /* Clustering */,
 				33F64F1127283201004EB0CD /* Macaw */,
+				33B2FF2C274C3F8500518F12 /* Lottie */,
 			);
 			productName = Beam;
 			productReference = 965A78252514F147009980D4 /* Beam.app */;
@@ -5072,11 +5081,11 @@
 				33088D6126B06677004FAE99 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
 				33F0F1C626DE87E000FF8B48 /* XCRemoteSwiftPackageReference "Vinyl" */,
 				96AC99F626E65CFB0016E941 /* XCRemoteSwiftPackageReference "uuid-kit" */,
-				A5F47EC126F8D633004B7CDE /* XCRemoteSwiftPackageReference "lottie-ios" */,
 				333E61822707094000847A0C /* XCRemoteSwiftPackageReference "Swime" */,
 				52466B20270DA966002D1716 /* XCRemoteSwiftPackageReference "clustering" */,
 				33F64F1027283201004EB0CD /* XCRemoteSwiftPackageReference "Macaw" */,
 				9624A65527431B4200B8D012 /* XCRemoteSwiftPackageReference "swift-atomics" */,
+				33B2FF2B274C3F8500518F12 /* XCRemoteSwiftPackageReference "lottie-ios" */,
 			);
 			productRefGroup = 965A78262514F147009980D4 /* Products */;
 			projectDirPath = "";
@@ -5209,6 +5218,7 @@
 				8AD2637126F4A0480074D673 /* UITests-Playground.html in Resources */,
 				8ADD06072729657D004C3EC9 /* WebPositionsUI_web.ts in Resources */,
 				A515597A267786E1006F6D6F /* MediaPlayer.js in Resources */,
+				33BBA505274423E200FE92DB /* editor-embed_collapse.json in Resources */,
 				418172412581107C00317ED8 /* ScrollableTextView.xib in Resources */,
 				3303E10326FA22D300E175AC /* user_infos.graphql in Resources */,
 				8AC2EFD6266F86F500049005 /* yarn.lock in Resources */,
@@ -5235,6 +5245,7 @@
 				5224CD522685FF9B00D4179E /* update_beam_object.graphql in Resources */,
 				BAA67B681D12191FE57E7807 /* PopupUI_web.scss in Resources */,
 				8AD2636726F4A0480074D673 /* PointAndShootUI_native-Benchmark.test.ts in Resources */,
+				33BBA507274423E700FE92DB /* editor-embed_expand.json in Resources */,
 				1A560C30E74FFFB97685C043 /* PointAndShootHelper.ts in Resources */,
 				BAA676CC6D40AAD13AA19B2A /* BeamTypes.ts in Resources */,
 				BAA67C93BB2CDDDD22791FA2 /* Frames.test.ts in Resources */,
@@ -5776,6 +5787,7 @@
 				330D3824265FC6B200A2536B /* DownloadCell.swift in Sources */,
 				52F4E4AE264182E00067B017 /* IdentityRequest.swift in Sources */,
 				528F296D26B449EA006857E5 /* Beam.xcdatamodeld in Sources */,
+				33DE802C273A482000B7FCAF /* CollapsableNode.swift in Sources */,
 				52B9A39A264566D60063AEEF /* OauthButton.swift in Sources */,
 				96FACC8A26079C7E0088DD67 /* InputText.swift in Sources */,
 				A5CD2343270C83E900240987 /* MeetingFormatterView.swift in Sources */,
@@ -7151,6 +7163,14 @@
 				kind = branch;
 			};
 		};
+		33B2FF2B274C3F8500518F12 /* XCRemoteSwiftPackageReference "lottie-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/eLud/lottie-ios";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
 		33F0F1C626DE87E000FF8B48 /* XCRemoteSwiftPackageReference "Vinyl" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/penso/Vinyl";
@@ -7319,14 +7339,6 @@
 				kind = branch;
 			};
 		};
-		A5F47EC126F8D633004B7CDE /* XCRemoteSwiftPackageReference "lottie-ios" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/airbnb/lottie-ios";
-			requirement = {
-				branch = "lottie/macos-spm";
-				kind = branch;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -7339,6 +7351,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 333E61822707094000847A0C /* XCRemoteSwiftPackageReference "Swime" */;
 			productName = Swime;
+		};
+		33B2FF2C274C3F8500518F12 /* Lottie */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 33B2FF2B274C3F8500518F12 /* XCRemoteSwiftPackageReference "lottie-ios" */;
+			productName = Lottie;
 		};
 		33F0F1C726DE87E000FF8B48 /* Vinyl */ = {
 			isa = XCSwiftPackageProductDependency;
@@ -7494,11 +7511,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */;
 			productName = Nimble;
-		};
-		A5F47EC226F8D633004B7CDE /* Lottie */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = A5F47EC126F8D633004B7CDE /* XCRemoteSwiftPackageReference "lottie-ios" */;
-			productName = Lottie;
 		};
 /* End XCSwiftPackageProductDependency section */
 
