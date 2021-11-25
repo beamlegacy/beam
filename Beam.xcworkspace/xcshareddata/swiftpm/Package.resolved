@@ -165,10 +165,10 @@
       },
       {
         "package": "Lottie",
-        "repositoryURL": "https://github.com/airbnb/lottie-ios",
+        "repositoryURL": "https://github.com/eLud/lottie-ios",
         "state": {
-          "branch": "lottie/macos-spm",
-          "revision": "f4d701070f9743b9ef7b9ac42d386d1ef98b842f",
+          "branch": "master",
+          "revision": "13a8764f5164651f6db74ec0d859f1ae69120a3a",
           "version": null
         }
       },
