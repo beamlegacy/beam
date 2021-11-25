@@ -23,6 +23,7 @@ class AllCardsViewModel: ObservableObject, Identifiable {
 
     private var coreDataObservers = Set<AnyCancellable>()
     private var metadataFetchers = Set<AnyCancellable>()
+    private var notesCancellables = Set<AnyCancellable>()
     private var notesMetadataCache: NoteListMetadataCache {
         NoteListMetadataCache.shared
     }
@@ -35,6 +36,12 @@ class AllCardsViewModel: ObservableObject, Identifiable {
                 self?.refreshAllNotes()
             }
             .store(in: &coreDataObservers)
+        NotificationCenter.default
+            .publisher(for: .defaultDatabaseUpdate, object: nil)
+            .sink { [weak self] _ in
+                self?.refreshAllNotes()
+            }
+            .store(in: &notesCancellables)
     }
 
     fileprivate func refreshAllNotes() {
