@@ -101,7 +101,7 @@ extension PreferencesManager {
     static let newTabWindowMakeActiveDefault = true
     static let cmdNumberSwitchTabsDefault = false
     static let showWebsiteIconTabDefault = true
-    static let restoreLastBeamSessionDefault = true
+    static let restoreLastBeamSessionDefault = false
 }
 
 extension PreferencesManager {
