@@ -117,55 +117,25 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
         return matchingLinks
     }
 
-    public func getIdFor(url: String) -> UUID? {
-        try? dbPool.read { db in
-            try Link.filter(Column("url") == url).fetchOne(db)?.id
-        }
-    }
-
-    public func getLinkFor(url: String) -> Link? {
+    public func getOrCreateIdFor(url: String, title: String?) -> UUID {
         (try? dbPool.read { db in
-            try Link.filter(Column("url") == url).fetchOne(db)
-        })
+            try Link.filter(Column("url") == url).fetchOne(db)?.id
+        }) ?? visit(url)
     }
 
-    public func store(link: Link, shouldSaveOnNetwork: Bool, networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
+    private func store(link: Link, shouldSaveOnNetwork: Bool, networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
         try store(links: [link], shouldSaveOnNetwork: shouldSaveOnNetwork, networkCompletion: networkCompletion)
     }
 
-    public func store(links: [Link], shouldSaveOnNetwork: Bool, networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
+    private func store(links: [Link], shouldSaveOnNetwork: Bool, networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
         try dbPool.write { db in
             for var link in links {
                 try link.insert(db)
             }
         }
 
-        guard shouldSaveOnNetwork, AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else { return }
+        guard shouldSaveOnNetwork else { return }
         saveOnNetwork(links, networkCompletion)
-    }
-
-    public func createIdFor(url: String, title: String? = nil) -> UUID {
-        var link = getLinkFor(url: url) ?? Link(url: url, title: title)
-        _ = try? dbPool.write { db in
-            try link.insert(db)
-        }
-
-        return link.id
-    }
-    public func isDomain(id: UUID) -> Bool? {
-        guard let link = linkFor(id: id) else { return nil }
-        return URL(string: link.url)?.isDomain ?? false
-    }
-    public func getDomainId(id: UUID, networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) -> UUID? {
-        guard let link = linkFor(id: id),
-              let domain = URL(string: link.url)?.domain else { return nil }
-        if let domainLink = getLinkFor(url: domain.absoluteString) {
-            return domainLink.id
-        } else {
-            let domainLink = Link(url: domain.absoluteString, title: nil)
-            try? store(link: domainLink, shouldSaveOnNetwork: true, networkCompletion: networkCompletion)
-            return domainLink.id
-        }
     }
 
     public func linkFor(id: UUID) -> Link? {
@@ -174,22 +144,52 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
         }
     }
 
-    public func visit(url: String, title: String? = nil) {
-        var link = getLinkFor(url: url) ?? Link(url: url, title: title)
-        link.updatedAt = BeamDate.now
-        link.title = title
+    public func isDomain(id: UUID) -> Bool {
+        guard let link = linkFor(id: id), URL(string: link.url)?.isDomain ?? false else { return false }
+        return true
+    }
 
-        _ = try? dbPool.write { db in
-            do {
-                try link.update(db, columns: [Column("updateAt"), Column("title")])
-            } catch {
+    public func getDomainId(id: UUID) -> UUID? {
+        guard let link = linkFor(id: id),
+              let domain = URL(string: link.url)?.domain else { return nil }
+        return getOrCreateIdFor(url: domain.absoluteString, title: nil)
+    }
+
+    public func linkFor(url: String) -> Link? {
+        try? dbPool.read { db in
+            try Link.filter(Column("url") == url).fetchOne(db)
+        }
+    }
+
+    public func visit(_ url: String, title: String? = nil) -> UUID {
+        return visit(url, title: title).id
+    }
+
+    public func visit(_ url: String, title: String?) -> Link {
+        guard var link = linkFor(url: url) else {
+            // The link doesn't exist, create it and return the id
+            var link = Link(url: url, title: title)
+            _ = try? dbPool.write { db in
                 try link.insert(db)
             }
+
+            // Save the new link on the network once:
+            saveOnNetwork(link)
+
+            return link
         }
 
-        if AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled {
-            saveOnNetwork(link)
+        // otherwise let's update the title and the updatedAt
+        link.title = title
+        link.updatedAt = BeamDate.now
+        _ = try? dbPool.write { db in
+            try link.update(db, columns: [Column("updateAt"), Column("title")])
         }
+
+        // Save the updated link on the network
+        saveOnNetwork(link)
+
+        return link
     }
 
     public func deleteAll() throws {
@@ -226,7 +226,7 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
         }
 
         return try dbPool.read { db in
-            try Link.filter(Column("updatedAt") < updatedSince).fetchAll(db)
+            try Link.filter(Column("updatedAt") >= updatedSince).fetchAll(db)
         }
     }
 
@@ -270,6 +270,8 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
     }
 
     private func saveOnNetwork(_ links: [Link], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
+        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else { return }
+
         let localTimer = BeamDate.now
 
         Logger.shared.logDebug("Will save links \(links) on the BeamObject API",
@@ -297,6 +299,8 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
     }
 
     private func saveOnNetwork(_ link: Link, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
+        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else { return }
+
         let localTimer = BeamDate.now
 
         Logger.shared.logDebug("Will save link \(link.url) [\(link.id)] on the BeamObject API",

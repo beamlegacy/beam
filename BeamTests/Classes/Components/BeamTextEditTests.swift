@@ -36,7 +36,7 @@ class BeamTextEditTests: XCTestCase {
     func testCopyPasteUrls() throws {
         func pasteAndCheckNoteSourceFor(url: String) throws {
             editor.paste("")
-            let urlId  = try XCTUnwrap(LinkStore.getIdFor(url))
+            let urlId  = try XCTUnwrap(LinkStore.getOrCreateIdFor(url))
             XCTAssertNotNil(note.sources.get(urlId: urlId))
             pasteboard.clearContents()
         }
@@ -87,7 +87,7 @@ class BeamTextEditTests: XCTestCase {
         XCTAssertEqual(activeSources.count, 1)
         let pastedNoteSources = try XCTUnwrap(activeSources[note.id])
         XCTAssertEqual(pastedNoteSources.count, 4)
-        let expectedSources = urls.compactMap(LinkStore.getIdFor)
+        let expectedSources = urls.map { LinkStore.getOrCreateIdFor($0) }
         XCTAssertEqual(Set(pastedNoteSources), Set(expectedSources))
     }
 
@@ -118,7 +118,7 @@ class BeamTextEditTests: XCTestCase {
         editor.focusedWidget = node
         root.cursorPosition = node.textCount
         editor.pressEnter(false, false, false, false)
-        let urlId = try XCTUnwrap(LinkStore.getIdFor(urls[0]))
+        let urlId = try XCTUnwrap(LinkStore.getOrCreateIdFor(urls[0]))
         XCTAssertNotNil(note.sources.get(urlId: urlId))
 
         //adding a note source in the case of a url detected after inserting a space
@@ -127,7 +127,7 @@ class BeamTextEditTests: XCTestCase {
         editor.focusedWidget = anotherNode
         root.cursorPosition = anotherNode.textCount
         editor.insertText(string: " ", replacementRange: nil)
-        let anotherUrlId  = try XCTUnwrap(LinkStore.getIdFor(urls[1]))
+        let anotherUrlId  = try XCTUnwrap(LinkStore.getOrCreateIdFor(urls[1]))
         XCTAssertNotNil(note.sources.get(urlId: anotherUrlId))
 
         //Checking that urls have been added active notesources
@@ -135,7 +135,7 @@ class BeamTextEditTests: XCTestCase {
         XCTAssertEqual(activeSources.count, 1)
         let detectedNoteSources = try XCTUnwrap(activeSources[note.id])
         XCTAssertEqual(detectedNoteSources.count, 2)
-        let expectedSources = urls.compactMap(LinkStore.getIdFor)
+        let expectedSources = urls.map { LinkStore.getOrCreateIdFor($0) }
         XCTAssertEqual(Set(detectedNoteSources), Set(expectedSources))
     }
 }

@@ -228,8 +228,8 @@ public class BrowsingNode: ObservableObject, Codable {
     }
 
     private static func updateDomainFrecency(scorer: FrecencyScorer, id: UUID, value: Float, date: Date, paramKey: FrecencyParamKey) {
-        if let isDomain = LinkStore.shared.isDomain(id: id),
-            !isDomain,
+        let isDomain = LinkStore.shared.isDomain(id: id)
+        if !isDomain,
             let domainId = LinkStore.shared.getDomainId(id: id) {
             scorer.update(id: domainId, value: value, eventType: .webDomainIncrement, date: date, paramKey: paramKey)
         }
@@ -237,7 +237,7 @@ public class BrowsingNode: ObservableObject, Codable {
 
     public init(tree: BrowsingTree, parent: BrowsingNode?, url: String, title: String?, isLinkActivation: Bool) {
         id = UUID()
-        self.link = LinkStore.createIdFor(url, title: title)
+        self.link = LinkStore.visit(url, title: title).id
         self.parent = parent
         self.tree = tree
         self.isLinkActivation = isLinkActivation
@@ -458,7 +458,7 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
     }
 
     public func navigateTo(url link: String, title: String?, startReading: Bool, isLinkActivation: Bool, readCount: Int) {
-        guard current.link != LinkStore.getIdFor(link) else { return }
+        guard current.link != LinkStore.getOrCreateIdFor(link) else { return }
         Logger.shared.logInfo("navigateFrom \(currentLink) to \(link)", category: .web)
         let event = isLinkActivation ? ReadingEventType.navigateToLink : ReadingEventType.searchBarNavigation
         current.addEvent(event)

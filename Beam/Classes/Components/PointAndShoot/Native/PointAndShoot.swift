@@ -309,7 +309,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
             scorer?.addTextSelection()
             // TODO: Convert BeamText to BeamElement of quote type
             // Adds urlId to current card source
-            let urlId = LinkStore.createIdFor(sourceUrl.absoluteString, title: nil)
+            let urlId = LinkStore.getOrCreateIdFor(sourceUrl.absoluteString)
             targetNote.sources.add(urlId: urlId, noteId: targetNote.id, type: .user, sessionId: self.data.sessionId, activeSources: data.activeSources)
             // Updates frecency score of destination note
             self.data.noteFrecencyScorer.update(id: targetNote.id, value: 1.0, eventType: .notePointAndShoot, date: BeamDate.now, paramKey: .note30d0)
