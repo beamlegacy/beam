@@ -1,0 +1,13 @@
+subscription ($id: ID!) {
+  beamObjectUpdated(id: $id) {
+    beamObject {
+      id
+      dataUrl
+      checksum
+      type
+      createdAt
+      updatedAt
+      deletedAt
+    }
+  }
+}

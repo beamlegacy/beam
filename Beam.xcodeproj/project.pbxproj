@@ -385,6 +385,10 @@
 		52DF49A625E42110009A651E /* BeamUITestsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52DF49A525E42110009A651E /* BeamUITestsHelper.swift */; };
 		52E04FD6252C7A4600AD9F56 /* writing_space.json in Resources */ = {isa = PBXBuildFile; fileRef = 52E04FD5252C7A4600AD9F56 /* writing_space.json */; };
 		52E04FED252C814D00AD9F56 /* RoamImporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52E04FEC252C814D00AD9F56 /* RoamImporterTests.swift */; };
+		52EA56CE274F8F8B00F092C8 /* beam_object_data_url.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 52EA56CD274F8F8B00F092C8 /* beam_object_data_url.graphql */; };
+		52EA56D5274F8FA400F092C8 /* beam_objects_data_url.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 52EA56D4274F8FA400F092C8 /* beam_objects_data_url.graphql */; };
+		52EA56D7274F8FDC00F092C8 /* subscription_beam_objects_updated_data_url.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 52EA56D6274F8FDC00F092C8 /* subscription_beam_objects_updated_data_url.graphql */; };
+		52EA56D9274F8FFD00F092C8 /* subscription_beam_object_updated_data_url.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 52EA56D8274F8FFD00F092C8 /* subscription_beam_object_updated_data_url.graphql */; };
 		52ECE01E272970260010E223 /* UserAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52ECE01D272970260010E223 /* UserAlert.swift */; };
 		52F27FCB25B9B404006E09A2 /* ViewModelFetchedResults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52F27FB625B9B404006E09A2 /* ViewModelFetchedResults.swift */; };
 		52F4E49826417EF00067B017 /* create_identity.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 52F4E49726417EF00067B017 /* create_identity.graphql */; };
@@ -1492,6 +1496,10 @@
 		52DF49A525E42110009A651E /* BeamUITestsHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamUITestsHelper.swift; sourceTree = "<group>"; };
 		52E04FD5252C7A4600AD9F56 /* writing_space.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = writing_space.json; sourceTree = "<group>"; };
 		52E04FEC252C814D00AD9F56 /* RoamImporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoamImporterTests.swift; sourceTree = "<group>"; };
+		52EA56CD274F8F8B00F092C8 /* beam_object_data_url.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = beam_object_data_url.graphql; sourceTree = "<group>"; };
+		52EA56D4274F8FA400F092C8 /* beam_objects_data_url.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = beam_objects_data_url.graphql; sourceTree = "<group>"; };
+		52EA56D6274F8FDC00F092C8 /* subscription_beam_objects_updated_data_url.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = subscription_beam_objects_updated_data_url.graphql; sourceTree = "<group>"; };
+		52EA56D8274F8FFD00F092C8 /* subscription_beam_object_updated_data_url.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = subscription_beam_object_updated_data_url.graphql; sourceTree = "<group>"; };
 		52ECE01D272970260010E223 /* UserAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAlert.swift; sourceTree = "<group>"; };
 		52F27FB625B9B404006E09A2 /* ViewModelFetchedResults.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewModelFetchedResults.swift; sourceTree = "<group>"; };
 		52F4E49726417EF00067B017 /* create_identity.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = create_identity.graphql; sourceTree = "<group>"; };
@@ -3090,11 +3098,15 @@
 				5224CD452685FF7E00D4179E /* update_beam_objects.graphql */,
 				5224CD512685FF9B00D4179E /* update_beam_object.graphql */,
 				5224CD692685FFD100D4179E /* beam_object.graphql */,
+				52EA56CD274F8F8B00F092C8 /* beam_object_data_url.graphql */,
 				5224CD6F2685FFDD00D4179E /* beam_objects.graphql */,
+				52EA56D4274F8FA400F092C8 /* beam_objects_data_url.graphql */,
 				522F149227033DE000EDF2F6 /* beam_object_checksums.graphql */,
 				5224CD752685FFFC00D4179E /* beam_object_updated_at.graphql */,
 				520BC40026D7B02200A82966 /* subscription_beam_objects_updated.graphql */,
+				52EA56D6274F8FDC00F092C8 /* subscription_beam_objects_updated_data_url.graphql */,
 				520BC40D26D7B05F00A82966 /* subscription_beam_object_updated.graphql */,
+				52EA56D8274F8FFD00F092C8 /* subscription_beam_object_updated_data_url.graphql */,
 			);
 			path = BeamObject;
 			sourceTree = "<group>";
@@ -5204,9 +5216,12 @@
 				8AD2636A26F4A0480074D673 /* UITests-3.html in Resources */,
 				5224CD6A2685FFD100D4179E /* beam_object.graphql in Resources */,
 				8ADD05FD2729657D004C3EC9 /* WebPositions_prod.js in Resources */,
+				52EA56D9274F8FFD00F092C8 /* subscription_beam_object_updated_data_url.graphql in Resources */,
 				8AD2637026F4A0480074D673 /* Beam.css in Resources */,
+				52EA56D5274F8FA400F092C8 /* beam_objects_data_url.graphql in Resources */,
 				520BC40E26D7B05F00A82966 /* subscription_beam_object_updated.graphql in Resources */,
 				8AD2635E26F4A0480074D673 /* PointAndShootUI_native.test.ts in Resources */,
+				52EA56CE274F8F8B00F092C8 /* beam_object_data_url.graphql in Resources */,
 				BAA67EC2B781F8A78CD5A6B0 /* Beam.scss in Resources */,
 				BAA67B51C8D9DBD6FE5327B6 /* mixins.scss in Resources */,
 				8AD2636C26F4A0480074D673 /* UITests-4.html in Resources */,
@@ -5218,6 +5233,7 @@
 				1A560C30E74FFFB97685C043 /* PointAndShootHelper.ts in Resources */,
 				BAA676CC6D40AAD13AA19B2A /* BeamTypes.ts in Resources */,
 				BAA67C93BB2CDDDD22791FA2 /* Frames.test.ts in Resources */,
+				52EA56D7274F8FDC00F092C8 /* subscription_beam_objects_updated_data_url.graphql in Resources */,
 				BAA67935127F5C704ED1B29A /* BeamKeyEvent.ts in Resources */,
 				BAA67AEAB5F02CF0D106321F /* BeamHTMLCollection.ts in Resources */,
 				BAA679B295647FBEBBA187A4 /* BeamDOMRectList.ts in Resources */,
