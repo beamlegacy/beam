@@ -2,6 +2,8 @@ import Foundation
 
 class LoggerSplitViewController: NSSplitViewController {
     var progressIndicator: NSProgressIndicator?
+    var liveButton: NSButton?
+
     private var searchTask: DispatchWorkItem?
     var categoryController: LoggerCategoryTableViewController? {
         splitViewItems.first?.viewController as? LoggerCategoryTableViewController

@@ -3,6 +3,7 @@ import Foundation
 // This will be instantly deallocated and replaced by LoggerSplitViewController
 class LoggerWindowController: NSWindowController {
     @IBOutlet weak var progressIndicator: NSProgressIndicator!
+    @IBOutlet weak var liveButton: NSButton!
     @IBOutlet weak var searchField: NSSearchField!
     override func windowDidLoad() {
         super.windowDidLoad()
@@ -11,6 +12,7 @@ class LoggerWindowController: NSWindowController {
             window?.delegate = delegate
             searchField.delegate = delegate
             delegate.progressIndicator = progressIndicator
+            delegate.liveButton = liveButton
         }
     }
 }
