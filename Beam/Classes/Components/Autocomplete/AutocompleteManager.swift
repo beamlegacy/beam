@@ -84,14 +84,16 @@ class AutocompleteManager: ObservableObject {
         } else {
             self.resetAutocompleteSelection()
         }
-        guard !searchText.isEmpty else {
-            cancelAutocomplete()
-            return
-        }
 
         stopCurrentCompletionWork()
-        let publishers = getAutocompletePublishers(for: searchText) +
+        var publishers: [AnyPublisher<AutocompleteManager.AutocompletePublisherSourceResults, Never>]
+        if searchText.isEmpty {
+            publishers = getDefaultSuggestionsPublishers()
+        } else {
+            publishers = getAutocompletePublishers(for: searchText) +
             [getSearchEnginePublisher(for: searchText, searchEngine: searchEngineCompleter)]
+        }
+
         Publishers.MergeMany(publishers).collect()
             .receive(on: DispatchQueue.main)
             .sink { [weak self] publishersResults in
@@ -162,7 +164,6 @@ class AutocompleteManager: ObservableObject {
         if let i = selectedIndex, i >= 0, i < autocompleteResults.count {
             let result = autocompleteResults[i]
             let resultText = result.text
-            textChangeIsFromSelection = true
 
             // if the first result is compatible with autoselection, select the added string
             if i == 0, let completingText = result.completingText,
@@ -175,10 +176,10 @@ class AutocompleteManager: ObservableObject {
                 guard resultPrefix.lowercased() == completingText.lowercased() else { return }
 
                 let additionalText = resultText.substring(range: newSelection)
-                searchQuery = completingText + additionalText
+                setQuery(completingText + additionalText, updateAutocompleteResults: false)
                 searchQuerySelectedRange = newSelection
             } else if searchQuery != resultText {
-                searchQuery = resultText
+                setQuery(resultText, updateAutocompleteResults: false)
                 searchQuerySelectedRange = resultText.count..<resultText.count
             }
         }
@@ -188,7 +189,7 @@ class AutocompleteManager: ObservableObject {
         if resetText, let currentSelectedIndex = autocompleteSelectedIndex,
            currentSelectedIndex < autocompleteResults.count {
             let previousResult = autocompleteResults[currentSelectedIndex]
-            setQueryWithoutAutocompleting(previousResult.completingText ?? "")
+            setQuery(previousResult.completingText ?? "", updateAutocompleteResults: false)
         }
         searchQuerySelectedRange = nil
         autocompleteSelectedIndex = nil
@@ -228,8 +229,8 @@ extension AutocompleteManager {
         switch cursorMovement {
         case .right:
             if let selectedIndex = autocompleteSelectedIndex, let url = autocompleteResults[selectedIndex].url, searchQuery != url.urlStringWithoutScheme {
-                textChangeIsFromSelection = true
-                searchQuery = url.scheme?.contains("http") == true ? url.urlStringWithoutScheme : url.absoluteString
+                let newQuery = url.scheme?.contains("http") == true ? url.urlStringWithoutScheme : url.absoluteString
+                setQuery(newQuery, updateAutocompleteResults: false)
             }
             resetAutocompleteSelection()
             return false
@@ -254,15 +255,22 @@ extension AutocompleteManager {
         stopCurrentCompletionWork()
     }
 
-    func resetQuery() {
-        searchQuery = ""
-        autocompleteResults = []
+    func resetQuery(clearResults: Bool = true) {
+        setQuery("", updateAutocompleteResults: false)
+        if clearResults {
+            autocompleteResults = []
+        }
         stopCurrentCompletionWork()
     }
 
-    func setQueryWithoutAutocompleting(_ query: String) {
-        textChangeIsFromSelection = true
+    func setQuery(_ query: String, updateAutocompleteResults: Bool) {
+        textChangeIsFromSelection = !updateAutocompleteResults
         searchQuery = query
+    }
+
+    func getEmptyQuerySuggestions() {
+        guard searchQuery.isEmpty else { return }
+        buildAutocompleteResults(for: searchQuery)
     }
 
     // Allows the user to enter the next character of the suggestion

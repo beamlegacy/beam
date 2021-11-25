@@ -16,6 +16,7 @@ extension PreferencesManager {
     static let showPNSKey = "showPNSview"
     static let PnsJSIsOnKey = "PnsJSIsOn"
     static let SpaIndexingKey = "SpaIndexing"
+    static let omniboxV2IsOnKey = "OmniboxV2IsOn"
 }
 
 // MARK: - Default Values
@@ -30,6 +31,7 @@ extension PreferencesManager {
     static let showPNSDefault = true
     static let PnsJSIsOnDefault = true
     static let spaIndexingDefault = false
+    static let omniboxV2IsOnDefault = false
 }
 
 extension PreferencesManager {
@@ -55,4 +57,7 @@ extension PreferencesManager {
 
     @UserDefault(key: SpaIndexingKey, defaultValue: spaIndexingDefault, container: advancedPreferencesContainer)
     static var enableSpaIndexing: Bool
+
+    @UserDefault(key: omniboxV2IsOnKey, defaultValue: omniboxV2IsOnDefault, container: advancedPreferencesContainer)
+    static var omniboxV2IsOn: Bool
 }

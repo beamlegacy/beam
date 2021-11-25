@@ -16,6 +16,13 @@ extension AutocompleteManager {
         Self.logIntermediate(step: step, stepShortName: stepShortName, results: results)
     }
 
+    func getDefaultSuggestionsPublishers() -> [AnyPublisher<AutocompletePublisherSourceResults, Never>] {
+        [
+            // Default suggestions will be improved in a upcoming ticket
+            futureToPublisher(defaultSuggestionsNotesResults(), source: .note)
+        ]
+    }
+
     func getAutocompletePublishers(for searchText: String) -> [AnyPublisher<AutocompletePublisherSourceResults, Never>] {
         [
             futureToPublisher(autocompleteNotesResults(for: searchText), source: .note),
@@ -234,6 +241,23 @@ extension AutocompleteManager {
         if atIndex < finalResults.count {
             finalResults.insert(contentsOf: toInsert, at: atIndex)
             self.autocompleteResults = finalResults
+        }
+    }
+
+    // MARK: - Empty Query Suggestions
+    private func defaultSuggestionsNotesResults() -> Future<[AutocompleteResult], Error> {
+        Future { [weak self] promise in
+            let documentManager = DocumentManager()
+            let limit = 3
+            let documentStructs = documentManager.loadAllWithLimit(limit, sortingKey: .updatedAt(false))
+            let ids = documentStructs.map { $0.id }
+            let scores = GRDBDatabase.shared.getFrecencyScoreValues(noteIds: ids, paramKey: AutocompleteManager.noteFrecencyParamKey)
+            let autocompleteResults = documentStructs.map {
+                AutocompleteResult(text: $0.title, source: .note(noteId: $0.id), uuid: $0.id, score: scores[$0.id])
+            }.sorted(by: >).prefix(limit)
+            let autocompleteResultsArray = Array(autocompleteResults)
+            self?.logIntermediate(step: "NoteRecents", stepShortName: "NR", results: autocompleteResultsArray)
+            promise(.success(autocompleteResultsArray))
         }
     }
 }
