@@ -28,6 +28,7 @@ class BeamObject: Codable {
     var receivedAt: Date?
 
     var data: Data?
+    var dataUrl: String?
     var largeData: Data?
     var dataChecksum: String?
     var previousChecksum: String?

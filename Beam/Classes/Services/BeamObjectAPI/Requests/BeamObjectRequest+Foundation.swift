@@ -332,4 +332,61 @@ extension BeamObjectRequest {
             }
         }
     }
+
+    enum BeamObjectRequestError: Error {
+        case malformattedURL
+        case not200
+    }
+
+    private func fetchDataFromUrl(urlString: String,
+                                  _ completionHandler: @escaping (Swift.Result<Data, Error>) -> Void) throws -> URLSessionDataTask {
+
+        guard let url = URL(string: urlString) else {
+             throw BeamObjectRequestError.malformattedURL
+        }
+        var request = URLRequest(url: url)
+        let headers: [String: String] = [
+            "User-Agent": "Beam client, \(Information.appVersionAndBuild)"
+        ]
+
+        request.httpMethod = "GET"
+        request.allHTTPHeaderFields = headers
+
+        // Authentication headers for beamapp.co URLs
+        //        if authenticatedCall ?? authenticatedAPICall {
+        //            AuthenticationManager.shared.updateAccessTokenIfNeeded()
+        //
+        //            guard AuthenticationManager.shared.isAuthenticated,
+        //                  let accessToken = AuthenticationManager.shared.accessToken else {
+        //                LibrariesManager.nonFatalError(error: APIRequestError.notAuthenticated,
+        //                                               addedInfo: AuthenticationManager.shared.hashTokensInfos())
+        //
+        //                NotificationCenter.default.post(name: .networkUnauthorized, object: self)
+        //                throw APIRequestError.notAuthenticated
+        //            }
+        //
+        //            request.setValue("Bearer " + accessToken,
+        //                             forHTTPHeaderField: "Authorization")
+        //        }
+
+        let session = BeamURLSession.shared
+        let task = session.dataTask(with: request) { (data, response, error) -> Void in
+            guard let httpResponse = response as? HTTPURLResponse,
+                  httpResponse.statusCode == 200,
+                  let data = data else {
+                      if let error = error {
+                          completionHandler(.failure(error))
+                      } else {
+                          completionHandler(.failure(BeamObjectRequestError.not200))
+                      }
+
+                      return
+                  }
+
+            completionHandler(.success(data))
+        }
+
+        task.resume()
+        return task
+    }
 }

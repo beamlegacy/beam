@@ -16,6 +16,7 @@ struct Configuration {
     static private(set) var sentryEnabled = EnvironmentVariables.sentryEnabled
     static private(set) var networkEnabledDefault = EnvironmentVariables.networkEnabled
     static private(set) var topDomainDBMaxSize = 10000
+    static private(set) var beamObjectDataOnSeparateCall = true
 
     static private(set) var sentryDsn = "https://\(sentryKey)@\(sentryHostname)/\(sentryProject)"
 
