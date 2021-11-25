@@ -11,6 +11,17 @@ import BeamCore
 
 class ResizableNode: ElementNode {
 
+    var canBeResized = true {
+        didSet {
+            if !canBeResized, let handle = layers["handle"], let handleLayer = handle.layer as? CAShapeLayer {
+                handleLayer.removeFromSuperlayer()
+            } else {
+                setupResizeHandleLayer()
+            }
+            invalidate()
+        }
+    }
+
     ///The main element's size (image or video)
     var resizableElementContentSize = CGSize.zero
 
@@ -72,6 +83,10 @@ class ResizableNode: ElementNode {
     }
 
     func setupResizeHandleLayer() {
+
+        guard canBeResized else {
+            return
+        }
         let handleLayer = CAShapeLayer()
         handleLayer.lineWidth = 2
         handleLayer.lineCap = .round

@@ -22,34 +22,34 @@ class RestAPIServer {
                 return createBody(for: note)
             case .unpublishNote:
                 return nil
-            case .embed(_):
+            case .embed:
                 return nil
             }
         }
 
         var baseURL: URL {
             switch self {
-            case .publishNote(_), .unpublishNote(_):
+            case .publishNote, .unpublishNote:
                 return URL(string: EnvironmentVariables.PublicAPI.publishServer)!
-            case .embed(_):
+            case .embed:
                 return URL(string: EnvironmentVariables.PublicAPI.embed)!
             }
         }
 
         var route: String {
             switch self {
-            case .publishNote(_):
+            case .publishNote:
                 return "/note"
             case .unpublishNote(let noteId):
                 return "/note/\(noteId)"
-            case .embed(_):
+            case .embed:
                 return "/parseContent"
             }
         }
 
         var queryParameters: [String: String]? {
             switch self {
-            case .publishNote(_), .unpublishNote(_):
+            case .publishNote, .unpublishNote:
                 return nil
             case .embed(let url):
                 let content = url.absoluteString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? url.absoluteString
@@ -63,11 +63,11 @@ class RestAPIServer {
 
         var httpMethod: String {
             switch self {
-            case .publishNote(_):
+            case .publishNote:
                 return "POST"
-            case .unpublishNote(_):
+            case .unpublishNote:
                 return "DELETE"
-            case .embed(_):
+            case .embed:
                 return "GET"
             }
         }

@@ -52,6 +52,10 @@ extension BeamColor {
         static let sourceButtonStroke = BeamColor.Custom(named: "EditorSourceButtonStroke").alpha(0.2)
         static let sourceButtonStrokeHover = BeamColor.From(color: .white, alpha: 0.2)
         static let sourceButtonStrokeClicked = BeamColor.From(color: .white, alpha: 0.2)
+
+        static let collapseExpandButton = BeamColor.LightStoneGray
+        static let collapseExpandButtonHover = BeamColor.Bluetiful
+        static let collapseExpandButtonClicked = BeamColor.Custom(named: "EditorSearchClicked")
     }
 }
 
