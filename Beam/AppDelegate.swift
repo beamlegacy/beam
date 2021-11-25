@@ -265,11 +265,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window.makeKeyAndOrderFront(nil)
         windows.append(window)
         subscribeToStateChanges(for: window.state)
+        if PreferencesManager.restoreLastBeamSession {
+            window.reOpenClosedTab(nil)
+        }
         return window
     }
 
     // MARK: - Tabs
-    static let closeTabCmdGrp = "CloseTabCmdGrp"
     func applicationWillTerminate(_ aNotification: Notification) {
         // Insert code here to tear down your application
         data.clusteringManager.saveOrphanedUrls(orphanedUrlManager: data.clusteringOrphanedUrlManager)
@@ -282,7 +284,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let tmpCmdManager = CommandManager<BeamState>()
 
         for window in windows where window.state.browserTabsManager.tabs.count > 0 {
-            tmpCmdManager.beginGroup(with: AppDelegate.closeTabCmdGrp)
+            tmpCmdManager.beginGroup(with: ClosedTabDataPersistence.closeTabCmdGrp)
 
             for tab in window.state.browserTabsManager.tabs.reversed() {
                 guard !tab.isPinned, tab.url != nil, let index = window.state.browserTabsManager.tabs.firstIndex(of: tab) else { continue }
@@ -298,7 +300,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         let encoder = JSONEncoder()
         guard let data = try? encoder.encode(windowForTabsCmd) else { return }
-        UserDefaults.standard.set(data, forKey: onExit ? BeamWindow.savedCloseTabCmdsKey : BeamWindow.savedTabsKey)
+        if onExit {
+            ClosedTabDataPersistence.savedCloseTabData = data
+        } else {
+            ClosedTabDataPersistence.savedTabsData = data
+        }
     }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {

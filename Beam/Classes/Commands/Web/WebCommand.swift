@@ -48,7 +48,7 @@ class GroupWebCommand: GroupCommand<BeamState> {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         // TODO: Implement generic way to handle this
         // Look at BeamObjectManager and his translator
-        if name == AppDelegate.closeTabCmdGrp {
+        if name == ClosedTabDataPersistence.closeTabCmdGrp {
             commands = try values.decode([CloseTab].self, forKey: .commands)
         }
     }

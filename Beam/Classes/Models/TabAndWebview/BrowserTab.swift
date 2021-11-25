@@ -592,9 +592,9 @@ import Promises
 
     func createNewTab(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, setCurrent: Bool) -> WebPage? {
         guard let state = state else { return nil }
-        if let currentTabId = state.browserTabsManager.currentTab?.id, !setCurrent && state.browserTabsManager.currentTabGroupKey != currentTabId {
-            state.browserTabsManager.removeTabFromGroup(tabId: currentTabId)
-            state.browserTabsManager.createNewGroup(for: currentTabId)
+        if let currentTab = state.browserTabsManager.currentTab, !currentTab.isPinned && !setCurrent && state.browserTabsManager.currentTabGroupKey != currentTab.id {
+            state.browserTabsManager.removeTabFromGroup(tabId: currentTab.id)
+            state.browserTabsManager.createNewGroup(for: currentTab.id)
         }
         return createNewTab(targetURL, configuration, setCurrent: setCurrent, state: state)
     }
