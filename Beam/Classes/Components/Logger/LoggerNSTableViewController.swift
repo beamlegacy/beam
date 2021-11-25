@@ -12,6 +12,8 @@ class LoggerNSTableController: NSViewController {
 
     private var searchText: String?
 
+    var automaticScroll = true
+
     public func deleteAll() {
         if selectedCategories.isEmpty {
             LoggerRecorder.shared.deleteAll()
@@ -29,7 +31,7 @@ class LoggerNSTableController: NSViewController {
                                category: .marker)
     }
 
-    public func download() {
+    public func exportLogs() {
         let savePanel = NSSavePanel()
         savePanel.canCreateDirectories = true
         savePanel.showsTagField = false
@@ -60,6 +62,41 @@ class LoggerNSTableController: NSViewController {
             } catch {
                 Logger.shared.logError("Error opening \(url): \(error.localizedDescription)", category: .general)
             }
+        }
+    }
+
+    public func importLogs() {
+        let openPanel = NSOpenPanel()
+        openPanel.allowsMultipleSelection = false
+        openPanel.canChooseDirectories = false
+        openPanel.canCreateDirectories = false
+        openPanel.canChooseFiles = true
+        openPanel.title = "Select logs to import"
+        openPanel.begin { [weak openPanel] result in
+            guard result == .OK, let selectedPath = openPanel?.url?.path else { openPanel?.close(); return }
+
+            guard let data = NSData(contentsOfFile: selectedPath) as Data?, let dataString = data.asString else { return }
+
+            let seq = CSVUnescapingSequence(input: dataString)
+            let parser = CSVParser(input: seq)
+
+            var index = 0
+            for line in parser {
+                let newLogEntry = LogEntry(context: CoreDataManager.shared.mainContext)
+                newLogEntry.level = line[1]
+                newLogEntry.category = line[2]
+                newLogEntry.log = line[3]
+                newLogEntry.created_at = line[0].iso8601withFractionalSeconds
+                index += 1
+            }
+
+            try? CoreDataManager.shared.mainContext.save()
+
+            self.loadData()
+            self.tableView.reloadData()
+            self.tableView.scrollRowToVisible(self.logEntries.count - 1)
+
+            openPanel?.close()
         }
     }
 
@@ -155,15 +192,23 @@ class LoggerNSTableController: NSViewController {
                     return
                 }
 
-                self.logEntries.removeFirst()
-                self.tableView.removeRows(at: IndexSet(integer: 0),
-                                          withAnimation: [])
+                if self.automaticScroll {
+                    if self.logEntries.count > 500 {
+                        self.logEntries.removeFirst()
+                        self.tableView.removeRows(at: IndexSet(integer: 0),
+                                                  withAnimation: [])
+                    }
 
-                self.logEntries.append(logEntry)
-                self.tableView.insertRows(at: IndexSet(integer: self.logEntries.count - 1),
-                                          withAnimation: [])
+                    self.logEntries.append(logEntry)
+                    self.tableView.insertRows(at: IndexSet(integer: self.logEntries.count - 1),
+                                              withAnimation: [])
 
-                self.tableView.scrollRowToVisible(self.logEntries.count - 1, animated: true)
+                    self.tableView.scrollRowToVisible(self.logEntries.count - 1, animated: true)
+                } else {
+                    self.logEntries.append(logEntry)
+                    self.tableView.insertRows(at: IndexSet(integer: self.logEntries.count - 1),
+                                              withAnimation: [])
+                }
             }
             .store(in: &cancellables)
     }
