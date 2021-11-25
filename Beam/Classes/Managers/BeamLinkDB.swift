@@ -123,10 +123,10 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
         }
     }
 
-    public func getLinkFor(url: String, title: String?) -> Link {
+    public func getLinkFor(url: String) -> Link? {
         (try? dbPool.read { db in
             try Link.filter(Column("url") == url).fetchOne(db)
-        }) ?? Link(url: url, title: title)
+        })
     }
 
     public func store(link: Link, shouldSaveOnNetwork: Bool, networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
@@ -141,17 +141,31 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
         }
 
         guard shouldSaveOnNetwork, AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else { return }
-
         saveOnNetwork(links, networkCompletion)
     }
 
     public func createIdFor(url: String, title: String? = nil) -> UUID {
-        var link = getLinkFor(url: url, title: title)
+        var link = getLinkFor(url: url) ?? Link(url: url, title: title)
         _ = try? dbPool.write { db in
             try link.insert(db)
         }
 
         return link.id
+    }
+    public func isDomain(id: UUID) -> Bool? {
+        guard let link = linkFor(id: id) else { return nil }
+        return URL(string: link.url)?.isDomain ?? false
+    }
+    public func getDomainId(id: UUID, networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) -> UUID? {
+        guard let link = linkFor(id: id),
+              let domain = URL(string: link.url)?.domain else { return nil }
+        if let domainLink = getLinkFor(url: domain.absoluteString) {
+            return domainLink.id
+        } else {
+            let domainLink = Link(url: domain.absoluteString, title: nil)
+            try? store(link: domainLink, shouldSaveOnNetwork: true, networkCompletion: networkCompletion)
+            return domainLink.id
+        }
     }
 
     public func linkFor(id: UUID) -> Link? {
@@ -161,7 +175,7 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
     }
 
     public func visit(url: String, title: String? = nil) {
-        var link = getLinkFor(url: url, title: title)
+        var link = getLinkFor(url: url) ?? Link(url: url, title: title)
         link.updatedAt = BeamDate.now
         link.title = title
 

@@ -85,4 +85,8 @@ public extension URL {
     var isDomain: Bool {
         self.pathComponents.count <= 1
     }
+    var domain: URL? {
+        guard let host = self.host, let scheme = self.scheme else { return nil }
+        return URL(string: "\(scheme)://\(host)/")
+    }
 }

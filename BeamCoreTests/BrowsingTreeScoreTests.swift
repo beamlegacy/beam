@@ -131,7 +131,7 @@ class BrowsingTreeScoreTests: XCTestCase {
         }
     }
 
-    func testFrecencyWrite() {
+    func testFrecencyWrite() throws {
         //checks that frecency writer is called with right values
         func testCall(call: UpdateScoreArgs, expectedUrlId urlId: UUID, expectedValue value: Float, expectedEventType eventType: FrecencyEventType, expectedDate date: Date, expectedKey paramKey: FrecencyParamKey) {
             XCTAssertEqual(call.id, urlId)
@@ -144,13 +144,22 @@ class BrowsingTreeScoreTests: XCTestCase {
         let tree = BrowsingTree(BrowsingTreeOrigin.searchBar(query: "some weird keywords"), frecencyScorer: fakeScorer)
         let root = tree.root!
         let rootCreationDate = root.events[0].date
-        tree.navigateTo(url: "www.somesite.com", title: nil, startReading: true, isLinkActivation: true, readCount: 10)
+        tree.navigateTo(url: "http://www.somesite.com/", title: nil, startReading: true, isLinkActivation: true, readCount: 10)
         tree.switchToOtherTab()
-        let child = tree.current!
-        let childCreationDate = child.events[0].date
-        let readStart = child.events[1].date
-        let readEnd = child.events[2].date
-        let readDuration = Float(readEnd.timeIntervalSince(readStart))
+        let child0 = tree.current!
+        let childCreationDate0 = child0.events[0].date
+        let readStart0 = child0.events[1].date
+        let readEnd0 = child0.events[2].date
+        let readDuration0 = Float(readEnd0.timeIntervalSince(readStart0))
+
+        tree.navigateTo(url: "http://www.somesite.com/abc", title: nil, startReading: true, isLinkActivation: true, readCount: 10)
+        tree.switchToOtherTab()
+        let child1 = tree.current!
+        let domainLink = try XCTUnwrap(LinkStore.shared.getDomainId(id: child1.link))
+        let childCreationDate1 = child1.events[0].date
+        let readStart1 = child1.events[1].date
+        let readEnd1 = child1.events[2].date
+        let readDuration1 = Float(readEnd1.timeIntervalSince(readStart1))
         guard let fakeFrecencyScorer = tree.frecencyScorer as? FakeFrecencyScorer else {
             fatalError("frecencyScorer should be a FakeFrecencyScorer")
         }
@@ -158,7 +167,13 @@ class BrowsingTreeScoreTests: XCTestCase {
         //root visit has no read period so only info at creation is sent
         testCall(call: updateScoreCalls[0], expectedUrlId: root.link, expectedValue: 1, expectedEventType: .webRoot, expectedDate: rootCreationDate, expectedKey: .webVisit30d0)
         //child parent is root and tree origin is search so child visit type is .searchBar
-        testCall(call: updateScoreCalls[1], expectedUrlId: child.link, expectedValue: 1, expectedEventType: .webSearchBar, expectedDate: childCreationDate, expectedKey: .webVisit30d0)
-        testCall(call: updateScoreCalls[2], expectedUrlId: child.link, expectedValue: readDuration, expectedEventType: .webSearchBar, expectedDate: readStart, expectedKey: .webReadingTime30d0)
+        testCall(call: updateScoreCalls[1], expectedUrlId: child0.link, expectedValue: 1, expectedEventType: .webSearchBar, expectedDate: childCreationDate0, expectedKey: .webVisit30d0)
+        testCall(call: updateScoreCalls[2], expectedUrlId: child0.link, expectedValue: readDuration0, expectedEventType: .webSearchBar, expectedDate: readStart0, expectedKey: .webReadingTime30d0)
+
+        testCall(call: updateScoreCalls[3], expectedUrlId: child1.link, expectedValue: 1, expectedEventType: .webSearchBar, expectedDate: childCreationDate1, expectedKey: .webVisit30d0)
+        testCall(call: updateScoreCalls[4], expectedUrlId: domainLink, expectedValue: 1, expectedEventType: .webDomainIncrement, expectedDate: childCreationDate1, expectedKey: .webVisit30d0)
+
+        testCall(call: updateScoreCalls[5], expectedUrlId: child1.link, expectedValue: readDuration1, expectedEventType: .webSearchBar, expectedDate: readStart1, expectedKey: .webReadingTime30d0)
+        testCall(call: updateScoreCalls[6], expectedUrlId: domainLink, expectedValue: readDuration1, expectedEventType: .webDomainIncrement, expectedDate: readStart1, expectedKey: .webReadingTime30d0)
     }
 }
