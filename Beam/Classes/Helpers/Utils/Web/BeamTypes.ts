@@ -223,6 +223,9 @@ export interface BeamElement extends BeamParentNode {
   removeAttribute(pointDatasetKey: any)
   dataset: any
   attributes: NamedNodeMap
+  srcset?: string
+  currentSrc?: string
+  src?: string
 
   /**
    * @type string
