@@ -186,9 +186,7 @@ class AutocompleteManager: ObservableObject {
     }
 
     private func resetAutocompleteSelection(resetText: Bool) {
-        if resetText, let currentSelectedIndex = autocompleteSelectedIndex,
-           currentSelectedIndex < autocompleteResults.count {
-            let previousResult = autocompleteResults[currentSelectedIndex]
+        if resetText, let previousResult = autocompleteResult(at: autocompleteSelectedIndex) {
             setQuery(previousResult.completingText ?? "", updateAutocompleteResults: false)
         }
         searchQuerySelectedRange = nil
@@ -204,6 +202,11 @@ class AutocompleteManager: ObservableObject {
 // MARK: - Public methods
 extension AutocompleteManager {
 
+    func autocompleteResult(at index: Int?) -> AutocompleteResult? {
+        guard let index = index, index >= 0 && index < autocompleteResults.count else { return nil }
+        return autocompleteResults[index]
+    }
+
     func selectPreviousAutocomplete() {
         if let i = autocompleteSelectedIndex {
             let newIndex = i - 1
@@ -212,7 +215,7 @@ extension AutocompleteManager {
             } else {
                 resetAutocompleteSelection(resetText: true)
             }
-        } else {
+        } else if autocompleteResults.count > 0 {
             autocompleteSelectedIndex = (-1).clampInLoop(0, autocompleteResults.count - 1)
         }
     }
@@ -220,7 +223,7 @@ extension AutocompleteManager {
     func selectNextAutocomplete() {
         if let i = autocompleteSelectedIndex {
             autocompleteSelectedIndex = (i + 1).clampInLoop(0, autocompleteResults.count - 1)
-        } else {
+        } else if autocompleteResults.count > 0 {
             autocompleteSelectedIndex = 0
         }
     }
@@ -228,7 +231,7 @@ extension AutocompleteManager {
     func handleLeftRightCursorMovement(_ cursorMovement: CursorMovement) -> Bool {
         switch cursorMovement {
         case .right:
-            if let selectedIndex = autocompleteSelectedIndex, let url = autocompleteResults[selectedIndex].url, searchQuery != url.urlStringWithoutScheme {
+            if let url = autocompleteResult(at: autocompleteSelectedIndex)?.url, searchQuery != url.urlStringWithoutScheme {
                 let newQuery = url.scheme?.contains("http") == true ? url.urlStringWithoutScheme : url.absoluteString
                 setQuery(newQuery, updateAutocompleteResults: false)
             }
