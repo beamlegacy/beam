@@ -613,6 +613,9 @@ public class DocumentManager: NSObject {
                 Logger.shared.logDebug("Network task for \(documentStruct.titleAndId): not cancelling previous throttled network call",
                                        category: .documentNetwork)
             }
+        } else {
+            Logger.shared.logDebug("Network task for \(documentStruct.titleAndId): not previous throttled network call",
+                                   category: .documentNetwork)
         }
 
         var networkTask: DispatchWorkItem!
@@ -653,7 +656,7 @@ public class DocumentManager: NSObject {
 
             let saveObject = DocumentStruct(document: updatedDocument)
 
-            Logger.shared.logDebug("Network task for \(saveObject.titleAndId): calling network",
+            Logger.shared.logDebug("Network task for \(documentStruct.titleAndId): calling network with \(updatedDocument.titleAndId) (refreshed object)",
                                    category: .documentNetwork)
 
             guard !networkTask.isCancelled else { return }
@@ -666,7 +669,7 @@ public class DocumentManager: NSObject {
                 Self.networkTasks.removeValue(forKey: document_id)
                 Self.networkTasksSemaphore.signal()
 
-                Logger.shared.logDebug("Network task for \(documentStruct.titleAndId): executed (inloop)",
+                Logger.shared.logDebug("Network task for \(updatedDocument.titleAndId): executed (inloop)",
                                        category: .documentNetwork,
                                        localTimer: localTimer)
 
@@ -674,13 +677,20 @@ public class DocumentManager: NSObject {
             }
             semaphore.wait()
 
-            Logger.shared.logDebug("Network task for \(documentStruct.titleAndId): executed (outloop)",
+            Logger.shared.logDebug("Network task for \(updatedDocument.titleAndId): executed (outloop)",
                                    category: .documentNetwork)
 
             if request == nil {
-                Logger.shared.logDebug("Network task for \(documentStruct.titleAndId): request is nil, reinjecting",
+                Logger.shared.logDebug("Network task for \(updatedDocument.titleAndId): request is nil, reinjecting",
                                        category: .documentNetwork)
                 documentManager.saveAndThrottle(saveObject)
+            }
+        }
+
+        if let tuple = Self.networkTasks[document_id] {
+            if !tuple.0.isCancelled && tuple.1 == false {
+                Logger.shared.logError("Network task for \(documentStruct.titleAndId): previous task not cancelled but not running!",
+                                       category: .documentNetwork)
             }
         }
 
