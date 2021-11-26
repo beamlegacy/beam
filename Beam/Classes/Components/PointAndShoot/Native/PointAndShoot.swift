@@ -283,6 +283,17 @@ class PointAndShoot: WebPageHolder, ObservableObject {
         // Convert html to BeamText
         let htmlNoteAdapter = HtmlNoteAdapter(sourceUrl, self.page.downloadManager, self.page.fileStorage)
         htmlNoteAdapter.convert(html: shootGroup.html(), completion: { [self] (beamElements: [BeamElement]) in
+            // exit early when failing to collect correctly
+            guard beamElements.count != 0 else {
+                Logger.shared.logError("BE-007 FAIL", category: .general)
+                self.showAlert(shootGroup, beamElements, "failed to collect html elements", completion: {
+                    shootGroup.setConfirmation(.failure)
+                    self.showShootConfirmation(group: shootGroup)
+                    completion()
+                })
+                return
+            }
+
             let elements = beamElements.map({ element -> BeamElement in
                 element.query = self.page.originalQuery
 
@@ -294,15 +305,6 @@ class PointAndShoot: WebPageHolder, ObservableObject {
             // Update shootgroup information
             shootGroup.numberOfElements = elements.count
             shootGroup.setNoteInfo(NoteInfo(id: targetNote.id, title: targetNote.title))
-            // exit early when failing to collect correctly
-            guard shootGroup.numberOfElements != 0 else {
-                self.showAlert(shootGroup, elements, "failed to collect html elements")
-                shootGroup.setConfirmation(.failure)
-                self.showShootConfirmation(group: shootGroup)
-                completion()
-                return
-            }
-
             // Set Destination note to the current card
             // Update BrowsingScorer about note submission
             page.setDestinationNote(targetNote, rootElement: targetNote)
@@ -331,27 +333,11 @@ class PointAndShoot: WebPageHolder, ObservableObject {
                     destinationElement.removeChild(onlyChild)
                 }
                 elements.forEach({ quote in destinationElement.addChild(quote) })
-                updateShootGroupAfterAddPageToNote(shootGroup: shootGroup, elements: elements, targetNote: targetNote)
-
+                shootGroup.setConfirmation(.success)
+                self.showShootConfirmation(group: shootGroup)
                 completion()
             }
         })
-    }
-
-    private func updateShootGroupAfterAddPageToNote(shootGroup: ShootGroup, elements: [BeamElement], targetNote: BeamNote) {
-        var shootGroup = shootGroup
-        // Complete PNS and clear stored data
-        shootGroup.numberOfElements = elements.count
-        shootGroup.setNoteInfo(NoteInfo(id: targetNote.id, title: targetNote.title))
-
-        if shootGroup.numberOfElements == 0 {
-            self.showAlert(shootGroup, elements, "numberOfElements is zero")
-            shootGroup.setConfirmation(.failure)
-        } else {
-            shootGroup.setConfirmation(.success)
-        }
-
-        self.showShootConfirmation(group: shootGroup)
     }
 
     /// Draws shoot confirmation
