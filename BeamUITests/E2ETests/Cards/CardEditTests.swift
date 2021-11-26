@@ -83,6 +83,28 @@ class CardEditTests: BaseTest {
         XCTAssertFalse(journalView.openAllCardsMenu().isCardNameAvailable(cardNameToBeCreated), "\(cardNameToBeCreated) card is not deleted")
     }
     
+    func testImageNotesSourceIconRedirectonToWebSource() {
+        let pnsView = PnSTestView()
+        let webView = WebTestView()
+        
+        testRailPrint("When I add image to a card")
+        BeamUITestsHelper(launchApp().app).openTestPage(page: .page4)
+        let imageItemToAdd = pnsView.image("forest")
+        pnsView.addToTodayCard(imageItemToAdd)
+        
+        testRailPrint("Then it has a source icon")
+        let cardView = webView.openDestinationCard()
+        let imageNote = cardView.getImageNoteByIndex(noteIndex: 0)
+        imageNote.hover()
+        XCTAssertTrue(cardView.button(CardViewLocators.Buttons.sourceButton.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout))
+        
+        testRailPrint("Then I'm redirected to the source page when clicking on the icon")
+        cardView.button(CardViewLocators.Buttons.sourceButton.accessibilityIdentifier).tapInTheMiddle()
+        XCTAssertEqual(webView.getNumberOfTabs(), 2)
+        let webPageUrl = OmniBarTestView().getSearchFieldValue()
+        XCTAssertTrue(webPageUrl.hasSuffix("/UITests-4.html"), "Actual web page is \(webPageUrl)")
+    }
+    
     func testIntendUnintendNote() throws {
         try XCTSkipIf(true, "Blocked by https://linear.app/beamapp/issue/BE-2234/perform-uitest-locally-trigger-the-vinyl-fatalerror")
         launchApp()
