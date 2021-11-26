@@ -26,6 +26,7 @@ enum CardViewLocators {
         case deleteCardButton = "editor-delete"
         case publishCardButton = "NoteHeaderPublishButton"
         case linkNamesButton = "cardTitleLayer"
+        case sourceButton = "source"
     }
     
     enum TextFields: String, CaseIterable, UIElement {
