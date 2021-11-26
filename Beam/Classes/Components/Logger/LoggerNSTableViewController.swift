@@ -295,8 +295,7 @@ extension LoggerNSTableController: NSTableViewDelegate {
 
     static private let dateFormat: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.dateStyle = .short
-        formatter.timeStyle = .medium
+        formatter.dateFormat = "y-MM-dd H:mm:ss.SSS"
         return formatter
     }()
 }
