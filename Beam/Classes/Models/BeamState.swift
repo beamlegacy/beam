@@ -22,7 +22,7 @@ import Sentry
             EventsTracker.logBreadcrumb(message: "currentNote changed to \(String(describing: currentNote))", category: "BeamState")
             if let note = currentNote {
                 recentsManager.currentNoteChanged(note)
-                handleNoteDeletion(note)
+                observeNoteDeletion(note)
             }
             focusOmniBox = false
         }
@@ -566,11 +566,12 @@ import Sentry
     }
 
     private var noteDeletionCancellable: AnyCancellable?
-    func handleNoteDeletion(_ note: BeamNote) {
-        noteDeletionCancellable = note.$deleted.sink { [unowned self] deleted in
+    func observeNoteDeletion(_ note: BeamNote) {
+        noteDeletionCancellable = note.$deleted.sink { [weak self, weak note] deleted in
             guard deleted else { return }
-            noteDeletionCancellable = nil
-            self.navigateToJournal(note: nil)
+            self?.noteDeletionCancellable = nil
+            guard let note = note, self?.mode == .note, self?.currentNote == note else { return }
+            self?.navigateToJournal(note: nil)
 
             UserAlert.showError(message: "The note '\(note.title)' has been deleted.",
                                 informativeText: "Navigating back to the journal.")
