@@ -208,8 +208,8 @@ class ImageNode: ResizableNode {
     private func sourceButtonLayer(with caLayer: CALayer, shape: CAShapeLayer) -> Layer {
         let sourceLayer = Layer(name: "source", layer: caLayer)
 
-        sourceLayer.hovered = { [sourceImageLayer] hover in
-            guard let sourceImage = NSImage(named: "editor-url_big") else { return }
+        sourceLayer.hovered = { [weak self, sourceImageLayer] hover in
+            guard let self = self, let sourceImage = NSImage(named: "editor-url_big") else { return }
             sourceImage.isTemplate = true
             let tintedImage = sourceImage.fill(color: hover ? .white : BeamColor.Corduroy.nsColor)
 
