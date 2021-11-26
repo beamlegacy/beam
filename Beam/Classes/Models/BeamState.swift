@@ -438,8 +438,7 @@ import Sentry
         let queryString = autocompleteManager.searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
 
         focusOmniBox = false
-        if let index = autocompleteManager.autocompleteSelectedIndex {
-            let result = autocompleteManager.autocompleteResults[index]
+        if let result = autocompleteManager.autocompleteResult(at: autocompleteManager.autocompleteSelectedIndex) {
             autocompleteManager.resetQuery()
             selectAutocompleteResult(result)
             return
