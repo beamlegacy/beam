@@ -29,7 +29,6 @@ class BeamObject: Codable {
 
     var data: Data?
     var dataUrl: String?
-    var largeData: Data?
     var dataChecksum: String?
     var previousChecksum: String?
     var privateKeySignature: String?
@@ -57,6 +56,7 @@ class BeamObject: Codable {
         case deletedAt
         case receivedAt
         case data
+        case dataUrl = "dataUrl"
         case dataChecksum = "checksum"
         case previousChecksum
         case privateKeySignature

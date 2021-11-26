@@ -5,3 +5,9 @@ extension Int64 {
         return ByteCountFormatter().string(fromByteCount: Int64(self))
     }
 }
+
+extension Int {
+    var byteSize: String {
+        return ByteCountFormatter().string(fromByteCount: Int64(self))
+    }
+}

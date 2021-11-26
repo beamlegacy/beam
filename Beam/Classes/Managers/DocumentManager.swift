@@ -679,12 +679,6 @@ public class DocumentManager: NSObject {
 
             Logger.shared.logDebug("Network task for \(updatedDocument.titleAndId): executed (outloop)",
                                    category: .documentNetwork)
-
-            if request == nil {
-                Logger.shared.logDebug("Network task for \(updatedDocument.titleAndId): request is nil, reinjecting",
-                                       category: .documentNetwork)
-                documentManager.saveAndThrottle(saveObject)
-            }
         }
 
         if let tuple = Self.networkTasks[document_id] {
