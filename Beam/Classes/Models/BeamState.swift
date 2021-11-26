@@ -49,6 +49,7 @@ import Sentry
     @Published var canGoForward: Bool = false
     @Published var isFullScreen: Bool = false
     @Published var focusOmniBox: Bool = true
+    var useOmniboxV2 = false
 
     @Published var destinationCardIsFocused: Bool = false
     @Published var destinationCardName: String = ""
@@ -340,7 +341,7 @@ import Sentry
             return false
         }
         guard let tabIndex = browserTabsManager.tabs.firstIndex(of: tab) else { return false }
-        return cmdManager.run(command: CloseTab(tab: tab, tabIndex: tabIndex, wasCurrentTab: browserTabsManager.currentTab === tab), on: self)
+        return cmdManager.run(command: CloseTab(tab: tab, tabIndex: tabIndex, wasCurrentTab: browserTabsManager.currentTab === tab), on: self, needsToBeSaved: tab.url != nil)
     }
 
     func createNoteForQuery(_ query: String) -> BeamNote {
@@ -463,6 +464,7 @@ import Sentry
 
     override public init() {
         data = AppDelegate.main.data
+        useOmniboxV2 = PreferencesManager.omniboxV2IsOn
         super.init()
         setup(data: data)
 
@@ -481,6 +483,7 @@ import Sentry
 
     required public init(from decoder: Decoder) throws {
         data = AppDelegate.main.data
+        useOmniboxV2 = PreferencesManager.omniboxV2IsOn
         super.init()
 
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -533,8 +536,9 @@ import Sentry
         EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
         if mode == .web {
             if let url = browserTabsManager.currentTab?.url?.absoluteString {
+                autocompleteManager.resetQuery()
                 autocompleteManager.searchQuerySelectedRange = url.wholeRange
-                autocompleteManager.setQueryWithoutAutocompleting(url)
+                autocompleteManager.setQuery(url, updateAutocompleteResults: false)
             } else {
                 autocompleteManager.resetQuery()
             }

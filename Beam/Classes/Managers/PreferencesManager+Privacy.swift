@@ -22,7 +22,7 @@ extension PreferencesManager {
 }
 
 extension PreferencesManager {
-    static var privacyPreferencesContainer = UserDefaults(suiteName: "app_privacy_preferences") ?? .standard
+    static var privacyPreferencesContainer = "app_privacy_preferences"
 
     // MARK: - Global ON/OFF of AdBlocker
     static var isfilterGroupsEnabled: Bool {
@@ -39,13 +39,13 @@ extension PreferencesManager {
         }
     }
 
-    @UserDefault(key: adsFilterKey, defaultValue: adsFilterDefault, container: privacyPreferencesContainer)
+    @UserDefault(key: adsFilterKey, defaultValue: adsFilterDefault, suiteName: privacyPreferencesContainer)
     static var isAdsFilterEnabled: Bool
 
-    @UserDefault(key: privacyFilterKey, defaultValue: privacyFilterDefault, container: privacyPreferencesContainer)
+    @UserDefault(key: privacyFilterKey, defaultValue: privacyFilterDefault, suiteName: privacyPreferencesContainer)
     static var isPrivacyFilterEnabled: Bool
 
-    @UserDefault(key: annoyanceFilterKey, defaultValue: annoyanceFilterDefault, container: privacyPreferencesContainer)
+    @UserDefault(key: annoyanceFilterKey, defaultValue: annoyanceFilterDefault, suiteName: privacyPreferencesContainer)
     static var isAnnoyancesFilterEnabled: Bool
 
     static var isSocialMediaFilterEnabled: Bool {

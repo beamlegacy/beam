@@ -71,6 +71,8 @@ struct BeamTextField: NSViewRepresentable {
             textField.updateTextSelectionColor(selectedRangeColor)
         }
         textField.setText(text, font: font, icon: nil, skipGuards: false)
+        textField.setPlaceholder(placeholder, font: font, icon: nil)
+
         textField.onPerformKeyEquivalent = { [weak coordinator] event in
             coordinator?.performKeyEquivalentHandler(event: event) ?? false
         }
@@ -230,7 +232,7 @@ struct BeamTextField: NSViewRepresentable {
         }
 
         func control(_ control: NSControl, textView: NSTextView, doCommandBy commandSelector: Selector) -> Bool {
-            if commandSelector == #selector(NSResponder.insertNewline(_:)) {
+            if commandSelector == #selector(NSResponder.insertNewline(_:)) || commandSelector == #selector(NSResponder.insertNewlineIgnoringFieldEditor(_:)) {
                 parent.onCommit(modifierFlagsPressed)
                 return true
             } else if commandSelector == #selector(NSResponder.cancelOperation(_:)) {

@@ -110,7 +110,7 @@ class LinksSection: Widget {
         // BeamNote by itself don't contain any text so there is no reason to count it as a reference:
         for noteReference in allLinks where noteReference.elementID != noteReference.noteID {
             let noteID = noteReference.noteID
-            guard let breadCrumb = root?.getBreadCrumb(for: noteReference) else { continue }
+            guard let breadCrumb = root?.getBreadCrumb(for: noteReference) else { break }
 
             // Prepare title children:
             guard let refTitleWidget = try? titles[noteID]

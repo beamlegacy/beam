@@ -14,19 +14,22 @@ struct AutocompleteItem: View {
     var disabled: Bool = false
     var displayIcon: Bool = true
     var alwaysHighlightCompletingText: Bool = false
-    var allowCmdEnter: Bool = true
+    var allowNewCardShortcut: Bool = true
 
     var colorPalette: AutocompleteItemColorPalette = Self.defaultColorPalette
     var additionalLeadingPadding: CGFloat = 0
+    var designV2 = false
 
     @State private var isTouchDown = false
 
     @State private var favicon: NSImage?
     var backgroundColor: Color {
-        guard !isTouchDown else {
-            return colorPalette.touchdownBackgroundColor.swiftUI
+        switch item.source {
+        case .createCard, .note:
+            return isTouchDown ? colorPalette.touchdownCardBackgroundColor.swiftUI : colorPalette.selectedCardBackgroundColor.swiftUI.opacity(selected ? 1.0 : 0.0)
+        default:
+            return isTouchDown ? colorPalette.touchdownBackgroundColor.swiftUI : colorPalette.selectedBackgroundColor.swiftUI.opacity(selected ? 1.0 : 0.0)
         }
-        return colorPalette.selectedBackgroundColor.swiftUI.opacity(selected ? 1.0 : 0.0)
     }
 
     func iconNameSource(_ source: AutocompleteResult.Source) -> String {
@@ -46,29 +49,45 @@ struct AutocompleteItem: View {
         item.source == .url && item.information != nil
     }
 
-    private var textColor: Color {
+    private var defaultTextColor: Color {
         disabled ? BeamColor.LightStoneGray.swiftUI : colorPalette.textColor.swiftUI
     }
     private let secondaryTextColor = BeamColor.Autocomplete.subtitleText.swiftUI
     private let subtitleLinkColor = BeamColor.Autocomplete.link.swiftUI
+    private let cardColor = BeamColor.Beam.swiftUI
     private var mainTextColor: Color {
-        if item.source == .topDomain ||
-            (item.source == .url && !isUrlWithTitle) {
+        switch item.source {
+        case .topDomain:
             return subtitleLinkColor
+        case .url where !isUrlWithTitle:
+            return subtitleLinkColor
+        case .note, .createCard:
+            return cardColor
+        default:
+            return defaultTextColor
         }
-        return textColor
     }
     private var informationColor: Color {
         switch item.source {
         case .history, .url:
             return subtitleLinkColor
+        case .createCard where designV2:
+            return defaultTextColor
         default:
             return colorPalette.informationTextColor.swiftUI
         }
     }
+    private var shortcutColor: Color {
+        switch item.source {
+        case .note, .createCard:
+            return cardColor
+        default:
+            return subtitleLinkColor
+        }
+    }
 
     private func highlightedTextRanges(in text: String) -> [Range<String.Index>] {
-        guard let completingText = item.completingText else {
+        guard let completingText = item.completingText, item.source != .createCard else {
             return []
         }
         if alwaysHighlightCompletingText || [.autocomplete, .history, .url, .topDomain].contains(item.source) {
@@ -81,6 +100,9 @@ struct AutocompleteItem: View {
     }
 
     var mainText: String {
+        if designV2 && item.source == .createCard {
+            return "New Card:"
+        }
         if isUrlWithTitle, let information = item.information {
             return information
         }
@@ -88,11 +110,18 @@ struct AutocompleteItem: View {
     }
 
     var secondaryText: String? {
-        isUrlWithTitle ? item.text : item.information
+        if designV2 && item.source == .createCard {
+            return " " + item.text
+        } else if isUrlWithTitle {
+            return " – \(item.text)"
+        } else if let info = item.information {
+            return " – \(info)"
+        }
+        return nil
     }
 
     var body: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: designV2 ? BeamSpacing._120 : BeamSpacing._80) {
             if displayIcon {
                 if let icon = favicon {
                     Image(nsImage: icon)
@@ -101,6 +130,7 @@ struct AutocompleteItem: View {
                         .frame(maxWidth: 16, maxHeight: 16)
                 } else {
                     Icon(name: item.source.iconName, size: 16, color: secondaryTextColor)
+                        .blendModeLightMultiplyDarkScreen()
                 }
             }
             HStack(alignment: .firstTextBaseline, spacing: 0) {
@@ -113,7 +143,7 @@ struct AutocompleteItem: View {
                 .layoutPriority(10)
                 if let info = secondaryText {
                     HStack {
-                        StyledText(verbatim: " – \(info)")
+                        StyledText(verbatim: info)
                             .style(.font(BeamFont.semibold(size: 13).swiftUI), ranges: highlightedTextRanges)
                             .font(BeamFont.regular(size: 13).swiftUI)
                             .foregroundColor(informationColor)
@@ -128,18 +158,27 @@ struct AutocompleteItem: View {
                         .foregroundColor(BeamColor.CharmedGreen.swiftUI)
                 }
             }
+            .blendModeLightMultiplyDarkScreen()
             Spacer(minLength: 0)
-            if item.source == .createCard && allowCmdEnter {
-                Icon(name: "shortcut-cmd+return", size: 12, color: secondaryTextColor, alignment: .trailing)
+            if item.source == .createCard && allowNewCardShortcut {
+                HStack(spacing: BeamSpacing._20) {
+                    Icon(name: designV2 ? "shortcut-option" : "shortcut-cmd", size: 12, color: cardColor, alignment: .trailing)
+                    Icon(name: "shortcut-return", size: 12, color: cardColor, alignment: .trailing)
+                }
+                .opacity(0.5)
+                .blendModeLightMultiplyDarkScreen()
             } else {
-                Icon(name: "shortcut-return", size: 12, color: selected ? secondaryTextColor : .clear, alignment: .trailing)
+                Icon(name: "shortcut-return", size: 12, color: selected ? shortcutColor : .clear, alignment: .trailing)
+                    .opacity(0.7)
+                    .blendModeLightMultiplyDarkScreen()
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.vertical, BeamSpacing._80)
-        .padding(.horizontal, BeamSpacing._120)
+        .padding(.vertical, designV2 ? BeamSpacing._100 : BeamSpacing._80)
+        .padding(.horizontal, designV2 ? BeamSpacing._80 : BeamSpacing._120)
         .padding(.leading, additionalLeadingPadding)
         .background(backgroundColor)
+        .cornerRadius(designV2 ? 6 : 0)
         .onTouchDown { t in
             isTouchDown = t && !disabled
         }
@@ -160,6 +199,8 @@ struct AutocompleteItemColorPalette {
     var informationTextColor = BeamColor.Autocomplete.subtitleText
     var selectedBackgroundColor = BeamColor.Autocomplete.selectedBackground
     var touchdownBackgroundColor = BeamColor.Autocomplete.clickedBackground
+    var selectedCardBackgroundColor = BeamColor.Autocomplete.selectedCardBackground
+    var touchdownCardBackgroundColor = BeamColor.Autocomplete.clickedCardBackground
 }
 
 extension AutocompleteItem {
@@ -167,8 +208,9 @@ extension AutocompleteItem {
 }
 
 struct AutocompleteItem_Previews: PreviewProvider {
+    static let designV2 = true
     static let items = [
-        AutocompleteResult(text: "James Dean", source: .createCard, information: "Create Card"),
+        AutocompleteResult(text: "James Dean", source: .createCard, information: "New Card"),
         AutocompleteResult(text: "James Dean", source: .note, completingText: "Ja"),
         AutocompleteResult(text: "James Dean", source: .autocomplete, information: "Google Search"),
         AutocompleteResult(text: "jamesdean.com", source: .url),
@@ -178,8 +220,8 @@ struct AutocompleteItem_Previews: PreviewProvider {
     static var previews: some View {
         VStack(spacing: 0) {
             ForEach(Array(items.enumerated()), id: \.0) { index, item in
-                AutocompleteItem(item: item, selected: index == selectedIndex)
-                    .frame(width: 300, height: 32)
+                AutocompleteItem(item: item, selected: index == selectedIndex, designV2: designV2)
+                    .frame(width: 300, height: designV2 ? 36 : 32)
             }
         }.padding(.vertical)
     }

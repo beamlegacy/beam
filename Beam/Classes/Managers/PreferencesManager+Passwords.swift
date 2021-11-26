@@ -22,14 +22,14 @@ extension PreferencesManager {
 }
 
 extension PreferencesManager {
-    static var passwordsPreferencesContainer = UserDefaults(suiteName: "app_passwords_preferences") ?? .standard
+    static var passwordsPreferencesContainer = "app_passwords_preferences"
 
-    @UserDefault(key: autofillUsernamePasswordsKey, defaultValue: autofillUsernamePasswordsDefault, container: passwordsPreferencesContainer)
+    @UserDefault(key: autofillUsernamePasswordsKey, defaultValue: autofillUsernamePasswordsDefault, suiteName: passwordsPreferencesContainer)
     static var autofillUsernamePasswords: Bool
 
-    @UserDefault(key: autofillAdressesKey, defaultValue: autofillAdressesDefault, container: passwordsPreferencesContainer)
+    @UserDefault(key: autofillAdressesKey, defaultValue: autofillAdressesDefault, suiteName: passwordsPreferencesContainer)
     static var autofillAdresses: Bool
 
-    @UserDefault(key: autofillCreditCardsKey, defaultValue: autofillCreditCardsDefault, container: passwordsPreferencesContainer)
+    @UserDefault(key: autofillCreditCardsKey, defaultValue: autofillCreditCardsDefault, suiteName: passwordsPreferencesContainer)
     static var autofillCreditCards: Bool
 }

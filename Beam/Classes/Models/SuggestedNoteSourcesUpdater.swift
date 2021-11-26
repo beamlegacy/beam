@@ -119,13 +119,23 @@ public class SuggestedNoteSourceUpdater {
         return (sourcesToAdd: sourcesToAdd, sourcesToRemove: sourcesToRemove)
     }
 
+    func getSimilarityForSuggestion(suggestionPageId: UUID, noteId: UUID, activeSources: [UUID: [UUID]], similarities: [UUID: [UUID: Double]]) -> Double? {
+        var finalSimilarity: Double?
+        finalSimilarity = similarities[noteId]?[suggestionPageId]
+        for pageId in (activeSources[noteId] ?? [UUID]()) {
+            if let similarity = similarities[pageId]?[suggestionPageId] {
+                finalSimilarity = max(finalSimilarity ?? similarity, similarity)
+            }
+        }
+        return finalSimilarity
+    }
     /// Given instructions about sources that are to be added to and removed from different notes,
     /// this function performs the actual addition and removal
     ///
     /// - Parameters:
     ///   - sourcesToAdd: A dictionary from noteId to a list of pageId's, representing sources that are to be added
     ///   - sourcesToRemove: A dictionary from notId to a list of pageId's, representing sources that are to be removed
-    private func addAndRemoveFromNotes(sourcesToAdd: UpdateSources, sourcesToRemove: UpdateSources) {
+    private func addAndRemoveFromNotes(sourcesToAdd: UpdateSources, sourcesToRemove: UpdateSources, activeSources: [UUID: [UUID]], similarities: [UUID: [UUID: Double]]) {
         let allNotes = Array(Set(sourcesToRemove.keys).union(Set(sourcesToAdd.keys)))
         for noteId in allNotes {
             DispatchQueue.main.async {
@@ -135,8 +145,9 @@ public class SuggestedNoteSourceUpdater {
                             for pageId in addPagesToNote {
                                 let longTermScore = self.LongTermUrlScoreStoreProtocol.getMany(urlIds: [pageId])
                                 let frecency = try? self.frecencyFetcher.fetchOne(id: pageId, paramKey: .webVisit30d0)
+                                let similarity = self.getSimilarityForSuggestion(suggestionPageId: pageId, noteId: noteId, activeSources: activeSources, similarities: similarities)
                                 DispatchQueue.main.async {
-                                    note.sources.add(urlId: pageId, noteId: noteId, type: .suggestion, sessionId: self.sessionId, frecency: frecency?.lastScore, longTermScore: longTermScore[0])
+                                    note.sources.add(urlId: pageId, noteId: noteId, type: .suggestion, sessionId: self.sessionId, frecency: frecency?.lastScore, similarity: similarity, longTermScore: longTermScore[0])
                                 }
                             }
                         }
@@ -156,12 +167,12 @@ public class SuggestedNoteSourceUpdater {
     /// - Parameters:
     ///   - urlGroups: list of lists of pages (each list represents one group)
     ///   - noteGroups: list of lists of notes (each list represents one group)
-    public func update(urlGroups: [[UUID]], noteGroups: [[UUID]], activeSources: [UUID: [UUID]] = [UUID: [UUID]]()) {
+    public func update(urlGroups: [[UUID]], noteGroups: [[UUID]], activeSources: [UUID: [UUID]] = [UUID: [UUID]](), similarities: [UUID: [UUID: Double]]) {
         guard urlGroups != oldUrlGroups || noteGroups != oldNoteGroups else { return }
         myQueue.async {
             guard let (sourcesToAdd, sourcesToRemove) = self.createUpdateInstructions(urlGroups: urlGroups, noteGroups: noteGroups, activeSources: activeSources) else { return }
 
-            self.addAndRemoveFromNotes(sourcesToAdd: sourcesToAdd, sourcesToRemove: sourcesToRemove)
+            self.addAndRemoveFromNotes(sourcesToAdd: sourcesToAdd, sourcesToRemove: sourcesToRemove, activeSources: activeSources, similarities: similarities)
 
             DispatchQueue.main.async {
                 self.oldUrlGroups = urlGroups

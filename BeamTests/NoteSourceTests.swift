@@ -124,7 +124,7 @@ class NoteSourceTests: XCTestCase {
         let noteId = UUID()
         //At source addition, sources longTermScore objects are nil
         for row in dataSet {
-            let id = LinkStore.createIdFor(row.0, title: "")
+            let id = LinkStore.getOrCreateIdFor(row.0, title: "")
             if let selections = row.1 {
                 scoreStore.apply(to: id) { $0.textSelections = selections }
             }
@@ -139,7 +139,7 @@ class NoteSourceTests: XCTestCase {
         waitForExpectations(timeout: 1, handler: nil)
 
         for row in dataSet {
-            let id = LinkStore.getIdFor(row.0)!
+            let id = LinkStore.getOrCreateIdFor(row.0)
             let source = try XCTUnwrap(sources.get(urlId: id))
             if let selections = row.1 {
                 let longTermScore = try XCTUnwrap(source.longTermScore)
@@ -170,12 +170,12 @@ class NoteSourceTests: XCTestCase {
         
         func indexToUrlId(index: Int) -> UUID {
             let url = dataSet[index].0
-            return LinkStore.getIdFor(url)!
+            return LinkStore.getOrCreateIdFor(url)
         }
         //adding note source and inserting their longTermScore counterparts in
         //db
         for row in dataSet {
-            let id = LinkStore.createIdFor(row.0, title: "")
+            let id = LinkStore.getOrCreateIdFor(row.0, title: "")
             scoreStore.apply(to: id) {
                 $0.lastCreationDate = now
                 $0.textSelections = row.1

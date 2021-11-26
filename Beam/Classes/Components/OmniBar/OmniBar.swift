@@ -31,15 +31,16 @@ struct OmniBar: View {
     }
 
     private var isEditing: Bool {
-        return state.focusOmniBox
+        !state.useOmniboxV2 && state.focusOmniBox
     }
 
     private func setIsEditing(_ editing: Bool) {
         state.focusOmniBox = editing
         if editing {
             if state.mode == .web, let url = browserTabsManager.currentTab?.url?.absoluteString {
+                autocompleteManager.resetQuery()
                 autocompleteManager.searchQuerySelectedRange = url.wholeRange
-                autocompleteManager.setQueryWithoutAutocompleting(url)
+                autocompleteManager.setQuery(url, updateAutocompleteResults: false)
             }
         } else if state.mode != .web || browserTabsManager.currentTab?.url != nil {
             autocompleteManager.resetQuery()
@@ -92,17 +93,16 @@ struct OmniBar: View {
                     .animation(enableAnimations ? .easeInOut(duration: isEditing ? 0.1 : 0.3) : nil, value: isEditing)
                     .animation(nil)
                     GlobalCenteringContainer(enabled: !isEditing && state.mode != .web, containerGeometry: containerGeometry) {
-                            OmniBarSearchField(isEditing: Binding<Bool>(get: {
-                                isEditing
-                            }, set: {
-                                setIsEditing($0)
-                            }),
-                            modifierFlagsPressed: $modifierFlagsPressed,
-                            enableAnimations: enableAnimations)
+                            OmniBarSearchField(isEditing: Binding<Bool>(get: { isEditing },
+                                                                        set: { setIsEditing($0) }),
+                                               modifierFlagsPressed: $modifierFlagsPressed,
+                                               enableAnimations: enableAnimations, designV2: false)
                             .frame(maxHeight: .infinity)
                             .offset(x: 0, y: autocompleteManager.animatedQuery != nil ? -12 : 0)
                             .opacity(autocompleteManager.animatedQuery != nil ? 0 : 1)
                             .overlay(cmdReturnAnimatedOverlay)
+                            .allowsHitTesting(!state.useOmniboxV2)
+                            .opacity(state.useOmniboxV2 && state.focusOmniBox ? 0.0 : 1.0)
                     }
                     .padding(.leading, !isEditing && state.mode == .web ? 8 : 7)
                 }

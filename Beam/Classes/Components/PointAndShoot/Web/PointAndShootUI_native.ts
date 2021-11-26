@@ -2,6 +2,7 @@ import {PointAndShootUI} from "./PointAndShootUI"
 import {Native} from "../../../Helpers/Utils/Web/Native"
 import {
   BeamElement,
+  BeamElementBounds,
   BeamHTMLElement,
   BeamNodeType,
   BeamRange,
@@ -38,8 +39,8 @@ export class PointAndShootUI_native implements PointAndShootUI {
       return
     }
     const { id, element } = pointTarget
-    const rect = this.elementBounds(element)
-
+    const { rect } = this.elementBounds(element)
+    
     const payload = {
       point: { 
         id, 
@@ -60,12 +61,12 @@ export class PointAndShootUI_native implements PointAndShootUI {
     }
 
     const targets = shootTargets.map(({ id, element }) => {
-      const rect = this.elementBounds(element)
+      const {element: boundsElement, rect} = this.elementBounds(element)
       return { 
         id, 
         rect, 
-        html: this.getHtml(element),
-        text: element.innerText
+        html: this.getHtml(boundsElement),
+        text: (<BeamHTMLElement>boundsElement).innerText ?? ""
       }
     })
 
@@ -81,22 +82,8 @@ export class PointAndShootUI_native implements PointAndShootUI {
   }
 
   selectPayload = {}
-  private getHtml(element: BeamHTMLElement): string {
+  private getHtml(element: BeamHTMLElement | BeamElement): string {
     const { win } = this.native
-
-    let elementString
-    // If we support embedding on the current location
-    if (BeamElementHelper.isEmbed(element, win)) {
-      // parse the element for embedding. Parsing can fail so we support 
-      // falling back on the default element parsing
-      elementString = BeamEmbedHelper.parseElementForEmbed(element, win)
-    }
-
-    if (elementString) {
-      return elementString
-    }
-
-    // default element parser
     const parsedElement = BeamElementHelper.parseElementBasedOnStyles(element, win)
     return parsedElement.outerHTML
   }
@@ -226,25 +213,25 @@ export class PointAndShootUI_native implements PointAndShootUI {
 
     return newArea
   }
-
   /**
    * Gets the visual bounds of a given element. If the element contains child nodes,
-   * the sum of all child node bounds is used instead (recursively)
+   * the sum of all child node bounds is used instead (recursively). If no meaningful elements
+   * are found recurse upwards in the DOM.
    *
    * Supported child node types are:
    *  - Element
    *  - Text
    *  See: https://developer.mozilla.org/en-US/docs/Web/API/Node/nodeType
    *
-   * @param {BeamElement} el
-   * @param {BeamRect} area
-   * @param clippingArea
-   * @return {*} {BeamRect}
+   * @param {(BeamHTMLElement | BeamElement)} el
+   * @param {BeamRect} [area]
+   * @param {BeamRect} [clippingArea]
+   * @param {number} [count=5]
+   * @return {*}  {BeamElementBounds}
    * @memberof PointAndShootUI_native
    */
-  elementBounds(el: BeamElement, area?: BeamRect, clippingArea?: BeamRect): BeamRect {
+  elementBounds(el: BeamHTMLElement | BeamElement, area?: BeamRect, clippingArea?: BeamRect, count = 5): BeamElementBounds {
     const {win} = this.native
-
     // Find svg root if any and use it for bounds calculation
     const svgRoot = BeamElementHelper.getSvgRoot(el)
     if (svgRoot) {
@@ -254,12 +241,23 @@ export class PointAndShootUI_native implements PointAndShootUI {
     const bounds = el.getBoundingClientRect()
     // If we have a too large element, exit early
     if (BeamElementHelper.isLargerThanWindow(bounds, win)) {
-      return 
+      return {
+        element: el,
+        rect: area
+      }
     }
 
-    // Make sure the element has something we're interested in, otherwise exit early
+    // Make sure the element has something we're interested in, otherwise recurse up to the parent element. 
+    // If after 5 levels no meaningful element is found exit.
     if (!PointAndShootHelper.isMeaningfulOrChildrenAre(el, win)) {
-      return
+      if (count >= 0 && Boolean(el.parentElement)) {
+        const newCount = count--
+        return this.elementBounds(el.parentElement, area, clippingArea, newCount)
+      }
+      return {
+        element: el,
+        rect: area
+      }
     }
 
     // Get clipping area if previously undefined
@@ -276,13 +274,19 @@ export class PointAndShootUI_native implements PointAndShootUI {
     // return early with the simple element rect
     // check if the whole tree contains more than 150 html elements
     if (childElementTreeCount > 150) {
-      return this.setArea(area, bounds, clippingArea)
+      return {
+        element: el,
+        rect: this.setArea(area, bounds, clippingArea)
+      }
     }
     // check if the direct childNodes (this includes text nodes) are more than 150
     const childNodes = PointAndShootHelper.getMeaningfulChildNodes(el, win)
     // Filter useful childNodes
     if (childNodes.length > 150) {
-      return this.setArea(area, bounds, clippingArea)
+      return {
+        element: el,
+        rect: this.setArea(area, bounds, clippingArea)
+      }
     }
 
     // If it's an image or media, select the whole element
@@ -300,8 +304,11 @@ export class PointAndShootUI_native implements PointAndShootUI {
               area = this.setArea(area, childBounds, clippingArea)
             } else {
               // For any other element recursively call `elementBounds`
-              const bounds = this.elementBounds(childElement, area, clippingArea)
-              area = this.setArea(area, bounds, clippingArea)
+              if (count >= 0) {
+                const newCount = count--
+                const { rect } = this.elementBounds(childElement, area, clippingArea, newCount)
+                area = this.setArea(area, rect, clippingArea)
+              }
             }
           }
             break
@@ -318,7 +325,10 @@ export class PointAndShootUI_native implements PointAndShootUI {
         }
       }
 
-      return area
+      return {
+        element: el,
+        rect: area
+      }
     }
 
     // No meaningful childNodes, check the element itself
@@ -326,6 +336,9 @@ export class PointAndShootUI_native implements PointAndShootUI {
       area = this.setArea(area, bounds, clippingArea)
     }
 
-    return area
+    return {
+      element: el,
+      rect: area
+    }
   }
 }

@@ -52,6 +52,10 @@ extension BeamColor {
         static let sourceButtonStroke = BeamColor.Custom(named: "EditorSourceButtonStroke").alpha(0.2)
         static let sourceButtonStrokeHover = BeamColor.From(color: .white, alpha: 0.2)
         static let sourceButtonStrokeClicked = BeamColor.From(color: .white, alpha: 0.2)
+
+        static let collapseExpandButton = BeamColor.LightStoneGray
+        static let collapseExpandButtonHover = BeamColor.Bluetiful
+        static let collapseExpandButtonClicked = BeamColor.Custom(named: "EditorSearchClicked")
     }
 }
 
@@ -115,8 +119,10 @@ extension BeamColor {
         static let subtitleText = BeamColor.LightStoneGray
         static let newCardSubtitle = BeamColor.combining(lightColor: .Beam, lightAlpha: 0.7,
                                                          darkColor: .Beam)
-        static let selectedBackground = BeamColor.Generic.textSelection
-        static let clickedBackground = BeamColor.Bluetiful.alpha(0.14)
+        static let selectedBackground = BeamColor.Bluetiful.alpha(0.1)
+        static let clickedBackground = BeamColor.Bluetiful.alpha(0.16)
+        static let selectedCardBackground = BeamColor.Beam.alpha(0.1)
+        static let clickedCardBackground = BeamColor.Beam.alpha(0.16)
         static let focusedBackground = BeamColor.combining(lightColor: .From(color: .white), darkColor: .Nero)
         static let focusedShadow = BeamColor.combining(lightColor: .Niobium, lightAlpha: 0.15,
                                                        darkColor: .From(color: .black), darkAlpha: 0.6)
@@ -243,6 +249,8 @@ extension BeamColor.Generic {
 
     static let cursor = possibleCursorColors[randomCursorColorIndex]
     static let textSelection = possibleSelectionColors[randomCursorColorIndex]
+    static let blueTextSelection = BeamColor.combining(lightColor: .Bluetiful, lightAlpha: 0.14,
+                                                       darkColor: .Bluetiful, darkAlpha: 0.4)
 }
 
 extension BeamColor {

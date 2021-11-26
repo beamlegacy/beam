@@ -37,21 +37,23 @@ self.deletedAt = deletedAt
 
 public protocol LinkManager {
     func getLinks(matchingUrl url: String) -> [UUID: Link]
-    func getIdFor(url: String) -> UUID?
-    func createIdFor(url: String, title: String?) -> UUID
+    func getOrCreateIdFor(url: String, title: String?) -> UUID
     func linkFor(id: UUID) -> Link?
-    func visit(url: String, title: String?)
+    func visit(_ url: String, title: String?) -> Link
     func deleteAll() throws
+    func isDomain(id: UUID) -> Bool
+    func getDomainId(id: UUID) -> UUID?
     var allLinks: [Link] { get }
 }
 
 public class FakeLinkManager: LinkManager {
     public func getLinks(matchingUrl url: String) -> [UUID: Link] { [:] }
-    public func getIdFor(url: String) -> UUID? { nil }
-    public func createIdFor(url: String, title: String?) -> UUID { .null }
+    public func getOrCreateIdFor(url: String, title: String?) -> UUID { UUID.null }
     public func linkFor(id: UUID) -> Link? { nil }
-    public func visit(url: String, title: String?) { }
+    public func visit(_ url: String, title: String?) -> Link { Link(url: url, title: title) }
     public func deleteAll() throws { }
+    public func isDomain(id: UUID) -> Bool { false }
+    public func getDomainId(id: UUID) -> UUID? { UUID.null }
     public var allLinks: [Link] { [] }
 }
 
@@ -64,17 +66,18 @@ public class LinkStore: LinkManager {
     }
 
     public func getLinks(matchingUrl url: String) -> [UUID: Link] { linkManager.getLinks(matchingUrl: url) }
-    public func getIdFor(url: String) -> UUID? { linkManager.getIdFor(url: url) }
-    public func createIdFor(url: String, title: String? = nil) -> UUID { linkManager.createIdFor(url: url, title: title) }
+    public func getOrCreateIdFor(url: String, title: String? = nil) -> UUID { linkManager.getOrCreateIdFor(url: url, title: title) }
     public func linkFor(id: UUID) -> Link? { linkManager.linkFor(id: id) }
-    public func visit(url: String, title: String? = nil) { linkManager.visit(url: url, title: title) }
+    public func visit(_ url: String, title: String? = nil) -> Link { linkManager.visit(url, title: title) }
+    public func isDomain(id: UUID) -> Bool { linkManager.isDomain(id: id) }
+    public func getDomainId(id: UUID) -> UUID? { linkManager.getDomainId(id: id) }
     public func deleteAll() throws { try linkManager.deleteAll() }
+
     public static func linkFor(_ id: UUID) -> Link? {
         return shared.linkFor(id: id)
     }
-
-    public static func createIdFor(_ url: String, title: String?) -> UUID { shared.createIdFor(url: url, title: title) }
-    public static func getIdFor(_ url: String) -> UUID? { shared.getIdFor(url: url) }
+    public static func visit(_ url: String, title: String? = nil) -> Link { shared.visit(url, title: title) }
+    public static func getOrCreateIdFor(_ url: String, title: String? = nil) -> UUID { shared.getOrCreateIdFor(url: url, title: title) }
 
     public static func isInternalLink(id: UUID) -> Bool {
         guard let link = linkFor(id) else { return false }

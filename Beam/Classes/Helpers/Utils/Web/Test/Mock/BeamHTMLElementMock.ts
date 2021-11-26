@@ -12,6 +12,7 @@ export class BeamHTMLElementMock extends BeamElementMock implements BeamHTMLElem
   constructor(nodeName: string, attributes = {}) {
     super(nodeName, new BeamNamedNodeMap(attributes))
   }
+  parentElement?: BeamHTMLElement
 
   setQuerySelectorResult(query: string, element: BeamHTMLElementMock) {
     // if no array exists yet, create one

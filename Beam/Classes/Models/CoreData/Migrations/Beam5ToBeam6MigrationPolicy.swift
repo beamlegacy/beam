@@ -14,8 +14,13 @@ class Beam5ToBeam6MigrationPolicy: NSEntityMigrationPolicy {
     // This is why
     // https://stackoverflow.com/questions/46178853/why-is-my-core-data-migration-crashing-with-exc-bad-access
     override func createDestinationInstances(forSource sInstance: NSManagedObject, in mapping: NSEntityMapping, manager: NSMigrationManager) throws {
+        guard let journalDate = sInstance.value(forKey: "journal_date") as? String else {
+            fatalError("JournalDate is nil and this should never happen")
+        }
         let dInstance = NSEntityDescription.insertNewObject(forEntityName: mapping.destinationEntityName!, into: manager.destinationContext)
+        let journalDay = JournalDateConverter.toInt(from: journalDate)
 
+        dInstance.setValue(journalDay, forKey: #keyPath(Document.journal_day))
         dInstance.setValue(sInstance.value(forKey: "id"), forKey: (\Document.id)._kvcKeyPathString!)
         dInstance.setValue(sInstance.value(forKey: "data"), forKey: #keyPath(Document.data))
         dInstance.setValue(sInstance.value(forKey: "beam_api_data"), forKey: #keyPath(Document.beam_api_data))
@@ -30,13 +35,6 @@ class Beam5ToBeam6MigrationPolicy: NSEntityMigrationPolicy {
         dInstance.setValue(sInstance.value(forKey: "version"), forKey: #keyPath(Document.version))
         dInstance.setValue(sInstance.value(forKey: "is_public"), forKey: #keyPath(Document.is_public))
         dInstance.setValue(sInstance.value(forKey: "database_id"), forKey: #keyPath(Document.database_id))
-
-        if let journalDate = sInstance.value(forKey: "journal_date") as? String {
-            let journalDay = JournalDateConverter.toInt(from: journalDate)
-            dInstance.setValue(journalDay, forKey: #keyPath(Document.journal_day))
-        } else {
-            dInstance.setValue(0, forKey: #keyPath(Document.journal_day))
-        }
 
         manager.associate(sourceInstance: sInstance, withDestinationInstance: dInstance, for: mapping)
     }

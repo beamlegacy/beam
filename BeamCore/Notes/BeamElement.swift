@@ -93,6 +93,7 @@ public enum ElementKind: Codable, Equatable {
         }
     }
 
+    // swiftlint:disable:next cyclomatic_complexity
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
@@ -184,6 +185,7 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
     @Published open var id = UUID() { didSet { change(.meta) } }
     @Published open var text = BeamText() { didSet { change(.text) } }
     @Published open var open = true { didSet { change(.meta) } }
+    @Published open var collapsed = false { didSet { change(.meta) } }
     @Published open var children = [BeamElement]() { didSet { change(.tree) } }
     @Published open var readOnly = false { didSet { change(.meta) } }
     @Published open var score: Float = 0 { didSet { change(.meta) } }
@@ -211,6 +213,7 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
         case id
         case text
         case open
+        case collapsed
         case children
         case readOnly
         case score
@@ -244,6 +247,7 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
             text = BeamText(text: _text, attributes: [])
         }
         open = (try? container.decode(Bool.self, forKey: .open)) ?? true
+        collapsed = (try? container.decode(Bool.self, forKey: .collapsed)) ?? false
         if container.contains(.readOnly) {
             readOnly = try container.decode(Bool.self, forKey: .readOnly)
         }
@@ -282,6 +286,7 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
         }
     }
 
+    // swiftlint:disable cyclomatic_complexity
     open func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         let recursive = encoder.userInfo[Self.recursiveCoding] as? Bool ?? true
@@ -292,6 +297,9 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
         }
         if !open {
             try container.encode(open, forKey: .open)
+        }
+        if collapsed {
+            try container.encode(collapsed, forKey: .collapsed)
         }
         if readOnly {
             try container.encode(readOnly, forKey: .readOnly)
@@ -692,7 +700,7 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
         var richContent: [BeamElement] = []
 
         switch self.kind {
-        case .image(_, _):
+        case .image:
             richContent.append(self)
         default:
             break

@@ -309,17 +309,16 @@ class PointAndShoot: WebPageHolder, ObservableObject {
             scorer?.addTextSelection()
             // TODO: Convert BeamText to BeamElement of quote type
             // Adds urlId to current card source
-            let urlId = LinkStore.createIdFor(sourceUrl.absoluteString, title: nil)
+            let urlId = LinkStore.getOrCreateIdFor(sourceUrl.absoluteString)
             targetNote.sources.add(urlId: urlId, noteId: targetNote.id, type: .user, sessionId: self.data.sessionId, activeSources: data.activeSources)
             // Updates frecency score of destination note
             self.data.noteFrecencyScorer.update(id: targetNote.id, value: 1.0, eventType: .notePointAndShoot, date: BeamDate.now, paramKey: .note30d0)
             self.data.noteFrecencyScorer.update(id: targetNote.id, value: 1.0, eventType: .notePointAndShoot, date: BeamDate.now, paramKey: .note30d1)
             // Add all quotes to source Note
 
-            let shouldAddToSource = shouldAddToSourceNote(elements)
-            if let destinationElement = self.page.addToNote(allowSearchResult: true, inSourceBullet: shouldAddToSource) {
-                if let noteText = noteText, !noteText.isEmpty,
-                   let lastQuote = elements.last {
+            let addWithSourceBullet = shouldAddWithSourceBullet(elements)
+            if let destinationElement = self.page.addToNote(allowSearchResult: true, inSourceBullet: addWithSourceBullet) {
+                if let noteText = noteText, !noteText.isEmpty, let lastQuote = elements.last {
                     // Append NoteText last quote
                     let note = self.createNote(noteText)
                     lastQuote.addChild(note)
@@ -328,27 +327,31 @@ class PointAndShoot: WebPageHolder, ObservableObject {
                 // Add to source Note
                 if destinationElement.children.count == 1,
                    let onlyChild = destinationElement.children.first,
-                   onlyChild.text.isEmpty,
-                   onlyChild.kind == .bullet {
+                   onlyChild.text.isEmpty, onlyChild.kind == .bullet {
                     destinationElement.removeChild(onlyChild)
                 }
                 elements.forEach({ quote in destinationElement.addChild(quote) })
+                updateShootGroupAfterAddPageToNote(shootGroup: shootGroup, elements: elements, targetNote: targetNote)
 
-                // Complete PNS and clear stored data
-                shootGroup.numberOfElements = elements.count
-                shootGroup.setNoteInfo(NoteInfo(id: targetNote.id, title: targetNote.title))
-
-                if shootGroup.numberOfElements == 0 {
-                    self.showAlert(shootGroup, elements, "numberOfElements is zero")
-                    shootGroup.setConfirmation(.failure)
-                } else {
-                    shootGroup.setConfirmation(.success)
-                }
-
-                self.showShootConfirmation(group: shootGroup)
                 completion()
             }
         })
+    }
+
+    private func updateShootGroupAfterAddPageToNote(shootGroup: ShootGroup, elements: [BeamElement], targetNote: BeamNote) {
+        var shootGroup = shootGroup
+        // Complete PNS and clear stored data
+        shootGroup.numberOfElements = elements.count
+        shootGroup.setNoteInfo(NoteInfo(id: targetNote.id, title: targetNote.title))
+
+        if shootGroup.numberOfElements == 0 {
+            self.showAlert(shootGroup, elements, "numberOfElements is zero")
+            shootGroup.setConfirmation(.failure)
+        } else {
+            shootGroup.setConfirmation(.success)
+        }
+
+        self.showShootConfirmation(group: shootGroup)
     }
 
     /// Draws shoot confirmation
@@ -404,13 +407,19 @@ class PointAndShoot: WebPageHolder, ObservableObject {
     //This variable could be migrated as a preference if we want. Setting to true gives the original PnS behavior
     var embedMediaInSourceBullet = false
 
-    private func shouldAddToSourceNote(_ elements: [BeamElement]) -> Bool {
-        guard !embedMediaInSourceBullet else { return true }
+    /// Decides if this set of elements should be inserted with a source bullet
+    /// - Parameter elements: Array of BeamElement content
+    /// - Returns: true if elements should be added under a source bullen
+    private func shouldAddWithSourceBullet(_ elements: [BeamElement]) -> Bool {
+        guard !embedMediaInSourceBullet,
+              let first = elements.first,
+                elements.count == 1 else { return true }
 
-        if let first = elements.first, elements.count == 1, first.kind.isMedia {
+        // A single Image should be inserted without source bullet
+        if first.kind.isMedia {
             return false
-        } else {
-            return true
         }
+
+        return true
     }
 }

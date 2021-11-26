@@ -99,7 +99,7 @@ class CardReferenceFormatterView: FormatterView {
         listModel.excludeElements = excludeElements
         listModel.data = AppDelegate.main.data
         listModel.searchCardContent = searchCardContent
-        listModel.allowCmdEnter = false
+        listModel.allowNewCardShortcut = false
 
         var leadingPadding: CGFloat = CGFloat(typingPrefix)
         if !searchCardContent && typingPrefix == 1 {

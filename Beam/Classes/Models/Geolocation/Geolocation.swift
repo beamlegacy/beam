@@ -75,11 +75,11 @@ class GeolocationMessageHandler: BeamMessageHandler<GeolocationMessages>, CLLoca
 
             if !locationServicesIsEnabled() {
                 onLocationServicesIsDisabled()
-            } else if authorizationStatusIsDenied(status: CLLocationManager.authorizationStatus()) {
+            } else if authorizationStatusIsDenied(status: locationManager.authorizationStatus) {
                 onAuthorizationStatusIsDenied()
-            } else if authorizationStatusNeedRequest(status: CLLocationManager.authorizationStatus()) {
+            } else if authorizationStatusNeedRequest(status: locationManager.authorizationStatus) {
                 onAuthorizationStatusNeedRequest()
-            } else if authorizationStatusIsGranted(status: CLLocationManager.authorizationStatus()) {
+            } else if authorizationStatusIsGranted(status: locationManager.authorizationStatus) {
                 onAuthorizationStatusIsGranted()
             }
         case .geoloc_listenerRemoved:

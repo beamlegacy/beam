@@ -101,39 +101,39 @@ extension PreferencesManager {
     static let newTabWindowMakeActiveDefault = true
     static let cmdNumberSwitchTabsDefault = false
     static let showWebsiteIconTabDefault = true
-    static let restoreLastBeamSessionDefault = true
+    static let restoreLastBeamSessionDefault = false
 }
 
 extension PreferencesManager {
-    static var browserPreferencesContainer = UserDefaults(suiteName: "app_browser_preferences") ?? .standard
+    static var browserPreferencesContainer = "app_browser_preferences"
 
-    @UserDefault(key: selectedDefaultSearchEngineKey, defaultValue: defaultSearchEngine, container: browserPreferencesContainer)
+    @UserDefault(key: selectedDefaultSearchEngineKey, defaultValue: defaultSearchEngine, suiteName: browserPreferencesContainer)
     static var selectedSearchEngine: Int
 
-    @UserDefault(key: searchEngineSuggestionKey, defaultValue: includeSearchEngineSuggestionDefault, container: browserPreferencesContainer)
+    @UserDefault(key: searchEngineSuggestionKey, defaultValue: includeSearchEngineSuggestionDefault, suiteName: browserPreferencesContainer)
     static var includeSearchEngineSuggestion: Bool
 
-    @UserDefault(key: selectedDownloadFolderKey, defaultValue: defaultDownloadFolder, container: browserPreferencesContainer)
+    @UserDefault(key: selectedDownloadFolderKey, defaultValue: defaultDownloadFolder, suiteName: browserPreferencesContainer)
     static var selectedDownloadFolder: Int
 
-    @UserDefault(key: customDownloadFolderKey, defaultValue: defaultCustomDownloadFolder, container: browserPreferencesContainer)
+    @UserDefault(key: customDownloadFolderKey, defaultValue: defaultCustomDownloadFolder, suiteName: browserPreferencesContainer)
     static var customDownloadFolder: Data?
 
-    @UserDefault(key: openSafeFileAfterDownloadKey, defaultValue: openSafeFileAfterDownloadDefault, container: browserPreferencesContainer)
+    @UserDefault(key: openSafeFileAfterDownloadKey, defaultValue: openSafeFileAfterDownloadDefault, suiteName: browserPreferencesContainer)
     static var openSafeFileAfterDownload: Bool
 
-    @UserDefault(key: cmdClickOpenTabKey, defaultValue: cmdClickOpenTabDefault, container: browserPreferencesContainer)
+    @UserDefault(key: cmdClickOpenTabKey, defaultValue: cmdClickOpenTabDefault, suiteName: browserPreferencesContainer)
     static var cmdClickOpenTab: Bool
 
-    @UserDefault(key: newTabWindowMakeActiveKey, defaultValue: newTabWindowMakeActiveDefault, container: browserPreferencesContainer)
+    @UserDefault(key: newTabWindowMakeActiveKey, defaultValue: newTabWindowMakeActiveDefault, suiteName: browserPreferencesContainer)
     static var newTabWindowMakeActive: Bool
 
-    @UserDefault(key: cmdNumberSwitchTabsKey, defaultValue: cmdNumberSwitchTabsDefault, container: browserPreferencesContainer)
+    @UserDefault(key: cmdNumberSwitchTabsKey, defaultValue: cmdNumberSwitchTabsDefault, suiteName: browserPreferencesContainer)
     static var cmdNumberSwitchTabs: Bool
 
-    @UserDefault(key: showWebsiteIconTabKey, defaultValue: showWebsiteIconTabDefault, container: browserPreferencesContainer)
+    @UserDefault(key: showWebsiteIconTabKey, defaultValue: showWebsiteIconTabDefault, suiteName: browserPreferencesContainer)
     static var showWebsiteIconTab: Bool
 
-    @UserDefault(key: restoreLastBeamSessionKey, defaultValue: restoreLastBeamSessionDefault, container: browserPreferencesContainer)
+    @UserDefault(key: restoreLastBeamSessionKey, defaultValue: restoreLastBeamSessionDefault, suiteName: browserPreferencesContainer)
     static var restoreLastBeamSession: Bool
 }

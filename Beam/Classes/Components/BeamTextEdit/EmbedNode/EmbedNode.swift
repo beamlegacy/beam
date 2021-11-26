@@ -164,24 +164,30 @@ class EmbedNode: ResizableNode {
                     self?.isLoadingEmbed = false
                     self?.embedCancellables.removeAll()
                 } receiveValue: { [weak self] embedContent in
-                    if [.url, .image].contains(embedContent.type), let url = embedContent.embedURL {
-                        self?.webView?.load(URLRequest(url: url))
-                    } else if embedContent.type == .page, let content = embedContent.embedContent {
-                        let theme = self?.webView?.isDarkMode ?? false ? "dark" : "light"
-                        let headContent = self?.getHeadContent(theme: theme) ?? ""
-                        let styledEmbedContent = headContent + content
-                        self?.webView?.loadHTMLString(styledEmbedContent, baseURL: nil)
+                    switch embedContent.type {
+                    case .url, .link, .image, .photo, .video:
+                        if let url = embedContent.embedURL {
+                            self?.webView?.load(URLRequest(url: url))
+                        }
+                    case .page, .audio, .rich:
+                        if let content = embedContent.html {
+                            let theme = self?.webView?.isDarkMode ?? false ? "dark" : "light"
+                            let headContent = self?.getHeadContent(theme: theme) ?? ""
+                            let styledEmbedContent = headContent + content
+                            self?.webView?.loadHTMLString(styledEmbedContent, baseURL: nil)
+                        }
                     }
                 }.store(in: &embedCancellables)
         }
     }
 
-    // swiftlint:disable:next function_body_length
     /// Returns html a `<head>` tag, css style and a small script to correctly style the embed webview
     /// background in both Light and Dark color schemes. Also specifically provides support for twitter embeds
     /// - Parameter theme: The inital "dark" or "light" theme
     /// - Returns: html `<head>`tag as String
-    private func getHeadContent(theme: String) -> String {
+    private
+    // swiftlint:disable:next function_body_length
+    func getHeadContent(theme: String) -> String {
         return """
                         <head>
                             <meta name="twitter:dnt" content="on" />
