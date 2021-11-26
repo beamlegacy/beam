@@ -9,6 +9,7 @@ import Foundation
 import BeamCore
 import AppKit
 import Macaw
+import Lottie
 
 class ImageNode: ResizableNode {
 
@@ -16,13 +17,31 @@ class ImageNode: ResizableNode {
     private let cornerRadius = CGFloat(3)
 
     private var sourceImageLayer: CALayer?
+    private var imageLayer: Layer?
+
+    private var imageName: String?
+    private var imageSourceURL: URL?
+
+    var lottieView: AnimationView?
+
+    var isCollapsed: Bool {
+        didSet {
+            element.collapsed = isCollapsed
+            configureCollapsed(isCollapsed)
+            setupCollapseExpandLayer()
+            self.invalidateLayout()
+        }
+    }
+    var isHoverCollapseExpandButton: Bool = false
 
     init(parent: Widget, element: BeamElement, availableWidth: CGFloat?) {
+        self.isCollapsed = element.collapsed
         super.init(parent: parent, element: element, availableWidth: availableWidth)
         setupImage(width: availableWidth ?? fallBackWidth)
     }
 
     init(editor: BeamTextEdit, element: BeamElement, availableWidth: CGFloat?) {
+        self.isCollapsed = element.collapsed
         super.init(editor: editor, element: element, availableWidth: availableWidth)
         setupImage(width: availableWidth ?? fallBackWidth)
     }
@@ -37,12 +56,37 @@ class ImageNode: ResizableNode {
             Logger.shared.logError("ImageNode can only handle image elements, not \(element.kind)", category: .noteEditor)
             return
         }
-        guard let imageRecord = try? BeamFileDBManager.shared.fetch(uid: uid)
-        else {
+        guard let imageRecord = try? BeamFileDBManager.shared.fetch(uid: uid) else {
             Logger.shared.logError("ImageNode unable to fetch image '\(uid)' from FileDB", category: .noteEditor)
             return
         }
 
+        imageName = imageRecord.name
+        imageSourceURL = URL(string: self.element.text.text)
+
+        contentsPadding = NSEdgeInsets(top: 4, left: contentsPadding.left + 4, bottom: 14, right: 4)
+
+        setAccessibilityLabel("ImageNode")
+        setAccessibilityRole(.textArea)
+
+        setupImageLayer(using: imageRecord, uid: uid, width: width)
+        configureCollapsed(isCollapsed)
+        setupFocusLayer()
+        setupCollapseExpandLayer()
+    }
+
+    private func createImage(from imageRecord: BeamFileRecord) -> NSImage? {
+        switch imageRecord.type {
+        case "image/svg+xml":
+            guard let svgString = imageRecord.data.asString, case .image(_, let info) = element.kind, let size = info.size else { return nil }
+            let svgNode = try? SVGParser.parse(text: svgString)
+            return try? svgNode?.toNativeImage(size: Size(Double(size.width), Double(size.height)), scale: NSScreen.main?.backingScaleFactor ?? 1)
+        default:
+            return NSImage(data: imageRecord.data)
+        }
+    }
+
+    private func setupImageLayer(using imageRecord: BeamFileRecord, uid: UUID, width: CGFloat) {
         var imageLayer: Layer
         if let animatedImageLayer = Layer.animatedImage(named: "image", imageData: imageRecord.data) {
             animatedImageLayer.layer.position = .zero
@@ -71,33 +115,29 @@ class ImageNode: ResizableNode {
             imageLayer = Layer.image(named: "image", image: image, size: CGSize(width: width, height: height))
         }
 
+        imageLayer.mouseDown = { [weak self] _ -> Bool in
+            guard let self = self else { return false }
+            if self.isCollapsed {
+                self.isCollapsed = false
+                return true
+            }
+            return false
+        }
+
+        imageLayer.layer.cornerRadius = cornerRadius
+        imageLayer.layer.masksToBounds = true
+        imageLayer.layer.zPosition = 1
+        imageLayer.layer.contentsGravity = .resizeAspect
+
+        self.imageLayer = imageLayer
+        setupImageLayer(imageLayer)
+    }
+
+    private func setupImageLayer(_ imageLayer: Layer) {
         imageLayer.layer.cornerRadius = cornerRadius
         imageLayer.layer.masksToBounds = true
         imageLayer.layer.zPosition = 1
         addLayer(imageLayer, origin: .zero)
-
-        setAccessibilityLabel("ImageNode")
-        setAccessibilityRole(.textArea)
-
-        contentsPadding = NSEdgeInsets(top: 4, left: contentsPadding.left + 4, bottom: 14, right: 4)
-
-        setupFocusLayer()
-        setupResizeHandleLayer()
-
-        if URL(string: self.elementText.text) != nil {
-            setupSourceButtonLayer()
-        }
-    }
-
-    private func createImage(from imageRecord: BeamFileRecord) -> NSImage? {
-        switch imageRecord.type {
-        case "image/svg+xml":
-            guard let svgString = imageRecord.data.asString, case .image(_, let info) = element.kind, let size = info.size else { return nil }
-            let svgNode = try? SVGParser.parse(text: svgString)
-            return try? svgNode?.toNativeImage(size: Size(Double(size.width), Double(size.height)), scale: NSScreen.main?.backingScaleFactor ?? 1)
-        default:
-            return NSImage(data: imageRecord.data)
-        }
     }
 
     private func setupFocusLayer() {
@@ -115,6 +155,7 @@ class ImageNode: ResizableNode {
 
     private func setupSourceButtonLayer() {
 
+        guard imageSourceURL != nil else { return }
         guard let sourceImage = NSImage(named: "editor-url_big") else { return }
         sourceImage.isTemplate = true
         let tintedImage = sourceImage.fill(color: BeamColor.Corduroy.nsColor)
@@ -167,8 +208,8 @@ class ImageNode: ResizableNode {
     private func sourceButtonLayer(with caLayer: CALayer, shape: CAShapeLayer) -> Layer {
         let sourceLayer = Layer(name: "source", layer: caLayer)
 
-        sourceLayer.hovered = { [sourceImageLayer] hover in
-            guard let sourceImage = NSImage(named: "editor-url_big") else { return }
+        sourceLayer.hovered = { [weak self, sourceImageLayer] hover in
+            guard let self = self, let sourceImage = NSImage(named: "editor-url_big") else { return }
             sourceImage.isTemplate = true
             let tintedImage = sourceImage.fill(color: hover ? .white : BeamColor.Corduroy.nsColor)
 
@@ -180,7 +221,7 @@ class ImageNode: ResizableNode {
 
         sourceLayer.mouseDown = { [weak self] mouseInfo in
             guard mouseInfo.event.clickCount == 1 else { return false }
-            if let text = self?.elementText.text, URL(string: text) != nil {
+            if self?.imageSourceURL != nil {
                 shape.opacity = 0.9
                 return true
             }
@@ -189,7 +230,7 @@ class ImageNode: ResizableNode {
 
         sourceLayer.mouseUp = { [weak self] mouseInfo in
             guard mouseInfo.event.clickCount == 1 else { return false }
-            if let text = self?.elementText.text, let url = URL(string: text) {
+            if let url = self?.imageSourceURL {
                 self?.editor?.state?.handleOpenUrl(url, note: self?.element.note, element: self?.element)
                 shape.opacity = 0.7
                 return true
@@ -203,44 +244,66 @@ class ImageNode: ResizableNode {
 
     override func updateRendering() -> CGFloat {
         updateFocus()
-        return visibleSize.height
+        return isCollapsed ? 26.0 : visibleSize.height
     }
 
     override func updateLayout() {
         super.updateLayout()
         if let imageLayer = layers["image"] {
-            let position = CGPoint(x: contentsLead, y: contentsTop)
-            let bounds = CGRect(origin: .zero, size: visibleSize)
+            let position = CGPoint(x: contentsLead, y: isCollapsed ? contentsTop + 7 : contentsTop)
+            let bounds = CGRect(origin: .zero, size: isCollapsed ? CGSize(width: 16, height: 16) : visibleSize)
             guard bounds != imageLayer.layer.bounds || position != imageLayer.layer.position else { return }
             imageLayer.layer.position = position
             imageLayer.layer.bounds = bounds
-
-            if let focusLayer = layers["focus"], let borderLayer = focusLayer.layer as? CAShapeLayer {
-                let focusBounds = bounds.insetBy(dx: -focusMargin / 2, dy: -focusMargin / 2)
-                let borderPath = NSBezierPath(roundedRect: focusBounds, xRadius: cornerRadius, yRadius: cornerRadius)
-                borderLayer.path = borderPath.cgPath
-                borderLayer.position = CGPoint(x: position.x + bounds.size.width / 2, y: position.y + bounds.size.height / 2)
-                borderLayer.bounds = focusBounds
-            }
 
             if let source = layers["source"] {
                 let margin: CGFloat = 6.0
                 let size = source.layer.frame.size
                 source.layer.frame.origin = CGPoint(x: contentsLead + visibleSize.width - margin - size.width, y: contentsTop + margin)
             }
+
+            layoutCollapseExpand(contentLayer: imageLayer.layer)
+
+            if let focusLayer = layers["focus"], let borderLayer = focusLayer.layer as? CAShapeLayer {
+                var focusBounds = bounds.insetBy(dx: -focusMargin / 2, dy: -focusMargin / 2)
+                var collaspsedAdjustedBounds: CGRect?
+                if isCollapsed, let textLayer = layers["collapsed-text"] {
+                    focusBounds.size.width += textLayer.layer.frame.width + 6
+                    focusBounds.size.height = 27
+                    collaspsedAdjustedBounds = bounds
+                    collaspsedAdjustedBounds?.size.width += textLayer.layer.frame.width + 6
+                    collaspsedAdjustedBounds?.size.height += textLayer.layer.frame.width + 6
+                }
+                let borderPath = NSBezierPath(roundedRect: focusBounds, xRadius: cornerRadius, yRadius: cornerRadius)
+                borderLayer.path = borderPath.cgPath
+                borderLayer.position = CGPoint(x: position.x + (collaspsedAdjustedBounds ?? bounds).size.width / 2, y: position.y + bounds.size.height / 2)
+                borderLayer.bounds = focusBounds
+                borderLayer.lineWidth = isCollapsed ? 0 : 5
+                borderLayer.fillColor = isCollapsed ? BeamColor.Editor.linkActiveBackground.cgColor : NSColor.clear.cgColor
+            }
         }
     }
 
     public override func updateElementCursor() {
-        let containerLayer = layers["image"]?.layer
+        let containerLayer = isCollapsed ? layers["collapsed-text"]?.layer : layers["image"]?.layer
         let bounds = containerLayer?.bounds ?? .zero
-        let cursorRect = NSRect(x: caretIndex == 0 ? -4 : (bounds.width + 2), y: -focusMargin, width: 2, height: bounds.height + focusMargin * 2)
+        let offset = isCollapsed ? 20.0 : 0.0
+        let cursorRect = NSRect(x: caretIndex == 0 ? -4 : (bounds.width + 2 + offset), y: isCollapsed ? -focusMargin + 7 : -focusMargin, width: 2, height: bounds.height + focusMargin * 2)
         layoutCursor(cursorRect)
     }
 
     override func updateFocus() {
         guard let focusLayer = layers["focus"] else { return }
         focusLayer.layer.opacity = isFocused ? 1 : 0
+        if isCollapsed, let textLayer = layers["collapsed-text"]?.layer as? CATextLayer {
+            let color = isFocused ? BeamColor.Editor.linkActive : BeamColor.Editor.link
+            if let text = textLayer.string as? NSAttributedString {
+                guard let mutable = text.mutableCopy() as? NSMutableAttributedString else { return }
+                textLayer.string = mutable.addAttributes([.foregroundColor: color.cgColor])
+            }
+            let tintedImage = NSImage(named: "editor-url")?.fill(color: color.nsColor)
+            textLayer.sublayers?.first?.contents = tintedImage
+        }
     }
 
     override func onUnfocus() {
@@ -277,9 +340,36 @@ class ImageNode: ResizableNode {
             super.hover = hover
         }
     }
+
+    private func configureCollapsed(_ isCollapsed: Bool) {
+        if isCollapsed {
+            self.canBeResized = false
+            self.layers["source"]?.layer.removeFromSuperlayer()
+            let thumbnail = NSImage(named: "field-web")!
+            self.setupCollapsedLayer(title: mediaName, thumbnailLayer: imageLayer, or: thumbnail)
+        } else {
+            self.cleanCollapsedLayer()
+            self.canBeResized = true
+            self.setupResizeHandleLayer()
+            self.setupSourceButtonLayer()
+        }
+    }
 }
 
 // MARK: - ImageNode + Layer
 extension ImageNode {
     override var bulletLayerPositionY: CGFloat { 9 }
+
+    override var indentLayerPositionY: CGFloat { 28 }
+}
+
+extension ImageNode: Collapsable {
+
+    var mediaName: String {
+        imageSourceURL?.absoluteString ?? imageName ?? "Image"
+    }
+
+    var mediaURL: URL? {
+        imageSourceURL
+    }
 }

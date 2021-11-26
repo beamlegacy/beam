@@ -45,7 +45,7 @@ public enum PublicationStatus: Codable, Equatable {
 
     public var isPublic: Bool {
         switch self {
-        case .published(_, _):
+        case .published:
             return true
         default:
             return false

@@ -24,7 +24,7 @@
         "repositoryURL": "https://gitlab+deploy-token-596840:s63rWYma33o3RCwsbebz@gitlab.com/beamgroup/clustering.git",
         "state": {
           "branch": null,
-          "revision": "710583cd7d21d53d5e1bc8cf20ad6460029eea7b",
+          "revision": "f3efaf164b6401c049715b21af2850023298e802",
           "version": null
         }
       },
@@ -165,10 +165,10 @@
       },
       {
         "package": "Lottie",
-        "repositoryURL": "https://github.com/airbnb/lottie-ios",
+        "repositoryURL": "https://github.com/eLud/lottie-ios",
         "state": {
-          "branch": "lottie/macos-spm",
-          "revision": "f4d701070f9743b9ef7b9ac42d386d1ef98b842f",
+          "branch": "master",
+          "revision": "13a8764f5164651f6db74ec0d859f1ae69120a3a",
           "version": null
         }
       },

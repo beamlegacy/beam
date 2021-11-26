@@ -37,21 +37,19 @@ extension BeamWindow {
         state.createEmptyTabWithCurrentDestinationCard()
     }
 
-    static let savedCloseTabCmdsKey = "savedClosedTabCmds"
-    static let savedTabsKey = "savedTabsKey"
     @IBAction func reOpenClosedTab(_ sender: Any?) {
         if state.cmdManager.canUndo {
             if state.mode != .web {
                 state.mode = .web
             }
             _ = state.cmdManager.undo(context: state)
-        } else if let data = UserDefaults.standard.data(forKey: Self.savedCloseTabCmdsKey) {
-            restoreTabs(from: data)
-            UserDefaults.standard.removeObject(forKey: Self.savedCloseTabCmdsKey)
-            UserDefaults.standard.removeObject(forKey: Self.savedTabsKey)
-        } else if let data = UserDefaults.standard.data(forKey: Self.savedTabsKey) {
-            restoreTabs(from: data)
-            UserDefaults.standard.removeObject(forKey: Self.savedTabsKey)
+        } else if !ClosedTabDataPersistence.savedCloseTabData.isEmpty {
+            restoreTabs(from: ClosedTabDataPersistence.savedCloseTabData)
+            ClosedTabDataPersistence.savedCloseTabData.removeAll()
+            ClosedTabDataPersistence.savedTabsData.removeAll()
+        } else if !ClosedTabDataPersistence.savedTabsData.isEmpty {
+            restoreTabs(from: ClosedTabDataPersistence.savedTabsData)
+            ClosedTabDataPersistence.savedTabsData.removeAll()
         }
     }
 
@@ -59,7 +57,7 @@ extension BeamWindow {
         let decoder = JSONDecoder()
         guard let windowCommands = try? decoder.decode([Int: GroupWebCommand].self, from: data) else { return }
         for windowCommand in windowCommands.keys {
-            guard var beamWindow = AppDelegate.main.window,
+            guard var beamWindow = AppDelegate.main.windows.first,
                     let command = windowCommands[windowCommand] else { continue }
             if windowCommand > 0 {
                 beamWindow = AppDelegate.main.createWindow(frame: nil)
@@ -99,6 +97,10 @@ extension BeamWindow {
     }
 
     @IBAction func openLocation(_ sender: Any?) {
+        state.setFocusOmnibox()
+    }
+
+    @IBAction func openDocument(_ sender: Any?) {
         state.setFocusOmnibox()
     }
 

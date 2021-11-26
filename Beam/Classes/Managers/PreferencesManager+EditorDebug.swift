@@ -63,49 +63,49 @@ extension PreferencesManager {
 }
 
 extension PreferencesManager {
-    static var editorDebugPreferencesContainer = UserDefaults(suiteName: "app_advanced_preferences_editor_debug") ?? .standard
+    static var editorDebugPreferencesContainer = "app_advanced_preferences_editor_debug"
 
-    @UserDefault(key: editorLeadingPercentageKey, defaultValue: editorLeadingPercentageDefault, container: editorDebugPreferencesContainer)
+    @UserDefault(key: editorLeadingPercentageKey, defaultValue: editorLeadingPercentageDefault, suiteName: editorDebugPreferencesContainer)
     static var editorLeadingPercentage: CGFloat
-    @UserDefault(key: editorIsCenteredKey, defaultValue: editorIsCenteredDefault, container: editorDebugPreferencesContainer)
+    @UserDefault(key: editorIsCenteredKey, defaultValue: editorIsCenteredDefault, suiteName: editorDebugPreferencesContainer)
     static var editorIsCentered: Bool
 
-    @UserDefault(key: editorHeaderTopPaddingKey, defaultValue: editorHeaderTopPaddingDefault, container: editorDebugPreferencesContainer)
+    @UserDefault(key: editorHeaderTopPaddingKey, defaultValue: editorHeaderTopPaddingDefault, suiteName: editorDebugPreferencesContainer)
     static var editorHeaderTopPadding: CGFloat
-    @UserDefault(key: editorJournalTopPaddingKey, defaultValue: editorJournalTopPaddingDefault, container: editorDebugPreferencesContainer)
+    @UserDefault(key: editorJournalTopPaddingKey, defaultValue: editorJournalTopPaddingDefault, suiteName: editorDebugPreferencesContainer)
     static var editorJournalTopPadding: CGFloat
-    @UserDefault(key: editorCardTopPaddingKey, defaultValue: editorCardTopPaddingDefault, container: editorDebugPreferencesContainer)
+    @UserDefault(key: editorCardTopPaddingKey, defaultValue: editorCardTopPaddingDefault, suiteName: editorDebugPreferencesContainer)
     static var editorCardTopPadding: CGFloat
 
-    @UserDefault(key: editorLineHeightHeadingKey, defaultValue: editorLineHeightHeadingDefault, container: editorDebugPreferencesContainer)
+    @UserDefault(key: editorLineHeightHeadingKey, defaultValue: editorLineHeightHeadingDefault, suiteName: editorDebugPreferencesContainer)
     static var editorLineHeightHeading: CGFloat
-    @UserDefault(key: editorLineHeightKey, defaultValue: editorLineHeightDefault, container: editorDebugPreferencesContainer)
+    @UserDefault(key: editorLineHeightKey, defaultValue: editorLineHeightDefault, suiteName: editorDebugPreferencesContainer)
     static var editorLineHeight: CGFloat
-    @UserDefault(key: editorLineHeightMultipleLineKey, defaultValue: editorLineHeightMultipleLineDefault, container: editorDebugPreferencesContainer)
+    @UserDefault(key: editorLineHeightMultipleLineKey, defaultValue: editorLineHeightMultipleLineDefault, suiteName: editorDebugPreferencesContainer)
     static var editorLineHeightMultipleLine: CGFloat
 
-    @UserDefault(key: editorFontSizeKey, defaultValue: editorFontSizeDefault, container: editorDebugPreferencesContainer)
+    @UserDefault(key: editorFontSizeKey, defaultValue: editorFontSizeDefault, suiteName: editorDebugPreferencesContainer)
     static var editorFontSize: CGFloat
-    @UserDefault(key: editorCardTitleFontSizeKey, defaultValue: editorCardTitleFontSizeDefault, container: editorDebugPreferencesContainer)
+    @UserDefault(key: editorCardTitleFontSizeKey, defaultValue: editorCardTitleFontSizeDefault, suiteName: editorDebugPreferencesContainer)
     static var editorCardTitleFontSize: CGFloat
-    @UserDefault(key: editorFontSizeHeadingOneKey, defaultValue: editorFontSizeHeadingOneDefault, container: editorDebugPreferencesContainer)
+    @UserDefault(key: editorFontSizeHeadingOneKey, defaultValue: editorFontSizeHeadingOneDefault, suiteName: editorDebugPreferencesContainer)
     static var editorFontSizeHeadingOne: CGFloat
-    @UserDefault(key: editorFontSizeHeadingTwoKey, defaultValue: editorFontSizeHeadingTwoDefault, container: editorDebugPreferencesContainer)
+    @UserDefault(key: editorFontSizeHeadingTwoKey, defaultValue: editorFontSizeHeadingTwoDefault, suiteName: editorDebugPreferencesContainer)
     static var editorFontSizeHeadingTwo: CGFloat
 
-    @UserDefault(key: editorMinWidthKey, defaultValue: editorMinWidthDefault, container: editorDebugPreferencesContainer)
+    @UserDefault(key: editorMinWidthKey, defaultValue: editorMinWidthDefault, suiteName: editorDebugPreferencesContainer)
     static var editorMinWidth: CGFloat
-    @UserDefault(key: editorMaxWidthKey, defaultValue: editorMaxWidthDefault, container: editorDebugPreferencesContainer)
+    @UserDefault(key: editorMaxWidthKey, defaultValue: editorMaxWidthDefault, suiteName: editorDebugPreferencesContainer)
     static var editorMaxWidth: CGFloat
 
-    @UserDefault(key: editorParentSpacingKey, defaultValue: editorParentSpacingDefault, container: editorDebugPreferencesContainer)
+    @UserDefault(key: editorParentSpacingKey, defaultValue: editorParentSpacingDefault, suiteName: editorDebugPreferencesContainer)
     static var editorParentSpacing: CGFloat
-    @UserDefault(key: editorChildSpacingKey, defaultValue: editorChildSpacingDefault, container: editorDebugPreferencesContainer)
+    @UserDefault(key: editorChildSpacingKey, defaultValue: editorChildSpacingDefault, suiteName: editorDebugPreferencesContainer)
     static var editorChildSpacing: CGFloat
 
-    @UserDefault(key: editorHeaderOneSizeKey, defaultValue: editorHeaderOneSizeDefault, container: editorDebugPreferencesContainer)
+    @UserDefault(key: editorHeaderOneSizeKey, defaultValue: editorHeaderOneSizeDefault, suiteName: editorDebugPreferencesContainer)
     static var editorHeaderOneSize: CGFloat
-    @UserDefault(key: editorHeaderTwoSizeKey, defaultValue: editorHeaderTwoSizeDefault, container: editorDebugPreferencesContainer)
+    @UserDefault(key: editorHeaderTwoSizeKey, defaultValue: editorHeaderTwoSizeDefault, suiteName: editorDebugPreferencesContainer)
     static var editorHeaderTwoSize: CGFloat
 
     static func resetDefaultValuesForEditorDebug() {

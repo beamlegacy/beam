@@ -265,11 +265,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window.makeKeyAndOrderFront(nil)
         windows.append(window)
         subscribeToStateChanges(for: window.state)
+        if PreferencesManager.restoreLastBeamSession {
+            window.reOpenClosedTab(nil)
+        }
         return window
     }
 
     // MARK: - Tabs
-    static let closeTabCmdGrp = "CloseTabCmdGrp"
     func applicationWillTerminate(_ aNotification: Notification) {
         // Insert code here to tear down your application
         data.clusteringManager.saveOrphanedUrls(orphanedUrlManager: data.clusteringOrphanedUrlManager)
@@ -282,7 +284,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let tmpCmdManager = CommandManager<BeamState>()
 
         for window in windows where window.state.browserTabsManager.tabs.count > 0 {
-            tmpCmdManager.beginGroup(with: AppDelegate.closeTabCmdGrp)
+            tmpCmdManager.beginGroup(with: ClosedTabDataPersistence.closeTabCmdGrp)
 
             for tab in window.state.browserTabsManager.tabs.reversed() {
                 guard !tab.isPinned, tab.url != nil, let index = window.state.browserTabsManager.tabs.firstIndex(of: tab) else { continue }
@@ -298,7 +300,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         let encoder = JSONEncoder()
         guard let data = try? encoder.encode(windowForTabsCmd) else { return }
-        UserDefaults.standard.set(data, forKey: onExit ? BeamWindow.savedCloseTabCmdsKey : BeamWindow.savedTabsKey)
+        if onExit {
+            ClosedTabDataPersistence.savedCloseTabData = data
+        } else {
+            ClosedTabDataPersistence.savedTabsData = data
+        }
     }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
@@ -391,33 +397,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 d.state == .running
             }
 
-            let message: String
-            let question: String
-
-            if let uniqueDownload = downloads.first, downloads.count == 1 {
-                question = NSLocalizedString("A download is in progress", comment: "Quit during download")
-                message = """
-                        Are you sure you want to quit? Beam is currently downloading "\(uniqueDownload.suggestedFileName)".
-                        If you quit now, Beam won’t finish downloading this file.
-                        """
-            } else {
-                question = NSLocalizedString("Downloads are in progress", comment: "Quit during downloads")
-                message = """
-                        Are you sure you want to quit? Beam is currently downloading \(downloads.count) files.
-                        If you quit now, Beam won’t finish downloading these files.
-                        """
-            }
-
-            let alert = NSAlert()
-
-            let info = NSLocalizedString(message, comment: "Quit with download message")
-            let quitButton = NSLocalizedString("Quit", comment: "Quit button title")
-            let cancelButton = NSLocalizedString("Don't quit", comment: "Don't quit button title")
-            alert.messageText = question
-            alert.informativeText = info
-            alert.addButton(withTitle: quitButton)
-            alert.addButton(withTitle: cancelButton)
-
+            let alert = buildAlertForDownloadInProgress(downloads)
             let answer = alert.runModal()
             if answer == .alertSecondButtonReturn {
                 return .terminateCancel
@@ -435,8 +415,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return .terminateLater
     }
 
-    // MARK: -
-    // MARK: Preferences
+    // MARK: - Preferences
     lazy var preferences: [PreferencePane] = [
         GeneralPreferencesViewController,
         BrowserPreferencesViewController,
@@ -524,7 +503,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return true
     }
 
-    // MARK: - NSAppearance
+}
+
+// MARK: - NSAppearance
+extension AppDelegate {
     @objc
     func interfaceModeChanged(sender: NSNotification) {
         if BeamAppearance(rawValue: PreferencesManager.beamAppearancePreference) == BeamAppearance.system {
@@ -547,5 +529,39 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         case .system:
             setAppearance(getSystemAppearance())
         }
+    }
+}
+
+// MARK: - Downloads
+extension AppDelegate {
+
+    fileprivate func buildAlertForDownloadInProgress(_ downloads: [Download]) -> NSAlert {
+        let message: String
+        let question: String
+
+        if let uniqueDownload = downloads.first, downloads.count == 1 {
+            question = NSLocalizedString("A download is in progress", comment: "Quit during download")
+            message = """
+                        Are you sure you want to quit? Beam is currently downloading "\(uniqueDownload.suggestedFileName)".
+                        If you quit now, Beam won’t finish downloading this file.
+                        """
+        } else {
+            question = NSLocalizedString("Downloads are in progress", comment: "Quit during downloads")
+            message = """
+                        Are you sure you want to quit? Beam is currently downloading \(downloads.count) files.
+                        If you quit now, Beam won’t finish downloading these files.
+                        """
+        }
+
+        let alert = NSAlert()
+
+        let info = NSLocalizedString(message, comment: "Quit with download message")
+        let quitButton = NSLocalizedString("Quit", comment: "Quit button title")
+        let cancelButton = NSLocalizedString("Don't quit", comment: "Don't quit button title")
+        alert.messageText = question
+        alert.informativeText = info
+        alert.addButton(withTitle: quitButton)
+        alert.addButton(withTitle: cancelButton)
+        return alert
     }
 }

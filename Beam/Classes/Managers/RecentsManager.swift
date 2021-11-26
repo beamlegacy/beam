@@ -25,6 +25,13 @@ class RecentsManager: ObservableObject {
         self.documentManager = documentManager
         self.fetchRecents()
         self.observeCoreDataChanges()
+
+        NotificationCenter.default
+            .publisher(for: .defaultDatabaseUpdate, object: nil)
+            .sink { [weak self] _ in
+                self?.fetchRecents()
+            }
+            .store(in: &notesCancellables)
     }
 
     private func fetchRecents() {

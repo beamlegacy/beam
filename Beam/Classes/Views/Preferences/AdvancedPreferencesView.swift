@@ -33,6 +33,7 @@ struct AdvancedPreferencesView: View {
     @State var showTabGrougpingMenuItem = PreferencesManager.showTabGrougpingMenuItem
     @State var isDataBackupOnUpdateOn = PreferencesManager.isDataBackupOnUpdateOn
     @State var enableSpaIndexing = PreferencesManager.enableSpaIndexing
+    @State var omniboxV2IsOn = PreferencesManager.omniboxV2IsOn
 
     // Database
     @State private var newDatabaseTitle = ""
@@ -360,6 +361,13 @@ struct AdvancedPreferencesView: View {
                     CopyAccessToken
                     ResetOnboarding
                 }
+                Preferences.Section(bottomDivider: true) {
+                    Text("Enable Omnibox V2")
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.text.swiftUI)
+                } content: {
+                    OmniboxV2EnabledCheckbox
+                }
                 Preferences.Section(title: "State Restoration Enabled", bottomDivider: true) {
                     StateRestorationEnabledButton
                 }
@@ -416,6 +424,17 @@ struct AdvancedPreferencesView: View {
             .foregroundColor(BeamColor.Generic.text.swiftUI)
             .onReceive([pnsJSIsOn].publisher.first()) {
                 PreferencesManager.PnsJSIsOn = $0
+            }
+    }
+
+    private var OmniboxV2EnabledCheckbox: some View {
+        return Toggle(isOn: $omniboxV2IsOn) {
+            Text("Enabled")
+        }.toggleStyle(CheckboxToggleStyle())
+            .font(BeamFont.regular(size: 13).swiftUI)
+            .foregroundColor(BeamColor.Generic.text.swiftUI)
+            .onReceive([omniboxV2IsOn].publisher.first()) {
+                PreferencesManager.omniboxV2IsOn = $0
             }
     }
 

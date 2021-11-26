@@ -124,12 +124,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
             waitTimeOut: 2.0
         )
         browsingTreeSender = BrowsingTreeSender(config: treeConfig, appSessionId: sessionId)
-        do {
-            linkDB = try BeamLinkDB(path: BeamData.linkDBPath)
-        } catch {
-            Logger.shared.logError("Unable to access link DB \(error)", category: .linkDB)
-            fatalError("Unable to access link DB \(error)")
-        }
+        linkDB = BeamLinkDB(path: BeamData.linkDBPath)
 
         super.init()
 
@@ -192,7 +187,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
             guard let id = currentId else { return }
             if tabToIndex.shouldBeIndexed {
                 self.clusteringManager.addPage(id: id, parentId: parentId, value: tabToIndex)
-                LinkStore.shared.visit(url: tabToIndex.url.string, title: tabToIndex.document.title)
+                LinkStore.shared.visit(tabToIndex.url.string, title: tabToIndex.document.title)
             }
 
             // Update history record

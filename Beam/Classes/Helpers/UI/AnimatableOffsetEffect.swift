@@ -26,3 +26,9 @@ extension View {
         return modifier(OffsetEffect(offset: offset))
     }
 }
+
+extension AnyTransition {
+    static func animatableOffset(offset: CGSize) -> AnyTransition {
+        .modifier(active: OffsetEffect(offset: offset), identity: OffsetEffect(offset: .zero))
+    }
+}

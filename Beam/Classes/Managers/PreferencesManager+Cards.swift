@@ -44,20 +44,20 @@ extension PreferencesManager {
 }
 
 extension PreferencesManager {
-    static var cardsPreferencesContainer = UserDefaults(suiteName: "app_cards_preferences") ?? .standard
+    static var cardsPreferencesContainer = "app_cards_preferences"
 
-    @UserDefault(key: checkSpellingIsOnKey, defaultValue: checkSpellingIsOnDefault, container: cardsPreferencesContainer)
+    @UserDefault(key: checkSpellingIsOnKey, defaultValue: checkSpellingIsOnDefault, suiteName: cardsPreferencesContainer)
     static var checkSpellingIsOn: Bool
 
-    @UserDefault(key: checkGrammarIsOnKey, defaultValue: checkGrammarIsOnDefault, container: cardsPreferencesContainer)
+    @UserDefault(key: checkGrammarIsOnKey, defaultValue: checkGrammarIsOnDefault, suiteName: cardsPreferencesContainer)
     static var checkGrammarIsOn: Bool
 
-    @UserDefault(key: correctSpellingIsOnKey, defaultValue: correctSpellingIsOnDefault, container: cardsPreferencesContainer)
+    @UserDefault(key: correctSpellingIsOnKey, defaultValue: correctSpellingIsOnDefault, suiteName: cardsPreferencesContainer)
     static var correctSpellingIsOn: Bool
 
-    @UserDefault(key: embedContentPreferenceKey, defaultValue: embedContentPreferenceDefault, container: cardsPreferencesContainer)
+    @UserDefault(key: embedContentPreferenceKey, defaultValue: embedContentPreferenceDefault, suiteName: cardsPreferencesContainer)
     static var embedContentPreference: Int
 
-    @UserDefault(key: alwaysShowBulletsKey, defaultValue: alwaysShowBulletsDefault, container: cardsPreferencesContainer)
+    @UserDefault(key: alwaysShowBulletsKey, defaultValue: alwaysShowBulletsDefault, suiteName: cardsPreferencesContainer)
     static var alwaysShowBullets: Bool
 }

@@ -80,7 +80,7 @@ struct MeetingsListView: View {
                                 HStack(spacing: 5) {
                                     Text(time)
                                         .foregroundColor(isSelected ? BeamColor.Beam.swiftUI : BeamColor.LightStoneGray.swiftUI)
-                                        .blendMode(.multiply)
+                                        .blendModeLightMultiplyDarkScreen()
                                         .frame(width: maxTimeWidth, alignment: .trailing)
                                     StyledText(verbatim: meeting.name)
                                         .style(.font(BeamFont.semibold(size: 13).swiftUI), ranges: highlightedTextRanges)

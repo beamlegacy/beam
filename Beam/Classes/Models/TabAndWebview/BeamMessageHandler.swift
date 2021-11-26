@@ -50,14 +50,22 @@ class BeamMessageHandler<T: RawRepresentable & CaseIterable> : NSObject, WKScrip
     }
 
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        guard let webView = message.webView as? BeamWebView else {
-            fatalError("WebView is not a BeamWebview")
+        guard let webView = message.webView else {
+            Logger.shared.logError("WebView is nil on received WKScriptMessage", category: .web)
+            return
         }
-        guard let webPage = webView.page else {
+        guard let beamWebView = webView as? BeamWebView else {
+            // Failing this type cast during a "Sign in with Apple" flow is most likely due to the creation of a "SecretWebView"
+            // https://github.com/WebKit/WebKit/blob/main/Source/WebKit/UIProcess/Cocoa/SOAuthorization/PopUpSOAuthorizationSession.mm#L193
+            Logger.shared.logError("WebView cannot be cast to BeamWebView type || \(self.jsFileName) || message \(message.name) \(message.body)", category: .web)
+            return
+        }
+        guard let beamWebPage = beamWebView.page else {
+            Logger.shared.logError("WebView doesn't include a WebPage", category: .web)
             return
         }
 
-        onMessage(messageName: message.name, messageBody: message.body, from: webPage)
+        onMessage(messageName: message.name, messageBody: message.body, from: beamWebPage)
     }
 
     func destroy(for webView: WKWebView) {

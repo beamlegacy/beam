@@ -70,6 +70,12 @@ class CardCreationTests: BaseTest {
         testRailPrint("Then card with \(cardNameToBeCreated) is opened")
         XCTAssertTrue(cardView.waitForCardViewToLoad())
         XCTAssertTrue(cardView.staticText(cardNameToBeCreated).waitForExistence(timeout: minimumWaitTimeout))
+        
+        testRailPrint("Then Journal has no mentions for created card")
+        ShortcutsHelper().shortcutActionInvoke(action: .showJournal)
+        journalView.waitForJournalViewToLoad()
+        XCTAssertEqual(cardView.getNumberOfVisibleNotes(), 1)
+        XCTAssertEqual(cardView.getCardNoteValueByIndex(0), emptyString )
     }
     
     func testCreateCardOmniboxCmdEnter() {

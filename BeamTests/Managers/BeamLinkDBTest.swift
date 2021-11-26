@@ -5,49 +5,32 @@ import XCTest
 @testable import BeamCore
 
 class BeamLinkDBTests: XCTestCase {
-    let beamHelper = BeamTestsHelper()
-    let beamObjectHelper = BeamObjectTestsHelper()
-
-    override func setUp() {
-        super.setUp()
-        beforeNetworkTests()
-    }
-
     override func tearDown() {
         super.tearDown()
-        stopNetworkTests()
-    }
-    func testSavingLinkOnBeamObjects() throws {
-        let expectation = self.expectation(description: "save link")
-        let link = Link(url: "http://abc.com", title: "Your daily dose of alphabet")
-        try BeamLinkDB.shared.store(link: link, shouldSaveOnNetwork: true) { _ in
-            expectation.fulfill()
-        }
-        wait(for: [expectation], timeout: 10.0)
-        do {
-            let remoteLink: Link? = try beamObjectHelper.fetchOnAPI(link.beamObjectId)
-            XCTAssertNotNil(remoteLink, "Object doesn't exist on the API side?")
-            XCTAssertEqual(remoteLink?.id, link.id)
-            XCTAssertEqual(remoteLink?.url, link.url)
-
-        } catch {
-            XCTFail(error.localizedDescription)
-        }
-    }
-    private func beforeNetworkTests() {
-        // Need to freeze date to compare objects, as `createdAt` would be different from the network stubs we get
-        // back from Vinyl.
-        BeamDate.freeze("2021-03-19T12:21:03Z")
-
-        BeamTestsHelper.logout()
-
-        beamHelper.beginNetworkRecording(test: self)
-        BeamTestsHelper.login()
-    }
-
-    private func stopNetworkTests() {
-        BeamObjectTestsHelper().deleteAll()
         try? BeamLinkDB.shared.deleteAll()
-        beamHelper.endNetworkRecording()
+    }
+
+    func testDomain() throws {
+        //not a domain case
+        let url0 = "http://123.fr/yourdestiny.html"
+        let id0 = BeamLinkDB.shared.getOrCreateIdFor(url: url0, title: nil)
+        var isDomain = BeamLinkDB.shared.isDomain(id: id0)
+        XCTAssertFalse(isDomain)
+        var domainId = try XCTUnwrap(BeamLinkDB.shared.getDomainId(id: id0))
+        var domainLink = try XCTUnwrap(BeamLinkDB.shared.linkFor(id: domainId))
+        XCTAssertEqual(domainLink.url, "http://123.fr/")
+
+        //domain case
+        let url1 = "http://depannage.com"
+        let id1 = BeamLinkDB.shared.getOrCreateIdFor(url: url1, title: nil)
+        isDomain = BeamLinkDB.shared.isDomain(id: id1)
+        XCTAssert(isDomain)
+        domainId = try XCTUnwrap(BeamLinkDB.shared.getDomainId(id: id1))
+        domainLink = try XCTUnwrap(BeamLinkDB.shared.linkFor(id: domainId))
+        XCTAssertEqual(domainLink.url, "http://depannage.com/")
+
+        //no existing id case
+        XCTAssertFalse(BeamLinkDB.shared.isDomain(id: UUID()))
+        XCTAssertNil(BeamLinkDB.shared.getDomainId(id: UUID()))
     }
 }

@@ -283,8 +283,8 @@ struct DocumentDetail: View {
 
 struct DocumentDetail_Previews: PreviewProvider {
     static var previews: some View {
-        // swiftlint:disable:next force_try
         let documentManager = DocumentManager()
+        // swiftlint:disable:next force_try
         let document = try! documentManager.fetchFirst()!
 
         return DocumentDetail(document: document).background(Color.white)

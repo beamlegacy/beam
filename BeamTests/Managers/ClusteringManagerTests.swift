@@ -88,7 +88,7 @@ class ClusteringManagerTests: XCTestCase {
         expect(self.clusteringManager.clusteredPagesId).toEventually(contain([self.pageIDs[0],self.pageIDs[1]]) || contain([self.pageIDs[1]]))
 
         clusteringManager.addNote(note: notes[2])
-        expect(self.clusteringManager.clusteredNotesId).toEventually(contain([notes[0].id, notes[2].id]) || contain([notes[1].id, notes[2].id]) || contain([notes[2].id]))
+        expect(self.clusteringManager.clusteredNotesId).toEventually(contain([notes[0].id, notes[1].id, notes[2].id]) || contain([notes[1].id, notes[2].id]) || contain([notes[2].id]))
     }
 
     /// Test that the clusteringManager knows how to extract id-s and parenting relations correctly

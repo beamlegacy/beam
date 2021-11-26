@@ -256,10 +256,11 @@ class BeamNSTextField: NSTextField, BeamNSTextFieldProtocol {
     }
 
     override var intrinsicContentSize: NSSize {
+        let superSize = super.intrinsicContentSize
         guard shouldUseIntrinsicContentSize else {
-            return super.intrinsicContentSize
+            return superSize
         }
-        return sharedImpl.intrinsicContentSize
+        return CGSize(width: sharedImpl.intrinsicContentSize.width, height: superSize.height)
     }
 
     override func performKeyEquivalent(with event: NSEvent) -> Bool {
@@ -356,10 +357,11 @@ class BeamNSSecureTextField: NSSecureTextField, BeamNSTextFieldProtocol {
     }
 
     override var intrinsicContentSize: NSSize {
+        let superSize = super.intrinsicContentSize
         guard shouldUseIntrinsicContentSize else {
-            return super.intrinsicContentSize
+            return superSize
         }
-        return sharedImpl.intrinsicContentSize
+        return CGSize(width: sharedImpl.intrinsicContentSize.width, height: superSize.height)
     }
 
     override func performKeyEquivalent(with event: NSEvent) -> Bool {

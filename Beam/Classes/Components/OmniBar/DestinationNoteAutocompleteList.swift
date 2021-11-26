@@ -71,7 +71,7 @@ struct DestinationNoteAutocompleteList: View {
             ForEach(model.results, id: \.id) { i in
                 return AutocompleteItem(item: i, selected: model.isSelected(i), disabled: i.disabled, displayIcon: false,
                                         alwaysHighlightCompletingText: alwaysHighlightCompletingText,
-                                        allowCmdEnter: model.allowCmdEnter, colorPalette: colorPalette,
+                                        allowNewCardShortcut: model.allowNewCardShortcut, colorPalette: colorPalette,
                                         additionalLeadingPadding: additionLeadingPadding)
                     .if(model.searchCardContent) {
                         $0.frame(minHeight: itemHeight).fixedSize(horizontal: false, vertical: true)
@@ -118,7 +118,7 @@ extension DestinationNoteAutocompleteList {
         var data: BeamData?
         var useRecents = true
         var searchCardContent = false
-        var allowCmdEnter = true
+        var allowNewCardShortcut = true
         var excludeElements: [UUID] = []
         var modifierFlagsPressed: NSEvent.ModifierFlags?
 

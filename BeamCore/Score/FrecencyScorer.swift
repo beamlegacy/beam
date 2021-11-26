@@ -13,6 +13,7 @@ public enum FrecencyEventType {
     case webLinkActivation
     case webFromNote
     case webSearchBar
+    case webDomainIncrement //domain frecency update when visiting a url
     //beamnote interaction frecency events
     case noteCreate
     case noteVisit
@@ -24,7 +25,8 @@ private let webEventWeights: [FrecencyEventType: Float] = [
     .webRoot: 0,
     .webSearchBar: 1.5,
     .webLinkActivation: 1,
-    .webFromNote: 1.5
+    .webFromNote: 1.5,
+    .webDomainIncrement: 0.5
 ]
 private let noteEventWeights: [[FrecencyEventType: Float]] = [
     [

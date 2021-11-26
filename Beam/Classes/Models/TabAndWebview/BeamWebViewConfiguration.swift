@@ -40,7 +40,7 @@ class BeamWebViewConfigurationBase: WKWebViewConfiguration, BeamWebViewConfigura
 
     override init() {
         super.init()
-        preferences.javaScriptEnabled = true
+
         preferences.javaScriptCanOpenWindowsAutomatically = false
         preferences.tabFocusesLinks = true
         //        preferences.plugInsEnabled = true
@@ -48,7 +48,7 @@ class BeamWebViewConfigurationBase: WKWebViewConfiguration, BeamWebViewConfigura
         preferences.isFraudulentWebsiteWarningEnabled = true
         preferences.setValue(true, forKey: "developerExtrasEnabled")
         defaultWebpagePreferences.preferredContentMode = .desktop
-
+        defaultWebpagePreferences.allowsContentJavaScript = true
         #if BEAM_WEBKIT_ENHANCEMENT_ENABLED
         preferences._setAllowsPicture(inPictureMediaPlayback: true)
         preferences._setFullScreenEnabled(true)

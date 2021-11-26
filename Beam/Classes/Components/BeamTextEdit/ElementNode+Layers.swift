@@ -9,7 +9,7 @@ import Foundation
 
 extension ElementNode {
 
-    static var indentLayerPosX: CGFloat = 4.5
+    static var indentLayerPosX: CGFloat = 5
 
     @objc var shouldDisplayBullet: Bool {
         true
@@ -18,6 +18,8 @@ extension ElementNode {
     @objc var bulletLayerPositionY: CGFloat {
         firstLineBaseline - 15
     }
+
+    @objc var indentLayerPositionY: CGFloat { 3 }
 
     private enum LayerName: String {
         case indentLayer
@@ -95,6 +97,7 @@ extension ElementNode {
             bulletLayer.frame.origin = CGPoint(x: Self.bulletLayerPositionX, y: bulletLayerPositionY)
         }
         bulletLayer.layer.opacity = Float((showDisclosureButton || !PreferencesManager.alwaysShowBullets) ? 0 : 1)
+        bulletLayer.layer.isHidden = !self.isFocused && self.elementText.isEmpty
     }
 
     private func updateDisclosureLayer() {
@@ -108,7 +111,7 @@ extension ElementNode {
 
     private func updateIndentLayer() {
         guard let indentLayer = layers[LayerName.indentLayer.rawValue] else { return }
-        let y = firstLineHeight + 3
+        let y = firstLineHeight + indentLayerPositionY
         indentLayer.frame = NSRect(x: Self.indentLayerPosX, y: y, width: 0.5, height: frame.height - y)
         indentLayer.layer.isHidden = !(showDisclosureButton && self.open)
     }

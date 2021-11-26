@@ -20,6 +20,11 @@ export interface BeamShootGroup {
   text?: string
 }
 
+export interface BeamElementBounds {
+  element: BeamHTMLElement | BeamElement
+  rect: BeamRect
+}
+
 export interface BeamVisualViewport {
   /**
    * @type {number}
@@ -213,10 +218,14 @@ export interface BeamCharacterData extends BeamNode {
 export type BeamText = BeamCharacterData
 
 export interface BeamElement extends BeamParentNode {
+  cloneNode(arg0: boolean): BeamElement
   querySelectorAll(query: string): BeamElement[]
   removeAttribute(pointDatasetKey: any)
   dataset: any
   attributes: NamedNodeMap
+  srcset?: string
+  currentSrc?: string
+  src?: string
 
   /**
    * @type string

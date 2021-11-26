@@ -23,4 +23,8 @@ enum BeamAnimation {
     static func spring(stiffness: Double, damping: Double) -> Animation {
         .interpolatingSpring(stiffness: stiffness, damping: damping)
     }
+
+    static func easingBounce(duration: Double) -> Animation {
+        Animation.timingCurve(0.5, -0.01, 0.22, 1.17, duration: duration * Self.multiplier)
+    }
 }

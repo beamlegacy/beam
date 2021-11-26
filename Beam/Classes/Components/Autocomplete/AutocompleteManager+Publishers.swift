@@ -16,6 +16,13 @@ extension AutocompleteManager {
         Self.logIntermediate(step: step, stepShortName: stepShortName, results: results)
     }
 
+    func getDefaultSuggestionsPublishers() -> [AnyPublisher<AutocompletePublisherSourceResults, Never>] {
+        [
+            // Default suggestions will be improved in a upcoming ticket
+            futureToPublisher(defaultSuggestionsNotesResults(), source: .note)
+        ]
+    }
+
     func getAutocompletePublishers(for searchText: String) -> [AnyPublisher<AutocompletePublisherSourceResults, Never>] {
         [
             futureToPublisher(autocompleteNotesResults(for: searchText), source: .note),
@@ -79,7 +86,7 @@ extension AutocompleteManager {
     }
 
     private func autocompleteNotesContentsResults(for query: String) -> Future<[AutocompleteResult], Error> {
-        Future { [weak beamData] promise in
+        Future { promise in
             GRDBDatabase.shared.search(matchingAllTokensIn: query, maxResults: 10, frecencyParam: AutocompleteManager.noteFrecencyParamKey) { result in
                 switch result {
                 case .failure(let error): promise(.failure(error))
@@ -166,7 +173,7 @@ extension AutocompleteManager {
     }
 
     private func autocompleteCanCreateNoteResult(for query: String) -> Future<Bool, Error> {
-        Future { [weak self, query] promise in
+        Future { promise in
             let documentManager = DocumentManager()
             documentManager.loadDocumentByTitle(title: query) { result in
                 switch result {
@@ -234,6 +241,23 @@ extension AutocompleteManager {
         if atIndex < finalResults.count {
             finalResults.insert(contentsOf: toInsert, at: atIndex)
             self.autocompleteResults = finalResults
+        }
+    }
+
+    // MARK: - Empty Query Suggestions
+    private func defaultSuggestionsNotesResults() -> Future<[AutocompleteResult], Error> {
+        Future { [weak self] promise in
+            let documentManager = DocumentManager()
+            let limit = 3
+            let documentStructs = documentManager.loadAllWithLimit(limit, sortingKey: .updatedAt(false))
+            let ids = documentStructs.map { $0.id }
+            let scores = GRDBDatabase.shared.getFrecencyScoreValues(noteIds: ids, paramKey: AutocompleteManager.noteFrecencyParamKey)
+            let autocompleteResults = documentStructs.map {
+                AutocompleteResult(text: $0.title, source: .note(noteId: $0.id), uuid: $0.id, score: scores[$0.id])
+            }.sorted(by: >).prefix(limit)
+            let autocompleteResultsArray = Array(autocompleteResults)
+            self?.logIntermediate(step: "NoteRecents", stepShortName: "NR", results: autocompleteResultsArray)
+            promise(.success(autocompleteResultsArray))
         }
     }
 }

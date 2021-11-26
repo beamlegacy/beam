@@ -53,15 +53,15 @@ struct DownloadCell: View {
             case .running:
                 CircledButton(image: "download-pause", action: pauseDownload, onHover: { hover in
                     hoverState = hover ? .pause : nil
-                }).blendMode(colorScheme == .dark ? .screen : .multiply)
+                }).blendModeLightMultiplyDarkScreen()
             case .suspended:
                 CircledButton(image: "download-resume", action: resumeDownload, onHover: { hover in
                     hoverState = hover ? .resume : nil
-                }).blendMode(colorScheme == .dark ? .screen : .multiply)
+                }).blendModeLightMultiplyDarkScreen()
             case .completed where download.errorMessage != nil:
                 CircledButton(image: "download-resume", action: resumeDownload, onHover: { hover in
                     hoverState = hover ? .resume : nil
-                }).blendMode(colorScheme == .dark ? .screen : .multiply)
+                }).blendModeLightMultiplyDarkScreen()
             case .completed, .canceling:
                 EmptyView()
             @unknown default:
@@ -69,7 +69,7 @@ struct DownloadCell: View {
             }
             CircledButton(image: "download-view", action: showInFinder, onHover: { hover in
                 hoverState = hover ? .view : nil
-            }).blendMode(colorScheme == .dark ? .screen : .multiply)
+            }).blendModeLightMultiplyDarkScreen()
         }
         .padding(.horizontal, 8)
         .animation(.easeInOut(duration: 0.3), value: hoverState)

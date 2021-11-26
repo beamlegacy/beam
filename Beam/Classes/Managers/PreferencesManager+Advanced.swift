@@ -16,6 +16,7 @@ extension PreferencesManager {
     static let showPNSKey = "showPNSview"
     static let PnsJSIsOnKey = "PnsJSIsOn"
     static let SpaIndexingKey = "SpaIndexing"
+    static let omniboxV2IsOnKey = "OmniboxV2IsOn"
 }
 
 // MARK: - Default Values
@@ -30,29 +31,33 @@ extension PreferencesManager {
     static let showPNSDefault = true
     static let PnsJSIsOnDefault = true
     static let spaIndexingDefault = false
+    static let omniboxV2IsOnDefault = false
 }
 
 extension PreferencesManager {
-    static var advancedPreferencesContainer = UserDefaults(suiteName: "app_advanced_preferences") ?? .standard
+    static var advancedPreferencesContainer = "app_advanced_preferences"
 
-    @UserDefault(key: browsingSessionCollectionIsOnKey, defaultValue: browsingSessionCollectionIsOnDefault, container: advancedPreferencesContainer)
+    @UserDefault(key: browsingSessionCollectionIsOnKey, defaultValue: browsingSessionCollectionIsOnDefault, suiteName: advancedPreferencesContainer)
     static var browsingSessionCollectionIsOn: Bool
 
-    @UserDefault(key: showTabGrougpingMenuItemKey, defaultValue: showTabGrougpingMenuItemDefault, container: advancedPreferencesContainer)
+    @UserDefault(key: showTabGrougpingMenuItemKey, defaultValue: showTabGrougpingMenuItemDefault, suiteName: advancedPreferencesContainer)
     static var showTabGrougpingMenuItem: Bool
 
-    @UserDefault(key: showDebugSectionKey, defaultValue: showDebugSectionDefault, container: advancedPreferencesContainer)
+    @UserDefault(key: showDebugSectionKey, defaultValue: showDebugSectionDefault, suiteName: advancedPreferencesContainer)
     static var showDebugSection: Bool
 
-    @UserDefault(key: showOmnibarScoreSectionKey, defaultValue: showOmnibarScoreSectionDefault, container: advancedPreferencesContainer)
+    @UserDefault(key: showOmnibarScoreSectionKey, defaultValue: showOmnibarScoreSectionDefault, suiteName: advancedPreferencesContainer)
     static var showOmnibarScoreSection: Bool
 
-    @UserDefault(key: showPNSKey, defaultValue: showPNSDefault, container: advancedPreferencesContainer)
+    @UserDefault(key: showPNSKey, defaultValue: showPNSDefault, suiteName: advancedPreferencesContainer)
     static var showPNSView: Bool
 
-    @UserDefault(key: PnsJSIsOnKey, defaultValue: PnsJSIsOnDefault, container: advancedPreferencesContainer)
+    @UserDefault(key: PnsJSIsOnKey, defaultValue: PnsJSIsOnDefault, suiteName: advancedPreferencesContainer)
     static var PnsJSIsOn: Bool
 
-    @UserDefault(key: SpaIndexingKey, defaultValue: spaIndexingDefault, container: advancedPreferencesContainer)
+    @UserDefault(key: SpaIndexingKey, defaultValue: spaIndexingDefault, suiteName: advancedPreferencesContainer)
     static var enableSpaIndexing: Bool
+
+    @UserDefault(key: omniboxV2IsOnKey, defaultValue: omniboxV2IsOnDefault, suiteName: advancedPreferencesContainer)
+    static var omniboxV2IsOn: Bool
 }
