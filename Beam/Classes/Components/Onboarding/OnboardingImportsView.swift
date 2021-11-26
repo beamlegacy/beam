@@ -37,7 +37,7 @@ struct OnboardingImportsView: View {
     private var picker: some View {
         HStack(spacing: BeamSpacing._40) {
             Picker("", selection: $selectedSource) {
-                ForEach(ImportSource.allCases, id: \.self) { source in
+                ForEach(availableSources, id: \.self) { source in
                     if source == .passwordsCSV {
                         Divider()
                     }
@@ -156,9 +156,7 @@ struct OnboardingImportsView: View {
     }
 
     private func updateAvailableSources() {
-        availableSources = ImportSource.allCases.compactMap({ s in
-            s.isAvailable ? s : nil
-        })
+        availableSources = ImportSource.allCases.filter { $0.isAvailable }
     }
     private let skipActionId = UUID()
     private let importActionId = UUID()
