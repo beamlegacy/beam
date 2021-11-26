@@ -1,6 +1,8 @@
 import Foundation
 import BeamCore
 
+// swiftlint:disable function_length
+
 extension BeamObjectRequest {
     @discardableResult
     // return multiple errors, as the API might return more than one.
@@ -232,6 +234,18 @@ extension BeamObjectRequest {
     }
 
     @discardableResult
+    func fetchAllWithDataUrl(receivedAtAfter: Date? = nil,
+                             ids: [UUID]? = nil,
+                             beamObjectType: String? = nil,
+                             _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
+        let parameters = BeamObjectsParameters(receivedAtAfter: receivedAtAfter,
+                                               ids: ids,
+                                               beamObjectType: beamObjectType)
+
+        return try fetchAllWithFile("beam_objects_data_url", parameters, completion)
+    }
+
+    @discardableResult
     func fetchAllChecksums(receivedAtAfter: Date? = nil,
                            ids: [UUID]? = nil,
                            beamObjectType: String? = nil,
@@ -244,6 +258,7 @@ extension BeamObjectRequest {
     }
 
     @discardableResult
+    // swiftlint:disable:next function_body_length
     private func fetchAllWithFile<T: Encodable>(_ filename: String,
                                                 _ parameters: T,
                                                 _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
@@ -258,39 +273,81 @@ extension BeamObjectRequest {
                     completion(.failure(APIRequestError.parserError))
                     return
                 }
-
                 /*
-                 When fetching all beam objects, we decrypt them if needed. We might have decryption issue
-                 like not having the key it was encrypted with. In such case we filter those out as the calling
-                 code wouldn't know what to do with it anyway.
+                 We cover all cases:
+                 - if `dataUrl` was requested, it will fetch the data in another network call, set `data` then return the object
+                 - if `dataUrl` wasn't requested, it just returns the object
                  */
-                do {
-                    let decryptedObjects: [BeamObject] = try beamObjects.compactMap {
-                        do {
-                            try $0.decrypt()
-                            try $0.setTimestamps()
-                            return $0
-                        } catch EncryptionManagerError.authenticationFailure {
-                            Logger.shared.logError("Can't decrypt \($0)", category: .beamObjectNetwork)
-                        } catch BeamObject.BeamObjectError.differentEncryptionKey {
-                            let privateKeySignature = try EncryptionManager.shared.privateKey().asString().SHA256()
-                            Logger.shared.logError("Can't decrypt beam object, private key \($0.privateKeySignature ?? "-") unavailable. Current private key: \(privateKeySignature).", category: .beamObjectNetwork)
+
+                let callback = {
+                    /*
+                     When fetching all beam objects, we decrypt them if needed. We might have decryption issue
+                     like not having the key it was encrypted with. In such case we filter those out as the calling
+                     code wouldn't know what to do with it anyway.
+                     */
+                    do {
+                        let decryptedObjects: [BeamObject] = try beamObjects.compactMap {
+                            do {
+                                try $0.decrypt()
+                                try $0.setTimestamps()
+                                return $0
+                            } catch EncryptionManagerError.authenticationFailure {
+                                Logger.shared.logError("Can't decrypt \($0)", category: .beamObjectNetwork)
+                            } catch BeamObject.BeamObjectError.differentEncryptionKey {
+                                let privateKeySignature = try EncryptionManager.shared.privateKey().asString().SHA256()
+                                Logger.shared.logError("Can't decrypt beam object, private key \($0.privateKeySignature ?? "-") unavailable. Current private key: \(privateKeySignature).", category: .beamObjectNetwork)
+                            }
+
+                            return nil
                         }
 
-                        return nil
-                    }
+                        if decryptedObjects.count < beamObjects.count {
+                            UserAlert.showError(message: "Encryption error",
+                                                informativeText: "\(beamObjects.count - decryptedObjects.count) objects we fetched couldn't be decrypted, check logs for more details. You probably have a different local private key than the one used to encrypt objects on the API side. Either use a different account, or copy/paste your private key in the advanced settings.")
+                        }
 
-                    if decryptedObjects.count < beamObjects.count {
-                        UserAlert.showError(message: "Encryption error",
-                                            informativeText: "\(beamObjects.count - decryptedObjects.count) objects we fetched couldn't be decrypted, check logs for more details. You probably have a different local private key than the one used to encrypt objects on the API side. Either use a different account, or copy/paste your private key in the advanced settings.")
+                        completion(.success(decryptedObjects))
+                    } catch {
+                        // Will catch anything but encryption errors
+                        completion(.failure(error))
+                        return
                     }
+                }
 
-                    completion(.success(decryptedObjects))
-                } catch {
-                    // Will catch anything but encryption errors
-                    completion(.failure(error))
+                guard !beamObjects.compactMap({ $0.dataUrl }).isEmpty else {
+                    callback()
                     return
                 }
+
+                let group = DispatchGroup()
+                let lock = DispatchSemaphore(value: 1)
+
+                // TODO: are all those fetches optimized, what happens when we have 1,000 objects?
+                // Could we limit the amount of parallel calls? Can we stream multiple into the same HTTP Request?
+                for beamObject in beamObjects {
+                    guard let dataUrl = beamObject.dataUrl else { continue }
+
+                    do {
+                        group.enter()
+                        try self.fetchDataFromUrl(urlString: dataUrl) { result in
+                            switch result {
+                            case .failure(let error):
+                                Logger.shared.logError(error.localizedDescription, category: .beamObjectNetwork)
+                            case .success(let data):
+                                lock.wait()
+                                beamObject.data = data
+                                lock.signal()
+                            }
+                            group.leave()
+                        }
+                    } catch {
+                        Logger.shared.logError(error.localizedDescription, category: .beamObjectNetwork)
+                    }
+                }
+
+                group.wait()
+
+                callback()
             }
         }
     }
@@ -299,6 +356,12 @@ extension BeamObjectRequest {
     func fetch(_ beamObjectID: UUID,
                _ completionHandler: @escaping (Swift.Result<BeamObject, Error>) -> Void) throws -> URLSessionDataTask {
         try fetchWithFile("beam_object", beamObjectID, completionHandler)
+    }
+
+    @discardableResult
+    func fetchWithDataUrl(_ beamObjectID: UUID,
+                          _ completionHandler: @escaping (Swift.Result<BeamObject, Error>) -> Void) throws -> URLSessionDataTask {
+        try fetchWithFile("beam_object_data_url", beamObjectID, completionHandler)
     }
 
     @discardableResult
@@ -319,16 +382,41 @@ extension BeamObjectRequest {
             case .failure(let error):
                 completionHandler(.failure(error))
             case .success(let fetchBeamObject):
-                do {
-                    try fetchBeamObject.decrypt()
-                    try fetchBeamObject.setTimestamps()
-                } catch {
-                    // Will catch decrypting errors
-                    completionHandler(.failure(error))
+                /*
+                 We cover all cases:
+                 - if `dataUrl` was requested, it will fetch the data in another network call, set `data` then return the object
+                 - if `dataUrl` wasn't requested, it just returns the object
+                 */
+                let callback = {
+                    do {
+                        try fetchBeamObject.decrypt()
+                        try fetchBeamObject.setTimestamps()
+                    } catch {
+                        // Will catch decrypting errors
+                        completionHandler(.failure(error))
+                        return
+                    }
+
+                    completionHandler(.success(fetchBeamObject))
+                }
+
+                guard let dataUrl = fetchBeamObject.dataUrl else {
+                    callback()
                     return
                 }
 
-                completionHandler(.success(fetchBeamObject))
+                do {
+                    try self.fetchDataFromUrl(urlString: dataUrl) { result in
+                        switch result {
+                        case .failure(let error): completionHandler(.failure(error))
+                        case .success(let data):
+                            fetchBeamObject.data = data
+                            callback()
+                        }
+                    }
+                } catch {
+                    completionHandler(.failure(error))
+                }
             }
         }
     }
@@ -338,6 +426,7 @@ extension BeamObjectRequest {
         case not200
     }
 
+    @discardableResult
     private func fetchDataFromUrl(urlString: String,
                                   _ completionHandler: @escaping (Swift.Result<Data, Error>) -> Void) throws -> URLSessionDataTask {
 
@@ -352,33 +441,17 @@ extension BeamObjectRequest {
         request.httpMethod = "GET"
         request.allHTTPHeaderFields = headers
 
-        // Authentication headers for beamapp.co URLs
-        //        if authenticatedCall ?? authenticatedAPICall {
-        //            AuthenticationManager.shared.updateAccessTokenIfNeeded()
-        //
-        //            guard AuthenticationManager.shared.isAuthenticated,
-        //                  let accessToken = AuthenticationManager.shared.accessToken else {
-        //                LibrariesManager.nonFatalError(error: APIRequestError.notAuthenticated,
-        //                                               addedInfo: AuthenticationManager.shared.hashTokensInfos())
-        //
-        //                NotificationCenter.default.post(name: .networkUnauthorized, object: self)
-        //                throw APIRequestError.notAuthenticated
-        //            }
-        //
-        //            request.setValue("Bearer " + accessToken,
-        //                             forHTTPHeaderField: "Authorization")
-        //        }
-
         let session = BeamURLSession.shared
+        let localTimer = BeamDate.now
         let task = session.dataTask(with: request) { (data, response, error) -> Void in
+            Logger.shared.logDebug("[\(data?.count.byteSize ?? "-")] \((response as? HTTPURLResponse)?.statusCode ?? 0) \(urlString)",
+                                   category: .network,
+                                   localTimer: localTimer)
+
             guard let httpResponse = response as? HTTPURLResponse,
                   httpResponse.statusCode == 200,
                   let data = data else {
-                      if let error = error {
-                          completionHandler(.failure(error))
-                      } else {
-                          completionHandler(.failure(BeamObjectRequestError.not200))
-                      }
+                      completionHandler(.failure(error ?? BeamObjectRequestError.not200))
 
                       return
                   }

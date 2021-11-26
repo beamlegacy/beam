@@ -103,7 +103,6 @@ class APIRequest: NSObject {
             let lineBreak = "\r\n"
             var queryData = Data()
 
-
             // Add the GraphQL query
             queryData.append("\(lineBreak)--\(boundary)\(lineBreak)".asData)
             queryData.append("Content-Disposition: form-data; name=\"operations\"\(lineBreak)\(lineBreak)".asData)

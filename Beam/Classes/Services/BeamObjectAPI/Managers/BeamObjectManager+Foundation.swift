@@ -673,6 +673,7 @@ extension BeamObjectManager {
                     let remoteObject: T = try remoteBeamObject.decodeBeamObject()
                     completion(.success(remoteObject))
                 } catch {
+                    Logger.shared.logError(error.localizedDescription, category: .beamObject)
                     completion(.failure(BeamObjectManagerError.decodingError(remoteBeamObject)))
                 }
             }
@@ -1007,7 +1008,11 @@ extension BeamObjectManager {
     internal func fetchBeamObjects(_ ids: [UUID],
                                    _ completion: @escaping (Result<[BeamObject], Error>) -> Void) throws -> APIRequest {
         let request = BeamObjectRequest()
-        try request.fetchAll(ids: ids, completion)
+        if Configuration.beamObjectDataOnSeparateCall {
+            try request.fetchAllWithDataUrl(ids: ids, completion)
+        } else {
+            try request.fetchAll(ids: ids, completion)
+        }
         return request
     }
 
@@ -1039,7 +1044,13 @@ extension BeamObjectManager {
     internal func fetchBeamObject(_ id: UUID,
                                   _ completion: @escaping (Result<BeamObject, Error>) -> Void) throws -> APIRequest {
         let request = BeamObjectRequest()
-        try request.fetch(id, completion)
+
+        if Configuration.beamObjectDataOnSeparateCall {
+            try request.fetchWithDataUrl(id, completion)
+        } else {
+            try request.fetch(id, completion)
+        }
+
         return request
     }
 
