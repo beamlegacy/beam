@@ -37,6 +37,14 @@ public struct BeamText: Codable {
             case source
         }
 
+        var shouldBeSaved: Bool {
+            switch self {
+            case .decorated:
+                return false
+            default:
+                return true
+            }
+        }
         // swiftlint:disable:next nesting
         public enum AttributeError: Error {
             case unknownAttribute
@@ -211,7 +219,8 @@ public struct BeamText: Codable {
 
             try container.encode(string, forKey: .string)
             if !attributes.isEmpty {
-                try container.encode(attributes, forKey: .attributes)
+                let attributesToSave = attributes.filter { $0.shouldBeSaved }
+                try container.encode(attributesToSave, forKey: .attributes)
             }
         }
 
