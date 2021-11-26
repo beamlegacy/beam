@@ -11,7 +11,8 @@ import BeamCore
 struct JournalDateConverter {
     static func toString(from journalDay: Int64) -> String {
         if journalDay == 0 || String(journalDay).count != 8 {
-            fatalError("JournalDay: \(journalDay) is incorrect and this should never happen")
+            Logger.shared.logError("JournalDay: \(journalDay) is incorrect and this should never happen", category: .document)
+            return "0000-00-00"
         }
         var journalDayStr = String(journalDay)
         journalDayStr.insert("-", at: journalDayStr.index(journalDayStr.startIndex, offsetBy: 4))
