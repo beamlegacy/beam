@@ -142,13 +142,31 @@ class EmbedNode: ResizableNode {
         self.loadingView = container
     }
 
+    /// Display EmbedContent in WebView
+    /// - Parameter embedContent: EmbedContent to display
+    fileprivate func loadEmbedContentInWebView(_ embedContent: EmbedContent) {
+        switch embedContent.type {
+        case .url, .link, .image, .photo, .video:
+            if let url = embedContent.embedURL {
+                self.webView?.load(URLRequest(url: url, cachePolicy: .returnCacheDataElseLoad))
+            }
+        case .page, .audio, .rich:
+            if let content = embedContent.html {
+                let theme = self.webView?.isDarkMode ?? false ? "dark" : "light"
+                let headContent = self.getHeadContent(theme: theme)
+                let styledEmbedContent = headContent + content
+                self.webView?.loadHTMLString(styledEmbedContent, baseURL: nil)
+            }
+        }
+    }
+
     private func updateEmbedContent() {
         guard let sourceURL = sourceURL else { return }
 
         embedCancellables.removeAll()
         let builder = EmbedContentBuilder()
-        if let embedUrl = builder.embeddableContent(for: sourceURL)?.embedURL {
-            webView?.load(URLRequest(url: embedUrl))
+        if let embedContent = builder.embeddableContent(for: sourceURL) {
+            self.loadEmbedContentInWebView(embedContent)
         } else {
             isLoadingEmbed = true
             builder.embeddableContentAsync(for: sourceURL)
@@ -164,19 +182,7 @@ class EmbedNode: ResizableNode {
                     self?.isLoadingEmbed = false
                     self?.embedCancellables.removeAll()
                 } receiveValue: { [weak self] embedContent in
-                    switch embedContent.type {
-                    case .url, .link, .image, .photo, .video:
-                        if let url = embedContent.embedURL {
-                            self?.webView?.load(URLRequest(url: url))
-                        }
-                    case .page, .audio, .rich:
-                        if let content = embedContent.html {
-                            let theme = self?.webView?.isDarkMode ?? false ? "dark" : "light"
-                            let headContent = self?.getHeadContent(theme: theme) ?? ""
-                            let styledEmbedContent = headContent + content
-                            self?.webView?.loadHTMLString(styledEmbedContent, baseURL: nil)
-                        }
-                    }
+                    self?.loadEmbedContentInWebView(embedContent)
                 }.store(in: &embedCancellables)
         }
     }
