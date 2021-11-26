@@ -14,7 +14,7 @@ enum EmbedContentError: Error, Equatable {
     case noSuitableStrategy
 }
 
-struct EmbedContent {
+struct EmbedContent: Equatable {
     /// oEmbed compliant media type
     enum MediaType: String {
         @available(*, deprecated, message: "Use link instead")
@@ -54,6 +54,11 @@ private class EmbedContentCache {
         cache.value(forKey: urlString)
     }
     func saveEmbedContent(_ embedContent: EmbedContent, for urlString: String) {
+        if let cachedEmbedContent = cache.value(forKey: urlString),
+           embedContent == cachedEmbedContent {
+            Logger.shared.logDebug("Cached EmbedContent is Equal to embedContent. Skipping saving embed content to cache", category: .embed)
+            return
+        }
         cache.insert(embedContent, forKey: urlString)
     }
     func clear() { cache.removeAllValues() }
@@ -174,7 +179,8 @@ struct EmbedContentLocalStrategy: EmbedContentStrategy {
 
     // MARK: Youtube
     private func youtubeEmbedURL(from url: URL) -> URL? {
-        guard let youtubeID = extractYouTubeId(from: url) else { return nil }
+        guard url.hostname?.contains("youtube.com") ?? false || url.hostname?.contains("youtu.be") ?? false,
+              let youtubeID = extractYouTubeId(from: url) else { return nil }
         var urlString = "https://www.youtube.com/embed/\(youtubeID)"
         if let timestamp = extractYouTubeTimestamp(from: url) {
             urlString += "?start=\(timestamp)"
