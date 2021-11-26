@@ -80,6 +80,16 @@ class BeamCheckboxCALayer: CALayer {
         setupLayers()
     }
 
+    override init(layer: Any) {
+        if let layer = layer as? BeamCheckboxCALayer {
+            squareLayer = layer.squareLayer
+            checkLayer = layer.checkLayer
+            mixedLayer = layer.mixedLayer
+            innerStrokeLayer = layer.innerStrokeLayer
+        }
+        super.init(layer: layer)
+    }
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
