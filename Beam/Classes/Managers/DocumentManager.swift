@@ -604,10 +604,14 @@ public class DocumentManager: NSObject {
          */
         if let tuple = Self.networkTasks[document_id] {
             if tuple.1 == false {
-                Logger.shared.logDebug("Cancel previous throttled network call", category: .documentNetwork)
+                Logger.shared.logDebug("Network task for \(documentStruct.titleAndId): cancelling previous throttled network call",
+                                       category: .documentNetwork)
 
                 tuple.0.cancel()
                 tuple.2?(.failure(DocumentManagerError.operationCancelled))
+            } else {
+                Logger.shared.logDebug("Network task for \(documentStruct.titleAndId): not cancelling previous throttled network call",
+                                       category: .documentNetwork)
             }
         }
 
@@ -615,18 +619,18 @@ public class DocumentManager: NSObject {
         var networkTaskStarted = false
 
         networkTask = DispatchWorkItem {
-            Logger.shared.logDebug("Network task called for \(documentStruct.titleAndId)",
+            Logger.shared.logDebug("Network task for \(documentStruct.titleAndId): starting",
                                    category: .documentNetwork)
 
             guard !networkTask.isCancelled else {
-                Logger.shared.logDebug("Network task called for \(documentStruct.titleAndId) but task is cancelled",
+                Logger.shared.logDebug("Network task for \(documentStruct.titleAndId): cancelled",
                                        category: .documentNetwork)
                 networkCompletion?(.failure(DocumentManagerError.operationCancelled))
                 return
             }
             networkTaskStarted = true
 
-            Logger.shared.logDebug("Network task for \(documentStruct.titleAndId) executing",
+            Logger.shared.logDebug("Network task for \(documentStruct.titleAndId): executing",
                                    category: .documentNetwork)
 
             let localTimer = BeamDate.now
@@ -635,19 +639,21 @@ public class DocumentManager: NSObject {
             // context.refresh(document, mergeChanges: false)
             let documentManager = DocumentManager()
 
-            Logger.shared.logDebug("Fetching documentManager.fetchWithId", category: .documentNetwork)
+            Logger.shared.logDebug("Network task for \(documentStruct.titleAndId): calling fetchWithId",
+                                   category: .documentNetwork)
 
             guard let updatedDocument = try? documentManager.fetchWithId(documentStruct.id) else {
-                Logger.shared.logWarning("Weird, document disappeared (deleted?), isCancelled: \(networkTask.isCancelled): \(documentStruct.titleAndId)",
+                Logger.shared.logWarning("Network task for \(documentStruct.titleAndId): document disappeared (deleted?), isCancelled: \(networkTask.isCancelled)",
                                          category: .coredata)
                 networkCompletion?(.failure(DocumentManagerError.localDocumentNotFound))
                 return
             }
-            Logger.shared.logDebug("Fetching documentManager.fetchWithId: previousChecksum \(updatedDocument.beam_object_previous_checksum ?? "-")", category: .documentNetwork)
+            Logger.shared.logDebug("Network task for \(documentStruct.titleAndId): called fetchWithId. previousChecksum \(updatedDocument.beam_object_previous_checksum ?? "-")",
+                                   category: .documentNetwork)
 
             let saveObject = DocumentStruct(document: updatedDocument)
 
-            Logger.shared.logDebug("Network task for \(saveObject.titleAndId).",
+            Logger.shared.logDebug("Network task for \(saveObject.titleAndId): calling network",
                                    category: .documentNetwork)
 
             guard !networkTask.isCancelled else { return }
@@ -660,7 +666,7 @@ public class DocumentManager: NSObject {
                 Self.networkTasks.removeValue(forKey: document_id)
                 Self.networkTasksSemaphore.signal()
 
-                Logger.shared.logDebug("Network task for \(documentStruct.titleAndId) executed",
+                Logger.shared.logDebug("Network task for \(documentStruct.titleAndId): executed (inloop)",
                                        category: .documentNetwork,
                                        localTimer: localTimer)
 
@@ -668,8 +674,12 @@ public class DocumentManager: NSObject {
             }
             semaphore.wait()
 
+            Logger.shared.logDebug("Network task for \(documentStruct.titleAndId): executed (outloop)",
+                                   category: .documentNetwork)
+
             if request == nil {
-                Logger.shared.logDebug("Network call already running, reinjecting", category: .documentNetwork)
+                Logger.shared.logDebug("Network task for \(documentStruct.titleAndId): request is nil, reinjecting",
+                                       category: .documentNetwork)
                 documentManager.saveAndThrottle(saveObject)
             }
         }
@@ -678,7 +688,8 @@ public class DocumentManager: NSObject {
         // `asyncAfter` will not execute before `deadline` but might be executed later. It is not accurate.
         // TODO: use `Timer.scheduledTimer` or `perform:with:afterDelay`
         backgroundQueue.asyncAfter(deadline: .now() + delay, execute: networkTask)
-        Logger.shared.logDebug("Adding network task for \(documentStruct.titleAndId)", category: .documentNetwork)
+        Logger.shared.logDebug("Network task for \(documentStruct.titleAndId): adding network task for later",
+                               category: .documentNetwork)
     }
 }
 
