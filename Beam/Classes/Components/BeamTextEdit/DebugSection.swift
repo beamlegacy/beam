@@ -163,6 +163,20 @@ class DebugSection: Widget {
         }), origin: CGPoint(x: 0, y: 90))
     }
 
+    public func setupContinueWidget(with notes: [BeamNote], and link: Link?) {
+        let hasNotes = !notes.isEmpty
+        let notesStr: String = notes.map({ $0.title }).joined(separator: " ")
+        let continueNotesLayer = Layer.text(named: "continueNotes", "Continue to Notes: \(notesStr)", color: BeamColor.Generic.text.nsColor, size: 12)
+        if hasNotes {
+            addLayer(continueNotesLayer, origin: CGPoint(x: 0, y: 110))
+        }
+
+        if let linkTitle = link?.title, let linkUrl = link?.url {
+            let continueLinksLayer = Layer.text(named: "continueLinks", "Continue to Link: \(linkTitle) \(linkUrl)", color: BeamColor.Generic.text.nsColor, size: 12)
+            addLayer(continueLinksLayer, origin: CGPoint(x: 0, y: hasNotes ? 130 : 110))
+        }
+    }
+
     override func updateSubLayersLayout() {
         super.updateSubLayersLayout()
 
