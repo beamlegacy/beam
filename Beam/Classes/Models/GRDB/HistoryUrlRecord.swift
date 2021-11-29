@@ -44,7 +44,7 @@ extension HistoryUrlRecord {
     static let content = hasOne(FTS.self, using: ForeignKey(["rowid"], to: ["rowid"]))
 }
 
-extension HistoryUrlRecord: MutablePersistableRecord {
+extension HistoryUrlRecord: PersistableRecord {
     /// The values persisted in the database
     func encode(to container: inout PersistenceContainer) {
         container[Columns.id] = id
@@ -52,10 +52,5 @@ extension HistoryUrlRecord: MutablePersistableRecord {
         container[Columns.title] = title
         container[Columns.content] = content
         container[Columns.aliasUrl] = aliasUrl
-    }
-
-    // Update auto-incremented id upon successful insertion
-    mutating func didInsert(with rowID: Int64, for column: String?) {
-//        id = rowID
     }
 }

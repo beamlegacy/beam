@@ -227,6 +227,17 @@ struct GRDBDatabase {
                 t.column("content")
             }
         }
+        migrator.registerMigration("moveLinkStoreToGRDB") { db in
+            try db.create(table: BeamLinkDB.tableName, ifNotExists: true) { table in
+                table.column("id", .text).notNull().primaryKey().unique(onConflict: .replace)
+                table.column("url", .text).notNull().indexed().unique(onConflict: .replace)
+                table.column("title", .text).collate(.localizedCaseInsensitiveCompare)
+                table.column("createdAt", .datetime).notNull().defaults(sql: "CURRENT_TIMESTAMP")
+                table.column("updatedAt", .datetime).notNull().defaults(sql: "CURRENT_TIMESTAMP")
+                table.column("deletedAt", .datetime)
+                table.column("previousChecksum", .text)
+            }
+        }
 
         #if DEBUG
         // Speed up development by nuking the database when migrations change
@@ -856,7 +867,7 @@ extension GRDBDatabase {
 
     // MARK: - FrecencyUrlRecord
 
-    func saveFrecencyUrl(_ frecencyUrl: inout FrecencyUrlRecord) throws {
+    func saveFrecencyUrl(_ frecencyUrl: FrecencyUrlRecord) throws {
         try dbWriter.write { db in
             try frecencyUrl.save(db)
         }
@@ -1005,6 +1016,98 @@ extension GRDBDatabase {
     func deleteBrowsingTrees(ids: [UUID]) throws {
         _ = try dbWriter.write { db in
             try BrowsingTreeRecord.deleteAll(db, ids: ids)
+        }
+    }
+    // MARK: - LinkStore
+    func getLinks(matchingUrl url: String) -> [UUID: Link] {
+        var matchingLinks = [UUID: Link]()
+        try? dbReader.read { db in
+            try Link.filter(Column("url").like("%\(url)%"))
+                .fetchAll(db)
+                .forEach { matchingLinks[$0.id] = $0 }
+        }
+        return matchingLinks
+    }
+
+    func getTopScoredLinks(matchingUrl url: String, frecencyParam: FrecencyParamKey, limit: Int = 10) -> [LinkWithFrecency] {
+        let association = Link.frecencyScores
+            .filter(FrecencyUrlRecord.Columns.frecencyKey == frecencyParam)
+            .order(FrecencyUrlRecord.Columns.frecencySortScore.desc)
+            .forKey("frecency")
+        var query: QueryInterfaceRequest<Link>
+        query = Link
+            .filter(Column("url").like("%\(url)%"))
+            .including(optional: association)
+            .limit(limit)
+        return (try? dbReader.read { db in
+            try LinkWithFrecency.fetchAll(db, query)
+        }) ?? []
+    }
+
+    func getOrCreateIdFor(url: String, title: String?) -> UUID {
+        (try? dbReader.read { db in
+            try Link.filter(Column("url") == url).fetchOne(db)?.id
+        }) ?? visit(url: url, title: title).id
+    }
+
+    func insert(links: [Link]) throws {
+        try dbWriter.write { db in
+            for var link in links {
+                try link.insert(db)
+            }
+        }
+    }
+
+    func linkFor(id: UUID) -> Link? {
+        try? dbReader.read { db in
+            try Link.filter(Column("id") == id).fetchOne(db)
+        }
+    }
+
+    func linkFor(url: String) -> Link? {
+        try? dbReader.read { db in
+            try Link.filter(Column("url") == url).fetchOne(db)
+        }
+    }
+
+    func visit(url: String, title: String? = nil) -> Link {
+        guard var link = linkFor(url: url) else {
+            // The link doesn't exist, create it and return the id
+            var link = Link(url: url, title: title)
+            _ = try? dbWriter.write { db in
+                try link.insert(db)
+            }
+            return link
+        }
+
+        // otherwise let's update the title and the updatedAt
+        link.title = title
+        link.updatedAt = BeamDate.now
+        _ = try? dbWriter.write { db in
+            try link.update(db, columns: [Column("updateAt"), Column("title")])
+        }
+        return link
+    }
+
+    func deleteAll() throws {
+        _ = try dbWriter.write { db in
+            try Link.deleteAll(db)
+        }
+    }
+
+    func allLinks(updatedSince: Date?) throws -> [Link] {
+        guard let updatedSince = updatedSince
+        else {
+            return try dbReader.read { db in try Link.fetchAll(db) }
+        }
+        return try dbReader.read { db in
+            try Link.filter(Column("updatedAt") >= updatedSince).fetchAll(db)
+        }
+    }
+
+    func getLinks(ids: [UUID]) throws -> [Link] {
+        try dbReader.read { db in
+            try Link.filter(keys: ids).fetchAll(db)
         }
     }
 }

@@ -100,8 +100,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     static var idToTitle: [UUID: String] = [:]
     static var titleToId: [String: UUID] = [:]
 
-    var linkDB: BeamLinkDB
-
     //swiftlint:disable:next function_body_length
     override init() {
         LinkStore.shared = LinkStore(linkManager: BeamLinkDB.shared)
@@ -124,8 +122,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
             waitTimeOut: 2.0
         )
         browsingTreeSender = BrowsingTreeSender(config: treeConfig, appSessionId: sessionId)
-        linkDB = BeamLinkDB(path: BeamData.linkDBPath)
-
         super.init()
 
         let documentManager = DocumentManager()
