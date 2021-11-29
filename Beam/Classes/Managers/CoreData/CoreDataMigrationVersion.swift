@@ -9,6 +9,7 @@ enum CoreDataMigrationVersion: String, CaseIterable {
     case version5 = "Beam5"
     case version6 = "Beam6"
     case version7 = "Beam7"
+    case version8 = "Beam8"
 
     // TODO: when adding a migration, fix the test named `it("imports its own backup")` with a new BeamExport.sqlite
 
@@ -39,6 +40,8 @@ enum CoreDataMigrationVersion: String, CaseIterable {
         case .version6:
             return .version7
         case .version7:
+            return .version8
+        case .version8:
             return nil
         }
     }
