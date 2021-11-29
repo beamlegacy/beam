@@ -98,12 +98,12 @@ La recopie vidéo est également au menu depuis le centre de contrôle de l'appa
 
         // Check frecency record is retrieved
         do {
-            var frecency = FrecencyUrlRecord(urlId: urlIds[0],
+            let frecency = FrecencyUrlRecord(urlId: urlIds[0],
                                              lastAccessAt: Date(timeIntervalSince1970: 0),
                                              frecencyScore: 0.42,
                                              frecencySortScore: 0,
                                              frecencyKey: .webVisit30d0)
-            try db.saveFrecencyUrl(&frecency)
+            try db.saveFrecencyUrl(frecency)
             // Match urlId = 0, and check frecency record
             searchHistory(db, query: "Monterey") { matches in
                 expect(matches.count) == 1
@@ -138,12 +138,12 @@ La recopie vidéo est également au menu depuis le centre de contrôle de l'appa
             (urlId: urlIds[2], lastAccessAt: BeamDate.now, frecencyScore: 0.0, frecencySortScore: 1.42,            frecencyKey: FrecencyParamKey.webVisit30d0),
             (urlId: urlIds[2], lastAccessAt: BeamDate.now, frecencyScore: 0.0, frecencySortScore: -Float.infinity, frecencyKey: FrecencyParamKey.webReadingTime30d0),
         ] {
-            var frecency = FrecencyUrlRecord(urlId: f.urlId,
+            let frecency = FrecencyUrlRecord(urlId: f.urlId,
                                              lastAccessAt: f.lastAccessAt,
                                              frecencyScore: Float(f.frecencyScore),
                                              frecencySortScore: Float(f.frecencySortScore),
                                              frecencyKey: f.frecencyKey)
-            try db.saveFrecencyUrl(&frecency)
+            try db.saveFrecencyUrl(frecency)
         }
 
         // Retrieve search results with frecency sort on .visit30d0
