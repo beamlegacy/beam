@@ -610,7 +610,6 @@
 		96F2BF0F263B208500F02F16 /* Caret.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F2BF0E263B208500F02F16 /* Caret.swift */; };
 		96F5354A27104BE400B719C6 /* EventsTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181718C2581107C00317ED8 /* EventsTracker.swift */; };
 		96F5355A271DADDD00B719C6 /* BeamLinkDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F53559271DADDD00B719C6 /* BeamLinkDB.swift */; };
-		96F673D225B7207100E8175B /* StoredLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F673D125B7207100E8175B /* StoredLink.swift */; };
 		96F936632590FA59006D8E53 /* BTextEdit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F936622590FA59006D8E53 /* BTextEdit.swift */; };
 		96FACC522604B0EE0088DD67 /* DeleteElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96FACC512604B0EE0088DD67 /* DeleteElement.swift */; };
 		96FACC6C2604F2650088DD67 /* FocusElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96FACC6B2604F2650088DD67 /* FocusElement.swift */; };
@@ -1716,7 +1715,6 @@
 		96EBCE09262A01160014D923 /* ExportAllBrowsingSessions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportAllBrowsingSessions.swift; sourceTree = "<group>"; };
 		96F2BF0E263B208500F02F16 /* Caret.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Caret.swift; sourceTree = "<group>"; };
 		96F53559271DADDD00B719C6 /* BeamLinkDB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamLinkDB.swift; sourceTree = "<group>"; };
-		96F673D125B7207100E8175B /* StoredLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoredLink.swift; sourceTree = "<group>"; };
 		96F93617258CFDD2006D8E53 /* BeamText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamText.swift; sourceTree = "<group>"; };
 		96F936622590FA59006D8E53 /* BTextEdit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BTextEdit.swift; sourceTree = "<group>"; };
 		96FACC512604B0EE0088DD67 /* DeleteElement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteElement.swift; sourceTree = "<group>"; };
@@ -1776,6 +1774,7 @@
 		A0AEC24F27022ADA00BEE4F3 /* PasswordEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordEditView.swift; sourceTree = "<group>"; };
 		A0B8C44E26D550D300130FC7 /* Beam5ToBeam6MigrationPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Beam5ToBeam6MigrationPolicy.swift; sourceTree = "<group>"; };
 		A0B8C45A26D556A900130FC7 /* Beam6.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Beam6.xcdatamodel; sourceTree = "<group>"; };
+		A0C04B8127552163003FC63A /* Beam8.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Beam8.xcdatamodel; sourceTree = "<group>"; };
 		A0C0C2A625E5109F00BE34F0 /* InsertElement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsertElement.swift; sourceTree = "<group>"; };
 		A0C58C372640026600FB95D8 /* ToastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastView.swift; sourceTree = "<group>"; };
 		A0C5D85A263C638A00FA6F6E /* CredentialsConfirmationToast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialsConfirmationToast.swift; sourceTree = "<group>"; };
@@ -2659,7 +2658,6 @@
 				418171792581107C00317ED8 /* Document+CoreDataProperties.swift */,
 				520088B72613265900AED835 /* Database.swift */,
 				520088BB2613266600AED835 /* Database+CoreDataProperties.swift */,
-				96F673D125B7207100E8175B /* StoredLink.swift */,
 				A0CFFA4826D9304F004FC8C1 /* JournalDateConverter.swift */,
 				52DB02652716DCE800F3881D /* LoggerRecorder.swift */,
 			);
@@ -6020,7 +6018,6 @@
 				032562B026051D3B006513E4 /* RBSynchronizeInterval.m in Sources */,
 				032562AD26051D3B006513E4 /* RBFilterBuilder.m in Sources */,
 				524CF6CA25F2735D007312F0 /* EncryptionManager.swift in Sources */,
-				96F673D225B7207100E8175B /* StoredLink.swift in Sources */,
 				DA69304D268B4DD9008EF756 /* BrowsingTreeSender.swift in Sources */,
 				032562AC26051D3B006513E4 /* punycode.c in Sources */,
 				96120D4B260CD5E100592546 /* TextEdit+Hyperlink.swift in Sources */,
@@ -7582,6 +7579,7 @@
 		528F296826B449EA006857E5 /* Beam.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				A0C04B8127552163003FC63A /* Beam8.xcdatamodel */,
 				52DB02562716CA8A00F3881D /* Beam7.xcdatamodel */,
 				A0B8C45A26D556A900130FC7 /* Beam6.xcdatamodel */,
 				528F297226B449FB006857E5 /* Beam5.xcdatamodel */,
@@ -7590,7 +7588,7 @@
 				528F296B26B449EA006857E5 /* Beam2.xcdatamodel */,
 				528F296C26B449EA006857E5 /* Beam4.xcdatamodel */,
 			);
-			currentVersion = 52DB02562716CA8A00F3881D /* Beam7.xcdatamodel */;
+			currentVersion = A0C04B8127552163003FC63A /* Beam8.xcdatamodel */;
 			path = Beam.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;
