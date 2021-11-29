@@ -34,7 +34,8 @@ class EmbedNode: ResizableNode {
     }
 
     private var sourceURL: URL? {
-        guard case .embed(let sourceURL, _) = element.kind, let url = URL(string: sourceURL) else { return nil }
+        guard case .embed(let sourceMetadata, _) = element.kind,
+              case let .remote(url) = sourceMetadata.origin else { return nil }
         return url
     }
 

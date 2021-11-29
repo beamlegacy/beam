@@ -49,8 +49,10 @@ class ImageNode: ResizableNode {
     private func setupImage(width: CGFloat) {
         var uid = UUID.null
         switch element.kind {
-        case .image(let id, let displayInfos):
-            uid = id
+        case .image(let sourceMetadata, let displayInfos):
+            if case let .local(id) = sourceMetadata.origin {
+                uid = id
+            }
             desiredWidthRatio = displayInfos.displayRatio
         default:
             Logger.shared.logError("ImageNode can only handle image elements, not \(element.kind)", category: .noteEditor)
