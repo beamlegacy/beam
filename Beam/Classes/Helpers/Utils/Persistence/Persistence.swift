@@ -1,5 +1,6 @@
 import Foundation
 import os.log
+import BeamCore
 
 // Inspired from https://www.avanderlee.com/swift/property-wrappers/
 
@@ -40,6 +41,10 @@ enum Persistence {
     enum TopDomains {
         @StandardStorable("last_fetched_at") static var lastFetchedAt: Date?
         @StandardStorable("top_domains.version") static var version: String?
+    }
+
+    enum ContinueTo {
+        @StandardStorable("summary") static var summary: String?
     }
 
     enum Database {
