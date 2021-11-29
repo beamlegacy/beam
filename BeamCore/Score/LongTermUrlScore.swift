@@ -36,7 +36,7 @@ public class LongTermUrlScore: Codable {
         self.urlId = urlId
     }
 
-    func score(date: Date = BeamDate.now) -> Float {
+    public func score(date: Date = BeamDate.now) -> Float {
         guard let lastCreationDate = lastCreationDate else { return 0 }
         let timeSinceLastCreation = Float(date.timeIntervalSince(lastCreationDate))
         return scrollRatioY
