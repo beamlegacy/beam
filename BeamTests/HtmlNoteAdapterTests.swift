@@ -254,7 +254,7 @@ class HtmlNoteAdapterTests: XCTestCase {
         htmlNoteAdapter.convert(html: html, completion: { (results: [BeamElement]) in
             XCTAssertEqual(results.count, 1)
             if let embedElement = results.first {
-                XCTAssertEqual(embedElement.kind, .embed(urlString, displayRatio: nil))
+                XCTAssertEqual(embedElement.kind, .embed(SourceMetadata(origin: .remote(URL(string: urlString)!)), displayRatio: nil))
             }
             expectation.fulfill()
         })
@@ -271,7 +271,7 @@ class HtmlNoteAdapterTests: XCTestCase {
             XCTAssertEqual(results.count, 1)
             if let embedElement = results.first {
                 let embedUrl = "https://www.youtube.com/embed/dQw4w9WgXcQ"
-                XCTAssertEqual(embedElement.kind, .embed(embedUrl, displayRatio: nil))
+                XCTAssertEqual(embedElement.kind, .embed(SourceMetadata(origin: .remote(URL(string: embedUrl)!)), displayRatio: nil))
             }
             expectation.fulfill()
         })
@@ -286,7 +286,7 @@ class HtmlNoteAdapterTests: XCTestCase {
             XCTAssertEqual(results.count, 1)
             if let embedElement = results.first {
                 let embedUrl = "https://www.youtube.com/embed/dQw4w9WgXcQ"
-                XCTAssertEqual(embedElement.kind, .embed(embedUrl, displayRatio: nil))
+                XCTAssertEqual(embedElement.kind, .embed(SourceMetadata(origin: .remote(URL(string: embedUrl)!)), displayRatio: nil))
             }
             expectation.fulfill()
         })

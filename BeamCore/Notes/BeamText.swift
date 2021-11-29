@@ -20,7 +20,7 @@ public struct BeamText: Codable {
 
         case strong
         case emphasis
-        case source(String)
+        case source(SourceMetadata)
         case link(String)
         case internalLink(UUID)
         case strikethrough
@@ -60,7 +60,12 @@ public struct BeamText: Codable {
                 switch type {
                 case "strong": self = .strong
                 case "emphasis": self = .emphasis
-                case "source": self = .source(try container.decode(String.self, forKey: .payload))
+                case "source":
+                    if let src = try? container.decodeIfPresent(SourceMetadata.self, forKey: .payload) {
+                        self = .source(src)
+                    } else {
+                        self = .source(SourceMetadata(string: try container.decode(String.self, forKey: .payload)))
+                    }
                 case "link": self = .link(try container.decode(String.self, forKey: .payload))
                 case "internalLink":
                     if let string = try? container.decode(String.self, forKey: .payload) {
@@ -83,7 +88,7 @@ public struct BeamText: Codable {
                 switch type {
                 case 0: self = .strong
                 case 1: self = .emphasis
-                case 2: self = .source(try container.decode(String.self, forKey: .payload))
+                case 2: self = .source(try container.decode(SourceMetadata.self, forKey: .payload))
                 case 3: self = .link(try container.decode(String.self, forKey: .payload))
                 case 4: self = .internalLink(try container.decode(UUID.self, forKey: .payload))
                 case 5: self = .strikethrough
@@ -150,6 +155,16 @@ public struct BeamText: Codable {
         public var isInternalLink: Bool {
             switch self {
             case .internalLink:
+                return true
+            default:
+                return false
+            }
+        }
+
+        /// Return true if BeamText is of source type
+        public var isSource: Bool {
+            switch self {
+            case .source:
                 return true
             default:
                 return false
@@ -228,6 +243,15 @@ public struct BeamText: Codable {
             for attribute in attributes {
                 if case let .internalLink(linkId) = attribute {
                     return linkId
+                }
+            }
+            return nil
+        }
+
+        public var source: SourceMetadata? {
+            for attribute in attributes {
+                if case let .source(source) = attribute {
+                    return source
                 }
             }
             return nil
