@@ -645,7 +645,12 @@ public class DocumentManager: NSObject {
             Logger.shared.logDebug("Network task for \(documentStruct.titleAndId): calling fetchWithId",
                                    category: .documentNetwork)
 
-            guard let updatedDocument = try? documentManager.fetchWithId(documentStruct.id) else {
+            var updatedDocument: Document?
+            documentManager.saveDocumentQueue.sync {
+                updatedDocument = try? documentManager.fetchWithId(documentStruct.id)
+            }
+
+            guard let updatedDocument = updatedDocument else {
                 Logger.shared.logWarning("Network task for \(documentStruct.titleAndId): document disappeared (deleted?), isCancelled: \(networkTask.isCancelled)",
                                          category: .coredata)
                 networkCompletion?(.failure(DocumentManagerError.localDocumentNotFound))
