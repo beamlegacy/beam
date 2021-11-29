@@ -4,6 +4,7 @@
 //
 //  Created by Jean-Louis Darmon on 31/05/2021.
 //
+// swiftlint:disable:next file_length, type_body_length
 
 import Foundation
 import BeamCore
@@ -11,7 +12,15 @@ import Combine
 import Clustering
 import Fakery
 
+// swiftlint:disable:next type_body_length
 class ClusteringManager: ObservableObject {
+
+    public struct SummaryForNewDay: Codable {
+        var notes: [Date: [UUID]]?
+        var pageId: UUID?
+        var pageDate: Date = Date.distantPast
+        var pageScore: Float = 0
+    }
 
     enum InitialiseNotes {
         case zeroPagesAdded
@@ -49,7 +58,13 @@ class ClusteringManager: ObservableObject {
     var sessionId: UUID
     var navigationBasedPageGroups = [[UUID]]()
     var similarities = [UUID: [UUID: Double]]()
+    var notesChangedByUserInSession = [UUID]()
+    let LongTermUrlScoreStoreProtocol = LongTermUrlScoreStore.shared
+    var summary: SummaryForNewDay
+    public var continueToNotes = [UUID]()
+    public var continueToPage: UUID?
 
+    // swiftlint:disable:next function_body_length
     init(ranker: SessionLinkRanker, candidate: Int, navigation: Double, text: Double, entities: Double, sessionId: UUID, activeSources: ActiveSources) {
         self.selectedTabGroupingCandidate = candidate
         self.weightNavigation = navigation
@@ -60,6 +75,40 @@ class ClusteringManager: ObservableObject {
         self.cluster = Cluster(candidate: candidate, weightNavigation: navigation, weightText: text, weightEntities: entities, noteContentThreshold: 100)
         self.ranker = ranker
         self.sessionId = sessionId
+        self.summary = SummaryForNewDay()
+        if let summaryString = Persistence.ContinueTo.summary,
+           let jsonData = summaryString.data(using: .utf8),
+           let unwrappedSummary = try? JSONDecoder().decode(SummaryForNewDay.self, from: jsonData) {
+            self.summary = unwrappedSummary
+        }
+        if let notesWithActivity = summary.notes {
+            let allNotesWithFrequency = NSCountedSet(array: notesWithActivity.compactMap({ $0.value }))
+            if let mostFrequentNote = allNotesWithFrequency.max(by: { allNotesWithFrequency.count(for: $0) < allNotesWithFrequency.count(for: $1) }) as? UUID {
+                self.continueToNotes.append(mostFrequentNote)
+            }
+            for noteDate in notesWithActivity.keys.sorted(by: { $0 > $1 }) {
+//                if Calendar.current.isDate(BeamDate.now, equalTo: noteDate, toGranularity: .day) {
+//                    continue
+//                }
+                if let notesFromDate = notesWithActivity[noteDate] {
+                    if notesFromDate.indices.contains(0) {
+                        self.continueToNotes.append(notesFromDate[0]) // TODO: Try also random element
+                        self.continueToNotes = Array(Set(self.continueToNotes))
+                    }
+                    if notesFromDate.indices.contains(1),
+                       self.continueToNotes.count < 2 {
+                        self.continueToNotes.append(notesFromDate[1])
+                        self.continueToNotes = Array(Set(self.continueToNotes))
+                    }
+                }
+                if continueToNotes.count > 1 {
+                    break
+                }
+            }
+        }
+        if let pageWithActivity = summary.pageId {
+            self.continueToPage = pageWithActivity
+        }
         setupObservers()
         #if DEBUG
         setupDebugObservers()
@@ -192,7 +241,7 @@ class ClusteringManager: ObservableObject {
             if newContent != nil {
                 replaceContent = true
             }
-            cluster.add(page: pageToAdd, ranking: ranking, activeSources: activeSources.activeSources.map({ $0.1 }).reduce([], +), replaceContent: replaceContent) { result in
+            cluster.add(page: pageToAdd, ranking: ranking, activeSources: Array(Set(activeSources.urls)), replaceContent: replaceContent) { result in
                 DispatchQueue.main.async {
                     self.isClustering = false
                 }
@@ -222,7 +271,7 @@ class ClusteringManager: ObservableObject {
         if self.initialiseNotes {
             let notes = BeamNote.fetchNotesWithType(type: .note, 10, 0)
             for note in notes {
-                self.addNote(note: note)
+                self.addNote(note: note, addToNextSummary: false)
             }
         }
     }
@@ -238,7 +287,11 @@ class ClusteringManager: ObservableObject {
         return fullText.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    func addNote(note: BeamNote) {
+    func addNote(note: BeamNote, addToNextSummary: Bool = true) {
+        if addToNextSummary,
+           !self.notesChangedByUserInSession.contains(note.id) {
+            notesChangedByUserInSession.append(note.id)
+        }
         let fullText = cleanTextFrom(note: note)
         let clusteringNote = ClusteringNote(id: note.id, title: note.title, content: fullText)
         // TODO: Add link information to notes
@@ -247,7 +300,7 @@ class ClusteringManager: ObservableObject {
         if self.sendRanking {
             ranking = self.ranker.clusteringRemovalSorted(links: self.clusteredPagesId.reduce([], +))
         }
-        self.cluster.add(note: clusteringNote, ranking: ranking, activeSources: activeSources.activeSources.map({ $0.1 }).reduce([], +)) { result in
+        self.cluster.add(note: clusteringNote, ranking: ranking, activeSources: Array(Set(activeSources.urls))) { result in
             DispatchQueue.main.async {
                 self.isClustering = false
             }
@@ -364,4 +417,52 @@ class ClusteringManager: ObservableObject {
         }
         orphanedUrlManager.save()
     }
+
+    // swiftlint:disable:next cyclomatic_complexity
+    public func exportSummaryForNextSession() {
+        if self.notesChangedByUserInSession.isEmpty {
+            for (pageGroup, noteGroup) in zip(self.clusteredPagesId, self.clusteredNotesId).reversed() {
+                if !noteGroup.isEmpty && !pageGroup.isEmpty {
+                    for noteId in noteGroup {
+                        self.notesChangedByUserInSession.append(noteId)
+                    }
+                }
+            }
+        }
+        let allVisitedPages = self.clusteredPagesId.flatMap({ $0 })
+        let allLongTermScores = self.LongTermUrlScoreStoreProtocol.getMany(urlIds: allVisitedPages)
+        let dateToAdd = BeamDate.now
+        if allVisitedPages.count > 0 && allLongTermScores.count > 0 {
+            let (pageToPropose, pageScoreToPropose) = zip(allVisitedPages, allLongTermScores).sorted {$0.1.score() > $1.1.score()}[0]
+            if self.summary.pageId == nil {
+                summary.pageId = pageToPropose
+                summary.pageDate = dateToAdd
+                summary.pageScore = pageScoreToPropose.score()
+            } else if !Calendar.current.isDate(dateToAdd, equalTo: summary.pageDate, toGranularity: .day) || summary.pageScore < pageScoreToPropose.score() {
+                summary.pageId = pageToPropose
+                summary.pageDate = dateToAdd
+                summary.pageScore = pageScoreToPropose.score()
+               }
+        }
+        if !self.notesChangedByUserInSession.isEmpty {
+            if summary.notes == nil {
+                summary.notes = [dateToAdd: self.notesChangedByUserInSession]
+            } else {
+                summary.notes?[dateToAdd] = self.notesChangedByUserInSession
+                while summary.notes?.keys.count ?? 0 > 10 {
+                    if let furthestDate = summary.notes?.keys.sorted(by: { $0 < $1 })[0],
+                       Calendar.current.dateComponents([.day], from: furthestDate, to: dateToAdd).day ?? 0 > 7 {
+                        summary.notes?[furthestDate] = nil
+                    } else {
+                        break
+                    }
+                }
+            }
+        }
+        if let jsonData = try? JSONEncoder().encode(summary),
+           let jsonString = String(data: jsonData, encoding: .utf8) {
+            Persistence.ContinueTo.summary = jsonString
+        }
+    }
+    // swiftlint:disable:next file_length
 }

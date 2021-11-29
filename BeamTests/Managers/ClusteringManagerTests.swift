@@ -157,4 +157,47 @@ class ClusteringManagerTests: XCTestCase {
         expect(splittedText[1]) == "The"
         expect(splittedText[8]) == ""
     }
+    
+    func testSummaryUpdate() throws {
+        let oldSummary = Persistence.ContinueTo.summary
+        var testSummary = ClusteringManager.SummaryForNewDay()
+        testSummary.notes = [Calendar.current.date(byAdding: .day, value: -11, to: BeamDate.now)!: [notes[0].id, notes[1].id],
+                             Calendar.current.date(byAdding: .day, value: -10, to: BeamDate.now)!: [notes[0].id, notes[3].id],
+                             Calendar.current.date(byAdding: .day, value: -9, to: BeamDate.now)!: [notes[0].id, notes[1].id],
+                             Calendar.current.date(byAdding: .day, value: -8, to: BeamDate.now)!: [notes[0].id, notes[3].id],
+                             Calendar.current.date(byAdding: .day, value: -7, to: BeamDate.now)!: [notes[0].id, notes[1].id],
+                             Calendar.current.date(byAdding: .day, value: -6, to: BeamDate.now)!: [notes[0].id, notes[3].id],
+                             Calendar.current.date(byAdding: .day, value: -5, to: BeamDate.now)!: [notes[0].id, notes[1].id],
+                             Calendar.current.date(byAdding: .day, value: -4, to: BeamDate.now)!: [notes[0].id, notes[3].id],
+                             Calendar.current.date(byAdding: .day, value: -3, to: BeamDate.now)!: [notes[0].id, notes[1].id],
+                             Calendar.current.date(byAdding: .day, value: -2, to: BeamDate.now)!: [notes[0].id, notes[3].id],
+                             Calendar.current.date(byAdding: .day, value: -1, to: BeamDate.now)!: [notes[2].id]]
+        
+        testSummary.pageId = pageIDs[0]
+        testSummary.pageScore = Float(9.5)
+        testSummary.pageDate = Calendar.current.date(byAdding: .day, value: -1, to: BeamDate.now)!
+        if let jsonData = try? JSONEncoder().encode(testSummary),
+           let jsonString = String(data: jsonData, encoding: .utf8) {
+            Persistence.ContinueTo.summary = jsonString
+        }
+        let otherClusteringManager = ClusteringManager(ranker: sessionLinkRanker, candidate: 2, navigation: 0.5, text: 0.9, entities: 0.4, sessionId: UUID(), activeSources: activeSources)
+        expect(Set(otherClusteringManager.continueToNotes)) == Set([notes[0].id, notes[2].id])
+        expect(otherClusteringManager.continueToPage!) == pageIDs[0]
+        
+        otherClusteringManager.addPage(id: documents[1].id, parentId: nil, value: informations[1])
+        expect(otherClusteringManager.clusteredPagesId).toEventually(equal([[self.pageIDs[1]]]))
+        otherClusteringManager.addNote(note: notes[2])
+        expect(otherClusteringManager.clusteredNotesId).toEventually(contain([notes[2].id]))
+
+        otherClusteringManager.exportSummaryForNextSession()
+        var newSummary = ClusteringManager.SummaryForNewDay()
+        if let summaryString = Persistence.ContinueTo.summary,
+           let jsonData = summaryString.data(using: .utf8),
+           let unwrappedSummary = try? JSONDecoder().decode(ClusteringManager.SummaryForNewDay.self, from: jsonData) {
+            newSummary = unwrappedSummary
+        }
+        expect(newSummary.notes?.count).toEventually(equal(10))
+        
+        Persistence.ContinueTo.summary = oldSummary
+    }
 }
