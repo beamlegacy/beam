@@ -164,7 +164,7 @@ extension BeamTextEdit {
             types.append(.h1)
         case .heading(2):
             types.append(.h2)
-        case .quote(1, node.text.text, node.text.text):
+        case .quote(1, SourceMetadata(string: node.text.text, title: node.text.text)):
             types.append(.quote)
         default:
             break
@@ -227,7 +227,7 @@ extension BeamTextEdit {
         case .h2:
             elementKind = .heading(2)
         case .quote:
-            elementKind = .quote(1, node.text.text, node.text.text)
+            elementKind = .quote(1, SourceMetadata(string: node.text.text, title: node.text.text))
         case .checkmark:
             elementKind = .check(false)
         default:

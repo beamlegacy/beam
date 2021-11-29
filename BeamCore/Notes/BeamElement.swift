@@ -33,14 +33,33 @@ public struct MediaDisplayInfos: Codable, Equatable {
 }
 
 public enum ElementKind: Codable, Equatable {
+    /// Plain bullet
     case bullet
+    /// Heading
+    /// - Int: Level of identation
     case heading(Int)
-    case quote(Int, String, String)
+    /// Quote
+    /// - Int: Level of identation
+    /// - SourceMetadata
+    case quote(Int, SourceMetadata)
+    /// Check
+    /// - Bool: True for checked, false for unchecked
     case check(Bool)
+    /// Code block
     case code
+    /// Dividing line
     case divider
-    case image(UUID, displayInfos: MediaDisplayInfos)
-    case embed(String, displayRatio: Double?)
+    /// Image
+    /// - SourceMetadata
+    /// - displayInfos: Describes the image size and ratio
+    case image(SourceMetadata, displayInfos: MediaDisplayInfos)
+    /// Embed
+    /// - SourceMetadata
+    /// - displayRatio
+    case embed(SourceMetadata, displayRatio: Double?)
+    /// Block Reference
+    /// - UUID: Target Note UUID
+    /// - UUID: Target Element UUID
     case blockReference(UUID, UUID)
 
     public var isText: Bool {
@@ -104,9 +123,15 @@ public enum ElementKind: Codable, Equatable {
         case "heading":
             self = .heading(try container.decode(Int.self, forKey: .level))
         case "quote":
-            self = .quote(try container.decode(Int.self, forKey: .level),
-                            try container.decode(String.self, forKey: .source),
-                            try container.decode(String.self, forKey: .title))
+            let level = try container.decode(Int.self, forKey: .level)
+
+            if let sourceMetadata = try? container.decodeIfPresent(SourceMetadata.self, forKey: .source) {
+                self = .quote(level, sourceMetadata)
+            } else {
+                let source = try container.decode(String.self, forKey: .source)
+                let title = try container.decode(String.self, forKey: .title)
+                self = .quote(level, SourceMetadata(string: source, title: title))
+            }
         case "check":
             self = .check(try container.decode(Bool.self, forKey: .value))
         case "code":
@@ -124,10 +149,19 @@ public enum ElementKind: Codable, Equatable {
                 displayInfos = MediaDisplayInfos(height: nil, width: nil, displayRatio: sizeRatio)
             }
 
-            self = .image(id, displayInfos: displayInfos)
+            if let sourceMetadata = try? container.decodeIfPresent(SourceMetadata.self, forKey: .source) {
+                self = .image(sourceMetadata, displayInfos: displayInfos)
+            } else {
+                self = .image(SourceMetadata(origin: .local(id)), displayInfos: displayInfos)
+            }
         case "embed":
             let sizeRatio = try? container.decodeIfPresent(Double.self, forKey: .sizeRatio)
-            self = .embed(try container.decode(String.self, forKey: .source), displayRatio: sizeRatio)
+            if let sourceMetadata = try? container.decodeIfPresent(SourceMetadata.self, forKey: .source) {
+                self = .embed(sourceMetadata, displayRatio: sizeRatio)
+            } else {
+                let string = try container.decode(String.self, forKey: .source)
+                self = .embed(SourceMetadata(string: string), displayRatio: sizeRatio)
+            }
         case "blockReference":
             let noteID = try (try? container.decode(UUID.self, forKey: .title)) ?? BeamNote.idForNoteNamed(try container.decode(String.self, forKey: .title), false) ?? UUID.null
             let elementID = try (try? container.decode(UUID.self, forKey: .source)) ?? UUID(uuidString: try container.decode(String.self, forKey: .source)) ?? UUID.null
@@ -146,11 +180,10 @@ public enum ElementKind: Codable, Equatable {
         case let .heading(level):
             try container.encode("heading", forKey: .type)
             try container.encode(level, forKey: .level)
-        case let .quote(level, source, title):
+        case let .quote(level, source):
             try container.encode("quote", forKey: .type)
             try container.encode(level, forKey: .level)
             try container.encode(source, forKey: .source)
-            try container.encode(title, forKey: .title)
         case let .check(checked):
             try container.encode("check", forKey: .type)
             try container.encode(checked, forKey: .value)

@@ -62,11 +62,13 @@ extension BeamTextEdit {
             strNode.append(NSAttributedString(string: "\n---\n"))
 
         case let .image(source, _):
-            strNode.append(buildStringFrom(image: source))
+            if case let .local(id) = source.origin {
+                strNode.append(buildStringFrom(image: id))
+            }
 
         case let .embed(source, _):
-            guard let url = URL(string: source) else { return strNode }
-            strNode.append(NSAttributedString(string: source, attributes: [.link: url]))
+            guard case let .remote(url) = source.origin else { return strNode }
+            strNode.append(NSAttributedString(string: source.title ?? url.absoluteString, attributes: [.link: url]))
         }
 
         return strNode

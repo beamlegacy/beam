@@ -117,7 +117,7 @@ class HtmlVisitor {
                     let fileName = url.lastPathComponent
                     // BeamElements default to bullets, if we don't create an image kind here the closure
                     // will lose it's reference because it will be executed after joining BeamElement together
-                    imgElement.kind = .image(UUID(), displayInfos: MediaDisplayInfos())
+                    imgElement.kind = .image(SourceMetadata(origin: .local(UUID())), displayInfos: MediaDisplayInfos())
 
                     // By defining the Closure outside the `visit()` func we keep the reference to the imgElement
                     // With this in memory reference we can close the closure without having to wrap
@@ -131,7 +131,7 @@ class HtmlVisitor {
                                 imgElement.text.addAttributes([.link(mdUrl)], to: imgElement.text.wholeRange)
                                 return
                             }
-                            imgElement.kind = .image(fileId, displayInfos: MediaDisplayInfos(height: Int(size.height), width: Int(size.width), displayRatio: nil))
+                            imgElement.kind = .image(SourceMetadata(origin: .local(fileId)), displayInfos: MediaDisplayInfos(height: Int(size.height), width: Int(size.width), displayRatio: nil))
 
                             // If we can get the image, change the text of the element to the actual source instead of the link
                             imgElement.text = BeamText(text: urlBase.absoluteString)
@@ -149,7 +149,7 @@ class HtmlVisitor {
                        let fileId = HtmlVisitor.storeImageData(base64, mimeType, fileName, fileStorage),
                        let size = Self.imageSize(data: base64, type: mimeType, htmlSize: imgAttr.size) {
                         let imgElement = BeamElement()
-                        imgElement.kind = .image(fileId, displayInfos: MediaDisplayInfos(height: Int(size.height), width: Int(size.width), displayRatio: nil))
+                        imgElement.kind = .image(SourceMetadata(origin: .local(fileId)), displayInfos: MediaDisplayInfos(height: Int(size.height), width: Int(size.width), displayRatio: nil))
 
                         // If we can get the image, change the text of the element to the actual source instead of the link
                         imgElement.text = BeamText(text: urlBase.absoluteString)
@@ -219,7 +219,7 @@ class HtmlVisitor {
            let link = links.first,
            let url = URL(string: link),
            EmbedContentBuilder().canBuildEmbed(for: url) {
-            element.kind = .embed(url.absoluteString, displayRatio: nil)
+            element.kind = .embed(SourceMetadata(origin: .remote(url)), displayRatio: nil)
         }
     }
 }

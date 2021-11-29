@@ -298,8 +298,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
                 element.query = self.page.originalQuery
 
                 guard element.kind == .bullet else { return element }
-
-                element.kind = .quote(1, sourceUrl.absoluteString, group.href)
+                element.text.addAttributes([.source(SourceMetadata(origin: .remote(sourceUrl), title: page.title))], to: element.text.wholeRange)
                 return element
             })
             // Update shootgroup information
@@ -309,7 +308,6 @@ class PointAndShoot: WebPageHolder, ObservableObject {
             // Update BrowsingScorer about note submission
             page.setDestinationNote(targetNote, rootElement: targetNote)
             scorer?.addTextSelection()
-            // TODO: Convert BeamText to BeamElement of quote type
             // Adds urlId to current card source
             let urlId = LinkStore.getOrCreateIdFor(sourceUrl.absoluteString)
             targetNote.sources.add(urlId: urlId, noteId: targetNote.id, type: .user, sessionId: self.data.sessionId, activeSources: data.activeSources)
