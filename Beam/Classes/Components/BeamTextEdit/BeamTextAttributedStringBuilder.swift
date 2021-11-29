@@ -131,7 +131,7 @@ struct BeamTextAttributedStringBuilder {
         var emphasis = false
         var strikethrough = false
         var underline = false
-        var source: String?
+        var source: SourceMetadata?
         var webLink: String?
         var internalLink: String?
         var decoratedValue: BeamText.AttributeDecoratedValue?
