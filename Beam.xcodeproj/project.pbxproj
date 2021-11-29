@@ -973,6 +973,7 @@
 		DA547BA527107DA00085EEC1 /* BrowsingTreeRecordTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA547BA427107DA00085EEC1 /* BrowsingTreeRecordTests.swift */; };
 		DA5A16EA26F8EB4200226C89 /* BeamTextEditTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF9C18826E61FCA00C350B5 /* BeamTextEditTests.swift */; };
 		DA5C63E5274BEF31001F7CEF /* AutocompleteResultTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5C63DE274BEEE1001F7CEF /* AutocompleteResultTest.swift */; };
+		DA5C63F1274D0873001F7CEF /* AppDelegate+LinkDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5C63F0274D0873001F7CEF /* AppDelegate+LinkDB.swift */; };
 		DA63D513267CF10800D7C756 /* FrecencyScorer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA63D512267CF10800D7C756 /* FrecencyScorer.swift */; };
 		DA63D519267CF28800D7C756 /* FrecencyScorerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA63D518267CF28800D7C756 /* FrecencyScorerTest.swift */; };
 		DA69304D268B4DD9008EF756 /* BrowsingTreeSender.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA69304C268B4DD9008EF756 /* BrowsingTreeSender.swift */; };
@@ -2107,6 +2108,7 @@
 		DA3E41BF2642CC7900BA3952 /* TextSaver.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextSaver.swift; sourceTree = "<group>"; };
 		DA547BA427107DA00085EEC1 /* BrowsingTreeRecordTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BrowsingTreeRecordTests.swift; path = BeamTests/Classes/Models/GRDB/BrowsingTreeRecordTests.swift; sourceTree = SOURCE_ROOT; };
 		DA5C63DE274BEEE1001F7CEF /* AutocompleteResultTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AutocompleteResultTest.swift; path = BeamTests/AutocompleteResultTest.swift; sourceTree = SOURCE_ROOT; };
+		DA5C63F0274D0873001F7CEF /* AppDelegate+LinkDB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+LinkDB.swift"; sourceTree = "<group>"; };
 		DA63D512267CF10800D7C756 /* FrecencyScorer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FrecencyScorer.swift; sourceTree = "<group>"; };
 		DA63D518267CF28800D7C756 /* FrecencyScorerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrecencyScorerTest.swift; sourceTree = "<group>"; };
 		DA69304C268B4DD9008EF756 /* BrowsingTreeSender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowsingTreeSender.swift; sourceTree = "<group>"; };
@@ -2942,6 +2944,7 @@
 				332AB2EF26FE17D6007717D8 /* AppDelegate+UserInfos.swift */,
 				A5DE86A32692AEEC00E05C20 /* BeamWindow+NSMenu.swift */,
 				3343794227037578004EF5A4 /* BeamWindow+Search.swift */,
+				DA5C63F0274D0873001F7CEF /* AppDelegate+LinkDB.swift */,
 			);
 			path = "AppDelegate+Beam";
 			sourceTree = "<group>";
@@ -6203,6 +6206,7 @@
 				A055CE7A274E8DD5003DB3D0 /* ClosedTabDataPersistence.swift in Sources */,
 				A5D88585274E4E2100F37859 /* BlendModePerColorScheme.swift in Sources */,
 				BAA679A5A0853E5E53ACD3F1 /* BeamDownloadManager.swift in Sources */,
+				DA5C63F1274D0873001F7CEF /* AppDelegate+LinkDB.swift in Sources */,
 				BAA673C9223F304A166B92D5 /* WebNoteController.swift in Sources */,
 				A52596E9273EB8AC004B27E4 /* OnboardingImportsView.swift in Sources */,
 				A5919F6D268EA0A2009015C5 /* WebPageBaseImpl.swift in Sources */,

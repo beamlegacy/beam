@@ -16,6 +16,7 @@ extension Link: TableRecord {
     enum Columns: String, ColumnExpression {
         case id, url, title, createdAt, updatedAt, deletedAt, previousChecksum
     }
+    static let frecencyScores = hasMany(FrecencyUrlRecord.self, using: ForeignKey(["urlId"]))
 }
 
 // Fetching methods
@@ -71,24 +72,35 @@ enum BeamLinkDBManagerError: Error, Equatable {
     case localLinkNotFound
 }
 
+struct LinkWithFrecency: FetchableRecord {
+    var link: Link
+    var frecency: FrecencyUrlRecord?
+
+    init(row: Row) {
+        link = Link(row: row)
+        frecency = row["frecency"]
+    }
+}
+
 public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
+    let db: GRDBDatabase
     static let tableName = "Link"
     var dbPool: DatabasePool
     static var shared = BeamLinkDB(path: BeamData.linkDBPath)
     internal static var backgroundQueue = DispatchQueue(label: "Links BeamObjectManager backgroundQueue", qos: .userInitiated)
 
     //swiftlint:disable:next function_body_length
-    init(path: String) {
-        let configuration = GRDB.Configuration()
+    init(path: String, db: GRDBDatabase = GRDBDatabase.shared) {
+        self.db = db
 
+    //TODO: remove everything dbPool related when link data moved to GRDB
+        let configuration = GRDB.Configuration()
         do {
             dbPool = try DatabasePool(path: path, configuration: configuration)
         } catch {
             fatalError("Couldn't instanciate link db: \(error)")
         }
-
         var migrator = DatabaseMigrator()
-
         migrator.registerMigration("createLinkDB") { db in
             try db.create(table: BeamLinkDB.tableName, ifNotExists: true) { table in
                 table.column("id", .text).notNull().primaryKey().unique(onConflict: .replace)
@@ -108,19 +120,11 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
     }
 
     public func getLinks(matchingUrl url: String) -> [UUID: Link] {
-        var matchingLinks = [UUID: Link]()
-        try? dbPool.read { db in
-            try Link.filter(Column("url").like("%\(url)%"))
-                .fetchAll(db)
-                .forEach { matchingLinks[$0.id] = $0 }
-        }
-        return matchingLinks
+        return db.getLinks(matchingUrl: url)
     }
 
     public func getOrCreateIdFor(url: String, title: String?) -> UUID {
-        (try? dbPool.read { db in
-            try Link.filter(Column("url") == url).fetchOne(db)?.id
-        }) ?? visit(url)
+        db.getOrCreateIdFor(url: url, title: title)
     }
 
     private func store(link: Link, shouldSaveOnNetwork: Bool, networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
@@ -128,21 +132,15 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
     }
 
     private func store(links: [Link], shouldSaveOnNetwork: Bool, networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
-        try dbPool.write { db in
-            for var link in links {
-                try link.insert(db)
-            }
-        }
+        try db.insert(links: links)
 
         guard shouldSaveOnNetwork else { return }
         saveOnNetwork(links, networkCompletion)
     }
 
     public func linkFor(id: UUID) -> Link? {
-        try? dbPool.read { db in
-            try Link.filter(Column("id") == id).fetchOne(db)
+        db.linkFor(id: id)
         }
-    }
 
     public func isDomain(id: UUID) -> Bool {
         guard let link = linkFor(id: id), URL(string: link.url)?.isDomain ?? false else { return false }
@@ -156,9 +154,7 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
     }
 
     public func linkFor(url: String) -> Link? {
-        try? dbPool.read { db in
-            try Link.filter(Column("url") == url).fetchOne(db)
-        }
+        db.linkFor(url: url)
     }
 
     public func visit(_ url: String, title: String? = nil) -> UUID {
@@ -166,42 +162,35 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
     }
 
     public func visit(_ url: String, title: String?) -> Link {
-        guard var link = linkFor(url: url) else {
-            // The link doesn't exist, create it and return the id
-            var link = Link(url: url, title: title)
-            _ = try? dbPool.write { db in
-                try link.insert(db)
-            }
-
-            // Save the new link on the network once:
-            saveOnNetwork(link)
-
-            return link
-        }
-
-        // otherwise let's update the title and the updatedAt
-        link.title = title
-        link.updatedAt = BeamDate.now
-        _ = try? dbPool.write { db in
-            try link.update(db, columns: [Column("updateAt"), Column("title")])
-        }
-
-        // Save the updated link on the network
+        let link: Link = db.visit(url: url, title: title)
         saveOnNetwork(link)
-
         return link
     }
 
-    public func deleteAll() throws {
+    public func deleteAllLegacy() throws {
         _ = try dbPool.write { db in
             try Link.deleteAll(db)
         }
     }
 
+    public func deleteAll() throws {
+        try db.deleteAll()
+    }
+
     public var allLinks: [Link] {
+        return (try? db.allLinks(updatedSince: nil)) ?? []
+    }
+
+    public var allLinksLegacy: [Link] {
         (try? dbPool.read { db in
             try? Link.fetchAll(db)
         }) ?? []
+    }
+
+    public var countLegacy: Int? {
+        return try? dbPool.read { db in
+            try Link.fetchCount(db)
+        }
     }
     public func showAllLinks() {
         Logger.shared.logDebug("------Links-------", category: .linkDB)
@@ -220,20 +209,11 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
     }
 
     func allObjects(updatedSince: Date?) throws -> [Link] {
-        guard let updatedSince = updatedSince
-        else {
-            return try dbPool.read { db in try Link.fetchAll(db) }
-        }
-
-        return try dbPool.read { db in
-            try Link.filter(Column("updatedAt") >= updatedSince).fetchAll(db)
-        }
+        return try db.allLinks(updatedSince: updatedSince)
     }
 
     func fetchWithIds(_ ids: [UUID]) throws -> [Link] {
-        try dbPool.read { db in
-            try Link.filter(keys: ids).fetchAll(db)
-        }
+        return try db.getLinks(ids: ids)
     }
 
     func checksumsForIds(_ ids: [UUID]) throws -> [UUID: String] {

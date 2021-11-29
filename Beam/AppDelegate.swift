@@ -87,6 +87,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         ContentBlockingManager.shared.setup()
+        //TODO: - Remove when everyone has its local links data moved from old db to grdb
+        moveLinkDB()
         BeamObjectManager.setup()
 
         data = BeamData()
