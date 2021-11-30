@@ -322,6 +322,16 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         })
     }
 
+    public func clearCookiesAndCache() {
+        HTTPCookieStorage.shared.cookies?.forEach(HTTPCookieStorage.shared.deleteCookie)
+
+        WKWebsiteDataStore.default().fetchDataRecords(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(), completionHandler: { records in
+            records.forEach { record in
+                WKWebsiteDataStore.default().removeData(ofTypes: record.dataTypes, for: [record], completionHandler: {})
+            }
+        })
+    }
+
     func setup(webView: WKWebView) {
         let configuration = webView.configurationWithoutMakingCopy
         for cookie in cookies.cookies ?? [] {

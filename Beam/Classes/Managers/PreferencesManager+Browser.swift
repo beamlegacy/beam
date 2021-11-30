@@ -105,35 +105,33 @@ extension PreferencesManager {
 }
 
 extension PreferencesManager {
-    static var browserPreferencesContainer = "app_browser_preferences"
-
-    @UserDefault(key: selectedDefaultSearchEngineKey, defaultValue: defaultSearchEngine, suiteName: browserPreferencesContainer)
+    @UserDefault(key: selectedDefaultSearchEngineKey, defaultValue: defaultSearchEngine, suiteName: BeamUserDefaults.browserPreferences.suiteName)
     static var selectedSearchEngine: Int
 
-    @UserDefault(key: searchEngineSuggestionKey, defaultValue: includeSearchEngineSuggestionDefault, suiteName: browserPreferencesContainer)
+    @UserDefault(key: searchEngineSuggestionKey, defaultValue: includeSearchEngineSuggestionDefault, suiteName: BeamUserDefaults.browserPreferences.suiteName)
     static var includeSearchEngineSuggestion: Bool
 
-    @UserDefault(key: selectedDownloadFolderKey, defaultValue: defaultDownloadFolder, suiteName: browserPreferencesContainer)
+    @UserDefault(key: selectedDownloadFolderKey, defaultValue: defaultDownloadFolder, suiteName: BeamUserDefaults.browserPreferences.suiteName)
     static var selectedDownloadFolder: Int
 
-    @UserDefault(key: customDownloadFolderKey, defaultValue: defaultCustomDownloadFolder, suiteName: browserPreferencesContainer)
+    @UserDefault(key: customDownloadFolderKey, defaultValue: defaultCustomDownloadFolder, suiteName: BeamUserDefaults.browserPreferences.suiteName)
     static var customDownloadFolder: Data?
 
-    @UserDefault(key: openSafeFileAfterDownloadKey, defaultValue: openSafeFileAfterDownloadDefault, suiteName: browserPreferencesContainer)
+    @UserDefault(key: openSafeFileAfterDownloadKey, defaultValue: openSafeFileAfterDownloadDefault, suiteName: BeamUserDefaults.browserPreferences.suiteName)
     static var openSafeFileAfterDownload: Bool
 
-    @UserDefault(key: cmdClickOpenTabKey, defaultValue: cmdClickOpenTabDefault, suiteName: browserPreferencesContainer)
+    @UserDefault(key: cmdClickOpenTabKey, defaultValue: cmdClickOpenTabDefault, suiteName: BeamUserDefaults.browserPreferences.suiteName)
     static var cmdClickOpenTab: Bool
 
-    @UserDefault(key: newTabWindowMakeActiveKey, defaultValue: newTabWindowMakeActiveDefault, suiteName: browserPreferencesContainer)
+    @UserDefault(key: newTabWindowMakeActiveKey, defaultValue: newTabWindowMakeActiveDefault, suiteName: BeamUserDefaults.browserPreferences.suiteName)
     static var newTabWindowMakeActive: Bool
 
-    @UserDefault(key: cmdNumberSwitchTabsKey, defaultValue: cmdNumberSwitchTabsDefault, suiteName: browserPreferencesContainer)
+    @UserDefault(key: cmdNumberSwitchTabsKey, defaultValue: cmdNumberSwitchTabsDefault, suiteName: BeamUserDefaults.browserPreferences.suiteName)
     static var cmdNumberSwitchTabs: Bool
 
-    @UserDefault(key: showWebsiteIconTabKey, defaultValue: showWebsiteIconTabDefault, suiteName: browserPreferencesContainer)
+    @UserDefault(key: showWebsiteIconTabKey, defaultValue: showWebsiteIconTabDefault, suiteName: BeamUserDefaults.browserPreferences.suiteName)
     static var showWebsiteIconTab: Bool
 
-    @UserDefault(key: restoreLastBeamSessionKey, defaultValue: restoreLastBeamSessionDefault, suiteName: browserPreferencesContainer)
+    @UserDefault(key: restoreLastBeamSessionKey, defaultValue: restoreLastBeamSessionDefault, suiteName: BeamUserDefaults.browserPreferences.suiteName)
     static var restoreLastBeamSession: Bool
 }

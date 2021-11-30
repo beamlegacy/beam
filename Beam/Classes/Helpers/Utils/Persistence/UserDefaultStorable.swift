@@ -19,7 +19,7 @@ struct UserDefault<Value> {
     init(key: String, defaultValue: Value, suiteName: String? = nil) {
         self.key = key
         self.defaultValue = defaultValue
-        self.suiteName = suiteName ?? "" + Configuration.env
+        self.suiteName = suiteName ?? Configuration.env
         container = UserDefaults(suiteName: self.suiteName)
     }
 

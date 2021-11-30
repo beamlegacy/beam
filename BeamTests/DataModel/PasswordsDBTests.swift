@@ -229,7 +229,7 @@ class PasswordsDBTests: XCTestCase {
         BeamObjectTestsHelper().deleteAll()
         let semaphore = DispatchSemaphore(value: 0)
 
-        PasswordManager.shared.realDeleteAll { _ in
+        PasswordManager.shared.realDeleteAll(includedRemote: true) { _ in
             semaphore.signal()
         }
         semaphore.wait()
