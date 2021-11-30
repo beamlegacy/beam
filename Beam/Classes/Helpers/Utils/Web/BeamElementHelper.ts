@@ -151,19 +151,19 @@ export class BeamElementHelper {
   /**
    * Returns parent of node type. Maximum allowed recursive depth is 10
    *
-   * @private
-   * @param {*} node target node to start at
-   * @param {*} type parent type to search for
-   * @param {number} [count=0] iteration count
-   * @return {*} 
-   * @memberof PointAndShootUI_native
+   * @static
+   * @param {BeamElement} node target node to start at
+   * @param {string} type parent type to search for
+   * @param {number} [count=10] maximum depth of recursion, defaults to 10
+   * @return {*}  {(BeamElement | undefined)}
+   * @memberof BeamElementHelper
    */
-  static hasParentOfType(element, type, count = 0) {
-    if (count > 10) return null
+  static hasParentOfType(element: BeamElement, type: string, count = 10): BeamElement | undefined {
+    if (count <= 0) return null
     if (type !== "BODY" && element?.tagName === "BODY") return null
     if (!element?.parentElement) return null
     if (type === element?.tagName) return element
-    const newCount = count++
+    const newCount = count--
     return BeamElementHelper.hasParentOfType(element.parentElement, type, newCount)
   }
   /**

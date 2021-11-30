@@ -16,7 +16,6 @@ import {BeamElementHelper} from "../../../Helpers/Utils/Web/BeamElementHelper"
 import {BeamRectHelper} from "../../../Helpers/Utils/Web/BeamRectHelper"
 import {PointAndShootHelper} from "./PointAndShootHelper"
 import {dequal as isDeepEqual} from "dequal"
-import { BeamEmbedHelper } from "../../../Helpers/Utils/Web/BeamEmbedHelper"
 
 export class PointAndShootUI_native implements PointAndShootUI {
   native
