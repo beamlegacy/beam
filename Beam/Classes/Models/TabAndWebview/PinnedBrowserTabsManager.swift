@@ -16,7 +16,7 @@ class PinnedBrowserTabsManager {
         let title: String
     }
 
-    @UserDefault(key: "PinnedTabs", defaultValue: Data(), suiteName: "PinnedBrowserTabsManager")
+    @UserDefault(key: "PinnedTabs", defaultValue: Data(), suiteName: BeamUserDefaults.pinnedBrowserTabs.suiteName)
     var pinnedTabsData: Data
 
     private var encoder: JSONEncoder {

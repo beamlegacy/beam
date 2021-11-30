@@ -44,20 +44,18 @@ extension PreferencesManager {
 }
 
 extension PreferencesManager {
-    static var cardsPreferencesContainer = "app_cards_preferences"
-
-    @UserDefault(key: checkSpellingIsOnKey, defaultValue: checkSpellingIsOnDefault, suiteName: cardsPreferencesContainer)
+    @UserDefault(key: checkSpellingIsOnKey, defaultValue: checkSpellingIsOnDefault, suiteName: BeamUserDefaults.cardsPreferences.suiteName)
     static var checkSpellingIsOn: Bool
 
-    @UserDefault(key: checkGrammarIsOnKey, defaultValue: checkGrammarIsOnDefault, suiteName: cardsPreferencesContainer)
+    @UserDefault(key: checkGrammarIsOnKey, defaultValue: checkGrammarIsOnDefault, suiteName: BeamUserDefaults.cardsPreferences.suiteName)
     static var checkGrammarIsOn: Bool
 
-    @UserDefault(key: correctSpellingIsOnKey, defaultValue: correctSpellingIsOnDefault, suiteName: cardsPreferencesContainer)
+    @UserDefault(key: correctSpellingIsOnKey, defaultValue: correctSpellingIsOnDefault, suiteName: BeamUserDefaults.cardsPreferences.suiteName)
     static var correctSpellingIsOn: Bool
 
-    @UserDefault(key: embedContentPreferenceKey, defaultValue: embedContentPreferenceDefault, suiteName: cardsPreferencesContainer)
+    @UserDefault(key: embedContentPreferenceKey, defaultValue: embedContentPreferenceDefault, suiteName: BeamUserDefaults.cardsPreferences.suiteName)
     static var embedContentPreference: Int
 
-    @UserDefault(key: alwaysShowBulletsKey, defaultValue: alwaysShowBulletsDefault, suiteName: cardsPreferencesContainer)
+    @UserDefault(key: alwaysShowBulletsKey, defaultValue: alwaysShowBulletsDefault, suiteName: BeamUserDefaults.cardsPreferences.suiteName)
     static var alwaysShowBullets: Bool
 }

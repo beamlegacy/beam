@@ -209,7 +209,7 @@
 		4181725E2581107C00317ED8 /* AccountManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171E82581107C00317ED8 /* AccountManager.swift */; };
 		4181725F2581107C00317ED8 /* DocumentManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171E92581107C00317ED8 /* DocumentManager.swift */; };
 		418172602581107C00317ED8 /* LibrairiesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171EA2581107C00317ED8 /* LibrairiesManager.swift */; };
-		4181727B258110D100317ED8 /* AppDelegate+CoreData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41817277258110D100317ED8 /* AppDelegate+CoreData.swift */; };
+		4181727B258110D100317ED8 /* AppDelegate+Data.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41817277258110D100317ED8 /* AppDelegate+Data.swift */; };
 		4181727E258110D100317ED8 /* AppDelegate+URL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181727A258110D100317ED8 /* AppDelegate+URL.swift */; };
 		418172AA25811A3A00317ED8 /* BeamTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418172A825811A3A00317ED8 /* BeamTextField.swift */; };
 		418172AB25811A3A00317ED8 /* BeamTextFieldView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418172A925811A3A00317ED8 /* BeamTextFieldView.swift */; };
@@ -678,6 +678,7 @@
 		A0AA693325C41C9B0038F9A3 /* MouseHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0AA693225C41C9B0038F9A3 /* MouseHandler.swift */; };
 		A0AEC25027022ADA00BEE4F3 /* PasswordEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0AEC24F27022ADA00BEE4F3 /* PasswordEditView.swift */; };
 		A0B8C44F26D550D300130FC7 /* Beam5ToBeam6MigrationPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0B8C44E26D550D300130FC7 /* Beam5ToBeam6MigrationPolicy.swift */; };
+		A0C04B8B27553C51003FC63A /* BeamUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0C04B8A27553C51003FC63A /* BeamUserDefaults.swift */; };
 		A0C0C2A725E5109F00BE34F0 /* InsertElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0C0C2A625E5109F00BE34F0 /* InsertElement.swift */; };
 		A0C58C382640026600FB95D8 /* ToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0C58C372640026600FB95D8 /* ToastView.swift */; };
 		A0C5D85B263C638A00FA6F6E /* CredentialsConfirmationToast.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0C5D85A263C638A00FA6F6E /* CredentialsConfirmationToast.swift */; };
@@ -1322,7 +1323,7 @@
 		418171E82581107C00317ED8 /* AccountManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AccountManager.swift; sourceTree = "<group>"; };
 		418171E92581107C00317ED8 /* DocumentManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DocumentManager.swift; sourceTree = "<group>"; };
 		418171EA2581107C00317ED8 /* LibrairiesManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LibrairiesManager.swift; sourceTree = "<group>"; };
-		41817277258110D100317ED8 /* AppDelegate+CoreData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "AppDelegate+CoreData.swift"; sourceTree = "<group>"; };
+		41817277258110D100317ED8 /* AppDelegate+Data.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "AppDelegate+Data.swift"; sourceTree = "<group>"; };
 		4181727A258110D100317ED8 /* AppDelegate+URL.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "AppDelegate+URL.swift"; sourceTree = "<group>"; };
 		418172A825811A3A00317ED8 /* BeamTextField.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeamTextField.swift; sourceTree = "<group>"; };
 		418172A925811A3A00317ED8 /* BeamTextFieldView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeamTextFieldView.swift; sourceTree = "<group>"; };
@@ -1777,6 +1778,7 @@
 		A0B8C44E26D550D300130FC7 /* Beam5ToBeam6MigrationPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Beam5ToBeam6MigrationPolicy.swift; sourceTree = "<group>"; };
 		A0B8C45A26D556A900130FC7 /* Beam6.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Beam6.xcdatamodel; sourceTree = "<group>"; };
 		A0C04B8127552163003FC63A /* Beam8.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Beam8.xcdatamodel; sourceTree = "<group>"; };
+		A0C04B8A27553C51003FC63A /* BeamUserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamUserDefaults.swift; sourceTree = "<group>"; };
 		A0C0C2A625E5109F00BE34F0 /* InsertElement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsertElement.swift; sourceTree = "<group>"; };
 		A0C58C372640026600FB95D8 /* ToastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastView.swift; sourceTree = "<group>"; };
 		A0C5D85A263C638A00FA6F6E /* CredentialsConfirmationToast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialsConfirmationToast.swift; sourceTree = "<group>"; };
@@ -2714,6 +2716,7 @@
 				418171942581107C00317ED8 /* Persistence.swift */,
 				418171952581107C00317ED8 /* StandardStorable.swift */,
 				524CF6CD25F27609007312F0 /* KeychainStorable.swift */,
+				A0C04B8A27553C51003FC63A /* BeamUserDefaults.swift */,
 				A07F2437269D8B0D008918B0 /* UserDefaultStorable.swift */,
 				A519F0662721A25000BB42E2 /* Cache.swift */,
 				A519F06D2721A4A400BB42E2 /* ImageCodableWrapper.swift */,
@@ -2939,7 +2942,7 @@
 			isa = PBXGroup;
 			children = (
 				52DB02632716D07900F3881D /* AppDelegate+Log.swift */,
-				41817277258110D100317ED8 /* AppDelegate+CoreData.swift */,
+				41817277258110D100317ED8 /* AppDelegate+Data.swift */,
 				524299C625A47D2600F4DBF5 /* AppDelegate+Preferences.swift */,
 				521EEDF62593824100BA2485 /* AppDelegate+Document.swift */,
 				52B17AC2262446B200CB4728 /* AppDelegate+Database.swift */,
@@ -5673,6 +5676,7 @@
 				9652A93426A6B24E00F0590C /* FakeNoteGenerator.swift in Sources */,
 				A05ADF6E264D8C59002DF91A /* OverlayViewCenterViewModel.swift in Sources */,
 				5298268C2641A37500E9448C /* GithubButton.swift in Sources */,
+				A0C04B8B27553C51003FC63A /* BeamUserDefaults.swift in Sources */,
 				0D15BE3F2681CEA40035F322 /* GRDBDatabase+Persistence.swift in Sources */,
 				0D3DD8F52681CD4B009F2DF0 /* HistoryUrlRecord.swift in Sources */,
 				4181720E2581107C00317ED8 /* NoteBackForwardList.swift in Sources */,
@@ -5745,7 +5749,7 @@
 				4181722C2581107C00317ED8 /* AutocompleteList.swift in Sources */,
 				527C4F302719818A00772973 /* LoggerCategoryTableViewController.swift in Sources */,
 				A0877A3726FDD8400081C7D8 /* ChangeCredentialsView.swift in Sources */,
-				4181727B258110D100317ED8 /* AppDelegate+CoreData.swift in Sources */,
+				4181727B258110D100317ED8 /* AppDelegate+Data.swift in Sources */,
 				96988C8325BB0AF2000223A3 /* DestinationNotePicker.swift in Sources */,
 				A57BFEA12615B45C00CFB646 /* TableCellView.swift in Sources */,
 				A572629825FFADC5004416C0 /* MouseInteraction.swift in Sources */,

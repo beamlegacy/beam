@@ -80,23 +80,21 @@ extension PreferencesManager {
 }
 
 extension PreferencesManager {
-    static var generalPreferencesContainer = "app_general_preferences"
-
-    @UserDefault(key: beamAppearanceKey, defaultValue: beamAppearancePreferenceDefault, suiteName: generalPreferencesContainer)
+    @UserDefault(key: beamAppearanceKey, defaultValue: beamAppearancePreferenceDefault, suiteName: BeamUserDefaults.generalPreferences.suiteName)
     static var beamAppearancePreference: Int
 
-    @UserDefault(key: fontMinKey, defaultValue: isFontMinOnPreferenceDefault, suiteName: generalPreferencesContainer)
+    @UserDefault(key: fontMinKey, defaultValue: isFontMinOnPreferenceDefault, suiteName: BeamUserDefaults.generalPreferences.suiteName)
     static var isFontMinOnPreference: Bool
 
-    @UserDefault(key: fontSizeIndexKey, defaultValue: fontSizeIndexPreferenceDefault, suiteName: generalPreferencesContainer)
+    @UserDefault(key: fontSizeIndexKey, defaultValue: fontSizeIndexPreferenceDefault, suiteName: BeamUserDefaults.generalPreferences.suiteName)
     static var fontSizeIndexPreference: Int
 
-    @UserDefault(key: tabToHighlightKey, defaultValue: isTabToHighlightOnDefault, suiteName: generalPreferencesContainer)
+    @UserDefault(key: tabToHighlightKey, defaultValue: isTabToHighlightOnDefault, suiteName: BeamUserDefaults.generalPreferences.suiteName)
     static var isTabToHighlightOn: Bool
 
-    @UserDefault(key: autoUpdateKey, defaultValue: isAutoUpdateOnDefault, suiteName: generalPreferencesContainer)
+    @UserDefault(key: autoUpdateKey, defaultValue: isAutoUpdateOnDefault, suiteName: BeamUserDefaults.generalPreferences.suiteName)
     static var isAutoUpdateOn: Bool
 
-    @UserDefault(key: dataBackupOnUpdate, defaultValue: isDataBackupOnUpdateOnDefault, suiteName: generalPreferencesContainer)
+    @UserDefault(key: dataBackupOnUpdate, defaultValue: isDataBackupOnUpdateOnDefault, suiteName: BeamUserDefaults.generalPreferences.suiteName)
     static var isDataBackupOnUpdateOn: Bool
 }

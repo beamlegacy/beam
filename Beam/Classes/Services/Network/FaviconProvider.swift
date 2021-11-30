@@ -46,6 +46,10 @@ final class FaviconProvider {
         self.debouncedSaveToDisk?()
     }
 
+    public func clear() {
+        cache.removeAllValues()
+    }
+
     private func saveCacheToDisk() {
         Logger.shared.logInfo("FaviconProvider saved cache to disk", category: .favIcon)
         do {
