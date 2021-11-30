@@ -23,7 +23,17 @@ struct DestinationNotePicker: View {
     private let boxHeight: CGFloat = 32
     private let maxBoxWidth: CGFloat = 230
     private var title: String {
-        state.destinationCardName
+        guard !isEditing else {
+            return state.destinationCardName
+        }
+        if let note = tab.noteController.note {
+            if let date = note.type.journalDate {
+                return BeamDate.journalNoteTitle(for: date, with: .medium)
+            } else {
+                return state.destinationCardName
+            }
+        }
+        return BeamDate.journalNoteTitle(for: BeamDate.now, with: .medium)
     }
     private var placeholder: String {
         let currentNote = tab.noteController.noteOrDefault.title
