@@ -547,9 +547,9 @@ import Sentry
 
     func startNewSearch() {
         EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
-        autocompleteManager.cancelAutocomplete()
-        autocompleteManager.resetQuery()
         if mode == .web {
+            autocompleteManager.cancelAutocomplete()
+            autocompleteManager.resetQuery()
             createEmptyTab()
         }
         if focusOmniBox {
