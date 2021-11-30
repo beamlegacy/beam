@@ -27,6 +27,7 @@ enum CardViewLocators {
         case publishCardButton = "NoteHeaderPublishButton"
         case linkNamesButton = "cardTitleLayer"
         case sourceButton = "source"
+        case expandButton = "global-expand"
     }
     
     enum TextFields: String, CaseIterable, UIElement {
