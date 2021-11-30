@@ -152,10 +152,10 @@ class PasswordManager {
         networkCompletion?(.success(false))
     }
 
-    func realDeleteAll(_ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
+    func realDeleteAll(includedRemote: Bool, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
         do {
             try passwordsDB.realDeleteAll()
-            if AuthenticationManager.shared.isAuthenticated {
+            if AuthenticationManager.shared.isAuthenticated && includedRemote {
                 try self.deleteAllFromBeamObjectAPI { result in
                     networkCompletion?(result)
                 }
