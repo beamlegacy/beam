@@ -22,14 +22,12 @@ extension PreferencesManager {
 }
 
 extension PreferencesManager {
-    static var passwordsPreferencesContainer = "app_passwords_preferences"
-
-    @UserDefault(key: autofillUsernamePasswordsKey, defaultValue: autofillUsernamePasswordsDefault, suiteName: passwordsPreferencesContainer)
+    @UserDefault(key: autofillUsernamePasswordsKey, defaultValue: autofillUsernamePasswordsDefault, suiteName: BeamUserDefaults.passwordsPreferences.suiteName)
     static var autofillUsernamePasswords: Bool
 
-    @UserDefault(key: autofillAdressesKey, defaultValue: autofillAdressesDefault, suiteName: passwordsPreferencesContainer)
+    @UserDefault(key: autofillAdressesKey, defaultValue: autofillAdressesDefault, suiteName: BeamUserDefaults.passwordsPreferences.suiteName)
     static var autofillAdresses: Bool
 
-    @UserDefault(key: autofillCreditCardsKey, defaultValue: autofillCreditCardsDefault, suiteName: passwordsPreferencesContainer)
+    @UserDefault(key: autofillCreditCardsKey, defaultValue: autofillCreditCardsDefault, suiteName: BeamUserDefaults.passwordsPreferences.suiteName)
     static var autofillCreditCards: Bool
 }
