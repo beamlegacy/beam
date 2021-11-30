@@ -16,6 +16,10 @@ enum BeamAnimation {
         Animation.timingCurve(0.25, 0.1, 0.25, 0.1, duration: duration * Self.multiplier)
     }
 
+    static func easeIn(duration: Double) -> Animation {
+        Animation.easeIn(duration: duration * Self.multiplier)
+    }
+
     static func easeInOut(duration: Double) -> Animation {
         Animation.easeInOut(duration: duration * Self.multiplier)
     }

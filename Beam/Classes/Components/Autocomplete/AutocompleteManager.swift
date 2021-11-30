@@ -312,12 +312,13 @@ extension AutocompleteManager {
 
     // MARK: - Animations
     func shakeOmniBox() {
-        let animation = Animation.interpolatingSpring(stiffness: 500, damping: 16)
-        withAnimation(animation) {
+        let animationIn = BeamAnimation.easeIn(duration: 0.08)
+        let animationOut = BeamAnimation.defaultiOSEasing(duration: 0.3)
+        withAnimation(animationIn) {
             animateInputingCharacter = true
         }
-        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: .milliseconds(150))) { [weak self] in
-            withAnimation(animation) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(80)) { [weak self] in
+            withAnimation(animationOut) {
                 self?.animateInputingCharacter = false
             }
         }
