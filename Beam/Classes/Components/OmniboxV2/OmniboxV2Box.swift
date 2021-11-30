@@ -44,8 +44,12 @@ struct OmniboxV2Box: View {
         [.today, .note].contains(state.mode)
     }
 
+    private var showPressedState: Bool {
+        autocompleteManager.animateInputingCharacter
+    }
+
     var body: some View {
-        OmniboxV2Box.Background(isPulled: boxIsPulled) {
+        OmniboxV2Box.Background(isPulled: boxIsPulled, isPressingCharacter: showPressedState) {
             VStack(spacing: 0) {
                 HStack(spacing: BeamSpacing._200) {
                     OmniBarSearchField(isEditing: isEditingBinding,
@@ -99,6 +103,7 @@ struct OmniboxV2Box: View {
 /// And sets up transitions.
 struct OmniboxV2Container: View {
     @EnvironmentObject var state: BeamState
+    @EnvironmentObject var autocompleteManager: AutocompleteManager
     @EnvironmentObject var browserTabsManager: BrowserTabsManager
 
     @State private var isFirstLaunchAppear = true
@@ -112,6 +117,10 @@ struct OmniboxV2Container: View {
             savedTopOffset = offset
         }
         return offset
+    }
+
+    private var showPressedState: Bool {
+        autocompleteManager.animateInputingCharacter
     }
 
     var body: some View {
@@ -134,6 +143,7 @@ struct OmniboxV2Container: View {
                                                 .scale(scale: 0.9).animation(BeamAnimation.defaultiOSEasing(duration: 0.25)))
                         )
                     )
+                    .animatableOffsetEffect(offset: CGSize(width: 0, height: showPressedState ? 10 : 0))
                     .onAppear {
                         guard isFirstLaunchAppear else { return }
                         DispatchQueue.main.async {

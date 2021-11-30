@@ -11,6 +11,7 @@ extension OmniboxV2Box {
 
     struct Background<Content: View>: View {
         var isPulled = false
+        var isPressingCharacter = false
         var alignment: Alignment = .center
         var content: () -> Content
 
@@ -25,10 +26,10 @@ extension OmniboxV2Box {
             (isPulled ? pulledShadowColor : baseShadowColor).swiftUI
         }
         private var shadowRadius: CGFloat {
-            isPulled ? 20 : 60
+            (isPulled ? 20 : 60) * (isPressingCharacter ? 1/3 : 1.0)
         }
         private var shadowOffsetY: CGFloat {
-            isPulled ? 4 : 24
+            (isPulled ? 4 : 24) * (isPressingCharacter ? 1/3 : 1.0)
         }
 
         private let animationDuration: Double = 0.3
