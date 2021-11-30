@@ -31,13 +31,9 @@ public class BeamDate {
 
     public static func journalNoteTitle(for date: Date = now, with style: DateFormatter.Style = .long) -> String {
         let fmt = DateFormatter()
-        if style == .short {
-            fmt.dateFormat = "MMM d, yy"
-        } else {
-            fmt.dateStyle = style
-            fmt.timeStyle = .none
-            fmt.doesRelativeDateFormatting = false
-        }
+        fmt.dateStyle = style
+        fmt.timeStyle = .none
+        fmt.doesRelativeDateFormatting = false
         return fmt.string(from: date)
     }
 }
