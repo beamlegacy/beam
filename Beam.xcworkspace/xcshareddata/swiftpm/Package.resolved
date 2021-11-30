@@ -92,6 +92,15 @@
         }
       },
       {
+        "package": "FaviconFinder",
+        "repositoryURL": "https://github.com/will-lumley/FaviconFinder.git",
+        "state": {
+          "branch": null,
+          "revision": "f62aeb293fcc8e6a399e9e8e0d152d42e7167b1f",
+          "version": "3.2.0"
+        }
+      },
+      {
         "package": "FileCheck",
         "repositoryURL": "https://github.com/llvm-swift/FileCheck.git",
         "state": {

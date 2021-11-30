@@ -431,6 +431,7 @@
 		87F11BD9266533C1003BE98E /* PasswordGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F11BD8266533C1003BE98E /* PasswordGenerator.swift */; };
 		87F11BDB26655170003BE98E /* MockAutocompleteStores.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F11BDA26655170003BE98E /* MockAutocompleteStores.swift */; };
 		87F47CC92669415800D01960 /* WebAutocompleteContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F47CC82669415800D01960 /* WebAutocompleteContext.swift */; };
+		8A0DFADC275668E40044515B /* FaviconFinder in Frameworks */ = {isa = PBXBuildFile; productRef = 8A0DFAD4275664090044515B /* FaviconFinder */; };
 		8A14155A267393E2005F2464 /* WebPositionsTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A141559267393E2005F2464 /* WebPositionsTest.swift */; };
 		8A1B8FCE26A9CB31006D849D /* PointAndShootPathFrame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A1B8FCD26A9CB31006D849D /* PointAndShootPathFrame.swift */; };
 		8A23713226D91C2800D8526A /* PointAndShoot+Alert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A23713126D91C2800D8526A /* PointAndShoot+Alert.swift */; };
@@ -2183,6 +2184,7 @@
 				33793AD2265CFEC50041E1B8 /* FavIcon in Frameworks */,
 				3315DC932667859A002A47CF /* Promises in Frameworks */,
 				A0A84FBC2636FA99008F0326 /* PMKFoundation in Frameworks */,
+				8A0DFADC275668E40044515B /* FaviconFinder in Frameworks */,
 				33793AD7265CFEC50041E1B8 /* KeychainAccess in Frameworks */,
 				3315DC942667859A002A47CF /* PromisesTestHelpers in Frameworks */,
 				33B2FF2D274C3F8500518F12 /* Lottie in Frameworks */,
@@ -5020,6 +5022,7 @@
 				52466B21270DA966002D1716 /* Clustering */,
 				33F64F1127283201004EB0CD /* Macaw */,
 				33B2FF2C274C3F8500518F12 /* Lottie */,
+				8A0DFAD4275664090044515B /* FaviconFinder */,
 			);
 			productName = Beam;
 			productReference = 965A78252514F147009980D4 /* Beam.app */;
@@ -5141,6 +5144,7 @@
 				33F64F1027283201004EB0CD /* XCRemoteSwiftPackageReference "Macaw" */,
 				9624A65527431B4200B8D012 /* XCRemoteSwiftPackageReference "swift-atomics" */,
 				33B2FF2B274C3F8500518F12 /* XCRemoteSwiftPackageReference "lottie-ios" */,
+				8A0DFAD3275664090044515B /* XCRemoteSwiftPackageReference "FaviconFinder" */,
 			);
 			productRefGroup = 965A78262514F147009980D4 /* Products */;
 			projectDirPath = "";
@@ -7356,6 +7360,14 @@
 				minimumVersion = 1.2.12;
 			};
 		};
+		8A0DFAD3275664090044515B /* XCRemoteSwiftPackageReference "FaviconFinder" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/will-lumley/FaviconFinder.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.0.0;
+			};
+		};
 		9624A65527431B4200B8D012 /* XCRemoteSwiftPackageReference "swift-atomics" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/apple/swift-atomics.git";
@@ -7491,6 +7503,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises" */;
 			productName = PromisesTestHelpers;
+		};
+		8A0DFAD4275664090044515B /* FaviconFinder */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8A0DFAD3275664090044515B /* XCRemoteSwiftPackageReference "FaviconFinder" */;
+			productName = FaviconFinder;
 		};
 		9624A65627431B4200B8D012 /* Atomics */ = {
 			isa = XCSwiftPackageProductDependency;
