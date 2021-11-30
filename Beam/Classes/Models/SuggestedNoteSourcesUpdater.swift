@@ -143,11 +143,13 @@ public class SuggestedNoteSourceUpdater {
                     if let addPagesToNote = sourcesToAdd[noteId] {
                         note.sources.refreshScores {
                             for pageId in addPagesToNote {
-                                let longTermScore = self.LongTermUrlScoreStoreProtocol.getMany(urlIds: [pageId])
+                                let longTermScores = self.LongTermUrlScoreStoreProtocol.getMany(urlIds: [pageId])
+                                let longTermScore = longTermScores.count > 0 ? longTermScores[0] : nil
                                 let frecency = try? self.frecencyFetcher.fetchOne(id: pageId, paramKey: .webVisit30d0)
                                 let similarity = self.getSimilarityForSuggestion(suggestionPageId: pageId, noteId: noteId, activeSources: activeSources, similarities: similarities)
                                 DispatchQueue.main.async {
-                                    note.sources.add(urlId: pageId, noteId: noteId, type: .suggestion, sessionId: self.sessionId, frecency: frecency?.lastScore, similarity: similarity, longTermScore: longTermScore[0])
+                                    note.sources.add(urlId: pageId, noteId: noteId, type: .suggestion, sessionId: self.sessionId, frecency: frecency?.lastScore, similarity: similarity, longTermScore: longTermScore
+                                    )
                                 }
                             }
                         }
