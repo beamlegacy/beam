@@ -373,7 +373,7 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
             child.removeUnselectedElementsFromTree(selectedElements: selectedElements, keepFoldedChildren: keepFoldedChildren)
             if !selectedElements.contains(child) {
                 removeChild(child)
-                for subChild in child.children {
+                for subChild in child.children where selectedElements.contains(subChild) {
                     addChild(subChild)
                 }
             }
