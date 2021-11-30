@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import FavIcon
+import FaviconFinder
 import BeamCore
 
 final class FaviconProvider {
@@ -104,23 +104,20 @@ final class FaviconProvider {
     // MARK: - From Web URL
     private func retrieveFavicon(fromURL url: URL, handler: @escaping FaviconProviderHandler) {
         let scaledSize = defaultScaledSize
-        do {
-            try FavIcon.downloadPreferred(url, width: scaledSize, height: scaledSize) { [weak self] result in
-                if case let .success(image) = result {
-                    guard let self = self else { return }
-                    let cacheKey = self.cacheKeyForURL(url, size: scaledSize)
-                    let icon = Favicon(url: url, origin: .url, image: image)
-                    self.updateCache(withIcon: icon, for: cacheKey)
-                    handler(image)
-                    return
-                } else if case let .failure(error) = result {
-                    Logger.shared.logDebug("FaviconProvider failure: \(error.localizedDescription)", category: .favIcon)
-                }
+        FaviconFinder(url: url, preferredType: .html, preferences: [
+            FaviconDownloadType.html: FaviconType.appleTouchIcon.rawValue,
+            FaviconDownloadType.ico: "favicon.ico"
+        ]).downloadFavicon { result in
+            switch result {
+            case .success(let icon):
+                let favicon = Favicon(url: icon.url, origin: .url, image: icon.image)
+                let cacheKey = self.cacheKeyForURL(url, size: scaledSize)
+                self.updateCache(withIcon: favicon, for: cacheKey)
+                handler(icon.image)
+            case .failure(let error):
+                Logger.shared.logDebug("FaviconProvider failure: \(error.localizedDescription)", category: .favIcon)
                 handler(nil)
             }
-        } catch let error {
-            Logger.shared.logDebug("FaviconProvider error: \(error.localizedDescription)", category: .favIcon)
-            handler(nil)
         }
     }
 
@@ -202,15 +199,14 @@ final class FaviconProvider {
 
     private static let GET_FAVICON_SCRIPT = """
         var favicons = [];
-        var nodeList = document.getElementsByTagName('link');
+        var nodeList = document.querySelectorAll("link[rel='icon'], link[rel='shortcut icon']")
+
         for (var i = 0; i < nodeList.length; i++) {
-            if((nodeList[i].getAttribute('rel').toLowerCase() == 'icon')||(nodeList[i].getAttribute('rel').toLowerCase() == 'shortcut icon')) {
-                const node = nodeList[i];
-                favicons.push({
-                    url: node.getAttribute('href'),
-                    sizes: node.getAttribute('sizes')
-                });
-            }
+            const node = nodeList[i];
+            favicons.push({
+                url: node.getAttribute('href'),
+                sizes: node.getAttribute('sizes')
+            });
         }
         favicons;
     """
