@@ -14,6 +14,13 @@ struct RecentsListView: View {
 
     var currentNote: BeamNote?
 
+    private func titleForNote(_ note: BeamNote) -> String {
+        guard let journalDate = note.type.journalDate else {
+            return note.title
+        }
+        return BeamDate.journalNoteTitle(for: journalDate, with: .medium)
+    }
+
     var body: some View {
         HStack(spacing: 6) {
             ButtonLabel("Journal", state: state.mode == .today ? .active : .normal) {
@@ -25,7 +32,7 @@ struct RecentsListView: View {
                 ForEach(recentsManager.recentNotes) { note in
                     let isToday = state.mode == .today
                     let isActive = !isToday && note.id == currentNote?.id
-                    ButtonLabel(note.title, state: isActive ? .active : .normal, action: {
+                    ButtonLabel(titleForNote(note), state: isActive ? .active : .normal, action: {
                         state.navigateToNote(id: note.id)
                     })
                 }
