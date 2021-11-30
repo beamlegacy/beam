@@ -79,4 +79,8 @@ extension XCUIElement {
         self.typeText(text)
         return self
     }
+    
+    public func getSize() -> (width: CGFloat, height: CGFloat) {
+        return (self.frame.size.width, self.frame.size.height)
+    }
 }
