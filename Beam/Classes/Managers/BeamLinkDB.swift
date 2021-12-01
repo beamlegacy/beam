@@ -124,7 +124,8 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
     }
 
     public func getOrCreateIdFor(url: String, title: String?) -> UUID {
-        db.getOrCreateIdFor(url: url, title: title)
+        guard url != Link.missing.url else { return Link.missing.id }
+        return db.getOrCreateIdFor(url: url, title: title)
     }
 
     private func store(link: Link, shouldSaveOnNetwork: Bool, networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
@@ -162,6 +163,7 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
     }
 
     public func visit(_ url: String, title: String?) -> Link {
+        guard url != Link.missing.url else { return Link.missing }
         let link: Link = db.visit(url: url, title: title)
         saveOnNetwork(link)
         return link
