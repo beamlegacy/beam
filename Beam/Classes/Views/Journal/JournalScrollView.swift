@@ -14,6 +14,7 @@ struct JournalScrollView: NSViewRepresentable {
 
     var axes: Axis.Set
     var showsIndicators: Bool
+    var topInset: CGFloat = 0
     let proxy: GeometryProxy
     let onScroll: ((CGPoint) -> Void)?
 
@@ -36,7 +37,9 @@ struct JournalScrollView: NSViewRepresentable {
         scrollView.horizontalScroller?.alphaValue = 0
         scrollView.borderType = .noBorder
         scrollView.backgroundColor = BeamColor.Generic.background.nsColor
-
+        if topInset != 0 {
+            scrollView.contentInsets = NSEdgeInsets(top: topInset, left: 0, bottom: 0, right: 0)
+        }
         // Initial document view
         let journalStackView = JournalStackView(horizontalSpace: 0,
                                                 topOffset: Self.firstNoteTopOffset(forProxy: proxy))

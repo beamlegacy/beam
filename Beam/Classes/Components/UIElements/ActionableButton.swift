@@ -102,7 +102,7 @@ struct ActionableButton: View {
     var body: some View {
         HStack(spacing: hSpacing) {
             if let icon = variant.style.icon, icon.alignment == .leading {
-                Icon(name: icon.name, size: icon.size, color: iconColor)
+                Icon(name: icon.name, width: icon.size, color: iconColor)
                     .padding(.leading, hPadding)
             }
             Text(text)
@@ -113,7 +113,7 @@ struct ActionableButton: View {
                     $0.frame(minWidth: textMinWidth, alignment: Alignment(horizontal: variant.style.textAlignment, vertical: .center))
                 }
             if let icon = variant.style.icon, icon.alignment == .trailing {
-                Icon(name: icon.name, size: icon.size, color: iconColor)
+                Icon(name: icon.name, width: icon.size, color: iconColor)
                     .padding(.trailing, hPadding)
             }
         }

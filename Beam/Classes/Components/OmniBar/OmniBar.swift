@@ -13,6 +13,8 @@ struct OmniBar: View {
     @EnvironmentObject var state: BeamState
     @EnvironmentObject var autocompleteManager: AutocompleteManager
     @EnvironmentObject var browserTabsManager: BrowserTabsManager
+    @Environment(\.isMainWindow) private var isMainWindow: Bool
+    @Environment(\.colorScheme) private var colorScheme
 
     var isAboveContent: Bool = false
 
@@ -24,7 +26,7 @@ struct OmniBar: View {
     private var enableAnimations: Bool {
         !state.windowIsResizing
     }
-    private let windowControlsWidth: CGFloat = 92
+    private let windowControlsWidth: CGFloat = 72
     private let boxHeightEditing: CGFloat = 40
     private var boxHeight: CGFloat {
         return isEditing ? boxHeightEditing : 32
@@ -57,7 +59,7 @@ struct OmniBar: View {
         state.mode == .web && browserTabsManager.currentTab != nil
     }
     private var showPivotButton: Bool {
-        state.hasBrowserTabs && !state.destinationCardIsFocused
+        state.hasBrowserTabs && (state.useOmniboxV2 || !state.destinationCardIsFocused)
     }
     private var hasRightActions: Bool {
         return showPivotButton || showDestinationNotePicker
@@ -82,29 +84,32 @@ struct OmniBar: View {
         enableAnimations ? .easeInOut(duration: 0.3) : nil
     }
 
+    private var tapGestureWindowProof: some Gesture {
+        // onTapGesture is triggered when moving NSWindow quickly.
+        // Using a drag gesture instead to make sure the cursor/window hasn't moved.
+        DragGesture(minimumDistance: 0)
+            .onChanged { _ in
+                guard dragStartWindowPosition == nil else { return }
+                dragStartWindowPosition = state.windowFrame.origin
+            }
+            .onEnded { value in
+                let windowHasMoved = hasWindowMovedSinceDragStart()
+                dragStartWindowPosition = nil
+                guard value.translation == .zero || !windowHasMoved else { return }
+                setIsEditing(true)
+            }
+    }
+
     // MARK: Views
-    private func fieldView(containerGeometry: GeometryProxy) -> some View {
+    private func fieldViewLegacy(containerGeometry: GeometryProxy) -> some View {
         OmniBarFieldBackground(isEditing: isEditing, isPressingCharacter: showPressedState, enableAnimations: enableAnimations) {
             VStack(spacing: 0) {
                 HStack(spacing: 4) {
-                    HStack(spacing: 4) {
-                        leftFieldActions
-                    }
+                    leftFieldActions
                     .animation(enableAnimations ? .easeInOut(duration: isEditing ? 0.1 : 0.3) : nil, value: isEditing)
                     .animation(nil)
-                    GlobalCenteringContainer(enabled: !isEditing && state.mode != .web, containerGeometry: containerGeometry) {
-                            OmniBarSearchField(isEditing: Binding<Bool>(get: { isEditing },
-                                                                        set: { setIsEditing($0) }),
-                                               modifierFlagsPressed: $modifierFlagsPressed,
-                                               enableAnimations: enableAnimations, designV2: false)
-                            .frame(maxHeight: .infinity)
-                            .offset(x: 0, y: autocompleteManager.animatedQuery != nil ? -12 : 0)
-                            .opacity(autocompleteManager.animatedQuery != nil ? 0 : 1)
-                            .overlay(cmdReturnAnimatedOverlay)
-                            .allowsHitTesting(!state.useOmniboxV2)
-                            .opacity(state.useOmniboxV2 && state.focusOmniBox ? 0.0 : 1.0)
-                    }
-                    .padding(.leading, !isEditing && state.mode == .web ? 8 : 7)
+                    centerView(containerGeometry: containerGeometry)
+                        .padding(.leading, !isEditing && state.mode == .web ? 8 : 7)
                 }
                 .padding(.leading, BeamSpacing._50)
                 .padding(.trailing, BeamSpacing._120)
@@ -115,19 +120,7 @@ struct OmniBar: View {
                 }
             }
         }
-        .gesture(DragGesture(minimumDistance: 0)
-                    // onTapGesture is triggered when moving NSWindow quickly.
-                    // Using a drag gesture instead to make sure the cursor/window hasn't moved.
-                    .onChanged { _ in
-                        guard dragStartWindowPosition == nil else { return }
-                        dragStartWindowPosition = state.windowFrame.origin
-                    }
-                    .onEnded { value in
-                        let windowHasMoved = hasWindowMovedSinceDragStart()
-                        dragStartWindowPosition = nil
-                        guard value.translation == .zero || !windowHasMoved else { return }
-                        setIsEditing(true)
-        })
+        .gesture(tapGestureWindowProof)
         .frame(maxWidth: .infinity)
         .fixedSize(horizontal: false, vertical: true)
         .padding(.trailing, isEditing ? 6 : 10)
@@ -136,16 +129,35 @@ struct OmniBar: View {
         .animatableOffsetEffect(offset: CGSize(width: 0, height: showPressedState ? 3 : 0))
     }
 
-    var leftFieldActions: some View {
-        Group {
+    private func centerView(containerGeometry: GeometryProxy) -> some View {
+        // Will be replaced by card switch and tabs v2
+        GlobalCenteringContainer(enabled: !isEditing && state.mode != .web, containerGeometry: containerGeometry) {
+            OmniBarSearchField(isEditing: Binding<Bool>(get: { isEditing },
+                                                        set: { setIsEditing($0) }),
+                               modifierFlagsPressed: $modifierFlagsPressed,
+                               enableAnimations: enableAnimations, designV2: false)
+                .frame(maxHeight: .infinity)
+                .offset(x: 0, y: autocompleteManager.animatedQuery != nil ? -12 : 0)
+                .opacity(autocompleteManager.animatedQuery != nil ? 0 : 1)
+                .overlay(cmdReturnAnimatedOverlay)
+                .allowsHitTesting(!state.useOmniboxV2)
+                .opacity(state.useOmniboxV2 && state.focusOmniBox ? 0.0 : 1.0)
+                .opacity(isMainWindow ? 1 : (colorScheme == .dark ? 0.6 : 0.8))
+        }
+        .contentShape(Rectangle())
+    }
+
+    private var leftFieldActions: some View {
+        HStack(spacing: 1) {
             if !isEditing {
                 if state.mode != .today {
-                    OmniBarButton(icon: "nav-journal", accessibilityId: "journal", action: goToJournal)
+                    OmniboxV2ToolbarButton(icon: "nav-journal", action: goToJournal)
+                        .accessibilityIdentifier("journal")
                         .animation(nil)
                 }
-                Chevrons()
+                OmniboxV2ToolbarChevrons()
                     .animation(nil)
-                if state.mode == .web, let currentTab = browserTabsManager.currentTab {
+                if !state.useOmniboxV2 && state.mode == .web, let currentTab = browserTabsManager.currentTab {
                     OmniBarReloadButton(currentTab: currentTab, action: toggleReloadWeb)
                         .animation(nil)
                 }
@@ -153,11 +165,11 @@ struct OmniBar: View {
         }
     }
 
-    var cmdReturnAnimatedOverlay: some View {
+    private var cmdReturnAnimatedOverlay: some View {
         Group {
             if let animatedQuery = autocompleteManager.animatedQuery {
                 HStack(spacing: BeamSpacing._50) {
-                    Icon(name: "field-search", size: 16, color: BeamColor.Bluetiful.swiftUI)
+                    Icon(name: "field-search", color: BeamColor.Bluetiful.swiftUI)
                     Text(animatedQuery)
                         .font(BeamFont.medium(size: 13).swiftUI)
                         .lineLimit(1)
@@ -172,65 +184,68 @@ struct OmniBar: View {
         }
     }
 
-    func rightActionsView(containerGeometry: GeometryProxy) -> some View {
+    private func rightActionsView(containerGeometry: GeometryProxy) -> some View {
         Group {
             if hasRightActions {
-                HStack(alignment: .center) {
+                HStack(alignment: .center, spacing: BeamSpacing._100) {
                     if showDownloadsButton {
                         OmniBarDownloadButton(downloadManager: state.data.downloadManager, action: {
-                            if let downloaderWindow = state.downloaderWindow {
-                                downloaderWindow.close()
-                            } else if let window = CustomPopoverPresenter.shared.presentPopoverChildWindow() {
-                                let downloaderView = DownloaderView(downloader: state.data.downloadManager) { [weak window] in
-                                    window?.close()
-                                }
-                                let omnibarFrame = containerGeometry.safeTopLeftGlobalFrame(in: window.parent)
-                                var origin = CGPoint(x: omnibarFrame.origin.x + omnibarFrame.width - DownloaderView.width - 18, y: omnibarFrame.maxY)
-                                if let parentWindow = window.parent {
-                                    origin = origin.flippedPointToBottomLeftOrigin(in: parentWindow)
-                                }
-                                window.setView(with: downloaderView, at: origin, fromTopLeft: true)
-                                window.makeKey()
-                                state.downloaderWindow = window
-                            }
+                            onDownloadButtonPressed(containerGeometry: containerGeometry)
                         })
-                        .frame(height: 32, alignment: .top)
                         .background(GeometryReader { proxy -> Color in
                             let rect = proxy.safeTopLeftGlobalFrame(in: nil)
                             let center = CGPoint(x: rect.origin.x + rect.width / 2, y: rect.origin.y + rect.height / 2)
                             state.downloadButtonPosition = center
                             return Color.clear
                         })
-
                     }
-                    if showDestinationNotePicker, let currentTab = browserTabsManager.currentTab {
-                        DestinationNotePicker(tab: currentTab)
-                            .frame(height: 32, alignment: .top)
+                    if state.useOmniboxV2 {
+                        OmniboxV2ToolbarButton(icon: "nav-omnibox", action: {
+                            setIsEditing(true)
+                        })
+                            .accessibilityIdentifier("nav-omnibox")
                     }
-                    if showPivotButton {
-                        OmniBarButton(icon: state.mode == .web ? "nav-pivot_card" : "nav-pivot_web", accessibilityId: state.mode == .web ? "pivot-card" : "pivot-web", action: toggleMode, size: 32)
-                            .frame(height: 32, alignment: .top)
+                    HStack(spacing: BeamSpacing._20) {
+                        if showDestinationNotePicker, let currentTab = browserTabsManager.currentTab {
+                            DestinationNotePicker(tab: currentTab)
+                                .frame(height: 32, alignment: .top)
+                        }
+                        if showPivotButton {
+                            OmniboxV2ToolbarButton(icon: state.mode == .web ? "nav-pivot_card" : "nav-pivot_web", action: toggleMode)
+                                .accessibilityIdentifier(state.mode == .web ? "pivot-card" : "pivot-web")
+                        }
                     }
                 }
-                .padding(.top, BeamSpacing._100)
-                .padding(.trailing, BeamSpacing._100)
-                .frame(height: boxHeightEditing)
-                .animation(defaultAnimation)
+                .padding(.top, state.useOmniboxV2 ? 0 : BeamSpacing._100)
+                .padding(.trailing, state.useOmniboxV2 ? 14 : BeamSpacing._100)
+                .if(!state.useOmniboxV2) {
+                    $0.frame(height: boxHeightEditing)
+                    .animation(defaultAnimation)
+                }
             }
         }
     }
 
     var body: some View {
         GeometryReader { containerGeometry in
-            HStack(alignment: .top, spacing: 2) {
-                fieldView(containerGeometry: containerGeometry)
+            HStack(alignment: state.useOmniboxV2 ? .center : .top, spacing: 2) {
+                if !state.useOmniboxV2 {
+                    fieldViewLegacy(containerGeometry: containerGeometry)
+                } else {
+                    leftFieldActions
+                    centerView(containerGeometry: containerGeometry)
+                        .gesture(tapGestureWindowProof)
+                        .padding(.horizontal, 14)
+                }
                 rightActionsView(containerGeometry: containerGeometry)
             }
-            .padding(.leading, state.isFullScreen ? 0 : windowControlsWidth)
+            .padding(.leading, 15 + (state.isFullScreen ? 0 : windowControlsWidth))
             .frame(height: 52, alignment: .top)
-            .background(BeamColor.Generic.background.swiftUI
-                            .shadow(color: barShadowColor, radius: 0, x: 0, y: 0.5)
-            )
+            .if(!state.useOmniboxV2) {
+                $0.background(BeamColor.Generic.background.swiftUI
+                                .shadow(color: barShadowColor, radius: 0, x: 0, y: 0.5)
+                )
+            }
         }
         .frame(height: 52, alignment: .top)
     }
@@ -264,6 +279,24 @@ struct OmniBar: View {
     func toggleMode() {
         state.toggleBetweenWebAndNote()
     }
+
+    private func onDownloadButtonPressed(containerGeometry: GeometryProxy) {
+        if let downloaderWindow = state.downloaderWindow {
+            downloaderWindow.close()
+        } else if let window = CustomPopoverPresenter.shared.presentPopoverChildWindow() {
+            let downloaderView = DownloaderView(downloader: state.data.downloadManager) { [weak window] in
+                window?.close()
+            }
+            let omnibarFrame = containerGeometry.safeTopLeftGlobalFrame(in: window.parent)
+            var origin = CGPoint(x: omnibarFrame.origin.x + omnibarFrame.width - DownloaderView.width - 18, y: omnibarFrame.maxY)
+            if let parentWindow = window.parent {
+                origin = origin.flippedPointToBottomLeftOrigin(in: parentWindow)
+            }
+            window.setView(with: downloaderView, at: origin, fromTopLeft: true)
+            window.makeKey()
+            state.downloaderWindow = window
+        }
+    }
 }
 
 private struct OmniBarReloadButton: View {
@@ -271,9 +304,9 @@ private struct OmniBarReloadButton: View {
     var action: () -> Void
     var body: some View {
         if currentTab.isLoading == true {
-           return OmniBarButton(icon: "nav-refresh_stop", accessibilityId: "stopLoading", action: action)
+            return OmniboxV2ToolbarButton(icon: "nav-refresh_stop", action: action).accessibilityIdentifier("stopLoading")
         } else {
-            return OmniBarButton(icon: "nav-refresh", accessibilityId: "refresh", action: action)
+            return OmniboxV2ToolbarButton(icon: "nav-refresh", action: action).accessibilityIdentifier("refresh")
         }
     }
 }

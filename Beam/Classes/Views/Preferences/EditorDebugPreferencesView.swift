@@ -27,6 +27,7 @@ struct EditorDebugPreferencesView: View {
     @State var editorMaxWidth = PreferencesManager.editorMaxWidth
     @State var editorParentSpacing = PreferencesManager.editorParentSpacing
     @State var editorChildSpacing = PreferencesManager.editorChildSpacing
+    @State var editorToolbarOverlayOpacity = PreferencesManager.editorToolbarOverlayOpacity
 
     @State var editorFontSize = PreferencesManager.editorFontSize
     @State var editorCardTitleFontSize = PreferencesManager.editorCardTitleFontSize
@@ -65,6 +66,7 @@ struct EditorDebugPreferencesView: View {
                                      editorMaxWidth: $editorMaxWidth,
                                      editorParentSpacing: $editorParentSpacing,
                                      editorChildSpacing: $editorChildSpacing,
+                                     editorToobarOverlayOpacity: $editorToolbarOverlayOpacity,
                                      formatter: formatter())
                 }
                 Preferences.Section(bottomDivider: true) {
@@ -146,6 +148,7 @@ struct EditorAppearance: View {
     @Binding var editorMaxWidth: CGFloat
     @Binding var editorParentSpacing: CGFloat
     @Binding var editorChildSpacing: CGFloat
+    @Binding var editorToobarOverlayOpacity: Double
     var formatter: NumberFormatter
 
     var body: some View {
@@ -279,6 +282,21 @@ struct EditorAppearance: View {
                 }.disableAutocorrection(true)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .frame(width: 50, height: 25, alignment: .center)
+            }
+
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Toolbar Overlay Opacity")
+                    Text("Default: \(PreferencesManager.editorToolbarOverlayOpacityDefault)")
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
+                }
+                TextField("", value: $editorToobarOverlayOpacity, formatter: formatter) { _ in
+                } onCommit: {
+                    PreferencesManager.editorToolbarOverlayOpacity = editorToobarOverlayOpacity
+                }.disableAutocorrection(true)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .frame(width: 50, height: 25, alignment: .center)
             }
         }
     }

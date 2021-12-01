@@ -16,11 +16,10 @@ struct ModeView: View {
     @Binding var contentIsScrolled: Bool
 
     @State private var transitionModel = ModeTransitionModel()
+    private let cardScrollViewTopInset: CGFloat = OmniboxV2Toolbar.height
 
     private var webContent: some View {
-        VStack(spacing: 0) {
-            BrowserTabBar(tabs: $browserTabsManager.tabs, currentTab: $browserTabsManager.currentTab)
-                .zIndex(9)
+        ZStack(alignment: .top) {
             if let tab = browserTabsManager.currentTab {
                 EnhancedWebView(tab: tab).clipped()
             }
@@ -31,9 +30,9 @@ struct ModeView: View {
     private var noteContent: some View {
         Group {
             if let currentNote = state.currentNote {
-                NoteView(note: currentNote, containerGeometry: containerGeometry, leadingPercentage: PreferencesManager.editorLeadingPercentage,
+                NoteView(note: currentNote, containerGeometry: containerGeometry, topInset: cardScrollViewTopInset, leadingPercentage: PreferencesManager.editorLeadingPercentage,
                          centerText: false, initialFocusedState: state.notesFocusedStates.currentFocusedState) { scrollPoint in
-                    contentIsScrolled = scrollPoint.y > NoteView.topSpacingBeforeTitle
+                    contentIsScrolled = scrollPoint.y > NoteView.topSpacingBeforeTitle - cardScrollViewTopInset
                     CustomPopoverPresenter.shared.dismissPopovers()
                 }
                 .onAppear { contentIsScrolled = false }
@@ -45,6 +44,7 @@ struct ModeView: View {
     private func journalContent(containerGeometry: GeometryProxy) -> some View {
         JournalScrollView(axes: [.vertical],
                           showsIndicators: false,
+                          topInset: cardScrollViewTopInset,
                           proxy: containerGeometry) { scrollPoint in
             contentIsScrolled = scrollPoint.y >
                 JournalScrollView.firstNoteTopOffset(forProxy: containerGeometry)

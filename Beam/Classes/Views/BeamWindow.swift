@@ -212,6 +212,10 @@ class BeamWindow: NSWindow, NSDraggingDestination {
 
 extension BeamWindow: NSWindowDelegate {
 
+    func windowDidResignMain(_ notification: Notification) {
+        state.windowIsMain = false
+    }
+
     func windowDidBecomeMain(_ notification: Notification) {
         state.windowIsMain = true
         for window in AppDelegate.main.windows where window != self {

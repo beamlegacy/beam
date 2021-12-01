@@ -94,7 +94,7 @@ struct ButtonLabel: View {
                 customViewBuilder(isHovering, isTouching)
             } else {
                 if let icon = iconName {
-                    Icon(name: icon, size: style.iconSize, color: foregroundColor)
+                    Icon(name: icon, width: style.iconSize, color: foregroundColor)
                 }
                 if let text = text {
                     Text(text)
@@ -103,7 +103,7 @@ struct ButtonLabel: View {
                         .underline(variant == .primary, color: foregroundColor)
                 }
                 if variant == .dropdown {
-                    Icon(name: "editor-breadcrumb_down", size: 8, color: foregroundColor)
+                    Icon(name: "editor-breadcrumb_down", width: 8, color: foregroundColor)
                 }
             }
         }

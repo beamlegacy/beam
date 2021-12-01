@@ -29,6 +29,7 @@ public struct BTextEditScrollable<Content: View>: NSViewRepresentable {
     var minimumWidth: CGFloat = 800
     var maximumWidth: CGFloat = 1024
     var topOffset = CGFloat(28)
+    var scrollViewTopInset: CGFloat = 0
     var footerHeight = CGFloat(28)
     var leadingPercentage = PreferencesManager.editorLeadingPercentage
     var centerText = PreferencesManager.editorIsCentered
@@ -57,7 +58,9 @@ public struct BTextEditScrollable<Content: View>: NSViewRepresentable {
             scrollView.contentView.rightAnchor.constraint(equalTo: edit.rightAnchor),
             scrollView.contentView.topAnchor.constraint(equalTo: edit.topAnchor)
         ])
-
+        if let onScroll = onScroll {
+            context.coordinator.observeScrollViewScroll(scrollView, onScroll: onScroll)
+        }
         buildHeaderView(scrollView, context: context)
         if focusOnAppear {
             focusEditor(edit)
@@ -138,6 +141,9 @@ public struct BTextEditScrollable<Content: View>: NSViewRepresentable {
         scrollView.hasVerticalScroller = true
         scrollView.hasHorizontalScroller = false
         scrollView.borderType = .noBorder
+        if scrollViewTopInset != 0 {
+            scrollView.contentInsets = NSEdgeInsets(top: scrollViewTopInset, left: 0, bottom: 0, right: 0)
+        }
         return scrollView
     }
 }
@@ -146,6 +152,7 @@ extension BTextEditScrollable {
     public class BTextEditScrollableCoordinator: NSObject {
         private let parent: BTextEditScrollable
         fileprivate var onDeinit: () -> Void = {}
+        fileprivate var onScroll: ((CGPoint) -> Void)?
         fileprivate var headerHostingView: NSView?
 
         init(_ edit: BTextEditScrollable) {
@@ -154,6 +161,19 @@ extension BTextEditScrollable {
 
         deinit {
             onDeinit()
+        }
+
+        fileprivate func observeScrollViewScroll(_ scrollView: NSScrollView, onScroll: @escaping (CGPoint) -> Void) {
+            self.onScroll = onScroll
+            NotificationCenter.default.addObserver(self,
+                                                   selector: #selector(contentOffsetDidChange(notification:)),
+                                                   name: NSView.boundsDidChangeNotification,
+                                                   object: scrollView.contentView)
+        }
+
+        @objc private func contentOffsetDidChange(notification: Notification) {
+            guard let clipView = notification.object as? NSClipView else { return }
+            onScroll?(clipView.bounds.origin)
         }
     }
 }

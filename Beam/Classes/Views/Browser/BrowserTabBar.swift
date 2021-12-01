@@ -32,6 +32,7 @@ struct BrowserTabBar: View {
 
     private var emptySpacer: some View {
         BrowserTabView.BackgroundView(isSelected: false, isHovering: false)
+            .opacity(designV2 ? 0 : 1)
             .overlay(Separator(hairline: true, color: BrowserTabView.separatorColor)
                         .padding(.vertical, 7),
                      alignment: .trailing)
@@ -43,6 +44,10 @@ struct BrowserTabBar: View {
 
     private var stackAnimation: Animation? {
         disableAnimation ? nil : BeamAnimation.easeInOut(duration: animationDuration)
+    }
+
+    private var designV2: Bool {
+        state.useOmniboxV2
     }
 
     // swiftlint:disable function_body_length
@@ -59,6 +64,7 @@ struct BrowserTabBar: View {
                            isSelected: selected,
                            isDragging: isTheDraggedTab,
                            allowHover: allowHover,
+                           designV2: designV2,
                            onClose: {
                 guard index < tabs.count else { return }
                 let tab = tabs[index]
@@ -153,7 +159,7 @@ struct BrowserTabBar: View {
 
                     // Dragging Tab
                     if let currentTab = currentTab, isDraggingATab {
-                        BrowserTabView(tab: currentTab, isSelected: true, isDragging: true)
+                        BrowserTabView(tab: currentTab, isSelected: true, isDragging: true, designV2: designV2)
                             .offset(x: dragModel.offset.x, y: dragModel.offset.y)
                             .frame(width: dragModel.widthForDraggingTab)
                             .transition(.asymmetric(insertion: .identity, removal: .opacity.animation(BeamAnimation.easeInOut(duration: 0.1))))
@@ -167,13 +173,13 @@ struct BrowserTabBar: View {
                         .onEnded { dragGestureOnEnded(gestureValue: $0) }
                 )
             }
-            BrowserNewTabView {
+            BrowserNewTabView(designV2: designV2) {
                 state.startNewSearch()
             }
         }
         .frame(height: 28)
         .background(
-            BeamColor.ToolBar.secondaryBackground.swiftUI
+            BeamColor.ToolBar.secondaryBackground.swiftUI.opacity(designV2 ? 0 : 1)
                 .overlay(Rectangle()
                             .fill(BeamColor.ToolBar.shadowBottom.swiftUI)
                             .frame(height: Separator.hairlineHeight),
