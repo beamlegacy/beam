@@ -103,6 +103,18 @@ class WebTestView: BaseView {
         return self
     }
     
+    func scrollDown(_ numberOfTimes : Int = 1) {
+        for _ in 1...numberOfTimes {
+            self.app.webViews.firstMatch.scroll(byDeltaX: 0, deltaY: -200)
+        }
+    }
+    
+    func scrollUp(_ numberOfTimes : Int = 1) {
+        for _ in 1...numberOfTimes {
+            self.app.webViews.firstMatch.scroll(byDeltaX: 0, deltaY: 200)
+        }
+    }
+    
     func isGoogleSearchTabOpened() -> Bool {
         return image("Google").waitForExistence(timeout: minimumWaitTimeout)
     }

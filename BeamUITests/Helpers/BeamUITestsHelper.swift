@@ -141,50 +141,6 @@ class BeamUITestsHelper {
         XCTAssertEqual(ShootCardPickerLabels.element.frame.origin.x, referenceElement.frame.origin.x + (referenceElement.frame.width / 2) + padding, accuracy: 10)
         XCTAssertEqual(ShootCardPickerLabels.element.frame.origin.y, referenceElement.frame.origin.y + PnsFrame.element.frame.height, accuracy: 10)
     }
-    
-    func assertFramePositions(searchText: String, identifier: String, message: String? = nil) {
-        guard let message = message else {
-            let message = "\(identifier) location doesn't match \"\(searchText)\" location"
-            assertFramePositions(searchText: searchText, identifier: identifier, message: message)
-            return
-        }
-        let padding: CGFloat = 16
-        
-        // Delay because of animations
-        sleep(1)
-        /// Hover element to make it active
-        let referenceElementMiddle = self.app.webViews.staticTexts[searchText].coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
-        referenceElementMiddle.hover()
-
-        /// Assert one element exists
-        let PnsFrames = self.app.otherElements.matching(identifier: identifier)
-        XCTAssertEqual(PnsFrames.count, 1)
-
-        // Expect element to be correctly positioned
-        let PnsFrame = self.app.otherElements.matching(identifier: identifier).element.frame
-        let referenceElement = self.app.webViews.staticTexts[searchText].frame
-        
-        /// Assert X location
-        XCTAssertEqual(PnsFrame.origin.x, referenceElement.origin.x, accuracy: 10, message)
-        
-        /// Assert Y location
-        let start = referenceElement.origin.y - padding
-        let end = referenceElement.origin.y + referenceElement.height + padding
-        assertBetweenRange(value: PnsFrame.origin.y, start: start, end: end, accuracy: 10)
-        
-        /// Assert width size
-        XCTAssertEqual(PnsFrame.width, referenceElement.width + padding, accuracy: 10, message)
-        
-        /// Assert height size
-        XCTAssertEqual(PnsFrame.height, referenceElement.height + padding, accuracy: 10, message)
-    }
-    
-    func assertBetweenRange(value: CGFloat, start: CGFloat, end: CGFloat, accuracy: CGFloat = 0) {
-        let accuracyStart = start - accuracy
-        let accuracyEnd = end + accuracy
-        let message = "\(value) isn't between \(start) and \(end) within accuracy: \(accuracy)"
-        XCTAssertTrue(accuracyStart...accuracyEnd ~= value, message)
-    }
 }
 
 extension BeamUITestsHelper {
