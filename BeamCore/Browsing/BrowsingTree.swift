@@ -176,7 +176,7 @@ public class BrowsingNode: ObservableObject, Codable {
         LinkStore.linkFor(link)?.title ?? "<???>"
     }
     public var url: String {
-        LinkStore.linkFor(link)?.url ?? "<???>"
+        LinkStore.linkFor(link)?.url ?? Link.missing.url
     }
     private var isForeground: Bool = false
     private var lastStartReading: Date?
@@ -369,7 +369,7 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
         self.origin = origin ?? defaultOrigin
         self.frecencyScorer = frecencyScorer
         self.longTermScoreStore = longTermScoreStore
-        self.root = BrowsingNode(tree: self, parent: nil, url: "<???>", title: nil, isLinkActivation: false)
+        self.root = BrowsingNode(tree: self, parent: nil, url: Link.missing.url, title: nil, isLinkActivation: false)
         self.current = root
     }
 
@@ -434,7 +434,7 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
     }
 
     public var currentLink: String {
-        LinkStore.linkFor(current.link)?.url ?? "<???>"
+        LinkStore.linkFor(current.link)?.url ?? Link.missing.url
     }
 
     @discardableResult
@@ -522,7 +522,7 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
     public var idUrlMapping: [UUID: String] {
         var mapping = [UUID: String]()
         links.forEach {
-            if let url = LinkStore.linkFor($0)?.url {mapping[$0] = url}
+            mapping[$0] = (LinkStore.linkFor($0)?.url ?? Link.missing.url)
         }
         return mapping
     }

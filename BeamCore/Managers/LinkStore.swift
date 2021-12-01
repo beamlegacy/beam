@@ -9,6 +9,7 @@ import Foundation
 import UUIDKit
 
 public struct Link: Codable {
+    public static let missing = Link(url: "<???>", title: nil, createdAt: Date.distantPast, updatedAt: Date.distantPast)
     enum CodingKeys: String, CodingKey {
         case url, title, createdAt, updatedAt, deletedAt
     }
@@ -30,8 +31,8 @@ public struct Link: Codable {
 
         self.createdAt = createdAt
         self.updatedAt = updatedAt
-self.deletedAt = deletedAt
-    self.previousChecksum = previousChecksum
+        self.deletedAt = deletedAt
+        self.previousChecksum = previousChecksum
     }
 }
 
