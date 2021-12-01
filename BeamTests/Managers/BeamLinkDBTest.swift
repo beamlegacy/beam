@@ -62,4 +62,15 @@ class BeamLinkDBTests: XCTestCase {
         XCTAssertEqual(results[1].link.id, links[1].id)
         XCTAssertEqual(results[1].frecency?.frecencySortScore, frecencies[2].frecencySortScore)
     }
+    func testMissingLinkHandling() {
+        //when getting id for missing url, it retreives the link but doesn't save it in db
+        let createdLinkId: UUID = BeamLinkDB.shared.getOrCreateIdFor(url: "<???>", title: nil)
+        XCTAssertEqual(createdLinkId, Link.missing.id)
+        XCTAssertNil(GRDBDatabase.shared.linkFor(url: "<???>"))
+
+        //when visiting missing url, it retreives the link but doesn't save it in db
+        let visitedLinkId: UUID = BeamLinkDB.shared.visit("<???>", title: nil)
+        XCTAssertEqual(visitedLinkId, Link.missing.id)
+        XCTAssertNil(GRDBDatabase.shared.linkFor(url: "<???>"))
+    }
 }
