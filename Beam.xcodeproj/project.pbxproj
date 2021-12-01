@@ -766,7 +766,6 @@
 		A5651A7726035D3A0035F12B /* AppDelegate+NSMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5651A7626035D3A0035F12B /* AppDelegate+NSMenu.swift */; };
 		A56696B12614CF7F00B814D2 /* TableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A56696B02614CF7F00B814D2 /* TableView.swift */; };
 		A567157125F66F8600B46110 /* StyledText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A567157025F66F8600B46110 /* StyledText.swift */; };
-		A5679CE2262ECB9500E7FA69 /* NavigationCollectUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5679CE1262ECB9500E7FA69 /* NavigationCollectUITests.swift */; };
 		A569EA3026A196F600B0861B /* AutocompleteManager+Publishers.swift in Sources */ = {isa = PBXBuildFile; fileRef = A569EA2F26A196F600B0861B /* AutocompleteManager+Publishers.swift */; };
 		A56BAF5826B937CE0006F8D5 /* NoteEditFocusedState.swift in Sources */ = {isa = PBXBuildFile; fileRef = A56BAF5726B937CE0006F8D5 /* NoteEditFocusedState.swift */; };
 		A56DF8F12625D27500F1CF55 /* TextFormatterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A56DF8F02625D27500F1CF55 /* TextFormatterView.swift */; };
@@ -1868,7 +1867,6 @@
 		A5651A7626035D3A0035F12B /* AppDelegate+NSMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+NSMenu.swift"; sourceTree = "<group>"; };
 		A56696B02614CF7F00B814D2 /* TableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableView.swift; sourceTree = "<group>"; };
 		A567157025F66F8600B46110 /* StyledText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StyledText.swift; sourceTree = "<group>"; };
-		A5679CE1262ECB9500E7FA69 /* NavigationCollectUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationCollectUITests.swift; sourceTree = "<group>"; };
 		A569EA2F26A196F600B0861B /* AutocompleteManager+Publishers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AutocompleteManager+Publishers.swift"; sourceTree = "<group>"; };
 		A56BAF5726B937CE0006F8D5 /* NoteEditFocusedState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteEditFocusedState.swift; sourceTree = "<group>"; };
 		A56DF8F02625D27500F1CF55 /* TextFormatterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextFormatterView.swift; sourceTree = "<group>"; };
@@ -4059,7 +4057,6 @@
 				B57A9B2826AB0642002C954D /* Base */,
 				52DF49A425E420FB009A651E /* Helpers */,
 				965A784E2514F149009980D4 /* Info.plist */,
-				A5679CE1262ECB9500E7FA69 /* NavigationCollectUITests.swift */,
 				A5E112E826BA94E800BAD335 /* BrowserTabUITests.swift */,
 			);
 			path = BeamUITests;
@@ -6445,7 +6442,6 @@
 				52A94E3C25E90094004BAC93 /* XCUIElement+Beam.swift in Sources */,
 				B5E38D5826EA23D900236FBD /* SearchTestView.swift in Sources */,
 				B557155726FA257700F6C9D4 /* UpdateTestView.swift in Sources */,
-				A5679CE2262ECB9500E7FA69 /* NavigationCollectUITests.swift in Sources */,
 				B5984C9A27031F3B00192B5F /* PasswordsTestView.swift in Sources */,
 				B5CDFF31274E400F00742CC9 /* OnboardingLandingViewLocators.swift in Sources */,
 				B5BA078D26B0027A00D31FED /* CardEditTests.swift in Sources */,

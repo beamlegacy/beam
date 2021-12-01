@@ -15,7 +15,7 @@ class PnSTestView: BaseView {
             let elementMiddle = element.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
             // click at middle of element1 to make sure the page has focus
             elementMiddle.hover()
-            _ = otherElement(PnSViewLocators.Other.pointFrame.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout)
+            _ = otherElement(PnSViewLocators.Other.pointFrame.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout)
             elementMiddle.click()
         }
     }
@@ -74,11 +74,25 @@ class PnSTestView: BaseView {
         return self
     }
     
+    func pressOptionButtonFor(seconds: UInt32) {
+        XCUIElement.perform(withKeyModifiers: .option) {
+            sleep(seconds)
+        }
+    }
+    
     //Too unstable due to fast pop-up disappearing, could cause false failures
     func openCardFromSuccessWithoutAddedItemsPopUp(_ cardName: String) -> CardTestView {
         _ = staticText(PnSViewLocators.StaticTexts.addedToPopup.accessibilityIdentifier + cardName).waitForExistence(timeout: implicitWaitTimeout)
         staticText(PnSViewLocators.StaticTexts.addedToPopup.accessibilityIdentifier + cardName).click()
         return CardTestView()
+    }
+    
+    func getShootFrameSelection() -> XCUIElementQuery {
+        return app.otherElements.matching(identifier:PnSViewLocators.Other.shootFrameSelection.accessibilityIdentifier)
+    }
+    
+    func getShootFrameSelectionLabelElement() -> XCUIElement {
+        return app.staticTexts.matching(identifier: PnSViewLocators.Other.shootFrameSelectionLabel.accessibilityIdentifier).element
     }
     
     func assertAddedNumberOfItemsToCardSuccessfully(_ numberOfItemsAdded: String, _ cardName: String) -> Bool {
@@ -96,5 +110,54 @@ class PnSTestView: BaseView {
     func assertNumberOfAvailablePointFrames(_ expectedNumber: Int ) -> Bool {
         _ = otherElement(PnSViewLocators.Other.pointFrame.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout)
         return app.otherElements.matching(identifier:PnSViewLocators.Other.pointFrame.accessibilityIdentifier).count == expectedNumber
+    }
+    
+    func assertNumberOfAvailableShootFrameSelection(_ expectedNumber: Int ) -> Bool {
+        _ = otherElement(PnSViewLocators.Other.shootFrameSelection.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout)
+        return app.otherElements.matching(identifier:PnSViewLocators.Other.shootFrameSelection.accessibilityIdentifier).count == expectedNumber
+    }
+    
+    func assertBetweenRange(value: CGFloat, start: CGFloat, end: CGFloat, accuracy: CGFloat = 0) {
+        let accuracyStart = start - accuracy
+        let accuracyEnd = end + accuracy
+        let message = "\(value) isn't between \(start) and \(end) within accuracy: \(accuracy)"
+        XCTAssertTrue(accuracyStart...accuracyEnd ~= value, message)
+    }
+    
+    func assertFramePositions(searchText: String, identifier: String, message: String? = nil) {
+        guard let message = message else {
+            let message = "\(identifier) location doesn't match \"\(searchText)\" location"
+            assertFramePositions(searchText: searchText, identifier: identifier, message: message)
+            return
+        }
+        let padding: CGFloat = 16
+        
+        // Delay because of animations
+        sleep(1)
+        /// Hover element to make it active
+        let referenceElementMiddle = self.app.webViews.staticTexts[searchText].coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        referenceElementMiddle.hover()
+
+        /// Assert one element exists
+        let PnsFrames = self.app.otherElements.matching(identifier: identifier)
+        XCTAssertEqual(PnsFrames.count, 1)
+
+        // Expect element to be correctly positioned
+        let PnsFrame = self.app.otherElements.matching(identifier: identifier).element.frame
+        let referenceElement = self.app.webViews.staticTexts[searchText].frame
+        
+        /// Assert X location
+        XCTAssertEqual(PnsFrame.origin.x, referenceElement.origin.x, accuracy: 10, message)
+        
+        /// Assert Y location
+        let start = referenceElement.origin.y - padding
+        let end = referenceElement.origin.y + referenceElement.height + padding
+        assertBetweenRange(value: PnsFrame.origin.y, start: start, end: end, accuracy: 10)
+        
+        /// Assert width size
+        XCTAssertEqual(PnsFrame.width, referenceElement.width + padding, accuracy: 10, message)
+        
+        /// Assert height size
+        XCTAssertEqual(PnsFrame.height, referenceElement.height + padding, accuracy: 10, message)
     }
 }
