@@ -20,12 +20,17 @@ struct ContentView: View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
                 ModeView(containerGeometry: geometry, contentIsScrolled: $contentIsScrolled)
+                    .frame(maxWidth: .infinity)
                     .overlay(OmniboxV2Toolbar(isAboveContent: isToolbarAboveContent), alignment: .top)
-                if shouldDisplayBottomBar {
+                    .overlay(shouldDisplayBottomBar && state.useOmniboxV2 ?
+                             WindowBottomToolBar()
+                                .transition(AnyTransition.opacity.animation(Animation.easeInOut(duration: 0.2))) : nil, alignment: .bottom)
+                if shouldDisplayBottomBar && !state.useOmniboxV2 {
                     WindowBottomToolBar()
                         .transition(AnyTransition.opacity.animation(Animation.easeInOut(duration: 0.2)))
                 }
-            }.overlay(
+            }
+            .overlay(
                 state.useOmniboxV2 ?
                 OmniboxV2Container()
                     .environmentObject(state.autocompleteManager)

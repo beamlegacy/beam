@@ -62,7 +62,7 @@ struct OmniBar: View {
         state.hasBrowserTabs && (state.useOmniboxV2 || !state.destinationCardIsFocused)
     }
     private var hasRightActions: Bool {
-        return showPivotButton || showDestinationNotePicker
+        state.useOmniboxV2 || showPivotButton || showDestinationNotePicker
     }
     private var barShadowColor: Color {
         isAboveContent ? BeamColor.ToolBar.shadowTop.swiftUI : BeamColor.ToolBar.shadowTop.swiftUI.opacity(0.0)
@@ -108,7 +108,7 @@ struct OmniBar: View {
                     leftFieldActions
                     .animation(enableAnimations ? .easeInOut(duration: isEditing ? 0.1 : 0.3) : nil, value: isEditing)
                     .animation(nil)
-                    centerView(containerGeometry: containerGeometry)
+                    centerSearchFieldView(containerGeometry: containerGeometry)
                         .padding(.leading, !isEditing && state.mode == .web ? 8 : 7)
                 }
                 .padding(.leading, BeamSpacing._50)
@@ -129,9 +129,9 @@ struct OmniBar: View {
         .animatableOffsetEffect(offset: CGSize(width: 0, height: showPressedState ? 3 : 0))
     }
 
-    private func centerView(containerGeometry: GeometryProxy) -> some View {
+    private func centerSearchFieldView(containerGeometry: GeometryProxy) -> some View {
         // Will be replaced by card switch and tabs v2
-        GlobalCenteringContainer(enabled: !isEditing && state.mode != .web, containerGeometry: containerGeometry) {
+        GlobalCenteringContainer(enabled: !state.useOmniboxV2 && !isEditing && state.mode != .web, containerGeometry: containerGeometry) {
             OmniBarSearchField(isEditing: Binding<Bool>(get: { isEditing },
                                                         set: { setIsEditing($0) }),
                                modifierFlagsPressed: $modifierFlagsPressed,
@@ -145,6 +145,22 @@ struct OmniBar: View {
                 .opacity(isMainWindow ? 1 : (colorScheme == .dark ? 0.6 : 0.8))
         }
         .contentShape(Rectangle())
+    }
+
+    private func cardSwitcherView(containerGeometry: GeometryProxy) -> some View {
+        GlobalCenteringContainer(enabled: true, containerGeometry: containerGeometry) {
+            CardSwitcher(currentNote: state.currentNote, designV2: true)
+                .frame(maxHeight: .infinity)
+                .opacity(isMainWindow ? 1 : (colorScheme == .dark ? 0.6 : 0.8))
+                .environmentObject(state.recentsManager)
+        }
+        .transition(.asymmetric(insertion: .opacity.animation(BeamAnimation.easeInOut(duration: 0.08))
+                                    .combined(with: .animatableOffset(offset: CGSize(width: 0, height: 8))
+                                                .animation(BeamAnimation.spring(stiffness: 380, damping: 25))
+                                             ),
+                                removal: .opacity.animation(BeamAnimation.easeInOut(duration: 0.08))
+                                    .combined(with: .animatableOffset(offset: CGSize(width: 0, height: -8)).animation(BeamAnimation.spring(stiffness: 380, damping: 25).delay(0.03)))
+                               ))
     }
 
     private var leftFieldActions: some View {
@@ -233,9 +249,22 @@ struct OmniBar: View {
                     fieldViewLegacy(containerGeometry: containerGeometry)
                 } else {
                     leftFieldActions
-                    centerView(containerGeometry: containerGeometry)
-                        .gesture(tapGestureWindowProof)
-                        .padding(.horizontal, 14)
+                    if state.mode == .web {
+                        centerSearchFieldView(containerGeometry: containerGeometry)
+                            .gesture(tapGestureWindowProof)
+                            .padding(.horizontal, 14)
+                            .transition(.asymmetric(insertion: .opacity.animation(BeamAnimation.easeInOut(duration: 0.12).delay(0.05))
+                                                        .combined(with: .animatableOffset(offset: CGSize(width: 0, height: -8))
+                                                                    .animation(BeamAnimation.spring(stiffness: 380, damping: 25).delay(0.05))
+                                                                 ),
+                                                    removal: .opacity.animation(BeamAnimation.easeInOut(duration: 0.08))
+                                                        .combined(with: .animatableOffset(offset: CGSize(width: 0, height: 8))
+                                                                    .animation(BeamAnimation.spring(stiffness: 380, damping: 25))
+                                                                 )
+                                                   ))
+                    } else {
+                        cardSwitcherView(containerGeometry: containerGeometry)
+                    }
                 }
                 rightActionsView(containerGeometry: containerGeometry)
             }

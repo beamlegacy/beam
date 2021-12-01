@@ -67,6 +67,7 @@ struct ModeView: View {
         Group {
             if let page = state.currentPage {
                 WindowPageView(page: page)
+                    .padding(.top, cardScrollViewTopInset)
                     .transition(.identity)
             }
         }
