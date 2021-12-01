@@ -139,9 +139,6 @@ public enum ElementKind: Codable, Equatable {
         case "divider":
             self = .divider
         case "image":
-            let id = try (try? container.decode(UUID.self, forKey: .source)) ??
-            UUID.v5(name: try container.decode(String.self, forKey: .source), namespace: .url)
-
             var displayInfos = MediaDisplayInfos()
             if let infos = try? container.decodeIfPresent(MediaDisplayInfos.self, forKey: .displayInfos) {
                 displayInfos = infos
@@ -152,6 +149,7 @@ public enum ElementKind: Codable, Equatable {
             if let sourceMetadata = try? container.decodeIfPresent(SourceMetadata.self, forKey: .source) {
                 self = .image(sourceMetadata, displayInfos: displayInfos)
             } else {
+                let id = try (try? container.decode(UUID.self, forKey: .source)) ?? UUID.v5(name: try container.decode(String.self, forKey: .source), namespace: .url)
                 self = .image(SourceMetadata(origin: .local(id)), displayInfos: displayInfos)
             }
         case "embed":
