@@ -21,6 +21,7 @@ struct PointAndShootPathFrame: View {
         ZStack(alignment: .center) {
             Path(group.groupPath)
                 .fill(fill)
+                .accessibility(identifier: "ShootFrameSelection")
 
             Rectangle().fill(Color.clear) // needed to enable hover
                 .onHover { isHovering = $0 }
