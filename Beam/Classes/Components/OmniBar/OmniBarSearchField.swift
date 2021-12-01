@@ -98,18 +98,20 @@ struct OmniBarSearchField: View {
     }
     var body: some View {
         HStack(spacing: designV2 ? BeamSpacing._120 : BeamSpacing._80) {
-            if let icon = favicon {
-                Image(nsImage: icon)
-                    .resizable()
-                    .scaledToFit()
-                    .opacity(shouldShowWebHost ? 0 : 1.0)
-                    .frame(width: shouldShowWebHost ? 0 : 16)
-                    .transition(.identity)
-            } else if let iconName = leadingIconName {
-                Icon(name: iconName, color: (designV2 ? BeamColor.LightStoneGray : textColor).swiftUI)
-                    .opacity(shouldShowWebHost ? 0 : 1.0)
-                    .frame(width: shouldShowWebHost ? 0 : 16)
-                    .transition(.identity)
+            if designV2 || !state.useOmniboxV2 {
+                if let icon = favicon {
+                    Image(nsImage: icon)
+                        .resizable()
+                        .scaledToFit()
+                        .opacity(shouldShowWebHost ? 0 : 1.0)
+                        .frame(width: shouldShowWebHost ? 0 : 16)
+                        .transition(.identity)
+                } else if let iconName = leadingIconName {
+                    Icon(name: iconName, color: (designV2 ? BeamColor.LightStoneGray : textColor).swiftUI)
+                        .opacity(shouldShowWebHost ? 0 : 1.0)
+                        .frame(width: shouldShowWebHost ? 0 : 16)
+                        .transition(.identity)
+                }
             }
             ZStack(alignment: .leading) {
                 Group {
@@ -120,9 +122,7 @@ struct OmniBarSearchField: View {
                                 .lineLimit(1)
                                 .font(textFont.swiftUI)
                                 .foregroundColor(hasText ? textColor.swiftUI : BeamColor.Generic.placeholder.swiftUI)
-                            if !shouldCenter || currentDisplayMode == .web {
-                                Spacer(minLength: 0)
-                            }
+                            Spacer(minLength: 0)
                         }
                     } else {
                         BeamTextField(

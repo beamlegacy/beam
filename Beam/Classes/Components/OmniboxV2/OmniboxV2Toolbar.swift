@@ -19,6 +19,10 @@ struct OmniboxV2Toolbar: View {
 
     var isAboveContent = false
 
+    private let webOverlayTransition = AnyTransition.asymmetric(insertion: .opacity.animation(BeamAnimation.easeInOut(duration: 0.2)),
+                                                                removal: .opacity.animation(BeamAnimation.defaultiOSEasing(duration: 0.15)))
+    private let notwebOverlayTransition = AnyTransition.asymmetric(insertion: .opacity.animation(BeamAnimation.defaultiOSEasing(duration: 0.15)),
+                                                                   removal: .opacity.animation(BeamAnimation.easeInOut(duration: 0.2)))
     private let overlayOpacity = PreferencesManager.editorToolbarOverlayOpacity
     private var blurOverlay: some View {
         VStack(spacing: 0) {
@@ -28,11 +32,15 @@ struct OmniboxV2Toolbar: View {
                         BeamColor.Generic.background.swiftUI.opacity(overlayOpacity)
                         BeamColor.Mercury.swiftUI.opacity(overlayOpacity)
                     }
+                    .transition(webOverlayTransition)
                     Separator(horizontal: true, hairline: true, color: BeamColor.ToolBar.backgroundBottomSeparatorWeb)
+                        .transition(webOverlayTransition)
                 } else {
                     BeamColor.Generic.background.swiftUI.opacity(overlayOpacity)
+                        .transition(notwebOverlayTransition)
                     if isAboveContent {
                         Separator(horizontal: true, hairline: true, color: BeamColor.ToolBar.backgroundBottomSeparator)
+                            .transition(notwebOverlayTransition)
                     }
                 }
             } else {
