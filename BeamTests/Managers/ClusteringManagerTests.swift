@@ -151,11 +151,8 @@ class ClusteringManagerTests: XCTestCase {
     /// Test that text cleaning for notes is done correctly
     func testNoteTextCleaning() throws {
         let fullText = self.clusteringManager.cleanTextFrom(note: notes[0])
-        let separators = CharacterSet(charactersIn: " \n")
-        let splittedText = fullText.components(separatedBy: separators)
-        expect(splittedText[0]) == "Tennis"
-        expect(splittedText[1]) == "The"
-        expect(splittedText[8]) == ""
+        expect(fullText[0]) == "Tennis"
+        expect(fullText[1]) == "The official site of Roger Federer is "
     }
     
     func testSummaryUpdate() throws {
