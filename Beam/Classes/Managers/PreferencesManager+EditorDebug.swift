@@ -15,6 +15,7 @@ extension PreferencesManager {
     static let editorHeaderTopPaddingKey = "editorHeaderTopPadding"
     static let editorJournalTopPaddingKey = "journalTopPadding"
     static let editorCardTopPaddingKey = "cardTopPadding"
+    static let editorToolbarOverlayOpacityKey = "toolbarOverlayOpacity"
 
     static let editorMinWidthKey = "editorMinWidth"
     static let editorMaxWidthKey = "editorMaxWidth"
@@ -43,6 +44,7 @@ extension PreferencesManager {
     static let editorHeaderTopPaddingDefault: CGFloat = 160
     static let editorJournalTopPaddingDefault: CGFloat = 145
     static let editorCardTopPaddingDefault: CGFloat = 20
+    static let editorToolbarOverlayOpacityDefault: CGFloat = 0.4
 
     static let editorMinWidthDefault: CGFloat = 450
     static let editorMaxWidthDefault: CGFloat = 670
@@ -74,6 +76,8 @@ extension PreferencesManager {
     static var editorJournalTopPadding: CGFloat
     @UserDefault(key: editorCardTopPaddingKey, defaultValue: editorCardTopPaddingDefault, suiteName: BeamUserDefaults.editorDebugPreferences.suiteName)
     static var editorCardTopPadding: CGFloat
+    @UserDefault(key: editorToolbarOverlayOpacityKey, defaultValue: editorToolbarOverlayOpacityDefault, suiteName: BeamUserDefaults.editorDebugPreferences.suiteName)
+    static var editorToolbarOverlayOpacity: Double
 
     @UserDefault(key: editorLineHeightHeadingKey, defaultValue: editorLineHeightHeadingDefault, suiteName: BeamUserDefaults.editorDebugPreferences.suiteName)
     static var editorLineHeightHeading: CGFloat

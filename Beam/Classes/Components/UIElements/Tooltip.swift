@@ -24,7 +24,7 @@ struct Tooltip: View {
         VStack(spacing: 4) {
             HStack(spacing: 0) {
                 if let icon = icon {
-                    Icon(name: icon, size: 16, color: foregroundColor)
+                    Icon(name: icon, color: foregroundColor)
                 }
                 if let title = title {
                     Text(title)

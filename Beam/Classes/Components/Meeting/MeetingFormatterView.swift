@@ -62,7 +62,7 @@ private struct MeetingFormatterContainerView: View {
 
             if viewModel.visible {
                 HStack(spacing: 3) {
-                    Icon(name: "editor-calendar", size: 16, color: BeamColor.Beam.swiftUI)
+                    Icon(name: "editor-calendar", color: BeamColor.Beam.swiftUI)
                     Text("Meeting")
                         .font(BeamFont.regular(size: 14).swiftUI)
                         .foregroundColor(BeamColor.Beam.swiftUI)

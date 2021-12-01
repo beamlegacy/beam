@@ -145,6 +145,10 @@ extension BeamColor {
 
 extension BeamColor {
     enum ToolBar {
+        static let backgroundInactiveWindow = BeamColor.combining(lightColor: .Mercury, darkColor: .Nero)
+        static let backgroundBottomSeparator = BeamColor.combining(lightColor: From(color: .black), lightAlpha: 0.1, darkColor: From(color: .white), darkAlpha: 0.1)
+        static let backgroundBottomSeparatorWeb = BeamColor.combining(lightColor: From(color: .black), lightAlpha: 0.1, darkColor: From(color: .black), darkAlpha: 0.75)
+        static let backgroundBottomSeparatorInactiveWindow = BeamColor.combining(lightColor: From(color: .black), lightAlpha: 0.2, darkColor: From(color: .black), darkAlpha: 0.75)
         static let shadowTop = BeamColor.combining(lightColor: .From(color: .black), lightAlpha: 0.050,
                                                    darkColor: .Mercury)
         static let shadowBottom = BeamColor.combining(lightColor: .From(color: .black), lightAlpha: 0.1,
@@ -152,6 +156,11 @@ extension BeamColor {
         static let secondaryBackground = BeamColor.combining(lightColor: .Mercury, darkColor: BeamColor.Custom(named: "BrowserTabSecondaryBackground"))
         static let hoveredSecondaryAdditionalBackground =
             BeamColor.combining(lightColor: .Niobium.alpha(0.07), darkColor: BeamColor.Custom(named: "BrowserTabHoveredAdditionalBackground"))
+
+        static let buttonForeground = BeamColor.LightStoneGray
+        static let buttonForegroundInactiveWindow = BeamColor.AlphaGray
+        static let buttonForegroundHoveredClicked = BeamColor.Generic.text
+        static let buttonBackgroundClicked = BeamColor.Mercury
     }
 }
 
