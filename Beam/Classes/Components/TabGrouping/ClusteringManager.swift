@@ -276,15 +276,19 @@ class ClusteringManager: ObservableObject {
         }
     }
 
-    func cleanTextFrom(note: BeamNote) -> String {
-        var fullText = note.allTexts.map { $0.1.text }.joined(separator: "\n")
+    func cleanTextFrom(note: BeamNote) -> [String] {
+        var fullText = note.allTexts.map { $0.1.text }
         guard let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue) else { return fullText }
-        let matches = detector.matches(in: fullText, options: [], range: NSRange(location: 0, length: fullText.utf16.count))
-        for match in matches.reversed() {
-            guard let range = Range(match.range, in: fullText) else { continue }
-            fullText.removeSubrange(range)
+        for block in fullText.enumerated() {
+            let matches = detector.matches(in: block.element, options: [], range: NSRange(location: 0, length: block.element.utf16.count))
+            var newBlock = block.element
+            for match in matches.reversed() {
+                guard let range = Range(match.range, in: newBlock) else { continue }
+                newBlock.removeSubrange(range)
+            }
+            fullText[block.offset] = newBlock
         }
-        return fullText.trimmingCharacters(in: .whitespacesAndNewlines)
+        return fullText
     }
 
     func addNote(note: BeamNote, addToNextSummary: Bool = true) {
