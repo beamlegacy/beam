@@ -10,7 +10,8 @@ import SwiftUI
 
 struct Icon: View {
     var name: String
-    var size: CGFloat = 16
+    var width: CGFloat = 16
+    var size: CGSize?
     var color = BeamColor.Button.text.swiftUI
     var alignment: Alignment = .center
 
@@ -20,6 +21,6 @@ struct Icon: View {
             .scaledToFill()
             .foregroundColor(.white)
             .colorMultiply(color) // foregroundColor cannot be animated while colorMultiply can
-            .frame(width: size, height: size, alignment: alignment)
+            .frame(width: size?.width ?? width, height: size?.height ?? width, alignment: alignment)
     }
 }

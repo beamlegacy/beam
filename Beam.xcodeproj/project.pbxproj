@@ -202,7 +202,7 @@
 		4181724F2581107C00317ED8 /* WebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171D32581107C00317ED8 /* WebView.swift */; };
 		418172502581107C00317ED8 /* NoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171D52581107C00317ED8 /* NoteView.swift */; };
 		418172522581107C00317ED8 /* OmniBarSearchField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171D82581107C00317ED8 /* OmniBarSearchField.swift */; };
-		418172532581107C00317ED8 /* Chevrons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171D92581107C00317ED8 /* Chevrons.swift */; };
+		418172532581107C00317ED8 /* OmniboxV2ToolbarChevrons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171D92581107C00317ED8 /* OmniboxV2ToolbarChevrons.swift */; };
 		418172542581107C00317ED8 /* OmniBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171DA2581107C00317ED8 /* OmniBar.swift */; };
 		418172592581107C00317ED8 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171E02581107C00317ED8 /* ContentView.swift */; };
 		4181725D2581107C00317ED8 /* AuthenticationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171E72581107C00317ED8 /* AuthenticationManager.swift */; };
@@ -760,7 +760,6 @@
 		A545D30625F7D93B00E68F94 /* MathsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A545D30525F7D93B00E68F94 /* MathsTests.swift */; };
 		A54936C6260B721600EF7622 /* WindowBottomToolBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = A54936C5260B721600EF7622 /* WindowBottomToolBar.swift */; };
 		A552DF2925F0E22B00570C85 /* OmniBarFieldBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = A552DF2825F0E22B00570C85 /* OmniBarFieldBackground.swift */; };
-		A552DF2D25F12A3600570C85 /* OmniBarButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A552DF2C25F12A3600570C85 /* OmniBarButton.swift */; };
 		A552DF3325F1741900570C85 /* GlobalCenteringContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A552DF3225F1741900570C85 /* GlobalCenteringContainer.swift */; };
 		A55760822665501000DEE86C /* TableViewColumn.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55760812665501000DEE86C /* TableViewColumn.swift */; };
 		A5651A7726035D3A0035F12B /* AppDelegate+NSMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5651A7626035D3A0035F12B /* AppDelegate+NSMenu.swift */; };
@@ -824,6 +823,8 @@
 		A5D8858C274E4EB600F37859 /* OmniboxV2ClearButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5D8858B274E4EB600F37859 /* OmniboxV2ClearButton.swift */; };
 		A5D8858E274E4F0100F37859 /* OmniboxV2BoxBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5D8858D274E4F0100F37859 /* OmniboxV2BoxBackground.swift */; };
 		A5D88596274E919300F37859 /* NodeHeaderViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5D88595274E919300F37859 /* NodeHeaderViewModel.swift */; };
+		A5D8859E274EA78800F37859 /* OmniboxV2ToolbarButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5D8859D274EA78800F37859 /* OmniboxV2ToolbarButton.swift */; };
+		A5D885B1274F9F5200F37859 /* OmniboxV2Toolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5D885B0274F9F5200F37859 /* OmniboxV2Toolbar.swift */; };
 		A5DE141C26491F840023F753 /* WKWebview+Zoom.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5DE141B26491F840023F753 /* WKWebview+Zoom.swift */; };
 		A5DE143226496F250023F753 /* NoteHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5DE143126496F250023F753 /* NoteHeaderView.swift */; };
 		A5DE86A42692AEEC00E05C20 /* BeamWindow+NSMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5DE86A32692AEEC00E05C20 /* BeamWindow+NSMenu.swift */; };
@@ -1315,7 +1316,7 @@
 		418171D32581107C00317ED8 /* WebView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebView.swift; sourceTree = "<group>"; };
 		418171D52581107C00317ED8 /* NoteView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NoteView.swift; sourceTree = "<group>"; };
 		418171D82581107C00317ED8 /* OmniBarSearchField.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OmniBarSearchField.swift; sourceTree = "<group>"; };
-		418171D92581107C00317ED8 /* Chevrons.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Chevrons.swift; sourceTree = "<group>"; };
+		418171D92581107C00317ED8 /* OmniboxV2ToolbarChevrons.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OmniboxV2ToolbarChevrons.swift; sourceTree = "<group>"; };
 		418171DA2581107C00317ED8 /* OmniBar.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OmniBar.swift; sourceTree = "<group>"; };
 		418171E02581107C00317ED8 /* ContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		418171E72581107C00317ED8 /* AuthenticationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AuthenticationManager.swift; sourceTree = "<group>"; };
@@ -1861,7 +1862,6 @@
 		A545D30525F7D93B00E68F94 /* MathsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MathsTests.swift; sourceTree = "<group>"; };
 		A54936C5260B721600EF7622 /* WindowBottomToolBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowBottomToolBar.swift; sourceTree = "<group>"; };
 		A552DF2825F0E22B00570C85 /* OmniBarFieldBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniBarFieldBackground.swift; sourceTree = "<group>"; };
-		A552DF2C25F12A3600570C85 /* OmniBarButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniBarButton.swift; sourceTree = "<group>"; };
 		A552DF3225F1741900570C85 /* GlobalCenteringContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalCenteringContainer.swift; sourceTree = "<group>"; };
 		A55760812665501000DEE86C /* TableViewColumn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableViewColumn.swift; sourceTree = "<group>"; };
 		A5651A7626035D3A0035F12B /* AppDelegate+NSMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+NSMenu.swift"; sourceTree = "<group>"; };
@@ -1923,6 +1923,8 @@
 		A5D8858B274E4EB600F37859 /* OmniboxV2ClearButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniboxV2ClearButton.swift; sourceTree = "<group>"; };
 		A5D8858D274E4F0100F37859 /* OmniboxV2BoxBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniboxV2BoxBackground.swift; sourceTree = "<group>"; };
 		A5D88595274E919300F37859 /* NodeHeaderViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NodeHeaderViewModel.swift; sourceTree = "<group>"; };
+		A5D8859D274EA78800F37859 /* OmniboxV2ToolbarButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniboxV2ToolbarButton.swift; sourceTree = "<group>"; };
+		A5D885B0274F9F5200F37859 /* OmniboxV2Toolbar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniboxV2Toolbar.swift; sourceTree = "<group>"; };
 		A5DE141B26491F840023F753 /* WKWebview+Zoom.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WKWebview+Zoom.swift"; sourceTree = "<group>"; };
 		A5DE143126496F250023F753 /* NoteHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteHeaderView.swift; sourceTree = "<group>"; };
 		A5DE86A32692AEEC00E05C20 /* BeamWindow+NSMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamWindow+NSMenu.swift"; sourceTree = "<group>"; };
@@ -2884,10 +2886,8 @@
 			children = (
 				418171DA2581107C00317ED8 /* OmniBar.swift */,
 				418171D82581107C00317ED8 /* OmniBarSearchField.swift */,
-				A552DF2C25F12A3600570C85 /* OmniBarButton.swift */,
 				A552DF2825F0E22B00570C85 /* OmniBarFieldBackground.swift */,
 				A552DF3225F1741900570C85 /* GlobalCenteringContainer.swift */,
-				418171D92581107C00317ED8 /* Chevrons.swift */,
 				96988C8225BB0AF2000223A3 /* DestinationNotePicker.swift */,
 				A545D2FA25F7B1D800E68F94 /* DestinationNoteAutocompleteList.swift */,
 			);
@@ -4428,6 +4428,9 @@
 				A5B71851274B92E70010FE8E /* OmniboxV2Box.swift */,
 				A5D8858D274E4F0100F37859 /* OmniboxV2BoxBackground.swift */,
 				A5D8858B274E4EB600F37859 /* OmniboxV2ClearButton.swift */,
+				A5D885B0274F9F5200F37859 /* OmniboxV2Toolbar.swift */,
+				A5D8859D274EA78800F37859 /* OmniboxV2ToolbarButton.swift */,
+				418171D92581107C00317ED8 /* OmniboxV2ToolbarChevrons.swift */,
 			);
 			path = OmniboxV2;
 			sourceTree = "<group>";
@@ -5727,7 +5730,7 @@
 				521EEDF72593824100BA2485 /* AppDelegate+Document.swift in Sources */,
 				52842D502715B3A80099602C /* FilesContentView.swift in Sources */,
 				33353EE226F3D0BA00063078 /* ActionableButton.swift in Sources */,
-				418172532581107C00317ED8 /* Chevrons.swift in Sources */,
+				418172532581107C00317ED8 /* OmniboxV2ToolbarChevrons.swift in Sources */,
 				A5E2938A2746C6C300638ABA /* FlippedGeometryHelper.swift in Sources */,
 				33AC9D9A26B01A60004E7EF4 /* AuthenticationViewModel.swift in Sources */,
 				A536DE0F269C6ABD003FAAF4 /* ToastTextIconView.swift in Sources */,
@@ -5991,11 +5994,13 @@
 				5298EAF426272C720033862C /* CoreDataMigrationVersion.swift in Sources */,
 				96F936632590FA59006D8E53 /* BTextEdit.swift in Sources */,
 				521EEDED2593803F00BA2485 /* DocumentDetail.swift in Sources */,
+				A5D8859E274EA78800F37859 /* OmniboxV2ToolbarButton.swift in Sources */,
 				A05ADF6C264D8C34002DF91A /* OverlayViewCenter.swift in Sources */,
 				A520D8DF25F8DF8D00400720 /* TouchDownModifier.swift in Sources */,
 				418171ED2581107C00317ED8 /* Session.swift in Sources */,
 				A5C9F00A261364F50096380F /* WindowPageView.swift in Sources */,
 				52ECE01E272970260010E223 /* UserAlert.swift in Sources */,
+				A5D885B1274F9F5200F37859 /* OmniboxV2Toolbar.swift in Sources */,
 				A5919F7F268EF964009015C5 /* TextEditCmdReturnAnimator.swift in Sources */,
 				52842D522715B3F40099602C /* FilesList.swift in Sources */,
 				4181713325810CDC00317ED8 /* Constants.swift in Sources */,
@@ -6166,7 +6171,6 @@
 				33D5F85A2697478E002C4F25 /* PopupView.swift in Sources */,
 				961EC4F225B4511D009FA322 /* Layer.swift in Sources */,
 				52019A7526DE47CA005E8278 /* DatabaseManager+PromiseKit.swift in Sources */,
-				A552DF2D25F12A3600570C85 /* OmniBarButton.swift in Sources */,
 				A52393A826541A06008D4C85 /* ModeViewTransitions.swift in Sources */,
 				5298EAF926272CA90033862C /* CoreDataMigrationStep.swift in Sources */,
 				960A57E6264C851E0061E8D2 /* ProxyImageNode.swift in Sources */,

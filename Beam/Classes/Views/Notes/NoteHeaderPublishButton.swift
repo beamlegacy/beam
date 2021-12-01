@@ -84,7 +84,7 @@ struct NoteHeaderPublishButton: View {
                     HStack(spacing: BeamSpacing._20) {
                         ZStack {
                             // Using a ZStack with opacity to better animate alongside the spring text
-                            Icon(name: "collect-generic", size: 16, color: BeamColor.Niobium.swiftUI)
+                            Icon(name: "collect-generic", color: BeamColor.Niobium.swiftUI)
                                 .opacity(displayCheckIcon ? 1 : 0)
                             LottieView(name: "editor-publish", playing: animateLottie,
                                        color: displayTitle ? BeamColor.Niobium.nsColor : BeamColor.LightStoneGray.nsColor,

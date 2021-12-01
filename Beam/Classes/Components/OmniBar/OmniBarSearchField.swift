@@ -106,7 +106,7 @@ struct OmniBarSearchField: View {
                     .frame(width: shouldShowWebHost ? 0 : 16)
                     .transition(.identity)
             } else if let iconName = leadingIconName {
-                Icon(name: iconName, size: 16, color: (designV2 ? BeamColor.LightStoneGray : textColor).swiftUI)
+                Icon(name: iconName, color: (designV2 ? BeamColor.LightStoneGray : textColor).swiftUI)
                     .opacity(shouldShowWebHost ? 0 : 1.0)
                     .frame(width: shouldShowWebHost ? 0 : 16)
                     .transition(.identity)
@@ -117,6 +117,7 @@ struct OmniBarSearchField: View {
                         HStack(spacing: 0) {
                             let hasText = !textFieldText.wrappedValue.isEmpty
                             Text(hasText ? textFieldText.wrappedValue : "Search Beam or the web")
+                                .lineLimit(1)
                                 .font(textFont.swiftUI)
                                 .foregroundColor(hasText ? textColor.swiftUI : BeamColor.Generic.placeholder.swiftUI)
                             if !shouldCenter || currentDisplayMode == .web {
