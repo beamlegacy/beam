@@ -161,6 +161,10 @@ extension BeamColor {
         static let buttonForegroundInactiveWindow = BeamColor.AlphaGray
         static let buttonForegroundHoveredClicked = BeamColor.Generic.text
         static let buttonBackgroundClicked = BeamColor.Mercury
+
+        static let capsuleStroke = BeamColor.combining(lightColor: From(color: .black), lightAlpha: 0.1, darkColor: From(color: .white), darkAlpha: 0.15)
+        static let capsuleStrokeClicked = BeamColor.combining(lightColor: From(color: .black), lightAlpha: 0.1, darkColor: From(color: .white), darkAlpha: 0.25)
+
     }
 }
 

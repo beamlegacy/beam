@@ -708,6 +708,7 @@
 		A0F558E626BD51A70024C47E /* EditorDebugPreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0F558E526BD51A70024C47E /* EditorDebugPreferencesView.swift */; };
 		A0F558F126BD536A0024C47E /* PreferencesManager+EditorDebug.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0F558F026BD536A0024C47E /* PreferencesManager+EditorDebug.swift */; };
 		A0F558F526BD8F260024C47E /* DebugSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0F558F426BD8F260024C47E /* DebugSection.swift */; };
+		A5011E4A2754E6E800A76667 /* OmniboxV2CapsuleButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5011E492754E6E800A76667 /* OmniboxV2CapsuleButton.swift */; };
 		A501B4CF2734397E00407F3E /* EmbedContentLocalStrategyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A501B4CE2734397E00407F3E /* EmbedContentLocalStrategyTests.swift */; };
 		A501B4D1273439C500407F3E /* EmbedContentAPIStrategyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A501B4D0273439C500407F3E /* EmbedContentAPIStrategyTests.swift */; };
 		A50241D426D8FA6600C93E1E /* GutterItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50241D326D8FA6600C93E1E /* GutterItemView.swift */; };
@@ -844,7 +845,7 @@
 		A5F47EC526F8D6A9004B7CDE /* LottieView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F47EC426F8D6A9004B7CDE /* LottieView.swift */; };
 		A5F47EC826F8D718004B7CDE /* editor-publish.json in Resources */ = {isa = PBXBuildFile; fileRef = A5F47EC726F8D718004B7CDE /* editor-publish.json */; };
 		A5F47ECA26F8D71C004B7CDE /* editor-unpublish.json in Resources */ = {isa = PBXBuildFile; fileRef = A5F47EC926F8D71C004B7CDE /* editor-unpublish.json */; };
-		A5FE1615264AD64900B7526D /* RecentsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5FE1614264AD64900B7526D /* RecentsListView.swift */; };
+		A5FE1615264AD64900B7526D /* CardSwitcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5FE1614264AD64900B7526D /* CardSwitcher.swift */; };
 		A5FE96CD2612469C002A2B73 /* AutocompleteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5FE96CC2612469C002A2B73 /* AutocompleteManager.swift */; };
 		B5056A8D26F88A0700FFD2A2 /* HelpAndFeedbackTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5056A8C26F88A0700FFD2A2 /* HelpAndFeedbackTests.swift */; };
 		B5056A8F26F88AB000FFD2A2 /* HelpTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5056A8E26F88AB000FFD2A2 /* HelpTestView.swift */; };
@@ -1808,6 +1809,7 @@
 		A0F558E526BD51A70024C47E /* EditorDebugPreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorDebugPreferencesView.swift; sourceTree = "<group>"; };
 		A0F558F026BD536A0024C47E /* PreferencesManager+EditorDebug.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PreferencesManager+EditorDebug.swift"; sourceTree = "<group>"; };
 		A0F558F426BD8F260024C47E /* DebugSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugSection.swift; sourceTree = "<group>"; };
+		A5011E492754E6E800A76667 /* OmniboxV2CapsuleButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniboxV2CapsuleButton.swift; sourceTree = "<group>"; };
 		A501B4CE2734397E00407F3E /* EmbedContentLocalStrategyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbedContentLocalStrategyTests.swift; sourceTree = "<group>"; };
 		A501B4D0273439C500407F3E /* EmbedContentAPIStrategyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbedContentAPIStrategyTests.swift; sourceTree = "<group>"; };
 		A50241D326D8FA6600C93E1E /* GutterItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GutterItemView.swift; sourceTree = "<group>"; };
@@ -1944,7 +1946,7 @@
 		A5F47EC426F8D6A9004B7CDE /* LottieView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LottieView.swift; sourceTree = "<group>"; };
 		A5F47EC726F8D718004B7CDE /* editor-publish.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "editor-publish.json"; sourceTree = "<group>"; };
 		A5F47EC926F8D71C004B7CDE /* editor-unpublish.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "editor-unpublish.json"; sourceTree = "<group>"; };
-		A5FE1614264AD64900B7526D /* RecentsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentsListView.swift; sourceTree = "<group>"; };
+		A5FE1614264AD64900B7526D /* CardSwitcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardSwitcher.swift; sourceTree = "<group>"; };
 		A5FE96CC2612469C002A2B73 /* AutocompleteManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutocompleteManager.swift; sourceTree = "<group>"; };
 		B5056A8C26F88A0700FFD2A2 /* HelpAndFeedbackTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpAndFeedbackTests.swift; sourceTree = "<group>"; };
 		B5056A8E26F88AB000FFD2A2 /* HelpTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpTestView.swift; sourceTree = "<group>"; };
@@ -4295,7 +4297,7 @@
 			children = (
 				A54936C5260B721600EF7622 /* WindowBottomToolBar.swift */,
 				33B27469264C103400A318CD /* SmallUpdateIndicatorView.swift */,
-				A5FE1614264AD64900B7526D /* RecentsListView.swift */,
+				A5FE1614264AD64900B7526D /* CardSwitcher.swift */,
 				A53C8F4D26446C6C003A5DF8 /* SharingBannerInfo.swift */,
 				A5919F53268BE208009015C5 /* NoteMediaPlayingButton.swift */,
 			);
@@ -4431,6 +4433,7 @@
 				A5D885B0274F9F5200F37859 /* OmniboxV2Toolbar.swift */,
 				A5D8859D274EA78800F37859 /* OmniboxV2ToolbarButton.swift */,
 				418171D92581107C00317ED8 /* OmniboxV2ToolbarChevrons.swift */,
+				A5011E492754E6E800A76667 /* OmniboxV2CapsuleButton.swift */,
 			);
 			path = OmniboxV2;
 			sourceTree = "<group>";
@@ -5760,7 +5763,7 @@
 				418172272581107C00317ED8 /* NSMutableAttributedString+Range.swift in Sources */,
 				8A9B1A9F26DD33EA00B3B5FA /* PointAndShoot+Target.swift in Sources */,
 				9691C2592644948200F70DA1 /* BeamFileDB.swift in Sources */,
-				A5FE1615264AD64900B7526D /* RecentsListView.swift in Sources */,
+				A5FE1615264AD64900B7526D /* CardSwitcher.swift in Sources */,
 				4131F16825BEC48C006473CD /* SpacerWidget.swift in Sources */,
 				96A1C67626F8ABBF006AFF88 /* AppDelegate+JsonImportExport.swift in Sources */,
 				4181723A2581107C00317ED8 /* Parser.swift in Sources */,
@@ -5896,6 +5899,7 @@
 				A5CD234A270C9B6900240987 /* MeetingsListView.swift in Sources */,
 				8A23713226D91C2800D8526A /* PointAndShoot+Alert.swift in Sources */,
 				52FB30CA25E3D7B3001BF098 /* String+Title.swift in Sources */,
+				A5011E4A2754E6E800A76667 /* OmniboxV2CapsuleButton.swift in Sources */,
 				A5EBF15526D8F2FD00597A1C /* VisualEffectView.swift in Sources */,
 				A5336C0B273AB6050075AF92 /* OnboardingView.swift in Sources */,
 				A5CA5DBA2624FF4A004E9D3E /* BeamNSTableView.swift in Sources */,

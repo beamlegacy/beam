@@ -29,7 +29,7 @@ struct WindowBottomToolBar: View {
 
     private func recentsStack(containerGeometry: GeometryProxy) -> some View {
         GlobalCenteringContainer(enabled: true, containerGeometry: containerGeometry) {
-            RecentsListView(currentNote: currentNote)
+            CardSwitcher(currentNote: currentNote)
                 .environmentObject(state.recentsManager)
         }
         .animation(animationEnabled ? .easeInOut(duration: 0.3) : nil)
@@ -40,13 +40,13 @@ struct WindowBottomToolBar: View {
             HStack {
                 SmallUpdateIndicatorView(versionChecker: state.data.versionChecker)
                 Spacer(minLength: 20)
-                if [.today, .note].contains(state.mode) {
+                if !state.useOmniboxV2 && [.today, .note].contains(state.mode) {
                     recentsStack(containerGeometry: geo)
                         .frame(height: buttonsHeight)
                     Spacer(minLength: 20)
                 }
                 HStack {
-                    if state.mode != .page {
+                    if !state.useOmniboxV2 && state.mode != .page {
                         ButtonLabel("All Cards") {
                             state.navigateToPage(WindowPage.allCardsWindowPage)
                         }
@@ -61,10 +61,12 @@ struct WindowBottomToolBar: View {
             }
             .padding(.vertical, BeamSpacing._50)
             .frame(height: barHeight)
-            .background(
-                BeamColor.Generic.background.swiftUI
-                    .shadow(color: BeamColor.ToolBar.shadowTop.swiftUI, radius: 0, x: 0, y: -0.5)
-            )
+            .if(!state.useOmniboxV2) {
+                $0.background(
+                    BeamColor.Generic.background.swiftUI
+                        .shadow(color: BeamColor.ToolBar.shadowTop.swiftUI, radius: 0, x: 0, y: -0.5)
+                )
+            }
             .frame(maxWidth: .infinity)
         }
         .frame(height: barHeight)
