@@ -129,7 +129,7 @@ struct AutocompleteItem: View {
                         .scaledToFit()
                         .frame(maxWidth: 16, maxHeight: 16)
                 } else {
-                    Icon(name: item.source.iconName, size: 16, color: secondaryTextColor)
+                    Icon(name: item.source.iconName, color: secondaryTextColor)
                         .blendModeLightMultiplyDarkScreen()
                 }
             }
@@ -162,13 +162,13 @@ struct AutocompleteItem: View {
             Spacer(minLength: 0)
             if item.source == .createCard && allowNewCardShortcut {
                 HStack(spacing: BeamSpacing._20) {
-                    Icon(name: designV2 ? "shortcut-option" : "shortcut-cmd", size: 12, color: cardColor, alignment: .trailing)
-                    Icon(name: "shortcut-return", size: 12, color: cardColor, alignment: .trailing)
+                    Icon(name: designV2 ? "shortcut-option" : "shortcut-cmd", width: 12, color: cardColor, alignment: .trailing)
+                    Icon(name: "shortcut-return", width: 12, color: cardColor, alignment: .trailing)
                 }
                 .opacity(0.5)
                 .blendModeLightMultiplyDarkScreen()
             } else {
-                Icon(name: "shortcut-return", size: 12, color: selected ? shortcutColor : .clear, alignment: .trailing)
+                Icon(name: "shortcut-return", width: 12, color: selected ? shortcutColor : .clear, alignment: .trailing)
                     .opacity(0.7)
                     .blendModeLightMultiplyDarkScreen()
             }

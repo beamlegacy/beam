@@ -13,6 +13,7 @@ import WebKit
 public struct WebView: View, NSViewRepresentable {
     /// The WKWebView to display
     var webView: WKWebView
+    var topContentInset: CGFloat?
 
     public typealias NSViewType = NSViewContainerView<WKWebView>
 
@@ -21,12 +22,9 @@ public struct WebView: View, NSViewRepresentable {
     }
 
     public func updateNSView(_ nsView: WebView.NSViewType, context: NSViewRepresentableContext<WebView>) {
+        if let topContentInset = topContentInset, webView.supportsTopContentInset {
+            webView.setTopContentInset(topContentInset)
+        }
         nsView.contentView = webView
-    }
-}
-
-struct WebView_Previews: PreviewProvider {
-    static var previews: some View {
-        Text("Hello, World!")
     }
 }

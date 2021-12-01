@@ -58,7 +58,7 @@ private struct HyperlinkEditorView: View {
             VStack(spacing: 0) {
                 HStack(alignment: .center, spacing: 4) {
                     textField(viewModel.title, editingBinding: $isEditingTitle, placeholder: "Title")
-                    Icon(name: "shortcut-return", size: 12, color: BeamColor.LightStoneGray.swiftUI)
+                    Icon(name: "shortcut-return", width: 12, color: BeamColor.LightStoneGray.swiftUI)
                         .opacity(isEditingTitle ? 1 : 0)
                         .padding(BeamSpacing._20)
                         .onTapGesture {
@@ -69,7 +69,7 @@ private struct HyperlinkEditorView: View {
                 Separator(horizontal: true)
                 HStack(alignment: .center, spacing: 4) {
                     textField(viewModel.url, editingBinding: $isEditingUrl, placeholder: "Link URL")
-                    Icon(name: "shortcut-return", size: 12, color: BeamColor.LightStoneGray.swiftUI)
+                    Icon(name: "shortcut-return", width: 12, color: BeamColor.LightStoneGray.swiftUI)
                         .opacity(isEditingUrl ? 1 : 0)
                         .padding(BeamSpacing._20)
                         .onTapGesture {

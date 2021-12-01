@@ -165,29 +165,35 @@ class BeamWebView: WKWebView {
     }
     var preventScrolling: Bool = false
 
+    private func mouseLocation(from event: NSEvent) -> CGPoint {
+        var point = convert(event.locationInWindow, from: nil)
+        point.y -= self.topContentInset
+        return point
+    }
+
     public override func mouseDown(with theEvent: NSEvent) {
         super.mouseDown(with: theEvent)
-        mouseClickChange(convert(theEvent.locationInWindow, from: nil))
+        mouseClickChange(mouseLocation(from: theEvent))
     }
 
     public override func scrollWheel(with theEvent: NSEvent) {
         guard preventScrolling else {
             super.scrollWheel(with: theEvent)
-            mouseMoveTriggeredChange(convert(theEvent.locationInWindow, from: nil), theEvent.modifierFlags)
+            mouseMoveTriggeredChange(mouseLocation(from: theEvent), theEvent.modifierFlags)
             return
         }
         nextResponder?.scrollWheel(with: theEvent)
-        mouseMoveTriggeredChange(convert(theEvent.locationInWindow, from: nil), theEvent.modifierFlags)
+        mouseMoveTriggeredChange(mouseLocation(from: theEvent), theEvent.modifierFlags)
     }
 
     public override func mouseMoved(with theEvent: NSEvent) {
         super.mouseMoved(with: theEvent)
-        mouseMoveTriggeredChange(convert(theEvent.locationInWindow, from: nil), theEvent.modifierFlags)
+        mouseMoveTriggeredChange(mouseLocation(from: theEvent), theEvent.modifierFlags)
     }
 
     public override func mouseDragged(with theEvent: NSEvent) {
         super.mouseDragged(with: theEvent)
-        mouseMoveTriggeredChange(convert(theEvent.locationInWindow, from: nil), theEvent.modifierFlags)
+        mouseMoveTriggeredChange(mouseLocation(from: theEvent), theEvent.modifierFlags)
     }
 }
 
@@ -198,11 +204,5 @@ extension WKWebView {
     /// So everytime you try to access it, it creates a copy of it, which is most likely not what we want.
     var configurationWithoutMakingCopy: WKWebViewConfiguration {
         (self as? BeamWebView)?.currentConfiguration ?? configuration
-    }
-
-    // Use JS to redirect the page without adding a history entry
-    func replaceLocation(with url: URL) {
-        let safeUrl = url.absoluteString.replacingOccurrences(of: "'", with: "%27")
-        evaluateJavaScript("location.replace('\(safeUrl)')")
     }
 }
