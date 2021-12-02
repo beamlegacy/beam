@@ -67,12 +67,12 @@ La recopie vidéo est également au menu depuis le centre de contrôle de l'appa
             expect(matches[0].url) == "https://macg.co"
         }
 
-        // Prefix match on last token - anyToken match
-        searchHistory(db, query: "max pho") { matches in
+        // Prefix match on last token - allTokens match
+        searchHistory(db, query: "maximum pho") { matches in
             expect(matches.count) == 1
             expect(matches[0].url) == "https://macg.co"
         }
-        searchHistory(db, query: "max nothing") { matches in
+        searchHistory(db, query: "max pho") { matches in
             expect(matches.count) == 0
         }
 

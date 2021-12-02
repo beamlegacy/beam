@@ -751,7 +751,7 @@ extension GRDBDatabase {
                        prefixLast: Bool = true,
                        enabledFrecencyParam: FrecencyParamKey? = nil,
                        completion: @escaping (Result<[HistorySearchResult], Error>) -> Void) {
-        guard var pattern = FTS3Pattern(matchingAnyTokenIn: query) else {
+        guard var pattern = FTS3Pattern(matchingAllTokensIn: query) else {
             completion(.failure(ReadError.invalidFTSPattern))
             return
         }
