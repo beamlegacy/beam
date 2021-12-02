@@ -157,10 +157,10 @@ public class DocumentManager: NSObject {
         return parseDocumentBody(document)
     }
 
-    func fetchOrCreate(title: String) -> DocumentStruct? {
+    func fetchOrCreate(_ title: String, id: UUID = UUID(), deletedAt: Date?) -> DocumentStruct? {
         checkThread()
         do {
-            let document = try fetchOrCreateWithTitle(title)
+            let document: Document = try fetchOrCreate(title, id: id, deletedAt: deletedAt)
             return parseDocumentBody(document)
         } catch {
             Logger.shared.logError(error.localizedDescription, category: .coredata)
@@ -811,12 +811,12 @@ extension DocumentManager {
 
 // For tests
 extension DocumentManager {
-    func create(title: String) -> DocumentStruct? {
+    func create(title: String, deletedAt: Date?) -> DocumentStruct? {
         checkThread()
         var result: DocumentStruct?
 
         do {
-            let document: Document = try create(id: UUID(), title: title)
+            let document: Document = try create(id: UUID(), title: title, deletedAt: nil)
             result = parseDocumentBody(document)
         } catch {
             Logger.shared.logError(error.localizedDescription, category: .coredata)
@@ -943,13 +943,14 @@ extension DocumentManager {
         }
     }
 
-    func create(id: UUID, title: String? = nil) throws -> Document {
+    func create(id: UUID, title: String? = nil, deletedAt: Date?) throws -> Document {
         checkThread()
         let document = Document(context: context)
         document.id = id
         document.database_id = DatabaseManager.defaultDatabase.id
         document.version = 0
         document.document_type = DocumentType.note.rawValue
+        document.deleted_at = deletedAt
         if let title = title {
             document.title = title
         }
@@ -1042,20 +1043,21 @@ extension DocumentManager {
         return try fetchFirst(filters: [.id(id), .includeDeleted, .allDatabases])
     }
 
-    func fetchOrCreateWithId(_ id: UUID) throws -> Document {
+    func fetchOrCreate(_ id: UUID, title: String, deletedAt: Date?) throws -> Document {
         checkThread()
-        let document = try ((try? fetchWithId(id)) ?? (try create(id: id)))
+        let document = try ((try? fetchWithId(id)) ?? (try create(id: id, title: title, deletedAt: deletedAt)))
+        return document
+    }
+
+    func fetchOrCreate(_ title: String, id: UUID? = nil, deletedAt: Date?) throws -> Document {
+        checkThread()
+        let document = try ((try? fetchWithTitle(title)) ?? (try create(id: id ?? UUID(), title: title, deletedAt: deletedAt)))
         return document
     }
 
     func fetchWithTitle(_ title: String) throws -> Document? {
         checkThread()
         return try fetchFirst(filters: [.title(title)], sortingKey: .title(true))
-    }
-
-    func fetchOrCreateWithTitle(_ title: String) throws -> Document {
-        checkThread()
-        return try ((try? fetchFirst(filters: [.title(title)])) ?? (try create(id: UUID(), title: title)))
     }
 
     func fetchWithJournalDate(_ date: String) -> Document? {

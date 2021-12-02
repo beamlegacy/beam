@@ -14,7 +14,7 @@ extension DocumentManager {
             .then(on: backgroundQueue) { _ -> Promise<DocumentStruct> in
                 let documentManager = DocumentManager()
                 return try documentManager.context.performAndWait {
-                    let document: Document = try documentManager.create(id: id, title: title)
+                    let document: Document = try documentManager.create(id: id, title: title, deletedAt: nil)
                     return .value(documentManager.parseDocumentBody(document))
                 }
             }
@@ -26,7 +26,7 @@ extension DocumentManager {
                 let documentManager = DocumentManager()
                 return documentManager.context.performAndWait {
                     do {
-                        let document = try documentManager.fetchOrCreateWithTitle(title)
+                        let document: Document = try documentManager.fetchOrCreate(title, deletedAt: nil)
                         return .value(documentManager.parseDocumentBody(document))
                     } catch {
                         return Promise<DocumentStruct>(error: error)
@@ -53,7 +53,7 @@ extension DocumentManager {
 
                     guard !cancelme else { throw PMKError.cancelled }
 
-                    let document = try documentManager.fetchOrCreateWithId(documentStruct.id)
+                    let document: Document = try documentManager.fetchOrCreate(documentStruct.id, title: documentStruct.title, deletedAt: documentStruct.deletedAt)
                     document.update(documentStruct)
                     document.data = documentStruct.data
                     document.updated_at = BeamDate.now

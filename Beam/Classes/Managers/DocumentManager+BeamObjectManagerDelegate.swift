@@ -85,12 +85,17 @@ extension DocumentManager: BeamObjectManagerDelegate {
             var changed = false
 
             for var document in documents {
-                guard var localDocument = try? fetchOrCreateWithId(document.id) else {
+                let fakeDate = Date.distantPast
+                guard var localDocument: Document = try? fetchOrCreate(document.id, title: document.title, deletedAt: fakeDate) else {
                     Logger.shared.logError("Received object \(document.titleAndId), but could't create it localy, skip",
                                            category: .documentNetwork)
                     continue
                 }
 
+                // We may have used a fake date to make sure we could create the document, let's restore it to it's corect date before other modifications to make it sure we can save it later:
+                if localDocument.deleted_at == fakeDate {
+                    localDocument.deleted_at = document.deletedAt
+                }
                 guard !self.isEqual(localDocument, to: document) else { continue }
 
                 if document.checksum == localDocument.beam_object_previous_checksum &&
@@ -176,7 +181,7 @@ extension DocumentManager: BeamObjectManagerDelegate {
                         case 1002:
                             Logger.shared.logWarning("Version \(localDocument.version) is higher than \(document.version)",
                                                      category: .documentNetwork)
-                            localDocument = try fetchOrCreateWithId(document.id)
+                        localDocument = try fetchOrCreate(document.id, title: document.title, deletedAt: document.deletedAt)
                             Logger.shared.logWarning("After reload: \(localDocument.version)",
                                                      category: .documentNetwork)
                         case 1003:
@@ -295,7 +300,7 @@ extension DocumentManager: BeamObjectManagerDelegate {
 
         return try documentManager.saveDocumentQueue.sync {
             // Merging might fail, in such case we send the remote version of the document
-            let document = try documentManager.fetchOrCreateWithId(documentStruct.id)
+            let document: Document = try documentManager.fetchOrCreate(documentStruct.id, title: documentStruct.title, deletedAt: documentStruct.deletedAt)
             if let beam_api_data = document.beam_api_data,
                let data = BeamElement.threeWayMerge(ancestor: beam_api_data,
                                                     input1: documentStruct.data,
