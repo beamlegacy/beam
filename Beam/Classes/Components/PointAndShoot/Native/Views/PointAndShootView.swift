@@ -68,6 +68,7 @@ struct PointAndShootView: View {
 
                     RoundedRectangle(cornerRadius: isRect ? padding : 20, style: .continuous)
                         .fill(background)
+                        .accessibility(identifier: "PointFrame")
                         .animation(.easeInOut(duration: 0.2), value: background)
                         .scaleEffect(scale)
                         .animation(.spring(response: 0.2, dampingFraction: 0.5, blendDuration: 0.2), value: scale)
@@ -95,7 +96,6 @@ struct PointAndShootView: View {
                         })
                         .pointAndShootFrameOffset(pns, target: target)
                         .allowsHitTesting(!pns.isAltKeyDown)
-                        .accessibility(identifier: "PointFrame")
                 }
             } else {
                 // MARK: - Selecting
