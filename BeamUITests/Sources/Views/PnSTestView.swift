@@ -135,7 +135,7 @@ class PnSTestView: BaseView {
         // Delay because of animations
         sleep(1)
         /// Hover element to make it active
-        let referenceElementMiddle = self.app.webViews.staticTexts[searchText].coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        let referenceElementMiddle = self.app.webViews.staticTexts[searchText].firstMatch.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
         referenceElementMiddle.hover()
 
         /// Assert one element exists
@@ -144,7 +144,7 @@ class PnSTestView: BaseView {
 
         // Expect element to be correctly positioned
         let PnsFrame = self.app.otherElements.matching(identifier: identifier).element.frame
-        let referenceElement = self.app.webViews.staticTexts[searchText].frame
+        let referenceElement = self.app.webViews.staticTexts[searchText].firstMatch.frame
         
         /// Assert X location
         XCTAssertEqual(PnsFrame.origin.x, referenceElement.origin.x, accuracy: 10, message)
