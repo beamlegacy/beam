@@ -11,7 +11,7 @@ extension DocumentManager {
         backgroundQueue.async { [unowned self] in
             let documentManager = DocumentManager()
             do {
-                let document = try documentManager.fetchOrCreateWithTitle(title)
+                let document: Document = try documentManager.fetchOrCreate(title, deletedAt: nil)
                 completion?(self.parseDocumentBody(document))
             } catch {
                 completion?(nil)
@@ -23,7 +23,7 @@ extension DocumentManager {
         backgroundQueue.async { [unowned self] in
             let documentManager = DocumentManager()
             do {
-                let document: Document = try documentManager.create(id: id, title: title)
+                let document: Document = try documentManager.create(id: id, title: title, deletedAt: nil)
                 completion?(.success(self.parseDocumentBody(document)))
             } catch {
                 completion?(.failure(error))
@@ -72,7 +72,7 @@ extension DocumentManager {
                     let documentManager = DocumentManager()
 
                     do {
-                        let document = try documentManager.fetchOrCreateWithId(documentStruct.id)
+                        let document: Document = try documentManager.fetchOrCreate(documentStruct.id, title: documentStruct.title, deletedAt: documentStruct.deletedAt)
                         Logger.shared.logDebug("Fetched \(remoteDocumentStruct.title) {\(remoteDocumentStruct.id)} with previous checksum \(remoteDocumentStruct.checksum ?? "-")",
                                                category: .documentNetwork)
                         document.beam_object_previous_checksum = remoteDocumentStruct.checksum
@@ -172,7 +172,7 @@ extension DocumentManager {
             let documentManager = DocumentManager()
 
             do {
-                let document = try documentManager.fetchOrCreateWithId(documentStruct.id)
+                let document: Document = try documentManager.fetchOrCreate(documentStruct.id, title: documentStruct.title, deletedAt: documentStruct.deletedAt)
                 document.update(documentStruct)
                 document.data = documentStruct.data
                 document.updated_at = BeamDate.now

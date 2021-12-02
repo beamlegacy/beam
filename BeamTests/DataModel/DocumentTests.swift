@@ -84,7 +84,7 @@ class DocumentTests: QuickSpec {
 
         describe("MD5") {
             it("generates the same MD5 as Ruby") {
-                let document: Document = try sut.create(id: UUID(), title: "foobar")
+                let document: Document = try sut.create(id: UUID(), title: "foobar", deletedAt: nil)
                 document.data = "foobar".data(using: .utf8)
                 // Calculated from Ruby with Digest::MD5.hexdigest "foobar"
                 expect(document.data?.MD5).to(equal("3858f62230ac3c915f300c664312c63f"))
@@ -115,8 +115,8 @@ class DocumentTests: QuickSpec {
                 let id = UUID()
                 let title = String.randomTitle()
 
-                let document1: Document = try sut.create(id: UUID(), title: title)
-                let document2: Document = try sut.create(id: UUID(), title: title + "2")
+                let document1: Document = try sut.create(id: UUID(), title: title, deletedAt: nil)
+                let document2: Document = try sut.create(id: UUID(), title: title + "2", deletedAt: nil)
 
                 document1.id = id
                 document2.id = id
@@ -137,7 +137,7 @@ class DocumentTests: QuickSpec {
                 let title2 = String.randomTitle()
                 let title3 = String.randomTitle()
 
-                let document1: Document = try sut.create(id: UUID(), title: title)
+                let document1: Document = try sut.create(id: UUID(), title: title, deletedAt: nil)
                 expect { try CoreDataManager.save(mainContext) }.toNot(throwError())
                 var document2: Document!
                 backgroundContext.performAndWait {
