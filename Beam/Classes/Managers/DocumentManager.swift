@@ -816,7 +816,7 @@ extension DocumentManager {
         var result: DocumentStruct?
 
         do {
-            let document: Document = try create(id: UUID(), title: title, deletedAt: nil)
+            let document: Document = try create(id: UUID(), title: title, deletedAt: deletedAt)
             result = parseDocumentBody(document)
         } catch {
             Logger.shared.logError(error.localizedDescription, category: .coredata)
