@@ -476,7 +476,7 @@ class DocumentManagerTests: QuickSpec {
         describe(".create()") {
             it("creates document") {
                 let title = String.randomTitle()
-                let docStruct = sut.create(title: title)!
+                let docStruct = sut.create(title: title, deletedAt: nil)!
                 expect(docStruct.title) == title
 
                 let count = sut.count(filters: [.databaseId(docStruct.databaseId), .id(docStruct.id)])
@@ -486,9 +486,9 @@ class DocumentManagerTests: QuickSpec {
 
             it("fails creating document") {
                 let title = String.randomTitle()
-                _ = sut.create(title: title)!
+                _ = sut.create(title: title, deletedAt: nil)!
 
-                let failDocStruct: DocumentStruct? = sut.create(title: title)
+                let failDocStruct: DocumentStruct? = sut.create(title: title, deletedAt: nil)
                 expect(failDocStruct).to(beNil())
             }
 
@@ -549,7 +549,7 @@ class DocumentManagerTests: QuickSpec {
                 it("creates document") {
                     waitUntil(timeout: .seconds(10)) { done in
                         sut
-                            .create(title: title)
+                            .create(id: UUID(), title: title)
                             .then { docStruct in
                                 expect(docStruct.title).to(equal(title))
                                 done()
@@ -561,7 +561,7 @@ class DocumentManagerTests: QuickSpec {
                 it("creates a document and execute the proper thread") {
                     waitUntil(timeout: .seconds(10)) { done in
                         sut
-                            .create(title: title)
+                            .create(id: UUID(), title: title)
                             .then { docStruct in
                                 sut.backgroundQueue.sync {
                                     expect(docStruct.title).to(equal(title))
@@ -577,7 +577,7 @@ class DocumentManagerTests: QuickSpec {
                     docStruct = helper.saveLocally(docStruct)
                     waitUntil(timeout: .seconds(10)) { done in
                         sut
-                            .create(title: title)
+                            .create(id: UUID(), title: title)
                             .then { docStruct in
                                 fail("Shouldn't happen")
                                 done()
@@ -608,10 +608,10 @@ class DocumentManagerTests: QuickSpec {
         describe(".fetchOrCreate()") {
             it("creates the document once") {
                 let title = String.randomTitle()
-                let documentStruct: DocumentStruct? = sut.fetchOrCreate(title: title)
+                let documentStruct: DocumentStruct? = sut.fetchOrCreate(title, deletedAt: nil)
                 expect(documentStruct?.title).to(equal(title))
 
-                let documentStruct2: DocumentStruct? = sut.fetchOrCreate(title: title)
+                let documentStruct2: DocumentStruct? = sut.fetchOrCreate(title, deletedAt: nil)
                 expect(documentStruct2?.title).to(equal(title))
 
                 expect(documentStruct?.id).toNot(beNil())
@@ -755,7 +755,7 @@ class DocumentManagerTests: QuickSpec {
                 let title = String.randomTitle()
 
                 //swiftlint:disable:next force_cast
-                docStruct = sut.create(title: title)!
+                docStruct = sut.create(title: title, deletedAt: nil)!
                 expect(docStruct.version).to(equal(0))
                 let document = "whatever binary data"
                 //swiftlint:disable:next force_try
@@ -812,7 +812,7 @@ class DocumentManagerTests: QuickSpec {
                 let title = String.randomTitle()
 
                 //swiftlint:disable:next force_cast
-                docStruct = sut.create(title: title)!
+                docStruct = sut.create(title: title, deletedAt: nil)!
                 expect(docStruct.version).to(equal(0))
 
                 let document = "whatever binary data"

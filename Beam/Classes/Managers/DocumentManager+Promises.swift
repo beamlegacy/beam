@@ -9,12 +9,12 @@ import Promises
  */
 
 extension DocumentManager {
-    func create(title: String) -> Promises.Promise<DocumentStruct> {
+    func create(id: UUID, title: String) -> Promises.Promise<DocumentStruct> {
         coreDataManager.background()
             .then(on: backgroundQueue) { _ in
                 let documentManager = DocumentManager()
                 return try documentManager.context.performAndWait {
-                    let document: Document = try documentManager.create(id: UUID(), title: title)
+                    let document: Document = try documentManager.create(id: id, title: title, deletedAt: nil)
                     return Promise(self.parseDocumentBody(document))
                 }
             }
@@ -25,7 +25,7 @@ extension DocumentManager {
             .then(on: backgroundQueue) { _ in
                 let documentManager = DocumentManager()
                 return try documentManager.context.performAndWait {
-                    let document = try documentManager.fetchOrCreateWithTitle(title)
+                    let document: Document = try documentManager.fetchOrCreate(title, deletedAt: nil)
                     return Promise(self.parseDocumentBody(document))
                 }
             }
@@ -49,7 +49,7 @@ extension DocumentManager {
 
                 let documentManager = DocumentManager()
                 return try documentManager.context.performAndWait {
-                    let document = try documentManager.fetchOrCreateWithId(documentStruct.id)
+                    let document: Document = try documentManager.fetchOrCreate(documentStruct.id, title: documentStruct.title, deletedAt: documentStruct.deletedAt)
                     document.update(documentStruct)
                     document.data = documentStruct.data
                     document.updated_at = BeamDate.now
