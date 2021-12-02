@@ -92,7 +92,7 @@ extension DocumentManager: BeamObjectManagerDelegate {
                     continue
                 }
 
-                // We may have used a fake date to make sure we could create the document, let's restore it to it's corect date before other modifications to make it sure we can save it later:
+                // We may have used a fake date to make sure we could create the document, let's restore it to it's correct date before other modifications to make it sure we can save it later:
                 if localDocument.deleted_at == fakeDate {
                     localDocument.deleted_at = document.deletedAt
                 }
