@@ -55,14 +55,12 @@ struct OmniBar: View {
             !autocompleteManager.autocompleteResults.isEmpty &&
             autocompleteManager.searchQuery != browserTabsManager.currentTab?.url?.absoluteString
     }
-    private var showDestinationNotePicker: Bool {
-        state.mode == .web && browserTabsManager.currentTab != nil
-    }
+
     private var showPivotButton: Bool {
         state.hasBrowserTabs && (state.useOmniboxV2 || !state.destinationCardIsFocused)
     }
     private var hasRightActions: Bool {
-        state.useOmniboxV2 || showPivotButton || showDestinationNotePicker
+        state.useOmniboxV2 || showPivotButton
     }
     private var barShadowColor: Color {
         isAboveContent ? BeamColor.ToolBar.shadowTop.swiftUI : BeamColor.ToolBar.shadowTop.swiftUI.opacity(0.0)
@@ -218,17 +216,9 @@ struct OmniBar: View {
                             setIsEditing(true)
                         }).accessibilityIdentifier("nav-omnibox")
                     }
-                    if showDestinationNotePicker || showPivotButton {
-                        HStack(spacing: BeamSpacing._20) {
-                            if showDestinationNotePicker, let currentTab = browserTabsManager.currentTab {
-                                DestinationNotePicker(tab: currentTab)
-                                    .frame(height: 32, alignment: .top)
-                            }
-                            if showPivotButton {
-                                OmniboxV2ToolbarButton(icon: state.mode == .web ? "nav-pivot_card" : "nav-pivot_web", action: toggleMode)
-                                    .accessibilityIdentifier(state.mode == .web ? "pivot-card" : "pivot-web")
-                            }
-                        }
+                    if showPivotButton {
+                        OmniboxV2ToolbarButton(icon: state.mode == .web ? "nav-pivot_card" : "nav-pivot_web", action: toggleMode)
+                            .accessibilityIdentifier(state.mode == .web ? "pivot-card" : "pivot-web")
                     }
                 }
                 .padding(.trailing, state.useOmniboxV2 ? 14 : BeamSpacing._100)
