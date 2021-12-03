@@ -224,11 +224,6 @@
 		41855A3A25D1334F00DA49DC /* BeamCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41855A3925D1334F00DA49DC /* BeamCollectionView.swift */; };
 		41A969FF2581394300E6594B /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41A969FE2581394300E6594B /* Configuration.swift */; };
 		41B4277B25E52DCA00A8243F /* Localizable.stringsdict in Resources */ = {isa = PBXBuildFile; fileRef = 41B4277A25E52DCA00A8243F /* Localizable.stringsdict */; };
-		41D169A625DC07260018E5F2 /* Inter-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 41D169A125DC07250018E5F2 /* Inter-Bold.otf */; };
-		41D169A725DC07260018E5F2 /* Inter-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 41D169A225DC07260018E5F2 /* Inter-Regular.otf */; };
-		41D169A825DC07260018E5F2 /* Inter-SemiBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 41D169A325DC07260018E5F2 /* Inter-SemiBold.otf */; };
-		41D169A925DC07260018E5F2 /* Inter-Italic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 41D169A425DC07260018E5F2 /* Inter-Italic.otf */; };
-		41D169AA25DC07260018E5F2 /* Inter-Medium.otf in Resources */ = {isa = PBXBuildFile; fileRef = 41D169A525DC07260018E5F2 /* Inter-Medium.otf */; };
 		41FAD34F25E5742800D78B36 /* CALayer+Animation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41FAD34E25E5742800D78B36 /* CALayer+Animation.swift */; };
 		4E60970F26C554CD00F90260 /* SuggestedSourcesUpdaterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E60970E26C554CD00F90260 /* SuggestedSourcesUpdaterTests.swift */; };
 		4E6097C826CEA93700F90260 /* ActiveSources.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E6097A326CE8A6F00F90260 /* ActiveSources.swift */; };
@@ -744,6 +739,12 @@
 		A52596E7273EB87F004B27E4 /* OnboardingProfileCreationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52596E6273EB87F004B27E4 /* OnboardingProfileCreationView.swift */; };
 		A52596E9273EB8AC004B27E4 /* OnboardingImportsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52596E8273EB8AC004B27E4 /* OnboardingImportsView.swift */; };
 		A52596EB273EB8FB004B27E4 /* OnboardingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52596EA273EB8FB004B27E4 /* OnboardingManager.swift */; };
+		A52A559027592E9A002D0C99 /* Inter-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = A52A558C27592E99002D0C99 /* Inter-Regular.otf */; };
+		A52A559127592E9A002D0C99 /* Inter-Medium.otf in Resources */ = {isa = PBXBuildFile; fileRef = A52A558D27592E99002D0C99 /* Inter-Medium.otf */; };
+		A52A559227592E9A002D0C99 /* Inter-SemiBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = A52A558E27592E99002D0C99 /* Inter-SemiBold.otf */; };
+		A52A559327592E9A002D0C99 /* Inter-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = A52A558F27592E9A002D0C99 /* Inter-Bold.otf */; };
+		A52A559627592EB7002D0C99 /* Inter-MediumItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = A52A559427592EB7002D0C99 /* Inter-MediumItalic.otf */; };
+		A52A559727592EB7002D0C99 /* Inter-Italic.otf in Resources */ = {isa = PBXBuildFile; fileRef = A52A559527592EB7002D0C99 /* Inter-Italic.otf */; };
 		A52B5017271D72FB0078670C /* PinnedBrowserTabsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52B5016271D72FB0078670C /* PinnedBrowserTabsManager.swift */; };
 		A52B5022271DCB950078670C /* BrowserTabBarDragModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52B5021271DCB950078670C /* BrowserTabBarDragModel.swift */; };
 		A52BFDF72608D6710028D3F3 /* BeamFont.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52BFDF62608D6710028D3F3 /* BeamFont.swift */; };
@@ -1344,11 +1345,6 @@
 		418EA94125D696EA005894AA /* HyperlinkFormatterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HyperlinkFormatterView.swift; sourceTree = "<group>"; };
 		41A969FE2581394300E6594B /* Configuration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
 		41B4277A25E52DCA00A8243F /* Localizable.stringsdict */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; path = Localizable.stringsdict; sourceTree = "<group>"; };
-		41D169A125DC07250018E5F2 /* Inter-Bold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-Bold.otf"; sourceTree = "<group>"; };
-		41D169A225DC07260018E5F2 /* Inter-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-Regular.otf"; sourceTree = "<group>"; };
-		41D169A325DC07260018E5F2 /* Inter-SemiBold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-SemiBold.otf"; sourceTree = "<group>"; };
-		41D169A425DC07260018E5F2 /* Inter-Italic.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-Italic.otf"; sourceTree = "<group>"; };
-		41D169A525DC07260018E5F2 /* Inter-Medium.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-Medium.otf"; sourceTree = "<group>"; };
 		41FAD34E25E5742800D78B36 /* CALayer+Animation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CALayer+Animation.swift"; sourceTree = "<group>"; };
 		4E60970E26C554CD00F90260 /* SuggestedSourcesUpdaterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestedSourcesUpdaterTests.swift; sourceTree = "<group>"; };
 		4E6097A326CE8A6F00F90260 /* ActiveSources.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveSources.swift; sourceTree = "<group>"; };
@@ -1847,6 +1843,12 @@
 		A52596E6273EB87F004B27E4 /* OnboardingProfileCreationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingProfileCreationView.swift; sourceTree = "<group>"; };
 		A52596E8273EB8AC004B27E4 /* OnboardingImportsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingImportsView.swift; sourceTree = "<group>"; };
 		A52596EA273EB8FB004B27E4 /* OnboardingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingManager.swift; sourceTree = "<group>"; };
+		A52A558C27592E99002D0C99 /* Inter-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-Regular.otf"; sourceTree = "<group>"; };
+		A52A558D27592E99002D0C99 /* Inter-Medium.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-Medium.otf"; sourceTree = "<group>"; };
+		A52A558E27592E99002D0C99 /* Inter-SemiBold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-SemiBold.otf"; sourceTree = "<group>"; };
+		A52A558F27592E9A002D0C99 /* Inter-Bold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-Bold.otf"; sourceTree = "<group>"; };
+		A52A559427592EB7002D0C99 /* Inter-MediumItalic.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-MediumItalic.otf"; sourceTree = "<group>"; };
+		A52A559527592EB7002D0C99 /* Inter-Italic.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-Italic.otf"; sourceTree = "<group>"; };
 		A52B5016271D72FB0078670C /* PinnedBrowserTabsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinnedBrowserTabsManager.swift; sourceTree = "<group>"; };
 		A52B5021271DCB950078670C /* BrowserTabBarDragModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserTabBarDragModel.swift; sourceTree = "<group>"; };
 		A52BFDF62608D6710028D3F3 /* BeamFont.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamFont.swift; sourceTree = "<group>"; };
@@ -3104,11 +3106,12 @@
 			isa = PBXGroup;
 			children = (
 				A52BFDF62608D6710028D3F3 /* BeamFont.swift */,
-				41D169A125DC07250018E5F2 /* Inter-Bold.otf */,
-				41D169A425DC07260018E5F2 /* Inter-Italic.otf */,
-				41D169A525DC07260018E5F2 /* Inter-Medium.otf */,
-				41D169A225DC07260018E5F2 /* Inter-Regular.otf */,
-				41D169A325DC07260018E5F2 /* Inter-SemiBold.otf */,
+				A52A558C27592E99002D0C99 /* Inter-Regular.otf */,
+				A52A558D27592E99002D0C99 /* Inter-Medium.otf */,
+				A52A558E27592E99002D0C99 /* Inter-SemiBold.otf */,
+				A52A558F27592E9A002D0C99 /* Inter-Bold.otf */,
+				A52A559527592EB7002D0C99 /* Inter-Italic.otf */,
+				A52A559427592EB7002D0C99 /* Inter-MediumItalic.otf */,
 			);
 			path = Fonts;
 			sourceTree = "<group>";
@@ -5234,6 +5237,7 @@
 				BAA672842544E82A5782C2A7 /* BeamWindowDecorator.js in Resources */,
 				8ADD06082729657D004C3EC9 /* WebPositionsUI.ts in Resources */,
 				8AC643D1271DA9FC00DDC899 /* navigation_prod.js in Resources */,
+				A52A559227592E9A002D0C99 /* Inter-SemiBold.otf in Resources */,
 				8AC643CF271DA98B00DDC899 /* pns_prod.js in Resources */,
 				5224CD462685FF7E00D4179E /* update_beam_objects.graphql in Resources */,
 				8ADD05FE2729657D004C3EC9 /* WebPositionsUI_native.ts in Resources */,
@@ -5252,7 +5256,6 @@
 				8AD2636D26F4A0480074D673 /* UITests-Password.html in Resources */,
 				52F4E4BA264185FC0067B017 /* identities.graphql in Resources */,
 				8ADD05FF2729657D004C3EC9 /* WebPositionsUIMock.ts in Resources */,
-				41D169A725DC07260018E5F2 /* Inter-Regular.otf in Resources */,
 				8AD2636526F4A0480074D673 /* PointAndShootUI_native-Benchmark.test.bench in Resources */,
 				7521342B26F4A00D00BBBD6D /* GenericErrorPage.html in Resources */,
 				56A5BD3725CCAFA400ED7C50 /* english.stopwords in Resources */,
@@ -5262,14 +5265,10 @@
 				96C5FE44268F4D5700889B5E /* Geolocation.js in Resources */,
 				52F4E4B42641844E0067B017 /* delete_identity.graphql in Resources */,
 				418171F62581107C00317ED8 /* sign_in.graphql in Resources */,
-				41D169A925DC07260018E5F2 /* Inter-Italic.otf in Resources */,
 				418170FF2581060A00317ED8 /* Colors.xcassets in Resources */,
-				41D169A825DC07260018E5F2 /* Inter-SemiBold.otf in Resources */,
 				52F4E49826417EF00067B017 /* create_identity.graphql in Resources */,
 				8AD2636F26F4A0480074D673 /* audio.mp3 in Resources */,
-				41D169AA25DC07260018E5F2 /* Inter-Medium.otf in Resources */,
 				52F4E4A226417F210067B017 /* sign_in_with_provider.graphql in Resources */,
-				41D169A625DC07260018E5F2 /* Inter-Bold.otf in Resources */,
 				75A1E5B52719A7DA000824B1 /* topdomains_v0.1.txt in Resources */,
 				520BC40126D7B02200A82966 /* subscription_beam_objects_updated.graphql in Resources */,
 				A58645E626FB12DC00D7FF86 /* WebViewFocusHandling.js in Resources */,
@@ -5280,10 +5279,12 @@
 				8AD2636926F4A0480074D673 /* UITests-2.html in Resources */,
 				56A5BD3125CC680E00ED7C50 /* url.stopwords in Resources */,
 				41B4277B25E52DCA00A8243F /* Localizable.stringsdict in Resources */,
+				A52A559727592EB7002D0C99 /* Inter-Italic.otf in Resources */,
 				A5F47EC826F8D718004B7CDE /* editor-publish.json in Resources */,
 				5224CD762685FFFC00D4179E /* beam_object_updated_at.graphql in Resources */,
 				8759678526FB903C0097C3CC /* UITests-Passwords.csv in Resources */,
 				8AD2637126F4A0480074D673 /* UITests-Playground.html in Resources */,
+				A52A559327592E9A002D0C99 /* Inter-Bold.otf in Resources */,
 				8ADD06072729657D004C3EC9 /* WebPositionsUI_web.ts in Resources */,
 				A515597A267786E1006F6D6F /* MediaPlayer.js in Resources */,
 				33BBA505274423E200FE92DB /* editor-embed_collapse.json in Resources */,
@@ -5295,6 +5296,7 @@
 				8AD2636826F4A0480074D673 /* UITests-Alerts.html in Resources */,
 				8ADD06012729657D004C3EC9 /* WebPositions.js in Resources */,
 				8AD2637226F4A0480074D673 /* beam-logo-test.png in Resources */,
+				A52A559027592E9A002D0C99 /* Inter-Regular.otf in Resources */,
 				3355999D26CBF11E00F52C23 /* SearchWebPage.js in Resources */,
 				A5F47ECA26F8D71C004B7CDE /* editor-unpublish.json in Resources */,
 				5224CD602685FFB500D4179E /* delete_all_beam_objects.graphql in Resources */,
@@ -5310,11 +5312,13 @@
 				8AD2636C26F4A0480074D673 /* UITests-4.html in Resources */,
 				522F149327033DE000EDF2F6 /* beam_object_checksums.graphql in Resources */,
 				BAA675AE9C103046AC022CBA /* .sassrc in Resources */,
+				A52A559127592E9A002D0C99 /* Inter-Medium.otf in Resources */,
 				5224CD522685FF9B00D4179E /* update_beam_object.graphql in Resources */,
 				BAA67B681D12191FE57E7807 /* PopupUI_web.scss in Resources */,
 				8AD2636726F4A0480074D673 /* PointAndShootUI_native-Benchmark.test.ts in Resources */,
 				33BBA507274423E700FE92DB /* editor-embed_expand.json in Resources */,
 				1A560C30E74FFFB97685C043 /* PointAndShootHelper.ts in Resources */,
+				A52A559627592EB7002D0C99 /* Inter-MediumItalic.otf in Resources */,
 				BAA676CC6D40AAD13AA19B2A /* BeamTypes.ts in Resources */,
 				BAA67C93BB2CDDDD22791FA2 /* Frames.test.ts in Resources */,
 				BAA67935127F5C704ED1B29A /* BeamKeyEvent.ts in Resources */,
