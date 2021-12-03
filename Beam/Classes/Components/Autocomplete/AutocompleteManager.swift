@@ -19,6 +19,7 @@ class AutocompleteManager: ObservableObject {
 
     private var textChangeIsFromSelection = false
     private var replacedProposedText: String?
+    private var autocompleteResultsAreFromEmptyQuery = false
 
     @Published var searchQuerySelectedRange: Range<Int>?
     @Published var autocompleteResults = [AutocompleteResult]()
@@ -101,6 +102,7 @@ class AutocompleteManager: ObservableObject {
                 let (finalResults, _) = self.mergeAndSortPublishersResults(publishersResults: publishersResults, for: searchText)
                 self.logAutocompleteResultFinished(for: searchText, finalResults: finalResults, startedAt: startChrono)
 
+                self.autocompleteResultsAreFromEmptyQuery = searchText.isEmpty
                 self.autocompleteResults = finalResults
                 if !isRemovingCharacters {
                     self.automaticallySelectFirstResultIfNeeded(withResults: finalResults, searchText: searchText)
@@ -252,16 +254,17 @@ extension AutocompleteManager {
         resetAutocompleteSelection(resetText: false)
     }
 
-    func cancelAutocomplete() {
+    func clearAutocompleteResults() {
         resetAutocompleteSelection()
         autocompleteResults = []
+        autocompleteResultsAreFromEmptyQuery = false
         stopCurrentCompletionWork()
     }
 
-    func resetQuery(clearResults: Bool = true) {
+    func resetQuery() {
         setQuery("", updateAutocompleteResults: false)
-        if clearResults {
-            autocompleteResults = []
+        if !autocompleteResultsAreFromEmptyQuery {
+            clearAutocompleteResults()
         }
         stopCurrentCompletionWork()
     }
