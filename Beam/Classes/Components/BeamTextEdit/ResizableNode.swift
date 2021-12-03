@@ -13,8 +13,8 @@ class ResizableNode: ElementNode {
 
     var canBeResized = true {
         didSet {
-            if !canBeResized, let handle = layers["handle"], let handleLayer = handle.layer as? CAShapeLayer {
-                handleLayer.removeFromSuperlayer()
+            if !canBeResized {
+                removeLayer("handle")
             } else {
                 setupResizeHandleLayer()
             }
@@ -53,7 +53,9 @@ class ResizableNode: ElementNode {
 
     override var hover: Bool {
         didSet {
-            if let handle = layers["handle"], let handleLayer = handle.layer as? CAShapeLayer {
+            if let handle = layers["handle"],
+               let handleLayer = handle.layer as? CAShapeLayer {
+                guard !isResizing else { return }
                 handleLayer.opacity = hover ? 1.0 : 0.0
             }
             invalidate()
