@@ -164,7 +164,7 @@ class ClusteringManager: ObservableObject {
         return nil
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
+    // swiftlint:disable:next cyclomatic_complexity, function_body_length
     func getIdAndParent(tabToIndex: TabInformation) -> (UUID?, UUID?) {
         guard tabToIndex.isPinnedTab == false else {
             return (nil, nil)
@@ -172,6 +172,18 @@ class ClusteringManager: ObservableObject {
         var id = tabToIndex.currentTabTree?.current.link
         var parentId = tabToIndex.parentBrowsingNode?.link
         var parentTimeStamp = Date.distantPast
+        switch tabToIndex.currentTabTree?.origin {
+        case .linkFromNote(let noteName):
+            if let root = tabToIndex.currentTabTree?.root,
+               tabToIndex.parentBrowsingNode?.id == root.id,
+               let id = id,
+               let note = BeamNote.fetch(title: noteName) {
+                note.sources.add(urlId: id, noteId: note.id, type: .user, sessionId: self.sessionId, activeSources: self.activeSources)
+                self.addNote(note: note)
+            }
+        default:
+            break
+        }
         if let parent = tabToIndex.parentBrowsingNode,
            let lastEventType = parent.events.last?.type {
             if let lastEventTime = parent.events.last?.date {
@@ -336,7 +348,7 @@ class ClusteringManager: ObservableObject {
 
     func change(candidate: Int, weightNavigation: Double, weightText: Double, weightEntities: Double) {
         isClustering = true
-        cluster.changeCandidate(to: candidate, with: weightNavigation, with: weightText, with: weightEntities, activeSources: Array(Set(activeSources.activeSources.map({ $0.1 }).reduce([], +)))) { result in
+        cluster.changeCandidate(to: candidate, with: weightNavigation, with: weightText, with: weightEntities, activeSources: Array(Set(activeSources.urls))) { result in
             DispatchQueue.main.async {
                 self.isClustering = false
             }
