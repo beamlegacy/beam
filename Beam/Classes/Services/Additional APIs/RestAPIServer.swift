@@ -185,7 +185,6 @@ class RestAPIServer {
                 }
 
                 let jsonDecoder = JSONDecoder()
-                jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
                 guard let data = data else {
                     completion(.failure(RestAPIServer.Error.noDataReceived))
                     return
