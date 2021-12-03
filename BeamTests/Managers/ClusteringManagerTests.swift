@@ -134,6 +134,31 @@ class ClusteringManagerTests: XCTestCase {
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[3]).0) == nodes[4]?.link
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[3]).1) == nodes[1]?.link
     }
+    
+    /// Test that the when a page is opened through a link in a note the page is added as an active source for the session
+    /// (and that this doesn't happen for consequent pages)
+    func testGetIdAndParentLinkFromNote() throws {
+        // Start a new browsing tree and navigate to a page through a link in a note
+        let _ = BeamNote.create(title: notes[0].title)
+        let tree = BrowsingTree(.linkFromNote(noteName: notes[0].title))
+        var nodes = [tree.current]
+        tree.navigateTo(url: informations[0].url.string, title: documents[0].title, startReading: false, isLinkActivation: false, readCount: 400)
+        nodes.append(tree.current)
+        informations[0].currentTabTree = tree
+        informations[0].parentBrowsingNode = nodes[0]
+        expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[0]).0) == nodes[1]?.link
+        expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[0]).1).to(beNil())
+        expect(self.activeSources.activeSources) == [BeamNote.fetch(title: notes[0].title)!.id: [nodes[1]!.link]]
+        
+        // Navigate to second page from first page
+        tree.navigateTo(url: informations[1].url.string, title: nil, startReading: false, isLinkActivation: true, readCount: 400)
+        nodes.append(tree.current)
+        informations[1].currentTabTree = tree
+        informations[1].parentBrowsingNode = nodes[1]
+        expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[1]).0) == nodes[2]?.link
+        expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[1]).1) == nodes[1]?.link
+        expect(self.activeSources.activeSources) == [BeamNote.fetch(title: notes[0].title)!.id: [nodes[1]!.link]]
+    }
 
     /// Test that URLs that are not suggested for any note are extracted correctly for the pourposes of monitoring
     func testOrphanedUrls() throws {
