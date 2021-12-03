@@ -40,39 +40,34 @@ struct OmniboxV2CapsuleButton: View {
         return BeamColor.Corduroy.swiftUI
     }
 
-    private var font: Font {
-        if isSelected {
-            return BeamFont.medium(size: 11).swiftUI
-        }
-        return BeamFont.regular(size: 11).swiftUI
-    }
+    private let defaultFont = BeamFont.regular(size: 11).swiftUI
+    private let selectedFont = BeamFont.medium(size: 11).swiftUI
+    private let minHPadding = BeamSpacing._80
 
     var body: some View {
-        ZStack {
-            backgroundColor
-                .cornerRadius(6)
-            HStack(spacing: 0) {
-                Spacer(minLength: BeamSpacing._80)
-                Text(text)
-                    .lineLimit(1)
-                    .font(font)
-                    .foregroundColor(foregroundColor)
-                Spacer(minLength: BeamSpacing._80)
-            }
-        }
-        .frame(height: 28)
-        .cornerRadius(6)
-        .padding(0.5)
-        .overlay(
-            RoundedRectangle(cornerRadius: 6.5)
-                .strokeBorder(style: .init(lineWidth: 0.5)).foregroundColor(strokeColor)
-        )
-        .blendModeLightMultiplyDarkScreen()
-        .onHover { isHovering = $0 }
-        .onTouchDown { isPressed = $0 }
-        .simultaneousGesture(TapGesture().onEnded {
-            action?()
-        })
+        Text(text)
+            .font(defaultFont)
+            .opacity(isSelected ? 0 : 1) // To avoid different width when changing font, we use a shadow text + overlay to maintain layout
+            .lineLimit(1)
+            .padding(.horizontal, minHPadding)
+            .frame(height: 28)
+            .overlay(
+                isSelected ? Text(text).font(selectedFont).lineLimit(1).padding(.horizontal, minHPadding - 1) : nil
+            )
+            .foregroundColor(foregroundColor)
+            .background(backgroundColor)
+            .cornerRadius(6)
+            .padding(0.5)
+            .overlay(
+                RoundedRectangle(cornerRadius: 6.5)
+                    .strokeBorder(style: .init(lineWidth: 0.5)).foregroundColor(strokeColor)
+            )
+            .blendModeLightMultiplyDarkScreen()
+            .onHover { isHovering = $0 }
+            .onTouchDown { isPressed = $0 }
+            .simultaneousGesture(TapGesture().onEnded {
+                action?()
+            })
     }
 }
 

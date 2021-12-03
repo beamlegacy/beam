@@ -47,7 +47,7 @@ struct GlobalCenteringContainer<Content: View>: View {
 
     var body: some View {
         GeometryReader { geo in
-            UnderlyingSpacers(offsetX: globalCenteringOffsetX(containerGeo: containerGeometry, searchStackGeo: geo)) {
+            UnderlyingSpacers(offsetX: globalCenteringOffsetX(containerGeo: containerGeometry, searchStackGeo: geo), availableWidth: geo.size.width) {
                 content()
             }
         }
@@ -57,25 +57,56 @@ struct GlobalCenteringContainer<Content: View>: View {
 private struct UnderlyingSpacers<Content: View>: View {
     var content: () -> Content
     var offsetX: CGFloat
+    var availableWidth: CGFloat
 
+    @State private var contentSize: CGSize?
     private var debug = false // true to see the offset adjustement
 
-    init(offsetX: CGFloat, @ViewBuilder content: @escaping () -> Content) {
+    init(offsetX: CGFloat, availableWidth: CGFloat, @ViewBuilder content: @escaping () -> Content) {
         self.content = content
         self.offsetX = offsetX
+        self.availableWidth = availableWidth
+    }
+
+    private var freeSpace: CGFloat {
+        guard let contentSize = contentSize else {
+            return availableWidth
+        }
+        return max(0, availableWidth - contentSize.width)
+    }
+
+    private var leftOffset: CGFloat {
+        max(0, min(freeSpace + offsetX, -offsetX))
+    }
+
+    private var rightOffset: CGFloat {
+        max(0, min(freeSpace - offsetX, offsetX))
+    }
+
+    private var shouldFixedSize: Bool {
+        freeSpace > 0 && offsetX != 0
     }
 
     var body: some View {
         HStack(spacing: 0) {
             Rectangle()
                 .fill(debug ? Color.orange : Color.clear)
-                .frame(width: max(0, -offsetX))
+                .frame(width: leftOffset)
             Spacer(minLength: 0)
+                .frame(height: 1)
+                .border(debug ? Color.blue : Color.clear)
             content()
+                .fixedSize(horizontal: shouldFixedSize, vertical: false)
+                .readSize(onChange: { size in
+                    contentSize = size
+                })
+                .layoutPriority(2)
             Spacer(minLength: 0)
+                .frame(height: 1)
+                .border(debug ? Color.blue : Color.clear)
             Rectangle()
                 .fill(debug ? Color.orange : Color.clear)
-                .frame(width: max(0, offsetX))
+                .frame(width: rightOffset)
         }
     }
 }
