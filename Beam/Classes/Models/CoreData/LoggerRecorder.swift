@@ -4,10 +4,11 @@ import os
 
 class LoggerRecorder {
     public static var shared = LoggerRecorder()
+    static var context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
 
     public init() {
         Logger.shared.callback = { (message, level, category, thread, duration) in
-            let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
+            let context = Self.context
 
             context.perform {
                 let logEntry = LogEntry(context: context)
