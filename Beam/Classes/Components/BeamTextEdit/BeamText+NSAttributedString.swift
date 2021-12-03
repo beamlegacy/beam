@@ -100,25 +100,25 @@ extension BeamText {
     }
 
     static func font(fontSize: CGFloat, strong: Bool, emphasis: Bool, elementKind: ElementKind) -> NSFont {
-        var font = BeamFont.regular(size: fontSize).nsFont
-
+        var font: BeamFont
+        var strong = strong
         switch elementKind {
-        case .bullet, .code, .quote, .check, .divider:
-            break
         case .heading:
-            font = BeamFont.medium(size: fontSize).nsFont
-        case .image, .embed, .blockReference:
+            strong = true
+        case .bullet, .code, .quote, .check, .divider, .image, .embed, .blockReference:
             break
         }
 
-        if strong {
-            font = BeamFont.medium(size: fontSize).nsFont
+        if strong && emphasis{
+            font = BeamFont.mediumItalic(size: fontSize)
+        } else if strong {
+            font = BeamFont.medium(size: fontSize)
+        } else if emphasis {
+            font = BeamFont.regularItalic(size: fontSize) //NSFontManager.shared.convert(NSFont.systemFont(ofSize: fontSize), toHaveTrait: .italicFontMask)
+        } else {
+            font = BeamFont.regular(size: fontSize)
         }
 
-        if emphasis {
-            font = NSFontManager.shared.convert(NSFont.systemFont(ofSize: fontSize), toHaveTrait: .italicFontMask)
-        }
-
-        return font
+        return font.nsFont
     }
 }
