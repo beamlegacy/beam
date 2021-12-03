@@ -212,8 +212,16 @@ class BeamWindow: NSWindow, NSDraggingDestination {
 
 extension BeamWindow: NSWindowDelegate {
 
+    private func highestWindowParent(for window: NSWindow?) -> NSWindow? {
+        var parent = window?.parent
+        while parent?.parent != nil {
+            parent = parent?.parent
+        }
+        return parent
+    }
+
     func windowDidResignMain(_ notification: Notification) {
-        state.windowIsMain = false
+        state.windowIsMain = highestWindowParent(for: NSApp.mainWindow) == self
     }
 
     func windowDidBecomeMain(_ notification: Notification) {

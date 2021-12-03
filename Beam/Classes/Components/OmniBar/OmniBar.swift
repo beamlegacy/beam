@@ -140,11 +140,9 @@ struct OmniBar: View {
                 .offset(x: 0, y: autocompleteManager.animatedQuery != nil ? -12 : 0)
                 .opacity(autocompleteManager.animatedQuery != nil ? 0 : 1)
                 .overlay(cmdReturnAnimatedOverlay)
-                .allowsHitTesting(!state.useOmniboxV2)
                 .opacity(state.useOmniboxV2 && state.focusOmniBox ? 0.0 : 1.0)
                 .opacity(isMainWindow ? 1 : (colorScheme == .dark ? 0.6 : 0.8))
         }
-        .contentShape(Rectangle())
     }
 
     private func cardSwitcherView(containerGeometry: GeometryProxy) -> some View {
@@ -218,24 +216,25 @@ struct OmniBar: View {
                     if state.useOmniboxV2 {
                         OmniboxV2ToolbarButton(icon: "nav-omnibox", action: {
                             setIsEditing(true)
-                        })
-                            .accessibilityIdentifier("nav-omnibox")
+                        }).accessibilityIdentifier("nav-omnibox")
                     }
-                    HStack(spacing: BeamSpacing._20) {
-                        if showDestinationNotePicker, let currentTab = browserTabsManager.currentTab {
-                            DestinationNotePicker(tab: currentTab)
-                                .frame(height: 32, alignment: .top)
-                        }
-                        if showPivotButton {
-                            OmniboxV2ToolbarButton(icon: state.mode == .web ? "nav-pivot_card" : "nav-pivot_web", action: toggleMode)
-                                .accessibilityIdentifier(state.mode == .web ? "pivot-card" : "pivot-web")
+                    if showDestinationNotePicker || showPivotButton {
+                        HStack(spacing: BeamSpacing._20) {
+                            if showDestinationNotePicker, let currentTab = browserTabsManager.currentTab {
+                                DestinationNotePicker(tab: currentTab)
+                                    .frame(height: 32, alignment: .top)
+                            }
+                            if showPivotButton {
+                                OmniboxV2ToolbarButton(icon: state.mode == .web ? "nav-pivot_card" : "nav-pivot_web", action: toggleMode)
+                                    .accessibilityIdentifier(state.mode == .web ? "pivot-card" : "pivot-web")
+                            }
                         }
                     }
                 }
-                .padding(.top, state.useOmniboxV2 ? 0 : BeamSpacing._100)
                 .padding(.trailing, state.useOmniboxV2 ? 14 : BeamSpacing._100)
                 .if(!state.useOmniboxV2) {
-                    $0.frame(height: boxHeightEditing)
+                    $0.padding(.top, BeamSpacing._100)
+                    .frame(height: boxHeightEditing)
                     .animation(defaultAnimation)
                 }
             }
@@ -244,7 +243,7 @@ struct OmniBar: View {
 
     var body: some View {
         GeometryReader { containerGeometry in
-            HStack(alignment: state.useOmniboxV2 ? .center : .top, spacing: 2) {
+            HStack(alignment: state.useOmniboxV2 ? .center : .top, spacing: state.useOmniboxV2 ? 0 : 2) {
                 if !state.useOmniboxV2 {
                     fieldViewLegacy(containerGeometry: containerGeometry)
                 } else {
@@ -264,6 +263,7 @@ struct OmniBar: View {
                                                    ))
                     } else {
                         cardSwitcherView(containerGeometry: containerGeometry)
+                            .padding(.horizontal, 14)
                     }
                 }
                 rightActionsView(containerGeometry: containerGeometry)

@@ -45,9 +45,7 @@ struct OmniboxV2Toolbar: View {
                 }
             } else {
                 BeamColor.ToolBar.backgroundInactiveWindow.swiftUI
-                if isAboveContent {
-                    Separator(horizontal: true, hairline: true, color: BeamColor.ToolBar.backgroundBottomSeparatorInactiveWindow)
-                }
+                Separator(horizontal: true, hairline: true, color: BeamColor.ToolBar.backgroundBottomSeparatorInactiveWindow)
             }
         }
     }
