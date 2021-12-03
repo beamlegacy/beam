@@ -251,7 +251,7 @@ struct OmniBarSearchField: View {
                 autocompleteManager.resetQuery()
             }
         } else {
-            autocompleteManager.cancelAutocomplete()
+            autocompleteManager.clearAutocompleteResults()
         }
     }
 }

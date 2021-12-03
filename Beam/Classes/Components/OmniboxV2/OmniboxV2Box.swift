@@ -94,7 +94,7 @@ struct OmniboxV2Box: View {
                 autocompleteManager.setQuery(url, updateAutocompleteResults: false)
             }
         } else if state.mode != .web || browserTabsManager.currentTab?.url != nil {
-            autocompleteManager.resetQuery(clearResults: false)
+            autocompleteManager.resetQuery()
         }
     }
 }
