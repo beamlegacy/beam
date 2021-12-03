@@ -430,7 +430,7 @@ import Sentry
         case .createCard:
             navigateToNote(createNoteForQuery(result.text))
         }
-        autocompleteManager.cancelAutocomplete()
+        autocompleteManager.clearAutocompleteResults()
     }
 
     func startQuery() {
@@ -456,7 +456,7 @@ import Sentry
         } else {
             _ = createTab(withURL: url, originalQuery: queryString)
         }
-        autocompleteManager.cancelAutocomplete()
+        autocompleteManager.clearAutocompleteResults()
         autocompleteManager.resetQuery()
         mode = .web
     }
@@ -548,7 +548,7 @@ import Sentry
     func startNewSearch() {
         EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
         if mode == .web {
-            autocompleteManager.cancelAutocomplete()
+            autocompleteManager.clearAutocompleteResults()
             autocompleteManager.resetQuery()
             createEmptyTab()
         }
