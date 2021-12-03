@@ -56,6 +56,7 @@ extension BeamColor {
         static let collapseExpandButton = BeamColor.LightStoneGray
         static let collapseExpandButtonHover = BeamColor.Bluetiful
         static let collapseExpandButtonClicked = BeamColor.Custom(named: "EditorSearchClicked")
+        static let tokenNoLinkActiveBackground = BeamColor.combining(lightColor: .Mercury, darkColor: .AlphaGray, darkAlpha: 0.5)
     }
 }
 

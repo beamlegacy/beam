@@ -37,10 +37,9 @@ class CardViewEmbedsTests: BaseTest {
         
         testRailPrint("Then element width and height is changed accordingly")
         XCTAssertEqual(sizeBeforeCollapse.width, sizeAfterCollapse.width)
-        XCTAssertTrue(sizeBeforeCollapse.height > sizeAfterCollapse.height * 5 && sizeBeforeCollapse.height < sizeAfterCollapse.height * 7)
+        XCTAssertTrue(sizeBeforeCollapse.height > sizeAfterCollapse.height * 2 && sizeBeforeCollapse.height < sizeAfterCollapse.height * 4)
         
-        /*Blocked by https://linear.app/beamapp/issue/BE-2559/expand-icon-overlaps-image-link
-        testRailPrint("Then TBD expand")
+        testRailPrint("Then image node is expanded")
         cardView.clickNoteExpandButtonByIndex(noteIndex: 0)
         XCTAssertEqual(cardView.getNotesExpandButtonsCount(), 1)
         XCTAssertEqual(cardView.getNoteExpandButtonByIndex(noteIndex: 0).title, toLinkTitle)
@@ -49,7 +48,6 @@ class CardViewEmbedsTests: BaseTest {
         let sizeAfterExpand = cardView.getImageNoteByIndex(noteIndex: 0).getSize()
         XCTAssertEqual(sizeBeforeCollapse.width, sizeAfterExpand.width)
         XCTAssertEqual(sizeBeforeCollapse.height, sizeAfterExpand.height)
-        */
     }
     
 }
