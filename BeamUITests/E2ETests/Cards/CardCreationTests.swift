@@ -35,8 +35,8 @@ class CardCreationTests: BaseTest {
     }
     
     func testCreateCardUsingCardsSearchList() throws {
+        try XCTSkipIf(true, "Destination Note Picker UI is currently hidden")
         let journalView = launchApp()
-        
         testRailPrint("When I create \(cardNameToBeCreated) a card from Webview cards search results")
         let webView = journalView.searchInOmniBar(cardNameToBeCreated, true)
         webView.searchForCardByTitle(cardNameToBeCreated)
