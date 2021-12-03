@@ -29,6 +29,9 @@ class ImageNode: ResizableNode {
             element.collapsed = isCollapsed
             configureCollapsed(isCollapsed)
             setupCollapseExpandLayer()
+            if let imageLayer = imageLayer {
+                layoutCollapseExpand(contentLayer: imageLayer.layer)
+            }
             self.invalidateLayout()
         }
     }
@@ -71,10 +74,15 @@ class ImageNode: ResizableNode {
         setAccessibilityLabel("ImageNode")
         setAccessibilityRole(.textArea)
 
+        setupFocusLayer()
         setupImageLayer(using: imageRecord, uid: uid, width: width)
         configureCollapsed(isCollapsed)
-        setupFocusLayer()
         setupCollapseExpandLayer()
+
+        updateLayout()
+        if let imageLayer = imageLayer {
+            layoutFocus(contentLayer: imageLayer.layer)
+        }
     }
 
     private func createImage(from imageRecord: BeamFileRecord) -> NSImage? {
@@ -129,7 +137,7 @@ class ImageNode: ResizableNode {
         imageLayer.layer.cornerRadius = cornerRadius
         imageLayer.layer.masksToBounds = true
         imageLayer.layer.zPosition = 1
-        imageLayer.layer.contentsGravity = .resizeAspect
+        imageLayer.layer.contentsGravity = .resizeAspectFill
 
         self.imageLayer = imageLayer
         setupImageLayer(imageLayer)
@@ -143,13 +151,10 @@ class ImageNode: ResizableNode {
     }
 
     private func setupFocusLayer() {
-        let bounds = CGRect.zero
         let borderLayer = CAShapeLayer()
         borderLayer.lineWidth = 5
         borderLayer.strokeColor = selectionColor.cgColor
         borderLayer.fillColor = NSColor.clear.cgColor
-        borderLayer.bounds = bounds
-        borderLayer.position = .zero
         borderLayer.zPosition = 0
         let focusLayer = Layer(name: "focus", layer: borderLayer)
         addLayer(focusLayer, origin: .zero)
@@ -246,43 +251,52 @@ class ImageNode: ResizableNode {
 
     override func updateRendering() -> CGFloat {
         updateFocus()
-        return isCollapsed ? 26.0 : visibleSize.height
+        let height = layers["focus"]?.layer.frame.height ?? 26.0
+        return isCollapsed ? height : visibleSize.height
     }
 
     override func updateLayout() {
         super.updateLayout()
+
+        guard let imageLayer = imageLayer else {
+            return
+        }
+
+        layoutImageLayer()
+        layoutCollapseExpand(contentLayer: imageLayer.layer)
+        layoutFocus(contentLayer: imageLayer.layer)
+    }
+
+    private func layoutImageLayer() {
         if let imageLayer = layers["image"] {
-            let position = CGPoint(x: contentsLead, y: isCollapsed ? contentsTop + 7 : contentsTop)
-            let bounds = CGRect(origin: .zero, size: isCollapsed ? CGSize(width: 16, height: 16) : visibleSize)
-            guard bounds != imageLayer.layer.bounds || position != imageLayer.layer.position else { return }
+            let position = contentPosition
+            let contentBounds = CGRect(origin: .zero, size: isCollapsed ? CGSize(width: 16, height: 16) : visibleSize)
             imageLayer.layer.position = position
-            imageLayer.layer.bounds = bounds
+            imageLayer.layer.bounds = contentBounds
 
             if let source = layers["source"] {
                 let margin: CGFloat = 6.0
                 let size = source.layer.frame.size
                 source.layer.frame.origin = CGPoint(x: contentsLead + visibleSize.width - margin - size.width, y: contentsTop + margin)
             }
+        }
+    }
 
-            layoutCollapseExpand(contentLayer: imageLayer.layer)
-
-            if let focusLayer = layers["focus"], let borderLayer = focusLayer.layer as? CAShapeLayer {
-                var focusBounds = bounds.insetBy(dx: -focusMargin / 2, dy: -focusMargin / 2)
-                var collaspsedAdjustedBounds: CGRect?
-                if isCollapsed, let textLayer = layers["collapsed-text"] {
-                    focusBounds.size.width += textLayer.layer.frame.width + 6
-                    focusBounds.size.height = 27
-                    collaspsedAdjustedBounds = bounds
-                    collaspsedAdjustedBounds?.size.width += textLayer.layer.frame.width + 6
-                    collaspsedAdjustedBounds?.size.height += textLayer.layer.frame.width + 6
-                }
-                let borderPath = NSBezierPath(roundedRect: focusBounds, xRadius: cornerRadius, yRadius: cornerRadius)
-                borderLayer.path = borderPath.cgPath
-                borderLayer.position = CGPoint(x: position.x + (collaspsedAdjustedBounds ?? bounds).size.width / 2, y: position.y + bounds.size.height / 2)
-                borderLayer.bounds = focusBounds
-                borderLayer.lineWidth = isCollapsed ? 0 : 5
-                borderLayer.fillColor = isCollapsed ? BeamColor.Editor.linkActiveBackground.cgColor : NSColor.clear.cgColor
+    private func layoutFocus(contentLayer: CALayer) {
+        if let focusLayer = layers["focus"], let borderLayer = focusLayer.layer as? CAShapeLayer {
+            var focusBounds = contentLayer.bounds.insetBy(dx: -focusMargin / 2, dy: -focusMargin / 2)
+            if isCollapsed, let textLayer = layers["collapsed-text"] {
+                focusBounds.size.width += textLayer.layer.frame.width + 12
+                focusBounds.size.height = textLayer.layer.frame.height + 9
             }
+            let borderPath = NSBezierPath(roundedRect: focusBounds, xRadius: cornerRadius, yRadius: cornerRadius)
+            borderLayer.path = borderPath.cgPath
+
+            let offset = isCollapsed ? 3.0 : 0.0
+            let focusOrigin = CGPoint(x: contentLayer.position.x - offset, y: contentLayer.frame.minY - offset )
+            borderLayer.frame = CGRect(origin: focusOrigin, size: focusBounds.size)
+            borderLayer.lineWidth = isCollapsed ? 0 : 5
+            borderLayer.fillColor = tokenColor
         }
     }
 
@@ -297,13 +311,10 @@ class ImageNode: ResizableNode {
     override func updateFocus() {
         guard let focusLayer = layers["focus"] else { return }
         focusLayer.layer.opacity = isFocused ? 1 : 0
-        if isCollapsed, let textLayer = layers["collapsed-text"]?.layer as? CATextLayer {
-            let color = isFocused ? BeamColor.Editor.linkActive : BeamColor.Editor.link
-            if let text = textLayer.string as? NSAttributedString {
-                guard let mutable = text.mutableCopy() as? NSMutableAttributedString else { return }
-                textLayer.string = mutable.addAttributes([.foregroundColor: color.cgColor])
-            }
-            let tintedImage = NSImage(named: "editor-url")?.fill(color: color.nsColor)
+        if isCollapsed, let collapsedText = layers["collapsed-text"], let textLayer = collapsedText.layer as? CATextLayer {
+            let hover = collapsedText.hovering
+            textLayer.string = buildCollapsedTitle(mouseInteractionType: hover && !isFocused ? .hovered : nil)
+            let tintedImage = NSImage(named: "editor-url")?.fill(color: textColor.nsColor)
             textLayer.sublayers?.first?.contents = tintedImage
         }
     }
@@ -346,7 +357,7 @@ class ImageNode: ResizableNode {
     private func configureCollapsed(_ isCollapsed: Bool) {
         if isCollapsed {
             self.canBeResized = false
-            self.layers["source"]?.layer.removeFromSuperlayer()
+            self.removeLayer("source")
             let thumbnail = NSImage(named: "field-web")!
             self.setupCollapsedLayer(title: mediaName, thumbnailLayer: imageLayer, or: thumbnail)
         } else {
