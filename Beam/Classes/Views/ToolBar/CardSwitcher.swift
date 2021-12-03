@@ -61,10 +61,12 @@ struct CardSwitcher: View {
                 v1Layout
             } else {
                 HStack(spacing: 0) {
+                    Spacer(minLength: 0)
                     OmniboxV2CapsuleButton(text: "Journal", isSelected: state.mode == .today) {
                         state.navigateToJournal(note: nil)
                     }
                     .fixedSize(horizontal: true, vertical: false)
+                    .layoutPriority(2)
                     .onHover { h in
                         if h {
                             hoveredIndex = 0
@@ -79,7 +81,6 @@ struct CardSwitcher: View {
                             OmniboxV2CapsuleButton(text: titleForNote(note), isSelected: isActive) {
                                 state.navigateToNote(note)
                             }
-                            .fixedSize(horizontal: true, vertical: false)
                             .onHover { h in
                                 if h {
                                     hoveredIndex = index + 1
@@ -89,15 +90,17 @@ struct CardSwitcher: View {
                                 .opacity(hoveredIndex == index + 1 || hoveredIndex == index + 2 ? 0 : 1)
                         }
                     }
-                    OmniboxV2CapsuleButton(text: "All cards", isSelected: isAllCardsActive) {
+                    OmniboxV2CapsuleButton(text: "All Cards", isSelected: isAllCardsActive) {
                         state.navigateToPage(.allCardsWindowPage)
                     }
                     .fixedSize(horizontal: true, vertical: false)
+                    .layoutPriority(2)
                     .onHover { h in
                         if h {
                             hoveredIndex = recentsManager.recentNotes.count + 1
                         }
                     }
+                    Spacer(minLength: 0)
                 }
             }
         }
@@ -106,7 +109,6 @@ struct CardSwitcher: View {
                 hoveredIndex = -1
             }
         }
-        
     }
 }
 
