@@ -278,6 +278,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
         guard let sourceUrl = page.url else {
             fatalError("Could not find note to update with title \(targetNote.title)")
         }
+
         // Make group mutable
         var shootGroup = group
         // Convert html to BeamText
@@ -285,7 +286,6 @@ class PointAndShoot: WebPageHolder, ObservableObject {
         htmlNoteAdapter.convert(html: shootGroup.html(), completion: { [self] (beamElements: [BeamElement]) in
             // exit early when failing to collect correctly
             guard beamElements.count != 0 else {
-                Logger.shared.logError("BE-007 FAIL", category: .general)
                 self.showAlert(shootGroup, beamElements, "failed to collect html elements", completion: {
                     shootGroup.setConfirmation(.failure)
                     self.showShootConfirmation(group: shootGroup)
@@ -305,17 +305,8 @@ class PointAndShoot: WebPageHolder, ObservableObject {
             shootGroup.numberOfElements = elements.count
             shootGroup.setNoteInfo(NoteInfo(id: targetNote.id, title: targetNote.title))
             // Set Destination note to the current card
-            // Update BrowsingScorer about note submission
             page.setDestinationNote(targetNote, rootElement: targetNote)
-            scorer?.addTextSelection()
-            // Adds urlId to current card source
-            let urlId = LinkStore.getOrCreateIdFor(sourceUrl.absoluteString)
-            targetNote.sources.add(urlId: urlId, noteId: targetNote.id, type: .user, sessionId: self.data.sessionId, activeSources: data.activeSources)
-            // Updates frecency score of destination note
-            self.data.noteFrecencyScorer.update(id: targetNote.id, value: 1.0, eventType: .notePointAndShoot, date: BeamDate.now, paramKey: .note30d0)
-            self.data.noteFrecencyScorer.update(id: targetNote.id, value: 1.0, eventType: .notePointAndShoot, date: BeamDate.now, paramKey: .note30d1)
             // Add all quotes to source Note
-
             let addWithSourceBullet = shouldAddWithSourceBullet(elements)
             if let destinationElement = self.page.addToNote(allowSearchResult: true, inSourceBullet: addWithSourceBullet) {
                 if let noteText = noteText, !noteText.isEmpty, let lastQuote = elements.last {
@@ -331,6 +322,11 @@ class PointAndShoot: WebPageHolder, ObservableObject {
                     destinationElement.removeChild(onlyChild)
                 }
                 elements.forEach({ quote in destinationElement.addChild(quote) })
+
+                // Add sourceUrl to note sources
+                self.setNoteSources(targetNote: targetNote, sourceUrl: sourceUrl)
+
+                // Show confirmation UI
                 shootGroup.setConfirmation(.success)
                 self.showShootConfirmation(group: shootGroup)
                 completion()
@@ -353,6 +349,39 @@ class PointAndShoot: WebPageHolder, ObservableObject {
             guard let self = self else { return }
             self.shootConfirmationGroup = nil
         }
+    }
+
+    /// Add url to the note's sources
+    /// - Parameters:
+    ///   - targetNote
+    ///   - sourceUrl
+    private func setNoteSources(targetNote: BeamNote, sourceUrl: URL) {
+        // Update BrowsingScorer about note submission
+        scorer?.addTextSelection()
+        // Adds urlId to current card source
+        let urlId = LinkStore.getOrCreateIdFor(sourceUrl.absoluteString)
+        targetNote.sources.add(
+            urlId: urlId,
+            noteId: targetNote.id,
+            type: .user,
+            sessionId: self.data.sessionId,
+            activeSources: data.activeSources
+        )
+        // Updates frecency score of destination note
+        self.data.noteFrecencyScorer.update(
+            id: targetNote.id,
+            value: 1.0,
+            eventType: .notePointAndShoot,
+            date: BeamDate.now,
+            paramKey: .note30d0
+        )
+        self.data.noteFrecencyScorer.update(
+            id: targetNote.id,
+            value: 1.0,
+            eventType: .notePointAndShoot,
+            date: BeamDate.now,
+            paramKey: .note30d1
+        )
     }
 
     /// Clears all stored Point and Shoot session data
