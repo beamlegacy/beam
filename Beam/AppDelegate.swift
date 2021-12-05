@@ -94,7 +94,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         data = BeamData()
 
         if !isRunningTests {
-            createWindow(frame: nil)
+            createWindow(frame: nil, restoringTabs: true)
         }
 
         // So we remember we're not currently using the default api server
@@ -246,11 +246,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @IBAction func newWindow(_ sender: Any?) {
-        self.createWindow(frame: nil)
+        self.createWindow(frame: nil, restoringTabs: false)
     }
 
     @discardableResult
-    func createWindow(frame: NSRect?) -> BeamWindow {
+    func createWindow(frame: NSRect?, restoringTabs: Bool) -> BeamWindow {
         // Create the window and set the content view.
         let window = BeamWindow(contentRect: frame ?? CGRect(origin: .zero, size: defaultWindowSize),
                                 data: data,
@@ -267,7 +267,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window.makeKeyAndOrderFront(nil)
         windows.append(window)
         subscribeToStateChanges(for: window.state)
-        if PreferencesManager.restoreLastBeamSession {
+        if PreferencesManager.restoreLastBeamSession, restoringTabs {
             window.reOpenClosedTab(nil)
         }
         return window
@@ -312,7 +312,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         if !flag {
-            createWindow(frame: nil)
+            createWindow(frame: nil, restoringTabs: true)
         }
 
         return true

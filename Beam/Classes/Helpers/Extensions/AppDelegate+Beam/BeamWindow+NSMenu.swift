@@ -60,7 +60,7 @@ extension BeamWindow {
             guard var beamWindow = AppDelegate.main.windows.first,
                     let command = windowCommands[windowCommand] else { continue }
             if windowCommand > 0 {
-                beamWindow = AppDelegate.main.createWindow(frame: nil)
+                beamWindow = AppDelegate.main.createWindow(frame: nil, restoringTabs: false)
             }
             beamWindow.state.cmdManager.appendToDone(command: command)
 
