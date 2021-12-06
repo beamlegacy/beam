@@ -879,6 +879,8 @@
 		B57535F426BD6FFC0053CE2D /* NoteViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57535F326BD6FFC0053CE2D /* NoteViewLocators.swift */; };
 		B575360526BDA6260053CE2D /* LoginTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = B575360426BDA6260053CE2D /* LoginTest.swift */; };
 		B575361126C0F0EF0053CE2D /* JavascriptNativeInteractionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B575361026C0F0EF0053CE2D /* JavascriptNativeInteractionsTests.swift */; };
+		B579258F275E473E0093B32B /* DeleteNotesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B579258E275E473E0093B32B /* DeleteNotesTests.swift */; };
+		B5792591275E4FE30093B32B /* FileMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5792590275E4FE30093B32B /* FileMenu.swift */; };
 		B57A9B3126AB06AD002C954D /* BaseTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57A9B3026AB06AD002C954D /* BaseTest.swift */; };
 		B57A9B3626AB07B8002C954D /* UIElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57A9B3526AB07B8002C954D /* UIElement.swift */; };
 		B57A9B3926AB0809002C954D /* BaseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57A9B3826AB0809002C954D /* BaseView.swift */; };
@@ -1984,6 +1986,8 @@
 		B57535F326BD6FFC0053CE2D /* NoteViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteViewLocators.swift; sourceTree = "<group>"; };
 		B575360426BDA6260053CE2D /* LoginTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginTest.swift; sourceTree = "<group>"; };
 		B575361026C0F0EF0053CE2D /* JavascriptNativeInteractionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JavascriptNativeInteractionsTests.swift; sourceTree = "<group>"; };
+		B579258E275E473E0093B32B /* DeleteNotesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteNotesTests.swift; sourceTree = "<group>"; };
+		B5792590275E4FE30093B32B /* FileMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileMenu.swift; sourceTree = "<group>"; };
 		B57A9B3026AB06AD002C954D /* BaseTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseTest.swift; sourceTree = "<group>"; };
 		B57A9B3526AB07B8002C954D /* UIElement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIElement.swift; sourceTree = "<group>"; };
 		B57A9B3826AB0809002C954D /* BaseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseView.swift; sourceTree = "<group>"; };
@@ -4586,6 +4590,14 @@
 			path = JavascriptNative;
 			sourceTree = "<group>";
 		};
+		B5792588275E46F50093B32B /* ImportExport */ = {
+			isa = PBXGroup;
+			children = (
+				B579258E275E473E0093B32B /* DeleteNotesTests.swift */,
+			);
+			path = ImportExport;
+			sourceTree = "<group>";
+		};
 		B57A9B2826AB0642002C954D /* Base */ = {
 			isa = PBXGroup;
 			children = (
@@ -4662,6 +4674,7 @@
 		B57A9B3E26AB091A002C954D /* E2ETests */ = {
 			isa = PBXGroup;
 			children = (
+				B5792588275E46F50093B32B /* ImportExport */,
 				B5CDFF26274E38E800742CC9 /* Onboarding */,
 				B5FAE2FA270ECF7100EAC8A3 /* Shortcuts */,
 				B5FAE2F1270ECEC500EAC8A3 /* Preferences */,
@@ -4721,6 +4734,7 @@
 			children = (
 				B5BA078826AF3E4700D31FED /* UITestsMenuBar.swift */,
 				B5EB9A7526C28192004C798A /* GoMenu.swift */,
+				B5792590275E4FE30093B32B /* FileMenu.swift */,
 			);
 			path = MenuBars;
 			sourceTree = "<group>";
@@ -6423,6 +6437,7 @@
 				B5DC1FBE26B92A8800A4C94B /* CardViewTests.swift in Sources */,
 				B551F3C726BD10C300B72D27 /* AppWebsiteViewLocators.swift in Sources */,
 				B5DC1F8126B1975900A4C94B /* OmniBarLocators.swift in Sources */,
+				B579258F275E473E0093B32B /* DeleteNotesTests.swift in Sources */,
 				B5FAE2EE270DDD9F00EAC8A3 /* AlertViewLocators.swift in Sources */,
 				B5C71D532716F4280028D495 /* UITestPagePasswordManager.swift in Sources */,
 				B5F845E526F8CCB500B15209 /* BlockReferenceTests.swift in Sources */,
@@ -6431,6 +6446,7 @@
 				B5FAE2E7270DDD6C00EAC8A3 /* AlertTestView.swift in Sources */,
 				B51DC76E26F44FE00074ACCA /* PnSViewLocators.swift in Sources */,
 				B5984C9D27031F7E00192B5F /* PasswordViewLocators.swift in Sources */,
+				B5792591275E4FE30093B32B /* FileMenu.swift in Sources */,
 				B57A9B3B26AB08A5002C954D /* AllCardsViewLocators.swift in Sources */,
 				B5EB9A7626C28192004C798A /* GoMenu.swift in Sources */,
 				B5FAE2FC270ECFA600EAC8A3 /* ShortcutsHelper.swift in Sources */,
