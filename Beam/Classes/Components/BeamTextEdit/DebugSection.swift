@@ -118,10 +118,8 @@ class DebugSection: Widget {
     }
 
     private func setupDebugInfoLayer() {
-        let documentManager = DocumentManager()
         let nodeDatabaseId = self.note.documentStruct?.databaseId.uuidString ?? "-"
-        let localDocument = try? documentManager.fetchWithId(self.note.id)
-        let previousChecksum = localDocument?.beam_object_previous_checksum ?? "-"
+        let previousChecksum = self.note.documentStruct?.previousChecksum ?? "-"
 
         let defaultDatabaseId = DatabaseManager.defaultDatabase.id.uuidString
         let databaseTextColor = nodeDatabaseId == defaultDatabaseId ? BeamColor.Generic.text.nsColor : BeamColor.Shiraz.nsColor

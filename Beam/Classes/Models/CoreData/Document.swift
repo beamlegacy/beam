@@ -27,13 +27,6 @@ class Document: NSManagedObject {
         "\(title) {\(id)} v\(version)"
     }
 
-    var hasLocalChanges: Bool {
-        // We don't have a saved previous version, it's a new document
-        guard let beam_api_data = beam_api_data else { return false }
-
-        return beam_api_data != data
-    }
-
     func delete(_ context: NSManagedObjectContext = CoreDataManager.shared.mainContext) {
         context.delete(self)
         do {

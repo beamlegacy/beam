@@ -4,11 +4,23 @@ import os
 
 class LoggerRecorder {
     public static var shared = LoggerRecorder()
-    static var context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
+    private var context: NSManagedObjectContext?
 
-    public init() {
+    public func reset() {
+        // `context?.performAndWait()` ensures that:
+        // 1. Any running `callback` calls in `attach` are finishing and its context saved before we finished `reset()`
+        // 2. No lock needed for changing `self.context`
+
+        context?.performAndWait {
+            self.context = nil
+        }
+    }
+
+    public func attach() {
+        self.context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
+
         Logger.shared.callback = { (message, level, category, thread, duration) in
-            let context = Self.context
+            guard let context = self.context else { return }
 
             context.perform {
                 let logEntry = LogEntry(context: context)

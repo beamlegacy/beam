@@ -40,15 +40,6 @@ extension MyRemoteObjectManager: BeamObjectManagerDelegate {
         Array(Self.store.values)
     }
 
-    func checksumsForIds(_ ids: [UUID]) throws -> [UUID: String] {
-        let values: [(UUID, String)] = Self.store.values.compactMap {
-            guard let previousChecksum = $0.previousChecksum else { return nil }
-            return ($0.beamObjectId, previousChecksum)
-        }
-
-        return Dictionary(uniqueKeysWithValues: values)
-    }
-
     func manageConflict(_ object: MyRemoteObject,
                         _ remoteObject: MyRemoteObject) throws -> MyRemoteObject {
         var result = object.copy()
@@ -70,14 +61,13 @@ extension MyRemoteObjectManager: BeamObjectManagerDelegate {
     func saveObjectsAfterConflict(_ objects: [MyRemoteObject]) throws {
         for object in objects {
             Self.store[object.beamObjectId] = object
-            Self.store[object.beamObjectId]?.previousChecksum = object.checksum
+            try BeamObjectChecksum.savePreviousChecksum(object: object)
         }
     }
 
-    func persistChecksum(_ objects: [MyRemoteObject]) throws {
-        for object in objects {
-            Self.store[object.beamObjectId]?.previousChecksum = object.previousChecksum
-        }
+    static func deleteAll() throws {
+        store.removeAll()
+        try BeamObjectChecksum.deletePreviousChecksums(type: .myRemoteObject)
     }
 
     private func isEqual(_ object1: MyRemoteObject, to object2: MyRemoteObject) -> Bool {

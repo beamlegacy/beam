@@ -40,10 +40,9 @@ class DocumentManagerTestsHelper {
         semaphore.wait()
     }
 
-    func saveLocallyAndRemotely(_ docStruct: DocumentStruct) throws -> DocumentStruct {
+    // You must keep the returned object since its `version` has incremented
+    func saveLocallyAndRemotely(_ docStruct: DocumentStruct) -> DocumentStruct {
         var result = docStruct.copy()
-
-        // The call to `saveDocumentStructOnAPI` expect the document to be already saved locally
         waitUntil(timeout: .seconds(10)) { done in
             result.version += 1
 
@@ -52,15 +51,7 @@ class DocumentManagerTestsHelper {
                 done()
             }
         }
-
-        // saveThenSaveOnAPI() saved on network, which then called `persistChecksum`, to be "up to date" we must reload
-        // the documentStruct from the DB
-
-        guard let savedDocumentStruct = documentManager.loadById(id: docStruct.id) else {
-            throw DocumentManagerError.localDocumentNotFound
-        }
-
-        return savedDocumentStruct
+        return result
     }
 
     func saveLocally(_ docStruct: DocumentStruct) -> DocumentStruct {
@@ -101,15 +92,20 @@ class DocumentManagerTestsHelper {
         }
     }
 
-    func saveRemotelyOnly(_ docStruct: DocumentStruct) {
+    func saveRemotelyOnly(_ docStruct: DocumentStruct, localDocumentStruct: DocumentStruct) throws {
+        // Be careful, this will not save on the remote side only, the checksum have been refactored and `saveOnBeamObjectAPI`
+        // will save previousData and the new checksum. Pass local `localDocumentStruct` to overwrite.
+
         waitUntil(timeout: .seconds(10)) { done in
-            var sendDocStruct = docStruct.copy()
-            sendDocStruct.previousChecksum = docStruct.beamObjectPreviousChecksum
+            let sendDocStruct = docStruct.copy()
             _ = try? self.documentManager.saveOnBeamObjectAPI(sendDocStruct) { result in
                 expect { try result.get() }.toNot(throwError())
                 done()
             }
         }
+
+        // We revert, the previousChecksum/previousData saved was from `docStruct` but we want `localDocumentStruct`
+        try BeamObjectChecksum.savePreviousChecksum(object: localDocumentStruct)
     }
 
     func fetchOnAPI(_ docStruct: DocumentStruct) -> DocumentStruct? {
@@ -153,7 +149,7 @@ class DocumentManagerTestsHelper {
 
     func deleteDocumentStruct(_ docStruct: DocumentStruct) {
         waitUntil(timeout: .seconds(10)) { done in
-            self.documentManager.delete(id: docStruct.id) { result in
+            self.documentManager.delete(document: docStruct) { result in
                 done()
             }
         }
@@ -228,7 +224,7 @@ class DocumentManagerTestsHelper {
 
     func createDefaultDatabase(_ id: String? = nil) {
         coreDataManager.mainContext.performAndWait {
-            let database = Database.create(title: "Default")
+            let database = Database.create(coreDataManager.mainContext, title: "Default")
             if let id = id, let uuid = UUID(uuidString: id) {
                 database.id = uuid
             }
@@ -243,62 +239,55 @@ class DocumentManagerTestsHelper {
                                               _ id: String? = nil,
                                               _ title: String) throws -> DocumentStruct {
         BeamDate.travel(-600)
-        var docStruct = self.createDocumentStruct(title: title)
+        var ancestorDocStruct = createDocumentStruct(title: title)
         if let id = id, let uuid = UUID(uuidString: id) {
-            docStruct.id = uuid
+            ancestorDocStruct.id = uuid
         }
 
-        docStruct.data = ancestor.asData
-        docStruct = try saveLocallyAndRemotely(docStruct)
+        ancestorDocStruct.data = ancestor.asData
+        ancestorDocStruct = saveLocallyAndRemotely(ancestorDocStruct)
 
-        let localStruct = docStruct.copy()
-
-        var localDocStruct = documentManager.loadById(id: docStruct.id)
-        expect(localDocStruct?.data) == ancestor.asData
-        expect(localDocStruct?.previousData) == ancestor.asData
+        var localDocStruct = documentManager.loadById(id: ancestorDocStruct.id)!
+        expect(localDocStruct.data) == ancestor.asData
+        expect(localDocStruct.previousSavedObject?.data) == ancestor.asData
+        expect(try BeamObjectChecksum.previousSavedObject(object: localDocStruct)) == ancestorDocStruct
+        expect(BeamObjectChecksum.previousChecksum(object: localDocStruct)) == (try BeamObject(ancestorDocStruct)).dataChecksum
 
         if let newRemote = newRemote {
             // Generates a new version on the API side only. move date because it must be more recent
             BeamDate.travel(20)
-            var newDocStruct = docStruct.copy()
+            var newDocStruct = ancestorDocStruct.copy()
             newDocStruct.updatedAt = BeamDate.now
             newDocStruct.data = newRemote.asData
-            self.saveRemotelyOnly(newDocStruct)
+            try saveRemotelyOnly(newDocStruct, localDocumentStruct: ancestorDocStruct)
             BeamDate.travel(-20)
-            
-            // savingRemotely changed previousData and checksum but we want to "simulate" that remote saves from another
-            // device, needing to rewrite the local version we had before
-            // docStruct = saveLocally(localStruct)
-            guard let document = try? documentManager.fetchWithId(docStruct.id) else {
-                fail("Couldn't fetch document")
-                return docStruct
-            }
 
-            document.beam_api_data = localStruct.previousData
-            document.beam_object_previous_checksum = localStruct.beamObjectPreviousChecksum
-            document.beam_api_checksum = localStruct.previousChecksum
-            _ = try? documentManager.saveContext()
+            expect(try BeamObjectChecksum.previousSavedObject(object: newDocStruct)) == ancestorDocStruct
+            expect(BeamObjectChecksum.previousChecksum(object: localDocStruct)) == (try BeamObject(ancestorDocStruct)).dataChecksum
         }
 
-        localDocStruct = documentManager.loadById(id: docStruct.id)
-        expect(localDocStruct?.data) == ancestor.asData
-        expect(localDocStruct?.previousData) == ancestor.asData
+        localDocStruct = documentManager.loadById(id: ancestorDocStruct.id)!
+        expect(localDocStruct.data) == ancestor.asData
 
         if let newLocal = newLocal {
             // Force to locally save an older version of the document
             BeamDate.travel(2)
-            docStruct.updatedAt = BeamDate.now
-            docStruct.data = newLocal.asData
-            docStruct = self.saveLocally(docStruct)
+            var localDocStruct = ancestorDocStruct.copy()
+            localDocStruct.updatedAt = BeamDate.now
+            localDocStruct.data = newLocal.asData
+            localDocStruct = saveLocally(localDocStruct)
 
-            localDocStruct = documentManager.loadById(id: docStruct.id)
-            expect(localDocStruct?.data) == newLocal.asData
+            localDocStruct = documentManager.loadById(id: ancestorDocStruct.id)!
+            expect(localDocStruct.data) == newLocal.asData
         }
 
-        localDocStruct = documentManager.loadById(id: docStruct.id)
-        expect(localDocStruct?.previousData) == ancestor.asData
+        localDocStruct = documentManager.loadById(id: ancestorDocStruct.id)!
 
-        return docStruct
+        try BeamObjectChecksum.savePreviousChecksum(object: ancestorDocStruct)
+
+        expect(localDocStruct.previousSavedObject?.data) == ancestor.asData
+
+        return localDocStruct
     }
 
     func defaultDecoder() -> JSONDecoder {
