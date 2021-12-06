@@ -180,9 +180,9 @@ public class TextRoot: ElementNode {
         childrenSpacing = PreferencesManager.editorParentSpacing
 
         if let note = note {
-            topSpacerWidget = SpacerWidget(parent: self, spacerType: .top, availableWidth: availableWidth - childInset)
+            topSpacerWidget = SpacerWidget(parent: self, spacerType: .beforeLinks, availableWidth: availableWidth - childInset)
             linksSection = LinksSection(parent: self, note: note, availableWidth: availableWidth - childInset)
-            middleSpacerWidget = SpacerWidget(parent: self, spacerType: .middle, availableWidth: availableWidth - childInset)
+            middleSpacerWidget = SpacerWidget(parent: self, spacerType: .beforeReferences, availableWidth: availableWidth - childInset)
             referencesSection = ReferencesSection(parent: self, note: note, availableWidth: availableWidth - childInset)
             bottomSpacerWidget = SpacerWidget(parent: self, spacerType: .bottom, availableWidth: availableWidth - childInset)
             if PreferencesManager.showDebugSection {
