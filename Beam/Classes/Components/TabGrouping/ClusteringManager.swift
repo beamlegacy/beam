@@ -36,7 +36,9 @@ class ClusteringManager: ObservableObject {
     var clusteredNotesId: [[UUID]] = [[]] {
         didSet {
             transformToClusteredNotes()
-            updateNoteSources()
+            if clusteredNotesId.count > 1 {
+                updateNoteSources()
+            }
         }
     }
     var sendRanking = false
