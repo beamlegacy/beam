@@ -233,9 +233,10 @@ public class DocumentManager: NSObject {
     func loadDocumentsWithType(type: DocumentType, _ limit: Int, _ fetchOffset: Int) -> [DocumentStruct] {
         checkThread()
         do {
-            return try fetchWithTypeAndLimit(type,
-                                             limit,
-                                             fetchOffset).compactMap { (document) -> DocumentStruct? in
+            let today = BeamNoteType.titleForDate(BeamDate.now)
+            let todayInt = JournalDateConverter.toInt(from: today)
+
+            return try fetchAll(filters: [.type(type), .nonFutureJournalDate(todayInt), .limit(limit), .offset(fetchOffset)], sortingKey: .journal(false)).compactMap { (document) -> DocumentStruct? in
                 parseDocumentBody(document)
             }
         } catch { return [] }
@@ -425,9 +426,18 @@ public class DocumentManager: NSObject {
         Self.savedCount += 1
 
         do {
+            let inserted = context.insertedObjects.compactMap { ($0 as? Document)?.documentStruct }
+            let updated = context.updatedObjects.compactMap { ($0 as? Document)?.documentStruct }
+            let saved = Set(inserted + updated)
+            let deleted = context.deletedObjects.compactMap { ($0 as? Document)?.id }
+
             let localTimer = BeamDate.now
             try CoreDataManager.save(context)
             Logger.shared.logDebug("[\(Self.savedCount)] CoreDataManager saved", category: .coredata, localTimer: localTimer)
+
+            saved.forEach(Self.documentSaved.send)
+            deleted.forEach(Self.documentDeleted.send)
+
             return true
         } catch let error as NSError {
             switch error.code {
@@ -807,6 +817,11 @@ extension DocumentManager {
             }
         return cancellable
     }
+
+    /// This publisher is triggered anytime we store a document in the DB. Note that it also happens when softDeleting a note
+    static let documentSaved = PassthroughSubject<DocumentStruct, Never>()
+    /// This publisher is triggered anytime we are completely removing a note from the DB. Soft delete do NOT call it though.
+    static let documentDeleted = PassthroughSubject<UUID, Never>()
 }
 
 // For tests
@@ -1057,24 +1072,13 @@ extension DocumentManager {
 
     func fetchWithTitle(_ title: String) throws -> Document? {
         checkThread()
-        return try fetchFirst(filters: [.title(title)], sortingKey: .title(true))
+        return try fetchFirst(filters: [.title(title), .nonDeleted], sortingKey: .title(true))
     }
 
     func fetchWithJournalDate(_ date: String) -> Document? {
         checkThread()
         let date = JournalDateConverter.toInt(from: date)
         return try? fetchFirst(filters: [.journalDate(date)])
-    }
-
-    func fetchWithTypeAndLimit(_ type: DocumentType,
-                               _ limit: Int,
-                               _ fetchOffset: Int) throws -> [Document] {
-        checkThread()
-
-        let today = BeamNoteType.titleForDate(BeamDate.now)
-        let todayInt = JournalDateConverter.toInt(from: today)
-
-        return try fetchAll(filters: [.type(type), .nonFutureJournalDate(todayInt), .limit(limit), .offset(fetchOffset)], sortingKey: .journal(false))
     }
 
     func fetchAllWithTitleMatch(title: String,

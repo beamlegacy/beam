@@ -179,3 +179,9 @@ extension DocumentStruct: Equatable {
 extension DocumentStruct: Hashable {
 
 }
+
+extension Document {
+    var documentStruct: DocumentStruct {
+        DocumentStruct(document: self)
+    }
+}
