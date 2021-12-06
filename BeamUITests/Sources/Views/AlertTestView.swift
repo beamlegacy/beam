@@ -54,7 +54,17 @@ class AlertTestView: BaseView {
         return self
     }
     
+    @discardableResult
+    func exitNowClick() -> BaseView {
+        self.getAlertDialog().buttons["Exit now"].click()
+        return self
+    }
+    
     private func getAlertDialogFromSheets() -> XCUIElement {
         return app.dialogs.sheets["alert"]
+    }
+    
+    func getAlertDialog() -> XCUIElement {
+        return app.dialogs["alert"]
     }
 }
