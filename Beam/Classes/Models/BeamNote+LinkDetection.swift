@@ -9,6 +9,10 @@ import Foundation
 import BeamCore
 
 public extension BeamNote {
+    var shouldAppearInJournal: Bool {
+        return !isEntireNoteEmpty() || !fastLinksAndReferences.isEmpty
+    }
+
     var mentionsCount: Int {
         Set<BeamNoteReference>(linksAndReferences(fast: true)).count
     }

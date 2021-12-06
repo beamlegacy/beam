@@ -266,7 +266,9 @@ class EmbedNode: ResizableNode {
 
         let r = layer.frame
         let embedFrame = CGRect(x: r.minX, y: r.minY, width: visibleSize.width, height: visibleSize.height)
-        embedView.frame = embedFrame
+        DispatchQueue.main.async { [weak self] in
+            self?.embedView.frame = embedFrame
+        }
     }
 
     var focusMargin = CGFloat(3)

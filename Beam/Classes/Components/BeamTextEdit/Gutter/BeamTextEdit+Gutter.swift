@@ -41,7 +41,9 @@ extension BeamTextEdit {
         guard let calendarManager = state?.data.calendarManager, !calendarManager.connectedSources.isEmpty else { return nil }
         let viewModel = CalendarGutterViewModel(calendarManager: calendarManager, noteId: self.note.id)
         let gutter = GutterContainerView(frame: NSRect.zero, isLeading: true, leadingGutterViewType: LeadingGutterView.LeadingGutterViewType.calendarGutterView(viewModel: viewModel))
-        self.addSubview(gutter, positioned: .above, relativeTo: nil)
+        DispatchQueue.main.async {
+            self.addSubview(gutter, positioned: .above, relativeTo: nil)
+        }
         return gutter
     }
 
@@ -69,7 +71,9 @@ extension BeamTextEdit {
 
     private func setupTrailingGutter() -> GutterContainerView {
         let gutter = GutterContainerView(frame: NSRect.zero, isLeading: false)
-        self.addSubview(gutter, positioned: .above, relativeTo: nil)
+        DispatchQueue.main.async {
+            self.addSubview(gutter, positioned: .above, relativeTo: nil)
+        }
         return gutter
     }
 

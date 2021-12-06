@@ -47,20 +47,20 @@ struct ModeView: View {
                           topInset: cardScrollViewTopInset,
                           proxy: containerGeometry) { scrollPoint in
             contentIsScrolled = scrollPoint.y >
-                JournalScrollView.firstNoteTopOffset(forProxy: containerGeometry)
+            JournalScrollView.firstNoteTopOffset(forProxy: containerGeometry)
             CustomPopoverPresenter.shared.dismissPopovers()
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .clipped()
-        .onAppear {
-            DispatchQueue.main.async {
-                state.data.reloadAllEvents()
-            }
-            contentIsScrolled = false
-        }
-        .animation(nil)
-        .transition(.noteContentTransition(transitionModel: transitionModel))
-        .accessibility(identifier: "journalView")
+                          .frame(maxWidth: .infinity, maxHeight: .infinity)
+                          .clipped()
+                          .onAppear {
+                              DispatchQueue.main.async {
+                                  state.data.reloadAllEvents()
+                              }
+                              contentIsScrolled = false
+                          }
+                          .animation(nil)
+                          .transition(.noteContentTransition(transitionModel: transitionModel))
+                          .accessibility(identifier: "journalView")
     }
 
     private var pageContent: some View {
