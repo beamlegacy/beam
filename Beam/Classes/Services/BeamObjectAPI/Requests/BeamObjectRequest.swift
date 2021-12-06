@@ -10,6 +10,7 @@ class BeamObjectRequest: APIRequest {
 
     struct BeamObjectIdParameters: Encodable {
         let id: UUID
+        let beamObjectType: String
     }
 
     struct DeleteAllBeamObjectsParameters: Encodable {

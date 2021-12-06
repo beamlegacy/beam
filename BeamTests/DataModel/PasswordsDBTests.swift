@@ -56,11 +56,10 @@ class PasswordsDBTests: XCTestCase {
         }
 
         do {
-            let remotePassword: PasswordRecord? = try beamObjectHelper.fetchOnAPI(newPasswordUnwrapped.beamObjectId)
+            let remotePassword: PasswordRecord? = try beamObjectHelper.fetchOnAPI(newPasswordUnwrapped)
             XCTAssertNotNil(remotePassword, "Object doesn't exist on the API side?")
 
             if var remotePassword = remotePassword {
-                remotePassword.checksum = nil // we don't care if those are different
                 // We need to decrypt passwords as both, even equal, will give different encrypted strings
                 let decryptedPassword = try EncryptionManager.shared.decryptString(remotePassword.password) ?? "1"
                 remotePassword.password = decryptedPassword

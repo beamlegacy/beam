@@ -26,7 +26,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
 
             coreDataManager = CoreDataManager()
             // Setup CoreData
-            coreDataManager.setup()
+            coreDataManager.setupWithoutMigration()
             CoreDataManager.shared = coreDataManager
             sut = DatabaseManager(coreDataManager: coreDataManager)
 
@@ -446,7 +446,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
 
                 afterEach {
                     helper.deleteDatabaseStruct(dbStruct)
-                    beamObjectHelper.delete(dbStruct.id)
+                    beamObjectHelper.delete( dbStruct)
                 }
 
                 context("Foundation") {
@@ -463,7 +463,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
                             }
                         }
 
-                        let remoteObject: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct.beamObjectId)
+                        let remoteObject: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct)
                         expect(remoteObject) == dbStruct
                     }
                 }
@@ -478,7 +478,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
                             }.catch { fail("Should not be called: \($0)"); done() }
                         }
 
-                        let remoteObject: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct.beamObjectId)
+                        let remoteObject: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct)
                         expect(remoteObject) == dbStruct
                     }
                 }
@@ -493,7 +493,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
                             }.catch { fail("Should not be called: \($0)"); done() }
                         }
 
-                        let remoteObject: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct.beamObjectId)
+                        let remoteObject: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct)
                         expect(remoteObject) == dbStruct
                     }
                 }
@@ -511,8 +511,8 @@ class DatabaseManagerNetworkTests: QuickSpec {
                 }
 
                 afterEach {
-                    beamObjectHelper.delete(dbStruct.id)
-                    beamObjectHelper.delete(dbStruct2.id)
+                    beamObjectHelper.delete(dbStruct)
+                    beamObjectHelper.delete(dbStruct2)
                 }
 
                 context("Foundation") {
@@ -531,10 +531,10 @@ class DatabaseManagerNetworkTests: QuickSpec {
                             }
                         }
 
-                        let remoteObject1: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct.beamObjectId)
+                        let remoteObject1: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct)
                         expect(remoteObject1) == dbStruct
 
-                        let remoteObject2: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct2.beamObjectId)
+                        let remoteObject2: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct2)
                         expect(remoteObject2) == dbStruct2
                     }
                 }
@@ -550,10 +550,10 @@ class DatabaseManagerNetworkTests: QuickSpec {
                             }.catch { fail("Should not be called: \($0)"); done() }
                         }
 
-                        let remoteObject1: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct.beamObjectId)
+                        let remoteObject1: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct)
                         expect(remoteObject1) == dbStruct
 
-                        let remoteObject2: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct2.beamObjectId)
+                        let remoteObject2: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct2)
                         expect(remoteObject2) == dbStruct2
                     }
                 }
@@ -569,10 +569,10 @@ class DatabaseManagerNetworkTests: QuickSpec {
                             }.catch { fail("Should not be called: \($0)"); done() }
                         }
 
-                        let remoteObject1: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct.beamObjectId)
+                        let remoteObject1: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct)
                         expect(remoteObject1) == dbStruct
 
-                        let remoteObject2: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct2.beamObjectId)
+                        let remoteObject2: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct2)
                         expect(remoteObject2) == dbStruct2
                     }
                 }
@@ -590,8 +590,8 @@ class DatabaseManagerNetworkTests: QuickSpec {
                 }
 
                 afterEach {
-                    beamObjectHelper.delete(dbStruct.id)
-                    beamObjectHelper.delete(dbStruct2.id)
+                    beamObjectHelper.delete(dbStruct)
+                    beamObjectHelper.delete(dbStruct2)
                 }
 
                 context("Foundation") {
@@ -610,10 +610,10 @@ class DatabaseManagerNetworkTests: QuickSpec {
                             }
                         }
 
-                        let remoteObject1: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct.beamObjectId)
+                        let remoteObject1: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct)
                         expect(remoteObject1) == dbStruct
 
-                        let remoteObject2: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct2.beamObjectId)
+                        let remoteObject2: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct2)
                         expect(remoteObject2) == dbStruct2
                     }
                 }
@@ -628,10 +628,10 @@ class DatabaseManagerNetworkTests: QuickSpec {
                             }.catch { fail("Should not be called: \($0)"); done() }
                         }
 
-                        let remoteObject1: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct.beamObjectId)
+                        let remoteObject1: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct)
                         expect(remoteObject1) == dbStruct
 
-                        let remoteObject2: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct2.beamObjectId)
+                        let remoteObject2: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct2)
                         expect(remoteObject2) == dbStruct2
                     }
                 }
@@ -646,10 +646,10 @@ class DatabaseManagerNetworkTests: QuickSpec {
                             }.catch { fail("Should not be called: \($0)"); done() }
                         }
 
-                        let remoteObject1: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct.beamObjectId)
+                        let remoteObject1: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct)
                         expect(remoteObject1) == dbStruct
 
-                        let remoteObject2: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct2.beamObjectId)
+                        let remoteObject2: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct2)
                         expect(remoteObject2) == dbStruct2
                     }
                 }
@@ -706,10 +706,10 @@ class DatabaseManagerNetworkTests: QuickSpec {
 
                             expect(try? Database.fetchWithId(CoreDataManager.shared.mainContext, dbStruct.id)?.title) == dbStruct.title
 
-                            let remoteObject1: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct.beamObjectId)
+                            let remoteObject1: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct)
                             expect(remoteObject1).to(beNil())
 
-                            let remoteObject2: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct2.beamObjectId)
+                            let remoteObject2: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct2)
                             dbStruct2.title = "\(dbStruct2.title) (2)"
                             expect(remoteObject2) == dbStruct2
 
@@ -782,10 +782,10 @@ class DatabaseManagerNetworkTests: QuickSpec {
 
                             expect(try? Database.fetchWithId(CoreDataManager.shared.mainContext, dbStruct.id)?.title) == dbStruct.title
 
-                            let remoteObject1: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct.beamObjectId)
+                            let remoteObject1: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct)
                             expect(remoteObject1).to(beNil())
 
-                            let remoteObject2: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct2.beamObjectId)
+                            let remoteObject2: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct2)
                             dbStruct2.title = "\(newTitle1) (2)"
                             expect(remoteObject2) == dbStruct2
 

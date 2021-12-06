@@ -10,9 +10,20 @@ enum BeamObjectConflictResolution {
     case fetchRemoteAndError
 }
 
+// Add your object type when saving over the beam object API
+enum BeamObjectObjectType: String {
+    case password
+    case link
+    case database
+    case browsingTree = "browsing_tree"
+    case file
+    case document
+    case myRemoteObject = "my_remote_object"
+}
+
 class BeamObjectManager {
-    static var managerInstances: [String: BeamObjectManagerDelegateProtocol] = [:]
-    static var translators: [String: (BeamObjectManagerDelegateProtocol, [BeamObject]) throws -> Void] = [:]
+    static var managerInstances: [BeamObjectObjectType: BeamObjectManagerDelegateProtocol] = [:]
+    static var translators: [BeamObjectObjectType: (BeamObjectManagerDelegateProtocol, [BeamObject]) throws -> Void] = [:]
 
     #if DEBUG
     static var networkRequests: [APIRequest] = []
@@ -23,20 +34,20 @@ class BeamObjectManager {
     let backgroundQueue = DispatchQueue(label: "BeamObjectManager backgroundQueue", qos: .userInitiated)
 
     static func register<M: BeamObjectManagerDelegateProtocol, O: BeamObjectProtocol>(_ manager: M, object: O.Type) {
-        managerInstances[object.beamObjectTypeName] = manager
+        managerInstances[object.beamObjectType] = manager
 
         /*
          Translators is a way to know what object type is being processed by the manager
          */
-        translators[object.beamObjectTypeName] = { manager, objects in
+        translators[object.beamObjectType] = { manager, objects in
 
             let encapsulatedObjects: [O] = try objects.map {
                 do {
-                    var result: O = try $0.decodeBeamObject()
+                    let result: O = try $0.decodeBeamObject()
 
                     // Setting previousChecksum so code not doing anything more than storing objects/replacing existing objects
                     // at least doesn't break the sync and delta sync.
-                    result.previousChecksum = result.checksum
+//                    result.previousChecksum = result.checksum
 
                     return result
                 } catch {
@@ -68,26 +79,22 @@ class BeamObjectManager {
 
     var conflictPolicyForSave: BeamObjectConflictResolution = .replace
 
-    internal func filteredObjects(_ beamObjects: [BeamObject]) -> [String: [BeamObject]] {
-        let filteredObjects: [String: [BeamObject]] = beamObjects.reduce(into: [:]) { result, object in
-            result[object.beamObjectType] = result[object.beamObjectType] ?? []
-            result[object.beamObjectType]?.append(object)
+    internal func filteredObjects(_ beamObjects: [BeamObject]) -> [BeamObjectObjectType: [BeamObject]] {
+        let filteredObjects: [BeamObjectObjectType: [BeamObject]] = beamObjects.reduce(into: [:]) { result, object in
+            if let beamObjectType = BeamObjectObjectType(rawValue: object.beamObjectType) {
+                result[beamObjectType] = result[beamObjectType] ?? []
+                result[beamObjectType]?.append(object)
+            }
         }
 
         return filteredObjects
     }
 
-    internal func parseFilteredObjectChecksums(_ filteredObjects: [String: [BeamObject]]) throws -> [String: [BeamObject]] {
-        var results: [String: [BeamObject]] = [:]
+    internal func parseFilteredObjectChecksums(_ filteredObjects: [BeamObjectObjectType: [BeamObject]]) throws -> [BeamObjectObjectType: [BeamObject]] {
+        var results: [BeamObjectObjectType: [BeamObject]] = [:]
 
         for (key, objects) in filteredObjects {
-            guard let managerInstance = Self.managerInstances[key] else {
-                Logger.shared.logDebug("**managerInstance for \(key) not found** keys: \(Self.managerInstances.keys)",
-                                       category: .beamObject)
-                continue
-            }
-
-            let checksums = try managerInstance.checksumsForIds(objects.map { $0.id })
+            let checksums = BeamObjectChecksum.previousChecksums(beamObjects: objects)
 
             let changedObjects = objects.filter { $0.dataChecksum != checksums[$0.id] }
             results[key] = changedObjects
@@ -96,7 +103,7 @@ class BeamObjectManager {
         return results
     }
 
-    internal func parseFilteredObjects(_ filteredObjects: [String: [BeamObject]]) throws {
+    internal func parseFilteredObjects(_ filteredObjects: [BeamObjectObjectType: [BeamObject]]) throws {
         var objectsInErrors: Set<String> = Set()
 
         for (key, objects) in filteredObjects {
@@ -153,12 +160,7 @@ class BeamObjectManager {
         objects.compactMap {
             if conflictedObject.beamObjectId == $0.beamObjectId { return nil }
 
-            var remoteObject = $0
-            remoteObject.checksum = remoteBeamObjects.first(where: {
-                $0.id == remoteObject.beamObjectId
-            })?.dataChecksum
-
-            return remoteObject
+            return $0
         }
     }
 
@@ -169,12 +171,7 @@ class BeamObjectManager {
         objects.compactMap {
             if objectErrorIds.contains($0.beamObjectId.uuidString.lowercased()) { return nil }
 
-            var remoteObject = $0
-            remoteObject.checksum = remoteBeamObjects.first(where: {
-                $0.id == remoteObject.beamObjectId
-            })?.dataChecksum
-
-            return remoteObject
+            return $0
         }
     }
 
@@ -182,9 +179,9 @@ class BeamObjectManager {
         var errors: [Error] = []
         let remoteObjects: [T] = try beamObjects.compactMap { beamObject in
             // Check if you have the same IDs for 2 different object types
-            guard beamObject.beamObjectType == T.beamObjectTypeName else {
+            guard beamObject.beamObjectType == T.beamObjectType.rawValue else {
                 // This is an important fail, we throw now
-                let error = BeamObjectManagerDelegateError.runtimeError("returned object \(beamObject) \(beamObject.id) is not a \(T.beamObjectTypeName).")
+                let error = BeamObjectManagerDelegateError.runtimeError("returned object \(beamObject) \(beamObject.id) is not a \(T.beamObjectType).")
                 throw error
             }
 
@@ -229,11 +226,11 @@ class BeamObjectManager {
                                                         _ remoteObject: T) -> T {
         var result = object
 
+        // Fetch the most recent
         if remoteObject.updatedAt > object.updatedAt {
             result = remoteObject
         }
 
-        result.previousChecksum = remoteObject.checksum
         return result
     }
 

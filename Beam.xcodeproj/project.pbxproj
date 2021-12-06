@@ -294,6 +294,7 @@
 		5241E5F626F8B0A900B08F69 /* AccountManager+Foundation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5241E5F526F8B0A900B08F69 /* AccountManager+Foundation.swift */; };
 		5241E5F826F8B0BA00B08F69 /* AccountManager+PromiseKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5241E5F726F8B0BA00B08F69 /* AccountManager+PromiseKit.swift */; };
 		5241E5FA26F8B0C300B08F69 /* AccountManager+Promises.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5241E5F926F8B0C300B08F69 /* AccountManager+Promises.swift */; };
+		5242279A275524C900457345 /* BeamObjectChecksum+CoreData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52422799275524C900457345 /* BeamObjectChecksum+CoreData.swift */; };
 		524299C725A47D2600F4DBF5 /* AppDelegate+Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524299C625A47D2600F4DBF5 /* AppDelegate+Preferences.swift */; };
 		524299E725A480A300F4DBF5 /* AccountsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524299E225A480A300F4DBF5 /* AccountsView.swift */; };
 		524299EE25A488E000F4DBF5 /* AdvancedPreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524299ED25A488E000F4DBF5 /* AdvancedPreferencesView.swift */; };
@@ -1416,6 +1417,8 @@
 		5241E5F526F8B0A900B08F69 /* AccountManager+Foundation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AccountManager+Foundation.swift"; sourceTree = "<group>"; };
 		5241E5F726F8B0BA00B08F69 /* AccountManager+PromiseKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AccountManager+PromiseKit.swift"; sourceTree = "<group>"; };
 		5241E5F926F8B0C300B08F69 /* AccountManager+Promises.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AccountManager+Promises.swift"; sourceTree = "<group>"; };
+		524227932755217B00457345 /* Beam9.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Beam9.xcdatamodel; sourceTree = "<group>"; };
+		52422799275524C900457345 /* BeamObjectChecksum+CoreData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamObjectChecksum+CoreData.swift"; sourceTree = "<group>"; };
 		5242684C25ED408500DB1D05 /* String+Split.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Split.swift"; sourceTree = "<group>"; };
 		524299C625A47D2600F4DBF5 /* AppDelegate+Preferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+Preferences.swift"; sourceTree = "<group>"; };
 		524299E225A480A300F4DBF5 /* AccountsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AccountsView.swift; sourceTree = "<group>"; };
@@ -2665,8 +2668,8 @@
 			isa = PBXGroup;
 			children = (
 				52301D62261C880200ED2238 /* Migrations */,
-				4181717F2581107C00317ED8 /* Document.swift */,
 				523416A12629D465001F306F /* BeamCoreDataObject.swift */,
+				4181717F2581107C00317ED8 /* Document.swift */,
 				418171792581107C00317ED8 /* Document+CoreDataProperties.swift */,
 				520088B72613265900AED835 /* Database.swift */,
 				520088BB2613266600AED835 /* Database+CoreDataProperties.swift */,
@@ -3193,6 +3196,7 @@
 			isa = PBXGroup;
 			children = (
 				5224CD7B2686034200D4179E /* BeamObject.swift */,
+				52422799275524C900457345 /* BeamObjectChecksum+CoreData.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -5779,6 +5783,7 @@
 				A5208D76261D07E9006193AF /* BeamColor.swift in Sources */,
 				4181724A2581107C00317ED8 /* TextView.swift in Sources */,
 				A587690426FA0E8200E8CC93 /* NoteHeaderPublishButton.swift in Sources */,
+				5242279A275524C900457345 /* BeamObjectChecksum+CoreData.swift in Sources */,
 				0325628F26051D3B006513E4 /* RBSQLite.m in Sources */,
 				A56BAF5826B937CE0006F8D5 /* NoteEditFocusedState.swift in Sources */,
 				DA9E5B9D26A843520040F09B /* NoteSources+LongTermUrlScoreStore.swift in Sources */,
@@ -7616,6 +7621,7 @@
 		528F296826B449EA006857E5 /* Beam.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				524227932755217B00457345 /* Beam9.xcdatamodel */,
 				A0C04B8127552163003FC63A /* Beam8.xcdatamodel */,
 				52DB02562716CA8A00F3881D /* Beam7.xcdatamodel */,
 				A0B8C45A26D556A900130FC7 /* Beam6.xcdatamodel */,
@@ -7625,7 +7631,7 @@
 				528F296B26B449EA006857E5 /* Beam2.xcdatamodel */,
 				528F296C26B449EA006857E5 /* Beam4.xcdatamodel */,
 			);
-			currentVersion = A0C04B8127552163003FC63A /* Beam8.xcdatamodel */;
+			currentVersion = 524227932755217B00457345 /* Beam9.xcdatamodel */;
 			path = Beam.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;

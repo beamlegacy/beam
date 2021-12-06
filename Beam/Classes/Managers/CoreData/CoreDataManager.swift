@@ -41,14 +41,20 @@ class CoreDataManager {
     }()
 
     init(storeType: String = NSSQLiteStoreType, migrator: CoreDataMigratorProtocol = CoreDataMigrator()) {
+        LoggerRecorder.shared.reset()
         self.storeType = storeType
         self.migrator = migrator
+    }
+
+    deinit {
+        Logger.shared.logDebug("CoreDataManager deinit", category: .coredata)
+        LoggerRecorder.shared.reset()
     }
 
     func setup() {
         let semaphore = DispatchSemaphore(value: 0)
 
-        loadPersistentStore {
+        migrateAndLoadStores {
             semaphore.signal()
         }
 
@@ -57,28 +63,34 @@ class CoreDataManager {
             Logger.shared.logError("Semaphore for CoreData setup timedout", category: .coredata)
             assert(false)
         }
+
+        LoggerRecorder.shared.attach()
     }
 
-    private func loadPersistentStore(completion: @escaping () -> Void) {
+    private func migrateAndLoadStores(completion: @escaping () -> Void) {
         migrateStoreIfNeeded {
             Logger.shared.logDebug("Coredata migrations checked", category: .coredata)
-            self.persistentContainer.loadPersistentStores { description, error in
-                self.storeURL = description.url
+            self.loadPersistentStores(completion: completion)
+        }
+    }
 
-                if let fileUrl = self.storeURL {
-                    Logger.shared.logDebug("sqlite file: \(fileUrl)", category: .coredata)
-                }
+    private func loadPersistentStores(completion: @escaping () -> Void) {
+        self.persistentContainer.loadPersistentStores { description, error in
+            self.storeURL = description.url
 
-                if let error = error {
-                    UserAlert.showError(message: "Coredata store error", error: error)
-
-                    NSApplication.shared.terminate(nil)
-
-                    return
-                }
-
-                completion()
+            if let fileUrl = self.storeURL {
+                Logger.shared.logDebug("sqlite file: \(fileUrl)", category: .coredata)
             }
+
+            if let error = error {
+                UserAlert.showError(message: "Coredata store error", error: error)
+
+                NSApplication.shared.terminate(nil)
+
+                return
+            }
+
+            completion()
         }
     }
 
@@ -136,6 +148,7 @@ class CoreDataManager {
 
     func importBackup(_ url: URL) throws {
         guard let storeURL = storeURL else { return }
+        LoggerRecorder.shared.reset()
 
         try persistentContainer.persistentStoreCoordinator.replacePersistentStore(at: storeURL,
                                                                                   destinationOptions: nil,
@@ -250,3 +263,23 @@ extension CoreDataManager {
         Promises.Promise(persistentContainer.newBackgroundContext())
     }
 }
+
+// MARK: tests
+#if DEBUG
+extension CoreDataManager {
+    func setupWithoutMigration() {
+        let semaphore = DispatchSemaphore(value: 0)
+
+        loadPersistentStores {
+            semaphore.signal()
+        }
+
+        let semaphoreResult = semaphore.wait(timeout: DispatchTime.now() + .seconds(10))
+        if case .timedOut = semaphoreResult {
+            Logger.shared.logError("Semaphore for CoreData setup timedout", category: .coredata)
+            assert(false)
+        }
+        LoggerRecorder.shared.attach()
+    }
+}
+#endif

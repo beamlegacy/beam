@@ -154,6 +154,7 @@ public class DocumentManager: NSObject {
     func loadById(id: UUID) -> DocumentStruct? {
         checkThread()
         guard let document = try? self.fetchWithId(id) else { return nil }
+
         return parseDocumentBody(document)
     }
 
@@ -319,11 +320,8 @@ public class DocumentManager: NSObject {
                        deletedAt: document.deleted_at,
                        data: document.data ?? Data(),
                        documentType: DocumentType(rawValue: document.document_type) ?? DocumentType.note,
-                       previousData: document.beam_api_data,
-                       previousChecksum: document.beam_api_checksum,
                        version: document.version,
                        isPublic: document.is_public,
-                       beamObjectPreviousChecksum: document.beam_object_previous_checksum,
                        journalDate: document.document_type == DocumentType.journal.rawValue ? JournalDateConverter.toString(from: document.journal_day) : nil
         )
     }
@@ -331,7 +329,8 @@ public class DocumentManager: NSObject {
     /// Update local coredata instance with data we fetched remotely, we detected the need for a merge between both versions
     private func mergeWithLocalChanges(_ document: Document, _ input2: Data) -> Bool {
         checkThread()
-        guard let beam_api_data = document.beam_api_data,
+        let documentStruct = DocumentStruct(document: document)
+        guard let beam_api_data = documentStruct.previousSavedObject?.data,
               let input1 = document.data else {
             return false
         }
@@ -357,13 +356,20 @@ public class DocumentManager: NSObject {
                                category: .documentDebug)
 
         document.data = newData
-        document.beam_api_data = input2
         return true
     }
 
-    func mergeDocumentWithNewData(_ document: Document, _ documentStruct: DocumentStruct) -> Bool {
+    func mergeDocumentWithNewData(_ document: Document, _ remoteDocumentStruct: DocumentStruct) -> Bool {
         checkThread()
-        guard mergeWithLocalChanges(document, documentStruct.data) else {
+
+        // If the local data is equal to what was previously saved (hasLocalChanges), we have no local motification.
+        // We can just use the remote document and store it as our new local document.
+        guard DocumentStruct(document: document).hasLocalChanges else {
+            Logger.shared.logDebug("Document has no local change", category: .documentMerge)
+            return false
+        }
+
+        guard mergeWithLocalChanges(document, remoteDocumentStruct.data) else {
             // Local version could not be merged with remote version
             Logger.shared.logWarning("Document has local change but could not merge", category: .documentMerge)
             NotificationCenter.default.post(name: .apiDocumentConflict,
@@ -388,7 +394,6 @@ public class DocumentManager: NSObject {
             document.database_id == documentStruct.databaseId &&
             document.document_type == documentStruct.documentType.rawValue &&
             document.deleted_at?.intValue == documentStruct.deletedAt?.intValue &&
-            document.beam_object_previous_checksum == documentStruct.previousChecksum &&
             document.id == documentStruct.id
     }
 
@@ -412,9 +417,10 @@ public class DocumentManager: NSObject {
     @discardableResult
     func saveContext(file: StaticString = #file, line: UInt = #line) throws -> Bool {
         checkThread()
-        Logger.shared.logDebug("DocumentManager.saveContext called from \(file):\(line). \(context.hasChanges ? "changed" : "unchanged")", category: .document)
+        Logger.shared.logDebug("\(self) DocumentManager.saveContext called from \(file):\(line). \(context.hasChanges ? "changed" : "unchanged")", category: .document)
 
         guard context.hasChanges else {
+            Logger.shared.logDebug("DocumentManager.saveContext: no changes!", category: .document)
             return false
         }
 
@@ -666,10 +672,11 @@ public class DocumentManager: NSObject {
                 networkCompletion?(.failure(DocumentManagerError.localDocumentNotFound))
                 return
             }
-            Logger.shared.logDebug("Network task for \(documentStruct.titleAndId): called fetchWithId. previousChecksum \(updatedDocument.beam_object_previous_checksum ?? "-")",
-                                   category: .documentNetwork)
 
             let saveObject = DocumentStruct(document: updatedDocument)
+
+            Logger.shared.logDebug("Network task for \(documentStruct.titleAndId): called fetchWithId. previousChecksum \(saveObject.previousChecksum ?? "-")",
+                                   category: .documentNetwork)
 
             Logger.shared.logDebug("Network task for \(documentStruct.titleAndId): calling network with \(updatedDocument.titleAndId) (refreshed object)",
                                    category: .documentNetwork)
@@ -716,10 +723,6 @@ public class DocumentManager: NSObject {
         Logger.shared.logDebug("Network task for \(documentStruct.titleAndId): adding network task for later",
                                category: .documentNetwork)
     }
-}
-
-extension DocumentManager {
-    public override var description: String { "Beam.DocumentManager" }
 }
 
 // MARK: - updates
@@ -1055,6 +1058,7 @@ extension DocumentManager {
 
     func fetchWithId(_ id: UUID) throws -> Document? {
         checkThread()
+
         return try fetchFirst(filters: [.id(id), .includeDeleted, .allDatabases])
     }
 

@@ -43,8 +43,8 @@ class CoreDataContextObserverTests: QuickSpec {
                             ids?.forEach { receivedIds.insert($0) }
                             numberOfPublishes += 1
                         }
-                    documentManager.delete(id: doc2.id) { _ in
-                        documentManager.delete(id: doc3.id) { _ in
+                    documentManager.delete(document: doc2) { _ in
+                        documentManager.delete(document: doc3) { _ in
                             cancellable.cancel()
                             done()
                         }

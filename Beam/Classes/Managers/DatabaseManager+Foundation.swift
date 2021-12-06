@@ -110,7 +110,7 @@ extension DatabaseManager {
 
             do {
                 let documentManager = DocumentManager()
-                let documentIds = try documentManager.fetchAll(filters: [.databaseId(id)]).map { $0.id }
+                let documents = try documentManager.fetchAll(filters: [.databaseId(id)]).map { DocumentStruct(document: $0)}
 
                 _ = try documentManager.deleteAll(databaseId: id)
                 coredataDb.delete(context)
@@ -134,7 +134,7 @@ extension DatabaseManager {
                     return
                 }
 
-                self.deleteWithBeamObjectAPI(id, documentIds, completion)
+                self.deleteWithBeamObjectAPI(database: databaseStruct, documents: documents, completion)
             } catch {
                 Logger.shared.logError(error.localizedDescription, category: .database)
                 completion(.failure(error))
@@ -143,8 +143,8 @@ extension DatabaseManager {
         }
     }
 
-    private func deleteWithBeamObjectAPI(_ id: UUID,
-                                         _ documentIds: [UUID],
+    private func deleteWithBeamObjectAPI(database: DatabaseStruct,
+                                         documents: [DocumentStruct],
                                          _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
 
         do {
@@ -155,7 +155,7 @@ extension DatabaseManager {
 
             // Delete database
             group.enter()
-            try self.deleteFromBeamObjectAPI(id) { result in
+            try deleteFromBeamObjectAPI(object: database) { result in
                 switch result {
                 case .success: break
                 case .failure(let error):
@@ -169,7 +169,7 @@ extension DatabaseManager {
             let documentManager = DocumentManager()
 
             group.enter()
-            try documentManager.deleteFromBeamObjectAPI(documentIds) { result in
+            try documentManager.deleteFromBeamObjectAPI(objects: documents) { result in
                 switch result {
                 case .success: break
                 case .failure(let error):
@@ -222,7 +222,6 @@ extension DatabaseManager {
                     let database = Database.rawFetchOrCreateWithId(context, databaseStruct.id)
 
                     do {
-                        database.beam_object_previous_checksum = remoteDatabaseStruct.checksum
                         database.update(remoteDatabaseStruct)
                         let success = try Self.saveContext(context: context)
                         completion?(.success(success))
@@ -342,11 +341,9 @@ extension DatabaseManager {
                         return
                     }
 
-                    var updatedDatabaseStruct = DatabaseStruct(database: updatedDatabase)
+                    let updatedDatabaseStruct = DatabaseStruct(database: updatedDatabase)
 
                     do {
-                        updatedDatabaseStruct.previousChecksum = updatedDatabaseStruct.beamObjectPreviousChecksum
-
                         try self.saveOnBeamObjectAPI(updatedDatabaseStruct) { result in
                             switch result {
                             case .failure(let error): networkCompletion?(.failure(error))

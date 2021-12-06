@@ -2,16 +2,13 @@ import Foundation
 import BeamCore
 
 struct DatabaseStruct: BeamObjectProtocol {
-    static var beamObjectTypeName: String { "database" }
+    static var beamObjectType = BeamObjectObjectType.database
 
     var id: UUID = .null
     var title: String
     var createdAt: Date
     var updatedAt: Date
     var deletedAt: Date?
-    var previousChecksum: String?
-    var checksum: String?
-    var beamObjectPreviousChecksum: String?
 
     var uuidString: String {
         id.uuidString.lowercased()
@@ -35,9 +32,7 @@ struct DatabaseStruct: BeamObjectProtocol {
                        title: title,
                        createdAt: createdAt,
                        updatedAt: updatedAt,
-                       deletedAt: deletedAt,
-                       previousChecksum: previousChecksum,
-                       beamObjectPreviousChecksum: beamObjectPreviousChecksum
+                       deletedAt: deletedAt
         )
     }
 }
@@ -49,7 +44,6 @@ extension DatabaseStruct {
         self.updatedAt = database.updated_at
         self.deletedAt = database.deleted_at
         self.title = database.title
-        self.beamObjectPreviousChecksum = database.beam_object_previous_checksum
     }
 
     init(title: String) {
