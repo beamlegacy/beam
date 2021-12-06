@@ -184,7 +184,7 @@ struct ChangeCredentialsView: View {
         let secondSplit = Text(", ")
         let symbolSplit = editing ? Text("one symbol").foregroundColor(newPassword.containsSymbol ? green : yellow) : Text("one symbol")
         let thirdSplit = Text(" and ")
-        let numberSplit = editing ? Text("one number").foregroundColor(newPassword.containsDigit ? green : yellow) : Text("one symbol")
+        let numberSplit = editing ? Text("one number").foregroundColor(newPassword.containsDigit ? green : yellow) : Text("one number")
 
         return firstSplit + charSplit + secondSplit + symbolSplit + thirdSplit + numberSplit
     }
