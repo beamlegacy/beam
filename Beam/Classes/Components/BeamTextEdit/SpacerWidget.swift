@@ -9,8 +9,8 @@ import Foundation
 
 class SpacerWidget: Widget {
     enum SpacerType: String {
-        case top
-        case middle
+        case beforeLinks
+        case beforeReferences
         case bottom
     }
 
@@ -22,12 +22,16 @@ class SpacerWidget: Widget {
     }
 
     override func updateRendering() -> CGFloat {
+        let linksVisible = root?.linksSection?.selfVisible ?? true
+        let refsVisible = root?.referencesSection?.selfVisible ?? true
         switch spacerType {
-        case .top:
-            return 44
-        case .middle:
-            return (root?.linksSection?.open ?? true) ? 40 : 10
+        case .beforeLinks:
+            return (linksVisible || refsVisible) ? 44 : 0
+        case .beforeReferences:
+            let space: CGFloat = (root?.linksSection?.open ?? true) ? 40 : 0
+            return (linksVisible && refsVisible) ? space : 0
         case .bottom:
+            guard !(editor?.journalMode ?? true) else { return 0 }
             return 30
         }
     }

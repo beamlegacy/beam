@@ -28,6 +28,16 @@ import Sentry
         }
     }
 
+    @Published var journalNoteToFocus: BeamNote? {
+        didSet {
+            EventsTracker.logBreadcrumb(message: "current journal Note to focus changed to \(String(describing: currentNote))", category: "BeamState")
+            if let note = currentNote {
+                recentsManager.currentNoteChanged(note)
+            }
+            focusOmniBox = false
+        }
+    }
+
     private(set) lazy var recentsManager: RecentsManager = {
         RecentsManager(with: DocumentManager())
     }()
@@ -219,6 +229,7 @@ import Sentry
         }
         backForwardList.push(.journal)
         updateCanGoBackForward()
+        journalNoteToFocus = note
         return true
     }
 

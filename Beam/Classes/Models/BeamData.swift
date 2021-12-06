@@ -21,7 +21,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         return _todaysNote!
     }
     @Published var journal: [BeamNote] = []
-
     @Published var noteCount = 0
     @Published var lastChangedElement: BeamElement?
     @Published var lastIndexedElement: BeamElement?
@@ -213,7 +212,51 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
 
         NotificationCenter.default.addObserver(self, selector: #selector(calendarDayDidChange(notification:)),
                                                name: NSNotification.Name.NSCalendarDayChanged, object: nil)
+
+        DocumentManager.documentSaved.receive(on: DispatchQueue.main)
+            .sink { [weak self] documentStruct in
+                guard let self = self else { return }
+
+                print("documentSaved: \(documentStruct)")
+                // All notes go through this publisher
+                BeamNote.updateNote(documentStruct)
+                Self.noteUpdated.send(documentStruct)
+                switch documentStruct.documentType {
+                case .note:
+                    break
+                case .journal:
+                    // Only send journal updates to this one
+                    Self.journalNoteUpdated.send(documentStruct)
+
+                    // Also update the journal if a note was added or removed and it's not in the future
+                    if let journalDateString = documentStruct.journalDate, let journalDate = BeamNoteType.dateFormater.date(from: journalDateString), journalDate <= BeamDate.now {
+                        let contained = self.journal.contains(where: { $0.id == documentStruct.id })
+                        let added = documentStruct.deletedAt == nil && !contained
+                        let removed = documentStruct.deletedAt != nil && contained
+
+                        if added {
+                            if !self.journal.contains(where: { $0.id == documentStruct.id }),
+                               let index = self.journal.firstIndex(where: { journalDate > ($0.type.journalDate ?? BeamDate.now) }),
+                               let note = BeamNote.fetch(id: documentStruct.id) {
+                                self.journal.insert(note, at: index)
+                            }
+                        } else if removed {
+                            if let index = self.journal.firstIndex(where: { $0.id == documentStruct.id }) {
+                                self.journal.remove(at: index)
+                            }
+                        }
+                    }
+                }
+            }.store(in: &scope)
+
+        DocumentManager.documentDeleted.receive(on: DispatchQueue.main)
+            .sink { documentStruct in
+                BeamNote.purgeDeletedNode(documentStruct)
+            }.store(in: &scope)
     }
+
+    static let noteUpdated = PassthroughSubject<DocumentStruct, Never>()
+    static let journalNoteUpdated = PassthroughSubject<DocumentStruct, Never>()
 
     func allWindowsDidClose() {
         resetPinnedTabs()
@@ -247,23 +290,38 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
 
     func setupJournal(firstSetup: Bool = false) {
         journalCancellables = []
+        journal.removeAll()
         let note  = BeamNote.fetchOrCreateJournalNote(date: BeamDate.now)
         observeJournal(note: note)
         journal.append(note)
         _todaysNote = note
-        updateJournal(with: 2, and: journal.count, fetchEvents: !firstSetup)
+        updateJournal(with: 1, and: journal.count, fetchEvents: !firstSetup)
     }
 
     func updateJournal(with limit: Int = 0, and fetchOffset: Int = 0, fetchEvents: Bool = true) {
         isFetching = true
-        let _journal = BeamNote.fetchNotesWithType(type: .journal, limit, fetchOffset).compactMap { $0.type.isJournal && !$0.type.isFutureJournal ? $0 : nil }
+        let _journal = BeamNote.fetchNotesWithType(type: .journal, limit, fetchOffset).compactMap {
+            $0.type.isJournal &&
+            !$0.type.isFutureJournal
+            ? $0 : nil }
+        appendToJournal(_journal, fetchEvents: fetchEvents)
+    }
+
+    func loadJournalUpTo(date: String) {
+        let _journal = BeamNote.fetchJournalsFrom(date: date)
+        appendToJournal(_journal, fetchEvents: true)
+    }
+
+    func appendToJournal(_ _journal: [BeamNote], fetchEvents: Bool) {
         for note in _journal {
             observeJournal(note: note)
-            if fetchEvents, let journalDate = note.type.journalDate, !note.isEntireNoteEmpty() {
+            if fetchEvents, let journalDate = note.type.journalDate, note.shouldAppearInJournal {
                 loadEvents(for: note.id, for: journalDate)
             }
         }
-        journal.append(contentsOf: _journal)
+        let newJournal = journal + _journal
+        let sorted = Set(newJournal).sorted { ($0.type.journalDate ?? Date.distantPast) > ($1.type.journalDate ?? Date.distantPast) }
+        journal = sorted
     }
 
     func updateNoteCount() {

@@ -32,6 +32,14 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         }
     }
 
+    func runBeforeNextLayout(_ block: @escaping () -> Void) {
+        editor?.runBeforeNextLayout(block)
+    }
+
+    func runAfterNextLayout(_ block: @escaping () -> Void) {
+        editor?.runAfterNextLayout(block)
+    }
+
     var selected: Bool = false {
         didSet {
             selectionLayer.removeAllAnimations()
@@ -61,18 +69,22 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
     var selfVisible = true {
         didSet {
-            invalidateLayout()
-            updateLayersVisibility()
-            invalidateRendering()
+            updateVisible()
         }
     }
 
     var visible = true {
         didSet {
-            updateChildrenVisibility()
-            updateLayersVisibility()
-            invalidateRendering()
+            updateVisible()
         }
+    }
+
+    func updateVisible() {
+        runAfterNextLayout { [weak self] in
+            self?.updateLayersVisibility()
+        }
+        invalidateLayout()
+        invalidateRendering()
     }
 
     func updateLayersVisibility() {
@@ -419,6 +431,8 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     var inInitialLayout: Bool {
         initialLayout || (editor?.frame.isEmpty ?? true)
     }
+
+    var shouldDisableActions: Bool { inInitialLayout }
     final func setLayout(_ frame: NSRect) {
         self.frame = frame
         defer {
@@ -426,10 +440,17 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
             initialLayout = false
         }
 
-        if inInitialLayout {
+        if shouldDisableActions {
             CATransaction.begin()
             CATransaction.setDisableActions(true)
         }
+
+        defer {
+            if shouldDisableActions {
+                CATransaction.commit()
+            }
+        }
+
         layer.bounds = contentsFrame
         layer.position = CGPoint(x: frameInDocument.origin.x + contentsFrame.origin.x, y: frameInDocument.origin.y + contentsFrame.origin.y)
 
@@ -445,11 +466,6 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
             invalidate() // invalidate before change
             currentFrameInDocument = frame
             invalidate()  // invalidate after the change
-        }
-
-        if inInitialLayout {
-            updateLayersVisibility()
-            CATransaction.commit()
         }
     }
 
@@ -511,6 +527,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         let newActions = [
             kCAOnOrderIn: NSNull(),
             kCAOnOrderOut: NSNull(),
+            kCATransition: NSNull(),
             "sublayers": NSNull(),
             "contents": NSNull(),
             "bounds": NSNull()

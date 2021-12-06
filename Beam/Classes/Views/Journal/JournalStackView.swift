@@ -9,18 +9,23 @@ import Foundation
 import BeamCore
 
 class JournalStackView: NSView {
-    public var horizontalSpace: CGFloat
+    public var verticalSpace: CGFloat
     public var topOffset: CGFloat
-    public var todaysMaxPosition: CGFloat = 0
-    public var bottomInset: CGFloat = 0
-    public var bottomInsetForToday: CGFloat = 0
 
-    private var views: [Int: BeamTextEdit] = [:]
-    private var viewCount: Int = 0
+    var state: BeamState
+    var onStartEditing: (() -> Void)?
 
-    init(horizontalSpace: CGFloat, topOffset: CGFloat) {
-        self.horizontalSpace = horizontalSpace
+    private var notes: [BeamNote] = []
+    private var views: [BeamNote: BeamTextEdit] = [:]
+
+    override var wantsUpdateLayer: Bool { true }
+
+    init(state: BeamState, safeTop: CGFloat, onStartEditing: (() -> Void)?, verticalSpace: CGFloat, topOffset: CGFloat) {
+        self.state = state
+        self.onStartEditing = onStartEditing
+        self.verticalSpace = verticalSpace
         self.topOffset = topOffset
+        self.safeTop = safeTop
         super.init(frame: NSRect())
         self.translatesAutoresizingMaskIntoConstraints = false
         self.layer?.backgroundColor = BeamColor.Generic.background.cgColor
@@ -50,77 +55,195 @@ class JournalStackView: NSView {
     public override func layout() {
         relayoutSubViews()
         super.layout()
-        needsLayout = false
     }
 
-    private func relayoutSubViews() {
-        let textEditViews = self.subviews.compactMap { $0 as? BeamTextEdit }
-        var lastViewHeight: CGFloat = .zero
-        for (idx, textEdit) in textEditViews.enumerated() {
-            var newFrame = textEdit.frame
-            if idx != 0 {
-                newFrame.origin = CGPoint(x: 0, y: lastViewHeight)
-            }
-            newFrame.size = NSSize(width: self.frame.width, height: textEdit.intrinsicContentSize.height)
-            textEdit.frame = newFrame
-            textEdit.relayoutRoot()
+    var countChanged = false
+    var initialLayout = true
 
-            if idx == 0 {
-                lastViewHeight = topOffset + textEdit.intrinsicContentSize.height + horizontalSpace + bottomInset
-            } else {
-                lastViewHeight = textEdit.frame.origin.y + textEdit.intrinsicContentSize.height + horizontalSpace
+    var safeTop: CGFloat { didSet { invalidateIntrinsicContentSize() } }
+
+    private func relayoutSubViews() {
+        guard let scrollView = enclosingScrollView else { return }
+        defer {
+            countChanged = false
+            initialLayout = false
+        }
+
+        var secondNoteY = CGFloat(0)
+        let clipView = scrollView.contentView
+
+        let textEditViews = self.notes.compactMap { views[$0] }
+        var lastViewY = topOffset
+        var first = true
+
+        let animateMoves = countChanged && !initialLayout
+        if animateMoves {
+            NSAnimationContext.beginGrouping()
+            NSAnimationContext.current.duration = 0.2
+        }
+
+        defer {
+            if animateMoves {
+                NSAnimationContext.endGrouping()
             }
+        }
+
+        let scrollPosition = clipView.bounds.origin.y
+        let clipHeight = clipView.bounds.height
+
+        for textEdit in textEditViews {
+            if first {
+                let firstNoteHeight = topOffset + textEdit.intrinsicContentSize.height + verticalSpace
+                secondNoteY = max(clipHeight, firstNoteHeight) - safeTop
+
+                if scrollPosition <= secondNoteY - (topOffset + textEdit.intrinsicContentSize.height + safeTop) {
+                    if textEdit.superview == self {
+                        enclosingScrollView?.addFloatingSubview(textEdit, for: .vertical)
+                    }
+
+                    let elastic = min(0, safeTop + scrollPosition)
+                    let posY = topOffset - elastic
+                    let newFrame = NSRect(origin: CGPoint(x: 0, y: posY),
+                                          size: NSSize(width: self.frame.width, height: textEdit.intrinsicContentSize.height))
+                    textEdit.frame = newFrame
+                    lastViewY = secondNoteY
+                    first = false
+                    continue
+                }
+                lastViewY = secondNoteY - textEdit.intrinsicContentSize.height - verticalSpace
+                if textEdit.superview != self {
+                    addSubview(textEdit)
+                }
+            }
+            let newFrame = NSRect(origin: CGPoint(x: 0, y: lastViewY),
+                                  size: NSSize(width: self.frame.width, height: textEdit.intrinsicContentSize.height))
+            if !textEdit.frame.isEmpty && !first && animateMoves {
+                textEdit.animator().frame = newFrame
+            } else {
+                textEdit.frame = newFrame
+            }
+
+            lastViewY = (first ? secondNoteY : newFrame.maxY + verticalSpace).rounded()
+            first = false
         }
     }
 
     override public var intrinsicContentSize: NSSize {
-        guard let width: CGFloat = getTodaysView()?.intrinsicContentSize.width else { return .zero }
-        var height: CGFloat = topOffset * 2.5 + bottomInset
-        for view in self.subviews {
-          guard let textEditView = view as? BeamTextEdit else { continue }
-          height += textEditView.intrinsicContentSize.height + horizontalSpace
+        guard let firstNote = notes.first,
+              let textEdit = views[firstNote],
+              let scrollView = enclosingScrollView
+        else { return .zero }
+
+        let width = textEdit.intrinsicContentSize.width
+        let clipView = scrollView.contentView
+        let clipHeight = clipView.bounds.height
+        let firstNoteHeight = topOffset + textEdit.intrinsicContentSize.height + verticalSpace
+        let secondNoteY = max(clipHeight, firstNoteHeight) - safeTop
+
+        var height = secondNoteY
+        var first = true
+        for note in self.notes {
+            if !first, let textEdit = views[note] {
+              height += textEdit.intrinsicContentSize.height + verticalSpace
+            }
+            first = false
         }
+
+        height += topOffset
         return NSSize(width: width, height: height)
     }
 
-    public func hasChildViews(for note: BeamElement) -> Bool {
-       return views.values.contains(where: { $0.note == note })
+    public func setNotes(_ notes: [BeamNote], focussingOn: BeamNote?) {
+        let sortedNotes = notes.sorted(by: { lhs, rhs in
+            guard let j1 = lhs.type.journalDate,
+                  let j2 = rhs.type.journalDate else { return false }
+            return j1 > j2
+        })
+
+        defer {
+            if let focus = focussingOn, let focused = views[focus] {
+                DispatchQueue.main.async {
+                    self.scrollToVisible(focused.frame)
+                    self.window?.makeFirstResponder(focused)
+                }
+            }
+        }
+
+        guard self.notes != sortedNotes else {
+            return
+        }
+        self.notes = sortedNotes
+
+        let noteSet = Set(notes)
+        for (note, view) in views {
+            // Remove the notes that are there any more:
+            if !noteSet.contains(note) {
+                view.removeFromSuperview()
+                countChanged = true
+            }
+        }
+
+        for note in self.notes where note.shouldAppearInJournal || note.isTodaysNote {
+            addNote(note)
+        }
+
+        if countChanged {
+            invalidateIntrinsicContentSize()
+        }
+        layout()
     }
 
-    public func addChildView(view: BeamTextEdit) {
-        if self.subviews.isEmpty {
-            view.frame.origin = CGPoint(x: 0, y: topOffset)
-            bottomInset = getBottomInsetForTodays(view)
-            bottomInsetForToday = bottomInset
-            view.frame.size = NSSize(width: self.frame.width, height: view.intrinsicContentSize.height)
-            todaysMaxPosition = topOffset + bottomInset
-        } else {
-            view.frame.origin = CGPoint(x: 0, y: intrinsicContentSize.height + horizontalSpace - view.cardTopSpace)
-            view.frame.size = NSSize(width: self.frame.width, height: view.intrinsicContentSize.height)
-        }
-        self.addSubview(view)
-        views[viewCount] = view
-        viewCount += 1
-    }
-
-    public func removeChildViews() {
-        views.forEach { (_, value) in
-            value.removeFromSuperview()
-        }
-        views.removeAll()
-        viewCount = 0
-        invalidateLayout()
-    }
-
-    private func getBottomInsetForTodays(_ view: BeamTextEdit) -> CGFloat {
-        var bottomInset = self.frame.height - (topOffset + view.intrinsicContentSize.height) - view.cardTopSpace - view.cardHeaderLayer.frame.size.height - horizontalSpace
-        if bottomInset <= 0 {
-            bottomInset = horizontalSpace
-        }
-        return bottomInset
+    public func addNote(_ note: BeamNote) {
+        guard views[note] == nil else { return }
+        let view = getTextEditView(for: note)
+        views[note] = view
+        countChanged = true
+        addSubview(view)
     }
 
     public func getTodaysView() -> BeamTextEdit? {
-        return views[0]
+        guard let note = notes.first else { return nil }
+        return views[note]
     }
+
+    private func getTextEditView(for note: BeamNote) -> BeamTextEdit {
+        let textEditView = BeamTextEdit(root: note, journalMode: true)
+        textEditView.state = state
+        textEditView.onStartEditing = onStartEditing
+        textEditView.openURL = { [weak state] url, element in
+            state?.handleOpenUrl(url, note: element.note, element: element)
+        }
+        textEditView.openCard = { [weak state] cardId, elementId, unfold in
+            state?.navigateToNote(id: cardId, elementId: elementId, unfold: unfold ?? false)
+        }
+        textEditView.startQuery = { [weak state] textNode, animated in
+            state?.startQuery(textNode, animated: animated)
+        }
+        textEditView.onFocusChanged = { [weak state] elementId, cursorPosition in
+            state?.updateNoteFocusedState(note: note, focusedElement: elementId, cursorPosition: cursorPosition)
+        }
+        textEditView.minimumWidth = 800
+        textEditView.maximumWidth = 1024
+        textEditView.footerHeight = 0
+        textEditView.topOffset = 0
+        textEditView.leadingPercentage = PreferencesManager.editorLeadingPercentage
+        textEditView.centerText = PreferencesManager.editorIsCentered
+        textEditView.showTitle = true
+
+        return textEditView
+    }
+
+    func updateScrollingFrames() {
+        relayoutSubViews()
+    }
+
+    override func mouseDown(with event: NSEvent) {
+        // Find the nearest editor:
+        let location = convert(event.locationInWindow, from: nil)
+        if let closest = notes.first(where: { views[$0]?.frame.maxY ?? 0 <= location.y }), let newResponder = views[closest] {
+            window?.makeFirstResponder(newResponder)
+        }
+        super.mouseDown(with: event)
+    }
+
 }
