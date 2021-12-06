@@ -388,6 +388,9 @@ struct AdvancedPreferencesView: View {
                 Preferences.Section(title: "Create 100 random notes") {
                     Create100RandomNotes
                 }
+                Preferences.Section(title: "Create 10 random notes") {
+                    Create10RandomNotes
+                }
             }.onAppear {
                 observeDefaultDatabase()
             }
@@ -675,6 +678,14 @@ struct AdvancedPreferencesView: View {
             BeamUITestsMenuGenerator.create100Notes()
         }, label: {
             Text("Create 100 Random notes")
+        })
+    }
+    
+    private var Create10RandomNotes: some View {
+        Button(action: {
+            BeamUITestsMenuGenerator.create10Notes()
+        }, label: {
+            Text("Create 10 Random notes")
         })
     }
 

@@ -29,6 +29,7 @@ class BeamUITestsMenuGenerator {
         case .loadUITestPageMedia: loadUITestsPage(identifier: "Media")
         case .insertTextInCurrentNote: insertTextInCurrentNote()
         case .create100Notes: Self.create100Notes()
+        case .create10Notes: Self.create10Notes()
         case .setAutoUpdateToMock: setAutoUpdateToMock()
         case .cleanDownloads: cleanDownloadFolder()
         case .omnibarFillHistory: fillHistory()
@@ -140,6 +141,14 @@ class BeamUITestsMenuGenerator {
 
     static public func create100Notes() {
         let generator = FakeNoteGenerator(count: 100, journalRatio: 0.2, futureRatio: 0.1)
+        generator.generateNotes()
+        for note in generator.notes {
+            note.save()
+        }
+    }
+    
+    static public func create10Notes() {
+        let generator = FakeNoteGenerator(count: 10, journalRatio: 0.2, futureRatio: 0.1)
         generator.generateNotes()
         for note in generator.notes {
             note.save()
