@@ -21,17 +21,19 @@ class PublishNoteAPITests: XCTestCase {
     var testNoteDocumentStruct: DocumentStruct!
 
     override func setUpWithError() throws {
-
         BeamTestsHelper.logout()
         beamTestHelper.beginNetworkRecording(test: self)
 
+        LoggerRecorder.shared.reset()
+
         coreDataManager = CoreDataManager()
-        // Setup CoreData
-        coreDataManager.setup()
         CoreDataManager.shared = coreDataManager
 
+        // Setup CoreData
+        coreDataManager.setupWithoutMigration()
+
         helper = DocumentManagerTestsHelper(documentManager: DocumentManager(),
-                                            coreDataManager: coreDataManager)
+                                            coreDataManager: CoreDataManager.shared)
 
         helper.deleteAllDocuments()
         helper.deleteAllDatabases()

@@ -22,14 +22,13 @@ class DocumentTests: QuickSpec {
             coreDataManager = CoreDataManager()
 
             // Setup CoreData
-            coreDataManager.setup()
-            //CoreDataManager.shared = coreDataManager
+            coreDataManager.setupWithoutMigration()
 
             sut = DocumentManager(coreDataManager: coreDataManager)
             mainContext = sut.context
-            backgroundContext = coreDataManager.backgroundContext
+            backgroundContext = CoreDataManager.shared.backgroundContext
             helper = DocumentManagerTestsHelper(documentManager: sut,
-                                                     coreDataManager: coreDataManager)
+                                                coreDataManager: coreDataManager)
 
             helper.deleteAllDocuments()
         }

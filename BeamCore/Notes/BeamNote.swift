@@ -189,9 +189,7 @@ public class BeamNote: BeamElement {
         #if DEBUG
         let count = (Self.decodeCount[id] ?? 0) + 1
         Self.decodeCount[id] = count
-        //swiftlint:disable print
-        print("Decoded \(ttl) - \(id) (count = \(count))")
-        //swiftlint:enable print
+        Logger.shared.logDebug("Decoded \(ttl) - \(id) (count = \(count))", category: .noteEditor)
         #endif
     }
 

@@ -21,10 +21,8 @@ public struct Link: Codable {
     public var createdAt: Date
     public var updatedAt: Date
     public var deletedAt: Date?
-    public var previousChecksum: String?
-    public var checksum: String?
 
-    public init(url: String, title: String?, createdAt: Date = BeamDate.now, updatedAt: Date = BeamDate.now, deletedAt: Date? = nil, previousChecksum: String? = nil) {
+    public init(url: String, title: String?, createdAt: Date = BeamDate.now, updatedAt: Date = BeamDate.now, deletedAt: Date? = nil) {
         self.id = UUID.v5(name: url, namespace: .url)
         self.url = url
         self.title = title
@@ -32,7 +30,6 @@ public struct Link: Codable {
         self.createdAt = createdAt
         self.updatedAt = updatedAt
         self.deletedAt = deletedAt
-        self.previousChecksum = previousChecksum
     }
 }
 

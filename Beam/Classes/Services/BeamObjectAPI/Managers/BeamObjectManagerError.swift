@@ -10,6 +10,7 @@ enum BeamObjectManagerError: Error {
     case invalidObjectType(BeamObject, BeamObject)
     case beamObjectAPIDisabled
     case fetchError
+    case nestedTooDeep
 }
 
 extension BeamObjectManagerError: LocalizedError {
@@ -33,6 +34,8 @@ extension BeamObjectManagerError: LocalizedError {
             return "invalidObjectType local: \(localObject) remote: \(remoteObject)"
         case .fetchError:
             return "Fetching error"
+        case .nestedTooDeep:
+            return "Nested too deep"
         }
     }
 }

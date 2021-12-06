@@ -28,7 +28,7 @@ struct DatabaseDetail: View {
 
                     HStack {
                         Text("Beam Object Checksum:").bold()
-                        Text(database.beam_object_previous_checksum ?? "-")
+                        Text(DatabaseStruct(database: database).previousChecksum ?? "-")
                         Spacer()
                     }
 

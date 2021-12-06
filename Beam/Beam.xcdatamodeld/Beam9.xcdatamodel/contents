@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="19461" systemVersion="21A559" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="BeamObjectChecksum" representedClassName=".BeamObjectChecksum" syncable="YES" codeGenerationType="class">
+        <attribute name="data_sent" optional="YES" attributeType="Binary"/>
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="object_type" attributeType="String"/>
+        <attribute name="previous_checksum" attributeType="String"/>
+        <attribute name="updated_at" attributeType="Date" defaultDateTimeInterval="659896560" usesScalarValueType="NO"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="id"/>
+                <constraint value="object_type"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
+    </entity>
+    <entity name="Database" representedClassName=".Database" syncable="YES">
+        <attribute name="created_at" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="deleted_at" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="title" attributeType="String"/>
+        <attribute name="updated_at" attributeType="Date" usesScalarValueType="NO"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="id"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
+    </entity>
+    <entity name="Document" representedClassName=".Document" syncable="YES">
+        <attribute name="created_at" attributeType="Date" defaultDateTimeInterval="628161600" usesScalarValueType="NO"/>
+        <attribute name="data" optional="YES" attributeType="Binary"/>
+        <attribute name="database_id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="deleted_at" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="document_type" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="id" attributeType="UUID" defaultValueString="6A275532-F5C5-4FA1-8EF5-4D8BE0DAAD71" usesScalarValueType="NO"/>
+        <attribute name="is_public" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="journal_day" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="title" attributeType="String" defaultValueString=""/>
+        <attribute name="updated_at" attributeType="Date" defaultDateTimeInterval="628161600" usesScalarValueType="NO"/>
+        <attribute name="version" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="id"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
+    </entity>
+    <entity name="LogEntry" representedClassName=".LogEntry" syncable="YES" codeGenerationType="class">
+        <attribute name="category" attributeType="String"/>
+        <attribute name="created_at" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="duration" optional="YES" attributeType="Decimal" defaultValueString="0.0"/>
+        <attribute name="level" attributeType="String"/>
+        <attribute name="log" attributeType="String"/>
+        <fetchIndex name="byCategoryIndex">
+            <fetchIndexElement property="category" type="Binary" order="ascending"/>
+        </fetchIndex>
+    </entity>
+    <entity name="StoredLink" representedClassName=".StoredLink" syncable="YES">
+        <attribute name="bid" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="title" optional="YES" attributeType="String"/>
+        <attribute name="url" attributeType="String" defaultValueString=""/>
+        <fetchIndex name="byPropertyId">
+            <fetchIndexElement property="bid" type="Binary" order="ascending"/>
+        </fetchIndex>
+        <fetchIndex name="byPropertyUrl">
+            <fetchIndexElement property="url" type="Binary" order="ascending"/>
+        </fetchIndex>
+    </entity>
+    <elements>
+        <element name="Database" positionX="-279" positionY="-162" width="128" height="104"/>
+        <element name="Document" positionX="-176.8372802734375" positionY="-258.5739135742188" width="128" height="194"/>
+        <element name="LogEntry" positionX="-297" positionY="-144" width="128" height="104"/>
+        <element name="StoredLink" positionX="-410.7252197265625" positionY="-248.30859375" width="128" height="74"/>
+        <element name="BeamObjectChecksum" positionX="-288" positionY="-135" width="128" height="104"/>
+    </elements>
+</model>

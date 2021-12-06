@@ -87,7 +87,7 @@ extension DatabaseManager {
                         return .value(false)
                     }
 
-                    return self.deleteFromBeamObjectAPI(database.beamObjectId)
+                    return self.deleteFromBeamObjectAPI(objects: [database])
                 }
             }
     }

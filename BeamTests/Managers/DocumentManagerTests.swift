@@ -110,6 +110,24 @@ class DocumentManagerTests: QuickSpec {
 
                     let count = sut.count(filters: [.id(docStruct.id)])
                     expect(count) == 1
+
+                    /*
+                     I had issues with multiple context not propagating changes between them, I use the following
+                     lines to ensure it works for basic scenarios.
+                     */
+                    guard let savedDocStruct = sut.loadById(id: docStruct.id) else {
+                        fail("No coredata instance")
+                        return
+                    }
+                    expect(savedDocStruct.data) == docStruct.data
+
+                    guard let cdDocStruct = try? sut.fetchWithId(docStruct.id) else {
+                        fail("No coredata instance")
+                        return
+                    }
+                    expect(cdDocStruct.data) == docStruct.data
+                    sut.context.refresh(cdDocStruct, mergeChanges: false)
+                    expect(cdDocStruct.data) == docStruct.data
                 }
 
                 it("saves all calls on coreData") {
@@ -375,7 +393,7 @@ class DocumentManagerTests: QuickSpec {
                     var docStruct = helper.createDocumentStruct()
                     docStruct = helper.saveLocally(docStruct)
                     waitUntil(timeout: .seconds(10)) { done in
-                        sut.delete(id: docStruct.id) { _ in
+                        sut.delete(document: docStruct) { _ in
                             done()
                         }
                     }
@@ -390,7 +408,7 @@ class DocumentManagerTests: QuickSpec {
                     var docStruct = helper.createDocumentStruct()
                     docStruct = helper.saveLocally(docStruct)
                     waitUntil(timeout: .seconds(10)) { done in
-                        let promise: PromiseKit.Promise<Bool> = sut.delete(id: docStruct.id)
+                        let promise: PromiseKit.Promise<Bool> = sut.delete(document: docStruct)
                         promise
                             .done { _ in done() }
                             .catch { _ in }
@@ -406,7 +424,7 @@ class DocumentManagerTests: QuickSpec {
                     var docStruct = helper.createDocumentStruct()
                     docStruct = helper.saveLocally(docStruct)
                     waitUntil(timeout: .seconds(10)) { done in
-                        let promise: Promises.Promise<Bool> = sut.delete(id: docStruct.id)
+                        let promise: Promises.Promise<Bool> = sut.delete(document: docStruct)
                         promise.then { _ in done() }
                     }
 
@@ -426,7 +444,7 @@ class DocumentManagerTests: QuickSpec {
                     var docStruct2 = helper.createDocumentStruct()
                     docStruct2 = helper.saveLocally(docStruct2)
                     waitUntil(timeout: .seconds(10)) { done in
-                        sut.delete(ids: [docStruct.id, docStruct2.id]) { _ in
+                        sut.delete(documents: [docStruct, docStruct2]) { _ in
                             done()
                         }
                     }

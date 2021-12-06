@@ -82,7 +82,7 @@ extension DatabaseManager {
                         return Promise(false)
                     }
 
-                    return self.deleteFromBeamObjectAPI(database.beamObjectId)
+                    return self.deleteFromBeamObjectAPI(object: database)
                 }
             }
     }
@@ -105,7 +105,7 @@ extension DatabaseManager {
 
         let request = BeamObjectRequest()
 
-        let promise: Promise<Bool> = request.deleteAll(beamObjectType: Self.BeamObjectType.beamObjectTypeName)
+        let promise: Promise<Bool> = request.deleteAll(beamObjectType: Self.BeamObjectType.beamObjectType)
 
         return promise
     }
