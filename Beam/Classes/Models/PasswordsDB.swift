@@ -33,20 +33,15 @@ struct PasswordRecord {
     var createdAt: Date
     var updatedAt: Date
     var deletedAt: Date?
-    var previousCheckSum: String?
-    var checksum: String?
     var privateKeySignature: String?
 }
 
 extension PasswordRecord: BeamObjectProtocol {
-    static var beamObjectTypeName: String = "password"
+    static var beamObjectType = BeamObjectObjectType.password
+
     var beamObjectId: UUID {
         get { uuid }
         set { uuid = newValue }
-    }
-    var previousChecksum: String? {
-        get { previousCheckSum }
-        set { previousCheckSum = newValue }
     }
 
     // Used for encoding this into BeamObject
@@ -71,8 +66,6 @@ extension PasswordRecord: BeamObjectProtocol {
                        createdAt: createdAt,
                        updatedAt: updatedAt,
                        deletedAt: deletedAt,
-                       previousCheckSum: previousCheckSum,
-                       checksum: checksum,
                        privateKeySignature: privateKeySignature)
     }
 
@@ -97,7 +90,7 @@ extension PasswordRecord: Equatable { }
 
 extension PasswordRecord: TableRecord {
     enum Columns: String, ColumnExpression {
-        case uuid, entryId, hostname, username, password, createdAt, updatedAt, deletedAt, previousChecksum, privateKeySignature
+        case uuid, entryId, hostname, username, password, createdAt, updatedAt, deletedAt, privateKeySignature
     }
 }
 
@@ -112,7 +105,6 @@ extension PasswordRecord: FetchableRecord {
         createdAt = row[Columns.createdAt]
         updatedAt = row[Columns.updatedAt]
         deletedAt = row[Columns.deletedAt]
-        previousCheckSum = row[Columns.previousChecksum]
         privateKeySignature = row[Columns.privateKeySignature]
     }
 }
@@ -132,7 +124,6 @@ extension PasswordRecord: MutablePersistableRecord {
         container[Columns.createdAt] = createdAt
         container[Columns.updatedAt] = updatedAt
         container[Columns.deletedAt] = deletedAt
-        container[Columns.previousChecksum] = previousCheckSum
         container[Columns.privateKeySignature] = privateKeySignature
     }
 }
@@ -162,7 +153,6 @@ class PasswordsDB: PasswordStore {
                 table.column("createdAt", .datetime).notNull().defaults(sql: "CURRENT_TIMESTAMP")
                 table.column("updatedAt", .datetime).notNull().defaults(sql: "CURRENT_TIMESTAMP")
                 table.column("deletedAt", .datetime)
-                table.column("previousChecksum", .text)
             }
         }
 
@@ -177,8 +167,7 @@ class PasswordsDB: PasswordStore {
                         password: password["password"],
                         createdAt: BeamDate.now,
                         updatedAt: BeamDate.now,
-                        deletedAt: nil,
-                        previousCheckSum: nil)
+                        deletedAt: nil)
                     try passwordRecord.insert(db)
                 }
             }
@@ -206,7 +195,6 @@ class PasswordsDB: PasswordStore {
                         createdAt: password["createdAt"],
                         updatedAt: password["updatedAt"],
                         deletedAt: password["deletedAt"],
-                        previousCheckSum: password["previousCheckSum"],
                         privateKeySignature: encryptedPassword.isEmpty ? nil : try EncryptionManager.shared.privateKey().asString().SHA256())
                     try passwordRecord.insert(db)
                 }
@@ -361,7 +349,6 @@ class PasswordsDB: PasswordStore {
                     createdAt: BeamDate.now,
                     updatedAt: BeamDate.now,
                     deletedAt: nil,
-                    previousCheckSum: nil,
                     privateKeySignature: privateKeySignature)
                 try passwordRecord.insert(db)
                 return passwordRecord

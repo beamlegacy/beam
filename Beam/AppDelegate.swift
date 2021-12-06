@@ -28,6 +28,7 @@ public class BeamApplication: SentryCrashExceptionApplication {
 }
 
 @NSApplicationMain
+// swiftlint:disable type_body_length
 class AppDelegate: NSObject, NSApplicationDelegate {
     // swiftlint:disable:next force_cast
     class var main: AppDelegate { NSApplication.shared.delegate as! AppDelegate }
@@ -320,7 +321,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationWillFinishLaunching(_ notification: Notification) {
         CoreDataManager.shared.setup()
-        _ = LoggerRecorder.shared
+
         Logger.shared.logDebug("-------------------------( applicationLaunching )-------------------------",
                                 category: .marker)
 

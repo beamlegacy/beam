@@ -30,8 +30,7 @@ class DocumentManagerNetworkTests: QuickSpec {
 
             coreDataManager = CoreDataManager()
             // Setup CoreData
-            coreDataManager.setup()
-            CoreDataManager.shared = coreDataManager
+            coreDataManager.setupWithoutMigration()
             sut = DocumentManager(coreDataManager: coreDataManager)
             helper = DocumentManagerTestsHelper(documentManager: sut,
                                                 coreDataManager: coreDataManager)
@@ -214,6 +213,19 @@ class DocumentManagerNetworkTests: QuickSpec {
                     /*
                      Generated those with the app, and looked at the website https://app.beamapp.co
                      for the exact content of `data`.
+
+                     Without conflicts means the API side of the data was changed by another device, and the local data wasn't
+                     modified since its network save. The state should be:
+
+                     localDocument:
+                     localDocStruct.data = ancestor
+                     localDocStruct.previousData = ancestor
+                     localDocStruct.previousChecksum = ancestor.SHA256
+
+                     remoteDocument:
+                     remoteDocument.data = newRemote
+                     remoteDocument.dataChecksum = newRemote.SHA256
+                     remoteDocument.previousChecksum = whatever (the remote object could have been updated a few times)
                      */
 
                     // 1\n2\n3
@@ -226,6 +238,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                                                                                      newRemote: newRemote,
                                                                                      "6E38CEAB-8736-4D29-9A5C-C977AB348D99",
                                                                                      "Document Title")
+
                         networkCalls = APIRequest.callsCount
                     }
 
@@ -235,6 +248,24 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                     context("with Foundation") {
                         it("refreshes the local document") {
+                            // 1st: making sure the local data is `ancestor`
+                            guard let savedDocStruct = sut.loadById(id: docStruct.id) else {
+                                fail("No coredata instance")
+                                return
+                            }
+
+                            expect(savedDocStruct.data) == ancestor.asData
+
+                            guard let cdDocStruct = try? sut.fetchWithId(docStruct.id) else {
+                                fail("No coredata instance")
+                                return
+                            }
+                            //
+
+                            expect(cdDocStruct.data) == ancestor.asData
+                            sut.context.refresh(cdDocStruct, mergeChanges: false)
+                            expect(cdDocStruct.data) == ancestor.asData
+
                             waitUntil(timeout: .seconds(10)) { done in
                                 try? sut.refresh(docStruct) { result in
                                     expect { try result.get() }.toNot(throwError())
@@ -245,17 +276,43 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                             expect(APIRequest.callsCount - networkCalls) == 2
 
-                            let newDocStruct = sut.loadById(id: docStruct.id)
-                            expect(newDocStruct?.data) == newRemote.asData
+                            // 2nd: making sure the local data is `newRemote`
+                            guard let savedDocStruct = sut.loadById(id: docStruct.id) else {
+                                fail("No coredata instance")
+                                return
+                            }
+
+                            expect(savedDocStruct.data) == newRemote.asData
+
+                            guard let cdDocStruct = try? sut.fetchWithId(docStruct.id) else {
+                                fail("No coredata instance")
+                                return
+                            }
+
+                            expect(cdDocStruct.data) == newRemote.asData
+                            sut.context.refresh(cdDocStruct, mergeChanges: false)
+                            expect(cdDocStruct.data) == newRemote.asData
                         }
                     }
                 }
 
                 context("with conflict") {
-
                     /*
                      Generated those with the app, and looked at the website https://app.beamapp.co
                      for the exact content of `data`.
+
+                     With conflicts means the API side of the data was changer by another device, and the local data was
+                     modified since its network save. The state should be:
+
+                     localDocument:
+                     localDocStruct.data = newLocal
+                     localDocStruct.previousData = ancestor
+                     localDocStruct.previousChecksum = ancestor.SHA256
+
+                     remoteDocument:
+                     remoteDocument.data = newRemote
+                     remoteDocument.dataChecksum = newRemote.SHA256
+                     remoteDocument.previousChecksum = whatever (the remote object could have been updated a few times)
                      */
 
                     // 1\n2\n3
@@ -279,9 +336,9 @@ class DocumentManagerNetworkTests: QuickSpec {
                         let remoteStruct = helper.fetchOnAPI(docStruct)
                         expect(remoteStruct?.data) == newRemote.asData
 
-                        let localDocStruct = sut.loadById(id: docStruct.id)
-                        expect(localDocStruct?.data) == newLocal.asData
-                        expect(localDocStruct?.previousData) == ancestor.asData
+                        let localDocStruct = sut.loadById(id: docStruct.id)!
+                        expect(localDocStruct.data) == newLocal.asData
+                        expect(localDocStruct.previousSavedObject?.data) == ancestor.asData
                     }
 
                     afterEach {
@@ -292,7 +349,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                         it("refreshes the local document") {
                             let networkCalls = APIRequest.callsCount
 
-                            waitUntil(timeout: .seconds(1200)) { done in
+                            waitUntil(timeout: .seconds(10)) { done in
                                 try? sut.refresh(docStruct) { result in
                                     expect { try result.get() }.toNot(throwError())
                                     expect { try result.get() } == true
@@ -587,7 +644,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                 }
 
                 afterEach {
-                    beamObjectHelper.delete(docStruct.id)
+                    beamObjectHelper.delete(docStruct)
                 }
 
                 context("Foundation") {
@@ -604,7 +661,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                             }
                         }
 
-                        let remoteObject: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct.beamObjectId)
+                        let remoteObject: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct)
                         expect(remoteObject) == docStruct
                     }
                 }
@@ -619,7 +676,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                             }.catch { fail("Should not be called: \($0)"); done() }
                         }
 
-                        let remoteObject: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct.beamObjectId)
+                        let remoteObject: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct)
                         expect(remoteObject) == docStruct
                     }
                 }
@@ -634,7 +691,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                             }.catch { fail("Should not be called: \($0)"); done() }
                         }
 
-                        let remoteObject: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct.beamObjectId)
+                        let remoteObject: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct)
                         expect(remoteObject) == docStruct
                     }
                 }
@@ -671,10 +728,10 @@ class DocumentManagerNetworkTests: QuickSpec {
                             }
                         }
 
-                        let remoteObject1: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct.beamObjectId)
+                        let remoteObject1: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct)
                         expect(remoteObject1) == docStruct
 
-                        let remoteObject2: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct2.beamObjectId)
+                        let remoteObject2: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct2)
                         expect(remoteObject2) == docStruct2
                     }
                 }
@@ -690,10 +747,10 @@ class DocumentManagerNetworkTests: QuickSpec {
                             }.catch { fail("Should not be called: \($0)"); done() }
                         }
 
-                        let remoteObject1: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct.beamObjectId)
+                        let remoteObject1: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct)
                         expect(remoteObject1) == docStruct
 
-                        let remoteObject2: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct2.beamObjectId)
+                        let remoteObject2: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct2)
                         expect(remoteObject2) == docStruct2
                     }
                 }
@@ -709,10 +766,10 @@ class DocumentManagerNetworkTests: QuickSpec {
                             }.catch { fail("Should not be called: \($0)"); done() }
                         }
 
-                        let remoteObject1: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct.beamObjectId)
+                        let remoteObject1: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct)
                         expect(remoteObject1) == docStruct
 
-                        let remoteObject2: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct2.beamObjectId)
+                        let remoteObject2: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct2)
                         expect(remoteObject2) == docStruct2
                     }
                 }
@@ -731,8 +788,8 @@ class DocumentManagerNetworkTests: QuickSpec {
                 }
 
                 afterEach {
-                    beamObjectHelper.delete(docStruct.id)
-                    beamObjectHelper.delete(docStruct2.id)
+                    beamObjectHelper.delete(docStruct)
+                    beamObjectHelper.delete(docStruct2)
                 }
 
                 context("Foundation") {
@@ -755,10 +812,10 @@ class DocumentManagerNetworkTests: QuickSpec {
                             }
                         }
 
-                        let remoteObject1: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct.beamObjectId)
+                        let remoteObject1: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct)
                         expect(remoteObject1) == docStruct
 
-                        let remoteObject2: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct2.beamObjectId)
+                        let remoteObject2: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct2)
                         expect(remoteObject2) == docStruct2
                     }
                 }
@@ -773,10 +830,10 @@ class DocumentManagerNetworkTests: QuickSpec {
                             }.catch { fail("Should not be called: \($0)"); done() }
                         }
                         
-                        let remoteObject1: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct.beamObjectId)
+                        let remoteObject1: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct)
                         expect(remoteObject1) == docStruct
                         
-                        let remoteObject2: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct2.beamObjectId)
+                        let remoteObject2: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct2)
                         expect(remoteObject2) == docStruct2
                     }
                 }
@@ -791,10 +848,10 @@ class DocumentManagerNetworkTests: QuickSpec {
                             }.catch { fail("Should not be called: \($0)"); done() }
                         }
                         
-                        let remoteObject1: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct.beamObjectId)
+                        let remoteObject1: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct)
                         expect(remoteObject1) == docStruct
                         
-                        let remoteObject2: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct2.beamObjectId)
+                        let remoteObject2: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct2)
                         expect(remoteObject2) == docStruct2
                     }
                 }
@@ -871,10 +928,10 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                             expect(try? sut.fetchWithId(docStruct2.id)?.title) == docStruct2.title
 
-                            let remoteObject1: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct.beamObjectId)
+                            let remoteObject1: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct)
                             expect(remoteObject1).to(beNil())
 
-                            let remoteObject2: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct2.beamObjectId)
+                            let remoteObject2: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct2)
                             expect(remoteObject2?.deletedAt).toNot(beNil())
                         }
                     }
@@ -937,10 +994,10 @@ class DocumentManagerNetworkTests: QuickSpec {
                             expect(try? sut.fetchWithId(docStruct.id)?.title) == docStruct.title
                             expect(try? sut.fetchWithId(docStruct2.id)?.title) == docStruct2.title
 
-                            let remoteObject1: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct.beamObjectId)
+                            let remoteObject1: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct)
                             expect(remoteObject1).to(beNil())
 
-                            let remoteObject2: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct2.beamObjectId)
+                            let remoteObject2: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct2)
                             expect(remoteObject2) == docStruct2
                         }
                     }
@@ -971,10 +1028,10 @@ class DocumentManagerNetworkTests: QuickSpec {
                             expect(try? sut.fetchWithId(docStruct.id)).to(beNil())
                             expect(try? sut.fetchWithId(docStruct3.id)?.title) == docStruct.title
 
-                            let remoteObject1: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct.beamObjectId)
+                            let remoteObject1: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct)
                             expect(remoteObject1).to(beNil())
 
-                            let remoteObject3: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct3.beamObjectId)
+                            let remoteObject3: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct3)
                             expect(remoteObject3).to(beNil())
                         }
                     }
@@ -1005,10 +1062,10 @@ class DocumentManagerNetworkTests: QuickSpec {
                             expect(localDocument?.title) == docStruct.title
                             expect(localDocument?.deleted_at).to(beNil())
 
-                            let remoteObject1: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct.beamObjectId)
+                            let remoteObject1: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct)
                             expect(remoteObject1).to(beNil())
 
-                            let remoteObject3: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct3.beamObjectId)
+                            let remoteObject3: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct3)
                             expect(remoteObject3?.deletedAt).toNot(beNil())
                         }
                     }

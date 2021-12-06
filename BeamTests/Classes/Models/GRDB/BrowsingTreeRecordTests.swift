@@ -25,19 +25,15 @@ class BrowsingTreeRecordTests: XCTestCase {
         let rootId = tree.root.id
 
         //test save/get of one tree
-        var record = try XCTUnwrap(tree.toRecord(appSessionId: appSessionId))
+        let record = try XCTUnwrap(tree.toRecord(appSessionId: appSessionId))
         try XCTAssert(!db.exists(browsingTreeRecord: record))
         XCTAssertEqual(db.countBrowsingTrees, 0)
         try db.save(browsingTreeRecord: record)
         XCTAssertEqual(db.countBrowsingTrees, 1)
         XCTAssert(try db.exists(browsingTreeRecord: record))
-        record.previousChecksum = "abc"
         try db.save(browsingTreeRecord: record)
-        let fetchedRecord = try XCTUnwrap(try? db.getBrowsingTree(rootId: record.rootId))
-        XCTAssertEqual(fetchedRecord.previousChecksum, "abc")
 
         //test saveMany/getMany trees
-        record.previousChecksum = "def"
         let anotherTree = BrowsingTree(nil)
         let anotherRootId = anotherTree.root.id
         let anotherRecord = try XCTUnwrap(anotherTree.toRecord(appSessionId: appSessionId))
@@ -46,7 +42,6 @@ class BrowsingTreeRecordTests: XCTestCase {
         var fetchedRecords = try XCTUnwrap(try? db.getBrowsingTrees(rootIds: [rootId, UUID()]))
         XCTAssertEqual(fetchedRecords.count, 1)
         XCTAssertEqual(fetchedRecords[0].rootId, rootId)
-        XCTAssertEqual(fetchedRecords[0].previousChecksum, "def")
 
         //test getAll
         fetchedRecords = try XCTUnwrap(try? db.getAllBrowsingTrees())

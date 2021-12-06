@@ -194,15 +194,6 @@ extension PasswordManager: BeamObjectManagerDelegate {
         try self.passwordsDB.allRecords(updatedSince)
     }
 
-    func checksumsForIds(_ ids: [UUID]) throws -> [UUID: String] {
-        let values: [(UUID, String)] = try passwordsDB.fetchWithIds(ids).compactMap {
-            guard let previousChecksum = $0.previousChecksum else { return nil }
-            return ($0.beamObjectId, previousChecksum)
-        }
-
-        return Dictionary(uniqueKeysWithValues: values)
-    }
-
     func saveAllOnNetwork(_ passwords: [PasswordRecord], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
         Self.backgroundQueue.async { [weak self] in
             do {
@@ -243,22 +234,5 @@ extension PasswordManager: BeamObjectManagerDelegate {
                 Logger.shared.logError(error.localizedDescription, category: .passwordNetwork)
             }
         }
-    }
-
-    func persistChecksum(_ objects: [PasswordRecord]) throws {
-        Logger.shared.logDebug("persistChecksum \(objects.count) passwords on the BeamObject API",
-                               category: .passwordNetwork)
-
-        var passwords: [PasswordRecord] = []
-        for updateObject in objects {
-            // TODO: make faster with a `fetchWithIds(ids: [UUID])`
-            guard var password = try? self.passwordsDB.fetchWithId(updateObject.beamObjectId) else {
-                throw PasswordManagerError.localPasswordNotFound
-            }
-
-            password.previousChecksum = updateObject.previousChecksum
-            passwords.append(password)
-        }
-        try self.passwordsDB.save(passwords: passwords)
     }
 }

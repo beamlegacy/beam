@@ -14,7 +14,7 @@ import BeamCore
 extension Link: TableRecord {
     /// The table columns
     enum Columns: String, ColumnExpression {
-        case id, url, title, createdAt, updatedAt, deletedAt, previousChecksum
+        case id, url, title, createdAt, updatedAt, deletedAt
     }
     static let frecencyScores = hasMany(FrecencyUrlRecord.self, using: ForeignKey(["urlId"]))
 }
@@ -27,8 +27,7 @@ extension Link: FetchableRecord {
                   title: row[Columns.title],
                   createdAt: row[Columns.createdAt],
                   updatedAt: row[Columns.updatedAt],
-                  deletedAt: row[Columns.deletedAt],
-                  previousChecksum: row[Columns.previousChecksum]
+                  deletedAt: row[Columns.deletedAt]
         )
     }
 }
@@ -47,12 +46,11 @@ extension Link: MutablePersistableRecord {
         container[Columns.createdAt] = createdAt
         container[Columns.updatedAt] = updatedAt
         container[Columns.deletedAt] = deletedAt
-        container[Columns.previousChecksum] = previousChecksum
     }
 }
 
 extension Link: BeamObjectProtocol {
-    static var beamObjectTypeName: String = "link"
+    static var beamObjectType = BeamObjectObjectType.link
 
     var beamObjectId: UUID {
         get {
@@ -64,7 +62,7 @@ extension Link: BeamObjectProtocol {
     }
 
     public func copy() throws -> Link {
-        Link(url: url, title: title, createdAt: createdAt, updatedAt: updatedAt, deletedAt: deletedAt, previousChecksum: previousChecksum)
+        Link(url: url, title: title, createdAt: createdAt, updatedAt: updatedAt, deletedAt: deletedAt)
     }
 }
 
@@ -109,7 +107,6 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
                 table.column("createdAt", .datetime).notNull().defaults(sql: "CURRENT_TIMESTAMP")
                 table.column("updatedAt", .datetime).notNull().defaults(sql: "CURRENT_TIMESTAMP")
                 table.column("deletedAt", .datetime)
-                table.column("previousChecksum", .text)
             }
         }
         do {
@@ -218,15 +215,6 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
         return try db.getLinks(ids: ids)
     }
 
-    func checksumsForIds(_ ids: [UUID]) throws -> [UUID: String] {
-        let values: [(UUID, String)] = try fetchWithIds(ids).compactMap {
-            guard let previousChecksum = $0.previousChecksum else { return nil }
-            return ($0.beamObjectId, previousChecksum)
-        }
-
-        return Dictionary(uniqueKeysWithValues: values)
-    }
-
     func saveAllOnNetwork(_ links: [Link], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
         let localTimer = BeamDate.now
 
@@ -309,23 +297,6 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
                 Logger.shared.logError(error.localizedDescription, category: .fileNetwork)
             }
         }
-    }
-
-    func persistChecksum(_ objects: [Link]) throws {
-        Logger.shared.logDebug("Saved \(objects.count) \(Self.BeamObjectType) checksums",
-                               category: .linkNetwork)
-
-        var links: [Link] = []
-        for updateObject in objects {
-            // TODO: make faster with a `fetchWithIds(ids: [UUID])`
-            guard var link = linkFor(id: updateObject.beamObjectId) else {
-                throw BeamLinkDBManagerError.localLinkNotFound
-            }
-
-            link.previousChecksum = updateObject.previousChecksum
-            links.append(link)
-        }
-        try store(links: links, shouldSaveOnNetwork: false)
     }
 
     func manageConflict(_ object: Link,

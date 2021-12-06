@@ -270,7 +270,7 @@ extension BeamNote: BeamNoteDocument {
                             dump(documentStruct)
 
                             // We delete the passed documentStruct as it conflicts with existing
-                            DocumentManager().delete(id: documentStruct.id) { _ in
+                            DocumentManager().delete(document: documentStruct) { _ in
                                 DispatchQueue.main.async {
                                     self.updateWithDocumentStruct(existingDocument)
                                     self.savedVersion.store(existingDocument.version, ordering: .relaxed)
@@ -359,17 +359,17 @@ extension BeamNote: BeamNoteDocument {
         if decodeChildren == false {
             decoder.userInfo[BeamElement.recursiveCoding] = false
         }
-        if let previousData = documentStruct.previousData {
-            let note = try decoder.decode(BeamNote.self, from: previousData)
-            note.version.store(documentStruct.version, ordering: .relaxed)
-            note.databaseId = documentStruct.databaseId
-            note.savedVersion.store(note.version.load(ordering: .relaxed), ordering: .relaxed)
-            note.updateDate = documentStruct.updatedAt
-            note.deleted = documentStruct.deletedAt != nil
 
-            return note
-        }
-        return nil
+        guard let previousData = BeamObjectChecksum.sentData(object: documentStruct) else { return nil }
+
+        let note = try decoder.decode(BeamNote.self, from: previousData)
+        note.version.store(documentStruct.version, ordering: .relaxed)
+        note.databaseId = documentStruct.databaseId
+        note.savedVersion.store(note.version.load(ordering: .relaxed), ordering: .relaxed)
+        note.updateDate = documentStruct.updatedAt
+        note.deleted = documentStruct.deletedAt != nil
+
+        return note
     }
 
     public static func fetch(title: String,

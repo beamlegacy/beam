@@ -42,6 +42,7 @@ extension DocumentManager {
         try refreshFromBeamObjectAPIAndSaveLocally(documentStruct, forced, completion)
     }
 
+    // swiftlint:disable function_body_length
     func refreshFromBeamObjectAPIAndSaveLocally(_ documentStruct: DocumentStruct,
                                                 _ forced: Bool = false,
                                                 _ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) throws {
@@ -54,7 +55,7 @@ extension DocumentManager {
             case .failure(let error): completion?(.failure(error))
             case .success(let remoteDocumentStruct):
                 guard let remoteDocumentStruct = remoteDocumentStruct else {
-                    Logger.shared.logDebug("\(documentStruct.title): remote is not more recent",
+                    Logger.shared.logDebug("\(documentStruct.title): remote is not more recent, skip",
                                            category: .documentNetwork)
                     completion?(.success(false))
                     return
@@ -68,14 +69,13 @@ extension DocumentManager {
                 }
 
                 // Saving the remote version locally
-                self.backgroundQueue.async { [unowned self] in
+                self.saveDocumentQueue.async { [unowned self] in
                     let documentManager = DocumentManager()
 
                     do {
                         let document: Document = try documentManager.fetchOrCreate(documentStruct.id, title: documentStruct.title, deletedAt: documentStruct.deletedAt)
-                        Logger.shared.logDebug("Fetched \(remoteDocumentStruct.title) {\(remoteDocumentStruct.id)} with previous checksum \(remoteDocumentStruct.checksum ?? "-")",
+                        Logger.shared.logDebug("Fetched \(remoteDocumentStruct.title) {\(remoteDocumentStruct.id)} with previous checksum \(try remoteDocumentStruct.checksum())",
                                                category: .documentNetwork)
-                        document.beam_object_previous_checksum = remoteDocumentStruct.checksum
 
                         if !documentManager.mergeDocumentWithNewData(document, remoteDocumentStruct) {
                             document.data = remoteDocumentStruct.data
@@ -87,7 +87,38 @@ extension DocumentManager {
 
                         self.notificationDocumentUpdate(DocumentStruct(document: document))
 
-                        completion?(.success(try documentManager.saveContext()))
+                        // Once we locally saved the remote object, we want to update the local previous Checksum to
+                        // avoid non-existing conflicts
+                        try BeamObjectChecksum.savePreviousChecksum(object: remoteDocumentStruct)
+                        let success = try documentManager.saveContext()
+
+                        /*
+                         Spent *hours* on that problem. The new `DocumentManager` instance is saving the coredata object,
+                         but the `context` attached to `self` seems to return an old version of the coredata object unless
+                         we force and refresh that object manually...
+                         */
+                        self.context.performAndWait {
+                            if let localStoredDocument = try? self.fetchWithId(documentStruct.id) {
+                                self.context.refresh(localStoredDocument, mergeChanges: false)
+
+                                #if DEBUG
+                                assert(localStoredDocument.data == document.data)
+                                #endif
+                            } else {
+                                assert(false)
+                            }
+                        }
+
+                        #if DEBUG
+                        if let localStoredDocumentStruct = documentManager.loadById(id: documentStruct.id) {
+                            dump(localStoredDocumentStruct)
+                            assert(localStoredDocumentStruct.data == document.data)
+                        } else {
+                            assert(false)
+                        }
+                        #endif
+
+                        completion?(.success(success))
                     } catch {
                         completion?(.failure(error))
                     }
@@ -195,6 +226,19 @@ extension DocumentManager {
 
             do {
                 try documentManager.saveContext()
+
+                /*
+                 Spent *hours* on that problem. The new `DocumentManager` instance is saving the coredata object,
+                 but the `context` attached to `self` seems to return an old version of the coredata object unless
+                 we force and refresh that object manually...
+
+                 Don't use performAndWait as it creates a DEADLOCK
+                 */
+                self.context.perform {
+                    if let localStoredDocument = try? self.fetchWithId(documentStruct.id) {
+                        self.context.refresh(localStoredDocument, mergeChanges: false)
+                    }
+                }
             } catch {
                 completion?(.failure(error))
                 networkCompletion?(.failure(DocumentManagerError.networkNotCalled))
@@ -225,9 +269,6 @@ extension DocumentManager {
         }
 
         do {
-            var documentStruct = documentStruct.copy()
-
-            documentStruct.previousChecksum = documentStruct.beamObjectPreviousChecksum
             let document_id = documentStruct.id
 
             return try self.saveOnBeamObjectAPI(documentStruct) { result in
@@ -251,9 +292,6 @@ extension DocumentManager {
     func saveOnApi(_ documentStruct: DocumentStruct,
                    _ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) -> APIRequest? {
         do {
-            var documentStruct = documentStruct.copy()
-
-            documentStruct.previousChecksum = documentStruct.beamObjectPreviousChecksum
             let document_id = documentStruct.id
 
             let apiRequest = try self.saveOnBeamObjectAPI(documentStruct) { result in
@@ -280,7 +318,7 @@ extension DocumentManager {
                                     _ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
         // This is a new document, we can delete it
         guard !localDocumentStruct.isEmpty else {
-            self.delete(id: localDocumentStruct.id) { result in
+            delete(document: localDocumentStruct) { result in
                 Logger.shared.logDebug("Deleted \(localDocumentStruct.titleAndId)",
                                        category: .document)
                 completion?(result)
@@ -328,7 +366,6 @@ extension DocumentManager {
 
                 var documentStruct = DocumentStruct(document: document)
                 documentStruct.deletedAt = BeamDate.now
-                documentStruct.previousChecksum = documentStruct.beamObjectPreviousChecksum
 
                 document.deleted_at = documentStruct.deletedAt
                 goodObjects.append(documentStruct)
@@ -383,29 +420,29 @@ extension DocumentManager {
      - you know the note has not been propagated yet (previousChecksums are nil)
      - you're adding this in a debug window for developers (like DocumentDetail)
      */
-    func delete(ids: [UUID], completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
-        ids.forEach { Self.cancelPreviousThrottledAPICall($0) }
+    func delete(documents: [DocumentStruct], completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
+        documents.forEach { Self.cancelPreviousThrottledAPICall($0.beamObjectId) }
 
         var errors: [Error] = []
-        var goodIds: [UUID] = []
+        var goods: [DocumentStruct] = []
         backgroundQueue.async {
             let documentManager = DocumentManager()
-            for id in ids {
-                guard let document: Document = try? documentManager.fetchWithId(id) else {
+            for document in documents {
+                guard let cdDocument: Document = try? documentManager.fetchWithId(document.id) else {
                     errors.append(DocumentManagerError.idNotFound)
                     continue
                 }
 
-                if let database = try? Database.fetchWithId(documentManager.context, document.database_id) {
+                if let database = try? Database.fetchWithId(documentManager.context, cdDocument.database_id) {
                     database.updated_at = BeamDate.now
                 } else {
                     // We should always have a connected database
                     Logger.shared.logError("No connected database", category: .document)
                 }
 
-                let documentStruct = DocumentStruct(document: document)
-                document.delete(documentManager.context)
-                goodIds.append(id)
+                let documentStruct = DocumentStruct(document: cdDocument)
+                cdDocument.delete(documentManager.context)
+                goods.append(document)
 
                 // Ping others about the update
                 documentManager.notificationDocumentDelete(documentStruct)
@@ -427,7 +464,7 @@ extension DocumentManager {
             }
 
             do {
-                try self.deleteFromBeamObjectAPI(goodIds) { result in
+                try self.deleteFromBeamObjectAPI(objects: goods) { result in
                     guard errors.isEmpty else {
                         completion(.failure(DocumentManagerError.multipleErrors(errors)))
                         return
@@ -445,8 +482,8 @@ extension DocumentManager {
      You should *not* use this unless you know what you're doing, deleting objects prevent the deletion to be propagated
      to other devices through the API. Use `softDelete` instead.
      */
-    func delete(id: UUID, _ networkDelete: Bool = true, completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
-        self.delete(ids: [id], completion: completion)
+    func delete(document: DocumentStruct, _ networkDelete: Bool = true, completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
+        delete(documents: [document], completion: completion)
     }
 
     /// WARNING: this will delete *ALL* documents, including from different databases.

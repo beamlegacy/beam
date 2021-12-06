@@ -25,7 +25,7 @@ extension BrowsingTree {
 extension BrowsingTree: DatabaseValueConvertible {}
 
 struct BrowsingTreeRecord: Decodable, BeamObjectProtocol {
-    static var beamObjectTypeName = "browsingTree"
+    static var beamObjectType = BeamObjectObjectType.browsingTree
 
     public enum CodingKeys: String, CodingKey {
         case rootId, rootCreatedAt, appSessionId, data, createdAt, updatedAt, deletedAt
@@ -39,8 +39,6 @@ struct BrowsingTreeRecord: Decodable, BeamObjectProtocol {
     var createdAt: Date = BeamDate.now
     var updatedAt: Date = BeamDate.now
     var deletedAt: Date?
-    var previousChecksum: String?
-    var checksum: String?
     var beamObjectId: UUID {
         get { rootId }
         set { rootId = newValue }
@@ -54,8 +52,7 @@ struct BrowsingTreeRecord: Decodable, BeamObjectProtocol {
             data: data,
             createdAt: createdAt,
             updatedAt: updatedAt,
-            deletedAt: deletedAt,
-            previousChecksum: previousChecksum
+            deletedAt: deletedAt
         )
     }
 }
@@ -74,7 +71,6 @@ extension BrowsingTreeRecord: FetchableRecord {
         createdAt = row[Columns.createdAt]
         updatedAt = row[Columns.updatedAt]
         deletedAt = row[Columns.deletedAt]
-        previousChecksum = row[Columns.previousChecksum]
     }
 }
 
@@ -87,14 +83,13 @@ extension BrowsingTreeRecord: PersistableRecord {
         container[Columns.createdAt] = createdAt
         container[Columns.updatedAt] = updatedAt
         container[Columns.deletedAt] = deletedAt
-        container[Columns.previousChecksum] = previousChecksum
     }
 }
 
 extension BrowsingTreeRecord: TableRecord {
     /// The table columns
     enum Columns: String, ColumnExpression {
-        case rootId, rootCreatedAt, appSessionId, data, createdAt, updatedAt, deletedAt, previousChecksum
+        case rootId, rootCreatedAt, appSessionId, data, createdAt, updatedAt, deletedAt
     }
 }
 
@@ -220,14 +215,6 @@ extension BrowsingTreeStoreManager: BeamObjectManagerDelegate {
         try getAllBrowsingTrees(updatedSince: updatedSince)
     }
 
-    func checksumsForIds(_ rootIds: [UUID]) throws -> [UUID: String] {
-        let values: [(UUID, String)] = try getBrowsingTrees(rootIds: rootIds).compactMap {
-            guard let previousChecksum = $0.previousChecksum else { return nil }
-            return ($0.rootId, previousChecksum)
-        }
-        return Dictionary(uniqueKeysWithValues: values)
-    }
-
     private func saveOnNetwork(_ record: BrowsingTreeRecord, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
         Self.backgroundQueue.async { [weak self] in
             do {
@@ -274,15 +261,6 @@ extension BrowsingTreeStoreManager: BeamObjectManagerDelegate {
         }
     }
 
-    func persistChecksum(_ records: [BrowsingTreeRecord]) throws {
-        Logger.shared.logDebug("Saved \(records.count) BeamObject checksums",
-                               category: .fileNetwork)
-        if try !(records.allSatisfy { try exists(browsingTreeRecord: $0) }) {
-            throw BrowsingTreeStoreManagerError.localFileNotFound
-        }
-        try save(browsingTreeRecords: records)
-    }
-
     func manageConflict(_ object: BrowsingTreeRecord,
                         _ remoteObject: BrowsingTreeRecord) throws -> BrowsingTreeRecord {
         fatalError("Managed by BeamObjectManager")
@@ -304,18 +282,19 @@ extension BrowsingTreeStoreManager {
             completion?(.failure(error))
             return
         }
-        let legacyIds = treeRecords.compactMap { (record) -> UUID? in
+        let legacyObjects = treeRecords.compactMap { record -> BrowsingTreeRecord? in
             let tree = record.data
-            return tree.root.legacy ? record.rootId : nil
+            return tree.root.legacy ? record : nil
         }
-        if legacyIds.count == 0 {
+        if legacyObjects.isEmpty {
             Logger.shared.logInfo("No legacy tree to clean", category: .browsingTreeNetwork)
             return
         }
         //local cleanup
         do {
-            try delete(ids: legacyIds)
-            Logger.shared.logInfo("Succesfully locally deleted \(legacyIds.count) legacy tree(s) ", category: .browsingTreeNetwork)
+            try delete(ids: legacyObjects.compactMap { $0.id })
+            Logger.shared.logInfo("Succesfully locally deleted \(legacyObjects.count) legacy tree(s) ",
+                                  category: .browsingTreeNetwork)
         } catch {
             Logger.shared.logError(error.localizedDescription, category: .browsingTreeNetwork)
             completion?(.failure(error))
@@ -323,13 +302,13 @@ extension BrowsingTreeStoreManager {
         }
         //remote cleanup
         do {
-            try BrowsingTreeStoreManager.shared.deleteFromBeamObjectAPI(legacyIds) { result in
+            try BrowsingTreeStoreManager.shared.deleteFromBeamObjectAPI(objects: legacyObjects) { result in
                 switch result {
                 case .failure(let error):
                     Logger.shared.logError(error.localizedDescription, category: .browsingTreeNetwork)
                     completion?(.failure(error))
                 case .success:
-                    Logger.shared.logInfo("Succesfully deleted \(legacyIds.count) legacy tree(s) from API", category: .browsingTreeNetwork)
+                    Logger.shared.logInfo("Succesfully deleted \(legacyObjects.count) legacy tree(s) from API", category: .browsingTreeNetwork)
                     completion?(.success(true))
                 }
             }

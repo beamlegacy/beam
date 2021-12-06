@@ -18,8 +18,6 @@ extension DocumentManager: BeamObjectManagerDelegate {
                 guard !self.isEqual(documentCoreData, to: updateObject) else { continue }
 
                 documentCoreData.data = updateObject.data
-                documentCoreData.beam_object_previous_checksum = updateObject.previousChecksum
-                documentCoreData.beam_api_data = updateObject.data
                 documentCoreData.version += 1
 
                 do {
@@ -41,42 +39,6 @@ extension DocumentManager: BeamObjectManagerDelegate {
 
     static var conflictPolicy: BeamObjectConflictResolution = .fetchRemoteAndError
 
-    func persistChecksum(_ objects: [DocumentStruct]) throws {
-        var changed = false
-
-        let documentManager = DocumentManager()
-        try documentManager.saveDocumentQueue.sync {
-            for updateObject in objects {
-                guard let documentCoreData = try? documentManager.fetchWithId(updateObject.id) else {
-                    throw DocumentManagerError.localDocumentNotFound
-                }
-
-                /*
-                 `persistChecksum` might be called more than once for the same object, if you save one object and
-                 it conflicts, once merged it will call saveOnBeamAPI() again and there will be no way to know this
-                 2nd save doesn't need to persist checksum, unless passing a method attribute `dontSaveChecksum`
-                 which is annoying as a pattern.
-
-                 Instead I just check if it's the same, with same previous data and we skip the save to avoid a
-                 CD save.
-                 */
-                guard documentCoreData.beam_object_previous_checksum != updateObject.previousChecksum ||
-                        documentCoreData.beam_api_data != updateObject.data else {
-                            continue
-                        }
-
-                Logger.shared.logDebug("PersistChecksum \(updateObject.titleAndId) with previous checksum \(updateObject.previousChecksum ?? "-")",
-                                       category: .documentNetwork)
-                documentCoreData.beam_object_previous_checksum = updateObject.previousChecksum
-                documentCoreData.beam_api_data = updateObject.data
-
-                changed = true
-            }
-
-            if changed { try documentManager.saveContext() }
-        }
-    }
-
     // swiftlint:disable:next function_body_length cyclomatic_complexity
     internal func receivedObjectsInContext(_ documents: [DocumentStruct]) throws {
         var changedDocuments: Set<DocumentStruct> = Set()
@@ -92,17 +54,12 @@ extension DocumentManager: BeamObjectManagerDelegate {
                     continue
                 }
 
-                // We may have used a fake date to make sure we could create the document, let's restore it to it's correct date before other modifications to make it sure we can save it later:
-                if localDocument.deleted_at == fakeDate {
-                    localDocument.deleted_at = document.deletedAt
-                }
                 guard !self.isEqual(localDocument, to: document) else { continue }
 
-                if document.checksum == localDocument.beam_object_previous_checksum &&
-                    document.data == localDocument.beam_api_data {
-                    Logger.shared.logDebug("Received object \(document.titleAndId), but has same checksum \(document.checksum ?? "-") and previous data, skip",
-                                           category: .documentNetwork)
-                    continue
+                // We may have used a fake date to make sure we could create the document,
+                // let's restore it to it's correct date before other modifications to make it sure we can save it later:
+                if localDocument.deleted_at == fakeDate {
+                    localDocument.deleted_at = document.deletedAt
                 }
 
                 var good = false
@@ -115,10 +72,9 @@ extension DocumentManager: BeamObjectManagerDelegate {
                         }
 
                         localDocument.update(document)
-                        Logger.shared.logDebug("Received object \(document.titleAndId), set previous checksum \(document.checksum ?? "-")",
+                        Logger.shared.logDebug("Received object \(document.titleAndId) update",
                                                category: .documentNetwork)
 
-                        localDocument.beam_object_previous_checksum = document.checksum
                         localDocument.version += 1
 
                         try checkValidations(localDocument)
@@ -158,7 +114,7 @@ extension DocumentManager: BeamObjectManagerDelegate {
                                     guard let localConflictedDocumentCD = try? fetchWithId(localConflictedDocument.id) else { continue }
 
                                     // We already saved this document, we must propagate its deletion
-                                    if localConflictedDocumentCD.beam_api_sent_at != nil {
+                                    if BeamObjectChecksum.previousChecksum(object: document) != nil {
                                         localConflictedDocumentCD.deleted_at = BeamDate.now
                                         changedDocuments.insert(DocumentStruct(document: localConflictedDocumentCD))
                                         Logger.shared.logWarning("Title is in conflict, but local documents are empty, soft deleting",
@@ -181,7 +137,7 @@ extension DocumentManager: BeamObjectManagerDelegate {
                         case 1002:
                             Logger.shared.logWarning("Version \(localDocument.version) is higher than \(document.version)",
                                                      category: .documentNetwork)
-                        localDocument = try fetchOrCreate(document.id, title: document.title, deletedAt: document.deletedAt)
+                            localDocument = try fetchOrCreate(document.id, title: document.title, deletedAt: document.deletedAt)
                             Logger.shared.logWarning("After reload: \(localDocument.version)",
                                                      category: .documentNetwork)
                         case 1003:
@@ -274,21 +230,9 @@ extension DocumentManager: BeamObjectManagerDelegate {
         let documentManager = DocumentManager()
         let allDocuments = try documentManager.fetchAll(filters: filters)
         let allDocStrucs: [DocumentStruct] = allDocuments.map {
-            var result = DocumentStruct(document: $0)
-            result.previousChecksum = result.beamObjectPreviousChecksum
-            return result
+            DocumentStruct(document: $0)
         }
         return allDocStrucs
-    }
-
-    func checksumsForIds(_ ids: [UUID]) throws -> [UUID: String] {
-        let documentManager = DocumentManager()
-        let values: [(UUID, String)] = try documentManager.fetchAllWithIds(ids).compactMap {
-            guard let previousChecksum = $0.beam_object_previous_checksum else { return nil }
-            return ($0.id, previousChecksum)
-        }
-
-        return Dictionary(uniqueKeysWithValues: values)
     }
 
     func manageConflict(_ documentStruct: DocumentStruct,
@@ -300,8 +244,10 @@ extension DocumentManager: BeamObjectManagerDelegate {
 
         return try documentManager.saveDocumentQueue.sync {
             // Merging might fail, in such case we send the remote version of the document
-            let document: Document = try documentManager.fetchOrCreate(documentStruct.id, title: documentStruct.title, deletedAt: documentStruct.deletedAt)
-            if let beam_api_data = document.beam_api_data,
+            let document = try documentManager.fetchOrCreate(documentStruct.id,
+                                                             title: documentStruct.title,
+                                                             deletedAt: documentStruct.deletedAt)
+            if let beam_api_data = documentStruct.previousSavedObject?.data,
                let data = BeamElement.threeWayMerge(ancestor: beam_api_data,
                                                     input1: documentStruct.data,
                                                     input2: remoteDocumentStruct.data) {
