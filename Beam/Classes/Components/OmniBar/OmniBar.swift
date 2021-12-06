@@ -60,7 +60,7 @@ struct OmniBar: View {
         state.hasBrowserTabs && (state.useOmniboxV2 || !state.destinationCardIsFocused)
     }
     private var hasRightActions: Bool {
-        state.useOmniboxV2 || showPivotButton
+        state.useOmniboxV2 || showPivotButton || showDownloadsButton
     }
     private var barShadowColor: Color {
         isAboveContent ? BeamColor.ToolBar.shadowTop.swiftUI : BeamColor.ToolBar.shadowTop.swiftUI.opacity(0.0)
