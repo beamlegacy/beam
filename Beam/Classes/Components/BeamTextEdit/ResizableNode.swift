@@ -165,10 +165,18 @@ class ResizableNode: ElementNode {
 
     private func updateElementRatio() {
         switch element.kind {
-        case .image(let uid, _):
-            element.kind = .image(uid, displayInfos: MediaDisplayInfos(height: Int(resizableElementContentSize.height), width: Int(resizableElementContentSize.width), displayRatio: desiredWidthRatio))
-        case .embed(let source, _):
-            element.kind = .embed(source, displayRatio: desiredWidthRatio)
+        case .image(let uid, let sourceMetadata, _):
+            element.kind = .image(
+                uid,
+                origin: sourceMetadata,
+                displayInfos: MediaDisplayInfos(
+                    height: Int(resizableElementContentSize.height),
+                    width: Int(resizableElementContentSize.width),
+                    displayRatio: desiredWidthRatio
+                )
+            )
+        case .embed(let url, let sourceMetadata, _):
+            element.kind = .embed(url, origin: sourceMetadata, displayRatio: desiredWidthRatio)
         default:
             break
         }

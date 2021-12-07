@@ -1809,7 +1809,7 @@ public extension CALayer {
             do {
                 let uid = try fileManager.insert(name: url.lastPathComponent, data: data)
                 let newElement = BeamElement()
-                newElement.kind = .image(SourceMetadata(origin: .local(uid)), displayInfos: MediaDisplayInfos(height: Int(image.size.height), width: Int(image.size.width), displayRatio: nil))
+                newElement.kind = .image(uid, displayInfos: MediaDisplayInfos(height: Int(image.size.height), width: Int(image.size.width), displayRatio: nil))
                 rootNode.cmdManager.insertElement(newElement, inNode: newParent, afterNode: afterNode)
                 Logger.shared.logInfo("Added Image to note \(String(describing: rootNode.element.note)) with uid \(uid) from dropped file (\(image))", category: .noteEditor)
             } catch {
