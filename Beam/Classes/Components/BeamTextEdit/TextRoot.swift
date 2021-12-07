@@ -24,7 +24,7 @@ public struct TextConfig {
     var editable: Bool = true
     var keepCursorMidScreen = false //true
 
-    var color = BeamColor.Generic.text.nsColor
+    var color = BeamColor.Generic.text.staticColor
     var disabledColor = NSColor.disabledControlTextColor
     var cursorColor = BeamColor.Generic.cursor.nsColor
     var selectionColor = BeamColor.Generic.textSelection.nsColor

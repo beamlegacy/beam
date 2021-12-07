@@ -127,7 +127,7 @@ extension Collapsable where Self: ElementNode {
         }
 
         let mouseInteraction = MouseInteraction(type: mouseInteractionType ?? .unknown, range: NSRange(location: 0, length: text.count))
-        let config = BeamTextAttributedStringBuilder.Config(elementKind: .bullet, ranges: text.ranges, fontSize: PreferencesManager.editorFontSize, markedRange: nil, searchedRanges: [], mouseInteraction: mouseInteraction)
+        let config = BeamTextAttributedStringBuilder.Config(elementKind: .bullet, ranges: text.ranges, fontSize: PreferencesManager.editorFontSize, fontColor: BeamColor.Generic.text.staticColor, markedRange: nil, searchedRanges: [], mouseInteraction: mouseInteraction)
 
         let builtString = builder.build(config: config).addAttributes([.foregroundColor: textColor.cgColor])
         return builtString
