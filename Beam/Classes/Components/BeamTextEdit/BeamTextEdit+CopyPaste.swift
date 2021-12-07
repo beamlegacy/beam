@@ -50,6 +50,7 @@ extension BeamTextEdit {
             let config = BeamTextAttributedStringBuilder.Config(elementKind: node.elementKind,
                                                                 ranges: node.elementText.ranges,
                                                                 fontSize: TextNode.fontSizeFor(kind: node.elementKind),
+                                                                fontColor: node.color,
                                                                 caret: nil,
                                                                 markedRange: .none,
                                                                 selectedRange: .none,
