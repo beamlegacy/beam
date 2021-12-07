@@ -52,10 +52,8 @@ class ImageNode: ResizableNode {
     private func setupImage(width: CGFloat) {
         var uid = UUID.null
         switch element.kind {
-        case .image(let sourceMetadata, let displayInfos):
-            if case let .local(id) = sourceMetadata.origin {
-                uid = id
-            }
+        case .image(let id, _, let displayInfos):
+            uid = id
             desiredWidthRatio = displayInfos.displayRatio
         default:
             Logger.shared.logError("ImageNode can only handle image elements, not \(element.kind)", category: .noteEditor)
@@ -88,7 +86,7 @@ class ImageNode: ResizableNode {
     private func createImage(from imageRecord: BeamFileRecord) -> NSImage? {
         switch imageRecord.type {
         case "image/svg+xml":
-            guard let svgString = imageRecord.data.asString, case .image(_, let info) = element.kind, let size = info.size else { return nil }
+            guard let svgString = imageRecord.data.asString, case .image(_, _, let info) = element.kind, let size = info.size else { return nil }
             let svgNode = try? SVGParser.parse(text: svgString)
             return try? svgNode?.toNativeImage(size: Size(Double(size.width), Double(size.height)), scale: NSScreen.main?.backingScaleFactor ?? 1)
         default:
