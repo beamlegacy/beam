@@ -111,7 +111,7 @@ class BeamElementJoinTests: XCTestCase {
         let paragraph1 = BeamElement(BeamText(text: "wikipedia", attributes: [.link("https://wikipedia.org")]))
         let paragraph2 = BeamElement(BeamText(text: " dolor"))
         let image1 = BeamElement(BeamText(text: "google logo"))
-        image1.kind = .image(SourceMetadata(origin: .local(UUID())), displayInfos: MediaDisplayInfos())
+        image1.kind = .image(UUID(), displayInfos: MediaDisplayInfos())
         let paragraph3 = BeamElement(BeamText(text: " met"))
         let paragraph4 = BeamElement(BeamText(text: "..."))
         parentElement.addChild(paragraph1)

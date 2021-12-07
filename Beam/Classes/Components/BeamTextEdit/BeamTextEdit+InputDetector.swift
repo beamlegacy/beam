@@ -288,7 +288,7 @@ extension BeamTextEdit {
             }
 
             if let sourcemetadata = metadata {
-                node.cmdManager.formatText(in: node, for: .quote(level, sourcemetadata), with: nil, for: nil, isActive: false)
+                node.cmdManager.formatText(in: node, for: .quote(level, origin: sourcemetadata), with: nil, for: nil, isActive: false)
             }
 
             self.rootNode?.cursorPosition = 0
