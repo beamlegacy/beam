@@ -71,6 +71,7 @@ extension BeamText {
         let config = BeamTextAttributedStringBuilder.Config(elementKind: node.elementKind,
                                                             ranges: ranges,
                                                             fontSize: node.fontSize,
+                                                            fontColor: node.color,
                                                             caret: caret,
                                                             markedRange: node.markedTextRange,
                                                             selectedRange: selectedRange,
