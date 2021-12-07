@@ -42,6 +42,17 @@ class ProxyTextNode: TextNode, ProxyNode {
         }.store(in: &scope)
     }
 
+
+    // MARK: TextConfig and Paddings
+    
+    override var config: TextConfig {
+        var config = TextConfig()
+        if !isLink {
+            config.color = BeamColor.Editor.reference.staticColor
+        }
+        return config
+    }
+
     override func textPadding(elementKind: ElementKind) -> NSEdgeInsets {
         switch elementKind {
         case .check:

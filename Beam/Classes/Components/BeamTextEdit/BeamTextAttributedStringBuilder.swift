@@ -14,6 +14,7 @@ struct BeamTextAttributedStringBuilder {
         var elementKind: ElementKind
         var ranges: [BeamText.Range] = []
         var fontSize: CGFloat
+        var fontColor: NSColor
 
         var caret: Caret?
         var markedRange: Swift.Range<Int>?
@@ -165,7 +166,7 @@ struct BeamTextAttributedStringBuilder {
         }
 
         stringAttributes[.font] = font(fontSize: config.fontSize, strong: strong, emphasis: emphasis, elementKind: config.elementKind)
-        stringAttributes[.foregroundColor] = BeamColor.Generic.text.staticColor
+        stringAttributes[.foregroundColor] = config.fontColor
         if let link = webLink {
             if let url = URL(string: link) ?? link.toEncodedURL {
                 stringAttributes[.link] = url as NSURL

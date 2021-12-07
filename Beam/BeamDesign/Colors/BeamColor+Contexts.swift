@@ -44,6 +44,7 @@ extension BeamColor {
         static let syntax = BeamColor.Custom(named: "EditorSyntaxColor")
         static let indentBackground = BeamColor.combining(lightColor: .Mercury, lightAlpha: 0.5, darkColor: .Mercury)
         static let underlineAndStrikethrough = BeamColor.Niobium
+        static let reference = BeamColor.combining(lightColor: .Niobium, lightAlpha: 0.75, darkColor: .Niobium, darkAlpha: 0.65)
 
         static let sourceButtonBackground = BeamColor.Nero
         static let sourceButtonBackgroundHover = BeamColor.Niobium
