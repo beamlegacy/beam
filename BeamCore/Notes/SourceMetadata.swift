@@ -35,14 +35,33 @@ public struct SourceMetadata: Codable, Equatable, Hashable {
         // swiftlint:disable:next cyclomatic_complexity
         public init(from decoder: Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
-
-            if let uuid = try container.decodeIfPresent(UUID.self, forKey: .local) {
+            // Compatibility: We went through multiple strategies to encode and decode the origin.
+            // For backwards compatibility all strategies are still supported
+            // v2 .local
+            if let uuid = try? container.decodeIfPresent(UUID.self, forKey: .local) {
                 self = .local(uuid)
-            } else if let url = try container.decodeIfPresent(URL.self, forKey: .remote) {
-                self = .remote(url)
-            } else {
-                throw SourceMetadataError.failedToDecode("origin", forKey: "local and remote")
+                return
             }
+            // v2 .remote
+            if let url = try? container.decodeIfPresent(URL.self, forKey: .remote) {
+                self = .remote(url)
+                return
+            }
+
+            // v1 .local
+            if let localDict = try? container.decodeIfPresent([String: UUID].self, forKey: .local),
+                      let uuid = localDict.values.first {
+                self = .local(uuid)
+                return
+            }
+            // v1 .remote
+            if let remoteDict = try? container.decodeIfPresent([String: URL].self, forKey: .remote),
+                      let url = remoteDict.values.first {
+                self = .remote(url)
+                return
+            }
+
+            throw SourceMetadataError.failedToDecode("origin", forKey: "local and remote")
         }
 
         public func encode(to encoder: Encoder) throws {
