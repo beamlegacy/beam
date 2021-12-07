@@ -12,6 +12,7 @@ import UUIDKit
 
 public enum ElementKindError: Error {
     case typeNameUnknown(String)
+    case failedToDecode(String, forKey: String)
 }
 
 public struct MediaDisplayInfos: Codable, Equatable {
@@ -41,7 +42,7 @@ public enum ElementKind: Codable, Equatable {
     /// Quote
     /// - Int: Level of identation
     /// - SourceMetadata
-    case quote(Int, SourceMetadata)
+    case quote(Int, origin: SourceMetadata? = nil)
     /// Check
     /// - Bool: True for checked, false for unchecked
     case check(Bool)
@@ -50,17 +51,20 @@ public enum ElementKind: Codable, Equatable {
     /// Dividing line
     case divider
     /// Image
+    /// - UUID: ID of the image
     /// - SourceMetadata
     /// - displayInfos: Describes the image size and ratio
-    case image(SourceMetadata, displayInfos: MediaDisplayInfos)
+    case image(UUID, origin: SourceMetadata? = nil, displayInfos: MediaDisplayInfos)
     /// Embed
+    /// - URL: url to embed
     /// - SourceMetadata
     /// - displayRatio
-    case embed(SourceMetadata, displayRatio: Double?)
+    case embed(URL, origin: SourceMetadata? = nil, displayRatio: Double?)
     /// Block Reference
     /// - UUID: Target Note UUID
     /// - UUID: Target Element UUID
-    case blockReference(UUID, UUID)
+    /// - SourceMetadata
+    case blockReference(UUID, UUID, origin: SourceMetadata? = nil)
 
     public var isText: Bool {
         !isMedia
@@ -87,6 +91,7 @@ public enum ElementKind: Codable, Equatable {
         case height
         case width
         case displayInfos
+        case sourceMetadata
     }
 
     public var rawValue: String {
@@ -103,16 +108,16 @@ public enum ElementKind: Codable, Equatable {
             return "code"
         case .divider:
             return "divider"
-        case .image(let source, _):
-            return "image '\(source)'"
-        case .embed(let source, _):
-            return "embed '\(source)'"
-        case .blockReference(let note, let elementId):
+        case .image(let imageId, _, _):
+            return "image '\(imageId)'"
+        case .embed(let url, _, _):
+            return "embed '\(url.absoluteString)'"
+        case .blockReference(let note, let elementId, _):
             return "blockReference '\(note).\(elementId)'"
         }
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
@@ -126,11 +131,11 @@ public enum ElementKind: Codable, Equatable {
             let level = try container.decode(Int.self, forKey: .level)
 
             if let sourceMetadata = try? container.decodeIfPresent(SourceMetadata.self, forKey: .source) {
-                self = .quote(level, sourceMetadata)
+                self = .quote(level, origin: sourceMetadata)
             } else {
                 let source = try container.decode(String.self, forKey: .source)
                 let title = try container.decode(String.self, forKey: .title)
-                self = .quote(level, SourceMetadata(string: source, title: title))
+                self = .quote(level, origin: SourceMetadata(string: source, title: title))
             }
         case "check":
             self = .check(try container.decode(Bool.self, forKey: .value))
@@ -146,23 +151,88 @@ public enum ElementKind: Codable, Equatable {
                 displayInfos = MediaDisplayInfos(height: nil, width: nil, displayRatio: sizeRatio)
             }
 
-            if let sourceMetadata = try? container.decodeIfPresent(SourceMetadata.self, forKey: .source) {
-                self = .image(sourceMetadata, displayInfos: displayInfos)
-            } else {
-                let id = try (try? container.decode(UUID.self, forKey: .source)) ?? UUID.v5(name: try container.decode(String.self, forKey: .source), namespace: .url)
-                self = .image(SourceMetadata(origin: .local(id)), displayInfos: displayInfos)
+            // Compatibility: We went through multiple strategies to decode the image source.
+            // For backwards compatibility all strategies are still supported
+            // V4
+            if let imageId = try? container.decodeIfPresent(UUID.self, forKey: .source) {
+                self = .image(imageId, displayInfos: displayInfos)
+                return
             }
+            // V3
+            if let sourceMetadata = try? container.decodeIfPresent(SourceMetadata.self, forKey: .source),
+               case .local(let imageId) = sourceMetadata.origin {
+                self = .image(imageId, displayInfos: displayInfos)
+                return
+            }
+            // V2
+            if let imageId = try? container.decodeIfPresent(UUID.self, forKey: .source) {
+                self = .image(imageId, displayInfos: displayInfos)
+                return
+            }
+            // V1
+            if let imageIdString = try? container.decodeIfPresent(String.self, forKey: .source) {
+                let imageId = UUID.v5(name: imageIdString, namespace: .url)
+                self = .image(imageId, displayInfos: displayInfos)
+                return
+            } else {
+                throw ElementKindError.failedToDecode(typeName, forKey: "source")
+            }
+
         case "embed":
             let sizeRatio = try? container.decodeIfPresent(Double.self, forKey: .sizeRatio)
-            if let sourceMetadata = try? container.decodeIfPresent(SourceMetadata.self, forKey: .source) {
-                self = .embed(sourceMetadata, displayRatio: sizeRatio)
-            } else {
-                let string = try container.decode(String.self, forKey: .source)
-                self = .embed(SourceMetadata(string: string), displayRatio: sizeRatio)
+
+            // Compatibility: We went through multiple strategies to decode the embed source.
+            // For backwards compatibility all strategies are still supported
+            // V3
+            if let urlString = try? container.decodeIfPresent(String.self, forKey: .source),
+               let url = URL(string: urlString) {
+                self = .embed(url, displayRatio: sizeRatio)
+                return
             }
+
+            // V2
+            if let sourceMetadata = try? container.decodeIfPresent(SourceMetadata.self, forKey: .source),
+               case .remote(let url) = sourceMetadata.origin {
+                self = .embed(url, displayRatio: sizeRatio)
+                return
+            }
+
+            // V1
+            if let urlString = try? container.decodeIfPresent(String.self, forKey: .source),
+                let url = URL(string: urlString) {
+                self = .embed(url, displayRatio: sizeRatio)
+                return
+            } else {
+                throw ElementKindError.failedToDecode(typeName, forKey: "source")
+            }
+
         case "blockReference":
-            let noteID = try (try? container.decode(UUID.self, forKey: .title)) ?? BeamNote.idForNoteNamed(try container.decode(String.self, forKey: .title), false) ?? UUID.null
-            let elementID = try (try? container.decode(UUID.self, forKey: .source)) ?? UUID(uuidString: try container.decode(String.self, forKey: .source)) ?? UUID.null
+            // Compatibility: We went through multiple strategies to decode the title UUID.
+            // For backwards compatibility all strategies are still supported
+            var noteID = UUID.null
+            // V2
+            if let id = try? container.decodeIfPresent(UUID.self, forKey: .title) {
+                noteID = id
+            }
+            // V1
+            if let idString = try container.decodeIfPresent(String.self, forKey: .title),
+               let id = BeamNote.idForNoteNamed(idString, false) {
+                noteID = id
+            }
+
+            // Compatibility: We went through multiple strategies to decode the source UUID.
+            // For backwards compatibility all strategies are still supported
+            var elementID = UUID.null
+            // V2
+            if let id = try? container.decodeIfPresent(UUID.self, forKey: .source) {
+                elementID = id
+            }
+            // V1
+            if let idString = try container.decodeIfPresent(String.self, forKey: .source),
+               let id = UUID(uuidString: idString) {
+                elementID = id
+            }
+
             self = .blockReference(noteID, elementID)
         default:
             throw ElementKindError.typeNameUnknown(typeName)
@@ -178,10 +248,14 @@ public enum ElementKind: Codable, Equatable {
         case let .heading(level):
             try container.encode("heading", forKey: .type)
             try container.encode(level, forKey: .level)
-        case let .quote(level, source):
+        case let .quote(level, sourceMetadata):
             try container.encode("quote", forKey: .type)
             try container.encode(level, forKey: .level)
-            try container.encode(source, forKey: .source)
+            /// .source should describe a datasource, for additional source
+            /// information use sourceMetadata instead
+            /// TODO: Rename .source to be descriptive e.g. "imageId"
+            try container.encode(sourceMetadata, forKey: .source)
+            try container.encode(sourceMetadata, forKey: .sourceMetadata)
         case let .check(checked):
             try container.encode("check", forKey: .type)
             try container.encode(checked, forKey: .value)
@@ -189,18 +263,31 @@ public enum ElementKind: Codable, Equatable {
             try container.encode("code", forKey: .type)
         case .divider:
             try container.encode("divider", forKey: .type)
-        case let .image(source, displayInfo):
+        case let .image(imageId, sourceMetadata, displayInfo):
             try container.encode("image", forKey: .type)
-            try container.encode(source, forKey: .source)
+            /// .source should describe a datasource, for additional source
+            /// information use sourceMetadata instead
+            /// TODO: Rename .source to be descriptive e.g. "imageId"
+            try container.encode(imageId, forKey: .source)
+            try container.encode(sourceMetadata, forKey: .sourceMetadata)
             try container.encode(displayInfo, forKey: .displayInfos)
-        case let .embed(source, sizeRatio):
+        case let .embed(url, sourceMetadata, sizeRatio):
             try container.encode("embed", forKey: .type)
-            try container.encode(source, forKey: .source)
+            /// .source should describe a datasource, for additional source
+            /// information use sourceMetadata instead
+            /// TODO: Rename .source to be descriptive e.g. "url"
+            try container.encode(url, forKey: .source)
+            try container.encode(sourceMetadata, forKey: .sourceMetadata)
             try container.encode(sizeRatio, forKey: .sizeRatio)
-        case let .blockReference(title, source):
+        case let .blockReference(noteId, elementId, sourceMetadata):
             try container.encode("blockReference", forKey: .type)
-            try container.encode(title, forKey: .title)
-            try container.encode(source, forKey: .source)
+            /// TODO: Rename .title to be descriptive e.g. "noteId"
+            try container.encode(noteId, forKey: .title)
+            /// .source should describe a datasource, for additional source
+            /// information use sourceMetadata instead
+            /// TODO: Rename .source to be descriptive e.g. "elementId"
+            try container.encode(elementId, forKey: .source)
+            try container.encode(sourceMetadata, forKey: .sourceMetadata)
         }
     }
 }

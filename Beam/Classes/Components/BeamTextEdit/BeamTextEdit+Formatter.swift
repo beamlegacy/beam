@@ -227,7 +227,7 @@ extension BeamTextEdit {
         case .h2:
             elementKind = .heading(2)
         case .quote:
-            elementKind = .quote(1, SourceMetadata(string: node.text.text, title: node.text.text))
+            elementKind = .quote(1, origin: SourceMetadata(string: node.text.text, title: node.text.text))
         case .checkmark:
             elementKind = .check(false)
         default:

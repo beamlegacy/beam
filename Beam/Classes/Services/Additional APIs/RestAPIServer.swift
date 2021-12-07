@@ -119,9 +119,8 @@ class RestAPIServer {
             body.append(note)
             for content in richContent {
                 switch content.kind {
-                case .image(let sourceMetadata, _):
-                    if case let .local(fileId) = sourceMetadata.origin,
-                       let fileRecord = try? fileDB.fetch(uid: fileId) {
+                case .image(let fileId, _, _):
+                    if let fileRecord = try? fileDB.fetch(uid: fileId) {
                         let resourceData = fileRecord.data
                         let resourcePart = createMultipartBody(data: resourceData, documentName: fileRecord.uid.uuidString, fileNameAndExtension: fileRecord.name, mimetype: fileRecord.type)
                         body.appendString(lineBreak)

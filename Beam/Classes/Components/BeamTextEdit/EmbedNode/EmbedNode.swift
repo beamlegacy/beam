@@ -34,8 +34,7 @@ class EmbedNode: ResizableNode {
     }
 
     private var sourceURL: URL? {
-        guard case .embed(let sourceMetadata, _) = element.kind,
-              case let .remote(url) = sourceMetadata.origin else { return nil }
+        guard case .embed(let url, _, _) = element.kind else { return nil }
         return url
     }
 
@@ -57,7 +56,7 @@ class EmbedNode: ResizableNode {
             return
         }
 
-        if case .embed(_, let ratio) = element.kind {
+        if case .embed(_, _, let ratio) = element.kind {
             desiredWidthRatio = ratio
         }
 

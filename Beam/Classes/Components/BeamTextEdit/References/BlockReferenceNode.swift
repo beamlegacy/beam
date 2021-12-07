@@ -72,7 +72,7 @@ class BlockReferenceNode: TextNode {
         var refElementId: UUID
 
         switch element.kind {
-        case let .blockReference(noteid, elid):
+        case let .blockReference(noteid, elid, _):
             refNoteId = noteid
             refElementId = elid
         default:
