@@ -105,76 +105,134 @@ platform :mac do
                 code_sign_identity: "Mac Developer",
                 profile_name: "Beam Development",
                 build_configurations: ["Test"])
+    #run_tests(
+    #  scheme: "Beam",
+    #  skip_testing: "BeamUITests",
+    #  output_types: "junit",
+    #  output_files: "tests.xml",
+    #  use_system_scm: true,
+    #  number_of_retries: 2
+    #)
+    ## For Gitlab artifacts
+    #slather(
+    #  cobertura_xml: true,
+    #  workspace: "Beam.xcworkspace",
+    #  proj: "Beam.xcodeproj",
+    #  scheme: "Beam",
+    #  source_directory: "./Beam",
+    #  output_directory: "./"
+    #)
+    ## For automatic code coverage check
+    #slather(
+    #  simple_output: true,
+    #  workspace: "Beam.xcworkspace",
+    #  proj: "Beam.xcodeproj",
+    #  scheme: "Beam",
+    #  source_directory: "./Beam",
+    #  output_directory: "./"
+    #)
     run_tests(
       scheme: "Beam",
-      skip_testing: "BeamUITests",
-      output_types: "junit",
+      testplan: "BeamTests",
+      workspace: "Beam.xcworkspace",
       output_files: "tests.xml",
       use_system_scm: true,
+      #code_coverage: true,
+      result_bundle: true,
+      fail_build: false,
       number_of_retries: 2
     )
     # For Gitlab artifacts
-    slather(
-      cobertura_xml: true,
-      workspace: "Beam.xcworkspace",
-      proj: "Beam.xcodeproj",
-      scheme: "Beam",
-      source_directory: "./Beam",
-      output_directory: "./"
-    )
+    #slather(
+    #  cobertura_xml: true,
+    #  workspace: "Beam.xcworkspace",
+    #  proj: "Beam.xcodeproj",
+    #  scheme: "Beam",
+    #  binary_basename: "Beam",
+    #  source_directory: "./Beam",
+    #  output_directory: "./"
+    #)
     # For automatic code coverage check
-    slather(
-      simple_output: true,
-      workspace: "Beam.xcworkspace",
-      proj: "Beam.xcodeproj",
-      scheme: "Beam",
-      source_directory: "./Beam",
-      output_directory: "./"
-    )
+    #slather(
+    #  simple_output: true,
+    #  workspace: "Beam.xcworkspace",
+    #  proj: "Beam.xcodeproj",
+    #  scheme: "Beam",
+    #  binary_basename: "Beam",
+    #  source_directory: "./Beam",
+    #  output_directory: "./"
+    #)
+    # # For Gitlab artifacts
+    # slather(
+    #   cobertura_xml: true,
+    #   workspace: "Beam.xcworkspace",
+    #   proj: "Beam.xcodeproj",
+    #   scheme: "Beam",
+    #   source_directory: "./Beam",
+    #   output_directory: "./"
+    # )
+    # # For automatic code coverage check
+    # slather(
+    #   simple_output: true,
+    #   workspace: "Beam.xcworkspace",
+    #   proj: "Beam.xcodeproj",
+    #   scheme: "Beam",
+    #   source_directory: "./Beam",
+    #   output_directory: "./"
+    # )
   end
 
-  desc "Run UI tests"
-  lane :uitests do
-    update_app_identifier(
-      xcodeproj: "Beam.xcodeproj",
-      plist_path: "Beam/Configuration/Info.plist",
-      app_identifier: ENV["APP_IDENTIFIER"]
-    )
-    check_certs(profile_development: true,
-                cert_development: true,
-                profile_provision_name: "Beam Development",
-                profile_cert_id: "697853WUNU",
-                profile_filename: "development.co.beamapp.macos.mobileprovision",
-                code_sign_identity: "Mac Developer",
-                profile_name: "Beam Development",
-                build_configurations: ["Test"])
-    run_tests(
-      scheme: "Beam",
-      only_testing: "BeamUITests",
-      output_types: "junit",
-      output_files: "tests.xml",
-      result_bundle: true,
-      use_system_scm: true,
-      number_of_retries: 2
-    )
-    # For Gitlab artifacts
-    slather(
-      cobertura_xml: true,
-      workspace: "Beam.xcworkspace",
-      proj: "Beam.xcodeproj",
-      scheme: "Beam",
-      source_directory: "./Beam",
-      output_directory: "./"
-    )
-    # For automatic code coverage check
-    slather(
-      simple_output: true,
-      workspace: "Beam.xcworkspace",
-      proj: "Beam.xcodeproj",
-      scheme: "Beam",
-      source_directory: "./Beam",
-      output_directory: "./"
-    )
+  4.times do |index|
+    name = "Thread#{index+1}"
+
+    desc "Run UI tests #{name}"
+    lane :"uitests#{name}" do
+      update_app_identifier(
+        xcodeproj: "Beam.xcodeproj",
+        plist_path: "Beam/Configuration/Info.plist",
+        app_identifier: ENV["APP_IDENTIFIER"]
+      )
+      check_certs(
+        profile_development: true,
+        cert_development: true,
+        profile_provision_name: "Beam Development",
+        profile_cert_id: "697853WUNU",
+        profile_filename: "development.co.beamapp.macos.mobileprovision",
+        code_sign_identity: "Mac Developer",
+        profile_name: "Beam Development",
+        build_configurations: ["Test"]
+      )
+      run_tests(
+        scheme: "Beam",
+        testplan: "BeamUITests-#{name}",
+        workspace: "Beam.xcworkspace",
+        output_types: "html,junit",
+        output_files: "tests.html,tests.xml",
+        result_bundle: true,
+        use_system_scm: true,
+        code_coverage: true,
+        fail_build: false
+      )
+      # number_of_retries: 2
+      # # For Gitlab artifacts
+      # slather(
+      #   cobertura_xml: true,
+      #   workspace: "Beam.xcworkspace",
+      #   proj: "Beam.xcodeproj",
+      #   scheme: "Beam",
+      #   source_directory: "./Beam",
+      #   output_directory: "./",
+      # )
+      # # For automatic code coverage check
+      # slather(
+      #   simple_output: true,
+      #   workspace: "Beam.xcworkspace",
+      #   proj: "Beam.xcodeproj",
+      #   scheme: "Beam",
+      #   source_directory: "./Beam",
+      #   output_directory: "./"
+      # )
+    end
   end
 
   ## To release developer version
