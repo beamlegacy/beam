@@ -293,10 +293,14 @@ public class DocumentManager: NSObject {
         } catch { return [] }
     }
 
-    func loadAllWithLimit(_ limit: Int = 4, sortingKey: SortingKey? = nil) -> [DocumentStruct] {
+    func loadAllWithLimit(_ limit: Int = 4, sortingKey: SortingKey? = nil, type: DocumentType? = nil) -> [DocumentStruct] {
         checkThread()
+        var filters: [DocumentFilter] = [.limit(limit)]
+        if let type = type {
+            filters.append(.type(type))
+        }
         do {
-            return try fetchAll(filters: [.limit(limit)], sortingKey: sortingKey).compactMap { document -> DocumentStruct? in
+            return try fetchAll(filters: filters, sortingKey: sortingKey).compactMap { document -> DocumentStruct? in
             parseDocumentBody(document)
                 }
         } catch { return [] }
