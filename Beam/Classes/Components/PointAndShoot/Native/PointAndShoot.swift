@@ -134,28 +134,33 @@ class PointAndShoot: WebPageHolder, ObservableObject {
             return
         }
 
-        if (isAltKeyDown || activeShootGroup != nil), activePointGroup != nil {
-            // if we have an existing group matching the id
-            if activeShootGroup != nil, activeShootGroup?.id == groupId {
-                activeShootGroup?.updateTargets(groupId, [target])
-            } else if hasGraceRectAndMouseOverlap(target, href, mouseLocation),
-                      !isLargeTargetArea(target),
-                      !isTypingOnWebView,
-                      activeSelectGroup == nil,
-                      activeShootGroup == nil {
+        // Dismiss group when we won't we creating or updating any ShootGroup
+        guard (isAltKeyDown || activeShootGroup != nil), activePointGroup != nil else {
+            let tempGroup = ShootGroup(groupId, [], text, href, shapeCache: shapeCache)
+            dismissedGroups.append(tempGroup)
+            return
+        }
 
-                activeShootGroup = ShootGroup(groupId, [target], text, href, shapeCache: shapeCache)
-                if let group = self.activeShootGroup,
-                   let sourceUrl = self.page.url {
-                    let text = group.text
-                    self.page.addTextToClusteringManager(text, url: sourceUrl)
-                }
-                throttledHaptic()
-            } else {
-                if !isAltKeyDown {
-                    let tempGroup = ShootGroup(groupId, [], text, href, shapeCache: shapeCache)
-                    dismissedGroups.append(tempGroup)
-                }
+        // If we have an existing group matching the id
+        if activeShootGroup != nil, activeShootGroup?.id == groupId {
+            activeShootGroup?.updateTargets(groupId, [target])
+        } else if hasGraceRectAndMouseOverlap(target, href, mouseLocation),
+                  !isLargeTargetArea(target),
+                  !isTypingOnWebView,
+                  activeSelectGroup == nil,
+                  activeShootGroup == nil {
+
+            activeShootGroup = ShootGroup(groupId, [target], text, href, shapeCache: shapeCache)
+            if let group = self.activeShootGroup,
+               let sourceUrl = self.page.url {
+                let text = group.text
+                self.page.addTextToClusteringManager(text, url: sourceUrl)
+            }
+            throttledHaptic()
+        } else {
+            if !isAltKeyDown {
+                let tempGroup = ShootGroup(groupId, [], text, href, shapeCache: shapeCache)
+                dismissedGroups.append(tempGroup)
             }
         }
     }
