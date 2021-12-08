@@ -23,4 +23,11 @@ class ContextMenuTestView: BaseView {
     override func staticText(_ element: String) -> XCUIElement {
         self.menuElement().staticTexts[element]
     }
+    
+    @discardableResult
+    func clickItem(item: NoteViewLocators.ContextMenuItems) -> BaseView {
+        staticText(item.accessibilityIdentifier).clickOnExistence()
+        return BaseView()
+    }
+    
 }
