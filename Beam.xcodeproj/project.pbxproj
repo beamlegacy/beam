@@ -2033,6 +2033,11 @@
 		B5EB9A6926C25FB8004C798A /* OmnibarDestinationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmnibarDestinationTests.swift; sourceTree = "<group>"; };
 		B5EB9A7526C28192004C798A /* GoMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoMenu.swift; sourceTree = "<group>"; };
 		B5EB9A7726C2A887004C798A /* OmnibarAutocompleteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmnibarAutocompleteTests.swift; sourceTree = "<group>"; };
+		B5EEBFEE2757DC4200DA9782 /* BeamTests.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = BeamTests.xctestplan; sourceTree = "<group>"; };
+		B5EEBFEF2757DC8600DA9782 /* BeamUITests-Thread2.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = "BeamUITests-Thread2.xctestplan"; sourceTree = "<group>"; };
+		B5EEBFF02757DC9D00DA9782 /* BeamUITests-Thread3.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = "BeamUITests-Thread3.xctestplan"; sourceTree = "<group>"; };
+		B5EEBFF12757DCB500DA9782 /* BeamUITests-Thread4.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = "BeamUITests-Thread4.xctestplan"; sourceTree = "<group>"; };
+		B5EEBFF22757DCCC00DA9782 /* BeamUITests-Thread1.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = "BeamUITests-Thread1.xctestplan"; sourceTree = "<group>"; };
 		B5F845E026F8CC9C00B15209 /* ReferencesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReferencesTests.swift; sourceTree = "<group>"; };
 		B5F845E226F8CCA700B15209 /* LinksTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinksTests.swift; sourceTree = "<group>"; };
 		B5F845E426F8CCB500B15209 /* BlockReferenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockReferenceTests.swift; sourceTree = "<group>"; };
@@ -3992,6 +3997,7 @@
 		965A781C2514F147009980D4 = {
 			isa = PBXGroup;
 			children = (
+				B5EEBFE82757D98B00DA9782 /* BeamTestPlans */,
 				965A78272514F147009980D4 /* Beam */,
 				965A78402514F149009980D4 /* BeamTests */,
 				965A784B2514F149009980D4 /* BeamUITests */,
@@ -4813,6 +4819,18 @@
 				B52744CC270B03730045805F /* SearchOnCardTests.swift */,
 			);
 			path = Search;
+			sourceTree = "<group>";
+		};
+		B5EEBFE82757D98B00DA9782 /* BeamTestPlans */ = {
+			isa = PBXGroup;
+			children = (
+				B5EEBFEE2757DC4200DA9782 /* BeamTests.xctestplan */,
+				B5EEBFEF2757DC8600DA9782 /* BeamUITests-Thread2.xctestplan */,
+				B5EEBFF02757DC9D00DA9782 /* BeamUITests-Thread3.xctestplan */,
+				B5EEBFF12757DCB500DA9782 /* BeamUITests-Thread4.xctestplan */,
+				B5EEBFF22757DCCC00DA9782 /* BeamUITests-Thread1.xctestplan */,
+			);
+			path = BeamTestPlans;
 			sourceTree = "<group>";
 		};
 		B5F845DA26F8CC8900B15209 /* BiDi */ = {

@@ -1,0 +1,57 @@
+{
+  "configurations" : [
+    {
+      "id" : "47D2064D-CCB6-438B-A337-4473F66768A5",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+
+  },
+  "testTargets" : [
+    {
+      "skippedTests" : [
+        "AllCardsDeleteTests",
+        "AllCardsViewTests",
+        "BaseTest",
+        "BlockReferenceTests",
+        "BrowserShortcutsTests",
+        "BrowserTabViewTests",
+        "CardCreationTests",
+        "CardEditTests",
+        "CardPublishTests",
+        "CardViewEmbedsTests",
+        "CardViewTests",
+        "DeleteNotesTests",
+        "DownloadsTest",
+        "EditorShortcutsTests",
+        "HelpAndFeedbackTests",
+        "JavascriptNativeInteractionsTests",
+        "JournalTest",
+        "LinksTests",
+        "LoginPasswordAutocompleteTests",
+        "LoginTest",
+        "NoteEditorTests",
+        "ReferencesTests",
+        "SearchOnCardTests",
+        "SearchOnWebTests",
+        "SignInSucessfullyTests",
+        "SignInTests",
+        "SignUpAutocompleteTests",
+        "SlashMenuTests",
+        "UpdateViewTests",
+        "WaitHelper",
+        "WebsiteAuthTest"
+      ],
+      "target" : {
+        "containerPath" : "container:Beam.xcodeproj",
+        "identifier" : "965A78472514F149009980D4",
+        "name" : "BeamUITests"
+      }
+    }
+  ],
+  "version" : 1
+}

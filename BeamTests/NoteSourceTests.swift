@@ -97,6 +97,7 @@ class NoteSourceTests: XCTestCase {
         sources.remove(urlId: secondUrlId, noteId: noteId, isUserSourceProtected: false, activeSources: activeSources)
         XCTAssertEqual(sources.count, 0)
     }
+    
     func testRemoveWithSessionId() throws {
         let firstUrlId = UUID()
         let secondUrlId = UUID()
@@ -115,6 +116,7 @@ class NoteSourceTests: XCTestCase {
     }
 
     func testSourcesScoreRefresh() throws {
+        try XCTSkipIf(true, "Skipped due to Flakiness BE-2615")
         let dataSet: [(String, Int?)] = [
             //url, textAddCount
             ("http://www.red.com", 1),
@@ -154,8 +156,8 @@ class NoteSourceTests: XCTestCase {
         }
     }
 
-    
     func testSourceSort() throws {
+        try XCTSkipIf(true, "Skipped due Flakiness BE-2615")
         let now = BeamDate.now
         let oneDay = Double(24.0 * 60.0 * 60.0)
         let yesterday = now - oneDay
