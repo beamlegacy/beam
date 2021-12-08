@@ -141,6 +141,25 @@ class BeamUITestsHelper {
         XCTAssertEqual(ShootCardPickerLabels.element.frame.origin.x, referenceElement.frame.origin.x + (referenceElement.frame.width / 2) + padding, accuracy: 10)
         XCTAssertEqual(ShootCardPickerLabels.element.frame.origin.y, referenceElement.frame.origin.y + PnsFrame.element.frame.height, accuracy: 10)
     }
+    
+    func typeAndEditHardcodedText (_ view: BaseView) -> String {
+        let helper = ShortcutsHelper()
+        view.app.typeText("Typed Text at the row")
+        view.typeKeyboardKey(.leftArrow, 4)
+        helper.shortcutActionInvokeRepeatedly(action: .selectOnLeft, numberOfTimes: 4)
+        view.typeKeyboardKey(.delete)
+        
+        helper.shortcutActionInvoke(action: .endOfLine)
+        helper.shortcutActionInvokeRepeatedly(action: .selectOnLeft, numberOfTimes: 4)
+        view.typeKeyboardKey(.delete)
+        
+        helper.shortcutActionInvoke(action: .beginOfLine)
+        view.typeKeyboardKey(.rightArrow, 4)
+        helper.shortcutActionInvokeRepeatedly(action: .selectOnRight, numberOfTimes: 4)
+        view.typeKeyboardKey(.space)
+        let expectedTextAfterChange = "Type xt at"
+        return expectedTextAfterChange
+    }
 }
 
 extension BeamUITestsHelper {
