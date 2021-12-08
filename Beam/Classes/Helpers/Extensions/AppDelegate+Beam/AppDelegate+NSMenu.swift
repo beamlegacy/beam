@@ -66,8 +66,14 @@ extension AppDelegate: NSMenuDelegate, NSMenuItemValidation {
 
     private func updateMenuItems(items: [NSMenuItem], for state: BeamState?) {
         for item in items {
-            if item.tag == 0 { continue }
+            if item.title == "Recent Cards" && item.hasSubmenu {
+                item.submenu?.removeAllItems()
+                for recentCard in recentCardsItems() {
+                    item.submenu?.addItem(recentCard)
+                }
+            }
 
+            if item.tag == 0 { continue }
             let value = abs(item.tag)
             item.isEnabled = passConditionTag(tag: value, for: state)
 
@@ -105,6 +111,29 @@ extension AppDelegate: NSMenuDelegate, NSMenuItemValidation {
             return customValidationItem.validateForState(window?.state, window: window)
         }
         return passConditionTag(tag: value, for: window?.state)
+    }
+
+    func recentCardsItems() -> [NSMenuItem] {
+        var recentItems: [NSMenuItem] = []
+
+        guard let recentsNotes = window?.state.recentsManager.recentNotes else {
+            let emptyItem = NSMenuItem()
+            emptyItem.title = "No recent Cards"
+            emptyItem.tag = 0
+            emptyItem.isEnabled = false
+            recentItems.append(emptyItem)
+            return recentItems
+        }
+
+        for note in recentsNotes {
+            let recentNoteItem = NSMenuItem()
+            recentNoteItem.title = note.title
+            recentNoteItem.tag = 0
+            recentNoteItem.isEnabled = true
+            recentNoteItem.action = #selector(BeamWindow.openRecentNote(_:))
+            recentItems.append(recentNoteItem)
+        }
+        return recentItems
     }
 }
 
