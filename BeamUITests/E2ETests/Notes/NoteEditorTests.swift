@@ -10,6 +10,7 @@ import XCTest
 
 class NoteEditorTests: BaseTest {
     
+    let cardTestView = CardTestView()
     let texts = [
         "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
     
@@ -30,7 +31,7 @@ class NoteEditorTests: BaseTest {
         firstJournalEntry.clear()
         
         testRailPrint("Then note displays typed text correctly")
-        CardTestView().getCardNotesForVisiblePart().first?.click()
+        cardTestView.getCardNotesForVisiblePart().first?.click()
         journalView.app.typeText(texts[0])
         XCTAssertEqual(journalView.getElementStringValue(element:firstJournalEntry), texts[0])
         
@@ -57,14 +58,13 @@ class NoteEditorTests: BaseTest {
         launchApp()
         
         testRailPrint("Given I type \(contextMenuTriggerKey) char")
-        CardTestView().getCardNotesForVisiblePart().first?.click()
+        cardTestView.getCardNotesForVisiblePart().first?.click()
         let firstJournalEntry = journalView.getNoteByIndex(1)
         firstJournalEntry.tapInTheMiddle()
         firstJournalEntry.clear()
-        journalView.app.typeText(contextMenuTriggerKey)
+        let contextMenuView = cardTestView.triggerContextMenu(key:  NoteViewLocators.Groups.slashContextMenu.accessibilityIdentifier)
         
         testRailPrint("Then Context menu is displayed")
-        let contextMenuView = ContextMenuTestView(key: NoteViewLocators.Groups.slashContextMenu.accessibilityIdentifier)
         XCTAssertTrue(contextMenuView.menuElement().waitForExistence(timeout: implicitWaitTimeout))
         
         testRailPrint("Then Context menu items exist, enabled and hittable")
