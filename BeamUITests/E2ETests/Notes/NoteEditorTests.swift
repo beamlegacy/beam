@@ -10,34 +10,44 @@ import XCTest
 
 class NoteEditorTests: BaseTest {
     
+    let texts = [
+        "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+    
+        //Blocked by BE-2500 and BE-2502
+                //"0º‚B†¹1¡ŽCçÇ2™€DÎ3£ÐE´4¢ðFƒÏ5ƒÞG©›6§þH™Ó7¶ýIˆ8•°JÔ9ª·Kš • – – endash— em dashL¬Ò=‚±MµÂ[“”OøØ]‘’P¼½´ªQœŒ‘æÆR®‰,¾SßÍ.„˜TÝ;…ÚU¨``V×/÷¿W…„X‰œY¥ÁZ‡", //åÅ for BE-2500 it was in the beginning
+                //სხივი causes additional char to appear
+        "Промінь Δέσμη 빔 ビーム 光束 Bjælke Stråle 0º‚B†¹1¡ŽCçÇ2™€DÎ3£ÐE´4¢ðFƒÏ5ƒÞG©›6§þH™Ó7¶ýIˆ8•°JÔ9ª·Kš • – – endash— em dashL¬Ò=‚±MµÂ[“”OøØ]‘’P¼½´ªQœŒ‘æÆR®‰,¾SßÍ.„˜TÝ;…ÚU¨``V×/÷¿W…„X‰œY¥ÁZ‡",
+    
+        "The standard@chunk.com of Lorem Ipsum https://used.since.the 1500s is reproduced.com below for those interested. Sections 1.10.32 and 1.10.33 from de Finibus Bonorum et Malorum by Cicero are also reproduced in their exact original form, accompanied by English versions from the 1914 translation by H. Rackham."
+    ]
+    
     func testTypeTextInNote() {
-        let numberOfCharsToDelete = 3
         let journalView = launchApp()
         BeamUITestsHelper(journalView.app).tapCommand(.destroyDB)
         launchApp()
+        let helper = ShortcutsHelper()
         let firstJournalEntry = journalView.getNoteByIndex(1)
         firstJournalEntry.clear()
         
-        let dateFormatter = DateFormatter()
-        // some CI macs don't like to input ":"
-        dateFormatter.dateFormat = "dd-MM-yyyy HH-mm Z"
-        let textInput = "Testing typing date \(dateFormatter.string(from: Date()))_ok"
-        
-        testRailPrint("Given I type slowly in the journal note: \(textInput)")
+        testRailPrint("Then note displays typed text correctly")
         CardTestView().getCardNotesForVisiblePart().first?.click()
-        journalView.app.typeSlowly(textInput, everyNChar: 1)
+        journalView.app.typeText(texts[0])
+        XCTAssertEqual(journalView.getElementStringValue(element:firstJournalEntry), texts[0])
         
-        testRailPrint("Then note displays typed text: \(textInput)")
-        XCTAssertEqual(firstJournalEntry.value as? String, textInput)
+        testRailPrint("Then note displays typed text from the beginning of the note correctly")
+        helper.shortcutActionInvoke(action: .beginOfNote)
+        journalView.app.typeText(texts[1])
+        XCTAssertEqual(journalView.getElementStringValue(element:firstJournalEntry), texts[1] + "]" + texts[0]) // "]" is a workaround for BE-2502 - to be replaced once it is fixed
         
-        testRailPrint("When I delete \(numberOfCharsToDelete) last chars")
-        journalView.typeKeyboardKey(.delete, numberOfCharsToDelete)
+        testRailPrint("Then note displays replaced typed text correctly")
+        helper.shortcutActionInvoke(action: .selectAll)
+        journalView.app.typeText(texts[2])
+        XCTAssertEqual(journalView.getElementStringValue(element:firstJournalEntry), texts[2])
         
-        let index = textInput.firstIndex(of: "_")!
-        let editedText = String(textInput[..<index])
-
-        testRailPrint("Then note displays edited text: \(editedText)")
-        XCTAssertEqual(firstJournalEntry.value as? String, editedText)
+        journalView.typeKeyboardKey(.enter)
+        testRailPrint("Then second note displays changed text correctly")
+        let expectedResult = BeamUITestsHelper(journalView.app).typeAndEditHardcodedText(journalView)
+        XCTAssertEqual(journalView.getElementStringValue(element:journalView.getNoteByIndex(2)), expectedResult)
     }
     
     func testSlashCommandsView() {
