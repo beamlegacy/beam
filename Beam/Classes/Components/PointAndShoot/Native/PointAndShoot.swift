@@ -270,11 +270,15 @@ class PointAndShoot: WebPageHolder, ObservableObject {
         return note
     }
 
-    /// Adds the activeShootGroup to the journal. It will convert the html to beamtext, apply quote styling and download any target images.
+    /// Adds the activeShootGroup to the journal. It will convert the html to beamtext,
+    /// apply quote styling and download any target images.
     /// - Parameters:
-    ///   - noteTitle: title of note to assign to.
+    ///   - targetNote: The note the shootgroup should be added to
+    ///   - group: ShootGroup to add
+    ///   - withSourceBullet: If shoot should be inserted underneath a source bullet
+    ///   - completion:
     ///   - noteText: optional text to add underneath the shoot quote
-    func addShootToNote(targetNote: BeamNote, withNote noteText: String? = nil, group: ShootGroup, completion: @escaping () -> Void) {
+    func addShootToNote(targetNote: BeamNote, withNote noteText: String? = nil, group: ShootGroup, withSourceBullet: Bool = true, completion: @escaping () -> Void) {
         guard let sourceUrl = page.url else {
             fatalError("Could not find note to update with title \(targetNote.title)")
         }
@@ -307,7 +311,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
             // Set Destination note to the current card
             page.setDestinationNote(targetNote, rootElement: targetNote)
             // Add all quotes to source Note
-            let addWithSourceBullet = shouldAddWithSourceBullet(elements)
+            let addWithSourceBullet = withSourceBullet ? shouldAddWithSourceBullet(elements) : withSourceBullet
             if let destinationElement = self.page.addToNote(allowSearchResult: true, inSourceBullet: addWithSourceBullet) {
                 if let noteText = noteText, !noteText.isEmpty, let lastQuote = elements.last {
                     // Append NoteText last quote
@@ -430,6 +434,15 @@ class PointAndShoot: WebPageHolder, ObservableObject {
 
         // A single Image should be inserted without source bullet
         if first.kind.isMedia {
+            return false
+        }
+
+        // A single link matching the source bullet link should be inserted without source bullet
+        guard let pageUrl = page.url?.absoluteString else {
+            Logger.shared.logDebug("Could not find page url while checking text links", category: .pointAndShoot)
+            return true
+        }
+        for link in first.text.links where (link == pageUrl) && (first.text.text == page.title) {
             return false
         }
 
