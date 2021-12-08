@@ -1,0 +1,71 @@
+{
+  "configurations" : [
+    {
+      "id" : "C758D21E-F9A5-493E-9FC6-28CE6A688E82",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "codeCoverage" : {
+      "targets" : [
+        {
+          "containerPath" : "container:Beam.xcodeproj",
+          "identifier" : "965A78242514F147009980D4",
+          "name" : "Beam"
+        }
+      ]
+    },
+    "commandLineArgumentEntries" : [
+      {
+        "argument" : "-com.apple.CoreData.MigrationDebug 1"
+      },
+      {
+        "argument" : "--export-all-note-sources",
+        "enabled" : false
+      },
+      {
+        "argument" : "-com.apple.CoreData.Logging.stderr 1",
+        "enabled" : false
+      },
+      {
+        "argument" : "-com.apple.CoreData.ConcurrencyDebug 1",
+        "enabled" : false
+      },
+      {
+        "argument" : "-com.apple.CoreData.SQLDebug 1",
+        "enabled" : false
+      },
+      {
+        "argument" : "--export-all-browsing-sessions",
+        "enabled" : false
+      }
+    ],
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:Beam.xcodeproj",
+      "identifier" : "965A78242514F147009980D4",
+      "name" : "Beam"
+    },
+    "uiTestingScreenshotsLifetime" : "keepAlways",
+    "userAttachmentLifetime" : "keepAlways"
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:Beam.xcodeproj",
+        "identifier" : "96319D162616232700D1CF31",
+        "name" : "BeamCoreTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:Beam.xcodeproj",
+        "identifier" : "965A783C2514F149009980D4",
+        "name" : "BeamTests"
+      }
+    }
+  ],
+  "version" : 1
+}
