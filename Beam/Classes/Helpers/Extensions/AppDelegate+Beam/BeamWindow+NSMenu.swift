@@ -172,6 +172,12 @@ extension BeamWindow {
         state.browserTabsManager.currentTab?.collectTab()
     }
 
+    @IBAction func openRecentNote(_ sender: NSMenuItem) {
+        let recentsNotes = state.recentsManager.recentNotes
+        guard let id = recentsNotes.first(where: { $0.title == sender.title })?.id else { return }
+        state.navigateToNote(id: id)
+    }
+
     // MARK: - Web Navigation
 
     var shift: Bool { NSEvent.modifierFlags.contains(.shift) }
