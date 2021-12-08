@@ -26,5 +26,9 @@ enum NoteViewLocators {
         case textItem = "ContextMenuItem-text"
         case dividerItem = "ContextMenuItem-divider"
     }
+    
+    enum Others: String, CaseIterable, UIElement {
+        case beginningPartOfContextItem = "ContextMenuItem-"
+    }
 
 }

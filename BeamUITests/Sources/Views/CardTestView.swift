@@ -11,6 +11,7 @@ import XCTest
 class CardTestView: BaseView {
     
     var cardTitle: XCUIElement { return textField(CardViewLocators.TextFields.cardTitle.accessibilityIdentifier)}
+    var cardTitleStatic: XCUIElement { return staticText(CardViewLocators.TextFields.cardTitle.accessibilityIdentifier)}
 
     @discardableResult
     func waitForCardViewToLoad() -> Bool {
@@ -24,6 +25,10 @@ class CardTestView: BaseView {
     
     func getCardTitle() -> String {
         return self.getElementStringValue(element: cardTitle)
+    }
+    
+    func getCardStaticTitle() -> String {
+        return self.getElementStringValue(element: cardTitleStatic)
     }
     
     func clickDeleteButton() -> AlertTestView {
@@ -233,5 +238,10 @@ class CardTestView: BaseView {
     func addTestRef(_ referenceText: String) -> CardTestView {
         app.typeText("((\(referenceText))\r")
         return self
+    }
+    
+    func triggerContextMenu(key: String) -> ContextMenuTestView {
+        app.typeText("/")
+        return ContextMenuTestView(key: key)
     }
 }
