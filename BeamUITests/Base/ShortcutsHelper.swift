@@ -34,6 +34,14 @@ class ShortcutsHelper {
         XCUIApplication().typeKey(key, modifierFlags:[.command, .shift])
     }
     
+    private func invokeShiftKey(_ key: String) {
+        XCUIApplication().typeKey(key, modifierFlags:.shift)
+    }
+    
+    private func invokeShiftKey(_ key: XCUIKeyboardKey) {
+        XCUIApplication().typeKey(key, modifierFlags:.shift)
+    }
+    
     enum ShortcutCommand {
         case selectAll
         case undo
@@ -63,6 +71,11 @@ class ShortcutsHelper {
         case close
         case closeWindow
         case collectFullPage
+        case endOfLine
+        case beginOfLine
+        case beginOfNote
+        case selectOnLeft
+        case selectOnRight
     }
     
     @discardableResult
@@ -104,6 +117,11 @@ class ShortcutsHelper {
         case .close: invokeCMDKey("w")
         case .closeWindow: invokeCMDShiftKey("w")
         case .collectFullPage: invokeCMDKey("s")
+        case .endOfLine: invokeCMDKey(.rightArrow)
+        case .beginOfLine: invokeCMDKey(.leftArrow)
+        case .selectOnRight: invokeShiftKey(.rightArrow)
+        case .selectOnLeft: invokeShiftKey(.leftArrow)
+        case .beginOfNote: invokeCMDKey(.upArrow)
         }
         return BaseView()
     }
