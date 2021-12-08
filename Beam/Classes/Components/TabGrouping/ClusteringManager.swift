@@ -283,7 +283,9 @@ class ClusteringManager: ObservableObject {
         }
         // After adding the second page, add notes from previous sessions
         if self.initialiseNotes {
-            let notes = BeamNote.fetchNotesWithType(type: .note, 10, 0)
+            let notes = DocumentManager().loadAllWithLimit(10, sortingKey: .updatedAt(false), type: .note).compactMap {
+                BeamNote.fetch(id: $0.id)
+            }
             for note in notes {
                 self.addNote(note: note, addToNextSummary: false)
             }
