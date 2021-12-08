@@ -16,6 +16,7 @@ class BaseTest: XCTestCase {
     let minimumWaitTimeout = TimeInterval(2)
     let emptyString = ""
     let beamAppInstance = XCUIApplication(bundleIdentifier: "co.beamapp.macos")
+    let uiTestModeLaunchArgument = "XCUITest"
     
     override func setUpWithError() throws {
         try super.setUpWithError()
