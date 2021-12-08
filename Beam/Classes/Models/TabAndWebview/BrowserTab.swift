@@ -756,7 +756,7 @@ import Promises
                 let shootGroup = PointAndShoot.ShootGroup.init(UUID().uuidString, [target], "", "", shapeCache: nil, showRect: false, directShoot: true)
 
                 if let note = self.noteController.note {
-                    pns.addShootToNote(targetNote: note, withNote: nil, group: shootGroup, completion: {})
+                    pns.addShootToNote(targetNote: note, withNote: nil, group: shootGroup, withSourceBullet: false, completion: {})
                 } else {
                     pns.activeShootGroup = shootGroup
                 }
