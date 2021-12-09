@@ -71,9 +71,7 @@ func export_all_note_sources(to url: URL?) {
         .compactMap { title -> [NoteAndSourcesRow]? in
             guard let note = BeamNote.fetch(title: title, keepInMemory: false),
                   !note.type.isJournal else { return nil }
-            let sem = DispatchSemaphore(value: 0)
-            note.sources.refreshScores { sem.signal() }
-            sem.wait()
+            note.sources.refreshScores()
             if note.sources.count > 0 {
                 return note.sources.getAll().map { s in
                     return NoteAndSourcesRow(
