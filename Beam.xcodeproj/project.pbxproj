@@ -408,9 +408,16 @@
 		872644772619903B0070E83D /* StepperControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 872644762619903B0070E83D /* StepperControl.swift */; };
 		8726448F26199B8F0070E83D /* OptionSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8726448E26199B8F0070E83D /* OptionSelector.swift */; };
 		872644C3261B29620070E83D /* PasswordManagerMenuViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 872644C1261B29620070E83D /* PasswordManagerMenuViewModel.swift */; };
+		873528B827342E6A005E7CBC /* SandboxEscape.swift in Sources */ = {isa = PBXBuildFile; fileRef = 873528B727342E6A005E7CBC /* SandboxEscape.swift */; };
+		873528BA27342F85005E7CBC /* BrowserHistoryImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 873528B927342F85005E7CBC /* BrowserHistoryImporter.swift */; };
+		873528BC27343871005E7CBC /* SafariImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 873528BB27343871005E7CBC /* SafariImporter.swift */; };
+		873528BE2735335F005E7CBC /* FirefoxImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 873528BD2735335F005E7CBC /* FirefoxImporter.swift */; };
+		873528C127354295005E7CBC /* INI in Frameworks */ = {isa = PBXBuildFile; productRef = 873528C027354295005E7CBC /* INI */; };
+		873528C327354B96005E7CBC /* ChromeImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 873528C227354B96005E7CBC /* ChromeImporter.swift */; };
 		8746CCA6266DFDCD00F44D41 /* PasswordImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8746CCA5266DFDCD00F44D41 /* PasswordImporter.swift */; };
 		8759678526FB903C0097C3CC /* UITests-Passwords.csv in Resources */ = {isa = PBXBuildFile; fileRef = 8759677E26FB8BDA0097C3CC /* UITests-Passwords.csv */; };
 		8760F45926F1DCA700864D9B /* PasswordManagerCredentialsBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8760F45826F1DCA700864D9B /* PasswordManagerCredentialsBuilder.swift */; };
+		8768D5EC2735A1100079DEC6 /* AppDelegate+BrowserHistoryImport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8768D5EB2735A1100079DEC6 /* AppDelegate+BrowserHistoryImport.swift */; };
 		8775C5F32613212C00A26CAC /* StoredPasswordCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8775C5F22613212C00A26CAC /* StoredPasswordCell.swift */; };
 		8775C5FB261323EC00A26CAC /* PasswordManagerMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8775C5FA261323EC00A26CAC /* PasswordManagerMenu.swift */; };
 		877888D9269C743F00D703F0 /* CSVParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877888D1269C743F00D703F0 /* CSVParser.swift */; };
@@ -1002,7 +1009,15 @@
 		BAA67F0398B7B9D2CA9ADE25 /* ContentTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA674174D9C44BC3C8FF465 /* ContentTypes.swift */; };
 		BAA67FA1EA0AEC590CEE0AB8 /* WebNavigationContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67226F0A10301D829E071 /* WebNavigationContext.swift */; };
 		DA0EA7172698400400BD5D2F /* LongTermUrlScoreStoreTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0EA7162698400400BD5D2F /* LongTermUrlScoreStoreTest.swift */; };
+		DA113A852760FA26006B20AF /* chromeHistory.db in Resources */ = {isa = PBXBuildFile; fileRef = DA113A842760FA26006B20AF /* chromeHistory.db */; };
+		DA113A872760FAEF006B20AF /* BrowserHistoryImportTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA113A862760FAEF006B20AF /* BrowserHistoryImportTest.swift */; };
 		DA1EB2A126CD33D5006AEB86 /* WebSessionizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1EB2A026CD33D5006AEB86 /* WebSessionizer.swift */; };
+		DA22536327623C2900041D41 /* safariHistory.db-wal in Resources */ = {isa = PBXBuildFile; fileRef = DA22535B27623C2800041D41 /* safariHistory.db-wal */; };
+		DA22536427623C2900041D41 /* safariHistory.db in Resources */ = {isa = PBXBuildFile; fileRef = DA22536127623C2800041D41 /* safariHistory.db */; };
+		DA22536527623C2900041D41 /* safariHistory.db-shm in Resources */ = {isa = PBXBuildFile; fileRef = DA22536227623C2900041D41 /* safariHistory.db-shm */; };
+		DA2253692762426E00041D41 /* firefoxPlaces.db-shm in Resources */ = {isa = PBXBuildFile; fileRef = DA2253662762426E00041D41 /* firefoxPlaces.db-shm */; };
+		DA22536A2762426E00041D41 /* firefoxPlaces.db-wal in Resources */ = {isa = PBXBuildFile; fileRef = DA2253672762426E00041D41 /* firefoxPlaces.db-wal */; };
+		DA22536B2762426E00041D41 /* firefoxPlaces.db in Resources */ = {isa = PBXBuildFile; fileRef = DA2253682762426E00041D41 /* firefoxPlaces.db */; };
 		DA3239D8269DDE2F00A1F4C3 /* LongTermUrlScore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3239D7269DDE2F00A1F4C3 /* LongTermUrlScore.swift */; };
 		DA3239DE269DE06F00A1F4C3 /* LongTermUrlScore+GRDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3239DD269DE06F00A1F4C3 /* LongTermUrlScore+GRDB.swift */; };
 		DA3E41D42642CC7900BA3952 /* TextSaver.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3E41BF2642CC7900BA3952 /* TextSaver.swift */; };
@@ -1027,6 +1042,7 @@
 		DABFD3B726FCAC8300C1F7F0 /* Csv.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABFD3B626FCAC8300C1F7F0 /* Csv.swift */; };
 		DABFF8072742731B00FAF364 /* BeamLinkDBTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABFF8062742731B00FAF364 /* BeamLinkDBTest.swift */; };
 		DAEAAF3026D3CA4D00D17559 /* ExportAllNoteSources.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAAF2F26D3CA4D00D17559 /* ExportAllNoteSources.swift */; };
+		DAEC880F2739953A0087FC18 /* BatchFrecencyUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEC880E2739953A0087FC18 /* BatchFrecencyUpdater.swift */; };
 		DAEEA73B26A5C4A600AE72DE /* NoteSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEEA73A26A5C4A600AE72DE /* NoteSource.swift */; };
 		DAEEA74826A6B96A00AE72DE /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEEA74726A6B96A00AE72DE /* Utilities.swift */; };
 		DAEEA77C26A701CC00AE72DE /* NoteSourceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEEA77B26A701CC00AE72DE /* NoteSourceTests.swift */; };
@@ -1564,9 +1580,15 @@
 		872644762619903B0070E83D /* StepperControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StepperControl.swift; sourceTree = "<group>"; };
 		8726448E26199B8F0070E83D /* OptionSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OptionSelector.swift; sourceTree = "<group>"; };
 		872644C1261B29620070E83D /* PasswordManagerMenuViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PasswordManagerMenuViewModel.swift; sourceTree = "<group>"; };
+		873528B727342E6A005E7CBC /* SandboxEscape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SandboxEscape.swift; sourceTree = "<group>"; };
+		873528B927342F85005E7CBC /* BrowserHistoryImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserHistoryImporter.swift; sourceTree = "<group>"; };
+		873528BB27343871005E7CBC /* SafariImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariImporter.swift; sourceTree = "<group>"; };
+		873528BD2735335F005E7CBC /* FirefoxImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirefoxImporter.swift; sourceTree = "<group>"; };
+		873528C227354B96005E7CBC /* ChromeImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChromeImporter.swift; sourceTree = "<group>"; };
 		8746CCA5266DFDCD00F44D41 /* PasswordImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordImporter.swift; sourceTree = "<group>"; };
 		8759677E26FB8BDA0097C3CC /* UITests-Passwords.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = "UITests-Passwords.csv"; sourceTree = "<group>"; };
 		8760F45826F1DCA700864D9B /* PasswordManagerCredentialsBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordManagerCredentialsBuilder.swift; sourceTree = "<group>"; };
+		8768D5EB2735A1100079DEC6 /* AppDelegate+BrowserHistoryImport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+BrowserHistoryImport.swift"; sourceTree = "<group>"; };
 		8775C5F22613212C00A26CAC /* StoredPasswordCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoredPasswordCell.swift; sourceTree = "<group>"; };
 		8775C5FA261323EC00A26CAC /* PasswordManagerMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordManagerMenu.swift; sourceTree = "<group>"; };
 		877888D1269C743F00D703F0 /* CSVParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CSVParser.swift; sourceTree = "<group>"; };
@@ -2181,7 +2203,15 @@
 		BAA67FA6403B5D2284B56F13 /* Native.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = Native.ts; sourceTree = "<group>"; };
 		BAA67FB8275D3AA84301AE01 /* EventsMock.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = EventsMock.ts; sourceTree = "<group>"; };
 		DA0EA7162698400400BD5D2F /* LongTermUrlScoreStoreTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LongTermUrlScoreStoreTest.swift; sourceTree = "<group>"; };
+		DA113A842760FA26006B20AF /* chromeHistory.db */ = {isa = PBXFileReference; lastKnownFileType = file; path = chromeHistory.db; sourceTree = "<group>"; };
+		DA113A862760FAEF006B20AF /* BrowserHistoryImportTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BrowserHistoryImportTest.swift; path = Managers/BrowserHistoryImportTest.swift; sourceTree = "<group>"; };
 		DA1EB2A026CD33D5006AEB86 /* WebSessionizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSessionizer.swift; sourceTree = "<group>"; };
+		DA22535B27623C2800041D41 /* safariHistory.db-wal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "safariHistory.db-wal"; sourceTree = "<group>"; };
+		DA22536127623C2800041D41 /* safariHistory.db */ = {isa = PBXFileReference; lastKnownFileType = file; path = safariHistory.db; sourceTree = "<group>"; };
+		DA22536227623C2900041D41 /* safariHistory.db-shm */ = {isa = PBXFileReference; lastKnownFileType = file; path = "safariHistory.db-shm"; sourceTree = "<group>"; };
+		DA2253662762426E00041D41 /* firefoxPlaces.db-shm */ = {isa = PBXFileReference; lastKnownFileType = file; path = "firefoxPlaces.db-shm"; sourceTree = "<group>"; };
+		DA2253672762426E00041D41 /* firefoxPlaces.db-wal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "firefoxPlaces.db-wal"; sourceTree = "<group>"; };
+		DA2253682762426E00041D41 /* firefoxPlaces.db */ = {isa = PBXFileReference; lastKnownFileType = file; path = firefoxPlaces.db; sourceTree = "<group>"; };
 		DA3239D7269DDE2F00A1F4C3 /* LongTermUrlScore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LongTermUrlScore.swift; sourceTree = "<group>"; };
 		DA3239DD269DE06F00A1F4C3 /* LongTermUrlScore+GRDB.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "LongTermUrlScore+GRDB.swift"; sourceTree = "<group>"; };
 		DA3E41BF2642CC7900BA3952 /* TextSaver.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextSaver.swift; sourceTree = "<group>"; };
@@ -2204,6 +2234,7 @@
 		DABFD3B626FCAC8300C1F7F0 /* Csv.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Csv.swift; sourceTree = "<group>"; };
 		DABFF8062742731B00FAF364 /* BeamLinkDBTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamLinkDBTest.swift; sourceTree = "<group>"; };
 		DAEAAF2F26D3CA4D00D17559 /* ExportAllNoteSources.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportAllNoteSources.swift; sourceTree = "<group>"; };
+		DAEC880E2739953A0087FC18 /* BatchFrecencyUpdater.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BatchFrecencyUpdater.swift; sourceTree = "<group>"; };
 		DAEEA73A26A5C4A600AE72DE /* NoteSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteSource.swift; sourceTree = "<group>"; };
 		DAEEA74726A6B96A00AE72DE /* Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
 		DAEEA77B26A701CC00AE72DE /* NoteSourceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteSourceTests.swift; sourceTree = "<group>"; };
@@ -2258,6 +2289,7 @@
 				3315DC942667859A002A47CF /* PromisesTestHelpers in Frameworks */,
 				33B2FF2D274C3F8500518F12 /* Lottie in Frameworks */,
 				964548A02523B3550064D062 /* CloudKit.framework in Frameworks */,
+				873528C127354295005E7CBC /* INI in Frameworks */,
 				3315DC962667859A002A47CF /* OAuthSwift in Frameworks */,
 				33793AD1265CFEC50041E1B8 /* SwiftSoup in Frameworks */,
 				33088D6326B06677004FAE99 /* ZIPFoundation in Frameworks */,
@@ -2406,6 +2438,7 @@
 		0DC6E2DA26A02B0E00BD2E2A /* Assets */ = {
 			isa = PBXGroup;
 			children = (
+				DA113A7C2760F77D006B20AF /* BrowserHistoryImport */,
 				0DC6E2DB26A02B5900BD2E2A /* topdomains_test.txt */,
 			);
 			path = Assets;
@@ -2714,6 +2747,7 @@
 		418171712581107C00317ED8 /* Importers */ = {
 			isa = PBXGroup;
 			children = (
+				873528B127342DE5005E7CBC /* BrowserHistory */,
 				8746CC9D266DFDB100F44D41 /* Passwords */,
 				418171722581107C00317ED8 /* Roam */,
 			);
@@ -3026,6 +3060,7 @@
 				52A8698C26CBB3C000FCCC69 /* AppDelegate+ShowError.swift */,
 				96A1C67526F8ABBF006AFF88 /* AppDelegate+JsonImportExport.swift */,
 				332AB2EF26FE17D6007717D8 /* AppDelegate+UserInfos.swift */,
+				8768D5EB2735A1100079DEC6 /* AppDelegate+BrowserHistoryImport.swift */,
 				A5DE86A32692AEEC00E05C20 /* BeamWindow+NSMenu.swift */,
 				3343794227037578004EF5A4 /* BeamWindow+Search.swift */,
 				DA5C63F0274D0873001F7CEF /* AppDelegate+LinkDB.swift */,
@@ -3668,6 +3703,18 @@
 			path = Error;
 			sourceTree = "<group>";
 		};
+		873528B127342DE5005E7CBC /* BrowserHistory */ = {
+			isa = PBXGroup;
+			children = (
+				873528B727342E6A005E7CBC /* SandboxEscape.swift */,
+				873528B927342F85005E7CBC /* BrowserHistoryImporter.swift */,
+				873528BB27343871005E7CBC /* SafariImporter.swift */,
+				873528BD2735335F005E7CBC /* FirefoxImporter.swift */,
+				873528C227354B96005E7CBC /* ChromeImporter.swift */,
+			);
+			path = BrowserHistory;
+			sourceTree = "<group>";
+		};
 		8746CC9D266DFDB100F44D41 /* Passwords */ = {
 			isa = PBXGroup;
 			children = (
@@ -4118,6 +4165,7 @@
 		965A78402514F149009980D4 /* BeamTests */ = {
 			isa = PBXGroup;
 			children = (
+				DA113A862760FAEF006B20AF /* BrowserHistoryImportTest.swift */,
 				DAA3879C26B1837300CAE20B /* FrecencyNoteTriggerTests.swift */,
 				DAA3875326B043C800CAE20B /* FrecencyNoteRecordTest.swift */,
 				DAEEA77B26A701CC00AE72DE /* NoteSourceTests.swift */,
@@ -5050,11 +5098,26 @@
 		DA0EA6FB269836B600BD5D2F /* Score */ = {
 			isa = PBXGroup;
 			children = (
+				DAEC880E2739953A0087FC18 /* BatchFrecencyUpdater.swift */,
 				DA3239D7269DDE2F00A1F4C3 /* LongTermUrlScore.swift */,
 				DA63D512267CF10800D7C756 /* FrecencyScorer.swift */,
 				DAEEA74726A6B96A00AE72DE /* Utilities.swift */,
 			);
 			path = Score;
+			sourceTree = "<group>";
+		};
+		DA113A7C2760F77D006B20AF /* BrowserHistoryImport */ = {
+			isa = PBXGroup;
+			children = (
+				DA2253682762426E00041D41 /* firefoxPlaces.db */,
+				DA2253662762426E00041D41 /* firefoxPlaces.db-shm */,
+				DA2253672762426E00041D41 /* firefoxPlaces.db-wal */,
+				DA22536127623C2800041D41 /* safariHistory.db */,
+				DA22536227623C2900041D41 /* safariHistory.db-shm */,
+				DA22535B27623C2800041D41 /* safariHistory.db-wal */,
+				DA113A842760FA26006B20AF /* chromeHistory.db */,
+			);
+			path = BrowserHistoryImport;
 			sourceTree = "<group>";
 		};
 		DA1EB29826CD3312006AEB86 /* Browsing */ = {
@@ -5177,6 +5240,7 @@
 				333E61832707094000847A0C /* Swime */,
 				52466B21270DA966002D1716 /* Clustering */,
 				33F64F1127283201004EB0CD /* Macaw */,
+				873528C027354295005E7CBC /* INI */,
 				33B2FF2C274C3F8500518F12 /* Lottie */,
 				8A0DFAD4275664090044515B /* FaviconFinder */,
 			);
@@ -5298,6 +5362,7 @@
 				333E61822707094000847A0C /* XCRemoteSwiftPackageReference "Swime" */,
 				52466B20270DA966002D1716 /* XCRemoteSwiftPackageReference "clustering" */,
 				33F64F1027283201004EB0CD /* XCRemoteSwiftPackageReference "Macaw" */,
+				873528BF27354295005E7CBC /* XCRemoteSwiftPackageReference "ini" */,
 				9624A65527431B4200B8D012 /* XCRemoteSwiftPackageReference "swift-atomics" */,
 				33B2FF2B274C3F8500518F12 /* XCRemoteSwiftPackageReference "lottie-ios" */,
 				8A0DFAD3275664090044515B /* XCRemoteSwiftPackageReference "FaviconFinder" */,
@@ -5492,17 +5557,24 @@
 			buildActionMask = 2147483647;
 			files = (
 				0DC6E2E926A0A4DB00BD2E2A /* topdomains_test.txt in Resources */,
+				DA22536527623C2900041D41 /* safariHistory.db-shm in Resources */,
 				5281B09425C99D3300DF66D9 /* 2_local.json in Resources */,
+				DA22536B2762426E00041D41 /* firefoxPlaces.db in Resources */,
 				5281B08A25C998E700DF66D9 /* 1_ancestor.json in Resources */,
+				DA22536A2762426E00041D41 /* firefoxPlaces.db-wal in Resources */,
 				032562C026051D48006513E4 /* kith.gz in Resources */,
 				5281B08625C998A900DF66D9 /* 1_merged.json in Resources */,
 				5281B08225C9989E00DF66D9 /* 1_remote.json in Resources */,
 				032562E726051D5F006513E4 /* blockerList.json in Resources */,
+				DA22536327623C2900041D41 /* safariHistory.db-wal in Resources */,
 				5281B09025C99D1C00DF66D9 /* 2_ancestor.json in Resources */,
 				52DD53F125F1122F004F7EC8 /* BeamExport.sqlite in Resources */,
 				5281B09825C99D4B00DF66D9 /* 2_remote.json in Resources */,
 				5281B07C25C9989300DF66D9 /* 1_local.json in Resources */,
+				DA22536427623C2900041D41 /* safariHistory.db in Resources */,
 				52E04FD6252C7A4600AD9F56 /* writing_space.json in Resources */,
+				DA113A852760FA26006B20AF /* chromeHistory.db in Resources */,
+				DA2253692762426E00041D41 /* firefoxPlaces.db-shm in Resources */,
 				032562EE26051D62006513E4 /* Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -5826,6 +5898,7 @@
 				969CE3EA26CB7B01000AEF37 /* BeamNoteType.swift in Sources */,
 				4E6097C826CEA93700F90260 /* ActiveSources.swift in Sources */,
 				DA63D513267CF10800D7C756 /* FrecencyScorer.swift in Sources */,
+				DAEC880F2739953A0087FC18 /* BatchFrecencyUpdater.swift in Sources */,
 				A5208E27261F7419006193AF /* String+Calculations.swift in Sources */,
 				96319D6226162F5C00D1CF31 /* LinkStore.swift in Sources */,
 				96319D3F2616233E00D1CF31 /* String+Ranges.swift in Sources */,
@@ -6020,6 +6093,7 @@
 				5241E5E926F89AE700B08F69 /* UserSessionRequest+Foundation.swift in Sources */,
 				A0CB5AEA268B231400D1EF02 /* CardsPreferencesView.swift in Sources */,
 				52019A7126DE4718005E8278 /* DocumentManager+Promises.swift in Sources */,
+				873528C327354B96005E7CBC /* ChromeImporter.swift in Sources */,
 				96FACC6C2604F2650088DD67 /* FocusElement.swift in Sources */,
 				8A0DFAC327551F600044515B /* EmbedNodeWebViewConfiguration.swift in Sources */,
 				A0F558F526BD8F260024C47E /* DebugSection.swift in Sources */,
@@ -6251,6 +6325,7 @@
 				032562B026051D3B006513E4 /* RBSynchronizeInterval.m in Sources */,
 				032562AD26051D3B006513E4 /* RBFilterBuilder.m in Sources */,
 				524CF6CA25F2735D007312F0 /* EncryptionManager.swift in Sources */,
+				873528BC27343871005E7CBC /* SafariImporter.swift in Sources */,
 				DA69304D268B4DD9008EF756 /* BrowsingTreeSender.swift in Sources */,
 				032562AC26051D3B006513E4 /* punycode.c in Sources */,
 				96120D4B260CD5E100592546 /* TextEdit+Hyperlink.swift in Sources */,
@@ -6365,6 +6440,7 @@
 				9691E3D825AD9F3300A13080 /* TextRoot.swift in Sources */,
 				A5651A7726035D3A0035F12B /* AppDelegate+NSMenu.swift in Sources */,
 				33D3248E26CEA5A300B44281 /* WebSearchMessageHandler.swift in Sources */,
+				873528BE2735335F005E7CBC /* FirefoxImporter.swift in Sources */,
 				4181724C2581107C00317ED8 /* BrowserTabView.swift in Sources */,
 				A51559892677AC99006F6D6F /* MediaPlayerController.swift in Sources */,
 				521EEDE125937F5B00BA2485 /* DocumentsContentView.swift in Sources */,
@@ -6408,6 +6484,7 @@
 				A0A3BED5266FD1B200566D6C /* BeamStepperButton.swift in Sources */,
 				BAA67CE03D8FFB795346CD06 /* WebPositions.swift in Sources */,
 				A07F2436269C8529008918B0 /* PreferencePaneBuilder.swift in Sources */,
+				873528B827342E6A005E7CBC /* SandboxEscape.swift in Sources */,
 				BAA67D3C5D44656448093D73 /* LoggingMessageHandler.swift in Sources */,
 				A52FCB632666514000BCD38A /* TextLinesDecorationLayer.swift in Sources */,
 				A514401B2638038C0021DD56 /* BrowserNewTabView.swift in Sources */,
@@ -6449,10 +6526,12 @@
 				A0184F7126AF56AB00993C32 /* PreferencesManager+Advanced.swift in Sources */,
 				BAA67E2CEDBE8BF2696AB646 /* BeamWebView.swift in Sources */,
 				BAA67ACD35DACF0E03ED520B /* DownloadManager.swift in Sources */,
+				8768D5EC2735A1100079DEC6 /* AppDelegate+BrowserHistoryImport.swift in Sources */,
 				BAA67F0398B7B9D2CA9ADE25 /* ContentTypes.swift in Sources */,
 				A055CE7A274E8DD5003DB3D0 /* ClosedTabDataPersistence.swift in Sources */,
 				A5D88585274E4E2100F37859 /* BlendModePerColorScheme.swift in Sources */,
 				BAA679A5A0853E5E53ACD3F1 /* BeamDownloadManager.swift in Sources */,
+				873528BA27342F85005E7CBC /* BrowserHistoryImporter.swift in Sources */,
 				DA5C63F1274D0873001F7CEF /* AppDelegate+LinkDB.swift in Sources */,
 				BAA673C9223F304A166B92D5 /* WebNoteController.swift in Sources */,
 				A52596E9273EB8AC004B27E4 /* OnboardingImportsView.swift in Sources */,
@@ -6481,6 +6560,7 @@
 				A50612DF26CC75C70053AD37 /* Calendar+AdditionsTests.swift in Sources */,
 				527524EB26A1A9E100C2F385 /* BeamObjectTestsHelper.swift in Sources */,
 				8AC2EFDB266F8A0800049005 /* PointAndShootPointingTest.swift in Sources */,
+				DA113A872760FAEF006B20AF /* BrowserHistoryImportTest.swift in Sources */,
 				8AA9EEB72678ACF6009D6B31 /* WebAutocompleteContextTest.swift in Sources */,
 				9686B47B26D6B9A400749455 /* NoteIndexingTests.swift in Sources */,
 				032562CF26051D50006513E4 /* RBZipTests.m in Sources */,
@@ -7591,6 +7671,14 @@
 				minimumVersion = 1.2.12;
 			};
 		};
+		873528BF27354295005E7CBC /* XCRemoteSwiftPackageReference "ini" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/bouke/ini.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
 		8A0DFAD3275664090044515B /* XCRemoteSwiftPackageReference "FaviconFinder" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/will-lumley/FaviconFinder.git";
@@ -7734,6 +7822,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises" */;
 			productName = PromisesTestHelpers;
+		};
+		873528C027354295005E7CBC /* INI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 873528BF27354295005E7CBC /* XCRemoteSwiftPackageReference "ini" */;
+			productName = INI;
 		};
 		8A0DFAD4275664090044515B /* FaviconFinder */ = {
 			isa = XCSwiftPackageProductDependency;

@@ -108,6 +108,18 @@ public class GRDBUrlFrecencyStorage: FrecencyStorage {
                                        frecencyKey: paramKey)
         try GRDBDatabase.shared.saveFrecencyUrl(record)
     }
+    public func save(scores: [FrecencyScore], paramKey: FrecencyParamKey) throws {
+        let records = scores.map { score in
+            FrecencyUrlRecord(
+                urlId: score.id,
+                lastAccessAt: score.lastTimestamp,
+                frecencyScore: score.lastScore,
+                frecencySortScore: score.sortValue,
+                frecencyKey: paramKey
+            )
+        }
+        try GRDBDatabase.shared.save(urlFrecencies: records)
+    }
 }
 
 public class GRDBNoteFrecencyStorage: FrecencyStorage {
@@ -133,4 +145,17 @@ public class GRDBNoteFrecencyStorage: FrecencyStorage {
                                        frecencyKey: paramKey)
         try GRDBDatabase.shared.saveFrecencyNote(record)
     }
+    public func save(scores: [FrecencyScore], paramKey: FrecencyParamKey) throws {
+        let records = scores.map { score in
+            FrecencyNoteRecord(
+                noteId: score.id,
+                lastAccessAt: score.lastTimestamp,
+                frecencyScore: score.lastScore,
+                frecencySortScore: score.sortValue,
+                frecencyKey: paramKey
+            )
+        }
+        try GRDBDatabase.shared.save(noteFrecencies: records)
+    }
+
 }

@@ -56,6 +56,7 @@ public enum LogCategory: String, CaseIterable {
     case embed
     case marker
     case sentry
+    case browserImport
 }
 
 public final class Logger {
