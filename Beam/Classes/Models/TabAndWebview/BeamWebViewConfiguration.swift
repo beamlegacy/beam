@@ -18,8 +18,9 @@ protocol BeamWebViewConfiguration {
      - Parameters:
        - source: The JavaScript code to inject
        - when: the injection location (usually at document end so that the DOM is there)
+       - forMainFrameOnly: If scripts should be added to the main window frame or all frames
      */
-    func addJS(source: String, when: WKUserScriptInjectionTime)
+    func addJS(source: String, when: WKUserScriptInjectionTime, forMainFrameOnly: Bool)
 
     func obfuscate(str: String) -> String
 }
@@ -59,10 +60,10 @@ class BeamWebViewConfigurationBase: WKWebViewConfiguration, BeamWebViewConfigura
 
     func registerAllMessageHandlers() {}
 
-    func addJS(source: String, when: WKUserScriptInjectionTime) {
+    func addJS(source: String, when: WKUserScriptInjectionTime, forMainFrameOnly: Bool = false) {
         let parameterized = source.replacingOccurrences(of: "__ENABLED__", with: "true")
         let obfuscated = obfuscate(str: parameterized)
-        let script = WKUserScript(source: obfuscated, injectionTime: when, forMainFrameOnly: false)
+        let script = WKUserScript(source: obfuscated, injectionTime: when, forMainFrameOnly: forMainFrameOnly)
         userContentController.addUserScript(script)
     }
 
@@ -79,4 +80,5 @@ class BeamWebViewConfigurationBase: WKWebViewConfiguration, BeamWebViewConfigura
         let uuidIdentifier = id.uuidString.replacingOccurrences(of: "-", with: "_")
         return str.replacingOccurrences(of: "__ID__", with: "beam" + uuidIdentifier)
     }
+
 }

@@ -8,6 +8,7 @@
 import Foundation
 
 enum BeamUserDefaults: CaseIterable {
+    case supportedEmbedDomains
     case pinnedBrowserTabs
     case savedClosedTabs
     case generalPreferences
@@ -24,6 +25,7 @@ enum BeamUserDefaults: CaseIterable {
 
     private var suiteNamePrefix: String {
         switch self {
+        case .supportedEmbedDomains: return "SupportedEmbedDomains"
         case .pinnedBrowserTabs: return "PinnedBrowserTabsManager"
         case .savedClosedTabs: return "SavedClosedTabs"
         case .generalPreferences: return "app_general_preferences"

@@ -15,6 +15,7 @@ class RestAPIServer {
         case publishNote(note: BeamNote)
         case unpublishNote(noteId: UUID)
         case embed(url: URL)
+        case providers
 
         func bodyParameters() throws -> (Data, String)? {
             switch self {
@@ -24,6 +25,8 @@ class RestAPIServer {
                 return nil
             case .embed:
                 return nil
+            case .providers:
+                return nil
             }
         }
 
@@ -32,6 +35,8 @@ class RestAPIServer {
             case .publishNote, .unpublishNote:
                 return URL(string: EnvironmentVariables.PublicAPI.publishServer)!
             case .embed:
+                return URL(string: EnvironmentVariables.PublicAPI.embed)!
+            case .providers:
                 return URL(string: EnvironmentVariables.PublicAPI.embed)!
             }
         }
@@ -44,12 +49,14 @@ class RestAPIServer {
                 return "/note/\(noteId)"
             case .embed:
                 return "/parseContent"
+            case .providers:
+                return "/providers"
             }
         }
 
         var queryParameters: [String: String]? {
             switch self {
-            case .publishNote, .unpublishNote:
+            case .publishNote, .unpublishNote, .providers:
                 return nil
             case .embed(let url):
                 let content = url.absoluteString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? url.absoluteString
@@ -67,7 +74,7 @@ class RestAPIServer {
                 return "POST"
             case .unpublishNote:
                 return "DELETE"
-            case .embed:
+            case .embed, .providers:
                 return "GET"
             }
         }

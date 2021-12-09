@@ -427,6 +427,21 @@
 		87F11BD9266533C1003BE98E /* PasswordGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F11BD8266533C1003BE98E /* PasswordGenerator.swift */; };
 		87F11BDB26655170003BE98E /* MockAutocompleteStores.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F11BDA26655170003BE98E /* MockAutocompleteStores.swift */; };
 		87F47CC92669415800D01960 /* WebAutocompleteContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F47CC82669415800D01960 /* WebAutocompleteContext.swift */; };
+		8A0DFAB327551E3D0044515B /* EmbedNodeUIMock.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8A0DFAA027551E3D0044515B /* EmbedNodeUIMock.ts */; };
+		8A0DFAB427551E3D0044515B /* EmbedNode.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8A0DFAA227551E3D0044515B /* EmbedNode.ts */; };
+		8A0DFAB527551E3D0044515B /* jest.config.js in Resources */ = {isa = PBXBuildFile; fileRef = 8A0DFAA327551E3D0044515B /* jest.config.js */; };
+		8A0DFAB627551E3D0044515B /* EmbedNodeUI_native.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8A0DFAA427551E3D0044515B /* EmbedNodeUI_native.ts */; };
+		8A0DFAB727551E3D0044515B /* webpack.config.js in Resources */ = {isa = PBXBuildFile; fileRef = 8A0DFAA527551E3D0044515B /* webpack.config.js */; };
+		8A0DFAB827551E3D0044515B /* EmbedNodeUI.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8A0DFAA627551E3D0044515B /* EmbedNodeUI.ts */; };
+		8A0DFABA27551E3D0044515B /* package.json in Resources */ = {isa = PBXBuildFile; fileRef = 8A0DFAA827551E3D0044515B /* package.json */; };
+		8A0DFABB27551E3D0044515B /* EmbedNode_prod.js in Resources */ = {isa = PBXBuildFile; fileRef = 8A0DFAA927551E3D0044515B /* EmbedNode_prod.js */; };
+		8A0DFABC27551E3D0044515B /* .eslintrc.js in Resources */ = {isa = PBXBuildFile; fileRef = 8A0DFAAA27551E3D0044515B /* .eslintrc.js */; };
+		8A0DFABD27551E3D0044515B /* tsconfig.json in Resources */ = {isa = PBXBuildFile; fileRef = 8A0DFAAB27551E3D0044515B /* tsconfig.json */; };
+		8A0DFABE27551E3D0044515B /* EmbedNodeUI_web.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8A0DFAAC27551E3D0044515B /* EmbedNodeUI_web.ts */; };
+		8A0DFABF27551E3D0044515B /* EmbedNode.js in Resources */ = {isa = PBXBuildFile; fileRef = 8A0DFAAD27551E3D0044515B /* EmbedNode.js */; };
+		8A0DFAC127551E950044515B /* EmbedNodeMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A0DFAC027551E950044515B /* EmbedNodeMessageHandler.swift */; };
+		8A0DFAC327551F600044515B /* EmbedNodeWebViewConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A0DFAC227551F600044515B /* EmbedNodeWebViewConfiguration.swift */; };
+		8A0DFACE2756497A0044515B /* EmbedNode.css in Resources */ = {isa = PBXBuildFile; fileRef = 8A0DFAC82756497A0044515B /* EmbedNode.css */; };
 		8A0DFADC275668E40044515B /* FaviconFinder in Frameworks */ = {isa = PBXBuildFile; productRef = 8A0DFAD4275664090044515B /* FaviconFinder */; };
 		8A14155A267393E2005F2464 /* WebPositionsTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A141559267393E2005F2464 /* WebPositionsTest.swift */; };
 		8A1B8FCE26A9CB31006D849D /* PointAndShootPathFrame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A1B8FCD26A9CB31006D849D /* PointAndShootPathFrame.swift */; };
@@ -503,6 +518,12 @@
 		8ADD06082729657D004C3EC9 /* WebPositionsUI.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8ADD05FB2729657D004C3EC9 /* WebPositionsUI.ts */; };
 		8ADD060A27296E00004C3EC9 /* WebPositionsMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ADD060927296E00004C3EC9 /* WebPositionsMessageHandler.swift */; };
 		8AED4FF026C2A3AA00E29DB7 /* PointAndShootFrameOffset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AED4FEF26C2A3AA00E29DB7 /* PointAndShootFrameOffset.swift */; };
+		8AF4F7C4275A66DF0081B6B5 /* SupportedEmbedDomains.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AF4F7C3275A66DF0081B6B5 /* SupportedEmbedDomains.swift */; };
+		8AF4F7CB275A66FF0081B6B5 /* EmbedContentAPIStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AF4F7CA275A66FF0081B6B5 /* EmbedContentAPIStrategy.swift */; };
+		8AF4F7CD275A67190081B6B5 /* EmbedContentLocalStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AF4F7CC275A67190081B6B5 /* EmbedContentLocalStrategy.swift */; };
+		8AF4F7CF275A674B0081B6B5 /* EmbedContentStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AF4F7CE275A674B0081B6B5 /* EmbedContentStrategy.swift */; };
+		8AF4F7D1275A67750081B6B5 /* EmbedContentCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AF4F7D0275A67750081B6B5 /* EmbedContentCache.swift */; };
+		8AF4F7D3275A67960081B6B5 /* EmbedContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AF4F7D2275A67960081B6B5 /* EmbedContent.swift */; };
 		8AF61F14267BA292006DD5C2 /* RBAllowlistEntry.m in Sources */ = {isa = PBXBuildFile; fileRef = 8AF61F13267BA292006DD5C2 /* RBAllowlistEntry.m */; };
 		9609AF502617159B00322141 /* URL+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418173BD2581251600317ED8 /* URL+Beam.swift */; };
 		960A57E4264C84BD0061E8D2 /* ProxyElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 960A57E3264C84BD0061E8D2 /* ProxyElement.swift */; };
@@ -1562,6 +1583,22 @@
 		87F11BD8266533C1003BE98E /* PasswordGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordGenerator.swift; sourceTree = "<group>"; };
 		87F11BDA26655170003BE98E /* MockAutocompleteStores.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAutocompleteStores.swift; sourceTree = "<group>"; };
 		87F47CC82669415800D01960 /* WebAutocompleteContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebAutocompleteContext.swift; sourceTree = "<group>"; };
+		8A0DFAA027551E3D0044515B /* EmbedNodeUIMock.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = EmbedNodeUIMock.ts; sourceTree = "<group>"; };
+		8A0DFAA127551E3D0044515B /* EmbedNode_prod.js.map */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.module-map"; path = EmbedNode_prod.js.map; sourceTree = "<group>"; };
+		8A0DFAA227551E3D0044515B /* EmbedNode.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = EmbedNode.ts; sourceTree = "<group>"; };
+		8A0DFAA327551E3D0044515B /* jest.config.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = jest.config.js; sourceTree = "<group>"; };
+		8A0DFAA427551E3D0044515B /* EmbedNodeUI_native.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = EmbedNodeUI_native.ts; sourceTree = "<group>"; };
+		8A0DFAA527551E3D0044515B /* webpack.config.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = webpack.config.js; sourceTree = "<group>"; };
+		8A0DFAA627551E3D0044515B /* EmbedNodeUI.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = EmbedNodeUI.ts; sourceTree = "<group>"; };
+		8A0DFAA827551E3D0044515B /* package.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = package.json; sourceTree = "<group>"; };
+		8A0DFAA927551E3D0044515B /* EmbedNode_prod.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = EmbedNode_prod.js; sourceTree = "<group>"; };
+		8A0DFAAA27551E3D0044515B /* .eslintrc.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = .eslintrc.js; sourceTree = "<group>"; };
+		8A0DFAAB27551E3D0044515B /* tsconfig.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = tsconfig.json; sourceTree = "<group>"; };
+		8A0DFAAC27551E3D0044515B /* EmbedNodeUI_web.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = EmbedNodeUI_web.ts; sourceTree = "<group>"; };
+		8A0DFAAD27551E3D0044515B /* EmbedNode.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = EmbedNode.js; sourceTree = "<group>"; };
+		8A0DFAC027551E950044515B /* EmbedNodeMessageHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbedNodeMessageHandler.swift; sourceTree = "<group>"; };
+		8A0DFAC227551F600044515B /* EmbedNodeWebViewConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbedNodeWebViewConfiguration.swift; sourceTree = "<group>"; };
+		8A0DFAC82756497A0044515B /* EmbedNode.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; path = EmbedNode.css; sourceTree = "<group>"; };
 		8A141559267393E2005F2464 /* WebPositionsTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebPositionsTest.swift; sourceTree = "<group>"; };
 		8A1B8FCD26A9CB31006D849D /* PointAndShootPathFrame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootPathFrame.swift; sourceTree = "<group>"; };
 		8A23713126D91C2800D8526A /* PointAndShoot+Alert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PointAndShoot+Alert.swift"; sourceTree = "<group>"; };
@@ -1637,6 +1674,12 @@
 		8ADD060927296E00004C3EC9 /* WebPositionsMessageHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebPositionsMessageHandler.swift; sourceTree = "<group>"; };
 		8AED4FEF26C2A3AA00E29DB7 /* PointAndShootFrameOffset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootFrameOffset.swift; sourceTree = "<group>"; };
 		8AF0E335268F30E0007C75D8 /* pns_prod.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = pns_prod.js; sourceTree = "<group>"; };
+		8AF4F7C3275A66DF0081B6B5 /* SupportedEmbedDomains.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportedEmbedDomains.swift; sourceTree = "<group>"; };
+		8AF4F7CA275A66FF0081B6B5 /* EmbedContentAPIStrategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbedContentAPIStrategy.swift; sourceTree = "<group>"; };
+		8AF4F7CC275A67190081B6B5 /* EmbedContentLocalStrategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbedContentLocalStrategy.swift; sourceTree = "<group>"; };
+		8AF4F7CE275A674B0081B6B5 /* EmbedContentStrategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbedContentStrategy.swift; sourceTree = "<group>"; };
+		8AF4F7D0275A67750081B6B5 /* EmbedContentCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbedContentCache.swift; sourceTree = "<group>"; };
+		8AF4F7D2275A67960081B6B5 /* EmbedContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbedContent.swift; sourceTree = "<group>"; };
 		8AF61F11267BA292006DD5C2 /* RBAllowlistEntry-Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "RBAllowlistEntry-Private.h"; sourceTree = "<group>"; };
 		8AF61F12267BA292006DD5C2 /* RBAllowlistEntry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RBAllowlistEntry.h; sourceTree = "<group>"; };
 		8AF61F13267BA292006DD5C2 /* RBAllowlistEntry.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RBAllowlistEntry.m; sourceTree = "<group>"; };
@@ -2555,6 +2598,12 @@
 				4181715A2581107C00317ED8 /* Network */,
 				DA69304C268B4DD9008EF756 /* BrowsingTreeSender.swift */,
 				A51F555127329829002C5584 /* EmbedContentBuilder.swift */,
+				8AF4F7D2275A67960081B6B5 /* EmbedContent.swift */,
+				8AF4F7D0275A67750081B6B5 /* EmbedContentCache.swift */,
+				8AF4F7CE275A674B0081B6B5 /* EmbedContentStrategy.swift */,
+				8AF4F7CC275A67190081B6B5 /* EmbedContentLocalStrategy.swift */,
+				8AF4F7CA275A66FF0081B6B5 /* EmbedContentAPIStrategy.swift */,
+				8AF4F7C3275A66DF0081B6B5 /* SupportedEmbedDomains.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -3649,6 +3698,35 @@
 			path = PasswordManagerMenu;
 			sourceTree = "<group>";
 		};
+		8A0DFA9E27551E3D0044515B /* Web */ = {
+			isa = PBXGroup;
+			children = (
+				8A0DFAC82756497A0044515B /* EmbedNode.css */,
+				8A0DFA9F27551E3D0044515B /* Test */,
+				8A0DFAA127551E3D0044515B /* EmbedNode_prod.js.map */,
+				8A0DFAA227551E3D0044515B /* EmbedNode.ts */,
+				8A0DFAA327551E3D0044515B /* jest.config.js */,
+				8A0DFAA427551E3D0044515B /* EmbedNodeUI_native.ts */,
+				8A0DFAA527551E3D0044515B /* webpack.config.js */,
+				8A0DFAA627551E3D0044515B /* EmbedNodeUI.ts */,
+				8A0DFAA827551E3D0044515B /* package.json */,
+				8A0DFAA927551E3D0044515B /* EmbedNode_prod.js */,
+				8A0DFAAA27551E3D0044515B /* .eslintrc.js */,
+				8A0DFAAB27551E3D0044515B /* tsconfig.json */,
+				8A0DFAAC27551E3D0044515B /* EmbedNodeUI_web.ts */,
+				8A0DFAAD27551E3D0044515B /* EmbedNode.js */,
+			);
+			path = Web;
+			sourceTree = "<group>";
+		};
+		8A0DFA9F27551E3D0044515B /* Test */ = {
+			isa = PBXGroup;
+			children = (
+				8A0DFAA027551E3D0044515B /* EmbedNodeUIMock.ts */,
+			);
+			path = Test;
+			sourceTree = "<group>";
+		};
 		8A7C80F326F9E03F00D3BA72 /* Omnibar */ = {
 			isa = PBXGroup;
 			children = (
@@ -4367,7 +4445,10 @@
 		A5919F63268EA024009015C5 /* EmbedNode */ = {
 			isa = PBXGroup;
 			children = (
+				8A0DFA9E27551E3D0044515B /* Web */,
 				9691C2BB2645F93100F70DA1 /* EmbedNode.swift */,
+				8A0DFAC227551F600044515B /* EmbedNodeWebViewConfiguration.swift */,
+				8A0DFAC027551E950044515B /* EmbedNodeMessageHandler.swift */,
 				A5919F6E268EA499009015C5 /* EmbedNodeWebPage.swift */,
 			);
 			path = EmbedNode;
@@ -5062,9 +5143,11 @@
 				8ADD05ED272963CA004C3EC9 /* Write xcfilelist: WebPositions  */,
 				8A0D274726D5338600CE0AC9 /* Write xcfilelist: Point and Shoot */,
 				8AE0E6F5271D9C01004B22FB /* Write xcfilelist: Navigation */,
+				8AE1496627551D2900C71304 /* Write xcfilelist: EmbedNode */,
 				8ADD05EC27296396004C3EC9 /* Build Web: WebPositions */,
 				0274A217261212DC00DA35CE /* Build Web: Point and Shoot */,
 				8AE0E6F4271D9AF7004B22FB /* Build Web: Navigation */,
+				8AE1496727551D7D00C71304 /* Build Web: EmbedNode */,
 				965A78232514F147009980D4 /* Resources */,
 				5259C3AA258A7DC300DD67E7 /* Embed Frameworks */,
 				52C60BFF258B63A5008B7C10 /* Embed XPC Services */,
@@ -5297,12 +5380,15 @@
 			files = (
 				BAA672842544E82A5782C2A7 /* BeamWindowDecorator.js in Resources */,
 				8ADD06082729657D004C3EC9 /* WebPositionsUI.ts in Resources */,
+				8A0DFAB727551E3D0044515B /* webpack.config.js in Resources */,
 				8AC643D1271DA9FC00DDC899 /* navigation_prod.js in Resources */,
+				8A0DFACE2756497A0044515B /* EmbedNode.css in Resources */,
 				A52A559227592E9A002D0C99 /* Inter-SemiBold.otf in Resources */,
 				8AC643CF271DA98B00DDC899 /* pns_prod.js in Resources */,
 				5224CD462685FF7E00D4179E /* update_beam_objects.graphql in Resources */,
 				8ADD05FE2729657D004C3EC9 /* WebPositionsUI_native.ts in Resources */,
 				5241E5F426F89C5000B08F69 /* refresh_token.graphql in Resources */,
+				8A0DFAB327551E3D0044515B /* EmbedNodeUIMock.ts in Resources */,
 				8A5BC63C2733EFEF008E22D2 /* PNSWindowMock.ts in Resources */,
 				8A5BC63A2733EFEF008E22D2 /* BeamNode.test.ts in Resources */,
 				8ADD05FC2729657D004C3EC9 /* WebPositions.ts in Resources */,
@@ -5318,6 +5404,7 @@
 				52F4E4BA264185FC0067B017 /* identities.graphql in Resources */,
 				8ADD05FF2729657D004C3EC9 /* WebPositionsUIMock.ts in Resources */,
 				8AD2636526F4A0480074D673 /* PointAndShootUI_native-Benchmark.test.bench in Resources */,
+				8A0DFAB427551E3D0044515B /* EmbedNode.ts in Resources */,
 				7521342B26F4A00D00BBBD6D /* GenericErrorPage.html in Resources */,
 				56A5BD3725CCAFA400ED7C50 /* english.stopwords in Resources */,
 				418171F42581107C00317ED8 /* sign_up.graphql in Resources */,
@@ -5327,6 +5414,7 @@
 				52F4E4B42641844E0067B017 /* delete_identity.graphql in Resources */,
 				418171F62581107C00317ED8 /* sign_in.graphql in Resources */,
 				418170FF2581060A00317ED8 /* Colors.xcassets in Resources */,
+				8A0DFAB827551E3D0044515B /* EmbedNodeUI.ts in Resources */,
 				52F4E49826417EF00067B017 /* create_identity.graphql in Resources */,
 				8AD2636F26F4A0480074D673 /* audio.mp3 in Resources */,
 				52F4E4A226417F210067B017 /* sign_in_with_provider.graphql in Resources */,
@@ -5349,11 +5437,15 @@
 				8ADD06072729657D004C3EC9 /* WebPositionsUI_web.ts in Resources */,
 				A515597A267786E1006F6D6F /* MediaPlayer.js in Resources */,
 				33BBA505274423E200FE92DB /* editor-embed_collapse.json in Resources */,
+				8A0DFAB527551E3D0044515B /* jest.config.js in Resources */,
 				418172412581107C00317ED8 /* ScrollableTextView.xib in Resources */,
 				3303E10326FA22D300E175AC /* user_infos.graphql in Resources */,
+				8A0DFABA27551E3D0044515B /* package.json in Resources */,
+				8A0DFABC27551E3D0044515B /* .eslintrc.js in Resources */,
 				8AC2EFD6266F86F500049005 /* yarn.lock in Resources */,
 				5224CD702685FFDD00D4179E /* beam_objects.graphql in Resources */,
 				418171F52581107C00317ED8 /* forgot_password.graphql in Resources */,
+				8A0DFABE27551E3D0044515B /* EmbedNodeUI_web.ts in Resources */,
 				8AD2636826F4A0480074D673 /* UITests-Alerts.html in Resources */,
 				8ADD06012729657D004C3EC9 /* WebPositions.js in Resources */,
 				8AD2637226F4A0480074D673 /* beam-logo-test.png in Resources */,
@@ -5372,9 +5464,12 @@
 				BAA67B51C8D9DBD6FE5327B6 /* mixins.scss in Resources */,
 				8AD2636C26F4A0480074D673 /* UITests-4.html in Resources */,
 				522F149327033DE000EDF2F6 /* beam_object_checksums.graphql in Resources */,
+				8A0DFAB627551E3D0044515B /* EmbedNodeUI_native.ts in Resources */,
 				BAA675AE9C103046AC022CBA /* .sassrc in Resources */,
+				8A0DFABF27551E3D0044515B /* EmbedNode.js in Resources */,
 				A52A559127592E9A002D0C99 /* Inter-Medium.otf in Resources */,
 				5224CD522685FF9B00D4179E /* update_beam_object.graphql in Resources */,
+				8A0DFABB27551E3D0044515B /* EmbedNode_prod.js in Resources */,
 				BAA67B681D12191FE57E7807 /* PopupUI_web.scss in Resources */,
 				8AD2636726F4A0480074D673 /* PointAndShootUI_native-Benchmark.test.ts in Resources */,
 				33BBA507274423E700FE92DB /* editor-embed_expand.json in Resources */,
@@ -5388,6 +5483,7 @@
 				BAA678D1C511EC1CD440D39B /* BeamElementHelper.ts in Resources */,
 				BAA675FD3D04C5100F11FF68 /* BeamNavigation.ts in Resources */,
 				BAA67C841553BDE705F061CE /* BeamNavigation.test.ts in Resources */,
+				8A0DFABD27551E3D0044515B /* tsconfig.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -5609,6 +5705,7 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "if [ $ENABLE_PREVIEWS == \"NO\" ]\nthen\n    export PATH=\"$PATH:/opt/homebrew/bin\"\n    ./scripts/build_xcfilelist_webpositions.sh\n \nelse\n    echo \"Skipping the script because of SwiftUI preview mode\"\nfi\n";
+			showEnvVarsInLog = 0;
 		};
 		8AE0E6F4271D9AF7004B22FB /* Build Web: Navigation */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -5629,6 +5726,7 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "if [ $ENABLE_PREVIEWS == \"NO\" ]\nthen\n    ./scripts/build_js_navigation.sh\n \nelse\n    echo \"Skipping the script because of SwiftUI preview mode\"\nfi\n";
+			showEnvVarsInLog = 0;
 		};
 		8AE0E6F5271D9C01004B22FB /* Write xcfilelist: Navigation */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -5649,6 +5747,48 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "if [ $ENABLE_PREVIEWS == \"NO\" ]\nthen\n    export PATH=\"$PATH:/opt/homebrew/bin\"\n    ./scripts/build_xcfilelist_navigation.sh\n \nelse\n    echo \"Skipping the script because of SwiftUI preview mode\"\nfi\n";
+		};
+		8AE1496627551D2900C71304 /* Write xcfilelist: EmbedNode */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/scripts/build_xcfilelist_embednode.sh",
+			);
+			name = "Write xcfilelist: EmbedNode";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(SRCROOT)/WebFileList_embednode.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ $ENABLE_PREVIEWS == \"NO\" ]\nthen\n    export PATH=\"$PATH:/opt/homebrew/bin\"\n    ./scripts/build_xcfilelist_embednode.sh\n \nelse\n    echo \"Skipping the script because of SwiftUI preview mode\"\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		8AE1496727551D7D00C71304 /* Build Web: EmbedNode */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"$(SRCROOT)/WebFileList_embednode.xcfilelist",
+			);
+			inputPaths = (
+			);
+			name = "Build Web: EmbedNode";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(SRCROOT)/Beam/Classes/Components/BeamTextEdit/EmbedNode/Web/EmbedNode_prod.js",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ $ENABLE_PREVIEWS == \"NO\" ]\nthen\n    ./scripts/build_js_embednode.sh\n \nelse\n    echo \"Skipping the script because of SwiftUI preview mode\"\nfi\n";
+			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -5804,6 +5944,7 @@
 				418172532581107C00317ED8 /* OmniboxV2ToolbarChevrons.swift in Sources */,
 				A5E2938A2746C6C300638ABA /* FlippedGeometryHelper.swift in Sources */,
 				33AC9D9A26B01A60004E7EF4 /* AuthenticationViewModel.swift in Sources */,
+				8AF4F7CF275A674B0081B6B5 /* EmbedContentStrategy.swift in Sources */,
 				A536DE0F269C6ABD003FAAF4 /* ToastTextIconView.swift in Sources */,
 				A0208F8225D6BB1C00CA054C /* AppDelegate+BeamTests.swift in Sources */,
 				03CA9A9725CC61BF00E7CFA2 /* ContentBlockingManager.swift in Sources */,
@@ -5818,6 +5959,7 @@
 				5298EB2D26274D530033862C /* BeamToBeam2MigrationPolicy.swift in Sources */,
 				33CCBFA626A61C15004B6236 /* PopoverWindow.swift in Sources */,
 				4181722C2581107C00317ED8 /* AutocompleteList.swift in Sources */,
+				8AF4F7CD275A67190081B6B5 /* EmbedContentLocalStrategy.swift in Sources */,
 				527C4F302719818A00772973 /* LoggerCategoryTableViewController.swift in Sources */,
 				A0877A3726FDD8400081C7D8 /* ChangeCredentialsView.swift in Sources */,
 				4181727B258110D100317ED8 /* AppDelegate+Data.swift in Sources */,
@@ -5834,6 +5976,7 @@
 				A5FE1615264AD64900B7526D /* CardSwitcher.swift in Sources */,
 				4131F16825BEC48C006473CD /* SpacerWidget.swift in Sources */,
 				96A1C67626F8ABBF006AFF88 /* AppDelegate+JsonImportExport.swift in Sources */,
+				8AF4F7D1275A67750081B6B5 /* EmbedContentCache.swift in Sources */,
 				4181723A2581107C00317ED8 /* Parser.swift in Sources */,
 				524520A425C8234500AC0007 /* BeamElement+Merge.swift in Sources */,
 				A0C5D85B263C638A00FA6F6E /* CredentialsConfirmationToast.swift in Sources */,
@@ -5843,6 +5986,7 @@
 				5242279A275524C900457345 /* BeamObjectChecksum+CoreData.swift in Sources */,
 				0325628F26051D3B006513E4 /* RBSQLite.m in Sources */,
 				A56BAF5826B937CE0006F8D5 /* NoteEditFocusedState.swift in Sources */,
+				8AF4F7D3275A67960081B6B5 /* EmbedContent.swift in Sources */,
 				DA9E5B9D26A843520040F09B /* NoteSources+LongTermUrlScoreStore.swift in Sources */,
 				A0E9B0FB2666A80600FC99A5 /* TabGroupingTitleBarView.swift in Sources */,
 				A567157125F66F8600B46110 /* StyledText.swift in Sources */,
@@ -5877,6 +6021,7 @@
 				A0CB5AEA268B231400D1EF02 /* CardsPreferencesView.swift in Sources */,
 				52019A7126DE4718005E8278 /* DocumentManager+Promises.swift in Sources */,
 				96FACC6C2604F2650088DD67 /* FocusElement.swift in Sources */,
+				8A0DFAC327551F600044515B /* EmbedNodeWebViewConfiguration.swift in Sources */,
 				A0F558F526BD8F260024C47E /* DebugSection.swift in Sources */,
 				418171F92581107C00317ED8 /* SearchEngine.swift in Sources */,
 				33353ED426F3672F00063078 /* ShortcutModifier.swift in Sources */,
@@ -5892,6 +6037,7 @@
 				A581B4452705EE98002B41CD /* BoxedTextFieldView.swift in Sources */,
 				52B17ABA262442BC00CB4728 /* DatabasesList.swift in Sources */,
 				418171FE2581107C00317ED8 /* HtmlNoteAdapter.swift in Sources */,
+				8A0DFAC127551E950044515B /* EmbedNodeMessageHandler.swift in Sources */,
 				A03CE0EC25F954CB00D767B0 /* BeamNoteDataHolder.swift in Sources */,
 				96C9AAB92593BB67007D3D98 /* Widget.swift in Sources */,
 				524B856D25D2DD0700BB7C7A /* NSMAnagedObjectContext+performAndWait.swift in Sources */,
@@ -6040,6 +6186,7 @@
 				4181723D2581107C00317ED8 /* BeamTextEdit.swift in Sources */,
 				5268FD1027020A9B003677B2 /* Date+iso8601millseconds.swift in Sources */,
 				9691E40225AE5D2C00A13080 /* NodeSelection.swift in Sources */,
+				8AF4F7CB275A66FF0081B6B5 /* EmbedContentAPIStrategy.swift in Sources */,
 				333E4F8D270AE2B7005B72CD /* BeamTextEdit+Search.swift in Sources */,
 				5204FE3B25F128BD00FD22F8 /* DocumentStruct.swift in Sources */,
 				75FD7B6F2707006400BEFBA7 /* BeamSchemeHandler.swift in Sources */,
@@ -6190,6 +6337,7 @@
 				524299C725A47D2600F4DBF5 /* AppDelegate+Preferences.swift in Sources */,
 				522969E226669016005067A6 /* APIWebSocketRequest.swift in Sources */,
 				418172452581107C00317ED8 /* SearchBar.swift in Sources */,
+				8AF4F7C4275A66DF0081B6B5 /* SupportedEmbedDomains.swift in Sources */,
 				418172182581107C00317ED8 /* PerformanceDebug.swift in Sources */,
 				A50612D626CC75200053AD37 /* Calendar+Additions.swift in Sources */,
 				33353EDC26F36B4300063078 /* Shortcut.swift in Sources */,
