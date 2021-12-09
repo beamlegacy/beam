@@ -11,21 +11,15 @@ import AppKit
 import WebKit
 import Combine
 
-private class EmbedNodeWebViewConfiguration: BeamWebViewConfigurationBase {
-    override func registerAllMessageHandlers() {
-        LoggingMessageHandler(config: self).register(to: self)
-        MediaPlayerMessageHandler(config: self).register(to: self)
-    }
-}
-
 class EmbedNode: ResizableNode {
 
     private static var webViewConfiguration = EmbedNodeWebViewConfiguration()
     var webView: BeamWebView?
+    private var embedContent: EmbedContent?
     private var embedView = NSView()
     private var webPage: EmbedNodeWebPage?
     private var embedCancellables = Set<AnyCancellable>()
-    private let sizeRatio = 240.0/320.0
+    private let defaultSizeRatio = 240.0/320.0
     private var loadingView: NSView?
     private var isLoadingEmbed = false {
         didSet {
@@ -54,10 +48,6 @@ class EmbedNode: ResizableNode {
         guard case .embed = element.kind else {
             Logger.shared.logError("EmbedNode can only handle url elements, not \(element.kind)", category: .embed)
             return
-        }
-
-        if case .embed(_, _, let ratio) = element.kind {
-            desiredWidthRatio = ratio
         }
 
         setupResizeHandleLayer()
@@ -101,10 +91,7 @@ class EmbedNode: ResizableNode {
 
         contentsPadding = NSEdgeInsets(top: 4, left: contentsPadding.left + 4, bottom: 14, right: 4)
 
-        // Embed don't have size on there own… By default, they are as wide as the editor
-        let height = availableWidth  * CGFloat(sizeRatio)
-        resizableElementContentSize = CGSize(width: availableWidth, height: height)
-
+        updateResizableElementContentSize(with: embedContent)
         setupLoader()
         updateEmbedContent()
     }
@@ -145,17 +132,18 @@ class EmbedNode: ResizableNode {
     /// Display EmbedContent in WebView
     /// - Parameter embedContent: EmbedContent to display
     fileprivate func loadEmbedContentInWebView(_ embedContent: EmbedContent) {
+        updateResizableElementContentSize(with: embedContent)
+        self.updateLayout()
         switch embedContent.type {
-        case .url, .link, .image, .photo, .video:
+        case .url, .link:
             if let url = embedContent.embedURL {
                 self.webView?.load(URLRequest(url: url, cachePolicy: .returnCacheDataElseLoad))
             }
-        case .page, .audio, .rich:
+        case .page, .audio, .rich, .video, .photo, .image:
             if let content = embedContent.html {
                 let theme = self.webView?.isDarkMode ?? false ? "dark" : "light"
                 let headContent = self.getHeadContent(theme: theme)
-                let styledEmbedContent = headContent + content
-                self.webView?.loadHTMLString(styledEmbedContent, baseURL: nil)
+                self.webView?.loadHTMLString(headContent + content, baseURL: nil)
             }
         }
     }
@@ -166,6 +154,7 @@ class EmbedNode: ResizableNode {
         embedCancellables.removeAll()
         let builder = EmbedContentBuilder()
         if let embedContent = builder.embeddableContent(for: sourceURL) {
+            self.embedContent = embedContent
             self.loadEmbedContentInWebView(embedContent)
         } else {
             isLoadingEmbed = true
@@ -182,61 +171,26 @@ class EmbedNode: ResizableNode {
                     self?.isLoadingEmbed = false
                     self?.embedCancellables.removeAll()
                 } receiveValue: { [weak self] embedContent in
+                    self?.embedContent = embedContent
                     self?.loadEmbedContentInWebView(embedContent)
                 }.store(in: &embedCancellables)
         }
     }
 
-    /// Returns html a `<head>` tag, css style and a small script to correctly style the embed webview
-    /// background in both Light and Dark color schemes. Also specifically provides support for twitter embeds
+    /// Returns html a `<head>` tag to correctly style the twitter embed and the webview background
+    /// in both Light and Dark color schemes.Css and Scripts are added via EmbedNode.ts
     /// - Parameter theme: The inital "dark" or "light" theme
     /// - Returns: html `<head>`tag as String
     private
     // swiftlint:disable:next function_body_length
     func getHeadContent(theme: String) -> String {
         return """
-                        <head>
-                            <meta name="twitter:dnt" content="on" />
-                            <meta name="twitter:widgets:theme" content="\(theme)" />
-                            <meta name="twitter:widgets:chrome" content="transparent" />
-                            <style>
-                            /* Light */
-                            :root {
-                                --Beam-Embed-Background: #ffffffff;
-                                --Beam-Embed-Color: #393e47ff;
-                            }
-
-                            @media (prefers-color-scheme: dark) {
-                                /* Dark */
-                                :root {
-                                    --Beam-Embed-Background: #1c1c1fff;
-                                    --Beam-Embed-Color: #edededff;
-                                }
-                            }
-
-                            html {
-                                color: var(--Beam-Embed-Color);
-                                background-color: var(--Beam-Embed-Background);
-                            }
-                            </style>
-                            <script>
-                            function switchTweetTheme(currentTheme, targetTheme) {
-                                var tweets = document.querySelectorAll("[data-tweet-id]")
-
-                                tweets.forEach(function (tweet) {
-                                    var src = tweet.getAttribute("src")
-                                    tweet.setAttribute("src",src.replace("theme=" + currentTheme, "theme=" + targetTheme))
-                                })
-                            }
-
-                            window.matchMedia("(prefers-color-scheme: dark)").addListener((event) => {
-                                let currentTheme = event.matches ? "light" : "dark"
-                                let targetTheme = event.matches ? "dark" : "light"
-                                switchTweetTheme(currentTheme, targetTheme)
-                            })
-                            </script>
-                        </head>
-                        """
+            <head>
+                <meta name="twitter:dnt" content="on" />
+                <meta name="twitter:widgets:theme" content="\(theme)" />
+                <meta name="twitter:widgets:chrome" content="transparent" />
+            </head>
+        """
     }
 
     private func clearWebViewAndStopPlaying() {
@@ -259,14 +213,31 @@ class EmbedNode: ResizableNode {
 
     override func updateLayout() {
         super.updateLayout()
-
-        let height = availableWidth  * CGFloat(sizeRatio)
-        resizableElementContentSize = CGSize(width: availableWidth, height: height)
-
         let r = layer.frame
         let embedFrame = CGRect(x: r.minX, y: r.minY, width: visibleSize.width, height: visibleSize.height)
         DispatchQueue.main.async { [weak self] in
             self?.embedView.frame = embedFrame
+        }
+    }
+
+    /// Updates the resizableElementContentSize with the EmbedContent width and height
+    /// - Parameter content: EmbedContent of this EmbedNode
+    func updateResizableElementContentSize(with content: EmbedContent?) {
+        if let content = content {
+            if let width = content.width {
+                resizableElementContentSize.width = width
+            }
+
+            if let height = content.height {
+                resizableElementContentSize.height = height
+            }
+
+            if let width = content.width, let height = content.height {
+                desiredHeightRatio = (1 / width) * height
+            }
+        } else {
+            let height = availableWidth  * CGFloat(defaultSizeRatio)
+            resizableElementContentSize = CGSize(width: availableWidth, height: height)
         }
     }
 
@@ -329,6 +300,20 @@ extension EmbedNode: EmbedNodeWebPageDelegate {
             mediaManager.addNotePlaying(note: note, elementId: elementId, webView: webView)
         } else {
             mediaManager.stopNotePlaying(note: note, elementId: elementId, url: url)
+        }
+    }
+
+    /// Gets called from the EmbedNodeMessageHandler with updated sizes when resizing the webview
+    /// - Parameter size: Computed width and height from JS
+    func embedNodeDelegateCallback(size: CGSize) {
+        if embedContent?.height == nil {
+            resizableElementContentSize.height = size.height
+            self.invalidateLayout()
+        } else if let content = embedContent, content.width != nil, content.height != nil {
+            // with both height and width defined scale by ratio
+            let newRatio = (1 / size.width) * size.height
+            desiredHeightRatio = newRatio
+            self.invalidateLayout()
         }
     }
 }

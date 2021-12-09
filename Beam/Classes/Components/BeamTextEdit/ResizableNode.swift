@@ -22,12 +22,13 @@ class ResizableNode: ElementNode {
         }
     }
 
-    ///The main element's size (image or video)
+    ///The main element's real size (image or video)
     var resizableElementContentSize = CGSize.zero
 
     var isResizing = false
 
     @OptionalClamped<Double>(0.0...1.0) var desiredWidthRatio = nil
+    @OptionalClamped<Double>(0.0...1.0) var desiredHeightRatio = nil
 
     var initialDragImageSize: CGSize?
     var initialDragImageGlobalPosition: NSPoint?
@@ -43,10 +44,20 @@ class ResizableNode: ElementNode {
         if let ratio = desiredWidthRatio {
             computedWidth = computeWidth(with: contentsWidth * CGFloat(ratio))
         } else {
-            computedWidth = computeWidth(with: nil)
+            computedWidth = computeWidth(with: contentsWidth)
         }
         let width = computedWidth.isNaN ? 0 : computedWidth
-        let computedHeight = (width / resizableElementContentSize.width) * resizableElementContentSize.height
+        var computedHeight = (width / resizableElementContentSize.width) * resizableElementContentSize.height
+        // swiftlint:disable:next empty_enum_arguments
+        if case .embed(_, _, _) = element.kind {
+            if let ratio = desiredHeightRatio {
+                // scale embed by ratio when both height and width are defined
+                computedHeight = width * CGFloat(ratio)
+            } else {
+                // fix height in place when no height is defined
+                computedHeight = resizableElementContentSize.height
+            }
+        }
         let height = computedHeight.isNaN ? 0 : computedHeight
         return NSSize(width: width, height: height)
     }
