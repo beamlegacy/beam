@@ -62,6 +62,7 @@ class ClusteringManager: ObservableObject {
     var similarities = [UUID: [UUID: Double]]()
     var notesChangedByUserInSession = [UUID]()
     let LongTermUrlScoreStoreProtocol = LongTermUrlScoreStore.shared
+    let frecencyFetcher = GRDBUrlFrecencyStorage()
     var summary: SummaryForNewDay
     public var continueToNotes = [UUID]()
     public var continueToPage: UUID?
@@ -451,17 +452,24 @@ class ClusteringManager: ObservableObject {
         }
         let allVisitedPages = self.clusteredPagesId.flatMap({ $0 })
         let allLongTermScores = self.LongTermUrlScoreStoreProtocol.getMany(urlIds: allVisitedPages)
+        let allScores = allLongTermScores.enumerated().map { longTermScore -> Float in
+            if let frecency = try? self.frecencyFetcher.fetchOne(id: allVisitedPages[longTermScore.offset], paramKey: .webVisit30d0)?.lastScore {
+                return longTermScore.element.score() / frecency
+            } else {
+                return longTermScore.element.score()
+            }
+        }
         let dateToAdd = BeamDate.now
-        if allVisitedPages.count > 0 && allLongTermScores.count > 0 {
-            let (pageToPropose, pageScoreToPropose) = zip(allVisitedPages, allLongTermScores).sorted {$0.1.score() > $1.1.score()}[0]
+        if allVisitedPages.count > 0 && allScores.count > 0 {
+            let (pageToPropose, pageScoreToPropose) = zip(allVisitedPages, allScores).sorted {$0.1 > $1.1}[0]
             if self.summary.pageId == nil {
                 summary.pageId = pageToPropose
                 summary.pageDate = dateToAdd
-                summary.pageScore = pageScoreToPropose.score()
-            } else if !Calendar.current.isDate(dateToAdd, equalTo: summary.pageDate, toGranularity: .day) || summary.pageScore < pageScoreToPropose.score() {
+                summary.pageScore = pageScoreToPropose
+            } else if !Calendar.current.isDate(dateToAdd, equalTo: summary.pageDate, toGranularity: .day) || summary.pageScore < pageScoreToPropose {
                 summary.pageId = pageToPropose
                 summary.pageDate = dateToAdd
-                summary.pageScore = pageScoreToPropose.score()
+                summary.pageScore = pageScoreToPropose
                }
         }
         if !self.notesChangedByUserInSession.isEmpty {
