@@ -137,6 +137,15 @@
         }
       },
       {
+        "package": "INI",
+        "repositoryURL": "https://github.com/bouke/ini.git",
+        "state": {
+          "branch": null,
+          "revision": "60b7887c6f4051e5cb76b5faa0a7d6db510ddcb0",
+          "version": "1.2.0"
+        }
+      },
+      {
         "package": "JWTDecode",
         "repositoryURL": "https://github.com/auth0/JWTDecode.swift.git",
         "state": {

@@ -491,6 +491,25 @@
                                                             <action selector="importNotes:" target="Voe-Tx-rLC" id="5ba-tS-OS3"/>
                                                         </connections>
                                                     </menuItem>
+                                                    <menuItem isSeparatorItem="YES" id="tjb-m3-N6g"/>
+                                                    <menuItem title="Import Safari History" id="3xJ-aB-Hsi">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="importSafariHistory:" target="Voe-Tx-rLC" id="yBq-S3-5zY"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                    <menuItem title="Import Firefox History" id="ORD-oT-gZt">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="importFirefoxHistory:" target="Voe-Tx-rLC" id="ctj-vu-7Yk"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                    <menuItem title="Import Chrome History" id="1up-Ef-3Fj">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="importChromeHistory:" target="Voe-Tx-rLC" id="BAG-iw-5da"/>
+                                                        </connections>
+                                                    </menuItem>
                                                 </items>
                                             </menu>
                                         </menuItem>
