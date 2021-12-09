@@ -84,7 +84,6 @@ class DeleteDocument: DocumentCommand {
                 if !links.isEmpty {
                     noteLinks.append(contentsOf: links)
                     refsMapping[doc.id] = Set(links.map { $0.noteID })
-                    BeamData.updateTitleIdNoteMapping(noteId: note.id, currentName: note.title, newName: nil)
                 }
             }
         }

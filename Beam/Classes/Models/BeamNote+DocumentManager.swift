@@ -139,7 +139,15 @@ extension BeamNote: BeamNoteDocument {
         Self.reloadAfterRename(previousTitle: previousTitle, note: self)
         indexContents()
         Logger.shared.logInfo("Rename \(previousTitle) to \(title) [\(id)]", category: .document)
-        AppDelegate.main.data.renamedNote = (id, previousTitle, title)
+//        AppDelegate.main.data.renamedNote = (id, previousTitle, title)
+
+        _ = syncedSave()
+
+        for link in links {
+            guard let element = link.element else { continue }
+            element.updateNoteNamesInInternalLinks(recursive: true)
+            _ = element.note?.syncedSave()
+        }
     }
 
     public func indexContents() {
@@ -472,6 +480,17 @@ extension BeamNote: BeamNoteDocument {
             let todayInt = JournalDateConverter.toInt(from: date)
 
             return try documentManager.fetchAll(filters: [.type(.journal), .nonFutureJournalDate(todayInt)], sortingKey: .journal(false)).compactMap({ Self.fetch(id: $0.id) })
+        } catch { return [] }
+    }
+
+    public static func fetchJournalsBefore(count: Int, date: String) -> [BeamNote] {
+        beamCheckMainThread()
+        let documentManager = DocumentManager()
+        documentManager.checkThread()
+        do {
+            let dateInt = JournalDateConverter.toInt(from: date)
+
+            return try documentManager.fetchAll(filters: [.type(.journal), .beforeJournalDate(dateInt), .limit(count)], sortingKey: .journal(false)).compactMap({ Self.fetch(id: $0.id) })
         } catch { return [] }
     }
 

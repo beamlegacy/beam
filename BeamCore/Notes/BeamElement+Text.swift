@@ -12,8 +12,8 @@ public extension BeamElement {
         let childrenText = children.reduce([]) { value, element -> [(UUID, BeamText)] in
             value + element.allTexts
         }
-        if let note = self as? BeamNote {
-            return [(id, BeamText(text: note.title))] + childrenText
+        if self as? BeamNote != nil {
+            return childrenText
         }
 
         return [(id, text)] + childrenText
