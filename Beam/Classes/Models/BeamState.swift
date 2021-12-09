@@ -264,7 +264,16 @@ import Sentry
         return tab
     }
 
-    func createTab(withURL url: URL, originalQuery: String?, setCurrent: Bool = true, note: BeamNote? = nil, rootElement: BeamElement? = nil, webView: BeamWebView? = nil) -> BrowserTab {
+    /// Create a new browsertab in the current beam window. Will always switch the view mode to `.web`.
+    /// - Parameters:
+    ///   - url: the URL to open.
+    ///   - originalQuery: optional search query to configure the browsing tree with.
+    ///   - setCurrent: optional flag to set created tab as the new focussed tab. Defaults to true.
+    ///   - note: optional BeamNote to set as destination.
+    ///   - rootElement: optional root BeamElement where collected content with be added to.
+    ///   - webView: optional webview to create a new tab with
+    /// - Returns: Returns the newly created tab. The returned tab can safely be discarded.
+    @discardableResult func createTab(withURL url: URL, originalQuery: String? = nil, setCurrent: Bool = true, note: BeamNote? = nil, rootElement: BeamElement? = nil, webView: BeamWebView? = nil) -> BrowserTab {
         EventsTracker.logBreadcrumb(message: "\(#function) \(String(describing: note)) \(String(describing: url))", category: "BeamState")
         let origin = BrowsingTreeOrigin.searchBar(query: originalQuery ?? "<???>")
         let tab = addNewTab(origin: origin, setCurrent: setCurrent, note: note, element: rootElement, url: url, webView: webView)
