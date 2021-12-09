@@ -153,15 +153,6 @@ class ScrollViewContentWatcher: NSObject {
     }
 
     private func loadMore() {
-        guard let clipView = contentView,
-              let scrollView = clipView.superview as? NSScrollView,
-              scrollView.documentView as? JournalStackView != nil else { return }
-
-        let totalJournal = DocumentManager().count(filters: [.type(.journal)])
-        if totalJournal != data.journal.count {
-            data.updateJournal(with: 1, and: data.journal.count)
-        }
-        // Imo we shouldn't have a case were totalJournal == 0, but alway >= 1
-        data.isFetching = totalJournal != data.journal.count && totalJournal != 0
+        data.loadMorePastJournalNotes(count: 1, fetchEvents: true)
     }
 }

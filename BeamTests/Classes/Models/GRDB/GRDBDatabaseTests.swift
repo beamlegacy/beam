@@ -252,8 +252,8 @@ class GRDBDatabaseBeamElementTests: XCTestCase {
 
         // Match on the note title - return all note children
         matches = db.search(matchingAllTokensIn: "bar note").map { $0.uid }
-        expect(matches.count) == 5
-        expect(matches) == [note.id] + note.children.map { $0.id }
+        expect(matches.count) == 4
+        expect(matches) == note.children.map { $0.id }
     }
 
     func testMatchingAnyTokensIn() throws {
@@ -273,8 +273,8 @@ class GRDBDatabaseBeamElementTests: XCTestCase {
 
         // Match on the note title - return all note children
         matches = db.search(matchingAnyTokenIn: "bar note").map { $0.uid }
-        expect(matches.count) == 5
-        expect(matches) == [note.id] + note.children.map { $0.id }
+        expect(matches.count) == 4
+        expect(matches) == note.children.map { $0.id }
     }
 
     func testMatchingPhrase() throws {
@@ -288,7 +288,7 @@ class GRDBDatabaseBeamElementTests: XCTestCase {
         // Match on the note title - return all note children
         let matches = db.search(matchingAllTokensIn: "bar note", maxResults: 1).map { $0.uid }
         expect(matches.count) == 1
-        expect(matches) == [note.id]
+        expect(matches) == [note.children.first?.id]
     }
 
     func testClear() throws {
@@ -304,7 +304,7 @@ class GRDBDatabaseBeamElementTests: XCTestCase {
     func testRemove() throws {
         var matches = db.search(matchingAllTokensIn: "tata").map { $0.uid }
         expect(matches.count) == 1
-        expect(self.db.elementsCount) == 5
+        expect(self.db.elementsCount) == 4
 
         try db.remove(note: note)
         expect(self.db.elementsCount) == 0

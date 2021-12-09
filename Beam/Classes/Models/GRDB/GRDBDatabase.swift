@@ -310,7 +310,7 @@ extension GRDBDatabase {
         updateIndexedAt(for: note)
     }
 
-    func appendAsync(element: BeamElement) {
+    func appendAsync(element: BeamElement, _ completion: @escaping () -> Void = {}) {
         guard let note = element.note else { return }
         let noteTitle = note.title
         let noteId = note.id
@@ -318,7 +318,7 @@ extension GRDBDatabase {
         let text = element.text.text
         let links = element.internalLinksInSelf
 
-        DispatchQueue.global(qos: .default).async {
+        DispatchQueue.global(qos: .userInitiated).async {
             do {
                 try dbWriter.write { db in
                     try BeamElementRecord.filter(Column("noteId") == noteId.uuidString && Column("uid") == element.id.uuidString).deleteAll(db)
@@ -343,6 +343,7 @@ extension GRDBDatabase {
                 Logger.shared.logError("Error while indexing element \(noteTitle) - \(element.id.uuidString): \(error)", category: .search)
             }
             updateIndexedAt(for: note)
+            completion()
         }
     }
 
