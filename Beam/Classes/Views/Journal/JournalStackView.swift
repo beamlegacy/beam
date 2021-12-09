@@ -62,6 +62,7 @@ class JournalStackView: NSView {
 
     var safeTop: CGFloat { didSet { invalidateIntrinsicContentSize() } }
 
+    //swiftlint:disable:next function_body_length
     private func relayoutSubViews() {
         guard let scrollView = enclosingScrollView else { return }
         defer {
@@ -240,7 +241,11 @@ class JournalStackView: NSView {
     override func mouseDown(with event: NSEvent) {
         // Find the nearest editor:
         let location = convert(event.locationInWindow, from: nil)
-        if let closest = notes.first(where: { views[$0]?.frame.maxY ?? 0 <= location.y }), let newResponder = views[closest] {
+        let closest = notes.first(where: {
+            guard let view = views[$0] else { return false }
+            return view.frame.maxY >= location.y
+        })
+        if let closest = closest, let newResponder = views[closest] {
             window?.makeFirstResponder(newResponder)
         }
         super.mouseDown(with: event)

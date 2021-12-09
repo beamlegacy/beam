@@ -75,7 +75,17 @@ public extension BeamElement {
 public extension BeamElement {
     /// - Returns: true is something was actually updated
     @discardableResult
-    func updateNoteNamesInInternalLinks(recursive: Bool = false) -> Bool {
+    func updateNoteNamesInInternalLinks(recursive: Bool) -> Bool {
+        let res = _updateNoteNamesInInternalLinks(recursive: recursive)
+        if res, let note = note, !note.cmdManager.isEmpty {
+            // If the card renaming has changed anything in the currently edited note we need to reset the commandManager
+            note.resetCommandManager()
+            _ = note.syncedSave()
+        }
+        return res
+    }
+
+    private func _updateNoteNamesInInternalLinks(recursive: Bool) -> Bool {
         var res = text.resolveNotesNames()
 
         if recursive {
@@ -84,13 +94,9 @@ public extension BeamElement {
             }
         }
 
-        if res, let note = note, !note.cmdManager.isEmpty {
-            // If the card renaming has changed anything in the currently edited note we need to reset the commandManager
-            note.resetCommandManager()
-            _ = note.syncedSave()
-        }
         return res
     }
+
 }
 
 public extension BeamNoteReference {
