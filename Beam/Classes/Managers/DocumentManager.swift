@@ -44,6 +44,7 @@ enum DocumentFilter {
     case title(String)
     case titleMatch(String)
     case journalDate(Int64)
+    case beforeJournalDate(Int64)
     case nonFutureJournalDate(Int64)
     case type(DocumentType)
     case nonDeleted ///< filter out deleted notes (the default if nothing is explicitely requested)
@@ -893,6 +894,9 @@ extension DocumentManager {
                 predicates.append(NSPredicate(format: "title CONTAINS[cd] %@", title as CVarArg))
             case let .journalDate(journalDate):
                 predicates.append(NSPredicate(format: "journal_day == %d",
+                                              journalDate))
+            case let .beforeJournalDate(journalDate):
+                predicates.append(NSPredicate(format: "journal_day < %d",
                                               journalDate))
             case let .nonFutureJournalDate(journalDate):
                 predicates.append(NSPredicate(format: "journal_day <= \(journalDate)"))

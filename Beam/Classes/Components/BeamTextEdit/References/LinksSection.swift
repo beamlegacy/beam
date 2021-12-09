@@ -10,6 +10,10 @@ import Combine
 import AppKit
 import BeamCore
 
+extension BeamNote {
+    var sortingDate: Date { type.journalDate ?? creationDate }
+}
+
 class LinksSection: Widget {
     var note: BeamNote
 
@@ -31,6 +35,8 @@ class LinksSection: Widget {
         self.note = note
         super.init(parent: parent, availableWidth: availableWidth)
 
+        selfVisible = false
+        visible = false
         setupUI(openChildren: openChildrenDefault)
         setupSectionMode()
     }
@@ -95,6 +101,8 @@ class LinksSection: Widget {
 
     var initialUpdate = true
     func updateLinkedReferences(links: [BeamNoteReference]) {
+        let sectionName = String(describing: Self.self)
+        Logger.shared.logInfo("\(sectionName).updateLinkedReferences[\(note.title)] \(links.count) incoming", category: .noteEditor)
         defer {
             initialUpdate = false
         }
@@ -110,7 +118,7 @@ class LinksSection: Widget {
         // BeamNote by itself don't contain any text so there is no reason to count it as a reference:
         for noteReference in allLinks where noteReference.elementID != noteReference.noteID {
             let noteID = noteReference.noteID
-            guard let breadCrumb = root?.getBreadCrumb(for: noteReference) else { break }
+            guard let breadCrumb = root?.getBreadCrumb(for: noteReference) else { continue }
 
             // Prepare title children:
             guard let refTitleWidget = try? titles[noteID]
@@ -121,7 +129,7 @@ class LinksSection: Widget {
             toRemove.remove(refTitleWidget)
 
             // now attach bread crumbs to the titles we just refreshed
-            if shouldHandleReference(rootNote: note.title, rootNoteId: note.id, text: breadCrumb.proxy.text) {
+            if shouldHandleReference(rootNote: note.title, rootNoteId: note.id, text: breadCrumb.proxy.text, proxy: breadCrumb.proxyTextNode) {
                 refTitleWidget.addChild(breadCrumb)
                 validRefs += 1
             } else {
@@ -147,14 +155,15 @@ class LinksSection: Widget {
         updateHeading(validRefs)
 
         sortChildren()
+        Logger.shared.logInfo("\(sectionName).updateLinkedReferences[\(note.title)] done: \(validRefs) element(s) in section", category: .noteEditor)
     }
 
     func sortChildren() {
         children.sort { left, right in
             guard let left = left.children.first as? BreadCrumb,
                   let right = right.children.first as? BreadCrumb,
-                  let leftDate = left.proxy.proxy.note?.updateDate,
-                  let rightDate = right.proxy.proxy.note?.updateDate
+                  let leftDate = left.proxy.proxy.note?.sortingDate,
+                  let rightDate = right.proxy.proxy.note?.sortingDate
             else {
                 Logger.shared.logError("LinksSection - Trying to compared notes that have no date", category: .noteEditor)
                 return false
@@ -178,22 +187,21 @@ class LinksSection: Widget {
 
     func updateHeading(_ count: Int) {
         sectionTitleLayer.string = "link".localizedStringWith(comment: "link section title", count)
-        selfVisible = !children.isEmpty
-        visible = selfVisible
-        sectionTitleLayer.isHidden = !selfVisible
-        separatorLayer.isHidden = !selfVisible
     }
 
-    func shouldHandleReference(rootNote: String, rootNoteId: UUID, text: BeamText) -> Bool {
-        let linksToNote = text.hasLinkToNote(id: rootNoteId)
-        let referencesToNote = text.hasReferenceToNote(titled: rootNote)
-
-        // This is subtle: we don't want hide nodes that have just been edited so that they are not a link to this card anymore, so we make them disapear only if the became a reference to the curent card. This only happens after the initial update as the initial update should filter out anything that is not a link. It has the symetrical behaviour of ReferencesSection
-        if initialUpdate {
-            return linksToNote
-        } else {
-            return linksToNote || !referencesToNote
+    override var children: [Widget] {
+        didSet {
+            selfVisible = !children.isEmpty
+            visible = selfVisible
+            sectionTitleLayer.isHidden = !selfVisible
+            separatorLayer.isHidden = !selfVisible
         }
+    }
+
+    func shouldHandleReference(rootNote: String, rootNoteId: UUID, text: BeamText, proxy: ProxyTextNode?) -> Bool {
+        let linksToNote = text.hasLinkToNote(id: rootNoteId)
+
+        return linksToNote || (proxy?.isFocused ?? false)
     }
 
     func setupLayerFrame() {

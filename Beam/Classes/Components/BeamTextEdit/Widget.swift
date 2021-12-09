@@ -18,7 +18,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     var debug = false
     var currentFrameInDocument = NSRect()
     var nodeProvider: NodeProvider?
-    var hasValidNodeProvider: Bool { nodeProvider?.holder != nil }
+    var hasValidNodeProvider: Bool { nodeProvider?.holder?.editor != nil }
     var isInNodeProviderTree: Bool { hasValidNodeProvider || (parent?.isInNodeProviderTree ?? false) }
     var isTreeBoundary: Bool { nodeProvider != nil }
 
@@ -87,7 +87,10 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         invalidateRendering()
     }
 
+    var disableAnimationsForNextLayout = true
+
     func updateLayersVisibility() {
+        disableAnimationsForNextLayout = layer.isHidden
         layer.isHidden = !visible || !selfVisible
         for l in layers where l.value.layer.superlayer == editor?.layer {
             l.value.layer.isHidden = !visible || !selfVisible
@@ -314,6 +317,10 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         return parents
     }
 
+    func firstParentWithType<ParentType>(_ type: ParentType.Type) -> ParentType? {
+        allParents.first(where: { $0 as? ParentType != nil }) as? ParentType
+    }
+
     var firstVisibleParent: Widget? {
         var last: Widget?
         for p in allParents.reversed() {
@@ -432,12 +439,13 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         initialLayout || (editor?.frame.isEmpty ?? true)
     }
 
-    var shouldDisableActions: Bool { inInitialLayout }
+    var shouldDisableActions: Bool { inInitialLayout || layer.isHidden || layer.frame.isEmpty || disableAnimationsForNextLayout }
     final func setLayout(_ frame: NSRect) {
         self.frame = frame
         defer {
             needLayout = false
             initialLayout = false
+            disableAnimationsForNextLayout = false
         }
 
         if shouldDisableActions {
@@ -445,14 +453,12 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
             CATransaction.setDisableActions(true)
         }
 
-        defer {
-            if shouldDisableActions {
-                CATransaction.commit()
-            }
-        }
-
         layer.bounds = contentsFrame
         layer.position = CGPoint(x: frameInDocument.origin.x + contentsFrame.origin.x, y: frameInDocument.origin.y + contentsFrame.origin.y)
+
+        if shouldDisableActions {
+            CATransaction.commit()
+        }
 
         layer.backgroundColor = debug ? NSColor.systemPink.withAlphaComponent(0.1).cgColor : nil
 
@@ -735,23 +741,24 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
     internal var layers: [String: Layer] = [:]
     func addLayer(_ layer: Layer, origin: CGPoint? = nil, global: Bool = false) {
-        layer.widget = self
-        layer.frame = CGRect(origin: origin ?? layer.frame.origin, size: layer.frame.size).rounded()
+        CATransaction.disableAnimations {
+            layer.widget = self
+            layer.frame = CGRect(origin: origin ?? layer.frame.origin, size: layer.frame.size).rounded()
 
-        layer.layer.deepContentsScale = self.layer.contentsScale
+            layer.layer.deepContentsScale = self.layer.contentsScale
 
-        if global {
-            editor?.addToMainLayer(layer.layer)
-            layer.layer.isHidden = !inVisibleBranch
-        } else if layer.layer.superlayer == nil {
-            self.layer.addSublayer(layer.layer)
-            assert(layer.layer.superlayer == self.layer)
+            if global {
+                editor?.addToMainLayer(layer.layer)
+                layer.layer.isHidden = !inVisibleBranch
+            } else if layer.layer.superlayer == nil {
+                self.layer.addSublayer(layer.layer)
+                assert(layer.layer.superlayer == self.layer)
 
-            layer.setAccessibilityParent(self)
-//            layer.setAccessibilityFrameInParentSpace(layer.frame)
+                layer.setAccessibilityParent(self)
+            }
+
+            self.layers[layer.name] = layer
         }
-
-        layers[layer.name] = layer
     }
 
     func removeLayer(_ layer: Layer) {
@@ -772,7 +779,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     }
 
     func dispatchMouseDown(mouseInfo: MouseInfo) -> Widget? {
-        guard inVisibleBranch else { return nil }
+        guard visible, inVisibleBranch else { return nil }
 
         clickedLayer = nil
         for layer in layers.values.reversed() where !layer.layer.isHidden {
@@ -800,7 +807,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         }
 
 //        Logger.shared.logDebug("dispatch down: \(mouseInfo.position)")
-        if mouseDown(mouseInfo: mouseInfo) {
+        if visible, mouseDown(mouseInfo: mouseInfo) {
             return self
         }
 
@@ -808,10 +815,10 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     }
 
     func dispatchMouseUp(mouseInfo: MouseInfo) -> Widget? {
-        guard inVisibleBranch else { return nil }
+        guard visible, inVisibleBranch else { return nil }
         guard let mouseHandler = root?.mouseHandler else { return nil }
 
-        if mouseHandler.handleMouseUp(mouseInfo: mouseInfo) {
+        if visible, mouseHandler.handleMouseUp(mouseInfo: mouseInfo) {
             return mouseHandler
         }
 

@@ -36,6 +36,13 @@ class ReferencesSection: LinksSection {
             guard let self = self else { return }
             self.doSetupSectionMode()
         }
+
+        note.$title
+            .dropFirst()
+            .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
+            .sink { _ in
+                self.updateLinkedReferences(links: self.links)
+            }.store(in: &scope)
     }
 
     override func updateHeading(_ count: Int) {
@@ -46,16 +53,16 @@ class ReferencesSection: LinksSection {
         separatorLayer.isHidden = !selfVisible
     }
 
-    override func shouldHandleReference(rootNote: String, rootNoteId: UUID, text: BeamText) -> Bool {
+    override func shouldHandleReference(rootNote: String, rootNoteId: UUID, text: BeamText, proxy: ProxyTextNode?) -> Bool {
         let linksToNote = text.hasLinkToNote(id: rootNoteId)
         let referencesToNote = text.hasReferenceToNote(titled: rootNote)
 
-        // This is subtle: we don't want hide nodes that have just been edited so that they are not a reference to this card anymore, so we make them disapear only if the became a link to the curent card. This only happens after the initial update as the initial update should filter out anything that is not a reference. It has the symetrical behaviour of LinksSection
-        if initialUpdate {
-            return !linksToNote && referencesToNote
-        } else {
-            return !linksToNote
-        }
+        let isChild = proxy?.allParents.contains(self) ?? false
+        let isFocused = proxy?.isFocused ?? false
+        let mayBeDanglingRef = isChild && isFocused
+        let result = !linksToNote && (referencesToNote || mayBeDanglingRef)
+        Logger.shared.logInfo("ReferenceSection.shouldHandleReference to \(rootNote) - \(rootNoteId): \(result) [!linksToNote.\(linksToNote) && (referencesToNote.\(referencesToNote) || Dangling.\(mayBeDanglingRef)] - text: \(text.text)", category: .noteEditor)
+        return result
     }
 
     func createLinkAllLayer() {
@@ -66,14 +73,15 @@ class ReferencesSection: LinksSection {
             "linkAllLayer",
             linkContentLayer,
             activated: { [weak self] in
-                guard let self = self,
-                      let rootNote = self.editor?.note.note else { return }
+                guard let self = self else { return }
 
                 if let linkLayer = self.linkLayer, linkLayer.layer.isHidden { return }
 
                 for child in self.children {
-                    guard let title = child as? RefNoteTitle else { continue }
-                    title.makeLinksToNoteExplicit(forNote: rootNote.title)
+                    for crumb in child.children {
+                        guard let breadCrumb = crumb as? BreadCrumb else { continue }
+                        breadCrumb.convertReferenceToLink()
+                    }
                 }
             }, hovered: {[weak self] isHover in
                 guard let self = self else { return }

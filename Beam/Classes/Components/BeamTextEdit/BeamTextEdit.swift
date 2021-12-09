@@ -1111,9 +1111,7 @@ public extension CALayer {
         guard !(inputContext?.handleEvent(event) ?? false) else { return }
         reBlink()
         rootNode.cancelNodeSelection() // TODO: change this to handle manipulating the node selection with the mouse
-        if self.mouseDownPos != nil {
-            self.mouseDownPos = nil
-        }
+        mouseDownPos = nil
         if event.clickCount == 1 { hideInlineFormatter() }
         self.mouseDownPos = convert(event.locationInWindow)
         let info = MouseInfo(rootNode, mouseDownPos ?? .zero, event)
@@ -1128,6 +1126,9 @@ public extension CALayer {
     public override func mouseDown(with event: NSEvent) {
         //       window?.makeFirstResponder(self)
         handleMouseDown(event: event)
+        if window?.firstResponder != self {
+            window?.makeFirstResponder(self)
+        }
     }
 
     let scrollXBorder = CGFloat(20)
