@@ -1,0 +1,22 @@
+/* Light */
+:root {
+  --Beam-Embed-Background: #ffffffff;
+  --Beam-Embed-Color: #393e47ff;
+}
+
+@media (prefers-color-scheme: dark) {
+  /* Dark */
+  :root {
+      --Beam-Embed-Background: #1c1c1fff;
+      --Beam-Embed-Color: #edededff;
+  }
+}
+
+html {
+  color: var(--Beam-Embed-Color);
+  background-color: var(--Beam-Embed-Background);
+}
+
+html, body, .twitter-tweet {
+  margin: 0 !important;
+}

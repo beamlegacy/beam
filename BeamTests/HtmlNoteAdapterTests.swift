@@ -253,9 +253,8 @@ class HtmlNoteAdapterTests: XCTestCase {
         let expectation = XCTestExpectation(description: "convert html to BeamElements")
         htmlNoteAdapter.convert(html: html, completion: { (results: [BeamElement]) in
             XCTAssertEqual(results.count, 1)
-            if let embedElement = results.first,
-               let url = URL(string: urlString) {
-                XCTAssertEqual(embedElement.kind, .embed(url, origin: SourceMetadata(origin: .remote(url)), displayRatio: nil))
+            if let firstResult = results.first {
+                XCTAssertEqual(firstResult.kind, .bullet)
             }
             expectation.fulfill()
         })

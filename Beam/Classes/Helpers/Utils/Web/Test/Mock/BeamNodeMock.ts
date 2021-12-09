@@ -27,6 +27,8 @@ export class BeamNodeMock extends BeamEventTargetMock implements BeamNode {
     this.nodeName = nodeName
     this.nodeType = nodeType
   }
+  offsetHeight: number
+  offsetWidth: number
 
   appendChild(node: BeamNode): BeamNode {
     this.childNodes.push(node)
