@@ -874,6 +874,14 @@ extension GRDBDatabase {
         }
     }
 
+    func save(urlFrecencies: [FrecencyUrlRecord]) throws {
+        try dbWriter.write { db in
+            for var frecency in urlFrecencies {
+                try frecency.save(db)
+            }
+        }
+    }
+
     func fetchOneFrecency(fromUrl: UUID) throws -> [FrecencyParamKey: FrecencyUrlRecord] {
         var result = [FrecencyParamKey: FrecencyUrlRecord]()
         for type in FrecencyParamKey.allCases {
@@ -904,6 +912,15 @@ extension GRDBDatabase {
             try frecencyNote.save(db)
         }
     }
+
+    func save(noteFrecencies: [FrecencyNoteRecord]) throws {
+        try dbWriter.write { db in
+            for frecency in noteFrecencies {
+                try frecency.save(db)
+            }
+        }
+    }
+
     func fetchOneFrecencyNote(noteId: UUID, paramKey: FrecencyParamKey) throws -> FrecencyNoteRecord? {
         try dbReader.read { db in
             return try FrecencyNoteRecord
@@ -912,6 +929,7 @@ extension GRDBDatabase {
                 .fetchOne(db)
         }
     }
+
     func getFrecencyScoreValues(noteIds: [UUID], paramKey: FrecencyParamKey) -> [UUID: Float] {
         var scores = [UUID: Float]()
         let noteIdsStr = noteIds.map { $0.uuidString }
