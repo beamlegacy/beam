@@ -317,7 +317,7 @@ class EmbedNode: ResizableNode {
 
 extension EmbedNode: EmbedNodeWebPageDelegate {
     var mediaPlayerManager: NoteMediaPlayerManager? {
-        AppDelegate.main.window?.state.noteMediaPlayerManager
+        self.editor?.state?.noteMediaPlayerManager
     }
 
     func embedNodeDidUpdateMediaController(_ controller: MediaPlayerController?) {
@@ -341,8 +341,23 @@ extension EmbedNode: WKNavigationDelegate {
     }
 
     public func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, preferences: WKWebpagePreferences, decisionHandler: @escaping (WKNavigationActionPolicy, WKWebpagePreferences) -> Void) {
-        Logger.shared.logDebug("Embed decidePolicyFor: \(String(describing: navigationAction))", category: .embed)
-        decisionHandler(.allow, preferences)
+        // When clicking on a link inside the EmbedNode
+        guard let targetURL = navigationAction.request.url,
+              navigationAction.navigationType == .linkActivated,
+              let destinationNote = root?.editor?.note as? BeamNote,
+              let rootElement = root?.element,
+              let state = self.editor?.state else {
+            Logger.shared.logDebug("Embed decidePolicyFor: \(String(describing: navigationAction)), allow navigation", category: .embed)
+            decisionHandler(.allow, preferences)
+            return
+        }
+
+        Logger.shared.logDebug("Embed decidePolicyFor: \(String(describing: navigationAction)), cancel navigation, creating new tab", category: .embed)
+        // Create a new tab with the targetURL, the current note as destinationNote and the embedNode as rootElement
+        _ = state.createTab(withURL: targetURL, note: destinationNote, rootElement: rootElement)
+
+        // Don't navigate the EmbedNode
+        decisionHandler(.cancel, preferences)
     }
 
     public func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse, decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
