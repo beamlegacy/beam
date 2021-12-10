@@ -104,7 +104,7 @@ export class BeamEmbedHelper {
     }
 
     let parentLinkElement = BeamElementHelper.hasParentOfType(element, "A", 5)
-    return Boolean(parentLinkElement.href.includes("/watch?v="))
+    return Boolean(parentLinkElement?.href?.includes("/watch?v="))
   }
 
 
