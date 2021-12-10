@@ -42,34 +42,6 @@
       </CodeCoverageTargets>
       <TestPlans>
       </TestPlans>
-      <Testables>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "965A783C2514F149009980D4"
-               BuildableName = "BeamTests.xctest"
-               BlueprintName = "BeamTests"
-               ReferencedContainer = "container:Beam.xcodeproj">
-            </BuildableReference>
-            <SkippedTests>
-               <Test
-                  Identifier = "PublicServerTests">
-               </Test>
-            </SkippedTests>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO"
-            parallelizable = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "96319D162616232700D1CF31"
-               BuildableName = "BeamCoreTests.xctest"
-               BlueprintName = "BeamCoreTests"
-               ReferencedContainer = "container:Beam.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-      </Testables>
    </TestAction>
    <LaunchAction
       buildConfiguration = "Debug"
