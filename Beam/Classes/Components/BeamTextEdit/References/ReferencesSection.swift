@@ -40,7 +40,8 @@ class ReferencesSection: LinksSection {
         note.$title
             .dropFirst()
             .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
-            .sink { _ in
+            .sink { [weak self] _ in
+                guard let self = self else { return }
                 self.updateLinkedReferences(links: self.links)
             }.store(in: &scope)
     }
