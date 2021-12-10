@@ -283,6 +283,11 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
             if parent == nil && oldValue?.root?.focusedWidget === self {
                 oldValue?.root?.focusedWidget = nil
             }
+
+            if parent != nil {
+                updateChildrenVisibility()
+            }
+
             _root = nil
         }
     }
@@ -641,6 +646,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         let isVisible = visible && open
         for c in children {
             c.visible = isVisible
+            editor?.addToMainLayer(c.layer)
             c.updateChildrenVisibility()
         }
     }
@@ -692,6 +698,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         children.removeAll { w -> Bool in
             w === child
         }
+        guard child.parent == self else { return }
         child.removeFromSuperlayer(recursive: true)
 
         updateRemovedChild(child: child)
@@ -766,6 +773,8 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     }
 
     func removeLayer(_ name: String) {
+        guard let l = layers[name] else { return }
+        l.layer.removeFromSuperlayer()
         layers.removeValue(forKey: name)
     }
 
