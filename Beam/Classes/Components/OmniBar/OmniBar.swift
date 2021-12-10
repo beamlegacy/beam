@@ -217,8 +217,7 @@ struct OmniBar: View {
                         }).accessibilityIdentifier("nav-omnibox")
                     }
                     if showPivotButton {
-                        OmniboxV2ToolbarButton(icon: state.mode == .web ? "nav-pivot_card" : "nav-pivot_web", action: toggleMode)
-                            .accessibilityIdentifier(state.mode == .web ? "pivot-card" : "pivot-web")
+                        OmniboxV2ToolbarSwitcher(modeWeb: state.mode != .web, tabsCount: state.browserTabsManager.tabs.count, action: toggleMode)
                     }
                 }
                 .padding(.trailing, state.useOmniboxV2 ? 14 : BeamSpacing._100)
