@@ -781,6 +781,9 @@
 		A52FCB632666514000BCD38A /* TextLinesDecorationLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52FCB622666514000BCD38A /* TextLinesDecorationLayer.swift */; };
 		A5316A192667B9110039ED9C /* Range+BeamTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5316A182667B9110039ED9C /* Range+BeamTests.swift */; };
 		A5336C0B273AB6050075AF92 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5336C0A273AB6050075AF92 /* OnboardingView.swift */; };
+		A5347A632763B3E7006EEF8C /* OmniboxV2ToolbarSwitcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5347A622763B3E7006EEF8C /* OmniboxV2ToolbarSwitcher.swift */; };
+		A5347A6A2763B53A006EEF8C /* nav-pivot_web.json in Resources */ = {isa = PBXBuildFile; fileRef = A5347A692763B53A006EEF8C /* nav-pivot_web.json */; };
+		A5347A6C2763B53F006EEF8C /* nav-pivot_card.json in Resources */ = {isa = PBXBuildFile; fileRef = A5347A6B2763B53F006EEF8C /* nav-pivot_card.json */; };
 		A536DE0F269C6ABD003FAAF4 /* ToastTextIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A536DE0E269C6ABD003FAAF4 /* ToastTextIconView.swift */; };
 		A53B43F326B0946B0043D37A /* NoteListMetadataCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53B43F226B0946B0043D37A /* NoteListMetadataCache.swift */; };
 		A53C8F4E26446C6C003A5DF8 /* SharingBannerInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53C8F4D26446C6C003A5DF8 /* SharingBannerInfo.swift */; };
@@ -1929,6 +1932,9 @@
 		A52FCB622666514000BCD38A /* TextLinesDecorationLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextLinesDecorationLayer.swift; sourceTree = "<group>"; };
 		A5316A182667B9110039ED9C /* Range+BeamTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Range+BeamTests.swift"; sourceTree = "<group>"; };
 		A5336C0A273AB6050075AF92 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		A5347A622763B3E7006EEF8C /* OmniboxV2ToolbarSwitcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniboxV2ToolbarSwitcher.swift; sourceTree = "<group>"; };
+		A5347A692763B53A006EEF8C /* nav-pivot_web.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "nav-pivot_web.json"; sourceTree = "<group>"; };
+		A5347A6B2763B53F006EEF8C /* nav-pivot_card.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "nav-pivot_card.json"; sourceTree = "<group>"; };
 		A536DE0E269C6ABD003FAAF4 /* ToastTextIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastTextIconView.swift; sourceTree = "<group>"; };
 		A53B43F226B0946B0043D37A /* NoteListMetadataCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteListMetadataCache.swift; sourceTree = "<group>"; };
 		A53C8F4D26446C6C003A5DF8 /* SharingBannerInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharingBannerInfo.swift; sourceTree = "<group>"; };
@@ -4588,6 +4594,7 @@
 				A5D885B0274F9F5200F37859 /* OmniboxV2Toolbar.swift */,
 				A5D8859D274EA78800F37859 /* OmniboxV2ToolbarButton.swift */,
 				418171D92581107C00317ED8 /* OmniboxV2ToolbarChevrons.swift */,
+				A5347A622763B3E7006EEF8C /* OmniboxV2ToolbarSwitcher.swift */,
 				A5011E492754E6E800A76667 /* OmniboxV2CapsuleButton.swift */,
 			);
 			path = OmniboxV2;
@@ -4632,6 +4639,8 @@
 				33BBA504274423E200FE92DB /* editor-embed_collapse.json */,
 				A5F47EC726F8D718004B7CDE /* editor-publish.json */,
 				A5F47EC926F8D71C004B7CDE /* editor-unpublish.json */,
+				A5347A6B2763B53F006EEF8C /* nav-pivot_card.json */,
+				A5347A692763B53A006EEF8C /* nav-pivot_web.json */,
 			);
 			path = Lotties;
 			sourceTree = "<group>";
@@ -5503,6 +5512,7 @@
 				A515597A267786E1006F6D6F /* MediaPlayer.js in Resources */,
 				33BBA505274423E200FE92DB /* editor-embed_collapse.json in Resources */,
 				8A0DFAB527551E3D0044515B /* jest.config.js in Resources */,
+				A5347A6A2763B53A006EEF8C /* nav-pivot_web.json in Resources */,
 				418172412581107C00317ED8 /* ScrollableTextView.xib in Resources */,
 				3303E10326FA22D300E175AC /* user_infos.graphql in Resources */,
 				8A0DFABA27551E3D0044515B /* package.json in Resources */,
@@ -5530,6 +5540,7 @@
 				8AD2636C26F4A0480074D673 /* UITests-4.html in Resources */,
 				522F149327033DE000EDF2F6 /* beam_object_checksums.graphql in Resources */,
 				8A0DFAB627551E3D0044515B /* EmbedNodeUI_native.ts in Resources */,
+				A5347A6C2763B53F006EEF8C /* nav-pivot_card.json in Resources */,
 				BAA675AE9C103046AC022CBA /* .sassrc in Resources */,
 				8A0DFABF27551E3D0044515B /* EmbedNode.js in Resources */,
 				A52A559127592E9A002D0C99 /* Inter-Medium.otf in Resources */,
@@ -5948,6 +5959,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				525098EA264E9824002D1548 /* HyperlinkFormatterView.swift in Sources */,
+				A5347A632763B3E7006EEF8C /* OmniboxV2ToolbarSwitcher.swift in Sources */,
 				525098E5264E9817002D1548 /* ProxyTextNode.swift in Sources */,
 				522D48A62719D1F20038DB81 /* LoggerSplitViewController.swift in Sources */,
 				0325629326051D3B006513E4 /* RBKVO.m in Sources */,
