@@ -100,10 +100,9 @@ class RefNoteTitle: Widget {
     // Modify AddChild so that children are always sorted
     override func addChild(_ child: Widget) {
         guard !children.contains(child) else { return }
-        changingChildren = true
-        defer { changingChildren = false }
         var newChildren = children
         newChildren.append(child)
+        updateAddedChild(child: child)
         children = newChildren.sorted { left, right in
             guard let leftBC = left as? BreadCrumb,
                   let rightBC = right as? BreadCrumb,
@@ -115,7 +114,7 @@ class RefNoteTitle: Widget {
 
             return leftElement.indexPath < rightElement.indexPath
         }
-        updateAddedChild(child: child)
+        updateChildrenVisibility()
     }
 
 }

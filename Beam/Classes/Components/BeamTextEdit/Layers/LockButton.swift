@@ -47,7 +47,6 @@ class LockButton: ButtonLayer {
 
         setAccessibilityLabel("lock button")
         setAccessibilityRole(.button)
-        setAccessibilityDisclosed(locked)
     }
 
     func updateLock() {

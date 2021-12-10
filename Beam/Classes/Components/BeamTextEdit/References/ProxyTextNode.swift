@@ -31,10 +31,10 @@ class ProxyTextNode: TextNode, ProxyNode {
                       self.editor != nil,
                       self.isInNodeProviderTree
                 else { return }
-                self.children = newChildren.compactMap({ e -> ProxyTextNode? in
+                self.children = newChildren.compactMap({ e -> Widget? in
                     let ref = self.nodeFor(e, withParent: self)
                     ref.parent = self
-                    return ref as? ProxyTextNode
+                    return ref
                 })
 
                 self.invalidateRendering()
@@ -42,9 +42,7 @@ class ProxyTextNode: TextNode, ProxyNode {
         }.store(in: &scope)
     }
 
-
     // MARK: TextConfig and Paddings
-    
     override var config: TextConfig {
         var config = TextConfig()
         if !isLink {

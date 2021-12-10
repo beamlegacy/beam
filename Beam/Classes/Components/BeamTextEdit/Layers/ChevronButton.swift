@@ -35,7 +35,6 @@ class ChevronButton: ButtonLayer {
         updateChevron()
 
         setAccessibilityRole(.disclosureTriangle)
-        setAccessibilityDisclosed(open)
     }
 
     func updateChevron() {

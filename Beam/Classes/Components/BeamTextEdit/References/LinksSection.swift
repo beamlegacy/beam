@@ -55,7 +55,8 @@ class LinksSection: Widget {
         sectionTitleLayer.fontSize = 12
         sectionTitleLayer.foregroundColor = BeamColor.LinkedSection.sectionTitle.cgColor
 
-        addLayer(ButtonLayer("sectionTitle", sectionTitleLayer, activated: {
+        addLayer(ButtonLayer("sectionTitle", sectionTitleLayer, activated: { [weak self] in
+            guard let self = self else { return }
             guard let chevron = self.layers["disclosure"] as? ChevronButton else { return }
 
             self.open.toggle()
@@ -72,8 +73,9 @@ class LinksSection: Widget {
     final func doSetupSectionMode() {
         AppDelegate.main.data.$lastIndexedElement
             .dropFirst()
-            .filter({ element in
-                guard let element = element,
+            .filter({ [weak self] element in
+                guard let self = self,
+                      let element = element,
                       let refNoteID = element.note?.id
                 else { return false }
                 let ref = BeamNoteReference(noteID: refNoteID, elementID: element.id)
@@ -129,7 +131,7 @@ class LinksSection: Widget {
             toRemove.remove(refTitleWidget)
 
             // now attach bread crumbs to the titles we just refreshed
-            if shouldHandleReference(rootNote: note.title, rootNoteId: note.id, text: breadCrumb.proxy.text, proxy: breadCrumb.proxyTextNode) {
+            if shouldHandleReference(rootNote: note.title, rootNoteId: note.id, text: breadCrumb.proxy.text, proxy: breadCrumb.proxyNode as? ProxyTextNode) {
                 refTitleWidget.addChild(breadCrumb)
                 validRefs += 1
             } else {
@@ -200,8 +202,15 @@ class LinksSection: Widget {
 
     func shouldHandleReference(rootNote: String, rootNoteId: UUID, text: BeamText, proxy: ProxyTextNode?) -> Bool {
         let linksToNote = text.hasLinkToNote(id: rootNoteId)
+        let referencesToNote = text.hasReferenceToNote(titled: rootNote)
 
-        return linksToNote || (proxy?.isFocused ?? false)
+        let isChild = proxy?.allParents.contains(self) ?? false
+        let isFocused = proxy?.isFocused ?? false
+        let mayBeDanglingRef = isChild && isFocused && !linksToNote && !referencesToNote
+        let result = linksToNote || mayBeDanglingRef
+
+        Logger.shared.logInfo("LinkSection.shouldHandleReference to \(rootNote) - \(rootNoteId): \(result) [linksToNote.\(linksToNote) || Dangling.\(mayBeDanglingRef)] (referencesToNote.\(referencesToNote)) - text: \(text.text)", category: .noteEditor)
+        return result
     }
 
     func setupLayerFrame() {
