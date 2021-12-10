@@ -598,7 +598,9 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
         return hasher.combine(id)
     }
 
+    open var isProxy: Bool { false }
     public let changed = PassthroughSubject<(BeamElement, ChangeType), Never>()
+    public let treeChanged = PassthroughSubject<(BeamElement), Never>()
     public private(set) var lastChangeType: ChangeType?
     open var changePropagationEnabled = true
     public enum ChangeType {
@@ -614,6 +616,8 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
             updateTextStats()
         }
         parent?.childChanged(self, type)
+
+        parentChanged(self)
     }
 
     open func childChanged(_ child: BeamElement, _ type: ChangeType) {
@@ -625,6 +629,14 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
             updateTextStats()
         }
         parent?.childChanged(child, type)
+    }
+
+    open func parentChanged(_ parent: BeamElement) {
+        guard changePropagationEnabled, !isProxy else { return }
+        treeChanged.send(parent)
+        for child in children {
+            child.parentChanged(parent)
+        }
     }
 
     open func findElement(_ id: UUID) -> BeamElement? {
