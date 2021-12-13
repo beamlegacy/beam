@@ -25,18 +25,9 @@ class WebNavigationMessageHandler: BeamMessageHandler<NavigationMessages> {
         case NavigationMessages.nav_locationChanged:
             guard let dict = msgPayload,
                   let urlString = dict["url"] as? String,
-                  let type = dict["type"] as? String,
-                  let href = dict["href"] as? String
-                else {
+                  let type = dict["type"] as? String
+            else {
                 Logger.shared.logError("Expected a url in location change message \(String(describing: msgPayload))", category: .web)
-                return
-            }
-            guard urlString != webPage.url?.absoluteString else {
-                Logger.shared.logDebug("Location change event url isn't different from current webPage url", category: .web)
-                return
-            }
-            guard href == webPage.url?.absoluteString else {
-                Logger.shared.logWarning("Location changed but in \(href) which is different from main frame \(String(describing: webPage.url))", category: .web)
                 return
             }
             guard let url = URL(string: urlString) else {
@@ -45,7 +36,7 @@ class WebNavigationMessageHandler: BeamMessageHandler<NavigationMessages> {
             }
             guard let navigationController = webPage.navigationController else { return }
             let replace: Bool = type == "replaceState" ? true : false
-            navigationController.navigatedTo(url: url, webView: webPage.webView, replace: replace)
+            navigationController.navigatedTo(url: url, webView: webPage.webView, replace: replace, fromJS: true)
             _ = webPage.executeJS("dispatchEvent(new Event('beam_historyLoad'))", objectName: nil)
         }
     }

@@ -30,8 +30,7 @@ extension PreferencesManager {
     static let showOmnibarScoreSectionDefault = false
     static let showPNSDefault = true
     static let PnsJSIsOnDefault = true
-    static let spaIndexingDefault = false
-    static let omniboxV2IsOnDefault = false
+    static let omniboxV2IsOnDefault = true
 }
 
 extension PreferencesManager {
@@ -52,9 +51,6 @@ extension PreferencesManager {
 
     @UserDefault(key: PnsJSIsOnKey, defaultValue: PnsJSIsOnDefault, suiteName: BeamUserDefaults.advancedPreferences.suiteName)
     static var PnsJSIsOn: Bool
-
-    @UserDefault(key: SpaIndexingKey, defaultValue: spaIndexingDefault, suiteName: BeamUserDefaults.advancedPreferences.suiteName)
-    static var enableSpaIndexing: Bool
 
     @UserDefault(key: omniboxV2IsOnKey, defaultValue: omniboxV2IsOnDefault, suiteName: BeamUserDefaults.advancedPreferences.suiteName)
     static var omniboxV2IsOn: Bool

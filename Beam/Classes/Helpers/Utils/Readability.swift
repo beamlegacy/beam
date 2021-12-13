@@ -9,7 +9,7 @@
 import Foundation
 import WebKit
 
-struct Readability: Codable {
+struct Readability: Codable, Equatable {
     enum Direction: String, Codable {
         case ltr
         case rtl
