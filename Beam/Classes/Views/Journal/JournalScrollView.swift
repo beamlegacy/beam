@@ -11,6 +11,7 @@ import BeamCore
 
 struct JournalScrollView: NSViewRepresentable {
     typealias NSViewType = NSScrollView
+    typealias StackView = JournalSimpleStackView
 
     var axes: Axis.Set
     var showsIndicators: Bool
@@ -42,7 +43,7 @@ struct JournalScrollView: NSViewRepresentable {
             scrollView.contentInsets = NSEdgeInsets(top: topInset, left: 0, bottom: 0, right: 0)
         }
         // Initial document view
-        let journalStackView = JournalStackView(state: state, safeTop: OmniboxV2Toolbar.height, onStartEditing: { self.isEditing = true }, verticalSpace: 10,
+        let journalStackView = StackView(state: state, safeTop: OmniboxV2Toolbar.height, onStartEditing: { self.isEditing = true }, verticalSpace: 10,
                                                 topOffset: Self.firstNoteTopOffset(forProxy: proxy))
         journalStackView.frame = NSRect(x: 0, y: 0, width: proxy.size.width, height: proxy.size.height)
         scrollView.documentView = journalStackView
@@ -59,7 +60,7 @@ struct JournalScrollView: NSViewRepresentable {
     }
 
     func updateNSView(_ nsView: NSScrollView, context: Context) {
-        guard let journalStackView = nsView.documentView as? JournalStackView else { return }
+        guard let journalStackView = nsView.documentView as? StackView else { return }
         journalStackView.invalidateLayout()
         if state.data.newDay {
             state.data.reloadJournal()
@@ -122,12 +123,12 @@ class ScrollViewContentWatcher: NSObject {
                                                object: nil)
     }
 
-    let spaceBeforeLoadingMoreData = CGFloat(200)
+    let spaceBeforeLoadingMoreData = CGFloat(1.0)
 
     @objc private func contentOffsetDidChange(notification: Notification) {
         guard let clipView = notification.object as? NSClipView,
               let scrollView = clipView.superview as? NSScrollView,
-              let documentView = scrollView.documentView as? JournalStackView else { return }
+              let documentView = scrollView.documentView as? JournalScrollView.StackView else { return }
 
         bounds = clipView.bounds
         // Update position of todays item
@@ -135,7 +136,7 @@ class ScrollViewContentWatcher: NSObject {
 
         // Update journal when scrollview is close to the end
         let offset = documentView.frame.maxY -  bounds.maxY
-        if offset < spaceBeforeLoadingMoreData {
+        if offset < spaceBeforeLoadingMoreData * bounds.height {
             loadMore()
         }
         onScroll?(clipView.bounds.origin)
@@ -144,7 +145,7 @@ class ScrollViewContentWatcher: NSObject {
     @objc private func defaultDatabaseDidChange(notification: Notification) {
         guard let clipView = contentView,
               let scrollView = clipView.superview as? NSScrollView,
-              let documentView = scrollView.documentView as? JournalStackView else { return }
+              let documentView = scrollView.documentView as? JournalScrollView.StackView else { return }
 
         BeamNote.clearCancellables()
         documentView.invalidateLayout()
