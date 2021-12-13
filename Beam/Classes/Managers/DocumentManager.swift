@@ -93,31 +93,9 @@ public class DocumentManager: NSObject {
         context = Thread.isMainThread ? self.coreDataManager.mainContext : self.coreDataManager.persistentContainer.newBackgroundContext()
 
         super.init()
-
-        // Used to debug CD issues
-        //observeCoredataNotification()
     }
 
     // MARK: Coredata Updates
-    private var cancellables = [AnyCancellable]()
-    private func observeCoredataNotification() {
-        NotificationCenter.default
-            .publisher(for: Notification.Name.NSManagedObjectContextObjectsDidChange)
-            .sink { [weak self] notification in
-                guard let self = self else { return }
-                self.printObjects(notification)
-            }
-            .store(in: &cancellables)
-    }
-
-    private func notificationsToDocuments(_ notification: Notification) -> [Document] {
-        if let updatedObjects = notification.userInfo?[NSUpdatedObjectsKey] as? Set<NSManagedObject>, !updatedObjects.isEmpty {
-            return updatedObjects.compactMap { $0 as? Document }
-        }
-
-        return []
-    }
-
     @objc func managedObjectContextObjectsDidChange(_ notification: Notification) {
         printObjects(notification)
     }
@@ -576,35 +554,6 @@ public class DocumentManager: NSObject {
         }
     }
 
-    // MARK: notifications
-    func notificationDocumentUpdate(_ documentStruct: DocumentStruct) {
-        let userInfo: [AnyHashable: Any] = [
-            "updatedDocuments": [documentStruct],
-            "deletedDocuments": []
-        ]
-
-        Logger.shared.logDebug("Posting notification .documentUpdate for \(documentStruct.titleAndId)",
-                               category: .documentNotification)
-
-        NotificationCenter.default.post(name: .documentUpdate,
-                                        object: self,
-                                        userInfo: userInfo)
-    }
-
-    func notificationDocumentDelete(_ documentStruct: DocumentStruct) {
-        let userInfo: [AnyHashable: Any] = [
-            "updatedDocuments": [],
-            "deletedDocuments": [documentStruct]
-        ]
-
-        Logger.shared.logDebug("Posting notification .documentUpdate for deleted \(documentStruct.titleAndId)",
-                               category: .documentNotification)
-
-        NotificationCenter.default.post(name: .documentUpdate,
-                                        object: self,
-                                        userInfo: userInfo)
-    }
-
     // MARK: Shared
     // swiftlint:disable function_body_length
     func saveAndThrottle(_ documentStruct: DocumentStruct,
@@ -732,100 +681,6 @@ public class DocumentManager: NSObject {
 
 // MARK: - updates
 extension DocumentManager {
-    /// Use this to have updates when the underlaying CD object `Document` changes
-    func onDocumentChange(_ documentStruct: DocumentStruct,
-                          completionHandler: @escaping (DocumentStruct) -> Void) -> AnyCancellable {
-        Logger.shared.logDebug("onDocumentChange called for \(documentStruct.titleAndId)", category: .documentNotification)
-
-        var documentId = documentStruct.id
-        let cancellable = NotificationCenter.default
-            .publisher(for: .documentUpdate)
-            .sink { notification in
-                let documentManager = DocumentManager()
-                guard let updatedDocuments = notification.userInfo?["updatedDocuments"] as? [DocumentStruct] else {
-                    return
-                }
-
-                for document in updatedDocuments {
-
-                    /*
-                     I used to prevent calling `completionHandler` when that condition was true:
-
-                     `if let documentManager = notification.object as? DocumentManager, documentManager == self { return }`
-
-                     to avoid the same DocumentManager to return its own saved update.
-
-                     But we have legit scenarios when such is happening, for example when there is an API conflict,
-                     and the manager fetch, merge and resave that merged object.
-
-                     We need the UI to be updated about such to reflect the merge.
-                     */
-
-                    if document.title == documentStruct.title &&
-                        document.databaseId == documentStruct.databaseId &&
-                        document.id != documentId {
-
-                        /*
-                         When a document is deleted and overwritten because of a title conflict, we want to let
-                         the editor know to update the editor UI with the new document.
-
-                         However when going on the "see all notes" debug window, and forcing a document refresh,
-                         we don't want the editor UI to change.
-                         */
-
-                        guard let coreDataDocument = try? documentManager.fetchWithId(documentId) else {
-                            Logger.shared.logDebug("onDocumentChange for \(document.titleAndId) (new id)",
-                                                   category: .documentNotification)
-                            documentId = document.id
-                            completionHandler(document)
-                            return
-                        }
-
-                        if documentStruct.deletedAt == nil, coreDataDocument.deleted_at != documentStruct.deletedAt {
-                            Logger.shared.logDebug("onDocumentChange for \(document.titleAndId) (new id)",
-                                                   category: .documentNotification)
-                            documentId = document.id
-                            completionHandler(document)
-                        } else {
-                            Logger.shared.logDebug("onDocumentChange: no notification for \(document.titleAndId) (new id)",
-                                                   category: .documentNotification)
-                        }
-                    } else if document.id == documentId {
-                        Logger.shared.logDebug("onDocumentChange for \(document.titleAndId)",
-                                               category: .documentNotification)
-                        completionHandler(document)
-                    } else if document.title == documentStruct.title {
-                        Logger.shared.logDebug("onDocumentChange for \(document.titleAndId) but not detected. Called with \(documentStruct.titleAndId), {\(documentId)}",
-                                               category: .documentNotification)
-                    }
-                }
-            }
-        return cancellable
-    }
-
-    func onDocumentDelete(_ documentStruct: DocumentStruct,
-                          completionHandler: @escaping (DocumentStruct) -> Void) -> AnyCancellable {
-        Logger.shared.logDebug("onDocumentDelete called for \(documentStruct.titleAndId)", category: .documentDebug)
-
-        let cancellable = NotificationCenter.default
-            .publisher(for: .documentUpdate)
-            .sink { notification in
-                // Skip notification coming from this manager
-                if let documentManager = notification.object as? DocumentManager, documentManager == self {
-                    return
-                }
-
-                if let deletedDocuments = notification.userInfo?["deletedDocuments"] as? [DocumentStruct] {
-                    for document in deletedDocuments where document.id == documentStruct.id {
-                        Logger.shared.logDebug("notification for \(document.titleAndId)", category: .document)
-                        try? GRDBDatabase.shared.remove(noteTitled: document.title)
-                        completionHandler(document)
-                    }
-                }
-            }
-        return cancellable
-    }
-
     /// This publisher is triggered anytime we store a document in the DB. Note that it also happens when softDeleting a note
     static let documentSaved = PassthroughSubject<DocumentStruct, Never>()
     /// This publisher is triggered anytime we are completely removing a note from the DB. Soft delete do NOT call it though.

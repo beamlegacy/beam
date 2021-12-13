@@ -712,13 +712,14 @@ class DocumentManagerTests: QuickSpec {
 
                 var cancellable: AnyCancellable!
                 waitUntil(timeout: .seconds(10)) { done in
-                    cancellable = callbackDocumentManager.onDocumentChange(docStruct) { updatedDocStruct in
-                        expect(docStruct.id).to(equal(updatedDocStruct.id))
-                        expect(updatedDocStruct.title).to(equal(newTitle))
-                        cancellable.cancel() // To avoid a warning
-                        done()
-                    }
-
+                    cancellable = DocumentManager.documentSaved.receive(on: DispatchQueue.main)
+                        .sink { updatedDocStruct in
+                            guard updatedDocStruct.id == docStruct.id else { return }
+                            expect(docStruct.id).to(equal(updatedDocStruct.id))
+                            expect(updatedDocStruct.title).to(equal(newTitle))
+                            cancellable.cancel() // To avoid a warning
+                            done()
+                        }
                     docStruct.title = newTitle
                     docStruct.data = newTitle.asData // to force the callback
                     sut.save(docStruct, completion: { result in
@@ -741,7 +742,8 @@ class DocumentManagerTests: QuickSpec {
 
                 var cancellable: AnyCancellable!
                 waitUntil(timeout: .seconds(10)) { done in
-                    cancellable = callbackDocumentManager.onDocumentChange(docStruct) { updatedDocStruct in
+                    cancellable = DocumentManager.documentSaved.receive(on: DispatchQueue.main)
+                        .sink { updatedDocStruct in
                         expect(docStruct.id).to(equal(updatedDocStruct.id))
                         expect(updatedDocStruct.title).to(equal(newTitle))
                         cancellable.cancel() // To avoid a warning
