@@ -46,9 +46,9 @@ class OmnibarViewTests: BaseTest {
     
     func testOmnibarPivotButtonClicking() {
         let journalView = launchApp()
-        
-        testRailPrint("Given I open test page")
+        testRailPrint("Given I open 2 test pages")
         let omnibarView = OmniBarTestView()
+        BeamUITestsHelper(journalView.app).openTestPage(page: BeamUITestsHelper.UITestsPageCommand.page1)
         BeamUITestsHelper(journalView.app).openTestPage(page: BeamUITestsHelper.UITestsPageCommand.page1)
         
         testRailPrint("Then Webview is opened and Omnibar has additional buttons")
@@ -56,7 +56,9 @@ class OmnibarViewTests: BaseTest {
         XCTAssertEqual(omnibarView.getAutocompleteResults().count, 0)
         XCTAssertTrue(omnibarView.button(OmniBarLocators.Buttons.homeButton.accessibilityIdentifier).exists)
         XCTAssertTrue(omnibarView.button(OmniBarLocators.Buttons.refreshButton.accessibilityIdentifier).exists)
-        XCTAssertTrue(omnibarView.button(OmniBarLocators.Buttons.openCardButton.accessibilityIdentifier).exists)
+        let pivotButton = omnibarView.button(OmniBarLocators.Buttons.openCardButton.accessibilityIdentifier)
+        XCTAssertTrue(pivotButton.exists)
+        XCTAssertEqual(pivotButton.title, "card")
 
         testRailPrint("When I click on pivot button")
         WebTestView().openDestinationCard()
@@ -64,7 +66,12 @@ class OmnibarViewTests: BaseTest {
         testRailPrint("Then journal view is opened and Omnibar additional buttons are not displayed")
         XCTAssertTrue(journalView.scrollView(JournalViewLocators.ScrollViews.journalScrollView.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
         XCTAssertFalse(omnibarView.button(OmniBarLocators.Buttons.refreshButton.accessibilityIdentifier).exists)
-        
+
+        testRailPrint("Then pivot button shows the number of tabs")
+        let pivotWebButton = omnibarView.button(OmniBarLocators.Buttons.openWebButton.accessibilityIdentifier)
+        XCTAssertTrue(pivotWebButton.exists)
+        XCTAssertEqual(pivotWebButton.title, "2")
+
         testRailPrint("When I open web view")
         CardTestView().navigateToWebView()
         
