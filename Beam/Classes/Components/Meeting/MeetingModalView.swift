@@ -87,7 +87,7 @@ struct MeetingModalView: View {
                                         } else if focusedField == .meetingName {
                                             focusedField = nil
                                         }
-                                    }))
+                                    }), foregroundColor: BeamColor.Beam)
                                 Icon(name: "tool-close",
                                      color: hoveredCloseButtonIndex == -1 ? BeamColor.Corduroy.swiftUI : BeamColor.AlphaGray.swiftUI)
                                     .onTapGesture {
