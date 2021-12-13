@@ -60,7 +60,10 @@ struct OmniboxV2ToolbarSwitcher: View {
         .frame(width: 28, height: 28)
         .contentShape(Rectangle())
         .onHover { isHovering = $0 }
-            .accessibilityIdentifier(modeWeb ? "pivot-card" : "pivot-web")
+        .accessibilityElement(children: .ignore)
+        .accessibilityAddTraits(.isButton)
+        .accessibilityLabel(modeWeb ? "\(tabsCount)" : "card")
+        .accessibilityIdentifier(modeWeb ? "pivot-web" : "pivot-card")
     }
 }
 
