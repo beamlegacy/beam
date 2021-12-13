@@ -30,7 +30,7 @@ extension PreferencesManager {
     static let showOmnibarScoreSectionDefault = false
     static let showPNSDefault = true
     static let PnsJSIsOnDefault = true
-    static let omniboxV2IsOnDefault = true
+    static let omniboxV2IsOnDefault = false
 }
 
 extension PreferencesManager {
