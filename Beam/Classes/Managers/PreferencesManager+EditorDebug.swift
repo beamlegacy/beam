@@ -48,10 +48,10 @@ extension PreferencesManager {
 
     static let editorMinWidthDefault: CGFloat = 450
     static let editorMaxWidthDefault: CGFloat = 670
-    static let editorParentSpacingDefault: CGFloat = 2
-    static let editorChildSpacingDefault: CGFloat = 0
+    static let editorParentSpacingDefault: CGFloat = 9
+    static let editorChildSpacingDefault: CGFloat = 1
 
-    static let editorHeaderOneSizeDefault: CGFloat = 2
+    static let editorHeaderOneSizeDefault: CGFloat = 3
     static let editorHeaderTwoSizeDefault: CGFloat = 2
 
     static let editorLineHeightHeadingDefault: CGFloat = 1.2
