@@ -89,4 +89,9 @@ public extension URL {
         guard let host = self.host, let scheme = self.scheme else { return nil }
         return URL(string: "\(scheme)://\(host)/")
     }
+
+    func isSameOrigin(as url: URL) -> Bool {
+        guard self.scheme == url.scheme, self.host == url.host, self.port == url.port else { return false }
+        return true
+    }
 }

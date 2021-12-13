@@ -13,7 +13,7 @@ class TestWebPage: WebPage {
     private(set) var pointAndShootAllowed: Bool = true
     private(set) var title: String = "PNS MockPage"
     static let urlStr = "https://webpage.com"
-    private(set) var url: URL? = URL(string: urlStr)
+    var url: URL? = URL(string: urlStr)
     var userTypedDomain: URL?
     var score: Float = 0
     var pointAndShoot: PointAndShoot?
@@ -219,7 +219,7 @@ class DownloadManagerMock: DownloadManager {
 class NavigationControllerMock: WebNavigationController {
     var events: [String] = []
 
-    func navigatedTo(url: URL, webView: WKWebView, replace: Bool) {
+    func navigatedTo(url: URL, webView: WKWebView, replace: Bool, fromJS: Bool = false) {
         events.append("navigatedTo \(url) \(replace)")
     }
 

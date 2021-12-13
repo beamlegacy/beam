@@ -65,4 +65,28 @@ class URLBeamTest: XCTestCase {
         XCTAssertEqual(URL(string: "https://www.wikipedia.org")?.domain, URL(string: "https://www.wikipedia.org/"))
         XCTAssertNil(URL(string: "www.wikipedia.org/wiki")?.domain)
     }
+
+    func testSameOrigin() {
+        let firstUrl = URL(string: "http://www.example.com/dir/page.html")!
+
+        //Same origin, other page
+        XCTAssertTrue(URL(string: "http://www.example.com/dir/page2.html")!.isSameOrigin(as: firstUrl))
+        //Same origin, other folder
+        XCTAssertTrue(URL(string: "http://www.example.com/dir2/other.html")!.isSameOrigin(as: firstUrl))
+        //Same origin, with username and password
+        XCTAssertTrue(URL(string: "http://username:password@www.example.com/dir2/other.html")!.isSameOrigin(as: firstUrl))
+
+        //Port changed
+        XCTAssertFalse(URL(string: "http://www.example.com:81/dir/page.html")!.isSameOrigin(as: firstUrl))
+        //Scheme changed
+        XCTAssertFalse(URL(string: "https://www.example.com/dir/page.html")!.isSameOrigin(as: firstUrl))
+        //Subdomain changed, different host
+        XCTAssertFalse(URL(string: "http://en.example.com/dir/page.html")!.isSameOrigin(as: firstUrl))
+        //Subdomain changed, different host
+        XCTAssertFalse(URL(string: "http://example.com/dir/page.html")!.isSameOrigin(as: firstUrl))
+        //Subdomain changed, different host
+        XCTAssertFalse(URL(string: "http://v2.www.example.com/dir/page.html")!.isSameOrigin(as: firstUrl))
+        //Port made explicit, this is a change
+        XCTAssertFalse(URL(string: "http://www.example.com:80/dir/page.html")!.isSameOrigin(as: firstUrl))
+    }
 }
