@@ -239,6 +239,24 @@ struct GRDBDatabase {
             }
         }
 
+        migrator.registerMigration("BeamElementRecord_databaseId") { db in
+            if try db.tableExists("BeamElementRecord") {
+                try db.execute(sql: "DROP TABLE BeamElementRecord")
+                needsCardReindexing = true
+            }
+
+            try db.create(virtualTable: "BeamElementRecord", ifNotExists: true, using: FTS4()) { t in // or FTS3(), or FTS5()
+                // t.compress = "zip"
+                // t.uncompress = "unzip"
+                t.tokenizer = .unicode61()
+                t.column("title")
+                t.column("uid")
+                t.column("text")
+                t.column("noteId")
+                t.column("databaseId")
+            }
+        }
+
         #if DEBUG
         // Speed up development by nuking the database when migrations change
         migrator.eraseDatabaseOnSchemaChange = true
@@ -271,8 +289,9 @@ extension GRDBDatabase {
         do {
             try dbWriter.write { db in
                 try BeamElementRecord.filter(Column("noteId") == note.id.uuidString).deleteAll(db)
+                let databaseId =  note.databaseId?.uuidString ?? Database.defaultDatabase().id.uuidString
                 for elem in note.allTexts {
-                    var record = BeamElementRecord(title: note.title, text: elem.1.text, uid: elem.0.uuidString, noteId: note.id.uuidString)
+                    var record = BeamElementRecord(title: note.title, text: elem.1.text, uid: elem.0.uuidString, noteId: note.id.uuidString, databaseId: databaseId)
                     try record.insert(db)
                 }
             }
@@ -295,7 +314,7 @@ extension GRDBDatabase {
         do {
             try dbWriter.write { db in
                 try BeamElementRecord.filter(Column("noteId") == noteId.uuidString && Column("uid") == element.id.uuidString).deleteAll(db)
-                var record = BeamElementRecord(id: nil, title: noteTitle, text: element.text.text, uid: element.id.uuidString, noteId: noteId.uuidString)
+                var record = BeamElementRecord(id: nil, title: noteTitle, text: element.text.text, uid: element.id.uuidString, noteId: noteId.uuidString, databaseId: note.databaseId?.uuidString ?? Database.defaultDatabase().id.uuidString)
                 try record.insert(db)
                 try BidirectionalLink.filter(Column("sourceElementId") == element.id && Column("sourceNoteId") == noteId).deleteAll(db)
             }
@@ -322,7 +341,7 @@ extension GRDBDatabase {
             do {
                 try dbWriter.write { db in
                     try BeamElementRecord.filter(Column("noteId") == noteId.uuidString && Column("uid") == element.id.uuidString).deleteAll(db)
-                    var record = BeamElementRecord(id: nil, title: noteTitle, text: text, uid: elementId.uuidString, noteId: noteId.uuidString)
+                    var record = BeamElementRecord(id: nil, title: noteTitle, text: text, uid: elementId.uuidString, noteId: noteId.uuidString, databaseId: note.databaseId?.uuidString ?? Database.defaultDatabase().id.uuidString)
                     try record.insert(db)
                     try BidirectionalLink.filter(Column("sourceElementId") == elementId && Column("sourceNoteId") == noteId).deleteAll(db)
                 }
@@ -348,11 +367,15 @@ extension GRDBDatabase {
     }
 
     func remove(note: BeamNote) throws {
-        let noteId = note.id.uuidString
+        try remove(noteId: note.id)
+    }
+
+    func remove(noteId: UUID) throws {
+        let noteIdString = noteId.uuidString
         _ = try dbWriter.write { db in
-            try BeamElementRecord.filter(Column("noteId") == noteId).deleteAll(db)
+            try BeamElementRecord.filter(Column("noteId") == noteIdString).deleteAll(db)
         }
-        removeIndexedAt(for: note)
+        removeIndexedAt(for: noteId)
     }
 
     func updateIndexedAt(for note: BeamNote) {
@@ -371,14 +394,19 @@ extension GRDBDatabase {
     }
 
     func removeIndexedAt(for note: BeamNote) {
+        removeIndexedAt(for: note.id)
+    }
+
+    func removeIndexedAt(for noteId: UUID) {
+        let noteIdString = noteId.uuidString
         do {
             _ = try dbWriter.write({ db in
                 try BeamNoteIndexingRecord
-                    .filter(BeamNoteIndexingRecord.Columns.noteId == note.id.uuidString)
+                    .filter(BeamNoteIndexingRecord.Columns.noteId == noteIdString)
                     .deleteAll(db)
             })
         } catch {
-            Logger.shared.logError("Error trying to delete note [\(note.id)] indexing date: \(error)", category: .database)
+            Logger.shared.logError("Error trying to delete note [\(noteIdString)] indexing date: \(error)", category: .database)
 
         }
     }
@@ -578,15 +606,20 @@ extension GRDBDatabase {
                         filter: SQLSpecificExpressible? = nil,
                         frencencyParam: FrecencyParamKey) throws -> [SearchResult] {
 
+        let databaseId = Database.defaultDatabase().id.uuidString
         let association = BeamElementRecord.frecency
             .filter(FrecencyNoteRecord.Columns.frecencyKey == frencencyParam)
             .order(FrecencyNoteRecord.Columns.frecencySortScore.desc)
             .forKey("frecency")
         var query: QueryInterfaceRequest<BeamElementRecord>
         if let pattern = pattern {
-            query = BeamElementRecord.matching(pattern).including(optional: association)
+            query = BeamElementRecord
+                .filter(BeamElementRecord.Columns.databaseId == databaseId)
+                .matching(pattern).including(optional: association)
         } else {
-            query = BeamElementRecord.all().including(optional: association)
+            query = BeamElementRecord
+                .filter(BeamElementRecord.Columns.databaseId == databaseId)
+                .including(optional: association)
         }
         if let filter = filter {
             query = query.filter(filter)

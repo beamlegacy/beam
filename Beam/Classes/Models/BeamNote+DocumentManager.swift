@@ -88,6 +88,7 @@ extension BeamNote: BeamNoteDocument {
             return
         }
 
+        try? GRDBDatabase.shared.remove(noteId: id)
         unload(note: note)
         Self.visitFetchedNotes {
             $0.updateNoteNamesInInternalLinks(recursive: true)

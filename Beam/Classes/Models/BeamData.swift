@@ -208,7 +208,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
             .sink { [weak self] documentStruct in
                 guard let self = self else { return }
 
-                print("documentSaved: \(documentStruct)")
                 // All notes go through this publisher
                 BeamNote.updateNote(documentStruct)
                 Self.noteUpdated.send(documentStruct)
@@ -241,8 +240,8 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
             }.store(in: &scope)
 
         DocumentManager.documentDeleted.receive(on: DispatchQueue.main)
-            .sink { documentStruct in
-                BeamNote.purgeDeletedNode(documentStruct)
+            .sink { id in
+                BeamNote.purgeDeletedNode(id)
             }.store(in: &scope)
     }
 
