@@ -122,8 +122,13 @@ struct CalendarView: View {
         let model = MeetingModalView.ViewModel(meetingName: meeting.name, startTime: meeting.startTime,
                                                attendees: meeting.attendees,
                                                onFinish: { meeting in
-            if let meeting = meeting, let note = state?.data.todaysNote {
-                self.addMeeting(meeting, to: note)
+            if let meeting = meeting, let todaysNote = state?.data.todaysNote {
+                if meeting.startTime != BeamDate.now {
+                    let meetingDateNote = BeamNote.fetch(journalDate: meeting.startTime)
+                    self.addMeeting(meeting, to: meetingDateNote ?? todaysNote)
+                } else {
+                    self.addMeeting(meeting, to: todaysNote)
+                }
             }
             state?.overlayViewModel.modalView = nil
         })
