@@ -1055,7 +1055,7 @@ extension GRDBDatabase {
             .forKey("frecency")
         var query: QueryInterfaceRequest<Link>
         query = Link
-            .filter(Column("url").like("%\(url)%"))
+            .filter(Column("url").like("%.\(url)%") || Column("url").like("%/\(url)%"))
             .including(optional: association)
             .limit(limit)
         return (try? dbReader.read { db in

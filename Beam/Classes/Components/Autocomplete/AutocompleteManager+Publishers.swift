@@ -166,7 +166,7 @@ extension AutocompleteManager {
                                           information: scoredLink.link.title, completingText: query,
                                           score: scoredLink.frecency?.frecencySortScore)
             }.sorted(by: >)
-            self.logIntermediate(step: "HistoryTittle", stepShortName: "HT", results: results)
+            self.logIntermediate(step: "HistoryTitle", stepShortName: "HT", results: results)
             promise(.success(results))
         }
     }

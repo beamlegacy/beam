@@ -151,11 +151,12 @@ struct AutocompleteItem: View {
                     .layoutPriority(0)
                 }
 
-                if PreferencesManager.showOmnibarScoreSection, let score = item.score {
+                if PreferencesManager.showOmnibarScoreSection {
                     Spacer()
-                    StyledText(verbatim: " Score: \(score)")
+                    Text(debugString(score: item.score))
                         .font(BeamFont.regular(size: 13).swiftUI)
                         .foregroundColor(BeamColor.CharmedGreen.swiftUI)
+                        .layoutPriority(10)
                 }
             }
             .blendModeLightMultiplyDarkScreen()
@@ -191,6 +192,14 @@ struct AutocompleteItem: View {
         }
         .accessibilityElement()
         .accessibility(identifier: "autocompleteResult\(selected ? "-selected":"")-\(item.text)-\(item.source)")
+    }
+
+    private func debugString(score: Float?) -> String {
+        var debugString = "\(item.source)"
+        if let score = score {
+            debugString += " - Score: \(score)"
+        }
+        return debugString
     }
 }
 

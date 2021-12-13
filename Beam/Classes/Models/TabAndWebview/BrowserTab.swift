@@ -441,7 +441,7 @@ import Promises
         self.title = title ?? ""
     }
 
-    private func updateFavIcon(fromWebView: Bool, cacheOnly: Bool = false) {
+    func updateFavIcon(fromWebView: Bool, cacheOnly: Bool = false) {
         guard let url = url else { favIcon = nil; return }
         FaviconProvider.shared.favicon(fromURL: url, webView: fromWebView ? webView : nil, cacheOnly: cacheOnly) { [weak self] (image) in
             guard let self = self else { return }
@@ -497,37 +497,18 @@ import Promises
             .sink { [unowned self] value in
             self.receivedWebviewTitle(value)
         }.store(in: &scope)
+
         webView.publisher(for: \.url).sink { [unowned self] webviewUrl in
             guard let webviewUrl = webviewUrl else {
                 return // webview probably failed to load
             }
-            if webviewUrl.isDomain {
-                userTypedDomain = webviewUrl
-            }
-            if BeamURL(webviewUrl).isErrorPage {
-                let beamSchemeUrl = BeamURL(webviewUrl)
-                url = beamSchemeUrl.originalURLFromErrorPage
 
-                if let extractedCode = BeamURL.getQueryStringParameter(url: beamSchemeUrl.url.absoluteString, param: "code"),
-                   let errorCode = Int(extractedCode),
-                   let errorUrl = url {
-                    errorPageManager = .init(errorCode, webView: webView,
-                                             errorUrl: errorUrl,
-                                             defaultLocalizedDescription: BeamURL.getQueryStringParameter(url: beamSchemeUrl.url.absoluteString, param: "localizedDescription"))
-                }
-            } else {
-                url = webviewUrl
+            // For security reason, we shoud only update the URL from JS when the new one is from same origin
+            // If the page is loading, we are not navigating through JS, so URL will be updated in webView(_, didCommit) in BeamWebNavigationController
+            // https://github.com/mozilla-mobile/firefox-ios/wiki/WKWebView-navigation-and-security-considerations#single-page-js-apps-spas
+            if !webView.isLoading, let url = url, webviewUrl.isSameOrigin(as: url) {
+                self.url = webviewUrl
             }
-            leave()
-            updateFavIcon(fromWebView: false, cacheOnly: true)
-            if PreferencesManager.enableSpaIndexing {
-                // not just in didFinish delegate but everytime we observe url change, it's the only solution for SPA websites
-                // https://github.com/mozilla-mobile/firefox-ios/wiki/WKWebView-navigation-and-security-considerations#single-page-js-apps-spas
-                navigationController?.navigatedTo(url: webviewUrl, webView: webView, replace: false)
-            }
-            // self.browsingTree.current.score.openIndex = self.navigationCount
-            // self.updateScore()
-            // self.navigationCount = 0
         }.store(in: &scope)
         webView.publisher(for: \.isLoading).sink { [unowned self] value in isLoading = value }.store(in: &scope)
         webView.publisher(for: \.estimatedProgress).sink { [unowned self] value in estimatedLoadingProgress = value }.store(in: &scope)
