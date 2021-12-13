@@ -30,7 +30,6 @@ extension DocumentManager: BeamObjectManagerDelegate {
                 }
 
                 let savedDoc = DocumentStruct(document: documentCoreData)
-                self.notificationDocumentUpdate(savedDoc)
                 indexDocument(savedDoc)
             }
             try documentManager.saveContext()
@@ -80,7 +79,6 @@ extension DocumentManager: BeamObjectManagerDelegate {
                         try checkValidations(localDocument)
 
                         let savedDoc = DocumentStruct(document: localDocument)
-                        notificationDocumentUpdate(savedDoc)
                         indexDocument(savedDoc)
 
                         good = true

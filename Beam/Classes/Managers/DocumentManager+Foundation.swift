@@ -85,8 +85,6 @@ extension DocumentManager {
 
                         try documentManager.checkValidations(document)
 
-                        self.notificationDocumentUpdate(DocumentStruct(document: document))
-
                         // Once we locally saved the remote object, we want to update the local previous Checksum to
                         // avoid non-existing conflicts
                         try BeamObjectChecksum.savePreviousChecksum(object: remoteDocumentStruct)
@@ -245,9 +243,6 @@ extension DocumentManager {
                 return
             }
 
-            // Ping others about the update
-            documentManager.notificationDocumentUpdate(documentStruct)
-
             completion?(.success(true))
 
             // If not authenticated, we don't need to send to BeamAPI
@@ -369,9 +364,6 @@ extension DocumentManager {
 
                 document.deleted_at = documentStruct.deletedAt
                 goodObjects.append(documentStruct)
-
-                // Ping others about the update
-                documentManager.notificationDocumentUpdate(documentStruct)
             }
 
             do {
@@ -440,12 +432,13 @@ extension DocumentManager {
                     Logger.shared.logError("No connected database", category: .document)
                 }
 
-                let documentStruct = DocumentStruct(document: cdDocument)
-                cdDocument.delete(documentManager.context)
+                documentManager.context.delete(cdDocument)
+                do {
+                    try documentManager.saveContext()
+                } catch {
+                    Logger.shared.logError(error.localizedDescription, category: .coredata)
+                }
                 goods.append(document)
-
-                // Ping others about the update
-                documentManager.notificationDocumentDelete(documentStruct)
             }
 
             do {

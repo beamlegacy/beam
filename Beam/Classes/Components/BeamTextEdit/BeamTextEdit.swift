@@ -412,7 +412,7 @@ public extension CALayer {
         layoutInvalidated = false
         updateLayout(nodesRect)
 
-        if let stack = superview as? JournalStackView {
+        if let stack = superview as? JournalScrollView.StackView {
             stack.invalidateLayout()
         }
     }
@@ -541,6 +541,13 @@ public extension CALayer {
     var safeContentSize: NSSize = .zero
     override public var intrinsicContentSize: NSSize {
         guard !delayedInit, !frame.isEmpty, let rootNode = rootNode else {
+            if let root = unpreparedRoot {
+                let fontSize = Int(TextNode.fontSizeFor(kind: .bullet)) * 3
+                let size = root.allVisibleTexts.reduce(0) { partialResult, element in
+                    partialResult + Int(1 + element.1.text.count / 80) * fontSize
+                }
+                return NSSize(width: 670, height: size)
+            }
             return NSSize(width: 670, height: 300)
         }
         let textNodeWidth = Self.textNodeWidth(for: frame.size)

@@ -71,7 +71,6 @@ extension DocumentManager {
 
                     // Ping others about the update
                     let savedDocumentStruct = DocumentStruct(document: document)
-                    self.notificationDocumentUpdate(savedDocumentStruct)
 
                     guard AuthenticationManager.shared.isAuthenticated,
                           Configuration.networkEnabled else {
@@ -134,12 +133,8 @@ extension DocumentManager {
                         Logger.shared.logError("No connected database", category: .document)
                     }
 
-                    let documentStruct = DocumentStruct(document: cdDocument)
-                    cdDocument.delete(documentManager.context)
-
+                    documentManager.context.delete(cdDocument)
                     try documentManager.saveContext()
-
-                    self.notificationDocumentDelete(documentStruct)
 
                     guard AuthenticationManager.shared.isAuthenticated,
                           Configuration.networkEnabled,

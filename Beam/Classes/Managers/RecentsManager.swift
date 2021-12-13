@@ -80,15 +80,19 @@ class RecentsManager: ObservableObject {
     }
 
     private func observeCoreDataChanges() {
-        CoreDataContextObserver.shared
-            .publisher(for: .deletedDocuments)
-            .receive(on: RunLoop.main)
-            .sink { [weak self] deletedDocumentsIds in
-                guard let self = self, let deletedDocumentsIds = deletedDocumentsIds else { return }
-                self.recentNotes.removeAll { note in
-                    deletedDocumentsIds.contains(note.id)
+        DocumentManager.documentSaved.receive(on: DispatchQueue.main)
+            .sink { [weak self] documentStruct in
+                guard let self = self else { return }
+                if documentStruct.deletedAt != nil {
+                    self.fetchRecents()
                 }
-            }
-            .store(in: &deletionsCancellables)
+            }.store(in: &deletionsCancellables)
+
+        DocumentManager.documentDeleted.receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                   guard let self = self else { return }
+                self.fetchRecents()
+            }.store(in: &deletionsCancellables)
+
     }
 }
