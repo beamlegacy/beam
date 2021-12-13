@@ -186,8 +186,12 @@ class BeamObject: Codable {
         }
 
         decodedObject.beamObjectId = id
-        decodedObject.createdAt = createdAt ?? decodedObject.createdAt
-        decodedObject.updatedAt = updatedAt ?? decodedObject.updatedAt
+
+        // Don't use `createdAt` and `updatedAt` as those might be changed on the API side, only trust the encrypted signed
+        // ones from internal data
+        // decodedObject.createdAt = createdAt ?? decodedObject.createdAt
+        // decodedObject.updatedAt = updatedAt ?? decodedObject.updatedAt
+
         decodedObject.deletedAt = deletedAt ?? decodedObject.deletedAt
 
         return decodedObject
@@ -221,6 +225,31 @@ class BeamObject: Codable {
         return nil
     }
 
+}
+
+// MARK: - Encryption
+extension BeamObject {
+    func setTimestamps() throws {
+        guard let data = data else { return }
+
+        /*
+         The returned unencrypted `created_at` and `updated_at` from the API might be different from the one we sent which
+         are embed inside the encrypted data. We don't trust the API and only rely on signed data.
+         */
+        struct BeamObjectDates: Codable {
+            let createdAt: Date?
+            let updatedAt: Date?
+        }
+
+        do {
+            let parsedRemoteObject = try Self.decoder.decode(BeamObjectDates.self, from: data)
+            createdAt = parsedRemoteObject.createdAt ?? createdAt
+            updatedAt = parsedRemoteObject.updatedAt ?? updatedAt
+        } catch {
+            dump(error)
+            throw error
+        }
+    }
 }
 
 // MARK: - Encryption
