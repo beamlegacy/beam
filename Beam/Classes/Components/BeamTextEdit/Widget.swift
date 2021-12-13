@@ -1009,8 +1009,8 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         var p = parent
         var n: Widget?
         while n == nil && p != nil {
-            n = p!.nextSibbling()
-            p = p!.parent
+            n = p?.nextSibbling()
+            p = p?.parent
         }
 
         if n != nil && n !== self {
