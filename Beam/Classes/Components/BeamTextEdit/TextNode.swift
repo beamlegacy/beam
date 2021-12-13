@@ -499,9 +499,9 @@ public class TextNode: ElementNode {
 
             switch elementKind {
             case .heading(1):
-                size.height += PreferencesManager.editorHeaderOneSize
+                size.height -= PreferencesManager.editorHeaderOneSize
             case .heading(2):
-                size.height += PreferencesManager.editorHeaderTwoSize
+                size.height -= PreferencesManager.editorHeaderTwoSize
             default:
                 size.height -= 5
             }

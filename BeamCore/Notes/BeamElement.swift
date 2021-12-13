@@ -771,6 +771,29 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
         return nil
     }
 
+    open func nextElement() -> BeamElement? {
+        if children.count > 0 {
+            return children.first
+        }
+
+        if let n = nextSibbling() {
+            return n
+        }
+
+        var p = parent
+        var n: BeamElement?
+        while n == nil && p != nil {
+            n = p?.nextSibbling()
+            p = p?.parent
+        }
+
+        if n !== self {
+            return n
+        }
+
+        return nil
+    }
+
     open func nextSibbling() -> BeamElement? {
         if let p = parent {
             let sibblings = p.children
