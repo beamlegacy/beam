@@ -239,7 +239,7 @@ public class ElementNode: Widget {
             selectionLayer.position.y -= parent.childrenSpacing
             selectionLayer.bounds.size = CGSize(width: selectionLayerWidth - selectionLayerPosX,
                                                 height: selectionLayerHeight + parent.childrenSpacing)
-            if !self.children.isEmpty {
+            if !self.children.isEmpty && self.open {
                 selectionLayer.bounds.size.height -= childrenSpacing
             }
         }
