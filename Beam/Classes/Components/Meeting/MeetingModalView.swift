@@ -79,7 +79,7 @@ struct MeetingModalView: View {
                                 .padding(.bottom, BeamSpacing._120)
 
                             HStack {
-                                BoxedTextFieldView(title: "Meeting Title", text: $viewModel.meetingName, isEditing: Binding<Bool>(
+                                BoxedTextFieldView(title: "Meeting Title (Optional)", text: $viewModel.meetingName, isEditing: Binding<Bool>(
                                     get: { focusedField == .meetingName },
                                     set: {
                                         if $0 {
@@ -183,7 +183,7 @@ struct MeetingModalView: View {
                     ActionableButton(text: "Cancel", defaultState: .normal, variant: .secondary, minWidth: 120) {
                         viewModel.cancel()
                     }
-                    ActionableButton(text: "Add", defaultState: .normal, variant: .primaryPurple, minWidth: 120) {
+                    ActionableButton(text: "Add", defaultState: viewModel.meetingName.isEmpty && viewModel.attendees.isEmpty ? .disabled : .normal, variant: .primaryPurple, minWidth: 120) {
                         viewModel.addMeeting()
                     }
                 }
@@ -266,7 +266,6 @@ extension MeetingModalView {
         }
 
         func addMeeting() {
-            guard !meetingName.isEmpty else { return }
             let meeting = Meeting(name: meetingName, startTime: startTime, attendees: attendees, linkCards: linkCards)
             onFinish?(meeting)
         }
