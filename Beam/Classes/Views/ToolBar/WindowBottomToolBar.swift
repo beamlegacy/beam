@@ -39,6 +39,8 @@ struct WindowBottomToolBar: View {
         GeometryReader { geo in
             HStack {
                 SmallUpdateIndicatorView(versionChecker: state.data.versionChecker)
+                    .padding(.leading, 7)
+                    .offset(x: 0, y: -6)
                 Spacer(minLength: 20)
                 if !state.useOmniboxV2 && [.today, .note].contains(state.mode) {
                     recentsStack(containerGeometry: geo)
@@ -57,9 +59,9 @@ struct WindowBottomToolBar: View {
                         .environmentObject(state.noteMediaPlayerManager)
                 }
                 .fixedSize(horizontal: true, vertical: false)
-                .padding(.trailing, BeamSpacing._50)
+                .padding(.trailing, BeamSpacing._70)
             }
-            .padding(.vertical, BeamSpacing._50)
+            .padding(.vertical, BeamSpacing._70)
             .frame(height: barHeight)
             .if(!state.useOmniboxV2) {
                 $0.background(
@@ -108,6 +110,12 @@ private struct BottomToolBarTrailingIconView: View {
                         window?.makeKey()
                     }
                     .accessibility(identifier: "HelpButton")
+                    .background(
+                        Circle()
+                            .foregroundColor(BeamColor.Generic.background.swiftUI)
+                            .frame(width: 16, height: 16)
+                            .offset(x: -0.5)
+                    )
                     .overlay(
                         Circle().stroke(BeamColor.Button.activeBackground.swiftUI, lineWidth: 1)
                             .frame(width: 16, height: 16)
