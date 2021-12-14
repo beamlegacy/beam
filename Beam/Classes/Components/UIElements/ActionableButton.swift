@@ -130,7 +130,7 @@ struct ActionableButton: View {
             guard defaultState != .disabled else { return }
             isTouched = touching
         }
-        .simultaneousGesture(action != nil ?
+        .simultaneousGesture(action != nil && defaultState != .disabled ?
             TapGesture(count: 1).onEnded {
                 action?()
             } : nil
