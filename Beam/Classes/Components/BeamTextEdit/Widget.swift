@@ -80,8 +80,10 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     }
 
     func updateVisible() {
-        runAfterNextLayout { [weak self] in
-            self?.updateLayersVisibility()
+        runAfterNextLayout {
+            DispatchQueue.main.async { [weak self] in
+                self?.updateLayersVisibility()
+            }
         }
         invalidateLayout()
         invalidateRendering()
