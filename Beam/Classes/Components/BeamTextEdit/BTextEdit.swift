@@ -45,7 +45,7 @@ public struct BTextEditScrollable<Content: View>: NSViewRepresentable {
     }
 
     public func makeNSView(context: Context) -> NSViewType {
-        let edit = BeamTextEdit(root: note, journalMode: false)
+        let edit = BeamTextEdit(root: note, journalMode: false, enableDelayedInit: true)
 
         edit.state = state
         updateEditorProperties(edit, context: context)

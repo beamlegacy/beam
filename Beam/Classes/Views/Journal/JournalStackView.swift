@@ -158,7 +158,7 @@ class JournalSimpleStackView: NSView {
 
     public func addNote(_ note: BeamNote) {
         guard views[note] == nil else { return }
-        let view = getTextEditView(for: note, enableDelayedInit: views.count > 0)
+        let view = getTextEditView(for: note, enableDelayedInit: views.count > 3)
         views[note] = view
         countChanged = true
         addSubview(view)
