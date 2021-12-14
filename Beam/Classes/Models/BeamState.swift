@@ -87,6 +87,9 @@ import Sentry
 
     @Published var currentPage: WindowPage?
     @Published var overlayViewModel: OverlayViewCenterViewModel = OverlayViewCenterViewModel()
+
+    var shouldDisableLeadingGutterHover: Bool = false
+
     weak var currentEditor: BeamTextEdit?
     var editorShouldAllowMouseEvents: Bool {
         overlayViewModel.modalView == nil
@@ -196,7 +199,7 @@ import Sentry
 
         guard note != currentNote else { return true }
 
-        note.sources.refreshScores() {}
+        note.sources.refreshScores {}
         data.noteFrecencyScorer.update(id: note.id, value: 1.0, eventType: .noteVisit, date: BeamDate.now, paramKey: .note30d0)
         data.noteFrecencyScorer.update(id: note.id, value: 1.0, eventType: .noteVisit, date: BeamDate.now, paramKey: .note30d1)
         currentPage = nil

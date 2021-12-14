@@ -32,6 +32,9 @@ class CalendarGutterViewModel: ObservableObject {
 struct CalendarView: View {
     @State var isHoveringConnect = false
     @State var isHoveringNotConnect = false
+
+    @EnvironmentObject var state: BeamState
+    
     @ObservedObject var viewModel: CalendarGutterViewModel
 
     private var transitionInOutHiddenView: AnyTransition {
@@ -75,6 +78,7 @@ struct CalendarView: View {
                     }.transition(transitionInOutHiddenView)
                 }
             }.onHover { isHovering in
+                guard !state.shouldDisableLeadingGutterHover else { return }
                 withAnimation {
                     isHoveringConnect = isHovering
                 }
