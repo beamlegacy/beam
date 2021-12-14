@@ -87,7 +87,7 @@ public extension CALayer {
         }
     }
 
-    public var enableDelayedInit = true
+    public var enableDelayedInit: Bool
     var delayedInit = true
     func updateRoot(with note: BeamElement) {
         guard note != rootNode?.element else { return }
@@ -99,7 +99,6 @@ public extension CALayer {
 
         let initRootNode: () -> TextRoot = {
             let root = TextRoot(editor: self, element: note, availableWidth: Self.textNodeWidth(for: self.frame.size))
-            self.rootNode = root
             if let window = self.window {
                 root.contentsScale = window.backingScaleFactor
             }
@@ -116,7 +115,7 @@ public extension CALayer {
                     self?.searchViewModel?.search()
                 }.store(in: &self.noteCancellables)
             self.delayedInit = false
-            self.invalidateLayout()
+            self.rootNode = root
         }
 
         if enableDelayedInit, let note = note as? BeamNote {
@@ -179,7 +178,7 @@ public extension CALayer {
 
     public override var wantsUpdateLayer: Bool { true }
 
-    public init(root: BeamElement, journalMode: Bool, enableDelayedInit: Bool = true) {
+    public init(root: BeamElement, journalMode: Bool, enableDelayedInit: Bool) {
         self.enableDelayedInit = enableDelayedInit
         self.journalMode = journalMode
 
@@ -433,17 +432,19 @@ public extension CALayer {
     }
 
     private func updateLayout(_ rect: NSRect) {
+        guard let rootNode = rootNode else { return }
         let textNodeWidth = Self.textNodeWidth(for: frame.size)
-        let workBlock = { [unowned self] in
-            doRunBeforeNextLayout()
+        let workBlock = { [weak self] in
+            guard let self = self else { return }
+            self.doRunBeforeNextLayout()
 
-            rootNode?.availableWidth = textNodeWidth
+            rootNode.availableWidth = textNodeWidth
             self.updateCardHearderLayer(rect)
-            rootNode?.setLayout(rect)
+            self.rootNode?.setLayout(rect)
             self.updateTrailingGutterLayout(textRect: rect)
             self.updateLeadingGutterLayout(textRect: rect)
 
-            doRunAfterNextLayout()
+            self.doRunAfterNextLayout()
         }
         if isResizing || shouldDisableAnimationAtNextLayout {
             shouldDisableAnimationAtNextLayout = false
@@ -464,7 +465,7 @@ public extension CALayer {
     var rootNode: TextRoot? {
         didSet {
             guard oldValue != rootNode else { return }
-            invalidateIntrinsicContentSize()
+            invalidateLayout()
         }
     }
 
@@ -541,12 +542,12 @@ public extension CALayer {
     var safeContentSize: NSSize = .zero
     override public var intrinsicContentSize: NSSize {
         guard !delayedInit, !frame.isEmpty, let rootNode = rootNode else {
-            if let root = unpreparedRoot {
+            if let root = unpreparedRoot, journalMode {
                 let fontSize = Int(TextNode.fontSizeFor(kind: .bullet)) * 3
                 let size = root.allVisibleTexts.reduce(0) { partialResult, element in
                     partialResult + Int(1 + element.1.text.count / 80) * fontSize
                 }
-                return NSSize(width: 670, height: size)
+                return NSSize(width: 670, height: max(300, size))
             }
             return NSSize(width: 670, height: 300)
         }
