@@ -10,47 +10,45 @@ import XCTest
 
 class SearchOnCardTests: BaseTest {
     
-    func testSearchViewAppearace() throws {
-        try XCTSkipIf(true, "False failure fix WIP")
+    func testSearchViewAppearace() {
         let searchView = prepareTest(populateCardTimes: 2)
         
         testRailPrint("Then by default search field is unavailable")
-        XCTAssertFalse(searchView.textField(SearchViewLocators.TextFields.searchFieldCard.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout))
+        XCTAssertFalse(searchView.textField(SearchViewLocators.TextFields.searchField.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout))
         
         testRailPrint("When I use CMD+F")
         searchView.triggerSearchField()
         testRailPrint("Then search field appears. Search result options do not exist")
-        XCTAssertTrue(searchView.getCardSearchField().waitForExistence(timeout: implicitWaitTimeout))
+        XCTAssertTrue(searchView.getSearchFieldElement().waitForExistence(timeout: implicitWaitTimeout))
         XCTAssertFalse(searchView.image(SearchViewLocators.Buttons.forwardButton.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout))
         XCTAssertFalse(searchView.image(SearchViewLocators.Buttons.backwardButton.accessibilityIdentifier).exists)
 
         testRailPrint("When I search for letter")
-        searchView.typeInSearchField("t", isWebSearch: false)
+        searchView.typeInSearchField("t")
         testRailPrint("Then search result options appear")
         XCTAssertTrue(searchView.image(SearchViewLocators.Buttons.forwardButton.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
         XCTAssertTrue(searchView.image(SearchViewLocators.Buttons.backwardButton.accessibilityIdentifier).exists)
         
         testRailPrint("Then can I close search field via x icon")
         searchView.closeSearchField()
-        XCTAssertFalse(searchView.getCardSearchField().waitForExistence(timeout: minimumWaitTimeout))
+        XCTAssertFalse(searchView.getSearchFieldElement().waitForExistence(timeout: minimumWaitTimeout))
         
         testRailPrint("Then I can reopen search field again")
         searchView.triggerSearchField()
-        XCTAssertTrue(searchView.getCardSearchField().waitForExistence(timeout: implicitWaitTimeout))
+        XCTAssertTrue(searchView.getSearchFieldElement().waitForExistence(timeout: implicitWaitTimeout))
     }
     
-    func testSearchResultsCounter() throws {
-        try XCTSkipIf(true, "False failure fix WIP")
+    func testSearchResultsCounter() {
         let searchView = prepareTest(populateCardTimes: 5)
         
         testRailPrint("When I search for available letter in text")
         searchView.triggerSearchField()
-        searchView.typeInSearchField("t", isWebSearch: false)
+        searchView.typeInSearchField("t")
         testRailPrint("Then I see correct number of results")
         XCTAssertTrue(searchView.assertResultsCounterNumber("1/40"))
         
         testRailPrint("When I add char to the search keyword")
-        searchView.typeInSearchField(" ", isWebSearch: false)
+        searchView.typeInSearchField(" ")
         testRailPrint("Then I see correct number of results")
         XCTAssertTrue(searchView.assertResultsCounterNumber("1/20"))
         
@@ -65,7 +63,7 @@ class SearchOnCardTests: BaseTest {
         XCTAssertTrue(searchView.assertResultsCounterNumber("20/20"))
         
         testRailPrint("When I add char to the search keyword to have no results")
-        searchView.typeInSearchField("#", isWebSearch: false)
+        searchView.typeInSearchField("#")
         testRailPrint("Then I see not found result")
         XCTAssertTrue(searchView.assertResultsCounterNumber(SearchViewLocators.StaticTexts.emptySearchResult.accessibilityIdentifier))
         
@@ -83,21 +81,19 @@ class SearchOnCardTests: BaseTest {
         XCTAssertFalse(searchView.image(SearchViewLocators.Buttons.backwardButton.accessibilityIdentifier).exists)
     }
     
-    func testSearchKeywordCaseSensitivity() throws {
-        try XCTSkipIf(true, "False failure fix WIP")
+    func testSearchKeywordCaseSensitivity() {
         //Impossible to locate highlighted elements, highlight is covered only for web
         let searchView = prepareTest(populateCardTimes: 2)
         let firstSearch = "TeST"
 
         testRailPrint("When I search for \(firstSearch)")
         searchView.triggerSearchField()
-        searchView.typeInSearchField(firstSearch, isWebSearch: false)
+        searchView.typeInSearchField(firstSearch)
         testRailPrint("Then I see correct number of results")
         XCTAssertTrue(searchView.assertResultsCounterNumber("1/8"))
     }
     
-    func testSearchFieldPasteAndTypeText() throws {
-        try XCTSkipIf(true, "False failure fix WIP")
+    func testSearchFieldPasteAndTypeText() {
         let searchView = prepareTest(populateCardTimes: 1)
         let textToPaste = "test 0: "
         
@@ -108,13 +104,12 @@ class SearchOnCardTests: BaseTest {
         XCTAssertTrue(searchView.assertResultsCounterNumber("1/1"))
     }
     
-    func testSearchFieldUpdateInstantly() throws {
-        try XCTSkipIf(true, "False failure fix WIP")
+    func testSearchFieldUpdateInstantly() {
         let searchView = prepareTest(populateCardTimes: 1)
         let cardView = CardTestView()
         let textToType = "test"
         
-        searchView.activateSearchField(isWebSearch: false).typeInSearchField(textToType, isWebSearch: false, true)
+        searchView.activateSearchField(isWebSearch: false).typeInSearchField(textToType, true)
         cardView.typeInCardNoteByIndex(noteIndex: 0, text: textToType, needsActivation: true)
         
         testRailPrint("Then I see number of results is updated correctly")

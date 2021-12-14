@@ -11,7 +11,7 @@ import XCTest
 class CardViewEmbedsTests: BaseTest {
     
     func testEmbedsCollapseExpandIcons() throws {
-        try XCTSkipIf(true, "False failure fix WIP")
+        try XCTSkipIf(true, "Blocked by https://linear.app/beamapp/issue/BE-2718/crash-on-switching-from-web-view-to-card-view-using-pivot-button")
         let toLinkTitle = "to Link"
         let toImageTitle = "to Image"
         let pnsView = PnSTestView()

@@ -10,19 +10,13 @@ import XCTest
 
 class SearchTestView: BaseView {
     
-    func getWebSearchField() -> XCUIElement {
-        _ = self.textField(SearchViewLocators.TextFields.searchFieldWeb.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout)
-        return self.textField(SearchViewLocators.TextFields.searchFieldWeb.accessibilityIdentifier)
-    }
-    
-    func getCardSearchField() -> XCUIElement {
-        _ = self.textField(SearchViewLocators.TextFields.searchFieldCard.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout)
-        return self.textField(SearchViewLocators.TextFields.searchFieldCard.accessibilityIdentifier)
+    func getSearchFieldElement() -> XCUIElement {
+        return textField(SearchViewLocators.TextFields.searchField.accessibilityIdentifier)
     }
     
     @discardableResult
-    func typeInSearchField(_ searchText: String, isWebSearch: Bool , _ pressEnter: Bool = false) -> SearchTestView {
-        let searchField = isWebSearch ? getWebSearchField() : getCardSearchField()
+    func typeInSearchField(_ searchText: String, _ pressEnter: Bool = false) -> SearchTestView {
+        let searchField = self.getSearchFieldElement()
         searchField.click()
         searchField.typeText(searchText)
         if pressEnter {
@@ -54,14 +48,12 @@ class SearchTestView: BaseView {
     @discardableResult
     func activateSearchField(isWebSearch: Bool) -> SearchTestView {
         triggerSearchField()
-        let searchField = isWebSearch ? getWebSearchField() : getCardSearchField()
-        searchField.tapInTheMiddle()
+        self.getSearchFieldElement().tapInTheMiddle()
         return self
     }
     
     func getSearchFieldValue(isWebSearch: Bool) -> String {
-        let searchField = isWebSearch ? getWebSearchField() : getCardSearchField()
-        return searchField.value as? String ?? "\(String(describing: searchField.value)) unwrap issue"
+        return getElementStringValue(element: self.getSearchFieldElement())
     }
     
     func assertResultsCounterNumber(_ expectedValue: String) -> Bool {
