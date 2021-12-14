@@ -48,7 +48,7 @@ struct NoteMediaPlayingButton: View {
                         hoverMenuDelayedBlock = block
                         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: .milliseconds(1000)), execute: block)
                     }
-                    .offset(x: (-contextMenuSize.width / 2) - 20, y: -contextMenuSize.height + 6)
+                    .offset(x: (-contextMenuSize.width / 2) - 42, y: -contextMenuSize.height + 6)
             }
         }
         .frame(width: 20, height: 20)
