@@ -48,6 +48,7 @@ struct SearchInContentView: View {
         .padding(.vertical, 8)
         .frame(width: 320, height: 36)
         .background(backgroundView)
+        .accessibilityIdentifier("search-field")
     }
 
     private var backgroundView: some View {

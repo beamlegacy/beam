@@ -133,11 +133,10 @@ class PnSAddToCardTests: BaseTest {
         XCTAssertEqual(cardView.getElementStringValue(element: cardNotes[cardNotes.count - 1]), noteText) //CI specific issue handling
     }
     
-    func testCollectImage() throws {
-        try XCTSkipIf(true, "False failure fix WIP")
+    func testCollectImage() {
         let journalView = launchApp()
         let helper = BeamUITestsHelper(journalView.app)
-        
+        helper.tapCommand(.resizeSquare1000)
         print("Given I create \(cardNameToBeCreated) card")
         journalView.createCardViaOmnibarSearch(cardNameToBeCreated)
         
