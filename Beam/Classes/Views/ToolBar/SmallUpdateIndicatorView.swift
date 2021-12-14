@@ -13,6 +13,7 @@ import Combine
 struct SmallUpdateIndicatorView: View {
 
     @ObservedObject var versionChecker: VersionChecker
+    @EnvironmentObject var state: BeamState
 
     @State private var showReleaseNotes = false
     @State private var opacity = 1.0
@@ -79,7 +80,11 @@ struct SmallUpdateIndicatorView: View {
             default:
                 EmptyView()
             }
-        }.opacity(opacity)
+        }
+        .opacity(opacity)
+        .onHover { hover in
+            state.shouldDisableLeadingGutterHover = hover
+        }
     }
 
     func updateInstalledMessage(timerExpired: Bool) -> String {
@@ -87,7 +92,12 @@ struct SmallUpdateIndicatorView: View {
     }
 
     private var buttonLabelStyle: ButtonLabelStyle {
-        return ButtonLabelStyle(spacing: 1, activeBackgroundColor: .clear)
+        return ButtonLabelStyle(spacing: 1,
+                                foregroundColor: BeamColor.LightStoneGray.swiftUI,
+                                activeForegroundColor: BeamColor.Niobium.swiftUI,
+                                backgroundColor: BeamColor.Generic.background.swiftUI,
+                                hoveredBackgroundColor: BeamColor.Generic.background.swiftUI,
+                                activeBackgroundColor: BeamColor.Mercury.swiftUI)
     }
 
     private var beamStyle: ReleaseNoteView.ReleaseNoteViewStyle {
