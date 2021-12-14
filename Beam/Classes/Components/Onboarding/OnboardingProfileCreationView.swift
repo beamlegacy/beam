@@ -67,9 +67,23 @@ struct OnboardingProfileCreationView: View {
     }
 
     private func saveUsernameAndFinish() {
-        AuthenticationManager.shared.username = textField
-        finish(nil)
-        // Send username to API when https://linear.app/beamapp/issue/BE-1941/add-graphql-api-call-to-set-username
+        let username = textField.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard isUsernameValid(username) else { return }
+        let accountManager = AccountManager()
+        accountManager.setUsername(username: username) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .failure(let error):
+                    if case APIRequestError.apiErrors(let errorable) = error, let firstError = errorable.errors?.first {
+                        errorMessage = firstError.message
+                    } else {
+                        errorMessage = error.localizedDescription
+                    }
+                case .success:
+                    finish(nil)
+                }
+            }
+        }
     }
 }
 
