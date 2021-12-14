@@ -81,9 +81,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
     func updateVisible() {
         runAfterNextLayout {
-            DispatchQueue.main.async { [weak self] in
-                self?.updateLayersVisibility()
-            }
+            updateLayersVisibility()
         }
         invalidateLayout()
         invalidateRendering()
@@ -446,7 +444,9 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         initialLayout || (editor?.frame.isEmpty ?? true)
     }
 
-    var shouldDisableActions: Bool { inInitialLayout || layer.isHidden || layer.frame.isEmpty || disableAnimationsForNextLayout }
+    var shouldDisableActions: Bool {
+        inInitialLayout || layer.isHidden || layer.frame.isEmpty || disableAnimationsForNextLayout
+    }
     final func setLayout(_ frame: NSRect) {
         self.frame = frame
         defer {
@@ -455,7 +455,8 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
             disableAnimationsForNextLayout = false
         }
 
-        if shouldDisableActions {
+        let disableActions = shouldDisableActions
+        if disableActions {
             CATransaction.begin()
             CATransaction.setDisableActions(true)
         }
@@ -463,7 +464,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         layer.bounds = contentsFrame
         layer.position = CGPoint(x: frameInDocument.origin.x + contentsFrame.origin.x, y: frameInDocument.origin.y + contentsFrame.origin.y)
 
-        if shouldDisableActions {
+        if disableActions {
             CATransaction.commit()
         }
 
