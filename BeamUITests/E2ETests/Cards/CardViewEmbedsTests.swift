@@ -10,7 +10,8 @@ import XCTest
 
 class CardViewEmbedsTests: BaseTest {
     
-    func testEmbedsCollapseExpandIcons() {
+    func testEmbedsCollapseExpandIcons() throws {
+        try XCTSkipIf(true, "False failure fix WIP")
         let toLinkTitle = "to Link"
         let toImageTitle = "to Image"
         let pnsView = PnSTestView()

@@ -211,7 +211,7 @@ platform :mac do
         result_bundle: true,
         use_system_scm: true,
         code_coverage: true,
-        fail_build: false
+        fail_build: true
       )
       # number_of_retries: 2
       # # For Gitlab artifacts
