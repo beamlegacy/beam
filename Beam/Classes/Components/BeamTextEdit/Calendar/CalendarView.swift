@@ -142,7 +142,9 @@ struct CalendarView: View {
             let meetingNote = BeamNote.fetchOrCreate(title: meeting.name)
             meetingAttributes = [.internalLink(meetingNote.id)]
         }
-        text.insert(meeting.name, at: 0, withAttributes: meetingAttributes)
+        if !meeting.name.isEmpty {
+            text.insert(meeting.name, at: 0, withAttributes: meetingAttributes)
+        }
 
         if !meeting.attendees.isEmpty {
             let prefix = "Meeting with "
@@ -159,7 +161,9 @@ struct CalendarView: View {
                     position += separator.count
                 }
             }
-            text.insert(" for ", at: position, withAttributes: [])
+            if !meeting.name.isEmpty {
+                text.insert(" for ", at: position, withAttributes: [])
+            }
         }
         if let element = note.children.last, element.text.isEmpty {
             element.text = text
