@@ -275,11 +275,11 @@ extension APIRequest {
             Logger.shared.logError("Current network calls is different from expected", category: .network)
         }
         #endif
-        
+
         if Configuration.env == Configuration.unitTestModeLaunchArgument, !BeamURLSession.shouldNotBeVinyled, !(BeamURLSession.shared is Turntable), !ProcessInfo().arguments.contains(Configuration.uiTestModeLaunchArgument) {
             fatalError("All network calls must be caught by Vinyl in test environment. \(filename) was called.")
         }
-        
+
 
         // Note: all `completionHandler` call must use `backgroundQueue.async` because if the
         // code called in the completion handler is blocking, it will prevent new following requests

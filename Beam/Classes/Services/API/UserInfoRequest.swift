@@ -18,17 +18,13 @@ class UserInfoRequest: APIRequest {
         let username: String?
         let errors: [UserErrorData]?
     }
-}
 
-extension UserInfoRequest {
+    struct UpdateMeParameters: Encodable {
+        let username: String
+    }
 
-    @discardableResult
-    func getUserInfos(completionHandler: @escaping (Result<UserInfos, Error>) -> Void) throws -> URLSessionDataTask {
-
-        let bodyParamsRequest = GraphqlParameters(fileName: "user_infos", variables: EmptyVariable())
-
-        return try performRequest(bodyParamsRequest: bodyParamsRequest, authenticatedCall: true, completionHandler: { (result: Result<UserInfos, Error>) in
-            completionHandler(result)
-        })
+    struct UpdateMe: Decodable, Errorable {
+        let me: UserMe?
+        let errors: [UserErrorData]?
     }
 }

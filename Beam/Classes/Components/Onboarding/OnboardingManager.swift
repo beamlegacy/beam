@@ -83,7 +83,11 @@ class OnboardingManager: ObservableObject {
         currentStepIsFromHistory = false
         if let nextStep = nextStep ?? stepAfter(step: previous) {
             currentStep = nextStep
-            stepsHistory.append(previous)
+            if AuthenticationManager.shared.isAuthenticated {
+                stepsHistory.removeAll()
+            } else {
+                stepsHistory.append(previous)
+            }
         } else {
             needsToDisplayOnboard = false
         }
