@@ -40,7 +40,8 @@
         "OmnibarViewTests",
         "OnboardingTests",
         "PnSAddToCardTests",
-        "WaitHelper"
+        "WaitHelper",
+        "dummytests"
       ],
       "target" : {
         "containerPath" : "container:Beam.xcodeproj",

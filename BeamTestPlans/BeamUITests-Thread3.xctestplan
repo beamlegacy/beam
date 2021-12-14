@@ -44,7 +44,9 @@
         "SlashMenuTests",
         "UpdateViewTests",
         "WaitHelper",
-        "WebsiteAuthTest"
+        "WebsiteAuthTest",
+        "dummytests",
+        "dummytests\/testFailure()"
       ],
       "target" : {
         "containerPath" : "container:Beam.xcodeproj",

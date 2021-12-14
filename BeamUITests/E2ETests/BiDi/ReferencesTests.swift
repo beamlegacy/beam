@@ -36,5 +36,6 @@ class ReferencesTests: BaseTest {
         cardView.openLinkByIndex(0)
         XCTAssertEqual(cardView.getNumberOfVisibleNotes(), 2)
         XCTAssertEqual(cardView.getCardNoteValueByIndex(0), cardName1)
+        
     }
 }

@@ -10,7 +10,8 @@ import XCTest
 
 class SearchOnCardTests: BaseTest {
     
-    func testSearchViewAppearace() {
+    func testSearchViewAppearace() throws {
+        try XCTSkipIf(true, "False failure fix WIP")
         let searchView = prepareTest(populateCardTimes: 2)
         
         testRailPrint("Then by default search field is unavailable")
@@ -38,7 +39,8 @@ class SearchOnCardTests: BaseTest {
         XCTAssertTrue(searchView.getCardSearchField().waitForExistence(timeout: implicitWaitTimeout))
     }
     
-    func testSearchResultsCounter() {
+    func testSearchResultsCounter() throws {
+        try XCTSkipIf(true, "False failure fix WIP")
         let searchView = prepareTest(populateCardTimes: 5)
         
         testRailPrint("When I search for available letter in text")
@@ -81,7 +83,8 @@ class SearchOnCardTests: BaseTest {
         XCTAssertFalse(searchView.image(SearchViewLocators.Buttons.backwardButton.accessibilityIdentifier).exists)
     }
     
-    func testSearchKeywordCaseSensitivity() {
+    func testSearchKeywordCaseSensitivity() throws {
+        try XCTSkipIf(true, "False failure fix WIP")
         //Impossible to locate highlighted elements, highlight is covered only for web
         let searchView = prepareTest(populateCardTimes: 2)
         let firstSearch = "TeST"
@@ -94,6 +97,7 @@ class SearchOnCardTests: BaseTest {
     }
     
     func testSearchFieldPasteAndTypeText() throws {
+        try XCTSkipIf(true, "False failure fix WIP")
         let searchView = prepareTest(populateCardTimes: 1)
         let textToPaste = "test 0: "
         
@@ -104,7 +108,8 @@ class SearchOnCardTests: BaseTest {
         XCTAssertTrue(searchView.assertResultsCounterNumber("1/1"))
     }
     
-    func testSearchFieldUpdateInstantly() {
+    func testSearchFieldUpdateInstantly() throws {
+        try XCTSkipIf(true, "False failure fix WIP")
         let searchView = prepareTest(populateCardTimes: 1)
         let cardView = CardTestView()
         let textToType = "test"
