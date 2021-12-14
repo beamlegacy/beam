@@ -41,12 +41,12 @@ extension BeamTextEdit {
         clearDebounceTimer()
         guard let node = formatterTargetNode ?? (focusedWidget as? TextNode),
               isInlineFormatterHidden else { return }
-        var atPoint = baseInlineFormatterPosition(for: node)
+        var atPoint = baseInlineFormatterPosition(for: node, cursorPosition: atPosition)
         atPoint.x -= 4
         atPoint.y += 8
         var targetRange = atPosition..<atPosition
         if let text = initialText {
-            targetRange = max(0, targetRange.lowerBound - text.count)..<targetRange.upperBound
+            targetRange = targetRange.lowerBound..<(targetRange.upperBound + text.count)
         }
         let menuView = CardReferenceFormatterView(initialText: initialText, searchCardContent: searchCardContent,
                                                   typingPrefix: prefix, typingSuffix: suffix, excludingElements: [node.elementId],

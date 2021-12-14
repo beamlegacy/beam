@@ -288,8 +288,8 @@ extension BeamTextEdit {
         }
     }
 
-    func baseInlineFormatterPosition(for node: TextNode) -> CGPoint {
-        var (offset, rect) = node.offsetAndFrameAt(index: node.cursorPosition)
+    func baseInlineFormatterPosition(for node: TextNode, cursorPosition: Int? = nil) -> CGPoint {
+        var (offset, rect) = node.offsetAndFrameAt(index: cursorPosition ?? node.cursorPosition)
         if rect.size.height == .zero {
             rect.size.height = node.firstLineHeight
         }
