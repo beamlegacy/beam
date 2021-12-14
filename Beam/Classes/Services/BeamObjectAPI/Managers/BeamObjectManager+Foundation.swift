@@ -89,7 +89,9 @@ extension BeamObjectManager {
 
                     if let request = request {
                         #if DEBUG
-                        Self.networkRequests.append(request)
+                        DispatchQueue.main.async {
+                            Self.networkRequests.append(request)
+                        }
                         #endif
                     }
                 } catch {
@@ -204,7 +206,9 @@ extension BeamObjectManager {
                     }
 
                     #if DEBUG
-                    Self.networkRequests.append(beamRequestForIds)
+                    DispatchQueue.main.async {
+                        Self.networkRequests.append(beamRequestForIds)
+                    }
                     #endif
                 } catch {
                     AppDelegate.showMessage("Error fetching objects from API then storing locally: \(error.localizedDescription). This is not normal, check the logs and ask support.")
@@ -214,7 +218,9 @@ extension BeamObjectManager {
         }
 
         #if DEBUG
-        Self.networkRequests.append(beamRequest)
+        DispatchQueue.main.async {
+            Self.networkRequests.append(beamRequest)
+        }
         #endif
     }
 
@@ -269,7 +275,9 @@ extension BeamObjectManager {
         }
 
         #if DEBUG
-        Self.networkRequests.append(beamRequest)
+        DispatchQueue.main.async {
+            Self.networkRequests.append(beamRequest)
+        }
         #endif
     }
 }
@@ -327,7 +335,9 @@ extension BeamObjectManager {
         }
 
         #if DEBUG
-        Self.networkRequests.append(request)
+        DispatchQueue.main.async {
+            Self.networkRequests.append(request)
+        }
         #endif
         return request
     }
@@ -579,7 +589,9 @@ extension BeamObjectManager {
         }
 
         #if DEBUG
-        Self.networkRequests.append(request)
+        DispatchQueue.main.async {
+            Self.networkRequests.append(request)
+        }
         #endif
 
         return request
@@ -724,7 +736,9 @@ extension BeamObjectManager {
         }
 
         #if DEBUG
-        Self.networkRequests.append(request)
+        DispatchQueue.main.async {
+            Self.networkRequests.append(request)
+        }
         #endif
 
         return request
@@ -936,7 +950,9 @@ extension BeamObjectManager {
         }
 
         #if DEBUG
-        Self.networkRequests.append(request)
+        DispatchQueue.main.async {
+            Self.networkRequests.append(request)
+        }
         #endif
 
         return request
@@ -1090,7 +1106,9 @@ extension BeamObjectManager {
         }
 
         #if DEBUG
-        Self.networkRequests.append(request)
+        DispatchQueue.main.async {
+            Self.networkRequests.append(request)
+        }
         #endif
 
         return request
@@ -1119,7 +1137,9 @@ extension BeamObjectManager {
         }
 
         #if DEBUG
-        Self.networkRequests.append(request)
+        DispatchQueue.main.async {
+            Self.networkRequests.append(request)
+        }
         #endif
 
         return request
@@ -1152,7 +1172,9 @@ extension BeamObjectManager {
         }
 
         #if DEBUG
-        Self.networkRequests.append(request)
+        DispatchQueue.main.async {
+            Self.networkRequests.append(request)
+        }
         #endif
 
         return request
