@@ -164,11 +164,14 @@ extension BeamColor {
 
         static let buttonForeground = BeamColor.LightStoneGray
         static let buttonForegroundInactiveWindow = BeamColor.AlphaGray
+        static let buttonForegroundDisabled = BeamColor.AlphaGray.alpha(0.5)
         static let buttonForegroundHoveredClicked = BeamColor.Generic.text
         static let buttonBackgroundClicked = BeamColor.Mercury
 
-        static let capsuleStroke = BeamColor.combining(lightColor: From(color: .black), lightAlpha: 0.1, darkColor: From(color: .white), darkAlpha: 0.15)
+        static let capsuleStroke = BeamColor.combining(lightColor: From(color: .black), lightAlpha: 0.1, darkColor: From(color: .white), darkAlpha: 0.20)
         static let capsuleStrokeClicked = BeamColor.combining(lightColor: From(color: .black), lightAlpha: 0.1, darkColor: From(color: .white), darkAlpha: 0.25)
+        static let capsuleTabForegroundStroke = BeamColor.combining(lightColor: From(color: .black), lightAlpha: 0.1, darkColor: From(color: .white), darkAlpha: 0.25)
+        static let capsuleTabStrokeClicked = BeamColor.combining(lightColor: From(color: .black), lightAlpha: 0.1, darkColor: From(color: .white), darkAlpha: 0.45)
         static let capsuleForegroundBackgrond = BeamColor.combining(lightColor: .Generic.background, darkColor: .Mercury)
 
     }

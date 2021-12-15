@@ -9,6 +9,7 @@ import SwiftUI
 import Combine
 
 struct OmniboxV2TabFaviconView: View {
+    @Environment(\.isMainWindow) private var isMainWindow
 
     var favIcon: NSImage?
     var isLoading: Bool
@@ -49,6 +50,9 @@ struct OmniboxV2TabFaviconView: View {
                     .cornerRadius(isLoading ? iconSize / 2 : 0)
                     .frame(width: iconSize, height: iconSize)
                     .blendMode(.normal)
+                    .if(!isMainWindow) {
+                        $0.grayscale(0.99)
+                    }
             } else {
                 let iconSize: CGFloat = isLoading ? 12 : 16
                 Icon(name: "field-web", width: iconSize, color: BeamColor.LightStoneGray.swiftUI)

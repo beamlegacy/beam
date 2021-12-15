@@ -17,6 +17,7 @@ struct OmniboxV2Toolbar: View {
     @Environment(\.colorScheme) private var colorScheme
 
     var isAboveContent = false
+    @State private var allowTransparentBackground = true
 
     private let webOverlayTransition = AnyTransition.asymmetric(insertion: .opacity.animation(BeamAnimation.easeInOut(duration: 0.2)),
                                                                 removal: .opacity.animation(BeamAnimation.defaultiOSEasing(duration: 0.15)))
@@ -48,6 +49,7 @@ struct OmniboxV2Toolbar: View {
         }
     }
     var body: some View {
+        let mode = state.mode
         VStack(spacing: 0) {
             OmniBar(isAboveContent: isAboveContent)
                 .environmentObject(state.autocompleteManager)
@@ -60,10 +62,36 @@ struct OmniboxV2Toolbar: View {
         .background(
             VisualEffectView(material: .headerView)
                 .overlay(blurOverlay)
-                .opacity(state.mode == .web || isAboveContent ? 1 : 0)
-                .animation(BeamAnimation.easeInOut(duration: 0.05), value: isAboveContent)
+                .opacity(!allowTransparentBackground || isAboveContent ? 1 : 0)
         )
         .zIndex(10)
+        .onChange(of: mode) { [mode] newMode in
+            updateBackgroundVisibility(mode: newMode, previousMode: mode)
+        }
+        .onAppear {
+            allowTransparentBackground = mode != .web
+        }
+    }
+
+    private let backgroundTransitionAnimation = BeamAnimation.easeInOut(duration: 0.1)
+
+    private func updateBackgroundVisibility(mode: Mode, previousMode: Mode) {
+        guard previousMode != mode else { return }
+        if mode == .web {
+            if isAboveContent {
+                allowTransparentBackground = false
+            } else {
+                withAnimation(BeamAnimation.easeInOut(duration: 0.05)) {
+                    allowTransparentBackground = false
+                }
+            }
+        } else if previousMode == .web {
+            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(250)) {
+                withAnimation(backgroundTransitionAnimation) {
+                    allowTransparentBackground = true
+                }
+            }
+        }
     }
 }
 
