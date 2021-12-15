@@ -287,8 +287,20 @@ extension BeamWindow {
 
 // MARK: - Title Bar
 class TitleBarViewControllerWithMouseDown: NSTitlebarAccessoryViewController {
+
+    private func allowWindowDragging(with event: NSEvent) -> Bool {
+        if let window = self.view.window as? BeamWindow,
+           window.state.mode == .web && window.state.undraggableWindowRect != .zero &&
+           window.state.undraggableWindowRect.contains(event.locationInWindow.flippedPointToTopLeftOrigin(in: window)) {
+            return false
+        }
+        return true
+    }
+
     override func mouseDown(with event: NSEvent) {
-        super.mouseDown(with: event)
+        if allowWindowDragging(with: event) {
+            super.mouseDown(with: event)
+        }
         // NSTitlebarAccessoryViewController steal mouseDown events
         // But we need them for the view placed below the title bar
         // See touch down state of omnibar buttons

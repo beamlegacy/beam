@@ -1,5 +1,5 @@
 //
-//  BrowserTabBarDragModel.swift
+//  TabsDragModel.swift
 //  Beam
 //
 //  Created by Remi Santos on 18/10/2021.
@@ -8,43 +8,65 @@
 import Foundation
 import SwiftUI
 
-class BrowserTabBarDragModel: ObservableObject {
+class TabsDragModel: ObservableObject {
     @Published var offset = CGPoint.zero
     @Published var draggingOverIndex: Int?
     @Published var dragStartIndex: Int?
     @Published var draggingOverPins: Bool = false {
         didSet {
             guard draggingOverPins != oldValue || defaultTabWidth == 0 else { return }
-            defaultTabWidth = tabWidth(selected: false, pinned: false)
-            activeTabWidth = tabWidth(selected: true, pinned: false)
-            pinnedTabWidth = tabWidth(selected: false, pinned: true)
+            defaultTabWidth = tabWidth(selected: false, pinned: false) + spaceBetweenTabs
+            activeTabWidth = tabWidth(selected: true, pinned: false) + spaceBetweenTabs
+            pinnedTabWidth = tabWidth(selected: false, pinned: true) + spaceBetweenTabs
         }
     }
+    var designV2 = false
 
     private var dragStartScrollOffset: CGFloat = 0
-    private var widthProvider: TabWidthProvider?
+    private var widthProvider: TabsWidthProvider?
     private var defaultTabWidth: CGFloat = 0
     private var activeTabWidth: CGFloat = 0
     private var pinnedTabWidth: CGFloat = 0
+    private var spaceBetweenTabs: CGFloat = 0
+    private var spaceBetweenSections: CGFloat = 0
     private var tabsCount: Int = 0
     private var pinnedTabsCount: Int = 0
+    private var singleTabCenteringAdjustment: CGFloat = 0
 
+    var unpinnedTabsCount: Int {
+        tabsCount - pinnedTabsCount
+    }
     var widthForDraggingTab: CGFloat {
-        draggingOverPins ? pinnedTabWidth : activeTabWidth
+        (draggingOverPins ? pinnedTabWidth : activeTabWidth) - spaceBetweenTabs
+    }
+    var widthForDraggingSpacer: CGFloat {
+        widthForDraggingTab - (draggingOverPins ? 0 : 0)
+    }
+    var dragStartedFromPinnedTab: Bool {
+        guard let dragStartIndex = dragStartIndex else { return false }
+        return dragStartIndex < pinnedTabsCount
+    }
+
+    private var pinnedSectionMaxX: CGFloat {
+        guard pinnedTabsCount > 0 else { return 0 }
+        return (CGFloat(pinnedTabsCount) * pinnedTabWidth) + spaceBetweenSections
     }
 
     func prepareForDrag(gestureValue: DragGesture.Value, scrollContentOffset: CGFloat,
-                        currentTabIndex: Int, tabsCount: Int, pinnedTabsCount: Int,
-                        widthProvider: TabWidthProvider) {
+                        currentTabIndex: Int, tabsCount: Int, pinnedTabsCount: Int, singleTabCenteringAdjustment: CGFloat = 0,
+                        widthProvider: TabsWidthProvider) {
 
         self.tabsCount = tabsCount
         self.pinnedTabsCount = pinnedTabsCount
         self.widthProvider = widthProvider
         self.pinnedTabWidth = tabWidth(selected: false, pinned: true)
+        self.spaceBetweenTabs = widthProvider.separatorWidth
+        self.spaceBetweenSections = widthProvider.separatorBetweenPinnedAndOther - self.spaceBetweenTabs
         self.dragStartScrollOffset = scrollContentOffset
+        self.singleTabCenteringAdjustment = singleTabCenteringAdjustment
 
         var locationX = gestureValue.startLocation.x
-        let pinnedTabsMaxX = CGFloat(pinnedTabsCount) * pinnedTabWidth
+        let pinnedTabsMaxX = pinnedSectionMaxX
         self.draggingOverPins = locationX < pinnedTabsMaxX
 
         var tabIndex: Int // guess start index
@@ -52,11 +74,11 @@ class BrowserTabBarDragModel: ObservableObject {
             tabIndex = Int((locationX / pinnedTabWidth).rounded(.down))
         } else {
             locationX += scrollContentOffset
-            tabIndex = Int(((locationX - pinnedTabsMaxX) / defaultTabWidth).rounded(.down)) + pinnedTabsCount
+            let locationXInUnpinnedTabs = locationX - pinnedTabsMaxX
+            tabIndex = Int((locationXInUnpinnedTabs / defaultTabWidth).rounded(.down)) + pinnedTabsCount
             if tabIndex > currentTabIndex && currentTabIndex >= pinnedTabsCount {
-                let unpinnedLocation = locationX - pinnedTabsMaxX
-                if (unpinnedLocation) > defaultTabWidth * CGFloat(currentTabIndex - pinnedTabsCount) + activeTabWidth {
-                    tabIndex = Int(((unpinnedLocation - (activeTabWidth - defaultTabWidth)) / defaultTabWidth).rounded(.down)) + pinnedTabsCount
+                if locationXInUnpinnedTabs > defaultTabWidth * CGFloat(currentTabIndex - pinnedTabsCount) + activeTabWidth {
+                    tabIndex = Int(((locationXInUnpinnedTabs - (activeTabWidth - defaultTabWidth)) / defaultTabWidth).rounded(.down)) + pinnedTabsCount
                 } else {
                     tabIndex = currentTabIndex
                 }
@@ -94,36 +116,41 @@ class BrowserTabBarDragModel: ObservableObject {
 
     private func unpinnedTabMinXDuringDrag(tabIndex: Int) -> CGFloat {
         let pinnedTabsCountDuringDrag = pinnedTabsCountDuringDrag()
-        return (pinnedTabsCountDuringDrag * pinnedTabWidth) + (CGFloat(tabIndex) - pinnedTabsCountDuringDrag) * defaultTabWidth
+        return (pinnedTabsCountDuringDrag * pinnedTabWidth)
+            + (pinnedTabsCountDuringDrag > 0 ? spaceBetweenSections : 0)
+            + (CGFloat(tabIndex) - pinnedTabsCountDuringDrag) * defaultTabWidth
+            - (unpinnedTabsCount == 1 ? singleTabCenteringAdjustment / 2 : 0)
     }
 
     private func calculateNewOffsetXOnDrag(fromGesture gestureValue: DragGesture.Value, scrollContentOffset: CGFloat) -> CGFloat {
         guard let dragStartIndex = dragStartIndex else { return 0 }
         let locationX = gestureValue.location.x
         let startLocationX = gestureValue.startLocation.x
-        let pinnedTabsMaxX = pinnedTabWidth * CGFloat(pinnedTabsCount)
+        let pinnedTabsMaxX = pinnedSectionMaxX
         let currentTabOrigin: CGFloat
-        if dragStartIndex < pinnedTabsCount || draggingOverPins {
+        if dragStartedFromPinnedTab || draggingOverPins {
             currentTabOrigin = pinnedTabMinXDuringDrag(pinnedTabIndex: dragStartIndex)
         } else {
             currentTabOrigin = unpinnedTabMinXDuringDrag(tabIndex: dragStartIndex) - scrollContentOffset
         }
         var offsetX = currentTabOrigin + (locationX - startLocationX)
 
-        let minOffsetXBeforePinning = pinnedTabsMaxX + pinnedTabWidth
+        let minOffsetXBeforePinning = pinnedTabsMaxX + pinnedTabWidth - spaceBetweenSections
         let minOverlap: CGFloat = 10
-        if dragStartIndex >= pinnedTabsCount {
-            self.draggingOverPins = locationX <= (pinnedTabsMaxX + pinnedTabWidth)
+        if !dragStartedFromPinnedTab {
+            self.draggingOverPins = locationX <= minOffsetXBeforePinning
             if offsetX < (pinnedTabsMaxX - minOverlap) && locationX > minOffsetXBeforePinning {
                 // resistance to convert a tab to a pinned tab.
-                offsetX = pinnedTabsMaxX - minOverlap
+                if 1 == 1 && unpinnedTabsCount > 1 {
+                    offsetX = pinnedTabsMaxX - minOverlap
+                }
             } else if locationX < minOffsetXBeforePinning {
                 let locationInTab = startLocationX - currentTabOrigin
                 if locationInTab > pinnedTabWidth {
                     offsetX += locationInTab - pinnedTabWidth/2
                 }
             }
-        } else if dragStartIndex < pinnedTabsCount {
+        } else if dragStartedFromPinnedTab {
             self.draggingOverPins = locationX <= pinnedTabsMaxX
             if locationX > pinnedTabsMaxX {
                 offsetX -= pinnedTabWidth
@@ -145,7 +172,13 @@ class BrowserTabBarDragModel: ObservableObject {
             var thresholdMinX: CGFloat // Left
             var thresholdMaxX: CGFloat // Right
             if draggingOverPins {
-                newDragIndex = Int((gestureValue.location.x / pinnedTabWidth).rounded(.down))
+                let locX = gestureValue.location.x
+                if dragStartIndex < pinnedTabsCount && locX > pinnedTabWidth * CGFloat(pinnedTabsCount) {
+                    newDragIndex = pinnedTabsCount - 1
+                } else {
+                    newDragIndex = Int((locX / pinnedTabWidth).rounded(.down))
+                }
+
             } else {
                 if draggingOverIndex < pinnedTabsCount {
                     thresholdMinX = pinnedTabMinXDuringDrag(pinnedTabIndex: draggingOverIndex)
@@ -174,7 +207,7 @@ class BrowserTabBarDragModel: ObservableObject {
     func dragGestureEnded(scrollContentOffset: CGFloat) {
         guard let draggingOverIndex = draggingOverIndex else { return }
         let x: CGFloat
-        if draggingOverIndex < pinnedTabsCount {
+        if draggingOverPins {
             x = pinnedTabMinXDuringDrag(pinnedTabIndex: draggingOverIndex)
         } else {
             x = unpinnedTabMinXDuringDrag(tabIndex: draggingOverIndex) - scrollContentOffset

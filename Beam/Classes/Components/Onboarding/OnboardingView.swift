@@ -115,7 +115,7 @@ struct OnboardingView: View {
                 }
                 Spacer()
                 if [.welcome, .emailConnect].contains(currentStep.type) {
-                    GlobalCenteringContainer(enabled: true, containerGeometry: proxy) {
+                    GlobalCenteringContainer(containerGeometry: proxy) {
                         HStack(spacing: 0) {
                             Text("Terms and Conditions").onTapGesture {
                                 openExternalURL("https://front.beamapp.co/terms", title: "Terms and Conditions")

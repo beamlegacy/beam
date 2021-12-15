@@ -294,8 +294,9 @@ struct BrowserTabView_Previews: PreviewProvider {
             }
             Rectangle().fill(Color.red)
                 .frame(width: 1, height: 280)
-        }.padding()
-            .frame(width: 360)
-            .background(BeamColor.Beam.swiftUI)
+        }
+        .padding()
+        .frame(width: 360)
+        .background(BeamColor.Generic.background.swiftUI)
     }
 }

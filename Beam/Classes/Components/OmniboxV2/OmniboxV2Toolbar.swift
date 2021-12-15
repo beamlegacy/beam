@@ -10,7 +10,6 @@ import SwiftUI
 struct OmniboxV2Toolbar: View {
 
     static let height: CGFloat = 52
-    static let heightWithTabs: CGFloat = 80
 
     @EnvironmentObject var state: BeamState
     @EnvironmentObject var browserTabsManager: BrowserTabsManager
@@ -38,10 +37,9 @@ struct OmniboxV2Toolbar: View {
                 } else {
                     BeamColor.Generic.background.swiftUI.opacity(overlayOpacity)
                         .transition(notwebOverlayTransition)
-                    if isAboveContent {
-                        Separator(horizontal: true, hairline: true, color: BeamColor.ToolBar.backgroundBottomSeparator)
-                            .transition(notwebOverlayTransition)
-                    }
+                    Separator(horizontal: true, hairline: true, color: BeamColor.ToolBar.backgroundBottomSeparator)
+                        .transition(notwebOverlayTransition)
+                        .opacity(isAboveContent ? 1 : 0)
                 }
             } else {
                 BeamColor.ToolBar.backgroundInactiveWindow.swiftUI
@@ -54,7 +52,7 @@ struct OmniboxV2Toolbar: View {
             OmniBar(isAboveContent: isAboveContent)
                 .environmentObject(state.autocompleteManager)
                 .zIndex(11)
-            if state.mode == .web {
+            if state.mode == .web && !state.useOmniboxV2 {
                 BrowserTabBar(tabs: $browserTabsManager.tabs, currentTab: $browserTabsManager.currentTab)
                     .opacity(isMainWindow ? 1 : (colorScheme == .dark ? 0.6 : 0.8))
             }
@@ -62,6 +60,8 @@ struct OmniboxV2Toolbar: View {
         .background(
             VisualEffectView(material: .headerView)
                 .overlay(blurOverlay)
+                .opacity(state.mode == .web || isAboveContent ? 1 : 0)
+                .animation(BeamAnimation.easeInOut(duration: 0.05), value: isAboveContent)
         )
         .zIndex(10)
     }

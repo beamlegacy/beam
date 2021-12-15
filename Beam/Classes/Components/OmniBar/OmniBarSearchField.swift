@@ -60,6 +60,10 @@ struct OmniBarSearchField: View {
             FaviconProvider.shared.favicon(fromURL: url, cacheOnly: true) { (image) in
                 icon = image
             }
+        } else if state.focusOmniBoxFromTab,
+                  let tab = browserTabsManager.currentTab, textFieldText.wrappedValue == tab.url?.absoluteString,
+                  let favicon = tab.favIcon {
+            icon = favicon
         }
         return icon
     }
