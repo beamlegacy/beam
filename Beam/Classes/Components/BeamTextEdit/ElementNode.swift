@@ -253,16 +253,33 @@ public class ElementNode: Widget {
     }
 
     func setPaddings() {
-        // Padding bottom of self for higher or smaller depth of next element
+        // WARNING
+        // Be extra carefull when changing values
+        //
+        // Padding bottom of Node depending of the nextElement with higher or smaller depth
         if let nextElement = self.element.nextElement() {
             var newPadding: CGFloat?
-            if nextElement.depth > depth, self.parent !== root?.element {
-                newPadding = nextElement.isHeader ? 2 : 1
-            } else if nextElement.depth < depth, nextElement.parent !== root?.element {
-                newPadding = nextElement.isHeader ? 5 : 0
+
+            if self.open {
+                if nextElement.depth > depth, self.parent !== root?.element {
+                    newPadding = nextElement.isHeader ? 2 : 1
+                } else if nextElement.depth < depth {
+                    if nextElement.parent === root?.element {
+                        newPadding = nextElement.isHeader ? 7 : 0
+                    } else {
+                        newPadding = nextElement.isHeader ? 5 : 0
+                    }
+                } else {
+                    newPadding = 0
+                }
             } else {
-                newPadding = 0
+                if self.isHeader {
+                    newPadding = 4
+                } else {
+                    newPadding = 0
+                }
             }
+
             if let newPadding = newPadding, contentsPadding.bottom != newPadding {
                 contentsPadding.bottom = newPadding
             }
