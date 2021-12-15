@@ -83,7 +83,7 @@ struct OmniboxV2ToolbarSwitcher: View {
                 showLottie = false
             } else {
                 DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(200)) { // wait for lottie first animation to be over
-                    showLottie = isMainWindow
+                    showLottie = true
                 }
             }
         }
