@@ -17,7 +17,7 @@ struct NoteMediaPlayingButton: View {
     @State private var hoverButtonDelayedBlock: DispatchWorkItem?
     @State private var hoverMenuDelayedBlock: DispatchWorkItem?
 
-    @State var contextMenuModel: ContextMenuViewModel? = ContextMenuViewModel()
+    @StateObject var contextMenuModel: ContextMenuViewModel = ContextMenuViewModel()
     @State var contextMenuSize = CGSize.zero
 
     var body: some View {
@@ -27,28 +27,31 @@ struct NoteMediaPlayingButton: View {
                 updateContextMenuItems()
             }.onHover { hovering in
                 hoverButtonDelayedBlock?.cancel()
-
                 let block = DispatchWorkItem(block: {
                     self.isHoveringButton = hovering
-                    self.updateContextMenuItems()
+                    if !isHoveringMenu {
+                        self.updateContextMenuItems()
+                    }
                 })
                 hoverButtonDelayedBlock = block
                 DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: .milliseconds(hovering ? 500 : 1000)), execute: block)
             }
-            if let contextMenuModel = contextMenuModel {
+            if let contextMenuModel = contextMenuModel, contextMenuModel.visible {
                 ContextMenuView(viewModel: contextMenuModel)
                     .frame(width: contextMenuSize.width, height: contextMenuSize.height)
                     .onHover { hovering in
                         isHoveringMenu = hovering
+
+                        guard !hovering else { return }
                         hoverMenuDelayedBlock?.cancel()
                         let block = DispatchWorkItem(block: {
                             self.isHoveringMenu = hovering
-                            self.updateContextMenuItems()
+                            contextMenuModel.visible = hovering
                         })
                         hoverMenuDelayedBlock = block
                         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: .milliseconds(1000)), execute: block)
                     }
-                    .offset(x: (-contextMenuSize.width / 2) - 42, y: -contextMenuSize.height + 6)
+                    .offset(x: (-contextMenuSize.width / 2) + 18, y: -contextMenuSize.height + 6)
             }
         }
         .frame(width: 20, height: 20)
@@ -61,8 +64,7 @@ struct NoteMediaPlayingButton: View {
     }
 
     private func clearContextMenuModel() {
-        contextMenuModel?.items = []
-        contextMenuModel = nil
+        contextMenuModel.items = []
     }
 
     func updateContextMenuItems() {
@@ -79,11 +81,11 @@ struct NoteMediaPlayingButton: View {
             alreadyAddedNotes[i.note.id] = item
             return item
         }
-        contextMenuSize = CGSize(width: 180, height: ContextMenuView.idealSizeForItems(items).height)
-        contextMenuModel?.items = items
-        contextMenuModel?.animationDirection = .top
-        contextMenuModel?.containerSize = contextMenuSize
-        contextMenuModel?.visible = isHoveringButton || isHoveringMenu
+        contextMenuSize = CGSize(width: 240, height: ContextMenuView.idealSizeForItems(items).height)
+        contextMenuModel.items = items
+        contextMenuModel.animationDirection = .top
+        contextMenuModel.containerSize = contextMenuSize
+        contextMenuModel.visible = isHoveringButton || isHoveringMenu
     }
 
 }
