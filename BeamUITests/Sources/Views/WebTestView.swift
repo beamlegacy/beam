@@ -56,7 +56,9 @@ class WebTestView: BaseView {
     @discardableResult
     func openDestinationCard() -> CardTestView {
         button(OmniBarLocators.Buttons.openCardButton.accessibilityIdentifier).clickOnHittable()
-        return CardTestView()
+        let cardView = CardTestView()
+        cardView.waitForCardViewToLoad()
+        return cardView
     }
     
     func getNumberOfTabs() -> Int {
