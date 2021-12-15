@@ -38,6 +38,9 @@ extension PreferencesManager {
 
 // MARK: - Default Values
 extension PreferencesManager {
+    // WARNING
+    // Be extra carefull when changing values
+    //
     static let editorIsCenteredDefault = false
     static let editorLeadingPercentageDefault: CGFloat = 45
 
@@ -48,7 +51,7 @@ extension PreferencesManager {
 
     static let editorMinWidthDefault: CGFloat = 450
     static let editorMaxWidthDefault: CGFloat = 670
-    static let editorParentSpacingDefault: CGFloat = 9
+    static let editorParentSpacingDefault: CGFloat = 2
     static let editorChildSpacingDefault: CGFloat = 1
 
     static let editorHeaderOneSizeDefault: CGFloat = 3
