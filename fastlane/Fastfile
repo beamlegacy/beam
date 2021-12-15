@@ -565,12 +565,13 @@ platform :mac do
 
     next unless ["HEAD", "master", "develop", "release"].include?(Actions.git_branch)
 
-    attachments = lane_context[SharedValues::S3_FILES_OUTPUT_PATHS].map do |file|
+		attachments = lane_context[SharedValues::S3_FILES_OUTPUT_PATHS].map do |file|
       {
-        title_link: file,
-        fallback: file
+        title: file.split("/").last,
+        value: file,
+        short: false
       }
-    end
+		end
 
     slack(
       message: "Beam MacOS success build",
@@ -581,11 +582,7 @@ platform :mac do
 
       },
       attachment_properties: {
-        fields: [
-          title: "DMG",
-          value: lane_context[SharedValues::S3_FILES_OUTPUT_PATHS].first,
-          short: false
-        ],
+        fields: attachments,
       },
       slack_url: ENV["SLACK_WEBHOOK_URL"]
     )
