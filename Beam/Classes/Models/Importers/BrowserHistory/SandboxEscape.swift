@@ -35,8 +35,7 @@ enum SandboxEscape {
             let handle = try FileHandle(forReadingFrom: url)
             try? handle.close()
             return true
-        }
-        catch {
+        } catch {
             let decodedError = error as NSError
             guard decodedError.domain == NSCocoaErrorDomain, decodedError.code == NSFileWriteNoPermissionError else {
                 throw error

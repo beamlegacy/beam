@@ -4,6 +4,7 @@
 //
 //  Created by Stef Kors on 06/09/2021.
 //
+// swiftlint:disable file_length
 
 import Foundation
 import SwiftSoup
