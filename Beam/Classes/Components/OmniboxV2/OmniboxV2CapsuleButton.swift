@@ -13,18 +13,22 @@ struct OmniboxV2CapsuleButton<Content: View>: View {
     var text: String
     var isSelected = false
     var isForeground = false
+    var tabStyle = false
+    var lonelyStyle = false
     var label: ((_ isHovering: Bool, _ isPressed: Bool) -> Content)?
     var action: (() -> Void)?
 
     @State var isHovering: Bool = false
     @State var isPressed: Bool = false
 
-    init(isSelected: Bool = false, isForeground: Bool = false,
+    init(isSelected: Bool = false, isForeground: Bool = false, tabStyle: Bool = false, lonelyStyle: Bool = false,
          @ViewBuilder label: @escaping (_ isHovering: Bool, _ isPressed: Bool) -> Content,
          action: (() -> Void)? = nil) {
         self.text = ""
         self.isForeground = isForeground
         self.isSelected = isSelected
+        self.tabStyle = tabStyle
+        self.lonelyStyle = lonelyStyle
         self.label = label
         self.action = action
     }
@@ -43,10 +47,22 @@ struct OmniboxV2CapsuleButton<Content: View>: View {
 
     private var strokeColor: Color {
         guard isEnabled else { return .clear }
-        if isPressed {
-            return BeamColor.ToolBar.capsuleStrokeClicked.swiftUI
-        } else if isForeground || isHovering {
-            return BeamColor.ToolBar.capsuleStroke.swiftUI
+        if tabStyle {
+            if isPressed && lonelyStyle {
+                return BeamColor.ToolBar.capsuleStrokeClicked.swiftUI
+            } else if isPressed {
+                return BeamColor.ToolBar.capsuleTabStrokeClicked.swiftUI
+            } else if isForeground && !lonelyStyle {
+                return BeamColor.ToolBar.capsuleTabForegroundStroke.swiftUI
+            } else if isHovering && (!isForeground || lonelyStyle) {
+                return BeamColor.ToolBar.capsuleStroke.swiftUI
+            }
+        } else {
+            if isPressed {
+                return BeamColor.ToolBar.capsuleStrokeClicked.swiftUI
+            } else if isForeground || isHovering {
+                return BeamColor.ToolBar.capsuleStroke.swiftUI
+            }
         }
         return .clear
     }
@@ -109,10 +125,13 @@ struct OmniboxV2CapsuleButton<Content: View>: View {
 }
 
 extension OmniboxV2CapsuleButton where Content == EmptyView {
-    init(text: String, isSelected: Bool = false, isForeground: Bool = false, action: (() -> Void)? = nil) {
+    init(text: String, isSelected: Bool = false, isForeground: Bool = false, tabStyle: Bool = false, lonelyStyle: Bool = false,
+         action: (() -> Void)? = nil) {
         self.text = text
         self.isSelected = isSelected
         self.isForeground = isForeground
+        self.tabStyle = tabStyle
+        self.lonelyStyle = lonelyStyle
         self.action = action
         self.label = nil
     }
