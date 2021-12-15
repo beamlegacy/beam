@@ -28,7 +28,7 @@ class ImageNode: ResizableNode {
         didSet {
             element.collapsed = isCollapsed
             configureCollapsed(isCollapsed)
-            setupCollapseExpandLayer()
+            setupCollapseExpandLayer(hidden: !hover)
             if let imageLayer = imageLayer {
                 layoutCollapseExpand(contentLayer: imageLayer.layer)
             }
@@ -75,7 +75,7 @@ class ImageNode: ResizableNode {
         setupFocusLayer()
         setupImageLayer(using: imageRecord, uid: uid, width: width)
         configureCollapsed(isCollapsed)
-        setupCollapseExpandLayer()
+        setupCollapseExpandLayer(hidden: !hover)
 
         updateLayout()
         if let imageLayer = imageLayer {
@@ -347,6 +347,12 @@ class ImageNode: ResizableNode {
                     source.layer.backgroundFilters = []
                 }
             }
+            if let collapseExpand = self.layers["global-expand"],
+                  let textLayer = collapseExpand.layer.sublayers?[1] as? CATextLayer {
+                collapseExpand.layer.opacity = hover ? 1.0 : 0.0
+                textLayer.opacity = hover ? 1.0 : 0.0
+            }
+
             invalidate()
             super.hover = hover
         }

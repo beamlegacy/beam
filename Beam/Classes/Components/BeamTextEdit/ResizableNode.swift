@@ -124,6 +124,7 @@ class ResizableNode: ElementNode {
             self?.initialDragImageSize = nil
             self?.isResizing = false
             self?.updateElementRatio()
+
             return true
         } dragged: { [weak self] info in
             guard let initialPosition = self?.initialDragImageGlobalPosition else { return false }

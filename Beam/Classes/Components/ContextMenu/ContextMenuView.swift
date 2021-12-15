@@ -95,7 +95,7 @@ class ContextMenuViewModel: BaseFormatterViewViewModel, ObservableObject {
 
 struct ContextMenuView: View {
 
-    @ObservedObject var viewModel = ContextMenuViewModel()
+    @ObservedObject var viewModel: ContextMenuViewModel
     static let itemHeight: CGFloat = 24
     static let defaultWidth: CGFloat = 160
     static let largeWidth: CGFloat = 240
