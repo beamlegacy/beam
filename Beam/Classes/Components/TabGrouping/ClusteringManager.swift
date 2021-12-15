@@ -167,7 +167,7 @@ class ClusteringManager: ObservableObject {
         return nil
     }
 
-    // swiftlint:disable:next cyclomatic_complexity, function_body_length
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
     func getIdAndParent(tabToIndex: TabInformation) -> (UUID?, UUID?) {
         guard tabToIndex.isPinnedTab == false else {
             return (nil, nil)

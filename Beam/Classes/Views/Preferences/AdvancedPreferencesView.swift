@@ -660,7 +660,7 @@ struct AdvancedPreferencesView: View {
             Text("Create 100 Random notes")
         })
     }
-    
+
     private var Create10RandomNotes: some View {
         Button(action: {
             BeamUITestsMenuGenerator.create10Notes()
