@@ -25,7 +25,7 @@ enum WebsiteAuthPopupViewLocators {
     }
     
     enum Labels: String, CaseIterable, UIElement {
-        case titleLabel = "Connect to app.beamapp.co:443"
+        case titleLabel = "Connect to rails.beamapp.co:443"
         case descriptionLabel = "Your login information will be sent securely."
     }
 
