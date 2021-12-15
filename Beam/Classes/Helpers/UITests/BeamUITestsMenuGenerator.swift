@@ -146,7 +146,7 @@ class BeamUITestsMenuGenerator {
             note.save()
         }
     }
-    
+
     static public func create10Notes() {
         let generator = FakeNoteGenerator(count: 10, journalRatio: 0.2, futureRatio: 0.1)
         generator.generateNotes()
