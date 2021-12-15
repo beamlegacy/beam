@@ -9,6 +9,7 @@ import SwiftUI
 
 struct OmniboxV2ToolbarButton: View {
     @Environment(\.isMainWindow) private var isMainWindow: Bool
+    @Environment(\.isEnabled) private var isEnabled
 
     var icon: String
     var customIconSize: CGSize?
@@ -21,6 +22,9 @@ struct OmniboxV2ToolbarButton: View {
     private var foregroundColor: Color {
         guard isMainWindow else {
             return BeamColor.ToolBar.buttonForegroundInactiveWindow.swiftUI
+        }
+        if !isEnabled {
+            return BeamColor.ToolBar.buttonForegroundDisabled.swiftUI
         }
         if isHovering || isTouchDown {
             return BeamColor.ToolBar.buttonForegroundHoveredClicked.swiftUI
@@ -49,6 +53,7 @@ struct OmniboxV2ToolbarButton: View {
             .simultaneousGesture(TapGesture().onEnded {
                 action?()
             })
+            .allowsHitTesting(isEnabled)
     }
 }
 

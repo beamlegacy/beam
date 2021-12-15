@@ -28,8 +28,12 @@ struct OmniboxV2TabView: View {
     var onCopy: (() -> Void)?
     var onToggleMute: (() -> Void)?
 
+    private let localCoordinateSpaceName = "TabCoordinateSpace"
     private let defaultFadeTransition = AnyTransition.opacity.animation(BeamAnimation.easeInOut(duration: 0.08))
     private let defaultFadeTransitionDelayed = AnyTransition.opacity.animation(BeamAnimation.easeInOut(duration: 0.08).delay(0.03))
+    private var sideViewsTransition: AnyTransition {
+        !isSelected ? .identity : .asymmetric(insertion: defaultFadeTransitionDelayed, removal: defaultFadeTransition)
+    }
 
     private func shouldShowTitle(geometry: GeometryProxy) -> Bool {
         geometry.size.width >= 80
@@ -40,7 +44,7 @@ struct OmniboxV2TabView: View {
     }
 
     private var foregroundColor: Color {
-        if isHovering && isSelected {
+        if isSelected {
             return BeamColor.Generic.text.swiftUI
         }
         return BeamColor.Corduroy.swiftUI
@@ -78,18 +82,27 @@ struct OmniboxV2TabView: View {
     private func leadingViews(shouldShowClose: Bool) -> some View {
         HStack(spacing: 1) {
             if shouldShowClose {
-                TabContentIcon(name: "tabs-close_xs", color: BeamColor.LightStoneGray, action: onClose)
-            }
-            if audioIsPlaying {
-                audioView
+                closeIcon
             }
         }
     }
 
-    private func trailingViews(shouldShowCopy: Bool) -> some View {
-        HStack(spacing: 1) {
+    private func estimatedTrailingViewsWidth(shouldShowCopy: Bool, shouldShowMedia: Bool) -> CGFloat {
+        let intericonSpacing = BeamSpacing._60
+        let trailingViewLeadingPadding = BeamSpacing._40
+        return (shouldShowCopy ? 12 : 0) + (shouldShowMedia ? 16 : 0)
+        + (shouldShowCopy && shouldShowMedia ? intericonSpacing : 0)
+        + (shouldShowCopy || shouldShowMedia ? trailingViewLeadingPadding : 0)
+    }
+    private func trailingViews(shouldShowCopy: Bool, shouldShowMedia: Bool) -> some View {
+        return HStack(spacing: BeamSpacing._60) {
             if shouldShowCopy {
                 TabContentIcon(name: "editor-url_copy", width: 12, action: onCopy)
+                    .transition(sideViewsTransition)
+            }
+            if shouldShowMedia {
+                audioView
+                    .transition(sideViewsTransition)
             }
         }
     }
@@ -99,11 +112,29 @@ struct OmniboxV2TabView: View {
                                 estimatedLoadingProgress: tab.estimatedLoadingProgress, disableAnimations: isDragging)
     }
 
-    private func centerView(shouldShowSecurity: Bool) -> some View {
+    private var closeIcon: some View {
+        TabContentIcon(name: "tabs-close_xs", color: BeamColor.LightStoneGray, action: onClose)
+    }
+
+    private func centerViewTransition(foregroundHoverStyle: Bool) -> AnyTransition {
+        guard !isDragging && !disableAnimations else {
+            return .identity
+        }
+        let offsetAnimation = BeamAnimation.spring(stiffness: 380, damping: 20)
+        if foregroundHoverStyle {
+            return .asymmetric(insertion: .animatableOffset(offset: CGSize(width: 0, height: 8)).animation(offsetAnimation).combined(with: defaultFadeTransitionDelayed),
+                               removal: .animatableOffset(offset: CGSize(width: 0, height: -8)).animation(offsetAnimation).combined(with: defaultFadeTransitionDelayed))
+        } else {
+            return .asymmetric(insertion: .animatableOffset(offset: CGSize(width: 0, height: -8)).animation(offsetAnimation).combined(with: defaultFadeTransition),
+                               removal: .animatableOffset(offset: CGSize(width: 0, height: 8)).animation(offsetAnimation).combined(with: defaultFadeTransition))
+        }
+    }
+
+    private func centerView(shouldShowSecurity: Bool, leadingViewsWidth: CGFloat, trailingViewsWidth: CGFloat) -> some View {
         ZStack {
             let isHovering = isEnabled && (isHovering || isDragging)
-            let offsetAnimation = BeamAnimation.spring(stiffness: 380, damping: 20)
-            let showHoverStyle = isHovering && isSelected && tab.url != nil
+            let showForegroundHoverStyle = isHovering && isSelected && tab.url != nil
+            let shouldShowClose = isHovering
             let iconNextToTitle = Group { if shouldShowSecurity { securityIcon } else { faviconView } }
             let iconSpacing: CGFloat = shouldShowSecurity ? 1 : 4
             if isSingleTab {
@@ -116,68 +147,110 @@ struct OmniboxV2TabView: View {
                     }
                 }.opacity(0)
             }
-            if showHoverStyle {
+            if showForegroundHoverStyle {
                 HStack(spacing: iconSpacing) {
                     iconNextToTitle
                     Text(tab.url?.urlStringWithoutScheme ?? tab.title)
                 }
-                .transition(
-                    isDragging || disableAnimations ? .identity :
-                            .asymmetric(insertion: .animatableOffset(offset: CGSize(width: 0, height: 8)).animation(offsetAnimation).combined(with: defaultFadeTransitionDelayed),
-                                        removal: .animatableOffset(offset: CGSize(width: 0, height: -8)).animation(offsetAnimation).combined(with: defaultFadeTransitionDelayed))
-                )
+                .transition(centerViewTransition(foregroundHoverStyle: true))
             } else {
                 HStack(spacing: iconSpacing) {
                     iconNextToTitle
                     Text(tab.title)
+                    if isSingleTab && !isHovering && audioIsPlaying {
+                        audioView
+                    }
                 }
-                .transition(
-                    isDragging || disableAnimations ? .identity :
-                            .asymmetric(insertion: .animatableOffset(offset: CGSize(width: 0, height: -8)).animation(offsetAnimation).combined(with: defaultFadeTransition),
-                                        removal: .animatableOffset(offset: CGSize(width: 0, height: 8)).animation(offsetAnimation).combined(with: defaultFadeTransition))
-                )
+                .if(!isSingleTab) {
+                    $0.opacity(0)
+                    .overlay(GeometryReader { proxy in
+                        let spaceAroundTitle = proxy.frame(in: .named(localCoordinateSpaceName)).minX
+                        let hasEnoughSpaceForClose = spaceAroundTitle >= leadingViewsWidth
+                        HStack(spacing: iconSpacing) {
+                            if shouldShowClose && !hasEnoughSpaceForClose {
+                                closeIcon
+                            } else {
+                                iconNextToTitle
+                            }
+                            Text(tab.title)
+                                .padding(.trailing, max(0, trailingViewsWidth - spaceAroundTitle))
+                        }
+                    }, alignment: .leading)
+                }
+                .transition(centerViewTransition(foregroundHoverStyle: false))
             }
         }
         .lineLimit(1)
     }
 
+    // swiftlint:disable:next function_body_length
     private func label(isHovering: Bool, containerGeometry: GeometryProxy) -> some View {
         let isHovering = isEnabled && (isHovering || isDragging)
         let shouldShowTitle = shouldShowTitle(geometry: containerGeometry)
         let shouldShowSecurity = isHovering && tab.url != nil && isSelected
         let shouldShowCopy = isHovering && shouldShowTitle && tab.url != nil
-        let shouldShowClose = !isPinned && isHovering && !shouldShowCompactSize(geometry: containerGeometry)
+        let shouldShowCompactSize = shouldShowCompactSize(geometry: containerGeometry)
+        let shouldShowClose = !isPinned && isHovering && !shouldShowCompactSize
+        let shouldShowMedia = !shouldShowCompactSize && (!isSingleTab || isHovering) && audioIsPlaying
+        let showForegroundHoverStyle = isHovering && isSelected && tab.url != nil
+        let hPadding = shouldShowCompactSize ? 0 : BeamSpacing._80
 
         let leadingViews = leadingViews(shouldShowClose: shouldShowClose)
-        let trailingViews = trailingViews(shouldShowCopy: shouldShowCopy)
-        let showsAnyLeadingView = shouldShowClose || audioIsPlaying
-        let showsAnyTrailingView = shouldShowCopy
+        let trailingViews = trailingViews(shouldShowCopy: shouldShowCopy, shouldShowMedia: shouldShowMedia)
+        var estimatedTrailingViewsWidth: CGFloat = 0
+        if !showForegroundHoverStyle {
+            estimatedTrailingViewsWidth = hPadding + self.estimatedTrailingViewsWidth(shouldShowCopy: shouldShowCopy, shouldShowMedia: shouldShowMedia)
+        }
+        let estimatedLeadingViewsWidth: CGFloat = hPadding + (shouldShowClose ? 16 : 0)
         return HStack(spacing: 0) {
-            if showsAnyLeadingView {
-                leadingViews
-                .transition(!isSelected ? .identity : .asymmetric(insertion: defaultFadeTransitionDelayed, removal: defaultFadeTransition))
-                Spacer(minLength: 4)
+
+            // Leading Content
+            if showForegroundHoverStyle {
+                leadingViews.transition(sideViewsTransition).padding(.leading, hPadding)
+                Spacer(minLength: BeamSpacing._40)
+            } else {
+                Rectangle().fill(Color.clear).frame(minWidth: hPadding)
+                    .overlay(GeometryReader { geometryProxy in
+                        ZStack(alignment: .leading) {
+                            if geometryProxy.size.width >= estimatedLeadingViewsWidth {
+                                leadingViews.transition(sideViewsTransition)
+                            }
+                        }.padding(.leading, hPadding).frame(maxHeight: .infinity)
+                    }, alignment: .leading)
             }
+
+            // Center Content
             if shouldShowTitle {
-                centerView(shouldShowSecurity: shouldShowSecurity)
+                centerView(shouldShowSecurity: shouldShowSecurity, leadingViewsWidth: estimatedLeadingViewsWidth, trailingViewsWidth: estimatedTrailingViewsWidth)
                     .if(isSingleTab) {
-                        $0.frame(maxWidth: containerGeometry.size.width - 60)
+                        $0.frame(maxWidth: min(400, containerGeometry.size.width - 60))
                     }
-                .layoutPriority(1)
+                    .layoutPriority(2)
+            } else if shouldShowCompactSize && audioIsPlaying {
+                audioView
             } else {
                 faviconView
             }
-            if showsAnyLeadingView || showsAnyTrailingView {
-                Spacer(minLength: 4)
-                ZStack(alignment: .trailing) {
-                    leadingViews.opacity(0).frame(minWidth: 0) // copy leading view on the other size to center content
-                    trailingViews
-                }
-                .transition(!isSelected ? .identity : .asymmetric(insertion: defaultFadeTransitionDelayed, removal: defaultFadeTransition))
+
+            // Trailing Content
+            if showForegroundHoverStyle {
+                Spacer(minLength: BeamSpacing._40)
             }
+            ZStack {
+                if showForegroundHoverStyle {
+                    trailingViews.padding(.trailing, hPadding).opacity(0) // hidden, to push content
+                } else {
+                    Rectangle().fill(Color.clear)
+                        .frame(minWidth: hPadding)
+                }
+            }
+            .overlay(ZStack {
+                trailingViews
+            }.padding(.trailing, hPadding), alignment: .trailing)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .fixedSize(horizontal: isSingleTab && !isPinned, vertical: false)
+        .coordinateSpace(name: localCoordinateSpaceName)
     }
 
     var body: some View {
@@ -186,14 +259,15 @@ struct OmniboxV2TabView: View {
                 label(isHovering: isHovering, containerGeometry: proxy)
                     .font(font)
                     .foregroundColor(foregroundColor)
-                    .padding(.horizontal, shouldShowCompactSize(geometry: proxy) ? 0 : BeamSpacing._80)
                     .if(!isDragging || colorScheme == .dark) {
                         $0.blendModeLightMultiplyDarkScreen()
                     }
                     .background(
                         // Using Capsule as background instead of Capsule's label property because we have different gestures (drag/click) + paddings
                         // and they don't play well with the rendering updates of the capsule label with parameters.
-                        OmniboxV2CapsuleButton(isSelected: false, isForeground: isSelected && (!isSingleTab || isDragging), label: { _, _ in Group { } }, action: nil)
+                        OmniboxV2CapsuleButton(isSelected: false, isForeground: isSelected && (!isSingleTab || isDragging),
+                                               tabStyle: true, lonelyStyle: isSingleTab,
+                                               label: { _, _ in Group { } }, action: nil)
                     )
                     .if(isDragging) {
                         $0.opacity(0.9).scaleEffect(1.07)
