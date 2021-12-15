@@ -242,19 +242,24 @@ struct OmniboxV2TabsList: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .contentShape(Path(CGRect(x: 0, y: 12, width: geometry.size.width, height: OmniboxV2TabView.height))) // limit the drag gesture space
-            .simultaneousGesture(
-                DragGesture(minimumDistance: 1)
-                    .onChanged { dragGestureOnChange(gestureValue: $0, containerGeometry: geometry) }
-                    .onEnded { dragGestureOnEnded(gestureValue: $0) }
-            )
+            .if(tabsSections.otherTabs.count > 1) { // disabling single tab drag gesture for now -> https://linear.app/beamapp/issue/BE-2692/web-tabs-design-review
+                $0.simultaneousGesture(
+                    DragGesture(minimumDistance: 1)
+                        .onChanged { dragGestureOnChange(gestureValue: $0, containerGeometry: geometry) }
+                        .onEnded { dragGestureOnEnded(gestureValue: $0) }
+                )
+            }
             .onChange(of: geometry.size) { _ in
-                updateDraggableWindowRect(with: geometry)
+                updateDraggableWindowRect(with: geometry, tabsSections: tabsSections)
+            }
+            .onChange(of: tabsSections.otherTabs.count) { _ in
+                updateDraggableWindowRect(with: geometry, tabsSections: tabsSections)
             }
             .onAppear {
-                updateDraggableWindowRect(with: geometry)
+                updateDraggableWindowRect(with: geometry, tabsSections: tabsSections)
             }
             .onDisappear {
-                updateDraggableWindowRect(with: nil)
+                updateDraggableWindowRect(with: nil, tabsSections: tabsSections)
             }
             .onPreferenceChange(CurrentTabGlobalFrameKey.self) {
                 guard !isDraggingATab else { return }
@@ -264,8 +269,8 @@ struct OmniboxV2TabsList: View {
     }
 
     // MARK: - Actions
-    private func updateDraggableWindowRect(with geometry: GeometryProxy?) {
-        guard let geometry = geometry else {
+    private func updateDraggableWindowRect(with geometry: GeometryProxy?, tabsSections: TabsSections) {
+        guard let geometry = geometry, tabsSections.otherTabs.count > 1 else {
             state.undraggableWindowRect = .zero
             return
         }
