@@ -909,7 +909,7 @@ extension GRDBDatabase {
 
     func save(urlFrecencies: [FrecencyUrlRecord]) throws {
         try dbWriter.write { db in
-            for var frecency in urlFrecencies {
+            for frecency in urlFrecencies {
                 try frecency.save(db)
             }
         }

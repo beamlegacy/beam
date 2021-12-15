@@ -285,7 +285,6 @@
 		522F149327033DE000EDF2F6 /* beam_object_checksums.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 522F149227033DE000EDF2F6 /* beam_object_checksums.graphql */; };
 		523060A827426D1400A03844 /* BeamObjectManagerCall.swift in Sources */ = {isa = PBXBuildFile; fileRef = 523060A727426D1400A03844 /* BeamObjectManagerCall.swift */; };
 		523416A22629D465001F306F /* BeamCoreDataObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 523416A12629D465001F306F /* BeamCoreDataObject.swift */; };
-		523A32CF267764A200606768 /* EnvironmentVariables.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52B9A38B264562E60063AEEF /* EnvironmentVariables.swift */; };
 		523FF66125C31D8800B4BD6E /* Data+String.swift in Sources */ = {isa = PBXBuildFile; fileRef = 523FF66025C31D8800B4BD6E /* Data+String.swift */; };
 		5241E5E926F89AE700B08F69 /* UserSessionRequest+Foundation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5241E5E826F89AE700B08F69 /* UserSessionRequest+Foundation.swift */; };
 		5241E5F026F89AF200B08F69 /* UserSessionRequest+PromiseKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5241E5EF26F89AF200B08F69 /* UserSessionRequest+PromiseKit.swift */; };
@@ -580,6 +579,7 @@
 		9634DD79264AA1A10065383E /* TextFrameLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9634DD78264AA1A10065383E /* TextFrameLayer.swift */; };
 		9634DD8F264AF7940065383E /* TextLineLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9634DD8E264AF7940065383E /* TextLineLayer.swift */; };
 		9634DD91264B203E0065383E /* ShapeLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9634DD90264B203E0065383E /* ShapeLayer.swift */; };
+		9639AA75276906820006C724 /* EnvironmentVariables_generated.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9639AA74276906820006C724 /* EnvironmentVariables_generated.swift */; };
 		9639FB1D2616FCA300C85B95 /* BeamCore.h in Headers */ = {isa = PBXBuildFile; fileRef = 96319C91261614C000D1CF31 /* BeamCore.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		963DBB3B2698605600080928 /* BeamText+LinksTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 963DBB3A2698605600080928 /* BeamText+LinksTests.swift */; };
 		963DBB3D2698655C00080928 /* BeamElementLinksTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 963DBB3C2698655C00080928 /* BeamElementLinksTests.swift */; };
@@ -1745,6 +1745,7 @@
 		9634DD78264AA1A10065383E /* TextFrameLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextFrameLayer.swift; sourceTree = "<group>"; };
 		9634DD8E264AF7940065383E /* TextLineLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextLineLayer.swift; sourceTree = "<group>"; };
 		9634DD90264B203E0065383E /* ShapeLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeLayer.swift; sourceTree = "<group>"; };
+		9639AA74276906820006C724 /* EnvironmentVariables_generated.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EnvironmentVariables_generated.swift; sourceTree = "<group>"; };
 		963DBB3A2698605600080928 /* BeamText+LinksTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamText+LinksTests.swift"; sourceTree = "<group>"; };
 		963DBB3C2698655C00080928 /* BeamElementLinksTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BeamElementLinksTests.swift; path = BeamTests/TextLayout/BeamElementLinksTests.swift; sourceTree = SOURCE_ROOT; };
 		9645489F2523B3550064D062 /* CloudKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CloudKit.framework; path = System/Library/Frameworks/CloudKit.framework; sourceTree = SDKROOT; };
@@ -3352,6 +3353,7 @@
 			isa = PBXGroup;
 			children = (
 				52B9A38B264562E60063AEEF /* EnvironmentVariables.swift */,
+				9639AA74276906820006C724 /* EnvironmentVariables_generated.swift */,
 			);
 			path = Configuration;
 			sourceTree = "<group>";
@@ -5194,7 +5196,6 @@
 				96319D0B2616232600D1CF31 /* Sources */,
 				96319D0C2616232600D1CF31 /* Frameworks */,
 				96319D0D2616232600D1CF31 /* Resources */,
-				523A32DD26776D3000606768 /* Clean Variable env injector */,
 			);
 			buildRules = (
 			);
@@ -5732,33 +5733,20 @@
 			inputFileListPaths = (
 			);
 			inputPaths = (
+				"$(SRCROOT)/.envrc",
+				"$(SRCROOT)/.envrc.private",
+				"$(SRCROOT)//BeamCore/Configuration/EnvironmentVariables.swift",
 			);
 			name = "Variable env injector";
 			outputFileListPaths = (
 			);
 			outputPaths = (
+				"${SRCROOT}/BeamCore/Configuration/EnvironmentVariables_generated.swift",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ $ENABLE_PREVIEWS == \"NO\" ]\nthen\n    # your code to execute here\n    PATH=/opt/homebrew/bin:${PATH}\n    direnv allow ..\n    eval \"$(direnv export bash)\"\n\n    git checkout ${SRCROOT}/BeamCore/Configuration/EnvironmentVariables.swift\n\n    if which variable-injector >/dev/null; then\n      variable-injector --file ${SRCROOT}/BeamCore/Configuration/EnvironmentVariables.swift # --verbose # Pass your paramenters\n    else\n      echo \"Warning: Swift Variable Injector not installed, download from https://github.com/penso/variable-injector\"\n      exit 1\n    fi\n\nelse\n  echo \"Skipping the script because of SwiftUI preview mode\"\nfi\n";
-		};
-		523A32DD26776D3000606768 /* Clean Variable env injector */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = "Clean Variable env injector";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "if [ $ENABLE_PREVIEWS == \"NO\" ]\nthen\n    PATH=/opt/homebrew/bin:${PATH}\n    git checkout ${SRCROOT}/BeamCore/Configuration/EnvironmentVariables.swift\nelse\n  echo \"Skipping the script because of SwiftUI preview mode\"\nfi\n\n\n";
+			shellScript = "if [ $ENABLE_PREVIEWS == \"NO\" ]\nthen\n    # your code to execute here\n    PATH=/opt/homebrew/bin:${PATH}\n    direnv allow ..\n    eval \"$(direnv export bash)\"\n\n    cp ${SRCROOT}/BeamCore/Configuration/EnvironmentVariables.swift ${SRCROOT}/BeamCore/Configuration/EnvironmentVariables_generated.swift\n    if which variable-injector >/dev/null; then\n      variable-injector --file ${SRCROOT}/BeamCore/Configuration/EnvironmentVariables_generated.swift # --verbose # Pass your paramenters\n    else\n      echo \"Warning: Swift Variable Injector not installed, download from https://github.com/penso/variable-injector\"\n      exit 1\n    fi\n\nelse\n  echo \"Skipping the script because of SwiftUI preview mode\"\nfi\n";
+			showEnvVarsInLog = 0;
 		};
 		8A0D274726D5338600CE0AC9 /* Write xcfilelist: Point and Shoot */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -5924,7 +5912,6 @@
 				DAA60C232666893300C927E5 /* SessionLinkRanker.swift in Sources */,
 				0D45BA2F26949EF100D4E8A5 /* DispatchTime+Chrono.swift in Sources */,
 				96319D472616233E00D1CF31 /* String+Data.swift in Sources */,
-				523A32CF267764A200606768 /* EnvironmentVariables.swift in Sources */,
 				9609AF502617159B00322141 /* URL+Beam.swift in Sources */,
 				96F5354A27104BE400B719C6 /* EventsTracker.swift in Sources */,
 				522BC3D726A6EAEE0018B51E /* Date+IntValue.swift in Sources */,
@@ -5946,6 +5933,7 @@
 				96319D3F2616233E00D1CF31 /* String+Ranges.swift in Sources */,
 				96319D3B2616233E00D1CF31 /* String+MD5.swift in Sources */,
 				96319D6726162F7800D1CF31 /* BID.swift in Sources */,
+				9639AA75276906820006C724 /* EnvironmentVariables_generated.swift in Sources */,
 				96319D392616233E00D1CF31 /* WeakReference.swift in Sources */,
 				96C1D7EB2624C0ED0085FD23 /* BeamElement+Text.swift in Sources */,
 				96319D452616233E00D1CF31 /* String+Regex.swift in Sources */,

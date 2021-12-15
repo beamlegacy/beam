@@ -280,7 +280,6 @@ extension APIRequest {
             fatalError("All network calls must be caught by Vinyl in test environment. \(filename) was called.")
         }
 
-
         // Note: all `completionHandler` call must use `backgroundQueue.async` because if the
         // code called in the completion handler is blocking, it will prevent new following requests
         // to be parsed in the NSURLSession delegate callback thread

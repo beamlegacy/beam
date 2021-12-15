@@ -110,7 +110,7 @@ extension BeamText {
             break
         }
 
-        if strong && emphasis{
+        if strong && emphasis {
             font = BeamFont.mediumItalic(size: fontSize)
         } else if strong {
             font = BeamFont.medium(size: fontSize)
