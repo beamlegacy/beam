@@ -28,7 +28,7 @@ struct WindowBottomToolBar: View {
     private var buttonsHeight: CGFloat { barHeight - verticalPadding * 2 }
 
     private func recentsStack(containerGeometry: GeometryProxy) -> some View {
-        GlobalCenteringContainer(enabled: true, containerGeometry: containerGeometry) {
+        GlobalCenteringContainer(containerGeometry: containerGeometry) {
             CardSwitcher(currentNote: currentNote)
                 .environmentObject(state.recentsManager)
         }

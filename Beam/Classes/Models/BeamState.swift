@@ -59,6 +59,7 @@ import Sentry
     @Published var canGoForward: Bool = false
     @Published var isFullScreen: Bool = false
     @Published var focusOmniBox: Bool = true
+    @Published var focusOmniBoxFromTab: Bool = false
     var useOmniboxV2 = false
 
     @Published var destinationCardIsFocused: Bool = false
@@ -66,6 +67,7 @@ import Sentry
     @Published var destinationCardNameSelectedRange: Range<Int>?
 
     @Published var windowIsResizing = false
+    var undraggableWindowRect: CGRect = .zero
     @Published var windowIsMain = true
     @Published var windowFrame = CGRect.zero
     var associatedWindow: NSWindow? {
@@ -428,7 +430,7 @@ import Sentry
             searchEngine.query = result.text
             // Logger.shared.logDebug("Start search query: \(searchEngine.searchUrl)")
             let url = URL(string: searchEngine.searchUrl)!
-            if mode == .web && currentTab != nil && currentTab?.shouldNavigateInANewTab(url: url) != true {
+            if mode == .web && currentTab != nil && focusOmniBoxFromTab && currentTab?.shouldNavigateInANewTab(url: url) != true {
                 navigateCurrentTab(toURL: url)
             } else {
                 _ = createTab(withURL: url, originalQuery: result.text)
@@ -440,7 +442,7 @@ import Sentry
                 Logger.shared.logError("autocomplete result without correct url \(result.text)", category: .search)
                 return
             }
-            if  mode == .web && currentTab != nil && currentTab?.shouldNavigateInANewTab(url: url) != true {
+            if  mode == .web && currentTab != nil && focusOmniBoxFromTab && currentTab?.shouldNavigateInANewTab(url: url) != true {
                 navigateCurrentTab(toURL: url)
             } else {
                 _ = createTab(withURL: url, originalQuery: result.text)
@@ -474,7 +476,7 @@ import Sentry
 
         // Logger.shared.logDebug("Start query: \(url)")
 
-        if mode == .web && currentTab != nil && currentTab?.shouldNavigateInANewTab(url: url) != true {
+        if mode == .web && currentTab != nil && focusOmniBoxFromTab && currentTab?.shouldNavigateInANewTab(url: url) != true {
             navigateCurrentTab(toURL: url)
         } else {
             _ = createTab(withURL: url, originalQuery: queryString)
@@ -554,10 +556,11 @@ import Sentry
         }
     }
 
-    func setFocusOmnibox() {
+    func setFocusOmnibox(fromTab: Bool = false) {
         EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
         if mode == .web {
-            if let url = browserTabsManager.currentTab?.url?.absoluteString {
+            focusOmniBoxFromTab = fromTab && useOmniboxV2
+            if fromTab, let url = browserTabsManager.currentTab?.url?.absoluteString {
                 autocompleteManager.resetQuery()
                 autocompleteManager.searchQuerySelectedRange = url.wholeRange
                 autocompleteManager.setQuery(url, updateAutocompleteResults: false)
@@ -570,15 +573,17 @@ import Sentry
 
     func startNewSearch() {
         EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
-        if mode == .web {
+
+        if !useOmniboxV2 && mode == .web {
             autocompleteManager.clearAutocompleteResults()
             autocompleteManager.resetQuery()
             createEmptyTab()
         }
+
         if focusOmniBox {
             autocompleteManager.shakeOmniBox()
         }
-        focusOmniBox = true
+        setFocusOmnibox(fromTab: false)
     }
 
     func resetDestinationCard() {
@@ -619,13 +624,13 @@ extension BeamState: BrowserTabsManagerDelegate {
     func showNextTab() {
         let wasFocused = focusOmniBox
         browserTabsManager.showNextTab()
-        if wasFocused { setFocusOmnibox() }
+        if wasFocused { setFocusOmnibox(fromTab: true) }
     }
 
     func showPreviousTab() {
         let wasFocused = focusOmniBox
         browserTabsManager.showPreviousTab()
-        if wasFocused { setFocusOmnibox() }
+        if wasFocused { setFocusOmnibox(fromTab: true) }
     }
 
     // MARK: BrowserTabsManagerDelegate

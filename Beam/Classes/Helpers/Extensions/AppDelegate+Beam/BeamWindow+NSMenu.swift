@@ -97,11 +97,11 @@ extension BeamWindow {
     }
 
     @IBAction func openLocation(_ sender: Any?) {
-        state.setFocusOmnibox()
+        state.setFocusOmnibox(fromTab: true)
     }
 
     @IBAction func openDocument(_ sender: Any?) {
-        state.setFocusOmnibox()
+        state.startNewSearch()
     }
 
     @IBAction func showCardSelector(_ sender: Any?) {
