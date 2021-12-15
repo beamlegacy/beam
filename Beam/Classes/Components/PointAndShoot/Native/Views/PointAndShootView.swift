@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct PointAndShootView: View {
+    static let defaultPickerSize = CGSize(width: 300, height: 80)
+    static let smallPickerSize = CGSize(width: 300, height: 42)
+
     @EnvironmentObject var browserTabsManager: BrowserTabsManager
     @ObservedObject var pns: PointAndShoot
     @State private var isConfirmation: Bool = false
@@ -116,7 +119,7 @@ struct PointAndShootView: View {
 
         // MARK: - ShootConfirmation
         if let group = pns.activeShootGroup ?? pns.shootConfirmationGroup {
-            let size =  pns.shootConfirmationGroup == nil ? CGSize(width: 300, height: 80) : CGSize(width: 300, height: 42)
+            let size =  pns.shootConfirmationGroup == nil ? Self.defaultPickerSize : Self.smallPickerSize
             PointAndShootCardPickerPositioning(group: pns.translateAndScaleGroup(group), cardPickerSize: size) {
                 FormatterViewBackground {
                     PointAndShootCardPicker(completedGroup: pns.shootConfirmationGroup, allowAnimation: $allowAnimation)

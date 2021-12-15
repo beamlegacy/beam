@@ -86,9 +86,9 @@ extension AppDelegate: NSMenuDelegate, NSMenuItemValidation {
     private func updateFullPageCollectMenu(_ menuItem: NSMenuItem) {
         guard let currentTab = window?.state.browserTabsManager.currentTab else { return }
         if let note = currentTab.noteController.note {
-            menuItem.title = "Collect Page to \(note.title)"
+            menuItem.title = "Capture Page to \(note.title)"
         } else {
-            menuItem.title = "Collect Page to Card…"
+            menuItem.title = "Capture Page to Card…"
         }
     }
 

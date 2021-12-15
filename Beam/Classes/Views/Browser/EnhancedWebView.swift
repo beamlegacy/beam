@@ -13,7 +13,7 @@ struct EnhancedWebView: View {
     @EnvironmentObject var data: BeamData
     @EnvironmentObject var state: BeamState
 
-    private let topContentInset: CGFloat = OmniboxV2Toolbar.heightWithTabs
+    private let topContentInset: CGFloat = OmniboxV2Toolbar.height
 
     var body: some View {
         GeometryReader { proxy in

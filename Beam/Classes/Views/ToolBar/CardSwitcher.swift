@@ -45,7 +45,7 @@ struct CardSwitcher: View {
     }
 
     private var separator: some View {
-        Separator()
+        Separator(rounded: true, color: BeamColor.ToolBar.horizontalSeparator)
             .frame(height: 16)
             .padding(.horizontal, 1.5)
             .blendModeLightMultiplyDarkScreen()

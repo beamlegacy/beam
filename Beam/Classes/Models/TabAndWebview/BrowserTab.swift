@@ -728,12 +728,16 @@ import Promises
         else { return }
 
         let animator = FullPageCollectAnimator(webView: webView)
-
         guard let (hoverLayer, hoverGroup, webViewGroup) = animator.buildFullPageCollectAnimation() else { return }
+        let webviewFrame = webView.frame
 
         let remover = LayerRemoverAnimationDelegate(with: hoverLayer) { _ in
             DispatchQueue.main.async {
-                let target = PointAndShoot.Target.init(id: UUID().uuidString, rect: self.webView.frame, mouseLocation: pns.mouseLocation, html: "<a href=\"\(url)\">\(self.title)</a>", animated: true)
+                var webviewCenter = CGPoint(x: webviewFrame.midX, y: webviewFrame.midY)
+                webviewCenter.x -= PointAndShootView.defaultPickerSize.width / 2
+                webviewCenter.y -= PointAndShootView.defaultPickerSize.height / 2
+                let mouseLocation = webviewFrame.contains(pns.mouseLocation) ? pns.mouseLocation : webviewCenter
+                let target = PointAndShoot.Target.init(id: UUID().uuidString, rect: self.webView.frame, mouseLocation: mouseLocation, html: "<a href=\"\(url)\">\(self.title)</a>", animated: true)
                 let shootGroup = PointAndShoot.ShootGroup.init(UUID().uuidString, [target], "", "", shapeCache: nil, showRect: false, directShoot: true)
 
                 if let note = self.noteController.note {

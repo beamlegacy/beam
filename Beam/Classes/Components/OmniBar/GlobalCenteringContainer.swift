@@ -14,7 +14,7 @@ import SwiftUI
  *
  * See Preview for example / play with it.
  * 
- * Needed for OmnibarSearchField to be centered relatively to the window, no matter how much buttons there are left and right.
+ * Needed for Omnibox content to be centered relatively to the window, no matter how much buttons there are left and right.
  */
 struct GlobalCenteringContainer<Content: View>: View {
     var content: () -> Content
@@ -22,7 +22,7 @@ struct GlobalCenteringContainer<Content: View>: View {
     var enabled: Bool = true
     var containerGeometry: GeometryProxy?
 
-    func globalCenteringOffsetX(containerGeo: GeometryProxy?, searchStackGeo: GeometryProxy) -> CGFloat {
+    func globalCenteringOffsetX(containerGeo: GeometryProxy?, contentGeo: GeometryProxy) -> CGFloat {
         guard enabled else { return 0 }
         var containerGlobal: NSRect
         if let containerGeo = containerGeo {
@@ -31,15 +31,15 @@ struct GlobalCenteringContainer<Content: View>: View {
             // fallback, but prefer using the container geometry.
             containerGlobal = AppDelegate.main.window?.contentView?.bounds ?? .zero
         }
-        let stackGlobal = searchStackGeo.frame(in: .global)
+        let contentGlobal = contentGeo.frame(in: .global)
 
-        let rightSpacing = containerGlobal.maxX - stackGlobal.maxX
-        let leftSpacing = stackGlobal.minX - containerGlobal.minX
+        let rightSpacing = containerGlobal.maxX - contentGlobal.maxX
+        let leftSpacing = contentGlobal.minX - containerGlobal.minX
         let offsetX = leftSpacing - rightSpacing + containerGlobal.minX
         return offsetX
     }
 
-    init(enabled: Bool, containerGeometry: GeometryProxy?, @ViewBuilder content: @escaping () -> Content) {
+    init(enabled: Bool = true, containerGeometry: GeometryProxy?, @ViewBuilder content: @escaping () -> Content) {
         self.content = content
         self.enabled = enabled
         self.containerGeometry = containerGeometry
@@ -47,7 +47,7 @@ struct GlobalCenteringContainer<Content: View>: View {
 
     var body: some View {
         GeometryReader { geo in
-            UnderlyingSpacers(offsetX: globalCenteringOffsetX(containerGeo: containerGeometry, searchStackGeo: geo), availableWidth: geo.size.width) {
+            UnderlyingSpacers(offsetX: globalCenteringOffsetX(containerGeo: containerGeometry, contentGeo: geo), availableWidth: geo.size.width) {
                 content()
             }
         }

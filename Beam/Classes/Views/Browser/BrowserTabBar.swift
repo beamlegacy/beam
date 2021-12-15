@@ -21,7 +21,7 @@ struct BrowserTabBar: View {
     @Binding var tabs: [BrowserTab]
     @Binding var currentTab: BrowserTab?
 
-    @ObservedObject private var dragModel = BrowserTabBarDragModel()
+    @ObservedObject private var dragModel = TabsDragModel()
     @State private var disableAnimation = false
     @State private var firstGestureValue: DragGesture.Value?
     @State private var enableScrollOffsetTracking = false
@@ -51,7 +51,7 @@ struct BrowserTabBar: View {
     }
 
     // swiftlint:disable function_body_length
-    func renderItem(tab: BrowserTab, index: Int, allowHover: Bool, widthProvider: TabWidthProvider,
+    func renderItem(tab: BrowserTab, index: Int, allowHover: Bool, widthProvider: TabsWidthProvider,
                     containerGeometry: GeometryProxy, scrollViewProxy: ScrollViewProxy?) -> some View {
         Group {
             let selected = isSelected(tab)
@@ -266,8 +266,8 @@ struct BrowserTabBar: View {
         tabs.filter { $0.isPinned }
     }
 
-    private func widthProvider(for containerGeometry: GeometryProxy) -> TabWidthProvider {
-        TabWidthProvider(tabsCount: tabs.count, pinnedTabsCount: pinnedTabs().count,
+    private func widthProvider(for containerGeometry: GeometryProxy) -> TabsWidthProvider {
+        TabsWidthProvider(tabsCount: tabs.count, pinnedTabsCount: pinnedTabs().count,
                          containerSize: containerGeometry.size, currentTabIsPinned: currentTab?.isPinned == true,
                          dragModel: dragModel)
     }
@@ -308,42 +308,6 @@ struct BrowserTabBar: View {
         } else {
             scrollViewProxy.scrollTo("tab-\(tab.id)")
         }
-    }
-}
-
-class TabWidthProvider {
-    private var tabsCount: Int
-    private var pinnedTabsCount: Int
-    private var containerSize: CGSize
-    private var currentTabIsPinned: Bool
-    private weak var dragModel: BrowserTabBarDragModel?
-
-    internal init(tabsCount: Int, pinnedTabsCount: Int, containerSize: CGSize,
-                  currentTabIsPinned: Bool, dragModel: BrowserTabBarDragModel) {
-        self.tabsCount = tabsCount
-        self.pinnedTabsCount = pinnedTabsCount
-        self.containerSize = containerSize
-        self.currentTabIsPinned = currentTabIsPinned
-        self.dragModel = dragModel
-    }
-
-    func widthForTab(selected: Bool, pinned: Bool) -> CGFloat {
-        guard !pinned else { return BrowserTabView.pinnedWidth }
-        var pinnedTabsCount = pinnedTabsCount
-        if dragModel?.draggingOverPins == true && !currentTabIsPinned {
-            pinnedTabsCount += 1
-        } else if dragModel?.draggingOverIndex != nil && dragModel?.draggingOverPins != true && currentTabIsPinned {
-            pinnedTabsCount -= 1
-        }
-        let availableWidth = containerSize.width - (CGFloat(pinnedTabsCount) * BrowserTabView.pinnedWidth)
-        let unpinnedTabsCount = tabsCount - pinnedTabsCount
-        guard unpinnedTabsCount > 0 else { return availableWidth }
-        var tabWidth = availableWidth / CGFloat(unpinnedTabsCount)
-        if tabWidth < BrowserTabView.minimumActiveWidth {
-            // not enough space for all tabs
-            tabWidth = (availableWidth - BrowserTabView.minimumActiveWidth) / CGFloat(unpinnedTabsCount - 1)
-        }
-        return max(selected ? BrowserTabView.minimumActiveWidth : BrowserTabView.minimumWidth, tabWidth)
     }
 }
 
