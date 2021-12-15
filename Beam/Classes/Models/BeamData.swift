@@ -35,6 +35,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
 
     var cookies: HTTPCookieStorage
     var downloadManager: BeamDownloadManager = BeamDownloadManager()
+    var importsManager: ImportsManager = ImportsManager()
     lazy var calendarManager: CalendarManager = {
         let cm = CalendarManager()
         observeCalendarManager(cm)

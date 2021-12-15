@@ -45,6 +45,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     var data: BeamData!
     var cancellableScope = Set<AnyCancellable>()
+    var cancellableImportsScope = Set<AnyCancellable>()
 
     private let defaultWindowMinimumSize = CGSize(width: 800, height: 400)
     private let defaultWindowSize = CGSize(width: 800, height: 600)
@@ -376,22 +377,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
             // Customize this code block to include application-specific recovery steps.
             let result = sender.presentError(nserror)
-            if result {
-                return .terminateCancel
-            }
-
-            let question = NSLocalizedString("Could not save changes while quitting. Quit anyway?", comment: "Quit without saves error question message")
-            let info = NSLocalizedString("Quitting now will lose any changes you have made since the last successful save", comment: "Quit without saves error question info")
-            let quitButton = NSLocalizedString("Quit anyway", comment: "Quit anyway button title")
-            let cancelButton = NSLocalizedString("Cancel", comment: "Cancel button title")
-            let alert = NSAlert()
-            alert.messageText = question
-            alert.informativeText = info
-            alert.addButton(withTitle: quitButton)
-            alert.addButton(withTitle: cancelButton)
-
-            let answer = alert.runModal()
-            if answer == .alertSecondButtonReturn {
+            if result || cancelQuitAlertForSync() {
                 return .terminateCancel
             }
         }
@@ -408,6 +394,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
 
+        if data.importsManager.isImporting, cancelQuitAlertForImports() == true {
+            return .terminateCancel
+        }
+
         syncDataWithBeamObject { _ in
             Logger.shared.logDebug("Sending toApplicationShouldTerminate true")
             RunLoop.main.perform(inModes: [.modalPanel]) {
@@ -417,6 +407,43 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         return .terminateLater
+    }
+
+    private func cancelQuitAlertForImports() -> Bool {
+        let question = NSLocalizedString("We're still importing data", comment: "Quit interrupting import message")
+        let info = NSLocalizedString("Are you sure you want to interrupt the process and quit now? You can always import data from the File → Import menu.",
+                                     comment: "Quit interrupting import info")
+        let quitButton = NSLocalizedString("Quit", comment: "Quit anyway button title")
+        let cancelButton = NSLocalizedString("Cancel", comment: "Cancel button title")
+        let alert = NSAlert()
+        alert.messageText = question
+        alert.informativeText = info
+        alert.addButton(withTitle: quitButton)
+        alert.addButton(withTitle: cancelButton)
+
+        let answer = alert.runModal()
+        if answer == .alertSecondButtonReturn {
+            return true
+        }
+        return false
+    }
+
+    private func cancelQuitAlertForSync() -> Bool {
+        let question = NSLocalizedString("Could not save changes while quitting. Quit anyway?", comment: "Quit without saves error question message")
+        let info = NSLocalizedString("Quitting now will lose any changes you have made since the last successful save", comment: "Quit without saves error question info")
+        let quitButton = NSLocalizedString("Quit anyway", comment: "Quit anyway button title")
+        let cancelButton = NSLocalizedString("Cancel", comment: "Cancel button title")
+        let alert = NSAlert()
+        alert.messageText = question
+        alert.informativeText = info
+        alert.addButton(withTitle: quitButton)
+        alert.addButton(withTitle: cancelButton)
+
+        let answer = alert.runModal()
+        if answer == .alertSecondButtonReturn {
+            return true
+        }
+        return false
     }
 
     // MARK: - Preferences

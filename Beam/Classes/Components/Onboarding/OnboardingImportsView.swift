@@ -19,7 +19,6 @@ struct OnboardingImportsView: View {
     @State var availableSources: [ImportSource] = [.safari, .passwordsCSV]
     @State var selectedSource: ImportSource = .safari
     @State private var passwordImportURL: URL?
-    @State private var historyImportURL: URL?
 
     private let iconCache = ImportSourceIconCache()
     private func iconImage(for source: ImportSource) -> some View {
@@ -95,18 +94,14 @@ struct OnboardingImportsView: View {
                 importPasswords()
             }
             HStack(spacing: BeamSpacing._40) {
-                CheckboxView(checked: $checkHistory.onChange({ newValue in
-                    if newValue {
-                        importHistory()
-                    } else {
-                        historyImportURL = nil
-                    }
+                CheckboxView(checked: $checkHistory.onChange({ _ in
                     updateActions()
                 }))
-                Text("History") + Text(" - not supported yet").foregroundColor(BeamColor.Generic.subtitle.swiftUI)
+                Text("History")
             }.onTapGesture {
-                importHistory()
-            }.disabled(true)
+                checkHistory.toggle()
+                updateActions()
+            }
         }
     }
 
@@ -150,7 +145,6 @@ struct OnboardingImportsView: View {
             checkPassword = false
             passwordImportURL = nil
             checkHistory = false
-            historyImportURL = nil
             updateActions()
         }
     }
@@ -165,7 +159,7 @@ struct OnboardingImportsView: View {
             actions = []
             return
         }
-        let importEnable = selectedSource == .passwordsCSV || passwordImportURL != nil || historyImportURL != nil
+        let importEnable = selectedSource == .passwordsCSV || passwordImportURL != nil || checkHistory
         let importTitle = selectedSource == .passwordsCSV ? "Import Passwords" : "Import"
         actions = [
             .init(id: skipActionId, title: "Skip", enabled: true, secondary: true),
@@ -184,14 +178,6 @@ extension OnboardingImportsView {
         openFilePanel(title: "Select a csv file exported from \(selectedSource.rawValue)") { url in
             passwordImportURL = url
             checkPassword = url != nil
-            updateActions()
-        }
-    }
-
-    private func importHistory() {
-        openFilePanel(title: "Select a csv file exported from \(selectedSource.rawValue)") { url in
-            historyImportURL = url
-            checkHistory = url != nil
             updateActions()
         }
     }
@@ -218,7 +204,7 @@ extension OnboardingImportsView {
             }
             return
         }
-        guard !isLoading && (passwordImportURL != nil || historyImportURL != nil || directPasswordsCSVURL != nil) else { return }
+        guard !isLoading && (passwordImportURL != nil || checkHistory || directPasswordsCSVURL != nil) else { return }
         isLoading = true
         updateActions()
         let startTime = BeamDate.now
@@ -229,8 +215,8 @@ extension OnboardingImportsView {
                 Logger.shared.logError("Error importing passwords \(String(describing: error))", category: .passwordManager)
             }
         }
-        if historyImportURL != nil {
-            // Waiting for import history implementation https://gitlab.com/beamgroup/beam/-/merge_requests/1586
+        if checkHistory, let importer = selectedSource.historyImporter {
+            AppDelegate.main.data.importsManager.startBrowserHistoryImport(from: importer)
         }
         let delay = Int(max(0, 2 + startTime.timeIntervalSinceNow.rounded(.up)))
         DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(delay)) {
@@ -297,6 +283,19 @@ extension OnboardingImportsView {
                 return true
             case .safari, .chrome, .firefox:
                 return appURL != nil
+            }
+        }
+
+        var historyImporter: BrowserHistoryImporter? {
+            switch self {
+            case .safari:
+                return SafariImporter()
+            case .chrome:
+                return ChromeImporter()
+            case .firefox:
+                return FirefoxImporter()
+            case .passwordsCSV:
+                return nil
             }
         }
     }

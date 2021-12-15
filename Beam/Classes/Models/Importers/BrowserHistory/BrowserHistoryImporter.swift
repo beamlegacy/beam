@@ -26,8 +26,17 @@ protocol BrowserHistoryImporter {
     func importHistory(from databaseURL: URL) throws
 }
 
+enum BrowserHistoryImporterError: Error {
+    case noDatabaseURL
+}
+
 extension BrowserHistoryImporter {
+
     func importHistory() throws {
+        let url = try historyDatabaseURL()
+        guard let url = url else {
+            throw BrowserHistoryImporterError.noDatabaseURL
+        }
         try historyDatabaseURL().map { url in
             DispatchQueue.global().async {
                 do {
