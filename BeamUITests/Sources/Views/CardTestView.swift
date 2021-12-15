@@ -99,6 +99,10 @@ class CardTestView: BaseView {
         return app.windows.textViews.matching(identifier:  CardViewLocators.TextFields.imageNote.accessibilityIdentifier).allElementsBoundByIndex
     }
     
+    func getImageNotesElementsQuery() -> XCUIElementQuery {
+        return app.windows.textViews.matching(identifier:  CardViewLocators.TextFields.imageNote.accessibilityIdentifier)
+    }
+    
     func getImageNoteByIndex(noteIndex: Int) -> XCUIElement {
         return self.getImageNotes()[noteIndex]
     }
