@@ -19,7 +19,7 @@ class AllCardsTestView: BaseView {
     
     @discardableResult
     func deleteCardByIndex(_ index: Int) -> AllCardsTestView {
-        getCardsNames()[index].hover()
+        getCardsNamesElements()[index].hover()
         triggerSingleCardMenuOptionAction(.deleteNotes)
         AlertTestView().confirmDeletion()
         return self
@@ -39,16 +39,20 @@ class AllCardsTestView: BaseView {
         return self
     }
     
-    func getCardsNames() -> [XCUIElement]{
+    func getCardsNamesElements() -> [XCUIElement]{
         return app.windows.staticTexts.matching(identifier: AllCardsViewLocators.ColumnCells.cardTitleColumnCell.accessibilityIdentifier).allElementsBoundByIndex
     }
     
+    func getCardsNamesElementQuery() -> XCUIElementQuery {
+        return app.windows.staticTexts.matching(identifier: AllCardsViewLocators.ColumnCells.cardTitleColumnCell.accessibilityIdentifier)
+    }
+    
     func getCardNameValueByIndex(_ index: Int) -> String {
-        return self.getElementStringValue(element: getCardsNames()[index])
+        return self.getElementStringValue(element: getCardsNamesElements()[index])
     }
     
     func getNumberOfCards() -> Int {
-        getCardsNames().count
+        getCardsNamesElements().count
     }
     
     @discardableResult
@@ -62,7 +66,7 @@ class AllCardsTestView: BaseView {
     }
     
     func isCardNameAvailable(_ cardName: String) -> Bool {
-        let cards = getCardsNames()
+        let cards = getCardsNamesElements()
         var i = cards.count
         repeat {
             let cardInList = cards[i - 1].value as? String
