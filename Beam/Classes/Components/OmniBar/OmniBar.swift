@@ -144,7 +144,7 @@ struct OmniBar: View {
     }
 
     private func cardSwitcherView(containerGeometry: GeometryProxy) -> some View {
-        GlobalCenteringContainer(enabled: true, containerGeometry: containerGeometry) {
+        GlobalCenteringContainer(containerGeometry: containerGeometry) {
             CardSwitcher(currentNote: state.currentNote, designV2: true)
                 .frame(maxHeight: .infinity)
                 .opacity(isMainWindow ? 1 : (colorScheme == .dark ? 0.6 : 0.8))
@@ -157,6 +157,21 @@ struct OmniBar: View {
                                 removal: .opacity.animation(BeamAnimation.easeInOut(duration: 0.08))
                                     .combined(with: .animatableOffset(offset: CGSize(width: 0, height: -8)).animation(BeamAnimation.spring(stiffness: 380, damping: 25).delay(0.03)))
                                ))
+    }
+
+    private func tabs(containerGeometry: GeometryProxy) -> some View {
+        OmniboxV2TabsList(tabs: $browserTabsManager.tabs, currentTab: $browserTabsManager.currentTab, globalContainerGeometry: containerGeometry)
+            .opacity(isMainWindow ? 1 : (colorScheme == .dark ? 0.6 : 0.8))
+            .frame(maxHeight: .infinity)
+            .transition(.asymmetric(insertion: .opacity.animation(BeamAnimation.easeInOut(duration: 0.12).delay(0.05))
+                                        .combined(with: .animatableOffset(offset: CGSize(width: 0, height: -8))
+                                                    .animation(BeamAnimation.spring(stiffness: 380, damping: 25).delay(0.05))
+                                                 ),
+                                    removal: .opacity.animation(BeamAnimation.easeInOut(duration: 0.08))
+                                        .combined(with: .animatableOffset(offset: CGSize(width: 0, height: 8))
+                                                    .animation(BeamAnimation.spring(stiffness: 380, damping: 25))
+                                                 )
+                                   ))
     }
 
     private var leftFieldActions: some View {
@@ -213,7 +228,11 @@ struct OmniBar: View {
                     }
                     if state.useOmniboxV2 {
                         OmniboxV2ToolbarButton(icon: "nav-omnibox", action: {
-                            setIsEditing(true)
+                            if state.useOmniboxV2 {
+                                state.setFocusOmnibox(fromTab: false)
+                            } else {
+                                setIsEditing(true)
+                            }
                         }).accessibilityIdentifier("nav-omnibox")
                     }
                     if showPivotButton {
@@ -238,18 +257,8 @@ struct OmniBar: View {
                 } else {
                     leftFieldActions
                     if state.mode == .web {
-                        centerSearchFieldView(containerGeometry: containerGeometry)
-                            .gesture(tapGestureWindowProof)
+                        tabs(containerGeometry: containerGeometry)
                             .padding(.horizontal, 14)
-                            .transition(.asymmetric(insertion: .opacity.animation(BeamAnimation.easeInOut(duration: 0.12).delay(0.05))
-                                                        .combined(with: .animatableOffset(offset: CGSize(width: 0, height: -8))
-                                                                    .animation(BeamAnimation.spring(stiffness: 380, damping: 25).delay(0.05))
-                                                                 ),
-                                                    removal: .opacity.animation(BeamAnimation.easeInOut(duration: 0.08))
-                                                        .combined(with: .animatableOffset(offset: CGSize(width: 0, height: 8))
-                                                                    .animation(BeamAnimation.spring(stiffness: 380, damping: 25))
-                                                                 )
-                                                   ))
                     } else {
                         cardSwitcherView(containerGeometry: containerGeometry)
                             .padding(.horizontal, 14)

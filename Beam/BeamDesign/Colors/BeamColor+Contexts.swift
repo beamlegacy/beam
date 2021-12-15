@@ -151,6 +151,7 @@ extension BeamColor {
         static let backgroundBottomSeparator = BeamColor.combining(lightColor: From(color: .black), lightAlpha: 0.1, darkColor: From(color: .white), darkAlpha: 0.1)
         static let backgroundBottomSeparatorWeb = BeamColor.combining(lightColor: From(color: .black), lightAlpha: 0.1, darkColor: From(color: .black), darkAlpha: 0.75)
         static let backgroundBottomSeparatorInactiveWindow = BeamColor.combining(lightColor: From(color: .black), lightAlpha: 0.2, darkColor: From(color: .black), darkAlpha: 0.75)
+        static let horizontalSeparator = BeamColor.combining(lightColor: .Mercury, darkColor: .Nero, darkAlpha: 0.75)
         static let shadowTop = BeamColor.combining(lightColor: .From(color: .black), lightAlpha: 0.050,
                                                    darkColor: .Mercury)
         static let shadowBottom = BeamColor.combining(lightColor: .From(color: .black), lightAlpha: 0.1,
@@ -166,6 +167,7 @@ extension BeamColor {
 
         static let capsuleStroke = BeamColor.combining(lightColor: From(color: .black), lightAlpha: 0.1, darkColor: From(color: .white), darkAlpha: 0.15)
         static let capsuleStrokeClicked = BeamColor.combining(lightColor: From(color: .black), lightAlpha: 0.1, darkColor: From(color: .white), darkAlpha: 0.25)
+        static let capsuleForegroundBackgrond = BeamColor.combining(lightColor: .Generic.background, darkColor: .Mercury)
 
     }
 }

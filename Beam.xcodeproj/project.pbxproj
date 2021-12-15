@@ -775,7 +775,7 @@
 		A52A559627592EB7002D0C99 /* Inter-MediumItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = A52A559427592EB7002D0C99 /* Inter-MediumItalic.otf */; };
 		A52A559727592EB7002D0C99 /* Inter-Italic.otf in Resources */ = {isa = PBXBuildFile; fileRef = A52A559527592EB7002D0C99 /* Inter-Italic.otf */; };
 		A52B5017271D72FB0078670C /* PinnedBrowserTabsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52B5016271D72FB0078670C /* PinnedBrowserTabsManager.swift */; };
-		A52B5022271DCB950078670C /* BrowserTabBarDragModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52B5021271DCB950078670C /* BrowserTabBarDragModel.swift */; };
+		A52B5022271DCB950078670C /* TabsDragModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52B5021271DCB950078670C /* TabsDragModel.swift */; };
 		A52BFDF72608D6710028D3F3 /* BeamFont.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52BFDF62608D6710028D3F3 /* BeamFont.swift */; };
 		A52BFE63260901980028D3F3 /* Separator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52BFE62260901980028D3F3 /* Separator.swift */; };
 		A52FCB632666514000BCD38A /* TextLinesDecorationLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52FCB622666514000BCD38A /* TextLinesDecorationLayer.swift */; };
@@ -808,6 +808,8 @@
 		A56BAF5826B937CE0006F8D5 /* NoteEditFocusedState.swift in Sources */ = {isa = PBXBuildFile; fileRef = A56BAF5726B937CE0006F8D5 /* NoteEditFocusedState.swift */; };
 		A56DF8F12625D27500F1CF55 /* TextFormatterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A56DF8F02625D27500F1CF55 /* TextFormatterView.swift */; };
 		A56FFE0326971F8500BEE6A1 /* CalendarPickerFormatterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A56FFE0226971F8500BEE6A1 /* CalendarPickerFormatterView.swift */; };
+		A570D2E827581A14003B239D /* OmniboxV2TabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A570D2E727581A14003B239D /* OmniboxV2TabView.swift */; };
+		A570D2F227583BD4003B239D /* OmniboxV2TabsList.swift in Sources */ = {isa = PBXBuildFile; fileRef = A570D2F127583BD4003B239D /* OmniboxV2TabsList.swift */; };
 		A570D32E27591C27003B239D /* ReadSizeViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = A570D32D27591C27003B239D /* ReadSizeViewModifier.swift */; };
 		A572370D2655654900AE6BFC /* CoreDataContextObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = A572370C2655654900AE6BFC /* CoreDataContextObserver.swift */; };
 		A572629825FFADC5004416C0 /* MouseInteraction.swift in Sources */ = {isa = PBXBuildFile; fileRef = A572629725FFADC5004416C0 /* MouseInteraction.swift */; };
@@ -848,6 +850,9 @@
 		A5B532432703525D007FC8B8 /* MeetingModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5B532422703525D007FC8B8 /* MeetingModalView.swift */; };
 		A5B71852274B92E70010FE8E /* OmniboxV2Box.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5B71851274B92E70010FE8E /* OmniboxV2Box.swift */; };
 		A5BF04D32681A4F800CC80EB /* ElementNode+Layers.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BF04D22681A4F800CC80EB /* ElementNode+Layers.swift */; };
+		A5C2023B2761FDA2008BB2FB /* OmniboxV2TabFaviconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C2023A2761FDA2008BB2FB /* OmniboxV2TabFaviconView.swift */; };
+		A5C202422762071C008BB2FB /* OmniboxV2TabAudioView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C202412762071C008BB2FB /* OmniboxV2TabAudioView.swift */; };
+		A5C2024C27623A8C008BB2FB /* TabsWidthProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C2024B27623A8C008BB2FB /* TabsWidthProvider.swift */; };
 		A5C7F10A267CC9FD002EE550 /* BeamTextEdit+InputDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C7F109267CC9FD002EE550 /* BeamTextEdit+InputDetector.swift */; };
 		A5C9F005261353420096380F /* WindowPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C9F004261353420096380F /* WindowPage.swift */; };
 		A5C9F00A261364F50096380F /* WindowPageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C9F009261364F50096380F /* WindowPageView.swift */; };
@@ -1931,7 +1936,7 @@
 		A52A559427592EB7002D0C99 /* Inter-MediumItalic.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-MediumItalic.otf"; sourceTree = "<group>"; };
 		A52A559527592EB7002D0C99 /* Inter-Italic.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-Italic.otf"; sourceTree = "<group>"; };
 		A52B5016271D72FB0078670C /* PinnedBrowserTabsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinnedBrowserTabsManager.swift; sourceTree = "<group>"; };
-		A52B5021271DCB950078670C /* BrowserTabBarDragModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserTabBarDragModel.swift; sourceTree = "<group>"; };
+		A52B5021271DCB950078670C /* TabsDragModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabsDragModel.swift; sourceTree = "<group>"; };
 		A52BFDF62608D6710028D3F3 /* BeamFont.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamFont.swift; sourceTree = "<group>"; };
 		A52BFE62260901980028D3F3 /* Separator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Separator.swift; sourceTree = "<group>"; };
 		A52FCB622666514000BCD38A /* TextLinesDecorationLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextLinesDecorationLayer.swift; sourceTree = "<group>"; };
@@ -1965,6 +1970,8 @@
 		A56BAF5726B937CE0006F8D5 /* NoteEditFocusedState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteEditFocusedState.swift; sourceTree = "<group>"; };
 		A56DF8F02625D27500F1CF55 /* TextFormatterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextFormatterView.swift; sourceTree = "<group>"; };
 		A56FFE0226971F8500BEE6A1 /* CalendarPickerFormatterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarPickerFormatterView.swift; sourceTree = "<group>"; };
+		A570D2E727581A14003B239D /* OmniboxV2TabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniboxV2TabView.swift; sourceTree = "<group>"; };
+		A570D2F127583BD4003B239D /* OmniboxV2TabsList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniboxV2TabsList.swift; sourceTree = "<group>"; };
 		A570D32D27591C27003B239D /* ReadSizeViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadSizeViewModifier.swift; sourceTree = "<group>"; };
 		A572370C2655654900AE6BFC /* CoreDataContextObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataContextObserver.swift; sourceTree = "<group>"; };
 		A572629725FFADC5004416C0 /* MouseInteraction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MouseInteraction.swift; sourceTree = "<group>"; };
@@ -2003,6 +2010,9 @@
 		A5B532422703525D007FC8B8 /* MeetingModalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingModalView.swift; sourceTree = "<group>"; };
 		A5B71851274B92E70010FE8E /* OmniboxV2Box.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniboxV2Box.swift; sourceTree = "<group>"; };
 		A5BF04D22681A4F800CC80EB /* ElementNode+Layers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ElementNode+Layers.swift"; sourceTree = "<group>"; };
+		A5C2023A2761FDA2008BB2FB /* OmniboxV2TabFaviconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniboxV2TabFaviconView.swift; sourceTree = "<group>"; };
+		A5C202412762071C008BB2FB /* OmniboxV2TabAudioView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniboxV2TabAudioView.swift; sourceTree = "<group>"; };
+		A5C2024B27623A8C008BB2FB /* TabsWidthProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabsWidthProvider.swift; sourceTree = "<group>"; };
 		A5C7F109267CC9FD002EE550 /* BeamTextEdit+InputDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamTextEdit+InputDetector.swift"; sourceTree = "<group>"; };
 		A5C9F004261353420096380F /* WindowPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowPage.swift; sourceTree = "<group>"; };
 		A5C9F009261364F50096380F /* WindowPageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowPageView.swift; sourceTree = "<group>"; };
@@ -2987,7 +2997,6 @@
 			isa = PBXGroup;
 			children = (
 				418171D12581107C00317ED8 /* BrowserTabBar.swift */,
-				A52B5021271DCB950078670C /* BrowserTabBarDragModel.swift */,
 				418171D02581107C00317ED8 /* BrowserTabView.swift */,
 				A514401A2638038C0021DD56 /* BrowserNewTabView.swift */,
 				418171D22581107C00317ED8 /* TabStats.swift */,
@@ -4611,6 +4620,12 @@
 				418171D92581107C00317ED8 /* OmniboxV2ToolbarChevrons.swift */,
 				A5347A622763B3E7006EEF8C /* OmniboxV2ToolbarSwitcher.swift */,
 				A5011E492754E6E800A76667 /* OmniboxV2CapsuleButton.swift */,
+				A570D2E727581A14003B239D /* OmniboxV2TabView.swift */,
+				A5C202412762071C008BB2FB /* OmniboxV2TabAudioView.swift */,
+				A5C2023A2761FDA2008BB2FB /* OmniboxV2TabFaviconView.swift */,
+				A570D2F127583BD4003B239D /* OmniboxV2TabsList.swift */,
+				A5C2024B27623A8C008BB2FB /* TabsWidthProvider.swift */,
+				A52B5021271DCB950078670C /* TabsDragModel.swift */,
 			);
 			path = OmniboxV2;
 			sourceTree = "<group>";
@@ -6151,6 +6166,7 @@
 				523FF66125C31D8800B4BD6E /* Data+String.swift in Sources */,
 				A0AEC25027022ADA00BEE4F3 /* PasswordEditView.swift in Sources */,
 				A57BFEBD2615B49C00CFB646 /* TableRowView.swift in Sources */,
+				A5C2024C27623A8C008BB2FB /* TabsWidthProvider.swift in Sources */,
 				A515597B267786E1006F6D6F /* MediaPlayerMessageHandler.swift in Sources */,
 				A5EBF15326D7BF8A00597A1C /* BeamTextEdit+Gutter.swift in Sources */,
 				418172AA25811A3A00317ED8 /* BeamTextField.swift in Sources */,
@@ -6202,7 +6218,7 @@
 				418172282581107C00317ED8 /* Range+Beam.swift in Sources */,
 				52842D552715CFDF0099602C /* FileDetail.swift in Sources */,
 				A0CB7E5D268E733400D15AFD /* PreferencesManager+Browser.swift in Sources */,
-				A52B5022271DCB950078670C /* BrowserTabBarDragModel.swift in Sources */,
+				A52B5022271DCB950078670C /* TabsDragModel.swift in Sources */,
 				3330D7CB265E466D008C9E20 /* OmniBarDownloadButton.swift in Sources */,
 				87F11BD9266533C1003BE98E /* PasswordGenerator.swift in Sources */,
 				A52596E5273EB83B004B27E4 /* OnboardingWelcomeView.swift in Sources */,
@@ -6279,6 +6295,7 @@
 				418173C32581276F00317ED8 /* String+NSMutableAttributedString.swift in Sources */,
 				523060A827426D1400A03844 /* BeamObjectManagerCall.swift in Sources */,
 				A5DE86A42692AEEC00E05C20 /* BeamWindow+NSMenu.swift in Sources */,
+				A570D2E827581A14003B239D /* OmniboxV2TabView.swift in Sources */,
 				A5ECC8FF2679EBB500D8A087 /* HoverVisibleModifier.swift in Sources */,
 				96120D0E260C917600592546 /* TextLine.swift in Sources */,
 				0DC6E2CF269DE73B00BD2E2A /* AppDelegate+TopDomain.swift in Sources */,
@@ -6363,6 +6380,7 @@
 				9611995E25A27A17005BEC82 /* BeamObjCBridge.m in Sources */,
 				DAA60C2C2666899A00C927E5 /* BeamState.swift in Sources */,
 				96DDF54B26823A4200FF8CCE /* BidirectionalLink.swift in Sources */,
+				A5C2023B2761FDA2008BB2FB /* OmniboxV2TabFaviconView.swift in Sources */,
 				0325629126051D3B006513E4 /* RBDigest.m in Sources */,
 				75A1E5BA271D98F1000824B1 /* ExternalDeeplinkHandler.swift in Sources */,
 				A569EA3026A196F600B0861B /* AutocompleteManager+Publishers.swift in Sources */,
@@ -6492,6 +6510,7 @@
 				A0A84FEB26381B64008F0326 /* OtherPasswordsModal.swift in Sources */,
 				A570D32E27591C27003B239D /* ReadSizeViewModifier.swift in Sources */,
 				521EEDE925937FAD00BA2485 /* DocumentRow.swift in Sources */,
+				A570D2F227583BD4003B239D /* OmniboxV2TabsList.swift in Sources */,
 				414B98F025A239F8002E81A3 /* FormatterView.swift in Sources */,
 				525C235125BAFC6B001B9625 /* Merge.swift in Sources */,
 				52DB02642716D07900F3881D /* AppDelegate+Log.swift in Sources */,
@@ -6573,6 +6592,7 @@
 				3303E0EA26F8C91100E175AC /* RestAPIServer.swift in Sources */,
 				A519F06E2721A4A400BB42E2 /* ImageCodableWrapper.swift in Sources */,
 				BAA674265355DDF432FE4B7A /* WebNavigationMessageHandler.swift in Sources */,
+				A5C202422762071C008BB2FB /* OmniboxV2TabAudioView.swift in Sources */,
 				BAA676DF0484BA2E4D6CECDF /* BeamWebNavigationController.swift in Sources */,
 				BAA67FA1EA0AEC590CEE0AB8 /* WebNavigationContext.swift in Sources */,
 				A59C4413268233960066AA0E /* CheckboxLayer.swift in Sources */,
