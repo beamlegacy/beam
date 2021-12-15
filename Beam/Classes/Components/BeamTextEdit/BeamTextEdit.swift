@@ -337,6 +337,7 @@ public extension CALayer {
     }
 
     var searchResults: [SearchResult]?
+    var lockCursor: Bool = false
 
     public var config = TextConfig()
 
@@ -1137,6 +1138,7 @@ public extension CALayer {
         if window?.firstResponder != self {
             window?.makeFirstResponder(self)
         }
+        lockCursor = true
     }
 
     let scrollXBorder = CGFloat(20)
@@ -1247,6 +1249,8 @@ public extension CALayer {
 
     public override func cursorUpdate(with event: NSEvent) {
         guard let rootNode = rootNode, shouldAllowMouseEvents() else { return }
+        guard !lockCursor else { return }
+
         let point = convert(event.locationInWindow)
         let views = rootNode.getWidgetsAt(point, point, ignoreX: true)
         let preciseViews = rootNode.getWidgetsAt(point, point, ignoreX: false)
@@ -1261,6 +1265,7 @@ public extension CALayer {
     }
 
     override public func mouseUp(with event: NSEvent) {
+        lockCursor = false
         guard let rootNode = rootNode, shouldAllowMouseEvents() else { return }
         guard !(inputContext?.handleEvent(event) ?? false) else { return }
         stopSelectionDrag()

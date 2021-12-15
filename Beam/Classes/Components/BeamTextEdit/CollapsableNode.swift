@@ -25,7 +25,7 @@ protocol Collapsable: AnyObject {
     var contentPosition: CGPoint { get }
 
     func setupCollapsedLayer(title: String, thumbnailLayer: Layer?, or thumbnailImage: NSImage?)
-    func setupCollapseExpandLayer()
+    func setupCollapseExpandLayer(hidden: Bool)
     func cleanCollapsedLayer()
 
     func buildCollapsedTitle(mouseInteractionType: MouseInteractionType?) -> NSAttributedString
@@ -93,7 +93,7 @@ extension Collapsable where Self: ElementNode {
         addLayer(text, origin: CGPoint(x: thumbnailLayer.layer.position.x + thumbnailWidth + 6, y: 0))
 }
 
-    func setupCollapseExpandLayer() {
+    func setupCollapseExpandLayer(hidden: Bool) {
 
         let hoverColor = isHoverCollapseExpandButton ? BeamColor.Editor.collapseExpandButtonHover : BeamColor.Editor.collapseExpandButton
 
@@ -108,6 +108,7 @@ extension Collapsable where Self: ElementNode {
         globalLayer.addSublayer(layer)
         globalLayer.addSublayer(textLayer)
         textLayer.frame.origin = CGPoint(x: 15, y: -1)
+        globalLayer.opacity = hidden ? 0.0 : 1.0
 
         configureMouseInteraction(for: global)
 
@@ -193,6 +194,7 @@ extension Collapsable where Self: ElementNode {
         let mouseHover: (Bool) -> Void = { [weak self] isHover in
             guard let collapseExpand = self?.layers["global-expand"],
                   let textLayer = collapseExpand.layer.sublayers?[1] as? CATextLayer else { return }
+//            collapseExpand.layer.opacity = isHover ? 1.0 : 0.0
             textLayer.opacity = isHover ? 1.0 : 0.0
             let hoverColor = isHover ? BeamColor.Editor.collapseExpandButtonHover : BeamColor.Editor.collapseExpandButton
             textLayer.foregroundColor = hoverColor.cgColor
