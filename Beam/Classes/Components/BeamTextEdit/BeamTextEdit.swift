@@ -152,7 +152,7 @@ public extension CALayer {
         noteCancellables.removeAll()
         safeContentSize = .zero
         realContentSize = .zero
-        invalidateIntrinsicContentSize()
+        invalidateLayout()
     }
 
     private var noteCancellables = [AnyCancellable]()
@@ -337,6 +337,7 @@ public extension CALayer {
     }
 
     var searchResults: [SearchResult]?
+    var lockCursor: Bool = false
 
     public var config = TextConfig()
 
@@ -410,10 +411,6 @@ public extension CALayer {
         currentIndicativeLayoutHeight = 0
         layoutInvalidated = false
         updateLayout(nodesRect)
-
-        if let stack = superview as? JournalScrollView.StackView {
-            stack.invalidateLayout()
-        }
     }
 
     private var nodesRect: NSRect {
@@ -473,9 +470,7 @@ public extension CALayer {
     var focusedWidget: Widget? {
         get { rootNode?.focusedWidget }
         set {
-            invalidate()
             rootNode?.focusedWidget = newValue
-            invalidate()
         }
     }
     var mouseHandler: Widget? {
@@ -585,8 +580,6 @@ public extension CALayer {
                 self?.relayoutRoot()
             }
         }
-
-        invalidate()
     }
 
     var toRunBeforeNextLayout = [() -> Void]()
@@ -614,10 +607,6 @@ public extension CALayer {
         }
 
         toRunAfterNextLayout = []
-    }
-
-    public func invalidate() {
-        setNeedsDisplay(bounds)
     }
 
     // Text Input from AppKit:
@@ -654,7 +643,6 @@ public extension CALayer {
     public override func becomeFirstResponder() -> Bool {
         blinkPhase = true
         hasFocus = true
-        invalidate()
         if focusedWidget == nil {
             focusedWidget = rootNode?.children.first(where: { widget in
                 widget as? ElementNode != nil
@@ -1137,6 +1125,7 @@ public extension CALayer {
         if window?.firstResponder != self {
             window?.makeFirstResponder(self)
         }
+        lockCursor = true
     }
 
     let scrollXBorder = CGFloat(20)
@@ -1247,6 +1236,8 @@ public extension CALayer {
 
     public override func cursorUpdate(with event: NSEvent) {
         guard let rootNode = rootNode, shouldAllowMouseEvents() else { return }
+        guard !lockCursor else { return }
+
         let point = convert(event.locationInWindow)
         let views = rootNode.getWidgetsAt(point, point, ignoreX: true)
         let preciseViews = rootNode.getWidgetsAt(point, point, ignoreX: false)
@@ -1261,6 +1252,7 @@ public extension CALayer {
     }
 
     override public func mouseUp(with event: NSEvent) {
+        lockCursor = false
         guard let rootNode = rootNode, shouldAllowMouseEvents() else { return }
         guard !(inputContext?.handleEvent(event) ?? false) else { return }
         stopSelectionDrag()

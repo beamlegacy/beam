@@ -10,7 +10,7 @@ import XCTest
 
 class WebsiteAuthTest: BaseTest {
     
-    let searchAppWebsite = "app.beamapp.co"
+    let searchAppWebsite = "rails.beamapp.co"
     let correctLogin = "beam"
     let correctPass = "jiUJDLr>3Dxx"
     

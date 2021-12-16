@@ -11,7 +11,6 @@ import XCTest
 class CardViewEmbedsTests: BaseTest {
     
     func testEmbedsCollapseExpandIcons() throws {
-        try XCTSkipIf(true, "Blocked by https://linear.app/beamapp/issue/BE-2718/crash-on-switching-from-web-view-to-card-view-using-pivot-button")
         let toLinkTitle = "to Link"
         let toImageTitle = "to Image"
         let pnsView = PnSTestView()
@@ -38,7 +37,8 @@ class CardViewEmbedsTests: BaseTest {
         
         testRailPrint("Then element width and height is changed accordingly")
         XCTAssertEqual(sizeBeforeCollapse.width, sizeAfterCollapse.width)
-        XCTAssertTrue(sizeBeforeCollapse.height > sizeAfterCollapse.height * 2 && sizeBeforeCollapse.height < sizeAfterCollapse.height * 4)
+        XCTAssertGreaterThan(sizeBeforeCollapse.height, sizeAfterCollapse.height * 2)
+        XCTAssertLessThan(sizeBeforeCollapse.height, sizeAfterCollapse.height * 4.5)
         
         testRailPrint("Then image node is expanded")
         cardView.clickNoteExpandButtonByIndex(noteIndex: 0)

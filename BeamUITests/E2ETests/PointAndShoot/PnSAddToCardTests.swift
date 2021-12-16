@@ -145,13 +145,15 @@ class PnSAddToCardTests: BaseTest {
         let webView = WebTestView()
         let gifItemToAdd = pnsView.image("File:Beam mode 2.gif")
         pnsView.addToCardByName(gifItemToAdd, cardNameToBeCreated)
-        XCTAssertEqual(webView.openDestinationCard().getNumberOfImageNotes(), 1)
+        let cardView = webView.openDestinationCard()
+        XCTAssertTrue(waitHelper.waitForCountValueEqual(timeout: cardView.implicitWaitTimeout, expectedNumber: 1, elementQuery: cardView.getImageNotesElementsQuery()), "Image note didn't appear within \(cardView.implicitWaitTimeout) seconds")
         
         testRailPrint("Then I successfully collect image")
         helper.openTestPage(page: .page4)
         let imageItemToAdd = pnsView.image("forest")
         pnsView.addToCardByName(imageItemToAdd, cardNameToBeCreated)
-        XCTAssertEqual(webView.openDestinationCard().getNumberOfImageNotes(), 2)
+        webView.openDestinationCard()
+        XCTAssertTrue(waitHelper.waitForCountValueEqual(timeout: cardView.implicitWaitTimeout, expectedNumber: 2, elementQuery: cardView.getImageNotesElementsQuery()), "Image note didn't appear within \(cardView.implicitWaitTimeout) seconds")
     }
     
     func testCollectVideo() throws {

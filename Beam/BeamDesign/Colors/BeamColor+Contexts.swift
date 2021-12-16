@@ -46,9 +46,11 @@ extension BeamColor {
         static let underlineAndStrikethrough = BeamColor.Niobium
         static let reference = BeamColor.combining(lightColor: .Niobium, lightAlpha: 0.75, darkColor: .Niobium, darkAlpha: 0.65)
 
-        static let sourceButtonBackground = BeamColor.Nero
-        static let sourceButtonBackgroundHover = BeamColor.Niobium
-        static let sourceButtonBackgroundClicked = BeamColor.Niobium
+        //Like Nero, but always in light mode
+        static let sourceButtonBackground = BeamColor.Custom(named: "EditorSourceButtonBackground")
+        //Like Niobium, but always in light mode
+        static let sourceButtonBackgroundHover = BeamColor.Custom(named: "EditorSourceButtonBackgroundHover")
+        static let sourceButtonBackgroundClicked = BeamColor.Custom(named: "EditorSourceButtonBackgroundHover")
 
         static let sourceButtonStroke = BeamColor.Custom(named: "EditorSourceButtonStroke").alpha(0.2)
         static let sourceButtonStrokeHover = BeamColor.From(color: .white, alpha: 0.2)
@@ -162,11 +164,14 @@ extension BeamColor {
 
         static let buttonForeground = BeamColor.LightStoneGray
         static let buttonForegroundInactiveWindow = BeamColor.AlphaGray
+        static let buttonForegroundDisabled = BeamColor.AlphaGray.alpha(0.5)
         static let buttonForegroundHoveredClicked = BeamColor.Generic.text
         static let buttonBackgroundClicked = BeamColor.Mercury
 
-        static let capsuleStroke = BeamColor.combining(lightColor: From(color: .black), lightAlpha: 0.1, darkColor: From(color: .white), darkAlpha: 0.15)
+        static let capsuleStroke = BeamColor.combining(lightColor: From(color: .black), lightAlpha: 0.1, darkColor: From(color: .white), darkAlpha: 0.20)
         static let capsuleStrokeClicked = BeamColor.combining(lightColor: From(color: .black), lightAlpha: 0.1, darkColor: From(color: .white), darkAlpha: 0.25)
+        static let capsuleTabForegroundStroke = BeamColor.combining(lightColor: From(color: .black), lightAlpha: 0.1, darkColor: From(color: .white), darkAlpha: 0.25)
+        static let capsuleTabStrokeClicked = BeamColor.combining(lightColor: From(color: .black), lightAlpha: 0.1, darkColor: From(color: .white), darkAlpha: 0.45)
         static let capsuleForegroundBackgrond = BeamColor.combining(lightColor: .Generic.background, darkColor: .Mercury)
 
     }

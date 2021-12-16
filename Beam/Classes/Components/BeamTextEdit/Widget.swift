@@ -592,14 +592,9 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         p.invalidateLayout()
     }
 
-    func onInvalidated() {
-    }
-
     final func invalidate() {
-        guard !inInitialLayout else { return }
-        guard !layer.needsDisplay() else { return }
+        guard !inInitialLayout, !layer.needsDisplay() else { return }
         layer.setNeedsDisplay()
-        onInvalidated()
     }
 
     final func invalidateRendering() {
