@@ -567,6 +567,7 @@
 		9634DD79264AA1A10065383E /* TextFrameLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9634DD78264AA1A10065383E /* TextFrameLayer.swift */; };
 		9634DD8F264AF7940065383E /* TextLineLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9634DD8E264AF7940065383E /* TextLineLayer.swift */; };
 		9634DD91264B203E0065383E /* ShapeLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9634DD90264B203E0065383E /* ShapeLayer.swift */; };
+		9635C980276AABB300015575 /* SignPost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9635C97F276AABB300015575 /* SignPost.swift */; };
 		9635C96D276945CD00015575 /* OldJournalStackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9635C96C276945CD00015575 /* OldJournalStackView.swift */; };
 		9635C97427696C5700015575 /* DebugHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9635C97327696C5700015575 /* DebugHelpers.swift */; };
 		9639AA75276906820006C724 /* EnvironmentVariables_generated.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9639AA74276906820006C724 /* EnvironmentVariables_generated.swift */; };
@@ -1725,6 +1726,7 @@
 		9634DD78264AA1A10065383E /* TextFrameLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextFrameLayer.swift; sourceTree = "<group>"; };
 		9634DD8E264AF7940065383E /* TextLineLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextLineLayer.swift; sourceTree = "<group>"; };
 		9634DD90264B203E0065383E /* ShapeLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeLayer.swift; sourceTree = "<group>"; };
+		9635C97F276AABB300015575 /* SignPost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignPost.swift; sourceTree = "<group>"; };
 		9635C96C276945CD00015575 /* OldJournalStackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OldJournalStackView.swift; sourceTree = "<group>"; };
 		9635C97327696C5700015575 /* DebugHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugHelpers.swift; sourceTree = "<group>"; };
 		9639AA74276906820006C724 /* EnvironmentVariables_generated.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EnvironmentVariables_generated.swift; sourceTree = "<group>"; };
@@ -4108,6 +4110,7 @@
 				4181718C2581107C00317ED8 /* EventsTracker.swift */,
 				9676141F25CA989D00BDA862 /* WeakReference.swift */,
 				9676143725CAAD5300BDA862 /* RWLock.swift */,
+				9635C97F276AABB300015575 /* SignPost.swift */,
 				9635C97327696C5700015575 /* DebugHelpers.swift */,
 			);
 			path = Utils;
@@ -5886,6 +5889,7 @@
 				964FE64D262D8ED300966E03 /* Dictionary+valuesMatchingKeys.swift in Sources */,
 				DAEEA73B26A5C4A600AE72DE /* NoteSource.swift in Sources */,
 				96319D3E2616233E00D1CF31 /* String+c99.swift in Sources */,
+				9635C980276AABB300015575 /* SignPost.swift in Sources */,
 				96319D5D261626BE00D1CF31 /* Score.swift in Sources */,
 				96319D3A2616233E00D1CF31 /* CommandManager.swift in Sources */,
 				969CE3EA26CB7B01000AEF37 /* BeamNoteType.swift in Sources */,

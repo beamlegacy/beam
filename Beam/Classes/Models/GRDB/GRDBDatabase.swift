@@ -259,7 +259,7 @@ struct GRDBDatabase {
 
         #if DEBUG
         // Speed up development by nuking the database when migrations change
-        migrator.eraseDatabaseOnSchemaChange = true
+        migrator.eraseDatabaseOnSchemaChange = false
         #endif
 
         try migrator.migrate(dbWriter)
