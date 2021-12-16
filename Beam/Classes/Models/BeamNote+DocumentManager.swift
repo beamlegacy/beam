@@ -153,10 +153,13 @@ extension BeamNote: BeamNoteDocument {
 
     public func indexContents() {
         beamCheckMainThread()
+        sign.begin(Signs.indexContents)
         try? GRDBDatabase.shared.append(note: self)
+        sign.end(Signs.indexContents)
     }
 
     public func syncedSave() -> Bool {
+        sign.begin(Signs.syncedSave)
         var saved = false
         let semaphore = DispatchSemaphore(value: 0)
         save { result in
@@ -174,16 +177,19 @@ extension BeamNote: BeamNoteDocument {
         }
         semaphore.wait()
 
+        sign.end(Signs.syncedSave)
         return saved
     }
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
     public func save(completion: ((Result<Bool, Error>) -> Void)? = nil) {
         beamCheckMainThread()
+        sign.begin(Signs.save)
         guard !saving.load(ordering: .relaxed) && version.load(ordering: .relaxed) == savedVersion.load(ordering: .relaxed) else {
             Logger.shared.logWarning("Waiting for last save: \(title) {\(id)} - saved version \(savedVersion.load(ordering: .relaxed)) / current \(version.load(ordering: .relaxed))",
                                      category: .document)
             completion?(.failure(BeamNoteError.saveAlreadyRunning))
+            sign.end(Signs.save)
             return
         }
 
@@ -201,6 +207,7 @@ extension BeamNote: BeamNoteDocument {
             Logger.shared.logError("Unable to find active document struct \(titleAndId)", category: .document)
             saving.store(false, ordering: .relaxed)
             completion?(.failure(BeamNoteError.unableToCreateDocumentStruct))
+            sign.end(Signs.save)
             return
         }
 
@@ -211,6 +218,7 @@ extension BeamNote: BeamNoteDocument {
         guard !documentStruct.data.isEmpty else {
             Logger.shared.logInfo("BeamNote '\(titleAndId)' save error: empty data", category: .document)
             completion?(.failure(BeamNoteError.dataIsEmpty))
+            sign.end(Signs.save)
             return
         }
 
@@ -291,6 +299,7 @@ extension BeamNote: BeamNoteDocument {
 
                             // Avoid calling save() again
                             self.saving.store(false, ordering: .relaxed)
+                            Self.signPost.end(Signs.save, id: self.sign)
                             return
                         }
                     case 1003:
@@ -312,6 +321,7 @@ extension BeamNote: BeamNoteDocument {
 
                         self.saving.store(false, ordering: .relaxed)
                         completion?(.failure(error))
+                        Self.signPost.end(Signs.save, id: self.sign)
                         return
                     default:
                         Logger.shared.logError("Error saving: \(error.localizedDescription)",
@@ -334,6 +344,7 @@ extension BeamNote: BeamNoteDocument {
 
             self.saving.store(false, ordering: .relaxed)
             completion?(result)
+            Self.signPost.end(Signs.save, id: self.sign)
         })
     }
 
@@ -385,6 +396,12 @@ extension BeamNote: BeamNoteDocument {
                              keepInMemory: Bool = true,
                              decodeChildren: Bool = true) -> BeamNote? {
         beamCheckMainThread()
+        let sign = Self.signPost.createId()
+        sign.begin(Signs.fetchTitle)
+        defer {
+            sign.end(Signs.fetchTitle)
+        }
+
         let documentManager = DocumentManager()
         // Is the note in the cache?
         if let note = getFetchedNote(title) {
@@ -409,6 +426,11 @@ extension BeamNote: BeamNoteDocument {
                              keepInMemory: Bool = true,
                              decodeChildren: Bool = true) -> BeamNote? {
         beamCheckMainThread()
+        let sign = Self.signPost.createId()
+        sign.begin(Signs.fetchJournalDate)
+        defer {
+            sign.end(Signs.fetchJournalDate)
+        }
         let documentManager = DocumentManager()
         // Is the note in the cache?
         let title = BeamDate.journalNoteTitle(for: journalDate)
@@ -435,6 +457,12 @@ extension BeamNote: BeamNoteDocument {
     public static func fetch(id: UUID,
                              keepInMemory: Bool = true,
                              decodeChildren: Bool = true) -> BeamNote? {
+        let sign = Self.signPost.createId()
+        sign.begin(Signs.fetchId)
+        defer {
+            sign.end(Signs.fetchId)
+        }
+
         let documentManager = DocumentManager()
         if keepInMemory {
             // Is the note in the cache?
@@ -458,6 +486,11 @@ extension BeamNote: BeamNoteDocument {
     }
 
     public static func fetchNotesWithType(type: DocumentType, _ limit: Int, _ fetchOffset: Int) -> [BeamNote] {
+        let sign = Self.signPost.createId()
+        sign.begin(Signs.fetchNotesWithType)
+        defer {
+            sign.end(Signs.fetchNotesWithType)
+        }
         beamCheckMainThread()
         let documentManager = DocumentManager()
         return documentManager.loadDocumentsWithType(type: type, limit, fetchOffset).compactMap { doc -> BeamNote? in
@@ -475,6 +508,12 @@ extension BeamNote: BeamNoteDocument {
 
     public static func fetchJournalsFrom(date: String) -> [BeamNote] {
         beamCheckMainThread()
+        let sign = Self.signPost.createId()
+        sign.begin(Signs.fetchJournalsFromDate)
+        defer {
+            sign.end(Signs.fetchJournalsFromDate)
+        }
+
         let documentManager = DocumentManager()
         documentManager.checkThread()
         do {
@@ -485,6 +524,11 @@ extension BeamNote: BeamNoteDocument {
     }
 
     public static func fetchJournalsBefore(count: Int, date: String) -> [BeamNote] {
+        let sign = Self.signPost.createId()
+        sign.begin(Signs.fetchJournalsBefore)
+        defer {
+            sign.end(Signs.fetchJournalsBefore)
+        }
         beamCheckMainThread()
         let documentManager = DocumentManager()
         documentManager.checkThread()
@@ -502,6 +546,11 @@ extension BeamNote: BeamNoteDocument {
 
     // Beware that this function crashes whatever note with that title in the cache
     public static func create(title: String) -> BeamNote {
+        let sign = Self.signPost.createId()
+        sign.begin(Signs.createTitle)
+        defer {
+            sign.end(Signs.createTitle)
+        }
         beamCheckMainThread()
         assert(getFetchedNote(title) == nil)
         let note = BeamNote(title: title)
@@ -515,6 +564,11 @@ extension BeamNote: BeamNoteDocument {
     }
 
     public static func create(journalDate: Date) -> BeamNote {
+        let sign = Self.signPost.createId()
+        sign.begin(Signs.createJournalDate)
+        defer {
+            sign.end(Signs.createJournalDate)
+        }
         beamCheckMainThread()
         let note = BeamNote(journalDate: journalDate)
         note.databaseId = DatabaseManager.defaultDatabase.id
@@ -533,6 +587,11 @@ extension BeamNote: BeamNoteDocument {
     }
 
     public static func fetchOrCreate(title: String) -> BeamNote {
+        let sign = Self.signPost.createId()
+        sign.begin(Signs.fetchOrCreate)
+        defer {
+            sign.end(Signs.fetchOrCreate)
+        }
         beamCheckMainThread()
         // Is the note in the cache?
         if let note = fetch(title: title) {
@@ -544,6 +603,11 @@ extension BeamNote: BeamNoteDocument {
     }
 
     public static func fetchOrCreateJournalNote(date: Date) -> BeamNote {
+        let sign = Self.signPost.createId()
+        sign.begin(Signs.fetchOrCreateJournal)
+        defer {
+            sign.end(Signs.fetchOrCreateJournal)
+        }
         beamCheckMainThread()
         // Is the note in the cache?
         if let note = fetch(journalDate: date) {
@@ -570,6 +634,11 @@ extension BeamNote: BeamNoteDocument {
     public var isTodaysNote: Bool { type.isJournal && type.journalDateString == BeamNoteType.iso8601ForDate(BeamDate.now) }
 
     public static func indexAllNotes() {
+        let sign = Self.signPost.createId()
+        sign.begin(Signs.indexAllNotes)
+        defer {
+            sign.end(Signs.indexAllNotes)
+        }
         beamCheckMainThread()
         var log = [String]()
         log.append("Before reindexing, DB contains \((try? GRDBDatabase.shared.countBidirectionalLinks()) ?? -1) bidirectional links from \((try? GRDBDatabase.shared.countIndexedElements()) ?? -1) indexed elements")
@@ -591,6 +660,11 @@ extension BeamNote: BeamNoteDocument {
     }
 
     public static func rebuildAllNotes() {
+        let sign = Self.signPost.createId()
+        sign.begin(Signs.rebuildAllNotes)
+        defer {
+            sign.end(Signs.rebuildAllNotes)
+        }
         beamCheckMainThread()
         let documentManager = DocumentManager()
         var rebuilt = [String]()
@@ -704,8 +778,31 @@ extension BeamNote: BeamNoteDocument {
     }
 
     static public func loadNotes(_ ids: [UUID], _ completion: @escaping ([BeamNote]) -> Void) {
+        let sign = Self.signPost.createId()
+        sign.begin(Signs.loadNotes)
         DispatchQueue.global(qos: .userInitiated).async {
             completion(ids.compactMap { BeamNote.fetch(id: $0, keepInMemory: true, decodeChildren: true) })
+            sign.end(Signs.loadNotes)
         }
     }
+
+    struct Signs {
+        static let indexContents: StaticString = "indexContents"
+        static let syncedSave: StaticString = "syncedSave"
+        static let save: StaticString = "save"
+        static let fetchTitle: StaticString = "fetchTitle"
+        static let fetchJournalDate: StaticString = "fetchJournalDate"
+        static let fetchId: StaticString = "fetchId"
+        static let fetchNotesWithType: StaticString = "fetchNotesWithType"
+        static let fetchJournalsFromDate: StaticString = "fetchJournalsFromDate"
+        static let fetchJournalsBefore: StaticString = "fetchJournalsBefore"
+        static let createTitle: StaticString = "createTitle"
+        static let createJournalDate: StaticString = "createJournalDate"
+        static let fetchOrCreate: StaticString = "fetchOrCreate"
+        static let fetchOrCreateJournal: StaticString = "fetchOrCreateJournal"
+        static let indexAllNotes: StaticString = "indexAllNotes"
+        static let rebuildAllNotes: StaticString = "rebuildAllNotes"
+        static let loadNotes: StaticString = "loadNotes"
+    }
+
 }

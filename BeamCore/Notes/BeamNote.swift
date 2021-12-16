@@ -126,6 +126,7 @@ public class BeamNote: BeamElement {
     public init(title: String) {
         self.title = Self.validTitle(fromTitle: title)
         super.init()
+        self.sign = Self.signPost.createId(object: self)
         setupSourceObserver()
         checkHasNote()
     }
@@ -134,6 +135,7 @@ public class BeamNote: BeamElement {
         self.title = BeamDate.journalNoteTitle(for: journalDate)
         self.type = BeamNoteType.journalForDate(journalDate)
         super.init()
+        self.sign = Self.signPost.createId(object: self)
         setupSourceObserver()
         checkHasNote()
     }
@@ -161,6 +163,7 @@ public class BeamNote: BeamElement {
         }
 
         try super.init(from: decoder)
+        self.sign = Self.signPost.createId(object: self)
         if container.contains(.sources) {
             do {
                 sources = try container.decode(NoteSources.self, forKey: .sources)
@@ -427,6 +430,9 @@ public class BeamNote: BeamElement {
         let timeInterval = self.updateDate.timeIntervalSince(publicationDate)
         return timeInterval > 2
     }
+
+    public static var signPost = SignPost("BeamNote")
+    public var sign: SignPostId!
 }
 
 public func beamCheckMainThread() {
