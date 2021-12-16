@@ -90,6 +90,8 @@ public extension CALayer {
     public var enableDelayedInit: Bool
     var delayedInit = true
     func updateRoot(with note: BeamElement) {
+        sign.begin(Signs.updateRoot)
+
         guard note != rootNode?.element else { return }
 
         clearRoot()
@@ -98,6 +100,9 @@ public extension CALayer {
         }
 
         let initRootNode: () -> TextRoot = {
+            self.sign.begin(Signs.updateLayout_initRootNode)
+            defer { self.sign.end(Signs.updateLayout_initRootNode) }
+
             let root = TextRoot(editor: self, element: note, availableWidth: Self.textNodeWidth(for: self.frame.size))
             if let window = self.window {
                 root.contentsScale = window.backingScaleFactor
@@ -107,6 +112,9 @@ public extension CALayer {
         }
 
         let initLayout: (TextRoot) -> Void = { root in
+            self.sign.begin(Signs.updateLayout_initLayout)
+            defer { self.sign.end(Signs.updateLayout_initLayout) }
+
             root.element
                 .changed
                 .debounce(for: .seconds(1), scheduler: RunLoop.main)
@@ -116,9 +124,11 @@ public extension CALayer {
                 }.store(in: &self.noteCancellables)
             self.delayedInit = false
             self.rootNode = root
+            self.sign.end(Signs.updateRoot)
         }
 
         if enableDelayedInit, let note = note as? BeamNote {
+            self.sign.begin(Signs.updateRoot_delayedInit)
             delayedInit = true
             let rect = nodesRect
             let refsAndLinks = note.fastLinksAndReferences.compactMap { $0.noteID }
@@ -129,6 +139,7 @@ public extension CALayer {
                         root.setLayout(rect)
                         DispatchQueue.main.async {
                             initLayout(root)
+                            self.sign.end(Signs.updateRoot_delayedInit)
                         }
                     }
                 }
@@ -185,6 +196,7 @@ public extension CALayer {
         note = root
 
         super.init(frame: NSRect())
+        self.sign = Self.signPost.createId(object: self)
 
         setAccessibilityIdentifier("TextEdit")
         setAccessibilityLabel("Note Editor")
@@ -394,6 +406,11 @@ public extension CALayer {
     }
 
     func prepareRoot() {
+        sign.begin(Signs.prepareRoot)
+        defer {
+            sign.end(Signs.prepareRoot)
+        }
+
         guard let root = unpreparedRoot else { return }
         unpreparedRoot = nil
         let old = inRelayout
@@ -403,6 +420,11 @@ public extension CALayer {
     }
 
     func relayoutRoot() {
+        sign.begin(Signs.relayoutRoot)
+        defer {
+            sign.end(Signs.relayoutRoot)
+        }
+
         currentIndicativeLayoutHeight = 0
         if !frame.isEmpty {
             prepareRoot()
@@ -429,6 +451,11 @@ public extension CALayer {
     }
 
     private func updateLayout(_ rect: NSRect) {
+        sign.begin(Signs.updateLayout)
+        defer {
+            sign.end(Signs.updateLayout)
+        }
+
         guard let rootNode = rootNode else { return }
         let textNodeWidth = Self.textNodeWidth(for: frame.size)
         let workBlock = { [weak self] in
@@ -1833,5 +1860,17 @@ public extension CALayer {
         for range in text.noteSourceEligibleLinkRanges {
             addNoteSourceFrom(url: range.string)
         }
+    }
+
+    public static var signPost = SignPost("BeamTextEdit")
+    public var sign: SignPostId!
+    struct Signs {
+        static let updateRoot: StaticString = "updateRoot"
+        static let prepareRoot: StaticString = "prepareRoot"
+        static let relayoutRoot: StaticString = "relayoutRoot"
+        static let updateLayout: StaticString = "updateLayout"
+        static let updateLayout_initRootNode: StaticString = "updateLayout.initRootNode"
+        static let updateLayout_initLayout: StaticString = "updateLayout.initLayout"
+        static let updateRoot_delayedInit: StaticString = "updateRoot.delayedInit"
     }
 }
