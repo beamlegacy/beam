@@ -196,7 +196,7 @@ extension BeamObjectManagerDelegate {
             let beamObject = try BeamObject(object)
 
             guard let remoteChecksum = remoteChecksum, remoteChecksum != beamObject.dataChecksum else {
-                return Promise.value(nil)
+                return .value(nil)
             }
 
             return objectManager.fetchObject(object: object).then(on: backgroundQueue) {
@@ -204,7 +204,7 @@ extension BeamObjectManagerDelegate {
             }
         }.recover(on: backgroundQueue) { error -> Promise<BeamObjectType?> in
             if case APIRequestError.notFound = error {
-                return Promise.value(nil)
+                return .value(nil)
             }
             throw error
         }
@@ -220,7 +220,7 @@ extension BeamObjectManagerDelegate {
         return objectManager.fetchAllObjects()
     }
 
-    func saveOnBeamObjectAPI(_ object: BeamObjectType) -> PromiseKit.Promise<BeamObjectType> {
+    func saveOnBeamObjectAPI(_ object: BeamObjectType) -> Promise<BeamObjectType> {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             return Promise(error: APIRequestError.notAuthenticated)
         }

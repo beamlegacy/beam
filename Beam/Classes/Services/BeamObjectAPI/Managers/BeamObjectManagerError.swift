@@ -5,7 +5,6 @@ enum BeamObjectManagerError: Error {
     case notAuthenticated
     case multipleErrors([Error])
     case invalidChecksum(BeamObject)
-    case invalidChecksums([BeamObject])
     case decodingError(BeamObject)
     case encodingError
     case invalidObjectType(BeamObject, BeamObject)
@@ -25,8 +24,6 @@ extension BeamObjectManagerError: LocalizedError {
             return "Multiple errors: \(errors)"
         case .invalidChecksum(let object):
             return "Invalid Checksum \(object.id)"
-        case .invalidChecksums(let objects):
-            return "Invalid Checksums \(objects.map { $0.id })"
         case .decodingError(let object):
             return "Decoding Error \(object)"
         case .encodingError:
